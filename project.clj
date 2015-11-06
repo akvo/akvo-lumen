@@ -5,6 +5,8 @@
             :url "https://www.gnu.org/licenses/agpl-3.0.html"}
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [org.clojure/java.jdbc "0.3.6"]
-                 [org.postgresql/postgresql "9.4-1204-jdbc42"]
+                 [org.postgresql/postgresql "9.4-1204-jdbc41"]
                  [cheshire "5.5.0"]
-                 [clojurewerkz/elastisch "2.1.0"]])
+                 [clojurewerkz/elastisch "2.1.0"]
+                 [com.stuartsierra/component "0.3.0"]
+                 [clj-statsd "0.3.11"]])
