@@ -9,4 +9,8 @@
                  [cheshire "5.5.0"]
                  [clojurewerkz/elastisch "2.1.0"]
                  [com.stuartsierra/component "0.3.0"]
-                 [clj-statsd "0.3.11"]])
+                 [clj-statsd "0.3.11"]
+                 [ring "1.4.0"]
+                 [compojure "1.4.0"]
+                 [clj-http "2.0.0"]
+                 [org.clojure/data.csv "0.1.3"]])
