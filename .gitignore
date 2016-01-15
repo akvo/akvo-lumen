@@ -3,3 +3,6 @@
 .settings/*
 .project
 target/*
+node_modules
+secrets.js
+bundle.js
