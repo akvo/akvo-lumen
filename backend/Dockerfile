@@ -1,13 +1,10 @@
-FROM ubuntu:14.04
+FROM python:3.4
 MAINTAINER Akvo.org <akvo.dev@akvo.org>
 
-ENV DEBIAN_FRONTEND noninteractive
+ENV PYTHONUNBUFFERED 1
 
-RUN \
-    apt-get update && apt-get -y upgrade &&
-    rm -rf /var/lib/apt/lists/*
-    # add-apt-repository -y ppa:nginx/stable && \
-    # apt-get install -y nginx && \
-
-# EXPOSE ...
-# CMD ["..."]
+RUN mkdir -p /app
+WORKDIR /app
+ADD requirements.txt /app
+RUN pip install -r requirements.txt
+ADD . /app
