@@ -1,11 +1,15 @@
+# Dashboard
+node_modules
+secrets.js
+bundle.js
 
-
-
+# ETL
 etl/bin/
 etl/.classpath
 etl/.settings/*
 etl/.project
 etl/target/*
+
 
 # From https://github.com/github/gitignore
 
@@ -28,7 +32,6 @@ pip-delete-this-directory.txt
 
 # Django stuff:
 *.log
-
 
 # Leiningen
 
@@ -150,3 +153,6 @@ tramp
 Session.vim
 .netrwhist
 *~
+
+
+
