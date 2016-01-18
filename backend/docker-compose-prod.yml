@@ -1,0 +1,9 @@
+db:
+  image: postgres:9.5
+web:
+  build: .
+  command: gunicorn --chdir /app runway.wsgi:application -b :8000
+  ports:
+    - "8000:8000"
+  links:
+    - db
