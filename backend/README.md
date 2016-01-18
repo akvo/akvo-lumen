@@ -23,11 +23,13 @@ We use the Docker tool chain, docker, docker-machine & docker-compose needs to b
 ```
 
 ## Run
+To get the ip for the default docker machine issue:
+```shell
+$ docker-machine ip default
+```
+
 To run the app do:
 ```shell
 $ docker-compose up
 ```
-Now the Django app should be available at the docker ip's default ip on port 8000. The docker ip we can get with:
-```shell
-$ docker-machine ip default
-```
+Now the Django app should be available at the docker ip's default ip on port 8000. ```
