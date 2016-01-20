@@ -32,4 +32,10 @@ To run the app do:
 ```shell
 $ docker-compose up
 ```
-Now the Django app should be available at the docker ip's default ip on port 8000. ```
+Now the Django app should be available at the docker ip's default ip on port 8000.
+
+
+```shell 
+docker-compose run web django-admin.py startprojec composeexample .
+docker-compose run web manage.py startapp users
+```
