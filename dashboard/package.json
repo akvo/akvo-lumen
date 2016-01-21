@@ -2,6 +2,7 @@
   "name": "dash-dashboard-prototyp",
   "version": "0.0.1",
   "description": "An introduction to some of the front-end components of DASH",
+  "repository": "https://github.com/akvo/akvo-dash",
   "main": "index.jsx",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -33,7 +34,10 @@
     "webpack-dev-server": "^1.14.0"
   },
   "devDependencies": {
-    "react-hot-loader": "^1.3.0"
+    "react-hot-loader": "^1.3.0",
+    "redux-devtools": "^3.0.1",
+    "redux-devtools-dock-monitor": "^1.0.1",
+    "redux-devtools-log-monitor": "^1.0.2"
   },
   "babel": {
     "presets": [

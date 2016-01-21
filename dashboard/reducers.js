@@ -8,7 +8,7 @@ function dataSets(state={dataSets: []}, action) {
     case "BEGIN_ADD_DATASET":
       return Object.assign({}, state, {
         isFetchInProgress: true
-      }) 
+      })
     case "ADD_DATASET_SUCCESS":
       var newDataSets = state.dataSets.slice(0, state.dataSets.length);
       newDataSets.push(action.data);
@@ -17,7 +17,7 @@ function dataSets(state={dataSets: []}, action) {
         dataSets: newDataSets,
         waitingForDatasetName: true,
         isFetchInProgress: false
-      }) 
+      })
     case "ADD_DATASET_ERROR":
       return state;
     case "SAVE_DATASET_NAME":
@@ -31,7 +31,7 @@ function dataSets(state={dataSets: []}, action) {
       return Object.assign({}, state, {
         activeDatasetGraph: action.datasetIndex
       })
-    default: 
+    default:
       return state;
   }
 }
@@ -101,7 +101,7 @@ function dashboards(state={all: [], pendingDashboard: {exists: false, visualisat
 
       return Object.assign({}, state, {
         pendingDashboard: newPendingDashboard
-      });  
+      });
     case "TOGGLE_ACTIVE_DASHBOARD":
       var newActiveValue;
       parseInt(action.dashboardID) === parseInt(state.activeDashboard) ?
@@ -114,11 +114,11 @@ function dashboards(state={all: [], pendingDashboard: {exists: false, visualisat
   }
 }
 
-const todoApp = combineReducers({
+const dashApp = combineReducers({
   router: routerStateReducer,
   dataSets,
   visualisations,
   dashboards
 })
 
-export default todoApp
+export default dashApp

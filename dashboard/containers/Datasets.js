@@ -14,9 +14,10 @@ class Datasets extends Component {
     return (
       <div>
         <h1>Akvo DASH prototype</h1>
-        <Navigation router={router}
-        visualisations={visualisations}
-        dashboards={dashboards} />
+        <Navigation
+          router={router}
+          visualisations={visualisations}
+          dashboards={dashboards} />
         <h2>Datasets</h2>
         <DatasetInput onSubmit={(url) =>
           dispatch(fetchDataset(url))

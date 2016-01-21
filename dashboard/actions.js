@@ -63,8 +63,8 @@ export function fetchDataset(url) {
 				   'Authorization': 'Basic ' + FLOW_AUTH_TOKEN
 				  }
 			  })
-			.then( response => response.json())
-			.then (json => {
+			.then(response => response.json())
+			.then(json => {
 				dispatch(downloadDatasetSuccess(json));
 			});
 	}
