@@ -6,3 +6,4 @@ target/*
 node_modules
 secrets.js
 bundle.js
+.DS_Store
