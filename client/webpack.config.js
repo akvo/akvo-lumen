@@ -1,4 +1,6 @@
 var webpack = require('webpack');
+var SystemBellPlugin = require('system-bell-webpack-plugin');
+
 
 const entry = process.env.NODE_ENV === 'production' ?
   [
@@ -29,6 +31,7 @@ module.exports = {
   },
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
+    new SystemBellPlugin(),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV)
     })

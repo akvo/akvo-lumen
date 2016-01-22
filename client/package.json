@@ -36,6 +36,7 @@
     "redux-devtools": "^3.0.1",
     "redux-devtools-dock-monitor": "^1.0.1",
     "redux-devtools-log-monitor": "^1.0.2",
+    "system-bell-webpack-plugin": "^1.0.0",
     "webpack": "^1.12.11",
     "webpack-dev-server": "^1.14.1"
   },
