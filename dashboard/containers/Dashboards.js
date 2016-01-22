@@ -15,9 +15,10 @@ class Dashboards extends Component {
     return (
       <div>
         <h1>Akvo DASH prototype</h1>
-        <Navigation router={router}
-        visualisations={visualisations}
-        dashboards={dashboards} />
+        <Navigation
+          router={router}
+          visualisations={visualisations}
+          dashboards={dashboards} />
         <h2>Dashboards</h2>
         {!dashboards.pendingDashboard.exists &&
           <button onClick={() => dispatch(beginAddDashboard())}>
@@ -25,12 +26,12 @@ class Dashboards extends Component {
           </button>
         }
         {dashboards.pendingDashboard.exists &&
-          <AddDashboardDialog 
+          <AddDashboardDialog
             cancelAddDashboard={() => dispatch(cancelAddDashboard())}
             confirmAddDashboard={(data) => dispatch(confirmAddDashboard(data))}
             visualisations={visualisations}
             datasets={dataSets}
-            toggleVisualisationToPendingDashboard={(id) => 
+            toggleVisualisationToPendingDashboard={(id) =>
               dispatch(toggleVisualisationToPendingDashboard(id))
             }/>
         }

@@ -13,9 +13,10 @@ class Visualisations extends Component {
     return (
       <div>
         <h1>Akvo DASH prototype</h1>
-        <Navigation router={router}
-        visualisations={visualisations}
-        dashboards={dashboards} />
+        <Navigation
+          router={router}
+          visualisations={visualisations}
+          dashboards={dashboards} />
         <h2>Visualisations</h2>
         <VisualisationList
           datasets={dataSets}
