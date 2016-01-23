@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, PropTypes } from 'react';
 
 export default class OrganizationMenu extends Component {
   render() {
@@ -12,8 +12,8 @@ export default class OrganizationMenu extends Component {
 }
 
 OrganizationMenu.propTypes = {
-  user: React.PropTypes.shape({
-    name: React.PropTypes.string,
-    organization: React.PropTypes.string,
+  user: PropTypes.shape({
+    name: PropTypes.string,
+    organization: PropTypes.string,
   }),
 };

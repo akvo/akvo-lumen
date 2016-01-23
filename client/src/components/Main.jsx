@@ -1,5 +1,4 @@
-import React from 'react';
-import { Component } from 'react';
+import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { routeActions } from 'redux-simple-router';
 import WorkspaceNav from './WorkspaceNav';
@@ -19,9 +18,9 @@ class Main extends Component {
 }
 
 Main.propTypes = {
-  children: React.PropTypes.element,
-  user: React.PropTypes.object,
-  collections: React.PropTypes.array,
+  children: PropTypes.element,
+  user: PropTypes.object,
+  collections: PropTypes.array,
 };
 
 function select(state) {

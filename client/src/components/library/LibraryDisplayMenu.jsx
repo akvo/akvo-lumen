@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, PropTypes } from 'react';
 
 export default class LibraryDisplayMenu extends Component {
   render() {
@@ -26,8 +26,8 @@ export default class LibraryDisplayMenu extends Component {
 }
 
 LibraryDisplayMenu.propTypes = {
-  sortOrder: React.PropTypes.oneOf(['LAST_MODIFIED', 'CREATED', 'NAME']).isRequired,
-  onChangeSortOrder: React.PropTypes.func,
-  displayMode: React.PropTypes.oneOf(['GRID', 'LIST']).isRequired,
-  onChangeDisplayMode: React.PropTypes.func,
+  sortOrder: PropTypes.oneOf(['LAST_MODIFIED', 'CREATED', 'NAME']).isRequired,
+  onChangeSortOrder: PropTypes.func,
+  displayMode: PropTypes.oneOf(['GRID', 'LIST']).isRequired,
+  onChangeDisplayMode: PropTypes.func,
 };

@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, PropTypes } from 'react';
 
 export default class LibraryCreateButton extends Component {
   render() {
@@ -15,5 +15,5 @@ export default class LibraryCreateButton extends Component {
 }
 
 LibraryCreateButton.propTypes = {
-  onCreate: React.PropTypes.func.isRequired,
+  onCreate: PropTypes.func.isRequired,
 };

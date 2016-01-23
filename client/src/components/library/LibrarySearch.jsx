@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, PropTypes } from 'react';
 
 export default class LibrarySearch extends Component {
 
@@ -19,5 +19,5 @@ export default class LibrarySearch extends Component {
 }
 
 LibrarySearch.propTypes = {
-  onSearch: React.PropTypes.func.isRequired,
+  onSearch: PropTypes.func.isRequired,
 };

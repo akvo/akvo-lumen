@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, PropTypes } from 'react';
 
 import NavLink from './workspace-nav/NavLink';
 import OrganizationMenu from './workspace-nav/OrganizationMenu';
@@ -19,6 +19,6 @@ export default class WorkspaceNav extends Component {
 }
 
 WorkspaceNav.propTypes = {
-  collections: React.PropTypes.array,
-  user: React.PropTypes.object,
+  collections: PropTypes.array,
+  user: PropTypes.object,
 };

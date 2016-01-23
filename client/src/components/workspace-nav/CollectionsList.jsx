@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, PropTypes } from 'react';
 import CollectionListItem from './CollectionListItem';
 
 export default class CollectionsList extends Component {
@@ -16,5 +16,5 @@ export default class CollectionsList extends Component {
 }
 
 CollectionsList.propTypes = {
-  collections: React.PropTypes.array.isRequired,
+  collections: PropTypes.array.isRequired,
 };

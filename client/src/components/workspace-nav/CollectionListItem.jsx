@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, PropTypes } from 'react';
 import { Link } from 'react-router';
 
 function slug(collection) {
@@ -17,5 +17,5 @@ export default class CollectionListItem extends Component {
 }
 
 CollectionListItem.propTypes = {
-  collection: React.PropTypes.object,
+  collection: PropTypes.object,
 };
