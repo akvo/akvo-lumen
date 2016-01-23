@@ -13,6 +13,7 @@ const entry = process.env.NODE_ENV === 'production' ?
 console.log(__dirname);
 module.exports = {
   entry: entry,
+  devtool: 'source-map',
   output: {
     path: __dirname,
     filename: "bundle.js"
