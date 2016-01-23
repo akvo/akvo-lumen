@@ -9,7 +9,7 @@
     "test:watch": "npm test -- --watch",
     "start": "node server.js",
     "build": "NODE_ENV=production webpack -p",
-    "lint": "./node_modules/.bin/eslint --ext .jsx --ext .js src"
+    "lint": "./node_modules/.bin/eslint --ext .jsx --ext .js src test"
   },
   "author": "Akvo Foundation",
   "license": "ISC",
