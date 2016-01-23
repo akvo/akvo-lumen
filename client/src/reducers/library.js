@@ -1,6 +1,6 @@
 import * as constants from '../constants/library';
 
-const initialState = {
+export const initialState = {
   datasets: {},
   visualisations: {},
   dashboards: {},
