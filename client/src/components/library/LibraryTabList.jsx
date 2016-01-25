@@ -5,9 +5,9 @@ export default class LibraryTabList extends Component {
     return (
       <div>
         <ul>
-          <li onClick={() => this.props.onSelect('DATASETS')}>Datasets</li>
-          <li onClick={() => this.props.onSelect('VISUALISATIONS')}>Visualisations</li>
-          <li onClick={() => this.props.onSelect('DASHBOARDS')}>Dashboards</li>
+          <li onClick={() => this.props.onSelect('datasets')}>Datasets</li>
+          <li onClick={() => this.props.onSelect('visualisations')}>Visualisations</li>
+          <li onClick={() => this.props.onSelect('dashboards')}>Dashboards</li>
         </ul>
       </div>
     );
@@ -16,5 +16,5 @@ export default class LibraryTabList extends Component {
 
 LibraryTabList.propTypes = {
   onSelect: PropTypes.func,
-  selected: PropTypes.oneOf(['ALL', 'DATASETS', 'VISUALISATIONS', 'DASHBOARDS']),
+  selected: PropTypes.oneOf(['all', 'datasets', 'visualisations', 'dashboards']),
 };

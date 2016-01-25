@@ -7,18 +7,16 @@ export default class LibraryDisplayMenu extends Component {
       <div>
         <select
           value={sortOrder}
-          onChange={evt => onChangeSortOrder(evt.target.value)}
-        >
-          <option value="LAST_MODIFIED">Last Modified</option>
-          <option value="CREATED">Created</option>
-          <option value="NAME">Name</option>
+          onChange={evt => onChangeSortOrder(evt.target.value)}>
+          <option value="last_modified">Last Modified</option>
+          <option value="created">Created</option>
+          <option value="name">Name</option>
         </select>
         <select
           value={displayMode}
-          onChange={evt => onChangeDisplayMode(evt.target.value)}
-        >
-          <option value="GRID">Grid</option>
-          <option value="LIST">List</option>
+          onChange={evt => onChangeDisplayMode(evt.target.value)}>
+          <option value="grid">Grid</option>
+          <option value="list">List</option>
         </select>
       </div>
     );
@@ -26,8 +24,8 @@ export default class LibraryDisplayMenu extends Component {
 }
 
 LibraryDisplayMenu.propTypes = {
-  sortOrder: PropTypes.oneOf(['LAST_MODIFIED', 'CREATED', 'NAME']).isRequired,
+  sortOrder: PropTypes.oneOf(['last_modified', 'created', 'name']).isRequired,
   onChangeSortOrder: PropTypes.func,
-  displayMode: PropTypes.oneOf(['GRID', 'LIST']).isRequired,
+  displayMode: PropTypes.oneOf(['grid', 'list']).isRequired,
   onChangeDisplayMode: PropTypes.func,
 };

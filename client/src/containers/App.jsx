@@ -1,6 +1,6 @@
 import React from 'react';
 import { Component } from 'react';
-import { Router, Route, IndexRoute, browserHistory } from 'react-router';
+import { Router, Route, IndexRedirect, browserHistory } from 'react-router';
 import Library from '../components/Library';
 import Datasets from '../components/Datasets';
 import Visualisations from '../components/Visualisations';
@@ -12,11 +12,14 @@ class App extends Component {
     return (
       <Router history={browserHistory}>
         <Route path="/" component={Main}>
-          <IndexRoute component={Library}/>
+          <IndexRedirect from="" to="library"/>
+          <Route path="library" component={Library}>
+            <Route path=":collection" component={Library}/>
+          </Route>
           <Route path="datasets" component={Datasets}/>
           <Route path="visualisations" component={Visualisations}/>
           <Route path="dashboards" component={Dashboards}/>
-        </Route>
+      </Route>
       </Router>
     );
   }
