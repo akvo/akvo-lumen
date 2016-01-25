@@ -1,5 +1,6 @@
 var webpack = require('webpack');
 var SystemBellPlugin = require('system-bell-webpack-plugin');
+var ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 
 const entry = process.env.NODE_ENV === 'production' ?
@@ -27,7 +28,11 @@ module.exports = {
         test: /\.jsx?$/,
         exclude: /node_modules/,
         loaders: ["react-hot", "babel-loader"]
-      }
+      },
+      {
+          test: /\.scss$/,
+          loader: "style-loader!css-loader!sass-loader"
+      }      
     ]
   },
   plugins: [
@@ -35,6 +40,6 @@ module.exports = {
     new SystemBellPlugin(),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV)
-    })
+    })  
   ]
 };
