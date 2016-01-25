@@ -7,6 +7,17 @@ We use the Docker tool chain, docker, docker-machine & docker-compose needs to b
 
 
 ## Get started
+Create a development env var file, this is so we don't have to pass in env vars every time we run our development environment.
+```shell
+$ touch runway/.env
+```
+Add development settings:
+```shell
+DEBUG=on
+DATABASE_URL=psql://postgres:postgres@db:5432/postgres
+SECRET_KEY=zig9s!trkt1(@adhol_9-!d#cm52(begsp2!=-dp(gbbj^j3nm
+```
+
 To get the ip for the default docker machine:
 
 ```shell
