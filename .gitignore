@@ -11,6 +11,10 @@ etl/.project
 etl/target/*
 
 
+# Backend
+backend/runway/.env
+
+
 # From https://github.com/github/gitignore
 
 # Python

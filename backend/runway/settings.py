@@ -10,20 +10,25 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 
-import os
+# Settings build using Django-environ
+# http://django-environ.readthedocs.org/en/latest/#django-environ
+import environ
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+root = environ.Path(__file__) - 3
+env = environ.Env(
+    DEBUG=(bool, False),
+)
+environ.Env.read_env()
 
+SITE_ROOT = root()
+DEBUG = env('DEBUG')
+TEMPLATE_DEBUG = DEBUG
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
+DATABASES = {
+    'default': env.db()
+}
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'zig9s!trkt1(@adhol_9-!d#cm52(begsp2!=-dp(gbbj^j3nm'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+SECRET_KEY = env('SECRET_KEY')
 
 ALLOWED_HOSTS = []
 
@@ -69,20 +74,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'runway.wsgi.application'
-
-
-# Database
-# https://docs.djangoproject.com/en/1.9/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'HOST': 'db',
-        'PORT': 5432,
-    }
-}
 
 
 
