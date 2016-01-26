@@ -5,10 +5,12 @@ import OrganizationMenu from './workspace-nav/OrganizationMenu';
 import CollectionsList from './workspace-nav/CollectionsList';
 import NavWorkspaceSwitch from './workspace-nav/NavWorkspaceSwitch';
 
+require('../styles/WorkspaceNav.scss');
+
 export default class WorkspaceNav extends Component {
   render() {
     return (
-      <nav>
+      <nav className="WorkspaceNav">
         <NavLink collapsed={false}/>
         <OrganizationMenu user={this.props.user}/>
         <CollectionsList collections={this.props.collections} />

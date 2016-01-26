@@ -10,7 +10,7 @@ export default class LibrarySearch extends Component {
 
   render() {
     return (
-      <div>
+      <div className="LibrarySearch">
         <input ref="search" placeholder="Search"></input>
         <button onClick={evt => this.handleClick(evt)}>Search</button>
       </div>

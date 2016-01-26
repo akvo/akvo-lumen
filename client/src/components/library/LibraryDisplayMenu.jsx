@@ -4,7 +4,7 @@ export default class LibraryDisplayMenu extends Component {
   render() {
     const { sortOrder, onChangeSortOrder, displayMode, onChangeDisplayMode } = this.props;
     return (
-      <div>
+      <div className="LibraryDisplayMenu">
         <select
           value={sortOrder}
           onChange={evt => onChangeSortOrder(evt.target.value)}>

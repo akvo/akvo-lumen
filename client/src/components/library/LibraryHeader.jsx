@@ -6,10 +6,12 @@ import LibrarySearch from './LibrarySearch';
 import LibraryTabList from './LibraryTabList';
 import LibraryDisplayMenu from './LibraryDisplayMenu';
 
+require('../../styles/LibraryHeader.scss');
+
 export default class LibraryHeader extends Component {
   render() {
     return (
-      <div>
+      <div className="LibraryHeader">
         <LocationIndicator />
         <LibraryCreateButton
           onCreate={type => console.log(type)}/>

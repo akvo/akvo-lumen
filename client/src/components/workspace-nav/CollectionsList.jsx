@@ -11,7 +11,7 @@ export default class CollectionsList extends Component {
       );
     });
 
-    return <ul>{listItems}</ul>;
+    return <ul className="CollectionsList">{listItems}</ul>;
   }
 }
 

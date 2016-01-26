@@ -3,10 +3,14 @@ import { connect } from 'react-redux';
 import { routeActions } from 'react-router-redux';
 import WorkspaceNav from './WorkspaceNav';
 
+require('../styles/reset.global.scss');
+require('../styles/style.global.scss');
+require('../styles/Main.scss');
+
 class Main extends Component {
   render() {
     return (
-      <div>
+      <div className="Main">
         <WorkspaceNav
           collections={this.props.collections}
           user={this.props.user}

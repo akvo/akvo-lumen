@@ -6,6 +6,8 @@ import LibraryHeader from './library/LibraryHeader';
 import LibraryListing from './library/LibraryListing';
 import * as libraryActions from '../actions/library';
 
+require('../styles/Library.scss');
+
 function mergeQuery(location, query) {
   return Object.assign({}, location, {
     query: Object.assign({}, location.query, query)
@@ -26,7 +28,7 @@ class Library extends Component {
     const searchString = query.search || "";
     const collection = params.collection || null;
     return (
-      <div>
+      <div className="Library">
         <LibraryHeader
           displayMode={displayMode}
           onChangeDisplayMode={(newDisplayMode) => {

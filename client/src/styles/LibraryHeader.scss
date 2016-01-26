@@ -1,0 +1,50 @@
+.LibraryHeader {
+    padding: 1em 3em 0em 3em;
+    border-bottom: 0.1rem solid rgba(0,0,0,0.2);
+    > * {
+        display: inline-block;
+        vertical-align: top;
+        padding: 0.5rem 0.5rem;
+    }
+    .LocationIndicator {
+        width: 15%;
+        margin-right: 40%;
+    }
+    .LibraryCreateButton {
+        margin-top: 0.5rem;
+        width: 12.5%;
+        margin-right: 2.5%;
+    }
+    .LibrarySearch {
+        width: 30%;
+        input {
+            width: 80%;
+        }
+        button {
+            width: 20%;
+        }
+    }
+    .LibraryTabList {
+        width: 60%;
+        margin-right: 10%;
+        padding-bottom: 0;
+        li {
+            display: inline-block;
+            padding: 0 1.5rem 1.5rem 1.5rem;
+            text-align: center;
+            &.selected {
+            	border-bottom: 0.25rem solid red;
+            }
+        }
+    }
+    .LibraryDisplayMenu {
+        width: 30%;
+        padding-bottom: 1.5rem;
+        select {
+            width: 50%;
+        }
+    }
+    .LibraryTabList, .LibraryDisplayMenu {
+    	margin-top: 1.5rem;
+    }
+}

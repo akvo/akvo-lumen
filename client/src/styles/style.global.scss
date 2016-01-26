@@ -1,0 +1,18 @@
+html, body, #root, #root > div {
+    height: 100%;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+/* Identify elements that can be clicked or tap to interact with */
+
+.clickable, a {
+    &:hover {
+        opacity: 0.8;
+    }
+    &:active {
+        opacity: 0.6;
+    }
+}
