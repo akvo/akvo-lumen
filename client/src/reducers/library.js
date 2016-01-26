@@ -1,5 +1,3 @@
-import * as constants from '../constants/library';
-
 export const initialState = {
   datasets: {},
   visualisations: {},
