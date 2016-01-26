@@ -11,9 +11,15 @@ export default class WorkspaceNav extends Component {
   render() {
     return (
       <nav className="WorkspaceNav">
-        <NavLink collapsed={false}/>
-        <OrganizationMenu user={this.props.user}/>
-        <CollectionsList collections={this.props.collections} />
+        <div className="header">
+          <h1>DASH</h1>
+          <OrganizationMenu user={this.props.user} />
+        </div>
+        <div className="links">
+          <NavLink to="library" />
+          <CollectionsList collections={this.props.collections} />
+          <NavLink to="activity" />
+        </div>
         <NavWorkspaceSwitch />
       </nav>
     );

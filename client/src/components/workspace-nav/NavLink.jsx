@@ -1,9 +1,13 @@
-import React, { Component } from 'react';
+import React, { Component, PropTypes } from 'react';
 
 export default class NavLink extends Component {
   render() {
     return (
-      <div className="Navlink">DASH</div>
+      <div className="NavLink">{this.props.to}</div>
     );
   }
 }
+
+NavLink.propTypes = {
+  to: PropTypes.string,
+};
