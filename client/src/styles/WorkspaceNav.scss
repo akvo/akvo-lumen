@@ -1,4 +1,70 @@
 .WorkspaceNav {
-	padding: 2rem;
-	border-right: 0.1rem solid rgba(0,0,0,0.2);
+    border-right: 0.1rem solid rgba(0, 0, 0, 0.05);
+    background-color: rgb(240, 240, 240);
+    width: 14rem;
+    .header {
+        padding: 1rem;
+        height: 8rem;
+        border-bottom: 0.1rem solid rgba(0, 0, 0, 0.1);
+        h1 {
+            color: rgb(150, 150, 150);
+            padding-bottom: 2rem;
+        }
+    }
+    .OrganizationMenu {
+        .name {
+            padding-bottom: 0.25rem;
+        }
+        .organization {
+            color: rgb(150, 150, 150);
+        }
+    }
+    .links {
+        padding: 1rem;
+        background-color: rgb(200, 200, 200);
+        border-bottom: 0.1rem solid rgba(0, 0, 0, 0.1);
+    }
+    .NavLink, h1, h3 {
+        font-variant: small-caps;
+        text-transform: lowercase;
+    }
+    .NavLink, .CollectionsList {
+        padding: 1rem 0;
+    }
+    .NavLink {
+        .selected {
+            font-weight: bold;
+        }
+        border-bottom: 0.1rem solid rgba(0, 0, 0, 0.1);
+        &:first-child {
+            padding-top: 0;
+        }
+        &:last-child {
+            border-bottom: 0;
+            border-top: 0.1rem solid rgba(0, 0, 0, 0.1);
+            padding-bottom: 0;
+        }
+    }
+    .CollectionsList {
+        h3 {
+            padding-bottom: 1rem;
+        }
+        li {
+            padding: 0.5rem 0;
+            margin-left: 1.25rem;
+            &:first-child {
+                padding-top: 0;
+            }
+        }
+    }
+    .NavWorkspaceSwitch {
+        padding: 1rem;
+        text-align: center;
+        a {
+            padding: 0.75rem;
+            margin-top: 1rem;
+            border: 0.1rem solid rgba(0, 0, 0, 0.2);
+            display: inline-block;
+        }
+    }
 }

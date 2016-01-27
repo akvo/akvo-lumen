@@ -9,7 +9,12 @@ export default class CollectionsList extends Component {
         </li>
       )
     );
-    return <ul className="CollectionsList">{listItems}</ul>;
+    return (
+      <div className="CollectionsList">
+        <h3>Collections</h3>
+        <ul>{listItems}</ul>
+      </div>
+    );
   }
 }
 
