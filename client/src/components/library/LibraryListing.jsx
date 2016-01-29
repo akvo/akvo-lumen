@@ -5,7 +5,7 @@ require('../../styles/LibraryListing.scss');
 
 export default class LibraryListing extends Component {
   mapEntityObjectsToArray(...objects) {
-    // Convert one or more entity objects to an array of entities
+    // Convert one or more entity objects into an array of entities
     const output = [];
     objects.map((entityObject) => {
       Object.keys(entityObject).map(key => {
@@ -15,13 +15,15 @@ export default class LibraryListing extends Component {
     });
     return output;
   }
+
   render() {
     const { datasets, visualisations, dashboards } = this.props.library;
     const isSortDateType = this.props.sortOrder === 'created' ||
-            this.props.sortOrder === 'last_modified';
-    let entities = [];
+                this.props.sortOrder === 'last_modified';
     const listGroups = {};
     const listGroupsArray = [];
+    let entities = [];
+
     if (this.props.filterBy === 'all') {
       entities = this.mapEntityObjectsToArray(datasets, visualisations, dashboards);
     } else {
@@ -49,13 +51,13 @@ export default class LibraryListing extends Component {
         // Take the year, month and day as the key
         const key = `${sd.getUTCFullYear()}-${sd.getUTCMonth() + 1}-${sd.getUTCDate()}`;
 
-        // If the propety for this day doesn't exist yet, create it
+        // If the property for this day doesn't exist yet, create it
         listGroups[key] = listGroups[key] || { listGroupDate: key, entities: [] };
         listGroups[key].entities.push(entity);
       });
     }
 
-    // Sort entities by sortOrder
+    // Sort ListGroup entities by sortOrder
 
     const sortListGroupBySortOrder = (a, b) => {
       let output;

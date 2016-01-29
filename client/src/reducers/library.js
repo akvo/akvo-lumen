@@ -1,3 +1,5 @@
+import * as dataset from '../constants/dataset';
+
 const mockData = {
   datasets: {
     101: {
@@ -67,6 +69,13 @@ export const initialState = {
 
 export default function library(state = mockData, action) {
   switch (action.type) {
+    case dataset.CREATE:
+      const id = action.dataset.id;
+      return Object.assign({}, state, {
+        datasets: Object.assign({}, state.datasets, {
+          [id]: action.dataset,
+        }),
+      });
     default: return state;
   }
 }

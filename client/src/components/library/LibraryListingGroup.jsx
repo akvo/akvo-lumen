@@ -27,9 +27,9 @@ export default class LibraryListingGroup extends Component {
 
 LibraryListingGroup.propTypes = {
   listGroup: PropTypes.shape({
-      listGroupDate: PropTypes.string.isRequired,
-      entities: PropTypes.array,
-    }),
+    listGroupDate: PropTypes.string.isRequired,
+    entities: PropTypes.array,
+  }),
   displayMode: PropTypes.oneOf(['list', 'grid']).isRequired,
   isSortDateType: PropTypes.bool.isRequired,
 };

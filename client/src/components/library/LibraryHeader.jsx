@@ -14,7 +14,7 @@ export default class LibraryHeader extends Component {
       <div className="LibraryHeader">
         <LocationIndicator />
         <LibraryCreateButton
-          onCreate={type => console.log(type)}/>
+          onCreate={this.props.onCreate}/>
         <LibrarySearch
           onSearch={this.props.onSetSearchString}/>
         <LibraryTabList
@@ -42,4 +42,5 @@ LibraryHeader.propTypes = {
   filterBy: PropTypes.string.isRequired,
   onChangeFilterBy: PropTypes.func.isRequired,
   onSetSearchString: PropTypes.func.isRequired,
+  onCreate: PropTypes.func.isRequired,
 };
