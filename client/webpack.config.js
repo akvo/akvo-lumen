@@ -17,7 +17,8 @@ module.exports = {
   devtool: 'source-map',
   output: {
     path: __dirname,
-    filename: "bundle.js"
+    filename: "bundle.js",
+    publicPath: '/'
   },
   resolve: {
     extensions: ['', '.js', '.jsx']
@@ -30,9 +31,13 @@ module.exports = {
         loaders: ["react-hot", "babel-loader"]
       },
       {
-          test: /\.scss$/,
-          loader: "style-loader!css-loader!sass-loader"
-      }      
+        test: /\.scss$/,
+        loader: "style-loader!css-loader!sass-loader"
+      },
+      {
+        test: /\.css$/,
+        loader: "style-loader!css-loader"
+      }
     ]
   },
   plugins: [
@@ -40,6 +45,6 @@ module.exports = {
     new SystemBellPlugin(),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV)
-    })  
+    })
   ]
 };

@@ -6,4 +6,5 @@ target/*
 node_modules
 secrets.js
 bundle.js
+npm-debug.log
 .DS_Store
