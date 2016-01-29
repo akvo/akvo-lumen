@@ -1,6 +1,25 @@
 import React, { Component, PropTypes } from 'react';
 import { Table, Column, Cell } from 'fixed-data-table';
 
+class PreviewHeader extends Component {
+  render() {
+    return (
+      <Cell>
+        <div>
+          <div>{this.props.title}</div>
+          <div>
+            <select>
+              <option>String</option>
+              <option>Number</option>
+              <option>Date</option>
+            </select>
+          </div>
+        </div>
+      </Cell>
+    );
+  }
+}
+
 export default class Preview extends Component {
 
   constructor() {
@@ -25,7 +44,7 @@ export default class Preview extends Component {
   render() {
     const cols = this.props.columns.map((column) => (
       <Column
-        header={<Cell>{column.title}</Cell>}
+        header={<PreviewHeader title={column.title}/>}
         cell={props => <Cell>{column.values[props.rowIndex]}</Cell>}
         width={200}/>
     ));
@@ -33,7 +52,7 @@ export default class Preview extends Component {
     return (
       <div ref="wrappingDiv">
         <Table
-          headerHeight={30}
+          headerHeight={50}
           rowHeight={30}
           rowsCount={this.props.columns[0].values.length}
           width={this.state.width}
