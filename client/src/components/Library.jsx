@@ -22,7 +22,7 @@ class Library extends Component {
     const query = location.query;
     const displayMode = query.display || 'list';
     const sortOrder = query.sort || 'last_modified';
-    const reverseSort = query.reverse === 'true' || false;
+    const reverseSort = query.reverse === 'true';
     const filterBy = query.filter || 'all';
     const searchString = query.search || '';
     const collection = params.collection || null;
