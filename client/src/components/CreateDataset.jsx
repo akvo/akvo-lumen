@@ -68,6 +68,18 @@ class CreateDataset extends Component {
       this.setState({ currentPage: 'settings' });
     } else if (currentPage === 'settings') {
       dispatch(createDataset(dataset));
+      dispatch(routeActions.goBack());
+    }
+  }
+
+  isNextOrImportDisabled() {
+    const { currentPage, dataset } = this.state;
+    if (currentPage === 'source') {
+      return false;
+    } else if (currentPage === 'file') {
+      return !dataset.columns;
+    } else if (currentPage === 'settings') {
+      return !dataset.name;
     }
   }
 
@@ -101,6 +113,7 @@ class CreateDataset extends Component {
           Previous
         </button>
         <button
+          disabled={this.isNextOrImportDisabled()}
           onClick={this.handleNextOrImport.bind(this)}>
           {currentPage === 'settings' ? 'Import' : 'Next'}
         </button>
