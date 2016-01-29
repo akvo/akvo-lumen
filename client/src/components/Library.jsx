@@ -52,6 +52,9 @@ class Library extends Component {
                 search: newSearchString,
               }));
             }
+          }}
+          onCreate={(type) => {
+            dispatch(routeActions.push(`/${type}/create`));
           }}/>
         <LibraryListing
           displayMode={displayMode}
@@ -59,6 +62,7 @@ class Library extends Component {
           filterBy={filterBy}
           searchString={searchString}
           collection={collection}/>
+        {this.props.children}
       </div>
     );
   }
@@ -68,6 +72,7 @@ Library.propTypes = {
   dispatch: PropTypes.func,
   location: PropTypes.object,
   params: PropTypes.object,
+  children: PropTypes.element,
 };
 
 export default connect(state => state.library)(Library);

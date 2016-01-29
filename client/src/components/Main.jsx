@@ -6,6 +6,7 @@ import WorkspaceNav from './WorkspaceNav';
 require('../styles/reset.global.scss');
 require('../styles/style.global.scss');
 require('../styles/Main.scss');
+require('fixed-data-table/dist/fixed-data-table.css');
 
 class Main extends Component {
   render() {
