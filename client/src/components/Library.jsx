@@ -22,6 +22,7 @@ class Library extends Component {
     const query = location.query;
     const displayMode = query.display || 'list';
     const sortOrder = query.sort || 'last_modified';
+    const reverseSort = query.reverse === 'true' || false;
     const filterBy = query.filter || 'all';
     const searchString = query.search || '';
     const collection = params.collection || null;
@@ -40,6 +41,12 @@ class Library extends Component {
               sort: newSortOrder,
             }));
           }}
+          reverseSort={reverseSort}
+          onChangeReverseSort={(newReverseSort) => {
+            dispatch(updateQueryAction(location, {
+              reverse: newReverseSort,
+            }));
+          }}
           filterBy={filterBy}
           onChangeFilterBy={(newFilterBy) => {
             dispatch(updateQueryAction(location, {
@@ -56,9 +63,11 @@ class Library extends Component {
         <LibraryListing
           displayMode={displayMode}
           sortOrder={sortOrder}
+          reverseSort={reverseSort}
           filterBy={filterBy}
           searchString={searchString}
-          collection={collection}/>
+          collection={collection}
+          library={this.props}/>
       </div>
     );
   }

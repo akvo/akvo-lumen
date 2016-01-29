@@ -1,13 +1,23 @@
 import React, { Component, PropTypes } from 'react';
 
 export default class LibraryTabList extends Component {
+  capitalize(string) {
+    return string[0].toUpperCase() + string.slice(1);
+  }
   render() {
+    const tabs = ['all', 'datasets', 'visualisations', 'dashboards'];
     return (
       <div className="LibraryTabList">
         <ul>
-          <li onClick={() => this.props.onSelect('datasets')}>Datasets</li>
-          <li onClick={() => this.props.onSelect('visualisations')}>Visualisations</li>
-          <li onClick={() => this.props.onSelect('dashboards')}>Dashboards</li>
+          {tabs.map((tabname, index) =>
+            <li
+              key={index}
+              onClick={() => this.props.onSelect(tabname)}
+              className={`clickable  ${tabname === this.props.selected && 'selected'}`}
+            >
+              {this.capitalize(tabname)}
+            </li>
+          )}
         </ul>
       </div>
     );
