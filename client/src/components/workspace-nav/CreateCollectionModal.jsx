@@ -2,6 +2,16 @@ import React, { Component, PropTypes } from 'react';
 import Modal from 'react-modal';
 
 export default class CreateCollectionModal extends Component {
+  constructor() {
+    super();
+    this.state = { name: '' };
+    this.handleInputChange = this.handleInputChange.bind(this);
+  }
+
+  handleInputChange(evt) {
+    this.setState({ name: evt.target.value.trim() });
+  }
+
   render() {
     const { onCancel, onCreate } = this.props;
     return (
@@ -18,14 +28,23 @@ export default class CreateCollectionModal extends Component {
         <h1>Create a new collection</h1>
         <div>Collection name</div>
         <input
+          onChange={this.handleInputChange}
           type="text"
-          ref="collectionName"
           placeholder="Collection name"/>
         <div>
-          <button onClick={onCancel}>
+          <button
+            onClick={() => {
+              this.setState({ name: '' });
+              onCancel();
+            }}>
             Cancel
           </button>
-          <button onClick={() => onCreate(this.refs.collectionName.value)}>
+          <button
+            disabled={this.state.name === ''}
+            onClick={() => {
+              this.setState({ name: '' });
+              onCreate(this.state.name);
+            }}>
             Create
           </button>
         </div>
