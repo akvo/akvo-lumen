@@ -12,11 +12,8 @@ class Main extends Component {
   render() {
     return (
       <div className="Main">
-        <WorkspaceNav
-          collections={this.props.collections}
-          user={this.props.user}
-        />
-      {this.props.children}
+        <WorkspaceNav/>
+        {this.props.children}
       </div>
     );
   }
@@ -24,8 +21,6 @@ class Main extends Component {
 
 Main.propTypes = {
   children: PropTypes.element,
-  user: PropTypes.object,
-  collections: PropTypes.array,
 };
 
 function select(state) {

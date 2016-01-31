@@ -4,11 +4,6 @@ import Root from './containers/Root';
 import configureStore from './store/configureStore';
 
 const initialState = {
-  collections: [
-    { name: 'Collection A', id: 123432 },
-    { name: 'Collection B', id: 432111 },
-    { name: 'Collection C', id: 332233 },
-  ],
   user: {
     name: 'Timdont Cook',
     organization: 'Akvo DASH',
