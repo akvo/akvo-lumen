@@ -16,6 +16,7 @@ export default class LibraryHeader extends Component {
         <LibraryCreateButton
           onCreate={this.props.onCreate}/>
         <LibrarySearch
+          searchString={this.props.searchString}
           onSearch={this.props.onSetSearchString}/>
         <LibraryTabList
           selected={this.props.filterBy}
@@ -41,6 +42,7 @@ LibraryHeader.propTypes = {
   onChangeReverseSort: PropTypes.func.isRequired,
   filterBy: PropTypes.string.isRequired,
   onChangeFilterBy: PropTypes.func.isRequired,
+  searchString: PropTypes.string,
   onSetSearchString: PropTypes.func.isRequired,
   onCreate: PropTypes.func.isRequired,
 };

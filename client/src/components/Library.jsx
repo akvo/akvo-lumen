@@ -53,6 +53,7 @@ class Library extends Component {
               filter: newFilterBy,
             }));
           }}
+          searchString={searchString}
           onSetSearchString={(newSearchString) => {
             if (newSearchString !== '') {
               dispatch(updateQueryAction(location, {
