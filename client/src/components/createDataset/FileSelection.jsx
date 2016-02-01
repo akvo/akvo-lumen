@@ -26,7 +26,13 @@ export default class FileSelection extends Component {
   }
 
   render() {
-    return this.renderFileSelection();
+    return (
+      <div className="FileSelection">
+        <div className="contents">
+          {this.renderFileSelection()}
+        </div>
+      </div>
+    );
   }
 }
 

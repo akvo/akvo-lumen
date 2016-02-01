@@ -1,0 +1,126 @@
+.CreateDataset {
+    position: relative;
+    min-height: 100%;
+    .modalTitle {
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+    }
+    .tabMenu {
+        padding: 3rem 0;
+    }
+    .tab {
+        display: inline-block;
+        width: 27%;
+        margin-left: calc(19% / 6);
+        margin-right: calc(19% / 6);
+        text-align: center;
+        padding: 0.75rem 0.75rem;
+        color: rgb(200, 200, 200);
+        border-bottom: 0.15rem solid rgb(200, 200, 200);
+        &.selected {
+            color: black;
+            border-color: black;
+        }
+    }
+    .close {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        padding: 0.3rem;
+        font-size: 1rem;
+    }
+    .movementControls {
+        position: absolute;
+        height: 4rem;
+        bottom: 0;
+        left: 2rem;
+        right: 2rem;
+        border-top: 0.1rem solid rgb(200, 200, 200);
+        background-color: white;
+    }
+    .buttonContainer {
+        position: relative;
+    }
+    .next, .previous {
+        position: absolute;
+        top: 1.5rem;
+        padding: 0.5rem 1rem;
+    }
+    .next {
+        right: 2rem;
+    }
+    .previous {
+        left: 2rem;
+    }
+    .SourceSelection {
+        display: relative;
+        margin: 0 4rem;
+        .sourceOptionContainer {
+            display: inline-block;
+            width: 20%;
+            height: 6rem;
+            margin: 1rem calc(20% / 8);
+            padding: 1rem;
+            text-align: center;
+            background-color: whitesmoke;
+            vertical-align: bottom;
+            input {
+                margin-right: 0.5rem;
+            }
+        }
+    }
+    .FileSelection {
+        width: 100%;
+        min-height: 15rem;
+        display: table;
+        .contents {
+            vertical-align: middle;
+            text-align: center;
+            display: table-cell;
+        }
+    }
+    .LinkFileSelection {
+        .linkFileInput, .linkFileInputLabel {
+            font-size: 1.25rem;
+        }
+        .linkFileInputLabel {
+            margin-right: 0.5rem;
+        }
+    }
+    .DataFileFileSelection {
+        .dataFileUploadMessage, .dataFileUploadInput {
+            font-size: 1rem;
+        }
+        .dataFileUploadMessage {
+            line-height: 2rem;
+        }
+        .dataFileUploadInput {
+            padding: 1rem;
+        }
+    }
+    .Settings {
+        dt, dd {
+            display: inline-block;
+            line-height: 1.4rem;
+            margin-bottom: 0.5rem;
+        }
+        dt {
+            width: 25%;
+            max-width: 12rem;
+            padding-right: 0.25rem;
+            text-align: right;
+        }
+        dd {
+            width: 70%;
+            min-width: calc(100% - 12rem);
+        }
+        .datasetNameInput {
+            width: 20rem;
+        }
+    }
+    .Preview {
+        padding-top: 1rem;
+        padding-bottom: 6rem;
+    }
+}

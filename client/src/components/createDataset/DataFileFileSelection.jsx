@@ -43,12 +43,14 @@ export default class DataFileFileSelection extends Component {
   render() {
     return (
       <div
+        className="DataFileFileSelection"
         onDragEnter={this.handleDragEnter}
         onDragOver={this.handleDragOver}
         onDrop={this.handleDrop}>
-        <h1>Drop file anywhere to upload</h1>
-        <h3>or</h3>
+        <p className="dataFileUploadMessage">Drop file anywhere to upload</p>
+        <p className="dataFileUploadMessage">or</p>
         <input
+          className="dataFileUploadInput"
           ref="fileInput"
           type="file"
           onChange={() => {

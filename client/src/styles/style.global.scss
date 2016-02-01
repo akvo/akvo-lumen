@@ -6,19 +6,29 @@ html, body, #root, #root > div {
     box-sizing: border-box;
 }
 
+/* Very basic text styling */
+
 body {
-	font-family: Arial, Helvetica, sans-serif;
-	color: rgb(30,30,30);
+    font-family: Arial, Helvetica, sans-serif;
+    color: rgb(30, 30, 30);
+}
+
+p, h1, h2, h3, h4, h5 {
+    line-height: 1.4em;
 }
 
 /* Identify elements that can be clicked or tap to interact with */
 
 .clickable, a {
-	cursor: pointer;
+    cursor: pointer;
     &:hover {
         opacity: 0.8;
     }
     &:active {
         opacity: 0.6;
+    }
+    &:disabled {
+        opacity: 1;
+        cursor: not-allowed;
     }
 }
