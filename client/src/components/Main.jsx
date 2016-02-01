@@ -1,6 +1,4 @@
 import React, { Component, PropTypes } from 'react';
-import { connect } from 'react-redux';
-import { routeActions } from 'react-router-redux';
 import WorkspaceNav from './WorkspaceNav';
 
 require('../styles/reset.global.scss');
@@ -8,7 +6,7 @@ require('../styles/style.global.scss');
 require('../styles/Main.scss');
 require('fixed-data-table/dist/fixed-data-table.css');
 
-class Main extends Component {
+export default class Main extends Component {
   render() {
     return (
       <div className="Main">
@@ -22,12 +20,3 @@ class Main extends Component {
 Main.propTypes = {
   children: PropTypes.element,
 };
-
-function select(state) {
-  return state;
-}
-
-export default connect(
-  select,
-  routeActions
-)(Main);
