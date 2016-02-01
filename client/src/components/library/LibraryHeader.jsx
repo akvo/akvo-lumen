@@ -23,7 +23,7 @@ export default class LibraryHeader extends Component {
         <LibraryDisplayMenu
           sortOrder={this.props.sortOrder}
           onChangeSortOrder={this.props.onChangeSortOrder}
-          reverseSort={this.props.reverseSort}
+          isReverseSort={this.props.isReverseSort}
           onChangeReverseSort={this.props.onChangeReverseSort}
           displayMode={this.props.displayMode}
           onChangeDisplayMode={this.props.onChangeDisplayMode}/>
@@ -37,7 +37,7 @@ LibraryHeader.propTypes = {
   onChangeDisplayMode: PropTypes.func.isRequired,
   sortOrder: PropTypes.string.isRequired,
   onChangeSortOrder: PropTypes.func.isRequired,
-  reverseSort: PropTypes.bool.isRequired,
+  isReverseSort: PropTypes.bool.isRequired,
   onChangeReverseSort: PropTypes.func.isRequired,
   filterBy: PropTypes.string.isRequired,
   onChangeFilterBy: PropTypes.func.isRequired,
