@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react';
-import * as csv from '../../parsers/csv';
+import * as csv from '../../../parsers/csv';
 
 export default class LinkFileSelection extends Component {
   constructor() {

@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import WorkspaceNav from './WorkspaceNav';
+import DashboardModal from './DashboardModal';
 
 require('../styles/reset.global.scss');
 require('../styles/style.global.scss');
@@ -12,6 +13,7 @@ export default class Main extends Component {
       <div className="Main">
         <WorkspaceNav/>
         {this.props.children}
+        <DashboardModal />
       </div>
     );
   }

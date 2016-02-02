@@ -4,28 +4,19 @@ import NavLink from './workspace-nav/NavLink';
 import OrganizationMenu from './workspace-nav/OrganizationMenu';
 import CollectionsList from './workspace-nav/CollectionsList';
 import NavWorkspaceSwitch from './workspace-nav/NavWorkspaceSwitch';
-import CreateCollectionModal from './workspace-nav/CreateCollectionModal';
-import { createCollection } from '../actions/collection';
+import { showModal } from '../actions/activeModal';
 
 require('../styles/WorkspaceNav.scss');
 
 export default class WorkspaceNav extends Component {
+
   constructor() {
     super();
-    this.state = {
-      showCreateCollectionModal: false,
-    };
-    this.handleCreateCollection = this.handleCreateCollection.bind(this);
-    this.handleToggleCreateCollectionModal = this.handleToggleCreateCollectionModal.bind(this);
+    this.handleShowCreateCollectionModal = this.handleShowCreateCollectionModal.bind(this);
   }
 
-  handleCreateCollection(name) {
-    this.setState({ showCreateCollectionModal: false });
-    this.props.dispatch(createCollection(name));
-  }
-
-  handleToggleCreateCollectionModal() {
-    this.setState({ showCreateCollectionModal: !this.state.showCreateCollectionModal });
+  handleShowCreateCollectionModal() {
+    this.props.dispatch(showModal('create-collection'));
   }
 
   render() {
@@ -39,14 +30,10 @@ export default class WorkspaceNav extends Component {
           <NavLink to="library" />
           <CollectionsList
             collections={this.props.collections}
-            onShowCreateCollectionModal={this.handleToggleCreateCollectionModal} />
+            onShowCreateCollectionModal={this.handleShowCreateCollectionModal} />
           <NavLink to="activity" />
         </div>
         <NavWorkspaceSwitch />
-        <CreateCollectionModal
-          isOpen={this.state.showCreateCollectionModal}
-          onCreate={this.handleCreateCollection}
-          onCancel={this.handleToggleCreateCollectionModal}/>
       </nav>
     );
   }

@@ -1,9 +1,11 @@
 import React, { Component, PropTypes } from 'react';
 import Modal from 'react-modal';
+import { createCollection } from '../../actions/collection';
+
 
 require('../../styles/CreateCollectionModal.scss');
 
-export default class CreateCollectionModal extends Component {
+export default class CreateCollection extends Component {
   constructor() {
     super();
     this.state = { name: '' };
@@ -15,10 +17,10 @@ export default class CreateCollectionModal extends Component {
   }
 
   render() {
-    const { onCancel, onCreate } = this.props;
+    const { onCancel, onSubmit } = this.props;
     return (
       <Modal
-        isOpen={this.props.isOpen}
+        isOpen
         style={{
           content: {
             width: 400,
@@ -59,7 +61,7 @@ export default class CreateCollectionModal extends Component {
               disabled={this.state.name === ''}
               onClick={() => {
                 this.setState({ name: '' });
-                onCreate(this.state.name);
+                onSubmit(createCollection(this.state.name));
               }}>
               Create
             </button>
@@ -70,8 +72,7 @@ export default class CreateCollectionModal extends Component {
   }
 }
 
-CreateCollectionModal.propTypes = {
-  onCreate: PropTypes.func.isRequired,
+CreateCollection.propTypes = {
+  onSubmit: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
-  isOpen: PropTypes.bool.isRequired,
 };
