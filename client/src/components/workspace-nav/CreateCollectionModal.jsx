@@ -25,28 +25,41 @@ export default class CreateCollectionModal extends Component {
             marginRight: 'auto',
           },
         }}>
-        <h1>Create a new collection</h1>
-        <div>Collection name</div>
-        <input
-          onChange={this.handleInputChange}
-          type="text"
-          placeholder="Collection name"/>
-        <div>
+        <div className="CreateCollectionModal">
+          <h2>Create a new collection</h2>
           <button
+            className="close"
             onClick={() => {
               this.setState({ name: '' });
               onCancel();
             }}>
-            Cancel
+            X
           </button>
-          <button
-            disabled={this.state.name === ''}
-            onClick={() => {
-              this.setState({ name: '' });
-              onCreate(this.state.name);
-            }}>
-            Create
-          </button>
+          <label htmlFor="nameInput">Collection name</label>
+          <input
+            id="nameInput"
+            onChange={this.handleInputChange}
+            type="text"
+            placeholder="Collection name"/>
+          <div className="controls">
+            <button
+              className="cancel clickable"
+              onClick={() => {
+                this.setState({ name: '' });
+                onCancel();
+              }}>
+              Cancel
+            </button>
+            <button
+              className="create clickable"
+              disabled={this.state.name === ''}
+              onClick={() => {
+                this.setState({ name: '' });
+                onCreate(this.state.name);
+              }}>
+              Create
+            </button>
+          </div>
         </div>
       </Modal>
     );
