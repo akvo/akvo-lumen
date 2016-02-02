@@ -37,7 +37,7 @@ const supportedFormats = [{
 export default class SourceSelection extends Component {
   render() {
     const sources = supportedFormats.map(source => (
-      <div key={source.type}>
+      <div className="sourceOptionContainer" key={source.type}>
         <input
           type="radio"
           name="choose_data_source"
@@ -50,7 +50,7 @@ export default class SourceSelection extends Component {
         {source.label}
       </div>
     ));
-    return <div>{sources}</div>;
+    return <div className="SourceSelection">{sources}</div>;
   }
 }
 

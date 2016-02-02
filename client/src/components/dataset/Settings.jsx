@@ -25,7 +25,7 @@ function fileName(source) {
 export default class Settings extends Component {
   render() {
     return (
-      <div>
+      <div className="Settings">
         <dl>
           <dt>Source: </dt>
           <dd>{sourceComponent(this.props.dataset.source)}</dd>
@@ -35,6 +35,7 @@ export default class Settings extends Component {
 
           <dt>Dataset name: </dt>
           <dd><input
+            className="datasetNameInput"
             onChange={() => {
               // We should probably not do onChange for perf reasons. Perhaps onBlur?
               this.props.onChange(Object.assign({}, this.props.dataset, {

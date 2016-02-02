@@ -28,7 +28,7 @@
     }
     .LibraryTabList {
         width: 60%;
-        margin-right: 10%;
+        margin-right: 5%;
         padding-bottom: 0;
         li {
             display: inline-block;
@@ -40,10 +40,16 @@
         }
     }
     .LibraryDisplayMenu {
-        width: 30%;
+        width: 35%;
         padding-bottom: 1.5rem;
         select {
-            width: 50%;
+            width: 45%;
+        }
+        input {
+            width: 10%;
+            margin-left: 0;
+            margin-right: 0;
+            text-align: center;
         }
     }
     .LibraryTabList, .LibraryDisplayMenu {

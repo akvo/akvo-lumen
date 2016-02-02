@@ -32,7 +32,7 @@ export default class Preview extends Component {
     ));
 
     return (
-      <div ref="wrappingDiv">
+      <div className="Preview" ref="wrappingDiv">
         <Table
           headerHeight={50}
           rowHeight={30}

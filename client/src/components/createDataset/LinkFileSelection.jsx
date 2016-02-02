@@ -32,9 +32,15 @@ export default class LinkFileSelection extends Component {
 
   render() {
     return (
-      <div>
-        <span>Link: </span>
+      <div className="LinkFileSelection">
+        <label
+          className="linkFileInputLabel"
+          htmlFor="linkFileInput">
+            Link:
+        </label>
         <input
+          className="linkFileInput"
+          id="linkFileInput"
           type="text"
           placeholder="Paste url here"
           onChange={this.handleLink}/>
