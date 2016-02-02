@@ -1,6 +1,8 @@
 import React, { Component, PropTypes } from 'react';
 import Modal from 'react-modal';
 
+require('../../styles/CreateCollectionModal.scss');
+
 export default class CreateCollectionModal extends Component {
   constructor() {
     super();
@@ -20,27 +22,29 @@ export default class CreateCollectionModal extends Component {
         style={{
           content: {
             width: 400,
-            height: 200,
+            height: 250,
             marginLeft: 'auto',
             marginRight: 'auto',
           },
         }}>
         <div className="CreateCollectionModal">
-          <h2>Create a new collection</h2>
+          <h2 className="title">Create a new collection</h2>
           <button
-            className="close"
+            className="close clickable"
             onClick={() => {
               this.setState({ name: '' });
               onCancel();
             }}>
             X
           </button>
-          <label htmlFor="nameInput">Collection name</label>
-          <input
-            id="nameInput"
-            onChange={this.handleInputChange}
-            type="text"
-            placeholder="Collection name"/>
+          <div className="contents">
+            <label htmlFor="nameInput">Collection name</label>
+            <input
+              id="nameInput"
+              onChange={this.handleInputChange}
+              type="text"
+              placeholder="Collection name"/>
+          </div>
           <div className="controls">
             <button
               className="cancel clickable"
