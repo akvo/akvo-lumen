@@ -1,0 +1,32 @@
+.LibraryListing {
+  .LibraryListingGroup {
+    margin: 1rem;
+    padding: 1rem;
+  }  
+  .LibraryListingItem {
+    display: inline-block;
+    margin: 2.5%;
+    padding: 1rem;
+    background-color: whitesmoke;
+    cursor: pointer;
+    &:hover {
+      background-color: rgb(200, 200, 200);
+    } 
+  }
+  &.grid {
+    .LibraryListingItem {
+      width: 45%;
+      &:nth-last-child(1), &:nth-last-child(2) {
+        margin-bottom: 0;
+      }
+    }
+  }
+  &.list {
+    .LibraryListingItem {
+      width: 95%;
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }    
+  }
+}

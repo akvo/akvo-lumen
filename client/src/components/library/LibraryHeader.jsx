@@ -16,6 +16,7 @@ export default class LibraryHeader extends Component {
         <LibraryCreateButton
           onCreate={this.props.onCreate}/>
         <LibrarySearch
+          searchString={this.props.searchString}
           onSearch={this.props.onSetSearchString}/>
         <LibraryTabList
           selected={this.props.filterBy}
@@ -23,6 +24,8 @@ export default class LibraryHeader extends Component {
         <LibraryDisplayMenu
           sortOrder={this.props.sortOrder}
           onChangeSortOrder={this.props.onChangeSortOrder}
+          isReverseSort={this.props.isReverseSort}
+          onChangeReverseSort={this.props.onChangeReverseSort}
           displayMode={this.props.displayMode}
           onChangeDisplayMode={this.props.onChangeDisplayMode}/>
       </div>
@@ -35,8 +38,11 @@ LibraryHeader.propTypes = {
   onChangeDisplayMode: PropTypes.func.isRequired,
   sortOrder: PropTypes.string.isRequired,
   onChangeSortOrder: PropTypes.func.isRequired,
+  isReverseSort: PropTypes.bool.isRequired,
+  onChangeReverseSort: PropTypes.func.isRequired,
   filterBy: PropTypes.string.isRequired,
   onChangeFilterBy: PropTypes.func.isRequired,
+  searchString: PropTypes.string,
   onSetSearchString: PropTypes.func.isRequired,
   onCreate: PropTypes.func.isRequired,
 };

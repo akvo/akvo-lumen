@@ -2,7 +2,8 @@ import React, { Component, PropTypes } from 'react';
 
 export default class LibraryDisplayMenu extends Component {
   render() {
-    const { sortOrder, onChangeSortOrder, displayMode, onChangeDisplayMode } = this.props;
+    const { sortOrder, onChangeSortOrder, displayMode, onChangeDisplayMode,
+      isReverseSort, onChangeReverseSort } = this.props;
     return (
       <div className="LibraryDisplayMenu">
         <select
@@ -12,6 +13,12 @@ export default class LibraryDisplayMenu extends Component {
           <option value="created">Created</option>
           <option value="name">Name</option>
         </select>
+        <input
+          type="checkbox"
+          name="reverseSort"
+          defaultChecked={isReverseSort}
+          onChange={(evt) => onChangeReverseSort(evt.target.checked)}
+        />
         <select
           value={displayMode}
           onChange={evt => onChangeDisplayMode(evt.target.value)}>
@@ -25,7 +32,9 @@ export default class LibraryDisplayMenu extends Component {
 
 LibraryDisplayMenu.propTypes = {
   sortOrder: PropTypes.oneOf(['last_modified', 'created', 'name']).isRequired,
-  onChangeSortOrder: PropTypes.func,
+  onChangeSortOrder: PropTypes.func.isRequired,
+  isReverseSort: PropTypes.bool.isRequired,
+  onChangeReverseSort: PropTypes.func.isRequired,
   displayMode: PropTypes.oneOf(['grid', 'list']).isRequired,
-  onChangeDisplayMode: PropTypes.func,
+  onChangeDisplayMode: PropTypes.func.isRequired,
 };
