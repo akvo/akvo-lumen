@@ -1,15 +1,13 @@
 import React, { Component, PropTypes } from 'react';
 import Modal from 'react-modal';
-import { connect } from 'react-redux';
-import { routeActions } from 'react-router-redux';
 import SourceSelection from './createDataset/SourceSelection';
 import FileSelection from './createDataset/FileSelection';
-import Settings from './dataset/Settings';
-import { createDataset } from '../actions/dataset';
+import Settings from '../dataset/Settings';
+import { createDataset } from '../../actions/dataset';
 
-require('../styles/CreateDataset.scss');
+require('../../styles/CreateDataset.scss');
 
-class CreateDataset extends Component {
+export default class CreateDataset extends Component {
 
   constructor() {
     super();
@@ -62,15 +60,14 @@ class CreateDataset extends Component {
   }
 
   handleNextOrImport() {
-    const { dispatch } = this.props;
+    const { onSubmit } = this.props;
     const { currentPage, dataset } = this.state;
     if (currentPage === 'source') {
       this.setState({ currentPage: 'file' });
     } else if (currentPage === 'file') {
       this.setState({ currentPage: 'settings' });
     } else if (currentPage === 'settings') {
-      dispatch(createDataset(dataset));
-      dispatch(routeActions.goBack());
+      onSubmit(createDataset(dataset));
     }
   }
 
@@ -95,13 +92,13 @@ class CreateDataset extends Component {
   }
 
   render() {
-    const { dispatch } = this.props;
+    const { onCancel } = this.props;
     const { currentPage } = this.state;
     return (
       <Modal isOpen>
         <div className="CreateDataset">
           <h3 className="modalTitle">New Dataset</h3>
-          <button className="btn close clickable" onClick={() => dispatch(routeActions.goBack())}>
+          <button className="btn close clickable" onClick={onCancel}>
             X
           </button>
           <ul className="tabMenu">
@@ -133,13 +130,6 @@ class CreateDataset extends Component {
 }
 
 CreateDataset.propTypes = {
-  dispatch: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
+  onCancel: PropTypes.func.isRequired,
 };
-
-function mapStateToProps() {
-  return {};
-}
-
-export default connect(
-  mapStateToProps
-)(CreateDataset);

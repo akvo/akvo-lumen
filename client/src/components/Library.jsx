@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { routeActions } from 'react-router-redux';
 import LibraryHeader from './library/LibraryHeader';
 import LibraryListing from './library/LibraryListing';
+import { showModal } from '../actions/activeModal';
 
 require('../styles/Library.scss');
 
@@ -62,7 +63,12 @@ class Library extends Component {
             }
           }}
           onCreate={(type) => {
-            dispatch(routeActions.push(`/${type}/create`));
+            if (type === 'dataset') {
+              // Data set creation is handled in a modal
+              dispatch(showModal('create-dataset'));
+            } else {
+              dispatch(routeActions.push(`/${type}/create`));
+            }
           }}/>
         <LibraryListing
           displayMode={displayMode}
