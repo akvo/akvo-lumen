@@ -1,54 +1,115 @@
 # Runway
-Where Dash models live.
+
+FIXME: description
+
+## Developing
+
+- Install Postgres and make sure that CLI tools are available.
 
 
-## Requirements
-We use the Docker tool chain, docker, docker-machine & docker-compose needs to be available. Docs to get this exists at [docker.com](https://www.docker.com).
 
 
-## Get started
-Create a development env var file, this is so we don't have to pass in env vars every time we run our development environment.
-```shell
-$ touch runway/.env
-```
-Add development settings:
-```shell
-DEBUG=on
-DATABASE_URL=psql://postgres:postgres@db:5432/postgres
-SECRET_KEY=zig9s!trkt1(@adhol_9-!d#cm52(begsp2!=-dp(gbbj^j3nm
-```
+### Setup
 
-To get the ip for the default docker machine:
+When you first clone this repository, run:
 
-```shell
-$ docker-machine ip default
+```sh
+lein setup
 ```
 
-To run the container for development:
-```shell
-$ docker-compose up
-```
-Now the Django app should be available at the docker ip's default ip on port 8000.
+This will create files for local configuration, and prep your system
+for the project.
 
+### Environment
 
-## How to Django
+To begin developing, start with a REPL.
 
-The project was created with:
-```shell
-$ docker-compose run web django-admin.py startproject runway .
+```sh
+lein repl
 ```
 
-To create a new app on the container:
-```shell
-$ docker-compose run web ./manage.py startapp polls
+Run `go` to initiate and start the system.
+
+```clojure
+user=> (go)
+:started
 ```
 
-Docker compose have commands liks ps, stop, start to control the lifecycle of the system.
+By default this creates a web server at <http://localhost:3000>.
 
+When you make changes to your source files, use `reset` to reload any
+modified files and reset the server.
 
-## Production
-For production we can run the Django app with Gunicorn.
-
-```shell
-$ docker-compose -f docker-compose.prod.yml up
+```clojure
+user=> (reset)
+:reloading (...)
+:resumed
 ```
+
+### Documentation
+
+Documentation exists in doc/ this is generated from resource/doc. To generate
+new documentation:
+
+```sh
+lein codox
+```
+
+### Testing
+
+Testing is fastest through the REPL, as you avoid environment startup
+time.
+
+```clojure
+user=> (test)
+...
+```
+
+But you can also run tests through Leiningen.
+
+```sh
+lein test
+```
+
+### Migrations
+
+Migrations are handled by [ragtime][]. Migration files are stored in
+the `resources/migrations` directory, and are applied in alphanumeric
+order.
+
+To update the database to the latest migration, open the REPL and run:
+
+```clojure
+user=> (migrate)
+Applying 20150815144312-create-users
+Applying 20150815145033-create-posts
+```
+
+To rollback the last migration, run:
+
+```clojure
+user=> (rollback)
+Rolling back 20150815145033-create-posts
+```
+
+Note that the system needs to be setup with `(init)` or `(go)` before
+migrations can be applied.
+
+[ragtime]: https://github.com/weavejester/ragtime
+
+### Generators
+
+This project has several [generators][] to help you create files.
+
+* `lein gen endpoint <name>` to create a new endpoint
+* `lein gen component <name>` to create a new component
+
+[generators]: https://github.com/weavejester/lein-generate
+
+## Deploying
+
+FIXME: steps to deploy
+
+## Legal
+
+Copyright © 2016 FIXME
