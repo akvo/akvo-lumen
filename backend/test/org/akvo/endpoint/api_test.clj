@@ -1,9 +1,9 @@
-(ns runway.endpoint.home-test
+(ns org.akvo.endpoint.api-test
   (:require [clojure.test :refer :all]
-            [runway.endpoint.home :as home]))
+            [org.akvo.endpoint.api :as api]))
 
 (def handler
-  (home/home-endpoint {}))
+  (api/api-endpoint {}))
 
 (deftest a-test
   (testing "FIXME, I fail."

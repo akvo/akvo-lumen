@@ -1,9 +1,9 @@
-(ns runway.endpoint.assets-test
+(ns org.akvo.endpoint.home-test
   (:require [clojure.test :refer :all]
-            [runway.endpoint.assets :as assets]))
+            [org.akvo.endpoint.home :as home]))
 
 (def handler
-  (assets/assets-endpoint {}))
+  (home/home-endpoint {}))
 
 (deftest a-test
   (testing "FIXME, I fail."
