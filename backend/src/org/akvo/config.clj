@@ -1,4 +1,4 @@
-(ns runway.config
+(ns org.akvo.config
   (:require [environ.core :refer [env]]))
 
 (def defaults

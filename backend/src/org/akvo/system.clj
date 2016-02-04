@@ -1,4 +1,4 @@
-(ns runway.system
+(ns org.akvo.system
   (:require [clojure.java.io :as io]
             [com.stuartsierra.component :as component]
             [duct.component.endpoint :refer [endpoint-component]]
@@ -12,12 +12,11 @@
             [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
             [ring.middleware.reload :refer [wrap-reload]]
             [ring.middleware.webjars :refer [wrap-webjars]]
-            [runway.endpoint.home :refer [home-endpoint]]
-            [runway.endpoint.api :refer [api-endpoint]]
-            [runway.endpoint.assets :refer [assets-endpoint]]
-            [runway.component.http :as http]
-            [com.akolov.enlive-reload :refer [wrap-enlive-reload]]
-            ))
+            [org.akvo.endpoint.home :refer [home-endpoint]]
+            [org.akvo.endpoint.api :refer [api-endpoint]]
+            [org.akvo.endpoint.assets :refer [assets-endpoint]]
+            [org.akvo.component.http :as http]
+            [com.akolov.enlive-reload :refer [wrap-enlive-reload]]))
 
 (def base-config
   {:app {:middleware [[wrap-reload] ;; Should only be for development profile?
@@ -26,13 +25,13 @@
                       [wrap-webjars]
                       [wrap-defaults :defaults]
                       [wrap-route-aliases :aliases]]
-         :not-found  (io/resource "runway/errors/404.html")
+         :not-found  (io/resource "org.akvo/errors/404.html")
          :defaults   (meta-merge site-defaults
                                  {:static false}
                                  ;; {:static {:resources "runway/public"}}
                                  )
          :aliases    {"/" "/index"}}
-   :ragtime {:resource-path "runway/migrations"}})
+   :ragtime {:resource-path "org.akvo/migrations"}})
 
 (defn new-system [config]
   (let [config (meta-merge base-config config)]

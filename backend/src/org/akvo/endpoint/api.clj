@@ -1,4 +1,4 @@
-(ns runway.endpoint.api
+(ns org.akvo.endpoint.api
   (:require [cheshire.core :as json]
             [compojure.core :refer :all]
             [ring.util.response :refer [redirect]]))

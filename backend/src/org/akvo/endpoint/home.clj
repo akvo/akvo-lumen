@@ -1,9 +1,9 @@
-(ns runway.endpoint.home
+(ns org.akvo.endpoint.home
   (:require [compojure.core :refer :all]
             [net.cgrand.enlive-html :as html]))
 
 
-(html/deftemplate app-templ "runway/html/app.html"
+(html/deftemplate app-templ "org/akvo/html/app.html"
   [])
 
 (defn home-endpoint [{{db :spec} :db}]

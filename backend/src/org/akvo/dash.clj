@@ -1,13 +1,13 @@
-(ns runway.main
-  "Akvo Runway starting point."
+(ns org.akvo.dash
+  "Akvo Dash starting point."
   (:gen-class)
   (:require [clojure.java.io :as io]
             [com.stuartsierra.component :as component]
             [duct.middleware.errors :refer [wrap-hide-errors]]
             [duct.util.runtime :refer [add-shutdown-hook]]
             [meta-merge.core :refer [meta-merge]]
-            [runway.config :as config]
-            [runway.system :refer [new-system]]))
+            [org.akvo.config :as config]
+            [org.akvo.system :refer [new-system]]))
 
 (def prod-config
   {:app {:middleware     [[wrap-hide-errors :internal-error]]

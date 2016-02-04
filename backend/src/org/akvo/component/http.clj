@@ -1,4 +1,4 @@
-(ns runway.component.http
+(ns org.akvo.component.http
   (:require [com.stuartsierra.component :as component]
             [immutant.web :as web]))
 

@@ -9,8 +9,8 @@
             [reloaded.repl :refer [system init start stop go reset]]
             [ring.middleware.stacktrace :refer [wrap-stacktrace]]
             [duct.component.ragtime :as ragtime]
-            [runway.config :as config]
-            [runway.system :as system]))
+            [org.akvo.config :as config]
+            [org.akvo.system :as system]))
 
 (def dev-config
   {:app {:middleware [wrap-stacktrace]}})
