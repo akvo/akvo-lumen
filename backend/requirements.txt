@@ -1,6 +1,0 @@
-Django==1.9.1
-psycopg2
-django-environ
-
-# Production
-gunicorn
