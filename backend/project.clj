@@ -4,6 +4,7 @@
   :min-lein-version "2.0.0"
   :dependencies [[com.stuartsierra/component "0.3.0"]
                  [aleph "0.4.1-beta3"]
+                 [cheshire "5.5.0"]
                  [compojure "1.4.0"]
                  [duct "0.5.8"]
                  [duct/hikaricp-component "0.1.0"]
