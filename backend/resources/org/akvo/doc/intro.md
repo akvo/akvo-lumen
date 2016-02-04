@@ -1,12 +1,9 @@
 # Introduction
 
-Runway is the name of the backend project for the Dash product. There is also a Dashboard...
+Dash used Duct to organise.
 
-Runway used Duct to organise.
+Dash serve an API.
 
-Runway serve an API.
-
-Runway 
 
 TODO: write [great documentation](http://jacobian.org/writing/what-to-write/)
 

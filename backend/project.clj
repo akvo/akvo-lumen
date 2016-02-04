@@ -26,7 +26,7 @@
   :plugins [[lein-codox "0.9.1"]
             [lein-environ "1.0.2"]
             [lein-gen "0.2.2"]]
-  :codox {:doc-paths ["resources/dash/doc"]
+  :codox {:doc-paths ["resources/org/akvo/doc"]
           :output-path "doc"}
   :generators [[duct/generators "0.5.8"]]
   :duct {:ns-prefix org.akvo}
