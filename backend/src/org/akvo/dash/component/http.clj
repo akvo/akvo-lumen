@@ -1,4 +1,4 @@
-(ns org.akvo.component.http
+(ns org.akvo.dash.component.http
   (:require [com.stuartsierra.component :as component]
             [immutant.web :as web]))
 

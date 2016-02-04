@@ -1,4 +1,4 @@
-(ns org.akvo.config
+(ns org.akvo.dash.config
   (:require [environ.core :refer [env]]))
 
 (def defaults

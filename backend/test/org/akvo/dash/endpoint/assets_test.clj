@@ -1,6 +1,6 @@
-(ns org.akvo.endpoint.assets-test
+(ns org.akvo.dash.endpoint.assets-test
   (:require [clojure.test :refer :all]
-            [org.akvo.endpoint.assets :as assets]))
+            [org.akvo.dash.endpoint.assets :as assets]))
 
 (def handler
   (assets/assets-endpoint {}))

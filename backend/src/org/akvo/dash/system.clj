@@ -1,4 +1,4 @@
-(ns org.akvo.system
+(ns org.akvo.dash.system
   (:require [clojure.java.io :as io]
             [com.stuartsierra.component :as component]
             [duct.component.endpoint :refer [endpoint-component]]
@@ -12,10 +12,10 @@
             [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
             [ring.middleware.reload :refer [wrap-reload]]
             [ring.middleware.webjars :refer [wrap-webjars]]
-            [org.akvo.endpoint.home :refer [home-endpoint]]
-            [org.akvo.endpoint.api :refer [api-endpoint]]
-            [org.akvo.endpoint.assets :refer [assets-endpoint]]
-            [org.akvo.component.http :as http]
+            [org.akvo.dash.endpoint.home :refer [home-endpoint]]
+            [org.akvo.dash.endpoint.api :refer [api-endpoint]]
+            [org.akvo.dash.endpoint.assets :refer [assets-endpoint]]
+            [org.akvo.dash.component.http :as http]
             [com.akolov.enlive-reload :refer [wrap-enlive-reload]]))
 
 (def base-config
@@ -25,13 +25,13 @@
                       [wrap-webjars]
                       [wrap-defaults :defaults]
                       [wrap-route-aliases :aliases]]
-         :not-found  (io/resource "org.akvo/errors/404.html")
+         :not-found  (io/resource "org/akvo/dash/errors/404.html")
          :defaults   (meta-merge site-defaults
                                  {:static false}
                                  ;; {:static {:resources "runway/public"}}
                                  )
          :aliases    {"/" "/index"}}
-   :ragtime {:resource-path "org.akvo/migrations"}})
+   :ragtime {:resource-path "org/akvo/dash/migrations"}})
 
 (defn new-system [config]
   (let [config (meta-merge base-config config)]

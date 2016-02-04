@@ -1,5 +1,5 @@
-(defproject org.akvo/dash "0.1.0-SNAPSHOT"
-  :description "Backend to Dash."
+(defproject org.akvo.dash "0.1.0-SNAPSHOT"
+  :description "Akvo Dash backend."
   :url "https://github.com/akvo/akvo-dash"
   :min-lein-version "2.0.0"
   :dependencies [[com.stuartsierra/component "0.3.0"]
@@ -26,11 +26,11 @@
   :plugins [[lein-codox "0.9.1"]
             [lein-environ "1.0.2"]
             [lein-gen "0.2.2"]]
-  :codox {:doc-paths ["resources/org/akvo/doc"]
+  :codox {:doc-paths ["resources/org/akvo/dash/doc"]
           :output-path "doc"}
   :generators [[duct/generators "0.5.8"]]
-  :duct {:ns-prefix org.akvo}
-  :main ^:skip-aot org.akvo.dash
+  :duct {:ns-prefix org.akvo.dash}
+  :main ^:skip-aot org.akvo.dash.main
   :target-path "target/%s/"
   :aliases {"gen"   ["generate"]
             "setup" ["do" ["generate" "locals"]]}

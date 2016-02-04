@@ -1,9 +1,9 @@
-(ns org.akvo.endpoint.example-test
+(ns org.akvo.dash.endpoint.example-test
   (:require [com.stuartsierra.component :as component]
             [clojure.test :refer :all]
             [kerodon.core :refer :all]
             [kerodon.test :refer :all]
-            [org.akvo.endpoint.example :as example]))
+            [org.akvo.dash.endpoint.example :as example]))
 
 (def handler
   (example/example-endpoint {}))
