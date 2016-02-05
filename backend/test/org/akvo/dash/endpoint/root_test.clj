@@ -1,9 +1,9 @@
-(ns org.akvo.dash.endpoint.api-test
+(ns org.akvo.dash.endpoint.root-test
   (:require [clojure.test :refer :all]
-            [org.akvo.dash.endpoint.api :as api]))
+            [org.akvo.dash.endpoint.root :as root]))
 
 (def handler
-  (api/api-endpoint {}))
+  (root/root-endpoint {}))
 
 (deftest a-test
   (testing "FIXME, I fail."

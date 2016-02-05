@@ -1,6 +1,8 @@
 (defproject org.akvo.dash "0.1.0-SNAPSHOT"
   :description "Akvo Dash backend."
   :url "https://github.com/akvo/akvo-dash"
+  :license {:name "GNU Affero General Public License"
+            :url  "https://www.gnu.org/licenses/agpl"}
   :min-lein-version "2.0.0"
   :dependencies [[com.stuartsierra/component "0.3.0"]
                  [aleph "0.4.1-beta3"]

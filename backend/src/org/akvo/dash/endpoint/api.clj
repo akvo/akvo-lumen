@@ -82,7 +82,7 @@
 (defn api-endpoint
   ""
   [config]
-  (context "/api" []
+  (context "/apii" []
            (GET "/" []
                 (redirect "/api/v1"))
            (api-v1-routes config)))
