@@ -17,7 +17,7 @@
    [org.akvo.dash.endpoint.api :refer [api-endpoint]]
    [org.akvo.dash.endpoint.root :refer [root-endpoint]]
    [org.akvo.dash.endpoint.datasets :refer [datasets-endpoint]]
-   [org.akvo.dash.endpoint.visualizations :refer [visualizations-endpoint]]
+   [org.akvo.dash.endpoint.visualisations :refer [visualisations-endpoint]]
    [com.akolov.enlive-reload :refer [wrap-enlive-reload]]))
 
 (def base-config
@@ -45,13 +45,13 @@
          ;; :api (endpoint-component api-endpoint)
          :root (endpoint-component root-endpoint)
          :dataset (endpoint-component datasets-endpoint)
-         :visualizations (endpoint-component visualizations-endpoint)
+         :visualisations (endpoint-component visualisations-endpoint)
          )
         (component/system-using
          {:http [:app]
-          :app  [:root :dataset :visualizations]
+          :app  [:root :dataset :visualisations]
           :ragtime [:db]
           ;; :api [:db]
           :dataset [:db]
-          :visualizations [:db]
+          :visualisations [:db]
           }))))
