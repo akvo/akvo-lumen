@@ -10,9 +10,8 @@
     (if (:server component)
       component
       (let [options (-> component (dissoc :app))
-            handler (atom (delay (:handler app)))
-            server (web/run (fn [req]
-                              (@@handler req)) options)]
+            handler (:handler app)
+            server (web/run (fn [req] (handler req)) options)]
         (assoc component
                :server server
                :handler handler))))
