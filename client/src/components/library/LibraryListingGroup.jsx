@@ -76,4 +76,5 @@ LibraryListingGroup.propTypes = {
   displayMode: PropTypes.oneOf(['list', 'grid']).isRequired,
   sortOrder: PropTypes.oneOf(['created', 'last_modified', 'name']).isRequired,
   isReverseSort: PropTypes.bool.isRequired,
+  onSelectEntity: PropTypes.func.isRequired,
 };

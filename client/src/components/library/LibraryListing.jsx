@@ -130,4 +130,5 @@ LibraryListing.propTypes = {
   isReverseSort: PropTypes.bool.isRequired,
   displayMode: PropTypes.oneOf(['grid', 'list']).isRequired,
   searchString: PropTypes.string.isRequired,
+  onSelectEntity: PropTypes.func.isRequired,
 };

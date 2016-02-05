@@ -1,5 +1,4 @@
 import React, { Component, PropTypes } from 'react';
-import { routeActions } from 'react-router-redux';
 
 export default class LibraryListingItem extends Component {
 

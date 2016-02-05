@@ -13,3 +13,14 @@ export function createDataset(dataset) {
     }),
   };
 }
+
+// Currently only name
+export function saveDatasetSettings(id, { name }) {
+  return {
+    type: constants.SAVE_SETTINGS,
+    dataset: {
+      id,
+      name,
+    },
+  };
+}

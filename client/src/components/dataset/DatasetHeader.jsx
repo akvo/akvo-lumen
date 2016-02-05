@@ -6,6 +6,7 @@ export default class DatasetHeader extends Component {
     return (
       <div>
         <h1>{this.props.name}</h1>
+        <button onClick={this.props.onShowDatasetSettings}>...</button>
         { /*
           Additional stuff in the header:
           Share dataset with user,
@@ -20,4 +21,5 @@ export default class DatasetHeader extends Component {
 
 DatasetHeader.propTypes = {
   name: PropTypes.string.isRequired,
+  onShowDatasetSettings: PropTypes.func.isRequired,
 };

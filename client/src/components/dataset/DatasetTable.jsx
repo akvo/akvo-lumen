@@ -5,7 +5,7 @@ export default class DatasetTable extends Component {
 
   constructor() {
     super();
-    this.state = { width: 1024 };
+    this.state = { width: 1024, height: 800 };
     this.handleResize = this.handleResize.bind(this);
   }
 
@@ -19,7 +19,10 @@ export default class DatasetTable extends Component {
   }
 
   handleResize() {
-    this.setState({ width: this.refs.wrappingDiv.clientWidth });
+    this.setState({
+      width: this.refs.wrappingDiv.clientWidth,
+      height: this.refs.wrappingDiv.clientHeight,
+    });
   }
 
   render() {
@@ -39,7 +42,7 @@ export default class DatasetTable extends Component {
           rowHeight={30}
           rowsCount={this.props.columns[0].values.length}
           width={this.state.width}
-          height={300}>
+          height={this.state.height}>
           {cols}
         </Table>
       </div>

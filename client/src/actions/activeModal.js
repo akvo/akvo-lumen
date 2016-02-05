@@ -1,10 +1,10 @@
 import * as constants from '../constants/activeModal';
 
-
-export function showModal(modalName) {
+export function showModal(modalName, opts = {}) {
   return {
     type: constants.SHOW,
     modal: modalName,
+    opts,
   };
 }
 
