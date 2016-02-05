@@ -11,7 +11,7 @@
       component
       (let [options (-> component (dissoc :app))
             handler (:handler app)
-            server (web/run (fn [req] handler) options)]
+            server (web/run (fn [req] (handler req)) options)]
         (assoc component
                :server server
                :handler handler))))
