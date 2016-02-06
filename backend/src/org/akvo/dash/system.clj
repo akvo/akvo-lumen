@@ -14,10 +14,10 @@
    [ring.middleware.reload :refer [wrap-reload]]
    [ring.middleware.webjars :refer [wrap-webjars]]
    [org.akvo.dash.component.http :as http]
-   [org.akvo.dash.endpoint.api :refer [api-endpoint]]
-   [org.akvo.dash.endpoint.root :refer [root-endpoint]]
-   [org.akvo.dash.endpoint.datasets :refer [datasets-endpoint]]
-   [org.akvo.dash.endpoint.visualisations :refer [visualisations-endpoint]]
+   [org.akvo.dash.endpoint
+    [datasets :as datasets]
+    [root :as root]
+    [visualisations :as visualisations]]
    [com.akolov.enlive-reload :refer [wrap-enlive-reload]]))
 
 (def base-config
@@ -42,16 +42,14 @@
          :http (http/immutant-web (:http config))
          :db   (hikaricp (:db config))
          :ragtime (ragtime (:ragtime config))
-         ;; :api (endpoint-component api-endpoint)
-         :root (endpoint-component root-endpoint)
-         :dataset (endpoint-component datasets-endpoint)
-         :visualisations (endpoint-component visualisations-endpoint)
+         :root (endpoint-component root/endpoint)
+         :dataset (endpoint-component datasets/endpoint)
+         :visualisations (endpoint-component visualisations/endpoint)
          )
         (component/system-using
          {:http [:app]
           :app  [:root :dataset :visualisations]
           :ragtime [:db]
-          ;; :api [:db]
           :dataset [:db]
           :visualisations [:db]
           }))))

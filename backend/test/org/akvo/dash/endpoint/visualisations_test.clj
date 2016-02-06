@@ -3,7 +3,7 @@
             [org.akvo.dash.endpoint.visualisations :as visualisations]))
 
 (def handler
-  (visualisations/visualisations-endpoint {}))
+  (visualisations/endpoint {}))
 
 (deftest a-test
   (testing "FIXME, I fail."

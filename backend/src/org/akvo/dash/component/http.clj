@@ -1,4 +1,5 @@
 (ns org.akvo.dash.component.http
+  "Web server component that uses Immutant web."
   (:require [com.stuartsierra.component :as component]
             [immutant.web :as web]))
 
@@ -11,7 +12,9 @@
       component
       (let [options (-> component (dissoc :app))
             handler (:handler app)
-            server (web/run (fn [req] (handler req)) (assoc options :path "api"))]
+            server (web/run
+                     (fn [req] (handler req))
+                     (assoc options :path "api"))]
         (assoc component
                :server server
                :handler handler))))
@@ -27,3 +30,7 @@
   ""
   [options]
   (map->ImmutantWebServer options))
+
+
+(alter-meta! #'->ImmutantWebServer assoc :no-doc true)
+(alter-meta! #'map->ImmutantWebServer assoc :no-doc true)

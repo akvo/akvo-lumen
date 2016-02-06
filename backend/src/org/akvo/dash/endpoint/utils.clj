@@ -1,4 +1,5 @@
 (ns org.akvo.dash.endpoint.utils
+  "WIP might not stay once we are further along."
   (:require [cheshire.core :as json]))
 
 (defn render [body]

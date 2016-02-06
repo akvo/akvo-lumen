@@ -1,4 +1,5 @@
 (ns org.akvo.dash.endpoint.datasets
+  "Dataset..."
   (:require
    [compojure.core :refer :all]
    [org.akvo.dash.endpoint.utils :refer [render]]))
@@ -7,9 +8,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; WIP helpers while we structure the API
 
-(def json-headers {"Content-Type" "application/json"})
-
-(def datasets-data
+(def collection
   {:id     "abc123"
    :schema [{:header "Column 1"
              :type   "NUMBER"}
@@ -26,12 +25,12 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; API
 
-(defn datasets-endpoint [config]
+(defn endpoint [config]
 
   (context "/datasets" []
 
     (GET "/" []
-      (render datasets-data))
+      (render collection))
 
     (context "/:id" [id]
       (GET "/" []

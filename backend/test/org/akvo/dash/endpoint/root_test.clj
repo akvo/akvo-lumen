@@ -3,7 +3,7 @@
             [org.akvo.dash.endpoint.root :as root]))
 
 (def handler
-  (root/root-endpoint {}))
+  (root/endpoint {}))
 
 (deftest a-test
   (testing "FIXME, I fail."

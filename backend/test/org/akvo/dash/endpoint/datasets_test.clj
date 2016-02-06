@@ -3,7 +3,7 @@
             [org.akvo.dash.endpoint.datasets :as datasets]))
 
 (def handler
-  (datasets/datasets-endpoint {}))
+  (datasets/endpoint {}))
 
 (deftest a-test
   (testing "FIXME, I fail."
