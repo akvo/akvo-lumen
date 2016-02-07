@@ -36,7 +36,7 @@ export default class TwoAxisConfigMenu extends Component {
             type="text"
             id="chartTitle"
             placeholder="Untitled chart"
-            defaultValue={visualisation.title}
+            defaultValue={visualisation.name}
             onChange={this.props.onChangeTitle}
           />
         </div>

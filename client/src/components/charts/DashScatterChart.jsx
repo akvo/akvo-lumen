@@ -39,7 +39,7 @@ export default class DashScatterChart extends Component {
     return (
       <div className="DashScatterChart dashChart">
         <ScatterChart
-          title={visualisation.title}
+          title={visualisation.name}
           height={400}
           width={800}
           data={barData}

@@ -21,7 +21,7 @@ export default class EditVisualisationHeader extends Component {
       <nav className="EditVisualisationHeader">
         <div className="visualisationInfo">
           <h3>
-            {this.props.visualisation.title || 'Untitled visualisation'}
+            {this.props.visualisation.name || 'Untitled visualisation'}
           </h3>
           <div className="saveStatus">
             {saveStatus}

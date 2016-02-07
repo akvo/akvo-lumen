@@ -27,7 +27,7 @@ export default class DashPieChart extends Component {
     return (
       <div className="DashPieChart dashChart">
         <PieChart
-          title={visualisation.title}
+          title={visualisation.name}
           height={400}
           width={400}
           radius={100}

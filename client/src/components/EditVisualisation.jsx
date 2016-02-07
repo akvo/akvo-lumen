@@ -2,18 +2,25 @@ import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import EditVisualisationHeader from './editVisualisation/EditVisualisationHeader';
 import EditVisualisationEditor from './editVisualisation/EditVisualisationEditor';
-import { createVisualisation } from '../actions/visualisation';
+import { createVisualisation, saveVisualisationChanges } from '../actions/visualisation';
+import { routeActions } from 'react-router-redux';
 
 require('../styles/EditVisualisation.scss');
+
+const getEditingStatus = location => {
+  const testString = 'create';
+
+  return location.pathname.indexOf(testString) === -1;
+};
 
 class EditVisualisation extends Component {
 
   constructor() {
     super();
     this.state = {
+      type: 'visualisation',
       visualisationType: null,
-      title: 'Untitled Chart',
-      dataAxis: 'xAxis',
+      name: 'Untitled Chart',
       sourceDatasetX: null,
       datasetColumnX: null,
       labelX: null,
@@ -28,11 +35,26 @@ class EditVisualisation extends Component {
     };
   }
 
+  componentWillMount() {
+    const isEditingExistingVisualisation = getEditingStatus(this.props.location);
+
+    if (isEditingExistingVisualisation) {
+      const visualisationId = this.props.params.visualisationId;
+      this.setState(this.props.library.visualisations[visualisationId]);
+      this.setState({ isUnsavedChanges: null });
+    }
+  }
+
   onSave() {
     this.setState({
       isUnsavedChanges: false,
     });
-    this.props.dispatch(createVisualisation(this.state));
+    if (this.state.id) {
+      this.props.dispatch(saveVisualisationChanges(this.state));
+    } else {
+      this.props.dispatch(createVisualisation(this.state));
+    }
+    this.props.dispatch(routeActions.push('/library?filter=visualisations&sort=created'));
   }
 
   render() {
@@ -46,7 +68,7 @@ class EditVisualisation extends Component {
           datasets={this.props.library.datasets}
           onChangeTitle={event => (
             this.setState({
-              title: event.target.value,
+              name: event.target.value,
               isUnsavedChanges: true,
             })
           )}
@@ -110,6 +132,8 @@ class EditVisualisation extends Component {
 EditVisualisation.propTypes = {
   dispatch: PropTypes.func.isRequired,
   library: PropTypes.object.isRequired,
+  location: PropTypes.object.isRequired,
+  params: PropTypes.object,
 };
 
 export default connect(state => state)(EditVisualisation);

@@ -18,7 +18,7 @@ class App extends Component {
           <Route path="library/:collection" component={Library}/>
           <Route path="dataset/:datasetId" component={Dataset}/>
           <Route path="visualisation/create" component={EditVisualisation}/>
-          <Route path="visualisation/:id" component={EditVisualisation}/>
+          <Route path="visualisation/:visualisationId" component={EditVisualisation}/>
           <Route path="visualisations" component={Visualisations}/>
           <Route path="dashboards" component={Dashboards}/>
         </Route>

@@ -34,7 +34,7 @@ export default class DashLineChart extends Component {
     return (
       <div className="DashLineChart dashChart">
         <LineChart
-          title={visualisation.title}
+          title={visualisation.name}
           height={400}
           width={800}
           data={chartData}

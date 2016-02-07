@@ -12,3 +12,14 @@ export function createVisualisation(visualisation) {
     }),
   };
 }
+
+export function saveVisualisationChanges(visualisation) {
+  const now = Date.now();
+
+  return {
+    type: constants.EDIT,
+    visualisation: Object.assign({}, visualisation, {
+      modified: now,
+    }),
+  };
+}

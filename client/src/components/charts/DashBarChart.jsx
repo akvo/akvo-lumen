@@ -32,7 +32,7 @@ export default class DashBarChart extends Component {
     return (
       <div className="DashBarChart dashChart">
         <BarChart
-          title={visualisation.title}
+          title={visualisation.name}
           width={600}
           height={400}
           data={chartData}
