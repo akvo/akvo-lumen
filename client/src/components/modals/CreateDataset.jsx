@@ -49,9 +49,14 @@ export default class CreateDataset extends Component {
       case 'settings':
         return (
           <Settings
+            showPreview
             dataset={dataset}
-            onChange={(newDataset) => {
-              this.setState({ dataset: newDataset });
+            onChangeName={(newName) => {
+              this.setState({
+                dataset: Object.assign({}, this.state.dataset, {
+                  name: newName,
+                }),
+              });
             }}
           />
       );

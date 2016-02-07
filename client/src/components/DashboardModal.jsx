@@ -3,8 +3,8 @@ import { connect } from 'react-redux';
 
 import CreateDataset from './modals/CreateDataset';
 import CreateCollection from './modals/CreateCollection';
+import DatasetSettings from './modals/DatasetSettings';
 import { hideModal } from '../actions/activeModal';
-
 
 class DashboardModal extends Component {
 
@@ -41,6 +41,13 @@ class DashboardModal extends Component {
             onCancel={this.handleOnCancel}
             onSubmit={this.handleOnSubmit}/>
         );
+      case 'dataset-settings':
+        return (
+          <DatasetSettings
+            onCancel={this.handleOnCancel}
+            onSubmit={this.handleOnSubmit}
+            id={this.props.activeModal.id}/>
+        );
       default: return null;
     }
   }
@@ -52,7 +59,8 @@ class DashboardModal extends Component {
 
 DashboardModal.propTypes = {
   activeModal: PropTypes.shape({
-    modal: PropTypes.string,
+    modal: PropTypes.string.isRequired,
+    id: PropTypes.number,
   }),
   dispatch: PropTypes.func.isRequired,
 };
