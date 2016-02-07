@@ -15,6 +15,7 @@ class Main extends Component {
         <WorkspaceNav
           collections={this.props.collections}
           user={this.props.user}
+          location={this.props.location}
         />
       {this.props.children}
       </div>
@@ -26,6 +27,7 @@ Main.propTypes = {
   children: PropTypes.element,
   user: PropTypes.object,
   collections: PropTypes.array,
+  location: PropTypes.object,
 };
 
 function select(state) {

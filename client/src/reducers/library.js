@@ -7,18 +7,20 @@ const mockData = {
       type: 'dataset',
       created: '1449108685570',
       modified: '1459109685570',
+      id: 101,
     },
     105: {
       name: 'dataset 2',
       type: 'dataset',
       created: '1430489504345',
+      id: 105,
     },
     110: {
       name: 'dataset 3',
       type: 'dataset',
       created: '1453895504081',
       modified: '1459229685570',
-
+      id: 110,
     },
   },
   visualisations: {

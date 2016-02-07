@@ -1,0 +1,1 @@
+export const CREATE = 'VISUALISATION_CREATE';

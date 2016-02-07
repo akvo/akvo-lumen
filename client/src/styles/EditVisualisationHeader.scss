@@ -1,0 +1,35 @@
+.EditVisualisationHeader {
+  height: 4em;
+  position: absolute;
+  margin-left: 4em;
+  background-color: whitesmoke;
+  left: 0;
+  top: 0;
+  right: 0;
+  border-bottom: 0.1rem solid rgb(200,200,200);
+  .visualisationInfo, .controls {
+    display: inline-block;
+    height: 100%;
+    vertical-align: top;
+    padding: 0.5rem;
+  }
+  .visualisationInfo {
+    width: 60%;
+    background-color: white;
+    border-right: 0.1rem solid rgb(200,200,200);
+  }
+  .controls {
+    width: 40%;
+    text-align: right;
+    line-height: 3rem;
+    button {
+      padding: 0.5rem;
+      margin: 0.25rem;
+    }
+  }
+  .saveStatus {
+    color: rgba(0,0,0,0.5);
+    font-size: 0.7rem;
+    margin-top: 0.3rem;
+  }
+}
