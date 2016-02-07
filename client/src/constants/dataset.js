@@ -1,1 +1,2 @@
 export const CREATE = 'DATASET_CREATE';
+export const SAVE_SETTINGS = 'DATASET_SAVE_SETTINGS';

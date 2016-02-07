@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { routeActions } from 'react-router-redux';
 import LibraryHeader from './library/LibraryHeader';
 import LibraryListing from './library/LibraryListing';
+import { showModal } from '../actions/activeModal';
 
 require('../styles/Library.scss');
 
@@ -17,6 +18,16 @@ function updateQueryAction(location, query) {
 }
 
 class Library extends Component {
+
+  constructor() {
+    super();
+    this.handleSelectEntity = this.handleSelectEntity.bind(this);
+  }
+
+  handleSelectEntity(entityType, id) {
+    this.props.dispatch(routeActions.push(`/${entityType}/${id}`));
+  }
+
   render() {
     const { dispatch, location, params } = this.props;
     const query = location.query;
@@ -62,7 +73,12 @@ class Library extends Component {
             }
           }}
           onCreate={(type) => {
-            dispatch(routeActions.push(`/${type}/create`));
+            if (type === 'dataset') {
+              // Data set creation is handled in a modal
+              dispatch(showModal('create-dataset'));
+            } else {
+              dispatch(routeActions.push(`/${type}/create`));
+            }
           }}/>
         <LibraryListing
           displayMode={displayMode}
@@ -71,7 +87,8 @@ class Library extends Component {
           filterBy={filterBy}
           searchString={searchString}
           collection={collection}
-          library={this.props}/>
+          library={this.props}
+          onSelectEntity={this.handleSelectEntity}/>
         {this.props.children}
       </div>
     );

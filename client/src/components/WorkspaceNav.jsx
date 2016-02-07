@@ -1,13 +1,15 @@
 import React, { Component, PropTypes } from 'react';
-
+import { connect } from 'react-redux';
 import NavLink from './workspace-nav/NavLink';
 import OrganizationMenu from './workspace-nav/OrganizationMenu';
 import CollectionsList from './workspace-nav/CollectionsList';
 import NavWorkspaceSwitch from './workspace-nav/NavWorkspaceSwitch';
+import { showModal } from '../actions/activeModal';
 
 require('../styles/WorkspaceNav.scss');
 
-const collapsedLocations = ['/visualisation/'];
+const collapsedLocations = ['visualisation/', 'dataset/'];
+
 const getCollapsedStatus = (pathname) => {
   let collapsedStatus = false;
 
@@ -23,10 +25,12 @@ const getCollapsedStatus = (pathname) => {
 export default class WorkspaceNav extends Component {
   constructor() {
     super();
+    this.handleShowCreateCollectionModal = this.handleShowCreateCollectionModal.bind(this);
     this.state = {
       isFloating: false,
     };
   }
+
   getOnClick(isCollapsible) {
     let onClick = null;
 
@@ -35,6 +39,7 @@ export default class WorkspaceNav extends Component {
     }
     return onClick;
   }
+
   getClassName(isCollapsible) {
     let className = 'WorkspaceNav';
 
@@ -48,6 +53,11 @@ export default class WorkspaceNav extends Component {
 
     return className;
   }
+
+  handleShowCreateCollectionModal() {
+    this.props.dispatch(showModal('create-collection'));
+  }
+
   render() {
     const isCollapsible = getCollapsedStatus(this.props.location.pathname);
     const onClick = this.getOnClick(isCollapsible);
@@ -74,7 +84,9 @@ export default class WorkspaceNav extends Component {
         </div>
         <div className="links">
           <NavLink to="library" />
-          <CollectionsList collections={this.props.collections} />
+          <CollectionsList
+            collections={this.props.collections}
+            onShowCreateCollectionModal={this.handleShowCreateCollectionModal} />
           <NavLink to="activity" />
         </div>
         <NavWorkspaceSwitch />
@@ -84,7 +96,20 @@ export default class WorkspaceNav extends Component {
 }
 
 WorkspaceNav.propTypes = {
-  collections: PropTypes.array,
-  user: PropTypes.object,
+  collections: PropTypes.array.isRequired,
+  user: PropTypes.object.isRequired,
   location: PropTypes.object,
+  dispatch: PropTypes.func.isRequired,
 };
+
+function mapStateToProps(state) {
+  const collections = Object.keys(state.collections).map(key => state.collections[key]);
+  return {
+    collections,
+    user: state.user,
+  };
+}
+
+export default connect(
+  mapStateToProps
+)(WorkspaceNav);

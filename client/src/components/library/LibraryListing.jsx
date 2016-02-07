@@ -114,6 +114,7 @@ export default class LibraryListing extends Component {
               displayMode={this.props.displayMode}
               sortOrder={this.props.sortOrder}
               isReverseSort={this.props.isReverseSort}
+              onSelectEntity={this.props.onSelectEntity}
             />
           )}
         </ul>
@@ -129,4 +130,5 @@ LibraryListing.propTypes = {
   isReverseSort: PropTypes.bool.isRequired,
   displayMode: PropTypes.oneOf(['grid', 'list']).isRequired,
   searchString: PropTypes.string.isRequired,
+  onSelectEntity: PropTypes.func.isRequired,
 };

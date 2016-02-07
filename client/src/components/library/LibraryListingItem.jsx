@@ -1,11 +1,15 @@
 import React, { Component, PropTypes } from 'react';
 
 export default class LibraryListingItem extends Component {
+
   render() {
+    const { entity } = this.props;
     return (
-      <li key={this.props.entity.id} className="LibraryListingItem">
+      <li
+        onClick={() => this.props.onSelectEntity(entity.type, entity.id)}
+        key={entity.id} className="LibraryListingItem">
         <input type="checkbox" />
-        {this.props.entity.name}
+        {entity.name}
         <button>...</button>
       </li>
     );
@@ -14,4 +18,5 @@ export default class LibraryListingItem extends Component {
 
 LibraryListingItem.propTypes = {
   entity: PropTypes.object.isRequired,
+  onSelectEntity: PropTypes.func.isRequired,
 };

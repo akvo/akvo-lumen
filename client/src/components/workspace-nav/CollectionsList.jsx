@@ -11,7 +11,7 @@ export default class CollectionsList extends Component {
     );
     return (
       <div className="CollectionsList">
-        <h3>Collections</h3>
+        <h3>Collections <button onClick={this.props.onShowCreateCollectionModal}>+</button></h3>
         <ul>{listItems}</ul>
       </div>
     );
@@ -20,4 +20,5 @@ export default class CollectionsList extends Component {
 
 CollectionsList.propTypes = {
   collections: PropTypes.array.isRequired,
+  onShowCreateCollectionModal: PropTypes.func.isRequired,
 };

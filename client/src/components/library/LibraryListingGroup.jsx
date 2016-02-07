@@ -59,6 +59,7 @@ export default class LibraryListingGroup extends Component {
               key={index}
               entity={entity}
               displayMode={this.props.displayMode}
+              onSelectEntity={this.props.onSelectEntity}
             />
           )}
         </ol>
@@ -75,4 +76,5 @@ LibraryListingGroup.propTypes = {
   displayMode: PropTypes.oneOf(['list', 'grid']).isRequired,
   sortOrder: PropTypes.oneOf(['created', 'last_modified', 'name']).isRequired,
   isReverseSort: PropTypes.bool.isRequired,
+  onSelectEntity: PropTypes.func.isRequired,
 };
