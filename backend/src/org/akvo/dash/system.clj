@@ -2,36 +2,28 @@
   (:require
    [clojure.java.io :as io]
    [com.stuartsierra.component :as component]
-   [duct.component.endpoint :refer [endpoint-component]]
-   [duct.component.handler :refer [handler-component]]
-   [duct.component.hikaricp :refer [hikaricp]]
-   [duct.component.ragtime :refer [ragtime]]
+   [duct.component
+    [endpoint :refer [endpoint-component]]
+    [handler :refer [handler-component]]
+    [hikaricp :refer [hikaricp]]
+    [ragtime :refer [ragtime]]]
    [duct.middleware.not-found :refer [wrap-not-found]]
    [duct.middleware.route-aliases :refer [wrap-route-aliases]]
    [meta-merge.core :refer [meta-merge]]
    [ring.component.jetty :refer [jetty-server]]
-   [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
-   [ring.middleware.reload :refer [wrap-reload]]
-   [ring.middleware.webjars :refer [wrap-webjars]]
+   [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
    [org.akvo.dash.component.http :as http]
    [org.akvo.dash.endpoint
     [datasets :as datasets]
     [root :as root]
-    [visualisations :as visualisations]]
-   [com.akolov.enlive-reload :refer [wrap-enlive-reload]]))
+    [visualisations :as visualisations]]))
 
 (def base-config
-  {:app {:middleware [[wrap-reload] ;; Should only be for development profile?
-                      [wrap-enlive-reload]
-                      [wrap-not-found :not-found]
-                      [wrap-webjars]
+  {:app {:middleware [[wrap-not-found :not-found]
                       [wrap-defaults :defaults]
                       [wrap-route-aliases :aliases]]
          :not-found  (io/resource "org/akvo/dash/errors/404.html")
-         :defaults   (meta-merge site-defaults
-                                 {:static false}
-                                 ;; {:static {:resources "runway/public"}}
-                                 )
+         :defaults   (meta-merge api-defaults)
          :aliases    {"/" "/index"}}
    :ragtime {:resource-path "org/akvo/dash/migrations"}})
 
@@ -42,14 +34,12 @@
          :http (http/immutant-web (:http config))
          :db   (hikaricp (:db config))
          :ragtime (ragtime (:ragtime config))
-         :root (endpoint-component root/endpoint)
          :dataset (endpoint-component datasets/endpoint)
-         :visualisations (endpoint-component visualisations/endpoint)
-         )
+         :root (endpoint-component root/endpoint)
+         :visualisations (endpoint-component visualisations/endpoint))
         (component/system-using
          {:http [:app]
           :app  [:root :dataset :visualisations]
           :ragtime [:db]
           :dataset [:db]
-          :visualisations [:db]
-          }))))
+          :visualisations [:db]}))))
