@@ -1,26 +1,10 @@
 import React, { Component, PropTypes } from 'react';
 import { PieChart } from 'react-d3';
-
-const getChartData = (visualisation, datasets) => {
-  const datasetID = visualisation.sourceDatasetX;
-  const dataset = datasets[datasetID];
-  const columnIndex = visualisation.datasetColumnX;
-  const data = dataset.columns[columnIndex].values;
-  const dataValues = [];
-
-  data.map((entry, index) => {
-    dataValues.push({
-      label: index,
-      value: parseInt(entry, 10),
-    });
-  });
-
-  return dataValues;
-};
+import * as chart from '../../utilities/chart';
 
 export default class DashPieChart extends Component {
   render() {
-    const chartData = getChartData(this.props.visualisation, this.props.datasets);
+    const chartData = chart.getChartData(this.props.visualisation, this.props.datasets);
     const visualisation = this.props.visualisation;
     const innerRadius = visualisation.visualisationType === 'donut' ? 20 : null;
 
