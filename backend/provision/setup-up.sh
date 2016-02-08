@@ -11,7 +11,13 @@ psql -c "CREATE ROLE dash WITH PASSWORD 'password' CREATEDB LOGIN;"
 psql -c "
 CREATE DATABASE dash
 OWNER dash
-TEMPLATE template0;"
+TEMPLATE template0;
+"
+
+psql -d dash -c "
+CREATE EXTENSION IF NOT EXISTS hstore;
+CREATE EXTENSION IF NOT EXISTS citext;
+"
 
 
 echo ""

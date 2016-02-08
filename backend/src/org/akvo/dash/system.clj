@@ -12,18 +12,21 @@
    [meta-merge.core :refer [meta-merge]]
    [ring.component.jetty :refer [jetty-server]]
    [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
+   [org.akvo.pg-json]
    [org.akvo.dash.component.http :as http]
    [org.akvo.dash.endpoint
-    [datasets :as datasets]
+    [activity :as activity]
+    [dataset :as dataset]
     [root :as root]
-    [visualisations :as visualisations]]))
+    [visualisation :as visualisation]]))
 
 (def base-config
   {:app {:middleware [[wrap-not-found :not-found]
                       [wrap-defaults :defaults]
                       [wrap-route-aliases :aliases]]
          :not-found  (io/resource "org/akvo/dash/errors/404.html")
-         :defaults   (meta-merge api-defaults)
+         :defaults   (meta-merge api-defaults
+                                 {:params {:multipart true}}) ;; ?
          :aliases    {"/" "/index"}}
    :ragtime {:resource-path "org/akvo/dash/migrations"}})
 
@@ -34,12 +37,14 @@
          :http (http/immutant-web (:http config))
          :db   (hikaricp (:db config))
          :ragtime (ragtime (:ragtime config))
-         :dataset (endpoint-component datasets/endpoint)
+         :activity (endpoint-component activity/endpoint)
+         :dataset (endpoint-component dataset/endpoint)
          :root (endpoint-component root/endpoint)
-         :visualisations (endpoint-component visualisations/endpoint))
+         :visualisation (endpoint-component visualisation/endpoint))
         (component/system-using
          {:http [:app]
-          :app  [:root :dataset :visualisations]
-          :ragtime [:db]
+          :app  [:root :activity :dataset :visualisation]
+          :activity [:db]
           :dataset [:db]
-          :visualisations [:db]}))))
+          :ragtime [:db]
+          :visualisation [:db]}))))

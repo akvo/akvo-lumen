@@ -2,7 +2,7 @@
   "A Datasource describes a connection to data, it might be.."
   (:require
    [compojure.core :refer :all]
-   [org.akvo.dash.endpoint.utils :as u]))
+   [org.akvo.dash.endpoint.util :as u]))
 
 (def ^{:no-doc true} collection
   {:datasorces [{:id "a"} {:id "b"}]})

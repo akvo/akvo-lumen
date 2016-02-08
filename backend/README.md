@@ -22,7 +22,7 @@ To create the Postgres role & database run the provision script:
 ``` sh
 $ ./provision/set-up.sh
 ```
-
+There is also a tear-down.sh script to clean up.
 At this point all ground work is done and we can fire up a REPL:
 ```sh
 $ lein repl
@@ -34,6 +34,12 @@ user=> (migrate) ;; Migrate the db, requires a running app
 user=> (stop)
 user=> (start)
 user=> (reset)
+```
+
+## Docs
+``` sh
+$ lein codox
+$ open doc/index.html
 ```
 
 

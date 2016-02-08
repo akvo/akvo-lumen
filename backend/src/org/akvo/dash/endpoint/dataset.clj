@@ -1,8 +1,8 @@
-(ns org.akvo.dash.endpoint.datasets
+(ns org.akvo.dash.endpoint.dataset
   "Dataset..."
   (:require
    [compojure.core :refer :all]
-   [org.akvo.dash.endpoint.utils :refer [render]]))
+   [org.akvo.dash.endpoint.util :refer [render]]))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

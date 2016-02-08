@@ -1,4 +1,4 @@
-(ns org.akvo.dash.endpoint.utils
+(ns org.akvo.dash.endpoint.util
   "WIP might not stay once we are further along."
   (:require [cheshire.core :as json]))
 

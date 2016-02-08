@@ -1,4 +1,4 @@
-(ns org.akvo.dash.endpoint.visualisations
+(ns org.akvo.dash.endpoint.visualisation
   (:require [compojure.core :refer :all]))
 
 (defn endpoint [config]
