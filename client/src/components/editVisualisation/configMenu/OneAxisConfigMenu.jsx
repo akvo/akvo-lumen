@@ -68,6 +68,23 @@ export default class OneAxisConfigMenu extends Component {
             }
           </select>
         </div>
+        {visualisation.visualisationType === 'bar' &&
+          <div className="inputGroup">
+            <label htmlFor="xNameColumnMenu">Label column:</label>
+            <select
+              id="xNameColumnMenu"
+              disabled={xColumns.length === 0}
+              defaultValue={visualisation.datasetNameColumnX}
+              onChange={this.props.onChangeDatasetNameColumnX}
+            >
+              {visualisation.sourceDatasetX &&
+                xColumns.map((column, index) =>
+                  <option key={index} value={index}>{column.title}</option>
+                )
+              }
+            </select>
+          </div>
+        }
         <div className="inputGroup">
           <label htmlFor="xLabel">X Axis Label:</label>
           <input
@@ -99,6 +116,7 @@ OneAxisConfigMenu.propTypes = {
   onChangeTitle: PropTypes.func.isRequired,
   onChangeSourceDatasetX: PropTypes.func.isRequired,
   onChangeDatasetColumnX: PropTypes.func.isRequired,
+  onChangeDatasetNameColumnX: PropTypes.func.isRequired,
   onChangeDatasetLabelX: PropTypes.func.isRequired,
   onChangeDatasetLabelY: PropTypes.func.isRequired,
 };

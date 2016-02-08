@@ -14,9 +14,14 @@ export function getChartData(visualisation, datasets) {
   switch (visualisation.visualisationType) {
     case 'bar':
     case 'line':
+    case 'area':
 
       dataX.map((entry, index) => {
-        const key = nameDataX ? nameDataX[index] : index;
+        let key = index;
+
+        if (nameDataX && visualisation.visualisationType === 'bar') {
+          key = nameDataX.values[index];
+        }
 
         dataValues.push({
           x: key,
@@ -34,7 +39,7 @@ export function getChartData(visualisation, datasets) {
     case 'donut':
 
       dataX.map((entry, index) => {
-        const key = nameDataX ? nameDataX[index] : index;
+        const key = nameDataX ? nameDataX.values[index] : index;
 
         dataValues.push({
           label: key,

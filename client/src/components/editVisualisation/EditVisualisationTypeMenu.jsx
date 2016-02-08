@@ -5,7 +5,7 @@ require('../../styles/EditVisualisationTypeMenu.scss');
 export default class EditVisualisationTypeMenu extends Component {
 
   render() {
-    const chartTypes = ['bar', 'line', 'pie', 'donut', 'scatter'];
+    const chartTypes = ['bar', 'line', 'area', 'pie', 'donut', 'scatter'];
 
     return (
       <div className="EditVisualisationTypeMenu">

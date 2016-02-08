@@ -7,7 +7,7 @@ import PieConfigMenu from './configMenu/PieConfigMenu';
 require('../../styles/EditVisualisationConfig.scss');
 
 const getConfigMenu = (chartType, componentProps) => {
-  if (chartType === 'bar' || chartType === 'line') {
+  if (chartType === 'bar' || chartType === 'line' || chartType === 'area') {
     return (
       <OneAxisConfigMenu
         visualisation={componentProps.visualisation}
@@ -15,6 +15,7 @@ const getConfigMenu = (chartType, componentProps) => {
         onChangeTitle={componentProps.onChangeTitle}
         onChangeSourceDatasetX={componentProps.onChangeSourceDatasetX}
         onChangeDatasetColumnX={componentProps.onChangeDatasetColumnX}
+        onChangeDatasetNameColumnX={componentProps.onChangeDatasetNameColumnX}
         onChangeDatasetLabelX={componentProps.onChangeDatasetLabelX}
         onChangeDatasetLabelY={componentProps.onChangeDatasetLabelY}
       />
@@ -85,6 +86,7 @@ EditVisualisationConfig.propTypes = {
   onChangeSourceDatasetX: PropTypes.func.isRequired,
   onChangeSourceDatasetY: PropTypes.func.isRequired,
   onChangeDatasetColumnX: PropTypes.func.isRequired,
+  onChangeDatasetNameColumnX: PropTypes.func.isRequired,
   onChangeDatasetColumnY: PropTypes.func.isRequired,
   onChangeDatasetLabelX: PropTypes.func.isRequired,
   onChangeDatasetLabelY: PropTypes.func.isRequired,

@@ -67,6 +67,21 @@ export default class PieConfigMenu extends Component {
             }
           </select>
         </div>
+        <div className="inputGroup">
+          <label htmlFor="xNameColumnMenu">Label column:</label>
+          <select
+            id="xNameColumnMenu"
+            disabled={xColumns.length === 0}
+            defaultValue={visualisation.datasetNameColumnX}
+            onChange={this.props.onChangeDatasetNameColumnX}
+          >
+            {visualisation.sourceDatasetX &&
+              xColumns.map((column, index) =>
+                <option key={index} value={index}>{column.title}</option>
+              )
+            }
+          </select>
+        </div>
       </div>
     );
   }
@@ -78,4 +93,5 @@ PieConfigMenu.propTypes = {
   onChangeTitle: PropTypes.func.isRequired,
   onChangeSourceDatasetX: PropTypes.func.isRequired,
   onChangeDatasetColumnX: PropTypes.func.isRequired,
+  onChangeDatasetNameColumnX: PropTypes.func.isRequired,
 };

@@ -1,8 +1,8 @@
 import React, { Component, PropTypes } from 'react';
-import { LineChart } from 'react-d3';
+import { AreaChart } from 'react-d3';
 import * as chart from '../../utilities/chart';
 
-export default class DashLineChart extends Component {
+export default class DashAreaChart extends Component {
   render() {
     const chartData = chart.getChartData(this.props.visualisation, this.props.datasets);
     const visualisation = this.props.visualisation;
@@ -10,8 +10,8 @@ export default class DashLineChart extends Component {
     const gridVertical = true;
 
     return (
-      <div className="DashLineChart dashChart">
-        <LineChart
+      <div className="DashAreaChart dashChart">
+        <AreaChart
           title={visualisation.name}
           height={400}
           width={800}
@@ -26,7 +26,7 @@ export default class DashLineChart extends Component {
   }
 }
 
-DashLineChart.propTypes = {
+DashAreaChart.propTypes = {
   visualisation: PropTypes.object.isRequired,
   datasets: PropTypes.object.isRequired,
 };

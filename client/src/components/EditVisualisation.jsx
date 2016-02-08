@@ -23,6 +23,7 @@ class EditVisualisation extends Component {
       name: 'Untitled Chart',
       sourceDatasetX: null,
       datasetColumnX: null,
+      datasetNameColumnX: null,
       labelX: null,
       minX: null,
       maxX: null,
@@ -93,6 +94,12 @@ class EditVisualisation extends Component {
           onChangeDatasetColumnX={ event => (
             this.setState({
               datasetColumnX: event.target.value,
+              isUnsavedChanges: true,
+            })
+          )}
+          onChangeDatasetNameColumnX={ event => (
+            this.setState({
+              datasetNameColumnX: event.target.value,
               isUnsavedChanges: true,
             })
           )}

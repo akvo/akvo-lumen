@@ -1,6 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import DashBarChart from '../charts/DashBarChart';
 import DashLineChart from '../charts/DashLineChart';
+import DashAreaChart from '../charts/DashAreaChart';
 import DashPieChart from '../charts/DashPieChart';
 import DashScatterChart from '../charts/DashScatterChart';
 
@@ -31,6 +32,17 @@ const getChartPreview = (visualisation, datasets) => {
         output = <DashLineChart visualisation={visualisation} datasets={datasets} />;
       } else {
         output = <div>Line chart image placeholder</div>;
+      }
+
+      return output;
+
+    case 'area':
+      datasetColumn = visualisation.datasetColumnX;
+
+      if (datasetColumn) {
+        output = <DashAreaChart visualisation={visualisation} datasets={datasets} />;
+      } else {
+        output = <div>Area chart image placeholder</div>;
       }
 
       return output;
