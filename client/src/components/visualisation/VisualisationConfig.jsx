@@ -1,10 +1,10 @@
 import React, { Component, PropTypes } from 'react';
-import EditVisualisationTypeMenu from './EditVisualisationTypeMenu';
+import VisualisationTypeMenu from './VisualisationTypeMenu';
 import OneAxisConfigMenu from './configMenu/OneAxisConfigMenu';
 import TwoAxisConfigMenu from './configMenu/TwoAxisConfigMenu';
 import PieConfigMenu from './configMenu/PieConfigMenu';
 
-require('../../styles/EditVisualisationConfig.scss');
+require('../../styles/VisualisationConfig.scss');
 
 const getConfigMenu = (chartType, componentProps) => {
   if (chartType === 'bar' || chartType === 'line' || chartType === 'area') {
@@ -49,16 +49,16 @@ const getConfigMenu = (chartType, componentProps) => {
   }
 };
 
-export default class EditVisualisationConfig extends Component {
+export default class VisualisationConfig extends Component {
 
   render() {
     const visualisation = this.props.visualisation;
     const configMenu = getConfigMenu(visualisation.visualisationType, this.props);
 
     return (
-      <div className="EditVisualisationConfig">
+      <div className="VisualisationConfig">
         <h3 className="title">Configure Visualisation</h3>
-        <EditVisualisationTypeMenu
+        <VisualisationTypeMenu
           onChangeVisualisationType={this.props.onChangeVisualisationType}
           visualisation={visualisation}
         />
@@ -78,7 +78,7 @@ export default class EditVisualisationConfig extends Component {
   }
 }
 
-EditVisualisationConfig.propTypes = {
+VisualisationConfig.propTypes = {
   visualisation: PropTypes.object.isRequired,
   datasets: PropTypes.object.isRequired,
   onChangeTitle: PropTypes.func.isRequired,

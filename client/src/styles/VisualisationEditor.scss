@@ -1,21 +1,21 @@
-.EditVisualisationEditor {
+.VisualisationEditor {
   position: relative;
   margin-top: 4em;
   width: 100%;
-  .EditVisualisationConfig,
-  .EditVisualisationPreview {
+  .VisualisationConfig,
+  .VisualisationPreview {
     display: inline-block;
     vertical-align: top;
     min-height: 30rem;
     padding: 1rem;
   }
-  .EditVisualisationConfig {
+  .VisualisationConfig {
     position: relative;
     width: 30%;
     background-color: whitesmoke;
     padding-bottom: 4rem;
   }
-  .EditVisualisationPreview {
+  .VisualisationPreview {
     width: 70%;
   }
 }

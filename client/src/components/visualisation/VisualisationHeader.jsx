@@ -1,8 +1,8 @@
 import React, { Component, PropTypes } from 'react';
 
-require('../../styles/EditVisualisationHeader.scss');
+require('../../styles/VisualisationHeader.scss');
 
-export default class EditVisualisationHeader extends Component {
+export default class VisualisationHeader extends Component {
   render() {
     let saveStatus;
 
@@ -18,7 +18,7 @@ export default class EditVisualisationHeader extends Component {
     }
 
     return (
-      <nav className="EditVisualisationHeader">
+      <nav className="VisualisationHeader">
         <div className="visualisationInfo">
           <h3>
             {this.props.visualisation.name || 'Untitled visualisation'}
@@ -38,6 +38,6 @@ export default class EditVisualisationHeader extends Component {
   }
 }
 
-EditVisualisationHeader.propTypes = {
+VisualisationHeader.propTypes = {
   visualisation: PropTypes.object.isRequired,
 };

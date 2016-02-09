@@ -5,7 +5,7 @@ import DashAreaChart from '../charts/DashAreaChart';
 import DashPieChart from '../charts/DashPieChart';
 import DashScatterChart from '../charts/DashScatterChart';
 
-require('../../styles/EditVisualisationPreview.scss');
+require('../../styles/VisualisationPreview.scss');
 
 const getChartPreview = (visualisation, datasets) => {
   let output;
@@ -76,18 +76,18 @@ const getChartPreview = (visualisation, datasets) => {
   }
 };
 
-export default class CreateEditVisualisationPreview extends Component {
+export default class CreateVisualisationPreview extends Component {
   render() {
     const chart = getChartPreview(this.props.visualisation, this.props.datasets);
     return (
-      <div className="EditVisualisationPreview">
+      <div className="VisualisationPreview">
         {chart}
       </div>
     );
   }
 }
 
-CreateEditVisualisationPreview.propTypes = {
+CreateVisualisationPreview.propTypes = {
   visualisation: PropTypes.object.isRequired,
   datasets: PropTypes.object.isRequired,
 };

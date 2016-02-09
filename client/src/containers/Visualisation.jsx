@@ -1,11 +1,11 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
-import EditVisualisationHeader from './editVisualisation/EditVisualisationHeader';
-import EditVisualisationEditor from './editVisualisation/EditVisualisationEditor';
+import VisualisationHeader from '../components/visualisation/VisualisationHeader';
+import VisualisationEditor from '../components/visualisation/VisualisationEditor';
 import { createVisualisation, saveVisualisationChanges } from '../actions/visualisation';
 import { routeActions } from 'react-router-redux';
 
-require('../styles/EditVisualisation.scss');
+require('../styles/Visualisation.scss');
 
 const getEditingStatus = location => {
   const testString = 'create';
@@ -13,7 +13,7 @@ const getEditingStatus = location => {
   return location.pathname.indexOf(testString) === -1;
 };
 
-class EditVisualisation extends Component {
+class Visualisation extends Component {
 
   constructor() {
     super();
@@ -60,11 +60,11 @@ class EditVisualisation extends Component {
 
   render() {
     return (
-      <div className="EditVisualisation">
-        <EditVisualisationHeader
+      <div className="Visualisation">
+        <VisualisationHeader
           visualisation={this.state}
         />
-        <EditVisualisationEditor
+        <VisualisationEditor
           visualisation={this.state}
           datasets={this.props.library.datasets}
           onChangeTitle={event => (
@@ -136,11 +136,11 @@ class EditVisualisation extends Component {
   }
 }
 
-EditVisualisation.propTypes = {
+Visualisation.propTypes = {
   dispatch: PropTypes.func.isRequired,
   library: PropTypes.object.isRequired,
   location: PropTypes.object.isRequired,
   params: PropTypes.object,
 };
 
-export default connect(state => state)(EditVisualisation);
+export default connect(state => state)(Visualisation);

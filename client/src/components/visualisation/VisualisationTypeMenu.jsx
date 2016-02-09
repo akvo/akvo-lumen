@@ -1,14 +1,14 @@
 import React, { Component, PropTypes } from 'react';
 
-require('../../styles/EditVisualisationTypeMenu.scss');
+require('../../styles/VisualisationTypeMenu.scss');
 
-export default class EditVisualisationTypeMenu extends Component {
+export default class VisualisationTypeMenu extends Component {
 
   render() {
     const chartTypes = ['bar', 'line', 'area', 'pie', 'donut', 'scatter'];
 
     return (
-      <div className="EditVisualisationTypeMenu">
+      <div className="VisualisationTypeMenu">
         <label htmlFor="visualisationTypeMenu">
           Visualisation type:
         </label>
@@ -29,7 +29,7 @@ export default class EditVisualisationTypeMenu extends Component {
   }
 }
 
-EditVisualisationTypeMenu.propTypes = {
+VisualisationTypeMenu.propTypes = {
   visualisation: PropTypes.object.isRequired,
   onChangeVisualisationType: PropTypes.func.isRequired,
 };
