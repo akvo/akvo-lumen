@@ -2,10 +2,7 @@ var webpack = require('webpack');
 var WebpackDevServer = require('webpack-dev-server');
 var config = require('./webpack.config');
 
-const contentBase = __dirname.substring(0, __dirname.lastIndexOf('/')) + '/backend/resources/org/akvo/dash/public'
-
 new WebpackDevServer(webpack(config), {
-  contentBase: contentBase,
   publicPath: config.output.publicPath,
   hot: true,
   historyApiFallback: true,

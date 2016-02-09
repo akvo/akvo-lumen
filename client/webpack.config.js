@@ -7,20 +7,18 @@ const entry = process.env.NODE_ENV === 'production' ?
   [
     "./src/index.jsx"
   ] : [
-    'webpack-dev-server/client?http://0.0.0.0:3030', // WebpackDevServer host and port
+    'webpack-dev-server/client?http://0.0.0.0:3000', // WebpackDevServer host and port
     'webpack/hot/only-dev-server', // "only" prevents reload on syntax errors
     "./src/index.jsx"
   ];
-
-const path = __dirname.substring(0, __dirname.lastIndexOf('/')) + '/backend/resources/org/akvo/dash/public/build'
 
 module.exports = {
   entry: entry,
   devtool: 'source-map',
   output: {
-    path: path,
+    path: __dirname,
     filename: "bundle.js",
-    publicPath: 'build'
+    publicPath: '/'
   },
   resolve: {
     extensions: ['', '.js', '.jsx']
