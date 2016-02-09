@@ -1,35 +1,32 @@
 (ns org.akvo.dash.system
-  (:require [clojure.java.io :as io]
-            [com.stuartsierra.component :as component]
-            [duct.component.endpoint :refer [endpoint-component]]
-            [duct.component.handler :refer [handler-component]]
-            [duct.component.hikaricp :refer [hikaricp]]
-            [duct.component.ragtime :refer [ragtime]]
-            [duct.middleware.not-found :refer [wrap-not-found]]
-            [duct.middleware.route-aliases :refer [wrap-route-aliases]]
-            [meta-merge.core :refer [meta-merge]]
-            [ring.component.jetty :refer [jetty-server]]
-            [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
-            [ring.middleware.reload :refer [wrap-reload]]
-            [ring.middleware.webjars :refer [wrap-webjars]]
-            [org.akvo.dash.endpoint.home :refer [home-endpoint]]
-            [org.akvo.dash.endpoint.api :refer [api-endpoint]]
-            [org.akvo.dash.endpoint.assets :refer [assets-endpoint]]
-            [org.akvo.dash.component.http :as http]
-            [com.akolov.enlive-reload :refer [wrap-enlive-reload]]))
+  (:require
+   [clojure.java.io :as io]
+   [com.stuartsierra.component :as component]
+   [duct.component
+    [endpoint :refer [endpoint-component]]
+    [handler :refer [handler-component]]
+    [hikaricp :refer [hikaricp]]
+    [ragtime :refer [ragtime]]]
+   [duct.middleware.not-found :refer [wrap-not-found]]
+   [duct.middleware.route-aliases :refer [wrap-route-aliases]]
+   [meta-merge.core :refer [meta-merge]]
+   [ring.component.jetty :refer [jetty-server]]
+   [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
+   [org.akvo.pg-json]
+   [org.akvo.dash.component.http :as http]
+   [org.akvo.dash.endpoint
+    [activity :as activity]
+    [dataset :as dataset]
+    [root :as root]
+    [visualisation :as visualisation]]))
 
 (def base-config
-  {:app {:middleware [[wrap-reload] ;; Should only be for development profile?
-                      [wrap-enlive-reload]
-                      [wrap-not-found :not-found]
-                      [wrap-webjars]
+  {:app {:middleware [[wrap-not-found :not-found]
                       [wrap-defaults :defaults]
                       [wrap-route-aliases :aliases]]
          :not-found  (io/resource "org/akvo/dash/errors/404.html")
-         :defaults   (meta-merge site-defaults
-                                 {:static false}
-                                 ;; {:static {:resources "runway/public"}}
-                                 )
+         :defaults   (meta-merge api-defaults
+                                 {:params {:multipart true}}) ;; ?
          :aliases    {"/" "/index"}}
    :ragtime {:resource-path "org/akvo/dash/migrations"}})
 
@@ -40,14 +37,14 @@
          :http (http/immutant-web (:http config))
          :db   (hikaricp (:db config))
          :ragtime (ragtime (:ragtime config))
-         :home (endpoint-component home-endpoint)
-         :api (endpoint-component api-endpoint)
-         :assets (endpoint-component assets-endpoint)
-         )
+         :activity (endpoint-component activity/endpoint)
+         :dataset (endpoint-component dataset/endpoint)
+         :root (endpoint-component root/endpoint)
+         :visualisation (endpoint-component visualisation/endpoint))
         (component/system-using
          {:http [:app]
-          :app  [:home :assets :api]
+          :app  [:root :activity :dataset :visualisation]
+          :activity [:db]
+          :dataset [:db]
           :ragtime [:db]
-          :home [:db]
-          :api [:db]
-          }))))
+          :visualisation [:db]}))))

@@ -37,6 +37,9 @@ $ ./provision/set-up.sh
 More info at: [Environment
 variables](http://www.postgresql.org/docs/current/static/libpq-envars.html)
 
+### Clean up
+There is also a tear-down.sh script to clean up.
+
 At this point all ground work is done and we can fire up a REPL:
 ```sh
 $ lein repl
@@ -48,6 +51,12 @@ user=> (migrate) ;; Migrate the db, requires a running app
 user=> (stop)
 user=> (start)
 user=> (reset)
+```
+
+## Docs
+``` sh
+$ lein codox
+$ open doc/index.html
 ```
 
 

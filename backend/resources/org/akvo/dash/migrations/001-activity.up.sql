@@ -1,6 +1,8 @@
 CREATE TABLE activity (
        id SERIAL PRIMARY KEY,
-       activity json
+       user_id text NOT NULL,
+       ts timestamp without time zone default (now() at time zone 'utc'),
+       event jsonb NOT NULL
 );
 --;;
 
