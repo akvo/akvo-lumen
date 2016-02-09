@@ -1,9 +1,31 @@
 import React, { Component, PropTypes } from 'react';
-
-require('../../styles/VisualisationHeader.scss');
+import EntityTypeHeader from '../entity-editor/EntityTypeHeader';
 
 export default class VisualisationHeader extends Component {
+  getActionButtons() {
+    const user = {
+      buttonText: 'User',
+    };
+    const download = {
+      buttonText: 'Download',
+    };
+    const share = {
+      buttonText: 'Share',
+    };
+    const overflow = {
+      buttonText: 'Overflow',
+    };
+
+    return ([
+      user,
+      download,
+      share,
+      overflow,
+    ]);
+  }
+
   render() {
+    const actionButtons = this.getActionButtons();
     let saveStatus;
 
     switch (this.props.visualisation.isUnsavedChanges) {
@@ -18,22 +40,11 @@ export default class VisualisationHeader extends Component {
     }
 
     return (
-      <nav className="VisualisationHeader">
-        <div className="visualisationInfo">
-          <h3>
-            {this.props.visualisation.name || 'Untitled visualisation'}
-          </h3>
-          <div className="saveStatus">
-            {saveStatus}
-          </div>
-        </div>
-        <div className="controls">
-          <button className="userMenu clickable">User</button>
-          <button className="download clickable">Download</button>
-          <button className="share clickable">Share</button>
-          <button className="overflow clickable">Overflow</button>
-        </div>
-      </nav>
+      <EntityTypeHeader
+        title={this.props.visualisation.name || 'Untitled visualisation'}
+        saveStatus={saveStatus}
+        actionButtons={actionButtons}
+      />
     );
   }
 }

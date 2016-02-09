@@ -1,20 +1,13 @@
 import React, { Component, PropTypes } from 'react';
+import EntityTypeHeader from '../entity-editor/EntityTypeHeader';
 
 export default class DatasetHeader extends Component {
 
   render() {
     return (
-      <div>
-        <h1>{this.props.name}</h1>
-        <button onClick={this.props.onShowDatasetSettings}>...</button>
-        { /*
-          Additional stuff in the header:
-          Share dataset with user,
-          Info button
-          Visualisation count
-          More actions
-          */ }
-      </div>
+      <EntityTypeHeader
+        title={this.props.name}
+      />
     );
   }
 }

@@ -1,4 +1,4 @@
-.VisualisationHeader {
+.EntityTypeHeader {
   height: 4em;
   position: absolute;
   margin-left: 4em;
@@ -7,13 +7,13 @@
   top: 0;
   right: 0;
   border-bottom: 0.1rem solid rgb(200,200,200);
-  .visualisationInfo, .controls {
+  .entityInfo, .controls {
     display: inline-block;
     height: 100%;
     vertical-align: top;
     padding: 0.5rem;
   }
-  .visualisationInfo {
+  .entityInfo {
     width: 60%;
     background-color: white;
     border-right: 0.1rem solid rgb(200,200,200);
