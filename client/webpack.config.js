@@ -11,7 +11,7 @@ const entry = process.env.NODE_ENV === 'production' ?
     'webpack/hot/only-dev-server', // "only" prevents reload on syntax errors
     "./src/index.jsx"
   ];
-console.log(__dirname);
+
 module.exports = {
   entry: entry,
   devtool: 'source-map',
