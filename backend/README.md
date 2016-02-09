@@ -22,7 +22,24 @@ To create the Postgres role & database run the provision script:
 ``` sh
 $ ./provision/set-up.sh
 ```
+
+### Troubleshooting
+
+The `set-up.sh` script assumes that your user has rights to connect and
+create databases, roles, etc. You may need define the `PGUSER`
+enviroment variable with the proper settings, e.g.
+
+````sh
+$ export PGUSER=postgres
+$ ./provision/set-up.sh
+````
+
+More info at: [Environment
+variables](http://www.postgresql.org/docs/current/static/libpq-envars.html)
+
+### Clean up
 There is also a tear-down.sh script to clean up.
+
 At this point all ground work is done and we can fire up a REPL:
 ```sh
 $ lein repl
@@ -45,4 +62,4 @@ $ open doc/index.html
 
 ## Legal
 
-Copyright © 2016 - present Akvo.org
+Copyright © 2016 - present Akvo Foundation

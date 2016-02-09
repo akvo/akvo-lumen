@@ -18,6 +18,16 @@ function updateQueryAction(location, query) {
 }
 
 class Library extends Component {
+
+  constructor() {
+    super();
+    this.handleSelectEntity = this.handleSelectEntity.bind(this);
+  }
+
+  handleSelectEntity(entityType, id) {
+    this.props.dispatch(routeActions.push(`/${entityType}/${id}`));
+  }
+
   render() {
     const { dispatch, location, params } = this.props;
     const query = location.query;
@@ -77,7 +87,8 @@ class Library extends Component {
           filterBy={filterBy}
           searchString={searchString}
           collection={collection}
-          library={this.props}/>
+          library={this.props}
+          onSelectEntity={this.handleSelectEntity}/>
         {this.props.children}
       </div>
     );
