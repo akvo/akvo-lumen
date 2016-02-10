@@ -8,8 +8,6 @@
 
 ;; Deprecated
 (defn render [v]
-  "Takes a "
-  "Takes a function that will generate a response."
   (try
     {:status  200
      :headers {"Content-Type" "application/json"}
