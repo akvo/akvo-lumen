@@ -28,43 +28,48 @@ export default class CreateCollection extends Component {
             marginLeft: 'auto',
             marginRight: 'auto',
           },
+          overlay: {
+            zIndex: 99
+          },        
         }}>
-        <div className="CreateCollectionModal">
-          <h2 className="title">Create a new collection</h2>
-          <button
-            className="close clickable"
-            onClick={() => {
-              this.setState({ name: '' });
-              onCancel();
-            }}>
-            X
-          </button>
-          <div className="contents">
-            <label htmlFor="nameInput">Collection name</label>
-            <input
-              id="nameInput"
-              onChange={this.handleInputChange}
-              type="text"
-              placeholder="Collection name"/>
-          </div>
-          <div className="controls">
+        <div className={this.props.containerClassName}>
+          <div className="CreateCollectionModal">
+            <h2 className="title">Create a new collection</h2>
             <button
-              className="cancel clickable"
+              className="close clickable"
               onClick={() => {
                 this.setState({ name: '' });
                 onCancel();
               }}>
-              Cancel
+              X
             </button>
-            <button
-              className="create clickable"
-              disabled={this.state.name === ''}
-              onClick={() => {
-                this.setState({ name: '' });
-                onSubmit(createCollection(this.state.name));
-              }}>
-              Create
-            </button>
+            <div className="contents">
+              <label htmlFor="nameInput">Collection name</label>
+              <input
+                id="nameInput"
+                onChange={this.handleInputChange}
+                type="text"
+                placeholder="Collection name"/>
+            </div>
+            <div className="controls">
+              <button
+                className="cancel clickable"
+                onClick={() => {
+                  this.setState({ name: '' });
+                  onCancel();
+                }}>
+                Cancel
+              </button>
+              <button
+                className="create clickable"
+                disabled={this.state.name === ''}
+                onClick={() => {
+                  this.setState({ name: '' });
+                  onSubmit(createCollection(this.state.name));
+                }}>
+                Create
+              </button>
+            </div>
           </div>
         </div>
       </Modal>
@@ -75,4 +80,5 @@ export default class CreateCollection extends Component {
 CreateCollection.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
+  containerClassName: PropTypes.string,
 };

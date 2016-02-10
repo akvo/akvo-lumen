@@ -21,39 +21,52 @@ class DatasetSettings extends Component {
     return (
       <Modal
         isOpen
-        style={{ overlay: { zIndex: 1 } }}>
-        <div className="DatasetSettings">
-          <h2 className="title">Dataset Settings</h2>
-          <button
-            className="close clickable"
-            onClick={() => {
-              this.setState({ name: '' });
-              onCancel();
-            }}>
-            X
-          </button>
-          <Settings
-            dataset={dataset}
-            showPreview={false}
-            onChangeName={this.handleChangeName}/>
-          <div className="controls">
+        style={{
+          content: {
+            width: 600,
+            height: 300,
+            marginLeft: 'auto',
+            marginRight: 'auto',
+          },
+          overlay: {
+            zIndex: 99
+          },        
+        }}
+      >
+        <div className={this.props.containerClassName}>
+          <div className="DatasetSettings">
+            <h2 className="title">Dataset Settings</h2>
             <button
-              className="cancel clickable"
+              className="close clickable"
               onClick={() => {
                 this.setState({ name: '' });
                 onCancel();
               }}>
-              Cancel
+              X
             </button>
-            <button
-              className="create clickable"
-              disabled={this.state.name === ''}
-              onClick={() => {
-                onSubmit(saveDatasetSettings(dataset.id, this.state));
-                this.setState({ name: '' });
-              }}>
-              Save
-            </button>
+            <Settings
+              dataset={dataset}
+              showPreview={false}
+              onChangeName={this.handleChangeName}/>
+            <div className="controls">
+              <button
+                className="cancel clickable negative"
+                onClick={() => {
+                  this.setState({ name: '' });
+                  onCancel();
+                }}>
+                Cancel
+              </button>
+              <button
+                className="create clickable positive"
+                disabled={this.state.name === ''}
+                onClick={() => {
+                  onSubmit(saveDatasetSettings(dataset.id, this.state));
+                  this.setState({ name: '' });
+                }}>
+                Save
+              </button>
+            </div>
           </div>
         </div>
       </Modal>
@@ -65,6 +78,7 @@ DatasetSettings.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
   dataset: PropTypes.object.isRequired,
+  containerClassName: PropTypes.string,
 };
 
 function mapStateToProps(state, ownProps) {
