@@ -22,6 +22,9 @@
         border-top: 0.1rem solid rgb(200, 200, 200);
         background-color: white;
     }
+    .contents {
+        padding: 1rem;
+    }
     .buttonContainer {
         position: relative;
     }
@@ -57,7 +60,7 @@
         }
     }
     .DatasetSettings .Settings {
-        padding-top: 2rem;
+        padding-top: 4rem;
     } 
     .CreateDataset {
         .tabMenu {
@@ -127,5 +130,13 @@
             padding-top: 1rem;
             padding-bottom: 6rem;
         }        
+    }
+    .CreatCollectionModal {
+        .contents {
+            padding-top: 5rem;
+        }
+        #nameInput {
+            margin-left: 0.5rem;
+        }
     }
 }

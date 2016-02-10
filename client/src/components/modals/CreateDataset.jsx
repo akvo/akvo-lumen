@@ -117,13 +117,13 @@ export default class CreateDataset extends Component {
             <div className={`controls ${currentPage}`}>
               <div className="buttonContainer">
                 <button
-                  className="btn previous clickable positive"
+                  className="btn previous clickable negative"
                   disabled={currentPage === 'source'}
                   onClick={this.handlePrevious.bind(this)}>
                   Previous
                 </button>
                 <button
-                  className="btn next clickable negative"
+                  className="btn next clickable positive"
                   disabled={this.isNextOrImportDisabled()}
                   onClick={this.handleNextOrImport.bind(this)}>
                   {currentPage === 'settings' ? 'Import' : 'Next'}

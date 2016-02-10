@@ -5,6 +5,7 @@ import OrganizationMenu from './workspace-nav/OrganizationMenu';
 import CollectionsList from './workspace-nav/CollectionsList';
 import NavWorkspaceSwitch from './workspace-nav/NavWorkspaceSwitch';
 import { showModal } from '../actions/activeModal';
+import { Link } from 'react-router';
 
 require('../styles/WorkspaceNav.scss');
 
@@ -69,7 +70,7 @@ export default class WorkspaceNav extends Component {
         onClick={onClick}
       >
         <div className="header">
-          <h1>DASH</h1>
+          <h1><Link to="/">DASH</Link></h1>
           {isCollapsible && this.state.isFloating &&
             <button
               className="collapse clickable"

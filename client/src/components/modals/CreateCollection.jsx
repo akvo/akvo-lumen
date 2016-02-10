@@ -3,8 +3,6 @@ import Modal from 'react-modal';
 import { createCollection } from '../../actions/collection';
 
 
-require('../../styles/CreateCollectionModal.scss');
-
 export default class CreateCollection extends Component {
   constructor() {
     super();
@@ -29,12 +27,12 @@ export default class CreateCollection extends Component {
             marginRight: 'auto',
           },
           overlay: {
-            zIndex: 99
-          },        
+            zIndex: 99,
+          },
         }}>
         <div className={this.props.containerClassName}>
           <div className="CreateCollectionModal">
-            <h2 className="title">Create a new collection</h2>
+            <h2 className="modalTitle">Create a new collection</h2>
             <button
               className="close clickable"
               onClick={() => {
@@ -53,7 +51,7 @@ export default class CreateCollection extends Component {
             </div>
             <div className="controls">
               <button
-                className="cancel clickable"
+                className="cancel clickable negative"
                 onClick={() => {
                   this.setState({ name: '' });
                   onCancel();
@@ -61,7 +59,7 @@ export default class CreateCollection extends Component {
                 Cancel
               </button>
               <button
-                className="create clickable"
+                className="create clickable positive"
                 disabled={this.state.name === ''}
                 onClick={() => {
                   this.setState({ name: '' });

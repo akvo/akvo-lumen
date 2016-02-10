@@ -18,10 +18,11 @@ export default class EntityTypeHeader extends Component {
         </div>
         <div className="controls">
           {this.props.actionButtons &&
-            this.props.actionButtons.map(button =>
+            this.props.actionButtons.map((button, index) =>
               <button
                 className="overflow clickable"
                 onClick={button.onClick}
+                key={index}
               >
                 {button.buttonText}
               </button>

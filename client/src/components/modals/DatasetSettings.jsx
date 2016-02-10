@@ -29,13 +29,13 @@ class DatasetSettings extends Component {
             marginRight: 'auto',
           },
           overlay: {
-            zIndex: 99
-          },        
+            zIndex: 99,
+          },
         }}
       >
         <div className={this.props.containerClassName}>
           <div className="DatasetSettings">
-            <h2 className="title">Dataset Settings</h2>
+            <h2 className="modalTitle">Dataset Settings</h2>
             <button
               className="close clickable"
               onClick={() => {
