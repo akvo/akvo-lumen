@@ -6,8 +6,8 @@ An open-source, easy to use data mashup, analysis and publishing platform.
 - [Issues](https://github.com/akvo/akvo-dash/issues)
 - [Board](http://waffle.io/akvo/akvo-dash)
 
-## Dashboard
-[Readme](dashboard/README.md)
+## Client
+[Readme](client/README.md)
 
 ## Backend
 [Readme](backend/README.md)
