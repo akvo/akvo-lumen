@@ -25,6 +25,7 @@
     "history": "^2.0.0-rc2",
     "node-sass": "^3.4.2",
     "react": "^0.14.3",
+    "react-d3": "^0.4.0",
     "react-dom": "^0.14.3",
     "react-modal": "^0.6.1",
     "react-redux": "^4.0.0",

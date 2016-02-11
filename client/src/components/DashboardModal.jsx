@@ -6,6 +6,8 @@ import CreateCollection from './modals/CreateCollection';
 import DatasetSettings from './modals/DatasetSettings';
 import { hideModal } from '../actions/activeModal';
 
+require('../styles/DashboardModal.scss');
+
 class DashboardModal extends Component {
 
   constructor() {
@@ -24,6 +26,8 @@ class DashboardModal extends Component {
   }
 
   renderActiveModal() {
+    const containerClassName = 'DashboardModal';
+
     if (!this.props.activeModal) {
       // No modal active
       return null;
@@ -33,20 +37,23 @@ class DashboardModal extends Component {
         return (
           <CreateDataset
             onCancel={this.handleOnCancel}
-            onSubmit={this.handleOnSubmit}/>
+            onSubmit={this.handleOnSubmit}
+            containerClassName={containerClassName}/>
         );
       case 'create-collection':
         return (
           <CreateCollection
             onCancel={this.handleOnCancel}
-            onSubmit={this.handleOnSubmit}/>
+            onSubmit={this.handleOnSubmit}
+            containerClassName={containerClassName}/>
         );
       case 'dataset-settings':
         return (
           <DatasetSettings
             onCancel={this.handleOnCancel}
             onSubmit={this.handleOnSubmit}
-            id={this.props.activeModal.id}/>
+            id={this.props.activeModal.id}
+            containerClassName={containerClassName}/>
         );
       default: return null;
     }

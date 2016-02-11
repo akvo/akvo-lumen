@@ -2,6 +2,8 @@
     border-right: 0.1rem solid rgba(0, 0, 0, 0.05);
     background-color: rgb(240, 240, 240);
     width: 14rem;
+    z-index: 2;
+    transition: width 0.5s;
     .header {
         padding: 1rem;
         height: 8rem;
@@ -65,6 +67,40 @@
             margin-top: 1rem;
             border: 0.1rem solid rgba(0, 0, 0, 0.2);
             display: inline-block;
+        }
+    }
+    &.collapsed {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 4rem;
+        width: 4rem;
+        overflow: hidden;
+        border-right: none;
+
+        &:after {
+            content: '+';
+            background-color: grey;
+            color: white;
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            text-align: center;
+            font-size: 4rem;
+        }
+    }
+    &.floating {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+
+        .collapse {
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
         }
     }
 }

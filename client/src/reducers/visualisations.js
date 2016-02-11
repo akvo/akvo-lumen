@@ -1,3 +1,5 @@
+import * as constants from '../constants/visualisation';
+
 export const initialState = {
   102: {
     id: 102,
@@ -21,8 +23,26 @@ export const initialState = {
   },
 };
 
-export default function visualisations(state = initialState, action) {
+function createVisualisation(state, visualisationData) {
+  const id = visualisationData.id;
+  return Object.assign({}, state, {
+    [id]: visualisationData,
+  });
+}
+
+function editVisualisation(state, visualisationData) {
+  const id = visualisationData.id;
+  return Object.assign({}, state, {
+    [id]: visualisationData,
+  });
+}
+
+export default function visualisation(state = initialState, action) {
   switch (action.type) {
+    case constants.CREATE:
+      return createVisualisation(state, action.visualisation);
+    case constants.EDIT:
+      return editVisualisation(state, action.visualisation);
     default: return state;
   }
 }
