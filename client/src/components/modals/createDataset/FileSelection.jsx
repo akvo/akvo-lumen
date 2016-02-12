@@ -1,27 +1,26 @@
 import React, { Component, PropTypes } from 'react';
 import DataFileFileSelection from './DataFileFileSelection';
-import LinkFileSelection from './LinkFileSelection';
-import NotImplementedFileSelection from './NotImplementedFileSelection';
+import LinkDataSourceSettings from './LinkDataSourceSettings';
 
 export default class FileSelection extends Component {
 
   renderFileSelection() {
-    const { dataset, onChange } = this.props;
-    switch (dataset.source.type) {
+    const { dataSource, onChange } = this.props;
+    switch (dataSource.type) {
       case 'DATA_FILE':
         return (
           <DataFileFileSelection
-            dataset={dataset}
+            dataSource={dataSource}
             onChange={onChange}/>
         );
       case 'LINK':
         return (
-          <LinkFileSelection
-            dataset={dataset}
+          <LinkDataSourceSettings
+            dataSource={dataSource}
             onChange={onChange}/>
         );
       default:
-        return <NotImplementedFileSelection/>;
+        throw new Error(`Data source definition for ${dataSource.type} is not yet implemented`);
     }
   }
 
@@ -37,6 +36,9 @@ export default class FileSelection extends Component {
 }
 
 FileSelection.propTypes = {
-  dataset: PropTypes.object.isRequired,
+  dataSource: PropTypes.shape({
+    type: PropTypes.oneOf(['DATA_FILE', 'LINK']).isRequired,
+    // Other props are data source specific.
+  }),
   onChange: PropTypes.func.isRequired,
 };

@@ -1,63 +1,43 @@
 import React, { Component, PropTypes } from 'react';
+import { bindActionCreators } from 'redux';
+import { connect } from 'react-redux';
 import Modal from 'react-modal';
 import SourceSelection from './createDataset/SourceSelection';
 import FileSelection from './createDataset/FileSelection';
 import Settings from '../dataset/Settings';
-import { createDataset } from '../../actions/dataset';
+import * as actionCreators from '../../actions/dataset'
 
 require('../../styles/CreateDataset.scss');
 
-export default class CreateDataset extends Component {
+class CreateDataset extends Component {
 
   constructor() {
     super();
-    this.state = {
-      currentPage: 'source',
-      dataset: {
-        name: '',
-        source: {
-          type: 'DATA_FILE',
-        },
-        columns: null,
-      },
-    };
+    this.handleNextOrImport = this.handleNextOrImport.bind(this);
   }
 
   pageComponent(page) {
-    const { dataset } = this.state;
-    switch (page) {
-      case 'source':
+    const { currentPage, dataset} = this.props.imports;
+    switch (currentPage) {
+      case 'select-data-source-type':
         return (
           <SourceSelection
             dataSourceType={dataset.source.type}
-            onChangeDataSourceType={newDataSourceType => (
-              this.setState({
-                dataset: { source: { type: newDataSourceType } },
-              })
-            )}
+            onChangeDataSource={this.props.selectDataSource}
           />
       );
-      case 'file':
+      case 'define-data-source':
         return (
           <FileSelection
-            dataset={dataset}
-            onChange={(newDataset) => {
-              this.setState({ dataset: newDataset });
-            }}
+            dataSource={dataset.source}
+            onChange={this.props.defineDataSource}
           />
       );
-      case 'settings':
+      case 'define-dataset':
         return (
           <Settings
-            showPreview
             dataset={dataset}
-            onChangeName={(newName) => {
-              this.setState({
-                dataset: Object.assign({}, this.state.dataset, {
-                  name: newName,
-                }),
-              });
-            }}
+            onChangeName={this.props.defineDatasetSettings}
           />
       );
       default: throw new Error(`Not yet implemented: ${page}`);
@@ -65,40 +45,18 @@ export default class CreateDataset extends Component {
   }
 
   handleNextOrImport() {
-    const { onSubmit } = this.props;
-    const { currentPage, dataset } = this.state;
-    if (currentPage === 'source') {
-      this.setState({ currentPage: 'file' });
-    } else if (currentPage === 'file') {
-      this.setState({ currentPage: 'settings' });
-    } else if (currentPage === 'settings') {
-      onSubmit(createDataset(dataset));
-    }
-  }
-
-  isNextOrImportDisabled() {
-    const { currentPage, dataset } = this.state;
-    if (currentPage === 'source') {
-      return false;
-    } else if (currentPage === 'file') {
-      return !dataset.columns;
-    } else if (currentPage === 'settings') {
-      return !dataset.name;
-    }
-  }
-
-  handlePrevious() {
-    const { currentPage } = this.state;
-    if (currentPage === 'settings') {
-      this.setState({ currentPage: 'file' });
-    } else if (currentPage === 'file') {
-      this.setState({ currentPage: 'source' });
+    const { currentPage, dataset } = this.props.imports;
+    if (currentPage === 'define-dataset') {
+      this.props.createDataset(dataset);
+    } else {
+      this.props.nextPage();
     }
   }
 
   render() {
-    const { onCancel } = this.props;
-    const { currentPage } = this.state;
+    const { onCancel, imports } = this.props;
+    const { currentPage } = imports;
+
     return (
       <Modal isOpen>
         <div className="CreateDataset">
@@ -107,24 +65,23 @@ export default class CreateDataset extends Component {
             X
           </button>
           <ul className="tabMenu">
-            <li className={`tab ${currentPage === 'source' ? 'selected' : null}`}>Source</li>
-            <li className={`tab ${currentPage === 'file' ? 'selected' : null}`}>File / Project</li>
-            <li className={`tab ${currentPage === 'settings' ? 'selected' : null}`}>Settings</li>
+            <li className={`tab ${currentPage === 'select-data-source-type' ? 'selected' : null}`}>Source</li>
+            <li className={`tab ${currentPage === 'define-data-source' ? 'selected' : null}`}>File / Project</li>
+            <li className={`tab ${currentPage === 'define-dataset' ? 'selected' : null}`}>Settings</li>
           </ul>
           {this.pageComponent(currentPage)}
           <div className={`movementControls ${currentPage}`}>
             <div className="buttonContainer">
               <button
                 className="btn previous clickable"
-                disabled={currentPage === 'source'}
-                onClick={this.handlePrevious.bind(this)}>
+                disabled={currentPage === 'select-data-source-type'}
+                onClick={this.props.previousPage}>
                 Previous
               </button>
               <button
                 className="btn next clickable"
-                disabled={this.isNextOrImportDisabled()}
-                onClick={this.handleNextOrImport.bind(this)}>
-                {currentPage === 'settings' ? 'Import' : 'Next'}
+                onClick={this.handleNextOrImport}>
+                {currentPage === 'define-dataset' ? 'Import' : 'Next'}
               </button>
             </div>
           </div>
@@ -138,3 +95,21 @@ CreateDataset.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
 };
+
+
+function mapStateToProps(state, ownProps) {
+  return {
+    onSubmit: ownProps.onSubmit,
+    onCancel: ownProps.onCancel,
+    imports: state.library.imports,
+  }
+}
+
+function mapDispatchToProps(dispatch) {
+  return bindActionCreators(actionCreators, dispatch);
+}
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(CreateDataset)

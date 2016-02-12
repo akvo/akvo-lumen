@@ -25,30 +25,30 @@ function fileName(source) {
 export default class Settings extends Component {
 
   render() {
+    const { dataset } = this.props;
+
     return (
       <div className="Settings">
         <dl>
           <dt>Source: </dt>
-          <dd>{sourceComponent(this.props.dataset.source)}</dd>
+          <dd>{sourceComponent(dataset.source)}</dd>
 
           <dt>File name: </dt>
-          <dd>{fileName(this.props.dataset.source)}</dd>
+          <dd>{fileName(dataset.source)}</dd>
 
           <dt>Dataset name: </dt>
           <dd>
             <input
-              defaultValue={this.props.dataset.name}
+              defaultValue={dataset.name}
               className="datasetNameInput"
               onChange={() => {
                 // We should probably not do onChange for perf reasons. Perhaps onBlur?
-                this.props.onChangeName(this.refs.datasetNameInput.value);
+                this.props.onChangeName({name: this.refs.datasetNameInput.value});
               }}
               ref="datasetNameInput"
               type="text"/>
           </dd>
         </dl>
-        {this.props.showPreview ?
-          <Preview columns={this.props.dataset.columns}/> : null}
       </div>
     );
   }

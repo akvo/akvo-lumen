@@ -34,6 +34,19 @@ const supportedFormats = [{
   label: 'Google Drive',
 }];
 
+const defaultDataSources = {
+  'DATA_FILE': {
+    type: 'DATA_FILE'
+  },
+
+  'LINK': {
+    type: 'LINK',
+    url: '',
+  },
+
+  // TODO the rest.
+}
+
 export default class SourceSelection extends Component {
   render() {
     const sources = supportedFormats.map(source => (
@@ -43,9 +56,9 @@ export default class SourceSelection extends Component {
           name="choose_data_source"
           value={source.type}
           checked={source.type === this.props.dataSourceType}
-          onChange={evt => (
-            this.props.onChangeDataSourceType(evt.target.value)
-          )}/>
+          onChange={evt => {
+            this.props.onChangeDataSource(defaultDataSources[evt.target.value])
+          }}/>
         { /* <img src={source.icon}/> */ }
         {source.label}
       </div>
@@ -56,5 +69,5 @@ export default class SourceSelection extends Component {
 
 SourceSelection.propTypes = {
   dataSourceType: PropTypes.string.isRequired,
-  onChangeDataSourceType: PropTypes.func.isRequired,
+  onChangeDataSource: PropTypes.func.isRequired,
 };
