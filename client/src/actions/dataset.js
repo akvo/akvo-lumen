@@ -15,7 +15,7 @@ function createDatasetSuccess(dataset) {
   }
 }
 
-function createDatasetFailure(dataset) {
+function createDatasetFailure(error, dataset) {
   debugger;
   return {
     type: constants.CREATE_DATASET_FAILURE,
@@ -26,16 +26,16 @@ function createDatasetFailure(dataset) {
 export function createDataset(dataset) {
   return (dispatch, getState) => {
     dispatch(createDatasetRequest(dataset));
-    fetch('/api/dataset', {
+    fetch('/api/datasets', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(dataset),
     }).then(response => {
       return response.json();
     }).then(dataset => {
-      createDatasetSuccess(dataset)
+      dispatch(createDatasetSuccess(dataset))
     }).catch(error => {
-      createDatasetFailure(dataset);
+      dispatch(createDatasetFailure(error, dataset));
     });
   };
 }

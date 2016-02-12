@@ -29,6 +29,11 @@
 
   (context "/datasets" []
 
+    (POST "/" []
+      {:status 200
+       :headers {"Content-Type" "application/json"}
+       :body "{\"dataset\": {}}"})
+
     (GET "/" []
       (render collection))
 
