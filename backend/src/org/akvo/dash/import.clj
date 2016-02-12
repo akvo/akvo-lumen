@@ -1,5 +1,6 @@
 (ns org.akvo.dash.import
-  (:require [clj-http.client :as client]))
+  (:require [clojure.java.io :as io]
+            [clj-http.client :as client]))
 
 
 (defn ensure-directory [dir]
@@ -7,14 +8,15 @@
 
 ;; Persist file, S3 or whatnot. How do we set option?
 
+(defmulti do-import
+  "Import based on connection kind of task."
+  (fn [t] (:kind t)))
 
 (defmethod do-import :default [t]
   (throw (IllegalArgumentException.
           (str "Can't import task of kind" (:kind t)))))
 
-(defmulti do-import
-  "Import based on connection kind of task."
-  (fn [t] (:kind t)))
+
 
 (defmethod do-import "LINK" [{{url :url} :spec}]
   (prn url)
@@ -28,11 +30,6 @@
 
 (defmethod do-import "AKVO-FLOW" [t]
   (prn "was of type FLOW"))
-
-(defmethod do-import :default [t]
-  (throw (IllegalArgumentException.
-          (str "Can't import task of kind" (:kind t)))))
-
 
 ;; How do we store files?
 ;; Each teneant with it's own dir / bucket?
