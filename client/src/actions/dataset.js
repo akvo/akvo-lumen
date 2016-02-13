@@ -1,5 +1,46 @@
 import * as constants from '../constants/dataset';
 
+function fetchDatasetRequest(id) {
+  return {
+    type: constants.FETCH_DATASET_REQUEST,
+    id,
+  }
+}
+
+const pollInteval = 1000;
+function fetchDatasetSuccess(dataset) {
+  return (dispatch, getState) => {
+    if (dataset.state === 'PENDING') {
+      setTimeout(() => fetchDataset(dataset.id), pollInteval);
+    }
+    dispatch({
+      type: constants.FETCH_DATASET_SUCCESS,
+      dataset,
+    });
+  }
+}
+
+function fetchDatasetFailure(id) {
+  return {
+    type: constants.FETCH_DATASET_FAILURE,
+    id,
+  }
+}
+
+function fetchDataset(id) {
+  return (dispatch, getState) => {
+    dispatch(fetchDatasetRequest(id));
+    fetch(`/api/datasets/${id}`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    })
+    .then(response => response.json())
+    .then(dataset => dispatch(fetchDatasetSuccess(dataset)))
+    .catch(error => dispatch(fetchDatasetFailure(error, id)))
+  }
+}
+
+
 function createDatasetRequest(dataset) {
   return {
     type: constants.CREATE_DATASET_REQUEST,
@@ -8,15 +49,16 @@ function createDatasetRequest(dataset) {
 }
 
 function createDatasetSuccess(dataset) {
-  debugger;
-  return {
-    type: constants.CREATE_DATASET_SUCCESS,
-    dataset,
+  return (dispatch, getState) => {
+    dispatch({
+      type: constants.CREATE_DATASET_SUCCESS,
+      dataset,
+    })
+    dispatch(fetchDataset(dataset.id));
   }
 }
 
 function createDatasetFailure(error, dataset) {
-  debugger;
   return {
     type: constants.CREATE_DATASET_FAILURE,
     dataset,
@@ -30,14 +72,11 @@ export function createDataset(dataset) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(dataset),
-    }).then(response => {
-      return response.json();
-    }).then(dataset => {
-      dispatch(createDatasetSuccess(dataset))
-    }).catch(error => {
-      dispatch(createDatasetFailure(error, dataset));
-    });
-  };
+    })
+    .then(response => response.json())
+    .then(dataset => dispatch(createDatasetSuccess(dataset)))
+    .catch(error => dispatch(createDatasetFailure(error, dataset)))
+  }
 }
 
 // Currently only name
@@ -52,6 +91,7 @@ export function saveDatasetSettings(id, { name }) {
 }
 
 // Only name for now.
+// TODO: save to server.
 export function defineDatasetSettings({ name }) {
   return {
     type: constants.DEFINE_DATASET_SETTINGS,
@@ -104,37 +144,5 @@ function createDataSourceFailure(fetchId) {
   return {
     type: constants.CREATE_DATA_SOURCE_FAILURE,
     fetchId,
-  }
-}
-
-let _fetchId = 0;
-function nextFetchId() {
-  return _fetchId++;
-}
-
-// Poll each second.
-const pollingInterval = 1000;
-
-export function createDataSource(dataSource) {
-  const fetchId = nextFetchId();
-  return (dispatch, getState) => {
-    dispatch(createDataSourceRequest(fetchId));
-    fetch('/api/datasource', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: dataSource,
-    }).then(response => {
-      if (response.status !== 200) {
-        throw new Error('');
-      }
-      return response.json();
-    }).then(response => {
-      dispatch(createDataSourceSuccess(fetchId, response.id));
-      // Start polling for when the dataset is available
-
-
-    }).catch(error => {
-      dispatch(createDataSourceFailure(fetchId));
-    })
   }
 }
