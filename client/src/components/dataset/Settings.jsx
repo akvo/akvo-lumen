@@ -1,5 +1,4 @@
 import React, { Component, PropTypes } from 'react';
-import Preview from './Preview';
 
 function sourceComponent(source) {
   switch (source.type) {
@@ -43,7 +42,7 @@ export default class Settings extends Component {
               className="datasetNameInput"
               onChange={() => {
                 // We should probably not do onChange for perf reasons. Perhaps onBlur?
-                this.props.onChangeName({name: this.refs.datasetNameInput.value});
+                this.props.onChangeName({ name: this.refs.datasetNameInput.value });
               }}
               ref="datasetNameInput"
               type="text"/>

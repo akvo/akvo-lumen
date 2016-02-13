@@ -39,5 +39,5 @@ LinkDataSourceSettings.propTypes = {
   dataSource: PropTypes.shape({
     type: PropTypes.oneOf(['LINK']).isRequired,
     url: PropTypes.string.isRequired,
-  })
+  }),
 };

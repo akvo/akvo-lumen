@@ -35,17 +35,17 @@ const supportedFormats = [{
 }];
 
 const defaultDataSources = {
-  'DATA_FILE': {
-    type: 'DATA_FILE'
+  DATA_FILE: {
+    type: 'DATA_FILE',
   },
 
-  'LINK': {
+  LINK: {
     type: 'LINK',
     url: '',
   },
 
   // TODO the rest.
-}
+};
 
 export default class SourceSelection extends Component {
   render() {
@@ -57,7 +57,7 @@ export default class SourceSelection extends Component {
           value={source.type}
           checked={source.type === this.props.dataSourceType}
           onChange={evt => {
-            this.props.onChangeDataSource(defaultDataSources[evt.target.value])
+            this.props.onChangeDataSource(defaultDataSources[evt.target.value]);
           }}/>
         { /* <img src={source.icon}/> */ }
         {source.label}

@@ -5,7 +5,7 @@ import Modal from 'react-modal';
 import SourceSelection from './createDataset/SourceSelection';
 import FileSelection from './createDataset/FileSelection';
 import Settings from '../dataset/Settings';
-import * as actionCreators from '../../actions/dataset'
+import * as actionCreators from '../../actions/dataset';
 
 require('../../styles/CreateDataset.scss');
 
@@ -17,7 +17,7 @@ class CreateDataset extends Component {
   }
 
   pageComponent(page) {
-    const { currentPage, dataset} = this.props.imports;
+    const { currentPage, dataset } = this.props.imports;
     switch (currentPage) {
       case 'select-data-source-type':
         return (
@@ -65,9 +65,15 @@ class CreateDataset extends Component {
             X
           </button>
           <ul className="tabMenu">
-            <li className={`tab ${currentPage === 'select-data-source-type' ? 'selected' : null}`}>Source</li>
-            <li className={`tab ${currentPage === 'define-data-source' ? 'selected' : null}`}>File / Project</li>
-            <li className={`tab ${currentPage === 'define-dataset' ? 'selected' : null}`}>Settings</li>
+            <li className={`tab ${currentPage === 'select-data-source-type' ? 'selected' : null}`}>
+              Source
+            </li>
+            <li className={`tab ${currentPage === 'define-data-source' ? 'selected' : null}`}>
+              File / Project
+            </li>
+            <li className={`tab ${currentPage === 'define-dataset' ? 'selected' : null}`}>
+              Settings
+            </li>
           </ul>
           {this.pageComponent(currentPage)}
           <div className={`movementControls ${currentPage}`}>
@@ -94,6 +100,16 @@ class CreateDataset extends Component {
 CreateDataset.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
+  previousPage: PropTypes.func.isRequired,
+  nextPage: PropTypes.func.isRequired,
+  defineDatasetSettings: PropTypes.func.isRequired,
+  defineDataSource: PropTypes.func.isRequired,
+  selectDataSource: PropTypes.func.isRequired,
+  createDataset: PropTypes.func.isRequired,
+  imports: PropTypes.shape({
+    currentPage: PropTypes.string.isRequired,
+    dataset: PropTypes.object.isRequired, // TODO: shape?
+  }),
 };
 
 
@@ -102,7 +118,7 @@ function mapStateToProps(state, ownProps) {
     onSubmit: ownProps.onSubmit,
     onCancel: ownProps.onCancel,
     imports: state.library.imports,
-  }
+  };
 }
 
 function mapDispatchToProps(dispatch) {
@@ -112,4 +128,4 @@ function mapDispatchToProps(dispatch) {
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(CreateDataset)
+)(CreateDataset);

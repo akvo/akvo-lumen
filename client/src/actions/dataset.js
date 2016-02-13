@@ -4,12 +4,12 @@ function fetchDatasetRequest(id) {
   return {
     type: constants.FETCH_DATASET_REQUEST,
     id,
-  }
+  };
 }
 
 const pollInteval = 1000;
 function fetchDatasetSuccess(dataset) {
-  return (dispatch, getState) => {
+  return (dispatch) => {
     if (dataset.state === 'PENDING') {
       setTimeout(() => fetchDataset(dataset.id), pollInteval);
     }
@@ -17,18 +17,18 @@ function fetchDatasetSuccess(dataset) {
       type: constants.FETCH_DATASET_SUCCESS,
       dataset,
     });
-  }
+  };
 }
 
 function fetchDatasetFailure(id) {
   return {
     type: constants.FETCH_DATASET_FAILURE,
     id,
-  }
+  };
 }
 
 function fetchDataset(id) {
-  return (dispatch, getState) => {
+  return (dispatch) => {
     dispatch(fetchDatasetRequest(id));
     fetch(`/api/datasets/${id}`, {
       method: 'GET',
@@ -36,8 +36,8 @@ function fetchDataset(id) {
     })
     .then(response => response.json())
     .then(dataset => dispatch(fetchDatasetSuccess(dataset)))
-    .catch(error => dispatch(fetchDatasetFailure(error, id)))
-  }
+    .catch(error => dispatch(fetchDatasetFailure(error, id)));
+  };
 }
 
 
@@ -45,28 +45,28 @@ function createDatasetRequest(dataset) {
   return {
     type: constants.CREATE_DATASET_REQUEST,
     dataset,
-  }
+  };
 }
 
 function createDatasetSuccess(dataset) {
-  return (dispatch, getState) => {
+  return (dispatch) => {
     dispatch({
       type: constants.CREATE_DATASET_SUCCESS,
       dataset,
-    })
+    });
     dispatch(fetchDataset(dataset.id));
-  }
+  };
 }
 
 function createDatasetFailure(error, dataset) {
   return {
     type: constants.CREATE_DATASET_FAILURE,
     dataset,
-  }
+  };
 }
 
 export function createDataset(dataset) {
-  return (dispatch, getState) => {
+  return (dispatch) => {
     dispatch(createDatasetRequest(dataset));
     fetch('/api/datasets', {
       method: 'POST',
@@ -74,9 +74,9 @@ export function createDataset(dataset) {
       body: JSON.stringify(dataset),
     })
     .then(response => response.json())
-    .then(dataset => dispatch(createDatasetSuccess(dataset)))
-    .catch(error => dispatch(createDatasetFailure(error, dataset)))
-  }
+    .then(ds => dispatch(createDatasetSuccess(ds)))
+    .catch(error => dispatch(createDatasetFailure(error, dataset)));
+  };
 }
 
 // Currently only name
@@ -95,54 +95,32 @@ export function saveDatasetSettings(id, { name }) {
 export function defineDatasetSettings({ name }) {
   return {
     type: constants.DEFINE_DATASET_SETTINGS,
-    dataset: { name }
-  }
+    dataset: { name },
+  };
 }
 
 export function selectDataSource(dataSource) {
   return {
     type: constants.SELECT_DATA_SOURCE,
     dataSource,
-  }
+  };
 }
 
 export function nextPage() {
   return {
     type: constants.NEXT_PAGE,
-  }
+  };
 }
 
 export function previousPage() {
   return {
     type: constants.PREVIOUS_PAGE,
-  }
+  };
 }
 
 export function defineDataSource(dataSource) {
   return {
     type: constants.DEFINE_DATA_SOURCE,
     dataSource,
-  }
-}
-
-function createDataSourceRequest(fetchId) {
-  return {
-    type: constants.CREATE_DATA_SOURCE_REQUEST,
-    fetchId,
-  }
-}
-
-function createDataSourceSuccess(fetchId, importId) {
-  return {
-    type: constants.CREATE_DATA_SOURCE_SUCCESS,
-    fetchId,
-    importId,
-  }
-}
-
-function createDataSourceFailure(fetchId) {
-  return {
-    type: constants.CREATE_DATA_SOURCE_FAILURE,
-    fetchId,
-  }
+  };
 }

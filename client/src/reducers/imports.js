@@ -13,49 +13,50 @@ export const initialState = {
 
 function selectDataSource(state, dataSource) {
   return update(state, {
-    dataset: {source: { $set: dataSource }}
+    dataset: { source: { $set: dataSource } },
   });
 }
 
 function nextPage(state) {
   const currentPage = state.currentPage;
-  let nextPage = '';
+  let nPage = '';
   if (currentPage === 'select-data-source-type') {
-    nextPage = 'define-data-source';
+    nPage = 'define-data-source';
   } else if (currentPage === 'define-data-source') {
-    nextPage = 'define-dataset';
+    nPage = 'define-dataset';
   } else {
     throw new Error(`No next page for ${currentPage}`);
   }
   return update(state, {
-    currentPage: { $set: nextPage }
+    currentPage: { $set: nPage },
   });
 }
 
 function previousPage(state) {
   const currentPage = state.currentPage;
-  let previousPage = '';
+  let prevPage = '';
   if (currentPage === 'define-dataset') {
-    previousPage = 'define-data-source';
+    prevPage = 'define-data-source';
   } else if (currentPage === 'define-data-source') {
-    previousPage = 'select-data-source-type';
+    prevPage = 'select-data-source-type';
   } else {
     throw new Error(`No previous page for ${currentPage}`);
   }
-
-  return update(state, {currentPage: {$set: previousPage}});
+  return update(state, {
+    currentPage: { $set: prevPage },
+  });
 }
 
 function defineDataSource(state, dataSource) {
   return update(state, {
-    dataset: {source: {$set: dataSource}}
-  })
+    dataset: { source: { $set: dataSource } },
+  });
 }
 
 // Only name for now.
 function defineDatasetSettings(state, { name }) {
   return update(state, {
-    dataset: {name: {$set: name}}
+    dataset: { name: { $set: name } },
   });
 }
 
@@ -71,12 +72,6 @@ export default function dataSources(state = initialState, action) {
       return defineDataSource(state, action.dataSource);
     case constants.DEFINE_DATASET_SETTINGS:
       return defineDatasetSettings(state, action.dataset);
-    case constants.CREATE_DATA_SOURCE_REQUEST:
-      return createDataSourceRequest(state, action.fetchId);
-    case constants.CREATE_DATA_SOURCE_FAILURE:
-      return createDataSourceFailure(state, action.fetchId);
-    case constants.CREATE_DATA_SOURCE_SUCCESS:
-      return createDataSourceSuccess(state, action.fetchId, action.importId);
     default: return state;
   }
 }
