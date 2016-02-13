@@ -11,7 +11,9 @@ const pollInteval = 1000;
 function fetchDatasetSuccess(dataset) {
   return (dispatch) => {
     if (dataset.state === 'PENDING') {
+      /* eslint-disable no-use-before-define */
       setTimeout(() => fetchDataset(dataset.id), pollInteval);
+      /* esllint-enable no-use-before-define */
     }
     dispatch({
       type: constants.FETCH_DATASET_SUCCESS,
