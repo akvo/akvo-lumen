@@ -23,17 +23,14 @@ function initNotAuthenticated() {
 
 keycloak.init({ onLoad: 'login-required' }).success((authenticated) => {
   if (authenticated) {
-    keycloak.loadUserProfile().success(function(profile) {
+    keycloak.loadUserProfile().success((profile) => {
       initAuthenticated(profile);
-    }).error(function() {
-      console.error('Failed to load profile');
+    }).error(() => {
       initNotAuthenticated();
-    })
+    });
   } else {
-    console.error('Failed to authenticate');
     initNotAuthenticated();
   }
 }).error(() => {
-  console.error('Failed to authenticate');
   initNotAuthenticated();
-})
+});
