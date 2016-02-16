@@ -58,7 +58,9 @@ class CreateDataset extends Component {
     const { currentPage } = imports;
 
     return (
-      <Modal isOpen>
+      <Modal
+        isOpen
+        style={{ overlay: { zIndex: 99 } }}>
         <div className="CreateDataset">
           <h3 className="modalTitle">New Dataset</h3>
           <button className="btn close clickable" onClick={onCancel}>
@@ -110,6 +112,7 @@ CreateDataset.propTypes = {
     currentPage: PropTypes.string.isRequired,
     dataset: PropTypes.object.isRequired, // TODO: shape?
   }),
+  containerClassName: PropTypes.string,
 };
 
 

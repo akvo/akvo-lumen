@@ -32,3 +32,11 @@ p, h1, h2, h3, h4, h5 {
         cursor: not-allowed;
     }
 }
+
+/* Always show modals on top of the stack */
+
+.ReactModalPortal {
+    > * {
+        z-index: 99;
+    }
+}

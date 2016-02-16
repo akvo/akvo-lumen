@@ -5,14 +5,54 @@ import OrganizationMenu from './workspace-nav/OrganizationMenu';
 import CollectionsList from './workspace-nav/CollectionsList';
 import NavWorkspaceSwitch from './workspace-nav/NavWorkspaceSwitch';
 import { showModal } from '../actions/activeModal';
+import { Link } from 'react-router';
 
 require('../styles/WorkspaceNav.scss');
 
-export default class WorkspaceNav extends Component {
+const collapsedLocations = ['visualisation/', 'dataset/'];
 
+const getCollapsedStatus = (pathname) => {
+  let collapsedStatus = false;
+
+  collapsedLocations.map(location => {
+    if (pathname.indexOf(location) > -1) {
+      collapsedStatus = true;
+    }
+  });
+
+  return collapsedStatus;
+};
+
+export default class WorkspaceNav extends Component {
   constructor() {
     super();
     this.handleShowCreateCollectionModal = this.handleShowCreateCollectionModal.bind(this);
+    this.state = {
+      isFloating: false,
+    };
+  }
+
+  getOnClick(isCollapsible) {
+    let onClick = null;
+
+    if (isCollapsible && !this.state.isFloating) {
+      onClick = () => this.setState({ isFloating: true });
+    }
+    return onClick;
+  }
+
+  getClassName(isCollapsible) {
+    let className = 'WorkspaceNav';
+
+    if (isCollapsible) {
+      if (this.state.isFloating) {
+        className = `${className} floating`;
+      } else {
+        className = `${className} collapsed clickable`;
+      }
+    }
+
+    return className;
   }
 
   handleShowCreateCollectionModal() {
@@ -20,10 +60,27 @@ export default class WorkspaceNav extends Component {
   }
 
   render() {
+    const isCollapsible = getCollapsedStatus(this.props.location.pathname);
+    const onClick = this.getOnClick(isCollapsible);
+    const className = this.getClassName(isCollapsible);
+
     return (
-      <nav className="WorkspaceNav">
+      <nav
+        className={className}
+        onClick={onClick}
+      >
         <div className="header">
-          <h1>DASH</h1>
+          <h1><Link to="/">DASH</Link></h1>
+          {isCollapsible && this.state.isFloating &&
+            <button
+              className="collapse clickable"
+              onClick={ () => {
+                this.setState({ isFloating: false });
+              }}
+            >
+              {"<"}
+            </button>
+          }
           <OrganizationMenu user={this.props.user} />
         </div>
         <div className="links">
@@ -42,6 +99,7 @@ export default class WorkspaceNav extends Component {
 WorkspaceNav.propTypes = {
   collections: PropTypes.array.isRequired,
   user: PropTypes.object.isRequired,
+  location: PropTypes.object,
   dispatch: PropTypes.func.isRequired,
 };
 
