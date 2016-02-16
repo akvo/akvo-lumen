@@ -2,11 +2,11 @@ import { combineReducers } from 'redux';
 import datasets from './datasets';
 import visualisations from './visualisations';
 import dashboards from './dashboards';
-import imports from './imports';
+import datasetImport from './datasetImport';
 
 export default combineReducers({
   datasets,
   visualisations,
   dashboards,
-  imports,
+  datasetImport,
 });

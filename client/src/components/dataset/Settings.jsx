@@ -56,5 +56,4 @@ export default class Settings extends Component {
 Settings.propTypes = {
   dataset: PropTypes.object.isRequired,
   onChangeName: PropTypes.func.isRequired,
-  showPreview: PropTypes.bool.isRequired,
 };

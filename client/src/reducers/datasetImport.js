@@ -60,7 +60,7 @@ function defineDatasetSettings(state, { name }) {
   });
 }
 
-export default function dataSources(state = initialState, action) {
+export default function datasetImport(state = initialState, action) {
   switch (action.type) {
     case constants.SELECT_DATA_SOURCE:
       return selectDataSource(state, action.dataSource);

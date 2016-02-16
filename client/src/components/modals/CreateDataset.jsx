@@ -17,7 +17,7 @@ class CreateDataset extends Component {
   }
 
   pageComponent(page) {
-    const { currentPage, dataset } = this.props.imports;
+    const { currentPage, dataset } = this.props.datasetImport;
     switch (currentPage) {
       case 'select-data-source-type':
         return (
@@ -45,7 +45,7 @@ class CreateDataset extends Component {
   }
 
   handleNextOrImport() {
-    const { currentPage, dataset } = this.props.imports;
+    const { currentPage, dataset } = this.props.datasetImport;
     if (currentPage === 'define-dataset') {
       this.props.createDataset(dataset);
     } else {
@@ -54,8 +54,8 @@ class CreateDataset extends Component {
   }
 
   render() {
-    const { onCancel, imports } = this.props;
-    const { currentPage } = imports;
+    const { onCancel, datasetImport } = this.props;
+    const { currentPage } = datasetImport;
 
     return (
       <Modal
@@ -108,7 +108,7 @@ CreateDataset.propTypes = {
   defineDataSource: PropTypes.func.isRequired,
   selectDataSource: PropTypes.func.isRequired,
   createDataset: PropTypes.func.isRequired,
-  imports: PropTypes.shape({
+  datasetImport: PropTypes.shape({
     currentPage: PropTypes.string.isRequired,
     dataset: PropTypes.object.isRequired, // TODO: shape?
   }),
@@ -120,7 +120,7 @@ function mapStateToProps(state, ownProps) {
   return {
     onSubmit: ownProps.onSubmit,
     onCancel: ownProps.onCancel,
-    imports: state.library.imports,
+    datasetImport: state.library.datasetImport,
   };
 }
 
