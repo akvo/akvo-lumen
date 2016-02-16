@@ -9,7 +9,7 @@ export default class LinkDataSourceSettings extends Component {
   handleLink(evt) {
     const url = evt.target.value.trim();
     this.props.onChange({
-      type: 'LINK',
+      kind: 'LINK',
       url,
     });
   }
@@ -37,7 +37,7 @@ export default class LinkDataSourceSettings extends Component {
 LinkDataSourceSettings.propTypes = {
   onChange: PropTypes.func.isRequired,
   dataSource: PropTypes.shape({
-    type: PropTypes.oneOf(['LINK']).isRequired,
+    kind: PropTypes.oneOf(['LINK']).isRequired,
     url: PropTypes.string.isRequired,
   }),
 };

@@ -5,7 +5,7 @@ export const initialState = {
   currentPage: 'select-data-source-type',
   dataset: {
     source: {
-      type: 'DATA_FILE',
+      kind: 'DATA_FILE',
     },
     name: '',
   },

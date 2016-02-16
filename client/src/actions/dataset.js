@@ -22,14 +22,14 @@ function fetchDatasetSuccess(dataset) {
   };
 }
 
-function fetchDatasetFailure(id) {
+function fetchDatasetFailure(error, id) {
   return {
     type: constants.FETCH_DATASET_FAILURE,
     id,
   };
 }
 
-function fetchDataset(id) {
+export function fetchDataset(id) {
   return (dispatch) => {
     dispatch(fetchDatasetRequest(id));
     fetch(`/api/datasets/${id}`, {
@@ -93,7 +93,6 @@ export function saveDatasetSettings(id, { name }) {
 }
 
 // Only name for now.
-// TODO: save to server.
 export function defineDatasetSettings({ name }) {
   return {
     type: constants.DEFINE_DATASET_SETTINGS,

@@ -6,7 +6,7 @@ export default class FileSelection extends Component {
 
   renderFileSelection() {
     const { dataSource, onChange } = this.props;
-    switch (dataSource.type) {
+    switch (dataSource.kind) {
       case 'DATA_FILE':
         return (
           <DataFileFileSelection
@@ -37,7 +37,7 @@ export default class FileSelection extends Component {
 
 FileSelection.propTypes = {
   dataSource: PropTypes.shape({
-    type: PropTypes.oneOf(['DATA_FILE', 'LINK']).isRequired,
+    kind: PropTypes.oneOf(['DATA_FILE', 'LINK']).isRequired,
     // Other props are data source specific.
   }),
   onChange: PropTypes.func.isRequired,

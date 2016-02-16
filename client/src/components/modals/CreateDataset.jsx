@@ -22,7 +22,7 @@ class CreateDataset extends Component {
       case 'select-data-source-type':
         return (
           <SourceSelection
-            dataSourceType={dataset.source.type}
+            dataSourceKind={dataset.source.kind}
             onChangeDataSource={this.props.selectDataSource}
           />
       );
