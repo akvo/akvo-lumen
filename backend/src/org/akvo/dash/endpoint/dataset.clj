@@ -82,8 +82,7 @@
                                           :transformation transformation-id})
                                      :i (insert-import
                                          tx
-                                         {:datasource datasource-id})})
-                ]
+                                         {:datasource datasource-id})})]
             (scheduling/schedule
              #(import/job db {:import-id (-> r :i :id)}))
 
@@ -96,13 +95,14 @@
             ;; We should really log (warn)
             (pprint e)
             (pprint (.getNextException e))
-            {:status 500 ;; ?
+            {:status  500 ;; ?
              :headers {"content-type" "text/plain"}
-             :body (str e (.getNextException e))}))))
+             :body    (str e (.getNextException e))}))))
 
 
     (context "/:id" [id]
       (GET "/" []
+        ;; We need to deal with not existing ids
         (let [r        (dataset-by-id db {:id (str->uuid id)})
               resp-map {:id     (str (:view_id r))
                         :status (:status r)

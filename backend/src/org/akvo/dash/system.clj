@@ -10,7 +10,6 @@
    [duct.middleware.not-found :refer [wrap-not-found]]
    [duct.middleware.route-aliases :refer [wrap-route-aliases]]
    [meta-merge.core :refer [meta-merge]]
-   ;; [ring.component.jetty :refer [jetty-server]]
    [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
    [org.akvo.pg-json]
    [org.akvo.dash.component
@@ -18,7 +17,6 @@
    [org.akvo.dash.endpoint
     [activity :as activity]
     [dataset :as dataset]
-    [datasource :as datasource]
     [root :as root]
     [visualisation :as visualisation]]))
 
@@ -40,16 +38,14 @@
          :db   (hikaricp (:db config))
          :ragtime (ragtime (:ragtime config))
          :activity (endpoint-component activity/endpoint)
-         :datasource (endpoint-component datasource/endpoint)
          :dataset (endpoint-component dataset/endpoint)
          :root (endpoint-component root/endpoint)
          :visualisation (endpoint-component visualisation/endpoint))
 
         (component/system-using
          {:http [:app]
-          :app  [:root :activity :dataset :datasource :visualisation]
+          :app  [:root :activity :dataset :visualisation]
           :activity [:db]
           :dataset [:db]
-          :datasource [:db]
           :ragtime [:db]
           :visualisation [:db]}))))
