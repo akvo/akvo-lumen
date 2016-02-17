@@ -9,7 +9,6 @@
 
 
 #_(deftest collection-test
-
   (testing "Access"
     (let [resp (handler (mock/request :get "/datasources"))]
       (is (= 200

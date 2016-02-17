@@ -2,6 +2,7 @@
   "A Datasource describes a connection to data, it might be a link, or an other
   form of description on how to connect to the source data."
   (:require
+   [cheshire.core :as json]
    [clojure.pprint :refer [pprint]]
    [compojure.core :refer :all]
    [hugsql.core :as hugsql]
@@ -70,10 +71,9 @@
             ;;                    :status :pending})
             ;; (throw (Exception. "jdbc-transaction-fail"))
             )
-          (scheduling/schedule #(import/job {:import-id import-id
-                                  :kind      kind
-                                  :spec      spec})
-                    #_(in 10 :seconds))
+
+          (scheduling/schedule
+           #(import/job {:import-id import-id}))
           (u/val->json-resp resp)
           (catch PSQLException e
             ;; Log error

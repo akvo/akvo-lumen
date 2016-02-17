@@ -50,7 +50,7 @@
     (GET "/" []
       (u/fn->json-resp (all-datasets db)))
 
-    ;; POST does only handle LINK type blindly!!!
+    ;; POST blindly expect LINK kind
     (POST "/" [req]
       (fn [req]
         (try

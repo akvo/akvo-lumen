@@ -1,0 +1,2 @@
+export const CREATE = 'VISUALISATION_CREATE';
+export const EDIT = 'VISUALISATION_EDIT';

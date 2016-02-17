@@ -1,9 +1,10 @@
 import React, { Component, PropTypes } from 'react';
+import { Link } from 'react-router';
 
 export default class NavLink extends Component {
   render() {
     return (
-      <div className="NavLink">{this.props.to}</div>
+      <Link className="NavLink" to={this.props.to}>{this.props.to}</Link>
     );
   }
 }

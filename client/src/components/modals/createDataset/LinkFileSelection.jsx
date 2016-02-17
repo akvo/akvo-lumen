@@ -24,8 +24,6 @@ export default class LinkFileSelection extends Component {
             mimeType: 'text/csv',
           },
         }));
-      }).catch(err => {
-        console.log(err);
       });
     }
   }

@@ -11,7 +11,9 @@ export default class Main extends Component {
   render() {
     return (
       <div className="Main">
-        <WorkspaceNav/>
+        <WorkspaceNav
+          location={this.props.location}
+        />
         {this.props.children}
         <DashboardModal />
       </div>
@@ -21,4 +23,5 @@ export default class Main extends Component {
 
 Main.propTypes = {
   children: PropTypes.element,
+  location: PropTypes.object,
 };

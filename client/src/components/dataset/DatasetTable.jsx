@@ -1,6 +1,8 @@
 import React, { Component, PropTypes } from 'react';
 import { Table, Column, Cell } from 'fixed-data-table';
 
+require('../../styles/DatasetTable.scss');
+
 export default class DatasetTable extends Component {
 
   constructor() {

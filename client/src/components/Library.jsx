@@ -24,6 +24,11 @@ class Library extends Component {
     this.handleSelectEntity = this.handleSelectEntity.bind(this);
   }
 
+  componentDidMount() {
+    // Fetch the library.
+  }
+
+
   handleSelectEntity(entityType, id) {
     this.props.dispatch(routeActions.push(`/${entityType}/${id}`));
   }
