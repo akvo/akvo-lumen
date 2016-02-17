@@ -1,8 +1,7 @@
 CREATE TABLE datasources (
-       id text PRIMARY KEY,
+       id uuid PRIMARY KEY,
        kind text NOT NULL,
-       -- spec jsonb NOT NULL,
-       spec jsonb,
+       spec jsonb NOT NULL,
        ts timestamptz DEFAULT now()
 );
 --;

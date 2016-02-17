@@ -1,10 +1,14 @@
 (ns org.akvo.dash.endpoint.root
   "The root (/) API resource."
-  (:require [compojure.core :refer :all]))
+  (:require
+   [clojure.pprint :refer [pprint]]
+   [compojure.core :refer :all]
+            ))
 
 (defn endpoint [config]
   (routes
-   (GET "/" [] "Akvo Dash API")
+   (GET "/" []
+        "Akvo Dash API")
 
    (GET "/people.csv" []
      {:status 200
