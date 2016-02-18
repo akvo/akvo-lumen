@@ -14,7 +14,7 @@
   "Return snake_cased PGObject of type json."
   [v]
   (doto (PGobject.)
-      (.setType "json")
+      (.setType "jsonb")
       (.setValue (json/generate-string v
                                        {:key-fn (fn [k] (-> k
                                                             name
@@ -36,6 +36,9 @@
       "jsonb" (json/parse-string v
                                  (fn [k]
                                    (->kebab-case-keyword k)))
+      "json" (json/parse-string v
+                                (fn [k]
+                                  (->kebab-case-keyword k)))
       :else  v)))
 
 (extend-protocol jdbc/IResultSetReadColumn
