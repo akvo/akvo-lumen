@@ -1,11 +1,14 @@
 (ns org.akvo.pg-json
   "Make sure we talk Postgres json."
   (:require
-   [clojure.pprint :refer [pprint]]
    [camel-snake-kebab.core :refer [->kebab-case-keyword ->snake_case_string]]
    [cheshire.core :as json]
+   [clj-time.coerce :as c]
+   [clojure.pprint :refer [pprint]]
    [clojure.java.jdbc :as jdbc])
-  (:import org.postgresql.util.PGobject))
+  (:import org.postgresql.util.PGobject
+           java.sql.Timestamp)
+  )
 
 ;; This is heavily "inspired" by Travis Vachon
 ;; http://hiim.tv/clojure/2014/05/15/clojure-postgres-json/
@@ -44,3 +47,11 @@
   PGobject
   (result-set-read-column [pgobj meta idx]
     (parse-pgobj pgobj)))
+
+;; Using timestamps, but why not as ISO?
+(extend-protocol jdbc/IResultSetReadColumn
+  Timestamp
+  (result-set-read-column [this _ _]
+    (-> this
+        c/from-sql-time
+        c/to-long)))
