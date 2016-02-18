@@ -8,7 +8,7 @@
    [hugsql.core :as hugsql]
    ))
 
-(hugsql/def-db-fns "org/akvo/dash/endpoint/sql/dataview.sql")
+(hugsql/def-db-fns "org/akvo/dash/endpoint/library.sql")
 
 (defn endpoint
   ""
@@ -18,7 +18,7 @@
 
     (GET "/" []
       (fn [req]
-        (let [datasets       (all-datasets db)
+        (let [datasets       (dataset-coll db)
               visualisations []
               dashboards     []]
           {:status  200
