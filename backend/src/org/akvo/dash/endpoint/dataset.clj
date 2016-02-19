@@ -99,17 +99,29 @@
              :headers {"content-type" "text/plain"}
              :body    (str e (.getNextException e))}))))
 
-    ;; We need to deal with not existing ids
+
+
     (context "/:id" [id]
+
       (GET "/" []
-        (let [r        (dataset-by-id db {:id (str->uuid id)})
-              resp-map {:id     (str (:view_id r))
-                        :status (:status r)
-                        :name   (:dataset_name r)}
-              resp (condp = (:status r)
-                     "OK" (assoc resp-map :columns (json/parse-string (slurp (-> r :noble :noble))))
-                     "PENDING" resp-map
-                     "FAILURE" resp-map)]
-          {:status 200
-           :headers {"content-type" "application/json"}
-           :body (json/generate-string resp)})))))
+
+        (let [r (dataset-by-id db {:id (str->uuid id)})
+              ;; Made error msg top level to show it's not implemented
+              e "Could not find dataset on remote server (404)"]
+          (if (nil? r)
+            {:status  404
+             :headers {"content-type" "text/plain"}
+             :body    "404 Not Found"}
+            (let [resp-map {:id     (str (:view_id r))
+                            :status (:status r)
+                            :name   (:dataset_name r)}
+                  resp     (condp = (:status r)
+                             "OK"      (assoc resp-map
+                                              :columns
+                                              (json/parse-string
+                                               (slurp (-> r :noble :noble))))
+                             "FAILURE" (assoc resp-map :reason e)
+                             resp-map)]
+              {:status  200
+               :headers {"content-type" "application/json"}
+               :body    (json/generate-string resp)})))))))

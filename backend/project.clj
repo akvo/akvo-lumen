@@ -7,6 +7,7 @@
   :dependencies [[camel-snake-kebab "0.3.2"]
                  [cheshire "5.5.0"]
                  [clj-http "2.0.1"]
+                 [clj-time "0.11.0"]
                  [com.layerware/hugsql "0.3.1"]
                  [com.stuartsierra/component "0.3.0"]
                  [compojure "1.4.0"]
@@ -40,6 +41,10 @@
   :target-path "target/%s/"
   :aliases {"gen"   ["generate"]
             "setup" ["do" ["generate" "locals"]]}
+  :test-selectors {:default     (or  (complement :integration)
+                                     (complement :wip))
+                   :wip         :wip
+                   :integration :integration}
   :profiles
   {:dev  [:project/dev  :profiles/dev]
    :test [:project/test :profiles/test]

@@ -17,6 +17,7 @@
    [org.akvo.dash.endpoint
     [activity :as activity]
     [dataset :as dataset]
+    [library :as library]
     [root :as root]
     [visualisation :as visualisation]]))
 
@@ -38,14 +39,16 @@
          :db   (hikaricp (:db config))
          :ragtime (ragtime (:ragtime config))
          :activity (endpoint-component activity/endpoint)
+         :library (endpoint-component library/endpoint)
          :dataset (endpoint-component dataset/endpoint)
          :root (endpoint-component root/endpoint)
          :visualisation (endpoint-component visualisation/endpoint))
 
         (component/system-using
          {:http [:app]
-          :app  [:root :activity :dataset :visualisation]
+          :app  [:root :activity :dataset :library :visualisation]
           :activity [:db]
           :dataset [:db]
+          :library [:db]
           :ragtime [:db]
           :visualisation [:db]}))))

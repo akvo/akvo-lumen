@@ -12,7 +12,7 @@
   (csv/read-csv (slurp (io/resource "org/akvo/dash/test/people.csv"))))
 
 
-(deftest parse-csv-with-header-test
+(deftest ^:integration parse-csv-with-header-test
   (testing "CSV import."
     (is (->> (diff (tf/parse-csv-with-headers people)
                    [{:title  "Name"
@@ -32,7 +32,7 @@
              (every? true?)))))
 
 
-(deftest parse-csv-without-header-test
+(deftest ^:integration parse-csv-without-header-test
   (testing "CSV import of file without header."
 
     (is (->> (diff (tf/parse-csv-without-headers (rest people))
@@ -53,7 +53,7 @@
              (every? true?)))))
 
 
-(deftest update-column-header-test
+(deftest ^:wip update-column-header-test
   (let [data {:columns (tf/parse-csv-without-headers (rest people))}]
 
     (testing "Update column header"
@@ -66,7 +66,7 @@
                    :title))))))
 
 
-(deftest update-column-type-description-test
+(deftest ^:integration update-column-type-description-test
   (let [data {:columns (tf/parse-csv-with-headers people)}]
 
     (testing "Change column type to NUMBER"
@@ -79,7 +79,7 @@
                   :type))))))
 
 
-(deftest cast-column-values-test
+(deftest ^:integration cast-column-values-test
   (let [data {:columns (tf/parse-csv-with-headers people)}]
 
     (testing "Change column values to number"
