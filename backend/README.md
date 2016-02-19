@@ -1,7 +1,5 @@
 # Akvo Dash
 
-[![Build Status](https://travis-ci.org/akvo/akvo-dash.svg?branch=#33library-endpoint)](https://travis-ci.org/akvo/akvo-dash)
-
 ## Quickstart
 Dash depends on a Postgres db. If on OS X, [Postgres.app](http://postgresapp.com/)
 is an easy path.

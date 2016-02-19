@@ -1,7 +1,8 @@
-(ns org.akvo.pg-json
+(ns org.akvo.db-util
   "Make sure we talk Postgres json."
   (:require
    [camel-snake-kebab.core :refer [->kebab-case-keyword ->snake_case_string]]
+   [clojure.pprint :refer [pprint]]
    [cheshire.core :as json]
    [clj-time.coerce :as c]
    [clojure.java.jdbc :as jdbc])
