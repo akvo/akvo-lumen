@@ -1,4 +1,5 @@
 import * as constants from '../constants/dataset';
+import { hideModal } from './activeModal';
 
 function fetchDatasetRequest(id) {
   return {
@@ -56,6 +57,7 @@ function createDatasetSuccess(dataset) {
       type: constants.CREATE_DATASET_SUCCESS,
       dataset,
     });
+    dispatch(hideModal());
     dispatch(fetchDataset(dataset.id));
   };
 }
@@ -123,5 +125,12 @@ export function defineDataSource(dataSource) {
   return {
     type: constants.DEFINE_DATA_SOURCE,
     dataSource,
+  };
+}
+
+export function fetchDatasetsSuccess(datasets) {
+  return {
+    type: constants.FETCH_DATASETS_SUCCESS,
+    datasets,
   };
 }

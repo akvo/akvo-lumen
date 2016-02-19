@@ -54,9 +54,15 @@ function saveDatasetSettings(state, dataset) {
 
 function saveDataset(state, dataset) {
   const id = dataset.id;
+  const ds = update(dataset, { $merge: { type: 'dataset' } });
   return update(state, {
-    [id]: { $set: dataset },
+    [id]: { $set: ds },
   });
+}
+
+function saveDatasets(state) {
+  // TODO
+  return state;
 }
 
 export default function datasets(state = initialState, action) {
@@ -67,6 +73,8 @@ export default function datasets(state = initialState, action) {
       return saveDatasetSettings(state, action.dataset);
     case constants.FETCH_DATASET_SUCCESS:
       return saveDataset(state, action.dataset);
+    case constants.FETCH_DATASETS_SUCCESS:
+      return saveDatasets(state, action.datasets);
     default: return state;
   }
 }

@@ -1,4 +1,32 @@
 import * as constants from '../constants/library';
+import fetch from 'isomorphic-fetch';
+import { fetchDatasetsSuccess } from './dataset';
+
+function fetchLibraryRequest() {
+  return {
+    type: constants.FETCH_LIBRARY_REQUEST,
+  };
+}
+
+function fetchLibraryFailure() {
+  return {
+    type: constants.FETCH_LIBRARY_FAILURE,
+  };
+}
+
+export function fetchLibrary() {
+  return (dispatch) => {
+    dispatch(fetchLibraryRequest());
+    fetch('/api/library')
+    .then(response => response.json())
+    .then(library => {
+      dispatch(fetchDatasetsSuccess(library.datasets));
+      // dispatch(fetchVisualisationsSuccess(library.visualisations));
+      // dispatch(fetchDashboardsSuccess(library.dashboards));
+    })
+    .catch(error => dispatch(fetchLibraryFailure(error)));
+  };
+}
 
 export function changeDisplayMode(displayMode) {
   return {

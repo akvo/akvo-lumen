@@ -4,6 +4,8 @@ import { routeActions } from 'react-router-redux';
 import LibraryHeader from './library/LibraryHeader';
 import LibraryListing from './library/LibraryListing';
 import { showModal } from '../actions/activeModal';
+import { fetchLibrary } from '../actions/library';
+
 
 require('../styles/Library.scss');
 
@@ -25,7 +27,7 @@ class Library extends Component {
   }
 
   componentDidMount() {
-    // Fetch the library.
+    this.props.dispatch(fetchLibrary());
   }
 
 
@@ -42,6 +44,7 @@ class Library extends Component {
     const filterBy = query.filter || 'all';
     const searchString = query.search || '';
     const collection = params.collection || null;
+
     return (
       <div className="Library">
         <LibraryHeader
