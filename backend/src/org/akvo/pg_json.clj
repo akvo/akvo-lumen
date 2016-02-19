@@ -4,11 +4,10 @@
    [camel-snake-kebab.core :refer [->kebab-case-keyword ->snake_case_string]]
    [cheshire.core :as json]
    [clj-time.coerce :as c]
-   [clojure.pprint :refer [pprint]]
    [clojure.java.jdbc :as jdbc])
-  (:import org.postgresql.util.PGobject
-           java.sql.Timestamp)
-  )
+  (:import
+   java.sql.Timestamp
+   org.postgresql.util.PGobject))
 
 ;; This is heavily "inspired" by Travis Vachon
 ;; http://hiim.tv/clojure/2014/05/15/clojure-postgres-json/
@@ -20,7 +19,8 @@
   (doto (PGobject.)
       (.setType "jsonb")
       (.setValue (json/generate-string v
-                                       {:key-fn (fn [k] (->snake_case_string k))}))))
+                                       {:key-fn (fn [k]
+                                                  (->snake_case_string k))}))))
 
 (extend-protocol jdbc/ISQLValue
   clojure.lang.IPersistentMap
@@ -41,17 +41,18 @@
       "jsonb" (json/parse-string v
                                  (fn [k]
                                    (->kebab-case-keyword k)))
-      :else   v)))
+      :else v)))
+
 
 (extend-protocol jdbc/IResultSetReadColumn
   PGobject
-  (result-set-read-column [pgobj meta idx]
+  (result-set-read-column [pgobj _ _]
     (parse-pgobj pgobj)))
 
 ;; Using timestamps, but why not as ISO?
 (extend-protocol jdbc/IResultSetReadColumn
   Timestamp
-  (result-set-read-column [this _ _]
-    (-> this
+  (result-set-read-column [ts _ _]
+    (-> ts
         c/from-sql-time
         c/to-long)))

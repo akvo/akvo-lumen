@@ -99,9 +99,12 @@
              :headers {"content-type" "text/plain"}
              :body    (str e (.getNextException e))}))))
 
+
+
     (context "/:id" [id]
 
       (GET "/" []
+
         (let [r (dataset-by-id db {:id (str->uuid id)})
               ;; Made error msg top level to show it's not implemented
               e "Could not find dataset on remote server (404)"]

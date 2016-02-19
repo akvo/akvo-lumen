@@ -10,9 +10,9 @@ function fetchDatasetRequest(id) {
 const pollInteval = 1000;
 function fetchDatasetSuccess(dataset) {
   return (dispatch) => {
-    if (dataset.state === 'PENDING') {
+    if (dataset.status === 'PENDING') {
       /* eslint-disable no-use-before-define */
-      setTimeout(() => fetchDataset(dataset.id), pollInteval);
+      setTimeout(() => dispatch(fetchDataset(dataset.id)), pollInteval);
       /* esllint-enable no-use-before-define */
     }
     dispatch({
