@@ -1,6 +1,8 @@
 # Akvo Dash
 An open-source, easy to use data mashup, analysis and publishing platform.
 
+[![Build Status](https://travis-ci.org/akvo/akvo-dash.svg?branch=client-server-api)](https://travis-ci.org/akvo/akvo-dash)
+
 ## PM
 
 - [Issues](https://github.com/akvo/akvo-dash/issues)

@@ -28,15 +28,3 @@
                       :visualisations visualisations
                       :dashboards     dashboards}
                      {:key-fn (fn [k] (->snake_case_string k))})})))))
-
-
-
-;; (let [d  {:first-key  "first value"
-;;           :second-key {:third-key "second value"
-;;                        :forth-key :third-value}}
-;;       j0 (json/generate-string d
-;;                                {:key-fn (fn [k] (->snake_case_string k))}
-;;                                )
-;;       j1 (json/parse-string j0
-;;                             (fn [k] (->kebab-case-keyword k)))
-;;       ])

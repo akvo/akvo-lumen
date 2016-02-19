@@ -11,7 +11,7 @@
    [duct.middleware.route-aliases :refer [wrap-route-aliases]]
    [meta-merge.core :refer [meta-merge]]
    [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
-   [org.akvo.pg-json]
+   [org.akvo.db-util]
    [org.akvo.dash.component
     [http :as http]]
    [org.akvo.dash.endpoint
