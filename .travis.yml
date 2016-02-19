@@ -1,0 +1,4 @@
+language: clojure
+sudo: false
+before_install: cd backend
+script: lein2 do clean, check, test
