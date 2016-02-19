@@ -6,6 +6,14 @@
    [clojure.pprint :refer [pprint]]))
 
 
+(defn rr
+  "Expremental render response. Default to 200 application/json"
+  [body & args]
+  (merge {:status  200
+          :headers {"content-type" "application/json"}
+          :body    body}
+         (first args)))
+
 ;; Deprecated
 (defn render [v]
   (try

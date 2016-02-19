@@ -27,6 +27,7 @@
                  [ring-jetty-component "0.3.0"]
                  [ring/ring-defaults "0.1.5"]
                  [ring/ring-devel "1.4.0"]
+                 [ring/ring-json "0.4.0"]
                  [ring/ring-mock "0.3.0"]
                  [traversy "0.4.0"]]
   :repl-options {:timeout 120000}

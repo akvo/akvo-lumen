@@ -11,6 +11,7 @@
    [duct.middleware.route-aliases :refer [wrap-route-aliases]]
    [meta-merge.core :refer [meta-merge]]
    [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
+   [ring.middleware.json :refer [wrap-json-response]]
    [org.akvo.db-util]
    [org.akvo.dash.component
     [http :as http]]
@@ -24,7 +25,8 @@
 (def base-config
   {:app {:middleware [[wrap-not-found :not-found]
                       [wrap-defaults :defaults]
-                      [wrap-route-aliases :aliases]]
+                      [wrap-route-aliases :aliases]
+                      wrap-json-response]
          :not-found  (io/resource "org/akvo/dash/errors/404.html")
          :defaults   (meta-merge api-defaults
                                  {:params {:multipart true}}) ;; ?
