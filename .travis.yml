@@ -1,4 +1,7 @@
-language: clojure
+language:
+  - clojure
+  - node_js
 sudo: false
-before_install: cd backend
-script: lein2 do clean, check, test
+script:
+  - cd backend && lein2 do clean, check, test
+  - cd ../client && npm install && npm test
