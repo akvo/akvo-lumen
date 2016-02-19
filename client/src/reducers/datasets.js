@@ -60,9 +60,12 @@ function saveDataset(state, dataset) {
   });
 }
 
-function saveDatasets(state) {
-  // TODO
-  return state;
+function saveDatasets(state, datasets) {
+  // TODO Should we overwrite?
+  return datasets.reduce((result, dataset) => {
+    const id = dataset.id;
+    return Object.assign({}, result, { [id]: Object.assign({}, dataset, { type: 'dataset' })})
+  }, state);
 }
 
 export default function datasets(state = initialState, action) {
