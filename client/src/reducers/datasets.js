@@ -1,4 +1,5 @@
 import * as constants from '../constants/dataset';
+import update from 'react-addons-update';
 
 export const initialState = {
   101: {
@@ -51,12 +52,22 @@ function saveDatasetSettings(state, dataset) {
   });
 }
 
+function saveDataset(state, dataset) {
+  const id = dataset.id;
+  debugger;
+  return update(state, {
+    [id]: { $set: dataset }
+  });
+}
+
 export default function datasets(state = initialState, action) {
   switch (action.type) {
     case constants.CREATE:
       return createDataset(state, action.dataset);
     case constants.SAVE_SETTINGS:
       return saveDatasetSettings(state, action.dataset);
+    case constants.FETCH_DATASET_SUCCESS:
+      return saveDataset(state, action.dataset);
     default: return state;
   }
 }
