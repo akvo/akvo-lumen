@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react';
-import DataFileFileSelection from './DataFileFileSelection';
+import DataFileDataSourceSettings from './DataFileDataSourceSettings';
 import LinkDataSourceSettings from './LinkDataSourceSettings';
 
 export default class FileSelection extends Component {
@@ -9,7 +9,7 @@ export default class FileSelection extends Component {
     switch (dataSource.kind) {
       case 'DATA_FILE':
         return (
-          <DataFileFileSelection
+          <DataFileDataSourceSettings
             dataSource={dataSource}
             onChange={onChange}/>
         );
