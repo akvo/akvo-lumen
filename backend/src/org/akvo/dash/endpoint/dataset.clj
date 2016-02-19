@@ -101,7 +101,6 @@
 
     (context "/:id" [id]
 
-
       (GET "/" []
         (let [r (dataset-by-id db {:id (str->uuid id)})
               ;; Made error msg top level to show it's not implemented
