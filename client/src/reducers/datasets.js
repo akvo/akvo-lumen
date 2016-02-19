@@ -54,9 +54,8 @@ function saveDatasetSettings(state, dataset) {
 
 function saveDataset(state, dataset) {
   const id = dataset.id;
-  debugger;
   return update(state, {
-    [id]: { $set: dataset }
+    [id]: { $set: dataset },
   });
 }
 
