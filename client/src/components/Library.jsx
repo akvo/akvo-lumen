@@ -27,7 +27,10 @@ class Library extends Component {
   }
 
   componentDidMount() {
-    this.props.dispatch(fetchLibrary());
+    // TODO better heuristics
+    if (Object.keys(this.props.datasets).length === 0) {
+      this.props.dispatch(fetchLibrary());
+    }
   }
 
 
@@ -108,6 +111,7 @@ Library.propTypes = {
   location: PropTypes.object,
   params: PropTypes.object,
   children: PropTypes.element,
+  datasets: PropTypes.object.isRequired,
 };
 
 export default connect(state => state.library)(Library);

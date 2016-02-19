@@ -28,10 +28,12 @@ function saveDataset(state, dataset) {
 }
 
 function saveDatasets(state, ds) {
-  // TODO Should we overwrite?
+  // TODO we should probably not overwrite?
   return ds.reduce((result, dataset) => {
     const id = dataset.id;
-    return Object.assign({}, result, { [id]: Object.assign({}, dataset, { type: 'dataset' }) });
+    return Object.assign({}, result, {
+      [id]: Object.assign({}, dataset, { type: 'dataset' }),
+    });
   }, state);
 }
 
