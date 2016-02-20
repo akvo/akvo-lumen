@@ -28,7 +28,7 @@
   (.mkdirs (io/file dir)))
 
 
-(defn snake-case-keys
+#_(defn snake-case-keys
   "Snake_case keys in a map.
 
   Only top level, should we walk seqs?"
@@ -37,7 +37,7 @@
         (for [[k v] m]
           [(->snake_case k) v])))
 
-(defn kebab-case-keys
+#_(defn kebab-case-keys
   "Kebab-case keys in a map.
 
   Only top level, should we walk seqs"
@@ -52,17 +52,18 @@
 ;;;
 
 (defn import-spec
-  "Using the task get a job spec."
-  [db task]
-  (kebab-case-keys (import-job db task)))
+  "Using the task get a job spec, which essentially is a datasource & the id
+  of the current import."
+  [db id]
+  (import-job db {:id id}))
 
 (defmulti download
   "Download content based on spec."
-  (fn [import-job] (:kind import-job)))
+  (fn [datasource] (-> datasource :spec :kind)))
 
-(defmethod download :default [import-job]
+(defmethod download :default [datasource]
   (throw (IllegalArgumentException.
-          (str "Can't download file of " (:kind import-job) " kind."))))
+          (str "Can't download file of " (->  datasource :spec :kind) " kind."))))
 
 (defmethod download "LINK" [{{url :url} :spec}]
   (let [resp (client/get url)
@@ -72,7 +73,6 @@
      :content-type   (get-in resp [:headers "Content-Type"])
      :digest         (sha1 data)
      :file-extension (last (str/split url #"\."))}))
-
 
 (defmulti persist-content
   "Persist file according to config."
@@ -153,21 +153,23 @@
   B1. Update the import with the already existing revision and set status to OK.
 
   D. Things fail and we mark the import as FAIL. Maybe we should add a reason."
-  [db task]
+  [db id]
   (try
-    (let [import-job (import-spec db task)
-          content    (download import-job)]
+    (let [datasource (datasource-by-import db
+                                           {:id id})
+          content    (download datasource)]
+
       ;; Branch if revision exists
       (if (not (nil? (revision-digest-by-digest db content)))
-        (update-import-with-revision db (assoc (merge content import-job)
-                                               :status "OK"))
-        (handle-new-revision db content import-job))
-      ;; Kick of scheduled periodic job?
-      )
+        (update-import-with-revision db
+                                     (assoc content
+                                            :id id
+                                            :status "OK"))
+        (handle-new-revision db content import-job)))
     (catch Exception e
       (pprint e)
       (update-import-status db
-                            {:import-id (:import-id task)
-                             :status    "FAILED"})
+                            {:id     id
+                             :status "FAILED"})
       ;; Add logging
       )))

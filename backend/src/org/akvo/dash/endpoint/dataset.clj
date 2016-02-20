@@ -54,11 +54,31 @@
     (GET "/" []
       (rr (dataset-coll db)))
 
-    ;; (GET "/" []
-    ;;   (u/fn->json-resp (all-datasets db)))
+    (POST "/" []
+      (fn [req]
+        (let [transformation {:id  (u/squuid)
+                              :fns {:fns []}}
+              datasource     {:id   (u/squuid)
+                              :kind (get-in req [:body "source" "kind"])
+                              :spec (get-in req [:body "source"])}
+              dataview       {:id             (u/squuid)
+                              :dataset_name   (get-in req [:body "name"])
+                              :datasource     (:id datasource)
+                              :transformation (:id transformation)}
+              import         {:datasource (:id datasource)}
+              res            (clojure.java.jdbc/with-db-transaction [tx db]
+                               {:t (insert-transformation tx transformation)
+                                :s (insert-datasource tx datasource)
+                                :v (insert-dataview tx dataview)
+                                :i (insert-import tx import)})]
+          (scheduling/schedule #(import/job db
+                                            (-> res :i :id)))
+          (rr {"id"     (:id dataview)
+               "name"   (:dataset_name dataview)
+               "status" "PENDING"}))))
 
     ;; POST blindly expect LINK kind
-    (POST "/" [req]
+    #_(POST "/" [req]
       (fn [req]
         (try
           (let [body              (json/parse-string (slurp (:body req))

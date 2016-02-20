@@ -1,7 +1,7 @@
 -- :name insert-dataview :! :n
 -- :Insert a single dataview
 INSERT INTO dataview (id, dataset_name, datasource, transformation)
-VALUES (:id, :dataset-name, :datasource, :transformation)
+VALUES (:id, :dataset_name, :datasource, :transformation)
 
 -- :name all-datasets :? :*
 -- :doc Get all datasets

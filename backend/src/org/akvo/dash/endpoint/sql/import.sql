@@ -15,13 +15,21 @@ ORDER BY ts;
 SELECT * FROM imports
 WHERE datasource = :datasource;
 
--- :name import-job :? :1
+-- :name datasource-by-import :? :1
 -- :doc Get import job details by import id
-SELECT imports.id AS import_id, datasources.id AS datasource_id, kind, spec
+SELECT datasources.*
 FROM imports
 LEFT JOIN datasources
 ON imports.datasource=datasources.id
-WHERE imports.id = :import-id;
+WHERE imports.id = :id;
+
+-- :name import-job :? :1
+-- :doc Get import job details by import id
+SELECT imports.spec
+FROM imports
+LEFT JOIN datasources
+ON imports.datasource=datasources.id
+WHERE imports.id = :id;
 
 -- :name insert-revision :! :n
 -- :doc Insert revision
@@ -38,7 +46,7 @@ LEFT JOIN datasources
 ON (datasources.id=imports.datasource)
 WHERE datasources.id = :datasource_id
 ORDER BY import_id DESC
-LIMIT 2; -- LIMIT 1!!!
+LIMIT 1;
 
 -- :name revision-digest-by-digest :? :1
 -- :doc Get revision by digest, used to checkfor presence. Does not pull full record.
@@ -46,16 +54,15 @@ SELECT digest
 FROM revisions
 WHERE digest = :digest
 
-
 -- :name update-import-with-revision :! :n
 -- :doc Update import with revision
 UPDATE imports
 SET revision = :digest, status = :status
-WHERE id = :import-id
+WHERE id = :id
 
 
 -- :name update-import-status :! :n
 -- :doc ...
 UPDATE imports
 SET status = :status
-WHERE id = :import-id
+WHERE id = :id

@@ -9,6 +9,7 @@
                  [clj-http "2.0.1"]
                  [clj-time "0.11.0"]
                  [com.layerware/hugsql "0.3.1"]
+                 [com.novemberain/pantomime "2.8.0"]
                  [com.stuartsierra/component "0.3.0"]
                  [compojure "1.4.0"]
                  [duct "0.5.8"]
