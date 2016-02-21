@@ -59,6 +59,12 @@ $ lein codox
 $ open doc/index.html
 ```
 
+## Tests
+
+```
+lein test
+lein test :integration
+```
 
 ## Legal
 

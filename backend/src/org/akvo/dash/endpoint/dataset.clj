@@ -56,6 +56,9 @@
 
     (POST "/" []
       (fn [req]
+        ;; This needs to be reviwed once we get file upload. Not sure how that
+        ;; will work do we have everying in one request? Does body include both
+        ;; dataset info as name and the file?
         (let [transformation {:id  (u/squuid)
                               :fns {:fns []}}
               datasource     {:id   (u/squuid)
@@ -70,62 +73,22 @@
                                {:t (insert-transformation tx transformation)
                                 :s (insert-datasource tx datasource)
                                 :v (insert-dataview tx dataview)
-                                :i (insert-import tx import)})]
-          (scheduling/schedule #(import/job db
-                                            (-> res :i :id)))
-          (rr {"id"     (:id dataview)
-               "name"   (:dataset_name dataview)
-               "status" "PENDING"}))))
+                                :i (insert-import tx import)})
+              resp           {"id"   (:id dataview)
+                              "name" (:dataset_name dataview)}]
 
-    ;; POST blindly expect LINK kind
-    #_(POST "/" [req]
-      (fn [req]
-        (try
-          (let [body              (json/parse-string (slurp (:body req))
-                                                     true)
-                dataset-name      (:name body)
-                datasource-id     (u/squuid)
-                dataview-id       (u/squuid)
-                transformation-id (u/squuid)
-                kind              (-> body :source :kind)
-                ;; How to handle / structure spec needs some thought
-                spec              {:url    (-> body :source :url)
-                                   :update "NO"}
-                r                 (clojure.java.jdbc/with-db-transaction [tx db]
-                                    {:t (insert-transformation
-                                         tx
-                                         {:id  transformation-id
-                                          :fns {:fns []}})
-                                     :s (insert-datasource
-                                         tx
-                                         {:id   datasource-id
-                                          :kind kind
-                                          :spec spec})
-                                     :v (insert-dataview
-                                         tx
-                                         {:id             dataview-id
-                                          :dataset-name   dataset-name
-                                          :datasource     datasource-id
-                                          :transformation transformation-id})
-                                     :i (insert-import
-                                         tx
-                                         {:datasource datasource-id})})]
-            (scheduling/schedule
-             #(import/job db {:import-id (-> r :i :id)}))
-
-            {:status  200
-             :headers {"content-type" "application/json"}
-             :body    (json/generate-string {:name   dataset-name
-                                             :id     dataview-id
-                                             :status "PENDING"})})
-          (catch Exception e
-            ;; We should really log (warn)
-            (pprint e)
-            (pprint (.getNextException e))
-            {:status  500 ;; ?
-             :headers {"content-type" "text/plain"}
-             :body    (str e (.getNextException e))}))))
-
+          (if (= "FILE" (:kind datasource))
+            (let [filename "org.akvo.dash.test/people.csv"
+                  data     (slurp (clojure.java.io/resource filename))]
+              (import/handle-file-upload db
+                                         {:file-name filename
+                                          :data      data}
+                                         (-> res :i :id))
+              (rr (assoc resp "status" "OK")))
+            (do
+              (scheduling/schedule #(import/job db
+                                                (-> res :i :id)))
+              (rr (assoc resp "status" "PENDING") ))))))
 
 
     (context "/:id" [id]

@@ -63,7 +63,7 @@
 
 (defmethod download :default [datasource]
   (throw (IllegalArgumentException.
-          (str "Can't download file of " (->  datasource :spec :kind) " kind."))))
+          (str "Can't download file of " (-> datasource :spec :kind) " kind."))))
 
 (defmethod download "LINK" [{{url :url} :spec}]
   (let [resp (client/get url)
@@ -73,6 +73,7 @@
      :content-type   (get-in resp [:headers "Content-Type"])
      :digest         (sha1 data)
      :file-extension (last (str/split url #"\."))}))
+
 
 (defmulti persist-content
   "Persist file according to config."
@@ -134,6 +135,15 @@
                                   :import-id (:import-id import-job)
                                   :status    "OK"})))
 
+(defn handle-file-upload
+  "This does not do anything at the moment, need to know more on how the file
+  upload works before we can implement it."
+  [db file id]
+  (pprint "@import/handle-file-upload")
+  (pprint "Not doing anything at the moment.")
+  (pprint file))
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; API
 ;;;
@@ -158,7 +168,6 @@
     (let [datasource (datasource-by-import db
                                            {:id id})
           content    (download datasource)]
-
       ;; Branch if revision exists
       (if (not (nil? (revision-digest-by-digest db content)))
         (update-import-with-revision db
@@ -170,6 +179,4 @@
       (pprint e)
       (update-import-status db
                             {:id     id
-                             :status "FAILED"})
-      ;; Add logging
-      )))
+                             :status "FAILED"}))))
