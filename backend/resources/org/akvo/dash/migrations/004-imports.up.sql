@@ -3,6 +3,7 @@ CREATE TABLE imports (
        datasource uuid references datasources(id),
        revision text references revisions(digest),
        status text DEFAULT 'PENDING',
+       note text DEFAULT '',
        ts timestamptz DEFAULT now()
 );
 --;

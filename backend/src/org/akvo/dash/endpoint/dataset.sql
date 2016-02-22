@@ -1,16 +1,24 @@
 -- :name dataset-coll :? :*
 -- :doc returns the dataset collection
-SELECT q.view_id AS id, q.dataset_name AS "name", q.status,
-       q.view_ts AS created,
-       GREATEST(q.trans_ts, q.import_ts, q.view_ts, q.meta_ts) AS modified
+SELECT q.dataset_id AS id, q.dataset_name AS "name", q.status,
+       q.dataset_ts AS created,
+       GREATEST(q.import_ts, q.dataset_ts, q.meta_ts, q.transformation_ts) AS modified
 FROM (
      SELECT DISTINCT ON (ds.id)
-     ds.id AS view_id, dsm.dataset_name, j.status, t.id AS transformation_id,
-     t.ts AS trans_ts, j.ts AS import_ts, ds.ts AS view_ts, dsm.ts AS meta_ts
+     ds.id AS dataset_id, m.dataset_name, j.status,
+     j.ts AS import_ts, ds.ts AS dataset_ts, m.ts AS meta_ts, tf.ts AS transformation_ts
      FROM dataset ds
+     LEFT JOIN (
+          SELECT DISTINCT ON (dsm.dataset)
+          dsm.id, dsm.dataset_name, dsm.dataset, dsm.ts
+          FROM dataset_meta dsm
+          ORDER BY dsm.dataset, dsm.id DESC) m ON ds.id = m.dataset
+     LEFT JOIN (
+         SELECT DISTINCT ON (t.dataset)
+         t.id, t.fns, t.dataset, t.ts
+         FROM transformations t
+         ORDER BY t.dataset, t.id DESC) tf ON ds.id = tf.dataset
      LEFT JOIN datasources s ON ds.datasource = s.id
-     LEFT JOIN transformations t ON ds.transformation = t.id -- n?
-     LEFT JOIN dataset_meta dsm ON dsm.dataset = ds.id
      LEFT JOIN (
           SELECT DISTINCT ON (i.datasource)
           i.id, i.datasource, i.revision, i.status, i.ts, r.noble
@@ -21,8 +29,8 @@ FROM (
 
 -- :name insert-transformation :! :n
 -- :doc Insert a transformation
-INSERT INTO transformations (id, fns)
-VALUES (:id, :fns::jsonb)
+INSERT INTO transformations (id, dataset, fns)
+VALUES (:id, :dataset, :fns::jsonb)
 
 -- :name insert-datasource :! :n
 -- :doc Insert a single datasource returning affected row count
@@ -32,8 +40,8 @@ values (:id, :kind, :spec::jsonb)
 
 -- :name insert-dataset :! :n
 -- :Insert a single dataset
-INSERT INTO dataset (id, datasource, transformation)
-VALUES (:id, :datasource, :transformation)
+INSERT INTO dataset (id, datasource)
+VALUES (:id, :datasource)
 
 
 -- :name insert-dataset_meta :! :n
@@ -51,15 +59,25 @@ RETURNING id;
 
 -- :name dataset-by-id :? :1
 -- :doc Get dataset by id
-SELECT DISTINCT ON (v.id)
-v.id AS id, v.dataset_name AS name, s.id AS source_id, i.id AS import_id, i.noble, t.id AS tranformation_id, t.fns, i.digest, i.status
-FROM dataview v
-LEFT JOIN datasources s ON v.datasource = s.id
+SELECT DISTINCT ON (ds.id)
+ds.id AS id, s.id AS datasource_id, m.dataset_name AS name,
+i.status, i.digest, i.noble, tf.id AS transformation_id, tf.fns AS transformations
+FROM dataset ds
 LEFT JOIN (
-SELECT DISTINCT ON (i.datasource)
-i.id, i.datasource, i.status, i.revision, r.noble, r.digest
-FROM imports i LEFT JOIN revisions r ON i.revision = r.digest
-ORDER BY i.datasource, i.id DESC) i ON s.id = i.datasource
-LEFT JOIN transformations t ON t.id = v.transformation
-WHERE v.id = :id
-ORDER BY v.id DESC;
+     SELECT DISTINCT ON (dsm.dataset)
+     dsm.id, dsm.dataset_name, dsm.dataset
+     FROM dataset_meta dsm
+     ORDER BY dsm.dataset, dsm.id DESC) m ON ds.id = m.dataset
+LEFT JOIN (
+     SELECT DISTINCT ON (t.dataset)
+     t.id, t.fns, t.dataset
+     FROM transformations t
+     ORDER BY t.dataset, t.id DESC) tf ON ds.id = tf.dataset
+LEFT JOIN datasources s ON ds.datasource = s.id
+LEFT JOIN (
+     SELECT DISTINCT ON (i.datasource)
+     i.id, i.datasource, i.status, i.revision, r.noble, r.digest
+     FROM imports i LEFT JOIN revisions r ON i.revision = r.digest
+     ORDER BY i.datasource, i.id DESC) i ON s.id = i.datasource
+-- transformations
+WHERE ds.id = :id;

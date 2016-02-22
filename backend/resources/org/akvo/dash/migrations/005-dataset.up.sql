@@ -1,10 +1,7 @@
 CREATE TABLE dataset (
-id uuid PRIMARY KEY,
--- dataset_name text NOT NULL,
-datasource uuid references datasources(id) NOT NULL,
-transformation uuid references transformations(id) NOT NULL,
--- enabled BOOLEAN NOT NULL DEFAULT TRUE,
-ts timestamptz DEFAULT now()
+       id uuid PRIMARY KEY,
+       datasource uuid references datasources(id) NOT NULL,
+       ts timestamptz DEFAULT now()
 );
 --;
 
@@ -20,5 +17,6 @@ CREATE TABLE dataset_meta (
        ts timestamptz DEFAULT now()
 );
 --;
+
 GRANT ALL ON dataset_meta to dash;
 --;

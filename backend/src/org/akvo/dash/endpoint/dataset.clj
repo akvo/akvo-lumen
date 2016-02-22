@@ -13,29 +13,15 @@
    [ring.util.io :refer [string-input-stream]]))
 
 
+(hugsql/def-db-fns "org/akvo/dash/endpoint/dataset.sql")
+
+
 (defn str->uuid ;; unnecessary?
   "Converts a string to a UUID.
   This will thrown on invalid uuid!"
   [s]
   (java.util.UUID/fromString s))
 
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; HUGSQL fns
-
-(hugsql/def-db-fns "org/akvo/dash/endpoint/dataset.sql")
-
-
-;; (hugsql/def-db-fns "org/akvo/dash/endpoint/library.sql")
-
-;; Organise!
-;; (hugsql/def-db-fns "org/akvo/dash/endpoint/sql/datasource.sql")
-;; (hugsql/def-db-fns "org/akvo/dash/endpoint/sql/import.sql")
-;; (hugsql/def-db-fns "org/akvo/dash/endpoint/sql/dataview.sql")
-;; (hugsql/def-db-fns "org/akvo/dash/endpoint/sql/transformation.sql")
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; API
 
 (defn endpoint
   "/datasets
@@ -63,24 +49,24 @@
         ;; This needs to be reviwed once we get file upload. Not sure how that
         ;; will work do we have everying in one request? Does body include both
         ;; dataset info as name and the file?
-        (let [transformation {:id  (u/squuid)
-                              :fns {:fns []}}
-              datasource     {:id   (u/squuid)
+        (let [datasource     {:id   (u/squuid)
                               :kind (get-in req [:body "source" "kind"])
                               :spec (get-in req [:body "source"])}
               dataset        {:id             (u/squuid)
                               :dataset_name   (get-in req [:body "name"])
-                              :datasource     (:id datasource)
-                              :transformation (:id transformation)}
+                              :datasource     (:id datasource)}
               dataset_meta   {:id           (u/squuid)
                               :dataset_name (get-in req [:body "name"])
                               :dataset      (:id dataset)}
               import         {:datasource (:id datasource)}
+              transformation {:id      (u/squuid)
+                              :dataset (:id dataset)
+                              :fns     {:fns []}}
               res            (clojure.java.jdbc/with-db-transaction [tx db]
-                               {:t   (insert-transformation tx transformation)
-                                :s   (insert-datasource tx datasource)
+                               {:s   (insert-datasource tx datasource)
                                 :ds  (insert-dataset tx dataset)
                                 :dsm (insert-dataset_meta tx dataset_meta)
+                                :t   (insert-transformation tx transformation)
                                 :i   (insert-import tx import)})
               resp           {"id"   (:id dataset)
                               "name" (:dataset_name dataset_meta)}]
