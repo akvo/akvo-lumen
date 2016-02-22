@@ -8,9 +8,8 @@ before_install:
   - npm config set spin false
   - npm install
   - cd ../backend
-  - cp profiles.clj.template profiles.clj
 script:
-  - lein2 do clean, check, test :all
+  - lein2 do clean, check, test
   - cd ../client
   - npm run lint
   - npm test
