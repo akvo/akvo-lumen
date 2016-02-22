@@ -1,13 +1,13 @@
-(ns org.akvo.dash.integration-test
+(ns org.akvo.dash.functional-test
   (:require
-   [org.akvo.dash.fixtures :refer [integration-fixture]]
+   [org.akvo.dash.fixtures :refer [system-fixture]]
    [clj-http.client :as client]
    [clojure.test :refer :all]))
 
 
-(use-fixtures :once integration-fixture)
+(use-fixtures :once system-fixture)
 
-(deftest ^:integration ping
+(deftest ^:functional ping
 
   (testing "Root endpoint - status code"
     (let [resp (client/get "http://localhost:3000/api")]
@@ -22,10 +22,8 @@
       (is (= 200 (:status resp))))))
 
 
-(deftest ^:wip ping-wip
+#_(deftest ^:wip ping-wip
 
   (testing "Dataset endpoint - status code"
     (let [resp (client/get "http://localhost:3000/api/datasets/does-not-exists")]
-      (is (= 404 (:status resp)))))
-
-  )
+      (is (= 404 (:status resp))))))

@@ -43,11 +43,9 @@
   :target-path "target/%s/"
   :aliases {"gen"   ["generate"]
             "setup" ["do" ["generate" "locals"]]}
-  :test-selectors {:default (and (complement :integration)
-                                 (complement :wip))
-                   :wip :wip
-                   :all (and (constantly true)
-                             (complement :wip))}
+  :test-selectors {:default (and (constantly true)
+                                 (complement :functional))
+                   :all (constantly true)}
   :profiles
   {:dev  [:project/dev  :profiles/dev]
    :test [:project/test :profiles/test]

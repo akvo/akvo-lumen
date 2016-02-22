@@ -65,16 +65,11 @@ $ open doc/index.html
 
 ## Tests
 
-Tests can be augmented with ^:integration or ^:wip. Where the first is
-starting the full system for integration test. We dont' want to do this for
-default unit tests. The "wip" (work in progress) tag let's us build test and
-have them in a broken state and not have to comment them out before every
-commit / push. This to keep CI happy.
+Tests can be augmented with ^:functional and those will not be runned by default but only if the :all directive is issued.
 
 ```
-lein test       (default, don't run integration or wip tests)
-lein test :all  (integration but not wip)
-lein test :wip  (test that is worked in progress)
+lein test  
+lein test :all
 ```
 
 ## Legal

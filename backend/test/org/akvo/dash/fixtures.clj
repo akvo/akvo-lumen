@@ -4,7 +4,7 @@
    [reloaded.repl :refer [system stop go]]))
 
 
-(defn integration-fixture
+(defn system-fixture
   "Starts the system and migrates, no setup or tear down."
   [f]
   (try
