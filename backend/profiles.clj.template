@@ -1,0 +1,8 @@
+;; Local profile overrides
+
+{:profiles/dev
+ {:env
+  {:database-url "jdbc:postgresql://localhost/dash?user=dash&password=password"}}
+ :profiles/test
+ {:env
+  {:database-url "jdbc:postgresql://localhost/dash_test?user=dash&password=password"}}}
