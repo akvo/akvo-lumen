@@ -1,6 +1,6 @@
 -- :name dataset-coll :? :*
 -- :doc returns the dataset collection
-SELECT ds.view_id AS id, ds.dataset_name AS name, ds.status,
+SELECT ds.view_id AS id, ds.dataset_name as "name", ds.status,
 ds.view_ts AS created,
 GREATEST(ds.trans_ts, ds.import_ts, ds.view_ts) AS modified
 FROM (

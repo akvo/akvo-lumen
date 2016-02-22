@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import DatasetHeader from '../components/dataset/DatasetHeader';
 import DatasetTable from '../components/dataset/DatasetTable';
 import { showModal } from '../actions/activeModal';
+import { fetchDataset } from '../actions/dataset';
 
 require('../styles/Dataset.scss');
 
@@ -14,7 +15,8 @@ class Dataset extends Component {
   }
 
   componentDidMount() {
-    // Fetch data if not available
+    const { dispatch, dataset } = this.props;
+    dispatch(fetchDataset(dataset.id));
   }
 
   handleShowDatasetSettings() {
@@ -41,7 +43,7 @@ class Dataset extends Component {
 
 Dataset.propTypes = {
   dataset: PropTypes.shape({
-    id: PropTypes.number.isRequired,
+    id: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,
     columns: PropTypes.array,
   }),

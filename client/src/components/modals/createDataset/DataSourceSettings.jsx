@@ -1,15 +1,15 @@
 import React, { Component, PropTypes } from 'react';
-import DataFileFileSelection from './DataFileFileSelection';
+import DataFileDataSourceSettings from './DataFileDataSourceSettings';
 import LinkDataSourceSettings from './LinkDataSourceSettings';
 
-export default class FileSelection extends Component {
+export default class DataSourceSettings extends Component {
 
   renderFileSelection() {
     const { dataSource, onChange } = this.props;
     switch (dataSource.kind) {
       case 'DATA_FILE':
         return (
-          <DataFileFileSelection
+          <DataFileDataSourceSettings
             dataSource={dataSource}
             onChange={onChange}/>
         );
@@ -35,7 +35,7 @@ export default class FileSelection extends Component {
   }
 }
 
-FileSelection.propTypes = {
+DataSourceSettings.propTypes = {
   dataSource: PropTypes.shape({
     kind: PropTypes.oneOf(['DATA_FILE', 'LINK']).isRequired,
     // Other props are data source specific.

@@ -3,7 +3,7 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import Modal from 'react-modal';
 import SourceSelection from './createDataset/SourceSelection';
-import FileSelection from './createDataset/FileSelection';
+import DataSourceSettings from './createDataset/DataSourceSettings';
 import Settings from '../dataset/Settings';
 import * as actionCreators from '../../actions/dataset';
 
@@ -28,7 +28,7 @@ class CreateDataset extends Component {
       );
       case 'define-data-source':
         return (
-          <FileSelection
+          <DataSourceSettings
             dataSource={dataset.source}
             onChange={this.props.defineDataSource}
           />

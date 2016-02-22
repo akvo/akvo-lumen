@@ -4,6 +4,8 @@ import { routeActions } from 'react-router-redux';
 import LibraryHeader from './library/LibraryHeader';
 import LibraryListing from './library/LibraryListing';
 import { showModal } from '../actions/activeModal';
+import { fetchLibrary } from '../actions/library';
+
 
 require('../styles/Library.scss');
 
@@ -25,7 +27,10 @@ class Library extends Component {
   }
 
   componentDidMount() {
-    // Fetch the library.
+    // TODO better heuristics
+    if (Object.keys(this.props.datasets).length === 0) {
+      this.props.dispatch(fetchLibrary());
+    }
   }
 
 
@@ -42,6 +47,7 @@ class Library extends Component {
     const filterBy = query.filter || 'all';
     const searchString = query.search || '';
     const collection = params.collection || null;
+
     return (
       <div className="Library">
         <LibraryHeader
@@ -105,6 +111,7 @@ Library.propTypes = {
   location: PropTypes.object,
   params: PropTypes.object,
   children: PropTypes.element,
+  datasets: PropTypes.object.isRequired,
 };
 
 export default connect(state => state.library)(Library);

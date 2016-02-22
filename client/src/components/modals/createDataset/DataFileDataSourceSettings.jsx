@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import * as csv from '../../../parsers/csv';
 
-export default class DataFileFileSelection extends Component {
+export default class DataFileDataSourceSettings extends Component {
   constructor() {
     super();
     this.handleDragEnter = this.handleDragEnter.bind(this);
@@ -61,7 +61,7 @@ export default class DataFileFileSelection extends Component {
   }
 }
 
-DataFileFileSelection.propTypes = {
+DataFileDataSourceSettings.propTypes = {
   dataset: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,
 };
