@@ -2,6 +2,7 @@
   (:require
    [clojure.data :refer [diff]]
    [clojure.data.csv :as csv]
+   [clojure.pprint :refer [pprint]]
    [clojure.java.io :as io]
    [clojure.test :refer :all]
    [org.akvo.dash.transformation :as tf]))
@@ -12,48 +13,43 @@
   (csv/read-csv (slurp (io/resource "org/akvo/dash/test/people.csv"))))
 
 
-(deftest ^:integration parse-csv-with-header-test
+(deftest parse-csv-with-header-test
   (testing "CSV import."
     (is (->> (diff (tf/parse-csv-with-headers people)
                    [{:title  "Name"
                      :type   "STRING"
-                     :values ["Bob" "Stella" "Sam" "Jane"]}
-                    {:title  "Age"
-                     :type   "STRING"
-                     :values ["44" "53" "20" "27"]}
-                    {:title  "Sex"
-                     :type   "STRING"
-                     :values ["M" "F" "M" "F"]}
+                     :values ["Paul" "Stella" "Samuel" "Jane" "Sven"]}
+                    {:title "Age" :type "STRING" :values ["98" "23" "32" "28" "55"]}
+                    {:title "Sex" :type "STRING" :values ["M" "F" "M" "F" "M"]}
                     {:title  "Location"
-                     :type   "STRING"
-                     :values ["Scottland" "Australia" "Canada" "France"]}])
+                     :type   "STRING" ,
+                     :values ["Scottland" "Australia" "Canada" "France" "Sweden"]}])
              (map nil?)
              butlast
              (every? true?)))))
 
 
-(deftest ^:integration parse-csv-without-header-test
-  (testing "CSV import of file without header."
-
-    (is (->> (diff (tf/parse-csv-without-headers (rest people))
-                   [{:title  "1"
-                     :type   "STRING"
-                     :values ["Bob" "Stella" "Sam" "Jane"]}
-                    {:title  "2"
-                     :type   "STRING"
-                     :values ["44" "53" "20" "27"]}
-                    {:title  "3"
-                     :type   "STRING"
-                     :values ["M" "F" "M" "F"]}
-                    {:title  "4"
-                     :type   "STRING"
-                     :values ["Scottland" "Australia" "Canada" "France"]}])
+(deftest parse-csv-without-header-test
+  (testing "CSV import."
+    (is (->> (diff (tf/parse-csv-without-headers people)
+                   [{:title  "1"      ,
+                     :type   "STRING" ,
+                     :values ["Name" "Paul" "Stella" "Samuel" "Jane" "Sven"]}
+                    {:title  "2"      ,
+                     :type   "STRING" ,
+                     :values ["Age" "98" "23" "32" "28" "55"]}
+                    {:title "3" , :type "STRING" , :values ["Sex" "M" "F" "M" "F" "M"]}
+                    {:title "4",
+                     :type "STRING",
+                     :values
+                     ["Location" "Scottland" "Australia" "Canada" "France" "Sweden"]}]
+                   )
              (map nil?)
              butlast
              (every? true?)))))
 
 
-(deftest ^:wip update-column-header-test
+(deftest update-column-header-test
   (let [data {:columns (tf/parse-csv-without-headers (rest people))}]
 
     (testing "Update column header"
@@ -66,7 +62,7 @@
                    :title))))))
 
 
-(deftest ^:integration update-column-type-description-test
+(deftest update-column-type-description-test
   (let [data {:columns (tf/parse-csv-with-headers people)}]
 
     (testing "Change column type to NUMBER"
@@ -79,7 +75,7 @@
                   :type))))))
 
 
-(deftest ^:integration cast-column-values-test
+(deftest cast-column-values-test
   (let [data {:columns (tf/parse-csv-with-headers people)}]
 
     (testing "Change column values to number"

@@ -9,7 +9,7 @@ before_install:
   - npm install
   - cd ../backend
 script:
-  - lein2 do clean, check, test
+  - lein2 do clean, check, test :all
   - cd ../client
   - npm run lint
   - npm test

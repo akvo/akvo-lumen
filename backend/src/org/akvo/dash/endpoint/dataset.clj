@@ -14,7 +14,8 @@
 
 
 (defn str->uuid ;; unnecessary?
-  "Converts a string to a UUID."
+  "Converts a string to a UUID.
+  This will thrown on invalid uuid!"
   [s]
   (java.util.UUID/fromString s))
 

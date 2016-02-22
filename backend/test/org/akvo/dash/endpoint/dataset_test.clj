@@ -7,7 +7,6 @@
 (def handler
   (dataset/endpoint {}))
 
-
 (deftest handler-test
   (testing "logic"
     (is (= 1 1))))
