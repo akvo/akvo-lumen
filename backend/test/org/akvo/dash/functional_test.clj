@@ -25,5 +25,5 @@
 #_(deftest ^:wip ping-wip
 
   (testing "Dataset endpoint - status code"
-    (let [resp (client/get "http://localhost:3000/api/datasets/does-not-exists")]
+    (let [resp (client/get "http://locwalhost:3000/api/datasets/does-not-exists")]
       (is (= 404 (:status resp))))))

@@ -18,44 +18,17 @@
    [org.akvo.dash.transformation :as t]))
 
 
-(hugsql/def-db-fns "org/akvo/dash/endpoint/sql/import.sql")
+(hugsql/def-db-fns "org/akvo/dash/import.sql")
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Util
-;;;
+
 
 (defn ensure-directory [dir]
   (.mkdirs (io/file dir)))
 
 
-#_(defn snake-case-keys
-  "Snake_case keys in a map.
-
-  Only top level, should we walk seqs?"
-  [m]
-  (into {}
-        (for [[k v] m]
-          [(->snake_case k) v])))
-
-#_(defn kebab-case-keys
-  "Kebab-case keys in a map.
-
-  Only top level, should we walk seqs"
-  [m]
-  (into {}
-        (for [[k v] m]
-          [(->kebab-case k) v])))
-
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Import job
+;;; Download
 ;;;
-
-(defn import-spec
-  "Using the task get a job spec, which essentially is a datasource & the id
-  of the current import."
-  [db id]
-  (import-job db {:id id}))
 
 (defmulti download
   "Download content based on spec."
@@ -74,6 +47,10 @@
      :digest         (sha1 data)
      :file-extension (last (str/split url #"\."))}))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Persist
+;;;
 
 (defmulti persist-content
   "Persist file according to config."
@@ -117,7 +94,7 @@
   2. perist noble
   3. insert new revision
   4. update import"
-  [db content import-job]
+  [db content id]
   (let [config {:kind "DISK" :path "/tmp/akvo/dash"}
         p      (persist-content config :pristine content)
         n      (persist-content config
@@ -131,9 +108,9 @@
                       :noble        n
                       :pristine     p})
     (update-import-with-revision db
-                                 {:digest    (:digest content)
-                                  :import-id (:import-id import-job)
-                                  :status    "OK"})))
+                                 {:digest (:digest content)
+                                  :id     id
+                                  :status "OK"})))
 
 (defn handle-file-upload
   "This does not do anything at the moment, need to know more on how the file
@@ -174,7 +151,7 @@
                                      (assoc content
                                             :id id
                                             :status "OK"))
-        (handle-new-revision db content import-job)))
+        (handle-new-revision db content id)))
     (catch Exception e
       (pprint e)
       (update-import-status db
