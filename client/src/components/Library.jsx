@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
-import { routeActions } from 'react-router-redux';
+import { push } from 'react-router-redux';
 import LibraryHeader from './library/LibraryHeader';
 import LibraryListing from './library/LibraryListing';
 import { showModal } from '../actions/activeModal';
@@ -16,7 +16,7 @@ function mergeQuery(location, query) {
 }
 
 function updateQueryAction(location, query) {
-  return routeActions.push(mergeQuery(location, query));
+  return push(mergeQuery(location, query));
 }
 
 class Library extends Component {
@@ -35,7 +35,7 @@ class Library extends Component {
 
 
   handleSelectEntity(entityType, id) {
-    this.props.dispatch(routeActions.push(`/${entityType}/${id}`));
+    this.props.dispatch(push(`/${entityType}/${id}`));
   }
 
   render() {
@@ -88,9 +88,9 @@ class Library extends Component {
               // Data set creation is handled in a modal
               dispatch(showModal('create-dataset'));
             } else {
-              dispatch(routeActions.push(`/${type}/create`));
+              dispatch(push(`/${type}/create`));
             }
-          }}/>
+          }} />
         <LibraryListing
           displayMode={displayMode}
           sortOrder={sortOrder}
@@ -99,7 +99,7 @@ class Library extends Component {
           searchString={searchString}
           collection={collection}
           library={this.props}
-          onSelectEntity={this.handleSelectEntity}/>
+          onSelectEntity={this.handleSelectEntity} />
         {this.props.children}
       </div>
     );

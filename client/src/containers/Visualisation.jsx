@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import VisualisationHeader from '../components/visualisation/VisualisationHeader';
 import VisualisationEditor from '../components/visualisation/VisualisationEditor';
 import { createVisualisation, saveVisualisationChanges } from '../actions/visualisation';
-import { routeActions } from 'react-router-redux';
+import { push } from 'react-router-redux';
 
 require('../styles/Visualisation.scss');
 
@@ -55,7 +55,7 @@ class Visualisation extends Component {
     } else {
       this.props.dispatch(createVisualisation(this.state));
     }
-    this.props.dispatch(routeActions.push('/library?filter=visualisations&sort=created'));
+    this.props.dispatch(push('/library?filter=visualisations&sort=created'));
   }
 
   render() {

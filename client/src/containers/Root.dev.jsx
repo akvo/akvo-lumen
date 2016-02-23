@@ -5,11 +5,12 @@ import DevTools from './DevTools';
 
 export default class Root extends Component {
   render() {
-    const { store } = this.props;
+    const { store, history } = this.props;
+
     return (
       <Provider store={store}>
         <div>
-          <App />
+          <App history={history} />
           <DevTools />
         </div>
       </Provider>
@@ -18,5 +19,6 @@ export default class Root extends Component {
 }
 
 Root.propTypes = {
-  store: PropTypes.object,
+  store: PropTypes.object.isRequired,
+  history: PropTypes.object.isRequired,
 };

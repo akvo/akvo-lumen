@@ -6,8 +6,8 @@ require('../../styles/LibraryListing.scss');
 const mapEntityObjectsToArray = (...objects) => {
   // Convert one or more entity objects into an array of entities
   const output = [];
-  objects.map((entityObject) => {
-    Object.keys(entityObject).map(key => {
+  objects.forEach((entityObject) => {
+    Object.keys(entityObject).forEach(key => {
       const entity = entityObject[key];
       output.push(entity);
     });
@@ -28,7 +28,7 @@ const filterEntities = (library, filterBy, searchString) => {
     searchedEntities = unsearchedEntities;
   } else {
     // Basic, proof-of-concept string matching for search function
-    unsearchedEntities.map(entity => {
+    unsearchedEntities.forEach(entity => {
       if (entity.name.toLowerCase().indexOf(searchString.toLowerCase()) > -1) {
         searchedEntities.push(entity);
       }
@@ -42,14 +42,14 @@ const groupEntities = (entities, sortOrder) => {
   const listGroups = {};
 
   if (sortOrder === 'name') {
-    entities.map(entity => {
+    entities.forEach(entity => {
       const key = entity.name.toLowerCase().charAt(0);
 
       listGroups[key] = listGroups[key] || { listGroupName: key, entities: [] };
       listGroups[key].entities.push(entity);
     });
   } else if (sortOrder === 'created' || sortOrder === 'last_modified') {
-    entities.map(entity => {
+    entities.forEach(entity => {
       let entityDate = sortOrder === 'created' ? entity.created : entity.modified || entity.created;
       entityDate = new Date(parseInt(entityDate, 10));
 
@@ -71,7 +71,7 @@ const sortGroups = (listGroups, sortOrder, isReverseSort) => {
   const listGroupArray = [];
 
   // Convert the listGroup objects into an unsorted listGroup array
-  Object.keys(listGroups).map(key => {
+  Object.keys(listGroups).forEach(key => {
     listGroupArray.push(listGroups[key]);
   });
 

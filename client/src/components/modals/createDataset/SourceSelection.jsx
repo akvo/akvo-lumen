@@ -58,7 +58,7 @@ export default class SourceSelection extends Component {
           checked={source.kind === this.props.dataSourceKind}
           onChange={evt => {
             this.props.onChangeDataSource(defaultDataSources[evt.target.value]);
-          }}/>
+          }} />
         {source.label}
       </div>
     ));
