@@ -65,5 +65,37 @@
 
       (GET "/" []
         (fn [req]
-          (rr (visualisation-by-id db
-                                   {:id (str->uuid id)})))))))
+          (try
+            (let [res (visualisation-by-id db
+                                           {:id (str->uuid id)}) ]
+              (if (nil? res)
+                (rr {:error "Not Found"} {:status 404})
+                (rr res )))
+            (catch Exception e
+              (prn e)
+              (prn (.getNextException e))
+              (rr {:error (.getNextException e)} {:status 500})))))
+
+      (PUT "/" []
+        (fn [req]
+          (insert-visualisation-data db
+                                     {:id            (squuid)
+                                      :visualisation (str->uuid id)
+                                      :name          (get-in req [:body "name"])
+                                      :spec          (get-in req [:body "spec"])})
+          (rr {:status "OK"} {:status 200})))
+
+      (DELETE "/" []
+        (fn [req]
+          (try
+            (delete-visualisation db
+                                  {:id            (squuid)
+                                   :visualisation (str->uuid id)
+                                   :name          ""
+                                   :spec          {}
+                                   :enabled       false})
+            (rr {:status "OK"})
+            (catch Exception e
+              (prn e)
+              (prn (.getNextException e))
+              (rr {"error" (.getNextException e)} {:status 500}))))))))
