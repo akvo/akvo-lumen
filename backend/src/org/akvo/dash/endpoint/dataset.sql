@@ -32,6 +32,7 @@ FROM (
 INSERT INTO transformations (id, dataset, fns)
 VALUES (:id, :dataset, :fns::jsonb)
 
+
 -- :name insert-datasource :! :n
 -- :doc Insert a single datasource returning affected row count
 insert into datasources (id, kind, spec)
