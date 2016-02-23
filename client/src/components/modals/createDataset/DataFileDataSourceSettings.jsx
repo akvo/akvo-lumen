@@ -27,17 +27,17 @@ export default class DataFileDataSourceSettings extends Component {
 
   uploadFile(file) {
     const upload = new tus.Upload(file, {
-      endpoint: "http://localhost:3030/api/files",
-      onError: function(error) {
-        console.log("Failed because: " + error)
+      endpoint: 'http://localhost:3030/api/files',
+      onError(error) {
+        console.log(`Failed because: ${error}`);
       },
-      onProgress: function(bytesUploaded, bytesTotal) {
-        const percentage = (bytesUploaded / bytesTotal * 100).toFixed(2)
-        console.log(bytesUploaded, bytesTotal, percentage + "%")
+      onProgress(bytesUploaded, bytesTotal) {
+        const percentage = (bytesUploaded / bytesTotal * 100).toFixed(2);
+        console.log(bytesUploaded, bytesTotal, `${percentage}%`);
       },
-      onSuccess: function() {
-        console.log("Download %s from %s", upload.file.name, upload.url)
-      }
+      onSuccess() {
+        console.log(`Download ${upload.file.name} from ${upload.url}`);
+      },
     });
     upload.start();
   }
