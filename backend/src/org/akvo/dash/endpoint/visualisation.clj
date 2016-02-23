@@ -7,6 +7,11 @@
 
 (hugsql/def-db-fns "org/akvo/dash/endpoint/visualisation.sql")
 
+(defn str->uuid ;; unnecessary?
+  "Converts a string to a UUID.
+  This will thrown on invalid uuid!"
+  [s]
+  (java.util.UUID/fromString s))
 
 (defn endpoint
   "/visualisations
@@ -54,4 +59,11 @@
                  :spec (:spec visualidation-data)}))
           (catch Exception e
             (prn e)
-            (prn  (.getNextException e))))))))
+            (prn  (.getNextException e))))))
+
+    (context "/:id" [id]
+
+      (GET "/" []
+        (fn [req]
+          (rr (visualisation-by-id db
+                                   {:id (str->uuid id)})))))))
