@@ -32,9 +32,9 @@ class Dataset extends Component {
         <DatasetHeader
           onShowDatasetSettings={this.handleShowDatasetSettings}
           name={dataset.name}
-          id={dataset.id}/>
+          id={dataset.id} />
         {dataset.columns ?
-          <DatasetTable columns={dataset.columns}/> :
+          <DatasetTable columns={dataset.columns} /> :
           <div>loading...</div>}
       </div>
     );

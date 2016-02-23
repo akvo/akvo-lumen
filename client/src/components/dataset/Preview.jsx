@@ -26,9 +26,9 @@ export default class Preview extends Component {
   render() {
     const cols = this.props.columns.map((column) => (
       <Column
-        header={<PreviewHeader title={column.title}/>}
+        header={<PreviewHeader title={column.title} />}
         cell={props => <Cell>{column.values[props.rowIndex]}</Cell>}
-        width={200}/>
+        width={200} />
     ));
 
     return (

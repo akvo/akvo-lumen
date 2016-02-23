@@ -7,8 +7,9 @@ import PieConfigMenu from './configMenu/PieConfigMenu';
 require('../../styles/VisualisationConfig.scss');
 
 const getConfigMenu = (chartType, componentProps) => {
+  let configMenu;
   if (chartType === 'bar' || chartType === 'line' || chartType === 'area') {
-    return (
+    configMenu = (
       <OneAxisConfigMenu
         visualisation={componentProps.visualisation}
         datasets={componentProps.datasets}
@@ -20,9 +21,8 @@ const getConfigMenu = (chartType, componentProps) => {
         onChangeDatasetLabelY={componentProps.onChangeDatasetLabelY}
       />
     );
-  }
-  if (chartType === 'pie' || chartType === 'donut') {
-    return (
+  } else if (chartType === 'pie' || chartType === 'donut') {
+    configMenu = (
       <PieConfigMenu
         visualisation={componentProps.visualisation}
         datasets={componentProps.datasets}
@@ -31,9 +31,8 @@ const getConfigMenu = (chartType, componentProps) => {
         onChangeDatasetColumnX={componentProps.onChangeDatasetColumnX}
       />
     );
-  }
-  if (chartType === 'scatter') {
-    return (
+  } else if (chartType === 'scatter') {
+    configMenu = (
       <TwoAxisConfigMenu
         visualisation={componentProps.visualisation}
         datasets={componentProps.datasets}
@@ -47,6 +46,7 @@ const getConfigMenu = (chartType, componentProps) => {
       />
     );
   }
+  return configMenu;
 };
 
 export default class VisualisationConfig extends Component {

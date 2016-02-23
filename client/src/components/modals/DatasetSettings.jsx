@@ -47,7 +47,7 @@ class DatasetSettings extends Component {
             <Settings
               dataset={dataset}
               showPreview={false}
-              onChangeName={this.handleChangeName}/>
+              onChangeName={this.handleChangeName} />
             <div className="controls">
               <button
                 className="cancel clickable negative"

@@ -47,7 +47,7 @@ export default class CreateCollection extends Component {
                 id="nameInput"
                 onChange={this.handleInputChange}
                 type="text"
-                placeholder="Collection name"/>
+                placeholder="Collection name" />
             </div>
             <div className="controls">
               <button

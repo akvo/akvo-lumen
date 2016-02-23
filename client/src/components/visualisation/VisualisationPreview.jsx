@@ -10,8 +10,6 @@ require('../../styles/VisualisationPreview.scss');
 const getChartPreview = (visualisation, datasets) => {
   let output;
   let datasetColumn;
-  let datasetColumnX;
-  let datasetColumnY;
 
   switch (visualisation.visualisationType) {
     case 'bar':
@@ -60,10 +58,7 @@ const getChartPreview = (visualisation, datasets) => {
       return output;
 
     case 'scatter':
-      datasetColumnX = visualisation.datasetColumnX;
-      datasetColumnY = visualisation.datasetColumnY;
-
-      if (datasetColumnX && datasetColumnY) {
+      if (visualisation.datasetColumnX && visualisation.datasetColumnY) {
         output = <DashScatterChart visualisation={visualisation} datasets={datasets} />;
       } else {
         output = <div>Scatter chart image placeholder</div>;

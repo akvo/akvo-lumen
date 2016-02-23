@@ -1,5 +1,7 @@
 import React from 'react';
 import { render } from 'react-dom';
+import { browserHistory } from 'react-router';
+import { syncHistoryWithStore } from 'react-router-redux';
 import Root from './containers/Root';
 import configureStore from './store/configureStore';
 import keycloak from './auth';
@@ -13,8 +15,9 @@ function initAuthenticated(profile) {
   };
 
   const store = configureStore(initialState);
+  const history = syncHistoryWithStore(browserHistory, store);
   const rootElement = document.querySelector('#root');
-  render(<Root store={store}/>, rootElement);
+  render(<Root store={store} history={history} />, rootElement);
 }
 
 function initNotAuthenticated() {

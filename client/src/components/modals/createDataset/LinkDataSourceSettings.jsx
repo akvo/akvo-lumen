@@ -28,7 +28,7 @@ export default class LinkDataSourceSettings extends Component {
           type="text"
           placeholder="Paste url here"
           defaultValue={this.props.dataSource.url}
-          onChange={this.handleLink}/>
+          onChange={this.handleLink} />
       </div>
     );
   }

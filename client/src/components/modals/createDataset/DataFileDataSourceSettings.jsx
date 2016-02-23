@@ -55,7 +55,7 @@ export default class DataFileDataSourceSettings extends Component {
           type="file"
           onChange={() => {
             this.uploadFile(this.refs.fileInput.files[0]);
-          }}/>
+          }} />
       </div>
     );
   }

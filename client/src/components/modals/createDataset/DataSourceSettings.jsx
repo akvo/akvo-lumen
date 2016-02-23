@@ -11,13 +11,13 @@ export default class DataSourceSettings extends Component {
         return (
           <DataFileDataSourceSettings
             dataSource={dataSource}
-            onChange={onChange}/>
+            onChange={onChange} />
         );
       case 'LINK':
         return (
           <LinkDataSourceSettings
             dataSource={dataSource}
-            onChange={onChange}/>
+            onChange={onChange} />
         );
       default:
         throw new Error(`Data source definition for ${dataSource.type} is not yet implemented`);

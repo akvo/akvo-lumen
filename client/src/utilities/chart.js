@@ -16,7 +16,7 @@ export function getChartData(visualisation, datasets) {
     case 'line':
     case 'area':
 
-      dataX.map((entry, index) => {
+      dataX.forEach((entry, index) => {
         let key = index;
 
         if (nameDataX && visualisation.visualisationType === 'bar') {
@@ -38,7 +38,7 @@ export function getChartData(visualisation, datasets) {
     case 'pie':
     case 'donut':
 
-      dataX.map((entry, index) => {
+      dataX.forEach((entry, index) => {
         const key = nameDataX ? nameDataX.values[index] : index;
 
         dataValues.push({
@@ -52,7 +52,7 @@ export function getChartData(visualisation, datasets) {
 
     case 'scatter':
 
-      dataX.map((entry, index) => {
+      dataX.forEach((entry, index) => {
         dataValues.push({
           x: parseInt(entry, 10),
           y: parseInt(dataY[index], 10),
