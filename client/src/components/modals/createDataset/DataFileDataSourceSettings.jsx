@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react';
-import * as csv from '../../../parsers/csv';
+import * as tus from 'tus-js-client';
 
 export default class DataFileDataSourceSettings extends Component {
   constructor() {
@@ -26,18 +26,20 @@ export default class DataFileDataSourceSettings extends Component {
   }
 
   uploadFile(file) {
-    const reader = new FileReader();
-    reader.addEventListener('loadend', () => {
-      this.props.onChange(Object.assign({}, this.props.dataset, {
-        columns: csv.parse(reader.result, { separator: ',', isFirstRowHeader: true }),
-        source: {
-          type: 'DATA_FILE',
-          name: file.name,
-          mimeType: 'text/csv',
-        },
-      }));
+    const upload = new tus.Upload(file, {
+      endpoint: "http://localhost:3030/api/files",
+      onError: function(error) {
+        console.log("Failed because: " + error)
+      },
+      onProgress: function(bytesUploaded, bytesTotal) {
+        const percentage = (bytesUploaded / bytesTotal * 100).toFixed(2)
+        console.log(bytesUploaded, bytesTotal, percentage + "%")
+      },
+      onSuccess: function() {
+        console.log("Download %s from %s", upload.file.name, upload.url)
+      }
     });
-    reader.readAsText(file);
+    upload.start();
   }
 
   render() {

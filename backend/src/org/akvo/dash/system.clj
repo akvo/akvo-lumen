@@ -20,7 +20,8 @@
     [dataset :as dataset]
     [library :as library]
     [root :as root]
-    [visualisation :as visualisation]]))
+    [visualisation :as visualisation]
+    [files :as files]]))
 
 (def base-config
   {:app {:middleware [[wrap-not-found :not-found]
@@ -45,11 +46,12 @@
          :library (endpoint-component library/endpoint)
          :dataset (endpoint-component dataset/endpoint)
          :root (endpoint-component root/endpoint)
-         :visualisation (endpoint-component visualisation/endpoint))
+         :visualisation (endpoint-component visualisation/endpoint)
+         :files (endpoint-component files/endpoint))
 
         (component/system-using
          {:http [:app]
-          :app  [:root :activity :dataset :library :visualisation]
+          :app  [:root :activity :dataset :library :visualisation :files]
           :activity [:db]
           :dataset [:db]
           :library [:db]

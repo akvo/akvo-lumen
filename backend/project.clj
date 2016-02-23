@@ -1,8 +1,8 @@
 (defproject org.akvo.dash "0.1.0-SNAPSHOT"
   :description "Akvo Dash backend."
   :url "https://github.com/akvo/akvo-dash"
-  :license {:name "GNU Affero General Public License"
-            :url  "https://www.gnu.org/licenses/agpl"}
+  :license {:name "GNU Affero General Public License 3.0"
+            :url  "https://www.gnu.org/licenses/agpl-3.0.html"}
   :min-lein-version "2.0.0"
   :dependencies [[camel-snake-kebab "0.3.2"]
                  [cheshire "5.5.0"]
@@ -30,7 +30,8 @@
                  [ring/ring-devel "1.4.0"]
                  [ring/ring-json "0.4.0"]
                  [ring/ring-mock "0.3.0"]
-                 [traversy "0.4.0"]]
+                 [traversy "0.4.0"]
+                 [org.akvo/resumed "0.1.0-SNAPSHOT"]]
   :repl-options {:timeout 120000}
   :plugins [[lein-codox "0.9.1"]
             [lein-environ "1.0.2"]
