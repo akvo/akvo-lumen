@@ -1,7 +1,7 @@
 # Akvo Dash
 
 ## Quickstart
-Dash depends on a Postgres db. If on OS X, [Postgres.app](http://postgresapp.com/)
+Dash depends on Postgres 9.4. If on OS X, [Postgres.app](http://postgresapp.com/)
 is an easy path.
 
 Create local config files:
@@ -68,7 +68,7 @@ $ open doc/index.html
 Tests can be augmented with ^:functional and those will not be runned by default but only if the :all directive is issued.
 
 ```
-lein test  
+lein test
 lein test :all
 ```
 

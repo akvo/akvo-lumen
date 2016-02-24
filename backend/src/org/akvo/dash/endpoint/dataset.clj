@@ -71,12 +71,10 @@
               resp           {"id"   (:id dataset)
                               "name" (:dataset_name dataset_meta)}]
 
-          (if (= "FILE" (:kind datasource))
-            (let [filename "org.akvo.dash.test/people.csv"
-                  data     (slurp (clojure.java.io/resource filename))]
+          (if (= "DATA_FILE" (:kind datasource))
+            (do ;; add try catch around handler since this can blow up!!!!
               (import/handle-file-upload db
-                                         {:file-name filename
-                                          :data      data}
+                                         datasource
                                          (-> res :i :id))
               (rr (assoc resp "status" "OK")))
             (do

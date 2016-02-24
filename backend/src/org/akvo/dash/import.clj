@@ -30,15 +30,15 @@
 ;;; Download
 ;;;
 
-(defmulti download
+(defmulti yank
   "Download content based on spec."
-  (fn [datasource] (-> datasource :spec :kind)))
+  (fn [datasource] (get-in datasource [:spec "kind"])))
 
-(defmethod download :default [datasource]
+(defmethod yank :default [datasource]
   (throw (IllegalArgumentException.
           (str "Can't download file of " (-> datasource :spec :kind) " kind."))))
 
-(defmethod download "LINK" [{{url :url} :spec}]
+(defmethod yank "LINK" [{{url :url} :spec}]
   (let [resp (client/get url)
         data (:body resp)]
     {:data           data
@@ -46,6 +46,15 @@
      :content-type   (get-in resp [:headers "Content-Type"])
      :digest         (sha1 data)
      :file-extension (last (str/split url #"\."))}))
+
+(defmethod yank "DATA_FILE" [datasource]
+  (let [file-id (last (str/split (get-in datasource [:spec "url"])
+                                 #"\/"))
+        data (slurp (str "/tmp/akvo/dash/" "resumed/" file-id "/file"))]
+    {:data data
+     :digest (sha1 data)
+     :file-extension (last (str/split (get-in datasource [:spec "fileName"])
+                                      #"\."))}))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -112,13 +121,33 @@
                                   :id     id
                                   :status "OK"})))
 
+
+(defn do-import
+  ""
+  [db datasource id]
+  nil
+
+  )
+
+
 (defn handle-file-upload
-  "This does not do anything at the moment, need to know more on how the file
-  upload works before we can implement it."
-  [db file id]
-  (pprint "@import/handle-file-upload")
-  (pprint "Not doing anything at the moment.")
-  (pprint file))
+  "Import file upload."
+  [db datasource id]
+  (try
+    (let [content (yank datasource)]
+      (if (not (nil? (revision-digest-by-digest db content)))
+        (update-import-with-revision db
+                                     (assoc content
+                                            :id id
+                                            :status "OK"))
+        (handle-new-revision db content id)))
+    (catch Exception e
+      (pprint e)
+      (pprint (.getNextException e))
+      (update-import-status db
+                            {:id     id
+                             :status "FAILED"})
+      (throw (Exception. "Could not handle file upload")))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -144,7 +173,7 @@
   (try
     (let [datasource (datasource-by-import db
                                            {:id id})
-          content    (download datasource)]
+          content    (yank datasource)]
       ;; Branch if revision exists
       (if (not (nil? (revision-digest-by-digest db content)))
         (update-import-with-revision db
@@ -154,6 +183,7 @@
         (handle-new-revision db content id)))
     (catch Exception e
       (pprint e)
+      (pprint (.getNextException e))
       (update-import-status db
                             {:id     id
                              :status "FAILED"}))))
