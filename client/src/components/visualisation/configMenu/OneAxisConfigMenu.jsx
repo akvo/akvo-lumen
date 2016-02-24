@@ -23,6 +23,25 @@ export default class OneAxisConfigMenu extends Component {
       xColumns = this.props.datasets[visualisation.sourceDatasetX].columns || [];
     }
 
+    const datasetOptions = datasetArray.map((dataset) =>
+      <option
+        key={dataset.id}
+        value={dataset.id}
+      >
+        {dataset.name}
+      </option>
+    );
+
+    datasetOptions.unshift(
+      <option
+        key="__placeholder"
+        value="__placeholder"
+        disabled
+      >
+        Choose a dataset ...
+      </option>
+    );
+
     return (
       <div className="OneAxisConfigMenu">
         <div className="inputGroup">
@@ -40,17 +59,10 @@ export default class OneAxisConfigMenu extends Component {
           <label htmlFor="xDatasetMenu">Source dataset:</label>
           <select
             id="xDatasetMenu"
-            defaultValue={visualisation.sourceDatasetX}
+            defaultValue={visualisation.sourceDatasetX || '__placeholder'}
             onChange={this.props.onChangeSourceDatasetX}
           >
-            {datasetArray.map((dataset, index) =>
-              <option
-                key={index}
-                value={dataset.id}
-              >
-                {dataset.name}
-              </option>
-            )}
+            {datasetOptions}
           </select>
         </div>
         <div className="inputGroup">
