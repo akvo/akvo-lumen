@@ -44,11 +44,13 @@ variables](http://www.postgresql.org/docs/current/static/libpq-envars.html)
 
 There is also a tear-down.sh script to clean up.
 
+### Start the backend
 At this point all ground work is done and we can fire up a REPL:
 ```sh
 $ lein repl
 ```
 
+Once the repl is up and running, run these commands one by one
 ```clojure
 user=> (go)      ;; Init and start the app
 user=> (migrate) ;; Migrate the db, requires a running app
