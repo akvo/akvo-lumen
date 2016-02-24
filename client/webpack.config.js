@@ -1,7 +1,7 @@
 var webpack = require('webpack');
 var SystemBellPlugin = require('system-bell-webpack-plugin');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
-
+var path = require('path');
 
 const entry = process.env.NODE_ENV === 'production' ?
   [
@@ -25,9 +25,14 @@ module.exports = {
   },
   module: {
     loaders: [
+
       {
         test: /\.jsx?$/,
-        exclude: /node_modules/,
+        //exclude: /node_modules/,
+        include: [
+          path.join(__dirname, "node_modules/tus-js-client/"),
+          path.join(__dirname, "src/"),
+        ],
         loaders: ["react-hot", "babel-loader"]
       },
       {

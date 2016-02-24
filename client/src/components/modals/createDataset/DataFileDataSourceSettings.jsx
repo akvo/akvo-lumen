@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react';
-import * as tus from 'tus-js-client';
+import * as tus from 'tus-js-client/lib';
 
 export default class DataFileDataSourceSettings extends Component {
   constructor() {
