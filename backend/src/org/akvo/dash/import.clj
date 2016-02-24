@@ -50,11 +50,13 @@
      :file-extension (last (str/split url #"\."))}))
 
 (defmethod yank "DATA_FILE" [datasource]
-  (let [file-id (last (str/split (get-in datasource [:spec "url"])
-                                 #"\/"))
-        data (slurp (str "/tmp/akvo/dash/" "resumed/" file-id "/file"))]
-    {:data data
-     :digest (sha1 data)
+  (let [url       (get-in datasource [:spec "url"])
+        ;; file-name (get-in datasource [:spec "fileName"])
+        file-id   (last (str/split url
+                                   #"\/"))
+        data      (slurp (str "/tmp/akvo/dash/" "resumed/" file-id "/file"))]
+    {:data           data
+     :digest         (sha1 data)
      :file-extension (last (str/split (get-in datasource [:spec "fileName"])
                                       #"\."))}))
 
