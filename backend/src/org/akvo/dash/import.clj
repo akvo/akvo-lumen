@@ -125,12 +125,25 @@
 (defn do-import
   ""
   [db datasource id]
-  nil
+  (try
+    (let [content (yank datasource)]
+      (if (not (nil? (revision-digest-by-digest db content)))
+        (update-import-with-revision db
+                                     (assoc content
+                                            :id id
+                                            :status "OK"))
+        (handle-new-revision db
+                             content id)))
+    (catch Exception e
+      (pprint e)
+      (pprint (.getNextException e))
+      (update-import-status db
+                            {:id     id
+                             :status "FAILED"})
+      (throw (Exception. "Coudl not handle file upload")))))
 
-  )
 
-
-(defn handle-file-upload
+#_(defn handle-file-upload
   "Import file upload."
   [db datasource id]
   (try
@@ -155,6 +168,16 @@
 ;;;
 
 (defn job
+  [db id]
+  (try
+    (do-import db
+               (datasource-by-import db
+                                     {:id id}))
+    (catch Exception e
+      (pprint e)
+      (pprint (.getNextException e)))))
+
+#_(defn job
   "An import job.
   1. First grab import spec from task.
   2. Try and download content. If we fail mark the import as failed.
