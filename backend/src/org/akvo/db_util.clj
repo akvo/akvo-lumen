@@ -1,8 +1,6 @@
 (ns org.akvo.db-util
   "Make sure we talk Postgres json."
   (:require
-   [camel-snake-kebab.core :refer [->kebab-case-keyword ->snake_case_string]]
-   [clojure.pprint :refer [pprint]]
    [cheshire.core :as json]
    [clj-time.coerce :as c]
    [clojure.java.jdbc :as jdbc])
@@ -15,13 +13,10 @@
 ;; Difference in that this uses Cheshire.
 
 (defn val->jsonb-pgobj
-  "Return snake_cased PGObject of type json."
   [v]
   (doto (PGobject.)
-      (.setType "jsonb")
-      (.setValue (json/generate-string v
-                                       {:key-fn (fn [k]
-                                                  (->snake_case_string k))}))))
+    (.setType "jsonb")
+    (.setValue (json/generate-string v))))
 
 (extend-protocol jdbc/ISQLValue
   clojure.lang.IPersistentMap
@@ -31,17 +26,13 @@
   (sql-value [v] (val->jsonb-pgobj v)))
 
 (defn parse-pgobj
-  "Parse PGobject to kebab-case-keyword."
+  "Parse PGobject to jsonb."
   [pgobj]
   (let [t (.getType pgobj)
         v (.getValue pgobj)]
     (case t
-      "json"  (json/parse-string v
-                                 (fn [k]
-                                   (->kebab-case-keyword k)))
-      "jsonb" (json/parse-string v
-                                 (fn [k]
-                                   (->kebab-case-keyword k)))
+      "json"  (json/parse-string v)
+      "jsonb" (json/parse-string v)
       :else v)))
 
 

@@ -48,7 +48,7 @@
       (fn [req]
         (try
           (let [datasource     {:id   (u/squuid)
-                                :kind (get-in req [:body "source" "kind"])
+                                :kind (get-in req [:body "source" "kind"]) ;;?
                                 :spec (get-in req [:body "source"])}
                 dataset        {:id           (u/squuid)
                                 :dataset_name (get-in req [:body "name"])
@@ -68,9 +68,8 @@
                                   :i   (insert-import tx import)})
                 resp           {"id"   (:id dataset)
                                 "name" (:dataset_name dataset_meta)}]
-
-            (if (= "DATA_FILE" (:kind datasource))
-              (do ;; add try catch around handler since this can blow up!!!!
+            (if (= "DATA_FILE" (get-in datasource [:spec "kind"]))
+              (do
                 (import/do-import db
                                   datasource
                                   (-> res :i :id))
@@ -78,7 +77,7 @@
               (do
                 (scheduling/schedule #(import/job db
                                                   (-> res :i :id)))
-                (rr (assoc resp "status" "PENDING") ))))
+                (rr (assoc resp "status" "PENDING")))))
           (catch Exception e
             (rr {:error "Could not complete upload"
                  :status "FAILED"})))))
@@ -100,7 +99,7 @@
                (condp = (:status r)
                  "OK"      (assoc resp-map
                                   :columns (json/parse-string
-                                            (slurp (-> r :noble :noble))))
+                                            (slurp (get-in r [:noble "noble"]))))
                  "FAILURE" (assoc resp-map
                                   :reason
                                   "Could not find dataset on remote server (404)")
