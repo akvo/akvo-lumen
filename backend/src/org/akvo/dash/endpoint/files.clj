@@ -3,8 +3,5 @@
             [org.akvo.resumed :refer [make-handler]]))
 
 (defn endpoint [config]
-  (let [h (make-handler config)
-        tmp (fn [req]
-              (prn req)
-              (h req))]
-    (ANY "/files*" req (tmp req))))
+  (let [file-upload-handler (make-handler config)]
+    (ANY "/files*" req (file-upload-handler req))))
