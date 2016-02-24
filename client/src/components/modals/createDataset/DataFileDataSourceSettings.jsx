@@ -69,6 +69,5 @@ export default class DataFileDataSourceSettings extends Component {
 }
 
 DataFileDataSourceSettings.propTypes = {
-  dataset: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,
 };
