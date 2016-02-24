@@ -46,43 +46,42 @@
 
     (POST "/" []
       (fn [req]
-        ;; This needs to be reviwed once we get file upload. Not sure how that
-        ;; will work do we have everying in one request? Does body include both
-        ;; dataset info as name and the file?
-        (let [datasource     {:id   (u/squuid)
-                              :kind (get-in req [:body "source" "kind"])
-                              :spec (get-in req [:body "source"])}
-              dataset        {:id             (u/squuid)
-                              :dataset_name   (get-in req [:body "name"])
-                              :datasource     (:id datasource)}
-              dataset_meta   {:id           (u/squuid)
-                              :dataset_name (get-in req [:body "name"])
-                              :dataset      (:id dataset)}
-              import         {:datasource (:id datasource)}
-              transformation {:id      (u/squuid)
-                              :dataset (:id dataset)
-                              :fns     {:fns []}}
-              res            (clojure.java.jdbc/with-db-transaction [tx db]
-                               {:s   (insert-datasource tx datasource)
-                                :ds  (insert-dataset tx dataset)
-                                :dsm (insert-dataset_meta tx dataset_meta)
-                                :t   (insert-transformation tx transformation)
-                                :i   (insert-import tx import)})
-              resp           {"id"   (:id dataset)
-                              "name" (:dataset_name dataset_meta)}]
+        (try
+          (let [datasource     {:id   (u/squuid)
+                                :kind (get-in req [:body "source" "kind"])
+                                :spec (get-in req [:body "source"])}
+                dataset        {:id           (u/squuid)
+                                :dataset_name (get-in req [:body "name"])
+                                :datasource   (:id datasource)}
+                dataset_meta   {:id           (u/squuid)
+                                :dataset_name (get-in req [:body "name"])
+                                :dataset      (:id dataset)}
+                import         {:datasource (:id datasource)}
+                transformation {:id      (u/squuid)
+                                :dataset (:id dataset)
+                                :fns     {:fns []}}
+                res            (clojure.java.jdbc/with-db-transaction [tx db]
+                                 {:s   (insert-datasource tx datasource)
+                                  :ds  (insert-dataset tx dataset)
+                                  :dsm (insert-dataset_meta tx dataset_meta)
+                                  :t   (insert-transformation tx transformation)
+                                  :i   (insert-import tx import)})
+                resp           {"id"   (:id dataset)
+                                "name" (:dataset_name dataset_meta)}]
 
-          (if (= "FILE" (:kind datasource))
-            (let [filename "org.akvo.dash.test/people.csv"
-                  data     (slurp (clojure.java.io/resource filename))]
-              (import/handle-file-upload db
-                                         {:file-name filename
-                                          :data      data}
-                                         (-> res :i :id))
-              (rr (assoc resp "status" "OK")))
-            (do
-              (scheduling/schedule #(import/job db
-                                                (-> res :i :id)))
-              (rr (assoc resp "status" "PENDING") ))))))
+            (if (= "DATA_FILE" (:kind datasource))
+              (do ;; add try catch around handler since this can blow up!!!!
+                (import/do-import db
+                                  datasource
+                                  (-> res :i :id))
+                (rr (assoc resp "status" "OK")))
+              (do
+                (scheduling/schedule #(import/job db
+                                                  (-> res :i :id)))
+                (rr (assoc resp "status" "PENDING") ))))
+          (catch Exception e
+            (rr {:error "Could not complete upload"
+                 :status "FAILED"})))))
 
 
     (context "/:id" [id]
@@ -95,7 +94,9 @@
                 {:status  404
                  :headers {"content-type" "text"}})
             (rr
-             (let [resp-map (select-keys r [:id :name :status])]
+             (let [k        [:id :datasource :name :status :created :modified
+                             :transformations]
+                   resp-map (select-keys r k)]
                (condp = (:status r)
                  "OK"      (assoc resp-map
                                   :columns (json/parse-string
