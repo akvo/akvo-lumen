@@ -6,7 +6,7 @@
   Pristine came to mind and noble just fell out of 'refined' from the
   dictionary."
   (:require
-   [camel-snake-kebab.core :refer [->kebab-case ->snake_case]]
+   ;; [camel-snake-kebab.core :refer [->kebab-case ->snake_case]]
    [cheshire.core :as json]
    [clj-http.client :as client]
    [clojure.data.csv :as csv]
@@ -36,10 +36,12 @@
 
 (defmethod yank :default [datasource]
   (throw (IllegalArgumentException.
-          (str "Can't download file of " (-> datasource :spec :kind) " kind."))))
+          (str "Can't download file of "
+               (get-in datasource [:spec "kind"]) " kind."))))
 
-(defmethod yank "LINK" [{{url :url} :spec}]
-  (let [resp (client/get url)
+(defmethod yank "LINK" [{spec :spec}]
+  (let [url  (get spec "url")
+        resp (client/get url)
         data (:body resp)]
     {:data           data
      :content-length (get-in resp [:headers "Content-Length"])
@@ -48,11 +50,13 @@
      :file-extension (last (str/split url #"\."))}))
 
 (defmethod yank "DATA_FILE" [datasource]
-  (let [file-id (last (str/split (get-in datasource [:spec "url"])
-                                 #"\/"))
-        data (slurp (str "/tmp/akvo/dash/" "resumed/" file-id "/file"))]
-    {:data data
-     :digest (sha1 data)
+  (let [url       (get-in datasource [:spec "url"])
+        ;; file-name (get-in datasource [:spec "fileName"])
+        file-id   (last (str/split url
+                                   #"\/"))
+        data      (slurp (str "/tmp/akvo/dash/" "resumed/" file-id "/file"))]
+    {:data           data
+     :digest         (sha1 data)
      :file-extension (last (str/split (get-in datasource [:spec "fileName"])
                                       #"\."))}))
 
@@ -67,7 +71,7 @@
 
 (defmethod persist-content :default [config _ _]
   (throw (IllegalArgumentException.
-          (str "Can't store pristine file with  config" (:kind config)))))
+          (str "Can't store pristine file with config" (:kind config)))))
 
 (defmethod persist-content "DISK" [{path :path
                                     kind :kind}
@@ -143,41 +147,11 @@
       (throw (Exception. "Coudl not handle file upload")))))
 
 
-#_(defn handle-file-upload
-  "Import file upload."
-  [db datasource id]
-  (try
-    (let [content (yank datasource)]
-      (if (not (nil? (revision-digest-by-digest db content)))
-        (update-import-with-revision db
-                                     (assoc content
-                                            :id id
-                                            :status "OK"))
-        (handle-new-revision db content id)))
-    (catch Exception e
-      (pprint e)
-      (pprint (.getNextException e))
-      (update-import-status db
-                            {:id     id
-                             :status "FAILED"})
-      (throw (Exception. "Could not handle file upload")))))
-
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; API
 ;;;
 
 (defn job
-  [db id]
-  (try
-    (do-import db
-               (datasource-by-import db
-                                     {:id id}))
-    (catch Exception e
-      (pprint e)
-      (pprint (.getNextException e)))))
-
-#_(defn job
   "An import job.
   1. First grab import spec from task.
   2. Try and download content. If we fail mark the import as failed.
@@ -194,19 +168,10 @@
   D. Things fail and we mark the import as FAIL. Maybe we should add a reason."
   [db id]
   (try
-    (let [datasource (datasource-by-import db
-                                           {:id id})
-          content    (yank datasource)]
-      ;; Branch if revision exists
-      (if (not (nil? (revision-digest-by-digest db content)))
-        (update-import-with-revision db
-                                     (assoc content
-                                            :id id
-                                            :status "OK"))
-        (handle-new-revision db content id)))
+    (do-import db
+               (datasource-by-import db
+                                     {:id id})
+               id)
     (catch Exception e
       (pprint e)
-      (pprint (.getNextException e))
-      (update-import-status db
-                            {:id     id
-                             :status "FAILED"}))))
+      (pprint (.getNextException e)))))
