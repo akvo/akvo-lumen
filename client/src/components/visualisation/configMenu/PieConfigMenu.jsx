@@ -4,7 +4,7 @@ const getDatasetArray = datasetObject => {
   const datasetArray = [];
   const sortFunction = (a, b) => a.name.toLowerCase() > b.name.toLowerCase();
 
-  Object.keys(datasetObject).map(key => {
+  Object.keys(datasetObject).forEach(key => {
     datasetArray.push(datasetObject[key]);
   });
 

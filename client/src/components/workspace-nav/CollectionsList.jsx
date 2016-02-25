@@ -5,7 +5,7 @@ export default class CollectionsList extends Component {
   render() {
     const listItems = this.props.collections.map((collection) => (
         <li key={collection.id}>
-          <CollectionListItem collection={collection}/>
+          <CollectionListItem collection={collection} />
         </li>
       )
     );

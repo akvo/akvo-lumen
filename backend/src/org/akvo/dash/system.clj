@@ -10,20 +10,25 @@
    [duct.middleware.not-found :refer [wrap-not-found]]
    [duct.middleware.route-aliases :refer [wrap-route-aliases]]
    [meta-merge.core :refer [meta-merge]]
-   [ring.component.jetty :refer [jetty-server]]
    [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
-   [org.akvo.pg-json]
-   [org.akvo.dash.component.http :as http]
+   [ring.middleware.json :refer [wrap-json-body wrap-json-response]]
+   [org.akvo.db-util]
+   [org.akvo.dash.component
+    [http :as http]]
    [org.akvo.dash.endpoint
     [activity :as activity]
     [dataset :as dataset]
+    [library :as library]
     [root :as root]
-    [visualisation :as visualisation]]))
+    [visualisation :as visualisation]
+    [files :as files]]))
 
 (def base-config
   {:app {:middleware [[wrap-not-found :not-found]
                       [wrap-defaults :defaults]
-                      [wrap-route-aliases :aliases]]
+                      [wrap-route-aliases :aliases]
+                      wrap-json-response
+                      wrap-json-body]
          :not-found  (io/resource "org/akvo/dash/errors/404.html")
          :defaults   (meta-merge api-defaults
                                  {:params {:multipart true}}) ;; ?
@@ -38,13 +43,17 @@
          :db   (hikaricp (:db config))
          :ragtime (ragtime (:ragtime config))
          :activity (endpoint-component activity/endpoint)
+         :library (endpoint-component library/endpoint)
          :dataset (endpoint-component dataset/endpoint)
          :root (endpoint-component root/endpoint)
-         :visualisation (endpoint-component visualisation/endpoint))
+         :visualisation (endpoint-component visualisation/endpoint)
+         :files (endpoint-component files/endpoint))
+
         (component/system-using
          {:http [:app]
-          :app  [:root :activity :dataset :visualisation]
+          :app  [:root :activity :dataset :library :visualisation :files]
           :activity [:db]
           :dataset [:db]
+          :library [:db]
           :ragtime [:db]
           :visualisation [:db]}))))

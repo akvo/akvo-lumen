@@ -32,7 +32,7 @@ export default class DatasetTable extends Component {
       <Column
         header={column.title}
         cell={props => <Cell>{column.values[props.rowIndex]}</Cell>}
-        width={200}/>
+        width={200} />
     ));
 
     return (

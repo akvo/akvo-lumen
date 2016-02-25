@@ -5,6 +5,6 @@
 (def handler
   (activity/endpoint {}))
 
-(deftest a-test
+#_(deftest a-test
   (testing "FIXME, I fail."
     (is (= 0 1))))

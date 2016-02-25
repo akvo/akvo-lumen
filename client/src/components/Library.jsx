@@ -1,9 +1,11 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
-import { routeActions } from 'react-router-redux';
+import { push } from 'react-router-redux';
 import LibraryHeader from './library/LibraryHeader';
 import LibraryListing from './library/LibraryListing';
 import { showModal } from '../actions/activeModal';
+import { fetchLibrary } from '../actions/library';
+
 
 require('../styles/Library.scss');
 
@@ -14,7 +16,7 @@ function mergeQuery(location, query) {
 }
 
 function updateQueryAction(location, query) {
-  return routeActions.push(mergeQuery(location, query));
+  return push(mergeQuery(location, query));
 }
 
 class Library extends Component {
@@ -24,8 +26,16 @@ class Library extends Component {
     this.handleSelectEntity = this.handleSelectEntity.bind(this);
   }
 
+  componentDidMount() {
+    // TODO better heuristics
+    if (Object.keys(this.props.datasets).length === 0) {
+      this.props.dispatch(fetchLibrary());
+    }
+  }
+
+
   handleSelectEntity(entityType, id) {
-    this.props.dispatch(routeActions.push(`/${entityType}/${id}`));
+    this.props.dispatch(push(`/${entityType}/${id}`));
   }
 
   render() {
@@ -37,6 +47,7 @@ class Library extends Component {
     const filterBy = query.filter || 'all';
     const searchString = query.search || '';
     const collection = params.collection || null;
+
     return (
       <div className="Library">
         <LibraryHeader
@@ -77,9 +88,9 @@ class Library extends Component {
               // Data set creation is handled in a modal
               dispatch(showModal('create-dataset'));
             } else {
-              dispatch(routeActions.push(`/${type}/create`));
+              dispatch(push(`/${type}/create`));
             }
-          }}/>
+          }} />
         <LibraryListing
           displayMode={displayMode}
           sortOrder={sortOrder}
@@ -88,7 +99,7 @@ class Library extends Component {
           searchString={searchString}
           collection={collection}
           library={this.props}
-          onSelectEntity={this.handleSelectEntity}/>
+          onSelectEntity={this.handleSelectEntity} />
         {this.props.children}
       </div>
     );
@@ -100,6 +111,7 @@ Library.propTypes = {
   location: PropTypes.object,
   params: PropTypes.object,
   children: PropTypes.element,
+  datasets: PropTypes.object.isRequired,
 };
 
 export default connect(state => state.library)(Library);

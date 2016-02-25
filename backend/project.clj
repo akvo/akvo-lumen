@@ -1,12 +1,16 @@
 (defproject org.akvo.dash "0.1.0-SNAPSHOT"
   :description "Akvo Dash backend."
   :url "https://github.com/akvo/akvo-dash"
-  :license {:name "GNU Affero General Public License"
-            :url  "https://www.gnu.org/licenses/agpl"}
+  :license {:name "GNU Affero General Public License 3.0"
+            :url  "https://www.gnu.org/licenses/agpl-3.0.html"}
   :min-lein-version "2.0.0"
-  :dependencies [[com.layerware/hugsql "0.3.1"]
-                 [com.stuartsierra/component "0.3.0"]
+  :dependencies [[camel-snake-kebab "0.3.2"]
                  [cheshire "5.5.0"]
+                 [clj-http "2.0.1"]
+                 [clj-time "0.11.0"]
+                 [com.layerware/hugsql "0.3.1"]
+                 [com.novemberain/pantomime "2.8.0"]
+                 [com.stuartsierra/component "0.3.0"]
                  [compojure "1.4.0"]
                  [duct "0.5.8"]
                  [duct/hikaricp-component "0.1.0"]
@@ -14,13 +18,20 @@
                  [environ "1.0.2"]
                  [meta-merge "0.1.1"]
                  [org.clojure/clojure "1.8.0"]
+                 [org.clojure/data.csv "0.1.3"]
+                 [org.immutant/scheduling "2.1.2"]
                  [org.immutant/web "2.1.2"]
                  [org.postgresql/postgresql "9.4-1206-jdbc41"]
                  [org.slf4j/slf4j-nop "1.7.14"]
+                 [pandect "0.5.4"]
                  [ring "1.4.0"]
                  [ring-jetty-component "0.3.0"]
                  [ring/ring-defaults "0.1.5"]
-                 [ring/ring-devel "1.4.0"]]
+                 [ring/ring-devel "1.4.0"]
+                 [ring/ring-json "0.4.0"]
+                 [ring/ring-mock "0.3.0"]
+                 [traversy "0.4.0"]
+                 [org.akvo/resumed "0.1.0-SNAPSHOT"]]
   :repl-options {:timeout 120000}
   :plugins [[lein-codox "0.9.1"]
             [lein-environ "1.0.2"]
@@ -33,6 +44,9 @@
   :target-path "target/%s/"
   :aliases {"gen"   ["generate"]
             "setup" ["do" ["generate" "locals"]]}
+  :test-selectors {:default (and (constantly true)
+                                 (complement :functional))
+                   :all (constantly true)}
   :profiles
   {:dev  [:project/dev  :profiles/dev]
    :test [:project/test :profiles/test]

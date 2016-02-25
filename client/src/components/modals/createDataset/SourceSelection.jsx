@@ -1,52 +1,64 @@
 import React, { Component, PropTypes } from 'react';
 
 const supportedFormats = [{
-  type: 'DATA_FILE',
+  kind: 'DATA_FILE',
   icon: '/assets/data-file.png',
   label: 'Data file',
 }, {
-  type: 'LINK',
+  kind: 'LINK',
   icon: '/assets/link.png',
   label: 'Link',
 }, {
-  type: 'DROPBOX',
+  kind: 'DROPBOX',
   icon: '/assets/dropbox.png',
   label: 'Dropbox',
 }, {
-  type: 'WORLD_BANK',
+  kind: 'WORLD_BANK',
   icon: '/assets/world-bank.png',
   label: 'World Bank',
 }, {
-  type: 'AKVO_RSR',
+  kind: 'AKVO_RSR',
   icon: '/assets/akvo-rsr.png',
   label: 'Akvo RSR',
 }, {
-  type: 'AKVO_FLOW',
+  kind: 'AKVO_FLOW',
   icon: '/assets/akvo-flow.png',
   label: 'Akvo FLOW',
 }, {
-  type: 'GITHUB',
+  kind: 'GITHUB',
   icon: '/assets/github.png',
   label: 'Github',
 }, {
-  type: 'GOOGLE_DRIVE',
+  kind: 'GOOGLE_DRIVE',
   icon: '/assets/google-drive.png',
   label: 'Google Drive',
 }];
 
+const defaultDataSources = {
+  DATA_FILE: {
+    kind: 'DATA_FILE',
+  },
+
+  LINK: {
+    kind: 'LINK',
+    url: '',
+  },
+
+  // TODO the rest.
+};
+
 export default class SourceSelection extends Component {
   render() {
     const sources = supportedFormats.map(source => (
-      <div className="sourceOptionContainer" key={source.type}>
+      <div className="sourceOptionContainer" key={source.kind}>
         <input
           type="radio"
           name="choose_data_source"
-          value={source.type}
-          checked={source.type === this.props.dataSourceType}
-          onChange={evt => (
-            this.props.onChangeDataSourceType(evt.target.value)
-          )}/>
-        { /* <img src={source.icon}/> */ }
+          value={source.kind}
+          checked={source.kind === this.props.dataSourceKind}
+          onChange={evt => {
+            this.props.onChangeDataSource(defaultDataSources[evt.target.value]);
+          }} />
         {source.label}
       </div>
     ));
@@ -55,6 +67,6 @@ export default class SourceSelection extends Component {
 }
 
 SourceSelection.propTypes = {
-  dataSourceType: PropTypes.string.isRequired,
-  onChangeDataSourceType: PropTypes.func.isRequired,
+  dataSourceKind: PropTypes.string.isRequired,
+  onChangeDataSource: PropTypes.func.isRequired,
 };

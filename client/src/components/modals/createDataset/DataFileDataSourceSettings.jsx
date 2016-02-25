@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
-import * as csv from '../../../parsers/csv';
+import * as tus from 'tus-js-client/lib';
 
-export default class DataFileFileSelection extends Component {
+export default class DataFileDataSourceSettings extends Component {
   constructor() {
     super();
     this.handleDragEnter = this.handleDragEnter.bind(this);
@@ -26,18 +26,25 @@ export default class DataFileFileSelection extends Component {
   }
 
   uploadFile(file) {
-    const reader = new FileReader();
-    reader.addEventListener('loadend', () => {
-      this.props.onChange(Object.assign({}, this.props.dataset, {
-        columns: csv.parse(reader.result, { separator: ',', isFirstRowHeader: true }),
-        source: {
-          type: 'DATA_FILE',
-          name: file.name,
-          mimeType: 'text/csv',
-        },
-      }));
+    const onChange = this.props.onChange;
+    const upload = new tus.Upload(file, {
+      endpoint: 'http://localhost:3030/api/files',
+      onError(error) {
+        console.error(`Failed because: ${error}`);
+      },
+      onProgress(bytesUploaded, bytesTotal) {
+        const percentage = (bytesUploaded / bytesTotal * 100).toFixed(2);
+        console.log(bytesUploaded, bytesTotal, `${percentage}%`);
+      },
+      onSuccess() {
+        onChange({
+          kind: 'DATA_FILE',
+          url: upload.url,
+          fileName: upload.file.name,
+        });
+      },
     });
-    reader.readAsText(file);
+    upload.start();
   }
 
   render() {
@@ -55,13 +62,12 @@ export default class DataFileFileSelection extends Component {
           type="file"
           onChange={() => {
             this.uploadFile(this.refs.fileInput.files[0]);
-          }}/>
+          }} />
       </div>
     );
   }
 }
 
-DataFileFileSelection.propTypes = {
-  dataset: PropTypes.object.isRequired,
+DataFileDataSourceSettings.propTypes = {
   onChange: PropTypes.func.isRequired,
 };

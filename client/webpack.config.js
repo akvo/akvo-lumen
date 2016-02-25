@@ -1,13 +1,13 @@
 var webpack = require('webpack');
 var SystemBellPlugin = require('system-bell-webpack-plugin');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
-
+var path = require('path');
 
 const entry = process.env.NODE_ENV === 'production' ?
   [
     "./src/index.jsx"
   ] : [
-    'webpack-dev-server/client?http://0.0.0.0:3000', // WebpackDevServer host and port
+    'webpack-dev-server/client?http://0.0.0.0:3030', // WebpackDevServer host and port
     'webpack/hot/only-dev-server', // "only" prevents reload on syntax errors
     "./src/index.jsx"
   ];
@@ -25,9 +25,14 @@ module.exports = {
   },
   module: {
     loaders: [
+
       {
         test: /\.jsx?$/,
-        exclude: /node_modules/,
+        //exclude: /node_modules/,
+        include: [
+          path.join(__dirname, "node_modules/tus-js-client/"),
+          path.join(__dirname, "src/"),
+        ],
         loaders: ["react-hot", "babel-loader"]
       },
       {
