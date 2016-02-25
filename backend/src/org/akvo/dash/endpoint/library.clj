@@ -19,6 +19,6 @@
 
     (GET "/" []
       (fn [req]
-        (rr {:datasets       (dataset-coll db)
-             :visualisations []
+        (rr {:datasets       (all-datasets db)
+             :visualisations (all-visualisations db)
              :dashboards     []})))))

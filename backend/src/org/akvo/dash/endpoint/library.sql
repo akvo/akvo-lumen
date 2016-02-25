@@ -1,4 +1,4 @@
--- :name dataset-coll :? :*
+-- :name all-datasets :? :*
 -- :doc returns the dataset collection
 SELECT q.dataset_id AS id, q.dataset_name AS "name", q.status,
        q.dataset_ts AS created,
@@ -25,3 +25,15 @@ FROM (
           FROM imports i LEFT JOIN revisions r ON i.revision = r.digest
           ORDER BY i.datasource, i.id DESC) j ON s.id = j.datasource
      ORDER BY ds.id DESC) q
+
+
+-- :name all-visualisations :? :*
+-- :doc All visualisations
+SELECT v.id, vd.name, v.ts AS created, vd.ts AS modified
+FROM visualisation v
+LEFT JOIN (
+     SELECT DISTINCT ON (v_data.visualisation)
+     v_data.name, v_data.visualisation, v_data.spec, v_data.enabled, v_data.ts
+     FROM visualisation_data v_data
+     ORDER BY v_data.visualisation, v_data.id DESC) vd ON v.id = vd.visualisation
+WHERE vd.enabled = 'true';
