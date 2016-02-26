@@ -83,7 +83,7 @@
                                       :visualisation (str->uuid id)
                                       :name          (get-in req [:body "name"])
                                       :spec          (get-in req [:body "spec"])})
-          (rr {:status "OK"} {:status 200})))
+          (rr {:status "OK"})))
 
       (DELETE "/" []
         (fn [req]
