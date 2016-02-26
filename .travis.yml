@@ -1,15 +1,19 @@
 language:
-  - clojure
-  - node_js
+- clojure
+- node_js
 sudo: false
 before_install:
-  - nvm install 4
-  - cd client
-  - npm config set spin false
-  - npm install
-  - cd ../backend
+- nvm install 4
+- cd client
+- npm config set spin false
+- npm install
+- cd ../backend
 script:
-  - lein2 do clean, check, test
-  - cd ../client
-  - npm run lint
-  - npm test
+- lein2 do clean, check, test
+- cd ../client
+- npm run lint
+- npm test
+notifications:
+  hipchat:
+    rooms:
+      secure: rTvHHDbTaoiha4bipdbpSJQJAXpaBiP+tHah6pxRfodSb3S7SvfkBXgctxuNGumVPOCt2efiih51CUxQR4NkOjOLmJI1LgWQmdf9MqUEFz/4Hd9nWB6lYbmbaN/lGEh4pn3NGiWueq6MUO7ORPmVdSOMgH+YBI1U77pJ43NNW5izXrHUNr5xZzZjiYxnFW4pfzuw2iAlnvrHOGPxBQZM8MSqINP2quveqUziBoYmShW4TSHRTV2fpYHEjUbSfq4U2S4mAua9I9QoZjSAuZXFHglmrdNCKlPaXpCouON0uKIecMSu26fDCH8MDq0hcXD5cdm/X+uW6z95UlJVIKyUT02a06G0Bt6OonYox9eJKNFtTxN5aPithM0fa/4r2aXyF5WaSsBFlHKAMhWY4ZbfXj/k9QFsd13aTf7aCRfOAq5VqsTrEW9SgQW5+ID64dWelB3w7MO0pIfe48F3OB2zCnzPwRgH0HA6qMQCRAVDEB0upkt4yIMjURNB74doRfA8DeYhA4ptEDU6X2RCPa5N5B3xJlIheW9I/2RCYRze3zRu7l2CeD+Sg7Vj3O9sqbyj5ZNh6ktw82BNWK2j+igwjk6jy9RaPNsfVEWyOaxjNCyOffd2BeRZP8Gv0CtQP1owc12l9U8SRAt4N1zlAxSp7jZky0hHS4JvT9+PjvZtE6Q=
