@@ -1,6 +1,7 @@
 (ns org.akvo.dash.endpoint.dataset
   "Dataset..."
   (:require
+   [clojure.java.jdbc]
    [cheshire.core :as json]
    [clojure.pprint :refer [pprint]]
    [compojure.core :refer :all]

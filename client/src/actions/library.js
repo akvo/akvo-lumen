@@ -1,6 +1,7 @@
 import * as constants from '../constants/library';
 import fetch from 'isomorphic-fetch';
 import { fetchDatasetsSuccess } from './dataset';
+import { fetchVisualisationsSuccess } from './visualisation';
 
 function fetchLibraryRequest() {
   return {
@@ -21,7 +22,7 @@ export function fetchLibrary() {
     .then(response => response.json())
     .then(library => {
       dispatch(fetchDatasetsSuccess(library.datasets));
-      // dispatch(fetchVisualisationsSuccess(library.visualisations));
+      dispatch(fetchVisualisationsSuccess(library.visualisations));
       // dispatch(fetchDashboardsSuccess(library.dashboards));
     })
     .catch(error => dispatch(fetchLibraryFailure(error)));
