@@ -1,6 +1,14 @@
 import React, { Component, PropTypes } from 'react';
 
 export default class LinkDataSourceSettings extends Component {
+
+  static isValidSource(source) {
+    return (
+      source.kind === 'LINK' &&
+      source.url
+    );
+  }
+
   constructor() {
     super();
     this.handleLink = this.handleLink.bind(this);

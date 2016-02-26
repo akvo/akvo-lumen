@@ -2,6 +2,15 @@ import React, { Component, PropTypes } from 'react';
 import * as tus from 'tus-js-client/lib';
 
 export default class DataFileDataSourceSettings extends Component {
+
+  static isValidSource(source) {
+    return (
+      source.kind === 'DATA_FILE' &&
+      source.url &&
+      source.fileName
+    );
+  }
+
   constructor() {
     super();
     this.handleDragEnter = this.handleDragEnter.bind(this);
@@ -28,7 +37,7 @@ export default class DataFileDataSourceSettings extends Component {
   uploadFile(file) {
     const onChange = this.props.onChange;
     const upload = new tus.Upload(file, {
-      endpoint: 'http://localhost:3030/api/files',
+      endpoint: '/api/files',
       onError(error) {
         console.error(`Failed because: ${error}`);
       },

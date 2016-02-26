@@ -72,6 +72,8 @@ export default function datasetImport(state = initialState, action) {
       return defineDataSource(state, action.dataSource);
     case constants.DEFINE_DATASET_SETTINGS:
       return defineDatasetSettings(state, action.dataset);
+    case constants.CLEAR_IMPORT:
+      return initialState;
     default: return state;
   }
 }
