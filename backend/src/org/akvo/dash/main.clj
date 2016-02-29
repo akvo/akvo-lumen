@@ -5,6 +5,7 @@
             [com.stuartsierra.component :as component]
             [duct.middleware.errors :refer [wrap-hide-errors]]
             [duct.util.runtime :refer [add-shutdown-hook]]
+            [duct.component.ragtime :as ragtime]
             [meta-merge.core :refer [meta-merge]]
             [org.akvo.dash.config :as config]
             [org.akvo.dash.system :refer [new-system]]))
@@ -23,4 +24,8 @@
   (let [system (new-system config)]
     (println "Starting HTTP server on port" (-> system :http :port))
     (add-shutdown-hook ::stop-system #(component/stop system))
-    (component/start system)))
+    (-> system
+        component/start
+        :ragtime
+        ragtime/reload
+        ragtime/migrate)))
