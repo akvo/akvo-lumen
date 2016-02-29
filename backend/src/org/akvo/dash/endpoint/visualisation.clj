@@ -2,16 +2,11 @@
   (:require
    [compojure.core :refer :all]
    [hugsql.core :as hugsql]
-   [org.akvo.dash.endpoint.util :refer [rr squuid]]))
+   [org.akvo.dash.endpoint.util :refer [rr squuid str->uuid]]))
 
 
 (hugsql/def-db-fns "org/akvo/dash/endpoint/visualisation.sql")
 
-(defn str->uuid ;; unnecessary?
-  "Converts a string to a UUID.
-  This will thrown on invalid uuid!"
-  [s]
-  (java.util.UUID/fromString s))
 
 (defn endpoint
   "/visualisations
