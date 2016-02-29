@@ -42,55 +42,29 @@ export default class WorkspaceNav extends Component {
     super();
     this.handleShowCreateCollectionModal = this.handleShowCreateCollectionModal.bind(this);
     this.state = {
-      isManuallyExpanded: false,
-      isManuallyCollapsed: false,
+      isManuallyInverted: false,
     };
   }
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.location.pathname !== this.props.location.pathname) {
       this.setState({
-        isManuallyExpanded: false,
-        isManuallyCollapsed: false,
+        isManuallyInverted: false,
       });
     }
-  }
-
-  getOnClick(isCollapsedByDefault) {
-    let onClick;
-
-    if (isCollapsedByDefault) {
-      onClick = () => {
-        if (this.state.isManuallyExpanded) {
-          this.setState({ isManuallyExpanded: false });
-        } else {
-          this.setState({ isManuallyExpanded: true });
-        }
-      };
-    } else {
-      onClick = () => {
-        if (this.state.isManuallyCollapsed) {
-          this.setState({ isManuallyCollapsed: false });
-        } else {
-          this.setState({ isManuallyCollapsed: true });
-        }
-      };
-    }
-
-    return onClick;
   }
 
   getClassName(isFloatOnTop) {
     let className = 'WorkspaceNav';
 
     if (isFloatOnTop) {
-      if (this.state.isManuallyExpanded) {
+      if (this.state.isManuallyInverted) {
         className = `${className} floating`;
       } else {
         className = `${className} collapsed`;
       }
     } else {
-      if (this.state.isManuallyCollapsed) {
+      if (this.state.isManuallyInverted) {
         className = `${className} collapsed noFloat`;
       }
     }
@@ -105,8 +79,14 @@ export default class WorkspaceNav extends Component {
   render() {
     const activeSubtitle = getActiveSubtitle(this.props.location.pathname);
     const isFloatOnTop = getCollapsedStatus(this.props.location.pathname);
-    const onClick = this.getOnClick(isFloatOnTop);
     const className = this.getClassName(isFloatOnTop);
+    const onClick = () => {
+      if (this.state.isManuallyInverted) {
+        this.setState({ isManuallyInverted: false });
+      } else {
+        this.setState({ isManuallyInverted: true });
+      }
+    };
 
     return (
       <nav
