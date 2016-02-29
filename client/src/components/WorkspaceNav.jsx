@@ -23,32 +23,49 @@ const getCollapsedStatus = (pathname) => {
   return collapsedStatus;
 };
 
+const getActiveSubtitle = (pathname) => {
+  let activeSubtitle;
+
+  if (pathname === 'library') {
+    activeSubtitle = 'library';
+  } else if (pathname.indexOf('library') > -1) {
+    activeSubtitle = 'collections';
+  } else if (pathname.indexOf('activity') > -1) {
+    activeSubtitle = 'activity';
+  }
+
+  return activeSubtitle;
+};
+
 export default class WorkspaceNav extends Component {
   constructor() {
     super();
     this.handleShowCreateCollectionModal = this.handleShowCreateCollectionModal.bind(this);
     this.state = {
-      isFloating: false,
+      isManuallyInverted: false,
     };
   }
 
-  getOnClick(isCollapsible) {
-    let onClick = null;
-
-    if (isCollapsible && !this.state.isFloating) {
-      onClick = () => this.setState({ isFloating: true });
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.location.pathname !== this.props.location.pathname) {
+      this.setState({
+        isManuallyInverted: false,
+      });
     }
-    return onClick;
   }
 
-  getClassName(isCollapsible) {
+  getClassName(isFloatOnTop) {
     let className = 'WorkspaceNav';
 
-    if (isCollapsible) {
-      if (this.state.isFloating) {
+    if (isFloatOnTop) {
+      if (this.state.isManuallyInverted) {
         className = `${className} floating`;
       } else {
-        className = `${className} collapsed clickable`;
+        className = `${className} collapsed`;
+      }
+    } else {
+      if (this.state.isManuallyInverted) {
+        className = `${className} collapsed noFloat`;
       }
     }
 
@@ -60,35 +77,49 @@ export default class WorkspaceNav extends Component {
   }
 
   render() {
-    const isCollapsible = getCollapsedStatus(this.props.location.pathname);
-    const onClick = this.getOnClick(isCollapsible);
-    const className = this.getClassName(isCollapsible);
+    const activeSubtitle = getActiveSubtitle(this.props.location.pathname);
+    const isFloatOnTop = getCollapsedStatus(this.props.location.pathname);
+    const className = this.getClassName(isFloatOnTop);
+    const onClick = () => {
+      if (this.state.isManuallyInverted) {
+        this.setState({ isManuallyInverted: false });
+      } else {
+        this.setState({ isManuallyInverted: true });
+      }
+    };
 
     return (
       <nav
         className={className}
-        onClick={onClick}
       >
         <div className="header">
-          <h1><Link to="/">DASH</Link></h1>
-          {isCollapsible && this.state.isFloating &&
-            <button
-              className="collapse clickable"
-              onClick={ () => {
-                this.setState({ isFloating: false });
-              }}
+          <div className="rowPrimary">
+            <div
+              className="menuIcon clickable"
+              onClick={onClick}
             >
-              {"<"}
-            </button>
-          }
+            </div>
+            <h1><Link to="/">DASH</Link></h1>
+          </div>
           <OrganizationMenu user={this.props.user} />
         </div>
         <div className="links">
-          <NavLink to="library" />
+          <NavLink
+            to="library"
+            className="library subtitle"
+            isSelected={activeSubtitle === 'library'}
+          />
           <CollectionsList
             collections={this.props.collections}
-            onShowCreateCollectionModal={this.handleShowCreateCollectionModal} />
-          <NavLink to="activity" />
+            onShowCreateCollectionModal={this.handleShowCreateCollectionModal}
+            isSelected={activeSubtitle === 'collections'}
+            pathname={this.props.location.pathname}
+          />
+          <NavLink
+            to="activity"
+            className="activity subtitle disabled"
+            isSelected={activeSubtitle === 'activity'}
+          />
         </div>
         <NavWorkspaceSwitch />
       </nav>

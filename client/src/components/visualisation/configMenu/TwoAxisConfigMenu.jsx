@@ -1,4 +1,5 @@
 import React, { Component, PropTypes } from 'react';
+import DashSelect from '../../common/DashSelect';
 
 const getDatasetArray = datasetObject => {
   const datasetArray = [];
@@ -11,6 +12,32 @@ const getDatasetArray = datasetObject => {
   datasetArray.sort(sortFunction);
 
   return datasetArray;
+};
+
+const getDatasetOptions = (datasetArray) => {
+  const output = [];
+
+  datasetArray.forEach(option => {
+    output.push({
+      value: option.id, label: option.name,
+    });
+  });
+
+  return output;
+};
+
+const getDashSelectOptionsFromColumnArray = (array) => {
+  const output = [];
+
+  if (array) {
+    array.forEach((entry, index) => {
+      output.push({
+        value: index, label: entry.title,
+      });
+    });
+  }
+
+  return output;
 };
 
 export default class TwoAxisConfigMenu extends Component {
@@ -28,11 +55,17 @@ export default class TwoAxisConfigMenu extends Component {
       yColumns = this.props.datasets[visualisation.sourceDatasetY].columns || [];
     }
 
+    const datasetOptions = getDatasetOptions(datasetArray);
+    const columnOptionsX = getDashSelectOptionsFromColumnArray(xColumns);
+    const columnOptionsY = getDashSelectOptionsFromColumnArray(yColumns);
+
+
     return (
       <div className="TwoAxisConfigMenu">
         <div className="inputGroup">
           <label htmlFor="chartTitle">Chart title:</label>
           <input
+            className="textInput"
             type="text"
             id="chartTitle"
             placeholder="Untitled chart"
@@ -43,39 +76,26 @@ export default class TwoAxisConfigMenu extends Component {
         <h3>X-Axis</h3>
         <div className="inputGroup">
           <label htmlFor="xDatasetMenu">Source dataset:</label>
-          <select
-            id="xDatasetMenu"
-            defaultValue={visualisation.sourceDatasetX}
+          <DashSelect
+            name="xDatasetMenu"
+            value={visualisation.sourceDatasetX || 'Choose a dataset option...'}
+            options={datasetOptions}
             onChange={this.props.onChangeSourceDatasetX}
-          >
-            {datasetArray.map((dataset, index) =>
-              <option
-                key={index}
-                value={dataset.id}
-              >
-                {dataset.name}
-              </option>
-            )}
-          </select>
+          />
         </div>
         <div className="inputGroup">
           <label htmlFor="xColumnMenu">Dataset column:</label>
-          <select
-            id="xColumnMenu"
-            disabled={xColumns.length === 0}
-            defaultValue={visualisation.datasetColumnX}
+          <DashSelect
+            name="xColumnMenu"
+            value={visualisation.datasetColumnX || 'Choose a dataset column...'}
+            options={columnOptionsX}
             onChange={this.props.onChangeDatasetColumnX}
-          >
-            {visualisation.sourceDatasetX &&
-              xColumns.map((column, index) =>
-                <option key={index} value={index}>{column.title}</option>
-              )
-            }
-          </select>
+          />
         </div>
         <div className="inputGroup">
           <label htmlFor="xLabel">X Axis Label:</label>
           <input
+            className="textInput"
             type="text"
             placeholder="X Axis label"
             defaultValue={visualisation.labelX}
@@ -86,39 +106,26 @@ export default class TwoAxisConfigMenu extends Component {
         <h3>Y-Axis</h3>
         <div className="inputGroup">
           <label htmlFor="yDatasetMenu">Source dataset:</label>
-          <select
-            id="yDatasetMenu"
-            defaultValue={visualisation.sourceDatasetY}
+          <DashSelect
+            name="yDatasetMenu"
+            value={visualisation.sourceDatasetY || 'Choose a dataset option...'}
+            options={datasetOptions}
             onChange={this.props.onChangeSourceDatasetY}
-          >
-            {datasetArray.map((dataset, index) =>
-              <option
-                key={index}
-                value={dataset.id}
-              >
-                {dataset.name}
-              </option>
-            )}
-          </select>
+          />
         </div>
         <div className="inputGroup">
           <label htmlFor="yColumnMenu">Dataset column:</label>
-          <select
-            id="yColumnMenu"
-            disabled={yColumns.length === 0}
-            defaultValue={visualisation.datasetColumnY}
+          <DashSelect
+            name="yColumnMenu"
+            value={visualisation.datasetColumnY || 'Choose a dataset column...'}
+            options={columnOptionsY}
             onChange={this.props.onChangeDatasetColumnY}
-          >
-            {visualisation.sourceDatasetY &&
-              yColumns.map((column, index) =>
-                <option key={index} value={index}>{column.title}</option>
-              )
-            }
-          </select>
+          />
         </div>
         <div className="inputGroup">
           <label htmlFor="yLabel">Y Axis Label:</label>
           <input
+            className="textInput"
             type="text"
             placeholder="Y Axis label"
             defaultValue={visualisation.labelY}

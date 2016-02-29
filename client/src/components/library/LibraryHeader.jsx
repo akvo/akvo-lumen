@@ -12,22 +12,28 @@ export default class LibraryHeader extends Component {
   render() {
     return (
       <div className="LibraryHeader">
-        <LocationIndicator />
-        <LibraryCreateButton
-          onCreate={this.props.onCreate} />
-        <LibrarySearch
-          searchString={this.props.searchString}
-          onSearch={this.props.onSetSearchString} />
-        <LibraryTabList
-          selected={this.props.filterBy}
-          onSelect={this.props.onChangeFilterBy} />
-        <LibraryDisplayMenu
-          sortOrder={this.props.sortOrder}
-          onChangeSortOrder={this.props.onChangeSortOrder}
-          isReverseSort={this.props.isReverseSort}
-          onChangeReverseSort={this.props.onChangeReverseSort}
-          displayMode={this.props.displayMode}
-          onChangeDisplayMode={this.props.onChangeDisplayMode} />
+        <div className="row rowPrimary">
+          <LocationIndicator
+            pathname={this.props.pathname}
+          />
+          <LibraryCreateButton
+            onCreate={this.props.onCreate} />
+          <LibrarySearch
+            searchString={this.props.searchString}
+            onSearch={this.props.onSetSearchString} />
+        </div>
+        <div className="row rowSecondary">
+          <LibraryTabList
+            selected={this.props.filterBy}
+            onSelect={this.props.onChangeFilterBy} />
+          <LibraryDisplayMenu
+            sortOrder={this.props.sortOrder}
+            onChangeSortOrder={this.props.onChangeSortOrder}
+            isReverseSort={this.props.isReverseSort}
+            onChangeReverseSort={this.props.onChangeReverseSort}
+            displayMode={this.props.displayMode}
+            onChangeDisplayMode={this.props.onChangeDisplayMode} />
+        </div>
       </div>
     );
   }
@@ -45,4 +51,5 @@ LibraryHeader.propTypes = {
   searchString: PropTypes.string,
   onSetSearchString: PropTypes.func.isRequired,
   onCreate: PropTypes.func.isRequired,
+  pathname: PropTypes.string.isRequired,
 };

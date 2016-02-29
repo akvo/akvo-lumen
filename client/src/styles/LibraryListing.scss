@@ -1,24 +1,89 @@
+@import 'modules/colors';
+
 .LibraryListing {
   .LibraryListingGroup {
     margin: 1rem;
     padding: 1rem;
+
+    h3 {
+      color: $midGrey;
+      font-size: 1.1rem;
+    }
   }
   .LibraryListingItem {
     display: inline-block;
-    margin: 2.5%;
-    padding: 1rem;
-    background-color: whitesmoke;
+    margin: 1rem 2.5%;
     cursor: pointer;
+    position: relative;
+    min-height: 5rem;
+    padding: 0.5rem 0;
+    overflow: hidden;
+    transition: background-color 0.3s ease;
     &:hover {
-      background-color: rgb(200, 200, 200);
+      background-color: $lightBlueGrey;
+    }
+    .selectEntity {
+      position: absolute;
+      top: 0.75rem;
+      left: 0.25rem;
+      margin: 0;
+    }
+    .entityIcon {
+      height: 4rem;
+      width: 4rem;
+      margin-left: 1.5rem;
+      margin-top: 0.25rem;
+      display: inline-block;
+      background-size: cover;
+      background-repeat: no-repeat;
+    }
+    &.visualisation {
+      .entityIcon {
+        background-image: url('img/icon-256-library-listing-visualisation.png');
+      }
+    }
+    &.dashboard {
+      .entityIcon {
+        background-image: url('img/icon-256-library-listing-dashboard.png');
+      }
+    }
+    &.dataset {
+      .entityIcon {
+        background-image: url('img/icon-256-library-listing-dataset.png');
+      }
+    }
+    .textContents {
+      display: inline-block;
+      padding-left: 1rem;
+      vertical-align: top;
+      width: calc(100% - 6.5rem);
+    }
+    .entityName {
+      color: $strongBlue;
+      font-weight: bold;
+      text-transform: capitalize;
+    }
+    .entityControls {
+      display: inline-block;
+      width: 1rem;
+      vertical-align: top;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      .showControls {
+        transform: rotate(90deg);
+        font-size: 2rem;
+        font-weight: bold;
+        color: $strongBlue;
+      }
+    }
+    &:hover .entityControls {
+      opacity: 1;
     }
   }
   &.grid {
     .LibraryListingItem {
-      width: 45%;
-      &:nth-last-child(1), &:nth-last-child(2) {
-        margin-bottom: 0;
-      }
+      width: calc(85% / 3);
+      min-width: 15rem;
     }
   }
   &.list {

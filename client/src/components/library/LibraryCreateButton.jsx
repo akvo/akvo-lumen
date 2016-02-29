@@ -1,18 +1,30 @@
 import React, { Component, PropTypes } from 'react';
+import DashSelect from '../common/DashSelect';
 
 export default class LibraryCreateButton extends Component {
   render() {
     const { onCreate } = this.props;
+    const options = [
+      { value: 'dataset', label: 'Dataset' },
+      { value: 'visualisation', label: 'Visualisation' },
+      { value: 'dashboard', label: 'Dashboard' },
+      { value: 'collection', label: 'Collection' },
+    ];
+    const onChange = (value) => {
+      onCreate(value);
+      // Force a rerender so menu still shows placeholder
+      this.forceUpdate();
+    };
+
     return (
-      <select
-        className="LibraryCreateButton"
-        onChange={evt => onCreate(evt.target.value)} value="new"
-      >
-        <option value="new">New</option>
-        <option value="dataset">Dataset</option>
-        <option value="visualisation">Visualisation</option>
-        <option value="dashboard">Dashboard</option>
-      </select>
+      <div className="LibraryCreateButton">
+        <DashSelect
+          name="create-button"
+          options={options}
+          onChange={onChange}
+          placeholder="New"
+        />
+      </div>
     );
   }
 }

@@ -6,10 +6,14 @@ html, body, #root, #root > div {
     box-sizing: border-box;
 }
 
+#root {
+    min-width: 1024px;
+}
+
 /* Very basic text styling */
 
 body {
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: 'Source Sans Pro', sans-serif;
     color: rgb(30, 30, 30);
 }
 
@@ -31,6 +35,10 @@ p, h1, h2, h3, h4, h5 {
         opacity: 1;
         cursor: not-allowed;
     }
+}
+
+.disabled {
+    cursor: not-allowed;
 }
 
 /* Always show modals on top of the stack */

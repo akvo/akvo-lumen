@@ -29,6 +29,7 @@ const getConfigMenu = (chartType, componentProps) => {
         onChangeTitle={componentProps.onChangeTitle}
         onChangeSourceDatasetX={componentProps.onChangeSourceDatasetX}
         onChangeDatasetColumnX={componentProps.onChangeDatasetColumnX}
+        onChangeDatasetNameColumnX={componentProps.onChangeDatasetNameColumnX}
       />
     );
   } else if (chartType === 'scatter') {

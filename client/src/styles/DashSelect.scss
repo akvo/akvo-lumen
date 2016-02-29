@@ -1,0 +1,26 @@
+.DashSelect {
+  * {
+    box-shadow: none !important;
+    border-radius: 0;
+  }
+  .Select, .Select-control, .Select-input {
+    height: 100%;
+  }
+  .Select-placeholder {
+    cursor: pointer;
+  }
+  .Select-control {
+    transition: background-color 0.3s ease;
+  }
+  .Select-placeholder {
+    transition: color 0.3s ease;
+  }
+  .Select-arrow {
+    transition: border 0.3s ease;
+  }
+  .Select-option {
+    transition: color 0.3s, border 0.3s;
+    transition-timing-function: ease;
+    border-radius: 0;
+  }
+}

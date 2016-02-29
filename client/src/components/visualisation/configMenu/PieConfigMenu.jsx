@@ -1,4 +1,5 @@
 import React, { Component, PropTypes } from 'react';
+import DashSelect from '../../common/DashSelect';
 
 const getDatasetArray = datasetObject => {
   const datasetArray = [];
@@ -13,6 +14,31 @@ const getDatasetArray = datasetObject => {
   return datasetArray;
 };
 
+const getDatasetOptions = (datasetArray) => {
+  const output = [];
+
+  datasetArray.forEach(option => {
+    output.push({
+      value: option.id, label: option.name,
+    });
+  });
+
+  return output;
+};
+
+const getDashSelectOptionsFromColumnArray = (array) => {
+  const output = [];
+
+  if (array) {
+    array.forEach((entry, index) => {
+      output.push({
+        value: index, label: entry.title,
+      });
+    });
+  }
+  return output;
+};
+
 export default class PieConfigMenu extends Component {
   render() {
     const datasetArray = getDatasetArray(this.props.datasets);
@@ -23,11 +49,15 @@ export default class PieConfigMenu extends Component {
       xColumns = this.props.datasets[visualisation.sourceDatasetX].columns || [];
     }
 
+    const datasetOptions = getDatasetOptions(datasetArray);
+    const columnOptionsX = getDashSelectOptionsFromColumnArray(xColumns);
+
     return (
       <div className="PieConfigMenu">
         <div className="inputGroup">
           <label htmlFor="chartTitle">Chart title:</label>
           <input
+            className="textInput"
             type="text"
             id="chartTitle"
             placeholder="Untitled chart"
@@ -37,51 +67,32 @@ export default class PieConfigMenu extends Component {
         </div>
         <div className="inputGroup">
           <label htmlFor="xDatasetMenu">Source dataset:</label>
-          <select
-            id="xDatasetMenu"
-            defaultValue={visualisation.sourceDatasetX}
+          <DashSelect
+            name="xDatasetMenu"
+            value={visualisation.sourceDatasetX || 'Choose a dataset option...'}
+            options={datasetOptions}
             onChange={this.props.onChangeSourceDatasetX}
-          >
-            {datasetArray.map((dataset, index) =>
-              <option
-                key={index}
-                value={dataset.id}
-              >
-                {dataset.name}
-              </option>
-            )}
-          </select>
+          />
         </div>
         <div className="inputGroup">
           <label htmlFor="xColumnMenu">Dataset column:</label>
-          <select
-            id="xColumnMenu"
-            disabled={xColumns.length === 0}
-            defaultValue={visualisation.datasetColumnX}
+          <DashSelect
+            name="xColumnMenu"
+            value={visualisation.datasetColumnX || 'Choose a dataset column...'}
+            options={columnOptionsX}
             onChange={this.props.onChangeDatasetColumnX}
-          >
-            {visualisation.sourceDatasetX &&
-              xColumns.map((column, index) =>
-                <option key={index} value={index}>{column.title}</option>
-              )
-            }
-          </select>
+          />
         </div>
-        <div className="inputGroup">
-          <label htmlFor="xNameColumnMenu">Label column:</label>
-          <select
-            id="xNameColumnMenu"
-            disabled={xColumns.length === 0}
-            defaultValue={visualisation.datasetNameColumnX}
-            onChange={this.props.onChangeDatasetNameColumnX}
-          >
-            {visualisation.sourceDatasetX &&
-              xColumns.map((column, index) =>
-                <option key={index} value={index}>{column.title}</option>
-              )
-            }
-          </select>
-        </div>
+          <div className="inputGroup">
+            <label htmlFor="xNameColumnMenu">Label column:</label>
+            <DashSelect
+              name="xNameColumnMenu"
+              disabled={xColumns.length === 0}
+              value={visualisation.datasetNameColumnX || 'Choose a name column...'}
+              onChange={this.props.onChangeDatasetNameColumnX}
+              options={columnOptionsX}
+            />
+          </div>
       </div>
     );
   }

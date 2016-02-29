@@ -12,26 +12,32 @@ const supportedFormats = [{
   kind: 'DROPBOX',
   icon: '/assets/dropbox.png',
   label: 'Dropbox',
+  disabled: true,
 }, {
   kind: 'WORLD_BANK',
   icon: '/assets/world-bank.png',
   label: 'World Bank',
+  disabled: true,
 }, {
   kind: 'AKVO_RSR',
   icon: '/assets/akvo-rsr.png',
   label: 'Akvo RSR',
+  disabled: true,
 }, {
   kind: 'AKVO_FLOW',
   icon: '/assets/akvo-flow.png',
   label: 'Akvo FLOW',
+  disabled: true,
 }, {
   kind: 'GITHUB',
   icon: '/assets/github.png',
   label: 'Github',
+  disabled: true,
 }, {
   kind: 'GOOGLE_DRIVE',
   icon: '/assets/google-drive.png',
   label: 'Google Drive',
+  disabled: true,
 }];
 
 const defaultDataSources = {
@@ -50,10 +56,15 @@ const defaultDataSources = {
 export default class SourceSelection extends Component {
   render() {
     const sources = supportedFormats.map(source => (
-      <div className="sourceOptionContainer" key={source.kind}>
+      <div
+        className={`sourceOptionContainer ${source.kind} ${source.disabled ? 'disabled' : ''}`}
+        key={source.kind}
+      >
         <input
+          className="sourceOption"
           type="radio"
           name="choose_data_source"
+          disabled={source.disabled}
           value={source.kind}
           checked={source.kind === this.props.dataSourceKind}
           onChange={evt => {

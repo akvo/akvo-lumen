@@ -66,8 +66,8 @@ class Visualisation extends Component {
     this.props.dispatch(push('/library?filter=visualisations&sort=created'));
   }
 
-  handleChangeSourceDataset(event, axis) {
-    const datasetId = event.target.value;
+  handleChangeSourceDataset(value, axis) {
+    const datasetId = value;
     const sourceDataset = axis === 'X' ? 'sourceDatasetX' : 'sourceDatasetY';
     if (!this.props.library.datasets[datasetId].columns) {
       this.props.dispatch(fetchDataset(datasetId));
@@ -99,24 +99,24 @@ class Visualisation extends Component {
               isUnsavedChanges: true,
             })
           )}
-          onChangeVisualisationType={event => (
+          onChangeVisualisationType={value => (
             this.setState({
-              visualisationType: event.target.value,
+              visualisationType: value,
               isUnsavedChanges: true,
             })
           )}
-          onChangeSourceDatasetX={event => (
-            this.handleChangeSourceDataset(event, 'X')
+          onChangeSourceDatasetX={value => (
+            this.handleChangeSourceDataset(value, 'X')
           )}
-          onChangeDatasetColumnX={ event => (
+          onChangeDatasetColumnX={ value => (
             this.setState({
-              datasetColumnX: event.target.value,
+              datasetColumnX: value,
               isUnsavedChanges: true,
             })
           )}
-          onChangeDatasetNameColumnX={ event => (
+          onChangeDatasetNameColumnX={ value => (
             this.setState({
-              datasetNameColumnX: event.target.value,
+              datasetNameColumnX: value,
               isUnsavedChanges: true,
             })
           )}
@@ -126,12 +126,12 @@ class Visualisation extends Component {
               isUnsavedChanges: true,
             })
           )}
-          onChangeSourceDatasetY={ event => (
-            this.handleChangeSourceDataset(event, 'Y')
+          onChangeSourceDatasetY={ value => (
+            this.handleChangeSourceDataset(value, 'Y')
           )}
-          onChangeDatasetColumnY={ event => (
+          onChangeDatasetColumnY={ value => (
             this.setState({
-              datasetColumnY: event.target.value,
+              datasetColumnY: value,
               isUnsavedChanges: true,
             })
           )}

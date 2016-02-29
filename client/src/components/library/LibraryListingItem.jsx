@@ -7,10 +7,17 @@ export default class LibraryListingItem extends Component {
     return (
       <li
         onClick={() => this.props.onSelectEntity(entity.type, entity.id)}
-        key={entity.id} className="LibraryListingItem">
-        <input type="checkbox" />
-        {entity.name}
-        <button>...</button>
+        key={entity.id}
+        className={`LibraryListingItem ${entity.type}`}
+      >
+        <input type="checkbox" className="selectEntity disabled" />
+        <div className="entityIcon"></div>
+        <div className="textContents">
+          <h3 className="entityName">{entity.name}</h3>
+        </div>
+        <div className="entityControls">
+          <button className="showControls clickable disabled">...</button>
+        </div>
       </li>
     );
   }

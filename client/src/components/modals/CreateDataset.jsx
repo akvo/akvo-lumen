@@ -67,41 +67,59 @@ class CreateDataset extends Component {
     return (
       <Modal
         isOpen
-        style={{ overlay: { zIndex: 99 } }}>
-        <div className="CreateDataset">
-          <h3 className="modalTitle">New Dataset</h3>
-          <button className="btn close clickable" onClick={() => {
-            clearImport();
-            onCancel();
-          }}>
-            X
-          </button>
-          <ul className="tabMenu">
-            <li className={`tab ${currentPage === 'select-data-source-type' ? 'selected' : null}`}>
-              Source
-            </li>
-            <li className={`tab ${currentPage === 'define-data-source' ? 'selected' : null}`}>
-              File / Project
-            </li>
-            <li className={`tab ${currentPage === 'define-dataset' ? 'selected' : null}`}>
-              Settings
-            </li>
-          </ul>
-          {this.pageComponent(currentPage)}
-          <div className={`movementControls ${currentPage}`}>
-            <div className="buttonContainer">
-              <button
-                className="btn previous clickable"
-                disabled={currentPage === 'select-data-source-type'}
-                onClick={this.props.previousPage}>
-                Previous
-              </button>
-              <button
-                className="btn next clickable"
-                disabled={currentPage === 'define-dataset' ? !this.isValidImport() : false}
-                onClick={this.handleNextOrImport}>
-                {currentPage === 'define-dataset' ? 'Import' : 'Next'}
-              </button>
+        style={
+          {
+            content: {
+              borderRadius: 0,
+              border: '0.1rem solid rgb(223, 244, 234)',
+              marginLeft: '7rem',
+              marginRight: '7rem',
+            },
+            overlay: {
+              zIndex: 99,
+              backgroundColor: 'rgba(0,0,0,0.6)',
+            },
+          }
+        }
+      >
+        <div className={this.props.containerClassName}>
+          <div className="CreateDataset">
+            <h3 className="modalTitle">New Dataset</h3>
+            <div className="btn close clickable" onClick={() => {
+              clearImport();
+              onCancel();
+            }}>
+              +
+            </div>
+            <ul className="tabMenu">
+              <li
+                className={`tab ${currentPage === 'select-data-source-type' ? 'selected' : null}`}
+              >
+                Source
+              </li>
+              <li className={`tab ${currentPage === 'define-data-source' ? 'selected' : null}`}>
+                File / Project
+              </li>
+              <li className={`tab ${currentPage === 'define-dataset' ? 'selected' : null}`}>
+                Settings
+              </li>
+            </ul>
+            {this.pageComponent(currentPage)}
+            <div className={`controls ${currentPage}`}>
+              <div className="buttonContainer">
+                <button
+                  className="btn previous clickable negative"
+                  disabled={currentPage === 'select-data-source-type'}
+                  onClick={this.props.previousPage}>
+                  Previous
+                </button>
+                <button
+                  className="btn next clickable positive"
+                  disabled={currentPage === 'define-dataset' ? !this.isValidImport() : false}
+                  onClick={this.handleNextOrImport}>
+                  {currentPage === 'define-dataset' ? 'Import' : 'Next'}
+                </button>
+              </div>
             </div>
           </div>
         </div>

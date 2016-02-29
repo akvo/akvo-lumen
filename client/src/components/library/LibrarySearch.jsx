@@ -10,8 +10,18 @@ export default class LibrarySearch extends Component {
   render() {
     return (
       <div className="LibrarySearch">
-        <input ref="search" placeholder="Search" defaultValue={this.props.searchString}></input>
-        <button onClick={evt => this.handleClick(evt)}>Search</button>
+        <input
+          className="search"
+          ref="search"
+          placeholder="Search"
+          defaultValue={this.props.searchString}
+        />
+        <button
+          onClick={evt => this.handleClick(evt)}
+          className="clickable"
+        >
+          Search
+        </button>
       </div>
     );
   }
