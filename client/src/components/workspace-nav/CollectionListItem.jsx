@@ -8,7 +8,7 @@ function slug(collection) {
 export default class CollectionListItem extends Component {
   render() {
     const collection = this.props.collection;
-    const isActive = this.props.pathname.indexOf('' + collection.id) > -1;
+    const isActive = this.props.pathname.indexOf(`${collection.id}`) > -1;
     const className = isActive ? 'selected' : null;
 
     return (
@@ -24,4 +24,5 @@ export default class CollectionListItem extends Component {
 
 CollectionListItem.propTypes = {
   collection: PropTypes.object,
+  pathname: PropTypes.string,
 };

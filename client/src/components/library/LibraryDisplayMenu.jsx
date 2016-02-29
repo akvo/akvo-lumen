@@ -3,12 +3,11 @@ import DashSelect from '../common/DashSelect';
 
 export default class LibraryDisplayMenu extends Component {
   render() {
-    const { sortOrder, onChangeSortOrder, displayMode, onChangeDisplayMode,
-      isReverseSort, onChangeReverseSort } = this.props;
+    const { sortOrder, onChangeSortOrder, onChangeDisplayMode } = this.props;
     const sortOptions = [
-      {value: 'last_modified', label: 'Last modified'},
-      {value: 'created', label: 'Created'},
-      {value: 'name', label: 'Name'},
+      { value: 'last_modified', label: 'Last modified' },
+      { value: 'created', label: 'Created' },
+      { value: 'name', label: 'Name' },
     ];
     return (
       <div className="LibraryDisplayMenu">

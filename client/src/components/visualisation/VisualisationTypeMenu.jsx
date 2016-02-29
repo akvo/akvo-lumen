@@ -7,12 +7,12 @@ export default class VisualisationTypeMenu extends Component {
 
   render() {
     const chartTypes = [
-      { value: 'bar', label: 'bar',},
-      { value: 'line', label: 'line',},
-      { value: 'area', label: 'area',},
-      { value: 'pie', label: 'pie',},
-      { value: 'donut', label: 'donut',},
-      { value: 'scatter', label: 'scatter',},
+      { value: 'bar', label: 'bar' },
+      { value: 'line', label: 'line' },
+      { value: 'area', label: 'area' },
+      { value: 'pie', label: 'pie' },
+      { value: 'donut', label: 'donut' },
+      { value: 'scatter', label: 'scatter' },
     ];
 
     return (

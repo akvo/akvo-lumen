@@ -10,7 +10,7 @@ export default class LibraryListingItem extends Component {
         key={entity.id}
         className={`LibraryListingItem ${entity.type}`}
       >
-        <input type="checkbox" className="selectEntity disabled"/>
+        <input type="checkbox" className="selectEntity disabled" />
         <div className="entityIcon"></div>
         <div className="textContents">
           <h3 className="entityName">{entity.name}</h3>

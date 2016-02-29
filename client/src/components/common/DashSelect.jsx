@@ -22,4 +22,6 @@ DashSelect.propTypes = {
   options: PropTypes.array.isRequired,
   name: PropTypes.string,
   onChange: PropTypes.func,
+  clearable: PropTypes.bool,
+  searchable: PropTypes.bool,
 };

@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, PropTypes } from 'react';
 
 const getLocation = pathname => {
   let location;
@@ -6,12 +6,13 @@ const getLocation = pathname => {
   if (pathname === 'library') {
     location = 'Library';
   } else if (location.indexOf('library') > -1) {
-    pathname = 'Collection';
+    location = 'Collection';
   } else if (location.indexOf('activity') > -1) {
-    pathname = 'Activity';
+    location = 'Activity';
   }
+
   return location;
-}
+};
 
 export default class LocationIndicator extends Component {
   render() {
@@ -22,3 +23,7 @@ export default class LocationIndicator extends Component {
     );
   }
 }
+
+LocationIndicator.propTypes = {
+  pathname: PropTypes.string,
+};

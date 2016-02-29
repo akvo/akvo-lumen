@@ -82,7 +82,9 @@ class CreateDataset extends Component {
               +
             </div>
             <ul className="tabMenu">
-              <li className={`tab ${currentPage === 'select-data-source-type' ? 'selected' : null}`}>
+              <li
+                className={`tab ${currentPage === 'select-data-source-type' ? 'selected' : null}`}
+              >
                 Source
               </li>
               <li className={`tab ${currentPage === 'define-data-source' ? 'selected' : null}`}>

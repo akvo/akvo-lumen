@@ -15,7 +15,7 @@ const getDatasetArray = datasetObject => {
 };
 
 const getDatasetOptions = (datasetArray) => {
-  let output = [];
+  const output = [];
 
   datasetArray.forEach(option => {
     output.push({
@@ -27,7 +27,7 @@ const getDatasetOptions = (datasetArray) => {
 };
 
 const getDashSelectOptionsFromColumnArray = (array) => {
-  let output = [];
+  const output = [];
 
   if (array) {
     array.forEach((entry, index) => {
@@ -69,7 +69,7 @@ export default class PieConfigMenu extends Component {
           <label htmlFor="xDatasetMenu">Source dataset:</label>
           <DashSelect
             name="xDatasetMenu"
-            value={visualisation.sourceDatasetX || "Choose a dataset option..."}
+            value={visualisation.sourceDatasetX || 'Choose a dataset option...'}
             options={datasetOptions}
             onChange={this.props.onChangeSourceDatasetX}
           />
@@ -78,7 +78,7 @@ export default class PieConfigMenu extends Component {
           <label htmlFor="xColumnMenu">Dataset column:</label>
           <DashSelect
             name="xColumnMenu"
-            value={visualisation.datasetColumnX || "Choose a dataset column..."}
+            value={visualisation.datasetColumnX || 'Choose a dataset column...'}
             options={columnOptionsX}
             onChange={this.props.onChangeDatasetColumnX}
           />
@@ -88,7 +88,7 @@ export default class PieConfigMenu extends Component {
             <DashSelect
               name="xNameColumnMenu"
               disabled={xColumns.length === 0}
-              value={visualisation.datasetNameColumnX || "Choose a name column..."}
+              value={visualisation.datasetNameColumnX || 'Choose a name column...'}
               onChange={this.props.onChangeDatasetNameColumnX}
               options={columnOptionsX}
             />

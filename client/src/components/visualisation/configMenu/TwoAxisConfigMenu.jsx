@@ -15,7 +15,7 @@ const getDatasetArray = datasetObject => {
 };
 
 const getDatasetOptions = (datasetArray) => {
-  let output = [];
+  const output = [];
 
   datasetArray.forEach(option => {
     output.push({
@@ -27,7 +27,7 @@ const getDatasetOptions = (datasetArray) => {
 };
 
 const getDashSelectOptionsFromColumnArray = (array) => {
-  let output = [];
+  const output = [];
 
   if (array) {
     array.forEach((entry, index) => {
@@ -78,7 +78,7 @@ export default class TwoAxisConfigMenu extends Component {
           <label htmlFor="xDatasetMenu">Source dataset:</label>
           <DashSelect
             name="xDatasetMenu"
-            value={visualisation.sourceDatasetX || "Choose a dataset option..."}
+            value={visualisation.sourceDatasetX || 'Choose a dataset option...'}
             options={datasetOptions}
             onChange={this.props.onChangeSourceDatasetX}
           />
@@ -87,7 +87,7 @@ export default class TwoAxisConfigMenu extends Component {
           <label htmlFor="xColumnMenu">Dataset column:</label>
           <DashSelect
             name="xColumnMenu"
-            value={visualisation.datasetColumnX || "Choose a dataset column..."}
+            value={visualisation.datasetColumnX || 'Choose a dataset column...'}
             options={columnOptionsX}
             onChange={this.props.onChangeDatasetColumnX}
           />
@@ -108,7 +108,7 @@ export default class TwoAxisConfigMenu extends Component {
           <label htmlFor="yDatasetMenu">Source dataset:</label>
           <DashSelect
             name="yDatasetMenu"
-            value={visualisation.sourceDatasetY || "Choose a dataset option..."}
+            value={visualisation.sourceDatasetY || 'Choose a dataset option...'}
             options={datasetOptions}
             onChange={this.props.onChangeSourceDatasetY}
           />
@@ -117,7 +117,7 @@ export default class TwoAxisConfigMenu extends Component {
           <label htmlFor="yColumnMenu">Dataset column:</label>
           <DashSelect
             name="yColumnMenu"
-            value={visualisation.datasetColumnY || "Choose a dataset column..."}
+            value={visualisation.datasetColumnY || 'Choose a dataset column...'}
             options={columnOptionsY}
             onChange={this.props.onChangeDatasetColumnY}
           />

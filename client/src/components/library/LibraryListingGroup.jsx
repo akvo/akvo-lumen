@@ -2,16 +2,17 @@ import React, { Component, PropTypes } from 'react';
 import LibraryListingItem from './LibraryListingItem';
 
 const getListGroupTitle = (listGroupName, sortOrder) => {
-  let title, date, locale, month;
+  let title;
 
   if (sortOrder === 'name') {
     title = listGroupName.toUpperCase();
   } else if (sortOrder === 'created' || sortOrder === 'last_modified') {
-    date = new Date(Date.parse(listGroupName));
-    locale = 'en-us';
-    month = date.toLocaleString(locale, {month: 'long'});
+    const date = new Date(Date.parse(listGroupName));
+    const locale = 'en-us';
+    const month = date.toLocaleString(locale, { month: 'long' });
     title = `${date.getDate()} ${month} ${date.getFullYear()}`;
   }
+
   return title;
 };
 

@@ -18,4 +18,6 @@ export default class NavLink extends Component {
 
 NavLink.propTypes = {
   to: PropTypes.string,
+  className: PropTypes.string,
+  isSelected: PropTypes.bool,
 };

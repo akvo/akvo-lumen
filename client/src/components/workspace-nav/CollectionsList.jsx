@@ -12,7 +12,7 @@ export default class CollectionsList extends Component {
         </li>
       )
     );
-    const subtitleClassName = `subtitle${this.props.isSelected ? ' selected' : ''}`
+    const subtitleClassName = `subtitle${this.props.isSelected ? ' selected' : ''}`;
 
     return (
       <div className="CollectionsList">
@@ -36,4 +36,6 @@ export default class CollectionsList extends Component {
 CollectionsList.propTypes = {
   collections: PropTypes.array.isRequired,
   onShowCreateCollectionModal: PropTypes.func.isRequired,
+  pathname: PropTypes.string,
+  isSelected: PropTypes.bool,
 };

@@ -61,7 +61,7 @@ export default class SourceSelection extends Component {
         key={source.kind}
       >
         <input
-          className='sourceOption'
+          className="sourceOption"
           type="radio"
           name="choose_data_source"
           disabled={source.disabled}

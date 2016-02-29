@@ -35,7 +35,7 @@ const getActiveSubtitle = (pathname) => {
   }
 
   return activeSubtitle;
-}
+};
 
 export default class WorkspaceNav extends Component {
   constructor() {
@@ -47,37 +47,37 @@ export default class WorkspaceNav extends Component {
     };
   }
 
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.location.pathname !== this.props.location.pathname) {
+      this.setState({
+        isManuallyExpanded: false,
+        isManuallyCollapsed: false,
+      });
+    }
+  }
+
   getOnClick(isCollapsedByDefault) {
     let onClick;
 
     if (isCollapsedByDefault) {
       onClick = () => {
         if (this.state.isManuallyExpanded) {
-          this.setState({isManuallyExpanded: false});
+          this.setState({ isManuallyExpanded: false });
         } else {
-          this.setState({isManuallyExpanded: true});
+          this.setState({ isManuallyExpanded: true });
         }
       };
     } else {
       onClick = () => {
         if (this.state.isManuallyCollapsed) {
-          this.setState({isManuallyCollapsed: false});
+          this.setState({ isManuallyCollapsed: false });
         } else {
-          this.setState({isManuallyCollapsed: true});
+          this.setState({ isManuallyCollapsed: true });
         }
       };
     }
 
     return onClick;
-  }
-
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.location.pathname != this.props.location.pathname) {
-      this.setState({
-        isManuallyExpanded: false,
-        isManuallyCollapsed: false,
-      });
-    }
   }
 
   getClassName(isFloatOnTop) {
@@ -92,8 +92,6 @@ export default class WorkspaceNav extends Component {
     } else {
       if (this.state.isManuallyCollapsed) {
         className = `${className} collapsed noFloat`;
-      } else {
-        className = className;
       }
     }
 
