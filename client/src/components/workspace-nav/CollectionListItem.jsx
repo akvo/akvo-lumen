@@ -24,5 +24,5 @@ export default class CollectionListItem extends Component {
 
 CollectionListItem.propTypes = {
   collection: PropTypes.object,
-  pathname: PropTypes.string,
+  pathname: PropTypes.string.isRequired,
 };

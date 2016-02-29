@@ -5,9 +5,9 @@ const getLocation = pathname => {
 
   if (pathname === 'library') {
     location = 'Library';
-  } else if (location.indexOf('library') > -1) {
+  } else if (pathname.indexOf('library') > -1) {
     location = 'Collection';
-  } else if (location.indexOf('activity') > -1) {
+  } else if (pathname.indexOf('activity') > -1) {
     location = 'Activity';
   }
 
@@ -25,5 +25,5 @@ export default class LocationIndicator extends Component {
 }
 
 LocationIndicator.propTypes = {
-  pathname: PropTypes.string,
+  pathname: PropTypes.string.isRequired,
 };

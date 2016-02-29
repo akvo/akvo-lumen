@@ -36,6 +36,6 @@ export default class CollectionsList extends Component {
 CollectionsList.propTypes = {
   collections: PropTypes.array.isRequired,
   onShowCreateCollectionModal: PropTypes.func.isRequired,
-  pathname: PropTypes.string,
+  pathname: PropTypes.string.isRequired,
   isSelected: PropTypes.bool,
 };
