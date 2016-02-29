@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import VisualisationHeader from '../components/visualisation/VisualisationHeader';
 import VisualisationEditor from '../components/visualisation/VisualisationEditor';
-import { createVisualisation, saveVisualisationChanges } from '../actions/visualisation';
+import * as actions from '../actions/visualisation';
 import { fetchDataset } from '../actions/dataset';
 import { push } from 'react-router-redux';
 
@@ -44,9 +44,14 @@ class Visualisation extends Component {
 
     if (isEditingExistingVisualisation) {
       const visualisationId = this.props.params.visualisationId;
+      this.props.dispatch(actions.fetchVisualisation(visualisationId));
       this.setState(this.props.library.visualisations[visualisationId]);
       this.setState({ isUnsavedChanges: null });
     }
+  }
+
+  componentWillReceiveProps() {
+    this.setState(this.props.library.visualisations[this.props.params.visualisationId]);
   }
 
   onSave() {
@@ -54,9 +59,9 @@ class Visualisation extends Component {
       isUnsavedChanges: false,
     });
     if (this.state.id) {
-      this.props.dispatch(saveVisualisationChanges(this.state));
+      this.props.dispatch(actions.saveVisualisationChanges(this.state));
     } else {
-      this.props.dispatch(createVisualisation(this.state));
+      this.props.dispatch(actions.createVisualisation(this.state));
     }
     this.props.dispatch(push('/library?filter=visualisations&sort=created'));
   }

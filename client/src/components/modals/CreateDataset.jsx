@@ -14,6 +14,7 @@ class CreateDataset extends Component {
   constructor() {
     super();
     this.handleNextOrImport = this.handleNextOrImport.bind(this);
+    this.isValidImport = this.isValidImport.bind(this);
   }
 
   pageComponent(page) {
@@ -48,13 +49,19 @@ class CreateDataset extends Component {
     const { currentPage, dataset } = this.props.datasetImport;
     if (currentPage === 'define-dataset') {
       this.props.createDataset(dataset);
+      this.props.clearImport();
     } else {
       this.props.nextPage();
     }
   }
 
+  isValidImport() {
+    // TODO Only check source for now.
+    return DataSourceSettings.isValidSource(this.props.datasetImport.dataset.source);
+  }
+
   render() {
-    const { onCancel, datasetImport } = this.props;
+    const { onCancel, datasetImport, clearImport } = this.props;
     const { currentPage } = datasetImport;
 
     return (
@@ -78,7 +85,10 @@ class CreateDataset extends Component {
         <div className={this.props.containerClassName}>
           <div className="CreateDataset">
             <h3 className="modalTitle">New Dataset</h3>
-            <div className="btn close clickable" onClick={onCancel}>
+            <div className="btn close clickable" onClick={() => {
+              clearImport();
+              onCancel();
+            }}>
               +
             </div>
             <ul className="tabMenu">
@@ -105,6 +115,7 @@ class CreateDataset extends Component {
                 </button>
                 <button
                   className="btn next clickable positive"
+                  disabled={currentPage === 'define-dataset' ? !this.isValidImport() : false}
                   onClick={this.handleNextOrImport}>
                   {currentPage === 'define-dataset' ? 'Import' : 'Next'}
                 </button>
@@ -126,6 +137,7 @@ CreateDataset.propTypes = {
   defineDataSource: PropTypes.func.isRequired,
   selectDataSource: PropTypes.func.isRequired,
   createDataset: PropTypes.func.isRequired,
+  clearImport: PropTypes.func.isRequired,
   datasetImport: PropTypes.shape({
     currentPage: PropTypes.string.isRequired,
     dataset: PropTypes.object.isRequired, // TODO: shape?
