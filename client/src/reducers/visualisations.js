@@ -1,32 +1,18 @@
+import update from 'react-addons-update';
 import * as constants from '../constants/visualisation';
 
-export const initialState = {
-  102: {
-    id: 102,
-    name: 'visualisation 1',
-    type: 'visualisation',
-    created: '1449873058414',
-  },
-  104: {
-    id: 104,
-    name: 'visualisation 2',
-    type: 'visualisation',
-    created: '1448146165194',
-    modified: '1469109685570',
-
-  },
-  109: {
-    id: 109,
-    name: 'visualisation 3',
-    type: 'visualisation',
-    created: '1449873058411',
-  },
-};
+export const initialState = {};
 
 function createVisualisation(state, visualisationData) {
   const id = visualisationData.id;
-  return Object.assign({}, state, {
-    [id]: visualisationData,
+  const vis = update(visualisationData.spec, {
+    $merge: {
+      type: 'visualisation',
+      id,
+    },
+  });
+  return update(state, {
+    [id]: { $set: vis },
   });
 }
 
@@ -37,10 +23,35 @@ function editVisualisation(state, visualisationData) {
   });
 }
 
+function saveVisualisations(state, visualisations) {
+  // TODO we should probably not overwrite?
+  return visualisations.reduce((result, vis) => {
+    const id = vis.id;
+    return update(result, {
+      [id]: { $set: update(vis, { $merge: { type: 'visualisation' } }) },
+    });
+  }, state);
+}
+
+function saveVisualisation(state, vis) {
+  const id = vis.id;
+  const spec = vis.spec;
+  const existingVis = state[id];
+  return update(state, {
+    [id]: {
+      $set: update(existingVis, { $merge: spec }),
+    },
+  });
+}
+
 export default function visualisation(state = initialState, action) {
   switch (action.type) {
-    case constants.CREATE:
+    case constants.CREATE_VISUALISATION_SUCCESS:
       return createVisualisation(state, action.visualisation);
+    case constants.FETCH_VISUALISATIONS_SUCCESS:
+      return saveVisualisations(state, action.visualisations);
+    case constants.FETCH_VISUALISATION_SUCCESS:
+      return saveVisualisation(state, action.visualisation);
     case constants.EDIT:
       return editVisualisation(state, action.visualisation);
     default: return state;
