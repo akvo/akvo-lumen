@@ -103,4 +103,29 @@
                  "FAILURE" (assoc resp-map
                                   :reason
                                   "Could not find dataset on remote server (404)")
-                 resp-map))))))))) ;; "PENDING" do nothing
+                 resp-map)))))) ;; "PENDING" do nothing
+
+      (PUT "/" []
+        (fn [req]
+          (insert-dataset_meta db
+                               {:id           (squuid)
+                                :dataset      (str->uuid id)
+                                :dataset_name (get-in req [:body "name"])})
+          (rr "\"OK\"")))
+
+      ;; ## DELETE
+      ;; Do we allow delete? Visualisations & in the longer run Dashboards
+      ;; do rely on them being present. One could imagine at least 3
+      ;; a: Don't allow deletion
+      ;;    This seems to hinder creativity.
+      ;; b: Archive
+      ;;    Do not allow deletion of dataset but a way to archive them from your
+      ;;    Dashboards main area. Problems with keeping track of stuff?
+      ;; c: Cascading
+      ;;    Do not allow delete where there are anything using the dataset.
+      ;;    This does however create "issues" when we reference datasets in
+      ;;    jsonb blobs like in visualistion spec. Should we query all jsonb
+      ;;    specs for a possible match on dataset? - seems slow
+      ;; (DELETE "/" []
+      ;;   (fn [req] (rr "OK")))
+      )))

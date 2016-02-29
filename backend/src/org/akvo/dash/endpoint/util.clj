@@ -2,8 +2,9 @@
   "Handy fns.")
 
 (defn rr
-  "Exprimental render response. Defaults to status 200 & content-type
-  application/json"
+  "Render json response. Defaults to status 200 & content-type
+  application/json. To return a 404 response:
+  (rr {:error \"Not found\"} {:status 404})"
   [body & args]
   (merge {:status  200
           :headers {"content-type" "application/json"}
