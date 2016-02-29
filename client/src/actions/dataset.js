@@ -69,6 +69,12 @@ function createDatasetFailure(error, dataset) {
   };
 }
 
+export function clearImport() {
+  return {
+    type: constants.CLEAR_IMPORT,
+  };
+}
+
 export function createDataset(dataset) {
   return (dispatch) => {
     dispatch(createDatasetRequest(dataset));
@@ -78,7 +84,10 @@ export function createDataset(dataset) {
       body: JSON.stringify(dataset),
     })
     .then(response => response.json())
-    .then(ds => dispatch(createDatasetSuccess(ds)))
+    .then(ds => {
+      dispatch(createDatasetSuccess(ds));
+      dispatch(clearImport());
+    })
     .catch(error => dispatch(createDatasetFailure(error, dataset)));
   };
 }

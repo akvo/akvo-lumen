@@ -4,6 +4,14 @@ import LinkDataSourceSettings from './LinkDataSourceSettings';
 
 export default class DataSourceSettings extends Component {
 
+  static isValidSource(dataSource) {
+    switch (dataSource.kind) {
+      case 'DATA_FILE': return DataFileDataSourceSettings.isValidSource(dataSource);
+      case 'LINK': return LinkDataSourceSettings.isValidSource(dataSource);
+      default: throw new Error(`Unknown data source kind: ${dataSource.kind}`);
+    }
+  }
+
   renderFileSelection() {
     const { dataSource, onChange } = this.props;
     switch (dataSource.kind) {
