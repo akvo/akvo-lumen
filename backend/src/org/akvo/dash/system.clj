@@ -27,11 +27,11 @@
   {:app {:middleware [[wrap-not-found :not-found]
                       [wrap-defaults :defaults]
                       [wrap-route-aliases :aliases]
-                      wrap-json-response
-                      wrap-json-body]
+                      wrap-json-body
+                      wrap-json-response]
          :not-found  (io/resource "org/akvo/dash/errors/404.html")
          :defaults   (meta-merge api-defaults
-                                 {:params {:multipart true}}) ;; ?
+                                 {:params {:multipart true}})
          :aliases    {"/" "/index"}}
    :ragtime {:resource-path "org/akvo/dash/migrations"}})
 

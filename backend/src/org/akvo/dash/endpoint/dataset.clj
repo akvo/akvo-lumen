@@ -107,7 +107,7 @@
       (PUT "/" []
         (fn [req]
           (insert-dataset_meta db
-                               {:id           (u/squuid)
+                               {:id           (squuid)
                                 :dataset      (str->uuid id)
                                 :dataset_name (get-in req [:body "name"])})
           (rr "\"OK\"")))
