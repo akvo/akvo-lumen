@@ -6,8 +6,7 @@
    [compojure.core :refer :all]
    [hugsql.core :as hugsql]
    [immutant.scheduling :as scheduling]
-   [org.akvo.dash.endpoint.util :as u]
-   [org.akvo.dash.endpoint.util :refer [rr]]
+   [org.akvo.dash.endpoint.util :refer [rr squuid str->uuid]]
    [org.akvo.dash.import :as import]
    [pandect.algo.sha1 :refer [sha1]]
    [ring.util.io :refer [string-input-stream]]))
@@ -16,11 +15,11 @@
 (hugsql/def-db-fns "org/akvo/dash/endpoint/dataset.sql")
 
 
-(defn str->uuid ;; unnecessary?
-  "Converts a string to a UUID.
-  This will thrown on invalid uuid!"
-  [s]
-  (java.util.UUID/fromString s))
+;; (defn str->uuid ;; unnecessary?
+;;   "Converts a string to a UUID.
+;;   This will thrown on invalid uuid!"
+;;   [s]
+;;   (java.util.UUID/fromString s))
 
 
 (defn endpoint
@@ -47,17 +46,17 @@
     (POST "/" []
       (fn [req]
         (try
-          (let [datasource     {:id   (u/squuid)
+          (let [datasource     {:id   (squuid)
                                 :kind (get-in req [:body "source" "kind"]) ;;?
                                 :spec (get-in req [:body "source"])}
-                dataset        {:id           (u/squuid)
+                dataset        {:id           (squuid)
                                 :dataset_name (get-in req [:body "name"])
                                 :datasource   (:id datasource)}
-                dataset_meta   {:id           (u/squuid)
+                dataset_meta   {:id           (squuid)
                                 :dataset_name (get-in req [:body "name"])
                                 :dataset      (:id dataset)}
                 import         {:datasource (:id datasource)}
-                transformation {:id      (u/squuid)
+                transformation {:id      (squuid)
                                 :dataset (:id dataset)
                                 :fns     {:fns []}}
                 res            (clojure.java.jdbc/with-db-transaction [tx db]
