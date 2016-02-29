@@ -21,28 +21,31 @@ export default class CreateCollection extends Component {
         isOpen
         style={{
           content: {
-            width: 400,
-            height: 250,
+            width: 500,
+            height: 300,
             marginLeft: 'auto',
             marginRight: 'auto',
+            borderRadius: 0,
+            border: '0.1rem solid rgb(223, 244, 234)',
           },
           overlay: {
             zIndex: 99,
+            backgroundColor: 'rgba(0,0,0,0.6)',
           },
         }}>
         <div className={this.props.containerClassName}>
           <div className="CreateCollectionModal">
             <h2 className="modalTitle">Create a new collection</h2>
-            <button
+            <div
               className="close clickable"
               onClick={() => {
                 this.setState({ name: '' });
                 onCancel();
               }}>
-              X
-            </button>
+              +
+            </div>
             <div className="contents">
-              <label htmlFor="nameInput">Collection name</label>
+              <label htmlFor="nameInput">Collection name:</label>
               <input
                 id="nameInput"
                 onChange={this.handleInputChange}

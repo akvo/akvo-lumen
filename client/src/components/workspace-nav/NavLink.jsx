@@ -3,8 +3,15 @@ import { Link } from 'react-router';
 
 export default class NavLink extends Component {
   render() {
+    let className = 'NavLink';
+    if (this.props.className) className += ` ${this.props.className}`;
+    if (this.props.isSelected) className += ' selected';
+
     return (
-      <Link className="NavLink" to={this.props.to}>{this.props.to}</Link>
+      <Link
+        className={className}
+        to={this.props.to}>{this.props.to}
+      </Link>
     );
   }
 }

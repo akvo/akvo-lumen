@@ -4,7 +4,7 @@ export default class NavWorkspaceSwitch extends Component {
   render() {
     return (
 		<div className="NavWorkspaceSwitch">
-			<a>NavWorkspaceSwitch</a>
+			<a className="disabled">Admin view</a>
 		</div>
     );
   }

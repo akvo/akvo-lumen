@@ -51,6 +51,7 @@ class Library extends Component {
     return (
       <div className="Library">
         <LibraryHeader
+          pathname={this.props.location.pathname}
           displayMode={displayMode}
           onChangeDisplayMode={(newDisplayMode) => {
             dispatch(updateQueryAction(location, {
@@ -90,7 +91,8 @@ class Library extends Component {
             } else {
               dispatch(push(`/${type}/create`));
             }
-          }} />
+          }}
+        />
         <LibraryListing
           displayMode={displayMode}
           sortOrder={sortOrder}

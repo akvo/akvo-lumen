@@ -7,7 +7,7 @@ export default class EntityTypeHeader extends Component {
     return (
       <nav className="EntityTypeHeader">
         <div className="entityInfo">
-          <h3>
+          <h3 className="entityTitle">
             {this.props.title}
           </h3>
           {this.props.saveStatus &&
@@ -23,6 +23,7 @@ export default class EntityTypeHeader extends Component {
                 className="overflow clickable"
                 onClick={button.onClick}
                 key={index}
+                disabled
               >
                 {button.buttonText}
               </button>

@@ -8,8 +8,14 @@ function slug(collection) {
 export default class CollectionListItem extends Component {
   render() {
     const collection = this.props.collection;
+    const isActive = this.props.pathname.indexOf('' + collection.id) > -1;
+    const className = isActive ? 'selected' : null;
+
     return (
-      <Link to={`/library/${slug(collection)}`}>
+      <Link
+        to={`/library/${slug(collection)}`}
+        className={className}
+      >
         {collection.name}
       </Link>
     );

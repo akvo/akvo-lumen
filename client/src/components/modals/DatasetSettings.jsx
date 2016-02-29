@@ -27,23 +27,26 @@ class DatasetSettings extends Component {
             height: 300,
             marginLeft: 'auto',
             marginRight: 'auto',
+            borderRadius: 0,
+            border: '0.1rem solid rgb(223, 244, 234)',
           },
           overlay: {
             zIndex: 99,
+            backgroundColor: 'rgba(0,0,0,0.6)',
           },
         }}
       >
         <div className={this.props.containerClassName}>
           <div className="DatasetSettings">
             <h2 className="modalTitle">Dataset Settings</h2>
-            <button
+            <div
               className="close clickable"
               onClick={() => {
                 this.setState({ name: '' });
                 onCancel();
               }}>
-              X
-            </button>
+              +
+            </div>
             <Settings
               dataset={dataset}
               showPreview={false}

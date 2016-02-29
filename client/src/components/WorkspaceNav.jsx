@@ -23,32 +23,77 @@ const getCollapsedStatus = (pathname) => {
   return collapsedStatus;
 };
 
+const getActiveSubtitle = (pathname) => {
+  let activeSubtitle;
+
+  if (pathname === 'library') {
+    activeSubtitle = 'library';
+  } else if (pathname.indexOf('library') > -1) {
+    activeSubtitle = 'collections';
+  } else if (pathname.indexOf('activity') > -1) {
+    activeSubtitle = 'activity';
+  }
+
+  return activeSubtitle;
+}
+
 export default class WorkspaceNav extends Component {
   constructor() {
     super();
     this.handleShowCreateCollectionModal = this.handleShowCreateCollectionModal.bind(this);
     this.state = {
-      isFloating: false,
+      isManuallyExpanded: false,
+      isManuallyCollapsed: false,
     };
   }
 
-  getOnClick(isCollapsible) {
-    let onClick = null;
+  getOnClick(isCollapsedByDefault) {
+    let onClick;
 
-    if (isCollapsible && !this.state.isFloating) {
-      onClick = () => this.setState({ isFloating: true });
+    if (isCollapsedByDefault) {
+      onClick = () => {
+        if (this.state.isManuallyExpanded) {
+          this.setState({isManuallyExpanded: false});
+        } else {
+          this.setState({isManuallyExpanded: true});
+        }
+      };
+    } else {
+      onClick = () => {
+        if (this.state.isManuallyCollapsed) {
+          this.setState({isManuallyCollapsed: false});
+        } else {
+          this.setState({isManuallyCollapsed: true});
+        }
+      };
     }
+
     return onClick;
   }
 
-  getClassName(isCollapsible) {
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.location.pathname != this.props.location.pathname) {
+      this.setState({
+        isManuallyExpanded: false,
+        isManuallyCollapsed: false,
+      });
+    }
+  }
+
+  getClassName(isFloatOnTop) {
     let className = 'WorkspaceNav';
 
-    if (isCollapsible) {
-      if (this.state.isFloating) {
+    if (isFloatOnTop) {
+      if (this.state.isManuallyExpanded) {
         className = `${className} floating`;
       } else {
-        className = `${className} collapsed clickable`;
+        className = `${className} collapsed`;
+      }
+    } else {
+      if (this.state.isManuallyCollapsed) {
+        className = `${className} collapsed noFloat`;
+      } else {
+        className = className;
       }
     }
 
@@ -60,35 +105,43 @@ export default class WorkspaceNav extends Component {
   }
 
   render() {
-    const isCollapsible = getCollapsedStatus(this.props.location.pathname);
-    const onClick = this.getOnClick(isCollapsible);
-    const className = this.getClassName(isCollapsible);
+    const activeSubtitle = getActiveSubtitle(this.props.location.pathname);
+    const isFloatOnTop = getCollapsedStatus(this.props.location.pathname);
+    const onClick = this.getOnClick(isFloatOnTop);
+    const className = this.getClassName(isFloatOnTop);
 
     return (
       <nav
         className={className}
-        onClick={onClick}
       >
         <div className="header">
-          <h1><Link to="/">DASH</Link></h1>
-          {isCollapsible && this.state.isFloating &&
-            <button
-              className="collapse clickable"
-              onClick={ () => {
-                this.setState({ isFloating: false });
-              }}
+          <div className="rowPrimary">
+            <div
+              className="menuIcon clickable"
+              onClick={onClick}
             >
-              {"<"}
-            </button>
-          }
+            </div>
+            <h1><Link to="/">DASH</Link></h1>
+          </div>
           <OrganizationMenu user={this.props.user} />
         </div>
         <div className="links">
-          <NavLink to="library" />
+          <NavLink
+            to="library"
+            className="library subtitle"
+            isSelected={activeSubtitle === 'library'}
+          />
           <CollectionsList
             collections={this.props.collections}
-            onShowCreateCollectionModal={this.handleShowCreateCollectionModal} />
-          <NavLink to="activity" />
+            onShowCreateCollectionModal={this.handleShowCreateCollectionModal}
+            isSelected={activeSubtitle === 'collections'}
+            pathname={this.props.location.pathname}
+          />
+          <NavLink
+            to="activity"
+            className="activity subtitle disabled"
+            isSelected={activeSubtitle === 'activity'}
+          />
         </div>
         <NavWorkspaceSwitch />
       </nav>

@@ -1,30 +1,43 @@
 import React, { Component, PropTypes } from 'react';
+import DashSelect from '../common/DashSelect';
 
 export default class LibraryDisplayMenu extends Component {
   render() {
     const { sortOrder, onChangeSortOrder, displayMode, onChangeDisplayMode,
       isReverseSort, onChangeReverseSort } = this.props;
+    const sortOptions = [
+      {value: 'last_modified', label: 'Last modified'},
+      {value: 'created', label: 'Created'},
+      {value: 'name', label: 'Name'},
+    ];
     return (
       <div className="LibraryDisplayMenu">
-        <select
+        <label
+          className="sortOrderLabel"
+          htmlFor="sort-order"
+        >
+          Sort by:
+        </label>
+        <DashSelect
+          name="sort-order"
+          options={sortOptions}
+          onChange={value => onChangeSortOrder(value)}
           value={sortOrder}
-          onChange={evt => onChangeSortOrder(evt.target.value)}>
-          <option value="last_modified">Last Modified</option>
-          <option value="created">Created</option>
-          <option value="name">Name</option>
-        </select>
-        <input
-          type="checkbox"
-          name="reverseSort"
-          defaultChecked={isReverseSort}
-          onChange={(evt) => onChangeReverseSort(evt.target.checked)}
         />
-        <select
-          value={displayMode}
-          onChange={evt => onChangeDisplayMode(evt.target.value)}>
-          <option value="grid">Grid</option>
-          <option value="list">List</option>
-        </select>
+        <div className="displayControls">
+          <div
+            className="clickable displayGrid control"
+            onClick = {() => onChangeDisplayMode('grid')}
+          >
+            Grid
+          </div>
+          <div
+            className="clickable displayList control"
+            onClick = {() => onChangeDisplayMode('list')}
+          >
+            List
+          </div>
+        </div>
       </div>
     );
   }

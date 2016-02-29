@@ -1,25 +1,34 @@
+@import 'modules/colors';
+
 .DashboardModal {
     position: relative;
     min-height: 100%;
+    overflow: visible;
     .modalTitle {
         position: absolute;
-        top: 1rem;
-        left: 1rem;
+        top: 0.5rem;
+        left: 0rem;
+        font-size: 1.25rem;
+        font-weight: bold;
+        line-height: 1rem;
     }
     .close {
         position: absolute;
-        top: 1rem;
-        right: 1rem;
-        padding: 0.3rem;
-        font-size: 1rem;
+        top: 0rem;
+        right: 0rem;
+        font-size: 3rem;
+        font-weight: bold;
+        transform: rotate(45deg);
+        color: $mintGreen;
+        line-height: 1.5rem;
+        padding: 0;
     }
     .controls {
         position: absolute;
-        height: 4rem;
+        height: 3rem;
         bottom: 0;
-        left: 2rem;
-        right: 2rem;
-        border-top: 0.1rem solid rgb(200, 200, 200);
+        left: 0rem;
+        right: 0rem;
         background-color: white;
     }
     .contents {
@@ -27,29 +36,47 @@
     }
     .buttonContainer {
         position: relative;
+        width: 100%;
+        height: 100%;
     }
     .positive, .negative {
         position: absolute;
-        top: 1.5rem;
+        bottom: 0rem;
+        font-size: 1rem;
         padding: 0.5rem 1rem;
+        border-radius: 0.4rem;
+        font-weight: bold;
+        transition: color 0.3s, background-color 0.3s, border 0.3s;
+        transition-timing-function: ease;
+
+        &[disabled] {
+            background-color: transparent;
+            color: $lightBlueGrey;
+            border: 0.1rem solid $lightBlueGrey;
+        }
     }
     .positive {
-        right: 2rem;
+        right: 0rem;
+        color: $white;
+        background-color: $mintGreen;
     }
     .negative {
-        left: 2rem;
+        left: 0rem;
+        color: $midGrey;
+        border: 0.1rem solid $lightGreen;
     }
     .Settings {
         dt, dd {
             display: inline-block;
             line-height: 1.4rem;
-            margin-bottom: 0.5rem;
+            margin-bottom: 2rem;
         }
         dt {
             width: 25%;
             max-width: 12rem;
-            padding-right: 0.25rem;
+            padding-right: 1rem;
             text-align: right;
+            color: $blueGrey;
         }
         dd {
             width: 70%;
@@ -57,11 +84,13 @@
         }
         .datasetNameInput {
             width: 20rem;
+            padding: 0.25rem 0.5rem;
+            font-size: 1rem;
         }
     }
     .DatasetSettings .Settings {
         padding-top: 4rem;
-    } 
+    }
     .CreateDataset {
         .tabMenu {
             padding: 3rem 0;
@@ -73,16 +102,19 @@
             margin-right: calc(19% / 6);
             text-align: center;
             padding: 0.75rem 0.75rem;
-            color: rgb(200, 200, 200);
-            border-bottom: 0.15rem solid rgb(200, 200, 200);
+            color: $midGrey;
+            border-bottom: 0.3rem solid $midGrey;
+            font-weight: bold;
+            transition: color 0.3s, border 0.3s;
+            transition-timing-function: ease;
             &.selected {
-                color: black;
-                border-color: black;
+                color: $mintGreen;
+                border-color: $mintGreen;
             }
         }
         .SourceSelection {
             display: relative;
-            margin: 0 4rem;
+            margin: 0;
             .sourceOptionContainer {
                 display: inline-block;
                 width: 20%;
@@ -114,6 +146,9 @@
             .linkFileInputLabel {
                 margin-right: 0.5rem;
             }
+            .linkFileInput {
+                padding: 0.25rem 0.5rem;
+            }
         }
         .DataFileFileSelection {
             .dataFileUploadMessage, .dataFileUploadInput {
@@ -129,14 +164,22 @@
         .Preview {
             padding-top: 1rem;
             padding-bottom: 6rem;
-        }        
+        }
     }
-    .CreatCollectionModal {
+    .CreateCollectionModal {
         .contents {
-            padding-top: 5rem;
+            padding-top: 7rem;
+            padding-left: 0;
+            padding-right: 0;
+        }
+        label {
+            color: $blueGrey;
         }
         #nameInput {
             margin-left: 0.5rem;
+            font-size: 1rem;
+            padding: 0.25rem 0.5rem;
+            width: 15rem;
         }
     }
 }
