@@ -7,7 +7,7 @@
 
 (use-fixtures :once system-fixture)
 
-(deftest ^:functional ping
+(deftest ^:functional ping-collections
 
   (testing "Root endpoint - status code"
     (let [resp (client/get "http://localhost:3000/api")]
@@ -19,6 +19,14 @@
 
   (testing "Library endpoint - status code"
     (let [resp (client/get "http://localhost:3000/api/library")]
+      (is (= 200 (:status resp)))))
+
+  (testing "Visualisations endpoint - status code"
+    (let [resp (client/get "http://localhost:3000/api/visualisations")]
+      (is (= 200 (:status resp)))))
+
+  (testing "Activity endpoint - status code"
+    (let [resp (client/get "http://localhost:3000/api/activities")]
       (is (= 200 (:status resp))))))
 
 
