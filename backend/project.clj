@@ -19,6 +19,7 @@
                  [meta-merge "0.1.1"]
                  [org.clojure/clojure "1.8.0"]
                  [org.clojure/data.csv "0.1.3"]
+                 [org.clojure/java.jdbc "0.4.2"]
                  [org.immutant/scheduling "2.1.2"]
                  [org.immutant/web "2.1.2"]
                  [org.postgresql/postgresql "9.4.1208"]

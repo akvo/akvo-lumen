@@ -1,5 +1,6 @@
 (ns org.akvo.dash.endpoint.visualisation
   (:require
+   [clojure.java.jdbc :as jdbc]
    [compojure.core :refer :all]
    [hugsql.core :as hugsql]
    [org.akvo.dash.endpoint.util :refer [rr squuid str->uuid]]))
@@ -44,7 +45,7 @@
                                     :visualisation (:id visualisation)
                                     :name          (get-in req [:body "name"])
                                     :spec          (get-in req [:body "spec"])}
-                res                (clojure.java.jdbc/with-db-transaction [tx db]
+                res                (jdbc/with-db-transaction [tx db]
                                      {:v  (insert-visualisation tx
                                                                 visualisation)
                                       :vd (insert-visualisation-data tx
