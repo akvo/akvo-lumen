@@ -4,6 +4,7 @@ secrets.js
 bundle.js
 npm-debug.log
 .DS_Store
+client/dist
 
 # ETL
 etl/bin/
