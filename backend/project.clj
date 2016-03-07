@@ -4,11 +4,10 @@
   :license {:name "GNU Affero General Public License 3.0"
             :url  "https://www.gnu.org/licenses/agpl-3.0.html"}
   :min-lein-version "2.0.0"
-  :dependencies [[camel-snake-kebab "0.3.2"]
-                 [cheshire "5.5.0"]
+  :dependencies [[cheshire "5.5.0"]
                  [clj-http "2.1.0"]
                  [clj-time "0.11.0"]
-                 [com.layerware/hugsql "0.4.3"]
+                 [com.layerware/hugsql "0.4.4"]
                  [com.novemberain/pantomime "2.8.0"]
                  [com.stuartsierra/component "0.3.1"]
                  [compojure "1.4.0"]
