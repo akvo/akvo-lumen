@@ -11,9 +11,6 @@ const getChartPreview = (visualisation, datasets) => {
   let output;
   let datasetColumn;
 
-  console.log("BINK");
-  console.dir(visualisation);
-
   switch (visualisation.visualisationType) {
     case 'bar':
       datasetColumn = visualisation.datasetColumnX;
