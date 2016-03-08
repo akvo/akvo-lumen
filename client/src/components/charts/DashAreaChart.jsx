@@ -20,6 +20,8 @@ export default class DashAreaChart extends Component {
           gridVertical={gridVertical}
           xAxisLabel={visualisation.labelX || ''}
           yAxisLabel={visualisation.labelY || ''}
+          xAxisLabelOffset={50}
+          yAxisLabelOffset={75}
           />
       </div>
     );
