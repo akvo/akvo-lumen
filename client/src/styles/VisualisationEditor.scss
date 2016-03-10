@@ -1,0 +1,26 @@
+@import 'modules/colors';
+
+.VisualisationEditor {
+  position: relative;
+  margin-top: 4em;
+  width: 100%;
+  min-height: 100%;
+  .VisualisationConfig,
+  .VisualisationPreview {
+    display: inline-block;
+    vertical-align: top;
+    min-height: 40rem;
+    min-height: calc(100vh - 4rem);
+    padding: 1rem;
+  }
+  .VisualisationConfig {
+    position: relative;
+    width: 30%;
+    padding-bottom: 4rem;
+    background-color: $white;
+    box-shadow: 0rem 0rem 0.25rem rgba(0,0,0,0.15);
+  }
+  .VisualisationPreview {
+    width: 70%;
+  }
+}

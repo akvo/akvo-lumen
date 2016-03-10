@@ -1,0 +1,46 @@
+@import 'modules/colors';
+
+.VisualisationConfig {
+  h3 {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: $strongBlue;
+  }
+  .textInput {
+    height: 2.5rem;
+    border-radius: 0.4rem;
+    border: 0.1rem solid $lightBlueGrey;
+    padding: 0.5rem;
+    font-size: 1rem;
+    background-color: $white;
+  }
+  .DashSelect {
+    height: 2.5rem;
+  }
+  label, select, input {
+    display: block;
+    margin: 0.5rem 0;
+    width: 100%;
+  }
+  label {
+    color: $blueGrey;
+    font-size: 0.8rem;
+  }
+  .inputGroup {
+    padding-bottom: 0.5rem;
+    &:first-child {
+      padding-top: 0.5rem;
+    }
+  }
+  .saveChanges {
+    bottom: 1rem;
+    display: block;
+    padding: 0.6rem 1.2rem;;
+    margin: 0.75rem auto;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    color: $mintGreen;
+    border: 0.1rem solid $mintGreen;
+    border-radius: 0.6rem;
+  }
+}
