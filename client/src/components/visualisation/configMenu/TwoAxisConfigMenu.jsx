@@ -77,7 +77,8 @@ export default function TwoAxisConfigMenu(props) {
         <label htmlFor="xDatasetMenu">Source dataset:</label>
         <DashSelect
           name="xDatasetMenu"
-          value={visualisation.sourceDatasetX || 'Choose a dataset option...'}
+          value={visualisation.sourceDatasetX !== null ?
+            visualisation.sourceDatasetX : 'Choose a dataset option...'}
           options={datasetOptions}
           onChange={props.onChangeSourceDatasetX}
         />
@@ -86,7 +87,8 @@ export default function TwoAxisConfigMenu(props) {
         <label htmlFor="xColumnMenu">Dataset column:</label>
         <DashSelect
           name="xColumnMenu"
-          value={visualisation.datasetColumnX || 'Choose a dataset column...'}
+          value={visualisation.datasetColumnX !== null ?
+            visualisation.datasetColumnX : 'Choose a dataset column...'}
           options={columnOptionsX}
           onChange={props.onChangeDatasetColumnX}
         />
@@ -107,7 +109,8 @@ export default function TwoAxisConfigMenu(props) {
         <label htmlFor="yDatasetMenu">Source dataset:</label>
         <DashSelect
           name="yDatasetMenu"
-          value={visualisation.sourceDatasetY || 'Choose a dataset option...'}
+          value={visualisation.sourceDatasetY !== null ?
+            visualisation.sourceDatasetY : 'Choose a dataset option...'}
           options={datasetOptions}
           onChange={props.onChangeSourceDatasetY}
         />
@@ -116,7 +119,8 @@ export default function TwoAxisConfigMenu(props) {
         <label htmlFor="yColumnMenu">Dataset column:</label>
         <DashSelect
           name="yColumnMenu"
-          value={visualisation.datasetColumnY || 'Choose a dataset column...'}
+          value={visualisation.datasetColumnY !== null ?
+            visualisation.datasetColumnY : 'Choose a dataset column...'}
           options={columnOptionsY}
           onChange={props.onChangeDatasetColumnY}
         />

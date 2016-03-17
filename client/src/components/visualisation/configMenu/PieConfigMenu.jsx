@@ -68,18 +68,19 @@ export default function PieConfigMenu(props) {
         <label htmlFor="xDatasetMenu">Source dataset:</label>
         <DashSelect
           name="xDatasetMenu"
-          value={visualisation.sourceDatasetX || 'Choose a dataset option...'}
+          value={visualisation.sourceDatasetX !== null ?
+            visualisation.sourceDatasetX : 'Choose a dataset option...'}
           options={datasetOptions}
           onChange={props.onChangeSourceDatasetX}
         />
       </div>
       <div className="inputGroup">
-        <label htmlFor="xColumnMenu">Dataset column:</label>
+        <label htmlFor="xNameColumnMenu">Label column:</label>
         <DashSelect
           name="xColumnMenu"
-          value={visualisation.datasetColumnX || 'Choose a dataset column...'}
+          value={visualisation.datasetColumnX !== null ?
+            visualisation.datasetColumnX : 'Choose a dataset column...'}
           options={columnOptionsX}
-          onChange={props.onChangeDatasetColumnX}
         />
       </div>
         <div className="inputGroup">
@@ -87,7 +88,8 @@ export default function PieConfigMenu(props) {
           <DashSelect
             name="xNameColumnMenu"
             disabled={xColumns.length === 0}
-            value={visualisation.datasetNameColumnX || 'Choose a name column...'}
+            value={visualisation.datasetNameColumnX !== null ?
+              visualisation.datasetNameColumnX : 'Choose a name column...'}
             onChange={props.onChangeDatasetNameColumnX}
             options={columnOptionsX}
           />

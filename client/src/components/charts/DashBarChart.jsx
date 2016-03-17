@@ -9,11 +9,13 @@ export default function DashBarChart({ visualisation, datasets }) {
     <div className="DashBarChart dashChart">
       <BarChart
         title={visualisation.name}
-        width={600}
+        width={800}
         height={400}
         data={chartData}
         xAxisLabel={visualisation.labelX || ''}
         yAxisLabel={visualisation.labelY || ''}
+        xAxisLabelOffset={50}
+        yAxisLabelOffset={75}
       />
     </div>
   );

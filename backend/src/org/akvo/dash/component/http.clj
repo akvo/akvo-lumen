@@ -10,7 +10,9 @@
   (start [component]
     (if (:server component)
       component
-      (let [options (-> component (dissoc :app))
+      (let [options (-> component
+                        (dissoc :app)
+                        (assoc :host "0.0.0.0"))
             handler (:handler app)
             server (web/run
                      (fn [req] (handler req)) options)]
