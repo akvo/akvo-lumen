@@ -1,23 +1,21 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PropTypes } from 'react';
 import { Cell } from 'fixed-data-table';
 
-export default class PreviewHeader extends Component {
-  render() {
-    return (
-      <Cell>
+export default function PreviewHeader({ title }) {
+  return (
+    <Cell>
+      <div>
+        <div>{title}</div>
         <div>
-          <div>{this.props.title}</div>
-          <div>
-            <select>
-              <option>String</option>
-              <option>Number</option>
-              <option>Date</option>
-            </select>
-          </div>
+          <select>
+            <option>String</option>
+            <option>Number</option>
+            <option>Date</option>
+          </select>
         </div>
-      </Cell>
-    );
-  }
+      </div>
+    </Cell>
+  );
 }
 
 PreviewHeader.propTypes = {

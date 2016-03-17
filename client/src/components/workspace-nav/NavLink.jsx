@@ -1,19 +1,19 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PropTypes } from 'react';
 import { Link } from 'react-router';
 
-export default class NavLink extends Component {
-  render() {
-    let className = 'NavLink';
-    if (this.props.className) className += ` ${this.props.className}`;
-    if (this.props.isSelected) className += ' selected';
+export default function NavLink({ className, isSelected, to }) {
+  let classNames = 'NavLink';
+  if (className) classNames += ` ${className}`;
+  if (isSelected) classNames += ' selected';
 
-    return (
-      <Link
-        className={className}
-        to={this.props.to}>{this.props.to}
-      </Link>
-    );
-  }
+  return (
+    <Link
+      className={classNames}
+      to={to}
+    >
+      {to}
+    </Link>
+  );
 }
 
 NavLink.propTypes = {

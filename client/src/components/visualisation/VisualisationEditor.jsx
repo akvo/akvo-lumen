@@ -1,23 +1,21 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PropTypes } from 'react';
 import VisualisationConfig from './VisualisationConfig';
 import VisualisationPreview from './VisualisationPreview';
 
 require('../../styles/VisualisationEditor.scss');
 
-export default class VisualisationEditor extends Component {
-  render() {
-    return (
-      <div className="VisualisationEditor">
-        <VisualisationConfig
-          {...this.props}
-          />
-        <VisualisationPreview
-          visualisation={this.props.visualisation}
-          datasets={this.props.datasets}
-        />
-      </div>
-    );
-  }
+export default function VisualisationEditor(props) {
+  return (
+    <div className="VisualisationEditor">
+      <VisualisationConfig
+        {...props}
+      />
+      <VisualisationPreview
+        visualisation={props.visualisation}
+        datasets={props.datasets}
+      />
+    </div>
+  );
 }
 
 VisualisationEditor.propTypes = {

@@ -1,4 +1,4 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PropTypes } from 'react';
 import LibraryListingGroup from './LibraryListingGroup';
 
 require('../../styles/LibraryListing.scss');
@@ -96,31 +96,29 @@ const sortGroups = (listGroups, sortOrder, isReverseSort) => {
   return listGroupArray;
 };
 
-export default class LibraryListing extends Component {
+export default function LibraryListing({
+  library, filterBy, sortOrder, isReverseSort, displayMode, searchString, onSelectEntity }) {
+  const entities = filterEntities(library, filterBy,
+    searchString);
+  const listGroups = groupEntities(entities, sortOrder);
+  const sortedListGroups = sortGroups(listGroups, sortOrder, isReverseSort);
 
-  render() {
-    const entities = filterEntities(this.props.library, this.props.filterBy,
-      this.props.searchString);
-    const listGroups = groupEntities(entities, this.props.sortOrder);
-    const sortedListGroups = sortGroups(listGroups, this.props.sortOrder, this.props.isReverseSort);
-
-    return (
-      <div className={`LibraryListing ${this.props.displayMode}`}>
-        <ul>
-          {sortedListGroups.map((listGroup, index) =>
-            <LibraryListingGroup
-              key={index}
-              listGroup={listGroup}
-              displayMode={this.props.displayMode}
-              sortOrder={this.props.sortOrder}
-              isReverseSort={this.props.isReverseSort}
-              onSelectEntity={this.props.onSelectEntity}
-            />
-          )}
-        </ul>
-      </div>
-    );
-  }
+  return (
+    <div className={`LibraryListing ${displayMode}`}>
+      <ul>
+        {sortedListGroups.map((listGroup, index) =>
+          <LibraryListingGroup
+            key={index}
+            listGroup={listGroup}
+            displayMode={displayMode}
+            sortOrder={sortOrder}
+            isReverseSort={isReverseSort}
+            onSelectEntity={onSelectEntity}
+          />
+        )}
+      </ul>
+    </div>
+  );
 }
 
 LibraryListing.propTypes = {

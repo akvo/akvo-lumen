@@ -1,27 +1,24 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PropTypes } from 'react';
 import { BarChart } from 'react-d3';
 import * as chart from '../../utilities/chart';
 
-export default class DashBarChart extends Component {
-  render() {
-    const chartData = chart.getChartData(this.props.visualisation, this.props.datasets);
-    const visualisation = this.props.visualisation;
+export default function DashBarChart({ visualisation, datasets }) {
+  const chartData = chart.getChartData(visualisation, datasets);
 
-    return (
-      <div className="DashBarChart dashChart">
-        <BarChart
-          title={visualisation.name}
-          width={800}
-          height={400}
-          data={chartData}
-          xAxisLabel={visualisation.labelX || ''}
-          yAxisLabel={visualisation.labelY || ''}
-          xAxisLabelOffset={50}
-          yAxisLabelOffset={75}
-        />
-      </div>
-    );
-  }
+  return (
+    <div className="DashBarChart dashChart">
+      <BarChart
+        title={visualisation.name}
+        width={800}
+        height={400}
+        data={chartData}
+        xAxisLabel={visualisation.labelX || ''}
+        yAxisLabel={visualisation.labelY || ''}
+        xAxisLabelOffset={50}
+        yAxisLabelOffset={75}
+      />
+    </div>
+  );
 }
 
 DashBarChart.propTypes = {

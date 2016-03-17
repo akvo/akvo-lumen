@@ -32,19 +32,22 @@ export default class DatasetTable extends Component {
       <Column
         header={column.title}
         cell={props => <Cell>{column.values[props.rowIndex]}</Cell>}
-        width={200} />
+        width={200}
+      />
     ));
 
     return (
       <div
         className="DatasetTable"
-        ref="wrappingDiv">
+        ref="wrappingDiv"
+      >
         <Table
           headerHeight={50}
           rowHeight={30}
           rowsCount={this.props.columns[0].values.length}
           width={this.state.width}
-          height={this.state.height}>
+          height={this.state.height}
+        >
           {cols}
         </Table>
       </div>
