@@ -88,7 +88,8 @@ class CreateDataset extends Component {
             <div className="btn close clickable" onClick={() => {
               clearImport();
               onCancel();
-            }}>
+            }}
+            >
               +
             </div>
             <ul className="tabMenu">
@@ -110,13 +111,15 @@ class CreateDataset extends Component {
                 <button
                   className="btn previous clickable negative"
                   disabled={currentPage === 'select-data-source-type'}
-                  onClick={this.props.previousPage}>
+                  onClick={this.props.previousPage}
+                >
                   Previous
                 </button>
                 <button
                   className="btn next clickable positive"
                   disabled={currentPage === 'define-dataset' ? !this.isValidImport() : false}
-                  onClick={this.handleNextOrImport}>
+                  onClick={this.handleNextOrImport}
+                >
                   {currentPage === 'define-dataset' ? 'Import' : 'Next'}
                 </button>
               </div>

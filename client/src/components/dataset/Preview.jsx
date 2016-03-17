@@ -28,7 +28,8 @@ export default class Preview extends Component {
       <Column
         header={<PreviewHeader title={column.title} />}
         cell={props => <Cell>{column.values[props.rowIndex]}</Cell>}
-        width={200} />
+        width={200}
+      />
     ));
 
     return (
@@ -38,7 +39,8 @@ export default class Preview extends Component {
           rowHeight={30}
           rowsCount={this.props.columns[0].values.length}
           width={this.state.width}
-          height={300}>
+          height={300}
+        >
           {cols}
         </Table>
       </div>
