@@ -45,7 +45,8 @@ export default class Settings extends Component {
                 this.props.onChangeName({ name: this.refs.datasetNameInput.value });
               }}
               ref="datasetNameInput"
-              type="text" />
+              type="text"
+            />
           </dd>
         </dl>
       </div>

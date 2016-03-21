@@ -101,7 +101,8 @@ class Library extends Component {
           searchString={searchString}
           collection={collection}
           library={this.props}
-          onSelectEntity={this.handleSelectEntity} />
+          onSelectEntity={this.handleSelectEntity}
+        />
         {this.props.children}
       </div>
     );

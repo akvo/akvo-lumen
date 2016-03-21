@@ -1,36 +1,38 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PropTypes } from 'react';
 import CollectionListItem from './CollectionListItem';
 
-export default class CollectionsList extends Component {
-  render() {
-    const listItems = this.props.collections.map((collection) => (
-        <li key={collection.id}>
-          <CollectionListItem
-            collection={collection}
-            pathname={this.props.pathname}
-          />
-        </li>
-      )
-    );
-    const subtitleClassName = `subtitle${this.props.isSelected ? ' selected' : ''}`;
+export default function CollectionsList({
+  collections,
+  onShowCreateCollectionModal,
+  pathname,
+  isSelected }) {
+  const listItems = collections.map((collection) => (
+      <li key={collection.id}>
+        <CollectionListItem
+          collection={collection}
+          pathname={pathname}
+        />
+      </li>
+    )
+  );
+  const subtitleClassName = `subtitle${isSelected ? ' selected' : ''}`;
 
-    return (
-      <div className="CollectionsList">
-        <div className="subtitleRow">
-          <h3 className={subtitleClassName}>
-            Collections
-            <span
-              onClick={this.props.onShowCreateCollectionModal}
-              className="addCollection clickable button"
-            >
-              +
-            </span>
-          </h3>
-        </div>
-        <ul>{listItems}</ul>
+  return (
+    <div className="CollectionsList">
+      <div className="subtitleRow">
+        <h3 className={subtitleClassName}>
+          Collections
+          <span
+            onClick={onShowCreateCollectionModal}
+            className="addCollection clickable button"
+          >
+            +
+          </span>
+        </h3>
       </div>
-    );
-  }
+      <ul>{listItems}</ul>
+    </div>
+  );
 }
 
 CollectionsList.propTypes = {

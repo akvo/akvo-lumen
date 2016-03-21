@@ -1,14 +1,12 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PropTypes } from 'react';
 
-export default class OrganizationMenu extends Component {
-  render() {
-    return (
-      <div className="OrganizationMenu">
-        <div className="name">{this.props.user.name}</div>
-        <div className="organization">{this.props.user.organization}</div>
-      </div>
-    );
-  }
+export default function OrganizationMenu({ user }) {
+  return (
+    <div className="OrganizationMenu">
+      <div className="name">{user.name}</div>
+      <div className="organization">{user.organization}</div>
+    </div>
+  );
 }
 
 OrganizationMenu.propTypes = {

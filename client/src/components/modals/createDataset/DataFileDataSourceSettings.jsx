@@ -62,7 +62,8 @@ export default class DataFileDataSourceSettings extends Component {
         className="DataFileFileSelection"
         onDragEnter={this.handleDragEnter}
         onDragOver={this.handleDragOver}
-        onDrop={this.handleDrop}>
+        onDrop={this.handleDrop}
+      >
         <p className="dataFileUploadMessage">Drop file anywhere to upload</p>
         <p className="dataFileUploadMessage">or</p>
         <input
@@ -71,7 +72,8 @@ export default class DataFileDataSourceSettings extends Component {
           type="file"
           onChange={() => {
             this.uploadFile(this.refs.fileInput.files[0]);
-          }} />
+          }}
+        />
       </div>
     );
   }

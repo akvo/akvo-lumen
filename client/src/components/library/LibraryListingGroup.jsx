@@ -1,4 +1,4 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PropTypes } from 'react';
 import LibraryListingItem from './LibraryListingItem';
 
 const getListGroupTitle = (listGroupName, sortOrder) => {
@@ -46,29 +46,26 @@ const sortListGroupEntities = (entities, sortOrder, isReverseSort) => {
   return sortedEntities;
 };
 
-export default class LibraryListingGroup extends Component {
-  render() {
-    const listGroupTitle = getListGroupTitle(this.props.listGroup.listGroupName,
-      this.props.sortOrder);
-    const sortedEntities = sortListGroupEntities(this.props.listGroup.entities,
-      this.props.sortOrder, this.props.isReverseSort);
+export default function LibraryListingGroup({
+  listGroup, displayMode, sortOrder, isReverseSort, onSelectEntity }) {
+  const listGroupTitle = getListGroupTitle(listGroup.listGroupName, sortOrder);
+  const sortedEntities = sortListGroupEntities(listGroup.entities, sortOrder, isReverseSort);
 
-    return (
-      <div className="LibraryListingGroup">
-        <h3>{listGroupTitle}</h3>
-        <ol>
-          {sortedEntities.map((entity, index) =>
-            <LibraryListingItem
-              key={index}
-              entity={entity}
-              displayMode={this.props.displayMode}
-              onSelectEntity={this.props.onSelectEntity}
-            />
-          )}
-        </ol>
-      </div>
-    );
-  }
+  return (
+    <div className="LibraryListingGroup">
+      <h3>{listGroupTitle}</h3>
+      <ol>
+        {sortedEntities.map((entity, index) =>
+          <LibraryListingItem
+            key={index}
+            entity={entity}
+            displayMode={displayMode}
+            onSelectEntity={onSelectEntity}
+          />
+        )}
+      </ol>
+    </div>
+  );
 }
 
 LibraryListingGroup.propTypes = {

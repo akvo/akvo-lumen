@@ -1,4 +1,4 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PropTypes } from 'react';
 
 const supportedFormats = [{
   kind: 'DATA_FILE',
@@ -53,28 +53,27 @@ const defaultDataSources = {
   // TODO the rest.
 };
 
-export default class SourceSelection extends Component {
-  render() {
-    const sources = supportedFormats.map(source => (
-      <div
-        className={`sourceOptionContainer ${source.kind} ${source.disabled ? 'disabled' : ''}`}
-        key={source.kind}
-      >
-        <input
-          className="sourceOption"
-          type="radio"
-          name="choose_data_source"
-          disabled={source.disabled}
-          value={source.kind}
-          checked={source.kind === this.props.dataSourceKind}
-          onChange={evt => {
-            this.props.onChangeDataSource(defaultDataSources[evt.target.value]);
-          }} />
-        {source.label}
-      </div>
-    ));
-    return <div className="SourceSelection">{sources}</div>;
-  }
+export default function SourceSelection({ dataSourceKind, onChangeDataSource }) {
+  const sources = supportedFormats.map(source => (
+    <div
+      className={`sourceOptionContainer ${source.kind} ${source.disabled ? 'disabled' : ''}`}
+      key={source.kind}
+    >
+      <input
+        className="sourceOption"
+        type="radio"
+        name="choose_data_source"
+        disabled={source.disabled}
+        value={source.kind}
+        checked={source.kind === dataSourceKind}
+        onChange={evt => {
+          onChangeDataSource(defaultDataSources[evt.target.value]);
+        }}
+      />
+      {source.label}
+    </div>
+  ));
+  return <div className="SourceSelection">{sources}</div>;
 }
 
 SourceSelection.propTypes = {

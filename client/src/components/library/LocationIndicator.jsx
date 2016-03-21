@@ -1,4 +1,4 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PropTypes } from 'react';
 
 const getLocation = pathname => {
   let location;
@@ -14,14 +14,12 @@ const getLocation = pathname => {
   return location;
 };
 
-export default class LocationIndicator extends Component {
-  render() {
-    const location = getLocation(this.props.pathname);
+export default function LocationIndicator({ pathname }) {
+  const location = getLocation(pathname);
 
-    return (
-      <div className="LocationIndicator">{location}</div>
-    );
-  }
+  return (
+    <div className="LocationIndicator">{location}</div>
+  );
 }
 
 LocationIndicator.propTypes = {

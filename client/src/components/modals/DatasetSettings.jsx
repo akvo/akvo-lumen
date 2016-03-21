@@ -44,20 +44,23 @@ class DatasetSettings extends Component {
               onClick={() => {
                 this.setState({ name: '' });
                 onCancel();
-              }}>
+              }}
+            >
               +
             </div>
             <Settings
               dataset={dataset}
               showPreview={false}
-              onChangeName={this.handleChangeName} />
+              onChangeName={this.handleChangeName}
+            />
             <div className="controls">
               <button
                 className="cancel clickable negative"
                 onClick={() => {
                   this.setState({ name: '' });
                   onCancel();
-                }}>
+                }}
+              >
                 Cancel
               </button>
               <button
@@ -66,7 +69,8 @@ class DatasetSettings extends Component {
                 onClick={() => {
                   onSubmit(saveDatasetSettings(dataset.id, this.state));
                   this.setState({ name: '' });
-                }}>
+                }}
+              >
                 Save
               </button>
             </div>

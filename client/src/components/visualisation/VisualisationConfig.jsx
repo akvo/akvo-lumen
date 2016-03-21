@@ -1,4 +1,4 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PropTypes } from 'react';
 import VisualisationTypeMenu from './VisualisationTypeMenu';
 import OneAxisConfigMenu from './configMenu/OneAxisConfigMenu';
 import TwoAxisConfigMenu from './configMenu/TwoAxisConfigMenu';
@@ -50,33 +50,30 @@ const getConfigMenu = (chartType, componentProps) => {
   return configMenu;
 };
 
-export default class VisualisationConfig extends Component {
+export default function VisualisationConfig(props) {
+  const visualisation = props.visualisation;
+  const configMenu = getConfigMenu(visualisation.visualisationType, props);
 
-  render() {
-    const visualisation = this.props.visualisation;
-    const configMenu = getConfigMenu(visualisation.visualisationType, this.props);
-
-    return (
-      <div className="VisualisationConfig">
-        <h3 className="title">Configure Visualisation</h3>
-        <VisualisationTypeMenu
-          onChangeVisualisationType={this.props.onChangeVisualisationType}
-          visualisation={visualisation}
-        />
-        {visualisation.visualisationType &&
-          configMenu
-        }
-        {visualisation.visualisationType &&
-          <button
-            className="saveChanges clickable"
-            onClick={this.props.onSaveDataset}
-          >
-            Save changes
-          </button>
-        }
-      </div>
-    );
-  }
+  return (
+    <div className="VisualisationConfig">
+      <h3 className="title">Configure Visualisation</h3>
+      <VisualisationTypeMenu
+        onChangeVisualisationType={props.onChangeVisualisationType}
+        visualisation={visualisation}
+      />
+      {visualisation.visualisationType &&
+        configMenu
+      }
+      {visualisation.visualisationType &&
+        <button
+          className="saveChanges clickable"
+          onClick={props.onSaveDataset}
+        >
+          Save changes
+        </button>
+      }
+    </div>
+  );
 }
 
 VisualisationConfig.propTypes = {

@@ -1,4 +1,4 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PropTypes } from 'react';
 import DashBarChart from '../charts/DashBarChart';
 import DashLineChart from '../charts/DashLineChart';
 import DashAreaChart from '../charts/DashAreaChart';
@@ -15,7 +15,7 @@ const getChartPreview = (visualisation, datasets) => {
     case 'bar':
       datasetColumn = visualisation.datasetColumnX;
 
-      if (datasetColumn) {
+      if (datasetColumn !== null) {
         output = <DashBarChart visualisation={visualisation} datasets={datasets} />;
       } else {
         output = <div>Pie chart image placeholder</div>;
@@ -26,7 +26,7 @@ const getChartPreview = (visualisation, datasets) => {
     case 'line':
       datasetColumn = visualisation.datasetColumnX;
 
-      if (datasetColumn) {
+      if (datasetColumn !== null) {
         output = <DashLineChart visualisation={visualisation} datasets={datasets} />;
       } else {
         output = <div>Line chart image placeholder</div>;
@@ -37,7 +37,7 @@ const getChartPreview = (visualisation, datasets) => {
     case 'area':
       datasetColumn = visualisation.datasetColumnX;
 
-      if (datasetColumn) {
+      if (datasetColumn !== null) {
         output = <DashAreaChart visualisation={visualisation} datasets={datasets} />;
       } else {
         output = <div>Area chart image placeholder</div>;
@@ -49,7 +49,7 @@ const getChartPreview = (visualisation, datasets) => {
     case 'pie':
       datasetColumn = visualisation.datasetColumnX;
 
-      if (datasetColumn) {
+      if (datasetColumn !== null) {
         output = <DashPieChart visualisation={visualisation} datasets={datasets} />;
       } else {
         output = <div>Pie chart image placeholder</div>;
@@ -58,7 +58,7 @@ const getChartPreview = (visualisation, datasets) => {
       return output;
 
     case 'scatter':
-      if (visualisation.datasetColumnX && visualisation.datasetColumnY) {
+      if (visualisation.datasetColumnX !== null && visualisation.datasetColumnY !== null) {
         output = <DashScatterChart visualisation={visualisation} datasets={datasets} />;
       } else {
         output = <div>Scatter chart image placeholder</div>;
@@ -71,15 +71,13 @@ const getChartPreview = (visualisation, datasets) => {
   }
 };
 
-export default class CreateVisualisationPreview extends Component {
-  render() {
-    const chart = getChartPreview(this.props.visualisation, this.props.datasets);
-    return (
-      <div className="VisualisationPreview">
-        {chart}
-      </div>
-    );
-  }
+export default function CreateVisualisationPreview({ visualisation, datasets }) {
+  const chart = getChartPreview(visualisation, datasets);
+  return (
+    <div className="VisualisationPreview">
+      {chart}
+    </div>
+  );
 }
 
 CreateVisualisationPreview.propTypes = {
