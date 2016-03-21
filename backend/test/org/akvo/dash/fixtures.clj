@@ -4,6 +4,8 @@
    [reloaded.repl :refer [system stop go]]))
 
 
+
+
 (defn system-fixture
   "Starts the system and migrates, no setup or tear down."
   [f]
@@ -11,4 +13,5 @@
     (go)
     (-> system :ragtime ragtime/reload ragtime/migrate)
     (f)
+    (-> system :ragtime ragtime/reload (ragtime/rollback "001-activity"))
     (finally (stop))))
