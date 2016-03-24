@@ -5,10 +5,11 @@
             [com.stuartsierra.component :as component]
             [duct.middleware.errors :refer [wrap-hide-errors]]
             [duct.util.runtime :refer [add-shutdown-hook]]
-            [duct.component.ragtime :as ragtime]
+            ;; [duct.component.ragtime :as ragtime]
             [meta-merge.core :refer [meta-merge]]
             [org.akvo.dash.config :as config]
-            [org.akvo.dash.system :refer [new-system]]))
+            [org.akvo.dash.system :refer [new-system]]
+            [org.akvo.dash.migrate :as migrate]))
 
 (def prod-config
   {:app {:middleware     [[wrap-hide-errors :internal-error]]
@@ -24,8 +25,12 @@
   (let [system (new-system config)]
     (println "Starting HTTP server on port" (-> system :http :port))
     (add-shutdown-hook ::stop-system #(component/stop system))
+    (migrate/migrate {:connection-uri (-> config :db :uri)})
     (-> system
         component/start
-        :ragtime
-        ragtime/reload
-        ragtime/migrate)))
+        ;; :migrathor
+        ;; migrathor/migrate
+        ;; :ragtime
+        ;; ragtime/reload
+        ;; ragtime/migrate
+        )))

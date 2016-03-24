@@ -7,26 +7,27 @@
   :dependencies [[cheshire "5.5.0"]
                  [clj-http "2.1.0"]
                  [clj-time "0.11.0"]
-                 [com.layerware/hugsql "0.4.4"]
+                 [com.layerware/hugsql "0.4.6"]
                  [com.novemberain/pantomime "2.8.0"]
                  [com.stuartsierra/component "0.3.1"]
-                 [compojure "1.4.0"]
-                 [duct "0.5.8"]
+                 [compojure "1.5.0"]
+                 [duct "0.5.10"]
                  [duct/hikaricp-component "0.1.0"]
-                 [duct/ragtime-component "0.1.3"]
+                 ;; [duct/ragtime-component "0.1.3"]
                  [environ "1.0.2"]
                  [meta-merge "0.1.1"]
                  [org.clojure/clojure "1.8.0"]
                  [org.clojure/data.csv "0.1.3"]
-                 [org.clojure/java.jdbc "0.4.2"]
-                 [org.immutant/scheduling "2.1.2"]
-                 [org.immutant/web "2.1.2"]
+                 [org.clojure/java.jdbc "0.5.0"]
+                 [org.immutant/scheduling "2.1.3"]
+                 [org.immutant/web "2.1.3"]
                  [org.postgresql/postgresql "9.4.1208"]
-                 [org.slf4j/slf4j-nop "1.7.18"]
+                 [org.slf4j/slf4j-nop "1.7.19"]
                  [pandect "0.5.4"]
+                 [ragtime "0.5.3"]
                  [ring "1.4.0"]
-                 [ring-jetty-component "0.3.0"]
-                 [ring/ring-defaults "0.1.5"]
+                 ;; [ring-jetty-component "0.3.0"]
+                 [ring/ring-defaults "0.2.0"]
                  [ring/ring-devel "1.4.0"]
                  [ring/ring-json "0.4.0"]
                  [ring/ring-mock "0.3.0"]
@@ -43,7 +44,8 @@
   :main ^:skip-aot org.akvo.dash.main
   :target-path "target/%s/"
   :aliases {"gen"   ["generate"]
-            "setup" ["do" ["generate" "locals"]]}
+            "setup" ["do" ["generate" "locals"]]
+            "migrate" ["run" "-m" "user/migrate"]}
   :test-selectors {:default (and (constantly true)
                                  (complement :functional))
                    :all (constantly true)}
@@ -56,7 +58,7 @@
    :project/dev   {:dependencies [[reloaded.repl "0.2.1"]
                                   [org.clojure/tools.namespace "0.2.11"]
                                   [org.clojure/tools.nrepl "0.2.12"]
-                                  [eftest "0.1.0"]
+                                  [eftest "0.1.1"]
                                   [kerodon "0.7.0"]]
                    :source-paths ["dev"]
                    :repl-options {:init-ns user}
