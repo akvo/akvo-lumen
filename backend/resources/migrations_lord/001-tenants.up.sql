@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS tenants (
     enabled BOOLEAN NOT NULL DEFAULT TRUE,
     label text,
     title text,
-    _validrange tstzrange
+    _validrange tstzrange NOT NULL
 );
 
 GRANT ALL ON tenants to dash;

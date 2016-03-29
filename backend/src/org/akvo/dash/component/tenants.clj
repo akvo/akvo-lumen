@@ -44,6 +44,7 @@
                  (get tenant :db_url))
     (.setDataSourceClassName cfg
                              "org.postgresql.ds.PGSimpleDataSource")
+    (.setMaximumPoolSize cfg 2)
     {:datasource (HikariDataSource. cfg)}))
 
 (defrecord Lord [db]

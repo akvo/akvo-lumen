@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS datasources (
     -- ts timestamptz DEFAULT now()
     -- created ??
     -- modified ??
-    _validrange tstzrange
+    _validrange tstzrange NOT NULL
 );
 
 GRANT ALL ON datasources to dash;
