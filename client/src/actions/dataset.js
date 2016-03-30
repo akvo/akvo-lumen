@@ -1,5 +1,6 @@
 import * as constants from '../constants/dataset';
 import { hideModal } from './activeModal';
+import headers from './headers';
 
 function fetchDatasetRequest(id) {
   return {
@@ -35,7 +36,7 @@ export function fetchDataset(id) {
     dispatch(fetchDatasetRequest(id));
     fetch(`/api/datasets/${id}`, {
       method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
+      headers: headers(),
     })
     .then(response => response.json())
     .then(dataset => dispatch(fetchDatasetSuccess(dataset)))
@@ -80,7 +81,7 @@ export function createDataset(dataset) {
     dispatch(createDatasetRequest(dataset));
     fetch('/api/datasets', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: headers(),
       body: JSON.stringify(dataset),
     })
     .then(response => response.json())
