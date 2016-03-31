@@ -1,5 +1,4 @@
-SET search_path = history, pg_catalog;
-CREATE TABLE IF NOT EXISTS tenants (
+CREATE TABLE IF NOT EXISTS history.tenants (
     id serial,
     db_uri text,
     enabled BOOLEAN NOT NULL DEFAULT TRUE,
@@ -8,14 +7,13 @@ CREATE TABLE IF NOT EXISTS tenants (
     _validrange tstzrange NOT NULL
 );
 
-GRANT ALL ON tenants to dash;
+GRANT ALL ON history.tenants to dash;
 
-ALTER TABLE ONLY tenants
+ALTER TABLE ONLY history.tenants
 ADD CONSTRAINT tenants_exclusion EXCLUDE
 USING gist (id WITH =, _validrange WITH &&);
 --;;
 
-SET search_path = public, pg_catalog;
 
 CREATE TABLE IF NOT EXISTS tenants (
     id serial,

@@ -1,28 +1,24 @@
-SET search_path = history, pg_catalog;
-CREATE TABLE IF NOT EXISTS datasources (
+CREATE TABLE IF NOT EXISTS history.datasources (
     id text PRIMARY KEY,
     spec jsonb NOT NULL,
-    -- ts timestamptz DEFAULT now()
-    -- created ??
-    -- modified ??
+    created timestamptz DEFAULT now(),
+    modified timestamptz DEFAULT now(),
     _validrange tstzrange NOT NULL
 );
 
-GRANT ALL ON datasources to dash;
+GRANT ALL ON history.datasources to dash;
 
-ALTER TABLE ONLY datasources
+ALTER TABLE ONLY history.datasources
 ADD CONSTRAINT datasources_exclusion EXCLUDE
 USING gist (id WITH =, _validrange WITH &&);
 --;;
 
-SET search_path = public, pg_catalog;
 
 CREATE TABLE IF NOT EXISTS datasources (
     id text PRIMARY KEY,
-    spec jsonb NOT NULL
-    -- ts timestamptz DEFAULT now()
-    -- created ??
-    -- modified ??
+    spec jsonb NOT NULL,
+    created timestamptz DEFAULT now(),
+    modified timestamptz DEFAULT now()
 );
 
 GRANT ALL ON datasources to dash;

@@ -23,12 +23,12 @@ Edit profiles.clj to match:
 
 To create the Postgres role & database run the provision script:
 ``` sh
-$ ./provision/set-up.sh
+$ ./provision/setup.sh
 ```
 
 ### Troubleshooting
 
-The `set-up.sh` script assumes that your user has rights to connect and
+The `setup.sh` script assumes that your user has rights to connect and
 create databases, roles, etc. You may need define the `PGUSER`
 enviroment variable with the proper settings, e.g.
 
@@ -42,7 +42,10 @@ variables](http://www.postgresql.org/docs/current/static/libpq-envars.html)
 
 ### Clean up
 
-There is also a tear-down.sh script to clean up.
+``` sh
+$ ./provision/tear-down.sh
+```
+
 
 ### Start the backend
 At this point all ground work is done and we can fire up a REPL:

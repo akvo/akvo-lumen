@@ -3,7 +3,8 @@
   (:require
    [cheshire.core :as json]
    [clj-time.coerce :as c]
-   [clojure.java.jdbc :as jdbc])
+   [clojure.java.jdbc :as jdbc]
+   )
   (:import
    java.sql.Timestamp
    org.postgresql.util.PGobject))
@@ -16,7 +17,7 @@
   [v]
   (doto (PGobject.)
     (.setType "jsonb")
-    (.setValue (json/generate-string v))))
+    (.setValue (json/encode v))))
 
 (extend-protocol jdbc/ISQLValue
   clojure.lang.IPersistentMap
@@ -31,10 +32,9 @@
   (let [t (.getType pgobj)
         v (.getValue pgobj)]
     (case t
-      "json"  (json/parse-string v)
-      "jsonb" (json/parse-string v)
+      "json"  (json/decode v)
+      "jsonb" (json/decode v)
       :else v)))
-
 
 (extend-protocol jdbc/IResultSetReadColumn
   PGobject
