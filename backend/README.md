@@ -9,7 +9,7 @@ Create local config files:
 $ lein setup
 ```
 
-Edit profiles.clj to match:
+Edit profiles.clj to match (there is a profiles.clj.template file):
 ```clojure
 {:profiles/dev
  {:env
@@ -21,10 +21,12 @@ Edit profiles.clj to match:
     "jdbc:postgresql://localhost/dash_test?user=dash&password=password"}}}
 ```
 
-To create the Postgres role & database run the provision script:
+To create the Postgres role & databases run the provision script:
 ``` sh
 $ ./provision/setup.sh
 ```
+This did setup three databases dash which is the lord db that manges the tenants
+& two tenant dbs.
 
 ### Troubleshooting
 
@@ -46,6 +48,20 @@ variables](http://www.postgresql.org/docs/current/static/libpq-envars.html)
 $ ./provision/tear-down.sh
 ```
 
+### Hosts
+Dash is a multi tenant system and to do enable local routing to the tenatns we
+created earlier we need to run the provision/setup-localhost.sh script to add:
+
+``` sh
+127.0.0.1 t1.dash.akvo.org
+127.0.0.1 t2.dash.akvo.org
+```
+
+The tenants api root should be accessable at
+ - http://t1.dash.akvo.org:3000/api
+ - http://t2.dash.akvo.org:3000/api
+
+Hitting that endpoint should print the tenants dns label and connection pool.
 
 ### Start the backend
 At this point all ground work is done and we can fire up a REPL:

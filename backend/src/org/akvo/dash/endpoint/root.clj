@@ -12,5 +12,6 @@
      (fn [req]
        (let [db (connection (:lord config)
                             (:tenant-label req))]
+         (println "Tenant label: " (:tenant-label req))
          (pprint db)
          "Akvo Dash API")))))
