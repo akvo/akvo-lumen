@@ -32,45 +32,54 @@
 ;;;
 
 (defprotocol TenantConnection
-  (connection [component tenant-id] "Geta connection based on a tenant-id"))
+  (connection [component label] "Connection based on a tenant dns label."))
 
 
-(defn- connection-pool
-  "Creates a Hikari connection pool, using an tenant instance. Maybe this needs
-  some typing to not break with changes..."
+(defn pool
+  "Created a Hikari connection pool."
   [tenant]
   (let [cfg (HikariConfig.)]
-    (.setJdbcUrl cfg
-                 (get tenant :db_url))
-    (.setDataSourceClassName cfg
-                             "org.postgresql.ds.PGSimpleDataSource")
+    (.setJdbcUrl cfg (:db_uri tenant))
+    (.setPoolName cfg (:label tenant))
     (.setMaximumPoolSize cfg 2)
     {:datasource (HikariDataSource. cfg)}))
+
 
 (defrecord Lord [db]
 
   component/Lifecycle
   (start [component]
-    (assoc component :tenants (atom {})))
+    (pprint "@lord/start")
+    #_(pprint db)
+    (if (:tenants component)
+      component
+      (assoc component :tenants (atom {}))))
 
   (stop [component]
-    (doseq [[_ conn] (deref (:tenants component))]
-      (.close (:datasource conn)))
-    (dissoc component :tenants))
+    (pprint "@lord/stop")
+    (if-let [tenants @(:tenants component)]
+      (do
+        (doseq [[_ {{conn :datasource} :spec}] tenants]
+          (.close conn))
+        (dissoc component :tenants))
+      component))
 
   TenantConnection
-  (connection [{:keys [db tenants]} label]
+  (connection
+      [{:keys [tenants] :as component} label]
+      ;;[{:keys [tenants db]} label]
     (if-let [tenant (get @tenants label)]
-      tenant
-      (do ;; setup tenant connection pool from db values
-        (if-let [tenant (tenant-by-id (:spec db)
+      (:spec tenant)
+      (do
+        (if-let [tenant (tenant-by-id (:spec (:db component))
                                       {:label label})]
           (do
             (swap! tenants
                    assoc
                    label
-                   (connection-pool tenant))
-            (get @tenants label))
+                   {:uri  (:db_uri tenant)
+                    :spec (pool tenant)})
+            (:spec (get @tenants label)))
           (throw (Exception. "Could not match dns label with tenant.")))))))
 
 

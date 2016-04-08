@@ -46,21 +46,25 @@
     (-> (component/system-map
          :app  (handler-component (:app config))
          :http (http/immutant-web (:http config))
+
+         ;; :activity (endpoint-component activity/endpoint)
+         ;; :dataset (endpoint-component dataset/endpoint)
          :db   (hikaricp (:db config))
-         :lord (tenants/lord)
-         :activity (endpoint-component activity/endpoint)
+         ;; :files (endpoint-component files/endpoint)
          :library (endpoint-component library/endpoint)
-         :dataset (endpoint-component dataset/endpoint)
          :root (endpoint-component root/endpoint)
-         :visualisation (endpoint-component visualisation/endpoint)
-         :files (endpoint-component files/endpoint))
+         :lord (tenants/lord)
+         :visualisation (endpoint-component visualisation/endpoint))
 
         (component/system-using
-         {:http [:app]
-          :app  [:root :activity :dataset :library :visualisation :files :lord]
-          :lord [:db]
-          :root [:lord]
-          :activity [:db]
-          :dataset [:db]
-          :library [:db]
-          :visualisation [:db]}))))
+         {:http          [:app]
+          :app           [:lord :db :root :library]
+          ;;:app           [:root :activity :dataset :library :visualisation :files :lord :db]
+          :root          [:lord]
+          :library       [:lord]
+          :lord          [:db]
+          ;; :activity      [:db]
+          ;; :dataset       [:db]
+          ;; :visualisation [:db]
+          }
+         ))))

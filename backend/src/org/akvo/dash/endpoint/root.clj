@@ -6,12 +6,11 @@
    [org.akvo.dash.component.tenants :refer [connection]]))
 
 
-(defn endpoint [config]
+(defn endpoint
+  [{lord :lord :as config}]
   (routes
    (GET "/" []
-     (fn [req]
-       (let [db (connection (:lord config)
-                            (:tenant-label req))]
-         (println "Tenant label: " (:tenant-label req))
-         (pprint db)
-         "Akvo Dash API")))))
+     (fn [{label :tenant-label :as req}]
+       (let [db (connection lord label)]
+         (println "Tenant label: " label)
+         (str "Akvo Dash API (" label ")"))))))
