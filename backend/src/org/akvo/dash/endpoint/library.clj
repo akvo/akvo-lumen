@@ -17,12 +17,11 @@
   Return the library"
   [{lord :lord :as config}]
   (context "/library" []
-      (routes
-       (GET "/" []
-         (fn [{label :tenant-label :as req}]
-           (pprint lord)
-           (pprint label)
-           (let [db (connection lord label)]
-             (rr {:datasets       (all-datasets db)
-                  :visualisations [] ;;(all-visualisations db)
-                  :dashboards     []})))))))
+
+    (GET "/" []
+      (fn [{label :tenant-label :as request}]
+        (pprint request)
+        (let [db (connection lord label)]
+          (rr {:datasets       (all-datasets db)
+               :visualisations [] ;;(all-visualisations db)
+               :dashboards     []}))))))

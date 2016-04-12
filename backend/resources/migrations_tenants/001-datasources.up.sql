@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS history.datasources (
-    id text PRIMARY KEY,
+    id text NOT NULL,
     spec jsonb NOT NULL,
     created timestamptz DEFAULT now(),
     modified timestamptz DEFAULT now(),

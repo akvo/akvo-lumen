@@ -48,7 +48,7 @@
          :http (http/immutant-web (:http config))
 
          ;; :activity (endpoint-component activity/endpoint)
-         ;; :dataset (endpoint-component dataset/endpoint)
+         :dataset (endpoint-component dataset/endpoint)
          :db   (hikaricp (:db config))
          ;; :files (endpoint-component files/endpoint)
          :library (endpoint-component library/endpoint)
@@ -58,13 +58,13 @@
 
         (component/system-using
          {:http          [:app]
-          :app           [:lord :db :root :library]
+          :app           [:lord :db :root :library :dataset]
           ;;:app           [:root :activity :dataset :library :visualisation :files :lord :db]
           :root          [:lord]
           :library       [:lord]
           :lord          [:db]
           ;; :activity      [:db]
-          ;; :dataset       [:db]
+          :dataset       [:lord]
           ;; :visualisation [:db]
           }
          ))))

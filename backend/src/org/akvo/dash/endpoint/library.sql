@@ -1,7 +1,6 @@
 -- :name all-datasets :? :*
 -- :doc returns the dataset collection
-
-SELECT *
+SELECT id, name, datasource, status, created, modified
 FROM datasets;
 
 -- :name yank-tables :? :*

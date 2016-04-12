@@ -1,7 +1,9 @@
 CREATE TABLE IF NOT EXISTS history.datasets (
-    id text PRIMARY KEY,
-    title text NOT NULL,
+    id text NOT NULL,
+    "name" text NOT NULL,
     d jsonb,
+    datasource text NOT NULL,
+    status text DEFAULT 'PENDING',
     author jsonb,
     enabled BOOLEAN NOT NULL DEFAULT TRUE,
     created timestamptz DEFAULT now(),
@@ -19,8 +21,10 @@ USING gist (id WITH =, _validrange WITH &&);
 
 CREATE TABLE IF NOT EXISTS datasets (
     id text PRIMARY KEY,
-    title text NOT NULL,
+    "name" text NOT NULL,
     d jsonb,
+    datasource text references datasources(id) NOT NULL,
+    status text DEFAULT 'PENDING',
     author jsonb,
     enabled BOOLEAN NOT NULL DEFAULT TRUE,
     created timestamptz DEFAULT now(),
