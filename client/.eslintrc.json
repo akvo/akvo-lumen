@@ -12,8 +12,5 @@
         "jsx": true
       }
     }
-  },
-  "rules": {
-    "react/jsx-no-bind": 0
   }
 }

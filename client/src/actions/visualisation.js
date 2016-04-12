@@ -1,6 +1,7 @@
 import * as constants from '../constants/visualisation';
 import { fetchDataset } from './dataset';
 import fetch from 'isomorphic-fetch';
+import headers from './headers';
 
 export function fetchVisualisationsSuccess(visualisations) {
   return {
@@ -30,7 +31,7 @@ function createVisualisationRequest(visualisation) {
     });
     fetch('/api/visualisations', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: headers(),
       body: JSON.stringify({
         name: visualisation.name,
         spec: visualisation,
@@ -96,7 +97,10 @@ function fetchVisualisationRequest(id) {
 export function fetchVisualisation(id) {
   return (dispatch) => {
     dispatch(fetchVisualisationRequest(id));
-    fetch(`/api/visualisations/${id}`)
+    fetch(`/api/visualisations/${id}`, {
+      method: 'GET',
+      headers: headers(),
+    })
     .then(response => response.json())
     .then(visualisation => dispatch(fetchVisualisationSuccess(visualisation)))
     .catch(err => dispatch(fetchVisualisationFailure(id, err)));
