@@ -1,39 +1,9 @@
 (ns org.akvo.dash.import.flow
   (:require [clojure.string :as str]
             [clojure.java.jdbc :as jdbc]
+            [akvo.commons.psql-util :as pg]
             [cheshire.core :as json])
   (:import [org.postgresql.util PGobject]))
-
-;; TODO: copied from akvo-commons
-(defn val->jsonb-pgobj
-  [v]
-  (doto (PGobject.)
-    (.setType "jsonb")
-    (.setValue (json/generate-string v))))
-
-(extend-protocol jdbc/ISQLValue
-  clojure.lang.IPersistentMap
-  (sql-value [v] (val->jsonb-pgobj v))
-
-  clojure.lang.IPersistentVector
-  (sql-value [v] (val->jsonb-pgobj v)))
-
-
-;; From json & jsonb
-
-(defn pgobj->val
-  [^PGobject pgobj]
-  (let [t (.getType pgobj)
-        v (.getValue pgobj)]
-    (case t
-      "json"  (json/parse-string v)
-      "jsonb" (json/parse-string v)
-      :else   v)))
-
-(extend-protocol jdbc/IResultSetReadColumn
-  PGobject
-  (result-set-read-column [pgobj _ _]
-    (pgobj->val pgobj)))
 
 (set! *warn-on-reflection* true)
 (set! *print-length* 20)
@@ -179,7 +149,7 @@
          (map (fn [data-row]
                 (into {} (map vector
                               column-names
-                              (map  val->jsonb-pgobj data-row) )))
+                              (map pg/val->jsonb-pgobj data-row) )))
               dataset-data)))
 
 
