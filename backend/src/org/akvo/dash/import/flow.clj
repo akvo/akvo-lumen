@@ -1,5 +1,6 @@
-(ns datacleaning.flow
-  (:require [clojure.java.jdbc :as jdbc]
+(ns org.akvo.dash.import.flow
+  (:require [clojure.string :as str]
+            [clojure.java.jdbc :as jdbc]
             [cheshire.core :as json])
   (:import [org.postgresql.util PGobject]))
 
@@ -117,7 +118,7 @@
                         :questions)
                   (:question-groups form))))
 
-(defn dataset-data [data-points format-responses]
+(defn dataset-data [data-points form-id format-responses]
   (for [data-point data-points
         :let [form-instance (get-in data-point [:form-instances form-id])]
         :when form-instance]
@@ -147,7 +148,7 @@
           table-name
           (str/join ", " (map #(str % " jsonb") column-names))))
 
-(defn insert-dataset-columns! [conn dataset-columns column-names]
+(defn insert-dataset-columns! [conn dataset-id dataset-columns column-names]
   (apply jdbc/insert!
          conn
          :dataset_column
@@ -168,7 +169,7 @@
                  :table_name table-name
                  :version 0}))
 
-(defn insert-dataset-data! [conn dataset-data column-names]
+(defn insert-dataset-data! [conn dataset-data table-name column-names]
   (apply jdbc/insert!
          conn
          table-name
@@ -187,13 +188,13 @@
         data-points (survey-data-points org-id survey-id)
         dataset-columns (dataset-columns form)
         column-count (count dataset-columns)
-        dataset-data (dataset-data data-points format-responses)
+        dataset-data (dataset-data data-points (:id form) format-responses)
         table-name (str "t_" (str/replace (uuid) "-" ""))
-        dataset-id (:id (first (jdbc/insert! conn :dataset (select-keys dataset [:name]))))
+        dataset-id (:id (first (jdbc/insert! conn :dataset (:name survey))))
         column-names (map #(str "c" %) (range))]
-    (insert-dataset-columns! conn dataset-columns column-names)
+    (insert-dataset-columns! conn dataset-id dataset-columns column-names)
     (insert-dataset-version! conn dataset-id table-name)
     (jdbc/execute! conn [(create-data-table table-name (take column-count column-names))])
-    (insert-dataset-data! dataset-data column-names)))
+    (insert-dataset-data! dataset-data table-name column-names)))
 
 ;; (create-dataset "akvoflow-uat1" 10079120 7169115)
