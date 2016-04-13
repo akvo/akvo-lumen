@@ -5,7 +5,6 @@
             [com.stuartsierra.component :as component]
             [duct.middleware.errors :refer [wrap-hide-errors]]
             [duct.util.runtime :refer [add-shutdown-hook]]
-            ;; [duct.component.ragtime :as ragtime]
             [meta-merge.core :refer [meta-merge]]
             [org.akvo.dash.config :as config]
             [org.akvo.dash.system :refer [new-system]]
@@ -27,10 +26,4 @@
     (add-shutdown-hook ::stop-system #(component/stop system))
     (migrate/migrate {:connection-uri (-> config :db :uri)})
     (-> system
-        component/start
-        ;; :migrathor
-        ;; migrathor/migrate
-        ;; :ragtime
-        ;; ragtime/reload
-        ;; ragtime/migrate
-        )))
+        component/start)))

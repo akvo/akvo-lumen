@@ -21,6 +21,11 @@ UPDATE datasets
 SET d = :d::jsonb, status = :status
 WHERE id = :id;
 
+-- :name update-dataset-name :! :n
+-- :doc Update dataset name
+UPDATE datasets
+SET "name" = :name
+WHERE id = :id
 
 -- :name dataset-by-id :? :1
 -- :doc Get dataset by id

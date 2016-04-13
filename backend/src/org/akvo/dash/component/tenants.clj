@@ -22,7 +22,7 @@
   [handler]
   (fn [req]
     (handler (assoc req
-                    :tenant-label
+                    :tenant
                     (first (str/split (get-in req [:headers "host"])
                                       #"\."))))))
 

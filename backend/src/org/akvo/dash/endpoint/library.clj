@@ -7,7 +7,9 @@
    [org.akvo.dash.component.tenants :refer [connection]]
    [org.akvo.dash.endpoint.util :refer [rr]]))
 
-(hugsql/def-db-fns "org/akvo/dash/endpoint/library.sql")
+
+(hugsql/def-db-fns "org/akvo/dash/endpoint/dataset.sql")
+(hugsql/def-db-fns "org/akvo/dash/endpoint/visualisation.sql")
 
 
 (defn endpoint
@@ -19,9 +21,8 @@
   (context "/library" []
 
     (GET "/" []
-      (fn [{label :tenant-label :as request}]
-        (pprint request)
+      (fn [{label :tenant :as request}]
         (let [db (connection lord label)]
           (rr {:datasets       (all-datasets db)
-               :visualisations [] ;;(all-visualisations db)
-               :dashboards     []}))))))
+               :visualisations (all-visualisations db)
+               :dashboards     [] }))))))
