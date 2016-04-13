@@ -65,9 +65,6 @@
                 (assoc form :question-groups (get question-groups (:id form))))]
     (assoc survey :forms (into {} (map (juxt :id identity)) forms))))
 
-
-(comment (time (survey-definition "akvoflow-uat1" 10079120)) )
-
 (defn response-index
   "Index a sequence of responses in form-instance-id question-id iteration order."
   [responses]
@@ -80,7 +77,12 @@
   "Index a sequence of form-instances in data_point_id and form_id order"
   [form-instances responses]
   (reduce (fn [index {:keys [id form_id data_point_id] :as form-instance}]
-            (assoc-in index [data_point_id form_id] (assoc form-instance :responses (get responses id))))
+            (update-in index
+                       [data_point_id form_id]
+                       (fnil conj [])
+                       (assoc form-instance
+                              :responses
+                              (get responses id))))
           {}
           form-instances))
 
@@ -118,18 +120,19 @@
                         :questions)
                   (:question-groups form))))
 
-(defn dataset-data [data-points form-id format-responses]
-  (for [data-point data-points
-        :let [form-instance (get-in data-point [:form-instances form-id])]
-        :when form-instance]
-    (reduce into
-            ((juxt :identifier :latitude :longitude) data-point)
-            [((juxt :sumbitter :sumbitted_at) form-instance)
-             (format-responses form-instance)])))
+(defn form-instance-row [format-responses data-point form-instance]
+  (reduce into
+          ((juxt :identifier :latitude :longitude) data-point)
+          [((juxt :submitter :submitted_at) form-instance)
+           (format-responses form-instance)]))
 
-;; (count (survey-data-points "akvoflow-uat1" 5889121))
-;; (survey-data-points "akvoflow-uat1" 10079120)
-;; (get-survey-data 10079120)
+(defn dataset-data [data-points form-id format-responses]
+  (reduce into
+          []
+          (for [data-point data-points
+                         :let [form-instances (get-in data-point [:form-instances form-id])]]
+            (map #(form-instance-row format-responses data-point %)
+                 form-instances))) )
 
 (defn format-responses-fn [form]
   (let [question-ids (mapcat (comp #(map :id %) :questions)
@@ -190,11 +193,9 @@
         column-count (count dataset-columns)
         dataset-data (dataset-data data-points (:id form) format-responses)
         table-name (str "t_" (str/replace (uuid) "-" ""))
-        dataset-id (:id (first (jdbc/insert! conn :dataset (:name survey))))
+        dataset-id (:id (first (jdbc/insert! conn :dataset {:name (:display_text survey)})))
         column-names (map #(str "c" %) (range))]
     (insert-dataset-columns! conn dataset-id dataset-columns column-names)
     (insert-dataset-version! conn dataset-id table-name)
     (jdbc/execute! conn [(create-data-table table-name (take column-count column-names))])
-    (insert-dataset-data! dataset-data table-name column-names)))
-
-;; (create-dataset "akvoflow-uat1" 10079120 7169115)
+    (insert-dataset-data! conn dataset-data table-name column-names)))
