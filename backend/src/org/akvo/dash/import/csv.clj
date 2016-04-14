@@ -1,7 +1,8 @@
 (ns org.akvo.dash.import.csv
   (:require [clojure.java.io :as io]
             [clojure.string :as s]
-            [clojure.java.jdbc :as jdbc])
+            [clojure.java.jdbc :as jdbc]
+            [clojure.data.csv :as csv])
   (:import org.postgresql.copy.CopyManager
            org.postgresql.core.BaseConnection
            java.util.UUID))
@@ -57,8 +58,7 @@
   "Returns the number of columns from a file"
   [path separator]
   (with-open [r (io/reader path)]
-    (let [line (.readLine r)]
-      (count (s/split line (re-pattern (str separator)))))))
+    (count (first (csv/read-csv r :separator separator)))))
 
 (defn make-dataset
   "Creates a dataset from a CSV file on disk"
