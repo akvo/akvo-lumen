@@ -175,7 +175,7 @@
         dataset-columns (dataset-columns form)
         column-count (count dataset-columns)
         dataset-data (dataset-data data-points (:id form) format-responses)
-        table-name (str "t_" (str/replace (uuid) "-" ""))
+        table-name (str "ds_" (str/replace (uuid) "-" "_"))
         dataset-id (:id (first (jdbc/insert! conn :dataset {:name (:display_text survey)})))
         column-names (map #(str "c" %) (range))]
     (insert-dataset-columns! conn dataset-id dataset-columns column-names)
