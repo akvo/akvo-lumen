@@ -6,9 +6,9 @@
 
 (deftest test-util-functions
   (testing "SQL generation"
-    (is (= "CREATE TEMP TABLE uuid1 (serial rnum, c1 text, c2 text, c3 text)"
+    (is (= "CREATE TEMP TABLE uuid1 (rnum serial, c1 text, c2 text, c3 text)"
            (get-create-table-sql "uuid1" 3 "text" true)))
-    (is (= "CREATE TABLE uuid2 (integer rnum, c1 jsonb, c2 jsonb, c3 jsonb)"
+    (is (= "CREATE TABLE uuid2 (rnum integer, c1 jsonb, c2 jsonb, c3 jsonb)"
            (get-create-table-sql "uuid2" 3 "jsonb" false)))
     (is (= "COPY uuid1 (c1, c2, c3) FROM STDIN WITH (FORMAT CSV)"
            (get-copy-sql "uuid1" 3 false)))

@@ -28,7 +28,7 @@
   (format "CREATE %s %s (%s, %s)"
           (if temp? "TEMP TABLE" "TABLE")
           t-name
-          (if temp? "serial rnum" "integer rnum")
+          (if temp? "rnum serial" "rnum integer")
           (get-cols num-cols c-type)))
 
 (defn get-copy-sql
@@ -64,7 +64,13 @@
   "Creates a dataset from a CSV file on disk"
   [spec conn]
   (let [fpath (:path spec)
-        n-cols (get-num-cols fpath)
-        id (gen-table-name)
-        id-temp (str id "_temp")]
-    []))
+        headers? (:headers? spec)
+        n-cols (get-num-cols fpath \,)
+        table (gen-table-name)
+        temp (str table "_temp")
+        copy-manager (CopyManager. (cast BaseConnection (:connection conn)))
+        _ (jdbc/execute! conn [(get-create-table-sql temp n-cols "text" true)])
+        _ (jdbc/execute! conn [(get-create-table-sql table n-cols "jsonb" false)])
+        _ (.copyIn copy-manager (get-copy-sql temp n-cols headers?) (io/input-stream fpath))
+        _ (jdbc/execute! conn [(get-insert-sql temp table n-cols)])]
+    table))
