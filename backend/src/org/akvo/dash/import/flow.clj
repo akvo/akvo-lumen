@@ -8,9 +8,8 @@
 (set! *warn-on-reflection* true)
 (set! *print-length* 20)
 
-(defn survey-definition [org-id survey-id]
-  (let [conn (str "jdbc:postgresql://localhost/" org-id)
-        survey (first (jdbc/query conn ["SELECT * FROM survey where id=?" survey-id]))
+(defn survey-definition [conn survey-id]
+  (let [survey (first (jdbc/query conn ["SELECT * FROM survey where id=?" survey-id]))
         forms (jdbc/query conn ["select * from form where survey_id=?" survey-id])
         question-groups (jdbc/query conn
                                     [(print-str "select question_group.*"
@@ -56,20 +55,34 @@
           {}
           form-instances))
 
-(defn survey-data-points [org-id survey-id]
-  (let [conn (str "jdbc:postgresql://localhost/" org-id)
-        data-points (jdbc/query conn ["SELECT * FROM data_point where survey_id=?" survey-id])
+
+(defn form-instances-sql
+  [{:keys [form-id]}]
+  (if form-id
+    (print-str "select form_instance.* from form_instance"
+               "where form_instance.form_id=?")
+    (print-str "select form_instance.* from form_instance, form"
+               "where form_instance.form_id=form.id and"
+               "form.survey_id=?")))
+
+(defn responses-sql [{:keys [form-id]}]
+  (if form-id
+    (print-str "select response.* from response, form_instance"
+               "where response.form_instance_id=form_instance.id and"
+               "form_instance.form_id=?")
+    (print-str "select response.* from response, form_instance, form"
+               "where response.form_instance_id=form_instance.id and"
+               "form_instance.form_id=form.id and"
+               "form.survey_id=?")))
+
+(defn survey-data-points [conn {:keys [survey-id form-id] :as opts}]
+  (let [data-points (jdbc/query conn ["SELECT * FROM data_point where survey_id=?" survey-id])
         form-instances (jdbc/query conn
-                                   [(print-str "select form_instance.* from form_instance, form"
-                                               "where form_instance.form_id=form.id and"
-                                               "form.survey_id=?")
-                                    survey-id])
+                                   [(form-instances-sql opts)
+                                    (or form-id survey-id)])
         responses (jdbc/query conn
-                              [(print-str "select response.* from response, form_instance, form"
-                                          "where response.form_instance_id=form_instance.id and"
-                                          "form_instance.form_id=form.id and"
-                                          "form.survey_id=?")
-                               survey-id])
+                              [(responses-sql opts)
+                               (or form-id survey-id)])
         responses (response-index responses)
         form-instances (form-instances-index form-instances responses)]
     (for [{:keys [id] :as data-point} data-points]
@@ -155,10 +168,10 @@
 
 (defn create-dataset [org-id survey-id form-id]
   (let [conn (str "jdbc:postgresql://localhost/" org-id)
-        survey (survey-definition org-id survey-id)
+        survey (survey-definition conn survey-id)
         form (get-in survey [:forms form-id])
         format-responses (format-responses-fn form)
-        data-points (survey-data-points org-id survey-id)
+        data-points (survey-data-points conn {:survey-id survey-id :form-id form-id})
         dataset-columns (dataset-columns form)
         column-count (count dataset-columns)
         dataset-data (dataset-data data-points (:id form) format-responses)
