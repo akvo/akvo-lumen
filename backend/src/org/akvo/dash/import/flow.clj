@@ -4,6 +4,8 @@
             [akvo.commons.psql-util :as pg]
             [hugsql.core :as hugsql]
             [cheshire.core :as json])
+            [cheshire.core :as json]
+            [org.akvo.dash.import.common :refer (make-dataset-data-table)])
   (:import [org.postgresql.util PGobject]))
 
 (set! *warn-on-reflection* true)
@@ -154,3 +156,7 @@
     (insert-dataset-version! conn dataset-id table-name)
     (jdbc/execute! conn [(create-data-table table-name (take column-count column-names))])
     (insert-dataset-data! conn dataset-data table-name column-names)))
+
+(defmethod make-dataset-data-table "flow"
+  [tenant-conn config table-name {:strs [orgId surveyId formId]}]
+  {:success? true})

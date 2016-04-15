@@ -76,7 +76,7 @@
   [dataset-id, names, num-cols, c-type]
   (vec
    (for [i (range 1 (inc num-cols))]
-     [(str (squuid))
+     [(str (squuid)) 
       dataset-id
       c-type
       (if (empty? names) (str "Column " i) (nth names (dec i)))
