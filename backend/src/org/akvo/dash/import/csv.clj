@@ -2,10 +2,14 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as s]
             [clojure.java.jdbc :as jdbc]
-            [clojure.data.csv :as csv])
+            [clojure.data.csv :as csv]
+            [hugsql.core :as hugsql]
+            [org.akvo.dash.endpoint.util :refer [squuid]])
   (:import org.postgresql.copy.CopyManager
            org.postgresql.core.BaseConnection
            java.util.UUID))
+
+(hugsql/def-db-fns "org/akvo/dash/import.sql")
 
 (defn- get-cols
   ([num-cols]
@@ -54,23 +58,52 @@
             (s/join ", " src-cols)
             src-table)))
 
-(defn get-num-cols
-  "Returns the number of columns from a file"
+(defn get-headers
+  "Returns the first line CSV a file"
   [path separator]
   (with-open [r (io/reader path)]
-    (count (first (csv/read-csv r :separator separator)))))
+    (first (csv/read-csv r :separator separator))))
+
+(defn get-num-cols
+  "Returns the number of columns based on the
+  first lie of a CSV file"
+  [path separator]
+  (count (get-headers path separator)))
+
+(defn get-column-tuples
+  "Returns a vector of tuples suitable for a single
+   SQL insert"
+  [dataset-id, names, num-cols, c-type]
+  (vec
+   (for [i (range 1 (inc num-cols))]
+     [(str (squuid))
+      dataset-id
+      c-type
+      (if (empty? names) (str "Column " i) (nth names (dec i)))
+      (str "c" i)
+      (* 10 i)])))
 
 (defn make-dataset
-  "Creates a dataset from a CSV file on disk"
-  [spec conn]
-  (let [fpath (:path spec)
+  "Creates a dataset from a CSV file"
+  [conn spec]
+  (let [path (:path spec)
         headers? (:headers? spec)
-        n-cols (get-num-cols fpath \,)
+        dataset-name (:dataset-name spec)
+        col-names (if headers? (get-headers path \,) [])
+        n-cols (get-num-cols path \,)
         table (gen-table-name)
         temp (str table "_temp")
+        dataset-id (str (squuid))
         copy-manager (CopyManager. (cast BaseConnection (:connection conn)))
         _ (jdbc/execute! conn [(get-create-table-sql temp n-cols "text" true)])
         _ (jdbc/execute! conn [(get-create-table-sql table n-cols "jsonb" false)])
-        _ (.copyIn copy-manager (get-copy-sql temp n-cols headers?) (io/input-stream fpath))
-        _ (jdbc/execute! conn [(get-insert-sql temp table n-cols)])]
-    table))
+        _ (.copyIn copy-manager (get-copy-sql temp n-cols headers?) (io/input-stream path))
+        _ (jdbc/execute! conn [(get-insert-sql temp table n-cols)])
+        _ (insert-dataset conn {:id dataset-id
+                                :name dataset-name})
+        _ (insert-dataset-version conn {:id (str (squuid))
+                                        :dataset-id dataset-id
+                                        :table-name table})
+        _ (insert-dataset-columns conn {:columns
+                                        (get-column-tuples dataset-id col-names n-cols "text")})]
+    dataset-id))
