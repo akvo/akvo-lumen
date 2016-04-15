@@ -2,28 +2,20 @@
   (:require [clojure.string :as str]
             [clojure.java.jdbc :as jdbc]
             [akvo.commons.psql-util :as pg]
+            [hugsql.core :as hugsql]
             [cheshire.core :as json])
   (:import [org.postgresql.util PGobject]))
 
 (set! *warn-on-reflection* true)
 (set! *print-length* 20)
 
+(hugsql/def-db-fns "org/akvo/dash/import/flow.sql")
+
 (defn survey-definition [conn survey-id]
-  (let [survey (first (jdbc/query conn ["SELECT * FROM survey where id=?" survey-id]))
-        forms (jdbc/query conn ["select * from form where survey_id=?" survey-id])
-        question-groups (jdbc/query conn
-                                    [(print-str "select question_group.*"
-                                                "from question_group, form"
-                                                "where question_group.form_id = form.id and"
-                                                "form.survey_id=?")
-                                     survey-id])
-        questions (jdbc/query conn
-                              [(print-str "select question.*"
-                                          "from question, question_group, form"
-                                          "where question_group.form_id = form.id and"
-                                          "question.question_group_id = question_group.id and"
-                                          "form.survey_id=?")
-                               survey-id])
+  (let [survey (survey-by-id conn {:id survey-id})
+        forms (forms-by-survey-id conn {:survey-id survey-id})
+        question-groups (question-groups-by-survey-id conn {:survey-id survey-id})
+        questions (questions-by-survey-id conn {:survey-id survey-id})
         questions (group-by :question_group_id questions)
         question-groups (for [{:keys [id] :as question-group} (sort-by :display_order question-groups)]
                           (assoc question-group
@@ -55,34 +47,14 @@
           {}
           form-instances))
 
-
-(defn form-instances-sql
-  [{:keys [form-id]}]
-  (if form-id
-    (print-str "select form_instance.* from form_instance"
-               "where form_instance.form_id=?")
-    (print-str "select form_instance.* from form_instance, form"
-               "where form_instance.form_id=form.id and"
-               "form.survey_id=?")))
-
-(defn responses-sql [{:keys [form-id]}]
-  (if form-id
-    (print-str "select response.* from response, form_instance"
-               "where response.form_instance_id=form_instance.id and"
-               "form_instance.form_id=?")
-    (print-str "select response.* from response, form_instance, form"
-               "where response.form_instance_id=form_instance.id and"
-               "form_instance.form_id=form.id and"
-               "form.survey_id=?")))
-
 (defn survey-data-points [conn {:keys [survey-id form-id] :as opts}]
-  (let [data-points (jdbc/query conn ["SELECT * FROM data_point where survey_id=?" survey-id])
-        form-instances (jdbc/query conn
-                                   [(form-instances-sql opts)
-                                    (or form-id survey-id)])
-        responses (jdbc/query conn
-                              [(responses-sql opts)
-                               (or form-id survey-id)])
+  (let [data-points (data-points-by-survey-id conn {:survey-id survey-id})
+        form-instances (if form-id
+                         (form-instances-by-form-id conn {:form-id form-id})
+                         (form-instances-by-survey-id conn {:survey-id survey-id}))
+        responses (if form-id
+                    (responses-by-form-id conn {:form-id form-id})
+                    (responses-by-survey-id conn {:survey-id survey-id}))
         responses (response-index responses)
         form-instances (form-instances-index form-instances responses)]
     (for [{:keys [id] :as data-point} data-points]
