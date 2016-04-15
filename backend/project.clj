@@ -30,6 +30,7 @@
                  [ring/ring-json "0.4.0"]
                  [traversy "0.4.0"]
                  [org.akvo/resumed "0.1.0-SNAPSHOT"]
+                 [org.akvo/commons "0.4.4-SNAPSHOT"]
                  [org.apache.tika/tika-core "1.12"]]
   :repl-options {:timeout 120000}
   :plugins [[lein-codox "0.9.1"]
