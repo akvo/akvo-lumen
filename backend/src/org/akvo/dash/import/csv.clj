@@ -94,16 +94,15 @@
         table (gen-table-name)
         temp (str table "_temp")
         dataset-id (str (squuid))
-        copy-manager (CopyManager. (cast BaseConnection (:connection conn)))
-        _ (jdbc/execute! conn [(get-create-table-sql temp n-cols "text" true)])
-        _ (jdbc/execute! conn [(get-create-table-sql table n-cols "jsonb" false)])
-        _ (.copyIn copy-manager (get-copy-sql temp n-cols headers?) (io/input-stream path))
-        _ (jdbc/execute! conn [(get-insert-sql temp table n-cols)])
-        _ (insert-dataset conn {:id dataset-id
-                                :name dataset-name})
-        _ (insert-dataset-version conn {:id (str (squuid))
-                                        :dataset-id dataset-id
-                                        :table-name table})
-        _ (insert-dataset-columns conn {:columns
-                                        (get-column-tuples dataset-id col-names n-cols "text")})]
+        copy-manager (CopyManager. (cast BaseConnection (:connection conn)))]
+    (jdbc/execute! conn [(get-create-table-sql temp n-cols "text" true)])
+    (jdbc/execute! conn [(get-create-table-sql table n-cols "jsonb" false)])
+    (.copyIn copy-manager (get-copy-sql temp n-cols headers?) (io/input-stream path))
+    (jdbc/execute! conn [(get-insert-sql temp table n-cols)])
+    (insert-dataset conn {:id dataset-id
+                          :name dataset-name})
+    (insert-dataset-version conn {:id (str (squuid))
+                                  :dataset-id dataset-id
+                                  :table-name table})
+    (insert-dataset-columns conn {:columns (get-column-tuples dataset-id col-names n-cols "text")})
     dataset-id))
