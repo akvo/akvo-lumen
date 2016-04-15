@@ -3,13 +3,9 @@
             [clojure.java.jdbc :as jdbc]
             [akvo.commons.psql-util :as pg]
             [hugsql.core :as hugsql]
-            [cheshire.core :as json])
             [cheshire.core :as json]
             [org.akvo.dash.import.common :refer (make-dataset-data-table)])
   (:import [org.postgresql.util PGobject]))
-
-(set! *warn-on-reflection* true)
-(set! *print-length* 20)
 
 (hugsql/def-db-fns "org/akvo/dash/import/flow.sql")
 

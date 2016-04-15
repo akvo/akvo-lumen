@@ -7,7 +7,8 @@
    [compojure.core :refer :all]
    [hugsql.core :as hugsql]
    [immutant.scheduling :as scheduling]
-   [org.akvo.dash.endpoint.util :refer [rr squuid str->uuid]]
+   [org.akvo.dash.endpoint.util :refer [rr str->uuid]]
+   [org.akvo.dash.util :refer [squuid]]
    [org.akvo.dash.import :as import]
    [pandect.algo.sha1 :refer [sha1]]
    [ring.util.io :refer [string-input-stream]]))

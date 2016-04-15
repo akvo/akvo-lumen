@@ -3,7 +3,8 @@
    [clojure.java.jdbc :as jdbc]
    [compojure.core :refer :all]
    [hugsql.core :as hugsql]
-   [org.akvo.dash.endpoint.util :refer [rr squuid str->uuid]]))
+   [org.akvo.dash.endpoint.util :refer [rr str->uuid]]
+   [org.akvo.dash.util :refer [squuid]]))
 
 
 (hugsql/def-db-fns "org/akvo/dash/endpoint/visualisation.sql")

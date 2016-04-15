@@ -18,7 +18,7 @@
 
 (defn do-import [conn config {:strs [title description] :as settings}]
   (let [table-name (str "ds_" (str/replace (java.util.UUID/randomUUID) "-" "_"))
-        status (make-dataset-data-table conn config table-name spec)]
+        status (make-dataset-data-table conn config table-name settings)]
     (if (:success? status)
       (let [dataset-id (squuid)]
         (insert-dataset conn {:id dataset-id

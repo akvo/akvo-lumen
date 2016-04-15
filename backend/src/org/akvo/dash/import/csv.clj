@@ -4,7 +4,7 @@
             [clojure.java.jdbc :as jdbc]
             [clojure.data.csv :as csv]
             [hugsql.core :as hugsql]
-            [org.akvo.dash.endpoint.util :refer [squuid]])
+            [org.akvo.dash.util :refer [squuid]])
   (:import org.postgresql.copy.CopyManager
            org.postgresql.core.BaseConnection
            java.util.UUID))
@@ -76,7 +76,7 @@
   [dataset-id, names, num-cols, c-type]
   (vec
    (for [i (range 1 (inc num-cols))]
-     [(str (squuid)) 
+     [(str (squuid))
       dataset-id
       c-type
       (if (empty? names) (str "Column " i) (nth names (dec i)))
