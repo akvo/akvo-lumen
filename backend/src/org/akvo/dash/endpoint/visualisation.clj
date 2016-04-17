@@ -22,14 +22,14 @@
         (rr (all-visualisations (connection lord
                                             tenant)))))
     (POST "/" []
-      (fn [{tenant :tenant :as request}]
+      (fn [{:keys [:tenant :jwt-claims] :as request}]
         (try
           (let [resp (first (insert-visualisation
                              (connection lord tenant)
                              {:id     (squuid)
                               :name   (get-in request [:body "name"])
                               :spec   (get-in request [:body "spec"])
-                              :author {:user "Bob"}}))]
+                              :author jwt-claims}))]
             (rr (dissoc resp :author)))
           (catch Exception e
             (pprint e)

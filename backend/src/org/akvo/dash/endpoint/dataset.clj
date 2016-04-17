@@ -23,13 +23,13 @@
 
 (defn handle-datasets-POST!
   ""
-  [{:keys [:body :tenant] :as request} db]
+  [{:keys [:body :tenant :jwt-claims] :as request} db]
   (let [datasource {:id   (squuid)
                     :spec (get body "source")}
         dataset    {:id         (squuid)
                     :name       (get body "name")
                     :datasource (:id datasource)
-                    :author     (json/encode {:user "Bob"})}
+                    :author     (json/encode jwt-claims)}
         resp       (jdbc/with-db-transaction [tx db]
                      {:datasource (insert-datasource tx datasource)
                       :dataset    (insert-dataset tx dataset)})]
