@@ -61,17 +61,20 @@
 ;; =======
 
 (defn dataset-columns [form]
-  (concat [{:name "Identifier" :type "string"}
-           {:name "Latitude" :type "number"}
-           {:name "Longitude" :type "number"}
-           {:name "Submitter" :type "string"}
-           {:name "Submitted at" :type "date"}]
-          (mapcat (comp #(map (fn [question]
-                                {:name (:display_text question)
-                                 :type "string"})
-                              %)
-                        :questions)
-                  (:question-groups form))))
+  (let [common [{:title "Identifier" :type "string"}
+                {:title "Latitude" :type "number"}
+                {:title "Longitude" :type "number"}
+                {:title "Submitter" :type "string"}
+                {:title "Submitted at" :type "date"}]
+        questions (mapcat (comp #(map (fn [question]
+                                        {:title (:display_text question)
+                                         :type "string"})
+                                      %)
+                                :questions)
+                          (:question-groups form))]
+    (map-indexed (fn [idx col]
+                   (assoc col :column-name (str "c" (inc idx))))
+                 (concat common questions))))
 
 (defn form-instance-row [format-responses data-point form-instance]
   (reduce into
@@ -96,34 +99,10 @@
                                             [:responses question-id 0 :value "value"])))
             question-ids))))
 
-(defn uuid []
-  (str (java.util.UUID/randomUUID)))
-
 (defn create-data-table [table-name column-names]
   (format "create table %s (%s);"
           table-name
           (str/join ", " (map #(str % " jsonb") column-names))))
-
-(defn insert-dataset-columns! [conn dataset-id dataset-columns column-names]
-  (apply jdbc/insert!
-         conn
-         :dataset_column
-         (map-indexed
-          (fn [idx column]
-            (assoc column :c_order idx))
-          (map (fn [column-name column]
-                 (merge column
-                        {:c_name column-name
-                         :dataset_id dataset-id}))
-               column-names
-               dataset-columns))))
-
-(defn insert-dataset-version! [conn dataset-id table-name]
-  (jdbc/insert! conn
-                :dataset_version
-                {:dataset_id dataset-id
-                 :table_name table-name
-                 :version 0}))
 
 (defn insert-dataset-data! [conn dataset-data table-name column-names]
   (apply jdbc/insert!
@@ -135,24 +114,26 @@
                               (map pg/val->jsonb-pgobj data-row) )))
               dataset-data)))
 
-
-(defn create-dataset [org-id survey-id form-id]
-  (let [conn (str "jdbc:postgresql://localhost/" org-id)
-        survey (survey-definition conn survey-id)
+(defn create-dataset [tenant-conn table-name report-conn survey-id form-id]
+  (let [survey (survey-definition report-conn survey-id)
         form (get-in survey [:forms form-id])
         format-responses (format-responses-fn form)
-        data-points (survey-data-points conn {:survey-id survey-id :form-id form-id})
+        data-points (survey-data-points report-conn {:survey-id survey-id :form-id form-id})
         dataset-columns (dataset-columns form)
-        column-count (count dataset-columns)
-        dataset-data (dataset-data data-points (:id form) format-responses)
-        table-name (str "ds_" (str/replace (uuid) "-" "_"))
-        dataset-id (:id (first (jdbc/insert! conn :dataset {:name (:display_text survey)})))
-        column-names (map #(str "c" %) (range))]
-    (insert-dataset-columns! conn dataset-id dataset-columns column-names)
-    (insert-dataset-version! conn dataset-id table-name)
-    (jdbc/execute! conn [(create-data-table table-name (take column-count column-names))])
-    (insert-dataset-data! conn dataset-data table-name column-names)))
+        dataset-data (dataset-data data-points (:id form) format-responses)]
+    (jdbc/execute! tenant-conn [(create-data-table table-name (map :column-name dataset-columns))])
+    (insert-dataset-data! tenant-conn dataset-data table-name (map :column-name dataset-columns))
+    (mapv (juxt :title :column-name :type) dataset-columns)))
 
 (defmethod make-dataset-data-table "flow"
-  [tenant-conn config table-name {:strs [orgId surveyId formId]}]
-  {:success? true})
+  [tenant-conn {:keys [flow-report-database-url]} table-name {:strs [orgId surveyId formId]}]
+  (try
+    {:success? true
+     :columns (create-dataset tenant-conn
+                              table-name
+                              (format flow-report-database-url orgId)
+                              surveyId
+                              formId)}
+    (catch Exception e
+      {:success? false
+       :reason (.getMessage e)})))
