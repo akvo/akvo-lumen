@@ -18,7 +18,6 @@
 (defn wrap-label-tenant
   "Parses the first dns label as tenant id and adds it to the request map as
   tenant-id."
-  {:arglist '([handler])}
   [handler]
   (fn [req]
     (handler (assoc req

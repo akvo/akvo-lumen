@@ -16,8 +16,6 @@
                  [environ "1.0.2"]
                  [meta-merge "0.1.1"]
                  [org.akvo/commons "0.4.4-SNAPSHOT"]
-                 [org.akvo/commons "0.4.4-SNAPSHOT"]
-                 [org.akvo/resumed "0.1.0-SNAPSHOT"]
                  [org.akvo/resumed "0.1.0-SNAPSHOT"]
                  [org.apache.tika/tika-core "1.12"]
                  [org.clojure/clojure "1.8.0"]
@@ -30,11 +28,9 @@
                  [pandect "0.5.4"]
                  [ragtime "0.5.3"]
                  [ring "1.4.0"]
-                 ;; [ring-jetty-component "0.3.0"]
                  [ring/ring-defaults "0.2.0"]
                  [ring/ring-json "0.4.0"]
-                 [traversy "0.4.0"]
-                 ]
+                 [traversy "0.4.0"]]
 
   :repl-options {:timeout 120000}
   :plugins [[lein-codox "0.9.1"]
