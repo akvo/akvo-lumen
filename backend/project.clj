@@ -16,7 +16,10 @@
                  [environ "1.0.2"]
                  [meta-merge "0.1.1"]
                  [org.akvo/commons "0.4.4-SNAPSHOT"]
+                 [org.akvo/commons "0.4.4-SNAPSHOT"]
                  [org.akvo/resumed "0.1.0-SNAPSHOT"]
+                 [org.akvo/resumed "0.1.0-SNAPSHOT"]
+                 [org.apache.tika/tika-core "1.12"]
                  [org.clojure/clojure "1.8.0"]
                  [org.clojure/data.csv "0.1.3"]
                  [org.clojure/java.jdbc "0.5.0"]
@@ -27,11 +30,12 @@
                  [pandect "0.5.4"]
                  [ragtime "0.5.3"]
                  [ring "1.4.0"]
+                 ;; [ring-jetty-component "0.3.0"]
                  [ring/ring-defaults "0.2.0"]
-                 [ring/ring-devel "1.4.0"]
                  [ring/ring-json "0.4.0"]
-                 [ring/ring-mock "0.3.0"]
-                 [traversy "0.4.0"]]
+                 [traversy "0.4.0"]
+                 ]
+
   :repl-options {:timeout 120000}
   :plugins [[lein-codox "0.9.1"]
             [lein-environ "1.0.2"]
@@ -54,12 +58,15 @@
    :uberjar {:aot :all}
    :profiles/dev  {}
    :profiles/test {}
-   :project/dev   {:dependencies [[reloaded.repl "0.2.1"]
+   :project/dev   {:dependencies [[ring/ring-mock "0.3.0"]
+                                  [ring/ring-devel "1.4.0"]
+                                  [reloaded.repl "0.2.1"]
                                   [org.clojure/tools.namespace "0.2.11"]
                                   [org.clojure/tools.nrepl "0.2.12"]
                                   [eftest "0.1.1"]
                                   [kerodon "0.7.0"]]
                    :source-paths ["dev"]
+                   :resource-paths ["test/resources"]
                    :repl-options {:init-ns user}
                    :env {:port 3000}}
    :project/test  {}})
