@@ -5,7 +5,7 @@
    [cheshire.core :as json]
    [compojure.core :refer :all]
    [hugsql.core :as hugsql]
-   [org.akvo.dash.util :refer [squuid]]))
+   [org.akvo.dash.util :refer [squuid]]
    [org.akvo.dash.component.tenant-manager :refer [connection]]
    [org.akvo.dash.endpoint.util :refer [rr str->uuid]]))
 
