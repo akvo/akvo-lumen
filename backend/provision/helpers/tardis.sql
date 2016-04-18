@@ -36,9 +36,6 @@ CREATE FUNCTION log_change() RETURNS trigger
 
             IF isempty(tstzrange(lower(tt), now(), $$[)$$)) THEN
 
-                -- What edge case are we missing by commenting the following lines of code?
-		-- How can we get the lastxid value?
-
 		--IF NOT lastxid = txid_current() THEN
 		--    RAISE EXCEPTION 'UPDATE would have empty validity: %d!', OLD;
 		--END IF;
