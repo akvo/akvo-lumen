@@ -95,10 +95,10 @@
   (let [path (:path spec)
         headers? (:headers? spec)
         n-cols (get-num-cols path \,)
-        col-names (if headers?
-                    (get-headers path \,)
-                    (vec (for [i (range 1 (inc n-cols))]
-                           (str "Column " i))))
+        col-titles (if headers?
+                     (get-headers path \,)
+                     (vec (for [i (range 1 (inc n-cols))]
+                            (str "Column " i))))
         temp-table (str table-name "_temp")
         copy-manager (CopyManager. (cast BaseConnection (:connection tenant-conn)))]
     (jdbc/execute! tenant-conn [(get-create-table-sql temp-table n-cols "text" true)])
@@ -106,6 +106,6 @@
     (.copyIn copy-manager (get-copy-sql temp-table n-cols headers?) (io/input-stream path))
     (jdbc/execute! tenant-conn [(get-insert-sql temp-table table-name n-cols)])
     (jdbc/execute! tenant-conn [(get-drop-table-sql temp-table)])
-    (jdbc/execute! tenant-conn [(get-vacuum-sql table-name)])
+    (jdbc/execute! tenant-conn [(get-vacuum-sql table-name)] :transaction? false)
     {:success? true
-     :columns (get-column-tuples col-names)}))
+     :columns (get-column-tuples col-titles)}))
