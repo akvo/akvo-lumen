@@ -15,9 +15,9 @@ before_install:
 - cd ../backend/provision
 - ./setup-up.sh
 - cd ../
+- cp profiles.clj.template profiles.clj
 
 script:
-- cp profiles.clj.template profiles.clj
 - lein2 do clean, check, test :all
 - cd ../client
 - npm run lint
