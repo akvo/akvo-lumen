@@ -72,7 +72,7 @@
   "Returns the first line CSV a file"
   [path separator]
   (with-open [r (io/reader path)]
-    (vec (first (csv/read-csv r :separator separator)))))
+    (first (csv/read-csv r :separator separator))))
 
 (defn get-num-cols
   "Returns the number of columns based on the
