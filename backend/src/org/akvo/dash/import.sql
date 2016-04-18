@@ -24,4 +24,4 @@ VALUES (:id, :dataset-id, :type, :c-name, :c-order)
 -- :name insert-dataset-columns :! n
 -- :doc Insert new dataset columns with *tuple parameters
 INSERT INTO dataset_column(id, dataset_id, type, name, c_name, c_order)
-VALUES :tuple*:columnsq
+VALUES :tuple*:columns

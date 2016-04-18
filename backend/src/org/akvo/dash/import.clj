@@ -21,7 +21,7 @@
   :default
   (fn [content]
     (throw (IllegalArgumentException.
-            (str "Can't process dataa of " (:type content) " type.")))))
+            (str "Can't process data of " (:type content) " type.")))))
 
 (defmethod parse-content "csv" [{data :data}]
   (-> (csv/read-csv data)
