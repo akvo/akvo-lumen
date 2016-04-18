@@ -1,7 +1,6 @@
 (ns org.akvo.dash.migrate
-  ""
+  "Migrates the tenant manager and it's tenants."
   (:require
-   [clojure.pprint :refer [pprint]]
    [hugsql.core :as hugsql]
    [ragtime.jdbc :as jdbc]
    [ragtime.repl :as repl]))
@@ -17,10 +16,10 @@
 (defn migrate
   ""
   [db-spec]
-  ;; lord
-  (do-migrate "migrations_lord" db-spec)
+  ;; manager
+  (do-migrate "org/akvo/dash/migrations_tenant_manager" db-spec)
 
   ;; tenants
   (doseq [tenant (all-tenants db-spec)]
-    (do-migrate "migrations_tenants"
+    (do-migrate "org/akvo/dash/migrations_tenants"
                 {:connection-uri (:db_uri tenant)})))

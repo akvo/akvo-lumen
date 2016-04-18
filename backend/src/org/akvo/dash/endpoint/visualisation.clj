@@ -5,7 +5,7 @@
    [cheshire.core :as json]
    [compojure.core :refer :all]
    [hugsql.core :as hugsql]
-   [org.akvo.dash.component.tenants :refer [connection]]
+   [org.akvo.dash.component.tenant-manager :refer [connection]]
    [org.akvo.dash.endpoint.util :refer [rr squuid str->uuid]]))
 
 
@@ -13,19 +13,19 @@
 
 (defn endpoint
   ""
-  [{lord :lord :as config}]
+  [{tm :tenant-manager :as config}]
 
   (context "/visualisations" []
 
     (GET "/" []
       (fn [{tenant :tenant :as request}]
-        (rr (all-visualisations (connection lord
+        (rr (all-visualisations (connection tm
                                             tenant)))))
     (POST "/" []
       (fn [{:keys [:tenant :jwt-claims] :as request}]
         (try
           (let [resp (first (insert-visualisation
-                             (connection lord tenant)
+                             (connection tm tenant)
                              {:id     (squuid)
                               :name   (get-in request [:body "name"])
                               :spec   (get-in request [:body "spec"])
@@ -40,6 +40,6 @@
 
       (GET "/" []
         (fn [{tenant :tenant :as request}]
-          (rr (dissoc (visualisation-by-id (connection lord tenant)
+          (rr (dissoc (visualisation-by-id (connection tm tenant)
                                            {:id id})
                       :author)))))))

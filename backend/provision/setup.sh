@@ -13,8 +13,8 @@ cd $DIR
 # Setup Dash role
 psql -c "CREATE ROLE dash WITH PASSWORD 'password' CREATEDB LOGIN;"
 
-# Setup dash (lord) db
-psql -f $DIR/helpers/create-lord.sql
+# Setup dash db
+psql -f $DIR/helpers/create-dash.sql
 
 # Setup Tardis
 psql -d dash -f $DIR/helpers/tardis.sql

@@ -9,7 +9,7 @@
    [compojure.core :refer :all]
    [hugsql.core :as hugsql]
    [immutant.scheduling :as scheduling]
-   [org.akvo.dash.component.tenants :refer [connection]]
+   [org.akvo.dash.component.tenant-manager :refer [connection]]
    [org.akvo.dash.endpoint.util :refer [rr squuid str->uuid]]
    [org.akvo.dash.transformation :as t]
    [org.akvo.dash.import :as import]
@@ -45,20 +45,20 @@
 ;;;  Endpoint spec
 
 (defn endpoint
-  [{lord :lord :as config}]
+  [{tm :tenant-manager :as config}]
 
   (context "/datasets" []
 
     (GET "/" []
       (fn [{tenant :tenant :as request}]
         (pprint request)
-        (rr (all-datasets (connection lord tenant)))))
+        (rr (all-datasets (connection tm tenant)))))
 
     (POST "/" []
       (fn [{tenant :tenant :as request}]
         (try
           (handle-datasets-POST! request
-                                 (connection lord tenant))
+                                 (connection tm tenant))
           (catch Exception e
             (pprint e)
             (pprint (.getNextExcpetion e))
@@ -71,7 +71,7 @@
       (GET "/" []
         (fn [{tenant :tenant :as request}]
           (let [{:keys [:id :d :name :status :created :modified] :as ds}
-                (dataset-by-id (connection lord tenant)
+                (dataset-by-id (connection tm tenant)
                                {:id id})
                 resp
                 {"id"              id
@@ -87,7 +87,7 @@
       (PUT "/" []
         (fn [{tenant :tenant :as request}]
           (try
-            (update-dataset-name (connection lord tenant)
+            (update-dataset-name (connection tm tenant)
                                  {:id   id
                                   :name (get-in request [:body "name"])})
             (rr "\"OK\"")

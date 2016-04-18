@@ -25,8 +25,7 @@ To create the Postgres role & databases run the provision script:
 ``` sh
 $ ./provision/setup.sh
 ```
-This did setup three databases dash which is the lord db that manges the tenants
-& two tenant dbs.
+This creates the central db dash and two tenants.
 
 ### Troubleshooting
 

@@ -1,5 +1,5 @@
-(ns org.akvo.dash.component.tenants
-  "Component that controll the tenants, hence - \"lord\"
+(ns org.akvo.dash.component.tenant-manager
+  "Component that controll the tenants,
   We use the first domain label e.g. t1 in t1.dash.akvo.org to dispatch."
   (:require
    [clojure.pprint :refer [pprint]]
@@ -9,7 +9,7 @@
   (:import [com.zaxxer.hikari HikariConfig HikariDataSource]))
 
 
-(hugsql/def-db-fns "org/akvo/dash/component/tenants.sql")
+(hugsql/def-db-fns "org/akvo/dash/component/tenant_manager.sql")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Middleware
@@ -45,18 +45,15 @@
     {:datasource (HikariDataSource. cfg)}))
 
 
-(defrecord Lord [db]
+(defrecord TenantManager [db]
 
   component/Lifecycle
   (start [component]
-    (pprint "@lord/start")
-    #_(pprint db)
     (if (:tenants component)
       component
       (assoc component :tenants (atom {}))))
 
   (stop [component]
-    (pprint "@lord/stop")
     (if-let [tenants @(:tenants component)]
       (do
         (doseq [[_ {{conn :datasource} :spec}] tenants]
@@ -67,7 +64,6 @@
   TenantConnection
   (connection
       [{:keys [tenants] :as component} label]
-      ;;[{:keys [tenants db]} label]
     (if-let [tenant (get @tenants label)]
       (:spec tenant)
       (do
@@ -83,10 +79,10 @@
           (throw (Exception. "Could not match dns label with tenant.")))))))
 
 
-(defn lord
+(defn manager
   ""
   []
-  (map->Lord {}))
+  (map->TenantManager {}))
 
-(alter-meta! #'->Lord assoc :no-doc true)
-(alter-meta! #'map->Lord assoc :no-doc true)
+(alter-meta! #'->TenantManager assoc :no-doc true)
+(alter-meta! #'map->TenantManager assoc :no-doc true)

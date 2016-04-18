@@ -12,7 +12,7 @@
    [meta-merge.core :refer [meta-merge]]
    [org.akvo.dash.component
     [http :as http]
-    [tenants :as tenants]]
+    [tenant-manager :as tm]]
    [org.akvo.dash.endpoint
     [dataset :as dataset]
     [files :as files]
@@ -36,7 +36,7 @@
                       wrap-json-body
                       wrap-auth
                       [wrap-jwt :jwt]
-                      tenants/wrap-label-tenant
+                      tm/wrap-label-tenant
                       wrap-json-response]
          :jwt        "https://login.test.akvo-ops.org/auth/realms/akvo"
          :not-found  (io/resource "org/akvo/dash/errors/404.html")
@@ -55,15 +55,16 @@
          :db   (hikaricp (:db config))
          :files (endpoint-component files/endpoint)
          :library (endpoint-component library/endpoint)
-         :lord (tenants/lord)
+         :tenant-manager (tm/manager)
          :root (endpoint-component root/endpoint)
          :visualisation (endpoint-component visualisation/endpoint))
 
         (component/system-using
-         {:http          [:app]
-          :app           [:dataset :files :library :lord :root :visualisation]
-          :root          [:lord]
-          :library       [:lord]
-          :lord          [:db]
-          :dataset       [:lord]
-          :visualisation [:lord]}))))
+         {:http           [:app]
+          :app            [:dataset :files :library :tenant-manager :root
+                           :visualisation]
+          :root           [:tenant-manager]
+          :library        [:tenant-manager]
+          :tenant-manager [:db]
+          :dataset        [:tenant-manager]
+          :visualisation  [:tenant-manager]}))))

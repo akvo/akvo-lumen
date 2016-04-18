@@ -4,7 +4,7 @@
    [clojure.pprint :refer [pprint]]
    [compojure.core :refer :all]
    [hugsql.core :as hugsql]
-   [org.akvo.dash.component.tenants :refer [connection]]
+   [org.akvo.dash.component.tenant-manager :refer [connection]]
    [org.akvo.dash.endpoint.util :refer [rr]]))
 
 
@@ -17,12 +17,12 @@
 
   / GET
   Return the library"
-  [{lord :lord :as config}]
+  [{tm :tenant-manager :as config}]
   (context "/library" []
 
     (GET "/" []
       (fn [{label :tenant :as request}]
-        (let [db (connection lord label)]
+        (let [db (connection tm label)]
           (rr {:datasets       (all-datasets db)
                :visualisations (all-visualisations db)
                :dashboards     [] }))))))

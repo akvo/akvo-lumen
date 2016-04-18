@@ -11,8 +11,7 @@ TODO: write [great documentation](http://jacobian.org/writing/what-to-write/)
 ## Concepts
 
 Dash is a multi tenant system. There is a central component that handles the
-different tenants. We call this lord. The analogy comes from landlord and it's
-tenants.
+different tenants. We call this tenant manager.
 
 
 ------------------------------------------------------------------------

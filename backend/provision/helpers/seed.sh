@@ -28,7 +28,7 @@ WITH OWNER = dash
 
 psql -d dash_tenant_2 -f $DIR/tardis.sql
 
-# Seed lord db with created tenants
+# Seed dash db with created tenants
 psql -d dash -c "
 INSERT INTO tenants (db_uri, label, title)
 VALUES ('jdbc:postgresql://localhost/dash_tenant_1?user=dash&password=password',
