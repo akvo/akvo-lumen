@@ -1,97 +1,45 @@
 (ns org.akvo.dash.endpoint.visualisation
   (:require
    [clojure.java.jdbc :as jdbc]
+   [clojure.pprint :refer [pprint]]
+   [cheshire.core :as json]
    [compojure.core :refer :all]
    [hugsql.core :as hugsql]
+   [org.akvo.dash.component.tenant-manager :refer [connection]]
    [org.akvo.dash.endpoint.util :refer [rr squuid str->uuid]]))
 
 
 (hugsql/def-db-fns "org/akvo/dash/endpoint/visualisation.sql")
 
-
 (defn endpoint
-  "/visualisations
-
-  / GET
-  Return the visualisation collection.
-  ;; Twiiter style
-  ;; :count       20
-  ;; :cursor      1
-  ;; :next_cursor 21
-  ;; Factual style
-  ;; :offset      1
-  ;; :limit       20
-  ;; :previous_cursor -1
-  ;; ?
-
-
-  / POST
-  Creates a visualisation
-
-  ...
-  "
-  [{{db :spec} :db}]
+  ""
+  [{tm :tenant-manager :as config}]
 
   (context "/visualisations" []
 
     (GET "/" []
-      (rr {:entities (all-visualisations db)}))
-
+      (fn [{tenant :tenant :as request}]
+        (rr (all-visualisations (connection tm
+                                            tenant)))))
     (POST "/" []
-      (fn [req]
+      (fn [{:keys [:tenant :jwt-claims] :as request}]
         (try
-          (let [visualisation      {:id (squuid)}
-                visualidation-data {:id            (squuid)
-                                    :visualisation (:id visualisation)
-                                    :name          (get-in req [:body "name"])
-                                    :spec          (get-in req [:body "spec"])}
-                res                (jdbc/with-db-transaction [tx db]
-                                     {:v  (insert-visualisation tx
-                                                                visualisation)
-                                      :vd (insert-visualisation-data tx
-                                                                     visualidation-data)})]
-            (rr {:id   (:id visualisation)
-                 :name (:name visualidation-data)
-                 :spec (:spec visualidation-data)}))
+          (let [resp (first (insert-visualisation
+                             (connection tm tenant)
+                             {:id     (squuid)
+                              :name   (get-in request [:body "name"])
+                              :spec   (get-in request [:body "spec"])
+                              :author jwt-claims}))]
+            (rr (dissoc resp :author)))
           (catch Exception e
-            (prn e)
-            (prn  (.getNextException e))))))
+            (pprint e)
+            (pprint (.getNextException e))
+            (rr {:error e})))))
 
     (context "/:id" [id]
 
       (GET "/" []
-        (fn [req]
-          (try
-            (let [res (visualisation-by-id db
-                                           {:id (str->uuid id)}) ]
-              (if (nil? res)
-                (rr {:error "Not Found"} {:status 404})
-                (rr res )))
-            (catch Exception e
-              (prn e)
-              (prn (.getNextException e))
-              (rr {:error (.getNextException e)} {:status 500})))))
-
-      (PUT "/" []
-        (fn [req]
-          (insert-visualisation-data db
-                                     {:id            (squuid)
-                                      :visualisation (str->uuid id)
-                                      :name          (get-in req [:body "name"])
-                                      :spec          (get-in req [:body "spec"])})
-          (rr {:status "OK"})))
-
-      (DELETE "/" []
-        (fn [req]
-          (try
-            (delete-visualisation db
-                                  {:id            (squuid)
-                                   :visualisation (str->uuid id)
-                                   :name          ""
-                                   :spec          {}
-                                   :enabled       false})
-            (rr {:status "OK"})
-            (catch Exception e
-              (prn e)
-              (prn (.getNextException e))
-              (rr {"error" (.getNextException e)} {:status 500}))))))))
+        (fn [{tenant :tenant :as request}]
+          (rr (dissoc (visualisation-by-id (connection tm tenant)
+                                           {:id id})
+                      :author)))))))
