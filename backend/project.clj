@@ -21,7 +21,7 @@
                  [org.clojure/java.jdbc "0.4.2"]
                  [org.immutant/scheduling "2.1.2"]
                  [org.immutant/web "2.1.2"]
-                 [org.postgresql/postgresql "9.4.1208.jre7"]
+                 [org.postgresql/postgresql "9.4.1208"]
                  [org.slf4j/slf4j-nop "1.7.18"]
                  [pandect "0.5.4"]
                  [ring "1.4.0"]
