@@ -30,11 +30,11 @@ psql -d dash_tenant_2 -f $DIR/tardis.sql
 
 # Seed dash db with created tenants
 psql -d dash -c "
-INSERT INTO tenants (db_uri, label, title)
+INSERT INTO tenant (db_uri, label, title)
 VALUES ('jdbc:postgresql://localhost/dash_tenant_1?user=dash&password=password',
        't1', 'Tenant 1');
 
-INSERT INTO tenants (db_uri, label, title)
+INSERT INTO tenant (db_uri, label, title)
 VALUES ('jdbc:postgresql://localhost/dash_tenant_2?user=dash&password=password',
        't2', 'Tenant 2');
 "
