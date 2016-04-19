@@ -38,9 +38,7 @@ export default class DataFileDataSourceSettings extends Component {
   uploadFile(file) {
     const onChange = this.props.onChange;
     const upload = new tus.Upload(file, {
-      headers: {
-        Authorization: `Bearer ${keycloak.token}`
-      },
+      headers: { Authorization: `Bearer ${keycloak.token}` },
       endpoint: '/api/files',
       onError(error) {
         console.error(`Failed because: ${error}`);
