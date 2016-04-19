@@ -16,7 +16,7 @@ before_install:
 - npm config set spin false
 - npm install
 - cd ../backend/provision
-- ./setup-up.sh
+- ./setup.sh
 - cd ../
 - cp profiles.clj.template profiles.clj
 
