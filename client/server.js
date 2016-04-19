@@ -8,7 +8,8 @@ new WebpackDevServer(webpack(config), {
   historyApiFallback: true,
   proxy: {
     '/api/*': {
-      target: 'http://localhost:3000',
+      // target: 'http://localhost:3000',
+        target: "http://t1.dash.akvo.org:3000",
       secure: false
     }
   }
