@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import * as tus from 'tus-js-client';
+import keycloak from '../../../auth';
 
 export default class DataFileDataSourceSettings extends Component {
 
@@ -37,6 +38,7 @@ export default class DataFileDataSourceSettings extends Component {
   uploadFile(file) {
     const onChange = this.props.onChange;
     const upload = new tus.Upload(file, {
+      headers: {Authorization: `Bearer ${keycloak.token}`},
       endpoint: '/api/files',
       onError(error) {
         console.error(`Failed because: ${error}`);
