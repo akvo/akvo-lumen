@@ -103,7 +103,7 @@
         copy-manager (CopyManager. (cast BaseConnection (:connection tenant-conn)))]
     (jdbc/execute! tenant-conn [(get-create-table-sql temp-table n-cols "text" true)])
     (jdbc/execute! tenant-conn [(get-create-table-sql table-name n-cols "jsonb" false)])
-    (.copyIn copy-manager (get-copy-sql temp-table n-cols headers?) (io/input-stream path))
+    (.copyIn copy-manager ^String (get-copy-sql temp-table n-cols headers?) (io/input-stream path))
     (jdbc/execute! tenant-conn [(get-insert-sql temp-table table-name n-cols)])
     (jdbc/execute! tenant-conn [(get-drop-table-sql temp-table)])
     (jdbc/execute! tenant-conn [(get-vacuum-sql table-name)] :transaction? false)
