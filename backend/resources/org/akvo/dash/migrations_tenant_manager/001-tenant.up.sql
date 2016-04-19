@@ -15,7 +15,9 @@ FOR EACH ROW EXECUTE PROCEDURE history.log_change();
 
 --;;
 CREATE TABLE IF NOT EXISTS history.tenant (
-       LIKE public.tenant, _validrange tstzrange NOT NULL);
+       LIKE public.tenant,
+       _validrange tstzrange NOT NULL
+);
 
 GRANT ALL ON tenant TO dash;
 
