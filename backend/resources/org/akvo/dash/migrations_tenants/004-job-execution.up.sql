@@ -1,11 +1,11 @@
 CREATE TABLE job_execution (
-  id TEXT PRIMARY KEY,
-  data_source_id TEXT REFERENCES data_source,
-  started_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  finished_at TIMESTAMPTZ,
-  error_reason TEXT,
-  created TIMESTAMPTZ DEFAULT now(),
-  modified TIMESTAMPTZ DEFAULT now()
+  id text PRIMARY KEY,
+  data_source_id text REFERENCES data_source,
+  started_at timestamptz NOT NULL DEFAULT now(),
+  finished_at timestamptz,
+  error_reason text,
+  created timestamptz DEFAULT now(),
+  modified timestamptz DEFAULT now()
 );
 
 GRANT ALL ON job_execution to dash;

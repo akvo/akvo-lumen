@@ -1,14 +1,13 @@
 (ns org.akvo.dash.endpoint.dataset
   "Dataset..."
-  (:require
-   [clojure.set :as set]
-   [clojure.string :as str]
-   [clojure.java.jdbc :as jdbc]
-   [compojure.core :refer :all]
-   [hugsql.core :as hugsql]
-   [org.akvo.dash.component.tenant-manager :refer [connection]]
-   [org.akvo.dash.import :as import]
-   [ring.util.response :refer (response not-found)]))
+  (:require [clojure.set :as set]
+            [clojure.string :as str]
+            [clojure.java.jdbc :as jdbc]
+            [compojure.core :refer :all]
+            [hugsql.core :as hugsql]
+            [org.akvo.dash.component.tenant-manager :refer [connection]]
+            [org.akvo.dash.import :as import]
+            [ring.util.response :refer (response not-found)]))
 
 
 (hugsql/def-db-fns "org/akvo/dash/endpoint/dataset.sql")

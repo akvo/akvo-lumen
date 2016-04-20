@@ -1,16 +1,16 @@
 CREATE TABLE dataset_column (
-  id TEXT PRIMARY KEY,
-  dataset_id TEXT REFERENCES dataset,
-  title TEXT NOT NULL,
-  type TEXT NOT NULL,
+  id text PRIMARY KEY,
+  dataset_id text REFERENCES dataset,
+  title text NOT NULL,
+  type text NOT NULL,
   -- The name of the column in the data table
-  column_name TEXT NOT NULL,
-  column_order SMALLINT NOT NULL,
-  sort SMALLINT,
-  direction CHAR(1),
-  hidden BOOLEAN,
-  created TIMESTAMPTZ DEFAULT now(),
-  modified TIMESTAMPTZ DEFAULT now()
+  column_name text NOT NULL,
+  column_order smallint NOT NULL,
+  sort smallint,
+  direction char(1),
+  hidden boolean,
+  created timestamptz DEFAULT now(),
+  modified timestamptz DEFAULT now()
 );
 
 GRANT ALL ON dataset_column to dash;
