@@ -1,7 +1,7 @@
 -- :name all-datasets :? :*
 -- :doc All datasets.
-SELECT id, name, datasource, status, created, modified
-FROM datasets;
+SELECT id, title as name, created, modified --TODO name->title
+FROM dataset;
 
 -- :name insert-datasource :<!
 -- :doc insert datasource
@@ -27,7 +27,26 @@ UPDATE datasets
 SET "name" = :name
 WHERE id = :id
 
+
+
 -- :name dataset-by-id :? :1
--- :doc Get dataset by id
-SELECT * from datasets
-WHERE id = :id
+SELECT dataset_version.table_name AS "table-name",
+       dataset.transaction_log AS "transaction-log",
+       dataset.title,
+       dataset.created,
+       dataset.modified,
+       dataset.id
+  FROM dataset_version, dataset
+ WHERE dataset_version.dataset_id=:id
+   AND dataset.id=dataset_version.dataset_id
+   AND version=(SELECT max(version)
+                  FROM dataset_version
+                 WHERE dataset_version.dataset_id=:id);
+
+-- :name dataset-columns-by-dataset-id :? :*
+SELECT title,
+       type,
+       column_name AS "column-name",
+       column_order AS "column-order"
+  FROM dataset_column
+ WHERE dataset_id=:id

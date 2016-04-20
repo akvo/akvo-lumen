@@ -4,7 +4,8 @@
             [clojure.java.jdbc :as jdbc]
             [clojure.data.csv :as csv]
             [hugsql.core :as hugsql]
-            [org.akvo.dash.util :refer [squuid]])
+            [org.akvo.dash.util :refer [squuid]]
+            [org.akvo.dash.import.common :refer (make-dataset-data-table)])
   (:import org.postgresql.copy.CopyManager
            org.postgresql.core.BaseConnection
            java.util.UUID))
@@ -51,7 +52,7 @@
   [src-table dest-table num-cols]
   (let [cols (for [i (range 1 (inc num-cols))]
                (str "c" i))
-        src-cols (map #(format "to_jsonb(replace(%s, '\\', '\\\\'))" %) cols)]
+        src-cols (map #(format "to_json(replace(%s, '\\', '\\\\'))::jsonb" %) cols)]
     (format "INSERT INTO %s (rnum, %s) SELECT rnum, %s FROM %s"
             dest-table
             (s/join ", " cols)
@@ -86,13 +87,18 @@
    (map-indexed (fn [idx title]
                   [title (str "c" (inc idx)) "text"]) col-titles)))
 
-(defn make-dataset-data-table
-  "Creates a dataset data table from a CSV file. Some of keys
-  required in `spec`:
-  :path - defines the path to the CSV file on disk
-  :headers? - defines if the CSV file contains headers"
-  [tenant-conn config table-name spec]
-  (let [path (:path spec)
+(defmethod make-dataset-data-table "csv" [tenant-conn config table-name spec]
+  (let [;; TODO a bit of "manual" integration work
+        file-on-disk? (contains? spec "fileName")
+        path (let [url (get spec "url")]
+               (if file-on-disk?
+                 (str "/tmp/akvo/dash/resumed/"
+                      (last (s/split url #"\/"))
+                      "/file")
+                 url))
+        ;; TODO spec will have string keys since & probably no '&' as
+        ;; that's not really idiomatic in json. Perhaps 'hasHeaders'
+        ;; instead?
         headers? (:headers? spec)
         n-cols (get-num-cols path \,)
         col-titles (if headers?
@@ -100,8 +106,8 @@
                      (vec (for [i (range 1 (inc n-cols))]
                             (str "Column " i))))
         temp-table (str table-name "_temp")
-        copy-manager (CopyManager. (cast BaseConnection (:connection tenant-conn)))]
-    (jdbc/execute! tenant-conn [(get-create-table-sql temp-table n-cols "text" true)])
+        copy-manager (CopyManager. (cast BaseConnection (.unwrap (.getConnection (:datasource tenant-conn)) BaseConnection)))]
+    (jdbc/execute! tenant-conn [(get-create-table-sql temp-table n-cols "text" false)])
     (jdbc/execute! tenant-conn [(get-create-table-sql table-name n-cols "jsonb" false)])
     (.copyIn copy-manager (get-copy-sql temp-table n-cols headers?) (io/input-stream path))
     (jdbc/execute! tenant-conn [(get-insert-sql temp-table table-name n-cols)])

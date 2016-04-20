@@ -135,5 +135,6 @@
                               surveyId
                               formId)}
     (catch Exception e
+      (.printStackTrace e)
       {:success? false
-       :reason (.getMessage e)})))
+       :reason (str "Unexpected error " (.getMessage e))})))

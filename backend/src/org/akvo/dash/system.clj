@@ -30,14 +30,14 @@
 ;;;
 
 (def base-config
-  {:app {:middleware [[wrap-not-found :not-found]
+  {:app {:middleware [wrap-json-response
+                      [wrap-not-found :not-found]
                       [wrap-defaults :defaults]
                       [wrap-route-aliases :aliases]
                       wrap-json-body
                       wrap-auth
                       [wrap-jwt :jwt]
-                      tm/wrap-label-tenant
-                      wrap-json-response]
+                      tm/wrap-label-tenant]
          :jwt        "https://login.test.akvo-ops.org/auth/realms/akvo"
          :not-found  (io/resource "org/akvo/dash/errors/404.html")
          :defaults   (meta-merge api-defaults
@@ -46,19 +46,17 @@
 
 
 (defn new-system [config]
-  ;; (migrate config)
   (let [config (meta-merge base-config config)]
     (-> (component/system-map
          :app  (handler-component (:app config))
          :http (http/immutant-web (:http config))
-         :dataset (endpoint-component dataset/endpoint)
+         :dataset (endpoint-component (dataset/endpoint (select-keys config [:flow-report-database-url])))
          :db   (hikaricp (:db config))
          :files (endpoint-component files/endpoint)
          :library (endpoint-component library/endpoint)
          :tenant-manager (tm/manager)
          :root (endpoint-component root/endpoint)
          :visualisation (endpoint-component visualisation/endpoint))
-
         (component/system-using
          {:http           [:app]
           :app            [:dataset :files :library :tenant-manager :root

@@ -1,98 +1,74 @@
 (ns org.akvo.dash.endpoint.dataset
   "Dataset..."
   (:require
+   [clojure.set :as set]
+   [clojure.string :as str]
    [clojure.java.jdbc :as jdbc]
-   [clojure.data.csv :as csv]
-   [cheshire.core :as json]
-   [clj-http.client :as client]
-   [clojure.pprint :refer [pprint]]
    [compojure.core :refer :all]
    [hugsql.core :as hugsql]
-   [immutant.scheduling :as scheduling]
-   [org.akvo.dash.endpoint.util :refer [rr str->uuid]]
-   [org.akvo.dash.util :refer [squuid]]
    [org.akvo.dash.component.tenant-manager :refer [connection]]
-   [org.akvo.dash.transformation :as t]
    [org.akvo.dash.import :as import]
-   [pandect.algo.sha1 :refer [sha1]]
-   [clojure.java.jdbc :as jdbc]
-   [ring.util.io :refer [string-input-stream]]))
+   [ring.util.response :refer (response not-found)]))
 
 
 (hugsql/def-db-fns "org/akvo/dash/endpoint/dataset.sql")
 
+(defn select-data-sql [table-name columns]
+  (format "SELECT %s FROM %s"
+          (str/join "," (map :column-name columns))
+          table-name))
 
-(defn handle-datasets-POST!
-  ""
-  [{:keys [:body :tenant :jwt-claims] :as request} db]
-  (let [datasource {:id   (squuid)
-                    :spec (get body "source")}
-        dataset    {:id         (squuid)
-                    :name       (get body "name")
-                    :datasource (:id datasource)
-                    :author     (json/encode jwt-claims)}
-        resp       (jdbc/with-db-transaction [tx db]
-                     {:datasource (insert-datasource tx datasource)
-                      :dataset    (insert-dataset tx dataset)})]
-    (scheduling/schedule #(import/job db
-                                     (-> resp :datasource first)
-                                     (-> resp :dataset first)))
-    (rr (select-keys (-> resp :dataset first)
-                     [:id :name :status :created :modified]))))
-
+(defn find-dataset [conn id]
+  (when-let [dataset (dataset-by-id conn {:id id})]
+    (let [columns (sort-by :column-order (dataset-columns-by-dataset-id conn {:id id}))
+          data (rest (jdbc/query conn [(select-data-sql (:table-name dataset) columns)] :as-arrays? true))
+          columns-with-data (map (fn [column values]
+                                   {:title (:title column)
+                                    :type (:type column)
+                                    :values values})
+                                 columns
+                                 (apply map vector data))]
+      {:id id
+       :name (:title dataset)
+       :modified (:modified dataset)
+       :created (:created dataset)
+       :columns  columns-with-data})))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;;  Endpoint spec
 
-(defn endpoint
-  [{tm :tenant-manager :as config}]
-
-  (context "/datasets" []
-
-    (GET "/" []
-      (fn [{tenant :tenant :as request}]
-        (pprint request)
-        (rr (all-datasets (connection tm tenant)))))
-
-    (POST "/" []
-      (fn [{tenant :tenant :as request}]
-        (try
-          (handle-datasets-POST! request
-                                 (connection tm tenant))
-          (catch Exception e
-            (pprint e)
-            (pprint (.getNextExcpetion e))
-            (rr {:error  "Could not complete upload."
-                 :status "FAILURE"})))))
-
-
-    (context "/:id" [id]
-
+(defn endpoint [config]
+  (fn [{tm :tenant-manager}]
+    (context "/datasets" []
       (GET "/" []
         (fn [{tenant :tenant :as request}]
-          (let [{:keys [:id :d :name :status :created :modified] :as ds}
-                (dataset-by-id (connection tm tenant)
-                               {:id id})
-                resp
-                {"id"              id
-                 "name"            name
-                 "status"          status
-                 "created"         created
-                 "modified"        modified
-                 "transformations" []}]
-            (rr (if d
-                  (assoc resp :columns d)
-                  resp)))))
+          (response (all-datasets (connection tm tenant)))))
 
-      (PUT "/" []
-        (fn [{tenant :tenant :as request}]
-          (try
-            (update-dataset-name (connection tm tenant)
-                                 {:id   id
-                                  :name (get-in request [:body "name"])})
-            (rr "\"OK\"")
-            (catch Exception e
-              (pprint e)
-              (pprint (.getNextException e))
-              (rr "\"FAILURE\""))))))))
+      (POST "/" {:keys [tenant body] :as request}
+        (let [tenant-conn (connection tm tenant)]
+          (let [;; TODO accidentally introduced mismatch between what
+                ;; the client sends and what the new import
+                ;; expects. Should be resolved.
+                data-source (assoc (set/rename-keys (get body "source") {"kind" "type"})
+                                   "title" (get body "name"))
+                data-source (if (or (= "DATA_FILE" (get data-source "type"))
+                                    (= "LINK" (get data-source "type")))
+                              (assoc data-source "type" "csv")
+                              data-source)]
+            (response (import/handle-import-request tenant-conn config data-source)))))
+
+      (GET "/:id" {:keys [tenant params]}
+        (let [tenant-conn (connection tm tenant)
+              dataset (find-dataset tenant-conn (:id params))]
+          (if dataset
+            (response dataset)
+            (not-found {:id (:id params)}))))
+
+
+      (GET "/import/:id" {:keys [tenant params]}
+        (let [tenant-conn (connection tm tenant)
+              import-id (:id params)]
+          (if-let [status (import/status tenant-conn import-id)]
+            (response status)
+            (not-found {"importId" import-id})))))))
