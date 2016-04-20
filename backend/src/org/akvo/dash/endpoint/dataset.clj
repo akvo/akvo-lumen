@@ -1,22 +1,14 @@
 (ns org.akvo.dash.endpoint.dataset
   "Dataset..."
-  (:require
-   [clojure.java.jdbc :as jdbc]
-   [clojure.data.csv :as csv]
-   [cheshire.core :as json]
-   [clj-http.client :as client]
-   [clojure.pprint :refer [pprint]]
-   [compojure.core :refer :all]
-   [hugsql.core :as hugsql]
-   [immutant.scheduling :as scheduling]
-   [org.akvo.dash.component.tenant-manager :refer [connection]]
-   [org.akvo.dash.endpoint.util :refer [rr squuid str->uuid]]
-   [org.akvo.dash.transformation :as t]
-   [org.akvo.dash.import :as import]
-   [pandect.algo.sha1 :refer [sha1]]
-   [clojure.java.jdbc :as jdbc]
-   [ring.util.io :refer [string-input-stream]]))
-
+  (:require [cheshire.core :as json]
+            [clojure.java.jdbc :as jdbc]
+            [clojure.pprint :refer [pprint]]
+            [compojure.core :refer :all]
+            [hugsql.core :as hugsql]
+            [immutant.scheduling :as scheduling]
+            [org.akvo.dash.component.tenant-manager :refer [connection]]
+            [org.akvo.dash.endpoint.util :refer [rr squuid]]
+            [org.akvo.dash.import :as import]))
 
 (hugsql/def-db-fns "org/akvo/dash/endpoint/dataset.sql")
 
