@@ -20,8 +20,12 @@
 
 (defn- check-response
   [response expected]
-  (is expected (:status response))
+  (when (= expected 200)
+    (prn response))
+  (is (= expected (:status response)))
   (condp = expected
+    201 (is "" (:body response))
+    200 (is "" (:body response))
     401 (is "Not authenticated" (:body response))
     403 (is "Not authorized" (:body response))))
 
@@ -37,6 +41,23 @@
     (let [response ((m/wrap-auth test-handler)
                     (immutant-request :post "/"))]
       (is (= 401 (:status response)))))
+
+  (testing "GET resource with claims but no tenant"
+    (check-response
+     ((m/wrap-auth test-handler)
+      (-> (immutant-request :get "/resource")
+          (assoc-in [:jwt-claims "realm_access" "roles"]
+                    ["akvo:dash:t0"])))
+     403))
+
+  (testing "GET resource with claims and tenant"
+    (check-response
+     ((m/wrap-auth test-handler)
+      (-> (immutant-request :get "/resource")
+          (assoc-in [:jwt-claims "realm_access" "roles"]
+                    ["akvo:dash:t0"])
+          (assoc :tenant "t0")))
+     200))
 
   (testing "GET resource without claims"
     (let [response ((m/wrap-auth test-handler)
@@ -96,9 +117,10 @@
                                                ))]
         (is (not (contains? response :jwt-claims)))))
 
-    #_(testing "Valid token should yeild jwt-claims."
-      (let [response (jwt-middleware (assoc-in (immutant-request :get "/")
-                                               [:headers "authorization"]
-                                               "valid-token"
-                                               ))]
-        (is (contains? response :jwt-claims))))))
+    ;; (testing "Valid token should yeild jwt-claims."
+    ;;   (let [response (jwt-middleware (assoc-in (immutant-request :get "/")
+    ;;                                            [:headers "authorization"]
+    ;;                                            "valid-token"
+    ;;                                            ))]
+    ;;     (is (contains? response :jwt-claims))))
+    ))
