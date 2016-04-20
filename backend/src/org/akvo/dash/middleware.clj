@@ -13,9 +13,8 @@
   return 403. Otherwise grant access."
   [handler]
   (fn [request]
-    (if (or (and (= (:path-info request) "/")
-                 (= (:request-method request) :get))
-            (= (s/starts-with? (:path-info request) "/files"))) ;; < !!!!!!!!!!!!!!!!!!!!
+    (if (and (= "/" (:path-info request)) ;; GET @ root is public
+             (= :get (:request-method request)))
       (handler request)
       (if-let [claimed-roles (get-in request [:jwt-claims "realm_access" "roles"])]
         (if (contains? (set claimed-roles)

@@ -1,13 +1,10 @@
 (ns org.akvo.dash.endpoint.visualisation
-  (:require
-   [clojure.java.jdbc :as jdbc]
-   [clojure.pprint :refer [pprint]]
-   [cheshire.core :as json]
-   [compojure.core :refer :all]
-   [hugsql.core :as hugsql]
-   [org.akvo.dash.util :refer [squuid]]
-   [org.akvo.dash.component.tenant-manager :refer [connection]]
-   [org.akvo.dash.endpoint.util :refer [rr str->uuid]]))
+  (:require [clojure.pprint :refer [pprint]]
+            [compojure.core :refer :all]
+            [hugsql.core :as hugsql]
+            [org.akvo.dash.component.tenant-manager :refer [connection]]
+            [org.akvo.dash.endpoint.util :refer [rr]]
+            [org.akvo.dash.util :refer [squuid]]))
 
 (hugsql/def-db-fns "org/akvo/dash/endpoint/visualisation.sql")
 

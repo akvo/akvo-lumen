@@ -1,17 +1,16 @@
 (ns org.akvo.dash.import
-  (:require
-   [akvo.commons.psql-util :as pg]
-   [cheshire.core :as json]
-   [clj-http.client :as client]
-   [clojure.data.csv :as csv]
-   [clojure.string :as str]
-   [hugsql.core :as hugsql]
-   [pandect.algo.sha1 :refer [sha1]]
-   [org.akvo.dash.transformation :as t]
-   [org.akvo.dash.import.flow]
-   [org.akvo.dash.import.csv]
-   [org.akvo.dash.util :refer (squuid)]
-   [org.akvo.dash.import.common :refer (make-dataset-data-table)]))
+  (:require [akvo.commons.psql-util :as pg]
+            [cheshire.core :as json]
+            [clj-http.client :as client]
+            [clojure.data.csv :as csv]
+            [clojure.string :as str]
+            [hugsql.core :as hugsql]
+            [pandect.algo.sha1 :refer [sha1]]
+            [org.akvo.dash.transformation :as t]
+            [org.akvo.dash.import.flow]
+            [org.akvo.dash.import.csv]
+            [org.akvo.dash.util :refer (squuid)]
+            [org.akvo.dash.import.common :refer (make-dataset-data-table)]))
 
 (hugsql/def-db-fns "org/akvo/dash/import.sql")
 

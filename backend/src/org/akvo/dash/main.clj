@@ -6,9 +6,10 @@
             [duct.middleware.errors :refer [wrap-hide-errors]]
             [duct.util.runtime :refer [add-shutdown-hook]]
             [meta-merge.core :refer [meta-merge]]
-            [org.akvo.dash.config :as config]
-            [org.akvo.dash.system :refer [new-system]]
-            [org.akvo.dash.migrate :as migrate]))
+            [org.akvo.dash
+             [config :as config]
+             [migrate :as migrate]
+             [system :refer [new-system]]]))
 
 (def prod-config
   {:app {:middleware     [[wrap-hide-errors :internal-error]]
