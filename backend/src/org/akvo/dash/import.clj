@@ -1,11 +1,10 @@
 (ns org.akvo.dash.import
   "Import of data. LINK and DATA_FILE implemented."
-  (:require
-   [clj-http.client :as client]
-   [clojure.data.csv :as csv]
-   [clojure.string :as str]
-   [hugsql.core :as hugsql]
-   [org.akvo.dash.transformation :as t]))
+  (:require [clj-http.client :as client]
+            [clojure.data.csv :as csv]
+            [clojure.string :as str]
+            [hugsql.core :as hugsql]
+            [org.akvo.dash.transformation :as t]))
 
 
 (hugsql/def-db-fns "org/akvo/dash/import.sql")

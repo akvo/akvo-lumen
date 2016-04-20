@@ -1,10 +1,5 @@
 (ns org.akvo.dash.transformation
-  (:require
-   [clojure.data.csv :as csv]
-   [clojure.java.io :as io]
-   [clojure.pprint :refer [pprint]]
-   [traversy.lens :as l]))
-
+  (:require [traversy.lens :as l]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Parse CSV

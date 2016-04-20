@@ -1,9 +1,9 @@
 (ns org.akvo.dash.migrate
   "Migrates the tenant manager and it's tenants."
-  (:require
-   [hugsql.core :as hugsql]
-   [ragtime.jdbc :as jdbc]
-   [ragtime.repl :as repl]))
+  (:require [hugsql.core :as hugsql]
+            [ragtime
+             [jdbc :as jdbc]
+             [repl :as repl]]))
 
 (hugsql/def-db-fns "org/akvo/dash/migrate.sql")
 

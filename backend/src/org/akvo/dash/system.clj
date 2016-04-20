@@ -1,29 +1,28 @@
 (ns org.akvo.dash.system
-  (:require
-   [akvo.commons.psql-util]
-   [clojure.java.io :as io]
-   [com.stuartsierra.component :as component]
-   [duct.component
-    [endpoint :refer [endpoint-component]]
-    [handler :refer [handler-component]]
-    [hikaricp :refer [hikaricp]]]
-   [duct.middleware.not-found :refer [wrap-not-found]]
-   [duct.middleware.route-aliases :refer [wrap-route-aliases]]
-   [meta-merge.core :refer [meta-merge]]
-   [org.akvo.dash.component
-    [http :as http]
-    [tenant-manager :as tm]]
-   [org.akvo.dash.endpoint
-    [dataset :as dataset]
-    [files :as files]
-    [library :as library]
-    [root :as root]
-    [visualisation :as visualisation]]
-   [org.akvo.dash.middleware :refer [wrap-auth wrap-jwt]]
-   [org.akvo.dash.migrate :refer [migrate]]
-   [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
-   [ring.middleware.json :refer [wrap-json-body wrap-json-response]]))
-
+  (:require [akvo.commons.psql-util]
+            [clojure.java.io :as io]
+            [com.stuartsierra.component :as component]
+            [duct.component
+             [endpoint :refer [endpoint-component]]
+             [handler :refer [handler-component]]
+             [hikaricp :refer [hikaricp]]]
+            [duct.middleware
+             [not-found :refer [wrap-not-found]]
+             [route-aliases :refer [wrap-route-aliases]]]
+            [meta-merge.core :refer [meta-merge]]
+            [org.akvo.dash.component
+             [http :as http]
+             [tenant-manager :as tm]]
+            [org.akvo.dash.endpoint
+             [dataset :as dataset]
+             [files :as files]
+             [library :as library]
+             [root :as root]
+             [visualisation :as visualisation]]
+            [org.akvo.dash.middleware :refer [wrap-auth wrap-jwt]]
+            [ring.middleware
+             [defaults :refer [api-defaults wrap-defaults]]
+             [json :refer [wrap-json-body wrap-json-response]]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; System
