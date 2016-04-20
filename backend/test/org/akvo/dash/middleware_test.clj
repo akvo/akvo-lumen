@@ -115,12 +115,4 @@
                                                [:headers "authorization"]
                                                "invalid-token"
                                                ))]
-        (is (not (contains? response :jwt-claims)))))
-
-    ;; (testing "Valid token should yeild jwt-claims."
-    ;;   (let [response (jwt-middleware (assoc-in (immutant-request :get "/")
-    ;;                                            [:headers "authorization"]
-    ;;                                            "valid-token"
-    ;;                                            ))]
-    ;;     (is (contains? response :jwt-claims))))
-    ))
+        (is (not (contains? response :jwt-claims)))))))
