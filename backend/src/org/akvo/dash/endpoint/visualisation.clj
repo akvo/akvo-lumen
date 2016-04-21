@@ -3,7 +3,8 @@
             [compojure.core :refer :all]
             [hugsql.core :as hugsql]
             [org.akvo.dash.component.tenant-manager :refer [connection]]
-            [org.akvo.dash.endpoint.util :refer [rr squuid]]))
+            [org.akvo.dash.endpoint.util :refer [rr squuid]])
+  (:import [java.sql SQLException]))
 
 (hugsql/def-db-fns "org/akvo/dash/endpoint/visualisation.sql")
 
@@ -29,7 +30,8 @@
             (rr (dissoc resp :author)))
           (catch Exception e
             (pprint e)
-            (pprint (.getNextException e))
+            (when (isa? SQLException (type e))
+              (pprint (.getNextException ^SQLException e)))
             (rr {:error e})))))
 
     (context "/:id" [id]

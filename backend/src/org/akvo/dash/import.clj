@@ -2,9 +2,11 @@
   "Import of data. LINK and DATA_FILE implemented."
   (:require [clj-http.client :as client]
             [clojure.data.csv :as csv]
+            [clojure.pprint :refer [pprint]]
             [clojure.string :as str]
             [hugsql.core :as hugsql]
-            [org.akvo.dash.transformation :as t]))
+            [org.akvo.dash.transformation :as t])
+  (:import [java.sql SQLException]))
 
 
 (hugsql/def-db-fns "org/akvo/dash/import.sql")
@@ -70,5 +72,6 @@
                              {:id     (:id dataset)
                               :status "FAILURE"
                               :d      ""})
-        (prn e)
-        (prn (.getNextException e))))))
+        (pprint e)
+        (when (isa? SQLException (type e))
+          (pprint (.getNextException ^SQLException e)))))))

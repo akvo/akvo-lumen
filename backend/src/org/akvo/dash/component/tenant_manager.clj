@@ -53,7 +53,7 @@
     (if-let [tenants @(:tenants component)]
       (do
         (doseq [[_ {{conn :datasource} :spec}] tenants]
-          (.close conn))
+          (.close ^HikariDataSource conn))
         (dissoc component :tenants))
       component))
 

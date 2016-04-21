@@ -8,7 +8,8 @@
             [immutant.scheduling :as scheduling]
             [org.akvo.dash.component.tenant-manager :refer [connection]]
             [org.akvo.dash.endpoint.util :refer [rr squuid]]
-            [org.akvo.dash.import :as import]))
+            [org.akvo.dash.import :as import])
+  (:import [java.sql SQLException]))
 
 (hugsql/def-db-fns "org/akvo/dash/endpoint/dataset.sql")
 
@@ -53,7 +54,8 @@
                                  (connection tm tenant))
           (catch Exception e
             (pprint e)
-            (pprint (.getNextExcpetion e))
+            (when (isa? SQLException (type e))
+              (pprint (.getNextException ^SQLException e)))
             (rr {:error  "Could not complete upload."
                  :status "FAILURE"})))))
 
@@ -85,5 +87,6 @@
             (rr "\"OK\"")
             (catch Exception e
               (pprint e)
-              (pprint (.getNextException e))
+              (when (isa? SQLException (type e))
+                (pprint (.getNextException ^SQLException e)))
               (rr "\"FAILURE\""))))))))
