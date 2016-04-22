@@ -38,9 +38,8 @@
                                                                        (* 10 (inc order))])
                                                                     (:columns status)))}))
 
-         (do
-           (update-failed-job-execution conn {:id job-execution-id
-                                              :reason (:reason status)}))))
+         (update-failed-job-execution conn {:id job-execution-id
+                                            :reason (:reason status)})))
     (catch Exception e
       (.printStackTrace e))))
 

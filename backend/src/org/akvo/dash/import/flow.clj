@@ -86,9 +86,9 @@
   (reduce into
           []
           (for [data-point data-points
-                         :let [form-instances (get-in data-point [:form-instances form-id])]]
+                :let [form-instances (get-in data-point [:form-instances form-id])]]
             (map #(form-instance-row format-responses data-point %)
-                 form-instances))) )
+                 form-instances))))
 
 (defn format-responses-fn [form]
   (let [question-ids (mapcat (comp #(map :id %) :questions)

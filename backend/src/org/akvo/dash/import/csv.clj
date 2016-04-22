@@ -77,7 +77,7 @@
 
 (defn get-num-cols
   "Returns the number of columns based on the
-  first lie of a CSV file"
+  first line of a CSV file"
   [path separator]
   (count (get-headers path separator)))
 
