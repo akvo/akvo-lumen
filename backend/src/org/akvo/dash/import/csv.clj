@@ -7,7 +7,7 @@
             [org.akvo.dash.util :refer [squuid]]
             [org.akvo.dash.import.common :refer (make-dataset-data-table)])
   (:import org.postgresql.copy.CopyManager
-           org.postgresql.core.BaseConnection
+           org.postgresql.PGConnection
            java.util.UUID))
 
 (hugsql/def-db-fns "org/akvo/dash/import.sql")
@@ -105,11 +105,12 @@
                      (get-headers path \,)
                      (vec (for [i (range 1 (inc n-cols))]
                             (str "Column " i))))
-        temp-table (str table-name "_temp")
-        copy-manager (CopyManager. (cast BaseConnection (.unwrap (.getConnection (:datasource tenant-conn)) BaseConnection)))]
+        temp-table (str table-name "_temp")]
     (jdbc/execute! tenant-conn [(get-create-table-sql temp-table n-cols "text" false)])
     (jdbc/execute! tenant-conn [(get-create-table-sql table-name n-cols "jsonb" false)])
-    (.copyIn copy-manager ^String (get-copy-sql temp-table n-cols headers?) (io/input-stream path))
+    (with-open [conn (-> tenant-conn :datasource .getConnection)]
+      (let [copy-manager (.getCopyAPI (.unwrap conn PGConnection))]
+        (.copyIn copy-manager ^String (get-copy-sql temp-table n-cols headers?) (io/input-stream path))))
     (jdbc/execute! tenant-conn [(get-insert-sql temp-table table-name n-cols)])
     (jdbc/execute! tenant-conn [(get-drop-table-sql temp-table)])
     (jdbc/execute! tenant-conn [(get-vacuum-sql table-name)] :transaction? false)
