@@ -1,13 +1,10 @@
 (ns org.akvo.dash.component.tenant-manager
   "Component that controll the tenants,
   We use the first domain label e.g. t1 in t1.dash.akvo.org to dispatch."
-  (:require
-   [clojure.pprint :refer [pprint]]
-   [clojure.string :as str]
-   [com.stuartsierra.component :as component]
-   [hugsql.core :as hugsql])
+  (:require [clojure.string :as str]
+            [com.stuartsierra.component :as component]
+            [hugsql.core :as hugsql])
   (:import [com.zaxxer.hikari HikariConfig HikariDataSource]))
-
 
 (hugsql/def-db-fns "org/akvo/dash/component/tenant_manager.sql")
 

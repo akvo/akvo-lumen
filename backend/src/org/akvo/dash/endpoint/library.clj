@@ -1,12 +1,9 @@
 (ns org.akvo.dash.endpoint.library
   "Library endpoint..."
-  (:require
-   [clojure.pprint :refer [pprint]]
-   [compojure.core :refer :all]
-   [hugsql.core :as hugsql]
-   [org.akvo.dash.component.tenant-manager :refer [connection]]
-   [org.akvo.dash.endpoint.util :refer [rr]]))
-
+  (:require [compojure.core :refer :all]
+            [hugsql.core :as hugsql]
+            [org.akvo.dash.component.tenant-manager :refer [connection]]
+            [org.akvo.dash.endpoint.util :refer [rr]]))
 
 (hugsql/def-db-fns "org/akvo/dash/endpoint/dataset.sql")
 (hugsql/def-db-fns "org/akvo/dash/endpoint/visualisation.sql")
