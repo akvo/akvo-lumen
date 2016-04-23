@@ -16,6 +16,7 @@
             [org.akvo.dash.endpoint
              [dataset :as dataset]
              [files :as files]
+             [flow :as flow]
              [library :as library]
              [root :as root]
              [visualisation :as visualisation]]
@@ -52,16 +53,18 @@
          :dataset (endpoint-component (dataset/endpoint (select-keys config [:flow-report-database-url])))
          :db   (hikaricp (:db config))
          :files (endpoint-component files/endpoint)
+         :flow (endpoint-component (flow/endpoint (select-keys config [:flow-report-database-url])))
          :library (endpoint-component library/endpoint)
          :tenant-manager (tm/manager)
          :root (endpoint-component root/endpoint)
          :visualisation (endpoint-component visualisation/endpoint))
         (component/system-using
          {:http           [:app]
-          :app            [:dataset :files :library :tenant-manager :root
+          :app            [:dataset :files :flow :library :tenant-manager :root
                            :visualisation]
           :root           [:tenant-manager]
           :library        [:tenant-manager]
+          :flow           [:tenant-manager]
           :tenant-manager [:db]
           :dataset        [:tenant-manager]
           :visualisation  [:tenant-manager]}))))

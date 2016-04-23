@@ -76,3 +76,41 @@ SELECT response.*
  WHERE response.form_instance_id=form_instance.id
    AND form_instance.form_id=form.id
    AND form.survey_id=:survey-id
+
+-- :name descendant-folders-and-surveys-by-folder-id
+-- :command :query
+-- :result :many
+-- :doc Recursively get all descendant folders and surveys with folder-id as root
+WITH RECURSIVE descendants(parent_id, id) as (
+  (
+    SELECT parent_id, id, 'folder' as type, display_text
+      FROM folder
+     WHERE parent_id IN (:v*:folder-ids)
+     UNION
+    SELECT folder_id, id, 'survey', display_text
+      FROM survey
+     WHERE folder_id IN (:v*:folder-ids)
+  )
+  UNION
+  (
+  SELECT folders_and_surveys.parent_id,
+         folders_and_surveys.id,
+         folders_and_surveys.type,
+         folders_and_surveys.display_text
+    FROM (
+           SELECT parent_id, id, 'folder' AS type, display_text
+             FROM folder
+            UNION
+           SELECT folder_id, id, 'survey', display_text
+             FROM survey
+         )
+         folders_and_surveys,
+         descendants
+   WHERE descendants.id=folders_and_surveys.parent_id
+  )
+)
+SELECT id,
+       parent_id AS "folderId",
+       type,
+       display_text AS title
+  FROM descendants;
