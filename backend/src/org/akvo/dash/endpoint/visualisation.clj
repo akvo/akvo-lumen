@@ -3,7 +3,8 @@
             [compojure.core :refer :all]
             [hugsql.core :as hugsql]
             [org.akvo.dash.component.tenant-manager :refer [connection]]
-            [org.akvo.dash.endpoint.util :refer [rr squuid]]))
+            [org.akvo.dash.endpoint.util :refer [rr]]
+            [org.akvo.dash.util :refer [squuid]]))
 
 (hugsql/def-db-fns "org/akvo/dash/endpoint/visualisation.sql")
 

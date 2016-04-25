@@ -2,6 +2,14 @@ import * as constants from '../constants/dataset';
 import { hideModal } from './activeModal';
 import headers from './headers';
 
+/*
+ * Fetch a dataset by id
+ * fetchDataset(id)
+ * Actions:
+ * - FETCH_DATASET_REQUEST { id }
+ * - FETCH_DATASET_SUCCESS { dataset }
+ * - FETCH_DATASET_FAILURE { error, id }
+ */
 function fetchDatasetRequest(id) {
   return {
     type: constants.FETCH_DATASET_REQUEST,
@@ -9,18 +17,10 @@ function fetchDatasetRequest(id) {
   };
 }
 
-const pollInteval = 1000;
 function fetchDatasetSuccess(dataset) {
-  return (dispatch) => {
-    if (dataset.status === 'PENDING') {
-      /* eslint-disable no-use-before-define */
-      setTimeout(() => dispatch(fetchDataset(dataset.id)), pollInteval);
-      /* esllint-enable no-use-before-define */
-    }
-    dispatch({
-      type: constants.FETCH_DATASET_SUCCESS,
-      dataset,
-    });
+  return {
+    type: constants.FETCH_DATASET_SUCCESS,
+    dataset,
   };
 }
 
@@ -44,29 +44,58 @@ export function fetchDataset(id) {
   };
 }
 
+/*
+ * Dataset import
+ * importDataset(dataSource)
+ * Actions:
+ * IMPORT_DATASET_REQUEST
+ * IMPORT_DATASET_SUCCESS
+ * IMPORT_DATASET_FAILURE
+ */
 
-function createDatasetRequest(dataset) {
+function importDatasetFailure(importId, reason) {
   return {
-    type: constants.CREATE_DATASET_REQUEST,
-    dataset,
+    type: constants.IMPORT_DATASET_FAILURE,
+    importId,
+    reason,
   };
 }
 
-function createDatasetSuccess(dataset) {
+function importDatasetSuccess(datasetId) {
   return (dispatch) => {
+    dispatch(fetchDataset(datasetId));
     dispatch({
-      type: constants.CREATE_DATASET_SUCCESS,
-      dataset,
+      type: constants.IMPORT_DATASET_SUCCESS,
+      datasetId,
     });
-    dispatch(hideModal());
-    dispatch(fetchDataset(dataset.id));
   };
 }
 
-function createDatasetFailure(error, dataset) {
+const pollInteval = 1000;
+function pollDatasetImportStatus(importId) {
+  return (dispatch) => {
+    fetch(`/api/datasets/import/${importId}`, {
+      method: 'GET',
+      headers: headers(),
+    })
+    .then(response => response.json())
+    .then(({ status, reason, datasetId }) => {
+      if (status === 'PENDING') {
+        setTimeout(() => dispatch(pollDatasetImportStatus(importId)), pollInteval);
+      } else if (status === 'FAILED') {
+        dispatch(importDatasetFailure(importId, reason));
+      } else if (status === 'OK') {
+        dispatch(importDatasetSuccess(datasetId));
+      }
+    })
+    .catch(error => dispatch(error));
+  };
+}
+
+function importDatasetRequest(dataSource) {
   return {
-    type: constants.CREATE_DATASET_FAILURE,
-    dataset,
+    type: constants.IMPORT_DATASET_REQUEST,
+    dataSource,
   };
 }
 
@@ -76,22 +105,27 @@ export function clearImport() {
   };
 }
 
-export function createDataset(dataset) {
+export function importDataset(dataSource) {
   return (dispatch) => {
-    dispatch(createDatasetRequest(dataset));
+    dispatch(importDatasetRequest(dataSource));
     fetch('/api/datasets', {
       method: 'POST',
       headers: headers(),
-      body: JSON.stringify(dataset),
+      body: JSON.stringify(dataSource),
     })
     .then(response => response.json())
-    .then(ds => {
-      dispatch(createDatasetSuccess(ds));
+    .then(importStatus => {
+      dispatch(pollDatasetImportStatus(importStatus.importId));
+      dispatch(hideModal());
       dispatch(clearImport());
     })
-    .catch(error => dispatch(createDatasetFailure(error, dataset)));
+    .catch(() => dispatch(importDatasetFailure('Unable to start import process', dataSource)));
   };
 }
+
+/*
+ *
+ */
 
 // Currently only name
 export function saveDatasetSettings(id, { name }) {

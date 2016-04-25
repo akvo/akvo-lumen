@@ -7,4 +7,6 @@
 (def environ
   {:http {:port (some-> env :port Integer.)
           :path "api"}
-   :db   {:uri  (env :database-url)}})
+   :db   {:uri  (env :database-url)}
+   :flow-report-database-url (env :flow-report-database-url)
+   })

@@ -50,10 +50,11 @@
       (assoc component :tenants (atom {}))))
 
   (stop [component]
-    (if-let [tenants @(:tenants component)]
+    (if-let [tenants (:tenants component)]
       (do
-        (doseq [[_ {{conn :datasource} :spec}] tenants]
-          (.close conn))
+        (doseq [[_ {{conn :datasource} :spec}] @tenants]
+          (when-not (.isClosed conn)
+            (.close conn)))
         (dissoc component :tenants))
       component))
 

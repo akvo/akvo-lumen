@@ -2,28 +2,18 @@
   (:require [clojure.string :as str]
             [clojure.java.jdbc :as jdbc]
             [akvo.commons.psql-util :as pg]
-            [cheshire.core :as json])
+            [hugsql.core :as hugsql]
+            [cheshire.core :as json]
+            [org.akvo.dash.import.common :refer (make-dataset-data-table)])
   (:import [org.postgresql.util PGobject]))
 
-(set! *warn-on-reflection* true)
-(set! *print-length* 20)
+(hugsql/def-db-fns "org/akvo/dash/import/flow.sql")
 
 (defn survey-definition [conn survey-id]
-  (let [survey (first (jdbc/query conn ["SELECT * FROM survey where id=?" survey-id]))
-        forms (jdbc/query conn ["select * from form where survey_id=?" survey-id])
-        question-groups (jdbc/query conn
-                                    [(print-str "select question_group.*"
-                                                "from question_group, form"
-                                                "where question_group.form_id = form.id and"
-                                                "form.survey_id=?")
-                                     survey-id])
-        questions (jdbc/query conn
-                              [(print-str "select question.*"
-                                          "from question, question_group, form"
-                                          "where question_group.form_id = form.id and"
-                                          "question.question_group_id = question_group.id and"
-                                          "form.survey_id=?")
-                               survey-id])
+  (let [survey (survey-by-id conn {:id survey-id})
+        forms (forms-by-survey-id conn {:survey-id survey-id})
+        question-groups (question-groups-by-survey-id conn {:survey-id survey-id})
+        questions (questions-by-survey-id conn {:survey-id survey-id})
         questions (group-by :question_group_id questions)
         question-groups (for [{:keys [id] :as question-group} (sort-by :display_order question-groups)]
                           (assoc question-group
@@ -55,34 +45,14 @@
           {}
           form-instances))
 
-
-(defn form-instances-sql
-  [{:keys [form-id]}]
-  (if form-id
-    (print-str "select form_instance.* from form_instance"
-               "where form_instance.form_id=?")
-    (print-str "select form_instance.* from form_instance, form"
-               "where form_instance.form_id=form.id and"
-               "form.survey_id=?")))
-
-(defn responses-sql [{:keys [form-id]}]
-  (if form-id
-    (print-str "select response.* from response, form_instance"
-               "where response.form_instance_id=form_instance.id and"
-               "form_instance.form_id=?")
-    (print-str "select response.* from response, form_instance, form"
-               "where response.form_instance_id=form_instance.id and"
-               "form_instance.form_id=form.id and"
-               "form.survey_id=?")))
-
 (defn survey-data-points [conn {:keys [survey-id form-id] :as opts}]
-  (let [data-points (jdbc/query conn ["SELECT * FROM data_point where survey_id=?" survey-id])
-        form-instances (jdbc/query conn
-                                   [(form-instances-sql opts)
-                                    (or form-id survey-id)])
-        responses (jdbc/query conn
-                              [(responses-sql opts)
-                               (or form-id survey-id)])
+  (let [data-points (data-points-by-survey-id conn {:survey-id survey-id})
+        form-instances (if form-id
+                         (form-instances-by-form-id conn {:form-id form-id})
+                         (form-instances-by-survey-id conn {:survey-id survey-id}))
+        responses (if form-id
+                    (responses-by-form-id conn {:form-id form-id})
+                    (responses-by-survey-id conn {:survey-id survey-id}))
         responses (response-index responses)
         form-instances (form-instances-index form-instances responses)]
     (for [{:keys [id] :as data-point} data-points]
@@ -91,17 +61,20 @@
 ;; =======
 
 (defn dataset-columns [form]
-  (concat [{:name "Identifier" :type "string"}
-           {:name "Latitude" :type "number"}
-           {:name "Longitude" :type "number"}
-           {:name "Submitter" :type "string"}
-           {:name "Submitted at" :type "date"}]
-          (mapcat (comp #(map (fn [question]
-                                {:name (:display_text question)
-                                 :type "string"})
-                              %)
-                        :questions)
-                  (:question-groups form))))
+  (let [common [{:title "Identifier" :type "string"}
+                {:title "Latitude" :type "number"}
+                {:title "Longitude" :type "number"}
+                {:title "Submitter" :type "string"}
+                {:title "Submitted at" :type "date"}]
+        questions (mapcat (comp #(map (fn [question]
+                                        {:title (:display_text question)
+                                         :type "string"})
+                                      %)
+                                :questions)
+                          (:question-groups form))]
+    (map-indexed (fn [idx col]
+                   (assoc col :column-name (str "c" (inc idx))))
+                 (concat common questions))))
 
 (defn form-instance-row [format-responses data-point form-instance]
   (reduce into
@@ -113,9 +86,9 @@
   (reduce into
           []
           (for [data-point data-points
-                         :let [form-instances (get-in data-point [:form-instances form-id])]]
+                :let [form-instances (get-in data-point [:form-instances form-id])]]
             (map #(form-instance-row format-responses data-point %)
-                 form-instances))) )
+                 form-instances))))
 
 (defn format-responses-fn [form]
   (let [question-ids (mapcat (comp #(map :id %) :questions)
@@ -126,34 +99,10 @@
                                             [:responses question-id 0 :value "value"])))
             question-ids))))
 
-(defn uuid []
-  (str (java.util.UUID/randomUUID)))
-
 (defn create-data-table [table-name column-names]
   (format "create table %s (%s);"
           table-name
           (str/join ", " (map #(str % " jsonb") column-names))))
-
-(defn insert-dataset-columns! [conn dataset-id dataset-columns column-names]
-  (apply jdbc/insert!
-         conn
-         :dataset_column
-         (map-indexed
-          (fn [idx column]
-            (assoc column :c_order idx))
-          (map (fn [column-name column]
-                 (merge column
-                        {:c_name column-name
-                         :dataset_id dataset-id}))
-               column-names
-               dataset-columns))))
-
-(defn insert-dataset-version! [conn dataset-id table-name]
-  (jdbc/insert! conn
-                :dataset_version
-                {:dataset_id dataset-id
-                 :table_name table-name
-                 :version 0}))
 
 (defn insert-dataset-data! [conn dataset-data table-name column-names]
   (apply jdbc/insert!
@@ -165,20 +114,27 @@
                               (map pg/val->jsonb-pgobj data-row) )))
               dataset-data)))
 
-
-(defn create-dataset [org-id survey-id form-id]
-  (let [conn (str "jdbc:postgresql://localhost/" org-id)
-        survey (survey-definition conn survey-id)
+(defn create-dataset [tenant-conn table-name report-conn survey-id form-id]
+  (let [survey (survey-definition report-conn survey-id)
         form (get-in survey [:forms form-id])
         format-responses (format-responses-fn form)
-        data-points (survey-data-points conn {:survey-id survey-id :form-id form-id})
+        data-points (survey-data-points report-conn {:survey-id survey-id :form-id form-id})
         dataset-columns (dataset-columns form)
-        column-count (count dataset-columns)
-        dataset-data (dataset-data data-points (:id form) format-responses)
-        table-name (str "ds_" (str/replace (uuid) "-" "_"))
-        dataset-id (:id (first (jdbc/insert! conn :dataset {:name (:display_text survey)})))
-        column-names (map #(str "c" %) (range))]
-    (insert-dataset-columns! conn dataset-id dataset-columns column-names)
-    (insert-dataset-version! conn dataset-id table-name)
-    (jdbc/execute! conn [(create-data-table table-name (take column-count column-names))])
-    (insert-dataset-data! conn dataset-data table-name column-names)))
+        dataset-data (dataset-data data-points (:id form) format-responses)]
+    (jdbc/execute! tenant-conn [(create-data-table table-name (map :column-name dataset-columns))])
+    (insert-dataset-data! tenant-conn dataset-data table-name (map :column-name dataset-columns))
+    (mapv (juxt :title :column-name :type) dataset-columns)))
+
+(defmethod make-dataset-data-table "flow"
+  [tenant-conn {:keys [flow-report-database-url]} table-name {:strs [orgId surveyId formId]}]
+  (try
+    {:success? true
+     :columns (create-dataset tenant-conn
+                              table-name
+                              (format flow-report-database-url orgId)
+                              surveyId
+                              formId)}
+    (catch Exception e
+      (.printStackTrace e)
+      {:success? false
+       :reason (str "Unexpected error " (.getMessage e))})))
