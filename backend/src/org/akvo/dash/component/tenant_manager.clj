@@ -52,9 +52,8 @@
   (stop [component]
     (if-let [tenants (:tenants component)]
       (do
-        (doseq [[_ {{conn :datasource} :spec}] @tenants]
-          (when-not (.isClosed conn)
-            (.close conn)))
+        (doseq [[_ {{^HikariDataSource conn :datasource} :spec}] @tenants]
+          (.close conn))
         (dissoc component :tenants))
       component))
 
