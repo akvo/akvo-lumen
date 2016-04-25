@@ -31,8 +31,8 @@ const initialState = {
 };
 
 export default class AkvoFlowDataSourceSettings extends Component {
-  static isValidSource() {
-    return false;
+  static isValidSource({ instance, surveyId }) {
+    return typeof instance === 'string' && typeof surveyId === 'number';
   }
 
   constructor(props) {
@@ -184,6 +184,9 @@ export default class AkvoFlowDataSourceSettings extends Component {
 }
 
 AkvoFlowDataSourceSettings.propTypes = {
-  dataSource: PropTypes.object.isRequired,
+  dataSource: PropTypes.shape({
+    instance: PropTypes.string,
+    surveyId: PropTypes.number,
+  }).isRequired,
   onChange: PropTypes.func.isRequired,
 };
