@@ -1,0 +1,23 @@
+@import 'modules/colors';
+
+.DashProgressBar {
+  position: relative;
+  width: 100%;
+  .textContent {
+    display: none;
+  }
+  .progressBar {
+    height: 1.25rem;
+    width: 100%;
+    position: relative;
+    border-radius: 0.4rem;
+    border: 0.1rem solid $mintGreen;
+    overflow: hidden;
+  }
+  .progressIndicator {
+    background-color: $mintGreen;
+    display: block;
+    height: 1.25rem;
+    transition: width 0.5s;
+  }
+}
