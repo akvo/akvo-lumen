@@ -108,40 +108,40 @@ class Visualisation extends Component {
           onChangeSourceDatasetX={value => (
             this.handleChangeSourceDataset(value, 'X')
           )}
-          onChangeDatasetColumnX={ value => (
+          onChangeDatasetColumnX={value => (
             this.setState({
               datasetColumnX: value,
               isUnsavedChanges: true,
             })
           )}
-          onChangeDatasetNameColumnX={ value => (
+          onChangeDatasetNameColumnX={value => (
             this.setState({
               datasetNameColumnX: value,
               isUnsavedChanges: true,
             })
           )}
-          onChangeDatasetLabelX={ event => (
+          onChangeDatasetLabelX={event => (
             this.setState({
               labelX: event.target.value,
               isUnsavedChanges: true,
             })
           )}
-          onChangeSourceDatasetY={ value => (
+          onChangeSourceDatasetY={value => (
             this.handleChangeSourceDataset(value, 'Y')
           )}
-          onChangeDatasetColumnY={ value => (
+          onChangeDatasetColumnY={value => (
             this.setState({
               datasetColumnY: value,
               isUnsavedChanges: true,
             })
           )}
-          onChangeDatasetLabelY={ event => (
+          onChangeDatasetLabelY={event => (
             this.setState({
               labelY: event.target.value,
               isUnsavedChanges: true,
             })
           )}
-          onSaveDataset={ () => (
+          onSaveDataset={() => (
             this.onSave()
           )}
         />
