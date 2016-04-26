@@ -50,9 +50,10 @@
     (-> (component/system-map
          :app  (handler-component (:app config))
          :http (http/immutant-web (:http config))
-         :dataset (endpoint-component (dataset/endpoint (select-keys config [:flow-report-database-url])))
+         :dataset (endpoint-component (dataset/endpoint (select-keys config [:flow-report-database-url
+                                                                             :file-upload-path])))
          :db   (hikaricp (:db config))
-         :files (endpoint-component files/endpoint)
+         :files (endpoint-component (files/endpoint (select-keys config [:file-upload-path])))
          :flow (endpoint-component (flow/endpoint (select-keys config [:flow-report-database-url])))
          :library (endpoint-component library/endpoint)
          :tenant-manager (tm/manager)

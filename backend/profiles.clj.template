@@ -2,7 +2,11 @@
 
 {:profiles/dev
  {:env
-  {:database-url "jdbc:postgresql://localhost/dash?user=dash&password=password"}}
+  {:database-url "jdbc:postgresql://localhost/dash?user=dash&password=password"
+   :flow-report-database-url "jdbc:postgresql://localhost/%s"
+   :file-upload-path "/tmp/akvo/dash"}}
  :profiles/test
  {:env
-  {:database-url "jdbc:postgresql://localhost/dash_test?user=dash&password=password"}}}
+  {:database-url "jdbc:postgresql://localhost/dash_test?user=dash&password=password"
+   :flow-report-database-url "jdbc:postgresql://localhost/%s"
+   :file-upload-path "/tmp/akvo/dash"}}}

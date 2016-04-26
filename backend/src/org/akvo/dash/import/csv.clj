@@ -87,12 +87,14 @@
    (map-indexed (fn [idx title]
                   [title (str "c" (inc idx)) "text"]) col-titles)))
 
-(defmethod make-dataset-data-table "csv" [tenant-conn config table-name spec]
+(defmethod make-dataset-data-table "csv"
+  [tenant-conn {:keys [file-upload-path]} table-name spec]
   (let [;; TODO a bit of "manual" integration work
         file-on-disk? (contains? spec "fileName")
         path (let [url (get spec "url")]
                (if file-on-disk?
-                 (str "/tmp/akvo/dash/resumed/"
+                 (str file-upload-path
+                      "/resumed/"
                       (last (s/split url #"\/"))
                       "/file")
                  url))
