@@ -14,7 +14,7 @@
            (get-copy-sql "uuid1" 3 false)))
     (is (= "COPY uuid2 (c1, c2, c3) FROM STDIN WITH (FORMAT CSV, HEADER true)"
            (get-copy-sql "uuid2" 3 true)))
-    (is (= "INSERT INTO uuid1 (rnum, c1, c2) SELECT rnum, to_jsonb(replace(c1, '\\', '\\\\')), to_jsonb(replace(c2, '\\', '\\\\')) FROM t_uuid1"
+    (is (= "INSERT INTO uuid1 (rnum, c1, c2) SELECT rnum, to_json(replace(c1, '\\', '\\\\'))::jsonb, to_json(replace(c2, '\\', '\\\\'))::jsonb FROM t_uuid1"
            (get-insert-sql "t_uuid1" "uuid1" 2)))
     (is (= 19 (get-num-cols (io/file (io/resource "artist")) \tab)))
     (is (= 23 (get-num-cols (io/file (io/resource "products")) \,)))

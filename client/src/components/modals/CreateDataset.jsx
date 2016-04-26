@@ -48,7 +48,7 @@ class CreateDataset extends Component {
   handleNextOrImport() {
     const { currentPage, dataset } = this.props.datasetImport;
     if (currentPage === 'define-dataset') {
-      this.props.createDataset(dataset);
+      this.props.importDataset(dataset);
       this.props.clearImport();
     } else {
       this.props.nextPage();
@@ -139,7 +139,7 @@ CreateDataset.propTypes = {
   defineDatasetSettings: PropTypes.func.isRequired,
   defineDataSource: PropTypes.func.isRequired,
   selectDataSource: PropTypes.func.isRequired,
-  createDataset: PropTypes.func.isRequired,
+  importDataset: PropTypes.func.isRequired,
   clearImport: PropTypes.func.isRequired,
   datasetImport: PropTypes.shape({
     currentPage: PropTypes.string.isRequired,
