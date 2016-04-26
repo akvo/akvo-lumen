@@ -15,10 +15,9 @@ before_install:
 - cd client
 - npm config set spin false
 - npm install
-- cd ../backend/provision
-- ./setup.sh
-- cd ../
+- cd ../backend
 - cp profiles.clj.template profiles.clj
+- ./provision/setup.sh
 
 script:
 - lein2 do clean, check, test :all
