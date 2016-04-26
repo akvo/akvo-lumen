@@ -20,7 +20,7 @@
 
 (defn to-number
   [engine value]
-  (js-eval engine (str "+" value)))
+  (js-eval engine (str "Number(" value ")")))
 
 (defn to-string
   [engine value]
