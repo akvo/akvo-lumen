@@ -125,7 +125,7 @@
     (insert-dataset-data! tenant-conn dataset-data table-name (map :column-name dataset-columns))
     (mapv (juxt :title :column-name :type) dataset-columns)))
 
-(defmethod make-dataset-data-table "flow"
+(defmethod make-dataset-data-table "AKVO_FLOW"
   [tenant-conn {:keys [flow-report-database-url]} table-name {:strs [orgId surveyId formId]}]
   (try
     {:success? true

@@ -44,16 +44,7 @@
 
       (POST "/" {:keys [tenant body] :as request}
         (let [tenant-conn (connection tm tenant)]
-          (let [;; TODO accidentally introduced mismatch between what
-                ;; the client sends and what the new import
-                ;; expects. Should be resolved.
-                data-source (assoc (set/rename-keys (get body "source") {"kind" "type"})
-                                   "title" (get body "name"))
-                data-source (if (or (= "DATA_FILE" (get data-source "type"))
-                                    (= "LINK" (get data-source "type")))
-                              (assoc data-source "type" "csv")
-                              data-source)]
-            (response (import/handle-import-request tenant-conn config data-source)))))
+          (response (import/handle-import-request tenant-conn config body))))
 
       (GET "/:id" {:keys [tenant params]}
         (let [tenant-conn (connection tm tenant)

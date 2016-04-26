@@ -87,7 +87,7 @@
    (map-indexed (fn [idx title]
                   [title (str "c" (inc idx)) "text"]) col-titles)))
 
-(defmethod make-dataset-data-table "csv"
+(defmethod make-dataset-data-table "CSV"
   [tenant-conn {:keys [file-upload-path]} table-name spec]
   (let [;; TODO a bit of "manual" integration work
         file-on-disk? (contains? spec "fileName")
