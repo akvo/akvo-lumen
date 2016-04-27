@@ -9,16 +9,13 @@
 
 (defn endpoint
   ""
-  [{tm :tenant-manager :as config}]
-  (context "/imports" []
+  [{tm :tenant-manager}]
+  (context "/imports" {:keys [params tenant] :as request}
 
     (GET "/" []
-      (fn [{tenant :tenant :as request}]
-        (let [tenant-conn (connection tm tenant)]
-          (response/response (all-imports tenant-conn)))))
+      (response/response (all-imports (connection tm tenant))))
 
-    (GET "/:id" {:keys [params tenant]}
-      (if-let [status (import/status (connection tm tenant)
-                                     (:id params))]
+    (GET "/:id" [id]
+      (if-let [status (import/status (connection tm tenant) id)]
         (response/response status)
-        (response/not-found {"importId" (:id params)})))))
+        (response/not-found {"importId" id})))))

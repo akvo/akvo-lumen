@@ -15,12 +15,12 @@
   / GET
   Return the library"
   [{tm :tenant-manager :as config}]
-  (context "/library" []
+  (context "/library" {:keys [params tenant] :as request}
 
     (GET "/" []
-      (fn [{label :tenant :as request}]
-        (let [db (connection tm label)]
-          (response
-           {:dashboards     []
-            :datasets       (all-datasets db)
-            :visualisations (all-visualisations db)}))))))
+
+      (let [tenant-conn (connection tm tenant)]
+        (response
+         {:dashboards     []
+          :datasets       (all-datasets tenant-conn)
+          :visualisations (all-visualisations tenant-conn)})))))
