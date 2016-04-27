@@ -16,7 +16,7 @@ CREATE OR REPLACE FUNCTION to_number(val jsonb, raise_on_error boolean)
   RETURNS jsonb AS
 $BODY$
 BEGIN
-  RETURN CAST (replace(val::text, '"', '') AS numeric);
+  RETURN CAST (trim(both '"' from val::text) AS numeric);
 EXCEPTION
   WHEN invalid_text_representation THEN
     IF raise_on_error THEN
