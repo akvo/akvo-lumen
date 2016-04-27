@@ -35,11 +35,6 @@ CREATE FUNCTION log_change() RETURNS trigger
             FETCH FROM c INTO tt;
 
             IF isempty(tstzrange(lower(tt), now(), $$[)$$)) THEN
-
-		--IF NOT lastxid = txid_current() THEN
-		--    RAISE EXCEPTION 'UPDATE would have empty validity: %d!', OLD;
-		--END IF;
-
 		EXECUTE 'DELETE FROM history.' || TG_TABLE_NAME ||
 		  ' WHERE CURRENT OF ' || quote_ident(c::text);
             ELSE
