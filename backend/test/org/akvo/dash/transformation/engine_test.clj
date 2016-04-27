@@ -11,5 +11,4 @@
       (is (number? (to-number e "'10.5'")))
       (is (string? (to-string e 10)))
       (is (= "AKVO" (to-uppercase e "akvo")))
-      (is (= "akvo" (to-lowercase e "AKVO")))
-      (is (= "Akvo Foundation" (to-titlecase e "akvo foundation"))))))
+      (is (= "akvo" (to-lowercase e "AKVO"))))))
