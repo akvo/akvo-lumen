@@ -80,7 +80,10 @@ SELECT response.*
 -- :name descendant-folders-and-surveys-by-folder-id
 -- :command :query
 -- :result :many
--- :doc Recursively get all descendant folders and surveys with folder-id as root
+-- :doc Recursively get all descendant folders and
+-- surveys with folder-id as root. For now we only support
+-- non-monitoring surveys which is why we additionally filter by
+-- form_count=1
 WITH RECURSIVE descendants(parent_id, id) as (
   (
     SELECT parent_id, id, 'folder' as type, display_text, NULL AS form_count

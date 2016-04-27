@@ -126,14 +126,20 @@
     (mapv (juxt :title :column-name :type) dataset-columns)))
 
 (defmethod make-dataset-data-table "AKVO_FLOW"
-  [tenant-conn {:keys [flow-report-database-url]} table-name {:strs [orgId surveyId formId]}]
+  [tenant-conn {:keys [flow-report-database-url]} table-name {:strs [instance surveyId]}]
   (try
-    {:success? true
-     :columns (create-dataset tenant-conn
-                              table-name
-                              (format flow-report-database-url orgId)
-                              surveyId
-                              formId)}
+    (let [report-db (format flow-report-database-url instance)
+          ;; For now we can assume that we only import non-monitoring surveys and
+          ;; we fetch the one and only form id here instead.
+          form-id (-> (forms-by-survey-id report-db {:survey-id surveyId})
+                      first
+                      :id)]
+      {:success? true
+       :columns (create-dataset tenant-conn
+                                table-name
+                                report-db
+                                surveyId
+                                form-id)})
     (catch Exception e
       (.printStackTrace e)
       {:success? false
