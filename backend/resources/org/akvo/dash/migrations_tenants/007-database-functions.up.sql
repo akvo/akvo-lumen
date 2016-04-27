@@ -3,7 +3,7 @@ CREATE OR REPLACE FUNCTION to_number(val jsonb, default_val numeric)
   RETURNS jsonb AS
 $BODY$
 BEGIN
-  RETURN CAST (replace(val::text, '"', '') AS numeric);
+  RETURN CAST (trim(both '"' from val::text) AS numeric);
 EXCEPTION
   WHEN invalid_text_representation THEN
     RETURN default_val;
