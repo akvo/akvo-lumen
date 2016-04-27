@@ -60,12 +60,4 @@
               dataset (find-dataset tenant-conn (:id params))]
           (if dataset
             (response dataset)
-            (not-found {:id (:id params)}))))
-
-
-      (GET "/import/:id" {:keys [tenant params]}
-        (let [tenant-conn (connection tm tenant)
-              import-id (:id params)]
-          (if-let [status (import/status tenant-conn import-id)]
-            (response status)
-            (not-found {"importId" import-id})))))))
+            (not-found {:id (:id params)})))))))
