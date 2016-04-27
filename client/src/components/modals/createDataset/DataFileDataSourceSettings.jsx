@@ -23,8 +23,7 @@ export default class DataFileDataSourceSettings extends Component {
   }
 
   getShowProgressBarBool() {
-    return this.state.uploadProgressPercentage !== null
-      && this.state.uploadProgressPercentage < 100;
+    return this.state.uploadProgressPercentage !== null;
   }
 
   handleDragEnter(evt) {
