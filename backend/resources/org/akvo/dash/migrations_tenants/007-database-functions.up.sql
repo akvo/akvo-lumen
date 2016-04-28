@@ -41,3 +41,17 @@ BEGIN
 END;
 $BODY$
   LANGUAGE plpgsql IMMUTABLE STRICT;
+
+CREATE OR REPLACE FUNCTION to_date(val jsonb, format text)
+  RETURNS jsonb AS
+$BODY$
+DECLARE
+  tmp text = trim(both '"' from val::text);
+BEGIN
+  RETURN date_part('epoch', to_timestamp(tmp, format))::numeric;
+EXCEPTION
+  WHEN OTHERS THEN
+    RETURN NULL;
+END;
+$BODY$
+  LANGUAGE plpgsql IMMUTABLE STRICT;
