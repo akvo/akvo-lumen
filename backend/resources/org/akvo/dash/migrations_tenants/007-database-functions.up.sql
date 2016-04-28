@@ -27,3 +27,17 @@ EXCEPTION
 END;
 $BODY$
   LANGUAGE plpgsql IMMUTABLE STRICT;
+
+CREATE OR REPLACE FUNCTION to_text(val jsonb)
+  RETURNS jsonb AS
+$BODY$
+DECLARE
+  tmp text = val::text;
+BEGIN
+  IF trim(both '"' from tmp) = tmp THEN
+    RETURN '"' || tmp || '"';
+  END IF;
+  RETURN tmp;
+END;
+$BODY$
+  LANGUAGE plpgsql IMMUTABLE STRICT;
