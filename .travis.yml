@@ -24,17 +24,17 @@ before_install:
 - sudo sh -c 'echo "local all all trust" > /etc/postgresql/9.5/main/pg_hba.conf'
 - sudo sh -c 'echo -n "host all all 127.0.0.1/32 trust" >> /etc/postgresql/9.5/main/pg_hba.conf'
 - sudo /etc/init.d/postgresql restart
-- sudo psql -U postgres -c "CREATE ROLE travis CREATEDB LOGIN;"
+- sudo psql -U postgres -c "CREATE ROLE travis SUPERUSER;"
 - sudo psql -U postgres -c "CREATE DATABASE travis WITH OWNER = travis;"
 - psql --version
 
-- nvm install 4
-- cd client
-- npm config set spin false
-- npm install
-- cd ../backend
+- cd backend
 - cp profiles.clj.template profiles.clj
 - ./provision/setup.sh
+- cd ../client
+- nvm install 4
+- npm config set spin false
+- npm install
 
 script:
 - lein2 do clean, check, test :all
