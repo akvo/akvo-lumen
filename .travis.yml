@@ -1,18 +1,30 @@
 language:
 - clojure
 - node_js
+
+jdk:
+- oraclejdk8
+
 sudo: false
+
+addons:
+  postgresql: "9.4"
+
 before_install:
 - nvm install 4
 - cd client
 - npm config set spin false
 - npm install
 - cd ../backend
+- cp profiles.clj.template profiles.clj
+- ./provision/setup.sh
+
 script:
-- lein2 do clean, check, test
+- lein2 do clean, check, test :all
 - cd ../client
 - npm run lint
 - npm test
+
 notifications:
   hipchat:
     rooms:
