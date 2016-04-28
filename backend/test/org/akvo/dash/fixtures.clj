@@ -1,27 +1,12 @@
 (ns org.akvo.dash.fixtures
   (:require
-   ;; [duct.component.ragtime :as ragtime]
    [hugsql.core :as hugsql]
-   [meta-merge.core :refer [meta-merge]]
    [org.akvo.dash.migrate :as migrate]
-   [org.akvo.dash.component.tenant-manager :refer [connection]]
-   [org.akvo.dash.config :as config]
    [reloaded.repl :refer [system stop go]]
-   [ring.middleware.stacktrace :refer [wrap-stacktrace]]))
+   [user :refer [config]]))
+
 
 (hugsql/def-db-fns "org/akvo/dash/fixtures.sql")
-
-(def dev-config
-  {:app {:middleware [wrap-stacktrace]}})
-
-(def config
-  (meta-merge config/defaults
-              config/environ
-              dev-config))
-;(defn system-fixture
-;  "Just a dummy fixture while we rework stuff"
-;  [f]
-;  (f))
 
 
 (defn system-fixture
