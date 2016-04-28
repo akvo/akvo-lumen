@@ -35,6 +35,7 @@ before_install:
 - nvm install 4
 - npm config set spin false
 - npm install
+- cd ../backend
 
 script:
 - lein2 do clean, check, test :all
