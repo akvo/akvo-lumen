@@ -52,8 +52,8 @@
          :http (http/immutant-web (:http config))
          :dataset (endpoint-component dataset/endpoint)
          :db   (hikaricp (:db config))
-         :files (endpoint-component (files/endpoint (select-keys config [:file-upload-path])))
-         :flow (endpoint-component (flow/endpoint (select-keys config [:flow-report-database-url])))
+         :files (endpoint-component files/endpoint)
+         :flow (endpoint-component flow/endpoint)
          :library (endpoint-component library/endpoint)
          :tenant-manager (tm/manager)
          :root (endpoint-component root/endpoint)
@@ -65,7 +65,8 @@
                            :visualisation]
           :root           [:tenant-manager]
           :library        [:tenant-manager]
-          :flow           [:tenant-manager]
+          :flow           [:tenant-manager :config]
           :tenant-manager [:db]
           :dataset        [:tenant-manager :config]
-          :visualisation  [:tenant-manager]}))))
+          :visualisation  [:tenant-manager]
+          :files          [:config]}))))
