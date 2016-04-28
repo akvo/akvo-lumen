@@ -3,8 +3,9 @@
             [compojure.core :refer :all]
             [hugsql.core :as hugsql]
             [org.akvo.dash.component.tenant-manager :refer [connection]]
-            [org.akvo.dash.endpoint.util :refer [rr]]
-            [org.akvo.dash.util :refer [squuid]]))
+            [org.akvo.dash.util :refer [squuid]]
+            [ring.util.response :refer [response]])
+  (:import [java.sql SQLException]))
 
 (hugsql/def-db-fns "org/akvo/dash/endpoint/visualisation.sql")
 
@@ -16,7 +17,7 @@
 
     (GET "/" []
       (fn [{tenant :tenant :as request}]
-        (rr (all-visualisations (connection tm
+        (response (all-visualisations (connection tm
                                             tenant)))))
     (POST "/" []
       (fn [{:keys [:tenant :jwt-claims] :as request}]
@@ -27,16 +28,17 @@
                               :name   (get-in request [:body "name"])
                               :spec   (get-in request [:body "spec"])
                               :author jwt-claims}))]
-            (rr (dissoc resp :author)))
+            (response (dissoc resp :author)))
           (catch Exception e
             (pprint e)
-            (pprint (.getNextException e))
-            (rr {:error e})))))
+            (when (isa? SQLException (type e))
+              (pprint (.getNextException ^SQLException e)))
+            (response {:error e})))))
 
     (context "/:id" [id]
 
       (GET "/" []
         (fn [{tenant :tenant :as request}]
-          (rr (dissoc (visualisation-by-id (connection tm tenant)
-                                           {:id id})
+          (response (dissoc (visualisation-by-id (connection tm tenant)
+                                                 {:id id})
                       :author)))))))

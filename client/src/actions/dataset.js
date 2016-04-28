@@ -74,7 +74,7 @@ function importDatasetSuccess(datasetId) {
 const pollInteval = 1000;
 function pollDatasetImportStatus(importId) {
   return (dispatch) => {
-    fetch(`/api/datasets/import/${importId}`, {
+    fetch(`/api/imports/${importId}`, {
       method: 'GET',
       headers: headers(),
     })

@@ -37,7 +37,7 @@ const getActiveSubtitle = (pathname) => {
   return activeSubtitle;
 };
 
-export default class WorkspaceNav extends Component {
+export class WorkspaceNav extends Component {
   constructor() {
     super();
     this.handleShowCreateCollectionModal = this.handleShowCreateCollectionModal.bind(this);

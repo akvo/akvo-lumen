@@ -76,3 +76,51 @@ SELECT response.*
  WHERE response.form_instance_id=form_instance.id
    AND form_instance.form_id=form.id
    AND form.survey_id=:survey-id
+
+-- :name descendant-folders-and-surveys-by-folder-id
+-- :command :query
+-- :result :many
+-- :doc Recursively get all descendant folders and
+-- surveys with folder-id as root. For now we only support
+-- non-monitoring surveys which is why we additionally filter by
+-- form_count=1
+WITH RECURSIVE descendants(parent_id, id) as (
+  (
+    SELECT parent_id, id, 'folder' as type, display_text, NULL AS form_count
+      FROM folder
+     WHERE parent_id IN (:v*:folder-ids)
+     UNION
+    SELECT survey.folder_id, survey.id, 'survey', survey.display_text, count(form)
+      FROM survey, form
+     WHERE folder_id IN (:v*:folder-ids)
+       AND survey.id=form.survey_id
+  GROUP BY survey.id
+  )
+  UNION
+  (
+  SELECT folders_and_surveys.parent_id,
+         folders_and_surveys.id,
+         folders_and_surveys.type,
+         folders_and_surveys.display_text,
+         folders_and_surveys.form_count
+    FROM (
+           SELECT parent_id, id, 'folder' AS type, display_text, NULL AS form_count
+             FROM folder
+            UNION
+           SELECT survey.folder_id, survey.id, 'survey', survey.display_text, count(form)
+             FROM survey, form
+            WHERE survey.id=form.survey_id
+         GROUP BY survey.id
+         )
+         folders_and_surveys,
+         descendants
+   WHERE descendants.id=folders_and_surveys.parent_id
+  )
+)
+SELECT id,
+       parent_id AS "folderId",
+       type,
+       display_text AS title
+  FROM descendants
+ WHERE form_count=1
+    OR type='folder';

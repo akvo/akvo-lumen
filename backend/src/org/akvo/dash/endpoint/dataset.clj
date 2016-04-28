@@ -31,41 +31,27 @@
        :created (:created dataset)
        :columns  columns-with-data})))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;
-;;;  Endpoint spec
 
-(defn endpoint [config]
-  (fn [{tm :tenant-manager}]
-    (context "/datasets" []
+(defn endpoint [{:keys [tenant-manager config]}]
+  (context "/datasets" {:keys [params tenant] :as request}
+
+    (GET "/" []
+      (response (all-datasets (connection tenant-manager tenant))))
+
+    (POST "/" {:keys [tenant body] :as request}
+      (let [tenant-conn (connection tenant-manager tenant)]
+        (response (import/handle-import-request tenant-conn config body))))
+
+    (context "/:id" [id]
+
       (GET "/" []
-        (fn [{tenant :tenant :as request}]
-          (response (all-datasets (connection tm tenant)))))
-
-      (POST "/" {:keys [tenant body] :as request}
-        (let [tenant-conn (connection tm tenant)]
-          (let [;; TODO accidentally introduced mismatch between what
-                ;; the client sends and what the new import
-                ;; expects. Should be resolved.
-                data-source (assoc (set/rename-keys (get body "source") {"kind" "type"})
-                                   "title" (get body "name"))
-                data-source (if (or (= "DATA_FILE" (get data-source "type"))
-                                    (= "LINK" (get data-source "type")))
-                              (assoc data-source "type" "csv")
-                              data-source)]
-            (response (import/handle-import-request tenant-conn config data-source)))))
-
-      (GET "/:id" {:keys [tenant params]}
-        (let [tenant-conn (connection tm tenant)
-              dataset (find-dataset tenant-conn (:id params))]
+        (let [dataset (find-dataset (connection tenant-manager tenant) id)]
           (if dataset
             (response dataset)
-            (not-found {:id (:id params)}))))
+            (not-found {:id id}))))
 
 
-      (GET "/import/:id" {:keys [tenant params]}
-        (let [tenant-conn (connection tm tenant)
-              import-id (:id params)]
-          (if-let [status (import/status tenant-conn import-id)]
-            (response status)
-            (not-found {"importId" import-id})))))))
+      (context "/transformations" []
+
+        (GET "/" []
+          (response {:fns []}))))))
