@@ -22,7 +22,7 @@ export default class DataFileDataSourceSettings extends Component {
     this.state = { uploadProgressPercentage: null };
   }
 
-  getShowProgressBarBool() {
+  isProgressBarVisible() {
     return this.state.uploadProgressPercentage !== null;
   }
 
@@ -43,7 +43,7 @@ export default class DataFileDataSourceSettings extends Component {
   }
 
   handleProgress(percentage) {
-    this.setState({ uploadProgressPercentage: parseFloat(percentage) });
+    this.setState({ uploadProgressPercentage: percentage });
   }
 
   uploadFile(file) {
@@ -54,10 +54,10 @@ export default class DataFileDataSourceSettings extends Component {
       endpoint: '/api/files',
       onError(error) {
         console.error(`Failed because: ${error}`);
-        handleProgress(null);
+        handleProgress(-1);
       },
       onProgress(bytesUploaded, bytesTotal) {
-        const percentage = (bytesUploaded / bytesTotal * 100).toFixed(2);
+        const percentage = parseFloat((bytesUploaded / bytesTotal * 100).toFixed(2));
         handleProgress(percentage);
       },
       onSuccess() {
@@ -83,16 +83,18 @@ export default class DataFileDataSourceSettings extends Component {
         <p className="dataFileUploadMessage">Drop file anywhere to upload</p>
         <p className="dataFileUploadMessage">or</p>
         <input
-          className={`dataFileUploadInput${this.getShowProgressBarBool() ? ' progressActive' : ''}`}
+          className={`dataFileUploadInput${this.isProgressBarVisible() ? ' progressActive' : ''}`}
           ref="fileInput"
           type="file"
           onChange={() => {
             this.uploadFile(this.refs.fileInput.files[0]);
           }}
         />
-        { this.getShowProgressBarBool() &&
+        { this.isProgressBarVisible() &&
           <DashProgressBar
             progressPercentage={this.state.uploadProgressPercentage}
+            errorText="Error"
+            completionText="Success"
           />
         }
       </div>
