@@ -24,7 +24,7 @@ before_install:
 - sudo sh -c 'echo "local all all trust" > /etc/postgresql/9.5/main/pg_hba.conf'
 - sudo sh -c 'echo -n "host all all 127.0.0.1/32 trust" >> /etc/postgresql/9.5/main/pg_hba.conf'
 - sudo /etc/init.d/postgresql restart
-- sudo psql -U postgres -c "CREATE ROLE travis CREATEDB;"
+- sudo psql -U postgres -c "CREATE ROLE travis CREATEDB LOGIN;"
 - psql --version
 
 - nvm install 4
