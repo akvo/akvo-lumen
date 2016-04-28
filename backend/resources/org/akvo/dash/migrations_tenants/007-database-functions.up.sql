@@ -42,7 +42,7 @@ END;
 $BODY$
   LANGUAGE plpgsql IMMUTABLE STRICT;
 
-CREATE OR REPLACE FUNCTION to_date(val jsonb, format text)
+CREATE OR REPLACE FUNCTION to_date(val jsonb, format text, raise_on_error boolean)
   RETURNS jsonb AS
 $BODY$
 DECLARE
@@ -51,7 +51,20 @@ BEGIN
   RETURN date_part('epoch', to_timestamp(tmp, format))::numeric;
 EXCEPTION
   WHEN OTHERS THEN
+  IF raise_on_error THEN
+    RAISE EXCEPTION 'Unable to convert % to date value', val;
+  ELSE
     RETURN NULL;
+  END IF;
+END;
+$BODY$
+  LANGUAGE plpgsql IMMUTABLE STRICT;
+
+CREATE OR REPLACE FUNCTION to_date(val jsonb, format text)
+  RETURNS jsonb AS
+$BODY$
+BEGIN
+  RETURN to_date(val, format, false);
 END;
 $BODY$
   LANGUAGE plpgsql IMMUTABLE STRICT;
