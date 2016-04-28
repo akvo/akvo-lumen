@@ -31,41 +31,35 @@
        :created (:created dataset)
        :columns  columns-with-data})))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;
-;;;  Endpoint spec
+(defn endpoint [{:keys [tenant-manager config]}]
+  (context "/datasets" []
+    (GET "/" []
+      (fn [{tenant :tenant :as request}]
+        (response (all-datasets (connection tenant-manager tenant)))))
 
-(defn endpoint [config]
-  (fn [{tm :tenant-manager}]
-    (context "/datasets" []
-      (GET "/" []
-        (fn [{tenant :tenant :as request}]
-          (response (all-datasets (connection tm tenant)))))
+    (POST "/" {:keys [tenant body] :as request}
+      (let [tenant-conn (connection tenant-manager tenant)]
+        (let [;; TODO accidentally introduced mismatch between what
+              ;; the client sends and what the new import
+              ;; expects. Should be resolved.
+              data-source (assoc (set/rename-keys (get body "source") {"kind" "type"})
+                                 "title" (get body "name"))
+              data-source (if (or (= "DATA_FILE" (get data-source "type"))
+                                  (= "LINK" (get data-source "type")))
+                            (assoc data-source "type" "csv")
+                            data-source)]
+          (response (import/handle-import-request tenant-conn config data-source)))))
 
-      (POST "/" {:keys [tenant body] :as request}
-        (let [tenant-conn (connection tm tenant)]
-          (let [;; TODO accidentally introduced mismatch between what
-                ;; the client sends and what the new import
-                ;; expects. Should be resolved.
-                data-source (assoc (set/rename-keys (get body "source") {"kind" "type"})
-                                   "title" (get body "name"))
-                data-source (if (or (= "DATA_FILE" (get data-source "type"))
-                                    (= "LINK" (get data-source "type")))
-                              (assoc data-source "type" "csv")
-                              data-source)]
-            (response (import/handle-import-request tenant-conn config data-source)))))
+    (GET "/:id" {:keys [tenant params]}
+      (let [tenant-conn (connection tenant-manager tenant)
+            dataset (find-dataset tenant-conn (:id params))]
+        (if dataset
+          (response dataset)
+          (not-found {:id (:id params)}))))
 
-      (GET "/:id" {:keys [tenant params]}
-        (let [tenant-conn (connection tm tenant)
-              dataset (find-dataset tenant-conn (:id params))]
-          (if dataset
-            (response dataset)
-            (not-found {:id (:id params)}))))
-
-
-      (GET "/import/:id" {:keys [tenant params]}
-        (let [tenant-conn (connection tm tenant)
-              import-id (:id params)]
-          (if-let [status (import/status tenant-conn import-id)]
-            (response status)
-            (not-found {"importId" import-id})))))))
+    (GET "/import/:id" {:keys [tenant params]}
+      (let [tenant-conn (connection tenant-manager tenant)
+            import-id (:id params)]
+        (if-let [status (import/status tenant-conn import-id)]
+          (response status)
+          (not-found {"importId" import-id}))))))
