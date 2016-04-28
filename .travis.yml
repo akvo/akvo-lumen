@@ -28,14 +28,13 @@ before_install:
 - sudo psql -U postgres -c "CREATE DATABASE travis WITH OWNER = travis;"
 - psql --version
 
-- cd backend
-- cp profiles.clj.template profiles.clj
-- ./provision/setup.sh
-- cd ../client
+- cd client
 - nvm install 4
 - npm config set spin false
 - npm install
 - cd ../backend
+- cp profiles.clj.template profiles.clj
+- ./provision/setup.sh
 
 script:
 - lein2 do clean, check, test :all
