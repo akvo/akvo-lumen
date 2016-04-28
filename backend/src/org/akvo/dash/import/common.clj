@@ -16,8 +16,10 @@
              table and type is the user visible type of the column
              data (string/number/date)"
   (fn [tenant-conn config table-name spec]
-    (get spec "type")))
-
+    (let [kind (get spec "kind")]
+      (if (#{"LINK" "DATA_FILE"} kind)
+        "CSV" ;; TODO: Unify elsewhere
+        kind))))
 
 (defmethod make-dataset-data-table :default
   [_ _ _ spec]
