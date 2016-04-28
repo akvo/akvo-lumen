@@ -24,7 +24,7 @@ before_install:
 - sudo sh -c 'echo "local all all trust" > /etc/postgresql/9.5/main/pg_hba.conf'
 - sudo sh -c 'echo -n "host all all 127.0.0.1/32 trust" >> /etc/postgresql/9.5/main/pg_hba.conf'
 - sudo /etc/init.d/postgresql restart
-- sudo psql -U postgres -c "CREATE ROLE travis SUPERUSER;"
+- sudo psql -U postgres -c "CREATE ROLE travis SUPERUSER CREATEDB CREATEROLE INHERIT LOGIN;"
 - sudo psql -U postgres -c "CREATE DATABASE travis WITH OWNER = travis;"
 - psql --version
 
