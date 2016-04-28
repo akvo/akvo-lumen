@@ -31,32 +31,26 @@
        :created (:created dataset)
        :columns  columns-with-data})))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;
-;;;  Endpoint spec
-
-(defn endpoint [config]
-  (fn [{tm :tenant-manager}]
-    (context "/datasets" []
-      (GET "/" []
-        (fn [{tenant :tenant :as request}]
-          (response (all-datasets (connection tm tenant)))))
+(defn endpoint [{:keys [tenant-manager config]}]
+  (context "/datasets" []
+    (GET "/" []
+      (fn [{tenant :tenant :as request}]
+        (response (all-datasets (connection tenant-manager tenant)))))
 
       (POST "/" {:keys [tenant body] :as request}
-        (let [tenant-conn (connection tm tenant)]
+        (let [tenant-conn (connection tenant-manager tenant)]
           (response (import/handle-import-request tenant-conn config body))))
 
-      (GET "/:id" {:keys [tenant params]}
-        (let [tenant-conn (connection tm tenant)
-              dataset (find-dataset tenant-conn (:id params))]
-          (if dataset
-            (response dataset)
-            (not-found {:id (:id params)}))))
+    (GET "/:id" {:keys [tenant params]}
+      (let [tenant-conn (connection tenant-manager tenant)
+            dataset (find-dataset tenant-conn (:id params))]
+        (if dataset
+          (response dataset)
+          (not-found {:id (:id params)}))))
 
-
-      (GET "/import/:id" {:keys [tenant params]}
-        (let [tenant-conn (connection tm tenant)
-              import-id (:id params)]
-          (if-let [status (import/status tenant-conn import-id)]
-            (response status)
-            (not-found {"importId" import-id})))))))
+    (GET "/import/:id" {:keys [tenant params]}
+      (let [tenant-conn (connection tenant-manager tenant)
+            import-id (:id params)]
+        (if-let [status (import/status tenant-conn import-id)]
+          (response status)
+          (not-found {"importId" import-id}))))))

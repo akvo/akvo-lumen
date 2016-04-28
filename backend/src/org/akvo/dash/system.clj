@@ -48,17 +48,17 @@
 (defn new-system [config]
   (let [config (meta-merge base-config config)]
     (-> (component/system-map
-         :app  (handler-component (:app config))
+         :app (handler-component (:app config))
          :http (http/immutant-web (:http config))
-         :dataset (endpoint-component (dataset/endpoint (select-keys config [:flow-report-database-url
-                                                                             :file-upload-path])))
+         :dataset (endpoint-component dataset/endpoint)
          :db   (hikaricp (:db config))
          :files (endpoint-component (files/endpoint (select-keys config [:file-upload-path])))
          :flow (endpoint-component (flow/endpoint (select-keys config [:flow-report-database-url])))
          :library (endpoint-component library/endpoint)
          :tenant-manager (tm/manager)
          :root (endpoint-component root/endpoint)
-         :visualisation (endpoint-component visualisation/endpoint))
+         :visualisation (endpoint-component visualisation/endpoint)
+         :config config)
         (component/system-using
          {:http           [:app]
           :app            [:dataset :files :flow :library :tenant-manager :root
@@ -67,5 +67,5 @@
           :library        [:tenant-manager]
           :flow           [:tenant-manager]
           :tenant-manager [:db]
-          :dataset        [:tenant-manager]
+          :dataset        [:tenant-manager :config]
           :visualisation  [:tenant-manager]}))))
