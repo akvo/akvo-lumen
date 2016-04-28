@@ -1,8 +1,8 @@
 (ns org.akvo.dash.endpoint.activity
   (:require [compojure.core :refer :all]
-            [org.akvo.dash.endpoint.util :refer [rr]]))
+            [ring.util.response :refer [response]]))
 
 (defn endpoint [{{db :spec} :db}]
   (context "/activities" []
     (GET "/" []
-      (rr {:activities []}))))
+      (response {:activities []}))))

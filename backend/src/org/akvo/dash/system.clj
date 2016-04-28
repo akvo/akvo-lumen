@@ -17,6 +17,7 @@
              [dataset :as dataset]
              [files :as files]
              [flow :as flow]
+             [import :as import]
              [library :as library]
              [root :as root]
              [visualisation :as visualisation]]
@@ -54,6 +55,7 @@
          :db   (hikaricp (:db config))
          :files (endpoint-component files/endpoint)
          :flow (endpoint-component flow/endpoint)
+         :import (endpoint-component import/endpoint)
          :library (endpoint-component library/endpoint)
          :tenant-manager (tm/manager)
          :root (endpoint-component root/endpoint)
@@ -61,9 +63,10 @@
          :config config)
         (component/system-using
          {:http           [:app]
-          :app            [:dataset :files :flow :library :tenant-manager :root
+          :app            [:dataset :files :flow :import :library :tenant-manager :root
                            :visualisation]
           :root           [:tenant-manager]
+          :import         [:tenant-manager]
           :library        [:tenant-manager]
           :flow           [:tenant-manager :config]
           :tenant-manager [:db]

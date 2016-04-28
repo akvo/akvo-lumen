@@ -31,26 +31,27 @@
        :created (:created dataset)
        :columns  columns-with-data})))
 
+
 (defn endpoint [{:keys [tenant-manager config]}]
-  (context "/datasets" []
+  (context "/datasets" {:keys [params tenant] :as request}
+
     (GET "/" []
-      (fn [{tenant :tenant :as request}]
-        (response (all-datasets (connection tenant-manager tenant)))))
+      (response (all-datasets (connection tenant-manager tenant))))
 
-      (POST "/" {:keys [tenant body] :as request}
-        (let [tenant-conn (connection tenant-manager tenant)]
-          (response (import/handle-import-request tenant-conn config body))))
+    (POST "/" {:keys [tenant body] :as request}
+      (let [tenant-conn (connection tenant-manager tenant)]
+        (response (import/handle-import-request tenant-conn config body))))
 
-    (GET "/:id" {:keys [tenant params]}
-      (let [tenant-conn (connection tenant-manager tenant)
-            dataset (find-dataset tenant-conn (:id params))]
-        (if dataset
-          (response dataset)
-          (not-found {:id (:id params)}))))
+    (context "/:id" [id]
 
-    (GET "/import/:id" {:keys [tenant params]}
-      (let [tenant-conn (connection tenant-manager tenant)
-            import-id (:id params)]
-        (if-let [status (import/status tenant-conn import-id)]
-          (response status)
-          (not-found {"importId" import-id}))))))
+      (GET "/" []
+        (let [dataset (find-dataset (connection tenant-manager tenant) id)]
+          (if dataset
+            (response dataset)
+            (not-found {:id id}))))
+
+
+      (context "/transformations" []
+
+        (GET "/" []
+          (response {:fns []}))))))
