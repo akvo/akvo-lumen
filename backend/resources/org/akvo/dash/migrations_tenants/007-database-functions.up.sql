@@ -34,10 +34,10 @@ $BODY$
 DECLARE
   tmp text = val::text;
 BEGIN
-  IF trim(both '"' from tmp) = tmp THEN
-    RETURN '"' || tmp || '"';
+  IF left(tmp, 1) = '"' THEN
+    RETURN tmp;
   END IF;
-  RETURN tmp;
+  RETURN '"' || tmp || '"';
 END;
 $BODY$
   LANGUAGE plpgsql IMMUTABLE STRICT;
