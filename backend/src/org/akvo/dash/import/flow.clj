@@ -45,7 +45,7 @@
 
 (defmethod render-response "FREE_TEXT"
   [{:keys [value]}]
-  (when value
+  (when (string? value)
     (str value)))
 
 (defmethod render-response "NUMBER"
