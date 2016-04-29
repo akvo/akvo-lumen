@@ -46,7 +46,7 @@
 (defmethod render-response "FREE_TEXT"
   [{:keys [value]}]
   (when (string? value)
-    (str value)))
+    value))
 
 (defmethod render-response "NUMBER"
   [{:keys [value]}]
@@ -68,6 +68,13 @@
       "Point" (let [coords (get-in value ["geometry" "coordinates"])]
                 (str/join "," coords)))
     ""))
+
+(defmethod render-response "CASCADE"
+  [{:keys [value]}]
+  (when (coll? value)
+    (str/join "|" (map (fn [item]
+                         (get item "name"))
+                       value))))
 
 (defmethod render-response :default
   [response]

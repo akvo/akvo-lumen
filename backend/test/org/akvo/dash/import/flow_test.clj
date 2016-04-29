@@ -15,5 +15,8 @@
     (is (= (render-response {:value 42 :question-type "FREE_TEXT"})
            nil))
     (is (= (render-response {:value {:foo "bar"} :question-type "FREE_TEXT"})
-           nil))))
+           nil)))
 
+  (testing "CASCADE responses"
+    (is (= (render-response {:value [{"name" "France"} {"name" "Paris"}] :question-type "CASCADE"})
+           "France|Paris"))))
