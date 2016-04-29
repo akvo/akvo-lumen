@@ -68,3 +68,26 @@ BEGIN
 END;
 $BODY$
   LANGUAGE plpgsql IMMUTABLE STRICT;
+
+CREATE OR REPLACE FUNCTION split_column(column_name text, table_name text, delimeter text)
+  RETURNS void AS
+$BODY$
+DECLARE
+  r record;
+  rnum int = 0;
+  max_length smallint = 0;
+  cur_length smallint = 0;
+BEGIN
+  FOR r IN EXECUTE format('SELECT rnum, string_to_array(trim(both ''"'' from %s::text), $1) as a FROM %s',
+    column_name, table_name) USING delimeter
+  LOOP
+    cur_length = array_length(r.a, 1);
+    IF cur_length > max_length THEN
+      max_length = cur_length;
+      rnum = r.rnum;
+    END IF;
+  END LOOP;
+  RAISE EXCEPTION 'rnum: % - max: %', rnum, max_length;
+END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE;
