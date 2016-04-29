@@ -24,41 +24,8 @@
                 (assoc form :question-groups (get question-groups (:id form))))]
     (assoc survey :forms (into {} (map (juxt :id identity)) forms))))
 
-(defn response-index
-  "Index a sequence of responses in form-instance-id question-id iteration order."
-  [responses]
-  (reduce (fn [index {:keys [form_instance_id question_id iteration] :as response}]
-            (assoc-in index [form_instance_id question_id iteration] response))
-          {}
-          responses))
-
-(defn form-instances-index
-  "Index a sequence of form-instances in data_point_id and form_id order"
-  [form-instances responses]
-  (reduce (fn [index {:keys [id form_id data_point_id] :as form-instance}]
-            (update-in index
-                       [data_point_id form_id]
-                       (fnil conj [])
-                       (assoc form-instance
-                              :responses
-                              (get responses id))))
-          {}
-          form-instances))
-
-(defn survey-data-points [conn {:keys [survey-id form-id] :as opts}]
-  (let [data-points (data-points-by-survey-id conn {:survey-id survey-id})
-        form-instances (if form-id
-                         (form-instances-by-form-id conn {:form-id form-id})
-                         (form-instances-by-survey-id conn {:survey-id survey-id}))
-        responses (if form-id
-                    (responses-by-form-id conn {:form-id form-id})
-                    (responses-by-survey-id conn {:survey-id survey-id}))
-        responses (response-index responses)
-        form-instances (form-instances-index form-instances responses)]
-    (for [{:keys [id] :as data-point} data-points]
-      (assoc data-point :form-instances (get form-instances id)))))
-
-;; =======
+(defn questions [form]
+  (mapcat :questions (:question-groups form)))
 
 (defn dataset-columns [form]
   (let [common [{:title "Identifier" :type "string"}
@@ -66,80 +33,103 @@
                 {:title "Longitude" :type "number"}
                 {:title "Submitter" :type "string"}
                 {:title "Submitted at" :type "date"}]
-        questions (mapcat (comp #(map (fn [question]
-                                        {:title (:display_text question)
-                                         :type "string"})
-                                      %)
-                                :questions)
-                          (:question-groups form))]
+        qs (map (fn [q]
+                  {:type "string"
+                   :title (:display_text q)})
+                (questions form))]
     (map-indexed (fn [idx col]
                    (assoc col :column-name (str "c" (inc idx))))
-                 (concat common questions))))
+                 (concat common qs))))
 
-(defn form-instance-row [format-responses data-point form-instance]
-  (reduce into
-          ((juxt :identifier :latitude :longitude) data-point)
-          [((juxt :submitter :submitted_at) form-instance)
-           (format-responses form-instance)]))
+(defmulti render-response :question-type)
 
-(defn dataset-data [data-points form-id format-responses]
-  (reduce into
-          []
-          (for [data-point data-points
-                :let [form-instances (get-in data-point [:form-instances form-id])]]
-            (map #(form-instance-row format-responses data-point %)
-                 form-instances))))
+(defmethod render-response "FREE_TEXT"
+  [{:keys [value]}]
+  (when value
+    (str value)))
 
-(defn format-responses-fn [form]
-  (let [question-ids (mapcat (comp #(map :id %) :questions)
-                             (:question-groups form))]
-    (fn [form-instance]
-      (mapv (fn [question-id]
-              (json/generate-string (get-in form-instance
-                                            [:responses question-id 0 :value "value"])))
-            question-ids))))
+(defmethod render-response "NUMBER"
+  [{:keys [value]}]
+  (when (number? value)
+    value))
+
+(defmethod render-response "OPTION"
+  [{:keys [value]}]
+  (str/join "|" (map (fn [{:strs [text code]}]
+                       (if code
+                         (str/join ":" [code text])
+                         text))
+                     value)))
+
+(defmethod render-response "GEO"
+  [{:keys [value]}]
+  (if (map? value)
+    (condp = (get-in value ["geometry" "type"])
+      "Point" (let [coords (get-in value ["geometry" "coordinates"])]
+                (str/join "," coords)))
+    ""))
+
+(defmethod render-response :default
+  [response]
+  nil)
+
+(defn question-responses
+  "Returns responses indexed by question id. A respons map consists of
+  a :value and a :question-type"
+  [conn form-instance-id]
+  (into {}
+        (map (juxt :question-id identity)
+             (responses-by-form-instance-id
+              conn
+              {:form-instance-id form-instance-id}))))
+
+(defn form-instance-data-rows [conn form]
+  (for [form-instance (form-instances-by-form-id conn {:form-id (:id form)})]
+    (let [responses (question-responses conn (:id form-instance))]
+      (map pg/val->jsonb-pgobj
+           (concat ((juxt :identifier :latitude :longitude :submitter :submitted_at)
+                    form-instance)
+                   (for [question (questions form)]
+                     (render-response (get responses (:id question)))))) )))
+
+(defn form-data
+  "Returns a sequence of maps of the form {\"c1\" jsonb-obj, ...}"
+  [conn form columns]
+  (let [data-rows (form-instance-data-rows conn form)]
+    (map (fn [columns data-row]
+           (into {} (map (fn [column-name response]
+                           [column-name response])
+                         (map :column-name columns)
+                         data-row)))
+         (repeat columns)
+         data-rows)))
 
 (defn create-data-table [table-name column-names]
   (format "create table %s (%s);"
           table-name
           (str/join ", " (map #(str % " jsonb") column-names))))
 
-(defn insert-dataset-data! [conn dataset-data table-name column-names]
-  (apply jdbc/insert!
-         conn
-         table-name
-         (map (fn [data-row]
-                (into {} (map vector
-                              column-names
-                              (map pg/val->jsonb-pgobj data-row) )))
-              dataset-data)))
-
-(defn create-dataset [tenant-conn table-name report-conn survey-id form-id]
+(defn create-dataset [tenant-conn table-name report-conn survey-id]
   (let [survey (survey-definition report-conn survey-id)
-        form (get-in survey [:forms form-id])
-        format-responses (format-responses-fn form)
-        data-points (survey-data-points report-conn {:survey-id survey-id :form-id form-id})
-        dataset-columns (dataset-columns form)
-        dataset-data (dataset-data data-points (:id form) format-responses)]
-    (jdbc/execute! tenant-conn [(create-data-table table-name (map :column-name dataset-columns))])
-    (insert-dataset-data! tenant-conn dataset-data table-name (map :column-name dataset-columns))
-    (mapv (juxt :title :column-name :type) dataset-columns)))
+        ;; For now we can assume that we only import non-monitoring
+        ;; surveys, so grap the first and only form
+        form (-> survey :forms first val)
+        columns (dataset-columns form)
+        data-rows (form-data report-conn form columns)]
+    (jdbc/execute! tenant-conn [(create-data-table table-name (map :column-name columns))])
+    (doseq [data-row data-rows]
+      (jdbc/insert! tenant-conn table-name data-row))
+    (mapv (juxt :title :column-name :type) columns)))
 
 (defmethod make-dataset-data-table "AKVO_FLOW"
   [tenant-conn {:keys [flow-report-database-url]} table-name {:strs [instance surveyId]}]
   (try
-    (let [report-db (format flow-report-database-url instance)
-          ;; For now we can assume that we only import non-monitoring surveys and
-          ;; we fetch the one and only form id here instead.
-          form-id (-> (forms-by-survey-id report-db {:survey-id surveyId})
-                      first
-                      :id)]
+    (jdbc/with-db-connection [report-conn (format flow-report-database-url instance)]
       {:success? true
        :columns (create-dataset tenant-conn
                                 table-name
-                                report-db
-                                surveyId
-                                form-id)})
+                                report-conn
+                                surveyId)})
     (catch Exception e
       (.printStackTrace e)
       {:success? false
