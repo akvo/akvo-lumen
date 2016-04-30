@@ -8,6 +8,18 @@
 
 (hugsql/def-db-fns "org/akvo/dash/import/flow.sql")
 
+(defn remove-empty-folders
+  "Remove empty folders"
+  [folders-and-surveys]
+  (loop [fas folders-and-surveys]
+    (let [folder-ids (set (map :folderId fas))
+          next-fas (remove #(and (= (:type %) "folder")
+                                 (not (folder-ids (:id %))))
+                           fas)]
+      (if (= (count fas) (count next-fas))
+        fas
+        (recur next-fas)))))
+
 (defn endpoint [{{:keys [flow-report-database-url]} :config}]
   (context "/flow" _
     (GET "/folders-and-surveys/:org-id" request
@@ -20,16 +32,18 @@
                                      (Long/parseLong id))))
                             (remove nil?)))]
         (if-not (empty? root-ids)
-          (response (descendant-folders-and-surveys-by-folder-id
-                     (format flow-report-database-url org-id)
-                     {:folder-ids root-ids}
-                     {}
-                     :identifiers identity))
+          (response (remove-empty-folders
+                     (descendant-folders-and-surveys-by-folder-id
+                      (format flow-report-database-url org-id)
+                      {:folder-ids root-ids}
+                      {}
+                      :identifiers identity)) )
           (response ()))))
 
     (GET "/instances" request
       (let [flow-instances (let [roles (get-in request [:jwt-claims "realm_access" "roles"])]
                              (->> roles
                                   (map #(second (re-find #"akvo:flow:(.+?):" %)))
-                                  (remove nil?)))]
+                                  (remove nil?)
+                                  set))]
         (response {:instances flow-instances})))))
