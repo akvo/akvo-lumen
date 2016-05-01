@@ -19,6 +19,7 @@
                  [org.akvo/resumed "0.1.0-SNAPSHOT"]
                  [org.apache.tika/tika-core "1.12"]
                  [org.clojure/clojure "1.8.0"]
+                 [org.clojure/core.match "0.3.0-alpha4"]
                  [org.clojure/data.csv "0.1.3"]
                  [org.clojure/java.jdbc "0.5.0"]
                  [org.immutant/scheduling "2.1.3"]
@@ -36,33 +37,35 @@
   :plugins [[lein-codox "0.9.1"]
             [lein-environ "1.0.2"]
             [lein-gen "0.2.2"]]
-  :codox {:doc-paths ["resources/org/akvo/dash/doc"]
+  :codox {:doc-paths   ["resources/org/akvo/dash/doc"]
           :output-path "doc"}
   :generators [[duct/generators "0.5.8"]]
   :duct {:ns-prefix org.akvo.dash}
   :main ^:skip-aot org.akvo.dash.main
   :target-path "target/%s/"
-  :aliases {"gen"   ["generate"]
-            "setup" ["do" ["generate" "locals"]]
-            "migrate" ["run" "-m" "user/migrate"]}
+  :aliases {"gen"      ["generate"]
+            "migrate"  ["run" "-m" "user/migrate"]
+            "rollback" ["run" "-m" "user/rollback"]
+            "seed"     ["run" "-m" "user/seed"]
+            "setup"    ["do" ["generate" "locals"]]}
   :test-selectors {:default (and (constantly true)
                                  (complement :functional))
-                   :all (constantly true)}
+                   :all     (constantly true)}
   :profiles
-  {:dev  [:project/dev  :profiles/dev]
-   :test [:project/test :profiles/test]
-   :uberjar {:aot :all}
+  {:dev           [:project/dev  :profiles/dev]
+   :test          [:project/test :profiles/test]
+   :uberjar       {:aot :all}
    :profiles/dev  {}
    :profiles/test {}
-   :project/dev   {:dependencies [[ring/ring-mock "0.3.0"]
-                                  [ring/ring-devel "1.4.0"]
-                                  [reloaded.repl "0.2.1"]
-                                  [org.clojure/tools.namespace "0.2.11"]
-                                  [org.clojure/tools.nrepl "0.2.12"]
-                                  [eftest "0.1.1"]
-                                  [kerodon "0.7.0"]]
-                   :source-paths ["dev"]
+   :project/dev   {:dependencies   [[ring/ring-mock "0.3.0"]
+                                    [ring/ring-devel "1.4.0"]
+                                    [reloaded.repl "0.2.1"]
+                                    [org.clojure/tools.namespace "0.2.11"]
+                                    [org.clojure/tools.nrepl "0.2.12"]
+                                    [eftest "0.1.1"]
+                                    [kerodon "0.7.0"]]
+                   :source-paths   ["dev"]
                    :resource-paths ["test/resources"]
-                   :repl-options {:init-ns user}
-                   :env {:port 3000}}
+                   :repl-options   {:init-ns user}
+                   :env            {:port 3000}}
    :project/test  {}})
