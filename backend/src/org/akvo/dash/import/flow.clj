@@ -3,9 +3,7 @@
             [clojure.java.jdbc :as jdbc]
             [akvo.commons.psql-util :as pg]
             [hugsql.core :as hugsql]
-            [cheshire.core :as json]
-            [org.akvo.dash.import.common :refer (make-dataset-data-table)])
-  (:import [org.postgresql.util PGobject]))
+            [org.akvo.dash.import.common :refer (make-dataset-data-table)]))
 
 (hugsql/def-db-fns "org/akvo/dash/import/flow.sql")
 
@@ -27,6 +25,17 @@
 (defn questions [form]
   (mapcat :questions (:question-groups form)))
 
+(defn question-type->dash-type [question-type]
+  ;; A lot of this is TBD.
+  (condp = question-type
+    "FREE_TEXT" "string"
+    "CASCADE" "string"
+    "OPTION" "string"
+    "GEO" "string"
+    "DATE" "date"
+    "NUMBER" "number"
+    "object"))
+
 (defn dataset-columns [form]
   (let [common [{:title "Identifier" :type "string"}
                 {:title "Latitude" :type "number"}
@@ -34,7 +43,7 @@
                 {:title "Submitter" :type "string"}
                 {:title "Submitted at" :type "date"}]
         qs (map (fn [q]
-                  {:type "string"
+                  {:type (question-type->dash-type (:type q))
                    :title (:display_text q)})
                 (questions form))]
     (map-indexed (fn [idx col]
