@@ -25,9 +25,6 @@ export function getChartData(visualisation, datasets) {
         }
       });
 
-      // DEBUG
-      dataValues.shift();
-
       output.push({
         values: dataValues,
       });
@@ -50,9 +47,6 @@ export function getChartData(visualisation, datasets) {
         });
       });
 
-      // DEBUG
-      dataValues.shift();
-
       output.push({
         name: 'series1',
         values: dataValues,
@@ -73,9 +67,6 @@ export function getChartData(visualisation, datasets) {
         });
       });
 
-      // DEBUG
-      output.shift();
-
       break;
 
     case 'scatter':
@@ -88,9 +79,6 @@ export function getChartData(visualisation, datasets) {
 
         return item;
       });
-
-      // DEBUG
-      dataValues.shift();
 
       output.push({
         name: 'series1',
