@@ -3,7 +3,8 @@
             [clojure.set :as set]
             [compojure.core :refer :all]
             [ring.util.response :refer (response)]
-            [hugsql.core :as hugsql]))
+            [hugsql.core :as hugsql]
+            [org.akvo.dash.import.flow :as flow-import]))
 
 
 (hugsql/def-db-fns "org/akvo/dash/import/flow.sql")
@@ -24,20 +25,14 @@
   (context "/flow" _
     (GET "/folders-and-surveys/:org-id" request
       (let [org-id (-> request :params :org-id)
-            root-ids (let [roles (get-in request [:jwt-claims "realm_access" "roles"])
-                           pattern (re-pattern (format "akvo:flow:%s:(\\d+?)" org-id))]
-                       (->> roles
-                            (map (fn [role]
-                                   (when-let [id (second (re-find pattern role))]
-                                     (Long/parseLong id))))
-                            (remove nil?)))]
+            root-ids (flow-import/root-ids org-id (:jwt-claims request))]
         (if-not (empty? root-ids)
           (response (remove-empty-folders
                      (descendant-folders-and-surveys-by-folder-id
                       (format flow-report-database-url org-id)
                       {:folder-ids root-ids}
                       {}
-                      :identifiers identity)) )
+                      :identifiers identity)))
           (response ()))))
 
     (GET "/instances" request

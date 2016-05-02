@@ -3,7 +3,7 @@
             [clojure.java.jdbc :as jdbc]
             [akvo.commons.psql-util :as pg]
             [hugsql.core :as hugsql]
-            [org.akvo.dash.import.common :refer (make-dataset-data-table)]))
+            [org.akvo.dash.import.common :as import]))
 
 (hugsql/def-db-fns "org/akvo/dash/import/flow.sql")
 
@@ -137,7 +137,32 @@
       (jdbc/insert! tenant-conn table-name data-row))
     (mapv (juxt :title :column-name :type) columns)))
 
-(defmethod make-dataset-data-table "AKVO_FLOW"
+(defmethod import/valid? "AKVO_FLOW"
+  [{:strs [instance surveyId]}]
+  (and (string? instance)
+       (integer? surveyId)))
+
+(defn root-ids [instance claims]
+  (let [roles (get-in claims ["realm_access" "roles"])
+        pattern (re-pattern (format "akvo:flow:%s:(\\d+)" instance))]
+    (->> roles
+         (map (fn [role]
+                (when-let [id (second (re-find pattern role))]
+                  (Long/parseLong id))))
+         (remove nil?))))
+
+(defmethod import/authorized? "AKVO_FLOW"
+  [claims {:keys [flow-report-database-url]} {:strs [instance surveyId]}]
+  (let [folder-ids (root-ids instance claims)]
+    (contains? (->> (descendant-folders-and-surveys-by-folder-id (format flow-report-database-url instance)
+                                                                 {:folder-ids folder-ids}
+                                                                 {}
+                                                                 :identifiers identity)
+                    (map :id)
+                    set)
+               surveyId)))
+
+(defmethod import/make-dataset-data-table "AKVO_FLOW"
   [tenant-conn {:keys [flow-report-database-url]} table-name {:strs [instance surveyId]}]
   (try
     (jdbc/with-db-connection [report-conn (format flow-report-database-url instance)]

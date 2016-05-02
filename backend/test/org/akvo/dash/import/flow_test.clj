@@ -20,3 +20,22 @@
   (testing "CASCADE responses"
     (is (= (render-response {:value [{"name" "France"} {"name" "Paris"}] :question-type "CASCADE"})
            "France|Paris"))))
+
+(deftest root-ids-test
+  (testing "Parse root ids from claims set"
+    (is (= (set (root-ids "akvoflow-1" {"realm_access" {"roles" []}}))
+           #{}))
+    (is (= (set (root-ids "akvoflow-1" {"realm_access" {"roles" ["akvo:dash:tenant-1"]}}))
+           #{}))
+    (is (= (set (root-ids "akvoflow-1" {"realm_access" {"roles" ["akvo:dash:tenant-1"
+                                                                 "akvo:flow:akvoflow-2:0"]}}))
+           #{}))
+    (is (= (set (root-ids "akvoflow-1" {"realm_access" {"roles" ["akvo:dash:tenant-1"
+                                                                 "akvo:flow:akvoflow-2:0"
+                                                                 "akvo:flow:akvoflow-1:0"]}}))
+           #{0}))
+    (is (= (set (root-ids "akvoflow-1" {"realm_access" {"roles" ["akvo:dash:tenant-1"
+                                                                 "akvo:flow:akvoflow-2:0"
+                                                                 "akvo:flow:akvoflow-1:0"
+                                                                 "akvo:flow:akvoflow-1:123"]}}))
+           #{0 123}))))
