@@ -10,6 +10,24 @@ export function getChartData(visualisation, datasets) {
   let output = [];
 
   switch (visualisation.visualisationType) {
+    case 'map':
+
+      dataX.forEach((entry, index) => {
+        const newPositionObject = {
+          position: [parseFloat(dataX[index]), parseFloat(dataY[index])],
+        };
+
+        if (!isNaN(newPositionObject.position[0])
+            && !isNaN(newPositionObject.position[1])) {
+          dataValues.push(newPositionObject);
+        }
+      });
+
+      output.push({
+        values: dataValues,
+      });
+      break;
+
     case 'bar':
     case 'line':
     case 'area':

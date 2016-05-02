@@ -23,4 +23,8 @@
     transition-timing-function: ease;
     border-radius: 0;
   }
+  .Select-menu-outer, .Select-menu {
+    /* Overrides default max-height of 200px */
+    max-height: initial;
+  }
 }

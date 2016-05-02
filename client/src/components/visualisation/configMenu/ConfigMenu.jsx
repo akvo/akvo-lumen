@@ -124,7 +124,7 @@ export default function ConfigMenu(props) {
       break;
 
     case 'scatter':
-
+    case 'map':
       subtitle1 = <h3>X-Axis</h3>;
       subtitle2 = <h3>Y-Axis</h3>;
       labelColumnXInput = null;
