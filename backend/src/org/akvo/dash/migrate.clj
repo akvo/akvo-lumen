@@ -4,7 +4,8 @@
             [hugsql.core :as hugsql]
             [ragtime
              [jdbc :as jdbc]
-             [repl :as repl]]))
+             [repl :as repl]])
+  (:import  org.postgresql.util.PSQLException))
 
 (hugsql/def-db-fns "org/akvo/dash/migrate.sql")
 
@@ -42,7 +43,9 @@
   (let [manager-spec     {:datastore  (jdbc/sql-database db)
                           :migrations (jdbc/load-resources
                                        "org/akvo/dash/migrations_tenant_manager")}
-        tenants          (all-tenants db)
+        tenants          (try
+                           (all-tenants db)
+                           (catch PSQLException e []))
         tenant-spec-base {:migrations (jdbc/load-resources
                                        "org/akvo/dash/migrations_tenants")}]
     (match [args]

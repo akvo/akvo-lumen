@@ -38,9 +38,9 @@
     (GET "/" []
       (response (all-datasets (connection tenant-manager tenant))))
 
-    (POST "/" {:keys [tenant body] :as request}
+    (POST "/" {:keys [tenant body jwt-claims] :as request}
       (let [tenant-conn (connection tenant-manager tenant)]
-        (response (import/handle-import-request tenant-conn config body))))
+        (import/handle-import-request tenant-conn config jwt-claims body)))
 
     (context "/:id" [id]
 

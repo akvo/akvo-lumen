@@ -18,7 +18,6 @@ CREATE FUNCTION history.log_change() RETURNS trigger AS $_$
             FETCH FROM c INTO tt;
 
             IF isempty(tstzrange(lower(tt), now(), $$[)$$)) THEN
-
 		EXECUTE 'DELETE FROM history.' || TG_TABLE_NAME ||
 		  ' WHERE CURRENT OF ' || quote_ident(c::text);
             ELSE
@@ -53,7 +52,6 @@ CREATE FUNCTION history.log_change() RETURNS trigger AS $_$
     END;
 $_$ LANGUAGE plpgsql;
 -- ;;
-
 
 CREATE OR REPLACE FUNCTION public.tardis(t text) RETURNS void AS $$
 BEGIN

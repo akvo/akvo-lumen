@@ -32,6 +32,15 @@
         }
         .dataFileUploadInput {
             padding: 1rem;
+            padding-bottom: 3.25rem;
+            &.progressActive {
+                padding-bottom: 1rem;
+            }
+        }
+        .DashProgressBar {
+            width: 90%;
+            max-width: 20rem;
+            margin: 1rem auto 0 auto;
         }
     }
     .Settings {
