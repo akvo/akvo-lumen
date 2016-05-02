@@ -23,3 +23,25 @@
   (doseq [tenant (all-tenants db-spec)]
     (do-migrate "org/akvo/dash/migrations_tenants"
                 {:connection-uri (:db_uri tenant)})))
+
+
+(defn do-rollback
+  ""
+  [path db-spec]
+  (repl/rollback {:datastore  (jdbc/sql-database db-spec)
+                  :migrations (jdbc/load-resources path)}
+                  (count (jdbc/load-resources path))))
+
+
+(defn rollback
+  ""
+  [db-spec]
+
+  ;; tenants
+  (doseq [tenant (all-tenants db-spec)]
+    (do-rollback "org/akvo/dash/migrations_tenants"
+                {:connection-uri (:db_uri tenant)}))
+
+  ;; manager
+  (do-rollback "org/akvo/dash/migrations_tenant_manager" db-spec))
+

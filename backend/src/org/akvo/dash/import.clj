@@ -18,11 +18,11 @@
   (try
     (let [table-name (str "ds_" (str/replace (java.util.UUID/randomUUID) "-" "_"))
           spec (:spec (data-source-spec-by-job-execution-id conn {:job-execution-id job-execution-id}))
-          status (make-dataset-data-table conn config table-name spec)]
+          status (make-dataset-data-table conn config table-name (get spec "source"))]
        (if (:success? status)
          (let [dataset-id (squuid)]
            (insert-dataset conn {:id dataset-id
-                                 :title (get spec "title")
+                                 :title (get spec "name") ;; TODO Consistent naming. Change on client side?
                                  :description (get spec "description" "")})
            (insert-dataset-version conn {:id (squuid)
                                          :dataset-id dataset-id
@@ -45,7 +45,7 @@
 
 (defn handle-import-request [tenant-conn config data-source]
   (let [data-source-id (str (squuid))
-        job-execution-id (str (squuid)) ]
+        job-execution-id (str (squuid))]
     (insert-data-source tenant-conn {:id data-source-id
                                      :spec (json/generate-string data-source)})
     (insert-job-execution tenant-conn {:id job-execution-id

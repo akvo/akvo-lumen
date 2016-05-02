@@ -1,21 +1,28 @@
 (ns org.akvo.dash.fixtures
   (:require
-   ;; [duct.component.ragtime :as ragtime]
-   [reloaded.repl :refer [system stop go]]))
+   [hugsql.core :as hugsql]
+   [org.akvo.dash.migrate :as migrate]
+   [reloaded.repl :refer [system stop go]]
+   [user :refer [config]]))
+
+
+(hugsql/def-db-fns "org/akvo/dash/fixtures.sql")
 
 
 (defn system-fixture
-  "Just a dummy fixture while we rework stuff"
+  "Starts the system and migrates, no setup or tear down."
   [f]
-  (f))
-
-
-;; (defn system-fixture
-;;   "Starts the system and migrates, no setup or tear down."
-;;   [f]
-;;   (try
-;;     (go)
-;;     (-> system :ragtime ragtime/reload ragtime/migrate)
-;;     (f)
-;;     (-> system :ragtime ragtime/reload (ragtime/rollback "001-activity"))
-;;     (finally (stop))))
+  (let [conn {:connection-uri (-> config :db :uri)}]
+    (try
+      (go)
+      (migrate/migrate conn)
+      (insert-tenant conn {:db_uri "jdbc:postgresql://localhost/test_dash_tenant_1?user=dash&password=password"
+                           :label "t1"
+                           :title "Tenant 1"})
+      (insert-tenant conn {:db_uri "jdbc:postgresql://localhost/test_dash_tenant_2?user=dash&password=password"
+                                 :label "t2"
+                                 :title "Tenant 2"})
+      (migrate/migrate conn)
+      (f)
+      (migrate/rollback conn)
+      (finally (stop)))))

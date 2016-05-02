@@ -2,8 +2,8 @@
   "Library endpoint..."
   (:require [compojure.core :refer :all]
             [hugsql.core :as hugsql]
-            [org.akvo.dash.component.tenant-manager :refer [connection]]
-            [org.akvo.dash.endpoint.util :refer [rr]]))
+            [ring.util.response :refer [response]]
+            [org.akvo.dash.component.tenant-manager :refer [connection]]))
 
 (hugsql/def-db-fns "org/akvo/dash/endpoint/dataset.sql")
 (hugsql/def-db-fns "org/akvo/dash/endpoint/visualisation.sql")
@@ -15,11 +15,12 @@
   / GET
   Return the library"
   [{tm :tenant-manager :as config}]
-  (context "/library" []
+  (context "/library" {:keys [params tenant] :as request}
 
     (GET "/" []
-      (fn [{label :tenant :as request}]
-        (let [db (connection tm label)]
-          (rr {:datasets       (all-datasets db)
-               :visualisations (all-visualisations db)
-               :dashboards     [] }))))))
+
+      (let [tenant-conn (connection tm tenant)]
+        (response
+         {:dashboards     []
+          :datasets       (all-datasets tenant-conn)
+          :visualisations (all-visualisations tenant-conn)})))))

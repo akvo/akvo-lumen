@@ -33,6 +33,8 @@
 (defn migrate []
   (mig/migrate {:connection-uri (-> config :db :uri)}))
 
+(defn rollback []
+  (mig/rollback {:connection-uri (-> config :db :uri)}))
 
 (when (io/resource "local.clj")
   (load "local"))

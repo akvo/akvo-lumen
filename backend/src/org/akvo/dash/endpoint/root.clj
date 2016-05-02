@@ -1,7 +1,7 @@
 (ns org.akvo.dash.endpoint.root
   "The root (/) API resource."
   (:require [compojure.core :refer :all]
-            [org.akvo.dash.endpoint.util :refer [rr]]))
+            [ring.util.response :refer [response]]))
 
 
 (defn endpoint
@@ -13,6 +13,7 @@
                           "://" (:server-name request)
                           ":" (:server-port request)
                           (:uri request))]
-        (rr {:tenant (:tenant request)
-             :resources {:datasets       (str base-url "datasets")
-                         :visualisations (str base-url "visualisations")}})))))
+        (response
+         {:tenant (:tenant request)
+          :resources {:datasets       (str base-url "datasets")
+                      :visualisations (str base-url "visualisations")}})))))
