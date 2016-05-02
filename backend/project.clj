@@ -60,7 +60,8 @@
                                   [org.clojure/tools.namespace "0.2.11"]
                                   [org.clojure/tools.nrepl "0.2.12"]
                                   [eftest "0.1.1"]
-                                  [kerodon "0.7.0"]]
+                                  [kerodon "0.7.0"]
+                                  [criterium "0.4.4"]]
                    :source-paths ["dev"]
                    :resource-paths ["test/resources"]
                    :repl-options {:init-ns user}
