@@ -18,7 +18,7 @@ Edit profiles.clj to match (there is a profiles.clj.template file):
  :profiles/test
  {:env
   {:database-url
-    "jdbc:postgresql://localhost/dash_test?user=dash&password=password"}}}
+    "jdbc:postgresql://localhost/test_dash?user=dash&password=password"}}}
 ```
 
 To create the Postgres role & databases run the provision script:

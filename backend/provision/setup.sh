@@ -18,6 +18,7 @@ psql -f $DIR/helpers/create-dash.sql
 
 # Setup Tardis
 psql -d dash -f $DIR/helpers/tardis.sql
+psql -d test_dash -f $DIR/helpers/tardis.sql
 
 # Migrate dash db (to get tenants table)
 # lein run -m 'user/migrate'

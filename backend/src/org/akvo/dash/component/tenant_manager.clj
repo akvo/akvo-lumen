@@ -28,7 +28,8 @@
 ;;;
 
 (defprotocol TenantConnection
-  (connection [component label] "Connection based on a tenant dns label."))
+  (connection [component label] "Connection based on a tenant dns label.")
+  (uri [component label] "Database URI based on a tenant dns label."))
 
 
 (defn pool
@@ -39,6 +40,17 @@
     (.setPoolName cfg (:label tenant))
     (.setMaximumPoolSize cfg 2)
     {:datasource (HikariDataSource. cfg)}))
+
+
+(defn load-tenant [db tenants label]
+  (if-let [tenant (tenant-by-id (:spec db)
+                                {:label label})]
+    (swap! tenants
+           assoc
+           label
+           {:uri  (:db_uri tenant)
+            :spec (pool tenant)})
+    (throw (Exception. "Could not match dns label with tenant from tenats."))))
 
 
 (defrecord TenantManager [db]
@@ -52,28 +64,25 @@
   (stop [component]
     (if-let [tenants (:tenants component)]
       (do
-        (doseq [[_ {{conn :datasource} :spec}] @tenants]
-          (when-not (.isClosed conn)
-            (.close conn)))
+        (doseq [[_ {{^HikariDataSource conn :datasource} :spec}] @tenants]
+          (.close conn))
         (dissoc component :tenants))
       component))
 
   TenantConnection
-  (connection
-      [{:keys [tenants] :as component} label]
+  (connection [{:keys [db tenants] :as component} label]
     (if-let [tenant (get @tenants label)]
       (:spec tenant)
       (do
-        (if-let [tenant (tenant-by-id (:spec (:db component))
-                                      {:label label})]
-          (do
-            (swap! tenants
-                   assoc
-                   label
-                   {:uri  (:db_uri tenant)
-                    :spec (pool tenant)})
-            (:spec (get @tenants label)))
-          (throw (Exception. "Could not match dns label with tenant.")))))))
+        (load-tenant db tenants label)
+        (:spec (get @tenants label)))))
+
+  (uri [{:keys [db tenants] :as component} label]
+    (if-let [tenant (get @tenants label)]
+      (:uri tenant)
+      (do
+        (load-tenant db tenants label)
+        (:uri (get @tenants label))))))
 
 
 (defn manager

@@ -27,7 +27,7 @@ const supportedFormats = [{
   kind: 'AKVO_FLOW',
   icon: '/assets/akvo-flow.png',
   label: 'Akvo FLOW',
-  disabled: true,
+  disabled: false,
 }, {
   kind: 'GITHUB',
   icon: '/assets/github.png',
@@ -48,6 +48,12 @@ const defaultDataSources = {
   LINK: {
     kind: 'LINK',
     url: '',
+  },
+
+  AKVO_FLOW: {
+    kind: 'AKVO_FLOW',
+    instance: null,
+    surveyId: null,
   },
 
   // TODO the rest.

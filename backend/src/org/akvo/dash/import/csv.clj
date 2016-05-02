@@ -5,7 +5,7 @@
             [clojure.data.csv :as csv]
             [hugsql.core :as hugsql]
             [org.akvo.dash.util :refer [squuid]]
-            [org.akvo.dash.import.common :refer (make-dataset-data-table)])
+            [org.akvo.dash.import.common :as import])
   (:import org.postgresql.copy.CopyManager
            org.postgresql.PGConnection
            java.util.UUID))
@@ -87,12 +87,24 @@
    (map-indexed (fn [idx title]
                   [title (str "c" (inc idx)) "text"]) col-titles)))
 
-(defmethod make-dataset-data-table "csv" [tenant-conn config table-name spec]
+(defmethod import/valid? "CSV"
+  [{:strs [url fileName]}]
+  (and (string? url)
+       (or (nil? fileName)
+           (string? fileName))))
+
+(defmethod import/authorized? "CSV"
+  [claims config spec]
+  true)
+
+(defmethod import/make-dataset-data-table "CSV"
+  [tenant-conn {:keys [file-upload-path]} table-name spec]
   (let [;; TODO a bit of "manual" integration work
         file-on-disk? (contains? spec "fileName")
         path (let [url (get spec "url")]
                (if file-on-disk?
-                 (str "/tmp/akvo/dash/resumed/"
+                 (str file-upload-path
+                      "/resumed/"
                       (last (s/split url #"\/"))
                       "/file")
                  url))

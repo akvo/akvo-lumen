@@ -155,3 +155,7 @@ tramp
 Session.vim
 .netrwhist
 *~
+
+# IntelliJ IDE
+*.iml
+.idea

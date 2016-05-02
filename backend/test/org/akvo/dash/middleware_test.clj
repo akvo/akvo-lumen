@@ -20,8 +20,6 @@
 
 (defn- check-response
   [response expected]
-  (when (= expected 200)
-    (prn response))
   (is (= expected (:status response)))
   (condp = expected
     201 (is "" (:body response))
