@@ -39,6 +39,53 @@ const getDashSelectOptionsFromColumnArray = (array) => {
   return output;
 };
 
+const getSubTitle = subtitle => (
+  <h3>{subtitle}</h3>
+);
+
+const getColumnMenu = (choice, name, options, onchange) => (
+  <div className="inputGroup">
+    <label htmlFor={name}>
+      Dataset column:
+    </label>
+    <DashSelect
+      name={name}
+      value={choice !== null ?
+        choice : 'Choose a dataset column...'}
+      options={options}
+      onChange={onchange}
+    />
+  </div>
+);
+
+const getLabelColumnMenu = (choice, name, options, onchange) => (
+  <div className="inputGroup">
+    <label htmlFor={name}>Label column:</label>
+    <DashSelect
+      name={name}
+      disabled={options ? options.length === 0 : true}
+      value={choice !== null ?
+        choice : 'Choose a name column...'}
+      onChange={onchange}
+      options={options}
+    />
+  </div>
+);
+
+const getLabelInput = (value, placeholder, name, onchange) => (
+  <div className="inputGroup">
+    <label htmlFor={name}>X Axis Label:</label>
+    <input
+      className="textInput"
+      name={name}
+      type="text"
+      placeholder={placeholder}
+      defaultValue={value}
+      onChange={onchange}
+    />
+  </div>
+);
+
 export default function ConfigMenu(props) {
   const datasetArray = getDatasetArray(props.datasets);
   const datasetOptions = getDatasetOptions(datasetArray);
@@ -48,152 +95,97 @@ export default function ConfigMenu(props) {
     props.datasets[visualisation.sourceDatasetX].columns : [];
   const columnOptionsX = getDashSelectOptionsFromColumnArray(xColumns);
 
-  let subtitle1;
-  let subtitle2;
-  let labelColumnXInput;
-  let xAxisLabelInput;
-  let yAxisLabelInput;
-  let yColumnInput;
+  const getComponents = visualisationType => {
+    let output;
+    switch (visualisationType) {
+      case 'bar':
+        output = (
+          <div>
+            {getSubTitle('X-Axis')}
+            {getColumnMenu(visualisation.datasetColumnX, 'xColumnInput',
+              columnOptionsX, props.onChangeDatasetColumnX)}
+            {getLabelColumnMenu(visualisation.datasetNameColumnX, 'xNameColumnMenu',
+              columnOptionsX, props.onChangeDatasetNameColumnX)}
+            {getLabelInput(visualisation.labelX, 'X Axis label', 'xLabel',
+            props.onChangeDatasetLabelX)}
+            {getSubTitle('Y-Axis')}
+            {getLabelInput(visualisation.labelY, 'Y Axis label', 'yLabel',
+              props.onChangeDatasetLabelY)}
+          </div>
+        );
+        break;
 
-  switch (visualisation.visualisationType) {
-    case 'bar':
+      case 'line':
+      case 'area':
 
-      subtitle1 = <h3>X-Axis</h3>;
-      subtitle2 = <h3>Y-Axis</h3>;
-      labelColumnXInput = (
-        <div className="inputGroup">
-          <label htmlFor="xNameColumnMenu">Label column:</label>
-          <DashSelect
-            name="xNameColumnMenu"
-            disabled={xColumns ? xColumns.length === 0 : true}
-            value={visualisation.datasetNameColumnX !== null ?
-              visualisation.datasetNameColumnX : 'Choose a name column...'}
-            onChange={props.onChangeDatasetNameColumnX}
-            options={columnOptionsX}
-          />
-        </div>
-      );
-      xAxisLabelInput = (
-        <div className="inputGroup">
-          <label htmlFor="xLabel">X Axis Label:</label>
-          <input
-            className="textInput"
-            type="text"
-            placeholder="X Axis label"
-            defaultValue={visualisation.labelX}
-            onChange={props.onChangeDatasetLabelX}
-          />
-        </div>
-      );
-      yAxisLabelInput = (
-        <div className="inputGroup">
-          <label htmlFor="yLabel">Y Axis Label:</label>
-          <input
-            className="textInput"
-            type="text"
-            placeholder="Y Axis label"
-            defaultValue={visualisation.labelY}
-            onChange={props.onChangeDatasetLabelY}
-          />
-        </div>
-      );
-      yColumnInput = null;
+        output = (
+          <div>
+            {getSubTitle('X-Axis')}
+            {getColumnMenu(visualisation.datasetColumnX, 'xColumnInput',
+              columnOptionsX, props.onChangeDatasetColumnX)}
+            {getLabelInput(visualisation.labelX, 'X Axis label', 'xLabel',
+              props.onChangeDatasetLabelX)}
+            {getSubTitle('Y-Axis')}
+            {getLabelInput(visualisation.labelY, 'Y Axis label', 'yLabel',
+              props.onChangeDatasetLabelY)}
+          </div>
+        );
+        break;
 
-      break;
+      case 'scatter':
 
-    case 'line':
-    case 'area':
-      subtitle1 = <h3>X-Axis</h3>;
-      subtitle2 = <h3>Y-Axis</h3>;
-      labelColumnXInput = null;
-      xAxisLabelInput = (
-        <div className="inputGroup">
-          <label htmlFor="xLabel">X Axis Label:</label>
-          <input
-            className="textInput"
-            type="text"
-            placeholder="X Axis label"
-            defaultValue={visualisation.labelX}
-            onChange={props.onChangeDatasetLabelX}
-          />
-        </div>
-      );
-      yAxisLabelInput = null;
-      yColumnInput = null;
+        output = (
+          <div>
+            {getSubTitle('X-Axis')}
+            {getColumnMenu(visualisation.datasetColumnX, 'xColumnInput',
+              columnOptionsX, props.onChangeDatasetColumnX)}
+            {getLabelInput(visualisation.labelX, 'X Axis label', 'xLabel',
+              props.onChangeDatasetLabelX)}
+            {getSubTitle('Y-Axis')}
+            {getColumnMenu(visualisation.datasetColumnY, 'yColumnInput',
+              columnOptionsX, props.onChangeDatasetColumnY)}
+            {getLabelInput(visualisation.labelY, 'Y Axis label', 'yLabel',
+              props.onChangeDatasetLabelY)}
+          </div>
+        );
+        break;
 
-      break;
+      case 'map':
 
-    case 'scatter':
-    case 'map':
-      subtitle1 = <h3>X-Axis</h3>;
-      subtitle2 = <h3>Y-Axis</h3>;
-      labelColumnXInput = null;
-      xAxisLabelInput = (
-        <div className="inputGroup">
-          <label htmlFor="xLabel">X Axis Label:</label>
-          <input
-            className="textInput"
-            type="text"
-            placeholder="X Axis label"
-            defaultValue={visualisation.labelX}
-            onChange={props.onChangeDatasetLabelX}
-          />
-        </div>
-      );
-      yAxisLabelInput = (
-        <div className="inputGroup">
-          <label htmlFor="yLabel">Y Axis Label:</label>
-          <input
-            className="textInput"
-            type="text"
-            placeholder="Y Axis label"
-            defaultValue={visualisation.labelY}
-            onChange={props.onChangeDatasetLabelY}
-          />
-        </div>
-      );
-      yColumnInput = (
-        <div className="inputGroup">
-          <label htmlFor="yColumnMenu">Dataset column:</label>
-          <DashSelect
-            name="yColumnMenu"
-            value={visualisation.datasetColumnY !== null ?
-              visualisation.datasetColumnY : 'Choose a dataset column...'}
-            options={columnOptionsX}
-            onChange={props.onChangeDatasetColumnY}
-          />
-        </div>
-      );
+        output = (
+          <div>
+            {getSubTitle('Latitude')}
+            {getColumnMenu(visualisation.datasetColumnX, 'xColumnInput',
+              columnOptionsX, props.onChangeDatasetColumnX)}
+            {getSubTitle('Longitude')}
+            {getColumnMenu(visualisation.datasetColumnY, 'yColumnInput',
+              columnOptionsX, props.onChangeDatasetColumnY)}
+            {getSubTitle('Popup Label')}
+            {getLabelColumnMenu(visualisation.datasetNameColumnX, 'xNameColumnMenu',
+              columnOptionsX, props.onChangeDatasetNameColumnX)}
+          </div>
+        );
+        break;
 
-      break;
+      case 'pie':
+      case 'donut':
 
-    case 'pie':
-    case 'donut':
+        output = (
+          <div>
+            {getColumnMenu(visualisation.datasetColumnX, 'xColumnInput',
+              columnOptionsX, props.onChangeDatasetColumnX)}
+            {getLabelColumnMenu(visualisation.datasetNameColumnX, 'xNameColumnMenu',
+              columnOptionsX, props.onChangeDatasetNameColumnX)}
+          </div>
+        );
+        break;
 
-      subtitle1 = null;
-      subtitle2 = null;
-      labelColumnXInput = (
-        <div className="inputGroup">
-          <label htmlFor="xNameColumnMenu">Label column:</label>
-          <DashSelect
-            name="xNameColumnMenu"
-            disabled={xColumns ? xColumns.length === 0 : true}
-            value={visualisation.datasetNameColumnX !== null ?
-              visualisation.datasetNameColumnX : 'Choose a name column...'}
-            onChange={props.onChangeDatasetNameColumnX}
-            options={columnOptionsX}
-          />
-        </div>
-      );
-      xAxisLabelInput = null;
-      yAxisLabelInput = null;
-      yColumnInput = null;
+      default:
+        throw new Error('Invalid visualisation type');
+    }
 
-      break;
-
-    default:
-      throw new Error('Invalid visualisation type');
-  }
+    return output;
+  };
 
   return (
     <div className="ConfigMenu">
@@ -218,23 +210,7 @@ export default function ConfigMenu(props) {
           onChange={props.onChangeTitle}
         />
       </div>
-      {subtitle1}
-      <div className="inputGroup">
-        <label htmlFor="xColumnMenu">Dataset column:</label>
-        <DashSelect
-          name="xColumnMenu"
-          value={visualisation.datasetColumnX !== null ?
-            visualisation.datasetColumnX : 'Choose a dataset column...'}
-          options={columnOptionsX}
-          onChange={props.onChangeDatasetColumnX}
-        />
-      </div>
-      {labelColumnXInput}
-      {xAxisLabelInput}
-
-      {subtitle2}
-      {yColumnInput}
-      {yAxisLabelInput}
+      {getComponents(visualisation.visualisationType)}
     </div>
   );
 }

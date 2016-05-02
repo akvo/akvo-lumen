@@ -13,8 +13,10 @@ export function getChartData(visualisation, datasets) {
     case 'map':
 
       dataX.forEach((entry, index) => {
+        const label = nameDataX ? nameDataX.values[index] : null;
         const newPositionObject = {
           position: [parseFloat(dataX[index]), parseFloat(dataY[index])],
+          label,
         };
 
         if (!isNaN(newPositionObject.position[0])
@@ -22,6 +24,9 @@ export function getChartData(visualisation, datasets) {
           dataValues.push(newPositionObject);
         }
       });
+
+      // DEBUG
+      dataValues.shift();
 
       output.push({
         values: dataValues,
@@ -45,6 +50,9 @@ export function getChartData(visualisation, datasets) {
         });
       });
 
+      // DEBUG
+      dataValues.shift();
+
       output.push({
         name: 'series1',
         values: dataValues,
@@ -65,6 +73,9 @@ export function getChartData(visualisation, datasets) {
         });
       });
 
+      // DEBUG
+      output.shift();
+
       break;
 
     case 'scatter':
@@ -77,6 +88,9 @@ export function getChartData(visualisation, datasets) {
 
         return item;
       });
+
+      // DEBUG
+      dataValues.shift();
 
       output.push({
         name: 'series1',

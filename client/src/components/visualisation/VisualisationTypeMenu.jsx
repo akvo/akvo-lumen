@@ -11,7 +11,7 @@ export default function VisualisationTypeMenu({ visualisation, onChangeVisualisa
     { value: 'pie', label: 'pie' },
     { value: 'donut', label: 'donut' },
     { value: 'scatter', label: 'scatter' },
-    { value: 'map', label: 'map'},
+    { value: 'map', label: 'map' },
   ];
 
   return (

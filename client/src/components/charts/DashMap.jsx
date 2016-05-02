@@ -8,22 +8,27 @@ require('../../styles/DashMap.scss');
 
 export default function DashMap({ visualisation, datasets }) {
   const chartData = chart.getChartData(visualisation, datasets);
-  console.dir(chartData[0].values)
 
   return (
     <div className="DashMap dashChart">
       <Map
-        center={[0,0]}
+        center={[0, 0]}
         zoom={2}
         scrollWheelZoom={false}
       >
         <TileLayer
-          url='http://{s}.tile.osm.org/{z}/{x}/{y}.png'
-          attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+          url="http://{s}.tile.osm.org/{z}/{x}/{y}.png"
+          attribution="&copy; <a href='http://osm.org/copyright'>OpenStreetMap</a> contributors"
         />
         {
           chartData[0].values.map((entry, index) =>
-            <Marker position={entry.position}>
+            <Marker position={entry.position} key={index}>
+              {
+                entry.label &&
+                  <Popup>
+                    <span>{entry.label}</span>
+                  </Popup>
+              }
             </Marker>
           )
         }
