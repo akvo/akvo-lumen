@@ -1,9 +1,6 @@
 (ns org.akvo.dash.transformation.engine
   (:import [javax.script ScriptEngine ScriptEngineManager])
-  (:require [clojure.java.jdbc :as jdbc]
-            [hugsql.core :as hugsql]))
-
-(hugsql/def-db-fns "org/akvo/dash/transformation/engine.sql")
+  (:require [clojure.java.jdbc :as jdbc]))
 
 (defn get-engine
   "Returns a Nashorn engine capable of evaluating
@@ -32,7 +29,3 @@
 (defn to-uppercase
   [engine value]
   (js-eval engine (str "'" value "'.toUpperCase()")))
-
-(defn to-titlecase
-  [engine value]
-  (js-eval engine (str "toTitleCase('" value "')")))
