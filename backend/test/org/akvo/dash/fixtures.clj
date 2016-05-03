@@ -24,5 +24,5 @@
                                  :title "Tenant 2"})
       (migrate/migrate conn)
       (f)
-      (migrate/rollback conn [])
+      (migrate/rollback conn [:all])
       (finally (stop)))))
