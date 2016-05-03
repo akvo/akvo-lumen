@@ -33,49 +33,32 @@ SELECT question.*
    AND question.question_group_id = question_group.id
    AND form.survey_id=:survey-id
 
--- :name data-points-by-survey-id
--- :command :query
--- :result :many
--- :doc Get data points by survey id
-SELECT *
-  FROM data_point
- WHERE survey_id=:survey-id
-
--- :name form-instances-by-survey-id
--- :command :query
--- :result :many
--- :doc Get form instances by survey id
-SELECT form_instance.*
-  FROM form_instance, form
- WHERE form_instance.form_id=form.id
-   AND form.survey_id=:survey-id
-
 -- :name form-instances-by-form-id
 -- :command :query
 -- :result :many
 -- :doc Get form instances by form id
-SELECT form_instance.*
-  FROM form_instance
- WHERE form_instance.form_id=:form-id
+  SELECT form_instance.id,
+         data_point.identifier,
+         data_point.latitude,
+         data_point.longitude,
+         form_instance.submitter,
+         form_instance.submitted_at
+    FROM data_point, form_instance
+   WHERE form_instance.data_point_id=data_point.id AND
+         form_instance.form_id=:form-id
+ORDER BY form_instance.submitted_at;
 
--- :name responses-by-form-id
+-- :name responses-by-form-instance-id
 -- :command :query
 -- :result :many
--- :doc Get responses by form id
-SELECT response.*
-  FROM response, form_instance
- WHERE response.form_instance_id=form_instance.id
-   AND form_instance.form_id=:form-id
-
--- :name responses-by-survey-id
--- :command :query
--- :result :many
--- :doc Get responses by survey id
-SELECT response.*
-  FROM response, form_instance, form
- WHERE response.form_instance_id=form_instance.id
-   AND form_instance.form_id=form.id
-   AND form.survey_id=:survey-id
+-- :doc Get responses by form instance id. Only first iteration
+SELECT question_id AS "question-id",
+       value->'value' AS value,
+       type AS "question-type"
+  FROM response, question
+ WHERE form_instance_id=:form-instance-id
+   AND iteration=0
+   AND question.id=response.question_id
 
 -- :name descendant-folders-and-surveys-by-folder-id
 -- :command :query

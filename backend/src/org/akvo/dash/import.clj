@@ -5,12 +5,12 @@
             [clojure.data.csv :as csv]
             [clojure.string :as str]
             [hugsql.core :as hugsql]
-            [pandect.algo.sha1 :refer [sha1]]
+            [ring.util.response :as res]
             [org.akvo.dash.transformation :as t]
             [org.akvo.dash.import.flow]
             [org.akvo.dash.import.csv]
             [org.akvo.dash.util :refer (squuid)]
-            [org.akvo.dash.import.common :refer (make-dataset-data-table)]))
+            [org.akvo.dash.import.common :as import]))
 
 (hugsql/def-db-fns "org/akvo/dash/import.sql")
 
@@ -18,40 +18,46 @@
   (try
     (let [table-name (str "ds_" (str/replace (java.util.UUID/randomUUID) "-" "_"))
           spec (:spec (data-source-spec-by-job-execution-id conn {:job-execution-id job-execution-id}))
-          status (make-dataset-data-table conn config table-name (get spec "source"))]
-       (if (:success? status)
-         (let [dataset-id (squuid)]
-           (insert-dataset conn {:id dataset-id
-                                 :title (get spec "name") ;; TODO Consistent naming. Change on client side?
-                                 :description (get spec "description" "")})
-           (insert-dataset-version conn {:id (squuid)
-                                         :dataset-id dataset-id
-                                         :job-execution-id job-execution-id
-                                         :table-name table-name
-                                         :version 1})
-           (insert-dataset-columns conn {:columns (vec (map-indexed (fn [order [title column-name type]]
-                                                                      [(squuid)
-                                                                       dataset-id
-                                                                       type
-                                                                       title
-                                                                       column-name
-                                                                       (* 10 (inc order))])
-                                                                    (:columns status)))}))
+          status (import/make-dataset-data-table conn config table-name (get spec "source"))]
+      (if (:success? status)
+        (let [dataset-id (squuid)]
+          (insert-dataset conn {:id dataset-id
+                                :title (get spec "name") ;; TODO Consistent naming. Change on client side?
+                                :description (get spec "description" "")})
+          (insert-dataset-version conn {:id (squuid)
+                                        :dataset-id dataset-id
+                                        :job-execution-id job-execution-id
+                                        :table-name table-name
+                                        :version 1})
+          (insert-dataset-columns conn {:columns (vec (map-indexed (fn [order [title column-name type]]
+                                                                     [(squuid)
+                                                                      dataset-id
+                                                                      type
+                                                                      title
+                                                                      column-name
+                                                                      (* 10 (inc order))])
+                                                                   (:columns status)))}))
 
-         (update-failed-job-execution conn {:id job-execution-id
-                                            :reason (:reason status)})))
+        (update-failed-job-execution conn {:id job-execution-id
+                                           :reason (:reason status)})))
     (catch Exception e
       (.printStackTrace e))))
 
-(defn handle-import-request [tenant-conn config data-source]
-  (let [data-source-id (str (squuid))
-        job-execution-id (str (squuid))]
-    (insert-data-source tenant-conn {:id data-source-id
-                                     :spec (json/generate-string data-source)})
-    (insert-job-execution tenant-conn {:id job-execution-id
-                                       :data-source-id data-source-id})
-    (future (do-import tenant-conn config job-execution-id))
-    {"importId" job-execution-id}))
+(defn handle-import-request [tenant-conn config claims data-source]
+  (if-not (import/valid? (get data-source "source"))
+    (-> (res/response {"dataSource" data-source})
+        (res/status 400))
+    (if-not (import/authorized? claims config (get data-source "source"))
+      (-> (res/response {"dataSource" data-source})
+          (res/status 401))
+      (let [data-source-id (str (squuid))
+            job-execution-id (str (squuid))]
+        (insert-data-source tenant-conn {:id data-source-id
+                                         :spec (json/generate-string data-source)})
+        (insert-job-execution tenant-conn {:id job-execution-id
+                                           :data-source-id data-source-id})
+        (future (do-import tenant-conn config job-execution-id))
+        (res/response {"importId" job-execution-id})))))
 
 (defn status
   "Get the status of an import (job execution). There are three different states:
