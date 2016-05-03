@@ -18,8 +18,8 @@ CREATE FUNCTION history.log_change() RETURNS trigger AS $_$
             FETCH FROM c INTO tt;
 
             IF isempty(tstzrange(lower(tt), now(), $$[)$$)) THEN
-		EXECUTE 'DELETE FROM history.' || TG_TABLE_NAME ||
-		  ' WHERE CURRENT OF ' || quote_ident(c::text);
+                EXECUTE 'DELETE FROM history.' || TG_TABLE_NAME ||
+                  ' WHERE CURRENT OF ' || quote_ident(c::text);
             ELSE
                 EXECUTE 'UPDATE history.' || TG_TABLE_NAME || ' SET _validrange = tstzrange($1, now(), $$[)$$)' ||
                   ' WHERE CURRENT OF ' || quote_ident(c::text) USING lower(tt);
