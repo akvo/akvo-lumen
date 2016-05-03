@@ -10,26 +10,32 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 cd $DIR
 
-# Setup Dash role
+
+# Provision
+
+## Create dash role
 psql -c "CREATE ROLE dash WITH PASSWORD 'password' CREATEDB LOGIN;"
 
-# Setup dash db
+## Create dash dbs
 psql -f $DIR/helpers/create-dash.sql
 
-# Setup Tardis
-psql -d dash -f $DIR/helpers/tardis.sql
-psql -d test_dash -f $DIR/helpers/tardis.sql
+## Create extensions for dbs
+psql -d dash -f $DIR/helpers/create-extensions.sql
+psql -d test_dash -f $DIR/helpers/create-extensions.sql
 
-# Migrate dash db (to get tenants table)
-# lein run -m 'user/migrate'
-lein migrate
+## Create tenants dbs
+psql -f $DIR/helpers/create-tenants.sql
 
-# Add tenants
-$DIR/helpers/seed.sh
+## Create extensions for dbs
+psql -d dash_tenant_1 -f $DIR/helpers/create-extensions.sql
+psql -d dash_tenant_2 -f $DIR/helpers/create-extensions.sql
+psql -d test_dash_tenant_1 -f $DIR/helpers/create-extensions.sql
+psql -d test_dash_tenant_2 -f $DIR/helpers/create-extensions.sql
 
-# Migrate tenants
-# lein run -m 'user/migrate'
-lein migrate
+
+# Migrate, seed tenant manager with tenants & migrate added tenants
+lein do migrate, seed, migrate
+
 
 echo ""
 echo "----------"

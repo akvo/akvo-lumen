@@ -1,25 +1,8 @@
-SET statement_timeout = 0;
-SET lock_timeout = 0;
-SET client_encoding = 'UTF8';
-SET standard_conforming_strings = on;
-SET check_function_bodies = false;
-SET client_min_messages = warning;
-SET row_security = off;
-
-
 CREATE SCHEMA history;
+-- ;;
 
-CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
 
-CREATE EXTENSION IF NOT EXISTS btree_gist WITH SCHEMA public;
-
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA public;
-
-SET search_path = history, pg_catalog;
-
-CREATE FUNCTION log_change() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $_$
+CREATE FUNCTION history.log_change() RETURNS trigger AS $_$
     DECLARE
       c refcursor;
       tt tstzrange;
@@ -35,8 +18,8 @@ CREATE FUNCTION log_change() RETURNS trigger
             FETCH FROM c INTO tt;
 
             IF isempty(tstzrange(lower(tt), now(), $$[)$$)) THEN
-		EXECUTE 'DELETE FROM history.' || TG_TABLE_NAME ||
-		  ' WHERE CURRENT OF ' || quote_ident(c::text);
+               EXECUTE 'DELETE FROM history.' || TG_TABLE_NAME ||
+                  ' WHERE CURRENT OF ' || quote_ident(c::text);
             ELSE
                 EXECUTE 'UPDATE history.' || TG_TABLE_NAME || ' SET _validrange = tstzrange($1, now(), $$[)$$)' ||
                   ' WHERE CURRENT OF ' || quote_ident(c::text) USING lower(tt);
@@ -67,7 +50,26 @@ CREATE FUNCTION log_change() RETURNS trigger
         END IF;
         RETURN NULL;
     END;
-$_$;
+$_$ LANGUAGE plpgsql;
+-- ;;
 
+CREATE OR REPLACE FUNCTION public.tardis(t text) RETURNS void AS $$
+BEGIN
 
-GRANT ALL ON SCHEMA history to dash;
+EXECUTE format('
+        CREATE TABLE IF NOT EXISTS history.%I (
+        LIKE public.%I,
+        _validrange tstzrange NOT NULL
+        );
+
+        ALTER TABLE ONLY history.%I
+        ADD CONSTRAINT %I_exclusion EXCLUDE
+        USING gist (id WITH =, _validrange WITH &&);
+
+        CREATE TRIGGER %I_history BEFORE
+        INSERT OR DELETE OR UPDATE ON %I
+        FOR EACH ROW EXECUTE PROCEDURE history.log_change();
+        ', t, t, t, t, t, t);
+END
+$$ LANGUAGE plpgsql;
+-- ;;
