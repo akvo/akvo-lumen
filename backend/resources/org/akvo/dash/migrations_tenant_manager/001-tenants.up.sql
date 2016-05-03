@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS tenants (
     id serial,
     db_uri text,
     enabled BOOLEAN NOT NULL DEFAULT TRUE,
-    label text,
+    label text UNIQUE,
     title text
 );
 
