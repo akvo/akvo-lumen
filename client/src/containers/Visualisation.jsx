@@ -66,7 +66,6 @@ class Visualisation extends Component {
   }
 
   handleChangeSourceDataset(value) {
-    console.log(value);
     const datasetId = value;
     if (!this.props.library.datasets[datasetId].columns) {
       this.props.dispatch(fetchDataset(datasetId));

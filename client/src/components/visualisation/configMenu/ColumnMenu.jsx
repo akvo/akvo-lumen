@@ -20,7 +20,7 @@ export default function ColumnMenu(props) {
 
 ColumnMenu.propTypes = {
   name: PropTypes.string.isRequired,
-  choice: PropTypes.string,
+  choice: PropTypes.number,
   options: PropTypes.array.isRequired,
   onChange: PropTypes.func.isRequired,
 };
