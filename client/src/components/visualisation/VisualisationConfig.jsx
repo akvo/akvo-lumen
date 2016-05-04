@@ -10,7 +10,7 @@ const getConfigMenu = (chartType, componentProps) => {
       visualisation={componentProps.visualisation}
       datasets={componentProps.datasets}
       onChangeTitle={componentProps.onChangeTitle}
-      onChangeSourceDatasetX={componentProps.onChangeSourceDatasetX}
+      onChangeSourceDataset={componentProps.onChangeSourceDataset}
       onChangeDatasetColumnX={componentProps.onChangeDatasetColumnX}
       onChangeDatasetColumnY={componentProps.onChangeDatasetColumnY}
       onChangeDatasetNameColumnX={componentProps.onChangeDatasetNameColumnX}
@@ -53,8 +53,7 @@ VisualisationConfig.propTypes = {
   datasets: PropTypes.object.isRequired,
   onChangeTitle: PropTypes.func.isRequired,
   onChangeVisualisationType: PropTypes.func.isRequired,
-  onChangeSourceDatasetX: PropTypes.func.isRequired,
-  onChangeSourceDatasetY: PropTypes.func.isRequired,
+  onChangeSourceDataset: PropTypes.func.isRequired,
   onChangeDatasetColumnX: PropTypes.func.isRequired,
   onChangeDatasetNameColumnX: PropTypes.func.isRequired,
   onChangeDatasetColumnY: PropTypes.func.isRequired,

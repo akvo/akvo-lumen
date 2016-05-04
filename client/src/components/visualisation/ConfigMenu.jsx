@@ -52,8 +52,8 @@ export default function ConfigMenu(props) {
   const datasetOptions = getDatasetOptions(datasetArray);
   const visualisation = props.visualisation;
 
-  const columns = props.datasets[visualisation.sourceDatasetX] ?
-    props.datasets[visualisation.sourceDatasetX].columns : [];
+  const columns = props.datasets[visualisation.sourceDataset] ?
+    props.datasets[visualisation.sourceDataset].columns : [];
   const columnOptions = getDashSelectOptionsFromColumnArray(columns);
 
   const getComponents = visualisationType => {
@@ -218,10 +218,10 @@ export default function ConfigMenu(props) {
         <label htmlFor="xDatasetMenu">Source dataset:</label>
         <DashSelect
           name="xDatasetMenu"
-          value={visualisation.sourceDatasetX !== null ?
-            visualisation.sourceDatasetX : 'Choose a dataset option...'}
+          value={visualisation.sourceDataset !== null ?
+            visualisation.sourceDataset : 'Choose a dataset option...'}
           options={datasetOptions}
-          onChange={props.onChangeSourceDatasetX}
+          onChange={props.onChangeSourceDataset}
         />
       </div>
       <div className="inputGroup">
@@ -244,7 +244,7 @@ ConfigMenu.propTypes = {
   visualisation: PropTypes.object.isRequired,
   datasets: PropTypes.object.isRequired,
   onChangeTitle: PropTypes.func.isRequired,
-  onChangeSourceDatasetX: PropTypes.func.isRequired,
+  onChangeSourceDataset: PropTypes.func.isRequired,
   onChangeDatasetColumnX: PropTypes.func.isRequired,
   onChangeDatasetColumnY: PropTypes.func,
   onChangeDatasetNameColumnX: PropTypes.func,

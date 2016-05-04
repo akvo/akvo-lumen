@@ -62,15 +62,10 @@ export function saveVisualisationChanges(visualisation) {
 function fetchVisualisationSuccess(visualisation) {
   return (dispatch) => {
     // We also need to possibly fetch datasets.
-    const datasetXId = visualisation.spec.sourceDatasetX;
-    const datasetYId = visualisation.spec.sourceDatasetY;
+    const datasetId = visualisation.spec.sourceDataset;
 
-    if (datasetXId) {
-      dispatch(fetchDataset(datasetXId));
-    }
-
-    if (datasetYId) {
-      dispatch(fetchDataset(datasetYId));
+    if (datasetId) {
+      dispatch(fetchDataset(datasetId));
     }
 
     dispatch({
