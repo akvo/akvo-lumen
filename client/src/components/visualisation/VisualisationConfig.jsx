@@ -1,6 +1,6 @@
 import React, { PropTypes } from 'react';
 import VisualisationTypeMenu from './VisualisationTypeMenu';
-import ConfigMenu from './configMenu/ConfigMenu';
+import ConfigMenu from './ConfigMenu';
 
 require('../../styles/VisualisationConfig.scss');
 
