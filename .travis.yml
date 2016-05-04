@@ -10,8 +10,6 @@ cache:
   - $HOME/.m2
   - client/node_modules
 
-# testing the cache
-
 sudo: required
 
 addons:
