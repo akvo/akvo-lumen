@@ -4,7 +4,7 @@
 
 * Perform `npm install` from inside the `client` directory
 
-* Run `npm start` and access the client application on http://localhost:3030
+* Run `npm start` and access the client application on http://t1.dash.localhost:3030
 
 * Run `npm run build` to build a production version of the application
 
