@@ -18,7 +18,7 @@ const getDatasetArray = datasetObject => {
   return datasetArray;
 };
 
-const getDatasetOptions = (datasetArray) => {
+const getDatasetOptions = datasetArray => {
   const output = [];
 
   datasetArray.forEach(option => {
@@ -30,7 +30,7 @@ const getDatasetOptions = (datasetArray) => {
   return output;
 };
 
-const getDashSelectOptionsFromColumnArray = (array) => {
+const getDashSelectOptionsFromColumnArray = array => {
   const output = [];
 
   if (array) {
