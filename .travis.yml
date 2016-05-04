@@ -5,6 +5,11 @@ language:
 jdk:
 - oraclejdk8
 
+cache:
+  directories:
+  - $HOME/.m2
+  - client/node_modules
+
 sudo: required
 
 addons:
