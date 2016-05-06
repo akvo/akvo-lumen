@@ -41,8 +41,11 @@ before_install:
 - cp profiles.clj.template profiles.clj
 - ./provision/setup.sh
 
+- mkdir -p $HOME/.lein
+- echo '{:user {:plugins [[jonase/eastwood "0.2.3"]]}}' > $HOME/.lein/profiles.clj
+
 script:
-- lein2 do clean, check, test :all
+- lein2 do clean, check, test :all, eastwood '{:source-paths ["src" "test"]}'
 - cd ../client
 - npm run lint
 - npm test
