@@ -22,10 +22,10 @@
   [response expected]
   (is (= expected (:status response)))
   (condp = expected
-    201 (is "" (:body response))
-    200 (is "" (:body response))
-    401 (is "Not authenticated" (:body response))
-    403 (is "Not authorized" (:body response))))
+    201 (is (= "" (:body response)))
+    200 (is (= "" (:body response)))
+    401 (is (= "Not authenticated" (:body response)))
+    403 (is (= "Not authorized" (:body response)))))
 
 
 (deftest wrap-auth-test
