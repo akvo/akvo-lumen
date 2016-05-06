@@ -23,6 +23,18 @@ function fileName(source) {
 
 export default class Settings extends Component {
 
+  constructor() {
+    super();
+    this.handleUpdate = this.handleUpdate.bind(this);
+  }
+
+  handleUpdate() {
+    this.props.onChangeSettings({
+      name: this.refs.datasetNameInput.value,
+      hasHeaders: this.refs.datasetHeaderStatusToggle.checked,
+    });
+  }
+
   render() {
     const { dataset } = this.props;
 
@@ -40,12 +52,19 @@ export default class Settings extends Component {
             <input
               defaultValue={dataset.name}
               className="datasetNameInput"
-              onChange={() => {
-                // We should probably not do onChange for perf reasons. Perhaps onBlur?
-                this.props.onChangeName({ name: this.refs.datasetNameInput.value });
-              }}
+              onChange={this.handleUpdate}
               ref="datasetNameInput"
               type="text"
+            />
+          </dd>
+          <dt>Data has column headers:</dt>
+          <dd>
+            <input
+              type="checkbox"
+              className="datasetHeaderStatusToggle"
+              defaultChecked={dataset.hasHeaders}
+              ref="datasetHeaderStatusToggle"
+              onChange={this.handleUpdate}
             />
           </dd>
         </dl>
@@ -56,5 +75,5 @@ export default class Settings extends Component {
 
 Settings.propTypes = {
   dataset: PropTypes.object.isRequired,
-  onChangeName: PropTypes.func.isRequired,
+  onChangeSettings: PropTypes.func.isRequired,
 };

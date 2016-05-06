@@ -8,6 +8,7 @@ export const initialState = {
       kind: 'DATA_FILE',
     },
     name: '',
+    hasHeaders: true,
   },
 };
 
@@ -53,10 +54,13 @@ function defineDataSource(state, dataSource) {
   });
 }
 
-// Only name for now.
-function defineDatasetSettings(state, { name }) {
+// Only name and header status for now
+function defineDatasetSettings(state, { name, hasHeaders }) {
   return update(state, {
-    dataset: { name: { $set: name } },
+    dataset: {
+      name: { $set: name },
+      hasHeaders: { $set: hasHeaders },
+    },
   });
 }
 
