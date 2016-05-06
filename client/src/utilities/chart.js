@@ -1,5 +1,5 @@
 export function getChartData(visualisation, datasets) {
-  const datasetID = visualisation.sourceDatasetX;
+  const datasetID = visualisation.sourceDataset;
   const dataset = datasets[datasetID];
   const columnIndexX = visualisation.datasetColumnX;
   const columnIndexY = visualisation.datasetColumnY;
