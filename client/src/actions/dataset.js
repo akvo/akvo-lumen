@@ -44,6 +44,13 @@ export function fetchDataset(id) {
   };
 }
 
+export function updateDatasetUploadStatus(status) {
+  return {
+    type: constants.UPDATE_UPLOAD_STATUS,
+    uploadRunning: status,
+  };
+}
+
 /*
  * Dataset import
  * importDataset(dataSource)

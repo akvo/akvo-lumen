@@ -10,6 +10,7 @@ export const initialState = {
     name: '',
     hasHeaders: true,
   },
+  uploadRunning: false,
 };
 
 function selectDataSource(state, dataSource) {
@@ -48,6 +49,12 @@ function previousPage(state) {
   });
 }
 
+function updateUploadStatus(state, uploadStatus) {
+  return update(state, {
+    uploadRunning: { $set: uploadStatus },
+  });
+}
+
 function defineDataSource(state, dataSource) {
   return update(state, {
     dataset: { source: { $set: dataSource } },
@@ -72,6 +79,8 @@ export default function datasetImport(state = initialState, action) {
       return nextPage(state);
     case constants.PREVIOUS_PAGE:
       return previousPage(state);
+    case constants.UPDATE_UPLOAD_STATUS:
+      return updateUploadStatus(state, action.uploadRunning);
     case constants.DEFINE_DATA_SOURCE:
       return defineDataSource(state, action.dataSource);
     case constants.DEFINE_DATASET_SETTINGS:

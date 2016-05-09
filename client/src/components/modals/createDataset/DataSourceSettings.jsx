@@ -15,13 +15,14 @@ export default class DataSourceSettings extends Component {
   }
 
   renderFileSelection() {
-    const { dataSource, onChange } = this.props;
+    const { dataSource, onChange, updateUploadStatus } = this.props;
     switch (dataSource.kind) {
       case 'DATA_FILE':
         return (
           <DataFileDataSourceSettings
             dataSource={dataSource}
             onChange={onChange}
+            updateUploadStatus={updateUploadStatus}
           />
         );
       case 'LINK':
@@ -60,4 +61,5 @@ DataSourceSettings.propTypes = {
     // Other props are data source specific.
   }),
   onChange: PropTypes.func.isRequired,
+  updateUploadStatus: PropTypes.func.isRequired,
 };

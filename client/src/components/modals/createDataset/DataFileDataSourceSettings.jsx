@@ -48,12 +48,14 @@ export default class DataFileDataSourceSettings extends Component {
 
   uploadFile(file) {
     const onChange = this.props.onChange;
+    const updateUploadStatus = this.props.updateUploadStatus;
     const handleProgress = this.handleProgress;
     const upload = new tus.Upload(file, {
       headers: { Authorization: `Bearer ${keycloak.token}` },
       endpoint: '/api/files',
       onError(error) {
         console.error(`Failed because: ${error}`);
+        updateUploadStatus(false);
         handleProgress(-1);
       },
       onProgress(bytesUploaded, bytesTotal) {
@@ -61,6 +63,7 @@ export default class DataFileDataSourceSettings extends Component {
         handleProgress(percentage);
       },
       onSuccess() {
+        updateUploadStatus(false);
         onChange({
           kind: 'DATA_FILE',
           url: upload.url,
@@ -70,6 +73,7 @@ export default class DataFileDataSourceSettings extends Component {
     });
     upload.start();
     handleProgress(0);
+    updateUploadStatus(true);
   }
 
   render() {
@@ -104,4 +108,5 @@ export default class DataFileDataSourceSettings extends Component {
 
 DataFileDataSourceSettings.propTypes = {
   onChange: PropTypes.func.isRequired,
+  updateUploadStatus: PropTypes.func.isRequired,
 };
