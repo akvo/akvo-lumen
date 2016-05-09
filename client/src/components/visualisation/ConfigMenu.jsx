@@ -32,22 +32,20 @@ const getDatasetArray = datasetObject => {
   return datasetArray;
 };
 
-const getDatasetOptions = datasetArray => {
+const getDatasetOptions = datasetArray =>
   datasetArray.map(option => ({
     value: option.id,
     label: option.name,
   }));
-};
 
-const getDashSelectOptionsFromColumnArray = (array = []) => {
+const getDashSelectOptionsFromColumnArray = (array = []) =>
   array.map((entry, index) => ({
     value: index,
     label: entry.title,
   }));
-};
 
-const getSubTitle = subtitle => (
-  <h3 className="subtitle">{subtitle}</h3>
+const Subtitle = ({ children }) => (
+  <h3 className="subtitle">{children}</h3>
 );
 
 export default function ConfigMenu(props) {
@@ -65,7 +63,7 @@ export default function ConfigMenu(props) {
       case 'bar':
         output = (
           <div>
-            {getSubTitle('X-Axis')}
+            <Subtitle>X-Axis</Subtitle>
             <ColumnMenu
               choice={visualisation.datasetColumnX}
               name="xColumnInput"
@@ -84,7 +82,7 @@ export default function ConfigMenu(props) {
               name="xLabel"
               onChange={props.onChangeDatasetLabelX}
             />
-            {getSubTitle('Y-Axis')}
+            <Subtitle>Y-Axis</Subtitle>
             <LabelInput
               value={visualisation.labelY}
               placeholder="Y Axis label"
@@ -100,7 +98,7 @@ export default function ConfigMenu(props) {
 
         output = (
           <div>
-            {getSubTitle('X-Axis')}
+            <Subtitle>X-Axis</Subtitle>
             <ColumnMenu
               choice={visualisation.datasetColumnX}
               name="xColumnInput"
@@ -113,7 +111,7 @@ export default function ConfigMenu(props) {
               name="xLabel"
               onChange={props.onChangeDatasetLabelX}
             />
-            {getSubTitle('Y-Axis')}
+            <Subtitle>Y-Axis</Subtitle>
             <LabelInput
               value={visualisation.labelY}
               placeholder="Y Axis label"
@@ -128,7 +126,7 @@ export default function ConfigMenu(props) {
 
         output = (
           <div>
-            {getSubTitle('X-Axis')}
+            <Subtitle>X-Axis</Subtitle>
             <ColumnMenu
               choice={visualisation.datasetColumnX}
               name="xColumnInput"
@@ -141,7 +139,7 @@ export default function ConfigMenu(props) {
               name="xLabel"
               onChange={props.onChangeDatasetLabelX}
             />
-            {getSubTitle('Y-Axis')}
+            <Subtitle>Y-Axis</Subtitle>
             <ColumnMenu
               choice={visualisation.datasetColumnY}
               name="yColumnInput"
@@ -162,21 +160,21 @@ export default function ConfigMenu(props) {
 
         output = (
           <div>
-            {getSubTitle('Latitude')}
+            <Subtitle>Latitude</Subtitle>
             <ColumnMenu
               choice={visualisation.datasetColumnX}
               name="xColumnInput"
               options={columnOptions}
               onChange={props.onChangeDatasetColumnX}
             />
-            {getSubTitle('Longitude')}
+            <Subtitle>Longitude</Subtitle>
             <ColumnMenu
               choice={visualisation.datasetColumnY}
               name="yColumnInput"
               options={columnOptions}
               onChange={props.onChangeDatasetColumnY}
             />
-            {getSubTitle('Popup Label')}
+            <Subtitle>Popup Label</Subtitle>
             <LabelColumnMenu
               choice={visualisation.datasetNameColumnX}
               name="xNameColumnMenu"
@@ -242,6 +240,10 @@ export default function ConfigMenu(props) {
     </div>
   );
 }
+
+Subtitle.propTypes = {
+  children: PropTypes.node.isRequired,
+};
 
 ConfigMenu.propTypes = {
   visualisation: PropTypes.object.isRequired,
