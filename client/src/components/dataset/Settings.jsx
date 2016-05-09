@@ -31,7 +31,7 @@ export default class Settings extends Component {
   handleUpdate() {
     this.props.onChangeSettings({
       name: this.refs.datasetNameInput.value,
-      hasHeaders: this.refs.datasetHeaderStatusToggle.checked,
+      hasColumnHeaders : this.refs.datasetHeaderStatusToggle.checked,
     });
   }
 
@@ -62,7 +62,7 @@ export default class Settings extends Component {
             <input
               type="checkbox"
               className="datasetHeaderStatusToggle"
-              defaultChecked={dataset.hasHeaders}
+              defaultChecked={dataset.hasColumnHeaders }
               ref="datasetHeaderStatusToggle"
               onChange={this.handleUpdate}
             />

@@ -8,7 +8,7 @@ export const initialState = {
       kind: 'DATA_FILE',
     },
     name: '',
-    hasHeaders: true,
+    hasColumnHeaders : true,
   },
   uploadRunning: false,
 };
@@ -62,11 +62,11 @@ function defineDataSource(state, dataSource) {
 }
 
 // Only name and header status for now
-function defineDatasetSettings(state, { name, hasHeaders }) {
+function defineDatasetSettings(state, { name, hasColumnHeaders  }) {
   return update(state, {
     dataset: {
       name: { $set: name },
-      hasHeaders: { $set: hasHeaders },
+      hasColumnHeaders : { $set: hasColumnHeaders  },
     },
   });
 }

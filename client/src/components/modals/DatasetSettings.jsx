@@ -12,8 +12,8 @@ class DatasetSettings extends Component {
     this.handleChangeSettings = this.handleChangeSettings.bind(this);
   }
 
-  handleChangeSettings({ name, hasHeaders }) {
-    this.setState({ name, hasHeaders });
+  handleChangeSettings({ name, hasColumnHeaders  }) {
+    this.setState({ name, hasColumnHeaders  });
   }
 
   render() {
