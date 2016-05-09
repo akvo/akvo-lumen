@@ -15,7 +15,7 @@ export function getChartData(visualisation, datasets) {
       dataX.forEach((entry, index) => {
         const label = nameDataX ? nameDataX.values[index] : null;
         const newPositionObject = {
-          position: [parseFloat(dataX[index]), parseFloat(dataY[index])],
+          position: [parseFloat(dataY[index]), parseFloat(dataX[index])],
           label,
         };
 

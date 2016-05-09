@@ -162,17 +162,17 @@ export default function ConfigMenu(props) {
           <div>
             <Subtitle>Latitude</Subtitle>
             <ColumnMenu
-              choice={visualisation.datasetColumnX}
-              name="xColumnInput"
-              options={columnOptions}
-              onChange={props.onChangeDatasetColumnX}
-            />
-            <Subtitle>Longitude</Subtitle>
-            <ColumnMenu
               choice={visualisation.datasetColumnY}
               name="yColumnInput"
               options={columnOptions}
               onChange={props.onChangeDatasetColumnY}
+            />
+            <Subtitle>Longitude</Subtitle>
+            <ColumnMenu
+              choice={visualisation.datasetColumnX}
+              name="xColumnInput"
+              options={columnOptions}
+              onChange={props.onChangeDatasetColumnX}
             />
             <Subtitle>Popup Label</Subtitle>
             <LabelColumnMenu
