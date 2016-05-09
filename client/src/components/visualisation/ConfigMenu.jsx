@@ -7,7 +7,21 @@ import LabelInput from './configMenu/LabelInput';
 
 const getDatasetArray = datasetObject => {
   const datasetArray = [];
-  const sortFunction = (a, b) => a.name.toLowerCase() > b.name.toLowerCase();
+  const sortFunction = (a, b) => {
+    const string1 = a.name.toLowerCase();
+    const string2 = b.name.toLowerCase();
+    let out = 0;
+
+    if (string1 > string2) {
+      out = 1;
+    } else if (string1 === string2) {
+      out = 0;
+    } else {
+      out = -1;
+    }
+
+    return out;
+  };
 
   Object.keys(datasetObject).forEach(key => {
     datasetArray.push(datasetObject[key]);
