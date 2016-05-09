@@ -148,7 +148,6 @@ CreateDataset.propTypes = {
     currentPage: PropTypes.string.isRequired,
     dataset: PropTypes.object.isRequired, // TODO: shape?
   }),
-  updateDatasetUploadStatus: PropTypes.func.isRequired,
   containerClassName: PropTypes.string,
 };
 
