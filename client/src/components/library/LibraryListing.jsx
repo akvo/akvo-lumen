@@ -69,6 +69,7 @@ const groupEntities = (entities, sortOrder) => {
 // Accepts an object containing list groups, and returns a sorted array of list groups
 const sortGroups = (listGroups, sortOrder, isReverseSort) => {
   const listGroupArray = [];
+  let sortFunction;
 
   // Convert the listGroup objects into an unsorted listGroup array
   Object.keys(listGroups).forEach(key => {
@@ -77,23 +78,37 @@ const sortGroups = (listGroups, sortOrder, isReverseSort) => {
 
   // Prepare the appropriate sort function based on sortOrder
   if (sortOrder === 'name') {
-    listGroupArray.sort();
-    if (isReverseSort) listGroupArray.reverse();
-  } else if (sortOrder === 'created' || sortOrder === 'last_modified') {
-    const sortFunction = (a, b) => {
-      let output;
-      if (isReverseSort) {
-        output = new Date(a.listGroupName) - new Date(b.listGroupName);
+    sortFunction = (a, b) => {
+      const string1 = a.listGroupName.toLowerCase();
+      const string2 = b.listGroupName.toLowerCase();
+      let out;
+
+      if (string1 > string2) {
+        out = 1;
+      } else if (string1 === string2) {
+        out = 0;
       } else {
-        output = new Date(b.listGroupName) - new Date(a.listGroupName);
+        out = -1;
       }
 
-      return output;
+      if (isReverseSort) out = out * -1;
+      return out;
     };
-    listGroupArray.sort(sortFunction);
+  } else if (sortOrder === 'created' || sortOrder === 'last_modified') {
+    sortFunction = (a, b) => {
+      let out;
+
+      if (isReverseSort) {
+        out = new Date(a.listGroupName) - new Date(b.listGroupName);
+      } else {
+        out = new Date(b.listGroupName) - new Date(a.listGroupName);
+      }
+
+      return out;
+    };
   }
 
-  return listGroupArray;
+  return listGroupArray.sort(sortFunction);
 };
 
 export default function LibraryListing({

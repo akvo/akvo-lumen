@@ -4,24 +4,24 @@ import ColumnMenu from './configMenu/ColumnMenu';
 import LabelColumnMenu from './configMenu/LabelColumnMenu';
 import LabelInput from './configMenu/LabelInput';
 
+const sortFunction = (a, b) => {
+  const string1 = a.name.toLowerCase();
+  const string2 = b.name.toLowerCase();
+  let out = 0;
+
+  if (string1 > string2) {
+    out = 1;
+  } else if (string1 === string2) {
+    out = 0;
+  } else {
+    out = -1;
+  }
+
+  return out;
+};
 
 const getDatasetArray = datasetObject => {
   const datasetArray = [];
-  const sortFunction = (a, b) => {
-    const string1 = a.name.toLowerCase();
-    const string2 = b.name.toLowerCase();
-    let out = 0;
-
-    if (string1 > string2) {
-      out = 1;
-    } else if (string1 === string2) {
-      out = 0;
-    } else {
-      out = -1;
-    }
-
-    return out;
-  };
 
   Object.keys(datasetObject).forEach(key => {
     datasetArray.push(datasetObject[key]);
@@ -33,28 +33,17 @@ const getDatasetArray = datasetObject => {
 };
 
 const getDatasetOptions = datasetArray => {
-  const output = [];
-
-  datasetArray.forEach(option => {
-    output.push({
-      value: option.id, label: option.name,
-    });
-  });
-
-  return output;
+  datasetArray.map(option => ({
+    value: option.id,
+    label: option.name,
+  }));
 };
 
-const getDashSelectOptionsFromColumnArray = array => {
-  const output = [];
-
-  if (array) {
-    array.forEach((entry, index) => {
-      output.push({
-        value: index, label: entry.title,
-      });
-    });
-  }
-  return output;
+const getDashSelectOptionsFromColumnArray = (array = []) => {
+  array.map((entry, index) => ({
+    value: index,
+    label: entry.title,
+  }));
 };
 
 const getSubTitle = subtitle => (
