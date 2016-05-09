@@ -31,7 +31,7 @@ export default class Settings extends Component {
   handleUpdate() {
     this.props.onChangeSettings({
       name: this.refs.datasetNameInput.value,
-      hasColumnHeaders : this.refs.datasetHeaderStatusToggle.checked,
+      hasColumnHeaders: this.refs.datasetHeaderStatusToggle.checked,
     });
   }
 
