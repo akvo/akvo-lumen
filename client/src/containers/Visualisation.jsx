@@ -22,13 +22,12 @@ class Visualisation extends Component {
       type: 'visualisation',
       visualisationType: null,
       name: 'Untitled Chart',
-      sourceDatasetX: null,
+      sourceDataset: null,
       datasetColumnX: null,
       datasetNameColumnX: null,
       labelX: null,
       minX: null,
       maxX: null,
-      sourceDatasetY: null,
       datasetColumnY: null,
       labelY: null,
       minY: null,
@@ -66,14 +65,13 @@ class Visualisation extends Component {
     this.props.dispatch(push('/library?filter=visualisations&sort=created'));
   }
 
-  handleChangeSourceDataset(value, axis) {
+  handleChangeSourceDataset(value) {
     const datasetId = value;
-    const sourceDataset = axis === 'X' ? 'sourceDatasetX' : 'sourceDatasetY';
     if (!this.props.library.datasets[datasetId].columns) {
       this.props.dispatch(fetchDataset(datasetId));
     }
     this.setState({
-      [sourceDataset]: datasetId,
+      sourceDataset: datasetId,
       isUnsavedChanges: true,
     });
   }
@@ -105,8 +103,8 @@ class Visualisation extends Component {
               isUnsavedChanges: true,
             })
           )}
-          onChangeSourceDatasetX={value => (
-            this.handleChangeSourceDataset(value, 'X')
+          onChangeSourceDataset={value => (
+            this.handleChangeSourceDataset(value)
           )}
           onChangeDatasetColumnX={value => (
             this.setState({
@@ -125,9 +123,6 @@ class Visualisation extends Component {
               labelX: event.target.value,
               isUnsavedChanges: true,
             })
-          )}
-          onChangeSourceDatasetY={value => (
-            this.handleChangeSourceDataset(value, 'Y')
           )}
           onChangeDatasetColumnY={value => (
             this.setState({

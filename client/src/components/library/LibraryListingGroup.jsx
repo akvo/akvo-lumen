@@ -24,9 +24,18 @@ const sortListGroupEntities = (entities, sortOrder, isReverseSort) => {
 
   if (sortOrder === 'name') {
     sortFunction = (a, b) => {
-      let output = a.name > b.name ? 1 : -1;
-      if (isReverseSort) output = output * -1;
-      return output;
+      let out;
+
+      if (a.name > b.name) {
+        out = 1;
+      } else if (a.name === b.name) {
+        out = 0;
+      } else {
+        out = -1;
+      }
+
+      if (isReverseSort) out = out * -1;
+      return out;
     };
   } else if (sortOrder === 'created' || sortOrder === 'last_modified') {
     sortFunction = (a, b) => {

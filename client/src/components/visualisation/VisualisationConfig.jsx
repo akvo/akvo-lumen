@@ -1,52 +1,24 @@
 import React, { PropTypes } from 'react';
 import VisualisationTypeMenu from './VisualisationTypeMenu';
-import OneAxisConfigMenu from './configMenu/OneAxisConfigMenu';
-import TwoAxisConfigMenu from './configMenu/TwoAxisConfigMenu';
-import PieConfigMenu from './configMenu/PieConfigMenu';
+import ConfigMenu from './ConfigMenu';
 
 require('../../styles/VisualisationConfig.scss');
 
 const getConfigMenu = (chartType, componentProps) => {
-  let configMenu;
-  if (chartType === 'bar' || chartType === 'line' || chartType === 'area') {
-    configMenu = (
-      <OneAxisConfigMenu
-        visualisation={componentProps.visualisation}
-        datasets={componentProps.datasets}
-        onChangeTitle={componentProps.onChangeTitle}
-        onChangeSourceDatasetX={componentProps.onChangeSourceDatasetX}
-        onChangeDatasetColumnX={componentProps.onChangeDatasetColumnX}
-        onChangeDatasetNameColumnX={componentProps.onChangeDatasetNameColumnX}
-        onChangeDatasetLabelX={componentProps.onChangeDatasetLabelX}
-        onChangeDatasetLabelY={componentProps.onChangeDatasetLabelY}
-      />
-    );
-  } else if (chartType === 'pie' || chartType === 'donut') {
-    configMenu = (
-      <PieConfigMenu
-        visualisation={componentProps.visualisation}
-        datasets={componentProps.datasets}
-        onChangeTitle={componentProps.onChangeTitle}
-        onChangeSourceDatasetX={componentProps.onChangeSourceDatasetX}
-        onChangeDatasetColumnX={componentProps.onChangeDatasetColumnX}
-        onChangeDatasetNameColumnX={componentProps.onChangeDatasetNameColumnX}
-      />
-    );
-  } else if (chartType === 'scatter') {
-    configMenu = (
-      <TwoAxisConfigMenu
-        visualisation={componentProps.visualisation}
-        datasets={componentProps.datasets}
-        onChangeTitle={componentProps.onChangeTitle}
-        onChangeSourceDatasetX={componentProps.onChangeSourceDatasetX}
-        onChangeSourceDatasetY={componentProps.onChangeSourceDatasetY}
-        onChangeDatasetColumnX={componentProps.onChangeDatasetColumnX}
-        onChangeDatasetColumnY={componentProps.onChangeDatasetColumnY}
-        onChangeDatasetLabelX={componentProps.onChangeDatasetLabelX}
-        onChangeDatasetLabelY={componentProps.onChangeDatasetLabelY}
-      />
-    );
-  }
+  const configMenu = (
+    <ConfigMenu
+      visualisation={componentProps.visualisation}
+      datasets={componentProps.datasets}
+      onChangeTitle={componentProps.onChangeTitle}
+      onChangeSourceDataset={componentProps.onChangeSourceDataset}
+      onChangeDatasetColumnX={componentProps.onChangeDatasetColumnX}
+      onChangeDatasetColumnY={componentProps.onChangeDatasetColumnY}
+      onChangeDatasetNameColumnX={componentProps.onChangeDatasetNameColumnX}
+      onChangeDatasetLabelX={componentProps.onChangeDatasetLabelX}
+      onChangeDatasetLabelY={componentProps.onChangeDatasetLabelY}
+    />
+  );
+
   return configMenu;
 };
 
@@ -81,8 +53,7 @@ VisualisationConfig.propTypes = {
   datasets: PropTypes.object.isRequired,
   onChangeTitle: PropTypes.func.isRequired,
   onChangeVisualisationType: PropTypes.func.isRequired,
-  onChangeSourceDatasetX: PropTypes.func.isRequired,
-  onChangeSourceDatasetY: PropTypes.func.isRequired,
+  onChangeSourceDataset: PropTypes.func.isRequired,
   onChangeDatasetColumnX: PropTypes.func.isRequired,
   onChangeDatasetNameColumnX: PropTypes.func.isRequired,
   onChangeDatasetColumnY: PropTypes.func.isRequired,

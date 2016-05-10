@@ -4,6 +4,7 @@ import DashLineChart from '../charts/DashLineChart';
 import DashAreaChart from '../charts/DashAreaChart';
 import DashPieChart from '../charts/DashPieChart';
 import DashScatterChart from '../charts/DashScatterChart';
+import DashMap from '../charts/DashMap';
 
 require('../../styles/VisualisationPreview.scss');
 
@@ -62,6 +63,17 @@ const getChartPreview = (visualisation, datasets) => {
         output = <DashScatterChart visualisation={visualisation} datasets={datasets} />;
       } else {
         output = <div>Scatter chart image placeholder</div>;
+      }
+
+      return output;
+
+    case 'map':
+      output = <DashMap visualisation={visualisation} datasets={datasets} />;
+
+      if (visualisation.datasetColumnX !== null && visualisation.datasetColumnY !== null) {
+        output = <DashMap visualisation={visualisation} datasets={datasets} />;
+      } else {
+        output = <div>Map visualisation image placeholder</div>;
       }
 
       return output;
