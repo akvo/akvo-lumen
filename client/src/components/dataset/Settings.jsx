@@ -21,27 +21,16 @@ function fileName(source) {
   }
 }
 
-const showDatasetHeaderToggle = dataset =>
-  dataset.source.kind === 'DATA_FILE' || dataset.source.kind === 'LINK';
-
-
 export default class Settings extends Component {
 
   constructor() {
     super();
     this.handleUpdate = this.handleUpdate.bind(this);
-    this.handleToggleColumnHeaders = this.handleToggleColumnHeaders.bind(this);
   }
 
   handleUpdate() {
     this.props.onChangeSettings({
       name: this.refs.datasetNameInput.value,
-    });
-  }
-
-  handleToggleColumnHeaders() {
-    this.props.onChangeDataSource({
-      hasColumnHeaders: this.refs.datasetHeaderStatusToggle.checked,
     });
   }
 
@@ -67,20 +56,6 @@ export default class Settings extends Component {
               type="text"
             />
           </dd>
-          { showDatasetHeaderToggle(dataset) &&
-            <span>
-              <dt>Data has column headers:</dt>
-              <dd>
-                <input
-                  type="checkbox"
-                  className="datasetHeaderStatusToggle"
-                  defaultChecked={dataset.source.hasColumnHeaders}
-                  ref="datasetHeaderStatusToggle"
-                  onChange={this.handleToggleColumnHeaders}
-                />
-              </dd>
-            </span>
-          }
         </dl>
       </div>
     );
@@ -90,5 +65,4 @@ export default class Settings extends Component {
 Settings.propTypes = {
   dataset: PropTypes.object.isRequired,
   onChangeSettings: PropTypes.func.isRequired,
-  onChangeDataSource: PropTypes.func.isRequired,
 };

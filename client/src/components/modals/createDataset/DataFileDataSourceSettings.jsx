@@ -94,6 +94,21 @@ export default class DataFileDataSourceSettings extends Component {
             this.uploadFile(this.refs.fileInput.files[0]);
           }}
         />
+        <p className="dataFileUploadHeaderToggle">
+          File has column headers:
+          <input
+            type="checkbox"
+            className="datasetHeaderStatusToggle"
+            defaultChecked={this.props.dataSource.hasColumnHeaders}
+            ref="datasetHeaderStatusToggle"
+            onClick={() => {
+              this.props.onChange({
+                hasColumnHeaders: this.refs.datasetHeaderStatusToggle.checked,
+              });
+            }
+            }
+          />
+        </p>
         { this.isProgressBarVisible() &&
           <DashProgressBar
             progressPercentage={this.state.uploadProgressPercentage}
@@ -107,6 +122,7 @@ export default class DataFileDataSourceSettings extends Component {
 }
 
 DataFileDataSourceSettings.propTypes = {
+  dataSource: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,
   updateUploadStatus: PropTypes.func.isRequired,
 };
