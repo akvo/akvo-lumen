@@ -146,10 +146,10 @@ export function saveDatasetSettings(id, { name }) {
 }
 
 // Only name for now.
-export function defineDatasetSettings({ name, hasColumnHeaders }) {
+export function defineDatasetSettings({ name }) {
   return {
     type: constants.DEFINE_DATASET_SETTINGS,
-    dataset: { name, hasColumnHeaders },
+    dataset: { name },
   };
 }
 
