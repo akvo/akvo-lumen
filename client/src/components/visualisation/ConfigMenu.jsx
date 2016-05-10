@@ -7,7 +7,7 @@ import LabelInput from './configMenu/LabelInput';
 const sortFunction = (a, b) => {
   const string1 = a.name.toLowerCase();
   const string2 = b.name.toLowerCase();
-  let out = 0;
+  let out;
 
   if (string1 > string2) {
     out = 1;
@@ -60,6 +60,7 @@ export default function ConfigMenu(props) {
   const getComponents = visualisationType => {
     let output;
     switch (visualisationType) {
+
       case 'bar':
         output = (
           <div>
@@ -95,7 +96,6 @@ export default function ConfigMenu(props) {
 
       case 'line':
       case 'area':
-
         output = (
           <div>
             <Subtitle>X-Axis</Subtitle>
@@ -123,7 +123,6 @@ export default function ConfigMenu(props) {
         break;
 
       case 'scatter':
-
         output = (
           <div>
             <Subtitle>X-Axis</Subtitle>
@@ -157,7 +156,6 @@ export default function ConfigMenu(props) {
         break;
 
       case 'map':
-
         output = (
           <div>
             <Subtitle>Latitude</Subtitle>
@@ -187,7 +185,6 @@ export default function ConfigMenu(props) {
 
       case 'pie':
       case 'donut':
-
         output = (
           <div>
             <ColumnMenu
