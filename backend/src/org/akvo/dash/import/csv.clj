@@ -88,8 +88,9 @@
                   [title (str "c" (inc idx)) "text"]) col-titles)))
 
 (defmethod import/valid? "CSV"
-  [{:strs [url fileName]}]
+  [{:strs [url fileName hasColumnHeaders]}]
   (and (string? url)
+       (contains? #{true false nil} hasColumnHeaders)
        (or (nil? fileName)
            (string? fileName))))
 
@@ -99,32 +100,33 @@
 
 (defmethod import/make-dataset-data-table "CSV"
   [tenant-conn {:keys [file-upload-path]} table-name spec]
-  (let [;; TODO a bit of "manual" integration work
-        file-on-disk? (contains? spec "fileName")
-        path (let [url (get spec "url")]
-               (if file-on-disk?
-                 (str file-upload-path
-                      "/resumed/"
-                      (last (s/split url #"\/"))
-                      "/file")
-                 url))
-        ;; TODO spec will have string keys since & probably no '&' as
-        ;; that's not really idiomatic in json. Perhaps 'hasHeaders'
-        ;; instead?
-        headers? (:headers? spec)
-        n-cols (get-num-cols path \,)
-        col-titles (if headers?
-                     (get-headers path \,)
-                     (vec (for [i (range 1 (inc n-cols))]
-                            (str "Column " i))))
-        temp-table (str table-name "_temp")]
-    (jdbc/execute! tenant-conn [(get-create-table-sql temp-table n-cols "text" false)])
-    (jdbc/execute! tenant-conn [(get-create-table-sql table-name n-cols "jsonb" false)])
-    (with-open [conn (-> tenant-conn :datasource .getConnection)]
-      (let [copy-manager (.getCopyAPI (.unwrap conn PGConnection))]
-        (.copyIn copy-manager ^String (get-copy-sql temp-table n-cols headers?) (io/input-stream path))))
-    (jdbc/execute! tenant-conn [(get-insert-sql temp-table table-name n-cols)])
-    (jdbc/execute! tenant-conn [(get-drop-table-sql temp-table)])
-    (jdbc/execute! tenant-conn [(get-vacuum-sql table-name)] :transaction? false)
-    {:success? true
-     :columns (get-column-tuples col-titles)}))
+  (try
+    (let [ ;; TODO a bit of "manual" integration work
+          file-on-disk? (contains? spec "fileName")
+          path (let [url (get spec "url")]
+                 (if file-on-disk?
+                   (str file-upload-path
+                        "/resumed/"
+                        (last (s/split url #"\/"))
+                        "/file")
+                   url))
+          headers? (boolean (get spec "hasColumnHeaders"))
+          n-cols (get-num-cols path \,)
+          col-titles (if headers?
+                       (get-headers path \,)
+                       (vec (for [i (range 1 (inc n-cols))]
+                              (str "Column " i))))
+          temp-table (str table-name "_temp")]
+      (jdbc/execute! tenant-conn [(get-create-table-sql temp-table n-cols "text" false)])
+      (jdbc/execute! tenant-conn [(get-create-table-sql table-name n-cols "jsonb" false)])
+      (with-open [conn (-> tenant-conn :datasource .getConnection)]
+        (let [copy-manager (.getCopyAPI (.unwrap conn PGConnection))]
+          (.copyIn copy-manager ^String (get-copy-sql temp-table n-cols headers?) (io/input-stream path))))
+      (jdbc/execute! tenant-conn [(get-insert-sql temp-table table-name n-cols)])
+      (jdbc/execute! tenant-conn [(get-drop-table-sql temp-table)])
+      (jdbc/execute! tenant-conn [(get-vacuum-sql table-name)] :transaction? false)
+      {:success? true
+       :columns (get-column-tuples col-titles)})
+    (catch Exception e
+      {:success? false
+       :reason (str "Unexpected error " (.getMessage e))})) )
