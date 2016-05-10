@@ -15,7 +15,7 @@ export default class DataSourceSettings extends Component {
   }
 
   renderFileSelection() {
-    const { dataSource, onChange, updateUploadStatus } = this.props;
+    const { dataSource, onChange, onChangeSettings, updateUploadStatus } = this.props;
     switch (dataSource.kind) {
       case 'DATA_FILE':
         return (
@@ -37,6 +37,7 @@ export default class DataSourceSettings extends Component {
           <AkvoFlowDataSourceSettings
             dataSource={dataSource}
             onChange={onChange}
+            onChangeSettings={onChangeSettings}
           />
         );
       default:
@@ -61,5 +62,6 @@ DataSourceSettings.propTypes = {
     // Other props are data source specific.
   }),
   onChange: PropTypes.func.isRequired,
+  onChangeSettings: PropTypes.func.isRequired,
   updateUploadStatus: PropTypes.func.isRequired,
 };

@@ -32,6 +32,7 @@ class CreateDataset extends Component {
           <DataSourceSettings
             dataSource={dataset.source}
             onChange={this.props.defineDataSource}
+            onChangeSettings={this.props.defineDatasetSettings}
             updateUploadStatus={this.props.updateDatasetUploadStatus}
           />
       );
