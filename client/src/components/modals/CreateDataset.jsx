@@ -40,6 +40,7 @@ class CreateDataset extends Component {
           <Settings
             dataset={dataset}
             onChangeSettings={this.props.defineDatasetSettings}
+            onChangeDataSource={this.props.defineDataSource}
           />
       );
       default: throw new Error(`Not yet implemented: ${page}`);

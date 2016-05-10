@@ -6,9 +6,9 @@ export const initialState = {
   dataset: {
     source: {
       kind: 'DATA_FILE',
+      hasColumnHeaders: true,
     },
     name: '',
-    hasColumnHeaders: true,
   },
   uploadRunning: false,
 };
@@ -57,16 +57,15 @@ function updateUploadStatus(state, uploadStatus) {
 
 function defineDataSource(state, dataSource) {
   return update(state, {
-    dataset: { source: { $set: dataSource } },
+    dataset: { source: { $merge: dataSource } },
   });
 }
 
 // Only name and header status for now
-function defineDatasetSettings(state, { name, hasColumnHeaders }) {
+function defineDatasetSettings(state, { name }) {
   return update(state, {
     dataset: {
       name: { $set: name },
-      hasColumnHeaders: { $set: hasColumnHeaders },
     },
   });
 }
