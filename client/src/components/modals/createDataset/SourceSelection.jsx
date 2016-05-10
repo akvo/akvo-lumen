@@ -48,6 +48,7 @@ const defaultDataSources = {
   LINK: {
     kind: 'LINK',
     url: '',
+    hasColumnHeaders: true,
   },
 
   AKVO_FLOW: {

@@ -48,12 +48,14 @@ export default class DataFileDataSourceSettings extends Component {
 
   uploadFile(file) {
     const onChange = this.props.onChange;
+    const updateUploadStatus = this.props.updateUploadStatus;
     const handleProgress = this.handleProgress;
     const upload = new tus.Upload(file, {
       headers: { Authorization: `Bearer ${keycloak.token}` },
       endpoint: '/api/files',
       onError(error) {
         console.error(`Failed because: ${error}`);
+        updateUploadStatus(false);
         handleProgress(-1);
       },
       onProgress(bytesUploaded, bytesTotal) {
@@ -61,6 +63,7 @@ export default class DataFileDataSourceSettings extends Component {
         handleProgress(percentage);
       },
       onSuccess() {
+        updateUploadStatus(false);
         onChange({
           kind: 'DATA_FILE',
           url: upload.url,
@@ -70,6 +73,7 @@ export default class DataFileDataSourceSettings extends Component {
     });
     upload.start();
     handleProgress(0);
+    updateUploadStatus(true);
   }
 
   render() {
@@ -90,6 +94,21 @@ export default class DataFileDataSourceSettings extends Component {
             this.uploadFile(this.refs.fileInput.files[0]);
           }}
         />
+        <p className="dataFileUploadHeaderToggle">
+          File has column headers:
+          <input
+            type="checkbox"
+            className="datasetHeaderStatusToggle"
+            defaultChecked={this.props.dataSource.hasColumnHeaders}
+            ref="datasetHeaderStatusToggle"
+            onClick={() => {
+              this.props.onChange({
+                hasColumnHeaders: this.refs.datasetHeaderStatusToggle.checked,
+              });
+            }
+            }
+          />
+        </p>
         { this.isProgressBarVisible() &&
           <DashProgressBar
             progressPercentage={this.state.uploadProgressPercentage}
@@ -103,5 +122,7 @@ export default class DataFileDataSourceSettings extends Component {
 }
 
 DataFileDataSourceSettings.propTypes = {
+  dataSource: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,
+  updateUploadStatus: PropTypes.func.isRequired,
 };

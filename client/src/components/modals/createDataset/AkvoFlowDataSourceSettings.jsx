@@ -93,11 +93,12 @@ export default class AkvoFlowDataSourceSettings extends Component {
   }
 
   handleSurveySelection(survey) {
-    const { dataSource, onChange } = this.props;
+    const { dataSource, onChange, onChangeSettings } = this.props;
     this.setState({ selectedSurveyId: survey.id });
     onChange(Object.assign({}, dataSource, {
       surveyId: survey.id,
     }));
+    onChangeSettings({ name: survey.title });
   }
 
   handleFolderSelection(folder, idx) {
@@ -189,4 +190,5 @@ AkvoFlowDataSourceSettings.propTypes = {
     surveyId: PropTypes.number,
   }).isRequired,
   onChange: PropTypes.func.isRequired,
+  onChangeSettings: PropTypes.func.isRequired,
 };

@@ -32,13 +32,15 @@ class CreateDataset extends Component {
           <DataSourceSettings
             dataSource={dataset.source}
             onChange={this.props.defineDataSource}
+            onChangeSettings={this.props.defineDatasetSettings}
+            updateUploadStatus={this.props.updateDatasetUploadStatus}
           />
       );
       case 'define-dataset':
         return (
           <Settings
             dataset={dataset}
-            onChangeName={this.props.defineDatasetSettings}
+            onChangeSettings={this.props.defineDatasetSettings}
           />
       );
       default: throw new Error(`Not yet implemented: ${page}`);
@@ -62,7 +64,7 @@ class CreateDataset extends Component {
 
   render() {
     const { onCancel, datasetImport, clearImport } = this.props;
-    const { currentPage } = datasetImport;
+    const { currentPage, uploadRunning } = datasetImport;
 
     return (
       <Modal
@@ -110,14 +112,15 @@ class CreateDataset extends Component {
               <div className="buttonContainer">
                 <button
                   className="btn previous clickable negative"
-                  disabled={currentPage === 'select-data-source-type'}
+                  disabled={currentPage === 'select-data-source-type' || uploadRunning}
                   onClick={this.props.previousPage}
                 >
                   Previous
                 </button>
                 <button
                   className="btn next clickable positive"
-                  disabled={currentPage === 'define-dataset' ? !this.isValidImport() : false}
+                  disabled={currentPage === 'define-dataset' ? !this.isValidImport() : false
+                    || uploadRunning}
                   onClick={this.handleNextOrImport}
                 >
                   {currentPage === 'define-dataset' ? 'Import' : 'Next'}
@@ -136,6 +139,7 @@ CreateDataset.propTypes = {
   onCancel: PropTypes.func.isRequired,
   previousPage: PropTypes.func.isRequired,
   nextPage: PropTypes.func.isRequired,
+  updateDatasetUploadStatus: PropTypes.func.isRequired,
   defineDatasetSettings: PropTypes.func.isRequired,
   defineDataSource: PropTypes.func.isRequired,
   selectDataSource: PropTypes.func.isRequired,

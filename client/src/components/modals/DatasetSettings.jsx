@@ -9,11 +9,11 @@ class DatasetSettings extends Component {
     super(props);
     const { dataset } = this.props;
     this.state = { name: dataset.name };
-    this.handleChangeName = this.handleChangeName.bind(this);
+    this.handleChangeSettings = this.handleChangeSettings.bind(this);
   }
 
-  handleChangeName(newName) {
-    this.setState({ name: newName });
+  handleChangeSettings({ name }) {
+    this.setState({ name });
   }
 
   render() {
@@ -51,7 +51,7 @@ class DatasetSettings extends Component {
             <Settings
               dataset={dataset}
               showPreview={false}
-              onChangeName={this.handleChangeName}
+              onChangeSettings={this.handleChangeSettings}
             />
             <div className="controls">
               <button

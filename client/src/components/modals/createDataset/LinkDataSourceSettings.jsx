@@ -25,20 +25,39 @@ export default class LinkDataSourceSettings extends Component {
   render() {
     return (
       <div className="LinkFileSelection">
-        <label
-          className="linkFileInputLabel"
-          htmlFor="linkFileInput"
-        >
-            Link:
-        </label>
-        <input
-          className="linkFileInput"
-          id="linkFileInput"
-          type="text"
-          placeholder="Paste url here"
-          defaultValue={this.props.dataSource.url}
-          onChange={this.handleLink}
-        />
+        <div>
+          <label
+            className="linkFileInputLabel"
+            htmlFor="linkFileInput"
+          >
+              Link:
+          </label>
+          <input
+            className="linkFileInput"
+            id="linkFileInput"
+            type="text"
+            placeholder="Paste url here"
+            defaultValue={this.props.dataSource.url}
+            onChange={this.handleLink}
+          />
+        </div>
+        <div>
+          <label
+            className="linkFileToggleLabel"
+          >
+            Data has column headers:
+          </label>
+          <input
+            type="checkbox"
+            defaultChecked={this.props.dataSource.hasColumnHeaders}
+            ref="datasetHeaderStatusToggle"
+            onClick={() => {
+              this.props.onChange({
+                hasColumnHeaders: this.refs.datasetHeaderStatusToggle.checked,
+              });
+            }}
+          />
+        </div>
       </div>
     );
   }
@@ -49,5 +68,6 @@ LinkDataSourceSettings.propTypes = {
   dataSource: PropTypes.shape({
     kind: PropTypes.oneOf(['LINK']).isRequired,
     url: PropTypes.string.isRequired,
+    hasColumnHeaders: PropTypes.bool.isRequired,
   }),
 };
