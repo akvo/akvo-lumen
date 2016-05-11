@@ -15,8 +15,9 @@
 
 (def conn {:connection-uri (-> config :db :uri)})
 
-(defn sql-now[]
+(defn sql-now
   "Returns now in sql time formate"
+  []
   (coerce/to-sql-time (time/now)))
 
 (defn for-all-tenants
@@ -34,39 +35,36 @@
                    :transaction_log (json/generate-string "log entry")}]
 
       (testing "insert"
-        (defn test-insert
-          [db_uri]
-          (insert-dataset db_uri dataset)
-          (is (=
-                1
-                ((count-history-dataset-by-ts db_uri {:now (sql-now)}) :count))))
-        (for-all-tenants test-insert))
+        (let [test-insert (fn [db_uri]
+                            (insert-dataset db_uri dataset)
+                            (is (=
+                                  1
+                                  ((count-history-dataset-by-ts db_uri {:now (sql-now)}) :count))))]
+          (for-all-tenants test-insert)))
 
       (testing "update"
-        (defn test-update
-          [db_uri]
-          (let [new-log-entry {:transaction_log (json/generate-string "new log entry")}]
-            (update-dataset db_uri (merge dataset new-log-entry))
-            (is (=
-                  1
-                  ((count-history-dataset-by-ts db_uri {:now (sql-now)}) :count)))
-            (is (=
-                  (history-dataset-by-ts db_uri {:now (sql-now)})
-                  (history-dataset-by-transaction-log db_uri new-log-entry)))
-            (is (=
-                  2
-                  ((count-all-history-datasets db_uri ) :count)))))
-        (for-all-tenants test-update))
+        (let [test-update (fn [db_uri]
+                            (let [new-log-entry {:transaction_log (json/generate-string "new log entry")}]
+                              (update-dataset db_uri (merge dataset new-log-entry))
+                              (is (=
+                                    1
+                                    ((count-history-dataset-by-ts db_uri {:now (sql-now)}) :count)))
+                              (is (=
+                                    (history-dataset-by-ts db_uri {:now (sql-now)})
+                                    (history-dataset-by-transaction-log db_uri new-log-entry)))
+                              (is (=
+                                    2
+                                    ((count-all-history-datasets db_uri) :count)))))]
+          (for-all-tenants test-update)))
 
       (testing "delete"
-        (defn test-delete
-          [db_uri]
-          (delete-dataset-by-id db_uri dataset)
-          (is (=
-                0
-                ((count-history-dataset-by-ts db_uri {:now (sql-now)}) :count)))
-          (is (=
-                2
-                ((count-all-history-datasets db_uri ) :count))))
-        (for-all-tenants test-delete))
+        (let [test-delete (fn [db_uri]
+                            (delete-dataset-by-id db_uri dataset)
+                            (is (=
+                                  0
+                                  ((count-history-dataset-by-ts db_uri {:now (sql-now)}) :count)))
+                            (is (=
+                                  2
+                                  ((count-all-history-datasets db_uri) :count))))]
+          (for-all-tenants test-delete)))
       )))
