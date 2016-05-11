@@ -42,6 +42,12 @@ UPDATE job_execution
        error_reason=:reason
  WHERE id=:id
 
+-- :name update-successful-job-execution :! :n
+-- :doc Update successful job execution
+UPDATE job_execution
+   SET finished_at=now()
+ WHERE id=:id
+
 -- :name job-execution-by-id :? :1
 SELECT *
   FROM job_execution
