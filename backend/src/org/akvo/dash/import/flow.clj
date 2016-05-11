@@ -28,19 +28,19 @@
 (defn question-type->dash-type [question-type]
   ;; A lot of this is TBD.
   (condp = question-type
-    "FREE_TEXT" "string"
-    "CASCADE" "string"
-    "OPTION" "string"
-    "GEO" "string"
+    "FREE_TEXT" "text"
+    "CASCADE" "text"
+    "OPTION" "text"
+    "GEO" "text"
     "DATE" "date"
     "NUMBER" "number"
     "object"))
 
 (defn dataset-columns [form]
-  (let [common [{:title "Identifier" :type "string"}
+  (let [common [{:title "Identifier" :type "text"}
                 {:title "Latitude" :type "number"}
                 {:title "Longitude" :type "number"}
-                {:title "Submitter" :type "string"}
+                {:title "Submitter" :type "text"}
                 {:title "Submitted at" :type "date"}]
         qs (map (fn [q]
                   {:type (question-type->dash-type (:type q))
