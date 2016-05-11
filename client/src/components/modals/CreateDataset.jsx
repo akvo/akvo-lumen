@@ -87,10 +87,12 @@ class CreateDataset extends Component {
         <div className={this.props.containerClassName}>
           <div className="CreateDataset">
             <h3 className="modalTitle">New Dataset</h3>
-            <div className="btn close clickable" onClick={() => {
-              clearImport();
-              onCancel();
-            }}
+            <div
+              className="btn close clickable"
+              onClick={() => {
+                clearImport();
+                onCancel();
+              }}
             >
               +
             </div>

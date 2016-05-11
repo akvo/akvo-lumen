@@ -7,14 +7,13 @@ export default function CollectionsList({
   pathname,
   isSelected }) {
   const listItems = collections.map((collection) => (
-      <li key={collection.id}>
-        <CollectionListItem
-          collection={collection}
-          pathname={pathname}
-        />
-      </li>
-    )
-  );
+    <li key={collection.id}>
+      <CollectionListItem
+        collection={collection}
+        pathname={pathname}
+      />
+    </li>
+  ));
   const subtitleClassName = `subtitle${isSelected ? ' selected' : ''}`;
 
   return (

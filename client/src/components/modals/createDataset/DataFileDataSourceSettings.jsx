@@ -109,7 +109,7 @@ export default class DataFileDataSourceSettings extends Component {
             }
           />
         </p>
-        { this.isProgressBarVisible() &&
+        {this.isProgressBarVisible() &&
           <DashProgressBar
             progressPercentage={this.state.uploadProgressPercentage}
             errorText="Error"
