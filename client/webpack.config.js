@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 var webpack = require('webpack');
 var path = require('path');
 var SystemBellPlugin = require('system-bell-webpack-plugin');

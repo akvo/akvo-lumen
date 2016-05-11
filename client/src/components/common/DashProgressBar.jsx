@@ -18,7 +18,7 @@ export default function DashProgressBar(props) {
         aria-valuemax="100"
       >
         <span className="textContent">
-          Progress: { progress }%
+          Progress: {progress}%
         </span>
         <span
           className="progressIndicator"
