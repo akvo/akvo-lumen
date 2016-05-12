@@ -1,3 +1,42 @@
+@import 'modules/colors';
+
 .DatasetTable {
   margin-top: 4rem;
+  .ColumnHeader {
+    * {
+      line-height: 50px;
+    }
+    .columnType {
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      margin: 0 0.75rem;
+      color: $blueGrey;
+    }
+  }
+  .TransformContextMenu {
+    &:before {
+      content: '';
+      display: block;
+      width: 0px;
+      height: 0px;
+      position: absolute;
+      top: -10px;
+      left: 15px;
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+      border-bottom: 10px solid black;
+    }
+  }
+  .transformMenuItem {
+    padding: 0.5rem 0;
+    width: 6rem;
+    &.selected {
+      &:after {
+        content: '✓';
+        float: right;
+        font-family: monospace;
+        font-weight: bold;
+      }
+    }
+  }
 }
