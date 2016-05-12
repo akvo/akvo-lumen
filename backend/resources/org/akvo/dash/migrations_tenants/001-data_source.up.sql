@@ -10,3 +10,8 @@ BEGIN
     PERFORM tardis('data_source');
 END$$;
 -- ;;
+
+CREATE TRIGGER data_source_modified
+BEFORE UPDATE ON data_source
+FOR EACH ROW EXECUTE PROCEDURE update_modified();
+--;;

@@ -1,0 +1,51 @@
+@import 'modules/colors';
+
+.DataTableSidebar {
+  .header {
+    padding: 1rem;
+    border-bottom: 0.1rem solid grey;
+  }
+  .inputs {
+    padding: 1rem;
+    line-height: 1.4rem;
+  }
+  .inputGroup {
+    margin-bottom: 1.5rem;
+    label {
+      font-size: 0.8rem;
+      margin-bottom: 0.25rem;
+    }
+  }
+  .DashSelect {
+    height: 2.6rem;
+  }
+  h3 {
+    display: inline-block;
+  }
+  .columnTitle {
+    font-weight: bold;
+  }
+  .close {
+    float: right;
+    line-height: 1.4rem;
+    font-size: 1rem;
+  }
+  .apply, .cancel {
+    display: inline-block;
+    width: 6.5rem;
+    text-align: center;
+    padding: 0.6rem 1rem;
+    margin: 0.75rem 1.25rem;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    color: $mintGreen;
+    border: 0.1rem solid $mintGreen;
+    border-radius: 0.6rem;
+    vertical-align: top;
+  }
+  .cancel {
+    float: right;
+    color: $blueGrey;
+    border-color: $blueGrey;
+  }
+}

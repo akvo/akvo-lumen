@@ -13,3 +13,8 @@ BEGIN
     PERFORM tardis('job_execution');
 END$$;
 -- ;;
+
+CREATE TRIGGER job_execution_modified
+BEFORE UPDATE ON job_execution
+FOR EACH ROW EXECUTE PROCEDURE update_modified();
+--;;

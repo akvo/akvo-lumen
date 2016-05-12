@@ -73,3 +73,11 @@ EXECUTE format('
 END
 $$ LANGUAGE plpgsql;
 -- ;;
+
+CREATE FUNCTION public.update_modified() RETURNS TRIGGER AS $$
+    BEGIN
+        NEW.modified = now();
+        RETURN NEW;
+    END
+$$ LANGUAGE plpgsql;
+-- ;;
