@@ -18,3 +18,8 @@ BEGIN
     PERFORM tardis('dataset_column');
 END$$;
 -- ;;
+
+CREATE TRIGGER dataset_column_modified
+BEFORE UPDATE ON dataset_column
+FOR EACH ROW EXECUTE PROCEDURE update_modified();
+--;;
