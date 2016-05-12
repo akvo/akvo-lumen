@@ -18,9 +18,11 @@
   (context "/library" {:keys [params tenant] :as request}
 
     (GET "/" []
-
       (let [tenant-conn (connection tm tenant)]
         (response
          {:dashboards     []
-          :datasets       (all-datasets tenant-conn)
+          :datasets       (all-datasets tenant-conn
+                                        {}
+                                        {}
+                                        :identifiers identity)
           :visualisations (all-visualisations tenant-conn)})))))
