@@ -14,33 +14,40 @@
 
 (hugsql/def-db-fns "org/akvo/dash/import.sql")
 
+(defn successful-import [conn job-execution-id table-name status spec]
+  (let [dataset-id (squuid)]
+    (insert-dataset conn {:id dataset-id
+                          :title (get spec "name") ;; TODO Consistent naming. Change on client side?
+                          :description (get spec "description" "")})
+    (insert-dataset-version conn {:id (squuid)
+                                  :dataset-id dataset-id
+                                  :job-execution-id job-execution-id
+                                  :table-name table-name
+                                  :version 1})
+    (insert-dataset-columns conn {:columns (vec (map-indexed (fn [order [title column-name type]]
+                                                               [(squuid)
+                                                                dataset-id
+                                                                type
+                                                                title
+                                                                column-name
+                                                                (* 10 (inc order))])
+                                                             (:columns status)))})
+    (update-successful-job-execution conn {:id job-execution-id})))
+
+(defn failed-import [conn job-execution-id reason]
+  (update-failed-job-execution conn {:id job-execution-id
+                                     :reason reason}))
+
 (defn do-import [conn config job-execution-id]
   (try
     (let [table-name (str "ds_" (str/replace (java.util.UUID/randomUUID) "-" "_"))
           spec (:spec (data-source-spec-by-job-execution-id conn {:job-execution-id job-execution-id}))
           status (import/make-dataset-data-table conn config table-name (get spec "source"))]
       (if (:success? status)
-        (let [dataset-id (squuid)]
-          (insert-dataset conn {:id dataset-id
-                                :title (get spec "name") ;; TODO Consistent naming. Change on client side?
-                                :description (get spec "description" "")})
-          (insert-dataset-version conn {:id (squuid)
-                                        :dataset-id dataset-id
-                                        :job-execution-id job-execution-id
-                                        :table-name table-name
-                                        :version 1})
-          (insert-dataset-columns conn {:columns (vec (map-indexed (fn [order [title column-name type]]
-                                                                     [(squuid)
-                                                                      dataset-id
-                                                                      type
-                                                                      title
-                                                                      column-name
-                                                                      (* 10 (inc order))])
-                                                                   (:columns status)))}))
-
-        (update-failed-job-execution conn {:id job-execution-id
-                                           :reason (:reason status)})))
+        (successful-import conn job-execution-id table-name status spec)
+        (failed-import conn job-execution-id (:reason status))))
     (catch Exception e
+      (failed-import conn job-execution-id (str "Unknown error: " (.getMessage e)))
       (.printStackTrace e))))
 
 (defn handle-import-request [tenant-conn config claims data-source]
