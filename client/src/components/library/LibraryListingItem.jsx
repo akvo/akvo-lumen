@@ -17,7 +17,8 @@ export default function LibraryListingItem({ entity, onSelectEntity }) {
       <div className="entityIcon"></div>
       <div className="textContents">
         <h3 className="entityName">{entity.name}</h3>
-        {entity.status === 'FAILED' ? <p>{entity.errorReason}</p> : null}
+        {entity.status === 'FAILED' ? <p>{entity.reason}</p> : null}
+        {entity.status === 'PENDING' ? <p>pending...</p> : null}
       </div>
       <div className="entityControls">
         <button className="showControls clickable disabled">...</button>
@@ -30,8 +31,8 @@ LibraryListingItem.propTypes = {
   entity: PropTypes.shape({
     id: PropTypes.string,
     name: PropTypes.string.isRequired,
-    status: PropTypes.oneOf(['SUCCESS', 'FAILED', 'PENDING']),
-    errorReason: PropTypes.string,
+    status: PropTypes.oneOf(['OK', 'FAILED', 'PENDING']),
+    reason: PropTypes.string,
   }).isRequired,
   onSelectEntity: PropTypes.func.isRequired,
 };

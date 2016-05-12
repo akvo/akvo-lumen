@@ -19,6 +19,37 @@ function saveDatasetSettings(state, dataset) {
   });
 }
 
+function importDatasetPending(state, { importId, name }) {
+  const now = Date.now();
+  return Object.assign({}, state, {
+    [importId]: {
+      name,
+      type: 'dataset',
+      status: 'PENDING',
+      modified: now,
+      created: now,
+    },
+  });
+}
+
+function importDatasetFailure(state, { importId, reason }) {
+  const now = Date.now();
+  const dataset = Object.assign({}, state[importId], {
+    status: 'FAILED',
+    reason,
+    modified: now,
+  });
+  return Object.assign({}, state, {
+    [importId]: dataset,
+  });
+}
+
+function importDatasetSuccess(state, { importId }) {
+  const newState = Object.assign({}, state);
+  delete newState[importId];
+  return newState;
+}
+
 function saveDataset(state, dataset) {
   const id = dataset.id;
   const ds = update(dataset, { $merge: { type: 'dataset' } });
@@ -43,6 +74,12 @@ export default function datasets(state = initialState, action) {
       return createDataset(state, action.dataset);
     case constants.SAVE_SETTINGS:
       return saveDatasetSettings(state, action.dataset);
+    case constants.IMPORT_DATASET_PENDING:
+      return importDatasetPending(state, action);
+    case constants.IMPORT_DATASET_FAILURE:
+      return importDatasetFailure(state, action);
+    case constants.IMPORT_DATASET_SUCCESS:
+      return importDatasetSuccess(state, action);
     case constants.FETCH_DATASET_SUCCESS:
       return saveDataset(state, action.dataset);
     case constants.FETCH_DATASETS_SUCCESS:

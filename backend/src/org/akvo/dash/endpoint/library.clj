@@ -21,8 +21,5 @@
       (let [tenant-conn (connection tm tenant)]
         (response
          {:dashboards     []
-          :datasets       (all-datasets tenant-conn
-                                        {}
-                                        {}
-                                        :identifiers identity)
+          :datasets       (all-datasets tenant-conn)
           :visualisations (all-visualisations tenant-conn)})))))
