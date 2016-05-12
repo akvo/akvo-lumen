@@ -11,7 +11,7 @@ export default function TransformContextMenu(props) {
       style={props.style}
     >
       <ul>
-        { props.options.map((item, index) => {
+        {props.options.map((item, index) => {
           const selected = item.value === props.selected ? ' selected' : '';
 
           return (

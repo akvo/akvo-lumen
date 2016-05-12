@@ -166,22 +166,22 @@ export default class DatasetTable extends Component {
           }}
         >
           {this.state.activeTransformationMenu &&
-              <TransformContextMenu
-                options={columnTypeOptions}
-                selected={this.state.activeTransformationMenu.currentType}
-                style={{
-                  backgroundColor: 'white',
-                  padding: '1rem',
-                  border: '1px solid black',
-                  width: '8rem',
-                  marginTop: '0.75rem',
-                  position: 'absolute',
-                  top: `${this.state.activeTransformationMenu.top}px`,
-                  left: `${this.state.activeTransformationMenu.left}px`,
-                  zIndex: '999',
-                }}
-                onOptionSelected={this.handleClickTransformContextMenuItem}
-              />
+            <TransformContextMenu
+              options={columnTypeOptions}
+              selected={this.state.activeTransformationMenu.currentType}
+              style={{
+                backgroundColor: 'white',
+                padding: '1rem',
+                border: '1px solid black',
+                width: '8rem',
+                marginTop: '0.75rem',
+                position: 'absolute',
+                top: `${this.state.activeTransformationMenu.top}px`,
+                left: `${this.state.activeTransformationMenu.left}px`,
+                zIndex: '999',
+              }}
+              onOptionSelected={this.handleClickTransformContextMenuItem}
+            />
           }
           <Table
             headerHeight={50}
