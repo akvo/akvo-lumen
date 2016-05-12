@@ -13,3 +13,8 @@ BEGIN
     PERFORM tardis('visualisation');
 END$$;
 --;;
+
+CREATE TRIGGER visualisation_modified
+BEFORE UPDATE ON visualisation
+FOR EACH ROW EXECUTE PROCEDURE update_modified();
+--;;

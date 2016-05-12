@@ -15,3 +15,8 @@ BEGIN
     PERFORM tardis('dataset_version');
 END$$;
 -- ;;
+
+CREATE TRIGGER dataset_version_modified
+BEFORE UPDATE ON dataset_version
+FOR EACH ROW EXECUTE PROCEDURE update_modified();
+--;;
