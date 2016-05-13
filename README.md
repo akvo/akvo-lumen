@@ -1,12 +1,12 @@
-# Akvo Dash
+# Akvo Lumen
 An open-source, easy to use data mashup, analysis and publishing platform.
 
 [![Build Status](https://travis-ci.org/akvo/akvo-lumen.svg?branch=develop)](https://travis-ci.org/akvo/akvo-lumen)
 
 ## PM
 
-- [Issues](https://github.com/akvo/akvo-dash/issues)
-- [Board](http://waffle.io/akvo/akvo-dash)
+- [Issues](https://github.com/akvo/akvo-lumen/issues)
+- [Board](http://waffle.io/akvo/akvo-lumen)
 
 ## Client
 [Readme](client/README.md)

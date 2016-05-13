@@ -1,8 +1,8 @@
 {
   "name": "akvo-dash",
   "version": "0.0.1",
-  "description": "Akvo DASH client application",
-  "repository": "https://github.com/akvo/akvo-dash",
+  "description": "Akvo Lumen client application",
+  "repository": "https://github.com/akvo/akvo-lumen",
   "main": "index.jsx",
   "scripts": {
     "test": "mocha --compilers js:babel-core/register --recursive",
