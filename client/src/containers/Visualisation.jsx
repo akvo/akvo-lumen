@@ -91,12 +91,6 @@ class Visualisation extends Component {
               isUnsavedChanges: true,
             })
           )}
-          onChangeDataAxis={event => (
-            this.setState({
-              dataAxis: event.target.value,
-              isUnsavedChanges: true,
-            })
-          )}
           onChangeVisualisationType={value => (
             this.setState({
               visualisationType: value,
