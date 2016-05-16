@@ -61,10 +61,17 @@ export function updateDatasetUploadStatus(status) {
  */
 
 function importDatasetPending(importId, name) {
+  const now = Date.now();
   return {
     type: constants.IMPORT_DATASET_PENDING,
-    importId,
-    name,
+    dataset: {
+      id: importId,
+      type: 'dataset',
+      status: 'PENDING',
+      name,
+      created: now,
+      modified: now,
+    },
   };
 }
 
@@ -73,6 +80,7 @@ function importDatasetFailure(importId, reason) {
     type: constants.IMPORT_DATASET_FAILURE,
     importId,
     reason,
+    modified: Date.now(),
   };
 }
 

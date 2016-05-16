@@ -19,25 +19,18 @@ function saveDatasetSettings(state, dataset) {
   });
 }
 
-function importDatasetPending(state, { importId, name }) {
-  const now = Date.now();
+function importDatasetPending(state, dataset) {
+  const id = dataset.id;
   return Object.assign({}, state, {
-    [importId]: {
-      name,
-      type: 'dataset',
-      status: 'PENDING',
-      modified: now,
-      created: now,
-    },
+    [id]: dataset,
   });
 }
 
-function importDatasetFailure(state, { importId, reason }) {
-  const now = Date.now();
+function importDatasetFailure(state, { importId, reason, modified }) {
   const dataset = Object.assign({}, state[importId], {
     status: 'FAILED',
     reason,
-    modified: now,
+    modified,
   });
   return Object.assign({}, state, {
     [importId]: dataset,
@@ -75,7 +68,7 @@ export default function datasets(state = initialState, action) {
     case constants.SAVE_SETTINGS:
       return saveDatasetSettings(state, action.dataset);
     case constants.IMPORT_DATASET_PENDING:
-      return importDatasetPending(state, action);
+      return importDatasetPending(state, action.dataset);
     case constants.IMPORT_DATASET_FAILURE:
       return importDatasetFailure(state, action);
     case constants.IMPORT_DATASET_SUCCESS:
