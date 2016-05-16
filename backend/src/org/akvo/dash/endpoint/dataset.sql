@@ -23,6 +23,10 @@ SELECT id, name, NULL, 'PENDING', modified, created
 SELECT id, title, NULL, 'OK', modified, created
   FROM dataset;
 
+-- :name delete-dataset-by-id :! :n
+-- :doc delete dataset
+DELETE FROM dataset WHERE id=:id;
+
 -- :name insert-datasource :<!
 -- :doc insert datasource
 INSERT INTO datasources (id, spec)

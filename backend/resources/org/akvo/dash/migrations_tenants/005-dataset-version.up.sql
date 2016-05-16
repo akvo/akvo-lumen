@@ -1,7 +1,7 @@
 CREATE TABLE dataset_version (
     id text PRIMARY KEY,
-    dataset_id text REFERENCES dataset,
-    job_execution_id text REFERENCES job_execution,
+    dataset_id text REFERENCES dataset ON DELETE CASCADE,
+    job_execution_id text REFERENCES job_execution ON DELETE CASCADE,
     version smallint NOT NULL,
     -- The name of the data table
     table_name text UNIQUE NOT NULL,

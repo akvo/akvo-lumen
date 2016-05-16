@@ -1,5 +1,6 @@
 CREATE TABLE IF NOT EXISTS visualisation (
     id text NOT NULL,
+    dataset_id text REFERENCES dataset ON DELETE CASCADE,
     "name" text NOT NULL,
     spec jsonb,
     author jsonb,

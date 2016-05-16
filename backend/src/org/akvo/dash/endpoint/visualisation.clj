@@ -11,34 +11,36 @@
 
 (defn endpoint
   ""
-  [{tm :tenant-manager :as config}]
+  [{tm :tenant-manager}]
 
   (context "/visualisations" []
 
-    (GET "/" []
-      (fn [{tenant :tenant :as request}]
-        (response (all-visualisations (connection tm
-                                            tenant)))))
-    (POST "/" []
-      (fn [{:keys [:tenant :jwt-claims] :as request}]
-        (try
-          (let [resp (first (insert-visualisation
-                             (connection tm tenant)
-                             {:id     (squuid)
-                              :name   (get-in request [:body "name"])
-                              :spec   (get-in request [:body "spec"])
-                              :author jwt-claims}))]
-            (response (dissoc resp :author)))
-          (catch Exception e
-            (pprint e)
-            (when (isa? SQLException (type e))
-              (pprint (.getNextException ^SQLException e)))
-            (response {:error e})))))
+    (GET "/" {:keys [tenant]}
+      (response (all-visualisations (connection tm tenant))))
+
+    (POST "/" {:keys [tenant jwt-claims body]}
+      (try
+        (let [resp (first (insert-visualisation
+                           (connection tm tenant)
+                           {:id (squuid)
+                            :dataset-id (get-in body ["spec" "sourceDataset"])
+                            :name (get body "name")
+                            :spec (get body "spec")
+                            :author jwt-claims}))]
+          (response (dissoc resp :author)))
+        (catch Exception e
+          (pprint e)
+          (when (isa? SQLException (type e))
+            (pprint (.getNextException ^SQLException e)))
+          (response {:error e}))))
 
     (context "/:id" [id]
 
-      (GET "/" []
-        (fn [{tenant :tenant :as request}]
-          (response (dissoc (visualisation-by-id (connection tm tenant)
-                                                 {:id id})
-                      :author)))))))
+      (GET "/" {:keys [tenant]}
+        (response (dissoc (visualisation-by-id (connection tm tenant)
+                                               {:id id})
+                          :author)))
+
+      (DELETE "/" {:keys [tenant]}
+        (delete-visualisation-by-id (connection tm tenant) {:id id})
+        (response {:id id})))))
