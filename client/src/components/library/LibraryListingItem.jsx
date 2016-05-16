@@ -1,9 +1,8 @@
 import React, { PropTypes } from 'react';
-
+import LoadingSpinner from '../common/LoadingSpinner';
 
 export default function LibraryListingItem({ entity, onSelectEntity }) {
   const status = entity.status;
-
   return (
     <li
       onClick={() => {
@@ -15,7 +14,9 @@ export default function LibraryListingItem({ entity, onSelectEntity }) {
       className={`LibraryListingItem ${entity.type} ${status}`}
     >
       {status === 'PENDING' &&
-        <div className="pendingOverlay" />
+        <div className="pendingOverlay">
+          <LoadingSpinner />
+        </div>
       }
       <input type="checkbox" className="selectEntity disabled" />
       <div className="entityIcon"></div>
