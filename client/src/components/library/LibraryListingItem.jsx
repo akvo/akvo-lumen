@@ -2,23 +2,30 @@ import React, { PropTypes } from 'react';
 
 
 export default function LibraryListingItem({ entity, onSelectEntity }) {
+  const status = entity.status;
+
   return (
     <li
       onClick={() => {
-        if (entity.status === 'FAILED' || entity.status === 'PENDING') {
-          return;
+        if (status === 'OK') {
+          onSelectEntity(entity.type, entity.id);
         }
-        onSelectEntity(entity.type, entity.id);
       }}
       key={entity.id}
-      className={`LibraryListingItem ${entity.type}`}
+      className={`LibraryListingItem ${entity.type} ${status}`}
     >
+      {status === 'PENDING' &&
+        <div className="pendingOverlay" />
+      }
       <input type="checkbox" className="selectEntity disabled" />
       <div className="entityIcon"></div>
       <div className="textContents">
-        <h3 className="entityName">{entity.name}</h3>
-        {entity.status === 'FAILED' ? <p>{entity.reason}</p> : null}
-        {entity.status === 'PENDING' ? <p>pending...</p> : null}
+        <h3 className="entityName">
+          {entity.name}
+          {status === 'FAILED' && ' (Import failed)'}
+        </h3>
+        {status === 'FAILED' && <p>{entity.reason}</p>}
+        {status === 'PENDING' && <p>Pending...</p>}
       </div>
       <div className="entityControls">
         <button className="showControls clickable disabled">...</button>
