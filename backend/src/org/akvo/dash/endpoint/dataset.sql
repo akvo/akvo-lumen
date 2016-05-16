@@ -1,7 +1,27 @@
 -- :name all-datasets :? :*
--- :doc All datasets.
-SELECT id, title as name, created, modified --TODO name->title
-FROM dataset;
+-- :doc All datasets. Including pending datasets and datasets that failed to import
+WITH
+failed_imports AS (
+         --TODO name->title
+  SELECT job_execution.id, spec->>'name' AS name, error_reason, job_execution.created, job_execution.modified
+    FROM data_source, job_execution
+   WHERE job_execution.data_source_id=data_source.id
+     AND error_reason IS NOT NULL
+),
+pending_imports AS (
+  SELECT job_execution.id, spec->>'name' AS name, job_execution.created, job_execution.modified
+    FROM data_source, job_execution
+   WHERE job_execution.data_source_id=data_source.id
+     AND finished_at IS NULL
+)
+SELECT id, name, error_reason as reason, 'FAILED' AS status, modified, created
+  FROM failed_imports
+ UNION
+SELECT id, name, NULL, 'PENDING', modified, created
+  FROM pending_imports
+ UNION
+SELECT id, title, NULL, 'OK', modified, created
+  FROM dataset;
 
 -- :name insert-datasource :<!
 -- :doc insert datasource

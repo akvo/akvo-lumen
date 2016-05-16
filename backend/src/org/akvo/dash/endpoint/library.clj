@@ -18,7 +18,6 @@
   (context "/library" {:keys [params tenant] :as request}
 
     (GET "/" []
-
       (let [tenant-conn (connection tm tenant)]
         (response
          {:dashboards     []

@@ -60,27 +60,45 @@ export function updateDatasetUploadStatus(status) {
  * IMPORT_DATASET_FAILURE
  */
 
+function importDatasetPending(importId, name) {
+  const now = Date.now();
+  return {
+    type: constants.IMPORT_DATASET_PENDING,
+    dataset: {
+      id: importId,
+      type: 'dataset',
+      status: 'PENDING',
+      name,
+      created: now,
+      modified: now,
+    },
+  };
+}
+
 function importDatasetFailure(importId, reason) {
   return {
     type: constants.IMPORT_DATASET_FAILURE,
     importId,
     reason,
+    modified: Date.now(),
   };
 }
 
-function importDatasetSuccess(datasetId) {
+function importDatasetSuccess(datasetId, importId) {
   return (dispatch) => {
     dispatch(fetchDataset(datasetId));
     dispatch({
       type: constants.IMPORT_DATASET_SUCCESS,
       datasetId,
+      importId,
     });
   };
 }
 
 const pollInteval = 1000;
-function pollDatasetImportStatus(importId) {
+function pollDatasetImportStatus(importId, name) {
   return (dispatch) => {
+    dispatch(importDatasetPending(importId, name));
     fetch(`/api/imports/${importId}`, {
       method: 'GET',
       headers: headers(),
@@ -88,11 +106,11 @@ function pollDatasetImportStatus(importId) {
     .then(response => response.json())
     .then(({ status, reason, datasetId }) => {
       if (status === 'PENDING') {
-        setTimeout(() => dispatch(pollDatasetImportStatus(importId)), pollInteval);
+        setTimeout(() => dispatch(pollDatasetImportStatus(importId, name)), pollInteval);
       } else if (status === 'FAILED') {
         dispatch(importDatasetFailure(importId, reason));
       } else if (status === 'OK') {
-        dispatch(importDatasetSuccess(datasetId));
+        dispatch(importDatasetSuccess(datasetId, importId));
       }
     })
     .catch(error => dispatch(error));
@@ -121,8 +139,8 @@ export function importDataset(dataSource) {
       body: JSON.stringify(dataSource),
     })
     .then(response => response.json())
-    .then(importStatus => {
-      dispatch(pollDatasetImportStatus(importStatus.importId));
+    .then(({ importId }) => {
+      dispatch(pollDatasetImportStatus(importId, dataSource.name));
       dispatch(hideModal());
       dispatch(clearImport());
     })

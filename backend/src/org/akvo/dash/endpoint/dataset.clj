@@ -29,6 +29,7 @@
        :name (:title dataset)
        :modified (:modified dataset)
        :created (:created dataset)
+       :status "OK"
        :columns  columns-with-data})))
 
 
