@@ -16,14 +16,18 @@
   (context "/visualisations" []
 
     (GET "/" {:keys [tenant]}
-      (response (all-visualisations (connection tm tenant))))
+      (response (all-visualisations (connection tm tenant)
+                                    {}
+                                    {}
+                                    :identifiers identity)))
 
     (POST "/" {:keys [tenant jwt-claims body]}
       (try
         (let [resp (first (insert-visualisation
                            (connection tm tenant)
                            {:id (squuid)
-                            :dataset-id (get-in body ["spec" "sourceDataset"])
+                            :dataset-id (get body "datasetId")
+                            :type (get body "visualisationType")
                             :name (get body "name")
                             :spec (get body "spec")
                             :author jwt-claims}))]
@@ -38,7 +42,9 @@
 
       (GET "/" {:keys [tenant]}
         (response (dissoc (visualisation-by-id (connection tm tenant)
-                                               {:id id})
+                                               {:id id}
+                                               {}
+                                               :identifiers identity                                               )
                           :author)))
 
       (DELETE "/" {:keys [tenant]}

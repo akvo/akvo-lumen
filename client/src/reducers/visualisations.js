@@ -28,7 +28,7 @@ function saveVisualisations(state, visualisations) {
   return visualisations.reduce((result, vis) => {
     const id = vis.id;
     return update(result, {
-      [id]: { $set: update(vis, { $merge: { type: 'visualisation' } }) },
+      [id]: { $set: update(vis, { $merge: { type: 'visualisation', status: 'OK' } }) },
     });
   }, state);
 }

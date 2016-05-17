@@ -1,9 +1,9 @@
 export function getChartData(visualisation, datasets) {
-  const datasetID = visualisation.sourceDataset;
-  const dataset = datasets[datasetID];
-  const columnIndexX = visualisation.datasetColumnX;
-  const columnIndexY = visualisation.datasetColumnY;
-  const nameDataX = dataset.columns[visualisation.datasetNameColumnX];
+  const { datasetId, spec } = visualisation;
+  const dataset = datasets[datasetId];
+  const columnIndexX = spec.datasetColumnX;
+  const columnIndexY = spec.datasetColumnY;
+  const nameDataX = dataset.columns[spec.datasetNameColumnX];
   const dataX = dataset.columns[columnIndexX].values;
   const dataY = columnIndexY !== null ? dataset.columns[columnIndexY].values : null;
   let dataValues = [];

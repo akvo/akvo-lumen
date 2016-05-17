@@ -8,7 +8,6 @@
 (hugsql/def-db-fns "org/akvo/dash/endpoint/dataset.sql")
 (hugsql/def-db-fns "org/akvo/dash/endpoint/visualisation.sql")
 
-
 (defn endpoint
   "/library
 
@@ -22,4 +21,4 @@
         (response
          {:dashboards     []
           :datasets       (all-datasets tenant-conn)
-          :visualisations (all-visualisations tenant-conn)})))))
+          :visualisations (all-visualisations tenant-conn {} {} :identifiers identity)})))))

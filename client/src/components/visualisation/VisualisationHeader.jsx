@@ -50,5 +50,8 @@ export default class VisualisationHeader extends Component {
 }
 
 VisualisationHeader.propTypes = {
-  visualisation: PropTypes.object.isRequired,
+  visualisation: PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    isUnsavedChanges: PropTypes.bool.isRequired,
+  }).isRequired,
 };

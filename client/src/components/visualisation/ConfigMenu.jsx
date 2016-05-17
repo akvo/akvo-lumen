@@ -28,7 +28,6 @@ const getDatasetArray = datasetObject => {
   });
 
   datasetArray.sort(sortFunction);
-
   return datasetArray;
 };
 
@@ -52,9 +51,11 @@ export default function ConfigMenu(props) {
   const datasetArray = getDatasetArray(props.datasets);
   const datasetOptions = getDatasetOptions(datasetArray);
   const visualisation = props.visualisation;
+  const onChangeSpec = props.onChangeVisualisationSpec;
+  const spec = visualisation.spec;
 
-  const columns = props.datasets[visualisation.sourceDataset] ?
-    props.datasets[visualisation.sourceDataset].columns : [];
+  const columns = props.datasets[visualisation.datasetId] ?
+    props.datasets[visualisation.datasetId].columns : [];
   const columnOptions = getDashSelectOptionsFromColumnArray(columns);
 
   const getComponents = visualisationType => {
@@ -66,29 +67,37 @@ export default function ConfigMenu(props) {
           <div>
             <Subtitle>X-Axis</Subtitle>
             <ColumnMenu
-              choice={visualisation.datasetColumnX}
+              choice={spec.datasetColumnX}
               name="xColumnInput"
               options={columnOptions}
-              onChange={props.onChangeDatasetColumnX}
+              onChange={(event) => onChangeSpec({
+                datasetColumnX: event.target.value,
+              })}
             />
             <LabelColumnMenu
-              choice={visualisation.datasetNameColumnX}
+              choice={spec.datasetNameColumnX}
               name="xNameColumnMenu"
               options={columnOptions}
-              onChange={props.onChangeDatasetNameColumnX}
+              onChange={(event) => onChangeSpec({
+                datasetNameColumnX: event.target.value,
+              })}
             />
             <LabelInput
-              value={visualisation.labelX}
+              value={spec.labelX}
               placeholder="X Axis label"
               name="xLabel"
-              onChange={props.onChangeDatasetLabelX}
+              onChange={(event) => onChangeSpec({
+                datasetLabelX: event.target.value,
+              })}
             />
             <Subtitle>Y-Axis</Subtitle>
             <LabelInput
-              value={visualisation.labelY}
+              value={spec.labelY}
               placeholder="Y Axis label"
               name="yLabel"
-              onChange={props.onChangeDatasetLabelY}
+              onChange={(event) => onChangeSpec({
+                datasetLabelY: event.target.value,
+              })}
             />
           </div>
         );
@@ -100,23 +109,29 @@ export default function ConfigMenu(props) {
           <div>
             <Subtitle>X-Axis</Subtitle>
             <ColumnMenu
-              choice={visualisation.datasetColumnX}
+              choice={spec.datasetColumnX}
               name="xColumnInput"
               options={columnOptions}
-              onChange={props.onChangeDatasetColumnX}
+              onChange={(event) => onChangeSpec({
+                datasetColumnX: event.target.value,
+              })}
             />
             <LabelInput
-              value={visualisation.labelX}
+              value={spec.labelX}
               placeholder="X Axis label"
               name="xLabel"
-              onChange={props.onChangeDatasetLabelX}
+              onChange={(event) => onChangeSpec({
+                labelX: event.target.value,
+              })}
             />
             <Subtitle>Y-Axis</Subtitle>
             <LabelInput
-              value={visualisation.labelY}
+              value={spec.labelY}
               placeholder="Y Axis label"
               name="yLabel"
-              onChange={props.onChangeDatasetLabelY}
+              onChange={(event) => onChangeSpec({
+                labelY: event.target.value,
+              })}
             />
           </div>
         );
@@ -127,29 +142,37 @@ export default function ConfigMenu(props) {
           <div>
             <Subtitle>X-Axis</Subtitle>
             <ColumnMenu
-              choice={visualisation.datasetColumnX}
+              choice={spec.datasetColumnX}
               name="xColumnInput"
               options={columnOptions}
-              onChange={props.onChangeDatasetColumnX}
+              onChange={(event) => onChangeSpec({
+                datasetColumnX: event.target.value,
+              })}
             />
             <LabelInput
-              value={visualisation.labelX}
+              value={spec.labelX}
               placeholder="X Axis label"
               name="xLabel"
-              onChange={props.onChangeDatasetLabelX}
+              onChange={(event) => onChangeSpec({
+                labelX: event.target.value,
+              })}
             />
             <Subtitle>Y-Axis</Subtitle>
             <ColumnMenu
-              choice={visualisation.datasetColumnY}
+              choice={spec.datasetColumnY}
               name="yColumnInput"
               options={columnOptions}
-              onChange={props.onChangeDatasetColumnY}
+              onChange={(event) => onChangeSpec({
+                datasetColumnY: event.target.value,
+              })}
             />
             <LabelInput
-              value={visualisation.labelY}
+              value={spec.labelY}
               placeholder="Y Axis label"
               name="yLabel"
-              onChange={props.onChangeDatasetLabelY}
+              onChange={(event) => onChangeSpec({
+                labelY: event.target.value,
+              })}
             />
           </div>
         );
@@ -160,24 +183,30 @@ export default function ConfigMenu(props) {
           <div>
             <Subtitle>Latitude</Subtitle>
             <ColumnMenu
-              choice={visualisation.datasetColumnY}
+              choice={spec.datasetColumnY}
               name="yColumnInput"
               options={columnOptions}
-              onChange={props.onChangeDatasetColumnY}
+              onChange={(value) => onChangeSpec({
+                datasetColumnY: value,
+              })}
             />
             <Subtitle>Longitude</Subtitle>
             <ColumnMenu
-              choice={visualisation.datasetColumnX}
+              choice={spec.datasetColumnX}
               name="xColumnInput"
               options={columnOptions}
-              onChange={props.onChangeDatasetColumnX}
+              onChange={(value) => onChangeSpec({
+                datasetColumnX: value,
+              })}
             />
             <Subtitle>Popup Label</Subtitle>
             <LabelColumnMenu
-              choice={visualisation.datasetNameColumnX}
+              choice={spec.datasetNameColumnX}
               name="xNameColumnMenu"
               options={columnOptions}
-              onChange={props.onChangeDatasetNameColumnX}
+              onChange={(value) => onChangeSpec({
+                datasetNameColumnX: value,
+              })}
             />
           </div>
         );
@@ -188,16 +217,20 @@ export default function ConfigMenu(props) {
         output = (
           <div>
             <ColumnMenu
-              choice={visualisation.datasetColumnX}
+              choice={spec.datasetColumnX}
               name="xColumnInput"
               options={columnOptions}
-              onChange={props.onChangeDatasetColumnX}
+              onChange={(event) => onChangeSpec({
+                datasetColumnX: event.target.value,
+              })}
             />
             <LabelColumnMenu
-              choice={visualisation.datasetNameColumnX}
+              choice={spec.datasetNameColumnX}
               name="xNameColumnMenu"
               options={columnOptions}
-              onChange={props.onChangeDatasetNameColumnX}
+              onChange={(event) => onChangeSpec({
+                datasetNameColumnX: event.target.value,
+              })}
             />
           </div>
         );
@@ -216,8 +249,8 @@ export default function ConfigMenu(props) {
         <label htmlFor="xDatasetMenu">Source dataset:</label>
         <DashSelect
           name="xDatasetMenu"
-          value={visualisation.sourceDataset !== null ?
-            visualisation.sourceDataset : 'Choose a dataset option...'}
+          value={visualisation.datasetId !== null ?
+            visualisation.datasetId : 'Choose a dataset option...'}
           options={datasetOptions}
           onChange={props.onChangeSourceDataset}
         />
@@ -247,9 +280,5 @@ ConfigMenu.propTypes = {
   datasets: PropTypes.object.isRequired,
   onChangeTitle: PropTypes.func.isRequired,
   onChangeSourceDataset: PropTypes.func.isRequired,
-  onChangeDatasetColumnX: PropTypes.func.isRequired,
-  onChangeDatasetColumnY: PropTypes.func,
-  onChangeDatasetNameColumnX: PropTypes.func,
-  onChangeDatasetLabelX: PropTypes.func,
-  onChangeDatasetLabelY: PropTypes.func,
+  onChangeVisualisationSpec: PropTypes.func.isRequired,
 };

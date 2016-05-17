@@ -32,10 +32,7 @@ function createVisualisationRequest(visualisation) {
     fetch('/api/visualisations', {
       method: 'POST',
       headers: headers(),
-      body: JSON.stringify({
-        name: visualisation.name,
-        spec: visualisation,
-      }),
+      body: JSON.stringify(visualisation),
     })
     .then(response => response.json())
     .then(vis => dispatch(createVisualisationSuccess(vis)))
@@ -62,7 +59,7 @@ export function saveVisualisationChanges(visualisation) {
 function fetchVisualisationSuccess(visualisation) {
   return (dispatch) => {
     // We also need to possibly fetch datasets.
-    const datasetId = visualisation.spec.sourceDataset;
+    const datasetId = visualisation.datasetId;
 
     if (datasetId) {
       dispatch(fetchDataset(datasetId));
