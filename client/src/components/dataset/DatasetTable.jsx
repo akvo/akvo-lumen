@@ -14,6 +14,7 @@ export default class DatasetTable extends Component {
       width: 1024,
       height: 800,
       activeTransformationMenu: null,
+      activeColumnMenu: null,
       transformationSidebar: null,
     };
     this.handleResize = this.handleResize.bind(this);
@@ -21,6 +22,7 @@ export default class DatasetTable extends Component {
     this.handleClickTransformContextMenuToggle =
       this.handleClickTransformContextMenuToggle.bind(this);
     this.handleClickTransformContextMenuItem = this.handleClickTransformContextMenuItem.bind(this);
+    this.handleClickColumnMenuToggle = this.handleClickColumnMenuToggle.bind(this);
     this.handleShowSidebar = this.handleShowSidebar.bind(this);
     this.handleHideSidebar = this.handleHideSidebar.bind(this);
   }
@@ -48,10 +50,13 @@ export default class DatasetTable extends Component {
     not have an "onScroll" event, only onScrollEnd, which is too slow. */
     this.setState({
       activeTransformationMenu: null,
+      activeColumnMenu: null,
     });
   }
 
   handleClickTransformContextMenuToggle(columnTitle, columnType, left, top) {
+    this.setState({ activeColumnMenu: null });
+
     if (this.state.activeTransformationMenu &&
         columnTitle === this.state.activeTransformationMenu.title) {
       // Close the menu
@@ -81,6 +86,25 @@ export default class DatasetTable extends Component {
 
     // Close the context menu
     this.setState({ activeTransformationMenu: null });
+  }
+
+  handleClickColumnMenuToggle(columnTitle, left, top, width) {
+    this.setState({ activeTransformationMenu: null });
+
+    if (this.state.activeColumnMenu &&
+        columnTitle === this.state.activeColumnMenu.title) {
+      // Close the menu
+      this.setState({ activeColumnMenu: null });
+    } else {
+      this.setState({
+        activeColumnMenu: {
+          title: columnTitle,
+          left,
+          top,
+          width,
+        },
+      });
+    }
   }
 
   handleShowSidebar(sidebar) {
@@ -119,6 +143,59 @@ export default class DatasetTable extends Component {
       },
     ];
 
+    const columnMenuOptions = [
+      {
+        label: 'Filter',
+        value: 'filter',
+      },
+      {
+        label: 'Sort',
+        value: 'sort',
+        subMenu: [
+          {
+            label: 'Ascending',
+            value: 'sortAscending',
+          },
+          {
+            label: 'Descending',
+            value: 'sortDescending',
+          },
+        ],
+      },
+      {
+        label: 'Whitespace',
+        value: 'whitespace',
+        subMenu: [
+          {
+            label: 'Remove leading and trailing whitespace',
+            value: 'removeLeadingTrailingWhitespace',
+          },
+          {
+            label: 'Remove double spaces',
+            value: 'removeDoubleWhitespace',
+          },
+        ],
+      },
+      {
+        label: 'Change case',
+        value: 'changeCase',
+        subMenu: [
+          {
+            label: 'To Uppercase',
+            value: 'toUppercase',
+          },
+          {
+            label: 'To Lowercase',
+            value: 'toLowercase',
+          },
+          {
+            label: 'To Titlecase',
+            value: 'toTitlecase',
+          },
+        ],
+      },
+    ];
+
     const cols = this.props.columns.map((column, index) => {
       const columnHeader = (
         <ColumnHeader
@@ -126,6 +203,9 @@ export default class DatasetTable extends Component {
           columnType={column.type}
           columnTitle={column.title}
           onClickTransformContextMenuToggle={this.handleClickTransformContextMenuToggle}
+          onClickColumnMenuToggle={this.handleClickColumnMenuToggle}
+          columnMenuActive={this.state.activeColumnMenu
+            && this.state.activeColumnMenu.title === column.title}
         >
           {column.title}
         </ColumnHeader>
@@ -172,17 +252,28 @@ export default class DatasetTable extends Component {
               options={columnTypeOptions}
               selected={this.state.activeTransformationMenu.currentType}
               style={{
-                backgroundColor: 'white',
-                padding: '1rem',
-                border: '1px solid black',
                 width: '8rem',
-                marginTop: '0.75rem',
-                position: 'absolute',
                 top: `${this.state.activeTransformationMenu.top}px`,
                 left: `${this.state.activeTransformationMenu.left}px`,
-                zIndex: '999',
+                right: 'initial',
               }}
               onOptionSelected={this.handleClickTransformContextMenuItem}
+              arrowClass="topLeft"
+              arrowOffset="15px"
+            />
+          }
+          {this.state.activeColumnMenu &&
+            <ContextMenu
+              options={columnMenuOptions}
+              selected={null}
+              style={{
+                width: `${this.state.activeColumnMenu.width}px`,
+                top: `${this.state.activeColumnMenu.top}px`,
+                left: `${this.state.activeColumnMenu.left}px`,
+                right: 'initial',
+              }}
+              onOptionSelected={(option) => { console.log(option); }}
+
             />
           }
           <Table

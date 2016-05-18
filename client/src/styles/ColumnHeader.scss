@@ -1,0 +1,33 @@
+@import 'modules/colors';
+
+.ColumnHeader {
+  &:after {
+    content: '';
+    display: block;
+    width: 0;
+    height: 0;
+    border-right: 10px solid transparent;
+    border-left: 10px solid transparent;
+    border-top: 10px solid $blueGrey;
+    border-bottom: none;
+    position: absolute;
+    right: 0.5rem;
+    top: calc(50% - 5px);
+  }
+  &.columnMenuActive {
+    background-color: rgba(0,0,0,0.125);
+    &:after {
+      border-top: none;
+      border-bottom: 10px solid $blueGrey;
+    }
+  }
+  * {
+    line-height: 50px;
+  }
+  .columnType {
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    margin: 0 0.75rem;
+    color: $blueGrey;
+  }
+}
