@@ -117,7 +117,7 @@
                        (vec (for [i (range 1 (inc n-cols))]
                               (str "Column " i))))
           temp-table (str table-name "_temp")]
-      (jdbc/execute! tenant-conn [(get-create-table-sql temp-table n-cols "text" false)])
+      (jdbc/execute! tenant-conn [(get-create-table-sql temp-table n-cols "text" true)])
       (jdbc/execute! tenant-conn [(get-create-table-sql table-name n-cols "jsonb" false)])
       (with-open [conn (-> tenant-conn :datasource .getConnection)]
         (let [copy-manager (.getCopyAPI (.unwrap conn PGConnection))]
