@@ -5,14 +5,8 @@ export const initialState = {};
 
 function createVisualisation(state, visualisationData) {
   const id = visualisationData.id;
-  const vis = update(visualisationData.spec, {
-    $merge: {
-      type: 'visualisation',
-      id,
-    },
-  });
   return update(state, {
-    [id]: { $set: vis },
+    [id]: { $set: visualisationData },
   });
 }
 
