@@ -70,16 +70,16 @@ export default function ConfigMenu(props) {
               choice={spec.datasetColumnX}
               name="xColumnInput"
               options={columnOptions}
-              onChange={(event) => onChangeSpec({
-                datasetColumnX: event.target.value,
+              onChange={(value) => onChangeSpec({
+                datasetColumnX: value,
               })}
             />
             <LabelColumnMenu
               choice={spec.datasetNameColumnX}
               name="xNameColumnMenu"
               options={columnOptions}
-              onChange={(event) => onChangeSpec({
-                datasetNameColumnX: event.target.value,
+              onChange={(value) => onChangeSpec({
+                datasetNameColumnX: value,
               })}
             />
             <LabelInput
@@ -87,7 +87,7 @@ export default function ConfigMenu(props) {
               placeholder="X Axis label"
               name="xLabel"
               onChange={(event) => onChangeSpec({
-                datasetLabelX: event.target.value,
+                labelX: event.target.value,
               })}
             />
             <Subtitle>Y-Axis</Subtitle>
@@ -96,7 +96,7 @@ export default function ConfigMenu(props) {
               placeholder="Y Axis label"
               name="yLabel"
               onChange={(event) => onChangeSpec({
-                datasetLabelY: event.target.value,
+                labelY: event.target.value,
               })}
             />
           </div>
@@ -112,8 +112,8 @@ export default function ConfigMenu(props) {
               choice={spec.datasetColumnX}
               name="xColumnInput"
               options={columnOptions}
-              onChange={(event) => onChangeSpec({
-                datasetColumnX: event.target.value,
+              onChange={(value) => onChangeSpec({
+                datasetColumnX: value,
               })}
             />
             <LabelInput
@@ -145,8 +145,8 @@ export default function ConfigMenu(props) {
               choice={spec.datasetColumnX}
               name="xColumnInput"
               options={columnOptions}
-              onChange={(event) => onChangeSpec({
-                datasetColumnX: event.target.value,
+              onChange={(value) => onChangeSpec({
+                datasetColumnX: value,
               })}
             />
             <LabelInput
@@ -162,8 +162,8 @@ export default function ConfigMenu(props) {
               choice={spec.datasetColumnY}
               name="yColumnInput"
               options={columnOptions}
-              onChange={(event) => onChangeSpec({
-                datasetColumnY: event.target.value,
+              onChange={(value) => onChangeSpec({
+                datasetColumnY: value,
               })}
             />
             <LabelInput
@@ -220,16 +220,16 @@ export default function ConfigMenu(props) {
               choice={spec.datasetColumnX}
               name="xColumnInput"
               options={columnOptions}
-              onChange={(event) => onChangeSpec({
-                datasetColumnX: event.target.value,
+              onChange={(value) => onChangeSpec({
+                datasetColumnX: value,
               })}
             />
             <LabelColumnMenu
               choice={spec.datasetNameColumnX}
               name="xNameColumnMenu"
               options={columnOptions}
-              onChange={(event) => onChangeSpec({
-                datasetNameColumnX: event.target.value,
+              onChange={(value) => onChangeSpec({
+                datasetNameColumnX: value,
               })}
             />
           </div>
