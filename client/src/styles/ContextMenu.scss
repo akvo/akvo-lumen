@@ -5,11 +5,13 @@
   background-color: white;
   padding: 1rem 0;
   border: 1px solid black;
-  margin-top: 10px;
   z-index: 99;
   /* Default positioning... */
   width: 8rem;
   right: 0;
+  &.hasArrow {
+    margin-top: 10px;
+  }
   .arrow {
     content: '';
     display: block;
