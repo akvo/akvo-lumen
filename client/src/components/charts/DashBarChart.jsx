@@ -4,16 +4,17 @@ import * as chart from '../../utilities/chart';
 
 export default function DashBarChart({ visualisation, datasets }) {
   const chartData = chart.getChartData(visualisation, datasets);
+  const { name, spec } = visualisation;
 
   return (
     <div className="DashBarChart dashChart">
       <BarChart
-        title={visualisation.name}
+        title={name}
         width={800}
         height={400}
         data={chartData}
-        xAxisLabel={visualisation.labelX || ''}
-        yAxisLabel={visualisation.labelY || ''}
+        xAxisLabel={spec.labelX || ''}
+        yAxisLabel={spec.labelY || ''}
         xAxisLabelOffset={50}
         yAxisLabelOffset={75}
       />
