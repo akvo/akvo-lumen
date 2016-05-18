@@ -11,7 +11,10 @@ export default class ContextMenuItem extends Component {
 
   render() {
     const item = this.props.item;
-    const onClick = item.subMenu ? null : () => this.props.handleItemClick(item.value);
+    const onClick = item.subMenu ? null : (event) => {
+      event.stopPropagation();
+      this.props.handleItemClick(item.value);
+    };
 
     return (
       <li
