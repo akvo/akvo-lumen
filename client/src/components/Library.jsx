@@ -5,7 +5,8 @@ import LibraryHeader from './library/LibraryHeader';
 import LibraryListing from './library/LibraryListing';
 import { showModal } from '../actions/activeModal';
 import { fetchLibrary } from '../actions/library';
-
+import { deleteVisualisation } from '../actions/visualisation';
+import { deleteDataset } from '../actions/dataset';
 
 require('../styles/Library.scss');
 
@@ -24,6 +25,7 @@ class Library extends Component {
   constructor() {
     super();
     this.handleSelectEntity = this.handleSelectEntity.bind(this);
+    this.handleEntityAction = this.handleEntityAction.bind(this);
   }
 
   componentDidMount() {
@@ -36,6 +38,26 @@ class Library extends Component {
 
   handleSelectEntity(entityType, id) {
     this.props.dispatch(push(`/${entityType}/${id}`));
+  }
+
+  handleEntityAction(actionType, entityType, id) {
+    const { dispatch } = this.props;
+    if (actionType === 'delete') {
+      switch (entityType) {
+        case 'dataset':
+          dispatch(deleteDataset(id));
+          break;
+        case 'visualisation':
+          dispatch(deleteVisualisation(id));
+          break;
+        case 'dashboard':
+          throw new Error('Dashboard deletion not yet implemented');
+        default:
+          throw new Error(`Invalid entity type: ${entityType}`);
+      }
+    } else {
+      throw new Error(`Action ${actionType} not yet implemented for entity type ${entityType}`);
+    }
   }
 
   render() {
@@ -102,6 +124,7 @@ class Library extends Component {
           collection={collection}
           library={this.props}
           onSelectEntity={this.handleSelectEntity}
+          onEntityAction={this.handleEntityAction}
         />
         {this.props.children}
       </div>

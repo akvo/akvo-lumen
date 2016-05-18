@@ -61,6 +61,12 @@ function saveDatasets(state, ds) {
   }, state);
 }
 
+function removeDataset(state, id) {
+  const newState = Object.assign({}, state);
+  delete newState[id];
+  return newState;
+}
+
 export default function datasets(state = initialState, action) {
   switch (action.type) {
     case constants.CREATE:
@@ -77,6 +83,8 @@ export default function datasets(state = initialState, action) {
       return saveDataset(state, action.dataset);
     case constants.FETCH_DATASETS_SUCCESS:
       return saveDatasets(state, action.datasets);
+    case constants.REMOVE_DATASET:
+      return removeDataset(state, action.id);
     default: return state;
   }
 }
