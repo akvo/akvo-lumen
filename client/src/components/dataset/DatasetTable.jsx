@@ -25,6 +25,7 @@ export default class DatasetTable extends Component {
     this.handleClickColumnMenuToggle = this.handleClickColumnMenuToggle.bind(this);
     this.handleShowSidebar = this.handleShowSidebar.bind(this);
     this.handleHideSidebar = this.handleHideSidebar.bind(this);
+    this.getCellClassName = this.getCellClassName.bind(this);
   }
 
   componentDidMount() {
@@ -127,6 +128,15 @@ export default class DatasetTable extends Component {
     });
   }
 
+  getCellClassName(columnTitle) {
+    if (this.state.transformationSidebar &&
+      this.state.transformationSidebar.columnTitle === columnTitle) {
+      return 'sidebarTargetingColumn';
+    }
+
+    return '';
+  }
+
   render() {
     const columnTypeOptions = [
       {
@@ -212,6 +222,7 @@ export default class DatasetTable extends Component {
       );
       return (
         <Column
+          cellClassName={this.getCellClassName(column.title)}
           key={index}
           header={columnHeader}
           cell={props => (<Cell>{column.values[props.rowIndex]}</Cell>)}
