@@ -8,13 +8,30 @@ import DashMap from '../charts/DashMap';
 
 require('../../styles/VisualisationPreview.scss');
 
-const getChartPreview = (visualisation, datasets) => {
+
+function shouldRender(visualisation, datasets) {
+  const datasetId = visualisation.datasetId;
+  if (datasetId == null) {
+    return false;
+  }
+  const dataset = datasets[datasetId];
+  if (dataset == null) {
+    return false;
+  }
+  if (dataset.columns == null) {
+    return false;
+  }
+  return true;
+}
+
+const ChartPreview = ({ visualisation, datasets }) => {
+  const { spec, visualisationType } = visualisation;
   let output;
   let datasetColumn;
 
-  switch (visualisation.visualisationType) {
+  switch (visualisationType) {
     case 'bar':
-      datasetColumn = visualisation.datasetColumnX;
+      datasetColumn = spec.datasetColumnX;
 
       if (datasetColumn !== null) {
         output = <DashBarChart visualisation={visualisation} datasets={datasets} />;
@@ -25,7 +42,7 @@ const getChartPreview = (visualisation, datasets) => {
       return output;
 
     case 'line':
-      datasetColumn = visualisation.datasetColumnX;
+      datasetColumn = spec.datasetColumnX;
 
       if (datasetColumn !== null) {
         output = <DashLineChart visualisation={visualisation} datasets={datasets} />;
@@ -36,7 +53,7 @@ const getChartPreview = (visualisation, datasets) => {
       return output;
 
     case 'area':
-      datasetColumn = visualisation.datasetColumnX;
+      datasetColumn = spec.datasetColumnX;
 
       if (datasetColumn !== null) {
         output = <DashAreaChart visualisation={visualisation} datasets={datasets} />;
@@ -48,7 +65,7 @@ const getChartPreview = (visualisation, datasets) => {
 
     case 'donut':
     case 'pie':
-      datasetColumn = visualisation.datasetColumnX;
+      datasetColumn = spec.datasetColumnX;
 
       if (datasetColumn !== null) {
         output = <DashPieChart visualisation={visualisation} datasets={datasets} />;
@@ -59,7 +76,7 @@ const getChartPreview = (visualisation, datasets) => {
       return output;
 
     case 'scatter':
-      if (visualisation.datasetColumnX !== null && visualisation.datasetColumnY !== null) {
+      if (spec.datasetColumnX !== null && spec.datasetColumnY !== null) {
         output = <DashScatterChart visualisation={visualisation} datasets={datasets} />;
       } else {
         output = <div>Scatter chart image placeholder</div>;
@@ -68,9 +85,7 @@ const getChartPreview = (visualisation, datasets) => {
       return output;
 
     case 'map':
-      output = <DashMap visualisation={visualisation} datasets={datasets} />;
-
-      if (visualisation.datasetColumnX !== null && visualisation.datasetColumnY !== null) {
+      if (spec.datasetColumnX !== null && spec.datasetColumnY !== null) {
         output = <DashMap visualisation={visualisation} datasets={datasets} />;
       } else {
         output = <div>Map visualisation image placeholder</div>;
@@ -84,10 +99,14 @@ const getChartPreview = (visualisation, datasets) => {
 };
 
 export default function CreateVisualisationPreview({ visualisation, datasets }) {
-  const chart = getChartPreview(visualisation, datasets);
   return (
     <div className="VisualisationPreview">
-      {chart}
+      {shouldRender(visualisation, datasets) ?
+        <ChartPreview
+          visualisation={visualisation}
+          datasets={datasets}
+        /> :
+        null}
     </div>
   );
 }

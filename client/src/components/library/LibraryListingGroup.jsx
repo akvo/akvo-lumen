@@ -56,7 +56,7 @@ const sortListGroupEntities = (entities, sortOrder, isReverseSort) => {
 };
 
 export default function LibraryListingGroup({
-  listGroup, displayMode, sortOrder, isReverseSort, onSelectEntity }) {
+  listGroup, displayMode, sortOrder, isReverseSort, onSelectEntity, onEntityAction }) {
   const listGroupTitle = getListGroupTitle(listGroup.listGroupName, sortOrder);
   const sortedEntities = sortListGroupEntities(listGroup.entities, sortOrder, isReverseSort);
 
@@ -70,6 +70,7 @@ export default function LibraryListingGroup({
             entity={entity}
             displayMode={displayMode}
             onSelectEntity={onSelectEntity}
+            onEntityAction={onEntityAction}
           />
         )}
       </ol>
@@ -86,4 +87,5 @@ LibraryListingGroup.propTypes = {
   sortOrder: PropTypes.oneOf(['created', 'last_modified', 'name']).isRequired,
   isReverseSort: PropTypes.bool.isRequired,
   onSelectEntity: PropTypes.func.isRequired,
+  onEntityAction: PropTypes.func.isRequired,
 };

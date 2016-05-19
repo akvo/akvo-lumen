@@ -1,4 +1,5 @@
 import * as constants from '../constants/dataset';
+import * as visualisationActions from './visualisation';
 import { hideModal } from './activeModal';
 import headers from './headers';
 
@@ -201,5 +202,57 @@ export function fetchDatasetsSuccess(datasets) {
   return {
     type: constants.FETCH_DATASETS_SUCCESS,
     datasets,
+  };
+}
+
+
+/* Delete dataset actions */
+
+function deleteDatasetRequest(id) {
+  return {
+    type: constants.DELETE_DATASET_REQUEST,
+    id,
+  };
+}
+
+/* Should only remove the dataset from the redux store.
+   To delete a dataset use deleteDataset istead */
+function removeDataset(id) {
+  return {
+    type: constants.REMOVE_DATASET,
+    id,
+  };
+}
+
+function deleteDatasetSuccess(id) {
+  return (dispatch, getState) => {
+    dispatch(removeDataset(id));
+    const visualisations = getState().library.visualisations;
+    Object.keys(visualisations).forEach(visualisationId => {
+      if (visualisations[visualisationId].datasetId === id) {
+        dispatch(visualisationActions.removeVisualisation(visualisationId));
+      }
+    });
+  };
+}
+
+function deleteDatasetFailure(id, error) {
+  return {
+    type: constants.DELETE_DATASET_FAILURE,
+    id,
+    error,
+  };
+}
+
+export function deleteDataset(id) {
+  return (dispatch) => {
+    dispatch(deleteDatasetRequest(id));
+    fetch(`/api/datasets/${id}`, {
+      method: 'DELETE',
+      headers: headers(),
+    })
+    .then(response => response.json())
+    .then(() => dispatch(deleteDatasetSuccess(id)))
+    .catch(error => dispatch(deleteDatasetFailure(id, error)));
   };
 }

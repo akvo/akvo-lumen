@@ -112,7 +112,14 @@ const sortGroups = (listGroups, sortOrder, isReverseSort) => {
 };
 
 export default function LibraryListing({
-  library, filterBy, sortOrder, isReverseSort, displayMode, searchString, onSelectEntity }) {
+  library,
+  filterBy,
+  sortOrder,
+  isReverseSort,
+  displayMode,
+  searchString,
+  onSelectEntity,
+  onEntityAction }) {
   const entities = filterEntities(library, filterBy,
     searchString);
   const listGroups = groupEntities(entities, sortOrder);
@@ -129,6 +136,7 @@ export default function LibraryListing({
             sortOrder={sortOrder}
             isReverseSort={isReverseSort}
             onSelectEntity={onSelectEntity}
+            onEntityAction={onEntityAction}
           />
         )}
       </ul>
@@ -144,4 +152,5 @@ LibraryListing.propTypes = {
   displayMode: PropTypes.oneOf(['grid', 'list']).isRequired,
   searchString: PropTypes.string.isRequired,
   onSelectEntity: PropTypes.func.isRequired,
+  onEntityAction: PropTypes.func.isRequired,
 };

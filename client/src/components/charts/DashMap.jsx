@@ -8,7 +8,6 @@ require('../../styles/DashMap.scss');
 
 export default function DashMap({ visualisation, datasets }) {
   const chartData = chart.getChartData(visualisation, datasets);
-
   return (
     <div className="DashMap dashChart">
       <Map

@@ -1,8 +1,8 @@
 # Introduction
 
-Dash used Duct to organise.
+Lumen used Duct to organise.
 
-Dash serve an API.
+Lumen serve an API.
 
 
 TODO: write [great documentation](http://jacobian.org/writing/what-to-write/)
@@ -10,7 +10,7 @@ TODO: write [great documentation](http://jacobian.org/writing/what-to-write/)
 
 ## Concepts
 
-Dash is a multi tenant system. There is a central component that handles the
+Lumen is a multi tenant system. There is a central component that handles the
 different tenants. We call this tenant manager.
 
 

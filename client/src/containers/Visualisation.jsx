@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
+import update from 'react-addons-update';
 import VisualisationHeader from '../components/visualisation/VisualisationHeader';
 import VisualisationEditor from '../components/visualisation/VisualisationEditor';
 import * as actions from '../actions/visualisation';
@@ -20,19 +21,21 @@ class Visualisation extends Component {
     super();
     this.state = {
       type: 'visualisation',
-      visualisationType: null,
       name: 'Untitled Chart',
-      sourceDataset: null,
-      datasetColumnX: null,
-      datasetNameColumnX: null,
-      labelX: null,
-      minX: null,
-      maxX: null,
-      datasetColumnY: null,
-      labelY: null,
-      minY: null,
-      maxY: null,
-      isUnsavedChanges: null,
+      visualisationType: null,
+      datasetId: null,
+      isUnsavedChanges: false,
+      spec: {
+        datasetColumnX: null,
+        datasetNameColumnX: null,
+        labelX: null,
+        minX: null,
+        maxX: null,
+        datasetColumnY: null,
+        labelY: null,
+        minY: null,
+        maxY: null,
+      },
     };
 
     this.handleChangeSourceDataset = this.handleChangeSourceDataset.bind(this);
@@ -45,7 +48,7 @@ class Visualisation extends Component {
       const visualisationId = this.props.params.visualisationId;
       this.props.dispatch(actions.fetchVisualisation(visualisationId));
       this.setState(this.props.library.visualisations[visualisationId]);
-      this.setState({ isUnsavedChanges: null });
+      this.setState({ isUnsavedChanges: false });
     }
   }
 
@@ -54,15 +57,16 @@ class Visualisation extends Component {
   }
 
   onSave() {
+    const { dispatch } = this.props;
     this.setState({
       isUnsavedChanges: false,
     });
     if (this.state.id) {
-      this.props.dispatch(actions.saveVisualisationChanges(this.state));
+      dispatch(actions.saveVisualisationChanges(this.state));
     } else {
-      this.props.dispatch(actions.createVisualisation(this.state));
+      dispatch(actions.createVisualisation(this.state));
     }
-    this.props.dispatch(push('/library?filter=visualisations&sort=created'));
+    dispatch(push('/library?filter=visualisations&sort=created'));
   }
 
   handleChangeSourceDataset(value) {
@@ -70,8 +74,9 @@ class Visualisation extends Component {
     if (!this.props.library.datasets[datasetId].columns) {
       this.props.dispatch(fetchDataset(datasetId));
     }
+
     this.setState({
-      sourceDataset: datasetId,
+      datasetId,
       isUnsavedChanges: true,
     });
   }
@@ -91,46 +96,23 @@ class Visualisation extends Component {
               isUnsavedChanges: true,
             })
           )}
-          onChangeVisualisationType={value => (
+          onChangeVisualisationType={value => {
             this.setState({
               visualisationType: value,
               isUnsavedChanges: true,
-            })
-          )}
+            });
+          }}
           onChangeSourceDataset={value => (
             this.handleChangeSourceDataset(value)
           )}
-          onChangeDatasetColumnX={value => (
+          onChangeVisualisationSpec={value => {
+            const spec = update(this.state.spec, { $merge: value });
             this.setState({
-              datasetColumnX: value,
               isUnsavedChanges: true,
-            })
-          )}
-          onChangeDatasetNameColumnX={value => (
-            this.setState({
-              datasetNameColumnX: value,
-              isUnsavedChanges: true,
-            })
-          )}
-          onChangeDatasetLabelX={event => (
-            this.setState({
-              labelX: event.target.value,
-              isUnsavedChanges: true,
-            })
-          )}
-          onChangeDatasetColumnY={value => (
-            this.setState({
-              datasetColumnY: value,
-              isUnsavedChanges: true,
-            })
-          )}
-          onChangeDatasetLabelY={event => (
-            this.setState({
-              labelY: event.target.value,
-              isUnsavedChanges: true,
-            })
-          )}
-          onSaveDataset={() => (
+              spec,
+            });
+          }}
+          onSaveVisualisation={() => (
             this.onSave()
           )}
         />

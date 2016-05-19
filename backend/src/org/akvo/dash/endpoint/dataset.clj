@@ -30,7 +30,7 @@
        :modified (:modified dataset)
        :created (:created dataset)
        :status "OK"
-       :columns  columns-with-data})))
+       :columns columns-with-data})))
 
 
 (defn endpoint [{:keys [tenant-manager config]}]
@@ -51,6 +51,9 @@
             (response dataset)
             (not-found {:id id}))))
 
+      (DELETE "/" []
+        (delete-dataset-by-id (connection tenant-manager tenant) {:id id})
+        (response {:id id}))
 
       (context "/transformations" []
 

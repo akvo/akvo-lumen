@@ -1,7 +1,7 @@
-# Akvo Dash
+# Akvo Lumen
 
 ## Quickstart
-Dash depends on Postgres 9.4. If on OS X, [Postgres.app](http://postgresapp.com/)
+Akvo Lumen depends on Postgres 9.4. If on OS X, [Postgres.app](http://postgresapp.com/)
 is an easy path.
 
 Create local config files:
@@ -48,17 +48,17 @@ $ ./provision/tear-down.sh
 ```
 
 ### Hosts
-Dash is a multi tenant system and to do enable local routing to the tenatns we
+Akvo Lumen is a multi tenant system and to do enable local routing to the tenatns we
 created earlier we need to run the provision/setup-localhost.sh script to add:
 
 ``` sh
-127.0.0.1 t1.dash.akvo.org
-127.0.0.1 t2.dash.akvo.org
+127.0.0.1 t1.lumen.localhost
+127.0.0.1 t2.lumen.localhost
 ```
 
 The tenants api root should be accessable at
- - http://t1.dash.akvo.org:3000/api
- - http://t2.dash.akvo.org:3000/api
+ - http://t1.lumen.localhost:3000/api
+ - http://t2.lumen.localhost:3000/api
 
 Hitting that endpoint should print the tenants dns label and connection pool.
 
