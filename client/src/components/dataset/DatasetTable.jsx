@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import { Table, Column, Cell } from 'fixed-data-table';
 import ColumnHeader from './ColumnHeader';
-import TransformContextMenu from './TransformContextMenu';
+import ContextMenu from '../common/ContextMenu';
 import DataTableSidebar from './DataTableSidebar';
 
 require('../../styles/DatasetTable.scss');
@@ -68,7 +68,7 @@ export default class DatasetTable extends Component {
     }
   }
 
-  handleClickTransformContextMenuItem(oldColumnType, newColumnType) {
+  handleClickTransformContextMenuItem(newColumnType, oldColumnType) {
     if (newColumnType !== oldColumnType) {
       if (newColumnType === 'date') {
         this.handleShowSidebar({
@@ -119,9 +119,10 @@ export default class DatasetTable extends Component {
       },
     ];
 
-    const cols = this.props.columns.map((column) => {
+    const cols = this.props.columns.map((column, index) => {
       const columnHeader = (
         <ColumnHeader
+          key={index}
           columnType={column.type}
           columnTitle={column.title}
           onClickTransformContextMenuToggle={this.handleClickTransformContextMenuToggle}
@@ -131,6 +132,7 @@ export default class DatasetTable extends Component {
       );
       return (
         <Column
+          key={index}
           header={columnHeader}
           cell={props => (<Cell>{column.values[props.rowIndex]}</Cell>)}
           width={200}
@@ -166,7 +168,7 @@ export default class DatasetTable extends Component {
           }}
         >
           {this.state.activeTransformationMenu &&
-            <TransformContextMenu
+            <ContextMenu
               options={columnTypeOptions}
               selected={this.state.activeTransformationMenu.currentType}
               style={{

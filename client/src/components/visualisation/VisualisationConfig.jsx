@@ -11,11 +11,7 @@ const getConfigMenu = (chartType, componentProps) => {
       datasets={componentProps.datasets}
       onChangeTitle={componentProps.onChangeTitle}
       onChangeSourceDataset={componentProps.onChangeSourceDataset}
-      onChangeDatasetColumnX={componentProps.onChangeDatasetColumnX}
-      onChangeDatasetColumnY={componentProps.onChangeDatasetColumnY}
-      onChangeDatasetNameColumnX={componentProps.onChangeDatasetNameColumnX}
-      onChangeDatasetLabelX={componentProps.onChangeDatasetLabelX}
-      onChangeDatasetLabelY={componentProps.onChangeDatasetLabelY}
+      onChangeVisualisationSpec={componentProps.onChangeVisualisationSpec}
     />
   );
 
@@ -39,7 +35,7 @@ export default function VisualisationConfig(props) {
       {visualisation.visualisationType &&
         <button
           className="saveChanges clickable"
-          onClick={props.onSaveDataset}
+          onClick={props.onSaveVisualisation}
         >
           Save changes
         </button>
@@ -54,10 +50,6 @@ VisualisationConfig.propTypes = {
   onChangeTitle: PropTypes.func.isRequired,
   onChangeVisualisationType: PropTypes.func.isRequired,
   onChangeSourceDataset: PropTypes.func.isRequired,
-  onChangeDatasetColumnX: PropTypes.func.isRequired,
-  onChangeDatasetNameColumnX: PropTypes.func.isRequired,
-  onChangeDatasetColumnY: PropTypes.func.isRequired,
-  onChangeDatasetLabelX: PropTypes.func.isRequired,
-  onChangeDatasetLabelY: PropTypes.func.isRequired,
-  onSaveDataset: PropTypes.func.isRequired,
+  onChangeVisualisationSpec: PropTypes.func.isRequired,
+  onSaveVisualisation: PropTypes.func.isRequired,
 };

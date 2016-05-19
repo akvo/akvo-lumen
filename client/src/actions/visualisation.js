@@ -32,10 +32,7 @@ function createVisualisationRequest(visualisation) {
     fetch('/api/visualisations', {
       method: 'POST',
       headers: headers(),
-      body: JSON.stringify({
-        name: visualisation.name,
-        spec: visualisation,
-      }),
+      body: JSON.stringify(visualisation),
     })
     .then(response => response.json())
     .then(vis => dispatch(createVisualisationSuccess(vis)))
@@ -62,7 +59,7 @@ export function saveVisualisationChanges(visualisation) {
 function fetchVisualisationSuccess(visualisation) {
   return (dispatch) => {
     // We also need to possibly fetch datasets.
-    const datasetId = visualisation.spec.sourceDataset;
+    const datasetId = visualisation.datasetId;
 
     if (datasetId) {
       dispatch(fetchDataset(datasetId));
@@ -99,5 +96,48 @@ export function fetchVisualisation(id) {
     .then(response => response.json())
     .then(visualisation => dispatch(fetchVisualisationSuccess(visualisation)))
     .catch(err => dispatch(fetchVisualisationFailure(id, err)));
+  };
+}
+
+/* Delete visualisation actions */
+
+function deleteVisualisationRequest(id) {
+  return {
+    type: constants.DELETE_VISUALISATION_REQUEST,
+    id,
+  };
+}
+
+/* Should only remove the visualisation from the redux store.
+   To delete a visualisation use deleteVisualisation istead */
+export function removeVisualisation(id) {
+  return {
+    type: constants.REMOVE_VISUALISATION,
+    id,
+  };
+}
+
+function deleteVisualisationSuccess(id) {
+  return removeVisualisation(id);
+}
+
+function deleteVisualisationFailure(id, error) {
+  return {
+    type: constants.DELETE_VISUALISATION_FAILURE,
+    id,
+    error,
+  };
+}
+
+export function deleteVisualisation(id) {
+  return (dispatch) => {
+    dispatch(deleteVisualisationRequest);
+    fetch(`/api/visualisations/${id}`, {
+      method: 'DELETE',
+      headers: headers(),
+    })
+    .then(response => response.json())
+    .then(() => dispatch(deleteVisualisationSuccess(id)))
+    .catch(error => dispatch(deleteVisualisationFailure(id, error)));
   };
 }

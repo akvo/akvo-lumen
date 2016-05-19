@@ -1,6 +1,6 @@
 CREATE TABLE dataset_column (
     id text PRIMARY KEY,
-    dataset_id text REFERENCES dataset,
+    dataset_id text REFERENCES dataset ON DELETE CASCADE,
     title text NOT NULL,
     type text NOT NULL,
     -- The name of the column in the data table
