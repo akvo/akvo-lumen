@@ -11,10 +11,10 @@ UPDATE :i:table-name
    SET :i:column-name = upper(:i:column-name::text)::jsonb
 
 
--- :name db-remove-lr-whitespace :! :n
+-- :name db-trim :! :n
 UPDATE :i:table-name
-   SET :i:column-name = trim_lr(:i:column-name)
+   SET :i:column-name = jsonb_trim(:i:column-name)
 
--- :name db-remove-double-whitespace :! :n
+-- :name db-trim-double :! :n
 UPDATE :i:table-name
    SET :i:column-name = trim_double(:i:column-name)

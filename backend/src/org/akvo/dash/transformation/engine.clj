@@ -10,8 +10,8 @@
    "core/to-titlecase" nil
    "core/to-lowercase" nil
    "core/to-uppercase" nil
-   "core/trim-whitespace" nil
-   "core/remove-doublespace" nil})
+   "core/trim" nil
+   "core/trim-doublespace" nil})
 
 
 (hugsql/def-db-fns "org/akvo/dash/transformation/engine.sql")
@@ -49,14 +49,14 @@
   {:success? true})
 
 
-(defmethod apply-operation :core/trim-whitespace
+(defmethod apply-operation :core/trim
   [tennant-conn table-name op-spec]
-  (db-remove-lr-whitespace tennant-conn {:table-name table-name
-                                         :column-name (get-in op-spec ["args" "columnName"])})
+  (db-trim tennant-conn {:table-name table-name
+                         :column-name (get-in op-spec ["args" "columnName"])})
   {:success? true})
 
-(defmethod apply-operation :core/remove-doublespace
+(defmethod apply-operation :core/trim-doublespace
   [tennant-conn table-name op-spec]
-  (db-remove-double-whitespace tennant-conn {:table-name table-name
-                                             :column-name (get-in op-spec ["args" "columnName"])})
+  (db-trim-double tennant-conn {:table-name table-name
+                                :column-name (get-in op-spec ["args" "columnName"])})
   {:success? true})

@@ -87,11 +87,11 @@ END;
 $BODY$
   LANGUAGE plpgsql IMMUTABLE STRICT;
 
-CREATE OR REPLACE FUNCTION trim_lr(val jsonb)
+CREATE OR REPLACE FUNCTION jsonb_trim(val jsonb)
   RETURNS jsonb AS
 $BODY$
 BEGIN
-  RETURN regexp_replace(regexp_replace(val::text, '^"(\s+)', '"'), '(\s+)"$', '"');
+  RETURN regexp_replace(val::text, '^"(\s+)|(\s+)"$', '"', 'g');
 END;
 $BODY$
   LANGUAGE plpgsql IMMUTABLE STRICT;
