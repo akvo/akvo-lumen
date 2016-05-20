@@ -13,10 +13,6 @@ CREATE TABLE IF NOT EXISTS visualisation (
 DO $$
 BEGIN
     PERFORM tardis('visualisation');
+    PERFORM install_update_modified('visualisation');
 END$$;
---;;
-
-CREATE TRIGGER visualisation_modified
-BEFORE UPDATE ON visualisation
-FOR EACH ROW EXECUTE PROCEDURE update_modified();
 --;;
