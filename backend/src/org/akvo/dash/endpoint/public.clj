@@ -7,7 +7,5 @@
 (defn endpoint [config]
   (context "/public" {:keys [params tenant] :as request}
 
-    (GET "/" []
-      (response {:id "abc123"})))
-
-  )
+    (GET "/:id" [id ]
+      (response {:id id}))))
