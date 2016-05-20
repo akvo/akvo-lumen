@@ -19,6 +19,7 @@
              [flow :as flow]
              [import :as import]
              [library :as library]
+             [public :as public]
              [root :as root]
              [share :as share]
              [visualisation :as visualisation]]
@@ -59,6 +60,7 @@
          :http (http/immutant-web (:http config))
          :import (endpoint-component import/endpoint)
          :library (endpoint-component library/endpoint)
+         :public (endpoint-component public/endpoint)
          :root (endpoint-component root/endpoint)
          :share (endpoint-component share/endpoint)
          :tenant-manager (tm/manager)
@@ -66,7 +68,7 @@
         (component/system-using
          {:http           [:app]
           :app            [:tenant-manager :dataset :files :flow :import
-                           :library :root :share :visualisation]
+                           :library :public :root :share :visualisation]
           :tenant-manager [:db]
           :root           [:tenant-manager]
           :dataset        [:tenant-manager :config]
@@ -74,5 +76,6 @@
           :flow           [:tenant-manager :config]
           :import         [:tenant-manager]
           :library        [:tenant-manager]
+          :public         [:config]
           :share          [:tenant-manager :config]
           :visualisation  [:tenant-manager]}))))
