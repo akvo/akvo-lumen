@@ -20,6 +20,7 @@
              [import :as import]
              [library :as library]
              [root :as root]
+             [share :as share]
              [visualisation :as visualisation]]
             [org.akvo.dash.middleware :refer [wrap-auth wrap-jwt]]
             [ring.middleware
@@ -50,26 +51,28 @@
   (let [config (meta-merge base-config config)]
     (-> (component/system-map
          :app (handler-component (:app config))
-         :http (http/immutant-web (:http config))
+         :config config
          :dataset (endpoint-component dataset/endpoint)
          :db   (hikaricp (:db config))
          :files (endpoint-component files/endpoint)
          :flow (endpoint-component flow/endpoint)
+         :http (http/immutant-web (:http config))
          :import (endpoint-component import/endpoint)
          :library (endpoint-component library/endpoint)
-         :tenant-manager (tm/manager)
          :root (endpoint-component root/endpoint)
-         :visualisation (endpoint-component visualisation/endpoint)
-         :config config)
+         :share (endpoint-component share/endpoint)
+         :tenant-manager (tm/manager)
+         :visualisation (endpoint-component visualisation/endpoint))
         (component/system-using
          {:http           [:app]
-          :app            [:dataset :files :flow :import :library :tenant-manager :root
-                           :visualisation]
+          :app            [:tenant-manager :dataset :files :flow :import
+                           :library :root :share :visualisation]
+          :tenant-manager [:db]
           :root           [:tenant-manager]
+          :dataset        [:tenant-manager :config]
+          :files          [:config]
+          :flow           [:tenant-manager :config]
           :import         [:tenant-manager]
           :library        [:tenant-manager]
-          :flow           [:tenant-manager :config]
-          :tenant-manager [:db]
-          :dataset        [:tenant-manager :config]
-          :visualisation  [:tenant-manager]
-          :files          [:config]}))))
+          :share          [:tenant-manager :config]
+          :visualisation  [:tenant-manager]}))))
