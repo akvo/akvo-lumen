@@ -11,9 +11,10 @@ export default class ShareEntity extends Component {
   constructor() {
     super();
     this.state = { shareId: '' };
+    this.fetchShareId = this.fetchShareId.bind(this);
   }
 
-  componentWillMount() {
+  fetchShareId() {
     const { id } = this.props.entity;
     if (id != null) {
       fetch(`/api/share/${id}`, {
@@ -32,6 +33,7 @@ export default class ShareEntity extends Component {
     return (
       <Modal
         isOpen={this.props.isOpen}
+        onAfterOpen={this.fetchShareId}
         style={{
           content: {
             width: 500,
@@ -42,7 +44,7 @@ export default class ShareEntity extends Component {
             border: '0.1rem solid rgb(223, 244, 234)',
           },
           overlay: {
-            zIndex: 99,
+            zIndex: 1000,
             backgroundColor: 'rgba(0,0,0,0.6)',
           },
         }}
