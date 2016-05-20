@@ -81,3 +81,16 @@ CREATE FUNCTION public.update_modified() RETURNS TRIGGER AS $$
     END
 $$ LANGUAGE plpgsql;
 -- ;;
+
+CREATE OR REPLACE FUNCTION public.install_update_modified(t text)
+  RETURNS void AS
+$$
+BEGIN
+EXECUTE format('
+        CREATE TRIGGER %I_modified
+        BEFORE UPDATE ON %I
+        FOR EACH ROW EXECUTE PROCEDURE update_modified();
+        ', t, t);
+END
+$$ LANGUAGE plpgsql;
+-- ;;

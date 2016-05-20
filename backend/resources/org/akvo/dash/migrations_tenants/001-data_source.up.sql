@@ -8,10 +8,6 @@ CREATE TABLE data_source (
 DO $$
 BEGIN
     PERFORM tardis('data_source');
+    PERFORM install_update_modified('data_source');
 END$$;
 -- ;;
-
-CREATE TRIGGER data_source_modified
-BEFORE UPDATE ON data_source
-FOR EACH ROW EXECUTE PROCEDURE update_modified();
---;;
