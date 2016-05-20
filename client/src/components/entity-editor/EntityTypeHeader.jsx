@@ -22,7 +22,6 @@ export default function EntityTypeHeader({ title, saveStatus, actionButtons }) {
               className="overflow clickable"
               onClick={button.onClick}
               key={index}
-              disabled
             >
               {button.buttonText}
             </button>
