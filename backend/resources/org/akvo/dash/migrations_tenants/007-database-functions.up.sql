@@ -78,11 +78,20 @@ END;
 $BODY$
   LANGUAGE plpgsql IMMUTABLE STRICT;
 
-CREATE OR REPLACE FUNCTION trim_space(val jsonb)
+CREATE OR REPLACE FUNCTION trim_double(val jsonb)
   RETURNS jsonb AS
 $BODY$
 BEGIN
   RETURN regexp_replace(val::text, '\s+', ' ', 'g');
+END;
+$BODY$
+  LANGUAGE plpgsql IMMUTABLE STRICT;
+
+CREATE OR REPLACE FUNCTION trim_lr(val jsonb)
+  RETURNS jsonb AS
+$BODY$
+BEGIN
+  RETURN regexp_replace(regexp_replace(val::text, '^"(\s+)', '"'), '(\s+)"$', '"');
 END;
 $BODY$
   LANGUAGE plpgsql IMMUTABLE STRICT;

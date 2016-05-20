@@ -1,31 +1,62 @@
 (ns org.akvo.dash.transformation.engine
-  (:import [javax.script ScriptEngine ScriptEngineManager])
-  (:require [clojure.java.jdbc :as jdbc]))
+  (:require [clojure.java.jdbc :as jdbc]
+            [hugsql.core :as hugsql]))
 
-(defn get-engine
-  "Returns a Nashorn engine capable of evaluating
-  JavaScript code"
-  []
-  (->
-   (ScriptEngineManager.)
-   (.getEngineByName "nashorn")))
+(def available-ops
+  {"core/chage-datatype" nil
+   "core/sort-column" nil
+   "core/remove-sort" nil
+   "core/filter" nil
+   "core/to-titlecase" nil
+   "core/to-lowercase" nil
+   "core/to-uppercase" nil
+   "core/trim-whitespace" nil
+   "core/remove-doublespace" nil})
 
-(defn js-eval
-  [engine expr]
-  (.eval ^ScriptEngine engine expr))
 
-(defn to-number
-  [engine value]
-  (js-eval engine (str "Number(" value ")")))
+(hugsql/def-db-fns "org/akvo/dash/transformation/engine.sql")
 
-(defn to-string
-  [engine value]
-  (js-eval engine (str "''+" value)))
+(defmulti apply-operation
+  "Applies a particular operation based on `op` key from spec
+   spec is a JSON payload with the following keys:
+   - \"op\" : operation to perform
+   - \"args\" : map with arguments to the operation
+   - \"onError\" : Error strategy"
+  (fn [tennant-conn table-name spec]
+    (keyword (get spec "op"))))
 
-(defn to-lowercase
-  [engine value]
-  (js-eval engine (str "'" value "'.toLowerCase()")))
+(defmethod apply-operation :default
+  [tennant-conn table-name op-spec]
+  {:success? false
+   :reason (str "Unknown operation " (op-spec "op"))})
 
-(defn to-uppercase
-  [engine value]
-  (js-eval engine (str "'" value "'.toUpperCase()")))
+(defmethod apply-operation :core/to-titlecase
+  [tennant-conn table-name op-spec]
+  (db-to-titlecase tennant-conn {:table-name table-name
+                                 :column-name (get-in op-spec ["args" "columnName"])})
+  {:success? true})
+
+(defmethod apply-operation :core/to-lowercase
+  [tennant-conn table-name op-spec]
+  (db-to-lowercase tennant-conn {:table-name table-name
+                                 :column-name (get-in op-spec ["args" "columnName"])})
+  {:success? true})
+
+(defmethod apply-operation :core/to-uppercase
+  [tennant-conn table-name op-spec]
+  (db-to-upercase tennant-conn {:table-name table-name
+                                :column-name (get-in op-spec ["args" "columnName"])})
+  {:success? true})
+
+
+(defmethod apply-operation :core/trim-whitespace
+  [tennant-conn table-name op-spec]
+  (db-remove-lr-whitespace tennant-conn {:table-name table-name
+                                         :column-name (get-in op-spec ["args" "columnName"])})
+  {:success? true})
+
+(defmethod apply-operation :core/remove-doublespace
+  [tennant-conn table-name op-spec]
+  (db-remove-double-whitespace tennant-conn {:table-name table-name
+                                             :column-name (get-in op-spec ["args" "columnName"])})
+  {:success? true})
