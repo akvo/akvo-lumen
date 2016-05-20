@@ -2,7 +2,7 @@ CREATE TABLE dataset (
     id text PRIMARY KEY,
     title text NOT NULL,
     description text DEFAULT '' NOT NULL,
-    transaction_log jsonb DEFAULT '[]'::jsonb NOT NULL,
+    transformations jsonb DEFAULT '[]'::jsonb NOT NULL,
     created timestamptz DEFAULT now() NOT NULL,
     modified timestamptz DEFAULT now() NOT NULL
 );
@@ -10,10 +10,6 @@ CREATE TABLE dataset (
 DO $$
 BEGIN
     PERFORM tardis('dataset');
+    PERFORM install_update_modified('dataset');
 END$$;
---;;
-
-CREATE TRIGGER dataset_modified
-BEFORE UPDATE ON dataset
-FOR EACH ROW EXECUTE PROCEDURE update_modified();
 --;;
