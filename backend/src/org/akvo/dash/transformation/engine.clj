@@ -3,7 +3,7 @@
             [hugsql.core :as hugsql]))
 
 (def available-ops
-  {"core/chage-datatype" nil
+  {"core/change-datatype" nil
    "core/sort-column" nil
    "core/remove-sort" nil
    "core/filter" nil

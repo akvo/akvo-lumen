@@ -1,6 +1,6 @@
 -- :name db-to-titlecase :! :n
 UPDATE :i:table-name
-   SET :i:column-name = titlecase(:i:column-name)
+   SET :i:column-name = lumen_titlecase(:i:column-name)
 
 -- :name db-to-lowercase :! :n
 UPDATE :i:table-name
@@ -13,8 +13,8 @@ UPDATE :i:table-name
 
 -- :name db-trim :! :n
 UPDATE :i:table-name
-   SET :i:column-name = jsonb_trim(:i:column-name)
+   SET :i:column-name = lumen_trim(:i:column-name)
 
 -- :name db-trim-double :! :n
 UPDATE :i:table-name
-   SET :i:column-name = trim_double(:i:column-name)
+   SET :i:column-name = lumen_trim_double(:i:column-name)

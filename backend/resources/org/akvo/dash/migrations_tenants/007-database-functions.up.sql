@@ -1,5 +1,5 @@
 
-CREATE OR REPLACE FUNCTION to_number(val jsonb, default_val numeric)
+CREATE OR REPLACE FUNCTION lumen_to_number(val jsonb, default_val numeric)
   RETURNS jsonb AS
 $BODY$
 BEGIN
@@ -12,7 +12,7 @@ $BODY$
   LANGUAGE plpgsql IMMUTABLE STRICT;
 
 
-CREATE OR REPLACE FUNCTION to_number(val jsonb, raise_on_error boolean)
+CREATE OR REPLACE FUNCTION lumen_to_number(val jsonb, raise_on_error boolean)
   RETURNS jsonb AS
 $BODY$
 BEGIN
@@ -28,7 +28,7 @@ END;
 $BODY$
   LANGUAGE plpgsql IMMUTABLE STRICT;
 
-CREATE OR REPLACE FUNCTION to_text(val jsonb)
+CREATE OR REPLACE FUNCTION lumen_to_text(val jsonb)
   RETURNS jsonb AS
 $BODY$
 DECLARE
@@ -42,7 +42,7 @@ END;
 $BODY$
   LANGUAGE plpgsql IMMUTABLE STRICT;
 
-CREATE OR REPLACE FUNCTION to_date(val jsonb, format text, raise_on_error boolean)
+CREATE OR REPLACE FUNCTION lumen_to_date(val jsonb, format text, raise_on_error boolean)
   RETURNS jsonb AS
 $BODY$
 DECLARE
@@ -60,7 +60,7 @@ END;
 $BODY$
   LANGUAGE plpgsql IMMUTABLE STRICT;
 
-CREATE OR REPLACE FUNCTION to_date(val jsonb, format text)
+CREATE OR REPLACE FUNCTION lumen_to_date(val jsonb, format text)
   RETURNS jsonb AS
 $BODY$
 BEGIN
@@ -69,7 +69,7 @@ END;
 $BODY$
   LANGUAGE plpgsql IMMUTABLE STRICT;
 
-CREATE OR REPLACE FUNCTION titlecase(val jsonb)
+CREATE OR REPLACE FUNCTION lumen_titlecase(val jsonb)
   RETURNS jsonb AS
 $BODY$
 BEGIN
@@ -78,7 +78,7 @@ END;
 $BODY$
   LANGUAGE plpgsql IMMUTABLE STRICT;
 
-CREATE OR REPLACE FUNCTION trim_double(val jsonb)
+CREATE OR REPLACE FUNCTION lumen_trim_double(val jsonb)
   RETURNS jsonb AS
 $BODY$
 BEGIN
@@ -87,7 +87,7 @@ END;
 $BODY$
   LANGUAGE plpgsql IMMUTABLE STRICT;
 
-CREATE OR REPLACE FUNCTION jsonb_trim(val jsonb)
+CREATE OR REPLACE FUNCTION lumen_trim(val jsonb)
   RETURNS jsonb AS
 $BODY$
 BEGIN
