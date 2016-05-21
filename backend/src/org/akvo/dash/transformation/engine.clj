@@ -60,3 +60,10 @@
   (db-trim-double tennant-conn {:table-name table-name
                                 :column-name (get-in op-spec ["args" "columnName"])})
   {:success? true})
+
+(defmethod apply-operation :core/sort-column
+  [tennant-conn table-name op-spec]
+  (let [args (get op-spec "args")]
+    (db-create-index tennant-conn {:index-name (str table-name "_" (args "columnName"))
+                                   :column-name (args "columnName")
+                                   :table-name table-name})))

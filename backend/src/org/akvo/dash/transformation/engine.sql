@@ -18,3 +18,7 @@ UPDATE :i:table-name
 -- :name db-trim-double :! :n
 UPDATE :i:table-name
    SET :i:column-name = lumen_trim_double(:i:column-name)
+
+-- :name db-create-index :!
+CREATE INDEX IF NOT EXISTS :i:index-name
+    ON :i:table-name (:i:column-name)
