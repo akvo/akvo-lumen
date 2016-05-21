@@ -34,6 +34,7 @@
     "react-addons-update": "^0.14.8",
     "react-d3": "^0.4.0",
     "react-dom": "^0.14.8",
+    "react-grid-layout": "^0.12.3",
     "react-leaflet": "^0.11.4",
     "react-modal": "^1.2.1",
     "react-redux": "^4.4.5",

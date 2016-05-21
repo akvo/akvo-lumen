@@ -3,7 +3,7 @@ import { Router, Route, IndexRedirect } from 'react-router';
 import Library from '../components/Library';
 import Visualisation from './Visualisation';
 import Dataset from './Dataset';
-import Dashboards from '../components/Dashboards';
+import Dashboard from './Dashboard';
 import Main from '../components/Main';
 
 export default function App({ history }) {
@@ -16,7 +16,7 @@ export default function App({ history }) {
         <Route path="dataset/:datasetId" component={Dataset} />
         <Route path="visualisation/create" component={Visualisation} />
         <Route path="visualisation/:visualisationId" component={Visualisation} />
-        <Route path="dashboards" component={Dashboards} />
+        <Route path="dashboard/create" component={Dashboard} />
       </Route>
     </Router>
   );
