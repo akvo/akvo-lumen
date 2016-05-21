@@ -63,7 +63,14 @@
 
 (defmethod apply-operation :core/sort-column
   [tennant-conn table-name op-spec]
-  (let [args (get op-spec "args")]
-    (db-create-index tennant-conn {:index-name (str table-name "_" (args "columnName"))
+  (let [args (get op-spec "args")
+        idx-name (str table-name "_" (args "columnName"))]
+    (db-create-index tennant-conn {:index-name idx-name
                                    :column-name (args "columnName")
                                    :table-name table-name})))
+
+(defmethod apply-operation :core/remove-sort
+  [tennant-conn table-name op-spec]
+  (let [args (get op-spec "args")
+        idx-name (str table-name "_" (args "columnName"))]
+    (db-drop-index tennant-conn {:index-name idx-name})))
