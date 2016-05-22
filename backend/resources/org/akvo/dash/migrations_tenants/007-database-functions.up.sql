@@ -38,7 +38,7 @@ DECLARE
   tmp text = trim(both '"' from tval);
 BEGIN
   IF tmp = tval THEN
-    RAISE EXCEPTION 'Value was not text: ', tval;
+    RAISE EXCEPTION 'Value was not text: %', tval;
   END IF;
   RETURN date_part('epoch', to_timestamp(tmp, format))::numeric;
 EXCEPTION
