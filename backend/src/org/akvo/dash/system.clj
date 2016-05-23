@@ -76,6 +76,6 @@
           :flow           [:tenant-manager :config]
           :import         [:tenant-manager]
           :library        [:tenant-manager]
-          :public         [:config]
+          :public         [:tenant-manager]
           :share          [:tenant-manager :config]
           :visualisation  [:tenant-manager]}))))
