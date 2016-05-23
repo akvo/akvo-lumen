@@ -1,7 +1,7 @@
 (ns org.akvo.dash.endpoint.dataset
-  (:require [clojure.set :as set]
+  (:require [clojure.java.jdbc :as jdbc]
+            [clojure.set :as set]
             [clojure.string :as str]
-            [clojure.java.jdbc :as jdbc]
             [compojure.core :refer :all]
             [hugsql.core :as hugsql]
             [org.akvo.dash.component.tenant-manager :refer [connection]]

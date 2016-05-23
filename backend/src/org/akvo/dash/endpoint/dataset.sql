@@ -55,7 +55,7 @@ WHERE id = :id
 
 -- :name dataset-by-id :? :1
 SELECT dataset_version.table_name AS "table-name",
-       dataset.transaction_log AS "transaction-log",
+       dataset.transformations,
        dataset.title,
        dataset.created,
        dataset.modified,
