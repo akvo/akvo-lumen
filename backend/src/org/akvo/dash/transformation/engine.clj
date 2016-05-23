@@ -2,6 +2,9 @@
   (:require [clojure.java.jdbc :as jdbc]
             [hugsql.core :as hugsql]))
 
+
+(hugsql/def-db-fns "org/akvo/dash/transformation/engine.sql")
+
 (def available-ops
   {"core/change-datatype" nil
    "core/sort-column" nil
@@ -13,8 +16,6 @@
    "core/trim" nil
    "core/trim-doublespace" nil})
 
-
-(hugsql/def-db-fns "org/akvo/dash/transformation/engine.sql")
 
 (defmulti apply-operation
   "Applies a particular operation based on `op` key from spec
@@ -74,3 +75,14 @@
   (let [args (get op-spec "args")
         idx-name (str table-name "_" (args "columnName"))]
     (db-drop-index tennant-conn {:index-name idx-name})))
+
+
+(defmethod apply-operation :core/change-datatype
+  [tennant-conn table-name op-spec]
+  (let [args (get op-spec "args")]
+    (db-change-data-type tennant-conn {:table-name table-name
+                                       :column-name (args "columnName")
+                                       :new-type (args "newType")
+                                       :default-value (args "defaultValue" "")
+                                       :parse-format (args "parseFormat" "")
+                                       :on-error (op-spec "onError")})))
