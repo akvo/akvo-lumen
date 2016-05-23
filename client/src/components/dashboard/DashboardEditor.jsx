@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import ReactGridLayout from 'react-grid-layout';
+import DashBarChart from '../charts/DashBarChart';
 
 require('../../styles/DashboardEditor.scss');
 require('../../../node_modules/react-grid-layout/css/styles.css');
@@ -10,9 +11,9 @@ export default class DashboardEditor extends Component{
   constructor() {
     super();
     this.state = {
-      grid: [{id: 1, name: "hello"}],
+      grid: [],
       gridX: 0,
-    }
+    };
   }
 
   render() {
@@ -28,17 +29,16 @@ export default class DashboardEditor extends Component{
       return arr;
     }
 
-    let gridX = 0;
-
     const onSpanClick = item => {
       var tmpArr = this.state.grid;
       var tmpInt = this.state.gridX;
 
       tmpArr.push(item);
-      tmpInt++;
 
       this.setState({gridX: tmpInt})
       this.setState({grid: tmpArr});
+
+      tmpInt = tmpInt === 0 ? 6 : 0;
     }
 
     return (
@@ -81,11 +81,16 @@ export default class DashboardEditor extends Component{
                 _grid={{
                   x: this.state.gridX,
                   y: Infinity,
-                  w: 2,
-                  h: 2,
+                  w: 6,
+                  h: 6,
                 }}
               >
-                {item.name}
+                <DashBarChart
+                  visualisation={item}
+                  datasets={this.props.datasets}
+                  width={350}
+                  height={180}
+                />
               </div>
             )}
             </ReactGridLayout>

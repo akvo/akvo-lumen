@@ -10,15 +10,19 @@ require('../../styles/VisualisationPreview.scss');
 
 
 function shouldRender(visualisation, datasets) {
+  console.log(visualisation, datasets);
   const datasetId = visualisation.datasetId;
   if (datasetId == null) {
+    console.log(1);
     return false;
   }
   const dataset = datasets[datasetId];
   if (dataset == null) {
+    console.log(2);
     return false;
   }
   if (dataset.columns == null) {
+    console.log(3);
     return false;
   }
   return true;
