@@ -9,6 +9,16 @@
 
 (hugsql/def-db-fns "org/akvo/dash/endpoint/visualisation.sql")
 
+
+(defn visualisation
+  ""
+  [conn id]
+  (dissoc (visualisation-by-id conn
+                               {:id id}
+                               {}
+                               :identifiers identity)
+          :author))
+
 (defn endpoint
   ""
   [{tm :tenant-manager}]
