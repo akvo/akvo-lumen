@@ -10,19 +10,20 @@ export default class ShareEntity extends Component {
 
   constructor() {
     super();
-    this.state = { shareId: '' };
+    this.state = { id: '' };
     this.fetchShareId = this.fetchShareId.bind(this);
   }
 
   fetchShareId() {
     const { id } = this.props.entity;
     if (id != null) {
-      fetch(`/api/share/${id}`, {
+      fetch('/api/shares', {
         method: 'POST',
+        body: JSON.stringify({ visualisationId: id }),
         headers: headers(),
       })
       .then(response => response.json())
-      .then(({ shareId }) => this.setState({ shareId }))
+      .then(response => this.setState({ id: response.id }))
       .catch(error => console.error(error));
     }
   }
@@ -59,12 +60,12 @@ export default class ShareEntity extends Component {
               +
             </div>
             <div className="contents">
-              <label htmlFor="nameInput">Share {type} {name}</label>
+              <label htmlFor="shareIdInput">Share {type} {name}</label>
               <input
-                id="nameInput"
-                onChange={this.handleInputChange}
+                readOnly
+                id="shareIdInput"
                 type="text"
-                value={this.state.shareId}
+                value={this.state.id}
               />
             </div>
           </div>

@@ -1,9 +1,10 @@
 (ns org.akvo.dash.endpoint.share
-  (:require [compojure.core :refer :all]
-            [hugsql.core :as hugsql]
-            [clojure.java.jdbc :as jdbc]
+  (:require [clojure.java.jdbc :as jdbc]
             [clojure.pprint :refer [pprint]]
+            [compojure.core :refer :all]
+            [hugsql.core :as hugsql]
             [org.akvo.dash.component.tenant-manager :refer [connection]]
+            [org.akvo.dash.util :refer (squuid)]
             [ring.util.response :refer [response]])
   (:import java.util.UUID))
 
@@ -15,15 +16,10 @@
   (all-shares conn))
 
 
-(defn share
-  "Create or return share for item."
-  [tenant-conn type id]
-  (jdbc/with-db-transaction [tx tenant-conn]
-    (let [existing-share (share-by-item-id tx {:visualisation-id (str id)})]
-      (if (not (nil? existing-share))
-        existing-share
-        (insert-share tx {:id               (str (UUID/randomUUID))
-                          :visualisation-id id})))))
+(defn share-visualisation [tenant-conn visualisation-id]
+  (first (insert-visualisation-share tenant-conn
+                                     {:id (str (squuid))
+                                      :visualisation-id visualisation-id})))
 
 (defn end-share
   "Delete the share."
@@ -37,7 +33,7 @@
       (response {:index 0
                  :items (collection (connection tenant-manager tenant))}))
 
-    (POST "/" {:keys [tenant body jwt-claims] :as request}
-      (let [tenant-conn (connection tenant-manager tenant)
-            item-id     (str (UUID/randomUUID))]
-        (response (share tenant-conn "v" item-id))))))
+    (POST "/" {:keys [tenant body] :as request}
+      (let [tenant-conn (connection tenant-manager tenant)]
+        (response (share-visualisation tenant-conn
+                                       (get body "visualisationId")))))))

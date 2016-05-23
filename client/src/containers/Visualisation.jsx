@@ -42,6 +42,7 @@ class Visualisation extends Component {
       },
     };
 
+    this.onSave = this.onSave.bind(this);
     this.handleChangeVisualisationSpec = this.handleChangeVisualisationSpec.bind(this);
     this.handleChangeVisualisation = this.handleChangeVisualisation.bind(this);
     this.handleChangeSourceDataset = this.handleChangeSourceDataset.bind(this);
@@ -57,15 +58,20 @@ class Visualisation extends Component {
     if (isEditingExistingVisualisation) {
       const visualisationId = this.props.params.visualisationId;
       this.props.dispatch(actions.fetchVisualisation(visualisationId));
-      this.setState(this.props.library.visualisations[visualisationId]);
-      this.setState({ isUnsavedChanges: false });
+      this.setState({
+        visualisation: this.props.library.visualisations[visualisationId],
+        isUnsavedChanges: false,
+      });
     }
   }
 
   componentWillReceiveProps() {
-    this.setState({
-      visualisation: this.props.library.visualisations[this.props.params.visualisationId],
-    });
+    // Need more intelligent merge
+    if (this.props.params.visualsationId != null) {
+      this.setState({
+        visualisation: this.props.library.visualisations[this.props.params.visualisationId],
+      });
+    }
   }
 
   onSave() {

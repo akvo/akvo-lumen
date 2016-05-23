@@ -1,6 +1,6 @@
 (ns org.akvo.dash.endpoint.share-test
-  (:require [clojure.test :refer :all]
-            [clojure.pprint :refer [pprint]]
+  (:require [clojure.pprint :refer [pprint]]
+            [clojure.test :refer :all]
             [hugsql.core :as hugsql]
             [org.akvo.dash.component.tenant-manager :as tm]
             [org.akvo.dash.endpoint.share :as share]
@@ -74,9 +74,9 @@
 ;;;
 
 (def test-spec
-  {:data-source-id   (squuid)
-   :dataset-id       (squuid)
-   :visualisation-id (squuid)})
+  {:data-source-id   (str (squuid))
+   :dataset-id       (str (squuid))
+   :visualisation-id (str (squuid))})
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -94,16 +94,16 @@
 
   (testing "Insert share"
     (seed test-conn test-spec)
-    (let [new-share (first (share/share test-conn
-                                        "v" (:visualisation-id test-spec)))
+    (let [new-share (share/share-visualisation test-conn
+                                               (:visualisation-id test-spec))
           r         (share/collection test-conn)]
       (is (= 1 (count r)))
-      (is (= new-share (first r)))))
+      (is (= (:id new-share) (:id (first r))))))
 
   (testing "New share on same item"
     (let [old-share-id (:id (first (share/collection test-conn)))
-          new-share-id (:id (share/share test-conn
-                                          "v" (:visualisation-id test-spec)))]
+          new-share-id (:id (share/share-visualisation test-conn
+                                                       (:visualisation-id test-spec)))]
       (is (= new-share-id old-share-id))))
 
   (testing "Remove share"

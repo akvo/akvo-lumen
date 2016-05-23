@@ -3,11 +3,14 @@
 SELECT *
 FROM share;
 
--- :name insert-share :<!
--- :doc Insert share.
+-- :name insert-visualisation-share :<!
+-- :doc Insert a visualisation share. If the visualisation is already shared the existing share id will be returned.
 INSERT INTO share (id, visualisation_id)
 VALUES (:id, :visualisation-id)
-RETURNING *;
+ON CONFLICT (visualisation_id)
+DO UPDATE SET visualisation_id=:visualisation-id
+WHERE share.visualisation_id=:visualisation-id
+RETURNING (id);
 
 -- :name share-by-item-id :? :1
 -- :doc Return share not by share id but item id.

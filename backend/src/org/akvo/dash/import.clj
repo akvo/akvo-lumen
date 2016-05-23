@@ -5,12 +5,12 @@
             [clojure.data.csv :as csv]
             [clojure.string :as str]
             [hugsql.core :as hugsql]
-            [ring.util.response :as res]
-            [org.akvo.dash.transformation :as t]
-            [org.akvo.dash.import.flow]
+            [org.akvo.dash.import.common :as import]
             [org.akvo.dash.import.csv]
+            [org.akvo.dash.import.flow]
+            [org.akvo.dash.transformation :as t]
             [org.akvo.dash.util :refer (squuid)]
-            [org.akvo.dash.import.common :as import]))
+            [ring.util.response :as res]))
 
 (hugsql/def-db-fns "org/akvo/dash/import.sql")
 
