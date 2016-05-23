@@ -5,8 +5,8 @@ FROM share;
 
 -- :name insert-share :<!
 -- :doc Insert share.
-INSERT INTO share (id, visualisation_id, spec)
-VALUES (:id, :visualisation-id, :spec::jsonb)
+INSERT INTO share (id, visualisation_id)
+VALUES (:id, :visualisation-id)
 RETURNING *;
 
 -- :name share-by-item-id :? :1

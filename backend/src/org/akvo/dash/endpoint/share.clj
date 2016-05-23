@@ -23,8 +23,7 @@
       (if (not (nil? existing-share))
         existing-share
         (insert-share tx {:id               (str (UUID/randomUUID))
-                          :visualisation-id id
-                          :spec             "{}"})))))
+                          :visualisation-id id})))))
 
 (defn end-share
   "Delete the share."
