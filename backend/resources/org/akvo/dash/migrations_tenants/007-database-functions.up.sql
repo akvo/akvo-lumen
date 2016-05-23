@@ -86,7 +86,6 @@ $$
 DECLARE
   initial_sql text = format('UPDATE %s SET %s = lumen_to_%s', tbl_name, col_name, new_type);
 BEGIN
-
   IF new_type = 'text' THEN
     RETURN format('%s(%s) WHERE rnum = $1', inital_sql, col_name);
   ELSIF new_type = 'number' THEN
@@ -120,8 +119,10 @@ DECLARE
   current_rnum integer;
   current_val jsonb;
   exec_log text[];
-  select_sql text = format('SELECT rnum, %s FROM %s ORDER BY rnum FOR UPDATE', col_name, tbl_name);
-  delete_sql text = format('DELETE FROM %s WHERE rnum = $1', tbl_name);
+  select_sql text = format('SELECT rnum, %I FROM %I ORDER BY rnum FOR UPDATE', col_name, tbl_name);
+  delete_sql text = format('DELETE FROM %I WHERE ', tbl_name);
+  delete_flag text = '''{"delete":true}''::jsonb';
+  flag_sql text = format('UPDATE %I SET %I = ' || delete_flag || ' WHERE rnum = $1', tbl_name, col_name);
   update_sql text = lumen_get_update_sql(tbl_name, col_name, new_type, on_error);
   t1 text;
   t2 text;
@@ -132,11 +133,9 @@ BEGIN
   -- new_type: 'text' | 'number' | 'date'
   -- on_error: 'default-value' | 'fail' | 'delete-row'
 
-  exec_log = array_append(exec_log, 'this is a log');
 
-
-  RAISE NOTICE 'SELECT SQL: %', select_sql;
-  RAISE NOTICE 'UPDATE SQL: %', update_sql;
+  --RAISE NOTICE 'SELECT SQL: %', select_sql;
+  --RAISE NOTICE 'UPDATE SQL: %', update_sql;
 
   OPEN cur FOR EXECUTE select_sql;
 
@@ -150,12 +149,27 @@ BEGIN
         GET STACKED DIAGNOSTICS t1 = MESSAGE_TEXT,
                                 t2 = PG_EXCEPTION_DETAIL,
                                 t3 = PG_EXCEPTION_HINT;
-        RAISE NOTICE 'Error processing % - % - % - %', current_val, t1, t2, t3;
+        --RAISE NOTICE 'Update failed: % - % - % - %', current_val, t1, t2, t3;
+	IF on_error = 'delete-row' THEN
+	  exec_log = array_append(exec_log, format('Mark to delete: rnum: %s - val: %s', current_rnum, current_val));
+	  BEGIN
+	    EXECUTE flag_sql USING current_rnum;
+	  EXCEPTION
+	    WHEN OTHERS THEN
+	      GET STACKED DIAGNOSTICS t1 = MESSAGE_TEXT;
+	      exec_log = array_append(exec_log, t1);
+	    END;
+	ELSE
+	  RAISE EXCEPTION 'Error processing row: rnum: % - val: % - msg: %', current_rnum, current_val, t1;
+	END IF;
     END;
   END LOOP;
+
+  IF on_error = 'delete-row' THEN
+    EXECUTE delete_sql || col_name || ' = ' || delete_flag;
+  END IF;
+
   RETURN array_to_json(exec_log);
 END;
 $$
   LANGUAGE plpgsql VOLATILE;
-
---SELECT lumen_change_data_type('ds_abb8940b_f77a_4d8d_96c5_d311940f6e37', 'c2', 'number', '-1'::jsonb, null, 'default-value');
