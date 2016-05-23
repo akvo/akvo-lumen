@@ -29,25 +29,27 @@ END;
 $$
   LANGUAGE plpgsql IMMUTABLE STRICT;
 
-CREATE OR REPLACE FUNCTION lumen_to_date(val jsonb, format text,
-  default_val numeric, raise_on_error boolean)
+CREATE OR REPLACE FUNCTION lumen_to_date(val jsonb, default_val jsonb,
+  parse_format text, raise_on_error boolean)
   RETURNS jsonb AS
 $$
 DECLARE
   tval text = val::text;
   tmp text = trim(both '"' from tval);
+  t1 text;
 BEGIN
   IF tmp = tval THEN
     RAISE EXCEPTION 'Value was not text: %', tval;
   END IF;
-  RETURN date_part('epoch', to_timestamp(tmp, format))::numeric;
+  RETURN date_part('epoch', to_timestamp(tmp, parse_format))::numeric;
 EXCEPTION
   WHEN OTHERS THEN
-  IF raise_on_error THEN
-    RAISE EXCEPTION 'Unable to convert % to date value', val;
-  ELSE
-    RETURN default_val;
-  END IF;
+    GET STACKED DIAGNOSTICS t1 = MESSAGE_TEXT;
+    IF raise_on_error THEN
+      RAISE EXCEPTION 'Unable to convert % to date value - msg: %', val, t1;
+    ELSE
+      RETURN default_val;
+    END IF;
 END;
 $$
   LANGUAGE plpgsql IMMUTABLE STRICT;
@@ -84,7 +86,7 @@ CREATE OR REPLACE FUNCTION lumen_get_update_sql(tbl_name text, col_name text, ne
   RETURNS text AS
 $$
 DECLARE
-  initial_sql text = format('UPDATE %s SET %s = lumen_to_%s', tbl_name, col_name, new_type);
+  initial_sql text = format('UPDATE %I SET %I = lumen_to_%s', tbl_name, col_name, new_type);
 BEGIN
   IF new_type = 'text' THEN
     RETURN format('%s(%s) WHERE rnum = $1', inital_sql, col_name);
@@ -98,9 +100,9 @@ BEGIN
     END IF;
   ELSIF new_type = 'date' THEN
     IF on_error = 'default-value' THEN
-      RETURN format('%s(%s, $1, $2, false) WHERE rnum = $1', initial_sql, col_name);
+      RETURN format('%s(%I, $1, $2, false) WHERE rnum = $3', initial_sql, col_name);
     ELSEIF on_error = 'fail' OR on_error = 'delete-row' THEN
-      RETURN format('%s(%s, $1, $2, true) WHERE rnum = $3', initial_sql, col_name);
+      RETURN format('%s(%I, $1, $2, true) WHERE rnum = $3', initial_sql, col_name);
     ELSE
       RAISE EXCEPTION 'Unknown on_error strategy: %', on_error;
     END IF;
@@ -143,7 +145,11 @@ BEGIN
     FETCH FROM cur INTO current_rnum, current_val;
     EXIT WHEN NOT FOUND;
     BEGIN
-      EXECUTE update_sql USING default_value, current_rnum;
+      IF new_type = 'date' THEN
+        EXECUTE update_sql USING default_value, parse_format, current_rnum;
+      ELSE
+        EXECUTE update_sql USING default_value, current_rnum;
+      END IF;
     EXCEPTION
       WHEN OTHERS THEN
         GET STACKED DIAGNOSTICS t1 = MESSAGE_TEXT,

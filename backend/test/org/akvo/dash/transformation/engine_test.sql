@@ -20,3 +20,19 @@ SELECT lumen_change_data_type('ds_test_1', 'c2', 'number', '0'::jsonb, null, 'de
 INSERT INTO ds_test_1 (c2) VALUES ('"1,5"');
 
 SELECT lumen_change_data_type('ds_test_1', 'c2', 'number', '0'::jsonb, null, 'delete-row');
+
+-- Testing to_date
+
+SELECT lumen_change_data_type('ds_test_1', 'c3', 'date', '0'::jsonb, 'YYYY-MM-DD', 'fail');
+
+DELETE FROM ds_test_1;
+
+INSERT INTO ds_test_1 (c3) VALUES ('"Not a date"'::jsonb);
+
+SELECT lumen_change_data_type('ds_test_1', 'c3', 'date', '0'::jsonb, 'YYYY-MM-DD', 'default-value');
+
+DELETE FROM ds_test_1;
+
+INSERT INTO ds_test_1 (c3) VALUES ('"Not a date"'::jsonb);
+
+SELECT lumen_change_data_type('ds_test_1', 'c3', 'date', '0'::jsonb, 'YYYY-MM-DD', 'delete-row');
