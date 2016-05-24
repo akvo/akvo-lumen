@@ -36,6 +36,7 @@
        "<html>\n"
        "  <head>\n"
        "  <meta charset=\"utf-8\" />\n"
+       "  <meta name=\"robots\" content=\"none\" />\n"
        "  <title>Akvo Lumen</title>\n"
        "  </head>\n"
        "<body>\n"
