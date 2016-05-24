@@ -23,14 +23,16 @@
 
   :success? - true if import was successful, false otherwise
   :reason - Short description of the reason for a failed import
-  :columns - A sequence of 3-tuples of the form
+  :columns - A sequence of maps with the column specification
 
-                 [title column-name type]
+                 {:title \"the title\"
+                  :column-name \"c1\"
+                  :type \"text\"}
 
              where title is the user visible title of the column,
              column-name is the name of the column in the generated
              table and type is the user visible type of the column
-             data (string/number/date)"
+             data (text/number/date)"
   (fn [tenant-conn config table-name spec]
     (dispatch-on-kind spec)))
 

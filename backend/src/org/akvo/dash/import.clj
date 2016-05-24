@@ -25,7 +25,7 @@
                                   :job-execution-id job-execution-id
                                   :table-name table-name
                                   :version 1
-                                  :columns (mapv (fn [[title column-name type]]
+                                  :columns (mapv (fn [{:keys [title column-name type]}]
                                                    {:type type
                                                     :title title
                                                     :columnName column-name
