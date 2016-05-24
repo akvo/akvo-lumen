@@ -16,15 +16,12 @@
   (db-test-table tenant-conn)
   (db-test-data tenant-conn)
   (f)
-  (db-drop-test-table tenant-conn)
-  ;;(migrate/rollback tenant-conn :all)
-  )
+  (db-drop-test-table tenant-conn))
 
 (use-fixtures :once transformation-fixture)
 
-(deftest ^:functional test-transformations
-  (testing "valid data"
-    (let [ops [{"op" "core/to-titlecase"
+(def transformations
+  {:ops [{"op" "core/to-titlecase"
                 "args" {"columnName" "c1"}
                 "onError" "default-value"}
                {"op" "core/change-datatype"
@@ -36,6 +33,74 @@
                 "args" {"columnName" "c3"
                         "newType" "date"
                         "defaultValue" "0"}
-                "onError" "default-value"}]]
+                "onError" "default-value"}]
+   :to-number {"op" "core/change-datatype"
+               "args" {"columnName" "c1"
+                       "newType" "number"
+                       "defaultValue" "0"}
+               "onError" "fail"}
+   :to-date {"op" "core/change-datatype"
+             "args" {"columnName" "c1"
+                     "newType" "date"
+                     "defaultValue" "0"
+                     "parseFormat" "YYYY-MM-DD"}
+             "onError" "fail"}})
+
+(deftest ^:functional test-transformations
+  (testing "Valid data"
+    (let [ops (:ops transformations)]
       (is (every? :success? (for [op ops]
-                              (apply-operation tenant-conn "ds_test_1" {} op)))))))
+                              (apply-operation tenant-conn "ds_test_1" {} op))))))
+
+  (testing "Invalid data, on-error: fail"
+    (let [op-to-number (:to-number transformations)
+          op-to-date (:to-date transformations)]
+
+      (db-delete-test-data tenant-conn)
+      (db-insert-invalid-data tenant-conn)
+
+      (is (not (:success? (apply-operation tenant-conn "ds_test_1" {} op-to-number))))
+      (is (not (:success? (apply-operation tenant-conn "ds_test_1" {} op-to-date))))))
+
+  (testing "Invalid data, on-error: default-value"
+    (let [op1 (assoc (:to-number transformations) "onError" "default-value")
+          op2 (assoc (:to-date transformations) "onError" "default-value")]
+
+      (db-delete-test-data tenant-conn)
+      (db-insert-invalid-data tenant-conn)
+
+      (let [result (apply-operation tenant-conn "ds_test_1" {} op1)
+            data (db-select-test-data tenant-conn)]
+        (is (:success? result))
+        (is (= 1 (count data)))
+        (is (zero? (:c1 (first data)))))
+
+
+      (db-delete-test-data tenant-conn)
+      (db-insert-invalid-data tenant-conn)
+
+      (let [result (apply-operation tenant-conn "ds_test_1" {} op2)
+            data (db-select-test-data tenant-conn)]
+        (is (:success? result))
+        (is (= 1 (count data)))
+        (is (zero? (:c1 (first data)))))))
+
+  (testing "Invalid data, on-error: delete-row"
+    (let [op1 (assoc (:to-number transformations) "onError" "delete-row")
+          op2 (assoc (:to-date transformations) "onError" "delete-row")]
+
+      (db-delete-test-data tenant-conn)
+      (db-insert-invalid-data tenant-conn)
+
+      (let [result (apply-operation tenant-conn "ds_test_1" {} op1)
+            data (db-select-test-data tenant-conn)]
+        (is (:success? result))
+        (is (zero? (count data))))
+
+      (db-delete-test-data tenant-conn)
+      (db-insert-invalid-data tenant-conn)
+
+      (let [result (apply-operation tenant-conn "ds_test_1" {} op2)
+            data (db-select-test-data tenant-conn)]
+        (is (:success? result))
+        (is (zero? (count data)))))))

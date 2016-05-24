@@ -121,11 +121,11 @@ DECLARE
   current_rnum integer;
   current_val jsonb;
   exec_log text[];
-  select_sql text = format('SELECT rnum, %I FROM %I ORDER BY rnum FOR UPDATE', col_name, tbl_name);
-  delete_sql text = format('DELETE FROM %I WHERE ', tbl_name);
+  select_sql text;
+  delete_sql text;
   delete_flag text = '''{"delete":true}''::jsonb';
-  flag_sql text = format('UPDATE %I SET %I = ' || delete_flag || ' WHERE rnum = $1', tbl_name, col_name);
-  update_sql text = lumen_get_update_sql(tbl_name, col_name, new_type, on_error);
+  flag_sql text;
+  update_sql text;
   t1 text;
   t2 text;
   t3 text;
@@ -135,9 +135,22 @@ BEGIN
   -- new_type: 'text' | 'number' | 'date'
   -- on_error: 'default-value' | 'fail' | 'delete-row'
 
+  IF tbl_name IS NULL OR tbl_name = '' THEN
+    RAISE EXCEPTION 'tbl_name is required';
+  END IF;
 
-  --RAISE NOTICE 'SELECT SQL: %', select_sql;
-  --RAISE NOTICE 'UPDATE SQL: %', update_sql;
+  IF col_name IS NULL OR char_length(col_name) = 0 THEN
+    RAISE EXCEPTION 'col_name is required';
+  END IF;
+
+  IF new_type IS NULL OR new_type = '' THEN
+    RAISE EXCEPTION 'new_type is required';
+  END IF;
+
+  select_sql = format('SELECT rnum, %s FROM %s ORDER BY rnum FOR UPDATE', col_name, tbl_name);
+  delete_sql = format('DELETE FROM %s WHERE ', tbl_name);
+  update_sql = lumen_get_update_sql(tbl_name, col_name, new_type, on_error);
+  flag_sql = format('UPDATE %I SET %s = ' || delete_flag || ' WHERE rnum = $1', tbl_name, col_name);
 
   OPEN cur FOR EXECUTE select_sql;
 

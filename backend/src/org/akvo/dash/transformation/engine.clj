@@ -1,6 +1,7 @@
 (ns org.akvo.dash.transformation.engine
   (:require [clojure.java.jdbc :as jdbc]
-            [hugsql.core :as hugsql]))
+            [hugsql.core :as hugsql])
+  (:import java.sql.SQLException))
 
 
 (hugsql/def-db-fns "org/akvo/dash/transformation/engine.sql")
@@ -93,11 +94,15 @@
 (defmethod apply-operation :core/change-datatype
   [tennant-conn table-name dv op-spec]
   (let [args (get op-spec "args")]
-    (db-change-data-type tennant-conn {:table-name table-name
-                                       :column-name (args "columnName")
-                                       :new-type (args "newType")
-                                       :default-value (args "defaultValue" "")
-                                       :parse-format (args "parseFormat" "")
-                                       :on-error (op-spec "onError")}))
-  {:success? true
-   :dv dv})
+    (try
+      (db-change-data-type tennant-conn {:table-name table-name
+                                         :column-name (args "columnName")
+                                         :new-type (args "newType")
+                                         :default-value (args "defaultValue" "")
+                                         :parse-format (args "parseFormat" "")
+                                         :on-error (op-spec "onError")})
+      {:success? true
+       :dv dv}
+      (catch SQLException e
+        {:success? false
+         :message (:cause e)}))))
