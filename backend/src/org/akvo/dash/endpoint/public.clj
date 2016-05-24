@@ -6,7 +6,7 @@
             [org.akvo.dash.component.tenant-manager :refer [connection]]
             [org.akvo.dash.endpoint.dataset :refer [find-dataset]]
             [org.akvo.dash.endpoint.visualisation :refer [visualisation]]
-            [ring.util.response :refer [not-found response header]]))
+            [ring.util.response :refer [content-type not-found response]]))
 
 (hugsql/def-db-fns "org/akvo/dash/endpoint/public.sql")
 
@@ -23,10 +23,11 @@
 
 (defn response-data
   [conn share]
-  (let [v (visualisation conn (:visualisation_id share))]
-    (str "lumenData = " (json/encode {:type "visualisation"
-                                      :visualisation v
-                                      :data (find-dataset conn (:datasetId v))})
+  (let [v (visualisation conn (:visualisation_id share))
+        d (find-dataset conn (:datasetId v))]
+    (str "LUMEN_DATA = "
+         (json/encode {"visualisation" (dissoc v :id :created :modified)
+                       "datasets"      {(:id d) {"columns" (:columns d)}}})
          ";")))
 
 
@@ -42,6 +43,8 @@
        "  <script>\n"
        json-litteral
        "  </script>\n"
+       "  <script type=\"text/javascript\" src=\"/assets/pub.bundle.js\"></script>"
+       "  <link href=\"https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700\" rel=\"stylesheet\" type=\"text/css\">"
        "</body>\n</html>"))
 
 
@@ -56,4 +59,4 @@
           (not-found {:error 404
                       :message (str "No public share with id: " id)})
           (-> (response (html-response (response-data conn share)))
-              (header "content-type" "text/html; charset=utf-8")))))))
+              (content-type "text/html; charset=utf-8")))))))
