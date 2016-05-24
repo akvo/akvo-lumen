@@ -18,7 +18,7 @@ VALUES (:id, :dataset-id, :job-execution-id, :table-name, :imported-table-name, 
 
 -- :name clone-data-table :! :n
 -- :doc Clone a data table
-CREATE TABLE :i:to-table AS SELECT * FROM :i:from-table
+CREATE TABLE :i:to-table AS TABLE :i:from-table
 
 -- :name data-source-spec-by-job-execution-id :? :1
 -- :doc Get the data source spec by job execution id
