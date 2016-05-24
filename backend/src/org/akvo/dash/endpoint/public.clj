@@ -24,22 +24,25 @@
 (defn response-data
   [conn share]
   (let [v (visualisation conn (:visualisation_id share))]
-    {:type "visualisation"
-     :visualisation v
-     :data (find-dataset conn (:datasetId v))}))
+    (str "lumenData = " (json/encode {:type "visualisation"
+                                      :visualisation v
+                                      :data (find-dataset conn (:datasetId v))})
+         ";")))
 
 
 (defn html-response [json-litteral]
-  (str "<!DOCTYPE html>"
-       "<html><head>"
-       "<meta charset=\"utf-8\" />"
-       "<title>Akvo Lumen</title>"
-       "</head><body>"
-       "<div id=\"root\"></div>"
-       "<script>"
+  (str "<!DOCTYPE html>\n"
+       "<html>\n"
+       "  <head>\n"
+       "  <meta charset=\"utf-8\" />\n"
+       "  <title>Akvo Lumen</title>\n"
+       "  </head>\n"
+       "<body>\n"
+       "  <div id=\"root\"></div>\n"
+       "  <script>\n"
        json-litteral
-       "</script>"
-       "</body></html>"))
+       "  </script>\n"
+       "</body>\n</html>"))
 
 
 (defn endpoint [{tm :tenant-manager :as config}]
@@ -52,5 +55,5 @@
         (if (nil? share)
           (not-found {:error 404
                       :message (str "No public share with id: " id)})
-          (-> (response (html-response (json/encode (response-data conn share))))
+          (-> (response (html-response (response-data conn share)))
               (header "content-type" "text/html; charset=utf-8")))))))
