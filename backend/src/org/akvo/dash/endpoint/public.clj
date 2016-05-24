@@ -1,8 +1,8 @@
 (ns org.akvo.dash.endpoint.public
-  (:require [compojure.core :refer :all]
+  (:require [cheshire.core :as json]
             [clojure.pprint :refer  [pprint]]
+            [compojure.core :refer :all]
             [hugsql.core :as hugsql]
-            [cheshire.core :as json]
             [org.akvo.dash.component.tenant-manager :refer [connection]]
             [org.akvo.dash.endpoint.dataset :refer [find-dataset]]
             [org.akvo.dash.endpoint.visualisation :refer [visualisation]]
@@ -53,10 +53,11 @@
   (context "/public" {:keys [params tenant] :as request}
 
     (GET "/:id" [id]
+
       (let [conn (connection tm tenant)
             share (get-share conn id)]
         (if (nil? share)
-          (not-found {:error 404
-                      :message (str "No public share with id: " id)})
+          (-> (not-found (str "No public share with id: " id))
+              (content-type "text/html; charset=utf-8"))
           (-> (response (html-response (response-data conn share)))
               (content-type "text/html; charset=utf-8")))))))

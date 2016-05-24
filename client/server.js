@@ -10,7 +10,11 @@ new WebpackDevServer(webpack(config), {
   historyApiFallback: true,
   proxy: {
     '/api/*': {
-        target: "http://t1.lumen.localhost:3000",
+      target: "http://t1.lumen.localhost:3000",
+      secure: false
+    },
+    '/public/*': {
+      target: "http://t1.lumen.localhost:3000",
       secure: false
     }
   }
