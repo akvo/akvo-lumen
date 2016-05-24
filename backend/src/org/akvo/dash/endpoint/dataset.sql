@@ -59,7 +59,8 @@ SELECT dataset_version.table_name AS "table-name",
        dataset.title,
        dataset.created,
        dataset.modified,
-       dataset.id
+       dataset.id,
+       dataset_version.columns
   FROM dataset_version, dataset
  WHERE dataset_version.dataset_id=:id
    AND dataset.id=dataset_version.dataset_id
