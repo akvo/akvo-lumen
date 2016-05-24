@@ -29,8 +29,6 @@
     (let [new-share (share/share-visualisation test-conn
                                                (:visualisation-id share-test/test-spec))
           p (get-share test-conn (:id new-share))]
-      (pprint new-share)
-      (pprint p)
       (is (= (:visualisation_id p)
              (:visualisation-id share-test/test-spec)))
       (is (= (:id new-share)

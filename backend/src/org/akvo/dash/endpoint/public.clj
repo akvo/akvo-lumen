@@ -25,7 +25,7 @@
   [conn share]
   (let [v (visualisation conn (:visualisation_id share))
         d (find-dataset conn (:datasetId v))]
-    (str "LUMEN_DATA = "
+    (str "window.LUMEN_DATA = "
          (json/encode {"visualisation" (dissoc v :id :created :modified)
                        "datasets"      {(:id d) {"columns" (:columns d)}}})
          ";")))
