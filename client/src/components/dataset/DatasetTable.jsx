@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { Table, Column, Cell } from 'fixed-data-table';
+import moment from 'moment';
 import ColumnHeader from './ColumnHeader';
 import ContextMenu from '../common/ContextMenu';
 import DataTableSidebar from './DataTableSidebar';
@@ -74,6 +75,15 @@ const columnMenuOptions = [
     ],
   },
 ];
+
+function formatCellValue(type, value) {
+  switch (type) {
+    case 'date':
+      return value == null ? null : moment(value).format();
+    default:
+      return value;
+  }
+}
 
 export default class DatasetTable extends Component {
 
@@ -275,7 +285,9 @@ export default class DatasetTable extends Component {
           cellClassName={this.getCellClassName(column.title)}
           key={index}
           header={columnHeader}
-          cell={props => (<Cell>{column.values[props.rowIndex]}</Cell>)}
+          cell={props => (
+            <Cell>{formatCellValue(column.type, column.values[props.rowIndex])}</Cell>
+          )}
           width={200}
         />
       );

@@ -1,7 +1,7 @@
 (ns org.akvo.dash.import.flow
-  (:require [clojure.string :as str]
+  (:require [akvo.commons.psql-util :as pg]
             [clojure.java.jdbc :as jdbc]
-            [akvo.commons.psql-util :as pg]
+            [clojure.string :as str]
             [hugsql.core :as hugsql]
             [org.akvo.dash.import.common :as import]))
 
@@ -46,9 +46,9 @@
                   {:type (question-type->dash-type (:type q))
                    :title (:display_text q)})
                 (questions form))]
-    (map-indexed (fn [idx col]
-                   (assoc col :column-name (str "c" (inc idx))))
-                 (concat common qs))))
+    (vec (map-indexed (fn [idx col]
+                        (assoc col :column-name (str "c" (inc idx))))
+                      (concat common qs)))))
 
 (defmulti render-response :question-type)
 
@@ -135,7 +135,7 @@
     (jdbc/execute! tenant-conn [(create-data-table table-name (map :column-name columns))])
     (doseq [data-row data-rows]
       (jdbc/insert! tenant-conn table-name data-row))
-    (mapv (juxt :title :column-name :type) columns)))
+    columns))
 
 (defmethod import/valid? "AKVO_FLOW"
   [{:strs [instance surveyId]}]
