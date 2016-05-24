@@ -144,7 +144,7 @@ export default class DataTableSidebar extends Component {
         return (null);
 
       default:
-        throw new Error('Unkown sidebar type suppled to DataTableSidebar');
+        throw new Error(`Unkown sidebar type ${sidebarType} supplied to getInputs`);
     }
   }
 
@@ -158,7 +158,7 @@ export default class DataTableSidebar extends Component {
         return 'Filter';
 
       default:
-        throw new Error('Unkown sidebar type suppled to DataTableSidebar');
+        throw new Error(`Unkown sidebar type ${sidebarType} supplied to getPositiveButtonText`);
     }
   }
 
