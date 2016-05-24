@@ -1,7 +1,17 @@
 import React from 'react';
 import { render } from 'react-dom';
-import DashMap from './components/charts/DashMap';
+import VisualisationPreview from './components/visualisation/VisualisationPreview';
+
+require('./styles/reset.global.scss');
+require('./styles/style.global.scss');
 
 const rootElement = document.querySelector('#root');
 const data = window.LUMEN_DATA;
-render(<DashMap visualisation={data.visualisation} datasets={data.datasets} />, rootElement);
+
+render(
+  <VisualisationPreview
+    visualisation={data.visualisation}
+    datasets={data.datasets}
+  />,
+  rootElement
+);
