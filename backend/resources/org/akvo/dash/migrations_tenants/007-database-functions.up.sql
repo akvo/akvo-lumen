@@ -143,7 +143,7 @@ BEGIN
     RAISE EXCEPTION 'col_name is required';
   END IF;
 
-  IF new_type IS NULL OR new_type = '' THEN
+  IF new_type IS NULL OR char_length(new_type) = 0 THEN
     RAISE EXCEPTION 'new_type is required';
   END IF;
 
