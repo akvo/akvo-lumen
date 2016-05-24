@@ -59,7 +59,7 @@
         (response (dissoc (visualisation-by-id (connection tm tenant)
                                                {:id id}
                                                {}
-                                               :identifiers identity                                               )
+                                               :identifiers identity)
                           :author)))
 
       (DELETE "/" {:keys [tenant]}
