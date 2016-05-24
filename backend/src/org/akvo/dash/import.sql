@@ -13,20 +13,8 @@ VALUES (:id, :title, :description)
 
 -- :name insert-dataset-version :! :n
 -- :doc Insert new dataset version
-INSERT INTO dataset_version(id, dataset_id, job_execution_id, version, table_name)
-VALUES (:id, :dataset-id, :job-execution-id, :version, :table-name)
-
-
--- :name insert-dataset-column :! n
--- :doc Insert new dataset column
-INSERT INTO dataset_column(id, dataset_id, type, title, column_name, column_order)
-VALUES (:id, :dataset-id, :type, :title, :column-name, :column-order)
-
-
--- :name insert-dataset-columns :! n
--- :doc Insert new dataset columns with *tuple parameters
-INSERT INTO dataset_column(id, dataset_id, type, title, column_name, column_order)
-VALUES :tuple*:columns
+INSERT INTO dataset_version(id, dataset_id, job_execution_id, table_name, version, columns)
+VALUES (:id, :dataset-id, :job-execution-id, :table-name, :version, :columns)
 
 -- :name data-source-spec-by-job-execution-id :? :1
 -- :doc Get the data source spec by job execution id

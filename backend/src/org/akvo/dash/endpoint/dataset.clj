@@ -11,18 +11,19 @@
 (hugsql/def-db-fns "org/akvo/dash/endpoint/dataset.sql")
 
 (defn select-data-sql [table-name columns]
-  (format "SELECT %s FROM %s"
-          (str/join "," (map :column-name columns))
-          table-name))
+  (let [column-names (map #(get % "columnName") columns)]
+    (format "SELECT %s FROM %s"
+            (str/join "," column-names)
+            table-name)))
 
 (defn find-dataset [conn id]
   (when-let [dataset (dataset-by-id conn {:id id})]
-    (let [columns (sort-by :column-order (dataset-columns-by-dataset-id conn {:id id}))
-          data (rest (jdbc/query conn [(select-data-sql (:table-name dataset) columns)] :as-arrays? true))
+    (let [columns (remove #(get % "hidden") (:columns dataset))
+          data (rest (jdbc/query conn
+                                 [(select-data-sql (:table-name dataset) columns)]
+                                 :as-arrays? true))
           columns-with-data (map (fn [column values]
-                                   {:title (:title column)
-                                    :type (:type column)
-                                    :values values})
+                                   (assoc column :values values))
                                  columns
                                  (apply map vector data))]
       {:id id

@@ -19,19 +19,20 @@
     (insert-dataset conn {:id dataset-id
                           :title (get spec "name") ;; TODO Consistent naming. Change on client side?
                           :description (get spec "description" "")})
+
     (insert-dataset-version conn {:id (squuid)
                                   :dataset-id dataset-id
                                   :job-execution-id job-execution-id
                                   :table-name table-name
-                                  :version 1})
-    (insert-dataset-columns conn {:columns (vec (map-indexed (fn [order [title column-name type]]
-                                                               [(squuid)
-                                                                dataset-id
-                                                                type
-                                                                title
-                                                                column-name
-                                                                (* 10 (inc order))])
-                                                             (:columns status)))})
+                                  :version 1
+                                  :columns (mapv (fn [{:keys [title column-name type]}]
+                                                   {:type type
+                                                    :title title
+                                                    :columnName column-name
+                                                    :sort nil
+                                                    :direction nil
+                                                    :hidden false})
+                                                 (:columns status))})
     (update-successful-job-execution conn {:id job-execution-id})))
 
 (defn failed-import [conn job-execution-id reason]
