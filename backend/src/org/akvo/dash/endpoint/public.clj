@@ -22,10 +22,10 @@
 
 (defn prepare-response
   [conn share]
-  (let [v (visualisation (:visualisation_id share))]
+  (let [v (visualisation conn (:visualisation_id share))]
     {:type "visualisation"
      :visualisation v
-     :data (find-dataset conn (:dataset_id v))}))
+     :data (find-dataset conn (:datasetId v))}))
 
 
 (defn endpoint [{tm :tenant-manager :as config}]
@@ -35,7 +35,6 @@
     (GET "/:id" [id]
       (let [conn (connection tm tenant)
             share (get-share conn id)]
-        (pprint share)
         (if (nil? share)
           (not-found {:error 404
                       :message (str "No public share with id: " id)})

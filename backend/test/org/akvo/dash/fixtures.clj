@@ -1,6 +1,7 @@
 (ns org.akvo.dash.fixtures
   (:require [hugsql.core :as hugsql]
             [org.akvo.dash.component.tenant-manager :as tm]
+            ;; [environ.core :refer [env]]
             [org.akvo.dash.migrate :as migrate]
             [ragtime
              [jdbc :as jdbc]
@@ -11,6 +12,9 @@
 
 (def test-tenant-spec
   (->> "profiles.clj" slurp read-string :profiles/test :env :tenants first))
+
+;; (def test-tenant-spec
+;;   (first (env :tenants)))
 
 (def test-conn
   (tm/pool test-tenant-spec))
