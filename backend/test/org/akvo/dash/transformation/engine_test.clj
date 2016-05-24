@@ -22,11 +22,20 @@
 
 (use-fixtures :once transformation-fixture)
 
-(def ops [{"op" "core/to-titlecase"
-           "args" {"columnName" "c1"}
-           "onError" "default-value"}])
-
 (deftest ^:functional test-transformations
   (testing "valid data"
-    (is (= {:success? true :dv {}}
-           (apply-operation tenant-conn "ds_test_1" {} (first ops))))))
+    (let [ops [{"op" "core/to-titlecase"
+                "args" {"columnName" "c1"}
+                "onError" "default-value"}
+               {"op" "core/change-datatype"
+                "args" {"columnName" "c2"
+                        "newType" "number"
+                        "defaultValue" "0"}
+                "onError" "default-value"}
+               {"op" "core/change-datatype"
+                "args" {"columnName" "c3"
+                        "newType" "date"
+                        "defaultValue" "0"}
+                "onError" "default-value"}]]
+      (is (every? :success? (for [op ops]
+                              (apply-operation tenant-conn "ds_test_1" {} op)))))))
