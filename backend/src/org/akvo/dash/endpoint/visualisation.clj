@@ -23,7 +23,7 @@
   ""
   [{tm :tenant-manager}]
 
-  (context "/visualisations" []
+  (context "/api/visualisations" []
 
     (GET "/" {:keys [tenant]}
       (response (all-visualisations (connection tm tenant)

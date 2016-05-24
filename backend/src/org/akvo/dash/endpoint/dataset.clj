@@ -35,7 +35,7 @@
 
 
 (defn endpoint [{:keys [tenant-manager config]}]
-  (context "/datasets" {:keys [params tenant] :as request}
+  (context "/api/datasets" {:keys [params tenant] :as request}
 
     (GET "/" []
       (response (all-datasets (connection tenant-manager tenant))))

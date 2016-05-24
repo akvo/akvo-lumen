@@ -50,7 +50,7 @@
 
 (defn endpoint [{tm :tenant-manager :as config}]
 
-  (context "/public" {:keys [params tenant] :as request}
+  (context "/s" {:keys [params tenant] :as request}
 
     (GET "/:id" [id]
 

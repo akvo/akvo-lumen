@@ -27,7 +27,7 @@
   (delete-share-by-id conn {:id id}))
 
 (defn endpoint [{:keys [tenant-manager config]}]
-  (context "/shares" {:keys [params tenant] :as request}
+  (context "/api/shares" {:keys [params tenant] :as request}
 
     (GET "/" []
       (response {:index 0

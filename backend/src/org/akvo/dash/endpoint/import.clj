@@ -10,7 +10,7 @@
 (defn endpoint
   ""
   [{tm :tenant-manager}]
-  (context "/imports" {:keys [params tenant] :as request}
+  (context "/api/imports" {:keys [params tenant] :as request}
 
     (GET "/" []
       (response/response (all-imports (connection tm tenant))))
