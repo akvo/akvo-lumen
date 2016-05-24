@@ -19,8 +19,8 @@
 (defn find-dataset [conn id]
   (when-let [dataset (dataset-by-id conn {:id id})]
     (let [columns (remove #(get % "hidden") (:columns dataset))
-          data (rest (jdbc/query conn [(select-data-sql (:table-name dataset)
-                                                        columns)]
+          data (rest (jdbc/query conn
+                                 [(select-data-sql (:table-name dataset) columns)]
                                  :as-arrays? true))
           columns-with-data (map (fn [column values]
                                    (assoc column :values values))
