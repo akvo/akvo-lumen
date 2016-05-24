@@ -13,8 +13,12 @@ VALUES (:id, :title, :description)
 
 -- :name insert-dataset-version :! :n
 -- :doc Insert new dataset version
-INSERT INTO dataset_version(id, dataset_id, job_execution_id, table_name, version, columns)
-VALUES (:id, :dataset-id, :job-execution-id, :table-name, :version, :columns)
+INSERT INTO dataset_version(id, dataset_id, job_execution_id, table_name, imported_table_name, version, columns)
+VALUES (:id, :dataset-id, :job-execution-id, :table-name, :imported-table-name, :version, :columns)
+
+-- :name clone-data-table :! :n
+-- :doc Clone a data table
+CREATE TABLE :i:to-table AS SELECT * FROM :i:from-table
 
 -- :name data-source-spec-by-job-execution-id :? :1
 -- :doc Get the data source spec by job execution id
