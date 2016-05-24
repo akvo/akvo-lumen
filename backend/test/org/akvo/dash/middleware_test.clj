@@ -33,17 +33,22 @@
   (testing "GET / without claims"
     (let [response ((m/wrap-auth test-handler)
                     (immutant-request :get "/"))]
+      (is (= 401 (:status response)))))
+
+  (testing "GET /api without claims"
+    (let [response ((m/wrap-auth test-handler)
+                    (immutant-request :get "/api"))]
       (is (= 200 (:status response)))))
 
-  (testing "POST / without claims"
+  (testing "POST /api without claims"
     (let [response ((m/wrap-auth test-handler)
-                    (immutant-request :post "/"))]
+                    (immutant-request :post "/api"))]
       (is (= 401 (:status response)))))
 
   (testing "GET resource with claims but no tenant"
     (check-response
      ((m/wrap-auth test-handler)
-      (-> (immutant-request :get "/resource")
+      (-> (immutant-request :get "/api/resource")
           (assoc-in [:jwt-claims "realm_access" "roles"]
                     ["akvo:dash:t0"])))
      403))
@@ -51,7 +56,7 @@
   (testing "GET resource with claims and tenant"
     (check-response
      ((m/wrap-auth test-handler)
-      (-> (immutant-request :get "/resource")
+      (-> (immutant-request :get "/api/resource")
           (assoc-in [:jwt-claims "realm_access" "roles"]
                     ["akvo:dash:t0"])
           (assoc :tenant "t0")))
@@ -59,41 +64,41 @@
 
   (testing "GET resource without claims"
     (let [response ((m/wrap-auth test-handler)
-                    (immutant-request :get "/resource"))]
+                    (immutant-request :get "/api/resource"))]
       (check-response response 401)))
 
   (testing "POST resource without claims"
     (let [response ((m/wrap-auth test-handler)
-                    (immutant-request :post "/resource"))]
+                    (immutant-request :post "/api/resource"))]
       (check-response response 401)))
 
   (testing "PATCH resource without claims"
     (let [response ((m/wrap-auth test-handler)
-                    (immutant-request :patch "/resource"))]
+                    (immutant-request :patch "/api/resource"))]
       (check-response response 401)))
 
   (testing "HEAD resource without claims"
     (let [response ((m/wrap-auth test-handler)
-                    (immutant-request :patch "/resource"))]
+                    (immutant-request :patch "/api/resource"))]
       (check-response response 401)))
 
   (testing "GET resource without claim role"
     (let [response ((m/wrap-auth test-handler)
-                    (assoc-in (immutant-request :get "/resource")
+                    (assoc-in (immutant-request :get "/api/resource")
                               [:jwt-claims "realm_access" "roles"]
                               []))]
       (check-response response 403)))
 
   (testing "POST resource without claim role"
     (let [response ((m/wrap-auth test-handler)
-                    (assoc-in (immutant-request :post "/resource")
+                    (assoc-in (immutant-request :post "/api/resource")
                               [:jwt-claims "realm_access" "roles"]
                               []))]
       (check-response response 403)))
 
   (testing "Faulty claims should return not authenticated"
     (let [response ((m/wrap-auth test-handler)
-                    (assoc-in (immutant-request :get "/resource")
+                    (assoc-in (immutant-request :get "/api/resource")
                               [:jwt-claims]
                               "realm_access"))]
       (check-response response 401))))
@@ -104,12 +109,12 @@
                                    (get-in system/base-config [:app :jwt]))]
 
     (testing "No token should not yeild jwt-claims."
-      (let [response (jwt-middleware (immutant-request :get "/"))]
+      (let [response (jwt-middleware (immutant-request :get "/api"))]
         (is (not (contains? response :jwt-claims)))))
 
 
     (testing "Invalid token should not yeild jwt-claims."
-      (let [response (jwt-middleware (assoc-in (immutant-request :get "/")
+      (let [response (jwt-middleware (assoc-in (immutant-request :get "/api")
                                                [:headers "authorization"]
                                                "invalid-token"
                                                ))]
