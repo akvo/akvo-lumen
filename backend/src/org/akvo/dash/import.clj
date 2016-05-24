@@ -5,12 +5,12 @@
             [clojure.data.csv :as csv]
             [clojure.string :as str]
             [hugsql.core :as hugsql]
-            [ring.util.response :as res]
-            [org.akvo.dash.transformation :as t]
-            [org.akvo.dash.import.flow]
+            [org.akvo.dash.import.common :as import]
             [org.akvo.dash.import.csv]
+            [org.akvo.dash.import.flow]
+            [org.akvo.dash.transformation :as t]
             [org.akvo.dash.util :refer (squuid)]
-            [org.akvo.dash.import.common :as import]))
+            [ring.util.response :as res]))
 
 (hugsql/def-db-fns "org/akvo/dash/import.sql")
 
@@ -19,19 +19,20 @@
     (insert-dataset conn {:id dataset-id
                           :title (get spec "name") ;; TODO Consistent naming. Change on client side?
                           :description (get spec "description" "")})
+
     (insert-dataset-version conn {:id (squuid)
                                   :dataset-id dataset-id
                                   :job-execution-id job-execution-id
                                   :table-name table-name
-                                  :version 1})
-    (insert-dataset-columns conn {:columns (vec (map-indexed (fn [order [title column-name type]]
-                                                               [(squuid)
-                                                                dataset-id
-                                                                type
-                                                                title
-                                                                column-name
-                                                                (* 10 (inc order))])
-                                                             (:columns status)))})
+                                  :version 1
+                                  :columns (mapv (fn [[title column-name type]]
+                                                   {:type type
+                                                    :title title
+                                                    :columnName column-name
+                                                    :sort nil
+                                                    :direction nil
+                                                    :hidden false})
+                                                 (:columns status))})
     (update-successful-job-execution conn {:id job-execution-id})))
 
 (defn failed-import [conn job-execution-id reason]
