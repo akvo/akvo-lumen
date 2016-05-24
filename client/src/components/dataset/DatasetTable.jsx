@@ -3,8 +3,77 @@ import { Table, Column, Cell } from 'fixed-data-table';
 import ColumnHeader from './ColumnHeader';
 import ContextMenu from '../common/ContextMenu';
 import DataTableSidebar from './DataTableSidebar';
+import DatasetControls from './DatasetControls';
 
 require('../../styles/DatasetTable.scss');
+
+const columnTypeOptions = [
+  {
+    label: 'text',
+    value: 'text',
+  },
+  {
+    label: 'number',
+    value: 'number',
+  },
+  {
+    label: 'date',
+    value: 'date',
+  },
+];
+
+const columnMenuOptions = [
+  {
+    label: 'Filter',
+    value: 'filter',
+  },
+  {
+    label: 'Sort',
+    value: 'sort',
+    subMenu: [
+      {
+        label: 'Ascending',
+        value: 'sort-ascending',
+      },
+      {
+        label: 'Descending',
+        value: 'sort-descending',
+      },
+    ],
+  },
+  {
+    label: 'Whitespace',
+    value: 'whitespace',
+    subMenu: [
+      {
+        label: 'Remove leading and trailing whitespace',
+        value: 'remove-leading-trailing-whitespace',
+      },
+      {
+        label: 'Remove double spaces',
+        value: 'remove-double-whitespace',
+      },
+    ],
+  },
+  {
+    label: 'Change case',
+    value: 'change-case',
+    subMenu: [
+      {
+        label: 'To Uppercase',
+        value: 'to-uppercase',
+      },
+      {
+        label: 'To Lowercase',
+        value: 'to-lowercase',
+      },
+      {
+        label: 'To Titlecase',
+        value: 'to-titlecase',
+      },
+    ],
+  },
+];
 
 export default class DatasetTable extends Component {
 
@@ -15,17 +84,14 @@ export default class DatasetTable extends Component {
       height: 800,
       activeTransformationMenu: null,
       activeColumnMenu: null,
-      transformationSidebar: null,
+      activeSidebar: null,
     };
     this.handleResize = this.handleResize.bind(this);
     this.handleScroll = this.handleScroll.bind(this);
-    this.handleClickTransformContextMenuToggle =
-      this.handleClickTransformContextMenuToggle.bind(this);
-    this.handleClickTransformContextMenuItem = this.handleClickTransformContextMenuItem.bind(this);
-    this.handleClickColumnMenuToggle = this.handleClickColumnMenuToggle.bind(this);
+    this.handleMenuToggleClick = this.handleMenuToggleClick.bind(this);
+    this.handleMenuItemClick = this.handleMenuItemClick.bind(this);
     this.handleShowSidebar = this.handleShowSidebar.bind(this);
     this.handleHideSidebar = this.handleHideSidebar.bind(this);
-    this.getCellClassName = this.getCellClassName.bind(this);
   }
 
   componentDidMount() {
@@ -35,6 +101,141 @@ export default class DatasetTable extends Component {
 
   componentWillUnmount() {
     window.removeEventListener('resize', this.handleResize);
+  }
+
+  getCellClassName(columnTitle) {
+    if (this.state.activeSidebar &&
+      this.state.activeSidebar.columnTitle === columnTitle) {
+      return 'sidebarTargetingColumn';
+    }
+
+    return '';
+  }
+
+  handleMenuToggleClick(type, options) {
+    /* TOFIX: currently, the sidebar-hiding updates the DOM too slowly
+    ** and any new context menu appears in an offset position.
+    */
+    this.handleHideSidebar();
+    switch (type) {
+      case 'transformContextMenu':
+        if (this.state.activeTransformationMenu &&
+            options.columnTitle === this.state.activeTransformationMenu.title) {
+          // Close the menu
+          this.setState({ activeTransformationMenu: null });
+        } else {
+          this.setState({
+            activeTransformationMenu: {
+              title: options.columnTitle,
+              currentType: options.columnType,
+              left: options.left,
+              top: options.top,
+            },
+            activeColumnMenu: null,
+          });
+        }
+        break;
+
+      case 'columnMenu':
+        if (this.state.activeColumnMenu &&
+            options.columnTitle === this.state.activeColumnMenu.title) {
+          // Close the menu
+          this.setState({ activeColumnMenu: null });
+        } else {
+          this.setState({
+            activeColumnMenu: {
+              title: options.columnTitle,
+              left: options.left,
+              top: options.top,
+              width: options.width,
+            },
+            activeTransformationMenu: null,
+          });
+        }
+        break;
+
+      case 'logMenu':
+        if (this.state.activeSidebar &&
+          this.state.activeSidebar.type === 'transformationLog') {
+          this.handleHideSidebar();
+        } else {
+          this.setState({
+            activeTransformationMenu: null,
+            activeColumnMenu: null,
+          });
+          this.handleShowSidebar({
+            type: 'transformationLog',
+            displayRight: true,
+          });
+        }
+        break;
+
+      default:
+        throw new Error(`Unknown menu type ${type} supplied to handleMenuToggleClick`);
+    }
+  }
+
+  handleMenuItemClick(type, item, oldItem) {
+    switch (type) {
+      case 'transformItem':
+        if (item !== oldItem) {
+          if (item === 'date') {
+            this.handleShowSidebar({
+              type: 'edit',
+              columnTitle: this.state.activeTransformationMenu.title,
+              oldColumnType: oldItem,
+              newColunType: item,
+            });
+          }
+        }
+       // Close the context menu
+        this.setState({ activeTransformationMenu: null });
+        break;
+
+      case 'columnItem':
+        this.setState({
+          activeColumnMenu: null,
+        });
+        switch (item) {
+          case 'filter':
+            this.handleShowSidebar({
+              type: 'filter',
+              columnTitle: this.state.activeColumnMenu.title,
+            });
+            break;
+
+          default:
+            throw new Error(`Unknown item ${item} supplied to handleMenuItemClick`);
+        }
+        break;
+      case 'datasetEditorItem':
+        console.log(item);
+        break;
+
+      default:
+        throw new Error(`Unknown item type ${type} supplied to handleMenuItemClick`);
+    }
+  }
+
+  handleShowSidebar(sidebar) {
+    /* Manually subtract the sidebar width from the datatable width -
+    using refs to measure the new width of the parent container grabs
+    old width before the DOM updates */
+    this.setState({
+      activeSidebar: sidebar,
+      width: this.state.activeSidebar ? this.state.width : this.state.width - 300,
+      height: this.state.height,
+    });
+  }
+
+  handleHideSidebar() {
+    if (this.state.activeSidebar) {
+      this.setState({
+        width: this.state.width + 300,
+        height: this.state.height,
+        activeSidebar: null,
+      });
+    }
   }
 
   handleResize() {
@@ -55,167 +256,16 @@ export default class DatasetTable extends Component {
     });
   }
 
-  handleClickTransformContextMenuToggle(columnTitle, columnType, left, top) {
-    this.setState({ activeColumnMenu: null });
-
-    if (this.state.activeTransformationMenu &&
-        columnTitle === this.state.activeTransformationMenu.title) {
-      // Close the menu
-      this.setState({ activeTransformationMenu: null });
-    } else {
-      this.setState({
-        activeTransformationMenu: {
-          title: columnTitle,
-          currentType: columnType,
-          left,
-          top,
-        },
-      });
-    }
-  }
-
-  handleClickTransformContextMenuItem(newColumnType, oldColumnType) {
-    if (newColumnType !== oldColumnType) {
-      if (newColumnType === 'date') {
-        this.handleShowSidebar({
-          columnTitle: this.state.activeTransformationMenu.title,
-          oldColumnType,
-          newColumnType,
-        });
-      }
-    }
-
-    // Close the context menu
-    this.setState({ activeTransformationMenu: null });
-  }
-
-  handleClickColumnMenuToggle(columnTitle, left, top, width) {
-    this.setState({ activeTransformationMenu: null });
-
-    if (this.state.activeColumnMenu &&
-        columnTitle === this.state.activeColumnMenu.title) {
-      // Close the menu
-      this.setState({ activeColumnMenu: null });
-    } else {
-      this.setState({
-        activeColumnMenu: {
-          title: columnTitle,
-          left,
-          top,
-          width,
-        },
-      });
-    }
-  }
-
-  handleShowSidebar(sidebar) {
-    /* Manually subtract the sidebar width from the datatable width -
-    using refs to measure the new width of the parent container grabs
-    old width before the DOM updates */
-    this.setState({
-      transformationSidebar: sidebar,
-      width: this.state.width - 300,
-      height: this.state.height,
-    });
-  }
-
-  handleHideSidebar() {
-    this.setState({
-      width: this.state.width + 300,
-      height: this.state.height,
-      transformationSidebar: null,
-      activeTransformationMenu: null,
-    });
-  }
-
-  getCellClassName(columnTitle) {
-    if (this.state.transformationSidebar &&
-      this.state.transformationSidebar.columnTitle === columnTitle) {
-      return 'sidebarTargetingColumn';
-    }
-
-    return '';
-  }
-
   render() {
-    const columnTypeOptions = [
-      {
-        label: 'text',
-        value: 'text',
-      },
-      {
-        label: 'number',
-        value: 'number',
-      },
-      {
-        label: 'date',
-        value: 'date',
-      },
-    ];
-
-    const columnMenuOptions = [
-      {
-        label: 'Filter',
-        value: 'filter',
-      },
-      {
-        label: 'Sort',
-        value: 'sort',
-        subMenu: [
-          {
-            label: 'Ascending',
-            value: 'sortAscending',
-          },
-          {
-            label: 'Descending',
-            value: 'sortDescending',
-          },
-        ],
-      },
-      {
-        label: 'Whitespace',
-        value: 'whitespace',
-        subMenu: [
-          {
-            label: 'Remove leading and trailing whitespace',
-            value: 'removeLeadingTrailingWhitespace',
-          },
-          {
-            label: 'Remove double spaces',
-            value: 'removeDoubleWhitespace',
-          },
-        ],
-      },
-      {
-        label: 'Change case',
-        value: 'changeCase',
-        subMenu: [
-          {
-            label: 'To Uppercase',
-            value: 'toUppercase',
-          },
-          {
-            label: 'To Lowercase',
-            value: 'toLowercase',
-          },
-          {
-            label: 'To Titlecase',
-            value: 'toTitlecase',
-          },
-        ],
-      },
-    ];
-
     const cols = this.props.columns.map((column, index) => {
       const columnHeader = (
         <ColumnHeader
           key={index}
           columnType={column.type}
           columnTitle={column.title}
-          onClickTransformContextMenuToggle={this.handleClickTransformContextMenuToggle}
-          onClickColumnMenuToggle={this.handleClickColumnMenuToggle}
-          columnMenuActive={this.state.activeColumnMenu
-            && this.state.activeColumnMenu.title === column.title}
+          onClickMenuToggle={this.handleMenuToggleClick}
+          columnMenuActive={Boolean(this.state.activeColumnMenu
+            && this.state.activeColumnMenu.title === column.title)}
         >
           {column.title}
         </ColumnHeader>
@@ -232,71 +282,80 @@ export default class DatasetTable extends Component {
     });
 
     return (
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'row',
-        }}
-      >
-        {this.state.transformationSidebar &&
-          <DataTableSidebar
-            style={{
-              width: '300px',
-              height: 'calc(100vh - 4rem)',
-              marginTop: '4rem',
-            }}
-            columnTitle={this.state.transformationSidebar.columnTitle}
-            newColumnType={this.state.transformationSidebar.newColumnType}
-            options={columnTypeOptions}
-            onClose={() => this.handleHideSidebar()}
-          />
-        }
+      <div className="DatasetTable">
+        <DatasetControls
+          columns={this.props.columns}
+          onClickMenuToggle={this.handleMenuToggleClick}
+          onClickMenuItem={this.handleMenuItemClick}
+        />
         <div
-          className="DatasetTable"
-          ref="wrappingDiv"
           style={{
-            width: this.state.transformationSidebar ? 'calc(100% - 300px)' : '100%',
+            display: 'flex',
+            flexDirection: this.state.activeSidebar && this.state.activeSidebar.displayRight ?
+              'row-reverse' : 'row',
           }}
         >
-          {this.state.activeTransformationMenu &&
-            <ContextMenu
+          {this.state.activeSidebar &&
+            <DataTableSidebar
+              style={{
+                width: '300px',
+                height: 'calc(100vh - 4rem)',
+              }}
+              sidebar={this.state.activeSidebar}
+              columnTitle={this.state.activeSidebar.columnTitle}
+              newColumnType={this.state.activeSidebar.newColumnType}
               options={columnTypeOptions}
-              selected={this.state.activeTransformationMenu.currentType}
-              style={{
-                width: '8rem',
-                top: `${this.state.activeTransformationMenu.top}px`,
-                left: `${this.state.activeTransformationMenu.left}px`,
-                right: 'initial',
-              }}
-              onOptionSelected={this.handleClickTransformContextMenuItem}
-              arrowClass="topLeft"
-              arrowOffset="15px"
+              onClose={() => this.handleHideSidebar()}
             />
           }
-          {this.state.activeColumnMenu &&
-            <ContextMenu
-              options={columnMenuOptions}
-              selected={null}
-              style={{
-                width: `${this.state.activeColumnMenu.width}px`,
-                top: `${this.state.activeColumnMenu.top}px`,
-                left: `${this.state.activeColumnMenu.left}px`,
-                right: 'initial',
-              }}
-              onOptionSelected={(option) => { console.log(option); }}
-
-            />
-          }
-          <Table
-            headerHeight={50}
-            rowHeight={30}
-            rowsCount={this.props.columns[0].values.length}
-            width={this.state.width}
-            height={this.state.height}
-            onScrollStart={() => this.handleScroll()}
+          <div
+            className="wrapper"
+            ref="wrappingDiv"
+            style={{
+              width: this.state.activeSidebar ? 'calc(100% - 300px)' : '100%',
+            }}
           >
-            {cols}
-          </Table>
+            {this.state.activeTransformationMenu &&
+              <ContextMenu
+                options={columnTypeOptions}
+                selected={this.state.activeTransformationMenu.currentType}
+                style={{
+                  width: '8rem',
+                  top: `${this.state.activeTransformationMenu.top}px`,
+                  left: `${this.state.activeTransformationMenu.left}px`,
+                  right: 'initial',
+                }}
+                onOptionSelected={(item, oldItem) =>
+                  this.handleMenuItemClick('transformItem', item, oldItem)}
+                arrowClass="topLeft"
+                arrowOffset="15px"
+              />
+            }
+            {this.state.activeColumnMenu &&
+              <ContextMenu
+                options={columnMenuOptions}
+                selected={null}
+                style={{
+                  width: `${this.state.activeColumnMenu.width}px`,
+                  top: `${this.state.activeColumnMenu.top}px`,
+                  left: `${this.state.activeColumnMenu.left}px`,
+                  right: 'initial',
+                }}
+                onOptionSelected={(item) => { this.handleMenuItemClick('columnItem', item); }}
+
+              />
+            }
+            <Table
+              headerHeight={50}
+              rowHeight={30}
+              rowsCount={this.props.columns[0].values.length}
+              width={this.state.width}
+              height={this.state.height}
+              onScrollStart={() => this.handleScroll()}
+            >
+              {cols}
+            </Table>
+          </div>
         </div>
       </div>
     );

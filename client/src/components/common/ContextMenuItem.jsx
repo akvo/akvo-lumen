@@ -42,7 +42,6 @@ ContextMenuItem.propTypes = {
   handleItemClick: PropTypes.func.isRequired,
   onOptionSelected: PropTypes.func.isRequired,
   style: PropTypes.object,
-  options: PropTypes.array.isRequired,
   selectedClassName: PropTypes.string,
   containerClass: PropTypes.string,
   itemClass: PropTypes.string,

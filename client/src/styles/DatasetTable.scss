@@ -1,8 +1,9 @@
 @import 'modules/colors';
 
 .DatasetTable {
-  margin-top: 4rem;
-
+  .wrapper {
+    height: calc(100vh - 8rem);
+  }
   .sidebarTargetingColumn {
     background-color: $lightGrey;
   }

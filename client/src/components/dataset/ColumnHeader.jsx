@@ -12,8 +12,14 @@ export default class ColumnHeader extends Component {
     const verticalOffset = rect.top + el.offsetHeight;
     const horizontalOffset = rect.left - (el.offsetWidth / 2);
 
-    this.props.onClickTransformContextMenuToggle(this.props.columnTitle,
-      this.props.columnType, horizontalOffset, verticalOffset);
+    const options = {
+      columnTitle: this.props.columnTitle,
+      columnType: this.props.columnType,
+      left: horizontalOffset,
+      top: verticalOffset,
+    };
+
+    this.props.onClickMenuToggle('transformContextMenu', options);
   }
 
   handleColumnMenuClick() {
@@ -23,8 +29,14 @@ export default class ColumnHeader extends Component {
     const horizontalOffset = rect.left;
     const width = el.offsetWidth;
 
-    this.props.onClickColumnMenuToggle(this.props.columnTitle,
-      horizontalOffset, verticalOffset, width);
+    const options = {
+      columnTitle: this.props.columnTitle,
+      left: horizontalOffset,
+      top: verticalOffset,
+      width,
+    };
+
+    this.props.onClickMenuToggle('columnMenu', options);
   }
 
   render() {
@@ -55,8 +67,7 @@ export default class ColumnHeader extends Component {
 ColumnHeader.propTypes = {
   columnType: PropTypes.string.isRequired,
   columnTitle: PropTypes.string.isRequired,
-  onClickTransformContextMenuToggle: PropTypes.func.isRequired,
   children: PropTypes.string.isRequired,
-  onClickColumnMenuToggle: PropTypes.func.isRequired,
   columnMenuActive: PropTypes.bool.isRequired,
+  onClickMenuToggle: PropTypes.func.isRequired,
 };
