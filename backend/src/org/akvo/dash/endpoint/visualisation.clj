@@ -9,11 +9,21 @@
 
 (hugsql/def-db-fns "org/akvo/dash/endpoint/visualisation.sql")
 
+
+(defn visualisation
+  ""
+  [conn id]
+  (dissoc (visualisation-by-id conn
+                               {:id id}
+                               {}
+                               :identifiers identity)
+          :author))
+
 (defn endpoint
   ""
   [{tm :tenant-manager}]
 
-  (context "/visualisations" []
+  (context "/api/visualisations" []
 
     (GET "/" {:keys [tenant]}
       (response (all-visualisations (connection tm tenant)
@@ -49,7 +59,7 @@
         (response (dissoc (visualisation-by-id (connection tm tenant)
                                                {:id id}
                                                {}
-                                               :identifiers identity                                               )
+                                               :identifiers identity)
                           :author)))
 
       (DELETE "/" {:keys [tenant]}

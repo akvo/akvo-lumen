@@ -7,13 +7,16 @@
 (defn endpoint
   [config]
 
-  (GET "/" []
+  (GET "/api" []
     (fn [request]
       (let [base-url (str (-> request :scheme name)
                           "://" (:server-name request)
                           ":" (:server-port request)
                           (:uri request))]
         (response
-         {:tenant (:tenant request)
-          :resources {:datasets       (str base-url "datasets")
+         {:help      "To access the API endpoints a valid authorization header needs to be provided."
+          :tenant    (:tenant request)
+          :resources {
+                      :datasets       (str base-url "datasets")
+                      :shares         (str base-url "shares")
                       :visualisations (str base-url "visualisations")}})))))

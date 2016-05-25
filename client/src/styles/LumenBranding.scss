@@ -1,0 +1,15 @@
+@import 'modules/colors';
+
+.LumenBranding {
+  position: fixed;
+  bottom: 1rem;
+  right: 2.5rem;
+  padding: 1rem;
+  background-color: rgba(255, 255, 255, 0.4);
+  pointer-events: none;
+  z-index: 2;
+  .logoColor {
+    font-weight: bold;
+    color: $mintGreen;
+  }
+}

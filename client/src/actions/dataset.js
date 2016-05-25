@@ -1,3 +1,4 @@
+import fetch from 'isomorphic-fetch';
 import * as constants from '../constants/dataset';
 import * as visualisationActions from './visualisation';
 import { hideModal } from './activeModal';

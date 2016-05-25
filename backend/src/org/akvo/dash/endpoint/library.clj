@@ -14,7 +14,7 @@
   / GET
   Return the library"
   [{tm :tenant-manager :as config}]
-  (context "/library" {:keys [params tenant] :as request}
+  (context "/api/library" {:keys [params tenant] :as request}
 
     (GET "/" []
       (let [tenant-conn (connection tm tenant)]

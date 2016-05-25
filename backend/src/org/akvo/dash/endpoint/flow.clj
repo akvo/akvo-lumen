@@ -22,7 +22,7 @@
         (recur next-fas)))))
 
 (defn endpoint [{{:keys [flow-report-database-url]} :config}]
-  (context "/flow" _
+  (context "/api/flow" _
     (GET "/folders-and-surveys/:org-id" request
       (let [org-id (-> request :params :org-id)
             root-ids (flow-import/root-ids org-id (:jwt-claims request))]

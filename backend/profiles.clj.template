@@ -1,5 +1,4 @@
 ;; Local profile overrides
-
 {:profiles/dev
  {:env
   {:database-url "jdbc:postgresql://localhost/dash?user=dash&password=password"
@@ -9,4 +8,10 @@
  {:env
   {:database-url "jdbc:postgresql://localhost/test_dash?user=dash&password=password"
    :flow-report-database-url "jdbc:postgresql://localhost/%s"
-   :file-upload-path "/tmp/akvo/dash"}}}
+   :file-upload-path "/tmp/akvo/dash"
+   :tenants [{:db_uri "jdbc:postgresql://localhost/test_dash_tenant_1?user=dash&password=password"
+              :label "t1"
+              :title "Tenant 1"}
+             {:db_uri "jdbc:postgresql://localhost/test_dash_tenant_2?user=dash&password=password"
+              :label "t2"
+              :title "Tenant 2"}]}}}
