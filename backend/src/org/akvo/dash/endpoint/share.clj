@@ -1,8 +1,6 @@
 (ns org.akvo.dash.endpoint.share
-  (:require [clojure.java.jdbc :as jdbc]
-            [clojure.pprint :refer [pprint]]
+  (:require [compojure.core :refer :all]
             [crypto.random :as random]
-            [compojure.core :refer :all]
             [hugsql.core :as hugsql]
             [org.akvo.dash.component.tenant-manager :refer [connection]]
             [ring.util.response :refer [response]]))
@@ -13,7 +11,6 @@
   "Returns all shared item for tenant."
   [conn]
   (all-shares conn))
-
 
 (defn share-visualisation [tenant-conn visualisation-id]
   (first (insert-visualisation-share tenant-conn
