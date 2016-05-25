@@ -18,6 +18,30 @@
    "core/trim-doublespace" nil})
 
 
+(defmulti column-metadata-operation
+  "Dispatch a columns metadata change"
+  (fn [columns op-spec]
+    (keyword (get op-spec "op"))))
+
+(defmethod column-metadata-operation :default
+  [columns op-spec]
+  (throw (str "Column metadata changes not supported on operation [" (op-spec "op") "]")))
+
+(defmethod column-metadata-operation :core/sort-column
+  [columns op-spec]
+  (let [col-name (get-column-name op-spec)
+        sort-direction (get-in op-spec ["args" "sortDirection"])
+        f (fn [{:keys [sort-idx result col-name]} current]
+            (let [c (if (= col-name (current "columnName"))
+                      (assoc current "sort" sort-idx "direction" sort-direction)
+                      current)
+                  new-idx (if (c "sort") (inc sort-idx) sort-idx)]
+              {:sort-idx new-idx
+               :result (conj result c)
+               :col-name col-name}))]
+    (:result (reduce f {:sort-idx 1 :result [] :col-name col-name} columns))))
+
+
 (defmulti apply-operation
   "Applies a particular operation based on `op` key from spec
    * tennant-conn: Open connection to the database
@@ -36,24 +60,27 @@
   {:success? false
    :message (str "Unknown operation " (op-spec "op"))})
 
+(defn- get-column-name [op-spec]
+  (get-in op-spec ["args" "columnName"]))
+
 (defmethod apply-operation :core/to-titlecase
   [tennant-conn table-name dv op-spec]
   (db-to-titlecase tennant-conn {:table-name table-name
-                                 :column-name (get-in op-spec ["args" "columnName"])})
+                                 :column-name (get-column-name op-spec)})
   {:success? true
    :dv dv})
 
 (defmethod apply-operation :core/to-lowercase
   [tennant-conn table-name dv op-spec]
   (db-to-lowercase tennant-conn {:table-name table-name
-                                 :column-name (get-in op-spec ["args" "columnName"])})
+                                 :column-name (get-column-name op-spec)})
   {:success? true
    :dv dv})
 
 (defmethod apply-operation :core/to-uppercase
   [tennant-conn table-name dv op-spec]
   (db-to-upercase tennant-conn {:table-name table-name
-                                :column-name (get-in op-spec ["args" "columnName"])})
+                                :column-name (get-column-name op-spec)})
   {:success? true
    :dv dv})
 
@@ -61,31 +88,33 @@
 (defmethod apply-operation :core/trim
   [tennant-conn table-name dv op-spec]
   (db-trim tennant-conn {:table-name table-name
-                         :column-name (get-in op-spec ["args" "columnName"])})
+                         :column-name (get-column-name op-spec)})
   {:success? true
    :dv dv})
 
 (defmethod apply-operation :core/trim-doublespace
   [tennant-conn table-name dv op-spec]
   (db-trim-double tennant-conn {:table-name table-name
-                                :column-name (get-in op-spec ["args" "columnName"])})
+                                :column-name (get-column-name op-spec)})
   {:success? true
    :dv dv})
 
 (defmethod apply-operation :core/sort-column
   [tennant-conn table-name dv op-spec]
-  (let [args (get op-spec "args")
-        idx-name (str table-name "_" (args "columnName"))]
+  (let [col-name (get-column-name op-spec)
+        idx-name (str table-name "_" col-name)
+        new-cols (column-metadata-operation (:columns dv) "core/sort-column")
+        dv (assoc dv :columns new-cols)]
     (db-create-index tennant-conn {:index-name idx-name
-                                   :column-name (args "columnName")
+                                   :column-name col-name
                                    :table-name table-name}))
   {:success? true
    :dv dv})
 
 (defmethod apply-operation :core/remove-sort
   [tennant-conn table-name dv op-spec]
-  (let [args (get op-spec "args")
-        idx-name (str table-name "_" (args "columnName"))]
+  (let [col-name (get-column-name op-spec)
+        idx-name (str table-name "_" col-name)]
     (db-drop-index tennant-conn {:index-name idx-name}))
   {:success? true
    :dv dv})

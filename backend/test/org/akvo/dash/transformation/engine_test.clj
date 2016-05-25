@@ -1,12 +1,16 @@
 (ns org.akvo.dash.transformation.engine-test
   (:require [clojure.test :refer :all]
+            [clojure.java.io :as io]
             [hugsql.core :as hugsql]
             [org.akvo.dash.migrate :as migrate]
             [reloaded.repl :refer [system stop go]]
             [org.akvo.dash.transformation.engine :refer :all]
+            [cheshire.core :as json]
             [user :refer [config]]))
 
 (hugsql/def-db-fns "org/akvo/dash/transformation/engine_test.sql")
+
+(def columns (json/parse-string (slurp (io/resource "columns_test.json"))))
 
 (def tenant-conn {:connection-uri "jdbc:postgresql://localhost/test_dash_tenant_1?user=dash&password=password"})
 
@@ -44,7 +48,11 @@
                      "newType" "date"
                      "defaultValue" "0"
                      "parseFormat" "YYYY-MM-DD"}
-             "onError" "fail"}})
+             "onError" "fail"}
+   :sort-column {"op" "core/sort-column"
+                 "args" {"columnName" "c1"
+                         "sortDirection" "ASC"}
+                 "onError" "fail"}})
 
 (deftest ^:functional test-transformations
   (testing "Valid data"
@@ -104,3 +112,14 @@
             data (db-select-test-data tenant-conn)]
         (is (:success? result))
         (is (zero? (count data)))))))
+
+
+
+(deftest test-metadata-transformations
+  (testing "core/sort-column"
+    (let [op (:sort-column transformations)
+          result (column-metadata-operation columns op)
+          c1 (first result)]
+      (is (= "c1" (get c1 "columnName")))
+      (is (= 1 (get c1 "sort")))
+      (is (= "ASC" (get c1 "direction"))))))
