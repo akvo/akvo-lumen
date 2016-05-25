@@ -17,6 +17,8 @@
    "core/trim" nil
    "core/trim-doublespace" nil})
 
+(defn- get-column-name [op-spec]
+  (get-in op-spec ["args" "columnName"]))
 
 (defmulti column-metadata-operation
   "Dispatch a columns metadata change"
@@ -59,9 +61,6 @@
   [tennant-conn table-name dv op-spec]
   {:success? false
    :message (str "Unknown operation " (op-spec "op"))})
-
-(defn- get-column-name [op-spec]
-  (get-in op-spec ["args" "columnName"]))
 
 (defmethod apply-operation :core/to-titlecase
   [tennant-conn table-name dv op-spec]
