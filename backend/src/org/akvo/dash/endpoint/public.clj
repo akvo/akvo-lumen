@@ -49,16 +49,13 @@
        "</body>\n</html>"))
 
 
-(defn endpoint [{tm :tenant-manager :as config}]
-
+(defn endpoint [{:keys [tenant-manager]}]
   (context "/s" {:keys [params tenant] :as request}
+    (let-routes [tenant-conn (connection tenant-manager tenant)]
 
-    (GET "/:id" [id]
-
-      (let [conn (connection tm tenant)
-            share (get-share conn id)]
-        (if (nil? share)
-          (-> (not-found (str "No public share with id: " id))
+      (GET "/:id" [id]
+        (if-let [share (get-share tenant-conn id)]
+          (-> (response (html-response (response-data tenant-conn share)))
               (content-type "text/html; charset=utf-8"))
-          (-> (response (html-response (response-data conn share)))
+          (-> (not-found (str "No public share with id: " id))
               (content-type "text/html; charset=utf-8")))))))

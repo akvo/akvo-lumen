@@ -7,15 +7,14 @@
 
 (hugsql/def-db-fns "org/akvo/dash/endpoint/import.sql")
 
-(defn endpoint
-  ""
-  [{tm :tenant-manager}]
+(defn endpoint [{:keys [tenant-manager]}]
   (context "/api/imports" {:keys [params tenant] :as request}
+    (let-routes [tenant-conn (connection tenant-manager tenant)]
 
-    (GET "/" []
-      (response/response (all-imports (connection tm tenant))))
+      (GET "/" _
+        (response/response (all-imports tenant-conn)))
 
-    (GET "/:id" [id]
-      (if-let [status (import/status (connection tm tenant) id)]
-        (response/response status)
-        (response/not-found {"importId" id})))))
+      (GET "/:id" [id]
+        (if-let [status (import/status tenant-conn id)]
+          (response/response status)
+          (response/not-found {"importId" id}))))))

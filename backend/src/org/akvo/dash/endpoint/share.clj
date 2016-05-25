@@ -35,14 +35,14 @@
   [conn id]
   (delete-share-by-id conn {:id id}))
 
-(defn endpoint [{:keys [tenant-manager config]}]
+(defn endpoint [{:keys [tenant-manager]}]
   (context "/api/shares" {:keys [params tenant] :as request}
+    (let-routes [tenant-conn (connection tenant-manager tenant)]
 
-    (GET "/" []
-      (response {:index 0
-                 :items (collection (connection tenant-manager tenant))}))
+      (GET "/" _
+        (response {:index 0
+                   :items (collection tenant-conn)}))
 
-    (POST "/" {:keys [tenant body] :as request}
-      (let [tenant-conn (connection tenant-manager tenant)]
+      (POST "/" {:keys [tenant body] :as request}
         (response (share-visualisation tenant-conn
                                        (get body "visualisationId")))))))
