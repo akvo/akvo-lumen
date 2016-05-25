@@ -11,7 +11,6 @@
                  [com.novemberain/pantomime "2.8.0"]
                  [com.stuartsierra/component "0.3.1"]
                  [compojure "1.5.0"]
-                 [crypto-random "1.2.0"]
                  [duct "0.5.10"]
                  [duct/hikaricp-component "0.1.0"]
                  [environ "1.0.2"]
