@@ -1,16 +1,10 @@
 @import 'modules/colors';
 
 .DatasetTable {
-  margin-top: 4rem;
-  .ColumnHeader {
-    * {
-      line-height: 50px;
-    }
-    .columnType {
-      text-transform: uppercase;
-      font-size: 0.75rem;
-      margin: 0 0.75rem;
-      color: $blueGrey;
-    }
+  .wrapper {
+    height: calc(100vh - 8rem);
+  }
+  .sidebarTargetingColumn {
+    background-color: $lightGrey;
   }
 }
