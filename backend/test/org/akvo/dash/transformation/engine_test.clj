@@ -52,7 +52,11 @@
    :sort-column {"op" "core/sort-column"
                  "args" {"columnName" "c1"
                          "sortDirection" "ASC"}
-                 "onError" "fail"}})
+                 "onError" "fail"}
+   :change-title {"op" "core/change-column-title"
+                  "args" {"columnName" "c2"
+                          "columnTitle" "My column"}
+                  "onError" "fail"}})
 
 (deftest ^:functional test-transformations
   (testing "Valid data"
@@ -122,4 +126,14 @@
           c1 (first result)]
       (is (= "c1" (get c1 "columnName")))
       (is (= 1 (get c1 "sort")))
-      (is (= "ASC" (get c1 "direction"))))))
+      (is (= "ASC" (get c1 "direction")))))
+
+  (testing "core/change-column-title"
+    (let [op (:change-title transformations)
+          result (column-metadata-operation columns op)
+          c1 (first result)
+          c2 (second result)]
+      (is (= "c1" (get c1 "columnName")))
+      (is (= "Column 1" (get c1 "title")))
+      (is (= "c2" (get c2 "columnName")))
+      (is (= "My column" (get c2 "title"))))))

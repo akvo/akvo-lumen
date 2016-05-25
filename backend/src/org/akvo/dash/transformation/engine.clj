@@ -8,6 +8,7 @@
 
 (def available-ops
   {"core/change-datatype" nil
+   "core/change-column-title" nil
    "core/sort-column" nil
    "core/remove-sort" nil
    "core/filter" nil
@@ -19,6 +20,13 @@
 
 (defn- get-column-name [op-spec]
   (get-in op-spec ["args" "columnName"]))
+
+(defn- mapv-columns [columns op-spec f]
+  (let [col-name (get-column-name op-spec)]
+    (mapv (fn [current]
+            (if (= (current "columnName") col-name)
+              (f current)
+              current)) columns)))
 
 (defmulti column-metadata-operation
   "Dispatch a columns metadata change"
@@ -43,6 +51,19 @@
                :col-name col-name}))]
     (:result (reduce f {:sort-idx 1 :result [] :col-name col-name} columns))))
 
+(defmethod column-metadata-operation :core/remove-sort
+  [columns op-spec]
+  (mapv-columns columns
+                op-spec
+                (fn [col]
+                  (assoc col "sort" nil "direction" nil))))
+
+(defmethod column-metadata-operation :core/change-column-title
+  [columns op-spec]
+  (mapv-columns columns
+                op-spec
+                (fn [col]
+                  (assoc col "title" (get-in op-spec ["args" "columnTitle"])))))
 
 (defmulti apply-operation
   "Applies a particular operation based on `op` key from spec
@@ -102,21 +123,27 @@
   [tennant-conn table-name dv op-spec]
   (let [col-name (get-column-name op-spec)
         idx-name (str table-name "_" col-name)
-        new-cols (column-metadata-operation (:columns dv) "core/sort-column")
-        dv (assoc dv :columns new-cols)]
+        new-cols (column-metadata-operation (:columns dv) "core/sort-column")]
     (db-create-index tennant-conn {:index-name idx-name
                                    :column-name col-name
-                                   :table-name table-name}))
-  {:success? true
-   :dv dv})
+                                   :table-name table-name})
+    {:success? true
+     :dv (assoc dv :columns new-cols)}))
 
 (defmethod apply-operation :core/remove-sort
   [tennant-conn table-name dv op-spec]
   (let [col-name (get-column-name op-spec)
-        idx-name (str table-name "_" col-name)]
-    (db-drop-index tennant-conn {:index-name idx-name}))
-  {:success? true
-   :dv dv})
+        idx-name (str table-name "_" col-name)
+        new-cols (column-metadata-operation (:columns dv) "core/remove-sort")]
+    (db-drop-index tennant-conn {:index-name idx-name})
+    {:success? true
+     :dv (assoc dv :columns new-cols)}))
+
+(defmethod apply-operation :core/change-column-title
+  [tenant-conn table-name dv op-spec]
+  (let [new-cols (column-metadata-operation (:columns dv) "core/change-column-title")]
+    {:success true
+     :dv (assoc dv :columns new-cols)}))
 
 
 (defmethod apply-operation :core/change-datatype
