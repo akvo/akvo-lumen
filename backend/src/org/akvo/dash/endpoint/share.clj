@@ -1,12 +1,11 @@
 (ns org.akvo.dash.endpoint.share
   (:require [clojure.java.jdbc :as jdbc]
             [clojure.pprint :refer [pprint]]
+            [crypto.random :as random]
             [compojure.core :refer :all]
             [hugsql.core :as hugsql]
             [org.akvo.dash.component.tenant-manager :refer [connection]]
-            [org.akvo.dash.util :refer (squuid)]
-            [ring.util.response :refer [response]])
-  (:import java.util.UUID))
+            [ring.util.response :refer [response]]))
 
 (hugsql/def-db-fns "org/akvo/dash/endpoint/share.sql")
 
@@ -18,7 +17,7 @@
 
 (defn share-visualisation [tenant-conn visualisation-id]
   (first (insert-visualisation-share tenant-conn
-                                     {:id (str (squuid))
+                                     {:id (random/url-part 8)
                                       :visualisation-id visualisation-id})))
 
 (defn end-share
