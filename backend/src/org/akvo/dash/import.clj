@@ -5,33 +5,41 @@
             [clojure.data.csv :as csv]
             [clojure.string :as str]
             [hugsql.core :as hugsql]
-            [ring.util.response :as res]
-            [org.akvo.dash.transformation :as t]
-            [org.akvo.dash.import.flow]
+            [org.akvo.dash.import.common :as import]
             [org.akvo.dash.import.csv]
+            [org.akvo.dash.import.flow]
+            [org.akvo.dash.transformation :as t]
             [org.akvo.dash.util :refer (squuid)]
-            [org.akvo.dash.import.common :as import]))
+            [ring.util.response :as res]))
 
 (hugsql/def-db-fns "org/akvo/dash/import.sql")
 
+(defn gen-table-name [prefix]
+  (str prefix "_" (str/replace (java.util.UUID/randomUUID) "-" "_")))
+
 (defn successful-import [conn job-execution-id table-name status spec]
-  (let [dataset-id (squuid)]
+  (let [dataset-id (squuid)
+        imported-table-name (gen-table-name "imported")]
     (insert-dataset conn {:id dataset-id
                           :title (get spec "name") ;; TODO Consistent naming. Change on client side?
                           :description (get spec "description" "")})
+    (clone-data-table conn {:from-table table-name
+                            :to-table imported-table-name})
     (insert-dataset-version conn {:id (squuid)
                                   :dataset-id dataset-id
                                   :job-execution-id job-execution-id
                                   :table-name table-name
-                                  :version 1})
-    (insert-dataset-columns conn {:columns (vec (map-indexed (fn [order [title column-name type]]
-                                                               [(squuid)
-                                                                dataset-id
-                                                                type
-                                                                title
-                                                                column-name
-                                                                (* 10 (inc order))])
-                                                             (:columns status)))})
+                                  :imported-table-name imported-table-name
+                                  :version 1
+                                  :columns (mapv (fn [{:keys [title column-name type]}]
+                                                   {:type type
+                                                    :title title
+                                                    :columnName column-name
+                                                    :sort nil
+                                                    :direction nil
+                                                    :hidden false})
+                                                 (:columns status))})
+
     (update-successful-job-execution conn {:id job-execution-id})))
 
 (defn failed-import [conn job-execution-id reason]
@@ -40,7 +48,7 @@
 
 (defn do-import [conn config job-execution-id]
   (try
-    (let [table-name (str "ds_" (str/replace (java.util.UUID/randomUUID) "-" "_"))
+    (let [table-name (gen-table-name "ds")
           spec (:spec (data-source-spec-by-job-execution-id conn {:job-execution-id job-execution-id}))
           status (import/make-dataset-data-table conn config table-name (get spec "source"))]
       (if (:success? status)

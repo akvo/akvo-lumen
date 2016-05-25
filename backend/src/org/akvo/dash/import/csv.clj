@@ -1,14 +1,14 @@
 (ns org.akvo.dash.import.csv
-  (:require [clojure.java.io :as io]
-            [clojure.string :as s]
+  (:require [clojure.data.csv :as csv]
+            [clojure.java.io :as io]
             [clojure.java.jdbc :as jdbc]
-            [clojure.data.csv :as csv]
+            [clojure.string :as s]
             [hugsql.core :as hugsql]
-            [org.akvo.dash.util :refer [squuid]]
-            [org.akvo.dash.import.common :as import])
-  (:import org.postgresql.copy.CopyManager
+            [org.akvo.dash.import.common :as import]
+            [org.akvo.dash.util :refer [squuid]])
+  (:import java.util.UUID
            org.postgresql.PGConnection
-           java.util.UUID))
+           org.postgresql.copy.CopyManager))
 
 (hugsql/def-db-fns "org/akvo/dash/import.sql")
 
@@ -85,7 +85,10 @@
   [col-titles]
   (vec
    (map-indexed (fn [idx title]
-                  [title (str "c" (inc idx)) "text"]) col-titles)))
+                  {:title title
+                   :column-name (str "c" (inc idx))
+                   :type "text"})
+                col-titles)))
 
 (defmethod import/valid? "CSV"
   [{:strs [url fileName hasColumnHeaders]}]
