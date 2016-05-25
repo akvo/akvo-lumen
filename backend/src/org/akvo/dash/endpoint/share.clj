@@ -11,7 +11,7 @@
 
 (defn random-url-safe-string
   "Returns a url safe random string of provided size. Defaults to size 8 bytes."
-  ([] (rand-url-part 8))
+  ([] (random-url-safe-string 8))
   ([size]
    (let [random-bytes (let [seed (byte-array size)]
                         (.nextBytes (SecureRandom.) seed)

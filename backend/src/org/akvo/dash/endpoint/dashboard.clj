@@ -1,28 +1,34 @@
 (ns org.akvo.dash.endpoint.dashboard
   (:require [compojure.core :refer :all]
             [clojure.pprint :refer [pprint]]
+            [hugsql.core :as hugsql]
             [org.akvo.dash.component.tenant-manager :refer [connection]]
+            [org.akvo.dash.util :refer [squuid]]
             [ring.util.response :as resp]))
 
+(hugsql/def-db-fns "org/akvo/dash/endpoint/dashboard.sql")
 
 (defn endpoint [{:keys [tenant-manager]}]
 
   (context "/api/dashboards" {:keys [params tenant] :as request}
-    ;; (let [tenant-conn (connection tenant-manager tenant)])
+    (let-routes [conn (connection tenant-manager tenant)]
 
-    (GET "/" []
-      (resp/response []))
+      (GET "/" _
+        (resp/response (all-dashboards conn)))
 
-    (POST "/" []
-      (resp/response {:id "abc123"}))
+      (POST "/" _
+        (resp/response (insert-dashboard conn {:id (squuid)
+                                               :spec {}})))
 
-    (context "/:id" [id]
+      (context "/:id" [id]
 
-      (GET "/" []
-        (resp/response {:id id}))
+        (GET "/" _
+          (resp/response (dashboard-by-id conn {:id id})))
 
-      (PUT "/" []
-        (resp/response {:id "New stuff or OK"}))
+        (PUT "/" _
+          (pprint "Update dashboard")
+          (resp/response {:status "DID nothing"}))
 
-      (DELETE "/" []
-        (resp/response {:status "OK"})))))
+        (DELETE "/" _
+          (delete-dashboard-by-id conn {:id id})
+          (resp/response {:status "OK"}))))))

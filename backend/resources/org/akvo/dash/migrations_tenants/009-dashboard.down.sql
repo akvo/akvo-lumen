@@ -1,0 +1,2 @@
+DROP TABLE IF EXISTS history.dashboard CASCADE;
+DROP TABLE IF EXISTS dashboard CASCADE;
