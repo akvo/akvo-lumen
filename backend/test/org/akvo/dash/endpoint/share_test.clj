@@ -10,47 +10,10 @@
              [jdbc :as jdbc]
              [repl :as repl]]))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Define a test db.
-;;; (Should probably be pulled from profiles.clj)
-
-;; (def test-tenant-1
-;;   {:db_uri "jdbc:postgresql://localhost/test_dash_tenant_1?user=dash&password=password"
-;;    :label "t1"
-;;    :title "Tenant 1"})
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; DB Fixture (no running system)
-;;;
-
-;; (defn- ragtime-spec
-;;   [tenant]
-;;   {:datastore  (jdbc/sql-database {:connection-uri (:db_uri tenant)})
-;;    :migrations (jdbc/load-resources "org/akvo/dash/migrations_tenants")})
-
-;; (defn migrate-tenant
-;;   [tenant]
-;;   (repl/migrate (ragtime-spec tenant)))
-
-;; (defn rollback-tenant
-;;   [tenant]
-;;   (let [spec (ragtime-spec tenant)]
-;;     (repl/rollback spec (count (:migrations spec)))))
-
-;; (defn db-fixture
-;;   "When we only want to have a migrated db and not run the system"
-;;   [f]
-;;   (rollback-tenant test-tenant-1)
-;;   (migrate-tenant test-tenant-1)
-;;   (f))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Helpers
 ;;;
-
-;; (def test-conn
-;;   (tm/pool test-tenant-1))
 
 (hugsql/def-db-fns "org/akvo/dash/import.sql")
 (hugsql/def-db-fns "org/akvo/dash/endpoint/visualisation.sql")
