@@ -15,8 +15,8 @@ export default function DashBarChart({ visualisation, datasets, width, height })
         data={chartData}
         xAxisLabel={spec.labelX || ''}
         yAxisLabel={spec.labelY || ''}
-        xAxisLabelOffset={50}
-        yAxisLabelOffset={75}
+        xAxisLabelOffset={0}
+        yAxisLabelOffset={0}
       />
     </div>
   );
