@@ -13,8 +13,7 @@
 
 (defn get-share
   [conn id]
-  (if-let [r (public-by-id conn {:id id})]
-    r))
+  (public-by-id conn {:id id}))
 
 (defn response-data
   [conn share]
