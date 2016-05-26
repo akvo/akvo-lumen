@@ -52,8 +52,4 @@
 
         (DELETE "/" _
           (delete-dataset-by-id tenant-conn {:id id})
-          (response {:id id}))
-
-        (context "/transformations" []
-          (GET "/" _
-            (response {:fns []})))))))
+          (response {:id id}))))))

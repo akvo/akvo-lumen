@@ -13,13 +13,8 @@
 
 (defn get-share
   [conn id]
-  (try
-    (if-let [r (public-by-id conn {:id id})]
-      r)
-    (catch Exception e
-      (pprint e)
-      (pprint (.getNextException e)))))
-
+  (if-let [r (public-by-id conn {:id id})]
+    r))
 
 (defn response-data
   [conn share]
@@ -29,7 +24,6 @@
          (json/encode {"visualisation" (dissoc v :id :created :modified)
                        "datasets"      {(:id d) {"columns" (:columns d)}}})
          ";")))
-
 
 (defn html-response [json-litteral]
   (str "<!DOCTYPE html>\n"
@@ -47,7 +41,6 @@
        "  <script type=\"text/javascript\" src=\"/assets/pub.bundle.js\"></script>"
        "  <link href=\"https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700\" rel=\"stylesheet\" type=\"text/css\">"
        "</body>\n</html>"))
-
 
 (defn endpoint [{:keys [tenant-manager]}]
   (context "/s" {:keys [params tenant] :as request}

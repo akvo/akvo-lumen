@@ -40,8 +40,7 @@
     (let-routes [tenant-conn (connection tenant-manager tenant)]
 
       (GET "/" _
-        (response {:index 0
-                   :items (collection tenant-conn)}))
+        (response (collection tenant-conn)))
 
       (POST "/" {:keys [tenant body] :as request}
         (response (share-visualisation tenant-conn
