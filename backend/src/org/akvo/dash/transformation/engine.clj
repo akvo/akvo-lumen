@@ -21,12 +21,19 @@
 (defn- get-column-name [op-spec]
   (get-in op-spec ["args" "columnName"]))
 
-(defn- mapv-columns [columns op-spec f]
-  (let [col-name (get-column-name op-spec)]
-    (mapv (fn [current]
-            (if (= (current "columnName") col-name)
-              (f current)
-              current)) columns)))
+(defn- get-column-idx [columns column-name]
+  (let [idx (loop [i 0
+                   cols columns]
+              (if (or (= column-name (get (first cols) "columnName"))
+                      (empty? cols))
+                i
+                (recur (inc i) (rest cols))))]
+    (if (= (count columns) idx)
+      -1
+      idx)))
+
+(defn- get-sort-idx [columns]
+  (inc (count (filter #(get % "sort") columns))))
 
 (defmulti column-metadata-operation
   "Dispatch a columns metadata change"
@@ -35,35 +42,34 @@
 
 (defmethod column-metadata-operation :default
   [columns op-spec]
-  (throw (str "Column metadata changes not supported on operation [" (op-spec "op") "]")))
+  (throw (Exception. (str "Column metadata changes not supported on operation [" (op-spec "op") "]"))))
 
 (defmethod column-metadata-operation :core/sort-column
   [columns op-spec]
   (let [col-name (get-column-name op-spec)
-        sort-direction (get-in op-spec ["args" "sortDirection"])
-        f (fn [{:keys [sort-idx result col-name]} current]
-            (let [c (if (= col-name (current "columnName"))
-                      (assoc current "sort" sort-idx "direction" sort-direction)
-                      current)
-                  new-idx (if (c "sort") (inc sort-idx) sort-idx)]
-              {:sort-idx new-idx
-               :result (conj result c)
-               :col-name col-name}))]
-    (:result (reduce f {:sort-idx 1 :result [] :col-name col-name} columns))))
+        col-idx (get-column-idx columns col-name)
+        sort-idx (get-sort-idx columns)
+        sort-direction (get-in op-spec ["args" "sortDirection"])]
+    (if (= col-idx -1)
+      (throw (Exception. (str "Column " col-name " not found")))
+      (update-in columns [col-idx] assoc "sort" sort-idx "direction" sort-direction))))
 
 (defmethod column-metadata-operation :core/remove-sort
   [columns op-spec]
-  (mapv-columns columns
-                op-spec
-                (fn [col]
-                  (assoc col "sort" nil "direction" nil))))
+  (let [col-name (get-column-name op-spec)
+        col-idx (get-column-idx columns col-name)]
+    (if (= col-idx -1)
+      (throw (Exception. (str "Column " col-name " not found")))
+      (update-in columns [col-idx] assoc "sort" nil "direction" nil))))
 
 (defmethod column-metadata-operation :core/change-column-title
   [columns op-spec]
-  (mapv-columns columns
-                op-spec
-                (fn [col]
-                  (assoc col "title" (get-in op-spec ["args" "columnTitle"])))))
+  (let [col-name (get-column-name op-spec)
+        col-idx (get-column-idx columns col-name)
+        col-title (get-in op-spec ["args" "columnTitle"])]
+    (if (= col-idx -1)
+      (throw (Exception. (str "Column " col-name " not found")))
+      (update-in columns [col-idx] assoc "title" col-title))))
 
 (defmulti apply-operation
   "Applies a particular operation based on `op` key from spec
@@ -123,7 +129,7 @@
   [tennant-conn table-name dv op-spec]
   (let [col-name (get-column-name op-spec)
         idx-name (str table-name "_" col-name)
-        new-cols (column-metadata-operation (:columns dv) "core/sort-column")]
+        new-cols (column-metadata-operation (:columns dv) op-spec)]
     (db-create-index tennant-conn {:index-name idx-name
                                    :column-name col-name
                                    :table-name table-name})
@@ -134,14 +140,14 @@
   [tennant-conn table-name dv op-spec]
   (let [col-name (get-column-name op-spec)
         idx-name (str table-name "_" col-name)
-        new-cols (column-metadata-operation (:columns dv) "core/remove-sort")]
+        new-cols (column-metadata-operation (:columns dv) op-spec)]
     (db-drop-index tennant-conn {:index-name idx-name})
     {:success? true
      :dv (assoc dv :columns new-cols)}))
 
 (defmethod apply-operation :core/change-column-title
   [tenant-conn table-name dv op-spec]
-  (let [new-cols (column-metadata-operation (:columns dv) "core/change-column-title")]
+  (let [new-cols (column-metadata-operation (:columns dv) op-spec)]
     {:success true
      :dv (assoc dv :columns new-cols)}))
 

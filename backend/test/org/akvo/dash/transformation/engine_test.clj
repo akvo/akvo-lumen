@@ -10,7 +10,7 @@
 
 (hugsql/def-db-fns "org/akvo/dash/transformation/engine_test.sql")
 
-(def columns (json/parse-string (slurp (io/resource "columns_test.json"))))
+(def columns (vec (json/parse-string (slurp (io/resource "columns_test.json")))))
 
 (def tenant-conn {:connection-uri "jdbc:postgresql://localhost/test_dash_tenant_1?user=dash&password=password"})
 
@@ -52,6 +52,9 @@
    :sort-column {"op" "core/sort-column"
                  "args" {"columnName" "c1"
                          "sortDirection" "ASC"}
+                 "onError" "fail"}
+   :remove-sort {"op" "core/remove-sort"
+                 "args" {"columnName" "c1"}
                  "onError" "fail"}
    :change-title {"op" "core/change-column-title"
                   "args" {"columnName" "c2"
@@ -127,6 +130,14 @@
       (is (= "c1" (get c1 "columnName")))
       (is (= 1 (get c1 "sort")))
       (is (= "ASC" (get c1 "direction")))))
+
+  (testing "core/remove-sort"
+    (let [op (:remove-sort transformations)
+          result (column-metadata-operation columns op)
+          c1 (first result)]
+      (is (= "c1" (get c1 "columnName")))
+      (is (nil? (get c1 "sort")))
+      (is (nil? (get c1 "direction")))))
 
   (testing "core/change-column-title"
     (let [op (:change-title transformations)
