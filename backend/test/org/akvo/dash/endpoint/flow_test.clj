@@ -48,20 +48,20 @@
       (f))))
 
 (defn flow-instances-request [& claims]
-  (-> (assoc (mock/request :get "/flow/instances")
+  (-> (assoc (mock/request :get "/api/flow/instances")
              :jwt-claims {"realm_access" {"roles" claims}})
       flow-endpoint
       :body
       :instances))
 
 (defn flow-folders-and-surveys-request [instance claims]
-  (-> (assoc (mock/request :get (str "/flow/folders-and-surveys/" instance))
+  (-> (assoc (mock/request :get (str "/api/flow/folders-and-surveys/" instance))
              :jwt-claims {"realm_access" {"roles" claims}})
       flow-endpoint
       :body))
 
 (deftest flow-endpoint-tests
-  (testing "/flow/instances"
+  (testing "/api/flow/instances"
     (is (= (flow-instances-request)
            #{}))
     (is (= (flow-instances-request "akvo:flow:akvoflow-1:0")

@@ -1,13 +1,56 @@
 (ns org.akvo.dash.fixtures
-  (:require
-   [hugsql.core :as hugsql]
-   [org.akvo.dash.migrate :as migrate]
-   [reloaded.repl :refer [system stop go]]
-   [user :refer [config]]))
+  (:require [hugsql.core :as hugsql]
+            [org.akvo.dash.component.tenant-manager :as tm]
+            ;; [environ.core :refer [env]]
+            [org.akvo.dash.migrate :as migrate]
+            [ragtime
+             [jdbc :as jdbc]
+             [repl :as repl]]
+            [reloaded.repl :refer [go stop]]
+            [user :refer [config]]))
 
+
+(def test-tenant-spec
+  (->> "profiles.clj" slurp read-string :profiles/test :env :tenants first))
+
+;; (def test-tenant-spec
+;;   (first (env :tenants)))
+
+(def test-conn
+  (tm/pool test-tenant-spec))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; DB setup / tear-down fixture
+;;;
+
+(defn- ragtime-spec
+  [tenant]
+  {:datastore  (jdbc/sql-database {:connection-uri (:db_uri tenant)})
+   :migrations (jdbc/load-resources "org/akvo/dash/migrations_tenants")})
+
+(defn migrate-tenant
+  [tenant]
+  (repl/migrate (ragtime-spec tenant)))
+
+(defn rollback-tenant
+  [tenant]
+  (let [spec (ragtime-spec tenant)]
+    (repl/rollback spec (count (:migrations spec)))))
+
+(defn db-fixture
+  "When we only want to have a migrated db and not run the system"
+  [f]
+  (rollback-tenant test-tenant-spec)
+  (migrate-tenant test-tenant-spec)
+  (f))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Running system fixture
+;;;
 
 (hugsql/def-db-fns "org/akvo/dash/fixtures.sql")
-
 
 (defn system-fixture
   "Starts the system and migrates, no setup or tear down."

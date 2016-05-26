@@ -9,8 +9,12 @@ new WebpackDevServer(webpack(config), {
   hot: true,
   historyApiFallback: true,
   proxy: {
-    '/api/*': {
-        target: "http://t1.dash.localhost:3000",
+    '/api*': {
+      target: "http://t1.lumen.localhost:3000",
+      secure: false
+    },
+    '/s/*': {
+      target: "http://t1.lumen.localhost:3000",
       secure: false
     }
   }

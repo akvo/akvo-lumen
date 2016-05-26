@@ -8,17 +8,14 @@
 (hugsql/def-db-fns "org/akvo/dash/endpoint/dataset.sql")
 (hugsql/def-db-fns "org/akvo/dash/endpoint/visualisation.sql")
 
-(defn endpoint
-  "/library
 
-  / GET
-  Return the library"
-  [{tm :tenant-manager :as config}]
-  (context "/library" {:keys [params tenant] :as request}
+(defn endpoint [{:keys [tenant-manager]}]
+  (context "/api/library" {:keys [tenant] :as request}
+    (let-routes [tenant-conn (connection tenant-manager tenant)]
 
-    (GET "/" []
-      (let [tenant-conn (connection tm tenant)]
+      (GET "/" _
         (response
          {:dashboards     []
           :datasets       (all-datasets tenant-conn)
-          :visualisations (all-visualisations tenant-conn {} {} :identifiers identity)})))))
+          :visualisations (all-visualisations
+                           tenant-conn {} {} :identifiers identity)})))))

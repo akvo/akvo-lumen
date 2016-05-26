@@ -6,8 +6,9 @@
   padding: 1rem 0;
   border: 1px solid black;
   z-index: 99;
+  line-height: 1.4rem;
   /* Default positioning... */
-  width: 8rem;
+  width: 10rem;
   right: 0;
   &.hasArrow {
     margin-top: 10px;
@@ -49,7 +50,7 @@
   }
   .contextMenuItem {
     background-color: white;
-    padding: 0.75rem 0.5rem;
+    padding: 0.75rem 1rem;
     width: 100%;
     &:hover {
       background-color: $lightGrey;

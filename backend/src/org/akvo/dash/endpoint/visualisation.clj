@@ -4,54 +4,63 @@
             [hugsql.core :as hugsql]
             [org.akvo.dash.component.tenant-manager :refer [connection]]
             [org.akvo.dash.util :refer [squuid]]
-            [ring.util.response :refer [response]])
+            [ring.util.response :refer [not-found response]])
   (:import [java.sql SQLException]))
 
 (hugsql/def-db-fns "org/akvo/dash/endpoint/visualisation.sql")
 
-(defn endpoint
+
+(defn visualisation
   ""
-  [{tm :tenant-manager}]
+  [conn id]
+  (dissoc (visualisation-by-id conn
+                               {:id id}
+                               {}
+                               :identifiers identity)
+          :author))
 
-  (context "/visualisations" []
+(defn endpoint [{:keys [tenant-manager]}]
+  (context "/api/visualisations" {:keys [params tenant] :as request}
+    (let-routes [tenant-conn (connection tenant-manager tenant)]
 
-    (GET "/" {:keys [tenant]}
-      (response (all-visualisations (connection tm tenant)
-                                    {}
-                                    {}
-                                    :identifiers identity)))
+      (GET "/" _
+        (response (all-visualisations tenant-conn
+                                      {}
+                                      {}
+                                      :identifiers identity)))
 
-    (POST "/" {:keys [tenant jwt-claims body]}
-      (try
-        (let [id (squuid)
-              resp (first (insert-visualisation
-                           (connection tm tenant)
-                           {:id id
-                            :dataset-id (get body "datasetId")
-                            :type (get body "visualisationType")
-                            :name (get body "name")
-                            :spec (get body "spec")
-                            :author jwt-claims}))]
-          (response (assoc body
-                           "id" id
-                           "status" "OK"
-                           "created" (:created resp)
-                           "modified" (:modified resp))))
-        (catch Exception e
-          (pprint e)
-          (when (isa? SQLException (type e))
-            (pprint (.getNextException ^SQLException e)))
-          (response {:error e}))))
+      (POST "/" {:keys [jwt-claims body]}
+        (try
+          (let [id (squuid)
+                resp (first (insert-visualisation
+                             tenant-conn
+                             {:id id
+                              :dataset-id (get body "datasetId")
+                              :type (get body "visualisationType")
+                              :name (get body "name")
+                              :spec (get body "spec")
+                              :author jwt-claims}))]
+            (response (assoc body
+                             "id" id
+                             "status" "OK"
+                             "created" (:created resp)
+                             "modified" (:modified resp))))
+          (catch Exception e
+            (pprint e)
+            (when (isa? SQLException (type e))
+              (pprint (.getNextException ^SQLException e)))
+            (response {:error e}))))
 
-    (context "/:id" [id]
+      (context "/:id" [id]
 
-      (GET "/" {:keys [tenant]}
-        (response (dissoc (visualisation-by-id (connection tm tenant)
-                                               {:id id}
-                                               {}
-                                               :identifiers identity                                               )
-                          :author)))
+        (GET "/" _
+          (if-let [v (visualisation-by-id tenant-conn
+                                          {:id id}
+                                          {}
+                                          :identifiers identity)]
+            (response (dissoc v :author))
+            (not-found {:id id})))
 
-      (DELETE "/" {:keys [tenant]}
-        (delete-visualisation-by-id (connection tm tenant) {:id id})
-        (response {:id id})))))
+        (DELETE "/" _
+          (delete-visualisation-by-id tenant-conn {:id id})
+          (response {:id id}))))))
