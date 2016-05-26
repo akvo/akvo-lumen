@@ -139,7 +139,7 @@
       (is (= "ASC" (get c2 "direction")))))
 
   (testing "core/remove-sort"
-    (let [sort-it (:remove-sort transformations)
+    (let [sort-it (:sort-column transformations)
           remove-it (:remove-sort transformations)
           result (-> columns
                      (column-metadata-operation sort-it)
