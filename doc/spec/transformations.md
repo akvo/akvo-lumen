@@ -81,6 +81,15 @@ Examples:
   * filterExpression (string): Filter expression e.g. `"< 10"`, `"contains 'akvo'"`
 * onError (string): `"fail"`
 
+On text columns:
+ * is: `c2 = 'value'`
+ * contains: `c2 ilike '%value%'`
+
+On number columns
+* Greater than: `c2 > value`
+* is: `c2 = value`
+* Less than: `c2 < value`
+
 Examples:
 
 ````
