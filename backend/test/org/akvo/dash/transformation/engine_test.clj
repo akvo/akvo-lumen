@@ -124,16 +124,26 @@
 
 (deftest test-metadata-transformations
   (testing "core/sort-column"
-    (let [op (:sort-column transformations)
-          result (column-metadata-operation columns op)
-          c1 (first result)]
+    (let [op1 (:sort-column transformations)
+          op2 (assoc-in (:sort-column transformations) ["args" "columnName"] "c2")
+          result (-> columns
+                     (column-metadata-operation op1)
+                     (column-metadata-operation op2))
+          c1 (first result)
+          c2 (second result)]
       (is (= "c1" (get c1 "columnName")))
       (is (= 1 (get c1 "sort")))
-      (is (= "ASC" (get c1 "direction")))))
+      (is (= "ASC" (get c1 "direction")))
+      (is (= "c2" (get c2 "columnName")))
+      (is (= 2 (get c2 "sort")))
+      (is (= "ASC" (get c2 "direction")))))
 
   (testing "core/remove-sort"
-    (let [op (:remove-sort transformations)
-          result (column-metadata-operation columns op)
+    (let [sort-it (:remove-sort transformations)
+          remove-it (:remove-sort transformations)
+          result (-> columns
+                     (column-metadata-operation sort-it)
+                     (column-metadata-operation remove-it))
           c1 (first result)]
       (is (= "c1" (get c1 "columnName")))
       (is (nil? (get c1 "sort")))

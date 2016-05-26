@@ -21,15 +21,12 @@
 (defn- get-column-name [op-spec]
   (get-in op-spec ["args" "columnName"]))
 
-(defn- get-column-idx [columns column-name]
-  (let [idx (loop [i 0
-                   cols columns]
-              (if (or (= column-name (get (first cols) "columnName"))
-                      (empty? cols))
-                i
-                (recur (inc i) (rest cols))))]
-    (if (= (count columns) idx)
-      -1
+(defn- get-column-idx
+  [columns column-name]
+  (let [idx (first
+             (keep-indexed #(when (= column-name (get %2 "columnName")) %1) columns))]
+    (if (nil? idx)
+      (throw (Exception. (str "Column " column-name " not found")))
       idx)))
 
 (defn- get-sort-idx [columns]
@@ -50,26 +47,20 @@
         col-idx (get-column-idx columns col-name)
         sort-idx (get-sort-idx columns)
         sort-direction (get-in op-spec ["args" "sortDirection"])]
-    (if (= col-idx -1)
-      (throw (Exception. (str "Column " col-name " not found")))
-      (update-in columns [col-idx] assoc "sort" sort-idx "direction" sort-direction))))
+    (update-in columns [col-idx] assoc "sort" sort-idx "direction" sort-direction)))
 
 (defmethod column-metadata-operation :core/remove-sort
   [columns op-spec]
   (let [col-name (get-column-name op-spec)
         col-idx (get-column-idx columns col-name)]
-    (if (= col-idx -1)
-      (throw (Exception. (str "Column " col-name " not found")))
-      (update-in columns [col-idx] assoc "sort" nil "direction" nil))))
+    (update-in columns [col-idx] assoc "sort" nil "direction" nil)))
 
 (defmethod column-metadata-operation :core/change-column-title
   [columns op-spec]
   (let [col-name (get-column-name op-spec)
         col-idx (get-column-idx columns col-name)
         col-title (get-in op-spec ["args" "columnTitle"])]
-    (if (= col-idx -1)
-      (throw (Exception. (str "Column " col-name " not found")))
-      (update-in columns [col-idx] assoc "title" col-title))))
+    (update-in columns [col-idx] assoc "title" col-title)))
 
 (defmulti apply-operation
   "Applies a particular operation based on `op` key from spec
