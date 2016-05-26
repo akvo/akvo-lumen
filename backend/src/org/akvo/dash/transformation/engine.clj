@@ -18,10 +18,14 @@
    "core/trim" nil
    "core/trim-doublespace" nil})
 
-(defn- get-column-name [op-spec]
+(defn- get-column-name
+  "Returns the columnName from the operation specification"
+  [op-spec]
   (get-in op-spec ["args" "columnName"]))
 
 (defn- get-column-idx
+  "Returns the column index or a given columnName.
+  Throws an exception if not found"
   [columns column-name]
   (let [idx (first
              (keep-indexed #(when (= column-name (get %2 "columnName")) %1) columns))]
@@ -29,7 +33,9 @@
       (throw (Exception. (str "Column " column-name " not found")))
       idx)))
 
-(defn- get-sort-idx [columns]
+(defn- get-sort-idx
+  "Returns the next sort index for a given vector of columns"
+  [columns]
   (inc (count (filter #(get % "sort") columns))))
 
 (defmulti column-metadata-operation
