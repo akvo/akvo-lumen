@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import ReactGridLayout from 'react-grid-layout';
-import DashBarChart from '../charts/DashBarChart';
+import DashChart from '../charts/DashChart';
 
 require('../../styles/DashboardEditor.scss');
 require('../../../node_modules/react-grid-layout/css/styles.css');
@@ -114,16 +114,23 @@ export default class DashboardEditor extends Component {
             backgroundColor: 'whitesmoke',
             position: 'relative',
             minWidth: '800px',
+            boxSizing: 'initial',
+            padding: '1rem',
           }}
         >
           <ReactGridLayout
             className="layout"
             cols={12}
             rows={12}
-            rowHeight={67}
-            width={800}
+            rowHeight={rowHeight}
+            width={canvasWidth}
             layout={this.state.layout}
             onLayoutChange={this.handleLayoutChange}
+            /* Setting any margin results in grid units being different
+            ** vertically and horizontally due to implementation details.
+            ** Use a margin on the grid item themselves for now.
+            */
+            margin={[0,0]}
           >
             {getArrayFromObject(this.state.entities).map(item =>
               <div
@@ -163,21 +170,25 @@ class DashboardCanvasItem extends Component {
     const layout = this.getItemLayout();
 
     return ({
-      width: (layout.w * unit) - 10,
-      height: (layout.h * unit) - 10,
+      width: (layout.w * unit) - 40,
+      height: (layout.h * unit) - 40,
     });
   }
 
   render() {
     const dimensions = this.getRenderDimensions();
-
     return (
       <div
         style={{
           padding: '10px',
+          margin: '10px',
+          backgroundColor: 'white',
+          pointerEvents: 'none',
+          border: '1px solid rgba(0,0,0,0.3)',
+          overflow: 'hidden',
         }}
       >
-        <DashBarChart
+        <DashChart
           visualisation={this.props.item}
           datasets={this.props.datasets}
           width={dimensions.width}

@@ -5,13 +5,7 @@
   margin-top: 4em;
   width: 100%;
   min-height: 100%;
-  .VisualisationPreview, .dashChart {
-    padding: 0;
-  }
-  .DashMap {
-    .leaflet-container {
-      width: 100%;
-      height: 180px;
-    }
+  .react-resizable-handle {
+    z-index: 99;
   }
 }

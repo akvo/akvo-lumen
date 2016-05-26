@@ -14,6 +14,7 @@ export default function DashMap({ visualisation, datasets, width, height}) {
         center={[0, 0]}
         zoom={2}
         scrollWheelZoom={false}
+        key={width}
         style={{
           width,
           height,
