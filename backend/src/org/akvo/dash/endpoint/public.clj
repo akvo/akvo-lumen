@@ -13,13 +13,7 @@
 
 (defn get-share
   [conn id]
-  (try
-    (if-let [r (public-by-id conn {:id id})]
-      r)
-    (catch Exception e
-      (pprint e)
-      (pprint (.getNextException e)))))
-
+  (public-by-id conn {:id id}))
 
 (defn response-data
   [conn share]
@@ -29,7 +23,6 @@
          (json/encode {"visualisation" (dissoc v :id :created :modified)
                        "datasets"      {(:id d) {"columns" (:columns d)}}})
          ";")))
-
 
 (defn html-response [json-litteral]
   (str "<!DOCTYPE html>\n"
@@ -48,17 +41,13 @@
        "  <link href=\"https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700\" rel=\"stylesheet\" type=\"text/css\">"
        "</body>\n</html>"))
 
-
-(defn endpoint [{tm :tenant-manager :as config}]
-
+(defn endpoint [{:keys [tenant-manager]}]
   (context "/s" {:keys [params tenant] :as request}
+    (let-routes [tenant-conn (connection tenant-manager tenant)]
 
-    (GET "/:id" [id]
-
-      (let [conn (connection tm tenant)
-            share (get-share conn id)]
-        (if (nil? share)
-          (-> (not-found (str "No public share with id: " id))
+      (GET "/:id" [id]
+        (if-let [share (get-share tenant-conn id)]
+          (-> (response (html-response (response-data tenant-conn share)))
               (content-type "text/html; charset=utf-8"))
-          (-> (response (html-response (response-data conn share)))
+          (-> (not-found (str "No public share with id: " id))
               (content-type "text/html; charset=utf-8")))))))
