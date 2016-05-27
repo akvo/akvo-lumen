@@ -109,12 +109,13 @@ export default class DatasetTable extends Component {
     }
   }
 
-  handleDataTypeContextMenuClicked({ column, newColumnType }) {
+  handleDataTypeContextMenuClicked({ column, dataTypeOptions, newColumnType }) {
     this.setState({ activeDataTypeContextMenu: null });
     if (newColumnType !== column.type) {
       this.handleShowSidebar({
         type: 'edit',
-        columnTitle: column.title,
+        column,
+        dataTypeOptions,
         newColumnType,
       });
     }
@@ -224,6 +225,12 @@ export default class DatasetTable extends Component {
             <DataTableSidebar
               {...activeSidebar}
               onClose={() => this.handleHideSidebar()}
+              onApply={(transformation) => {
+                this.handleHideSidebar();
+                if (transformation != null) {
+                  this.props.onTransform(transformation);
+                }
+              }}
             />}
           <div
             className="wrapper"
@@ -263,4 +270,5 @@ export default class DatasetTable extends Component {
 
 DatasetTable.propTypes = {
   columns: PropTypes.array.isRequired,
+  onTransform: PropTypes.func.isRequired,
 };

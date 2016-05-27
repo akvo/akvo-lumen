@@ -30,8 +30,9 @@ export default function DataTypeContextMenu({ column, dimensions, onContextMenuI
       }}
       onOptionSelected={item =>
         onContextMenuItemSelected({
-          newColumnType: item,
           column,
+          newColumnType: item,
+          dataTypeOptions: options,
         })}
       arrowClass="topLeft"
       arrowOffset="15px"

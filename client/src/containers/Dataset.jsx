@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import DatasetHeader from '../components/dataset/DatasetHeader';
 import DatasetTable from '../components/dataset/DatasetTable';
 import { showModal } from '../actions/activeModal';
-import { fetchDataset } from '../actions/dataset';
+import { fetchDataset, transform } from '../actions/dataset';
 
 require('../styles/Dataset.scss');
 
@@ -26,7 +26,7 @@ class Dataset extends Component {
   }
 
   render() {
-    const { dataset } = this.props;
+    const { dataset, dispatch } = this.props;
     return (
       <div className="Dataset">
         <DatasetHeader
@@ -37,6 +37,7 @@ class Dataset extends Component {
         {dataset.columns ?
           <DatasetTable
             columns={dataset.columns}
+            onTransform={(transformation) => dispatch(transform(dataset.id, transformation))}
           />
           :
           <div>loading...</div>}

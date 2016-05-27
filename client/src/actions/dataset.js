@@ -257,3 +257,11 @@ export function deleteDataset(id) {
     .catch(error => dispatch(deleteDatasetFailure(id, error)));
   };
 }
+
+export function transform(datasetId, transformation) {
+  return {
+    type: constants.TRANSFORM_DATASET,
+    datasetId,
+    transformation,
+  };
+}
