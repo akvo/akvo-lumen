@@ -29,10 +29,9 @@ export default class DatasetTable extends Component {
       activeColumnContextMenu: null,
       activeSidebar: null,
     };
+
     this.handleResize = this.handleResize.bind(this);
     this.handleScroll = this.handleScroll.bind(this);
-    this.handleMenuToggleClick = this.handleMenuToggleClick.bind(this);
-    this.handleMenuItemClick = this.handleMenuItemClick.bind(this);
     this.handleShowSidebar = this.handleShowSidebar.bind(this);
     this.handleHideSidebar = this.handleHideSidebar.bind(this);
 
@@ -41,6 +40,8 @@ export default class DatasetTable extends Component {
 
     this.handleDataTypeContextMenuClicked = this.handleDataTypeContextMenuClicked.bind(this);
     this.handleColumnContextMenuClicked = this.handleColumnContextMenuClicked.bind(this);
+
+    this.handleToggleTransformationLog = this.handleToggleTransformationLog.bind(this);
   }
 
   componentDidMount() {
@@ -53,8 +54,8 @@ export default class DatasetTable extends Component {
   }
 
   getCellClassName(columnTitle) {
-    if (this.state.activeSidebar &&
-      this.state.activeSidebar.columnTitle === columnTitle) {
+    const { activeSidebar } = this.state;
+    if (activeSidebar != null && activeSidebar.columnTitle === columnTitle) {
       return 'sidebarTargetingColumn';
     }
     return '';
@@ -92,49 +93,19 @@ export default class DatasetTable extends Component {
     }
   }
 
-  handleMenuToggleClick(type, options) {
-    /* FIXME: currently, the sidebar-hiding updates the DOM too slowly
-    ** and any new context menu appears in an offset position.
-    */
-    this.handleHideSidebar();
-    switch (type) {
-
-      case 'columnMenu':
-        if (this.state.activeColumnContextMenu &&
-            options.columnTitle === this.state.activeColumnContextMenu.title) {
-          // Close the menu
-          this.setState({ activeColumnContextMenu: null });
-        } else {
-          this.setState({
-            activeColumnContextMenu: {
-              title: options.columnTitle,
-              left: options.left,
-              top: options.top,
-              width: options.width,
-            },
-            activeDataTypeContextMenu: null,
-          });
-        }
-        break;
-
-      case 'logMenu':
-        if (this.state.activeSidebar &&
-          this.state.activeSidebar.type === 'transformationLog') {
-          this.handleHideSidebar();
-        } else {
-          this.setState({
-            activeDataTypeContextMenu: null,
-            activeColumnContextMenu: null,
-          });
-          this.handleShowSidebar({
-            type: 'transformationLog',
-            displayRight: true,
-          });
-        }
-        break;
-
-      default:
-        throw new Error(`Unknown menu type ${type} supplied to handleMenuToggleClick`);
+  handleToggleTransformationLog() {
+    if (this.state.activeSidebar &&
+      this.state.activeSidebar.type === 'transformationLog') {
+      this.handleHideSidebar();
+    } else {
+      this.setState({
+        activeDataTypeContextMenu: null,
+        activeColumnContextMenu: null,
+      });
+      this.handleShowSidebar({
+        type: 'transformationLog',
+        displayRight: true,
+      });
     }
   }
 
@@ -161,13 +132,6 @@ export default class DatasetTable extends Component {
 
       default:
         throw new Error(`Menu item ${menuItem} not yet implemented`);
-    }
-  }
-
-  handleMenuItemClick(type) {
-    switch (type) {
-      default:
-        throw new Error(`Unknown item type ${type} supplied to handleMenuItemClick`);
     }
   }
 
@@ -211,7 +175,13 @@ export default class DatasetTable extends Component {
   }
 
   render() {
-    const { activeDataTypeContextMenu, activeColumnContextMenu } = this.state;
+    const {
+      activeDataTypeContextMenu,
+      activeColumnContextMenu,
+      activeSidebar,
+      width,
+      height,
+    } = this.state;
 
     const cols = this.props.columns.map((column, index) => {
       const columnHeader = (
@@ -220,8 +190,8 @@ export default class DatasetTable extends Component {
           column={column}
           onToggleDataTypeContextMenu={this.handleToggleDataTypeContextMenu}
           onToggleColumnContextMenu={this.handleToggleColumnContextMenu}
-          columnMenuActive={Boolean(this.state.activeColumnContextMenu
-            && this.state.activeColumnContextMenu.title === column.title)}
+          columnMenuActive={activeColumnContextMenu != null &&
+            activeColumnContextMenu.column.title === column.title}
         />
       );
       return (
@@ -241,26 +211,25 @@ export default class DatasetTable extends Component {
       <div className="DatasetTable">
         <DatasetControls
           columns={this.props.columns}
-          onClickMenuToggle={this.handleMenuToggleClick}
-          onClickMenuItem={this.handleMenuItemClick}
+          onToggleTransformationLog={this.handleToggleTransformationLog}
+          onClickMenuItem={() => { throw new Error('Not yet implemented'); }}
         />
         <div
           style={{
             display: 'flex',
-            flexDirection: this.state.activeSidebar && this.state.activeSidebar.displayRight ?
-              'row-reverse' : 'row',
+            flexDirection: activeSidebar && activeSidebar.displayRight ? 'row-reverse' : 'row',
           }}
         >
-          {this.state.activeSidebar &&
+          {activeSidebar &&
             <DataTableSidebar
-              {...this.state.activeSidebar}
+              {...activeSidebar}
               onClose={() => this.handleHideSidebar()}
             />}
           <div
             className="wrapper"
             ref="wrappingDiv"
             style={{
-              width: this.state.activeSidebar ? 'calc(100% - 300px)' : '100%',
+              width: activeSidebar ? 'calc(100% - 300px)' : '100%',
             }}
           >
             {activeDataTypeContextMenu != null &&
@@ -269,7 +238,7 @@ export default class DatasetTable extends Component {
                 dimensions={activeDataTypeContextMenu.dimensions}
                 onContextMenuItemSelected={this.handleDataTypeContextMenuClicked}
               />}
-            {this.state.activeColumnContextMenu &&
+            {activeColumnContextMenu &&
               <ColumnContextMenu
                 column={activeColumnContextMenu.column}
                 dimensions={activeColumnContextMenu.dimensions}
@@ -279,8 +248,8 @@ export default class DatasetTable extends Component {
               headerHeight={50}
               rowHeight={30}
               rowsCount={this.props.columns[0].values.length}
-              width={this.state.width}
-              height={this.state.height}
+              width={width}
+              height={height}
               onScrollStart={() => this.handleScroll()}
             >
               {cols}

@@ -94,7 +94,7 @@ export default class DatasetControls extends Component {
           >
             <button
               className="transformationLogToggle clickable"
-              onClick={() => this.props.onClickMenuToggle('logMenu')}
+              onClick={this.props.onToggleTransformationLog}
             >
               Transformation log
             </button>
@@ -106,7 +106,7 @@ export default class DatasetControls extends Component {
 }
 
 DatasetControls.propTypes = {
-  onClickMenuToggle: PropTypes.func.isRequired,
+  onToggleTransformationLog: PropTypes.func.isRequired,
   onClickMenuItem: PropTypes.func.isRequired,
   columns: PropTypes.object,
 };
