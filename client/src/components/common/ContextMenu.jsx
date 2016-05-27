@@ -19,7 +19,7 @@ const getArrowStyle = (className, offset = '0px') => {
       break;
 
     default:
-      console.log('Unrecognized direction');
+      throw new Error(`Unknown direction ${className} supplied to getArrowStyle`);
   }
 
   style[direction] = offset;

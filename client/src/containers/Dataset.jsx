@@ -35,7 +35,10 @@ class Dataset extends Component {
           id={dataset.id}
         />
         {dataset.columns ?
-          <DatasetTable columns={dataset.columns} /> :
+          <DatasetTable
+            columns={dataset.columns}
+          />
+          :
           <div>loading...</div>}
       </div>
     );

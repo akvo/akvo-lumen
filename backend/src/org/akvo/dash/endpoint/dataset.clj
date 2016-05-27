@@ -6,7 +6,7 @@
             [hugsql.core :as hugsql]
             [org.akvo.dash.component.tenant-manager :refer [connection]]
             [org.akvo.dash.import :as import]
-            [ring.util.response :refer (response not-found)]))
+            [ring.util.response :refer (not-found response)]))
 
 (hugsql/def-db-fns "org/akvo/dash/endpoint/dataset.sql")
 
@@ -36,27 +36,20 @@
 
 (defn endpoint [{:keys [tenant-manager config]}]
   (context "/api/datasets" {:keys [params tenant] :as request}
+    (let-routes [tenant-conn (connection tenant-manager tenant)]
 
-    (GET "/" []
-      (response (all-datasets (connection tenant-manager tenant))))
+      (GET "/" _
+        (response (all-datasets tenant-conn)))
 
-    (POST "/" {:keys [tenant body jwt-claims] :as request}
-      (let [tenant-conn (connection tenant-manager tenant)]
-        (import/handle-import-request tenant-conn config jwt-claims body)))
+      (POST "/" {:keys [tenant body jwt-claims] :as request}
+        (import/handle-import-request tenant-conn config jwt-claims body))
 
-    (context "/:id" [id]
-
-      (GET "/" []
-        (let [dataset (find-dataset (connection tenant-manager tenant) id)]
-          (if dataset
+      (context "/:id" [id]
+        (GET "/" _
+          (if-let [dataset (find-dataset tenant-conn id)]
             (response dataset)
-            (not-found {:id id}))))
+            (not-found {:id id})))
 
-      (DELETE "/" []
-        (delete-dataset-by-id (connection tenant-manager tenant) {:id id})
-        (response {:id id}))
-
-      (context "/transformations" []
-
-        (GET "/" []
-          (response {:fns []}))))))
+        (DELETE "/" _
+          (delete-dataset-by-id tenant-conn {:id id})
+          (response {:id id}))))))

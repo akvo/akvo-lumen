@@ -15,9 +15,16 @@
       font-size: 0.8rem;
       margin-bottom: 0.25rem;
     }
-  }
-  .DashSelect {
-    height: 2.6rem;
+    input {
+      display: block;
+      width: 100%;
+      padding: 0.5rem;
+      font-size: 1rem;
+    }
+    .DashSelect, input {
+      height: 2.6rem;
+      color: #333;
+    }
   }
   h3 {
     display: inline-block;

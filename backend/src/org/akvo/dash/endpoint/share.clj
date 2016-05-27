@@ -3,8 +3,8 @@
             [compojure.core :refer :all]
             [hugsql.core :as hugsql]
             [org.akvo.dash.component.tenant-manager :refer [connection]]
-            [ring.util.response :refer [response]])
-  (:import [java.util Base64]
+            [ring.util.response "refer" [response]])
+  (:import java.util.Base64
            java.security.SecureRandom))
 
 (hugsql/def-db-fns "org/akvo/dash/endpoint/share.sql")
@@ -34,14 +34,13 @@
   [conn id]
   (delete-share-by-id conn {:id id}))
 
-(defn endpoint [{:keys [tenant-manager config]}]
+(defn endpoint [{:keys [tenant-manager]}]
   (context "/api/shares" {:keys [params tenant] :as request}
+    (let-routes [tenant-conn (connection tenant-manager tenant)]
 
-    (GET "/" []
-      (response {:index 0
-                 :items (collection (connection tenant-manager tenant))}))
+      (GET "/" _
+        (response (collection tenant-conn)))
 
-    (POST "/" {:keys [tenant body] :as request}
-      (let [tenant-conn (connection tenant-manager tenant)]
+      (POST "/" {:keys [tenant body] :as request}
         (response (share-visualisation tenant-conn
                                        (get body "visualisationId")))))))
