@@ -3,16 +3,18 @@
 WITH
 failed_imports AS (
          --TODO name->title
-  SELECT job_execution.id, spec->>'name' AS name, error_reason, job_execution.created, job_execution.modified
-    FROM data_source, job_execution
-   WHERE job_execution.data_source_id=data_source.id
-     AND error_reason IS NOT NULL
+  SELECT j.id, d.spec->>'name' AS name, j.log AS error_reason, j.created, j.modified
+    FROM data_source d, job_execution j
+   WHERE j.data_source_id = d.id
+     AND j.type = 'IMPORT'
+     AND j.log IS NOT NULL
 ),
 pending_imports AS (
-  SELECT job_execution.id, spec->>'name' AS name, job_execution.created, job_execution.modified
-    FROM data_source, job_execution
-   WHERE job_execution.data_source_id=data_source.id
-     AND finished_at IS NULL
+  SELECT j.id, d.spec->>'name' AS name, j.created, j.modified
+    FROM data_source d, job_execution j
+   WHERE j.data_source_id = d.id
+     AND j.type = 'IMPORT'
+     AND j.modified IS NULL
 )
 SELECT id, name, error_reason as reason, 'FAILED' AS status, modified, created
   FROM failed_imports
@@ -26,12 +28,6 @@ SELECT id, title, NULL, 'OK', modified, created
 -- :name delete-dataset-by-id :! :n
 -- :doc delete dataset
 DELETE FROM dataset WHERE id=:id;
-
--- :name insert-datasource :<!
--- :doc insert datasource
-INSERT INTO datasources (id, spec)
-VALUES (:id, :spec::jsonb)
-RETURNING *;
 
 -- :name insert-dataset :<!
 -- :doc insert dataset

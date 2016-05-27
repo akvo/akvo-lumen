@@ -3,8 +3,8 @@ INSERT INTO data_source(id, spec)
      VALUES (:id, :spec::jsonb);
 
 -- :name insert-job-execution :! :n
-INSERT INTO job_execution(id, data_source_id)
-     VALUES (:id, :data-source-id)
+INSERT INTO job_execution(id, data_source_id, type)
+     VALUES (:id, :data-source-id, 'IMPORT')
 
 -- :name insert-dataset :! :n
 -- :doc Insert new dataset
@@ -30,8 +30,8 @@ SELECT spec
 -- :name update-failed-job-execution :! :n
 -- :doc Update failed job execution
 UPDATE job_execution
-   SET finished_at=now(),
-       error_reason=:reason
+   SET modified=now(),
+       log=:reason
  WHERE id=:id
 
 -- :name update-successful-job-execution :! :n
