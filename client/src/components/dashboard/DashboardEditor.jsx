@@ -199,8 +199,9 @@ export default class DashboardEditor extends Component {
           className="DashboardEditorCanvasContainer"
           ref="DashboardEditorCanvasContainer"
         >
-          <div DashboardEditorCanvasControls>
+          <div className="DashboardEditorCanvasControls">
             <button
+              className="clickable"
               onClick={() => this.handleEntityToggle({ content: '' }, 'text')}
             >
               Add new text element

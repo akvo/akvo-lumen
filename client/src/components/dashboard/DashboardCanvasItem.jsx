@@ -28,9 +28,13 @@ export default class DashboardCanvasItem extends Component {
     });
   }
 
+  getIsDatasetLoaded(item) {
+    return item.type === 'visualisation' &&
+      this.props.datasets[this.props.item.visualisation.datasetId].columns;
+  }
+
   render() {
     const dimensions = this.getRenderDimensions();
-    const isDatasetLoaded = this.props.datasets[this.props.item.visualisation.datasetId].columns;
 
     return (
       <div
@@ -40,7 +44,7 @@ export default class DashboardCanvasItem extends Component {
             <div
               className="noPointerEvents itemContainer visualisation"
             >
-              {isDatasetLoaded ?
+              {this.getIsDatasetLoaded(this.props.item) ?
                 <DashChart
                   visualisation={this.props.item.visualisation}
                   datasets={this.props.datasets}

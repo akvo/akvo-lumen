@@ -17,8 +17,10 @@ body {
     color: rgb(30, 30, 30);
 }
 
-p, h1, h2, h3, h4, h5 {
+p, h1, h2, h3, h4, h5, button, input {
     line-height: 1.4em;
+    font-family: 'Source Sans Pro', sans-serif;
+    color: rgb(30, 30, 30);
 }
 
 /* Identify elements that can be clicked or tap to interact with */
