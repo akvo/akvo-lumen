@@ -6,18 +6,24 @@ export default function DashBarChart({ visualisation, datasets, width, height })
   const chartData = chart.getChartData(visualisation, datasets);
   const { name, spec } = visualisation;
 
-  const xOffset = 40;
-  const yOffset = 70;
-
   const computedHeight = height ? height : 400;
   const computedWidth = width ? width : 800;
 
   const hasAxisLabels = Boolean(visualisation.spec.labelX || visualisation.spec.labelY);
+  const hasNameColumn = Boolean(visualisation.spec.datasetNameColumnX);
 
-  const chartHeight = hasAxisLabels ? computedHeight - 32 - 24 : computedHeight - 24;
+  const xOffset = hasNameColumn ? 40 + 48 : 40;
+  const yOffset = 70;
+
+  let chartHeight = hasAxisLabels ? computedHeight - 32 - 24 : computedHeight - 24;
+  chartHeight = hasNameColumn ? chartHeight - 64 : chartHeight;
   const chartWidth = hasAxisLabels ? computedWidth - 64 : computedWidth;
 
-  const className = chart.getClassName(computedWidth, hasAxisLabels);
+  let className = chart.getClassName(computedWidth, hasAxisLabels);
+
+  if (hasNameColumn) {
+    className = `${className} hasNameColumn`;
+  }
 
   return (
     <div

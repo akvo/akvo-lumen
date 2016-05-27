@@ -6,6 +6,18 @@ require('../../styles/DashboardEditor.scss');
 require('../../../node_modules/react-grid-layout/css/styles.css');
 require('../../../node_modules/react-resizable/css/styles.css');
 
+const getArrayFromObject = (object) => {
+  const arr = [];
+
+  Object.keys(object).forEach((key) => {
+    let item = object[key];
+
+    arr.push(item);
+  })
+
+  return arr;
+}
+
 export default class DashboardEditor extends Component {
 
   constructor() {
@@ -16,139 +28,150 @@ export default class DashboardEditor extends Component {
       grid: [],
       entities: {},
       layout: [],
+      gridWidth: 1024,
     };
     this.handleLayoutChange = this.handleLayoutChange.bind(this);
+    this.handleVisualisationClick = this.handleVisualisationClick.bind(this);
+    this.handleResize = this.handleResize.bind(this);
+  }
+
+  componentDidMount() {
+    this.handleResize();
+    window.addEventListener('resize', this.handleResize);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.handleResize);
+  }
+
+  handleResize() {
+    // Offset the padding width (16px on each side)
+    const newWidth = this.refs.DashboardEditorCanvasContainer.clientWidth - 32;
+    if (newWidth !== this.state.gridWidth) {
+      this.setState({
+        gridWidth: newWidth,
+      });
+    }
   }
 
   handleLayoutChange(layout) {
     this.setState({layout: layout});
   }
 
+  handleVisualisationClick(item) {
+    let newEntities = this.state.entities;
+
+    if (this.state.entities[item.id]) {
+      delete newEntities[item.id];
+      this.setState({
+        entities: newEntities,
+      });
+    } else {
+      newEntities[item.id] = item;
+
+      let newLayout = this.state.layout;
+      newLayout.push({
+        w: 6,
+        h: 6,
+        x: 0,
+        y: 0,
+        i: item.id
+      });
+
+      this.setState({
+        layout: newLayout,
+      });
+      this.setState({
+        entities: newEntities,
+      })
+    }
+  }
+
   render() {
-    const getVisualisationArray = () => {
-      var arr = [];
 
-      Object.keys(this.props.visualisations).forEach((key) => {
-        let item = this.props.visualisations[key];
-
-        arr.push(item);
-      })
-
-      return arr;
-    }
-
-    const getArrayFromObject = (object) => {
-      const arr = [];
-
-      Object.keys(object).forEach((key) => {
-        let item = object[key];
-
-        arr.push(item);
-      })
-
-      return arr;
-    }
-
-    const onSpanClick = item => {
-      let newEntities = this.state.entities;
-
-      if (this.state.entities[item.id]) {
-        delete newEntities[item.id];
-        this.setState({
-          entities: newEntities,
-        });
-      } else {
-        newEntities[item.id] = item;
-
-        let newLayout = this.state.layout;
-        newLayout.push({
-          w: 6,
-          h: 6,
-          x: 0,
-          y: 0,
-          i: item.id
-        });
-
-        this.setState({
-          layout: newLayout,
-        });
-        this.setState({
-          entities: newEntities,
-        })
-      }
-    }
-
-    const canvasWidth = 800;
+    const canvasWidth = this.state.gridWidth;
     const rowHeight = canvasWidth / 12;
 
     return (
       <div className="DashboardEditor">
-        I am a dashboard editor!
-        <div className="VisualisationList">
-          <ul>
-            {getVisualisationArray().map(item =>
-              <li
-                key={item.id}
-                style={{
-                  margin: '0.5rem 0',
-                }}
-              >
-                {item.name}
-                <span
-                  className="clickable"
-                  onClick={() => onSpanClick(item)}
-                  style={{
-                    padding: '0.5rem',
-                    fontSize: '1.25rem',
-                  }}
-                >
-                  {this.state.entities[item.id] ? '[-]' : '[+]'}
-                </span>
-              </li>
-            )}
-          </ul>
-        </div>
+        <DashboardVisualisationList
+          visualisations={getArrayFromObject(this.props.visualisations)}
+          onVisualisationClick={this.handleVisualisationClick}
+          dashboardItems={this.state.entities}
+        />
         <div
-          className="DashboardEditorCanvas"
-          style={{
-            backgroundColor: 'whitesmoke',
-            position: 'relative',
-            minWidth: '800px',
-            boxSizing: 'initial',
-            padding: '1rem',
-          }}
+          className="DashboardEditorCanvasContainer"
+          ref="DashboardEditorCanvasContainer"
         >
-          <ReactGridLayout
-            className="layout"
-            cols={12}
-            rows={12}
-            rowHeight={rowHeight}
-            width={canvasWidth}
-            layout={this.state.layout}
-            onLayoutChange={this.handleLayoutChange}
-            /* Setting any margin results in grid units being different
-            ** vertically and horizontally due to implementation details.
-            ** Use a margin on the grid item themselves for now.
-            */
-            margin={[0,0]}
+          <div
+            className="DashboardEditorCanvas"
+            style={{
+              position: 'relative',
+              boxSizing: 'initial',
+              padding: '16px',
+            }}
           >
-            {getArrayFromObject(this.state.entities).map(item =>
-              <div
-                key={item.id}
-              >
-                <DashboardCanvasItem
-                  item={item}
-                  datasets={this.props.datasets}
-                  canvasLayout={this.state.layout}
-                  canvasWidth={canvasWidth}
-                />
-              </div>
-            )}
-            </ReactGridLayout>
+            <ReactGridLayout
+              className="layout"
+              cols={12}
+              rowHeight={rowHeight}
+              width={canvasWidth}
+              verticalCompact={false}
+              layout={this.state.layout}
+              onLayoutChange={this.handleLayoutChange}
+              /* Setting any margin results in grid units being different
+              ** vertically and horizontally due to implementation details.
+              ** Use a margin on the grid item themselves for now.
+              */
+              margin={[0,0]}
+            >
+              {getArrayFromObject(this.state.entities).map(item =>
+                <div
+                  key={item.id}
+                >
+                  <DashboardCanvasItem
+                    item={item}
+                    datasets={this.props.datasets}
+                    canvasLayout={this.state.layout}
+                    canvasWidth={canvasWidth}
+                  />
+                </div>
+              )}
+              </ReactGridLayout>
+          </div>
         </div>
       </div>
     );
   }
+}
+
+function DashboardVisualisationList(props) {
+  return (
+    <div className="DashboardVisualisationList">
+      <ul>
+        {props.visualisations.map(item =>
+          <li
+            key={item.id}
+            style={{
+              margin: '0.5rem 0',
+            }}
+          >
+            {item.name}
+            <span
+              className="clickable"
+              onClick={() => props.onVisualisationClick(item)}
+              style={{
+                padding: '0.5rem',
+                fontSize: '1.25rem',
+              }}
+            >
+              {props.dashboardItems[item.id] ? '[-]' : '[+]'}
+            </span>
+          </li>
+        )}
+      </ul>
+    </div>
+  );
 }
 
 class DashboardCanvasItem extends Component {

@@ -49,16 +49,27 @@ p, h1, h2, h3, h4, h5 {
     }
 }
 
-.dashChart.hasAxisLabels {
-  svg.rd3-chart {
-    padding: 16px 16px 16px 48px;
-    box-sizing: initial;
-  }
-}
-
 /* Charts */
 
 .dashChart {
+  svg.rd3-chart {
+    box-sizing: initial;
+  }
+  &.hasAxisLabels {
+    svg.rd3-chart {
+      padding: 16px 16px 16px 48px;
+    }
+  }
+  &.hasNameColumn {
+    svg.rd3-chart {
+      padding-bottom: 48px;
+    }
+  }
+  &.hasAxisLabels.hasNameColumn {
+    svg.rd3-chart {
+      padding: 16px 16px 64px 48px !important;
+    }
+  }
   &.xsmall {
     text {
       font-size: 0.4rem;
@@ -85,10 +96,40 @@ p, h1, h2, h3, h4, h5 {
     }
   }
 }
+.DashBarChart {
+  &.hasNameColumn {
+    .rd3-barchart-xaxis .tick text {
+      transform: rotate(45deg) translate(0.5rem, -0.25rem);
+      text-anchor: start;
+    }
+  }
+}
 
 h4.rd3-chart-title {
   margin-left: 3rem;
   font-size: 1.25rem;
   font-weight: bold;
   line-height: 24px;
+}
+
+/* tmp for dashboards */
+
+.Dashboard {
+  width: 100%;
+  .DashboardEditor {
+    margin-top: 4rem;
+    display: flex;
+
+    .DashboardVisualisationList {
+      width: 20rem;
+      overflow: auto;
+    }
+    .DashboardEditorCanvasContainer {
+      flex: 1;
+      overflow: auto;
+    }
+    .react-grid-layout {
+      background-color: whitesmoke;
+    }
+  }
 }
