@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import ReactGridLayout from 'react-grid-layout';
-import DashChart from '../charts/DashChart';
-import ContentEditable from 'react-contenteditable'
+import DashboardVisualisationList from './DashboardVisualisationList';
+import DashboardCanvasItem from './DashboardCanvasItem';
 
 require('../../styles/DashboardEditor.scss');
 require('../../../node_modules/react-grid-layout/css/styles.css');
@@ -11,30 +11,29 @@ const getArrayFromObject = (object) => {
   const arr = [];
 
   Object.keys(object).forEach((key) => {
-    let item = object[key];
+    const item = object[key];
 
     arr.push(item);
-  })
+  });
 
   return arr;
-}
+};
 
 const getNewEntityId = (entities, itemType) => {
   const entityArray = getArrayFromObject(entities);
   let highestIdInt = 0;
-  let newIdInt;
 
-  entityArray.map(item => {
+  entityArray.forEach(item => {
     if (item.type === itemType) {
-      const idInt = parseInt(item.id.substring(itemType.length + 1));
+      const idInt = parseInt(item.id.substring(itemType.length + 1), 10);
       if (idInt > highestIdInt) highestIdInt = idInt;
     }
   });
 
-  newIdInt = highestIdInt + 1;
+  const newIdInt = highestIdInt + 1;
 
   return `${itemType}-${newIdInt}`;
-}
+};
 
 const getFirstBlankRowGroup = (layout, height) => {
   /* Function to find the first collection of blank rows big
@@ -45,15 +44,14 @@ const getFirstBlankRowGroup = (layout, height) => {
   // If layout is empty, return the first row
   if (layout.length === 0) return 0;
 
-  let firstBlankRow;
-  let occupiedRows = {};
+  const occupiedRows = {};
   let lastRow = 0;
 
   /* Build an object of all occupied rows, and record the
   ** last currently occupied row.
   */
 
-  layout.map(item => {
+  layout.forEach(item => {
     for (let row = item.y; row < (item.y + item.h); row++) {
       occupiedRows[row] = true;
       if (row > lastRow) lastRow = row;
@@ -86,7 +84,7 @@ const getFirstBlankRowGroup = (layout, height) => {
   ** occupied row.
   */
   return lastRow + 1;
-}
+};
 
 export default class DashboardEditor extends Component {
 
@@ -125,12 +123,12 @@ export default class DashboardEditor extends Component {
   }
 
   handleLayoutChange(layout) {
-    this.setState({layout: layout});
+    this.setState({ layout });
   }
 
   handleEntityToggle(item, itemType) {
-    let newEntities = this.state.entities;
-    let newLayout = this.state.layout;
+    const newEntities = this.state.entities;
+    const newLayout = this.state.layout;
 
     if (this.state.entities[item.id]) {
       delete newEntities[item.id];
@@ -139,6 +137,7 @@ export default class DashboardEditor extends Component {
       });
     } else {
       if (itemType === 'visualisation') {
+        this.props.onAddVisualisation(item.datasetId);
         newEntities[item.id] = {
           type: itemType,
           id: item.id,
@@ -150,7 +149,7 @@ export default class DashboardEditor extends Component {
           h: 4,
           x: 0,
           y: getFirstBlankRowGroup(this.state.layout, 4),
-          i: item.id
+          i: item.id,
         });
       } else if (itemType === 'text') {
         const newEntityId = getNewEntityId(this.state.entities, itemType);
@@ -182,12 +181,10 @@ export default class DashboardEditor extends Component {
     const newEntities = this.state.entities;
 
     newEntities[entity.id] = entity;
-
     this.setState({ entities: newEntities });
   }
 
   render() {
-
     const canvasWidth = this.state.gridWidth;
     const rowHeight = canvasWidth / 12;
 
@@ -229,7 +226,7 @@ export default class DashboardEditor extends Component {
               ** vertically and horizontally due to implementation details.
               ** Use a margin on the grid item themselves for now.
               */
-              margin={[0,0]}
+              margin={[0, 0]}
             >
               {getArrayFromObject(this.state.entities).map(item =>
                 <div
@@ -245,182 +242,9 @@ export default class DashboardEditor extends Component {
                   />
                 </div>
               )}
-              </ReactGridLayout>
+            </ReactGridLayout>
           </div>
         </div>
-      </div>
-    );
-  }
-}
-
-function DashboardVisualisationList(props) {
-  const isOnDashboard = item => Boolean(props.dashboardItems[item.id]);
-
-  return (
-    <div
-      className="DashboardVisualisationList"
-      style={{
-        borderRight: '0.1rem solid black',
-        overflow: 'scroll',
-      }}
-    >
-      <ul
-        style={{
-          'padding': '1rem',
-        }}
-      >
-        {props.visualisations.map(item =>
-          <li
-            className={`listItem clickable ${item.visualisationType} ${isOnDashboard(item) ? 'added' : ''}`}
-            key={item.id}
-            style={{
-              margin: '1rem 0',
-              width: '100%',
-              height: '10rem',
-              border: '0.1rem solid black',
-              position: 'relative',
-            }}
-            onClick={() => props.onEntityClick(item, 'visualisation')}
-          >
-            <h4
-              style={{
-                padding: '0.5rem',
-              }}
-            >
-              {item.name}
-              <span
-                className="isOnDashboardIndicator"
-                style={{
-                  padding: '0.5rem',
-                  fontSize: '1.25rem',
-                  position: 'absolute',
-                  top: '0rem',
-                  right: '0rem',
-                }}
-              >
-                { isOnDashboard(item) ? '✔' : ''}
-              </span>
-            </h4>
-          </li>
-        )}
-      </ul>
-    </div>
-  );
-}
-
-class DashboardCanvasItem extends Component {
-
-  getItemLayout() {
-    let output;
-
-    this.props.canvasLayout.map((item, index) => {
-      if (item.i === this.props.item.id) {
-        output = this.props.canvasLayout[index];
-      }
-    });
-
-    return output;
-  }
-
-  getRenderDimensions() {
-    const unit = this.props.canvasWidth / 12;
-    const layout = this.getItemLayout();
-
-    return ({
-      width: (layout.w * unit) - 40,
-      height: (layout.h * unit) - 40,
-    });
-  }
-
-  render() {
-    const dimensions = this.getRenderDimensions();
-    return (
-      <div
-        style={{
-          padding: '10px',
-          margin: '10px',
-          backgroundColor: 'white',
-          border: '1px solid rgba(0,0,0,0.3)',
-          overflow: 'hidden',
-          position: 'relative',
-        }}
-      >
-          {this.props.item.type === 'visualisation' &&
-            <span
-              style={{
-                pointerEvents: 'none',
-              }}
-            >
-              <DashChart
-                visualisation={this.props.item.visualisation}
-                datasets={this.props.datasets}
-                width={dimensions.width}
-                height={dimensions.height}
-              />
-            </span>
-          }
-          {this.props.item.type === 'text' &&
-            <div
-              style={{
-                height: dimensions.height,
-                width: dimensions.width,
-                padding: '0.1rem',
-              }}
-            >
-              <DashboardCanvasItemEditable
-                onEntityUpdate={this.props.onEntityUpdate}
-                item={this.props.item}
-              />
-            </div>
-          }
-        <button
-          style={{
-            position: 'absolute',
-            top: '0px',
-            right: '5px',
-            display: 'block',
-            fontWeight: 'bold',
-            transform: 'rotate(45deg)',
-            zIndex: '2',
-            fontSize: '1.5rem',
-          }}
-          className="clickable deleteButton"
-          onClick={() => this.props.onDeleteClick(this.props.item)}
-        >
-          +
-        </button>
-      </div>
-    );
-  }
-}
-
-class DashboardCanvasItemEditable extends Component {
-  constructor() {
-    super();
-    this.state = {
-      html: 'Enter text here',
-    }
-    this.handleChange = this.handleChange.bind(this);
-    this.handleBlur = this.handleBlur.bind(this);
-  }
-  handleChange(evt) {
-    this.setState({ html: evt.target.value});
-  }
-  handleBlur() {
-    let newItem = this.props.item;
-    newItem.content = this.state.html;
-    this.props.onEntityUpdate(newItem);
-  }
-  render() {
-    return(
-      <div
-        className="DashboardCanvasItemEditable"
-        onBlur={this.handleBlur}
-      >
-        <ContentEditable
-          html={this.state.html}
-          onChange={this.handleChange}
-        />
       </div>
     );
   }
@@ -429,4 +253,5 @@ class DashboardCanvasItemEditable extends Component {
 DashboardEditor.propTypes = {
   visualisations: PropTypes.object.isRequired,
   datasets: PropTypes.object.isRequired,
+  onAddVisualisation: PropTypes.func.isRequired,
 };

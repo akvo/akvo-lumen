@@ -2,7 +2,7 @@ import React, { PropTypes } from 'react';
 import { AreaChart } from 'react-d3';
 import * as chart from '../../utilities/chart';
 
-export default function DashAreaChart({ visualisation, datasets, width, height}) {
+export default function DashAreaChart({ visualisation, datasets, width, height }) {
   const chartData = chart.getChartData(visualisation, datasets);
   const { name, spec } = visualisation;
 
@@ -12,8 +12,8 @@ export default function DashAreaChart({ visualisation, datasets, width, height})
   const xOffset = 40;
   const yOffset = 70;
 
-  const computedHeight = height ? height : 400;
-  const computedWidth = width ? width : 800;
+  const computedHeight = height || 400;
+  const computedWidth = width || 800;
 
   const hasAxisLabels = Boolean(visualisation.spec.labelX || visualisation.spec.labelY);
 
@@ -49,4 +49,6 @@ export default function DashAreaChart({ visualisation, datasets, width, height})
 DashAreaChart.propTypes = {
   visualisation: PropTypes.object.isRequired,
   datasets: PropTypes.object.isRequired,
+  width: PropTypes.number,
+  height: PropTypes.number,
 };

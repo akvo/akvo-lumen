@@ -6,8 +6,8 @@ export default function DashBarChart({ visualisation, datasets, width, height })
   const chartData = chart.getChartData(visualisation, datasets);
   const { name, spec } = visualisation;
 
-  const computedHeight = height ? height : 400;
-  const computedWidth = width ? width : 800;
+  const computedHeight = height || 400;
+  const computedWidth = width || 800;
 
   const hasAxisLabels = Boolean(visualisation.spec.labelX || visualisation.spec.labelY);
   const hasNameColumn = Boolean(visualisation.spec.datasetNameColumnX);
@@ -50,4 +50,6 @@ export default function DashBarChart({ visualisation, datasets, width, height })
 DashBarChart.propTypes = {
   visualisation: PropTypes.object.isRequired,
   datasets: PropTypes.object.isRequired,
+  width: PropTypes.number,
+  height: PropTypes.number,
 };

@@ -1,13 +1,10 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
-import update from 'react-addons-update';
 import DashboardEditor from '../components/dashboard/DashboardEditor';
 import EntityTypeHeader from '../components/entity-editor/EntityTypeHeader';
 import * as actions from '../actions/dashboard';
 import { fetchDataset } from '../actions/dataset';
 import { push } from 'react-router-redux';
-
-// require('../styles/Dashboard.scss');
 
 const getEditingStatus = location => {
   const testString = 'create';
@@ -27,6 +24,7 @@ class Dashboard extends Component {
         entities: [],
       },
     };
+    this.onAddVisualisation = this.onAddVisualisation.bind(this);
   }
 
   componentWillMount() {
@@ -57,6 +55,12 @@ class Dashboard extends Component {
     dispatch(push('/library?filter=dashboards&sort=created'));
   }
 
+  onAddVisualisation(datasetId) {
+    if (!this.props.library.datasets[datasetId].columns) {
+      this.props.dispatch(fetchDataset(datasetId));
+    }
+  }
+
   render() {
     return (
       <div className="Dashboard">
@@ -69,6 +73,7 @@ class Dashboard extends Component {
           dashboard={this.state}
           datasets={this.props.library.datasets}
           visualisations={this.props.library.visualisations}
+          onAddVisualisation={this.onAddVisualisation}
         />
       </div>
     );

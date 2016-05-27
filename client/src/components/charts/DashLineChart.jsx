@@ -12,9 +12,8 @@ export default function DashLineChart({ visualisation, datasets, width, height }
   const xOffset = 40;
   const yOffset = 70;
 
-  const computedHeight = height ? height : 400;
-  const computedWidth = width ? width : 800;
-
+  const computedHeight = height || 400;
+  const computedWidth = width || 800;
   const hasAxisLabels = Boolean(visualisation.spec.labelX || visualisation.spec.labelY);
 
   const chartHeight = hasAxisLabels ? computedHeight - 32 - 24 : computedHeight - 24;
@@ -49,4 +48,6 @@ export default function DashLineChart({ visualisation, datasets, width, height }
 DashLineChart.propTypes = {
   visualisation: PropTypes.object.isRequired,
   datasets: PropTypes.object.isRequired,
+  width: PropTypes.number,
+  height: PropTypes.number,
 };

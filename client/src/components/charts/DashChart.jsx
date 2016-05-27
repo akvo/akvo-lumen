@@ -7,7 +7,6 @@ import DashPieChart from './DashPieChart';
 import DashScatterChart from './DashScatterChart';
 
 export default function DashChart(props) {
-
   switch (props.visualisation.visualisationType) {
     case 'bar':
       return (
@@ -38,8 +37,6 @@ export default function DashChart(props) {
         />
       );
 
-      return output;
-
     case 'scatter':
       return (
         <DashScatterChart
@@ -55,11 +52,12 @@ export default function DashChart(props) {
       );
 
     default:
-      throw new Error(`Unknown chart type ${props.visualisation.visualisationType} supplied to DashChart`);
+      throw new Error(`Unknown chart type ${props.visualisation.visualisationType}
+        supplied to DashChart`);
   }
 }
 
-DashBarChart.propTypes = {
+DashChart.propTypes = {
   visualisation: PropTypes.object.isRequired,
   datasets: PropTypes.object.isRequired,
 };

@@ -41,6 +41,10 @@ p, h1, h2, h3, h4, h5 {
     cursor: not-allowed;
 }
 
+.noPointerEvents {
+  pointer-events: none;
+}
+
 /* Always show modals on top of the stack */
 
 .ReactModalPortal {
@@ -116,23 +120,4 @@ h4.rd3-chart-title {
 
 .Dashboard {
   width: 100%;
-  .DashboardEditor {
-    margin-top: 4rem;
-    display: flex;
-
-    .DashboardVisualisationList, .DashboardEditorCanvasContainer {
-      height: calc(100vh - 4rem);
-      overflow: auto;
-    }
-
-    .DashboardVisualisationList {
-      width: 20rem;
-    }
-    .DashboardEditorCanvasContainer {
-      flex: 1;
-    }
-    .react-grid-layout {
-      background-color: whitesmoke;
-    }
-  }
 }

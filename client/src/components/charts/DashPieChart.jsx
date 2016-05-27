@@ -2,12 +2,12 @@ import React, { PropTypes } from 'react';
 import { PieChart } from 'react-d3';
 import * as chart from '../../utilities/chart';
 
-export default function DashPieChart({ visualisation, datasets, width, height}) {
+export default function DashPieChart({ visualisation, datasets, width, height }) {
   const chartData = chart.getChartData(visualisation, datasets);
   const innerRadius = visualisation.visualisationType === 'donut' ? 20 : null;
 
-  const computedHeight = height ? height : 400;
-  const computedWidth = width ? width : 400;
+  const computedHeight = height || 400;
+  const computedWidth = width || 400;
 
   const chartHeight = computedHeight - 24;
   const chartWidth = computedWidth;
@@ -29,7 +29,7 @@ export default function DashPieChart({ visualisation, datasets, width, height}) 
         innerRadius={innerRadius}
         data={chartData}
         sectorBorderColor="white"
-        showInnerLabels={true}
+        showInnerLabels
       />
     </div>
   );
@@ -38,4 +38,6 @@ export default function DashPieChart({ visualisation, datasets, width, height}) 
 DashPieChart.propTypes = {
   visualisation: PropTypes.object.isRequired,
   datasets: PropTypes.object.isRequired,
+  width: PropTypes.number,
+  height: PropTypes.number,
 };
