@@ -18,6 +18,73 @@ const getArrayFromObject = (object) => {
   return arr;
 }
 
+const getNewEntityId = (entities, itemType) => {
+  const entityArray = getArrayFromObject(entities);
+  let highestIdInt = 0;
+  let newIdInt;
+
+  entityArray.map(item => {
+    if (item.type === itemType) {
+      const idInt = parseInt(item.id.substring(itemType.length + 1));
+      if (idInt > highestIdInt) highestIdInt = idInt;
+    }
+  });
+
+  newIdInt = highestIdInt + 1;
+
+  return `${itemType}-${newIdInt}`;
+}
+
+const getFirstBlankRowGroup = (layout, height) => {
+  /* Function to find the first collection of blank rows big
+  ** enough for the default height of the entity about to be
+  ** inserted.
+  */
+  if (layout.length === 0) return 0;
+
+  let firstBlankRow;
+  let occupiedRows = {};
+  let lastRow = 0;
+
+  /* Build an object of all occupied rows, and record the
+  ** last currently occupied row.
+  */
+
+  layout.map(item => {
+    for (let row = item.y; row < (item.y + item.h); row++) {
+      occupiedRows[row] = true;
+      if (row > lastRow) lastRow = row;
+    }
+  });
+
+  /* Loop through every row from 0 to the last occupied. If
+  ** we encounter a blank row n, check the next sequential rows
+  ** until we have enough blank row to fit our height. If we
+  ** do, return row n.
+  */
+
+  for (let i = 0; i < lastRow; i++) {
+    if (!occupiedRows[i]) {
+      let haveSpace = true;
+
+      for (let y = i + 1; y < (i + height); y++) {
+        if (occupiedRows[y]) {
+          haveSpace = false;
+        }
+      }
+
+      if (haveSpace) {
+        return i;
+      }
+    }
+  }
+
+  /* Otherwise, just return the row after the last currently
+  ** occupied row.
+  */
+  return lastRow + 1;
+}
+
 export default class DashboardEditor extends Component {
 
   constructor() {
@@ -58,8 +125,9 @@ export default class DashboardEditor extends Component {
     this.setState({layout: layout});
   }
 
-  handleVisualisationClick(item) {
+  handleVisualisationClick(item, itemType) {
     let newEntities = this.state.entities;
+    let newLayout = this.state.layout;
 
     if (this.state.entities[item.id]) {
       delete newEntities[item.id];
@@ -67,23 +135,43 @@ export default class DashboardEditor extends Component {
         entities: newEntities,
       });
     } else {
-      newEntities[item.id] = item;
+      if (itemType === 'visualisation') {
+        newEntities[item.id] = {
+          type: itemType,
+          id: item.id,
+          visualisation: item,
+        };
 
-      let newLayout = this.state.layout;
-      newLayout.push({
-        w: 6,
-        h: 6,
-        x: 0,
-        y: 0,
-        i: item.id
-      });
+        newLayout.push({
+          w: 6,
+          h: 4,
+          x: 0,
+          y: getFirstBlankRowGroup(this.state.layout, 4),
+          i: item.id
+        });
+      } else if (itemType === 'text') {
+        const newEntityId = getNewEntityId(this.state.entities, itemType);
+
+        newEntities[newEntityId] = {
+          type: itemType,
+          id: newEntityId,
+          content: '',
+        };
+        newLayout.push({
+          w: 4,
+          h: 1,
+          x: 0,
+          y: getFirstBlankRowGroup(this.state.layout, 1),
+          i: newEntityId,
+        });
+      }
 
       this.setState({
         layout: newLayout,
       });
       this.setState({
         entities: newEntities,
-      })
+      });
     }
   }
 
@@ -134,6 +222,7 @@ export default class DashboardEditor extends Component {
                     datasets={this.props.datasets}
                     canvasLayout={this.state.layout}
                     canvasWidth={canvasWidth}
+                    onDeleteClick={this.handleVisualisationClick}
                   />
                 </div>
               )}
@@ -148,6 +237,11 @@ export default class DashboardEditor extends Component {
 function DashboardVisualisationList(props) {
   return (
     <div className="DashboardVisualisationList">
+      <button
+        onClick={() => props.onVisualisationClick({ content: '' }, 'text')}
+      >
+        Add new text entity
+      </button>
       <ul>
         {props.visualisations.map(item =>
           <li
@@ -159,7 +253,7 @@ function DashboardVisualisationList(props) {
             {item.name}
             <span
               className="clickable"
-              onClick={() => props.onVisualisationClick(item)}
+              onClick={() => props.onVisualisationClick(item, 'visualisation')}
               style={{
                 padding: '0.5rem',
                 fontSize: '1.25rem',
@@ -206,17 +300,52 @@ class DashboardCanvasItem extends Component {
           padding: '10px',
           margin: '10px',
           backgroundColor: 'white',
-          pointerEvents: 'none',
           border: '1px solid rgba(0,0,0,0.3)',
           overflow: 'hidden',
+          position: 'relative',
         }}
       >
-        <DashChart
-          visualisation={this.props.item}
-          datasets={this.props.datasets}
-          width={dimensions.width}
-          height={dimensions.height}
-        />
+          {this.props.item.type === 'visualisation' &&
+            <span
+              style={{
+                pointerEvents: 'none',
+              }}
+            >
+              <DashChart
+                visualisation={this.props.item.visualisation}
+                datasets={this.props.datasets}
+                width={dimensions.width}
+                height={dimensions.height}
+              />
+            </span>
+          }
+          {this.props.item.type === 'text' &&
+            <div
+              style={{
+                height: dimensions.height,
+                width: dimensions.width,
+                padding: '0.1rem',
+              }}
+            >
+              Enter text here for {this.props.item.id}
+            </div>
+          }
+        <button
+          style={{
+            position: 'absolute',
+            top: '0px',
+            right: '5px',
+            display: 'block',
+            fontWeight: 'bold',
+            transform: 'rotate(45deg)',
+            zIndex: '2',
+            fontSize: '1.5rem',
+          }}
+          className="clickable deleteButton"
+          onClick={() => this.props.onDeleteClick(this.props.item)}
+        >
+          +
+        </button>
       </div>
     );
   }
