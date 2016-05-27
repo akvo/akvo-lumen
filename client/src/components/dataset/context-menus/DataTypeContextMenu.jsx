@@ -30,7 +30,6 @@ export default function DataTypeContextMenu({ column, dimensions, onContextMenuI
       }}
       onOptionSelected={item =>
         onContextMenuItemSelected({
-          type: 'edit', // TODO: 'edit' => 'change-column-type' (or something)
           newColumnType: item,
           column,
         })}

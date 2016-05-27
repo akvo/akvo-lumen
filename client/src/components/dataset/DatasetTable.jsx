@@ -91,6 +91,8 @@ export default class DatasetTable extends Component {
 
     this.handleToggleColumnContextMenu = this.handleToggleColumnContextMenu.bind(this);
     this.handleToggleDataTypeContextMenu = this.handleToggleDataTypeContextMenu.bind(this);
+
+    this.handleDataTypeContextMenuClicked = this.handleDataTypeContextMenuClicked.bind(this);
   }
 
   componentDidMount() {
@@ -177,23 +179,19 @@ export default class DatasetTable extends Component {
     }
   }
 
-  handleMenuItemClick(type, item, oldItem) {
-    const { activeDataTypeContextMenu } = this.state;
+  handleDataTypeContextMenuClicked({ column, newColumnType }) {
+    this.setState({ activeDataTypeContextMenu: null });
+    if (newColumnType !== column.type) {
+      this.handleShowSidebar({
+        type: 'edit',
+        columnTitle: column.title,
+        newColumnType,
+      });
+    }
+  }
+
+  handleMenuItemClick(type, item) {
     switch (type) {
-      case 'transformItem':
-        if (item !== oldItem) {
-          if (item === 'date') {
-            this.handleShowSidebar({
-              type: 'edit',
-              columnTitle: activeDataTypeContextMenu.column.title,
-              oldColumnType: oldItem,
-              newColunType: item,
-            });
-          }
-        }
-       // Close the context menu
-        this.setState({ activeDataTypeContextMenu: null });
-        break;
 
       case 'columnItem':
         this.setState({
@@ -314,9 +312,7 @@ export default class DatasetTable extends Component {
               <DataTypeContextMenu
                 column={activeDataTypeContextMenu.column}
                 dimensions={activeDataTypeContextMenu.dimensions}
-                onContextMenuItemSelected={({ newColumnType, column }) => {
-                  this.handleMenuItemClick('transformItem', newColumnType, column.type);
-                }}
+                onContextMenuItemSelected={this.handleDataTypeContextMenuClicked}
               />}
             {this.state.activeColumnMenu &&
               <ContextMenu

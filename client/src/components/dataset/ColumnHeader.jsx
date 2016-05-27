@@ -6,11 +6,11 @@ export default class ColumnHeader extends Component {
 
   constructor() {
     super();
-    this.handleColumnTypeMenuClick = this.handleColumnTypeMenuClick.bind(this);
+    this.handleDataTypeMenuClick = this.handleDataTypeMenuClick.bind(this);
     this.handleColumnMenuClick = this.handleColumnMenuClick.bind(this);
   }
 
-  handleColumnTypeMenuClick(event) {
+  handleDataTypeMenuClick(event) {
     event.stopPropagation();
 
     const el = this.refs.columnTypeLabel;
@@ -59,7 +59,7 @@ export default class ColumnHeader extends Component {
         >
           <span
             className="columnTypeToggle"
-            onClick={this.handleColumnTypeMenuClick}
+            onClick={this.handleDataTypeMenuClick}
             ref="columnTypeLabel"
           >
             {this.props.column.type}
