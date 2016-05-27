@@ -95,14 +95,14 @@ export default class DashboardEditor extends Component {
     this.state = {
       type: 'dashboard',
       name: 'Untitled dashboard',
-      grid: [],
       entities: {},
       layout: [],
       gridWidth: 1024,
     };
     this.handleLayoutChange = this.handleLayoutChange.bind(this);
-    this.handleEntityClick = this.handleEntityClick.bind(this);
+    this.handleEntityToggle = this.handleEntityToggle.bind(this);
     this.handleResize = this.handleResize.bind(this);
+    this.handleEntityUpdate = this.handleEntityUpdate.bind(this);
   }
 
   componentDidMount() {
@@ -128,7 +128,7 @@ export default class DashboardEditor extends Component {
     this.setState({layout: layout});
   }
 
-  handleEntityClick(item, itemType) {
+  handleEntityToggle(item, itemType) {
     let newEntities = this.state.entities;
     let newLayout = this.state.layout;
 
@@ -178,6 +178,14 @@ export default class DashboardEditor extends Component {
     }
   }
 
+  handleEntityUpdate(entity) {
+    const newEntities = this.state.entities;
+
+    newEntities[entity.id] = entity;
+
+    this.setState({ entities: newEntities });
+  }
+
   render() {
 
     const canvasWidth = this.state.gridWidth;
@@ -187,7 +195,7 @@ export default class DashboardEditor extends Component {
       <div className="DashboardEditor">
         <DashboardVisualisationList
           visualisations={getArrayFromObject(this.props.visualisations)}
-          onEntityClick={this.handleEntityClick}
+          onEntityClick={this.handleEntityToggle}
           dashboardItems={this.state.entities}
         />
         <div
@@ -196,9 +204,9 @@ export default class DashboardEditor extends Component {
         >
           <div DashboardEditorCanvasControls>
             <button
-              onClick={() => this.handleEntityClick({ content: '' }, 'text')}
+              onClick={() => this.handleEntityToggle({ content: '' }, 'text')}
             >
-              Add new text entity
+              Add new text element
             </button>
           </div>
           <div
@@ -232,7 +240,8 @@ export default class DashboardEditor extends Component {
                     datasets={this.props.datasets}
                     canvasLayout={this.state.layout}
                     canvasWidth={canvasWidth}
-                    onDeleteClick={this.handleEntityClick}
+                    onDeleteClick={this.handleEntityToggle}
+                    onEntityUpdate={this.handleEntityUpdate}
                   />
                 </div>
               )}
@@ -245,27 +254,53 @@ export default class DashboardEditor extends Component {
 }
 
 function DashboardVisualisationList(props) {
+  const isOnDashboard = item => Boolean(props.dashboardItems[item.id]);
+
   return (
-    <div className="DashboardVisualisationList">
-      <ul>
+    <div
+      className="DashboardVisualisationList"
+      style={{
+        borderRight: '0.1rem solid black',
+        overflow: 'scroll',
+      }}
+    >
+      <ul
+        style={{
+          'padding': '1rem',
+        }}
+      >
         {props.visualisations.map(item =>
           <li
+            className={`listItem clickable ${item.visualisationType} ${isOnDashboard(item) ? 'added' : ''}`}
             key={item.id}
             style={{
-              margin: '0.5rem 0',
+              margin: '1rem 0',
+              width: '100%',
+              height: '10rem',
+              border: '0.1rem solid black',
+              position: 'relative',
             }}
+            onClick={() => props.onEntityClick(item, 'visualisation')}
           >
-            {item.name}
-            <span
-              className="clickable"
-              onClick={() => props.onEntityClick(item, 'visualisation')}
+            <h4
               style={{
                 padding: '0.5rem',
-                fontSize: '1.25rem',
               }}
             >
-              {props.dashboardItems[item.id] ? '[-]' : '[+]'}
-            </span>
+              {item.name}
+              <span
+                className="isOnDashboardIndicator"
+                style={{
+                  padding: '0.5rem',
+                  fontSize: '1.25rem',
+                  position: 'absolute',
+                  top: '0rem',
+                  right: '0rem',
+                }}
+              >
+                { isOnDashboard(item) ? '✔' : ''}
+              </span>
+            </h4>
           </li>
         )}
       </ul>
@@ -332,7 +367,10 @@ class DashboardCanvasItem extends Component {
                 padding: '0.1rem',
               }}
             >
-              <DashboardCanvasItemEditable />
+              <DashboardCanvasItemEditable
+                onEntityUpdate={this.props.onEntityUpdate}
+                item={this.props.item}
+              />
             </div>
           }
         <button
@@ -363,14 +401,21 @@ class DashboardCanvasItemEditable extends Component {
       html: 'Enter text here',
     }
     this.handleChange = this.handleChange.bind(this);
+    this.handleBlur = this.handleBlur.bind(this);
   }
   handleChange(evt) {
     this.setState({ html: evt.target.value});
+  }
+  handleBlur() {
+    let newItem = this.props.item;
+    newItem.content = this.state.html;
+    this.props.onEntityUpdate(newItem);
   }
   render() {
     return(
       <div
         className="DashboardCanvasItemEditable"
+        onBlur={this.handleBlur}
       >
         <ContentEditable
           html={this.state.html}

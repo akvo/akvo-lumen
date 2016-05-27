@@ -120,13 +120,16 @@ h4.rd3-chart-title {
     margin-top: 4rem;
     display: flex;
 
+    .DashboardVisualisationList, .DashboardEditorCanvasContainer {
+      height: calc(100vh - 4rem);
+      overflow: auto;
+    }
+
     .DashboardVisualisationList {
       width: 20rem;
-      overflow: auto;
     }
     .DashboardEditorCanvasContainer {
       flex: 1;
-      overflow: auto;
     }
     .react-grid-layout {
       background-color: whitesmoke;
