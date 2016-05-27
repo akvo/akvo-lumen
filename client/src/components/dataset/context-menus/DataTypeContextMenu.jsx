@@ -17,19 +17,19 @@ const options = [
 ];
 
 /* "The job of a context menu is to create props for the sidebar" */
-export default function DataTypeContextMenu({ column, style, onMenuItemSelected }) {
+export default function DataTypeContextMenu({ column, dimensions, onContextMenuItemSelected }) {
   return (
     <ContextMenu
       options={options}
       selected={column.type}
       style={{
         width: '8rem',
-        top: `${style.top}px`,
-        left: `${style.left}px`,
+        top: `${dimensions.top}px`,
+        left: `${dimensions.left}px`,
         right: 'initial',
       }}
       onOptionSelected={item =>
-        onMenuItemSelected({
+        onContextMenuItemSelected({
           type: 'edit', // TODO: 'edit' => 'change-column-type' (or something)
           newColumnType: item,
           column,
@@ -42,6 +42,9 @@ export default function DataTypeContextMenu({ column, style, onMenuItemSelected 
 
 DataTypeContextMenu.propTypes = {
   column: PropTypes.object.isRequired,
-  style: PropTypes.object.isRequired,
-  onMenuItemSelected: PropTypes.func.isRequired,
+  dimensions: PropTypes.shape({
+    top: PropTypes.number.isRequired,
+    left: PropTypes.number.isRequired,
+  }).isRequired,
+  onContextMenuItemSelected: PropTypes.func.isRequired,
 };
