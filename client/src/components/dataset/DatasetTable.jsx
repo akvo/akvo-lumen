@@ -102,6 +102,9 @@ export default class DatasetTable extends Component {
     this.handleMenuItemClick = this.handleMenuItemClick.bind(this);
     this.handleShowSidebar = this.handleShowSidebar.bind(this);
     this.handleHideSidebar = this.handleHideSidebar.bind(this);
+
+    this.handleToggleColumnContextMenu = this.handleToggleColumnContextMenu.bind(this);
+    this.handleToggleDataTypeContextMenu = this.handleToggleDataTypeContextMenu.bind(this);
   }
 
   componentDidMount() {
@@ -118,12 +121,19 @@ export default class DatasetTable extends Component {
       this.state.activeSidebar.columnTitle === columnTitle) {
       return 'sidebarTargetingColumn';
     }
-
     return '';
   }
 
+  handleToggleDataTypeContextMenu(column, dims) {
+
+  }
+
+  handleToggleColumnContextMenu(column, dims) {
+
+  }
+
   handleMenuToggleClick(type, options) {
-    /* TOFIX: currently, the sidebar-hiding updates the DOM too slowly
+    /* FIXME: currently, the sidebar-hiding updates the DOM too slowly
     ** and any new context menu appears in an offset position.
     */
     this.handleHideSidebar();
@@ -218,9 +228,6 @@ export default class DatasetTable extends Component {
             throw new Error(`Unknown item ${item} supplied to handleMenuItemClick`);
         }
         break;
-      case 'datasetEditorItem':
-        console.log(item);
-        break;
 
       default:
         throw new Error(`Unknown item type ${type} supplied to handleMenuItemClick`);
@@ -271,14 +278,13 @@ export default class DatasetTable extends Component {
       const columnHeader = (
         <ColumnHeader
           key={index}
-          columnType={column.type}
-          columnTitle={column.title}
+          column={column}
+          onToggleDataTypeContextMenu={this.handleToggleDataTypeContextMenu}
+          onToggleColumnContextMenu={this.handleToggleColumnContextMenu}
           onClickMenuToggle={this.handleMenuToggleClick}
           columnMenuActive={Boolean(this.state.activeColumnMenu
             && this.state.activeColumnMenu.title === column.title)}
-        >
-          {column.title}
-        </ColumnHeader>
+        />
       );
       return (
         <Column
@@ -309,17 +315,10 @@ export default class DatasetTable extends Component {
         >
           {this.state.activeSidebar &&
             <DataTableSidebar
-              style={{
-                width: '300px',
-                height: 'calc(100vh - 4rem)',
-              }}
-              sidebar={this.state.activeSidebar}
-              columnTitle={this.state.activeSidebar.columnTitle}
-              newColumnType={this.state.activeSidebar.newColumnType}
+              {...this.state.activeSidebar}
               options={columnTypeOptions}
               onClose={() => this.handleHideSidebar()}
-            />
-          }
+            />}
           <div
             className="wrapper"
             ref="wrappingDiv"
@@ -354,7 +353,6 @@ export default class DatasetTable extends Component {
                   right: 'initial',
                 }}
                 onOptionSelected={(item) => { this.handleMenuItemClick('columnItem', item); }}
-
               />
             }
             <Table
