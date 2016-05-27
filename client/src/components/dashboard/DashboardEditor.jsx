@@ -194,6 +194,13 @@ export default class DashboardEditor extends Component {
           className="DashboardEditorCanvasContainer"
           ref="DashboardEditorCanvasContainer"
         >
+          <div DashboardEditorCanvasControls>
+            <button
+              onClick={() => this.handleEntityClick({ content: '' }, 'text')}
+            >
+              Add new text entity
+            </button>
+          </div>
           <div
             className="DashboardEditorCanvas"
             style={{
@@ -240,11 +247,6 @@ export default class DashboardEditor extends Component {
 function DashboardVisualisationList(props) {
   return (
     <div className="DashboardVisualisationList">
-      <button
-        onClick={() => props.onEntityClick({ content: '' }, 'text')}
-      >
-        Add new text entity
-      </button>
       <ul>
         {props.visualisations.map(item =>
           <li
