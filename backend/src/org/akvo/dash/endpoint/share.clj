@@ -3,7 +3,7 @@
             [compojure.core :refer :all]
             [hugsql.core :as hugsql]
             [org.akvo.dash.component.tenant-manager :refer [connection]]
-            [ring.util.response "refer" [response]])
+            [ring.util.response :refer [response]])
   (:import java.util.Base64
            java.security.SecureRandom))
 
