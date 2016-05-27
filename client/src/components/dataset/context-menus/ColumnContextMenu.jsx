@@ -1,3 +1,5 @@
+import React, { PropTypes } from 'react';
+import ContextMenu from '../../common/ContextMenu';
 
 // TODO: Depend on column type!
 const options = [{
@@ -37,3 +39,29 @@ const options = [{
     value: 'to-titlecase',
   }],
 }];
+
+export default function ColumnContextMenu({ column, dimensions, onContextMenuItemSelected }) {
+  return (
+    <ContextMenu
+      options={options}
+      selected={null}
+      style={{
+        width: `${dimensions.width}px`,
+        top: `${dimensions.top}px`,
+        left: `${dimensions.left}px`,
+        right: 'initial',
+      }}
+      onOptionSelected={(item) => onContextMenuItemSelected({ column, menuItem: item })}
+    />
+  );
+}
+
+ColumnContextMenu.propTypes = {
+  column: PropTypes.object.isRequired,
+  dimensions: PropTypes.shape({
+    width: PropTypes.number.isRequired,
+    top: PropTypes.number.isRequired,
+    left: PropTypes.number.isRequired,
+  }).isRequired,
+  onContextMenuItemSelected: PropTypes.func.isRequired,
+};

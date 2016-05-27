@@ -36,14 +36,16 @@ export default class ColumnHeader extends Component {
     const horizontalOffset = rect.left;
     const width = el.offsetWidth;
 
-    const options = {
-      columnTitle: this.props.column.title,
+    const dimensions = {
       left: horizontalOffset,
       top: verticalOffset,
       width,
     };
 
-    this.props.onClickMenuToggle('columnMenu', options);
+    this.props.onToggleColumnContextMenu({
+      dimensions,
+      column: this.props.column,
+    });
   }
 
   render() {
@@ -77,6 +79,6 @@ ColumnHeader.propTypes = {
     title: PropTypes.string.isRequired,
   }),
   onToggleDataTypeContextMenu: PropTypes.func.isRequired,
+  onToggleColumnContextMenu: PropTypes.func.isRequired,
   columnMenuActive: PropTypes.bool.isRequired,
-  onClickMenuToggle: PropTypes.func.isRequired,
 };
