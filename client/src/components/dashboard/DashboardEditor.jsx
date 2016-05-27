@@ -1,6 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import ReactGridLayout from 'react-grid-layout';
 import DashChart from '../charts/DashChart';
+import ContentEditable from 'react-contenteditable'
 
 require('../../styles/DashboardEditor.scss');
 require('../../../node_modules/react-grid-layout/css/styles.css');
@@ -40,6 +41,8 @@ const getFirstBlankRowGroup = (layout, height) => {
   ** enough for the default height of the entity about to be
   ** inserted.
   */
+
+  // If layout is empty, return the first row
   if (layout.length === 0) return 0;
 
   let firstBlankRow;
@@ -58,9 +61,9 @@ const getFirstBlankRowGroup = (layout, height) => {
   });
 
   /* Loop through every row from 0 to the last occupied. If
-  ** we encounter a blank row n, check the next sequential rows
-  ** until we have enough blank row to fit our height. If we
-  ** do, return row n.
+  ** we encounter a blank row i, check the next sequential rows
+  ** until we have enough blank rows to fit our height. If we
+  ** do, return row i.
   */
 
   for (let i = 0; i < lastRow; i++) {
@@ -98,7 +101,7 @@ export default class DashboardEditor extends Component {
       gridWidth: 1024,
     };
     this.handleLayoutChange = this.handleLayoutChange.bind(this);
-    this.handleVisualisationClick = this.handleVisualisationClick.bind(this);
+    this.handleEntityClick = this.handleEntityClick.bind(this);
     this.handleResize = this.handleResize.bind(this);
   }
 
@@ -125,7 +128,7 @@ export default class DashboardEditor extends Component {
     this.setState({layout: layout});
   }
 
-  handleVisualisationClick(item, itemType) {
+  handleEntityClick(item, itemType) {
     let newEntities = this.state.entities;
     let newLayout = this.state.layout;
 
@@ -184,7 +187,7 @@ export default class DashboardEditor extends Component {
       <div className="DashboardEditor">
         <DashboardVisualisationList
           visualisations={getArrayFromObject(this.props.visualisations)}
-          onVisualisationClick={this.handleVisualisationClick}
+          onEntityClick={this.handleEntityClick}
           dashboardItems={this.state.entities}
         />
         <div
@@ -222,7 +225,7 @@ export default class DashboardEditor extends Component {
                     datasets={this.props.datasets}
                     canvasLayout={this.state.layout}
                     canvasWidth={canvasWidth}
-                    onDeleteClick={this.handleVisualisationClick}
+                    onDeleteClick={this.handleEntityClick}
                   />
                 </div>
               )}
@@ -238,7 +241,7 @@ function DashboardVisualisationList(props) {
   return (
     <div className="DashboardVisualisationList">
       <button
-        onClick={() => props.onVisualisationClick({ content: '' }, 'text')}
+        onClick={() => props.onEntityClick({ content: '' }, 'text')}
       >
         Add new text entity
       </button>
@@ -253,7 +256,7 @@ function DashboardVisualisationList(props) {
             {item.name}
             <span
               className="clickable"
-              onClick={() => props.onVisualisationClick(item, 'visualisation')}
+              onClick={() => props.onEntityClick(item, 'visualisation')}
               style={{
                 padding: '0.5rem',
                 fontSize: '1.25rem',
@@ -327,7 +330,7 @@ class DashboardCanvasItem extends Component {
                 padding: '0.1rem',
               }}
             >
-              Enter text here for {this.props.item.id}
+              <DashboardCanvasItemEditable />
             </div>
           }
         <button
@@ -346,6 +349,31 @@ class DashboardCanvasItem extends Component {
         >
           +
         </button>
+      </div>
+    );
+  }
+}
+
+class DashboardCanvasItemEditable extends Component {
+  constructor() {
+    super();
+    this.state = {
+      html: 'Enter text here',
+    }
+    this.handleChange = this.handleChange.bind(this);
+  }
+  handleChange(evt) {
+    this.setState({ html: evt.target.value});
+  }
+  render() {
+    return(
+      <div
+        className="DashboardCanvasItemEditable"
+      >
+        <ContentEditable
+          html={this.state.html}
+          onChange={this.handleChange}
+        />
       </div>
     );
   }

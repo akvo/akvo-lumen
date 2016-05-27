@@ -33,6 +33,7 @@
     "react": "^0.14.8",
     "react-addons-css-transition-group": "^0.14.8",
     "react-addons-update": "^0.14.8",
+    "react-contenteditable": "^1.1.0",
     "react-d3": "^0.4.0",
     "react-dom": "^0.14.8",
     "react-grid-layout": "^0.12.3",
