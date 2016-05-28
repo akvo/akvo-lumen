@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import moment from 'moment';
 import { columnIndex } from '../../utilities/dataset';
 
 function makeParser(parser) {
@@ -10,7 +11,7 @@ function makeParser(parser) {
       const r = row;
       const val = r[idx];
       try {
-        const parsedVal = parser(row[idx]);
+        const parsedVal = parser(row[idx], args);
         r[idx] = parsedVal;
         return r;
       } catch (error) {
@@ -42,8 +43,11 @@ function textToNumber(s) {
   return n;
 }
 
-function textToDate() {
-
+function textToDate(s, { parseFormat }) {
+  if (!moment(s, parseFormat).isValid()) {
+    throw new Error('Parse error');
+  }
+  return moment(s, parseFormat).unix() * 1000;
 }
 
 function numberToText(n) {
