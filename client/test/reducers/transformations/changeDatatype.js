@@ -152,3 +152,62 @@ describe('changeDatatype text->date', () => {
     );
   });
 });
+
+describe('changeDatatype number->date', () => {
+  const datasets = {
+    id: {
+      id: 'id',
+      columns: [{
+        type: 'number',
+        columnName: 'c1',
+        title: 'Numbers with some timestamps',
+      }],
+      rows: [
+        [1482530400000],
+        [31528800000],
+        [null],
+        [-3423],
+      ],
+    },
+  };
+
+  const numberToDateAction = (onError, defaultValue) => transform('id', {
+    op: 'core/change-datatype',
+    args: {
+      columnName: 'c1',
+      newType: 'date',
+      defaultValue,
+    },
+    onError,
+  });
+  it('should change number to date with default null value', () => {
+    const newDatasets = reducer(
+      datasets,
+      numberToDateAction('default-value', null)
+    );
+    assert.deepStrictEqual(
+      newDatasets.id.rows.map(row => row[0]),
+      [1482530400000, 31528800000, null, null]
+    );
+  });
+  it('should change number to date with default 0 value', () => {
+    const newDatasets = reducer(
+      datasets,
+      numberToDateAction('default-value', '0')
+    );
+    assert.deepStrictEqual(
+      newDatasets.id.rows.map(row => row[0]),
+      [1482530400000, 31528800000, 0, 0]
+    );
+  });
+  it('should drop rows that cannot be parsed', () => {
+    const newDatasets = reducer(
+      datasets,
+      numberToDateAction('delete-row')
+    );
+    assert.deepStrictEqual(
+      newDatasets.id.rows.map(row => row[0]),
+      [1482530400000, 31528800000]
+    );
+  });
+});

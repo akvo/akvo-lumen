@@ -57,16 +57,31 @@ function numberToText(n) {
   return `${n}`;
 }
 
-function numberToDate() {
+function numberToDate(n) {
+  if (n == null) {
+    throw new Error('Parse error');
+  }
 
+  // Default value will be a string
+  const num = typeof n === 'string' ? parseInt(n, 10) : n;
+  if (isNaN(num) || num < 0) {
+    throw new Error('ParseError');
+  }
+  return num;
 }
 
-function dateToNumber() {
-
+function dateToNumber(n) {
+  if (!moment(n).isValid()) {
+    throw new Error('Parse error');
+  }
+  return n;
 }
 
-function dateToText() {
-
+function dateToText(d) {
+  if (!moment(d).isValid()) {
+    throw new Error('Parse error');
+  }
+  return moment(d).format();
 }
 
 const transformationFunctions = {
