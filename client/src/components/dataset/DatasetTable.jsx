@@ -176,6 +176,7 @@ export default class DatasetTable extends Component {
   }
 
   render() {
+    const { rows, columns, onTransform } = this.props;
     const {
       activeDataTypeContextMenu,
       activeColumnContextMenu,
@@ -183,8 +184,7 @@ export default class DatasetTable extends Component {
       width,
       height,
     } = this.state;
-
-    const cols = this.props.columns.map((column, index) => {
+    const cols = columns.map((column, index) => {
       const columnHeader = (
         <ColumnHeader
           key={index}
@@ -200,9 +200,7 @@ export default class DatasetTable extends Component {
           cellClassName={this.getCellClassName(column.title)}
           key={index}
           header={columnHeader}
-          cell={props => (
-            <Cell>{formatCellValue(column.type, column.values[props.rowIndex])}</Cell>
-          )}
+          cell={props => <Cell>{formatCellValue(column.type, rows[props.rowIndex][index])}</Cell>}
           width={200}
         />
       );
@@ -211,7 +209,8 @@ export default class DatasetTable extends Component {
     return (
       <div className="DatasetTable">
         <DatasetControls
-          columns={this.props.columns}
+          columns={columns}
+          rowsCount={rows.length}
           onToggleTransformationLog={this.handleToggleTransformationLog}
           onClickMenuItem={() => { throw new Error('Not yet implemented'); }}
         />
@@ -228,7 +227,7 @@ export default class DatasetTable extends Component {
               onApply={(transformation) => {
                 this.handleHideSidebar();
                 if (transformation != null) {
-                  this.props.onTransform(transformation);
+                  onTransform(transformation);
                 }
               }}
             />}
@@ -254,7 +253,7 @@ export default class DatasetTable extends Component {
             <Table
               headerHeight={50}
               rowHeight={30}
-              rowsCount={this.props.columns[0].values.length}
+              rowsCount={rows.length}
               width={width}
               height={height}
               onScrollStart={() => this.handleScroll()}
@@ -270,5 +269,6 @@ export default class DatasetTable extends Component {
 
 DatasetTable.propTypes = {
   columns: PropTypes.array.isRequired,
+  rows: PropTypes.array.isRequired,
   onTransform: PropTypes.func.isRequired,
 };

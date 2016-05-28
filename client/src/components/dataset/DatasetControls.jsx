@@ -79,7 +79,7 @@ export default class DatasetControls extends Component {
             className="rowCount"
           >
             {this.props.columns &&
-              this.props.columns[0].values.length} Rows
+              this.props.rowsCount} Rows
           </span>
           <span
             className="search"
@@ -108,5 +108,6 @@ export default class DatasetControls extends Component {
 DatasetControls.propTypes = {
   onToggleTransformationLog: PropTypes.func.isRequired,
   onClickMenuItem: PropTypes.func.isRequired,
-  columns: PropTypes.object,
+  columns: PropTypes.array.isRequired,
+  rowsCount: PropTypes.number.isRequired,
 };

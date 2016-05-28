@@ -3,9 +3,10 @@ export function getChartData(visualisation, datasets) {
   const dataset = datasets[datasetId];
   const columnIndexX = spec.datasetColumnX;
   const columnIndexY = spec.datasetColumnY;
-  const nameDataX = dataset.columns[spec.datasetNameColumnX];
-  const dataX = dataset.columns[columnIndexX].values;
-  const dataY = columnIndexY !== null ? dataset.columns[columnIndexY].values : null;
+  const nameDataX = spec.datasetNameColumnX != null ?
+    dataset.rows.map(row => row[spec.datasetNameColumnX]) : null;
+  const dataX = dataset.rows.map(row => row[columnIndexX]);
+  const dataY = columnIndexY !== null ? dataset.rows.map(row => row[columnIndexY]) : null;
   let dataValues = [];
   let output = [];
 
@@ -13,7 +14,7 @@ export function getChartData(visualisation, datasets) {
     case 'map':
 
       dataX.forEach((entry, index) => {
-        const label = nameDataX ? nameDataX.values[index] : null;
+        const label = nameDataX ? nameDataX[index] : null;
         const newPositionObject = {
           position: [parseFloat(dataY[index]), parseFloat(dataX[index])],
           label,
@@ -38,7 +39,7 @@ export function getChartData(visualisation, datasets) {
         let key = index;
 
         if (nameDataX && visualisation.visualisationType === 'bar') {
-          key = nameDataX.values[index];
+          key = nameDataX[index];
         }
 
         return ({
@@ -59,7 +60,7 @@ export function getChartData(visualisation, datasets) {
 
 
       output = dataX.map((entry, index) => {
-        const key = nameDataX ? nameDataX.values[index] : index;
+        const key = nameDataX ? nameDataX[index] : index;
 
         return ({
           label: key,

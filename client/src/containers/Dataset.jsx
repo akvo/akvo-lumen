@@ -34,9 +34,10 @@ class Dataset extends Component {
           name={dataset.name}
           id={dataset.id}
         />
-        {dataset.columns ?
+        {dataset.rows != null ?
           <DatasetTable
             columns={dataset.columns}
+            rows={dataset.rows}
             onTransform={(transformation) => dispatch(transform(dataset.id, transformation))}
           />
           :
@@ -51,6 +52,7 @@ Dataset.propTypes = {
     id: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,
     columns: PropTypes.array,
+    rows: PropTypes.array,
   }),
   dispatch: PropTypes.func.isRequired,
 };
