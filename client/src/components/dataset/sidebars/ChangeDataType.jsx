@@ -62,11 +62,11 @@ DefaultValueInput.propTypes = {
 
 const errorOptions = [
   {
-    value: 'emptyCell',
+    value: 'empty-cell',
     label: 'Leave empty',
   },
   {
-    value: 'defaultValue',
+    value: 'default-value',
     label: 'Pick a default value',
   },
   {
@@ -74,7 +74,7 @@ const errorOptions = [
     label: 'Let the transform fail',
   },
   {
-    value: 'deleteRow',
+    value: 'delete-row',
     label: 'Delete the row',
   },
 ];
@@ -99,8 +99,8 @@ export default class ChangeDataType extends Component {
         defaultValue: null,
         dateFormat: 'YYYY-MM-DD',
       },
-      onError: 'defaultValue',
-      errorStrategy: 'emptyCell',
+      onError: 'default-value',
+      errorStrategy: 'empty-cell',
     });
   }
 
@@ -115,14 +115,14 @@ export default class ChangeDataType extends Component {
         const args = Object.assign({}, this.state.args, { defaultValue: null });
         this.setState({
           args,
-          onError: 'defaultValue',
+          onError: 'default-value',
           errorStrategy,
         });
         break;
       }
-      case 'defaultValue':
+      case 'default-value':
       case 'fail':
-      case 'deleteRow': {
+      case 'delete-row': {
         this.setState({
           onError: errorStrategy,
           errorStrategy,
@@ -181,7 +181,7 @@ export default class ChangeDataType extends Component {
               onChange={this.handleChangeErrorStrategy}
             />
           </div>
-          {this.state.errorStrategy === 'defaultValue' ?
+          {this.state.errorStrategy === 'default-value' ?
             <DefaultValueInput
               defaultValue={this.state.args.defaultValue}
               onChange={defaultValue => this.mergeArgs({ defaultValue })}

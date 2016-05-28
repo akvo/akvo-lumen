@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import { columnIndex } from '../../utilities/dataset';
 
 function makeParser(parser) {
@@ -6,31 +7,29 @@ function makeParser(parser) {
     const { defaultValue } = args;
     const dv = defaultValue != null ? parser(defaultValue) : null;
     const newRows = rows.map(row => {
-      const clonedRow = row.slice(0);
-      const val = clonedRow[idx];
+      const r = row;
+      const val = r[idx];
       try {
-        const parsedVal = parser(clonedRow[idx]);
-        clonedRow[idx] = parsedVal;
-        return clonedRow;
+        const parsedVal = parser(row[idx]);
+        r[idx] = parsedVal;
+        return r;
       } catch (error) {
         switch (onError) {
           case 'default-value':
-            clonedRow[idx] = dv;
-            return clonedRow;
+            r[idx] = dv;
+            return r;
+          case 'delete-row':
+            return deleteMarker;
           case 'fail':
             throw new Error(`Failed to parse ${val} as number`);
-          case 'drop-row':
-            return deleteMarker;
           default:
             throw new Error(`Unknown error strategy ${onError}`);
         }
       }
     });
-    if (onError === 'drop-row') {
+    if (onError === 'delete-row') {
       return newRows.filter(row => row !== deleteMarker);
     }
-    console.log(onError);
-    console.log(newRows);
     return newRows;
   };
 }
@@ -47,8 +46,11 @@ function textToDate() {
 
 }
 
-function numberToText() {
-
+function numberToText(n) {
+  if (n == null) {
+    throw new Error('Parse error');
+  }
+  return `${n}`;
 }
 
 function numberToDate() {
@@ -86,13 +88,9 @@ export default function changeDatatype(dataset, { args, onError }) {
     return dataset;
   }
   const fn = transformationFunctions[prevType][newType];
-  const newRows = fn(dataset.rows, colIndex, onError, args);
-  const columns = dataset.columns.slice(0);
-  const newColumn = Object.assign({}, columns[colIndex], { type: newType });
-  columns[colIndex] = newColumn;
-  const newDataset = Object.assign({}, dataset, {
-    columns,
-    rows: newRows,
-  });
-  return newDataset;
+  const clonedDataset = _.cloneDeep(dataset);
+  const newRows = fn(clonedDataset.rows, colIndex, onError, args);
+  clonedDataset.rows = newRows;
+  clonedDataset.columns[colIndex].type = newType;
+  return clonedDataset;
 }
