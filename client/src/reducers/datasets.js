@@ -68,10 +68,11 @@ function removeDataset(state, id) {
   return newState;
 }
 
-function transformDataset(state, { id, transformation }) {
-  return Object.assign({}, state, {
-    [id]: applyTransformation(state[id], transformation),
+function transformDataset(state, { datasetId, transformation }) {
+  const newState = Object.assign({}, state, {
+    [datasetId]: applyTransformation(state[datasetId], transformation),
   });
+  return newState;
 }
 
 export default function datasets(state = initialState, action) {
