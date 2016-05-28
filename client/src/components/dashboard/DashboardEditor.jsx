@@ -36,21 +36,17 @@ const getNewEntityId = (entities, itemType) => {
 };
 
 const getFirstBlankRowGroup = (layout, height) => {
-  /* Function to find the first collection of blank rows big
-  ** enough for the default height of the entity about to be
-  ** inserted.
-  */
+  /* Function to find the first collection of blank rows big enough for the
+  /* default height of the entity about to beinserted. */
 
-  // If layout is empty, return the first row
+  /* If layout is empty, return the first row */
   if (layout.length === 0) return 0;
 
   const occupiedRows = {};
   let lastRow = 0;
 
-  /* Build an object of all occupied rows, and record the
-  ** last currently occupied row.
-  */
-
+  /* Build an object of all occupied rows, and record the last currently
+  /* occupied row. */
   layout.forEach(item => {
     for (let row = item.y; row < (item.y + item.h); row++) {
       occupiedRows[row] = true;
@@ -58,12 +54,9 @@ const getFirstBlankRowGroup = (layout, height) => {
     }
   });
 
-  /* Loop through every row from 0 to the last occupied. If
-  ** we encounter a blank row i, check the next sequential rows
-  ** until we have enough blank rows to fit our height. If we
-  ** do, return row i.
-  */
-
+  /* Loop through every row from 0 to the last occupied. If we encounter a blank
+  /* row i, check the next sequential rows until we have enough blank rows to
+  /* fit our height. If we do, return row i. */
   for (let i = 0; i < lastRow; i++) {
     if (!occupiedRows[i]) {
       let haveSpace = true;
@@ -80,9 +73,7 @@ const getFirstBlankRowGroup = (layout, height) => {
     }
   }
 
-  /* Otherwise, just return the row after the last currently
-  ** occupied row.
-  */
+  /* Otherwise, just return the row after the last currently occupied row. */
   return lastRow + 1;
 };
 
@@ -94,7 +85,8 @@ export default class DashboardEditor extends Component {
       type: 'dashboard',
       name: 'Untitled dashboard',
       entities: {},
-      layout: [],
+      propLayout: [],
+      currentLayout: [],
       gridWidth: 1024,
     };
     this.handleLayoutChange = this.handleLayoutChange.bind(this);
@@ -123,12 +115,21 @@ export default class DashboardEditor extends Component {
   }
 
   handleLayoutChange(layout) {
-    this.setState({ layout });
+    /* When the layout is updated (e.g by an entity being resized on the
+    /* canvas), store a copy of the updated layout. We use this copy as the
+    /* starting point for building a new layout whenever we add or remove an
+    /* entity from the canvas. We then pass that new layout as a prop to the
+    /* ReactGridLayout component. Trying to store the prop layout and the
+    /* current layout as the same value doesn't work - the ReactGridLayout
+    /* component updates its internal state on these kinds of layout changes,
+    /* and updating its "layout" prop with the updated layout here leads to
+    /* weird race conditions and broken layouts. */
+    this.setState({ currentLayout: layout });
   }
 
   handleEntityToggle(item, itemType) {
     const newEntities = this.state.entities;
-    const newLayout = this.state.layout;
+    const newLayout = this.state.currentLayout;
 
     if (this.state.entities[item.id]) {
       delete newEntities[item.id];
@@ -147,8 +148,10 @@ export default class DashboardEditor extends Component {
         newLayout.push({
           w: 6,
           h: 4,
+          minW: 4,
+          minH: 4,
           x: 0,
-          y: getFirstBlankRowGroup(this.state.layout, 4),
+          y: getFirstBlankRowGroup(this.state.currentLayout, 4),
           i: item.id,
         });
       } else if (itemType === 'text') {
@@ -161,17 +164,18 @@ export default class DashboardEditor extends Component {
         };
         newLayout.push({
           w: 4,
+          minW: 2,
           h: 1,
           x: 0,
-          y: getFirstBlankRowGroup(this.state.layout, 1),
+          y: getFirstBlankRowGroup(this.state.currentLayout, 1),
           i: newEntityId,
         });
       }
 
+      /* Note that we update the propLayout, not the currentLayout, to prevent
+      /* race conditions. */
       this.setState({
-        layout: newLayout,
-      });
-      this.setState({
+        propLayout: newLayout,
         entities: newEntities,
       });
     }
@@ -221,12 +225,12 @@ export default class DashboardEditor extends Component {
               rowHeight={rowHeight}
               width={canvasWidth}
               verticalCompact={false}
-              layout={this.state.layout}
+              layout={this.state.propLayout}
               onLayoutChange={this.handleLayoutChange}
+
               /* Setting any margin results in grid units being different
-              ** vertically and horizontally due to implementation details.
-              ** Use a margin on the grid item themselves for now.
-              */
+              /* vertically and horizontally due to implementation details. Use
+              /* a margin on the grid item themselves for now. */
               margin={[0, 0]}
             >
               {getArrayFromObject(this.state.entities).map(item =>
@@ -236,7 +240,7 @@ export default class DashboardEditor extends Component {
                   <DashboardCanvasItem
                     item={item}
                     datasets={this.props.datasets}
-                    canvasLayout={this.state.layout}
+                    canvasLayout={this.state.currentLayout}
                     canvasWidth={canvasWidth}
                     onDeleteClick={this.handleEntityToggle}
                     onEntityUpdate={this.handleEntityUpdate}
