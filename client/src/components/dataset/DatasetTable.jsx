@@ -121,18 +121,17 @@ export default class DatasetTable extends Component {
     }
   }
 
-  handleColumnContextMenuClicked({ column, menuItem }) {
+  handleColumnContextMenuClicked({ column, action }) {
     this.setState({ activeColumnContextMenu: null });
-    switch (menuItem) {
-      case 'filter':
+    switch (action.op) {
+      case 'core/filter':
         this.handleShowSidebar({
           type: 'filter',
           columnTitle: column.title,
         });
         break;
-
       default:
-        throw new Error(`Menu item ${menuItem} not yet implemented`);
+        this.props.onTransform(action);
     }
   }
 

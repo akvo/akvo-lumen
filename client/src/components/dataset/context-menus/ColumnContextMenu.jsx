@@ -1,10 +1,60 @@
 import React, { PropTypes } from 'react';
 import ContextMenu from '../../common/ContextMenu';
 
+const actions = {
+  'core/to-titlecase': {
+    op: 'core/to-titlecase',
+    args: {
+      defaultValue: null,
+    },
+    onError: 'default-value',
+  },
+  'core/to-lowercase': {
+    op: 'core/to-lowercase',
+    args: {
+      defaultValue: null,
+    },
+    onError: 'default-value',
+  },
+  'core/to-uppercase': {
+    op: 'core/to-uppercase',
+    args: {
+      defaultValue: null,
+    },
+    onError: 'default-value',
+  },
+  'core/trim': {
+    op: 'core/trim',
+    args: {
+      defaultValue: null,
+    },
+    onError: 'default-value',
+  },
+  'core/trim-doublespace': {
+    op: 'core/trim-doublespace',
+    args: {
+      defaultValue: null,
+    },
+    onError: 'default-value',
+  },
+  'core/filter': {
+    op: 'core/filter',
+    args: {
+      defaultValue: null,
+    },
+    onError: 'default-value',
+  },
+};
+
+function mergeArgs(action, args) {
+  const a = Object.assign({}, action.args, args);
+  return Object.assign({}, action, { args: a });
+}
+
 // TODO: Depend on column type!
 const options = [{
   label: 'Filter',
-  value: 'filter',
+  value: 'core/filter',
 }, {
   label: 'Sort',
   value: 'sort',
@@ -20,23 +70,23 @@ const options = [{
   value: 'whitespace',
   subMenu: [{
     label: 'Remove leading and trailing whitespace',
-    value: 'remove-leading-trailing-whitespace',
+    value: 'core/trim',
   }, {
     label: 'Remove double spaces',
-    value: 'remove-double-whitespace',
+    value: 'core/trim-doublespace',
   }],
 }, {
   label: 'Change case',
   value: 'change-case',
   subMenu: [{
     label: 'To Uppercase',
-    value: 'to-uppercase',
+    value: 'core/to-uppercase',
   }, {
     label: 'To Lowercase',
-    value: 'to-lowercase',
+    value: 'core/to-lowercase',
   }, {
     label: 'To Titlecase',
-    value: 'to-titlecase',
+    value: 'core/to-titlecase',
   }],
 }];
 
@@ -51,7 +101,10 @@ export default function ColumnContextMenu({ column, dimensions, onContextMenuIte
         left: `${dimensions.left}px`,
         right: 'initial',
       }}
-      onOptionSelected={(item) => onContextMenuItemSelected({ column, menuItem: item })}
+      onOptionSelected={(op) => onContextMenuItemSelected({
+        column,
+        action: mergeArgs(actions[op], { columnName: column.columnName }),
+      })}
     />
   );
 }
