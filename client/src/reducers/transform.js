@@ -1,11 +1,18 @@
 
 import changeDatatype from './transforms/changeDatatype';
+import textTransform from './transforms/text';
 
 const availableTransforms = {
   'core/change-datatype': changeDatatype,
+  'core/to-titlecase': textTransform,
+  'core/to-lowercase': textTransform,
+  'core/to-uppercase': textTransform,
+  'core/trim': textTransform,
+  'core/trim-doublespace': textTransform,
 };
 
 function recordHistory(previousDataset, nextDataset) {
+  // Do we really need to keep history-on-the-history?
   const history = (nextDataset.history || []).slice(0);
   history.unshift(previousDataset);
   return Object.assign({}, nextDataset, { history });
