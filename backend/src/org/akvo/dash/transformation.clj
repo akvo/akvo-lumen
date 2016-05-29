@@ -1,8 +1,6 @@
 (ns org.akvo.dash.transformation
   (require [org.akvo.dash.transformation.engine :refer [available-ops]]))
 
-
-
 ;; TODO: Potential change op-spec validation `core.spec`
 
 (def ops-set (set (keys available-ops)))
@@ -91,7 +89,7 @@
     {:valid? (every? valid-op? transformations)}
     (catch Exception e
       {:valid? false
-       :message (:cause e)})))
+       :message (.getMessage e)})))
 
 (defn schedule
   [tenant-conn transformations]
