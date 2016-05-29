@@ -107,6 +107,8 @@ export default class DatasetTable extends Component {
         displayRight: true,
         onClose: this.hideSidebar,
         onApply: this.hideSidebar,
+        columns: this.props.columns,
+        transformations: this.props.transformations,
       });
     }
   }
@@ -271,5 +273,6 @@ export default class DatasetTable extends Component {
 DatasetTable.propTypes = {
   columns: PropTypes.array.isRequired,
   rows: PropTypes.array.isRequired,
+  transformations: PropTypes.array,
   onTransform: PropTypes.func.isRequired,
 };

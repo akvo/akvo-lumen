@@ -8,3 +8,7 @@ export function columnIndex(columnName, columns) {
   }
   throw new Error(`Column "${columnName}" not found`);
 }
+
+export function columnTitle(columnName, columns) {
+  return columns[columnIndex(columnName, columns)].title;
+}

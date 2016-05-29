@@ -165,7 +165,7 @@ export default class ChangeDataType extends Component {
               }}
             />
           </div>
-          {newType === 'date' ?
+          {newType === 'date' && column.type === 'text' ?
             <DateFormatSelect
               dateFormat={this.state.args.dateFormat}
               onChange={dateFormat => this.mergeArgs({ dateFormat })}
