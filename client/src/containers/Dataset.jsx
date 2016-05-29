@@ -38,6 +38,7 @@ class Dataset extends Component {
           <DatasetTable
             columns={dataset.columns}
             rows={dataset.rows}
+            transformations={dataset.transformations}
             onTransform={(transformation) => dispatch(transform(dataset.id, transformation))}
           />
           :

@@ -27,13 +27,13 @@ export default class DatasetTable extends Component {
       height: 800,
       activeDataTypeContextMenu: null,
       activeColumnContextMenu: null,
-      activeSidebar: null,
+      sidebarProps: null,
     };
 
     this.handleResize = this.handleResize.bind(this);
     this.handleScroll = this.handleScroll.bind(this);
-    this.handleShowSidebar = this.handleShowSidebar.bind(this);
-    this.handleHideSidebar = this.handleHideSidebar.bind(this);
+    this.showSidebar = this.showSidebar.bind(this);
+    this.hideSidebar = this.hideSidebar.bind(this);
 
     this.handleToggleColumnContextMenu = this.handleToggleColumnContextMenu.bind(this);
     this.handleToggleDataTypeContextMenu = this.handleToggleDataTypeContextMenu.bind(this);
@@ -54,8 +54,8 @@ export default class DatasetTable extends Component {
   }
 
   getCellClassName(columnTitle) {
-    const { activeSidebar } = this.state;
-    if (activeSidebar != null && activeSidebar.columnTitle === columnTitle) {
+    const { sidebarProps } = this.state;
+    if (sidebarProps != null && sidebarProps.columnTitle === columnTitle) {
       return 'sidebarTargetingColumn';
     }
     return '';
@@ -94,17 +94,19 @@ export default class DatasetTable extends Component {
   }
 
   handleToggleTransformationLog() {
-    if (this.state.activeSidebar &&
-      this.state.activeSidebar.type === 'transformationLog') {
-      this.handleHideSidebar();
+    if (this.state.sidebarProps &&
+      this.state.sidebarProps.type === 'transformationLog') {
+      this.hideSidebar();
     } else {
       this.setState({
         activeDataTypeContextMenu: null,
         activeColumnContextMenu: null,
       });
-      this.handleShowSidebar({
+      this.showSidebar({
         type: 'transformationLog',
         displayRight: true,
+        onClose: this.hideSidebar,
+        onApply: this.hideSidebar,
       });
     }
   }
@@ -112,11 +114,16 @@ export default class DatasetTable extends Component {
   handleDataTypeContextMenuClicked({ column, dataTypeOptions, newColumnType }) {
     this.setState({ activeDataTypeContextMenu: null });
     if (newColumnType !== column.type) {
-      this.handleShowSidebar({
+      this.showSidebar({
         type: 'edit',
         column,
         dataTypeOptions,
         newColumnType,
+        onClose: this.hideSidebar,
+        onApply: transformation => {
+          this.hideSidebar();
+          this.props.onTransform(transformation);
+        },
       });
     }
   }
@@ -125,9 +132,14 @@ export default class DatasetTable extends Component {
     this.setState({ activeColumnContextMenu: null });
     switch (action.op) {
       case 'core/filter':
-        this.handleShowSidebar({
+        this.showSidebar({
           type: 'filter',
           columnTitle: column.title,
+          onClose: () => this.hideSidebar(),
+          onApply: transformation => {
+            this.hideSidebar();
+            this.props.onTransform(transformation);
+          },
         });
         break;
       default:
@@ -135,23 +147,23 @@ export default class DatasetTable extends Component {
     }
   }
 
-  handleShowSidebar(sidebar) {
+  showSidebar(sidebarProps) {
     /* Manually subtract the sidebar width from the datatable width -
     using refs to measure the new width of the parent container grabs
     old width before the DOM updates */
     this.setState({
-      activeSidebar: sidebar,
-      width: this.state.activeSidebar ? this.state.width : this.state.width - 300,
+      sidebarProps,
+      width: this.state.sidebarProps ? this.state.width : this.state.width - 300,
       height: this.state.height,
     });
   }
 
-  handleHideSidebar() {
-    if (this.state.activeSidebar) {
+  hideSidebar() {
+    if (this.state.sidebarProps) {
       this.setState({
         width: this.state.width + 300,
         height: this.state.height,
-        activeSidebar: null,
+        sidebarProps: null,
       });
     }
   }
@@ -175,11 +187,11 @@ export default class DatasetTable extends Component {
   }
 
   render() {
-    const { rows, columns, onTransform } = this.props;
+    const { rows, columns } = this.props;
     const {
       activeDataTypeContextMenu,
       activeColumnContextMenu,
-      activeSidebar,
+      sidebarProps,
       width,
       height,
     } = this.state;
@@ -216,25 +228,15 @@ export default class DatasetTable extends Component {
         <div
           style={{
             display: 'flex',
-            flexDirection: activeSidebar && activeSidebar.displayRight ? 'row-reverse' : 'row',
+            flexDirection: sidebarProps && sidebarProps.displayRight ? 'row-reverse' : 'row',
           }}
         >
-          {activeSidebar &&
-            <DataTableSidebar
-              {...activeSidebar}
-              onClose={() => this.handleHideSidebar()}
-              onApply={(transformation) => {
-                this.handleHideSidebar();
-                if (transformation != null) {
-                  onTransform(transformation);
-                }
-              }}
-            />}
+          {sidebarProps && <DataTableSidebar {...sidebarProps} />}
           <div
             className="wrapper"
             ref="wrappingDiv"
             style={{
-              width: activeSidebar ? 'calc(100% - 300px)' : '100%',
+              width: sidebarProps ? 'calc(100% - 300px)' : '100%',
             }}
           >
             {activeDataTypeContextMenu != null &&

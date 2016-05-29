@@ -2,7 +2,24 @@ import React, { PropTypes } from 'react';
 import SidebarHeader from './SidebarHeader';
 import SidebarControls from './SidebarControls';
 
-export default function TransformationLog({ onClose }) {
+function TransformationList({ transformations = [], columns }) {
+  return (
+    <div style={{ padding: '1rem' }}>
+      <ul>
+        {transformations.map(({ op }, index) => (
+          <li key={index}>{op}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+TransformationList.propTypes = {
+  transformations: PropTypes.array,
+  columns: PropTypes.array.isRequired,
+};
+
+export default function TransformationLog({ onClose, transformations = [], columns }) {
   return (
     <div
       className="DataTableSidebar"
@@ -14,9 +31,10 @@ export default function TransformationLog({ onClose }) {
       <SidebarHeader onClose={onClose}>
         Transformation Log
       </SidebarHeader>
-      <div style={{ padding: '1rem' }}>
-        Transformation log not yet implemented.
-      </div>
+      <TransformationList
+        transformations={transformations}
+        columns={columns}
+      />
       <SidebarControls
         onApply={onClose}
         onClose={onClose}
@@ -27,4 +45,6 @@ export default function TransformationLog({ onClose }) {
 
 TransformationLog.propTypes = {
   onClose: PropTypes.func.isRequired,
+  columns: PropTypes.array.isRequired,
+  transformations: PropTypes.array,
 };
