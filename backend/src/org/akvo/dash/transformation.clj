@@ -147,9 +147,8 @@
                                    :dataset-id dataset-id})
             (update-transformations tx {:transformations transformations
                                         :dataset-id dataset-id}))
-          #_(future
-              )
-          (execute tenant-conn job-id dataset-id transformations)
+          (future
+            (execute tenant-conn job-id dataset-id transformations))
           {:status 200
            :jobExecutionId job-id})
         {:status 400
