@@ -110,8 +110,7 @@
 ;;; /dashboards/:id PUT
 ;;;
 
-
-(defn update-dashboard
+(defn persist-dashboard
   "We update a dashboard via upsert of dashboard and clean - insert of
   dashboard_visualisations.
   1. Unpack text & visualisation entities
@@ -140,6 +139,15 @@
     {:id     id
      :status "OK"}))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; /dashboards/:id DELETE
+;;;
+
+(defn handle-dashboard-delete [tenant-conn id]
+  (delete-dashboard_visualisation tenant-conn {:dashboard-id id})
+  (delete-dashboard-by-id tenant-conn {:id id})
+  {:status "OK"})
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Routes
@@ -159,13 +167,16 @@
       (context "/:id" [id]
 
         (GET "/" _
-          (resp/response (handle-dashboard-by-id tenant-conn  id)))
+          (if-some [dashboard (dashboard-by-id tenant-conn {:id id})]
+            (resp/response (handle-dashboard-by-id tenant-conn  id))
+            (resp/not-found {:error "Not found"})))
 
         (PUT "/" {:keys [body]}
           (if-some [dashboard (dashboard-by-id tenant-conn {:id id})]
             (resp/response (update-dashboard tenant-conn id body))
-            (resp/not-found {:id id})))
+            (resp/not-found {:error "Not found"})))
 
         (DELETE "/" _
-          (delete-dashboard-by-id tenant-conn {:id id})
-          (resp/response {:status "OK"}))))))
+          (if-some [dashboard (dashboard-by-id tenant-conn {:id id})]
+            (resp/response (handle-dashboard-delete tenant-conn id))
+            (resp/not-found {:error "Not found"})))))))

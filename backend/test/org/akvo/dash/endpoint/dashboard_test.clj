@@ -63,7 +63,7 @@
 
   (testing "New dashboard"
 
-    (let [v-id (-> (all-visualisations test-conn) first :id)
+    (let [v-id          (-> (all-visualisations test-conn) first :id)
           new-dashboard (dashboard/handle-new-dashboard test-conn
                                                         (dashboard-spec v-id))]
       (is (not (nil? new-dashboard)))
@@ -77,9 +77,9 @@
           (is (not (nil? d)))))
 
       #_(testing "Update dashboard"
-        (let [e (dashboard/update-dashboard test-conn
-                                            (:id new-dashboard)
-                                            (:spec new-dashboard))]
+        (let [e (dashboard/persist-dashboard test-conn
+                                             (:id new-dashboard)
+                                             (:spec new-dashboard))
+              ]
           (pprint e)
-          (is (= 1 1))
-          )))))
+          (is (= 1 1)))))))
