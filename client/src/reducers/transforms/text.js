@@ -1,4 +1,4 @@
-import cloneDeep from 'lodash/clonedeep';
+import cloneDeep from 'lodash/cloneDeep';
 import { columnIndex } from '../../utilities/dataset';
 
 // http://stackoverflow.com/a/196991/24946

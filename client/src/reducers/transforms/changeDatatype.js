@@ -1,4 +1,4 @@
-import cloneDeep from 'lodash/clonedeep';
+import cloneDeep from 'lodash/cloneDeep';
 import moment from 'moment';
 import { columnIndex } from '../../utilities/dataset';
 
