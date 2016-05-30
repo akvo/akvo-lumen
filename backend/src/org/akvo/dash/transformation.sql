@@ -1,8 +1,8 @@
 
--- :name new-job-execution
+-- :name new-job-execution :! :n
 -- :doc Inserts a new transformation job execution
-INSERT INTO job_exection (id, dataset_id, type)
-VALUES (id, :dataset-id, 'TRANSFORMATION')
+INSERT INTO job_execution (id, dataset_id, type)
+VALUES (:id, :dataset-id, 'TRANSFORMATION')
 
 -- :name update-transformations :! :n
 -- :doc Updates the transformations property for a given dataset
@@ -27,7 +27,10 @@ SELECT imported_table_name AS "imported-table-name", columns, version
 
 -- :name update-job-execution :! :n
 -- :doc Updates a job_execution with a given log
-UPDATE job_execution SET log = :log
+UPDATE job_execution
+   SET log = :log,
+       status = :status
+ WHERE id = :id
 
 -- :name new-dataset-version :! :n
 -- :doc Inserts a new dataset version

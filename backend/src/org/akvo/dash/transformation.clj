@@ -1,8 +1,9 @@
 (ns org.akvo.dash.transformation
   (:require [clojure.java.jdbc :as jdbc]
+            [clojure.string :as str]
+            [hugsql.core :as hugsql]
             [org.akvo.dash.transformation.engine :as engine]
-            [org.akvo.dash.util :refer (squuid gen-table-name)]
-            [hugsql.core :as hugsql]))
+            [org.akvo.dash.util :refer (squuid gen-table-name)]))
 
 ;; TODO: Potential change op-spec validation `core.spec`
 
@@ -99,9 +100,10 @@
 
 (defn execute
   [tenant-conn job-id dataset-id transformations]
-  (let [dv (dataset-version-by-id dataset-id)
+  (let [dv (dataset-version-by-id tenant-conn {:id dataset-id})
         columns (vec (:columns dv))
-        imported-table (:imported-table-name dv)
+        source-table (:imported-table-name dv)
+        imported-table (gen-table-name "imported")
         table-name (gen-table-name "ds")
         f (fn [log op-spec]
             (let [step (engine/apply-operation tenant-conn
@@ -109,48 +111,48 @@
                                                columns
                                                op-spec)]
               (if (:success? step)
-                (if (:message step)
-                  (conj log (:message step))
-                  log)
+                (conj log step)
                 (throw (Exception. (str "Error applying operation: " op-spec))))))]
     (try
+      (copy-table tenant-conn {:source-table source-table
+                               :dest-table imported-table})
       (copy-table tenant-conn {:source-table imported-table
                                :dest-table table-name})
-      (let [result (reduce f [] transformations)]
-        (if (every? :success? result)
-          (do
-            (new-dataset-version tenant-conn {:id (str (squuid))
-                                              :dataset-id dataset-id
-                                              :job-execution-id job-id
-                                              :table-name table-name
-                                              :imported-table-name imported-table
-                                              :columns (:columns result)})
-            (update-job-execution {:id job-id
-                                   :status 'SUCCESS'
-                                   :log "Some log"}))
-          (update-job-execution tenant-conn {:id job-id
-                                             :status 'ERROR'
-                                             :log "some log"})))
+      (let [result (reduce f [] transformations)
+            log (str/join "\n" (filter :message result))
+            cols (:columns (last result))]
+        (new-dataset-version tenant-conn {:id (str (squuid))
+                                          :dataset-id dataset-id
+                                          :job-execution-id job-id
+                                          :table-name table-name
+                                          :imported-table-name imported-table
+                                          :version (inc (:version dv))
+                                          :columns cols})
+        (update-job-execution tenant-conn {:id job-id
+                                           :status "OK"
+                                           :log log}))
       (catch Exception e
         (update-job-execution tenant-conn {:id job-id
-                                           :status 'ERROR'
+                                           :status "FAILED"
                                            :log (.getMessage e)})))))
 
 (defn schedule
   [tenant-conn dataset-id transformations]
-  (if-let [dataset (dataset-by-id dataset-id)]
+  (if-let [dataset (dataset-by-id tenant-conn {:id dataset-id})]
     (let [v (valid? transformations)]
       (if (:valid? v)
         (let [job-id (str (squuid))]
           (jdbc/with-db-transaction [tx tenant-conn]
-            (new-job-execution tx {:dataset-id dataset-id})
+            (new-job-execution tx {:id job-id
+                                   :dataset-id dataset-id})
             (update-transformations tx {:transformations transformations
                                         :dataset-id dataset-id}))
-          (future
-            (execute tenant-conn job-id dataset-id transformations))
+          #_(future
+              )
+          (execute tenant-conn job-id dataset-id transformations)
           {:status 200
-           :job-execution-id job-id})
+           :jobExecutionId job-id})
         {:status 400
-         :body (:message v)}))
+         :body {:message (:message v)}}))
     {:status 400
-     :body "Dataset not found"}))
+     :body {:message "Dataset not found"}}))

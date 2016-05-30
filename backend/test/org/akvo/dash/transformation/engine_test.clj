@@ -12,9 +12,9 @@
 
 (def columns (vec (json/parse-string (slurp (io/resource "columns_test.json")))))
 
-(def tenant-conn {:connection-uri "jdbc:postgresql://localhost/test_dash_tenant_1?user=dash&password=password"})
+(def tenant-conn {:connection-uri "jdbc:postgresql://localhost/test_dash_tenant_2?user=dash&password=password"})
 
-(defn transformation-fixture
+(defn tf-engine-fixture
   [f]
   (migrate/do-migrate "org/akvo/dash/migrations_tenants" tenant-conn)
   (db-test-table tenant-conn)
@@ -22,7 +22,7 @@
   (f)
   (db-drop-test-table tenant-conn))
 
-(use-fixtures :once transformation-fixture)
+(use-fixtures :once tf-engine-fixture)
 
 (def transformations
   {:ops [{"op" "core/to-titlecase"
@@ -65,7 +65,7 @@
   (testing "Valid data"
     (let [ops (:ops transformations)]
       (is (every? :success? (for [op ops]
-                              (apply-operation tenant-conn "ds_test_1" {} op))))))
+                              (apply-operation tenant-conn "ds_test_1" columns op))))))
 
   (testing "Invalid data, on-error: fail"
     (let [op-to-number (:to-number transformations)
@@ -74,8 +74,8 @@
       (db-delete-test-data tenant-conn)
       (db-insert-invalid-data tenant-conn)
 
-      (is (not (:success? (apply-operation tenant-conn "ds_test_1" {} op-to-number))))
-      (is (not (:success? (apply-operation tenant-conn "ds_test_1" {} op-to-date))))))
+      (is (not (:success? (apply-operation tenant-conn "ds_test_1" columns op-to-number))))
+      (is (not (:success? (apply-operation tenant-conn "ds_test_1" columns op-to-date))))))
 
   (testing "Invalid data, on-error: default-value"
     (let [op1 (assoc (:to-number transformations) "onError" "default-value")
@@ -84,7 +84,7 @@
       (db-delete-test-data tenant-conn)
       (db-insert-invalid-data tenant-conn)
 
-      (let [result (apply-operation tenant-conn "ds_test_1" {} op1)
+      (let [result (apply-operation tenant-conn "ds_test_1" columns op1)
             data (db-select-test-data tenant-conn)]
         (is (:success? result))
         (is (= 1 (count data)))
@@ -94,7 +94,7 @@
       (db-delete-test-data tenant-conn)
       (db-insert-invalid-data tenant-conn)
 
-      (let [result (apply-operation tenant-conn "ds_test_1" {} op2)
+      (let [result (apply-operation tenant-conn "ds_test_1" columns op2)
             data (db-select-test-data tenant-conn)]
         (is (:success? result))
         (is (= 1 (count data)))
@@ -107,7 +107,7 @@
       (db-delete-test-data tenant-conn)
       (db-insert-invalid-data tenant-conn)
 
-      (let [result (apply-operation tenant-conn "ds_test_1" {} op1)
+      (let [result (apply-operation tenant-conn "ds_test_1" columns op1)
             data (db-select-test-data tenant-conn)]
         (is (:success? result))
         (is (zero? (count data))))
@@ -115,7 +115,7 @@
       (db-delete-test-data tenant-conn)
       (db-insert-invalid-data tenant-conn)
 
-      (let [result (apply-operation tenant-conn "ds_test_1" {} op2)
+      (let [result (apply-operation tenant-conn "ds_test_1" columns op2)
             data (db-select-test-data tenant-conn)]
         (is (:success? result))
         (is (zero? (count data)))))))

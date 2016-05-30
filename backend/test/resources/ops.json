@@ -11,7 +11,7 @@
   {
     "op": "core/change-datatype",
     "args": {
-      "columnName": "c1",
+      "columnName": "c3",
       "newType": "date",
       "defaultValue": "0",
       "parseFormat": "YYYY-MM-DD"
@@ -22,7 +22,7 @@
     "op": "core/change-column-title",
     "args": {
       "columnName": "c2",
-      "columnTitle": "My column"
+      "columnTitle": "My number column"
     },
     "onError": "fail"
   },
@@ -52,35 +52,35 @@
   {
     "op": "core/to-titlecase",
     "args": {
-      "columnName": "c2"
+      "columnName": "c1"
     },
     "onError": "default-value"
   },
   {
     "op": "core/to-lowercase",
     "args": {
-      "columnName": "c2"
+      "columnName": "c1"
     },
     "onError": "default-value"
   },
   {
     "op": "core/to-uppercase",
     "args": {
-      "columnName": "c2"
+      "columnName": "c1"
     },
     "onError": "default-value"
   },
   {
     "op": "core/trim",
     "args": {
-      "columnName": "c2"
+      "columnName": "c1"
     },
     "onError": "default-value"
   },
   {
     "op": "core/trim-doublespace",
     "args": {
-      "columnName": "c2"
+      "columnName": "c1"
     },
     "onError": "default-value"
   }

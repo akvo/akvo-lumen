@@ -1,7 +1,6 @@
 (ns org.akvo.dash.fixtures
   (:require [hugsql.core :as hugsql]
             [org.akvo.dash.component.tenant-manager :as tm]
-            ;; [environ.core :refer [env]]
             [org.akvo.dash.migrate :as migrate]
             [ragtime
              [jdbc :as jdbc]
@@ -63,8 +62,8 @@
                            :label "t1"
                            :title "Tenant 1"})
       (insert-tenant conn {:db_uri "jdbc:postgresql://localhost/test_dash_tenant_2?user=dash&password=password"
-                                 :label "t2"
-                                 :title "Tenant 2"})
+                           :label "t2"
+                           :title "Tenant 2"})
       (migrate/migrate conn)
       (f)
       (migrate/rollback conn [:all])

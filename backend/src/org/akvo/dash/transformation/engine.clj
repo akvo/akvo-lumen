@@ -68,11 +68,19 @@
         col-title (get-in op-spec ["args" "columnTitle"])]
     (update-in columns [col-idx] assoc "title" col-title)))
 
+(defmethod column-metadata-operation :core/change-datatype
+  [columns op-spec]
+  (let [col-name (get-column-name op-spec)
+        col-idx (get-column-idx columns col-name)
+        new-type (get-in op-spec ["args" "newType"])]
+    (update-in columns [col-idx] assoc "type" new-type)))
+
+
 (defmulti apply-operation
   "Applies a particular operation based on `op` key from spec
    * tenant-conn: Open connection to the database
    * table-name: table on which to operate (ds_<uuid>)
-   * dv: in-memory representation of a dataset version
+   * columns: in-memory representation of a columns spec
    * op-spec: JSON payload with the operation settings
    spec is a JSON payload with the following keys:
    - \"op\" : operation to perform
@@ -82,76 +90,77 @@
     (keyword (get op-spec "op"))))
 
 (defmethod apply-operation :default
-  [tennant-conn table-name dv op-spec]
+  [tennant-conn table-name columns op-spec]
   {:success? false
    :message (str "Unknown operation " (op-spec "op"))})
 
 (defmethod apply-operation :core/to-titlecase
-  [tennant-conn table-name dv op-spec]
+  [tennant-conn table-name columns op-spec]
   (db-to-titlecase tennant-conn {:table-name table-name
                                  :column-name (get-column-name op-spec)})
   {:success? true
-   :dv dv})
+   :columns columns})
 
 (defmethod apply-operation :core/to-lowercase
-  [tennant-conn table-name dv op-spec]
+  [tennant-conn table-name columns op-spec]
   (db-to-lowercase tennant-conn {:table-name table-name
                                  :column-name (get-column-name op-spec)})
   {:success? true
-   :dv dv})
+   :columns columns})
 
 (defmethod apply-operation :core/to-uppercase
-  [tennant-conn table-name dv op-spec]
+  [tennant-conn table-name columns op-spec]
   (db-to-upercase tennant-conn {:table-name table-name
                                 :column-name (get-column-name op-spec)})
   {:success? true
-   :dv dv})
+   :columns columns})
 
 
 (defmethod apply-operation :core/trim
-  [tennant-conn table-name dv op-spec]
+  [tennant-conn table-name columns op-spec]
   (db-trim tennant-conn {:table-name table-name
                          :column-name (get-column-name op-spec)})
   {:success? true
-   :dv dv})
+   :columns columns})
 
 (defmethod apply-operation :core/trim-doublespace
-  [tennant-conn table-name dv op-spec]
+  [tennant-conn table-name columns op-spec]
   (db-trim-double tennant-conn {:table-name table-name
                                 :column-name (get-column-name op-spec)})
   {:success? true
-   :dv dv})
+   :columns columns})
 
 (defmethod apply-operation :core/sort-column
-  [tennant-conn table-name dv op-spec]
+  [tennant-conn table-name columns op-spec]
   (let [col-name (get-column-name op-spec)
         idx-name (str table-name "_" col-name)
-        new-cols (column-metadata-operation (:columns dv) op-spec)]
+        new-cols (column-metadata-operation columns op-spec)]
     (db-create-index tennant-conn {:index-name idx-name
                                    :column-name col-name
                                    :table-name table-name})
     {:success? true
-     :dv (assoc dv :columns new-cols)}))
+     :columns new-cols}))
 
 (defmethod apply-operation :core/remove-sort
-  [tennant-conn table-name dv op-spec]
+  [tennant-conn table-name columns op-spec]
   (let [col-name (get-column-name op-spec)
         idx-name (str table-name "_" col-name)
-        new-cols (column-metadata-operation (:columns dv) op-spec)]
+        new-cols (column-metadata-operation columns op-spec)]
     (db-drop-index tennant-conn {:index-name idx-name})
     {:success? true
-     :dv (assoc dv :columns new-cols)}))
+     :columns new-cols}))
 
 (defmethod apply-operation :core/change-column-title
-  [tenant-conn table-name dv op-spec]
-  (let [new-cols (column-metadata-operation (:columns dv) op-spec)]
-    {:success true
-     :dv (assoc dv :columns new-cols)}))
+  [tenant-conn table-name columns op-spec]
+  (let [new-cols (column-metadata-operation columns op-spec)]
+    {:success? true
+     :columns new-cols}))
 
 
 (defmethod apply-operation :core/change-datatype
-  [tennant-conn table-name dv op-spec]
-  (let [args (get op-spec "args")]
+  [tennant-conn table-name columns op-spec]
+  (let [args (get op-spec "args")
+        new-cols (column-metadata-operation columns op-spec)]
     (try
       (db-change-data-type tennant-conn {:table-name table-name
                                          :column-name (args "columnName")
@@ -160,7 +169,12 @@
                                          :parse-format (args "parseFormat" "")
                                          :on-error (op-spec "onError")})
       {:success? true
-       :dv dv}
+       :columns new-cols}
       (catch SQLException e
         {:success? false
          :message (:cause e)}))))
+
+(defmethod apply-operation :core/filter
+  [tenant-conn table-name columns op-spec]
+  {:success? true
+   :columns columns})
