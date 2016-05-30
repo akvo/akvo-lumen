@@ -55,7 +55,7 @@ export default class DatasetTable extends Component {
 
   getCellClassName(columnTitle) {
     const { sidebarProps } = this.state;
-    if (sidebarProps != null && sidebarProps.columnTitle === columnTitle) {
+    if (sidebarProps != null && sidebarProps.column.title === columnTitle) {
       return 'sidebarTargetingColumn';
     }
     return '';
@@ -136,7 +136,7 @@ export default class DatasetTable extends Component {
       case 'core/filter':
         this.showSidebar({
           type: 'filter',
-          columnTitle: column.title,
+          column,
           onClose: () => this.hideSidebar(),
           onApply: transformation => {
             this.hideSidebar();
