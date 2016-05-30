@@ -22,7 +22,8 @@
              [public :as public]
              [root :as root]
              [share :as share]
-             [visualisation :as visualisation]]
+             [visualisation :as visualisation]
+             [transformation :as transformation]]
             [org.akvo.dash.middleware :refer [wrap-auth wrap-jwt]]
             [ring.middleware
              [defaults :refer [api-defaults wrap-defaults]]
@@ -64,11 +65,13 @@
          :root (endpoint-component root/endpoint)
          :share (endpoint-component share/endpoint)
          :tenant-manager (tm/manager)
-         :visualisation (endpoint-component visualisation/endpoint))
+         :visualisation (endpoint-component visualisation/endpoint)
+         :transformation (endpoint-component transformation/endpoint))
         (component/system-using
          {:http           [:app]
           :app            [:tenant-manager :dataset :files :flow :import
-                           :library :public :root :share :visualisation]
+                           :library :public :root :share :visualisation
+                           :transformation]
           :tenant-manager [:db]
           :root           [:tenant-manager]
           :dataset        [:tenant-manager :config]
@@ -78,4 +81,5 @@
           :library        [:tenant-manager]
           :public         [:tenant-manager]
           :share          [:tenant-manager :config]
-          :visualisation  [:tenant-manager]}))))
+          :visualisation  [:tenant-manager]
+          :transformation [:tenant-manager]}))))
