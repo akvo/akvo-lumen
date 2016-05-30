@@ -49,6 +49,7 @@
                          "h" 0
                          "i" "text-2"}}})
 
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Tests
 ;;;
@@ -63,23 +64,46 @@
 
   (testing "New dashboard"
 
-    (let [v-id          (-> (all-visualisations test-conn) first :id)
-          new-dashboard (dashboard/handle-new-dashboard test-conn
-                                                        (dashboard-spec v-id))]
-      (is (not (nil? new-dashboard)))
+    (let [v-id               (-> (all-visualisations test-conn) first :id)
+          d-spec             (dashboard-spec v-id)
+          {dashboard-id :id} (dashboard/handle-new-dashboard test-conn d-spec)]
+      (is (not (nil? dashboard-id)))
 
       (testing "Get dashboard"
-        (let [d (dashboard/handle-dashboard-by-id test-conn (:id new-dashboard))]
-          ;;(pprint d)
-          (is
-           (every? #(contains? d %) [:id :title :entities :layout
-                                     :created :modified]))
-          (is (not (nil? d)))))
+        (let [d (dashboard/handle-dashboard-by-id test-conn
+                                                  dashboard-id)]
+          (is (not (nil? d)))
+          (is (every? #(contains? d %)
+                      [:id :title :entities :layout :created :modified]))
+          (is (= (get d-spec "title")
+                 (get d :title)))
 
-      #_(testing "Update dashboard"
-        (let [e (dashboard/persist-dashboard test-conn
-                                             (:id new-dashboard)
-                                             (:spec new-dashboard))
-              ]
-          (pprint e)
-          (is (= 1 1)))))))
+          (is (= (set (mapv name (keys (:entities d))))
+                 (set (mapv name (keys (get d-spec "entities"))))))
+
+          (is (= (set (mapv name (keys (:layout d))))
+                 (set (mapv name (keys (get d-spec "layout"))))))))
+
+      (testing "Update dashboard"
+        (let [new-spec (-> d-spec
+                           (assoc "title" "My updated dashboard")
+                           (assoc-in ["entities" "text-1" "content"]
+                                     "Updated text entity")
+                           (assoc-in ["layout" "text-1" "h"] 1))]
+
+          (dashboard/persist-dashboard test-conn dashboard-id new-spec)
+          (let [updated-d (dashboard/handle-dashboard-by-id
+                           test-conn dashboard-id)]
+            (is (= (:title updated-d)
+                   "My updated dashboard"))
+            (is (= (get-in updated-d [:entities "text-1" "content"])
+                   "Updated text entity"))
+            (is (= (get-in updated-d [:layout "text-1" "h"])
+                   1)))))
+
+      (testing "Delete dashboard"
+        (dashboard/handle-dashboard-delete test-conn dashboard-id)
+        (is (nil? (dashboard-by-id test-conn {:id dashboard-id})))
+        (is (empty? (dashboard_visualiation-by-dashboard-id
+                     test-conn {:dashboard-id dashboard-id})))
+        (is (empty? (all-dashboards test-conn)))))))
