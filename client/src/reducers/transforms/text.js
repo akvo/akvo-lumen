@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import cloneDeep from 'lodash/clonedeep';
 import { columnIndex } from '../../utilities/dataset';
 
 // http://stackoverflow.com/a/196991/24946
@@ -45,7 +45,7 @@ export default function textTransform(dataset, { op, args }) {
 
   const transform = transforms[op];
 
-  const ds = _.cloneDeep(dataset);
+  const ds = cloneDeep(dataset);
 
   for (let rowIndex = 0; rowIndex < ds.rows.length; rowIndex++) {
     const val = ds.rows[rowIndex][colIndex];

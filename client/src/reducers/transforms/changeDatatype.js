@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import cloneDeep from 'lodash/clonedeep';
 import moment from 'moment';
 import { columnIndex } from '../../utilities/dataset';
 
@@ -107,7 +107,7 @@ export default function changeDatatype(dataset, { args, onError }) {
     return dataset;
   }
   const fn = transformationFunctions[prevType][newType];
-  const clonedDataset = _.cloneDeep(dataset);
+  const clonedDataset = cloneDeep(dataset);
   const newRows = fn(clonedDataset.rows, colIndex, onError, args);
   clonedDataset.rows = newRows;
   clonedDataset.columns[colIndex].type = newType;
