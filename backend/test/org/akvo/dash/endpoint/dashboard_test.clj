@@ -70,8 +70,16 @@
 
       (testing "Get dashboard"
         (let [d (dashboard/handle-dashboard-by-id test-conn (:id new-dashboard))]
-          (pprint d)
+          ;;(pprint d)
           (is
            (every? #(contains? d %) [:id :title :entities :layout
                                      :created :modified]))
-          (is (not (nil? d))))))))
+          (is (not (nil? d)))))
+
+      #_(testing "Update dashboard"
+        (let [e (dashboard/update-dashboard test-conn
+                                            (:id new-dashboard)
+                                            (:spec new-dashboard))]
+          (pprint e)
+          (is (= 1 1))
+          )))))

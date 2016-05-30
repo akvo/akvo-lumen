@@ -37,7 +37,7 @@
 
 (defn part-by-entity-type [entities]
   {:visualisations (filter-type entities "visualisation")
-   :text           (filter-type entities "text")})
+   :texts          (filter-type entities "text")})
 
 
 (defn handle-new-dashboard
@@ -53,7 +53,7 @@
       (jdbc/with-db-transaction [tx tenant-conn]
         (insert-dashboard tx {:id    dashboard-id
                               :title (get spec "title")
-                              :spec  (:text parted-spec)})
+                              :spec  (:texts parted-spec)})
         (doseq [visualisation (get-in parted-spec [:visualisations :entities])]
           (let [visualisation-id (get visualisation "id")
                 layout (first (filter #(= visualisation-id (get % "i"))
@@ -106,6 +106,40 @@
    (dashboard_visualiation-by-dashboard-id tenant-conn
                                            {:dashboard-id id})))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; /dashboards/:id PUT
+;;;
+
+
+(defn update-dashboard
+  "We update a dashboard via upsert of dashboard and clean - insert of
+  dashboard_visualisations.
+  1. Unpack text & visualisation entities
+  2. Update dashboard table
+  3. Remove old dashboard_visualisations
+  4. Add new dashboard_visualisations
+  "
+  [tenant-conn id spec]
+  (let [{texts          :texts
+         visualisations :visualisations} (part-by-entity-type spec)
+        visualisations-layouts           (:layout visualisations)]
+    (jdbc/with-db-transaction [tx tenant-conn]
+      (update-dashboard tx {:id    id
+                            :title (get spec "title")
+                            :spec  texts})
+      (delete-dashboard_visualisation tenant-conn {:dashboard-id id})
+      (doseq [visualisation-entity (:entities visualisations)]
+        (let [visualisation-id      (get visualisation-entity "id")
+              visualisations-layout (first (filter #(= visualisation-id
+                                                       (get % "i"))
+                                                   visualisations-layouts))]
+          (insert-dashboard_visualisation
+           tx {:dashboard-id     id
+               :visualisation-id visualisation-id
+               :layout           visualisations-layout}))))
+    {:id     id
+     :status "OK"}))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Routes
@@ -127,9 +161,10 @@
         (GET "/" _
           (resp/response (handle-dashboard-by-id tenant-conn  id)))
 
-        (PUT "/" _
-          (pprint "Update dashboard")
-          (resp/response {:status "DID nothing"}))
+        (PUT "/" {:keys [body]}
+          (if-some [dashboard (dashboard-by-id tenant-conn {:id id})]
+            (resp/response (update-dashboard tenant-conn id body))
+            (resp/not-found {:id id})))
 
         (DELETE "/" _
           (delete-dashboard-by-id tenant-conn {:id id})

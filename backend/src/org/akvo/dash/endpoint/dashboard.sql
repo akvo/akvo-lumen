@@ -9,6 +9,20 @@ INSERT INTO dashboard (id, title, spec)
 VALUES (:id, :title, :spec::jsonb)
 RETURNING *;
 
+-- :name upsert-dashboard :<!
+-- :doc Insert or update dashboard.
+INSERT INTO dashboard (id, title, spec)
+VALUES (:id, :title, :spec::jsonb)
+ON CONFLICT (id)
+DO UPDATE SET id=:id, title=:title, spec=:spec::jsonb
+RETURNING *;
+
+-- :name update-dashboard :<!
+UPDATE dashboard
+SET title = :title, spec = :spec::jsonb
+WHERE id = :id
+RETURNING *;
+
 -- :name dashboard-by-id :? :1
 -- :doc Return dashboard by id.
 SELECT *
