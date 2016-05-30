@@ -30,20 +30,20 @@ SELECT spec
 -- :name update-failed-job-execution :! :n
 -- :doc Update failed job execution
 UPDATE job_execution
-   SET modified=now(),
-       log=:reason
- WHERE id=:id
+   SET log = :reason,
+       status = 'FAILED'
+ WHERE id = :id
 
 -- :name update-successful-job-execution :! :n
 -- :doc Update successful job execution
 UPDATE job_execution
-   SET finished_at=now()
- WHERE id=:id
+   SET status = 'OK'
+ WHERE id = :id
 
 -- :name job-execution-by-id :? :1
 SELECT *
   FROM job_execution
- WHERE id=:id
+ WHERE id = :id
 
 -- :name dataset-id-by-job-execution-id :? :1
 -- :doc Find the dataset id corresponding to the job execution id

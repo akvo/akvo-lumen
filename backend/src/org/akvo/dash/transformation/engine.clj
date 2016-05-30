@@ -70,7 +70,7 @@
 
 (defmulti apply-operation
   "Applies a particular operation based on `op` key from spec
-   * tennant-conn: Open connection to the database
+   * tenant-conn: Open connection to the database
    * table-name: table on which to operate (ds_<uuid>)
    * dv: in-memory representation of a dataset version
    * op-spec: JSON payload with the operation settings

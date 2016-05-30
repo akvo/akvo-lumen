@@ -4,6 +4,7 @@ CREATE TABLE job_execution (
     dataset_id text REFERENCES dataset ON DELETE CASCADE,
     type text NOT NULL,
     log text,
+    status text NOT NULL DEFAULT 'PENDING',
     created timestamptz NOT NULL DEFAULT now(),
     modified timestamptz
 );

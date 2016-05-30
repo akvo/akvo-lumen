@@ -1,12 +1,18 @@
 (ns org.akvo.dash.transformation
-  (require [org.akvo.dash.transformation.engine :refer [available-ops]]))
+  (:require [clojure.java.jdbc :as jdbc]
+            [org.akvo.dash.transformation.engine :as engine]
+            [org.akvo.dash.util :refer (squuid gen-table-name)]
+            [hugsql.core :as hugsql]))
 
 ;; TODO: Potential change op-spec validation `core.spec`
 
-(def ops-set (set (keys available-ops)))
+(def ops-set (set (keys engine/available-ops)))
 (def on-error-set #{"fail" "default-value" "delete-row"})
 (def type-set #{"number" "text" "date"})
 (def sort-direction-set #{"ASC" "DESC"})
+
+(hugsql/def-db-fns "org/akvo/dash/transformation.sql")
+
 
 (defn- throw-invalid-op
   [op-spec]
@@ -91,11 +97,60 @@
       {:valid? false
        :message (.getMessage e)})))
 
+(defn execute
+  [tenant-conn job-id dataset-id transformations]
+  (let [dv (dataset-version-by-id dataset-id)
+        columns (vec (:columns dv))
+        imported-table (:imported-table-name dv)
+        table-name (gen-table-name "ds")
+        f (fn [log op-spec]
+            (let [step (engine/apply-operation tenant-conn
+                                               table-name
+                                               columns
+                                               op-spec)]
+              (if (:success? step)
+                (if (:message step)
+                  (conj log (:message step))
+                  log)
+                (throw (Exception. (str "Error applying operation: " op-spec))))))]
+    (try
+      (copy-table tenant-conn {:source-table imported-table
+                               :dest-table table-name})
+      (let [result (reduce f [] transformations)]
+        (if (every? :success? result)
+          (do
+            (new-dataset-version tenant-conn {:id (str (squuid))
+                                              :dataset-id dataset-id
+                                              :job-execution-id job-id
+                                              :table-name table-name
+                                              :imported-table-name imported-table
+                                              :columns (:columns result)})
+            (update-job-execution {:id job-id
+                                   :status 'SUCCESS'
+                                   :log "Some log"}))
+          (update-job-execution tenant-conn {:id job-id
+                                             :status 'ERROR'
+                                             :log "some log"})))
+      (catch Exception e
+        (update-job-execution tenant-conn {:id job-id
+                                           :status 'ERROR'
+                                           :log (.getMessage e)})))))
+
 (defn schedule
-  [tenant-conn transformations]
-  (let [v (valid? transformations)]
-    (if (:valid? v)
-      {:status 200
-       :body "job-id"}
-      {:status 400
-       :body (:message v)})))
+  [tenant-conn dataset-id transformations]
+  (if-let [dataset (dataset-by-id dataset-id)]
+    (let [v (valid? transformations)]
+      (if (:valid? v)
+        (let [job-id (str (squuid))]
+          (jdbc/with-db-transaction [tx tenant-conn]
+            (new-job-execution tx {:dataset-id dataset-id})
+            (update-transformations tx {:transformations transformations
+                                        :dataset-id dataset-id}))
+          (future
+            (execute tenant-conn job-id dataset-id transformations))
+          {:status 200
+           :job-execution-id job-id})
+        {:status 400
+         :body (:message v)}))
+    {:status 400
+     :body "Dataset not found"}))

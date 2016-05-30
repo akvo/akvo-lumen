@@ -9,13 +9,11 @@
             [org.akvo.dash.import.csv]
             [org.akvo.dash.import.flow]
             [org.akvo.dash.transformation :as t]
-            [org.akvo.dash.util :refer (squuid)]
+            [org.akvo.dash.util :refer (squuid gen-table-name)]
             [ring.util.response :as res]))
 
 (hugsql/def-db-fns "org/akvo/dash/import.sql")
 
-(defn gen-table-name [prefix]
-  (str prefix "_" (str/replace (java.util.UUID/randomUUID) "-" "_")))
 
 (defn successful-import [conn job-execution-id table-name status spec]
   (let [dataset-id (squuid)

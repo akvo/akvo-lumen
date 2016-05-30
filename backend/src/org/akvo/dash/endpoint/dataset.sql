@@ -3,23 +3,23 @@
 WITH
 failed_imports AS (
          --TODO name->title
-  SELECT j.id, d.spec->>'name' AS name, j.log AS error_reason, j.created, j.modified
+  SELECT j.id, d.spec->>'name' AS name, j.log AS error_reason, j.status, j.created, j.modified
     FROM data_source d, job_execution j
    WHERE j.data_source_id = d.id
      AND j.type = 'IMPORT'
-     AND j.log IS NOT NULL
+     AND j.status = 'FAILED'
 ),
 pending_imports AS (
-  SELECT j.id, d.spec->>'name' AS name, j.created, j.modified
+  SELECT j.id, d.spec->>'name' AS name, j.status, j.created, j.modified
     FROM data_source d, job_execution j
    WHERE j.data_source_id = d.id
      AND j.type = 'IMPORT'
-     AND j.modified IS NULL
+     AND j.status = 'PENDING'
 )
-SELECT id, name, error_reason as reason, 'FAILED' AS status, modified, created
+SELECT id, name, error_reason as reason, status, modified, created
   FROM failed_imports
  UNION
-SELECT id, name, NULL, 'PENDING', modified, created
+SELECT id, name, NULL, status, modified, created
   FROM pending_imports
  UNION
 SELECT id, title, NULL, 'OK', modified, created

@@ -8,4 +8,4 @@
     (let-routes [tenant-conn (connection tenant-manager tenant)]
       (context "/:id" [id]
         (POST "/" {:keys [body] :as request}
-          (t/schedule tenant-conn body))))))
+          (t/schedule tenant-conn id body))))))
