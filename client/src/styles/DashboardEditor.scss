@@ -1,0 +1,38 @@
+@import 'modules/colors';
+
+.DashboardEditor {
+  position: relative;
+  display: flex;
+  margin-top: 4em;
+  width: 100%;
+  min-height: 100%;
+  .DashboardVisualisationList, .DashboardEditorCanvasContainer {
+    height: calc(100vh - 4rem);
+    overflow: auto;
+  }
+  .DashboardVisualisationList {
+    width: 20rem;
+  }
+  .DashboardEditorCanvasContainer {
+    flex: 1;
+  }
+  .react-grid-layout {
+    background-color: whitesmoke;
+  }
+  .react-resizable-handle {
+    z-index: 99;
+  }
+  .DashboardEditorCanvasControls {
+    padding: 1rem 1rem 0 1rem;
+
+    button {
+      padding: 0.5rem 1rem;
+      background-color: $mintGreen;
+      color: white;
+      font-size: 1rem;
+      line-height: 1.4rem;
+      border-radius: 0.4rem;
+      font-weight: bold;
+    }
+  }
+}

@@ -17,8 +17,10 @@ body, button, input {
     color: rgb(30, 30, 30);
 }
 
-p, h1, h2, h3, h4, h5 {
+p, h1, h2, h3, h4, h5, button, input {
     line-height: 1.4em;
+    font-family: 'Source Sans Pro', sans-serif;
+    color: rgb(30, 30, 30);
 }
 
 /* Identify elements that can be clicked or tap to interact with */
@@ -41,6 +43,10 @@ p, h1, h2, h3, h4, h5 {
     cursor: not-allowed;
 }
 
+.noPointerEvents {
+  pointer-events: none;
+}
+
 /* Always show modals on top of the stack */
 
 .ReactModalPortal {
@@ -49,15 +55,71 @@ p, h1, h2, h3, h4, h5 {
     }
 }
 
-/* Add some padding to chart elements */
+/* Charts */
 
-svg.rd3-chart {
-    padding: 1rem 1rem 2rem 3rem;
+.dashChart {
+  svg.rd3-chart {
     box-sizing: initial;
+  }
+  &.hasAxisLabels {
+    svg.rd3-chart {
+      padding: 16px 16px 16px 48px;
+    }
+  }
+  &.hasNameColumn {
+    svg.rd3-chart {
+      padding-bottom: 48px;
+    }
+  }
+  &.hasAxisLabels.hasNameColumn {
+    svg.rd3-chart {
+      padding: 16px 16px 64px 48px !important;
+    }
+  }
+  &.xsmall {
+    text {
+      font-size: 0.4rem;
+    }
+  }
+  &.small {
+    text {
+      font-size: 0.6rem;
+    }
+  }
+  &.medium {
+    text {
+      font-size: 0.8rem;
+    }
+  }
+  &.large {
+    text {
+      font-size: 1rem;
+    }
+  }
+  &.xlarge {
+    text {
+      font-size: 1.2rem;
+    }
+  }
+}
+.DashBarChart {
+  &.hasNameColumn {
+    .rd3-barchart-xaxis .tick text {
+      transform: rotate(45deg) translate(0.5rem, -0.25rem);
+      text-anchor: start;
+    }
+  }
 }
 
 h4.rd3-chart-title {
-    margin-left: 3rem;
-    font-size: 1.25rem;
-    font-weight: bold;
+  margin-left: 3rem;
+  font-size: 1.25rem;
+  font-weight: bold;
+  line-height: 24px;
+}
+
+/* tmp for dashboards */
+
+.Dashboard {
+  width: 100%;
 }

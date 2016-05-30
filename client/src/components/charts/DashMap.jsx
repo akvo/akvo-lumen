@@ -6,7 +6,7 @@ require('../../../node_modules/leaflet/dist/leaflet.css');
 require('../../styles/DashMap.scss');
 
 
-export default function DashMap({ visualisation, datasets }) {
+export default function DashMap({ visualisation, datasets, width, height }) {
   const chartData = chart.getChartData(visualisation, datasets);
   return (
     <div className="DashMap dashChart">
@@ -14,6 +14,11 @@ export default function DashMap({ visualisation, datasets }) {
         center={[0, 0]}
         zoom={2}
         scrollWheelZoom={false}
+        key={width}
+        style={{
+          width,
+          height,
+        }}
       >
         <TileLayer
           url="http://{s}.tile.osm.org/{z}/{x}/{y}.png"
@@ -39,4 +44,6 @@ export default function DashMap({ visualisation, datasets }) {
 DashMap.propTypes = {
   visualisation: PropTypes.object.isRequired,
   datasets: PropTypes.object.isRequired,
+  width: PropTypes.number,
+  height: PropTypes.number,
 };
