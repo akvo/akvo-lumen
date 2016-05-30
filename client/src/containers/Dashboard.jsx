@@ -88,31 +88,3 @@ Dashboard.propTypes = {
 };
 
 export default connect(state => state)(Dashboard);
-
-/*
-          onChangeTitle={event => (
-            this.setState({
-              name: event.target.value,
-              isUnsavedChanges: true,
-            })
-          )}
-          onChangeDashboardType={value => {
-            this.setState({
-              visualisationType: value,
-              isUnsavedChanges: true,
-            });
-          }}
-          onChangeSourceDataset={value => (
-            this.handleChangeSourceDataset(value)
-          )}
-          onChangeDashboardSpec={value => {
-            const spec = update(this.state.spec, { $merge: value });
-            this.setState({
-              isUnsavedChanges: true,
-              spec,
-            });
-          }}
-          onSaveDashboard={() => (
-            this.onSave()
-          )}
-*/

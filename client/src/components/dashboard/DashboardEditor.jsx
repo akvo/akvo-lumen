@@ -7,17 +7,7 @@ require('../../styles/DashboardEditor.scss');
 require('../../../node_modules/react-grid-layout/css/styles.css');
 require('../../../node_modules/react-resizable/css/styles.css');
 
-const getArrayFromObject = (object) => {
-  const arr = [];
-
-  Object.keys(object).forEach((key) => {
-    const item = object[key];
-
-    arr.push(item);
-  });
-
-  return arr;
-};
+const getArrayFromObject = object => Object.keys(object).map(key => object[key]);
 
 const getNewEntityId = (entities, itemType) => {
   const entityArray = getArrayFromObject(entities);
@@ -37,7 +27,7 @@ const getNewEntityId = (entities, itemType) => {
 
 const getFirstBlankRowGroup = (layout, height) => {
   /* Function to find the first collection of blank rows big enough for the
-  /* default height of the entity about to beinserted. */
+  /* default height of the entity about to be inserted. */
 
   /* If layout is empty, return the first row */
   if (layout.length === 0) return 0;
