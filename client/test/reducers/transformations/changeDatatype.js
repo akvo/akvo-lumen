@@ -1,4 +1,5 @@
 import assert from 'assert';
+import moment from 'moment';
 import reducer from '../../../src/reducers/datasets';
 import { transform } from '../../../src/actions/dataset';
 
@@ -104,6 +105,10 @@ describe('changeDatatype number->text', () => {
 });
 
 describe('changeDatatype text->date', () => {
+  const date1 = '24-12-2016';
+  const date2 = '01-01-1971';
+  const ts1 = moment(date1, 'DD-MM-YYYY', true).unix() * 1000;
+  const ts2 = moment(date2, 'DD-MM-YYYY', true).unix() * 1000;
   const datasets = {
     id: {
       id: 'id',
@@ -113,8 +118,8 @@ describe('changeDatatype text->date', () => {
         title: 'Text columns with dates in DD-MM-YYYY format',
       }],
       rows: [
-        ['24-12-2016'],
-        ['01-01-1971'],
+        [date1],
+        [date2],
         [null],
         ['not-a-date'],
       ],
@@ -138,7 +143,7 @@ describe('changeDatatype text->date', () => {
     );
     assert.deepStrictEqual(
       newDatasets.id.rows.map(row => row[0]),
-      [1482530400000, 31528800000, null, null]
+      [ts1, ts2, null, null]
     );
   });
   it('should drop rows that cannot be parsed', () => {
@@ -148,7 +153,7 @@ describe('changeDatatype text->date', () => {
     );
     assert.deepStrictEqual(
       newDatasets.id.rows.map(row => row[0]),
-      [1482530400000, 31528800000]
+      [ts1, ts2]
     );
   });
 });

@@ -44,10 +44,10 @@ function textToNumber(s) {
 }
 
 function textToDate(s, { parseFormat }) {
-  if (!moment(s, parseFormat).isValid()) {
+  if (!moment(s, parseFormat, true).isValid()) {
     throw new Error('Parse error');
   }
-  return moment(s, parseFormat).unix() * 1000;
+  return moment(s, parseFormat, true).unix() * 1000;
 }
 
 function numberToText(n) {
@@ -71,17 +71,17 @@ function numberToDate(n) {
 }
 
 function dateToNumber(n) {
-  if (!moment(n).isValid()) {
+  if (!moment(n, true).isValid()) {
     throw new Error('Parse error');
   }
   return n;
 }
 
 function dateToText(d) {
-  if (!moment(d).isValid()) {
+  if (!moment(d, true).isValid()) {
     throw new Error('Parse error');
   }
-  return moment(d).format();
+  return moment(d, true).format();
 }
 
 const transformationFunctions = {
