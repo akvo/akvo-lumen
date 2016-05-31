@@ -130,7 +130,7 @@
                                                    :exec-log log}))
       (catch Exception e
         (update-job-failed-execution tenant-conn {:id job-id
-                                                  :error-log (.getMessage e)})))))
+                                                  :error-log [(.getMessage e)]})))))
 
 (defn schedule
   [tenant-conn dataset-id transformation-log]
