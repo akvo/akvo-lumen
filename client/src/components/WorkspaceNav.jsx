@@ -9,7 +9,7 @@ import { Link } from 'react-router';
 
 require('../styles/WorkspaceNav.scss');
 
-const collapsedLocations = ['visualisation/', 'dataset/'];
+const collapsedLocations = ['visualisation/', 'dataset/', 'dashboard/'];
 
 const getCollapsedStatus = (pathname) => {
   let collapsedStatus = false;

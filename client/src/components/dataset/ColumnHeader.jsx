@@ -4,7 +4,13 @@ require('../../styles/ColumnHeader.scss');
 
 export default class ColumnHeader extends Component {
 
-  handleTransformClick(event) {
+  constructor() {
+    super();
+    this.handleDataTypeMenuClick = this.handleDataTypeMenuClick.bind(this);
+    this.handleColumnMenuClick = this.handleColumnMenuClick.bind(this);
+  }
+
+  handleDataTypeMenuClick(event) {
     event.stopPropagation();
 
     const el = this.refs.columnTypeLabel;
@@ -12,14 +18,15 @@ export default class ColumnHeader extends Component {
     const verticalOffset = rect.top + el.offsetHeight;
     const horizontalOffset = rect.left - (el.offsetWidth / 2);
 
-    const options = {
-      columnTitle: this.props.columnTitle,
-      columnType: this.props.columnType,
+    const dimensions = {
       left: horizontalOffset,
       top: verticalOffset,
     };
 
-    this.props.onClickMenuToggle('transformContextMenu', options);
+    this.props.onToggleDataTypeContextMenu({
+      dimensions,
+      column: this.props.column,
+    });
   }
 
   handleColumnMenuClick() {
@@ -29,14 +36,16 @@ export default class ColumnHeader extends Component {
     const horizontalOffset = rect.left;
     const width = el.offsetWidth;
 
-    const options = {
-      columnTitle: this.props.columnTitle,
+    const dimensions = {
       left: horizontalOffset,
       top: verticalOffset,
       width,
     };
 
-    this.props.onClickMenuToggle('columnMenu', options);
+    this.props.onToggleColumnContextMenu({
+      dimensions,
+      column: this.props.column,
+    });
   }
 
   render() {
@@ -45,29 +54,31 @@ export default class ColumnHeader extends Component {
         className={`ColumnHeader clickable
           ${this.props.columnMenuActive ? 'columnMenuActive' : ''}`}
         ref="columnHeaderContainer"
-        onClick={() => this.handleColumnMenuClick()}
+        onClick={this.handleColumnMenuClick}
       >
         <span
           className="columnType clickable"
         >
           <span
             className="columnTypeToggle"
-            onClick={(e) => this.handleTransformClick(e)}
+            onClick={this.handleDataTypeMenuClick}
             ref="columnTypeLabel"
           >
-            {this.props.columnType}
+            {this.props.column.type}
           </span>
         </span>
-        {this.props.children}
+        {this.props.column.title}
       </div>
     );
   }
 }
 
 ColumnHeader.propTypes = {
-  columnType: PropTypes.string.isRequired,
-  columnTitle: PropTypes.string.isRequired,
-  children: PropTypes.string.isRequired,
+  column: PropTypes.shape({
+    type: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+  }),
+  onToggleDataTypeContextMenu: PropTypes.func.isRequired,
+  onToggleColumnContextMenu: PropTypes.func.isRequired,
   columnMenuActive: PropTypes.bool.isRequired,
-  onClickMenuToggle: PropTypes.func.isRequired,
 };

@@ -21,17 +21,14 @@
     (let [columns (remove #(get % "hidden") (:columns dataset))
           data (rest (jdbc/query conn
                                  [(select-data-sql (:table-name dataset) columns)]
-                                 :as-arrays? true))
-          columns-with-data (map (fn [column values]
-                                   (assoc column :values values))
-                                 columns
-                                 (apply map vector data))]
+                                 :as-arrays? true))]
       {:id id
        :name (:title dataset)
        :modified (:modified dataset)
        :created (:created dataset)
        :status "OK"
-       :columns columns-with-data})))
+       :columns columns
+       :rows data})))
 
 
 (defn endpoint [{:keys [tenant-manager config]}]
