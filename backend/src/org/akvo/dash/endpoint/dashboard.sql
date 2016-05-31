@@ -1,6 +1,6 @@
 -- :name all-dashboards :? :*
 -- :doc Return all dashboards
-SELECT *
+SELECT id, title, created, modified
 FROM dashboard;
 
 -- :name insert-dashboard :<!
