@@ -53,27 +53,27 @@
         col-idx (get-column-idx columns col-name)
         sort-idx (get-sort-idx columns)
         sort-direction (get-in op-spec ["args" "sortDirection"])]
-    (update-in columns [col-idx] assoc "sort" sort-idx "direction" sort-direction)))
+    (update columns col-idx assoc "sort" sort-idx "direction" sort-direction)))
 
 (defmethod column-metadata-operation :core/remove-sort
   [columns op-spec]
   (let [col-name (get-column-name op-spec)
         col-idx (get-column-idx columns col-name)]
-    (update-in columns [col-idx] assoc "sort" nil "direction" nil)))
+    (update columns col-idx assoc "sort" nil "direction" nil)))
 
 (defmethod column-metadata-operation :core/change-column-title
   [columns op-spec]
   (let [col-name (get-column-name op-spec)
         col-idx (get-column-idx columns col-name)
         col-title (get-in op-spec ["args" "columnTitle"])]
-    (update-in columns [col-idx] assoc "title" col-title)))
+    (update columns col-idx assoc "title" col-title)))
 
 (defmethod column-metadata-operation :core/change-datatype
   [columns op-spec]
   (let [col-name (get-column-name op-spec)
         col-idx (get-column-idx columns col-name)
         new-type (get-in op-spec ["args" "newType"])]
-    (update-in columns [col-idx] assoc "type" new-type)))
+    (update columns col-idx assoc "type" new-type)))
 
 
 (defmulti apply-operation
