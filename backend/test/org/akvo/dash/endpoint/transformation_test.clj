@@ -4,7 +4,3 @@
 
 (def handler
   (transformation/endpoint {}))
-
-(deftest a-test
-  (testing "FIXME, I fail."
-    (is (= 1 1))))
