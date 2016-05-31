@@ -36,7 +36,7 @@ describe('changeDatatype text->number', () => {
   it('should change text column to number', () => {
     const newDatasets = reducer(
       datasets,
-      textToNumberAction('default-value', '0')
+      textToNumberAction('default-value', 0)
     );
     assert.deepStrictEqual(
       newDatasets.id.rows.map(row => row[0]),
@@ -146,6 +146,16 @@ describe('changeDatatype text->date', () => {
       [ts1, ts2, null, null]
     );
   });
+  it('should change text to date with default timestamp value', () => {
+    const newDatasets = reducer(
+      datasets,
+      textToDateAction('default-value', 0)
+    );
+    assert.deepStrictEqual(
+      newDatasets.id.rows.map(row => row[0]),
+      [ts1, ts2, 0, 0]
+    );
+  });
   it('should drop rows that cannot be parsed', () => {
     const newDatasets = reducer(
       datasets,
@@ -198,7 +208,7 @@ describe('changeDatatype number->date', () => {
   it('should change number to date with default 0 value', () => {
     const newDatasets = reducer(
       datasets,
-      numberToDateAction('default-value', '0')
+      numberToDateAction('default-value', 0)
     );
     assert.deepStrictEqual(
       newDatasets.id.rows.map(row => row[0]),

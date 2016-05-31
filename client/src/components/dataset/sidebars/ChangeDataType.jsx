@@ -39,7 +39,7 @@ DateFormatSelect.propTypes = {
   onChange: PropTypes.func.isRequired,
 };
 
-function DefaultValueInput({ defaultValue, onChange }) {
+function DefaultValueInput({ defaultValue, onChange, newType }) {
   return (
     <div className="inputGroup">
       <label htmlFor="defaultValueInput">
@@ -48,7 +48,28 @@ function DefaultValueInput({ defaultValue, onChange }) {
       <input
         type="text"
         value={defaultValue}
-        onChange={(event) => onChange(event.target.value)}
+        onChange={(event) => {
+          const value = event.target.value;
+          if (newType === 'date') {
+            const n = parseInt(value, 10);
+            if (isNaN(n)) {
+              // TODO warn
+              onChange(null);
+            } else {
+              onChange(n);
+            }
+          } else if (newType === 'number') {
+            const n = parseFloat(value);
+            if (isNaN(n)) {
+              // TODO warn
+              onChange(null);
+            } else {
+              onChange(n);
+            }
+          } else {
+            onChange(value);
+          }
+        }}
       />
     </div>
   );
@@ -57,6 +78,7 @@ function DefaultValueInput({ defaultValue, onChange }) {
 DefaultValueInput.propTypes = {
   defaultValue: PropTypes.string,
   onChange: PropTypes.func.isRequired,
+  newType: PropTypes.oneOf(['date', 'text', 'number']).isRequired,
 };
 
 
@@ -184,6 +206,7 @@ export default class ChangeDataType extends Component {
           {this.state.errorStrategy === 'default-value' ?
             <DefaultValueInput
               defaultValue={this.state.args.defaultValue}
+              newType={newType}
               onChange={defaultValue => this.mergeArgs({ defaultValue })}
             /> : null}
         </div>
