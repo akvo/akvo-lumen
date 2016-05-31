@@ -26,7 +26,6 @@
 ;;;
 
 (defn filter-type
-  ""
   [dashboard-data kind]
   (let [entities (filter #(= kind (get % "type"))
                                        (vals (get dashboard-data "entities")))

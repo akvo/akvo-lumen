@@ -59,6 +59,19 @@
 (hugsql/def-db-fns "org/akvo/dash/endpoint/visualisation.sql")
 (hugsql/def-db-fns "org/akvo/dash/endpoint/dashboard.sql")
 
+(deftest dashboard-unit
+  (testing "filter-type"
+    (is (= (dashboard/filter-type (dashboard-spec "abc123") "text")
+           {:entities
+            '({"id" "text-1", "type" "text", "content" "I am a text entity."}
+             {"id" "text-2",
+              "type" "text",
+              "content" "I am another text entity."}),
+            :layout
+            '({"x" 2, "y" 0, "w" 0, "h" 0, "i" "text-1"}
+             {"x" 3, "y" 0, "w" 0, "h" 0, "i" "text-2"})}))))
+
+
 (deftest ^:functional dashboard
   (share-test/seed test-conn share-test/test-spec)
 
