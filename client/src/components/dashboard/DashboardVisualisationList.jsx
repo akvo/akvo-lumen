@@ -9,27 +9,35 @@ export default function DashboardVisualisationList(props) {
     <div
       className="DashboardVisualisationList"
     >
-      <ul
-        className="list"
-      >
-        {props.visualisations.map(item =>
-          <li
-            className={`listItem clickable ${item.visualisationType}
-              ${isOnDashboard(item) ? 'added' : ''}`}
-            key={item.id}
-            onClick={() => props.onEntityClick(item, 'visualisation')}
-          >
-            <h4>
-              {item.name}
-              <span
-                className="isOnDashboardIndicator"
-              >
-                {isOnDashboard(item) ? '✔' : ''}
-              </span>
-            </h4>
-          </li>
-        )}
-      </ul>
+      {props.visualisations.length === 0 ?
+        <div
+          className="noVisualisationsMessage"
+        >
+          No visualisations to show.
+        </div>
+        :
+        <ul
+          className="list"
+        >
+          {props.visualisations.map(item =>
+            <li
+              className={`listItem clickable ${item.visualisationType}
+                ${isOnDashboard(item) ? 'added' : ''}`}
+              key={item.id}
+              onClick={() => props.onEntityClick(item, 'visualisation')}
+            >
+              <h4>
+                {item.name}
+                <span
+                  className="isOnDashboardIndicator"
+                >
+                  {isOnDashboard(item) ? '✔' : ''}
+                </span>
+              </h4>
+            </li>
+          )}
+        </ul>
+      }
     </div>
   );
 }
