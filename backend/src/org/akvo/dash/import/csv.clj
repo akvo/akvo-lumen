@@ -10,8 +10,6 @@
            org.postgresql.PGConnection
            org.postgresql.copy.CopyManager))
 
-(hugsql/def-db-fns "org/akvo/dash/import.sql")
-
 (defn- get-cols
   ([num-cols]
    (get-cols num-cols nil))

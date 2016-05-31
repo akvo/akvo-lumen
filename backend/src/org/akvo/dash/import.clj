@@ -12,7 +12,7 @@
             [org.akvo.dash.util :refer (squuid gen-table-name)]
             [ring.util.response :as res]))
 
-(hugsql/def-db-fns "org/akvo/dash/import.sql")
+(hugsql/def-db-fns "org/akvo/dash/job-execution.sql")
 
 
 (defn successful-import [conn job-execution-id table-name status spec]
@@ -71,23 +71,3 @@
                                            :data-source-id data-source-id})
         (future (do-import tenant-conn config job-execution-id))
         (res/response {"importId" job-execution-id})))))
-
-(defn status
-  "Get the status of an import (job execution). There are three different states:
-  * { \"status\": \"PENDING\", \"importId\": <id> }
-  * { \"status\": \"FAILED\", \"importId\": <id>, \"reason\": <reason> }
-  * { \"status\": \"OK\", \"importId\": <id>, \"datasetId\": <dataset-id> }
-  Returns nil if the import does not exist"
-  [conn id]
-  (if-let [{:keys [dataset_id]} (dataset-id-by-job-execution-id conn {:id id})]
-    {"importId" id
-     "status" "OK"
-     "datasetId" dataset_id}
-    (let [{:keys [error_reason] :as job-exec} (job-execution-by-id conn {:id id})]
-      (when job-exec
-        (if error_reason
-          {"importId" id
-           "status" "FAILED"
-           "reason" error_reason}
-          {"importId" id
-           "status" "PENDING"})))))
