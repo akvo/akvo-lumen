@@ -41,7 +41,7 @@ UPDATE job_execution
  WHERE id = :id
 
 -- :name job-execution-by-id :? :1
-SELECT *
+SELECT status, error_log->>0 as "error-message"
   FROM job_execution
  WHERE id = :id
 

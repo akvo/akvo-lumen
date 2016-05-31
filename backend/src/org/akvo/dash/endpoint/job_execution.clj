@@ -17,10 +17,10 @@
     {"jobExecutionId" id
      "status" "OK"
      "datasetId" dataset_id}
-    (when-let [{:keys [status]} (job-execution-by-id conn {:id id})]
+    (when-let [{:keys [status error-message]} (job-execution-by-id conn {:id id})]
       {"jobExecutionId" id
        "status" status
-       "reason" "TODO!"})))
+       "reason" error-message})))
 
 (defn endpoint [{:keys [tenant-manager]}]
   (context "/api/job_executions" {:keys [tenant]}
