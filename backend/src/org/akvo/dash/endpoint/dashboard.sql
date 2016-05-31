@@ -45,7 +45,7 @@ RETURNING *;
 DELETE FROM dashboard_visualisation
 WHERE dashboard_id = :dashboard-id;
 
--- :name dashboard_visualiation-by-dashboard-id :? :*
+-- :name dashboard_visualisation-by-dashboard-id :? :*
 SELECT *
 FROM dashboard_visualisation
 WHERE dashboard_id = :dashboard-id;
