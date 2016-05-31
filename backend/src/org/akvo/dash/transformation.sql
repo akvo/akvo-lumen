@@ -1,15 +1,8 @@
 
--- :name new-job-execution :! :n
+-- :name new-transformation-job-execution :! :n
 -- :doc Inserts a new transformation job execution
 INSERT INTO job_execution (id, dataset_id, type)
 VALUES (:id, :dataset-id, 'TRANSFORMATION')
-
--- :name update-transformations :! :n
--- :doc Updates the transformations property for a given dataset
-UPDATE dataset
-   SET transformations = :transformations::jsonb
- WHERE id = :dataset-id
-
 
 -- :name dataset-by-id :? :1
 -- :doc Checks the existence of a dataset for a given id
@@ -42,9 +35,10 @@ UPDATE job_execution
 -- :name new-dataset-version :! :n
 -- :doc Inserts a new dataset version
 INSERT INTO dataset_version (id, dataset_id, job_execution_id, version,
-                             table_name, imported_table_name, columns)
+                             table_name, imported_table_name,
+                             transformations, columns)
 VALUES (:id, :dataset-id, :job-execution-id, :version,
-        :table-name, :imported-table-name, :columns::jsonb)
+        :table-name, :imported-table-name, :transformations, :columns)
 
 
 -- :name copy-table :!

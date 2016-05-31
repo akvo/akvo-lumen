@@ -1,11 +1,11 @@
 (ns org.akvo.dash.transformation
-  (:require [clojure.java.jdbc :as jdbc]
-            [clojure.string :as str]
+  (:require [clojure.string :as str]
             [hugsql.core :as hugsql]
             [org.akvo.dash.transformation.engine :as engine]
             [org.akvo.dash.util :refer (squuid gen-table-name)]))
 
 ;; TODO: Potential change op-spec validation `core.spec`
+;; TODO: Move the validation part to transformation.validation namespace
 
 (def ops-set (set (keys engine/available-ops)))
 (def on-error-set #{"fail" "default-value" "delete-row"})
@@ -91,15 +91,15 @@
       (throw-invalid-op op-spec)))
 
 (defn validate
-  [transformations]
+  [transformation-log]
   (try
-    {:valid? (every? validate-op transformations)}
+    {:valid? (every? validate-op transformation-log)}
     (catch Exception e
       {:valid? false
        :message (.getMessage e)})))
 
 (defn execute
-  [tenant-conn job-id dataset-id transformations]
+  [tenant-conn job-id dataset-id transformation-log]
   (let [dv (dataset-version-by-id tenant-conn {:id dataset-id})
         columns (vec (:columns dv))
         source-table (:imported-table-name dv)
@@ -115,7 +115,7 @@
     (try
       (copy-table tenant-conn {:source-table source-table
                                :dest-table table-name})
-      (let [result (reduce f [] transformations)
+      (let [result (reduce f [] transformation-log)
             log (mapcat :execution-log result)
             cols (:columns (last result))]
         (new-dataset-version tenant-conn {:id (str (squuid))
@@ -124,6 +124,7 @@
                                           :table-name table-name
                                           :imported-table-name source-table
                                           :version (inc (:version dv))
+                                          :transformations transformation-log
                                           :columns cols})
         (update-job-success-execution tenant-conn {:id job-id
                                                    :exec-log log}))
@@ -132,18 +133,15 @@
                                                   :error-log (.getMessage e)})))))
 
 (defn schedule
-  [tenant-conn dataset-id transformations]
+  [tenant-conn dataset-id transformation-log]
   (if-let [dataset (dataset-by-id tenant-conn {:id dataset-id})]
-    (let [v (validate transformations)]
+    (let [v (validate transformation-log)]
       (if (:valid? v)
         (let [job-id (str (squuid))]
-          (jdbc/with-db-transaction [tx tenant-conn]
-            (new-job-execution tx {:id job-id
-                                   :dataset-id dataset-id})
-            (update-transformations tx {:transformations transformations
-                                        :dataset-id dataset-id}))
+          (new-transformation-job-execution tenant-conn {:id job-id
+                                                         :dataset-id dataset-id})
           (future
-            (execute tenant-conn job-id dataset-id transformations))
+            (execute tenant-conn job-id dataset-id transformation-log))
           {:status 200
            :jobExecutionId job-id})
         {:status 400

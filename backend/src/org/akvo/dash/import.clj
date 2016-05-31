@@ -42,7 +42,7 @@
 
 (defn failed-import [conn job-execution-id reason]
   (update-failed-job-execution conn {:id job-execution-id
-                                     :reason reason}))
+                                     :reason [reason]}))
 
 (defn do-import [conn config job-execution-id]
   (try

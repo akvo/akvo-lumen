@@ -3,7 +3,7 @@
 WITH
 failed_imports AS (
          --TODO name->title
-  SELECT j.id, d.spec->>'name' AS name, j.error_log, j.status, j.created, j.modified
+  SELECT j.id, d.spec->>'name' AS name, j.error_log->>0 AS error_log, j.status, j.created, j.modified
     FROM data_source d, job_execution j
    WHERE j.data_source_id = d.id
      AND j.type = 'IMPORT'
@@ -51,12 +51,12 @@ WHERE id = :id
 
 -- :name dataset-by-id :? :1
 SELECT dataset_version.table_name AS "table-name",
-       dataset.transformations,
        dataset.title,
        dataset.created,
        dataset.modified,
        dataset.id,
-       dataset_version.columns
+       dataset_version.columns,
+       dataset_version.transformations
   FROM dataset_version, dataset
  WHERE dataset_version.dataset_id=:id
    AND dataset.id=dataset_version.dataset_id
