@@ -17,10 +17,10 @@
 (defn tf-engine-fixture
   [f]
   (migrate/do-migrate "org/akvo/dash/migrations_tenants" tenant-conn)
+  (db-drop-test-table tenant-conn)
   (db-test-table tenant-conn)
   (db-test-data tenant-conn)
-  (f)
-  (db-drop-test-table tenant-conn))
+  (f))
 
 (use-fixtures :once tf-engine-fixture)
 
@@ -31,22 +31,23 @@
                {"op" "core/change-datatype"
                 "args" {"columnName" "c2"
                         "newType" "number"
-                        "defaultValue" "0"}
+                        "defaultValue" 0}
                 "onError" "default-value"}
                {"op" "core/change-datatype"
                 "args" {"columnName" "c3"
                         "newType" "date"
-                        "defaultValue" "0"}
+                        "defaultValue" 0
+                        "parseFormat" "YYYY-MM-DD"}
                 "onError" "default-value"}]
    :to-number {"op" "core/change-datatype"
                "args" {"columnName" "c1"
                        "newType" "number"
-                       "defaultValue" "0"}
+                       "defaultValue" 0}
                "onError" "fail"}
    :to-date {"op" "core/change-datatype"
              "args" {"columnName" "c1"
                      "newType" "date"
-                     "defaultValue" "0"
+                     "defaultValue" 0
                      "parseFormat" "YYYY-MM-DD"}
              "onError" "fail"}
    :sort-column {"op" "core/sort-column"

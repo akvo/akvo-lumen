@@ -159,17 +159,14 @@
 
 (defmethod apply-operation :core/change-datatype
   [tennant-conn table-name columns op-spec]
-  (let [args (get op-spec "args")
-        new-cols (column-metadata-operation columns op-spec)]
+  (let [new-cols (column-metadata-operation columns op-spec)]
     (try
-      (db-change-data-type tennant-conn {:table-name table-name
-                                         :column-name (args "columnName")
-                                         :new-type (args "newType")
-                                         :default-value (args "defaultValue" "")
-                                         :parse-format (args "parseFormat" "")
-                                         :on-error (op-spec "onError")})
-      {:success? true
-       :columns new-cols}
+      (let [exec-log (db-change-data-type tennant-conn {:table-name table-name
+                                                        :args (get op-spec "args")
+                                                        :on-error (get op-spec "onError")})]
+        {:success? true
+         :execution-log exec-log
+         :columns new-cols})
       (catch SQLException e
         {:success? false
          :message (:cause e)}))))

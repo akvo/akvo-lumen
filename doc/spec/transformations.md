@@ -5,7 +5,7 @@
 * args
   * columName (string): `"c<number>"`
   * newType (string): `"number"` | `"date"` | `"text"`
-  * defaultValue (string): String representation of a valid default value e.g. `"0"`
+  * defaultValue: A valid default value for the `newType` e.g. 0 , "", null, 1464671242
   * parseFormat (string): Property used only to parse a date e.g. `"YYYY-MM-DD"`
 * onError (string): `"fail"` | `"default-value"` | `"delete-row"`
 
