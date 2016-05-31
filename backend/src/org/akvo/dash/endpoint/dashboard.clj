@@ -21,49 +21,6 @@
      (keys (get dashboard "layout"))))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; /dashboard POST
-;;;
-
-(defn filter-type
-  [dashboard-data kind]
-  (let [entities (filter #(= kind (get % "type"))
-                                       (vals (get dashboard-data "entities")))
-        ks     (set (map #(get % "id") entities))]
-    {:entities entities
-     :layout   (keep #(if (ks (get % "i")) %)
-                     (vals (get dashboard-data "layout")))}))
-
-(defn part-by-entity-type [entities]
-  {:visualisations (filter-type entities "visualisation")
-   :texts          (filter-type entities "text")})
-
-
-(defn handle-new-dashboard
-  "With a dashboard spec, first split into visualisation and text entities.
-  Insert new dashboard and pass all text entites into the dashboard.spec. Then
-  for each visualiation included in the dashboard insert an entry into
-  dashboard_visualisation with it's layout data."
-  [tenant-conn spec]
-  (if (dashboard-keys-match? spec)
-    (let [dashboard-id (str (squuid))
-          parted-spec  (part-by-entity-type spec)
-          visualisation-layouts (get-in parted-spec [:visualisations :layout])]
-      (jdbc/with-db-transaction [tx tenant-conn]
-        (insert-dashboard tx {:id    dashboard-id
-                              :title (get spec "title")
-                              :spec  (:texts parted-spec)})
-        (doseq [visualisation (get-in parted-spec [:visualisations :entities])]
-          (let [visualisation-id (get visualisation "id")
-                layout (first (filter #(= visualisation-id (get % "i"))
-                                       visualisation-layouts))]
-            (insert-dashboard_visualisation
-             tx {:dashboard-id     dashboard-id
-                 :visualisation-id visualisation-id
-                 :layout           layout}))))
-      {:id dashboard-id})
-    (throw (Exception. "Entities and layout dashboard keys does not match."))))
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; /dashboards/:id GET
@@ -106,6 +63,52 @@
                                            {:dashboard-id id})))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; /dashboard POST
+;;;
+
+(defn filter-type
+  [dashboard-data kind]
+  (let [entities (filter #(= kind (get % "type"))
+                                       (vals (get dashboard-data "entities")))
+        ks     (set (map #(get % "id") entities))]
+    {:entities entities
+     :layout   (keep #(if (ks (get % "i")) %)
+                     (vals (get dashboard-data "layout")))}))
+
+(defn part-by-entity-type [entities]
+  {:visualisations (filter-type entities "visualisation")
+   :texts          (filter-type entities "text")})
+
+
+(defn handle-new-dashboard
+  "With a dashboard spec, first split into visualisation and text entities.
+  Insert new dashboard and pass all text entites into the dashboard.spec. Then
+  for each visualiation included in the dashboard insert an entry into
+  dashboard_visualisation with it's layout data."
+  [tenant-conn spec]
+  (if (dashboard-keys-match? spec)
+    (let [dashboard-id (str (squuid))
+          parted-spec  (part-by-entity-type spec)
+          visualisation-layouts (get-in parted-spec [:visualisations :layout])]
+      (jdbc/with-db-transaction [tx tenant-conn]
+        (insert-dashboard tx {:id    dashboard-id
+                              :title (get spec "title")
+                              :spec  (:texts parted-spec)})
+        (doseq [visualisation (get-in parted-spec [:visualisations :entities])]
+          (let [visualisation-id (get visualisation "id")
+                layout (first (filter #(= visualisation-id (get % "i"))
+                                       visualisation-layouts))]
+            (insert-dashboard_visualisation
+             tx {:dashboard-id     dashboard-id
+                 :visualisation-id visualisation-id
+                 :layout           layout}))))
+      (handle-dashboard-by-id tenant-conn dashboard-id))
+    (throw (Exception. "Entities and layout dashboard keys does not match."))))
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; /dashboards/:id PUT
 ;;;
 
@@ -135,8 +138,7 @@
            tx {:dashboard-id     id
                :visualisation-id visualisation-id
                :layout           visualisations-layout}))))
-    {:id     id
-     :status "OK"}))
+    (handle-dashboard-by-id tenant-conn id)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; /dashboards/:id DELETE
@@ -172,7 +174,7 @@
 
         (PUT "/" {:keys [body]}
           (if-some [dashboard (dashboard-by-id tenant-conn {:id id})]
-            (resp/response (update-dashboard tenant-conn id body))
+            (resp/response (persist-dashboard tenant-conn id body))
             (resp/not-found {:error "Not found"})))
 
         (DELETE "/" _
