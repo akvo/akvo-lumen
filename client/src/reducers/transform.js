@@ -1,6 +1,7 @@
 
 import changeDatatype from './transforms/changeDatatype';
 import textTransform from './transforms/text';
+import sortColumn from './transforms/sortColumn';
 
 const availableTransforms = {
   'core/change-datatype': changeDatatype,
@@ -9,6 +10,7 @@ const availableTransforms = {
   'core/to-uppercase': textTransform,
   'core/trim': textTransform,
   'core/trim-doublespace': textTransform,
+  'core/sort-column': sortColumn,
 };
 
 function recordHistory(previousDataset, nextDataset) {
