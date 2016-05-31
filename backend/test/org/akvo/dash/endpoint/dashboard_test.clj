@@ -13,12 +13,6 @@
 ;;; Test data
 ;;;
 
-;; (def v-id
-;;   (str (squuid)))
-
-;; (def dashboard-id
-;;   (str (squuid)))
-
 (defn dashboard-spec [v-id]
   {"type"     "dashboard"
    "title"    "My first Dashboard"
