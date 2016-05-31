@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import DatasetHeader from '../components/dataset/DatasetHeader';
 import DatasetTable from '../components/dataset/DatasetTable';
 import { showModal } from '../actions/activeModal';
-import { fetchDataset, transform } from '../actions/dataset';
+import { fetchDataset, transform, undoTransformation } from '../actions/dataset';
 
 require('../styles/Dataset.scss');
 
@@ -40,6 +40,7 @@ class Dataset extends Component {
             rows={dataset.rows}
             transformations={dataset.transformations}
             onTransform={(transformation) => dispatch(transform(dataset.id, transformation))}
+            onUndoTransformation={() => dispatch(undoTransformation(dataset.id))}
           />
           :
           <div>loading...</div>}

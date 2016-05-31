@@ -10,9 +10,9 @@ function transformationDescription({ op, args }, columns) {
     case 'core/to-lowercase':
       return `${columnTitle(columnName, columns)} to lowercase`;
     case 'core/to-uppercase':
-      return `${columnTitle(columnName, columns)} to lowercase`;
+      return `${columnTitle(columnName, columns)} to uppercase`;
     case 'core/to-titlecase':
-      return `${columnTitle(columnName, columns)} to lowercase`;
+      return `${columnTitle(columnName, columns)} to titlecase`;
     case 'core/trim':
       return `${columnTitle(columnName, columns)} trimmed whitespace`;
     case 'core/trim-doublespace':
@@ -55,7 +55,7 @@ TransformationList.propTypes = {
   columns: PropTypes.array.isRequired,
 };
 
-export default function TransformationLog({ onClose, transformations = [], columns }) {
+export default function TransformationLog({ onClose, onUndo, transformations = [], columns }) {
   return (
     <div
       className="DataTableSidebar"
@@ -72,7 +72,8 @@ export default function TransformationLog({ onClose, transformations = [], colum
         columns={columns}
       />
       <SidebarControls
-        onApply={onClose}
+        positiveButtonText="Undo"
+        onApply={onUndo}
         onClose={onClose}
       />
     </div>
@@ -81,6 +82,7 @@ export default function TransformationLog({ onClose, transformations = [], colum
 
 TransformationLog.propTypes = {
   onClose: PropTypes.func.isRequired,
+  onUndo: PropTypes.func.isRequired,
   columns: PropTypes.array.isRequired,
   transformations: PropTypes.array,
 };
