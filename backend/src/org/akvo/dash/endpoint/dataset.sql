@@ -3,21 +3,23 @@
 WITH
 failed_imports AS (
          --TODO name->title
-  SELECT job_execution.id, spec->>'name' AS name, error_reason, job_execution.created, job_execution.modified
-    FROM data_source, job_execution
-   WHERE job_execution.data_source_id=data_source.id
-     AND error_reason IS NOT NULL
+  SELECT j.id, d.spec->>'name' AS name, j.error_log->>0 AS error_log, j.status, j.created, j.modified
+    FROM data_source d, job_execution j
+   WHERE j.data_source_id = d.id
+     AND j.type = 'IMPORT'
+     AND j.status = 'FAILED'
 ),
 pending_imports AS (
-  SELECT job_execution.id, spec->>'name' AS name, job_execution.created, job_execution.modified
-    FROM data_source, job_execution
-   WHERE job_execution.data_source_id=data_source.id
-     AND finished_at IS NULL
+  SELECT j.id, d.spec->>'name' AS name, j.status, j.created, j.modified
+    FROM data_source d, job_execution j
+   WHERE j.data_source_id = d.id
+     AND j.type = 'IMPORT'
+     AND j.status = 'PENDING'
 )
-SELECT id, name, error_reason as reason, 'FAILED' AS status, modified, created
+SELECT id, name, error_log as reason, status, modified, created
   FROM failed_imports
  UNION
-SELECT id, name, NULL, 'PENDING', modified, created
+SELECT id, name, NULL, status, modified, created
   FROM pending_imports
  UNION
 SELECT id, title, NULL, 'OK', modified, created
@@ -26,12 +28,6 @@ SELECT id, title, NULL, 'OK', modified, created
 -- :name delete-dataset-by-id :! :n
 -- :doc delete dataset
 DELETE FROM dataset WHERE id=:id;
-
--- :name insert-datasource :<!
--- :doc insert datasource
-INSERT INTO datasources (id, spec)
-VALUES (:id, :spec::jsonb)
-RETURNING *;
 
 -- :name insert-dataset :<!
 -- :doc insert dataset
@@ -55,12 +51,12 @@ WHERE id = :id
 
 -- :name dataset-by-id :? :1
 SELECT dataset_version.table_name AS "table-name",
-       dataset.transformations,
        dataset.title,
        dataset.created,
        dataset.modified,
        dataset.id,
-       dataset_version.columns
+       dataset_version.columns,
+       dataset_version.transformations
   FROM dataset_version, dataset
  WHERE dataset_version.dataset_id=:id
    AND dataset.id=dataset_version.dataset_id

@@ -3,8 +3,8 @@ INSERT INTO data_source(id, spec)
      VALUES (:id, :spec::jsonb);
 
 -- :name insert-job-execution :! :n
-INSERT INTO job_execution(id, data_source_id)
-     VALUES (:id, :data-source-id)
+INSERT INTO job_execution(id, data_source_id, type)
+     VALUES (:id, :data-source-id, 'IMPORT')
 
 -- :name insert-dataset :! :n
 -- :doc Insert new dataset
@@ -30,20 +30,20 @@ SELECT spec
 -- :name update-failed-job-execution :! :n
 -- :doc Update failed job execution
 UPDATE job_execution
-   SET finished_at=now(),
-       error_reason=:reason
- WHERE id=:id
+   SET error_log = :reason,
+       status = 'FAILED'
+ WHERE id = :id
 
 -- :name update-successful-job-execution :! :n
 -- :doc Update successful job execution
 UPDATE job_execution
-   SET finished_at=now()
- WHERE id=:id
+   SET status = 'OK'
+ WHERE id = :id
 
 -- :name job-execution-by-id :? :1
-SELECT *
+SELECT status, error_log->>0 as "error-message"
   FROM job_execution
- WHERE id=:id
+ WHERE id = :id
 
 -- :name dataset-id-by-job-execution-id :? :1
 -- :doc Find the dataset id corresponding to the job execution id
