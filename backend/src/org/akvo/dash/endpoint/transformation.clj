@@ -3,7 +3,7 @@
             [org.akvo.dash.component.tenant-manager :refer [connection]]
             [org.akvo.dash.transformation :as t]))
 
-(defn endpoint [{:keys [tenant-manager config]}]
+(defn endpoint [{:keys [tenant-manager]}]
   (context "/api/transformations" {:keys [tenant] :as request}
     (let-routes [tenant-conn (connection tenant-manager tenant)]
       (context "/:id" [id]

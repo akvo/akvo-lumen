@@ -30,8 +30,8 @@
 
 (deftest op-validation
   (testing "op validation"
-    (is (= true (:valid? (tf/valid? ops))))
-    (let [result (tf/valid? invalid-op)]
+    (is (= true (:valid? (tf/validate ops))))
+    (let [result (tf/validate invalid-op)]
       (is (= false (:valid? result)))
       (is (= (format "Invalid operation %s" (second invalid-op)) (:message result))))))
 

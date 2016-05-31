@@ -27,15 +27,15 @@
                     (on-error-set onError)))
       (throw-invalid-op op-spec)))
 
-(defmulti valid-op?
+(defmulti validate-op
   (fn [op-spec]
     (keyword (op-spec "op"))))
 
-(defmethod valid-op? :default
+(defmethod validate-op :default
   [op-spec]
   (throw-invalid-op op-spec))
 
-(defmethod valid-op? :core/change-datatype
+(defmethod validate-op :core/change-datatype
   [{:strs [op args] :as op-spec}]
   (or (boolean (and (required-keys op-spec)
                  (type-set (args "newType"))
@@ -45,55 +45,55 @@
                    true)))
       (throw-invalid-op op-spec)))
 
-(defmethod valid-op? :core/change-column-title
+(defmethod validate-op :core/change-column-title
   [{:strs [args] :as op-spec}]
   (or (boolean (and (required-keys op-spec)
                     (not-empty (args "columnTitle"))))
       (throw-invalid-op op-spec)))
 
-(defmethod valid-op? :core/sort-column
+(defmethod validate-op :core/sort-column
   [{:strs [args] :as op-spec}]
   (or (boolean (and (required-keys op-spec)
                     (sort-direction-set (args "sortDirection"))))
       (throw-invalid-op op-spec)))
 
-(defmethod valid-op? :core/remove-sort
+(defmethod validate-op :core/remove-sort
   [op-spec]
   (or (required-keys op-spec)
       (throw-invalid-op op-spec)))
 
-(defmethod valid-op? :core/filter
+(defmethod validate-op :core/filter
   [op-spec]
   true)
 
-(defmethod valid-op? :core/to-titlecase
+(defmethod validate-op :core/to-titlecase
   [op-spec]
   (required-keys op-spec))
 
-(defmethod valid-op? :core/to-lowercase
+(defmethod validate-op :core/to-lowercase
   [op-spec]
   (or (required-keys op-spec)
       (throw-invalid-op op-spec)))
 
-(defmethod valid-op? :core/to-uppercase
+(defmethod validate-op :core/to-uppercase
   [op-spec]
   (or (required-keys op-spec)
       (throw-invalid-op op-spec)))
 
-(defmethod valid-op? :core/trim
+(defmethod validate-op :core/trim
   [op-spec]
   (or (required-keys op-spec)
       (throw-invalid-op op-spec)))
 
-(defmethod valid-op? :core/trim-doublespace
+(defmethod validate-op :core/trim-doublespace
   [op-spec]
   (or (required-keys op-spec)
       (throw-invalid-op op-spec)))
 
-(defn valid?
+(defn validate
   [transformations]
   (try
-    {:valid? (every? valid-op? transformations)}
+    {:valid? (every? validate-op transformations)}
     (catch Exception e
       {:valid? false
        :message (.getMessage e)})))
@@ -134,7 +134,7 @@
 (defn schedule
   [tenant-conn dataset-id transformations]
   (if-let [dataset (dataset-by-id tenant-conn {:id dataset-id})]
-    (let [v (valid? transformations)]
+    (let [v (validate transformations)]
       (if (:valid? v)
         (let [job-id (str (squuid))]
           (jdbc/with-db-transaction [tx tenant-conn]
