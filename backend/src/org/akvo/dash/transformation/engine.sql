@@ -26,5 +26,5 @@ CREATE INDEX IF NOT EXISTS :i:index-name
 -- :name db-drop-index :!
 DROP INDEX IF EXISTS :i:index-name CASCADE
 
--- :name db-change-data-type :<!
+-- :name db-change-data-type :<! :1
 SELECT lumen_change_data_type(:table-name, :args, :on-error)

@@ -67,7 +67,7 @@ $$
 
 
 CREATE OR REPLACE FUNCTION lumen_change_data_type(tbl_name text, args jsonb, on_error text)
-  RETURNS text[] AS
+  RETURNS jsonb AS
 $$
 DECLARE
   cur refcursor;
@@ -163,7 +163,7 @@ BEGIN
     EXECUTE delete_sql USING delete_flag;
   END IF;
 
-  RETURN exec_log;
+  RETURN array_to_json(exec_log);
 END;
 $$
   LANGUAGE plpgsql VOLATILE;

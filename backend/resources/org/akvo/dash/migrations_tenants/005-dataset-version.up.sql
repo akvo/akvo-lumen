@@ -6,7 +6,7 @@ CREATE TABLE dataset_version (
     -- The name of the data table
     table_name text UNIQUE NOT NULL,
     -- The name of the data table that holds imported (non-transformed) data
-    imported_table_name text UNIQUE NOT NULL,
+    imported_table_name text NOT NULL,
     columns jsonb NOT NULL DEFAULT '[]'::jsonb,
     created timestamptz DEFAULT now(),
     modified timestamptz DEFAULT now(),

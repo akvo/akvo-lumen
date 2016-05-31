@@ -161,9 +161,10 @@
   [tennant-conn table-name columns op-spec]
   (let [new-cols (column-metadata-operation columns op-spec)]
     (try
-      (let [exec-log (db-change-data-type tennant-conn {:table-name table-name
-                                                        :args (get op-spec "args")
-                                                        :on-error (get op-spec "onError")})]
+      (let [result (db-change-data-type tennant-conn {:table-name table-name
+                                                      :args (get op-spec "args")
+                                                      :on-error (get op-spec "onError")})
+            exec-log (vec (:lumen_change_data_type result))]
         {:success? true
          :execution-log exec-log
          :columns new-cols})

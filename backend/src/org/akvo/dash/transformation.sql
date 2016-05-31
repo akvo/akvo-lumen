@@ -25,11 +25,18 @@ SELECT imported_table_name AS "imported-table-name", columns, version
                    WHERE v.dataset_id = :id);
 
 
--- :name update-job-execution :! :n
+-- :name update-job-success-execution :! :n
 -- :doc Updates a job_execution with a given log
 UPDATE job_execution
-   SET log = :log,
-       status = :status
+   SET execution_log = :exec-log,
+       status = 'OK'
+ WHERE id = :id
+
+-- :name update-job-failed-execution :! :n
+-- :doc Updates a job_execution with a given log
+UPDATE job_execution
+   SET error_log = :error-log,
+       status = 'FAILED'
  WHERE id = :id
 
 -- :name new-dataset-version :! :n

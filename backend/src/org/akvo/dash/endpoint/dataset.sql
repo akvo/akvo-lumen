@@ -3,7 +3,7 @@
 WITH
 failed_imports AS (
          --TODO name->title
-  SELECT j.id, d.spec->>'name' AS name, j.log AS error_reason, j.status, j.created, j.modified
+  SELECT j.id, d.spec->>'name' AS name, j.error_log, j.status, j.created, j.modified
     FROM data_source d, job_execution j
    WHERE j.data_source_id = d.id
      AND j.type = 'IMPORT'
@@ -16,7 +16,7 @@ pending_imports AS (
      AND j.type = 'IMPORT'
      AND j.status = 'PENDING'
 )
-SELECT id, name, error_reason as reason, status, modified, created
+SELECT id, name, error_log as reason, status, modified, created
   FROM failed_imports
  UNION
 SELECT id, name, NULL, status, modified, created

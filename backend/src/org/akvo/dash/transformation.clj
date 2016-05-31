@@ -103,7 +103,6 @@
   (let [dv (dataset-version-by-id tenant-conn {:id dataset-id})
         columns (vec (:columns dv))
         source-table (:imported-table-name dv)
-        imported-table (gen-table-name "imported")
         table-name (gen-table-name "ds")
         f (fn [log op-spec]
             (let [step (engine/apply-operation tenant-conn
@@ -115,26 +114,22 @@
                 (throw (Exception. (str "Error applying operation: " op-spec))))))]
     (try
       (copy-table tenant-conn {:source-table source-table
-                               :dest-table imported-table})
-      (copy-table tenant-conn {:source-table imported-table
                                :dest-table table-name})
       (let [result (reduce f [] transformations)
-            log (str/join "\n" (filter :message result))
+            log (mapcat :execution-log result)
             cols (:columns (last result))]
         (new-dataset-version tenant-conn {:id (str (squuid))
                                           :dataset-id dataset-id
                                           :job-execution-id job-id
                                           :table-name table-name
-                                          :imported-table-name imported-table
+                                          :imported-table-name source-table
                                           :version (inc (:version dv))
                                           :columns cols})
-        (update-job-execution tenant-conn {:id job-id
-                                           :status "OK"
-                                           :log log}))
+        (update-job-success-execution tenant-conn {:id job-id
+                                                   :exec-log log}))
       (catch Exception e
-        (update-job-execution tenant-conn {:id job-id
-                                           :status "FAILED"
-                                           :log (.getMessage e)})))))
+        (update-job-failed-execution tenant-conn {:id job-id
+                                                  :error-log (.getMessage e)})))))
 
 (defn schedule
   [tenant-conn dataset-id transformations]

@@ -30,7 +30,7 @@ SELECT spec
 -- :name update-failed-job-execution :! :n
 -- :doc Update failed job execution
 UPDATE job_execution
-   SET log = :reason,
+   SET error_log = :reason,
        status = 'FAILED'
  WHERE id = :id
 

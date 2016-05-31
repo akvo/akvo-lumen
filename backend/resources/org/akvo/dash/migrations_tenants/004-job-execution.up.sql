@@ -3,10 +3,11 @@ CREATE TABLE job_execution (
     data_source_id text REFERENCES data_source ON DELETE CASCADE,
     dataset_id text REFERENCES dataset ON DELETE CASCADE,
     type text NOT NULL,
-    log text,
+    execution_log jsonb,
+    error_log jsonb,
     status text NOT NULL DEFAULT 'PENDING',
     created timestamptz NOT NULL DEFAULT now(),
-    modified timestamptz
+    modified timestamptz NOT NULL DEFAULT now()
 );
 
 DO $$
