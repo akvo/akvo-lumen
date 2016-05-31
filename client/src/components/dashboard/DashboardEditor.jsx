@@ -190,6 +190,14 @@ export default class DashboardEditor extends Component {
               Save
             </button>
           </div>
+          <div className="DashboardNameInputContainer">
+            <input
+              type="text"
+              name="Dashboard name"
+              placeholder={dashboard.name}
+              onChange={(e) => { this.props.onUpdateName(e.target.value); }}
+            />
+          </div>
           <div
             className="DashboardEditorCanvas"
             style={{
@@ -245,5 +253,6 @@ DashboardEditor.propTypes = {
   }).isRequired,
   onUpdateLayout: PropTypes.func.isRequired,
   onUpdateEntities: PropTypes.func.isRequired,
+  onUpdateName: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
 };
