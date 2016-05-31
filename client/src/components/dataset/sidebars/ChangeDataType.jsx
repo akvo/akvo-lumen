@@ -50,8 +50,16 @@ function DefaultValueInput({ defaultValue, onChange, newType }) {
         value={defaultValue}
         onChange={(event) => {
           const value = event.target.value;
-          if (newType === 'number' || newType === 'date') {
+          if (newType === 'date') {
             const n = parseInt(value, 10);
+            if (isNaN(n)) {
+              // TODO warn
+              onChange(null);
+            } else {
+              onChange(n);
+            }
+          } else if (newType === 'number') {
+            const n = parseFloat(value);
             if (isNaN(n)) {
               // TODO warn
               onChange(null);
