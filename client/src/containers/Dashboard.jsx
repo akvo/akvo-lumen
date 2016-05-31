@@ -18,13 +18,14 @@ class Dashboard extends Component {
     super();
     this.state = {
       type: 'dashboard',
-      name: 'Untitled Dashboard',
-      isUnsavedChanges: false,
-      spec: {
-        entities: [],
-      },
+      name: 'Untitled dashboard',
+      entities: {},
+      layout: [],
     };
     this.onAddVisualisation = this.onAddVisualisation.bind(this);
+    this.updateLayout = this.updateLayout.bind(this);
+    this.updateEntities = this.updateEntities.bind(this);
+    this.onSave = this.onSave.bind(this);
   }
 
   componentWillMount() {
@@ -39,7 +40,9 @@ class Dashboard extends Component {
   }
 
   componentWillReceiveProps() {
+    /*
     this.setState(this.props.library.dashboards[this.props.params.dashboardId]);
+    */
   }
 
   onSave() {
@@ -61,6 +64,14 @@ class Dashboard extends Component {
     }
   }
 
+  updateLayout(layout) {
+    this.setState({ layout });
+  }
+
+  updateEntities(entities) {
+    this.setState({ entities });
+  }
+
   render() {
     return (
       <div className="Dashboard">
@@ -74,6 +85,9 @@ class Dashboard extends Component {
           datasets={this.props.library.datasets}
           visualisations={this.props.library.visualisations}
           onAddVisualisation={this.onAddVisualisation}
+          onSave={this.onSave}
+          onUpdateLayout={this.updateLayout}
+          onUpdateEntities={this.updateEntities}
         />
       </div>
     );

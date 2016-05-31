@@ -7,7 +7,7 @@ require('../../styles/DashboardCanvasItem.scss');
 export default class DashboardCanvasItem extends Component {
 
   getItemLayout() {
-    let output;
+    let output = null;
 
     this.props.canvasLayout.forEach((item, index) => {
       if (item.i === this.props.item.id) {
@@ -22,10 +22,14 @@ export default class DashboardCanvasItem extends Component {
     const unit = this.props.canvasWidth / 12;
     const layout = this.getItemLayout();
 
-    return ({
-      width: (layout.w * unit) - 40,
-      height: (layout.h * unit) - 40,
-    });
+    if (layout !== null) {
+      return ({
+        width: (layout.w * unit) - 40,
+        height: (layout.h * unit) - 40,
+      });
+    }
+
+    return null;
   }
 
   getIsDatasetLoaded(item) {
@@ -36,40 +40,45 @@ export default class DashboardCanvasItem extends Component {
   render() {
     const dimensions = this.getRenderDimensions();
 
+    if (dimensions === null) {
+      // Layout has not been updated in parent yet
+      return null;
+    }
+
     return (
       <div
         className="DashboardCanvasItem"
       >
-          {this.props.item.type === 'visualisation' &&
-            <div
-              className="noPointerEvents itemContainer visualisation"
-            >
-              {this.getIsDatasetLoaded(this.props.item) ?
-                <DashChart
-                  visualisation={this.props.item.visualisation}
-                  datasets={this.props.datasets}
-                  width={dimensions.width}
-                  height={dimensions.height}
-                />
-                :
-                <div>Loading dataset...</div>
-              }
-            </div>
-          }
-          {this.props.item.type === 'text' &&
-            <div
-              className="itemContainer text"
-              style={{
-                height: dimensions.height,
-                width: dimensions.width,
-              }}
-            >
-              <DashboardCanvasItemEditable
-                onEntityUpdate={this.props.onEntityUpdate}
-                item={this.props.item}
+        {this.props.item.type === 'visualisation' &&
+          <div
+            className="noPointerEvents itemContainer visualisation"
+          >
+            {this.getIsDatasetLoaded(this.props.item) ?
+              <DashChart
+                visualisation={this.props.item.visualisation}
+                datasets={this.props.datasets}
+                width={dimensions.width}
+                height={dimensions.height}
               />
-            </div>
-          }
+              :
+              <div>Loading dataset...</div>
+            }
+          </div>
+        }
+        {this.props.item.type === 'text' &&
+          <div
+            className="itemContainer text"
+            style={{
+              height: dimensions.height,
+              width: dimensions.width,
+            }}
+          >
+            <DashboardCanvasItemEditable
+              onEntityUpdate={this.props.onEntityUpdate}
+              item={this.props.item}
+            />
+          </div>
+        }
         <button
           className="clickable deleteButton"
           onClick={() => this.props.onDeleteClick(this.props.item)}

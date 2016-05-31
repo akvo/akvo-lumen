@@ -72,12 +72,8 @@ export default class DashboardEditor extends Component {
   constructor() {
     super();
     this.state = {
-      type: 'dashboard',
-      name: 'Untitled dashboard',
-      entities: {},
-      propLayout: [],
-      currentLayout: [],
       gridWidth: 1024,
+      propLayout: [],
     };
     this.handleLayoutChange = this.handleLayoutChange.bind(this);
     this.handleEntityToggle = this.handleEntityToggle.bind(this);
@@ -105,27 +101,15 @@ export default class DashboardEditor extends Component {
   }
 
   handleLayoutChange(layout) {
-    /* When the layout is updated (e.g by an entity being resized on the
-    /* canvas), store a copy of the updated layout. We use this copy as the
-    /* starting point for building a new layout whenever we add or remove an
-    /* entity from the canvas. We then pass that new layout as a prop to the
-    /* ReactGridLayout component. Trying to store the prop layout and the
-    /* current layout as the same value doesn't work - the ReactGridLayout
-    /* component updates its internal state on these kinds of layout changes,
-    /* and updating its "layout" prop with the updated layout here leads to
-    /* weird race conditions and broken layouts. */
-    this.setState({ currentLayout: layout });
+    this.props.onUpdateLayout(layout);
   }
 
   handleEntityToggle(item, itemType) {
-    const newEntities = this.state.entities;
-    const newLayout = this.state.currentLayout;
+    const newEntities = Object.assign({}, this.props.dashboard.entities);
+    const newLayout = this.props.dashboard.layout.slice(0);
 
-    if (this.state.entities[item.id]) {
+    if (this.props.dashboard.entities[item.id]) {
       delete newEntities[item.id];
-      this.setState({
-        entities: newEntities,
-      });
     } else {
       if (itemType === 'visualisation') {
         this.props.onAddVisualisation(item.datasetId);
@@ -141,11 +125,11 @@ export default class DashboardEditor extends Component {
           minW: 4,
           minH: 4,
           x: 0,
-          y: getFirstBlankRowGroup(this.state.currentLayout, 4),
+          y: getFirstBlankRowGroup(this.props.dashboard.layout, 4),
           i: item.id,
         });
       } else if (itemType === 'text') {
-        const newEntityId = getNewEntityId(this.state.entities, itemType);
+        const newEntityId = getNewEntityId(this.props.dashboard.entities, itemType);
 
         newEntities[newEntityId] = {
           type: itemType,
@@ -157,28 +141,27 @@ export default class DashboardEditor extends Component {
           minW: 2,
           h: 1,
           x: 0,
-          y: getFirstBlankRowGroup(this.state.currentLayout, 1),
+          y: getFirstBlankRowGroup(this.props.dashboard.layout, 1),
           i: newEntityId,
         });
       }
-
-      /* Note that we update the propLayout, not the currentLayout, to prevent
-      /* race conditions. */
-      this.setState({
-        propLayout: newLayout,
-        entities: newEntities,
-      });
     }
+
+    /* Note that we update the propLayout, not the parent layout, to prevent race conditions. The
+    /* parent layout will be updated automatically by handleLayoutChange */
+    this.setState({ propLayout: newLayout });
+    this.props.onUpdateEntities(newEntities);
   }
 
   handleEntityUpdate(entity) {
-    const newEntities = this.state.entities;
+    const newEntities = Object.assign({}, this.props.dashboard.entities);
 
     newEntities[entity.id] = entity;
-    this.setState({ entities: newEntities });
+    this.props.onUpdateEntities(newEntities);
   }
 
   render() {
+    const dashboard = this.props.dashboard;
     const canvasWidth = this.state.gridWidth;
     const rowHeight = canvasWidth / 12;
 
@@ -187,7 +170,7 @@ export default class DashboardEditor extends Component {
         <DashboardVisualisationList
           visualisations={getArrayFromObject(this.props.visualisations)}
           onEntityClick={this.handleEntityToggle}
-          dashboardItems={this.state.entities}
+          dashboardItems={dashboard.entities}
         />
         <div
           className="DashboardEditorCanvasContainer"
@@ -199,6 +182,12 @@ export default class DashboardEditor extends Component {
               onClick={() => this.handleEntityToggle({ content: '' }, 'text')}
             >
               Add new text element
+            </button>
+            <button
+              className="clickable"
+              onClick={() => this.props.onSave()}
+            >
+              Save
             </button>
           </div>
           <div
@@ -223,14 +212,14 @@ export default class DashboardEditor extends Component {
               /* a margin on the grid item themselves for now. */
               margin={[0, 0]}
             >
-              {getArrayFromObject(this.state.entities).map(item =>
+              {getArrayFromObject(dashboard.entities).map(item =>
                 <div
                   key={item.id}
                 >
                   <DashboardCanvasItem
                     item={item}
                     datasets={this.props.datasets}
-                    canvasLayout={this.state.currentLayout}
+                    canvasLayout={dashboard.layout}
                     canvasWidth={canvasWidth}
                     onDeleteClick={this.handleEntityToggle}
                     onEntityUpdate={this.handleEntityUpdate}
@@ -249,4 +238,12 @@ DashboardEditor.propTypes = {
   visualisations: PropTypes.object.isRequired,
   datasets: PropTypes.object.isRequired,
   onAddVisualisation: PropTypes.func.isRequired,
+  dashboard: PropTypes.shape({
+    entities: PropTypes.object.isRequired,
+    layout: PropTypes.array.isRequired,
+    name: PropTypes.string.isRequired,
+  }).isRequired,
+  onUpdateLayout: PropTypes.func.isRequired,
+  onUpdateEntities: PropTypes.func.isRequired,
+  onSave: PropTypes.func.isRequired,
 };

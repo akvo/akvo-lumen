@@ -40,7 +40,6 @@ function createVisualisationRequest(visualisation) {
   };
 }
 
-
 export function createVisualisation(visualisation) {
   return createVisualisationRequest(visualisation);
 }
