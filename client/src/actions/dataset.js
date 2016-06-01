@@ -266,20 +266,10 @@ export function transform(datasetId, transformation) {
   };
 }
 
-function sendTransformationLogRequest(datasetId, transformations) {
+function transformationLogRequestSent(datasetId) {
   return {
-    type: constants.SEND_TRANSFORMATION_LOG_REQUEST,
+    type: constants.TRANSFORMATION_LOG_REQUEST_SENT,
     datasetId,
-    transformations,
-  };
-}
-
-function sendTransformationLogFailure(datasetId, transformations, error) {
-  return {
-    type: constants.SEND_TRANSFORMATION_LOG_FAILURE,
-    datasetId,
-    transformations,
-    error,
   };
 }
 
@@ -321,7 +311,7 @@ function pollDatasetTransformationStatus(jobExecutionId, datasetId) {
 
 export function sendTransformationLog(datasetId, transformations) {
   return (dispatch) => {
-    dispatch(sendTransformationLogRequest(datasetId, transformations));
+    dispatch(transformationLogRequestSent(datasetId));
     fetch(`/api/transformations/${datasetId}`, {
       method: 'POST',
       headers: headers(),
@@ -329,7 +319,6 @@ export function sendTransformationLog(datasetId, transformations) {
     })
     .then(response => response.json())
     .then(({ jobExecutionId }) =>
-      dispatch(pollDatasetTransformationStatus(jobExecutionId, datasetId)))
-    .catch(error => dispatch(sendTransformationLogFailure(datasetId, transformations, error)));
+      dispatch(pollDatasetTransformationStatus(jobExecutionId, datasetId)));
   };
 }
