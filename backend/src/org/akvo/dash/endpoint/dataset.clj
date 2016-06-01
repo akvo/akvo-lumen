@@ -11,10 +11,18 @@
 (hugsql/def-db-fns "org/akvo/dash/endpoint/dataset.sql")
 
 (defn select-data-sql [table-name columns]
-  (let [column-names (map #(get % "columnName") columns)]
-    (format "SELECT %s FROM %s"
+  (let [column-names (map #(get % "columnName") columns)
+        f (fn [m] (get m "sort"))
+        sort-columns (conj
+                      (vec
+                       (for [c (sort-by f (filter f columns))]
+                         (str (get c "columnName") " " (get c "sortDirection"))))
+                      "rnum")
+        order-by-expr (str/join "," sort-columns)]
+    (format "SELECT %s FROM %s ORDER BY %s"
             (str/join "," column-names)
-            table-name)))
+            table-name
+            order-by-expr)))
 
 (defn find-dataset [conn id]
   (when-let [dataset (dataset-by-id conn {:id id})]
