@@ -43,14 +43,44 @@ export function createDashboard(dashboard) {
   return createDashboardRequest(dashboard);
 }
 
-export function saveDashboardChanges(dashboard) {
-  const now = Date.now();
+function editDashboardRequest(id) {
+  return {
+    type: constants.EDIT_DASHBOARD_REQUEST,
+    id,
+  };
+}
 
+function editDashboardSuccess(dash) {
   return {
     type: constants.EDIT,
-    dashboard: Object.assign({}, dashboard, {
-      modified: now,
-    }),
+    dashboard: dash,
+  };
+}
+
+function editDashboardFailure(id) {
+  return {
+    type: constants.EDIT_DASHBOARD_FAILURE,
+    id,
+  };
+}
+
+export function saveDashboardChanges(dashboard) {
+  const now = Date.now();
+  const dash = Object.assign({}, dashboard, {
+    modified: now,
+  });
+  const id = dash.id;
+
+  return (dispatch) => {
+    dispatch(editDashboardRequest);
+    fetch(`/api/dashboards/${dash.id}`, {
+      method: 'PUT',
+      headers: headers(),
+      body: JSON.stringify(dashboard),
+    })
+    .then(response => response.json())
+    .then((responseDash) => dispatch(editDashboardSuccess(responseDash)))
+    .catch(error => dispatch(editDashboardFailure(id, error)));
   };
 }
 

@@ -30,6 +30,9 @@ const getDashboardFromState = state => (
     title: state.name,
     entities: state.entities,
     layout: getLayoutObjectFromArray(state.layout),
+    id: state.id,
+    created: state.created,
+    modified: state.modified,
   }
 );
 
@@ -43,6 +46,8 @@ class Dashboard extends Component {
       entities: {},
       layout: [],
       id: null,
+      created: null,
+      modified: null,
     };
     this.onAddVisualisation = this.onAddVisualisation.bind(this);
     this.updateLayout = this.updateLayout.bind(this);
@@ -69,6 +74,8 @@ class Dashboard extends Component {
         name: dash.title,
         entities: dash.entities,
         layout: Object.keys(dash.layout).map(key => dash.layout[key]),
+        created: dash.created,
+        modified: dash.modified,
       });
 
       Object.keys(dash.entities).forEach(key => {
