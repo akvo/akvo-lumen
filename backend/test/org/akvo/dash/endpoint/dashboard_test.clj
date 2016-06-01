@@ -1,6 +1,5 @@
 (ns org.akvo.dash.endpoint.dashboard-test
   (:require [clojure.test :refer :all]
-            [clojure.pprint :refer [pprint]]
             [hugsql.core :as hugsql]
             [org.akvo.dash.fixtures :refer [db-fixture test-conn]]
             [org.akvo.dash.endpoint.share :as share]
@@ -81,7 +80,8 @@
                                                   dashboard-id)]
           (is (not (nil? d)))
           (is (every? #(contains? d %)
-                      [:id :title :entities :layout :created :modified]))
+                      [:id :title :entities :layout :type :status :created
+                       :modified]))
           (is (= (get d-spec "title")
                  (get d :title)))
 
