@@ -79,9 +79,11 @@
       (testing "Get dashboard"
         (let [d (dashboard/handle-dashboard-by-id test-conn
                                                   dashboard-id)]
+          (pprint d)
           (is (not (nil? d)))
           (is (every? #(contains? d %)
-                      [:id :title :entities :layout :created :modified]))
+                      [:id :title :entities :layout :type :status :created
+                       :modified]))
           (is (= (get d-spec "title")
                  (get d :title)))
 
