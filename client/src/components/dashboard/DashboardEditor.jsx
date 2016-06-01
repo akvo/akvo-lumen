@@ -86,17 +86,29 @@ export default class DashboardEditor extends Component {
     window.addEventListener('resize', this.handleResize);
   }
 
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.dashboard.layout.length > this.state.propLayout.length) {
+      this.setState({ propLayout: nextProps.dashboard.layout });
+    }
+  }
+
   componentWillUnmount() {
     window.removeEventListener('resize', this.handleResize);
   }
 
-  handleResize() {
-    // Offset the padding width (16px on each side)
-    const newWidth = this.refs.DashboardEditorCanvasContainer.clientWidth - 32;
-    if (newWidth !== this.state.gridWidth) {
-      this.setState({
-        gridWidth: newWidth,
-      });
+  getItemFromLibrary(item) {
+    switch (item.type) {
+      case 'text':
+        return item;
+
+      case 'visualisation': {
+        const output = Object.assign({}, item);
+        output.visualisation = this.props.visualisations[item.id];
+        return output;
+      }
+
+      default:
+        throw new Error(`Unknown item.type ${item.type} supplied to getItemFromLibrary()`);
     }
   }
 
@@ -112,11 +124,10 @@ export default class DashboardEditor extends Component {
       delete newEntities[item.id];
     } else {
       if (itemType === 'visualisation') {
-        this.props.onAddVisualisation(item.datasetId);
+        this.props.onAddVisualisation(this.props.visualisations[item.id].datasetId);
         newEntities[item.id] = {
           type: itemType,
           id: item.id,
-          visualisation: item,
         };
 
         newLayout.push({
@@ -151,6 +162,16 @@ export default class DashboardEditor extends Component {
     /* parent layout will be updated automatically by handleLayoutChange */
     this.setState({ propLayout: newLayout });
     this.props.onUpdateEntities(newEntities);
+  }
+
+  handleResize() {
+    // Offset the padding width (16px on each side)
+    const newWidth = this.refs.DashboardEditorCanvasContainer.clientWidth - 32;
+    if (newWidth !== this.state.gridWidth) {
+      this.setState({
+        gridWidth: newWidth,
+      });
+    }
   }
 
   handleEntityUpdate(entity) {
@@ -225,7 +246,7 @@ export default class DashboardEditor extends Component {
                   key={item.id}
                 >
                   <DashboardCanvasItem
-                    item={item}
+                    item={this.getItemFromLibrary(item)}
                     datasets={this.props.datasets}
                     canvasLayout={dashboard.layout}
                     canvasWidth={canvasWidth}

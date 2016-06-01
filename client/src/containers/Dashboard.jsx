@@ -27,7 +27,7 @@ const getLayoutObjectFromArray = arr => {
 const getDashboardFromState = state => (
   {
     type: state.type,
-    name: state.name,
+    title: state.name,
     entities: state.entities,
     layout: getLayoutObjectFromArray(state.layout),
   }
@@ -42,6 +42,7 @@ class Dashboard extends Component {
       name: 'Untitled dashboard',
       entities: {},
       layout: [],
+      id: null,
     };
     this.onAddVisualisation = this.onAddVisualisation.bind(this);
     this.updateLayout = this.updateLayout.bind(this);
@@ -56,28 +57,39 @@ class Dashboard extends Component {
     if (isEditingExistingDashboard) {
       const dashboardId = this.props.params.dashboardId;
       this.props.dispatch(actions.fetchDashboard(dashboardId));
-      this.setState(this.props.library.visualisations[dashboardId]);
-      this.setState({ isUnsavedChanges: false });
     }
   }
 
-  componentWillReceiveProps() {
-    /*
-    this.setState(this.props.library.dashboards[this.props.params.dashboardId]);
-    */
+  componentWillReceiveProps(nextProps) {
+    if (this.props.params.dashboardId != null) {
+      const dash = nextProps.library.dashboards[nextProps.params.dashboardId];
+
+      this.setState({
+        id: dash.id,
+        name: dash.title,
+        entities: dash.entities,
+        layout: Object.keys(dash.layout).map(key => dash.layout[key]),
+      });
+
+      Object.keys(dash.entities).forEach(key => {
+        const entity = dash.entities[key];
+        if (entity.type === 'visualisation') {
+          this.onAddVisualisation(this.props.library.visualisations[key].datasetId);
+        }
+      });
+    }
   }
 
   onSave() {
     const { dispatch } = this.props;
     const dashboard = getDashboardFromState(this.state);
-    console.log(dashboard);
     this.setState({
       isUnsavedChanges: false,
     });
     if (this.state.id) {
-      dispatch(actions.saveDashboardChanges(this.state));
+      dispatch(actions.saveDashboardChanges(dashboard));
     } else {
-      dispatch(actions.createDashboard(this.state));
+      dispatch(actions.createDashboard(dashboard));
     }
     dispatch(push('/library?filter=dashboards&sort=created'));
   }
@@ -104,7 +116,7 @@ class Dashboard extends Component {
     return (
       <div className="Dashboard">
         <EntityTypeHeader
-          title={this.state.name}
+          title={this.state.name || this.state.title}
           saveStatus={'Saving not yet implemented'}
           actionButtons={[]}
         />
