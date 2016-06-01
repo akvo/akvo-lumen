@@ -1,10 +1,9 @@
 CREATE TABLE dataset (
     id text PRIMARY KEY,
     title text NOT NULL,
-    description text DEFAULT '' NOT NULL,
-    transformations jsonb DEFAULT '[]'::jsonb NOT NULL,
-    created timestamptz DEFAULT now() NOT NULL,
-    modified timestamptz DEFAULT now() NOT NULL
+    description text NOT NULL DEFAULT '',
+    created timestamptz NOT NULL DEFAULT now(),
+    modified timestamptz NOT NULL DEFAULT now()
 );
 
 DO $$

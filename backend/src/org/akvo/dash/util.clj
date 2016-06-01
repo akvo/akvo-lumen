@@ -1,4 +1,5 @@
-(ns org.akvo.dash.util)
+(ns org.akvo.dash.util
+  (:require [clojure.string :as str]))
 
 (defn squuid
   "Sequential UUIDs.
@@ -13,3 +14,8 @@
         timed-msb (bit-or (bit-shift-left secs 32)
                           (bit-and 0x00000000ffffffff msb))]
     (java.util.UUID. timed-msb lsb)))
+
+(defn gen-table-name
+  "Generates a table name using a UUID suffix"
+  [prefix]
+  (str prefix "_" (str/replace (java.util.UUID/randomUUID) "-" "_")))

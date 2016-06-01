@@ -79,7 +79,7 @@ export default class DatasetControls extends Component {
             className="rowCount"
           >
             {this.props.columns &&
-              this.props.columns[0].values.length} Rows
+              this.props.rowsCount} Rows
           </span>
           <span
             className="search"
@@ -94,7 +94,7 @@ export default class DatasetControls extends Component {
           >
             <button
               className="transformationLogToggle clickable"
-              onClick={() => this.props.onClickMenuToggle('logMenu')}
+              onClick={this.props.onToggleTransformationLog}
             >
               Transformation log
             </button>
@@ -106,7 +106,8 @@ export default class DatasetControls extends Component {
 }
 
 DatasetControls.propTypes = {
-  onClickMenuToggle: PropTypes.func.isRequired,
+  onToggleTransformationLog: PropTypes.func.isRequired,
   onClickMenuItem: PropTypes.func.isRequired,
-  columns: PropTypes.object,
+  columns: PropTypes.array.isRequired,
+  rowsCount: PropTypes.number.isRequired,
 };

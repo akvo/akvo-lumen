@@ -101,7 +101,7 @@ const pollInteval = 1000;
 function pollDatasetImportStatus(importId, name) {
   return (dispatch) => {
     dispatch(importDatasetPending(importId, name));
-    fetch(`/api/imports/${importId}`, {
+    fetch(`/api/job_executions/${importId}`, {
       method: 'GET',
       headers: headers(),
     })
@@ -255,5 +255,13 @@ export function deleteDataset(id) {
     .then(response => response.json())
     .then(() => dispatch(deleteDatasetSuccess(id)))
     .catch(error => dispatch(deleteDatasetFailure(id, error)));
+  };
+}
+
+export function transform(datasetId, transformation) {
+  return {
+    type: constants.TRANSFORM_DATASET,
+    datasetId,
+    transformation,
   };
 }

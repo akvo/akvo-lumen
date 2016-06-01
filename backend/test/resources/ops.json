@@ -1,0 +1,87 @@
+[
+  {
+    "op": "core/change-datatype",
+    "args": {
+      "columnName": "c2",
+      "newType": "number",
+      "defaultValue": "0"
+    },
+    "onError": "default-value"
+  },
+  {
+    "op": "core/change-datatype",
+    "args": {
+      "columnName": "c3",
+      "newType": "date",
+      "defaultValue": "0",
+      "parseFormat": "YYYY-MM-DD"
+    },
+    "onError": "fail"
+  },
+  {
+    "op": "core/change-column-title",
+    "args": {
+      "columnName": "c2",
+      "columnTitle": "My number column"
+    },
+    "onError": "fail"
+  },
+  {
+    "op": "core/sort-column",
+    "args": {
+      "columnName": "c1",
+      "sortDirection": "ASC"
+    },
+    "onError": "fail"
+  },
+  {
+    "op": "core/remove-sort",
+    "args": {
+      "columnName": "c1"
+    },
+    "onError": "fail"
+  },
+  {
+    "op": "core/filter",
+    "args": {
+      "columnName": "c1",
+      "filterExpression": "< 10"
+    },
+    "onError": "fail"
+  },
+  {
+    "op": "core/to-titlecase",
+    "args": {
+      "columnName": "c1"
+    },
+    "onError": "default-value"
+  },
+  {
+    "op": "core/to-lowercase",
+    "args": {
+      "columnName": "c1"
+    },
+    "onError": "default-value"
+  },
+  {
+    "op": "core/to-uppercase",
+    "args": {
+      "columnName": "c1"
+    },
+    "onError": "default-value"
+  },
+  {
+    "op": "core/trim",
+    "args": {
+      "columnName": "c1"
+    },
+    "onError": "default-value"
+  },
+  {
+    "op": "core/trim-doublespace",
+    "args": {
+      "columnName": "c1"
+    },
+    "onError": "default-value"
+  }
+]
