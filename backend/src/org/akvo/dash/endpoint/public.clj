@@ -1,6 +1,5 @@
 (ns org.akvo.dash.endpoint.public
   (:require [cheshire.core :as json]
-            [clojure.pprint :refer  [pprint]]
             [compojure.core :refer :all]
             [hugsql.core :as hugsql]
             [org.akvo.dash.component.tenant-manager :refer [connection]]
@@ -21,7 +20,7 @@
         d (find-dataset conn (:datasetId v))]
     (str "window.LUMEN_DATA = "
          (json/encode {"visualisation" (dissoc v :id :created :modified)
-                       "datasets"      {(:id d) {"columns" (:columns d)}}})
+                       "datasets"      {(:id d) d}})
          ";")))
 
 (defn html-response [json-litteral]
