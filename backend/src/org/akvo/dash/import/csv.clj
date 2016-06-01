@@ -32,7 +32,7 @@
   (format "CREATE %s %s (%s, %s)"
           (if temp? "TEMP TABLE" "TABLE")
           t-name
-          (if temp? "rnum serial" "rnum integer")
+          (if temp? "rnum serial primary key" "rnum integer primary key")
           (get-cols num-cols c-type)))
 
 (defn get-copy-sql

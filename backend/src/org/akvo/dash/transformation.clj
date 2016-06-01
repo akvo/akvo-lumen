@@ -113,8 +113,11 @@
                 (conj log step)
                 (throw (Exception. (str "Error applying operation: " op-spec))))))]
     (try
-      (copy-table tenant-conn {:source-table source-table
-                               :dest-table table-name})
+      (copy-table tenant-conn
+                  {:source-table source-table
+                   :dest-table table-name}
+                  {}
+                  :transaction? false)
       (let [result (reduce f [] transformation-log)
             log (mapcat :execution-log result)
             cols (:columns (last result))]
