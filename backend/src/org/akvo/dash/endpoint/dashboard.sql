@@ -1,6 +1,6 @@
 -- :name all-dashboards :? :*
 -- :doc Return all dashboards
-SELECT id, title, created, modified
+SELECT id, title, 'ok' AS status, 'dashboard' AS type, created, modified
 FROM dashboard;
 
 -- :name insert-dashboard :<!
@@ -45,7 +45,7 @@ RETURNING *;
 DELETE FROM dashboard_visualisation
 WHERE dashboard_id = :dashboard-id;
 
--- :name dashboard_visualiation-by-dashboard-id :? :*
+-- :name dashboard_visualisation-by-dashboard-id :? :*
 SELECT *
 FROM dashboard_visualisation
 WHERE dashboard_id = :dashboard-id;

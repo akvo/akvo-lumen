@@ -121,7 +121,7 @@
          data-rows)))
 
 (defn create-data-table [table-name column-names]
-  (format "create table %s (%s);"
+  (format "create table %s (rnum serial, %s);"
           table-name
           (str/join ", " (map #(str % " jsonb") column-names))))
 

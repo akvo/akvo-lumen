@@ -111,6 +111,6 @@
       (testing "Delete dashboard"
         (dashboard/handle-dashboard-delete test-conn dashboard-id)
         (is (nil? (dashboard-by-id test-conn {:id dashboard-id})))
-        (is (empty? (dashboard_visualiation-by-dashboard-id
+        (is (empty? (dashboard_visualisation-by-dashboard-id
                      test-conn {:dashboard-id dashboard-id})))
         (is (empty? (all-dashboards test-conn)))))))

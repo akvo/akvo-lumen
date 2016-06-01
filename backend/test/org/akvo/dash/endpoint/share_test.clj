@@ -3,8 +3,8 @@
             [clojure.test :refer :all]
             [hugsql.core :as hugsql]
             [org.akvo.dash.component.tenant-manager :as tm]
-            [org.akvo.dash.fixtures :refer [db-fixture test-conn]]
             [org.akvo.dash.endpoint.share :as share]
+            [org.akvo.dash.fixtures :refer [db-fixture test-conn]]
             [org.akvo.dash.util :refer [squuid]]
             [ragtime
              [jdbc :as jdbc]
@@ -15,7 +15,7 @@
 ;;; Helpers
 ;;;
 
-(hugsql/def-db-fns "org/akvo/dash/import.sql")
+(hugsql/def-db-fns "org/akvo/dash/job-execution.sql")
 (hugsql/def-db-fns "org/akvo/dash/endpoint/visualisation.sql")
 
 (defn seed

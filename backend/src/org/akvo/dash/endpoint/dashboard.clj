@@ -31,7 +31,7 @@
   [text-entities dvs]
   (let [entries (reduce conj text-entities (map (fn [dv]
                                         {"id"   (:visualisation_id dv)
-                                         "type" "visualiation"}) dvs ))]
+                                         "type" "visualisation"}) dvs ))]
     (zipmap (map #(get % "id") entries)
             entries)))
 
@@ -59,7 +59,7 @@
   [tenant-conn id]
   (build-dashboard-by-id
    (dashboard-by-id tenant-conn {:id id})
-   (dashboard_visualiation-by-dashboard-id tenant-conn
+   (dashboard_visualisation-by-dashboard-id tenant-conn
                                            {:dashboard-id id})))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
