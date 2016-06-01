@@ -31,8 +31,9 @@
                                       :visualisation-id visualisation-id})))
 
 (defn share-dashboard [tenant-conn dashboard-id]
-  (println "share-dashboard")
-  {:status "Not implemented"})
+  (first (insert-dashboard-share tenant-conn
+                                 {:id (random-url-safe-string)
+                                  :dashboard-id dashboard-id})))
 
 (defn end-share
   "Delete the share."
