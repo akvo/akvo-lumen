@@ -1,9 +1,10 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router';
 import DatasetHeader from '../components/dataset/DatasetHeader';
 import DatasetTable from '../components/dataset/DatasetTable';
 import { showModal } from '../actions/activeModal';
-import { fetchDataset, transform } from '../actions/dataset';
+import { fetchDataset, transform, sendTransformationLog } from '../actions/dataset';
 
 require('../styles/Dataset.scss');
 
@@ -12,11 +13,20 @@ class Dataset extends Component {
   constructor() {
     super();
     this.handleShowDatasetSettings = this.handleShowDatasetSettings.bind(this);
+    this.willLeaveDatasets = this.willLeaveDatasets.bind(this);
   }
 
   componentDidMount() {
-    const { dispatch, dataset } = this.props;
+    const { dispatch, dataset, router, route } = this.props;
+    router.setRouteLeaveHook(route, this.routerWillLeave);
     dispatch(fetchDataset(dataset.id));
+  }
+
+  willLeaveDatasets() {
+    const { dispatch, dataset } = this.props;
+    if (dataset.history != null && dataset.history.length > 0) {
+      dispatch(sendTransformationLog(dataset.id, dataset.transformations));
+    }
   }
 
   handleShowDatasetSettings() {
@@ -55,6 +65,8 @@ Dataset.propTypes = {
     columns: PropTypes.array,
     rows: PropTypes.array,
   }),
+  router: PropTypes.object.isRequired,
+  route: PropTypes.object.isRequired,
   dispatch: PropTypes.func.isRequired,
 };
 
@@ -66,4 +78,4 @@ function mapStateToProps(state, ownProps) {
   };
 }
 
-export default connect(mapStateToProps)(Dataset);
+export default connect(mapStateToProps)(withRouter(Dataset));
