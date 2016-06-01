@@ -1,6 +1,5 @@
 (ns org.akvo.dash.endpoint.dashboard-test
   (:require [clojure.test :refer :all]
-            [clojure.pprint :refer [pprint]]
             [hugsql.core :as hugsql]
             [org.akvo.dash.fixtures :refer [db-fixture test-conn]]
             [org.akvo.dash.endpoint.share :as share]
@@ -79,7 +78,6 @@
       (testing "Get dashboard"
         (let [d (dashboard/handle-dashboard-by-id test-conn
                                                   dashboard-id)]
-          (pprint d)
           (is (not (nil? d)))
           (is (every? #(contains? d %)
                       [:id :title :entities :layout :type :status :created
