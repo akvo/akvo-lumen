@@ -35,6 +35,7 @@
        :modified (:modified dataset)
        :created (:created dataset)
        :status "OK"
+       :transformations (:transformations dataset)
        :columns columns
        :rows data})))
 

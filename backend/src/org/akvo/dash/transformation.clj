@@ -145,7 +145,7 @@
           (future
             (execute tenant-conn job-id dataset-id transformation-log))
           {:status 200
-           :jobExecutionId job-id})
+           :body {:jobExecutionId job-id}})
         {:status 400
          :body {:message (:message v)}}))
     {:status 400

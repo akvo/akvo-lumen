@@ -18,7 +18,7 @@ class Dataset extends Component {
 
   componentDidMount() {
     const { dispatch, dataset, router, route } = this.props;
-    router.setRouteLeaveHook(route, this.routerWillLeave);
+    router.setRouteLeaveHook(route, this.willLeaveDatasets);
     dispatch(fetchDataset(dataset.id));
   }
 
