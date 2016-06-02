@@ -71,7 +71,7 @@
       (imp/do-import test-conn {:file-upload-path "/tmp/akvo/dash"} job-id)
       (let [dataset-id (:dataset_id (dataset-id-by-job-execution-id test-conn {:id job-id}))
             transformation-job (tf/schedule test-conn dataset-id t-log)
-            t-job-id (get transformation-job :jobExecutionId)]
+            t-job-id (get-in transformation-job [:body :jobExecutionId])]
 
         (is (= 200  (:status transformation-job)))
 
