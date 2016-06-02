@@ -1,6 +1,9 @@
 (ns org.akvo.dash.endpoint.dashboard-test
   (:require [clojure.test :refer :all]
+<<<<<<< HEAD
             [clojure.pprint :refer [pprint]]
+=======
+>>>>>>> develop
             [hugsql.core :as hugsql]
             [org.akvo.dash.fixtures :refer [db-fixture test-conn]]
             [org.akvo.dash.endpoint.share :as share]
@@ -70,7 +73,6 @@
   (share-test/seed test-conn share-test/test-spec)
 
   (testing "Dashboard"
-
     (let [v-id               (-> (all-visualisations test-conn) first :id)
           d-spec             (dashboard-spec v-id)
           {dashboard-id :id} (dashboard/handle-new-dashboard test-conn d-spec)]
@@ -81,7 +83,8 @@
                                                   dashboard-id)]
           (is (not (nil? d)))
           (is (every? #(contains? d %)
-                      [:id :title :entities :layout :created :modified]))
+                      [:id :title :entities :layout :type :status :created
+                       :modified]))
           (is (= (get d-spec "title")
                  (get d :title)))
 
@@ -113,5 +116,6 @@
         (is (nil? (dashboard-by-id test-conn {:id dashboard-id})))
         (is (empty? (dashboard_visualisation-by-dashboard-id
                      test-conn {:dashboard-id dashboard-id})))
+
         (is (= (count (all-dashboards test-conn))
                1))))))

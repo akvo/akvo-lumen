@@ -51,7 +51,9 @@
   [dashboard dvs]
   (assoc (select-keys dashboard [:id :title :created :modified])
          :entities (all-entities (get-in dashboard [:spec "entities"]) dvs)
-         :layout (all-layouts (get-in dashboard [:spec "layout"]) dvs)))
+         :layout (all-layouts (get-in dashboard [:spec "layout"]) dvs)
+         :type "dashboard"
+         :status "OK"))
 
 
 (defn handle-dashboard-by-id
@@ -104,7 +106,6 @@
                  :layout           layout}))))
       (handle-dashboard-by-id tenant-conn dashboard-id))
     (throw (Exception. "Entities and layout dashboard keys does not match."))))
-
 
 
 
