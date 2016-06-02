@@ -64,11 +64,13 @@
                           "newType" "number"
                           "defaultValue" 0}
                   "onError" "default-value"}]]
+
       (insert-data-source test-conn {:id data-source-id
                                      :spec (json/generate-string data-source-spec)})
       (insert-job-execution test-conn {:id job-id
                                        :data-source-id data-source-id})
       (imp/do-import test-conn {:file-upload-path "/tmp/akvo/dash"} job-id)
+
       (let [dataset-id (:dataset_id (dataset-id-by-job-execution-id test-conn {:id job-id}))
             transformation-job (tf/schedule test-conn dataset-id t-log)
             t-job-id (get-in transformation-job [:body :jobExecutionId])]
@@ -82,9 +84,12 @@
 
         (is (= "OK" (:status (job-execution-status test-conn {:id t-job-id}))))
 
-        (is (zero? (:c5 (get-val-from-table test-conn
-                                            {:rnum 196
-                                             :column-name "c5"
-                                             :table-name (:table-name (get-table-name test-conn
-                                                                                      {:job-id t-job-id}))})))))
-      )))
+        (let [table-name (:table-name (get-table-name test-conn
+                                                      {:job-id t-job-id}))]
+          (is (zero? (:c5 (get-val-from-table test-conn
+                                              {:rnum 196
+                                               :column-name "c5"
+                                               :table-name table-name}))))
+          (is (= 879319 (:c5 (get-val-from-table test-conn {:rnum 17
+                                                            :column-name "c5"
+                                                            :table-name table-name})))))))))
