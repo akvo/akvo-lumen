@@ -1,11 +1,11 @@
 (ns org.akvo.dash.endpoint.public-test
   (:require [clojure.test :refer :all]
-            [clojure.pprint :refer [pprint]]
-            [org.akvo.dash.endpoint.public :refer [get-share]]
-            [org.akvo.dash.fixtures :refer [db-fixture test-conn]]
-            [org.akvo.dash.endpoint.share :as share]
-            [org.akvo.dash.endpoint.share-test :as share-test]))
-
+            [hugsql.core :as hugsql]
+            [org.akvo.dash.endpoint
+             [public :as public]
+             [share :as share]
+             [share-test :as share-test]]
+            [org.akvo.dash.fixtures :refer [db-fixture test-conn]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Tests
@@ -13,18 +13,30 @@
 
 (use-fixtures :once db-fixture)
 
+(hugsql/def-db-fns "org/akvo/dash/endpoint/dashboard.sql")
+
 (deftest ^:functional public-data
 
-  (testing "Non existing share id."
-    (let [r (get-share test-conn "abc123")]
+  (testing "Non existing public share id."
+    (let [r (public/get-share test-conn "abc123")]
       (is (= nil (get r "error")))))
 
-  (testing "Existing share."
+  (testing "Public visualiation share."
     (share-test/seed test-conn share-test/test-spec)
-    (let [new-share (share/share-visualisation test-conn
-                                               (:visualisation-id share-test/test-spec))
-          p (get-share test-conn (:id new-share))]
+    (let [new-share (share/share-visualisation
+                     test-conn (:visualisation-id share-test/test-spec))
+          p         (public/get-share test-conn (:id new-share))]
       (is (= (:visualisation_id p)
              (:visualisation-id share-test/test-spec)))
       (is (= (:id new-share)
-             (:id p))))))
+             (:id p)))))
+
+  (testing "Public dashboard share"
+    (let [dashboard-id    (-> (all-dashboards test-conn) first :id)
+          dashboard-share (share/share-dashboard test-conn dashboard-id)
+          share           (public/get-share test-conn (:id dashboard-share))
+          share-data      (public/response-data test-conn share)]
+      (is (every? #(contains? share-data %)
+                  ["dashboard" "visualisations" "datasets"]))
+      (is (every? #(not (nil? %))
+                  (vals share-data))))))

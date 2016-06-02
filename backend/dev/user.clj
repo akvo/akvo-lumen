@@ -1,6 +1,5 @@
 (ns user
   (:require [clojure.repl :refer :all]
-            [clojure.pprint :refer [pprint]]
             [clojure.tools.namespace.repl :refer [refresh]]
             [clojure.java.io :as io]
             [clojure.java.jdbc :as jdbc]
