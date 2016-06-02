@@ -101,7 +101,7 @@ const pollInteval = 1000;
 function pollDatasetImportStatus(importId, name) {
   return (dispatch) => {
     dispatch(importDatasetPending(importId, name));
-    fetch(`/api/imports/${importId}`, {
+    fetch(`/api/job_executions/${importId}`, {
       method: 'GET',
       headers: headers(),
     })

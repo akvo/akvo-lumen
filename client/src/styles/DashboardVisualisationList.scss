@@ -1,0 +1,29 @@
+@import 'modules/colors';
+
+.DashboardVisualisationList {
+  border-right: 0.1rem solid $lightGrey;
+  .list {
+    padding: 1rem;
+  }
+  .listItem {
+    margin: 1rem 0;
+    width: 100%;
+    height: 10rem;
+    border: 0.1rem solid $midGrey;
+    position: relative;
+
+    &.added {
+      background-color: $lightGreen;
+    }
+  }
+  h4 {
+    padding: 0.5rem;
+  }
+  .isOnDashboardIndicator {
+    padding: 0.5rem;
+    font-size: 1.25rem;
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+}

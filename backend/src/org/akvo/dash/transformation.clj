@@ -1,225 +1,150 @@
 (ns org.akvo.dash.transformation
-  (:require [traversy.lens :as l]))
+  (:require [clojure.string :as str]
+            [hugsql.core :as hugsql]
+            [org.akvo.dash.transformation.engine :as engine]
+            [org.akvo.dash.util :refer (squuid gen-table-name)]))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Parse CSV
+;; TODO: Potential change op-spec validation `core.spec`
+;; TODO: Move the validation part to transformation.validation namespace
 
-;; https://www.refheap.com/114736 - Jonas?
-;;
-;; (let [data  '(["Name" "Age" "Gender"]
-;;               ["John"  "35" "M"]
-;;               ["Maria" "2" "F"]
-;;               ["Pedro" "30" "M"]
-;;               ["Jose" "40" "M"])
-;;       tdata (apply mapv vector data)] ;; transpose data
-;;   (mapv (fn [r]
-;;           {"title"  (first r)
-;;            "values" (rest r)
-;;            "type"   "STRING"}) tdata))
+(def ops-set (set (keys engine/available-ops)))
+(def on-error-set #{"fail" "default-value" "delete-row"})
+(def type-set #{"number" "text" "date"})
+(def sort-direction-set #{"ASC" "DESC"})
 
-(defn parse-csv-with-headers
-  "Transforms CSV like format to a shape that is closer to our JSON
-  representaion.
-  [[header1 header2]
-   [foo bar]]
-  into
-  [[header1 foo]
-   [header2 bar]]"
-  [data]
-  (mapv (fn [r] ;; We feed in a row and get a column back.
-          {:title  (first r)
-           :type   "STRING"
-           :values (rest r)})
-        (apply mapv vector data))) ;; transpose data
+(hugsql/def-db-fns "org/akvo/dash/transformation.sql")
 
 
-(defn parse-csv-without-headers
-  "Add a header row with strings of number & call parse-csv-with-headers"
-  [data]
-  (let [n       (inc (count (first data)))
-        headers (vec (map str (range 1 n)))]
-    (parse-csv-with-headers (vec (cons headers
-                                       data)))))
+(defn- throw-invalid-op
+  [op-spec]
+  (throw (Exception. (str "Invalid operation " op-spec))))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Column header
+(defn required-keys
+  [{:strs [op args onError] :as op-spec}]
+  (or (boolean (and (ops-set op)
+                    (not-empty args)
+                    (re-find #"c\d+" (args "columnName"))
+                    (on-error-set onError)))
+      (throw-invalid-op op-spec)))
 
-(defn update-column-header
-  ""
-  [data old-header new-header]
-  (-> data
-      (l/update (l/*> (l/in [:columns])
-                  l/each
-                  (l/conditionally #(= old-header (get % :title))))
-              #(assoc % :title new-header))))
+(defmulti validate-op
+  (fn [op-spec]
+    (keyword (op-spec "op"))))
 
+(defmethod validate-op :default
+  [op-spec]
+  (throw-invalid-op op-spec))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Column type
+(defmethod validate-op :core/change-datatype
+  [{:strs [op args] :as op-spec}]
+  (or (boolean (and (required-keys op-spec)
+                 (type-set (args "newType"))
+                 (not-empty (args "defaultValue"))
+                 (if (= "date" (args "newType"))
+                   (not-empty (args "parseFormat"))
+                   true)))
+      (throw-invalid-op op-spec)))
 
-(defn update-column-type-description
-  "Update column type to new-type on column with columns-title."
-  [data column-title new-type]
-  (-> data
-      (l/update (l/*> (l/in [:columns])
-                  l/each
-                  (l/conditionally #(= column-title (get % :title))))
-              #(assoc % :type new-type))))
+(defmethod validate-op :core/change-column-title
+  [{:strs [args] :as op-spec}]
+  (or (boolean (and (required-keys op-spec)
+                    (not-empty (args "columnTitle"))))
+      (throw-invalid-op op-spec)))
 
+(defmethod validate-op :core/sort-column
+  [{:strs [args] :as op-spec}]
+  (or (boolean (and (required-keys op-spec)
+                    (sort-direction-set (args "sortDirection"))))
+      (throw-invalid-op op-spec)))
 
-(defn cast-column-values
-  "Update column type to new-type on column with columns-title."
-  [data column-title new-type cast-fn]
-  (-> data
-      (l/update (l/*> (l/in [:columns])
-                  l/each
-                  (l/conditionally #(= column-title (get % :title)))
-                  (l/in [:values]))
-              #(map cast-fn %))))
+(defmethod validate-op :core/remove-sort
+  [op-spec]
+  (or (required-keys op-spec)
+      (throw-invalid-op op-spec)))
 
+(defmethod validate-op :core/filter
+  [op-spec]
+  true)
 
-(defn cast-column
-  "Cast column with title to new type. Where type is one of:
-  [\"NUMBER\"]
-  cast-fn is a function that will parse the current value, e.i. for string to
-  number this read-string would be a good candidate."
-  [data title new-type cast-fn]
-  (-> data
-      (update-column-type-description title
-                                      new-type)
-      (cast-column-values title
-                          new-type
-                          cast-fn)))
+(defmethod validate-op :core/to-titlecase
+  [op-spec]
+  (required-keys op-spec))
 
-;; (cast-column "1" "NUMBER" read-string)
+(defmethod validate-op :core/to-lowercase
+  [op-spec]
+  (or (required-keys op-spec)
+      (throw-invalid-op op-spec)))
 
+(defmethod validate-op :core/to-uppercase
+  [op-spec]
+  (or (required-keys op-spec)
+      (throw-invalid-op op-spec)))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Coerce by guess?
+(defmethod validate-op :core/trim
+  [op-spec]
+  (or (required-keys op-spec)
+      (throw-invalid-op op-spec)))
 
-(defn guess-cast
-  "Can we pass in data an try and coerce data? At least it should be possible
-  for number
+(defmethod validate-op :core/trim-doublespace
+  [op-spec]
+  (or (required-keys op-spec)
+      (throw-invalid-op op-spec)))
 
-  Is it a good idea to alter data that way? Maybe something that the user should
-  add as a transformations?"
-  [data]
-  data)
+(defn validate
+  [transformation-log]
+  (try
+    {:valid? (every? validate-op transformation-log)}
+    (catch Exception e
+      {:valid? false
+       :message (.getMessage e)})))
 
+(defn execute
+  [tenant-conn job-id dataset-id transformation-log]
+  (let [dv (dataset-version-by-id tenant-conn {:id dataset-id})
+        columns (vec (:columns dv))
+        source-table (:imported-table-name dv)
+        table-name (gen-table-name "ds")
+        f (fn [log op-spec]
+            (let [step (engine/apply-operation tenant-conn
+                                               table-name
+                                               columns
+                                               op-spec)]
+              (if (:success? step)
+                (conj log step)
+                (throw (Exception. (str "Error applying operation: " op-spec))))))]
+    (try
+      (copy-table tenant-conn {:source-table source-table
+                               :dest-table table-name})
+      (let [result (reduce f [] transformation-log)
+            log (mapcat :execution-log result)
+            cols (:columns (last result))]
+        (new-dataset-version tenant-conn {:id (str (squuid))
+                                          :dataset-id dataset-id
+                                          :job-execution-id job-id
+                                          :table-name table-name
+                                          :imported-table-name source-table
+                                          :version (inc (:version dv))
+                                          :transformations transformation-log
+                                          :columns cols})
+        (update-job-success-execution tenant-conn {:id job-id
+                                                   :exec-log log}))
+      (catch Exception e
+        (update-job-failed-execution tenant-conn {:id job-id
+                                                  :error-log [(.getMessage e)]})))))
 
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Old
-
-
-;;; https://rosettacode.org/wiki/Determine_if_a_string_is_numeric#Clojure
-(defn numeric? [s]
-  (if-let [s (seq s)]
-    (let [s (if (= (first s) \-) (next s) s)
-          s (drop-while #(Character/isDigit %) s)
-          s (if (= (first s) \.) (next s) s)
-          s (drop-while #(Character/isDigit %) s)]
-      (empty? s))))
-
-;; Sure you want an int? Number, bigint?
-(defn parse-int [s]
-  (Integer. (re-find  #"\d+" s)))
-
-
-;; (defn column
-;;   "Takes a row and make it a column."
-;;   [row]
-;;   (merge {"title" (first row)}
-;;          (cond
-;;            (number? (second row)) {"type"   "NUMBER"
-;;                                    "values" (rest row)}
-;;            (numeric? (second row)) {"type"   "NUMBER"
-;;                                     "values" (map read-string (rest row))}
-;;            :else {"type"   "STRING"
-;;                   "values" (rest row)})))
-
-
-;; (def people
-;;   (csv/read-csv (slurp (io/resource "org/akvo/dash/test/people.csv")) ))
-
-;; (def people
-;;   (csv/read-csv (slurp (io/resource "org/akvo/dash/test/FL_insurance_sample.csv")) ))
-
-
-;; (-> [{:title "Name"} {:title "Age"}]
-;;     (view (combine (*> each)
-;;                    (conditionally #(= "Age" (:title %)))
-;;                    )))
-
-;; (-> [{:title "Name"} {:title "Age"}]
-;;     (update (combine (*> each)
-;;                    (conditionally #(= "Age" (:title %))))
-;;             #(assoc % :type "STRING")))
-
-;; (-> [{:title "Name" :type "STRING"} {:title "Age" :type "STRING"}]
-;;     (update (combine (*> each)
-;;                      (conditionally #(= "Age" (:title %))))
-;;             #(assoc % :type "NUMBER")))
-
-;; (pprint
-;;  (-> {:columns [{:title "Name" :type "STRING"} {:title "Age" :type "STRING"}]}
-;;      (update (*> (in [:columns])
-;;                  each
-;;                  (conditionally #(= "Age" (get % :title ))))
-;;              #(assoc % :type "NUMBER"))))
-
-;; (pprint
-;;  (-> {:columns [{"title" "Name" "type" "STRING"} {"title" "Age" "type" "STRING"}]}
-;;      (update (*> (in [:columns])
-;;                  each
-;;                  (conditionally #(= "Age" (get % "title"))))
-;;              #(assoc % "type" "NUMBER"))))
-
-;; (defn update-column-type
-;;   "Update column type to new-type on column with columns-title."
-;;   [data column-title new-type]
-;;   (-> data
-;;       (update (*> (in [:columns])
-;;                   each
-;;                   (conditionally #(= column-title (get % :title))))
-;;               #(assoc % column-title column-type))))
-
-;; (update-column-type
-;;  {:columns [{:title "Name" :type "STRING"} {:title "Age" :type "STRING"}]}
-;;  "Age"
-;;  "NUMBER"
-;;  )
-
-
-;; (defn coerce-column-view
-;;   ""
-;;   [data column-title type]
-;;   (-> data
-;;      (view (*> (in [:columns])
-;;                each
-;;                (conditionally #(= column-title (get % :title)))
-;;                (in [:values])))))
-
-
-;; (defn coerce-column
-;;   ""
-;;   [data column-title type]
-;;   (-> data
-;;       (update (*> (in [:columns])
-;;                 each
-;;                 (conditionally #(= column-title (get % :title)))
-;;                 (in [:values]))
-;;               #(map read-string %))))
-
-;; (pprint
-;;  (coerce-column
-;;   {:columns [{:title "Name" :type "STRING" :values ["1" "2" "3"]}
-;;              {:title "Age" :type "STRING" :values ["1" "2" "3"]}]}
-;;   "Age"
-;;   "NUMBER"))
-
-
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Playing with traversy lenses
+(defn schedule
+  [tenant-conn dataset-id transformation-log]
+  (if-let [dataset (dataset-by-id tenant-conn {:id dataset-id})]
+    (let [v (validate transformation-log)]
+      (if (:valid? v)
+        (let [job-id (str (squuid))]
+          (new-transformation-job-execution tenant-conn {:id job-id
+                                                         :dataset-id dataset-id})
+          (future
+            (execute tenant-conn job-id dataset-id transformation-log))
+          {:status 200
+           :jobExecutionId job-id})
+        {:status 400
+         :body {:message (:message v)}}))
+    {:status 400
+     :body {:message "Dataset not found"}}))

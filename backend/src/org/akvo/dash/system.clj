@@ -14,15 +14,17 @@
              [http :as http]
              [tenant-manager :as tm]]
             [org.akvo.dash.endpoint
+             [dashboard :as dashboard]
              [dataset :as dataset]
              [files :as files]
              [flow :as flow]
-             [import :as import]
              [library :as library]
              [public :as public]
              [root :as root]
              [share :as share]
-             [visualisation :as visualisation]]
+             [visualisation :as visualisation]
+             [transformation :as transformation]
+             [job-execution :as job-execution]]
             [org.akvo.dash.middleware :refer [wrap-auth wrap-jwt]]
             [ring.middleware
              [defaults :refer [api-defaults wrap-defaults]]
@@ -53,29 +55,34 @@
     (-> (component/system-map
          :app (handler-component (:app config))
          :config config
+         :dashboard (endpoint-component dashboard/endpoint)
          :dataset (endpoint-component dataset/endpoint)
          :db   (hikaricp (:db config))
          :files (endpoint-component files/endpoint)
          :flow (endpoint-component flow/endpoint)
          :http (http/immutant-web (:http config))
-         :import (endpoint-component import/endpoint)
          :library (endpoint-component library/endpoint)
          :public (endpoint-component public/endpoint)
          :root (endpoint-component root/endpoint)
          :share (endpoint-component share/endpoint)
          :tenant-manager (tm/manager)
-         :visualisation (endpoint-component visualisation/endpoint))
+         :visualisation (endpoint-component visualisation/endpoint)
+         :transformation (endpoint-component transformation/endpoint)
+         :job-execution (endpoint-component job-execution/endpoint))
         (component/system-using
          {:http           [:app]
-          :app            [:tenant-manager :dataset :files :flow :import
-                           :library :public :root :share :visualisation]
+          :app            [:tenant-manager :dashboard :dataset :files :flow
+                           :job-execution :library :public :root :share
+                           :transformation :visualisation]
           :tenant-manager [:db]
           :root           [:tenant-manager]
+          :dashboard      [:tenant-manager]
           :dataset        [:tenant-manager :config]
           :files          [:config]
           :flow           [:tenant-manager :config]
-          :import         [:tenant-manager]
           :library        [:tenant-manager]
           :public         [:tenant-manager]
           :share          [:tenant-manager :config]
-          :visualisation  [:tenant-manager]}))))
+          :visualisation  [:tenant-manager]
+          :transformation [:tenant-manager]
+          :job-execution  [:tenant-manager]}))))

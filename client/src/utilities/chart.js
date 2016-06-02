@@ -94,3 +94,26 @@ export function getChartData(visualisation, datasets) {
 
   return output;
 }
+
+export function getClassName(computedWidth, hasAxisLabels) {
+  let className = 'dashChart';
+  let size;
+
+  className = hasAxisLabels ? `${className} hasAxisLabels` : className;
+
+  if (computedWidth < 240) {
+    size = 'xsmall';
+  } else if (computedWidth < 480) {
+    size = 'small';
+  } else if (computedWidth < 720) {
+    size = 'medium';
+  } else if (computedWidth < 860) {
+    size = 'large';
+  } else {
+    size = 'xlarge';
+  }
+
+  className = `${className} ${size}`;
+
+  return className;
+}

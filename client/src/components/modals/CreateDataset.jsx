@@ -58,8 +58,8 @@ class CreateDataset extends Component {
   }
 
   isValidImport() {
-    // TODO Only check source for now.
-    return DataSourceSettings.isValidSource(this.props.datasetImport.dataset.source);
+    const dataset = this.props.datasetImport.dataset;
+    return DataSourceSettings.isValidSource(dataset.source) && dataset.name !== '';
   }
 
   render() {
