@@ -35,4 +35,20 @@
       font-weight: bold;
     }
   }
+  .DashboardNameInputContainer {
+    padding: 1rem 1rem 0 1rem;
+
+    input {
+      display: block;
+      margin: 0 auto;
+      width: 80%;
+      max-width: 40rem;
+      border: 0.1rem solid $lightGrey;
+      background-color: inherit;
+      padding: 0.5rem;
+      font-size: 1.15rem;
+      font-weight: bold;
+      text-align: center;
+    }
+  }
 }

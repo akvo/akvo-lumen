@@ -10,6 +10,9 @@ export default class DashboardCanvasItemEditable extends Component {
     this.handleChange = this.handleChange.bind(this);
     this.handleBlur = this.handleBlur.bind(this);
   }
+  componentWillMount() {
+    this.setState({ html: this.props.item.content || 'Enter text here' });
+  }
   handleChange(evt) {
     this.setState({ html: evt.target.value });
   }
