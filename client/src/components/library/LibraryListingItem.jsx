@@ -61,7 +61,6 @@ export default class LibraryListingItem extends Component {
 
   render() {
     const { entity, onSelectEntity, onEntityAction } = this.props;
-
     const status = entity.status;
     return (
       <li
@@ -82,7 +81,7 @@ export default class LibraryListingItem extends Component {
         <div className="entityIcon"></div>
         <div className="textContents">
           <h3 className="entityName">
-            {entity.name}
+            {entity.name || entity.title}
             {status === 'FAILED' && ' (Import failed)'}
           </h3>
           {status === 'FAILED' && <p>{entity.reason}</p>}

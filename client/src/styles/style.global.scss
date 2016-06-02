@@ -55,6 +55,11 @@ p, h1, h2, h3, h4, h5, button, input {
     }
 }
 
+/* Remove outline from input elements */
+*:focus {
+    outline: none;
+}
+
 /* Charts */
 
 .dashChart {
