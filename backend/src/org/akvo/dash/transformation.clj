@@ -39,7 +39,6 @@
   [{:strs [op args] :as op-spec}]
   (or (boolean (and (required-keys op-spec)
                  (type-set (args "newType"))
-                 (not-empty (args "defaultValue"))
                  (if (= "date" (args "newType"))
                    (not-empty (args "parseFormat"))
                    true)))
@@ -113,10 +112,13 @@
                 (conj log step)
                 (throw (Exception. (str "Error applying operation: " op-spec))))))]
     (try
-      (copy-table tenant-conn {:source-table source-table
-                               :dest-table table-name})
+      (copy-table tenant-conn
+                  {:source-table source-table
+                   :dest-table table-name}
+                  {}
+                  :transaction? false)
       (let [result (reduce f [] transformation-log)
-            log (mapcat :execution-log result)
+            log (vec (mapcat :execution-log result))
             cols (:columns (last result))]
         (new-dataset-version tenant-conn {:id (str (squuid))
                                           :dataset-id dataset-id

@@ -21,8 +21,11 @@
     (insert-dataset conn {:id dataset-id
                           :title (get spec "name") ;; TODO Consistent naming. Change on client side?
                           :description (get spec "description" "")})
-    (clone-data-table conn {:from-table table-name
-                            :to-table imported-table-name})
+    (clone-data-table conn
+                      {:from-table table-name
+                       :to-table imported-table-name}
+                      {}
+                      :transaction? false)
     (insert-dataset-version conn {:id (squuid)
                                   :dataset-id dataset-id
                                   :job-execution-id job-execution-id

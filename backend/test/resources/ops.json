@@ -4,7 +4,7 @@
     "args": {
       "columnName": "c2",
       "newType": "number",
-      "defaultValue": "0"
+      "defaultValue": 0
     },
     "onError": "default-value"
   },
@@ -13,7 +13,7 @@
     "args": {
       "columnName": "c3",
       "newType": "date",
-      "defaultValue": "0",
+      "defaultValue": 0,
       "parseFormat": "YYYY-MM-DD"
     },
     "onError": "fail"
