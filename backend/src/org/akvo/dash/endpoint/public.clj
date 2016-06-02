@@ -1,16 +1,15 @@
 (ns org.akvo.dash.endpoint.public
   (:require [cheshire.core :as json]
-            [clojure.pprint :refer [pprint]]
             [compojure.core :refer :all]
             [hugsql.core :as hugsql]
             [org.akvo.dash.component.tenant-manager :refer [connection]]
-            [org.akvo.dash.endpoint.dataset :refer [find-dataset]]
-            [org.akvo.dash.endpoint.visualisation :refer [visualisation]]
-            [org.akvo.dash.endpoint.dashboard :refer [handle-dashboard-by-id]]
+            [org.akvo.dash.endpoint
+             [dashboard :refer [handle-dashboard-by-id]]
+             [dataset :refer [find-dataset]]
+             [visualisation :refer [visualisation]]]
             [ring.util.response :refer [content-type not-found response]]))
 
 (hugsql/def-db-fns "org/akvo/dash/endpoint/public.sql")
-
 
 (defn get-share
   [conn id]

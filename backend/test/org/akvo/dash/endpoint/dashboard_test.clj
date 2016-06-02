@@ -69,7 +69,7 @@
 (deftest ^:functional dashboard
   (share-test/seed test-conn share-test/test-spec)
 
-  (testing "New dashboard"
+  (testing "Dashboard"
 
     (let [v-id               (-> (all-visualisations test-conn) first :id)
           d-spec             (dashboard-spec v-id)
@@ -113,4 +113,5 @@
         (is (nil? (dashboard-by-id test-conn {:id dashboard-id})))
         (is (empty? (dashboard_visualisation-by-dashboard-id
                      test-conn {:dashboard-id dashboard-id})))
-        (is (empty? (all-dashboards test-conn)))))))
+        (is (= (count (all-dashboards test-conn))
+               1))))))
