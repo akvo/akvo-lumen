@@ -1,30 +1,56 @@
 (ns org.akvo.dash.endpoint.public
   (:require [cheshire.core :as json]
-            [clojure.pprint :refer  [pprint]]
             [compojure.core :refer :all]
             [hugsql.core :as hugsql]
             [org.akvo.dash.component.tenant-manager :refer [connection]]
-            [org.akvo.dash.endpoint.dataset :refer [find-dataset]]
-            [org.akvo.dash.endpoint.visualisation :refer [visualisation]]
+            [org.akvo.dash.endpoint
+             [dashboard :refer [handle-dashboard-by-id]]
+             [dataset :refer [find-dataset]]
+             [visualisation :refer [visualisation]]]
             [ring.util.response :refer [content-type not-found response]]))
 
 (hugsql/def-db-fns "org/akvo/dash/endpoint/public.sql")
-
 
 (defn get-share
   [conn id]
   (public-by-id conn {:id id}))
 
-(defn response-data
-  [conn share]
-  (let [v (visualisation conn (:visualisation_id share))
-        d (find-dataset conn (:datasetId v))]
-    (str "window.LUMEN_DATA = "
-         (json/encode {"visualisation" (dissoc v :id :created :modified)
-                       "datasets"      {(:id d) {"columns" (:columns d)}}})
-         ";")))
+(defmulti response-data
+  (fn [_ share]
+    (cond
+      (not (nil? (:visualisation_id share))) :visualisation
+      (not (nil? (:dashboard_id share)))     :dashboard)))
 
-(defn html-response [json-litteral]
+(defmethod response-data :visualisation
+  [tenant-conn share]
+  (let [v (visualisation tenant-conn (:visualisation_id share))
+        d (find-dataset tenant-conn (:datasetId v))]
+    {"visualisation" (dissoc v :id :created :modified)
+     "datasets"      {(:id d) d}}))
+
+(defmethod response-data :dashboard
+  [tenant-conn share]
+  (let [dashboard         (handle-dashboard-by-id tenant-conn
+                                                  (:dashboard_id share))
+        visualisation-ids (remove nil?
+                                  (into []
+                                        (map (fn [m]
+                                               (if (= (get m "type")
+                                                      "visualisation")
+                                                 (get m "id")))
+                                             (vals (:entities dashboard)))))
+        visualisations    (first (map (fn [v-id]
+                                        {v-id (visualisation tenant-conn v-id)})
+                                      visualisation-ids))
+        datasets          (map (fn [v]
+                                 {(:datasetId v)
+                                  (find-dataset tenant-conn (:datasetId v))})
+                               (vals visualisations))]
+    {"dashboard"      dashboard
+     "visualisations" visualisations
+     "datasets"       datasets}))
+
+(defn html-response [data]
   (str "<!DOCTYPE html>\n"
        "<html>\n"
        "  <head>\n"
@@ -35,7 +61,9 @@
        "<body>\n"
        "  <div id=\"root\"></div>\n"
        "  <script>\n"
-       json-litteral
+       "window.LUMEN_DATA = "
+       (json/encode data)
+       ";"
        "  </script>\n"
        "  <script type=\"text/javascript\" src=\"/assets/pub.bundle.js\"></script>"
        "  <link href=\"https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700\" rel=\"stylesheet\" type=\"text/css\">"

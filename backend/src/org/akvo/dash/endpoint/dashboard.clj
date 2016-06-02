@@ -1,6 +1,5 @@
 (ns org.akvo.dash.endpoint.dashboard
   (:require [compojure.core :refer :all]
-            [clojure.pprint :refer [pprint]]
             [clojure.java.jdbc :as jdbc]
             [hugsql.core :as hugsql]
             [org.akvo.dash.component.tenant-manager :refer [connection]]
@@ -106,6 +105,7 @@
                  :layout           layout}))))
       (handle-dashboard-by-id tenant-conn dashboard-id))
     (throw (Exception. "Entities and layout dashboard keys does not match."))))
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
