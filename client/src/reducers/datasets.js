@@ -101,6 +101,16 @@ function transformationSuccess(state, { datasetId }) {
   });
 }
 
+function undoDatasetTransformation(state, id) {
+  const dataset = state[id];
+  if (dataset.history != null && dataset.history.length > 0) {
+    return Object.assign({}, {
+      [id]: dataset.history[0],
+    });
+  }
+  return state;
+}
+
 export default function datasets(state = initialState, action) {
   switch (action.type) {
     case constants.CREATE:
@@ -127,6 +137,8 @@ export default function datasets(state = initialState, action) {
       return transformationSuccess(state, action);
     case constants.TRANSFORMATION_FAILURE:
       return transformationFailure(state, action);
+    case constants.UNDO_TRANSFORMATION:
+      return undoDatasetTransformation(state, action.id);
     default: return state;
   }
 }

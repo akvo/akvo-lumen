@@ -44,6 +44,16 @@ const actions = {
     },
     onError: 'default-value',
   },
+  'sort-ascending': {
+    op: 'core/sort-column',
+    args: { sortDirection: 'ASC' },
+    onError: 'fail',
+  },
+  'sort-descending': {
+    op: 'core/sort-column',
+    args: { sortDirection: 'DESC' },
+    onError: 'fail',
+  },
 };
 
 function mergeArgs(action, args) {
@@ -101,7 +111,7 @@ export default function ColumnContextMenu({ column, dimensions, onContextMenuIte
         left: `${dimensions.left}px`,
         right: 'initial',
       }}
-      onOptionSelected={(op) => onContextMenuItemSelected({
+      onOptionSelected={op => onContextMenuItemSelected({
         column,
         action: mergeArgs(actions[op], { columnName: column.columnName }),
       })}

@@ -6,6 +6,7 @@
             [org.akvo.dash.component.tenant-manager :refer [connection]]))
 
 (hugsql/def-db-fns "org/akvo/dash/endpoint/dataset.sql")
+(hugsql/def-db-fns "org/akvo/dash/endpoint/dashboard.sql")
 (hugsql/def-db-fns "org/akvo/dash/endpoint/visualisation.sql")
 
 
@@ -15,7 +16,7 @@
 
       (GET "/" _
         (response
-         {:dashboards     []
+         {:dashboards     (all-dashboards tenant-conn)
           :datasets       (all-datasets tenant-conn)
           :visualisations (all-visualisations
                            tenant-conn {} {} :identifiers identity)})))))

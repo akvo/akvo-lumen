@@ -4,7 +4,11 @@ import { withRouter } from 'react-router';
 import DatasetHeader from '../components/dataset/DatasetHeader';
 import DatasetTable from '../components/dataset/DatasetTable';
 import { showModal } from '../actions/activeModal';
-import { fetchDataset, transform, sendTransformationLog } from '../actions/dataset';
+import {
+  fetchDataset,
+  transform,
+  sendTransformationLog,
+  undoTransformation } from '../actions/dataset';
 
 require('../styles/Dataset.scss');
 
@@ -50,6 +54,7 @@ class Dataset extends Component {
             rows={dataset.rows}
             transformations={dataset.transformations}
             onTransform={(transformation) => dispatch(transform(dataset.id, transformation))}
+            onUndoTransformation={() => dispatch(undoTransformation(dataset.id))}
           />
           :
           <div>loading...</div>}

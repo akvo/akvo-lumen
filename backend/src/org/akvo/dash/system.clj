@@ -14,6 +14,7 @@
              [http :as http]
              [tenant-manager :as tm]]
             [org.akvo.dash.endpoint
+             [dashboard :as dashboard]
              [dataset :as dataset]
              [files :as files]
              [flow :as flow]
@@ -54,6 +55,7 @@
     (-> (component/system-map
          :app (handler-component (:app config))
          :config config
+         :dashboard (endpoint-component dashboard/endpoint)
          :dataset (endpoint-component dataset/endpoint)
          :db   (hikaricp (:db config))
          :files (endpoint-component files/endpoint)
@@ -69,11 +71,12 @@
          :job-execution (endpoint-component job-execution/endpoint))
         (component/system-using
          {:http           [:app]
-          :app            [:tenant-manager :dataset :files :flow
-                           :library :public :root :share :visualisation
-                           :transformation :job-execution]
+          :app            [:tenant-manager :dashboard :dataset :files :flow
+                           :job-execution :library :public :root :share
+                           :transformation :visualisation]
           :tenant-manager [:db]
           :root           [:tenant-manager]
+          :dashboard      [:tenant-manager]
           :dataset        [:tenant-manager :config]
           :files          [:config]
           :flow           [:tenant-manager :config]

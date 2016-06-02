@@ -6,7 +6,6 @@ function makeParser(parser) {
   return (rows, idx, onError, args) => {
     const deleteMarker = {};
     const { defaultValue } = args;
-    const dv = defaultValue != null ? defaultValue : null;
     const newRows = rows.map(row => {
       const r = row;
       const val = r[idx];
@@ -17,7 +16,7 @@ function makeParser(parser) {
       } catch (error) {
         switch (onError) {
           case 'default-value':
-            r[idx] = dv;
+            r[idx] = defaultValue;
             return r;
           case 'delete-row':
             return deleteMarker;

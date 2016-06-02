@@ -322,3 +322,11 @@ export function sendTransformationLog(datasetId, transformations) {
       dispatch(pollDatasetTransformationStatus(jobExecutionId, datasetId)));
   };
 }
+
+
+export function undoTransformation(id) {
+  return {
+    type: constants.UNDO_TRANSFORMATION,
+    id,
+  };
+}
