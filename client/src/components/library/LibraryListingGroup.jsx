@@ -65,7 +65,7 @@ const convertEntity = entity => {
   }
 
   return output;
-}
+};
 
 export default function LibraryListingGroup({
   listGroup, displayMode, sortOrder, isReverseSort, onSelectEntity, onEntityAction }) {
