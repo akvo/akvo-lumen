@@ -265,3 +265,10 @@ export function transform(datasetId, transformation) {
     transformation,
   };
 }
+
+export function undoTransformation(id) {
+  return {
+    type: constants.UNDO_TRANSFORMATION,
+    id,
+  };
+}

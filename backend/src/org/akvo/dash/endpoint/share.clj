@@ -29,6 +29,11 @@
                                      {:id (random-url-safe-string)
                                       :visualisation-id visualisation-id})))
 
+(defn share-dashboard [tenant-conn dashboard-id]
+  (first (insert-dashboard-share tenant-conn
+                                 {:id (random-url-safe-string)
+                                  :dashboard-id dashboard-id})))
+
 (defn end-share
   "Delete the share."
   [conn id]
@@ -42,5 +47,8 @@
         (response (collection tenant-conn)))
 
       (POST "/" {:keys [tenant body] :as request}
-        (response (share-visualisation tenant-conn
-                                       (get body "visualisationId")))))))
+        (if (contains? body "visualisationId")
+          (response (share-visualisation tenant-conn
+                                         (get body "visualisationId")))
+          (response (share-dashboard tenant-conn
+                                     (get body "dashboardId"))))))))

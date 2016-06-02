@@ -55,7 +55,9 @@ export default class DatasetTable extends Component {
 
   getCellClassName(columnTitle) {
     const { sidebarProps } = this.state;
-    if (sidebarProps != null && sidebarProps.column.title === columnTitle) {
+    if (sidebarProps != null &&
+      sidebarProps.column &&
+      sidebarProps.column.title === columnTitle) {
       return 'sidebarTargetingColumn';
     }
     return '';
@@ -106,9 +108,8 @@ export default class DatasetTable extends Component {
         type: 'transformationLog',
         displayRight: true,
         onClose: this.hideSidebar,
-        onApply: this.hideSidebar,
+        onUndo: this.props.onUndoTransformation,
         columns: this.props.columns,
-        transformations: this.props.transformations,
       });
     }
   }
@@ -233,7 +234,11 @@ export default class DatasetTable extends Component {
             flexDirection: sidebarProps && sidebarProps.displayRight ? 'row-reverse' : 'row',
           }}
         >
-          {sidebarProps && <DataTableSidebar {...sidebarProps} />}
+          {sidebarProps &&
+            <DataTableSidebar
+              {...sidebarProps}
+              transformations={this.props.transformations}
+            />}
           <div
             className="wrapper"
             ref="wrappingDiv"
@@ -275,4 +280,5 @@ DatasetTable.propTypes = {
   rows: PropTypes.array.isRequired,
   transformations: PropTypes.array,
   onTransform: PropTypes.func.isRequired,
+  onUndoTransformation: PropTypes.func.isRequired,
 };
