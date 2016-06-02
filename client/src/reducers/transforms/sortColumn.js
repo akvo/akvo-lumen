@@ -56,13 +56,24 @@ function buildComparator(columns) {
   return composeComparators(columnComparators);
 }
 
-export default function sortColumn(dataset, { args }) {
-  const { columnName, sortDirection } = args;
+function sortColumns(dataset) {
+  const comp = buildComparator(dataset.columns);
+  dataset.rows.sort(comp);
+  return dataset;
+}
+
+export default function sortTransform(dataset, { op, args }) {
   const ds = cloneDeep(dataset);
-  const colIndex = columnIndex(columnName, dataset.columns);
-  ds.columns[colIndex].sort = nextSortLevel(ds.columns);
-  ds.columns[colIndex].direction = sortDirection;
-  const comp = buildComparator(ds.columns);
-  ds.rows.sort(comp);
-  return ds;
+  const { columnName, sortDirection } = args;
+  const colIndex = columnIndex(columnName, ds.columns);
+  if (op === 'core/sort-column') {
+    ds.columns[colIndex].sort = nextSortLevel(ds.columns);
+    ds.columns[colIndex].direction = sortDirection;
+  } else if (op === 'core/remove-sort') {
+    delete ds.columns[colIndex].sort;
+    delete ds.columns[colIndex].direction;
+  } else {
+    throw new Error(`Unknown sort transform ${op}`);
+  }
+  return sortColumns(ds);
 }

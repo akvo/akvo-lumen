@@ -207,6 +207,7 @@ export default class DatasetTable extends Component {
           onToggleColumnContextMenu={this.handleToggleColumnContextMenu}
           columnMenuActive={activeColumnContextMenu != null &&
             activeColumnContextMenu.column.title === column.title}
+          onRemoveSort={(transformation) => this.props.onTransform(transformation)}
         />
       );
       return (
