@@ -5,10 +5,8 @@
             [org.akvo.dash.endpoint.share :as share]
             [org.akvo.dash.endpoint.dashboard :as dashboard]
             [org.akvo.dash.fixtures :refer [db-fixture test-conn]]
-            [org.akvo.dash.util :refer [squuid]]
-            [ragtime
-             [jdbc :as jdbc]
-             [repl :as repl]]))
+            [org.akvo.dash.util :refer [squuid gen-table-name]]
+            [clojure.java.jdbc :as jdbc]))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -17,26 +15,32 @@
 
 (hugsql/def-db-fns "org/akvo/dash/job-execution.sql")
 (hugsql/def-db-fns "org/akvo/dash/endpoint/visualisation.sql")
+(hugsql/def-db-fns "org/akvo/dash/job-execution.sql")
 
-(defn dashboard-spec [v-id]
+(defn dashboard-spec [v1-id v2-id]
   {"type"     "dashboard"
    "title"    "My first Dashboard"
    ;; "id"       dashboard-id ;; Not present on new
-   "entities" {v-id     {"id"   v-id
-                         "type" "visualisation"
-                         ;;"visualisation" v-id ;; data?
-                         }
+   "entities" {v1-id    {"id"   v1-id
+                         "type" "visualisation"}
+               v2-id    {"id"   v2-id
+                         "type" "visualisation"}
                "text-1" {"id"      "text-1"
                          "type"    "text"
                          "content" "I am a text entity."}
                "text-2" {"id"      "text-2"
                          "type"    "text"
                          "content" "I am another text entity."}}
-   "layout"   {v-id     {"x" 1
+   "layout"   {v1-id    {"x" 1
                          "y" 0
                          "w" 0
                          "h" 0
-                         "i" v-id}
+                         "i" v1-id}
+               v2-id    {"x" 1
+                         "y" 0
+                         "w" 0
+                         "h" 0
+                         "i" v2-id}
                "text-1" {"x" 2
                          "y" 0
                          "w" 0
@@ -50,29 +54,76 @@
 
 (defn seed
   [conn spec]
-  (insert-data-source conn {:id   (:data-source-id spec)
+  (jdbc/execute! conn [(str "CREATE TABLE IF NOT EXISTS " (:table-name spec) " ("
+                            "rownr serial PRIMARY KEY"
+                            ");")])
+  (jdbc/execute! conn [(str "CREATE TABLE IF NOT EXISTS " (:table-name-2 spec) " ("
+                            "rownr serial PRIMARY KEY"
+                            ");")])
+  (jdbc/execute! conn [(str "CREATE TABLE IF NOT EXISTS " (:imported-table-name spec) " ("
+                            "rownr serial PRIMARY KEY"
+                            ");")])
+  (jdbc/execute! conn [(str "CREATE TABLE IF NOT EXISTS " (:imported-table-name-2 spec) " ("
+                            "rownr serial PRIMARY KEY"
+                            ");")])
+
+  (insert-data-source conn {:id (:data-source-id spec)
                             :spec "{}"})
+  (insert-job-execution conn {:id (:job-execution-id spec)
+                              :data-source-id (:data-source-id spec)})
+  (insert-job-execution conn {:id (:job-execution-id-2 spec)
+                              :data-source-id (:data-source-id spec)})
   (insert-dataset conn {:id          (:dataset-id spec)
                         :title       "Title"
                         :description "Description"})
+  (insert-dataset conn {:id          (:dataset-id-2 spec)
+                        :title       "Title"
+                        :description "Description"})
+  (insert-dataset-version conn {:id (squuid)
+                                :dataset-id (:dataset-id spec)
+                                :job-execution-id (:job-execution-id spec)
+                                :table-name (:table-name spec)
+                                :imported-table-name (:imported-table-name spec)
+                                :version 1
+                                :columns {}})
+  (insert-dataset-version conn {:id (squuid)
+                                :dataset-id (:dataset-id-2 spec)
+                                :job-execution-id (:job-execution-id-2 spec)
+                                :table-name (:table-name-2 spec)
+                                :imported-table-name (:imported-table-name-2 spec)
+                                :version 1
+                                :columns {}})
   (insert-visualisation conn {:id         (:visualisation-id spec)
                               :dataset-id (:dataset-id spec)
                               :name       "Visualisation"
                               :type       "pie"
                               :spec       "{}"
                               :author     "{}"})
-  (dashboard/handle-new-dashboard conn (dashboard-spec (:visualisation-id spec))))
+  (insert-visualisation conn {:id         (:visualisation2-id spec)
+                              :dataset-id (:dataset-id-2 spec)
+                              :name       "Visualisation"
+                              :type       "bar"
+                              :spec       "{}"
+                              :author     "{}"})
+  (dashboard/handle-new-dashboard conn (dashboard-spec (:visualisation-id spec)
+                                                       (:visualisation2-id spec))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Test data
 ;;;
 
-
-
 (def test-spec
-  {:data-source-id   (str (squuid))
-   :dataset-id       (str (squuid))
-   :visualisation-id (str (squuid))})
+  {:data-source-id        (str (squuid))
+   :job-execution-id      (str (squuid))
+   :job-execution-id-2    (str (squuid))
+   :dataset-id            (str (squuid))
+   :dataset-id-2          (str (squuid))
+   :visualisation-id      (str (squuid))
+   :visualisation2-id     (str (squuid))
+   :table-name            (gen-table-name "ds")
+   :table-name-2          (gen-table-name "ds")
+   :imported-table-name   (gen-table-name "imported")
+   :imported-table-name-2 (gen-table-name "imported")})
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
