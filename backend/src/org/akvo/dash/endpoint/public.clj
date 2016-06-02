@@ -26,18 +26,13 @@
   [tenant-conn share]
   (let [v (visualisation tenant-conn (:visualisation_id share))
         d (find-dataset tenant-conn (:datasetId v))]
-    (str "window.LUMEN_DATA = "
-         (json/encode {"visualisation" (dissoc v :id :created :modified)
-                       "datasets"      {(:id d) d}})
-         ";")))
-
-;; (defn dashboard-datasets)
+    {"visualisation" (dissoc v :id :created :modified)
+     "datasets"      {(:id d) d}}))
 
 (defmethod response-data :dashboard
   [tenant-conn share]
-  (let [dashboard         (handle-dashboard-by-id tenant-conn (:dashboard_id share))
-        ;; visualisation-ids (filter #(= "visualisation" (get % "type"))
-        ;;                           (vals (:entities dashboard)))
+  (let [dashboard         (handle-dashboard-by-id tenant-conn
+                                                  (:dashboard_id share))
         visualisation-ids (filter identity
                                   (into []
                                         (map (fn [m]
@@ -51,18 +46,12 @@
         datasets          (map (fn [v]
                                  {(:datasetId v)
                                   (find-dataset tenant-conn (:datasetId v))})
-                               (vals visualisations))
-        resp              {"dashboard"      dashboard
-                           "visualisations" visualisations
-                           "datasets"       datasets}]
-    (println "@response-data:dashboard")
-    (pprint resp)
+                               (vals visualisations))]
+    {"dashboard"      dashboard
+     "visualisations" visualisations
+     "datasets"       datasets}))
 
-    (str "window.LUMEN_DATA = "
-         (json/encode  resp)
-         ";")))
-
-(defn html-response [json-litteral]
+(defn html-response [data]
   (str "<!DOCTYPE html>\n"
        "<html>\n"
        "  <head>\n"
@@ -73,7 +62,9 @@
        "<body>\n"
        "  <div id=\"root\"></div>\n"
        "  <script>\n"
-       json-litteral
+       "window.LUMEN_DATA = "
+       (json/encode data)
+       ";"
        "  </script>\n"
        "  <script type=\"text/javascript\" src=\"/assets/pub.bundle.js\"></script>"
        "  <link href=\"https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700\" rel=\"stylesheet\" type=\"text/css\">"
