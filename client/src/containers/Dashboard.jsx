@@ -67,23 +67,28 @@ class Dashboard extends Component {
 
   componentWillReceiveProps(nextProps) {
     if (this.props.params.dashboardId != null) {
-      const dash = nextProps.library.dashboards[nextProps.params.dashboardId];
+      const dashboardIsEmpty = Boolean(Object.keys(this.state.entities).length === 0 &&
+        this.state.layout.length === 0);
 
-      this.setState({
-        id: dash.id,
-        name: dash.title,
-        entities: dash.entities,
-        layout: Object.keys(dash.layout).map(key => dash.layout[key]),
-        created: dash.created,
-        modified: dash.modified,
-      });
+      if (dashboardIsEmpty) {
+        const dash = nextProps.library.dashboards[nextProps.params.dashboardId];
 
-      Object.keys(dash.entities).forEach(key => {
-        const entity = dash.entities[key];
-        if (entity.type === 'visualisation') {
-          this.onAddVisualisation(this.props.library.visualisations[key].datasetId);
-        }
-      });
+        this.setState({
+          id: dash.id,
+          name: dash.title,
+          entities: dash.entities,
+          layout: Object.keys(dash.layout).map(key => dash.layout[key]),
+          created: dash.created,
+          modified: dash.modified,
+        });
+
+        Object.keys(dash.entities).forEach(key => {
+          const entity = dash.entities[key];
+          if (entity.type === 'visualisation') {
+            this.onAddVisualisation(this.props.library.visualisations[key].datasetId);
+          }
+        });
+      }
     }
   }
 
