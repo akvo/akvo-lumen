@@ -1,6 +1,5 @@
 (ns org.akvo.dash.endpoint.share
   (:require [clojure.string :as string]
-            [clojure.pprint :refer [pprint]]
             [compojure.core :refer :all]
             [hugsql.core :as hugsql]
             [org.akvo.dash.component.tenant-manager :refer [connection]]

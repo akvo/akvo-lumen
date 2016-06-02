@@ -1,6 +1,5 @@
 (ns org.akvo.dash.endpoint.share-test
-  (:require [clojure.pprint :refer [pprint]]
-            [clojure.test :refer :all]
+  (:require [clojure.test :refer :all]
             [hugsql.core :as hugsql]
             [org.akvo.dash.component.tenant-manager :as tm]
             [org.akvo.dash.endpoint.share :as share]
@@ -112,13 +111,7 @@
   (testing "Insert dashboard share"
     (let [dashboard-id (-> (all-dashboards test-conn) first :id)
           dashboard-share (share/share-dashboard test-conn dashboard-id)]
-      (is (contains? dashboard-share :id))
-      ;; (pprint dashboard-id)
-      ;; (pprint dashboard-share)
-      ;; (is (= 1 1))
-      )
-
-    )
+      (is (contains? dashboard-share :id))))
 
   (testing "History"
     (is (not (empty? (share-history test-conn))))))

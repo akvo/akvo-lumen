@@ -32,7 +32,7 @@
   [tenant-conn share]
   (let [dashboard         (handle-dashboard-by-id tenant-conn
                                                   (:dashboard_id share))
-        visualisation-ids (filter identity
+        visualisation-ids (remove nil?
                                   (into []
                                         (map (fn [m]
                                                (if (= (get m "type")

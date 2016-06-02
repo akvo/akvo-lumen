@@ -1,6 +1,5 @@
 (ns org.akvo.dash.endpoint.dashboard
   (:require [compojure.core :refer :all]
-            [clojure.pprint :refer [pprint]]
             [clojure.java.jdbc :as jdbc]
             [hugsql.core :as hugsql]
             [org.akvo.dash.component.tenant-manager :refer [connection]]

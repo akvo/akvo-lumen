@@ -1,9 +1,5 @@
 (ns org.akvo.dash.endpoint.dashboard-test
   (:require [clojure.test :refer :all]
-<<<<<<< HEAD
-            [clojure.pprint :refer [pprint]]
-=======
->>>>>>> develop
             [hugsql.core :as hugsql]
             [org.akvo.dash.fixtures :refer [db-fixture test-conn]]
             [org.akvo.dash.endpoint.share :as share]
