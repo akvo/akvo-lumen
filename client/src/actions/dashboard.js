@@ -73,7 +73,7 @@ export function saveDashboardChanges(dashboard) {
 
   return (dispatch) => {
     dispatch(editDashboardRequest);
-    fetch(`/api/dashboards/${dash.id}`, {
+    fetch(`/api/dashboards/${id}`, {
       method: 'PUT',
       headers: headers(),
       body: JSON.stringify(dashboard),
