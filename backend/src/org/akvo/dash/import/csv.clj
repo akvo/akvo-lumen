@@ -99,18 +99,24 @@
   [claims config spec]
   true)
 
-(defmethod import/make-dataset-data-table "CSV"
-  [tenant-conn {:keys [file-upload-path]} table-name spec]
-  (try
-    (let [ ;; TODO a bit of "manual" integration work
-          file-on-disk? (contains? spec "fileName")
-          path (let [url (get spec "url")]
+(defn- get-path
+  [spec file-upload-path]
+  (or (get spec "path")
+      (let [file-on-disk? (contains? spec "fileName")
+            url (get spec "url")]
                  (if file-on-disk?
                    (str file-upload-path
                         "/resumed/"
                         (last (s/split url #"\/"))
                         "/file")
-                   url))
+                   url))))
+
+
+(defmethod import/make-dataset-data-table "CSV"
+  [tenant-conn {:keys [file-upload-path]} table-name spec]
+  (try
+    (let [ ;; TODO a bit of "manual" integration work
+          path (get-path spec file-upload-path)
           headers? (boolean (get spec "hasColumnHeaders"))
           n-cols (get-num-cols path \,)
           col-titles (if headers?

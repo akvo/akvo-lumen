@@ -51,4 +51,10 @@ SELECT status, error_log->>0 as "error-message"
 -- :doc Find the dataset id corresponding to the job execution id
 SELECT dataset_id
   FROM dataset_version
- WHERE dataset_version.job_execution_id=:id
+ WHERE dataset_version.job_execution_id = :id
+
+-- :name job-execution-status :? :1
+-- :doc Get job execution status for a given job execution id
+SELECT status
+  FROM job_execution
+ WHERE id = :id
