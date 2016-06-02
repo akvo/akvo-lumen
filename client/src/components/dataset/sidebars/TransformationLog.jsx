@@ -19,6 +19,8 @@ function transformationDescription({ op, args }, columns) {
       return `${columnTitle(columnName, columns)} trimmed double spaces`;
     case 'core/change-datatype':
       return `${columnTitle(columnName, columns)} datatype to ${newType}`;
+    case 'core/sort-column':
+      return `${columnTitle(columnName, columns)} sorted ${args.sortDirection}`;
     default:
       return op;
   }
