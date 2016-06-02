@@ -31,12 +31,35 @@
                        "datasets"      {(:id d) d}})
          ";")))
 
+;; (defn dashboard-datasets)
+
 (defmethod response-data :dashboard
   [tenant-conn share]
-  (let [dashboard (handle-dashboard-by-id tenant-conn (:dashboard_id share))]
-    (pprint dashboard)
+  (let [dashboard         (handle-dashboard-by-id tenant-conn (:dashboard_id share))
+        ;; visualisation-ids (filter #(= "visualisation" (get % "type"))
+        ;;                           (vals (:entities dashboard)))
+        visualisation-ids (filter identity
+                                  (into []
+                                        (map (fn [m]
+                                               (if (= (get m "type")
+                                                      "visualisation")
+                                                 (get m "id")))
+                                             (vals (:entities dashboard)))))
+        visualisations    (first (map (fn [v-id]
+                                        {v-id (visualisation tenant-conn v-id)})
+                                      visualisation-ids))
+        datasets          (map (fn [v]
+                                 {(:datasetId v)
+                                  (find-dataset tenant-conn (:datasetId v))})
+                               (vals visualisations))
+        resp              {"dashboard"      dashboard
+                           "visualisations" visualisations
+                           "datasets"       datasets}]
+    (println "@response-data:dashboard")
+    (pprint resp)
+
     (str "window.LUMEN_DATA = "
-         (json/encode dashboard)
+         (json/encode  resp)
          ";")))
 
 (defn html-response [json-litteral]
