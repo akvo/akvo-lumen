@@ -55,4 +55,17 @@
     color: $blueGrey;
     border-color: $blueGrey;
   }
+  .TransformationList {
+    height: calc(100vh - 16rem);
+    overflow-y: scroll;
+    padding: 1rem;
+    ol {
+      list-style: initial;
+      list-style-type: decimal;
+      li {
+        margin-left: 1.25rem;
+        padding: 0.5rem;
+      }
+    }
+  }
 }
