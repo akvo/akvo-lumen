@@ -2,8 +2,8 @@
   (:require [clojure.test :refer :all]
             [hugsql.core :as hugsql]
             [org.akvo.dash.component.tenant-manager :as tm]
-            [org.akvo.dash.endpoint.share :as share]
             [org.akvo.dash.endpoint.dashboard :as dashboard]
+            [org.akvo.dash.endpoint.share :as share]
             [org.akvo.dash.fixtures :refer [db-fixture test-conn]]
             [org.akvo.dash.util :refer [squuid]]
             [ragtime
@@ -55,7 +55,7 @@
   (insert-dataset conn {:id          (:dataset-id spec)
                         :title       "Title"
                         :description "Description"})
-  (insert-visualisation conn {:id         (:visualisation-id spec)
+  (upsert-visualisation conn {:id         (:visualisation-id spec)
                               :dataset-id (:dataset-id spec)
                               :name       "Visualisation"
                               :type       "pie"

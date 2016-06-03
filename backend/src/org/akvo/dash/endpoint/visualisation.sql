@@ -13,8 +13,15 @@ WHERE id = :id;
 -- :doc delete visualisation by id
 DELETE FROM visualisation WHERE id = :id;
 
--- :name insert-visualisation :<!
--- :doc Insert a single visualisations
+-- :name upsert-visualisation :<!
+-- :doc Upsert a single visualisation
 INSERT INTO visualisation (id, dataset_id, "name", "type", spec, author)
-VALUES (:id, :dataset-id, :name, :type, :spec::jsonb, :author::jsonb)
+VALUES (:id, :dataset-id, :name, :type, :spec, :author)
+ON CONFLICT (id)
+DO UPDATE SET dataset_id = :dataset-id,
+              "name" = :name,
+              "type" = :type,
+              spec = :spec,
+              author = :author
+WHERE visualisation.id=:id
 RETURNING *;

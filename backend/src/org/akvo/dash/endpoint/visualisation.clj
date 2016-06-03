@@ -32,7 +32,7 @@
       (POST "/" {:keys [jwt-claims body]}
         (try
           (let [id (squuid)
-                resp (first (insert-visualisation
+                resp (first (upsert-visualisation
                              tenant-conn
                              {:id id
                               :dataset-id (get body "datasetId")
@@ -60,6 +60,16 @@
                                           :identifiers identity)]
             (response (dissoc v :author))
             (not-found {:id id})))
+
+        (PUT "/" {:keys [jwt-claims body]}
+          (upsert-visualisation tenant-conn
+            {:id id
+             :dataset-id (get body "datasetId")
+             :type (get body "visualisationType")
+             :name (get body "name")
+             :spec (get body "spec")
+             :author jwt-claims})
+          (response {:id id}))
 
         (DELETE "/" _
           (delete-visualisation-by-id tenant-conn {:id id})
