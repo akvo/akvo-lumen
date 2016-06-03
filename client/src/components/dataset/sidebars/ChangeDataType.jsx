@@ -18,7 +18,7 @@ const parseFormatOptions = [
   },
 ];
 
-function DarseFormatSelect({ onChange, parseFormat }) {
+function DateFormatSelect({ onChange, parseFormat }) {
   return (
     <div className="inputGroup">
       <label htmlFor="parseFormatMenu">
@@ -34,7 +34,7 @@ function DarseFormatSelect({ onChange, parseFormat }) {
   );
 }
 
-DarseFormatSelect.propTypes = {
+DateFormatSelect.propTypes = {
   parseFormat: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
 };
@@ -188,7 +188,7 @@ export default class ChangeDataType extends Component {
             />
           </div>
           {newType === 'date' && column.type === 'text' ?
-            <DarseFormatSelect
+            <DateFormatSelect
               parseFormat={this.state.args.parseFormat}
               onChange={parseFormat => this.mergeArgs({ parseFormat })}
             /> : null}
