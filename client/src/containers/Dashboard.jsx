@@ -51,16 +51,22 @@ class Dashboard extends Component {
       id: null,
       created: null,
       modified: null,
+<<<<<<< HEAD
       isUnsavedChanges: null,
       isShareModalVisible: false,
+=======
+>>>>>>> develop
     };
     this.onAddVisualisation = this.onAddVisualisation.bind(this);
     this.updateLayout = this.updateLayout.bind(this);
     this.updateEntities = this.updateEntities.bind(this);
     this.onUpdateName = this.onUpdateName.bind(this);
     this.onSave = this.onSave.bind(this);
+<<<<<<< HEAD
     this.toggleShareDashboard = this.toggleShareDashboard.bind(this);
     this.handleDashboardAction = this.handleDashboardAction.bind(this);
+=======
+>>>>>>> develop
   }
 
   componentWillMount() {
@@ -102,7 +108,13 @@ class Dashboard extends Component {
   onSave() {
     const { dispatch } = this.props;
     const dashboard = getDashboardFromState(this.state);
+<<<<<<< HEAD
 
+=======
+    this.setState({
+      isUnsavedChanges: false,
+    });
+>>>>>>> develop
     if (this.state.id) {
       dispatch(actions.saveDashboardChanges(dashboard));
     } else {
@@ -129,6 +141,7 @@ class Dashboard extends Component {
     this.setState({ entities });
   }
 
+<<<<<<< HEAD
   handleDashboardAction(action) {
     switch (action) {
       case 'share':
@@ -152,6 +165,15 @@ class Dashboard extends Component {
           dashboard={getDashboardFromState(this.state)}
           isUnsavedChanges={this.state.isUnsavedChanges}
           onDashboardAction={this.handleDashboardAction}
+=======
+  render() {
+    return (
+      <div className="Dashboard">
+        <EntityTypeHeader
+          title={this.state.name || this.state.title}
+          saveStatus={'Saving not yet implemented'}
+          actionButtons={[]}
+>>>>>>> develop
         />
         <DashboardEditor
           dashboard={this.state}
@@ -162,11 +184,14 @@ class Dashboard extends Component {
           onUpdateLayout={this.updateLayout}
           onUpdateEntities={this.updateEntities}
           onUpdateName={this.onUpdateName}
+<<<<<<< HEAD
         />
         <ShareEntity
           isOpen={this.state.isShareModalVisible}
           onClose={this.toggleShareDashboard}
           entity={getDashboardFromState(this.state)}
+=======
+>>>>>>> develop
         />
       </div>
     );
