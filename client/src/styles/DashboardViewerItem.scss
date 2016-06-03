@@ -1,0 +1,15 @@
+@import 'modules/colors';
+
+.DashboardCanvasItem {
+  position: relative;
+  overflow: hidden;
+  vertical-align: top;
+  background-color: white;
+  border: 0.1rem solid $midGrey;
+
+  .itemContainer {
+    &.text {
+      line-height: 1.4rem;
+    }
+  }
+}

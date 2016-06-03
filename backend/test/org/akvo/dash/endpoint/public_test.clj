@@ -38,5 +38,9 @@
           share-data      (public/response-data test-conn share)]
       (is (every? #(contains? share-data %)
                   ["dashboard" "visualisations" "datasets"]))
+      (is (= 2
+             (count (get share-data "datasets"))))
+      (is (= 2
+             (count (get share-data "visualisations"))))
       (is (every? #(not (nil? %))
-                  (vals share-data))))))
+                    (vals share-data))))))

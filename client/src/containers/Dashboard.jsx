@@ -1,7 +1,8 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import DashboardEditor from '../components/dashboard/DashboardEditor';
-import EntityTypeHeader from '../components/entity-editor/EntityTypeHeader';
+import DashboardHeader from '../components/dashboard/DashboardHeader';
+import ShareEntity from '../components/modals/ShareEntity';
 import * as actions from '../actions/dashboard';
 import { fetchDataset } from '../actions/dataset';
 import { push } from 'react-router-redux';
@@ -28,6 +29,8 @@ const getDashboardFromState = state => (
   {
     type: state.type,
     title: state.name,
+    /* Temporary shim until we standardize on "name" or "title" for entities */
+    name: state.name,
     entities: state.entities,
     layout: getLayoutObjectFromArray(state.layout),
     id: state.id,
@@ -48,12 +51,16 @@ class Dashboard extends Component {
       id: null,
       created: null,
       modified: null,
+      isUnsavedChanges: null,
+      isShareModalVisible: false,
     };
     this.onAddVisualisation = this.onAddVisualisation.bind(this);
     this.updateLayout = this.updateLayout.bind(this);
     this.updateEntities = this.updateEntities.bind(this);
     this.onUpdateName = this.onUpdateName.bind(this);
     this.onSave = this.onSave.bind(this);
+    this.toggleShareDashboard = this.toggleShareDashboard.bind(this);
+    this.handleDashboardAction = this.handleDashboardAction.bind(this);
   }
 
   componentWillMount() {
@@ -95,9 +102,6 @@ class Dashboard extends Component {
   onSave() {
     const { dispatch } = this.props;
     const dashboard = getDashboardFromState(this.state);
-    this.setState({
-      isUnsavedChanges: false,
-    });
     if (this.state.id) {
       dispatch(actions.saveDashboardChanges(dashboard));
     } else {
@@ -124,13 +128,29 @@ class Dashboard extends Component {
     this.setState({ entities });
   }
 
+  handleDashboardAction(action) {
+    switch (action) {
+      case 'share':
+        this.toggleShareDashboard();
+        break;
+      default:
+        throw new Error(`Action ${action} not yet implemented`);
+    }
+  }
+
+  toggleShareDashboard() {
+    this.setState({
+      isShareModalVisible: !this.state.isShareModalVisible,
+    });
+  }
+
   render() {
     return (
       <div className="Dashboard">
-        <EntityTypeHeader
-          title={this.state.name || this.state.title}
-          saveStatus={'Saving not yet implemented'}
-          actionButtons={[]}
+        <DashboardHeader
+          dashboard={getDashboardFromState(this.state)}
+          isUnsavedChanges={this.state.isUnsavedChanges}
+          onDashboardAction={this.handleDashboardAction}
         />
         <DashboardEditor
           dashboard={this.state}
@@ -141,6 +161,11 @@ class Dashboard extends Component {
           onUpdateLayout={this.updateLayout}
           onUpdateEntities={this.updateEntities}
           onUpdateName={this.onUpdateName}
+        />
+        <ShareEntity
+          isOpen={this.state.isShareModalVisible}
+          onClose={this.toggleShareDashboard}
+          entity={getDashboardFromState(this.state)}
         />
       </div>
     );

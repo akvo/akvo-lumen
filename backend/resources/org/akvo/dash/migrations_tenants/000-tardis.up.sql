@@ -66,7 +66,7 @@ EXECUTE format('
         ADD CONSTRAINT %I_exclusion EXCLUDE
         USING gist (id WITH =, _validrange WITH &&);
 
-        CREATE TRIGGER %I_history BEFORE
+        CREATE TRIGGER %I_history AFTER
         INSERT OR DELETE OR UPDATE ON %I
         FOR EACH ROW EXECUTE PROCEDURE history.log_change();
         ', t, t, t, t, t, t);

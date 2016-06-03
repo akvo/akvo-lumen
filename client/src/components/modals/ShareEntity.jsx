@@ -16,10 +16,12 @@ export default class ShareEntity extends Component {
 
   fetchShareId() {
     const { id } = this.props.entity;
+    const entityType = this.props.entity.type;
+
     if (id != null) {
       fetch('/api/shares', {
         method: 'POST',
-        body: JSON.stringify({ visualisationId: id }),
+        body: JSON.stringify({ [`${entityType}Id`]: id }),
         headers: headers(),
       })
       .then(response => response.json())
