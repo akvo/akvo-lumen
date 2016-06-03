@@ -36,7 +36,7 @@ const getSortFunc = layout => (a, b) => {
     return 1;
   }
   return 0;
-}
+};
 
 export default class DashboardViewer extends Component {
   constructor() {
