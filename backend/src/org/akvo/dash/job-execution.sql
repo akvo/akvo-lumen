@@ -50,3 +50,9 @@ SELECT status, error_log->>0 as "error-message"
 SELECT dataset_id
   FROM dataset_version
  WHERE dataset_version.job_execution_id=:id
+
+-- :name delete-failed-job-execution-by-id :! :n
+-- :doc delete failed job execution by id
+DELETE
+  FROM job_execution
+ WHERE id = :id AND status = 'FAILED'
