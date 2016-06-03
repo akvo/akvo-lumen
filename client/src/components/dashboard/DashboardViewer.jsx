@@ -20,6 +20,24 @@ const viewportLimits = [
 
 const getArrayFromObject = object => Object.keys(object).map(key => object[key]);
 
+const getSortFunc = layout => (a, b) => {
+  const ay = layout[a.id].y;
+  const by = layout[b.id].y;
+  const ax = layout[a.id].x;
+  const bx = layout[b.id].x;
+
+  if (ay < by) {
+    return -1;
+  } else if (ay > by) {
+    return 1;
+  } else if (ax < bx) {
+    return -1;
+  } else if (ax > bx) {
+    return 1;
+  }
+  return 0;
+}
+
 export default class DashboardViewer extends Component {
   constructor() {
     super();
@@ -80,25 +98,7 @@ export default class DashboardViewer extends Component {
   render() {
     const { dashboard, datasets } = this.props;
     const layout = dashboard.layout;
-
-    const sortFunc = (a, b) => {
-      const ay = layout[a.id].y;
-      const by = layout[b.id].y;
-      const ax = layout[a.id].x;
-      const bx = layout[b.id].x;
-
-      if (ay < by) {
-        return -1;
-      } else if (ay > by) {
-        return 1;
-      } else if (ax < bx) {
-        return -1;
-      } else if (ax > bx) {
-        return 1;
-      }
-      return 0;
-    };
-
+    const sortFunc = getSortFunc(layout);
     const sortedDashboard = getArrayFromObject(dashboard.entities).sort(sortFunc);
 
     return (
