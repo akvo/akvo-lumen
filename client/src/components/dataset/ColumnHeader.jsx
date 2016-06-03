@@ -68,9 +68,16 @@ export default class ColumnHeader extends Component {
         onClick={this.handleColumnMenuClick}
       >
         {column.sort != null ?
-          <div>
+          <div
+            className="sortLabel"
+          >
             Sort: {column.direction === 'ASC' ? 'Ascending' : 'Descending'}
-            <span onClick={(event) => this.handleRemoveSort(event, column)}>X</span>
+            <span
+              className="cancelSort"
+              onClick={(event) => this.handleRemoveSort(event, column)}
+            >
+              +
+            </span>
           </div>
           : null
         }

@@ -22,12 +22,34 @@
     }
   }
   * {
-    line-height: 50px;
+    line-height: 60px;
   }
   .columnType {
     text-transform: uppercase;
     font-size: 0.75rem;
     margin: 0 0.75rem;
     color: $blueGrey;
+  }
+  .sortLabel {
+    display: block;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0rem;
+    line-height: 0.7rem;
+    padding: 0.125rem 0.5rem 0.18rem 0.5rem;
+    background-color: rgba(0,0,0,0.25);
+    color: $black;
+    text-align: left;
+    * {
+      line-height: 0.7rem;
+      font-size: 0.75rem;
+    }
+    .cancelSort {
+      float: right;
+      transform: rotate(45deg);
+      font-size: 1.5rem;
+      margin-right: -0.25rem;
+    }
   }
 }

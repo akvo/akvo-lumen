@@ -260,7 +260,7 @@ export default class DatasetTable extends Component {
                 onContextMenuItemSelected={this.handleColumnContextMenuClicked}
               />}
             <Table
-              headerHeight={50}
+              headerHeight={60}
               rowHeight={30}
               rowsCount={rows.length}
               width={width}
