@@ -97,14 +97,14 @@
                               :dataset-id (:dataset-id spec)
                               :name       "Visualisation"
                               :type       "pie"
-                              :spec       "{}"
-                              :author     "{}"})
+                              :spec       {}
+                              :author     {}})
   (upsert-visualisation conn {:id         (:visualisation2-id spec)
                               :dataset-id (:dataset-id-2 spec)
                               :name       "Visualisation"
                               :type       "bar"
-                              :spec       "{}"
-                              :author     "{}"})
+                              :spec       {}
+                              :author     {}})
   (dashboard/handle-new-dashboard conn (dashboard-spec (:visualisation-id spec)
                                                        (:visualisation2-id spec))))
 
