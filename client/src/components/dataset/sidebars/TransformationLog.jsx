@@ -37,7 +37,9 @@ TransformationListItem.propTypes = {
 
 function TransformationList({ transformations = [], columns }) {
   return (
-    <div style={{ padding: '1rem' }}>
+    <div
+      className="TransformationList"
+    >
       <ol>
         {transformations.map((transformation, index) => (
           <li key={index}>
@@ -63,7 +65,7 @@ export default function TransformationLog({ onClose, onUndo, transformations = [
       className="DataTableSidebar"
       style={{
         width: '300px',
-        height: 'calc(100vh - 4rem)',
+        height: 'calc(100vh - 8rem)',
       }}
     >
       <SidebarHeader onClose={onClose}>
