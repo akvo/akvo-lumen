@@ -30,11 +30,11 @@
 
 (defn- visualisation-id-list
   [dashboard]
-  (remove nil? (->> dashboard
-                    :entities
-                    vals
-                    (filter #(= "visualisation" (get % "type")))
-                    (mapv #(get % "id")))))
+  (->> dashboard
+       :entities
+       vals
+       (filter #(= "visualisation" (get % "type")))
+       (mapv #(get % "id"))))
 
 (defn visualisation-list [tenant-conn visualisation-ids]
   (reduce conj {} (map (fn [v-id]
