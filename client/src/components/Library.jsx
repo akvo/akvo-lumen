@@ -30,8 +30,9 @@ class Library extends Component {
   }
 
   componentDidMount() {
+    const { datasets } = this.props;
     // TODO better heuristics
-    if (Object.keys(this.props.datasets).length === 0) {
+    if (Object.keys(datasets).length === 0) {
       this.props.dispatch(fetchLibrary());
     }
   }
@@ -42,11 +43,13 @@ class Library extends Component {
   }
 
   handleEntityAction(actionType, entityType, id) {
-    const { dispatch } = this.props;
+    const { dispatch, datasets } = this.props;
     if (actionType === 'delete') {
       switch (entityType) {
         case 'dataset':
-          dispatch(deleteDataset(id));
+          if (datasets[id].status !== 'PENDING') {
+            dispatch(deleteDataset(id));
+          }
           break;
         case 'visualisation':
           dispatch(deleteVisualisation(id));
