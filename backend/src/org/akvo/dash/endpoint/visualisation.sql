@@ -23,5 +23,4 @@ DO UPDATE SET dataset_id = :dataset-id,
               "type" = :type,
               spec = :spec,
               author = :author
-WHERE visualisation.id=:id
 RETURNING *;

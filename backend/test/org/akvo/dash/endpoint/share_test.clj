@@ -99,7 +99,7 @@
                               :type       "pie"
                               :spec       "{}"
                               :author     "{}"})
-  (insert-visualisation conn {:id         (:visualisation2-id spec)
+  (upsert-visualisation conn {:id         (:visualisation2-id spec)
                               :dataset-id (:dataset-id-2 spec)
                               :name       "Visualisation"
                               :type       "bar"
