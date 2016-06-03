@@ -104,9 +104,12 @@
         source-table (:imported-table-name dv)
         table-name (gen-table-name "ds")
         f (fn [log op-spec]
-            (let [step (engine/apply-operation tenant-conn
+            (let [cols (if (empty? log)
+                         columns
+                         (:columns (last log)))
+                  step (engine/apply-operation tenant-conn
                                                table-name
-                                               columns
+                                               cols
                                                op-spec)]
               (if (:success? step)
                 (conj log step)

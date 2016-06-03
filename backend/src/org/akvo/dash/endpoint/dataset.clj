@@ -16,13 +16,14 @@
         sort-columns (conj
                       (vec
                        (for [c (sort-by f (filter f columns))]
-                         (str (get c "columnName") " " (get c "sortDirection"))))
+                         (str (get c "columnName") " " (get c "direction"))))
                       "rnum")
-        order-by-expr (str/join "," sort-columns)]
-    (format "SELECT %s FROM %s ORDER BY %s"
-            (str/join "," column-names)
-            table-name
-            order-by-expr)))
+        order-by-expr (str/join "," sort-columns)
+        sql (format "SELECT %s FROM %s ORDER BY %s"
+                    (str/join "," column-names)
+                    table-name
+                    order-by-expr)]
+    sql))
 
 (defn find-dataset [conn id]
   (when-let [dataset (dataset-by-id conn {:id id})]
