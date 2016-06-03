@@ -28,24 +28,33 @@
     {"visualisation" (dissoc v :id :created :modified)
      "datasets"      {(:id d) d}}))
 
+(defn- visualisation-id-list
+  [dashboard]
+  (->> dashboard
+       :entities
+       vals
+       (filter #(= "visualisation" (get % "type")))
+       (mapv #(get % "id"))))
+
+(defn visualisation-list [tenant-conn visualisation-ids]
+  (reduce conj {} (map (fn [v-id]
+                         {v-id (visualisation tenant-conn v-id)})
+                       visualisation-ids)))
+
+(defn dataset-list
+  [tenant-conn visualisations]
+  (let [dataset-ids (vec (reduce conj #{} (map :datasetId
+                                               (vals visualisations))))]
+    (reduce conj {} (map (fn [d-id]
+                           {d-id (find-dataset tenant-conn d-id)})
+                         dataset-ids))))
+
 (defmethod response-data :dashboard
   [tenant-conn share]
-  (let [dashboard         (handle-dashboard-by-id tenant-conn
-                                                  (:dashboard_id share))
-        visualisation-ids (remove nil?
-                                  (into []
-                                        (map (fn [m]
-                                               (if (= (get m "type")
-                                                      "visualisation")
-                                                 (get m "id")))
-                                             (vals (:entities dashboard)))))
-        visualisations    (first (map (fn [v-id]
-                                        {v-id (visualisation tenant-conn v-id)})
-                                      visualisation-ids))
-        datasets          (map (fn [v]
-                                 {(:datasetId v)
-                                  (find-dataset tenant-conn (:datasetId v))})
-                               (vals visualisations))]
+  (let [dashboard (handle-dashboard-by-id tenant-conn (:dashboard_id share))
+        visualisation-ids (visualisation-id-list dashboard)
+        visualisations (visualisation-list tenant-conn visualisation-ids)
+        datasets (dataset-list tenant-conn visualisations)]
     {"dashboard"      dashboard
      "visualisations" visualisations
      "datasets"       datasets}))
