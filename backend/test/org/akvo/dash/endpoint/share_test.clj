@@ -1,12 +1,12 @@
 (ns org.akvo.dash.endpoint.share-test
-  (:require [clojure.test :refer :all]
+  (:require [clojure.java.jdbc :as jdbc]
+            [clojure.test :refer :all]
             [hugsql.core :as hugsql]
             [org.akvo.dash.component.tenant-manager :as tm]
-            [org.akvo.dash.endpoint.share :as share]
             [org.akvo.dash.endpoint.dashboard :as dashboard]
+            [org.akvo.dash.endpoint.share :as share]
             [org.akvo.dash.fixtures :refer [db-fixture test-conn]]
-            [org.akvo.dash.util :refer [squuid gen-table-name]]
-            [clojure.java.jdbc :as jdbc]))
+            [org.akvo.dash.util :refer [squuid gen-table-name]]))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -93,18 +93,18 @@
                                 :imported-table-name (:imported-table-name-2 spec)
                                 :version 1
                                 :columns {}})
-  (insert-visualisation conn {:id         (:visualisation-id spec)
+  (upsert-visualisation conn {:id         (:visualisation-id spec)
                               :dataset-id (:dataset-id spec)
                               :name       "Visualisation"
                               :type       "pie"
-                              :spec       "{}"
-                              :author     "{}"})
-  (insert-visualisation conn {:id         (:visualisation2-id spec)
+                              :spec       {}
+                              :author     {}})
+  (upsert-visualisation conn {:id         (:visualisation2-id spec)
                               :dataset-id (:dataset-id-2 spec)
                               :name       "Visualisation"
                               :type       "bar"
-                              :spec       "{}"
-                              :author     "{}"})
+                              :spec       {}
+                              :author     {}})
   (dashboard/handle-new-dashboard conn (dashboard-spec (:visualisation-id spec)
                                                        (:visualisation2-id spec))))
 

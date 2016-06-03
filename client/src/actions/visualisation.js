@@ -44,14 +44,47 @@ export function createVisualisation(visualisation) {
   return createVisualisationRequest(visualisation);
 }
 
-export function saveVisualisationChanges(visualisation) {
-  const now = Date.now();
+function saveVisualisationChangesFailure(visualisation) {
+  return {
+    type: constants.EDIT,
+    visualisation,
+  };
+}
 
+function saveVisualisationChangesSuccess(visualisation) {
+  const now = Date.now();
   return {
     type: constants.EDIT,
     visualisation: Object.assign({}, visualisation, {
       modified: now,
+      status: 'OK',
     }),
+  };
+}
+
+function saveVisualisationChangesRequest(visualisation) {
+  const now = Date.now();
+  return {
+    type: constants.EDIT,
+    visualisation: Object.assign({}, visualisation, {
+      modified: now,
+      status: 'PENDING',
+    }),
+  };
+}
+
+export function saveVisualisationChanges(visualisation) {
+  return (dispatch, getState) => {
+    const prevVisualisation = getState().library.visualisations[visualisation.id];
+    dispatch(saveVisualisationChangesRequest(visualisation));
+    fetch(`/api/visualisations/${visualisation.id}`, {
+      method: 'PUT',
+      headers: headers(),
+      body: JSON.stringify(visualisation),
+    })
+    .then(response => response.json())
+    .then(() => dispatch(saveVisualisationChangesSuccess(visualisation)))
+    .catch(() => dispatch(saveVisualisationChangesFailure(prevVisualisation)));
   };
 }
 
