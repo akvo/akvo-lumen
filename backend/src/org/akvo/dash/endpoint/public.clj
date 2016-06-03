@@ -30,10 +30,11 @@
 
 (defn- visualisation-id-list
   [dashboard]
-  (remove nil? (mapv (fn [m]
-                       (if (= (get m "type") "visualisation")
-                         (get m "id")))
-                     (vals (:entities dashboard)))))
+  (remove nil? (->> dashboard
+                    :entities
+                    vals
+                    (filter #(= "visualisation" (get % "type")))
+                    (mapv #(get % "id")))))
 
 (defn visualisation-list [tenant-conn visualisation-ids]
   (reduce conj {} (map (fn [v-id]
@@ -42,8 +43,7 @@
 
 (defn dataset-list
   [tenant-conn visualisations]
-  (let [dataset-ids (vec (reduce conj #{} (map (fn [v]
-                                                 (:datasetId v))
+  (let [dataset-ids (vec (reduce conj #{} (map :datasetId
                                                (vals visualisations))))]
     (reduce conj {} (map (fn [d-id]
                            {d-id (find-dataset tenant-conn d-id)})
