@@ -58,3 +58,10 @@ SELECT dataset_id
 SELECT status
   FROM job_execution
  WHERE id = :id
+
+-- :name delete-failed-job-execution-by-id :! :n
+-- :doc delete failed job execution by id
+DELETE
+  FROM job_execution
+ WHERE id = :id AND status = 'FAILED'
+

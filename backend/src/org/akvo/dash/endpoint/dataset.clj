@@ -5,10 +5,12 @@
             [compojure.core :refer :all]
             [hugsql.core :as hugsql]
             [org.akvo.dash.component.tenant-manager :refer [connection]]
+            [org.akvo.dash.endpoint.job-execution :as job-execution]
             [org.akvo.dash.import :as import]
             [ring.util.response :refer (not-found response)]))
 
 (hugsql/def-db-fns "org/akvo/dash/endpoint/dataset.sql")
+(hugsql/def-db-fns "org/akvo/dash/job-execution.sql")
 
 (defn select-data-sql [table-name columns]
   (let [column-names (map #(get % "columnName") columns)
@@ -58,5 +60,7 @@
             (not-found {:id id})))
 
         (DELETE "/" _
-          (delete-dataset-by-id tenant-conn {:id id})
+          (let [c (delete-dataset-by-id tenant-conn {:id id})]
+            (when (zero? c)
+              (delete-failed-job-execution-by-id tenant-conn {:id id})))
           (response {:id id}))))))
