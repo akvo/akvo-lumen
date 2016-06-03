@@ -65,7 +65,7 @@ export default class DashboardViewerItem extends Component {
       >
         {this.props.item.type === 'visualisation' &&
           <div
-            className="noPointerEvents itemContainer visualisation"
+            className="itemContainer visualisation"
           >
             <DashChart
               visualisation={this.props.item.visualisation}
