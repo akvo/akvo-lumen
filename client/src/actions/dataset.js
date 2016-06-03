@@ -266,6 +266,64 @@ export function transform(datasetId, transformation) {
   };
 }
 
+function transformationLogRequestSent(datasetId) {
+  return {
+    type: constants.TRANSFORMATION_LOG_REQUEST_SENT,
+    datasetId,
+  };
+}
+
+function transformationSuccess(datasetId) {
+  return {
+    type: constants.TRANSFORMATION_SUCCESS,
+    datasetId,
+  };
+}
+
+function transformationFailure(datasetId, reason) {
+  return {
+    type: constants.TRANSFORMATION_FAILURE,
+    datasetId,
+    reason,
+  };
+}
+
+function pollDatasetTransformationStatus(jobExecutionId, datasetId) {
+  return (dispatch) => {
+    fetch(`/api/job_executions/${jobExecutionId}`, {
+      method: 'GET',
+      headers: headers(),
+    })
+    .then(response => response.json())
+    .then(({ status, reason }) => {
+      if (status === 'PENDING') {
+        setTimeout(() =>
+          dispatch(pollDatasetTransformationStatus(jobExecutionId, datasetId)), pollInteval);
+      } else if (status === 'FAILED') {
+        dispatch(transformationFailure(datasetId, reason));
+      } else if (status === 'OK') {
+        dispatch(transformationSuccess(datasetId));
+      }
+    })
+    .catch(error => dispatch(error));
+  };
+}
+
+export function sendTransformationLog(datasetId, transformations) {
+  return (dispatch) => {
+    dispatch(transformationLogRequestSent(datasetId));
+    fetch(`/api/transformations/${datasetId}`, {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify(transformations),
+    })
+    .then(response => response.json())
+    .then(({ jobExecutionId }) =>
+      dispatch(pollDatasetTransformationStatus(jobExecutionId, datasetId)));
+  };
+}
+
+
 export function undoTransformation(id) {
   return {
     type: constants.UNDO_TRANSFORMATION,

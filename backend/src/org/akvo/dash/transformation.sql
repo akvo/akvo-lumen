@@ -43,4 +43,6 @@ VALUES (:id, :dataset-id, :job-execution-id, :version,
 
 -- :name copy-table :!
 -- :doc Copy a table defition (including data)
-CREATE TABLE :i:dest-table AS TABLE :i:source-table
+CREATE TABLE :i:dest-table (LIKE :i:source-table INCLUDING ALL);
+INSERT INTO :i:dest-table SELECT * FROM :i:source-table;
+VACUUM ANALYZE :i:dest-table;

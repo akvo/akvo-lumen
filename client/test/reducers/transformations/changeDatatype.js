@@ -107,8 +107,8 @@ describe('changeDatatype number->text', () => {
 describe('changeDatatype text->date', () => {
   const date1 = '24-12-2016';
   const date2 = '01-01-1971';
-  const ts1 = moment(date1, 'DD-MM-YYYY', true).unix() * 1000;
-  const ts2 = moment(date2, 'DD-MM-YYYY', true).unix() * 1000;
+  const ts1 = moment(date1, 'DD-MM-YYYY', true).unix();
+  const ts2 = moment(date2, 'DD-MM-YYYY', true).unix();
   const datasets = {
     id: {
       id: 'id',

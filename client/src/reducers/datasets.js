@@ -75,6 +75,32 @@ function transformDataset(state, { datasetId, transformation }) {
   return newState;
 }
 
+function transformationLogRequestSent(state, { datasetId }) {
+  const newDataset = Object.assign({}, state[datasetId], { status: 'PENDING' });
+  // Remove history, we don't need it anymore
+  delete newDataset.history;
+  return Object.assign({}, state, {
+    [datasetId]: newDataset,
+  });
+}
+
+function transformationFailure(state, { datasetId, reason }) {
+  return Object.assign({}, state, {
+    [datasetId]: Object.assign({}, state[datasetId], {
+      status: 'FAILED',
+      reason,
+    }),
+  });
+}
+
+function transformationSuccess(state, { datasetId }) {
+  return Object.assign({}, state, {
+    [datasetId]: Object.assign({}, state[datasetId], {
+      status: 'OK',
+    }),
+  });
+}
+
 function undoDatasetTransformation(state, id) {
   const dataset = state[id];
   if (dataset.history != null && dataset.history.length > 0) {
@@ -105,6 +131,12 @@ export default function datasets(state = initialState, action) {
       return removeDataset(state, action.id);
     case constants.TRANSFORM_DATASET:
       return transformDataset(state, action);
+    case constants.TRANSFORMATION_LOG_REQUEST_SENT:
+      return transformationLogRequestSent(state, action);
+    case constants.TRANSFORMATION_SUCCESS:
+      return transformationSuccess(state, action);
+    case constants.TRANSFORMATION_FAILURE:
+      return transformationFailure(state, action);
     case constants.UNDO_TRANSFORMATION:
       return undoDatasetTransformation(state, action.id);
     default: return state;

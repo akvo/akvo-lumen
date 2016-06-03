@@ -39,7 +39,6 @@
   [{:strs [op args] :as op-spec}]
   (or (boolean (and (required-keys op-spec)
                  (type-set (args "newType"))
-                 (not-empty (args "defaultValue"))
                  (if (= "date" (args "newType"))
                    (not-empty (args "parseFormat"))
                    true)))
@@ -105,18 +104,24 @@
         source-table (:imported-table-name dv)
         table-name (gen-table-name "ds")
         f (fn [log op-spec]
-            (let [step (engine/apply-operation tenant-conn
+            (let [cols (if (empty? log)
+                         columns
+                         (:columns (last log)))
+                  step (engine/apply-operation tenant-conn
                                                table-name
-                                               columns
+                                               cols
                                                op-spec)]
               (if (:success? step)
                 (conj log step)
                 (throw (Exception. (str "Error applying operation: " op-spec))))))]
     (try
-      (copy-table tenant-conn {:source-table source-table
-                               :dest-table table-name})
+      (copy-table tenant-conn
+                  {:source-table source-table
+                   :dest-table table-name}
+                  {}
+                  :transaction? false)
       (let [result (reduce f [] transformation-log)
-            log (mapcat :execution-log result)
+            log (vec (mapcat :execution-log result))
             cols (:columns (last result))]
         (new-dataset-version tenant-conn {:id (str (squuid))
                                           :dataset-id dataset-id
@@ -143,7 +148,7 @@
           (future
             (execute tenant-conn job-id dataset-id transformation-log))
           {:status 200
-           :jobExecutionId job-id})
+           :body {:jobExecutionId job-id}})
         {:status 400
          :body {:message (:message v)}}))
     {:status 400
