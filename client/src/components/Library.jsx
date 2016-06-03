@@ -7,6 +7,7 @@ import { showModal } from '../actions/activeModal';
 import { fetchLibrary } from '../actions/library';
 import { deleteVisualisation } from '../actions/visualisation';
 import { deleteDataset } from '../actions/dataset';
+import { deleteDashboard } from '../actions/dashboard';
 
 require('../styles/Library.scss');
 
@@ -51,7 +52,8 @@ class Library extends Component {
           dispatch(deleteVisualisation(id));
           break;
         case 'dashboard':
-          throw new Error('Dashboard deletion not yet implemented');
+          dispatch(deleteDashboard(id));
+          break;
         default:
           throw new Error(`Invalid entity type: ${entityType}`);
       }

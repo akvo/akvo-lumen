@@ -17,6 +17,7 @@ export default function App({ history }) {
         <Route path="visualisation/create" component={Visualisation} />
         <Route path="visualisation/:visualisationId" component={Visualisation} />
         <Route path="dashboard/create" component={Dashboard} />
+        <Route path="dashboard/:dashboardId" component={Dashboard} />
       </Route>
     </Router>
   );

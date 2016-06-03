@@ -55,6 +55,18 @@ const sortListGroupEntities = (entities, sortOrder, isReverseSort) => {
   return sortedEntities;
 };
 
+/* Temporary shim until we standardize on either "name" or "title" for entities */
+const convertEntity = entity => {
+  const output = Object.assign({}, entity);
+
+  if (output.title && !output.name) {
+    output.name = output.title;
+    delete output.title;
+  }
+
+  return output;
+};
+
 export default function LibraryListingGroup({
   listGroup, displayMode, sortOrder, isReverseSort, onSelectEntity, onEntityAction }) {
   const listGroupTitle = getListGroupTitle(listGroup.listGroupName, sortOrder);
@@ -67,7 +79,7 @@ export default function LibraryListingGroup({
         {sortedEntities.map((entity, index) =>
           <LibraryListingItem
             key={index}
-            entity={entity}
+            entity={convertEntity(entity)}
             displayMode={displayMode}
             onSelectEntity={onSelectEntity}
             onEntityAction={onEntityAction}

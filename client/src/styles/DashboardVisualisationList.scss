@@ -2,7 +2,7 @@
 
 .DashboardVisualisationList {
   border-right: 0.1rem solid $lightGrey;
-  .list {
+  .list, .noVisualisationsMessage {
     padding: 1rem;
   }
   .listItem {
