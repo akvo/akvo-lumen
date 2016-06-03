@@ -2,16 +2,26 @@ import React, { Component, PropTypes } from 'react';
 import Modal from 'react-modal';
 import fetch from 'isomorphic-fetch';
 import headers from '../../actions/headers';
+import CopyToClipboard from 'react-copy-to-clipboard';
+
 require('../../styles/DashboardModal.scss');
 require('../../styles/ShareEntity.scss');
-
 
 export default class ShareEntity extends Component {
 
   constructor() {
     super();
-    this.state = { id: '' };
+    this.state = {
+      id: '',
+      copiedToClipboard: false,
+    };
     this.fetchShareId = this.fetchShareId.bind(this);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (!nextProps.isOpen) {
+      this.setState({ copiedToClipboard: false });
+    }
   }
 
   fetchShareId() {
@@ -33,6 +43,7 @@ export default class ShareEntity extends Component {
   render() {
     const { entity, onClose } = this.props;
     const { type, name } = entity;
+    const shareUrl = `${window.location.origin}/s/${this.state.id}`;
     return (
       <Modal
         isOpen={this.props.isOpen}
@@ -62,13 +73,27 @@ export default class ShareEntity extends Component {
               +
             </div>
             <div className="contents">
-              <label htmlFor="shareIdInput">Share {type} {name}</label>
-              <input
-                readOnly
-                id="shareIdInput"
-                type="text"
-                value={this.state.id}
-              />
+              <label>Share {type} {name}</label>
+              <div
+                className="shareUrl"
+              >
+                <a
+                  href={shareUrl}
+                  target="_blank"
+                >
+                  {shareUrl}
+                </a>
+              </div>
+              <CopyToClipboard
+                text={shareUrl}
+                onCopy={() => this.setState({ copiedToClipboard: true })}
+              >
+                <button
+                  className={`copyButton clickable ${this.state.copiedToClipboard ? 'copied' : ''}`}
+                >
+                  {this.state.copiedToClipboard ? 'Copied!' : 'Copy to clipboard'}
+                </button>
+              </CopyToClipboard>
             </div>
           </div>
         </div>
