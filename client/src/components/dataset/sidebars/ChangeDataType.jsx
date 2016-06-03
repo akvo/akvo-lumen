@@ -3,7 +3,7 @@ import DashSelect from '../../common/DashSelect';
 import SidebarHeader from './SidebarHeader';
 import SidebarControls from './SidebarControls';
 
-const dateFormatOptions = [
+const parseFormatOptions = [
   {
     value: 'YYYY-MM-DD',
     label: 'YYYY-MM-DD',
@@ -18,24 +18,24 @@ const dateFormatOptions = [
   },
 ];
 
-function DateFormatSelect({ onChange, dateFormat }) {
+function DarseFormatSelect({ onChange, parseFormat }) {
   return (
     <div className="inputGroup">
-      <label htmlFor="dateFormatMenu">
+      <label htmlFor="parseFormatMenu">
         Date format:
       </label>
       <DashSelect
-        name="dateFormatMenu"
-        value={dateFormat}
-        options={dateFormatOptions}
+        name="parseFormatMenu"
+        value={parseFormat}
+        options={parseFormatOptions}
         onChange={onChange}
       />
     </div>
   );
 }
 
-DateFormatSelect.propTypes = {
-  dateFormat: PropTypes.string.isRequired,
+DarseFormatSelect.propTypes = {
+  parseFormat: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
 };
 
@@ -119,7 +119,7 @@ export default class ChangeDataType extends Component {
         columnName: column.columnName,
         newType: newColumnType,
         defaultValue: null,
-        dateFormat: 'YYYY-MM-DD',
+        parseFormat: 'YYYY-MM-DD',
       },
       onError: 'default-value',
       errorStrategy: 'empty-cell',
@@ -181,16 +181,16 @@ export default class ChangeDataType extends Component {
               options={dataTypeOptions}
               onChange={type => {
                 if (type === 'date') {
-                  this.mergeArgs({ newType: 'date', dateFormat: 'YYYY-MM-DD' });
+                  this.mergeArgs({ newType: 'date', parseFormat: 'YYYY-MM-DD' });
                 }
                 this.mergeArgs({ newType: type });
               }}
             />
           </div>
           {newType === 'date' && column.type === 'text' ?
-            <DateFormatSelect
-              dateFormat={this.state.args.dateFormat}
-              onChange={dateFormat => this.mergeArgs({ dateFormat })}
+            <DarseFormatSelect
+              parseFormat={this.state.args.parseFormat}
+              onChange={parseFormat => this.mergeArgs({ parseFormat })}
             /> : null}
           <div className="inputGroup">
             <label htmlFor="ifInvalidInput">
