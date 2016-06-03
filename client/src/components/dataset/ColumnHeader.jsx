@@ -8,6 +8,7 @@ export default class ColumnHeader extends Component {
     super();
     this.handleDataTypeMenuClick = this.handleDataTypeMenuClick.bind(this);
     this.handleColumnMenuClick = this.handleColumnMenuClick.bind(this);
+    this.handleRemoveSort = this.handleRemoveSort.bind(this);
   }
 
   handleDataTypeMenuClick(event) {
@@ -48,7 +49,17 @@ export default class ColumnHeader extends Component {
     });
   }
 
+  handleRemoveSort(event, column) {
+    event.stopPropagation();
+    this.props.onRemoveSort({
+      op: 'core/remove-sort',
+      args: { columnName: column.columnName },
+      onError: 'fail',
+    });
+  }
+
   render() {
+    const { column } = this.props;
     return (
       <div
         className={`ColumnHeader clickable
@@ -56,6 +67,20 @@ export default class ColumnHeader extends Component {
         ref="columnHeaderContainer"
         onClick={this.handleColumnMenuClick}
       >
+        {column.sort != null ?
+          <div
+            className="sortLabel"
+          >
+            Sort: {column.direction === 'ASC' ? 'Ascending' : 'Descending'}
+            <span
+              className="cancelSort"
+              onClick={(event) => this.handleRemoveSort(event, column)}
+            >
+              +
+            </span>
+          </div>
+          : null
+        }
         <span
           className="columnType clickable"
         >
@@ -64,10 +89,10 @@ export default class ColumnHeader extends Component {
             onClick={this.handleDataTypeMenuClick}
             ref="columnTypeLabel"
           >
-            {this.props.column.type}
+            {column.type}
           </span>
         </span>
-        {this.props.column.title}
+        {column.title}
       </div>
     );
   }
@@ -77,8 +102,11 @@ ColumnHeader.propTypes = {
   column: PropTypes.shape({
     type: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
+    sort: PropTypes.number,
+    direction: PropTypes.oneOf(['ASC', 'DESC']),
   }),
   onToggleDataTypeContextMenu: PropTypes.func.isRequired,
   onToggleColumnContextMenu: PropTypes.func.isRequired,
+  onRemoveSort: PropTypes.func.isRequired,
   columnMenuActive: PropTypes.bool.isRequired,
 };
