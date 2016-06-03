@@ -12,7 +12,7 @@ require('../../styles/DatasetTable.scss');
 function formatCellValue(type, value) {
   switch (type) {
     case 'date':
-      return value == null ? null : moment(value).format();
+      return value == null ? null : moment.unix(value).format();
     default:
       return value;
   }

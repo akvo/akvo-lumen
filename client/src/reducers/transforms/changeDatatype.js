@@ -46,7 +46,7 @@ function textToDate(s, { parseFormat }) {
   if (!moment(s, parseFormat, true).isValid()) {
     throw new Error('Parse error');
   }
-  return moment(s, parseFormat, true).unix() * 1000;
+  return moment(s, parseFormat, true).unix();
 }
 
 function numberToText(n) {
