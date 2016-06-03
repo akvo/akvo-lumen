@@ -6,6 +6,28 @@ require('../../styles/DashboardCanvasItem.scss');
 
 export default class DashboardCanvasItem extends Component {
 
+  constructor() {
+    super();
+    this.state = { style: null };
+  }
+
+  componentWillMount() {
+    this.setState({
+      style: {
+        boxShadow: '0 0 30px 20px rgb(223, 244, 234)',
+      },
+    });
+
+    setTimeout(() => {
+      this.setState({
+        style: {
+          boxShadow: 'none',
+          transition: 'box-shadow 1s ease-in-out',
+        },
+      });
+    });
+  }
+
   getItemLayout() {
     let output = null;
 
@@ -48,6 +70,7 @@ export default class DashboardCanvasItem extends Component {
     return (
       <div
         className="DashboardCanvasItem"
+        style={this.state.style}
       >
         {this.props.item.type === 'visualisation' &&
           <div
