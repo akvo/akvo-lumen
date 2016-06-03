@@ -55,16 +55,16 @@
 (defn seed
   [conn spec]
   (jdbc/execute! conn [(str "CREATE TABLE IF NOT EXISTS " (:table-name spec) " ("
-                            "rownr serial PRIMARY KEY"
+                            "rnum serial PRIMARY KEY"
                             ");")])
   (jdbc/execute! conn [(str "CREATE TABLE IF NOT EXISTS " (:table-name-2 spec) " ("
-                            "rownr serial PRIMARY KEY"
+                            "rnum serial PRIMARY KEY"
                             ");")])
   (jdbc/execute! conn [(str "CREATE TABLE IF NOT EXISTS " (:imported-table-name spec) " ("
-                            "rownr serial PRIMARY KEY"
+                            "rnum serial PRIMARY KEY"
                             ");")])
   (jdbc/execute! conn [(str "CREATE TABLE IF NOT EXISTS " (:imported-table-name-2 spec) " ("
-                            "rownr serial PRIMARY KEY"
+                            "rnum serial PRIMARY KEY"
                             ");")])
 
   (insert-data-source conn {:id (:data-source-id spec)
