@@ -25,7 +25,7 @@ export default class DashboardCanvasItem extends Component {
           transition: 'box-shadow 1s ease-in-out',
         },
       });
-    });
+    }, 0);
   }
 
   getItemLayout() {
