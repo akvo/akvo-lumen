@@ -52,6 +52,11 @@
 
 (defmulti render-response :question-type)
 
+(defmethod render-response "DATE"
+  [{:keys [value]}]
+  (when (integer? value)
+    (long (/ value 1000.0))))
+
 (defmethod render-response "FREE_TEXT"
   [{:keys [value]}]
   (when (string? value)
