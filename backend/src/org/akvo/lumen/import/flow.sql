@@ -42,7 +42,7 @@ SELECT question.*
          data_point.latitude,
          data_point.longitude,
          form_instance.submitter,
-         form_instance.submitted_at
+         extract(epoch from form_instance.submitted_at) as submitted_at
     FROM data_point, form_instance
    WHERE form_instance.data_point_id=data_point.id AND
          form_instance.form_id=:form-id
