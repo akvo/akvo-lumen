@@ -31,21 +31,21 @@ shift $((OPTIND-1))
 
 
 if [ $force -eq 1 ]; then
-   # Drop all connections from dash user
-   psql -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE usename = 'dash';"
+   # Drop all connections from lumen user
+   psql -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE usename = 'lumen';"
 fi
 
 
 # Clean up test dbs
-psql -c "DROP DATABASE IF EXISTS test_dash_tenant_2;"
-psql -c "DROP DATABASE IF EXISTS test_dash_tenant_1;"
-psql -c "DROP DATABASE IF EXISTS test_dash;"
+psql -c "DROP DATABASE IF EXISTS test_lumen_tenant_2;"
+psql -c "DROP DATABASE IF EXISTS test_lumen_tenant_1;"
+psql -c "DROP DATABASE IF EXISTS test_lumen;"
 
 # Clean up dev dbs
-psql -c "DROP DATABASE IF EXISTS dash_tenant_2;"
-psql -c "DROP DATABASE IF EXISTS dash_tenant_1;"
-psql -c "DROP DATABASE IF EXISTS dash;"
-psql -c "DROP USER IF EXISTS dash;"
+psql -c "DROP DATABASE IF EXISTS lumen_tenant_2;"
+psql -c "DROP DATABASE IF EXISTS lumen_tenant_1;"
+psql -c "DROP DATABASE IF EXISTS lumen;"
+psql -c "DROP USER IF EXISTS lumen;"
 
 echo ""
 echo "----------"
