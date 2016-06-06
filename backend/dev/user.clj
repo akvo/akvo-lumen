@@ -8,9 +8,9 @@
             [meta-merge.core :refer [meta-merge]]
             [reloaded.repl :refer [system init start stop go reset]]
             [ring.middleware.stacktrace :refer [wrap-stacktrace]]
-            [org.akvo.dash.config :as config]
-            [org.akvo.dash.system :as system]
-            [org.akvo.dash.migrate :as mig]))
+            [org.akvo.lumen.config :as config]
+            [org.akvo.lumen.system :as system]
+            [org.akvo.lumen.migrate :as mig]))
 
 (def dev-config
   {:app {:middleware [wrap-stacktrace]}})
