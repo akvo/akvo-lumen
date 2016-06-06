@@ -58,10 +58,10 @@
     (try
       (go)
       (migrate/migrate conn)
-      (insert-tenant conn {:db_uri "jdbc:postgresql://localhost/test_dash_tenant_1?user=dash&password=password"
+      (insert-tenant conn {:db_uri "jdbc:postgresql://localhost/test_lumen_tenant_1?user=lumen&password=password"
                            :label "t1"
                            :title "Tenant 1"})
-      (insert-tenant conn {:db_uri "jdbc:postgresql://localhost/test_dash_tenant_2?user=dash&password=password"
+      (insert-tenant conn {:db_uri "jdbc:postgresql://localhost/test_lumen_tenant_2?user=lumen&password=password"
                            :label "t2"
                            :title "Tenant 2"})
       (migrate/migrate conn)

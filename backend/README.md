@@ -14,18 +14,18 @@ Edit profiles.clj to match (there is a profiles.clj.template file):
 {:profiles/dev
  {:env
   {:database-url
-    "jdbc:postgresql://localhost/dash?user=dash&password=password"}}
+    "jdbc:postgresql://localhost/lumen?user=lumen&password=password"}}
  :profiles/test
  {:env
   {:database-url
-    "jdbc:postgresql://localhost/test_dash?user=dash&password=password"}}}
+    "jdbc:postgresql://localhost/test_lumen?user=lumen&password=password"}}}
 ```
 
 To create the Postgres role & databases run the provision script:
 ``` sh
 $ ./provision/setup.sh
 ```
-This creates the central db dash and two tenants.
+This creates the central db lumen and two tenants.
 
 ### Troubleshooting
 

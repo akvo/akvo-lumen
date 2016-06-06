@@ -1,6 +1,6 @@
 (ns org.akvo.lumen.component.tenant-manager
   "Component that controll the tenants,
-  We use the first domain label e.g. t1 in t1.dash.akvo.org to dispatch."
+  We use the first domain label e.g. t1 in t1.lumen.akvo.org to dispatch."
   (:require [clojure.string :as str]
             [com.stuartsierra.component :as component]
             [hugsql.core :as hugsql])

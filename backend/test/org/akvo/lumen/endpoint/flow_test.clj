@@ -66,14 +66,14 @@
            #{}))
     (is (= (flow-instances-request "akvo:flow:akvoflow-1:0")
            #{"akvoflow-1"}))
-    (is (= (flow-instances-request "akvo:dash:tenant-1"
+    (is (= (flow-instances-request "akvo:lumen:tenant-1"
                                    "akvo:flow:akvoflow-1:1000")
            #{"akvoflow-1"}))
-    (is (= (flow-instances-request "akvo:dash:tenant-1"
+    (is (= (flow-instances-request "akvo:lumen:tenant-1"
                                    "akvo:flow:akvoflow-1:1000"
                                    "akvo:flow:akvoflow-2:2000")
            #{"akvoflow-1" "akvoflow-2"}))
-    (is (= (flow-instances-request "akvo:dash:tenant-1"
+    (is (= (flow-instances-request "akvo:lumen:tenant-1"
                                    "akvo:flow:akvoflow-1:1000"
                                    "akvo:flow:akvoflow-2:2000"
                                    "akvo:flow:akvoflow-1:3000")

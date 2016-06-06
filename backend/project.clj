@@ -1,4 +1,4 @@
-(defproject org.akvo.dash "0.1.0-SNAPSHOT"
+(defproject org.akvo.lumen "0.1.0-SNAPSHOT"
   :description "Akvo Lumen backend"
   :url "https://github.com/akvo/akvo-lumen"
   :license {:name "GNU Affero General Public License 3.0"

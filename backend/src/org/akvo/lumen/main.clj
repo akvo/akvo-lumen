@@ -1,5 +1,5 @@
 (ns org.akvo.lumen.main
-  "Akvo Dash starting point."
+  "Akvo Lumen starting point."
   (:gen-class)
   (:require [clojure.java.io :as io]
             [com.stuartsierra.component :as component]

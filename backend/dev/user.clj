@@ -44,10 +44,10 @@
 (defn seed
   "At the moment only support seed of tenants table."
   []
-  (doseq [tenant [{:db_uri "jdbc:postgresql://localhost/dash_tenant_1?user=dash&password=password"
+  (doseq [tenant [{:db_uri "jdbc:postgresql://localhost/lumen_tenant_1?user=lumen&password=password"
                    :label  "t1"
                    :title  "Tenant 1"}
-                  {:db_uri "jdbc:postgresql://localhost/dash_tenant_2?user=dash&password=password"
+                  {:db_uri "jdbc:postgresql://localhost/lumen_tenant_2?user=lumen&password=password"
                    :label  "t2"
                    :title  "Tenant 2"}]]
     (seed-tenant {:connection-uri (-> config :db :uri)} tenant)))
