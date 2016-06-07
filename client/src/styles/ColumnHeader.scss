@@ -1,6 +1,10 @@
 @import 'modules/colors';
 
 .ColumnHeader {
+  vertical-align: top;
+  * {
+    vertical-align: top;
+  }
   &:after {
     content: '';
     display: block;
@@ -12,7 +16,7 @@
     border-bottom: none;
     position: absolute;
     right: 0.5rem;
-    top: calc(50% - 5px);
+    top: 25px;
   }
   &.columnMenuActive {
     background-color: rgba(0,0,0,0.125);
@@ -27,8 +31,21 @@
   .columnType {
     text-transform: uppercase;
     font-size: 0.75rem;
-    margin: 0 0.75rem;
+    margin: 0 0.5rem;
     color: $blueGrey;
+  }
+  .columnType, .columnTypeToggle {
+    display: inline-block;
+  }
+  .columnTypeToggle {
+    padding-top: 2px;
+  }
+  .columnTitleText {
+    max-width: 7.75rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
   }
   .sortLabel {
     display: block;
