@@ -3,9 +3,57 @@ import DashSelect from '../../common/DashSelect';
 import SidebarHeader from './SidebarHeader';
 import SidebarControls from './SidebarControls';
 
+function getExpressionOperatorAndValue(expression) {
+  const expressionOperator = Object.keys(expression)[0];
+  return [expressionOperator, expression[expressionOperator]];
+}
+
 export default class Filter extends Component {
+  constructor() {
+    super();
+    this.state = {};
+    this.handleChangeExpressionValue = this.handleChangeExpressionValue.bind(this);
+    this.handleChangeExpressionOperator = this.handleChangeExpressionOperator.bind(this);
+  }
+
+  componentWillMount() {
+    this.setState({
+      op: 'core/filter-column',
+      args: {
+        columnName: this.props.column.columnName,
+        expression: { is: '' },
+      },
+      onError: 'fail',
+    });
+  }
+
+  handleChangeExpressionValue(expressionValue) {
+    const { args } = this.state;
+    const [currentExpressionOperator] = getExpressionOperatorAndValue(args.expression);
+    const newArgs = Object.assign({}, args, {
+      expression: {
+        [currentExpressionOperator]: expressionValue,
+      },
+    });
+    this.setState(Object.assign({}, this.state, { args: newArgs }));
+  }
+
+  handleChangeExpressionOperator(expressionOperator) {
+    const { args } = this.state;
+    const currentValue = getExpressionOperatorAndValue(args.expression)[1];
+    const newArgs = Object.assign({}, args, {
+      expression: {
+        [expressionOperator]: currentValue,
+      },
+    });
+    this.setState(Object.assign({}, this.state, { args: newArgs }));
+  }
+
   render() {
-    const { onClose } = this.props;
+    const { onClose, onApply, column } = this.props;
+    const { args } = this.state;
+    const [expressionOperator, expressionValue] =
+      getExpressionOperatorAndValue(args.expression);
     return (
       <div
         className="DataTableSidebar"
@@ -15,7 +63,7 @@ export default class Filter extends Component {
         }}
       >
         <SidebarHeader onClose={onClose}>
-          Filter
+          Filter column {column.title}
         </SidebarHeader>
         <div className="inputs">
           <div className="inputGroup">
@@ -26,15 +74,16 @@ export default class Filter extends Component {
             </label>
             <DashSelect
               name="filterTypeMenu"
-              value="value-contains"
+              value={expressionOperator}
+              onChange={this.handleChangeExpressionOperator}
               options={[
                 {
                   label: 'Value contains',
-                  value: 'value-contains',
+                  value: 'contains',
                 },
                 {
                   label: 'Value is',
-                  value: 'value-is',
+                  value: 'is',
                 },
               ]}
             />
@@ -46,15 +95,17 @@ export default class Filter extends Component {
               Filter text
             </label>
             <input
+              value={expressionValue}
               type="text"
               className="filterTextInput"
               ref="filterTextInput"
+              onChange={(event) => this.handleChangeExpressionValue(event.target.value)}
             />
           </div>
         </div>
         <SidebarControls
           positiveButtonText="Filter"
-          onApply={onClose}
+          onApply={() => onApply(this.state)}
           onClose={onClose}
         />
       </div>
@@ -64,4 +115,8 @@ export default class Filter extends Component {
 
 Filter.propTypes = {
   onClose: PropTypes.func.isRequired,
+  onApply: PropTypes.func.isRequired,
+  column: PropTypes.shape({
+    columnName: PropTypes.string.isRequired,
+  }),
 };
