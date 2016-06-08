@@ -11,7 +11,7 @@
    "core/change-column-title" nil
    "core/sort-column" nil
    "core/remove-sort" nil
-   "core/filter" nil
+   "core/filter-column" nil
    "core/to-titlecase" nil
    "core/to-lowercase" nil
    "core/to-uppercase" nil
@@ -75,6 +75,12 @@
         new-type (get-in op-spec ["args" "newType"])]
     (update columns col-idx assoc "type" new-type)))
 
+(defmethod column-metadata-operation :core/filter-column
+  [columns op-spec]
+  (let [col-name (get-column-name op-spec)
+        col-idx (get-column-idx columns col-name)
+        filter-expr (get-in op-spec ["args" "expression"])]
+    (update columns col-idx assoc "filter" filter-expr)))
 
 (defmulti apply-operation
   "Applies a particular operation based on `op` key from spec
@@ -92,7 +98,7 @@
 (defmethod apply-operation :default
   [tennant-conn table-name columns op-spec]
   {:success? false
-   :message (str "Unknown operation " (op-spec "op"))})
+   :message (str "Unknown operation " (get op-spec "op"))})
 
 (defmethod apply-operation :core/to-titlecase
   [tennant-conn table-name columns op-spec]
@@ -170,9 +176,28 @@
          :columns new-cols})
       (catch SQLException e
         {:success? false
-         :message (:cause e)}))))
+         :message (.getMessage e)}))))
 
-(defmethod apply-operation :core/filter
+(defmethod apply-operation :core/filter-column
   [tenant-conn table-name columns op-spec]
-  {:success? true
-   :columns columns})
+  (try
+    (let [new-cols (column-metadata-operation columns op-spec)
+          expr (first (get-in op-spec ["args" "expression"]))
+          expr-fn (first expr)
+          expr-val (second expr)
+          filter-fn (if (= "is" expr-fn) ;; TODO: logic only valid for text columns
+                      "="
+                      "ilike")
+          filter-val (if (= "contains" expr-fn)
+                       (str "\"%" expr-val "%\"")
+                       (str "\"" expr-val "\""))
+          result (db-filter-column tenant-conn {:table-name table-name
+                                                :column-name (get-column-name op-spec)
+                                                :filter-fn filter-fn
+                                                :filter-val filter-val})]
+      {:success? true
+       :execution-log (str result)
+       :columns new-cols})
+    (catch Exception e
+      {:success? false
+       :message (.getMessage e)})))
