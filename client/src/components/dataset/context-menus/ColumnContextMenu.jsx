@@ -37,12 +37,10 @@ const actions = {
     },
     onError: 'default-value',
   },
-  'core/filter': {
-    op: 'core/filter',
-    args: {
-      defaultValue: null,
-    },
-    onError: 'default-value',
+  'core/filter-column': {
+    op: 'core/filter-column',
+    args: {},
+    onError: 'fail',
   },
   'sort-ascending': {
     op: 'core/sort-column',
@@ -76,7 +74,7 @@ const commonOptions = [{
 const dataTypeOptions = {
   text: [{
     label: 'Filter',
-    value: 'core/filter',
+    value: 'core/filter-column',
   }, {
     label: 'Whitespace',
     value: 'whitespace',
