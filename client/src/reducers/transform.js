@@ -2,6 +2,7 @@
 import changeDatatype from './transforms/changeDatatype';
 import textTransform from './transforms/text';
 import sortTransform from './transforms/sortColumn';
+import filterTransform from './transforms/filterColumn';
 
 const availableTransforms = {
   'core/change-datatype': changeDatatype,
@@ -12,6 +13,7 @@ const availableTransforms = {
   'core/trim-doublespace': textTransform,
   'core/sort-column': sortTransform,
   'core/remove-sort': sortTransform,
+  'core/filter-column': filterTransform,
 };
 
 function recordHistory(previousDataset, nextDataset) {

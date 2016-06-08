@@ -61,11 +61,7 @@ function mergeArgs(action, args) {
   return Object.assign({}, action, { args: a });
 }
 
-// TODO: Depend on column type!
-const options = [{
-  label: 'Filter',
-  value: 'core/filter',
-}, {
+const commonOptions = [{
   label: 'Sort',
   value: 'sort',
   subMenu: [{
@@ -75,35 +71,44 @@ const options = [{
     label: 'Descending',
     value: 'sort-descending',
   }],
-}, {
-  label: 'Whitespace',
-  value: 'whitespace',
-  subMenu: [{
-    label: 'Remove leading and trailing whitespace',
-    value: 'core/trim',
-  }, {
-    label: 'Remove double spaces',
-    value: 'core/trim-doublespace',
-  }],
-}, {
-  label: 'Change case',
-  value: 'change-case',
-  subMenu: [{
-    label: 'To Uppercase',
-    value: 'core/to-uppercase',
-  }, {
-    label: 'To Lowercase',
-    value: 'core/to-lowercase',
-  }, {
-    label: 'To Titlecase',
-    value: 'core/to-titlecase',
-  }],
 }];
+
+const dataTypeOptions = {
+  text: [{
+    label: 'Filter',
+    value: 'core/filter',
+  }, {
+    label: 'Whitespace',
+    value: 'whitespace',
+    subMenu: [{
+      label: 'Remove leading and trailing whitespace',
+      value: 'core/trim',
+    }, {
+      label: 'Remove double spaces',
+      value: 'core/trim-doublespace',
+    }],
+  }, {
+    label: 'Change case',
+    value: 'change-case',
+    subMenu: [{
+      label: 'To Uppercase',
+      value: 'core/to-uppercase',
+    }, {
+      label: 'To Lowercase',
+      value: 'core/to-lowercase',
+    }, {
+      label: 'To Titlecase',
+      value: 'core/to-titlecase',
+    }],
+  }],
+  number: [],
+  date: [],
+};
 
 export default function ColumnContextMenu({ column, dimensions, onContextMenuItemSelected }) {
   return (
     <ContextMenu
-      options={options}
+      options={commonOptions.concat(dataTypeOptions[column.type])}
       selected={null}
       style={{
         width: `${dimensions.width}px`,
