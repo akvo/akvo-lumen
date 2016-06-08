@@ -75,12 +75,6 @@
         new-type (get-in op-spec ["args" "newType"])]
     (update columns col-idx assoc "type" new-type)))
 
-(defmethod column-metadata-operation :core/filter-column
-  [columns op-spec]
-  (let [col-name (get-column-name op-spec)
-        col-idx (get-column-idx columns col-name)
-        filter-expr (get-in op-spec ["args" "expression"])]
-    (update columns col-idx assoc "filter" filter-expr)))
 
 (defmulti apply-operation
   "Applies a particular operation based on `op` key from spec
@@ -181,8 +175,7 @@
 (defmethod apply-operation :core/filter-column
   [tenant-conn table-name columns op-spec]
   (try
-    (let [new-cols (column-metadata-operation columns op-spec)
-          expr (first (get-in op-spec ["args" "expression"]))
+    (let [expr (first (get-in op-spec ["args" "expression"]))
           expr-fn (first expr)
           expr-val (second expr)
           filter-fn (if (= "is" expr-fn) ;; TODO: logic only valid for text columns
@@ -196,8 +189,8 @@
                                                 :filter-fn filter-fn
                                                 :filter-val filter-val})]
       {:success? true
-       :execution-log (str result)
-       :columns new-cols})
+       :execution-log [(str "Deleted " result " rows")]
+       :columns columns})
     (catch Exception e
       {:success? false
        :message (.getMessage e)})))
