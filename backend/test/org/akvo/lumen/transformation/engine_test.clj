@@ -83,7 +83,7 @@
       (db-delete-test-data tenant-conn)
       (db-test-data tenant-conn)
 
-      (is :success? (apply-operation tenant-conn "ds_test_1" columns filter-using-is))
+      (is (= true (:success? (apply-operation tenant-conn "ds_test_1" columns filter-using-is))))
 
       (let [result (db-select-test-data tenant-conn)]
         (is (= 1 (count result)))
@@ -92,7 +92,8 @@
       (db-delete-test-data tenant-conn)
       (db-test-data tenant-conn)
 
-      (is :success? (apply-operation tenant-conn "ds_test_1" columns filter-using-contains))
+      (is (= true (:success? (apply-operation tenant-conn "ds_test_1" columns filter-using-contains))))
+
       (let [result (db-select-test-data tenant-conn)]
         (is (= 1 (count result)))
         (is (= "akvo foundation" (:c1 (first result)))))))
