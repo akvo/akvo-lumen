@@ -42,10 +42,10 @@
     "onError": "fail"
   },
   {
-    "op": "core/filter",
+    "op": "core/filter-column",
     "args": {
       "columnName": "c1",
-      "filterExpression": "< 10"
+      "expression": {"<": 10}
     },
     "onError": "fail"
   },
