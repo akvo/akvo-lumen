@@ -8,6 +8,7 @@ export default class DashboardCanvasItemEditable extends Component {
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleBlur = this.handleBlur.bind(this);
+    this.handleFocus = this.handleFocus.bind(this);
   }
   componentWillMount() {
     this.setState({ textContents: this.props.item.content || 'Enter text here' });
@@ -21,6 +22,11 @@ export default class DashboardCanvasItemEditable extends Component {
     newItem.content = this.state.textContents;
     this.props.onEntityUpdate(newItem);
   }
+  handleFocus() {
+    if (this.state.textContents === 'Enter text here') {
+      this.setState({ textContents: '' });
+    }
+  }
   render() {
     return (
       <div
@@ -30,6 +36,7 @@ export default class DashboardCanvasItemEditable extends Component {
           type="text"
           onChange={this.handleChange}
           onBlur={this.handleBlur}
+          onFocus={this.handleFocus}
           value={this.state.textContents}
           style={{
             width: '95%',
