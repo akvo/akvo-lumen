@@ -28,7 +28,8 @@
                  [ragtime "0.5.3"]
                  [ring "1.4.0"]
                  [ring/ring-defaults "0.2.0"]
-                 [ring/ring-json "0.4.0"]]
+                 [ring/ring-json "0.4.0"]
+                 [com.ibm.icu/icu4j "57.1"]]
 
   :uberjar-name "akvo-lumen.jar"
   :repl-options {:timeout 120000}
