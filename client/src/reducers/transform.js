@@ -2,6 +2,7 @@
 import changeDatatype from './transforms/changeDatatype';
 import textTransform from './transforms/text';
 import sortTransform from './transforms/sortColumn';
+import filterTransform from './transforms/filterColumn';
 
 const availableTransforms = {
   'core/change-datatype': changeDatatype,
@@ -12,6 +13,7 @@ const availableTransforms = {
   'core/trim-doublespace': textTransform,
   'core/sort-column': sortTransform,
   'core/remove-sort': sortTransform,
+  'core/filter-column': filterTransform,
 };
 
 function recordHistory(previousDataset, nextDataset) {
@@ -28,9 +30,16 @@ function updateTransformationLog(dataset, transformation) {
 }
 
 export default function applyTransformation(dataset, transformation) {
-  const transformedDataset = availableTransforms[transformation.op](dataset, transformation);
-  if (transformedDataset === dataset) {
-    return dataset;
+  try {
+    const transformedDataset = availableTransforms[transformation.op](dataset, transformation);
+    if (transformedDataset === dataset) {
+      return dataset;
+    }
+    return updateTransformationLog(recordHistory(dataset, transformedDataset), transformation);
+  } catch (e) {
+    if (transformation.onError === 'fail') {
+      return dataset;
+    }
+    throw e;
   }
-  return updateTransformationLog(recordHistory(dataset, transformedDataset), transformation);
 }

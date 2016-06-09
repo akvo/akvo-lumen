@@ -1,20 +1,16 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import update from 'react-addons-update';
+import isEmpty from 'lodash/isEmpty';
 import VisualisationHeader from '../components/visualisation/VisualisationHeader';
 import VisualisationEditor from '../components/visualisation/VisualisationEditor';
 import ShareEntity from '../components/modals/ShareEntity';
 import * as actions from '../actions/visualisation';
 import { fetchDataset } from '../actions/dataset';
+import { fetchLibrary } from '../actions/library';
 import { push } from 'react-router-redux';
 
 require('../styles/Visualisation.scss');
-
-const getEditingStatus = location => {
-  const testString = 'create';
-
-  return location.pathname.indexOf(testString) === -1;
-};
 
 class Visualisation extends Component {
 
@@ -53,23 +49,42 @@ class Visualisation extends Component {
   }
 
   componentWillMount() {
-    const isEditingExistingVisualisation = getEditingStatus(this.props.location);
+    const { params, library, dispatch } = this.props;
+    const visualisationId = params.visualisationId;
+    const isEditingExistingVisualisation = visualisationId != null;
+
+    // If this is route is accessed via a permalink we'll have to fetch the library,
+    // where all the datasets are.
+    if (isEmpty(library.datasets)) {
+      dispatch(fetchLibrary());
+    }
 
     if (isEditingExistingVisualisation) {
-      const visualisationId = this.props.params.visualisationId;
-      this.props.dispatch(actions.fetchVisualisation(visualisationId));
-      this.setState({
-        visualisation: this.props.library.visualisations[visualisationId],
-        isUnsavedChanges: false,
-      });
+      const visualisation = library.visualisations[visualisationId];
+      if (visualisation == null) {
+        dispatch(actions.fetchVisualisation(visualisationId));
+      } else {
+        const datasetId = visualisation.datasetId;
+        if (datasetId != null) {
+          if (library.datasets[datasetId] == null || library.datasets[datasetId].rows == null) {
+            dispatch(fetchDataset(datasetId));
+          }
+        }
+        this.setState({
+          visualisation,
+          isUnsavedChanges: false,
+        });
+      }
     }
   }
 
   componentWillReceiveProps() {
-    // Need more intelligent merge
-    if (this.props.params.visualsationId != null) {
+    const visualisationId = this.props.params.visualisationId;
+    const isEditingExistingVisualisation = visualisationId != null;
+
+    if (isEditingExistingVisualisation && !this.state.isUnsavedChanges) {
       this.setState({
-        visualisation: this.props.library.visualisations[this.props.params.visualisationId],
+        visualisation: this.props.library.visualisations[visualisationId],
       });
     }
   }
@@ -137,6 +152,9 @@ class Visualisation extends Component {
   }
 
   render() {
+    if (this.state.visualisation == null) {
+      return <div className="Visualisation">Loading...</div>;
+    }
     return (
       <div className="Visualisation">
         <VisualisationHeader

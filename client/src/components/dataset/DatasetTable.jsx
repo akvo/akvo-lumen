@@ -134,7 +134,7 @@ export default class DatasetTable extends Component {
   handleColumnContextMenuClicked({ column, action }) {
     this.setState({ activeColumnContextMenu: null });
     switch (action.op) {
-      case 'core/filter':
+      case 'core/filter-column':
         this.showSidebar({
           type: 'filter',
           column,

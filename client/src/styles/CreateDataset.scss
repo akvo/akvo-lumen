@@ -57,7 +57,11 @@
         .DashProgressBar {
             width: 90%;
             max-width: 20rem;
-            margin: 1rem auto 0 auto;
+            margin: 1rem auto 1rem auto;
+        }
+        .errorText {
+            font-weight: bold;
+            color: $errorRed;
         }
     }
     .Settings {

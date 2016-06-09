@@ -15,16 +15,17 @@ Examples:
 {"op": "core/change-datatype",
  "args": {"columnName": "c2",
           "newType": "number",
-          "defaultValue": "0"},
+          "defaultValue": 0},
  "onError": "default-value"}
 ````
+
 ````
 {"op": "core/change-datatype",
  "args": {"columnName": "c1",
           "newType": "date",
-          "defaultValue": "0",
+          "defaultValue": 0,
           "parseFormat": "YYYY-MM-DD"},
- "onError", "fail"}
+ "onError": "fail"}
 ````
 
 ### core/change-column-title
@@ -37,9 +38,9 @@ Examples:
 
 ````
 {"op": "core/change-column-title",
- "args": {"columnName" "c2",
-          "columnTitle" "My column"},
- "onError" "fail"}
+ "args": {"columnName": "c2",
+          "columnTitle": "My column"},
+ "onError": "fail"}
 ````
 
 ### core/sort-column
@@ -53,9 +54,9 @@ Examples:
 
 ````
 {"op": "core/sort-column",
- "args" {"columnName" "c1"
-         "sortDirection" "ASC"},
- "onError" "fail"}
+ "args": {"columnName": "c1",
+          "sortDirection": "ASC"},
+ "onError": "fail"}
 ````
 
 ### core/remove-sort
@@ -68,35 +69,34 @@ Examples:
 
 ````
 {"op": "core/remove-sort",
- "args": {"columnName" "c1"},
+ "args": {"columnName": "c1"},
  "onError": "fail"}
 ````
 
-### core/filter
-
- __(WIP)__
+### core/filter-column
 
 * args
   * columName (string): `"c<number>"`
-  * filterExpression (string): Filter expression e.g. `"< 10"`, `"contains 'akvo'"`
+  * expression (object): `{"<filter-function>": <val>}` -
+  Note: `<val>` must be a valid value for the column
 * onError (string): `"fail"`
 
 On text columns:
- * is: `c2 = 'value'`
- * contains: `c2 ilike '%value%'`
+ * is: `{"is": "Akvo"}`
+ * contains: `{"contains": "foundation"}`
 
 On number columns
-* Greater than: `c2 > value`
-* is: `c2 = value`
-* Less than: `c2 < value`
+* Greater than: `{">": 20}`
+* is: `{"=": 10}`
+* Less than: `{"<": 0}`
 
 Examples:
 
 ````
 {"op": "core/sort-column",
- "args" {"columnName" "c1"
-         "filterExpression" "< 10"},
- "onError" "fail"}
+ "args": {"columnName": "c1",
+          "expression": {"<": 10}},
+ "onError": "fail"}
 ````
 
 ### core/to-titlecase
@@ -108,9 +108,9 @@ Examples:
 Examples:
 
 ````
-{"op": "core/to-titlecase"
- "args": {"columnName" "c2"},
- "onError" "default-value"}
+{"op": "core/to-titlecase",
+ "args": {"columnName": "c2"},
+ "onError": "default-value"}
 ````
 
 ### core/to-lowercase
@@ -122,9 +122,9 @@ Examples:
 Examples:
 
 ````
-{"op": "core/to-lowercase"
- "args": {"columnName" "c2"},
- "onError" "default-value"}
+{"op": "core/to-lowercase",
+ "args": {"columnName": "c2"},
+ "onError": "default-value"}
 ````
 
 ### core/to-uppercase
@@ -136,9 +136,9 @@ Examples:
 Examples:
 
 ````
-{"op": "core/to-uppercase"
- "args": {"columnName" "c2"},
- "onError" "default-value"}
+{"op": "core/to-uppercase",
+ "args": {"columnName": "c2"},
+ "onError": "default-value"}
 ````
 
 ### core/trim
@@ -150,9 +150,9 @@ Examples:
 Examples:
 
 ````
-{"op": "core/trim"
- "args": {"columnName" "c2"},
- "onError" "default-value"}
+{"op": "core/trim",
+ "args": {"columnName": "c2"},
+ "onError": "default-value"}
 ````
 
 ### core/trim-doublespace
@@ -164,7 +164,7 @@ Examples:
 Examples:
 
 ````
-{"op": "core/trim-double"
- "args": {"columnName" "c2"},
- "onError" "default-value"}
+{"op": "core/trim-double",
+ "args": {"columnName": "c2"},
+ "onError": "default-value"}
 ````
