@@ -110,11 +110,18 @@ export default class DataFileDataSourceSettings extends Component {
           />
         </p>
         {this.isProgressBarVisible() &&
-          <DashProgressBar
-            progressPercentage={this.state.uploadProgressPercentage}
-            errorText="Error"
-            completionText="Success"
-          />
+          <div>
+            <DashProgressBar
+              progressPercentage={this.state.uploadProgressPercentage}
+              errorText="Error"
+              completionText="Success"
+            />
+            {this.state.uploadProgressPercentage === -1 &&
+              <span className="errorText">
+                CSV file upload failed. Please try again.
+              </span>
+            }
+          </div>
         }
       </div>
     );
