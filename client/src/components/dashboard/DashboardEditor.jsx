@@ -199,13 +199,13 @@ export default class DashboardEditor extends Component {
         >
           <div className="DashboardEditorCanvasControls">
             <button
-              className="clickable"
+              className="clickable addText"
               onClick={() => this.handleEntityToggle({ content: '' }, 'text')}
             >
               Add new text element
             </button>
             <button
-              className="clickable"
+              className="clickable save"
               onClick={() => this.props.onSave()}
             >
               Save
