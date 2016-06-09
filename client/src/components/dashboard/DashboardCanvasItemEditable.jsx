@@ -1,5 +1,4 @@
 import React, { Component, PropTypes } from 'react';
-import ContentEditable from 'react-contenteditable';
 
 export default class DashboardCanvasItemEditable extends Component {
   constructor() {
@@ -26,11 +25,19 @@ export default class DashboardCanvasItemEditable extends Component {
     return (
       <div
         className="DashboardCanvasItemEditable"
-        onBlur={this.handleBlur}
       >
-        <ContentEditable
-          html={this.state.html}
+        <textarea
+          type="text"
           onChange={this.handleChange}
+          onBlur={this.handleBlur}
+          value={this.state.html}
+          style={{
+            width: '95%',
+            height: '100%',
+            resize: 'none',
+            border: 'none',
+            marginRight: '5%',
+          }}
         />
       </div>
     );

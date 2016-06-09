@@ -10,8 +10,7 @@
 
   .itemContainer {
     &.text {
-      padding: 0.25rem 1rem;
-      line-height: 1.4rem;
+      position: relative;
     }
   }
   .deleteButton {
@@ -23,5 +22,15 @@
     transform: rotate(45deg);
     z-index: 2;
     font-size: 1.5rem;
+  }
+  .DashboardCanvasItemEditable {
+    height: 100%;
+    textarea {
+      font-size: 1rem;
+      line-height: 1.4em;
+      @media (max-width: 1200px) {
+        font-size: 0.8rem
+      }
+    }
   }
 }
