@@ -4,7 +4,7 @@
 ## Usage
 
 ````
-cd $LUMEN_ROOT_SOURCE/!keycloak
+cd $LUMEN_ROOT_SOURCE/keycloak
 docker build -t akvo/keycloak .
 ````
 
