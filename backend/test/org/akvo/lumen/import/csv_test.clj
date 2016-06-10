@@ -16,6 +16,6 @@
            (get-copy-sql "uuid2" 3 true "ISO-8859-1")))
     (is (= "INSERT INTO uuid1 (rnum, c1, c2) SELECT rnum, to_json(replace(c1, '\\', '\\\\'))::jsonb, to_json(replace(c2, '\\', '\\\\'))::jsonb FROM t_uuid1"
            (get-insert-sql "t_uuid1" "uuid1" 2)))
-    (is (= 19 (get-num-cols (io/file (io/resource "artist")) \tab)))
-    (is (= 23 (get-num-cols (io/file (io/resource "products")) \,)))
-    (is (= 60 (get-num-cols (io/file (io/resource "rural-population")) \,)))))
+    (is (= 19 (get-num-cols (io/file (io/resource "artist")) \tab "UTF-8")))
+    (is (= 23 (get-num-cols (io/file (io/resource "products")) \, "UTF-8")))
+    (is (= 60 (get-num-cols (io/file (io/resource "rural-population")) \, "UTF-8")))))

@@ -71,15 +71,15 @@
 
 (defn get-headers
   "Returns the first line CSV a file"
-  [path separator]
-  (with-open [r (io/reader path)]
+  [path separator encoding]
+  (with-open [r (io/reader path :encoding encoding)]
     (first (csv/read-csv r :separator separator))))
 
 (defn get-num-cols
   "Returns the number of columns based on the
   first line of a CSV file"
-  [path separator]
-  (count (get-headers path separator)))
+  [path separator encoding]
+  (count (get-headers path separator encoding)))
 
 (defn get-encoding
   "Returns the character encoding reading some
@@ -133,9 +133,9 @@
           path (get-path spec file-upload-path)
           headers? (boolean (get spec "hasColumnHeaders"))
           encoding (get-encoding path)
-          n-cols (get-num-cols path \,)
+          n-cols (get-num-cols path \, encoding)
           col-titles (if headers?
-                       (get-headers path \,)
+                       (get-headers path \, encoding)
                        (vec (for [i (range 1 (inc n-cols))]
                               (str "Column " i))))
           temp-table (str table-name "_temp")
