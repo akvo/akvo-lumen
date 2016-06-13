@@ -19,7 +19,7 @@ case "$1" in
       docker run -d -p 8080:8080 --name lumen-keycloak -t akvo/keycloak
       ;;
     stop)
-      docker stop lumen-keycloak
+      docker stop lumen-keycloak && docker rm lumen-keycloak
       ;;
     *)
       usage
