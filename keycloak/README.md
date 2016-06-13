@@ -5,12 +5,12 @@
 
 ````
 cd $LUMEN_ROOT_SOURCE/keycloak
-docker build -t akvo/keycloak .
+./server.sh build
 ````
 
 After a successful build
 ````
-docker run -p 8080:8080 akvo/keycloak
+./server.sh run
 ````
 
 Open your browser: http://localhost:8080
