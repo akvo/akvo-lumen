@@ -1,7 +1,7 @@
 import Keycloak from 'keycloak-js';
 
 export default new Keycloak({
-  url: 'https://login.test.akvo-ops.org/auth',
+  url: 'http://localhost:8080/auth',
   realm: 'akvo',
-  clientId: 'akvo-dash',
+  clientId: 'akvo-lumen',
 });

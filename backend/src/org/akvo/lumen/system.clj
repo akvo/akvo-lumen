@@ -43,7 +43,7 @@
                       wrap-auth
                       [wrap-jwt :jwt]
                       tm/wrap-label-tenant]
-         :jwt        "https://login.test.akvo-ops.org/auth/realms/akvo"
+         :jwt        "http://localhost:8080/auth/realms/akvo"
          :not-found  (io/resource "org/akvo/lumen/errors/404.html")
          :defaults   (meta-merge api-defaults
                                  {:params {:multipart true}})
