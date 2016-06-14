@@ -10,7 +10,7 @@ function initAuthenticated(profile) {
   const initialState = {
     user: {
       name: profile.username,
-      organization: 'Akvo DASH',
+      organization: 'Akvo Lumen',
     },
   };
 
