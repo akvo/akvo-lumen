@@ -4,7 +4,7 @@ import Library from '../components/Library';
 import Visualisation from './Visualisation';
 import Dataset from './Dataset';
 import Dashboard from './Dashboard';
-import Main from '../components/Main';
+import Main from './Main';
 
 export default function App({ history }) {
   return (
