@@ -34,8 +34,9 @@
   "Go get cert from Keycloak and feed it to wrap-jwt-claims. Keycloak url can
   be configured via the KEYCLOAK_URL env var."
   [handler issuer]
+
   (try
-    (let [certs (-> (str issuer "/protocol/openid-connect/certs")
+    (let [certs (-> (str issuer "/realms/akvo/protocol/openid-connect/certs")
                     client/get
                     :body)]
       (jwt/wrap-jwt-claims handler (jwt/rsa-key certs 0) issuer))

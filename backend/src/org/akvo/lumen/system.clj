@@ -43,7 +43,6 @@
                         wrap-auth
                         [wrap-jwt :keycloak-url]
                         tm/wrap-label-tenant]
-         :keycloak-url "http://localhost:8080/auth/realms/akvo"
          :not-found    (io/resource "org/akvo/lumen/errors/404.html")
          :defaults     (meta-merge api-defaults
                                    {:params {:multipart true}})
