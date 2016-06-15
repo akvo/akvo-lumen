@@ -30,11 +30,7 @@ class Library extends Component {
   }
 
   componentDidMount() {
-    const { datasets } = this.props;
-    // TODO better heuristics
-    if (Object.keys(datasets).length === 0) {
-      this.props.dispatch(fetchLibrary());
-    }
+    this.props.dispatch(fetchLibrary());
   }
 
 
