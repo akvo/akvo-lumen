@@ -1,7 +1,6 @@
 (ns org.akvo.lumen.middleware
   (:require [akvo.commons.jwt :as jwt]
             [clj-http.client :as client]
-            [clojure.pprint :refer [pprint]]
             [clojure.string :as s]
             [ring.util.response :as response]))
 
