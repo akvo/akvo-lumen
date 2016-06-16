@@ -1,6 +1,5 @@
 (ns org.akvo.lumen.endpoint.visualisation
-  (:require [clojure.pprint :refer [pprint]]
-            [compojure.core :refer :all]
+  (:require [compojure.core :refer :all]
             [hugsql.core :as hugsql]
             [org.akvo.lumen.component.tenant-manager :refer [connection]]
             [org.akvo.lumen.util :refer [squuid]]
@@ -46,9 +45,9 @@
                              "created" (:created resp)
                              "modified" (:modified resp))))
           (catch Exception e
-            (pprint e)
+            (.printStackTrace e)
             (when (isa? SQLException (type e))
-              (pprint (.getNextException ^SQLException e)))
+              (.printStackTrace (.getNextException ^SQLException e)))
             (response {:error e}))))
 
       (context "/:id" [id]
@@ -72,5 +71,11 @@
           (response {:id id}))
 
         (DELETE "/" _
-          (delete-visualisation-by-id tenant-conn {:id id})
-          (response {:id id}))))))
+          (try
+            (delete-visualisation-by-id tenant-conn {:id id})
+            (response {:id id})
+            (catch Exception e
+              (.printStackTrace e)
+              (when (isa? SQLException (type e))
+                (.printStackTrace (.getNextException ^SQLException e)))
+              (response {:error e}))))))))
