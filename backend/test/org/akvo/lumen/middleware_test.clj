@@ -104,7 +104,7 @@
       (check-response response 401))))
 
 
-(deftest wrap-jwt-test
+#_(deftest wrap-jwt-test
   (let [jwt-middleware (m/wrap-jwt test-handler
                                    (get-in system/base-config [:app :jwt]))]
 
