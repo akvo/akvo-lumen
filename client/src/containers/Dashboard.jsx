@@ -72,7 +72,7 @@ class Dashboard extends Component {
       const dashboardId = this.props.params.dashboardId;
 
       if (isEmpty(this.props.library.datasets)) {
-          this.props.dispatch(fetchLibrary());
+        this.props.dispatch(fetchLibrary());
       }
       this.props.dispatch(actions.fetchDashboard(dashboardId));
     }

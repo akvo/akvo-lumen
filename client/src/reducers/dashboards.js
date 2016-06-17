@@ -32,7 +32,7 @@ function saveDashboards(state, dashboards) {
 function saveDashboard(state, dash) {
   const id = dash.id;
   return Object.assign({}, state, {
-    [id] : dash,
+    [id]: dash,
   });
 }
 
