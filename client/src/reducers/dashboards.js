@@ -18,19 +18,21 @@ function editDashboard(state, dashboardData) {
 }
 
 function saveDashboards(state, dashboards) {
-  // TODO we should probably not overwrite?
   return dashboards.reduce((result, dash) => {
     const id = dash.id;
-    return update(result, {
-      [id]: { $set: update(dash, { $merge: { type: 'dashboard', status: 'OK' } }) },
-    });
+    if (state[id] == null) {
+      return update(result, {
+        [id]: { $set: update(dash, { $merge: { type: 'dashboard', status: 'OK' } }) },
+      });
+    }
+    return result;
   }, state);
 }
 
 function saveDashboard(state, dash) {
   const id = dash.id;
-  return update(state, {
-    [id]: { $merge: dash },
+  return Object.assign({}, state, {
+    [id] : dash,
   });
 }
 
