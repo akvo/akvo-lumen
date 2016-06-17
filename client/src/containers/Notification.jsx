@@ -2,12 +2,23 @@ import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { hideNotification } from '../actions/notification';
 
+require('../styles/Notification.scss');
+
 export function Notification({ level, message, dispatch }) {
   return (
-    <div className={level}>
-      {message}
-      <span onClick={() => dispatch(hideNotification())}>
-        x
+    <div
+      className={`Notification ${level}`}
+    >
+      <span
+        className="message"
+      >
+        {message}
+      </span>
+      <span
+        className="close clickable"
+        onClick={() => dispatch(hideNotification())}
+      >
+        +
       </span>
     </div>
   );
