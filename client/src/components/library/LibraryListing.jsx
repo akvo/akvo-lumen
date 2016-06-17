@@ -1,4 +1,5 @@
 import React, { PropTypes } from 'react';
+import moment from 'moment';
 import LibraryListingGroup from './LibraryListingGroup';
 
 require('../../styles/LibraryListing.scss');
@@ -56,9 +57,7 @@ const groupEntities = (entities, sortOrder) => {
       entityDate = new Date(parseInt(entityDate, 10));
 
       // Take the year, month and day as the key
-      const key = `${entityDate.getUTCFullYear()}-` +
-        `${entityDate.getUTCMonth() + 1}-` +
-        `${entityDate.getUTCDate()}`;
+      const key = moment(entityDate).format('YYYY-MM-DD');
 
       listGroups[key] = listGroups[key] || { listGroupName: key, entities: [] };
       listGroups[key].entities.push(entity);
