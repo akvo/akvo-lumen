@@ -219,6 +219,11 @@ export default class DashboardEditor extends Component {
               onChange={(e) => { this.props.onUpdateName(e.target.value); }}
             />
           </div>
+          {getArrayFromObject(dashboard.entities).length === 0 &&
+            <div className="blankDashboardHelpText">
+              Click a visualisation in the visualisation list to add it to the dashboard.
+            </div>
+          }
           <div
             className="DashboardEditorCanvas"
             style={{
