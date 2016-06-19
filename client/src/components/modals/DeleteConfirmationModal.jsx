@@ -1,6 +1,9 @@
 import React, { PropTypes } from 'react';
 import Modal from 'react-modal';
 
+require('../../styles/DashboardModal.scss');
+require('../../styles/DeleteConfirmationModal.scss');
+
 function getEntity(entityId, entityType, library) {
   switch (entityType) {
     case 'dataset': return library.datasets[entityId];
@@ -19,7 +22,12 @@ function VisualisationsList({ datasetId, visualisations }) {
   if (dependentVisualisations.length > 0) {
     return (
       <div>
-        <span>The following visualisations will also be deleted:</span>
+        <span>
+          The following
+            {dependentVisualisations.length === 1 ?
+              ' visualisation ' : ` ${dependentVisualisations.length} visualisations `}
+          will also be deleted:
+        </span>
         <ul>
           {dependentVisualisations}
         </ul>
@@ -49,7 +57,7 @@ export default function DeleteConfirmationModal({
       style={{
         content: {
           width: 500,
-          height: 300,
+          height: entityType === 'dataset' ? 400 : 200,
           marginLeft: 'auto',
           marginRight: 'auto',
           borderRadius: 0,
@@ -61,8 +69,8 @@ export default function DeleteConfirmationModal({
         },
       }}
     >
-      <div>
-        <div>
+      <div className="DashboardModal">
+        <div className="DeleteConfirmationModal">
           <h2 className="modalTitle">{`Delete ${entityType} ${entity.name || entity.title}`}</h2>
           <div
             className="close clickable"
