@@ -80,6 +80,7 @@ export default class DashboardEditor extends Component {
     this.handleResize = this.handleResize.bind(this);
     this.handleEntityUpdate = this.handleEntityUpdate.bind(this);
     this.handleNameFocus = this.handleNameFocus.bind(this);
+    this.handleSave = this.handleSave.bind(this);
   }
 
   componentDidMount() {
@@ -190,6 +191,14 @@ export default class DashboardEditor extends Component {
     }
   }
 
+  handleSave() {
+    if (this.props.dashboard.name !== '') {
+      this.props.onSave();
+    } else {
+      // Show a warning
+    }
+  }
+
   render() {
     const dashboard = this.props.dashboard;
     const canvasWidth = this.state.gridWidth;
@@ -215,12 +224,14 @@ export default class DashboardEditor extends Component {
             </button>
             <button
               className="clickable save"
-              onClick={() => this.props.onSave()}
+              onClick={this.handleSave}
             >
               Save
             </button>
           </div>
-          <div className="DashboardNameInputContainer">
+          <div
+            className={`DashboardNameInputContainer ${dashboard.name === '' ? 'error' : ''}`}
+          >
             <input
               type="text"
               name="Dashboard name"
