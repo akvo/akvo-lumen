@@ -79,6 +79,7 @@ export default class DashboardEditor extends Component {
     this.handleEntityToggle = this.handleEntityToggle.bind(this);
     this.handleResize = this.handleResize.bind(this);
     this.handleEntityUpdate = this.handleEntityUpdate.bind(this);
+    this.handleNameFocus = this.handleNameFocus.bind(this);
   }
 
   componentDidMount() {
@@ -181,6 +182,14 @@ export default class DashboardEditor extends Component {
     this.props.onUpdateEntities(newEntities);
   }
 
+  handleNameFocus() {
+    const input = this.refs.dashboardName;
+
+    if (input.value === 'Untitled dashboard') {
+      input.value = '';
+    }
+  }
+
   render() {
     const dashboard = this.props.dashboard;
     const canvasWidth = this.state.gridWidth;
@@ -215,8 +224,10 @@ export default class DashboardEditor extends Component {
             <input
               type="text"
               name="Dashboard name"
-              placeholder={dashboard.name}
+              ref="dashboardName"
+              value={dashboard.name}
               onChange={(e) => { this.props.onUpdateName(e.target.value); }}
+              onFocus={this.handleNameFocus}
             />
           </div>
           <div
