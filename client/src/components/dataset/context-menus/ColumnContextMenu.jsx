@@ -106,7 +106,7 @@ const dataTypeOptions = {
 export default function ColumnContextMenu({ column, dimensions, onContextMenuItemSelected }) {
   return (
     <ContextMenu
-      options={commonOptions.concat(dataTypeOptions[column.type])}
+      options={commonOptions.concat(dataTypeOptions[column.get('type')])}
       selected={null}
       style={{
         width: `${dimensions.width}px`,
@@ -116,7 +116,7 @@ export default function ColumnContextMenu({ column, dimensions, onContextMenuIte
       }}
       onOptionSelected={op => onContextMenuItemSelected({
         column,
-        action: mergeArgs(actions[op], { columnName: column.columnName }),
+        action: mergeArgs(actions[op], { columnName: column.get('columnName') }),
       })}
     />
   );

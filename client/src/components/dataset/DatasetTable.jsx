@@ -84,7 +84,8 @@ export default class DatasetTable extends Component {
 
   handleToggleColumnContextMenu({ column, dimensions }) {
     const { activeColumnContextMenu } = this.state;
-    if (activeColumnContextMenu != null && column.title === activeColumnContextMenu.column.title) {
+    if (activeColumnContextMenu != null &&
+      column.get('title') === activeColumnContextMenu.column.get('title')) {
       this.setState({ activeColumnContextMenu: null });
     } else {
       this.setState({
@@ -208,7 +209,7 @@ export default class DatasetTable extends Component {
           onToggleDataTypeContextMenu={this.handleToggleDataTypeContextMenu}
           onToggleColumnContextMenu={this.handleToggleColumnContextMenu}
           columnMenuActive={activeColumnContextMenu != null &&
-            activeColumnContextMenu.column.title === column.get('title')}
+            activeColumnContextMenu.column.get('title') === column.get('title')}
           onRemoveSort={(transformation) => this.props.onTransform(transformation)}
         />
       );

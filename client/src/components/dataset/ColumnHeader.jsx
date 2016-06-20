@@ -42,7 +42,6 @@ export default class ColumnHeader extends Component {
       top: verticalOffset,
       width,
     };
-
     this.props.onToggleColumnContextMenu({
       dimensions,
       column: this.props.column,
