@@ -1,7 +1,7 @@
 import React, { PropTypes } from 'react';
 import SidebarHeader from './SidebarHeader';
 import SidebarControls from './SidebarControls';
-import { columnTitle } from '../../../utilities/dataset';
+import { columnTitle } from '../../../domain/dataset';
 
 
 function transformationDescription({ op, args }, columns) {

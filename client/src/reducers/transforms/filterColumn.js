@@ -1,5 +1,5 @@
 import cloneDeep from 'lodash/cloneDeep';
-import { columnIndex } from '../../utilities/dataset';
+import { columnIndex } from '../../domain/dataset';
 
 function getExpressionOperatorAndValue(expression) {
   const expressionOperator = Object.keys(expression)[0];

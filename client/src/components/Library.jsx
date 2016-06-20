@@ -8,6 +8,7 @@ import { fetchLibrary } from '../actions/library';
 import { deleteVisualisation } from '../actions/visualisation';
 import { deleteDataset } from '../actions/dataset';
 import { deleteDashboard } from '../actions/dashboard';
+import * as entity from '../domain/entity';
 
 require('../styles/Library.scss');
 
@@ -43,7 +44,7 @@ class Library extends Component {
     if (actionType === 'delete') {
       switch (entityType) {
         case 'dataset':
-          if (datasets[id].status !== 'PENDING') {
+          if (entity.isPending(datasets[id])) {
             dispatch(deleteDataset(id));
           }
           break;

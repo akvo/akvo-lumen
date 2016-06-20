@@ -1,6 +1,11 @@
 import React, { PropTypes, Component } from 'react';
 import LoadingSpinner from '../common/LoadingSpinner';
 import ContextMenu from '../common/ContextMenu';
+import {
+  getTitle, getType, getId,
+  getErrorMessage, isPending,
+  isFailed, isOk, getStatus,
+} from '../../domain/entity';
 
 function LibraryListingItemContextMenu({ onClick }) {
   return (
@@ -61,18 +66,17 @@ export default class LibraryListingItem extends Component {
 
   render() {
     const { entity, onSelectEntity, onEntityAction } = this.props;
-    const status = entity.status;
     return (
       <li
         onClick={() => {
-          if (status === 'OK') {
-            onSelectEntity(entity.type, entity.id);
+          if (isOk(entity)) {
+            onSelectEntity(getType(entity), getId(entity));
           }
         }}
-        key={entity.id}
-        className={`LibraryListingItem ${entity.type} ${status}`}
+        key={getId(entity)}
+        className={`LibraryListingItem ${getType(entity)} ${getStatus(entity)}`}
       >
-        {status === 'PENDING' &&
+        {isPending(entity) &&
           <div className="pendingOverlay">
             <LoadingSpinner />
           </div>
@@ -81,11 +85,11 @@ export default class LibraryListingItem extends Component {
         <div className="entityIcon"></div>
         <div className="textContents">
           <h3 className="entityName">
-            {entity.name || entity.title}
-            {status === 'FAILED' && ' (Import failed)'}
+            {getTitle(entity)}
+            {isFailed(entity) && ' (Import failed)'}
           </h3>
-          {status === 'FAILED' && <p>{entity.reason}</p>}
-          {status === 'PENDING' && <p>Pending...</p>}
+          {isFailed(entity) && <p>{getErrorMessage(entity)}</p>}
+          {isPending(entity) && <p>Pending...</p>}
         </div>
         <div className="entityControls">
           <button
@@ -94,10 +98,10 @@ export default class LibraryListingItem extends Component {
           >
             ...
           </button>
-          {this.state.contextMenuVisible ?
+          {this.state.contextMenuVisible &&
             <LibraryListingItemContextMenu
-              onClick={(actionType) => onEntityAction(actionType, entity.type, entity.id)}
-            /> : null}
+              onClick={(actionType) => onEntityAction(actionType, getType(entity), getId(entity))}
+            />}
         </div>
       </li>
     );
@@ -107,7 +111,7 @@ export default class LibraryListingItem extends Component {
 LibraryListingItem.propTypes = {
   entity: PropTypes.shape({
     id: PropTypes.string.isRequired,
-    name: PropTypes.string.isRequired,
+    title: PropTypes.string, // .isRequired,
     type: PropTypes.oneOf(['dataset', 'visualisation', 'dashboard']).isRequired,
     status: PropTypes.oneOf(['OK', 'FAILED', 'PENDING']).isRequired,
     reason: PropTypes.string,

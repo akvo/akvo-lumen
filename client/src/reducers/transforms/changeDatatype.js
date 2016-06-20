@@ -1,6 +1,6 @@
 import cloneDeep from 'lodash/cloneDeep';
 import moment from 'moment';
-import { columnIndex } from '../../utilities/dataset';
+import { columnIndex } from '../../domain/dataset';
 
 function makeParser(parser) {
   return (rows, idx, onError, args) => {

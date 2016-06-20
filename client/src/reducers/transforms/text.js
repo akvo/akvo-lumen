@@ -1,5 +1,5 @@
 import cloneDeep from 'lodash/cloneDeep';
-import { columnIndex } from '../../utilities/dataset';
+import { columnIndex } from '../../domain/dataset';
 
 // http://stackoverflow.com/a/196991/24946
 function toTitleCase(s) {

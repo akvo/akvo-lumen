@@ -1,6 +1,7 @@
 import React, { PropTypes } from 'react';
 import moment from 'moment';
 import LibraryListingGroup from './LibraryListingGroup';
+import * as entity from '../../domain/entity';
 
 require('../../styles/LibraryListing.scss');
 
@@ -9,8 +10,8 @@ const mapEntityObjectsToArray = (...objects) => {
   const output = [];
   objects.forEach((entityObject) => {
     Object.keys(entityObject).forEach(key => {
-      const entity = entityObject[key];
-      output.push(entity);
+      const ent = entityObject[key];
+      output.push(ent);
     });
   });
   return output;
@@ -29,10 +30,10 @@ const filterEntities = (library, filterBy, searchString) => {
     searchedEntities = unsearchedEntities;
   } else {
     // Basic, proof-of-concept string matching for search function
-    unsearchedEntities.forEach(entity => {
-      const entityTitle = entity.name || entity.title;
+    unsearchedEntities.forEach(ent => {
+      const entityTitle = entity.getTitle(ent);
       if (entityTitle.toLowerCase().indexOf(searchString.toLowerCase()) > -1) {
-        searchedEntities.push(entity);
+        searchedEntities.push(ent);
       }
     });
   }
@@ -44,23 +45,24 @@ const groupEntities = (entities, sortOrder) => {
   const listGroups = {};
 
   if (sortOrder === 'name') {
-    entities.forEach(entity => {
-      const entityTitle = entity.name || entity.title;
+    entities.forEach(ent => {
+      const entityTitle = entity.getTitle(ent);
       const key = entityTitle.toLowerCase().charAt(0);
 
       listGroups[key] = listGroups[key] || { listGroupName: key, entities: [] };
-      listGroups[key].entities.push(entity);
+      listGroups[key].entities.push(ent);
     });
   } else if (sortOrder === 'created' || sortOrder === 'last_modified') {
-    entities.forEach(entity => {
-      let entityDate = sortOrder === 'created' ? entity.created : entity.modified || entity.created;
+    entities.forEach(ent => {
+      let entityDate = sortOrder === 'created' ?
+        entity.getCreatedTimestamp(ent) : entity.getModifiedTimestamp(ent);
       entityDate = new Date(parseInt(entityDate, 10));
 
       // Take the year, month and day as the key
       const key = moment(entityDate).format('YYYY-MM-DD');
 
       listGroups[key] = listGroups[key] || { listGroupName: key, entities: [] };
-      listGroups[key].entities.push(entity);
+      listGroups[key].entities.push(ent);
     });
   }
 
@@ -125,7 +127,6 @@ export default function LibraryListing({
     searchString);
   const listGroups = groupEntities(entities, sortOrder);
   const sortedListGroups = sortGroups(listGroups, sortOrder, isReverseSort);
-
   return (
     <div className={`LibraryListing ${displayMode}`}>
       <ul>

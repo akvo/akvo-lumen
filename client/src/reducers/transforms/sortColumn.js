@@ -1,5 +1,5 @@
 import cloneDeep from 'lodash/cloneDeep';
-import { columnIndex } from '../../utilities/dataset';
+import { columnIndex } from '../../domain/dataset';
 
 const columnComparator = (type, sortDirection, colIndex) => (rowA, rowB) => {
   let n;

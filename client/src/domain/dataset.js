@@ -1,5 +1,3 @@
-// Helper functions for transforming datasets
-
 export function columnIndex(columnName, columns) {
   for (let i = 0; i < columns.length; i++) {
     if (columnName === columns[i].columnName) {

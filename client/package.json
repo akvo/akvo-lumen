@@ -25,6 +25,7 @@
     "file-loader": "^0.8.5",
     "fixed-data-table": "^0.6.0",
     "history": "^2.1.1",
+    "invariant": "^2.2.1",
     "isomorphic-fetch": "^2.2.1",
     "keycloak-js": "1.7.0",
     "leaflet": "^0.7.7",
@@ -50,10 +51,12 @@
     "sass-loader": "^3.2.0",
     "style-loader": "^0.13.1",
     "tus-js-client": "^1.1.4",
-    "url-loader": "^0.5.7"
+    "url-loader": "^0.5.7",
+    "warning": "^3.0.0"
   },
   "devDependencies": {
     "babel-eslint": "^6.0.4",
+    "babel-presets-react-production": "^1.0.3",
     "eslint": "^2.9.0",
     "eslint-config-airbnb": "^9.0.1",
     "eslint-plugin-import": "^1.7.0",
@@ -71,6 +74,11 @@
     "webpack-dev-server": "^1.14.1"
   },
   "babel": {
+    "env": {
+      "production": {
+        "presets": ["react-production"]
+      }
+    },
     "presets": [
       "es2015",
       "react"
