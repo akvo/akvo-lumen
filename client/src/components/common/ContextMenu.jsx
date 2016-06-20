@@ -38,7 +38,8 @@ export default function ContextMenu(props) {
 
   return (
     <div
-      className={`ContextMenu ${props.containerClass} ${props.arrowClass ? 'hasArrow' : ''}`}
+      className={`ContextMenu noSelect
+        ${props.containerClass} ${props.arrowClass ? 'hasArrow' : ''}`}
       style={props.style}
     >
       <span

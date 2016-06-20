@@ -55,7 +55,7 @@ export class WorkspaceNav extends Component {
   }
 
   getClassName(isFloatOnTop) {
-    let className = 'WorkspaceNav';
+    let className = 'WorkspaceNav noSelect';
 
     if (isFloatOnTop) {
       if (this.state.isManuallyInverted) {
