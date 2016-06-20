@@ -58,6 +58,7 @@ export default class ColumnHeader extends Component {
     });
   }
 
+  // TODO: move column.get(...) to domain/dataset.js
   render() {
     const { column } = this.props;
     return (
@@ -67,11 +68,11 @@ export default class ColumnHeader extends Component {
         ref="columnHeaderContainer"
         onClick={this.handleColumnMenuClick}
       >
-        {column.sort != null ?
+        {column.get('sort') != null ?
           <div
             className="sortLabel"
           >
-            Sort: {column.direction === 'ASC' ? 'Ascending' : 'Descending'}
+            Sort: {column.get('direction') === 'ASC' ? 'Ascending' : 'Descending'}
             <span
               className="cancelSort"
               onClick={(event) => this.handleRemoveSort(event, column)}
@@ -89,13 +90,13 @@ export default class ColumnHeader extends Component {
             onClick={this.handleDataTypeMenuClick}
             ref="columnTypeLabel"
           >
-            {column.type}
+            {column.get('type')}
           </span>
         </span>
         <span
           className="columnTitleText"
         >
-          {column.title}
+          {column.get('title')}
         </span>
       </div>
     );
@@ -103,12 +104,13 @@ export default class ColumnHeader extends Component {
 }
 
 ColumnHeader.propTypes = {
-  column: PropTypes.shape({
+  column: PropTypes.object.isRequired,
+/*  column: PropTypes.shape({
     type: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
     sort: PropTypes.number,
     direction: PropTypes.oneOf(['ASC', 'DESC']),
-  }),
+  }), */
   onToggleDataTypeContextMenu: PropTypes.func.isRequired,
   onToggleColumnContextMenu: PropTypes.func.isRequired,
   onRemoveSort: PropTypes.func.isRequired,

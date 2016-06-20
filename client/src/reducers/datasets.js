@@ -1,5 +1,4 @@
 import * as constants from '../constants/dataset';
-import update from 'react-addons-update';
 import applyTransformation from './transform';
 
 export const initialState = {};
@@ -45,19 +44,18 @@ function importDatasetSuccess(state, { importId }) {
 }
 
 function saveDataset(state, dataset) {
-  const id = dataset.id;
-  const ds = update(dataset, { $merge: { type: 'dataset' } });
-  return update(state, {
-    [id]: { $set: ds },
+  const id = dataset.get('id');
+  return Object.assign({}, state, {
+    [id]: dataset.set('type', 'dataset'),
   });
 }
 
 function saveDatasets(state, ds) {
   return ds.reduce((result, dataset) => {
-    const id = dataset.id;
+    const id = dataset.get('id');
     if (state[id] == null) {
       return Object.assign({}, result, {
-        [id]: Object.assign({}, dataset, { type: 'dataset' }),
+        [id]: dataset.set('type', 'dataset'),
       });
     }
     return result;

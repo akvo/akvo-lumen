@@ -9,6 +9,8 @@ import ColumnContextMenu from './context-menus/ColumnContextMenu';
 
 require('../../styles/DatasetTable.scss');
 
+// TODO move column.get and rows.get to domain/dataset.js?
+
 function formatCellValue(type, value) {
   switch (type) {
     case 'date':
@@ -206,16 +208,20 @@ export default class DatasetTable extends Component {
           onToggleDataTypeContextMenu={this.handleToggleDataTypeContextMenu}
           onToggleColumnContextMenu={this.handleToggleColumnContextMenu}
           columnMenuActive={activeColumnContextMenu != null &&
-            activeColumnContextMenu.column.title === column.title}
+            activeColumnContextMenu.column.title === column.get('title')}
           onRemoveSort={(transformation) => this.props.onTransform(transformation)}
         />
       );
       return (
         <Column
-          cellClassName={this.getCellClassName(column.title)}
+          cellClassName={this.getCellClassName(column.get('title'))}
           key={index}
           header={columnHeader}
-          cell={props => <Cell>{formatCellValue(column.type, rows[props.rowIndex][index])}</Cell>}
+          cell={props => (
+            <Cell>
+              {formatCellValue(column.get('type'), rows.getIn([props.rowIndex, index]))}
+            </Cell>
+          )}
           width={200}
         />
       );
@@ -225,7 +231,7 @@ export default class DatasetTable extends Component {
       <div className="DatasetTable">
         <DatasetControls
           columns={columns}
-          rowsCount={rows.length}
+          rowsCount={rows.size}
           onToggleTransformationLog={this.handleToggleTransformationLog}
           onClickMenuItem={() => { throw new Error('Not yet implemented'); }}
         />
@@ -262,7 +268,7 @@ export default class DatasetTable extends Component {
             <Table
               headerHeight={60}
               rowHeight={30}
-              rowsCount={rows.length}
+              rowsCount={rows.size}
               width={width}
               height={height}
               onScrollStart={() => this.handleScroll()}
@@ -277,9 +283,9 @@ export default class DatasetTable extends Component {
 }
 
 DatasetTable.propTypes = {
-  columns: PropTypes.array.isRequired,
-  rows: PropTypes.array.isRequired,
-  transformations: PropTypes.array,
+  columns: PropTypes.object.isRequired,
+  rows: PropTypes.object.isRequired,
+  transformations: PropTypes.object,
   onTransform: PropTypes.func.isRequired,
   onUndoTransformation: PropTypes.func.isRequired,
 };

@@ -109,13 +109,7 @@ export default class LibraryListingItem extends Component {
 }
 
 LibraryListingItem.propTypes = {
-  entity: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    title: PropTypes.string, // .isRequired,
-    type: PropTypes.oneOf(['dataset', 'visualisation', 'dashboard']).isRequired,
-    status: PropTypes.oneOf(['OK', 'FAILED', 'PENDING']).isRequired,
-    reason: PropTypes.string,
-  }).isRequired,
+  entity: PropTypes.object.isRequired,
   onSelectEntity: PropTypes.func.isRequired,
   onEntityAction: PropTypes.func.isRequired,
 };

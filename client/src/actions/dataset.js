@@ -1,4 +1,5 @@
 import fetch from 'isomorphic-fetch';
+import Immutable from 'immutable';
 import * as constants from '../constants/dataset';
 import * as visualisationActions from './visualisation';
 import { hideModal } from './activeModal';
@@ -41,7 +42,7 @@ export function fetchDataset(id) {
       headers: headers(),
     })
     .then(response => response.json())
-    .then(dataset => dispatch(fetchDatasetSuccess(dataset)))
+    .then(dataset => dispatch(fetchDatasetSuccess(Immutable.fromJS(dataset))))
     .catch(error => dispatch(fetchDatasetFailure(error, id)));
   };
 }

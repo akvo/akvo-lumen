@@ -1,8 +1,16 @@
 import moment from 'moment';
 import invariant from 'invariant';
+import Immutable from 'immutable';
+
+function get(entity, key) {
+  if (Immutable.Map.isMap(entity)) {
+    return entity.get(key);
+  }
+  return entity[key];
+}
 
 export function getTitle(entity) {
-  const title = entity.title || entity.name;
+  const title = get(entity, 'title') || get(entity, 'name');
   invariant(
     title != null,
     'Title for %s with id %s must not be null',
@@ -12,7 +20,7 @@ export function getTitle(entity) {
 }
 
 export function getId(entity) {
-  const id = entity.id;
+  const id = get(entity, 'id');
   invariant(
     id != null,
     'Id for entity %s must not be null',
@@ -22,7 +30,7 @@ export function getId(entity) {
 }
 
 export function getType(entity) {
-  const type = entity.type;
+  const type = get(entity, 'type');
   invariant(
     ['dataset', 'visualisation', 'dashboard'].indexOf(type) >= 0,
     'Entity %s (%s) unknown entity type %s',
@@ -44,7 +52,7 @@ export function isDashboard(entity) {
 }
 
 export function getStatus(entity) {
-  const status = entity.status;
+  const status = get(entity, 'status');
   invariant(
     ['OK', 'PENDING', 'FAILED'].indexOf(status) >= 0,
     'Invalid status for entity %s: %s',
@@ -66,7 +74,7 @@ export function isFailed(entity) {
 }
 
 export function getCreatedTimestamp(entity) {
-  const created = entity.created;
+  const created = get(entity, 'created');
   invariant(
     Number.isInteger(created),
     'Invalid created timestamp for %s: %s',
@@ -76,7 +84,7 @@ export function getCreatedTimestamp(entity) {
 }
 
 export function getModifiedTimestamp(entity) {
-  const modified = entity.modified;
+  const modified = get(entity, 'modified');
   invariant(
     Number.isInteger(modified),
     'Invalid created timestamp for %s: %s',
@@ -94,5 +102,5 @@ export function getModified(entity, format = 'MMMM Do YYYY') {
 }
 
 export function getErrorMessage(entity) {
-  return entity.reason || '';
+  return get(entity, 'reason') || '';
 }
