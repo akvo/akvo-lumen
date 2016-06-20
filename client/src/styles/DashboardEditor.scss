@@ -16,6 +16,12 @@
   .DashboardEditorCanvasContainer {
     flex: 1;
   }
+  .blankDashboardHelpText {
+    text-align: center;
+    padding: 6rem 1rem;
+    line-height: 1.4em;
+    color: $midGrey;
+  }
   .react-grid-layout {
     background-color: whitesmoke;
   }
