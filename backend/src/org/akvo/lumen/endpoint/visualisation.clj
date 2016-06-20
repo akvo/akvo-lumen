@@ -16,7 +16,7 @@
   (dissoc (visualisation-by-id conn
                                {:id id}
                                {}
-                               :identifiers identity)
+                               {:identifiers identity})
           :author))
 
 (defn endpoint [{:keys [tenant-manager]}]
@@ -27,7 +27,7 @@
         (response (all-visualisations tenant-conn
                                       {}
                                       {}
-                                      :identifiers identity)))
+                                      {:identifiers identity})))
 
       (POST "/" {:keys [jwt-claims body]}
         (try
@@ -57,7 +57,7 @@
           (if-let [v (visualisation-by-id tenant-conn
                                           {:id id}
                                           {}
-                                          :identifiers identity)]
+                                          {:identifiers identity})]
             (response (dissoc v :author))
             (not-found {:id id})))
 

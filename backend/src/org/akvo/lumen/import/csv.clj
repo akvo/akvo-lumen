@@ -131,7 +131,7 @@
           (.copyIn copy-manager ^String (get-copy-sql temp-table n-cols headers?) (io/input-stream path))))
       (jdbc/execute! tenant-conn [(get-insert-sql temp-table table-name n-cols)])
       (jdbc/execute! tenant-conn [(get-drop-table-sql temp-table)])
-      (jdbc/execute! tenant-conn [(get-vacuum-sql table-name)] :transaction? false)
+      (jdbc/execute! tenant-conn [(get-vacuum-sql table-name)] {:transaction? false})
       {:success? true
        :columns (get-column-tuples col-titles)})
     (catch Exception e

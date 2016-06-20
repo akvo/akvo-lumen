@@ -10,7 +10,7 @@
                  [com.layerware/hugsql "0.4.7"]
                  [com.novemberain/pantomime "2.8.0"]
                  [com.stuartsierra/component "0.3.1"]
-                 [compojure "1.5.0"]
+                 [compojure "1.5.1"]
                  [duct "0.5.10"]
                  [duct/hikaricp-component "0.1.0"]
                  [environ "1.0.3"]
@@ -21,17 +21,16 @@
                  [org.clojure/clojure "1.8.0"]
                  [org.clojure/core.match "0.3.0-alpha4"]
                  [org.clojure/data.csv "0.1.3"]
-                 [org.clojure/java.jdbc "0.5.0"]
+                 [org.clojure/java.jdbc "0.6.1"]
                  [org.immutant/scheduling "2.1.4" :exclusions [ch.qos.logback/logback-classic]]
                  [org.immutant/web "2.1.4"]
                  [org.postgresql/postgresql "9.4.1208"]
                  [org.slf4j/slf4j-nop "1.7.21"]
                  [pandect "0.6.0"]
-                 [ragtime "0.5.3"]
+                 [ragtime "0.6.0"]
                  [ring "1.5.0"]
                  [ring/ring-defaults "0.2.1"]
                  [ring/ring-json "0.4.0"]]
-
   :uberjar-name "akvo-lumen.jar"
   :repl-options {:timeout 120000}
   :plugins [[lein-codox "0.9.1"]
