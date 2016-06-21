@@ -44,7 +44,7 @@ class Library extends Component {
     if (actionType === 'delete') {
       switch (entityType) {
         case 'dataset':
-          if (entity.isPending(datasets[id])) {
+          if (!entity.isPending(datasets[id])) {
             dispatch(deleteDataset(id));
           }
           break;

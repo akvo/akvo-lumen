@@ -1,4 +1,5 @@
 import React, { Component, PropTypes } from 'react';
+import Immutable from 'immutable';
 import DashSelect from '../../common/DashSelect';
 import SidebarHeader from './SidebarHeader';
 import SidebarControls from './SidebarControls';
@@ -114,51 +115,39 @@ export default class ChangeDataType extends Component {
   componentWillMount() {
     const { column, newColumnType } = this.props;
     this.setState({
-      op: 'core/change-datatype',
-      args: {
-        columnName: column.columnName,
-        newType: newColumnType,
-        defaultValue: null,
-        parseFormat: 'YYYY-MM-DD',
-      },
-      onError: 'default-value',
+      transformation: Immutable.fromJS({
+        op: 'core/change-datatype',
+        args: {
+          columnName: column.get('columnName'),
+          newType: newColumnType,
+          defaultValue: null,
+          parseFormat: 'YYYY-MM-DD',
+        },
+        onError: 'default-value',
+      }),
       errorStrategy: 'empty-cell',
     });
   }
 
-
   mergeArgs(args) {
-    this.setState({ args: Object.assign({}, this.state.args, args) });
+    const transformation = this.state.transformation;
+    this.setState({ transformation: transformation.mergeIn(['args'], args) });
   }
 
   handleChangeErrorStrategy(errorStrategy) {
-    switch (errorStrategy) {
-      case 'emptyCell': {
-        const args = Object.assign({}, this.state.args, { defaultValue: null });
-        this.setState({
-          args,
-          onError: 'default-value',
-          errorStrategy,
-        });
-        break;
-      }
-      case 'default-value':
-      case 'fail':
-      case 'delete-row': {
-        this.setState({
-          onError: errorStrategy,
-          errorStrategy,
-        });
-        break;
-      }
-      default:
-        throw new Error(`Unkown error strategy ${errorStrategy}`);
-    }
+    const transformation = this.state.transformation;
+    const defaultValue = errorStrategy === 'empty-cell' ?
+      null : transformation.getIn(['args', 'defaultValue']);
+    this.setState({
+      errorStrategy,
+      transformation: transformation.setIn(['args', 'defaultValue'], defaultValue),
+    });
   }
 
   render() {
     const { column, dataTypeOptions, onClose, onApply } = this.props;
-    const { newType } = this.state.args;
+    const { transformation } = this.state;
+    const newType = transformation.getIn(['args', 'newType']);
     return (
       <div
         className="DataTableSidebar"
@@ -168,7 +157,7 @@ export default class ChangeDataType extends Component {
         }}
       >
         <SidebarHeader onClose={onClose}>
-          Change data type for {column.title}
+          Change data type for {column.get('title')}
         </SidebarHeader>
         <div className="inputs">
           <div className="inputGroup">
@@ -187,9 +176,9 @@ export default class ChangeDataType extends Component {
               }}
             />
           </div>
-          {newType === 'date' && column.type === 'text' ?
+          {newType === 'date' && column.get('type') === 'text' ?
             <DateFormatSelect
-              parseFormat={this.state.args.parseFormat}
+              parseFormat={transformation.getIn(['args', 'parseFormat'])}
               onChange={parseFormat => this.mergeArgs({ parseFormat })}
             /> : null}
           <div className="inputGroup">
@@ -205,13 +194,13 @@ export default class ChangeDataType extends Component {
           </div>
           {this.state.errorStrategy === 'default-value' ?
             <DefaultValueInput
-              defaultValue={this.state.args.defaultValue}
+              defaultValue={transformation.getIn(['args', 'defaultValue'])}
               newType={newType}
               onChange={defaultValue => this.mergeArgs({ defaultValue })}
             /> : null}
         </div>
         <SidebarControls
-          onApply={() => onApply(this.state)}
+          onApply={() => onApply(transformation)}
           onClose={onClose}
         />
       </div>
@@ -220,9 +209,7 @@ export default class ChangeDataType extends Component {
 }
 
 ChangeDataType.propTypes = {
-  column: PropTypes.shape({
-    title: PropTypes.string.isRequired,
-  }).isRequired,
+  column: PropTypes.object.isRequired,
   dataTypeOptions: PropTypes.array.isRequired,
   newColumnType: PropTypes.string.isRequired,
   onClose: PropTypes.func.isRequired,

@@ -110,6 +110,6 @@ export default function changeDatatype(dataset, transformation) {
   const newRows = fn(dataset.get('rows'), colIndex, onError, args);
   const newDataset = dataset
     .set('rows', newRows)
-    .setIn([colIndex, 'type'], newType);
+    .setIn(['columns', colIndex, 'type'], newType);
   return newDataset;
 }
