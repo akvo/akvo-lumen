@@ -1,6 +1,5 @@
 import * as constants from '../constants/dataset';
 import update from 'react-addons-update';
-import applyTransformation from './transform';
 
 export const initialState = {};
 
@@ -70,11 +69,10 @@ function removeDataset(state, id) {
   return newState;
 }
 
-function transformDataset(state, { datasetId, transformation }) {
-  const newState = Object.assign({}, state, {
-    [datasetId]: applyTransformation(state[datasetId], transformation),
+function replaceDataset(state, { dataset }) {
+  return Object.assign({}, state, {
+    [dataset.id]: dataset,
   });
-  return newState;
 }
 
 function transformationLogRequestSent(state, { datasetId }) {
@@ -131,8 +129,8 @@ export default function datasets(state = initialState, action) {
       return saveDatasets(state, action.datasets);
     case constants.REMOVE_DATASET:
       return removeDataset(state, action.id);
-    case constants.TRANSFORM_DATASET:
-      return transformDataset(state, action);
+    case constants.REPLACE_DATASET:
+      return replaceDataset(state, action);
     case constants.TRANSFORMATION_LOG_REQUEST_SENT:
       return transformationLogRequestSent(state, action);
     case constants.TRANSFORMATION_SUCCESS:

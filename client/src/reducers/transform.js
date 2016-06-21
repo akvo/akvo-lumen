@@ -30,16 +30,9 @@ function updateTransformationLog(dataset, transformation) {
 }
 
 export default function applyTransformation(dataset, transformation) {
-  try {
-    const transformedDataset = availableTransforms[transformation.op](dataset, transformation);
-    if (transformedDataset === dataset) {
-      return dataset;
-    }
-    return updateTransformationLog(recordHistory(dataset, transformedDataset), transformation);
-  } catch (e) {
-    if (transformation.onError === 'fail') {
-      return dataset;
-    }
-    throw e;
+  const transformedDataset = availableTransforms[transformation.op](dataset, transformation);
+  if (transformedDataset === dataset) {
+    return dataset;
   }
+  return updateTransformationLog(recordHistory(dataset, transformedDataset), transformation);
 }

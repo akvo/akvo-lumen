@@ -3,6 +3,8 @@ import * as constants from '../constants/dataset';
 import * as visualisationActions from './visualisation';
 import { hideModal } from './activeModal';
 import headers from './headers';
+import applyTransformation from '../reducers/transform';
+import { showNotification } from './notification';
 
 /*
  * Fetch a dataset by id
@@ -258,11 +260,27 @@ export function deleteDataset(id) {
   };
 }
 
+/*
+ * The reducer is run in the action creator to be able to
+ * properly catch exceptions in the case of { onError: 'fail' }
+ * See: https://github.com/zalmoxisus/redux-devtools-instrument/issues/5
+ */
 export function transform(datasetId, transformation) {
-  return {
-    type: constants.TRANSFORM_DATASET,
-    datasetId,
-    transformation,
+  return (dispatch, getState) => {
+    const dataset = getState().library.datasets[datasetId];
+    try {
+      const nextDataset = applyTransformation(dataset, transformation);
+      dispatch({
+        type: constants.REPLACE_DATASET,
+        dataset: nextDataset,
+      });
+    } catch (e) {
+      if (transformation.onError === 'fail') {
+        dispatch(showNotification('error', `Transformation aborted: ${e.message}`));
+      } else {
+        throw e;
+      }
+    }
   };
 }
 
