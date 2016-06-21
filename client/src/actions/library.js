@@ -1,5 +1,6 @@
 import fetch from 'isomorphic-fetch';
 import Immutable from 'immutable';
+import warning from 'warning';
 import * as constants from '../constants/library';
 import { fetchDatasetsSuccess } from './dataset';
 import { fetchVisualisationsSuccess } from './visualisation';
@@ -30,8 +31,11 @@ export function fetchLibrary() {
       dispatch(fetchDatasetsSuccess(Immutable.fromJS(library.datasets)));
       dispatch(fetchVisualisationsSuccess(library.visualisations));
       dispatch(fetchDashboardsSuccess(library.dashboards));
+    })
+    .catch(error => {
+      warning(false, 'Failed to fetch library: %s', error.message);
+      dispatch(fetchLibraryFailure(error));
     });
-//    .catch(error => dispatch(fetchLibraryFailure(error)));
   };
 }
 
