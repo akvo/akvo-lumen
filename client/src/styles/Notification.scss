@@ -31,5 +31,10 @@
     transform: rotate(45deg);
     right: 1rem;
     top: 0;
+    display: block;
+    /* Increase clickable area without altering position */
+    padding: 5rem;
+    margin: -5rem;
+    border-radius: 99rem;
   }
 }
