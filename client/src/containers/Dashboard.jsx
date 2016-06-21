@@ -68,12 +68,13 @@ class Dashboard extends Component {
   componentWillMount() {
     const isEditingExistingDashboard = getEditingStatus(this.props.location);
 
+    if (isEmpty(this.props.library.datasets)) {
+      this.props.dispatch(fetchLibrary());
+    }
+
     if (isEditingExistingDashboard) {
       const dashboardId = this.props.params.dashboardId;
 
-      if (isEmpty(this.props.library.datasets)) {
-        this.props.dispatch(fetchLibrary());
-      }
       this.props.dispatch(actions.fetchDashboard(dashboardId));
     }
   }
@@ -87,6 +88,14 @@ class Dashboard extends Component {
 
         // Test for both the dashboard and the layout to ensure the dashboard is fully loaded
         if (dash && dash.layout) {
+          const entityArray = Object.keys(dash.entities).map(key => dash.entities[key]);
+          const hasVisualisations = entityArray.some(entity => entity.type === 'visualisation');
+
+          if (hasVisualisations && isEmpty(this.props.library.visualisations)) {
+            // The dashboard has at least 1 visualisation, and no visualisations are loaded
+            return;
+          }
+
           this.setState({
             id: dash.id,
             name: dash.title,
