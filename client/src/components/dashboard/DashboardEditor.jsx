@@ -74,12 +74,13 @@ export default class DashboardEditor extends Component {
     this.state = {
       gridWidth: 1024,
       propLayout: [],
+      saveError: false,
     };
     this.handleLayoutChange = this.handleLayoutChange.bind(this);
     this.handleEntityToggle = this.handleEntityToggle.bind(this);
     this.handleResize = this.handleResize.bind(this);
     this.handleEntityUpdate = this.handleEntityUpdate.bind(this);
-    this.handleNameFocus = this.handleNameFocus.bind(this);
+    this.handleChangeName = this.handleChangeName.bind(this);
     this.handleSave = this.handleSave.bind(this);
   }
 
@@ -183,19 +184,16 @@ export default class DashboardEditor extends Component {
     this.props.onUpdateEntities(newEntities);
   }
 
-  handleNameFocus() {
-    const input = this.refs.dashboardName;
-
-    if (input.value === 'Untitled dashboard') {
-      input.value = '';
-    }
+  handleChangeName(e) {
+    this.setState({ saveError: false });
+    this.props.onUpdateName(e.target.value);
   }
 
   handleSave() {
     if (this.props.dashboard.name !== '') {
       this.props.onSave();
     } else {
-      // Show a warning
+      this.setState({ saveError: true });
     }
   }
 
@@ -230,15 +228,15 @@ export default class DashboardEditor extends Component {
             </button>
           </div>
           <div
-            className={`DashboardNameInputContainer ${dashboard.name === '' ? 'error' : ''}`}
+            className={`DashboardNameInputContainer ${this.state.saveError ? 'error' : ''}`}
           >
             <input
               type="text"
               name="Dashboard name"
               ref="dashboardName"
               value={dashboard.name}
-              onChange={(e) => { this.props.onUpdateName(e.target.value); }}
-              onFocus={this.handleNameFocus}
+              placeholder="Enter dashboard name"
+              onChange={this.handleChangeName}
             />
           </div>
           <div
