@@ -4,7 +4,7 @@
   :license {:name "GNU Affero General Public License 3.0"
             :url  "https://www.gnu.org/licenses/agpl-3.0.html"}
   :min-lein-version "2.0. 0"
-  :dependencies [[cheshire "5.6.1"]
+  :dependencies [[cheshire "5.6.2"]
                  [clj-http "3.1.0"]
                  [clj-time "0.12.0"]
                  [com.layerware/hugsql "0.4.7"]
