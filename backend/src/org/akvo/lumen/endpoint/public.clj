@@ -65,6 +65,7 @@
        "  <head>\n"
        "  <meta charset=\"utf-8\" />\n"
        "  <meta name=\"robots\" content=\"none\" />\n"
+       "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
        "  <title>Akvo Lumen</title>\n"
        "  </head>\n"
        "<body>\n"

@@ -45,7 +45,7 @@ class Dashboard extends Component {
     super();
     this.state = {
       type: 'dashboard',
-      name: 'Untitled dashboard',
+      name: '',
       entities: {},
       layout: [],
       id: null,

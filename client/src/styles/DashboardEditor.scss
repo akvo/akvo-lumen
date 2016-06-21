@@ -16,6 +16,12 @@
   .DashboardEditorCanvasContainer {
     flex: 1;
   }
+  .blankDashboardHelpText {
+    text-align: center;
+    padding: 6rem 1rem;
+    line-height: 1.4em;
+    color: $midGrey;
+  }
   .react-grid-layout {
     background-color: whitesmoke;
   }
@@ -27,12 +33,20 @@
 
     button {
       padding: 0.5rem 1rem;
-      background-color: $mintGreen;
-      color: white;
+      color: $mintGreen;
+      background-color: $white;
+      border: 0.1rem solid $mintGreen;
       font-size: 1rem;
       line-height: 1.4rem;
       border-radius: 0.4rem;
       font-weight: bold;
+      margin-right: 1rem;
+    }
+    button.save {
+      margin-right: 0;
+      background-color: $mintGreen;
+      color: white;
+      border: none;
     }
   }
   .DashboardNameInputContainer {
@@ -49,6 +63,10 @@
       font-size: 1.15rem;
       font-weight: bold;
       text-align: center;
+    }
+
+    &.error input {
+      box-shadow: 0 0 0.1rem 0.25rem $errorRed;
     }
   }
 }

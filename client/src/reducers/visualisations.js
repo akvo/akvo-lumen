@@ -31,6 +31,11 @@ function saveVisualisation(state, vis) {
   const id = vis.id;
   const spec = vis.spec;
   const existingVis = state[id];
+  if (existingVis == null) {
+    return Object.assign({}, state, {
+      [id]: Object.assign({}, vis, { type: 'visualisation', status: 'OK' }),
+    });
+  }
   return update(state, {
     [id]: {
       $set: update(existingVis, { $merge: spec }),
