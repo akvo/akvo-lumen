@@ -64,5 +64,9 @@
       font-weight: bold;
       text-align: center;
     }
+
+    &.error input {
+      box-shadow: 0 0 0.1rem 0.25rem $errorRed;
+    }
   }
 }
