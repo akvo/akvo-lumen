@@ -16,8 +16,27 @@
       background-color: $lightGreen;
     }
   }
-  h4 {
+  .background {
+    background-image: url('img/icon-256-library-listing-visualisation.png');
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    right: 1rem;
+    bottom: 1rem;
+    opacity: 0.075;
+  }
+  h4, .visualisationType {
     padding: 0.5rem;
+  }
+  h4 {
+    font-weight: bold;
+    font-size: 1.25rem;
+  }
+  .visualisationType {
+    color: $midGrey;
   }
   .isOnDashboardIndicator {
     padding: 0.5rem;
