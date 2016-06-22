@@ -55,11 +55,6 @@ const actions = Immutable.fromJS({
   },
 });
 
-function mergeArgs(action, args) {
-  const a = Object.assign({}, action.args, args);
-  return Object.assign({}, action, { args: a });
-}
-
 const commonOptions = [{
   label: 'Sort',
   value: 'sort',
