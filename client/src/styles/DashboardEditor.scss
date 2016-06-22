@@ -3,9 +3,8 @@
 .DashboardEditor {
   position: relative;
   display: flex;
-  margin-top: 4em;
+  margin-top: 4rem;
   width: 100%;
-  min-height: 100%;
   .DashboardVisualisationList, .DashboardEditorCanvasContainer {
     height: calc(100vh - 4rem);
     overflow: auto;
