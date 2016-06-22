@@ -1,7 +1,8 @@
 import React, { PropTypes } from 'react';
+import Immutable from 'immutable';
 import ContextMenu from '../../common/ContextMenu';
 
-const actions = {
+const actions = Immutable.fromJS({
   'core/to-titlecase': {
     op: 'core/to-titlecase',
     args: {
@@ -52,7 +53,7 @@ const actions = {
     args: { sortDirection: 'DESC' },
     onError: 'fail',
   },
-};
+});
 
 function mergeArgs(action, args) {
   const a = Object.assign({}, action.args, args);
@@ -116,7 +117,7 @@ export default function ColumnContextMenu({ column, dimensions, onContextMenuIte
       }}
       onOptionSelected={op => onContextMenuItemSelected({
         column,
-        action: mergeArgs(actions[op], { columnName: column.get('columnName') }),
+        action: actions.get(op).setIn(['args', 'columnName'], column.get('columnName')),
       })}
     />
   );
