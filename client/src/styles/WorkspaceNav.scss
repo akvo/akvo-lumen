@@ -151,6 +151,7 @@ $textHighlight: rgb(41, 166, 107); /* Mint green */
     }
     &.floating {
         position: absolute;
+        z-index: 100;
         top: 0;
         left: 0;
         bottom: 0;
