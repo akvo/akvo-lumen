@@ -334,7 +334,7 @@ export function sendTransformationLog(datasetId, transformations) {
     fetch(`/api/transformations/${datasetId}`, {
       method: 'POST',
       headers: headers(),
-      body: JSON.stringify(transformations),
+      body: JSON.stringify(transformations.toJSON()),
     })
     .then(response => response.json())
     .then(({ jobExecutionId }) =>

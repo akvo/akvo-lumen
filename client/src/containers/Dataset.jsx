@@ -31,8 +31,8 @@ class Dataset extends Component {
 
   willLeaveDatasets() {
     const { dispatch, dataset } = this.props;
-    if (dataset.history != null && dataset.history.length > 0) {
-      dispatch(sendTransformationLog(getId(dataset), getTransformations(dataset)));
+    if (dataset.get('history') != null && dataset.get('history').size > 0) {
+      dispatch(sendTransformationLog(getId(dataset), dataset.get('transformations')));
     }
   }
 
