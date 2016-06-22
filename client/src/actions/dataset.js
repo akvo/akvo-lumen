@@ -69,14 +69,14 @@ function importDatasetPending(importId, name) {
   const now = Date.now();
   return {
     type: constants.IMPORT_DATASET_PENDING,
-    dataset: {
+    dataset: Immutable.fromJS({
       id: importId,
       type: 'dataset',
       status: 'PENDING',
       name,
       created: now,
       modified: now,
-    },
+    }),
   };
 }
 
