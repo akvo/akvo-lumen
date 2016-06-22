@@ -17,27 +17,20 @@ const availableTransforms = {
 };
 
 export default function applyTransformation(dataset, transformation) {
-  try {
-    const transformedDataset =
-      availableTransforms[transformation.get('op')](dataset, transformation);
+  const transformedDataset =
+    availableTransforms[transformation.get('op')](dataset, transformation);
 
-    if (Immutable.is(transformedDataset, dataset)) {
-      return dataset;
-    }
-
-    return transformedDataset
-      .update('transformations', transformations => (
-        transformations == null ?
-          Immutable.List.of(transformation) : transformations.push(transformation)
-        ))
-      .update('history', history => (
-        history == null ?
-          Immutable.List.of(dataset) : history.push(dataset)
-        ));
-  } catch (e) {
-    if (transformation.onError === 'fail') {
-      return dataset;
-    }
-    throw e;
+  if (Immutable.is(transformedDataset, dataset)) {
+    return dataset;
   }
+
+  return transformedDataset
+    .update('transformations', transformations => (
+      transformations == null ?
+        Immutable.List.of(transformation) : transformations.push(transformation)
+      ))
+    .update('history', history => (
+      history == null ?
+        Immutable.List.of(dataset) : history.push(dataset)
+      ));
 }
