@@ -18,7 +18,7 @@ function shouldRender(visualisation, datasets) {
   if (dataset == null) {
     return false;
   }
-  if (dataset.columns == null) {
+  if (dataset.get('columns') == null) {
     return false;
   }
   return true;

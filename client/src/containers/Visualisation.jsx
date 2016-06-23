@@ -66,7 +66,8 @@ class Visualisation extends Component {
       } else {
         const datasetId = visualisation.datasetId;
         if (datasetId != null) {
-          if (library.datasets[datasetId] == null || library.datasets[datasetId].rows == null) {
+          if (library.datasets[datasetId] == null ||
+              library.datasets[datasetId].get('rows') == null) {
             dispatch(fetchDataset(datasetId));
           }
         }
@@ -129,7 +130,7 @@ class Visualisation extends Component {
   }
 
   handleChangeSourceDataset(datasetId) {
-    if (!this.props.library.datasets[datasetId].columns) {
+    if (!this.props.library.datasets[datasetId].get('columns')) {
       this.props.dispatch(fetchDataset(datasetId));
     }
     this.handleChangeVisualisation({ datasetId });

@@ -1,47 +1,34 @@
 import React, { PropTypes } from 'react';
+import Immutable from 'immutable';
 import DashSelect from '../common/DashSelect';
 import ColumnMenu from './configMenu/ColumnMenu';
 import LabelColumnMenu from './configMenu/LabelColumnMenu';
 import LabelInput from './configMenu/LabelInput';
+import * as entity from '../../domain/entity';
+
 
 const sortFunction = (a, b) => {
-  const string1 = a.name.toLowerCase();
-  const string2 = b.name.toLowerCase();
-  let out;
-
-  if (string1 > string2) {
-    out = 1;
-  } else if (string1 === string2) {
-    out = 0;
-  } else {
-    out = -1;
-  }
-
-  return out;
+  const string1 = entity.getTitle(a).toLowerCase();
+  const string2 = entity.getTitle(b).toLowerCase();
+  return string1.localeCompare(string2);
 };
 
-const getDatasetArray = datasetObject => {
-  const datasetArray = [];
-
-  Object.keys(datasetObject).forEach(key => {
-    datasetArray.push(datasetObject[key]);
-  });
-
-  datasetArray.sort(sortFunction);
-  return datasetArray;
-};
+const getDatasetArray = datasetObject =>
+  Object.keys(datasetObject)
+    .map(id => datasetObject[id])
+    .sort(sortFunction);
 
 const getDatasetOptions = datasetArray =>
-  datasetArray.map(option => ({
-    value: option.id,
-    label: option.name,
+  datasetArray.map(dataset => ({
+    value: entity.getId(dataset),
+    label: entity.getTitle(dataset),
   }));
 
-const getDashSelectOptionsFromColumnArray = (array = []) =>
-  array.map((entry, index) => ({
+const getDashSelectOptionsFromColumnList = (columns = Immutable.List()) =>
+  columns.map((column, index) => ({
     value: index,
-    label: entry.title,
-  }));
+    label: column.get('title'),
+  })).toArray();
 
 const Subtitle = ({ children }) => (
   <h3 className="subtitle">{children}</h3>
@@ -55,8 +42,8 @@ export default function ConfigMenu(props) {
   const spec = visualisation.spec;
 
   const columns = props.datasets[visualisation.datasetId] ?
-    props.datasets[visualisation.datasetId].columns : [];
-  const columnOptions = getDashSelectOptionsFromColumnArray(columns);
+    props.datasets[visualisation.datasetId].get('columns') : Immutable.List();
+  const columnOptions = getDashSelectOptionsFromColumnList(columns);
 
   const getComponents = visualisationType => {
     let output;

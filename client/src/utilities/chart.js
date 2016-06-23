@@ -4,9 +4,10 @@ export function getChartData(visualisation, datasets) {
   const columnIndexX = spec.datasetColumnX;
   const columnIndexY = spec.datasetColumnY;
   const nameDataX = spec.datasetNameColumnX != null ?
-    dataset.rows.map(row => row[spec.datasetNameColumnX]) : null;
-  const dataX = dataset.rows.map(row => row[columnIndexX]);
-  const dataY = columnIndexY !== null ? dataset.rows.map(row => row[columnIndexY]) : null;
+    dataset.get('rows').map(row => row.get(spec.datasetNameColumnX)).toArray() : null;
+  const dataX = dataset.get('rows').map(row => row.get(columnIndexX)).toArray();
+  const dataY = columnIndexY != null ?
+    dataset.get('rows').map(row => row.get(columnIndexY)).toArray() : null;
   let dataValues = [];
   let output = [];
 
