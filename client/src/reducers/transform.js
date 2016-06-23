@@ -31,6 +31,6 @@ export default function applyTransformation(dataset, transformation) {
       ))
     .update('history', history => (
       history == null ?
-        Immutable.List.of(dataset) : history.push(dataset)
+        Immutable.List.of(dataset) : history.unshift(dataset)
       ));
 }

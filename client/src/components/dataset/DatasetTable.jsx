@@ -59,7 +59,7 @@ export default class DatasetTable extends Component {
     const { sidebarProps } = this.state;
     if (sidebarProps != null &&
       sidebarProps.column &&
-      sidebarProps.column.title === columnTitle) {
+      sidebarProps.column.get('title') === columnTitle) {
       return 'sidebarTargetingColumn';
     }
     return '';
@@ -69,7 +69,7 @@ export default class DatasetTable extends Component {
     const { activeDataTypeContextMenu } = this.state;
 
     if (activeDataTypeContextMenu != null &&
-      column.title === activeDataTypeContextMenu.column.title) {
+      column.get('title') === activeDataTypeContextMenu.column.get('title')) {
       this.setState({ activeDataTypeContextMenu: null });
     } else {
       this.setState({
@@ -227,7 +227,6 @@ export default class DatasetTable extends Component {
         />
       );
     });
-
     return (
       <div className="DatasetTable">
         <DatasetControls
