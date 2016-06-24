@@ -3,6 +3,7 @@ import { routerReducer } from 'react-router-redux';
 import library from './library';
 import collections from './collections';
 import activeModal from './activeModal';
+import notification from './notification';
 
 function user(state = {}, action) {
   switch (action.type) {
@@ -16,6 +17,7 @@ const rootReducer = combineReducers({
   collections,
   activeModal,
   user,
+  notification,
 });
 
 export default rootReducer;

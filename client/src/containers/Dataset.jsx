@@ -1,9 +1,14 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router';
 import DatasetHeader from '../components/dataset/DatasetHeader';
 import DatasetTable from '../components/dataset/DatasetTable';
 import { showModal } from '../actions/activeModal';
-import { fetchDataset } from '../actions/dataset';
+import {
+  fetchDataset,
+  transform,
+  sendTransformationLog,
+  undoTransformation } from '../actions/dataset';
 
 require('../styles/Dataset.scss');
 
@@ -12,11 +17,21 @@ class Dataset extends Component {
   constructor() {
     super();
     this.handleShowDatasetSettings = this.handleShowDatasetSettings.bind(this);
+    this.willLeaveDatasets = this.willLeaveDatasets.bind(this);
   }
 
   componentDidMount() {
+    const { dispatch, router, route, params } = this.props;
+    const { datasetId } = params;
+    router.setRouteLeaveHook(route, this.willLeaveDatasets);
+    dispatch(fetchDataset(datasetId));
+  }
+
+  willLeaveDatasets() {
     const { dispatch, dataset } = this.props;
-    dispatch(fetchDataset(dataset.id));
+    if (dataset.history != null && dataset.history.length > 0) {
+      dispatch(sendTransformationLog(dataset.id, dataset.transformations));
+    }
   }
 
   handleShowDatasetSettings() {
@@ -26,15 +41,26 @@ class Dataset extends Component {
   }
 
   render() {
-    const { dataset } = this.props;
+    const { dataset, dispatch } = this.props;
+    if (dataset == null) {
+      return <div className="Dataset">Loading...</div>;
+    }
     return (
       <div className="Dataset">
         <DatasetHeader
           onShowDatasetSettings={this.handleShowDatasetSettings}
           name={dataset.name}
-          id={dataset.id} />
-        {dataset.columns ?
-          <DatasetTable columns={dataset.columns} /> :
+          id={dataset.id}
+        />
+        {dataset.rows != null ?
+          <DatasetTable
+            columns={dataset.columns}
+            rows={dataset.rows}
+            transformations={dataset.transformations}
+            onTransform={(transformation) => dispatch(transform(dataset.id, transformation))}
+            onUndoTransformation={() => dispatch(undoTransformation(dataset.id))}
+          />
+          :
           <div>loading...</div>}
       </div>
     );
@@ -46,7 +72,11 @@ Dataset.propTypes = {
     id: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,
     columns: PropTypes.array,
+    rows: PropTypes.array,
   }),
+  router: PropTypes.object.isRequired,
+  route: PropTypes.object.isRequired,
+  params: PropTypes.object.isRequired,
   dispatch: PropTypes.func.isRequired,
 };
 
@@ -58,4 +88,4 @@ function mapStateToProps(state, ownProps) {
   };
 }
 
-export default connect(mapStateToProps)(Dataset);
+export default connect(mapStateToProps)(withRouter(Dataset));

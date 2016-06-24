@@ -5,14 +5,8 @@ export const initialState = {};
 
 function createVisualisation(state, visualisationData) {
   const id = visualisationData.id;
-  const vis = update(visualisationData.spec, {
-    $merge: {
-      type: 'visualisation',
-      id,
-    },
-  });
   return update(state, {
-    [id]: { $set: vis },
+    [id]: { $set: visualisationData },
   });
 }
 
@@ -28,7 +22,7 @@ function saveVisualisations(state, visualisations) {
   return visualisations.reduce((result, vis) => {
     const id = vis.id;
     return update(result, {
-      [id]: { $set: update(vis, { $merge: { type: 'visualisation' } }) },
+      [id]: { $set: update(vis, { $merge: { type: 'visualisation', status: 'OK' } }) },
     });
   }, state);
 }
@@ -37,11 +31,22 @@ function saveVisualisation(state, vis) {
   const id = vis.id;
   const spec = vis.spec;
   const existingVis = state[id];
+  if (existingVis == null) {
+    return Object.assign({}, state, {
+      [id]: Object.assign({}, vis, { type: 'visualisation', status: 'OK' }),
+    });
+  }
   return update(state, {
     [id]: {
       $set: update(existingVis, { $merge: spec }),
     },
   });
+}
+
+function removeVisualisation(state, id) {
+  const newState = Object.assign({}, state);
+  delete newState[id];
+  return newState;
 }
 
 export default function visualisation(state = initialState, action) {
@@ -54,6 +59,8 @@ export default function visualisation(state = initialState, action) {
       return saveVisualisation(state, action.visualisation);
     case constants.EDIT:
       return editVisualisation(state, action.visualisation);
+    case constants.REMOVE_VISUALISATION:
+      return removeVisualisation(state, action.id);
     default: return state;
   }
 }

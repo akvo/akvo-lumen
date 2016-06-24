@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PropTypes } from 'react';
+import moment from 'moment';
 import LibraryListingGroup from './LibraryListingGroup';
 
 require('../../styles/LibraryListing.scss');
@@ -29,7 +30,8 @@ const filterEntities = (library, filterBy, searchString) => {
   } else {
     // Basic, proof-of-concept string matching for search function
     unsearchedEntities.forEach(entity => {
-      if (entity.name.toLowerCase().indexOf(searchString.toLowerCase()) > -1) {
+      const entityTitle = entity.name || entity.title;
+      if (entityTitle.toLowerCase().indexOf(searchString.toLowerCase()) > -1) {
         searchedEntities.push(entity);
       }
     });
@@ -43,7 +45,8 @@ const groupEntities = (entities, sortOrder) => {
 
   if (sortOrder === 'name') {
     entities.forEach(entity => {
-      const key = entity.name.toLowerCase().charAt(0);
+      const entityTitle = entity.name || entity.title;
+      const key = entityTitle.toLowerCase().charAt(0);
 
       listGroups[key] = listGroups[key] || { listGroupName: key, entities: [] };
       listGroups[key].entities.push(entity);
@@ -54,9 +57,7 @@ const groupEntities = (entities, sortOrder) => {
       entityDate = new Date(parseInt(entityDate, 10));
 
       // Take the year, month and day as the key
-      const key = `${entityDate.getUTCFullYear()}-` +
-        `${entityDate.getUTCMonth() + 1}-` +
-        `${entityDate.getUTCDate()}`;
+      const key = moment(entityDate).format('YYYY-MM-DD');
 
       listGroups[key] = listGroups[key] || { listGroupName: key, entities: [] };
       listGroups[key].entities.push(entity);
@@ -69,6 +70,7 @@ const groupEntities = (entities, sortOrder) => {
 // Accepts an object containing list groups, and returns a sorted array of list groups
 const sortGroups = (listGroups, sortOrder, isReverseSort) => {
   const listGroupArray = [];
+  let sortFunction;
 
   // Convert the listGroup objects into an unsorted listGroup array
   Object.keys(listGroups).forEach(key => {
@@ -77,50 +79,70 @@ const sortGroups = (listGroups, sortOrder, isReverseSort) => {
 
   // Prepare the appropriate sort function based on sortOrder
   if (sortOrder === 'name') {
-    listGroupArray.sort();
-    if (isReverseSort) listGroupArray.reverse();
-  } else if (sortOrder === 'created' || sortOrder === 'last_modified') {
-    const sortFunction = (a, b) => {
-      let output;
-      if (isReverseSort) {
-        output = new Date(a.listGroupName) - new Date(b.listGroupName);
+    sortFunction = (a, b) => {
+      const string1 = a.listGroupName.toLowerCase();
+      const string2 = b.listGroupName.toLowerCase();
+      let out;
+
+      if (string1 > string2) {
+        out = 1;
+      } else if (string1 === string2) {
+        out = 0;
       } else {
-        output = new Date(b.listGroupName) - new Date(a.listGroupName);
+        out = -1;
       }
 
-      return output;
+      if (isReverseSort) out = out * -1;
+      return out;
     };
-    listGroupArray.sort(sortFunction);
+  } else if (sortOrder === 'created' || sortOrder === 'last_modified') {
+    sortFunction = (a, b) => {
+      let out;
+
+      if (isReverseSort) {
+        out = new Date(a.listGroupName) - new Date(b.listGroupName);
+      } else {
+        out = new Date(b.listGroupName) - new Date(a.listGroupName);
+      }
+
+      return out;
+    };
   }
 
-  return listGroupArray;
+  return listGroupArray.sort(sortFunction);
 };
 
-export default class LibraryListing extends Component {
+export default function LibraryListing({
+  library,
+  filterBy,
+  sortOrder,
+  isReverseSort,
+  displayMode,
+  searchString,
+  onSelectEntity,
+  onEntityAction }) {
+  const entities = filterEntities(library, filterBy,
+    searchString);
+  const listGroups = groupEntities(entities, sortOrder);
+  const sortedListGroups = sortGroups(listGroups, sortOrder, isReverseSort);
 
-  render() {
-    const entities = filterEntities(this.props.library, this.props.filterBy,
-      this.props.searchString);
-    const listGroups = groupEntities(entities, this.props.sortOrder);
-    const sortedListGroups = sortGroups(listGroups, this.props.sortOrder, this.props.isReverseSort);
-
-    return (
-      <div className={`LibraryListing ${this.props.displayMode}`}>
-        <ul>
-          {sortedListGroups.map((listGroup, index) =>
-            <LibraryListingGroup
-              key={index}
-              listGroup={listGroup}
-              displayMode={this.props.displayMode}
-              sortOrder={this.props.sortOrder}
-              isReverseSort={this.props.isReverseSort}
-              onSelectEntity={this.props.onSelectEntity}
-            />
-          )}
-        </ul>
-      </div>
-    );
-  }
+  return (
+    <div className={`LibraryListing ${displayMode}`}>
+      <ul>
+        {sortedListGroups.map((listGroup, index) =>
+          <LibraryListingGroup
+            key={index}
+            listGroup={listGroup}
+            displayMode={displayMode}
+            sortOrder={sortOrder}
+            isReverseSort={isReverseSort}
+            onSelectEntity={onSelectEntity}
+            onEntityAction={onEntityAction}
+          />
+        )}
+      </ul>
+    </div>
+  );
 }
 
 LibraryListing.propTypes = {
@@ -131,4 +153,5 @@ LibraryListing.propTypes = {
   displayMode: PropTypes.oneOf(['grid', 'list']).isRequired,
   searchString: PropTypes.string.isRequired,
   onSelectEntity: PropTypes.func.isRequired,
+  onEntityAction: PropTypes.func.isRequired,
 };

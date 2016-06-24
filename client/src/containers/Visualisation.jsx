@@ -1,149 +1,180 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
+import update from 'react-addons-update';
+import isEmpty from 'lodash/isEmpty';
 import VisualisationHeader from '../components/visualisation/VisualisationHeader';
 import VisualisationEditor from '../components/visualisation/VisualisationEditor';
+import ShareEntity from '../components/modals/ShareEntity';
 import * as actions from '../actions/visualisation';
 import { fetchDataset } from '../actions/dataset';
+import { fetchLibrary } from '../actions/library';
 import { push } from 'react-router-redux';
 
 require('../styles/Visualisation.scss');
-
-const getEditingStatus = location => {
-  const testString = 'create';
-
-  return location.pathname.indexOf(testString) === -1;
-};
 
 class Visualisation extends Component {
 
   constructor() {
     super();
     this.state = {
-      type: 'visualisation',
-      visualisationType: null,
-      name: 'Untitled Chart',
-      sourceDatasetX: null,
-      datasetColumnX: null,
-      datasetNameColumnX: null,
-      labelX: null,
-      minX: null,
-      maxX: null,
-      sourceDatasetY: null,
-      datasetColumnY: null,
-      labelY: null,
-      minY: null,
-      maxY: null,
-      isUnsavedChanges: null,
+      isShareModalVisible: false,
+      isUnsavedChanges: false,
+      visualisation: {
+        type: 'visualisation',
+        name: 'Untitled Chart',
+        visualisationType: null,
+        datasetId: null,
+        spec: {
+          datasetColumnX: null,
+          datasetNameColumnX: null,
+          labelX: null,
+          minX: null,
+          maxX: null,
+          datasetColumnY: null,
+          labelY: null,
+          minY: null,
+          maxY: null,
+        },
+      },
     };
 
+    this.onSave = this.onSave.bind(this);
+    this.handleChangeVisualisationSpec = this.handleChangeVisualisationSpec.bind(this);
+    this.handleChangeVisualisation = this.handleChangeVisualisation.bind(this);
     this.handleChangeSourceDataset = this.handleChangeSourceDataset.bind(this);
+    this.handleChangeVisualisationTitle = this.handleChangeVisualisationTitle.bind(this);
+    this.handleChangeVisualisationType = this.handleChangeVisualisationType.bind(this);
+    this.handleVisualisationAction = this.handleVisualisationAction.bind(this);
+    this.toggleShareVisualisation = this.toggleShareVisualisation.bind(this);
   }
 
   componentWillMount() {
-    const isEditingExistingVisualisation = getEditingStatus(this.props.location);
+    const { params, library, dispatch } = this.props;
+    const visualisationId = params.visualisationId;
+    const isEditingExistingVisualisation = visualisationId != null;
+
+    // If this is route is accessed via a permalink we'll have to fetch the library,
+    // where all the datasets are.
+    if (isEmpty(library.datasets)) {
+      dispatch(fetchLibrary());
+    }
 
     if (isEditingExistingVisualisation) {
-      const visualisationId = this.props.params.visualisationId;
-      this.props.dispatch(actions.fetchVisualisation(visualisationId));
-      this.setState(this.props.library.visualisations[visualisationId]);
-      this.setState({ isUnsavedChanges: null });
+      const visualisation = library.visualisations[visualisationId];
+      if (visualisation == null) {
+        dispatch(actions.fetchVisualisation(visualisationId));
+      } else {
+        const datasetId = visualisation.datasetId;
+        if (datasetId != null) {
+          if (library.datasets[datasetId] == null || library.datasets[datasetId].rows == null) {
+            dispatch(fetchDataset(datasetId));
+          }
+        }
+        this.setState({
+          visualisation,
+          isUnsavedChanges: false,
+        });
+      }
     }
   }
 
   componentWillReceiveProps() {
-    this.setState(this.props.library.visualisations[this.props.params.visualisationId]);
+    const visualisationId = this.props.params.visualisationId;
+    const isEditingExistingVisualisation = visualisationId != null;
+
+    if (isEditingExistingVisualisation && !this.state.isUnsavedChanges) {
+      this.setState({
+        visualisation: this.props.library.visualisations[visualisationId],
+      });
+    }
   }
 
   onSave() {
+    const { dispatch } = this.props;
     this.setState({
       isUnsavedChanges: false,
     });
-    if (this.state.id) {
-      this.props.dispatch(actions.saveVisualisationChanges(this.state));
+    if (this.state.visualisation.id) {
+      dispatch(actions.saveVisualisationChanges(this.state.visualisation));
     } else {
-      this.props.dispatch(actions.createVisualisation(this.state));
+      dispatch(actions.createVisualisation(this.state.visualisation));
     }
-    this.props.dispatch(push('/library?filter=visualisations&sort=created'));
+    dispatch(push('/library?filter=visualisations&sort=created'));
   }
 
-  handleChangeSourceDataset(value, axis) {
-    const datasetId = value;
-    const sourceDataset = axis === 'X' ? 'sourceDatasetX' : 'sourceDatasetY';
-    if (!this.props.library.datasets[datasetId].columns) {
-      this.props.dispatch(fetchDataset(datasetId));
-    }
+  // Helper method for...
+  handleChangeVisualisation(map) {
+    const visualisation = Object.assign({}, this.state.visualisation, map);
     this.setState({
-      [sourceDataset]: datasetId,
+      visualisation,
       isUnsavedChanges: true,
     });
   }
 
+  handleChangeVisualisationSpec(value) {
+    const spec = update(this.state.visualisation.spec, { $merge: value });
+    const visualisation = Object.assign(this.state.visualisation, { spec });
+    this.setState({
+      isUnsavedChanges: true,
+      visualisation,
+    });
+  }
+
+  handleChangeVisualisationType(visualisationType) {
+    this.handleChangeVisualisation({ visualisationType });
+  }
+
+  handleChangeVisualisationTitle(event) {
+    this.handleChangeVisualisation({ name: event.target.value });
+  }
+
+  handleChangeSourceDataset(datasetId) {
+    if (!this.props.library.datasets[datasetId].columns) {
+      this.props.dispatch(fetchDataset(datasetId));
+    }
+    this.handleChangeVisualisation({ datasetId });
+  }
+
+  toggleShareVisualisation() {
+    this.setState({
+      isShareModalVisible: !this.state.isShareModalVisible,
+    });
+  }
+
+  handleVisualisationAction(action) {
+    switch (action) {
+      case 'share':
+        this.toggleShareVisualisation();
+        break;
+      default:
+        throw new Error(`Action ${action} not yet implemented`);
+    }
+  }
+
   render() {
+    if (this.state.visualisation == null) {
+      return <div className="Visualisation">Loading...</div>;
+    }
     return (
       <div className="Visualisation">
         <VisualisationHeader
-          visualisation={this.state}
+          isUnsavedChanges={this.state.isUnsavedChanges}
+          visualisation={this.state.visualisation}
+          onVisualisationAction={this.handleVisualisationAction}
         />
         <VisualisationEditor
-          visualisation={this.state}
+          visualisation={this.state.visualisation}
           datasets={this.props.library.datasets}
-          onChangeTitle={event => (
-            this.setState({
-              name: event.target.value,
-              isUnsavedChanges: true,
-            })
-          )}
-          onChangeDataAxis={event => (
-            this.setState({
-              dataAxis: event.target.value,
-              isUnsavedChanges: true,
-            })
-          )}
-          onChangeVisualisationType={value => (
-            this.setState({
-              visualisationType: value,
-              isUnsavedChanges: true,
-            })
-          )}
-          onChangeSourceDatasetX={value => (
-            this.handleChangeSourceDataset(value, 'X')
-          )}
-          onChangeDatasetColumnX={ value => (
-            this.setState({
-              datasetColumnX: value,
-              isUnsavedChanges: true,
-            })
-          )}
-          onChangeDatasetNameColumnX={ value => (
-            this.setState({
-              datasetNameColumnX: value,
-              isUnsavedChanges: true,
-            })
-          )}
-          onChangeDatasetLabelX={ event => (
-            this.setState({
-              labelX: event.target.value,
-              isUnsavedChanges: true,
-            })
-          )}
-          onChangeSourceDatasetY={ value => (
-            this.handleChangeSourceDataset(value, 'Y')
-          )}
-          onChangeDatasetColumnY={ value => (
-            this.setState({
-              datasetColumnY: value,
-              isUnsavedChanges: true,
-            })
-          )}
-          onChangeDatasetLabelY={ event => (
-            this.setState({
-              labelY: event.target.value,
-              isUnsavedChanges: true,
-            })
-          )}
-          onSaveDataset={ () => (
-            this.onSave()
-          )}
+          onChangeTitle={this.handleChangeVisualisationTitle}
+          onChangeVisualisationType={this.handleChangeVisualisationType}
+          onChangeSourceDataset={this.handleChangeSourceDataset}
+          onChangeVisualisationSpec={this.handleChangeVisualisationSpec}
+          onSaveVisualisation={this.onSave}
+        />
+        <ShareEntity
+          isOpen={this.state.isShareModalVisible}
+          onClose={this.toggleShareVisualisation}
+          entity={this.state.visualisation}
         />
       </div>
     );

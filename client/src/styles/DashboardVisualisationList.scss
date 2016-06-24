@@ -1,0 +1,48 @@
+@import 'modules/colors';
+
+.DashboardVisualisationList {
+  border-right: 0.1rem solid $lightGrey;
+  .list, .noVisualisationsMessage {
+    padding: 1rem;
+  }
+  .listItem {
+    margin: 1rem 0;
+    width: 100%;
+    height: 10rem;
+    border: 0.1rem solid $midGrey;
+    position: relative;
+
+    &.added {
+      background-color: $lightGreen;
+    }
+  }
+  .background {
+    background-image: url('img/icon-256-library-listing-visualisation.png');
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    right: 1rem;
+    bottom: 1rem;
+    opacity: 0.075;
+  }
+  h4, .visualisationType {
+    padding: 0.5rem;
+  }
+  h4 {
+    font-weight: bold;
+    font-size: 1.25rem;
+  }
+  .visualisationType {
+    color: $midGrey;
+  }
+  .isOnDashboardIndicator {
+    padding: 0.5rem;
+    font-size: 1.25rem;
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+}

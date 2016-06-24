@@ -6,9 +6,11 @@ export const initialState = {
   dataset: {
     source: {
       kind: 'DATA_FILE',
+      hasColumnHeaders: true,
     },
     name: '',
   },
+  uploadRunning: false,
 };
 
 function selectDataSource(state, dataSource) {
@@ -47,16 +49,24 @@ function previousPage(state) {
   });
 }
 
-function defineDataSource(state, dataSource) {
+function updateUploadStatus(state, uploadStatus) {
   return update(state, {
-    dataset: { source: { $set: dataSource } },
+    uploadRunning: { $set: uploadStatus },
   });
 }
 
-// Only name for now.
+function defineDataSource(state, dataSource) {
+  return update(state, {
+    dataset: { source: { $merge: dataSource } },
+  });
+}
+
+// Only name and header status for now
 function defineDatasetSettings(state, { name }) {
   return update(state, {
-    dataset: { name: { $set: name } },
+    dataset: {
+      name: { $set: name },
+    },
   });
 }
 
@@ -68,6 +78,8 @@ export default function datasetImport(state = initialState, action) {
       return nextPage(state);
     case constants.PREVIOUS_PAGE:
       return previousPage(state);
+    case constants.UPDATE_UPLOAD_STATUS:
+      return updateUploadStatus(state, action.uploadRunning);
     case constants.DEFINE_DATA_SOURCE:
       return defineDataSource(state, action.dataSource);
     case constants.DEFINE_DATASET_SETTINGS:

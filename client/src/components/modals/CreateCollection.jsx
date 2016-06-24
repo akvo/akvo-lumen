@@ -32,7 +32,8 @@ export default class CreateCollection extends Component {
             zIndex: 99,
             backgroundColor: 'rgba(0,0,0,0.6)',
           },
-        }}>
+        }}
+      >
         <div className={this.props.containerClassName}>
           <div className="CreateCollectionModal">
             <h2 className="modalTitle">Create a new collection</h2>
@@ -41,7 +42,8 @@ export default class CreateCollection extends Component {
               onClick={() => {
                 this.setState({ name: '' });
                 onCancel();
-              }}>
+              }}
+            >
               +
             </div>
             <div className="contents">
@@ -50,7 +52,8 @@ export default class CreateCollection extends Component {
                 id="nameInput"
                 onChange={this.handleInputChange}
                 type="text"
-                placeholder="Collection name" />
+                placeholder="Collection name"
+              />
             </div>
             <div className="controls">
               <button
@@ -58,7 +61,8 @@ export default class CreateCollection extends Component {
                 onClick={() => {
                   this.setState({ name: '' });
                   onCancel();
-                }}>
+                }}
+              >
                 Cancel
               </button>
               <button
@@ -67,7 +71,8 @@ export default class CreateCollection extends Component {
                 onClick={() => {
                   this.setState({ name: '' });
                   onSubmit(createCollection(this.state.name));
-                }}>
+                }}
+              >
                 Create
               </button>
             </div>

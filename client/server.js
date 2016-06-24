@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 var webpack = require('webpack');
 var WebpackDevServer = require('webpack-dev-server');
 var config = require('./webpack.config');
@@ -7,8 +9,12 @@ new WebpackDevServer(webpack(config), {
   hot: true,
   historyApiFallback: true,
   proxy: {
-    '/api/*': {
-      target: 'http://localhost:3000',
+    '/api*': {
+      target: "http://t1.lumen.localhost:3000",
+      secure: false
+    },
+    '/s/*': {
+      target: "http://t1.lumen.localhost:3000",
       secure: false
     }
   }

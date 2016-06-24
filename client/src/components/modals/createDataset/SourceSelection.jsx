@@ -1,4 +1,4 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PropTypes } from 'react';
 
 const supportedFormats = [{
   kind: 'DATA_FILE',
@@ -27,7 +27,7 @@ const supportedFormats = [{
   kind: 'AKVO_FLOW',
   icon: '/assets/akvo-flow.png',
   label: 'Akvo FLOW',
-  disabled: true,
+  disabled: false,
 }, {
   kind: 'GITHUB',
   icon: '/assets/github.png',
@@ -48,33 +48,39 @@ const defaultDataSources = {
   LINK: {
     kind: 'LINK',
     url: '',
+    hasColumnHeaders: true,
+  },
+
+  AKVO_FLOW: {
+    kind: 'AKVO_FLOW',
+    instance: null,
+    surveyId: null,
   },
 
   // TODO the rest.
 };
 
-export default class SourceSelection extends Component {
-  render() {
-    const sources = supportedFormats.map(source => (
-      <div
-        className={`sourceOptionContainer ${source.kind} ${source.disabled ? 'disabled' : ''}`}
-        key={source.kind}
-      >
-        <input
-          className="sourceOption"
-          type="radio"
-          name="choose_data_source"
-          disabled={source.disabled}
-          value={source.kind}
-          checked={source.kind === this.props.dataSourceKind}
-          onChange={evt => {
-            this.props.onChangeDataSource(defaultDataSources[evt.target.value]);
-          }} />
-        {source.label}
-      </div>
-    ));
-    return <div className="SourceSelection">{sources}</div>;
-  }
+export default function SourceSelection({ dataSourceKind, onChangeDataSource }) {
+  const sources = supportedFormats.map(source => (
+    <div
+      className={`sourceOptionContainer ${source.kind} ${source.disabled ? 'disabled' : ''}`}
+      key={source.kind}
+    >
+      <input
+        className="sourceOption"
+        type="radio"
+        name="choose_data_source"
+        disabled={source.disabled}
+        value={source.kind}
+        checked={source.kind === dataSourceKind}
+        onChange={evt => {
+          onChangeDataSource(defaultDataSources[evt.target.value]);
+        }}
+      />
+      {source.label}
+    </div>
+  ));
+  return <div className="SourceSelection">{sources}</div>;
 }
 
 SourceSelection.propTypes = {

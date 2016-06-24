@@ -1,6 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import DataFileDataSourceSettings from './DataFileDataSourceSettings';
 import LinkDataSourceSettings from './LinkDataSourceSettings';
+import AkvoFlowDataSourceSettings from './AkvoFlowDataSourceSettings';
 
 export default class DataSourceSettings extends Component {
 
@@ -8,24 +9,36 @@ export default class DataSourceSettings extends Component {
     switch (dataSource.kind) {
       case 'DATA_FILE': return DataFileDataSourceSettings.isValidSource(dataSource);
       case 'LINK': return LinkDataSourceSettings.isValidSource(dataSource);
+      case 'AKVO_FLOW': return AkvoFlowDataSourceSettings.isValidSource(dataSource);
       default: throw new Error(`Unknown data source kind: ${dataSource.kind}`);
     }
   }
 
   renderFileSelection() {
-    const { dataSource, onChange } = this.props;
+    const { dataSource, onChange, onChangeSettings, updateUploadStatus } = this.props;
     switch (dataSource.kind) {
       case 'DATA_FILE':
         return (
           <DataFileDataSourceSettings
             dataSource={dataSource}
-            onChange={onChange} />
+            onChange={onChange}
+            updateUploadStatus={updateUploadStatus}
+          />
         );
       case 'LINK':
         return (
           <LinkDataSourceSettings
             dataSource={dataSource}
-            onChange={onChange} />
+            onChange={onChange}
+          />
+        );
+      case 'AKVO_FLOW':
+        return (
+          <AkvoFlowDataSourceSettings
+            dataSource={dataSource}
+            onChange={onChange}
+            onChangeSettings={onChangeSettings}
+          />
         );
       default:
         throw new Error(`Data source definition for ${dataSource.type} is not yet implemented`);
@@ -45,8 +58,10 @@ export default class DataSourceSettings extends Component {
 
 DataSourceSettings.propTypes = {
   dataSource: PropTypes.shape({
-    kind: PropTypes.oneOf(['DATA_FILE', 'LINK']).isRequired,
+    kind: PropTypes.oneOf(['DATA_FILE', 'LINK', 'AKVO_FLOW']).isRequired,
     // Other props are data source specific.
   }),
   onChange: PropTypes.func.isRequired,
+  onChangeSettings: PropTypes.func.isRequired,
+  updateUploadStatus: PropTypes.func.isRequired,
 };

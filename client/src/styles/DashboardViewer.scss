@@ -1,0 +1,25 @@
+@import 'modules/colors';
+
+html, body, #root {
+  min-width: initial !important;
+}
+
+.DashboardViewer {
+  h1 {
+    font-size: 2rem;
+    line-height: 1.4em;
+    font-weight: bold;
+    padding: 0.5em;
+    width: 95%;
+    max-width: 50rem;
+    margin: 0.5em auto;
+    display: block;
+    text-align: center;
+    @media (max-width: 1024px) {
+      font-size: 1.6rem
+    }
+    @media (max-width: 720px) {
+      font-size: 1.4em;
+    }
+  }
+}

@@ -9,7 +9,7 @@ import { Link } from 'react-router';
 
 require('../styles/WorkspaceNav.scss');
 
-const collapsedLocations = ['visualisation/', 'dataset/'];
+const collapsedLocations = ['visualisation/', 'dataset/', 'dashboard/'];
 
 const getCollapsedStatus = (pathname) => {
   let collapsedStatus = false;
@@ -37,7 +37,7 @@ const getActiveSubtitle = (pathname) => {
   return activeSubtitle;
 };
 
-export default class WorkspaceNav extends Component {
+export class WorkspaceNav extends Component {
   constructor() {
     super();
     this.handleShowCreateCollectionModal = this.handleShowCreateCollectionModal.bind(this);
@@ -55,7 +55,7 @@ export default class WorkspaceNav extends Component {
   }
 
   getClassName(isFloatOnTop) {
-    let className = 'WorkspaceNav';
+    let className = 'WorkspaceNav noSelect';
 
     if (isFloatOnTop) {
       if (this.state.isManuallyInverted) {
@@ -105,10 +105,12 @@ export default class WorkspaceNav extends Component {
         </div>
         <div className="links">
           <NavLink
-            to="library"
+            to="/library"
             className="library subtitle"
             isSelected={activeSubtitle === 'library'}
-          />
+          >
+            Library
+          </NavLink>
           <CollectionsList
             collections={this.props.collections}
             onShowCreateCollectionModal={this.handleShowCreateCollectionModal}
@@ -116,10 +118,12 @@ export default class WorkspaceNav extends Component {
             pathname={this.props.location.pathname}
           />
           <NavLink
-            to="activity"
+            to="/activity"
             className="activity subtitle disabled"
             isSelected={activeSubtitle === 'activity'}
-          />
+          >
+            Activity
+          </NavLink>
         </div>
         <NavWorkspaceSwitch />
       </nav>

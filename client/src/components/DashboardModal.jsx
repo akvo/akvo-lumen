@@ -38,14 +38,16 @@ class DashboardModal extends Component {
           <CreateDataset
             onCancel={this.handleOnCancel}
             onSubmit={this.handleOnSubmit}
-            containerClassName={containerClassName} />
+            containerClassName={containerClassName}
+          />
         );
       case 'create-collection':
         return (
           <CreateCollection
             onCancel={this.handleOnCancel}
             onSubmit={this.handleOnSubmit}
-            containerClassName={containerClassName} />
+            containerClassName={containerClassName}
+          />
         );
       case 'dataset-settings':
         return (
@@ -53,7 +55,8 @@ class DashboardModal extends Component {
             onCancel={this.handleOnCancel}
             onSubmit={this.handleOnSubmit}
             id={this.props.activeModal.id}
-            containerClassName={containerClassName} />
+            containerClassName={containerClassName}
+          />
         );
       default: return null;
     }

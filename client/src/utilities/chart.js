@@ -1,29 +1,48 @@
 export function getChartData(visualisation, datasets) {
-  const datasetIDX = visualisation.sourceDatasetX;
-  const datasetIDY = visualisation.sourceDatasetY;
-  const datasetX = datasets[datasetIDX];
-  const datasetY = datasets[datasetIDY];
-  const columnIndexX = visualisation.datasetColumnX;
-  const columnIndexY = visualisation.datasetColumnY;
-  const nameDataX = datasetX.columns[visualisation.datasetNameColumnX];
-  const dataX = datasetX.columns[columnIndexX].values;
-  const dataY = datasetY ? datasetY.columns[columnIndexY].values : null;
-  const dataValues = [];
+  const { datasetId, spec } = visualisation;
+  const dataset = datasets[datasetId];
+  const columnIndexX = spec.datasetColumnX;
+  const columnIndexY = spec.datasetColumnY;
+  const nameDataX = spec.datasetNameColumnX != null ?
+    dataset.rows.map(row => row[spec.datasetNameColumnX]) : null;
+  const dataX = dataset.rows.map(row => row[columnIndexX]);
+  const dataY = columnIndexY !== null ? dataset.rows.map(row => row[columnIndexY]) : null;
+  let dataValues = [];
   let output = [];
 
   switch (visualisation.visualisationType) {
+    case 'map':
+
+      dataX.forEach((entry, index) => {
+        const label = nameDataX ? nameDataX[index] : null;
+        const newPositionObject = {
+          position: [parseFloat(dataY[index]), parseFloat(dataX[index])],
+          label,
+        };
+
+        if (!isNaN(newPositionObject.position[0])
+            && !isNaN(newPositionObject.position[1])) {
+          dataValues.push(newPositionObject);
+        }
+      });
+
+      output.push({
+        values: dataValues,
+      });
+      break;
+
     case 'bar':
     case 'line':
     case 'area':
 
-      dataX.forEach((entry, index) => {
+      dataValues = dataX.map((entry, index) => {
         let key = index;
 
         if (nameDataX && visualisation.visualisationType === 'bar') {
-          key = nameDataX.values[index];
+          key = nameDataX[index];
         }
 
-        dataValues.push({
+        return ({
           x: key,
           y: parseInt(entry, 10),
         });
@@ -33,36 +52,40 @@ export function getChartData(visualisation, datasets) {
         name: 'series1',
         values: dataValues,
       });
+
       break;
 
     case 'pie':
     case 'donut':
 
-      dataX.forEach((entry, index) => {
-        const key = nameDataX ? nameDataX.values[index] : index;
 
-        dataValues.push({
+      output = dataX.map((entry, index) => {
+        const key = nameDataX ? nameDataX[index] : index;
+
+        return ({
           label: key,
           value: parseInt(entry, 10),
         });
       });
 
-      output = dataValues;
       break;
 
     case 'scatter':
 
-      dataX.forEach((entry, index) => {
-        dataValues.push({
+      dataValues = dataX.map((entry, index) => {
+        const item = {
           x: parseInt(entry, 10),
           y: parseInt(dataY[index], 10),
-        });
+        };
+
+        return item;
       });
 
       output.push({
         name: 'series1',
         values: dataValues,
       });
+
       break;
 
     default:
@@ -70,4 +93,27 @@ export function getChartData(visualisation, datasets) {
   }
 
   return output;
+}
+
+export function getClassName(computedWidth, hasAxisLabels) {
+  let className = 'dashChart';
+  let size;
+
+  className = hasAxisLabels ? `${className} hasAxisLabels` : className;
+
+  if (computedWidth < 240) {
+    size = 'xsmall';
+  } else if (computedWidth < 480) {
+    size = 'small';
+  } else if (computedWidth < 720) {
+    size = 'medium';
+  } else if (computedWidth < 860) {
+    size = 'large';
+  } else {
+    size = 'xlarge';
+  }
+
+  className = `${className} ${size}`;
+
+  return className;
 }

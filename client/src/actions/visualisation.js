@@ -1,6 +1,7 @@
 import * as constants from '../constants/visualisation';
 import { fetchDataset } from './dataset';
 import fetch from 'isomorphic-fetch';
+import headers from './headers';
 
 export function fetchVisualisationsSuccess(visualisations) {
   return {
@@ -30,11 +31,8 @@ function createVisualisationRequest(visualisation) {
     });
     fetch('/api/visualisations', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: visualisation.name,
-        spec: visualisation,
-      }),
+      headers: headers(),
+      body: JSON.stringify(visualisation),
     })
     .then(response => response.json())
     .then(vis => dispatch(createVisualisationSuccess(vis)))
@@ -42,34 +40,61 @@ function createVisualisationRequest(visualisation) {
   };
 }
 
-
 export function createVisualisation(visualisation) {
   return createVisualisationRequest(visualisation);
 }
 
-export function saveVisualisationChanges(visualisation) {
-  const now = Date.now();
+function saveVisualisationChangesFailure(visualisation) {
+  return {
+    type: constants.EDIT,
+    visualisation,
+  };
+}
 
+function saveVisualisationChangesSuccess(visualisation) {
+  const now = Date.now();
   return {
     type: constants.EDIT,
     visualisation: Object.assign({}, visualisation, {
       modified: now,
+      status: 'OK',
     }),
+  };
+}
+
+function saveVisualisationChangesRequest(visualisation) {
+  const now = Date.now();
+  return {
+    type: constants.EDIT,
+    visualisation: Object.assign({}, visualisation, {
+      modified: now,
+      status: 'PENDING',
+    }),
+  };
+}
+
+export function saveVisualisationChanges(visualisation) {
+  return (dispatch, getState) => {
+    const prevVisualisation = getState().library.visualisations[visualisation.id];
+    dispatch(saveVisualisationChangesRequest(visualisation));
+    fetch(`/api/visualisations/${visualisation.id}`, {
+      method: 'PUT',
+      headers: headers(),
+      body: JSON.stringify(visualisation),
+    })
+    .then(response => response.json())
+    .then(() => dispatch(saveVisualisationChangesSuccess(visualisation)))
+    .catch(() => dispatch(saveVisualisationChangesFailure(prevVisualisation)));
   };
 }
 
 function fetchVisualisationSuccess(visualisation) {
   return (dispatch) => {
     // We also need to possibly fetch datasets.
-    const datasetXId = visualisation.spec.sourceDatasetX;
-    const datasetYId = visualisation.spec.sourceDatasetY;
+    const datasetId = visualisation.datasetId;
 
-    if (datasetXId) {
-      dispatch(fetchDataset(datasetXId));
-    }
-
-    if (datasetYId) {
-      dispatch(fetchDataset(datasetYId));
+    if (datasetId) {
+      dispatch(fetchDataset(datasetId));
     }
 
     dispatch({
@@ -96,9 +121,55 @@ function fetchVisualisationRequest(id) {
 export function fetchVisualisation(id) {
   return (dispatch) => {
     dispatch(fetchVisualisationRequest(id));
-    fetch(`/api/visualisations/${id}`)
+    fetch(`/api/visualisations/${id}`, {
+      method: 'GET',
+      headers: headers(),
+    })
     .then(response => response.json())
     .then(visualisation => dispatch(fetchVisualisationSuccess(visualisation)))
     .catch(err => dispatch(fetchVisualisationFailure(id, err)));
+  };
+}
+
+/* Delete visualisation actions */
+
+function deleteVisualisationRequest(id) {
+  return {
+    type: constants.DELETE_VISUALISATION_REQUEST,
+    id,
+  };
+}
+
+/* Should only remove the visualisation from the redux store.
+   To delete a visualisation use deleteVisualisation istead */
+export function removeVisualisation(id) {
+  return {
+    type: constants.REMOVE_VISUALISATION,
+    id,
+  };
+}
+
+function deleteVisualisationSuccess(id) {
+  return removeVisualisation(id);
+}
+
+function deleteVisualisationFailure(id, error) {
+  return {
+    type: constants.DELETE_VISUALISATION_FAILURE,
+    id,
+    error,
+  };
+}
+
+export function deleteVisualisation(id) {
+  return (dispatch) => {
+    dispatch(deleteVisualisationRequest);
+    fetch(`/api/visualisations/${id}`, {
+      method: 'DELETE',
+      headers: headers(),
+    })
+    .then(response => response.json())
+    .then(() => dispatch(deleteVisualisationSuccess(id)))
+    .catch(error => dispatch(deleteVisualisationFailure(id, error)));
   };
 }

@@ -1,6 +1,19 @@
+import fetch from 'isomorphic-fetch';
 import * as constants from '../constants/dataset';
+import * as visualisationActions from './visualisation';
 import { hideModal } from './activeModal';
+import headers from './headers';
+import applyTransformation from '../reducers/transform';
+import { showNotification } from './notification';
 
+/*
+ * Fetch a dataset by id
+ * fetchDataset(id)
+ * Actions:
+ * - FETCH_DATASET_REQUEST { id }
+ * - FETCH_DATASET_SUCCESS { dataset }
+ * - FETCH_DATASET_FAILURE { error, id }
+ */
 function fetchDatasetRequest(id) {
   return {
     type: constants.FETCH_DATASET_REQUEST,
@@ -8,18 +21,10 @@ function fetchDatasetRequest(id) {
   };
 }
 
-const pollInteval = 1000;
 function fetchDatasetSuccess(dataset) {
-  return (dispatch) => {
-    if (dataset.status === 'PENDING') {
-      /* eslint-disable no-use-before-define */
-      setTimeout(() => dispatch(fetchDataset(dataset.id)), pollInteval);
-      /* esllint-enable no-use-before-define */
-    }
-    dispatch({
-      type: constants.FETCH_DATASET_SUCCESS,
-      dataset,
-    });
+  return {
+    type: constants.FETCH_DATASET_SUCCESS,
+    dataset,
   };
 }
 
@@ -35,7 +40,7 @@ export function fetchDataset(id) {
     dispatch(fetchDatasetRequest(id));
     fetch(`/api/datasets/${id}`, {
       method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
+      headers: headers(),
     })
     .then(response => response.json())
     .then(dataset => dispatch(fetchDatasetSuccess(dataset)))
@@ -43,29 +48,83 @@ export function fetchDataset(id) {
   };
 }
 
-
-function createDatasetRequest(dataset) {
+export function updateDatasetUploadStatus(status) {
   return {
-    type: constants.CREATE_DATASET_REQUEST,
-    dataset,
+    type: constants.UPDATE_UPLOAD_STATUS,
+    uploadRunning: status,
   };
 }
 
-function createDatasetSuccess(dataset) {
+/*
+ * Dataset import
+ * importDataset(dataSource)
+ * Actions:
+ * IMPORT_DATASET_REQUEST
+ * IMPORT_DATASET_SUCCESS
+ * IMPORT_DATASET_FAILURE
+ */
+
+function importDatasetPending(importId, name) {
+  const now = Date.now();
+  return {
+    type: constants.IMPORT_DATASET_PENDING,
+    dataset: {
+      id: importId,
+      type: 'dataset',
+      status: 'PENDING',
+      name,
+      created: now,
+      modified: now,
+    },
+  };
+}
+
+function importDatasetFailure(importId, reason) {
+  return {
+    type: constants.IMPORT_DATASET_FAILURE,
+    importId,
+    reason,
+    modified: Date.now(),
+  };
+}
+
+function importDatasetSuccess(datasetId, importId) {
   return (dispatch) => {
+    dispatch(fetchDataset(datasetId));
     dispatch({
-      type: constants.CREATE_DATASET_SUCCESS,
-      dataset,
+      type: constants.IMPORT_DATASET_SUCCESS,
+      datasetId,
+      importId,
     });
-    dispatch(hideModal());
-    dispatch(fetchDataset(dataset.id));
   };
 }
 
-function createDatasetFailure(error, dataset) {
+const pollInteval = 1000;
+function pollDatasetImportStatus(importId, name) {
+  return (dispatch) => {
+    dispatch(importDatasetPending(importId, name));
+    fetch(`/api/job_executions/${importId}`, {
+      method: 'GET',
+      headers: headers(),
+    })
+    .then(response => response.json())
+    .then(({ status, reason, datasetId }) => {
+      if (status === 'PENDING') {
+        setTimeout(() => dispatch(pollDatasetImportStatus(importId, name)), pollInteval);
+      } else if (status === 'FAILED') {
+        dispatch(importDatasetFailure(importId, reason));
+      } else if (status === 'OK') {
+        dispatch(importDatasetSuccess(datasetId, importId));
+      }
+    })
+    .catch(error => dispatch(error));
+  };
+}
+
+function importDatasetRequest(dataSource) {
   return {
-    type: constants.CREATE_DATASET_FAILURE,
-    dataset,
+    type: constants.IMPORT_DATASET_REQUEST,
+    dataSource,
   };
 }
 
@@ -75,22 +134,27 @@ export function clearImport() {
   };
 }
 
-export function createDataset(dataset) {
+export function importDataset(dataSource) {
   return (dispatch) => {
-    dispatch(createDatasetRequest(dataset));
+    dispatch(importDatasetRequest(dataSource));
     fetch('/api/datasets', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(dataset),
+      headers: headers(),
+      body: JSON.stringify(dataSource),
     })
     .then(response => response.json())
-    .then(ds => {
-      dispatch(createDatasetSuccess(ds));
+    .then(({ importId }) => {
+      dispatch(pollDatasetImportStatus(importId, dataSource.name));
+      dispatch(hideModal());
       dispatch(clearImport());
     })
-    .catch(error => dispatch(createDatasetFailure(error, dataset)));
+    .catch(() => dispatch(importDatasetFailure('Unable to start import process', dataSource)));
   };
 }
+
+/*
+ *
+ */
 
 // Currently only name
 export function saveDatasetSettings(id, { name }) {
@@ -141,5 +205,146 @@ export function fetchDatasetsSuccess(datasets) {
   return {
     type: constants.FETCH_DATASETS_SUCCESS,
     datasets,
+  };
+}
+
+
+/* Delete dataset actions */
+
+function deleteDatasetRequest(id) {
+  return {
+    type: constants.DELETE_DATASET_REQUEST,
+    id,
+  };
+}
+
+/* Should only remove the dataset from the redux store.
+   To delete a dataset use deleteDataset istead */
+function removeDataset(id) {
+  return {
+    type: constants.REMOVE_DATASET,
+    id,
+  };
+}
+
+function deleteDatasetSuccess(id) {
+  return (dispatch, getState) => {
+    dispatch(removeDataset(id));
+    const visualisations = getState().library.visualisations;
+    Object.keys(visualisations).forEach(visualisationId => {
+      if (visualisations[visualisationId].datasetId === id) {
+        dispatch(visualisationActions.removeVisualisation(visualisationId));
+      }
+    });
+  };
+}
+
+function deleteDatasetFailure(id, error) {
+  return {
+    type: constants.DELETE_DATASET_FAILURE,
+    id,
+    error,
+  };
+}
+
+export function deleteDataset(id) {
+  return (dispatch) => {
+    dispatch(deleteDatasetRequest(id));
+    fetch(`/api/datasets/${id}`, {
+      method: 'DELETE',
+      headers: headers(),
+    })
+    .then(response => response.json())
+    .then(() => dispatch(deleteDatasetSuccess(id)))
+    .catch(error => dispatch(deleteDatasetFailure(id, error)));
+  };
+}
+
+/*
+ * The reducer is run in the action creator to be able to
+ * properly catch exceptions in the case of { onError: 'fail' }
+ * See: https://github.com/zalmoxisus/redux-devtools-instrument/issues/5
+ */
+export function transform(datasetId, transformation) {
+  return (dispatch, getState) => {
+    const dataset = getState().library.datasets[datasetId];
+    try {
+      const nextDataset = applyTransformation(dataset, transformation);
+      dispatch({
+        type: constants.REPLACE_DATASET,
+        dataset: nextDataset,
+      });
+    } catch (e) {
+      if (transformation.onError === 'fail') {
+        dispatch(showNotification('error', `Transformation aborted: ${e.message}`));
+      } else {
+        throw e;
+      }
+    }
+  };
+}
+
+function transformationLogRequestSent(datasetId) {
+  return {
+    type: constants.TRANSFORMATION_LOG_REQUEST_SENT,
+    datasetId,
+  };
+}
+
+function transformationSuccess(datasetId) {
+  return {
+    type: constants.TRANSFORMATION_SUCCESS,
+    datasetId,
+  };
+}
+
+function transformationFailure(datasetId, reason) {
+  return {
+    type: constants.TRANSFORMATION_FAILURE,
+    datasetId,
+    reason,
+  };
+}
+
+function pollDatasetTransformationStatus(jobExecutionId, datasetId) {
+  return (dispatch) => {
+    fetch(`/api/job_executions/${jobExecutionId}`, {
+      method: 'GET',
+      headers: headers(),
+    })
+    .then(response => response.json())
+    .then(({ status, reason }) => {
+      if (status === 'PENDING') {
+        setTimeout(() =>
+          dispatch(pollDatasetTransformationStatus(jobExecutionId, datasetId)), pollInteval);
+      } else if (status === 'FAILED') {
+        dispatch(transformationFailure(datasetId, reason));
+      } else if (status === 'OK') {
+        dispatch(transformationSuccess(datasetId));
+      }
+    })
+    .catch(error => dispatch(error));
+  };
+}
+
+export function sendTransformationLog(datasetId, transformations) {
+  return (dispatch) => {
+    dispatch(transformationLogRequestSent(datasetId));
+    fetch(`/api/transformations/${datasetId}`, {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify(transformations),
+    })
+    .then(response => response.json())
+    .then(({ jobExecutionId }) =>
+      dispatch(pollDatasetTransformationStatus(jobExecutionId, datasetId)));
+  };
+}
+
+
+export function undoTransformation(id) {
+  return {
+    type: constants.UNDO_TRANSFORMATION,
+    id,
   };
 }

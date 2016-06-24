@@ -1,0 +1,71 @@
+@import 'modules/colors';
+
+.DataTableSidebar {
+  .header {
+    padding: 1rem;
+    border-bottom: 0.1rem solid grey;
+  }
+  .inputs {
+    padding: 1rem;
+    line-height: 1.4rem;
+  }
+  .inputGroup {
+    margin-bottom: 1.5rem;
+    label {
+      font-size: 0.8rem;
+      margin-bottom: 0.25rem;
+    }
+    input {
+      display: block;
+      width: 100%;
+      padding: 0.5rem;
+      font-size: 1rem;
+    }
+    .DashSelect, input {
+      height: 2.6rem;
+      color: #333;
+    }
+  }
+  h3 {
+    display: inline-block;
+  }
+  .columnTitle {
+    font-weight: bold;
+  }
+  .close {
+    float: right;
+    line-height: 1.4rem;
+    font-size: 1rem;
+  }
+  .apply, .cancel {
+    display: inline-block;
+    width: 6.5rem;
+    text-align: center;
+    padding: 0.6rem 1rem;
+    margin: 0.75rem 1.25rem;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    color: $mintGreen;
+    border: 0.1rem solid $mintGreen;
+    border-radius: 0.6rem;
+    vertical-align: top;
+  }
+  .cancel {
+    float: right;
+    color: $blueGrey;
+    border-color: $blueGrey;
+  }
+  .TransformationList {
+    height: calc(100vh - 16rem);
+    overflow-y: scroll;
+    padding: 1rem;
+    ol {
+      list-style: initial;
+      list-style-type: decimal;
+      li {
+        margin-left: 1.25rem;
+        padding: 0.5rem;
+      }
+    }
+  }
+}

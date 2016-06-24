@@ -1,19 +1,17 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PropTypes } from 'react';
+import moment from 'moment';
 import LibraryListingItem from './LibraryListingItem';
 
 const getListGroupTitle = (listGroupName, sortOrder) => {
-  let title;
-
-  if (sortOrder === 'name') {
-    title = listGroupName.toUpperCase();
-  } else if (sortOrder === 'created' || sortOrder === 'last_modified') {
-    const date = new Date(Date.parse(listGroupName));
-    const locale = 'en-us';
-    const month = date.toLocaleString(locale, { month: 'long' });
-    title = `${date.getDate()} ${month} ${date.getFullYear()}`;
+  switch (sortOrder) {
+    case 'name':
+      return listGroupName.toUpperCase();
+    case 'created':
+    case 'last_modified':
+      return moment(listGroupName, 'YYYY-MM-DD').format('MMMM Do YYYY');
+    default:
+      throw new Error(`Invalid sort order ${sortOrder}`);
   }
-
-  return title;
 };
 
 const sortListGroupEntities = (entities, sortOrder, isReverseSort) => {
@@ -24,9 +22,18 @@ const sortListGroupEntities = (entities, sortOrder, isReverseSort) => {
 
   if (sortOrder === 'name') {
     sortFunction = (a, b) => {
-      let output = a.name > b.name ? 1 : -1;
-      if (isReverseSort) output = output * -1;
-      return output;
+      let out;
+
+      if (a.name > b.name) {
+        out = 1;
+      } else if (a.name === b.name) {
+        out = 0;
+      } else {
+        out = -1;
+      }
+
+      if (isReverseSort) out = out * -1;
+      return out;
     };
   } else if (sortOrder === 'created' || sortOrder === 'last_modified') {
     sortFunction = (a, b) => {
@@ -46,29 +53,39 @@ const sortListGroupEntities = (entities, sortOrder, isReverseSort) => {
   return sortedEntities;
 };
 
-export default class LibraryListingGroup extends Component {
-  render() {
-    const listGroupTitle = getListGroupTitle(this.props.listGroup.listGroupName,
-      this.props.sortOrder);
-    const sortedEntities = sortListGroupEntities(this.props.listGroup.entities,
-      this.props.sortOrder, this.props.isReverseSort);
+/* Temporary shim until we standardize on either "name" or "title" for entities */
+const convertEntity = entity => {
+  const output = Object.assign({}, entity);
 
-    return (
-      <div className="LibraryListingGroup">
-        <h3>{listGroupTitle}</h3>
-        <ol>
-          {sortedEntities.map((entity, index) =>
-            <LibraryListingItem
-              key={index}
-              entity={entity}
-              displayMode={this.props.displayMode}
-              onSelectEntity={this.props.onSelectEntity}
-            />
-          )}
-        </ol>
-      </div>
-    );
+  if (output.title && !output.name) {
+    output.name = output.title;
+    delete output.title;
   }
+
+  return output;
+};
+
+export default function LibraryListingGroup({
+  listGroup, displayMode, sortOrder, isReverseSort, onSelectEntity, onEntityAction }) {
+  const listGroupTitle = getListGroupTitle(listGroup.listGroupName, sortOrder);
+  const sortedEntities = sortListGroupEntities(listGroup.entities, sortOrder, isReverseSort);
+
+  return (
+    <div className="LibraryListingGroup">
+      <h3>{listGroupTitle}</h3>
+      <ol>
+        {sortedEntities.map((entity, index) =>
+          <LibraryListingItem
+            key={index}
+            entity={convertEntity(entity)}
+            displayMode={displayMode}
+            onSelectEntity={onSelectEntity}
+            onEntityAction={onEntityAction}
+          />
+        )}
+      </ol>
+    </div>
+  );
 }
 
 LibraryListingGroup.propTypes = {
@@ -80,4 +97,5 @@ LibraryListingGroup.propTypes = {
   sortOrder: PropTypes.oneOf(['created', 'last_modified', 'name']).isRequired,
   isReverseSort: PropTypes.bool.isRequired,
   onSelectEntity: PropTypes.func.isRequired,
+  onEntityAction: PropTypes.func.isRequired,
 };

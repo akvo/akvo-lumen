@@ -4,7 +4,6 @@
   .LibraryListingGroup {
     margin: 1rem;
     padding: 1rem;
-
     h3 {
       color: $midGrey;
       font-size: 1.1rem;
@@ -17,10 +16,21 @@
     position: relative;
     min-height: 5rem;
     padding: 0.5rem 0;
-    overflow: hidden;
+    /*overflow: hidden;*/
     transition: background-color 0.3s ease;
     &:hover {
-      background-color: $lightBlueGrey;
+      background-color: $lightGreen;
+    }
+    &.FAILED {
+      background-color: $lightErrorRed;
+      &:hover {
+        background: $lightErrorRed;
+      }
+    }
+    &.PENDING {
+      &:hover {
+        background-color: transparent;
+      }
     }
     .selectEntity {
       position: absolute;
@@ -78,6 +88,14 @@
     }
     &:hover .entityControls {
       opacity: 1;
+    }
+    .pendingOverlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      background-color: rgba(0,0,0,0.1);
     }
   }
   &.grid {

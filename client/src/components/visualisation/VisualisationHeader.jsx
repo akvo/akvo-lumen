@@ -2,7 +2,14 @@ import React, { Component, PropTypes } from 'react';
 import EntityTypeHeader from '../entity-editor/EntityTypeHeader';
 
 export default class VisualisationHeader extends Component {
+
+  constructor() {
+    super();
+    this.getActionButtons = this.getActionButtons.bind(this);
+  }
+
   getActionButtons() {
+    const { onVisualisationAction } = this.props;
     const user = {
       buttonText: 'User',
     };
@@ -11,6 +18,7 @@ export default class VisualisationHeader extends Component {
     };
     const share = {
       buttonText: 'Share',
+      onClick: () => onVisualisationAction('share'),
     };
     const overflow = {
       buttonText: 'Overflow',
@@ -28,7 +36,7 @@ export default class VisualisationHeader extends Component {
     const actionButtons = this.getActionButtons();
     let saveStatus;
 
-    switch (this.props.visualisation.isUnsavedChanges) {
+    switch (this.props.isUnsavedChanges) {
       case false:
         saveStatus = 'All changes saved';
         break;
@@ -50,5 +58,9 @@ export default class VisualisationHeader extends Component {
 }
 
 VisualisationHeader.propTypes = {
-  visualisation: PropTypes.object.isRequired,
+  isUnsavedChanges: PropTypes.bool.isRequired,
+  visualisation: PropTypes.shape({
+    name: PropTypes.string.isRequired,
+  }).isRequired,
+  onVisualisationAction: PropTypes.func.isRequired,
 };

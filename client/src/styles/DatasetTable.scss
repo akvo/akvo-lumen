@@ -1,3 +1,18 @@
+@import 'modules/colors';
+
 .DatasetTable {
-  margin-top: 4rem;
+  .wrapper {
+    height: calc(100vh - 8rem);
+    .public_fixedDataTableCell_main {
+      max-width: 200px;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+  }
+  .sidebarTargetingColumn {
+    background-color: $lightGrey;
+  }
+  .ColumnHeader {
+    position: relative;
+  }
 }

@@ -16,11 +16,25 @@
         }
     }
     .LinkFileSelection {
-        .linkFileInput, .linkFileInputLabel {
+        label, input {
+            padding: 0.25rem;
+        }
+        label {
+            margin-right: 0.5rem;
+        }
+        .linkFileInput {
+            width: 20rem;
+            max-width: 60%;
+        }
+        .linkFileInput, .linkFileLabel {
             font-size: 1.25rem;
         }
-        .linkFileInputLabel {
-            margin-right: 0.5rem;
+        div {
+            padding: 1rem;
+            width: 100%;
+            max-width: 30rem;
+            margin: 0 auto;
+            text-align: center;
         }
     }
     .DataFileFileSelection {
@@ -32,6 +46,22 @@
         }
         .dataFileUploadInput {
             padding: 1rem;
+        }
+        .dataFileUploadHeaderToggle {
+            padding: 1rem;
+            padding-bottom: 3.25rem;
+            &.progressActive {
+                padding-bottom: 1rem;
+            }
+        }
+        .DashProgressBar {
+            width: 90%;
+            max-width: 20rem;
+            margin: 1rem auto 1rem auto;
+        }
+        .errorText {
+            font-weight: bold;
+            color: $errorRed;
         }
     }
     .Settings {

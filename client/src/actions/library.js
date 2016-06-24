@@ -2,6 +2,8 @@ import * as constants from '../constants/library';
 import fetch from 'isomorphic-fetch';
 import { fetchDatasetsSuccess } from './dataset';
 import { fetchVisualisationsSuccess } from './visualisation';
+import { fetchDashboardsSuccess } from './dashboard';
+import headers from './headers';
 
 function fetchLibraryRequest() {
   return {
@@ -18,12 +20,15 @@ function fetchLibraryFailure() {
 export function fetchLibrary() {
   return (dispatch) => {
     dispatch(fetchLibraryRequest());
-    fetch('/api/library')
+    fetch('/api/library', {
+      method: 'GET',
+      headers: headers(),
+    })
     .then(response => response.json())
     .then(library => {
       dispatch(fetchDatasetsSuccess(library.datasets));
       dispatch(fetchVisualisationsSuccess(library.visualisations));
-      // dispatch(fetchDashboardsSuccess(library.dashboards));
+      dispatch(fetchDashboardsSuccess(library.dashboards));
     })
     .catch(error => dispatch(fetchLibraryFailure(error)));
   };

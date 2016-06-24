@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 var webpack = require('webpack');
 var path = require('path');
 var SystemBellPlugin = require('system-bell-webpack-plugin');
@@ -5,14 +7,16 @@ var ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 const isProd = process.env.NODE_ENV === 'production';
 
-const entry = isProd ?
-  [
-    "./src/index.jsx"
-  ] : [
-    'webpack-dev-server/client?http://0.0.0.0:3030', // WebpackDevServer host and port
-    'webpack/hot/only-dev-server', // "only" prevents reload on syntax errors
-    "./src/index.jsx"
-  ];
+const entry = {
+  app: isProd ? [
+      "./src/index.jsx"
+    ] : [
+      'webpack-dev-server/client?http://0.0.0.0:3030', // WebpackDevServer host and port
+      'webpack/hot/only-dev-server', // "only" prevents reload on syntax errors
+      "./src/index.jsx"
+    ],
+  pub: "./src/index-pub.jsx"
+}
 
 const jsLoaders = isProd ? ["babel-loader"] : ["react-hot", "babel-loader"];
 
@@ -21,7 +25,7 @@ module.exports = {
   devtool: 'source-map',
   output: {
     path: path.join(__dirname, 'dist'),
-    filename: "bundle.js",
+    filename: "[name].bundle.js",
     publicPath: '/assets/'
   },
   resolve: {
@@ -45,7 +49,7 @@ module.exports = {
       {
         test: /\.(png|jpg)$/,
         loader: 'url-loader?limit=8192'
-      }
+      },
     ]
   },
   plugins: [
