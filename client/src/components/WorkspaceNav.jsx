@@ -55,7 +55,7 @@ export class WorkspaceNav extends Component {
   }
 
   getClassName(isFloatOnTop) {
-    let className = 'WorkspaceNav';
+    let className = 'WorkspaceNav noSelect';
 
     if (isFloatOnTop) {
       if (this.state.isManuallyInverted) {
@@ -105,10 +105,12 @@ export class WorkspaceNav extends Component {
         </div>
         <div className="links">
           <NavLink
-            to="library"
+            to="/library"
             className="library subtitle"
             isSelected={activeSubtitle === 'library'}
-          />
+          >
+            Library
+          </NavLink>
           <CollectionsList
             collections={this.props.collections}
             onShowCreateCollectionModal={this.handleShowCreateCollectionModal}
@@ -116,10 +118,12 @@ export class WorkspaceNav extends Component {
             pathname={this.props.location.pathname}
           />
           <NavLink
-            to="activity"
+            to="/activity"
             className="activity subtitle disabled"
             isSelected={activeSubtitle === 'activity'}
-          />
+          >
+            Activity
+          </NavLink>
         </div>
         <NavWorkspaceSwitch />
       </nav>

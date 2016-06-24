@@ -74,11 +74,14 @@ export default class DashboardEditor extends Component {
     this.state = {
       gridWidth: 1024,
       propLayout: [],
+      saveError: false,
     };
     this.handleLayoutChange = this.handleLayoutChange.bind(this);
     this.handleEntityToggle = this.handleEntityToggle.bind(this);
     this.handleResize = this.handleResize.bind(this);
     this.handleEntityUpdate = this.handleEntityUpdate.bind(this);
+    this.handleChangeName = this.handleChangeName.bind(this);
+    this.handleSave = this.handleSave.bind(this);
   }
 
   componentDidMount() {
@@ -181,6 +184,19 @@ export default class DashboardEditor extends Component {
     this.props.onUpdateEntities(newEntities);
   }
 
+  handleChangeName(e) {
+    this.setState({ saveError: false });
+    this.props.onUpdateName(e.target.value);
+  }
+
+  handleSave() {
+    if (this.props.dashboard.name !== '') {
+      this.props.onSave();
+    } else {
+      this.setState({ saveError: true });
+    }
+  }
+
   render() {
     const dashboard = this.props.dashboard;
     const canvasWidth = this.state.gridWidth;
@@ -199,26 +215,35 @@ export default class DashboardEditor extends Component {
         >
           <div className="DashboardEditorCanvasControls">
             <button
-              className="clickable"
+              className="clickable addText"
               onClick={() => this.handleEntityToggle({ content: '' }, 'text')}
             >
               Add new text element
             </button>
             <button
-              className="clickable"
-              onClick={() => this.props.onSave()}
+              className="clickable save"
+              onClick={this.handleSave}
             >
               Save
             </button>
           </div>
-          <div className="DashboardNameInputContainer">
+          <div
+            className={`DashboardNameInputContainer ${this.state.saveError ? 'error' : ''}`}
+          >
             <input
               type="text"
               name="Dashboard name"
-              placeholder={dashboard.name}
-              onChange={(e) => { this.props.onUpdateName(e.target.value); }}
+              ref="dashboardName"
+              value={dashboard.name}
+              placeholder="Enter dashboard name"
+              onChange={this.handleChangeName}
             />
           </div>
+          {getArrayFromObject(dashboard.entities).length === 0 &&
+            <div className="blankDashboardHelpText">
+              Click a visualisation in the visualisation list to add it to the dashboard.
+            </div>
+          }
           <div
             className="DashboardEditorCanvas"
             style={{

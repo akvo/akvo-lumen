@@ -92,7 +92,11 @@ export default class ColumnHeader extends Component {
             {column.type}
           </span>
         </span>
-        {column.title}
+        <span
+          className="columnTitleText"
+        >
+          {column.title}
+        </span>
       </div>
     );
   }

@@ -34,6 +34,15 @@ export default function DashboardVisualisationList(props) {
                   {isOnDashboard(item) ? '✔' : ''}
                 </span>
               </h4>
+              <span className="visualisationType">
+                {item.visualisationType === 'map' ?
+                  'Map'
+                  :
+                  `${item.visualisationType.charAt(0).toUpperCase() +
+                      item.visualisationType.slice(1)} chart`
+                }
+              </span>
+              <div className="background" />
             </li>
           )}
         </ul>

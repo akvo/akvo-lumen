@@ -1,4 +1,5 @@
 import React, { PropTypes } from 'react';
+import moment from 'moment';
 import LibraryListingGroup from './LibraryListingGroup';
 
 require('../../styles/LibraryListing.scss');
@@ -29,7 +30,8 @@ const filterEntities = (library, filterBy, searchString) => {
   } else {
     // Basic, proof-of-concept string matching for search function
     unsearchedEntities.forEach(entity => {
-      if (entity.name.toLowerCase().indexOf(searchString.toLowerCase()) > -1) {
+      const entityTitle = entity.name || entity.title;
+      if (entityTitle.toLowerCase().indexOf(searchString.toLowerCase()) > -1) {
         searchedEntities.push(entity);
       }
     });
@@ -43,7 +45,8 @@ const groupEntities = (entities, sortOrder) => {
 
   if (sortOrder === 'name') {
     entities.forEach(entity => {
-      const key = entity.name.toLowerCase().charAt(0);
+      const entityTitle = entity.name || entity.title;
+      const key = entityTitle.toLowerCase().charAt(0);
 
       listGroups[key] = listGroups[key] || { listGroupName: key, entities: [] };
       listGroups[key].entities.push(entity);
@@ -54,9 +57,7 @@ const groupEntities = (entities, sortOrder) => {
       entityDate = new Date(parseInt(entityDate, 10));
 
       // Take the year, month and day as the key
-      const key = `${entityDate.getUTCFullYear()}-` +
-        `${entityDate.getUTCMonth() + 1}-` +
-        `${entityDate.getUTCDate()}`;
+      const key = moment(entityDate).format('YYYY-MM-DD');
 
       listGroups[key] = listGroups[key] || { listGroupName: key, entities: [] };
       listGroups[key].entities.push(entity);

@@ -1,0 +1,19 @@
+@import 'modules/colors';
+
+.DashboardModal {
+    height: 100%;
+}
+.DeleteConfirmationModal {
+    height: 100%;
+    padding-top: 2rem;
+    .contents {
+        overflow-y: auto;
+        max-height: 100%;
+    }
+    ul {
+        list-style: initial;
+        padding: 1rem 0;
+        margin-left: 1.25rem;
+        line-height: 1.4em;
+    }
+}
