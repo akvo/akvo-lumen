@@ -1,19 +1,17 @@
 import React, { PropTypes } from 'react';
+import moment from 'moment';
 import LibraryListingItem from './LibraryListingItem';
 
 const getListGroupTitle = (listGroupName, sortOrder) => {
-  let title;
-
-  if (sortOrder === 'name') {
-    title = listGroupName.toUpperCase();
-  } else if (sortOrder === 'created' || sortOrder === 'last_modified') {
-    const date = new Date(Date.parse(listGroupName));
-    const locale = 'en-us';
-    const month = date.toLocaleString(locale, { month: 'long' });
-    title = `${date.getDate()} ${month} ${date.getFullYear()}`;
+  switch (sortOrder) {
+    case 'name':
+      return listGroupName.toUpperCase();
+    case 'created':
+    case 'last_modified':
+      return moment(listGroupName, 'YYYY-MM-DD').format('MMMM Do YYYY');
+    default:
+      throw new Error(`Invalid sort order ${sortOrder}`);
   }
-
-  return title;
 };
 
 const sortListGroupEntities = (entities, sortOrder, isReverseSort) => {

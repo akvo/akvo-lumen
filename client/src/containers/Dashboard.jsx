@@ -1,9 +1,11 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
+import isEmpty from 'lodash/isEmpty';
 import DashboardEditor from '../components/dashboard/DashboardEditor';
 import DashboardHeader from '../components/dashboard/DashboardHeader';
 import ShareEntity from '../components/modals/ShareEntity';
 import * as actions from '../actions/dashboard';
+import { fetchLibrary } from '../actions/library';
 import { fetchDataset } from '../actions/dataset';
 import { push } from 'react-router-redux';
 
@@ -45,7 +47,7 @@ class Dashboard extends Component {
     super();
     this.state = {
       type: 'dashboard',
-      name: 'Untitled dashboard',
+      name: '',
       entities: {},
       layout: [],
       id: null,
@@ -66,8 +68,13 @@ class Dashboard extends Component {
   componentWillMount() {
     const isEditingExistingDashboard = getEditingStatus(this.props.location);
 
+    if (isEmpty(this.props.library.datasets)) {
+      this.props.dispatch(fetchLibrary());
+    }
+
     if (isEditingExistingDashboard) {
       const dashboardId = this.props.params.dashboardId;
+
       this.props.dispatch(actions.fetchDashboard(dashboardId));
     }
   }
@@ -76,25 +83,35 @@ class Dashboard extends Component {
     if (this.props.params.dashboardId != null) {
       const dashboardIsEmpty = Boolean(Object.keys(this.state.entities).length === 0 &&
         this.state.layout.length === 0);
-
       if (dashboardIsEmpty) {
         const dash = nextProps.library.dashboards[nextProps.params.dashboardId];
 
-        this.setState({
-          id: dash.id,
-          name: dash.title,
-          entities: dash.entities,
-          layout: Object.keys(dash.layout).map(key => dash.layout[key]),
-          created: dash.created,
-          modified: dash.modified,
-        });
+        // Test for both the dashboard and the layout to ensure the dashboard is fully loaded
+        if (dash && dash.layout) {
+          const entityArray = Object.keys(dash.entities).map(key => dash.entities[key]);
+          const hasVisualisations = entityArray.some(entity => entity.type === 'visualisation');
 
-        Object.keys(dash.entities).forEach(key => {
-          const entity = dash.entities[key];
-          if (entity.type === 'visualisation') {
-            this.onAddVisualisation(this.props.library.visualisations[key].datasetId);
+          if (hasVisualisations && isEmpty(this.props.library.visualisations)) {
+            // The dashboard has at least 1 visualisation, and no visualisations are loaded
+            return;
           }
-        });
+
+          this.setState({
+            id: dash.id,
+            name: dash.title,
+            entities: dash.entities,
+            layout: dash.layout ? Object.keys(dash.layout).map(key => dash.layout[key]) : null,
+            created: dash.created,
+            modified: dash.modified,
+          });
+
+          Object.keys(dash.entities).forEach(key => {
+            const entity = dash.entities[key];
+            if (entity.type === 'visualisation') {
+              this.onAddVisualisation(this.props.library.visualisations[key].datasetId);
+            }
+          });
+        }
       }
     }
   }

@@ -8,7 +8,8 @@
             [org.akvo.lumen.util :refer [squuid]])
   (:import java.util.UUID
            org.postgresql.PGConnection
-           org.postgresql.copy.CopyManager))
+           org.postgresql.copy.CopyManager
+           com.ibm.icu.text.CharsetDetector))
 
 (defn- get-cols
   ([num-cols]
@@ -38,10 +39,11 @@
 (defn get-copy-sql
   "Returns a `COPY` statement for the given
   table and number of columns"
-  [t-name num-cols headers?]
-  (format "COPY %s (%s) FROM STDIN WITH (FORMAT CSV%s)"
+  [t-name num-cols headers? encoding]
+  (format "COPY %s (%s) FROM STDIN WITH (FORMAT CSV, ENCODING '%s'%s)"
           t-name
           (get-cols num-cols)
+          encoding
           (if headers? ", HEADER true" "")))
 
 (defn get-insert-sql
@@ -69,15 +71,27 @@
 
 (defn get-headers
   "Returns the first line CSV a file"
-  [path separator]
-  (with-open [r (io/reader path)]
+  [path separator encoding]
+  (with-open [r (io/reader path :encoding encoding)]
     (first (csv/read-csv r :separator separator))))
 
 (defn get-num-cols
   "Returns the number of columns based on the
   first line of a CSV file"
-  [path separator]
-  (count (get-headers path separator)))
+  [path separator encoding]
+  (count (get-headers path separator encoding)))
+
+(defn get-encoding
+  "Returns the character encoding reading some
+  bytes from the file. It uses ICU's CharsetDetector"
+  [path]
+  (let [detector (CharsetDetector.)
+        ba (byte-array 4096)]
+    (with-open [is (io/input-stream path)]
+      (.read is ba))
+    (-> (.setText detector ba)
+        (.detect)
+        (.getName))))
 
 (defn get-column-tuples
   [col-titles]
@@ -118,17 +132,19 @@
     (let [ ;; TODO a bit of "manual" integration work
           path (get-path spec file-upload-path)
           headers? (boolean (get spec "hasColumnHeaders"))
-          n-cols (get-num-cols path \,)
+          encoding (get-encoding path)
+          n-cols (get-num-cols path \, encoding)
           col-titles (if headers?
-                       (get-headers path \,)
+                       (get-headers path \, encoding)
                        (vec (for [i (range 1 (inc n-cols))]
                               (str "Column " i))))
-          temp-table (str table-name "_temp")]
+          temp-table (str table-name "_temp")
+          copy-sql (get-copy-sql temp-table n-cols headers? encoding)]
       (jdbc/execute! tenant-conn [(get-create-table-sql temp-table n-cols "text" true)])
       (jdbc/execute! tenant-conn [(get-create-table-sql table-name n-cols "jsonb" false)])
       (with-open [conn (-> tenant-conn :datasource .getConnection)]
         (let [copy-manager (.getCopyAPI (.unwrap conn PGConnection))]
-          (.copyIn copy-manager ^String (get-copy-sql temp-table n-cols headers?) (io/input-stream path))))
+          (.copyIn copy-manager copy-sql (io/input-stream path))))
       (jdbc/execute! tenant-conn [(get-insert-sql temp-table table-name n-cols)])
       (jdbc/execute! tenant-conn [(get-drop-table-sql temp-table)])
       (jdbc/execute! tenant-conn [(get-vacuum-sql table-name)] {:transaction? false})

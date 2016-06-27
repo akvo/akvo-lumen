@@ -102,20 +102,3 @@
                               [:jwt-claims]
                               "realm_access"))]
       (check-response response 401))))
-
-
-(deftest wrap-jwt-test
-  (let [jwt-middleware (m/wrap-jwt test-handler
-                                   (get-in system/base-config [:app :jwt]))]
-
-    (testing "No token should not yeild jwt-claims."
-      (let [response (jwt-middleware (immutant-request :get "/api"))]
-        (is (not (contains? response :jwt-claims)))))
-
-
-    (testing "Invalid token should not yeild jwt-claims."
-      (let [response (jwt-middleware (assoc-in (immutant-request :get "/api")
-                                               [:headers "authorization"]
-                                               "invalid-token"
-                                               ))]
-        (is (not (contains? response :jwt-claims)))))))

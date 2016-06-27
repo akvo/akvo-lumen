@@ -31,3 +31,7 @@ SELECT table_name AS "table-name"
 SELECT :i:column-name
   FROM :i:table-name
  WHERE rnum = :rnum
+
+-- :name get-row-count ?: :1
+SELECT COUNT(*) AS total
+  FROM :i:table-name

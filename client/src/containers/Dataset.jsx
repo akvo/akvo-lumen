@@ -21,9 +21,10 @@ class Dataset extends Component {
   }
 
   componentDidMount() {
-    const { dispatch, dataset, router, route } = this.props;
+    const { dispatch, router, route, params } = this.props;
+    const { datasetId } = params;
     router.setRouteLeaveHook(route, this.willLeaveDatasets);
-    dispatch(fetchDataset(dataset.id));
+    dispatch(fetchDataset(datasetId));
   }
 
   willLeaveDatasets() {
@@ -41,6 +42,9 @@ class Dataset extends Component {
 
   render() {
     const { dataset, dispatch } = this.props;
+    if (dataset == null) {
+      return <div className="Dataset">Loading...</div>;
+    }
     return (
       <div className="Dataset">
         <DatasetHeader
@@ -72,6 +76,7 @@ Dataset.propTypes = {
   }),
   router: PropTypes.object.isRequired,
   route: PropTypes.object.isRequired,
+  params: PropTypes.object.isRequired,
   dispatch: PropTypes.func.isRequired,
 };
 

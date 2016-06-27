@@ -1,36 +1,50 @@
 import React, { Component, PropTypes } from 'react';
-import ContentEditable from 'react-contenteditable';
 
 export default class DashboardCanvasItemEditable extends Component {
   constructor() {
     super();
     this.state = {
-      html: 'Enter text here',
+      textContents: 'Enter text here',
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleBlur = this.handleBlur.bind(this);
+    this.handleFocus = this.handleFocus.bind(this);
   }
   componentWillMount() {
-    this.setState({ html: this.props.item.content || 'Enter text here' });
+    this.setState({ textContents: this.props.item.content || 'Enter text here' });
   }
   handleChange(evt) {
-    this.setState({ html: evt.target.value });
+    this.setState({ textContents: evt.target.value });
   }
   handleBlur() {
     const newItem = this.props.item;
 
-    newItem.content = this.state.html;
+    newItem.content = this.state.textContents;
     this.props.onEntityUpdate(newItem);
+  }
+  handleFocus() {
+    if (this.state.textContents === 'Enter text here') {
+      this.setState({ textContents: '' });
+    }
   }
   render() {
     return (
       <div
         className="DashboardCanvasItemEditable"
-        onBlur={this.handleBlur}
       >
-        <ContentEditable
-          html={this.state.html}
+        <textarea
+          type="text"
           onChange={this.handleChange}
+          onBlur={this.handleBlur}
+          onFocus={this.handleFocus}
+          value={this.state.textContents}
+          style={{
+            width: '95%',
+            height: '100%',
+            resize: 'none',
+            border: 'none',
+            marginRight: '5%',
+          }}
         />
       </div>
     );

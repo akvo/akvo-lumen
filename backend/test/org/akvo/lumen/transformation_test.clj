@@ -63,7 +63,11 @@
                   "args" {"columnName" "c5"
                           "newType" "number"
                           "defaultValue" 0}
-                  "onError" "default-value"}]]
+                  "onError" "default-value"}
+                 {"op" "core/filter-column"
+                  "args" {"columnName" "c4"
+                          "expression" {"contains" "broken"}}
+                  "onError" "fail"}]]
 
       (insert-data-source test-conn {:id data-source-id
                                      :spec (json/generate-string data-source-spec)})
@@ -90,6 +94,7 @@
                                               {:rnum 196
                                                :column-name "c5"
                                                :table-name table-name}))))
-          (is (= 879319 (:c5 (get-val-from-table test-conn {:rnum 17
-                                                            :column-name "c5"
-                                                            :table-name table-name})))))))))
+          (is (= "[Broken]" (:c4 (get-val-from-table test-conn {:rnum 196
+                                                                :column-name "c4"
+                                                                :table-name table-name}))))
+          (is (= 1 (:total (get-row-count test-conn {:table-name table-name})))))))))

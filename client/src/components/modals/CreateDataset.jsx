@@ -69,20 +69,18 @@ class CreateDataset extends Component {
     return (
       <Modal
         isOpen
-        style={
-          {
-            content: {
-              borderRadius: 0,
-              border: '0.1rem solid rgb(223, 244, 234)',
-              marginLeft: '7rem',
-              marginRight: '7rem',
-            },
-            overlay: {
-              zIndex: 99,
-              backgroundColor: 'rgba(0,0,0,0.6)',
-            },
-          }
-        }
+        style={{
+          content: {
+            borderRadius: 0,
+            border: '0.1rem solid rgb(223, 244, 234)',
+            marginLeft: '7rem',
+            marginRight: '7rem',
+          },
+          overlay: {
+            zIndex: 99,
+            backgroundColor: 'rgba(0,0,0,0.6)',
+          },
+        }}
       >
         <div className={this.props.containerClassName}>
           <div className="CreateDataset">

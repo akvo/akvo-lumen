@@ -44,19 +44,12 @@ export default class LibraryListingItem extends Component {
       contextMenuVisible: false,
     };
     this.handleToggleContextMenu = this.handleToggleContextMenu.bind(this);
-    this.handleContextMenuClick = this.handleContextMenuClick.bind(this);
   }
 
   handleToggleContextMenu(event) {
     event.stopPropagation();
     const { contextMenuVisible } = this.state;
     this.setState({ contextMenuVisible: !contextMenuVisible });
-  }
-
-  handleContextMenuClick(action) {
-    if (action === 'delete') {
-      action.delete();
-    }
   }
 
   render() {
@@ -96,7 +89,10 @@ export default class LibraryListingItem extends Component {
           </button>
           {this.state.contextMenuVisible ?
             <LibraryListingItemContextMenu
-              onClick={(actionType) => onEntityAction(actionType, entity.type, entity.id)}
+              onClick={(actionType) => {
+                this.setState({ contextMenuVisible: false });
+                onEntityAction(actionType, entity.type, entity.id);
+              }}
             /> : null}
         </div>
       </li>

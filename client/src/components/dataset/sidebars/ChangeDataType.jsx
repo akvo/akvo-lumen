@@ -93,7 +93,7 @@ const errorOptions = [
   },
   {
     value: 'fail',
-    label: 'Let the transform fail',
+    label: 'Abort transformation',
   },
   {
     value: 'delete-row',

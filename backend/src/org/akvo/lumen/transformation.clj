@@ -61,10 +61,6 @@
   (or (required-keys op-spec)
       (throw-invalid-op op-spec)))
 
-(defmethod validate-op :core/filter
-  [op-spec]
-  true)
-
 (defmethod validate-op :core/to-titlecase
   [op-spec]
   (required-keys op-spec))
@@ -87,6 +83,12 @@
 (defmethod validate-op :core/trim-doublespace
   [op-spec]
   (or (required-keys op-spec)
+      (throw-invalid-op op-spec)))
+
+(defmethod validate-op :core/filter-column
+  [op-spec]
+  (or (boolean (and (required-keys op-spec)
+                    (not-empty (get-in op-spec ["args" "expression"]))))
       (throw-invalid-op op-spec)))
 
 (defn validate
