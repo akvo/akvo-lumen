@@ -3,7 +3,8 @@
  {:env
   {:database-url "jdbc:postgresql://localhost/lumen?user=lumen&password=password"
    :flow-report-database-url "jdbc:postgresql://localhost/%s"
-   :file-upload-path "/tmp/akvo/lumen"}}
+   :file-upload-path "/tmp/akvo/lumen"
+   :lumen-keycloak-url "http://localhost:8080/auth"}}
  :profiles/test
  {:env
   {:database-url "jdbc:postgresql://localhost/test_lumen?user=lumen&password=password"
