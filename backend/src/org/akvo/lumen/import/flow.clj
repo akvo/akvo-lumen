@@ -162,7 +162,7 @@
     (contains? (->> (descendant-folders-and-surveys-by-folder-id (format flow-report-database-url instance)
                                                                  {:folder-ids folder-ids}
                                                                  {}
-                                                                 :identifiers identity)
+                                                                 {:identifiers identity})
                     (map :id)
                     set)
                surveyId)))
