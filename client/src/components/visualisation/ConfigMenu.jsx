@@ -130,7 +130,7 @@ export default function ConfigMenu(props) {
               placeholder="X Axis label"
               name="xLabel"
               onChange={(event) => onChangeSpec({
-                labelX: parseInt(event.target.value),
+                labelX: parseInt(event.target.value, 10),
               })}
             />
           </div>
