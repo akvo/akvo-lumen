@@ -42,4 +42,4 @@
       (jwt/wrap-jwt-claims handler (jwt/rsa-key certs 0) issuer))
     (catch Exception e
       (println "Could not get cert from Keycloak")
-      (.printStackTrace e))))
+      (throw e))))
