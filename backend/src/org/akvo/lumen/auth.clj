@@ -1,9 +1,9 @@
-(ns org.akvo.lumen.middleware
+(ns org.akvo.lumen.auth
   (:require [akvo.commons.jwt :as jwt]
+            [cheshire.core :as json]
             [clj-http.client :as client]
             [clojure.string :as s]
-            [ring.util.response :as response])
-  (:import [java.sql SQLException]))
+            [ring.util.response :as response]))
 
 
 (defn wrap-auth
@@ -33,13 +33,13 @@
 (defn wrap-jwt
   "Go get cert from Keycloak and feed it to wrap-jwt-claims. Keycloak url can
   be configured via the KEYCLOAK_URL env var."
-  [handler issuer]
+  [handler keycloak-url realm]
   (try
-    (let [certs (-> (str issuer "/realms/akvo/protocol/openid-connect/certs")
+    (let [issuer (str keycloak-url "/realms/" realm)
+          certs (-> (str issuer "/protocol/openid-connect/certs")
                     client/get
                     :body)]
       (jwt/wrap-jwt-claims handler (jwt/rsa-key certs 0) issuer))
     (catch Exception e
-      (.printStackTrace e)
-      (when (isa? SQLException (type e))
-        (.printStackTrace (.getNextException ^SQLException e))))))
+      (println "Could not get cert from Keycloak")
+      (throw e))))
