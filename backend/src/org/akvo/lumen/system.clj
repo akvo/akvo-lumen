@@ -25,7 +25,7 @@
              [visualisation :as visualisation]
              [transformation :as transformation]
              [job-execution :as job-execution]]
-            [org.akvo.lumen.middleware :refer [wrap-auth wrap-jwt]]
+            [org.akvo.lumen.auth :refer [wrap-auth wrap-jwt]]
             [ring.middleware
              [defaults :refer [api-defaults wrap-defaults]]
              [json :refer [wrap-json-body wrap-json-response]]]))
@@ -41,7 +41,7 @@
                         [wrap-route-aliases :aliases]
                         wrap-json-body
                         wrap-auth
-                        [wrap-jwt :keycloak-url]
+                        [wrap-jwt :keycloak-url :keycloak-realm]
                         tm/wrap-label-tenant]
          :not-found    (io/resource "org/akvo/lumen/errors/404.html")
          :defaults     (meta-merge api-defaults
