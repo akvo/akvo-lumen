@@ -33,13 +33,13 @@ const getDatasetArray = datasetObject => {
 
 const getDatasetOptions = datasetArray =>
   datasetArray.map(option => ({
-    value: option.id,
+    value: option.id.toString(),
     label: option.name,
   }));
 
 const getDashSelectOptionsFromColumnArray = (array = []) =>
   array.map((entry, index) => ({
-    value: index,
+    value: index.toString(),
     label: entry.title,
   }));
 
@@ -79,7 +79,7 @@ export default function ConfigMenu(props) {
               placeholder="Y Axis label"
               name="yLabel"
               onChange={(event) => onChangeSpec({
-                labelY: event.target.value,
+                labelY: parseInt(event.target.value, 10),
               })}
             />
             <Subtitle>X-Axis</Subtitle>
@@ -96,7 +96,7 @@ export default function ConfigMenu(props) {
               placeholder="X Axis label"
               name="xLabel"
               onChange={(event) => onChangeSpec({
-                labelX: event.target.value,
+                labelX: parseInt(event.target.value, 10),
               })}
             />
           </div>
@@ -130,7 +130,7 @@ export default function ConfigMenu(props) {
               placeholder="X Axis label"
               name="xLabel"
               onChange={(event) => onChangeSpec({
-                labelX: event.target.value,
+                labelX: parseInt(event.target.value),
               })}
             />
           </div>
@@ -249,8 +249,9 @@ export default function ConfigMenu(props) {
         <label htmlFor="xDatasetMenu">Source dataset:</label>
         <DashSelect
           name="xDatasetMenu"
+          placeholder="Choose dataset..."
           value={visualisation.datasetId !== null ?
-            visualisation.datasetId.toString() : 'Choose dataset...'}
+            visualisation.datasetId.toString() : null}
           options={datasetOptions}
           onChange={props.onChangeSourceDataset}
         />

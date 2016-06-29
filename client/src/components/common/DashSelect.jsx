@@ -18,7 +18,11 @@ export default function DashSelect(props) {
 }
 
 DashSelect.propTypes = {
-  options: PropTypes.array.isRequired,
+  options: PropTypes.arrayOf(React.PropTypes.shape({
+    value: PropTypes.string.isRequired,
+    label: PropTypes.string.isRequired,
+  })).isRequired,
+  placeholder: PropTypes.string,
   name: PropTypes.string,
   onChange: PropTypes.func,
   clearable: PropTypes.bool,
