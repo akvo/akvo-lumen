@@ -9,6 +9,7 @@ export default function DashSelect(props) {
     <div className="DashSelect">
       <Select
         {...props}
+        onChange={option => props.onChange(option.value)}
         clearable={props.clearable || false}
         searchable={props.searchable || false}
       />
