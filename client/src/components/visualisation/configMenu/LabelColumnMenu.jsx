@@ -10,8 +10,8 @@ export default function LabelColumnMenu(props) {
       <DashSelect
         name={props.name}
         disabled={props.options ? props.options.length === 0 : true}
-        value={props.choice !== null ?
-          props.choice : 'Choose a name column...'}
+        placeholder="Choose a name column..."
+        value={props.choice}
         onChange={props.onChange}
         options={props.options}
       />
