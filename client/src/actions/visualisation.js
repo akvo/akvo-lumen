@@ -1,175 +1,76 @@
-import * as constants from '../constants/visualisation';
+import { createAction } from 'redux-actions';
 import { fetchDataset } from './dataset';
-import fetch from 'isomorphic-fetch';
-import headers from './headers';
+import * as api from '../api';
 
-export function fetchVisualisationsSuccess(visualisations) {
-  return {
-    type: constants.FETCH_VISUALISATIONS_SUCCESS,
-    visualisations,
-  };
-}
+/* Fetched all visualisations */
+export const fetchVisualisationsSuccess = createAction('FETCH_VISUALISATIONS_SUCCESS');
 
-function createVisualisationSuccess(visualisation) {
-  return {
-    type: constants.CREATE_VISUALISATION_SUCCESS,
-    visualisation,
-  };
-}
+/* Create a new visualisation */
+export const createVisualisationRequest = createAction('CREATE_VISUALISATION_REQUEST');
+export const createVisualisationSuccess = createAction('CREATE_VISUALISATION_SUCCESS');
+export const createVisualisationFailure = createAction('CREATE_VISUALISATION_FAILURE');
 
-function createVisualisationFailure() {
-  return {
-    type: constants.CREATE_VISUALISATION_FAILURE,
-  };
-}
-
-function createVisualisationRequest(visualisation) {
+export function createVisualisation(visualisation) {
   return (dispatch) => {
-    dispatch({
-      type: constants.CREATE_VISUALISATION_REQUEST,
-      visualisation,
-    });
-    fetch('/api/visualisations', {
-      method: 'POST',
-      headers: headers(),
-      body: JSON.stringify(visualisation),
-    })
-    .then(response => response.json())
+    dispatch(createVisualisationRequest(visualisation));
+    api.post('/api/visualisations', visualisation)
     .then(vis => dispatch(createVisualisationSuccess(vis)))
     .catch(err => dispatch(createVisualisationFailure(err)));
   };
 }
 
-export function createVisualisation(visualisation) {
-  return createVisualisationRequest(visualisation);
-}
-
-function saveVisualisationChangesFailure(visualisation) {
-  return {
-    type: constants.EDIT,
-    visualisation,
-  };
-}
-
-function saveVisualisationChangesSuccess(visualisation) {
-  const now = Date.now();
-  return {
-    type: constants.EDIT,
-    visualisation: Object.assign({}, visualisation, {
-      modified: now,
-      status: 'OK',
-    }),
-  };
-}
-
-function saveVisualisationChangesRequest(visualisation) {
-  const now = Date.now();
-  return {
-    type: constants.EDIT,
-    visualisation: Object.assign({}, visualisation, {
-      modified: now,
-      status: 'PENDING',
-    }),
-  };
-}
-
-export function saveVisualisationChanges(visualisation) {
-  return (dispatch, getState) => {
-    const prevVisualisation = getState().library.visualisations[visualisation.id];
-    dispatch(saveVisualisationChangesRequest(visualisation));
-    fetch(`/api/visualisations/${visualisation.id}`, {
-      method: 'PUT',
-      headers: headers(),
-      body: JSON.stringify(visualisation),
-    })
-    .then(response => response.json())
-    .then(() => dispatch(saveVisualisationChangesSuccess(visualisation)))
-    .catch(() => dispatch(saveVisualisationChangesFailure(prevVisualisation)));
-  };
-}
-
-function fetchVisualisationSuccess(visualisation) {
-  return (dispatch) => {
-    // We also need to possibly fetch datasets.
-    const datasetId = visualisation.datasetId;
-
-    if (datasetId) {
-      dispatch(fetchDataset(datasetId));
-    }
-
-    dispatch({
-      type: constants.FETCH_VISUALISATION_SUCCESS,
-      visualisation,
-    });
-  };
-}
-
-function fetchVisualisationFailure(id) {
-  return {
-    type: constants.FETCH_VISUALISATION_FAILURE,
-    id,
-  };
-}
-
-function fetchVisualisationRequest(id) {
-  return {
-    type: constants.FETCH_VISUALISATION_REQUEST,
-    id,
-  };
-}
+/* Fetch a single visualisation */
+export const fetchVisualisationRequest = createAction('FETCH_VISUALISATION_REQUEST');
+export const fetchVisualisationSuccess = createAction('FETCH_VISUALISATION_SUCCESS');
+export const fetchVisualisationFailure = createAction('FETCH_VISUALISATION_FAILURE');
 
 export function fetchVisualisation(id) {
   return (dispatch) => {
     dispatch(fetchVisualisationRequest(id));
-    fetch(`/api/visualisations/${id}`, {
-      method: 'GET',
-      headers: headers(),
+    api.get(`/api/visualisations/${id}`)
+    .then(visualisation => {
+      // We also need to possibly fetch datasets.
+      const datasetId = visualisation.datasetId;
+      if (datasetId) {
+        dispatch(fetchDataset(datasetId));
+      }
+      dispatch(fetchVisualisationSuccess(visualisation));
     })
-    .then(response => response.json())
-    .then(visualisation => dispatch(fetchVisualisationSuccess(visualisation)))
-    .catch(err => dispatch(fetchVisualisationFailure(id, err)));
+    .catch(err => dispatch(fetchVisualisationFailure(err)));
+  };
+}
+
+/* Save an existing visualisation */
+export const saveVisualisationChangesRequest = createAction('SAVE_VISUALISATION_CHANGES_REQUEST');
+export const saveVisualisationChangesFailure = createAction('SAVE_VISUALISATION_CHANGES_FAILURE');
+export const saveVisualisationChangesSuccess = createAction('SAVE_VISUALISATION_CHANGES_SUCCESS');
+
+export function saveVisualisationChanges(visualisation) {
+  return (dispatch, getState) => {
+    const prevVisualisation = getState().library.visualisations[visualisation.id];
+    dispatch(saveVisualisationChangesRequest(Object.assign({}, visualisation, {
+      modified: Date.now(),
+      status: 'PENDING',
+    })));
+    api.put(`/api/visualisations/${visualisation.id}`, visualisation)
+    .then(() => dispatch(saveVisualisationChangesSuccess(Object.assign({}, visualisation, {
+      modified: Date.now(),
+      status: 'OK',
+    }))))
+    .catch(() => dispatch(saveVisualisationChangesFailure(prevVisualisation)));
   };
 }
 
 /* Delete visualisation actions */
-
-function deleteVisualisationRequest(id) {
-  return {
-    type: constants.DELETE_VISUALISATION_REQUEST,
-    id,
-  };
-}
-
-/* Should only remove the visualisation from the redux store.
-   To delete a visualisation use deleteVisualisation istead */
-export function removeVisualisation(id) {
-  return {
-    type: constants.REMOVE_VISUALISATION,
-    id,
-  };
-}
-
-function deleteVisualisationSuccess(id) {
-  return removeVisualisation(id);
-}
-
-function deleteVisualisationFailure(id, error) {
-  return {
-    type: constants.DELETE_VISUALISATION_FAILURE,
-    id,
-    error,
-  };
-}
+export const deleteVisualisationRequest = createAction('DELETE_VISUALISATION_REQUEST');
+export const deleteVisualisationFailure = createAction('DELETE_VISUALISATION_FAILURE');
+export const deleteVisualisationSuccess = createAction('DELETE_VISUALISATION_SUCCESS');
 
 export function deleteVisualisation(id) {
   return (dispatch) => {
     dispatch(deleteVisualisationRequest);
-    fetch(`/api/visualisations/${id}`, {
-      method: 'DELETE',
-      headers: headers(),
-    })
-    .then(response => response.json())
+    api.del(`/api/visualisations/${id}`)
     .then(() => dispatch(deleteVisualisationSuccess(id)))
-    .catch(error => dispatch(deleteVisualisationFailure(id, error)));
+    .catch(error => dispatch(deleteVisualisationFailure(error)));
   };
 }
