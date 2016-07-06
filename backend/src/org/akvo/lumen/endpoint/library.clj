@@ -19,4 +19,4 @@
          {:dashboards     (all-dashboards tenant-conn)
           :datasets       (all-datasets tenant-conn)
           :visualisations (all-visualisations
-                           tenant-conn {} {} :identifiers identity)})))))
+                           tenant-conn {} {} {:identifiers identity})})))))

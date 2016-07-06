@@ -26,7 +26,7 @@ const getDatasetOptions = datasetArray =>
 
 const getDashSelectOptionsFromColumnList = (columns = Immutable.List()) =>
   columns.map((column, index) => ({
-    value: index,
+    value: index.toString(),
     label: column.get('title'),
   })).toArray();
 
@@ -66,7 +66,7 @@ export default function ConfigMenu(props) {
               placeholder="Y Axis label"
               name="yLabel"
               onChange={(event) => onChangeSpec({
-                labelY: event.target.value,
+                labelY: event.target.value.toString(),
               })}
             />
             <Subtitle>X-Axis</Subtitle>
@@ -83,7 +83,7 @@ export default function ConfigMenu(props) {
               placeholder="X Axis label"
               name="xLabel"
               onChange={(event) => onChangeSpec({
-                labelX: event.target.value,
+                labelX: event.target.value.toString(),
               })}
             />
           </div>
@@ -108,7 +108,7 @@ export default function ConfigMenu(props) {
               placeholder="Y Axis label"
               name="yLabel"
               onChange={(event) => onChangeSpec({
-                labelY: event.target.value,
+                labelY: event.target.value.toString(),
               })}
             />
             <Subtitle>X-Axis</Subtitle>
@@ -117,7 +117,7 @@ export default function ConfigMenu(props) {
               placeholder="X Axis label"
               name="xLabel"
               onChange={(event) => onChangeSpec({
-                labelX: event.target.value,
+                labelX: event.target.value.toString(),
               })}
             />
           </div>
@@ -141,7 +141,7 @@ export default function ConfigMenu(props) {
               placeholder="Y Axis label"
               name="yLabel"
               onChange={(event) => onChangeSpec({
-                labelY: event.target.value,
+                labelY: event.target.value.toString(),
               })}
             />
             <Subtitle>X-Axis</Subtitle>
@@ -158,7 +158,7 @@ export default function ConfigMenu(props) {
               placeholder="X Axis label"
               name="xLabel"
               onChange={(event) => onChangeSpec({
-                labelX: event.target.value,
+                labelX: event.target.value.toString(),
               })}
             />
           </div>
@@ -236,8 +236,9 @@ export default function ConfigMenu(props) {
         <label htmlFor="xDatasetMenu">Source dataset:</label>
         <DashSelect
           name="xDatasetMenu"
+          placeholder="Choose dataset..."
           value={visualisation.datasetId !== null ?
-            visualisation.datasetId.toString() : 'Choose dataset...'}
+            visualisation.datasetId.toString() : null}
           options={datasetOptions}
           onChange={props.onChangeSourceDataset}
         />

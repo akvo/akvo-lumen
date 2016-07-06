@@ -91,7 +91,7 @@ class Dashboard extends Component {
           const entityArray = Object.keys(dash.entities).map(key => dash.entities[key]);
           const hasVisualisations = entityArray.some(entity => entity.type === 'visualisation');
 
-          if (hasVisualisations && isEmpty(this.props.library.visualisations)) {
+          if (hasVisualisations && isEmpty(nextProps.library.visualisations)) {
             // The dashboard has at least 1 visualisation, and no visualisations are loaded
             return;
           }
@@ -108,7 +108,7 @@ class Dashboard extends Component {
           Object.keys(dash.entities).forEach(key => {
             const entity = dash.entities[key];
             if (entity.type === 'visualisation') {
-              this.onAddVisualisation(this.props.library.visualisations[key].datasetId);
+              this.onAddVisualisation(nextProps.library.visualisations[key].datasetId);
             }
           });
         }

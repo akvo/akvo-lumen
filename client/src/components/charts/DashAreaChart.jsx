@@ -1,5 +1,5 @@
 import React, { PropTypes } from 'react';
-import { AreaChart } from 'react-d3';
+import { AreaChart } from 'rd3';
 import * as chart from '../../utilities/chart';
 
 export default function DashAreaChart({ visualisation, datasets, width, height }) {

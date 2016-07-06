@@ -1,68 +1,26 @@
-import * as constants from '../constants/dashboard';
-import fetch from 'isomorphic-fetch';
-import headers from './headers';
+import { createAction } from 'redux-actions';
+import * as api from '../api';
 
-export function fetchDashboardsSuccess(dashboards) {
-  return {
-    type: constants.FETCH_DASHBOARDS_SUCCESS,
-    dashboards,
-  };
-}
+export const fetchDashboardsSuccess = createAction('FETCH_DASHBOARDS_SUCCESS');
 
-function createDashboardSuccess(dashboard) {
-  return {
-    type: constants.CREATE_DASHBOARD_SUCCESS,
-    dashboard,
-  };
-}
+/* Create a new dashboard */
+export const createDashboardRequest = createAction('CREATE_DASHBOARD_REQUEST');
+export const createDashboardFailure = createAction('CREATE_DASHBOARD_FAILURE');
+export const createDashboardSuccess = createAction('CREATE_DASHBOARD_SUCCESS');
 
-function createDashboardFailure() {
-  return {
-    type: constants.CREATE_DASHBOARD_FAILURE,
-  };
-}
-
-function createDashboardRequest(dashboard) {
+export function createDashboard(dashboard) {
   return (dispatch) => {
-    dispatch({
-      type: constants.CREATE_DASHBOARD_REQUEST,
-      dashboard,
-    });
-    fetch('/api/dashboards', {
-      method: 'POST',
-      headers: headers(),
-      body: JSON.stringify(dashboard),
-    })
-    .then(response => response.json())
+    dispatch(createDashboardRequest(dashboard));
+    api.post('/api/dashboards', dashboard)
     .then(dash => dispatch(createDashboardSuccess(dash)))
     .catch(err => dispatch(createDashboardFailure(err)));
   };
 }
 
-export function createDashboard(dashboard) {
-  return createDashboardRequest(dashboard);
-}
-
-function editDashboardRequest(id) {
-  return {
-    type: constants.EDIT_DASHBOARD_REQUEST,
-    id,
-  };
-}
-
-function editDashboardSuccess(dash) {
-  return {
-    type: constants.EDIT,
-    dashboard: dash,
-  };
-}
-
-function editDashboardFailure(id) {
-  return {
-    type: constants.EDIT_DASHBOARD_FAILURE,
-    id,
-  };
-}
+/* Edit an existing dashboard */
+export const editDashboardRequest = createAction('EDIT_DASHBOARD_REQUEST');
+export const editDashboardFailure = createAction('EDIT_DASHBOARD_FAILURE');
+export const editDashboardSuccess = createAction('EDIT_DASHBOARD_SUCCESS');
 
 export function saveDashboardChanges(dashboard) {
   const now = Date.now();
@@ -73,92 +31,36 @@ export function saveDashboardChanges(dashboard) {
 
   return (dispatch) => {
     dispatch(editDashboardRequest);
-    fetch(`/api/dashboards/${id}`, {
-      method: 'PUT',
-      headers: headers(),
-      body: JSON.stringify(dashboard),
-    })
-    .then(response => response.json())
-    .then((responseDash) => dispatch(editDashboardSuccess(responseDash)))
-    .catch(error => dispatch(editDashboardFailure(id, error)));
+    api.put(`/api/dashboards/${id}`, dashboard)
+    .then(responseDash => dispatch(editDashboardSuccess(responseDash)))
+    .catch(error => dispatch(editDashboardFailure(error)));
   };
 }
 
-function fetchDashboardSuccess(dashboard) {
-  return (dispatch) => {
-    dispatch({
-      type: constants.FETCH_DASHBOARD_SUCCESS,
-      dashboard,
-    });
-  };
-}
-
-function fetchDashboardFailure(id) {
-  return {
-    type: constants.FETCH_DASHBOARD_FAILURE,
-    id,
-  };
-}
-
-function fetchDashboardRequest(id) {
-  return {
-    type: constants.FETCH_DASHBOARD_REQUEST,
-    id,
-  };
-}
+/* Fetch a single dashboard */
+export const fetchDashboardRequest = createAction('FETCH_DASHBOARD_REQUEST');
+export const fetchDashboardFailure = createAction('FETCH_DASHBOARD_FAILURE');
+export const fetchDashboardSuccess = createAction('FETCH_DASHBOARD_SUCCESS');
 
 export function fetchDashboard(id) {
   return (dispatch) => {
     dispatch(fetchDashboardRequest(id));
-    fetch(`/api/dashboards/${id}`, {
-      method: 'GET',
-      headers: headers(),
-    })
-    .then(response => response.json())
+    api.get(`/api/dashboards/${id}`)
     .then(dashboard => dispatch(fetchDashboardSuccess(dashboard)))
-    .catch(err => dispatch(fetchDashboardFailure(id, err)));
+    .catch(err => dispatch(fetchDashboardFailure(err)));
   };
 }
 
-/* Delete dashboard actions */
-
-function deleteDashboardRequest(id) {
-  return {
-    type: constants.DELETE_DASHBOARD_REQUEST,
-    id,
-  };
-}
-
-/* Should only remove the dashboard from the redux store.
-   To delete a dashboard use deleteDashboard istead */
-export function removeDashboard(id) {
-  return {
-    type: constants.REMOVE_DASHBOARD,
-    id,
-  };
-}
-
-function deleteDashboardSuccess(id) {
-  return removeDashboard(id);
-}
-
-function deleteDashboardFailure(id, error) {
-  return {
-    type: constants.DELETE_DASHBOARD_FAILURE,
-    id,
-    error,
-  };
-}
+/* Delete a dashboard */
+export const deleteDashboardRequest = createAction('DELETE_DASHBOARD_REQUEST');
+export const deleteDashboardFailure = createAction('DELETE_DASHBOARD_FAILURE');
+export const deleteDashboardSuccess = createAction('DELETE_DASHBOARD_SUCCESS');
 
 export function deleteDashboard(id) {
   return (dispatch) => {
-    dispatch(deleteDashboardRequest);
-    fetch(`/api/dashboards/${id}`, {
-      method: 'DELETE',
-      headers: headers(),
-    })
-    .then(response => response.json())
+    dispatch(deleteDashboardRequest(id));
+    api.del(`/api/dashboards/${id}`)
     .then(() => dispatch(deleteDashboardSuccess(id)))
-    .catch(error => dispatch(deleteDashboardFailure(id, error)));
+    .catch(error => dispatch(deleteDashboardFailure(error)));
   };
 }
