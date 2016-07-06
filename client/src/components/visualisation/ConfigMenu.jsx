@@ -79,7 +79,7 @@ export default function ConfigMenu(props) {
               placeholder="Y Axis label"
               name="yLabel"
               onChange={(event) => onChangeSpec({
-                labelY: parseInt(event.target.value, 10),
+                labelY: event.target.value.toString(),
               })}
             />
             <Subtitle>X-Axis</Subtitle>
@@ -96,7 +96,7 @@ export default function ConfigMenu(props) {
               placeholder="X Axis label"
               name="xLabel"
               onChange={(event) => onChangeSpec({
-                labelX: parseInt(event.target.value, 10),
+                labelX: event.target.value.toString(),
               })}
             />
           </div>
@@ -121,7 +121,7 @@ export default function ConfigMenu(props) {
               placeholder="Y Axis label"
               name="yLabel"
               onChange={(event) => onChangeSpec({
-                labelY: event.target.value,
+                labelY: event.target.value.toString(),
               })}
             />
             <Subtitle>X-Axis</Subtitle>
@@ -130,7 +130,7 @@ export default function ConfigMenu(props) {
               placeholder="X Axis label"
               name="xLabel"
               onChange={(event) => onChangeSpec({
-                labelX: parseInt(event.target.value, 10),
+                labelX: event.target.value.toString(),
               })}
             />
           </div>
@@ -154,7 +154,7 @@ export default function ConfigMenu(props) {
               placeholder="Y Axis label"
               name="yLabel"
               onChange={(event) => onChangeSpec({
-                labelY: event.target.value,
+                labelY: event.target.value.toString(),
               })}
             />
             <Subtitle>X-Axis</Subtitle>
@@ -171,7 +171,7 @@ export default function ConfigMenu(props) {
               placeholder="X Axis label"
               name="xLabel"
               onChange={(event) => onChangeSpec({
-                labelX: event.target.value,
+                labelX: event.target.value.toString(),
               })}
             />
           </div>
