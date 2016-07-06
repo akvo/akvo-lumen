@@ -57,7 +57,6 @@ export default class ColumnHeader extends Component {
     });
   }
 
-  // TODO: move column.get(...) to domain/dataset.js
   render() {
     const { column } = this.props;
     return (
@@ -104,12 +103,6 @@ export default class ColumnHeader extends Component {
 
 ColumnHeader.propTypes = {
   column: PropTypes.object.isRequired,
-/*  column: PropTypes.shape({
-    type: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
-    sort: PropTypes.number,
-    direction: PropTypes.oneOf(['ASC', 'DESC']),
-  }), */
   onToggleDataTypeContextMenu: PropTypes.func.isRequired,
   onToggleColumnContextMenu: PropTypes.func.isRequired,
   onRemoveSort: PropTypes.func.isRequired,

@@ -9,8 +9,6 @@ import ColumnContextMenu from './context-menus/ColumnContextMenu';
 
 require('../../styles/DatasetTable.scss');
 
-// TODO move column.get and rows.get to domain/dataset.js?
-
 function formatCellValue(type, value) {
   switch (type) {
     case 'date':
