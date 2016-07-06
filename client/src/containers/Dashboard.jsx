@@ -27,14 +27,16 @@ const getLayoutObjectFromArray = arr => {
   return object;
 };
 
-const getDashboardFromState = state => (
+/* Get a pure representation of a dashboard from the container state */
+const getDashboardFromState = (state, isForEditor) => (
   {
     type: state.type,
     title: state.name,
     /* Temporary shim until we standardize on "name" or "title" for entities */
     name: state.name,
     entities: state.entities,
-    layout: getLayoutObjectFromArray(state.layout),
+    /* The editor takes an array for layout, but for storage we use an id-keyed object */
+    layout: isForEditor ? state.layout : getLayoutObjectFromArray(state.layout),
     id: state.id,
     created: state.created,
     modified: state.modified,
@@ -55,7 +57,9 @@ class Dashboard extends Component {
       modified: null,
       isUnsavedChanges: null,
       isShareModalVisible: false,
+      requestedDatasetIds: [],
     };
+    this.loadDashboardIntoState = this.loadDashboardIntoState.bind(this);
     this.onAddVisualisation = this.onAddVisualisation.bind(this);
     this.updateLayout = this.updateLayout.bind(this);
     this.updateEntities = this.updateEntities.bind(this);
@@ -67,59 +71,61 @@ class Dashboard extends Component {
 
   componentWillMount() {
     const isEditingExistingDashboard = getEditingStatus(this.props.location);
+    const isLibraryLoaded = !isEmpty(this.props.library.datasets);
 
-    if (isEmpty(this.props.library.datasets)) {
+    if (!isLibraryLoaded) {
       this.props.dispatch(fetchLibrary());
     }
 
     if (isEditingExistingDashboard) {
       const dashboardId = this.props.params.dashboardId;
+      const existingDashboardLoaded =
+        isLibraryLoaded && !isEmpty(this.props.library.dashboards[dashboardId].layout);
 
-      this.props.dispatch(actions.fetchDashboard(dashboardId));
+      if (!existingDashboardLoaded) {
+        this.props.dispatch(actions.fetchDashboard(dashboardId));
+      } else {
+        this.loadDashboardIntoState(this.props.library.dashboards[dashboardId], this.props.library);
+      }
     }
   }
 
   componentWillReceiveProps(nextProps) {
-    if (this.props.params.dashboardId != null) {
-      const dashboardIsEmpty = Boolean(Object.keys(this.state.entities).length === 0 &&
-        this.state.layout.length === 0);
-      if (dashboardIsEmpty) {
-        const dash = nextProps.library.dashboards[nextProps.params.dashboardId];
+    const isEditingExistingDashboard = getEditingStatus(this.props.location);
+    const dashboardAlreadyLoaded = this.state.layout.length !== 0;
 
-        // Test for both the dashboard and the layout to ensure the dashboard is fully loaded
-        if (dash && dash.layout) {
-          const entityArray = Object.keys(dash.entities).map(key => dash.entities[key]);
-          const hasVisualisations = entityArray.some(entity => entity.type === 'visualisation');
+    if (isEditingExistingDashboard && !dashboardAlreadyLoaded) {
+      /* We need to load a dashboard, and we haven't loaded it yet. Check if nextProps has both i)
+      /* the dashboard and ii) the visualisations the dashboard contains, then load the dashboard
+      /* editor if both these conditions are true. */
 
-          if (hasVisualisations && isEmpty(nextProps.library.visualisations)) {
-            // The dashboard has at least 1 visualisation, and no visualisations are loaded
-            return;
-          }
+      const dash = nextProps.library.dashboards[nextProps.params.dashboardId];
+      const haveDashboardData = Boolean(dash && dash.layout);
 
-          this.setState({
-            id: dash.id,
-            name: dash.title,
-            entities: dash.entities,
-            layout: dash.layout ? Object.keys(dash.layout).map(key => dash.layout[key]) : null,
-            created: dash.created,
-            modified: dash.modified,
-          });
+      if (haveDashboardData) {
+        const dashboardEntities = Object.keys(dash.entities).map(key => dash.entities[key]);
+        const dashboardHasVisualisations =
+          dashboardEntities.some(entity => entity.type === 'visualisation');
+        const libraryHasVisualisations = !isEmpty(nextProps.library.visualisations);
 
-          Object.keys(dash.entities).forEach(key => {
-            const entity = dash.entities[key];
-            if (entity.type === 'visualisation') {
-              this.onAddVisualisation(nextProps.library.visualisations[key].datasetId);
-            }
-          });
+        if (dashboardHasVisualisations && !libraryHasVisualisations) {
+          /* We don't yet have the visualisations necessary to display this dashboard. Do nothing.
+          /* When the library API call returns and the visualisaitons are loaded,
+          /* componentWillReceiveProps will be called again. */
+          return;
         }
+
+        this.loadDashboardIntoState(dash, nextProps.library);
       }
     }
   }
 
   onSave() {
     const { dispatch } = this.props;
-    const dashboard = getDashboardFromState(this.state);
-    if (this.state.id) {
+    const dashboard = getDashboardFromState(this.state, false);
+    const isEditingExistingDashboard = getEditingStatus(this.props.location);
+
+    if (isEditingExistingDashboard) {
       dispatch(actions.saveDashboardChanges(dashboard));
     } else {
       dispatch(actions.createDashboard(dashboard));
@@ -128,7 +134,16 @@ class Dashboard extends Component {
   }
 
   onAddVisualisation(datasetId) {
-    if (!this.props.library.datasets[datasetId].columns) {
+    const datasetLoaded = this.props.library.datasets[datasetId].columns;
+    const datasetRequested = this.state.requestedDatasetIds.some(id => id === datasetId);
+
+    if (!datasetLoaded && !datasetRequested) {
+      const newRequestedDatasetIds = this.state.requestedDatasetIds.slice(0);
+
+      newRequestedDatasetIds.push(datasetId);
+      this.setState({
+        requestedDatasetIds: newRequestedDatasetIds,
+      });
       this.props.dispatch(fetchDataset(datasetId));
     }
   }
@@ -161,16 +176,48 @@ class Dashboard extends Component {
     });
   }
 
+  loadDashboardIntoState(dash, library) {
+    /* Put the dashboard into component state so it is fed to the DashboardEditor */
+    this.setState({
+      id: dash.id,
+      name: dash.title,
+      entities: dash.entities,
+      layout: Object.keys(dash.layout).map(key => dash.layout[key]),
+      created: dash.created,
+      modified: dash.modified,
+    });
+
+    /* Load each unique dataset referenced by visualisations in the dashboard. Note - Even though
+    /* onAddVisualisation also checks to see if a datasetId has already been requested, setState is
+    /* not synchronous and is too slow here, hence the extra check */
+    const requestedDatasetIds = this.state.requestedDatasetIds.slice(0);
+
+    Object.keys(dash.entities).forEach(key => {
+      const entity = dash.entities[key];
+      const isVisualisation = entity.type === 'visualisation';
+
+      if (isVisualisation) {
+        const datasetId = library.visualisations[key].datasetId;
+        const alreadyProcessed = requestedDatasetIds.some(id => id === datasetId);
+
+        if (!alreadyProcessed) {
+          requestedDatasetIds.push(datasetId);
+          this.onAddVisualisation(datasetId);
+        }
+      }
+    });
+  }
+
   render() {
     return (
       <div className="Dashboard">
         <DashboardHeader
-          dashboard={getDashboardFromState(this.state)}
+          dashboard={getDashboardFromState(this.state, false)}
           isUnsavedChanges={this.state.isUnsavedChanges}
           onDashboardAction={this.handleDashboardAction}
         />
         <DashboardEditor
-          dashboard={this.state}
+          dashboard={getDashboardFromState(this.state, true)}
           datasets={this.props.library.datasets}
           visualisations={this.props.library.visualisations}
           onAddVisualisation={this.onAddVisualisation}
@@ -182,7 +229,7 @@ class Dashboard extends Component {
         <ShareEntity
           isOpen={this.state.isShareModalVisible}
           onClose={this.toggleShareDashboard}
-          entity={getDashboardFromState(this.state)}
+          entity={getDashboardFromState(this.state, false)}
         />
       </div>
     );
