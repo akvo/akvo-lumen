@@ -67,4 +67,5 @@
       (migrate/migrate conn)
       (f)
       (migrate/rollback conn [:all])
-      (finally (stop)))))
+      (finally
+        (stop)))))

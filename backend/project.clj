@@ -4,7 +4,7 @@
   :license {:name "GNU Affero General Public License 3.0"
             :url  "https://www.gnu.org/licenses/agpl-3.0.html"}
   :min-lein-version "2.0.0"
-  :dependencies [[cheshire "5.6.2"]
+  :dependencies [[cheshire "5.6.3"]
                  [clj-http "3.1.0"]
                  [clj-time "0.12.0"]
                  [com.ibm.icu/icu4j "57.1"]
@@ -22,11 +22,11 @@
                  [org.clojure/core.match "0.3.0-alpha4"]
                  [org.clojure/data.csv "0.1.3"]
                  [org.clojure/java.jdbc "0.6.1"]
-                 [org.immutant/scheduling "2.1.4" :exclusions [ch.qos.logback/logback-classic]]
-                 [org.immutant/web "2.1.4"]
-                 [org.postgresql/postgresql "9.4.1208"]
+                 [org.immutant/scheduling "2.1.5" :exclusions [ch.qos.logback/logback-classic]]
+                 [org.immutant/web "2.1.5"]
+                 [org.postgresql/postgresql "9.4.1209"]
                  [org.slf4j/slf4j-nop "1.7.21"]
-                 [ragtime "0.6.0"]
+                 [ragtime "0.6.1"]
                  [ring "1.5.0"]
                  [ring/ring-defaults "0.2.1"]
                  [ring/ring-json "0.4.0"]]
