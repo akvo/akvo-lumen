@@ -1,59 +1,52 @@
+import { handleActions } from 'redux-actions';
 import update from 'react-addons-update';
-import * as constants from '../constants/dashboard';
+import * as actions from '../actions/dashboard';
 
 export const initialState = {};
 
-function createDashboard(state, dashboardData) {
-  const id = dashboardData.id;
+function createDashboard(state, { payload }) {
+  const id = payload.id;
   return update(state, {
-    [id]: { $set: dashboardData },
+    [id]: { $set: payload },
   });
 }
 
-function editDashboard(state, dashboardData) {
-  const id = dashboardData.id;
+function editDashboard(state, { payload }) {
+  const id = payload.id;
   return Object.assign({}, state, {
-    [id]: dashboardData,
+    [id]: payload,
   });
 }
 
-function saveDashboards(state, dashboards) {
-  return dashboards.reduce((result, dash) => {
-    const id = dash.id;
+function saveDashboards(state, { payload }) {
+  return payload.reduce((result, dashboard) => {
+    const id = dashboard.id;
     if (state[id] == null) {
       return update(result, {
-        [id]: { $set: update(dash, { $merge: { type: 'dashboard', status: 'OK' } }) },
+        [id]: { $set: update(dashboard, { $merge: { type: 'dashboard', status: 'OK' } }) },
       });
     }
     return result;
   }, state);
 }
 
-function saveDashboard(state, dash) {
-  const id = dash.id;
+function saveDashboard(state, { payload }) {
+  const id = payload.id;
   return Object.assign({}, state, {
-    [id]: dash,
+    [id]: payload,
   });
 }
 
-function removeDashboard(state, id) {
+function removeDashboard(state, { payload }) {
   const newState = Object.assign({}, state);
-  delete newState[id];
+  delete newState[payload];
   return newState;
 }
 
-export default function dashboard(state = initialState, action) {
-  switch (action.type) {
-    case constants.CREATE_DASHBOARD_SUCCESS:
-      return createDashboard(state, action.dashboard);
-    case constants.FETCH_DASHBOARDS_SUCCESS:
-      return saveDashboards(state, action.dashboards);
-    case constants.FETCH_DASHBOARD_SUCCESS:
-      return saveDashboard(state, action.dashboard);
-    case constants.EDIT:
-      return editDashboard(state, action.dashboard);
-    case constants.REMOVE_DASHBOARD:
-      return removeDashboard(state, action.id);
-    default: return state;
-  }
-}
+export default handleActions({
+  [actions.createDashboardSuccess]: createDashboard,
+  [actions.fetchDashboardsSuccess]: saveDashboards,
+  [actions.fetchDashboardSuccess]: saveDashboard,
+  [actions.editDashboardSuccess]: editDashboard,
+  [actions.deleteDashboardSuccess]: removeDashboard,
+}, initialState);
