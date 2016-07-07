@@ -84,6 +84,14 @@ export default class DashboardEditor extends Component {
     this.handleSave = this.handleSave.bind(this);
   }
 
+  componentWillMount() {
+    if (this.props.dashboard.layout) {
+      this.setState({
+        propLayout: this.props.dashboard.layout,
+      });
+    }
+  }
+
   componentDidMount() {
     this.handleResize();
     window.addEventListener('resize', this.handleResize);
