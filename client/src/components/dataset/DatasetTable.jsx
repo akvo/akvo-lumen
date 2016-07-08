@@ -117,7 +117,7 @@ export default class DatasetTable extends Component {
 
   handleDataTypeContextMenuClicked({ column, dataTypeOptions, newColumnType }) {
     this.setState({ activeDataTypeContextMenu: null });
-    if (newColumnType !== column.type) {
+    if (newColumnType !== column.get('type')) {
       this.showSidebar({
         type: 'edit',
         column,

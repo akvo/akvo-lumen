@@ -1,5 +1,6 @@
 import React, { PropTypes } from 'react';
 import Modal from 'react-modal';
+import { getTitle, getId } from '../../domain/entity';
 
 require('../../styles/DashboardModal.scss');
 require('../../styles/DeleteConfirmationModal.scss');
@@ -71,7 +72,7 @@ export default function DeleteConfirmationModal({
     >
       <div className="DashboardModal">
         <div className="DeleteConfirmationModal">
-          <h2 className="modalTitle">{`Delete ${entityType} ${entity.name || entity.title}`}</h2>
+          <h2 className="modalTitle">{`Delete ${entityType} ${getTitle(entity)}`}</h2>
           <div
             className="close clickable"
             onClick={onCancel}
@@ -81,7 +82,7 @@ export default function DeleteConfirmationModal({
           <div className="contents">
             {entityType === 'dataset' ?
               <VisualisationsList
-                datasetId={entity.id}
+                datasetId={getId(entity)}
                 visualisations={library.visualisations}
               /> : null
             }
