@@ -42,7 +42,7 @@ export default class Filter extends Component {
 
   handleChangeExpressionOperator(expressionOperator) {
     const { transformation } = this.state;
-    const expressionValue = transformation.getIn(['args', 'expression', expressionOperator]);
+    const expressionValue = transformation.getIn(['args', 'expression']).valueSeq().first();
     this.setState({
       transformation: transformation.setIn(
         ['args', 'expression'], Immutable.Map({ [expressionOperator]: expressionValue })),

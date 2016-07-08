@@ -276,7 +276,7 @@ export function transform(datasetId, transformation) {
         dataset: nextDataset,
       });
     } catch (e) {
-      if (transformation.onError === 'fail') {
+      if (transformation.get('onError') === 'fail') {
         dispatch(showNotification('error', `Transformation aborted: ${e.message}`));
       } else {
         throw e;

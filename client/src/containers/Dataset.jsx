@@ -68,7 +68,7 @@ class Dataset extends Component {
 }
 
 Dataset.propTypes = {
-  dataset: PropTypes.object.isRequired,
+  dataset: PropTypes.object,
   router: PropTypes.object.isRequired,
   route: PropTypes.object.isRequired,
   params: PropTypes.object.isRequired,

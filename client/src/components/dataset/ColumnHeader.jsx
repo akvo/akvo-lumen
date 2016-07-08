@@ -1,4 +1,5 @@
 import React, { Component, PropTypes } from 'react';
+import Immutable from 'immutable';
 
 require('../../styles/ColumnHeader.scss');
 
@@ -50,11 +51,11 @@ export default class ColumnHeader extends Component {
 
   handleRemoveSort(event, column) {
     event.stopPropagation();
-    this.props.onRemoveSort({
+    this.props.onRemoveSort(Immutable.fromJS({
       op: 'core/remove-sort',
-      args: { columnName: column.columnName },
+      args: { columnName: column.get('columnName') },
       onError: 'fail',
-    });
+    }));
   }
 
   render() {

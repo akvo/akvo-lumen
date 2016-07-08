@@ -48,7 +48,7 @@ function DefaultValueInput({ defaultValue, onChange, newType }) {
       </label>
       <input
         type="text"
-        value={defaultValue}
+        value={defaultValue || ''}
         onChange={(event) => {
           const value = event.target.value;
           if (newType === 'date') {
@@ -136,11 +136,14 @@ export default class ChangeDataType extends Component {
 
   handleChangeErrorStrategy(errorStrategy) {
     const transformation = this.state.transformation;
+    const onError = errorStrategy === 'empty-cell' ? 'default-value' : errorStrategy;
     const defaultValue = errorStrategy === 'empty-cell' ?
       null : transformation.getIn(['args', 'defaultValue']);
     this.setState({
       errorStrategy,
-      transformation: transformation.setIn(['args', 'defaultValue'], defaultValue),
+      transformation: transformation
+        .set('onError', onError)
+        .setIn(['args', 'defaultValue'], defaultValue),
     });
   }
 
