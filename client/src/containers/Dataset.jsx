@@ -4,6 +4,8 @@ import { withRouter } from 'react-router';
 import DatasetHeader from '../components/dataset/DatasetHeader';
 import DatasetTable from '../components/dataset/DatasetTable';
 import { showModal } from '../actions/activeModal';
+import { getId, getTitle } from '../domain/entity';
+import { getTransformations, getRows, getColumns } from '../domain/dataset';
 import {
   fetchDataset,
   transform,
@@ -29,14 +31,14 @@ class Dataset extends Component {
 
   willLeaveDatasets() {
     const { dispatch, dataset } = this.props;
-    if (dataset.history != null && dataset.history.length > 0) {
-      dispatch(sendTransformationLog(dataset.id, dataset.transformations));
+    if (dataset.get('history') != null && dataset.get('history').size > 0) {
+      dispatch(sendTransformationLog(getId(dataset), dataset.get('transformations')));
     }
   }
 
   handleShowDatasetSettings() {
     this.props.dispatch(showModal('dataset-settings', {
-      id: this.props.dataset.id,
+      id: getId(this.props.dataset),
     }));
   }
 
@@ -49,31 +51,24 @@ class Dataset extends Component {
       <div className="Dataset">
         <DatasetHeader
           onShowDatasetSettings={this.handleShowDatasetSettings}
-          name={dataset.name}
-          id={dataset.id}
+          name={getTitle(dataset)}
+          id={getId(dataset)}
         />
-        {dataset.rows != null ?
+        {getRows(dataset) != null &&
           <DatasetTable
-            columns={dataset.columns}
-            rows={dataset.rows}
-            transformations={dataset.transformations}
-            onTransform={(transformation) => dispatch(transform(dataset.id, transformation))}
-            onUndoTransformation={() => dispatch(undoTransformation(dataset.id))}
-          />
-          :
-          <div>loading...</div>}
+            columns={getColumns(dataset)}
+            rows={getRows(dataset)}
+            transformations={getTransformations(dataset)}
+            onTransform={(transformation) => dispatch(transform(getId(dataset), transformation))}
+            onUndoTransformation={() => dispatch(undoTransformation(getId(dataset)))}
+          />}
       </div>
     );
   }
 }
 
 Dataset.propTypes = {
-  dataset: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    name: PropTypes.string.isRequired,
-    columns: PropTypes.array,
-    rows: PropTypes.array,
-  }),
+  dataset: PropTypes.object,
   router: PropTypes.object.isRequired,
   route: PropTypes.object.isRequired,
   params: PropTypes.object.isRequired,

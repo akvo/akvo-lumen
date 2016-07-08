@@ -1,4 +1,5 @@
 import React, { Component, PropTypes } from 'react';
+import Immutable from 'immutable';
 
 require('../../styles/ColumnHeader.scss');
 
@@ -42,7 +43,6 @@ export default class ColumnHeader extends Component {
       top: verticalOffset,
       width,
     };
-
     this.props.onToggleColumnContextMenu({
       dimensions,
       column: this.props.column,
@@ -51,11 +51,11 @@ export default class ColumnHeader extends Component {
 
   handleRemoveSort(event, column) {
     event.stopPropagation();
-    this.props.onRemoveSort({
+    this.props.onRemoveSort(Immutable.fromJS({
       op: 'core/remove-sort',
-      args: { columnName: column.columnName },
+      args: { columnName: column.get('columnName') },
       onError: 'fail',
-    });
+    }));
   }
 
   render() {
@@ -67,11 +67,11 @@ export default class ColumnHeader extends Component {
         ref="columnHeaderContainer"
         onClick={this.handleColumnMenuClick}
       >
-        {column.sort != null ?
+        {column.get('sort') != null ?
           <div
             className="sortLabel"
           >
-            Sort: {column.direction === 'ASC' ? 'Ascending' : 'Descending'}
+            Sort: {column.get('direction') === 'ASC' ? 'Ascending' : 'Descending'}
             <span
               className="cancelSort"
               onClick={(event) => this.handleRemoveSort(event, column)}
@@ -89,13 +89,13 @@ export default class ColumnHeader extends Component {
             onClick={this.handleDataTypeMenuClick}
             ref="columnTypeLabel"
           >
-            {column.type}
+            {column.get('type')}
           </span>
         </span>
         <span
           className="columnTitleText"
         >
-          {column.title}
+          {column.get('title')}
         </span>
       </div>
     );
@@ -103,12 +103,7 @@ export default class ColumnHeader extends Component {
 }
 
 ColumnHeader.propTypes = {
-  column: PropTypes.shape({
-    type: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
-    sort: PropTypes.number,
-    direction: PropTypes.oneOf(['ASC', 'DESC']),
-  }),
+  column: PropTypes.object.isRequired,
   onToggleDataTypeContextMenu: PropTypes.func.isRequired,
   onToggleColumnContextMenu: PropTypes.func.isRequired,
   onRemoveSort: PropTypes.func.isRequired,

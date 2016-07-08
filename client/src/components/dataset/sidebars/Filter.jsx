@@ -1,11 +1,11 @@
 import React, { Component, PropTypes } from 'react';
+import Immutable from 'immutable';
 import DashSelect from '../../common/DashSelect';
 import SidebarHeader from './SidebarHeader';
 import SidebarControls from './SidebarControls';
 
 function getExpressionOperatorAndValue(expression) {
-  const expressionOperator = Object.keys(expression)[0];
-  return [expressionOperator, expression[expressionOperator]];
+  return expression.entrySeq().first();
 }
 
 export default class Filter extends Component {
@@ -18,42 +18,42 @@ export default class Filter extends Component {
 
   componentWillMount() {
     this.setState({
-      op: 'core/filter-column',
-      args: {
-        columnName: this.props.column.columnName,
-        expression: { is: '' },
-      },
-      onError: 'fail',
+      transformation: Immutable.fromJS({
+        op: 'core/filter-column',
+        args: {
+          columnName: this.props.column.get('columnName'),
+          expression: { is: '' },
+        },
+        onError: 'fail',
+      }),
     });
   }
 
   handleChangeExpressionValue(expressionValue) {
-    const { args } = this.state;
-    const [currentExpressionOperator] = getExpressionOperatorAndValue(args.expression);
-    const newArgs = Object.assign({}, args, {
-      expression: {
-        [currentExpressionOperator]: expressionValue,
-      },
+    const { transformation } = this.state;
+    const expression = transformation.getIn(['args', 'expression']);
+    const expressionOperator = expression.keySeq().first();
+    this.setState({
+      transformation: transformation.setIn(
+        ['args', 'expression', expressionOperator], expressionValue
+      ),
     });
-    this.setState(Object.assign({}, this.state, { args: newArgs }));
   }
 
   handleChangeExpressionOperator(expressionOperator) {
-    const { args } = this.state;
-    const currentValue = getExpressionOperatorAndValue(args.expression)[1];
-    const newArgs = Object.assign({}, args, {
-      expression: {
-        [expressionOperator]: currentValue,
-      },
+    const { transformation } = this.state;
+    const expressionValue = transformation.getIn(['args', 'expression']).valueSeq().first();
+    this.setState({
+      transformation: transformation.setIn(
+        ['args', 'expression'], Immutable.Map({ [expressionOperator]: expressionValue })),
     });
-    this.setState(Object.assign({}, this.state, { args: newArgs }));
   }
 
   render() {
     const { onClose, onApply, column } = this.props;
-    const { args } = this.state;
+    const { transformation } = this.state;
     const [expressionOperator, expressionValue] =
-      getExpressionOperatorAndValue(args.expression);
+      getExpressionOperatorAndValue(transformation.getIn(['args', 'expression']));
     return (
       <div
         className="DataTableSidebar"
@@ -63,7 +63,7 @@ export default class Filter extends Component {
         }}
       >
         <SidebarHeader onClose={onClose}>
-          Filter column {column.title}
+          Filter column {column.get('title')}
         </SidebarHeader>
         <div className="inputs">
           <div className="inputGroup">
@@ -105,7 +105,7 @@ export default class Filter extends Component {
         </div>
         <SidebarControls
           positiveButtonText="Filter"
-          onApply={() => onApply(this.state)}
+          onApply={() => onApply(transformation)}
           onClose={onClose}
         />
       </div>
@@ -116,7 +116,5 @@ export default class Filter extends Component {
 Filter.propTypes = {
   onClose: PropTypes.func.isRequired,
   onApply: PropTypes.func.isRequired,
-  column: PropTypes.shape({
-    columnName: PropTypes.string.isRequired,
-  }),
+  column: PropTypes.object.isRequired,
 };

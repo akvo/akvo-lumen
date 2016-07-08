@@ -57,7 +57,7 @@ export default class DatasetTable extends Component {
     const { sidebarProps } = this.state;
     if (sidebarProps != null &&
       sidebarProps.column &&
-      sidebarProps.column.title === columnTitle) {
+      sidebarProps.column.get('title') === columnTitle) {
       return 'sidebarTargetingColumn';
     }
     return '';
@@ -67,7 +67,7 @@ export default class DatasetTable extends Component {
     const { activeDataTypeContextMenu } = this.state;
 
     if (activeDataTypeContextMenu != null &&
-      column.title === activeDataTypeContextMenu.column.title) {
+      column.get('title') === activeDataTypeContextMenu.column.get('title')) {
       this.setState({ activeDataTypeContextMenu: null });
     } else {
       this.setState({
@@ -82,7 +82,8 @@ export default class DatasetTable extends Component {
 
   handleToggleColumnContextMenu({ column, dimensions }) {
     const { activeColumnContextMenu } = this.state;
-    if (activeColumnContextMenu != null && column.title === activeColumnContextMenu.column.title) {
+    if (activeColumnContextMenu != null &&
+      column.get('title') === activeColumnContextMenu.column.get('title')) {
       this.setState({ activeColumnContextMenu: null });
     } else {
       this.setState({
@@ -116,7 +117,7 @@ export default class DatasetTable extends Component {
 
   handleDataTypeContextMenuClicked({ column, dataTypeOptions, newColumnType }) {
     this.setState({ activeDataTypeContextMenu: null });
-    if (newColumnType !== column.type) {
+    if (newColumnType !== column.get('type')) {
       this.showSidebar({
         type: 'edit',
         column,
@@ -133,7 +134,7 @@ export default class DatasetTable extends Component {
 
   handleColumnContextMenuClicked({ column, action }) {
     this.setState({ activeColumnContextMenu: null });
-    switch (action.op) {
+    switch (action.get('op')) {
       case 'core/filter-column':
         this.showSidebar({
           type: 'filter',
@@ -206,26 +207,29 @@ export default class DatasetTable extends Component {
           onToggleDataTypeContextMenu={this.handleToggleDataTypeContextMenu}
           onToggleColumnContextMenu={this.handleToggleColumnContextMenu}
           columnMenuActive={activeColumnContextMenu != null &&
-            activeColumnContextMenu.column.title === column.title}
+            activeColumnContextMenu.column.get('title') === column.get('title')}
           onRemoveSort={(transformation) => this.props.onTransform(transformation)}
         />
       );
       return (
         <Column
-          cellClassName={this.getCellClassName(column.title)}
+          cellClassName={this.getCellClassName(column.get('title'))}
           key={index}
           header={columnHeader}
-          cell={props => <Cell>{formatCellValue(column.type, rows[props.rowIndex][index])}</Cell>}
+          cell={props => (
+            <Cell>
+              {formatCellValue(column.get('type'), rows.getIn([props.rowIndex, index]))}
+            </Cell>
+          )}
           width={200}
         />
       );
     });
-
     return (
       <div className="DatasetTable">
         <DatasetControls
           columns={columns}
-          rowsCount={rows.length}
+          rowsCount={rows.size}
           onToggleTransformationLog={this.handleToggleTransformationLog}
           onClickMenuItem={() => { throw new Error('Not yet implemented'); }}
         />
@@ -262,7 +266,7 @@ export default class DatasetTable extends Component {
             <Table
               headerHeight={60}
               rowHeight={30}
-              rowsCount={rows.length}
+              rowsCount={rows.size}
               width={width}
               height={height}
               onScrollStart={() => this.handleScroll()}
@@ -277,9 +281,9 @@ export default class DatasetTable extends Component {
 }
 
 DatasetTable.propTypes = {
-  columns: PropTypes.array.isRequired,
-  rows: PropTypes.array.isRequired,
-  transformations: PropTypes.array,
+  columns: PropTypes.object.isRequired,
+  rows: PropTypes.object.isRequired,
+  transformations: PropTypes.object,
   onTransform: PropTypes.func.isRequired,
   onUndoTransformation: PropTypes.func.isRequired,
 };

@@ -1,5 +1,4 @@
-import cloneDeep from 'lodash/cloneDeep';
-import { columnIndex } from '../../utilities/dataset';
+import { columnIndex } from '../../domain/dataset';
 
 // http://stackoverflow.com/a/196991/24946
 function toTitleCase(s) {
@@ -34,10 +33,14 @@ const transforms = {
   'core/trim-doublespace': trimDoublespace,
 };
 
-export default function textTransform(dataset, { op, args }) {
-  const { columnName } = args;
-  const colIndex = columnIndex(columnName, dataset.columns);
-  const colType = dataset.columns[colIndex].type;
+export default function textTransform(dataset, transformation) {
+  const op = transformation.get('op');
+  const args = transformation.get('args');
+  const columnName = args.get('columnName');
+  const columns = dataset.get('columns');
+  const rows = dataset.get('rows');
+  const colIndex = columnIndex(columnName, columns);
+  const colType = columns.getIn([colIndex, 'type']);
 
   if (colType !== 'text') {
     throw new Error(`Can't transform column of type ${colType} with ${op}`);
@@ -45,12 +48,10 @@ export default function textTransform(dataset, { op, args }) {
 
   const transform = transforms[op];
 
-  const ds = cloneDeep(dataset);
+  const newRows = rows.map(row => {
+    const val = row.get(colIndex);
+    return row.set(colIndex, val == null ? null : transform(val));
+  });
 
-  for (let rowIndex = 0; rowIndex < ds.rows.length; rowIndex++) {
-    const val = ds.rows[rowIndex][colIndex];
-    ds.rows[rowIndex][colIndex] = val == null ? null : transform(val);
-  }
-
-  return ds;
+  return dataset.set('rows', newRows);
 }

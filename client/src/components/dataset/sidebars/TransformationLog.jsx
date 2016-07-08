@@ -1,11 +1,16 @@
 import React, { PropTypes } from 'react';
+import Immutable from 'immutable';
 import SidebarHeader from './SidebarHeader';
 import SidebarControls from './SidebarControls';
-import { columnTitle } from '../../../utilities/dataset';
+import { columnTitle } from '../../../domain/dataset';
 
 
-function transformationDescription({ op, args }, columns) {
-  const { columnName, newType } = args;
+function transformationDescription(transformation, columns) {
+  const op = transformation.get('op');
+  const columnName = transformation.getIn(['args', 'columnName']);
+  const newType = transformation.getIn(['args', 'newType']);
+  const sortDirection = transformation.getIn(['args', 'sortDirection']);
+
   switch (op) {
     case 'core/to-lowercase':
       return `${columnTitle(columnName, columns)} to lowercase`;
@@ -20,7 +25,7 @@ function transformationDescription({ op, args }, columns) {
     case 'core/change-datatype':
       return `${columnTitle(columnName, columns)} datatype to ${newType}`;
     case 'core/sort-column':
-      return `${columnTitle(columnName, columns)} sorted ${args.sortDirection}`;
+      return `${columnTitle(columnName, columns)} sorted ${sortDirection}`;
     default:
       return op;
   }
@@ -32,10 +37,10 @@ function TransformationListItem({ transformation, columns }) {
 
 TransformationListItem.propTypes = {
   transformation: PropTypes.object.isRequired,
-  columns: PropTypes.array.isRequired,
+  columns: PropTypes.object.isRequired,
 };
 
-function TransformationList({ transformations = [], columns }) {
+function TransformationList({ transformations, columns }) {
   return (
     <div
       className="TransformationList"
@@ -55,11 +60,16 @@ function TransformationList({ transformations = [], columns }) {
 }
 
 TransformationList.propTypes = {
-  transformations: PropTypes.array,
-  columns: PropTypes.array.isRequired,
+  transformations: PropTypes.object.isRequired,
+  columns: PropTypes.object.isRequired,
 };
 
-export default function TransformationLog({ onClose, onUndo, transformations = [], columns }) {
+export default function TransformationLog({
+  onClose,
+  onUndo,
+  transformations = Immutable.List(),
+  columns,
+}) {
   return (
     <div
       className="DataTableSidebar"
@@ -87,6 +97,6 @@ export default function TransformationLog({ onClose, onUndo, transformations = [
 TransformationLog.propTypes = {
   onClose: PropTypes.func.isRequired,
   onUndo: PropTypes.func.isRequired,
-  columns: PropTypes.array.isRequired,
-  transformations: PropTypes.array,
+  columns: PropTypes.object.isRequired,
+  transformations: PropTypes.object,
 };
