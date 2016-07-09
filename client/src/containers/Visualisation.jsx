@@ -2,8 +2,6 @@ import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import update from 'react-addons-update';
 import isEmpty from 'lodash/isEmpty';
-import VisualisationHeader from '../components/visualisation/VisualisationHeader';
-import VisualisationEditor from '../components/visualisation/VisualisationEditor';
 import ShareEntity from '../components/modals/ShareEntity';
 import * as actions from '../actions/visualisation';
 import { fetchDataset } from '../actions/dataset';
@@ -36,6 +34,7 @@ class Visualisation extends Component {
           maxY: null,
         },
       },
+      asyncComponents: null,
     };
 
     this.onSave = this.onSave.bind(this);
@@ -77,6 +76,27 @@ class Visualisation extends Component {
         });
       }
     }
+  }
+
+  componentDidMount() {
+    require.ensure(['../components/charts/DashChart'], () => {
+      require.ensure([], () => {
+        /* eslint-disable global-require */
+        const VisualisationHeader =
+          require('../components/visualisation/VisualisationHeader').default;
+        const VisualisationEditor =
+          require('../components/visualisation/VisualisationEditor').default;
+        require('../styles/Visualisation.scss');
+        /* eslint-enable global-require */
+
+        this.setState({
+          asyncComponents: {
+            VisualisationHeader,
+            VisualisationEditor,
+          },
+        });
+      }, 'Visualisation');
+    }, 'DashChartPreload');
   }
 
   componentWillReceiveProps() {
@@ -153,9 +173,11 @@ class Visualisation extends Component {
   }
 
   render() {
-    if (this.state.visualisation == null) {
+    if (this.state.visualisation == null || !this.state.asyncComponents) {
       return <div className="Visualisation">Loading...</div>;
     }
+    const { VisualisationHeader, VisualisationEditor } = this.state.asyncComponents;
+
     return (
       <div className="Visualisation">
         <VisualisationHeader

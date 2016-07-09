@@ -1,6 +1,6 @@
 import React from 'react';
 import { render } from 'react-dom';
-import VisualisationPreview from './components/visualisation/VisualisationPreview';
+import AsyncDashChart from './components/charts/AsyncDashChart';
 import DashboardViewer from './components/dashboard/DashboardViewer';
 import LumenBranding from './components/common/LumenBranding';
 
@@ -11,7 +11,7 @@ const rootElement = document.querySelector('#root');
 const data = window.LUMEN_DATA;
 
 render(
-  <div>
+  <div className="viewer">
     {data.dashboard ?
       <DashboardViewer
         dashboard={data.dashboard}
@@ -19,7 +19,7 @@ render(
         datasets={data.datasets}
       />
       :
-      <VisualisationPreview
+      <AsyncDashChart
         visualisation={data.visualisation}
         datasets={data.datasets}
       />
