@@ -22,7 +22,8 @@ function shouldRender(visualisation, datasets) {
     return false;
   }
   const needSecondDataColumn = visualisationType === 'scatter' || visualisationType === 'map';
-  const haveSecondDataColumn = spec.datasetColumnY == null;
+  const haveSecondDataColumn = spec.datasetColumnY != null;
+  console.log(spec);
   if (needSecondDataColumn && !haveSecondDataColumn) {
     return false;
   }
