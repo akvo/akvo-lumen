@@ -23,7 +23,6 @@ function shouldRender(visualisation, datasets) {
   }
   const needSecondDataColumn = visualisationType === 'scatter' || visualisationType === 'map';
   const haveSecondDataColumn = spec.datasetColumnY != null;
-  console.log(spec);
   if (needSecondDataColumn && !haveSecondDataColumn) {
     return false;
   }
