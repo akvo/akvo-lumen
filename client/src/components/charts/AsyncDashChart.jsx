@@ -1,6 +1,4 @@
 import React, { Component, PropTypes } from 'react';
-/* Chart util is needed for all chart types. Include it here to prevent duplication in bundles */
-require('../../utilities/chart.js');
 
 /* This component should render the same markup as the regular DashChart, but only loads the
 /* dependencies needed to render a given chart type, rather than loading all dependencies for all

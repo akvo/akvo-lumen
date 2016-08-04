@@ -1,11 +1,6 @@
-import Immutable from 'immutable';
-
 export function getChartData(visualisation, datasets) {
   const { datasetId, spec } = visualisation;
-  // Test to see if the dataset is already an Immutable object
-  const dataset =
-    Immutable.Iterable.isIterable(datasets[datasetId]) ?
-      datasets[datasetId] : Immutable.fromJS(datasets[datasetId]);
+  const dataset = datasets[datasetId];
   const columnIndexX = spec.datasetColumnX;
   const columnIndexY = spec.datasetColumnY;
   const nameDataX = spec.datasetNameColumnX != null ?
