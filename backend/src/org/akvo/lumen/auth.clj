@@ -33,9 +33,9 @@
 (defn wrap-jwt
   "Go get cert from Keycloak and feed it to wrap-jwt-claims. Keycloak url can
   be configured via the KEYCLOAK_URL env var."
-  [handler keycloak-url realm]
+  [handler {:keys [keycloak-url keycloak-realm]}]
   (try
-    (let [issuer (str keycloak-url "/realms/" realm)
+    (let [issuer (str keycloak-url "/realms/" keycloak-realm)
           certs (-> (str issuer "/protocol/openid-connect/certs")
                     client/get
                     :body)]

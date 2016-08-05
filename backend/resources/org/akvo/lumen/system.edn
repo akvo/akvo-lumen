@@ -1,0 +1,68 @@
+{:components
+ {:app  duct.component.handler/handler-component
+  :db duct.component.hikaricp/hikaricp
+  :http org.akvo.lumen.component.http/http
+  :tenant-manager org.akvo.lumen.component.tenant-manager/tenant-manager}
+ :endpoints
+ {:dashboard org.akvo.lumen.endpoint.dashboard/endpoint
+  :dataset org.akvo.lumen.endpoint.dataset/endpoint
+  :files org.akvo.lumen.endpoint.files/endpoint
+  :flow org.akvo.lumen.endpoint.flow/endpoint
+  :job-execution org.akvo.lumen.endpoint.job-execution/endpoint
+  :library org.akvo.lumen.endpoint.library/endpoint
+  :public org.akvo.lumen.endpoint.public/endpoint
+  :root org.akvo.lumen.endpoint.root/endpoint
+  :share org.akvo.lumen.endpoint.share/endpoint
+  :transformation org.akvo.lumen.endpoint.transformation/endpoint
+  :visualisation org.akvo.lumen.endpoint.visualisation/endpoint}
+ :dependencies
+ {:http    [:app]
+  :app     [:dashboard :dataset :files :flow :job-execution :library :public
+            :root :share :transformation :visualisation]
+  :tenant-manager [:db]
+  :dashboard [:tenant-manager]
+  :dataset [:tenant-manager :config]
+  :files [:config]
+  :flow [:tenant-manager :config]
+  :job-execution [:tenant-manager]
+  :library [:tenant-manager]
+  :public [:tenant-manager]
+  :root [:tenant-manager]
+  :share [:tenant-manager :config]
+  :transformation [:tenant-manager]
+  :visualisation [:tenant-manager]}
+ :config
+ {:app
+  {:migrations {:tenant-manager "org/akvo/lumen/migrations/tenant_manager"
+                :tenants "org/akvo/lumen/migrations/tenants"}
+   :middleware
+   {:functions
+    {:hide-errors   duct.middleware.errors/wrap-hide-errors
+     :not-found     duct.middleware.not-found/wrap-not-found
+     :ring-defaults ring.middleware.defaults/wrap-defaults
+     :json-response ring.middleware.json/wrap-json-response
+     :json-body     ring.middleware.json/wrap-json-body
+     :wrap-label-tenant org.akvo.lumen.component.tenant-manager/wrap-label-tenant
+     :wrap-jwt      org.akvo.lumen.auth/wrap-jwt
+     :wrap-auth     org.akvo.lumen.auth/wrap-auth}
+    :applied
+    [:json-response :not-found :ring-defaults :json-body :wrap-label-tenant
+     :wrap-jwt :wrap-auth :hide-errors]
+    :arguments
+    {:not-found   "Resource Not Found"
+     :hide-errors "Internal Server Error"
+     :wrap-jwt {:keycloak-url keycloak-url
+                :keycloak-realm keycloak-realm}
+     :ring-defaults
+     {:params    {:urlencoded true
+                  :keywordize true}
+      :responses {:not-modified-responses true
+                  :absolute-redirects     true
+                  :content-types          true
+                  :default-charset        "utf-8"}}}}}
+  :http
+  {:port http-port}
+  :db
+  {:uri db-uri}
+  :config {:file-upload-path file-upload-path
+           :flow-report-database-url flow-report-database-url}}}

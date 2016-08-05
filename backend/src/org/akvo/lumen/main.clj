@@ -1,30 +1,22 @@
 (ns org.akvo.lumen.main
-  "Akvo Lumen starting point."
-  (:gen-class)
-  (:require [clojure.java.io :as io]
-            [com.stuartsierra.component :as component]
-            [duct.middleware.errors :refer [wrap-hide-errors]]
-            [duct.util.runtime :refer [add-shutdown-hook]]
-            [meta-merge.core :refer [meta-merge]]
-            [org.akvo.lumen
-             [config :as config]
-             [migrate :as migrate]
-             [system :refer [new-system]]]))
+    (:gen-class)
+    (:require [akvo.commons.psql-util]
+              [com.stuartsierra.component :as component]
+              [duct.util.runtime :refer [add-shutdown-hook]]
+              [duct.util.system :refer [load-system]]
+              [environ.core :refer [env]]
+              [clojure.java.io :as io]))
 
-(def prod-config
-  {:app {:middleware     [[wrap-hide-errors :internal-error]]
-         :internal-error (io/resource "errors/500.html")}})
-
-(def config
-  "Merge the default config(file) with provided environment (env vars)."
-  (meta-merge config/defaults
-              config/environ
-              prod-config))
 
 (defn -main [& args]
-  (let [system (new-system config)]
+  (let [bindings {'db-uri (:lumen-db-url env "jdbc:postgresql://localhost/lumen?user=lumen&password=password")
+                  'http-port (Integer/parseInt (:port env "3000"))
+                  'keycloak-realm "akvo"
+                  'keycloak-url (:lumen-keycloak-url env "http://localhost:8080/auth")
+                  'flow-report-database-url (env :flow-report-database-url)
+                  'file-upload-path (env :file-upload-path)}
+        system   (load-system [(io/resource "org/akvo/lumen/system.edn")]
+                              bindings)]
     (println "Starting HTTP server on port" (-> system :http :port))
     (add-shutdown-hook ::stop-system #(component/stop system))
-    (migrate/migrate {:connection-uri (-> config :db :uri)})
-    (-> system
-        component/start)))
+    (component/start system)))
