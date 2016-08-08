@@ -1,8 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import isEmpty from 'lodash/isEmpty';
-import DashboardEditor from '../components/dashboard/DashboardEditor';
-import DashboardHeader from '../components/dashboard/DashboardHeader';
 import ShareEntity from '../components/modals/ShareEntity';
 import * as actions from '../actions/dashboard';
 import { fetchLibrary } from '../actions/library';
@@ -58,6 +56,7 @@ class Dashboard extends Component {
       isUnsavedChanges: null,
       isShareModalVisible: false,
       requestedDatasetIds: [],
+      asyncComponents: null,
     };
     this.loadDashboardIntoState = this.loadDashboardIntoState.bind(this);
     this.onAddVisualisation = this.onAddVisualisation.bind(this);
@@ -88,6 +87,24 @@ class Dashboard extends Component {
         this.loadDashboardIntoState(this.props.library.dashboards[dashboardId], this.props.library);
       }
     }
+  }
+
+  componentDidMount() {
+    require.ensure(['../components/charts/DashChart'], () => {
+      require.ensure([], () => {
+        /* eslint-disable global-require */
+        const DashboardEditor = require('../components/dashboard/DashboardEditor').default;
+        const DashboardHeader = require('../components/dashboard/DashboardHeader').default;
+        /* eslint-enable global-require */
+
+        this.setState({
+          asyncComponents: {
+            DashboardEditor,
+            DashboardHeader,
+          },
+        });
+      }, 'Dashboard');
+    }, 'DashChartPreload');
   }
 
   componentWillReceiveProps(nextProps) {
@@ -209,6 +226,11 @@ class Dashboard extends Component {
   }
 
   render() {
+    if (!this.state.asyncComponents) {
+      return <div>Loading...</div>;
+    }
+    const { DashboardHeader, DashboardEditor } = this.state.asyncComponents;
+
     return (
       <div className="Dashboard">
         <DashboardHeader

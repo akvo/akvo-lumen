@@ -1,8 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
-import DatasetHeader from '../components/dataset/DatasetHeader';
-import DatasetTable from '../components/dataset/DatasetTable';
 import { showModal } from '../actions/activeModal';
 import { getId, getTitle } from '../domain/entity';
 import { getTransformations, getRows, getColumns } from '../domain/dataset';
@@ -18,6 +16,9 @@ class Dataset extends Component {
 
   constructor() {
     super();
+    this.state = {
+      asyncComponents: null,
+    };
     this.handleShowDatasetSettings = this.handleShowDatasetSettings.bind(this);
     this.willLeaveDatasets = this.willLeaveDatasets.bind(this);
   }
@@ -27,6 +28,20 @@ class Dataset extends Component {
     const { datasetId } = params;
     router.setRouteLeaveHook(route, this.willLeaveDatasets);
     dispatch(fetchDataset(datasetId));
+
+    require.ensure([], () => {
+      /* eslint-disable global-require */
+      const DatasetHeader = require('../components/dataset/DatasetHeader').default;
+      const DatasetTable = require('../components/dataset/DatasetTable').default;
+      /* eslint-enable global-require */
+
+      this.setState({
+        asyncComponents: {
+          DatasetHeader,
+          DatasetTable,
+        },
+      });
+    }, 'Dataset');
   }
 
   willLeaveDatasets() {
@@ -44,9 +59,11 @@ class Dataset extends Component {
 
   render() {
     const { dataset, dispatch } = this.props;
-    if (dataset == null) {
+    if (dataset == null || !this.state.asyncComponents) {
       return <div className="Dataset">Loading...</div>;
     }
+    const { DatasetHeader, DatasetTable } = this.state.asyncComponents;
+
     return (
       <div className="Dataset">
         <DatasetHeader

@@ -1,27 +1,37 @@
 import React from 'react';
 import { render } from 'react-dom';
-import VisualisationPreview from './components/visualisation/VisualisationPreview';
+import AsyncDashChart from './components/charts/AsyncDashChart';
 import DashboardViewer from './components/dashboard/DashboardViewer';
 import LumenBranding from './components/common/LumenBranding';
+import Immutable from 'immutable';
+
 
 require('./styles/reset.global.scss');
 require('./styles/style.global.scss');
 
 const rootElement = document.querySelector('#root');
 const data = window.LUMEN_DATA;
+const datasets = data.datasets;
+const immutableDatasets = {};
+
+// Transform datasets into immutable objects
+Object.keys(datasets).forEach(key => {
+  const dataset = Immutable.fromJS(datasets[key]);
+  immutableDatasets[key] = dataset;
+});
 
 render(
-  <div>
+  <div className="viewer">
     {data.dashboard ?
       <DashboardViewer
         dashboard={data.dashboard}
         visualisations={data.visualisations}
-        datasets={data.datasets}
+        datasets={immutableDatasets}
       />
       :
-      <VisualisationPreview
+      <AsyncDashChart
         visualisation={data.visualisation}
-        datasets={data.datasets}
+        datasets={immutableDatasets}
       />
     }
     <LumenBranding />

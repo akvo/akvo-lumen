@@ -1,6 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import DashboardViewerItem from './DashboardViewerItem';
 
+
 require('../../styles/DashboardViewer.scss');
 
 const viewportLimits = [

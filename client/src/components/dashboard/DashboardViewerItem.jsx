@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react';
-import DashChart from '../charts/DashChart';
+import AsyncDashChart from '../charts/AsyncDashChart';
 
 require('../../styles/DashboardViewerItem.scss');
 
@@ -67,7 +67,7 @@ export default class DashboardViewerItem extends Component {
           <div
             className="itemContainer visualisation"
           >
-            <DashChart
+            <AsyncDashChart
               visualisation={this.props.item.visualisation}
               datasets={this.props.datasets}
               width={style.width - (cPadding * 2)}

@@ -56,7 +56,7 @@ export default class DashboardCanvasItem extends Component {
 
   getIsDatasetLoaded(item) {
     return item.type === 'visualisation' &&
-      this.props.datasets[this.props.item.visualisation.datasetId].columns;
+      this.props.datasets[this.props.item.visualisation.datasetId].get('columns');
   }
 
   render() {
