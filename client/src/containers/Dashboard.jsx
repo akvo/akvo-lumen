@@ -1,11 +1,11 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import isEmpty from 'lodash/isEmpty';
+import { push } from 'react-router-redux';
 import ShareEntity from '../components/modals/ShareEntity';
 import * as actions from '../actions/dashboard';
 import { fetchLibrary } from '../actions/library';
 import { fetchDataset } from '../actions/dataset';
-import { push } from 'react-router-redux';
 
 const getEditingStatus = location => {
   const testString = 'create';

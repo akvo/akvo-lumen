@@ -174,8 +174,8 @@ export default class DatasetTable extends Component {
 
   handleResize() {
     this.setState({
-      width: this.refs.wrappingDiv.clientWidth,
-      height: this.refs.wrappingDiv.clientHeight,
+      width: this.wrappingDiv.clientWidth,
+      height: this.wrappingDiv.clientHeight,
     });
   }
 
@@ -246,7 +246,7 @@ export default class DatasetTable extends Component {
             />}
           <div
             className="wrapper"
-            ref="wrappingDiv"
+            ref={ref => { this.wrappingDiv = ref; }}
             style={{
               width: sidebarProps ? 'calc(100% - 300px)' : '100%',
             }}

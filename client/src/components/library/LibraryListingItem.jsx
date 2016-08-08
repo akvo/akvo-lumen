@@ -75,7 +75,7 @@ export default class LibraryListingItem extends Component {
           </div>
         }
         <input type="checkbox" className="selectEntity disabled" />
-        <div className="entityIcon"></div>
+        <div className="entityIcon" />
         <div className="textContents">
           <h3 className="entityName">
             {getTitle(entity)}

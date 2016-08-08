@@ -44,16 +44,18 @@ export default class LinkDataSourceSettings extends Component {
         <div>
           <label
             className="linkFileToggleLabel"
+            htmlFor="dataHasColumnHeadersCheckbox"
           >
             Data has column headers:
           </label>
           <input
+            id="dataHasColumnHeadersCheckbox"
             type="checkbox"
             defaultChecked={this.props.dataSource.hasColumnHeaders}
-            ref="datasetHeaderStatusToggle"
+            ref={ref => { this.datasetHeaderStatusToggle = ref; }}
             onClick={() => {
               this.props.onChange({
-                hasColumnHeaders: this.refs.datasetHeaderStatusToggle.checked,
+                hasColumnHeaders: this.datasetHeaderStatusToggle.checked,
               });
             }}
           />

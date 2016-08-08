@@ -1,10 +1,9 @@
 import React from 'react';
 import { render } from 'react-dom';
+import Immutable from 'immutable';
 import AsyncDashChart from './components/charts/AsyncDashChart';
 import DashboardViewer from './components/dashboard/DashboardViewer';
 import LumenBranding from './components/common/LumenBranding';
-import Immutable from 'immutable';
-
 
 require('./styles/reset.global.scss');
 require('./styles/style.global.scss');

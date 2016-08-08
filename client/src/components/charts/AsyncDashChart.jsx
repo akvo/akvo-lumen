@@ -22,6 +22,7 @@ export default class AsyncDashChart extends Component {
       require.ensure(['react-leaflet'], () => {
         // eslint-disable-next-line global-require
         const DashMap = require('./DashMap').default;
+
         output = DashMap;
 
         this.setState({

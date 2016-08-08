@@ -4,7 +4,7 @@ import { hideNotification } from '../actions/notification';
 
 require('../styles/Notification.scss');
 
-export function Notification({ level, message, dispatch }) {
+function Notification({ level, message, dispatch }) {
   return (
     <div
       className={`Notification ${level}`}
