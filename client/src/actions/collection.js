@@ -1,6 +1,6 @@
 import * as constants from '../constants/collection';
 
-export function createCollection(name) {
+export default function createCollection(name) {
   const now = Date.now();
   const id = Math.random() * 1e9 | 0;
 

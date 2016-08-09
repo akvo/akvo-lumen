@@ -15,7 +15,7 @@ export default class ColumnHeader extends Component {
   handleDataTypeMenuClick(event) {
     event.stopPropagation();
 
-    const el = this.refs.columnTypeLabel;
+    const el = this.columnTypeLabel;
     const rect = el.getBoundingClientRect();
     const verticalOffset = rect.top + el.offsetHeight;
     const horizontalOffset = rect.left - (el.offsetWidth / 2);
@@ -32,7 +32,7 @@ export default class ColumnHeader extends Component {
   }
 
   handleColumnMenuClick() {
-    const el = this.refs.columnHeaderContainer;
+    const el = this.columnHeaderContainer;
     const rect = el.getBoundingClientRect();
     const verticalOffset = rect.top + el.offsetHeight;
     const horizontalOffset = rect.left;
@@ -64,7 +64,7 @@ export default class ColumnHeader extends Component {
       <div
         className={`ColumnHeader clickable
           ${this.props.columnMenuActive ? 'columnMenuActive' : ''}`}
-        ref="columnHeaderContainer"
+        ref={ref => { this.columnHeaderContainer = ref; }}
         onClick={this.handleColumnMenuClick}
       >
         {column.get('sort') != null ?
@@ -87,7 +87,7 @@ export default class ColumnHeader extends Component {
           <span
             className="columnTypeToggle"
             onClick={this.handleDataTypeMenuClick}
-            ref="columnTypeLabel"
+            ref={ref => { this.columnTypeLabel = ref; }}
           >
             {column.get('type')}
           </span>

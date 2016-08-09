@@ -78,7 +78,7 @@ export default class DashboardViewer extends Component {
   }
 
   handleResize() {
-    const width = this.refs.DashboardViewer.clientWidth;
+    const width = this.DashboardViewer.clientWidth;
     let viewport;
 
     for (let i = 0; i < viewportLimits.length; i++) {
@@ -105,7 +105,7 @@ export default class DashboardViewer extends Component {
     return (
       <div
         className="DashboardViewer"
-        ref="DashboardViewer"
+        ref={ref => { this.DashboardViewer = ref; }}
         style={{
           width: '100%',
         }}
@@ -142,4 +142,3 @@ DashboardViewer.propTypes = {
     title: PropTypes.string.isRequired,
   }),
 };
-

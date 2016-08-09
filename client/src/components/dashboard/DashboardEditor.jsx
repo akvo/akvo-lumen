@@ -133,40 +133,38 @@ export default class DashboardEditor extends Component {
 
     if (this.props.dashboard.entities[item.id]) {
       delete newEntities[item.id];
-    } else {
-      if (itemType === 'visualisation') {
-        this.props.onAddVisualisation(this.props.visualisations[item.id].datasetId);
-        newEntities[item.id] = {
-          type: itemType,
-          id: item.id,
-        };
+    } else if (itemType === 'visualisation') {
+      this.props.onAddVisualisation(this.props.visualisations[item.id].datasetId);
+      newEntities[item.id] = {
+        type: itemType,
+        id: item.id,
+      };
 
-        newLayout.push({
-          w: 6,
-          h: 4,
-          minW: 4,
-          minH: 4,
-          x: 0,
-          y: getFirstBlankRowGroup(this.props.dashboard.layout, 4),
-          i: item.id,
-        });
-      } else if (itemType === 'text') {
-        const newEntityId = getNewEntityId(this.props.dashboard.entities, itemType);
+      newLayout.push({
+        w: 6,
+        h: 4,
+        minW: 4,
+        minH: 4,
+        x: 0,
+        y: getFirstBlankRowGroup(this.props.dashboard.layout, 4),
+        i: item.id,
+      });
+    } else if (itemType === 'text') {
+      const newEntityId = getNewEntityId(this.props.dashboard.entities, itemType);
 
-        newEntities[newEntityId] = {
-          type: itemType,
-          id: newEntityId,
-          content: '',
-        };
-        newLayout.push({
-          w: 4,
-          minW: 2,
-          h: 1,
-          x: 0,
-          y: getFirstBlankRowGroup(this.props.dashboard.layout, 1),
-          i: newEntityId,
-        });
-      }
+      newEntities[newEntityId] = {
+        type: itemType,
+        id: newEntityId,
+        content: '',
+      };
+      newLayout.push({
+        w: 4,
+        minW: 2,
+        h: 1,
+        x: 0,
+        y: getFirstBlankRowGroup(this.props.dashboard.layout, 1),
+        i: newEntityId,
+      });
     }
 
     /* Note that we update the propLayout, not the parent layout, to prevent race conditions. The
@@ -177,7 +175,7 @@ export default class DashboardEditor extends Component {
 
   handleResize() {
     // Offset the padding width (16px on each side)
-    const newWidth = this.refs.DashboardEditorCanvasContainer.clientWidth - 32;
+    const newWidth = this.DashboardEditorCanvasContainer.clientWidth - 32;
     if (newWidth !== this.state.gridWidth) {
       this.setState({
         gridWidth: newWidth,
@@ -219,7 +217,7 @@ export default class DashboardEditor extends Component {
         />
         <div
           className="DashboardEditorCanvasContainer"
-          ref="DashboardEditorCanvasContainer"
+          ref={ref => { this.DashboardEditorCanvasContainer = ref; }}
         >
           <div className="DashboardEditorCanvasControls">
             <button
@@ -241,7 +239,6 @@ export default class DashboardEditor extends Component {
             <input
               type="text"
               name="Dashboard name"
-              ref="dashboardName"
               value={dashboard.name}
               placeholder="Enter dashboard name"
               onChange={this.handleChangeName}

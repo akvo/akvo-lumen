@@ -139,7 +139,7 @@ export default class AkvoFlowDataSourceSettings extends Component {
 
     if (rootFolderIds.length !== 0) {
       hierarchyOptions.push(
-        [].concat.apply([], rootFolderIds.map(rootFolderId => {
+        [].concat([], ...rootFolderIds.map(rootFolderId => {
           const surveysAndFolders = folderIdIndex[rootFolderId];
           return surveysAndFolders.map(({ id, title }) => ({
             value: id,

@@ -94,7 +94,7 @@ const sortGroups = (listGroups, sortOrder, isReverseSort) => {
         out = -1;
       }
 
-      if (isReverseSort) out = out * -1;
+      if (isReverseSort) out *= -1;
       return out;
     };
   } else if (sortOrder === 'created' || sortOrder === 'last_modified') {
