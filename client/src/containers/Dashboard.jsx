@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
-import isEmpty from 'lodash/isEmpty';
+import { isEmpty, cloneDeep } from 'lodash';
 import { push } from 'react-router-redux';
 import ShareEntity from '../components/modals/ShareEntity';
 import * as actions from '../actions/dashboard';
@@ -27,18 +27,20 @@ const getLayoutObjectFromArray = arr => {
 
 /* Get a pure representation of a dashboard from the container state */
 const getDashboardFromState = (state, isForEditor) => (
-  {
-    type: state.type,
-    title: state.name,
-    /* Temporary shim until we standardize on "name" or "title" for entities */
-    name: state.name,
-    entities: state.entities,
-    /* The editor takes an array for layout, but for storage we use an id-keyed object */
-    layout: isForEditor ? state.layout : getLayoutObjectFromArray(state.layout),
-    id: state.id,
-    created: state.created,
-    modified: state.modified,
-  }
+  cloneDeep(
+    {
+      type: state.type,
+      title: state.name,
+      /* Temporary shim until we standardize on "name" or "title" for entities */
+      name: state.name,
+      entities: state.entities,
+      /* The editor takes an array for layout, but for storage we use an id-keyed object */
+      layout: isForEditor ? state.layout : getLayoutObjectFromArray(state.layout),
+      id: state.id,
+      created: state.created,
+      modified: state.modified,
+    }
+  )
 );
 
 class Dashboard extends Component {
@@ -230,7 +232,6 @@ class Dashboard extends Component {
       return <div>Loading...</div>;
     }
     const { DashboardHeader, DashboardEditor } = this.state.asyncComponents;
-
     return (
       <div className="Dashboard">
         <DashboardHeader

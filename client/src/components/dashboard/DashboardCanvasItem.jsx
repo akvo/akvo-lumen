@@ -28,12 +28,30 @@ export default class DashboardCanvasItem extends Component {
     }, 0);
   }
 
-  getItemLayout() {
+  shouldComponentUpdate(nextProps) {
+    const oldLayout = this.getItemLayout(this.props);
+    const newLayout = this.getItemLayout(nextProps);
+    const dimensionsUnchanged = oldLayout.w === newLayout.w && oldLayout.h === newLayout.h;
+    const canvasWidthUnchanged = this.props.canvasWidth === nextProps.canvasWidth;
+    const datasetLoaded = this.getIsDatasetLoaded(this.props);
+    const styleTransitionFinished = this.state.style.boxShadow === 'none';
+
+    const shouldNotUpdate = Boolean(
+        dimensionsUnchanged &&
+        canvasWidthUnchanged &&
+        datasetLoaded &&
+        styleTransitionFinished
+      );
+
+    return !shouldNotUpdate;
+  }
+
+  getItemLayout(props) {
     let output = null;
 
-    this.props.canvasLayout.forEach((item, index) => {
-      if (item.i === this.props.item.id) {
-        output = this.props.canvasLayout[index];
+    props.canvasLayout.forEach((item, index) => {
+      if (item.i === props.item.id) {
+        output = props.canvasLayout[index];
       }
     });
 
@@ -42,7 +60,7 @@ export default class DashboardCanvasItem extends Component {
 
   getRenderDimensions() {
     const unit = this.props.canvasWidth / 12;
-    const layout = this.getItemLayout();
+    const layout = this.getItemLayout(this.props);
 
     if (layout !== null) {
       return ({
@@ -54,9 +72,9 @@ export default class DashboardCanvasItem extends Component {
     return null;
   }
 
-  getIsDatasetLoaded(item) {
-    return item.type === 'visualisation' &&
-      this.props.datasets[this.props.item.visualisation.datasetId].get('columns');
+  getIsDatasetLoaded(props) {
+    return props.item.type === 'visualisation' &&
+      props.datasets[props.item.visualisation.datasetId].get('columns');
   }
 
   render() {
@@ -76,7 +94,7 @@ export default class DashboardCanvasItem extends Component {
           <div
             className="noPointerEvents itemContainer visualisation"
           >
-            {this.getIsDatasetLoaded(this.props.item) ?
+            {this.getIsDatasetLoaded(this.props) ?
               <DashChart
                 visualisation={this.props.item.visualisation}
                 datasets={this.props.datasets}
