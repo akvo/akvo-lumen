@@ -13,24 +13,6 @@ addons:
 services:
 - docker
 before_install:
-- sudo /etc/init.d/postgresql stop
-- sudo apt-get -y remove --purge postgresql-9.1
-- sudo apt-get -y remove --purge postgresql-9.2
-- sudo apt-get -y remove --purge postgresql-9.3
-- sudo apt-get -y remove --purge postgresql-9.4
-- sudo apt-get -y autoremove
-- sudo apt-key adv --keyserver keys.gnupg.net --recv-keys 7FCC7D46ACCC4CF8
-- sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ precise-pgdg main
-  9.5" >> /etc/apt/sources.list.d/postgresql.list'
-- sudo apt-get update
-- sudo apt-get -y install postgresql-9.5
-- sudo sh -c "sed -i 's/md5$/trust/g' /etc/postgresql/9.5/main/pg_hba.conf"
-- sudo sh -c "sed -i 's/peer$/trust/g' /etc/postgresql/9.5/main/pg_hba.conf"
-- sudo /etc/init.d/postgresql restart
-- sudo psql -U postgres -c "CREATE ROLE travis SUPERUSER CREATEDB CREATEROLE INHERIT
-  LOGIN;"
-- sudo psql -U postgres -c "CREATE DATABASE travis WITH OWNER = travis;"
-- psql --version
 - cd keycloak
 - ./server.sh build && ./server.sh run
 - cd ..
