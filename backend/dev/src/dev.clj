@@ -63,4 +63,4 @@
 ;;;
 
 (defn migrate []
-  (lumen-migrate/migrate sources))
+  (lumen-migrate/migrate))

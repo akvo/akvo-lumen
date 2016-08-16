@@ -37,6 +37,9 @@
   :aliases {"setup"   ["run" "-m" "duct.util.repl/setup"]
             "migrate" ["run" "-m" "dev/migrate"]
             "seed"    ["run" "-m" "dev/seed"]}
+  :test-selectors {:default (and (constantly true)
+                                 (complement :functional))
+                   :all     (constantly true)}
   :profiles
   {:dev           [:project/dev  :profiles/dev]
    :test          [:project/test :profiles/test]

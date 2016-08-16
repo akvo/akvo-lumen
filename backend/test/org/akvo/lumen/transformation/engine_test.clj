@@ -1,22 +1,22 @@
 (ns org.akvo.lumen.transformation.engine-test
-  (:require [clojure.test :refer :all]
+  (:require [cheshire.core :as json]
             [clojure.java.io :as io]
+            [clojure.test :refer :all]
             [hugsql.core :as hugsql]
+            [org.akvo.lumen.main]
             [org.akvo.lumen.migrate :as migrate]
-            [reloaded.repl :refer [system stop go]]
             [org.akvo.lumen.transformation.engine :refer :all]
-            [cheshire.core :as json]
-            [user :refer [config]]))
+            [reloaded.repl :refer [stop go]]))
 
 (hugsql/def-db-fns "org/akvo/lumen/transformation/engine_test.sql")
 
 (def columns (vec (take 3 (json/parse-string (slurp (io/resource "columns_test.json"))))))
 
-(def tenant-conn {:connection-uri "jdbc:postgresql://localhost/test_lumen_tenant_2?user=lumen&password=password"})
+(def tenant-conn {:connection-uri "jdbc:postgresql://localhost/test_lumen_tenant_1?user=lumen&password=password"})
 
 (defn tf-engine-fixture
   [f]
-  (migrate/do-migrate "org/akvo/lumen/migrations_tenants" tenant-conn)
+  (migrate/migrate-tenant tenant-conn)
   (db-drop-test-table tenant-conn)
   (db-test-table tenant-conn)
   (db-test-data tenant-conn)

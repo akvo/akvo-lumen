@@ -6,8 +6,11 @@
              [jdbc :as jdbc]
              [repl :as repl]]
             [reloaded.repl :refer [go stop]]
-            [user :refer [config]]))
+            ;; [user :refer [config]]
+            ))
 
+(def config
+  {:db {:uri "jdbc:postgresql://localhost/lumen?user=lumen&password=password"}})
 
 (def test-tenant-spec
   (->> "profiles.clj" slurp read-string :profiles/test :env :tenants first))
@@ -26,7 +29,7 @@
 (defn- ragtime-spec
   [tenant]
   {:datastore  (jdbc/sql-database {:connection-uri (:db_uri tenant)})
-   :migrations (jdbc/load-resources "org/akvo/lumen/migrations_tenants")})
+   :migrations (jdbc/load-resources "org/akvo/lumen/migrations/tenants")})
 
 (defn migrate-tenant
   [tenant]
@@ -51,7 +54,7 @@
 
 (hugsql/def-db-fns "org/akvo/lumen/fixtures.sql")
 
-(defn system-fixture
+#_(defn system-fixture
   "Starts the system and migrates, no setup or tear down."
   [f]
   (let [conn {:connection-uri (-> config :db :uri)}]
