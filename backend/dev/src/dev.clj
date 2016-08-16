@@ -47,8 +47,10 @@
 (defn seed
   "At the moment only support seed of tenants table."
   []
+  (println "@dev/seed")
   (let [db-uri (-> (lumen-migrate/construct-system sources {})
                    :config :db :uri)]
+    (prn db-uri)
     (doseq [tenants [{:db_uri "jdbc:postgresql://localhost/lumen_tenant_1?user=lumen&password=password"
                       :label  "t1"
                       :title  "Tenant 1"}
