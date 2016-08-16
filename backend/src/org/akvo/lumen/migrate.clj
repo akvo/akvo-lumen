@@ -17,11 +17,19 @@
   (ragtime-repl/migrate {:datastore datastore
                          :migrations migrations}))
 
+(defn debug-configs
+  [sources]
+  (let [config-files (map io/resource sources)
+        configs (map #(read-config % {}) config-files)]
+    (println "@debug-configs")
+    (prn config-files)
+    (prn configs)))
 
 (defn construct-system
   "Create a system definition."
   ([] (construct-system ["org/akvo/lumen/system.edn" "dev.edn" "local.edn"] {}))
   ([sources bindings]
+   (debug-configs sources)
    (->> (map io/resource sources)
         (map #(read-config % bindings))
         (apply meta-merge))))
