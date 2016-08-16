@@ -31,7 +31,9 @@ export default class DashboardCanvasItem extends Component {
   shouldComponentUpdate(nextProps) {
     const oldLayout = this.getItemLayout(this.props);
     const newLayout = this.getItemLayout(nextProps);
-    const dimensionsUnchanged = oldLayout.w === newLayout.w && oldLayout.h === newLayout.h;
+    const layoutsExist = Boolean(oldLayout && newLayout);
+    const dimensionsUnchanged = layoutsExist ?
+      oldLayout.w === newLayout.w && oldLayout.h === newLayout.h : false;
     const canvasWidthUnchanged = this.props.canvasWidth === nextProps.canvasWidth;
     const needDataset = this.props.item.type === 'visualisation';
     const datasetDependencyMet = needDataset ? this.getIsDatasetLoaded(this.props) : true;
