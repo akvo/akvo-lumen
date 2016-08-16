@@ -16,7 +16,9 @@
 
 (defn new-system []
   (load-system (keep io/resource
-                     ["org/akvo/lumen/system.edn" "dev.edn" "local.edn"])))
+                     ["org/akvo/lumen/system.edn" "dev.edn"
+                      ;; "local.edn"
+                      ])))
 
 (when (io/resource "local.clj")
   (load "local"))
@@ -29,7 +31,9 @@
 ;;; Definitions
 ;;;
 
-(def sources ["org/akvo/lumen/system.edn" "dev.edn" "local.edn"])
+(def sources ["org/akvo/lumen/system.edn" "dev.edn"
+              ;; "local.edn"
+              ])
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

@@ -27,7 +27,9 @@
 
 (defn construct-system
   "Create a system definition."
-  ([] (construct-system ["org/akvo/lumen/system.edn" "dev.edn" "local.edn"] {}))
+  ([] (construct-system ["org/akvo/lumen/system.edn" "dev.edn"
+                         ;; "local.edn"
+                         ] {}))
   ([sources bindings]
    (debug-configs sources)
    (->> (map io/resource sources)
