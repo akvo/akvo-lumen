@@ -35,11 +35,6 @@
   (uri [this label] "Database URI based on a tenant dns label."))
 
 
-(defprotocol TenantMigration
-  (migrate [this] "Migrate tenants")
-  (rollback [this] "Rollback tenants"))
-
-
 (defn pool
   "Created a Hikari connection pool."
   [tenant]
@@ -90,18 +85,7 @@
       (:uri tenant)
       (do
         (load-tenant db tenants label)
-        (:uri (get @tenants label)))))
-
-  TenantMigration
-  (migrate [this]
-    (let [migrations (ragtime-jdbc/load-resources (:resource-path this))]
-      (doseq [tenant (all-tenants {:connection-uri (get-in this [:db :uri])})]
-        (ragtime-repl/migrate
-         {:datastore  (ragtime-jdbc/sql-database (:db_uri tenant))
-          :migrations migrations}))))
-
-  (rollback [this]
-    (println "@TenantManager/rollback")))
+        (:uri (get @tenants label))))))
 
 
 (defn tenant-manager [options]

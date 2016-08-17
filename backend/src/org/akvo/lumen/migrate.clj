@@ -1,7 +1,6 @@
 (ns org.akvo.lumen.migrate
   (:require
    [clojure.java.io :as io]
-   ;; [duct.util.repl :as duct-repl]
    [duct.util.system :refer [read-config]]
    [environ.core :refer [env]]
    [hugsql.core :as hugsql]
@@ -12,27 +11,18 @@
 
 (hugsql/def-db-fns "org/akvo/lumen/migrate.sql")
 
+(def source-files ["org/akvo/lumen/system.edn" "dev.edn" "local.edn"])
 
 (defn do-migrate [datastore migrations]
   (ragtime-repl/migrate {:datastore datastore
                          :migrations migrations}))
 
-(defn debug-configs
-  [sources]
-  (let [config-files (map io/resource sources)
-        configs (map #(read-config % {}) config-files)]
-    (println "@debug-configs")
-    (prn config-files)
-    (prn configs)))
-
 (defn construct-system
   "Create a system definition."
-  ([] (construct-system ["org/akvo/lumen/system.edn" "dev.edn"
-                         ;; "local.edn"
-                         ] {}))
+  ([] (construct-system source-files {}))
   ([sources bindings]
-   (debug-configs sources)
    (->> (map io/resource sources)
+        (remove nil?)
         (map #(read-config % bindings))
         (apply meta-merge))))
 
@@ -48,9 +38,7 @@
 
 (defn migrate
   "Migrate tenant manager and tenants."
-  ([] (migrate ["org/akvo/lumen/system.edn" "dev.edn"
-                ;; "local.edn"
-                ]))
+  ([] (migrate source-files))
   ([system-definitions]
    (let [bindings {'http-port (Integer/parseInt (:port env "3000"))}
          system (construct-system system-definitions bindings)
@@ -71,7 +59,7 @@
                 (:tenants migrations))))
 
 
-(defn do-rollback [datastore migrations]
+#_(defn do-rollback [datastore migrations]
   (ragtime-repl/rollback {:datastore  datastore :migrations migrations}
                          (count migrations)))
 

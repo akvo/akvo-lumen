@@ -25,13 +25,6 @@
 
 (reloaded.repl/set-init! new-system)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Definitions
-;;;
-
-(def sources ["org/akvo/lumen/system.edn" "dev.edn" ;; "local.edn"
-              ])
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Seed
@@ -48,10 +41,8 @@
 (defn seed
   "At the moment only support seed of tenants table."
   []
-  (println "@dev/seed")
-  (let [db-uri (-> (lumen-migrate/construct-system sources {})
+  (let [db-uri (-> (lumen-migrate/construct-system)
                    :config :db :uri)]
-    (prn db-uri)
     (doseq [tenants [{:db_uri "jdbc:postgresql://localhost/lumen_tenant_1?user=lumen&password=password"
                       :label  "t1"
                       :title  "Tenant 1"}
