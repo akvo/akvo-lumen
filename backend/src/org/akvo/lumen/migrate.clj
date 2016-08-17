@@ -48,7 +48,9 @@
 
 (defn migrate
   "Migrate tenant manager and tenants."
-  ([] (migrate ["org/akvo/lumen/system.edn" "dev.edn" "local.edn"]))
+  ([] (migrate ["org/akvo/lumen/system.edn" "dev.edn"
+                ;; "local.edn"
+                ]))
   ([system-definitions]
    (let [bindings {'http-port (Integer/parseInt (:port env "3000"))}
          system (construct-system system-definitions bindings)
