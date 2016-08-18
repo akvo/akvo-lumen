@@ -1,13 +1,2 @@
 ;; Local profile overrides
-;; {:profiles/dev  {}
-;;  :profiles/test
-;;  {:resource-paths ["test/resources"]
-;;   :env
-;;   {:db {:uri "jdbc:postgresql://localhost/lumen?user=lumen&password=password"}
-;;    :tenants [{:db_uri "jdbc:postgresql://localhost/test_lumen_tenant_1?user=lumen&password=password"
-;;                    :label "t1"
-;;                    :title "Tenant 1"}
-;;                   {:db_uri "jdbc:postgresql://localhost/test_lumen_tenant_2?user=lumen&password=password"
-;;                    :label "t2"
-;;                    :title "Tenant 2"}] }
-;;                  }}
+{}
