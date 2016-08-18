@@ -1,22 +1,21 @@
 (ns org.akvo.lumen.fixtures
-  (:require [hugsql.core :as hugsql]
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
+            [hugsql.core :as hugsql]
             [org.akvo.lumen.component.tenant-manager :as tm]
             [org.akvo.lumen.migrate :as migrate]
             [ragtime
              [jdbc :as jdbc]
              [repl :as repl]]
-            [reloaded.repl :refer [go stop]]
-            ;; [user :refer [config]]
-            ))
+            [reloaded.repl :refer [go stop]]))
 
-(def config
+#_(def config
   {:db {:uri "jdbc:postgresql://localhost/lumen?user=lumen&password=password"}})
 
 (def test-tenant-spec
-  (->> "profiles.clj" slurp read-string :profiles/test :env :tenants first))
-
-;; (def test-tenant-spec
-;;   (first (env :tenants)))
+  (->> "seed.edn" io/resource slurp edn/read-string
+       :tenant-manager :tenants
+       first))
 
 (def test-conn
   (tm/pool test-tenant-spec))

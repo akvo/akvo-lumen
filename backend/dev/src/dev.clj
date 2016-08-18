@@ -1,14 +1,14 @@
 (ns dev
   (:refer-clojure :exclude [test])
-  (:require [clojure.repl :refer :all]
+  (:require [clojure.edn :as edn]
+            [clojure.repl :refer :all]
             [clojure.pprint :refer [pprint]]
             [clojure.tools.namespace.repl :refer [refresh]]
             [clojure.java.io :as io]
             [clojure.java.jdbc :as jdbc]
             [com.stuartsierra.component :as component]
             [duct.generate :as gen]
-            [duct.util.repl :refer [setup test cljs-repl ;; migrate rollback
-                                    ] :as duct-repl]
+            [duct.util.repl :refer [setup test cljs-repl] :as duct-repl]
             [duct.util.system :refer [load-system]]
             [org.akvo.lumen.migrate :as lumen-migrate]
             [reloaded.repl :refer [system init start stop go reset]])
@@ -43,13 +43,9 @@
   []
   (let [db-uri (-> (lumen-migrate/construct-system)
                    :config :db :uri)]
-    (doseq [tenants [{:db_uri "jdbc:postgresql://localhost/lumen_tenant_1?user=lumen&password=password"
-                      :label  "t1"
-                      :title  "Tenant 1"}
-                     {:db_uri "jdbc:postgresql://localhost/lumen_tenant_2?user=lumen&password=password"
-                      :label  "t2"
-                      :title  "Tenant 2"}]]
-      (seed-tenant {:connection-uri db-uri} tenants))))
+    (doseq [tenant (->> "seed.edn" io/resource slurp edn/read-string
+                         :tenant-manager :tenants)]
+      (seed-tenant {:connection-uri db-uri} tenant))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

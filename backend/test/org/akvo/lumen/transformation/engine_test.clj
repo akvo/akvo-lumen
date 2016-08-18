@@ -14,6 +14,8 @@
 
 (def tenant-conn {:connection-uri "jdbc:postgresql://localhost/test_lumen_tenant_1?user=lumen&password=password"})
 
+
+
 (defn tf-engine-fixture
   [f]
   (migrate/migrate-tenant tenant-conn)

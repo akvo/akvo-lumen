@@ -1,3 +1,0 @@
-DROP TABLE IF EXISTS history.share CASCADE;
-DROP TABLE IF EXISTS share CASCADE;
---;;

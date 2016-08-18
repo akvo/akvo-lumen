@@ -57,4 +57,6 @@
                    :resource-paths ["dev/resources" "test/resources"]
                    :repl-options   {:init-ns user}
                    :env            {:port "3000"}}
-   :project/test  {}})
+   :project/test  {:resource-paths ["test/resources"]
+                   :env
+                   {:db {:uri "jdbc:postgresql://localhost/lumen?user=lumen&password=password"}}}})

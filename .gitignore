@@ -6,12 +6,20 @@ npm-debug.log
 .DS_Store
 client/dist
 
-# ETL
-etl/bin/
-etl/.classpath
-etl/.settings/*
-etl/.project
-etl/target/*
+# Backend
+backend/target
+backend/classes
+backend/checkouts
+backend/pom.xml
+backend/pom.xml.asc
+backend/*.jar
+backend/*.class
+backend/.lein-*
+backend/.nrepl-port
+backend/.dir-locals.el
+backend/profiles.clj
+backend/dev/resources/local.edn
+backend/dev/src/local.clj
 
 # From https://github.com/github/gitignore
 
