@@ -46,8 +46,8 @@
      :wrap-jwt      org.akvo.lumen.auth/wrap-jwt
      :wrap-auth     org.akvo.lumen.auth/wrap-auth}
     :applied
-    [:json-response :not-found :ring-defaults :json-body :wrap-label-tenant
-     :wrap-jwt :wrap-auth :hide-errors]
+    [:json-response :not-found :ring-defaults :json-body
+     :wrap-auth :wrap-jwt :wrap-label-tenant :hide-errors]
     :arguments
     {:not-found   "Resource Not Found"
      :hide-errors "Internal Server Error"
