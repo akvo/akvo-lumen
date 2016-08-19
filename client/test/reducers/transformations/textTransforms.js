@@ -1,7 +1,8 @@
 import assert from 'assert';
+import Immutable from 'immutable';
 import applyTransformation from '../../../src/reducers/transform';
 
-const dataset = {
+const dataset = Immutable.fromJS({
   id: 'id',
   columns: [{
     type: 'text',
@@ -15,9 +16,9 @@ const dataset = {
     ['SoMe tExt'],
     ['  SoMe \n\n  tExt   '],
   ],
-};
+});
 
-const action = (op) => ({
+const action = (op) => Immutable.fromJS({
   op,
   args: {
     columnName: 'c1',
@@ -33,10 +34,10 @@ describe('Text transforms', () => {
       dataset,
       action('core/to-titlecase')
     );
-    assert.deepStrictEqual(
-      newDataset.rows.map(row => row[0]),
-      ['Foo', 'Bar', null, 'Some Text', '  Some \n\n  Text   ']
-    );
+    assert(Immutable.is(
+      newDataset.get('rows').map(row => row.get(0)),
+      Immutable.List(['Foo', 'Bar', null, 'Some Text', '  Some \n\n  Text   '])
+    ));
   });
 
   it('should transform with core/to-lowercase', () => {
@@ -44,10 +45,10 @@ describe('Text transforms', () => {
       dataset,
       action('core/to-lowercase')
     );
-    assert.deepStrictEqual(
-      newDataset.rows.map(row => row[0]),
-      ['foo', 'bar', null, 'some text', '  some \n\n  text   ']
-    );
+    assert(Immutable.is(
+      newDataset.get('rows').map(row => row.get(0)),
+      Immutable.List(['foo', 'bar', null, 'some text', '  some \n\n  text   '])
+    ));
   });
 
   it('should transform with core/to-uppercase', () => {
@@ -55,10 +56,10 @@ describe('Text transforms', () => {
       dataset,
       action('core/to-uppercase')
     );
-    assert.deepStrictEqual(
-      newDataset.rows.map(row => row[0]),
-      ['FOO', 'BAR', null, 'SOME TEXT', '  SOME \n\n  TEXT   ']
-    );
+    assert(Immutable.is(
+      newDataset.get('rows').map(row => row.get(0)),
+      Immutable.List(['FOO', 'BAR', null, 'SOME TEXT', '  SOME \n\n  TEXT   '])
+    ));
   });
 
   it('should transform with core/trim', () => {
@@ -66,10 +67,10 @@ describe('Text transforms', () => {
       dataset,
       action('core/trim')
     );
-    assert.deepStrictEqual(
-      newDataset.rows.map(row => row[0]),
-      ['foo', 'BAR', null, 'SoMe tExt', 'SoMe \n\n  tExt']
-    );
+    assert(Immutable.is(
+      newDataset.get('rows').map(row => row.get(0)),
+      Immutable.List(['foo', 'BAR', null, 'SoMe tExt', 'SoMe \n\n  tExt'])
+    ));
   });
 
   it('should transform with core/trim-doublespace', () => {
@@ -77,9 +78,9 @@ describe('Text transforms', () => {
       dataset,
       action('core/trim-doublespace')
     );
-    assert.deepStrictEqual(
-      newDataset.rows.map(row => row[0]),
-      ['foo', 'BAR', null, 'SoMe tExt', ' SoMe tExt ']
-    );
+    assert(Immutable.is(
+      newDataset.get('rows').map(row => row.get(0)),
+      Immutable.List(['foo', 'BAR', null, 'SoMe tExt', ' SoMe tExt '])
+    ));
   });
 });

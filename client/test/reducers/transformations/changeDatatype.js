@@ -1,9 +1,10 @@
 import assert from 'assert';
 import moment from 'moment';
+import Immutable from 'immutable';
 import applyTransformation from '../../../src/reducers/transform';
 
 describe('changeDatatype text->number', () => {
-  const dataset = {
+  const dataset = Immutable.fromJS({
     id: 'id',
     columns: [{
       type: 'text',
@@ -16,9 +17,9 @@ describe('changeDatatype text->number', () => {
       [null],
       ['not-a-number'],
     ],
-  };
+  });
 
-  const textToNumberAction = (onError, defaultValue) => ({
+  const textToNumberAction = (onError, defaultValue) => Immutable.fromJS({
     op: 'core/change-datatype',
     args: {
       columnName: 'c1',
@@ -34,25 +35,25 @@ describe('changeDatatype text->number', () => {
       dataset,
       textToNumberAction('default-value', 0)
     );
-    assert.deepStrictEqual(
-      newDataset.rows.map(row => row[0]),
-      [123, 3.14, 0, 0]
-    );
+    assert(Immutable.is(
+      newDataset.get('rows').map(row => row.get(0)),
+      Immutable.List([123, 3.14, 0, 0])
+    ));
   });
   it('should drop rows that cannot be parsed', () => {
     const newDataset = applyTransformation(
       dataset,
       textToNumberAction('delete-row')
     );
-    assert.deepStrictEqual(
-      newDataset.rows.map(row => row[0]),
-      [123, 3.14]
-    );
+    assert(Immutable.is(
+      newDataset.get('rows').map(row => row.get(0)),
+      Immutable.List([123, 3.14])
+    ));
   });
 });
 
 describe('changeDatatype number->text', () => {
-  const dataset = {
+  const dataset = Immutable.fromJS({
     id: 'id',
     columns: [{
       type: 'number',
@@ -65,9 +66,9 @@ describe('changeDatatype number->text', () => {
       [null],
       [-12],
     ],
-  };
+  });
 
-  const numberToTextAction = (onError, defaultValue) => ({
+  const numberToTextAction = (onError, defaultValue) => Immutable.fromJS({
     op: 'core/change-datatype',
     args: {
       columnName: 'c1',
@@ -76,25 +77,26 @@ describe('changeDatatype number->text', () => {
     },
     onError,
   });
+
   it('should change number to text with default N/A value', () => {
     const newDataset = applyTransformation(
       dataset,
       numberToTextAction('default-value', 'N/A')
     );
-    assert.deepStrictEqual(
-      newDataset.rows.map(row => row[0]),
-      ['123', '3.14', 'N/A', '-12']
-    );
+    assert(Immutable.is(
+      newDataset.get('rows').map(row => row.get(0)),
+      Immutable.List(['123', '3.14', 'N/A', '-12'])
+    ));
   });
   it('should drop rows that cannot be parsed', () => {
     const newDataset = applyTransformation(
       dataset,
       numberToTextAction('delete-row')
     );
-    assert.deepStrictEqual(
-      newDataset.rows.map(row => row[0]),
-      ['123', '3.14', '-12']
-    );
+    assert(Immutable.is(
+      newDataset.get('rows').map(row => row.get(0)),
+      Immutable.List(['123', '3.14', '-12'])
+    ));
   });
 });
 
@@ -103,7 +105,7 @@ describe('changeDatatype text->date', () => {
   const date2 = '01-01-1971';
   const ts1 = moment(date1, 'DD-MM-YYYY', true).unix();
   const ts2 = moment(date2, 'DD-MM-YYYY', true).unix();
-  const dataset = {
+  const dataset = Immutable.fromJS({
     id: 'id',
     columns: [{
       type: 'text',
@@ -116,9 +118,9 @@ describe('changeDatatype text->date', () => {
       [null],
       ['not-a-date'],
     ],
-  };
+  });
 
-  const textToDateAction = (onError, defaultValue) => ({
+  const textToDateAction = (onError, defaultValue) => Immutable.fromJS({
     op: 'core/change-datatype',
     args: {
       columnName: 'c1',
@@ -128,40 +130,41 @@ describe('changeDatatype text->date', () => {
     },
     onError,
   });
+
   it('should change text to date with default null value', () => {
     const newDataset = applyTransformation(
       dataset,
       textToDateAction('default-value', null)
     );
-    assert.deepStrictEqual(
-      newDataset.rows.map(row => row[0]),
-      [ts1, ts2, null, null]
-    );
+    assert(Immutable.is(
+      newDataset.get('rows').map(row => row.get(0)),
+      Immutable.List([ts1, ts2, null, null])
+    ));
   });
   it('should change text to date with default timestamp value', () => {
     const newDataset = applyTransformation(
       dataset,
       textToDateAction('default-value', 0)
     );
-    assert.deepStrictEqual(
-      newDataset.rows.map(row => row[0]),
-      [ts1, ts2, 0, 0]
-    );
+    assert(Immutable.is(
+      newDataset.get('rows').map(row => row.get(0)),
+      Immutable.List([ts1, ts2, 0, 0])
+    ));
   });
   it('should drop rows that cannot be parsed', () => {
     const newDataset = applyTransformation(
       dataset,
       textToDateAction('delete-row')
     );
-    assert.deepStrictEqual(
-      newDataset.rows.map(row => row[0]),
-      [ts1, ts2]
-    );
+    assert(Immutable.is(
+      newDataset.get('rows').map(row => row.get(0)),
+      Immutable.List([ts1, ts2])
+    ));
   });
 });
 
 describe('changeDatatype number->date', () => {
-  const dataset = {
+  const dataset = Immutable.fromJS({
     id: 'id',
     columns: [{
       type: 'number',
@@ -174,9 +177,9 @@ describe('changeDatatype number->date', () => {
       [null],
       [-3423],
     ],
-  };
+  });
 
-  const numberToDateAction = (onError, defaultValue) => ({
+  const numberToDateAction = (onError, defaultValue) => Immutable.fromJS({
     op: 'core/change-datatype',
     args: {
       columnName: 'c1',
@@ -185,34 +188,35 @@ describe('changeDatatype number->date', () => {
     },
     onError,
   });
+
   it('should change number to date with default null value', () => {
     const newDataset = applyTransformation(
       dataset,
       numberToDateAction('default-value', null)
     );
-    assert.deepStrictEqual(
-      newDataset.rows.map(row => row[0]),
-      [1482530400000, 31528800000, null, null]
-    );
+    assert(Immutable.is(
+      newDataset.get('rows').map(row => row.get(0)),
+      Immutable.List([1482530400000, 31528800000, null, null])
+    ));
   });
   it('should change number to date with default 0 value', () => {
     const newDataset = applyTransformation(
       dataset,
       numberToDateAction('default-value', 0)
     );
-    assert.deepStrictEqual(
-      newDataset.rows.map(row => row[0]),
-      [1482530400000, 31528800000, 0, 0]
-    );
+    assert(Immutable.is(
+      newDataset.get('rows').map(row => row.get(0)),
+      Immutable.List([1482530400000, 31528800000, 0, 0])
+    ));
   });
   it('should drop rows that cannot be parsed', () => {
     const newDataset = applyTransformation(
       dataset,
       numberToDateAction('delete-row')
     );
-    assert.deepStrictEqual(
-      newDataset.rows.map(row => row[0]),
-      [1482530400000, 31528800000]
-    );
+    assert(Immutable.is(
+      newDataset.get('rows').map(row => row.get(0)),
+      Immutable.List([1482530400000, 31528800000])
+    ));
   });
 });

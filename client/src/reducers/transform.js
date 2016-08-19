@@ -1,4 +1,4 @@
-
+import Immutable from 'immutable';
 import changeDatatype from './transforms/changeDatatype';
 import textTransform from './transforms/text';
 import sortTransform from './transforms/sortColumn';
@@ -16,23 +16,21 @@ const availableTransforms = {
   'core/filter-column': filterTransform,
 };
 
-function recordHistory(previousDataset, nextDataset) {
-  // Do we really need to keep history-on-the-history?
-  const history = (nextDataset.history || []).slice(0);
-  history.unshift(previousDataset);
-  return Object.assign({}, nextDataset, { history });
-}
-
-function updateTransformationLog(dataset, transformation) {
-  const transformations = (dataset.transformations || []).slice(0);
-  transformations.push(transformation);
-  return Object.assign({}, dataset, { transformations });
-}
-
 export default function applyTransformation(dataset, transformation) {
-  const transformedDataset = availableTransforms[transformation.op](dataset, transformation);
-  if (transformedDataset === dataset) {
+  const transformedDataset =
+    availableTransforms[transformation.get('op')](dataset, transformation);
+
+  if (Immutable.is(transformedDataset, dataset)) {
     return dataset;
   }
-  return updateTransformationLog(recordHistory(dataset, transformedDataset), transformation);
+
+  return transformedDataset
+    .update('transformations', transformations => (
+      transformations == null ?
+        Immutable.List.of(transformation) : transformations.push(transformation)
+      ))
+    .update('history', history => (
+      history == null ?
+        Immutable.List.of(dataset) : history.unshift(dataset)
+      ));
 }

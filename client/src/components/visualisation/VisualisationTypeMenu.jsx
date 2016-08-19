@@ -21,7 +21,8 @@ export default function VisualisationTypeMenu({ visualisation, onChangeVisualisa
       </label>
       <DashSelect
         name="visualisationTypeMenu"
-        value={visualisation.visualisationType || 'Choose a visualisation type...'}
+        placeholder="Choose a visualisation type..."
+        value={visualisation.visualisationType}
         options={chartTypes}
         onChange={onChangeVisualisationType}
       />

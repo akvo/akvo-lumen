@@ -1,4 +1,5 @@
 import fetch from 'isomorphic-fetch';
+import Immutable from 'immutable';
 import * as constants from '../constants/dataset';
 import * as visualisationActions from './visualisation';
 import { hideModal } from './activeModal';
@@ -43,7 +44,7 @@ export function fetchDataset(id) {
       headers: headers(),
     })
     .then(response => response.json())
-    .then(dataset => dispatch(fetchDatasetSuccess(dataset)))
+    .then(dataset => dispatch(fetchDatasetSuccess(Immutable.fromJS(dataset))))
     .catch(error => dispatch(fetchDatasetFailure(error, id)));
   };
 }
@@ -68,14 +69,14 @@ function importDatasetPending(importId, name) {
   const now = Date.now();
   return {
     type: constants.IMPORT_DATASET_PENDING,
-    dataset: {
+    dataset: Immutable.fromJS({
       id: importId,
       type: 'dataset',
       status: 'PENDING',
       name,
       created: now,
       modified: now,
-    },
+    }),
   };
 }
 
@@ -233,7 +234,7 @@ function deleteDatasetSuccess(id) {
     const visualisations = getState().library.visualisations;
     Object.keys(visualisations).forEach(visualisationId => {
       if (visualisations[visualisationId].datasetId === id) {
-        dispatch(visualisationActions.removeVisualisation(visualisationId));
+        dispatch(visualisationActions.deleteVisualisationSuccess(visualisationId));
       }
     });
   };
@@ -275,7 +276,7 @@ export function transform(datasetId, transformation) {
         dataset: nextDataset,
       });
     } catch (e) {
-      if (transformation.onError === 'fail') {
+      if (transformation.get('onError') === 'fail') {
         dispatch(showNotification('error', `Transformation aborted: ${e.message}`));
       } else {
         throw e;
@@ -333,7 +334,7 @@ export function sendTransformationLog(datasetId, transformations) {
     fetch(`/api/transformations/${datasetId}`, {
       method: 'POST',
       headers: headers(),
-      body: JSON.stringify(transformations),
+      body: JSON.stringify(transformations.toJSON()),
     })
     .then(response => response.json())
     .then(({ jobExecutionId }) =>

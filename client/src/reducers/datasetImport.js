@@ -1,5 +1,5 @@
-import * as constants from '../constants/dataset';
 import update from 'react-addons-update';
+import * as constants from '../constants/dataset';
 
 export const initialState = {
   currentPage: 'select-data-source-type',

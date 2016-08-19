@@ -21,7 +21,7 @@ export default function DataTypeContextMenu({ column, dimensions, onContextMenuI
   return (
     <ContextMenu
       options={options}
-      selected={column.type}
+      selected={column.get('type')}
       style={{
         width: '8rem',
         top: `${dimensions.top}px`,
