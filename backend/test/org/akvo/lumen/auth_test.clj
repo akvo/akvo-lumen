@@ -1,6 +1,5 @@
 (ns org.akvo.lumen.auth-test
   (:require [org.akvo.lumen.auth :as m]
-            [org.akvo.lumen.system :as system]
             [clojure.test :refer [deftest testing is]]
             [ring.mock.request :as mock]))
 

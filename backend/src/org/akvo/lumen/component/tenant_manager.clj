@@ -3,7 +3,10 @@
   We use the first domain label e.g. t1 in t1.lumen.akvo.org to dispatch."
   (:require [clojure.string :as str]
             [com.stuartsierra.component :as component]
-            [hugsql.core :as hugsql])
+            [hugsql.core :as hugsql]
+            [ragtime
+             [jdbc :as ragtime-jdbc]
+             [repl :as ragtime-repl]])
   (:import [com.zaxxer.hikari HikariConfig HikariDataSource]))
 
 (hugsql/def-db-fns "org/akvo/lumen/component/tenant_manager.sql")
@@ -28,8 +31,8 @@
 ;;;
 
 (defprotocol TenantConnection
-  (connection [component label] "Connection based on a tenant dns label.")
-  (uri [component label] "Database URI based on a tenant dns label."))
+  (connection [this label] "Connection based on a tenant dns label.")
+  (uri [this label] "Database URI based on a tenant dns label."))
 
 
 (defn pool
@@ -56,28 +59,28 @@
 (defrecord TenantManager [db]
 
   component/Lifecycle
-  (start [component]
-    (if (:tenants component)
-      component
-      (assoc component :tenants (atom {}))))
+  (start [this]
+    (if (:tenants this)
+      this
+      (assoc this :tenants (atom {}))))
 
-  (stop [component]
-    (if-let [tenants (:tenants component)]
+  (stop [this]
+    (if-let [tenants (:tenants this)]
       (do
         (doseq [[_ {{^HikariDataSource conn :datasource} :spec}] @tenants]
           (.close conn))
-        (dissoc component :tenants))
-      component))
+        (dissoc this :tenants))
+      this))
 
   TenantConnection
-  (connection [{:keys [db tenants] :as component} label]
+  (connection [{:keys [db tenants]} label]
     (if-let [tenant (get @tenants label)]
       (:spec tenant)
       (do
         (load-tenant db tenants label)
         (:spec (get @tenants label)))))
 
-  (uri [{:keys [db tenants] :as component} label]
+  (uri [{:keys [db tenants]} label]
     (if-let [tenant (get @tenants label)]
       (:uri tenant)
       (do
@@ -85,10 +88,5 @@
         (:uri (get @tenants label))))))
 
 
-(defn manager
-  ""
-  []
-  (map->TenantManager {}))
-
-(alter-meta! #'->TenantManager assoc :no-doc true)
-(alter-meta! #'map->TenantManager assoc :no-doc true)
+(defn tenant-manager [options]
+  (map->TenantManager options))

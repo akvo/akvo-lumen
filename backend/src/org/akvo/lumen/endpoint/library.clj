@@ -1,5 +1,4 @@
 (ns org.akvo.lumen.endpoint.library
-  "Library endpoint..."
   (:require [compojure.core :refer :all]
             [hugsql.core :as hugsql]
             [ring.util.response :refer [response]]

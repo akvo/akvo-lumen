@@ -1,18 +1,2 @@
 ;; Local profile overrides
-{:profiles/dev
- {:env
-  {:database-url "jdbc:postgresql://localhost/lumen?user=lumen&password=password"
-   :flow-report-database-url "jdbc:postgresql://localhost/%s"
-   :file-upload-path "/tmp/akvo/lumen"
-   :lumen-keycloak-url "http://localhost:8080/auth"}}
- :profiles/test
- {:env
-  {:database-url "jdbc:postgresql://localhost/test_lumen?user=lumen&password=password"
-   :flow-report-database-url "jdbc:postgresql://localhost/%s"
-   :file-upload-path "/tmp/akvo/lumen"
-   :tenants [{:db_uri "jdbc:postgresql://localhost/test_lumen_tenant_1?user=lumen&password=password"
-              :label "t1"
-              :title "Tenant 1"}
-             {:db_uri "jdbc:postgresql://localhost/test_lumen_tenant_2?user=lumen&password=password"
-              :label "t2"
-              :title "Tenant 2"}]}}}
+{}
