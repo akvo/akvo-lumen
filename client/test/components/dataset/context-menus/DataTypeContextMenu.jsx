@@ -1,6 +1,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import assert from 'assert';
+import Immutable from 'immutable';
 import DataTypeContextMenu from
   '../../../../src/components/dataset/context-menus/DataTypeContextMenu';
 import ContextMenu from '../../../../src/components/common/ContextMenu';
@@ -8,7 +9,7 @@ import ContextMenu from '../../../../src/components/common/ContextMenu';
 
 describe('<DataTypeContextMenu />', () => {
   const baseProps = {
-    column: {},
+    column: Immutable.fromJS({}),
     dimensions: { top: 0, left: 0 },
     onContextMenuItemSelected: () => {},
   };
