@@ -65,19 +65,6 @@
                          amount-or-id))
 
 
-(defn rollback
-  "Will rollback tenants."
-  []
-  (let [
-        system (construct-system source-files bindings)
-        migrations (load-migrations system)
-        tenant-manager-db {:connection-uri (get-in system [:config :db :uri])}
-        ]
-    (doseq [tenant (all-tenants tenant-manager-db)]
-      (do-rollback (ragtime-jdbc/sql-database {:connection-uri (:db_uri tenant)})
-                   (:tenants migrations)
-                   (count (:tenants migrations))))))
-
 (defn rollback-tenants [db migrations amount-or-id]
   (doseq [tenant (all-tenants db)]
     (do-rollback (ragtime-jdbc/sql-database {:connection-uri (:db_uri tenant)})
