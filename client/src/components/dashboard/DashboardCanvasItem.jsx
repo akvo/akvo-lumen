@@ -32,21 +32,21 @@ export default class DashboardCanvasItem extends Component {
     const oldLayout = this.getItemLayout(this.props);
     const newLayout = this.getItemLayout(nextProps);
     const layoutsExist = Boolean(oldLayout && newLayout);
-    const dimensionsUnchanged = layoutsExist ?
-      oldLayout.w === newLayout.w && oldLayout.h === newLayout.h : false;
-    const canvasWidthUnchanged = this.props.canvasWidth === nextProps.canvasWidth;
+    const dimensionsChanged = layoutsExist ?
+      oldLayout.w !== newLayout.w || oldLayout.h !== newLayout.h : true;
+    const canvasWidthChanged = this.props.canvasWidth !== nextProps.canvasWidth;
     const needDataset = this.props.item.type === 'visualisation';
     const datasetDependencyMet = needDataset ? this.getIsDatasetLoaded(this.props) : true;
     const styleTransitionFinished = this.state.style.boxShadow === 'none';
 
-    const shouldNotUpdate = Boolean(
-        dimensionsUnchanged &&
-        canvasWidthUnchanged &&
-        datasetDependencyMet &&
-        styleTransitionFinished
+    const shouldUpdate = Boolean(
+        dimensionsChanged ||
+        canvasWidthChanged ||
+        !datasetDependencyMet ||
+        !styleTransitionFinished
       );
 
-    return !shouldNotUpdate;
+    return shouldUpdate;
   }
 
   getItemLayout(props) {
