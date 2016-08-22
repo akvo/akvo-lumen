@@ -1,7 +1,6 @@
 (ns org.akvo.lumen.migrate
   (:require
    [clojure.java.io :as io]
-   [clojure.core.match :refer [match]]
    [duct.util.system :refer [read-config]]
    [environ.core :refer [env]]
    [hugsql.core :as hugsql]
