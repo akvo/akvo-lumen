@@ -1,23 +1,19 @@
-import cloneDeep from 'lodash/cloneDeep';
 import moment from 'moment';
-import { columnIndex } from '../../utilities/dataset';
+import { columnIndex } from '../../domain/dataset';
 
 function makeParser(parser) {
   return (rows, idx, onError, args) => {
     const deleteMarker = {};
-    const { defaultValue } = args;
+    const defaultValue = args.get('defaultValue');
     const newRows = rows.map(row => {
-      const r = row;
-      const val = r[idx];
+      const val = row.get(idx);
       try {
-        const parsedVal = parser(row[idx], args);
-        r[idx] = parsedVal;
-        return r;
+        const parsedVal = parser(val, args);
+        return row.set(idx, parsedVal);
       } catch (error) {
         switch (onError) {
           case 'default-value':
-            r[idx] = defaultValue;
-            return r;
+            return row.set(idx, defaultValue);
           case 'delete-row':
             return deleteMarker;
           case 'fail':
@@ -42,7 +38,8 @@ function textToNumber(s) {
   return n;
 }
 
-function textToDate(s, { parseFormat }) {
+function textToDate(s, args) {
+  const parseFormat = args.get('parseFormat');
   if (!moment(s, parseFormat, true).isValid()) {
     throw new Error('Parse error');
   }
@@ -98,17 +95,21 @@ const transformationFunctions = {
   },
 };
 
-export default function changeDatatype(dataset, { args, onError }) {
-  const { newType, columnName } = args;
-  const colIndex = columnIndex(columnName, dataset.columns);
-  const prevType = dataset.columns[colIndex].type;
+export default function changeDatatype(dataset, transformation) {
+  const args = transformation.get('args');
+  const newType = args.get('newType');
+  const columnName = args.get('columnName');
+  const onError = transformation.get('onError');
+  const columns = dataset.get('columns');
+  const colIndex = columnIndex(columnName, columns);
+  const prevType = columns.getIn([colIndex, 'type']);
   if (newType === prevType) {
     return dataset;
   }
   const fn = transformationFunctions[prevType][newType];
-  const clonedDataset = cloneDeep(dataset);
-  const newRows = fn(clonedDataset.rows, colIndex, onError, args);
-  clonedDataset.rows = newRows;
-  clonedDataset.columns[colIndex].type = newType;
-  return clonedDataset;
+  const newRows = fn(dataset.get('rows'), colIndex, onError, args);
+  const newDataset = dataset
+    .set('rows', newRows)
+    .setIn(['columns', colIndex, 'type'], newType);
+  return newDataset;
 }

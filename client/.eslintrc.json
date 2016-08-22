@@ -12,5 +12,12 @@
         "jsx": true
       }
     }
+  },
+  "rules": {
+    "new-cap": [2, {"capIsNewExceptions": ["Immutable.Map", "Immutable.Set", "Immutable.List"]}]
+  },
+  "globals": {
+    "window": true,
+    "document": true
   }
 }

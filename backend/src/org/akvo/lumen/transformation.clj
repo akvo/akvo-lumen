@@ -121,7 +121,7 @@
                   {:source-table source-table
                    :dest-table table-name}
                   {}
-                  :transaction? false)
+                  {:transaction? false})
       (let [result (reduce f [] transformation-log)
             log (vec (mapcat :execution-log result))
             cols (:columns (last result))]

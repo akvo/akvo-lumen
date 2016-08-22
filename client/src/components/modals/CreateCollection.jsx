@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import Modal from 'react-modal';
-import { createCollection } from '../../actions/collection';
+import createCollection from '../../actions/collection';
 
 
 export default class CreateCollection extends Component {

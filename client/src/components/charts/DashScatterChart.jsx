@@ -1,5 +1,5 @@
 import React, { PropTypes } from 'react';
-import { ScatterChart } from 'react-d3';
+import { ScatterChart } from 'rd3';
 import * as chart from '../../utilities/chart';
 
 export default function DashScatterChart({ visualisation, datasets, width, height }) {

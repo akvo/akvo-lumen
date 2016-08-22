@@ -3,7 +3,7 @@ import React, { Component, PropTypes } from 'react';
 export default class LibrarySearch extends Component {
 
   handleClick() {
-    const input = this.refs.search;
+    const input = this.search;
     this.props.onSearch(input.value.trim());
   }
 
@@ -12,7 +12,7 @@ export default class LibrarySearch extends Component {
       <div className="LibrarySearch">
         <input
           className="search"
-          ref="search"
+          ref={ref => { this.search = ref; }}
           placeholder="Search"
           defaultValue={this.props.searchString}
         />

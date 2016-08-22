@@ -9,7 +9,7 @@ require('../styles/style.global.scss');
 require('../styles/Main.scss');
 require('fixed-data-table/dist/fixed-data-table.css');
 
-export function Main({ location, children, notification }) {
+function Main({ location, children, notification }) {
   return (
     <div className="Main">
       {notification && <Notification {...notification} />}

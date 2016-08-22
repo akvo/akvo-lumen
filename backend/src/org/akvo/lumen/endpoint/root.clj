@@ -1,5 +1,4 @@
 (ns org.akvo.lumen.endpoint.root
-  "The root (/) API resource."
   (:require [compojure.core :refer :all]
             [ring.util.response :refer [response]]))
 
@@ -11,9 +10,10 @@
       (let [base-url (str (-> request :scheme name)
                           "://" (:server-name request)
                           ":" (:server-port request)
-                          (:uri request))]
+                          (:uri request) "/")]
         (response
-         {:help      "To access the API endpoints a valid authorization header needs to be provided."
+         {:help      (str "To access the API endpoints a valid authorization "
+                          "header needs to be provided.")
           :tenant    (:tenant request)
           :resources {:datasets       (str base-url "datasets")
                       :shares         (str base-url "shares")

@@ -1,19 +1,21 @@
 (ns org.akvo.lumen.fixtures
-  (:require [hugsql.core :as hugsql]
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
+            [hugsql.core :as hugsql]
             [org.akvo.lumen.component.tenant-manager :as tm]
             [org.akvo.lumen.migrate :as migrate]
             [ragtime
              [jdbc :as jdbc]
              [repl :as repl]]
-            [reloaded.repl :refer [go stop]]
-            [user :refer [config]]))
+            [reloaded.repl :refer [go stop]]))
 
+#_(def config
+  {:db {:uri "jdbc:postgresql://localhost/lumen?user=lumen&password=password"}})
 
 (def test-tenant-spec
-  (->> "profiles.clj" slurp read-string :profiles/test :env :tenants first))
-
-;; (def test-tenant-spec
-;;   (first (env :tenants)))
+  (->> "seed.edn" io/resource slurp edn/read-string
+       :tenant-manager :tenants
+       first))
 
 (def test-conn
   (tm/pool test-tenant-spec))
@@ -26,7 +28,7 @@
 (defn- ragtime-spec
   [tenant]
   {:datastore  (jdbc/sql-database {:connection-uri (:db_uri tenant)})
-   :migrations (jdbc/load-resources "org/akvo/lumen/migrations_tenants")})
+   :migrations (jdbc/load-resources "org/akvo/lumen/migrations/tenants")})
 
 (defn migrate-tenant
   [tenant]
@@ -51,7 +53,7 @@
 
 (hugsql/def-db-fns "org/akvo/lumen/fixtures.sql")
 
-(defn system-fixture
+#_(defn system-fixture
   "Starts the system and migrates, no setup or tear down."
   [f]
   (let [conn {:connection-uri (-> config :db :uri)}]
@@ -67,4 +69,5 @@
       (migrate/migrate conn)
       (f)
       (migrate/rollback conn [:all])
-      (finally (stop)))))
+      (finally
+        (stop)))))

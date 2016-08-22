@@ -39,6 +39,12 @@ To begin developing, start with a REPL.
 ```sh
 lein repl
 ```
+Run `dev` to switch to dev namespace.
+
+```clojure
+user=> (dev)
+:started
+```
 
 Run `go` to initiate and start the system.
 
@@ -109,14 +115,6 @@ migrations can be applied.
 
 [ragtime]: https://github.com/weavejester/ragtime
 
-### Generators
-
-This project has several [generators][] to help you create files.
-
-* `lein gen endpoint <name>` to create a new endpoint
-* `lein gen component <name>` to create a new component
-
-[generators]: https://github.com/weavejester/lein-generate
 
 ## Deploying
 

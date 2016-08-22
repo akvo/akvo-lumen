@@ -1,5 +1,5 @@
 import React, { PropTypes } from 'react';
-import { LineChart } from 'react-d3';
+import { LineChart } from 'rd3';
 import * as chart from '../../utilities/chart';
 
 export default function DashLineChart({ visualisation, datasets, width, height }) {

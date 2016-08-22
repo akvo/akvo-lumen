@@ -1,37 +1,36 @@
 import * as constants from '../constants/dataset';
-import update from 'react-addons-update';
 
 export const initialState = {};
 
 function createDataset(state, dataset) {
-  const id = dataset.id;
+  const id = dataset.get('id');
   return Object.assign({}, state, {
     [id]: dataset,
   });
 }
 
 function saveDatasetSettings(state, dataset) {
-  const { id, name } = dataset;
+  const id = dataset.get('id');
+  const name = dataset.get('name');
   return Object.assign({}, state, {
-    [id]: Object.assign({}, state[id], {
-      name,
-    }),
+    [id]: state[id].set('name', name),
   });
 }
 
 function importDatasetPending(state, dataset) {
-  const id = dataset.id;
+  const id = dataset.get('id');
   return Object.assign({}, state, {
     [id]: dataset,
   });
 }
 
 function importDatasetFailure(state, { importId, reason, modified }) {
-  const dataset = Object.assign({}, state[importId], {
+  const dataset = state[importId].merge({
     status: 'FAILED',
     reason,
     modified,
   });
+
   return Object.assign({}, state, {
     [importId]: dataset,
   });
@@ -44,19 +43,18 @@ function importDatasetSuccess(state, { importId }) {
 }
 
 function saveDataset(state, dataset) {
-  const id = dataset.id;
-  const ds = update(dataset, { $merge: { type: 'dataset' } });
-  return update(state, {
-    [id]: { $set: ds },
+  const id = dataset.get('id');
+  return Object.assign({}, state, {
+    [id]: dataset.set('type', 'dataset'),
   });
 }
 
 function saveDatasets(state, ds) {
   return ds.reduce((result, dataset) => {
-    const id = dataset.id;
+    const id = dataset.get('id');
     if (state[id] == null) {
       return Object.assign({}, result, {
-        [id]: Object.assign({}, dataset, { type: 'dataset' }),
+        [id]: dataset.set('type', 'dataset'),
       });
     }
     return result;
@@ -71,41 +69,36 @@ function removeDataset(state, id) {
 
 function replaceDataset(state, { dataset }) {
   return Object.assign({}, state, {
-    [dataset.id]: dataset,
+    [dataset.get('id')]: dataset,
   });
 }
 
 function transformationLogRequestSent(state, { datasetId }) {
-  const newDataset = Object.assign({}, state[datasetId], { status: 'PENDING' });
-  // Remove history, we don't need it anymore
-  delete newDataset.history;
+  const dataset = state[datasetId];
   return Object.assign({}, state, {
-    [datasetId]: newDataset,
+    [datasetId]: dataset.set('status', 'PENDING').delete('history'),
   });
 }
 
 function transformationFailure(state, { datasetId, reason }) {
+  const dataset = state[datasetId];
   return Object.assign({}, state, {
-    [datasetId]: Object.assign({}, state[datasetId], {
-      status: 'FAILED',
-      reason,
-    }),
+    [datasetId]: dataset.set('status', 'FAILED').set('reason', reason),
   });
 }
 
 function transformationSuccess(state, { datasetId }) {
+  const dataset = state[datasetId];
   return Object.assign({}, state, {
-    [datasetId]: Object.assign({}, state[datasetId], {
-      status: 'OK',
-    }),
+    [datasetId]: dataset.set('status', 'OK'),
   });
 }
 
 function undoDatasetTransformation(state, id) {
   const dataset = state[id];
-  if (dataset.history != null && dataset.history.length > 0) {
+  if (dataset.get('history') != null && dataset.get('history').size > 0) {
     return Object.assign({}, {
-      [id]: dataset.history[0],
+      [id]: dataset.getIn(['history', 0]),
     });
   }
   return state;

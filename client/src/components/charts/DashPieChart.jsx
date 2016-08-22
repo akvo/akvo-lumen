@@ -1,5 +1,5 @@
 import React, { PropTypes } from 'react';
-import { PieChart } from 'react-d3';
+import { PieChart } from 'rd3';
 import * as chart from '../../utilities/chart';
 
 export default function DashPieChart({ visualisation, datasets, width, height }) {

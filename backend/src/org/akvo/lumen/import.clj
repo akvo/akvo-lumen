@@ -25,7 +25,7 @@
                       {:from-table table-name
                        :to-table imported-table-name}
                       {}
-                      :transaction? false)
+                      {:transaction? false})
     (insert-dataset-version conn {:id (squuid)
                                   :dataset-id dataset-id
                                   :job-execution-id job-execution-id
