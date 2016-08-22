@@ -1,9 +1,11 @@
 (ns org.akvo.lumen.migrate
   (:require
    [clojure.java.io :as io]
+   [clojure.core.match :refer [match]]
    [duct.util.system :refer [read-config]]
    [environ.core :refer [env]]
    [hugsql.core :as hugsql]
+   [org.akvo.lumen.main :refer [bindings]]
    [meta-merge.core :refer [meta-merge]]
    [ragtime
     [jdbc :as ragtime-jdbc]
@@ -40,8 +42,7 @@
   "Migrate tenant manager and tenants."
   ([] (migrate source-files))
   ([system-definitions]
-   (let [bindings {'http-port (Integer/parseInt (:port env "3000"))}
-         system (construct-system system-definitions bindings)
+   (let [system (construct-system system-definitions bindings)
          migrations (load-migrations system)
          tenant-manager-db {:connection-uri (get-in system [:config :db :uri])}]
      (do-migrate (ragtime-jdbc/sql-database tenant-manager-db)
@@ -59,13 +60,55 @@
                 (:tenants migrations))))
 
 
-#_(defn do-rollback [datastore migrations]
-  (ragtime-repl/rollback {:datastore  datastore :migrations migrations}
-                         (count migrations)))
+(defn do-rollback [datastore migrations amount-or-id]
+  (ragtime-repl/rollback {:datastore  datastore
+                          :migrations migrations}
+                         amount-or-id))
 
-#_(defn rollback
+
+(defn rollback
+  "Will rollback tenants."
   []
-  (let [tenants (env :tenants)]
-    (println "@rollback")
-    (clojure.pprint/pprint tenants)
-    ))
+  (let [
+        system (construct-system source-files bindings)
+        migrations (load-migrations system)
+        tenant-manager-db {:connection-uri (get-in system [:config :db :uri])}
+        ]
+    (doseq [tenant (all-tenants tenant-manager-db)]
+      (do-rollback (ragtime-jdbc/sql-database {:connection-uri (:db_uri tenant)})
+                   (:tenants migrations)
+                   (count (:tenants migrations))))))
+
+(defn rollback-tenants [db migrations amount-or-id]
+  (doseq [tenant (all-tenants db)]
+    (do-rollback (ragtime-jdbc/sql-database {:connection-uri (:db_uri tenant)})
+                 migrations
+                 amount-or-id)))
+
+
+(defn rollback
+  "(rollback) ;; will rollback tenants
+  (rollback 1 ;; will rollback 1 migration on all tenants)
+  (rollback :tenant-manager) ;; will rollback tenant manager migrations"
+  [arg]
+  (let [system (construct-system source-files bindings)
+        migrations (load-migrations system)
+        tenant-migrations (:tenants migrations)
+        tenant-manager-migrations (:tenant-manager migrations)
+
+        tenant-manager-db {:connection-uri (get-in system [:config :db :uri])}]
+    (cond
+      (= arg :tenant-manager)
+      (do-rollback (ragtime-jdbc/sql-database tenant-manager-db)
+                   tenant-manager-migrations
+                   (count tenant-manager-migrations))
+
+      (number? arg)
+      (rollback-tenants tenant-manager-db
+                        (:tenants migrations)
+                        arg)
+
+      :else
+      (rollback-tenants tenant-manager-db
+                        (:tenants migrations)
+                        (count (:tenants migrations))))))

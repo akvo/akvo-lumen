@@ -54,3 +54,8 @@
 
 (defn migrate []
   (lumen-migrate/migrate))
+
+
+(defn rollback
+  ([] (lumen-migrate/rollback {}))
+  ([args] (lumen-migrate/rollback args)))
