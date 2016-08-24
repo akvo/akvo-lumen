@@ -37,7 +37,8 @@
                 :tenants "org/akvo/lumen/migrations/tenants"}
    :middleware
    {:functions
-    {:hide-errors   duct.middleware.errors/wrap-hide-errors
+    {:stacktrace ring.middleware.stacktrace/wrap-stacktrace
+     :hide-errors   duct.middleware.errors/wrap-hide-errors
      :not-found     duct.middleware.not-found/wrap-not-found
      :ring-defaults ring.middleware.defaults/wrap-defaults
      :json-response ring.middleware.json/wrap-json-response
@@ -47,7 +48,9 @@
      :wrap-auth     org.akvo.lumen.auth/wrap-auth}
     :applied
     [:json-response :not-found :ring-defaults :json-body
-     :wrap-auth :wrap-jwt :wrap-label-tenant ;; :hide-errors
+     :wrap-auth :wrap-jwt :wrap-label-tenant
+     :stacktrace
+     ;; :hide-errors
      ]
     :arguments
     {:not-found   "Resource Not Found"
