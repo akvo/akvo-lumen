@@ -4,7 +4,7 @@
    [duct.util.system :refer [read-config]]
    [environ.core :refer [env]]
    [hugsql.core :as hugsql]
-   [org.akvo.lumen.main :refer [bindings]]
+   [org.akvo.lumen.config :refer [bindings]]
    [meta-merge.core :refer [meta-merge]]
    [ragtime
     [jdbc :as ragtime-jdbc]
