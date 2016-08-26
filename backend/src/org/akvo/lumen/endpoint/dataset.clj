@@ -32,7 +32,7 @@
     (let [columns (remove #(get % "hidden") (:columns dataset))
           data (rest (jdbc/query conn
                                  [(select-data-sql (:table-name dataset) columns)]
-                                 :as-arrays? true))]
+                                 {:as-arrays? true}))]
       {:id id
        :name (:title dataset)
        :modified (:modified dataset)

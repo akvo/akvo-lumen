@@ -34,7 +34,7 @@ export default class Settings extends Component {
 
   handleUpdate() {
     this.props.onChangeSettings({
-      name: this.refs.datasetNameInput.value,
+      name: this.datasetNameInput.value,
     });
   }
 
@@ -56,7 +56,7 @@ export default class Settings extends Component {
               defaultValue={dataset.name}
               className="datasetNameInput"
               onChange={this.handleUpdate}
-              ref="datasetNameInput"
+              ref={ref => { this.datasetNameInput = ref; }}
               type="text"
             />
           </dd>

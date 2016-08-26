@@ -70,6 +70,7 @@ $ lein repl
 
 Once the repl is up and running, run these commands one by one
 ```clojure
+user=> (dev)     ;; Loads dev namespace
 user=> (go)      ;; Init and start the app
 user=> (migrate) ;; Migrate the db, requires a running app
 user=> (stop)
@@ -90,6 +91,37 @@ Tests can be augmented with ^:functional and those will not be runned by default
 ```
 lein test
 lein test :all
+```
+## Generators
+
+This project has several generator functions to help you create files.
+
+To create a new endpoint:
+
+```clojure
+dev=> (gen/endpoint "bar")
+Creating file src/foo/endpoint/bar.clj
+Creating file test/foo/endpoint/bar_test.clj
+Creating directory resources/foo/endpoint/bar
+nil
+```
+
+To create a new component:
+
+```clojure
+dev=> (gen/component "baz")
+Creating file src/foo/component/baz.clj
+Creating file test/foo/component/baz_test.clj
+nil
+```
+
+To create a new boundary:
+
+```clojure
+dev=> (gen/boundary "quz" foo.component.baz.Baz)
+Creating file src/foo/boundary/quz.clj
+Creating file test/foo/boundary/quz_test.clj
+nil
 ```
 
 ## Legal

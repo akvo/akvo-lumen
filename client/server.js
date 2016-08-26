@@ -9,11 +9,11 @@ new WebpackDevServer(webpack(config), {
   hot: true,
   historyApiFallback: true,
   proxy: {
-    '/api*': {
+    '/api/**': {
       target: "http://t1.lumen.localhost:3000",
       secure: false
     },
-    '/s/*': {
+    '/s/**': {
       target: "http://t1.lumen.localhost:3000",
       secure: false
     }

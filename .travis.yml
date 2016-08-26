@@ -1,38 +1,21 @@
 language:
 - clojure
 - node_js
-
 jdk:
 - oraclejdk8
-
 cache:
   directories:
   - $HOME/.m2
   - client/node_modules
-
 sudo: required
-
 addons:
-  postgresql: "9.5"
-
+  postgresql: '9.5'
+services:
+- docker
 before_install:
-- sudo /etc/init.d/postgresql stop
-- sudo apt-get -y remove --purge postgresql-9.1
-- sudo apt-get -y remove --purge postgresql-9.2
-- sudo apt-get -y remove --purge postgresql-9.3
-- sudo apt-get -y remove --purge postgresql-9.4
-- sudo apt-get -y autoremove
-- sudo apt-key adv --keyserver keys.gnupg.net --recv-keys 7FCC7D46ACCC4CF8
-- sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ precise-pgdg main 9.5" >> /etc/apt/sources.list.d/postgresql.list'
-- sudo apt-get update
-- sudo apt-get -y install postgresql-9.5
-- sudo sh -c "sed -i 's/md5$/trust/g' /etc/postgresql/9.5/main/pg_hba.conf"
-- sudo sh -c "sed -i 's/peer$/trust/g' /etc/postgresql/9.5/main/pg_hba.conf"
-- sudo /etc/init.d/postgresql restart
-- sudo psql -U postgres -c "CREATE ROLE travis SUPERUSER CREATEDB CREATEROLE INHERIT LOGIN;"
-- sudo psql -U postgres -c "CREATE DATABASE travis WITH OWNER = travis;"
-- psql --version
-
+- cd keycloak
+- ./server.sh build && ./server.sh run
+- cd ..
 - cd client
 - nvm install 4
 - npm config set spin false
@@ -40,17 +23,13 @@ before_install:
 - cd ../backend
 - cp profiles.clj.template profiles.clj
 - ./provision/setup.sh
-
 - mkdir -p $HOME/.lein
 - echo '{:user {:plugins [[jonase/eastwood "0.2.3"]]}}' > $HOME/.lein/profiles.clj
-
 script:
-- lein2 do clean, check, test :all, eastwood '{:source-paths ["src" "test"]}'
+- lein do clean, check, test :all, eastwood '{:source-paths ["src" "test"]}'
 - cd ../client
 - npm run lint
 - npm test
-
 notifications:
-  hipchat:
-    rooms:
-      secure: rTvHHDbTaoiha4bipdbpSJQJAXpaBiP+tHah6pxRfodSb3S7SvfkBXgctxuNGumVPOCt2efiih51CUxQR4NkOjOLmJI1LgWQmdf9MqUEFz/4Hd9nWB6lYbmbaN/lGEh4pn3NGiWueq6MUO7ORPmVdSOMgH+YBI1U77pJ43NNW5izXrHUNr5xZzZjiYxnFW4pfzuw2iAlnvrHOGPxBQZM8MSqINP2quveqUziBoYmShW4TSHRTV2fpYHEjUbSfq4U2S4mAua9I9QoZjSAuZXFHglmrdNCKlPaXpCouON0uKIecMSu26fDCH8MDq0hcXD5cdm/X+uW6z95UlJVIKyUT02a06G0Bt6OonYox9eJKNFtTxN5aPithM0fa/4r2aXyF5WaSsBFlHKAMhWY4ZbfXj/k9QFsd13aTf7aCRfOAq5VqsTrEW9SgQW5+ID64dWelB3w7MO0pIfe48F3OB2zCnzPwRgH0HA6qMQCRAVDEB0upkt4yIMjURNB74doRfA8DeYhA4ptEDU6X2RCPa5N5B3xJlIheW9I/2RCYRze3zRu7l2CeD+Sg7Vj3O9sqbyj5ZNh6ktw82BNWK2j+igwjk6jy9RaPNsfVEWyOaxjNCyOffd2BeRZP8Gv0CtQP1owc12l9U8SRAt4N1zlAxSp7jZky0hHS4JvT9+PjvZtE6Q=
+  slack:
+    secure: iO7fj8eFN5wyYSwwmlG4h5vVAWFVgKyH6o3uBq1kSrBbFlCPNQlBd92AeG3emf6DGR25cX0yRfmSQfQoIV1q//iJNyoMTVEG80Cw2aTjrp2IJ2u9ZkBVmDREILJEgj/qA6RRsYOoYsqTVGwLmkFyXBlTUL6GB4ZMPriyHgjjJOwTuJ1vhKoz7WIOeFCyMssNY6SNkfiZT1OFAoqmSlsP3B/W/tRtJT831mEApHcJ6QzBjsRnDwlB5P42tB1OlANTflfdpcIHkPQy/LeRxj9HorctkGiR4B0wExClfPHJQNldtzxUbgI9lpseiuAEUaqgQIRmpP6vXgOCGE8gzIoVWN3ZQgAxdCbvK/31lI2fIjPOLMUfC3BqQw9KI2lG5nH0rN1/YE5mgKM2GlQHX5URViLFQzpTyulZ/Mxh+LsaPScEyz+nFDZpaNuGx/o7dKv5FkVCj2gWRLgyJuSEKFFZtDMcsn24++uOe1eBEWsciJp51HiHeJCOFiEJnWrmhglwdsrgfGjqChsQFv28TVdcJoyO6WY7kDKrso+Xw+kOMffqGHnI/w856nEQCmGY+sR8oiEd+eDn3s4v5kwuWZ2P0gzro+8zH45AFh0OHVht4Nj0PTVy6oaK20UvcBhvAaV0ZpBBM8NhvYqNPI50Wua5asTAEbqo3GGJuQXS2zPg5b4=

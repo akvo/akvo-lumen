@@ -1,5 +1,5 @@
 import React, { PropTypes } from 'react';
-import { BarChart } from 'react-d3';
+import { BarChart } from 'rd3';
 import * as chart from '../../utilities/chart';
 
 export default function DashBarChart({ visualisation, datasets, width, height }) {

@@ -9,8 +9,8 @@ export default function ColumnMenu(props) {
       </label>
       <DashSelect
         name={props.name}
-        value={props.choice !== null ?
-          props.choice : 'Choose a dataset column...'}
+        placeholder="Choose a dataset column..."
+        value={props.choice}
         options={props.options}
         onChange={props.onChange}
       />

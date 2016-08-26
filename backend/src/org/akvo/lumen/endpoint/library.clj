@@ -1,5 +1,4 @@
 (ns org.akvo.lumen.endpoint.library
-  "Library endpoint..."
   (:require [compojure.core :refer :all]
             [hugsql.core :as hugsql]
             [ring.util.response :refer [response]]
@@ -19,4 +18,4 @@
          {:dashboards     (all-dashboards tenant-conn)
           :datasets       (all-datasets tenant-conn)
           :visualisations (all-visualisations
-                           tenant-conn {} {} :identifiers identity)})))))
+                           tenant-conn {} {} {:identifiers identity})})))))

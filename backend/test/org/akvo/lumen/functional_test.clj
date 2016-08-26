@@ -1,13 +1,13 @@
 (ns org.akvo.lumen.functional-test
   (:require
-   [org.akvo.lumen.fixtures :refer [system-fixture]]
+   ;; [org.akvo.lumen.fixtures :refer [system-fixture]]
    [clj-http.client :as client]
    [clojure.test :refer :all]))
 
 
-(use-fixtures :once system-fixture)
+#_(use-fixtures :once system-fixture)
 
-(deftest ^:functional ping-collections
+#_(deftest ^:functional ping-collections
 
   (testing "Root endpoint - status code"
     (let [resp (client/get "http://localhost:3000/api")]

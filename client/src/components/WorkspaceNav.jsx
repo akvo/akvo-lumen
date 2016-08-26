@@ -1,11 +1,11 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
+import { Link } from 'react-router';
 import NavLink from './workspace-nav/NavLink';
 import OrganizationMenu from './workspace-nav/OrganizationMenu';
 import CollectionsList from './workspace-nav/CollectionsList';
 import NavWorkspaceSwitch from './workspace-nav/NavWorkspaceSwitch';
 import { showModal } from '../actions/activeModal';
-import { Link } from 'react-router';
 
 require('../styles/WorkspaceNav.scss');
 
@@ -37,7 +37,7 @@ const getActiveSubtitle = (pathname) => {
   return activeSubtitle;
 };
 
-export class WorkspaceNav extends Component {
+class WorkspaceNav extends Component {
   constructor() {
     super();
     this.handleShowCreateCollectionModal = this.handleShowCreateCollectionModal.bind(this);
@@ -63,10 +63,8 @@ export class WorkspaceNav extends Component {
       } else {
         className = `${className} collapsed`;
       }
-    } else {
-      if (this.state.isManuallyInverted) {
-        className = `${className} collapsed noFloat`;
-      }
+    } else if (this.state.isManuallyInverted) {
+      className = `${className} collapsed noFloat`;
     }
 
     return className;
@@ -97,9 +95,8 @@ export class WorkspaceNav extends Component {
             <div
               className="menuIcon clickable"
               onClick={onClick}
-            >
-            </div>
-            <h1><Link to="/">DASH</Link></h1>
+            />
+            <h1><Link to="/">Lumen</Link></h1>
           </div>
           <OrganizationMenu user={this.props.user} />
         </div>

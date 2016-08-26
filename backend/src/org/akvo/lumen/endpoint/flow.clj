@@ -32,7 +32,7 @@
                       (format flow-report-database-url org-id)
                       {:folder-ids root-ids}
                       {}
-                      :identifiers identity)))
+                      {:identifiers identity})))
           (response ()))))
 
     (GET "/instances" request

@@ -1,8 +1,8 @@
 import React, { Component, PropTypes } from 'react';
 import Modal from 'react-modal';
 import fetch from 'isomorphic-fetch';
-import headers from '../../actions/headers';
 import CopyToClipboard from 'react-copy-to-clipboard';
+import headers from '../../actions/headers';
 
 require('../../styles/DashboardModal.scss');
 require('../../styles/ShareEntity.scss');
@@ -35,8 +35,7 @@ export default class ShareEntity extends Component {
         headers: headers(),
       })
       .then(response => response.json())
-      .then(response => this.setState({ id: response.id }))
-      .catch(error => console.error(error));
+      .then(response => this.setState({ id: response.id }));
     }
   }
 
@@ -73,13 +72,14 @@ export default class ShareEntity extends Component {
               +
             </div>
             <div className="contents">
-              <label>Share {type} {name}</label>
+              <label htmlFor="shareUrlCopyButton">Share {type} {name}</label>
               <div
                 className="shareUrl"
               >
                 <a
                   href={shareUrl}
                   target="_blank"
+                  rel="noopener noreferrer"
                 >
                   {shareUrl}
                 </a>
@@ -89,6 +89,7 @@ export default class ShareEntity extends Component {
                 onCopy={() => this.setState({ copiedToClipboard: true })}
               >
                 <button
+                  id="shareUrlCopyButton"
                   className={`copyButton clickable ${this.state.copiedToClipboard ? 'copied' : ''}`}
                 >
                   {this.state.copiedToClipboard ? 'Copied!' : 'Copy to clipboard'}

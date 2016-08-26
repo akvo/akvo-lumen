@@ -1,9 +1,9 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
-import DatasetHeader from '../components/dataset/DatasetHeader';
-import DatasetTable from '../components/dataset/DatasetTable';
 import { showModal } from '../actions/activeModal';
+import { getId, getTitle } from '../domain/entity';
+import { getTransformations, getRows, getColumns } from '../domain/dataset';
 import {
   fetchDataset,
   transform,
@@ -16,6 +16,9 @@ class Dataset extends Component {
 
   constructor() {
     super();
+    this.state = {
+      asyncComponents: null,
+    };
     this.handleShowDatasetSettings = this.handleShowDatasetSettings.bind(this);
     this.willLeaveDatasets = this.willLeaveDatasets.bind(this);
   }
@@ -25,55 +28,64 @@ class Dataset extends Component {
     const { datasetId } = params;
     router.setRouteLeaveHook(route, this.willLeaveDatasets);
     dispatch(fetchDataset(datasetId));
+
+    require.ensure([], () => {
+      /* eslint-disable global-require */
+      const DatasetHeader = require('../components/dataset/DatasetHeader').default;
+      const DatasetTable = require('../components/dataset/DatasetTable').default;
+      /* eslint-enable global-require */
+
+      this.setState({
+        asyncComponents: {
+          DatasetHeader,
+          DatasetTable,
+        },
+      });
+    }, 'Dataset');
   }
 
   willLeaveDatasets() {
     const { dispatch, dataset } = this.props;
-    if (dataset.history != null && dataset.history.length > 0) {
-      dispatch(sendTransformationLog(dataset.id, dataset.transformations));
+    if (dataset.get('history') != null && dataset.get('history').size > 0) {
+      dispatch(sendTransformationLog(getId(dataset), dataset.get('transformations')));
     }
   }
 
   handleShowDatasetSettings() {
     this.props.dispatch(showModal('dataset-settings', {
-      id: this.props.dataset.id,
+      id: getId(this.props.dataset),
     }));
   }
 
   render() {
     const { dataset, dispatch } = this.props;
-    if (dataset == null) {
+    if (dataset == null || !this.state.asyncComponents) {
       return <div className="Dataset">Loading...</div>;
     }
+    const { DatasetHeader, DatasetTable } = this.state.asyncComponents;
+
     return (
       <div className="Dataset">
         <DatasetHeader
           onShowDatasetSettings={this.handleShowDatasetSettings}
-          name={dataset.name}
-          id={dataset.id}
+          name={getTitle(dataset)}
+          id={getId(dataset)}
         />
-        {dataset.rows != null ?
+        {getRows(dataset) != null &&
           <DatasetTable
-            columns={dataset.columns}
-            rows={dataset.rows}
-            transformations={dataset.transformations}
-            onTransform={(transformation) => dispatch(transform(dataset.id, transformation))}
-            onUndoTransformation={() => dispatch(undoTransformation(dataset.id))}
-          />
-          :
-          <div>loading...</div>}
+            columns={getColumns(dataset)}
+            rows={getRows(dataset)}
+            transformations={getTransformations(dataset)}
+            onTransform={(transformation) => dispatch(transform(getId(dataset), transformation))}
+            onUndoTransformation={() => dispatch(undoTransformation(getId(dataset)))}
+          />}
       </div>
     );
   }
 }
 
 Dataset.propTypes = {
-  dataset: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    name: PropTypes.string.isRequired,
-    columns: PropTypes.array,
-    rows: PropTypes.array,
-  }),
+  dataset: PropTypes.object,
   router: PropTypes.object.isRequired,
   route: PropTypes.object.isRequired,
   params: PropTypes.object.isRequired,

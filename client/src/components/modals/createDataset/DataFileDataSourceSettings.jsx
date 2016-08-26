@@ -59,7 +59,7 @@ export default class DataFileDataSourceSettings extends Component {
         handleProgress(-1);
       },
       onProgress(bytesUploaded, bytesTotal) {
-        const percentage = parseFloat((bytesUploaded / bytesTotal * 100).toFixed(2));
+        const percentage = parseFloat(((bytesUploaded / bytesTotal) * 100).toFixed(2));
         handleProgress(percentage);
       },
       onSuccess() {
@@ -88,10 +88,10 @@ export default class DataFileDataSourceSettings extends Component {
         <p className="dataFileUploadMessage">or</p>
         <input
           className={`dataFileUploadInput${this.isProgressBarVisible() ? ' progressActive' : ''}`}
-          ref="fileInput"
+          ref={ref => { this.fileInput = ref; }}
           type="file"
           onChange={() => {
-            this.uploadFile(this.refs.fileInput.files[0]);
+            this.uploadFile(this.fileInput.files[0]);
           }}
         />
         <p className="dataFileUploadHeaderToggle">
@@ -100,10 +100,10 @@ export default class DataFileDataSourceSettings extends Component {
             type="checkbox"
             className="datasetHeaderStatusToggle"
             defaultChecked={this.props.dataSource.hasColumnHeaders}
-            ref="datasetHeaderStatusToggle"
+            ref={ref => { this.datasetHeaderStatusToggle = ref; }}
             onClick={() => {
               this.props.onChange({
-                hasColumnHeaders: this.refs.datasetHeaderStatusToggle.checked,
+                hasColumnHeaders: this.datasetHeaderStatusToggle.checked,
               });
             }
             }

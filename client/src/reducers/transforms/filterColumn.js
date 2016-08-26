@@ -1,9 +1,7 @@
-import cloneDeep from 'lodash/cloneDeep';
-import { columnIndex } from '../../utilities/dataset';
+import { columnIndex } from '../../domain/dataset';
 
 function getExpressionOperatorAndValue(expression) {
-  const expressionOperator = Object.keys(expression)[0];
-  return [expressionOperator, expression[expressionOperator]];
+  return expression.entrySeq().first();
 }
 
 function filterFunction(expressionOperator, expressionValue) {
@@ -19,15 +17,15 @@ function filterFunction(expressionOperator, expressionValue) {
 }
 
 function applyFilter(rows, colIndex, filterFn) {
-  return rows.filter(row => filterFn(row[colIndex]));
+  return rows.filter(row => filterFn(row.get(colIndex)));
 }
 
-export default function filterTransform(dataset, { args }) {
-  const ds = cloneDeep(dataset);
-  const { columnName, expression } = args;
+export default function filterTransform(dataset, transformation) {
+  const columnName = transformation.getIn(['args', 'columnName']);
+  const expression = transformation.getIn(['args', 'expression']);
   const [expressionOperator, expressionValue] = getExpressionOperatorAndValue(expression);
   const filterFn = filterFunction(expressionOperator, expressionValue);
-  const colIndex = columnIndex(columnName, ds.columns);
-  ds.rows = applyFilter(ds.rows, colIndex, filterFn);
-  return ds;
+  const colIndex = columnIndex(columnName, dataset.get('columns'));
+  const rows = applyFilter(dataset.get('rows'), colIndex, filterFn);
+  return dataset.set('rows', rows);
 }

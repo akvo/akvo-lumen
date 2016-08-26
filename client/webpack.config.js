@@ -9,16 +9,16 @@ const isProd = process.env.NODE_ENV === 'production';
 
 const entry = {
   app: isProd ? [
-      "./src/index.jsx"
+      './src/index.jsx'
     ] : [
       'webpack-dev-server/client?http://0.0.0.0:3030', // WebpackDevServer host and port
       'webpack/hot/only-dev-server', // "only" prevents reload on syntax errors
-      "./src/index.jsx"
+      './src/index.jsx'
     ],
-  pub: "./src/index-pub.jsx"
+  pub: './src/index-pub.jsx'
 }
 
-const jsLoaders = isProd ? ["babel-loader"] : ["react-hot", "babel-loader"];
+const jsLoaders = isProd ? ['babel-loader'] : ['react-hot', 'babel-loader'];
 
 module.exports = {
   entry: entry,
@@ -40,11 +40,11 @@ module.exports = {
       },
       {
         test: /\.scss$/,
-        loader: "style-loader!css-loader!sass-loader"
+        loader: 'style-loader!css-loader!sass-loader'
       },
       {
         test: /\.css$/,
-        loader: "style-loader!css-loader"
+        loader: 'style-loader!css-loader'
       },
       {
         test: /\.(png|jpg)$/,
@@ -56,7 +56,10 @@ module.exports = {
     new webpack.HotModuleReplacementPlugin(),
     new SystemBellPlugin(),
     new webpack.DefinePlugin({
-      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV)
+      'process.env': {
+        'NODE_ENV': JSON.stringify(process.env.NODE_ENV),
+        'LUMEN_KEYCLOAK_URL': JSON.stringify(process.env.LUMEN_KEYCLOAK_URL)
+      }
     })
   ]
 };
