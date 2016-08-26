@@ -6,9 +6,9 @@
 
 (defn assert-bindings []
   (assert (:lumen-db-url env) (error-msg "LUMEN_DB_URL"))
-  (assert (Integer/parseInt (:port env "3000")) (error-msg "LUMEN_KEYCLOAK_URL"))
-  (assert (:lumen-keycloak-url env) (error-msg "LUMEN_FLOW_REPORT_DATABASE_URL"))
-  (assert (:lumen-flow-report-database-url env) (error-msg "LUMEN_FILE_UPLOAD_PATH")))
+  (assert (:lumen-keycloak-url env) (error-msg "LUMEN_KEYCLOAK_URL"))
+  (assert (:lumen-flow-report-database-url env) (error-msg "LUMEN_FLOW_REPORT_DATABASE_URL"))
+  (assert (:lumen-file-upload-path env) (error-msg "LUMEN_FILE_UPLOAD_PATH")))
 
 (defn bindings []
   {'db-uri (:lumen-db-url env)
