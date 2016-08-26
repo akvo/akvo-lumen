@@ -4,8 +4,8 @@
    [duct.util.system :refer [read-config]]
    [environ.core :refer [env]]
    [hugsql.core :as hugsql]
-   [org.akvo.lumen.config :refer [bindings]]
    [meta-merge.core :refer [meta-merge]]
+   [org.akvo.lumen.config :refer [bindings]]
    [ragtime
     [jdbc :as ragtime-jdbc]
     [repl :as ragtime-repl]]))
@@ -41,7 +41,7 @@
   "Migrate tenant manager and tenants."
   ([] (migrate source-files))
   ([system-definitions]
-   (let [system (construct-system system-definitions bindings)
+   (let [system (construct-system system-definitions (bindings))
          migrations (load-migrations system)
          tenant-manager-db {:connection-uri (get-in system [:config :db :uri])}]
      (do-migrate (ragtime-jdbc/sql-database tenant-manager-db)
@@ -77,7 +77,7 @@
   (rollback 1 ;; will rollback 1 migration on all tenants)
   (rollback :tenant-manager) ;; will rollback tenant manager migrations"
   [arg]
-  (let [system (construct-system source-files bindings)
+  (let [system (construct-system source-files (bindings))
         migrations (load-migrations system)
         tenant-migrations (:tenants migrations)
         tenant-manager-migrations (:tenant-manager migrations)
