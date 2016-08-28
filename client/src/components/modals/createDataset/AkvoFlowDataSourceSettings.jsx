@@ -53,14 +53,13 @@ export default class AkvoFlowDataSourceSettings extends Component {
   handleSelectInstance(instance) {
     const { dataSource, onChange } = this.props;
     onChange(Object.assign({}, dataSource, {
-      instance,
+      instance: instance.value,
       surveyId: null,
     }));
     this.setState(Object.assign({}, initialState, {
       instances: this.state.instances,
     }));
-
-    fetch(`/api/flow/folders-and-surveys/${instance}`, {
+    fetch(`/api/flow/folders-and-surveys/${instance.value}`, {
       headers: headers(),
     })
     .then(response => response.json())
@@ -113,7 +112,7 @@ export default class AkvoFlowDataSourceSettings extends Component {
   }
 
   handleHierarchySelection(id, idx) {
-    const surveyOrFolder = this.state.idIndex[id];
+    const surveyOrFolder = this.state.idIndex[id.value];
     if (surveyOrFolder.type === 'survey') {
       this.handleSurveySelection(surveyOrFolder);
     } else {
