@@ -22,7 +22,7 @@ export default function MapVisualisation({ visualisation, datasets, width, heigh
       >
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution="&copy; <a href='http://osm.org/copyright'>OpenStreetMapVisualisation</a> contributors"
+          attribution="&copy; <a href='http://osm.org/copyright'>OpenStreetMap</a> contributors"
         />
         {
           chartData[0].values.map((entry, index) =>

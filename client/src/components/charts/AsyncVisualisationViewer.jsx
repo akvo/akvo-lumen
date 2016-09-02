@@ -21,9 +21,9 @@ export default class AsyncVisualisationViewer extends Component {
     if (props.visualisation.visualisationType === 'map') {
       require.ensure(['react-leaflet'], () => {
         // eslint-disable-next-line global-require
-        const Map = require('./MapVisualisation').default;
+        const MapVisualisation = require('./MapVisualisation').default;
 
-        output = Map;
+        output = MapVisualisation;
 
         this.setState({
           asyncComponents: {
