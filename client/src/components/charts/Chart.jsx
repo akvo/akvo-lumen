@@ -21,7 +21,7 @@ function getSize(computedWidth) {
 }
 
 export default function Chart({ visualisation, datasets, width, height }) {
-  const { visualisationType, spec } = visualisation;
+  const { visualisationType } = visualisation;
   const chartData = chart.getChartData(visualisation, datasets);
   const containerHeight = height || 400;
   const containerWidth = width || 800;
