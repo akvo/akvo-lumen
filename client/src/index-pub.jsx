@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from 'react-dom';
 import Immutable from 'immutable';
-import AsyncDashChart from './components/charts/AsyncDashChart';
+import AsyncVisualisationViewer from './components/charts/AsyncVisualisationViewer';
 import DashboardViewer from './components/dashboard/DashboardViewer';
 import LumenBranding from './components/common/LumenBranding';
 
@@ -28,7 +28,7 @@ render(
         datasets={immutableDatasets}
       />
       :
-      <AsyncDashChart
+      <AsyncVisualisationViewer
         visualisation={data.visualisation}
         datasets={immutableDatasets}
       />

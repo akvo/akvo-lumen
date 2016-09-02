@@ -92,7 +92,7 @@ class Dashboard extends Component {
   }
 
   componentDidMount() {
-    require.ensure(['../components/charts/DashChart'], () => {
+    require.ensure(['../components/charts/VisualisationViewer'], () => {
       require.ensure([], () => {
         /* eslint-disable global-require */
         const DashboardEditor = require('../components/dashboard/DashboardEditor').default;
@@ -106,7 +106,7 @@ class Dashboard extends Component {
           },
         });
       }, 'Dashboard');
-    }, 'DashChartPreload');
+    }, 'VisualisationViewerPreload');
   }
 
   componentWillReceiveProps(nextProps) {

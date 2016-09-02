@@ -79,7 +79,7 @@ class Visualisation extends Component {
   }
 
   componentDidMount() {
-    require.ensure(['../components/charts/DashChart'], () => {
+    require.ensure(['../components/charts/VisualisationViewer'], () => {
       require.ensure([], () => {
         /* eslint-disable global-require */
         const VisualisationHeader =
@@ -96,7 +96,7 @@ class Visualisation extends Component {
           },
         });
       }, 'Visualisation');
-    }, 'DashChartPreload');
+    }, 'VisualisationViewerPreload');
   }
 
   componentWillReceiveProps() {

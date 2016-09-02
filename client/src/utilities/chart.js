@@ -1,6 +1,12 @@
+import getVegaScatterSpec from './vega-specs/Scatter';
+import getVegaPieSpec from './vega-specs/Pie';
+import getVegaAreaSpec from './vega-specs/Area';
+import getVegaBarSpec from './vega-specs/Bar';
+
 export function getChartData(visualisation, datasets) {
   const { datasetId, spec } = visualisation;
   const dataset = datasets[datasetId];
+  const vType = visualisation.visualisationType;
   const columnIndexX = spec.datasetColumnX;
   const columnIndexY = spec.datasetColumnY;
   const nameDataX = spec.datasetNameColumnX != null ?
@@ -11,7 +17,7 @@ export function getChartData(visualisation, datasets) {
   let dataValues = [];
   let output = [];
 
-  switch (visualisation.visualisationType) {
+  switch (vType) {
     case 'map':
 
       dataX.forEach((entry, index) => {
@@ -35,57 +41,58 @@ export function getChartData(visualisation, datasets) {
     case 'bar':
     case 'line':
     case 'area':
+    case 'pie':
+    case 'donut':
 
       dataValues = dataX.map((entry, index) => {
-        let key = index;
+        const key = index;
+        let label;
 
-        if (nameDataX && visualisation.visualisationType === 'bar') {
-          key = nameDataX[index];
+        if (nameDataX) {
+          if (vType === 'bar' || vType === 'pie' || vType === 'donut') {
+            label = nameDataX[key];
+          }
         }
 
         return ({
           x: key,
-          y: parseInt(entry, 10),
+          y: parseFloat(entry),
+          label,
         });
       });
 
-      output.push({
-        name: 'series1',
+      output = {
+        name: 'table',
         values: dataValues,
-      });
+      };
 
-      break;
-
-    case 'pie':
-    case 'donut':
-
-
-      output = dataX.map((entry, index) => {
-        const key = nameDataX ? nameDataX[index] : index;
-
-        return ({
-          label: key,
-          value: parseInt(entry, 10),
-        });
-      });
+      if (vType === 'pie' || vType === 'donut') {
+        output.transform = [
+          {
+            type: 'pie',
+            field: 'y',
+          },
+        ];
+      }
 
       break;
 
     case 'scatter':
 
       dataValues = dataX.map((entry, index) => {
-        const item = {
-          x: parseInt(entry, 10),
-          y: parseInt(dataY[index], 10),
-        };
+        const label = nameDataX ? nameDataX[index] : null;
 
-        return item;
+        return ({
+          x: parseFloat(entry),
+          y: parseFloat(dataY[index]),
+          label,
+        });
       });
 
-      output.push({
-        name: 'series1',
+      output = {
+        name: 'table',
         values: dataValues,
-      });
+      };
 
       break;
 
@@ -96,25 +103,64 @@ export function getChartData(visualisation, datasets) {
   return output;
 }
 
-export function getClassName(computedWidth, hasAxisLabels) {
-  let className = 'dashChart';
-  let size;
+export function getVegaSpec(visualisation, data, containerHeight, containerWidth) {
+  const { visualisationType, name } = visualisation;
+  let vspec;
 
-  className = hasAxisLabels ? `${className} hasAxisLabels` : className;
+  switch (visualisationType) {
+    case 'bar':
+      vspec = getVegaBarSpec(visualisation, data, containerHeight, containerWidth);
+      break;
 
-  if (computedWidth < 240) {
-    size = 'xsmall';
-  } else if (computedWidth < 480) {
-    size = 'small';
-  } else if (computedWidth < 720) {
-    size = 'medium';
-  } else if (computedWidth < 860) {
-    size = 'large';
-  } else {
-    size = 'xlarge';
+    case 'area':
+    case 'line':
+      vspec = getVegaAreaSpec(visualisation, data, containerHeight, containerWidth);
+      break;
+
+    case 'pie':
+    case 'donut':
+      vspec = getVegaPieSpec(visualisation, data, containerHeight, containerWidth);
+      break;
+
+    case 'scatter':
+      vspec = getVegaScatterSpec(visualisation, data, containerHeight, containerWidth);
+      break;
+
+    default:
+      throw new Error(`Unknown chart type ${visualisationType} supplied to getVegaSpec()`);
   }
 
-  className = `${className} ${size}`;
+  /* Set the properties common to all visualisation types */
+  vspec.marks.push({
+    type: 'text',
+    name: 'title',
+    properties: {
+      enter: {
+        x: {
+          signal: 'width',
+          mult: 0.5,
+        },
+        y: {
+          value: -10,
+        },
+        text: {
+          value: name,
+        },
+        fill: {
+          value: 'black',
+        },
+        fontSize: {
+          value: 16,
+        },
+        align: {
+          value: 'center',
+        },
+        fontWeight: {
+          value: 'bold',
+        },
+      },
+    },
+  });
 
-  return className;
+  return vspec;
 }

@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import * as tus from 'tus-js-client';
 import keycloak from '../../../auth';
-import DashProgressBar from '../../common/DashProgressBar';
+import ProgressBar from '../../common/ProgressBar';
 
 export default class DataFileDataSourceSettings extends Component {
 
@@ -111,7 +111,7 @@ export default class DataFileDataSourceSettings extends Component {
         </p>
         {this.isProgressBarVisible() &&
           <div>
-            <DashProgressBar
+            <ProgressBar
               progressPercentage={this.state.uploadProgressPercentage}
               errorText="Error"
               completionText="Success"

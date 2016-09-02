@@ -1,11 +1,11 @@
 import React, { Component, PropTypes } from 'react';
 
-/* This component should render the same markup as the regular DashChart, but only loads the
-/* dependencies needed to render a given chart type, rather than loading all dependencies for all
-/* chart types. This is more efficient when we only have to render a known collection of
+/* This component should render the same markup as the regular VisualisationViewer, but only loads
+/* the dependencies needed to render a given chart type, rather than loading all dependencies for
+/* all chart types. This is more efficient when we only have to render a known collection of
 /* visualisations, rather than any possible visualisation. */
 
-export default class AsyncDashChart extends Component {
+export default class AsyncVisualisationViewer extends Component {
 
   constructor() {
     super();
@@ -21,9 +21,9 @@ export default class AsyncDashChart extends Component {
     if (props.visualisation.visualisationType === 'map') {
       require.ensure(['react-leaflet'], () => {
         // eslint-disable-next-line global-require
-        const DashMap = require('./DashMap').default;
+        const Map = require('./MapVisualisation').default;
 
-        output = DashMap;
+        output = Map;
 
         this.setState({
           asyncComponents: {
@@ -32,47 +32,31 @@ export default class AsyncDashChart extends Component {
         });
       }, 'reactLeaflet');
     } else {
-      require.ensure(['rd3'], () => {
+      require.ensure(['vega'], () => {
         /* eslint-disable global-require */
-        const DashAreaChart = require('./DashAreaChart').default;
-        const DashBarChart = require('./DashBarChart').default;
-        const DashLineChart = require('./DashLineChart').default;
-        const DashPieChart = require('./DashPieChart').default;
-        const DashScatterChart = require('./DashScatterChart').default;
+        const Chart = require('./Chart').default;
         /* eslint-enable global-require */
 
         switch (props.visualisation.visualisationType) {
           case 'bar':
-            output = DashBarChart;
-            break;
-
           case 'line':
-            output = DashLineChart;
-            break;
-
           case 'area':
-            output = DashAreaChart;
-            break;
-
           case 'donut':
           case 'pie':
-            output = DashPieChart;
-            break;
-
           case 'scatter':
-            output = DashScatterChart;
+            output = Chart;
             break;
 
           default:
             throw new Error(`Unknown chart type ${props.visualisation.visualisationType}
-              supplied to AsyncDashChart`);
+              supplied to AsyncVisualisationViewer`);
         }
         this.setState({
           asyncComponents: {
             output,
           },
         });
-      }, 'rd3');
+      }, 'vega');
     }
   }
 
@@ -85,7 +69,7 @@ export default class AsyncDashChart extends Component {
   }
 }
 
-AsyncDashChart.propTypes = {
+AsyncVisualisationViewer.propTypes = {
   visualisation: PropTypes.object.isRequired,
   datasets: PropTypes.object.isRequired,
 };

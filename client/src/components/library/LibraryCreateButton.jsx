@@ -1,5 +1,5 @@
 import React, { PropTypes } from 'react';
-import DashSelect from '../common/DashSelect';
+import SelectMenu from '../common/SelectMenu';
 
 const options = [
   { value: 'dataset', label: 'Dataset' },
@@ -11,7 +11,7 @@ const options = [
 export default function LibraryCreateButton({ onCreate }) {
   return (
     <div className="LibraryCreateButton">
-      <DashSelect
+      <SelectMenu
         name="create-button"
         options={options}
         onChange={onCreate}

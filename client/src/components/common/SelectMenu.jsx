@@ -2,11 +2,11 @@ import React, { PropTypes } from 'react';
 import Select from 'react-select';
 
 require('../../../node_modules/react-select/dist/react-select.css');
-require('../../styles/DashSelect.scss');
+require('../../styles/SelectMenu.scss');
 
-export default function DashSelect(props) {
+export default function SelectMenu(props) {
   return (
-    <div className="DashSelect">
+    <div className="SelectMenu">
       <Select
         {...props}
         onChange={option => props.onChange(option.value)}
@@ -17,7 +17,7 @@ export default function DashSelect(props) {
   );
 }
 
-DashSelect.propTypes = {
+SelectMenu.propTypes = {
   options: PropTypes.arrayOf(React.PropTypes.shape({
     value: PropTypes.string.isRequired,
     label: PropTypes.string.isRequired,

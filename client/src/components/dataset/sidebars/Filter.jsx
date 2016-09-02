@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import Immutable from 'immutable';
-import DashSelect from '../../common/DashSelect';
+import SelectMenu from '../../common/SelectMenu';
 import SidebarHeader from './SidebarHeader';
 import SidebarControls from './SidebarControls';
 
@@ -72,7 +72,7 @@ export default class Filter extends Component {
             >
               Show rows whose
             </label>
-            <DashSelect
+            <SelectMenu
               name="filterTypeMenu"
               value={expressionOperator}
               onChange={this.handleChangeExpressionOperator}
