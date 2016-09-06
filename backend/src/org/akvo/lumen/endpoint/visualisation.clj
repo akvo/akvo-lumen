@@ -35,7 +35,7 @@
         (response (visualisation/all tenant-conn)))
 
       (POST "/" {:keys [jwt-claims body]}
-        (let [resp (visualisation/create body jwt-claims)]
+        (let [resp (visualisation/create tenant-conn body jwt-claims)]
           (if (ok? resp)
             (response resp)
             (-> (response {:error (:error resp)})
