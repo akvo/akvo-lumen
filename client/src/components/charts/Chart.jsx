@@ -1,5 +1,6 @@
-import React, { PropTypes } from 'react';
+import React, { Component, PropTypes } from 'react';
 import vg from 'vega';
+import isEqual from 'lodash/isEqual';
 import * as chart from '../../utilities/chart';
 
 function getSize(computedWidth) {
@@ -20,29 +21,57 @@ function getSize(computedWidth) {
   return size;
 }
 
-export default function Chart({ visualisation, datasets, width, height }) {
-  const { visualisationType } = visualisation;
-  const chartData = chart.getChartData(visualisation, datasets);
-  const containerHeight = height || 400;
-  const containerWidth = width || 800;
-  const chartSize = getSize(containerWidth);
-  const className = `Chart ${visualisationType} ${chartSize}`;
-  const vegaSpec = chart.getVegaSpec(visualisation, chartData, containerHeight, containerWidth);
-  const elKey = visualisation.id ? visualisation.id : 'newVisualisation';
+export default class Chart extends Component {
 
-  vg.parse.spec(vegaSpec, (error, vchart) => vchart({ el: `.viz-${elKey}` }).update());
+  componentDidMount() {
+    this.renderChart(this.props);
+  }
 
-  return (
-    <div
-      className={className}
-      style={{
-        width: containerWidth,
-        height: containerHeight,
-      }}
-    >
-      <div className={`viz-${elKey}`} />
-    </div>
-  );
+  componentWillReceiveProps(nextProps) {
+    const visualisationChanged = !isEqual(this.props.visualisation, nextProps.visualisation);
+    const sizeChanged = this.props.width !== nextProps.width ||
+      this.props.height !== nextProps.height;
+
+    if (visualisationChanged || sizeChanged) {
+      this.renderChart(nextProps);
+    }
+  }
+
+  renderChart(props) {
+    const { visualisation, datasets, width, height } = props;
+    const chartData = chart.getChartData(visualisation, datasets);
+    const containerHeight = height || 400;
+    const containerWidth = width || 800;
+    const vegaSpec = chart.getVegaSpec(visualisation, chartData, containerHeight, containerWidth);
+
+    vg.parse.spec(vegaSpec, (error, vegaChart) => {
+      this.vegaChart = vegaChart({ el: this.element });
+      this.vegaChart.update();
+    });
+  }
+
+  render() {
+    const { visualisation, width, height } = this.props;
+    const { visualisationType } = visualisation;
+    const containerHeight = height || 400;
+    const containerWidth = width || 800;
+    const chartSize = getSize(containerWidth);
+    const className = `Chart ${visualisationType} ${chartSize}`;
+
+    return (
+      <div
+        className={className}
+        style={{
+          width: containerWidth,
+          height: containerHeight,
+        }}
+      >
+        <div
+          ref={el => { this.element = el; }}
+        />
+      </div>
+    );
+  }
 }
 
 Chart.propTypes = {

@@ -34,7 +34,7 @@ export default class DashboardHeader extends Component {
 
   render() {
     const actionButtons = this.getActionButtons();
-    let saveStatus = '';
+    const saveStatus = '';
 
     return (
       <EntityTypeHeader

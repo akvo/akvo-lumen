@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import update from 'react-addons-update';
-import isEmpty from 'lodash/isEmpty';
+import { isEmpty, cloneDeep } from 'lodash';
 import { push } from 'react-router-redux';
 import ShareEntity from '../components/modals/ShareEntity';
 import * as actions from '../actions/visualisation';
@@ -177,16 +177,17 @@ class Visualisation extends Component {
       return <div className="Visualisation">Loading...</div>;
     }
     const { VisualisationHeader, VisualisationEditor } = this.state.asyncComponents;
+    const clonedVisualisation = cloneDeep(this.state.visualisation);
 
     return (
       <div className="Visualisation">
         <VisualisationHeader
           isUnsavedChanges={this.state.isUnsavedChanges}
-          visualisation={this.state.visualisation}
+          visualisation={clonedVisualisation}
           onVisualisationAction={this.handleVisualisationAction}
         />
         <VisualisationEditor
-          visualisation={this.state.visualisation}
+          visualisation={clonedVisualisation}
           datasets={this.props.library.datasets}
           onChangeTitle={this.handleChangeVisualisationTitle}
           onChangeVisualisationType={this.handleChangeVisualisationType}
@@ -197,7 +198,7 @@ class Visualisation extends Component {
         <ShareEntity
           isOpen={this.state.isShareModalVisible}
           onClose={this.toggleShareVisualisation}
-          entity={this.state.visualisation}
+          entity={clonedVisualisation}
         />
       </div>
     );
