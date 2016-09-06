@@ -8,6 +8,7 @@
   (context "/api/transformations" {:keys [tenant] :as request}
     (let-routes [tenant-conn (connection tenant-manager tenant)]
       (context "/:id" [id]
+
         (POST "/" {:keys [body] :as request}
           (merge (response/response {})
             (t/schedule tenant-conn id (vec body))))))))
