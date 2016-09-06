@@ -1,5 +1,21 @@
 # Release Notes
 
+## 0.2.0
+
+Date: 2016-09-05
+
+### New and noteworthy
+
+* Frontend UI speedup by switching to immutable.js for datasets
+* Fixed various issues with Dashboard editor
+  * Race condition on cold reload
+  * Multiple datasets request on cold load
+  * Performance issues
+* Fixed issue with Label input in visualisation editor
+* Updated Duct framework, using edn files
+* Updated Frontend and Backend dependencies
+
+
 ## 0.1.0
 
 Date: 2016-06-24
