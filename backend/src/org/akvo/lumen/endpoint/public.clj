@@ -1,33 +1,34 @@
 (ns org.akvo.lumen.endpoint.public
   (:require [cheshire.core :as json]
             [compojure.core :refer :all]
-            [hugsql.core :as hugsql]
+            ;; [hugsql.core :as hugsql]
             [org.akvo.lumen.component.tenant-manager :refer [connection]]
-            [org.akvo.lumen.lib.dataset :as dataset]
-            [org.akvo.lumen.endpoint.visualisation :refer [visualisation]]
-            [org.akvo.lumen.lib.dashboard :refer [handle-dashboard-by-id]]
+            [org.akvo.lumen.lib.public :as public]
+            ;; [org.akvo.lumen.lib.dataset :as dataset]
+            ;; [org.akvo.lumen.endpoint.visualisation :refer [visualisation]]
+            ;; [org.akvo.lumen.lib.dashboard :refer [handle-dashboard-by-id]]
             [ring.util.response :refer [content-type not-found response]]))
 
-(hugsql/def-db-fns "org/akvo/lumen/endpoint/public.sql")
+;; (hugsql/def-db-fns "org/akvo/lumen/endpoint/public.sql")
 
-(defn get-share
+#_(defn get-share
   [conn id]
   (public-by-id conn {:id id}))
 
-(defmulti response-data
+#_(defmulti response-data
   (fn [_ share]
     (cond
       (not (nil? (:visualisation_id share))) :visualisation
       (not (nil? (:dashboard_id share)))     :dashboard)))
 
-(defmethod response-data :visualisation
+#_(defmethod response-data :visualisation
   [tenant-conn share]
   (let [v (visualisation tenant-conn (:visualisation_id share))
         d (dataset/dataset tenant-conn (:datasetId v))]
     {"visualisation" (dissoc v :id :created :modified)
      "datasets"      {(:id d) d}}))
 
-(defn- visualisation-id-list
+#_(defn- visualisation-id-list
   [dashboard]
   (->> dashboard
        :entities
@@ -35,12 +36,12 @@
        (filter #(= "visualisation" (get % "type")))
        (mapv #(get % "id"))))
 
-(defn visualisation-list [tenant-conn visualisation-ids]
+#_(defn visualisation-list [tenant-conn visualisation-ids]
   (reduce conj {} (map (fn [v-id]
                          {v-id (visualisation tenant-conn v-id)})
                        visualisation-ids)))
 
-(defn dataset-list
+#_(defn dataset-list
   [tenant-conn visualisations]
   (let [dataset-ids (vec (reduce conj #{} (map :datasetId
                                                (vals visualisations))))]
@@ -48,7 +49,7 @@
                            {d-id (dataset/dataset tenant-conn d-id)})
                          dataset-ids))))
 
-(defmethod response-data :dashboard
+#_(defmethod response-data :dashboard
   [tenant-conn share]
   (let [dashboard (handle-dashboard-by-id tenant-conn (:dashboard_id share))
         visualisation-ids (visualisation-id-list dashboard)
@@ -81,10 +82,17 @@
 (defn endpoint [{:keys [tenant-manager]}]
   (context "/s" {:keys [params tenant] :as request}
     (let-routes [tenant-conn (connection tenant-manager tenant)]
-
       (GET "/:id" [id]
-        (if-let [share (get-share tenant-conn id)]
+
+        #_(if-let [share (get-share tenant-conn id)]
           (-> (response (html-response (response-data tenant-conn share)))
               (content-type "text/html; charset=utf-8"))
           (-> (not-found (str "No public share with id: " id))
-              (content-type "text/html; charset=utf-8")))))))
+              (content-type "text/html; charset=utf-8")))
+
+        (let [share (public/share tenant-conn id)]
+          (if (share)
+            (-> (response (html-response share))
+                (content-type "text/html; charset=utf-8"))
+            (-> (not-found (str "No public share with id: " id))
+                (content-type "text/html; charset=utf-8"))))))))
