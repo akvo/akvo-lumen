@@ -3,9 +3,8 @@
             [compojure.core :refer :all]
             [hugsql.core :as hugsql]
             [org.akvo.lumen.component.tenant-manager :refer [connection]]
-            [org.akvo.lumen.endpoint
-             [dataset :refer [find-dataset]]
-             [visualisation :refer [visualisation]]]
+            [org.akvo.lumen.lib.dataset :as dataset]
+            [org.akvo.lumen.endpoint.visualisation :refer [visualisation]]
             [org.akvo.lumen.lib.dashboard :refer [handle-dashboard-by-id]]
             [ring.util.response :refer [content-type not-found response]]))
 
@@ -24,7 +23,7 @@
 (defmethod response-data :visualisation
   [tenant-conn share]
   (let [v (visualisation tenant-conn (:visualisation_id share))
-        d (find-dataset tenant-conn (:datasetId v))]
+        d (dataset/dataset tenant-conn (:datasetId v))]
     {"visualisation" (dissoc v :id :created :modified)
      "datasets"      {(:id d) d}}))
 
@@ -46,7 +45,7 @@
   (let [dataset-ids (vec (reduce conj #{} (map :datasetId
                                                (vals visualisations))))]
     (reduce conj {} (map (fn [d-id]
-                           {d-id (find-dataset tenant-conn d-id)})
+                           {d-id (dataset/dataset tenant-conn d-id)})
                          dataset-ids))))
 
 (defmethod response-data :dashboard

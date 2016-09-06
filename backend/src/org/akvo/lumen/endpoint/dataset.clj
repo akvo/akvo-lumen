@@ -1,18 +1,19 @@
 (ns org.akvo.lumen.endpoint.dataset
-  (:require [clojure.java.jdbc :as jdbc]
-            [clojure.set :as set]
-            [clojure.string :as str]
+  (:require ;; [clojure.java.jdbc :as jdbc]
+            ;; [clojure.set :as set]
+            ;; [clojure.string :as str]
             [compojure.core :refer :all]
-            [hugsql.core :as hugsql]
+            ;; [hugsql.core :as hugsql]
+            [org.akvo.lumen.lib.dataset :as d]
             [org.akvo.lumen.component.tenant-manager :refer [connection]]
             [org.akvo.lumen.endpoint.job-execution :as job-execution]
             [org.akvo.lumen.import :as import]
             [ring.util.response :refer (not-found response)]))
 
-(hugsql/def-db-fns "org/akvo/lumen/endpoint/dataset.sql")
-(hugsql/def-db-fns "org/akvo/lumen/job-execution.sql")
+;; (hugsql/def-db-fns "org/akvo/lumen/endpoint/dataset.sql")
+;; (hugsql/def-db-fns "org/akvo/lumen/job-execution.sql")
 
-(defn select-data-sql [table-name columns]
+#_(defn select-data-sql [table-name columns]
   (let [column-names (map #(get % "columnName") columns)
         f (fn [m] (get m "sort"))
         sort-columns (conj
@@ -27,7 +28,7 @@
                     order-by-expr)]
     sql))
 
-(defn find-dataset [conn id]
+#_(defn find-dataset [conn id]
   (when-let [dataset (dataset-by-id conn {:id id})]
     (let [columns (remove #(get % "hidden") (:columns dataset))
           data (rest (jdbc/query conn
@@ -48,19 +49,21 @@
     (let-routes [tenant-conn (connection tenant-manager tenant)]
 
       (GET "/" _
-        (response (all-datasets tenant-conn)))
+        (response (d/all-datasets tenant-conn)))
 
       (POST "/" {:keys [tenant body jwt-claims] :as request}
-        (import/handle-import-request tenant-conn config jwt-claims body))
+        ;; (import/handle-import-request tenant-conn config jwt-claims body)
+        (d/new-dataset tenant-conn config jwt-claims body))
 
       (context "/:id" [id]
         (GET "/" _
-          (if-let [dataset (find-dataset tenant-conn id)]
+          (if-let [dataset (d/dataset tenant-conn id)]
             (response dataset)
             (not-found {:id id})))
 
         (DELETE "/" _
-          (let [c (delete-dataset-by-id tenant-conn {:id id})]
+          #_(let [c (delete-dataset-by-id tenant-conn {:id id})]
             (when (zero? c)
               (delete-failed-job-execution-by-id tenant-conn {:id id})))
+          (d/delete-dataset tenant-conn id)
           (response {:id id}))))))
