@@ -1,12 +1,13 @@
 (ns org.akvo.lumen.endpoint.job-execution
   (:require [compojure.core :refer :all]
-            [hugsql.core :as hugsql]
+            ;; [hugsql.core :as hugsql]
             [org.akvo.lumen.component.tenant-manager :refer [connection]]
+            [org.akvo.lumen.lib.job-execution :as job-execution]
             [ring.util.response :as response]))
 
-(hugsql/def-db-fns "org/akvo/lumen/job-execution.sql")
+;; (hugsql/def-db-fns "org/akvo/lumen/job-execution.sql")
 
-(defn status
+#_(defn status
   "Get the status of a job execution. There are three different states:
   * { \"status\": \"PENDING\", \"jobExecytionId\": <id> }
   * { \"status\": \"FAILED\", \"jobExecutionId\": <id>, \"reason\": <reason> }
@@ -26,6 +27,6 @@
   (context "/api/job_executions" {:keys [tenant]}
     (let-routes [tenant-conn (connection tenant-manager tenant)]
       (GET "/:id" [id]
-        (if-let [status (status tenant-conn id)]
+        (if-let [status (job-execution/status tenant-conn id)]
           (response/response status)
           (response/not-found {"jobExecutionId" id}))))))
