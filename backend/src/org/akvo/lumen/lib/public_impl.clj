@@ -1,7 +1,7 @@
 (ns org.akvo.lumen.lib.public-impl
   (:require [hugsql.core :as hugsql]
             [org.akvo.lumen.lib.dataset :as dataset]
-            [org.akvo.lumen.endpoint.visualisation :refer [visualisation]]
+            [org.akvo.lumen.lib.visualisation :as visualisation]
             [org.akvo.lumen.lib.dashboard :refer [handle-dashboard-by-id]]))
 
 
@@ -20,7 +20,7 @@
 
 (defmethod response-data :visualisation
   [tenant-conn share]
-  (let [v (visualisation tenant-conn (:visualisation_id share))
+  (let [v (visualisation/fetch tenant-conn (:visualisation_id share))
         d (dataset/dataset tenant-conn (:datasetId v))]
     {"visualisation" (dissoc v :id :created :modified)
      "datasets"      {(:id d) d}}))
@@ -35,7 +35,7 @@
 
 (defn visualisation-list [tenant-conn visualisation-ids]
   (reduce conj {} (map (fn [v-id]
-                         {v-id (visualisation tenant-conn v-id)})
+                         {v-id (visualisation/fetch tenant-conn v-id)})
                        visualisation-ids)))
 
 (defn dataset-list
