@@ -3,7 +3,7 @@
             [clojure.test :refer :all]
             [hugsql.core :as hugsql]
             [org.akvo.lumen.component.tenant-manager :as tm]
-            [org.akvo.lumen.endpoint.dashboard :as dashboard]
+            [org.akvo.lumen.lib.dashboard :as dashboard]
             [org.akvo.lumen.lib.share :as share]
             [org.akvo.lumen.fixtures :refer [db-fixture test-conn]]
             [org.akvo.lumen.util :refer [squuid gen-table-name]]))

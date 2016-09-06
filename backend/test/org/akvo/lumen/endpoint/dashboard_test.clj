@@ -3,7 +3,8 @@
             [hugsql.core :as hugsql]
             [org.akvo.lumen.fixtures :refer [db-fixture test-conn]]
             [org.akvo.lumen.endpoint.share :as share]
-            [org.akvo.lumen.endpoint.dashboard :as dashboard]
+            [org.akvo.lumen.lib.dashboard :as dashboard]
+            [org.akvo.lumen.lib.dashboard-impl :as dashboard-impl]
             [org.akvo.lumen.endpoint.share-test :as share-test]
             [org.akvo.lumen.util :refer [squuid]]))
 
@@ -54,7 +55,7 @@
 
 (deftest dashboard-unit
   (testing "filter-type"
-    (is (= (dashboard/filter-type (dashboard-spec "abc123") "text")
+    (is (= (dashboard-impl/filter-type (dashboard-spec "abc123") "text")
            {:entities
             '({"id" "text-1", "type" "text", "content" "I am a text entity."}
              {"id" "text-2",
