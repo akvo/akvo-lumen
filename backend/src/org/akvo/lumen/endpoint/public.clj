@@ -90,9 +90,8 @@
           (-> (not-found (str "No public share with id: " id))
               (content-type "text/html; charset=utf-8")))
 
-        (let [share (public/share tenant-conn id)]
-          (if (share)
-            (-> (response (html-response share))
-                (content-type "text/html; charset=utf-8"))
-            (-> (not-found (str "No public share with id: " id))
-                (content-type "text/html; charset=utf-8"))))))))
+        (if-let [share (public/share tenant-conn id)]
+          (-> (response (html-response share))
+              (content-type "text/html; charset=utf-8"))
+          (-> (not-found (str "No public share with id: " id))
+              (content-type "text/html; charset=utf-8")))))))

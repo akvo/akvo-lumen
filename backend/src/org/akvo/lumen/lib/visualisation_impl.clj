@@ -23,10 +23,8 @@
                                              :name (get body "name")
                                              :spec (get body "spec")
                                              :author claims}))]
-      (println "@vis-impl/create")
-      (prn resp)
       (assoc body
-             "id" id
+             "id" (str id)
              "status" "OK"
              "created" (:created resp)
              "modified" (:modified resp)))
@@ -34,7 +32,7 @@
       (.printStackTrace e)
       (when (isa? SQLException (type e))
         (.printStackTrace (.getNextException ^SQLException e)))
-      {:error [e]})))
+      {:status 400})))
 
 
 (defn fetch [tenant-conn id]

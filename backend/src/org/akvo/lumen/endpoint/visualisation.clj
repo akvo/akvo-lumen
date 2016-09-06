@@ -28,18 +28,14 @@
 
 
 (defn endpoint [{:keys [tenant-manager]}]
-  (context "/api/visualiations" {:keys [params tenant] :as request}
+  (context "/api/visualisations" {:keys [params tenant] :as request}
     (let-routes [tenant-conn (connection tenant-manager tenant)]
 
       (GET "/" _
         (response (visualisation/all tenant-conn)))
 
       (POST "/" {:keys [jwt-claims body]}
-        (let [resp (visualisation/create tenant-conn body jwt-claims)]
-          (if (ok? resp)
-            (response resp)
-            (-> (response {:error (:error resp)})
-                (status 400)))))
+        (response (visualisation/create tenant-conn body jwt-claims)))
 
       (context "/:id" [id]
 
