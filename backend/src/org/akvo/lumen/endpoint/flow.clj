@@ -1,28 +1,7 @@
 (ns org.akvo.lumen.endpoint.flow
-  (:require ;; [clojure.string :as str]
-            ;; [clojure.set :as set]
-            [compojure.core :refer :all]
-            [ring.util.response :refer (response)]
-            ;; [hugsql.core :as hugsql]
-            ;; [org.akvo.lumen.import.flow :as flow-import]
+  (:require [compojure.core :refer :all]
             [org.akvo.lumen.lib.flow :as flow]
-            ))
-
-
-;; (hugsql/def-db-fns "org/akvo/lumen/import/flow.sql")
-
-
-#_(defn remove-empty-folders
-  "Remove empty folders"
-  [folders-and-surveys]
-  (loop [fas folders-and-surveys]
-    (let [folder-ids (set (map :folderId fas))
-          next-fas (remove #(and (= (:type %) "folder")
-                                 (not (folder-ids (:id %))))
-                           fas)]
-      (if (= (count fas) (count next-fas))
-        fas
-        (recur next-fas)))))
+            [ring.util.response :refer [response]]))
 
 (defn endpoint [{{:keys [flow-report-database-url]} :config}]
   (context "/api/flow" _
@@ -32,26 +11,7 @@
                                             (-> request :params :org-id))]
         (if items
           (response items)
-          (response ())))
-
-      #_(let [org-id (-> request :params :org-id)
-            root-ids (flow-import/root-ids org-id (:jwt-claims request))]
-        (if-not (empty? root-ids)
-          (response (remove-empty-folders
-                     (descendant-folders-and-surveys-by-folder-id
-                      (format flow-report-database-url org-id)
-                      {:folder-ids root-ids}
-                      {}
-                      {:identifiers identity})))
-          (response ())))
-      )
+          (response ()))))
 
     (GET "/instances" request
-      #_(let [flow-instances (let [roles (get-in request [:jwt-claims "realm_access" "roles"])]
-                             (->> roles
-                                  (map #(second (re-find #"akvo:flow:(.+?):" %)))
-                                  (remove nil?)
-                                  set))]
-        (response {:instances flow-instances}))
-
       (response (flow/instances (:jwt-claims request))))))

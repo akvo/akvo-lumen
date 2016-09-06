@@ -2,9 +2,8 @@
   (:require
    [compojure.core :refer :all]
    [org.akvo.lumen.component.tenant-manager :refer [connection]]
-   [org.akvo.lumen.lib.share :as s]
-   [ring.util.response :refer [response]])
-  )
+   [org.akvo.lumen.lib.share :as share]
+   [ring.util.response :refer [response]]))
 
 
 (defn endpoint [{:keys [tenant-manager]}]
@@ -12,11 +11,11 @@
     (let-routes [tenant-conn (connection tenant-manager tenant)]
 
       (GET "/" _
-        (response (s/collection tenant-conn)))
+        (response (share/collection tenant-conn)))
 
       (POST "/" {:keys [tenant body] :as request}
         (if (contains? body "visualisationId")
-          (response (s/share-visualisation tenant-conn
+          (response (share/share-visualisation tenant-conn
                                            (get body "visualisationId")))
-          (response (s/share-dashboard tenant-conn
+          (response (share/share-dashboard tenant-conn
                                        (get body "dashboardId"))))))))
