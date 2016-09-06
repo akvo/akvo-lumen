@@ -4,9 +4,9 @@
             [hugsql.core :as hugsql]
             [org.akvo.lumen.component.tenant-manager :refer [connection]]
             [org.akvo.lumen.endpoint
-             [dashboard :refer [handle-dashboard-by-id]]
              [dataset :refer [find-dataset]]
              [visualisation :refer [visualisation]]]
+            [org.akvo.lumen.lib.dashboard :refer [handle-dashboard-by-id]]
             [ring.util.response :refer [content-type not-found response]]))
 
 (hugsql/def-db-fns "org/akvo/lumen/endpoint/public.sql")
