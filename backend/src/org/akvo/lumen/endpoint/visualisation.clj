@@ -1,15 +1,69 @@
 (ns org.akvo.lumen.endpoint.visualisation
   (:require [compojure.core :refer :all]
-            [hugsql.core :as hugsql]
             [org.akvo.lumen.component.tenant-manager :refer [connection]]
-            [org.akvo.lumen.util :refer [squuid]]
-            [ring.util.response :refer [not-found response]])
-  (:import [java.sql SQLException]))
+            [org.akvo.lumen.lib.visualisation :as visualisation]
+            [ring.util.response :refer [not-found response status]]))
 
-(hugsql/def-db-fns "org/akvo/lumen/endpoint/visualisation.sql")
+#_(ns org.akvo.lumen.endpoint.visualisation
+    (:require [compojure.core :refer :all]
+            ;; [hugsql.core :as hugsql]
+            [org.akvo.lumen.component.tenant-manager :refer [connection]]
+            ;; [org.akvo.lumen.util :refer [squuid]]
+            [org.akvo.lumen.lib.visualisation :refer visualisation]
+            [ring.util.response :refer [not-found response status]]
+            )
+  #_(:import [java.sql SQLException])
+  )
+
+#_(hugsql/def-db-fns "org/akvo/lumen/endpoint/visualisation.sql")
 
 
-(defn visualisation
+
+
+
+(defn ok?
+  "Msg helper, true for successful message {:ok [...}.."
+  [msg]
+  (contains? msg :ok))
+
+
+(defn endpoint [{:keys [tenant-manager]}]
+  (context "/api/visualiations" {:keys [params tenant] :as request}
+    (let-routes [tenant-conn (connection tenant-manager tenant)]
+
+      (GET "/" _
+        (response (visualisation/all tenant-conn)))
+
+      (POST "/" {:keys [jwt-claims body]}
+        (let [resp (visualisation/create body jwt-claims)]
+          (if (ok? resp)
+            (response resp)
+            (-> (response {:error (:error resp)})
+                (status 400)))))
+
+      (context "/:id" [id]
+
+        (GET "/" _
+          (let [v (visualisation/fetch tenant-conn id)]
+            (if v
+              (response v)
+              (not-found {:id id}))))
+
+        (PUT "/" {:keys [jwt-claims body]}
+          (visualisation/upsert tenant-conn (assoc body "id" id) jwt-claims)
+          (response {:id id}))
+
+        (DELETE "/" _
+          (let [resp (visualisation/delete tenant-conn id)]
+            (if (ok? resp)
+              (response (-> :ok first resp))
+              (-> (response (:error resp))
+                  (status 400)))))))))
+
+
+
+
+#_(defn visualisation
   ""
   [conn id]
   (dissoc (visualisation-by-id conn
@@ -18,17 +72,17 @@
                                {:identifiers identity})
           :author))
 
-(defn endpoint [{:keys [tenant-manager]}]
+#_(defn endpoint [{:keys [tenant-manager]}]
   (context "/api/visualisations" {:keys [params tenant] :as request}
     (let-routes [tenant-conn (connection tenant-manager tenant)]
 
-      (GET "/" _
+      #_(GET "/" _
         (response (all-visualisations tenant-conn
                                       {}
                                       {}
                                       {:identifiers identity})))
 
-      (POST "/" {:keys [jwt-claims body]}
+      #_(POST "/" {:keys [jwt-claims body]}
         (try
           (let [id (squuid)
                 resp (first (upsert-visualisation
@@ -52,7 +106,7 @@
 
       (context "/:id" [id]
 
-        (GET "/" _
+        #_(GET "/" _
           (if-let [v (visualisation-by-id tenant-conn
                                           {:id id}
                                           {}
@@ -62,12 +116,12 @@
 
         (PUT "/" {:keys [jwt-claims body]}
           (upsert-visualisation tenant-conn
-            {:id id
-             :dataset-id (get body "datasetId")
-             :type (get body "visualisationType")
-             :name (get body "name")
-             :spec (get body "spec")
-             :author jwt-claims})
+                                {:id id
+                                 :dataset-id (get body "datasetId")
+                                 :type (get body "visualisationType")
+                                 :name (get body "name")
+                                 :spec (get body "spec")
+                                 :author jwt-claims})
           (response {:id id}))
 
         (DELETE "/" _
