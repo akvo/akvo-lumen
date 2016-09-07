@@ -6,7 +6,7 @@
             [org.akvo.lumen.endpoint.job-execution :as job-execution]))
 
 
-(hugsql/def-db-fns "org/akvo/lumen/endpoint/dataset.sql")
+(hugsql/def-db-fns "org/akvo/lumen/lib/dataset.sql")
 (hugsql/def-db-fns "org/akvo/lumen/job-execution.sql")
 
 

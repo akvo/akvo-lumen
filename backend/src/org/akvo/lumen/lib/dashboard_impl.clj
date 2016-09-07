@@ -3,7 +3,7 @@
             [org.akvo.lumen.util :refer [squuid]]))
 
 
-(hugsql/def-db-fns "org/akvo/lumen/endpoint/dashboard.sql")
+(hugsql/def-db-fns "org/akvo/lumen/lib/dashboard.sql")
 
 
 (defn dashboard-keys-match?

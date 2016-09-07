@@ -50,8 +50,8 @@
 
 (use-fixtures :once db-fixture)
 
-(hugsql/def-db-fns "org/akvo/lumen/endpoint/visualisation.sql")
-(hugsql/def-db-fns "org/akvo/lumen/endpoint/dashboard.sql")
+(hugsql/def-db-fns "org/akvo/lumen/lib/visualisation.sql")
+(hugsql/def-db-fns "org/akvo/lumen/lib/dashboard.sql")
 
 (deftest dashboard-unit
   (testing "filter-type"

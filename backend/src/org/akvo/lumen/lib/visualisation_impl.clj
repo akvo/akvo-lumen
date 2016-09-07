@@ -4,7 +4,7 @@
   (:import [java.sql SQLException]))
 
 
-(hugsql/def-db-fns "org/akvo/lumen/endpoint/visualisation.sql")
+(hugsql/def-db-fns "org/akvo/lumen/lib/visualisation.sql")
 
 
 (defn all [tenant-conn]

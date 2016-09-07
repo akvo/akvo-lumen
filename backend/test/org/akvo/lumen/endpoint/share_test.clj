@@ -14,8 +14,8 @@
 ;;;
 
 (hugsql/def-db-fns "org/akvo/lumen/job-execution.sql")
-(hugsql/def-db-fns "org/akvo/lumen/endpoint/visualisation.sql")
-(hugsql/def-db-fns "org/akvo/lumen/job-execution.sql")
+(hugsql/def-db-fns "org/akvo/lumen/lib/visualisation.sql")
+
 
 (defn dashboard-spec [v1-id v2-id]
   {"type"     "dashboard"
@@ -135,7 +135,7 @@
 (use-fixtures :once db-fixture)
 
 (hugsql/def-db-fns "org/akvo/lumen/endpoint/share_test.sql")
-(hugsql/def-db-fns "org/akvo/lumen/endpoint/dashboard.sql")
+(hugsql/def-db-fns "org/akvo/lumen/lib/dashboard.sql")
 
 (deftest ^:functional share
 

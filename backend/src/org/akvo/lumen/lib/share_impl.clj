@@ -5,7 +5,7 @@
            (java.security SecureRandom)))
 
 
-(hugsql/def-db-fns "org/akvo/lumen/endpoint/share.sql")
+(hugsql/def-db-fns "org/akvo/lumen/lib/share.sql")
 
 
 (defn random-url-safe-string

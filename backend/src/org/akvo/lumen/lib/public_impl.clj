@@ -5,7 +5,7 @@
             [org.akvo.lumen.lib.dashboard :refer [handle-dashboard-by-id]]))
 
 
-(hugsql/def-db-fns "org/akvo/lumen/endpoint/public.sql")
+(hugsql/def-db-fns "org/akvo/lumen/lib/public.sql")
 
 
 (defn get-share
