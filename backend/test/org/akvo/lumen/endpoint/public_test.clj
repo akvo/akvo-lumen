@@ -3,7 +3,7 @@
             [hugsql.core :as hugsql]
             [org.akvo.lumen.lib.public-impl :as public-impl]
             [org.akvo.lumen.endpoint
-             ;; [public :as public]
+             [public :as public]
              [share-test :as share-test]]
             [org.akvo.lumen.lib.share :as share]
             [org.akvo.lumen.fixtures :refer [db-fixture test-conn]]))

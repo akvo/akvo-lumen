@@ -14,5 +14,5 @@
       (GET "/" _
         (response
          {:dashboards (dashboard/all-dashboards tenant-conn)
-          :datasets (dataset/all-datasets tenant-conn)
+          :datasets (dataset/all tenant-conn)
           :visualisations (visualisation/all tenant-conn)})))))

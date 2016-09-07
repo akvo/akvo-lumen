@@ -21,7 +21,7 @@
 (defmethod response-data :visualisation
   [tenant-conn share]
   (let [v (visualisation/fetch tenant-conn (:visualisation_id share))
-        d (dataset/dataset tenant-conn (:datasetId v))]
+        d (dataset/create tenant-conn (:datasetId v))]
     {"visualisation" (dissoc v :id :created :modified)
      "datasets"      {(:id d) d}}))
 
@@ -43,7 +43,7 @@
   (let [dataset-ids (vec (reduce conj #{} (map :datasetId
                                                (vals visualisations))))]
     (reduce conj {} (map (fn [d-id]
-                           {d-id (dataset/dataset tenant-conn d-id)})
+                           {d-id (dataset/fetch tenant-conn d-id)})
                          dataset-ids))))
 
 (defmethod response-data :dashboard

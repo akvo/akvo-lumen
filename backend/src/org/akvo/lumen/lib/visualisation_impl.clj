@@ -45,7 +45,6 @@
     {:id (-> v first :id)}))
 
 (defn delete [tenant-conn id]
-  (let [deleted-rows (delete-visualisation-by-id tenant-conn {:id id})]
-    (prn deleted-rows)
-    (if (= deleted-rows 1)
+  (let [c (delete-visualisation-by-id tenant-conn {:id id})]
+    (when (not (zero? c))
       {:id id})))
