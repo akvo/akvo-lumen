@@ -21,7 +21,7 @@
 (defmethod response-data :visualisation
   [tenant-conn share]
   (let [v (visualisation/fetch tenant-conn (:visualisation_id share))
-        d (dataset/create tenant-conn (:datasetId v))]
+        d (dataset/fetch tenant-conn (:datasetId v))]
     {"visualisation" (dissoc v :id :created :modified)
      "datasets"      {(:id d) d}}))
 
