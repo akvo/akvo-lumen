@@ -105,8 +105,8 @@
                               :type       "bar"
                               :spec       {}
                               :author     {}})
-  (dashboard/handle-new-dashboard conn (dashboard-spec (:visualisation-id spec)
-                                                       (:visualisation2-id spec))))
+  (dashboard/create conn (dashboard-spec (:visualisation-id spec)
+                                         (:visualisation2-id spec))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Test data

@@ -72,11 +72,11 @@
   (testing "Dashboard"
     (let [v-id               (-> (all-visualisations test-conn) first :id)
           d-spec             (dashboard-spec v-id)
-          {dashboard-id :id} (dashboard/handle-new-dashboard test-conn d-spec)]
+          {dashboard-id :id} (dashboard/create test-conn d-spec)]
       (is (not (nil? dashboard-id)))
 
       (testing "Get dashboard"
-        (let [d (dashboard/handle-dashboard-by-id test-conn
+        (let [d (dashboard/fetch test-conn
                                                   dashboard-id)]
           (is (not (nil? d)))
           (is (every? #(contains? d %)
@@ -98,8 +98,8 @@
                                      "Updated text entity")
                            (assoc-in ["layout" "text-1" "h"] 1))]
 
-          (dashboard/persist-dashboard test-conn dashboard-id new-spec)
-          (let [updated-d (dashboard/handle-dashboard-by-id
+          (dashboard/upsert test-conn dashboard-id new-spec)
+          (let [updated-d (dashboard/fetch
                            test-conn dashboard-id)]
             (is (= (:title updated-d)
                    "My updated dashboard"))
@@ -109,7 +109,7 @@
                    1)))))
 
       (testing "Delete dashboard"
-        (dashboard/handle-dashboard-delete test-conn dashboard-id)
+        (dashboard/delete test-conn dashboard-id)
         (is (nil? (dashboard-by-id test-conn {:id dashboard-id})))
         (is (empty? (dashboard_visualisation-by-dashboard-id
                      test-conn {:dashboard-id dashboard-id})))

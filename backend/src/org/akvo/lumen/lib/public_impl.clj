@@ -2,7 +2,9 @@
   (:require [hugsql.core :as hugsql]
             [org.akvo.lumen.lib.dataset :as dataset]
             [org.akvo.lumen.lib.visualisation :as visualisation]
-            [org.akvo.lumen.lib.dashboard :refer [handle-dashboard-by-id]]))
+            [org.akvo.lumen.lib.dashboard :as dashboard]
+            ;; [org.akvo.lumen.lib.dashboard :refer [handle-dashboard-by-id]]
+            ))
 
 
 (hugsql/def-db-fns "org/akvo/lumen/lib/public.sql")
@@ -48,7 +50,7 @@
 
 (defmethod response-data :dashboard
   [tenant-conn share]
-  (let [dashboard (handle-dashboard-by-id tenant-conn (:dashboard_id share))
+  (let [dashboard (dashboard/fetch tenant-conn (:dashboard_id share))
         visualisation-ids (visualisation-id-list dashboard)
         visualisations (visualisation-list tenant-conn visualisation-ids)
         datasets (dataset-list tenant-conn visualisations)]
