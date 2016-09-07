@@ -3,6 +3,7 @@
             [org.akvo.lumen.util :refer [squuid]])
   (:import [java.sql SQLException]))
 
+
 (hugsql/def-db-fns "org/akvo/lumen/endpoint/visualisation.sql")
 
 

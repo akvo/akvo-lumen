@@ -3,6 +3,7 @@
             [org.akvo.lumen.lib.flow :as flow]
             [ring.util.response :refer [response]]))
 
+
 (defn endpoint [{{:keys [flow-report-database-url]} :config}]
   (context "/api/flow" _
     (GET "/folders-and-surveys/:org-id" request

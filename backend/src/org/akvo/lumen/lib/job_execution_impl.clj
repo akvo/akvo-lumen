@@ -1,7 +1,9 @@
 (ns org.akvo.lumen.lib.job-execution-impl
   (:require [hugsql.core :as hugsql]))
 
+
 (hugsql/def-db-fns "org/akvo/lumen/job-execution.sql")
+
 
 (defn status
   "Get the status of a job execution. There are three different states:

@@ -1,7 +1,6 @@
 (ns org.akvo.lumen.lib.dashboard-impl
-  (:require
-   [hugsql.core :as hugsql]
-   [org.akvo.lumen.util :refer [squuid]]))
+  (:require [hugsql.core :as hugsql]
+            [org.akvo.lumen.util :refer [squuid]]))
 
 
 (hugsql/def-db-fns "org/akvo/lumen/endpoint/dashboard.sql")

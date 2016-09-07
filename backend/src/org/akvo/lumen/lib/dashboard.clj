@@ -1,8 +1,7 @@
 (ns org.akvo.lumen.lib.dashboard
-  (:require
-   [clojure.java.jdbc :as jdbc]
-   [org.akvo.lumen.util :refer [squuid]]
-   [org.akvo.lumen.lib.dashboard-impl :as impl]))
+  (:require [clojure.java.jdbc :as jdbc]
+            [org.akvo.lumen.util :refer [squuid]]
+            [org.akvo.lumen.lib.dashboard-impl :as impl]))
 
 
 (defn all-dashboards [tenant-conn]

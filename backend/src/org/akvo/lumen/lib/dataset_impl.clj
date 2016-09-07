@@ -1,10 +1,10 @@
 (ns org.akvo.lumen.lib.dataset-impl
-  (:require
-   [clojure.java.jdbc :as jdbc]
-   [clojure.string :as str]
-   [hugsql.core :as hugsql]
-   [org.akvo.lumen.import :as import]
-   [org.akvo.lumen.endpoint.job-execution :as job-execution]))
+  (:require [clojure.java.jdbc :as jdbc]
+            [clojure.string :as str]
+            [hugsql.core :as hugsql]
+            [org.akvo.lumen.import :as import]
+            [org.akvo.lumen.endpoint.job-execution :as job-execution]))
+
 
 (hugsql/def-db-fns "org/akvo/lumen/endpoint/dataset.sql")
 (hugsql/def-db-fns "org/akvo/lumen/job-execution.sql")

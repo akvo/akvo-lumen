@@ -24,7 +24,7 @@
 
   (testing "Public visualiation share."
     (share-test/seed test-conn share-test/test-spec)
-    (let [new-share (share/share-visualisation
+    (let [new-share (share/visualisation
                      test-conn (:visualisation-id share-test/test-spec))
           p         (public-impl/get-share test-conn (:id new-share))]
       (is (= (:visualisation_id p)
@@ -34,7 +34,7 @@
 
   (testing "Public dashboard share"
     (let [dashboard-id    (-> (all-dashboards test-conn) first :id)
-          dashboard-share (share/share-dashboard test-conn dashboard-id)
+          dashboard-share (share/dashboard test-conn dashboard-id)
           share           (public-impl/get-share test-conn (:id dashboard-share))
           share-data      (public-impl/response-data test-conn share)]
       (is (every? #(contains? share-data %)

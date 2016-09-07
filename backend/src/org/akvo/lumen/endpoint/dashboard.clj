@@ -4,6 +4,7 @@
             [org.akvo.lumen.lib.dashboard :as d]
             [ring.util.response :as resp]))
 
+
 (defn endpoint [{:keys [tenant-manager]}]
 
   (context "/api/dashboards" {:keys [params tenant] :as request}

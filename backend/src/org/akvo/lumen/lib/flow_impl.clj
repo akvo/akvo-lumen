@@ -19,7 +19,6 @@
         fas
         (recur next-fas)))))
 
-
 (defn folder-and-surverys [claims flow-report-database-url org-id]
   (let [root-ids (flow-import/root-ids org-id claims)]
     (if-not (empty? root-ids)
@@ -29,7 +28,6 @@
         {:folder-ids root-ids}
         {}
         {:identifiers identity})))))
-
 
 (defn instances [claims]
   {:instances (let [roles (get-in claims ["realm_access" "roles"])]
