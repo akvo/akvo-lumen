@@ -2,17 +2,28 @@
   (:require [org.akvo.lumen.lib.visualisation-impl :as impl]))
 
 
-(defn all [tenant-conn]
+(defn all
+  "Returns all visualisations."
+  [tenant-conn]
   (impl/all tenant-conn))
 
-(defn create [tenant-conn body claims]
+(defn create
+  "Creates a new visualisation. Body should include keys and spec conform
+  to..."
+  [tenant-conn body claims]
   (impl/create tenant-conn body claims))
 
-(defn fetch [tenant-conn id]
+(defn fetch
+  "Get a single visualisation."
+  [tenant-conn id]
   (impl/fetch tenant-conn id))
 
-(defn upsert [tenant-conn body claims]
+(defn upsert
+  "Update or insert a visualisation. Body should conform to spec ..."
+  [tenant-conn body claims]
   (impl/upsert tenant-conn body claims))
 
-(defn delete [tenant-conn id]
+(defn delete
+  "Delete"
+  [tenant-conn id]
   (impl/delete tenant-conn id))

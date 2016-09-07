@@ -2,13 +2,8 @@
   (:require [compojure.core :refer :all]
             [org.akvo.lumen.component.tenant-manager :refer [connection]]
             [org.akvo.lumen.lib.visualisation :as visualisation]
-            [ring.util.response :refer [not-found response status]]))
+            [ring.util.response :refer [not-found response]]))
 
-
-(defn ok?
-  "Msg helper, true for successful message {:ok [...}.."
-  [msg]
-  (contains? msg :ok))
 
 (defn endpoint [{:keys [tenant-manager]}]
   (context "/api/visualisations" {:keys [params tenant] :as request}
@@ -26,15 +21,14 @@
           (let [v (visualisation/fetch tenant-conn id)]
             (if v
               (response v)
-              (not-found {:id id}))))
+              (not-found {:error "not found"}))))
 
         (PUT "/" {:keys [jwt-claims body]}
-          (visualisation/upsert tenant-conn (assoc body "id" id) jwt-claims)
-          (response {:id id}))
+          (response
+           (visualisation/upsert tenant-conn (assoc body "id" id) jwt-claims)))
 
         (DELETE "/" _
-          (let [resp (visualisation/delete tenant-conn id)]
-            (if (ok? resp)
-              (response (-> :ok first resp))
-              (-> (response (:error resp))
-                  (status 400)))))))))
+          (let [r (visualisation/delete tenant-conn id)]
+            (if r
+              (response r)
+              (not-found {:error "not found"}))))))))

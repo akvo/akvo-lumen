@@ -15,4 +15,4 @@
         (response
          {:dashboards (dashboard/all-dashboards tenant-conn)
           :datasets (dataset/all-datasets tenant-conn)
-          :visualisation (visualisation/all tenant-conn)})))))
+          :visualisations (visualisation/all tenant-conn)})))))
