@@ -3,7 +3,8 @@
             [hugsql.core :as hugsql]
             [org.akvo.lumen.fixtures :refer [db-fixture test-conn]]
             [org.akvo.lumen.endpoint.share :as share]
-            [org.akvo.lumen.endpoint.dashboard :as dashboard]
+            [org.akvo.lumen.lib.dashboard :as dashboard]
+            [org.akvo.lumen.lib.dashboard-impl :as dashboard-impl]
             [org.akvo.lumen.endpoint.share-test :as share-test]
             [org.akvo.lumen.util :refer [squuid]]))
 
@@ -49,12 +50,12 @@
 
 (use-fixtures :once db-fixture)
 
-(hugsql/def-db-fns "org/akvo/lumen/endpoint/visualisation.sql")
-(hugsql/def-db-fns "org/akvo/lumen/endpoint/dashboard.sql")
+(hugsql/def-db-fns "org/akvo/lumen/lib/visualisation.sql")
+(hugsql/def-db-fns "org/akvo/lumen/lib/dashboard.sql")
 
 (deftest dashboard-unit
   (testing "filter-type"
-    (is (= (dashboard/filter-type (dashboard-spec "abc123") "text")
+    (is (= (dashboard-impl/filter-type (dashboard-spec "abc123") "text")
            {:entities
             '({"id" "text-1", "type" "text", "content" "I am a text entity."}
              {"id" "text-2",
@@ -71,12 +72,11 @@
   (testing "Dashboard"
     (let [v-id               (-> (all-visualisations test-conn) first :id)
           d-spec             (dashboard-spec v-id)
-          {dashboard-id :id} (dashboard/handle-new-dashboard test-conn d-spec)]
+          {dashboard-id :id} (:body (dashboard/create test-conn d-spec))]
       (is (not (nil? dashboard-id)))
 
       (testing "Get dashboard"
-        (let [d (dashboard/handle-dashboard-by-id test-conn
-                                                  dashboard-id)]
+        (let [d (:body (dashboard/fetch test-conn dashboard-id))]
           (is (not (nil? d)))
           (is (every? #(contains? d %)
                       [:id :title :entities :layout :type :status :created
@@ -97,9 +97,8 @@
                                      "Updated text entity")
                            (assoc-in ["layout" "text-1" "h"] 1))]
 
-          (dashboard/persist-dashboard test-conn dashboard-id new-spec)
-          (let [updated-d (dashboard/handle-dashboard-by-id
-                           test-conn dashboard-id)]
+          (dashboard/upsert test-conn dashboard-id new-spec)
+          (let [updated-d (:body (dashboard/fetch test-conn dashboard-id))]
             (is (= (:title updated-d)
                    "My updated dashboard"))
             (is (= (get-in updated-d [:entities "text-1" "content"])
@@ -108,7 +107,7 @@
                    1)))))
 
       (testing "Delete dashboard"
-        (dashboard/handle-dashboard-delete test-conn dashboard-id)
+        (dashboard/delete test-conn dashboard-id)
         (is (nil? (dashboard-by-id test-conn {:id dashboard-id})))
         (is (empty? (dashboard_visualisation-by-dashboard-id
                      test-conn {:dashboard-id dashboard-id})))

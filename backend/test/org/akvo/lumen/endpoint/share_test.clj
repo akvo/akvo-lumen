@@ -3,8 +3,8 @@
             [clojure.test :refer :all]
             [hugsql.core :as hugsql]
             [org.akvo.lumen.component.tenant-manager :as tm]
-            [org.akvo.lumen.endpoint.dashboard :as dashboard]
-            [org.akvo.lumen.endpoint.share :as share]
+            [org.akvo.lumen.lib.dashboard :as dashboard]
+            [org.akvo.lumen.lib.share :as share]
             [org.akvo.lumen.fixtures :refer [db-fixture test-conn]]
             [org.akvo.lumen.util :refer [squuid gen-table-name]]))
 
@@ -14,8 +14,8 @@
 ;;;
 
 (hugsql/def-db-fns "org/akvo/lumen/job-execution.sql")
-(hugsql/def-db-fns "org/akvo/lumen/endpoint/visualisation.sql")
-(hugsql/def-db-fns "org/akvo/lumen/job-execution.sql")
+(hugsql/def-db-fns "org/akvo/lumen/lib/visualisation.sql")
+
 
 (defn dashboard-spec [v1-id v2-id]
   {"type"     "dashboard"
@@ -105,8 +105,8 @@
                               :type       "bar"
                               :spec       {}
                               :author     {}})
-  (dashboard/handle-new-dashboard conn (dashboard-spec (:visualisation-id spec)
-                                                       (:visualisation2-id spec))))
+  (dashboard/create conn (dashboard-spec (:visualisation-id spec)
+                                         (:visualisation2-id spec))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Test data
@@ -135,35 +135,38 @@
 (use-fixtures :once db-fixture)
 
 (hugsql/def-db-fns "org/akvo/lumen/endpoint/share_test.sql")
-(hugsql/def-db-fns "org/akvo/lumen/endpoint/dashboard.sql")
+(hugsql/def-db-fns "org/akvo/lumen/lib/dashboard.sql")
 
 (deftest ^:functional share
 
   (testing "Empty collection"
-    (is (empty? (share/collection test-conn))))
+    (is (empty? (:body (share/all test-conn)))))
 
   (testing "Insert visualisation share"
     (seed test-conn test-spec)
-    (let [new-share (share/share-visualisation test-conn
-                                               (:visualisation-id test-spec))
-          r         (share/collection test-conn)]
+    (let [new-share (:body (share/fetch test-conn
+                                        {"visualisationId"
+                                         (:visualisation-id test-spec)}))
+          r (:body (share/all test-conn))]
       (is (= 1 (count r)))
       (is (= (:id new-share) (:id (first r))))))
 
   (testing "New share on same item"
-    (let [old-share-id (:id (first (share/collection test-conn)))
-          new-share-id (:id (share/share-visualisation test-conn
-                                                       (:visualisation-id test-spec)))]
+    (let [old-share-id (:id (first (:body (share/all test-conn))))
+          new-share-id (:id (:body (share/fetch test-conn
+                                                {"visualisationId"
+                                                 (:visualisation-id test-spec)})))]
       (is (= new-share-id old-share-id))))
 
   (testing "Remove share"
-    (let [shares (share/collection test-conn)]
-      (share/end-share test-conn (:id (first shares)))
-      (is (empty? (share/collection test-conn)))))
+    (let [shares (:body (share/all test-conn))]
+      (share/delete test-conn (:id (first shares)))
+      (is (empty? (:body (share/all test-conn))))))
 
   (testing "Insert dashboard share"
     (let [dashboard-id (-> (all-dashboards test-conn) first :id)
-          dashboard-share (share/share-dashboard test-conn dashboard-id)]
+          dashboard-share (:body (share/fetch test-conn
+                                              {"dashboardId" dashboard-id}))]
       (is (contains? dashboard-share :id))))
 
   (testing "History"

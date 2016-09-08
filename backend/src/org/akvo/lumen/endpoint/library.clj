@@ -1,12 +1,11 @@
 (ns org.akvo.lumen.endpoint.library
   (:require [compojure.core :refer :all]
-            [hugsql.core :as hugsql]
-            [ring.util.response :refer [response]]
-            [org.akvo.lumen.component.tenant-manager :refer [connection]]))
-
-(hugsql/def-db-fns "org/akvo/lumen/endpoint/dataset.sql")
-(hugsql/def-db-fns "org/akvo/lumen/endpoint/dashboard.sql")
-(hugsql/def-db-fns "org/akvo/lumen/endpoint/visualisation.sql")
+            [org.akvo.lumen.component.tenant-manager :refer [connection]]
+            [org.akvo.lumen.lib
+             [dashboard :as dashboard]
+             [dataset :as dataset]
+             [visualisation :as visualisation]]
+            [ring.util.response :refer [response]]))
 
 
 (defn endpoint [{:keys [tenant-manager]}]
@@ -15,7 +14,6 @@
 
       (GET "/" _
         (response
-         {:dashboards     (all-dashboards tenant-conn)
-          :datasets       (all-datasets tenant-conn)
-          :visualisations (all-visualisations
-                           tenant-conn {} {} {:identifiers identity})})))))
+         {:dashboards (:body (dashboard/all tenant-conn))
+          :datasets (:body (dataset/all tenant-conn))
+          :visualisations (:body (visualisation/all tenant-conn))})))))

@@ -1,7 +1,8 @@
 (ns org.akvo.lumen.endpoint.flow-test
   (:require [clojure.test :refer :all]
             [ring.mock.request :as mock]
-            [org.akvo.lumen.endpoint.flow :as flow]))
+            [org.akvo.lumen.endpoint.flow :as flow]
+            [org.akvo.lumen.lib.flow-impl :as flow-impl]))
 
 (comment
   (require 'clojure.tools.namespace.repl)
@@ -35,7 +36,7 @@
 
 (deftest remove-empty-folders-tests
   (testing "remove empty folders"
-    (is (= (flow/remove-empty-folders folders-and-surveys)
+    (is (= (flow-impl/remove-empty-folders folders-and-surveys)
            folders-and-surveys-with-removed-empty-folders))))
 
 (def flow-endpoint
@@ -43,7 +44,7 @@
 
 (use-fixtures :each
   (fn [f]
-    (with-redefs [flow/descendant-folders-and-surveys-by-folder-id
+    (with-redefs [flow-impl/descendant-folders-and-surveys-by-folder-id
                   (constantly folders-and-surveys)]
       (f))))
 
