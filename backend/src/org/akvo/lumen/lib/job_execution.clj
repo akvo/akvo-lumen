@@ -5,4 +5,4 @@
 (defn status
   "Return status of a job execution."
   [tenant-conn id]
-  (impl/status tenant-conn id))
+  (impl/job-status tenant-conn id))

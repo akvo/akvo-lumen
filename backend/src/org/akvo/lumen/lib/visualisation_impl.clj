@@ -1,6 +1,7 @@
 (ns org.akvo.lumen.lib.visualisation-impl
   (:require [hugsql.core :as hugsql]
-            [org.akvo.lumen.util :refer [squuid]])
+            [org.akvo.lumen.util :refer [squuid]]
+            [ring.util.response :refer [not-found response]])
   (:import [java.sql SQLException]))
 
 
@@ -8,10 +9,10 @@
 
 
 (defn all [tenant-conn]
-  (all-visualisations tenant-conn
-                      {}
-                      {}
-                      {:identifiers identity}))
+  (response (all-visualisations tenant-conn
+                                 {}
+                                 {}
+                                 {:identifiers identity})))
 
 (defn create [tenant-conn body jwt-claims]
   (let [id (squuid)
@@ -22,18 +23,21 @@
                                         :name (get body "name")
                                         :spec (get body "spec")
                                         :author jwt-claims}))]
-    (assoc body
-           "id" (str id)
-           "status" "OK"
-           "created" (:created v)
-           "modified" (:modified v))))
+    (response (assoc body
+                     "id" (str id)
+                     "status" "OK"
+                     "created" (:created v)
+                     "modified" (:modified v)))))
 
 (defn fetch [tenant-conn id]
-  (dissoc (visualisation-by-id tenant-conn
-                               {:id id}
-                               {}
-                               {:identifiers identity})
-          :author))
+  (if-let [v (visualisation-by-id tenant-conn
+                                  {:id id}
+                                  {}
+                                  {:identifiers identity})]
+    (response (dissoc v :author))
+    (not-found {:error "Not found"}))
+
+  )
 
 (defn upsert [tenant-conn body jwt-claims]
   (let [v (upsert-visualisation tenant-conn
@@ -43,9 +47,9 @@
                                  :name (get body "name")
                                  :spec (get body "spec")
                                  :author jwt-claims})]
-    {:id (-> v first :id)}))
+    (response {:id (-> v first :id)})))
 
 (defn delete [tenant-conn id]
-  (let [c (delete-visualisation-by-id tenant-conn {:id id})]
-    (when (not (zero? c))
-      {:id id})))
+  (if (zero? (delete-visualisation-by-id tenant-conn {:id id}))
+    (not-found {:error "Not found"})
+    (response {:id id})))

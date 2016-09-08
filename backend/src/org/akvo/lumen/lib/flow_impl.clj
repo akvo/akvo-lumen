@@ -1,7 +1,8 @@
 (ns org.akvo.lumen.lib.flow-impl
   (:require [clojure.set :as set]
             [hugsql.core :as hugsql]
-            [org.akvo.lumen.import.flow :as flow-import]))
+            [org.akvo.lumen.import.flow :as flow-import]
+            [ring.util.response :refer [response]]))
 
 
 (hugsql/def-db-fns "org/akvo/lumen/import/flow.sql")
@@ -22,16 +23,19 @@
 (defn folder-and-surverys [claims flow-report-database-url org-id]
   (let [root-ids (flow-import/root-ids org-id claims)]
     (if-not (empty? root-ids)
-      (remove-empty-folders
-       (descendant-folders-and-surveys-by-folder-id
-        (format flow-report-database-url org-id)
-        {:folder-ids root-ids}
-        {}
-        {:identifiers identity})))))
+      (response
+       (remove-empty-folders
+        (descendant-folders-and-surveys-by-folder-id
+         (format flow-report-database-url org-id)
+         {:folder-ids root-ids}
+         {}
+         {:identifiers identity})))
+      (response ()))))
 
 (defn instances [claims]
-  {:instances (let [roles (get-in claims ["realm_access" "roles"])]
-                (->> roles
-                     (map #(second (re-find #"akvo:flow:(.+?):" %)))
-                     (remove nil?)
-                     set))})
+  (response
+   {:instances (let [roles (get-in claims ["realm_access" "roles"])]
+                 (->> roles
+                      (map #(second (re-find #"akvo:flow:(.+?):" %)))
+                      (remove nil?)
+                      set))}))

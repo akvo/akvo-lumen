@@ -5,7 +5,7 @@
 (defn all
   "Return all datasets."
   [tenant-conn]
-  (impl/all-datasets tenant-conn))
+  (impl/all tenant-conn))
 
 (defn create
   "Create new dataset. Body should conform..."

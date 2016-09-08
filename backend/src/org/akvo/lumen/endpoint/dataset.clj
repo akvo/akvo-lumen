@@ -1,8 +1,7 @@
 (ns org.akvo.lumen.endpoint.dataset
   (:require [compojure.core :refer :all]
             [org.akvo.lumen.component.tenant-manager :refer [connection]]
-            [org.akvo.lumen.lib.dataset :as dataset]
-            [ring.util.response :refer [not-found response]]))
+            [org.akvo.lumen.lib.dataset :as dataset]))
 
 
 (defn endpoint [{:keys [tenant-manager config]}]
@@ -10,18 +9,14 @@
     (let-routes [tenant-conn (connection tenant-manager tenant)]
 
       (GET "/" _
-        (response (dataset/all tenant-conn)))
+        (dataset/all tenant-conn))
 
       (POST "/" {:keys [tenant body jwt-claims] :as request}
-        (response (dataset/create tenant-conn config jwt-claims body)))
+        (dataset/create tenant-conn config jwt-claims body))
 
       (context "/:id" [id]
         (GET "/" _
-          (if-let [d (dataset/fetch tenant-conn id)]
-            (response d)
-            (not-found {:error "not found"})))
+          (dataset/fetch tenant-conn id))
 
         (DELETE "/" _
-          (if-let [r (dataset/delete tenant-conn id)]
-            (response r)
-            (not-found {:error "not found"})))))))
+          (dataset/delete tenant-conn id))))))

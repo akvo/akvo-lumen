@@ -5,7 +5,7 @@
 (defn all
   "Returns all dashboards."
   [tenant-conn]
-  (impl/all-dashboards tenant-conn))
+  (impl/all tenant-conn))
 
 (defn create
   "Creates a new dashboard."

@@ -5,17 +5,12 @@
 (defn all
   "Get all shares"
   [tenant-conn]
-  (impl/all-shares tenant-conn))
+  (impl/all tenant-conn))
 
-(defn visualisation
-  "Share a visualisation"
-  [tenant-conn visualisation-id]
-  (impl/visualisation tenant-conn visualisation-id))
-
-(defn dashboard
-  "Share a dashboard"
-  [tenant-conn dashboard-id]
-  (impl/dashboard tenant-conn dashboard-id))
+(defn fetch
+  "Get a share"
+  [tenant-conn spec]
+  (impl/fetch tenant-conn spec))
 
 (defn delete
   "Delete a share"

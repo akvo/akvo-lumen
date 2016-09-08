@@ -2,11 +2,15 @@
   (:require [hugsql.core :as hugsql]
             [clojure.java.jdbc :as jdbc]
             [org.akvo.lumen.util :refer [squuid]]
-            [org.akvo.lumen.util :refer [squuid]]))
+            [org.akvo.lumen.util :refer [squuid]]
+            [ring.util.response :refer [not-found response status]]))
 
 
 (hugsql/def-db-fns "org/akvo/lumen/lib/dashboard.sql")
 
+
+(defn all [tenant-conn]
+  (response (all-dashboards tenant-conn)))
 
 (defn dashboard-keys-match?
   "Make sure each key in entity have a matching key in layout."
@@ -85,13 +89,14 @@
              tx {:dashboard-id dashboard-id
                  :visualisation-id visualisation-id
                  :layout layout}))))
-      (handle-dashboard-by-id tenant-conn dashboard-id))
-    {:status 400
-     :body "Entities and layout dashboard keys does not match."}))
+      (response (handle-dashboard-by-id tenant-conn dashboard-id)))
+    (-> (response {:error "Entities and layout dashboard keys does not match."})
+        (status 400))))
 
 (defn fetch [tenant-conn id]
-  (if-some [d (dashboard-by-id tenant-conn {:id id})]
-    (handle-dashboard-by-id tenant-conn id)))
+  (if-let [d (dashboard-by-id tenant-conn {:id id})]
+    (response (handle-dashboard-by-id tenant-conn id))
+    (-> (not-found {:error "Not found"}))))
 
 (defn upsert
   "We update a dashboard via upsert of dashboard and clean - insert of
@@ -102,9 +107,7 @@
   4. Add new dashboard_visualisations
   "
   [tenant-conn id spec]
-  (let [;; {texts          :texts
-        ;;  visualisations :visualisations} (part-by-entity-type spec)
-        {:keys [texts visualisations]} (part-by-entity-type spec)
+  (let [{:keys [texts visualisations]} (part-by-entity-type spec)
         visualisations-layouts (:layout visualisations)]
     (jdbc/with-db-transaction [tx tenant-conn]
       (update-dashboard tx {:id id
@@ -120,11 +123,10 @@
            tx {:dashboard-id id
                :visualisation-id visualisation-id
                :layout visualisations-layout}))))
-    (handle-dashboard-by-id tenant-conn id)))
-
+    (response (handle-dashboard-by-id tenant-conn id))))
 
 (defn delete [tenant-conn id]
-  (let [c0 (delete-dashboard_visualisation tenant-conn {:dashboard-id id})
-        c1 (delete-dashboard-by-id tenant-conn {:id id})]
-    (when (= (+ c0 c1) 2)
-      {:id id})))
+  (delete-dashboard_visualisation tenant-conn {:dashboard-id id})
+  (if (zero? (delete-dashboard-by-id tenant-conn {:id id}))
+    (not-found {:error "Not round"})
+    (response {:id id})))

@@ -140,30 +140,33 @@
 (deftest ^:functional share
 
   (testing "Empty collection"
-    (is (empty? (share/all test-conn))))
+    (is (empty? (:body (share/all test-conn)))))
 
   (testing "Insert visualisation share"
     (seed test-conn test-spec)
-    (let [new-share (share/visualisation test-conn
-                                               (:visualisation-id test-spec))
-          r         (share/all test-conn)]
+    (let [new-share (:body (share/fetch test-conn
+                                        {"visualisationId"
+                                         (:visualisation-id test-spec)}))
+          r (:body (share/all test-conn))]
       (is (= 1 (count r)))
       (is (= (:id new-share) (:id (first r))))))
 
   (testing "New share on same item"
-    (let [old-share-id (:id (first (share/all test-conn)))
-          new-share-id (:id (share/visualisation test-conn
-                                                       (:visualisation-id test-spec)))]
+    (let [old-share-id (:id (first (:body (share/all test-conn))))
+          new-share-id (:id (:body (share/fetch test-conn
+                                                {"visualisationId"
+                                                 (:visualisation-id test-spec)})))]
       (is (= new-share-id old-share-id))))
 
   (testing "Remove share"
-    (let [shares (share/all test-conn)]
+    (let [shares (:body (share/all test-conn))]
       (share/delete test-conn (:id (first shares)))
-      (is (empty? (share/all test-conn)))))
+      (is (empty? (:body (share/all test-conn))))))
 
   (testing "Insert dashboard share"
     (let [dashboard-id (-> (all-dashboards test-conn) first :id)
-          dashboard-share (share/dashboard test-conn dashboard-id)]
+          dashboard-share (:body (share/fetch test-conn
+                                              {"dashboardId" dashboard-id}))]
       (is (contains? dashboard-share :id))))
 
   (testing "History"
