@@ -1,6 +1,6 @@
 import React, { PropTypes } from 'react';
 import Immutable from 'immutable';
-import DashSelect from '../common/DashSelect';
+import SelectMenu from '../common/SelectMenu';
 import ColumnMenu from './configMenu/ColumnMenu';
 import LabelColumnMenu from './configMenu/LabelColumnMenu';
 import LabelInput from './configMenu/LabelInput';
@@ -24,7 +24,7 @@ const getDatasetOptions = datasetArray =>
     label: entity.getTitle(dataset),
   }));
 
-const getDashSelectOptionsFromColumnList = (columns = Immutable.List()) =>
+const getSelectMenuOptionsFromColumnList = (columns = Immutable.List()) =>
   columns.map((column, index) => ({
     value: index.toString(),
     label: column.get('title'),
@@ -43,7 +43,7 @@ export default function ConfigMenu(props) {
 
   const columns = props.datasets[visualisation.datasetId] ?
     props.datasets[visualisation.datasetId].get('columns') : Immutable.List();
-  const columnOptions = getDashSelectOptionsFromColumnList(columns);
+  const columnOptions = getSelectMenuOptionsFromColumnList(columns);
 
   const getComponents = visualisationType => {
     let output;
@@ -161,6 +161,15 @@ export default function ConfigMenu(props) {
                 labelX: event.target.value.toString(),
               })}
             />
+            <Subtitle>Popup Label</Subtitle>
+            <LabelColumnMenu
+              choice={spec.datasetNameColumnX !== null ? spec.datasetNameColumnX.toString() : null}
+              name="xNameColumnMenu"
+              options={columnOptions}
+              onChange={(value) => onChangeSpec({
+                datasetNameColumnX: value,
+              })}
+            />
           </div>
         );
         break;
@@ -234,7 +243,7 @@ export default function ConfigMenu(props) {
     <div className="ConfigMenu">
       <div className="inputGroup">
         <label htmlFor="xDatasetMenu">Source dataset:</label>
-        <DashSelect
+        <SelectMenu
           name="xDatasetMenu"
           placeholder="Choose dataset..."
           value={visualisation.datasetId !== null ?

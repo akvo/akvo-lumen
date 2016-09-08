@@ -1,5 +1,5 @@
 import React, { PropTypes } from 'react';
-import DashSelect from '../common/DashSelect';
+import SelectMenu from '../common/SelectMenu';
 
 export default function LibraryDisplayMenu(props) {
   const { sortOrder, onChangeSortOrder, onChangeDisplayMode } = props;
@@ -16,7 +16,7 @@ export default function LibraryDisplayMenu(props) {
       >
         Sort by:
       </label>
-      <DashSelect
+      <SelectMenu
         name="sort-order"
         options={sortOptions}
         onChange={value => onChangeSortOrder(value)}

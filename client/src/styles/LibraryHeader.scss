@@ -33,7 +33,7 @@
         margin-right: 1.5rem;
         height: 3.5rem;
         position: relative;
-        .DashSelect {
+        .SelectMenu {
             height: 100%;
             .Select-control {
                 background-color: $mintGreen;
@@ -155,7 +155,7 @@
             width: 3.5rem;
             display: inline-block;
         }
-        .DashSelect {
+        .SelectMenu {
             width: 8rem;
             margin-right: calc(100% - 17.5rem);
             height: 2.5rem;

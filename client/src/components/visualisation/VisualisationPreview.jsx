@@ -1,5 +1,5 @@
 import React, { PropTypes } from 'react';
-import DashChart from '../charts/DashChart';
+import VisualisationViewer from '../charts/VisualisationViewer';
 
 require('../../styles/VisualisationPreview.scss');
 
@@ -33,7 +33,7 @@ export default function CreateVisualisationPreview({ visualisation, datasets }) 
   return (
     <div className="VisualisationPreview">
       {shouldRender(visualisation, datasets) ?
-        <DashChart
+        <VisualisationViewer
           visualisation={visualisation}
           datasets={datasets}
         /> :

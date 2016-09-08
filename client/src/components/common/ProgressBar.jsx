@@ -1,14 +1,14 @@
 import React, { PropTypes } from 'react';
 
-require('../../styles/DashProgressBar.scss');
+require('../../styles/ProgressBar.scss');
 
-export default function DashProgressBar(props) {
+export default function ProgressBar(props) {
   const isErrorState = props.progressPercentage === -1;
   const progress = isErrorState ? 0 : props.progressPercentage;
 
   return (
     <div
-      className="DashProgressBar"
+      className="ProgressBar"
     >
       <div
         className={`progressBar${isErrorState ? ' error' : ''}`}
@@ -41,7 +41,7 @@ export default function DashProgressBar(props) {
   );
 }
 
-DashProgressBar.propTypes = {
+ProgressBar.propTypes = {
   progressPercentage: PropTypes.number.isRequired,
   errorText: PropTypes.string,
   completionText: PropTypes.string,

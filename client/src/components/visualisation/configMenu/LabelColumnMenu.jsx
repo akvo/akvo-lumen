@@ -1,5 +1,5 @@
 import React, { PropTypes } from 'react';
-import DashSelect from '../../common/DashSelect';
+import SelectMenu from '../../common/SelectMenu';
 
 export default function LabelColumnMenu(props) {
   return (
@@ -7,7 +7,7 @@ export default function LabelColumnMenu(props) {
       <label htmlFor={props.name}>
         Label column:
       </label>
-      <DashSelect
+      <SelectMenu
         name={props.name}
         disabled={props.options ? props.options.length === 0 : true}
         placeholder="Choose a name column..."

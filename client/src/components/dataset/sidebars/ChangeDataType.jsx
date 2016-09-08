@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import Immutable from 'immutable';
-import DashSelect from '../../common/DashSelect';
+import SelectMenu from '../../common/SelectMenu';
 import SidebarHeader from './SidebarHeader';
 import SidebarControls from './SidebarControls';
 
@@ -25,7 +25,7 @@ function DateFormatSelect({ onChange, parseFormat }) {
       <label htmlFor="parseFormatMenu">
         Date format:
       </label>
-      <DashSelect
+      <SelectMenu
         name="parseFormatMenu"
         value={parseFormat}
         options={parseFormatOptions}
@@ -167,7 +167,7 @@ export default class ChangeDataType extends Component {
             <label htmlFor="dataTypeMenu">
               Change data type to:
             </label>
-            <DashSelect
+            <SelectMenu
               name="dataTypeMenu"
               value={newType}
               options={dataTypeOptions}
@@ -188,7 +188,7 @@ export default class ChangeDataType extends Component {
             <label htmlFor="ifInvalidInput">
               If cell format is invalid:
             </label>
-            <DashSelect
+            <SelectMenu
               name="dataTypeMenu"
               value={this.state.errorStrategy}
               options={errorOptions}

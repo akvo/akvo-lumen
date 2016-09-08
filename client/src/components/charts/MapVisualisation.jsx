@@ -3,13 +3,13 @@ import { Map, Marker, Popup, TileLayer } from 'react-leaflet';
 import * as chart from '../../utilities/chart';
 
 require('../../../node_modules/leaflet/dist/leaflet.css');
-require('../../styles/DashMap.scss');
+require('../../styles/MapVisualisation.scss');
 
 
-export default function DashMap({ visualisation, datasets, width, height }) {
+export default function MapVisualisation({ visualisation, datasets, width, height }) {
   const chartData = chart.getChartData(visualisation, datasets);
   return (
-    <div className="DashMap dashChart">
+    <div className="MapVisualisation dashChart">
       <Map
         center={[0, 0]}
         zoom={2}
@@ -41,7 +41,7 @@ export default function DashMap({ visualisation, datasets, width, height }) {
   );
 }
 
-DashMap.propTypes = {
+MapVisualisation.propTypes = {
   visualisation: PropTypes.object.isRequired,
   datasets: PropTypes.object.isRequired,
   width: PropTypes.number,

@@ -1,5 +1,5 @@
 import React, { PropTypes } from 'react';
-import DashSelect from '../common/DashSelect';
+import SelectMenu from '../common/SelectMenu';
 
 require('../../styles/VisualisationTypeMenu.scss');
 
@@ -19,7 +19,7 @@ export default function VisualisationTypeMenu({ visualisation, onChangeVisualisa
       <label htmlFor="visualisationTypeMenu">
         Visualisation type:
       </label>
-      <DashSelect
+      <SelectMenu
         name="visualisationTypeMenu"
         placeholder="Choose a visualisation type..."
         value={visualisation.visualisationType}

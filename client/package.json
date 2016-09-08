@@ -35,7 +35,6 @@
     "lodash": "^4.14.1",
     "moment": "^2.14.1",
     "node-sass": "^3.8.0",
-    "rd3": "^0.7.1",
     "react": "^15.3.1",
     "react-addons-css-transition-group": "^15.3.1",
     "react-addons-update": "^15.3.1",
@@ -59,6 +58,7 @@
     "style-loader": "^0.13.1",
     "tus-js-client": "^1.1.4",
     "url-loader": "^0.5.7",
+    "vega": "^2.6.3",
     "warning": "^3.0.0"
   },
   "devDependencies": {

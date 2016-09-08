@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react';
-import DashChart from '../charts/DashChart';
+import VisualisationViewer from '../charts/VisualisationViewer';
 import DashboardCanvasItemEditable from './DashboardCanvasItemEditable';
 
 require('../../styles/DashboardCanvasItem.scss');
@@ -98,7 +98,7 @@ export default class DashboardCanvasItem extends Component {
             className="noPointerEvents itemContainer visualisation"
           >
             {this.getIsDatasetLoaded(this.props) ?
-              <DashChart
+              <VisualisationViewer
                 visualisation={this.props.item.visualisation}
                 datasets={this.props.datasets}
                 width={dimensions.width}

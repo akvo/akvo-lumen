@@ -1,5 +1,5 @@
 import React, { PropTypes } from 'react';
-import DashSelect from '../../common/DashSelect';
+import SelectMenu from '../../common/SelectMenu';
 
 export default function ColumnMenu(props) {
   return (
@@ -7,7 +7,7 @@ export default function ColumnMenu(props) {
       <label htmlFor={props.name}>
         Dataset column:
       </label>
-      <DashSelect
+      <SelectMenu
         name={props.name}
         placeholder="Choose a dataset column..."
         value={props.choice}
