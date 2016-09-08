@@ -25,8 +25,8 @@ export default class ShareEntity extends Component {
   }
 
   fetchShareId() {
-    const { id } = this.props.entity;
-    const entityType = this.props.entity.type;
+    const { id } = this.props;
+    const entityType = this.props.type;
 
     if (id != null) {
       fetch('/api/shares', {
@@ -40,8 +40,7 @@ export default class ShareEntity extends Component {
   }
 
   render() {
-    const { entity, onClose } = this.props;
-    const { type, name } = entity;
+    const { type, title, onClose } = this.props;
     const shareUrl = `${window.location.origin}/s/${this.state.id}`;
     return (
       <Modal
@@ -64,7 +63,7 @@ export default class ShareEntity extends Component {
       >
         <div className="DashboardModal">
           <div className="ShareEntity">
-            <h2 className="modalTitle">{`Share ${type} "${name}"`}</h2>
+            <h2 className="modalTitle">{`Share ${type} "${title}"`}</h2>
             <div
               className="close clickable"
               onClick={onClose}
@@ -72,7 +71,7 @@ export default class ShareEntity extends Component {
               +
             </div>
             <div className="contents">
-              <label htmlFor="shareUrlCopyButton">Share {type} {name}</label>
+              <label htmlFor="shareUrlCopyButton">Share {type} {title}</label>
               <div
                 className="shareUrl"
               >
@@ -106,9 +105,7 @@ export default class ShareEntity extends Component {
 ShareEntity.propTypes = {
   onClose: PropTypes.func.isRequired,
   isOpen: PropTypes.bool.isRequired,
-  entity: PropTypes.shape({
-    id: PropTypes.string,
-    name: PropTypes.string,
-    type: PropTypes.string,
-  }).isRequired,
+  id: PropTypes.string,
+  title: PropTypes.string,
+  type: PropTypes.string,
 };

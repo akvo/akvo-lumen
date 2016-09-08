@@ -38,7 +38,7 @@ export default class DashboardHeader extends Component {
 
     return (
       <EntityTypeHeader
-        title={this.props.dashboard.title || 'Untitled dashboard'}
+        title={this.props.title || 'Untitled dashboard'}
         saveStatus={saveStatus}
         actionButtons={actionButtons}
       />
@@ -48,8 +48,6 @@ export default class DashboardHeader extends Component {
 
 DashboardHeader.propTypes = {
   isUnsavedChanges: PropTypes.bool,
-  dashboard: PropTypes.shape({
-    title: PropTypes.string.isRequired,
-  }).isRequired,
+  title: PropTypes.string.isRequired,
   onDashboardAction: PropTypes.func.isRequired,
 };

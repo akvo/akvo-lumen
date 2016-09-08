@@ -202,7 +202,9 @@ class Visualisation extends Component {
         <ShareEntity
           isOpen={this.state.isShareModalVisible}
           onClose={this.toggleShareVisualisation}
-          entity={visualisation}
+          title={visualisation.name}
+          id={visualisation.id}
+          type={visualisation.type}
         />
       </div>
     );

@@ -226,17 +226,17 @@ class Dashboard extends Component {
       return <div>Loading...</div>;
     }
     const { DashboardHeader, DashboardEditor } = this.state.asyncComponents;
-    const dashboard = getDashboardFromState(this.state.dashboard, false);
+    const dashboard = getDashboardFromState(this.state.dashboard, true);
 
     return (
       <div className="Dashboard">
         <DashboardHeader
-          dashboard={dashboard}
+          title={dashboard.title}
           isUnsavedChanges={this.state.isUnsavedChanges}
           onDashboardAction={this.handleDashboardAction}
         />
         <DashboardEditor
-          dashboard={getDashboardFromState(this.state.dashboard, true)}
+          dashboard={dashboard}
           datasets={this.props.library.datasets}
           visualisations={this.props.library.visualisations}
           onAddVisualisation={this.onAddVisualisation}
@@ -248,7 +248,9 @@ class Dashboard extends Component {
         <ShareEntity
           isOpen={this.state.isShareModalVisible}
           onClose={this.toggleShareDashboard}
-          entity={dashboard}
+          title={dashboard.title}
+          id={dashboard.id}
+          type={dashboard.type}
         />
       </div>
     );
