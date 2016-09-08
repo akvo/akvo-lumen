@@ -34,7 +34,7 @@
   :plugins [[lein-codox "0.9.6"]
             [lein-environ "1.0.3"]]
   :codox {:doc-paths   ["resources/org/akvo/lumen/doc"]
-          :output-path "../doc/backend"}
+          :output-path "../docs"}
   :main ^:skip-aot org.akvo.lumen.main
   :target-path "target/%s/"
   :aliases {"setup"   ["run" "-m" "duct.util.repl/setup"]
