@@ -26,35 +26,29 @@ const getLayoutObjectFromArray = arr => {
 };
 
 /* Get a pure representation of a dashboard from the container state */
-const getDashboardFromState = (state, isForEditor) => (
-  cloneDeep(
-    {
-      type: state.type,
-      title: state.name,
-      /* Temporary shim until we standardize on "name" or "title" for entities */
-      name: state.name,
-      entities: state.entities,
-      /* The editor takes an array for layout, but for storage we use an id-keyed object */
-      layout: isForEditor ? state.layout : getLayoutObjectFromArray(state.layout),
-      id: state.id,
-      created: state.created,
-      modified: state.modified,
-    }
-  )
-);
+const getDashboardFromState = (stateDashboard, isForEditor) => {
+  const chosenLayoutRepresentation = isForEditor ?
+        stateDashboard.layout : getLayoutObjectFromArray(stateDashboard.layout);
+
+  const dashboard = Object.assign({}, stateDashboard, { layout: chosenLayoutRepresentation });
+
+  return dashboard;
+};
 
 class Dashboard extends Component {
 
   constructor() {
     super();
     this.state = {
-      type: 'dashboard',
-      name: '',
-      entities: {},
-      layout: [],
-      id: null,
-      created: null,
-      modified: null,
+      dashboard: {
+        type: 'dashboard',
+        title: '',
+        entities: {},
+        layout: [],
+        id: null,
+        created: null,
+        modified: null,
+      },
       isUnsavedChanges: null,
       isShareModalVisible: false,
       requestedDatasetIds: [],
@@ -111,7 +105,7 @@ class Dashboard extends Component {
 
   componentWillReceiveProps(nextProps) {
     const isEditingExistingDashboard = getEditingStatus(this.props.location);
-    const dashboardAlreadyLoaded = this.state.layout.length !== 0;
+    const dashboardAlreadyLoaded = this.state.dashboard.layout.length !== 0;
 
     if (isEditingExistingDashboard && !dashboardAlreadyLoaded) {
       /* We need to load a dashboard, and we haven't loaded it yet. Check if nextProps has both i)
@@ -141,7 +135,7 @@ class Dashboard extends Component {
 
   onSave() {
     const { dispatch } = this.props;
-    const dashboard = getDashboardFromState(this.state, false);
+    const dashboard = getDashboardFromState(this.state.dashboard, false);
     const isEditingExistingDashboard = getEditingStatus(this.props.location);
 
     if (isEditingExistingDashboard) {
@@ -167,16 +161,20 @@ class Dashboard extends Component {
     }
   }
 
-  onUpdateName(name) {
-    this.setState({ name });
+  onUpdateName(title) {
+    const dashboard = Object.assign({}, this.state.dashboard, { title });
+    this.setState({ dashboard });
   }
 
   updateLayout(layout) {
-    this.setState({ layout });
+    const clonedLayout = cloneDeep(layout);
+    const dashboard = Object.assign({}, this.state.dashboard, { layout: clonedLayout });
+    this.setState({ dashboard });
   }
 
   updateEntities(entities) {
-    this.setState({ entities });
+    const dashboard = Object.assign({}, this.state.dashboard, { entities });
+    this.setState({ dashboard });
   }
 
   handleDashboardAction(action) {
@@ -197,14 +195,10 @@ class Dashboard extends Component {
 
   loadDashboardIntoState(dash, library) {
     /* Put the dashboard into component state so it is fed to the DashboardEditor */
-    this.setState({
-      id: dash.id,
-      name: dash.title,
-      entities: dash.entities,
-      layout: Object.keys(dash.layout).map(key => dash.layout[key]),
-      created: dash.created,
-      modified: dash.modified,
-    });
+    const dashboard = Object.assign({}, dash,
+      { layout: Object.keys(dash.layout).map(key => dash.layout[key]) }
+    );
+    this.setState({ dashboard });
 
     /* Load each unique dataset referenced by visualisations in the dashboard. Note - Even though
     /* onAddVisualisation also checks to see if a datasetId has already been requested, setState is
@@ -232,15 +226,17 @@ class Dashboard extends Component {
       return <div>Loading...</div>;
     }
     const { DashboardHeader, DashboardEditor } = this.state.asyncComponents;
+    const dashboard = getDashboardFromState(this.state.dashboard, true);
+
     return (
       <div className="Dashboard">
         <DashboardHeader
-          dashboard={getDashboardFromState(this.state, false)}
+          title={dashboard.title}
           isUnsavedChanges={this.state.isUnsavedChanges}
           onDashboardAction={this.handleDashboardAction}
         />
         <DashboardEditor
-          dashboard={getDashboardFromState(this.state, true)}
+          dashboard={dashboard}
           datasets={this.props.library.datasets}
           visualisations={this.props.library.visualisations}
           onAddVisualisation={this.onAddVisualisation}
@@ -252,7 +248,9 @@ class Dashboard extends Component {
         <ShareEntity
           isOpen={this.state.isShareModalVisible}
           onClose={this.toggleShareDashboard}
-          entity={getDashboardFromState(this.state, false)}
+          title={dashboard.title}
+          id={dashboard.id}
+          type={dashboard.type}
         />
       </div>
     );

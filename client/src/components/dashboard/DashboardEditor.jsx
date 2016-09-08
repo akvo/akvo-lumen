@@ -196,7 +196,7 @@ export default class DashboardEditor extends Component {
   }
 
   handleSave() {
-    if (this.props.dashboard.name !== '') {
+    if (this.props.dashboard.title !== '') {
       this.props.onSave();
     } else {
       this.setState({ saveError: true });
@@ -239,7 +239,7 @@ export default class DashboardEditor extends Component {
             <input
               type="text"
               name="Dashboard name"
-              value={dashboard.name}
+              value={dashboard.title}
               placeholder="Enter dashboard name"
               onChange={this.handleChangeName}
             />
@@ -300,7 +300,7 @@ DashboardEditor.propTypes = {
   dashboard: PropTypes.shape({
     entities: PropTypes.object.isRequired,
     layout: PropTypes.array.isRequired,
-    name: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
   }).isRequired,
   onUpdateLayout: PropTypes.func.isRequired,
   onUpdateEntities: PropTypes.func.isRequired,

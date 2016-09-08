@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import update from 'react-addons-update';
-import { isEmpty, cloneDeep } from 'lodash';
+import { isEmpty } from 'lodash';
 import { push } from 'react-router-redux';
 import ShareEntity from '../components/modals/ShareEntity';
 import * as actions from '../actions/visualisation';
@@ -99,13 +99,17 @@ class Visualisation extends Component {
     }, 'VisualisationViewerPreload');
   }
 
-  componentWillReceiveProps() {
+  componentWillReceiveProps(nextProps) {
+    /* If there is a visualisation to load from the library, and we haven't loaded it yet, load it
+    /* from nextProps if it exists there */
     const visualisationId = this.props.params.visualisationId;
     const isEditingExistingVisualisation = visualisationId != null;
+    const loadedVisualisation = this.state.visualisation.id != null;
+    const nextPropsHasVisualisation = Boolean(nextProps.library.visualisations[visualisationId]);
 
-    if (isEditingExistingVisualisation && !this.state.isUnsavedChanges) {
+    if (isEditingExistingVisualisation && !loadedVisualisation && nextPropsHasVisualisation) {
       this.setState({
-        visualisation: this.props.library.visualisations[visualisationId],
+        visualisation: nextProps.library.visualisations[visualisationId],
       });
     }
   }
@@ -134,7 +138,7 @@ class Visualisation extends Component {
 
   handleChangeVisualisationSpec(value) {
     const spec = update(this.state.visualisation.spec, { $merge: value });
-    const visualisation = Object.assign(this.state.visualisation, { spec });
+    const visualisation = Object.assign({}, this.state.visualisation, { spec });
     this.setState({
       isUnsavedChanges: true,
       visualisation,
@@ -177,17 +181,17 @@ class Visualisation extends Component {
       return <div className="Visualisation">Loading...</div>;
     }
     const { VisualisationHeader, VisualisationEditor } = this.state.asyncComponents;
-    const clonedVisualisation = cloneDeep(this.state.visualisation);
+    const visualisation = this.state.visualisation;
 
     return (
       <div className="Visualisation">
         <VisualisationHeader
           isUnsavedChanges={this.state.isUnsavedChanges}
-          visualisation={clonedVisualisation}
+          visualisation={visualisation}
           onVisualisationAction={this.handleVisualisationAction}
         />
         <VisualisationEditor
-          visualisation={clonedVisualisation}
+          visualisation={visualisation}
           datasets={this.props.library.datasets}
           onChangeTitle={this.handleChangeVisualisationTitle}
           onChangeVisualisationType={this.handleChangeVisualisationType}
@@ -198,7 +202,9 @@ class Visualisation extends Component {
         <ShareEntity
           isOpen={this.state.isShareModalVisible}
           onClose={this.toggleShareVisualisation}
-          entity={clonedVisualisation}
+          title={visualisation.name}
+          id={visualisation.id}
+          type={visualisation.type}
         />
       </div>
     );
