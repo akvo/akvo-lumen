@@ -1,6 +1,6 @@
 (ns org.akvo.lumen.lib.job-execution-impl
   (:require [hugsql.core :as hugsql]
-            [ring.util.response :refer [not-found response status]]))
+            [ring.util.response :as response]))
 
 
 (hugsql/def-db-fns "org/akvo/lumen/job-execution.sql")
@@ -14,14 +14,14 @@
   Returns nil if the job execution does not exist"
   [conn id]
   (if-let [{:keys [dataset_id]} (dataset-id-by-job-execution-id conn {:id id})]
-    (response
+    (response/response
      {"jobExecutionId" id
       "status" "OK"
       "datasetId" dataset_id})
     (if-let [{:keys [status error-message]} (job-execution-by-id conn {:id id})]
-      (-> (response
+      (-> (response/response
            {"jobExecutionId" id
             "status" status
             "reason" error-message})
-          (status 400))
-      (not-found {:error "not-found"}))))
+          (response/status 400))
+      (response/not-found {:error "not-found"}))))

@@ -96,7 +96,7 @@
 (defn fetch [tenant-conn id]
   (if-let [d (dashboard-by-id tenant-conn {:id id})]
     (response (handle-dashboard-by-id tenant-conn id))
-    (-> (not-found {:error "Not found"}))))
+    (not-found {:error "Not found"})))
 
 (defn upsert
   "We update a dashboard via upsert of dashboard and clean - insert of
