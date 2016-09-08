@@ -5,7 +5,7 @@
             :url  "https://www.gnu.org/licenses/agpl-3.0.html"}
   :min-lein-version "2.0.0"
   :dependencies [[cheshire "5.6.3"]
-                 [clj-http "3.1.0"]
+                 [clj-http "3.2.0"]
                  [clj-time "0.12.0"]
                  [com.ibm.icu/icu4j "57.1"]
                  [com.layerware/hugsql "0.4.7"]
@@ -13,7 +13,7 @@
                  [compojure "1.5.1"]
                  [duct "0.8.0"]
                  [duct/hikaricp-component "0.1.0"]
-                 [environ "1.0.3"]
+                 [environ "1.1.0"]
                  [meta-merge "1.0.0"]
                  [org.akvo/commons "0.4.4-SNAPSHOT"
                   :exclusions [org.postgresql/postgresql org.clojure/java.jdbc]]
@@ -23,9 +23,9 @@
                  [org.clojure/data.csv "0.1.3"]
                  [org.immutant/scheduling "2.1.5" :exclusions [ch.qos.logback/logback-classic]]
                  [org.immutant/web "2.1.5"]
-                 [org.postgresql/postgresql "9.4.1209"]
+                 [org.postgresql/postgresql "9.4.1210"]
                  [org.slf4j/slf4j-nop "1.7.21"]
-                 [ragtime/ragtime.jdbc "0.6.1"]
+                 [ragtime/ragtime.jdbc "0.6.3"]
                  [ring "1.5.0"]
                  [ring/ring-defaults "0.2.1"]
                  [ring/ring-json "0.4.0"]]
@@ -50,12 +50,12 @@
    :profiles/dev  {}
    :profiles/test {}
    :project/dev   {:dependencies   [[duct/generate "0.8.0"]
-                                    [reloaded.repl "0.2.2"]
+                                    [reloaded.repl "0.2.3"]
                                     [org.clojure/tools.namespace "0.2.11"]
                                     [org.clojure/tools.nrepl "0.2.12"]
                                     [eftest "0.1.1"]
-                                    [com.gearswithingears/shrubbery "0.3.1"]
-                                    [kerodon "0.7.0"]]
+                                    [com.gearswithingears/shrubbery "0.4.1"]
+                                    [kerodon "0.8.0"]]
                    :source-paths   ["dev/src"]
                    :resource-paths ["dev/resources" "test/resources"]
                    :repl-options   {:init-ns user}
