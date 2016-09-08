@@ -8,8 +8,7 @@
   (impl/all-dashboards tenant-conn))
 
 (defn create
-  "Creates a new dashboard. Body should include keys and spec conform
-  to..."
+  "Creates a new dashboard."
   [tenant-conn spec]
   (impl/create tenant-conn spec))
 
@@ -19,11 +18,11 @@
   (impl/fetch tenant-conn id))
 
 (defn upsert
-  "Update or insert a dashboard. Body should conform to spec ..."
+  "Update or insert a dashboard."
   [tenant-conn id spec]
   (impl/upsert tenant-conn id spec))
 
 (defn delete
-  "Delete dashboard"
+  "Delete dashboard."
   [tenant-conn id]
   (impl/delete tenant-conn id))

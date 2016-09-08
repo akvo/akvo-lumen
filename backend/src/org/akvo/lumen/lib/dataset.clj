@@ -13,11 +13,11 @@
   (impl/create tenant-conn config jwt-claims body))
 
 (defn fetch
-  ""
+  "Fetch dataset with id"
   [tenant-conn id]
   (impl/fetch tenant-conn id))
 
 (defn delete
-  ""
+  "Delete dataset with id"
   [tenant-conn id]
   (impl/delete tenant-conn id))
