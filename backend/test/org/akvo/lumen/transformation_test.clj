@@ -2,6 +2,7 @@
   (:require [cheshire.core :as json]
             [clojure.java.io :as io]
             [clojure.test :refer :all]
+            [com.stuartsierra.component :as component]
             [hugsql.core :as hugsql]
             [org.akvo.lumen.fixtures :refer (test-conn
                                             test-tenant-spec
@@ -9,6 +10,7 @@
                                             rollback-tenant)]
             [org.akvo.lumen.import :as imp]
             [org.akvo.lumen.transformation :as tf]
+            [org.akvo.lumen.component.transformation-engine :refer [transformation-engine]]
             [org.akvo.lumen.util :refer (squuid)]))
 
 (def ops (vec (json/parse-string (slurp (io/resource "ops.json")))))
@@ -21,6 +23,20 @@
 (hugsql/def-db-fns "org/akvo/lumen/transformation_test.sql")
 
 
+(def ^:dynamic *transformation-engine*)
+
+(def transformation-test-system
+  (component/system-map
+   :transformation-engine (transformation-engine {})))
+
+(defn new-fixture [f]
+  (alter-var-root #'transformation-test-system component/start)
+  (binding [*transformation-engine*
+            (:transformation-engine transformation-test-system)]
+    (f)
+    (alter-var-root #'transformation-test-system component/stop)))
+
+
 (defn test-fixture
   [f]
   (rollback-tenant test-tenant-spec)
@@ -30,7 +46,7 @@
   (new-test-data test-conn)
   (f))
 
-(use-fixtures :once test-fixture)
+(use-fixtures :once test-fixture new-fixture)
 
 (deftest op-validation
   (testing "op validation"
