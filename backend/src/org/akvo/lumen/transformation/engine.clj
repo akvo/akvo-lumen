@@ -1,6 +1,7 @@
 (ns org.akvo.lumen.transformation.engine
   (:require [clojure.java.jdbc :as jdbc]
-            [hugsql.core :as hugsql])
+            [hugsql.core :as hugsql]
+            [org.akvo.lumen.util :as util ])
   (:import java.sql.SQLException))
 
 
@@ -194,3 +195,52 @@
     (catch Exception e
       {:success? false
        :message (.getMessage e)})))
+
+(hugsql/def-db-fns "org/akvo/lumen/transformation.sql")
+
+(defn execute
+  [completion-promise tenant-conn job-id dataset-id transformation-log]
+  (println "completion-promise" completion-promise)
+  (println tenant-conn)
+  (println job-id)
+  (println dataset-id)
+  (println transformation-log)
+  (let [dv (dataset-version-by-id tenant-conn {:id dataset-id})
+        columns (vec (:columns dv))
+        source-table (:imported-table-name dv)
+        table-name (util/gen-table-name "ds")
+        f (fn [log op-spec]
+            (let [cols (if (empty? log)
+                         columns
+                         (:columns (last log)))
+                  step (apply-operation tenant-conn
+                                        table-name
+                                        cols
+                                        op-spec)]
+              (if (:success? step)
+                (conj log step)
+                (throw (Exception. (str "Error applying operation: " op-spec))))))]
+    (try
+      (copy-table tenant-conn
+                  {:source-table source-table
+                   :dest-table table-name}
+                  {}
+                  {:transaction? false})
+      (let [result (reduce f [] transformation-log)
+            log (vec (mapcat :execution-log result))
+            cols (:columns (last result))]
+        (new-dataset-version tenant-conn {:id (str (util/squuid))
+                                          :dataset-id dataset-id
+                                          :job-execution-id job-id
+                                          :table-name table-name
+                                          :imported-table-name source-table
+                                          :version (inc (:version dv))
+                                          :transformations transformation-log
+                                          :columns cols})
+        (update-job-success-execution tenant-conn {:id job-id
+                                                   :exec-log log})
+        ;; TODO deliver new-dataset-version-id instead
+        (deliver completion-promise {:job-id job-id}))
+      (catch Exception e
+        (update-job-failed-execution tenant-conn {:id job-id
+                                                  :error-log [(.getMessage e)]})))))
