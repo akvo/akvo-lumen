@@ -10,7 +10,9 @@
                                             rollback-tenant)]
             [org.akvo.lumen.import :as imp]
             [org.akvo.lumen.transformation :as tf]
+            [org.akvo.lumen.component.tenant-manager :refer [tenant-manager]]
             [org.akvo.lumen.component.transformation-engine :refer [transformation-engine]]
+            [duct.component.hikaricp :refer [hikaricp]]
             [org.akvo.lumen.util :refer (squuid)]))
 
 (def ops (vec (json/parse-string (slurp (io/resource "ops.json")))))
@@ -26,8 +28,14 @@
 (def ^:dynamic *transformation-engine*)
 
 (def transformation-test-system
-  (component/system-map
-   :transformation-engine (transformation-engine {})))
+  (->
+   (component/system-map
+    :transformation-engine (transformation-engine {})
+    :tenant-manager (tenant-manager {})
+    :db (hikaricp {:uri (:db_uri test-tenant-spec)}))
+   (component/system-using
+    {:transformation-engine [:tenant-manager]
+     :tenant-manager [:db]})))
 
 (defn new-fixture [f]
   (alter-var-root #'transformation-test-system component/start)
@@ -35,7 +43,6 @@
             (:transformation-engine transformation-test-system)]
     (f)
     (alter-var-root #'transformation-test-system component/stop)))
-
 
 (defn test-fixture
   [f]
@@ -58,9 +65,9 @@
 (deftest ^:functional test-transformations
   (testing "Transformation application"
     (is (= {:status 400 :body {:message "Dataset not found"}}
-           (tf/schedule test-conn "Not-valid-id" []))))
+           (tf/schedule test-conn *transformation-engine* "Not-valid-id" []))))
   (testing "Valid log"
-    (let [resp (tf/schedule test-conn "ds-1" ops)]
+    (let [resp (tf/schedule test-conn *transformation-engine* "ds-1" ops)]
       (is (= 200 (:status resp))))))
 
 (deftest ^:functional test-import-and-transform
@@ -92,7 +99,7 @@
       (imp/do-import test-conn {:file-upload-path "/tmp/akvo/dash"} job-id)
 
       (let [dataset-id (:dataset_id (dataset-id-by-job-execution-id test-conn {:id job-id}))
-            transformation-job (tf/schedule test-conn dataset-id t-log)
+            transformation-job (tf/schedule test-conn *transformation-engine*  dataset-id t-log)
             t-job-id (get-in transformation-job [:body :jobExecutionId])]
 
         (is (= 200  (:status transformation-job)))
