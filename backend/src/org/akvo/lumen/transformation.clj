@@ -103,7 +103,7 @@
 
 
 (defn schedule
-  [tenant-manager transformation-engine dataset-id transformation-log]
+  [tenant-conn transformation-engine dataset-id transformation-log]
   (if-let [dataset (dataset-by-id tenant-conn {:id dataset-id})]
     (let [v (validate transformation-log)]
       (if (:valid? v)
