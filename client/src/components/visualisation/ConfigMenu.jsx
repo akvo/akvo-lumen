@@ -2,7 +2,6 @@ import React, { PropTypes } from 'react';
 import Immutable from 'immutable';
 import SelectMenu from '../common/SelectMenu';
 import ColumnMenu from './configMenu/ColumnMenu';
-import LabelColumnMenu from './configMenu/LabelColumnMenu';
 import LabelInput from './configMenu/LabelInput';
 import * as entity from '../../domain/entity';
 
@@ -34,6 +33,12 @@ const Subtitle = ({ children }) => (
   <h3 className="subtitle">{children}</h3>
 );
 
+const datasetColumnLabelText = 'Dataset column';
+const datasetColumnPlaceholder = 'Choose a dataset column...';
+
+const labelColumnLabelText = 'Label column';
+const labelColumnPlaceholder = 'Choose a name column...';
+
 export default function ConfigMenu(props) {
   const datasetArray = getDatasetArray(props.datasets);
   const datasetOptions = getDatasetOptions(datasetArray);
@@ -54,6 +59,8 @@ export default function ConfigMenu(props) {
           <div>
             <Subtitle>Y-Axis</Subtitle>
             <ColumnMenu
+              placeholder={datasetColumnPlaceholder}
+              labelText={datasetColumnLabelText}
               choice={spec.datasetColumnX !== null ? spec.datasetColumnX.toString() : null}
               name="xColumnInput"
               options={columnOptions}
@@ -70,7 +77,9 @@ export default function ConfigMenu(props) {
               })}
             />
             <Subtitle>X-Axis</Subtitle>
-            <LabelColumnMenu
+            <ColumnMenu
+              placeholder={labelColumnPlaceholder}
+              labelText={labelColumnLabelText}
               choice={spec.datasetNameColumnX !== null ? spec.datasetNameColumnX.toString() : null}
               name="xNameColumnMenu"
               options={columnOptions}
@@ -96,6 +105,8 @@ export default function ConfigMenu(props) {
           <div>
             <Subtitle>Y-Axis</Subtitle>
             <ColumnMenu
+              placeholder={datasetColumnPlaceholder}
+              labelText={datasetColumnLabelText}
               choice={spec.datasetColumnX !== null ? spec.datasetColumnX.toString() : null}
               name="xColumnInput"
               options={columnOptions}
@@ -129,6 +140,8 @@ export default function ConfigMenu(props) {
           <div>
             <Subtitle>Y-Axis</Subtitle>
             <ColumnMenu
+              placeholder={datasetColumnPlaceholder}
+              labelText={datasetColumnLabelText}
               choice={spec.datasetColumnX !== null ? spec.datasetColumnX.toString() : null}
               name="xColumnInput"
               options={columnOptions}
@@ -146,6 +159,8 @@ export default function ConfigMenu(props) {
             />
             <Subtitle>X-Axis</Subtitle>
             <ColumnMenu
+              placeholder={datasetColumnPlaceholder}
+              labelText={datasetColumnLabelText}
               choice={spec.datasetColumnY !== null ? spec.datasetColumnY.toString() : null}
               name="yColumnInput"
               options={columnOptions}
@@ -162,7 +177,9 @@ export default function ConfigMenu(props) {
               })}
             />
             <Subtitle>Popup Label</Subtitle>
-            <LabelColumnMenu
+            <ColumnMenu
+              placeholder={labelColumnPlaceholder}
+              labelText={labelColumnLabelText}
               choice={spec.datasetNameColumnX !== null ? spec.datasetNameColumnX.toString() : null}
               name="xNameColumnMenu"
               options={columnOptions}
@@ -179,6 +196,8 @@ export default function ConfigMenu(props) {
           <div>
             <Subtitle>Latitude</Subtitle>
             <ColumnMenu
+              placeholder={datasetColumnPlaceholder}
+              labelText={datasetColumnLabelText}
               choice={spec.datasetColumnY !== null ? spec.datasetColumnY.toString() : null}
               name="yColumnInput"
               options={columnOptions}
@@ -188,6 +207,8 @@ export default function ConfigMenu(props) {
             />
             <Subtitle>Longitude</Subtitle>
             <ColumnMenu
+              placeholder={datasetColumnPlaceholder}
+              labelText={datasetColumnLabelText}
               choice={spec.datasetColumnX !== null ? spec.datasetColumnX.toString() : null}
               name="xColumnInput"
               options={columnOptions}
@@ -196,7 +217,9 @@ export default function ConfigMenu(props) {
               })}
             />
             <Subtitle>Popup Label</Subtitle>
-            <LabelColumnMenu
+            <ColumnMenu
+              placeholder={labelColumnPlaceholder}
+              labelText={labelColumnLabelText}
               choice={spec.datasetNameColumnX !== null ? spec.datasetNameColumnX.toString() : null}
               name="xNameColumnMenu"
               options={columnOptions}
@@ -213,6 +236,8 @@ export default function ConfigMenu(props) {
         output = (
           <div>
             <ColumnMenu
+              placeholder={datasetColumnPlaceholder}
+              labelText={datasetColumnLabelText}
               choice={spec.datasetColumnX !== null ? spec.datasetColumnX.toString() : null}
               name="xColumnInput"
               options={columnOptions}
@@ -220,7 +245,9 @@ export default function ConfigMenu(props) {
                 datasetColumnX: value,
               })}
             />
-            <LabelColumnMenu
+            <ColumnMenu
+              placeholder={labelColumnPlaceholder}
+              labelText={labelColumnLabelText}
               choice={spec.datasetNameColumnX !== null ? spec.datasetNameColumnX.toString() : null}
               name="xNameColumnMenu"
               options={columnOptions}

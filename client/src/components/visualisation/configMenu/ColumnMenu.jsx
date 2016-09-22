@@ -5,11 +5,12 @@ export default function ColumnMenu(props) {
   return (
     <div className="inputGroup">
       <label htmlFor={props.name}>
-        Dataset column:
+        {props.labelText}:
       </label>
       <SelectMenu
         name={props.name}
-        placeholder="Choose a dataset column..."
+        disabled={props.disabled || false}
+        placeholder={props.placeholder}
         value={props.choice}
         options={props.options}
         onChange={props.onChange}
@@ -19,8 +20,11 @@ export default function ColumnMenu(props) {
 }
 
 ColumnMenu.propTypes = {
+  placeholder: PropTypes.string,
+  labelText: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   choice: PropTypes.string,
   options: PropTypes.array.isRequired,
+  disabled: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
 };
