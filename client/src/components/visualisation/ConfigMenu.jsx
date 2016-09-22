@@ -83,6 +83,7 @@ export default function ConfigMenu(props) {
               choice={spec.datasetNameColumnX !== null ? spec.datasetNameColumnX.toString() : null}
               name="xNameColumnMenu"
               options={columnOptions}
+              clearable={true}
               onChange={(value) => onChangeSpec({
                 datasetNameColumnX: value,
               })}
@@ -183,6 +184,7 @@ export default function ConfigMenu(props) {
               choice={spec.datasetNameColumnX !== null ? spec.datasetNameColumnX.toString() : null}
               name="xNameColumnMenu"
               options={columnOptions}
+              clearable={true}
               onChange={(value) => onChangeSpec({
                 datasetNameColumnX: value,
               })}
@@ -223,6 +225,7 @@ export default function ConfigMenu(props) {
               choice={spec.datasetNameColumnX !== null ? spec.datasetNameColumnX.toString() : null}
               name="xNameColumnMenu"
               options={columnOptions}
+              clearable={true}
               onChange={(value) => onChangeSpec({
                 datasetNameColumnX: value,
               })}
@@ -251,6 +254,7 @@ export default function ConfigMenu(props) {
               choice={spec.datasetNameColumnX !== null ? spec.datasetNameColumnX.toString() : null}
               name="xNameColumnMenu"
               options={columnOptions}
+              clearable={true}
               onChange={(value) => onChangeSpec({
                 datasetNameColumnX: value,
               })}

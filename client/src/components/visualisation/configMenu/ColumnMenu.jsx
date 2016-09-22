@@ -14,6 +14,7 @@ export default function ColumnMenu(props) {
         value={props.choice}
         options={props.options}
         onChange={props.onChange}
+        clearable={props.clearable}
       />
     </div>
   );

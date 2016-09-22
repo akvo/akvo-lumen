@@ -9,9 +9,10 @@ export default function SelectMenu(props) {
     <div className="SelectMenu">
       <Select
         {...props}
-        onChange={option => props.onChange(option.value)}
+        onChange={option => props.onChange(option ? option.value : null)}
         clearable={props.clearable || false}
         searchable={props.searchable || false}
+        resetValue={null}
       />
     </div>
   );
@@ -19,7 +20,7 @@ export default function SelectMenu(props) {
 
 SelectMenu.propTypes = {
   options: PropTypes.arrayOf(React.PropTypes.shape({
-    value: PropTypes.string.isRequired,
+    value: PropTypes.string,
     label: PropTypes.string.isRequired,
   })).isRequired,
   placeholder: PropTypes.string,
