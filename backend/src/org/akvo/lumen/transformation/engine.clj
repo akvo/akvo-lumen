@@ -200,11 +200,6 @@
 
 (defn execute
   [completion-promise tenant-conn job-id dataset-id transformation-log]
-  (println "completion-promise" completion-promise)
-  (println tenant-conn)
-  (println job-id)
-  (println dataset-id)
-  (println transformation-log)
   (let [dv (dataset-version-by-id tenant-conn {:id dataset-id})
         columns (vec (:columns dv))
         source-table (:imported-table-name dv)
