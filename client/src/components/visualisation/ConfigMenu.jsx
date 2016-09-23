@@ -366,16 +366,42 @@ export default function ConfigMenu(props) {
               })}
             />
             <ColumnMenu
-              placeholder={labelColumnPlaceholder}
-              labelText={labelColumnLabelText}
-              choice={spec.datasetNameColumnX !== null ? spec.datasetNameColumnX.toString() : null}
-              name="xNameColumnMenu"
+              placeholder={groupColumnPlaceholder}
+              labelText={groupColumnLabelText}
+              choice={spec.datasetGroupColumnX !== null ?
+                spec.datasetGroupColumnX.toString() : null}
+              name="xGroupColumnMenu"
               options={columnOptions}
               clearable
               onChange={(value) => onChangeSpec({
-                datasetNameColumnX: value,
+                datasetGroupColumnX: value,
               })}
             />
+            {spec.datasetGroupColumnX == null ?
+              <ColumnMenu
+                placeholder={labelColumnPlaceholder}
+                labelText={labelColumnLabelText}
+                choice={spec.datasetNameColumnX !== null ?
+                  spec.datasetNameColumnX.toString() : null}
+                name="xNameColumnMenu"
+                options={columnOptions}
+                clearable
+                onChange={(value) => onChangeSpec({
+                  datasetNameColumnX: value,
+                })}
+              />
+              :
+              <ColumnMenu
+                placeholder="Choose aggregation type..."
+                labelText="Aggregation type"
+                choice={spec.aggregationTypeY !== null ? spec.aggregationTypeY.toString() : null}
+                name="yAggregationMenu"
+                options={aggregationOptions}
+                onChange={(value) => onChangeSpec({
+                  aggregationTypeY: value,
+                })}
+              />
+            }
           </div>
         );
         break;

@@ -3,8 +3,56 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
   const innerRadius = visualisation.visualisationType === 'donut' ?
     Math.floor(chartRadius / 1.75) : 0;
 
+  const hasAggregation = Boolean(visualisation.spec.datasetGroupColumnX &&
+    visualisation.spec.aggregationTypeY);
+  let dataArray;
+  const transformType = hasAggregation ? visualisation.spec.aggregationTypeY : null;
+
+  if (hasAggregation) {
+    const transform1 = {
+      name: 'summary',
+      source: 'table',
+      transform: [
+        {
+          type: 'aggregate',
+          groupby: ['aggregationValue'],
+          summarize: {
+            y: [
+              transformType,
+            ],
+          },
+        },
+      ],
+    };
+    const transform2 = {
+      name: 'pie',
+      source: 'summary',
+      transform: [
+        {
+          type: 'pie',
+          field: `${transformType}_y`,
+        },
+      ],
+    };
+
+    dataArray = [data, transform1, transform2];
+  } else {
+    const pieData = Object.assign({}, data);
+
+    pieData.transform = [{
+      type: 'pie',
+      field: 'y',
+    }];
+
+    dataArray = [pieData];
+  }
+
+  const dataSource = hasAggregation ? 'pie' : 'table';
+  const segmentLabelField = hasAggregation ? 'aggregationValue' : 'label';
+  const fieldY = hasAggregation ? `${transformType}_y` : 'y';
+
   return ({
-    data: [data],
+    data: dataArray,
     width: containerWidth - 20,
     height: containerHeight - 45,
     padding: {
@@ -18,8 +66,8 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
         name: 'r',
         type: 'ordinal',
         domain: {
-          data: 'table',
-          field: 'y',
+          data: dataSource,
+          field: fieldY,
         },
         range: [chartRadius],
       },
@@ -28,8 +76,8 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
         type: 'ordinal',
         range: 'category10',
         domain: {
-          data: 'table',
-          field: 'y',
+          data: dataSource,
+          field: fieldY,
         },
       },
     ],
@@ -37,7 +85,7 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
       {
         type: 'arc',
         from: {
-          data: 'table',
+          data: dataSource,
         },
         properties: {
           enter: {
@@ -72,7 +120,7 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
           update: {
             fill: {
               scale: 'c',
-              field: 'y',
+              field: fieldY,
             },
           },
           hover: {
@@ -85,7 +133,7 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
       {
         type: 'text',
         from: {
-          data: 'table',
+          data: dataSource,
         },
         properties: {
           enter: {
@@ -116,7 +164,7 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
               value: 'center',
             },
             text: {
-              field: 'y',
+              field: segmentLabelField,
             },
           },
         },
@@ -124,7 +172,13 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
       {
         type: 'text',
         from: {
-          data: 'table',
+          data: dataSource,
+          transform: [
+            {
+              type: 'filter',
+              test: 'datum._id == tooltip._id',
+            },
+          ],
         },
         properties: {
           enter: {
@@ -143,7 +197,7 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
             radius: {
               scale: 'r',
               field: 'a',
-              offset: 70,
+              offset: -1 * (chartRadius / 5),
             },
             theta: {
               field: 'layout_mid',
@@ -155,19 +209,8 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
               value: 'center',
             },
             text: {
-              field: 'label',
+              field: fieldY,
             },
-          },
-          update: {
-            fillOpacity: [
-              {
-                test: 'tooltip._id != datum._id',
-                value: 0,
-              },
-              {
-                value: 1,
-              },
-            ],
           },
         },
       },

@@ -73,15 +73,6 @@ export function getChartData(visualisation, datasets) {
         values: dataValues,
       };
 
-      if (vType === 'pie' || vType === 'donut') {
-        output.transform = [
-          {
-            type: 'pie',
-            field: 'y',
-          },
-        ];
-      }
-
       break;
 
     case 'scatter':
