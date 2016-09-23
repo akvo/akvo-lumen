@@ -35,9 +35,7 @@
                                   {}
                                   {:identifiers identity})]
     (response (dissoc v :author))
-    (not-found {:error "Not found"}))
-
-  )
+    (not-found {:error "Not found"})))
 
 (defn upsert [tenant-conn body jwt-claims]
   (let [v (upsert-visualisation tenant-conn
