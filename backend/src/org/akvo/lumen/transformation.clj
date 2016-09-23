@@ -110,13 +110,13 @@
         (let [job-id (str (squuid))]
           (new-transformation-job-execution tenant-conn {:id job-id
                                                          :dataset-id dataset-id})
-          (enqueue transformation-engine
-                   {:tenant-conn tenant-conn
-                    :job-id job-id
-                    :dataset-id dataset-id
-                    :transformation-log transformation-log})
-          {:status 200
-           :body {:jobExecutionId job-id}})
+          (let [completion-promise (enqueue transformation-engine
+                                            {:tenant-conn tenant-conn
+                                             :job-id job-id
+                                             :dataset-id dataset-id
+                                             :transformation-log transformation-log})]
+            {:status 200
+             :body @completion-promise}))
         {:status 400
          :body {:message (:message v)}}))
     {:status 400
