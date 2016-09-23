@@ -1,6 +1,37 @@
 export default function getVegaScatterSpec(visualisation, data, containerHeight, containerWidth) {
+  const hasAggregation = Boolean(visualisation.spec.datasetGroupColumnX &&
+    visualisation.spec.aggregationTypeY);
+  const dataArray = [data];
+  const transformType = hasAggregation ? visualisation.spec.aggregationTypeY : null;
+
+  if (hasAggregation) {
+    const transform1 = {
+      name: 'summary',
+      source: 'table',
+      transform: [
+        {
+          type: 'aggregate',
+          groupby: ['aggregationValue'],
+          summarize: {
+            y: [
+              transformType,
+            ],
+            x: [
+              transformType,
+            ],
+          },
+        },
+      ],
+    };
+    dataArray.push(transform1);
+  }
+
+  const dataSource = hasAggregation ? 'summary' : 'table';
+  const fieldX = hasAggregation ? `${transformType}_x` : 'x';
+  const fieldY = hasAggregation ? `${transformType}_y` : 'y';
+
   return ({
-    data: [data],
+    data: dataArray,
     width: containerWidth - 90,
     height: containerHeight - 100,
     padding: {
@@ -14,8 +45,8 @@ export default function getVegaScatterSpec(visualisation, data, containerHeight,
         name: 'xscale',
         type: 'linear',
         domain: {
-          data: 'table',
-          field: 'x',
+          data: dataSource,
+          field: fieldX,
         },
         range: 'width',
         nice: false,
@@ -24,8 +55,8 @@ export default function getVegaScatterSpec(visualisation, data, containerHeight,
         name: 'yscale',
         type: 'linear',
         domain: {
-          data: 'table',
-          field: 'y',
+          data: dataSource,
+          field: fieldY,
         },
         range: 'height',
         nice: true,
@@ -36,66 +67,29 @@ export default function getVegaScatterSpec(visualisation, data, containerHeight,
         type: 'x',
         scale: 'xscale',
         orient: 'bottom',
-        title: 'x',
+        title: visualisation.spec.labelX,
       },
       {
         type: 'y',
         scale: 'yscale',
         orient: 'left',
-        title: 'y',
+        title: visualisation.spec.labelY,
       },
     ],
     marks: [
       {
-        type: 'text',
-        from: {
-          data: 'table',
-        },
-        properties: {
-          enter: {
-            fill: {
-              value: 'black',
-            },
-            x: {
-              field: 'x',
-              scale: 'xscale',
-            },
-            y: {
-              field: 'y',
-              scale: 'yscale',
-              offset: -8,
-            },
-            text: {
-              field: 'label',
-            },
-            align: {
-              value: 'center',
-            },
-          },
-          update: {
-            fillOpacity: [
-              {
-                test: 'hover._id == datum._id',
-                value: 1,
-              },
-              { value: 0 },
-            ],
-          },
-        },
-      },
-      {
         type: 'symbol',
         from: {
-          data: 'table',
+          data: dataSource,
         },
         properties: {
           enter: {
             x: {
-              field: 'x',
+              field: fieldX,
               scale: 'xscale',
             },
             y: {
-              field: 'y',
+              field: fieldY,
               scale: 'yscale',
             },
             size: { value: 50 },
@@ -103,9 +97,56 @@ export default function getVegaScatterSpec(visualisation, data, containerHeight,
           },
           update: {
             fill: { value: 'rgb(149, 150, 184)' },
+            opacity: [
+              {
+                test: 'hover._id && hover._id !== datum._id',
+                value: 0.2,
+              },
+              {
+                value: 0.8,
+              },
+            ],
           },
           hover: {
             fill: { value: 'rgb(43, 182, 115)' },
+          },
+        },
+      },
+      {
+        type: 'text',
+        from: {
+          data: dataSource,
+          transform: [
+            {
+              type: 'filter',
+              test: 'datum._id == hover._id',
+            },
+          ],
+        },
+        properties: {
+          update: {
+            fill: {
+              value: 'black',
+            },
+            x: {
+              field: fieldX,
+              scale: 'xscale',
+            },
+            y: {
+              field: fieldY,
+              scale: 'yscale',
+              offset: -8,
+            },
+            text: {
+              template: hasAggregation ?
+                'Aggregation group: {{datum.aggregationValue}}'
+                :
+                '{{datum.label}}'
+              ,
+            },
+            align: {
+              value: 'center',
+            },
           },
         },
       },
@@ -113,7 +154,7 @@ export default function getVegaScatterSpec(visualisation, data, containerHeight,
     signals: [
       {
         name: 'hover',
-        init: { },
+        init: '{}',
         streams: [
           {
             type: 'symbol:mouseover',
@@ -123,14 +164,6 @@ export default function getVegaScatterSpec(visualisation, data, containerHeight,
             type: 'symbol:mouseout',
             expr: '{}',
           },
-        ],
-      },
-      {
-        name: 'position',
-        init: '{}',
-        streams: [
-          { type: 'symbol:mouseover', expr: 'datum' },
-          { type: 'symbol:mouseout', expr: '{}' },
         ],
       },
     ],

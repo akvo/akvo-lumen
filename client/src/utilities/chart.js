@@ -88,11 +88,13 @@ export function getChartData(visualisation, datasets) {
 
       dataValues = dataX.map((entry, index) => {
         const label = nameDataX ? nameDataX[index] : null;
+        const aggregationValue = aggregationValuesX ? aggregationValuesX[index] : null;
 
         return ({
           x: parseFloat(entry),
           y: parseFloat(dataY[index]),
           label,
+          aggregationValue,
         });
       });
 
