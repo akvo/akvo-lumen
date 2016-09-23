@@ -27,5 +27,6 @@ ColumnMenu.propTypes = {
   choice: PropTypes.string,
   options: PropTypes.array.isRequired,
   disabled: PropTypes.bool,
+  clearable: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
 };

@@ -39,6 +39,48 @@ const datasetColumnPlaceholder = 'Choose a dataset column...';
 const labelColumnLabelText = 'Label column';
 const labelColumnPlaceholder = 'Choose a name column...';
 
+const groupColumnLabelText = 'Group by column';
+const groupColumnPlaceholder = 'Choose a column to group by...';
+
+const aggregationOptions = [
+  {
+    value: 'mean',
+    label: 'mean',
+  },
+  {
+    value: 'median',
+    label: 'median',
+  },
+  {
+    value: 'max',
+    label: 'max',
+  },
+  {
+    value: 'min',
+    label: 'min',
+  },
+  {
+    value: 'count',
+    label: 'count',
+  },
+  {
+    value: 'distinct',
+    label: 'count unique',
+  },
+  {
+    value: 'sum',
+    label: 'sum',
+  },
+  {
+    value: 'q1',
+    label: 'lower quartile',
+  },
+  {
+    value: 'q3',
+    label: 'upper quartile',
+  },
+];
+
 export default function ConfigMenu(props) {
   const datasetArray = getDatasetArray(props.datasets);
   const datasetOptions = getDatasetOptions(datasetArray);
@@ -76,24 +118,51 @@ export default function ConfigMenu(props) {
                 labelY: event.target.value.toString(),
               })}
             />
+            {spec.datasetGroupColumnX !== null &&
+              <ColumnMenu
+                placeholder="Choose aggregation type..."
+                labelText="Aggregation type"
+                choice={spec.aggregationTypeY !== null ? spec.aggregationTypeY.toString() : null}
+                name="yAggregationMenu"
+                options={aggregationOptions}
+                onChange={(value) => onChangeSpec({
+                  aggregationTypeY: value,
+                })}
+              />
+            }
             <Subtitle>X-Axis</Subtitle>
-            <ColumnMenu
-              placeholder={labelColumnPlaceholder}
-              labelText={labelColumnLabelText}
-              choice={spec.datasetNameColumnX !== null ? spec.datasetNameColumnX.toString() : null}
-              name="xNameColumnMenu"
-              options={columnOptions}
-              clearable={true}
-              onChange={(value) => onChangeSpec({
-                datasetNameColumnX: value,
-              })}
-            />
+            {spec.datasetGroupColumnX === null &&
+              <ColumnMenu
+                placeholder={labelColumnPlaceholder}
+                labelText={labelColumnLabelText}
+                choice={spec.datasetNameColumnX !== null ?
+                  spec.datasetNameColumnX.toString() : null}
+                name="xNameColumnMenu"
+                options={columnOptions}
+                clearable
+                onChange={(value) => onChangeSpec({
+                  datasetNameColumnX: value,
+                })}
+              />
+            }
             <LabelInput
               value={spec.labelX !== null ? spec.labelX.toString() : null}
               placeholder="X Axis label"
               name="xLabel"
               onChange={(event) => onChangeSpec({
                 labelX: event.target.value.toString(),
+              })}
+            />
+            <ColumnMenu
+              placeholder={groupColumnPlaceholder}
+              labelText={groupColumnLabelText}
+              choice={spec.datasetGroupColumnX !== null ?
+                spec.datasetGroupColumnX.toString() : null}
+              name="xGroupColumnMenu"
+              options={columnOptions}
+              clearable
+              onChange={(value) => onChangeSpec({
+                datasetGroupColumnX: value,
               })}
             />
           </div>
@@ -184,7 +253,7 @@ export default function ConfigMenu(props) {
               choice={spec.datasetNameColumnX !== null ? spec.datasetNameColumnX.toString() : null}
               name="xNameColumnMenu"
               options={columnOptions}
-              clearable={true}
+              clearable
               onChange={(value) => onChangeSpec({
                 datasetNameColumnX: value,
               })}
@@ -225,7 +294,7 @@ export default function ConfigMenu(props) {
               choice={spec.datasetNameColumnX !== null ? spec.datasetNameColumnX.toString() : null}
               name="xNameColumnMenu"
               options={columnOptions}
-              clearable={true}
+              clearable
               onChange={(value) => onChangeSpec({
                 datasetNameColumnX: value,
               })}
@@ -254,7 +323,7 @@ export default function ConfigMenu(props) {
               choice={spec.datasetNameColumnX !== null ? spec.datasetNameColumnX.toString() : null}
               name="xNameColumnMenu"
               options={columnOptions}
-              clearable={true}
+              clearable
               onChange={(value) => onChangeSpec({
                 datasetNameColumnX: value,
               })}

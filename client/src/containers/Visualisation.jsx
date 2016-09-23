@@ -25,6 +25,8 @@ class Visualisation extends Component {
         spec: {
           datasetColumnX: null,
           datasetNameColumnX: null,
+          datasetGroupColumnX: null,
+          aggregationTypeY: null,
           labelX: null,
           minX: null,
           maxX: null,
