@@ -198,30 +198,43 @@
 
 (hugsql/def-db-fns "org/akvo/lumen/transformation.sql")
 
+(defn next-transformations
+  "Find non-applied transformations."
+  [previous-transformation-log current-transformation-log]
+  (let [n (count previous-transformation-log)]
+    (if (= previous-transformation-log (take n current-transformation-log))
+      (drop n current-transformation-log)
+      (throw (ex-info "Could not apply transformation. Previous transformation log has diverged"
+                      {:previous-transformation-log previous-transformation-log
+                       :current-transformation-log current-transformation-log})))))
+
 (defn execute
   [completion-promise tenant-conn job-id dataset-id transformation-log]
-  (let [dv (dataset-version-by-id tenant-conn {:id dataset-id})
-        columns (vec (:columns dv))
-        source-table (:imported-table-name dv)
-        table-name (util/gen-table-name "ds")
-        f (fn [log op-spec]
-            (let [cols (if (empty? log)
-                         columns
-                         (:columns (last log)))
-                  step (apply-operation tenant-conn
-                                        table-name
-                                        cols
-                                        op-spec)]
-              (if (:success? step)
-                (conj log step)
-                (throw (Exception. (str "Error applying operation: " op-spec))))))]
-    (try
+  (try
+    (let [dataset-version (dataset-version-by-id tenant-conn {:id dataset-id})
+          columns (vec (:columns dataset-version))
+          source-table (:table-name dataset-version)
+          previous-transformations (:transformations dataset-version)
+          new-transformations (next-transformations previous-transformations transformation-log)
+          table-name (util/gen-table-name "ds")
+          f (fn [log op-spec]
+              (let [cols (if (empty? log)
+                           columns
+                           (:columns (last log)))
+                    step (apply-operation tenant-conn
+                                          table-name
+                                          cols
+                                          op-spec)]
+                (if (:success? step)
+                  (conj log step)
+                  (throw (Exception. (str "Error applying operation: " op-spec))))))]
       (copy-table tenant-conn
                   {:source-table source-table
                    :dest-table table-name}
                   {}
                   {:transaction? false})
-      (let [result (reduce f [] transformation-log)
+      (printf "Will apply %s transformations\n" (count new-transformations))
+      (let [result (reduce f [] new-transformations)
             log (vec (mapcat :execution-log result))
             cols (:columns (last result))]
         (new-dataset-version tenant-conn {:id (str (util/squuid))
@@ -229,13 +242,13 @@
                                           :job-execution-id job-id
                                           :table-name table-name
                                           :imported-table-name source-table
-                                          :version (inc (:version dv))
+                                          :version (inc (:version dataset-version))
                                           :transformations transformation-log
                                           :columns cols})
         (update-job-success-execution tenant-conn {:id job-id
                                                    :exec-log log})
         ;; TODO deliver new-dataset-version-id instead
-        (deliver completion-promise {:job-id job-id}))
-      (catch Exception e
-        (update-job-failed-execution tenant-conn {:id job-id
-                                                  :error-log [(.getMessage e)]})))))
+        (deliver completion-promise {:job-id job-id})))
+    (catch Exception e
+      (update-job-failed-execution tenant-conn {:id job-id
+                                                :error-log [(.getMessage e)]}))))

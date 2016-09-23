@@ -10,7 +10,7 @@ SELECT id FROM dataset WHERE id = :id
 
 -- :name dataset-version-by-id :? :1
 -- :doc Returns the most recent dataset version for a given dataset id
-SELECT imported_table_name AS "imported-table-name", columns, version
+SELECT table_name AS "table-name", columns, version, transformations
   FROM dataset_version
  WHERE dataset_id = :id
    AND version = (SELECT MAX(v.version)
