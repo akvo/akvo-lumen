@@ -233,11 +233,11 @@
                    :dest-table table-name}
                   {}
                   {:transaction? false})
-      (printf "Will apply %s transformations\n" (count new-transformations))
       (let [result (reduce f [] new-transformations)
             log (vec (mapcat :execution-log result))
-            cols (:columns (last result))]
-        (new-dataset-version tenant-conn {:id (str (util/squuid))
+            cols (:columns (last result))
+            new-dataset-version-id (str (util/squuid))]
+        (new-dataset-version tenant-conn {:id new-dataset-version-id
                                           :dataset-id dataset-id
                                           :job-execution-id job-id
                                           :table-name table-name
@@ -247,8 +247,15 @@
                                           :columns cols})
         (update-job-success-execution tenant-conn {:id job-id
                                                    :exec-log log})
-        ;; TODO deliver new-dataset-version-id instead
-        (deliver completion-promise {:job-id job-id})))
+        (deliver completion-promise {:status "OK"
+                                     :job-execution-id job-id
+                                     :dataset-version-id new-dataset-version-id
+                                     :dataset-id dataset-id})))
     (catch Exception e
-      (update-job-failed-execution tenant-conn {:id job-id
-                                                :error-log [(.getMessage e)]}))))
+      (let [msg (.getMessage e)]
+        (update-job-failed-execution tenant-conn {:id job-id
+                                                  :error-log [msg]})
+        (deliver completion-promise {:status "FAILED"
+                                     :dataset-id dataset-id
+                                     :job-execution-id job-id
+                                     :message msg})))))
