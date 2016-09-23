@@ -216,31 +216,26 @@
           source-table (:table-name dataset-version)
           previous-transformations (:transformations dataset-version)
           new-transformations (next-transformations previous-transformations transformation-log)
-          table-name (util/gen-table-name "ds")
           f (fn [log op-spec]
               (let [cols (if (empty? log)
                            columns
                            (:columns (last log)))
                     step (apply-operation tenant-conn
-                                          table-name
+                                          source-table
                                           cols
                                           op-spec)]
                 (if (:success? step)
                   (conj log step)
                   (throw (Exception. (str "Error applying operation: " op-spec))))))]
-      (copy-table tenant-conn
-                  {:source-table source-table
-                   :dest-table table-name}
-                  {}
-                  {:transaction? false})
       (let [result (reduce f [] new-transformations)
             log (vec (mapcat :execution-log result))
             cols (:columns (last result))
             new-dataset-version-id (str (util/squuid))]
+        (clear-dataset-version-data-table tenant-conn {:id (:id dataset-version)})
         (new-dataset-version tenant-conn {:id new-dataset-version-id
                                           :dataset-id dataset-id
                                           :job-execution-id job-id
-                                          :table-name table-name
+                                          :table-name source-table
                                           :imported-table-name source-table
                                           :version (inc (:version dataset-version))
                                           :transformations transformation-log

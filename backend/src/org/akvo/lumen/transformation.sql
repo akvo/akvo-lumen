@@ -10,13 +10,18 @@ SELECT id FROM dataset WHERE id = :id
 
 -- :name dataset-version-by-id :? :1
 -- :doc Returns the most recent dataset version for a given dataset id
-SELECT table_name AS "table-name", columns, version, transformations
+SELECT id, table_name AS "table-name", columns, version, transformations
   FROM dataset_version
  WHERE dataset_id = :id
    AND version = (SELECT MAX(v.version)
                     FROM dataset_version v
                    WHERE v.dataset_id = :id);
 
+-- :name clear-dataset-version-data-table :! :n
+-- :doc Clear the table_name for a given dataset_version id
+UPDATE dataset_version
+   SET table_name=NULL
+ WHERE id = :id
 
 -- :name update-job-success-execution :! :n
 -- :doc Updates a job_execution with a given log
