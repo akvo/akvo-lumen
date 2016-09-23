@@ -192,6 +192,18 @@ export default function ConfigMenu(props) {
                 labelY: event.target.value.toString(),
               })}
             />
+            {spec.datasetGroupColumnX !== null &&
+              <ColumnMenu
+                placeholder="Choose aggregation type..."
+                labelText="Aggregation type"
+                choice={spec.aggregationTypeY !== null ? spec.aggregationTypeY.toString() : null}
+                name="yAggregationMenu"
+                options={aggregationOptions}
+                onChange={(value) => onChangeSpec({
+                  aggregationTypeY: value,
+                })}
+              />
+            }
             <Subtitle>X-Axis</Subtitle>
             <LabelInput
               value={spec.labelX !== null ? spec.labelX.toString() : null}
@@ -199,6 +211,18 @@ export default function ConfigMenu(props) {
               name="xLabel"
               onChange={(event) => onChangeSpec({
                 labelX: event.target.value.toString(),
+              })}
+            />
+            <ColumnMenu
+              placeholder={groupColumnPlaceholder}
+              labelText={groupColumnLabelText}
+              choice={spec.datasetGroupColumnX !== null ?
+                spec.datasetGroupColumnX.toString() : null}
+              name="xGroupColumnMenu"
+              options={columnOptions}
+              clearable
+              onChange={(value) => onChangeSpec({
+                datasetGroupColumnX: value,
               })}
             />
           </div>
