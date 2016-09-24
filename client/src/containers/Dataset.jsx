@@ -1,6 +1,4 @@
 import React, { Component, PropTypes } from 'react';
-import { connect } from 'react-redux';
-import { withRouter } from 'react-router';
 import Immutable from 'immutable';
 import { showModal } from '../actions/activeModal';
 import { getId, getTitle } from '../domain/entity';
@@ -9,13 +7,14 @@ import * as api from '../api';
 
 require('../styles/Dataset.scss');
 
-class Dataset extends Component {
+export default class Dataset extends Component {
 
   constructor() {
     super();
     this.state = {
       asyncComponents: null,
       dataset: null,
+      pendingTransformations: Immutable.List(),
     };
     this.handleShowDatasetSettings = this.handleShowDatasetSettings.bind(this);
     this.fetchDataset = this.fetchDataset.bind(this);
@@ -49,12 +48,16 @@ class Dataset extends Component {
   }
 
   transform(transformation) {
-    const { dataset } = this.state;
+    const { dataset, pendingTransformations } = this.state;
     const id = dataset.get('id');
 
+    this.setState({ pendingTransformations: pendingTransformations.push(transformation) });
     api.post(`/api/transformations/${id}`,
-      dataset.get('transformations').push(transformation).toJS())
-      .then(() => this.fetchDataset(id));
+      dataset.get('transformations').concat(pendingTransformations).push(transformation).toJS())
+      .then(() => {
+        this.setState({ pendingTransformations: pendingTransformations.shift() });
+        this.fetchDataset(id);
+      });
   }
 
   handleShowDatasetSettings() {
@@ -92,18 +95,6 @@ class Dataset extends Component {
 
 Dataset.propTypes = {
   dataset: PropTypes.object,
-  router: PropTypes.object.isRequired,
-  route: PropTypes.object.isRequired,
   params: PropTypes.object.isRequired,
   dispatch: PropTypes.func.isRequired,
 };
-
-function mapStateToProps(state, ownProps) {
-  const datasetId = ownProps.params.datasetId;
-  const dataset = state.library.datasets[datasetId];
-  return {
-    dataset,
-  };
-}
-
-export default connect(mapStateToProps)(withRouter(Dataset));
