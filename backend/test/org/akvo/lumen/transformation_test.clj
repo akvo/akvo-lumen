@@ -3,16 +3,16 @@
             [clojure.java.io :as io]
             [clojure.test :refer :all]
             [com.stuartsierra.component :as component]
+            [duct.component.hikaricp :refer [hikaricp]]
             [hugsql.core :as hugsql]
-            [org.akvo.lumen.fixtures :refer (test-conn
-                                            test-tenant-spec
-                                            migrate-tenant
-                                            rollback-tenant)]
-            [org.akvo.lumen.import :as imp]
-            [org.akvo.lumen.transformation :as tf]
             [org.akvo.lumen.component.tenant-manager :refer [tenant-manager]]
             [org.akvo.lumen.component.transformation-engine :refer [transformation-engine]]
-            [duct.component.hikaricp :refer [hikaricp]]
+            [org.akvo.lumen.fixtures :refer (test-conn
+                                             test-tenant-spec
+                                             migrate-tenant
+                                             rollback-tenant)]
+            [org.akvo.lumen.import :as imp]
+            [org.akvo.lumen.transformation :as tf]
             [org.akvo.lumen.util :refer (squuid)]))
 
 (def ops (vec (json/parse-string (slurp (io/resource "ops.json")))))
@@ -100,14 +100,9 @@
 
       (let [dataset-id (:dataset_id (dataset-id-by-job-execution-id test-conn {:id job-id}))
             transformation-job (tf/schedule test-conn *transformation-engine*  dataset-id t-log)
-            t-job-id (get-in transformation-job [:body :jobExecutionId])]
+            t-job-id (get-in transformation-job [:body :job-execution-id])]
 
-        (is (= 200  (:status transformation-job)))
-
-        (loop [job (job-execution-status test-conn {:id t-job-id})]
-          (if (not= (:status job) "PENDING")
-            true
-            (recur (job-execution-status test-conn {:id t-job-id}))))
+        (is (= 200 (:status transformation-job)))
 
         (is (= "OK" (:status (job-execution-status test-conn {:id t-job-id}))))
 
