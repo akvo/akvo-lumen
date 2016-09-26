@@ -19,7 +19,7 @@ export default class Dataset extends Component {
     this.handleShowDatasetSettings = this.handleShowDatasetSettings.bind(this);
     this.fetchDataset = this.fetchDataset.bind(this);
     this.transform = this.transform.bind(this);
-    this.undo = this.undo.bind(this)
+    this.undo = this.undo.bind(this);
   }
 
   componentDidMount() {
@@ -98,7 +98,7 @@ export default class Dataset extends Component {
             rows={getRows(dataset)}
             transformations={getTransformations(dataset)}
             onTransform={transformation => this.transform(transformation)}
-            onUndoTransformation={() => this.undo() }
+            onUndoTransformation={() => this.undo()}
           />}
       </div>
     );
