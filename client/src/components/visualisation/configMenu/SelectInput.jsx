@@ -1,7 +1,7 @@
 import React, { PropTypes } from 'react';
 import SelectMenu from '../../common/SelectMenu';
 
-export default function ColumnMenu(props) {
+export default function SelectInput(props) {
   return (
     <div className={`inputGroup${props.disabled ? ' disabled' : ''}`}>
       <label htmlFor={props.name}>
@@ -20,7 +20,7 @@ export default function ColumnMenu(props) {
   );
 }
 
-ColumnMenu.propTypes = {
+SelectInput.propTypes = {
   placeholder: PropTypes.string,
   labelText: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,

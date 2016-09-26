@@ -1,7 +1,7 @@
 import React, { PropTypes } from 'react';
 import Immutable from 'immutable';
 import SelectMenu from '../common/SelectMenu';
-import ColumnMenu from './configMenu/ColumnMenu';
+import SelectInput from './configMenu/SelectInput';
 import LabelInput from './configMenu/LabelInput';
 import * as entity from '../../domain/entity';
 
@@ -85,7 +85,7 @@ const ColumnGroupingInput = ({ spec, columnOptions, onChangeSpec }) => (
   <div
     className="ColumnGroupingInput"
   >
-    <ColumnMenu
+    <SelectInput
       placeholder={groupColumnPlaceholder}
       labelText={groupColumnLabelText}
       choice={spec.datasetGroupColumnX !== null ?
@@ -102,7 +102,7 @@ const ColumnGroupingInput = ({ spec, columnOptions, onChangeSpec }) => (
     >
       - or -
     </div>
-    <ColumnMenu
+    <SelectInput
       placeholder={labelColumnPlaceholder}
       labelText={labelColumnLabelText}
       choice={(spec.datasetNameColumnX !== null && spec.datasetGroupColumnX == null) ?
@@ -143,7 +143,7 @@ export default function ConfigMenu(props) {
         output = (
           <div>
             <Subtitle>Y-Axis</Subtitle>
-            <ColumnMenu
+            <SelectInput
               placeholder={datasetColumnPlaceholder}
               labelText={datasetColumnLabelText}
               choice={spec.datasetColumnX !== null ? spec.datasetColumnX.toString() : null}
@@ -153,7 +153,7 @@ export default function ConfigMenu(props) {
                 datasetColumnX: value,
               })}
             />
-            <ColumnMenu
+            <SelectInput
               placeholder={spec.datasetGroupColumnX !== null ?
                 'Choose aggregation type...' : 'Must choose "Group by" column first'}
               labelText="Aggregation type"
@@ -197,7 +197,7 @@ export default function ConfigMenu(props) {
         output = (
           <div>
             <Subtitle>Y-Axis</Subtitle>
-            <ColumnMenu
+            <SelectInput
               placeholder={datasetColumnPlaceholder}
               labelText={datasetColumnLabelText}
               choice={spec.datasetColumnX !== null ? spec.datasetColumnX.toString() : null}
@@ -207,7 +207,7 @@ export default function ConfigMenu(props) {
                 datasetColumnX: value,
               })}
             />
-            <ColumnMenu
+            <SelectInput
               placeholder={spec.datasetGroupColumnX !== null ?
                 'Choose aggregation type...' : 'Must choose "Group by" column first'}
               labelText="Aggregation type"
@@ -229,7 +229,7 @@ export default function ConfigMenu(props) {
               })}
             />
             <Subtitle>X-Axis</Subtitle>
-            <ColumnMenu
+            <SelectInput
               placeholder={groupColumnPlaceholder}
               labelText={groupColumnLabelText}
               choice={spec.datasetGroupColumnX !== null ?
@@ -257,7 +257,7 @@ export default function ConfigMenu(props) {
         output = (
           <div>
             <Subtitle>Y-Axis</Subtitle>
-            <ColumnMenu
+            <SelectInput
               placeholder={datasetColumnPlaceholder}
               labelText={datasetColumnLabelText}
               choice={spec.datasetColumnX !== null ? spec.datasetColumnX.toString() : null}
@@ -267,7 +267,7 @@ export default function ConfigMenu(props) {
                 datasetColumnX: value,
               })}
             />
-            <ColumnMenu
+            <SelectInput
               placeholder={spec.datasetGroupColumnX !== null ?
                 'Choose aggregation type...' : 'Must choose "Group by" column first'}
               labelText="Aggregation type"
@@ -289,7 +289,7 @@ export default function ConfigMenu(props) {
               })}
             />
             <Subtitle>X-Axis</Subtitle>
-            <ColumnMenu
+            <SelectInput
               placeholder={datasetColumnPlaceholder}
               labelText={datasetColumnLabelText}
               choice={spec.datasetColumnY !== null ? spec.datasetColumnY.toString() : null}
@@ -320,7 +320,7 @@ export default function ConfigMenu(props) {
         output = (
           <div>
             <Subtitle>Latitude</Subtitle>
-            <ColumnMenu
+            <SelectInput
               placeholder={datasetColumnPlaceholder}
               labelText={datasetColumnLabelText}
               choice={spec.datasetColumnY !== null ? spec.datasetColumnY.toString() : null}
@@ -331,7 +331,7 @@ export default function ConfigMenu(props) {
               })}
             />
             <Subtitle>Longitude</Subtitle>
-            <ColumnMenu
+            <SelectInput
               placeholder={datasetColumnPlaceholder}
               labelText={datasetColumnLabelText}
               choice={spec.datasetColumnX !== null ? spec.datasetColumnX.toString() : null}
@@ -342,7 +342,7 @@ export default function ConfigMenu(props) {
               })}
             />
             <Subtitle>Popup Label</Subtitle>
-            <ColumnMenu
+            <SelectInput
               placeholder={labelColumnPlaceholder}
               labelText={labelColumnLabelText}
               choice={spec.datasetNameColumnX !== null ? spec.datasetNameColumnX.toString() : null}
@@ -361,7 +361,7 @@ export default function ConfigMenu(props) {
       case 'donut':
         output = (
           <div>
-            <ColumnMenu
+            <SelectInput
               placeholder={datasetColumnPlaceholder}
               labelText={datasetColumnLabelText}
               choice={spec.datasetColumnX !== null ? spec.datasetColumnX.toString() : null}
@@ -371,7 +371,7 @@ export default function ConfigMenu(props) {
                 datasetColumnX: value,
               })}
             />
-            <ColumnMenu
+            <SelectInput
               placeholder={spec.datasetGroupColumnX !== null ?
                 'Choose aggregation type...' : 'Must choose "Group by" column first'}
               labelText="Aggregation type"
