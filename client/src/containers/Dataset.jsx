@@ -19,6 +19,7 @@ export default class Dataset extends Component {
     this.handleShowDatasetSettings = this.handleShowDatasetSettings.bind(this);
     this.fetchDataset = this.fetchDataset.bind(this);
     this.transform = this.transform.bind(this);
+    this.undo = this.undo.bind(this)
   }
 
   componentDidMount() {
@@ -60,6 +61,17 @@ export default class Dataset extends Component {
       });
   }
 
+  undo() {
+    const { dataset } = this.state;
+    const id = dataset.get('id');
+
+    api.post(`/api/transformations/${id}`,
+      dataset.get('transformations').pop().toJS())
+      .then(() => {
+        this.fetchDataset(id);
+      });
+  }
+
   handleShowDatasetSettings() {
     this.props.dispatch(showModal('dataset-settings', {
       id: getId(this.props.dataset),
@@ -86,7 +98,7 @@ export default class Dataset extends Component {
             rows={getRows(dataset)}
             transformations={getTransformations(dataset)}
             onTransform={transformation => this.transform(transformation)}
-            onUndoTransformation={() => { throw Error('not yet implemented'); }}
+            onUndoTransformation={() => this.undo() }
           />}
       </div>
     );

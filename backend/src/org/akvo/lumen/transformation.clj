@@ -100,8 +100,6 @@
       {:valid? false
        :message (.getMessage e)})))
 
-
-
 (defn schedule
   [tenant-conn transformation-engine dataset-id transformation-log]
   (if-let [dataset (dataset-by-id tenant-conn {:id dataset-id})]

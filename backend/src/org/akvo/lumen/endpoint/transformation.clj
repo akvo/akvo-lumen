@@ -8,8 +8,11 @@
 (defn endpoint [{:keys [tenant-manager transformation-engine]}]
   (context "/api/transformations" {:keys [tenant] :as request}
     (let-routes [tenant-conn (connection tenant-manager tenant)]
-      (context "/:id" [id]
+      (context "/:dataset-id" [dataset-id]
 
         (POST "/" {:keys [body] :as request}
           (merge (response/response {})
-            (t/schedule tenant-conn transformation-engine id (vec body))))))))
+            (t/schedule tenant-conn
+                        transformation-engine
+                        dataset-id
+                        (vec body))))))))

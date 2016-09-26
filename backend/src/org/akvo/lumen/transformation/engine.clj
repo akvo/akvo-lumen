@@ -1,7 +1,7 @@
 (ns org.akvo.lumen.transformation.engine
   (:require [clojure.java.jdbc :as jdbc]
             [hugsql.core :as hugsql]
-            [org.akvo.lumen.util :as util ])
+            [org.akvo.lumen.util :as util])
   (:import java.sql.SQLException))
 
 
@@ -198,24 +198,51 @@
 
 (hugsql/def-db-fns "org/akvo/lumen/transformation.sql")
 
-(defn next-transformations
+(defn non-applied-transformations
   "Find non-applied transformations."
-  [previous-transformation-log current-transformation-log]
-  (let [n (count previous-transformation-log)]
-    (if (= previous-transformation-log (take n current-transformation-log))
-      (drop n current-transformation-log)
-      (throw (ex-info "Could not apply transformation. Previous transformation log has diverged"
-                      {:previous-transformation-log previous-transformation-log
-                       :current-transformation-log current-transformation-log})))))
+  [current-transformation-log new-transformation-log]
+  (let [current-n (count current-transformation-log)
+        new-n (count new-transformation-log)]
+    (cond
+
+      ;; Nothing to apply
+      (= current-transformation-log new-transformation-log)
+      []
+
+      ;; New transformations to apply
+      (< current-n new-n)
+      (if (= current-transformation-log (take current-n new-transformation-log))
+        (drop current-n new-transformation-log) ;; Apply missing transformations
+        (throw (ex-info "Could not apply transformation. New transformation log has diverged"
+                        {:current-transformation-log current-transformation-log
+                         :new-transformation-log new-transformation-log})))
+
+      ;; Undo some transformations
+      (< new-n current-n)
+      (if (= new-transformation-log (take new-n current-transformation-log))
+        new-transformation-log
+        (throw (ex-info "Could not apply undo. New transformation log has diverged"
+                        {:current-transformation-log current-transformation-log
+                         :new-transformation-log new-transformation-log}))))))
 
 (defn execute
-  [completion-promise tenant-conn job-id dataset-id transformation-log]
+  [completion-promise tenant-conn job-id dataset-id new-transformation-log]
   (try
     (let [dataset-version (dataset-version-by-id tenant-conn {:id dataset-id})
           columns (vec (:columns dataset-version))
-          source-table (:table-name dataset-version)
-          previous-transformations (:transformations dataset-version)
-          new-transformations (next-transformations previous-transformations transformation-log)
+          current-transformation-log (:transformations dataset-version)
+          non-applied-transformation-log (non-applied-transformations current-transformation-log
+                                                                      new-transformation-log)
+          source-table (if (= non-applied-transformation-log new-transformation-log)
+                         (let [table-name (util/gen-table-name "ds")]
+                           ;; This is the undo case. Could optimize with periodic snapshots.
+                           (copy-table tenant-conn
+                                       {:source-table (:imported-table-name dataset-version)
+                                        :dest-table table-name}
+                                       {}
+                                       {:transaction? false})
+                           table-name)
+                         (:table-name dataset-version))
           f (fn [log op-spec]
               (let [cols (if (empty? log)
                            columns
@@ -226,8 +253,9 @@
                                           op-spec)]
                 (if (:success? step)
                   (conj log step)
-                  (throw (Exception. (str "Error applying operation: " op-spec))))))]
-      (let [result (reduce f [] new-transformations)
+                  (throw (ex-info (str "Error applying operation: " op-spec)
+                                  {:op-spec op-spec})))))]
+      (let [result (reduce f [] non-applied-transformation-log)
             log (vec (mapcat :execution-log result))
             cols (:columns (last result))
             new-dataset-version-id (str (util/squuid))]
@@ -236,9 +264,9 @@
                                           :dataset-id dataset-id
                                           :job-execution-id job-id
                                           :table-name source-table
-                                          :imported-table-name source-table
+                                          :imported-table-name (:imported-table-name dataset-version)
                                           :version (inc (:version dataset-version))
-                                          :transformations transformation-log
+                                          :transformations new-transformation-log
                                           :columns cols})
         (update-job-success-execution tenant-conn {:id job-id
                                                    :exec-log log})

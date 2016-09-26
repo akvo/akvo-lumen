@@ -32,8 +32,9 @@
   TransformationQueue
   (enqueue [this transformation]
     (let [completion-promise (promise)]
-      (when-not @running? (throw (ex-info "Transformation Engine is not running"
-                                          {:transformation transformation})))
+      (when-not @running?
+        (throw (ex-info "Transformation Engine is not running"
+                        {:transformation transformation})))
       (.put queue (assoc transformation :completion-promise completion-promise))
       completion-promise)))
 
