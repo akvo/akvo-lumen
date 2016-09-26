@@ -6,7 +6,7 @@ require('../../styles/SelectMenu.scss');
 
 export default function SelectMenu(props) {
   return (
-    <div className="SelectMenu">
+    <div className={`SelectMenu ${props.disabled ? 'disabled' : 'enabled'}`}>
       <Select
         {...props}
         onChange={option => props.onChange(option ? option.value : null)}
@@ -28,4 +28,5 @@ SelectMenu.propTypes = {
   onChange: PropTypes.func,
   clearable: PropTypes.bool,
   searchable: PropTypes.bool,
+  disabled: PropTypes.bool,
 };

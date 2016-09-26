@@ -81,6 +81,49 @@ const aggregationOptions = [
   },
 ];
 
+const ColumnGroupingInput = ({ spec, columnOptions, onChangeSpec }) => (
+  <div
+    className="ColumnGroupingInput"
+  >
+    <ColumnMenu
+      placeholder={groupColumnPlaceholder}
+      labelText={groupColumnLabelText}
+      choice={spec.datasetGroupColumnX !== null ?
+        spec.datasetGroupColumnX.toString() : null}
+      name="xGroupColumnMenu"
+      options={columnOptions}
+      clearable
+      onChange={(value) => onChangeSpec({
+        datasetGroupColumnX: value,
+      })}
+    />
+    <div
+      className="inputSeperator"
+    >
+      - or -
+    </div>
+    <ColumnMenu
+      placeholder={labelColumnPlaceholder}
+      labelText={labelColumnLabelText}
+      choice={(spec.datasetNameColumnX !== null && spec.datasetGroupColumnX == null) ?
+        spec.datasetNameColumnX.toString() : null}
+      name="xNameColumnMenu"
+      options={columnOptions}
+      disabled={spec.datasetGroupColumnX !== null}
+      clearable
+      onChange={(value) => onChangeSpec({
+        datasetNameColumnX: value,
+      })}
+    />
+  </div>
+);
+
+ColumnGroupingInput.propTypes = {
+  spec: PropTypes.object.isRequired,
+  columnOptions: PropTypes.array.isRequired,
+  onChangeSpec: PropTypes.func.isRequired,
+};
+
 export default function ConfigMenu(props) {
   const datasetArray = getDatasetArray(props.datasets);
   const datasetOptions = getDatasetOptions(datasetArray);
@@ -110,6 +153,19 @@ export default function ConfigMenu(props) {
                 datasetColumnX: value,
               })}
             />
+            <ColumnMenu
+              placeholder={spec.datasetGroupColumnX !== null ?
+                'Choose aggregation type...' : 'Must choose "Group by" column first'}
+              labelText="Aggregation type"
+              choice={spec.datasetGroupColumnX !== null ?
+                spec.aggregationTypeY.toString() : null}
+              name="yAggregationMenu"
+              options={aggregationOptions}
+              disabled={spec.datasetGroupColumnX === null}
+              onChange={(value) => onChangeSpec({
+                aggregationTypeY: value,
+              })}
+            />
             <LabelInput
               value={spec.labelY !== null ? spec.labelY.toString() : null}
               placeholder="Y Axis label"
@@ -118,51 +174,18 @@ export default function ConfigMenu(props) {
                 labelY: event.target.value.toString(),
               })}
             />
-            {spec.datasetGroupColumnX !== null &&
-              <ColumnMenu
-                placeholder="Choose aggregation type..."
-                labelText="Aggregation type"
-                choice={spec.aggregationTypeY !== null ? spec.aggregationTypeY.toString() : null}
-                name="yAggregationMenu"
-                options={aggregationOptions}
-                onChange={(value) => onChangeSpec({
-                  aggregationTypeY: value,
-                })}
-              />
-            }
             <Subtitle>X-Axis</Subtitle>
-            {spec.datasetGroupColumnX === null &&
-              <ColumnMenu
-                placeholder={labelColumnPlaceholder}
-                labelText={labelColumnLabelText}
-                choice={spec.datasetNameColumnX !== null ?
-                  spec.datasetNameColumnX.toString() : null}
-                name="xNameColumnMenu"
-                options={columnOptions}
-                clearable
-                onChange={(value) => onChangeSpec({
-                  datasetNameColumnX: value,
-                })}
-              />
-            }
+            <ColumnGroupingInput
+              spec={spec}
+              columnOptions={columnOptions}
+              onChangeSpec={onChangeSpec}
+            />
             <LabelInput
               value={spec.labelX !== null ? spec.labelX.toString() : null}
               placeholder="X Axis label"
               name="xLabel"
               onChange={(event) => onChangeSpec({
                 labelX: event.target.value.toString(),
-              })}
-            />
-            <ColumnMenu
-              placeholder={groupColumnPlaceholder}
-              labelText={groupColumnLabelText}
-              choice={spec.datasetGroupColumnX !== null ?
-                spec.datasetGroupColumnX.toString() : null}
-              name="xGroupColumnMenu"
-              options={columnOptions}
-              clearable
-              onChange={(value) => onChangeSpec({
-                datasetGroupColumnX: value,
               })}
             />
           </div>
@@ -184,6 +207,19 @@ export default function ConfigMenu(props) {
                 datasetColumnX: value,
               })}
             />
+            <ColumnMenu
+              placeholder={spec.datasetGroupColumnX !== null ?
+                'Choose aggregation type...' : 'Must choose "Group by" column first'}
+              labelText="Aggregation type"
+              choice={spec.datasetGroupColumnX !== null ?
+                spec.aggregationTypeY.toString() : null}
+              name="yAggregationMenu"
+              options={aggregationOptions}
+              disabled={spec.datasetGroupColumnX === null}
+              onChange={(value) => onChangeSpec({
+                aggregationTypeY: value,
+              })}
+            />
             <LabelInput
               value={spec.labelY !== null ? spec.labelY.toString() : null}
               placeholder="Y Axis label"
@@ -192,27 +228,7 @@ export default function ConfigMenu(props) {
                 labelY: event.target.value.toString(),
               })}
             />
-            {spec.datasetGroupColumnX !== null &&
-              <ColumnMenu
-                placeholder="Choose aggregation type..."
-                labelText="Aggregation type"
-                choice={spec.aggregationTypeY !== null ? spec.aggregationTypeY.toString() : null}
-                name="yAggregationMenu"
-                options={aggregationOptions}
-                onChange={(value) => onChangeSpec({
-                  aggregationTypeY: value,
-                })}
-              />
-            }
             <Subtitle>X-Axis</Subtitle>
-            <LabelInput
-              value={spec.labelX !== null ? spec.labelX.toString() : null}
-              placeholder="X Axis label"
-              name="xLabel"
-              onChange={(event) => onChangeSpec({
-                labelX: event.target.value.toString(),
-              })}
-            />
             <ColumnMenu
               placeholder={groupColumnPlaceholder}
               labelText={groupColumnLabelText}
@@ -223,6 +239,14 @@ export default function ConfigMenu(props) {
               clearable
               onChange={(value) => onChangeSpec({
                 datasetGroupColumnX: value,
+              })}
+            />
+            <LabelInput
+              value={spec.labelX !== null ? spec.labelX.toString() : null}
+              placeholder="X Axis label"
+              name="xLabel"
+              onChange={(event) => onChangeSpec({
+                labelX: event.target.value.toString(),
               })}
             />
           </div>
@@ -243,6 +267,19 @@ export default function ConfigMenu(props) {
                 datasetColumnX: value,
               })}
             />
+            <ColumnMenu
+              placeholder={spec.datasetGroupColumnX !== null ?
+                'Choose aggregation type...' : 'Must choose "Group by" column first'}
+              labelText="Aggregation type"
+              choice={spec.datasetGroupColumnX !== null ?
+                spec.aggregationTypeY.toString() : null}
+              name="yAggregationMenu"
+              options={aggregationOptions}
+              disabled={spec.datasetGroupColumnX === null}
+              onChange={(value) => onChangeSpec({
+                aggregationTypeY: value,
+              })}
+            />
             <LabelInput
               value={spec.labelY !== null ? spec.labelY.toString() : null}
               placeholder="Y Axis label"
@@ -251,18 +288,6 @@ export default function ConfigMenu(props) {
                 labelY: event.target.value.toString(),
               })}
             />
-            {spec.datasetGroupColumnX !== null &&
-              <ColumnMenu
-                placeholder="Choose aggregation type..."
-                labelText="Aggregation type"
-                choice={spec.aggregationTypeY !== null ? spec.aggregationTypeY.toString() : null}
-                name="yAggregationMenu"
-                options={aggregationOptions}
-                onChange={(value) => onChangeSpec({
-                  aggregationTypeY: value,
-                })}
-              />
-            }
             <Subtitle>X-Axis</Subtitle>
             <ColumnMenu
               placeholder={datasetColumnPlaceholder}
@@ -274,36 +299,17 @@ export default function ConfigMenu(props) {
                 datasetColumnY: value,
               })}
             />
+            <ColumnGroupingInput
+              spec={spec}
+              columnOptions={columnOptions}
+              onChangeSpec={onChangeSpec}
+            />
             <LabelInput
               value={spec.labelX !== null ? spec.labelX.toString() : null}
               placeholder="X Axis label"
               name="xLabel"
               onChange={(event) => onChangeSpec({
                 labelX: event.target.value.toString(),
-              })}
-            />
-            <ColumnMenu
-              placeholder={groupColumnPlaceholder}
-              labelText={groupColumnLabelText}
-              choice={spec.datasetGroupColumnX !== null ?
-                spec.datasetGroupColumnX.toString() : null}
-              name="xGroupColumnMenu"
-              options={columnOptions}
-              clearable
-              onChange={(value) => onChangeSpec({
-                datasetGroupColumnX: value,
-              })}
-            />
-            <Subtitle>Popup Label</Subtitle>
-            <ColumnMenu
-              placeholder={labelColumnPlaceholder}
-              labelText={labelColumnLabelText}
-              choice={spec.datasetNameColumnX !== null ? spec.datasetNameColumnX.toString() : null}
-              name="xNameColumnMenu"
-              options={columnOptions}
-              clearable
-              onChange={(value) => onChangeSpec({
-                datasetNameColumnX: value,
               })}
             />
           </div>
@@ -366,42 +372,23 @@ export default function ConfigMenu(props) {
               })}
             />
             <ColumnMenu
-              placeholder={groupColumnPlaceholder}
-              labelText={groupColumnLabelText}
+              placeholder={spec.datasetGroupColumnX !== null ?
+                'Choose aggregation type...' : 'Must choose "Group by" column first'}
+              labelText="Aggregation type"
               choice={spec.datasetGroupColumnX !== null ?
-                spec.datasetGroupColumnX.toString() : null}
-              name="xGroupColumnMenu"
-              options={columnOptions}
-              clearable
+                spec.aggregationTypeY.toString() : null}
+              name="yAggregationMenu"
+              options={aggregationOptions}
+              disabled={spec.datasetGroupColumnX === null}
               onChange={(value) => onChangeSpec({
-                datasetGroupColumnX: value,
+                aggregationTypeY: value,
               })}
             />
-            {spec.datasetGroupColumnX == null ?
-              <ColumnMenu
-                placeholder={labelColumnPlaceholder}
-                labelText={labelColumnLabelText}
-                choice={spec.datasetNameColumnX !== null ?
-                  spec.datasetNameColumnX.toString() : null}
-                name="xNameColumnMenu"
-                options={columnOptions}
-                clearable
-                onChange={(value) => onChangeSpec({
-                  datasetNameColumnX: value,
-                })}
-              />
-              :
-              <ColumnMenu
-                placeholder="Choose aggregation type..."
-                labelText="Aggregation type"
-                choice={spec.aggregationTypeY !== null ? spec.aggregationTypeY.toString() : null}
-                name="yAggregationMenu"
-                options={aggregationOptions}
-                onChange={(value) => onChangeSpec({
-                  aggregationTypeY: value,
-                })}
-              />
-            }
+            <ColumnGroupingInput
+              spec={spec}
+              columnOptions={columnOptions}
+              onChangeSpec={onChangeSpec}
+            />
           </div>
         );
         break;

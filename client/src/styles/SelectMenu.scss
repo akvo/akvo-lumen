@@ -3,11 +3,13 @@
     box-shadow: none !important;
     border-radius: 0;
   }
+  &.disabled {
+    .Select-control {
+      cursor: not-allowed;
+    }
+  }
   .Select, .Select-control, .Select-input {
     height: 100%;
-  }
-  .Select-placeholder {
-    cursor: pointer;
   }
   .Select-control {
     transition: background-color 0.3s ease;

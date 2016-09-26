@@ -26,7 +26,7 @@ class Visualisation extends Component {
           datasetColumnX: null,
           datasetNameColumnX: null,
           datasetGroupColumnX: null,
-          aggregationTypeY: null,
+          aggregationTypeY: 'mean', // default to mean
           labelX: null,
           minX: null,
           maxX: null,

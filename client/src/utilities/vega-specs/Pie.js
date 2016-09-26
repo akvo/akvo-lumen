@@ -32,6 +32,23 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
           type: 'pie',
           field: `${transformType}_y`,
         },
+        {
+          type: 'formula',
+          field: 'rounded_value',
+          expr: `floor(datum.${transformType}_y * 1000) / 1000`, // round label to 3 decimal places
+        },
+        {
+          type: 'formula',
+          field: 'percentage',
+          expr: '((datum.layout_end - datum.layout_start) / (2 * PI)) * 100',
+        },
+        {
+          type: 'formula',
+          field: 'rounded_percentage',
+          // round percentage to 2 decimal places for labels
+          expr: 'floor(datum.percentage * 100) / 100',
+        },
+
       ],
     };
 
@@ -176,7 +193,7 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
           transform: [
             {
               type: 'filter',
-              test: 'datum._id == tooltip._id',
+              test: 'datum._id == tooltip._id || datum._id == textTooltip._id',
             },
           ],
         },
@@ -208,9 +225,15 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
             align: {
               value: 'center',
             },
-            text: {
-              field: fieldY,
-            },
+            text: hasAggregation ?
+              {
+                template: '{{datum.rounded_percentage}}% ({{datum.rounded_value}})',
+              }
+              :
+              {
+                field: fieldY,
+              }
+            ,
           },
         },
       },
@@ -226,6 +249,20 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
           },
           {
             type: 'arc:mouseout',
+            expr: '{}',
+          },
+        ],
+      },
+      {
+        name: 'textTooltip',
+        init: {},
+        streams: [
+          {
+            type: 'text:mouseover',
+            expr: 'datum',
+          },
+          {
+            type: 'text:mouseout',
             expr: '{}',
           },
         ],

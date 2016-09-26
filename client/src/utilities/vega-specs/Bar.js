@@ -1,6 +1,5 @@
 export default function getVegaBarSpec(visualisation, data, containerHeight, containerWidth) {
-  const hasAggregation = Boolean(visualisation.spec.datasetGroupColumnX &&
-    visualisation.spec.aggregationTypeY);
+  const hasAggregation = Boolean(visualisation.spec.datasetGroupColumnX);
   const dataArray = [data];
   const transformType = hasAggregation ? visualisation.spec.aggregationTypeY : null;
 
@@ -62,11 +61,11 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
         type: 'ordinal',
         domain: {
           data: dataSource,
-          field: fieldX,
+          field: hasAggregation ? fieldX : 'label',
         },
         range: {
           data: dataSource,
-          field: fieldX,
+          field: hasAggregation ? fieldX : 'label',
         },
       },
     ],
@@ -76,7 +75,7 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
         scale: 'x',
         title: visualisation.spec.labelX,
         tickPadding: 0,
-        properties: visualisation.spec.datasetNameColumnX != null ?
+        properties: visualisation.spec.datasetNameColumnX !== null || hasAggregation ?
           {
             labels: {
               text: {
@@ -202,7 +201,7 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
           {
             type: 'rect:mouseover',
             expr: hasAggregation ?
-              // Round aggregation metrics to 3 sig figs for tooltip
+              // Round aggregation metrics to 3 decimal places for tooltip
               `floor(datum.${transformType}_y * 1000) / 1000`
               :
               'datum.y'

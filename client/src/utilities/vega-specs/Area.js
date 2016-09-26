@@ -1,7 +1,6 @@
 export default function getVegaAreaSpec(visualisation, data, containerHeight, containerWidth) {
   const { visualisationType } = visualisation;
-  const hasAggregation = Boolean(visualisation.spec.datasetGroupColumnX &&
-    visualisation.spec.aggregationTypeY);
+  const hasAggregation = Boolean(visualisation.spec.datasetGroupColumnX);
   const dataArray = [data];
   const transformType = hasAggregation ? visualisation.spec.aggregationTypeY : null;
 

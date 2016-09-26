@@ -3,7 +3,7 @@ import SelectMenu from '../../common/SelectMenu';
 
 export default function ColumnMenu(props) {
   return (
-    <div className="inputGroup">
+    <div className={`inputGroup${props.disabled ? ' disabled' : ''}`}>
       <label htmlFor={props.name}>
         {props.labelText}:
       </label>
