@@ -228,7 +228,7 @@
 (defn execute
   [completion-promise tenant-conn job-id dataset-id new-transformation-log]
   (try
-    (let [dataset-version (dataset-version-by-id tenant-conn {:id dataset-id})
+    (let [dataset-version (latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})
           columns (vec (:columns dataset-version))
           current-transformation-log (:transformations dataset-version)
           non-applied-transformation-log (non-applied-transformations current-transformation-log
@@ -257,7 +257,15 @@
                                   {:op-spec op-spec})))))]
       (let [result (reduce f [] non-applied-transformation-log)
             log (vec (mapcat :execution-log result))
-            cols (:columns (last result))
+            cols (vec (:columns (cond
+                                  (and (empty? result) (empty? new-transformation-log))
+                                  (dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id :version 1})
+
+                                  (empty? result)
+                                  dataset-version
+
+                                  :else
+                                  (last result))))
             new-dataset-version-id (str (util/squuid))]
         (clear-dataset-version-data-table tenant-conn {:id (:id dataset-version)})
         (new-dataset-version tenant-conn {:id new-dataset-version-id
