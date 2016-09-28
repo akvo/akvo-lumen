@@ -57,17 +57,19 @@
 
 (deftest op-validation
   (testing "op validation"
-    (is (= true (:valid? (tf/validate ops))))
-    (let [result (tf/validate invalid-op)]
+    (is (= true (every? true? (map tf/validate-op ops))))
+    (let [result (tf/validate {:type :transformation :transformation (second invalid-op)})]
       (is (= false (:valid? result)))
-      (is (= (format "Invalid operation %s" (second invalid-op)) (:message result))))))
+      (is (= (format "Invalid transformation %s" (second invalid-op)) (:message result))))))
 
 (deftest ^:functional test-transformations
   (testing "Transformation application"
     (is (= {:status 400 :body {:message "Dataset not found"}}
            (tf/schedule test-conn *transformation-engine* "Not-valid-id" []))))
   (testing "Valid log"
-    (let [resp (tf/schedule test-conn *transformation-engine* "ds-1" ops)]
+    (let [resp (last (for [transformation ops]
+                       (tf/schedule test-conn *transformation-engine* "ds-1" {:type :transformation
+                                                                              :transformation transformation})))]
       (is (= 200 (:status resp))))))
 
 (deftest ^:functional test-import-and-transform
@@ -99,7 +101,9 @@
       (imp/do-import test-conn {:file-upload-path "/tmp/akvo/dash"} job-id)
 
       (let [dataset-id (:dataset_id (dataset-id-by-job-execution-id test-conn {:id job-id}))
-            transformation-job (tf/schedule test-conn *transformation-engine*  dataset-id t-log)
+            transformation-job (last (for [transformation t-log]
+                                       (tf/schedule test-conn *transformation-engine*  dataset-id {:type :transformation
+                                                                                                   :transformation transformation})))
             t-job-id (get-in transformation-job [:body :job-execution-id])]
 
         (is (= 200 (:status transformation-job)))

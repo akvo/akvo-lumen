@@ -51,10 +51,8 @@ export default class Dataset extends Component {
   transform(transformation) {
     const { dataset, pendingTransformations } = this.state;
     const id = dataset.get('id');
-
     this.setState({ pendingTransformations: pendingTransformations.push(transformation) });
-    api.post(`/api/transformations/${id}`,
-      dataset.get('transformations').concat(pendingTransformations).push(transformation).toJS())
+    api.post(`/api/transformations/${id}/transform`, transformation.toJS())
       .then(() => {
         this.setState({ pendingTransformations: pendingTransformations.shift() });
         this.fetchDataset(id);
@@ -65,8 +63,7 @@ export default class Dataset extends Component {
     const { dataset } = this.state;
     const id = dataset.get('id');
 
-    api.post(`/api/transformations/${id}`,
-      dataset.get('transformations').pop().toJS())
+    api.post(`/api/transformations/${id}/undo`)
       .then(() => {
         this.fetchDataset(id);
       });

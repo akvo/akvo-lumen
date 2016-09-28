@@ -18,7 +18,7 @@
 
 (defn- throw-invalid-op
   [op-spec]
-  (throw (Exception. (str "Invalid operation " op-spec))))
+  (throw (ex-info (str "Invalid transformation " op-spec) op-spec)))
 
 (defn required-keys
   [{:strs [op args onError] :as op-spec}]
@@ -93,17 +93,24 @@
       (throw-invalid-op op-spec)))
 
 (defn validate
-  [transformation-log]
+  [command]
   (try
-    {:valid? (every? validate-op transformation-log)}
+    (condp = (:type command)
+      :transformation (if (validate-op (:transformation command))
+                        {:valid? true}
+                        {:valid? false
+                         :message (str "Invalid transformation " (:transformation command))})
+      :undo {:valid? true}
+      {:valid? false
+       :message (str "Unknown command " command)})
     (catch Exception e
       {:valid? false
        :message (.getMessage e)})))
 
 (defn schedule
-  [tenant-conn transformation-engine dataset-id transformation-log]
+  [tenant-conn transformation-engine dataset-id command]
   (if-let [dataset (dataset-by-id tenant-conn {:id dataset-id})]
-    (let [v (validate transformation-log)]
+    (let [v (validate command)]
       (if (:valid? v)
         (let [job-id (str (squuid))]
           (new-transformation-job-execution tenant-conn {:id job-id
@@ -112,7 +119,7 @@
                                             {:tenant-conn tenant-conn
                                              :job-id job-id
                                              :dataset-id dataset-id
-                                             :transformation-log transformation-log})]
+                                             :command command})]
             {:status 200
              :body @completion-promise}))
         {:status 400

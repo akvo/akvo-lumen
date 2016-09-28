@@ -10,9 +10,17 @@
     (let-routes [tenant-conn (connection tenant-manager tenant)]
       (context "/:dataset-id" [dataset-id]
 
-        (POST "/" {:keys [body] :as request}
+        (POST "/transform" {:keys [body] :as request}
           (merge (response/response {})
             (t/schedule tenant-conn
                         transformation-engine
                         dataset-id
-                        (vec body))))))))
+                        {:type :transformation
+                         :transformation body})))
+
+        (POST "/undo" _
+          (merge (response/response {})
+            (t/schedule tenant-conn
+                        transformation-engine
+                        dataset-id
+                        {:type :undo})))))))
