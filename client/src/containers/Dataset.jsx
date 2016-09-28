@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import Immutable from 'immutable';
+import { connect } from 'react-redux';
 import { showModal } from '../actions/activeModal';
 import { getId, getTitle } from '../domain/entity';
 import { getTransformations, getRows, getColumns } from '../domain/dataset';
@@ -7,7 +8,7 @@ import * as api from '../api';
 
 require('../styles/Dataset.scss');
 
-export default class Dataset extends Component {
+class Dataset extends Component {
 
   constructor() {
     super();
@@ -71,7 +72,7 @@ export default class Dataset extends Component {
 
   handleShowDatasetSettings() {
     this.props.dispatch(showModal('dataset-settings', {
-      id: getId(this.props.dataset),
+      id: getId(this.state.dataset),
     }));
   }
 
@@ -103,7 +104,9 @@ export default class Dataset extends Component {
 }
 
 Dataset.propTypes = {
-  dataset: PropTypes.object,
   params: PropTypes.object.isRequired,
   dispatch: PropTypes.func.isRequired,
 };
+
+// Just inject `dispatch`
+export default connect(() => ({}))(Dataset);

@@ -12,8 +12,8 @@
     (reset! running? true)
     (let [engine (future
                    (loop [transformation (.take queue)]
-                     (try
-                       (when-not (identical? transformation sentinel)
+                     (when-not (identical? transformation sentinel)
+                       (try
                          (let [{:keys [completion-promise tenant-conn job-id dataset-id command]} transformation]
                            (condp = (:type command)
                              :transformation
@@ -27,10 +27,10 @@
                              (engine/execute-undo completion-promise
                                                   tenant-conn
                                                   job-id
-                                                  dataset-id))))
-                       (catch Exception e
-                         (.printStackTrace e)))
-                     (recur (.take queue))))]
+                                                  dataset-id)))
+                         (catch Exception e
+                           (.printStackTrace e)))
+                       (recur (.take queue)))))]
       (assoc this :transformation-engine engine)))
 
   (stop [this]

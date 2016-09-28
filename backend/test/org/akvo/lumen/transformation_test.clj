@@ -24,7 +24,6 @@
 (hugsql/def-db-fns "org/akvo/lumen/job-execution.sql")
 (hugsql/def-db-fns "org/akvo/lumen/transformation_test.sql")
 
-
 (def ^:dynamic *transformation-engine*)
 
 (def transformation-test-system
