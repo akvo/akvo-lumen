@@ -104,7 +104,7 @@
             transformation-job (last (for [transformation t-log]
                                        (tf/schedule test-conn *transformation-engine*  dataset-id {:type :transformation
                                                                                                    :transformation transformation})))
-            t-job-id (get-in transformation-job [:body :job-execution-id])]
+            t-job-id (get-in transformation-job [:body :jobExecutionId])]
 
         (is (= 200 (:status transformation-job)))
 
