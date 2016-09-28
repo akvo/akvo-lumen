@@ -54,9 +54,12 @@ class Dataset extends Component {
     const id = dataset.get('id');
     this.setState({ pendingTransformations: pendingTransformations.push(transformation) });
     api.post(`/api/transformations/${id}/transform`, transformation.toJS())
-      .then(() => {
+      .then(({ status, message }) => {
         this.setState({ pendingTransformations: pendingTransformations.shift() });
         this.fetchDataset(id);
+        if (status === 'FAILED') {
+          throw new Error(`Failed to apply transformation: ${message}`);
+        }
       });
   }
 
@@ -65,8 +68,11 @@ class Dataset extends Component {
     const id = dataset.get('id');
 
     api.post(`/api/transformations/${id}/undo`)
-      .then(() => {
+      .then(({ status, message }) => {
         this.fetchDataset(id);
+        if (status === 'FAILED') {
+          throw new Error(`Failed to apply undo: ${message}`);
+        }
       });
   }
 

@@ -200,14 +200,14 @@
 
 (defn- deliver-promise-success [promise dataset-id dataset-version-id job-execution-id]
   (deliver promise {:status "OK"
-                    :job-execution-id job-execution-id
-                    :dataset-version-id dataset-version-id
-                    :dataset-id dataset-id}) )
+                    :jobExecutionId job-execution-id
+                    :datasetVersionId dataset-version-id
+                    :datasetId dataset-id}) )
 
 (defn- deliver-promise-failure [promise dataset-id job-id message]
   (deliver promise {:status "FAILED"
-                    :dataset-id dataset-id
-                    :job-execution-id job-id
+                    :datasetId dataset-id
+                    :jobExecutionId job-id
                     :message message}))
 
 (defn- execute-transformation-failed [completion-promise tenant-conn dataset-id job-id message]
