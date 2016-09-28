@@ -12,7 +12,6 @@ export default function SelectMenu(props) {
         onChange={option => props.onChange(option ? option.value : null)}
         clearable={props.clearable || false}
         searchable={props.searchable || false}
-        resetValue={null}
       />
     </div>
   );
