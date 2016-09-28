@@ -22,15 +22,23 @@
     margin: 0.5rem 0;
     width: 100%;
   }
-  label {
+  label, .inputSeperator {
     color: $blueGrey;
     font-size: 0.8rem;
+  }
+  .inputSeperator {
+    text-align: center;
   }
   .inputGroup {
     padding-bottom: 0.5rem;
     &:first-child {
       padding-top: 0.5rem;
     }
+  }
+  .ColumnGroupingInput {
+      padding: 0.5rem;
+      background-color: $lightGrey;
+      border-radius: 0.4rem;
   }
   .saveChanges {
     bottom: 1rem;

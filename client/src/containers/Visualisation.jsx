@@ -25,6 +25,8 @@ class Visualisation extends Component {
         spec: {
           datasetColumnX: null,
           datasetNameColumnX: null,
+          datasetGroupColumnX: null,
+          aggregationTypeY: 'mean', // default to mean
           labelX: null,
           minX: null,
           maxX: null,

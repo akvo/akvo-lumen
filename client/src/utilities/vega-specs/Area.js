@@ -1,8 +1,34 @@
 export default function getVegaAreaSpec(visualisation, data, containerHeight, containerWidth) {
   const { visualisationType } = visualisation;
+  const hasAggregation = Boolean(visualisation.spec.datasetGroupColumnX);
+  const dataArray = [data];
+  const transformType = hasAggregation ? visualisation.spec.aggregationTypeY : null;
+
+  if (hasAggregation) {
+    const transform1 = {
+      name: 'summary',
+      source: 'table',
+      transform: [
+        {
+          type: 'aggregate',
+          groupby: ['aggregationValue'],
+          summarize: {
+            y: [
+              transformType,
+            ],
+          },
+        },
+      ],
+    };
+    dataArray.push(transform1);
+  }
+
+  const dataSource = hasAggregation ? 'summary' : 'table';
+  const fieldX = hasAggregation ? 'aggregationValue' : 'x';
+  const fieldY = hasAggregation ? `${transformType}_y` : 'y';
 
   return ({
-    data: [data],
+    data: dataArray,
     height: containerHeight - 80,
     width: containerWidth - 70,
     padding: {
@@ -16,10 +42,10 @@ export default function getVegaAreaSpec(visualisation, data, containerHeight, co
         name: 'x',
         type: 'linear',
         range: 'width',
-        zero: true,
+        zero: !hasAggregation,
         domain: {
-          data: 'table',
-          field: 'x',
+          data: dataSource,
+          field: fieldX,
         },
       },
       {
@@ -28,8 +54,8 @@ export default function getVegaAreaSpec(visualisation, data, containerHeight, co
         range: 'height',
         nice: true,
         domain: {
-          data: 'table',
-          field: 'y',
+          data: dataSource,
+          field: fieldY,
         },
       },
     ],
@@ -37,7 +63,6 @@ export default function getVegaAreaSpec(visualisation, data, containerHeight, co
       {
         type: 'x',
         scale: 'x',
-        ticks: 20,
         title: visualisation.spec.labelX,
       },
       {
@@ -51,17 +76,17 @@ export default function getVegaAreaSpec(visualisation, data, containerHeight, co
         {
           type: 'area',
           from: {
-            data: 'table',
+            data: dataSource,
           },
           properties: {
             enter: {
               x: {
                 scale: 'x',
-                field: 'x',
+                field: fieldX,
               },
               y: {
                 scale: 'y',
-                field: 'y',
+                field: fieldY,
               },
               y2: {
                 scale: 'y',
@@ -77,17 +102,17 @@ export default function getVegaAreaSpec(visualisation, data, containerHeight, co
         {
           type: 'line',
           from: {
-            data: 'table',
+            data: dataSource,
           },
           properties: {
             enter: {
               x: {
                 scale: 'x',
-                field: 'x',
+                field: fieldX,
               },
               y: {
                 scale: 'y',
-                field: 'y',
+                field: fieldY,
               },
               y2: {
                 scale: 'y',

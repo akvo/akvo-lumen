@@ -1,6 +1,33 @@
 export default function getVegaBarSpec(visualisation, data, containerHeight, containerWidth) {
+  const hasAggregation = Boolean(visualisation.spec.datasetGroupColumnX);
+  const dataArray = [data];
+  const transformType = hasAggregation ? visualisation.spec.aggregationTypeY : null;
+
+  if (hasAggregation) {
+    const transform1 = {
+      name: 'summary',
+      source: 'table',
+      transform: [
+        {
+          type: 'aggregate',
+          groupby: ['aggregationValue'],
+          summarize: {
+            y: [
+              transformType,
+            ],
+          },
+        },
+      ],
+    };
+    dataArray.push(transform1);
+  }
+
+  const dataSource = hasAggregation ? 'summary' : 'table';
+  const fieldX = hasAggregation ? 'aggregationValue' : 'x';
+  const fieldY = hasAggregation ? `${transformType}_y` : 'y';
+
   return ({
-    data: [data],
+    data: dataArray,
     width: containerWidth - 70,
     height: containerHeight - 96,
     padding: {
@@ -15,8 +42,8 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
         type: 'ordinal',
         range: 'width',
         domain: {
-          data: 'table',
-          field: 'x',
+          data: dataSource,
+          field: fieldX,
         },
       },
       {
@@ -24,8 +51,8 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
         type: 'linear',
         range: 'height',
         domain: {
-          data: 'table',
-          field: 'y',
+          data: dataSource,
+          field: fieldY,
         },
         nice: true,
       },
@@ -33,12 +60,12 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
         name: 'xlabels',
         type: 'ordinal',
         domain: {
-          data: 'table',
-          field: 'x',
+          data: dataSource,
+          field: hasAggregation ? fieldX : 'label',
         },
         range: {
-          data: 'table',
-          field: 'label',
+          data: dataSource,
+          field: hasAggregation ? fieldX : 'label',
         },
       },
     ],
@@ -48,7 +75,7 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
         scale: 'x',
         title: visualisation.spec.labelX,
         tickPadding: 0,
-        properties: visualisation.spec.datasetNameColumnX != null ?
+        properties: visualisation.spec.datasetNameColumnX !== null || hasAggregation ?
           {
             labels: {
               text: {
@@ -76,13 +103,13 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
       {
         type: 'rect',
         from: {
-          data: 'table',
+          data: dataSource,
         },
         properties: {
           enter: {
             x: {
               scale: 'x',
-              field: 'x',
+              field: fieldX,
             },
             width: {
               scale: 'x',
@@ -91,7 +118,7 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
             },
             y: {
               scale: 'y',
-              field: 'y',
+              field: fieldY,
             },
             y2: {
               scale: 'y',
@@ -124,7 +151,7 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
           update: {
             x: {
               scale: 'x',
-              signal: 'tooltip.x',
+              signal: `tooltip.${fieldX}`,
             },
             dx: {
               scale: 'x',
@@ -133,11 +160,11 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
             },
             y: {
               scale: 'y',
-              signal: 'tooltip.y',
+              signal: `tooltip.${fieldY}`,
               offset: -5,
             },
             text: {
-              signal: 'tooltip.y',
+              signal: 'tooltipText',
             },
             fillOpacity: [
               {
@@ -160,6 +187,25 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
           {
             type: 'rect:mouseover',
             expr: 'datum',
+          },
+          {
+            type: 'rect:mouseout',
+            expr: '{}',
+          },
+        ],
+      },
+      {
+        name: 'tooltipText',
+        init: {},
+        streams: [
+          {
+            type: 'rect:mouseover',
+            expr: hasAggregation ?
+              // Round aggregation metrics to 3 decimal places for tooltip
+              `floor(datum.${transformType}_y * 1000) / 1000`
+              :
+              'datum.y'
+            ,
           },
           {
             type: 'rect:mouseout',

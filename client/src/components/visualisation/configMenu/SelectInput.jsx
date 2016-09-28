@@ -1,26 +1,32 @@
 import React, { PropTypes } from 'react';
 import SelectMenu from '../../common/SelectMenu';
 
-export default function ColumnMenu(props) {
+export default function SelectInput(props) {
   return (
-    <div className="inputGroup">
+    <div className={`inputGroup${props.disabled ? ' disabled' : ''}`}>
       <label htmlFor={props.name}>
-        Dataset column:
+        {props.labelText}:
       </label>
       <SelectMenu
         name={props.name}
-        placeholder="Choose a dataset column..."
+        disabled={props.disabled || false}
+        placeholder={props.placeholder}
         value={props.choice}
         options={props.options}
         onChange={props.onChange}
+        clearable={props.clearable}
       />
     </div>
   );
 }
 
-ColumnMenu.propTypes = {
+SelectInput.propTypes = {
+  placeholder: PropTypes.string,
+  labelText: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   choice: PropTypes.string,
   options: PropTypes.array.isRequired,
+  disabled: PropTypes.bool,
+  clearable: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
 };

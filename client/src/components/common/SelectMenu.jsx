@@ -6,10 +6,10 @@ require('../../styles/SelectMenu.scss');
 
 export default function SelectMenu(props) {
   return (
-    <div className="SelectMenu">
+    <div className={`SelectMenu ${props.disabled ? 'disabled' : 'enabled'}`}>
       <Select
         {...props}
-        onChange={option => props.onChange(option.value)}
+        onChange={option => props.onChange(option ? option.value : null)}
         clearable={props.clearable || false}
         searchable={props.searchable || false}
       />
@@ -19,7 +19,7 @@ export default function SelectMenu(props) {
 
 SelectMenu.propTypes = {
   options: PropTypes.arrayOf(React.PropTypes.shape({
-    value: PropTypes.string.isRequired,
+    value: PropTypes.string,
     label: PropTypes.string.isRequired,
   })).isRequired,
   placeholder: PropTypes.string,
@@ -27,4 +27,5 @@ SelectMenu.propTypes = {
   onChange: PropTypes.func,
   clearable: PropTypes.bool,
   searchable: PropTypes.bool,
+  disabled: PropTypes.bool,
 };

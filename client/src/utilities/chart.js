@@ -11,6 +11,8 @@ export function getChartData(visualisation, datasets) {
   const columnIndexY = spec.datasetColumnY;
   const nameDataX = spec.datasetNameColumnX != null ?
     dataset.get('rows').map(row => row.get(spec.datasetNameColumnX)).toArray() : null;
+  const aggregationValuesX = spec.datasetGroupColumnX != null ?
+    dataset.get('rows').map(row => row.get(spec.datasetGroupColumnX)).toArray() : null;
   const dataX = dataset.get('rows').map(row => row.get(columnIndexX)).toArray();
   const dataY = columnIndexY != null ?
     dataset.get('rows').map(row => row.get(columnIndexY)).toArray() : null;
@@ -47,17 +49,22 @@ export function getChartData(visualisation, datasets) {
       dataValues = dataX.map((entry, index) => {
         const key = index;
         let label;
+        let aggregationValue;
 
         if (nameDataX) {
           if (vType === 'bar' || vType === 'pie' || vType === 'donut') {
             label = nameDataX[key];
           }
         }
+        if (aggregationValuesX) {
+          aggregationValue = aggregationValuesX[key] ? aggregationValuesX[key].toString() : null;
+        }
 
         return ({
           x: key,
           y: parseFloat(entry),
           label,
+          aggregationValue,
         });
       });
 
@@ -66,26 +73,19 @@ export function getChartData(visualisation, datasets) {
         values: dataValues,
       };
 
-      if (vType === 'pie' || vType === 'donut') {
-        output.transform = [
-          {
-            type: 'pie',
-            field: 'y',
-          },
-        ];
-      }
-
       break;
 
     case 'scatter':
 
       dataValues = dataX.map((entry, index) => {
         const label = nameDataX ? nameDataX[index] : null;
+        const aggregationValue = aggregationValuesX ? aggregationValuesX[index] : null;
 
         return ({
           x: parseFloat(entry),
           y: parseFloat(dataY[index]),
           label,
+          aggregationValue,
         });
       });
 
@@ -99,7 +99,6 @@ export function getChartData(visualisation, datasets) {
     default:
       throw new Error('chart type not yet implemented');
   }
-
   return output;
 }
 
