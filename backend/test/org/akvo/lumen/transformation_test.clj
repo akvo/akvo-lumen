@@ -23,6 +23,7 @@
 
 (hugsql/def-db-fns "org/akvo/lumen/job-execution.sql")
 (hugsql/def-db-fns "org/akvo/lumen/transformation_test.sql")
+(hugsql/def-db-fns "org/akvo/lumen/transformation.sql")
 
 (def ^:dynamic *transformation-engine*)
 
@@ -119,3 +120,51 @@
                                                                 :column-name "c4"
                                                                 :table-name table-name}))))
           (is (= 1 (:total (get-row-count test-conn {:table-name table-name})))))))))
+
+
+(defn import-file
+  "Import a file and return the dataset-id"
+  [file {:keys [dataset-name has-column-headers?]}]
+  (let [data-source-id (str (squuid))
+        job-id (str (squuid))
+        data-source-spec {"name" (or dataset-name file)
+                          "source" {"path" (.getAbsolutePath (io/file (io/resource file)))
+                                    "kind" "DATA_FILE"
+                                    "fileName" (or dataset-name file)
+                                    "hascolumnheaders" (boolean has-column-headers?)}}]
+    (insert-data-source test-conn {:id data-source-id :spec data-source-spec})
+    (insert-job-execution test-conn {:id job-id :data-source-id data-source-id})
+    (imp/do-import test-conn {:file-upload-path "/tmp/akvo/dash"} job-id)
+    (:dataset_id (dataset-id-by-job-execution-id test-conn {:id job-id}))))
+
+(deftest ^:functional test-undo
+  (let [dataset-id (import-file "GDP.csv" {:dataset-name "GDP Undo Test"})
+        schedule (partial tf/schedule test-conn *transformation-engine* dataset-id)]
+    (is (= 200 (:status (schedule {:type :undo}))))
+    (let [{:keys [status body]} (do (schedule {:type :transformation
+                                               :transformation {"op" "core/to-lowercase"
+                                                                "args" {"columnName" "c1"}
+                                                                "onError" "fail"}})
+                                    (schedule {:type :transformation
+                                               :transformation {"op" "core/change-datatype"
+                                                                "args" {"columnName" "c5"
+                                                                        "newType" "number"
+                                                                        "defaultValue" 0}
+                                                                "onError" "default-value"}})
+                                    (schedule {:type :undo}))]
+      (is (= 200 status))
+      (is (= (:columns (dataset-version-by-dataset-id test-conn {:dataset-id dataset-id :version 2}))
+             (:columns (latest-dataset-version-by-dataset-id test-conn {:dataset-id dataset-id}))))
+      (let [table-name (:table-name (latest-dataset-version-by-dataset-id test-conn {:dataset-id dataset-id}))]
+        (is (= "usa"
+               (:c1 (get-val-from-table test-conn
+                                        {:rnum 1
+                                         :column-name "c1"
+                                         :table-name table-name})))))
+      (schedule {:type :undo})
+      (let [table-name (:table-name (latest-dataset-version-by-dataset-id test-conn {:dataset-id dataset-id}))]
+        (is (= "USA"
+               (:c1 (get-val-from-table test-conn
+                                        {:rnum 1
+                                         :column-name "c1"
+                                         :table-name table-name}))))))))
