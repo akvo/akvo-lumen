@@ -11,25 +11,26 @@
   (start [this]
     (reset! running? true)
     (let [engine (future
-                   (loop [;; TODO naming?
-                          transformation (.take queue)]
-                     (when-not (identical? transformation sentinel)
-                       (let [{:keys [completion-promise tenant-conn job-id dataset-id command]} transformation]
-                         (condp = (:type command)
-                           :transformation
-                           (engine/execute-transformation completion-promise
-                                                          tenant-conn
-                                                          job-id
-                                                          dataset-id
-                                                          (:transformation command))
+                   (loop [transformation (.take queue)]
+                     (try
+                       (when-not (identical? transformation sentinel)
+                         (let [{:keys [completion-promise tenant-conn job-id dataset-id command]} transformation]
+                           (condp = (:type command)
+                             :transformation
+                             (engine/execute-transformation completion-promise
+                                                            tenant-conn
+                                                            job-id
+                                                            dataset-id
+                                                            (:transformation command))
 
-                           :undo
-                           (engine/execute-undo completion-promise
-                                                tenant-conn
-                                                job-id
-                                                dataset-id)))
-
-                       (recur (.take queue)))))]
+                             :undo
+                             (engine/execute-undo completion-promise
+                                                  tenant-conn
+                                                  job-id
+                                                  dataset-id))))
+                       (catch Exception e
+                         (.printStackTrace e)))
+                     (recur (.take queue))))]
       (assoc this :transformation-engine engine)))
 
   (stop [this]

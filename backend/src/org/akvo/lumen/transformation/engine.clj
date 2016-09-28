@@ -244,10 +244,7 @@
 
 (defn- nothing-to-undo [completion-promise tenant-conn dataset-id dataset-version-id job-id]
   (update-job-success-execution tenant-conn {:id job-id :exec-log []})
-  (deliver completion-promise {:status "OK"
-                               :job-execution-id job-id
-                               :dataset-version-id dataset-version-id
-                               :dataset-id dataset-id}))
+  (deliver-promise-success completion-promise dataset-id dataset-version-id job-id))
 
 (defn- apply-undo [completion-promise tenant-conn job-id dataset-id current-dataset-version]
   (let [imported-table-name (:imported-table-name current-dataset-version)
