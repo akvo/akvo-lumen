@@ -115,13 +115,16 @@
         (let [job-id (str (squuid))]
           (new-transformation-job-execution tenant-conn {:id job-id
                                                          :dataset-id dataset-id})
-          (let [completion-promise (enqueue transformation-engine
-                                            {:tenant-conn tenant-conn
-                                             :job-id job-id
-                                             :dataset-id dataset-id
-                                             :command command})]
-            {:status 200
-             :body @completion-promise}))
+          (let [{:keys [status] :as resp} @(enqueue transformation-engine
+                                                    {:tenant-conn tenant-conn
+                                                     :job-id job-id
+                                                     :dataset-id dataset-id
+                                                     :command command})]
+            (if (= status "OK")
+              {:status 200
+               :body (dissoc resp :status)}
+              {:status 409
+               :body (dissoc resp :status)})))
         {:status 400
          :body {:message (:message v)}}))
     {:status 400
