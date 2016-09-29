@@ -22,7 +22,6 @@
                                                             job-id
                                                             dataset-id
                                                             (:transformation command))
-
                              :undo
                              (engine/execute-undo completion-promise
                                                   tenant-conn

@@ -102,8 +102,11 @@
 
       (let [dataset-id (:dataset_id (dataset-id-by-job-execution-id test-conn {:id job-id}))
             transformation-job (last (for [transformation t-log]
-                                       (tf/schedule test-conn *transformation-engine*  dataset-id {:type :transformation
-                                                                                                   :transformation transformation})))
+                                       (tf/schedule test-conn
+                                                    *transformation-engine*
+                                                    dataset-id
+                                                    {:type :transformation
+                                                     :transformation transformation})))
             t-job-id (get-in transformation-job [:body :jobExecutionId])]
 
         (is (= 200 (:status transformation-job)))
@@ -153,16 +156,22 @@
                                                                 "onError" "default-value"}})
                                     (schedule {:type :undo}))]
       (is (= 200 status))
-      (is (= (:columns (dataset-version-by-dataset-id test-conn {:dataset-id dataset-id :version 2}))
-             (:columns (latest-dataset-version-by-dataset-id test-conn {:dataset-id dataset-id}))))
-      (let [table-name (:table-name (latest-dataset-version-by-dataset-id test-conn {:dataset-id dataset-id}))]
+      (is (= (:columns (dataset-version-by-dataset-id test-conn
+                                                      {:dataset-id dataset-id :version 2}))
+             (:columns (latest-dataset-version-by-dataset-id test-conn
+                                                             {:dataset-id dataset-id}))))
+      (let [table-name (:table-name
+                        (latest-dataset-version-by-dataset-id test-conn
+                                                              {:dataset-id dataset-id}))]
         (is (= "usa"
                (:c1 (get-val-from-table test-conn
                                         {:rnum 1
                                          :column-name "c1"
                                          :table-name table-name})))))
       (schedule {:type :undo})
-      (let [table-name (:table-name (latest-dataset-version-by-dataset-id test-conn {:dataset-id dataset-id}))]
+      (let [table-name (:table-name
+                        (latest-dataset-version-by-dataset-id test-conn
+                                                              {:dataset-id dataset-id}))]
         (is (= "USA"
                (:c1 (get-val-from-table test-conn
                                         {:rnum 1
