@@ -4,7 +4,8 @@
   (:import [java.util.concurrent LinkedBlockingQueue]))
 
 (defprotocol TransformationQueue
-  (enqueue [this command] "Enqueue a command (transformation or undo) to the transformation engine"))
+  (enqueue [this command]
+    "Enqueue a command (transformation or undo) to the transformation engine"))
 
 (defrecord TransformationEngine [queue running? sentinel]
   component/Lifecycle
@@ -14,7 +15,11 @@
                    (loop [transformation (.take queue)]
                      (when-not (identical? transformation sentinel)
                        (try
-                         (let [{:keys [completion-promise tenant-conn job-id dataset-id command]} transformation]
+                         (let [{:keys [completion-promise
+                                       tenant-conn
+                                       job-id
+                                       dataset-id
+                                       command]} transformation]
                            (condp = (:type command)
                              :transformation
                              (engine/execute-transformation completion-promise
