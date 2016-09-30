@@ -87,7 +87,6 @@ export function getChartData(visualisation, datasets) {
         const filterValues = getFilterValues(filters, row);
 
         let label;
-        let aggregationValue;
 
         if (nameDataX) {
           if (vType === 'bar' || vType === 'pie' || vType === 'donut') {
@@ -100,9 +99,6 @@ export function getChartData(visualisation, datasets) {
               label = label.toString();
             }
           }
-        }
-        if (aggregationValuesX) {
-          aggregationValue = aggregationValuesX[key] ? aggregationValuesX[key].toString() : null;
         }
 
         let sortValue = sortDataX ? sortDataX[index] : null;
