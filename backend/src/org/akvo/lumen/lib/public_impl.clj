@@ -18,14 +18,15 @@
   (fn [_ share]
     (cond
       (not (nil? (:visualisation_id share))) :visualisation
-      (not (nil? (:dashboard_id share)))     :dashboard)))
+      (not (nil? (:dashboard_id share))) :dashboard)))
 
 (defmethod response-data :visualisation
   [tenant-conn share]
-  (let [v (visualisation/fetch tenant-conn (:visualisation_id share))
-        d (dataset/fetch tenant-conn (:datasetId v))]
+
+  (let [v (:body (visualisation/fetch tenant-conn (:visualisation_id share)))
+        d (:body (dataset/fetch tenant-conn (:datasetId v)))]
     {"visualisation" (dissoc v :id :created :modified)
-     "datasets"      {(:id d) d}}))
+     "datasets" {(:id d) d}}))
 
 (defn- visualisation-id-list
   [dashboard]
@@ -54,9 +55,9 @@
         visualisation-ids (visualisation-id-list dashboard)
         visualisations (visualisation-list tenant-conn visualisation-ids)
         datasets (dataset-list tenant-conn visualisations)]
-    {"dashboard"      dashboard
+    {"dashboard" dashboard
      "visualisations" visualisations
-     "datasets"       datasets}))
+     "datasets" datasets}))
 
 
 (defn html-response [data]
