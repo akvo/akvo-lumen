@@ -5,7 +5,7 @@ CREATE TABLE dataset_version (
     transformations jsonb NOT NULL DEFAULT '[]'::jsonb,
     version smallint NOT NULL,
     -- The name of the data table
-    table_name text UNIQUE NOT NULL,
+    table_name text UNIQUE,
     -- The name of the data table that holds imported (non-transformed) data
     imported_table_name text NOT NULL,
     columns jsonb NOT NULL DEFAULT '[]'::jsonb,

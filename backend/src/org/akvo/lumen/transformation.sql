@@ -8,15 +8,27 @@ VALUES (:id, :dataset-id, 'TRANSFORMATION')
 -- :doc Checks the existence of a dataset for a given id
 SELECT id FROM dataset WHERE id = :id
 
--- :name dataset-version-by-id :? :1
+-- :name latest-dataset-version-by-dataset-id :? :1
 -- :doc Returns the most recent dataset version for a given dataset id
-SELECT imported_table_name AS "imported-table-name", columns, version
+SELECT id, table_name AS "table-name", imported_table_name AS "imported-table-name", columns, version, transformations
   FROM dataset_version
- WHERE dataset_id = :id
+ WHERE dataset_id = :dataset-id
    AND version = (SELECT MAX(v.version)
                     FROM dataset_version v
-                   WHERE v.dataset_id = :id);
+                   WHERE v.dataset_id = :dataset-id);
 
+-- :name dataset-version-by-dataset-id :? :1
+-- :doc Returns the most recent dataset version for a given dataset id
+SELECT id, table_name AS "table-name", imported_table_name AS "imported-table-name", columns, version, transformations
+  FROM dataset_version
+ WHERE dataset_id = :dataset-id
+   AND version = :version;
+
+-- :name clear-dataset-version-data-table :! :n
+-- :doc Clear the table_name for a given dataset_version id
+UPDATE dataset_version
+   SET table_name=NULL
+ WHERE id = :id
 
 -- :name update-job-success-execution :! :n
 -- :doc Updates a job_execution with a given log
