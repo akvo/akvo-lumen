@@ -174,6 +174,7 @@ const SortInput = ({ spec, columnOptions, onChangeSpec }) => (
       onChange={(value) => onChangeSpec({
         datasetSortColumnX: value,
         datasetSortColumnXType: getColumnType(value, columnOptions),
+        reverseSortX: value === null ? false : spec.reverseSortX,
       })}
     />
     <SelectInput

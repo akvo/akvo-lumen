@@ -183,7 +183,11 @@ export default function getVegaScatterSpec(visualisation, data, containerHeight,
               }
               :
               {
-                template: '{{datum.label}}',
+                template: visualisation.spec.datasetNameColumnXType === 'date' ?
+                  '{{datum.label | time:"%Y-%b-%d %H-%M"}}'
+                  :
+                  '{{datum.label}}'
+                ,
               },
             align: {
               value: 'center',
