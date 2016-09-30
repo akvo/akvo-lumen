@@ -1,6 +1,7 @@
 (ns org.akvo.lumen.transformation
   (:require [clojure.string :as str]
             [hugsql.core :as hugsql]
+            [org.akvo.lumen.component.transformation-engine :refer (enqueue)]
             [org.akvo.lumen.transformation.engine :as engine]
             [org.akvo.lumen.util :refer (squuid gen-table-name)]))
 
@@ -17,7 +18,7 @@
 
 (defn- throw-invalid-op
   [op-spec]
-  (throw (Exception. (str "Invalid operation " op-spec))))
+  (throw (ex-info (str "Invalid transformation " op-spec) op-spec)))
 
 (defn required-keys
   [{:strs [op args onError] :as op-spec}]
@@ -92,65 +93,38 @@
       (throw-invalid-op op-spec)))
 
 (defn validate
-  [transformation-log]
+  [command]
   (try
-    {:valid? (every? validate-op transformation-log)}
+    (condp = (:type command)
+      :transformation (if (validate-op (:transformation command))
+                        {:valid? true}
+                        {:valid? false
+                         :message (str "Invalid transformation " (:transformation command))})
+      :undo {:valid? true}
+      {:valid? false
+       :message (str "Unknown command " command)})
     (catch Exception e
       {:valid? false
        :message (.getMessage e)})))
 
-(defn execute
-  [tenant-conn job-id dataset-id transformation-log]
-  (let [dv (dataset-version-by-id tenant-conn {:id dataset-id})
-        columns (vec (:columns dv))
-        source-table (:imported-table-name dv)
-        table-name (gen-table-name "ds")
-        f (fn [log op-spec]
-            (let [cols (if (empty? log)
-                         columns
-                         (:columns (last log)))
-                  step (engine/apply-operation tenant-conn
-                                               table-name
-                                               cols
-                                               op-spec)]
-              (if (:success? step)
-                (conj log step)
-                (throw (Exception. (str "Error applying operation: " op-spec))))))]
-    (try
-      (copy-table tenant-conn
-                  {:source-table source-table
-                   :dest-table table-name}
-                  {}
-                  {:transaction? false})
-      (let [result (reduce f [] transformation-log)
-            log (vec (mapcat :execution-log result))
-            cols (:columns (last result))]
-        (new-dataset-version tenant-conn {:id (str (squuid))
-                                          :dataset-id dataset-id
-                                          :job-execution-id job-id
-                                          :table-name table-name
-                                          :imported-table-name source-table
-                                          :version (inc (:version dv))
-                                          :transformations transformation-log
-                                          :columns cols})
-        (update-job-success-execution tenant-conn {:id job-id
-                                                   :exec-log log}))
-      (catch Exception e
-        (update-job-failed-execution tenant-conn {:id job-id
-                                                  :error-log [(.getMessage e)]})))))
-
 (defn schedule
-  [tenant-conn dataset-id transformation-log]
+  [tenant-conn transformation-engine dataset-id command]
   (if-let [dataset (dataset-by-id tenant-conn {:id dataset-id})]
-    (let [v (validate transformation-log)]
+    (let [v (validate command)]
       (if (:valid? v)
         (let [job-id (str (squuid))]
           (new-transformation-job-execution tenant-conn {:id job-id
                                                          :dataset-id dataset-id})
-          (future
-            (execute tenant-conn job-id dataset-id transformation-log))
-          {:status 200
-           :body {:jobExecutionId job-id}})
+          (let [{:keys [status] :as resp} @(enqueue transformation-engine
+                                                    {:tenant-conn tenant-conn
+                                                     :job-id job-id
+                                                     :dataset-id dataset-id
+                                                     :command command})]
+            (if (= status "OK")
+              {:status 200
+               :body (dissoc resp :status)}
+              {:status 409
+               :body (dissoc resp :status)})))
         {:status 400
          :body {:message (:message v)}}))
     {:status 400

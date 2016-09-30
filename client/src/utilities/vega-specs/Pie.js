@@ -53,6 +53,7 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
     };
 
     dataArray.push(transform1, transform2);
+
   } else {
     const pieData = Object.assign({}, data);
 

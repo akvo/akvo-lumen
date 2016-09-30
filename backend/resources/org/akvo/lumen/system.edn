@@ -2,7 +2,8 @@
  {:app  duct.component.handler/handler-component
   :db duct.component.hikaricp/hikaricp
   :http org.akvo.lumen.component.http/http
-  :tenant-manager org.akvo.lumen.component.tenant-manager/tenant-manager}
+  :tenant-manager org.akvo.lumen.component.tenant-manager/tenant-manager
+  :transformation-engine org.akvo.lumen.component.transformation-engine/transformation-engine}
  :endpoints
  {:dashboard org.akvo.lumen.endpoint.dashboard/endpoint
   :dataset org.akvo.lumen.endpoint.dataset/endpoint
@@ -20,6 +21,7 @@
   :app     [:dashboard :dataset :files :flow :job-execution :library :public
             :root :share :transformation :visualisation]
   :tenant-manager [:db]
+  :transformation-engine [:tenant-manager]
   :dashboard [:tenant-manager]
   :dataset [:tenant-manager :config]
   :files [:config]
@@ -29,8 +31,10 @@
   :public [:tenant-manager]
   :root [:tenant-manager]
   :share [:tenant-manager :config]
-  :transformation [:tenant-manager]
-  :visualisation [:tenant-manager]}
+  :transformation [:transformation-engine :tenant-manager]
+  :visualisation [:tenant-manager]
+
+  }
  :config
  {:app
   {:migrations {:tenant-manager "org/akvo/lumen/migrations/tenant_manager"

@@ -19,9 +19,8 @@
       "status" "OK"
       "datasetId" dataset_id})
     (if-let [{:keys [status error-message]} (job-execution-by-id conn {:id id})]
-      (-> (response/response
-           {"jobExecutionId" id
-            "status" status
-            "reason" error-message})
-          (response/status 400))
+      (response/response
+       {"jobExecutionId" id
+        "status" status
+        "reason" error-message})
       (response/not-found {:error "not-found"}))))
