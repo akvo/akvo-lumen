@@ -5,7 +5,7 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
 
   const hasAggregation = Boolean(visualisation.spec.datasetGroupColumnX &&
     visualisation.spec.aggregationTypeY);
-  let dataArray;
+  const dataArray = data.map(item => item);
   const transformType = hasAggregation ? visualisation.spec.aggregationTypeY : null;
 
   if (hasAggregation) {
@@ -52,16 +52,17 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
       ],
     };
 
-    dataArray = [data, transform1, transform2];
+    dataArray.push(transform1, transform2);
   } else {
     const pieData = Object.assign({}, data);
 
     pieData.transform = [{
       type: 'pie',
       field: 'y',
+      sort: 'true',
     }];
 
-    dataArray = [pieData];
+    dataArray.push(pieData);
   }
 
   const dataSource = hasAggregation ? 'pie' : 'table';

@@ -1,6 +1,6 @@
 export default function getVegaBarSpec(visualisation, data, containerHeight, containerWidth) {
   const hasAggregation = Boolean(visualisation.spec.datasetGroupColumnX);
-  const dataArray = [data];
+  const dataArray = data.map(item => item);
   const transformType = hasAggregation ? visualisation.spec.aggregationTypeY : null;
 
   if (hasAggregation) {
@@ -15,6 +15,9 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
             y: [
               transformType,
             ],
+            sortValue: [
+              transformType,
+            ],
           },
         },
       ],
@@ -23,8 +26,21 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
   }
 
   const dataSource = hasAggregation ? 'summary' : 'table';
+  const hasSort = visualisation.spec.datasetSortColumnX !== null;
   const fieldX = hasAggregation ? 'aggregationValue' : 'x';
   const fieldY = hasAggregation ? `${transformType}_y` : 'y';
+
+  let sort = null;
+  let reverse = false;
+
+  if (hasAggregation && hasSort) {
+    // Vega won't use an operation on text, so just set sort to "true" for text types
+    sort = visualisation.spec.datasetSortColumnXType === 'text' ? 'true' : {
+      field: `${transformType}_sortValue`,
+      op: 'mean',
+    };
+    reverse = visualisation.spec.reverseSortX;
+  }
 
   return ({
     data: dataArray,
@@ -44,7 +60,9 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
         domain: {
           data: dataSource,
           field: fieldX,
+          sort,
         },
+        reverse,
       },
       {
         name: 'y',
@@ -56,18 +74,6 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
         },
         nice: true,
       },
-      {
-        name: 'xlabels',
-        type: 'ordinal',
-        domain: {
-          data: dataSource,
-          field: hasAggregation ? fieldX : 'label',
-        },
-        range: {
-          data: dataSource,
-          field: hasAggregation ? fieldX : 'label',
-        },
-      },
     ],
     axes: [
       {
@@ -75,23 +81,19 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
         scale: 'x',
         title: visualisation.spec.labelX,
         tickPadding: 0,
-        properties: visualisation.spec.datasetNameColumnX !== null || hasAggregation ?
-          {
-            labels: {
+        properties: {
+          labels: (visualisation.spec.datasetNameColumnX === null && !hasAggregation) ?
+            // Supply an empty object to use the default axis labels
+            {}
+            :
+            // Force the axis labels to be blank - we will provide our own
+            {
               text: {
-                scale: 'xlabels',
+                value: '',
               },
-              angle: {
-                value: 35,
-              },
-              align: {
-                value: 'left',
-              },
-            },
-          }
-          :
-          {}
-        ,
+            }
+          ,
+        },
       },
       {
         type: 'y',
@@ -101,6 +103,7 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
     ],
     marks: [
       {
+        name: 'bars',
         type: 'rect',
         from: {
           data: dataSource,
@@ -133,6 +136,50 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
           hover: {
             fill: {
               value: 'rgb(43, 182, 115)',
+            },
+          },
+        },
+      },
+      {
+        type: 'text',
+        from: {
+          data: dataSource,
+        },
+        properties: {
+          enter: {
+            x: {
+              scale: 'x',
+              field: fieldX,
+            },
+            y: {
+              scale: 'y',
+              value: 0,
+              offset: 20,
+            },
+            dy: {
+              scale: 'x',
+              band: 'true',
+              mult: '-0.5',
+            },
+            fill: {
+              value: 'black',
+            },
+            align: {
+              value: 'left',
+            },
+            baseline: {
+              value: 'middle',
+            },
+            text: (visualisation.spec.datasetNameColumnX !== null || hasAggregation) ?
+              {
+                template: hasAggregation ? '{{datum.aggregationValue}}' : '{{datum.label}}',
+              }
+              :
+              {
+                value: '',
+              },
+            angle: {
+              value: 90,
             },
           },
         },
