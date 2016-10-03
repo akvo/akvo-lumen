@@ -46,7 +46,7 @@ class Dataset extends Component {
 
   fetchDataset(datasetId) {
     api.get(`/api/datasets/${datasetId}`)
-      .then((dataset) => this.setState({ dataset: Immutable.fromJS(dataset) }));
+      .then(dataset => this.setState({ dataset: Immutable.fromJS(dataset) }));
   }
 
   transform(transformation) {

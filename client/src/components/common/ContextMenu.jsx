@@ -30,7 +30,7 @@ const getArrowStyle = (className, offset = '0px') => {
 export default function ContextMenu(props) {
   const arrowClass = props.arrowClass ? `arrow arrow-${props.arrowClass}` : '';
   const arrowStyle = props.arrowOffset ? getArrowStyle(props.arrowClass, props.arrowOffset) : null;
-  const handleItemClick = newItem => {
+  const handleItemClick = (newItem) => {
     const oldItem = props.selected;
 
     props.onOptionSelected(newItem, oldItem);

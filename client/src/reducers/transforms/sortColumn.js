@@ -29,7 +29,7 @@ function composeComparators(comparators) {
 }
 
 
-const nextSortLevel = columns => {
+const nextSortLevel = (columns) => {
   const sortLevels = columns
     .map(column => column.get('sort'))
     .filter(n => n != null);
