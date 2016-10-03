@@ -177,3 +177,6 @@
                                         {:rnum 1
                                          :column-name "c1"
                                          :table-name table-name}))))))))
+
+(dotimes [_ 30]
+  (run-tests))
