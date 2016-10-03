@@ -7,7 +7,7 @@ require('../../styles/MapVisualisation.scss');
 
 
 export default function MapVisualisation({ visualisation, datasets, width, height }) {
-  const chartData = chart.getChartData(visualisation, datasets);
+  const chartData = chart.getChartData(visualisation, datasets)[0];
   return (
     <div className="MapVisualisation dashChart">
       <Map

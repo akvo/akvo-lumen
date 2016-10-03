@@ -1,7 +1,8 @@
 export default function getVegaAreaSpec(visualisation, data, containerHeight, containerWidth) {
   const { visualisationType } = visualisation;
-  const hasAggregation = Boolean(visualisation.spec.datasetGroupColumnX);
-  const dataArray = [data];
+  const hasAggregation = visualisation.spec.datasetGroupColumnX !== null;
+  const hasSort = visualisation.spec.datasetSortColumnX !== null;
+  const dataArray = data.map(item => item);
   const transformType = hasAggregation ? visualisation.spec.aggregationTypeY : null;
 
   if (hasAggregation) {
@@ -16,6 +17,9 @@ export default function getVegaAreaSpec(visualisation, data, containerHeight, co
             y: [
               transformType,
             ],
+            sortValue: [
+              transformType,
+            ],
           },
         },
       ],
@@ -24,17 +28,18 @@ export default function getVegaAreaSpec(visualisation, data, containerHeight, co
   }
 
   const dataSource = hasAggregation ? 'summary' : 'table';
-  const fieldX = hasAggregation ? 'aggregationValue' : 'x';
+  const xAggTrue = hasSort ? `${transformType}_sortValue` : 'aggregationValue';
+  const xAggFalse = 'x';
+  const fieldX = hasAggregation ? xAggTrue : xAggFalse;
   const fieldY = hasAggregation ? `${transformType}_y` : 'y';
-
   return ({
     data: dataArray,
-    height: containerHeight - 80,
+    height: containerHeight - 120,
     width: containerWidth - 70,
     padding: {
       top: 30,
       right: 20,
-      bottom: 50,
+      bottom: 90,
       left: 50,
     },
     scales: [
@@ -42,11 +47,12 @@ export default function getVegaAreaSpec(visualisation, data, containerHeight, co
         name: 'x',
         type: 'linear',
         range: 'width',
-        zero: !hasAggregation,
+        zero: false,
         domain: {
           data: dataSource,
           field: fieldX,
         },
+        reverse: hasAggregation ? visualisation.spec.reverseSortX : false,
       },
       {
         name: 'y',
@@ -64,6 +70,19 @@ export default function getVegaAreaSpec(visualisation, data, containerHeight, co
         type: 'x',
         scale: 'x',
         title: visualisation.spec.labelX,
+        properties: {
+          labels: {
+            text: {
+              template: '{{datum.data}}',
+            },
+            angle: {
+              value: 25,
+            },
+            align: {
+              value: 'left',
+            },
+          },
+        },
       },
       {
         type: 'y',

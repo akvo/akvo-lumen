@@ -3,6 +3,7 @@ import Immutable from 'immutable';
 import SelectMenu from '../common/SelectMenu';
 import SelectInput from './configMenu/SelectInput';
 import LabelInput from './configMenu/LabelInput';
+import FilterMenu from './configMenu/FilterMenu';
 import * as entity from '../../domain/entity';
 
 
@@ -26,8 +27,20 @@ const getDatasetOptions = datasetArray =>
 const getSelectMenuOptionsFromColumnList = (columns = Immutable.List()) =>
   columns.map((column, index) => ({
     value: index.toString(),
+    title: `${column.get('title')}`,
     label: `${column.get('title')} [${column.get('type')}]`,
+    type: `${column.get('type')}`,
   })).toArray();
+
+const getColumnType = (index, options) => {
+  let columnType = null;
+
+  if (index !== null) {
+    columnType = options.find(option => option.value === index).type;
+  }
+
+  return columnType;
+};
 
 const Subtitle = ({ children }) => (
   <h3 className="subtitle">{children}</h3>
@@ -97,6 +110,7 @@ const ColumnGroupingInput = ({ spec, columnOptions, onChangeSpec }) => (
       clearable
       onChange={(value) => onChangeSpec({
         datasetGroupColumnX: value,
+        datasetGroupColumnXType: getColumnType(value, columnOptions),
       })}
     />
     <div
@@ -115,6 +129,7 @@ const ColumnGroupingInput = ({ spec, columnOptions, onChangeSpec }) => (
       clearable
       onChange={(value) => onChangeSpec({
         datasetNameColumnX: value,
+        datasetNameColumnXType: getColumnType(value, columnOptions),
       })}
     />
   </div>
@@ -147,6 +162,49 @@ AggregationInput.propTypes = {
   onChangeSpec: PropTypes.func.isRequired,
 };
 
+const SortInput = ({ spec, columnOptions, onChangeSpec }) => (
+  <div>
+    <SelectInput
+      placeholder="Choose a column to sort by..."
+      labelText="Sort column"
+      choice={spec.datasetSortColumnX !== null ? spec.datasetSortColumnX.toString() : null}
+      name="xSortColumnInput"
+      options={columnOptions}
+      clearable
+      onChange={(value) => onChangeSpec({
+        datasetSortColumnX: value,
+        datasetSortColumnXType: getColumnType(value, columnOptions),
+        reverseSortX: value === null ? false : spec.reverseSortX,
+      })}
+    />
+    <SelectInput
+      placeholder="Sort direction..."
+      labelText="Sort direction"
+      choice={spec.reverseSortX ? 'dsc' : 'asc'}
+      disabled={!spec.datasetSortColumnX}
+      name="xSortColumnInput"
+      options={[
+        {
+          value: 'asc',
+          label: 'Ascending',
+        },
+        {
+          value: 'dsc',
+          label: 'Descending',
+        },
+      ]}
+      onChange={(value) => onChangeSpec({
+        reverseSortX: value === 'dsc',
+      })}
+    />
+  </div>
+);
+
+SortInput.propTypes = {
+  spec: PropTypes.object.isRequired,
+  columnOptions: PropTypes.array.isRequired,
+  onChangeSpec: PropTypes.func.isRequired,
+};
 
 export default function ConfigMenu(props) {
   const datasetArray = getDatasetArray(props.datasets);
@@ -175,6 +233,7 @@ export default function ConfigMenu(props) {
               options={columnOptions}
               onChange={(value) => onChangeSpec({
                 datasetColumnX: value,
+                datasetColumnXType: getColumnType(value, columnOptions),
               })}
             />
             <AggregationInput
@@ -191,6 +250,11 @@ export default function ConfigMenu(props) {
             />
             <Subtitle>X-Axis</Subtitle>
             <ColumnGroupingInput
+              spec={spec}
+              columnOptions={columnOptions}
+              onChangeSpec={onChangeSpec}
+            />
+            <SortInput
               spec={spec}
               columnOptions={columnOptions}
               onChangeSpec={onChangeSpec}
@@ -220,6 +284,7 @@ export default function ConfigMenu(props) {
               options={columnOptions}
               onChange={(value) => onChangeSpec({
                 datasetColumnX: value,
+                datasetColumnXType: getColumnType(value, columnOptions),
               })}
             />
             <AggregationInput
@@ -245,7 +310,13 @@ export default function ConfigMenu(props) {
               clearable
               onChange={(value) => onChangeSpec({
                 datasetGroupColumnX: value,
+                datasetGroupColumnXType: getColumnType(value, columnOptions),
               })}
+            />
+            <SortInput
+              spec={spec}
+              columnOptions={columnOptions}
+              onChangeSpec={onChangeSpec}
             />
             <LabelInput
               value={spec.labelX !== null ? spec.labelX.toString() : null}
@@ -266,11 +337,12 @@ export default function ConfigMenu(props) {
             <SelectInput
               placeholder={datasetColumnPlaceholder}
               labelText={datasetColumnLabelText}
-              choice={spec.datasetColumnX !== null ? spec.datasetColumnX.toString() : null}
-              name="xColumnInput"
+              choice={spec.datasetColumnY !== null ? spec.datasetColumnY.toString() : null}
+              name="yColumnInput"
               options={columnOptions}
               onChange={(value) => onChangeSpec({
-                datasetColumnX: value,
+                datasetColumnY: value,
+                datasetColumnYType: getColumnType(value, columnOptions),
               })}
             />
             <AggregationInput
@@ -289,11 +361,12 @@ export default function ConfigMenu(props) {
             <SelectInput
               placeholder={datasetColumnPlaceholder}
               labelText={datasetColumnLabelText}
-              choice={spec.datasetColumnY !== null ? spec.datasetColumnY.toString() : null}
-              name="yColumnInput"
+              choice={spec.datasetColumnX !== null ? spec.datasetColumnX.toString() : null}
+              name="xColumnInput"
               options={columnOptions}
               onChange={(value) => onChangeSpec({
-                datasetColumnY: value,
+                datasetColumnX: value,
+                datasetColumnXType: getColumnType(value, columnOptions),
               })}
             />
             <ColumnGroupingInput
@@ -325,6 +398,7 @@ export default function ConfigMenu(props) {
               options={columnOptions}
               onChange={(value) => onChangeSpec({
                 datasetColumnY: value,
+                datasetColumnYType: getColumnType(value, columnOptions),
               })}
             />
             <Subtitle>Longitude</Subtitle>
@@ -336,6 +410,7 @@ export default function ConfigMenu(props) {
               options={columnOptions}
               onChange={(value) => onChangeSpec({
                 datasetColumnX: value,
+                datasetColumnXType: getColumnType(value, columnOptions),
               })}
             />
             <Subtitle>Popup Label</Subtitle>
@@ -348,6 +423,7 @@ export default function ConfigMenu(props) {
               clearable
               onChange={(value) => onChangeSpec({
                 datasetNameColumnX: value,
+                datasetNameColumnXType: getColumnType(value, columnOptions),
               })}
             />
           </div>
@@ -366,6 +442,7 @@ export default function ConfigMenu(props) {
               options={columnOptions}
               onChange={(value) => onChangeSpec({
                 datasetColumnX: value,
+                datasetColumnXType: getColumnType(value, columnOptions),
               })}
             />
             <AggregationInput
@@ -373,6 +450,11 @@ export default function ConfigMenu(props) {
               onChangeSpec={onChangeSpec}
             />
             <ColumnGroupingInput
+              spec={spec}
+              columnOptions={columnOptions}
+              onChangeSpec={onChangeSpec}
+            />
+            <SortInput
               spec={spec}
               columnOptions={columnOptions}
               onChangeSpec={onChangeSpec}
@@ -401,6 +483,12 @@ export default function ConfigMenu(props) {
           onChange={props.onChangeSourceDataset}
         />
       </div>
+      <FilterMenu
+        hasDataset={Boolean(visualisation.datasetId !== null)}
+        onChangeSpec={onChangeSpec}
+        spec={spec}
+        columnOptions={columnOptions}
+      />
       <div className="inputGroup">
         <label htmlFor="chartTitle">Chart title:</label>
         <input
