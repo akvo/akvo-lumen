@@ -1,7 +1,7 @@
 {:config
  {:app
   {:middleware
-   {:functions {:stacktrace ring.middleware.stacktrace/wrap-stacktrace}
+   {:functions {:stacktrace #var ring.middleware.stacktrace/wrap-stacktrace}
     :applied   ^:replace [:json-response :not-found :ring-defaults
                           :json-body :wrap-auth :wrap-jwt :wrap-label-tenant
                           :stacktrace]
