@@ -63,7 +63,7 @@ export default class AkvoFlowDataSourceSettings extends Component {
       headers: headers(),
     })
     .then(response => response.json())
-    .then(foldersAndSurveys => {
+    .then((foldersAndSurveys) => {
       /*
        * Build 2 indexes to avoid repetetive calculation in render():
        * - id -> folder or surveyId
@@ -71,7 +71,7 @@ export default class AkvoFlowDataSourceSettings extends Component {
        */
       const idIndex = {};
       const folderIdIndex = {};
-      foldersAndSurveys.forEach(folderOrSurvey => {
+      foldersAndSurveys.forEach((folderOrSurvey) => {
         idIndex[folderOrSurvey.id] = folderOrSurvey;
         let existingFoldersAndSurveys = folderIdIndex[folderOrSurvey.folderId];
         if (existingFoldersAndSurveys === undefined) {
@@ -81,7 +81,7 @@ export default class AkvoFlowDataSourceSettings extends Component {
         folderIdIndex[folderOrSurvey.folderId] = existingFoldersAndSurveys;
       });
 
-      Object.keys(folderIdIndex).forEach(folderId => {
+      Object.keys(folderIdIndex).forEach((folderId) => {
         folderIdIndex[folderId].sort(foldersAndSurveysComparator);
       });
 
@@ -138,7 +138,7 @@ export default class AkvoFlowDataSourceSettings extends Component {
 
     if (rootFolderIds.length !== 0) {
       hierarchyOptions.push(
-        [].concat([], ...rootFolderIds.map(rootFolderId => {
+        [].concat([], ...rootFolderIds.map((rootFolderId) => {
           const surveysAndFolders = folderIdIndex[rootFolderId];
           return surveysAndFolders.map(({ id, title }) => ({
             value: id,
@@ -147,7 +147,7 @@ export default class AkvoFlowDataSourceSettings extends Component {
         }))
       );
 
-      hierarchyOptions = hierarchyOptions.concat(selectedFolders.map(folderId => {
+      hierarchyOptions = hierarchyOptions.concat(selectedFolders.map((folderId) => {
         const foldersAndSurveys = folderIdIndex[folderId];
         return foldersAndSurveys.map(({ id, title }) => ({
           value: id,

@@ -73,7 +73,7 @@ export default function SourceSelection({ dataSourceKind, onChangeDataSource }) 
         disabled={source.disabled}
         value={source.kind}
         checked={source.kind === dataSourceKind}
-        onChange={evt => {
+        onChange={(evt) => {
           onChangeDataSource(defaultDataSources[evt.target.value]);
         }}
       />

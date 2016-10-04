@@ -2,7 +2,7 @@ import * as constants from '../constants/collection';
 
 export default function createCollection(name) {
   const now = Date.now();
-  const id = Math.random() * 1e9 | 0;
+  const id = Math.round(Math.random() * 1e9);
 
   return {
     type: constants.CREATE,

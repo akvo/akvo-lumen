@@ -98,7 +98,7 @@ export default class Filter extends Component {
               value={expressionValue}
               type="text"
               className="filterTextInput"
-              onChange={(event) => this.handleChangeExpressionValue(event.target.value)}
+              onChange={event => this.handleChangeExpressionValue(event.target.value)}
             />
           </div>
         </div>

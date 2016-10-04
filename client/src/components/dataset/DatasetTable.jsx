@@ -124,7 +124,7 @@ export default class DatasetTable extends Component {
         dataTypeOptions,
         newColumnType,
         onClose: this.hideSidebar,
-        onApply: transformation => {
+        onApply: (transformation) => {
           this.hideSidebar();
           this.props.onTransform(transformation);
         },
@@ -140,7 +140,7 @@ export default class DatasetTable extends Component {
           type: 'filter',
           column,
           onClose: () => this.hideSidebar(),
-          onApply: transformation => {
+          onApply: (transformation) => {
             this.hideSidebar();
             this.props.onTransform(transformation);
           },
@@ -208,7 +208,7 @@ export default class DatasetTable extends Component {
           onToggleColumnContextMenu={this.handleToggleColumnContextMenu}
           columnMenuActive={activeColumnContextMenu != null &&
             activeColumnContextMenu.column.get('title') === column.get('title')}
-          onRemoveSort={(transformation) => this.props.onTransform(transformation)}
+          onRemoveSort={transformation => this.props.onTransform(transformation)}
         />
       );
       return (
@@ -246,7 +246,7 @@ export default class DatasetTable extends Component {
             />}
           <div
             className="wrapper"
-            ref={ref => { this.wrappingDiv = ref; }}
+            ref={(ref) => { this.wrappingDiv = ref; }}
             style={{
               width: sidebarProps ? 'calc(100% - 300px)' : '100%',
             }}

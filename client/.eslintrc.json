@@ -14,7 +14,12 @@
     }
   },
   "rules": {
-    "new-cap": [2, {"capIsNewExceptions": ["Immutable.Map", "Immutable.Set", "Immutable.List"]}]
+    "new-cap": [2, {"capIsNewExceptions": ["Immutable.Map", "Immutable.Set", "Immutable.List"]}],
+    "react/forbid-prop-types": 0,
+    "react/no-unused-prop-types": 0,
+    "jsx-a11y/no-static-element-interactions": 0,
+    "class-methods-use-this": 0,
+    "no-plusplus": 0
   },
   "globals": {
     "window": true,

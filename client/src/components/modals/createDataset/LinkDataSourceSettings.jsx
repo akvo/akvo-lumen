@@ -52,7 +52,7 @@ export default class LinkDataSourceSettings extends Component {
             id="dataHasColumnHeadersCheckbox"
             type="checkbox"
             defaultChecked={this.props.dataSource.hasColumnHeaders}
-            ref={ref => { this.datasetHeaderStatusToggle = ref; }}
+            ref={(ref) => { this.datasetHeaderStatusToggle = ref; }}
             onClick={() => {
               this.props.onChange({
                 hasColumnHeaders: this.datasetHeaderStatusToggle.checked,

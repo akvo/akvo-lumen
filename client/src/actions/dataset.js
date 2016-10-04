@@ -232,7 +232,7 @@ function deleteDatasetSuccess(id) {
   return (dispatch, getState) => {
     dispatch(removeDataset(id));
     const visualisations = getState().library.visualisations;
-    Object.keys(visualisations).forEach(visualisationId => {
+    Object.keys(visualisations).forEach((visualisationId) => {
       if (visualisations[visualisationId].datasetId === id) {
         dispatch(visualisationActions.deleteVisualisationSuccess(visualisationId));
       }

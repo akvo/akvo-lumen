@@ -18,7 +18,7 @@ const dataset = Immutable.fromJS({
   ],
 });
 
-const action = (op) => Immutable.fromJS({
+const action = op => Immutable.fromJS({
   op,
   args: {
     columnName: 'c1',

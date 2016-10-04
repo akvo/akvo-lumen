@@ -25,8 +25,8 @@ function VisualisationsList({ datasetId, visualisations }) {
       <div>
         <span>
           The following
-            {dependentVisualisations.length === 1 ?
-              ' visualisation ' : ` ${dependentVisualisations.length} visualisations `}
+          {dependentVisualisations.length === 1 ?
+            ' visualisation ' : ` ${dependentVisualisations.length} visualisations `}
           will also be deleted:
         </span>
         <ul>
