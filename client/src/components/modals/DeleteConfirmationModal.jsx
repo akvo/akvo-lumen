@@ -18,7 +18,7 @@ function VisualisationsList({ datasetId, visualisations }) {
   const dependentVisualisations = Object.keys(visualisations)
     .map(id => visualisations[id])
     .filter(vis => vis.datasetId === datasetId)
-    .map(vis => <li>{vis.name}</li>);
+    .map((vis, idx) => <li key={idx}>{vis.name}</li>);
 
   if (dependentVisualisations.length > 0) {
     return (

@@ -21,5 +21,4 @@ export default function DataTableSidebar(props) {
 DataTableSidebar.propTypes = {
   type: PropTypes.oneOf(['edit', 'filter', 'transformationLog']).isRequired,
   onClose: PropTypes.func.isRequired,
-  onApply: PropTypes.func.isRequired,
 };
