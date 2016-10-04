@@ -14,7 +14,7 @@ const datasets = data.datasets;
 const immutableDatasets = {};
 
 // Transform datasets into immutable objects
-Object.keys(datasets).forEach(key => {
+Object.keys(datasets).forEach((key) => {
   const dataset = Immutable.fromJS(datasets[key]);
   immutableDatasets[key] = dataset;
 });

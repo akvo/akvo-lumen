@@ -171,7 +171,7 @@ export default class ChangeDataType extends Component {
               name="dataTypeMenu"
               value={newType}
               options={dataTypeOptions}
-              onChange={type => {
+              onChange={(type) => {
                 if (type === 'date') {
                   this.mergeArgs({ newType: 'date', parseFormat: 'YYYY-MM-DD' });
                 }

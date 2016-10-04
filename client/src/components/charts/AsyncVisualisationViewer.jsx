@@ -15,10 +15,10 @@ export default class AsyncVisualisationViewer extends Component {
   }
 
   componentWillMount() {
-    const props = this.props;
+    const { visualisation } = this.props;
     let output;
 
-    if (props.visualisation.visualisationType === 'map') {
+    if (visualisation.visualisationType === 'map') {
       require.ensure(['react-leaflet'], () => {
         // eslint-disable-next-line global-require
         const MapVisualisation = require('./MapVisualisation').default;
@@ -37,7 +37,7 @@ export default class AsyncVisualisationViewer extends Component {
         const Chart = require('./Chart').default;
         /* eslint-enable global-require */
 
-        switch (props.visualisation.visualisationType) {
+        switch (visualisation.visualisationType) {
           case 'bar':
           case 'line':
           case 'area':
@@ -48,7 +48,7 @@ export default class AsyncVisualisationViewer extends Component {
             break;
 
           default:
-            throw new Error(`Unknown chart type ${props.visualisation.visualisationType}
+            throw new Error(`Unknown chart type ${visualisation.visualisationType}
               supplied to AsyncVisualisationViewer`);
         }
         this.setState({
@@ -71,5 +71,4 @@ export default class AsyncVisualisationViewer extends Component {
 
 AsyncVisualisationViewer.propTypes = {
   visualisation: PropTypes.object.isRequired,
-  datasets: PropTypes.object.isRequired,
 };

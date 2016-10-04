@@ -6,7 +6,7 @@ export default function CollectionsList({
   onShowCreateCollectionModal,
   pathname,
   isSelected }) {
-  const listItems = collections.map((collection) => (
+  const listItems = collections.map(collection => (
     <li key={collection.id}>
       <CollectionListItem
         collection={collection}

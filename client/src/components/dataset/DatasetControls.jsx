@@ -56,7 +56,7 @@ export default class DatasetControls extends Component {
                     value: 'merge-datasets',
                   },
                 ]}
-                onOptionSelected={(item) => this.props.onClickMenuItem('datasetEditorItem', item)}
+                onOptionSelected={item => this.props.onClickMenuItem('datasetEditorItem', item)}
                 style={{
                   left: 0,
                   width: '16rem',

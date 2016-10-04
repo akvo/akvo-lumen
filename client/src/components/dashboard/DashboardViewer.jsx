@@ -105,7 +105,7 @@ export default class DashboardViewer extends Component {
     return (
       <div
         className="DashboardViewer"
-        ref={ref => { this.DashboardViewer = ref; }}
+        ref={(ref) => { this.DashboardViewer = ref; }}
         style={{
           width: '100%',
         }}

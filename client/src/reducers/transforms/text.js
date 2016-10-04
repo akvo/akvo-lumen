@@ -4,7 +4,7 @@ import { columnIndex } from '../../domain/dataset';
 function toTitleCase(s) {
   return s.replace(
     /\w\S*/g,
-    (str) => str.charAt(0).toUpperCase() + str.substr(1).toLowerCase()
+    str => str.charAt(0).toUpperCase() + str.substr(1).toLowerCase()
   );
 }
 
@@ -48,7 +48,7 @@ export default function textTransform(dataset, transformation) {
 
   const transform = transforms[op];
 
-  const newRows = rows.map(row => {
+  const newRows = rows.map((row) => {
     const val = row.get(colIndex);
     return row.set(colIndex, val == null ? null : transform(val));
   });

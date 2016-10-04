@@ -56,7 +56,7 @@ export default class Settings extends Component {
               defaultValue={dataset.name}
               className="datasetNameInput"
               onChange={this.handleUpdate}
-              ref={ref => { this.datasetNameInput = ref; }}
+              ref={(ref) => { this.datasetNameInput = ref; }}
               type="text"
             />
           </dd>

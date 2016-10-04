@@ -67,7 +67,7 @@ export default class Chart extends Component {
         }}
       >
         <div
-          ref={el => { this.element = el; }}
+          ref={(el) => { this.element = el; }}
         />
       </div>
     );

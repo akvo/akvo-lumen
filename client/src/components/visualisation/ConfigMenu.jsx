@@ -108,7 +108,7 @@ const ColumnGroupingInput = ({ spec, columnOptions, onChangeSpec }) => (
       name="xGroupColumnMenu"
       options={columnOptions}
       clearable
-      onChange={(value) => onChangeSpec({
+      onChange={value => onChangeSpec({
         datasetGroupColumnX: value,
         datasetGroupColumnXType: getColumnType(value, columnOptions),
       })}
@@ -127,7 +127,7 @@ const ColumnGroupingInput = ({ spec, columnOptions, onChangeSpec }) => (
       options={columnOptions}
       disabled={spec.datasetGroupColumnX !== null}
       clearable
-      onChange={(value) => onChangeSpec({
+      onChange={value => onChangeSpec({
         datasetNameColumnX: value,
         datasetNameColumnXType: getColumnType(value, columnOptions),
       })}
@@ -151,7 +151,7 @@ const AggregationInput = ({ spec, onChangeSpec }) => (
     name="yAggregationMenu"
     options={aggregationOptions}
     disabled={spec.datasetGroupColumnX === null}
-    onChange={(value) => onChangeSpec({
+    onChange={value => onChangeSpec({
       aggregationTypeY: value,
     })}
   />
@@ -171,7 +171,7 @@ const SortInput = ({ spec, columnOptions, onChangeSpec }) => (
       name="xSortColumnInput"
       options={columnOptions}
       clearable
-      onChange={(value) => onChangeSpec({
+      onChange={value => onChangeSpec({
         datasetSortColumnX: value,
         datasetSortColumnXType: getColumnType(value, columnOptions),
         reverseSortX: value === null ? false : spec.reverseSortX,
@@ -193,7 +193,7 @@ const SortInput = ({ spec, columnOptions, onChangeSpec }) => (
           label: 'Descending',
         },
       ]}
-      onChange={(value) => onChangeSpec({
+      onChange={value => onChangeSpec({
         reverseSortX: value === 'dsc',
       })}
     />
@@ -217,7 +217,7 @@ export default function ConfigMenu(props) {
     props.datasets[visualisation.datasetId].get('columns') : Immutable.List();
   const columnOptions = getSelectMenuOptionsFromColumnList(columns);
 
-  const getComponents = visualisationType => {
+  const getComponents = (visualisationType) => {
     let output;
     switch (visualisationType) {
 
@@ -231,7 +231,7 @@ export default function ConfigMenu(props) {
               choice={spec.datasetColumnX !== null ? spec.datasetColumnX.toString() : null}
               name="xColumnInput"
               options={columnOptions}
-              onChange={(value) => onChangeSpec({
+              onChange={value => onChangeSpec({
                 datasetColumnX: value,
                 datasetColumnXType: getColumnType(value, columnOptions),
               })}
@@ -244,7 +244,7 @@ export default function ConfigMenu(props) {
               value={spec.labelY !== null ? spec.labelY.toString() : null}
               placeholder="Y Axis label"
               name="yLabel"
-              onChange={(event) => onChangeSpec({
+              onChange={event => onChangeSpec({
                 labelY: event.target.value.toString(),
               })}
             />
@@ -263,7 +263,7 @@ export default function ConfigMenu(props) {
               value={spec.labelX !== null ? spec.labelX.toString() : null}
               placeholder="X Axis label"
               name="xLabel"
-              onChange={(event) => onChangeSpec({
+              onChange={event => onChangeSpec({
                 labelX: event.target.value.toString(),
               })}
             />
@@ -282,7 +282,7 @@ export default function ConfigMenu(props) {
               choice={spec.datasetColumnX !== null ? spec.datasetColumnX.toString() : null}
               name="xColumnInput"
               options={columnOptions}
-              onChange={(value) => onChangeSpec({
+              onChange={value => onChangeSpec({
                 datasetColumnX: value,
                 datasetColumnXType: getColumnType(value, columnOptions),
               })}
@@ -295,7 +295,7 @@ export default function ConfigMenu(props) {
               value={spec.labelY !== null ? spec.labelY.toString() : null}
               placeholder="Y Axis label"
               name="yLabel"
-              onChange={(event) => onChangeSpec({
+              onChange={event => onChangeSpec({
                 labelY: event.target.value.toString(),
               })}
             />
@@ -308,7 +308,7 @@ export default function ConfigMenu(props) {
               name="xGroupColumnMenu"
               options={columnOptions}
               clearable
-              onChange={(value) => onChangeSpec({
+              onChange={value => onChangeSpec({
                 datasetGroupColumnX: value,
                 datasetGroupColumnXType: getColumnType(value, columnOptions),
               })}
@@ -322,7 +322,7 @@ export default function ConfigMenu(props) {
               value={spec.labelX !== null ? spec.labelX.toString() : null}
               placeholder="X Axis label"
               name="xLabel"
-              onChange={(event) => onChangeSpec({
+              onChange={event => onChangeSpec({
                 labelX: event.target.value.toString(),
               })}
             />
@@ -340,7 +340,7 @@ export default function ConfigMenu(props) {
               choice={spec.datasetColumnY !== null ? spec.datasetColumnY.toString() : null}
               name="yColumnInput"
               options={columnOptions}
-              onChange={(value) => onChangeSpec({
+              onChange={value => onChangeSpec({
                 datasetColumnY: value,
                 datasetColumnYType: getColumnType(value, columnOptions),
               })}
@@ -353,7 +353,7 @@ export default function ConfigMenu(props) {
               value={spec.labelY !== null ? spec.labelY.toString() : null}
               placeholder="Y Axis label"
               name="yLabel"
-              onChange={(event) => onChangeSpec({
+              onChange={event => onChangeSpec({
                 labelY: event.target.value.toString(),
               })}
             />
@@ -364,7 +364,7 @@ export default function ConfigMenu(props) {
               choice={spec.datasetColumnX !== null ? spec.datasetColumnX.toString() : null}
               name="xColumnInput"
               options={columnOptions}
-              onChange={(value) => onChangeSpec({
+              onChange={value => onChangeSpec({
                 datasetColumnX: value,
                 datasetColumnXType: getColumnType(value, columnOptions),
               })}
@@ -378,7 +378,7 @@ export default function ConfigMenu(props) {
               value={spec.labelX !== null ? spec.labelX.toString() : null}
               placeholder="X Axis label"
               name="xLabel"
-              onChange={(event) => onChangeSpec({
+              onChange={event => onChangeSpec({
                 labelX: event.target.value.toString(),
               })}
             />
@@ -396,7 +396,7 @@ export default function ConfigMenu(props) {
               choice={spec.datasetColumnY !== null ? spec.datasetColumnY.toString() : null}
               name="yColumnInput"
               options={columnOptions}
-              onChange={(value) => onChangeSpec({
+              onChange={value => onChangeSpec({
                 datasetColumnY: value,
                 datasetColumnYType: getColumnType(value, columnOptions),
               })}
@@ -408,7 +408,7 @@ export default function ConfigMenu(props) {
               choice={spec.datasetColumnX !== null ? spec.datasetColumnX.toString() : null}
               name="xColumnInput"
               options={columnOptions}
-              onChange={(value) => onChangeSpec({
+              onChange={value => onChangeSpec({
                 datasetColumnX: value,
                 datasetColumnXType: getColumnType(value, columnOptions),
               })}
@@ -421,7 +421,7 @@ export default function ConfigMenu(props) {
               name="xNameColumnMenu"
               options={columnOptions}
               clearable
-              onChange={(value) => onChangeSpec({
+              onChange={value => onChangeSpec({
                 datasetNameColumnX: value,
                 datasetNameColumnXType: getColumnType(value, columnOptions),
               })}
@@ -440,7 +440,7 @@ export default function ConfigMenu(props) {
               choice={spec.datasetColumnX !== null ? spec.datasetColumnX.toString() : null}
               name="xColumnInput"
               options={columnOptions}
-              onChange={(value) => onChangeSpec({
+              onChange={value => onChangeSpec({
                 datasetColumnX: value,
                 datasetColumnXType: getColumnType(value, columnOptions),
               })}

@@ -4,7 +4,7 @@ import getVegaPieSpec from './vega-specs/Pie';
 import getVegaAreaSpec from './vega-specs/Area';
 import getVegaBarSpec from './vega-specs/Bar';
 
-const getFilterValues = (filters, row) => filters.map(filter => {
+const getFilterValues = (filters, row) => filters.map((filter) => {
   const value = row.get(filter.column);
   const columnType = filter.columnType;
   let filterValue;
