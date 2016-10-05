@@ -199,10 +199,18 @@
       {:success? false
        :message (.getMessage e)})))
 
+(defn next-combined-column-name [columns column-name]
+  (let [existing-column-names (set (map (fn [column]
+                                          (get column "columnName")) columns))]
+    (if (contains? existing-column-names column-name)
+      (recur columns (str column-name "_0"))
+      column-name)))
+
 (defmethod apply-operation :core/combine
   [tenant-conn table-name columns op-spec]
   (try
-    (let [new-column-name (apply str (get-in op-spec ["args" "columnNames"]))]
+    (let [new-column-name
+          (next-combined-column-name columns (apply str (get-in op-spec ["args" "columnNames"])))]
       (add-column tenant-conn {:table-name table-name
                                :new-column-name new-column-name})
       (combine-columns tenant-conn
