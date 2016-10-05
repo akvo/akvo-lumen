@@ -10,7 +10,6 @@ UPDATE :i:table-name
 UPDATE :i:table-name
    SET :i:column-name = upper(:i:column-name::text)::jsonb
 
-
 -- :name db-trim :! :n
 UPDATE :i:table-name
    SET :i:column-name = lumen_trim(:i:column-name)
@@ -31,8 +30,19 @@ SELECT lumen_change_data_type(:table-name, :args, :on-error)
 
 
 -- :name db-filter-column :! :n
--- doc: TODO this filter only works on text columns (see the cast ::text)
+-- :doc TODO this filter only works on text columns (see the cast ::text)
 DELETE FROM :i:table-name
  WHERE rnum NOT IN (SELECT rnum
                       FROM :i:table-name
                      WHERE :i:column-name::text :sql:filter-fn :filter-val);
+
+-- :name add-column :!
+ALTER TABLE :i:table-name ADD COLUMN :i:new-column-name jsonb;
+
+-- :name combine-columns :!
+UPDATE :i:table-name
+SET :i:new-column-name = to_jsonb( (:i:first-column ->>0) || :seperator || (:i:second-column ->>0) );
+
+-- :name combine-columns-working :!
+UPDATE :i:table-name
+SET :i:new-column-name = to_jsonb( (c1->>0) || :seperator || (c2->>0) );

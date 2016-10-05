@@ -92,6 +92,13 @@
                     (not-empty (get-in op-spec ["args" "expression"]))))
       (throw-invalid-op op-spec)))
 
+(defmethod validate-op :core/combine
+  [op-spec]
+  true
+  #_(or (boolean (and (required-keys op-spec)
+                    (not-empty (get-in op-spec ["args" "expression"]))))
+      (throw-invalid-op op-spec)))
+
 (defn validate
   [command]
   (try

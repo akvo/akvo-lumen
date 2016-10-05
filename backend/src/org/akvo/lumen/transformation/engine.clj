@@ -16,7 +16,8 @@
    "core/to-lowercase" nil
    "core/to-uppercase" nil
    "core/trim" nil
-   "core/trim-doublespace" nil})
+   "core/trim-doublespace" nil
+   "core/combine" nil})
 
 (defn- get-column-name
   "Returns the columnName from the operation specification"
@@ -197,6 +198,30 @@
     (catch Exception e
       {:success? false
        :message (.getMessage e)})))
+
+(defmethod apply-operation :core/combine
+  [tenant-conn table-name columns op-spec]
+  (try
+    (let [new-column-name (apply str (get-in op-spec ["args" "columnNames"]))]
+      (add-column tenant-conn {:table-name table-name
+                               :new-column-name new-column-name})
+      (combine-columns tenant-conn
+                       {:table-name table-name
+                        :new-column-name new-column-name
+                        :first-column (get-in op-spec ["args" "columnNames" 0])
+                        :second-column (get-in op-spec ["args" "columnNames" 1])
+                        :seperator (get-in op-spec ["args" "seperator"])})
+      {:success? true
+       :execution-log [(str "Combined columns")]
+       :columns (conj columns {"title" (get-in op-spec ["args" "newColumnTitle"])
+                               "type" "text"
+                               "sort" nil
+                               "hidden" false
+                               "direction" nil
+                               "columnName" new-column-name})})
+    (catch Exception e
+      {:success? false
+       :message (:getMessage e)})))
 
 (hugsql/def-db-fns "org/akvo/lumen/transformation.sql")
 
