@@ -2,9 +2,8 @@
  {:app
   {:middleware
    {:functions {:stacktrace #var ring.middleware.stacktrace/wrap-stacktrace}
-    :applied   ^:replace [:json-response :not-found :ring-defaults
-                          :json-body :wrap-auth :wrap-jwt :wrap-label-tenant
-                          :stacktrace]
+    :applied   ^:replace [:not-found :json-response :ring-defaults :json-body
+                          :wrap-auth :wrap-jwt :wrap-label-tenant :stacktrace]
     :arguments {:wrap-jwt {:keycloak-url "http://localhost:8080/auth"
                            :keycloak-realm "akvo"}}}}
   :db {:uri "jdbc:postgresql://localhost/lumen?user=lumen&password=password"}
