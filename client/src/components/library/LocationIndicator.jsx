@@ -1,6 +1,6 @@
 import React, { PropTypes } from 'react';
 
-const getLocation = pathname => {
+const getLocation = (pathname) => {
   let location;
 
   if (pathname === 'library') {

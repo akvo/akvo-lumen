@@ -27,12 +27,12 @@ export function fetchLibrary() {
       headers: headers(),
     })
     .then(response => response.json())
-    .then(library => {
+    .then((library) => {
       dispatch(fetchDatasetsSuccess(Immutable.fromJS(library.datasets)));
       dispatch(fetchVisualisationsSuccess(library.visualisations));
       dispatch(fetchDashboardsSuccess(library.dashboards));
     })
-    .catch(error => {
+    .catch((error) => {
       warning(false, 'Failed to fetch library: %s', error.message);
       dispatch(fetchLibraryFailure(error));
     });

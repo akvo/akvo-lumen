@@ -13,7 +13,7 @@ const getNewEntityId = (entities, itemType) => {
   const entityArray = getArrayFromObject(entities);
   let highestIdInt = 0;
 
-  entityArray.forEach(item => {
+  entityArray.forEach((item) => {
     if (item.type === itemType) {
       const idInt = parseInt(item.id.substring(itemType.length + 1), 10);
       if (idInt > highestIdInt) highestIdInt = idInt;
@@ -37,7 +37,7 @@ const getFirstBlankRowGroup = (layout, height) => {
 
   /* Build an object of all occupied rows, and record the last currently
   /* occupied row. */
-  layout.forEach(item => {
+  layout.forEach((item) => {
     for (let row = item.y; row < (item.y + item.h); row++) {
       occupiedRows[row] = true;
       if (row > lastRow) lastRow = row;
@@ -217,7 +217,7 @@ export default class DashboardEditor extends Component {
         />
         <div
           className="DashboardEditorCanvasContainer"
-          ref={ref => { this.DashboardEditorCanvasContainer = ref; }}
+          ref={(ref) => { this.DashboardEditorCanvasContainer = ref; }}
         >
           <div className="DashboardEditorCanvasControls">
             <button
