@@ -24,7 +24,7 @@
   [{:strs [op args onError] :as op-spec}]
   (or (boolean (and (ops-set op)
                     (not-empty args)
-                    (re-find #"c\d+" (args "columnName"))
+                    #_(re-find #"c\d+" (args "columnName"))
                     (on-error-set onError)))
       (throw-invalid-op op-spec)))
 
@@ -92,11 +92,13 @@
                     (not-empty (get-in op-spec ["args" "expression"]))))
       (throw-invalid-op op-spec)))
 
+
 (defmethod validate-op :core/combine
   [op-spec]
-  true
-  #_(or (boolean (and (required-keys op-spec)
-                    (not-empty (get-in op-spec ["args" "expression"]))))
+  (or (boolean (and (every? string? (get-in op-spec ["args" "columnNames"]))
+                    (string? (get-in op-spec ["args" "newColumnTitle"]))
+                    (string? (get-in op-spec ["args" "seperator"]))
+                    (= (get op-spec "onError") "fail")))
       (throw-invalid-op op-spec)))
 
 (defn validate
