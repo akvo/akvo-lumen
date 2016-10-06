@@ -44,7 +44,3 @@ UPDATE :i:table-name
 SET :i:new-column-name = to_jsonb(
     TRIM(COALESCE((:i:first-column ->>0), '') || :separator ||  COALESCE((:i:second-column ->>0), ''))
 );
-
--- :name combine-columns-working :!
-UPDATE :i:table-name
-SET :i:new-column-name = to_jsonb( (c1->>0) || :seperator || (c2->>0) );

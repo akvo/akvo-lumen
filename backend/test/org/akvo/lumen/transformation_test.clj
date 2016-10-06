@@ -185,7 +185,7 @@
                                            :transformation {"op" "core/combine"
                                                             "args" {"columnNames" ["c1" "c2"]
                                                                     "newColumnTitle" "full name"
-                                                                    "seperator" " "}
+                                                                    "separator" " "}
                                                             "onError" "fail"}})]
       (is (= 200 status))
       (let [table-name (:table-name
