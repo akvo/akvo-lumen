@@ -41,7 +41,9 @@ ALTER TABLE :i:table-name ADD COLUMN :i:new-column-name jsonb;
 
 -- :name combine-columns :!
 UPDATE :i:table-name
-SET :i:new-column-name = to_jsonb( (:i:first-column ->>0) || :seperator || (:i:second-column ->>0) );
+SET :i:new-column-name = to_jsonb(
+    TRIM(COALESCE((:i:first-column ->>0), '') || :seperator ||  COALESCE((:i:second-column ->>0), ''))
+);
 
 -- :name combine-columns-working :!
 UPDATE :i:table-name

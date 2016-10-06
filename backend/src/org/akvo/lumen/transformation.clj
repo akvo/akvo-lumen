@@ -24,7 +24,6 @@
   [{:strs [op args onError] :as op-spec}]
   (or (boolean (and (ops-set op)
                     (not-empty args)
-                    #_(re-find #"c\d+" (args "columnName"))
                     (on-error-set onError)))
       (throw-invalid-op op-spec)))
 
