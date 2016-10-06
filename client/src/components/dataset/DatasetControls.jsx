@@ -44,8 +44,8 @@ export default class DatasetControls extends Component {
                     value: 'bulk-column-editor',
                   },
                   {
-                    label: 'Merge Columns',
-                    value: 'merge-columns',
+                    label: 'Combine Columns',
+                    value: 'combine-columns',
                   },
                   {
                     label: 'Derive new column',
@@ -56,7 +56,10 @@ export default class DatasetControls extends Component {
                     value: 'merge-datasets',
                   },
                 ]}
-                onOptionSelected={item => this.props.onClickMenuItem('datasetEditorItem', item)}
+                onOptionSelected={(item) => {
+                  this.onEditorToggleClick();
+                  this.props.onClickMenuItem(item);
+                }}
                 style={{
                   left: 0,
                   width: '16rem',

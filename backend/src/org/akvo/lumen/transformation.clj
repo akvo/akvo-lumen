@@ -96,7 +96,7 @@
   [op-spec]
   (or (boolean (and (every? string? (get-in op-spec ["args" "columnNames"]))
                     (string? (get-in op-spec ["args" "newColumnTitle"]))
-                    (string? (get-in op-spec ["args" "seperator"]))
+                    (string? (get-in op-spec ["args" "separator"]))
                     (= (get op-spec "onError") "fail")))
       (throw-invalid-op op-spec)))
 

@@ -183,6 +183,6 @@ Examples:
 {"op": "core/combine",
  "args": {"columnNames": ["c1", "c2"],
           "newColumnTitle": "New title",
-          "seperator": " "},
+          "separator": " "},
  "onError": "fail"}
 ````

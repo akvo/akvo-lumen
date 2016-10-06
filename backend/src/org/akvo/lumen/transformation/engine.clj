@@ -218,7 +218,7 @@
                         :new-column-name new-column-name
                         :first-column (get-in op-spec ["args" "columnNames" 0])
                         :second-column (get-in op-spec ["args" "columnNames" 1])
-                        :seperator (get-in op-spec ["args" "seperator"])})
+                        :separator (get-in op-spec ["args" "separator"])})
       {:success? true
        :execution-log [(str "Combined columns")]
        :columns (conj columns {"title" (get-in op-spec ["args" "newColumnTitle"])
