@@ -45,7 +45,7 @@ export default class DatasetControls extends Component {
                   },
                   {
                     label: 'Combine Columns',
-                    value: 'combine-columns',
+                    value: 'combineColumns',
                   },
                   {
                     label: 'Derive new column',

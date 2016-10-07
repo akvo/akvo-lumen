@@ -26,6 +26,14 @@ function transformationDescription(transformation, columns) {
       return `${columnTitle(columnName, columns)} datatype to ${newType}`;
     case 'core/sort-column':
       return `${columnTitle(columnName, columns)} sorted ${sortDirection}`;
+    case 'core/combine':
+      const firstColumnTitle =
+        columnTitle(transformation.getIn(['args', 'columnNames', 0]), columns);
+      const secondColumnTitle =
+        columnTitle(transformation.getIn(['args', 'columnNames', 1]), columns);
+      const newColumnTitle = transformation.getIn(['args', 'newColumnTitle']);
+      return `Combined columns "${firstColumnTitle}" and "${secondColumnTitle}"
+        into "${newColumnTitle}"`
     default:
       return op;
   }

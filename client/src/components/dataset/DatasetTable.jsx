@@ -118,7 +118,7 @@ export default class DatasetTable extends Component {
 
   handleToggleCombineColumnSidebar() {
     if (this.state.sidebarProps &&
-      this.state.sidebarProps.type === 'combine-columns') {
+      this.state.sidebarProps.type === 'combineColumns') {
       this.hideSidebar();
     } else {
       this.setState({
@@ -126,7 +126,7 @@ export default class DatasetTable extends Component {
         activeColumnContextMenu: null,
       });
       this.showSidebar({
-        type: 'combine-columns',
+        type: 'combineColumns',
         displayRight: false,
         onClose: this.hideSidebar,
         onApply: (transformation) => {
@@ -256,7 +256,7 @@ export default class DatasetTable extends Component {
           rowsCount={rows.size}
           onToggleTransformationLog={this.handleToggleTransformationLog}
           onClickMenuItem={(menuItem) => {
-            if (menuItem === 'combine-columns') {
+            if (menuItem === 'combineColumns') {
               this.handleToggleCombineColumnSidebar();
             } else {
               throw new Error(`Not yet implemented: ${menuItem}`);

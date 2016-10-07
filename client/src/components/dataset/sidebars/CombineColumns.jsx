@@ -54,6 +54,12 @@ export default class CombineColumns extends Component {
     };
   }
 
+  isValidTransformation() {
+    const { transformation } = this.state;
+    return transformation.getIn(['args', 'columnNames']).every((columnName) => columnName != null)
+      && transformation.getIn(['args', 'newColumnTitle']) != '';
+  }
+
   handleSelectColumn(idx, value) {
     const { transformation } = this.state;
     this.setState({
@@ -144,7 +150,7 @@ export default class CombineColumns extends Component {
         </div>
         <SidebarControls
           positiveButtonText="Combine"
-          onApply={() => onApply(this.state.transformation)}
+          onApply={this.isValidTransformation() ? () => onApply(this.state.transformation) : null}
           onClose={onClose}
         />
       </div>

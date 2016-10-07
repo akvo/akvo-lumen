@@ -210,17 +210,20 @@
   [tenant-conn table-name columns op-spec]
   (try
     (let [new-column-name
-          (next-combined-column-name columns (apply str (get-in op-spec ["args" "columnNames"])))]
+          (next-combined-column-name columns (apply str (get-in op-spec ["args" "columnNames"])))
+          first-column-name (get-in op-spec ["args" "columnNames" 0])
+          second-column-name (get-in op-spec ["args" "columnNames" 1])]
       (add-column tenant-conn {:table-name table-name
                                :new-column-name new-column-name})
       (combine-columns tenant-conn
                        {:table-name table-name
                         :new-column-name new-column-name
-                        :first-column (get-in op-spec ["args" "columnNames" 0])
-                        :second-column (get-in op-spec ["args" "columnNames" 1])
+                        :first-column first-column-name
+                        :second-column second-column-name
                         :separator (get-in op-spec ["args" "separator"])})
       {:success? true
-       :execution-log [(str "Combined columns")]
+       :execution-log [(format "Combined columns %s, %s into %s"
+                               first-column-name second-column-name new-column-name)]
        :columns (conj columns {"title" (get-in op-spec ["args" "newColumnTitle"])
                                "type" "text"
                                "sort" nil

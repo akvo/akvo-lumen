@@ -14,7 +14,7 @@ export default function DataTableSidebar(props) {
       return <Filter {...props} />;
     case 'transformationLog':
       return <TransformationLog {...props} />;
-    case 'combine-columns':
+    case 'combineColumns':
       return <CombineColumns {...props} />;
     default:
       throw new Error(`Unknown sidebar type ${props.type}`);
@@ -22,6 +22,6 @@ export default function DataTableSidebar(props) {
 }
 
 DataTableSidebar.propTypes = {
-  type: PropTypes.oneOf(['edit', 'filter', 'transformationLog', 'combine-columns']).isRequired,
+  type: PropTypes.oneOf(['edit', 'filter', 'transformationLog', 'combineColumns']).isRequired,
   onClose: PropTypes.func.isRequired,
 };
