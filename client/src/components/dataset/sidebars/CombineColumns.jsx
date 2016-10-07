@@ -56,8 +56,8 @@ export default class CombineColumns extends Component {
 
   isValidTransformation() {
     const { transformation } = this.state;
-    return transformation.getIn(['args', 'columnNames']).every((columnName) => columnName != null)
-      && transformation.getIn(['args', 'newColumnTitle']) != '';
+    return transformation.getIn(['args', 'columnNames']).every(columnName => columnName != null)
+      && transformation.getIn(['args', 'newColumnTitle']) !== '';
   }
 
   handleSelectColumn(idx, value) {
