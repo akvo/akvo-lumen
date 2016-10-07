@@ -6,11 +6,13 @@ export default function SidebarControls({
   positiveButtonText = 'Apply',
   negativeButtonText = 'Cancel',
 }) {
+  const isDisabled = onApply == null;
   return (
     <div className="controls">
       <button
         className="apply clickable"
         onClick={onApply}
+        disabled={isDisabled}
       >
         {positiveButtonText}
       </button>

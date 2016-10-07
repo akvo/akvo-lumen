@@ -1,4 +1,3 @@
-
 CREATE OR REPLACE FUNCTION lumen_to_number(val jsonb)
   RETURNS jsonb AS
 $$

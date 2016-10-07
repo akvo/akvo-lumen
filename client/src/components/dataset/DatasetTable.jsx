@@ -42,6 +42,7 @@ export default class DatasetTable extends Component {
     this.handleColumnContextMenuClicked = this.handleColumnContextMenuClicked.bind(this);
 
     this.handleToggleTransformationLog = this.handleToggleTransformationLog.bind(this);
+    this.handleToggleCombineColumnSidebar = this.handleToggleCombineColumnSidebar.bind(this);
   }
 
   componentDidMount() {
@@ -114,6 +115,29 @@ export default class DatasetTable extends Component {
       });
     }
   }
+
+  handleToggleCombineColumnSidebar() {
+    if (this.state.sidebarProps &&
+      this.state.sidebarProps.type === 'combineColumns') {
+      this.hideSidebar();
+    } else {
+      this.setState({
+        activeDataTypeContextMenu: null,
+        activeColumnContextMenu: null,
+      });
+      this.showSidebar({
+        type: 'combineColumns',
+        displayRight: false,
+        onClose: this.hideSidebar,
+        onApply: (transformation) => {
+          this.hideSidebar();
+          this.props.onTransform(transformation);
+        },
+        columns: this.props.columns,
+      });
+    }
+  }
+
 
   handleDataTypeContextMenuClicked({ column, dataTypeOptions, newColumnType }) {
     this.setState({ activeDataTypeContextMenu: null });
@@ -231,7 +255,13 @@ export default class DatasetTable extends Component {
           columns={columns}
           rowsCount={rows.size}
           onToggleTransformationLog={this.handleToggleTransformationLog}
-          onClickMenuItem={() => { throw new Error('Not yet implemented'); }}
+          onClickMenuItem={(menuItem) => {
+            if (menuItem === 'combineColumns') {
+              this.handleToggleCombineColumnSidebar();
+            } else {
+              throw new Error(`Not yet implemented: ${menuItem}`);
+            }
+          }}
         />
         <div
           style={{

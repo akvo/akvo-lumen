@@ -16,7 +16,8 @@
    "core/to-lowercase" nil
    "core/to-uppercase" nil
    "core/trim" nil
-   "core/trim-doublespace" nil})
+   "core/trim-doublespace" nil
+   "core/combine" nil})
 
 (defn- get-column-name
   "Returns the columnName from the operation specification"
@@ -197,6 +198,41 @@
     (catch Exception e
       {:success? false
        :message (.getMessage e)})))
+
+(defn next-combined-column-name [columns column-name]
+  (let [existing-column-names (set (map (fn [column]
+                                          (get column "columnName")) columns))]
+    (if (contains? existing-column-names column-name)
+      (recur columns (str column-name "_0"))
+      column-name)))
+
+(defmethod apply-operation :core/combine
+  [tenant-conn table-name columns op-spec]
+  (try
+    (let [new-column-name
+          (next-combined-column-name columns (apply str (get-in op-spec ["args" "columnNames"])))
+          first-column-name (get-in op-spec ["args" "columnNames" 0])
+          second-column-name (get-in op-spec ["args" "columnNames" 1])]
+      (add-column tenant-conn {:table-name table-name
+                               :new-column-name new-column-name})
+      (combine-columns tenant-conn
+                       {:table-name table-name
+                        :new-column-name new-column-name
+                        :first-column first-column-name
+                        :second-column second-column-name
+                        :separator (get-in op-spec ["args" "separator"])})
+      {:success? true
+       :execution-log [(format "Combined columns %s, %s into %s"
+                               first-column-name second-column-name new-column-name)]
+       :columns (conj columns {"title" (get-in op-spec ["args" "newColumnTitle"])
+                               "type" "text"
+                               "sort" nil
+                               "hidden" false
+                               "direction" nil
+                               "columnName" new-column-name})})
+    (catch Exception e
+      {:success? false
+       :message (:getMessage e)})))
 
 (hugsql/def-db-fns "org/akvo/lumen/transformation.sql")
 

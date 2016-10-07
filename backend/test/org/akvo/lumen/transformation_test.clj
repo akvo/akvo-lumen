@@ -134,7 +134,7 @@
                           "source" {"path" (.getAbsolutePath (io/file (io/resource file)))
                                     "kind" "DATA_FILE"
                                     "fileName" (or dataset-name file)
-                                    "hascolumnheaders" (boolean has-column-headers?)}}]
+                                    "hasColumnHeaders" (boolean has-column-headers?)}}]
     (insert-data-source test-conn {:id data-source-id :spec data-source-spec})
     (insert-job-execution test-conn {:id job-id :data-source-id data-source-id})
     (imp/do-import test-conn {:file-upload-path "/tmp/akvo/dash"} job-id)
@@ -177,3 +177,22 @@
                                         {:rnum 1
                                          :column-name "c1"
                                          :table-name table-name}))))))))
+
+(deftest ^:functional combine-transformation-test
+  (let [dataset-id (import-file "name.csv" {:has-column-headers? true})
+        schedule (partial tf/schedule test-conn *transformation-engine* dataset-id)]
+    (let [{:keys [status body]} (schedule {:type :transformation
+                                           :transformation {"op" "core/combine"
+                                                            "args" {"columnNames" ["c1" "c2"]
+                                                                    "newColumnTitle" "full name"
+                                                                    "separator" " "}
+                                                            "onError" "fail"}})]
+      (is (= 200 status))
+      (let [table-name (:table-name
+                        (latest-dataset-version-by-dataset-id test-conn
+                                                              {:dataset-id dataset-id}))]
+        (is (= "bob hope"
+               (:c1c2 (get-val-from-table test-conn
+                                          {:rnum 1
+                                           :column-name "c1c2"
+                                           :table-name table-name}))))))))

@@ -5,6 +5,16 @@ import SidebarControls from './SidebarControls';
 import { columnTitle } from '../../../domain/dataset';
 
 
+function combineTransformationDescription(transformation, columns) {
+  const firstColumnTitle =
+    columnTitle(transformation.getIn(['args', 'columnNames', 0]), columns);
+  const secondColumnTitle =
+    columnTitle(transformation.getIn(['args', 'columnNames', 1]), columns);
+  const newColumnTitle = transformation.getIn(['args', 'newColumnTitle']);
+  return `Combined columns "${firstColumnTitle}" and "${secondColumnTitle}"
+    into "${newColumnTitle}"`;
+}
+
 function transformationDescription(transformation, columns) {
   const op = transformation.get('op');
   const columnName = transformation.getIn(['args', 'columnName']);
@@ -26,6 +36,8 @@ function transformationDescription(transformation, columns) {
       return `${columnTitle(columnName, columns)} datatype to ${newType}`;
     case 'core/sort-column':
       return `${columnTitle(columnName, columns)} sorted ${sortDirection}`;
+    case 'core/combine':
+      return combineTransformationDescription(transformation, columns);
     default:
       return op;
   }
