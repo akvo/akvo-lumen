@@ -30,5 +30,5 @@ SidebarControls.propTypes = {
   positiveButtonText: PropTypes.string,
   negativeButtonText: PropTypes.string,
   onClose: PropTypes.func.isRequired,
-  onApply: PropTypes.func.isRequired,
+  onApply: PropTypes.func,
 };

@@ -28,10 +28,34 @@ class DateFormatSelect extends Component {
 
   constructor() {
     super();
-    this.state = {customParseFormat: false};
+    this.state = {
+      parseFormat: 'YYYY-MM-DD',
+      customParseFormat: null
+    };
+  }
+
+  onSelectMenuChange(parseFormat) {
+    if (parseFormat === 'CUSTOM') {
+      this.setState({
+        customParseFormat: '',
+        parseFormat: 'CUSTOM'});
+    } else {
+      this.setState({
+        customParseFormat: null,
+        parseFormat,
+      });
+    }
+    this.props.onChange(parseFormat === 'CUSTOM' ? '' : parseFormat)
+  }
+
+  onCustomParseFormatChange(customParseFormat) {
+    this.setState({ customParseFormat });
+    this.props.onChange(customParseFormat);
   }
 
   render () {
+    const { parseFormat, customParseFormat } = this.state;
+
     return (
       <div className="inputGroup">
         <label htmlFor="parseFormatMenu">
@@ -39,16 +63,16 @@ class DateFormatSelect extends Component {
         </label>
         <SelectMenu
           name="parseFormatMenu"
-          value={this.props.parseFormat}
+          value={parseFormat}
           options={parseFormatOptions}
-          onChange={format => format === "CUSTOM" ?
-            this.setState({customParseFormat: true}) : this.props.onChange(format)}
+          onChange={format => this.onSelectMenuChange(format)}
         />
-      {this.state.customParseFormat &&
+      {customParseFormat != null &&
         <input
+          value={customParseFormat}
           type="text"
           className="customParseFormatInput"
-          onChange={evt => null}
+          onChange={evt => this.onCustomParseFormatChange(evt.target.value)}
         />
       }
       </div>
@@ -58,7 +82,6 @@ class DateFormatSelect extends Component {
 
 
 DateFormatSelect.propTypes = {
-  parseFormat: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
 };
 
@@ -170,6 +193,10 @@ export default class ChangeDataType extends Component {
     });
   }
 
+  isValidTransformation() {
+    return this.state.transformation.getIn(['args', 'parseFormat']) !== '';
+  }
+
   render() {
     const { column, dataTypeOptions, onClose, onApply } = this.props;
     const { transformation } = this.state;
@@ -204,7 +231,6 @@ export default class ChangeDataType extends Component {
           </div>
           {newType === 'date' && column.get('type') === 'text' ?
             <DateFormatSelect
-              parseFormat={transformation.getIn(['args', 'parseFormat'])}
               onChange={parseFormat => this.mergeArgs({ parseFormat })}
             /> : null}
           <div className="inputGroup">
@@ -226,7 +252,7 @@ export default class ChangeDataType extends Component {
             /> : null}
         </div>
         <SidebarControls
-          onApply={() => onApply(transformation)}
+          onApply={ this.isValidTransformation() ? () => onApply(transformation) : null }
           onClose={onClose}
         />
       </div>
