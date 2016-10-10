@@ -212,8 +212,7 @@
         schedule (partial tf/schedule test-conn *transformation-engine* dataset-id)]
     (let [{:keys [status body]} (do (schedule (date-transformation "c1" "YYYY"))
                                     (schedule (date-transformation "c2" "DD/MM/YYYY"))
-                                    (schedule (date-transformation "c3" "YYYY-MM-DD"))
-                                    )]
+                                    (schedule (date-transformation "c3" "YYYY-MM-DD")))]
       (is (= 200 status))
       (let [table-name (:table-name
                         (latest-dataset-version-by-dataset-id test-conn
@@ -224,8 +223,8 @@
                                                  :table-name table-name}))
             second-date (:c2 (get-val-from-table test-conn
                                                  {:rnum 1
-                                                 :column-name "c2"
-                                                 :table-name table-name}))
+                                                  :column-name "c2"
+                                                  :table-name table-name}))
             third-date (:c3 (get-val-from-table test-conn
                                                 {:rnum 1
                                                  :column-name "c3"

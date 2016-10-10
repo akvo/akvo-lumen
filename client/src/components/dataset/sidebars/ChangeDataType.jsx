@@ -91,7 +91,6 @@ export default class ChangeDataType extends Component {
         onError: 'default-value',
       }),
       errorStrategy: 'empty-cell',
-      customParseFormat: false,
     });
   }
 
