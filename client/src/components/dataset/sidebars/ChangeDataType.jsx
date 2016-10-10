@@ -17,23 +17,45 @@ const parseFormatOptions = [
     value: 'MM-DD-YYYY',
     label: 'MM-DD-YYYY',
   },
+  {
+    value: 'CUSTOM',
+    label: 'Custom',
+  },
 ];
 
-function DateFormatSelect({ onChange, parseFormat }) {
-  return (
-    <div className="inputGroup">
-      <label htmlFor="parseFormatMenu">
-        Date format:
-      </label>
-      <SelectMenu
-        name="parseFormatMenu"
-        value={parseFormat}
-        options={parseFormatOptions}
-        onChange={onChange}
-      />
-    </div>
-  );
+
+class DateFormatSelect extends Component {
+
+  constructor() {
+    super();
+    this.state = {customParseFormat: false};
+  }
+
+  render () {
+    return (
+      <div className="inputGroup">
+        <label htmlFor="parseFormatMenu">
+          Date format:
+        </label>
+        <SelectMenu
+          name="parseFormatMenu"
+          value={this.props.parseFormat}
+          options={parseFormatOptions}
+          onChange={format => format === "CUSTOM" ?
+            this.setState({customParseFormat: true}) : this.props.onChange(format)}
+        />
+      {this.state.customParseFormat &&
+        <input
+          type="text"
+          className="customParseFormatInput"
+          onChange={evt => null}
+        />
+      }
+      </div>
+    );
+  };
 }
+
 
 DateFormatSelect.propTypes = {
   parseFormat: PropTypes.string.isRequired,
@@ -126,6 +148,7 @@ export default class ChangeDataType extends Component {
         onError: 'default-value',
       }),
       errorStrategy: 'empty-cell',
+      customParseFormat: false,
     });
   }
 
