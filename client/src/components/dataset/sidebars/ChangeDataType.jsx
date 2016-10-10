@@ -3,42 +3,7 @@ import Immutable from 'immutable';
 import SelectMenu from '../../common/SelectMenu';
 import SidebarHeader from './SidebarHeader';
 import SidebarControls from './SidebarControls';
-
-const parseFormatOptions = [
-  {
-    value: 'YYYY-MM-DD',
-    label: 'YYYY-MM-DD',
-  },
-  {
-    value: 'DD-MM-YYYY',
-    label: 'DD-MM-YYYY',
-  },
-  {
-    value: 'MM-DD-YYYY',
-    label: 'MM-DD-YYYY',
-  },
-];
-
-function DateFormatSelect({ onChange, parseFormat }) {
-  return (
-    <div className="inputGroup">
-      <label htmlFor="parseFormatMenu">
-        Date format:
-      </label>
-      <SelectMenu
-        name="parseFormatMenu"
-        value={parseFormat}
-        options={parseFormatOptions}
-        onChange={onChange}
-      />
-    </div>
-  );
-}
-
-DateFormatSelect.propTypes = {
-  parseFormat: PropTypes.string.isRequired,
-  onChange: PropTypes.func.isRequired,
-};
+import DateFormatSelect from './DateFormatSelect';
 
 function DefaultValueInput({ defaultValue, onChange, newType }) {
   return (
@@ -147,6 +112,10 @@ export default class ChangeDataType extends Component {
     });
   }
 
+  isValidTransformation() {
+    return this.state.transformation.getIn(['args', 'parseFormat']) !== '';
+  }
+
   render() {
     const { column, dataTypeOptions, onClose, onApply } = this.props;
     const { transformation } = this.state;
@@ -181,7 +150,6 @@ export default class ChangeDataType extends Component {
           </div>
           {newType === 'date' && column.get('type') === 'text' ?
             <DateFormatSelect
-              parseFormat={transformation.getIn(['args', 'parseFormat'])}
               onChange={parseFormat => this.mergeArgs({ parseFormat })}
             /> : null}
           <div className="inputGroup">
@@ -203,7 +171,7 @@ export default class ChangeDataType extends Component {
             /> : null}
         </div>
         <SidebarControls
-          onApply={() => onApply(transformation)}
+          onApply={this.isValidTransformation() ? () => onApply(transformation) : null}
           onClose={onClose}
         />
       </div>
