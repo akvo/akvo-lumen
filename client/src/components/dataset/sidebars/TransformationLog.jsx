@@ -48,6 +48,7 @@ function TransformationListItem({ transformation, columns }) {
     <div>
       {transformationDescription(transformation, columns)}
       {transformation.get('pending') && <span>(pending)</span>}
+      {transformation.get('undo') && <span>(undoing)</span>}
     </div>);
 }
 
@@ -87,6 +88,18 @@ export default function TransformationLog({
   pendingTransformations,
   columns,
 }) {
+
+  let allTransformations = transformations;
+  pendingTransformations.forEach(pendingTransformation => {
+    if (pendingTransformation.get('op') === 'undo' && !allTransformations.isEmpty()) {
+      allTransformations = allTransformations.update(allTransformations.size - 1,
+        transformation => transformation.set('undo', true)
+      );
+    } else {
+      allTransformations = allTransformations.push(pendingTransformation.set('pending', true));
+    }
+  })
+
   return (
     <div
       className="DataTableSidebar"
@@ -99,11 +112,7 @@ export default function TransformationLog({
         Transformation Log
       </SidebarHeader>
       <TransformationList
-        transformations={transformations.concat(
-          pendingTransformations.map(
-            pendingTransformation => pendingTransformation.set('pending', true)
-          )
-        )}
+        transformations={allTransformations}
         columns={columns}
       />
       <SidebarControls
