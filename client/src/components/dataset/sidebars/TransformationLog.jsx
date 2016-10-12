@@ -88,9 +88,8 @@ export default function TransformationLog({
   pendingTransformations,
   columns,
 }) {
-
   let allTransformations = transformations;
-  pendingTransformations.forEach(pendingTransformation => {
+  pendingTransformations.forEach((pendingTransformation) => {
     if (pendingTransformation.get('op') === 'undo' && !allTransformations.isEmpty()) {
       allTransformations = allTransformations.update(allTransformations.size - 1,
         transformation => transformation.set('undo', true)
@@ -98,7 +97,7 @@ export default function TransformationLog({
     } else {
       allTransformations = allTransformations.push(pendingTransformation.set('pending', true));
     }
-  })
+  });
 
   return (
     <div
