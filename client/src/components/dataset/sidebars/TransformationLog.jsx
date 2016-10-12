@@ -44,7 +44,11 @@ function transformationDescription(transformation, columns) {
 }
 
 function TransformationListItem({ transformation, columns }) {
-  return <span>{transformationDescription(transformation, columns)}</span>;
+  return (
+    <div>
+      {transformationDescription(transformation, columns)}
+      {transformation.get('pending') && <span>(pending)</span>}
+    </div>);
 }
 
 TransformationListItem.propTypes = {
@@ -80,6 +84,7 @@ export default function TransformationLog({
   onClose,
   onUndo,
   transformations = Immutable.List(),
+  pendingTransformations,
   columns,
 }) {
   return (
@@ -94,7 +99,11 @@ export default function TransformationLog({
         Transformation Log
       </SidebarHeader>
       <TransformationList
-        transformations={transformations}
+        transformations={transformations.concat(
+          pendingTransformations.map(
+            pendingTransformation => pendingTransformation.set('pending', true)
+          )
+        )}
         columns={columns}
       />
       <SidebarControls
@@ -111,4 +120,5 @@ TransformationLog.propTypes = {
   onUndo: PropTypes.func.isRequired,
   columns: PropTypes.object.isRequired,
   transformations: PropTypes.object,
+  pendingTransformations: PropTypes.object.isRequired,
 };

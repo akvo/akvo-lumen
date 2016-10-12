@@ -215,7 +215,7 @@ export default class DatasetTable extends Component {
   }
 
   render() {
-    const { rows, columns } = this.props;
+    const { rows, columns, pendingTransformations, transformations } = this.props;
     const {
       activeDataTypeContextMenu,
       activeColumnContextMenu,
@@ -255,6 +255,7 @@ export default class DatasetTable extends Component {
           columns={columns}
           rowsCount={rows.size}
           onToggleTransformationLog={this.handleToggleTransformationLog}
+          pendingTransformationsCount={pendingTransformations.size}
           onClickMenuItem={(menuItem) => {
             if (menuItem === 'combineColumns') {
               this.handleToggleCombineColumnSidebar();
@@ -272,7 +273,8 @@ export default class DatasetTable extends Component {
           {sidebarProps &&
             <DataTableSidebar
               {...sidebarProps}
-              transformations={this.props.transformations}
+              transformations={transformations}
+              pendingTransformations={pendingTransformations}
             />}
           <div
             className="wrapper"
@@ -314,6 +316,7 @@ DatasetTable.propTypes = {
   columns: PropTypes.object.isRequired,
   rows: PropTypes.object.isRequired,
   transformations: PropTypes.object,
+  pendingTransformations: PropTypes.object.isRequired,
   onTransform: PropTypes.func.isRequired,
   onUndoTransformation: PropTypes.func.isRequired,
 };
