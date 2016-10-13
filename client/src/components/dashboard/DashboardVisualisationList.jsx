@@ -14,38 +14,34 @@ export default function DashboardVisualisationList(props) {
           className="noVisualisationsMessage"
         >
           No visualisations to show.
-        </div>
-        :
-          <ul
-            className="list"
-          >
-            {props.visualisations.map(item =>
-              <li
-                className={`listItem clickable ${item.visualisationType}
-                ${isOnDashboard(item) ? 'added' : ''}`}
-                key={item.id}
-                onClick={() => props.onEntityClick(item, 'visualisation')}
-              >
-                <h4>
-                  {item.name}
-                  <span
-                    className="isOnDashboardIndicator"
-                  >
-                    {isOnDashboard(item) ? '✔' : ''}
-                  </span>
-                </h4>
-                <span className="visualisationType">
-                  {item.visualisationType === 'map' ?
-                  'Map'
-                  :
-                  `${item.visualisationType.charAt(0).toUpperCase() +
-                      item.visualisationType.slice(1)} chart`
-                }
+        </div> : <ul className="list">
+          {props.visualisations.map(item =>
+            <li
+              className={`listItem clickable ${item.visualisationType}
+              ${isOnDashboard(item) ? 'added' : ''}`}
+              key={item.id}
+              onClick={() => props.onEntityClick(item, 'visualisation')}
+            >
+              <h4>
+                {item.name}
+                <span
+                  className="isOnDashboardIndicator"
+                >
+                  {isOnDashboard(item) ? '✔' : ''}
                 </span>
-                <div className="background" />
-              </li>
-          )}
-          </ul>
+              </h4>
+              <span className="visualisationType">
+                {item.visualisationType === 'map' ?
+                'Map'
+                :
+                `${item.visualisationType.charAt(0).toUpperCase() +
+                    item.visualisationType.slice(1)} chart`
+              }
+              </span>
+              <div className="background" />
+            </li>
+        )}
+        </ul>
       }
     </div>
   );
