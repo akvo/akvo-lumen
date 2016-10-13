@@ -132,7 +132,9 @@ export default function TransformationLog({
       />
       <SidebarControls
         positiveButtonText="Undo"
-        onApply={onUndo}
+        onApply={
+          allTransformations.every(transformation => transformation.get('undo')) ? null : onUndo
+        }
         onClose={onClose}
       />
     </div>
