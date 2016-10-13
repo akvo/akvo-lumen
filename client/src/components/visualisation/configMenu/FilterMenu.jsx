@@ -160,44 +160,42 @@ export default class FilterMenu extends Component {
         </h4>
         <div className="container">
           {(!filters || filters.length === 0) ?
-            <div className="noFilters">No filters</div>
-            :
-              <div className="filterListContainer">
-                <ol className="filterList">
-                  {filters.map((filter, index) =>
-                    <li
-                      key={index}
-                      className="filterListItem"
+            <div className="noFilters">No filters</div> : <div className="filterListContainer">
+              <ol className="filterList">
+                {filters.map((filter, index) =>
+                  <li
+                    key={index}
+                    className="filterListItem"
+                  >
+                    <span className="filterIndicator">
+                      {getFilterOperationLabel(filter.operation)}
+                    </span>
+                    {' '}
+                    <span>
+                    rows where
+                    </span>
+                    {' '}
+                    <span className="filterIndicator">
+                      {columnOptions[filter.column].title}
+                    </span>
+                    {' '}
+                    <span>
+                      {getFilterStrategyLabel(filter.strategy, filter.column, columnOptions)}
+                    </span>
+                    {' '}
+                    <span className="filterIndicator">
+                      {getFilterDisplayValue(filter.value, filter.column, columnOptions)}
+                    </span>
+                    <button
+                      className="deleteFilter clickable"
+                      onClick={() => this.deleteFilter(index)}
                     >
-                      <span className="filterIndicator">
-                        {getFilterOperationLabel(filter.operation)}
-                      </span>
-                      {' '}
-                      <span>
-                      rows where
-                      </span>
-                      {' '}
-                      <span className="filterIndicator">
-                        {columnOptions[filter.column].title}
-                      </span>
-                      {' '}
-                      <span>
-                        {getFilterStrategyLabel(filter.strategy, filter.column, columnOptions)}
-                      </span>
-                      {' '}
-                      <span className="filterIndicator">
-                        {getFilterDisplayValue(filter.value, filter.column, columnOptions)}
-                      </span>
-                      <button
-                        className="deleteFilter clickable"
-                        onClick={() => this.deleteFilter(index)}
-                      >
-                      +
-                      </button>
-                    </li>
-                )}
-                </ol>
-              </div>
+                    +
+                    </button>
+                  </li>
+              )}
+              </ol>
+            </div>
           }
           {this.state.inputInProgress ?
             <div className="newFilterContainer">
@@ -267,17 +265,15 @@ export default class FilterMenu extends Component {
                   Cancel
                 </button>
               </div>
+            </div> : <div className="addFilterContainer">
+              <button
+                className={`addFilter clickable
+                ${hasDataset ? 'enabled' : 'disabled noPointerEvents'}`}
+                onClick={() => this.toggleInput()}
+              >
+              Add New Filter
+              </button>
             </div>
-            :
-              <div className="addFilterContainer">
-                <button
-                  className={`addFilter clickable
-                  ${hasDataset ? 'enabled' : 'disabled noPointerEvents'}`}
-                  onClick={() => this.toggleInput()}
-                >
-                Add New Filter
-                </button>
-              </div>
           }
         </div>
       </div>

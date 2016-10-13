@@ -26,12 +26,10 @@ render(
         dashboard={data.dashboard}
         visualisations={data.visualisations}
         datasets={immutableDatasets}
+      /> : <AsyncVisualisationViewer
+        visualisation={data.visualisation}
+        datasets={immutableDatasets}
       />
-      :
-        <AsyncVisualisationViewer
-          visualisation={data.visualisation}
-          datasets={immutableDatasets}
-        />
     }
     <LumenBranding />
   </div>,

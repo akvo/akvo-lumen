@@ -62,10 +62,7 @@ export default class AsyncVisualisationViewer extends Component {
 
   render() {
     return this.state.asyncComponents ?
-      <this.state.asyncComponents.output {...this.props} />
-      :
-        <div>Loading...</div>
-    ;
+      <this.state.asyncComponents.output {...this.props} /> : <div>Loading...</div>;
   }
 }
 
