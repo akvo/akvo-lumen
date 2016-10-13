@@ -105,7 +105,7 @@ export default class DashboardCanvasItem extends Component {
                 height={dimensions.height}
               />
               :
-              <div>Loading dataset...</div>
+                <div>Loading dataset...</div>
             }
           </div>
         }

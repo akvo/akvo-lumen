@@ -162,42 +162,42 @@ export default class FilterMenu extends Component {
           {(!filters || filters.length === 0) ?
             <div className="noFilters">No filters</div>
             :
-            <div className="filterListContainer">
-              <ol className="filterList">
-                {filters.map((filter, index) =>
-                  <li
-                    key={index}
-                    className="filterListItem"
-                  >
-                    <span className="filterIndicator">
-                      {getFilterOperationLabel(filter.operation)}
-                    </span>
-                    {' '}
-                    <span>
-                      rows where
-                    </span>
-                    {' '}
-                    <span className="filterIndicator">
-                      {columnOptions[filter.column].title}
-                    </span>
-                    {' '}
-                    <span>
-                      {getFilterStrategyLabel(filter.strategy, filter.column, columnOptions)}
-                    </span>
-                    {' '}
-                    <span className="filterIndicator">
-                      {getFilterDisplayValue(filter.value, filter.column, columnOptions)}
-                    </span>
-                    <button
-                      className="deleteFilter clickable"
-                      onClick={() => this.deleteFilter(index)}
+              <div className="filterListContainer">
+                <ol className="filterList">
+                  {filters.map((filter, index) =>
+                    <li
+                      key={index}
+                      className="filterListItem"
                     >
+                      <span className="filterIndicator">
+                        {getFilterOperationLabel(filter.operation)}
+                      </span>
+                      {' '}
+                      <span>
+                      rows where
+                      </span>
+                      {' '}
+                      <span className="filterIndicator">
+                        {columnOptions[filter.column].title}
+                      </span>
+                      {' '}
+                      <span>
+                        {getFilterStrategyLabel(filter.strategy, filter.column, columnOptions)}
+                      </span>
+                      {' '}
+                      <span className="filterIndicator">
+                        {getFilterDisplayValue(filter.value, filter.column, columnOptions)}
+                      </span>
+                      <button
+                        className="deleteFilter clickable"
+                        onClick={() => this.deleteFilter(index)}
+                      >
                       +
-                    </button>
-                  </li>
+                      </button>
+                    </li>
                 )}
-              </ol>
-            </div>
+                </ol>
+              </div>
           }
           {this.state.inputInProgress ?
             <div className="newFilterContainer">
@@ -269,15 +269,15 @@ export default class FilterMenu extends Component {
               </div>
             </div>
             :
-            <div className="addFilterContainer">
-              <button
-                className={`addFilter clickable
+              <div className="addFilterContainer">
+                <button
+                  className={`addFilter clickable
                   ${hasDataset ? 'enabled' : 'disabled noPointerEvents'}`}
-                onClick={() => this.toggleInput()}
-              >
+                  onClick={() => this.toggleInput()}
+                >
                 Add New Filter
-              </button>
-            </div>
+                </button>
+              </div>
           }
         </div>
       </div>

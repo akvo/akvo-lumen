@@ -16,36 +16,36 @@ export default function DashboardVisualisationList(props) {
           No visualisations to show.
         </div>
         :
-        <ul
-          className="list"
-        >
-          {props.visualisations.map(item =>
-            <li
-              className={`listItem clickable ${item.visualisationType}
+          <ul
+            className="list"
+          >
+            {props.visualisations.map(item =>
+              <li
+                className={`listItem clickable ${item.visualisationType}
                 ${isOnDashboard(item) ? 'added' : ''}`}
-              key={item.id}
-              onClick={() => props.onEntityClick(item, 'visualisation')}
-            >
-              <h4>
-                {item.name}
-                <span
-                  className="isOnDashboardIndicator"
-                >
-                  {isOnDashboard(item) ? '✔' : ''}
-                </span>
-              </h4>
-              <span className="visualisationType">
-                {item.visualisationType === 'map' ?
+                key={item.id}
+                onClick={() => props.onEntityClick(item, 'visualisation')}
+              >
+                <h4>
+                  {item.name}
+                  <span
+                    className="isOnDashboardIndicator"
+                  >
+                    {isOnDashboard(item) ? '✔' : ''}
+                  </span>
+                </h4>
+                <span className="visualisationType">
+                  {item.visualisationType === 'map' ?
                   'Map'
                   :
                   `${item.visualisationType.charAt(0).toUpperCase() +
                       item.visualisationType.slice(1)} chart`
                 }
-              </span>
-              <div className="background" />
-            </li>
+                </span>
+                <div className="background" />
+              </li>
           )}
-        </ul>
+          </ul>
       }
     </div>
   );

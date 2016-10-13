@@ -64,7 +64,7 @@ export default class AsyncVisualisationViewer extends Component {
     return this.state.asyncComponents ?
       <this.state.asyncComponents.output {...this.props} />
       :
-      <div>Loading...</div>
+        <div>Loading...</div>
     ;
   }
 }

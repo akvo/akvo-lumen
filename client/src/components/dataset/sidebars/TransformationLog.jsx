@@ -44,11 +44,14 @@ function transformationDescription(transformation, columns) {
 }
 
 function TransformationListItem({ transformation, columns }) {
+  const isUndoingTransformation = transformation.get('undo');
+  const isPendingTransformation = transformation.get('pending') && !isUndoingTransformation;
+
   return (
-    <div>
-      {transformationDescription(transformation, columns)}
-      {transformation.get('pending') && <span>(pending)</span>}
-      {transformation.get('undo') && <span>(undoing)</span>}
+    <div style={{ opacity: isUndoingTransformation ? 0.5 : 1 }}>
+      <div>{transformationDescription(transformation, columns)}</div>
+      {isPendingTransformation && <div style={{ fontSize: '0.6em', marginTop: 4 }}>APPLYING TRANSFORMATION</div>}
+      {isUndoingTransformation && <div style={{ fontSize: '0.6em', marginTop: 4 }}>UNDOING TRANSFORMATION</div>}
     </div>);
 }
 
@@ -84,13 +87,11 @@ TransformationList.propTypes = {
 function markUndo(transformations, idx) {
   if (idx < 0) {
     return transformations;
-  } else {
-    if (transformations.getIn([idx, 'undo'])) {
-      return markUndo(transformations, idx - 1);
-    } else {
-      return transformations.setIn([idx, 'undo'], true)
-    }
   }
+  if (transformations.getIn([idx, 'undo'])) {
+    return markUndo(transformations, idx - 1);
+  }
+  return transformations.setIn([idx, 'undo'], true);
 }
 
 function transformationLog(persistedTransformations, pendingTransformations) {
@@ -112,7 +113,7 @@ export default function TransformationLog({
   pendingTransformations,
   columns,
 }) {
-  let allTransformations = transformationLog(transformations, pendingTransformations);
+  const allTransformations = transformationLog(transformations, pendingTransformations);
 
   return (
     <div
