@@ -81,6 +81,30 @@ TransformationList.propTypes = {
   columns: PropTypes.object.isRequired,
 };
 
+function markUndo(transformations, idx) {
+  if (idx < 0) {
+    return transformations;
+  } else {
+    if (transformations.getIn([idx, 'undo'])) {
+      return markUndo(transformations, idx - 1);
+    } else {
+      return transformations.setIn([idx, 'undo'], true)
+    }
+  }
+}
+
+function transformationLog(persistedTransformations, pendingTransformations) {
+  let allTransformations = persistedTransformations;
+  pendingTransformations.forEach((pendingTransformation) => {
+    if (pendingTransformation.get('op') === 'undo') {
+      allTransformations = markUndo(allTransformations, allTransformations.size - 1);
+    } else {
+      allTransformations = allTransformations.push(pendingTransformation.set('pending', true));
+    }
+  });
+  return allTransformations;
+}
+
 export default function TransformationLog({
   onClose,
   onUndo,
@@ -88,16 +112,7 @@ export default function TransformationLog({
   pendingTransformations,
   columns,
 }) {
-  let allTransformations = transformations;
-  pendingTransformations.forEach((pendingTransformation) => {
-    if (pendingTransformation.get('op') === 'undo' && !allTransformations.isEmpty()) {
-      allTransformations = allTransformations.update(allTransformations.size - 1,
-        transformation => transformation.set('undo', true)
-      );
-    } else {
-      allTransformations = allTransformations.push(pendingTransformation.set('pending', true));
-    }
-  });
+  let allTransformations = transformationLog(transformations, pendingTransformations);
 
   return (
     <div
