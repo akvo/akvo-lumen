@@ -118,13 +118,12 @@
   (or (get spec "path")
       (let [file-on-disk? (contains? spec "fileName")
             url (get spec "url")]
-                 (if file-on-disk?
-                   (str file-upload-path
-                        "/resumed/"
-                        (last (s/split url #"\/"))
-                        "/file")
-                   url))))
-
+           (if file-on-disk?
+             (str file-upload-path
+                  "/resumed/"
+                  (last (s/split url #"\/"))
+                  "/file")
+             url))))
 
 (defmethod import/make-dataset-data-table "CSV"
   [tenant-conn {:keys [file-upload-path]} table-name spec]
@@ -152,4 +151,4 @@
        :columns (get-column-tuples col-titles)})
     (catch Exception e
       {:success? false
-       :reason (str "Unexpected error " (.getMessage e))})) )
+       :reason (str "Unexpected error " (.getMessage e))})))

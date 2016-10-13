@@ -15,7 +15,7 @@ case "$1" in
     build)
       docker build -t akvo/keycloak .
       ;;
-    run)
+    run|start)
       docker run -d -p 8080:8080 --name lumen-keycloak -t akvo/keycloak
       ;;
     stop)

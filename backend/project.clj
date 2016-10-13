@@ -19,6 +19,7 @@
                  [org.akvo/resumed "0.1.0-SNAPSHOT"]
                  [org.apache.tika/tika-core "1.13"]
                  [org.clojure/clojure "1.8.0"]
+                 [org.clojure/core.incubator "0.1.4"]
                  [org.clojure/data.csv "0.1.3"]
                  [org.immutant/scheduling "2.1.5" :exclusions [ch.qos.logback/logback-classic]]
                  [org.immutant/web "2.1.5"]
