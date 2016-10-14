@@ -44,7 +44,15 @@ function transformationDescription(transformation, columns) {
 }
 
 function TransformationListItem({ transformation, columns }) {
-  return <span>{transformationDescription(transformation, columns)}</span>;
+  const isUndoingTransformation = transformation.get('undo');
+  const isPendingTransformation = transformation.get('pending') && !isUndoingTransformation;
+
+  return (
+    <div style={{ opacity: isUndoingTransformation ? 0.5 : 1 }}>
+      <div>{transformationDescription(transformation, columns)}</div>
+      {isPendingTransformation && <div style={{ fontSize: '0.6em', marginTop: 4 }}>APPLYING TRANSFORMATION</div>}
+      {isUndoingTransformation && <div style={{ fontSize: '0.6em', marginTop: 4 }}>UNDOING TRANSFORMATION</div>}
+    </div>);
 }
 
 TransformationListItem.propTypes = {
@@ -76,12 +84,37 @@ TransformationList.propTypes = {
   columns: PropTypes.object.isRequired,
 };
 
+function markUndo(transformations, idx) {
+  if (idx < 0) {
+    return transformations;
+  }
+  if (transformations.getIn([idx, 'undo'])) {
+    return markUndo(transformations, idx - 1);
+  }
+  return transformations.setIn([idx, 'undo'], true);
+}
+
+function transformationLog(persistedTransformations, pendingTransformations) {
+  let allTransformations = persistedTransformations;
+  pendingTransformations.forEach((pendingTransformation) => {
+    if (pendingTransformation.get('op') === 'undo') {
+      allTransformations = markUndo(allTransformations, allTransformations.size - 1);
+    } else {
+      allTransformations = allTransformations.push(pendingTransformation.set('pending', true));
+    }
+  });
+  return allTransformations;
+}
+
 export default function TransformationLog({
   onClose,
   onUndo,
   transformations = Immutable.List(),
+  pendingTransformations,
   columns,
 }) {
+  const allTransformations = transformationLog(transformations, pendingTransformations);
+
   return (
     <div
       className="DataTableSidebar"
@@ -94,12 +127,14 @@ export default function TransformationLog({
         Transformation Log
       </SidebarHeader>
       <TransformationList
-        transformations={transformations}
+        transformations={allTransformations}
         columns={columns}
       />
       <SidebarControls
         positiveButtonText="Undo"
-        onApply={onUndo}
+        onApply={
+          allTransformations.every(transformation => transformation.get('undo')) ? null : onUndo
+        }
         onClose={onClose}
       />
     </div>
@@ -111,4 +146,5 @@ TransformationLog.propTypes = {
   onUndo: PropTypes.func.isRequired,
   columns: PropTypes.object.isRequired,
   transformations: PropTypes.object,
+  pendingTransformations: PropTypes.object.isRequired,
 };

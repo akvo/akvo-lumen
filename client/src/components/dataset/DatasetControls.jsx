@@ -17,6 +17,7 @@ export default class DatasetControls extends Component {
     });
   }
   render() {
+    const { pendingTransformationsCount } = this.props;
     return (
       <div className="DatasetControls">
         <span className="controlGroup1">
@@ -97,7 +98,7 @@ export default class DatasetControls extends Component {
               className="transformationLogToggle clickable"
               onClick={this.props.onToggleTransformationLog}
             >
-              Transformation log
+              Transformation log {pendingTransformationsCount > 0 && `(${pendingTransformationsCount})`}
             </button>
           </span>
         </span>
@@ -108,6 +109,7 @@ export default class DatasetControls extends Component {
 
 DatasetControls.propTypes = {
   onToggleTransformationLog: PropTypes.func.isRequired,
+  pendingTransformationsCount: PropTypes.number.isRequired,
   onClickMenuItem: PropTypes.func.isRequired,
   columns: PropTypes.object.isRequired,
   rowsCount: PropTypes.number.isRequired,

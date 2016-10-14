@@ -26,9 +26,7 @@ render(
         dashboard={data.dashboard}
         visualisations={data.visualisations}
         datasets={immutableDatasets}
-      />
-      :
-      <AsyncVisualisationViewer
+      /> : <AsyncVisualisationViewer
         visualisation={data.visualisation}
         datasets={immutableDatasets}
       />

@@ -160,9 +160,7 @@ export default class FilterMenu extends Component {
         </h4>
         <div className="container">
           {(!filters || filters.length === 0) ?
-            <div className="noFilters">No filters</div>
-            :
-            <div className="filterListContainer">
+            <div className="noFilters">No filters</div> : <div className="filterListContainer">
               <ol className="filterList">
                 {filters.map((filter, index) =>
                   <li
@@ -174,7 +172,7 @@ export default class FilterMenu extends Component {
                     </span>
                     {' '}
                     <span>
-                      rows where
+                    rows where
                     </span>
                     {' '}
                     <span className="filterIndicator">
@@ -192,10 +190,10 @@ export default class FilterMenu extends Component {
                       className="deleteFilter clickable"
                       onClick={() => this.deleteFilter(index)}
                     >
-                      +
+                    +
                     </button>
                   </li>
-                )}
+              )}
               </ol>
             </div>
           }
@@ -267,15 +265,13 @@ export default class FilterMenu extends Component {
                   Cancel
                 </button>
               </div>
-            </div>
-            :
-            <div className="addFilterContainer">
+            </div> : <div className="addFilterContainer">
               <button
                 className={`addFilter clickable
-                  ${hasDataset ? 'enabled' : 'disabled noPointerEvents'}`}
+                ${hasDataset ? 'enabled' : 'disabled noPointerEvents'}`}
                 onClick={() => this.toggleInput()}
               >
-                Add New Filter
+              Add New Filter
               </button>
             </div>
           }
