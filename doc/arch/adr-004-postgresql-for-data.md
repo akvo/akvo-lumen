@@ -4,12 +4,12 @@
 
 Users _connect_ to a datasource and import their data into the system.
 The original idea (inspired by Kibana) was to use ElasticSearch and
-its DSL to compute agregations on-the-fly.
+its DSL to compute aggregations on-the-fly.
 
-After some iterations we relized that the majority of the imported
+After some iterations we realized that the majority of the imported
 data will be _tabular_,that is, rows and columns. This shape of
 data fits well in the relational model (database tables).
-We also realized that the tranformations will be something that
+We also realized that the transformations will be something that
 will be computed _ahead of time_ and the resulting values will
 be persisted.
 
