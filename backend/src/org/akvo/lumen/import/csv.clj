@@ -6,10 +6,12 @@
             [hugsql.core :as hugsql]
             [org.akvo.lumen.import.common :as import]
             [org.akvo.lumen.util :refer [squuid]])
-  (:import java.util.UUID
+  (:import java.net.URI
+           java.util.UUID
            org.postgresql.PGConnection
            org.postgresql.copy.CopyManager
-           com.ibm.icu.text.CharsetDetector))
+           com.ibm.icu.text.CharsetDetector
+           org.apache.commons.io.input.UnixLineEndingInputStream))
 
 (defn- get-cols
   ([num-cols]
@@ -143,7 +145,9 @@
       (jdbc/execute! tenant-conn [(get-create-table-sql table-name n-cols "jsonb" false)])
       (with-open [conn (-> tenant-conn :datasource .getConnection)]
         (let [copy-manager (.getCopyAPI (.unwrap conn PGConnection))]
-          (.copyIn copy-manager copy-sql (io/input-stream path))))
+          (. copy-manager copyIn copy-sql
+                   (-> (io/input-stream path)
+                       (UnixLineEndingInputStream. true)))))
       (jdbc/execute! tenant-conn [(get-insert-sql temp-table table-name n-cols)])
       (jdbc/execute! tenant-conn [(get-drop-table-sql temp-table)])
       (jdbc/execute! tenant-conn [(get-vacuum-sql table-name)] {:transaction? false})
@@ -151,4 +155,4 @@
        :columns (get-column-tuples col-titles)})
     (catch Exception e
       {:success? false
-       :reason (str "Unexpected error " (.getMessage e))})))
+       :reason (str "Unexpected error: " (.getMessage e))})))
