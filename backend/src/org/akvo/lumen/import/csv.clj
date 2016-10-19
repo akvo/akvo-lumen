@@ -6,8 +6,7 @@
             [hugsql.core :as hugsql]
             [org.akvo.lumen.import.common :as import]
             [org.akvo.lumen.util :refer [squuid]])
-  (:import java.net.URI
-           java.util.UUID
+  (:import java.util.UUID
            org.postgresql.PGConnection
            org.postgresql.copy.CopyManager
            com.ibm.icu.text.CharsetDetector
