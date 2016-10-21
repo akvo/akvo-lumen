@@ -12,6 +12,7 @@
            com.ibm.icu.text.CharsetDetector
            org.apache.commons.io.input.UnixLineEndingInputStream))
 
+
 (defn- get-cols
   ([num-cols]
    (get-cols num-cols nil))
@@ -126,6 +127,12 @@
                   "/file")
              url))))
 
+(defn unix-line-ending-input-stream
+  ""
+  [path]
+  (-> (io/input-stream path)
+      (UnixLineEndingInputStream. true)))
+
 (defmethod import/make-dataset-data-table "CSV"
   [tenant-conn {:keys [file-upload-path]} table-name spec]
   (try
@@ -144,9 +151,7 @@
       (jdbc/execute! tenant-conn [(get-create-table-sql table-name n-cols "jsonb" false)])
       (with-open [conn (-> tenant-conn :datasource .getConnection)]
         (let [copy-manager (.getCopyAPI (.unwrap conn PGConnection))]
-          (. copy-manager copyIn copy-sql
-                   (-> (io/input-stream path)
-                       (UnixLineEndingInputStream. true)))))
+          (. copy-manager copyIn copy-sql unix-line-ending-input-stream path)))
       (jdbc/execute! tenant-conn [(get-insert-sql temp-table table-name n-cols)])
       (jdbc/execute! tenant-conn [(get-drop-table-sql temp-table)])
       (jdbc/execute! tenant-conn [(get-vacuum-sql table-name)] {:transaction? false})
