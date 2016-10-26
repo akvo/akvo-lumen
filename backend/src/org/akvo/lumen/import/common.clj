@@ -1,11 +1,21 @@
 (ns org.akvo.lumen.import.common
-  (:require [cheshire.core :as json]))
+  (:require [clojure.java.io :as io]
+            [cheshire.core :as json])
+  (:import org.apache.commons.io.input.UnixLineEndingInputStream))
 
 (defn dispatch-on-kind [spec]
   (let [kind (get spec "kind")]
     (if (#{"LINK" "DATA_FILE"} kind)
       "CSV" ;; TODO: Unify elsewhere
       kind)))
+
+(defn unix-line-ending-input-stream
+  "Thin wrapper around UnixLineEndingInputStream. Accepts and returns an input stream.
+
+  :eof? - true if there should also be a line ending at end of file"
+  [path & {:keys [eof?] :or [eof? false]}]
+  (->  (io/input-stream path)
+       (UnixLineEndingInputStream. eof?)))
 
 (defmulti valid?
   "Validate the data source specification"

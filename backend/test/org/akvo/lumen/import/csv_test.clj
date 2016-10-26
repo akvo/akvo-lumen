@@ -1,8 +1,7 @@
 (ns org.akvo.lumen.import.csv-test
   (:require [clojure.java.io :as io]
             [clojure.test :refer :all]
-            [org.akvo.lumen.import.csv :refer :all])
-  (:import org.apache.commons.io.input.UnixLineEndingInputStream))
+            [org.akvo.lumen.import.csv :refer :all]))
 
 
 (deftest test-util-functions
@@ -20,11 +19,3 @@
     (is (= 19 (get-num-cols (io/file (io/resource "artist")) \tab "UTF-8")))
     (is (= 23 (get-num-cols (io/file (io/resource "products")) \, "UTF-8")))
     (is (= 60 (get-num-cols (io/file (io/resource "rural-population")) \, "UTF-8")))))
-
-(deftest test-unix-line-endings
-  (testing "Import file with DOS line endings"
-    (with-open [stream (-> (io/input-stream (io/resource "dos.csv"))
-                           (UnixLineEndingInputStream. true))
-                raw-csv (. stream read)])))
-
-
