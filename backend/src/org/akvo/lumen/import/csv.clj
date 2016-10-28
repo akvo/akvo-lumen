@@ -142,9 +142,11 @@
           copy-sql (get-copy-sql temp-table n-cols headers? encoding)]
       (jdbc/execute! tenant-conn [(get-create-table-sql temp-table n-cols "text" true)])
       (jdbc/execute! tenant-conn [(get-create-table-sql table-name n-cols "jsonb" false)])
-      (with-open [conn (-> tenant-conn :datasource .getConnection)]
+      (with-open [conn (-> tenant-conn :datasource .getConnection)
+                  input-stream (-> (io/input-stream path)
+                                   import/unix-line-ending-input-stream)]
         (let [copy-manager (.. conn (unwrap PGConnection) (getCopyAPI))]
-          (. copy-manager copyIn copy-sql import/unix-line-ending-input-stream path)))
+          (. copy-manager copyIn copy-sql input-stream)))
       (jdbc/execute! tenant-conn [(get-insert-sql temp-table table-name n-cols)])
       (jdbc/execute! tenant-conn [(get-drop-table-sql temp-table)])
       (jdbc/execute! tenant-conn [(get-vacuum-sql table-name)] {:transaction? false})
