@@ -26,7 +26,7 @@ class CreateDataset extends Component {
             dataSourceKind={dataset.source.kind}
             onChangeDataSource={this.props.selectDataSource}
           />
-      );
+        );
       case 'define-data-source':
         return (
           <DataSourceSettings
@@ -35,14 +35,14 @@ class CreateDataset extends Component {
             onChangeSettings={this.props.defineDatasetSettings}
             updateUploadStatus={this.props.updateDatasetUploadStatus}
           />
-      );
+        );
       case 'define-dataset':
         return (
           <Settings
             dataset={dataset}
             onChangeSettings={this.props.defineDatasetSettings}
           />
-      );
+        );
       default: throw new Error(`Not yet implemented: ${page}`);
     }
   }
