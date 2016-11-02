@@ -69,6 +69,7 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
     return defaultPadding + pixPadding;
   };
 
+  const paddingX = getPaddingX();
 
   let sort = null;
   let reverse = false;
@@ -85,11 +86,11 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
   return ({
     data: dataArray,
     width: containerWidth - 70,
-    height: containerHeight - (26 + getPaddingX()),
+    height: containerHeight - (26 + paddingX),
     padding: {
       top: 26,
       left: 60,
-      bottom: getPaddingX(),
+      bottom: paddingX,
       right: 10,
     },
     scales: [
@@ -120,7 +121,7 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
         type: 'x',
         scale: 'x',
         title: visualisation.spec.labelX,
-        titleOffset: getPaddingX() - 10,
+        titleOffset: paddingX - 10,
         tickPadding: 0,
         properties: {
           labels: (visualisation.spec.datasetNameColumnX === null && !hasAggregation) ?
