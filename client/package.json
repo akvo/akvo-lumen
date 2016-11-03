@@ -30,6 +30,7 @@
     "immutable": "^3.8.1",
     "invariant": "^2.2.1",
     "isomorphic-fetch": "^2.2.1",
+    "json-loader": "^0.5.4",
     "keycloak-js": "1.9.7",
     "leaflet": "^0.7.7",
     "lodash": "^4.16.2",
