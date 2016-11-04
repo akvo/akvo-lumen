@@ -7,11 +7,21 @@ minikube-status:
 minikube-stop:
 	minikube stop
 
-build:
-	docker build -t akvo/lumen-backend .
+build-client:
+	docker build -t akvo/lumen-client client/
 
-push:
+push-client:
+	docker push akvo/lumen-client:latest
+
+build-backend:
+	docker build -t akvo/lumen-backend backend/
+
+push-backend:
 	docker push akvo/lumen-backend:latest
+
+build: build-client build-backend
+
+push: push-client push-backend
 
 deploy:
 	kubectl create -f ./deployment.yaml
