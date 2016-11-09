@@ -29,8 +29,26 @@ deploy:
 undeploy:
 	kubectl delete -f ./deployment.yaml
 
-expose:
+expose-local:
 	kubectl expose deployment lumen-deployment --type=NodePort
 
 url:
 	minikube service lumen-deployment --url
+
+gcloud:
+	gcloud container clusters get-credentials lumen --zone europe-west1-d --project akvo-lumen
+
+# From scratch
+
+# Step 1
+cluster:
+	gcloud container clusters create lumen --zone=europe-west1-d --machine-type=g1-small --num-nodes=2 --project=akvo-lumen
+
+# Step 2 add secrets to cluster, can be found in akvo-config
+
+# Step 3
+# make deploy
+
+# Step 4
+expose-production:
+	kubectl expose deployment lumen-deployment --type="LoadBalancer" --target-port=80 --load-balancer-ip='104.199.57.78'
