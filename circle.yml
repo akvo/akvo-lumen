@@ -13,20 +13,6 @@ machine:
 
 dependencies:
   pre:
-    ## K8S stuff
-    - sudo /opt/google-cloud-sdk/bin/gcloud --quiet components update
-    - sudo /opt/google-cloud-sdk/bin/gcloud --quiet components update kubectl
-    - echo $GCLOUD_SERVICE_KEY | base64 --decode -i > ${HOME}/account-auth.json
-    - sudo /opt/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file ${HOME}/account-auth.json
-    - sudo /opt/google-cloud-sdk/bin/gcloud config set project $PROJECT_NAME
-    - sudo /opt/google-cloud-sdk/bin/gcloud --quiet config set container/cluster $CLUSTER_NAME
-    # Reading the zone from the env var is not working so we set it here
-    - sudo /opt/google-cloud-sdk/bin/gcloud config set compute/zone ${CLOUDSDK_COMPUTE_ZONE}
-    - sudo /opt/google-cloud-sdk/bin/gcloud --quiet container clusters get-credentials $CLUSTER_NAME
-    # - docker build -t us.gcr.io/${PROJECT_NAME}/hello:$CIRCLE_SHA1 .
-    # Using a separate tag command until Docker 1.10 is available on CircleCI, then we can use two tags in the build command above
-    # - docker tag us.gcr.io/${PROJECT_NAME}/hello:$CIRCLE_SHA1 us.gcr.io/${PROJECT_NAME}/hello:latest
-
     ## App specific
     - ./server.sh build:
         pwd: keycloak
@@ -45,7 +31,6 @@ dependencies:
     - npm install:
         pwd: client
 
-
 test:
   override:
     - lein do clean, check, test :all, eastwood '{:source-paths ["src" "test"]}':
@@ -54,19 +39,19 @@ test:
     #     pwd: client
     - npm test:
         pwd: client
-  post:
-    - echo 'post test'
-
 
 deployment:
   prod:
     branch: issue/414-k8s
     commands:
-      - docker build -t eu.gcr.io/${PROJECT_NAME}/lumen-backend:$CIRCLE_SHA1 ./backend
-      - docker tag eu.gcr.io/${PROJECT_NAME}/lumen-backend:$CIRCLE_SHA1 eu.gcr.io/${PROJECT_NAME}/lumen-backend:latest
-      - docker build -t eu.gcr.io/${PROJECT_NAME}/lumen-client:$CIRCLE_SHA1 ./client
-      - docker tag eu.gcr.io/${PROJECT_NAME}/lumen-client:$CIRCLE_SHA1 eu.gcr.io/${PROJECT_NAME}/lumen-client:latest
+      - ./ci/setup_gcloud.sh
+      - ./ci/build_containers.sh
       - ./ci/deploy_prod.sh
+  # dev:
+  #   branch: develop
+  #   commands:
+  #     - ...
+
 
 
 
