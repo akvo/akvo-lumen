@@ -34,10 +34,12 @@ dependencies:
         pwd: backend
     - ./setup.sh:
         pwd: backend/provision
+    - mkdir -p $HOME/.lein
+    - echo '{:user {:plugins [[jonase/eastwood "0.2.3"]]}}' > $HOME/.lein/profiles.clj
 
 test:
   override:
-    - lein test :all:
+    - lein do clean, check, test :all, eastwood '{:source-paths ["src" "test"]}':
         pwd: backend
 
 
