@@ -1,6 +1,8 @@
 machine:
   java:
     version: openjdk8
+  node:
+    version: 6.9.1
   environment:
     PROJECT_NAME: akvo-lumen
     CLUSTER_NAME: lumen
@@ -30,18 +32,28 @@ dependencies:
         pwd: keycloak
     - ./server.sh run:
         pwd: keycloak
+    # Backend
     - cp profiles.clj.template profiles.clj:
         pwd: backend
     - ./setup.sh:
         pwd: backend/provision
     - mkdir -p $HOME/.lein
     - echo '{:user {:plugins [[jonase/eastwood "0.2.3"]]}}' > $HOME/.lein/profiles.clj
+    # Client
+    - npm config set spin false:
+        pwd: client
+    - npm install:
+        pwd: client
+
 
 test:
   override:
     - lein do clean, check, test :all, eastwood '{:source-paths ["src" "test"]}':
         pwd: backend
-
+    - npm run lint:
+        pwd: client
+    - npm test:
+        pwd: client
 
 #  post:
 #    - docker run -d -p 3000:3000 -e "SECRET_KEY_BASE=abcd1234" us.gcr.io/${PROJECT_NAME}/hello:$CIRCLE_SHA1; sleep 10
