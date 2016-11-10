@@ -1,7 +1,6 @@
-#!/bin/env bash
+#!/usr/bin/env bash
 
 set -e
-
 
 sudo /opt/google-cloud-sdk/bin/gcloud docker push eu.gcr.io/${PROJECT_NAME}/lumen-backend
 sudo /opt/google-cloud-sdk/bin/gcloud docker push eu.gcr.io/${PROJECT_NAME}/lumen-client
