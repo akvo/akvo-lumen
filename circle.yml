@@ -1,0 +1,52 @@
+machine:
+  java:
+    version: openjdk8
+  environment:
+    PROJECT_NAME: akvo-lumen
+    CLUSTER_NAME: lumen
+    CLOUDSDK_COMPUTE_ZONE: europe-west1-d
+    DEBIAN_FRONTEND: noninteractive
+  services:
+    - docker
+
+dependencies:
+  pre:
+    ## K8S stuff
+    - sudo /opt/google-cloud-sdk/bin/gcloud --quiet components update
+    - sudo /opt/google-cloud-sdk/bin/gcloud --quiet components update kubectl
+    - echo $GCLOUD_SERVICE_KEY | base64 --decode -i > ${HOME}/account-auth.json
+    - sudo /opt/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file ${HOME}/account-auth.json
+    - sudo /opt/google-cloud-sdk/bin/gcloud config set project $PROJECT_NAME
+    - sudo /opt/google-cloud-sdk/bin/gcloud --quiet config set container/cluster $CLUSTER_NAME
+    # Reading the zone from the env var is not working so we set it here
+    - sudo /opt/google-cloud-sdk/bin/gcloud config set compute/zone ${CLOUDSDK_COMPUTE_ZONE}
+    - sudo /opt/google-cloud-sdk/bin/gcloud --quiet container clusters get-credentials $CLUSTER_NAME
+    # - docker build -t us.gcr.io/${PROJECT_NAME}/hello:$CIRCLE_SHA1 .
+    # Using a separate tag command until Docker 1.10 is available on CircleCI, then we can use two tags in the build command above
+    # - docker tag us.gcr.io/${PROJECT_NAME}/hello:$CIRCLE_SHA1 us.gcr.io/${PROJECT_NAME}/hello:latest
+
+    ## App specific
+    - server.sh build:
+        pwd: keycloak
+    - server.sh run:
+        pwd: keycloak
+    - cp profiles.clj.template profiles.clj:
+        pwd: backend
+    - setup.sh:
+        pwd: backend/provision
+
+test:
+  override:
+    - lein test :all:
+        pwd: backend
+
+
+#  post:
+#    - docker run -d -p 3000:3000 -e "SECRET_KEY_BASE=abcd1234" us.gcr.io/${PROJECT_NAME}/hello:$CIRCLE_SHA1; sleep 10
+#    - curl --retry 10 --retry-delay 5 -v http://localhost:3000
+
+#deployment:
+#  prod:
+#    branch: master
+#    commands:
+#      - ./deploy.sh
