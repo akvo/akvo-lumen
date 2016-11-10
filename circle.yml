@@ -50,8 +50,8 @@ test:
   override:
     - lein do clean, check, test :all, eastwood '{:source-paths ["src" "test"]}':
         pwd: backend
-    - npm run lint:
-        pwd: client
+    # - npm run lint:
+    #     pwd: client
     - npm test:
         pwd: client
 
