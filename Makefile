@@ -35,13 +35,14 @@ expose-local:
 url:
 	minikube service lumen-deployment --url
 
-gcloud:
+kube-prod-cred:
 	gcloud container clusters get-credentials lumen --zone europe-west1-d --project akvo-lumen
+
 
 # From scratch
 
 # Step 1
-cluster:
+cluster-prod:
 	gcloud container clusters create lumen --zone=europe-west1-d --machine-type=g1-small --num-nodes=2 --project=akvo-lumen
 
 # Step 2 add secrets to cluster, can be found in akvo-config
@@ -52,3 +53,15 @@ cluster:
 # Step 4
 expose-production:
 	kubectl expose deployment lumen-deployment --type="LoadBalancer" --target-port=80 --load-balancer-ip='104.199.57.78'
+
+
+# Dev
+cluster-dev:
+	gcloud container clusters create lumen-dev --zone=europe-west1-d --machine-type=g1-small --num-nodes=1 --project=akvo-lumen
+
+kube-dev-cred:
+	gcloud container clusters get-credentials lumen-dev --zone europe-west1-d --project akvo-lumen
+
+
+expose-dev:
+	kubectl expose deployment lumen-deployment --type="LoadBalancer" --target-port=80 --load-balancer-ip='104.199.71.250'
