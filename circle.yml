@@ -26,13 +26,13 @@ dependencies:
     # - docker tag us.gcr.io/${PROJECT_NAME}/hello:$CIRCLE_SHA1 us.gcr.io/${PROJECT_NAME}/hello:latest
 
     ## App specific
-    - server.sh build:
+    - ./server.sh build:
         pwd: keycloak
-    - server.sh run:
+    - ./server.sh run:
         pwd: keycloak
     - cp profiles.clj.template profiles.clj:
         pwd: backend
-    - setup.sh:
+    - ./setup.sh:
         pwd: backend/provision
 
 test:
