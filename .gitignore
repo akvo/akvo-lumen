@@ -21,6 +21,10 @@ backend/profiles.clj
 backend/dev/resources/local.edn
 backend/dev/src/local.clj
 
+
+# Enable dockerignore files
+!**/.dockerignore
+
 # From https://github.com/github/gitignore
 
 # Python
