@@ -2,8 +2,15 @@
 
 set -e
 
-sudo /opt/google-cloud-sdk/bin/gcloud docker push eu.gcr.io/${PROJECT_NAME}/lumen-backend
-sudo /opt/google-cloud-sdk/bin/gcloud docker push eu.gcr.io/${PROJECT_NAME}/lumen-client
+export GOOGLE_APPLICATION_CREDENTIALS="/home/ubuntu/gcloud-service-key.json"
+sudo /opt/google-cloud-sdk/bin/gcloud container clusters get-credentials lumen --zone europe-west1-d
+
+sudo /opt/google-cloud-sdk/bin/gcloud config set container/use_client_certificate True
+sudo /opt/google-cloud-sdk/bin/gcloud container clusters get-credentials lumen --zone europe-west1-d
+
+
+sudo /opt/google-cloud-sdk/bin/gcloud docker -- push eu.gcr.io/${PROJECT_NAME}/lumen-backend
+sudo /opt/google-cloud-sdk/bin/gcloud docker -- push eu.gcr.io/${PROJECT_NAME}/lumen-client
 
 sudo chown -R ubuntu:ubuntu /home/ubuntu/.kube
 
