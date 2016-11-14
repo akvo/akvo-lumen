@@ -19,6 +19,10 @@ const strategies = {
       label: 'exactly matches',
       value: 'is',
     },
+    {
+      label: 'is empty',
+      value: 'isEmpty',
+    },
   ],
   number: [
     {
@@ -33,6 +37,10 @@ const strategies = {
       label: 'is lower than',
       value: 'isLower',
     },
+    {
+      label: 'is empty',
+      value: 'isEmpty',
+    },
   ],
   date: [
     {
@@ -42,6 +50,10 @@ const strategies = {
     {
       label: 'is before',
       value: 'isLower',
+    },
+    {
+      label: 'is empty',
+      value: 'isEmpty',
     },
   ],
 };
@@ -87,9 +99,9 @@ export default class FilterMenu extends Component {
   getIsFilterReady() {
     return Boolean(
       this.state.newFilterColumn &&
-      this.state.newFilterValue &&
       this.state.newFilterOperation &&
-      this.state.newFilterStrategy
+      this.state.newFilterStrategy &&
+      (this.state.newFilterValue || this.state.newFilterStrategy === 'isEmpty')
     );
   }
 
@@ -107,6 +119,12 @@ export default class FilterMenu extends Component {
       processedValue = Math.floor(inputDate.getTime() / 1000);
     } else {
       processedValue = value;
+    }
+
+    if (field === 'newFilterStrategy' && value === 'isEmpty') {
+      this.setState({
+        newFilterValue: null,
+      });
     }
 
     this.setState({
@@ -243,7 +261,10 @@ export default class FilterMenu extends Component {
                   <input
                     className={`filterMatchValueInput textInput
                       ${this.state.newFilterColumn ? 'enabled' : 'disabled'}`}
-                    disabled={this.state.newFilterColumn === null}
+                    disabled={
+                      this.state.newFilterColumn === null
+                      || this.state.newFilterStrategy === 'isEmpty'
+                    }
                     type={this.state.newFilterColumn ? activeColumnType : 'text'}
                     onChange={evt =>
                       this.updateNewFilter('newFilterValue', evt.target.value, activeColumnType)}
