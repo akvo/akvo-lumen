@@ -25,5 +25,5 @@ psql -c "
 
 psql --dbname=lumen -c "
         CREATE EXTENSION IF NOT EXISTS btree_gist WITH SCHEMA public;
-        CREATE EXTENSION IF NOT EXISTS pgcrypto  WITH SCHEMA public;
+        CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;
 "
