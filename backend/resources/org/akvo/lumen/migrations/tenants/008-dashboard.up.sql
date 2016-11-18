@@ -15,7 +15,7 @@ END$$;
 --;;
 
 CREATE TABLE dashboard_visualisation (
-    id text PRIMARY KEY DEFAULT uuid_generate_v4()::text,
+    id text PRIMARY KEY DEFAULT gen_random_uuid()::text,
     dashboard_id text REFERENCES dashboard (id) ON UPDATE CASCADE ON DELETE CASCADE,
     visualisation_id text REFERENCES visualisation (id) ON UPDATE CASCADE ON DELETE CASCADE,
     layout jsonb,
