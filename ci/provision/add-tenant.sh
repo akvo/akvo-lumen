@@ -15,6 +15,8 @@ DB_URI="jdbc:postgresql://$PGHOST/$TENANT?user=$TENANT&password=$TENANT_PASSWORD
 
 psql -c "CREATE ROLE $TENANT WITH PASSWORD '$TENANT_PASSWORD' LOGIN;"
 
+# psql -c "GRANT $TENANT TO lumen;"
+
 psql -c "
         CREATE DATABASE $TENANT
         WITH OWNER = $TENANT
@@ -25,7 +27,7 @@ psql -c "
 
 psql --dbname=$TENANT -c "
         CREATE EXTENSION IF NOT EXISTS btree_gist WITH SCHEMA public;
-        CREATE EXTENSION IF NOT EXISTS pgcrypto  WITH SCHEMA public;
+        CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;
 "
 
-psql -c "INSERT INTO tenants (db_uri, label, title) VALUES ($DB_URI, $LABEL, $TITLE);"
+psql -c "INSERT INTO tenants (db_uri, label, title) VALUES ('$DB_URI', '$LABEL', '$TITLE');"

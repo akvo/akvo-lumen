@@ -62,6 +62,8 @@ cluster-dev:
 kube-dev-cred:
 	gcloud container clusters get-credentials lumen-dev --zone europe-west1-d --project akvo-lumen
 
+deploy-dev:
+	kubectl create -f ./ci/prod/deployment.yaml
 
 expose-dev:
 	kubectl expose deployment lumen-deployment --type="LoadBalancer" --target-port=80 --load-balancer-ip='104.199.71.250'

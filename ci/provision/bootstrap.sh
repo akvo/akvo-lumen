@@ -13,7 +13,8 @@ hash psql 2>/dev/null || { echo >&2 $CLI_ERR_MSG ; exit 1; }
 # env PGHOST=****.db.elephantsql.com PGDATABASE=*** PGUSER=*** PGPASSWORD=*** ./setup-db.sh
 
 
-psql -c "CREATE ROLE lumen WITH PASSWORD '$PGPASSWORD' CREATEDB LOGIN;"
+psql -c "CREATE ROLE lumen WITH PASSWORD '$PGPASSWORD' SUPERUSER LOGIN;"
+
 
 psql -c "
         CREATE DATABASE lumen
