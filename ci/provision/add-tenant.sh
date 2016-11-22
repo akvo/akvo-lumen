@@ -15,8 +15,6 @@ DB_URI="jdbc:postgresql://$PGHOST/$TENANT?user=$TENANT&password=$TENANT_PASSWORD
 
 psql -c "CREATE ROLE $TENANT WITH PASSWORD '$TENANT_PASSWORD' LOGIN;"
 
-# psql -c "GRANT $TENANT TO lumen;"
-
 psql -c "
         CREATE DATABASE $TENANT
         WITH OWNER = $TENANT

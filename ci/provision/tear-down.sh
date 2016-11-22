@@ -12,9 +12,10 @@ hash psql 2>/dev/null || { echo >&2 $CLI_ERR_MSG ; exit 1; }
 # Use this as follow
 # env PGHOST=****.db.elephantsql.com PGDATABASE=*** PGUSER=*** PGPASSWORD=*** ./tear-down.sh
 
+
 psql -c "
-     DROP EXTENSION IF EXISTS pgcrypto;
-     DROP EXTENSION IF EXISTS btree_gist;
+     DROP EXTENSION IF EXISTS pgcrypto CASCADE;
+     DROP EXTENSION IF EXISTS btree_gist CASCADE;
 "
 
 psql -c "DROP DATABASE IF EXISTS lumen"
