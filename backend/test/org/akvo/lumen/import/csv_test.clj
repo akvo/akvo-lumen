@@ -18,4 +18,5 @@
            (get-insert-sql "t_uuid1" "uuid1" 2)))
     (is (= 19 (get-num-cols (io/file (io/resource "artist")) \tab "UTF-8")))
     (is (= 23 (get-num-cols (io/file (io/resource "products")) \, "UTF-8")))
-    (is (= 60 (get-num-cols (io/file (io/resource "rural-population")) \, "UTF-8")))))
+    (is (= 60 (get-num-cols (io/file (io/resource "rural-population")) \, "UTF-8")))
+    (is (= 3 (get-num-cols (io/file (io/resource "dos-line-endings.csv")) \, "UTF-8")))))
