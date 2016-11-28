@@ -69,4 +69,4 @@ deploy-dev:
 	kubectl create -f ./ci/prod/deployment.yaml
 
 expose-dev:
-	kubectl expose deployment lumen-deployment --type="LoadBalancer" --target-port=80 --load-balancer-ip='104.199.71.250'
+	kubectl expose deployment lumen --type="LoadBalancer" --target-port=80 --load-balancer-ip='104.199.71.250'
