@@ -6,7 +6,7 @@
 (defn -main [label title]
   (let [tenant (str "tenant_" label)
         tenant-password (clojure.string/replace (squuid) "-" "")
-        db-uri tenant-db-uri (format "jdbc:postgresql://%s/%s?user=%s&password=%s" (env :pghost) (env :pgdatabase) (env :pguser) (env :pgpassword))
+        db-uri (format "jdbc:postgresql://%s/%s?user=%s&password=%s" (env :pghost) (env :pgdatabase) (env :pguser) (env :pgpassword))
 
         tenant-db-uri (format "jdbc:postgresql://%s/%s?user=%s&password=%s" (env :pghost) tenant tenant tenant-password)]
     (jdbc/execute! db-uri
