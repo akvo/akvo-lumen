@@ -9,20 +9,24 @@ const getFilterValues = (filters, row) => filters.map((filter) => {
   const columnType = filter.columnType;
   let filterValue;
 
-  switch (columnType) {
-    case 'text':
-      filterValue = value.toString();
-      break;
+  if (value === null) {
+    filterValue = null;
+  } else {
+    switch (columnType) {
+      case 'text':
+        filterValue = value.toString();
+        break;
 
-    case 'number':
-      filterValue = parseFloat(value);
-      break;
-    case 'date':
-      filterValue = parseFloat(value) * 1000;
-      break;
+      case 'number':
+        filterValue = parseFloat(value) || null;
+        break;
+      case 'date':
+        filterValue = parseFloat(value) * 1000 || null;
+        break;
 
-    default:
-      throw new Error(`Unknown column type ${columnType} supplied to getFilterValues`);
+      default:
+        throw new Error(`Unknown column type ${columnType} supplied to getFilterValues`);
+    }
   }
 
   return filterValue;
@@ -227,6 +231,14 @@ export function getChartData(visualisation, datasets) {
             comparitor = '>=';
           } else if (filter.operation === 'keep') {
             comparitor = '<';
+          }
+          break;
+
+        case 'isEmpty':
+          if (filter.operation === 'remove') {
+            comparitor = '!=';
+          } else if (filter.operation === 'keep') {
+            comparitor = '===';
           }
           break;
 

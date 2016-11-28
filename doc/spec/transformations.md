@@ -168,3 +168,21 @@ Examples:
  "args": {"columnName": "c2"},
  "onError": "default-value"}
 ````
+
+### core/combine
+
+* args
+  * columNames (vector): `["c1", "c2"]`
+  * newColumnTitle (string): `"New title"`
+  * seperator (string): `","`
+* onError (string): `"fail"`
+
+Examples:
+
+````
+{"op": "core/combine",
+ "args": {"columnNames": ["c1", "c2"],
+          "newColumnTitle": "New title",
+          "separator": " "},
+ "onError": "fail"}
+````

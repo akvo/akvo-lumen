@@ -68,14 +68,15 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
   const dataSource = hasAggregation ? 'pie' : 'table';
   const segmentLabelField = hasAggregation ? 'aggregationValue' : 'label';
   const fieldY = hasAggregation ? `${transformType}_y` : 'y';
+  const showLegend = visualisation.spec.showLegend;
 
   return ({
     data: dataArray,
-    width: containerWidth - 20,
+    width: showLegend ? (chartRadius * 2) : containerWidth - 20,
     height: containerHeight - 45,
     padding: {
       top: 35,
-      right: 10,
+      right: 10 + showLegend ? containerWidth - (chartRadius * 2) - 10 : 0,
       bottom: 10,
       left: 10,
     },
@@ -95,7 +96,7 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
         range: 'category10',
         domain: {
           data: dataSource,
-          field: fieldY,
+          field: segmentLabelField,
         },
       },
     ],
@@ -138,7 +139,7 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
           update: {
             fill: {
               scale: 'c',
-              field: fieldY,
+              field: segmentLabelField,
             },
           },
           hover: {
@@ -148,45 +149,50 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
           },
         },
       },
-      {
-        type: 'text',
-        from: {
-          data: dataSource,
-        },
-        properties: {
-          enter: {
-            x: {
-              field: {
-                group: 'width',
+      showLegend ?
+        {
+          type: 'text',
+        }
+        :
+        {
+          type: 'text',
+          from: {
+            data: dataSource,
+          },
+          properties: {
+            enter: {
+              x: {
+                field: {
+                  group: 'width',
+                },
+                mult: 0.5,
               },
-              mult: 0.5,
-            },
-            y: {
-              field: {
-                group: 'height',
+              y: {
+                field: {
+                  group: 'height',
+                },
+                mult: 0.5,
               },
-              mult: 0.5,
-            },
-            radius: {
-              scale: 'r',
-              field: 'value',
-              offset: 30,
-            },
-            theta: {
-              field: 'layout_mid',
-            },
-            fill: {
-              value: 'black',
-            },
-            align: {
-              value: 'center',
-            },
-            text: {
-              field: segmentLabelField,
+              radius: {
+                scale: 'r',
+                field: 'value',
+                offset: 30,
+              },
+              theta: {
+                field: 'layout_mid',
+              },
+              fill: {
+                value: 'black',
+              },
+              align: {
+                value: 'center',
+              },
+              text: {
+                field: segmentLabelField,
+              },
             },
           },
         },
-      },
       {
         type: 'text',
         from: {
@@ -199,46 +205,91 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
           ],
         },
         properties: {
-          enter: {
-            x: {
-              field: {
-                group: 'width',
-              },
-              mult: 0.5,
-            },
-            y: {
-              field: {
-                group: 'height',
-              },
-              mult: 0.5,
-            },
-            radius: {
-              scale: 'r',
-              field: 'a',
-              offset: -1 * (chartRadius / 5),
-            },
-            theta: {
-              field: 'layout_mid',
-            },
-            fill: {
-              value: 'black',
-            },
-            align: {
-              value: 'center',
-            },
-            text: hasAggregation ?
+          enter:
+            showLegend ?
               {
-                template: '{{datum.rounded_percentage}}% ({{datum.rounded_value}})',
+                x: {
+                  value: (chartRadius * 2) + 20,
+                },
+                y: {
+                  value: chartRadius + 35,
+                },
+                fill: {
+                  value: 'black',
+                },
+                align: {
+                  value: 'left',
+                },
+                text: hasAggregation ?
+                  {
+                    template: `{{datum[${segmentLabelField}]}}: {{datum.rounded_percentage}}% ({{datum.rounded_value}})`,
+                  }
+                  :
+                  {
+                    field: fieldY,
+                  }
+                ,
               }
               :
               {
-                field: fieldY,
+                x: {
+                  field: {
+                    group: 'width',
+                  },
+                  mult: 0.5,
+                },
+                y: {
+                  field: {
+                    group: 'height',
+                  },
+                  mult: 0.5,
+                },
+                radius: {
+                  scale: 'r',
+                  field: 'a',
+                  offset: -1 * (chartRadius / 5),
+                },
+                theta: {
+                  field: 'layout_mid',
+                },
+                fill: {
+                  value: 'black',
+                },
+                align: {
+                  value: 'center',
+                },
+                text: hasAggregation ?
+                  {
+                    template: '{{datum.rounded_percentage}}% ({{datum.rounded_value}})',
+                  }
+                  :
+                  {
+                    field: fieldY,
+                  }
+                ,
               }
             ,
-          },
         },
       },
     ],
+    legends:
+      showLegend ?
+        [
+          {
+            fill: 'c',
+            orient: 'right',
+            title: 'Legend',
+            properties: {
+              symbols: {
+                shape: {
+                  value: 'square',
+                },
+              },
+            },
+          },
+        ]
+        :
+        [],
     signals: [
       {
         name: 'tooltip',

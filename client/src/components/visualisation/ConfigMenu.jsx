@@ -459,6 +459,19 @@ export default function ConfigMenu(props) {
               columnOptions={columnOptions}
               onChangeSpec={onChangeSpec}
             />
+            <label
+              htmlFor="showLegend"
+            >
+              Show legend
+            </label>
+            <input
+              name="showLegend"
+              type="checkbox"
+              checked={spec.showLegend}
+              onChange={evt => onChangeSpec({
+                showLegend: evt.target.checked,
+              })}
+            />
           </div>
         );
         break;

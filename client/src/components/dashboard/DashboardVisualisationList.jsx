@@ -14,15 +14,11 @@ export default function DashboardVisualisationList(props) {
           className="noVisualisationsMessage"
         >
           No visualisations to show.
-        </div>
-        :
-        <ul
-          className="list"
-        >
+        </div> : <ul className="list">
           {props.visualisations.map(item =>
             <li
               className={`listItem clickable ${item.visualisationType}
-                ${isOnDashboard(item) ? 'added' : ''}`}
+              ${isOnDashboard(item) ? 'added' : ''}`}
               key={item.id}
               onClick={() => props.onEntityClick(item, 'visualisation')}
             >
@@ -36,15 +32,15 @@ export default function DashboardVisualisationList(props) {
               </h4>
               <span className="visualisationType">
                 {item.visualisationType === 'map' ?
-                  'Map'
-                  :
-                  `${item.visualisationType.charAt(0).toUpperCase() +
-                      item.visualisationType.slice(1)} chart`
-                }
+                'Map'
+                :
+                `${item.visualisationType.charAt(0).toUpperCase() +
+                    item.visualisationType.slice(1)} chart`
+              }
               </span>
               <div className="background" />
             </li>
-          )}
+        )}
         </ul>
       }
     </div>

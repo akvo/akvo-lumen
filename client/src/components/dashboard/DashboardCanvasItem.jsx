@@ -103,9 +103,7 @@ export default class DashboardCanvasItem extends Component {
                 datasets={this.props.datasets}
                 width={dimensions.width}
                 height={dimensions.height}
-              />
-              :
-              <div>Loading dataset...</div>
+              /> : <div>Loading dataset...</div>
             }
           </div>
         }
@@ -142,4 +140,3 @@ DashboardCanvasItem.propTypes = {
   onEntityUpdate: PropTypes.func.isRequired,
   onDeleteClick: PropTypes.func.isRequired,
 };
-

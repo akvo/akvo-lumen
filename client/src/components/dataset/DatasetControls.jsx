@@ -17,6 +17,7 @@ export default class DatasetControls extends Component {
     });
   }
   render() {
+    const { pendingTransformationsCount } = this.props;
     return (
       <div className="DatasetControls">
         <span className="controlGroup1">
@@ -44,8 +45,8 @@ export default class DatasetControls extends Component {
                     value: 'bulk-column-editor',
                   },
                   {
-                    label: 'Merge Columns',
-                    value: 'merge-columns',
+                    label: 'Combine Columns',
+                    value: 'combineColumns',
                   },
                   {
                     label: 'Derive new column',
@@ -56,7 +57,10 @@ export default class DatasetControls extends Component {
                     value: 'merge-datasets',
                   },
                 ]}
-                onOptionSelected={item => this.props.onClickMenuItem('datasetEditorItem', item)}
+                onOptionSelected={(item) => {
+                  this.onEditorToggleClick();
+                  this.props.onClickMenuItem(item);
+                }}
                 style={{
                   left: 0,
                   width: '16rem',
@@ -94,7 +98,7 @@ export default class DatasetControls extends Component {
               className="transformationLogToggle clickable"
               onClick={this.props.onToggleTransformationLog}
             >
-              Transformation log
+              Transformation log {pendingTransformationsCount > 0 && `(${pendingTransformationsCount})`}
             </button>
           </span>
         </span>
@@ -105,6 +109,7 @@ export default class DatasetControls extends Component {
 
 DatasetControls.propTypes = {
   onToggleTransformationLog: PropTypes.func.isRequired,
+  pendingTransformationsCount: PropTypes.number.isRequired,
   onClickMenuItem: PropTypes.func.isRequired,
   columns: PropTypes.object.isRequired,
   rowsCount: PropTypes.number.isRequired,

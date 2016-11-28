@@ -15,7 +15,9 @@ class Dataset extends Component {
     this.state = {
       asyncComponents: null,
       dataset: null,
-      pendingTransformations: Immutable.List(),
+      // Pending transformations are represented as
+      // an oredered map from timestamp to transformation
+      pendingTransformations: Immutable.OrderedMap(),
     };
     this.handleShowDatasetSettings = this.handleShowDatasetSettings.bind(this);
     this.fetchDataset = this.fetchDataset.bind(this);
@@ -43,29 +45,50 @@ class Dataset extends Component {
       });
     }, 'Dataset');
   }
+  setPendingTransformation(timestamp, transformation) {
+    const { pendingTransformations } = this.state;
+    this.setState({
+      pendingTransformations: pendingTransformations.set(timestamp, transformation),
+    });
+  }
+
+  setPendingUndo(timestamp) {
+    const { pendingTransformations } = this.state;
+    this.setState({
+      pendingTransformations: pendingTransformations.set(timestamp, Immutable.Map({ op: 'undo' })),
+    });
+  }
 
   fetchDataset(datasetId) {
-    api.get(`/api/datasets/${datasetId}`)
+    return api.get(`/api/datasets/${datasetId}`)
       .then(dataset => this.setState({ dataset: Immutable.fromJS(dataset) }));
   }
 
+  removePending(timestamp) {
+    const { pendingTransformations } = this.state;
+    this.setState({ pendingTransformations: pendingTransformations.delete(timestamp) });
+  }
+
   transform(transformation) {
-    const { dataset, pendingTransformations } = this.state;
+    const { dataset } = this.state;
     const id = dataset.get('id');
-    this.setState({ pendingTransformations: pendingTransformations.push(transformation) });
+    const now = Date.now();
+
+    this.setPendingTransformation(now, transformation);
     api.post(`/api/transformations/${id}/transform`, transformation.toJS())
-      .then(() => {
-        this.setState({ pendingTransformations: pendingTransformations.shift() });
-        this.fetchDataset(id);
-      });
+      .then(() => this.fetchDataset(id))
+      .then(() => this.removePending(now));
   }
 
   undo() {
     const { dataset } = this.state;
     const id = dataset.get('id');
+    const now = Date.now();
 
+    this.setPendingUndo(now);
     api.post(`/api/transformations/${id}/undo`)
-      .then(() => this.fetchDataset(id));
+      .then(() => this.fetchDataset(id))
+      .then(() => this.removePending(now));
   }
 
   handleShowDatasetSettings() {
@@ -75,7 +98,7 @@ class Dataset extends Component {
   }
 
   render() {
-    const { dataset } = this.state;
+    const { dataset, pendingTransformations } = this.state;
     if (dataset == null || !this.state.asyncComponents) {
       return <div className="Dataset">Loading...</div>;
     }
@@ -93,6 +116,7 @@ class Dataset extends Component {
             columns={getColumns(dataset)}
             rows={getRows(dataset)}
             transformations={getTransformations(dataset)}
+            pendingTransformations={pendingTransformations.valueSeq()}
             onTransform={transformation => this.transform(transformation)}
             onUndoTransformation={() => this.undo()}
           />}

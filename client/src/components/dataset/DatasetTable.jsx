@@ -42,6 +42,7 @@ export default class DatasetTable extends Component {
     this.handleColumnContextMenuClicked = this.handleColumnContextMenuClicked.bind(this);
 
     this.handleToggleTransformationLog = this.handleToggleTransformationLog.bind(this);
+    this.handleToggleCombineColumnSidebar = this.handleToggleCombineColumnSidebar.bind(this);
   }
 
   componentDidMount() {
@@ -114,6 +115,29 @@ export default class DatasetTable extends Component {
       });
     }
   }
+
+  handleToggleCombineColumnSidebar() {
+    if (this.state.sidebarProps &&
+      this.state.sidebarProps.type === 'combineColumns') {
+      this.hideSidebar();
+    } else {
+      this.setState({
+        activeDataTypeContextMenu: null,
+        activeColumnContextMenu: null,
+      });
+      this.showSidebar({
+        type: 'combineColumns',
+        displayRight: false,
+        onClose: this.hideSidebar,
+        onApply: (transformation) => {
+          this.hideSidebar();
+          this.props.onTransform(transformation);
+        },
+        columns: this.props.columns,
+      });
+    }
+  }
+
 
   handleDataTypeContextMenuClicked({ column, dataTypeOptions, newColumnType }) {
     this.setState({ activeDataTypeContextMenu: null });
@@ -191,7 +215,7 @@ export default class DatasetTable extends Component {
   }
 
   render() {
-    const { rows, columns } = this.props;
+    const { rows, columns, pendingTransformations, transformations } = this.props;
     const {
       activeDataTypeContextMenu,
       activeColumnContextMenu,
@@ -231,7 +255,14 @@ export default class DatasetTable extends Component {
           columns={columns}
           rowsCount={rows.size}
           onToggleTransformationLog={this.handleToggleTransformationLog}
-          onClickMenuItem={() => { throw new Error('Not yet implemented'); }}
+          pendingTransformationsCount={pendingTransformations.size}
+          onClickMenuItem={(menuItem) => {
+            if (menuItem === 'combineColumns') {
+              this.handleToggleCombineColumnSidebar();
+            } else {
+              throw new Error(`Not yet implemented: ${menuItem}`);
+            }
+          }}
         />
         <div
           style={{
@@ -242,7 +273,8 @@ export default class DatasetTable extends Component {
           {sidebarProps &&
             <DataTableSidebar
               {...sidebarProps}
-              transformations={this.props.transformations}
+              transformations={transformations}
+              pendingTransformations={pendingTransformations}
             />}
           <div
             className="wrapper"
@@ -284,6 +316,7 @@ DatasetTable.propTypes = {
   columns: PropTypes.object.isRequired,
   rows: PropTypes.object.isRequired,
   transformations: PropTypes.object,
+  pendingTransformations: PropTypes.object.isRequired,
   onTransform: PropTypes.func.isRequired,
   onUndoTransformation: PropTypes.func.isRequired,
 };
