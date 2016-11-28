@@ -62,6 +62,9 @@ cluster-dev:
 kube-dev-cred:
 	gcloud container clusters get-credentials lumen-dev --zone europe-west1-d --project akvo-lumen
 
+gcloud-auth:
+	gcloud auth application-default login
+
 deploy-dev:
 	kubectl create -f ./ci/prod/deployment.yaml
 

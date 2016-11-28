@@ -9,7 +9,7 @@ hash psql 2>/dev/null || { echo >&2 $CLI_ERR_MSG ; exit 1; }
 LABEL=$1
 TITLE=$2
 TENANT=tenant_$LABEL
-TENANT_PASSWORD=`openssl rand -base64 32`
+TENANT_PASSWORD=`openssl rand -base64 32 | tr -cd '[[:alnum:]]'`
 DB_URI="jdbc:postgresql://$PGHOST/$TENANT?user=$TENANT&password=$TENANT_PASSWORD"
 
 
