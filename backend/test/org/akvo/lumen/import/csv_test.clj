@@ -1,8 +1,28 @@
 (ns org.akvo.lumen.import.csv-test
   (:require [clojure.java.io :as io]
             [clojure.test :refer :all]
-            [org.akvo.lumen.import.csv :refer :all]))
+            [hugsql.core :as hugsql]
+            [org.akvo.lumen.fixtures :refer [test-conn]]
+            [org.akvo.lumen.import.csv :refer :all]
+            [org.akvo.lumen.import :refer [do-import]]
+            [org.akvo.lumen.util :refer [squuid]]))
 
+(hugsql/def-db-fns "org/akvo/lumen/job-execution.sql")
+
+(defn import-file
+  "Import a file and return the dataset-id"
+  [file {:keys [dataset-name has-column-headers?]}]
+  (let [data-source-id (str (squuid))
+        job-id (str (squuid))
+        data-source-spec {"name" (or dataset-name file)
+                          "source" {"path" (.getAbsolutePath (io/file (io/resource file)))
+                                    "kind" "DATA_FILE"
+                                    "fileName" (or dataset-name file)
+                                    "hasColumnHeaders" (boolean has-column-headers?)}}]
+    (insert-data-source test-conn {:id data-source-id :spec data-source-spec})
+    (insert-job-execution test-conn {:id job-id :data-source-id data-source-id})
+    (do-import test-conn {:file-upload-path "/tmp/akvo/dash"} job-id)
+    (:dataset_id (dataset-id-by-job-execution-id test-conn {:id job-id}))))
 
 (deftest test-util-functions
   (testing "SQL generation"
@@ -18,5 +38,4 @@
            (get-insert-sql "t_uuid1" "uuid1" 2)))
     (is (= 19 (get-num-cols (io/file (io/resource "artist")) \tab "UTF-8")))
     (is (= 23 (get-num-cols (io/file (io/resource "products")) \, "UTF-8")))
-    (is (= 60 (get-num-cols (io/file (io/resource "rural-population")) \, "UTF-8")))
-    (is (= 3 (get-num-cols (io/file (io/resource "dos-line-endings.csv")) \, "UTF-8")))))
+    (is (= 60 (get-num-cols (io/file (io/resource "rural-population")) \, "UTF-8")))))

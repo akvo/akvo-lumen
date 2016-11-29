@@ -111,7 +111,7 @@
            (concat ((juxt :identifier :latitude :longitude :submitter :submitted_at)
                     form-instance)
                    (for [question (questions form)]
-                     (render-response (get responses (:id question)))))) )))
+                     (render-response (get responses (:id question)))))))))
 
 (defn form-data
   "Returns a sequence of maps of the form {\"c1\" jsonb-obj, ...}"
