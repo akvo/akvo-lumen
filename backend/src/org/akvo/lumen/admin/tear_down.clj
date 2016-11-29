@@ -4,7 +4,6 @@
             [environ.core :refer [env]]
             [org.akvo.lumen.admin.remove-tenant :refer (remove-tenant)]
             [org.akvo.lumen.util :refer [squuid]]
-
             [ragtime.jdbc]
             [ragtime.repl]))
 
