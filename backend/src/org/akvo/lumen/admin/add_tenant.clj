@@ -24,18 +24,22 @@
                              pg-host pg-password)
         tenant-db-uri (format "jdbc:postgresql://%1$s/%2$s?user=%2$s&password=%3$s"
                               pg-host tenant tenant-password)
-        exec! (fn [format-str & args]
-                (jdbc/execute! db-uri [(apply format format-str args)]
+        tenant-db-uri-with-superuser (format "jdbc:postgresql://%s/%s?user=%s&password=%s&sslmode=require"
+                                             pg-host tenant pg-user pg-password)
+        exec! (fn [db-uri format-str & args]
+                (jdbc/execute! db-uri
+                               [(apply format format-str args)]
                                {:transaction? false}))]
-    (exec! "CREATE ROLE %s WITH PASSWORD '%s' LOGIN;" tenant tenant-password)
-    (exec! (str "CREATE DATABASE %1$s "
+    (exec! db-uri "CREATE ROLE %s WITH PASSWORD '%s' LOGIN;" tenant tenant-password)
+    (exec! db-uri
+           (str "CREATE DATABASE %1$s "
                 "WITH OWNER = %1$s "
                 "TEMPLATE = template0 "
                 "ENCODING = 'UTF8' "
                 "LC_COLLATE = 'en_US.UTF-8' "
                 "LC_CTYPE = 'en_US.UTF-8';")
            tenant)
-    (exec! "CREATE EXTENSION IF NOT EXISTS btree_gist WITH SCHEMA public;")
-    (exec! "CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;")
+    (exec! tenant-db-uri-with-superuser "CREATE EXTENSION IF NOT EXISTS btree_gist WITH SCHEMA public;")
+    (exec! tenant-db-uri-with-superuser "CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;")
     (jdbc/insert! lumen-db-uri :tenants {:db_uri tenant-db-uri :label label :title title})
     (migrate-tenant tenant-db-uri)))
