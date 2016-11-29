@@ -2,7 +2,14 @@
   (:require [clojure.java.jdbc :as jdbc]
             [clojure.string :as s]
             [environ.core :refer [env]]
-            [org.akvo.lumen.util :refer [squuid]]))
+            [org.akvo.lumen.util :refer [squuid]]
+            [ragtime.jdbc]
+            [ragtime.repl]))
+
+(defn migrate-tenant [db-uri]
+  (ragtime.repl/migrate
+   {:datastore db-uri
+    :migrations (ragtime.jdbc/load-resources "org/akvo/lumen/migrations/tenants")}))
 
 (defn -main [label title]
   (let [{pg-host :pghost
@@ -27,4 +34,5 @@
            tenant)
     (exec! "CREATE EXTENSION IF NOT EXISTS btree_gist WITH SCHEMA public;")
     (exec! "CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;")
-    (jdbc/insert! db-uri :tenants {:db_uri tenant-db-uri :label label :title title})))
+    (jdbc/insert! db-uri :tenants {:db_uri tenant-db-uri :label label :title title})
+    (migrate-tenant tenant-db-uri)))
