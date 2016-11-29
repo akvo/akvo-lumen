@@ -25,6 +25,6 @@
                 "LC_COLLATE = 'en_US.UTF-8' "
                 "LC_CTYPE = 'en_US.UTF-8';")
            tenant)
-    (exec! db-uri "CREATE EXTENSION IF NOT EXISTS btree_gist WITH SCHEMA public;")
-    (exec! db-uri "CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;")
-    (jdbc/insert! db-uri :tenants {:db_uri db-uri :label label :title title})))
+    (exec! "CREATE EXTENSION IF NOT EXISTS btree_gist WITH SCHEMA public;")
+    (exec! "CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;")
+    (jdbc/insert! db-uri :tenants {:db_uri tenant-db-uri :label label :title title})))
