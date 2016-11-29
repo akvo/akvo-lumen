@@ -8,7 +8,7 @@
 
 (defn migrate-tenant [db-uri]
   (ragtime.repl/migrate
-   {:datastore db-uri
+   {:datastore (ragtime.jdbc/sql-database db-uri)
     :migrations (ragtime.jdbc/load-resources "org/akvo/lumen/migrations/tenants")}))
 
 (defn -main [label title]
@@ -20,10 +20,13 @@
         tenant-password (s/replace (squuid) "-" "")
         db-uri (format "jdbc:postgresql://%s/%s?user=%s&password=%s"
                        pg-host pg-database pg-user pg-password)
+        lumen-db-uri (format "jdbc:postgresql://%s/lumen?user=lumen&password=%s"
+                             pg-host pg-password)
         tenant-db-uri (format "jdbc:postgresql://%1$s/%2$s?user=%2$s&password=%3$s"
                               pg-host tenant tenant-password)
         exec! (fn [format-str & args]
-                (jdbc/execute! db-uri [(apply format format-str args)]))]
+                (jdbc/execute! db-uri [(apply format format-str args)]
+                               {:transaction? false}))]
     (exec! "CREATE ROLE %s WITH PASSWORD '%s' LOGIN;" tenant tenant-password)
     (exec! (str "CREATE DATABASE %1$s "
                 "WITH OWNER = %1$s "
@@ -34,5 +37,5 @@
            tenant)
     (exec! "CREATE EXTENSION IF NOT EXISTS btree_gist WITH SCHEMA public;")
     (exec! "CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;")
-    (jdbc/insert! db-uri :tenants {:db_uri tenant-db-uri :label label :title title})
+    (jdbc/insert! lumen-db-uri :tenants {:db_uri tenant-db-uri :label label :title title})
     (migrate-tenant tenant-db-uri)))
