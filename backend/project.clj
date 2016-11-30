@@ -10,7 +10,7 @@
                  [com.ibm.icu/icu4j "58.1"]
                  [com.layerware/hugsql "0.4.7"]
                  [com.stuartsierra/component "0.3.1"]
-                 [compojure "1.5.1"]
+                 [compojure "1.5.1" :exclusions [medley]]
                  [duct "0.8.2"]
                  [duct/hikaricp-component "0.1.0"]
                  [environ "1.1.0"]
@@ -30,6 +30,7 @@
                  [ring/ring-json "0.4.0"]]
   :uberjar-name "akvo-lumen.jar"
   :repl-options {:timeout 120000}
+  :pedantic? :abort
   :plugins [[lein-ancient "0.6.10"]
             [lein-codox "0.9.6"]
             [lein-environ "1.0.3"]]
