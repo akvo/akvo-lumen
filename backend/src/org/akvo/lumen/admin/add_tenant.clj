@@ -17,7 +17,7 @@
         tenant-password (s/replace (squuid) "-" "")
         db-uri (util/db-uri)
         lumen-db-uri (util/db-uri {:database "lumen" :user "lumen"})
-        tenant-db-uri (util/db-uri {:databse tenant :user tenant :password tenant-password})
+        tenant-db-uri (util/db-uri {:database tenant :user tenant :password tenant-password})
         tenant-db-uri-with-superuser (util/db-uri {:database tenant})]
     (util/exec! db-uri "CREATE ROLE %s WITH PASSWORD '%s' LOGIN;" tenant tenant-password)
     (util/exec! db-uri

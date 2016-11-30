@@ -12,9 +12,9 @@
 (defn db-uri
   "Build a db uri string using standard PG environment variables as fallback"
   ([] (db-uri {}))
-  ([{:keys [host user database password]
+  ([{:keys [host database user password]
      :or {host (env :pghost)
-          database (end :pgdatabase)
+          database (env :pgdatabase)
           user (env :pguser)
           password (env :pgpassword)}}]
    (format "jdbc:postgresql://%s/%s?user=%s&password=%s&sslmode=require"
