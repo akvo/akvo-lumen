@@ -15,11 +15,12 @@ backend/pom.xml.asc
 backend/*.jar
 backend/*.class
 backend/.lein-*
-backend/.nrepl-port
+backend/.nrepl-*
 backend/.dir-locals.el
 backend/profiles.clj
 backend/dev/resources/local.edn
 backend/dev/src/local.clj
+
 
 # From https://github.com/github/gitignore
 

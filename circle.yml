@@ -1,0 +1,57 @@
+machine:
+  java:
+    version: openjdk8
+  node:
+    version: 6.9.1
+  environment:
+    PROJECT_NAME: akvo-lumen
+    PROD_CLUSTER_NAME: lumen
+    DEV_CLUSTER_NAME: lumen-dev
+    CLOUDSDK_COMPUTE_ZONE: europe-west1-d
+    DEBIAN_FRONTEND: noninteractive
+  services:
+    - docker
+
+dependencies:
+  pre:
+    ## App specific
+    - ./server.sh build:
+        pwd: keycloak
+    - ./server.sh run:
+        pwd: keycloak
+    # Backend
+    - cp profiles.clj.template profiles.clj:
+        pwd: backend
+    - ./setup.sh:
+        pwd: backend/provision
+    - mkdir -p $HOME/.lein
+    - echo '{:user {:plugins [[jonase/eastwood "0.2.3"]]}}' > $HOME/.lein/profiles.clj
+    # Client
+    - npm config set spin false:
+        pwd: client
+    - npm install:
+        pwd: client
+
+test:
+  override:
+    - lein do clean, check, test :all, eastwood '{:source-paths ["src" "test"]}':
+        pwd: backend
+    - npm run lint:
+        pwd: client
+    - npm test:
+        pwd: client
+
+deployment:
+  dev:
+    branch: develop
+    commands:
+      - ./ci/dev/setup_gcloud.sh
+      - ./ci/dev/build_containers.sh
+      - ./ci/dev/deploy.sh
+
+  prod:
+    branch: master
+    commands:
+      - ./ci/prod/setup_gcloud.sh
+      - ./ci/prod/build_containers.sh
+      - ./ci/prod/deploy.sh
