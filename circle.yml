@@ -5,7 +5,8 @@ machine:
     version: 6.9.1
   environment:
     PROJECT_NAME: akvo-lumen
-    CLUSTER_NAME: lumen
+    PROD_CLUSTER_NAME: lumen
+    DEV_CLUSTER_NAME: lumen-dev
     CLOUDSDK_COMPUTE_ZONE: europe-west1-d
     DEBIAN_FRONTEND: noninteractive
   services:
@@ -35,32 +36,22 @@ test:
   override:
     - lein do clean, check, test :all, eastwood '{:source-paths ["src" "test"]}':
         pwd: backend
-    # - npm run lint:
-    #     pwd: client
+    - npm run lint:
+        pwd: client
     - npm test:
         pwd: client
 
 deployment:
-  prod:
+  dev:
     branch: issue/414-k8s
+    commands:
+      - ./ci/dev/setup_gcloud.sh
+      - ./ci/dev/build_containers.sh
+      - ./ci/dev/deploy.sh
+
+  prod:
+    branch: master
     commands:
       - ./ci/prod/setup_gcloud.sh
       - ./ci/prod/build_containers.sh
       - ./ci/prod/deploy.sh
-  # dev:
-  #   branch: develop
-  #   commands:
-  #     - ...
-
-
-
-
-#  post:
-#    - docker run -d -p 3000:3000 -e "SECRET_KEY_BASE=abcd1234" us.gcr.io/${PROJECT_NAME}/hello:$CIRCLE_SHA1; sleep 10
-#    - curl --retry 10 --retry-delay 5 -v http://localhost:3000
-
-#deployment:
-#  prod:
-#    branch: master
-#    commands:
-#      - ./deploy.sh
