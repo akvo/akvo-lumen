@@ -43,7 +43,7 @@ test:
 
 deployment:
   dev:
-    branch: issue/414-k8s
+    branch: develop
     commands:
       - ./ci/dev/setup_gcloud.sh
       - ./ci/dev/build_containers.sh
