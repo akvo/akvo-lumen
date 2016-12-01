@@ -42,6 +42,7 @@ class Visualisation extends Component {
           labelY: null,
           minY: null,
           maxY: null,
+          showLegend: null,
         },
       },
       asyncComponents: null,
