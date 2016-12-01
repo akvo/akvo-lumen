@@ -7,6 +7,13 @@
             [ragtime.jdbc]
             [ragtime.repl]))
 
+;; The following env vars are assumed to be present:
+;; PGHOST,  PGDATABASE, PGUSER, PGPASSWORD
+;; These can be found in the ElephantSQL console for the appropriate instance
+;; Use this as follow
+;; $ env PGHOST=***.db.elephantsql.com PGDATABASE=*** PGUSER=*** PGPASSWORD=*** \
+;;     lein run -m org.akvo.lumen.admin.add-tenant <label> <description>
+
 (defn migrate-tenant [db-uri]
   (ragtime.repl/migrate
    {:datastore (ragtime.jdbc/sql-database db-uri)
