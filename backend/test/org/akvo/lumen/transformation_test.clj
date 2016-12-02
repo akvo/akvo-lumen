@@ -134,11 +134,12 @@
                           "source" {"path" (.getAbsolutePath (io/file (io/resource file)))
                                     "kind" "DATA_FILE"
                                     "fileName" (or dataset-name file)
-                                    "hascolumnheaders" (boolean has-column-headers?)}}]
+                                    "hasColumnHeaders" (boolean has-column-headers?)}}]
     (insert-data-source test-conn {:id data-source-id :spec data-source-spec})
     (insert-job-execution test-conn {:id job-id :data-source-id data-source-id})
     (imp/do-import test-conn {:file-upload-path "/tmp/akvo/dash"} job-id)
     (:dataset_id (dataset-id-by-job-execution-id test-conn {:id job-id}))))
+
 
 (deftest ^:functional test-undo
   (let [dataset-id (import-file "GDP.csv" {:dataset-name "GDP Undo Test"})
@@ -177,3 +178,57 @@
                                         {:rnum 1
                                          :column-name "c1"
                                          :table-name table-name}))))))))
+
+(deftest ^:functional combine-transformation-test
+  (let [dataset-id (import-file "name.csv" {:has-column-headers? true})
+        schedule (partial tf/schedule test-conn *transformation-engine* dataset-id)]
+    (let [{:keys [status body]} (schedule {:type :transformation
+                                           :transformation {"op" "core/combine"
+                                                            "args" {"columnNames" ["c1" "c2"]
+                                                                    "newColumnTitle" "full name"
+                                                                    "separator" " "}
+                                                            "onError" "fail"}})]
+      (is (= 200 status))
+      (let [table-name (:table-name
+                        (latest-dataset-version-by-dataset-id test-conn
+                                                              {:dataset-id dataset-id}))]
+        (is (= "bob hope"
+               (:c1c2 (get-val-from-table test-conn
+                                          {:rnum 1
+                                           :column-name "c1c2"
+                                           :table-name table-name}))))))))
+
+(defn date-transformation [column-name format]
+  {:type :transformation
+   :transformation {"op" "core/change-datatype"
+                    "args" {"columnName" column-name
+                            "newType" "date"
+                            "defaultValue" 0
+                            "parseFormat" format}
+                    "onError" "fail"}})
+
+(deftest ^:functional date-parsing-test
+  (let [dataset-id (import-file "dates.csv" {:has-column-headers? true})
+        schedule (partial tf/schedule test-conn *transformation-engine* dataset-id)]
+    (let [{:keys [status body]} (do (schedule (date-transformation "c1" "YYYY"))
+                                    (schedule (date-transformation "c2" "DD/MM/YYYY"))
+                                    (schedule (date-transformation "c3" "YYYY-MM-DD")))]
+      (is (= 200 status))
+      (let [table-name (:table-name
+                        (latest-dataset-version-by-dataset-id test-conn
+                                                              {:dataset-id dataset-id}))
+            first-date (:c1 (get-val-from-table test-conn
+                                                {:rnum 1
+                                                 :column-name "c1"
+                                                 :table-name table-name}))
+            second-date (:c2 (get-val-from-table test-conn
+                                                 {:rnum 1
+                                                  :column-name "c2"
+                                                  :table-name table-name}))
+            third-date (:c3 (get-val-from-table test-conn
+                                                {:rnum 1
+                                                 :column-name "c3"
+                                                 :table-name table-name}))]
+        (is (pos? first-date))
+        (is (pos? second-date))
+        (is (pos? third-date))))))

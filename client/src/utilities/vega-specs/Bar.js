@@ -3,6 +3,10 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
   const dataArray = data.map(item => item);
   const transformType = hasAggregation ? visualisation.spec.aggregationTypeY : null;
 
+  /* Padding calculation constants */
+  const maxLabelLengthX = 32; // In chars. Labels longer than this are truncated (...)
+  const meanPixelsPerChar = 4.75; // Used to calculate padding for labels in pixels
+
   if (hasAggregation) {
     const transform1 = {
       name: 'summary',
@@ -30,6 +34,43 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
   const fieldX = hasAggregation ? 'aggregationValue' : 'x';
   const fieldY = hasAggregation ? `${transformType}_y` : 'y';
 
+  const getLabelsX = () => {
+    let labels;
+
+    if (hasAggregation) {
+      labels = data[0].values.map(item => item.aggregationValue);
+    } else {
+      labels = data[0].values.map((item) => {
+        const out = item.label ? item.label : item.x;
+
+        return out;
+      });
+    }
+
+    return labels;
+  };
+
+  const getLongestLabelLength = (labels) => {
+    let longestLength = 0;
+
+    labels.forEach((label) => {
+      if (label.toString().length > longestLength) longestLength = label.toString().length;
+    });
+
+    return longestLength;
+  };
+
+  const getPaddingX = () => {
+    const defaultPadding = 50;
+    const longestLabelLength = getLongestLabelLength(getLabelsX());
+    const charPadding = Math.min(longestLabelLength, maxLabelLengthX);
+    const pixPadding = charPadding * meanPixelsPerChar;
+
+    return defaultPadding + pixPadding;
+  };
+
+  const paddingX = getPaddingX();
+
   let sort = null;
   let reverse = false;
 
@@ -45,11 +86,11 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
   return ({
     data: dataArray,
     width: containerWidth - 70,
-    height: containerHeight - 96,
+    height: containerHeight - (26 + paddingX),
     padding: {
       top: 26,
       left: 60,
-      bottom: 70,
+      bottom: paddingX,
       right: 10,
     },
     scales: [
@@ -80,6 +121,7 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
         type: 'x',
         scale: 'x',
         title: visualisation.spec.labelX,
+        titleOffset: paddingX - 10,
         tickPadding: 0,
         properties: {
           labels: (visualisation.spec.datasetNameColumnX === null && !hasAggregation) ?
@@ -99,6 +141,8 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
         type: 'y',
         scale: 'y',
         title: visualisation.spec.labelY,
+        formatType: 'number',
+        format: 's',
       },
     ],
     marks: [
@@ -151,15 +195,15 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
               scale: 'x',
               field: fieldX,
             },
-            y: {
-              scale: 'y',
-              value: 0,
-              offset: 20,
-            },
             dy: {
               scale: 'x',
               band: 'true',
               mult: '-0.5',
+            },
+            y: {
+              scale: 'y',
+              value: 0,
+              offset: 15,
             },
             fill: {
               value: 'black',
@@ -172,7 +216,10 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
             },
             text: (visualisation.spec.datasetNameColumnX !== null || hasAggregation) ?
               {
-                template: hasAggregation ? '{{datum.aggregationValue}}' : '{{datum.label}}',
+                template: hasAggregation ?
+                  `{{datum.aggregationValue|truncate:${maxLabelLengthX}}}`
+                  :
+                  `{{datum.label|truncate:${maxLabelLengthX}}}`,
               }
               :
               {

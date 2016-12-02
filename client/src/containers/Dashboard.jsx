@@ -7,16 +7,16 @@ import * as actions from '../actions/dashboard';
 import { fetchLibrary } from '../actions/library';
 import { fetchDataset } from '../actions/dataset';
 
-const getEditingStatus = location => {
+const getEditingStatus = (location) => {
   const testString = 'create';
 
   return location.pathname.indexOf(testString) === -1;
 };
 
-const getLayoutObjectFromArray = arr => {
+const getLayoutObjectFromArray = (arr) => {
   const object = {};
 
-  arr.forEach(item => {
+  arr.forEach((item) => {
     const key = item.i;
 
     object[key] = item;
@@ -205,7 +205,7 @@ class Dashboard extends Component {
     /* not synchronous and is too slow here, hence the extra check */
     const requestedDatasetIds = this.state.requestedDatasetIds.slice(0);
 
-    Object.keys(dash.entities).forEach(key => {
+    Object.keys(dash.entities).forEach((key) => {
       const entity = dash.entities[key];
       const isVisualisation = entity.type === 'visualisation';
 

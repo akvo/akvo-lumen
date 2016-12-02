@@ -16,7 +16,8 @@
    "core/to-lowercase" nil
    "core/to-uppercase" nil
    "core/trim" nil
-   "core/trim-doublespace" nil})
+   "core/trim-doublespace" nil
+   "core/combine" nil})
 
 (defn- get-column-name
   "Returns the columnName from the operation specification"
@@ -89,67 +90,67 @@
    - \"op\" : operation to perform
    - \"args\" : map with arguments to the operation
    - \"onError\" : Error strategy"
-  (fn [tennant-conn table-name columns op-spec]
+  (fn [tenant-conn table-name columns op-spec]
     (keyword (get op-spec "op"))))
 
 (defmethod apply-operation :default
-  [tennant-conn table-name columns op-spec]
+  [tenant-conn table-name columns op-spec]
   {:success? false
    :message (str "Unknown operation " (get op-spec "op"))})
 
 (defmethod apply-operation :core/to-titlecase
-  [tennant-conn table-name columns op-spec]
-  (db-to-titlecase tennant-conn {:table-name table-name
+  [tenant-conn table-name columns op-spec]
+  (db-to-titlecase tenant-conn {:table-name table-name
                                  :column-name (get-column-name op-spec)})
   {:success? true
    :columns columns})
 
 (defmethod apply-operation :core/to-lowercase
-  [tennant-conn table-name columns op-spec]
-  (db-to-lowercase tennant-conn {:table-name table-name
+  [tenant-conn table-name columns op-spec]
+  (db-to-lowercase tenant-conn {:table-name table-name
                                  :column-name (get-column-name op-spec)})
   {:success? true
    :columns columns})
 
 (defmethod apply-operation :core/to-uppercase
-  [tennant-conn table-name columns op-spec]
-  (db-to-upercase tennant-conn {:table-name table-name
-                                :column-name (get-column-name op-spec)})
+  [tenant-conn table-name columns op-spec]
+  (db-to-upercase tenant-conn {:table-name table-name
+                               :column-name (get-column-name op-spec)})
   {:success? true
    :columns columns})
 
 
 (defmethod apply-operation :core/trim
-  [tennant-conn table-name columns op-spec]
-  (db-trim tennant-conn {:table-name table-name
-                         :column-name (get-column-name op-spec)})
+  [tenant-conn table-name columns op-spec]
+  (db-trim tenant-conn {:table-name table-name
+                        :column-name (get-column-name op-spec)})
   {:success? true
    :columns columns})
 
 (defmethod apply-operation :core/trim-doublespace
-  [tennant-conn table-name columns op-spec]
-  (db-trim-double tennant-conn {:table-name table-name
-                                :column-name (get-column-name op-spec)})
+  [tenant-conn table-name columns op-spec]
+  (db-trim-double tenant-conn {:table-name table-name
+                               :column-name (get-column-name op-spec)})
   {:success? true
    :columns columns})
 
 (defmethod apply-operation :core/sort-column
-  [tennant-conn table-name columns op-spec]
+  [tenant-conn table-name columns op-spec]
   (let [col-name (get-column-name op-spec)
         idx-name (str table-name "_" col-name)
         new-cols (column-metadata-operation columns op-spec)]
-    (db-create-index tennant-conn {:index-name idx-name
-                                   :column-name col-name
-                                   :table-name table-name})
+    (db-create-index tenant-conn {:index-name idx-name
+                                  :column-name col-name
+                                  :table-name table-name})
     {:success? true
      :columns new-cols}))
 
 (defmethod apply-operation :core/remove-sort
-  [tennant-conn table-name columns op-spec]
+  [tenant-conn table-name columns op-spec]
   (let [col-name (get-column-name op-spec)
         idx-name (str table-name "_" col-name)
         new-cols (column-metadata-operation columns op-spec)]
-    (db-drop-index tennant-conn {:index-name idx-name})
+    (db-drop-index tenant-conn {:index-name idx-name})
     {:success? true
      :columns new-cols}))
 
@@ -161,12 +162,12 @@
 
 
 (defmethod apply-operation :core/change-datatype
-  [tennant-conn table-name columns op-spec]
+  [tenant-conn table-name columns op-spec]
   (let [new-cols (column-metadata-operation columns op-spec)]
     (try
-      (let [result (db-change-data-type tennant-conn {:table-name table-name
-                                                      :args (get op-spec "args")
-                                                      :on-error (get op-spec "onError")})
+      (let [result (db-change-data-type tenant-conn {:table-name table-name
+                                                     :args (get op-spec "args")
+                                                     :on-error (get op-spec "onError")})
             exec-log (vec (:lumen_change_data_type result))]
         {:success? true
          :execution-log exec-log
@@ -197,6 +198,41 @@
     (catch Exception e
       {:success? false
        :message (.getMessage e)})))
+
+(defn next-combined-column-name [columns column-name]
+  (let [existing-column-names (set (map (fn [column]
+                                          (get column "columnName")) columns))]
+    (if (contains? existing-column-names column-name)
+      (recur columns (str column-name "_0"))
+      column-name)))
+
+(defmethod apply-operation :core/combine
+  [tenant-conn table-name columns op-spec]
+  (try
+    (let [new-column-name
+          (next-combined-column-name columns (apply str (get-in op-spec ["args" "columnNames"])))
+          first-column-name (get-in op-spec ["args" "columnNames" 0])
+          second-column-name (get-in op-spec ["args" "columnNames" 1])]
+      (add-column tenant-conn {:table-name table-name
+                               :new-column-name new-column-name})
+      (combine-columns tenant-conn
+                       {:table-name table-name
+                        :new-column-name new-column-name
+                        :first-column first-column-name
+                        :second-column second-column-name
+                        :separator (get-in op-spec ["args" "separator"])})
+      {:success? true
+       :execution-log [(format "Combined columns %s, %s into %s"
+                               first-column-name second-column-name new-column-name)]
+       :columns (conj columns {"title" (get-in op-spec ["args" "newColumnTitle"])
+                               "type" "text"
+                               "sort" nil
+                               "hidden" false
+                               "direction" nil
+                               "columnName" new-column-name})})
+    (catch Exception e
+      {:success? false
+       :message (:getMessage e)})))
 
 (hugsql/def-db-fns "org/akvo/lumen/transformation.sql")
 

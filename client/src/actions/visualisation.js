@@ -28,7 +28,7 @@ export function fetchVisualisation(id) {
   return (dispatch) => {
     dispatch(fetchVisualisationRequest(id));
     api.get(`/api/visualisations/${id}`)
-    .then(visualisation => {
+    .then((visualisation) => {
       // We also need to possibly fetch datasets.
       const datasetId = visualisation.datasetId;
       if (datasetId) {

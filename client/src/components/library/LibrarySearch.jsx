@@ -12,7 +12,7 @@ export default class LibrarySearch extends Component {
       <div className="LibrarySearch">
         <input
           className="search"
-          ref={ref => { this.search = ref; }}
+          ref={(ref) => { this.search = ref; }}
           placeholder="Search"
           defaultValue={this.props.searchString}
         />

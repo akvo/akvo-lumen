@@ -1,4 +1,3 @@
-
 CREATE OR REPLACE FUNCTION lumen_to_number(val jsonb)
   RETURNS jsonb AS
 $$
@@ -147,7 +146,7 @@ BEGIN
                                 t2 = PG_EXCEPTION_DETAIL,
                                 t3 = PG_EXCEPTION_HINT;
 	IF on_error = 'fail' THEN
-	  RAISE EXCEPTION 'Fail to convert value % to % - rnum: %', current_val, new_type, current_rnum;
+	  RAISE EXCEPTION 'Fail to convert value % to % using format % - rnum: %', current_val, new_type, parse_format, current_rnum;
 	ELSIF on_error = 'default-value' THEN
           exec_log = array_append(exec_log, format('Changing to default value - rnum: %s - val: %s - default: %s',
 	                                           current_rnum, current_val, default_value::text));

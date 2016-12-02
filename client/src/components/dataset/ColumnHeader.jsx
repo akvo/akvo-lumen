@@ -64,7 +64,7 @@ export default class ColumnHeader extends Component {
       <div
         className={`ColumnHeader clickable
           ${this.props.columnMenuActive ? 'columnMenuActive' : ''}`}
-        ref={ref => { this.columnHeaderContainer = ref; }}
+        ref={(ref) => { this.columnHeaderContainer = ref; }}
         onClick={this.handleColumnMenuClick}
       >
         {column.get('sort') != null ?
@@ -74,7 +74,7 @@ export default class ColumnHeader extends Component {
             Sort: {column.get('direction') === 'ASC' ? 'Ascending' : 'Descending'}
             <span
               className="cancelSort"
-              onClick={(event) => this.handleRemoveSort(event, column)}
+              onClick={event => this.handleRemoveSort(event, column)}
             >
               +
             </span>
@@ -87,13 +87,14 @@ export default class ColumnHeader extends Component {
           <span
             className="columnTypeToggle"
             onClick={this.handleDataTypeMenuClick}
-            ref={ref => { this.columnTypeLabel = ref; }}
+            ref={(ref) => { this.columnTypeLabel = ref; }}
           >
             {column.get('type')}
           </span>
         </span>
         <span
           className="columnTitleText"
+          title={column.get('title')}
         >
           {column.get('title')}
         </span>

@@ -1,25 +1,25 @@
 {:components
- {:app  duct.component.handler/handler-component
-  :db duct.component.hikaricp/hikaricp
-  :http org.akvo.lumen.component.http/http
-  :tenant-manager org.akvo.lumen.component.tenant-manager/tenant-manager
-  :transformation-engine org.akvo.lumen.component.transformation-engine/transformation-engine}
+ {:app  #var duct.component.handler/handler-component
+  :db #var duct.component.hikaricp/hikaricp
+  :http #var org.akvo.lumen.component.http/http
+  :tenant-manager #var org.akvo.lumen.component.tenant-manager/tenant-manager
+  :transformation-engine #var org.akvo.lumen.component.transformation-engine/transformation-engine}
  :endpoints
- {:dashboard org.akvo.lumen.endpoint.dashboard/endpoint
-  :dataset org.akvo.lumen.endpoint.dataset/endpoint
-  :files org.akvo.lumen.endpoint.files/endpoint
-  :flow org.akvo.lumen.endpoint.flow/endpoint
-  :job-execution org.akvo.lumen.endpoint.job-execution/endpoint
-  :library org.akvo.lumen.endpoint.library/endpoint
-  :public org.akvo.lumen.endpoint.public/endpoint
-  :root org.akvo.lumen.endpoint.root/endpoint
-  :share org.akvo.lumen.endpoint.share/endpoint
-  :transformation org.akvo.lumen.endpoint.transformation/endpoint
-  :visualisation org.akvo.lumen.endpoint.visualisation/endpoint}
+ {:dashboard #var org.akvo.lumen.endpoint.dashboard/endpoint
+  :dataset #var org.akvo.lumen.endpoint.dataset/endpoint
+  :files #var org.akvo.lumen.endpoint.files/endpoint
+  :flow #var org.akvo.lumen.endpoint.flow/endpoint
+  :job-execution #var org.akvo.lumen.endpoint.job-execution/endpoint
+  :library #var org.akvo.lumen.endpoint.library/endpoint
+  :public #var org.akvo.lumen.endpoint.public/endpoint
+  :root #var org.akvo.lumen.endpoint.root/endpoint
+  :share #var org.akvo.lumen.endpoint.share/endpoint
+  :transformation #var org.akvo.lumen.endpoint.transformation/endpoint
+  :visualisation #var org.akvo.lumen.endpoint.visualisation/endpoint}
  :dependencies
- {:http    [:app]
-  :app     [:dashboard :dataset :files :flow :job-execution :library :public
-            :root :share :transformation :visualisation]
+ {:http [:app]
+  :app [:dashboard :dataset :files :flow :job-execution :library :public
+        :root :share :transformation :visualisation]
   :tenant-manager [:db]
   :transformation-engine [:tenant-manager]
   :dashboard [:tenant-manager]
@@ -32,34 +32,28 @@
   :root [:tenant-manager]
   :share [:tenant-manager :config]
   :transformation [:transformation-engine :tenant-manager]
-  :visualisation [:tenant-manager]
-
-  }
+  :visualisation [:tenant-manager]}
  :config
  {:app
   {:migrations {:tenant-manager "org/akvo/lumen/migrations/tenant_manager"
                 :tenants "org/akvo/lumen/migrations/tenants"}
    :middleware
    {:functions
-    {:stacktrace ring.middleware.stacktrace/wrap-stacktrace
-     :hide-errors   duct.middleware.errors/wrap-hide-errors
-     :not-found     duct.middleware.not-found/wrap-not-found
-     :ring-defaults ring.middleware.defaults/wrap-defaults
-     :json-response ring.middleware.json/wrap-json-response
-     :json-body     ring.middleware.json/wrap-json-body
-     :wrap-label-tenant org.akvo.lumen.component.tenant-manager/wrap-label-tenant
-     :wrap-jwt      org.akvo.lumen.auth/wrap-jwt
-     :wrap-auth     org.akvo.lumen.auth/wrap-auth}
+    {:hide-errors #var duct.middleware.errors/wrap-hide-errors
+     :not-found #var duct.middleware.not-found/wrap-not-found
+     :ring-defaults #var ring.middleware.defaults/wrap-defaults
+     :json-response #var ring.middleware.json/wrap-json-response
+     :json-body #var ring.middleware.json/wrap-json-body
+     :wrap-label-tenant #var org.akvo.lumen.component.tenant-manager/wrap-label-tenant
+     :wrap-jwt #var org.akvo.lumen.auth/wrap-jwt
+     :wrap-auth #var org.akvo.lumen.auth/wrap-auth}
     :applied
-    [:json-response :not-found :ring-defaults :json-body
-     :wrap-auth :wrap-jwt :wrap-label-tenant
-     :stacktrace
-     ;; :hide-errors
-     ]
+    [:not-found :json-response :ring-defaults :json-body
+     :wrap-auth :wrap-jwt :wrap-label-tenant :hide-errors]
     :arguments
     {:not-found   "Resource Not Found"
      :hide-errors "Internal Server Error"
-     :wrap-jwt {:keycloak-url keycloak-url
+     :wrap-jwt {:keycloak-url  keycloak-url
                 :keycloak-realm keycloak-realm}
      :ring-defaults
      {:params    {:urlencoded true

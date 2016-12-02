@@ -18,15 +18,15 @@ function VisualisationsList({ datasetId, visualisations }) {
   const dependentVisualisations = Object.keys(visualisations)
     .map(id => visualisations[id])
     .filter(vis => vis.datasetId === datasetId)
-    .map(vis => <li>{vis.name}</li>);
+    .map((vis, idx) => <li key={idx}>{vis.name}</li>);
 
   if (dependentVisualisations.length > 0) {
     return (
       <div>
         <span>
           The following
-            {dependentVisualisations.length === 1 ?
-              ' visualisation ' : ` ${dependentVisualisations.length} visualisations `}
+          {dependentVisualisations.length === 1 ?
+            ' visualisation ' : ` ${dependentVisualisations.length} visualisations `}
           will also be deleted:
         </span>
         <ul>

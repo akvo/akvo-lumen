@@ -88,7 +88,7 @@ export default class DataFileDataSourceSettings extends Component {
         <p className="dataFileUploadMessage">or</p>
         <input
           className={`dataFileUploadInput${this.isProgressBarVisible() ? ' progressActive' : ''}`}
-          ref={ref => { this.fileInput = ref; }}
+          ref={(ref) => { this.fileInput = ref; }}
           type="file"
           onChange={() => {
             this.uploadFile(this.fileInput.files[0]);
@@ -100,7 +100,7 @@ export default class DataFileDataSourceSettings extends Component {
             type="checkbox"
             className="datasetHeaderStatusToggle"
             defaultChecked={this.props.dataSource.hasColumnHeaders}
-            ref={ref => { this.datasetHeaderStatusToggle = ref; }}
+            ref={(ref) => { this.datasetHeaderStatusToggle = ref; }}
             onClick={() => {
               this.props.onChange({
                 hasColumnHeaders: this.datasetHeaderStatusToggle.checked,

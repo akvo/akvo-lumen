@@ -14,7 +14,7 @@ const collapsedLocations = ['visualisation/', 'dataset/', 'dashboard/'];
 const getCollapsedStatus = (pathname) => {
   let collapsedStatus = false;
 
-  collapsedLocations.forEach(location => {
+  collapsedLocations.forEach((location) => {
     if (pathname.indexOf(location) > -1) {
       collapsedStatus = true;
     }
