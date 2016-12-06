@@ -3,6 +3,16 @@ import * as tus from 'tus-js-client';
 import keycloak from '../../../auth';
 import ProgressBar from '../../common/ProgressBar';
 
+const handleDragEnter = (evt) => {
+  evt.stopPropagation();
+  evt.preventDefault();
+};
+
+const handleDragOver = (evt) => {
+  evt.stopPropagation();
+  evt.preventDefault();
+};
+
 export default class DataFileDataSourceSettings extends Component {
 
   static isValidSource(source) {
@@ -15,8 +25,6 @@ export default class DataFileDataSourceSettings extends Component {
 
   constructor() {
     super();
-    this.handleDragEnter = this.handleDragEnter.bind(this);
-    this.handleDragOver = this.handleDragOver.bind(this);
     this.handleDrop = this.handleDrop.bind(this);
     this.handleProgress = this.handleProgress.bind(this);
     this.state = { uploadProgressPercentage: null };
@@ -24,16 +32,6 @@ export default class DataFileDataSourceSettings extends Component {
 
   isProgressBarVisible() {
     return this.state.uploadProgressPercentage !== null;
-  }
-
-  handleDragEnter(evt) {
-    evt.stopPropagation();
-    evt.preventDefault();
-  }
-
-  handleDragOver(evt) {
-    evt.stopPropagation();
-    evt.preventDefault();
   }
 
   handleDrop(evt) {
@@ -80,8 +78,8 @@ export default class DataFileDataSourceSettings extends Component {
     return (
       <div
         className="DataFileFileSelection"
-        onDragEnter={this.handleDragEnter}
-        onDragOver={this.handleDragOver}
+        onDragEnter={handleDragEnter}
+        onDragOver={handleDragOver}
         onDrop={this.handleDrop}
       >
         <p className="dataFileUploadMessage">Drop file anywhere to upload</p>
