@@ -1,5 +1,16 @@
 # Release Notes
 
+## 1-12-2016
+
+Date 2016-12-01
+
+### New and noteworthy
+
+* Implemented continuous integration
+* Defined Javascript expressions to be supported in derived columns
+* Set up Lumen production database
+
+
 ## 0.2.0
 
 Date: 2016-09-05
