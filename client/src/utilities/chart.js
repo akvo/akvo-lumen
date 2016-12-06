@@ -205,7 +205,7 @@ export function getChartData(visualisation, datasets) {
     output.name = 'source';
     outputArray.push(output);
 
-    for (let i = 0; i < filters.length; i++) {
+    for (let i = 0; i < filters.length; i += 1) {
       const filter = filters[i];
       let comparitor;
 

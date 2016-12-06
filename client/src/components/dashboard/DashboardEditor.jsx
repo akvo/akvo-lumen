@@ -38,7 +38,7 @@ const getFirstBlankRowGroup = (layout, height) => {
   /* Build an object of all occupied rows, and record the last currently
   /* occupied row. */
   layout.forEach((item) => {
-    for (let row = item.y; row < (item.y + item.h); row++) {
+    for (let row = item.y; row < (item.y + item.h); row += 1) {
       occupiedRows[row] = true;
       if (row > lastRow) lastRow = row;
     }
@@ -47,11 +47,11 @@ const getFirstBlankRowGroup = (layout, height) => {
   /* Loop through every row from 0 to the last occupied. If we encounter a blank
   /* row i, check the next sequential rows until we have enough blank rows to
   /* fit our height. If we do, return row i. */
-  for (let i = 0; i < lastRow; i++) {
+  for (let i = 0; i < lastRow; i += 1) {
     if (!occupiedRows[i]) {
       let haveSpace = true;
 
-      for (let y = i + 1; y < (i + height); y++) {
+      for (let y = i + 1; y < (i + height); y += 1) {
         if (occupiedRows[y]) {
           haveSpace = false;
         }
