@@ -1,5 +1,14 @@
 # Release Notes
 
+## 0.4.0 (unreleased)
+
+Date: 2016-12-07
+
+### New and noteworthy
+
+* DOS-formatted CSV files now import properly
+
+
 ## 0.2.0
 
 Date: 2016-09-05
