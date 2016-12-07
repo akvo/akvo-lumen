@@ -1,5 +1,13 @@
 # Release Notes
 
+## 0.4.0 (unreleased)
+
+Date: 2016-12-07
+
+### New and noteworthy
+
+* DOS-formatted CSV files now import properly
+
 ## 0.3.0
 
 Date 2016-12-01
@@ -9,7 +17,6 @@ Date 2016-12-01
 * Implemented continuous integration
 * Defined Javascript expressions to be supported in derived columns
 * Set up Lumen production database
-
 
 ## 0.2.0
 

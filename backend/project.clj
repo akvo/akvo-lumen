@@ -17,6 +17,7 @@
                  [meta-merge "1.0.0"]
                  [org.akvo/commons "0.4.4-SNAPSHOT" :exclusions [org.postgresql/postgresql org.clojure/java.jdbc]]
                  [org.akvo/resumed "0.1.0-SNAPSHOT"]
+                 [commons-io/commons-io "2.5"]
                  [org.apache.tika/tika-core "1.14"]
                  [org.clojure/clojure "1.8.0"]
                  [org.clojure/data.csv "0.1.3"]

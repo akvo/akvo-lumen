@@ -7,11 +7,12 @@
             [hugsql.core :as hugsql]
             [org.akvo.lumen.component.tenant-manager :refer [tenant-manager]]
             [org.akvo.lumen.component.transformation-engine :refer [transformation-engine]]
-            [org.akvo.lumen.fixtures :refer (test-conn
+            [org.akvo.lumen.fixtures :refer [test-conn
                                              test-tenant-spec
                                              migrate-tenant
-                                             rollback-tenant)]
+                                             rollback-tenant]]
             [org.akvo.lumen.import :as imp]
+            [org.akvo.lumen.import.csv-test :refer [import-file]]
             [org.akvo.lumen.transformation :as tf]
             [org.akvo.lumen.util :refer (squuid)]))
 
@@ -123,22 +124,6 @@
                                                                 :column-name "c4"
                                                                 :table-name table-name}))))
           (is (= 1 (:total (get-row-count test-conn {:table-name table-name})))))))))
-
-
-(defn import-file
-  "Import a file and return the dataset-id"
-  [file {:keys [dataset-name has-column-headers?]}]
-  (let [data-source-id (str (squuid))
-        job-id (str (squuid))
-        data-source-spec {"name" (or dataset-name file)
-                          "source" {"path" (.getAbsolutePath (io/file (io/resource file)))
-                                    "kind" "DATA_FILE"
-                                    "fileName" (or dataset-name file)
-                                    "hasColumnHeaders" (boolean has-column-headers?)}}]
-    (insert-data-source test-conn {:id data-source-id :spec data-source-spec})
-    (insert-job-execution test-conn {:id job-id :data-source-id data-source-id})
-    (imp/do-import test-conn {:file-upload-path "/tmp/akvo/dash"} job-id)
-    (:dataset_id (dataset-id-by-job-execution-id test-conn {:id job-id}))))
 
 
 (deftest ^:functional test-undo

@@ -11,6 +11,7 @@
            org.postgresql.copy.CopyManager
            com.ibm.icu.text.CharsetDetector))
 
+
 (defn- get-cols
   ([num-cols]
    (get-cols num-cols nil))
@@ -118,13 +119,12 @@
   (or (get spec "path")
       (let [file-on-disk? (contains? spec "fileName")
             url (get spec "url")]
-                 (if file-on-disk?
-                   (str file-upload-path
-                        "/resumed/"
-                        (last (s/split url #"\/"))
-                        "/file")
-                   url))))
-
+        (if file-on-disk?
+          (str file-upload-path
+            "/resumed/"
+            (last (s/split url #"\/"))
+            "/file")
+          url))))
 
 (defmethod import/make-dataset-data-table "CSV"
   [tenant-conn {:keys [file-upload-path]} table-name spec]
@@ -142,9 +142,11 @@
           copy-sql (get-copy-sql temp-table n-cols headers? encoding)]
       (jdbc/execute! tenant-conn [(get-create-table-sql temp-table n-cols "text" true)])
       (jdbc/execute! tenant-conn [(get-create-table-sql table-name n-cols "jsonb" false)])
-      (with-open [conn (-> tenant-conn :datasource .getConnection)]
+      (with-open [conn (-> tenant-conn :datasource .getConnection)
+                  input-stream (-> (io/input-stream path)
+                                   import/unix-line-ending-input-stream)]
         (let [copy-manager (.getCopyAPI (.unwrap conn PGConnection))]
-          (.copyIn copy-manager copy-sql (io/input-stream path))))
+          (.copyIn copy-manager copy-sql input-stream)))
       (jdbc/execute! tenant-conn [(get-insert-sql temp-table table-name n-cols)])
       (jdbc/execute! tenant-conn [(get-drop-table-sql temp-table)])
       (jdbc/execute! tenant-conn [(get-vacuum-sql table-name)] {:transaction? false})
@@ -152,4 +154,4 @@
        :columns (get-column-tuples col-titles)})
     (catch Exception e
       {:success? false
-       :reason (str "Unexpected error " (.getMessage e))})) )
+       :reason (str "Unexpected error: " (.getMessage e))})))
