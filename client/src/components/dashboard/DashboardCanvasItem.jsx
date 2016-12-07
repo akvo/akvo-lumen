@@ -7,10 +7,13 @@ require('../../styles/DashboardCanvasItem.scss');
 const getItemLayout = (props) => {
   let output = null;
 
-  props.canvasLayout.forEach((item, index) => {
+  props.canvasLayout.some((item, index) => {
+    let test = false;
     if (item.i === props.item.id) {
       output = props.canvasLayout[index];
+      test = true;
     }
+    return test;
   });
 
   return output;
