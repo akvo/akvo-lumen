@@ -119,12 +119,12 @@
   (or (get spec "path")
       (let [file-on-disk? (contains? spec "fileName")
             url (get spec "url")]
-           (if file-on-disk?
-             (str file-upload-path
-                  "/resumed/"
-                  (last (s/split url #"\/"))
-                  "/file")
-             url))))
+        (if file-on-disk?
+          (str file-upload-path
+            "/resumed/"
+            (last (s/split url #"\/"))
+            "/file")
+          url))))
 
 (defmethod import/make-dataset-data-table "CSV"
   [tenant-conn {:keys [file-upload-path]} table-name spec]
@@ -145,8 +145,8 @@
       (with-open [conn (-> tenant-conn :datasource .getConnection)
                   input-stream (-> (io/input-stream path)
                                    import/unix-line-ending-input-stream)]
-        (let [copy-manager (.. conn (unwrap PGConnection) (getCopyAPI))]
-          (. copy-manager copyIn copy-sql input-stream)))
+        (let [copy-manager (.getCopyAPI (.unwrap conn PGConnection))]
+          (.copyIn copy-manager copy-sql input-stream)))
       (jdbc/execute! tenant-conn [(get-insert-sql temp-table table-name n-cols)])
       (jdbc/execute! tenant-conn [(get-drop-table-sql temp-table)])
       (jdbc/execute! tenant-conn [(get-vacuum-sql table-name)] {:transaction? false})
