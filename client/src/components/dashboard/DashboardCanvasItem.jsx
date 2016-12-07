@@ -4,6 +4,24 @@ import DashboardCanvasItemEditable from './DashboardCanvasItemEditable';
 
 require('../../styles/DashboardCanvasItem.scss');
 
+const getItemLayout = (props) => {
+  let output = null;
+
+  props.canvasLayout.some((item, index) => {
+    let test = false;
+    if (item.i === props.item.id) {
+      output = props.canvasLayout[index];
+      test = true;
+    }
+    return test;
+  });
+
+  return output;
+};
+
+const getIsDatasetLoaded = props => Boolean(props.item.type === 'visualisation' &&
+    props.datasets[props.item.visualisation.datasetId].get('columns'));
+
 export default class DashboardCanvasItem extends Component {
 
   constructor() {
@@ -29,14 +47,14 @@ export default class DashboardCanvasItem extends Component {
   }
 
   shouldComponentUpdate(nextProps) {
-    const oldLayout = this.getItemLayout(this.props);
-    const newLayout = this.getItemLayout(nextProps);
+    const oldLayout = getItemLayout(this.props);
+    const newLayout = getItemLayout(nextProps);
     const layoutsExist = Boolean(oldLayout && newLayout);
     const dimensionsChanged = layoutsExist ?
       oldLayout.w !== newLayout.w || oldLayout.h !== newLayout.h : true;
     const canvasWidthChanged = this.props.canvasWidth !== nextProps.canvasWidth;
     const needDataset = this.props.item.type === 'visualisation';
-    const datasetDependencyMet = needDataset ? this.getIsDatasetLoaded(this.props) : true;
+    const datasetDependencyMet = needDataset ? getIsDatasetLoaded(this.props) : true;
     const styleTransitionFinished = this.state.style.boxShadow === 'none';
 
     const shouldUpdate = Boolean(
@@ -49,21 +67,9 @@ export default class DashboardCanvasItem extends Component {
     return shouldUpdate;
   }
 
-  getItemLayout(props) {
-    let output = null;
-
-    props.canvasLayout.forEach((item, index) => {
-      if (item.i === props.item.id) {
-        output = props.canvasLayout[index];
-      }
-    });
-
-    return output;
-  }
-
   getRenderDimensions() {
     const unit = this.props.canvasWidth / 12;
-    const layout = this.getItemLayout(this.props);
+    const layout = getItemLayout(this.props);
 
     if (layout !== null) {
       return ({
@@ -73,11 +79,6 @@ export default class DashboardCanvasItem extends Component {
     }
 
     return null;
-  }
-
-  getIsDatasetLoaded(props) {
-    return props.item.type === 'visualisation' &&
-      props.datasets[props.item.visualisation.datasetId].get('columns');
   }
 
   render() {
@@ -97,7 +98,7 @@ export default class DashboardCanvasItem extends Component {
           <div
             className="noPointerEvents itemContainer visualisation"
           >
-            {this.getIsDatasetLoaded(this.props) ?
+            {getIsDatasetLoaded(this.props) ?
               <VisualisationViewer
                 visualisation={this.props.item.visualisation}
                 datasets={this.props.datasets}
