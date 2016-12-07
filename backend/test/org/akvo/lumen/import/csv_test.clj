@@ -8,6 +8,8 @@
             [org.akvo.lumen.util :refer [squuid]]))
 
 (hugsql/def-db-fns "org/akvo/lumen/job-execution.sql")
+(hugsql/def-db-fns "org/akvo/lumen/transformation.sql")
+
 
 (defn import-file
   "Import a file and return the dataset-id"
@@ -39,3 +41,10 @@
     (is (= 19 (get-num-cols (io/file (io/resource "artist")) \tab "UTF-8")))
     (is (= 23 (get-num-cols (io/file (io/resource "products")) \, "UTF-8")))
     (is (= 60 (get-num-cols (io/file (io/resource "rural-population")) \, "UTF-8")))))
+
+(deftest ^:functional test-dos-file
+  (testing "Import of DOS-formatted CSV file"
+    (let [dataset-id (import-file "dos.csv" {:dataset-name "DOS data"})
+          dataset (dataset-version-by-dataset-id test-conn {:dataset-id dataset-id
+                                                            :version 1})]
+      (is (= 2 (count (:columns dataset)))))))
