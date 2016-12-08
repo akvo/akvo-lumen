@@ -195,8 +195,10 @@ Examples:
   * code (string): `"row['a'] + 1"`
 * onError (string): `"fail"` | `"delete-row"` | `"leave-empty"`
 
+````
 {"op": "core/derive",
  "args": {"newColumnTitle": "New title",
           "newColumnType": "text", // or "date", "number"
 	  "code": "row['a'] + row['b']"},
  "onError": "fail"}
+````
