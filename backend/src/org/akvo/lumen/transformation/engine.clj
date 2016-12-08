@@ -80,6 +80,7 @@
     (update columns col-idx assoc "type" new-type)))
 
 
+
 (defmulti apply-operation
   "Applies a particular operation based on `op` key from spec
    * tenant-conn: Open connection to the database
@@ -233,6 +234,12 @@
     (catch Exception e
       {:success? false
        :message (:getMessage e)})))
+
+
+(defmethod apply-operation :core/derive
+  [tenant-conn table-name columns op-spec]
+  ;; This is where the magic will happen.
+  )
 
 (hugsql/def-db-fns "org/akvo/lumen/transformation.sql")
 

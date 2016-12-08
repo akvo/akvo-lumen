@@ -100,6 +100,11 @@
                     (= (get op-spec "onError") "fail")))
       (throw-invalid-op op-spec)))
 
+(defmethod validate-op :core/derive
+  [op-spec]
+
+  )
+
 (defn validate
   [command]
   (try
