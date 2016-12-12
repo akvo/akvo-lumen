@@ -1,6 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import Immutable from 'immutable';
 import CodeMirror from 'react-codemirror';
+import esprima from 'esprima';
 import SelectMenu from '../../common/SelectMenu';
 import SidebarHeader from './SidebarHeader';
 import SidebarControls from './SidebarControls';
@@ -36,6 +37,22 @@ const errorStrategies = [
   },
 ];
 
+function isValidCode(code) {
+  try {
+    const ast = esprima.parse(code);
+    if (ast.body.length !== 1) {
+      return false;
+    }
+    const expressionStatement = ast.body[0];
+    if (expressionStatement.type !== 'ExpressionStatement') {
+      return false;
+    }
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
 export default class DeriveColumn extends Component {
   constructor() {
     super();
@@ -52,12 +69,6 @@ export default class DeriveColumn extends Component {
     };
   }
 
-  isValidTransformation() {
-    const { transformation } = this.state;
-    // TODO
-    return true;
-  }
-
   setTransformationProperty(path, value) {
     const { transformation } = this.state;
     this.setState({
@@ -65,23 +76,16 @@ export default class DeriveColumn extends Component {
     });
   }
 
-  handleChangeNewColumnTitle(value) {
+  isValidTransformation() {
     const { transformation } = this.state;
-    this.setState({
-      transformation: transformation.setIn(['args', 'newColumnTitle'], value),
-    });
-  }
-
-  // TODO Abstract, merge
-  handleChangeNewColumnType(value) {
-    const { transformation } = this.state;
-    this.setState({
-      transformation: transformation.setIn(['args', 'newColumnType'], value),
-    });
+    if (transformation.getIn(['args', 'newColumnTitle']) === '') {
+      return false;
+    }
+    return isValidCode(transformation.getIn(['args', 'code']));
   }
 
   render() {
-    const { onClose, onApply, columns } = this.props;
+    const { onClose, onApply /* columns */ } = this.props;
     const { transformation } = this.state;
     const args = transformation.get('args');
     return (
