@@ -49,8 +49,8 @@ export default class DatasetControls extends Component {
                     value: 'combineColumns',
                   },
                   {
-                    label: 'Derive new column',
-                    value: 'derive-new-column',
+                    label: 'Derive column',
+                    value: 'deriveColumn',
                   },
                   {
                     label: 'Merge datasets',
