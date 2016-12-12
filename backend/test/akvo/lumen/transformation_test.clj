@@ -1,20 +1,20 @@
-(ns org.akvo.lumen.transformation-test
+(ns akvo.lumen.transformation-test
   (:require [cheshire.core :as json]
             [clojure.java.io :as io]
             [clojure.test :refer :all]
             [com.stuartsierra.component :as component]
             [duct.component.hikaricp :refer [hikaricp]]
             [hugsql.core :as hugsql]
-            [org.akvo.lumen.component.tenant-manager :refer [tenant-manager]]
-            [org.akvo.lumen.component.transformation-engine :refer [transformation-engine]]
-            [org.akvo.lumen.fixtures :refer [test-conn
+            [akvo.lumen.component.tenant-manager :refer [tenant-manager]]
+            [akvo.lumen.component.transformation-engine :refer [transformation-engine]]
+            [akvo.lumen.fixtures :refer [test-conn
                                              test-tenant-spec
                                              migrate-tenant
                                              rollback-tenant]]
-            [org.akvo.lumen.import :as imp]
-            [org.akvo.lumen.import.csv-test :refer [import-file]]
-            [org.akvo.lumen.transformation :as tf]
-            [org.akvo.lumen.util :refer (squuid)]))
+            [akvo.lumen.import :as imp]
+            [akvo.lumen.import.csv-test :refer [import-file]]
+            [akvo.lumen.transformation :as tf]
+            [akvo.lumen.util :refer (squuid)]))
 
 (def ops (vec (json/parse-string (slurp (io/resource "ops.json")))))
 (def invalid-op (-> (take 3 ops)
@@ -22,9 +22,9 @@
                     (update-in [1 "args"] dissoc "parseFormat")))
 
 
-(hugsql/def-db-fns "org/akvo/lumen/job-execution.sql")
-(hugsql/def-db-fns "org/akvo/lumen/transformation_test.sql")
-(hugsql/def-db-fns "org/akvo/lumen/transformation.sql")
+(hugsql/def-db-fns "akvo/lumen/job-execution.sql")
+(hugsql/def-db-fns "akvo/lumen/transformation_test.sql")
+(hugsql/def-db-fns "akvo/lumen/transformation.sql")
 
 (def ^:dynamic *transformation-engine*)
 

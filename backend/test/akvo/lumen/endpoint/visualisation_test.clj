@@ -1,6 +1,6 @@
-(ns org.akvo.lumen.endpoint.visualisation-test
+(ns akvo.lumen.endpoint.visualisation-test
   (:require [clojure.test :refer :all]
-            [org.akvo.lumen.endpoint.visualisation :as visualisation]))
+            [akvo.lumen.endpoint.visualisation :as visualisation]))
 
 (def handler
   (visualisation/endpoint {}))

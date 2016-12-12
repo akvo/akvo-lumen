@@ -1,5 +1,5 @@
-(ns org.akvo.lumen.lib.dataset
-  (:require [org.akvo.lumen.lib.dataset-impl :as impl]))
+(ns akvo.lumen.lib.dataset
+  (:require [akvo.lumen.lib.dataset-impl :as impl]))
 
 
 (defn all

@@ -1,9 +1,9 @@
-(ns org.akvo.lumen.transformation
+(ns akvo.lumen.transformation
   (:require [clojure.string :as str]
             [hugsql.core :as hugsql]
-            [org.akvo.lumen.component.transformation-engine :refer (enqueue)]
-            [org.akvo.lumen.transformation.engine :as engine]
-            [org.akvo.lumen.util :refer (squuid gen-table-name)]))
+            [akvo.lumen.component.transformation-engine :refer (enqueue)]
+            [akvo.lumen.transformation.engine :as engine]
+            [akvo.lumen.util :refer (squuid gen-table-name)]))
 
 ;; TODO: Potential change op-spec validation `core.spec`
 ;; TODO: Move the validation part to transformation.validation namespace
@@ -13,7 +13,7 @@
 (def type-set #{"number" "text" "date"})
 (def sort-direction-set #{"ASC" "DESC"})
 
-(hugsql/def-db-fns "org/akvo/lumen/transformation.sql")
+(hugsql/def-db-fns "akvo/lumen/transformation.sql")
 
 
 (defn- throw-invalid-op

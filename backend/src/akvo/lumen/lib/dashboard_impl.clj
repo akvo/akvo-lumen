@@ -1,12 +1,12 @@
-(ns org.akvo.lumen.lib.dashboard-impl
+(ns akvo.lumen.lib.dashboard-impl
   (:require [hugsql.core :as hugsql]
             [clojure.java.jdbc :as jdbc]
-            [org.akvo.lumen.util :refer [squuid]]
-            [org.akvo.lumen.util :refer [squuid]]
+            [akvo.lumen.util :refer [squuid]]
+            [akvo.lumen.util :refer [squuid]]
             [ring.util.response :refer [not-found response status]]))
 
 
-(hugsql/def-db-fns "org/akvo/lumen/lib/dashboard.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/dashboard.sql")
 
 
 (defn all [tenant-conn]

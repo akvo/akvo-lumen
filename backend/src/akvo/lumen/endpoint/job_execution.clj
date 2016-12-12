@@ -1,7 +1,7 @@
-(ns org.akvo.lumen.endpoint.job-execution
+(ns akvo.lumen.endpoint.job-execution
   (:require [compojure.core :refer :all]
-            [org.akvo.lumen.component.tenant-manager :refer [connection]]
-            [org.akvo.lumen.lib.job-execution :as job-execution]))
+            [akvo.lumen.component.tenant-manager :refer [connection]]
+            [akvo.lumen.lib.job-execution :as job-execution]))
 
 
 (defn endpoint [{:keys [tenant-manager]}]

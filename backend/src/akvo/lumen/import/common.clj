@@ -1,4 +1,4 @@
-(ns org.akvo.lumen.import.common
+(ns akvo.lumen.import.common
   (:require [cheshire.core :as json])
   (:import org.apache.commons.io.input.UnixLineEndingInputStream))
 

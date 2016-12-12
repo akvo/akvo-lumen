@@ -1,4 +1,4 @@
-(ns org.akvo.lumen.util
+(ns akvo.lumen.util
   (:require [clojure.string :as str]))
 
 (defn squuid

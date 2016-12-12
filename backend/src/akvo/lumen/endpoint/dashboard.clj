@@ -1,7 +1,7 @@
-(ns org.akvo.lumen.endpoint.dashboard
+(ns akvo.lumen.endpoint.dashboard
   (:require [compojure.core :refer :all]
-            [org.akvo.lumen.component.tenant-manager :refer [connection]]
-            [org.akvo.lumen.lib.dashboard :as dashboard]))
+            [akvo.lumen.component.tenant-manager :refer [connection]]
+            [akvo.lumen.lib.dashboard :as dashboard]))
 
 
 (defn endpoint [{:keys [tenant-manager]}]

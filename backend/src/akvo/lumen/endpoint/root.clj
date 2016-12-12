@@ -1,4 +1,4 @@
-(ns org.akvo.lumen.endpoint.root
+(ns akvo.lumen.endpoint.root
   (:require [compojure.core :refer :all]
             [ring.util.response :refer [response]]))
 

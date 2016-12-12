@@ -1,11 +1,11 @@
-(ns org.akvo.lumen.import.flow
+(ns akvo.lumen.import.flow
   (:require [akvo.commons.psql-util :as pg]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
             [hugsql.core :as hugsql]
-            [org.akvo.lumen.import.common :as import]))
+            [akvo.lumen.import.common :as import]))
 
-(hugsql/def-db-fns "org/akvo/lumen/import/flow.sql")
+(hugsql/def-db-fns "akvo/lumen/import/flow.sql")
 
 (defn survey-definition [conn survey-id]
   (let [survey (survey-by-id conn {:id survey-id})

@@ -1,14 +1,14 @@
-(ns org.akvo.lumen.import.csv-test
+(ns akvo.lumen.import.csv-test
   (:require [clojure.java.io :as io]
             [clojure.test :refer :all]
             [hugsql.core :as hugsql]
-            [org.akvo.lumen.fixtures :refer [test-conn]]
-            [org.akvo.lumen.import.csv :refer :all]
-            [org.akvo.lumen.import :refer [do-import]]
-            [org.akvo.lumen.util :refer [squuid]]))
+            [akvo.lumen.fixtures :refer [test-conn]]
+            [akvo.lumen.import.csv :refer :all]
+            [akvo.lumen.import :refer [do-import]]
+            [akvo.lumen.util :refer [squuid]]))
 
-(hugsql/def-db-fns "org/akvo/lumen/job-execution.sql")
-(hugsql/def-db-fns "org/akvo/lumen/transformation.sql")
+(hugsql/def-db-fns "akvo/lumen/job-execution.sql")
+(hugsql/def-db-fns "akvo/lumen/transformation.sql")
 
 
 (defn import-file

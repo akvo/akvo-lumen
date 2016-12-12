@@ -1,9 +1,9 @@
-(ns org.akvo.lumen.fixtures
+(ns akvo.lumen.fixtures
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [hugsql.core :as hugsql]
-            [org.akvo.lumen.component.tenant-manager :as tm]
-            [org.akvo.lumen.migrate :as migrate]
+            [akvo.lumen.component.tenant-manager :as tm]
+            [akvo.lumen.migrate :as migrate]
             [ragtime
              [jdbc :as jdbc]
              [repl :as repl]]
@@ -28,7 +28,7 @@
 (defn- ragtime-spec
   [tenant]
   {:datastore  (jdbc/sql-database {:connection-uri (:db_uri tenant)})
-   :migrations (jdbc/load-resources "org/akvo/lumen/migrations/tenants")})
+   :migrations (jdbc/load-resources "akvo/lumen/migrations/tenants")})
 
 (defn migrate-tenant
   [tenant]
@@ -51,7 +51,7 @@
 ;;; Running system fixture
 ;;;
 
-(hugsql/def-db-fns "org/akvo/lumen/fixtures.sql")
+(hugsql/def-db-fns "akvo/lumen/fixtures.sql")
 
 #_(defn system-fixture
   "Starts the system and migrates, no setup or tear down."

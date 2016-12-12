@@ -1,18 +1,18 @@
-(ns org.akvo.lumen.import
+(ns akvo.lumen.import
   (:require [akvo.commons.psql-util :as pg]
             [cheshire.core :as json]
             [clj-http.client :as client]
             [clojure.data.csv :as csv]
             [clojure.string :as str]
             [hugsql.core :as hugsql]
-            [org.akvo.lumen.import.common :as import]
-            [org.akvo.lumen.import.csv]
-            [org.akvo.lumen.import.flow]
-            [org.akvo.lumen.transformation :as t]
-            [org.akvo.lumen.util :refer (squuid gen-table-name)]
+            [akvo.lumen.import.common :as import]
+            [akvo.lumen.import.csv]
+            [akvo.lumen.import.flow]
+            [akvo.lumen.transformation :as t]
+            [akvo.lumen.util :refer (squuid gen-table-name)]
             [ring.util.response :as res]))
 
-(hugsql/def-db-fns "org/akvo/lumen/job-execution.sql")
+(hugsql/def-db-fns "akvo/lumen/job-execution.sql")
 
 
 (defn successful-import [conn job-execution-id table-name status spec]

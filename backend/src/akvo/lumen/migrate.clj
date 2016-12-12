@@ -1,18 +1,18 @@
-(ns org.akvo.lumen.migrate
+(ns akvo.lumen.migrate
   (:require
    [clojure.java.io :as io]
    [duct.util.system :refer [read-config]]
    [environ.core :refer [env]]
    [hugsql.core :as hugsql]
    [meta-merge.core :refer [meta-merge]]
-   [org.akvo.lumen.config :refer [bindings]]
+   [akvo.lumen.config :refer [bindings]]
    [ragtime
     [jdbc :as ragtime-jdbc]
     [repl :as ragtime-repl]]))
 
-(hugsql/def-db-fns "org/akvo/lumen/migrate.sql")
+(hugsql/def-db-fns "akvo/lumen/migrate.sql")
 
-(def source-files ["org/akvo/lumen/system.edn" "dev.edn" "local.edn"])
+(def source-files ["akvo/lumen/system.edn" "dev.edn" "local.edn"])
 
 (defn do-migrate [datastore migrations]
   (ragtime-repl/migrate {:datastore datastore

@@ -1,7 +1,7 @@
-(ns org.akvo.lumen.endpoint.dataset
+(ns akvo.lumen.endpoint.dataset
   (:require [compojure.core :refer :all]
-            [org.akvo.lumen.component.tenant-manager :refer [connection]]
-            [org.akvo.lumen.lib.dataset :as dataset]))
+            [akvo.lumen.component.tenant-manager :refer [connection]]
+            [akvo.lumen.lib.dataset :as dataset]))
 
 
 (defn endpoint [{:keys [tenant-manager config]}]

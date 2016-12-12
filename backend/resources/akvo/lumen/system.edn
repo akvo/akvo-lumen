@@ -1,21 +1,21 @@
 {:components
  {:app  #var duct.component.handler/handler-component
   :db #var duct.component.hikaricp/hikaricp
-  :http #var org.akvo.lumen.component.http/http
-  :tenant-manager #var org.akvo.lumen.component.tenant-manager/tenant-manager
-  :transformation-engine #var org.akvo.lumen.component.transformation-engine/transformation-engine}
+  :http #var akvo.lumen.component.http/http
+  :tenant-manager #var akvo.lumen.component.tenant-manager/tenant-manager
+  :transformation-engine #var akvo.lumen.component.transformation-engine/transformation-engine}
  :endpoints
- {:dashboard #var org.akvo.lumen.endpoint.dashboard/endpoint
-  :dataset #var org.akvo.lumen.endpoint.dataset/endpoint
-  :files #var org.akvo.lumen.endpoint.files/endpoint
-  :flow #var org.akvo.lumen.endpoint.flow/endpoint
-  :job-execution #var org.akvo.lumen.endpoint.job-execution/endpoint
-  :library #var org.akvo.lumen.endpoint.library/endpoint
-  :public #var org.akvo.lumen.endpoint.public/endpoint
-  :root #var org.akvo.lumen.endpoint.root/endpoint
-  :share #var org.akvo.lumen.endpoint.share/endpoint
-  :transformation #var org.akvo.lumen.endpoint.transformation/endpoint
-  :visualisation #var org.akvo.lumen.endpoint.visualisation/endpoint}
+ {:dashboard #var akvo.lumen.endpoint.dashboard/endpoint
+  :dataset #var akvo.lumen.endpoint.dataset/endpoint
+  :files #var akvo.lumen.endpoint.files/endpoint
+  :flow #var akvo.lumen.endpoint.flow/endpoint
+  :job-execution #var akvo.lumen.endpoint.job-execution/endpoint
+  :library #var akvo.lumen.endpoint.library/endpoint
+  :public #var akvo.lumen.endpoint.public/endpoint
+  :root #var akvo.lumen.endpoint.root/endpoint
+  :share #var akvo.lumen.endpoint.share/endpoint
+  :transformation #var akvo.lumen.endpoint.transformation/endpoint
+  :visualisation #var akvo.lumen.endpoint.visualisation/endpoint}
  :dependencies
  {:http [:app]
   :app [:dashboard :dataset :files :flow :job-execution :library :public
@@ -35,8 +35,8 @@
   :visualisation [:tenant-manager]}
  :config
  {:app
-  {:migrations {:tenant-manager "org/akvo/lumen/migrations/tenant_manager"
-                :tenants "org/akvo/lumen/migrations/tenants"}
+  {:migrations {:tenant-manager "akvo/lumen/migrations/tenant_manager"
+                :tenants "akvo/lumen/migrations/tenants"}
    :middleware
    {:functions
     {:hide-errors #var duct.middleware.errors/wrap-hide-errors
@@ -44,9 +44,9 @@
      :ring-defaults #var ring.middleware.defaults/wrap-defaults
      :json-response #var ring.middleware.json/wrap-json-response
      :json-body #var ring.middleware.json/wrap-json-body
-     :wrap-label-tenant #var org.akvo.lumen.component.tenant-manager/wrap-label-tenant
-     :wrap-jwt #var org.akvo.lumen.auth/wrap-jwt
-     :wrap-auth #var org.akvo.lumen.auth/wrap-auth}
+     :wrap-label-tenant #var akvo.lumen.component.tenant-manager/wrap-label-tenant
+     :wrap-jwt #var akvo.lumen.auth/wrap-jwt
+     :wrap-auth #var akvo.lumen.auth/wrap-auth}
     :applied
     [:not-found :json-response :ring-defaults :json-body
      :wrap-auth :wrap-jwt :wrap-label-tenant :hide-errors]

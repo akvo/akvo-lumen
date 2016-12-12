@@ -1,4 +1,4 @@
-(ns org.akvo.lumen.auth
+(ns akvo.lumen.auth
   (:require [akvo.commons.jwt :as jwt]
             [cheshire.core :as json]
             [clj-http.client :as client]

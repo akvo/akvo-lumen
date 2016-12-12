@@ -1,9 +1,9 @@
-(ns org.akvo.lumen.lib.job-execution-impl
+(ns akvo.lumen.lib.job-execution-impl
   (:require [hugsql.core :as hugsql]
             [ring.util.response :as response]))
 
 
-(hugsql/def-db-fns "org/akvo/lumen/job-execution.sql")
+(hugsql/def-db-fns "akvo/lumen/job-execution.sql")
 
 
 (defn job-status

@@ -1,5 +1,5 @@
-(ns org.akvo.lumen.lib.share
-  (:require [org.akvo.lumen.lib.share-impl :as impl]))
+(ns akvo.lumen.lib.share
+  (:require [akvo.lumen.lib.share-impl :as impl]))
 
 
 (defn all

@@ -1,4 +1,4 @@
-(ns org.akvo.lumen.component.http
+(ns akvo.lumen.component.http
   "Immutant web Duct component."
   (:require [com.stuartsierra.component :as component]
             [immutant.web :as web]))

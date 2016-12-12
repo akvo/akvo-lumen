@@ -1,6 +1,6 @@
-(ns org.akvo.lumen.component.transformation-engine
+(ns akvo.lumen.component.transformation-engine
   (:require [com.stuartsierra.component :as component]
-            [org.akvo.lumen.transformation.engine :as engine])
+            [akvo.lumen.transformation.engine :as engine])
   (:import [java.util.concurrent LinkedBlockingQueue]))
 
 (defprotocol TransformationQueue

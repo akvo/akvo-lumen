@@ -1,7 +1,7 @@
-(ns org.akvo.lumen.endpoint.library
+(ns akvo.lumen.endpoint.library
   (:require [compojure.core :refer :all]
-            [org.akvo.lumen.component.tenant-manager :refer [connection]]
-            [org.akvo.lumen.lib
+            [akvo.lumen.component.tenant-manager :refer [connection]]
+            [akvo.lumen.lib
              [dashboard :as dashboard]
              [dataset :as dataset]
              [visualisation :as visualisation]]

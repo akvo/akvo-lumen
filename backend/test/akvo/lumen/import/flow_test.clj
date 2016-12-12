@@ -1,8 +1,8 @@
-(ns org.akvo.lumen.import.flow-test
+(ns akvo.lumen.import.flow-test
   (:require [clojure.test :refer :all]
             [clojure.java.io :as io]
             [clojure.edn :as edn]
-            [org.akvo.lumen.import.flow :refer :all]))
+            [akvo.lumen.import.flow :refer :all]))
 
 (comment
   (require 'clojure.tools.namespace.repl)

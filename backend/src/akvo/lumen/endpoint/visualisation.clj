@@ -1,7 +1,7 @@
-(ns org.akvo.lumen.endpoint.visualisation
+(ns akvo.lumen.endpoint.visualisation
   (:require [compojure.core :refer :all]
-            [org.akvo.lumen.component.tenant-manager :refer [connection]]
-            [org.akvo.lumen.lib.visualisation :as visualisation]))
+            [akvo.lumen.component.tenant-manager :refer [connection]]
+            [akvo.lumen.lib.visualisation :as visualisation]))
 
 
 (defn endpoint [{:keys [tenant-manager]}]

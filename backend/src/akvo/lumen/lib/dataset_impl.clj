@@ -1,14 +1,14 @@
-(ns org.akvo.lumen.lib.dataset-impl
+(ns akvo.lumen.lib.dataset-impl
   (:require [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
             [hugsql.core :as hugsql]
-            [org.akvo.lumen.import :as import]
-            [org.akvo.lumen.endpoint.job-execution :as job-execution]
+            [akvo.lumen.import :as import]
+            [akvo.lumen.endpoint.job-execution :as job-execution]
             [ring.util.response :refer [not-found response]]))
 
 
-(hugsql/def-db-fns "org/akvo/lumen/lib/dataset.sql")
-(hugsql/def-db-fns "org/akvo/lumen/job-execution.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
+(hugsql/def-db-fns "akvo/lumen/job-execution.sql")
 
 
 (defn all [tenant-conn]

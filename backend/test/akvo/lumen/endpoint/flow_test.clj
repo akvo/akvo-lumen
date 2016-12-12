@@ -1,8 +1,8 @@
-(ns org.akvo.lumen.endpoint.flow-test
+(ns akvo.lumen.endpoint.flow-test
   (:require [clojure.test :refer :all]
             [ring.mock.request :as mock]
-            [org.akvo.lumen.endpoint.flow :as flow]
-            [org.akvo.lumen.lib.flow-impl :as flow-impl]))
+            [akvo.lumen.endpoint.flow :as flow]
+            [akvo.lumen.lib.flow-impl :as flow-impl]))
 
 (comment
   (require 'clojure.tools.namespace.repl)

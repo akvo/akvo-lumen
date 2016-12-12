@@ -10,18 +10,18 @@
             [duct.generate :as gen]
             [duct.util.repl :refer [setup test cljs-repl] :as duct-repl]
             [duct.util.system :refer [load-system]]
-            [org.akvo.lumen.migrate :as lumen-migrate]
+            [akvo.lumen.migrate :as lumen-migrate]
             [reloaded.repl :refer [system init start stop go reset]])
   (:import  org.postgresql.util.PSQLException))
 
 (defn new-system []
   (load-system (keep io/resource
-                     ["org/akvo/lumen/system.edn" "dev.edn" "local.edn"])))
+                     ["akvo/lumen/system.edn" "dev.edn" "local.edn"])))
 
 (when (io/resource "local.clj")
   (load "local"))
 
-(gen/set-ns-prefix 'org.akvo.lumen)
+(gen/set-ns-prefix 'akvo.lumen)
 
 (reloaded.repl/set-init! new-system)
 

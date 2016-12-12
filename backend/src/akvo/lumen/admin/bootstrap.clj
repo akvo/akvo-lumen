@@ -1,9 +1,9 @@
-(ns org.akvo.lumen.admin.bootstrap
+(ns akvo.lumen.admin.bootstrap
   (:require [clojure.java.jdbc :as jdbc]
             [clojure.string :as s]
             [environ.core :refer [env]]
-            [org.akvo.lumen.admin.util :as util]
-            [org.akvo.lumen.util :refer [squuid]]
+            [akvo.lumen.admin.util :as util]
+            [akvo.lumen.util :refer [squuid]]
             [ragtime.jdbc]
             [ragtime.repl]))
 
@@ -12,12 +12,12 @@
 ;; These can be found in the ElephantSQL console for the appropriate instance
 ;; Use this as follow
 ;; $ env PGHOST=***.db.elephantsql.com PGDATABASE=*** PGUSER=*** PGPASSWORD=*** \
-;;     lein run -m org.akvo.lumen.admin.bootstrap
+;;     lein run -m akvo.lumen.admin.bootstrap
 
 (defn migrate [db-uri]
   (ragtime.repl/migrate
    {:datastore (ragtime.jdbc/sql-database db-uri)
-    :migrations (ragtime.jdbc/load-resources "org/akvo/lumen/migrations/tenant_manager")}))
+    :migrations (ragtime.jdbc/load-resources "akvo/lumen/migrations/tenant_manager")}))
 
 (defn -main []
   (let [db-uri (util/db-uri)

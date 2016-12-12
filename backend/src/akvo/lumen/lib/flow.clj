@@ -1,5 +1,5 @@
-(ns org.akvo.lumen.lib.flow
-  (:require [org.akvo.lumen.lib.flow-impl :as impl]))
+(ns akvo.lumen.lib.flow
+  (:require [akvo.lumen.lib.flow-impl :as impl]))
 
 
 (defn folders-and-surveys

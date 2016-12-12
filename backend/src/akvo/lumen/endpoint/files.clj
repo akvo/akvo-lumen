@@ -1,4 +1,4 @@
-(ns org.akvo.lumen.endpoint.files
+(ns akvo.lumen.endpoint.files
   (:require [compojure.core :refer [ANY]]
             [org.akvo.resumed :refer [make-handler]]))
 

@@ -1,5 +1,5 @@
-(ns org.akvo.lumen.lib.visualisation
-  (:require [org.akvo.lumen.lib.visualisation-impl :as impl]))
+(ns akvo.lumen.lib.visualisation
+  (:require [akvo.lumen.lib.visualisation-impl :as impl]))
 
 
 (defn all

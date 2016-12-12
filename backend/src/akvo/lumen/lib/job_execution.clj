@@ -1,5 +1,5 @@
-(ns org.akvo.lumen.lib.job-execution
-  (:require [org.akvo.lumen.lib.job-execution-impl :as impl]))
+(ns akvo.lumen.lib.job-execution
+  (:require [akvo.lumen.lib.job-execution-impl :as impl]))
 
 
 (defn status

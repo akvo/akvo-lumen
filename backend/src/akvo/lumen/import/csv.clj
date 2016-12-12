@@ -1,11 +1,11 @@
-(ns org.akvo.lumen.import.csv
+(ns akvo.lumen.import.csv
   (:require [clojure.data.csv :as csv]
             [clojure.java.io :as io]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as s]
             [hugsql.core :as hugsql]
-            [org.akvo.lumen.import.common :as import]
-            [org.akvo.lumen.util :refer [squuid]])
+            [akvo.lumen.import.common :as import]
+            [akvo.lumen.util :refer [squuid]])
   (:import java.util.UUID
            org.postgresql.PGConnection
            org.postgresql.copy.CopyManager

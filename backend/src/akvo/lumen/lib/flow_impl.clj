@@ -1,11 +1,11 @@
-(ns org.akvo.lumen.lib.flow-impl
+(ns akvo.lumen.lib.flow-impl
   (:require [clojure.set :as set]
             [hugsql.core :as hugsql]
-            [org.akvo.lumen.import.flow :as flow-import]
+            [akvo.lumen.import.flow :as flow-import]
             [ring.util.response :refer [response]]))
 
 
-(hugsql/def-db-fns "org/akvo/lumen/import/flow.sql")
+(hugsql/def-db-fns "akvo/lumen/import/flow.sql")
 
 
 (defn remove-empty-folders

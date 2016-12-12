@@ -1,11 +1,11 @@
-(ns org.akvo.lumen.lib.visualisation-impl
+(ns akvo.lumen.lib.visualisation-impl
   (:require [hugsql.core :as hugsql]
-            [org.akvo.lumen.util :refer [squuid]]
+            [akvo.lumen.util :refer [squuid]]
             [ring.util.response :refer [not-found response]])
   (:import [java.sql SQLException]))
 
 
-(hugsql/def-db-fns "org/akvo/lumen/lib/visualisation.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
 
 
 (defn all [tenant-conn]

@@ -1,12 +1,12 @@
-(ns org.akvo.lumen.endpoint.public-test
+(ns akvo.lumen.endpoint.public-test
   (:require [clojure.test :refer :all]
             [hugsql.core :as hugsql]
-            [org.akvo.lumen.lib.public-impl :as public-impl]
-            [org.akvo.lumen.endpoint
+            [akvo.lumen.lib.public-impl :as public-impl]
+            [akvo.lumen.endpoint
              [public :as public]
              [share-test :as share-test]]
-            [org.akvo.lumen.lib.share :as share]
-            [org.akvo.lumen.fixtures :refer [db-fixture test-conn]]))
+            [akvo.lumen.lib.share :as share]
+            [akvo.lumen.fixtures :refer [db-fixture test-conn]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Tests
@@ -14,7 +14,7 @@
 
 (use-fixtures :once db-fixture)
 
-(hugsql/def-db-fns "org/akvo/lumen/lib/dashboard.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/dashboard.sql")
 
 (deftest ^:functional public-data
 

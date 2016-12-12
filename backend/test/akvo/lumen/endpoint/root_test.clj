@@ -1,6 +1,6 @@
-(ns org.akvo.lumen.endpoint.root-test
+(ns akvo.lumen.endpoint.root-test
   (:require [clojure.test :refer :all]
-            [org.akvo.lumen.endpoint.root :as root]))
+            [akvo.lumen.endpoint.root :as root]))
 
 (def handler
   (root/endpoint {}))

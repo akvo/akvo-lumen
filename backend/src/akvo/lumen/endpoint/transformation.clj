@@ -1,7 +1,7 @@
-(ns org.akvo.lumen.endpoint.transformation
+(ns akvo.lumen.endpoint.transformation
   (:require [compojure.core :refer :all]
-            [org.akvo.lumen.component.tenant-manager :refer [connection]]
-            [org.akvo.lumen.transformation :as t]
+            [akvo.lumen.component.tenant-manager :refer [connection]]
+            [akvo.lumen.transformation :as t]
             [ring.util.response :as response]))
 
 (defn endpoint [{:keys [tenant-manager transformation-engine]}]

@@ -1,20 +1,20 @@
-(ns org.akvo.lumen.endpoint.share-test
+(ns akvo.lumen.endpoint.share-test
   (:require [clojure.java.jdbc :as jdbc]
             [clojure.test :refer :all]
             [hugsql.core :as hugsql]
-            [org.akvo.lumen.component.tenant-manager :as tm]
-            [org.akvo.lumen.lib.dashboard :as dashboard]
-            [org.akvo.lumen.lib.share :as share]
-            [org.akvo.lumen.fixtures :refer [db-fixture test-conn]]
-            [org.akvo.lumen.util :refer [squuid gen-table-name]]))
+            [akvo.lumen.component.tenant-manager :as tm]
+            [akvo.lumen.lib.dashboard :as dashboard]
+            [akvo.lumen.lib.share :as share]
+            [akvo.lumen.fixtures :refer [db-fixture test-conn]]
+            [akvo.lumen.util :refer [squuid gen-table-name]]))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Helpers
 ;;;
 
-(hugsql/def-db-fns "org/akvo/lumen/job-execution.sql")
-(hugsql/def-db-fns "org/akvo/lumen/lib/visualisation.sql")
+(hugsql/def-db-fns "akvo/lumen/job-execution.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
 
 
 (defn dashboard-spec [v1-id v2-id]
@@ -134,8 +134,8 @@
 
 (use-fixtures :once db-fixture)
 
-(hugsql/def-db-fns "org/akvo/lumen/endpoint/share_test.sql")
-(hugsql/def-db-fns "org/akvo/lumen/lib/dashboard.sql")
+(hugsql/def-db-fns "akvo/lumen/endpoint/share_test.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/dashboard.sql")
 
 (deftest ^:functional share
 

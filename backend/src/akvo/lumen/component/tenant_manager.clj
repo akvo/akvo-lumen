@@ -1,4 +1,4 @@
-(ns org.akvo.lumen.component.tenant-manager
+(ns akvo.lumen.component.tenant-manager
   "Component that controll the tenants,
   We use the first domain label e.g. t1 in t1.lumen.akvo.org to dispatch."
   (:require [clojure.string :as str]
@@ -9,7 +9,7 @@
              [repl :as ragtime-repl]])
   (:import [com.zaxxer.hikari HikariConfig HikariDataSource]))
 
-(hugsql/def-db-fns "org/akvo/lumen/component/tenant_manager.sql")
+(hugsql/def-db-fns "akvo/lumen/component/tenant_manager.sql")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Middleware

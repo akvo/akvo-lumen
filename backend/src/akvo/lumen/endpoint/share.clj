@@ -1,7 +1,7 @@
-(ns org.akvo.lumen.endpoint.share
+(ns akvo.lumen.endpoint.share
   (:require [compojure.core :refer :all]
-            [org.akvo.lumen.component.tenant-manager :refer [connection]]
-            [org.akvo.lumen.lib.share :as share]))
+            [akvo.lumen.component.tenant-manager :refer [connection]]
+            [akvo.lumen.lib.share :as share]))
 
 
 (defn endpoint [{:keys [tenant-manager]}]

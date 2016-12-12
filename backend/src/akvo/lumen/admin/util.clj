@@ -1,4 +1,4 @@
-(ns org.akvo.lumen.admin.util
+(ns akvo.lumen.admin.util
   (:require [clojure.java.jdbc :as jdbc]
             [environ.core :refer [env]]))
 

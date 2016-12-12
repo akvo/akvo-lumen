@@ -1,10 +1,10 @@
-(ns org.akvo.lumen.transformation.engine
+(ns akvo.lumen.transformation.engine
   (:require [hugsql.core :as hugsql]
-            [org.akvo.lumen.util :as util])
+            [akvo.lumen.util :as util])
   (:import java.sql.SQLException))
 
 
-(hugsql/def-db-fns "org/akvo/lumen/transformation/engine.sql")
+(hugsql/def-db-fns "akvo/lumen/transformation/engine.sql")
 
 (def available-ops
   {"core/change-datatype" nil
@@ -234,7 +234,7 @@
       {:success? false
        :message (:getMessage e)})))
 
-(hugsql/def-db-fns "org/akvo/lumen/transformation.sql")
+(hugsql/def-db-fns "akvo/lumen/transformation.sql")
 
 (defn- deliver-promise-success [promise dataset-id dataset-version-id job-execution-id]
   (deliver promise {:status "OK"

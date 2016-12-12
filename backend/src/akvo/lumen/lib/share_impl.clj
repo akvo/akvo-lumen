@@ -1,4 +1,4 @@
-(ns org.akvo.lumen.lib.share-impl
+(ns akvo.lumen.lib.share-impl
   (:require [clojure.string :as string]
             [hugsql.core :as hugsql]
             [ring.util.response :refer [not-found response status]])
@@ -6,7 +6,7 @@
            (java.security SecureRandom)))
 
 
-(hugsql/def-db-fns "org/akvo/lumen/lib/share.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/share.sql")
 
 
 (defn all [tenant-conn]

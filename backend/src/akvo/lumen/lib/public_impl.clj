@@ -1,13 +1,13 @@
-(ns org.akvo.lumen.lib.public-impl
+(ns akvo.lumen.lib.public-impl
   (:require [cheshire.core :as json]
             [hugsql.core :as hugsql]
-            [org.akvo.lumen.lib.dataset :as dataset]
-            [org.akvo.lumen.lib.visualisation :as visualisation]
-            [org.akvo.lumen.lib.dashboard :as dashboard]
+            [akvo.lumen.lib.dataset :as dataset]
+            [akvo.lumen.lib.visualisation :as visualisation]
+            [akvo.lumen.lib.dashboard :as dashboard]
             [ring.util.response :refer [content-type not-found response]]))
 
 
-(hugsql/def-db-fns "org/akvo/lumen/lib/public.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/public.sql")
 
 
 (defn get-share

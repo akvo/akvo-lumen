@@ -1,5 +1,5 @@
-(ns org.akvo.lumen.lib.dashboard
-  (:require [org.akvo.lumen.lib.dashboard-impl :as impl]))
+(ns akvo.lumen.lib.dashboard
+  (:require [akvo.lumen.lib.dashboard-impl :as impl]))
 
 
 (defn all

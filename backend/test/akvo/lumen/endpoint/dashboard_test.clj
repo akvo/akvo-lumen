@@ -1,12 +1,12 @@
-(ns org.akvo.lumen.endpoint.dashboard-test
+(ns akvo.lumen.endpoint.dashboard-test
   (:require [clojure.test :refer :all]
             [hugsql.core :as hugsql]
-            [org.akvo.lumen.fixtures :refer [db-fixture test-conn]]
-            [org.akvo.lumen.endpoint.share :as share]
-            [org.akvo.lumen.lib.dashboard :as dashboard]
-            [org.akvo.lumen.lib.dashboard-impl :as dashboard-impl]
-            [org.akvo.lumen.endpoint.share-test :as share-test]
-            [org.akvo.lumen.util :refer [squuid]]))
+            [akvo.lumen.fixtures :refer [db-fixture test-conn]]
+            [akvo.lumen.endpoint.share :as share]
+            [akvo.lumen.lib.dashboard :as dashboard]
+            [akvo.lumen.lib.dashboard-impl :as dashboard-impl]
+            [akvo.lumen.endpoint.share-test :as share-test]
+            [akvo.lumen.util :refer [squuid]]))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -50,8 +50,8 @@
 
 (use-fixtures :once db-fixture)
 
-(hugsql/def-db-fns "org/akvo/lumen/lib/visualisation.sql")
-(hugsql/def-db-fns "org/akvo/lumen/lib/dashboard.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/dashboard.sql")
 
 (deftest dashboard-unit
   (testing "filter-type"

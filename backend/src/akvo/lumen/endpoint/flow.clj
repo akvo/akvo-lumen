@@ -1,6 +1,6 @@
-(ns org.akvo.lumen.endpoint.flow
+(ns akvo.lumen.endpoint.flow
   (:require [compojure.core :refer :all]
-            [org.akvo.lumen.lib.flow :as flow]))
+            [akvo.lumen.lib.flow :as flow]))
 
 
 (defn endpoint [{{:keys [flow-report-database-url]} :config}]

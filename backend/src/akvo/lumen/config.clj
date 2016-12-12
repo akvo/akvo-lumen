@@ -1,4 +1,4 @@
-(ns org.akvo.lumen.config
+(ns akvo.lumen.config
   (:require [environ.core :refer [env]]))
 
 (defn- error-msg [env-var]

@@ -1,8 +1,8 @@
-(ns org.akvo.lumen.endpoint.public
+(ns akvo.lumen.endpoint.public
   (:require [cheshire.core :as json]
             [compojure.core :refer :all]
-            [org.akvo.lumen.component.tenant-manager :refer [connection]]
-            [org.akvo.lumen.lib.public :as public]))
+            [akvo.lumen.component.tenant-manager :refer [connection]]
+            [akvo.lumen.lib.public :as public]))
 
 
 (defn endpoint [{:keys [tenant-manager]}]
