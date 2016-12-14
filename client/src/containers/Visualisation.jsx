@@ -2,7 +2,6 @@ import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import update from 'react-addons-update';
 import { isEmpty } from 'lodash';
-import { push } from 'react-router-redux';
 import ShareEntity from '../components/modals/ShareEntity';
 import * as actions from '../actions/visualisation';
 import { fetchDataset } from '../actions/dataset';
@@ -135,7 +134,6 @@ class Visualisation extends Component {
     } else {
       dispatch(actions.createVisualisation(this.state.visualisation));
     }
-    dispatch(push('/library?filter=visualisations&sort=created'));
   }
 
   // Helper method for...
