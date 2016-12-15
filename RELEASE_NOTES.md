@@ -2,11 +2,13 @@
 
 ## 0.4.0 (unreleased)
 
-Date: 2016-12-07
+Date: 2016-12-23
 
 ### New and noteworthy
 
 * DOS-formatted CSV files now import properly
+* Improved the Visualisation editor
+  * "Save" button no longer redirects user to library view
 
 ## 0.3.0
 
