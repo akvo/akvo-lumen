@@ -1,4 +1,4 @@
-(defproject org.akvo.lumen "0.2-SNAPSHOT"
+(defproject org.akvo/lumen "0.3-SNAPSHOT"
   :description "Akvo Lumen backend"
   :url "https://github.com/akvo/akvo-lumen"
   :license {:name "GNU Affero General Public License 3.0"
@@ -35,9 +35,9 @@
   :plugins [[lein-ancient "0.6.10"]
             [lein-codox "0.9.6"]
             [lein-environ "1.0.3"]]
-  :codox {:doc-paths   ["resources/org/akvo/lumen/doc"]
+  :codox {:doc-paths   ["resources/akvo/lumen/doc"]
           :output-path "../docs"}
-  :main ^:skip-aot org.akvo.lumen.main
+  :main ^:skip-aot akvo.lumen.main
   :target-path "target/%s/"
   :aliases {"setup"   ["run" "-m" "duct.util.repl/setup"]
             "migrate" ["run" "-m" "dev/migrate"]
