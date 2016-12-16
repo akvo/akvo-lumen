@@ -1,4 +1,4 @@
-(ns org.akvo.lumen.transformation.js
+(ns akvo.lumen.transformation.js
   (:import [javax.script ScriptEngineManager ScriptEngine Invocable]
            [jdk.nashorn.api.scripting NashornScriptEngineFactory ClassFilter]))
 

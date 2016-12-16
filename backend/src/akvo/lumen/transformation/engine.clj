@@ -3,7 +3,6 @@
             [hugsql.core :as hugsql])
   (:import java.sql.SQLException))
 
-
 (hugsql/def-db-fns "akvo/lumen/transformation/engine.sql")
 
 (def available-ops
@@ -78,8 +77,6 @@
         col-idx (get-column-idx columns col-name)
         new-type (get-in op-spec ["args" "newType"])]
     (update columns col-idx assoc "type" new-type)))
-
-
 
 (defmulti apply-operation
   "Applies a particular operation based on `op` key from spec
