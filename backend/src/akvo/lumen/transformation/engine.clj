@@ -235,41 +235,41 @@
       {:success? false
        :message (:getMessage e)})))
 
-(require '[clojure.string :as str])
+#_(require '[clojure.string :as str])
 
-(defn next-derived-column-name [columns]
-  (let [nums (->> columns
-                  (map #(get % "columnName"))
-                  (filter #(str/starts-with? % "d"))
-                  (map #(subs % 1))
-                  (map #(Long/parseLong %)))]
-    (str "d"
-         (if (empty? nums)
-           1
-           (inc (apply max nums))))))
+#_(defn next-derived-column-name [columns]
+    (let [nums (->> columns
+                    (map #(get % "columnName"))
+                    (filter #(str/starts-with? % "d"))
+                    (map #(subs % 1))
+                    (map #(Long/parseLong %)))]
+      (str "d"
+           (if (empty? nums)
+             1
+             (inc (apply max nums))))))
 
-(defmethod apply-operation :core/derive
-  [tenant-conn table-name columns op-spec]
-  (let [code (get-in op-spec ["args" "code"])
-        column-title (get-in op-spec ["args" "newColumnTitle"])
-        column-type (get-in op-spec ["args" "newColumnType"])
-        column-name (next-derived-column-name columns)
-        transform (row-transform code)]
-    (doseq [row (select * from table-name)]
-      (let [row (row-context columns row)
-            val (row-transform row)]
-        (if (type= column-type (type val))
-          (insert into table-name (column-name) the-new-column (values))
-          (do ;; follow some error strategy
-            ))))
-    {:success? true
-     :execution-log [(format "Derived column %s" column-name)]
-     :columns (conj columns {"title" column-title
-                             "type" column-type
-                             "sort" nil
-                             "hidden" false
-                             "direction" nil
-                             "columnName" column-name})}))
+#_(defmethod apply-operation :core/derive
+    [tenant-conn table-name columns op-spec]
+    (let [code (get-in op-spec ["args" "code"])
+          column-title (get-in op-spec ["args" "newColumnTitle"])
+          column-type (get-in op-spec ["args" "newColumnType"])
+          column-name (next-derived-column-name columns)
+          transform (row-transform code)]
+      (doseq [row (select * from table-name)]
+        (let [row (row-context columns row)
+              val (row-transform row)]
+          (if (type= column-type (type val))
+            (insert into table-name (column-name) the-new-column (values))
+            (do ;; follow some error strategy
+              ))))
+      {:success? true
+       :execution-log [(format "Derived column %s" column-name)]
+       :columns (conj columns {"title" column-title
+                               "type" column-type
+                               "sort" nil
+                               "hidden" false
+                               "direction" nil
+                               "columnName" column-name})}))
 
 (hugsql/def-db-fns "akvo/lumen/transformation.sql")
 
