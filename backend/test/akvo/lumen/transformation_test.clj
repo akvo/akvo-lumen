@@ -1,20 +1,20 @@
 (ns akvo.lumen.transformation-test
-  (:require [cheshire.core :as json]
+  (:require [akvo.lumen.component.tenant-manager :refer [tenant-manager]]
+            [akvo.lumen.component.transformation-engine :refer [transformation-engine]]
+            [akvo.lumen.fixtures :refer [test-conn
+                                         test-tenant-spec
+                                         migrate-tenant
+                                         rollback-tenant]]
+            [akvo.lumen.import :as imp]
+            [akvo.lumen.import.csv-test :refer [import-file]]
+            [akvo.lumen.transformation :as tf]
+            [akvo.lumen.util :refer (squuid)]
+            [cheshire.core :as json]
             [clojure.java.io :as io]
             [clojure.test :refer :all]
             [com.stuartsierra.component :as component]
             [duct.component.hikaricp :refer [hikaricp]]
-            [hugsql.core :as hugsql]
-            [akvo.lumen.component.tenant-manager :refer [tenant-manager]]
-            [akvo.lumen.component.transformation-engine :refer [transformation-engine]]
-            [akvo.lumen.fixtures :refer [test-conn
-                                             test-tenant-spec
-                                             migrate-tenant
-                                             rollback-tenant]]
-            [akvo.lumen.import :as imp]
-            [akvo.lumen.import.csv-test :refer [import-file]]
-            [akvo.lumen.transformation :as tf]
-            [akvo.lumen.util :refer (squuid)]))
+            [hugsql.core :as hugsql]))
 
 (def ops (vec (json/parse-string (slurp (io/resource "ops.json")))))
 (def invalid-op (-> (take 3 ops)
@@ -217,3 +217,68 @@
         (is (pos? first-date))
         (is (pos? second-date))
         (is (pos? third-date))))))
+
+(defn change-datatype-transformation [column-name]
+  {:type :transformation
+   :transformation {"op" "core/change-datatype"
+                    "args" {"columnName" column-name
+                            "newType" "number"
+                            "defaultValue" nil}
+                    "onError" "default-value"}})
+
+(defn derive-column-transform [transform]
+  (let [default-args {"newColumnTitle" "Derived Column"
+                      "newColumnType" "number"}
+        args (merge default-args
+                    (get transform "args"))
+        default-transform {"op" "core/derive"
+                           "onError" "leave-empty"}]
+    {:type :transformation
+     :transformation (merge default-transform
+                            (assoc transform "args" args))}))
+
+(defn latest-data [dataset-id]
+  (let [table-name (:table-name
+                    (latest-dataset-version-by-dataset-id test-conn {:dataset-id dataset-id}))]
+    (get-data test-conn {:table-name table-name})))
+
+(deftest ^:functional derived-column-test
+  (let [dataset-id (import-file "derived-column.csv" {:has-column-headers? true})
+        schedule (partial tf/schedule test-conn *transformation-engine* dataset-id)]
+    (do (schedule (change-datatype-transformation "c2"))
+        (schedule (change-datatype-transformation "c3")))
+
+    (testing "Import and initial transforms"
+      (is (= (latest-data dataset-id)
+             [{:rnum 1 :c1 "a" :c2 1 :c3 2}
+              {:rnum 2 :c1 "b" :c2 3 :c3 nil}
+              {:rnum 3 :c1 nil :c2 4 :c3 5}])))
+
+    (testing "Basic addition"
+      (schedule (derive-column-transform {"args" {"code" "row['bar'] + row['baz']"}}))
+      (is (= [3 nil 9] (map :d1 (latest-data dataset-id))))
+      (schedule {:type :undo}))
+
+    (testing "Basic addition with abort"
+      (schedule (derive-column-transform {"args" {"code" "row['bar'] + row['baz']"}
+                                          "onError" "fail"}))
+      (is (-> (latest-data dataset-id)
+              first
+              keys
+              set
+              (contains? :d1)
+              not)))
+
+    (testing "Basic addition with drop row on error"
+      (schedule (derive-column-transform {"args" {"code" "row['bar'] + row['baz']"}
+                                          "onError" "delete-row"}))
+      (is (= [3 9] (map :d1 (latest-data dataset-id))))
+      (schedule {:type :undo}))
+
+    (testing "String transform"
+      (schedule (derive-column-transform {"args" {"code" "row['foo'].toUpperCase()"
+                                                  "newColumnType" "text"}}))
+      (is (= ["A" "B" nil] (map :d1 (latest-data dataset-id))))
+      (schedule (derive-column-transform {"args" {"code" "row['Derived column'].toLowerCase()"
+                                                  "newColumnType" "text"}}))
+      (is (= ["a" "b" nil] (map :d2 (latest-data dataset-id)))))))
