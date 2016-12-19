@@ -1,9 +1,9 @@
 (ns akvo.lumen.transformation
-  (:require [clojure.string :as str]
-            [hugsql.core :as hugsql]
-            [akvo.lumen.component.transformation-engine :refer (enqueue)]
+  (:require [akvo.lumen.component.transformation-engine :refer (enqueue)]
             [akvo.lumen.transformation.engine :as engine]
-            [akvo.lumen.util :refer (squuid gen-table-name)]))
+            [akvo.lumen.util :refer (squuid gen-table-name)]
+            [clojure.string :as str]
+            [hugsql.core :as hugsql]))
 
 ;; TODO: Potential change op-spec validation `core.spec`
 ;; TODO: Move the validation part to transformation.validation namespace
@@ -100,10 +100,11 @@
                     (= (get op-spec "onError") "fail")))
       (throw-invalid-op op-spec)))
 
+
+
 (defmethod validate-op :core/derive
   [op-spec]
-
-  )
+  true)
 
 (defn validate
   [command]

@@ -1,5 +1,11 @@
 (ns akvo.lumen.transformation.engine
-  (:require [akvo.lumen.util :as util]
+  (:require [akvo.commons.psql-util :refer (val->jsonb-pgobj)]
+            [akvo.lumen.transformation.js :as js]
+            [akvo.lumen.util :as util]
+            [clojure.java.jdbc :as jdbc]
+            [clojure.set :as set]
+            [clojure.string :as str]
+            [clojure.walk :as walk]
             [hugsql.core :as hugsql])
   (:import java.sql.SQLException))
 
@@ -16,7 +22,8 @@
    "core/to-uppercase" nil
    "core/trim" nil
    "core/trim-doublespace" nil
-   "core/combine" nil})
+   "core/combine" nil
+   "core/derive" nil})
 
 (defn- get-column-name
   "Returns the columnName from the operation specification"
@@ -232,41 +239,114 @@
       {:success? false
        :message (:getMessage e)})))
 
-#_(require '[clojure.string :as str])
+(defn next-derived-column-name [columns]
+  (let [nums (->> columns
+                  (map #(get % "columnName"))
+                  (filter #(str/starts-with? % "d"))
+                  (map #(subs % 1))
+                  (map #(Long/parseLong %)))]
+    (str "d"
+         (if (empty? nums)
+           1
+           (inc (apply max nums))))))
 
-#_(defn next-derived-column-name [columns]
-    (let [nums (->> columns
-                    (map #(get % "columnName"))
-                    (filter #(str/starts-with? % "d"))
-                    (map #(subs % 1))
-                    (map #(Long/parseLong %)))]
-      (str "d"
-           (if (empty? nums)
-             1
-             (inc (apply max nums))))))
-
-#_(defmethod apply-operation :core/derive
-    [tenant-conn table-name columns op-spec]
+(defmethod apply-operation :core/derive
+  [tenant-conn table-name columns op-spec]
+  (try
     (let [code (get-in op-spec ["args" "code"])
           column-title (get-in op-spec ["args" "newColumnTitle"])
           column-type (get-in op-spec ["args" "newColumnType"])
+          on-error (get op-spec "onError")
           column-name (next-derived-column-name columns)
-          transform (row-transform code)]
-      (doseq [row (select * from table-name)]
-        (let [row (row-context columns row)
-              val (row-transform row)]
-          (if (type= column-type (type val))
-            (insert into table-name (column-name) the-new-column (values))
-            (do ;; follow some error strategy
-              ))))
+          transform (js/row-transform code)
+          key-translation (into {}
+                                (map (fn [{:strs [columnName title]}]
+                                       [(keyword columnName) title])
+                                     columns))]
+
+      (jdbc/with-db-transaction [conn tenant-conn]
+        (add-column conn {:table-name table-name :new-column-name column-name})
+        (doseq [row (->> (jdbc/query tenant-conn [(format "SELECT * FROM %s" table-name)])
+                         (map #(set/rename-keys % key-translation)))]
+          (try
+            (jdbc/execute! conn
+                           [(format "UPDATE %s SET %s='%s'::jsonb WHERE rnum=%s"
+                                    table-name
+                                    column-name
+                                    (val->jsonb-pgobj (transform row))
+                                    (:rnum row))])
+            (catch Exception e
+              (condp = on-error
+                "leave-empty" (jdbc/execute! conn
+                                             [(format "UPDATE %s SET %s=NULL WHERE rnum=%s"
+                                                      table-name
+                                                      column-name
+                                                      (:rnum row))])
+                "fail" (throw e)
+                "delete-row" (jdbc/execute! conn
+                                            [(format "DELETE FROM %s WHERE rnum=%s"
+                                                     table-name
+                                                     (:rnum row))]))))))
       {:success? true
-       :execution-log [(format "Derived column %s" column-name)]
+       :execution-log [(format "Derived columns using '%s'" code)]
        :columns (conj columns {"title" column-title
                                "type" column-type
                                "sort" nil
                                "hidden" false
                                "direction" nil
-                               "columnName" column-name})}))
+                               "columnName" column-name})})
+    (catch Exception e
+      {:success? false
+       :message "Failed to transform"}))
+  )
+
+(comment
+
+
+  (apply-operation "jdbc:postgres://localhost/lumen_tenant_1"
+                   "ds_01109560_5537_450a_9dcf_f59319f69470"
+                   [{"columnName" "c1"
+                     "title" "foo"
+                     "type" "text"}
+                    {"columnName" "c2"
+                     "title" "bar"
+                     "type" "text"}
+                    {"columnName" "c3"
+                     "title" "baz"
+                     "type" "text"}]
+                   {"op" "core/derive"
+                    "args" {"code" "row['foo'].toUpperCase()"
+                            "newColumnType" "text"
+                            "newColumnTitle" "Upper"}
+                    "onError" "delete-row"})
+
+
+  )
+
+
+
+
+
+
+#_(transform nil)
+
+
+#_(doseq [row (select * from table-name)]
+    (let [row (row-context columns row)
+          val (row-transform row)]
+      (if (type= column-type (type val))
+        (insert into table-name (column-name) the-new-column (values))
+        (do ;; follow some error strategy
+          ))))
+#_{:success? true
+   :execution-log [(format "Derived column %s" column-name)]
+   :columns (conj columns {"title" column-title
+                           "type" column-type
+                           "sort" nil
+                           "hidden" false
+                           "direction" nil
+                           "columnName" column-name})}
+
 
 (hugsql/def-db-fns "akvo/lumen/transformation.sql")
 

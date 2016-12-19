@@ -18,32 +18,3 @@
     (.eval ^ScriptEngine engine ^String (derive-column-function code))
     (fn [row]
       (.invokeFunction ^Invocable engine "deriveColumn" (object-array [row])))))
-
-(def fun (row-transform "quit()"))
-
-
-(fun {"age" 10
-      "foo" 6})
-
-
-
-(time (def f (row-transform "return java.lang.Thread.interrupted()")))
-
-(comment
-  (f {})
-
-  (System/exit 1)
-  )
-
-;;; return row['a'] + (row['b'] < 10 ? row['c'] : row['c']
-;;; return <statement>
-
-;;; return while(true) {}
-
-
-#_(time (dotimes [_ 10000]
-          (f {"a" 3 "b" 7})))
-
-#_(let [m {"a" 1 "b" 2}]
-    (time (dotimes [_ 10000]
-            (+ (get m "a") (get m "b")))))
