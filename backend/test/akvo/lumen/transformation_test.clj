@@ -254,31 +254,41 @@
               {:rnum 2 :c1 "b" :c2 3 :c3 nil}
               {:rnum 3 :c1 nil :c2 4 :c3 5}])))
 
-    #_(testing "Basic addition"
-        (schedule (derive-column-transform {"args" {"code" "row['bar'] + row['baz']"}}))
-        (is (= [3 nil 9] (map :d1 (latest-data dataset-id))))
-        (schedule {:type :undo}))
+    (testing "Basic text transform"
+      (schedule (derive-column-transform {"args" {"code" "row['foo'].toUpperCase()"
+                                                  "newColumnTitle" "Derived 1"
+                                                  "newColumnType" "text"}
+                                          "onError" "leave-empty"}))
+      (is (= ["A" "B" nil] (map :d1 (latest-data dataset-id)))))
 
-    #_(testing "Basic addition with abort"
-        (schedule (derive-column-transform {"args" {"code" "row['bar'] + row['baz']"}
-                                            "onError" "fail"}))
-        (is (-> (latest-data dataset-id)
-                first
-                keys
-                set
-                (contains? :d1)
-                not)))
+    (testing "Basic text transform with drop row on error"
+      (schedule (derive-column-transform {"args" {"code" "row['foo'].replace('a', 'b')"
+                                                  "newColumnTitle" "Derived 3"
+                                                  "newColumnType" "text"}
+                                          "onError" "delete-row"}))
+      (is (= ["b" "b"] (map :d2 (latest-data dataset-id))))
+      ;; Undo this so we have all the rows in the remaining tests
+      (schedule {:type :undo}))
 
-    #_(testing "Basic addition with drop row on error"
-        (schedule (derive-column-transform {"args" {"code" "row['bar'] + row['baz']"}
-                                            "onError" "delete-row"}))
-        (is (= [3 9] (map :d1 (latest-data dataset-id))))
-        (schedule {:type :undo}))
+    (testing "Basic text transform with abort"
+      (schedule (derive-column-transform {"args" {"code" "row['foo'].length"
+                                                  "newColumnTitle" "Derived 2"
+                                                  "newColumnType" "number"}
+                                          "onError" "fail"}))
+      (is (-> (latest-data dataset-id)
+              first
+              keys
+              set
+              (contains? :d2)
+              not)))
 
-    #_(testing "String transform"
-        (schedule (derive-column-transform {"args" {"code" "row['foo'].toUpperCase()"
-                                                    "newColumnType" "text"}}))
-        (is (= ["A" "B" nil] (map :d1 (latest-data dataset-id))))
-        (schedule (derive-column-transform {"args" {"code" "row['Derived column'].toLowerCase()"
-                                                    "newColumnType" "text"}}))
-        (is (= ["a" "b" nil] (map :d2 (latest-data dataset-id)))))))
+    (testing "Nested string transform"
+      (schedule (derive-column-transform {"args" {"code" "row['foo'].toUpperCase()"
+                                                  "newColumnType" "text"
+                                                  "newColumnTitle" "Derived 4"}}))
+      (is (= ["A" "B" nil] (map :d2 (latest-data dataset-id))))
+
+      (schedule (derive-column-transform {"args" {"code" "row['Derived 4'].toLowerCase()"
+                                                  "newColumnType" "text"
+                                                  "newColumnTitle" "Derived 5"}}))
+      (is (= ["a" "b" nil] (map :d3 (latest-data dataset-id)))))))

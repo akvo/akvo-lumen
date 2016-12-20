@@ -264,29 +264,30 @@
                                        [(keyword columnName) title])
                                      columns))]
 
-      (jdbc/with-db-transaction [conn tenant-conn]
-        (add-column conn {:table-name table-name :new-column-name column-name})
-        (doseq [row (->> (jdbc/query tenant-conn [(format "SELECT * FROM %s" table-name)])
-                         (map #(set/rename-keys % key-translation)))]
-          (try
-            (jdbc/execute! conn
-                           [(format "UPDATE %s SET %s='%s'::jsonb WHERE rnum=%s"
-                                    table-name
-                                    column-name
-                                    (val->jsonb-pgobj (transform row))
-                                    (:rnum row))])
-            (catch Exception e
-              (condp = on-error
-                "leave-empty" (jdbc/execute! conn
-                                             [(format "UPDATE %s SET %s=NULL WHERE rnum=%s"
-                                                      table-name
-                                                      column-name
-                                                      (:rnum row))])
-                "fail" (throw e)
-                "delete-row" (jdbc/execute! conn
-                                            [(format "DELETE FROM %s WHERE rnum=%s"
-                                                     table-name
-                                                     (:rnum row))]))))))
+      (let [data (->> (jdbc/query tenant-conn [(format "SELECT * FROM %s" table-name)])
+                      (map #(set/rename-keys % key-translation)))]
+        (jdbc/with-db-transaction [conn tenant-conn]
+          (add-column conn {:table-name table-name :new-column-name column-name})
+          (doseq [row data]
+            (try
+              (jdbc/execute! conn
+                             [(format "UPDATE %s SET %s='%s'::jsonb WHERE rnum=%s"
+                                      table-name
+                                      column-name
+                                      (val->jsonb-pgobj (transform row))
+                                      (:rnum row))])
+              (catch Exception e
+                (condp = on-error
+                  "leave-empty" (jdbc/execute! conn
+                                               [(format "UPDATE %s SET %s=NULL WHERE rnum=%s"
+                                                        table-name
+                                                        column-name
+                                                        (:rnum row))])
+                  "fail" (throw e)
+                  "delete-row" (jdbc/execute! conn
+                                              [(format "DELETE FROM %s WHERE rnum=%s"
+                                                       table-name
+                                                       (:rnum row))])))))))
       {:success? true
        :execution-log [(format "Derived columns using '%s'" code)]
        :columns (conj columns {"title" column-title
@@ -297,8 +298,7 @@
                                "columnName" column-name})})
     (catch Exception e
       {:success? false
-       :message "Failed to transform"}))
-  )
+       :message ("Failed to transform: %s" (.getMessage e))})))
 
 (comment
 
