@@ -291,4 +291,61 @@
       (schedule (derive-column-transform {"args" {"code" "row['Derived 4'].toLowerCase()"
                                                   "newColumnType" "text"
                                                   "newColumnTitle" "Derived 5"}}))
-      (is (= ["a" "b" nil] (map :d3 (latest-data dataset-id)))))))
+      (is (= ["a" "b" nil] (map :d3 (latest-data dataset-id)))))
+
+    (testing "Date transform"
+      (let [{:keys [status body]} (schedule (derive-column-transform {"args" {"code" "new Date()"
+                                                                              "newColumnType" "date"
+                                                                              "newColumnTitle" "Derived 5"}
+                                                                      "onError" "fail"}))]
+        (is (= status 200))
+        (is (every? number? (map :d4 (latest-data dataset-id))))))
+
+    (testing "Valid type check"
+      (let [{:keys [status]} (schedule (derive-column-transform {"args" {"code" "new Date()"
+                                                                         "newColumnType" "number"
+                                                                         "newColumnTitle" "Derived 6"}
+                                                                 "onError" "fail"}))]
+        (is (= status 409))))
+
+    (testing "Sandboxing java interop"
+      (let [{:keys [status]} (schedule (derive-column-transform {"args" {"code" "new java.util.Date()"
+                                                                         "newColumnType" "number"
+                                                                         "newColumnTitle" "Derived 7"}
+                                                                 "onError" "fail"}))]
+        (is (= status 409))))
+
+    (testing "Sandboxing dangerous js functions"
+      (let [{:keys [status]} (schedule (derive-column-transform {"args" {"code" "quit()"
+                                                                         "newColumnType" "number"
+                                                                         "newColumnTitle" "Derived 7"}
+                                                                 "onError" "fail"}))]
+        (is (= status 409))))
+
+    (testing "Fail early on syntax error"
+      (let [{:keys [status]} (schedule (derive-column-transform {"args" {"code" ")"
+                                                                         "newColumnType" "text"
+                                                                         "newColumnTitle" "Derived 8"}
+                                                                 "onError" "fail"}))]
+        (is (= status 400))))
+
+    (testing "Fail infinite loop"
+      (let [{:keys [status]} (schedule (derive-column-transform {"args" {"code" "while(true) {}"
+                                                                         "newColumnType" "text"
+                                                                         "newColumnTitle" "Derived 9"}
+                                                                 "onError" "fail"}))]
+        (is (= status 400))))
+
+
+    (testing "Disallow anonymous functions"
+      (let [{:keys [status]} (schedule (derive-column-transform {"args" {"code" "(function() {})()"
+                                                                         "newColumnType" "text"
+                                                                         "newColumnTitle" "Derived 10"}
+                                                                 "onError" "fail"}))]
+        (is (= status 400)))
+
+      (let [{:keys [status]} (schedule (derive-column-transform {"args" {"code" "(() => 'foo')()"
+                                                                         "newColumnType" "text"
+                                                                         "newColumnTitle" "Derived 11"}
+                                                                 "onError" "fail"}))]
+        (is (= status 400))))))

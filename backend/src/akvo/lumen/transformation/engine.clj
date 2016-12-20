@@ -7,7 +7,8 @@
             [clojure.string :as str]
             [clojure.walk :as walk]
             [hugsql.core :as hugsql])
-  (:import java.sql.SQLException))
+  (:import java.sql.SQLException
+           jdk.nashorn.api.scripting.ScriptObjectMirror))
 
 (hugsql/def-db-fns "akvo/lumen/transformation/engine.sql")
 
@@ -250,6 +251,35 @@
            1
            (inc (apply max nums))))))
 
+(defn throw-invalid-return-type [value]
+  (throw (ex-info "Invalid return type"
+                  {:value value
+                   :type (type value)})))
+
+(defn ensure-valid-value-type [value type]
+  (when-not (nil? value)
+    (condp = type
+      "number" (if (and (number? value)
+                        (if (float? value)
+                          (java.lang.Double/isFinite value)
+                          true))
+                 value
+                 (throw-invalid-return-type value))
+      "text" (if (string? value)
+               value
+               (throw-invalid-return-type value))
+      "date" (cond
+               (number? value)
+               (long value)
+
+               (and (instance? jdk.nashorn.api.scripting.ScriptObjectMirror value)
+                    (.containsKey value "getTime"))
+
+               (long (.callMember value "getTime" (object-array 0)))
+
+               :else
+               (throw-invalid-return-type value)))))
+
 (defmethod apply-operation :core/derive
   [tenant-conn table-name columns op-spec]
   (try
@@ -274,7 +304,8 @@
                              [(format "UPDATE %s SET %s='%s'::jsonb WHERE rnum=%s"
                                       table-name
                                       column-name
-                                      (val->jsonb-pgobj (transform row))
+                                      (val->jsonb-pgobj (ensure-valid-value-type (transform row)
+                                                                                 column-type))
                                       (:rnum row))])
               (catch Exception e
                 (condp = on-error
@@ -315,38 +346,13 @@
                      "title" "baz"
                      "type" "text"}]
                    {"op" "core/derive"
-                    "args" {"code" "row['foo'].toUpperCase()"
-                            "newColumnType" "text"
+                    "args" {"code" "new Date()"
+                            "newColumnType" "date"
                             "newColumnTitle" "Upper"}
-                    "onError" "delete-row"})
+                    "onError" "leave-empty"})
 
 
   )
-
-
-
-
-
-
-#_(transform nil)
-
-
-#_(doseq [row (select * from table-name)]
-    (let [row (row-context columns row)
-          val (row-transform row)]
-      (if (type= column-type (type val))
-        (insert into table-name (column-name) the-new-column (values))
-        (do ;; follow some error strategy
-          ))))
-#_{:success? true
-   :execution-log [(format "Derived column %s" column-name)]
-   :columns (conj columns {"title" column-title
-                           "type" column-type
-                           "sort" nil
-                           "hidden" false
-                           "direction" nil
-                           "columnName" column-name})}
-
 
 (hugsql/def-db-fns "akvo/lumen/transformation.sql")
 
