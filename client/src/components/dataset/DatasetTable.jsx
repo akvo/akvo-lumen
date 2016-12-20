@@ -43,6 +43,7 @@ export default class DatasetTable extends Component {
 
     this.handleToggleTransformationLog = this.handleToggleTransformationLog.bind(this);
     this.handleToggleCombineColumnSidebar = this.handleToggleCombineColumnSidebar.bind(this);
+    this.handleToggleDeriveColumnSidebar = this.handleToggleDeriveColumnSidebar.bind(this);
   }
 
   componentDidMount() {
@@ -138,6 +139,28 @@ export default class DatasetTable extends Component {
     }
   }
 
+  // TODO Abstract to use same as combineColumns
+  handleToggleDeriveColumnSidebar() {
+    if (this.state.sidebarProps &&
+      this.state.sidebarProps.type === 'deriveColumn') {
+      this.hideSidebar();
+    } else {
+      this.setState({
+        activeDataTypeContextMenu: null,
+        activeColumnContextMenu: null,
+      });
+      this.showSidebar({
+        type: 'deriveColumn',
+        displayRight: false,
+        onClose: this.hideSidebar,
+        onApply: (transformation) => {
+          this.hideSidebar();
+          this.props.onTransform(transformation);
+        },
+        columns: this.props.columns,
+      });
+    }
+  }
 
   handleDataTypeContextMenuClicked({ column, dataTypeOptions, newColumnType }) {
     this.setState({ activeDataTypeContextMenu: null });
@@ -259,6 +282,8 @@ export default class DatasetTable extends Component {
           onClickMenuItem={(menuItem) => {
             if (menuItem === 'combineColumns') {
               this.handleToggleCombineColumnSidebar();
+            } else if (menuItem === 'deriveColumn') {
+              this.handleToggleDeriveColumnSidebar();
             } else {
               throw new Error(`Not yet implemented: ${menuItem}`);
             }
