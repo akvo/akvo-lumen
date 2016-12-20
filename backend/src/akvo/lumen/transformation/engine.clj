@@ -298,7 +298,7 @@
                                "columnName" column-name})})
     (catch Exception e
       {:success? false
-       :message ("Failed to transform: %s" (.getMessage e))})))
+       :message (format "Failed to transform: %s" (.getMessage e))})))
 
 (comment
 
