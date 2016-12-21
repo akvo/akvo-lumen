@@ -3,10 +3,10 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
   const innerRadius = visualisation.visualisationType === 'donut' ?
     Math.floor(chartRadius / 1.75) : 0;
 
-  const hasAggregation = Boolean(visualisation.spec.datasetGroupColumnX &&
-    visualisation.spec.aggregationTypeY);
+  const hasAggregation = Boolean(visualisation.spec.bucketColumn &&
+    visualisation.spec.metricAggregation);
   const dataArray = data.map(item => item);
-  const transformType = hasAggregation ? visualisation.spec.aggregationTypeY : null;
+  const transformType = hasAggregation ? visualisation.spec.metricAggregation : null;
 
   if (hasAggregation) {
     const transform1 = {

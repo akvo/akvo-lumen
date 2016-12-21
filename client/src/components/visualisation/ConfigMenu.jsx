@@ -103,33 +103,14 @@ const ColumnGroupingInput = ({ spec, columnOptions, onChangeSpec }) => (
     <SelectInput
       placeholder={groupColumnPlaceholder}
       labelText={groupColumnLabelText}
-      choice={spec.datasetGroupColumnX !== null ?
-        spec.datasetGroupColumnX.toString() : null}
+      choice={spec.bucketColumn !== null ?
+        spec.bucketColumn.toString() : null}
       name="xGroupColumnMenu"
       options={columnOptions}
       clearable
       onChange={value => onChangeSpec({
-        datasetGroupColumnX: value,
-        datasetGroupColumnXType: getColumnType(value, columnOptions),
-      })}
-    />
-    <div
-      className="inputSeperator"
-    >
-      - or -
-    </div>
-    <SelectInput
-      placeholder={labelColumnPlaceholder}
-      labelText={labelColumnLabelText}
-      choice={(spec.datasetNameColumnX !== null && spec.datasetGroupColumnX == null) ?
-        spec.datasetNameColumnX.toString() : null}
-      name="xNameColumnMenu"
-      options={columnOptions}
-      disabled={spec.datasetGroupColumnX !== null}
-      clearable
-      onChange={value => onChangeSpec({
-        datasetNameColumnX: value,
-        datasetNameColumnXType: getColumnType(value, columnOptions),
+        bucketColumn: value,
+        bucketColumnType: getColumnType(value, columnOptions),
       })}
     />
   </div>
@@ -143,16 +124,16 @@ ColumnGroupingInput.propTypes = {
 
 const AggregationInput = ({ spec, onChangeSpec }) => (
   <SelectInput
-    placeholder={spec.datasetGroupColumnX !== null ?
+    placeholder={spec.bucketColumn !== null ?
       'Choose aggregation type...' : 'Must choose "Group by" column first'}
     labelText={aggregationColumnLabelText}
-    choice={spec.datasetGroupColumnX !== null ?
-      spec.aggregationTypeY.toString() : null}
+    choice={spec.bucketColumn !== null ?
+      spec.metricAggregation.toString() : null}
     name="yAggregationMenu"
     options={aggregationOptions}
-    disabled={spec.datasetGroupColumnX === null}
+    disabled={spec.bucketColumn === null}
     onChange={value => onChangeSpec({
-      aggregationTypeY: value,
+      metricAggregation: value,
     })}
   />
 );
@@ -165,24 +146,10 @@ AggregationInput.propTypes = {
 const SortInput = ({ spec, columnOptions, onChangeSpec }) => (
   <div>
     <SelectInput
-      placeholder="Choose a column to sort by..."
-      labelText="Sort column"
-      choice={spec.datasetSortColumnX !== null ? spec.datasetSortColumnX.toString() : null}
-      name="xSortColumnInput"
-      options={columnOptions}
-      clearable
-      onChange={value => onChangeSpec({
-        datasetSortColumnX: value,
-        datasetSortColumnXType: getColumnType(value, columnOptions),
-        reverseSortX: value === null ? false : spec.reverseSortX,
-      })}
-    />
-    <SelectInput
-      placeholder="Sort direction..."
-      labelText="Sort direction"
-      choice={spec.reverseSortX ? 'dsc' : 'asc'}
-      disabled={!spec.datasetSortColumnX}
-      name="xSortColumnInput"
+      placeholder="Choose a sort direction..."
+      labelText="Sort"
+      choice={spec.sort !== null ? spec.sort.toString() : null}
+      name="sortInput"
       options={[
         {
           value: 'asc',
@@ -193,8 +160,9 @@ const SortInput = ({ spec, columnOptions, onChangeSpec }) => (
           label: 'Descending',
         },
       ]}
+      clearable
       onChange={value => onChangeSpec({
-        reverseSortX: value === 'dsc',
+        sort: value,
       })}
     />
   </div>
@@ -228,12 +196,12 @@ export default function ConfigMenu(props) {
             <SelectInput
               placeholder={datasetColumnPlaceholder}
               labelText={datasetColumnLabelText}
-              choice={spec.datasetColumnX !== null ? spec.datasetColumnX.toString() : null}
+              choice={spec.metricColumnX !== null ? spec.metricColumnX.toString() : null}
               name="xColumnInput"
               options={columnOptions}
               onChange={value => onChangeSpec({
-                datasetColumnX: value,
-                datasetColumnXType: getColumnType(value, columnOptions),
+                metricColumnX: value,
+                metricColumnXType: getColumnType(value, columnOptions),
               })}
             />
             <AggregationInput
@@ -241,11 +209,11 @@ export default function ConfigMenu(props) {
               onChangeSpec={onChangeSpec}
             />
             <LabelInput
-              value={spec.labelY !== null ? spec.labelY.toString() : null}
+              value={spec.axisLabelY !== null ? spec.axisLabelY.toString() : null}
               placeholder="Y Axis label"
               name="yLabel"
               onChange={event => onChangeSpec({
-                labelY: event.target.value.toString(),
+                axisLabelY: event.target.value.toString(),
               })}
             />
             <Subtitle>X-Axis</Subtitle>
@@ -260,11 +228,11 @@ export default function ConfigMenu(props) {
               onChangeSpec={onChangeSpec}
             />
             <LabelInput
-              value={spec.labelX !== null ? spec.labelX.toString() : null}
+              value={spec.axisLabelX !== null ? spec.axisLabelX.toString() : null}
               placeholder="X Axis label"
               name="xLabel"
               onChange={event => onChangeSpec({
-                labelX: event.target.value.toString(),
+                axisLabelX: event.target.value.toString(),
               })}
             />
           </div>
@@ -279,12 +247,12 @@ export default function ConfigMenu(props) {
             <SelectInput
               placeholder={datasetColumnPlaceholder}
               labelText={datasetColumnLabelText}
-              choice={spec.datasetColumnX !== null ? spec.datasetColumnX.toString() : null}
+              choice={spec.metricColumnX !== null ? spec.metricColumnX.toString() : null}
               name="xColumnInput"
               options={columnOptions}
               onChange={value => onChangeSpec({
-                datasetColumnX: value,
-                datasetColumnXType: getColumnType(value, columnOptions),
+                metricColumnX: value,
+                metricColumnXType: getColumnType(value, columnOptions),
               })}
             />
             <AggregationInput
@@ -292,25 +260,25 @@ export default function ConfigMenu(props) {
               onChangeSpec={onChangeSpec}
             />
             <LabelInput
-              value={spec.labelY !== null ? spec.labelY.toString() : null}
+              value={spec.axisLabelY !== null ? spec.axisLabelY.toString() : null}
               placeholder="Y Axis label"
               name="yLabel"
               onChange={event => onChangeSpec({
-                labelY: event.target.value.toString(),
+                axisLabelY: event.target.value.toString(),
               })}
             />
             <Subtitle>X-Axis</Subtitle>
             <SelectInput
               placeholder={groupColumnPlaceholder}
               labelText={groupColumnLabelText}
-              choice={spec.datasetGroupColumnX !== null ?
-                spec.datasetGroupColumnX.toString() : null}
+              choice={spec.bucketColumn !== null ?
+                spec.bucketColumn.toString() : null}
               name="xGroupColumnMenu"
               options={columnOptions}
               clearable
               onChange={value => onChangeSpec({
-                datasetGroupColumnX: value,
-                datasetGroupColumnXType: getColumnType(value, columnOptions),
+                bucketColumn: value,
+                bucketColumnType: getColumnType(value, columnOptions),
               })}
             />
             <SortInput
@@ -319,11 +287,11 @@ export default function ConfigMenu(props) {
               onChangeSpec={onChangeSpec}
             />
             <LabelInput
-              value={spec.labelX !== null ? spec.labelX.toString() : null}
+              value={spec.axisLabelX !== null ? spec.axisLabelX.toString() : null}
               placeholder="X Axis label"
               name="xLabel"
               onChange={event => onChangeSpec({
-                labelX: event.target.value.toString(),
+                axisLabelX: event.target.value.toString(),
               })}
             />
           </div>
@@ -337,12 +305,12 @@ export default function ConfigMenu(props) {
             <SelectInput
               placeholder={datasetColumnPlaceholder}
               labelText={datasetColumnLabelText}
-              choice={spec.datasetColumnY !== null ? spec.datasetColumnY.toString() : null}
+              choice={spec.metricColumnY !== null ? spec.metricColumnY.toString() : null}
               name="yColumnInput"
               options={columnOptions}
               onChange={value => onChangeSpec({
-                datasetColumnY: value,
-                datasetColumnYType: getColumnType(value, columnOptions),
+                metricColumnY: value,
+                metricColumnYType: getColumnType(value, columnOptions),
               })}
             />
             <AggregationInput
@@ -350,23 +318,23 @@ export default function ConfigMenu(props) {
               onChangeSpec={onChangeSpec}
             />
             <LabelInput
-              value={spec.labelY !== null ? spec.labelY.toString() : null}
+              value={spec.axisLabelY !== null ? spec.axisLabelY.toString() : null}
               placeholder="Y Axis label"
               name="yLabel"
               onChange={event => onChangeSpec({
-                labelY: event.target.value.toString(),
+                axisLabelY: event.target.value.toString(),
               })}
             />
             <Subtitle>X-Axis</Subtitle>
             <SelectInput
               placeholder={datasetColumnPlaceholder}
               labelText={datasetColumnLabelText}
-              choice={spec.datasetColumnX !== null ? spec.datasetColumnX.toString() : null}
+              choice={spec.metricColumnX !== null ? spec.metricColumnX.toString() : null}
               name="xColumnInput"
               options={columnOptions}
               onChange={value => onChangeSpec({
-                datasetColumnX: value,
-                datasetColumnXType: getColumnType(value, columnOptions),
+                metricColumnX: value,
+                metricColumnXType: getColumnType(value, columnOptions),
               })}
             />
             <ColumnGroupingInput
@@ -375,11 +343,11 @@ export default function ConfigMenu(props) {
               onChangeSpec={onChangeSpec}
             />
             <LabelInput
-              value={spec.labelX !== null ? spec.labelX.toString() : null}
+              value={spec.axisLabelX !== null ? spec.axisLabelX.toString() : null}
               placeholder="X Axis label"
               name="xLabel"
               onChange={event => onChangeSpec({
-                labelX: event.target.value.toString(),
+                axisLabelX: event.target.value.toString(),
               })}
             />
           </div>
@@ -393,37 +361,37 @@ export default function ConfigMenu(props) {
             <SelectInput
               placeholder={datasetColumnPlaceholder}
               labelText={datasetColumnLabelText}
-              choice={spec.datasetColumnY !== null ? spec.datasetColumnY.toString() : null}
+              choice={spec.metricColumnY !== null ? spec.metricColumnY.toString() : null}
               name="yColumnInput"
               options={columnOptions}
               onChange={value => onChangeSpec({
-                datasetColumnY: value,
-                datasetColumnYType: getColumnType(value, columnOptions),
+                metricColumnY: value,
+                metricColumnYType: getColumnType(value, columnOptions),
               })}
             />
             <Subtitle>Longitude</Subtitle>
             <SelectInput
               placeholder={datasetColumnPlaceholder}
               labelText={datasetColumnLabelText}
-              choice={spec.datasetColumnX !== null ? spec.datasetColumnX.toString() : null}
+              choice={spec.metricColumnX !== null ? spec.metricColumnX.toString() : null}
               name="xColumnInput"
               options={columnOptions}
               onChange={value => onChangeSpec({
-                datasetColumnX: value,
-                datasetColumnXType: getColumnType(value, columnOptions),
+                metricColumnX: value,
+                metricColumnXType: getColumnType(value, columnOptions),
               })}
             />
             <Subtitle>Popup Label</Subtitle>
             <SelectInput
               placeholder={labelColumnPlaceholder}
               labelText={labelColumnLabelText}
-              choice={spec.datasetNameColumnX !== null ? spec.datasetNameColumnX.toString() : null}
+              choice={spec.datapointLabelColumn !== null ? spec.datapointLabelColumn.toString() : null}
               name="xNameColumnMenu"
               options={columnOptions}
               clearable
               onChange={value => onChangeSpec({
-                datasetNameColumnX: value,
-                datasetNameColumnXType: getColumnType(value, columnOptions),
+                datapointLabelColumn: value,
+                datapointLabelColumnType: getColumnType(value, columnOptions),
               })}
             />
           </div>
@@ -437,12 +405,12 @@ export default function ConfigMenu(props) {
             <SelectInput
               placeholder={datasetColumnPlaceholder}
               labelText={datasetColumnLabelText}
-              choice={spec.datasetColumnX !== null ? spec.datasetColumnX.toString() : null}
+              choice={spec.metricColumnX !== null ? spec.metricColumnX.toString() : null}
               name="xColumnInput"
               options={columnOptions}
               onChange={value => onChangeSpec({
-                datasetColumnX: value,
-                datasetColumnXType: getColumnType(value, columnOptions),
+                metricColumnX: value,
+                metricColumnXType: getColumnType(value, columnOptions),
               })}
             />
             <AggregationInput

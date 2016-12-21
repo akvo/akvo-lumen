@@ -1,7 +1,7 @@
 export default function getVegaBarSpec(visualisation, data, containerHeight, containerWidth) {
-  const hasAggregation = Boolean(visualisation.spec.datasetGroupColumnX);
+  const hasAggregation = Boolean(visualisation.spec.bucketColumn);
   const dataArray = data.map(item => item);
-  const transformType = hasAggregation ? visualisation.spec.aggregationTypeY : null;
+  const transformType = hasAggregation ? visualisation.spec.metricAggregation : null;
 
   /* Padding calculation constants */
   const maxLabelLengthX = 32; // In chars. Labels longer than this are truncated (...)
@@ -30,21 +30,15 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
   }
 
   const dataSource = hasAggregation ? 'summary' : 'table';
-  const hasSort = visualisation.spec.datasetSortColumnX !== null;
-  const fieldX = hasAggregation ? 'aggregationValue' : 'x';
+  const hasSort = visualisation.spec.sort !== null;
+  const fieldX = hasAggregation ? 'aggregationValue' : 'index';
   const fieldY = hasAggregation ? `${transformType}_y` : 'y';
 
   const getLabelsX = () => {
-    let labels;
+    let labels = null;
 
     if (hasAggregation) {
       labels = data[0].values.map(item => item.aggregationValue);
-    } else {
-      labels = data[0].values.map((item) => {
-        const out = item.label ? item.label : item.x;
-
-        return out;
-      });
     }
 
     return labels;
@@ -53,9 +47,11 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
   const getLongestLabelLength = (labels) => {
     let longestLength = 0;
 
-    labels.forEach((label) => {
-      if (label.toString().length > longestLength) longestLength = label.toString().length;
-    });
+    if (labels) {
+      labels.forEach((label) => {
+        if (label.toString().length > longestLength) longestLength = label.toString().length;
+      });
+    }
 
     return longestLength;
   };
@@ -75,8 +71,7 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
   let reverse = false;
 
   if (hasAggregation && hasSort) {
-    // Vega won't use an operation on text, so just set sort to "true" for text types
-    sort = visualisation.spec.datasetSortColumnXType === 'text' ? 'true' : {
+    sort = {
       field: `${transformType}_sortValue`,
       op: 'mean',
     };
@@ -120,11 +115,11 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
       {
         type: 'x',
         scale: 'x',
-        title: visualisation.spec.labelX,
+        title: visualisation.spec.axisLabelX,
         titleOffset: paddingX - 10,
         tickPadding: 0,
         properties: {
-          labels: (visualisation.spec.datasetNameColumnX === null && !hasAggregation) ?
+          labels: !hasAggregation ?
             // Supply an empty object to use the default axis labels
             {}
             :
@@ -140,7 +135,7 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
       {
         type: 'y',
         scale: 'y',
-        title: visualisation.spec.labelY,
+        title: visualisation.spec.axisLabelY,
         formatType: 'number',
         format: 's',
       },
@@ -214,7 +209,7 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
             baseline: {
               value: 'middle',
             },
-            text: (visualisation.spec.datasetNameColumnX !== null || hasAggregation) ?
+            text: hasAggregation ?
               {
                 template: hasAggregation ?
                   `{{datum.aggregationValue|truncate:${maxLabelLengthX}}}`

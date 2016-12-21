@@ -17,12 +17,12 @@ function shouldRender(visualisation, datasets) {
     return false;
   }
   const { spec, visualisationType } = visualisation;
-  const haveDataColumn = spec.datasetColumnX != null;
+  const haveDataColumn = spec.metricColumnX != null;
   if (!haveDataColumn) {
     return false;
   }
   const needSecondDataColumn = visualisationType === 'scatter' || visualisationType === 'map';
-  const haveSecondDataColumn = spec.datasetColumnY != null;
+  const haveSecondDataColumn = spec.metricColumnY != null;
   if (needSecondDataColumn && !haveSecondDataColumn) {
     return false;
   }

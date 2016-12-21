@@ -1,9 +1,8 @@
 export default function getVegaAreaSpec(visualisation, data, containerHeight, containerWidth) {
   const { visualisationType } = visualisation;
-  const hasAggregation = visualisation.spec.datasetGroupColumnX !== null;
-  const hasSort = visualisation.spec.datasetSortColumnX !== null;
+  const hasAggregation = visualisation.spec.bucketColumn !== null;
   const dataArray = data.map(item => item);
-  const transformType = hasAggregation ? visualisation.spec.aggregationTypeY : null;
+  const transformType = hasAggregation ? visualisation.spec.metricAggregation : null;
 
   if (hasAggregation) {
     const transform1 = {
@@ -17,9 +16,6 @@ export default function getVegaAreaSpec(visualisation, data, containerHeight, co
             y: [
               transformType,
             ],
-            sortValue: [
-              transformType,
-            ],
           },
         },
       ],
@@ -28,8 +24,8 @@ export default function getVegaAreaSpec(visualisation, data, containerHeight, co
   }
 
   const dataSource = hasAggregation ? 'summary' : 'table';
-  const xAggTrue = hasSort ? `${transformType}_sortValue` : 'aggregationValue';
-  const xAggFalse = 'x';
+  const xAggTrue = 'aggregationValue';
+  const xAggFalse = 'index';
   const fieldX = hasAggregation ? xAggTrue : xAggFalse;
   const fieldY = hasAggregation ? `${transformType}_y` : 'y';
   return ({
@@ -69,7 +65,7 @@ export default function getVegaAreaSpec(visualisation, data, containerHeight, co
       {
         type: 'x',
         scale: 'x',
-        title: visualisation.spec.labelX,
+        title: visualisation.spec.axisLabelX,
         properties: {
           labels: {
             text: {
@@ -87,7 +83,7 @@ export default function getVegaAreaSpec(visualisation, data, containerHeight, co
       {
         type: 'y',
         scale: 'y',
-        title: visualisation.spec.labelY,
+        title: visualisation.spec.axisLabelY,
       },
     ],
     marks: [

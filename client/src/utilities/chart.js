@@ -37,20 +37,17 @@ export function getChartData(visualisation, datasets) {
   const filters = spec.filters;
   const dataset = datasets[datasetId];
   const vType = visualisation.visualisationType;
-  const columnIndexX = spec.datasetColumnX;
-  const columnIndexY = spec.datasetColumnY;
-  const nameDataX = spec.datasetNameColumnX != null ?
-    dataset.get('rows').map(row => row.get(spec.datasetNameColumnX)).toArray() : null;
-  const nameDataXType = spec.datasetNameColumnXType;
-  const aggregationValuesX = spec.datasetGroupColumnX != null ?
-    dataset.get('rows').map(row => row.get(spec.datasetGroupColumnX)).toArray() : null;
-  const sortDataX = spec.datasetSortColumnX != null ?
-    dataset.get('rows').map(row => row.get(spec.datasetSortColumnX)).toArray() : null;
+  const columnIndexX = spec.metricColumnX;
+  const columnIndexY = spec.metricColumnY;
+  const nameDataX = null;
+  const nameDataXType = null;
+  const aggregationValuesX = spec.bucketColumn != null ?
+    dataset.get('rows').map(row => row.get(spec.bucketColumn)).toArray() : null;
   const dataX = dataset.get('rows').map(row => row.get(columnIndexX)).toArray();
-  const dataXType = spec.datasetColumnXType;
+  const dataXType = spec.metricColumnXType;
   const dataY = columnIndexY != null ?
     dataset.get('rows').map(row => row.get(columnIndexY)).toArray() : null;
-  const dataYType = spec.datasetColumnYType;
+  const dataYType = spec.metricColumnYType;
   let dataValues = [];
   let output = [];
 
@@ -90,7 +87,7 @@ export function getChartData(visualisation, datasets) {
         /* specified in the filter at that index in the filter array. */
         const filterValues = getFilterValues(filters, row);
 
-        let label;
+        let label = null;
 
         if (nameDataX) {
           if (vType === 'bar' || vType === 'pie' || vType === 'donut') {
@@ -105,31 +102,20 @@ export function getChartData(visualisation, datasets) {
           }
         }
 
-        let sortValue = sortDataX ? sortDataX[index] : null;
-
-        if (spec.datasetSortColumnXType === 'date') {
-          sortValue = parseFloat(sortValue) * 1000;
-        } else if (spec.datasetSortColumnXType === 'number') {
-          sortValue = parseFloat(sortValue);
-        } else if (spec.datasetSortColumnXType === 'text') {
-          sortValue = sortValue.toString();
-        }
-
         let aggregationValue = aggregationValuesX ? aggregationValuesX[index] : null;
-        aggregationValue = spec.datasetGroupColumnXType === 'date' ?
+        aggregationValue = spec.bucketColumnType === 'date' ?
           parseFloat(aggregationValue) * 1000 : aggregationValue;
 
         return ({
-          x: key,
+          index: key,
           y: parseFloat(entry),
           label,
           aggregationValue,
-          sortValue,
           filterValues,
         });
       });
 
-      if (spec.datasetSortColumnX !== null) {
+      if (spec.sort !== null) {
         dataValues.sort((a, b) => {
           let returnValue;
 
@@ -170,7 +156,7 @@ export function getChartData(visualisation, datasets) {
         label = nameDataXType === 'date' ? parseFloat(label) * 1000 : label;
 
         let aggregationValue = aggregationValuesX ? aggregationValuesX[index] : null;
-        aggregationValue = spec.datasetGroupColumnXType === 'date' ?
+        aggregationValue = spec.bucketColumnType === 'date' ?
           parseFloat(aggregationValue) * 1000 : aggregationValue;
 
         const row = dataset.get('rows').get(index);
