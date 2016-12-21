@@ -274,7 +274,6 @@
 
                (and (instance? jdk.nashorn.api.scripting.ScriptObjectMirror value)
                     (.containsKey value "getTime"))
-
                (long (.callMember value "getTime" (object-array 0)))
 
                :else
@@ -294,31 +293,27 @@
                                        [(keyword columnName) title])
                                      columns))]
 
-      (let [data (->> (jdbc/query tenant-conn [(format "SELECT * FROM %s" table-name)])
+      (let [data (->> (all-data tenant-conn {:table-name table-name})
                       (map #(set/rename-keys % key-translation)))]
         (jdbc/with-db-transaction [conn tenant-conn]
           (add-column conn {:table-name table-name :new-column-name column-name})
           (doseq [row data]
             (try
-              (jdbc/execute! conn
-                             [(format "UPDATE %s SET %s='%s'::jsonb WHERE rnum=%s"
-                                      table-name
-                                      column-name
-                                      (val->jsonb-pgobj (ensure-valid-value-type (transform row)
-                                                                                 column-type))
-                                      (:rnum row))])
+              (set-cell-value conn {:table-name table-name
+                                    :column-name column-name
+                                    :rnum (:rnum row)
+                                    :value (val->jsonb-pgobj
+                                            (ensure-valid-value-type (transform row)
+                                                                     column-type))})
               (catch Exception e
                 (condp = on-error
-                  "leave-empty" (jdbc/execute! conn
-                                               [(format "UPDATE %s SET %s=NULL WHERE rnum=%s"
-                                                        table-name
-                                                        column-name
-                                                        (:rnum row))])
+                  "leave-empty" (set-cell-value conn {:table-name table-name
+                                                      :column-name column-name
+                                                      :rnum (:rnum row)
+                                                      :value nil})
                   "fail" (throw e)
-                  "delete-row" (jdbc/execute! conn
-                                              [(format "DELETE FROM %s WHERE rnum=%s"
-                                                       table-name
-                                                       (:rnum row))])))))))
+                  "delete-row" (delete-row conn {:table-name table-name
+                                                 :rnum (:rnum row)})))))))
       {:success? true
        :execution-log [(format "Derived columns using '%s'" code)]
        :columns (conj columns {"title" column-title
@@ -330,29 +325,6 @@
     (catch Exception e
       {:success? false
        :message (format "Failed to transform: %s" (.getMessage e))})))
-
-(comment
-
-
-  (apply-operation "jdbc:postgres://localhost/lumen_tenant_1"
-                   "ds_01109560_5537_450a_9dcf_f59319f69470"
-                   [{"columnName" "c1"
-                     "title" "foo"
-                     "type" "text"}
-                    {"columnName" "c2"
-                     "title" "bar"
-                     "type" "text"}
-                    {"columnName" "c3"
-                     "title" "baz"
-                     "type" "text"}]
-                   {"op" "core/derive"
-                    "args" {"code" "new Date()"
-                            "newColumnType" "date"
-                            "newColumnTitle" "Upper"}
-                    "onError" "leave-empty"})
-
-
-  )
 
 (hugsql/def-db-fns "akvo/lumen/transformation.sql")
 
