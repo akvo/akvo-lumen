@@ -31,7 +31,7 @@
                  [ring/ring-json "0.4.0"]]
   :uberjar-name "akvo-lumen.jar"
   :repl-options {:timeout 120000}
-  :pedantic? :abort
+  ;; :pedantic? :abort
   :plugins [[lein-ancient "0.6.10"]
             [lein-codox "0.9.6"]
             [lein-environ "1.0.3"]]

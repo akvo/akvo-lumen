@@ -47,8 +47,6 @@ UPDATE datasets
 SET "name" = :name
 WHERE id = :id
 
-
-
 -- :name dataset-by-id :? :1
 SELECT dataset_version.table_name AS "table-name",
        dataset.title,

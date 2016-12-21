@@ -3,6 +3,7 @@ import ChangeDataType from './sidebars/ChangeDataType';
 import Filter from './sidebars/Filter';
 import TransformationLog from './sidebars/TransformationLog';
 import CombineColumns from './sidebars/CombineColumns';
+import DeriveColumn from './sidebars/DeriveColumn';
 
 require('../../styles/DataTableSidebar.scss');
 
@@ -16,12 +17,22 @@ export default function DataTableSidebar(props) {
       return <TransformationLog {...props} />;
     case 'combineColumns':
       return <CombineColumns {...props} />;
+    case 'deriveColumn':
+      return <DeriveColumn {...props} />;
     default:
       throw new Error(`Unknown sidebar type ${props.type}`);
   }
 }
 
 DataTableSidebar.propTypes = {
-  type: PropTypes.oneOf(['edit', 'filter', 'transformationLog', 'combineColumns']).isRequired,
+  type: PropTypes.oneOf(
+    [
+      'edit',
+      'filter',
+      'transformationLog',
+      'combineColumns',
+      'deriveColumn',
+    ]
+  ).isRequired,
   onClose: PropTypes.func.isRequired,
 };

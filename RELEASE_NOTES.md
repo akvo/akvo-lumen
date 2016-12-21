@@ -8,6 +8,10 @@ Date: 2016-12-23
 
 * Improved the Visualisation editor
   * "Save" button no longer redirects user to library view
+* New transformation: Derive column
+  * Supports user defined formulas using Javascript as the
+    expression language
+
 
 ### Bugfixes
 * Make sure the authentication token is up-to-date so the user isn't
