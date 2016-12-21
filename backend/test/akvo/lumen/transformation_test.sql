@@ -35,3 +35,6 @@ SELECT :i:column-name
 -- :name get-row-count ?: :1
 SELECT COUNT(*) AS total
   FROM :i:table-name
+
+-- :name get-data :? :*
+SELECT * FROM :i:table-name
