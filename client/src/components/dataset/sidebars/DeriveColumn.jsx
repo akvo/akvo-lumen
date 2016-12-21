@@ -33,7 +33,7 @@ const errorStrategies = [
     value: 'fail',
   }, {
     label: 'Delete row',
-    value: 'delete',
+    value: 'delete-row',
   },
 ];
 
@@ -101,6 +101,18 @@ export default class DeriveColumn extends Component {
         </SidebarHeader>
         <div className="inputs">
           <div className="inputGroup">
+            <label htmlFor="code">
+              Code
+            </label>
+            <CodeMirror
+              value={args.get('code')}
+              onChange={code => this.setTransformationProperty(['args', 'code'], code)}
+              options={{
+                mode: 'javascript',
+              }}
+            />
+          </div>
+          <div className="inputGroup">
             <label
               htmlFor="titleTextInput"
             >
@@ -139,18 +151,6 @@ export default class DeriveColumn extends Component {
               value={transformation.get('onError')}
               onChange={value => this.setTransformationProperty(['onError'], value)}
               options={errorStrategies}
-            />
-          </div>
-          <div className="inputGroup">
-            <label htmlFor="code">
-              Code
-            </label>
-            <CodeMirror
-              value={args.get('code')}
-              onChange={code => this.setTransformationProperty(['args', 'code'], code)}
-              options={{
-                mode: 'javascript',
-              }}
             />
           </div>
         </div>
