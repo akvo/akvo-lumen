@@ -3,8 +3,6 @@
   (:import [javax.script ScriptEngineManager ScriptEngine Invocable ScriptContext Bindings]
            [jdk.nashorn.api.scripting NashornScriptEngineFactory ClassFilter]))
 
-(set! *warn-on-reflection* true)
-
 (defn derive-column-function [code]
   (format "var deriveColumn = function(row) {  return %s; }" code))
 

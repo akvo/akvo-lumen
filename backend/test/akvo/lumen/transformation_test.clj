@@ -178,10 +178,10 @@
                         (latest-dataset-version-by-dataset-id test-conn
                                                               {:dataset-id dataset-id}))]
         (is (= "bob hope"
-               (:c1c2 (get-val-from-table test-conn
-                                          {:rnum 1
-                                           :column-name "c1c2"
-                                           :table-name table-name}))))))))
+               (:d1 (get-val-from-table test-conn
+                                        {:rnum 1
+                                         :column-name "d1"
+                                         :table-name table-name}))))))))
 
 (defn date-transformation [column-name format]
   {:type :transformation

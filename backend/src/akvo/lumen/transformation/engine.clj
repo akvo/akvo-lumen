@@ -205,18 +205,22 @@
       {:success? false
        :message (.getMessage e)})))
 
-(defn next-combined-column-name [columns column-name]
-  (let [existing-column-names (set (map (fn [column]
-                                          (get column "columnName")) columns))]
-    (if (contains? existing-column-names column-name)
-      (recur columns (str column-name "_0"))
-      column-name)))
+(defn next-column-name [columns]
+  (let [nums (->> columns
+                  (map #(get % "columnName"))
+                  (filter #(str/starts-with? % "d"))
+                  (map #(subs % 1))
+                  (map #(Long/parseLong %)))]
+    (str "d"
+         (if (empty? nums)
+           1
+           (inc (apply max nums))))))
 
 (defmethod apply-operation :core/combine
   [tenant-conn table-name columns op-spec]
   (try
     (let [new-column-name
-          (next-combined-column-name columns (apply str (get-in op-spec ["args" "columnNames"])))
+          (next-column-name columns)
           first-column-name (get-in op-spec ["args" "columnNames" 0])
           second-column-name (get-in op-spec ["args" "columnNames" 1])]
       (add-column tenant-conn {:table-name table-name
@@ -239,17 +243,6 @@
     (catch Exception e
       {:success? false
        :message (:getMessage e)})))
-
-(defn next-derived-column-name [columns]
-  (let [nums (->> columns
-                  (map #(get % "columnName"))
-                  (filter #(str/starts-with? % "d"))
-                  (map #(subs % 1))
-                  (map #(Long/parseLong %)))]
-    (str "d"
-         (if (empty? nums)
-           1
-           (inc (apply max nums))))))
 
 (defn throw-invalid-return-type [value]
   (throw (ex-info "Invalid return type"
@@ -279,6 +272,17 @@
                :else
                (throw-invalid-return-type value)))))
 
+(defn handle-transform-exception
+  [exn conn on-error table-name column-name rnum]
+  (condp = on-error
+    "leave-empty" (set-cell-value conn {:table-name table-name
+                                        :column-name column-name
+                                        :rnum rnum
+                                        :value nil})
+    "fail" (throw exn)
+    "delete-row" (delete-row conn {:table-name table-name
+                                   :rnum rnum})))
+
 (defmethod apply-operation :core/derive
   [tenant-conn table-name columns op-spec]
   (try
@@ -286,13 +290,12 @@
           column-title (get-in op-spec ["args" "newColumnTitle"])
           column-type (get-in op-spec ["args" "newColumnType"])
           on-error (get op-spec "onError")
-          column-name (next-derived-column-name columns)
+          column-name (next-column-name columns)
           transform (js/row-transform code)
           key-translation (into {}
                                 (map (fn [{:strs [columnName title]}]
                                        [(keyword columnName) title])
                                      columns))]
-
       (let [data (->> (all-data tenant-conn {:table-name table-name})
                       (map #(set/rename-keys % key-translation)))]
         (jdbc/with-db-transaction [conn tenant-conn]
@@ -306,14 +309,7 @@
                                             (ensure-valid-value-type (transform row)
                                                                      column-type))})
               (catch Exception e
-                (condp = on-error
-                  "leave-empty" (set-cell-value conn {:table-name table-name
-                                                      :column-name column-name
-                                                      :rnum (:rnum row)
-                                                      :value nil})
-                  "fail" (throw e)
-                  "delete-row" (delete-row conn {:table-name table-name
-                                                 :rnum (:rnum row)})))))))
+                (handle-transform-exception e conn on-error table-name column-name (:rnum row)))))))
       {:success? true
        :execution-log [(format "Derived columns using '%s'" code)]
        :columns (conj columns {"title" column-title

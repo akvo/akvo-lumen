@@ -49,9 +49,10 @@ SET :i:new-column-name = to_jsonb(
 -- :doc Get all data from a data table
 SELECT * FROM :i:table-name
 
--- :name set-cell-value :! :n
--- :doc Set a cell to be empty (null)
+-- :name set-cell-value :!
+-- :doc Set cell value
 UPDATE :i:table-name SET :i:column-name = :value WHERE rnum=:rnum
 
 -- :name delete-row :!
+-- :doc Delete a row
 DELETE FROM :i:table-name WHERE rnum=:rnum

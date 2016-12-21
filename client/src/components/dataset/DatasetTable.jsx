@@ -139,7 +139,6 @@ export default class DatasetTable extends Component {
     }
   }
 
-  // TODO Abstract to use same as combineColumns
   handleToggleDeriveColumnSidebar() {
     if (this.state.sidebarProps &&
       this.state.sidebarProps.type === 'deriveColumn') {
