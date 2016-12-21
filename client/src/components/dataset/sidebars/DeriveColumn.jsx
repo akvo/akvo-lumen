@@ -77,8 +77,13 @@ export default class DeriveColumn extends Component {
   }
 
   isValidTransformation() {
+    const { columns } = this.props;
     const { transformation } = this.state;
-    if (transformation.getIn(['args', 'newColumnTitle']) === '') {
+    const title = transformation.getIn(['args', 'newColumnTitle']);
+    if (title.trim() === '') {
+      return false;
+    }
+    if (columns.some(col => col.get('title') === title)) {
       return false;
     }
     return isValidCode(transformation.getIn(['args', 'code']));
