@@ -12,8 +12,8 @@ Date: 2016-12-23
   * Supports user defined formulas using Javascript as the
     expression language
 
-
 ### Bugfixes
+
 * Make sure the authentication token is up-to-date so the user isn't
   unexpectedly logged out during a session
 * DOS-formatted CSV files now import properly
