@@ -9,6 +9,10 @@ Date: 2016-12-23
 * DOS-formatted CSV files now import properly
 * Improved the Visualisation editor
   * "Save" button no longer redirects user to library view
+* New transformation: Derive column
+  * Supports user defined formulas using Javascript as the
+    expression language
+
 
 ## 0.3.0
 
