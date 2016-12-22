@@ -109,17 +109,28 @@ export function getChartData(visualisation, datasets) {
     }
   });
 
-  if (spec.sort || (vType === 'area' && spec.metricColumnX !== null) || (vType === 'line' && spec.metricColumnX !== null)) {
-    dataValues = sortDataValues(dataValues, spec);
-  }
-
   if (spec.bucketColumn !== null) {
     dataValues = applyAggregations(dataValues, spec);
+  }
+
+  if (spec.sort || (vType === 'area' && spec.metricColumnX !== null) || (vType === 'line' && spec.metricColumnX !== null)) {
+    dataValues = sortDataValues(dataValues, spec);
   }
 
   output = {
     values: dataValues,
   };
+
+  if (vType === 'bar' && spec.subBucketMethod === 'stack') {
+    /* Vega will only have access to the subBucket values and not their totals for each bucket.
+    /* Because we are stacking the subBuckets, we need to add the total for each bucket so we can
+    /* set the Y-axis max to the correct value */
+    const max = getRangeMax(dataValues, spec);
+
+    output.metadata = {
+      max,
+    }
+  }
   /*
 
   switch (vType) {
@@ -292,7 +303,13 @@ export function getVegaSpec(visualisation, data, containerHeight, containerWidth
 }
 
 const sortDataValues = (dataValues, spec) => {
-  const sortField = spec.sort ? 'sortValue' : 'x';
+  let sortField;
+
+  if (spec.sort === null) {
+    sortField = 'x';
+  } else {
+    sortField = `${spec.metricAggregation}_y`;
+  }
 
   let out =  dataValues.sort((a, b) => {
     let returnValue;
@@ -333,6 +350,7 @@ const applyAggregations = (dataValues, spec) => {
       )
       .execute(dataValues);
   } else if (spec.bucketColumn !== null && spec.subBucketColumn !== null) {
+    /*
     out = dl.groupby(['bucketValue', 'subBucketValue'])
       .summarize(
         [
@@ -343,6 +361,18 @@ const applyAggregations = (dataValues, spec) => {
         ]
       )
       .execute(dataValues);
+    */
+    out = dl.groupby(['bucketValue'])
+      .summarize([
+      {
+        name: 'y',
+        ops: [spec.metricAggregation, 'values'],
+      }
+      ]).execute(dataValues);
+
+    out.forEach((item) => {
+      item.subBucket = dl.groupby(['subBucketValue']).summarize([{name: 'foobar', ops: ['count']}]).execute(item.values_y);
+    });
 
     console.log(out);
   } else {
@@ -350,4 +380,24 @@ const applyAggregations = (dataValues, spec) => {
   }
 
   return out;
+}
+
+const getRangeMax = (dataValues, spec) => {
+
+  /* This function can probably be sped up significantly, but given that it's operating on
+  /* aggregated data, it probably doesn't matter */
+  let bucketTotals = {};
+
+  dataValues.forEach((item) => {
+    bucketTotals[item.bucketValue] = bucketTotals[item.bucketValue] || 0;
+    bucketTotals[item.bucketValue] += item[`${spec.metricAggregation}_y`];
+  })
+
+  let max = 0;
+
+  Object.keys(bucketTotals).forEach((key) => {
+    max = bucketTotals[key] > max ? bucketTotals[key] : max;
+  });
+
+  return max;
 }
