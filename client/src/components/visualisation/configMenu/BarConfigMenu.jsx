@@ -1,12 +1,11 @@
 import React, { PropTypes } from 'react';
 import Immutable from 'immutable';
-import SelectMenu from '../common/SelectMenu';
-import SelectInput from './configMenu/SelectInput';
-import LabelInput from './configMenu/LabelInput';
-import FilterMenu from './configMenu/FilterMenu';
-import * as entity from '../../domain/entity';
-import VisualisationTypeMenu from './VisualisationTypeMenu';
-import BarConfigMenu from './configMenu/BarConfigMenu';
+import SelectMenu from '../../common/SelectMenu';
+import SelectInput from './SelectInput';
+import LabelInput from './LabelInput';
+import FilterMenu from './FilterMenu';
+import * as entity from '../../../domain/entity';
+import VisualisationTypeMenu from '../VisualisationTypeMenu';
 
 
 const sortFunction = (a, b) => {
@@ -206,7 +205,7 @@ SortInput.propTypes = {
   onChangeSpec: PropTypes.func.isRequired,
 };
 
-export default function ConfigMenu(props) {
+export default function BarConfigMenu(props) {
   const datasetArray = getDatasetArray(props.datasets);
   const datasetOptions = getDatasetOptions(datasetArray);
   const visualisation = props.visualisation;
@@ -222,11 +221,6 @@ export default function ConfigMenu(props) {
     switch (visualisationType) {
 
       case 'bar':
-        output = <BarConfigMenu {...props} />
-        break;
-
-      case 'line':
-      case 'area':
         output = (
           <div>
             <Subtitle>Y-Axis</Subtitle>
@@ -254,170 +248,47 @@ export default function ConfigMenu(props) {
               })}
             />
             <Subtitle>X-Axis</Subtitle>
-            <SelectInput
-              placeholder={datasetColumnPlaceholder}
-              labelText={datasetColumnLabelText}
-              choice={spec.metricColumnX !== null ? spec.metricColumnX.toString() : null}
-              name="metricColumnXInput"
-              options={columnOptions}
-              onChange={value => onChangeSpec({
-                metricColumnX: value,
-                metricColumnXType: getColumnType(value, columnOptions),
-              })}
-              clearable
-            />
-            <LabelInput
-              value={spec.axisLabelX !== null ? spec.axisLabelX.toString() : null}
-              placeholder="X Axis label"
-              name="xLabel"
-              onChange={event => onChangeSpec({
-                axisLabelX: event.target.value.toString(),
-              })}
-            />
-          </div>
-        );
-        break;
-
-      case 'scatter':
-        output = (
-          <div>
-            <Subtitle>Y-Axis</Subtitle>
-            <SelectInput
-              placeholder={datasetColumnPlaceholder}
-              labelText={datasetColumnLabelText}
-              choice={spec.metricColumnY !== null ? spec.metricColumnY.toString() : null}
-              name="yColumnInput"
-              options={columnOptions}
-              onChange={value => onChangeSpec({
-                metricColumnY: value,
-                metricColumnYType: getColumnType(value, columnOptions),
-              })}
-            />
-            <AggregationInput
-              spec={spec}
-              onChangeSpec={onChangeSpec}
-            />
-            <LabelInput
-              value={spec.axisLabelY !== null ? spec.axisLabelY.toString() : null}
-              placeholder="Y Axis label"
-              name="yLabel"
-              onChange={event => onChangeSpec({
-                axisLabelY: event.target.value.toString(),
-              })}
-            />
-            <Subtitle>X-Axis</Subtitle>
-            <SelectInput
-              placeholder={datasetColumnPlaceholder}
-              labelText={datasetColumnLabelText}
-              choice={spec.metricColumnX !== null ? spec.metricColumnX.toString() : null}
-              name="xColumnInput"
-              options={columnOptions}
-              onChange={value => onChangeSpec({
-                metricColumnX: value,
-                metricColumnXType: getColumnType(value, columnOptions),
-              })}
-            />
             <ColumnGroupingInput
               spec={spec}
               columnOptions={columnOptions}
               onChangeSpec={onChangeSpec}
             />
-            <LabelInput
-              value={spec.axisLabelX !== null ? spec.axisLabelX.toString() : null}
-              placeholder="X Axis label"
-              name="xLabel"
-              onChange={event => onChangeSpec({
-                axisLabelX: event.target.value.toString(),
-              })}
-            />
-          </div>
-        );
-        break;
-
-      case 'map':
-        output = (
-          <div>
-            <Subtitle>Latitude</Subtitle>
             <SelectInput
-              placeholder={datasetColumnPlaceholder}
-              labelText={datasetColumnLabelText}
-              choice={spec.metricColumnY !== null ? spec.metricColumnY.toString() : null}
-              name="yColumnInput"
-              options={columnOptions}
+              labelText="Sub-bucket method"
+              choice={spec.subBucketMethod !== null ? spec.subBucketMethod.toString() : null}
+              name="subBucketMethodInput"
+              disabled={spec.bucketColumn === null}
+              options={[
+                {
+                  value: 'split',
+                  label: 'Split bars',
+                },
+                {
+                  value: 'stack',
+                  label: 'Stack bars',
+                },
+              ]}
               onChange={value => onChangeSpec({
-                metricColumnY: value,
-                metricColumnYType: getColumnType(value, columnOptions),
+                subBucketMethod: value,
               })}
             />
-            <Subtitle>Longitude</Subtitle>
-            <SelectInput
-              placeholder={datasetColumnPlaceholder}
-              labelText={datasetColumnLabelText}
-              choice={spec.metricColumnX !== null ? spec.metricColumnX.toString() : null}
-              name="xColumnInput"
-              options={columnOptions}
-              onChange={value => onChangeSpec({
-                metricColumnX: value,
-                metricColumnXType: getColumnType(value, columnOptions),
-              })}
-            />
-            <Subtitle>Popup Label</Subtitle>
-            <SelectInput
-              placeholder={labelColumnPlaceholder}
-              labelText={labelColumnLabelText}
-              choice={spec.datapointLabelColumn !== null ? spec.datapointLabelColumn.toString() : null}
-              name="xNameColumnMenu"
-              options={columnOptions}
-              clearable
-              onChange={value => onChangeSpec({
-                datapointLabelColumn: value,
-                datapointLabelColumnType: getColumnType(value, columnOptions),
-              })}
-            />
-          </div>
-        );
-        break;
-
-      case 'pie':
-      case 'donut':
-        output = (
-          <div>
-            <SelectInput
-              placeholder={datasetColumnPlaceholder}
-              labelText={datasetColumnLabelText}
-              choice={spec.metricColumnX !== null ? spec.metricColumnX.toString() : null}
-              name="xColumnInput"
-              options={columnOptions}
-              onChange={value => onChangeSpec({
-                metricColumnX: value,
-                metricColumnXType: getColumnType(value, columnOptions),
-              })}
-            />
-            <AggregationInput
-              spec={spec}
-              onChangeSpec={onChangeSpec}
-            />
-            <ColumnGroupingInput
+            <ColumnSubGroupingInput
               spec={spec}
               columnOptions={columnOptions}
               onChangeSpec={onChangeSpec}
+              disabled={spec.bucketColumn === null}
             />
             <SortInput
               spec={spec}
               columnOptions={columnOptions}
               onChangeSpec={onChangeSpec}
             />
-            <label
-              htmlFor="showLegend"
-            >
-              Show legend
-            </label>
-            <input
-              name="showLegend"
-              type="checkbox"
-              checked={spec.showLegend}
-              onChange={evt => onChangeSpec({
-                showLegend: evt.target.checked,
+            <LabelInput
+              value={spec.axisLabelX !== null ? spec.axisLabelX.toString() : null}
+              placeholder="X Axis label"
+              name="xLabel"
+              onChange={event => onChangeSpec({
+                axisLabelX: event.target.value.toString(),
               })}
             />
           </div>
@@ -431,64 +302,17 @@ export default function ConfigMenu(props) {
     return output;
   };
 
-  return (
-    <div className="ConfigMenu">
-      <div className="inputGroup">
-        <label htmlFor="xDatasetMenu">Source dataset:</label>
-        <SelectMenu
-          name="xDatasetMenu"
-          placeholder="Choose dataset..."
-          value={visualisation.datasetId !== null ?
-            visualisation.datasetId.toString() : null}
-          options={datasetOptions}
-          onChange={props.onChangeSourceDataset}
-        />
-      </div>
-      <VisualisationTypeMenu
-        onChangeVisualisationType={props.onChangeVisualisationType}
-        visualisation={visualisation}
-      />
-      <div className="inputGroup">
-        <label htmlFor="chartTitle">Chart title:</label>
-        <input
-          className="textInput"
-          type="text"
-          id="chartTitle"
-          placeholder="Untitled chart"
-          defaultValue={visualisation.name !== null ? visualisation.name.toString() : null}
-          onChange={props.onChangeTitle}
-        />
-      </div>
-      {(visualisation.datasetId && visualisation.visualisationType) &&
-        getComponents(visualisation.visualisationType)
-      }
-      <button
-        className="saveChanges clickable"
-        onClick={props.onSaveVisualisation}
-      >
-        Save changes
-      </button>
-    </div>
-  );
+  return (getComponents(visualisation.visualisationType));
 }
 
 Subtitle.propTypes = {
   children: PropTypes.node.isRequired,
 };
 
-ConfigMenu.propTypes = {
+BarConfigMenu.propTypes = {
   visualisation: PropTypes.object.isRequired,
   datasets: PropTypes.object.isRequired,
   onChangeTitle: PropTypes.func.isRequired,
   onChangeSourceDataset: PropTypes.func.isRequired,
   onChangeVisualisationSpec: PropTypes.func.isRequired,
 };
-
-/*
-      <FilterMenu
-        hasDataset={Boolean(visualisation.datasetId !== null)}
-        onChangeSpec={onChangeSpec}
-        spec={spec}
-        columnOptions={columnOptions}
-      />
-*/

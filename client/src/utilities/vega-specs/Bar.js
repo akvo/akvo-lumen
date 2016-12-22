@@ -1,5 +1,5 @@
 export default function getVegaBarSpec(visualisation, data, containerHeight, containerWidth) {
-  const hasAggregation = Boolean(visualisation.spec.bucketColumn);
+  const hasAggregation = Boolean(visualisation.spec.bucketColumn !== null);
   const dataArray = data.map(item => item);
   const transformType = hasAggregation ? visualisation.spec.metricAggregation : null;
 
@@ -7,31 +7,9 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
   const maxLabelLengthX = 32; // In chars. Labels longer than this are truncated (...)
   const meanPixelsPerChar = 4.75; // Used to calculate padding for labels in pixels
 
-  if (hasAggregation) {
-    const transform1 = {
-      name: 'summary',
-      source: 'table',
-      transform: [
-        {
-          type: 'aggregate',
-          groupby: ['aggregationValue'],
-          summarize: {
-            y: [
-              transformType,
-            ],
-            sortValue: [
-              transformType,
-            ],
-          },
-        },
-      ],
-    };
-    dataArray.push(transform1);
-  }
-
-  const dataSource = hasAggregation ? 'summary' : 'table';
+  const dataSource = 'table';
   const hasSort = visualisation.spec.sort !== null;
-  const fieldX = hasAggregation ? 'aggregationValue' : 'index';
+  const fieldX = hasAggregation ? 'bucketValue' : 'index';
   const fieldY = hasAggregation ? `${transformType}_y` : 'y';
 
   const getLabelsX = () => {
@@ -46,12 +24,13 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
 
   const getLongestLabelLength = (labels) => {
     let longestLength = 0;
-
+    /*
     if (labels) {
       labels.forEach((label) => {
         if (label.toString().length > longestLength) longestLength = label.toString().length;
       });
     }
+    */
 
     return longestLength;
   };
@@ -77,6 +56,509 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
     };
     reverse = visualisation.spec.reverseSortX;
   }
+
+  if (visualisation.spec.subBucketColumn !== null && visualisation.spec.subBucketMethod === 'split') {
+    return ({
+      data: dataArray,
+      width: containerWidth - 170,
+      height: containerHeight - (26 + paddingX),
+      padding: {
+        top: 26,
+        left: 60,
+        bottom: paddingX,
+        right: 110,
+      },
+      scales: [
+        {
+          name: 'x',
+          type: 'ordinal',
+          range: 'width',
+          padding: 0.2,
+          domain: {
+            data: dataSource,
+            field: fieldX,
+            sort,
+          },
+          reverse,
+        },
+        {
+          name: 'y',
+          type: 'linear',
+          range: 'height',
+          domain: {
+            data: dataSource,
+            field: fieldY,
+          },
+          nice: true,
+        },
+        {
+          name: 'c',
+          type: 'ordinal',
+          range: 'category10',
+          domain: {
+            data: dataSource,
+            field: fieldY,
+          },
+        },
+        {
+          name: 'sgc',
+          type: 'ordinal',
+          range: 'category10',
+          domain: {
+            data: dataSource,
+            field: 'subBucketValue',
+          },
+        },
+      ],
+      axes: [
+        {
+          type: 'x',
+          scale: 'x',
+          title: visualisation.spec.axisLabelX,
+          titleOffset: paddingX - 10,
+          tickPadding: 0,
+          properties: {
+            labels: {
+              angle: {
+                value: '45',
+              },
+              dx: {
+                value: '5'
+              },
+              align: {
+                value: 'left',
+              }
+            },
+          },
+        },
+        {
+          type: 'y',
+          scale: 'y',
+          title: visualisation.spec.axisLabelY,
+          formatType: 'number',
+          format: 's',
+        },
+      ],
+      legends: [
+        {
+          fill: 'sgc',
+          orient: 'right',
+          title: 'Legend',
+          properties: {
+            symbols: {
+              shape: {
+                value: 'square',
+              },
+            },
+          },
+        },
+      ],
+      marks: [
+        {
+          name: 'bars',
+          type: 'group',
+          from: {
+            data: dataSource,
+          },
+          properties: {
+            enter: {
+              x: {
+                scale: 'x',
+                field: fieldX,
+              },
+              width: {
+                scale: 'x',
+                band: true,
+                offset: 0,
+              },
+              fill: {
+                value: 'rgba(155, 0, 0, 0.1)',
+              },
+            },
+          },
+          scales: [
+            {
+              name: 'sg',
+              type: 'ordinal',
+              range: 'width',
+              domain: {
+                data: dataSource,
+                field: 'subBucketValue',
+              },
+            },
+          ],
+          marks: [
+            {
+              name: 'subBuckets',
+              type: 'rect',
+              properties: {
+                enter: {
+                  x: {
+                    scale: 'sg',
+                    field: {
+                      parent: 'subBucketValue',
+                    },
+                  },
+                  width: {
+                    scale: 'sg',
+                    band: true,
+                    offset: 0,
+                  },
+                  y: {
+                    scale: 'y',
+                    field: {
+                      parent: fieldY,
+                    },
+                  },
+                  y2: {
+                    scale: 'y',
+                    value: 0,
+                  },
+                  fill: {
+                    scale: 'sgc',
+                    field: {
+                      parent: 'subBucketValue',
+                    },
+                  },
+                },
+              }
+            }
+          ],
+        },
+        {
+          type: 'text',
+          properties: {
+            enter: {
+              align: {
+                value: 'center',
+              },
+              fill: {
+                value: 'black',
+              },
+            },
+            update: {
+              x: {
+                scale: 'x',
+                signal: `tooltip.${fieldX}`,
+              },
+              dx: {
+                scale: 'x',
+                band: true,
+                mult: 0.5,
+              },
+              y: {
+                scale: 'y',
+                signal: `tooltip.${fieldY}`,
+                offset: -5,
+              },
+              text: {
+                signal: 'tooltipText',
+              },
+              fillOpacity: [
+                {
+                  test: '!tooltip._id',
+                  value: 0,
+                },
+                {
+                  value: 1,
+                },
+              ],
+            },
+          },
+        },
+      ],
+      signals: [
+        {
+          name: 'tooltip',
+          init: {},
+          streams: [
+            {
+              type: 'rect:mouseover',
+              expr: 'datum',
+            },
+            {
+              type: 'rect:mouseout',
+              expr: '{}',
+            },
+          ],
+        },
+        {
+          name: 'tooltipText',
+          init: {},
+          streams: [
+            {
+              type: 'rect:mouseover',
+              expr: hasAggregation ?
+                // Round aggregation metrics to 3 decimal places for tooltip
+                `floor(datum.${transformType}_y * 1000) / 1000`
+                :
+                'datum.y'
+              ,
+            },
+            {
+              type: 'rect:mouseout',
+              expr: '{}',
+            },
+          ],
+        },
+      ],
+    });
+  }
+
+
+
+
+if (visualisation.spec.subBucketColumn !== null && visualisation.spec.subBucketMethod === 'stack') {
+    return ({
+      data: dataArray,
+      width: containerWidth - 170,
+      height: containerHeight - (26 + paddingX),
+      padding: {
+        top: 26,
+        left: 60,
+        bottom: paddingX,
+        right: 110,
+      },
+      scales: [
+        {
+          name: 'x',
+          type: 'ordinal',
+          range: 'width',
+          padding: 0.2,
+          domain: {
+            data: dataSource,
+            field: fieldX,
+            sort,
+          },
+          reverse,
+        },
+        {
+          name: 'y',
+          type: 'linear',
+          range: 'height',
+          domain: {
+            data: dataSource,
+            field: fieldY,
+          },
+          nice: true,
+        },
+        {
+          name: 'c',
+          type: 'ordinal',
+          range: 'category10',
+          domain: {
+            data: dataSource,
+            field: fieldY,
+          },
+        },
+        {
+          name: 'sgc',
+          type: 'ordinal',
+          range: 'category10',
+          domain: {
+            data: dataSource,
+            field: 'subBucketValue',
+          },
+        },
+      ],
+      axes: [
+        {
+          type: 'x',
+          scale: 'x',
+          title: visualisation.spec.axisLabelX,
+          titleOffset: paddingX - 10,
+          tickPadding: 0,
+          properties: {
+            labels: {
+              angle: {
+                value: '45',
+              },
+              dx: {
+                value: '5'
+              },
+              align: {
+                value: 'left',
+              }
+            },
+          },
+        },
+        {
+          type: 'y',
+          scale: 'y',
+          title: visualisation.spec.axisLabelY,
+          formatType: 'number',
+          format: 's',
+        },
+      ],
+      legends: [
+        {
+          fill: 'sgc',
+          orient: 'right',
+          title: 'Legend',
+          properties: {
+            symbols: {
+              shape: {
+                value: 'square',
+              },
+            },
+          },
+        },
+      ],
+      marks: [
+        {
+          name: 'bars',
+          type: 'group',
+          from: {
+            data: dataSource,
+          },
+          properties: {
+            enter: {
+              x: {
+                scale: 'x',
+                field: fieldX,
+              },
+              width: {
+                scale: 'x',
+                band: true,
+                offset: 0,
+              },
+              fill: {
+                value: 'rgba(155, 0, 0, 0.1)',
+              },
+            },
+          },
+          scales: [
+            {
+              name: 'sg',
+              type: 'linear',
+              range: 'height',
+              domain: {
+                data: dataSource,
+                field: 'subBucketValue',
+              },
+            },
+          ],
+          marks: [
+            {
+              name: 'subBuckets',
+              type: 'rect',
+              properties: {
+                enter: {
+                  x: {
+                    scale: 'sg',
+                    field: {
+                      parent: 'subBucketValue',
+                    },
+                  },
+                  width: {
+                    scale: 'sg',
+                    band: true,
+                    offset: 0,
+                  },
+                  y: {
+                    scale: 'y',
+                    field: {
+                      parent: fieldY,
+                    },
+                  },
+                  y2: {
+                    scale: 'y',
+                    value: 0,
+                  },
+                  fill: {
+                    scale: 'sgc',
+                    field: {
+                      parent: 'subBucketValue',
+                    },
+                  },
+                },
+              }
+            }
+          ],
+        },
+        {
+          type: 'text',
+          properties: {
+            enter: {
+              align: {
+                value: 'center',
+              },
+              fill: {
+                value: 'black',
+              },
+            },
+            update: {
+              x: {
+                scale: 'x',
+                signal: `tooltip.${fieldX}`,
+              },
+              dx: {
+                scale: 'x',
+                band: true,
+                mult: 0.5,
+              },
+              y: {
+                scale: 'y',
+                signal: `tooltip.${fieldY}`,
+                offset: -5,
+              },
+              text: {
+                signal: 'tooltipText',
+              },
+              fillOpacity: [
+                {
+                  test: '!tooltip._id',
+                  value: 0,
+                },
+                {
+                  value: 1,
+                },
+              ],
+            },
+          },
+        },
+      ],
+      signals: [
+        {
+          name: 'tooltip',
+          init: {},
+          streams: [
+            {
+              type: 'rect:mouseover',
+              expr: 'datum',
+            },
+            {
+              type: 'rect:mouseout',
+              expr: '{}',
+            },
+          ],
+        },
+        {
+          name: 'tooltipText',
+          init: {},
+          streams: [
+            {
+              type: 'rect:mouseover',
+              expr: hasAggregation ?
+                // Round aggregation metrics to 3 decimal places for tooltip
+                `floor(datum.${transformType}_y * 1000) / 1000`
+                :
+                'datum.y'
+              ,
+            },
+            {
+              type: 'rect:mouseout',
+              expr: '{}',
+            },
+          ],
+        },
+      ],
+    });
+  }
+
+
+
+
 
   return ({
     data: dataArray,
@@ -119,17 +601,17 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
         titleOffset: paddingX - 10,
         tickPadding: 0,
         properties: {
-          labels: !hasAggregation ?
-            // Supply an empty object to use the default axis labels
-            {}
-            :
-            // Force the axis labels to be blank - we will provide our own
-            {
-              text: {
-                value: '',
-              },
+          labels: {
+            angle: {
+              value: '45',
+            },
+            dx: {
+              value: '5'
+            },
+            align: {
+              value: 'left',
             }
-          ,
+          },
         },
       },
       {
@@ -175,53 +657,6 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
           hover: {
             fill: {
               value: 'rgb(43, 182, 115)',
-            },
-          },
-        },
-      },
-      {
-        type: 'text',
-        from: {
-          data: dataSource,
-        },
-        properties: {
-          enter: {
-            x: {
-              scale: 'x',
-              field: fieldX,
-            },
-            dy: {
-              scale: 'x',
-              band: 'true',
-              mult: '-0.5',
-            },
-            y: {
-              scale: 'y',
-              value: 0,
-              offset: 15,
-            },
-            fill: {
-              value: 'black',
-            },
-            align: {
-              value: 'left',
-            },
-            baseline: {
-              value: 'middle',
-            },
-            text: hasAggregation ?
-              {
-                template: hasAggregation ?
-                  `{{datum.aggregationValue|truncate:${maxLabelLengthX}}}`
-                  :
-                  `{{datum.label|truncate:${maxLabelLengthX}}}`,
-              }
-              :
-              {
-                value: '',
-              },
-            angle: {
-              value: 90,
             },
           },
         },

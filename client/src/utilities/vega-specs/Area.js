@@ -1,33 +1,9 @@
 export default function getVegaAreaSpec(visualisation, data, containerHeight, containerWidth) {
   const { visualisationType } = visualisation;
-  const hasAggregation = visualisation.spec.bucketColumn !== null;
   const dataArray = data.map(item => item);
-  const transformType = hasAggregation ? visualisation.spec.metricAggregation : null;
-
-  if (hasAggregation) {
-    const transform1 = {
-      name: 'summary',
-      source: 'table',
-      transform: [
-        {
-          type: 'aggregate',
-          groupby: ['aggregationValue'],
-          summarize: {
-            y: [
-              transformType,
-            ],
-          },
-        },
-      ],
-    };
-    dataArray.push(transform1);
-  }
-
-  const dataSource = hasAggregation ? 'summary' : 'table';
-  const xAggTrue = 'aggregationValue';
-  const xAggFalse = 'index';
-  const fieldX = hasAggregation ? xAggTrue : xAggFalse;
-  const fieldY = hasAggregation ? `${transformType}_y` : 'y';
+  const dataSource = 'table';
+  const fieldX = visualisation.spec.metricColumnX !== null ? 'x' : 'index';
+  const fieldY = 'y';
   return ({
     data: dataArray,
     height: containerHeight - 120,
@@ -44,11 +20,11 @@ export default function getVegaAreaSpec(visualisation, data, containerHeight, co
         type: 'linear',
         range: 'width',
         zero: false,
+        nice: visualisation.spec.metricColumnXType === 'date' ? true : false, //round number origin
         domain: {
           data: dataSource,
           field: fieldX,
         },
-        reverse: hasAggregation ? visualisation.spec.reverseSortX : false,
       },
       {
         name: 'y',
@@ -69,10 +45,10 @@ export default function getVegaAreaSpec(visualisation, data, containerHeight, co
         properties: {
           labels: {
             text: {
-              template: '{{datum.data}}',
+              template: visualisation.spec.metricColumnXType === 'date' ? '{{datum.data|time:"%Y-%m-%d %H:%M:%S"}}' : '{{datum.data}}',
             },
             angle: {
-              value: 25,
+              value: 45,
             },
             align: {
               value: 'left',

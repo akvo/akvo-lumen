@@ -65,7 +65,7 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
     dataArray.push(pieData);
   }
 
-  const dataSource = hasAggregation ? 'pie' : 'table';
+  const dataSource = 'pie';
   const segmentLabelField = hasAggregation ? 'aggregationValue' : 'label';
   const fieldY = hasAggregation ? `${transformType}_y` : 'y';
   const showLegend = visualisation.spec.showLegend;

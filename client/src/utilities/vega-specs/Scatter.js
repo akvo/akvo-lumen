@@ -11,7 +11,7 @@ export default function getVegaScatterSpec(visualisation, data, containerHeight,
       transform: [
         {
           type: 'aggregate',
-          groupby: ['aggregationValue'],
+          groupby: ['bucketValue'],
           summarize: {
             y: [
               transformType,
@@ -27,7 +27,7 @@ export default function getVegaScatterSpec(visualisation, data, containerHeight,
     dataArray.push(transform1);
   }
 
-  const dataSource = hasAggregation ? 'summary' : 'table';
+  const dataSource = 'table';
   const fieldX = hasAggregation ? `${transformType}_x` : 'x';
   const fieldY = hasAggregation ? `${transformType}_y` : 'y';
 
@@ -176,9 +176,9 @@ export default function getVegaScatterSpec(visualisation, data, containerHeight,
             text: hasAggregation ?
               {
                 template: visualisation.spec.bucketColumnType === 'date' ?
-                  '{{datum.aggregationValue | time:"%Y-%b-%d %H-%M"}}'
+                  '{{datum.bucketValue | time:"%Y-%b-%d %H-%M"}}'
                   :
-                  '{{datum.aggregationValue}}'
+                  '{{datum.bucketValue}}'
                 ,
               }
               :

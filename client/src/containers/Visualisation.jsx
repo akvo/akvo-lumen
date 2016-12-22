@@ -32,6 +32,7 @@ class Visualisation extends Component {
           bucketColumnType: null,
           subBucketColumn: null,
           subBucketColumnType: null,
+          subBucketMethod: 'split', // can be "split" or "stack"
           metricAggregation: 'mean', // default to mean,
           axisLabelX: null,
           axisLabelY: null,
