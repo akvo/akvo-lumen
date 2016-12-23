@@ -109,28 +109,36 @@ export function getChartData(visualisation, datasets) {
     }
   });
 
-  if (spec.bucketColumn !== null) {
-    dataValues = applyAggregations(dataValues, spec);
-  }
-
-  if (spec.sort || (vType === 'area' && spec.metricColumnX !== null) || (vType === 'line' && spec.metricColumnX !== null)) {
-    dataValues = sortDataValues(dataValues, spec);
-  }
-
   output = {
     values: dataValues,
   };
+
+  if (spec.bucketColumn !== null) {
+    output = applyAggregations(output, spec);
+  }
+
+  if (spec.sort || (vType === 'area' && spec.metricColumnX !== null) || (vType === 'line' && spec.metricColumnX !== null)) {
+    output = sortDataValues(output, spec);
+  }
+
+  let shouldTruncateValues = true;
+
+  if (shouldTruncateValues) {
+    let limit = spec.subBucketColumn === null ? 30 : 30 * output.metadata.maxSubBuckets;
+    console.log(output.metadata.maxSubBuckets);
+    output.values = output.values.slice(0, limit);
+  }
 
   if (vType === 'bar' && spec.subBucketMethod === 'stack') {
     /* Vega will only have access to the subBucket values and not their totals for each bucket.
     /* Because we are stacking the subBuckets, we need to add the total for each bucket so we can
     /* set the Y-axis max to the correct value */
-    const max = getRangeMax(dataValues, spec);
+    const max = getRangeMax(output.values, spec);
 
-    output.metadata = {
-      max,
-    }
+    output.metadata = output.metadata || {};
+    output.metadata.max = max;
   }
+
   /*
 
   switch (vType) {
@@ -302,16 +310,18 @@ export function getVegaSpec(visualisation, data, containerHeight, containerWidth
   return vspec;
 }
 
-const sortDataValues = (dataValues, spec) => {
+const sortDataValues = (output, spec) => {
   let sortField;
 
   if (spec.sort === null) {
     sortField = 'x';
+  } else if (spec.subBucketColumn !== null) {
+    sortField = 'parentMetric';
   } else {
     sortField = `${spec.metricAggregation}_y`;
   }
 
-  let out =  dataValues.sort((a, b) => {
+  output.values.sort((a, b) => {
     let returnValue;
 
     if (a[sortField] > b[sortField]) {
@@ -330,16 +340,19 @@ const sortDataValues = (dataValues, spec) => {
     return returnValue;
   });
 
-  console.log(out);
-
-  return out;
+  return output;
 }
 
-const applyAggregations = (dataValues, spec) => {
-  let out;
+const applyAggregations = (output, spec) => {
+  const dataValues = output.values;
+  const metadata = {};
+  const aggregatedOutput = {};
+  const hasBuckets = spec.bucketColumn !== null && spec.subBucketColumn === null;
+  const hasSubBuckets = spec.bucketColumn !== null && spec.subBucketColumn !== null;
+  let aggregatedDataValues;
 
-  if (spec.bucketColumn !== null && spec.subBucketColumn === null) {
-    out = dl.groupby(['bucketValue'])
+  if (hasBuckets) {
+    aggregatedDataValues = dl.groupby(['bucketValue'])
       .summarize(
         [
           {
@@ -349,20 +362,9 @@ const applyAggregations = (dataValues, spec) => {
         ]
       )
       .execute(dataValues);
-  } else if (spec.bucketColumn !== null && spec.subBucketColumn !== null) {
-    /*
-    out = dl.groupby(['bucketValue', 'subBucketValue'])
-      .summarize(
-        [
-          {
-            name: 'y',
-            ops: [spec.metricAggregation],
-          },
-        ]
-      )
-      .execute(dataValues);
-    */
-    out = dl.groupby(['bucketValue'])
+  } else if (hasSubBuckets) {
+
+    const buckets = dl.groupby(['bucketValue'])
       .summarize([
       {
         name: 'y',
@@ -370,34 +372,49 @@ const applyAggregations = (dataValues, spec) => {
       }
       ]).execute(dataValues);
 
-    out.forEach((item) => {
-      item.subBucket = dl.groupby(['subBucketValue']).summarize([{name: 'foobar', ops: ['count']}]).execute(item.values_y);
+    let maxSubBuckets = 0;
+
+    const subBuckets = [];
+
+    buckets.forEach((bucket) => {
+      let parentMetric = bucket[`${spec.metricAggregation}_y`];
+      let parentBucketValue = bucket.bucketValue;
+
+      const parentSubBuckets = dl.groupby(['subBucketValue'])
+        .summarize([{
+          name: 'subBucketValue',
+          ops: [spec.metricAggregation],
+          as: [`${spec.metricAggregation}_y`]
+        }])
+        .execute(bucket.values_y);
+
+      maxSubBuckets = parentSubBuckets.length > maxSubBuckets ? parentSubBuckets.length : maxSubBuckets;
+
+      parentSubBuckets.forEach(subBucket => {
+        subBucket.parentMetric = parentMetric;
+        subBucket.bucketValue = parentBucketValue
+        subBuckets.push(subBucket);
+      });
     });
 
-    console.log(out);
+    metadata.maxSubBuckets = maxSubBuckets;
+    aggregatedDataValues = subBuckets;
   } else {
-    out = dataValues;
+    aggregatedDataValues = dataValues;
   }
 
-  return out;
+  aggregatedOutput.values = aggregatedDataValues;
+  aggregatedOutput.metadata = metadata;
+
+  return aggregatedOutput;
 }
 
-const getRangeMax = (dataValues, spec) => {
-
-  /* This function can probably be sped up significantly, but given that it's operating on
-  /* aggregated data, it probably doesn't matter */
-  let bucketTotals = {};
-
-  dataValues.forEach((item) => {
-    bucketTotals[item.bucketValue] = bucketTotals[item.bucketValue] || 0;
-    bucketTotals[item.bucketValue] += item[`${spec.metricAggregation}_y`];
-  })
-
+const getRangeMax = (values, spec) => {
   let max = 0;
 
-  Object.keys(bucketTotals).forEach((key) => {
-    max = bucketTotals[key] > max ? bucketTotals[key] : max;
-  });
+  values.forEach((item) => {
+    max = item.parentMetric > max ? item.parentMetric : max;
+  })
 
   return max;
 }
