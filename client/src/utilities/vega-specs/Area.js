@@ -20,7 +20,7 @@ export default function getVegaAreaSpec(visualisation, data, containerHeight, co
         type: 'linear',
         range: 'width',
         zero: false,
-        nice: visualisation.spec.metricColumnXType === 'date' ? true : false, //round number origin
+        nice: visualisation.spec.metricColumnXType === 'date' ? true : false, // round number origin
         domain: {
           data: dataSource,
           field: fieldX,

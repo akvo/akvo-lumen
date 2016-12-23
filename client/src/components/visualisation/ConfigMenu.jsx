@@ -222,7 +222,7 @@ export default function ConfigMenu(props) {
     switch (visualisationType) {
 
       case 'bar':
-        output = <BarConfigMenu {...props} />
+        output = <BarConfigMenu {...props} />;
         break;
 
       case 'line':
@@ -444,6 +444,12 @@ export default function ConfigMenu(props) {
           onChange={props.onChangeSourceDataset}
         />
       </div>
+      <FilterMenu
+        hasDataset={Boolean(visualisation.datasetId !== null)}
+        onChangeSpec={onChangeSpec}
+        spec={spec}
+        columnOptions={columnOptions}
+      />
       <VisualisationTypeMenu
         onChangeVisualisationType={props.onChangeVisualisationType}
         visualisation={visualisation}

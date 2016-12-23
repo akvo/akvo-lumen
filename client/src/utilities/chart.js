@@ -34,6 +34,53 @@ const getFilterValues = (filters, row) => filters.map((filter) => {
   return filterValue;
 });
 
+const getFilterArray = (spec) => {
+  const filterArray = [];
+
+  for (let i = 0; i < spec.filters.length; i += 1) {
+    const filter = spec.filters[i];
+    const testValue = filter.columnType === 'date' ? filter.value * 1000 : filter.value;
+
+    switch (filter.strategy) {
+      case 'isHigher':
+        if (filter.operation === 'remove') {
+          filterArray.push((d) => d <= testValue);
+        } else if (filter.operation === 'keep') {
+          filterArray.push((d) => d > testValue);
+        }
+        break;
+
+      case 'is':
+        if (filter.operation === 'remove') {
+          filterArray.push((d) => d !== testValue);
+        } else if (filter.operation === 'keep') {
+          filterArray.push((d) => d === testValue);
+        }
+        break;
+
+      case 'isLower':
+        if (filter.operation === 'remove') {
+          filterArray.push((d) => d >= testValue);
+        } else if (filter.operation === 'keep') {
+          filterArray.push((d) => d < testValue);
+        }
+        break;
+
+      case 'isEmpty':
+        if (filter.operation === 'remove') {
+          filterArray.push((d) => d != testValue);
+        } else if (filter.operation === 'keep') {
+          filterArray.push((d) => d === testValue);
+        }
+        break;
+
+      default:
+        throw new Error(`Unknown filter strategy ${filter.strategy} supplied to getChartData`);
+    }
+  }
+  return filterArray;
+}
+
 export function getChartData(visualisation, datasets) {
   const { datasetId, spec } = visualisation;
   const dataset = datasets[datasetId];
@@ -54,17 +101,18 @@ export function getChartData(visualisation, datasets) {
   const dataXType = spec.metricColumnXType;
 
   const dataYType = spec.metricColumnYType;
-  let dataValues = [];
+  const dataValues = [];
   let output = [];
+
+  let _filters;
+
+  if (spec.filters && spec.filters.length > 0) {
+    _filters = getFilterArray(spec);
+  }
 
   /* All visulations have a metricColumnY - only some also have a metricColumnX. So iterate over metricColumnY to process the data */
   metricColumnY.forEach((entry, index) => {
     const row = dataset.get('rows').get(index);
-
-    /* filterValues is an array of cell values in the correct order to be tested by the array of
-    /* filters for this visualisation. I.e. each value in this array is determined by the column
-    /* specified in the filter at that index in the filter array. */
-    const filterValues = getFilterValues(spec.filters, row);
 
     let bucketValue = bucketValues ? bucketValues[index] : null;
     bucketValue = spec.bucketColumnType === 'date' ?
@@ -84,11 +132,24 @@ export function getChartData(visualisation, datasets) {
       }
     }
 
-    /* Only include datapoint if all required row values are present */
+    /* Only include datapoint if all required row values are present, and it is not filtered out*/
     let includeDatapoint = true;
 
     if (entry === null) {
       includeDatapoint = false;
+    }
+
+    /* filterValues is an array of cell values in the correct order to be tested by the array of
+    /* filters for this visualisation. I.e. each value in this array is determined by the column
+    /* specified in the filter at that index in the filter array. */
+    const filterValues = getFilterValues(spec.filters, row);
+
+    if (includeDatapoint && _filters) {
+      for (let y = 0; y < _filters.length; y++) {
+        if (!_filters[y](filterValues[y])) {
+          includeDatapoint = false;
+        }
+      }
     }
 
     if ((vType === 'area' && spec.metricColumnX !== null) || (vType === 'line' && spec.metricColumnX !== null) || vType === 'scatter') {
@@ -114,25 +175,28 @@ export function getChartData(visualisation, datasets) {
   };
 
   if (spec.bucketColumn !== null) {
-    output = applyAggregations(output, spec);
+    output = applyBucketAggregation(output, spec);
   }
 
   if (spec.sort || (vType === 'area' && spec.metricColumnX !== null) || (vType === 'line' && spec.metricColumnX !== null)) {
     output = sortDataValues(output, spec);
   }
 
-  let shouldTruncateValues = true;
+  const shouldTruncateValues = vType === 'bar' && spec.truncateSize !== null;
 
   if (shouldTruncateValues) {
-    let limit = spec.subBucketColumn === null ? 30 : 30 * output.metadata.maxSubBuckets;
-    console.log(output.metadata.maxSubBuckets);
+    const limit = parseInt(spec.truncateSize);
+
     output.values = output.values.slice(0, limit);
   }
 
+  // Only apply the sub-bucket aggregations after we have sorted and truncated based on the bucket values
+
+  if (spec.subBucketColumn !== null) {
+    output = applySubBucketAggregation(output, spec);
+  }
+
   if (vType === 'bar' && spec.subBucketMethod === 'stack') {
-    /* Vega will only have access to the subBucket values and not their totals for each bucket.
-    /* Because we are stacking the subBuckets, we need to add the total for each bucket so we can
-    /* set the Y-axis max to the correct value */
     const max = getRangeMax(output.values, spec);
 
     output.metadata = output.metadata || {};
@@ -170,80 +234,8 @@ export function getChartData(visualisation, datasets) {
 
   const outputArray = [];
 
-  if (spec.filters && spec.filters.length > 0) {
-    const filterArray = [];
-
-    output.name = 'source';
-    outputArray.push(output);
-
-    for (let i = 0; i < spec.filters.length; i += 1) {
-      const filter = spec.filters[i];
-      let comparitor;
-
-      switch (filter.strategy) {
-        case 'isHigher':
-          if (filter.operation === 'remove') {
-            comparitor = '<=';
-          } else if (filter.operation === 'keep') {
-            comparitor = '>';
-          }
-          break;
-
-        case 'is':
-          if (filter.operation === 'remove') {
-            comparitor = '!==';
-          } else if (filter.operation === 'keep') {
-            comparitor = '===';
-          }
-          break;
-
-        case 'isLower':
-          if (filter.operation === 'remove') {
-            comparitor = '>=';
-          } else if (filter.operation === 'keep') {
-            comparitor = '<';
-          }
-          break;
-
-        case 'isEmpty':
-          if (filter.operation === 'remove') {
-            comparitor = '!=';
-          } else if (filter.operation === 'keep') {
-            comparitor = '===';
-          }
-          break;
-
-        default:
-          throw new Error(`Unknown filter strategy ${filter.strategy} supplied to getChartData`);
-      }
-
-      // Vega doesn't allow toString() so we have to use ugly type coercion
-      const filterValue = filter.value;
-      const adjustedFilterValue = filter.columnType === 'date' ?
-        parseFloat(filterValue * 1000)
-        :
-        filterValue;
-      const test = filter.columnType === 'text' ?
-        `('' + datum.filterValues[${i}]) ${comparitor} "${filter.value}"`
-        :
-        `parseFloat(datum.filterValues[${i}]) ${comparitor} parseFloat(${adjustedFilterValue})`
-      ;
-
-      filterArray.push({
-        type: 'filter',
-        test,
-      });
-    }
-
-    outputArray.push({
-      name: 'table',
-      source: 'source',
-      transform: filterArray,
-    });
-  } else {
-    output.name = 'table';
-    outputArray.push(output);
-  }
+  output.name = 'table';
+  outputArray.push(output);
 
   return outputArray;
 }
@@ -311,15 +303,7 @@ export function getVegaSpec(visualisation, data, containerHeight, containerWidth
 }
 
 const sortDataValues = (output, spec) => {
-  let sortField;
-
-  if (spec.sort === null) {
-    sortField = 'x';
-  } else if (spec.subBucketColumn !== null) {
-    sortField = 'parentMetric';
-  } else {
-    sortField = `${spec.metricAggregation}_y`;
-  }
+  const sortField = `${spec.metricAggregation}_y`;
 
   output.values.sort((a, b) => {
     let returnValue;
@@ -341,80 +325,65 @@ const sortDataValues = (output, spec) => {
   });
 
   return output;
-}
+};
 
-const applyAggregations = (output, spec) => {
-  const dataValues = output.values;
-  const metadata = {};
+const applyBucketAggregation = (output, spec) => {
+  const includeValues = spec.subBucketColumn !== null;
+  const ops = includeValues ? [spec.metricAggregation, 'values'] : [spec.metricAggregation];
   const aggregatedOutput = {};
-  const hasBuckets = spec.bucketColumn !== null && spec.subBucketColumn === null;
-  const hasSubBuckets = spec.bucketColumn !== null && spec.subBucketColumn !== null;
   let aggregatedDataValues;
 
-  if (hasBuckets) {
-    aggregatedDataValues = dl.groupby(['bucketValue'])
-      .summarize(
-        [
-          {
-            name: 'y',
-            ops: [spec.metricAggregation],
-          },
-        ]
-      )
-      .execute(dataValues);
-  } else if (hasSubBuckets) {
-
-    const buckets = dl.groupby(['bucketValue'])
-      .summarize([
-      {
-        name: 'y',
-        ops: [spec.metricAggregation, 'values'],
-      }
-      ]).execute(dataValues);
-
-    let maxSubBuckets = 0;
-
-    const subBuckets = [];
-
-    buckets.forEach((bucket) => {
-      let parentMetric = bucket[`${spec.metricAggregation}_y`];
-      let parentBucketValue = bucket.bucketValue;
-
-      const parentSubBuckets = dl.groupby(['subBucketValue'])
-        .summarize([{
-          name: 'subBucketValue',
-          ops: [spec.metricAggregation],
-          as: [`${spec.metricAggregation}_y`]
-        }])
-        .execute(bucket.values_y);
-
-      maxSubBuckets = parentSubBuckets.length > maxSubBuckets ? parentSubBuckets.length : maxSubBuckets;
-
-      parentSubBuckets.forEach(subBucket => {
-        subBucket.parentMetric = parentMetric;
-        subBucket.bucketValue = parentBucketValue
-        subBuckets.push(subBucket);
-      });
-    });
-
-    metadata.maxSubBuckets = maxSubBuckets;
-    aggregatedDataValues = subBuckets;
-  } else {
-    aggregatedDataValues = dataValues;
-  }
+  aggregatedDataValues = dl.groupby(['bucketValue'])
+    .summarize(
+      [
+        {
+          name: 'y',
+          ops,
+        },
+      ]
+    )
+    .execute(output.values);
 
   aggregatedOutput.values = aggregatedDataValues;
-  aggregatedOutput.metadata = metadata;
 
   return aggregatedOutput;
-}
+};
+
+const applySubBucketAggregation = (output, spec) => {
+  const buckets = output.values;
+  const subBuckets = [];
+
+  buckets.forEach((bucket) => {
+    const parentMetric = bucket[`${spec.metricAggregation}_y`];
+    const parentBucketValue = bucket.bucketValue;
+
+    const parentSubBuckets = dl.groupby(['subBucketValue'])
+      .summarize([{
+        name: 'y',
+        ops: [spec.metricAggregation],
+        as: [`${spec.metricAggregation}_y`],
+      }])
+      .execute(bucket.values_y);
+
+    parentSubBuckets.forEach((subBucket) => {
+      subBucket.parentMetric = parentMetric;
+      subBucket.bucketValue = parentBucketValue;
+      subBuckets.push(subBucket);
+    });
+  });
+
+
+  return {
+    values: subBuckets,
+  };
+};
 
 const getRangeMax = (values, spec) => {
   let max = 0;
 
   values.forEach((item) => {
     max = item.parentMetric > max ? item.parentMetric : max;
-  })
+  });
 
   return max;
-}
+};

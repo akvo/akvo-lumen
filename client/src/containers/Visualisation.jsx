@@ -9,6 +9,23 @@ import { fetchLibrary } from '../actions/library';
 
 require('../styles/Visualisation.scss');
 
+const updateAxisLabels = (spec) => {
+  let axisLabelY = spec.metricColumnYName;
+  let axisLabelX = spec.bucketColumn ? spec.bucketColumnName : spec.axisLabelX;
+
+  if (spec.bucketColumn !== null) {
+    axisLabelY += ` - ${spec.metricAggregation}`;
+
+    if (spec.truncateSize !== null) {
+      axisLabelX += ` - first ${spec.truncateSize}`;
+    }
+  }
+
+  const out = Object.assign({}, spec, { axisLabelY, axisLabelX });
+
+  return out;
+};
+
 class Visualisation extends Component {
 
   constructor() {
@@ -23,14 +40,19 @@ class Visualisation extends Component {
         datasetId: null,
         spec: {
           metricColumnY: null, // primary
+          metricColumnYName: null,
           metricColumnYType: null,
           metricColumnX: null, // secondary
+          metricColumnXName: null,
           metricColumnXType: null,
           datapointLabelColumn: null,
+          datapointLabelColumnName: null,
           datapointLabelColumnType: null,
           bucketColumn: null,
+          bucketColumnName: null,
           bucketColumnType: null,
           subBucketColumn: null,
+          subBucketColumnName: null,
           subBucketColumnType: null,
           subBucketMethod: 'split', // can be "split" or "stack"
           metricAggregation: 'mean', // default to mean,
@@ -39,6 +61,7 @@ class Visualisation extends Component {
           filters: [],
           sort: null, // can be "asc", "dsc" or "null"
           showLegend: null,
+          truncateSize: null,
           filters: [],
         },
       },
@@ -137,6 +160,7 @@ class Visualisation extends Component {
   // Helper method for...
   handleChangeVisualisation(map) {
     const visualisation = Object.assign({}, this.state.visualisation, map);
+
     this.setState({
       visualisation,
       isUnsavedChanges: true,
@@ -144,8 +168,24 @@ class Visualisation extends Component {
   }
 
   handleChangeVisualisationSpec(value) {
-    const spec = update(this.state.visualisation.spec, { $merge: value });
+    const axisLabelUpdateTriggers = [
+      'bucketColumn',
+      'subBucketColumn',
+      'truncateSize',
+      'metricAggregation',
+      'metricColumnY',
+      'metricColumnX',
+    ];
+    let spec = update(this.state.visualisation.spec, { $merge: value });
+
+    const shouldUpdateAxisLabels = axisLabelUpdateTriggers.some(trigger => Object.keys(value).some(key => key.toString() === trigger.toString()));
+
+    if (shouldUpdateAxisLabels) {
+      spec = update(spec, { $merge: updateAxisLabels(spec) });
+    }
+
     const visualisation = Object.assign({}, this.state.visualisation, { spec });
+
     this.setState({
       isUnsavedChanges: true,
       visualisation,

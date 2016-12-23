@@ -23,7 +23,7 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
   };
 
   const getLongestLabelLength = (labels) => {
-    let longestLength = 0;
+    const longestLength = 0;
     /*
     if (labels) {
       labels.forEach((label) => {
@@ -124,11 +124,11 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
                 value: '45',
               },
               dx: {
-                value: '5'
+                value: '5',
               },
               align: {
                 value: 'left',
-              }
+              },
             },
           },
         },
@@ -227,9 +227,9 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
                 hover: {
                   fill: {
                     value: 'rgb(43, 182, 115)',
-                  }
-                }
-              }
+                  },
+                },
+              },
             },
             {
               type: 'text',
@@ -271,7 +271,7 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
                   ],
                 },
               },
-            }
+            },
           ],
         },
       ],
@@ -310,9 +310,7 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
   }
 
 
-
-
-if (visualisation.spec.subBucketColumn !== null && visualisation.spec.subBucketMethod === 'stack') {
+  if (visualisation.spec.subBucketColumn !== null && visualisation.spec.subBucketMethod === 'stack') {
     return ({
       data: dataArray,
       width: containerWidth - 170,
@@ -365,11 +363,11 @@ if (visualisation.spec.subBucketColumn !== null && visualisation.spec.subBucketM
                 value: '45',
               },
               dx: {
-                value: '5'
+                value: '5',
               },
               align: {
                 value: 'left',
-              }
+              },
             },
           },
         },
@@ -406,9 +404,9 @@ if (visualisation.spec.subBucketColumn !== null && visualisation.spec.subBucketM
                 type: 'stack',
                 groupby: 'bucketValue',
                 field: fieldY,
-                sortby: 'subBucketValue'
+                sortby: 'subBucketValue',
               },
-            ]
+            ],
           },
           properties: {
             enter: {
@@ -466,7 +464,7 @@ if (visualisation.spec.subBucketColumn !== null && visualisation.spec.subBucketM
               },
               y: {
                 scale: 'y',
-                //signal: `tooltip.${layout}`,
+                // signal: `tooltip.${layout}`,
                 signal: 'tooltip.layout_end',
                 offset: 10,
               },
@@ -520,9 +518,6 @@ if (visualisation.spec.subBucketColumn !== null && visualisation.spec.subBucketM
   }
 
 
-
-
-
   return ({
     data: dataArray,
     width: containerWidth - 70,
@@ -568,11 +563,11 @@ if (visualisation.spec.subBucketColumn !== null && visualisation.spec.subBucketM
               value: '45',
             },
             dx: {
-              value: '5'
+              value: '5',
             },
             align: {
               value: 'left',
-            }
+            },
           },
         },
       },

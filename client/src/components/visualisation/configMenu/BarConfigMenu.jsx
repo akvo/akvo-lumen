@@ -33,14 +33,14 @@ const getSelectMenuOptionsFromColumnList = (columns = Immutable.List()) =>
     type: `${column.get('type')}`,
   })).toArray();
 
-const getColumnType = (index, options) => {
-  let columnType = null;
+const getColumnMetadata = (metadataName, index, options) => {
+  let metadata = null;
 
   if (index !== null) {
-    columnType = options.find(option => option.value === index).type;
+    metadata = options.find(option => option.value === index)[metadataName];
   }
 
-  return columnType;
+  return metadata;
 };
 
 const Subtitle = ({ children }) => (
@@ -114,7 +114,8 @@ const ColumnGroupingInput = ({ spec, columnOptions, onChangeSpec }) => (
       clearable
       onChange={value => onChangeSpec({
         bucketColumn: value,
-        bucketColumnType: getColumnType(value, columnOptions),
+        bucketColumnName: getColumnMetadata('title', value, columnOptions),
+        bucketColumnType: getColumnMetadata('type', value, columnOptions),
       })}
     />
   </div>
@@ -141,7 +142,8 @@ const ColumnSubGroupingInput = ({ spec, columnOptions, onChangeSpec, disabled })
       disabled={disabled}
       onChange={value => onChangeSpec({
         subBucketColumn: value,
-        subBucketColumnType: getColumnType(value, columnOptions),
+        subBucketName: getColumnMetadata('title', value, columnOptions),
+        subBucketColumnType: getColumnMetadata('type', value, columnOptions),
       })}
     />
   </div>
@@ -156,7 +158,7 @@ ColumnGroupingInput.propTypes = {
 const AggregationInput = ({ spec, onChangeSpec }) => (
   <SelectInput
     placeholder={spec.bucketColumn !== null ?
-      'Choose aggregation type...' : 'Must choose "Group by" column first'}
+      'Choose aggregation type...' : 'Must choose bucket column first'}
     labelText={aggregationColumnLabelText}
     choice={spec.bucketColumn !== null ?
       spec.metricAggregation.toString() : null}
@@ -206,6 +208,7 @@ SortInput.propTypes = {
 };
 
 export default function BarConfigMenu(props) {
+  console.log(props);
   const datasetArray = getDatasetArray(props.datasets);
   const datasetOptions = getDatasetOptions(datasetArray);
   const visualisation = props.visualisation;
@@ -232,7 +235,8 @@ export default function BarConfigMenu(props) {
               options={columnOptions}
               onChange={value => onChangeSpec({
                 metricColumnY: value,
-                metricColumnYType: getColumnType(value, columnOptions),
+                metricColumnYName: getColumnMetadata('title', value, columnOptions),
+                metricColumnYType: getColumnMetadata('type', value, columnOptions),
               })}
             />
             <AggregationInput
@@ -252,6 +256,38 @@ export default function BarConfigMenu(props) {
               spec={spec}
               columnOptions={columnOptions}
               onChangeSpec={onChangeSpec}
+            />
+            <SelectInput
+              labelText="Number of buckets to show"
+              choice={spec.truncateSize !== null ? spec.truncateSize.toString() : null}
+              name="truncateSizeInput"
+              disabled={spec.bucketColumn === null}
+              clearable
+              options={[
+                {
+                  value: '10',
+                  label: '10',
+                },
+                {
+                  value: '25',
+                  label: '25',
+                },
+                {
+                  value: '50',
+                  label: '50',
+                },
+                {
+                  value: '100',
+                  label: '100',
+                },
+                {
+                  value: '200',
+                  label: '200',
+                },
+              ]}
+              onChange={value => onChangeSpec({
+                truncateSize: value,
+              })}
             />
             <SelectInput
               labelText="Sub-bucket method"
@@ -301,7 +337,6 @@ export default function BarConfigMenu(props) {
 
     return output;
   };
-
   return (getComponents(visualisation.visualisationType));
 }
 
