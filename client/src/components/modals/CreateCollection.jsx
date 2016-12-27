@@ -19,6 +19,7 @@ export default class CreateCollection extends Component {
     return (
       <Modal
         isOpen
+        contentLabel="createCollectionModal"
         style={{
           content: {
             width: 500,
