@@ -45,6 +45,7 @@ export default class ShareEntity extends Component {
     return (
       <Modal
         isOpen={this.props.isOpen}
+        contentLabel="shareEntityModal"
         onAfterOpen={this.fetchShareId}
         style={{
           content: {

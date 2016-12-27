@@ -6,9 +6,17 @@ Date: 2016-12-23
 
 ### New and noteworthy
 
-* DOS-formatted CSV files now import properly
 * Improved the Visualisation editor
   * "Save" button no longer redirects user to library view
+* New transformation: Derive column
+  * Supports user defined formulas using Javascript as the
+    expression language
+
+### Bugfixes
+
+* Make sure the authentication token is up-to-date so the user isn't
+  unexpectedly logged out during a session
+* DOS-formatted CSV files now import properly
 
 ## 0.3.0
 

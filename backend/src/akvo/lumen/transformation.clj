@@ -1,9 +1,10 @@
 (ns akvo.lumen.transformation
-  (:require [clojure.string :as str]
-            [hugsql.core :as hugsql]
-            [akvo.lumen.component.transformation-engine :refer (enqueue)]
+  (:require [akvo.lumen.component.transformation-engine :refer (enqueue)]
             [akvo.lumen.transformation.engine :as engine]
-            [akvo.lumen.util :refer (squuid gen-table-name)]))
+            [akvo.lumen.transformation.js :as js]
+            [akvo.lumen.util :refer (squuid gen-table-name)]
+            [clojure.string :as str]
+            [hugsql.core :as hugsql]))
 
 ;; TODO: Potential change op-spec validation `core.spec`
 ;; TODO: Move the validation part to transformation.validation namespace
@@ -99,6 +100,19 @@
                     (string? (get-in op-spec ["args" "separator"]))
                     (= (get op-spec "onError") "fail")))
       (throw-invalid-op op-spec)))
+
+
+
+(defmethod validate-op :core/derive
+  [op-spec]
+  (let [column-type (get-in op-spec ["args" "newColumnType"])
+        column-title (get-in op-spec ["args" "newColumnTitle"])
+        code (get-in op-spec ["args" "code"])
+        on-error (get op-spec "onError")]
+    (and (string? column-title)
+         (#{"text" "number" "date"} column-type)
+         (#{"fail" "leave-empty" "delete-row"} on-error)
+         (js/valid? code))))
 
 (defn validate
   [command]
