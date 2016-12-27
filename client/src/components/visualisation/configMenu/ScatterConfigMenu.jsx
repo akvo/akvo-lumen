@@ -2,9 +2,8 @@ import React, { PropTypes } from 'react';
 import SelectInput from './SelectInput';
 import LabelInput from './LabelInput';
 import Subtitle from './Subtitle';
-import SortInput from './SortInput';
 
-export default function BarConfigMenu(props) {
+export default function ScatterConfigMenu(props) {
   const {
     visualisation,
     onChangeSpec,
@@ -21,11 +20,10 @@ export default function BarConfigMenu(props) {
         placeholder="Select a metric column"
         labelText="Metric column"
         choice={spec.metricColumnY !== null ? spec.metricColumnY.toString() : null}
-        name="metricColumnYInput"
+        name="yColumnInput"
         options={columnOptions}
         onChange={value => onChangeSpec({
           metricColumnY: value,
-          metricColumnYName: getColumnMetadata('title', value, columnOptions),
           metricColumnYType: getColumnMetadata('type', value, columnOptions),
         })}
       />
@@ -52,6 +50,17 @@ export default function BarConfigMenu(props) {
       />
       <Subtitle>X-Axis</Subtitle>
       <SelectInput
+        placeholder="Select a metric column"
+        labelText="Metric column"
+        choice={spec.metricColumnX !== null ? spec.metricColumnX.toString() : null}
+        name="xColumnInput"
+        options={columnOptions}
+        onChange={value => onChangeSpec({
+          metricColumnX: value,
+          metricColumnXType: getColumnMetadata('type', value, columnOptions),
+        })}
+      />
+      <SelectInput
         placeholder="Select a data column to group by"
         labelText="Bucket column"
         choice={spec.bucketColumn !== null ?
@@ -65,77 +74,6 @@ export default function BarConfigMenu(props) {
           bucketColumnType: getColumnMetadata('type', value, columnOptions),
         })}
       />
-      <SelectInput
-        labelText="Number of buckets to show"
-        choice={spec.truncateSize !== null ? spec.truncateSize.toString() : null}
-        name="truncateSizeInput"
-        disabled={spec.bucketColumn === null}
-        clearable
-        options={[
-          {
-            value: '10',
-            label: '10',
-          },
-          {
-            value: '25',
-            label: '25',
-          },
-          {
-            value: '50',
-            label: '50',
-          },
-          {
-            value: '100',
-            label: '100',
-          },
-          {
-            value: '200',
-            label: '200',
-          },
-        ]}
-        onChange={value => onChangeSpec({
-          truncateSize: value,
-        })}
-      />
-      <SelectInput
-        labelText="Sub-bucket method"
-        choice={spec.subBucketMethod !== null ? spec.subBucketMethod.toString() : null}
-        name="subBucketMethodInput"
-        disabled={spec.bucketColumn === null}
-        options={[
-          {
-            value: 'split',
-            label: 'Split bars',
-          },
-          {
-            value: 'stack',
-            label: 'Stack bars',
-          },
-        ]}
-        onChange={value => onChangeSpec({
-          subBucketMethod: value,
-        })}
-      />
-      <SelectInput
-        placeholder="Select a sub-bucket column"
-        labelText="Sub-bucket column"
-        choice={spec.subBucketColumn !== null ?
-          spec.subBucketColumn.toString() : null}
-        name="subGroupColumnMenu"
-        options={columnOptions}
-        clearable
-        disabled={spec.bucketColumn === null}
-        onChange={value => onChangeSpec({
-          subBucketColumn: value,
-          subBucketName: getColumnMetadata('title', value, columnOptions),
-          subBucketColumnType: getColumnMetadata('type', value, columnOptions),
-        })}
-      />
-      <SortInput
-        spec={spec}
-        columnOptions={columnOptions}
-        onChangeSpec={onChangeSpec}
-      />
       <LabelInput
         value={spec.axisLabelX !== null ? spec.axisLabelX.toString() : null}
         placeholder="X Axis label"
@@ -148,7 +86,7 @@ export default function BarConfigMenu(props) {
   );
 }
 
-BarConfigMenu.propTypes = {
+ScatterConfigMenu.propTypes = {
   visualisation: PropTypes.object.isRequired,
   datasets: PropTypes.object.isRequired,
   onChangeSpec: PropTypes.func.isRequired,

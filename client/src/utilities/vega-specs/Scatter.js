@@ -3,30 +3,6 @@ export default function getVegaScatterSpec(visualisation, data, containerHeight,
     visualisation.spec.metricAggregation);
   const dataArray = data.map(item => item);
   const transformType = hasAggregation ? visualisation.spec.metricAggregation : null;
-
-  if (hasAggregation) {
-    const transform1 = {
-      name: 'summary',
-      source: 'table',
-      transform: [
-        {
-          type: 'aggregate',
-          groupby: ['bucketValue'],
-          summarize: {
-            y: [
-              transformType,
-            ],
-            x: [
-              transformType,
-            ],
-          },
-        },
-      ],
-    };
-
-    dataArray.push(transform1);
-  }
-
   const dataSource = 'table';
   const fieldX = hasAggregation ? `${transformType}_x` : 'x';
   const fieldY = hasAggregation ? `${transformType}_y` : 'y';

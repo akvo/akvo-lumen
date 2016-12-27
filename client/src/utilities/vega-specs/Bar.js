@@ -1,65 +1,38 @@
+const getLongestLabelLength = (data) => {
+  const labels = data[0].values.map(item => item.bucketValue);
+  let longestLength = 0;
+
+  labels.forEach((label) => {
+    if (label.toString().length > longestLength) longestLength = label.toString().length;
+  });
+
+  return longestLength;
+};
+
+const getPaddingX = (data, maxLabelLengthX, meanPixelsPerChar, defaultPadding) => {
+  const longestLabelLength = getLongestLabelLength(data);
+  const charPadding = Math.min(longestLabelLength, maxLabelLengthX);
+  const pixPadding = charPadding * meanPixelsPerChar;
+
+  return defaultPadding + pixPadding;
+};
+
 export default function getVegaBarSpec(visualisation, data, containerHeight, containerWidth) {
-  const hasAggregation = Boolean(visualisation.spec.bucketColumn !== null);
   const dataArray = data.map(item => item);
-  const transformType = hasAggregation ? visualisation.spec.metricAggregation : null;
+  const { spec } = visualisation;
+  const transformType = spec.metricAggregation;
 
   /* Padding calculation constants */
   const maxLabelLengthX = 32; // In chars. Labels longer than this are truncated (...)
   const meanPixelsPerChar = 4.75; // Used to calculate padding for labels in pixels
+  const defaultPadding = 50;
+  const paddingX = getPaddingX(data, maxLabelLengthX, meanPixelsPerChar, defaultPadding);
 
   const dataSource = 'table';
-  const hasSort = visualisation.spec.sort !== null;
-  const fieldX = hasAggregation ? 'bucketValue' : 'index';
-  const fieldY = hasAggregation ? `${transformType}_y` : 'y';
+  const fieldX = 'bucketValue';
+  const fieldY = `${transformType}_y`;
 
-  const getLabelsX = () => {
-    let labels = null;
-
-    if (hasAggregation) {
-      labels = data[0].values.map(item => item.bucketValue);
-    }
-
-    return labels;
-  };
-
-  const getLongestLabelLength = (labels) => {
-    const longestLength = 0;
-    /*
-    if (labels) {
-      labels.forEach((label) => {
-        if (label.toString().length > longestLength) longestLength = label.toString().length;
-      });
-    }
-    */
-
-    return longestLength;
-  };
-
-  const getPaddingX = () => {
-    const defaultPadding = 50;
-    const longestLabelLength = getLongestLabelLength(getLabelsX());
-    const charPadding = Math.min(longestLabelLength, maxLabelLengthX);
-    const pixPadding = charPadding * meanPixelsPerChar;
-
-    return defaultPadding + pixPadding;
-  };
-
-  const paddingX = getPaddingX();
-
-  let sort = null;
-  let reverse = false;
-
-  if (hasAggregation && hasSort) {
-    sort = {
-      field: `${transformType}_sortValue`,
-      op: 'mean',
-    };
-    reverse = visualisation.spec.reverseSortX;
-  }
-
-  sort = null;
-
-  if (visualisation.spec.subBucketColumn !== null && visualisation.spec.subBucketMethod === 'split') {
+  if (spec.subBucketColumn !== null && spec.subBucketMethod === 'split') {
     return ({
       data: dataArray,
       width: containerWidth - 170,
@@ -80,7 +53,6 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
             data: dataSource,
             field: fieldX,
           },
-          reverse,
         },
         {
           name: 'y',
@@ -91,15 +63,6 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
             field: fieldY,
           },
           nice: true,
-        },
-        {
-          name: 'c',
-          type: 'ordinal',
-          range: 'category10',
-          domain: {
-            data: dataSource,
-            field: fieldY,
-          },
         },
         {
           name: 'sgc',
@@ -115,7 +78,7 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
         {
           type: 'x',
           scale: 'x',
-          title: visualisation.spec.axisLabelX,
+          title: spec.axisLabelX,
           titleOffset: paddingX - 10,
           tickPadding: 0,
           properties: {
@@ -135,7 +98,7 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
         {
           type: 'y',
           scale: 'y',
-          title: visualisation.spec.axisLabelY,
+          title: spec.axisLabelY,
           formatType: 'number',
           format: 's',
         },
@@ -309,8 +272,7 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
     });
   }
 
-
-  if (visualisation.spec.subBucketColumn !== null && visualisation.spec.subBucketMethod === 'stack') {
+  if (spec.subBucketColumn !== null && spec.subBucketMethod === 'stack') {
     return ({
       data: dataArray,
       width: containerWidth - 170,
@@ -331,7 +293,6 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
             data: dataSource,
             field: 'bucketValue',
           },
-          reverse,
         },
         {
           name: 'y',
@@ -354,7 +315,7 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
         {
           type: 'x',
           scale: 'x',
-          title: visualisation.spec.axisLabelX,
+          title: spec.axisLabelX,
           titleOffset: paddingX - 10,
           tickPadding: 0,
           properties: {
@@ -374,7 +335,7 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
         {
           type: 'y',
           scale: 'y',
-          title: visualisation.spec.axisLabelY,
+          title: spec.axisLabelY,
           formatType: 'number',
           format: 's',
         },
@@ -517,7 +478,6 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
     });
   }
 
-
   return ({
     data: dataArray,
     width: containerWidth - 70,
@@ -537,7 +497,6 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
           data: dataSource,
           field: fieldX,
         },
-        reverse,
       },
       {
         name: 'y',
@@ -554,7 +513,7 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
       {
         type: 'x',
         scale: 'x',
-        title: visualisation.spec.axisLabelX,
+        title: spec.axisLabelX,
         titleOffset: paddingX - 10,
         tickPadding: 0,
         properties: {
@@ -574,7 +533,7 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
       {
         type: 'y',
         scale: 'y',
-        title: visualisation.spec.axisLabelY,
+        title: spec.axisLabelY,
         formatType: 'number',
         format: 's',
       },
@@ -681,12 +640,7 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
         streams: [
           {
             type: 'rect:mouseover',
-            expr: hasAggregation ?
-              // Round aggregation metrics to 3 decimal places for tooltip
-              `floor(datum.${transformType}_y * 1000) / 1000`
-              :
-              'datum.y'
-            ,
+            expr: `floor(datum.${transformType}_y * 1000) / 1000`,
           },
           {
             type: 'rect:mouseout',

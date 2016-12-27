@@ -62,7 +62,6 @@ class Visualisation extends Component {
           sort: null, // can be "asc", "dsc" or "null"
           showLegend: null,
           truncateSize: null,
-          filters: [],
         },
       },
       asyncComponents: null,
@@ -178,7 +177,9 @@ class Visualisation extends Component {
     ];
     let spec = update(this.state.visualisation.spec, { $merge: value });
 
-    const shouldUpdateAxisLabels = axisLabelUpdateTriggers.some(trigger => Object.keys(value).some(key => key.toString() === trigger.toString()));
+    const shouldUpdateAxisLabels = axisLabelUpdateTriggers.some(trigger =>
+      Object.keys(value).some(key => key.toString() === trigger.toString())
+    );
 
     if (shouldUpdateAxisLabels) {
       spec = update(spec, { $merge: updateAxisLabels(spec) });
