@@ -1,7 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import update from 'react-addons-update';
-import { push } from 'react-router-redux';
 import { isEmpty } from 'lodash';
 import ShareEntity from '../components/modals/ShareEntity';
 import * as actions from '../actions/visualisation';
@@ -133,8 +132,7 @@ class Visualisation extends Component {
     if (this.state.visualisation.id) {
       dispatch(actions.saveVisualisationChanges(this.state.visualisation));
     } else {
-      dispatch(actions.createVisualisation(this.state.visualisation))
-        .then(vis => dispatch(push(`/visualisation/${vis.id}`)));
+      dispatch(actions.createVisualisation(this.state.visualisation));
     }
   }
 

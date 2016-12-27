@@ -1,4 +1,5 @@
 import { createAction } from 'redux-actions';
+import { push } from 'react-router-redux';
 import { fetchDataset } from './dataset';
 import * as api from '../api';
 
@@ -13,10 +14,10 @@ export const createVisualisationFailure = createAction('CREATE_VISUALISATION_FAI
 export function createVisualisation(visualisation) {
   return (dispatch) => {
     dispatch(createVisualisationRequest(visualisation));
-    return api.post('/api/visualisations', visualisation)
+    api.post('/api/visualisations', visualisation)
     .then((vis) => {
       dispatch(createVisualisationSuccess(vis));
-      return vis;
+      dispatch(push(`/visualisation/${vis.id}`));
     })
     .catch(err => dispatch(createVisualisationFailure(err)));
   };
