@@ -13,8 +13,11 @@ export const createVisualisationFailure = createAction('CREATE_VISUALISATION_FAI
 export function createVisualisation(visualisation) {
   return (dispatch) => {
     dispatch(createVisualisationRequest(visualisation));
-    api.post('/api/visualisations', visualisation)
-    .then(vis => dispatch(createVisualisationSuccess(vis)))
+    return api.post('/api/visualisations', visualisation)
+    .then((vis) => {
+      dispatch(createVisualisationSuccess(vis));
+      return vis;
+    })
     .catch(err => dispatch(createVisualisationFailure(err)));
   };
 }
