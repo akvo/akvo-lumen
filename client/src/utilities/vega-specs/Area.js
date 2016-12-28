@@ -2,8 +2,8 @@ export default function getVegaAreaSpec(visualisation, data, containerHeight, co
   const { visualisationType } = visualisation;
   const dataArray = data.map(item => item);
   const dataSource = 'table';
-  const fieldX = visualisation.spec.metricColumnX !== null ? 'x' : 'index';
-  const fieldY = 'y';
+  const fieldX = visualisation.spec.metricColumnX !== null ? 'bucketValue' : 'index';
+  const fieldY = visualisation.spec.metricColumnX !== null ? `${visualisation.spec.metricAggregation}_y` : 'y';
   return ({
     data: dataArray,
     height: containerHeight - 120,

@@ -141,7 +141,16 @@ const applySubBucketAggregation = (output, spec) => {
 
 const sortDataValues = (output, vType, spec) => {
   const isLineType = vType === 'line' || vType === 'area';
-  const sortField = isLineType ? 'x' : `${spec.metricAggregation}_y`;
+  const isLineAggregationType = (isLineType && spec.bucketColumn !== null);
+  let sortField;
+
+  if (isLineAggregationType) {
+    sortField = 'bucketValue';
+  } else if (isLineType) {
+    sortField = 'x';
+  } else {
+    sortField = `${spec.metricAggregation}_y`;
+  }
 
   output.values.sort((a, b) => {
     let returnValue;

@@ -45,6 +45,9 @@ const updateAxisLabels = (vType, spec) => {
     case 'line':
     case 'area':
       autoAxisLabelY = spec.metricColumnYName;
+      if (spec.bucketColumn !== null) {
+        autoAxisLabelY += ` - ${spec.metricAggregation}`;
+      }
 
       if (spec.metricColumnX === null) {
         autoAxisLabelX = 'Dataset row number';
