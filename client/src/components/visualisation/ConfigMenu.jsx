@@ -187,17 +187,19 @@ export default function ConfigMenu(props) {
         onChangeVisualisationType={props.onChangeVisualisationType}
         visualisation={visualisation}
       />
-      <div className="inputGroup">
-        <label htmlFor="chartTitle">Chart title:</label>
-        <input
-          className="textInput"
-          type="text"
-          id="chartTitle"
-          placeholder="Untitled chart"
-          defaultValue={visualisation.name !== null ? visualisation.name.toString() : null}
-          onChange={props.onChangeTitle}
-        />
-      </div>
+      {visualisation.visualisationType !== null &&
+        <div className="inputGroup">
+          <label htmlFor="chartTitle">Chart title:</label>
+          <input
+            className="textInput"
+            type="text"
+            id="chartTitle"
+            placeholder="Untitled chart"
+            defaultValue={visualisation.name !== null ? visualisation.name.toString() : null}
+            onChange={props.onChangeTitle}
+          />
+        </div>
+      }
       {(visualisation.datasetId && visualisation.visualisationType) &&
         getComponents(visualisation.visualisationType)
       }

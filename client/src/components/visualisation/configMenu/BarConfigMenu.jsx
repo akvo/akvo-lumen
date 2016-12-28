@@ -65,77 +65,81 @@ export default function BarConfigMenu(props) {
           bucketColumnType: getColumnMetadata('type', value, columnOptions),
         })}
       />
-      <SelectInput
-        labelText="Number of buckets to show"
-        choice={spec.truncateSize !== null ? spec.truncateSize.toString() : null}
-        name="truncateSizeInput"
-        disabled={spec.bucketColumn === null}
-        clearable
-        options={[
-          {
-            value: '10',
-            label: '10',
-          },
-          {
-            value: '25',
-            label: '25',
-          },
-          {
-            value: '50',
-            label: '50',
-          },
-          {
-            value: '100',
-            label: '100',
-          },
-          {
-            value: '200',
-            label: '200',
-          },
-        ]}
-        onChange={value => onChangeSpec({
-          truncateSize: value,
-        })}
-      />
-      <SelectInput
-        labelText="Sub-bucket method"
-        choice={spec.subBucketMethod !== null ? spec.subBucketMethod.toString() : null}
-        name="subBucketMethodInput"
-        disabled={spec.bucketColumn === null}
-        options={[
-          {
-            value: 'split',
-            label: 'Split bars',
-          },
-          {
-            value: 'stack',
-            label: 'Stack bars',
-          },
-        ]}
-        onChange={value => onChangeSpec({
-          subBucketMethod: value,
-        })}
-      />
-      <SelectInput
-        placeholder="Select a sub-bucket column"
-        labelText="Sub-bucket column"
-        choice={spec.subBucketColumn !== null ?
-          spec.subBucketColumn.toString() : null}
-        name="subGroupColumnMenu"
-        options={columnOptions}
-        clearable
-        disabled={spec.bucketColumn === null}
-        onChange={value => onChangeSpec({
-          subBucketColumn: value,
-          subBucketName: getColumnMetadata('title', value, columnOptions),
-          subBucketColumnType: getColumnMetadata('type', value, columnOptions),
-        })}
-      />
-      <SortInput
-        spec={spec}
-        columnOptions={columnOptions}
-        onChangeSpec={onChangeSpec}
-      />
+      {spec.bucketColumn !== null &&
+        <div>
+          <SelectInput
+            labelText="Number of buckets to show"
+            choice={spec.truncateSize !== null ? spec.truncateSize.toString() : null}
+            name="truncateSizeInput"
+            disabled={spec.bucketColumn === null}
+            clearable
+            options={[
+              {
+                value: '10',
+                label: '10',
+              },
+              {
+                value: '25',
+                label: '25',
+              },
+              {
+                value: '50',
+                label: '50',
+              },
+              {
+                value: '100',
+                label: '100',
+              },
+              {
+                value: '200',
+                label: '200',
+              },
+            ]}
+            onChange={value => onChangeSpec({
+              truncateSize: value,
+            })}
+          />
+          <SelectInput
+            placeholder="Select a sub-bucket column"
+            labelText="Sub-bucket column"
+            choice={spec.subBucketColumn !== null ?
+              spec.subBucketColumn.toString() : null}
+            name="subGroupColumnMenu"
+            options={columnOptions}
+            clearable
+            disabled={spec.bucketColumn === null}
+            onChange={value => onChangeSpec({
+              subBucketColumn: value,
+              subBucketName: getColumnMetadata('title', value, columnOptions),
+              subBucketColumnType: getColumnMetadata('type', value, columnOptions),
+            })}
+          />
+          <SelectInput
+            labelText="Sub-bucket method"
+            choice={spec.subBucketMethod !== null ? spec.subBucketMethod.toString() : null}
+            name="subBucketMethodInput"
+            disabled={spec.bucketColumn === null || spec.subBucketColumn === null}
+            options={[
+              {
+                value: 'split',
+                label: 'Split bars',
+              },
+              {
+                value: 'stack',
+                label: 'Stack bars',
+              },
+            ]}
+            onChange={value => onChangeSpec({
+              subBucketMethod: value,
+            })}
+          />
+          <SortInput
+            spec={spec}
+            columnOptions={columnOptions}
+            onChangeSpec={onChangeSpec}
+          />
+        </div>
+      }
       <LabelInput
         value={spec.axisLabelX !== null ? spec.axisLabelX.toString() : null}
         placeholder="X Axis label"

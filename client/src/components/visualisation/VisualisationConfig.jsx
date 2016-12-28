@@ -3,30 +3,19 @@ import ConfigMenu from './ConfigMenu';
 
 require('../../styles/VisualisationConfig.scss');
 
-const getConfigMenu = (chartType, componentProps) => {
-  const configMenu = (
-    <ConfigMenu
-      visualisation={componentProps.visualisation}
-      datasets={componentProps.datasets}
-      onChangeTitle={componentProps.onChangeTitle}
-      onChangeSourceDataset={componentProps.onChangeSourceDataset}
-      onChangeVisualisationSpec={componentProps.onChangeVisualisationSpec}
-      onChangeVisualisationType={componentProps.onChangeVisualisationType}
-      onSaveVisualisation={componentProps.onSaveVisualisation}
-    />
-  );
-
-  return configMenu;
-};
-
 export default function VisualisationConfig(props) {
-  const visualisation = props.visualisation;
-  const configMenu = getConfigMenu(visualisation.visualisationType, props);
-
   return (
     <div className="VisualisationConfig">
       <h3 className="title">Configure Visualisation</h3>
-      {configMenu}
+      <ConfigMenu
+        visualisation={props.visualisation}
+        datasets={props.datasets}
+        onChangeTitle={props.onChangeTitle}
+        onChangeSourceDataset={props.onChangeSourceDataset}
+        onChangeVisualisationSpec={props.onChangeVisualisationSpec}
+        onChangeVisualisationType={props.onChangeVisualisationType}
+        onSaveVisualisation={props.onSaveVisualisation}
+      />
     </div>
   );
 }
