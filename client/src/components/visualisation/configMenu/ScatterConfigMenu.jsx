@@ -25,6 +25,7 @@ export default function ScatterConfigMenu(props) {
         onChange={value => onChangeSpec({
           metricColumnY: value,
           metricColumnYType: getColumnMetadata('type', value, columnOptions),
+          metricColumnYName: getColumnMetadata('title', value, columnOptions),
         })}
       />
       <SelectInput
@@ -46,6 +47,7 @@ export default function ScatterConfigMenu(props) {
         name="yLabel"
         onChange={event => onChangeSpec({
           axisLabelY: event.target.value.toString(),
+          axisLabelYFromUser: true,
         })}
       />
       <Subtitle>X-Axis</Subtitle>
@@ -58,6 +60,7 @@ export default function ScatterConfigMenu(props) {
         onChange={value => onChangeSpec({
           metricColumnX: value,
           metricColumnXType: getColumnMetadata('type', value, columnOptions),
+          metricColumnXName: getColumnMetadata('title', value, columnOptions),
         })}
       />
       <SelectInput
@@ -80,6 +83,7 @@ export default function ScatterConfigMenu(props) {
         name="xLabel"
         onChange={event => onChangeSpec({
           axisLabelX: event.target.value.toString(),
+          axisLabelXFromUser: true,
         })}
       />
     </div>

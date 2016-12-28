@@ -48,6 +48,7 @@ export default function BarConfigMenu(props) {
         name="yLabel"
         onChange={event => onChangeSpec({
           axisLabelY: event.target.value.toString(),
+          axisLabelYFromUser: true,
         })}
       />
       <Subtitle>X-Axis</Subtitle>
@@ -99,6 +100,11 @@ export default function BarConfigMenu(props) {
               truncateSize: value,
             })}
           />
+          <SortInput
+            spec={spec}
+            columnOptions={columnOptions}
+            onChangeSpec={onChangeSpec}
+          />
           <SelectInput
             placeholder="Select a sub-bucket column"
             labelText="Sub-bucket column"
@@ -133,11 +139,6 @@ export default function BarConfigMenu(props) {
               subBucketMethod: value,
             })}
           />
-          <SortInput
-            spec={spec}
-            columnOptions={columnOptions}
-            onChangeSpec={onChangeSpec}
-          />
         </div>
       }
       <LabelInput
@@ -146,6 +147,7 @@ export default function BarConfigMenu(props) {
         name="xLabel"
         onChange={event => onChangeSpec({
           axisLabelX: event.target.value.toString(),
+          axisLabelXFromUser: true,
         })}
       />
     </div>

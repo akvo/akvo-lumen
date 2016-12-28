@@ -25,6 +25,7 @@ export default function LineConfigMenu(props) {
         onChange={value => onChangeSpec({
           metricColumnY: value,
           metricColumnYType: getColumnMetadata('type', value, columnOptions),
+          metricColumnYName: getColumnMetadata('title', value, columnOptions),
         })}
       />
       <SelectInput
@@ -35,7 +36,7 @@ export default function LineConfigMenu(props) {
           spec.metricAggregation.toString() : null}
         name="yAggregationMenu"
         options={aggregationOptions}
-        disabled={spec.bucketColumn === null}
+        disabled={spec.metricColumnY === null || spec.metricColumnX === null}
         onChange={value => onChangeSpec({
           metricAggregation: value,
         })}
@@ -46,6 +47,7 @@ export default function LineConfigMenu(props) {
         name="yLabel"
         onChange={event => onChangeSpec({
           axisLabelY: event.target.value.toString(),
+          axisLabelYFromUser: true,
         })}
       />
       <Subtitle>X-Axis</Subtitle>
@@ -58,6 +60,10 @@ export default function LineConfigMenu(props) {
         onChange={value => onChangeSpec({
           metricColumnX: value,
           metricColumnXType: getColumnMetadata('type', value, columnOptions),
+          metricColumnXName: getColumnMetadata('title', value, columnOptions),
+          bucketColumn: value,
+          bucketColumnType: getColumnMetadata('type', value, columnOptions),
+          bucketColumnName: getColumnMetadata('title', value, columnOptions),
         })}
         clearable
       />
@@ -67,6 +73,7 @@ export default function LineConfigMenu(props) {
         name="xLabel"
         onChange={event => onChangeSpec({
           axisLabelX: event.target.value.toString(),
+          axisLabelXFromUser: true,
         })}
       />
     </div>

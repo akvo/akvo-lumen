@@ -9,17 +9,66 @@ import { fetchLibrary } from '../actions/library';
 
 require('../styles/Visualisation.scss');
 
-const updateAxisLabels = (spec) => {
-  let axisLabelY = spec.metricColumnYName;
-  let axisLabelX = spec.bucketColumn ? spec.bucketColumnName : spec.axisLabelX;
+const updateAxisLabels = (vType, spec) => {
+  let autoAxisLabelY = '';
+  let autoAxisLabelX = '';
 
-  if (spec.bucketColumn !== null) {
-    axisLabelY += ` - ${spec.metricAggregation}`;
+  switch (vType) {
+    case 'bar':
+      autoAxisLabelY = spec.metricColumnYName;
+      autoAxisLabelX = spec.bucketColumn ? spec.bucketColumnName : autoAxisLabelX;
 
-    if (spec.truncateSize !== null) {
-      axisLabelX += ` - first ${spec.truncateSize}`;
-    }
+      if (spec.bucketColumn !== null) {
+        autoAxisLabelY += ` - ${spec.metricAggregation}`;
+
+        if (spec.truncateSize !== null) {
+          let truncateOrderIndicator;
+
+          if (spec.sort === 'asc') {
+            truncateOrderIndicator = 'bottom';
+          } else if (spec.sort === 'dsc') {
+            truncateOrderIndicator = 'top';
+          } else {
+            truncateOrderIndicator = 'first';
+          }
+
+          autoAxisLabelX += ` - ${truncateOrderIndicator} ${spec.truncateSize}`;
+        }
+      }
+
+      break;
+
+    case 'pie':
+      // No axis labels for pie charts
+      break;
+
+    case 'line':
+    case 'area':
+      autoAxisLabelY = spec.metricColumnYName;
+
+      if (spec.metricColumnX === null) {
+        autoAxisLabelX = 'Dataset row number';
+      } else {
+        autoAxisLabelX = spec.metricColumnXName;
+      }
+      break;
+
+    case 'scatter':
+      autoAxisLabelY = spec.metricColumnYName;
+      autoAxisLabelX = spec.metricColumnXName;
+
+      if (spec.bucketColumn !== null) {
+        autoAxisLabelY += ` - ${spec.metricAggregation}`;
+        autoAxisLabelX += ` - ${spec.metricAggregation}`;
+      }
+      break;
+
+    default:
+      throw new Error(`Unknown visualisation type ${vType}`);
   }
+
+  const axisLabelX = spec.axisLabelXFromUser ? spec.axisLabelX : autoAxisLabelX;
+  const axisLabelY = spec.axisLabelYFromUser ? spec.axisLabelY : autoAxisLabelY;
 
   const out = Object.assign({}, spec, { axisLabelY, axisLabelX });
 
@@ -57,7 +106,9 @@ class Visualisation extends Component {
           subBucketMethod: 'split', // can be "split" or "stack"
           metricAggregation: 'mean', // default to mean,
           axisLabelX: null,
+          axisLabelXFromUser: false, // Has the label been manually entered by the user?
           axisLabelY: null,
+          axisLabelYFromUser: false,
           filters: [],
           sort: null, // can be "asc", "dsc" or "null"
           showLegend: null,
@@ -174,15 +225,17 @@ class Visualisation extends Component {
       'metricAggregation',
       'metricColumnY',
       'metricColumnX',
+      'sort',
     ];
-    let spec = update(this.state.visualisation.spec, { $merge: value });
-
     const shouldUpdateAxisLabels = axisLabelUpdateTriggers.some(trigger =>
-      Object.keys(value).some(key => key.toString() === trigger.toString())
+        Object.keys(value).some(key => key.toString() === trigger.toString())
     );
 
+    let spec = update(this.state.visualisation.spec, { $merge: value });
+
     if (shouldUpdateAxisLabels) {
-      spec = update(spec, { $merge: updateAxisLabels(spec) });
+      spec = update(spec,
+        { $merge: updateAxisLabels(this.state.visualisation.visualisationType, spec) });
     }
 
     const visualisation = Object.assign({}, this.state.visualisation, { spec });
