@@ -1,6 +1,4 @@
 export default function getVegaPieSpec(visualisation, data, containerHeight, containerWidth) {
-  console.log(data);
-
   const chartRadius = containerHeight < containerWidth ? containerHeight / 3 : containerWidth / 3;
   const innerRadius = visualisation.visualisationType === 'donut' ?
     Math.floor(chartRadius / 1.75) : 0;
