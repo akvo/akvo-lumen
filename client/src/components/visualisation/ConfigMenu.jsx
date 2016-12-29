@@ -97,12 +97,12 @@ export default function ConfigMenu(props) {
     return metadata;
   };
 
-  const getComponents = (visualisationType) => {
-    let output;
-    switch (visualisationType) {
+  const getChartTypeEditor = (visualisationType) => {
+    let chartTypeEditor;
 
+    switch (visualisationType) {
       case 'bar':
-        output = (<BarConfigMenu
+        chartTypeEditor = (<BarConfigMenu
           visualisation={props.visualisation}
           onChangeSpec={props.onChangeVisualisationSpec}
           datasets={props.datasets}
@@ -114,7 +114,7 @@ export default function ConfigMenu(props) {
 
       case 'line':
       case 'area':
-        output = (<LineConfigMenu
+        chartTypeEditor = (<LineConfigMenu
           visualisation={props.visualisation}
           onChangeSpec={props.onChangeVisualisationSpec}
           datasets={props.datasets}
@@ -125,7 +125,7 @@ export default function ConfigMenu(props) {
         break;
 
       case 'scatter':
-        output = (<ScatterConfigMenu
+        chartTypeEditor = (<ScatterConfigMenu
           visualisation={props.visualisation}
           onChangeSpec={props.onChangeVisualisationSpec}
           datasets={props.datasets}
@@ -136,7 +136,7 @@ export default function ConfigMenu(props) {
         break;
 
       case 'map':
-        output = (<MapConfigMenu
+        chartTypeEditor = (<MapConfigMenu
           visualisation={props.visualisation}
           onChangeSpec={props.onChangeVisualisationSpec}
           datasets={props.datasets}
@@ -148,7 +148,7 @@ export default function ConfigMenu(props) {
 
       case 'pie':
       case 'donut':
-        output = (<PieConfigMenu
+        chartTypeEditor = (<PieConfigMenu
           visualisation={props.visualisation}
           onChangeSpec={props.onChangeVisualisationSpec}
           datasets={props.datasets}
@@ -161,7 +161,7 @@ export default function ConfigMenu(props) {
       default:
         throw new Error(`Invalid visualisation type "${visualisationType}"`);
     }
-    return output;
+    return chartTypeEditor;
   };
 
   return (
@@ -201,7 +201,7 @@ export default function ConfigMenu(props) {
         </div>
       }
       {(visualisation.datasetId && visualisation.visualisationType) &&
-        getComponents(visualisation.visualisationType)
+        getChartTypeEditor(visualisation.visualisationType)
       }
       <button
         className="saveChanges clickable"
