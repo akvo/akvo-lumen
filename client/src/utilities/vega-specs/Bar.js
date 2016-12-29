@@ -31,6 +31,7 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
   const dataSource = 'table';
   const fieldX = 'bucketValue';
   const fieldY = `${transformType}_y`;
+  const domainX = dataArray[0].values.map(item => item.bucketValue.toString());
 
   if (spec.subBucketColumn !== null && spec.subBucketMethod === 'split') {
     return ({
@@ -49,10 +50,7 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
           type: 'ordinal',
           range: 'width',
           padding: 0.1,
-          domain: {
-            data: dataSource,
-            field: fieldX,
-          },
+          domain: domainX,
         },
         {
           name: 'y',
@@ -289,10 +287,7 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
           type: 'ordinal',
           range: 'width',
           padding: 0.2,
-          domain: {
-            data: dataSource,
-            field: 'bucketValue',
-          },
+          domain: domainX,
         },
         {
           name: 'y',
@@ -493,10 +488,8 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
         name: 'x',
         type: 'ordinal',
         range: 'width',
-        domain: {
-          data: dataSource,
-          field: fieldX,
-        },
+        sort: false,
+        domain: domainX,
       },
       {
         name: 'y',
