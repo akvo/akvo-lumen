@@ -133,7 +133,6 @@ const applySubBucketAggregation = (output, spec) => {
     });
   });
 
-
   return {
     values: subBuckets,
   };
@@ -174,16 +173,6 @@ const sortDataValues = (output, vType, spec) => {
   return output;
 };
 
-const getRangeMax = (values) => {
-  let max = 0;
-
-  values.forEach((item) => {
-    max = item.parentMetric > max ? item.parentMetric : max;
-  });
-
-  return max;
-};
-
 export function getChartData(visualisation, datasets) {
   const { datasetId, spec } = visualisation;
   const dataset = datasets[datasetId];
@@ -191,36 +180,29 @@ export function getChartData(visualisation, datasets) {
   const metricColumnX = spec.metricColumnX !== null ?
     dataset.get('rows').map(row => row.get(spec.metricColumnX)).toArray() : null;
   const vType = visualisation.visualisationType;
-
-  const bucketValues = spec.bucketColumn != null ?
+  const bucketValueColumn = spec.bucketColumn != null ?
     dataset.get('rows').map(row => row.get(spec.bucketColumn)).toArray() : null;
-
-  const subBucketValues = spec.subBucketColumn != null ?
+  const subBucketValueColumn = spec.subBucketColumn != null ?
     dataset.get('rows').map(row => row.get(spec.subBucketColumn)).toArray() : null;
-
   const dataValues = [];
+  const filterArray = (spec.filters && spec.filters.length > 0) ? getFilterArray(spec) : null;
   let output = [];
 
-  let filterArray;
-
-  if (spec.filters && spec.filters.length > 0) {
-    filterArray = getFilterArray(spec);
-  }
-
-  /* All visulations have a metricColumnY - only some also have a metricColumnX. So iterate over
-  /* metricColumnY to process the data */
+  /* All visulations have a metricColumnY, so we use this column to iterate through the dataset
+  /* row-by-row, collecting and computing the necessary values to build each datapoint for the
+  /* chartData */
   metricColumnY.forEach((entry, index) => {
     const row = dataset.get('rows').get(index);
 
-    let bucketValue = bucketValues ? bucketValues[index] : null;
+    let bucketValue = bucketValueColumn ? bucketValueColumn[index] : null;
     bucketValue = spec.bucketColumnType === 'date' ?
       parseFloat(bucketValue) * 1000 : bucketValue;
 
-    let subBucketValue = subBucketValues ? subBucketValues[index] : null;
+    let subBucketValue = subBucketValueColumn ? subBucketValueColumn[index] : null;
     subBucketValue = spec.bucketColumnType === 'date' ?
       parseFloat(subBucketValue) * 1000 : subBucketValue;
 
-    let x;
+    let x = null; // Not all datapoints will have an 'x' value - sometimes we use the index instead
 
     if (metricColumnX !== null) {
       x = metricColumnX[index];
@@ -230,16 +212,23 @@ export function getChartData(visualisation, datasets) {
       }
     }
 
-    /* Only include datapoint if all required row values are present, and it is not filtered out*/
+    /* We will not include this datapointed if a required value is missing, or it is filtered out */
     let includeDatapoint = true;
 
     if (entry === null) {
       includeDatapoint = false;
     }
 
-    /* filterValues is an array of cell values in the correct order to be tested by the array of
-    /* filters for this visualisation. I.e. each value in this array is determined by the column
-    /* specified in the filter at that index in the filter array. */
+    if ((vType === 'area' && spec.metricColumnX !== null) ||
+      (vType === 'line' && spec.metricColumnX !== null) ||
+      vType === 'scatter' || vType === 'map') {
+      if (x === null) {
+        includeDatapoint = false;
+      }
+    }
+
+    /* filterValues is an array of cell values from the current row in the correct order to be
+    /* tested by filterArray, an array of filter functions. */
     const filterValues = getFilterValues(spec.filters, row);
 
     if (includeDatapoint && filterArray) {
@@ -247,12 +236,6 @@ export function getChartData(visualisation, datasets) {
         if (!filterArray[j](filterValues[j])) {
           includeDatapoint = false;
         }
-      }
-    }
-
-    if ((vType === 'area' && spec.metricColumnX !== null) || (vType === 'line' && spec.metricColumnX !== null) || vType === 'scatter' || vType === 'map') {
-      if (x === null) {
-        includeDatapoint = false;
       }
     }
 
@@ -268,14 +251,18 @@ export function getChartData(visualisation, datasets) {
   });
 
   output = {
-    values: dataValues,
+    values: dataValues, // A raw array of all datapoints included datapoints, before aggregations
   };
 
   if (spec.bucketColumn !== null) {
     output = applyBucketAggregation(output, spec);
   }
 
-  if (spec.sort || (vType === 'area' && spec.metricColumnX !== null) || (vType === 'line' && spec.metricColumnX !== null)) {
+  /* Sort the aggregated values if a sort is defined by the user, or if a sort is necessary to show
+  /* a coherent chart, based on the spec */
+  if (spec.sort ||
+    (vType === 'area' && spec.metricColumnX !== null) ||
+    (vType === 'line' && spec.metricColumnX !== null)) {
     output = sortDataValues(output, vType, spec);
   }
 
@@ -290,23 +277,22 @@ export function getChartData(visualisation, datasets) {
   /* Only apply the sub-bucket aggregations after we have sorted and truncated based on the
   /* bucket values */
 
-  if (spec.subBucketColumn !== null) {
+  if (vType === 'bar' && spec.subBucketColumn !== null) {
     output = applySubBucketAggregation(output, spec);
   }
 
   if (vType === 'bar' && spec.subBucketMethod === 'stack') {
-    const max = getRangeMax(output.values, spec);
+    const max = Math.max(...output.values.map(item => item.parentMetric));
 
     output.metadata = output.metadata || {};
     output.metadata.max = max;
   }
 
-  const outputArray = [];
-
   output.name = 'table';
-  outputArray.push(output);
 
-  return outputArray;
+  const chartData = [output];
+
+  return chartData;
 }
 
 export function getVegaSpec(visualisation, data, containerHeight, containerWidth) {
