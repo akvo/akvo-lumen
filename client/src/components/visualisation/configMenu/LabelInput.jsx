@@ -9,7 +9,7 @@ export default function LabelInput(props) {
         name={props.name}
         type="text"
         placeholder={props.placeholder}
-        defaultValue={props.value}
+        value={props.value || ''}
         onChange={props.onChange}
       />
     </div>

@@ -25,6 +25,7 @@ export default function VisualisationTypeMenu({ visualisation, onChangeVisualisa
         value={visualisation.visualisationType}
         options={chartTypes}
         onChange={onChangeVisualisationType}
+        disabled={visualisation.datasetId === null}
       />
     </div>
   );

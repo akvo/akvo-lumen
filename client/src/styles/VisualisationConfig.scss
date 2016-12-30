@@ -50,9 +50,20 @@
       cursor: not-allowed;
       filter: grayscale(100%);
       opacity: 0.5;
+      pointer-events: none;
     }
     .container {
       padding: 1rem 0 0.5rem 0;
+    }
+    .title {
+      position: relative;
+    }
+    .collapseToggle {
+      position: absolute;
+      right: 0;
+      font-size: 1.5rem;
+      font-weight: bold;
+      line-height: 1.5rem;
     }
     .noFilters {
       font-size: 0.8rem;
