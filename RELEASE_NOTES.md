@@ -1,8 +1,10 @@
 # Release Notes
 
-## 0.4.0 (unreleased)
+## 0.5.0 (unreleased)
 
-Date: 2016-12-23
+## 0.4.0
+
+Date: 2016-12-30
 
 ### New and noteworthy
 
