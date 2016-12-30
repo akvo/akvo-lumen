@@ -81,7 +81,7 @@ export default class DashboardViewer extends Component {
     const width = this.DashboardViewer.clientWidth;
     let viewport;
 
-    for (let i = 0; i < viewportLimits.length; i++) {
+    for (let i = 0; i < viewportLimits.length; i += 1) {
       const entry = viewportLimits[i];
 
       if (width < entry.limit) {

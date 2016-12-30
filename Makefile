@@ -46,7 +46,7 @@ deploy-prod:
 
 ## Step 4
 expose-production:
-	kubectl expose deployment lumen-deployment --type="LoadBalancer" --target-port=80 --load-balancer-ip='104.199.57.78'
+	kubectl expose deployment lumen --type="LoadBalancer" --target-port=80 --load-balancer-ip='104.199.57.78'
 
 
 # Dev

@@ -55,6 +55,7 @@ export default function DeleteConfirmationModal({
   return (
     <Modal
       isOpen
+      contentLabel="deleteConfirmationModal"
       style={{
         content: {
           width: 500,

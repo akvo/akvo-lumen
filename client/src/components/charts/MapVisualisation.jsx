@@ -8,6 +8,7 @@ require('../../styles/MapVisualisation.scss');
 
 export default function MapVisualisation({ visualisation, datasets, width, height }) {
   const chartData = chart.getChartData(visualisation, datasets)[0];
+
   return (
     <div className="MapVisualisation dashChart">
       <Map
@@ -25,8 +26,11 @@ export default function MapVisualisation({ visualisation, datasets, width, heigh
           attribution="&copy; <a href='http://osm.org/copyright'>OpenStreetMap</a> contributors"
         />
         {
-          chartData[0].values.map((entry, index) =>
-            <Marker position={entry.position} key={index}>
+          chartData.values.map((entry, index) =>
+            <Marker
+              position={[parseFloat(entry.x), parseFloat(entry.y)]}
+              key={index}
+            >
               {
                 entry.label &&
                   <Popup>

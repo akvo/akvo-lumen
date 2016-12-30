@@ -1,5 +1,40 @@
 # Release Notes
 
+## 0.5.0 (unreleased)
+
+## 0.4.0
+
+Date: 2016-12-30
+
+### New and noteworthy
+
+* Improved the Visualisation editor
+  * "Save" button no longer redirects user to library view
+  * New "Stack" and "Split" options for subgroups in Bar chart editor
+  * Number of bars in bar chart can now optionally be limited
+  * Aggregations for visualisations are now performed in a separate step
+  * Visualisation axis labels now update automatically without user input
+* New transformation: Derive column
+  * Supports user defined formulas using Javascript as the
+    expression language
+
+### Bugfixes
+
+* Make sure the authentication token is up-to-date so the user isn't
+  unexpectedly logged out during a session
+* DOS-formatted CSV files now import properly
+
+
+## 0.3.0
+
+Date 2016-12-01
+
+### New and noteworthy
+
+* Implemented continuous integration
+* Defined Javascript expressions to be supported in derived columns
+* Set up Lumen production database
+
 ## 0.2.0
 
 Date: 2016-09-05

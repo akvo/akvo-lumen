@@ -69,6 +69,7 @@ class CreateDataset extends Component {
     return (
       <Modal
         isOpen
+        contentLabel="createDataset"
         style={{
           content: {
             borderRadius: 0,

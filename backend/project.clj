@@ -1,4 +1,4 @@
-(defproject org.akvo.lumen "0.2-SNAPSHOT"
+(defproject org.akvo/lumen "0.3-SNAPSHOT"
   :description "Akvo Lumen backend"
   :url "https://github.com/akvo/akvo-lumen"
   :license {:name "GNU Affero General Public License 3.0"
@@ -17,6 +17,7 @@
                  [meta-merge "1.0.0"]
                  [org.akvo/commons "0.4.4-SNAPSHOT" :exclusions [org.postgresql/postgresql org.clojure/java.jdbc]]
                  [org.akvo/resumed "0.1.0-SNAPSHOT"]
+                 [commons-io/commons-io "2.5"]
                  [org.apache.tika/tika-core "1.14"]
                  [org.clojure/clojure "1.8.0"]
                  [org.clojure/data.csv "0.1.3"]
@@ -30,13 +31,13 @@
                  [ring/ring-json "0.4.0"]]
   :uberjar-name "akvo-lumen.jar"
   :repl-options {:timeout 120000}
-  :pedantic? :abort
+  ;; :pedantic? :abort
   :plugins [[lein-ancient "0.6.10"]
             [lein-codox "0.9.6"]
             [lein-environ "1.0.3"]]
-  :codox {:doc-paths   ["resources/org/akvo/lumen/doc"]
+  :codox {:doc-paths   ["resources/akvo/lumen/doc"]
           :output-path "../docs"}
-  :main ^:skip-aot org.akvo.lumen.main
+  :main ^:skip-aot akvo.lumen.main
   :target-path "target/%s/"
   :aliases {"setup"   ["run" "-m" "duct.util.repl/setup"]
             "migrate" ["run" "-m" "dev/migrate"]

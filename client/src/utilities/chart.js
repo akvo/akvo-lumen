@@ -1,4 +1,4 @@
-import moment from 'moment';
+import dl from 'datalib';
 import getVegaScatterSpec from './vega-specs/Scatter';
 import getVegaPieSpec from './vega-specs/Pie';
 import getVegaAreaSpec from './vega-specs/Area';
@@ -32,249 +32,267 @@ const getFilterValues = (filters, row) => filters.map((filter) => {
   return filterValue;
 });
 
-export function getChartData(visualisation, datasets) {
-  const { datasetId, spec } = visualisation;
-  const filters = spec.filters;
-  const dataset = datasets[datasetId];
-  const vType = visualisation.visualisationType;
-  const columnIndexX = spec.datasetColumnX;
-  const columnIndexY = spec.datasetColumnY;
-  const nameDataX = spec.datasetNameColumnX != null ?
-    dataset.get('rows').map(row => row.get(spec.datasetNameColumnX)).toArray() : null;
-  const nameDataXType = spec.datasetNameColumnXType;
-  const aggregationValuesX = spec.datasetGroupColumnX != null ?
-    dataset.get('rows').map(row => row.get(spec.datasetGroupColumnX)).toArray() : null;
-  const sortDataX = spec.datasetSortColumnX != null ?
-    dataset.get('rows').map(row => row.get(spec.datasetSortColumnX)).toArray() : null;
-  const dataX = dataset.get('rows').map(row => row.get(columnIndexX)).toArray();
-  const dataXType = spec.datasetColumnXType;
-  const dataY = columnIndexY != null ?
-    dataset.get('rows').map(row => row.get(columnIndexY)).toArray() : null;
-  const dataYType = spec.datasetColumnYType;
-  let dataValues = [];
-  let output = [];
+const getFilterArray = (spec) => {
+  const filterArray = [];
 
-  switch (vType) {
-    case 'map':
+  for (let i = 0; i < spec.filters.length; i += 1) {
+    const filter = spec.filters[i];
+    const testValue = filter.columnType === 'date' ? filter.value * 1000 : filter.value;
 
-      dataX.forEach((entry, index) => {
-        const label = nameDataX ? nameDataX[index] : null;
-        const newPositionObject = {
-          position: [parseFloat(dataY[index]), parseFloat(dataX[index])],
-          label,
-        };
-
-        if (!isNaN(newPositionObject.position[0])
-            && !isNaN(newPositionObject.position[1])) {
-          dataValues.push(newPositionObject);
+    switch (filter.strategy) {
+      case 'isHigher':
+        if (filter.operation === 'remove') {
+          filterArray.push(d => d <= testValue);
+        } else if (filter.operation === 'keep') {
+          filterArray.push(d => d > testValue);
         }
-      });
+        break;
 
-      output.push({
-        values: dataValues,
-      });
-      break;
-
-    case 'bar':
-    case 'line':
-    case 'area':
-    case 'pie':
-    case 'donut':
-
-      dataValues = dataX.map((entry, index) => {
-        const key = index;
-        const row = dataset.get('rows').get(index);
-
-        /* filterValues is an array of cell values in the correct order to be tested by the array of
-        /* filters for this visualisation. I.e. each value in this array is determined by the column
-        /* specified in the filter at that index in the filter array. */
-        const filterValues = getFilterValues(filters, row);
-
-        let label;
-
-        if (nameDataX) {
-          if (vType === 'bar' || vType === 'pie' || vType === 'donut') {
-            label = nameDataX[key];
-            if (nameDataXType === 'date') {
-              label = moment.unix(label).format('YYYY-MM-DD hh:mm');
-            } else if (nameDataXType === 'number') {
-              label = parseFloat(label);
-            } else if (nameDataXType === 'text') {
-              label = label.toString();
-            }
-          }
+      case 'is':
+        if (filter.operation === 'remove') {
+          filterArray.push(d => d !== testValue);
+        } else if (filter.operation === 'keep') {
+          filterArray.push(d => d === testValue);
         }
+        break;
 
-        let sortValue = sortDataX ? sortDataX[index] : null;
-
-        if (spec.datasetSortColumnXType === 'date') {
-          sortValue = parseFloat(sortValue) * 1000;
-        } else if (spec.datasetSortColumnXType === 'number') {
-          sortValue = parseFloat(sortValue);
-        } else if (spec.datasetSortColumnXType === 'text') {
-          sortValue = sortValue.toString();
+      case 'isLower':
+        if (filter.operation === 'remove') {
+          filterArray.push(d => d >= testValue);
+        } else if (filter.operation === 'keep') {
+          filterArray.push(d => d < testValue);
         }
+        break;
 
-        let aggregationValue = aggregationValuesX ? aggregationValuesX[index] : null;
-        aggregationValue = spec.datasetGroupColumnXType === 'date' ?
-          parseFloat(aggregationValue) * 1000 : aggregationValue;
+      case 'isEmpty':
+        if (filter.operation === 'remove') {
+          filterArray.push(d => d !== null || d !== '');
+        } else if (filter.operation === 'keep') {
+          filterArray.push(d => d === testValue);
+        }
+        break;
 
-        return ({
-          x: key,
-          y: parseFloat(entry),
-          label,
-          aggregationValue,
-          sortValue,
-          filterValues,
-        });
-      });
+      default:
+        throw new Error(`Unknown filter strategy ${filter.strategy} supplied to getChartData`);
+    }
+  }
+  return filterArray;
+};
 
-      if (spec.datasetSortColumnX !== null) {
-        dataValues.sort((a, b) => {
-          let returnValue;
+const applyBucketAggregation = (output, spec) => {
+  const includeValues = spec.subBucketColumn !== null;
+  const ops = includeValues ? [spec.metricAggregation, 'values'] : [spec.metricAggregation];
+  const aggregatedOutput = {};
 
-          if (a.sortValue > b.sortValue) {
-            returnValue = 1;
-          } else if (b.sortValue > a.sortValue) {
-            returnValue = -1;
-          } else {
-            returnValue = 0;
-          }
+  const summarizeArray = [
+    {
+      name: 'y',
+      ops,
+    },
+  ];
 
-          if (spec.reverseSortX) {
-            returnValue *= -1;
-          }
-
-          return returnValue;
-        });
-
-        dataValues = dataValues.map((item, index) => {
-          const newItem = Object.assign({}, item);
-
-          newItem.x = index;
-          return newItem;
-        });
-      }
-
-
-      output = {
-        values: dataValues,
-      };
-
-      break;
-
-    case 'scatter':
-
-      dataValues = dataX.map((entry, index) => {
-        let label = nameDataX ? nameDataX[index] : null;
-        label = nameDataXType === 'date' ? parseFloat(label) * 1000 : label;
-
-        let aggregationValue = aggregationValuesX ? aggregationValuesX[index] : null;
-        aggregationValue = spec.datasetGroupColumnXType === 'date' ?
-          parseFloat(aggregationValue) * 1000 : aggregationValue;
-
-        const row = dataset.get('rows').get(index);
-        const filterValues = getFilterValues(filters, row);
-        const x = dataXType === 'date' ? parseFloat(entry) * 1000 : parseFloat(entry);
-        const y = dataYType === 'date' ? parseFloat(dataY[index]) * 1000 : parseFloat(dataY[index]);
-
-        return ({
-          x,
-          y,
-          label,
-          aggregationValue,
-          filterValues,
-        });
-      });
-
-      output = {
-        values: dataValues,
-      };
-
-      break;
-
-    default:
-      throw new Error('chart type not yet implemented');
+  // If X axis is also a metric axis, summarize that too
+  if (spec.metricColumnX !== null) {
+    summarizeArray.push({
+      name: 'x',
+      ops,
+    });
   }
 
-  const outputArray = [];
+  const aggregatedDataValues = dl.groupby(['bucketValue'])
+    .summarize(summarizeArray)
+    .execute(output.values);
 
-  if (spec.filters && spec.filters.length > 0) {
-    const filterArray = [];
+  aggregatedOutput.values = aggregatedDataValues;
 
-    output.name = 'source';
-    outputArray.push(output);
+  return aggregatedOutput;
+};
 
-    for (let i = 0; i < filters.length; i++) {
-      const filter = filters[i];
-      let comparitor;
+const applySubBucketAggregation = (output, spec) => {
+  const buckets = output.values;
+  const subBuckets = [];
 
-      switch (filter.strategy) {
-        case 'isHigher':
-          if (filter.operation === 'remove') {
-            comparitor = '<=';
-          } else if (filter.operation === 'keep') {
-            comparitor = '>';
-          }
-          break;
+  buckets.forEach((bucket) => {
+    const parentMetric = bucket[`${spec.metricAggregation}_y`];
+    const parentBucketValue = bucket.bucketValue;
 
-        case 'is':
-          if (filter.operation === 'remove') {
-            comparitor = '!==';
-          } else if (filter.operation === 'keep') {
-            comparitor = '===';
-          }
-          break;
+    const parentSubBuckets = dl.groupby(['subBucketValue'])
+      .summarize([{
+        name: 'y',
+        ops: [spec.metricAggregation],
+        as: [`${spec.metricAggregation}_y`],
+      }])
+      .execute(bucket.values_y);
 
-        case 'isLower':
-          if (filter.operation === 'remove') {
-            comparitor = '>=';
-          } else if (filter.operation === 'keep') {
-            comparitor = '<';
-          }
-          break;
+    parentSubBuckets.forEach((subBucket) => {
+      const newSubBucket = Object.assign({}, subBucket);
 
-        case 'isEmpty':
-          if (filter.operation === 'remove') {
-            comparitor = '!=';
-          } else if (filter.operation === 'keep') {
-            comparitor = '===';
-          }
-          break;
+      newSubBucket.parentMetric = parentMetric;
+      newSubBucket.bucketValue = parentBucketValue;
+      subBuckets.push(newSubBucket);
+    });
+  });
 
-        default:
-          throw new Error(`Unknown filter strategy ${filter.strategy} supplied to getChartData`);
-      }
+  return {
+    values: subBuckets,
+  };
+};
 
-      // Vega doesn't allow toString() so we have to use ugly type coercion
-      const filterValue = filter.value;
-      const adjustedFilterValue = filter.columnType === 'date' ?
-        parseFloat(filterValue * 1000)
-        :
-        filterValue;
-      const test = filter.columnType === 'text' ?
-        `('' + datum.filterValues[${i}]) ${comparitor} "${filter.value}"`
-        :
-        `parseFloat(datum.filterValues[${i}]) ${comparitor} parseFloat(${adjustedFilterValue})`
-      ;
+const sortDataValues = (output, vType, spec) => {
+  const isLineType = vType === 'line' || vType === 'area';
+  const isLineAggregationType = (isLineType && spec.bucketColumn !== null);
+  let sortField;
 
-      filterArray.push({
-        type: 'filter',
-        test,
-      });
+  if (isLineAggregationType) {
+    sortField = 'bucketValue';
+  } else if (isLineType) {
+    sortField = 'x';
+  } else {
+    sortField = `${spec.metricAggregation}_y`;
+  }
+
+  output.values.sort((a, b) => {
+    let returnValue;
+
+    if (a[sortField] > b[sortField]) {
+      returnValue = 1;
+    } else if (b[sortField] > a[sortField]) {
+      returnValue = -1;
+    } else {
+      returnValue = 0;
     }
 
-    outputArray.push({
-      name: 'table',
-      source: 'source',
-      transform: filterArray,
-    });
-  } else {
-    output.name = 'table';
-    outputArray.push(output);
+    if (spec.sort === 'dsc') {
+      // reverse the sort
+      returnValue *= -1;
+    }
+
+    return returnValue;
+  });
+
+  return output;
+};
+
+export function getChartData(visualisation, datasets) {
+  const { datasetId, spec } = visualisation;
+  const dataset = datasets[datasetId];
+  const metricColumnY = dataset.get('rows').map(row => row.get(spec.metricColumnY)).toArray();
+  const metricColumnX = spec.metricColumnX !== null ?
+    dataset.get('rows').map(row => row.get(spec.metricColumnX)).toArray() : null;
+  const vType = visualisation.visualisationType;
+  const bucketValueColumn = spec.bucketColumn != null ?
+    dataset.get('rows').map(row => row.get(spec.bucketColumn)).toArray() : null;
+  const subBucketValueColumn = spec.subBucketColumn != null ?
+    dataset.get('rows').map(row => row.get(spec.subBucketColumn)).toArray() : null;
+  const dataValues = [];
+  const filterArray = (spec.filters && spec.filters.length > 0) ? getFilterArray(spec) : null;
+  let output = [];
+
+  /* All visulations have a metricColumnY, so we use this column to iterate through the dataset
+  /* row-by-row, collecting and computing the necessary values to build each datapoint for the
+  /* chartData */
+  metricColumnY.forEach((entry, index) => {
+    const row = dataset.get('rows').get(index);
+
+    let bucketValue = bucketValueColumn ? bucketValueColumn[index] : null;
+    bucketValue = spec.bucketColumnType === 'date' ?
+      parseFloat(bucketValue) * 1000 : bucketValue;
+
+    let subBucketValue = subBucketValueColumn ? subBucketValueColumn[index] : null;
+    subBucketValue = spec.bucketColumnType === 'date' ?
+      parseFloat(subBucketValue) * 1000 : subBucketValue;
+
+    let x = null; // Not all datapoints will have an 'x' value - sometimes we use the index instead
+
+    if (metricColumnX !== null) {
+      x = metricColumnX[index];
+
+      if (spec.metricColumnXType === 'date') {
+        x *= 1000;
+      }
+    }
+
+    /* We will not include this datapointed if a required value is missing, or it is filtered out */
+    let includeDatapoint = true;
+
+    if (entry === null) {
+      includeDatapoint = false;
+    }
+
+    if ((vType === 'area' && spec.metricColumnX !== null) ||
+      (vType === 'line' && spec.metricColumnX !== null) ||
+      vType === 'scatter' || vType === 'map') {
+      if (x === null) {
+        includeDatapoint = false;
+      }
+    }
+
+    /* filterValues is an array of cell values from the current row in the correct order to be
+    /* tested by filterArray, an array of filter functions. */
+    const filterValues = getFilterValues(spec.filters, row);
+
+    if (includeDatapoint && filterArray) {
+      for (let j = 0; j < filterArray.length; j += 1) {
+        if (!filterArray[j](filterValues[j])) {
+          includeDatapoint = false;
+        }
+      }
+    }
+
+    if (includeDatapoint) {
+      dataValues.push({
+        index,
+        x,
+        y: parseFloat(entry),
+        bucketValue,
+        subBucketValue,
+      });
+    }
+  });
+
+  output = {
+    values: dataValues, // A raw array of all datapoints included datapoints, before aggregations
+  };
+
+  if (spec.bucketColumn !== null) {
+    output = applyBucketAggregation(output, spec);
   }
 
-  return outputArray;
+  /* Sort the aggregated values if a sort is defined by the user, or if a sort is necessary to show
+  /* a coherent chart, based on the spec */
+  if (spec.sort ||
+    (vType === 'area' && spec.metricColumnX !== null) ||
+    (vType === 'line' && spec.metricColumnX !== null)) {
+    output = sortDataValues(output, vType, spec);
+  }
+
+  const shouldTruncateValues = vType === 'bar' && spec.truncateSize !== null;
+
+  if (shouldTruncateValues) {
+    const limit = parseInt(spec.truncateSize, 10);
+
+    output.values = output.values.slice(0, limit);
+  }
+
+  /* Only apply the sub-bucket aggregations after we have sorted and truncated based on the
+  /* bucket values */
+
+  if (vType === 'bar' && spec.subBucketColumn !== null) {
+    output = applySubBucketAggregation(output, spec);
+  }
+
+  if (vType === 'bar' && spec.subBucketMethod === 'stack') {
+    const max = Math.max(...output.values.map(item => item.parentMetric));
+
+    output.metadata = output.metadata || {};
+    output.metadata.max = max;
+  }
+
+  output.name = 'table';
+
+  const chartData = [output];
+
+  return chartData;
 }
 
 export function getVegaSpec(visualisation, data, containerHeight, containerWidth) {

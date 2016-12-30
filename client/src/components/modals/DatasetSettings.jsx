@@ -21,6 +21,7 @@ class DatasetSettings extends Component {
     return (
       <Modal
         isOpen
+        contentLabel="datasetSettingsModal"
         style={{
           content: {
             width: 600,

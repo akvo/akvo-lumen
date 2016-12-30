@@ -3,70 +3,43 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
   const innerRadius = visualisation.visualisationType === 'donut' ?
     Math.floor(chartRadius / 1.75) : 0;
 
-  const hasAggregation = Boolean(visualisation.spec.datasetGroupColumnX &&
-    visualisation.spec.aggregationTypeY);
+  const hasAggregation = Boolean(visualisation.spec.bucketColumn &&
+    visualisation.spec.metricAggregation);
   const dataArray = data.map(item => item);
-  const transformType = hasAggregation ? visualisation.spec.aggregationTypeY : null;
+  const transformType = hasAggregation ? visualisation.spec.metricAggregation : null;
 
-  if (hasAggregation) {
-    const transform1 = {
-      name: 'summary',
-      source: 'table',
-      transform: [
-        {
-          type: 'aggregate',
-          groupby: ['aggregationValue'],
-          summarize: {
-            y: [
-              transformType,
-            ],
-          },
-        },
-      ],
-    };
-    const transform2 = {
-      name: 'pie',
-      source: 'summary',
-      transform: [
-        {
-          type: 'pie',
-          field: `${transformType}_y`,
-        },
-        {
-          type: 'formula',
-          field: 'rounded_value',
-          expr: `floor(datum.${transformType}_y * 1000) / 1000`, // round label to 3 decimal places
-        },
-        {
-          type: 'formula',
-          field: 'percentage',
-          expr: '((datum.layout_end - datum.layout_start) / (2 * PI)) * 100',
-        },
-        {
-          type: 'formula',
-          field: 'rounded_percentage',
-          // round percentage to 2 decimal places for labels
-          expr: 'floor(datum.percentage * 100) / 100',
-        },
+  const layoutTransform = {
+    name: 'pie',
+    source: 'table',
+    transform: [
+      {
+        type: 'pie',
+        field: `${transformType}_y`,
+      },
+      {
+        type: 'formula',
+        field: 'rounded_value',
+        expr: `floor(datum.${transformType}_y * 1000) / 1000`, // round label to 3 decimal places
+      },
+      {
+        type: 'formula',
+        field: 'percentage',
+        expr: '((datum.layout_end - datum.layout_start) / (2 * PI)) * 100',
+      },
+      {
+        type: 'formula',
+        field: 'rounded_percentage',
+        // round percentage to 2 decimal places for labels
+        expr: 'floor(datum.percentage * 100) / 100',
+      },
 
-      ],
-    };
+    ],
+  };
 
-    dataArray.push(transform1, transform2);
-  } else {
-    const pieData = Object.assign({}, data);
+  dataArray.push(layoutTransform);
 
-    pieData.transform = [{
-      type: 'pie',
-      field: 'y',
-      sort: 'true',
-    }];
-
-    dataArray.push(pieData);
-  }
-
-  const dataSource = hasAggregation ? 'pie' : 'table';
-  const segmentLabelField = hasAggregation ? 'aggregationValue' : 'label';
+  const dataSource = 'pie';
+  const segmentLabelField = hasAggregation ? 'bucketValue' : 'label';
   const fieldY = hasAggregation ? `${transformType}_y` : 'y';
   const showLegend = visualisation.spec.showLegend;
 

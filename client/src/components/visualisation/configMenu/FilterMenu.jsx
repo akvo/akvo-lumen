@@ -90,6 +90,7 @@ export default class FilterMenu extends Component {
       newFilterValue: null,
       newFilterOperation: null,
       newFilterStrategy: null,
+      collapsed: true,
     };
 
     this.toggleInput = this.toggleInput.bind(this);
@@ -173,130 +174,142 @@ export default class FilterMenu extends Component {
       <div
         className={`FilterMenu inputGroup ${hasDataset ? 'enabled' : 'disabled'}`}
       >
-        <h4>
+        <h4 className="title">
           Dataset Filters
+          <button
+            className="collapseToggle clickable"
+            onClick={() => { this.setState({ collapsed: !this.state.collapsed }); }}
+          >
+            {this.state.collapsed ? '+' : '-'}
+          </button>
         </h4>
-        <div className="container">
-          {(!filters || filters.length === 0) ?
-            <div className="noFilters">No filters</div> : <div className="filterListContainer">
-              <ol className="filterList">
-                {filters.map((filter, index) =>
-                  <li
-                    key={index}
-                    className="filterListItem"
-                  >
-                    <span className="filterIndicator">
-                      {getFilterOperationLabel(filter.operation)}
-                    </span>
-                    {' '}
-                    <span>
-                    rows where
-                    </span>
-                    {' '}
-                    <span className="filterIndicator">
-                      {columnOptions[filter.column].title}
-                    </span>
-                    {' '}
-                    <span>
-                      {getFilterStrategyLabel(filter.strategy, filter.column, columnOptions)}
-                    </span>
-                    {' '}
-                    <span className="filterIndicator">
-                      {getFilterDisplayValue(filter.value, filter.column, columnOptions)}
-                    </span>
-                    <button
-                      className="deleteFilter clickable"
-                      onClick={() => this.deleteFilter(index)}
-                    >
-                    +
-                    </button>
-                  </li>
-              )}
-              </ol>
-            </div>
-          }
-          {this.state.inputInProgress ?
-            <div className="newFilterContainer">
-              <h4>New Filter</h4>
-              <div className="inputGroup">
-                <div className="filterBodyContainer">
-                  <label htmlFor="filterOperationInput">
-                    Filter operation
-                  </label>
-                  <SelectMenu
-                    className="filterOperationInput"
-                    name="filterOperationInput"
-                    placeholder="Choose a filter operation..."
-                    value={this.state.newFilterOperation || null}
-                    options={operations}
-                    onChange={choice => this.updateNewFilter('newFilterOperation', choice)}
-                  />
-                  <label htmlFor="filterColumnInput">
-                    Column to filter by:
-                  </label>
-                  <SelectMenu
-                    className="filterColumnInput"
-                    name="filterColumnInput"
-                    placeholder="Choose a column to filter by..."
-                    value={this.state.newFilterColumn || null}
-                    options={columnOptions}
-                    onChange={choice => this.updateNewFilter('newFilterColumn', choice)}
-                  />
-                  <label htmlFor="filterStrategyInput">
-                    Filter match method
-                  </label>
-                  <SelectMenu
-                    className={`filterStrategyInput
-                      ${this.state.newFilterColumn ? 'enabled' : 'disabled'}`}
-                    disabled={this.state.newFilterColumn === null}
-                    name="filterStrategyInput"
-                    placeholder="Choose a match method..."
-                    value={this.state.newFilterStrategy || null}
-                    options={this.state.newFilterColumn ? strategies[activeColumnType] : []}
-                    onChange={choice => this.updateNewFilter('newFilterStrategy', choice)}
-                  />
-                  <label htmlFor="filterMatchValueInput">
-                    Filter match value
-                  </label>
-                  <input
-                    className={`filterMatchValueInput textInput
-                      ${this.state.newFilterColumn ? 'enabled' : 'disabled'}`}
-                    disabled={
-                      this.state.newFilterColumn === null
-                      || this.state.newFilterStrategy === 'isEmpty'
-                    }
-                    type={this.state.newFilterColumn ? activeColumnType : 'text'}
-                    onChange={evt =>
-                      this.updateNewFilter('newFilterValue', evt.target.value, activeColumnType)}
-                  />
+        { this.state.collapsed ?
+          <div />
+          :
+          <div>
+            <div className="container">
+              {(!filters || filters.length === 0) ?
+                <div className="noFilters">No filters</div> : <div className="filterListContainer">
+                  <ol className="filterList">
+                    {filters.map((filter, index) =>
+                      <li
+                        key={index}
+                        className="filterListItem"
+                      >
+                        <span className="filterIndicator">
+                          {getFilterOperationLabel(filter.operation)}
+                        </span>
+                        {' '}
+                        <span>
+                        rows where
+                        </span>
+                        {' '}
+                        <span className="filterIndicator">
+                          {columnOptions[filter.column].title}
+                        </span>
+                        {' '}
+                        <span>
+                          {getFilterStrategyLabel(filter.strategy, filter.column, columnOptions)}
+                        </span>
+                        {' '}
+                        <span className="filterIndicator">
+                          {getFilterDisplayValue(filter.value, filter.column, columnOptions)}
+                        </span>
+                        <button
+                          className="deleteFilter clickable"
+                          onClick={() => this.deleteFilter(index)}
+                        >
+                        +
+                        </button>
+                      </li>
+                  )}
+                  </ol>
                 </div>
-              </div>
-              <div className="buttonContainer">
-                <button
-                  className={`saveFilter clickable
-                    ${this.getIsFilterReady() ? 'enabled' : 'disabled'}`}
-                  onClick={() => this.saveFilter()}
-                >
-                  Save Filter
-                </button>
-                <button
-                  className="cancelFilter clickable"
-                  onClick={() => this.toggleInput()}
-                >
-                  Cancel
-                </button>
-              </div>
-            </div> : <div className="addFilterContainer">
-              <button
-                className={`addFilter clickable
-                ${hasDataset ? 'enabled' : 'disabled noPointerEvents'}`}
-                onClick={() => this.toggleInput()}
-              >
-              Add New Filter
-              </button>
+              }
+              {this.state.inputInProgress ?
+                <div className="newFilterContainer">
+                  <h4>New Filter</h4>
+                  <div className="inputGroup">
+                    <div className="filterBodyContainer">
+                      <label htmlFor="filterOperationInput">
+                        Filter operation
+                      </label>
+                      <SelectMenu
+                        className="filterOperationInput"
+                        name="filterOperationInput"
+                        placeholder="Choose a filter operation..."
+                        value={this.state.newFilterOperation || null}
+                        options={operations}
+                        onChange={choice => this.updateNewFilter('newFilterOperation', choice)}
+                      />
+                      <label htmlFor="filterColumnInput">
+                        Column to filter by:
+                      </label>
+                      <SelectMenu
+                        className="filterColumnInput"
+                        name="filterColumnInput"
+                        placeholder="Choose a column to filter by..."
+                        value={this.state.newFilterColumn || null}
+                        options={columnOptions}
+                        onChange={choice => this.updateNewFilter('newFilterColumn', choice)}
+                      />
+                      <label htmlFor="filterStrategyInput">
+                        Filter match method
+                      </label>
+                      <SelectMenu
+                        className={`filterStrategyInput
+                          ${this.state.newFilterColumn ? 'enabled' : 'disabled'}`}
+                        disabled={this.state.newFilterColumn === null}
+                        name="filterStrategyInput"
+                        placeholder="Choose a match method..."
+                        value={this.state.newFilterStrategy || null}
+                        options={this.state.newFilterColumn ? strategies[activeColumnType] : []}
+                        onChange={choice => this.updateNewFilter('newFilterStrategy', choice)}
+                      />
+                      <label htmlFor="filterMatchValueInput">
+                        Filter match value
+                      </label>
+                      <input
+                        className={`filterMatchValueInput textInput
+                          ${this.state.newFilterColumn ? 'enabled' : 'disabled'}`}
+                        disabled={
+                          this.state.newFilterColumn === null
+                          || this.state.newFilterStrategy === 'isEmpty'
+                        }
+                        type={this.state.newFilterColumn ? activeColumnType : 'text'}
+                        onChange={evt =>
+                          this.updateNewFilter('newFilterValue', evt.target.value, activeColumnType)}
+                      />
+                    </div>
+                  </div>
+                  <div className="buttonContainer">
+                    <button
+                      className={`saveFilter clickable
+                        ${this.getIsFilterReady() ? 'enabled' : 'disabled'}`}
+                      onClick={() => this.saveFilter()}
+                    >
+                      Save Filter
+                    </button>
+                    <button
+                      className="cancelFilter clickable"
+                      onClick={() => this.toggleInput()}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div> : <div className="addFilterContainer">
+                  <button
+                    className={`addFilter clickable
+                    ${hasDataset ? 'enabled' : 'disabled noPointerEvents'}`}
+                    onClick={() => this.toggleInput()}
+                  >
+                  Add New Filter
+                  </button>
+                </div>
+              }
             </div>
-          }
-        </div>
+          </div>
+        }
       </div>
     );
   }
