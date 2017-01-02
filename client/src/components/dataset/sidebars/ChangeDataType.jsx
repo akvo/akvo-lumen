@@ -5,12 +5,15 @@ import SidebarHeader from './SidebarHeader';
 import SidebarControls from './SidebarControls';
 import DateFormatSelect from './DateFormatSelect';
 
-function DefaultValueInput({ defaultValue, onChange, newType }) {
+function getEmptyValue(newType) {
+  let emptyValue = '';
   if (newType === 'number') {
     emptyValue = 0;
-  } else {
-    emptyValue = '';
   }
+  return emptyValue;
+}
+
+function DefaultValueInput({ defaultValue, onChange, newType }) {
   return (
     <div className="inputGroup">
       <label htmlFor="defaultValueInput">
@@ -18,7 +21,7 @@ function DefaultValueInput({ defaultValue, onChange, newType }) {
       </label>
       <input
         type="text"
-        value={defaultValue || emptyValue}
+        value={defaultValue || getEmptyValue(newType)}
         onChange={(event) => {
           const value = event.target.value;
           if (newType === 'date') {
