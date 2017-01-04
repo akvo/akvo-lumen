@@ -1,5 +1,12 @@
 # Release Notes
 
+## 0.4.1
+
+### New and noteworthy
+
+* Enabled TLS
+
+
 ## 0.4.0 (unreleased)
 
 Date: 2016-12-23
