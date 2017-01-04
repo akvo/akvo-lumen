@@ -81,17 +81,17 @@ const updateAxisLabels = (vType, spec) => {
 };
 
 const updatePointColorKey = (visualisation, pointColorColumnIndex, datasets) => {
-  let temp = 0;
   const { spec } = visualisation;
-  const pointColorKey = Object.assign({}, spec.pointColorKey);
-
+  const pointColorKey = pointColorColumnIndex === spec.pointColorColumn ?
+    Object.assign({}, spec.pointColorKey) : {};
   const dataset = datasets[visualisation.datasetId];
   const pointColorColumn = dataset.get('rows').map(row => row.get(pointColorColumnIndex)).toArray();
+  let colorIndex = 0;
 
   pointColorColumn.forEach((item) => {
     if (pointColorKey[item] === undefined) {
-      pointColorKey[item] = defaultColors[temp];
-      temp += 1;
+      pointColorKey[item] = defaultColors[colorIndex];
+      colorIndex += 1;
     }
   });
 
