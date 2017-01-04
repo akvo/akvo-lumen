@@ -1,3 +1,4 @@
+# Local
 minikube-start:
 	minikube start --vm-driver xhyve
 
@@ -24,30 +25,32 @@ build: build-client build-backend
 push: push-client push-backend
 
 expose-local:
-	kubectl expose deployment lumen-deployment --type=NodePort
+	kubectl expose deployment lumen --type=NodePort
 
 url:
-	minikube service lumen-deployment --url
+	minikube service lumen --url
 
+# Prod
 kube-prod-cred:
 	gcloud container clusters get-credentials lumen --zone europe-west1-d --project akvo-lumen
 
-
-# Prod
 ## Step 1
 cluster-prod:
 	gcloud container clusters create lumen --zone=europe-west1-d --machine-type=g1-small --num-nodes=2 --project=akvo-lumen
 
 ## Step 2 add secrets to cluster, can be found in akvo-config
 
+## Step 3 Make sure there is an ingress object
+ingress-prod:
+	kubectl create -f ./ingress/prod.yaml
+
 ## Step 3
 deploy-prod:
 	kubectl create -f ./ci/deployment.yaml
 
 ## Step 4
-expose-production:
-	kubectl expose deployment lumen --type="LoadBalancer" --target-port=80 --load-balancer-ip='104.199.57.78'
-
+service-prod:
+	kubectl create -f ./ci/service.yaml
 
 # Dev
 cluster-dev:
@@ -61,6 +64,7 @@ gcloud-auth:
 
 deploy-dev:
 	kubectl create -f ./ci/deployment.yaml
+
 
 expose-dev:
 	kubectl expose deployment lumen --type="LoadBalancer" --target-port=80 --load-balancer-ip='104.199.71.250'

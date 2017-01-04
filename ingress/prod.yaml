@@ -1,0 +1,17 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: lumen
+  namespace: default
+spec:
+  tls:
+  - hosts:
+    - "*.akvolumen.org"
+    secretName: tls
+  rules:
+    - host: "*.akvolumen.org"
+      http:
+        paths:
+        - backend:
+            serviceName: lumen
+            servicePort: 80

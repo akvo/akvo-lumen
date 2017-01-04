@@ -1,6 +1,16 @@
 # Release Notes
 
-## 0.5.0 (unreleased)
+## 0.4.1
+
+Date 2017-01-04
+
+### New and noteworthy
+
+* Enabled TLS
+
+### Bugfixes
+
+* Fix a regression in the visualisation editor that prevented viewing maps
 
 ## 0.4.0
 
