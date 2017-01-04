@@ -9,6 +9,76 @@ import { fetchLibrary } from '../actions/library';
 
 require('../styles/Visualisation.scss');
 
+const updateAxisLabels = (vType, spec) => {
+  let autoAxisLabelY = '';
+  let autoAxisLabelX = '';
+
+  switch (vType) {
+    case 'bar':
+      autoAxisLabelY = spec.metricColumnYName;
+      autoAxisLabelX = spec.bucketColumn ? spec.bucketColumnName : autoAxisLabelX;
+
+      if (spec.bucketColumn !== null) {
+        autoAxisLabelY += ` - ${spec.metricAggregation}`;
+
+        if (spec.truncateSize !== null) {
+          let truncateOrderIndicator;
+
+          if (spec.sort === 'asc') {
+            truncateOrderIndicator = 'bottom';
+          } else if (spec.sort === 'dsc') {
+            truncateOrderIndicator = 'top';
+          } else {
+            truncateOrderIndicator = 'first';
+          }
+
+          autoAxisLabelX += ` - ${truncateOrderIndicator} ${spec.truncateSize}`;
+        }
+      }
+
+      break;
+
+    case 'line':
+    case 'area':
+      autoAxisLabelY = spec.metricColumnYName;
+      if (spec.bucketColumn !== null) {
+        autoAxisLabelY += ` - ${spec.metricAggregation}`;
+      }
+
+      if (spec.metricColumnX === null) {
+        autoAxisLabelX = 'Dataset row number';
+      } else {
+        autoAxisLabelX = spec.metricColumnXName;
+      }
+      break;
+
+    case 'scatter':
+      autoAxisLabelY = spec.metricColumnYName;
+      autoAxisLabelX = spec.metricColumnXName;
+
+      if (spec.bucketColumn !== null) {
+        autoAxisLabelY += ` - ${spec.metricAggregation}`;
+        autoAxisLabelX += ` - ${spec.metricAggregation}`;
+      }
+      break;
+
+    case 'pie':
+    case 'map':
+      // No axis labels for these visualisation types
+      break;
+
+    default:
+      throw new Error(`Unknown visualisation type ${vType}`);
+  }
+
+  const axisLabelX = spec.axisLabelXFromUser ? spec.axisLabelX : autoAxisLabelX;
+  const axisLabelY = spec.axisLabelYFromUser ? spec.axisLabelY : autoAxisLabelY;
+
+  const out = Object.assign({}, spec, { axisLabelY, axisLabelX });
+
+  return out;
+};
+
 class Visualisation extends Component {
 
   constructor() {
@@ -22,26 +92,31 @@ class Visualisation extends Component {
         visualisationType: null,
         datasetId: null,
         spec: {
+          metricColumnY: null, // primary
+          metricColumnYName: null,
+          metricColumnYType: null,
+          metricColumnX: null, // secondary
+          metricColumnXName: null,
+          metricColumnXType: null,
+          datapointLabelColumn: null,
+          datapointLabelColumnName: null,
+          datapointLabelColumnType: null,
+          bucketColumn: null,
+          bucketColumnName: null,
+          bucketColumnType: null,
+          subBucketColumn: null,
+          subBucketColumnName: null,
+          subBucketColumnType: null,
+          subBucketMethod: 'split', // can be "split" or "stack"
+          metricAggregation: 'mean', // default to mean,
+          axisLabelX: null,
+          axisLabelXFromUser: false, // Has the label been manually entered by the user?
+          axisLabelY: null,
+          axisLabelYFromUser: false,
           filters: [],
-          datasetColumnX: null,
-          datasetColumnXType: null,
-          datasetNameColumnX: null,
-          datasetNameColumnXType: null,
-          datasetGroupColumnX: null,
-          datasetGroupColumnXType: null,
-          datasetSortColumnX: null,
-          datasetSortColumnXType: null,
-          reverseSortX: false,
-          aggregationTypeY: 'mean', // default to mean
-          labelX: null,
-          minX: null,
-          maxX: null,
-          datasetColumnY: null,
-          datasetColumnYType: null,
-          labelY: null,
-          minY: null,
-          maxY: null,
+          sort: null, // can be "asc", "dsc" or "null"
           showLegend: null,
+          truncateSize: null,
         },
       },
       asyncComponents: null,
@@ -139,6 +214,7 @@ class Visualisation extends Component {
   // Helper method for...
   handleChangeVisualisation(map) {
     const visualisation = Object.assign({}, this.state.visualisation, map);
+
     this.setState({
       visualisation,
       isUnsavedChanges: true,
@@ -146,8 +222,28 @@ class Visualisation extends Component {
   }
 
   handleChangeVisualisationSpec(value) {
-    const spec = update(this.state.visualisation.spec, { $merge: value });
+    const axisLabelUpdateTriggers = [
+      'bucketColumn',
+      'subBucketColumn',
+      'truncateSize',
+      'metricAggregation',
+      'metricColumnY',
+      'metricColumnX',
+      'sort',
+    ];
+    const shouldUpdateAxisLabels = axisLabelUpdateTriggers.some(trigger =>
+        Object.keys(value).some(key => key.toString() === trigger.toString())
+    );
+
+    let spec = update(this.state.visualisation.spec, { $merge: value });
+
+    if (shouldUpdateAxisLabels) {
+      spec = update(spec,
+        { $merge: updateAxisLabels(this.state.visualisation.visualisationType, spec) });
+    }
+
     const visualisation = Object.assign({}, this.state.visualisation, { spec });
+
     this.setState({
       isUnsavedChanges: true,
       visualisation,

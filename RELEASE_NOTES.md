@@ -1,24 +1,38 @@
 # Release Notes
 
-## 0.4.1
+## 0.4.0 (unreleased)
+
+Date ?
 
 ### New and noteworthy
 
 * Enabled TLS
 
+### Bugfixes
 
-## 0.4.0 (unreleased)
+* Fix a regression in the visualisation editor that prevented viewing maps
 
-Date: 2016-12-23
+## 0.4.0
+
+Date: 2016-12-30
 
 ### New and noteworthy
 
-* DOS-formatted CSV files now import properly
 * Improved the Visualisation editor
   * "Save" button no longer redirects user to library view
+  * New "Stack" and "Split" options for subgroups in Bar chart editor
+  * Number of bars in bar chart can now optionally be limited
+  * Aggregations for visualisations are now performed in a separate step
+  * Visualisation axis labels now update automatically without user input
 * New transformation: Derive column
   * Supports user defined formulas using Javascript as the
     expression language
+
+### Bugfixes
+
+* Make sure the authentication token is up-to-date so the user isn't
+  unexpectedly logged out during a session
+* DOS-formatted CSV files now import properly
 
 
 ## 0.3.0
