@@ -6,6 +6,7 @@ import ShareEntity from '../components/modals/ShareEntity';
 import * as actions from '../actions/visualisation';
 import { fetchDataset } from '../actions/dataset';
 import { fetchLibrary } from '../actions/library';
+import defaultColors from '../utilities/defaultColors';
 
 require('../styles/Visualisation.scss');
 
@@ -79,6 +80,24 @@ const updateAxisLabels = (vType, spec) => {
   return out;
 };
 
+const updatePointColorKey = (visualisation, pointColorColumnIndex, datasets) => {
+  let temp = 0;
+  const { spec } = visualisation;
+  const pointColorKey = Object.assign({}, spec.pointColorKey);
+
+  const dataset = datasets[visualisation.datasetId];
+  const pointColorColumn = dataset.get('rows').map(row => row.get(pointColorColumnIndex)).toArray();
+
+  pointColorColumn.forEach((item) => {
+    if (pointColorKey[item] === undefined) {
+      pointColorKey[item] = defaultColors[temp];
+      temp += 1;
+    }
+  });
+
+  return pointColorKey;
+};
+
 class Visualisation extends Component {
 
   constructor() {
@@ -109,6 +128,10 @@ class Visualisation extends Component {
           subBucketColumnType: null,
           subBucketMethod: 'split', // can be "split" or "stack"
           metricAggregation: 'mean', // default to mean,
+          pointColorColumn: null,
+          pointColorColumnName: null,
+          pointColorColumnType: null,
+          pointColorKey: {},
           axisLabelX: null,
           axisLabelXFromUser: false, // Has the label been manually entered by the user?
           axisLabelY: null,
@@ -231,6 +254,7 @@ class Visualisation extends Component {
       'metricColumnX',
       'sort',
     ];
+
     const shouldUpdateAxisLabels = axisLabelUpdateTriggers.some(trigger =>
         Object.keys(value).some(key => key.toString() === trigger.toString())
     );
@@ -240,6 +264,12 @@ class Visualisation extends Component {
     if (shouldUpdateAxisLabels) {
       spec = update(spec,
         { $merge: updateAxisLabels(this.state.visualisation.visualisationType, spec) });
+    }
+
+    if (value.pointColorColumn !== undefined) {
+      const pointColorKey = updatePointColorKey(this.state.visualisation,
+        value.pointColorColumn, this.props.library.datasets);
+      spec = Object.assign({}, spec, { pointColorKey });
     }
 
     const visualisation = Object.assign({}, this.state.visualisation, { spec });

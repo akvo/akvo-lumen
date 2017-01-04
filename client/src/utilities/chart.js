@@ -186,6 +186,8 @@ export function getChartData(visualisation, datasets) {
     dataset.get('rows').map(row => row.get(spec.subBucketColumn)).toArray() : null;
   const datapointLabelValueColumn = spec.datapointLabelColumn != null ?
     dataset.get('rows').map(row => row.get(spec.datapointLabelColumn)).toArray() : null;
+  const pointColorValueColumn = spec.pointColorColumn != null ?
+    dataset.get('rows').map(row => row.get(spec.pointColorColumn)).toArray() : null;
   const dataValues = [];
   const filterArray = (spec.filters && spec.filters.length > 0) ? getFilterArray(spec) : null;
   let output = [];
@@ -208,6 +210,16 @@ export function getChartData(visualisation, datasets) {
     datapointLabelValue = spec.bucketColumnType === 'date' ?
       parseFloat(datapointLabelValue) * 1000 : datapointLabelValue;
 
+    let pointColorValue = pointColorValueColumn ? pointColorValueColumn[index] : null;
+    pointColorValue = spec.bucketColumnType === 'date' ?
+      parseFloat(pointColorValue) * 1000 : pointColorValue;
+
+    let pointColor;
+
+    if (vType === 'map' && pointColorValue !== null) {
+      pointColor = spec.pointColorKey[pointColorValue];
+    }
+
     let x = null; // Not all datapoints will have an 'x' value - sometimes we use the index instead
 
     if (metricColumnX !== null) {
@@ -218,7 +230,7 @@ export function getChartData(visualisation, datasets) {
       }
     }
 
-    /* We will not include this datapointed if a required value is missing, or it is filtered out */
+    /* We will not include this datapoint if a required value is missing, or it is filtered out */
     let includeDatapoint = true;
 
     if (entry === null) {
@@ -253,6 +265,7 @@ export function getChartData(visualisation, datasets) {
         bucketValue,
         subBucketValue,
         datapointLabelValue,
+        pointColor,
       });
     }
   });

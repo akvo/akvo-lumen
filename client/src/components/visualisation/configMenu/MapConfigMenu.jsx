@@ -50,6 +50,21 @@ export default function MapConfigMenu(props) {
           datapointLabelColumnType: getColumnMetadata('type', value, columnOptions),
         })}
       />
+      <Subtitle>Point color</Subtitle>
+      <SelectInput
+        placeholder="Select a data column to color points by"
+        labelText="Point color column"
+        choice={spec.pointColorColumn !== null ?
+          spec.pointColorColumn.toString() : null}
+        name="xGroupColumnMenu"
+        options={columnOptions}
+        clearable
+        onChange={value => onChangeSpec({
+          pointColorColumn: value,
+          pointColorName: getColumnMetadata('title', value, columnOptions),
+          pointColorType: getColumnMetadata('type', value, columnOptions),
+        })}
+      />
     </div>
   );
 }

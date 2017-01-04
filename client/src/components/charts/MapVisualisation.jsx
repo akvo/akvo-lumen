@@ -1,5 +1,5 @@
 import React, { PropTypes } from 'react';
-import { Map, Marker, Popup, TileLayer } from 'react-leaflet';
+import { Map, CircleMarker, Popup, TileLayer } from 'react-leaflet';
 import * as chart from '../../utilities/chart';
 
 require('../../../node_modules/leaflet/dist/leaflet.css');
@@ -27,8 +27,11 @@ export default function MapVisualisation({ visualisation, datasets, width, heigh
         />
         {
           chartData.values.map((entry, index) =>
-            <Marker
-              position={[parseFloat(entry.x), parseFloat(entry.y)]}
+            <CircleMarker
+              center={[parseFloat(entry.x), parseFloat(entry.y)]}
+              radius={3}
+              color={entry.pointColor || '#000000'}
+              fillOpacity="0.5"
               key={index}
             >
               {
@@ -37,7 +40,7 @@ export default function MapVisualisation({ visualisation, datasets, width, heigh
                     <span>{entry.datapointLabelValue}</span>
                   </Popup>
               }
-            </Marker>
+            </CircleMarker>
           )
         }
       </Map>
