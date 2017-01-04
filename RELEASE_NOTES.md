@@ -1,6 +1,10 @@
 # Release Notes
 
-## 0.5.0 (unreleased)
+## 0.4.1 (unreleased)
+
+### Bugfixes
+
+* Fix a regression in the visualisation editor that prevented viewing maps
 
 ## 0.4.0
 

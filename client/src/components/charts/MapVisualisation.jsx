@@ -32,9 +32,9 @@ export default function MapVisualisation({ visualisation, datasets, width, heigh
               key={index}
             >
               {
-                entry.label &&
+                entry.datapointLabelValue &&
                   <Popup>
-                    <span>{entry.label}</span>
+                    <span>{entry.datapointLabelValue}</span>
                   </Popup>
               }
             </Marker>

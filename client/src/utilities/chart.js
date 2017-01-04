@@ -184,6 +184,8 @@ export function getChartData(visualisation, datasets) {
     dataset.get('rows').map(row => row.get(spec.bucketColumn)).toArray() : null;
   const subBucketValueColumn = spec.subBucketColumn != null ?
     dataset.get('rows').map(row => row.get(spec.subBucketColumn)).toArray() : null;
+  const datapointLabelValueColumn = spec.datapointLabelColumn != null ?
+    dataset.get('rows').map(row => row.get(spec.datapointLabelColumn)).toArray() : null;
   const dataValues = [];
   const filterArray = (spec.filters && spec.filters.length > 0) ? getFilterArray(spec) : null;
   let output = [];
@@ -201,6 +203,10 @@ export function getChartData(visualisation, datasets) {
     let subBucketValue = subBucketValueColumn ? subBucketValueColumn[index] : null;
     subBucketValue = spec.bucketColumnType === 'date' ?
       parseFloat(subBucketValue) * 1000 : subBucketValue;
+
+    let datapointLabelValue = datapointLabelValueColumn ? datapointLabelValueColumn[index] : null;
+    datapointLabelValue = spec.bucketColumnType === 'date' ?
+      parseFloat(datapointLabelValue) * 1000 : datapointLabelValue;
 
     let x = null; // Not all datapoints will have an 'x' value - sometimes we use the index instead
 
@@ -246,6 +252,7 @@ export function getChartData(visualisation, datasets) {
         y: parseFloat(entry),
         bucketValue,
         subBucketValue,
+        datapointLabelValue,
       });
     }
   });

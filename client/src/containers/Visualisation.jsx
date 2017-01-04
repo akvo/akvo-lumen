@@ -38,10 +38,6 @@ const updateAxisLabels = (vType, spec) => {
 
       break;
 
-    case 'pie':
-      // No axis labels for pie charts
-      break;
-
     case 'line':
     case 'area':
       autoAxisLabelY = spec.metricColumnYName;
@@ -64,6 +60,11 @@ const updateAxisLabels = (vType, spec) => {
         autoAxisLabelY += ` - ${spec.metricAggregation}`;
         autoAxisLabelX += ` - ${spec.metricAggregation}`;
       }
+      break;
+
+    case 'pie':
+    case 'map':
+      // No axis labels for these visualisation types
       break;
 
     default:
