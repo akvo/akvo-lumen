@@ -17,24 +17,24 @@ export default function MapConfigMenu(props) {
       <SelectInput
         placeholder="Select a latitude column"
         labelText="Latitude column"
-        choice={spec.metricColumnY !== null ? spec.metricColumnY.toString() : null}
-        name="yColumnInput"
-        options={columnOptions}
-        onChange={value => onChangeSpec({
-          metricColumnY: value,
-          metricColumnYType: getColumnMetadata('type', value, columnOptions),
-        })}
-      />
-      <Subtitle>Longitude</Subtitle>
-      <SelectInput
-        placeholder="Select a longitude column"
-        labelText="Longitude column"
         choice={spec.metricColumnX !== null ? spec.metricColumnX.toString() : null}
         name="xColumnInput"
         options={columnOptions}
         onChange={value => onChangeSpec({
           metricColumnX: value,
           metricColumnXType: getColumnMetadata('type', value, columnOptions),
+        })}
+      />
+      <Subtitle>Longitude</Subtitle>
+      <SelectInput
+        placeholder="Select a longitude column"
+        labelText="Longitude column"
+        choice={spec.metricColumnY !== null ? spec.metricColumnY.toString() : null}
+        name="yColumnInput"
+        options={columnOptions}
+        onChange={value => onChangeSpec({
+          metricColumnY: value,
+          metricColumnYType: getColumnMetadata('type', value, columnOptions),
         })}
       />
       <Subtitle>Popup Label</Subtitle>
