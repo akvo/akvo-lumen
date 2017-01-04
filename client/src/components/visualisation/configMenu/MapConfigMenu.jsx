@@ -19,7 +19,7 @@ export default function MapConfigMenu(props) {
         labelText="Latitude column"
         choice={spec.metricColumnX !== null ? spec.metricColumnX.toString() : null}
         name="xColumnInput"
-        options={columnOptions}
+        options={columnOptions.filter(column => column.type === 'number')}
         onChange={value => onChangeSpec({
           metricColumnX: value,
           metricColumnXType: getColumnMetadata('type', value, columnOptions),
@@ -31,7 +31,7 @@ export default function MapConfigMenu(props) {
         labelText="Longitude column"
         choice={spec.metricColumnY !== null ? spec.metricColumnY.toString() : null}
         name="yColumnInput"
-        options={columnOptions}
+        options={columnOptions.filter(column => column.type === 'number')}
         onChange={value => onChangeSpec({
           metricColumnY: value,
           metricColumnYType: getColumnMetadata('type', value, columnOptions),

@@ -94,22 +94,24 @@ export default function MapVisualisation({ visualisation, datasets, width, heigh
           attribution="&copy; <a href='http://osm.org/copyright'>OpenStreetMap</a> contributors"
         />
         {
-          chartData.values.map((entry, index) =>
-            <CircleMarker
-              center={[parseFloat(entry.x), parseFloat(entry.y)]}
-              radius={3}
-              color={entry.pointColor || '#000000'}
-              fillOpacity="0.5"
-              key={index}
-            >
-              {
-                entry.datapointLabelValue &&
-                  <Popup>
-                    <span>{entry.datapointLabelValue}</span>
-                  </Popup>
-              }
-            </CircleMarker>
-          )
+          chartData.values
+            .filter(entry => entry.x != null && entry.y != null)
+            .map((entry, index) =>
+              <CircleMarker
+                center={[entry.x, entry.y]}
+                radius={3}
+                color={entry.pointColor || '#000000'}
+                fillOpacity="0.5"
+                key={index}
+              >
+                {
+                  entry.datapointLabelValue &&
+                    <Popup>
+                      <span>{entry.datapointLabelValue}</span>
+                    </Popup>
+                }
+              </CircleMarker>
+            )
         }
       </Map>
     </div>
