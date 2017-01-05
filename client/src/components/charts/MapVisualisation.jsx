@@ -7,7 +7,7 @@ require('../../styles/MapVisualisation.scss');
 
 
 export default function MapVisualisation({ visualisation, datasets, width, height }) {
-  const chartData = chart.getChartData(visualisation, datasets)[0];
+  const chartData = chart.getMapData(visualisation, datasets);
   const colorKeyArray = Object.keys(visualisation.spec.pointColorKey).map(key =>
     ({
       category: key,
@@ -94,11 +94,11 @@ export default function MapVisualisation({ visualisation, datasets, width, heigh
           attribution="&copy; <a href='http://osm.org/copyright'>OpenStreetMap</a> contributors"
         />
         {
-          chartData.values
-            .filter(entry => entry.x != null && entry.y != null)
+          chartData.map
+            .filter(entry => entry.latitude != null && entry.longitude != null)
             .map((entry, index) =>
               <CircleMarker
-                center={[entry.x, entry.y]}
+                center={[entry.latitude, entry.longitude]}
                 radius={3}
                 color={entry.pointColor || '#000000'}
                 fillOpacity="0.5"

@@ -140,6 +140,8 @@ class Visualisation extends Component {
           sort: null, // can be "asc", "dsc" or "null"
           showLegend: null,
           truncateSize: null,
+          longitude: null,
+          latitude: null,
         },
       },
       asyncComponents: null,

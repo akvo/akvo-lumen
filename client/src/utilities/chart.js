@@ -173,6 +173,84 @@ const sortDataValues = (output, vType, spec) => {
   return output;
 };
 
+
+export function getMapData(visualisation, datasets) {
+  const { datasetId, spec } = visualisation;
+  const dataset = datasets[datasetId];
+  const longitude = dataset.get('rows').map(row => row.get(spec.longitude)).toArray();
+  const latitude = spec.latitude !== null ?
+    dataset.get('rows').map(row => row.get(spec.latitude)).toArray() : null;
+  const vType = visualisation.visualisationType;
+
+  const datapointLabelValueColumn = spec.datapointLabelColumn != null ?
+    dataset.get('rows').map(row => row.get(spec.datapointLabelColumn)).toArray() : null;
+
+  const pointColorValueColumn = spec.pointColorColumn != null ?
+    dataset.get('rows').map(row => row.get(spec.pointColorColumn)).toArray() : null;
+
+  const dataValues = [];
+  const filterArray = (spec.filters && spec.filters.length > 0) ? getFilterArray(spec) : null;
+  let output = [];
+
+  /* All visulations have a metricColumnY, so we use this column to iterate through the dataset
+  /* row-by-row, collecting and computing the necessary values to build each datapoint for the
+  /* chartData */
+  longitude.forEach((entry, index) => {
+    const row = dataset.get('rows').get(index);
+
+    let datapointLabelValue = datapointLabelValueColumn ? datapointLabelValueColumn[index] : null;
+
+    datapointLabelValue = spec.datapointLabelValue === 'date' ?
+      parseFloat(datapointLabelValue) * 1000 : datapointLabelValue;
+
+    let pointColorValue = pointColorValueColumn ? pointColorValueColumn[index] : null;
+    pointColorValue = spec.pointColorValueColumn === 'date' ?
+      parseFloat(pointColorValue) * 1000 : pointColorValue;
+
+    let pointColor;
+
+    if (pointColorValue !== null) {
+      pointColor = spec.pointColorKey[pointColorValue];
+    }
+
+    const latitudeValue = latitude[index];
+
+    /* We will not include this datapoint if a required value is missing, or it is filtered out */
+    let includeDatapoint = true;
+
+    if (entry === null) {
+      includeDatapoint = false;
+    }
+
+    if (latitudeValue === null) {
+      includeDatapoint = false;
+    }
+
+    /* filterValues is an array of cell values from the current row in the correct order to be
+    /* tested by filterArray, an array of filter functions. */
+    const filterValues = getFilterValues(spec.filters, row);
+
+    if (includeDatapoint && filterArray) {
+      for (let j = 0; j < filterArray.length; j += 1) {
+        if (!filterArray[j](filterValues[j])) {
+          includeDatapoint = false;
+        }
+      }
+    }
+
+    if (includeDatapoint) {
+      dataValues.push({
+        latitude: latitudeValue,
+        longitude: entry,
+        datapointLabelValue,
+        pointColor,
+      });
+    }
+  });
+
+  return dataValues;
+}
+
 export function getChartData(visualisation, datasets) {
   const { datasetId, spec } = visualisation;
   const dataset = datasets[datasetId];
