@@ -11,6 +11,8 @@ Date 2017-01-04
 ### Bugfixes
 
 * Fix a regression in the visualisation editor that prevented viewing maps
+* Make sure 0 can be selected as a default numerical value when changing
+  column type
 
 ## 0.4.0
 
