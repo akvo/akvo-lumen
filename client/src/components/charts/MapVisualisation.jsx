@@ -8,10 +8,10 @@ require('../../styles/MapVisualisation.scss');
 
 export default function MapVisualisation({ visualisation, datasets, width, height }) {
   const chartData = chart.getMapData(visualisation, datasets);
-  const colorKeyArray = Object.keys(visualisation.spec.pointColorKey).map(key =>
+  const colorKeyArray = Object.keys(visualisation.spec.pointColorMapping).map(key =>
     ({
       category: key,
-      color: visualisation.spec.pointColorKey[key],
+      color: visualisation.spec.pointColorMapping[key],
     })
   );
 

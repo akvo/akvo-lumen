@@ -173,7 +173,6 @@ const sortDataValues = (output, vType, spec) => {
   return output;
 };
 
-
 export function getMapData(visualisation, datasets) {
   const { datasetId, spec } = visualisation;
   const dataset = datasets[datasetId];
@@ -184,6 +183,10 @@ export function getMapData(visualisation, datasets) {
   const longitudeIndex = dataset.get('columns').findIndex(column =>
     column.get('columnName') === spec.longitude);
 
+  const pointColorColumnIndex = dataset.get('columns').findIndex(column =>
+    column.get('columnName') === spec.pointColorColumn
+  );
+
   const longitude = dataset.get('rows').map(row => row.get(longitudeIndex)).toArray();
   const latitude = spec.latitude !== null ?
     dataset.get('rows').map(row => row.get(latitudeIndex)).toArray() : null;
@@ -192,7 +195,7 @@ export function getMapData(visualisation, datasets) {
     dataset.get('rows').map(row => row.get(spec.datapointLabelColumn)).toArray() : null;
 
   const pointColorValueColumn = spec.pointColorColumn != null ?
-    dataset.get('rows').map(row => row.get(spec.pointColorColumn)).toArray() : null;
+    dataset.get('rows').map(row => row.get(pointColorColumnIndex)).toArray() : null;
 
   const dataValues = [];
   const filterArray = (spec.filters && spec.filters.length > 0) ? getFilterArray(spec) : null;
@@ -215,7 +218,7 @@ export function getMapData(visualisation, datasets) {
     let pointColor;
 
     if (pointColorValue !== null) {
-      pointColor = spec.pointColorKey[pointColorValue];
+      pointColor = spec.pointColorMapping[pointColorValue];
     }
 
     const latitudeValue = latitude[index];
@@ -300,7 +303,7 @@ export function getChartData(visualisation, datasets) {
     let pointColor;
 
     if (vType === 'map' && pointColorValue !== null) {
-      pointColor = spec.pointColorKey[pointColorValue];
+      pointColor = spec.pointColorMapping[pointColorValue];
     }
 
     let x = null; // Not all datapoints will have an 'x' value - sometimes we use the index instead

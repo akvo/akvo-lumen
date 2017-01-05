@@ -59,8 +59,6 @@ export default function MapConfigMenu(props) {
         clearable
         onChange={value => onChangeSpec({
           pointColorColumn: value,
-          pointColorName: getColumnMetadata('title', value, columnOptions),
-          pointColorType: getColumnMetadata('type', value, columnOptions),
         })}
       />
     </div>

@@ -80,22 +80,22 @@ const updateAxisLabels = (vType, spec) => {
   return out;
 };
 
-const updatePointColorKey = (visualisation, pointColorColumnIndex, datasets) => {
-  const { spec } = visualisation;
-  const pointColorKey = pointColorColumnIndex === spec.pointColorColumn ?
-    Object.assign({}, spec.pointColorKey) : {};
+const updatePointColorMapping = (visualisation, pointColorColumnName, datasets) => {
   const dataset = datasets[visualisation.datasetId];
-  const pointColorColumn = dataset.get('rows').map(row => row.get(pointColorColumnIndex)).toArray();
-  let colorIndex = 0;
+  const pointColorColumnIndex = dataset.get('columns').findIndex(
+    column => column.get('columnName') === pointColorColumnName
+  );
+  const pointColorColumnData = dataset
+    .get('rows')
+    .map(row => row.get(pointColorColumnIndex))
+    .toSet().toArray();
 
-  pointColorColumn.forEach((item) => {
-    if (pointColorKey[item] === undefined) {
-      pointColorKey[item] = defaultColors[colorIndex];
-      colorIndex += 1;
-    }
-  });
+  const pointColorMapping = {};
+  pointColorColumnData.forEach(
+    (value, index) => { pointColorMapping[value] = defaultColors[index]; }
+  );
 
-  return pointColorKey;
+  return pointColorMapping;
 };
 
 class Visualisation extends Component {
@@ -129,9 +129,7 @@ class Visualisation extends Component {
           subBucketMethod: 'split', // can be "split" or "stack"
           metricAggregation: 'mean', // default to mean,
           pointColorColumn: null,
-          pointColorColumnName: null,
-          pointColorColumnType: null,
-          pointColorKey: {},
+          pointColorMapping: {},
           axisLabelX: null,
           axisLabelXFromUser: false, // Has the label been manually entered by the user?
           axisLabelY: null,
@@ -269,9 +267,9 @@ class Visualisation extends Component {
     }
 
     if (value.pointColorColumn !== undefined) {
-      const pointColorKey = updatePointColorKey(this.state.visualisation,
+      const pointColorMapping = updatePointColorMapping(this.state.visualisation,
         value.pointColorColumn, this.props.library.datasets);
-      spec = Object.assign({}, spec, { pointColorKey });
+      spec = Object.assign({}, spec, { pointColorMapping });
     }
 
     const visualisation = Object.assign({}, this.state.visualisation, { spec });
