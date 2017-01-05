@@ -31,7 +31,8 @@ const getDatasetOptions = datasetArray =>
 
 const getSelectMenuOptionsFromColumnList = (columns = Immutable.List()) =>
   columns.map((column, index) => ({
-    value: index.toString(),
+    value: `${column.get('columnName')}`,
+    index: index.toString(),
     title: `${column.get('title')}`,
     label: `${column.get('title')} [${column.get('type')}]`,
     type: `${column.get('type')}`,

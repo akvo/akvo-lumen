@@ -177,10 +177,16 @@ const sortDataValues = (output, vType, spec) => {
 export function getMapData(visualisation, datasets) {
   const { datasetId, spec } = visualisation;
   const dataset = datasets[datasetId];
-  const longitude = dataset.get('rows').map(row => row.get(spec.longitude)).toArray();
+
+  const latitudeIndex = dataset.get('columns').findIndex(column =>
+    column.get('columnName') === spec.latitude);
+
+  const longitudeIndex = dataset.get('columns').findIndex(column =>
+    column.get('columnName') === spec.longitude);
+
+  const longitude = dataset.get('rows').map(row => row.get(longitudeIndex)).toArray();
   const latitude = spec.latitude !== null ?
-    dataset.get('rows').map(row => row.get(spec.latitude)).toArray() : null;
-  const vType = visualisation.visualisationType;
+    dataset.get('rows').map(row => row.get(latitudeIndex)).toArray() : null;
 
   const datapointLabelValueColumn = spec.datapointLabelColumn != null ?
     dataset.get('rows').map(row => row.get(spec.datapointLabelColumn)).toArray() : null;
@@ -190,7 +196,6 @@ export function getMapData(visualisation, datasets) {
 
   const dataValues = [];
   const filterArray = (spec.filters && spec.filters.length > 0) ? getFilterArray(spec) : null;
-  let output = [];
 
   /* All visulations have a metricColumnY, so we use this column to iterate through the dataset
   /* row-by-row, collecting and computing the necessary values to build each datapoint for the
