@@ -202,3 +202,13 @@ Examples:
 	  "code": "row['a'] + row['b']"},
  "onError": "fail"}
 ````
+
+### core/delete-column
+
+* args
+  * columnName (string): The column to delete
+
+```
+{"op": "core/delete-column",
+ "args": {"columnName": "c4"}}
+```
