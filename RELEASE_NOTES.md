@@ -1,5 +1,11 @@
 # Release Notes
 
+## 0.5.0 (unreleased)
+
+### New and noteworthy
+
+* New transformation: Delete column
+
 ## 0.4.1
 
 Date 2017-01-04
