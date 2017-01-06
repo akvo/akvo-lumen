@@ -117,6 +117,12 @@
   (or (string? (get-in op-spec ["args" "columnName"]))
       (throw-invalid-op op-spec)))
 
+(defmethod validate-op :core/rename-column
+  [op-spec]
+  (or (and (string? (get-in op-spec ["args" "columnName"]))
+           (string? (get-in op-spec ["args" "newColumnTitle"])))
+      (throw-invalid-op op-spec)))
+
 (defn validate
   [command]
   (try

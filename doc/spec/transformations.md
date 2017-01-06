@@ -212,3 +212,15 @@ Examples:
 {"op": "core/delete-column",
  "args": {"columnName": "c4"}}
 ```
+
+### core/rename-column
+
+* args
+  * columnName (string): The column to rename
+  * newColumnTitle (string): The new column title
+
+```
+{"op": "core/rename-column",
+ "args": {"columnName": "c4",
+          "newColumnTitle": "New Title"}}
+```

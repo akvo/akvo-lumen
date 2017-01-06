@@ -5,6 +5,7 @@
 ### New and noteworthy
 
 * New transformation: Delete column
+* New transformation: Rename column
 
 ## 0.4.1
 
