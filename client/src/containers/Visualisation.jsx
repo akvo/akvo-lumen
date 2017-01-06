@@ -7,6 +7,8 @@ import * as actions from '../actions/visualisation';
 import { fetchDataset } from '../actions/dataset';
 import { fetchLibrary } from '../actions/library';
 import defaultColors from '../utilities/defaultColors';
+import genericSpecTemplate from './Visualisation/genericSpecTemplate';
+import mapSpecTemplate from './Visualisation/mapSpecTemplate';
 
 require('../styles/Visualisation.scss');
 
@@ -85,14 +87,21 @@ const updatePointColorMapping = (visualisation, pointColorColumnName, datasets) 
   const pointColorColumnIndex = dataset.get('columns').findIndex(
     column => column.get('columnName') === pointColorColumnName
   );
+  // const pointColorColumnType = dataset.get('columns').get(pointColorColumnIndex).get('type');
   const pointColorColumnData = dataset
     .get('rows')
     .map(row => row.get(pointColorColumnIndex))
     .toSet().toArray();
 
-  const pointColorMapping = {};
+  const pointColorMapping = [];
   pointColorColumnData.forEach(
-    (value, index) => { pointColorMapping[value] = defaultColors[index]; }
+    (value, index) => {
+      pointColorMapping.push({
+        op: 'equals',
+        value,
+        color: defaultColors[index],
+      });
+    }
   );
 
   return pointColorMapping;
@@ -110,37 +119,7 @@ class Visualisation extends Component {
         name: 'Untitled Chart',
         visualisationType: null,
         datasetId: null,
-        spec: {
-          metricColumnY: null, // primary
-          metricColumnYName: null,
-          metricColumnYType: null,
-          metricColumnX: null, // secondary
-          metricColumnXName: null,
-          metricColumnXType: null,
-          datapointLabelColumn: null,
-          datapointLabelColumnName: null,
-          datapointLabelColumnType: null,
-          bucketColumn: null,
-          bucketColumnName: null,
-          bucketColumnType: null,
-          subBucketColumn: null,
-          subBucketColumnName: null,
-          subBucketColumnType: null,
-          subBucketMethod: 'split', // can be "split" or "stack"
-          metricAggregation: 'mean', // default to mean,
-          pointColorColumn: null,
-          pointColorMapping: {},
-          axisLabelX: null,
-          axisLabelXFromUser: false, // Has the label been manually entered by the user?
-          axisLabelY: null,
-          axisLabelYFromUser: false,
-          filters: [],
-          sort: null, // can be "asc", "dsc" or "null"
-          showLegend: null,
-          truncateSize: null,
-          longitude: null,
-          latitude: null,
-        },
+        spec: {},
       },
       asyncComponents: null,
     };
@@ -281,7 +260,28 @@ class Visualisation extends Component {
   }
 
   handleChangeVisualisationType(visualisationType) {
-    this.handleChangeVisualisation({ visualisationType });
+    let specTemplate;
+    switch (visualisationType) {
+      case 'map':
+        specTemplate = Object.assign({}, mapSpecTemplate);
+        break;
+
+      case 'bar':
+      case 'line':
+      case 'area':
+      case 'pie':
+      case 'donut':
+      case 'scatter':
+        specTemplate = Object.assign({}, genericSpecTemplate);
+        break;
+
+      default:
+        throw new Error(`Unknown visualisation type ${visualisationType}`);
+    }
+    this.handleChangeVisualisation({
+      visualisationType,
+      spec: specTemplate,
+    });
   }
 
   handleChangeVisualisationTitle(event) {

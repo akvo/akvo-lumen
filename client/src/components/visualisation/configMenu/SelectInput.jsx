@@ -15,6 +15,7 @@ export default function SelectInput(props) {
         options={props.options}
         onChange={props.onChange}
         clearable={props.clearable}
+        multi={props.multi}
       />
     </div>
   );
@@ -24,9 +25,10 @@ SelectInput.propTypes = {
   placeholder: PropTypes.string,
   labelText: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
-  choice: PropTypes.string,
+  choice: PropTypes.node,
   options: PropTypes.array.isRequired,
   disabled: PropTypes.bool,
   clearable: PropTypes.bool,
+  multi: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
 };

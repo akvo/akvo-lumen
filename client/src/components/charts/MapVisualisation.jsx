@@ -8,12 +8,7 @@ require('../../styles/MapVisualisation.scss');
 
 export default function MapVisualisation({ visualisation, datasets, width, height }) {
   const chartData = chart.getMapData(visualisation, datasets);
-  const colorKeyArray = Object.keys(visualisation.spec.pointColorMapping).map(key =>
-    ({
-      category: key,
-      color: visualisation.spec.pointColorMapping[key],
-    })
-  );
+  const pointColorMapping = visualisation.spec.pointColorMapping;
 
   return (
     <div
@@ -24,7 +19,7 @@ export default function MapVisualisation({ visualisation, datasets, width, heigh
         height,
       }}
     >
-      {colorKeyArray.length > 1 &&
+      {pointColorMapping.length > 1 &&
         <div
           className="legend"
           style={{
@@ -48,7 +43,7 @@ export default function MapVisualisation({ visualisation, datasets, width, heigh
               flexDirection: 'column',
             }}
           >
-            {colorKeyArray.map((colorKey, index) =>
+            {pointColorMapping.map((mappingEntry, index) =>
               <li
                 key={index}
                 style={{
@@ -63,7 +58,7 @@ export default function MapVisualisation({ visualisation, datasets, width, heigh
                     width: '0.5rem',
                     display: 'inline-block',
                     borderRadius: '10rem',
-                    backgroundColor: colorKey.color,
+                    backgroundColor: mappingEntry.color,
                     opacity: 0.5,
                   }}
                 />
@@ -72,7 +67,7 @@ export default function MapVisualisation({ visualisation, datasets, width, heigh
                     marginLeft: '0.5em',
                   }}
                 >
-                  {colorKey.category}
+                  {mappingEntry.value}
                 </span>
               </li>
             )}
@@ -97,16 +92,31 @@ export default function MapVisualisation({ visualisation, datasets, width, heigh
           chartData.map((entry, index) =>
             <CircleMarker
               center={[entry.latitude, entry.longitude]}
-              radius={3}
+              radius={4}
               color={entry.pointColor || '#000000'}
               fillOpacity="0.5"
               key={index}
             >
-              {
-                entry.datapointLabelValue &&
-                  <Popup>
-                    <span>{entry.datapointLabelValue}</span>
-                  </Popup>
+              {entry.popupValues.length > 0 &&
+                <Popup>
+                  <ul>
+                    {entry.popupValues.map((popupObject, popupIndex) =>
+                      <li
+                        key={popupIndex}
+                        style={{
+                          marginBottom: '0.5rem',
+                        }}
+                      >
+                        <h4
+                          style={{
+                            fontWeight: 'bold',
+                          }}
+                        >{popupObject.key}</h4>
+                        <span>{popupObject.value}</span>
+                      </li>
+                  )}
+                  </ul>
+                </Popup>
               }
             </CircleMarker>
           )

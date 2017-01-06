@@ -2,12 +2,21 @@ import React, { PropTypes } from 'react';
 import SelectInput from './SelectInput';
 import Subtitle from './Subtitle';
 
+const handlePopupChange = (value, spec, onChangeSpec) => {
+  const popup = value.map(entry => ({
+    column: entry.value,
+  }));
+
+  onChangeSpec({
+    popup,
+  });
+};
+
 export default function MapConfigMenu(props) {
   const {
     visualisation,
     onChangeSpec,
     columnOptions,
-    getColumnMetadata,
   } = props;
   const spec = visualisation.spec;
 
@@ -35,19 +44,6 @@ export default function MapConfigMenu(props) {
           longitude: value,
         })}
       />
-      <Subtitle>Popup Label</Subtitle>
-      <SelectInput
-        placeholder="Select a popup label column"
-        labelText="Popup label column"
-        choice={spec.datapointLabelColumn !== null ? spec.datapointLabelColumn.toString() : null}
-        name="xNameColumnMenu"
-        options={columnOptions}
-        clearable
-        onChange={value => onChangeSpec({
-          datapointLabelColumn: value,
-          datapointLabelColumnType: getColumnMetadata('type', value, columnOptions),
-        })}
-      />
       <Subtitle>Point color</Subtitle>
       <SelectInput
         placeholder="Select a data column to color points by"
@@ -61,6 +57,15 @@ export default function MapConfigMenu(props) {
           pointColorColumn: value,
         })}
       />
+      <Subtitle>Popup</Subtitle>
+      <SelectInput
+        options={columnOptions}
+        choice={spec.popup.map(entry => entry.column)}
+        multi
+        labelText="Popup column"
+        onChange={value => handlePopupChange(value, spec, onChangeSpec)}
+        name="popupInput"
+      />
     </div>
   );
 }
@@ -73,3 +78,19 @@ MapConfigMenu.propTypes = {
   aggregationOptions: PropTypes.array.isRequired,
   getColumnMetadata: PropTypes.func.isRequired,
 };
+
+/*
+      <Subtitle>Popup Label</Subtitle>
+      <SelectInput
+        placeholder="Select a popup label column"
+        labelText="Popup label column"
+        choice={spec.datapointLabelColumn !== null ? spec.datapointLabelColumn.toString() : null}
+        name="xNameColumnMenu"
+        options={columnOptions}
+        clearable
+        onChange={value => onChangeSpec({
+          datapointLabelColumn: value,
+          datapointLabelColumnType: getColumnMetadata('type', value, columnOptions),
+        })}
+      />
+    */

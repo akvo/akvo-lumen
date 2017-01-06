@@ -196,6 +196,10 @@ export function getMapData(visualisation, datasets) {
   const dataValues = [];
   const filterArray = (spec.filters && spec.filters.length > 0) ? getFilterArray(spec) : null;
 
+  const popupColumnNames = spec.popup.map(obj => obj.column);
+  const popupColumnValues = popupColumnNames.map(name => getColumnData(dataset, name));
+  const popupColumnTitles = popupColumnNames.map(name => dataset.get('columns').get(getColumnIndex(dataset, name)).get('title'));
+
   longitude.forEach((entry, index) => {
     const row = dataset.get('rows').get(index);
 
@@ -208,10 +212,22 @@ export function getMapData(visualisation, datasets) {
     pointColorValue = spec.pointColorValueColumn === 'date' ?
       parseFloat(pointColorValue) * 1000 : pointColorValue;
 
+    const popupValues = [];
+
+    if (popupColumnValues.length > 0) {
+      popupColumnValues.forEach((column, localIndex) => {
+        popupValues.push({
+          key: popupColumnTitles[localIndex],
+          value: column[index],
+        });
+      });
+    }
+
     let pointColor;
 
     if (pointColorValue !== null) {
-      pointColor = spec.pointColorMapping[pointColorValue];
+      pointColor = spec.pointColorMapping.find(mappingEntry =>
+        mappingEntry.value === pointColorValue).color;
     }
 
     const latitudeValue = latitude[index];
@@ -244,6 +260,7 @@ export function getMapData(visualisation, datasets) {
         latitude: latitudeValue,
         longitude: entry,
         datapointLabelValue,
+        popupValues,
         pointColor,
       });
     }
@@ -265,8 +282,6 @@ export function getChartData(visualisation, datasets) {
     dataset.get('rows').map(row => row.get(spec.subBucketColumn)).toArray() : null;
   const datapointLabelValueColumn = spec.datapointLabelColumn != null ?
     dataset.get('rows').map(row => row.get(spec.datapointLabelColumn)).toArray() : null;
-  const pointColorValueColumn = spec.pointColorColumn != null ?
-    dataset.get('rows').map(row => row.get(spec.pointColorColumn)).toArray() : null;
   const dataValues = [];
   const filterArray = (spec.filters && spec.filters.length > 0) ? getFilterArray(spec) : null;
   let output = [];
@@ -289,16 +304,6 @@ export function getChartData(visualisation, datasets) {
     datapointLabelValue = spec.bucketColumnType === 'date' ?
       parseFloat(datapointLabelValue) * 1000 : datapointLabelValue;
 
-    let pointColorValue = pointColorValueColumn ? pointColorValueColumn[index] : null;
-    pointColorValue = spec.bucketColumnType === 'date' ?
-      parseFloat(pointColorValue) * 1000 : pointColorValue;
-
-    let pointColor;
-
-    if (vType === 'map' && pointColorValue !== null) {
-      pointColor = spec.pointColorMapping[pointColorValue];
-    }
-
     let x = null; // Not all datapoints will have an 'x' value - sometimes we use the index instead
 
     if (metricColumnX !== null) {
@@ -318,7 +323,7 @@ export function getChartData(visualisation, datasets) {
 
     if ((vType === 'area' && spec.metricColumnX !== null) ||
       (vType === 'line' && spec.metricColumnX !== null) ||
-      vType === 'scatter' || vType === 'map') {
+      vType === 'scatter') {
       if (x === null) {
         includeDatapoint = false;
       }
@@ -344,7 +349,6 @@ export function getChartData(visualisation, datasets) {
         bucketValue,
         subBucketValue,
         datapointLabelValue,
-        pointColor,
       });
     }
   });
