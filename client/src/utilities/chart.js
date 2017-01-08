@@ -16,14 +16,12 @@ const getFilterValues = (filters, row) => filters.map((filter) => {
       case 'text':
         filterValue = value.toString();
         break;
-
       case 'number':
         filterValue = parseFloat(value) || null;
         break;
       case 'date':
         filterValue = parseFloat(value) * 1000 || null;
         break;
-
       default:
         throw new Error(`Unknown column type ${columnType} supplied to getFilterValues`);
     }
@@ -177,96 +175,48 @@ function getColumnIndex(dataset, columnName) {
   return dataset.get('columns').findIndex(column => column.get('columnName') === columnName);
 }
 
-function getColumnData(dataset, columnName) {
-  if (columnName == null) {
-    return null;
-  }
-  return dataset.get('rows').map(row => row.get(getColumnIndex(dataset, columnName))).toArray();
+const defaultColor = '#000';
+
+// Assume all 'equals' for now
+function colorMappingFn(pointColorMapping) {
+  return (value) => {
+    const idx = pointColorMapping.findIndex(mappingEntry => mappingEntry.value === value);
+    return idx < 0 ? defaultColor : pointColorMapping[idx].color;
+  };
+}
+
+function filterFn(filters) {
+  return (row) => {
+    return true;
+  };
 }
 
 export function getMapData(visualisation, datasets) {
   const { datasetId, spec } = visualisation;
   const dataset = datasets[datasetId];
 
-  const longitude = getColumnData(dataset, spec.longitude);
-  const latitude = getColumnData(dataset, spec.latitude);
-  const datapointLabelValueColumn = getColumnData(dataset, spec.datapointLabelColumn);
-  const pointColorValueColumn = getColumnData(dataset, spec.pointColorColumn);
+  const longitudeIndex = getColumnIndex(dataset, spec.longitude);
+  const latitudeIndex = getColumnIndex(dataset, spec.latitude);
+  const pointColorIndex = getColumnIndex(dataset, spec.pointColorColumn);
+  const colorMapper = colorMappingFn(spec.pointColorMapping);
+  const popupIndexes = spec.popup.map(obj => getColumnIndex(dataset, obj.column));
+  const rowFilter = filterFn(spec.filters);
 
-  const dataValues = [];
-  const filterArray = (spec.filters && spec.filters.length > 0) ? getFilterArray(spec) : null;
-
-  const popupColumnNames = spec.popup.map(obj => obj.column);
-  const popupColumnValues = popupColumnNames.map(name => getColumnData(dataset, name));
-  const popupColumnTitles = popupColumnNames.map(name => dataset.get('columns').get(getColumnIndex(dataset, name)).get('title'));
-
-  longitude.forEach((entry, index) => {
-    const row = dataset.get('rows').get(index);
-
-    let datapointLabelValue = datapointLabelValueColumn ? datapointLabelValueColumn[index] : null;
-
-    datapointLabelValue = spec.datapointLabelValue === 'date' ?
-      parseFloat(datapointLabelValue) * 1000 : datapointLabelValue;
-
-    let pointColorValue = pointColorValueColumn ? pointColorValueColumn[index] : null;
-    pointColorValue = spec.pointColorValueColumn === 'date' ?
-      parseFloat(pointColorValue) * 1000 : pointColorValue;
-
-    const popupValues = [];
-
-    if (popupColumnValues.length > 0) {
-      popupColumnValues.forEach((column, localIndex) => {
-        popupValues.push({
-          key: popupColumnTitles[localIndex],
-          value: column[index],
-        });
-      });
-    }
-
-    let pointColor;
-
-    if (pointColorValue !== null) {
-      pointColor = spec.pointColorMapping.find(mappingEntry =>
-        mappingEntry.value === pointColorValue).color;
-    }
-
-    const latitudeValue = latitude[index];
-
-    /* We will not include this datapoint if a required value is missing, or it is filtered out */
-    let includeDatapoint = true;
-
-    if (entry === null) {
-      includeDatapoint = false;
-    }
-
-    if (latitudeValue === null) {
-      includeDatapoint = false;
-    }
-
-    /* filterValues is an array of cell values from the current row in the correct order to be
-    /* tested by filterArray, an array of filter functions. */
-    const filterValues = getFilterValues(spec.filters, row);
-
-    if (includeDatapoint && filterArray) {
-      for (let j = 0; j < filterArray.length; j += 1) {
-        if (!filterArray[j](filterValues[j])) {
-          includeDatapoint = false;
-        }
-      }
-    }
-
-    if (includeDatapoint) {
-      dataValues.push({
-        latitude: latitudeValue,
-        longitude: entry,
-        datapointLabelValue,
-        popupValues,
-        pointColor,
-      });
-    }
-  });
-
-  return dataValues;
+  return dataset.get('rows')
+    .filter(row => rowFilter(row))
+    .map(row => ({
+      latitude: row.get(latitudeIndex),
+      longitude: row.get(longitudeIndex),
+      pointColor: pointColorIndex < 0 ? defaultColor : colorMapper(row.get(pointColorIndex)),
+      popup: popupIndexes.map(idx => ({
+        title: dataset.getIn(['columns', idx, 'title']),
+        value: row.get(idx),
+      })),
+    }))
+    .filter(({ latitude, longitude }) =>
+      latitude != null && longitude != null
+    )
+    .toArray();
 }
 
 export function getChartData(visualisation, datasets) {

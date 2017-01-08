@@ -97,10 +97,10 @@ export default function MapVisualisation({ visualisation, datasets, width, heigh
               fillOpacity="0.5"
               key={index}
             >
-              {entry.popupValues.length > 0 &&
+              {entry.popup.length > 0 &&
                 <Popup>
                   <ul>
-                    {entry.popupValues.map((popupObject, popupIndex) =>
+                    {entry.popup.map((popupObject, popupIndex) =>
                       <li
                         key={popupIndex}
                         style={{
@@ -111,7 +111,7 @@ export default function MapVisualisation({ visualisation, datasets, width, heigh
                           style={{
                             fontWeight: 'bold',
                           }}
-                        >{popupObject.key}</h4>
+                        >{popupObject.title}</h4>
                         <span>{popupObject.value}</span>
                       </li>
                   )}

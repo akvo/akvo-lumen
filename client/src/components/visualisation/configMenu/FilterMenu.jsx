@@ -116,7 +116,6 @@ export default class FilterMenu extends Component {
     let processedValue;
     if (type === 'date') {
       const inputDate = new Date(value);
-
       processedValue = Math.floor(inputDate.getTime() / 1000);
     } else {
       processedValue = value;
