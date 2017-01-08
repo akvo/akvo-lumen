@@ -6,7 +6,6 @@ import ShareEntity from '../components/modals/ShareEntity';
 import * as actions from '../actions/visualisation';
 import { fetchDataset } from '../actions/dataset';
 import { fetchLibrary } from '../actions/library';
-import defaultColors from '../utilities/defaultColors';
 import genericSpecTemplate from './Visualisation/genericSpecTemplate';
 import mapSpecTemplate from './Visualisation/mapSpecTemplate';
 
@@ -80,31 +79,6 @@ const updateAxisLabels = (vType, spec) => {
   const out = Object.assign({}, spec, { axisLabelY, axisLabelX });
 
   return out;
-};
-
-const updatePointColorMapping = (visualisation, pointColorColumnName, datasets) => {
-  const dataset = datasets[visualisation.datasetId];
-  const pointColorColumnIndex = dataset.get('columns').findIndex(
-    column => column.get('columnName') === pointColorColumnName
-  );
-  // const pointColorColumnType = dataset.get('columns').get(pointColorColumnIndex).get('type');
-  const pointColorColumnData = dataset
-    .get('rows')
-    .map(row => row.get(pointColorColumnIndex))
-    .toSet().toArray();
-
-  const pointColorMapping = [];
-  pointColorColumnData.forEach(
-    (value, index) => {
-      pointColorMapping.push({
-        op: 'equals',
-        value,
-        color: defaultColors[index],
-      });
-    }
-  );
-
-  return pointColorMapping;
 };
 
 class Visualisation extends Component {
@@ -243,12 +217,6 @@ class Visualisation extends Component {
     if (shouldUpdateAxisLabels) {
       spec = update(spec,
         { $merge: updateAxisLabels(this.state.visualisation.visualisationType, spec) });
-    }
-
-    if (value.pointColorColumn !== undefined) {
-      const pointColorMapping = updatePointColorMapping(this.state.visualisation,
-        value.pointColorColumn, this.props.library.datasets);
-      spec = Object.assign({}, spec, { pointColorMapping });
     }
 
     const visualisation = Object.assign({}, this.state.visualisation, { spec });
