@@ -39,7 +39,8 @@ export default class Chart extends Component {
 
   renderChart(props) {
     const { visualisation, datasets, width, height } = props;
-    const chartData = chart.getChartData(visualisation, datasets);
+    const chartData = (visualisation.visualisationType === 'pie' || visualisation.visualisationType === 'donut') ?
+      chart.getPieData(visualisation, datasets) : chart.getChartData(visualisation, datasets);
     const containerHeight = height || 400;
     const containerWidth = width || 800;
     const vegaSpec = chart.getVegaSpec(visualisation, chartData, containerHeight, containerWidth);

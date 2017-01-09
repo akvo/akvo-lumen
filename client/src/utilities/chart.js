@@ -165,6 +165,33 @@ function filterFn(filters, columns) {
   return row => filterFns.every(fn => fn(row));
 }
 
+export function getPieData(visualisation, datasets) {
+  const { datasetId, spec } = visualisation;
+  const dataset = datasets[datasetId];
+  const bucketIndex = getColumnIndex(dataset, spec.bucketColumn);
+  const rowFilter = filterFn(spec.filters, dataset.get('columns'));
+
+  const valueArray = dataset.get('rows')
+    .filter(row => rowFilter(row))
+    .map(row => ({
+      bucketValue: row.get(bucketIndex),
+    }))
+    .toArray();
+
+  const aggregatedValues = dl.groupby(['bucketValue'])
+    .summarize([{
+      name: 'bucketValue',
+      ops: ['count'],
+      as: ['bucketCount'],
+    }])
+    .execute(valueArray);
+
+  return [{
+    name: 'table',
+    values: aggregatedValues,
+  }];
+}
+
 export function getMapData(visualisation, datasets) {
   const { datasetId, spec } = visualisation;
   const dataset = datasets[datasetId];

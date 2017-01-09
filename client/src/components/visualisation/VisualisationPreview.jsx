@@ -26,7 +26,7 @@ function shouldRender(visualisation, datasets) {
   if (needSecondDataColumn && !haveSecondDataColumn) {
     return false;
   }
-  const needAggregation = visualisationType === 'bar' || visualisationType === 'pie';
+  const needAggregation = visualisationType === 'bar' || visualisationType === 'pie' || visualisationType === 'donut';
   const haveAggregation = spec.bucketColumn !== null;
   if (needAggregation && !haveAggregation) {
     return false;

@@ -8,6 +8,7 @@ import { fetchDataset } from '../actions/dataset';
 import { fetchLibrary } from '../actions/library';
 import genericSpecTemplate from './Visualisation/genericSpecTemplate';
 import mapSpecTemplate from './Visualisation/mapSpecTemplate';
+import pieSpecTemplate from './Visualisation/pieSpecTemplate';
 
 require('../styles/Visualisation.scss');
 
@@ -65,6 +66,7 @@ const updateAxisLabels = (vType, spec) => {
       break;
 
     case 'pie':
+    case 'donut':
     case 'map':
       // No axis labels for these visualisation types
       break;
@@ -234,11 +236,14 @@ class Visualisation extends Component {
         specTemplate = Object.assign({}, mapSpecTemplate);
         break;
 
+      case 'pie':
+      case 'donut':
+        specTemplate = Object.assign({}, pieSpecTemplate);
+        break;
+
       case 'bar':
       case 'line':
       case 'area':
-      case 'pie':
-      case 'donut':
       case 'scatter':
         specTemplate = Object.assign({}, genericSpecTemplate);
         break;

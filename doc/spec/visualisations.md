@@ -39,3 +39,15 @@
   }]
 }
 ```
+
+### Pie and Donut Visualisation
+
+```
+{
+  filters: [],
+  bucketColumn: 'c1',
+  sort: null, // can be "asc", "dsc" or "null"
+  showLegend: null,
+}
+```
+
