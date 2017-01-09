@@ -193,19 +193,24 @@ export function getMapData(visualisation, datasets) {
     .toArray();
 }
 
+function columnData(dataset, columnName) {
+  if (columnName == null) {
+    return null;
+  }
+  const idx = getColumnIndex(dataset, columnName);
+  return dataset.get('rows').map(row => row.get(idx)).toArray();
+}
+
 export function getChartData(visualisation, datasets) {
   const { datasetId, spec } = visualisation;
   const dataset = datasets[datasetId];
-  const metricColumnY = dataset.get('rows').map(row => row.get(spec.metricColumnY)).toArray();
-  const metricColumnX = spec.metricColumnX !== null ?
-    dataset.get('rows').map(row => row.get(spec.metricColumnX)).toArray() : null;
   const vType = visualisation.visualisationType;
-  const bucketValueColumn = spec.bucketColumn != null ?
-    dataset.get('rows').map(row => row.get(spec.bucketColumn)).toArray() : null;
-  const subBucketValueColumn = spec.subBucketColumn != null ?
-    dataset.get('rows').map(row => row.get(spec.subBucketColumn)).toArray() : null;
-  const datapointLabelValueColumn = spec.datapointLabelColumn != null ?
-    dataset.get('rows').map(row => row.get(spec.datapointLabelColumn)).toArray() : null;
+  const metricColumnY = columnData(dataset, spec.metricColumnY);
+  const metricColumnX = columnData(dataset, spec.metricColumnX);
+  const bucketValueColumn = columnData(dataset, spec.bucketColumn);
+  const subBucketValueColumn = columnData(dataset, spec.subBucketColumn);
+  const datapointLabelValueColumn = columnData(dataset, spec.datapointLabelColumn);
+
   const dataValues = [];
   const rowFilter = filterFn(spec.filters, dataset.get('columns'));
   let output = [];
