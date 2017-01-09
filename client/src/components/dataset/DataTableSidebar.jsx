@@ -4,6 +4,7 @@ import Filter from './sidebars/Filter';
 import TransformationLog from './sidebars/TransformationLog';
 import CombineColumns from './sidebars/CombineColumns';
 import DeriveColumn from './sidebars/DeriveColumn';
+import RenameColumn from './sidebars/RenameColumn';
 
 require('../../styles/DataTableSidebar.scss');
 
@@ -19,6 +20,8 @@ export default function DataTableSidebar(props) {
       return <CombineColumns {...props} />;
     case 'deriveColumn':
       return <DeriveColumn {...props} />;
+    case 'renameColumn':
+      return <RenameColumn {...props} />;
     default:
       throw new Error(`Unknown sidebar type ${props.type}`);
   }
@@ -32,6 +35,7 @@ DataTableSidebar.propTypes = {
       'transformationLog',
       'combineColumns',
       'deriveColumn',
+      'renameColumn',
     ]
   ).isRequired,
   onClose: PropTypes.func.isRequired,

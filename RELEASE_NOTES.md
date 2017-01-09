@@ -1,6 +1,23 @@
 # Release Notes
 
-## 0.4.1 (unreleased)
+## 0.5.0 (unreleased)
+
+### New and noteworthy
+
+* New transformation: Delete column
+* New transformation: Rename column
+
+### Bugfixes
+
+* Fix broken Pie and Donut charts
+
+## 0.4.1
+
+Date 2017-01-04
+
+### New and noteworthy
+
+* Enabled TLS
 
 ### Bugfixes
 

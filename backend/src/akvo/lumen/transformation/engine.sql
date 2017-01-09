@@ -39,6 +39,9 @@ DELETE FROM :i:table-name
 -- :name add-column :!
 ALTER TABLE :i:table-name ADD COLUMN :i:new-column-name jsonb;
 
+-- :name delete-column :!
+ALTER TABLE :i:table-name DROP COLUMN :i:column-name;
+
 -- :name combine-columns :!
 UPDATE :i:table-name
 SET :i:new-column-name = to_jsonb(

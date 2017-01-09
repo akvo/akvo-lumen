@@ -24,7 +24,9 @@
    "core/trim" nil
    "core/trim-doublespace" nil
    "core/combine" nil
-   "core/derive" nil})
+   "core/derive" nil
+   "core/delete-column" nil
+   "core/rename-column" nil})
 
 (defn- get-column-name
   "Returns the columnName from the operation specification"
@@ -318,6 +320,33 @@
                                "hidden" false
                                "direction" nil
                                "columnName" column-name})})
+    (catch Exception e
+      {:success? false
+       :message (format "Failed to transform: %s" (.getMessage e))})))
+
+(defmethod apply-operation :core/delete-column
+  [tenant-conn table-name columns op-spec]
+  (try
+    (let [column-name (get-in op-spec ["args" "columnName"])
+          column-idx (get-column-idx columns column-name)]
+      (delete-column tenant-conn {:table-name table-name :column-name column-name})
+      {:success? true
+       :execution-log [(format "Deleted column %s" column-name)]
+       :columns (into (vec (take column-idx columns))
+                      (drop (inc column-idx) columns))})
+    (catch Exception e
+      {:success? false
+       :message (format "Failed to transform: %s" (.getMessage e))})))
+
+(defmethod apply-operation :core/rename-column
+  [tenant-conn table-name columns op-spec]
+  (try
+    (let [column-name (get-in op-spec ["args" "columnName"])
+          column-idx (get-column-idx columns column-name)
+          new-column-title (get-in op-spec ["args" "newColumnTitle"])]
+      {:success? true
+       :execution-log [(format "Renamed column %s to %s" column-name new-column-title)]
+       :columns (assoc-in columns [column-idx "title"] new-column-title)})
     (catch Exception e
       {:success? false
        :message (format "Failed to transform: %s" (.getMessage e))})))

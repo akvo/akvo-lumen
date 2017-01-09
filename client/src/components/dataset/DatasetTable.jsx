@@ -192,6 +192,17 @@ export default class DatasetTable extends Component {
           },
         });
         break;
+      case 'core/rename-column':
+        this.showSidebar({
+          type: 'renameColumn',
+          column,
+          onClose: () => this.hideSidebar(),
+          onApply: (transformation) => {
+            this.hideSidebar();
+            this.props.onTransform(transformation);
+          },
+        });
+        break;
       default:
         this.props.onTransform(action);
     }

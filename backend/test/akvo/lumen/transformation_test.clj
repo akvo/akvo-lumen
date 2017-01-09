@@ -349,3 +349,32 @@
                                                                          "newColumnTitle" "Derived 11"}
                                                                  "onError" "fail"}))]
         (is (= status 400))))))
+
+
+(deftest ^:functional delete-column-test
+  (let [dataset-id (import-file "dates.csv" {:has-column-headers? true})
+        schedule (partial tf/schedule test-conn *transformation-engine* dataset-id)]
+    (let [{:keys [status body]} (schedule {:type :transformation
+                                           :transformation {"op" "core/delete-column"
+                                                            "args" {"columnName" "c2"}
+                                                            "onError" "fail"}})]
+      (is (= 200 status))
+      (let [columns (:columns
+                     (latest-dataset-version-by-dataset-id test-conn
+                                                           {:dataset-id dataset-id}))]
+        (is (= ["c1" "c3" "c4"] (map #(get % "columnName") columns)))))))
+
+(deftest ^:functional rename-column-test
+  (let [dataset-id (import-file "dates.csv" {:has-column-headers? true})
+        schedule (partial tf/schedule test-conn *transformation-engine* dataset-id)]
+    (let [{:keys [status body]} (schedule {:type :transformation
+                                           :transformation {"op" "core/rename-column"
+                                                            "args" {"columnName" "c2"
+                                                                    "newColumnTitle" "New Title"}
+                                                            "onError" "fail"}})]
+      (is (= 200 status))
+      (let [columns (vec
+                     (:columns
+                      (latest-dataset-version-by-dataset-id test-conn
+                                                            {:dataset-id dataset-id}))) ]
+        (is (= "New Title" (get-in columns [1 "title"])))))))

@@ -17,12 +17,12 @@ export default function PieConfigMenu(props) {
       <SelectInput
         placeholder="Select a metric column"
         labelText="Metric column"
-        choice={spec.metricColumnX !== null ? spec.metricColumnX.toString() : null}
-        name="xColumnInput"
+        choice={spec.metricColumnY !== null ? spec.metricColumnY.toString() : null}
+        name="yColumnInput"
         options={columnOptions}
         onChange={value => onChangeSpec({
-          metricColumnX: value,
-          metricColumnXType: getColumnMetadata('type', value, columnOptions),
+          metricColumnY: value,
+          metricColumnYType: getColumnMetadata('type', value, columnOptions),
         })}
       />
       <SelectInput
