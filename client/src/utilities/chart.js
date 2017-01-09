@@ -4,69 +4,44 @@ import getVegaPieSpec from './vega-specs/Pie';
 import getVegaAreaSpec from './vega-specs/Area';
 import getVegaBarSpec from './vega-specs/Bar';
 
-const getFilterValues = (filters, row) => filters.map((filter) => {
-  const value = row.get(filter.column);
-  const columnType = filter.columnType;
-  let filterValue;
-
-  if (value === null) {
-    filterValue = null;
-  } else {
-    switch (columnType) {
-      case 'text':
-        filterValue = value.toString();
-        break;
-      case 'number':
-        filterValue = parseFloat(value) || null;
-        break;
-      case 'date':
-        filterValue = parseFloat(value) * 1000 || null;
-        break;
-      default:
-        throw new Error(`Unknown column type ${columnType} supplied to getFilterValues`);
-    }
-  }
-
-  return filterValue;
-});
-
-const getFilterArray = (spec) => {
+const getFilterArray = (filters, columns) => {
   const filterArray = [];
 
-  for (let i = 0; i < spec.filters.length; i += 1) {
-    const filter = spec.filters[i];
+  for (let i = 0; i < filters.length; i += 1) {
+    const filter = filters[i];
     const testValue = filter.columnType === 'date' ? filter.value * 1000 : filter.value;
+    const columnIndex = columns.findIndex(col => col.get('columnName') === filter.column);
 
     switch (filter.strategy) {
       case 'isHigher':
         if (filter.operation === 'remove') {
-          filterArray.push(d => d <= testValue);
+          filterArray.push(row => row.get(columnIndex) <= testValue);
         } else if (filter.operation === 'keep') {
-          filterArray.push(d => d > testValue);
+          filterArray.push(row => row.get(columnIndex) > testValue);
         }
         break;
 
       case 'is':
         if (filter.operation === 'remove') {
-          filterArray.push(d => d !== testValue);
+          filterArray.push(row => row.get(columnIndex) !== testValue);
         } else if (filter.operation === 'keep') {
-          filterArray.push(d => d === testValue);
+          filterArray.push(row => row.get(columnIndex) === testValue);
         }
         break;
 
       case 'isLower':
         if (filter.operation === 'remove') {
-          filterArray.push(d => d >= testValue);
+          filterArray.push(row => row.get(columnIndex) >= testValue);
         } else if (filter.operation === 'keep') {
-          filterArray.push(d => d < testValue);
+          filterArray.push(row => row.get(columnIndex) < testValue);
         }
         break;
 
       case 'isEmpty':
         if (filter.operation === 'remove') {
-          filterArray.push(d => d !== null || d !== '');
+          filterArray.push(row => row.get(columnIndex) !== null || row.get(columnIndex) !== '');
         } else if (filter.operation === 'keep') {
-          filterArray.push(d => d === testValue);
+          filterArray.push(row => row.get(columnIndex) === testValue);
         }
         break;
 
@@ -185,10 +160,9 @@ function colorMappingFn(pointColorMapping) {
   };
 }
 
-function filterFn(filters) {
-  return (row) => {
-    return true;
-  };
+function filterFn(filters, columns) {
+  const filterFns = getFilterArray(filters, columns);
+  return row => filterFns.every(fn => fn(row));
 }
 
 export function getMapData(visualisation, datasets) {
@@ -200,7 +174,7 @@ export function getMapData(visualisation, datasets) {
   const pointColorIndex = getColumnIndex(dataset, spec.pointColorColumn);
   const colorMapper = colorMappingFn(spec.pointColorMapping);
   const popupIndexes = spec.popup.map(obj => getColumnIndex(dataset, obj.column));
-  const rowFilter = filterFn(spec.filters);
+  const rowFilter = filterFn(spec.filters, dataset.get('columns'));
 
   return dataset.get('rows')
     .filter(row => rowFilter(row))
@@ -233,7 +207,7 @@ export function getChartData(visualisation, datasets) {
   const datapointLabelValueColumn = spec.datapointLabelColumn != null ?
     dataset.get('rows').map(row => row.get(spec.datapointLabelColumn)).toArray() : null;
   const dataValues = [];
-  const filterArray = (spec.filters && spec.filters.length > 0) ? getFilterArray(spec) : null;
+  const rowFilter = filterFn(spec.filters, dataset.get('columns'));
   let output = [];
 
   /* All visulations have a metricColumnY, so we use this column to iterate through the dataset
@@ -279,16 +253,8 @@ export function getChartData(visualisation, datasets) {
       }
     }
 
-    /* filterValues is an array of cell values from the current row in the correct order to be
-    /* tested by filterArray, an array of filter functions. */
-    const filterValues = getFilterValues(spec.filters, row);
-
-    if (includeDatapoint && filterArray) {
-      for (let j = 0; j < filterArray.length; j += 1) {
-        if (!filterArray[j](filterValues[j])) {
-          includeDatapoint = false;
-        }
-      }
+    if (includeDatapoint && !rowFilter(row)) {
+      includeDatapoint = false;
     }
 
     if (includeDatapoint) {
