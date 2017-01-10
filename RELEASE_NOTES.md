@@ -2,6 +2,10 @@
 
 ## 0.5.0 (unreleased)
 
+## 0.4.2
+
+Date 2017-01-10
+
 ### New and noteworthy
 
 * New transformation: Delete column
@@ -10,6 +14,7 @@
 ### Bugfixes
 
 * Fix broken Pie and Donut charts
+* Fix file upload regression
 
 ## 0.4.1
 
