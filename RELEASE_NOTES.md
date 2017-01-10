@@ -2,6 +2,14 @@
 
 ## 0.5.0 (unreleased)
 
+## 0.4.3
+
+Date 2017-01-10
+
+### Bugfixes
+
+* Fix file upload regression
+
 ## 0.4.2
 
 Date 2017-01-10
@@ -14,7 +22,6 @@ Date 2017-01-10
 ### Bugfixes
 
 * Fix broken Pie and Donut charts
-* Fix file upload regression
 
 ## 0.4.1
 
