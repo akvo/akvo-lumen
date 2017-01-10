@@ -6,11 +6,11 @@ import SidebarControls from './SidebarControls';
 import DateFormatSelect from './DateFormatSelect';
 
 function getEmptyValue(newType) {
-  let emptyValue = '';
+  let value = '';
   if (newType === 'number') {
-    emptyValue = 0;
+    value = 0;
   }
-  return emptyValue;
+  return value;
 }
 
 function DefaultValueInput({ defaultValue, onChange, newType }) {
@@ -25,21 +25,11 @@ function DefaultValueInput({ defaultValue, onChange, newType }) {
         onChange={(event) => {
           const value = event.target.value;
           if (newType === 'date') {
-            const n = parseInt(value, 10);
-            if (isNaN(n)) {
-              // TODO warn
-              onChange(null);
-            } else {
-              onChange(n);
-            }
+            const n = isNaN(value) ? null : parseInt(value, 10);
+            onChange(n);
           } else if (newType === 'number') {
-            const n = parseFloat(value);
-            if (isNaN(n)) {
-              // TODO warn
-              onChange(null);
-            } else {
-              onChange(n);
-            }
+            const n = (value === null || value === undefined || isNaN(value)) ? 0 : parseFloat(value);
+            onChange(n);
           } else {
             onChange(value);
           }
