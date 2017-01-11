@@ -1,18 +1,23 @@
 export default function getVegaAreaSpec(visualisation, data, containerHeight, containerWidth) {
   const { visualisationType } = visualisation;
-  const dataArray = data.map(item => item);
   const dataSource = 'table';
-  const fieldX = visualisation.spec.metricColumnX !== null ? 'bucketValue' : 'index';
-  const fieldY = visualisation.spec.metricColumnX !== null ? `${visualisation.spec.metricAggregation}_y` : 'y';
+  const fieldX = 'x';
+  const fieldY = 'y';
+  const xAxisType = data[0].metadata.xAxisType;
+  const paddingTop = 30;
+  const paddingRight = xAxisType === 'date' ? 80 : 20;
+  const paddingBottom = xAxisType === 'date' ? 120 : 90;
+  const paddingLeft = 50;
+
   return ({
-    data: dataArray,
-    height: containerHeight - 120,
-    width: containerWidth - 70,
+    data,
+    height: containerHeight - (paddingTop + paddingBottom),
+    width: containerWidth - (paddingLeft + paddingRight),
     padding: {
-      top: 30,
-      right: 20,
-      bottom: 90,
-      left: 50,
+      top: paddingTop,
+      right: paddingRight,
+      bottom: paddingBottom,
+      left: paddingLeft,
     },
     scales: [
       {
@@ -20,7 +25,7 @@ export default function getVegaAreaSpec(visualisation, data, containerHeight, co
         type: 'linear',
         range: 'width',
         zero: false,
-        nice: visualisation.spec.metricColumnXType === 'date', // round number origin
+        nice: xAxisType === 'date', // round number origin
         domain: {
           data: dataSource,
           field: fieldX,
@@ -45,7 +50,7 @@ export default function getVegaAreaSpec(visualisation, data, containerHeight, co
         properties: {
           labels: {
             text: {
-              template: visualisation.spec.metricColumnXType === 'date' ? '{{datum.data|time:"%Y-%m-%d %H:%M:%S"}}' : '{{datum.data}}',
+              template: xAxisType === 'date' ? '{{datum.data|time:"%Y-%m-%d %H:%M:%S"}}' : '{{datum.data}}',
             },
             angle: {
               value: 45,

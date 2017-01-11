@@ -9,7 +9,7 @@ const getFilterArray = (filters, columns) => {
 
   for (let i = 0; i < filters.length; i += 1) {
     const filter = filters[i];
-    const testValue = filter.columnType === 'date' ? filter.value * 1000 : filter.value;
+    const testValue = filter.value;
     const columnIndex = columns.findIndex(col => col.get('columnName') === filter.column);
 
     switch (filter.strategy) {
@@ -163,6 +163,50 @@ function colorMappingFn(pointColorMapping) {
 function filterFn(filters, columns) {
   const filterFns = getFilterArray(filters, columns);
   return row => filterFns.every(fn => fn(row));
+}
+
+export function getLineData(visualisation, datasets) {
+  const { datasetId, spec } = visualisation;
+  const dataset = datasets[datasetId];
+  const haveAggregation = visualisation.spec.metricAggregation != null;
+  const yIndex = getColumnIndex(dataset, spec.metricColumnY);
+  const xIndex = getColumnIndex(dataset, spec.metricColumnX);
+  const xAxisType = xIndex === -1 ? 'number' : dataset.get('columns').get(xIndex).get('type');
+  const rowFilter = filterFn(spec.filters, dataset.get('columns'));
+
+  const valueArray = dataset.get('rows')
+    .filter(row => rowFilter(row))
+    .map((row, index) => {
+      let x = spec.metricColumnX === null ? index : row.get(xIndex);
+      x = xAxisType === 'date' ? x * 1000 : x;
+
+      return ({
+        x,
+        y: row.get(yIndex),
+      });
+    })
+    .toArray()
+    .sort((a, b) => a.x - b.x);
+
+  let aggregatedValues;
+
+  if (haveAggregation) {
+    aggregatedValues = dl.groupby(['x'])
+      .summarize([{
+        name: 'y',
+        ops: [spec.metricAggregation],
+        as: ['y'],
+      }])
+      .execute(valueArray);
+  }
+
+  return [{
+    name: 'table',
+    values: haveAggregation ? aggregatedValues : valueArray,
+    metadata: {
+      xAxisType,
+    },
+  }];
 }
 
 export function getPieData(visualisation, datasets) {

@@ -17,7 +17,7 @@ function shouldRender(visualisation, datasets) {
     return false;
   }
   const { spec, visualisationType } = visualisation;
-  const haveDataColumn = spec.metricColumnY != null || spec.longitude !== null;
+  const haveDataColumn = spec.metricColumnY != null || spec.longitude != null;
   if (!haveDataColumn) {
     return false;
   }

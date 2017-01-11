@@ -9,70 +9,30 @@ import { fetchLibrary } from '../actions/library';
 import genericSpecTemplate from './Visualisation/genericSpecTemplate';
 import mapSpecTemplate from './Visualisation/mapSpecTemplate';
 import pieSpecTemplate from './Visualisation/pieSpecTemplate';
+import lineSpecTemplate from './Visualisation/lineSpecTemplate';
 
 require('../styles/Visualisation.scss');
 
-const updateAxisLabels = (vType, spec) => {
-  let autoAxisLabelY = '';
-  let autoAxisLabelX = '';
+const updateAxisLabels = (spec) => {
+  let autoAxisLabelY = spec.metricColumnYName;
+  let autoAxisLabelX = spec.bucketColumn ? spec.bucketColumnName : '';
 
-  switch (vType) {
-    case 'bar':
-      autoAxisLabelY = spec.metricColumnYName;
-      autoAxisLabelX = spec.bucketColumn ? spec.bucketColumnName : autoAxisLabelX;
+  if (spec.bucketColumn !== null) {
+    autoAxisLabelY += ` - ${spec.metricAggregation}`;
 
-      if (spec.bucketColumn !== null) {
-        autoAxisLabelY += ` - ${spec.metricAggregation}`;
+    if (spec.truncateSize !== null) {
+      let truncateOrderIndicator;
 
-        if (spec.truncateSize !== null) {
-          let truncateOrderIndicator;
-
-          if (spec.sort === 'asc') {
-            truncateOrderIndicator = 'bottom';
-          } else if (spec.sort === 'dsc') {
-            truncateOrderIndicator = 'top';
-          } else {
-            truncateOrderIndicator = 'first';
-          }
-
-          autoAxisLabelX += ` - ${truncateOrderIndicator} ${spec.truncateSize}`;
-        }
-      }
-
-      break;
-
-    case 'line':
-    case 'area':
-      autoAxisLabelY = spec.metricColumnYName;
-      if (spec.bucketColumn !== null) {
-        autoAxisLabelY += ` - ${spec.metricAggregation}`;
-      }
-
-      if (spec.metricColumnX === null) {
-        autoAxisLabelX = 'Dataset row number';
+      if (spec.sort === 'asc') {
+        truncateOrderIndicator = 'bottom';
+      } else if (spec.sort === 'dsc') {
+        truncateOrderIndicator = 'top';
       } else {
-        autoAxisLabelX = spec.metricColumnXName;
+        truncateOrderIndicator = 'first';
       }
-      break;
 
-    case 'scatter':
-      autoAxisLabelY = spec.metricColumnYName;
-      autoAxisLabelX = spec.metricColumnXName;
-
-      if (spec.bucketColumn !== null) {
-        autoAxisLabelY += ` - ${spec.metricAggregation}`;
-        autoAxisLabelX += ` - ${spec.metricAggregation}`;
-      }
-      break;
-
-    case 'pie':
-    case 'donut':
-    case 'map':
-      // No axis labels for these visualisation types
-      break;
-
-    default:
-      throw new Error(`Unknown visualisation type ${vType}`);
+      autoAxisLabelX += ` - ${truncateOrderIndicator} ${spec.truncateSize}`;
+    }
   }
 
   const axisLabelX = spec.axisLabelXFromUser ? spec.axisLabelX : autoAxisLabelX;
@@ -216,9 +176,9 @@ class Visualisation extends Component {
 
     let spec = update(this.state.visualisation.spec, { $merge: value });
 
-    if (shouldUpdateAxisLabels) {
+    if (this.state.visualisation.visualisationType === 'bar' && shouldUpdateAxisLabels) {
       spec = update(spec,
-        { $merge: updateAxisLabels(this.state.visualisation.visualisationType, spec) });
+        { $merge: updateAxisLabels(spec) });
     }
 
     const visualisation = Object.assign({}, this.state.visualisation, { spec });
@@ -241,9 +201,12 @@ class Visualisation extends Component {
         specTemplate = Object.assign({}, pieSpecTemplate);
         break;
 
-      case 'bar':
       case 'line':
       case 'area':
+        specTemplate = Object.assign({}, lineSpecTemplate);
+        break;
+
+      case 'bar':
       case 'scatter':
         specTemplate = Object.assign({}, genericSpecTemplate);
         break;
