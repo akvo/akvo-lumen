@@ -246,6 +246,8 @@ export function getMapData(visualisation, datasets) {
   const colorMapper = colorMappingFn(spec.pointColorMapping);
   const popupIndexes = spec.popup.map(obj => getColumnIndex(dataset, obj.column));
   const rowFilter = filterFn(spec.filters, dataset.get('columns'));
+  const filteredPointColorMapping = {};
+
 
   let maxLat = -90;
   let minLat = 90;
@@ -258,18 +260,30 @@ export function getMapData(visualisation, datasets) {
       const lat = row.get(latitudeIndex);
       const long = row.get(longitudeIndex);
 
-      maxLat = Math.max(lat, maxLat);
-      minLat = Math.min(lat, minLat);
-      maxLong = Math.max(long, maxLong);
-      minLong = Math.min(long, minLong);
+      if (lat !== null && long !== null) {
+        maxLat = Math.max(lat, maxLat);
+        minLat = Math.min(lat, minLat);
+        maxLong = Math.max(long, maxLong);
+        minLong = Math.min(long, minLong);
+      }
+
+      const pointColorValue = row.get(pointColorIndex);
+      const pointColor = pointColorIndex < 0 ? defaultColor : colorMapper(pointColorValue);
+
+      if (pointColor !== defaultColor) {
+        filteredPointColorMapping[pointColor] = pointColorValue;
+      }
 
       return ({
         latitude: lat,
         longitude: long,
-        pointColor: pointColorIndex < 0 ? defaultColor : colorMapper(row.get(pointColorIndex)),
+        pointColor,
         popup: popupIndexes.map(idx => ({
           title: dataset.getIn(['columns', idx, 'title']),
-          value: row.get(idx),
+          value: dataset.getIn(['columns', idx, 'type']) === 'date' ?
+            new Date(row.get(idx) * 1000).toString()
+            :
+            row.get(idx),
         })),
       });
     })
@@ -285,6 +299,7 @@ export function getMapData(visualisation, datasets) {
         [minLat, minLong],
         [maxLat, maxLong],
       ],
+      pointColorMapping: filteredPointColorMapping,
     },
   });
 }

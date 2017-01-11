@@ -5,11 +5,31 @@ import * as chart from '../../utilities/chart';
 require('../../../node_modules/leaflet/dist/leaflet.css');
 require('../../styles/MapVisualisation.scss');
 
+const isImage = (value) => {
+  /*
+  if (typeof value !== 'string') {
+    return false;
+  }
+
+  const lastChars = value.substring(value.length - 4, value.length);
+  const tests = ['jpg', 'jpeg', 'gif', 'png', 'svg'];
+  console.log(lastChars);
+
+  return !tests.some(testValue => lastChars.indexOf(testValue) === -1);
+  */
+  if (typeof value === 'string' && value.match(/\.(jp(e?)g|png|gif)$/) !== null) {
+    return true;
+  }
+  return false;
+};
 
 export default function MapVisualisation({ visualisation, datasets, width, height }) {
   const chartData = chart.getMapData(visualisation, datasets);
   const chartValues = chartData.values;
-  const pointColorMapping = visualisation.spec.pointColorMapping;
+  const pointColorMapping = Object.keys(chartData.metadata.pointColorMapping).map(color => ({
+    color,
+    value: chartData.metadata.pointColorMapping[color],
+  }));
 
   return (
     <div
@@ -20,7 +40,7 @@ export default function MapVisualisation({ visualisation, datasets, width, heigh
         height,
       }}
     >
-      {pointColorMapping.length > 1 &&
+      {pointColorMapping.length >= 1 &&
         <div
           className="legend"
           style={{
@@ -60,7 +80,7 @@ export default function MapVisualisation({ visualisation, datasets, width, heigh
                     display: 'inline-block',
                     borderRadius: '10rem',
                     backgroundColor: mappingEntry.color,
-                    opacity: 0.5,
+                    opacity: 1,
                   }}
                 />
                 <span
@@ -96,12 +116,17 @@ export default function MapVisualisation({ visualisation, datasets, width, heigh
               center={[entry.latitude, entry.longitude]}
               radius={4}
               color={entry.pointColor || '#000000'}
-              fillOpacity="0.5"
+              fillOpacity="1"
               key={index}
             >
               {entry.popup.length > 0 &&
                 <Popup>
-                  <ul>
+                  <ul
+                    style={{
+                      position: 'relative',
+                      minWidth: '12rem',
+                    }}
+                  >
                     {entry.popup.map((popupObject, popupIndex) =>
                       <li
                         key={popupIndex}
@@ -114,7 +139,28 @@ export default function MapVisualisation({ visualisation, datasets, width, heigh
                             fontWeight: 'bold',
                           }}
                         >{popupObject.title}</h4>
-                        <span>{popupObject.value}</span>
+                        <span>
+                          {isImage(popupObject.value) ?
+                            <a
+                              href={popupObject.value}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <img
+                                src={popupObject.value}
+                                role="presentation"
+                                style={{
+                                  width: '100%',
+                                  imageOrientation: 'from-image',
+                                }}
+                              />
+                            </a>
+                            :
+                            <span>
+                              {popupObject.value}
+                            </span>
+                          }
+                        </span>
                       </li>
                   )}
                   </ul>
