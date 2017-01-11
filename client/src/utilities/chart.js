@@ -247,21 +247,46 @@ export function getMapData(visualisation, datasets) {
   const popupIndexes = spec.popup.map(obj => getColumnIndex(dataset, obj.column));
   const rowFilter = filterFn(spec.filters, dataset.get('columns'));
 
-  return dataset.get('rows')
+  let maxLat = -90;
+  let minLat = 90;
+  let maxLong = -180;
+  let minLong = 180;
+
+  const values = dataset.get('rows')
     .filter(row => rowFilter(row))
-    .map(row => ({
-      latitude: row.get(latitudeIndex),
-      longitude: row.get(longitudeIndex),
-      pointColor: pointColorIndex < 0 ? defaultColor : colorMapper(row.get(pointColorIndex)),
-      popup: popupIndexes.map(idx => ({
-        title: dataset.getIn(['columns', idx, 'title']),
-        value: row.get(idx),
-      })),
-    }))
+    .map((row) => {
+      const lat = row.get(latitudeIndex);
+      const long = row.get(longitudeIndex);
+
+      maxLat = Math.max(lat, maxLat);
+      minLat = Math.min(lat, minLat);
+      maxLong = Math.max(long, maxLong);
+      minLong = Math.min(long, minLong);
+
+      return ({
+        latitude: lat,
+        longitude: long,
+        pointColor: pointColorIndex < 0 ? defaultColor : colorMapper(row.get(pointColorIndex)),
+        popup: popupIndexes.map(idx => ({
+          title: dataset.getIn(['columns', idx, 'title']),
+          value: row.get(idx),
+        })),
+      });
+    })
     .filter(({ latitude, longitude }) =>
       latitude != null && longitude != null
     )
     .toArray();
+
+  return ({
+    values,
+    metadata: {
+      bounds: [
+        [minLat, minLong],
+        [maxLat, maxLong],
+      ],
+    },
+  });
 }
 
 function columnData(dataset, columnName) {

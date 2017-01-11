@@ -8,6 +8,7 @@ require('../../styles/MapVisualisation.scss');
 
 export default function MapVisualisation({ visualisation, datasets, width, height }) {
   const chartData = chart.getMapData(visualisation, datasets);
+  const chartValues = chartData.values;
   const pointColorMapping = visualisation.spec.pointColorMapping;
 
   return (
@@ -79,6 +80,7 @@ export default function MapVisualisation({ visualisation, datasets, width, heigh
         zoom={2}
         scrollWheelZoom={false}
         key={width}
+        bounds={chartData.metadata.bounds}
         style={{
           width,
           height,
@@ -89,7 +91,7 @@ export default function MapVisualisation({ visualisation, datasets, width, heigh
           attribution="&copy; <a href='http://osm.org/copyright'>OpenStreetMap</a> contributors"
         />
         {
-          chartData.map((entry, index) =>
+          chartValues.map((entry, index) =>
             <CircleMarker
               center={[entry.latitude, entry.longitude]}
               radius={4}
