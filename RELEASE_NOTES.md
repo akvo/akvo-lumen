@@ -2,6 +2,11 @@
 
 ## 0.5.0 (unreleased)
 
+### Bugfixes
+
+* Fix regression where applied transformations are not reflected in
+  the visualisation editor
+
 ## 0.4.3
 
 Date 2017-01-10
