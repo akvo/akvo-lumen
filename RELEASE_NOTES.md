@@ -1,5 +1,28 @@
 # Release Notes
 
+## 0.5.0 (unreleased)
+
+## 0.4.3
+
+Date 2017-01-10
+
+### Bugfixes
+
+* Fix file upload regression
+
+## 0.4.2
+
+Date 2017-01-10
+
+### New and noteworthy
+
+* New transformation: Delete column
+* New transformation: Rename column
+
+### Bugfixes
+
+* Fix broken Pie and Donut charts
+
 ## 0.4.1
 
 Date 2017-01-04

@@ -23,7 +23,9 @@
    "core/trim" nil
    "core/trim-doublespace" nil
    "core/combine" nil
-   "core/derive" nil})
+   "core/derive" nil
+   "core/delete-column" nil
+   "core/rename-column" nil})
 
 (defn- get-column-name
   "Returns the columnName from the operation specification"
@@ -300,53 +302,32 @@
       {:success? false
        :message (format "Failed to transform: %s" (.getMessage e))})))
 
-(comment
+(defmethod apply-operation :core/delete-column
+  [tenant-conn table-name columns op-spec]
+  (try
+    (let [column-name (get-in op-spec ["args" "columnName"])
+          column-idx (get-column-idx columns column-name)]
+      (delete-column tenant-conn {:table-name table-name :column-name column-name})
+      {:success? true
+       :execution-log [(format "Deleted column %s" column-name)]
+       :columns (into (vec (take column-idx columns))
+                      (drop (inc column-idx) columns))})
+    (catch Exception e
+      {:success? false
+       :message (format "Failed to transform: %s" (.getMessage e))})))
 
-
-  (apply-operation "jdbc:postgres://localhost/lumen_tenant_1"
-                   "ds_01109560_5537_450a_9dcf_f59319f69470"
-                   [{"columnName" "c1"
-                     "title" "foo"
-                     "type" "text"}
-                    {"columnName" "c2"
-                     "title" "bar"
-                     "type" "text"}
-                    {"columnName" "c3"
-                     "title" "baz"
-                     "type" "text"}]
-                   {"op" "core/derive"
-                    "args" {"code" "row['foo'].toUpperCase()"
-                            "newColumnType" "text"
-                            "newColumnTitle" "Upper"}
-                    "onError" "delete-row"}))
-
-
-
-
-
-
-
-
-
-#_(transform nil)
-
-
-#_(doseq [row (select * from table-name)]
-    (let [row (row-context columns row)
-          val (row-transform row)]
-      (if (type= column-type (type val))
-        (insert into table-name (column-name) the-new-column (values))
-        (do)))) ;; follow some error strategy
-
-#_{:success? true
-   :execution-log [(format "Derived column %s" column-name)]
-   :columns (conj columns {"title" column-title
-                           "type" column-type
-                           "sort" nil
-                           "hidden" false
-                           "direction" nil
-                           "columnName" column-name})}
-
+(defmethod apply-operation :core/rename-column
+  [tenant-conn table-name columns op-spec]
+  (try
+    (let [column-name (get-in op-spec ["args" "columnName"])
+          column-idx (get-column-idx columns column-name)
+          new-column-title (get-in op-spec ["args" "newColumnTitle"])]
+      {:success? true
+       :execution-log [(format "Renamed column %s to %s" column-name new-column-title)]
+       :columns (assoc-in columns [column-idx "title"] new-column-title)})
+    (catch Exception e
+      {:success? false
+       :message (format "Failed to transform: %s" (.getMessage e))})))
 
 (hugsql/def-db-fns "akvo/lumen/transformation.sql")
 

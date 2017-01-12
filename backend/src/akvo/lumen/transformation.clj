@@ -101,8 +101,6 @@
                     (= (get op-spec "onError") "fail")))
       (throw-invalid-op op-spec)))
 
-
-
 (defmethod validate-op :core/derive
   [op-spec]
   (let [column-type (get-in op-spec ["args" "newColumnType"])
@@ -113,6 +111,17 @@
          (#{"text" "number" "date"} column-type)
          (#{"fail" "leave-empty" "delete-row"} on-error)
          (js/valid? code))))
+
+(defmethod validate-op :core/delete-column
+  [op-spec]
+  (or (string? (get-in op-spec ["args" "columnName"]))
+      (throw-invalid-op op-spec)))
+
+(defmethod validate-op :core/rename-column
+  [op-spec]
+  (or (and (string? (get-in op-spec ["args" "columnName"]))
+           (string? (get-in op-spec ["args" "newColumnTitle"])))
+      (throw-invalid-op op-spec)))
 
 (defn validate
   [command]

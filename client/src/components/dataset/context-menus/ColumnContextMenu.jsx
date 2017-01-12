@@ -53,6 +53,16 @@ const actions = Immutable.fromJS({
     args: { sortDirection: 'DESC' },
     onError: 'fail',
   },
+  'rename-column': {
+    op: 'core/rename-column',
+    args: {},
+    onError: 'fail',
+  },
+  'delete-column': {
+    op: 'core/delete-column',
+    args: {},
+    onError: 'fail',
+  },
 });
 
 const commonOptions = [{
@@ -65,6 +75,12 @@ const commonOptions = [{
     label: 'Descending',
     value: 'sort-descending',
   }],
+}, {
+  label: 'Rename Column',
+  value: 'rename-column',
+}, {
+  label: 'Delete Column',
+  value: 'delete-column',
 }];
 
 const dataTypeOptions = {
