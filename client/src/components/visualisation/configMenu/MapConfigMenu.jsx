@@ -1,37 +1,64 @@
 import React, { PropTypes, Component } from 'react';
+import { GithubPicker } from 'react-color';
 import SelectInput from './SelectInput';
 import Subtitle from './Subtitle';
 import { getPointColorValues } from '../../../utilities/chart';
 import defaultColors from '../../../utilities/defaultColors';
 
-function LabelItem({ color, value }) {
-  return (
-    <span>
-      <span
-        style={{
-          display: 'inline-block',
-          backgroundColor: color,
-          width: '1rem',
-          height: '1rem',
-        }}
-      />
-      {' '}
-      {value}
-    </span>
-  );
+class LabelItem extends Component {
+  constructor() {
+    super();
+    this.state = { displayColorPicker: false };
+  }
+
+  handleOnChangeColor(newColor) {
+    this.setState({ displayColorPicker: false });
+    this.props.onChangeColor(newColor);
+  }
+
+  render() {
+    const { color, value } = this.props;
+    const { displayColorPicker } = this.state;
+    return (
+      <span>
+        <span
+          onClick={() => this.setState({ displayColorPicker: true })}
+          style={{
+            display: 'inline-block',
+            backgroundColor: color,
+            width: '1rem',
+            height: '1rem',
+          }}
+        >
+          {displayColorPicker &&
+            <GithubPicker
+              color={color}
+              onChangeComplete={evt => this.handleOnChangeColor(evt.hex)}
+            />}
+        </span>
+        {' '}
+        {value}
+      </span>
+    );
+  }
 }
 
 LabelItem.propTypes = {
   color: PropTypes.string.isRequired,
   value: PropTypes.any,
+  onChangeColor: PropTypes.func.isRequired,
 };
 
-function Labels({ pointColorMapping }) {
+function Labels({ pointColorMapping, onChangeColor }) {
   return (
     <ul>
       {pointColorMapping.map(({ color, value }, idx) =>
         <li key={idx}>
-          <LabelItem color={color} value={value} />
+          <LabelItem
+            color={color}
+            value={value}
+            onChangeColor={newColor => onChangeColor(value, newColor)}
+          />
         </li>
       )}
     </ul>
@@ -40,6 +67,7 @@ function Labels({ pointColorMapping }) {
 
 Labels.propTypes = {
   pointColorMapping: PropTypes.array.isRequired,
+  onChangeColor: PropTypes.func.isRequired,
 };
 
 export default class MapConfigMenu extends Component {
@@ -63,6 +91,19 @@ export default class MapConfigMenu extends Component {
         value,
         color: defaultColors[index] || '#000000',
       })),
+    });
+  }
+
+  handleChangeLabelColor(value, color) {
+    const pointColorMapping = this.props.visualisation.spec.pointColorMapping;
+
+    this.props.onChangeSpec({
+      pointColorMapping: pointColorMapping.map((mapping) => {
+        if (mapping.value === value) {
+          return Object.assign({}, mapping, { color });
+        }
+        return mapping;
+      }),
     });
   }
 
@@ -110,7 +151,10 @@ export default class MapConfigMenu extends Component {
           onChange={columnName => this.handlePointColorColumnChange(columnName)}
         />
         { spec.pointColorColumn &&
-          <Labels pointColorMapping={spec.pointColorMapping} />
+          <Labels
+            pointColorMapping={spec.pointColorMapping}
+            onChangeColor={(value, newColor) => this.handleChangeLabelColor(value, newColor)}
+          />
         }
         <Subtitle>Popup</Subtitle>
         <SelectInput
