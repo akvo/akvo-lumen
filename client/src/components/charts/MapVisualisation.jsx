@@ -6,17 +6,6 @@ require('../../../node_modules/leaflet/dist/leaflet.css');
 require('../../styles/MapVisualisation.scss');
 
 const isImage = (value) => {
-  /*
-  if (typeof value !== 'string') {
-    return false;
-  }
-
-  const lastChars = value.substring(value.length - 4, value.length);
-  const tests = ['jpg', 'jpeg', 'gif', 'png', 'svg'];
-  console.log(lastChars);
-
-  return !tests.some(testValue => lastChars.indexOf(testValue) === -1);
-  */
   if (typeof value === 'string' && value.match(/\.(jp(e?)g|png|gif)$/) !== null) {
     return true;
   }
@@ -26,9 +15,9 @@ const isImage = (value) => {
 export default function MapVisualisation({ visualisation, datasets, width, height }) {
   const chartData = chart.getMapData(visualisation, datasets);
   const chartValues = chartData.values;
-  const pointColorMapping = Object.keys(chartData.metadata.pointColorMapping).map(color => ({
-    color,
-    value: chartData.metadata.pointColorMapping[color],
+  const pointColorMapping = Object.keys(chartData.metadata.pointColorMapping).map(value => ({
+    value,
+    color: chartData.metadata.pointColorMapping[value],
   }));
 
   return (

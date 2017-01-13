@@ -150,16 +150,6 @@ function getColumnIndex(dataset, columnName) {
   return dataset.get('columns').findIndex(column => column.get('columnName') === columnName);
 }
 
-const defaultColor = '#000';
-
-// Assume all 'equals' for now
-function colorMappingFn(pointColorMapping) {
-  return (value) => {
-    const idx = pointColorMapping.findIndex(mappingEntry => mappingEntry.value === value);
-    return idx < 0 ? defaultColor : pointColorMapping[idx].color;
-  };
-}
-
 function filterFn(filters, columns) {
   const filterFns = getFilterArray(filters, columns);
   return row => filterFns.every(fn => fn(row));
@@ -236,6 +226,27 @@ export function getPieData(visualisation, datasets) {
   }];
 }
 
+const defaultColor = '#000';
+
+// Assume all 'equals' for now
+function colorMappingFn(pointColorMapping) {
+  return (value) => {
+    const idx = pointColorMapping.findIndex(mappingEntry => mappingEntry.value === value);
+    return idx < 0 ? defaultColor : pointColorMapping[idx].color;
+  };
+}
+
+// Get the unique point color values out of the dataset
+export function getPointColorValues(dataset, columnName, filters) {
+  const pointColorIndex = getColumnIndex(dataset, columnName);
+  const rowFilter = filterFn(filters, dataset.get('columns'));
+  return dataset.get('rows')
+    .filter(rowFilter)
+    .map(row => row.get(pointColorIndex))
+    .toSet()
+    .toArray();
+}
+
 export function getMapData(visualisation, datasets) {
   const { datasetId, spec } = visualisation;
   const dataset = datasets[datasetId];
@@ -247,7 +258,6 @@ export function getMapData(visualisation, datasets) {
   const popupIndexes = spec.popup.map(obj => getColumnIndex(dataset, obj.column));
   const rowFilter = filterFn(spec.filters, dataset.get('columns'));
   const filteredPointColorMapping = {};
-
 
   let maxLat = -90;
   let minLat = 90;
@@ -271,7 +281,7 @@ export function getMapData(visualisation, datasets) {
       const pointColor = pointColorIndex < 0 ? defaultColor : colorMapper(pointColorValue);
 
       if (pointColor !== defaultColor) {
-        filteredPointColorMapping[pointColor] = pointColorValue;
+        filteredPointColorMapping[pointColorValue] = pointColor;
       }
 
       return ({

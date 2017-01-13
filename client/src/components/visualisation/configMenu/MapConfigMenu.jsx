@@ -1,14 +1,46 @@
 import React, { PropTypes, Component } from 'react';
 import SelectInput from './SelectInput';
 import Subtitle from './Subtitle';
+import { getPointColorValues } from '../../../utilities/chart';
 import defaultColors from '../../../utilities/defaultColors';
 
-function uniqueValues(dataset, columnName) {
-  const columnIndex = dataset.get('columns').findIndex(
-    column => column.get('columnName') === columnName
+function LabelItem({ color, value }) {
+  return (
+    <span>
+      <span
+        style={{
+          display: 'inline-block',
+          backgroundColor: color,
+          width: '1rem',
+          height: '1rem',
+        }}
+      />
+      {' '}
+      {value}
+    </span>
   );
-  return dataset.get('rows').map(row => row.get(columnIndex)).toSet().toArray();
 }
+
+LabelItem.propTypes = {
+  color: PropTypes.string.isRequired,
+  value: PropTypes.any,
+};
+
+function Labels({ pointColorMapping }) {
+  return (
+    <ul>
+      {pointColorMapping.map(({ color, value }, idx) =>
+        <li key={idx}>
+          <LabelItem color={color} value={value} />
+        </li>
+      )}
+    </ul>
+  );
+}
+
+Labels.propTypes = {
+  pointColorMapping: PropTypes.array.isRequired,
+};
 
 export default class MapConfigMenu extends Component {
 
@@ -22,14 +54,14 @@ export default class MapConfigMenu extends Component {
   handlePointColorColumnChange(columnName) {
     const { datasets, visualisation } = this.props;
     const dataset = datasets[visualisation.datasetId];
-    const values = uniqueValues(dataset, columnName);
+    const values = getPointColorValues(dataset, columnName, visualisation.spec.filters);
 
     this.props.onChangeSpec({
       pointColorColumn: columnName,
       pointColorMapping: values.map((value, index) => ({
         op: 'equals',
         value,
-        color: defaultColors[index],
+        color: defaultColors[index] || '#000000',
       })),
     });
   }
@@ -77,6 +109,9 @@ export default class MapConfigMenu extends Component {
           clearable
           onChange={columnName => this.handlePointColorColumnChange(columnName)}
         />
+        { spec.pointColorColumn &&
+          <Labels pointColorMapping={spec.pointColorMapping} />
+        }
         <Subtitle>Popup</Subtitle>
         <SelectInput
           options={columnOptions}
