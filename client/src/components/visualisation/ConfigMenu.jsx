@@ -181,7 +181,7 @@ export default function ConfigMenu(props) {
       <FilterMenu
         hasDataset={Boolean(visualisation.datasetId !== null)}
         onChangeSpec={onChangeSpec}
-        spec={spec}
+        filters={spec.filters}
         columnOptions={columnOptions}
       />
       <VisualisationTypeMenu

@@ -133,9 +133,9 @@ export default class FilterMenu extends Component {
   }
 
   saveFilter() {
-    const { spec, columnOptions } = this.props;
+    const { columnOptions } = this.props;
     const { newFilterColumn, newFilterValue, newFilterOperation, newFilterStrategy } = this.state;
-    const filters = spec.filters.map(item => item);
+    const filters = this.props.filters.map(item => item);
 
     filters.push({
       column: newFilterColumn,
@@ -157,7 +157,7 @@ export default class FilterMenu extends Component {
   }
 
   deleteFilter(index) {
-    const filters = this.props.spec.filters.map(item => item);
+    const filters = this.props.filters.map(item => item);
 
     filters.splice(index, 1);
 
@@ -167,14 +167,13 @@ export default class FilterMenu extends Component {
   }
 
   render() {
-    const { hasDataset, spec, columnOptions } = this.props;
+    const { hasDataset, filters, columnOptions } = this.props;
     const {
       newFilterColumn,
       newFilterStrategy,
       newFilterOperation,
       collapsed,
       inputInProgress } = this.state;
-    const { filters } = spec;
     const activeColumnType = newFilterColumn ?
       columnOptions.find(col => col.value === newFilterColumn).type : null;
     return (
@@ -320,7 +319,7 @@ export default class FilterMenu extends Component {
 }
 
 FilterMenu.propTypes = {
-  spec: PropTypes.object.isRequired,
+  filters: PropTypes.array.isRequired,
   hasDataset: PropTypes.bool.isRequired,
   columnOptions: PropTypes.array.isRequired,
   onChangeSpec: PropTypes.func.isRequired,
