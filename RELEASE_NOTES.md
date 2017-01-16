@@ -6,6 +6,8 @@
 
 * Fix regression where applied transformations are not reflected in
   the visualisation editor
+* Fixed a bug whereby it was impossible to enter 0 as a default fallback value
+  when changing the type of a column
 
 ## 0.4.3
 
