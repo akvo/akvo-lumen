@@ -11,11 +11,11 @@ spec:
     spec:
       containers:
       - name: lumen-client
-        image: eu.gcr.io/akvo-lumen/lumen-client:latest
+        image: akvo/lumen-client:latest
         ports:
         - containerPort: 80
       - name: lumen-backend
-        image: eu.gcr.io/akvo-lumen/lumen-backend:latest
+        image: akvo/lumen-backend:latest
         ports:
         - containerPort: 3000
         env:
