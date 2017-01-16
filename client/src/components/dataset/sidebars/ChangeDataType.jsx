@@ -6,32 +6,23 @@ import SidebarControls from './SidebarControls';
 import DateFormatSelect from './DateFormatSelect';
 
 function DefaultValueInput({ defaultValue, onChange, newType }) {
+  const emptyValue = newType === 'number' ? 0 : '';
   return (
     <div className="inputGroup">
       <label htmlFor="defaultValueInput">
         Default value:
       </label>
       <input
-        type="text"
-        value={defaultValue || ''}
+        type={newType === 'number' ? 'number' : 'text'}
+        value={defaultValue !== null ? defaultValue : emptyValue}
         onChange={(event) => {
           const value = event.target.value;
           if (newType === 'date') {
-            const n = parseInt(value, 10);
-            if (isNaN(n)) {
-              // TODO warn
-              onChange(null);
-            } else {
-              onChange(n);
-            }
+            const n = isNaN(value) ? null : parseInt(value, 10);
+            onChange(n);
           } else if (newType === 'number') {
             const n = parseFloat(value);
-            if (isNaN(n)) {
-              // TODO warn
-              onChange(null);
-            } else {
-              onChange(n);
-            }
+            onChange(n);
           } else {
             onChange(value);
           }
