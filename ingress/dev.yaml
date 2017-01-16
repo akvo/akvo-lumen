@@ -9,7 +9,7 @@ spec:
     - dev.lumen.test.akvo-ops.org
     secretName: tls
   rules:
-    - host: dev.lumen.test.akvo-ops.orwg
+    - host: dev.lumen.test.akvo-ops.org
       http:
         paths:
         - backend:
