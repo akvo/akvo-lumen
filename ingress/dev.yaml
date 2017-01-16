@@ -6,10 +6,10 @@ metadata:
 spec:
   tls:
   - hosts:
-    - dev.test.akvo-ops.org
+    - dev.lumen.test.akvo-ops.org
     secretName: tls
   rules:
-    - host: dev.test.akvo-ops.orwg
+    - host: dev.lumen.test.akvo-ops.orwg
       http:
         paths:
         - backend:
