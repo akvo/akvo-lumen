@@ -1,4 +1,4 @@
-FROM nginx:latest
+FROM nginx:1.11
 MAINTAINER Akvo Foundation <devops@akvo.org>
 
 ARG LUMEN_KEYCLOAK_URL
