@@ -18,7 +18,7 @@ function deriveTransformationDescription(transformation) {
 // Search the transformation list to find the column title and fall back to the columnTitle
 // function if this column hasn't been transformed before.
 function findTitle(columnName, transformations, index, columns) {
-  const historyTransformation = transformations.take(index).find(transformation =>
+  const historyTransformation = transformations.take(index).reverse().find(transformation =>
       transformation.getIn(['changedColumns', columnName]));
   if (historyTransformation != null) {
     return historyTransformation.getIn(['changedColumns', columnName, 'after', 'title']);
