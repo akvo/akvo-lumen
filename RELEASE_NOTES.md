@@ -2,7 +2,14 @@
 
 ## 0.5.0 (unreleased)
 
+## 0.4.4 (unreleased)
+
+Date 2017-01-17
+
 ### Bugfixes
+
+* Fix transformation log rendering where the log could render the
+  wrong title or in some cases not show up at all.
 
 * Fix regression where applied transformations are not reflected in
   the visualisation editor
