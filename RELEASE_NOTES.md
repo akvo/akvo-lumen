@@ -2,7 +2,7 @@
 
 ## 0.5.0 (unreleased)
 
-## 0.4.4 (unreleased)
+## 0.4.4
 
 Date 2017-01-17
 
