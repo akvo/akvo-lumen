@@ -2,9 +2,14 @@
 
 ## 0.5.0 (unreleased)
 
-## 0.4.4 (unreleased)
+## 0.4.4
 
 Date 2017-01-17
+
+### New and noteworthy
+
+* Client load times optimized by making server to client communication more
+  effcient.
 
 ### Bugfixes
 
