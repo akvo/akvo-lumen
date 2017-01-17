@@ -6,6 +6,11 @@
 
 Date 2017-01-17
 
+### New and noteworthy
+
+* Client load times optimized by making server to client communication more
+  effcient.
+
 ### Bugfixes
 
 * Fix transformation log rendering where the log could render the
