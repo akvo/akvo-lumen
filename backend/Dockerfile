@@ -1,4 +1,4 @@
-FROM clojure
+FROM clojure:lein-2.7.1
 MAINTAINER Akvo Foundation <devops@akvo.org>
 
 COPY . /tmp/lumen
