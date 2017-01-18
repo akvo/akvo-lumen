@@ -3,6 +3,17 @@ import Keycloak from 'keycloak-js';
 
 let keycloak = null;
 
+export function token() {
+  if (keycloak != null) {
+    return new Promise((resolve, reject) =>
+      keycloak.updateToken()
+        .success(() => resolve(keycloak.token))
+        .error(err => reject(err))
+    );
+  }
+  return new Promise((resolve, reject) => reject('Keycloak not initialized'));
+}
+
 export default function () {
   if (keycloak != null) {
     return new Promise(resolve => resolve(keycloak));

@@ -1,5 +1,4 @@
 import fetch from 'isomorphic-fetch';
-import headers from './actions/headers';
 import keycloak from './auth';
 
 function wrapUpdateToken(fetchRequestThunk) {
@@ -7,46 +6,54 @@ function wrapUpdateToken(fetchRequestThunk) {
     (resolve, reject) => (
       keycloak().then(kc => kc.updateToken()
         .success(() =>
-          fetchRequestThunk()
-            .then(response => resolve(response.json()))
+          fetchRequestThunk(kc.token)
+            .then(response => response.json())
+            .then(response => resolve(response))
             .catch(err => reject(err)))
         .error(err => reject(err))
     ))
   );
 }
 
-export function get(url) {
-  return wrapUpdateToken(() => fetch(url, {
+function requestHeaders(token, additionalHeaders = {}) {
+  return Object.assign({}, additionalHeaders, {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${token}`,
+  });
+}
+
+export function get(url, headers) {
+  return wrapUpdateToken(token => fetch(url, {
     method: 'GET',
-    headers: headers(),
+    headers: requestHeaders(token, headers),
   }));
 }
 
-export function post(url, body) {
-  return wrapUpdateToken(() =>
+export function post(url, body, headers) {
+  return wrapUpdateToken(token =>
     fetch(url, {
       method: 'POST',
-      headers: headers(),
+      headers: requestHeaders(token, headers),
       body: JSON.stringify(body),
     })
   );
 }
 
-export function put(url, body) {
-  return wrapUpdateToken(() =>
+export function put(url, body, headers) {
+  return wrapUpdateToken(token =>
     fetch(url, {
       method: 'PUT',
-      headers: headers(),
+      headers: requestHeaders(token, headers),
       body: JSON.stringify(body),
     })
   );
 }
 
-export function del(url) {
-  return wrapUpdateToken(() =>
+export function del(url, headers) {
+  return wrapUpdateToken(token =>
     fetch(url, {
       method: 'DELETE',
-      headers: headers(),
+      headers: requestHeaders(token, headers),
     })
   );
 }
