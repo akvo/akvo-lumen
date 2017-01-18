@@ -13,11 +13,13 @@
   Otherwiese grant access. This implies that access is on tenant level."
   [handler]
   (fn [request]
-    (if (or
-         (and (= "/api" (:path-info request))
-              (= :get (:request-method request)))
-         (and (s/starts-with? (:path-info request) "/s/" )
-              (= :get (:request-method request))))
+    (if (let [{:keys [path-info request-method]} request]
+          (or (and (= "/api" path-info)
+                   (= :get request-method))
+              (and (= "/env" path-info)
+                   (= :get request-method))
+              (and (or (s/starts-with? path-info "/s/"))
+                   (= :get request-method))))
       (handler request)
       (if-let [claimed-roles (get-in request
                                      [:jwt-claims "realm_access" "roles"])]
