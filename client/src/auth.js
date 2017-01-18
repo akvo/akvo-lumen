@@ -1,7 +1,21 @@
+import fetch from 'isomorphic-fetch';
 import Keycloak from 'keycloak-js';
 
-export default new Keycloak({
-  url: process.env.LUMEN_KEYCLOAK_URL || 'http://localhost:8080/auth',
-  realm: 'akvo',
-  clientId: 'akvo-lumen',
-});
+let keycloak = null;
+
+export default function () {
+  if (keycloak != null) {
+    return new Promise(resolve => resolve(keycloak));
+  }
+  return fetch('/env')
+    .then(response => response.json())
+    .then(({ keycloakURL }) => {
+      keycloak = new Keycloak({
+        url: keycloakURL,
+        realm: 'akvo',
+        clientId: 'akvo-lumen',
+      });
+      return keycloak;
+    }
+  );
+}

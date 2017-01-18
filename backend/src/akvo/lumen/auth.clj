@@ -18,7 +18,7 @@
                    (= :get request-method))
               (and (= "/env" path-info)
                    (= :get request-method))
-              (and (or (s/starts-with? path-info "/s/"))
+              (and (s/starts-with? path-info "/s/")
                    (= :get request-method))))
       (handler request)
       (if-let [claimed-roles (get-in request

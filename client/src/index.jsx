@@ -24,16 +24,18 @@ function initNotAuthenticated() {
   document.querySelector('#root').innerHTML = 'Authentication required.';
 }
 
-keycloak.init({ onLoad: 'login-required' }).success((authenticated) => {
-  if (authenticated) {
-    keycloak.loadUserProfile().success((profile) => {
-      initAuthenticated(profile);
-    }).error(() => {
+keycloak().then(
+  kc => kc.init({ onLoad: 'login-required' }).success((authenticated) => {
+    if (authenticated) {
+      kc.loadUserProfile().success((profile) => {
+        initAuthenticated(profile);
+      }).error(() => {
+        initNotAuthenticated();
+      });
+    } else {
       initNotAuthenticated();
-    });
-  } else {
+    }
+  }).error(() => {
     initNotAuthenticated();
   }
-}).error(() => {
-  initNotAuthenticated();
-});
+));

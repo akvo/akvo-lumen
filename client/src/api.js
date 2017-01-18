@@ -5,13 +5,13 @@ import keycloak from './auth';
 function wrapUpdateToken(fetchRequestThunk) {
   return new Promise(
     (resolve, reject) => (
-      keycloak.updateToken()
+      keycloak().then(kc => kc.updateToken()
         .success(() =>
           fetchRequestThunk()
             .then(response => resolve(response.json()))
             .catch(err => reject(err)))
         .error(err => reject(err))
-    )
+    ))
   );
 }
 
