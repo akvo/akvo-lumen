@@ -14,9 +14,9 @@ export function token() {
   return new Promise((resolve, reject) => reject('Keycloak not initialized'));
 }
 
-export default function () {
+export function init() {
   if (keycloak != null) {
-    return new Promise(resolve => resolve(keycloak));
+    throw new Error('Keycloak already initialized');
   }
   return fetch('/env')
     .then(response => response.json())

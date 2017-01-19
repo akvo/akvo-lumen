@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import * as tus from 'tus-js-client';
-import { token } from '../../../auth';
+import * as auth from '../../../auth';
 import ProgressBar from '../../common/ProgressBar';
 
 const handleDragEnter = (evt) => {
@@ -48,9 +48,9 @@ export default class DataFileDataSourceSettings extends Component {
     const onChange = this.props.onChange;
     const updateUploadStatus = this.props.updateUploadStatus;
     const handleProgress = this.handleProgress;
-    token().then((tk) => {
+    auth.token().then((token) => {
       const upload = new tus.Upload(file, {
-        headers: { Authorization: `Bearer ${tk}` },
+        headers: { Authorization: `Bearer ${token}` },
         endpoint: '/api/files',
         onError() {
           updateUploadStatus(false);

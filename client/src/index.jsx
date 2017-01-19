@@ -4,7 +4,7 @@ import { browserHistory } from 'react-router';
 import { syncHistoryWithStore } from 'react-router-redux';
 import Root from './containers/Root';
 import configureStore from './store/configureStore';
-import keycloak from './auth';
+import * as auth from './auth';
 
 function initAuthenticated(profile) {
   const initialState = {
@@ -24,7 +24,7 @@ function initNotAuthenticated() {
   document.querySelector('#root').innerHTML = 'Authentication required.';
 }
 
-keycloak().then(
+auth.init().then(
   kc => kc.init({ onLoad: 'login-required' }).success((authenticated) => {
     if (authenticated) {
       kc.loadUserProfile().success((profile) => {

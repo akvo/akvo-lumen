@@ -1,18 +1,10 @@
 import fetch from 'isomorphic-fetch';
-import keycloak from './auth';
+import * as auth from './auth';
 
 function wrapUpdateToken(fetchRequestThunk) {
-  return new Promise(
-    (resolve, reject) => (
-      keycloak().then(kc => kc.updateToken()
-        .success(() =>
-          fetchRequestThunk(kc.token)
-            .then(response => response.json())
-            .then(response => resolve(response))
-            .catch(err => reject(err)))
-        .error(err => reject(err))
-    ))
-  );
+  return auth.token()
+    .then(token => fetchRequestThunk(token))
+    .then(response => response.json());
 }
 
 function requestHeaders(token, additionalHeaders = {}) {
