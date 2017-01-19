@@ -24,18 +24,6 @@ function initNotAuthenticated() {
   document.querySelector('#root').innerHTML = 'Authentication required.';
 }
 
-auth.init().then(
-  kc => kc.init({ onLoad: 'login-required' }).success((authenticated) => {
-    if (authenticated) {
-      kc.loadUserProfile().success((profile) => {
-        initAuthenticated(profile);
-      }).error(() => {
-        initNotAuthenticated();
-      });
-    } else {
-      initNotAuthenticated();
-    }
-  }).error(() => {
-    initNotAuthenticated();
-  }
-));
+auth.init()
+  .then(profile => initAuthenticated(profile))
+  .catch(() => initNotAuthenticated());

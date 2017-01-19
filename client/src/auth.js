@@ -21,13 +21,25 @@ export function init() {
   }
   return fetch('/env')
     .then(response => response.json())
-    .then(({ keycloakURL }) => {
-      keycloak = new Keycloak({
-        url: keycloakURL,
-        realm: 'akvo',
-        clientId: 'akvo-lumen',
-      });
-      return keycloak;
-    }
-  );
+    .then(({ keycloakURL }) => new Keycloak({
+      url: keycloakURL,
+      realm: 'akvo',
+      clientId: 'akvo-lumen',
+    }))
+    .then(kc => new Promise((resolve, reject) =>
+      kc.init({ onLoad: 'login-required' }).success((authenticated) => {
+        if (authenticated) {
+          kc.loadUserProfile().success((profile) => {
+            keycloak = kc;
+            resolve(profile);
+          }).error(() => {
+            reject('Could not load user profile');
+          });
+        } else {
+          reject('Could not authenticate');
+        }
+      }).error(() => {
+        reject('Login attempt failed');
+      })
+  ));
 }
