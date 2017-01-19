@@ -7,6 +7,7 @@
  :endpoints
  {:dashboard #var akvo.lumen.endpoint.dashboard/endpoint
   :dataset #var akvo.lumen.endpoint.dataset/endpoint
+  :env #var akvo.lumen.endpoint.env/endpoint
   :files #var akvo.lumen.endpoint.files/endpoint
   :flow #var akvo.lumen.endpoint.flow/endpoint
   :job-execution #var akvo.lumen.endpoint.job-execution/endpoint
@@ -18,12 +19,13 @@
   :visualisation #var akvo.lumen.endpoint.visualisation/endpoint}
  :dependencies
  {:http [:app]
-  :app [:dashboard :dataset :files :flow :job-execution :library :public
+  :app [:dashboard :dataset :env :files :flow :job-execution :library :public
         :root :share :transformation :visualisation]
   :tenant-manager [:db]
   :transformation-engine [:tenant-manager]
   :dashboard [:tenant-manager]
   :dataset [:tenant-manager :config]
+  :env [:config]
   :files [:config]
   :flow [:tenant-manager :config]
   :job-execution [:tenant-manager]
@@ -53,7 +55,7 @@
     :arguments
     {:not-found   "Resource Not Found"
      :hide-errors "Internal Server Error"
-     :wrap-jwt {:keycloak-url  keycloak-url
+     :wrap-jwt {:keycloak-url   keycloak-url
                 :keycloak-realm keycloak-realm}
      :ring-defaults
      {:params    {:urlencoded true
@@ -66,5 +68,6 @@
   {:port http-port}
   :db
   {:uri db-uri}
-  :config {:file-upload-path file-upload-path
+  :config {:keycloak-url keycloak-url
+           :file-upload-path file-upload-path
            :flow-report-database-url flow-report-database-url}}}

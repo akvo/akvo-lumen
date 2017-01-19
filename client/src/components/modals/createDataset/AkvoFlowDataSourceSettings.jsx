@@ -1,7 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import Select from 'react-select';
-import fetch from 'isomorphic-fetch';
-import headers from '../../../actions/headers';
+import { get } from '../../../auth';
 
 function findRootFolderIds(surveysAndFolders) {
   const folderIds = {};
@@ -43,11 +42,8 @@ export default class AkvoFlowDataSourceSettings extends Component {
   }
 
   componentDidMount() {
-    fetch('/api/flow/instances', {
-      headers: headers(),
-    })
-    .then(response => response.json())
-    .then(instances => this.setState(instances));
+    get('/api/flow/instances')
+      .then(instances => this.setState(instances));
   }
 
   handleSelectInstance(instance) {
@@ -59,36 +55,33 @@ export default class AkvoFlowDataSourceSettings extends Component {
     this.setState(Object.assign({}, initialState, {
       instances: this.state.instances,
     }));
-    fetch(`/api/flow/folders-and-surveys/${instance.value}`, {
-      headers: headers(),
-    })
-    .then(response => response.json())
-    .then((foldersAndSurveys) => {
+    get(`/api/flow/folders-and-surveys/${instance.value}`)
+      .then((foldersAndSurveys) => {
       /*
        * Build 2 indexes to avoid repetetive calculation in render():
        * - id -> folder or surveyId
        * - folderId -> sorted array of folders and surveys
        */
-      const idIndex = {};
-      const folderIdIndex = {};
-      foldersAndSurveys.forEach((folderOrSurvey) => {
-        idIndex[folderOrSurvey.id] = folderOrSurvey;
-        let existingFoldersAndSurveys = folderIdIndex[folderOrSurvey.folderId];
-        if (existingFoldersAndSurveys === undefined) {
-          existingFoldersAndSurveys = [];
-        }
-        existingFoldersAndSurveys.push(folderOrSurvey);
-        folderIdIndex[folderOrSurvey.folderId] = existingFoldersAndSurveys;
+        const idIndex = {};
+        const folderIdIndex = {};
+        foldersAndSurveys.forEach((folderOrSurvey) => {
+          idIndex[folderOrSurvey.id] = folderOrSurvey;
+          let existingFoldersAndSurveys = folderIdIndex[folderOrSurvey.folderId];
+          if (existingFoldersAndSurveys === undefined) {
+            existingFoldersAndSurveys = [];
+          }
+          existingFoldersAndSurveys.push(folderOrSurvey);
+          folderIdIndex[folderOrSurvey.folderId] = existingFoldersAndSurveys;
+        });
+
+        Object.keys(folderIdIndex).forEach((folderId) => {
+          folderIdIndex[folderId].sort(foldersAndSurveysComparator);
+        });
+
+        const rootFolderIds = findRootFolderIds(foldersAndSurveys);
+
+        this.setState({ rootFolderIds, idIndex, folderIdIndex });
       });
-
-      Object.keys(folderIdIndex).forEach((folderId) => {
-        folderIdIndex[folderId].sort(foldersAndSurveysComparator);
-      });
-
-      const rootFolderIds = findRootFolderIds(foldersAndSurveys);
-
-      this.setState({ rootFolderIds, idIndex, folderIdIndex });
-    });
   }
 
   handleSurveySelection(survey) {

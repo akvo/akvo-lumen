@@ -1,7 +1,6 @@
 FROM nginx:1.11
 MAINTAINER Akvo Foundation <devops@akvo.org>
 
-ARG LUMEN_KEYCLOAK_URL
 
 RUN apt-get update && \
     apt-get install -y -q --no-install-recommends curl xz-utils && \
@@ -19,7 +18,7 @@ RUN cd /tmp/lumen/ && \
     npm set progress=false && \
     npm install && \
     npm rebuild node-sass && \
-    env LUMEN_KEYCLOAK_URL="https://login.test.akvo-ops.org/auth" npm run build && \
+    npm run build && \
     mkdir /usr/share/nginx/html/assets && \
     cp dist/* /usr/share/nginx/html/assets && \
     cd /tmp && rm -rf lumen
