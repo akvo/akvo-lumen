@@ -3,5 +3,5 @@
 
 (defn all
   "Return all tenants users"
-  [tenant]
-  (impl/all tenant))
+  [tenant keycloak]
+  (impl/all tenant keycloak))

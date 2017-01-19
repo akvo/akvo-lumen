@@ -2,6 +2,7 @@
  {:app  #var duct.component.handler/handler-component
   :db #var duct.component.hikaricp/hikaricp
   :http #var akvo.lumen.component.http/http
+  :keycloak #var akvo.lumen.component.keycloak/keycloak
   :tenant-manager #var akvo.lumen.component.tenant-manager/tenant-manager
   :transformation-engine #var akvo.lumen.component.transformation-engine/transformation-engine}
  :endpoints
@@ -28,12 +29,13 @@
   :files [:config]
   :flow [:tenant-manager :config]
   :job-execution [:tenant-manager]
+  :keycloak [:config]
   :library [:tenant-manager]
   :public [:tenant-manager]
   :root [:tenant-manager]
   :share [:tenant-manager :config]
   :transformation [:transformation-engine :tenant-manager]
-  :user [:tenant-manager :config]
+  :user [:keycloak :tenant-manager]
   :visualisation [:tenant-manager]}
  :config
  {:app
@@ -69,4 +71,6 @@
   :db
   {:uri db-uri}
   :config {:file-upload-path file-upload-path
-           :flow-report-database-url flow-report-database-url}}}
+           :flow-report-database-url flow-report-database-url
+           :keycloak-url keycloak-url
+           :keycloak-realm keycloak-realm}}}

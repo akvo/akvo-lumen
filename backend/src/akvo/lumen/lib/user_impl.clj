@@ -3,8 +3,15 @@
 
 ;; Where do we enforce admin rights?
 
-(defn all [tenant]
+(defn get-tenant-users []
+  ;; where do I find keycloak?
+  ;; what's the keycloak creds ?
+  ;; can a token?
+  )
+
+(defn all [tenant keycloak]
   (prn tenant)
+  (clojure.pprint/pprint keycloak)
   (response []))
 
 

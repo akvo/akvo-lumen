@@ -13,11 +13,11 @@
 ;; 3. Accept user invite - send back email to user and admin
 
 
-(defn endpoint [{:keys [tenant-manager]}]
+(defn endpoint [{:keys [keycloak tenant-manager]}]
   (context "/api/users" {:keys [params tenant] :as request}
 
     (GET "/" _
-      (user/all tenant))))
+      (user/all tenant keycloak))))
 
 
 ;; (defn user-invitation-endpoint [{:keys [tenant-manger]}]
