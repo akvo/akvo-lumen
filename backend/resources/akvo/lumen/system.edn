@@ -15,11 +15,12 @@
   :root #var akvo.lumen.endpoint.root/endpoint
   :share #var akvo.lumen.endpoint.share/endpoint
   :transformation #var akvo.lumen.endpoint.transformation/endpoint
+  :user #var akvo.lumen.endpoint.user/endpoint
   :visualisation #var akvo.lumen.endpoint.visualisation/endpoint}
  :dependencies
  {:http [:app]
   :app [:dashboard :dataset :files :flow :job-execution :library :public
-        :root :share :transformation :visualisation]
+        :root :share :transformation :user :visualisation]
   :tenant-manager [:db]
   :transformation-engine [:tenant-manager]
   :dashboard [:tenant-manager]
@@ -32,6 +33,7 @@
   :root [:tenant-manager]
   :share [:tenant-manager :config]
   :transformation [:transformation-engine :tenant-manager]
+  :user [:tenant-manager :config]
   :visualisation [:tenant-manager]}
  :config
  {:app
