@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import * as tus from 'tus-js-client';
-import keycloak from '../../../auth';
+import * as auth from '../../../auth';
 import ProgressBar from '../../common/ProgressBar';
 
 const handleDragEnter = (evt) => {
@@ -48,30 +48,31 @@ export default class DataFileDataSourceSettings extends Component {
     const onChange = this.props.onChange;
     const updateUploadStatus = this.props.updateUploadStatus;
     const handleProgress = this.handleProgress;
-    const upload = new tus.Upload(file, {
-      headers: { Authorization: `Bearer ${keycloak.token}` },
-      endpoint: '/api/files',
-      onError(error) {
-        console.error(`Failed because: ${error}`);
-        updateUploadStatus(false);
-        handleProgress(-1);
-      },
-      onProgress(bytesUploaded, bytesTotal) {
-        const percentage = parseFloat(((bytesUploaded / bytesTotal) * 100).toFixed(2));
-        handleProgress(percentage);
-      },
-      onSuccess() {
-        updateUploadStatus(false);
-        onChange({
-          kind: 'DATA_FILE',
-          url: upload.url,
-          fileName: upload.file.name,
-        });
-      },
+    auth.token().then((token) => {
+      const upload = new tus.Upload(file, {
+        headers: { Authorization: `Bearer ${token}` },
+        endpoint: '/api/files',
+        onError() {
+          updateUploadStatus(false);
+          handleProgress(-1);
+        },
+        onProgress(bytesUploaded, bytesTotal) {
+          const percentage = parseFloat(((bytesUploaded / bytesTotal) * 100).toFixed(2));
+          handleProgress(percentage);
+        },
+        onSuccess() {
+          updateUploadStatus(false);
+          onChange({
+            kind: 'DATA_FILE',
+            url: upload.url,
+            fileName: upload.file.name,
+          });
+        },
+      });
+      upload.start();
+      handleProgress(0);
+      updateUploadStatus(true);
     });
-    upload.start();
-    handleProgress(0);
-    updateUploadStatus(true);
   }
 
   render() {
@@ -103,8 +104,7 @@ export default class DataFileDataSourceSettings extends Component {
               this.props.onChange({
                 hasColumnHeaders: this.datasetHeaderStatusToggle.checked,
               });
-            }
-            }
+            }}
           />
         </p>
         {this.isProgressBarVisible() &&

@@ -1,11 +1,10 @@
-import fetch from 'isomorphic-fetch';
 import Immutable from 'immutable';
 import warning from 'warning';
 import * as constants from '../constants/library';
 import { fetchDatasetsSuccess } from './dataset';
 import { fetchVisualisationsSuccess } from './visualisation';
 import { fetchDashboardsSuccess } from './dashboard';
-import headers from './headers';
+import { get } from '../api';
 
 function fetchLibraryRequest() {
   return {
@@ -22,20 +21,16 @@ function fetchLibraryFailure() {
 export function fetchLibrary() {
   return (dispatch) => {
     dispatch(fetchLibraryRequest());
-    fetch('/api/library', {
-      method: 'GET',
-      headers: headers(),
-    })
-    .then(response => response.json())
-    .then((library) => {
-      dispatch(fetchDatasetsSuccess(Immutable.fromJS(library.datasets)));
-      dispatch(fetchVisualisationsSuccess(library.visualisations));
-      dispatch(fetchDashboardsSuccess(library.dashboards));
-    })
-    .catch((error) => {
-      warning(false, 'Failed to fetch library: %s', error.message);
-      dispatch(fetchLibraryFailure(error));
-    });
+    get('/api/library')
+      .then((library) => {
+        dispatch(fetchDatasetsSuccess(Immutable.fromJS(library.datasets)));
+        dispatch(fetchVisualisationsSuccess(library.visualisations));
+        dispatch(fetchDashboardsSuccess(library.dashboards));
+      })
+      .catch((error) => {
+        warning(false, 'Failed to fetch library: %s', error.message);
+        dispatch(fetchLibraryFailure(error));
+      });
   };
 }
 

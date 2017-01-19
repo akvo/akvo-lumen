@@ -10,5 +10,5 @@
   :http {:port 3000}
   :config {:file-upload-path "/tmp/akvo/lumen"
            :flow-report-database-url ""
-           :keycloak-url "http://localhost:8080/auth"
-           :keycloak-realm "akvo"}}}
+           :keycloak-realm "akvo"
+           :keycloak-url "http://localhost:8080/auth"}}}
