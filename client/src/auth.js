@@ -4,14 +4,15 @@ import Keycloak from 'keycloak-js';
 let keycloak = null;
 
 export function token() {
-  if (keycloak != null) {
-    return new Promise((resolve, reject) =>
-      keycloak.updateToken()
-        .success(() => resolve(keycloak.token))
-        .error(err => reject(err))
-    );
+  if (keycloak == null) {
+    throw new Error('Keycloak not initialized');
   }
-  return new Promise((resolve, reject) => reject('Keycloak not initialized'));
+
+  return new Promise((resolve, reject) =>
+    keycloak.updateToken()
+      .success(() => resolve(keycloak.token))
+      .error(err => reject(err))
+  );
 }
 
 export function init() {
