@@ -14,7 +14,7 @@ function DefaultValueInput({ defaultValue, onChange, newType }) {
       </label>
       <input
         type={newType === 'number' ? 'number' : 'text'}
-        value={defaultValue !== null ? defaultValue : emptyValue}
+        value={(defaultValue !== null && !isNaN(defaultValue)) ? defaultValue : emptyValue}
         onChange={(event) => {
           const value = event.target.value;
           if (newType === 'date') {
