@@ -15,11 +15,13 @@
 
 
 (defn endpoint [{:keys [keycloak tenant-manager]}]
-  (context "/api/users" {:keys [params tenant] :as request}
+  (context "/api/users" {:keys [headers params tenant] :as request}
 
-    (GET "/" _
-      (println "@endpoint/users")
-      (keycloak/users keycloak tenant))))
+    (let-routes [authorization-token (get headers "authorization")
+                 access-token "??????????????????????????????????"]
+
+      (GET "/" _
+        (keycloak/users keycloak tenant access-token)))))
 
 
 ;; (defn user-invitation-endpoint [{:keys [tenant-manger]}]

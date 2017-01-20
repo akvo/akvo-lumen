@@ -12,8 +12,8 @@
 ;;;
 
 (defprotocol UserManager
-  (users [this tenant-label] "List tenants users")
-  (add-user [this tenant-label user] "Add user to tenant"))
+  (users [this tenant-label authorization-token] "List tenants users")
+  (add-user [this tenant-label user authorization-token] "Add user to tenant"))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -67,6 +67,7 @@
                                   (headers-with-token openid-config
                                                       credentials)})
                  :body json/decode)
+
         ]
     (println "---------------------------------------------------------------")
     #_(clojure.pprint/pprint resp)
@@ -78,6 +79,30 @@
 ;; tenant-label -> path -> t1
 ;; tenant-group-path t1/
 ;; tenant-admin-group t1/admin
+
+(defn fetch-users
+  "Return the users for a tenant. The tenant label here becomes the group-name."
+  [{:keys [api-root credentials openid-config]} group-name access-token]
+  (try
+    (let [headers {:headers (headers-with-token openid-config credentials)}
+          ;; headers {"Authorization" access-token
+          ;; "Content-Type" "application/json"}
+          group (-> (client/get (format "%s/group-by-path/%s"
+                                        api-root group-name)
+                                headers)
+                    :body json/decode)
+          members (-> (client/get (format "%s/groups/%s/members"
+                                          api-root (get group "id"))
+                                  headers)
+                      :body json/decode)]
+      (response members))
+    (catch Exception e
+      (let [ed (ex-data e)]
+        (prn ed)
+        (response {:status (:status ed)
+                   :body (:reason-phrase ed)}))
+      )
+    ))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -94,12 +119,16 @@
     (assoc this :openid-config nil))
 
   UserManager
-  (users [this tenant-label]
+  (users [this tenant-label access-token]
+    (fetch-users this tenant-label access-token))
+
+  #_(users [this tenant-label]
     (println "@keycloak/users")
     (get-users-by-group-path this tenant-label))
 
-  (add-user [this tenant-label user]
+  (add-user [this tenant-label user authorization-token]
     (clojure.pprint/pprint this)
+    ;; Make sure to noly invite users that is enabled and have verified email
     (println "Add user")
     "ok"))
 
@@ -109,4 +138,7 @@
                        :credentials {"username" user
                                      "password" password
                                      "client_id" "akvo-lumen"
+
+                                     ;; "client_id" "lumen-backend"
+                                     ;; "client_secret" "96bb449d-82c3-4d50-8da6-659d1662c424"
                                      }}))
