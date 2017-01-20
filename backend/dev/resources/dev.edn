@@ -11,4 +11,9 @@
   :config {:file-upload-path "/tmp/akvo/lumen"
            :flow-report-database-url ""
            :keycloak-realm "akvo"
-           :keycloak-url "http://localhost:8080/auth"}}}
+           :keycloak-url "http://localhost:8080/auth"}
+  :keycloak {:url "http://localhost:8080/auth"
+             :realm "akvo"
+             :user "lumen"
+             :password "lumen"
+             :client_id "akvo-lumen"}}}

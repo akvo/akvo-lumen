@@ -1,7 +1,8 @@
 (ns akvo.lumen.endpoint.user
   (:require [akvo.lumen.component.tenant-manager :refer [connection]]
             [akvo.lumen.lib.user :as user]
-            [compojure.core :refer :all]))
+            [compojure.core :refer :all]
+            [akvo.lumen.component.keycloak :as keycloak]))
 
 
 ;; Each tenant will already have one admin user
@@ -17,7 +18,8 @@
   (context "/api/users" {:keys [params tenant] :as request}
 
     (GET "/" _
-      (user/all tenant keycloak))))
+      (println "@endpoint/users")
+      (keycloak/users keycloak tenant))))
 
 
 ;; (defn user-invitation-endpoint [{:keys [tenant-manger]}]

@@ -31,7 +31,6 @@
   :files [:config]
   :flow [:tenant-manager :config]
   :job-execution [:tenant-manager]
-  :keycloak [:config]
   :library [:tenant-manager]
   :public [:tenant-manager]
   :root [:tenant-manager]
@@ -75,4 +74,9 @@
   :config {:file-upload-path file-upload-path
            :flow-report-database-url flow-report-database-url
            :keycloak-url keycloak-url
-           :keycloak-realm keycloak-realm}}}
+           :keycloak-realm keycloak-realm}
+  :keycloak {:url keycloak-url
+             :realm keycloak-realm
+             :user keycloak-user
+             :password keycloak-password
+             :client_id keycloak-client-id}}}
