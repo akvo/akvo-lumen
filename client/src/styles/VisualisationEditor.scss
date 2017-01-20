@@ -13,6 +13,9 @@
     min-height: calc(100vh - 4rem);
     padding: 1rem;
   }
+  .VisualisationConfig.map {
+    padding: 0;
+  }
   .VisualisationConfig {
     display: block;
     overflow: scroll;

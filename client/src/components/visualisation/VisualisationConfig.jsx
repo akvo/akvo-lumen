@@ -4,9 +4,12 @@ import ConfigMenu from './ConfigMenu';
 require('../../styles/VisualisationConfig.scss');
 
 export default function VisualisationConfig(props) {
+  const vType = props.visualisation.visualisationType ?
+    props.visualisation.visualisationType : 'noVisualisationType';
   return (
-    <div className="VisualisationConfig">
-      <h3 className="title">Configure Visualisation</h3>
+    <div
+      className={`VisualisationConfig ${vType}`}
+    >
       <ConfigMenu
         visualisation={props.visualisation}
         datasets={props.datasets}

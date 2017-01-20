@@ -6,6 +6,9 @@ require('../../styles/VisualisationPreview.scss');
 
 function shouldRender(visualisation, datasets) {
   const datasetId = visualisation.datasetId;
+  if (visualisation.visualisationType === 'map') {
+    return true;
+  }
   if (datasetId == null) {
     return false;
   }
@@ -21,7 +24,7 @@ function shouldRender(visualisation, datasets) {
   if (!haveDataColumn) {
     return false;
   }
-  const needSecondDataColumn = visualisationType === 'scatter' || visualisationType === 'map';
+  const needSecondDataColumn = visualisationType === 'scatter';
   const haveSecondDataColumn = spec.metricColumnX != null || spec.latitude !== null;
   if (needSecondDataColumn && !haveSecondDataColumn) {
     return false;

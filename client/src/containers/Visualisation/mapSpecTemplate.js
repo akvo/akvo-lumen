@@ -1,11 +1,6 @@
 const mapSpec = {
-  filters: [],
-  showLegend: true,
-  latitude: null,
-  longitude: null,
-  pointColorColumn: null,
-  pointColorMapping: [],
-  popup: [],
+  baseLayer: 'street',
+  layers: [],
 };
 
 export default mapSpec;

@@ -1,76 +1,87 @@
 import React, { PropTypes, Component } from 'react';
-import { GithubPicker } from 'react-color';
-import SelectInput from './SelectInput';
-import Subtitle from './Subtitle';
-import { getPointColorValues } from '../../../utilities/chart';
-import defaultColors from '../../../utilities/defaultColors';
+import VisualisationTypeMenu from '../VisualisationTypeMenu';
+import LayerMenu from './LayerMenu';
+import LayerConfigMenu from './LayerConfigMenu';
+import mapLayerSpecTemplate from '../../../containers/Visualisation/mapLayerSpecTemplate';
 
-class LabelItem extends Component {
-  constructor() {
-    super();
-    this.state = { displayColorPicker: false };
-  }
-
-  handleOnChangeColor(newColor) {
-    this.setState({ displayColorPicker: false });
-    this.props.onChangeColor(newColor);
-  }
-
-  render() {
-    const { color, value } = this.props;
-    const { displayColorPicker } = this.state;
-    return (
-      <span>
-        <span
-          onClick={() => this.setState({ displayColorPicker: true })}
+const BaseLayerMenu = ({ baseLayer, onChangeBaseLayer }) => (
+  <div>
+    <h4>
+        Base map
+      </h4>
+    <ul
+      style={{
+        display: 'flex',
+        flexDirection: 'row',
+        alignContent: 'space-between',
+      }}
+    >
+      {['street', 'satellite', 'terrain'].map((layer, index) =>
+        <li
+          key={index}
+          onClick={() => onChangeBaseLayer(layer)}
           style={{
-            display: 'inline-block',
-            backgroundColor: color,
-            width: '1rem',
-            height: '1rem',
+            backgroundColor: layer === baseLayer ? 'black' : 'white',
+            color: layer === baseLayer ? 'white' : 'black',
+            display: 'flex-item',
+            flex: 1,
+            textAlign: 'center',
+            margin: '1rem 0',
+            padding: '0.5rem 0rem',
           }}
         >
-          {displayColorPicker &&
-            <GithubPicker
-              color={color}
-              onChangeComplete={evt => this.handleOnChangeColor(evt.hex)}
-            />}
-        </span>
-        {' '}
-        {value}
-      </span>
-    );
-  }
-}
-
-LabelItem.propTypes = {
-  color: PropTypes.string.isRequired,
-  value: PropTypes.any,
-  onChangeColor: PropTypes.func.isRequired,
-};
-
-function Labels({ pointColorMapping, onChangeColor }) {
-  return (
-    <ul>
-      {pointColorMapping.map(({ color, value }, idx) =>
-        <li key={idx}>
-          <LabelItem
-            color={color}
-            value={value}
-            onChangeColor={newColor => onChangeColor(value, newColor)}
-          />
+          {layer}
         </li>
-      )}
+        )}
     </ul>
+  </div>
   );
-}
 
-Labels.propTypes = {
-  pointColorMapping: PropTypes.array.isRequired,
-  onChangeColor: PropTypes.func.isRequired,
+BaseLayerMenu.propTypes = {
+  baseLayer: PropTypes.string.isRequired,
+  onChangeBaseLayer: PropTypes.func.isRequired,
 };
 
 export default class MapConfigMenu extends Component {
+
+  constructor() {
+    super();
+    this.state = {
+      selectedLayer: null,
+    };
+
+    this.handleAddMapLayer = this.handleAddMapLayer.bind(this);
+    this.handleDeleteMapLayer = this.handleDeleteMapLayer.bind(this);
+    this.handleChangeMapLayer = this.handleChangeMapLayer.bind(this);
+  }
+
+  handleAddMapLayer() {
+    const title = `Untitled Layer ${this.props.visualisation.spec.layers.length + 1}`;
+    const layers = this.props.visualisation.spec.layers.map(item => item);
+    layers.push(Object.assign({}, mapLayerSpecTemplate, { title }));
+    this.props.onChangeSpec({ layers });
+  }
+
+  handleDeleteMapLayer(layerIndex) {
+    const layers = this.props.visualisation.spec.layers.map(item => item);
+    layers.splice(layerIndex, 1);
+
+    this.props.onChangeSpec({ layers });
+  }
+
+  handleChangeMapLayer(layerIndex, value) {
+    const clonedLayer = Object.assign({}, this.props.visualisation.spec.layers[layerIndex], value);
+    const layers = this.props.visualisation.spec.layers.map(item => item);
+    layers[layerIndex] = clonedLayer;
+
+    // Temporary shim while we still define datasetId on the top-level visualisation
+    if (Object.keys(value).indexOf('datasetId') > -1) {
+      const datasetId = value.datasetId;
+      this.props.onChangeSourceDataset(datasetId, { layers });
+    } else {
+      this.props.onChangeSpec({ layers });
+    }
+  }
 
   handlePopupChange(columnNames) {
     const popup = columnNames.map(columnName => ({
@@ -79,92 +90,53 @@ export default class MapConfigMenu extends Component {
     this.props.onChangeSpec({ popup });
   }
 
-  handlePointColorColumnChange(columnName) {
-    const { datasets, visualisation } = this.props;
-    const dataset = datasets[visualisation.datasetId];
-    const values = getPointColorValues(dataset, columnName, visualisation.spec.filters);
-
-    this.props.onChangeSpec({
-      pointColorColumn: columnName,
-      pointColorMapping: values.map((value, index) => ({
-        op: 'equals',
-        value,
-        color: defaultColors[index] || '#000000',
-      })),
-    });
-  }
-
-  handleChangeLabelColor(value, color) {
-    const pointColorMapping = this.props.visualisation.spec.pointColorMapping;
-
-    this.props.onChangeSpec({
-      pointColorMapping: pointColorMapping.map((mapping) => {
-        if (mapping.value === value) {
-          return Object.assign({}, mapping, { color });
-        }
-        return mapping;
-      }),
-    });
-  }
-
   render() {
-    const {
-      visualisation,
-      onChangeSpec,
-      columnOptions,
-    } = this.props;
-    const spec = visualisation.spec;
+    const { visualisation, onChangeSpec } = this.props;
+    const { spec } = visualisation;
 
     return (
-      <div>
-        <Subtitle>Latitude</Subtitle>
-        <SelectInput
-          placeholder="Select a latitude column"
-          labelText="Latitude column"
-          choice={spec.latitude !== null ? spec.latitude.toString() : null}
-          name="xColumnInput"
-          options={columnOptions.filter(column => column.type === 'number')}
-          onChange={value => onChangeSpec({
-            latitude: value,
-          })}
-        />
-        <Subtitle>Longitude</Subtitle>
-        <SelectInput
-          placeholder="Select a longitude column"
-          labelText="Longitude column"
-          choice={spec.longitude !== null ? spec.longitude.toString() : null}
-          name="yColumnInput"
-          options={columnOptions.filter(column => column.type === 'number')}
-          onChange={value => onChangeSpec({
-            longitude: value,
-          })}
-        />
-        <Subtitle>Point color</Subtitle>
-        <SelectInput
-          placeholder="Select a data column to color points by"
-          labelText="Point color column"
-          choice={spec.pointColorColumn !== null ?
-            spec.pointColorColumn.toString() : null}
-          name="xGroupColumnMenu"
-          options={columnOptions}
-          clearable
-          onChange={columnName => this.handlePointColorColumnChange(columnName)}
-        />
-        { spec.pointColorColumn &&
-          <Labels
-            pointColorMapping={spec.pointColorMapping}
-            onChangeColor={(value, newColor) => this.handleChangeLabelColor(value, newColor)}
+      <div
+        className="MapConfigMenu"
+        style={{
+          minHeight: 'calc(100vh - 4rem)',
+          paddingBottom: '4rem',
+        }}
+      >
+        {this.state.selectedLayer === null ?
+          <div>
+            <div style={{ padding: '1rem' }}>
+              <VisualisationTypeMenu
+                onChangeVisualisationType={this.props.onChangeVisualisationType}
+                visualisation={visualisation}
+                disabled={false}
+              />
+            </div>
+            <LayerMenu
+              layers={this.props.visualisation.spec.layers}
+              activeLayer={this.state.activeLayer}
+              onAddLayer={() => this.handleAddMapLayer()}
+              onDeleteMapLayer={layerIndex => this.handleDeleteMapLayer(layerIndex)}
+              onSelectLayer={layerIndex => this.setState({ selectedLayer: layerIndex })}
+              onChangeMapLayer={this.handleChangeMapLayer}
+            />
+            <div style={{ padding: '1rem' }}>
+              <BaseLayerMenu
+                baseLayer={visualisation.spec.baseLayer}
+                onChangeBaseLayer={baseLayer => onChangeSpec({ baseLayer })}
+              />
+            </div>
+          </div>
+        :
+          <LayerConfigMenu
+            layer={spec.layers[this.state.selectedLayer]}
+            layerIndex={this.state.selectedLayer}
+            onDeselectLayer={() => this.setState({ selectedLayer: null })}
+            datasets={this.props.datasets}
+            datasetOptions={this.props.datasetOptions}
+            onChangeMapLayer={this.handleChangeMapLayer}
+            onSave={this.props.onSave}
           />
-        }
-        <Subtitle>Popup</Subtitle>
-        <SelectInput
-          options={columnOptions}
-          choice={spec.popup.map(entry => entry.column)}
-          multi
-          labelText="Popup column"
-          onChange={options => this.handlePopupChange(options.map(opt => opt.value))}
-          name="popupInput"
-        />
+      }
       </div>
     );
   }
@@ -174,7 +146,10 @@ MapConfigMenu.propTypes = {
   visualisation: PropTypes.object.isRequired,
   datasets: PropTypes.object.isRequired,
   onChangeSpec: PropTypes.func.isRequired,
-  columnOptions: PropTypes.array.isRequired,
   aggregationOptions: PropTypes.array.isRequired,
   getColumnMetadata: PropTypes.func.isRequired,
+  onChangeSourceDataset: PropTypes.func.isRequired,
+  onSave: PropTypes.func.isRequired,
+  onChangeVisualisationType: PropTypes.func.isRequired,
+  datasetOptions: PropTypes.array.isRequired,
 };

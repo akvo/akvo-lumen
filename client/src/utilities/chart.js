@@ -247,16 +247,16 @@ export function getPointColorValues(dataset, columnName, filters) {
     .toArray();
 }
 
-export function getMapData(visualisation, datasets) {
-  const { datasetId, spec } = visualisation;
+export function getMapData(layer, datasets) {
+  const { datasetId } = layer;
   const dataset = datasets[datasetId];
 
-  const longitudeIndex = getColumnIndex(dataset, spec.longitude);
-  const latitudeIndex = getColumnIndex(dataset, spec.latitude);
-  const pointColorIndex = getColumnIndex(dataset, spec.pointColorColumn);
-  const colorMapper = colorMappingFn(spec.pointColorMapping);
-  const popupIndexes = spec.popup.map(obj => getColumnIndex(dataset, obj.column));
-  const rowFilter = filterFn(spec.filters, dataset.get('columns'));
+  const longitudeIndex = getColumnIndex(dataset, layer.longitude);
+  const latitudeIndex = getColumnIndex(dataset, layer.latitude);
+  const pointColorIndex = getColumnIndex(dataset, layer.pointColorColumn);
+  const colorMapper = colorMappingFn(layer.pointColorMapping);
+  const popupIndexes = layer.popup.map(obj => getColumnIndex(dataset, obj.column));
+  const rowFilter = filterFn(layer.filters, dataset.get('columns'));
   const filteredPointColorMapping = {};
 
   let maxLat = -90;

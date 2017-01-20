@@ -3,4 +3,46 @@
     width: 100%;
     height: 30rem;
   }
+
+  .legend {
+    position: absolute;
+    display: flex;
+    background-color: rgba(255, 255, 255, 0.8);
+    font-size: 0.8rem;
+    line-height: 1.4em;
+    z-index: 1;
+
+    ul {
+      padding: 0.5rem 1rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+  }
+  .legend.left, .legend.right {
+    height: 10rem;
+  }
+  .legend.top, .legend.bottom {
+    width: 60%;
+    right: 20%;
+    left: 20%;
+    height: 6rem;
+    ul {
+      flex-direction: row;
+    }
+  }
+  .legend.top {
+    top: 1rem;
+  }
+  .legend.right {
+    right: 1rem;
+    bottom: 1rem;
+  }
+  .legend.bottom {
+    bottom: 1rem;
+  }
+  .legend.left {
+    left: 1rem;
+    bottom: 1rem;
+  }
 }

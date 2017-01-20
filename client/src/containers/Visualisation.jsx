@@ -183,10 +183,16 @@ class Visualisation extends Component {
 
     const visualisation = Object.assign({}, this.state.visualisation, { spec });
 
-    this.setState({
-      isUnsavedChanges: true,
-      visualisation,
-    });
+    this.handleChangeVisualisation(visualisation);
+  }
+
+  handleChangeSourceDataset(datasetId, optionalSpecChanges = {}) {
+    if (!this.props.library.datasets[datasetId].get('columns')) {
+      this.props.dispatch(fetchDataset(datasetId));
+    }
+    const spec = Object.assign({}, this.state.visualisation.spec, optionalSpecChanges);
+    const visualisation = Object.assign({}, this.state.visualisation, { datasetId }, { spec });
+    this.handleChangeVisualisation(visualisation);
   }
 
   handleChangeVisualisationType(visualisationType) {
@@ -222,13 +228,6 @@ class Visualisation extends Component {
 
   handleChangeVisualisationTitle(event) {
     this.handleChangeVisualisation({ name: event.target.value });
-  }
-
-  handleChangeSourceDataset(datasetId) {
-    if (!this.props.library.datasets[datasetId].get('columns')) {
-      this.props.dispatch(fetchDataset(datasetId));
-    }
-    this.handleChangeVisualisation({ datasetId });
   }
 
   toggleShareVisualisation() {
