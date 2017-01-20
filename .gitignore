@@ -5,6 +5,7 @@ bundle.js
 npm-debug.log
 .DS_Store
 client/dist
+client/yarn.lock
 
 # Backend
 backend/target
