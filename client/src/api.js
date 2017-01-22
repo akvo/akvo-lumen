@@ -1,32 +1,51 @@
 import fetch from 'isomorphic-fetch';
-import headers from './actions/headers';
+import * as auth from './auth';
 
-export function get(url) {
-  return fetch(url, {
+function wrapUpdateToken(fetchRequestThunk) {
+  return auth.token()
+    .then(token => fetchRequestThunk(token))
+    .then(response => response.json());
+}
+
+function requestHeaders(token, additionalHeaders = {}) {
+  return Object.assign({}, additionalHeaders, {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${token}`,
+  });
+}
+
+export function get(url, headers) {
+  return wrapUpdateToken(token => fetch(url, {
     method: 'GET',
-    headers: headers(),
-  }).then(response => response.json());
+    headers: requestHeaders(token, headers),
+  }));
 }
 
-export function post(url, body) {
-  return fetch(url, {
-    method: 'POST',
-    headers: headers(),
-    body: JSON.stringify(body),
-  }).then(response => response.json());
+export function post(url, body, headers) {
+  return wrapUpdateToken(token =>
+    fetch(url, {
+      method: 'POST',
+      headers: requestHeaders(token, headers),
+      body: JSON.stringify(body),
+    })
+  );
 }
 
-export function put(url, body) {
-  return fetch(url, {
-    method: 'PUT',
-    headers: headers(),
-    body: JSON.stringify(body),
-  }).then(response => response.json());
+export function put(url, body, headers) {
+  return wrapUpdateToken(token =>
+    fetch(url, {
+      method: 'PUT',
+      headers: requestHeaders(token, headers),
+      body: JSON.stringify(body),
+    })
+  );
 }
 
-export function del(url) {
-  return fetch(url, {
-    method: 'DELETE',
-    headers: headers(),
-  }).then(response => response.json());
+export function del(url, headers) {
+  return wrapUpdateToken(token =>
+    fetch(url, {
+      method: 'DELETE',
+      headers: requestHeaders(token, headers),
+    })
+  );
 }

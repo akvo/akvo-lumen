@@ -1,17 +1,80 @@
 # Release Notes
 
-## 0.4.0 (unreleased)
+## 0.5.0 (unreleased)
 
-Date: 2016-12-23
+## 0.4.4
+
+Date 2017-01-17
 
 ### New and noteworthy
 
-* DOS-formatted CSV files now import properly
+* Client load times optimized by making server to client communication more
+  effcient.
+
+### Bugfixes
+
+* Fix transformation log rendering where the log could render the
+  wrong title or in some cases not show up at all.
+
+* Fix regression where applied transformations are not reflected in
+  the visualisation editor
+* Fixed a bug whereby it was impossible to enter 0 as a default fallback value
+  when changing the type of a column
+
+## 0.4.3
+
+Date 2017-01-10
+
+### Bugfixes
+
+* Fix file upload regression
+
+## 0.4.2
+
+Date 2017-01-10
+
+### New and noteworthy
+
+* New transformation: Delete column
+* New transformation: Rename column
+
+### Bugfixes
+
+* Fix broken Pie and Donut charts
+
+## 0.4.1
+
+Date 2017-01-04
+
+### New and noteworthy
+
+* Enabled TLS
+
+### Bugfixes
+
+* Fix a regression in the visualisation editor that prevented viewing maps
+
+## 0.4.0
+
+Date: 2016-12-30
+
+### New and noteworthy
+
 * Improved the Visualisation editor
   * "Save" button no longer redirects user to library view
+  * New "Stack" and "Split" options for subgroups in Bar chart editor
+  * Number of bars in bar chart can now optionally be limited
+  * Aggregations for visualisations are now performed in a separate step
+  * Visualisation axis labels now update automatically without user input
 * New transformation: Derive column
   * Supports user defined formulas using Javascript as the
     expression language
+
+### Bugfixes
+
+* Make sure the authentication token is up-to-date so the user isn't
+  unexpectedly logged out during a session
+* DOS-formatted CSV files now import properly
 
 
 ## 0.3.0

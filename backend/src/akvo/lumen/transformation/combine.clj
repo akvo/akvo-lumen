@@ -7,10 +7,10 @@
 
 (defmethod engine/valid? :core/combine
   [op-spec]
-  (let [{column-names "columnNames"
+  (let [{[column-name-1 column-name-2] "columnNames"
          column-title "newColumnTitle"
          separator "separator"} (engine/args op-spec)]
-    (boolean (and (every? engine/valid-column-name? column-names)
+    (boolean (and (every? engine/valid-column-name? [column-name-1 column-name-2])
                   (string? column-title)
                   (string? separator)
                   (= (engine/error-strategy op-spec) "fail")))))

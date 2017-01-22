@@ -1,11 +1,10 @@
-import fetch from 'isomorphic-fetch';
 import Immutable from 'immutable';
 import * as constants from '../constants/dataset';
 import * as visualisationActions from './visualisation';
 import { hideModal } from './activeModal';
-import headers from './headers';
 import applyTransformation from '../reducers/transform';
 import { showNotification } from './notification';
+import { get, post, del } from '../api';
 
 /*
  * Fetch a dataset by id
@@ -39,13 +38,9 @@ function fetchDatasetFailure(error, id) {
 export function fetchDataset(id) {
   return (dispatch) => {
     dispatch(fetchDatasetRequest(id));
-    fetch(`/api/datasets/${id}`, {
-      method: 'GET',
-      headers: headers(),
-    })
-    .then(response => response.json())
-    .then(dataset => dispatch(fetchDatasetSuccess(Immutable.fromJS(dataset))))
-    .catch(error => dispatch(fetchDatasetFailure(error, id)));
+    get(`/api/datasets/${id}`)
+      .then(dataset => dispatch(fetchDatasetSuccess(Immutable.fromJS(dataset))))
+      .catch(error => dispatch(fetchDatasetFailure(error, id)));
   };
 }
 
@@ -104,21 +99,17 @@ const pollInteval = 1000;
 function pollDatasetImportStatus(importId, name) {
   return (dispatch) => {
     dispatch(importDatasetPending(importId, name));
-    fetch(`/api/job_executions/${importId}`, {
-      method: 'GET',
-      headers: headers(),
-    })
-    .then(response => response.json())
-    .then(({ status, reason, datasetId }) => {
-      if (status === 'PENDING') {
-        setTimeout(() => dispatch(pollDatasetImportStatus(importId, name)), pollInteval);
-      } else if (status === 'FAILED') {
-        dispatch(importDatasetFailure(importId, reason));
-      } else if (status === 'OK') {
-        dispatch(importDatasetSuccess(datasetId, importId));
-      }
-    })
-    .catch(error => dispatch(error));
+    get(`/api/job_executions/${importId}`)
+      .then(({ status, reason, datasetId }) => {
+        if (status === 'PENDING') {
+          setTimeout(() => dispatch(pollDatasetImportStatus(importId, name)), pollInteval);
+        } else if (status === 'FAILED') {
+          dispatch(importDatasetFailure(importId, reason));
+        } else if (status === 'OK') {
+          dispatch(importDatasetSuccess(datasetId, importId));
+        }
+      })
+      .catch(error => dispatch(error));
   };
 }
 
@@ -138,18 +129,12 @@ export function clearImport() {
 export function importDataset(dataSource) {
   return (dispatch) => {
     dispatch(importDatasetRequest(dataSource));
-    fetch('/api/datasets', {
-      method: 'POST',
-      headers: headers(),
-      body: JSON.stringify(dataSource),
-    })
-    .then(response => response.json())
-    .then(({ importId }) => {
-      dispatch(pollDatasetImportStatus(importId, dataSource.name));
-      dispatch(hideModal());
-      dispatch(clearImport());
-    })
-    .catch(() => dispatch(importDatasetFailure('Unable to start import process', dataSource)));
+    post('/api/datasets', dataSource)
+      .then(({ importId }) => {
+        dispatch(pollDatasetImportStatus(importId, dataSource.name));
+        dispatch(hideModal());
+        dispatch(clearImport());
+      });
   };
 }
 
@@ -251,13 +236,9 @@ function deleteDatasetFailure(id, error) {
 export function deleteDataset(id) {
   return (dispatch) => {
     dispatch(deleteDatasetRequest(id));
-    fetch(`/api/datasets/${id}`, {
-      method: 'DELETE',
-      headers: headers(),
-    })
-    .then(response => response.json())
-    .then(() => dispatch(deleteDatasetSuccess(id)))
-    .catch(error => dispatch(deleteDatasetFailure(id, error)));
+    del(`/api/datasets/${id}`)
+      .then(() => dispatch(deleteDatasetSuccess(id)))
+      .catch(error => dispatch(deleteDatasetFailure(id, error)));
   };
 }
 
@@ -309,36 +290,27 @@ function transformationFailure(datasetId, reason) {
 
 function pollDatasetTransformationStatus(jobExecutionId, datasetId) {
   return (dispatch) => {
-    fetch(`/api/job_executions/${jobExecutionId}`, {
-      method: 'GET',
-      headers: headers(),
-    })
-    .then(response => response.json())
-    .then(({ status, reason }) => {
-      if (status === 'PENDING') {
-        setTimeout(() =>
-          dispatch(pollDatasetTransformationStatus(jobExecutionId, datasetId)), pollInteval);
-      } else if (status === 'FAILED') {
-        dispatch(transformationFailure(datasetId, reason));
-      } else if (status === 'OK') {
-        dispatch(transformationSuccess(datasetId));
-      }
-    })
-    .catch(error => dispatch(error));
+    get(`/api/job_executions/${jobExecutionId}`)
+      .then(({ status, reason }) => {
+        if (status === 'PENDING') {
+          setTimeout(() =>
+            dispatch(pollDatasetTransformationStatus(jobExecutionId, datasetId)), pollInteval);
+        } else if (status === 'FAILED') {
+          dispatch(transformationFailure(datasetId, reason));
+        } else if (status === 'OK') {
+          dispatch(transformationSuccess(datasetId));
+        }
+      })
+      .catch(error => dispatch(error));
   };
 }
 
 export function sendTransformationLog(datasetId, transformations) {
   return (dispatch) => {
     dispatch(transformationLogRequestSent(datasetId));
-    fetch(`/api/transformations/${datasetId}`, {
-      method: 'POST',
-      headers: headers(),
-      body: JSON.stringify(transformations.toJSON()),
-    })
-    .then(response => response.json())
-    .then(({ jobExecutionId }) =>
-      dispatch(pollDatasetTransformationStatus(jobExecutionId, datasetId)));
+    post(`/api/transformations/${datasetId}`, transformations.toJSON())
+      .then(({ jobExecutionId }) =>
+        dispatch(pollDatasetTransformationStatus(jobExecutionId, datasetId)));
   };
 }
 

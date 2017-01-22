@@ -172,7 +172,7 @@ Examples:
 ### core/combine
 
 * args
-  * columNames (vector): `["c1", "c2"]`
+  * columnNames (vector): `["c1", "c2"]`
   * newColumnTitle (string): `"New title"`
   * seperator (string): `","`
 * onError (string): `"fail"`
@@ -202,3 +202,25 @@ Examples:
 	  "code": "row['a'] + row['b']"},
  "onError": "fail"}
 ````
+
+### core/delete-column
+
+* args
+  * columnName (string): The column to delete
+
+```
+{"op": "core/delete-column",
+ "args": {"columnName": "c4"}}
+```
+
+### core/rename-column
+
+* args
+  * columnName (string): The column to rename
+  * newColumnTitle (string): The new column title
+
+```
+{"op": "core/rename-column",
+ "args": {"columnName": "c4",
+          "newColumnTitle": "New Title"}}
+```

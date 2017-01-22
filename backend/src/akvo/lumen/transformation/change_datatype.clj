@@ -17,21 +17,6 @@
                     (string? parse-format)
                     true)))))
 
-(defn- ensure-valid-identifier [identifier]
-  (when-not (re-find #"^\w+$" identifier)
-    (throw (ex-info "Invalid identifier" {:identifier identifier}))))
-
-(defn- escape-string [s]
-  (when-not (nil? s)
-    (when-not (string? s)
-      (throw (ex-info "Not a string" {:s s})))
-    (str/replace s "'" "''")))
-
-(defn- ensure-number [n]
-  (when-not (or (nil? n)
-                (number? n))
-    (throw (ex-info "Not a number" {:n n}))))
-
 (defn format-sql [table-name column-name type]
   (let [format-str (format "ALTER TABLE %s ALTER COLUMN %s TYPE %s USING "
                            table-name column-name type)]
@@ -70,7 +55,7 @@
                           "fail" (alter-table "%s(%s)" type-conversion column-name)
                           "default-value" (alter-table "%s(%s, %s)" type-conversion column-name default-value)
                           "delete-row" (alter-table "%s(%s, NULL)" type-conversion column-name))]
-    (ensure-number default-value)
+    (engine/ensure-number default-value)
     (change-datatype tenant-conn table-name column-name on-error alter-table-sql)))
 
 (defn change-datatype-to-text
@@ -79,7 +64,7 @@
         on-error (engine/error-strategy op-spec)
         {column-name "columnName"
          default-value "defaultValue"} (engine/args op-spec)
-        default-value (escape-string default-value)
+        default-value (engine/pg-escape-string default-value)
         alter-table (format-sql table-name column-name "text")
         alter-table-sql (condp = on-error
                           "fail" (alter-table "%s(%s)" type-conversion column-name)
@@ -94,7 +79,7 @@
         {column-name "columnName"
          default-value "defaultValue"
          parse-format "parseFormat"} (engine/args op-spec)
-        parse-format (escape-string parse-format)
+        parse-format (engine/pg-escape-string parse-format)
         alter-table (format-sql table-name column-name "timestamptz")
         alter-table-sql (condp = (from-type columns op-spec)
                           "text" (condp = on-error
@@ -107,7 +92,7 @@
                                      "default-value" (alter-table "%s(%s, to_timestamp(%s))"
                                                                   type-conversion column-name default-value)
                                      "delete-row" (alter-table "%s(%s, NULL)" type-conversion column-name))) ]
-    (ensure-number default-value)
+    (engine/ensure-number default-value)
     (change-datatype tenant-conn table-name column-name on-error alter-table-sql)))
 
 (defmethod engine/apply-operation :core/change-datatype

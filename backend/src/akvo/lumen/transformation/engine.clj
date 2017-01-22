@@ -17,19 +17,6 @@
   [op-spec]
   false)
 
-;; TODO remove.
-(defmulti column-metadata-operation
-  "Dispatch a columns metadata change"
-  (fn [columns op-spec]
-    (keyword (get op-spec "op"))))
-
-(defmethod column-metadata-operation :default
-  [columns op-spec]
-  (throw (ex-info (format "Column metadata changes not supported on operation [%s]"
-                          (op-spec "op"))
-                  {:columns columns
-                   :op-spec op-spec})))
-
 (defmulti apply-operation
   "Applies a particular operation based on `op` key from spec
    * tenant-conn: Open connection to the database
@@ -48,8 +35,21 @@
   {:success? false
    :message (str "Unknown operation " (get op-spec "op"))})
 
+(defn pg-escape-string [s]
+  (when-not (nil? s)
+    (when-not (string? s)
+      (throw (ex-info "Not a string" {:s s})))
+    (str/replace s "'" "''")))
+
+(defn ensure-number [n]
+  (when-not (or (nil? n)
+                (number? n))
+    (throw (ex-info "Not a number" {:n n})))
+  n)
+
 (defn valid-column-name? [s]
-  (boolean (re-find #"^(c|d)\d+$" s)))
+  (and (string? s)
+       (boolean (re-find #"^(c|d)\d+$" s))))
 
 (defn valid-type? [s]
   (boolean (#{"text" "number" "date"} s)))
@@ -107,16 +107,38 @@
   (update-job-failed-execution tenant-conn {:id job-id :error-log [message]})
   (deliver-promise-failure completion-promise dataset-id job-id message))
 
+(defn index-by [key coll]
+  (reduce (fn [index item]
+            (assoc index (get item key) item))
+          {}
+          coll))
+
+(defn diff-columns [previous-columns next-columns]
+  (let [previous-columns (index-by "columnName" previous-columns)
+        next-columns (index-by "columnName" next-columns)
+        all-column-names (set/union (set (keys previous-columns))
+                                    (set (keys next-columns)))
+        changed-columns (for [column-name all-column-names
+                              :let [before (get previous-columns column-name)
+                                    after (get next-columns column-name)]
+                              :when (not= before after)]
+                          {"before" before "after" after})]
+    (reduce (fn [diff {:strs [before after]}]
+              (let [column-name (or (get before "columnName")
+                                    (get after "columnName"))]
+                (assoc diff column-name {"before" before "after" after})))
+            {}
+            changed-columns)))
+
 (defn execute-transformation
   [completion-promise tenant-conn job-id dataset-id transformation]
   (try
-    (let [dataset-version (latest-dataset-version-by-dataset-id tenant-conn
-                                                                {:dataset-id dataset-id})
-          columns (vec (:columns dataset-version))
+    (let [dataset-version (latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})
+          previous-columns (vec (:columns dataset-version))
           source-table (:table-name dataset-version)]
       (let [{:keys [success? message columns execution-log]} (apply-operation tenant-conn
                                                                               source-table
-                                                                              columns
+                                                                              previous-columns
                                                                               transformation)]
         (if success?
           (let [new-dataset-version-id (str (util/squuid))]
@@ -129,7 +151,8 @@
                                   :imported-table-name (:imported-table-name dataset-version)
                                   :version (inc (:version dataset-version))
                                   :transformations (conj (vec (:transformations dataset-version))
-                                                         transformation)
+                                                         (assoc transformation
+                                                                "changedColumns" (diff-columns previous-columns columns)))
                                   :columns columns})
             (update-job-success-execution tenant-conn {:id job-id :exec-log (vec execution-log)})
             (deliver-promise-success completion-promise dataset-id new-dataset-version-id job-id))

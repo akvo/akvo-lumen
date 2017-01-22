@@ -1,4 +1,5 @@
 import { createAction } from 'redux-actions';
+import { push } from 'react-router-redux';
 import { fetchDataset } from './dataset';
 import * as api from '../api';
 
@@ -14,7 +15,10 @@ export function createVisualisation(visualisation) {
   return (dispatch) => {
     dispatch(createVisualisationRequest(visualisation));
     api.post('/api/visualisations', visualisation)
-    .then(vis => dispatch(createVisualisationSuccess(vis)))
+    .then((vis) => {
+      dispatch(createVisualisationSuccess(vis));
+      dispatch(push(`/visualisation/${vis.id}`));
+    })
     .catch(err => dispatch(createVisualisationFailure(err)));
   };
 }

@@ -8,7 +8,13 @@ export default function VisualisationEditor(props) {
   return (
     <div className="VisualisationEditor">
       <VisualisationConfig
-        {...props}
+        visualisation={props.visualisation}
+        datasets={props.datasets}
+        onChangeTitle={props.onChangeTitle}
+        onChangeVisualisationType={props.onChangeVisualisationType}
+        onChangeSourceDataset={props.onChangeSourceDataset}
+        onChangeVisualisationSpec={props.onChangeVisualisationSpec}
+        onSaveVisualisation={props.onSaveVisualisation}
       />
       <VisualisationPreview
         visualisation={props.visualisation}
@@ -21,4 +27,9 @@ export default function VisualisationEditor(props) {
 VisualisationEditor.propTypes = {
   visualisation: PropTypes.object.isRequired,
   datasets: PropTypes.object.isRequired,
+  onChangeTitle: PropTypes.func.isRequired,
+  onChangeVisualisationType: PropTypes.func.isRequired,
+  onChangeSourceDataset: PropTypes.func.isRequired,
+  onChangeVisualisationSpec: PropTypes.func.isRequired,
+  onSaveVisualisation: PropTypes.func.isRequired,
 };

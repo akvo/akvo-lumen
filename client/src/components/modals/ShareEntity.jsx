@@ -1,8 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import Modal from 'react-modal';
-import fetch from 'isomorphic-fetch';
 import CopyToClipboard from 'react-copy-to-clipboard';
-import headers from '../../actions/headers';
+import { post } from '../../auth';
 
 require('../../styles/DashboardModal.scss');
 require('../../styles/ShareEntity.scss');
@@ -29,13 +28,8 @@ export default class ShareEntity extends Component {
     const entityType = this.props.type;
 
     if (id != null) {
-      fetch('/api/shares', {
-        method: 'POST',
-        body: JSON.stringify({ [`${entityType}Id`]: id }),
-        headers: headers(),
-      })
-      .then(response => response.json())
-      .then(response => this.setState({ id: response.id }));
+      post('/api/shares', { [`${entityType}Id`]: id })
+        .then(response => this.setState({ id: response.id }));
     }
   }
 
@@ -45,6 +39,7 @@ export default class ShareEntity extends Component {
     return (
       <Modal
         isOpen={this.props.isOpen}
+        contentLabel="shareEntityModal"
         onAfterOpen={this.fetchShareId}
         style={{
           content: {

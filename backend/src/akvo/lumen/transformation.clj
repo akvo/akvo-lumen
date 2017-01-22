@@ -13,7 +13,8 @@
     akvo.lumen.transformation.filter-column
     akvo.lumen.transformation.combine
     akvo.lumen.transformation.derive
-    akvo.lumen.transformation.change-column-title])
+    akvo.lumen.transformation.rename-column
+    akvo.lumen.transformation.delete-column])
 
 ;; Load transformation namespaces
 (apply require transformation-namespaces)

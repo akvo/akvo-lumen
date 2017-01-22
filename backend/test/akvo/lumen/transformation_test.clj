@@ -350,3 +350,35 @@
                                                                          "newColumnTitle" "Derived 11"}
                                                                  "onError" "fail"}))]
         (is (= status 400))))))
+
+
+(deftest ^:functional delete-column-test
+  (let [dataset-id (import-file "dates.csv" {:has-column-headers? true})
+        schedule (partial tf/schedule test-conn *transformation-engine* dataset-id)]
+    (let [{:keys [status body]} (schedule {:type :transformation
+                                           :transformation {"op" "core/delete-column"
+                                                            "args" {"columnName" "c2"}
+                                                            "onError" "fail"}})]
+      (is (= 200 status))
+      (let [{:keys [columns transformations]} (latest-dataset-version-by-dataset-id test-conn
+                                                                                    {:dataset-id dataset-id})]
+        (is (= ["c1" "c3" "c4"] (map #(get % "columnName") columns)))
+        (let [{:strs [before after]} (get-in (last transformations) ["changedColumns" "c2"])]
+          (is (= "c2" (get before "columnName")))
+          (is (nil? after)))))))
+
+(deftest ^:functional rename-column-test
+  (let [dataset-id (import-file "dates.csv" {:has-column-headers? true})
+        schedule (partial tf/schedule test-conn *transformation-engine* dataset-id)]
+    (let [{:keys [status body]} (schedule {:type :transformation
+                                           :transformation {"op" "core/rename-column"
+                                                            "args" {"columnName" "c2"
+                                                                    "newColumnTitle" "New Title"}
+                                                            "onError" "fail"}})]
+      (is (= 200 status))
+      (let [{:keys [columns transformations]} (latest-dataset-version-by-dataset-id test-conn
+                                                                                    {:dataset-id dataset-id})]
+        (is (= "New Title" (get-in (vec columns) [1 "title"])))
+        (let [{:strs [before after]} (get-in (last transformations) ["changedColumns" "c2"])]
+          (is (= "dd/mm/yyyy" (get before "title")))
+          (is (= "New Title" (get after "title"))))))))
