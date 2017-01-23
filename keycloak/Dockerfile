@@ -1,4 +1,4 @@
-FROM jboss/keycloak:1.9.7.Final
+FROM jboss/keycloak:2.5.0.Final
 
 ADD akvo.json /tmp/akvo.json
 
