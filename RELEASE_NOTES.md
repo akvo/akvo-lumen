@@ -2,6 +2,21 @@
 
 ## 0.5.0 (unreleased)
 
+## 0.4.5
+
+Date 2017-01-23
+
+### New and noteworthy
+
+* Moved to a highly available keycloak (single sign-on) instance running on
+  the same cloud environment as the rest of lumen
+
+### Bugfixes
+
+* Fixed a bug whereby it was impossible to enter 0 as a default fallback value
+  when changing the type of a column
+
+
 ## 0.4.4
 
 Date 2017-01-17
@@ -18,8 +33,6 @@ Date 2017-01-17
 
 * Fix regression where applied transformations are not reflected in
   the visualisation editor
-* Fixed a bug whereby it was impossible to enter 0 as a default fallback value
-  when changing the type of a column
 
 ## 0.4.3
 
