@@ -1,6 +1,5 @@
 (ns akvo.lumen.endpoint.user
   (:require [akvo.lumen.component.tenant-manager :refer [connection]]
-            ;; [akvo.lumen.lib.user :as user]
             [compojure.core :refer :all]
             [akvo.lumen.component.keycloak :as keycloak]))
 
