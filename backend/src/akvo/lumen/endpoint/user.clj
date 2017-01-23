@@ -1,6 +1,6 @@
 (ns akvo.lumen.endpoint.user
   (:require [akvo.lumen.component.tenant-manager :refer [connection]]
-            [akvo.lumen.lib.user :as user]
+            ;; [akvo.lumen.lib.user :as user]
             [compojure.core :refer :all]
             [akvo.lumen.component.keycloak :as keycloak]))
 
@@ -15,12 +15,12 @@
 
 
 (defn endpoint [{:keys [keycloak tenant-manager]}]
-  (context "/api/users" {:keys [headers params tenant] :as request}
+  (context "/api/users" {:keys [jwt-claims params tenant] :as request}
 
-    (let-routes [authorization-header (get headers "authorization")]
+    (let-routes [roles (get-in jwt-claims ["realm_access" "roles"])]
 
       (GET "/" _
-        (keycloak/users keycloak tenant authorization-header)))))
+        (keycloak/users keycloak tenant roles)))))
 
 
 ;; (defn user-invitation-endpoint [{:keys [tenant-manger]}]

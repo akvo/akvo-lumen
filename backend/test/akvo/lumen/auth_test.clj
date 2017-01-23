@@ -3,7 +3,6 @@
             [clojure.test :refer [deftest testing is]]
             [ring.mock.request :as mock]))
 
-
 (defn- test-handler
   [request]
   {:status 200
@@ -25,7 +24,6 @@
     200 (is (= "" (:body response)))
     401 (is (= "Not authenticated" (:body response)))
     403 (is (= "Not authorized" (:body response)))))
-
 
 (deftest wrap-auth-test
 
@@ -58,6 +56,15 @@
       (-> (immutant-request :get "/api/resource")
           (assoc-in [:jwt-claims "realm_access" "roles"]
                     ["akvo:lumen:t0"])
+          (assoc :tenant "t0")))
+     200))
+
+  (testing "GET resource as admin with claims and tenant"
+    (check-response
+     ((m/wrap-auth test-handler)
+      (-> (immutant-request :get "/api/resource")
+          (assoc-in [:jwt-claims "realm_access" "roles"]
+                    ["akvo:lumen:t0:admin"])
           (assoc :tenant "t0")))
      200))
 

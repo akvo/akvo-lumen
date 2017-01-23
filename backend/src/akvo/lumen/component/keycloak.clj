@@ -3,6 +3,7 @@
   (:require [cheshire.core :as json]
             [com.stuartsierra.component :as component]
             [clj-http.client :as client]
+            [clojure.set :as set]
             [ring.util.response :refer [not-found response]]))
 
 
@@ -20,6 +21,11 @@
 ;;; Helpers
 ;;;
 
+(defn tenant-admin?
+  [tenant-label claimed-roles]
+  (contains? (set claimed-roles)
+             (format "akvo:lumen:%s:admin" tenant-label)))
+
 (defn fetch-openid-configuration
   "Get the openid configuration"
   [issuer]
@@ -32,87 +38,22 @@
                               {:form-params params})]
     (-> response :body json/decode (get "access_token"))))
 
-(defn fetch-access-token-with-token [openid-config token]
-  (let [params {"grant_type" "client_credentials"}
-        response (client/post (get (openid-config "token_endpoint")
-                                   {:form-params params}))]
-    (-> response :body json/decode)))
-
 (defn headers-with-token [openid-config credentials]
   {"Authorization" (str "bearer " (fetch-access-token openid-config credentials))
    "Content-Type" "application/json"})
 
-(defn get-users [{:keys [api-root credentials openid-config]} tenant-label]
-  (println "@keycloak/get-users")
-  (let [url (format "%s/users" api-root)
-        resp (-> (client/get url {:headers
-                                  (headers-with-token openid-config
-                                                      credentials)})
-                 :body json/decode)
-        enabled-verified-users (filter (fn [user]
-                                         (and (get user "enabled")
-                                              (get user "emailVerified"))) resp)
-        trimmed-users (map (fn [user]
-                             (select-keys user ["username" "id" "email"]))
-                           enabled-verified-users)]
-    (println "---------------------------------------------------------------")
-    (clojure.pprint/pprint resp)
-    #_(clojure.pprint/pprint trimmed-users)
-    (println "---------------------------------------------------------------")
-    (response trimmed-users)))
-
-
-(defn get-users-by-group-path
-  ""
-  [{:keys [api-root credentials openid-config]} tenant-label]
-  (println "@keycloak/get-users-by-group-path")
-  (println api-root)
-  (println tenant-label)
-  (let [url (format "%s/group-by-path/%s/" api-root tenant-label)
-        resp (-> (client/get url {:headers
-                                  (headers-with-token openid-config
-                                                      credentials)})
-                 :body json/decode)
-
-        ]
-    (println "---------------------------------------------------------------")
-    #_(clojure.pprint/pprint resp)
-    #_(clojure.pprint/pprint trimmed-users)
-    (println url)
-    (println "---------------------------------------------------------------")
-    (response resp)))
-
-;; tenant-label -> path -> t1
-;; tenant-group-path t1/
-;; tenant-admin-group t1/admin
-
-
-
 (defn fetch-users
   "Return the users for a tenant. The tenant label here becomes the group-name."
-  [{:keys [api-root credentials openid-config]} group-name authorization-header]
+  [{:keys [api-root credentials openid-config]} group-name roles]
   (try
-    (let [ headers {:headers (headers-with-token openid-config credentials)}
-          ;; headers {"authorization" ;; "yrVpUckbUesEEErh"
-          ;;          (format "Bearer: %s" "yrVpUckbUesEEErh")
-          ;; "Content-Type" "application/json"}
-          ;; h (format "bearer %s" (subs authorization-header 7))
-
-
-          ;; headers {"Content-Type" "application/json"
-          ;;          "Authorization" h ;; authorization-header
-          ;;          }
-
-          x (do
-              (clojure.pprint/pprint headers))
-          ;; yrVpUckbUesEEErh
+    (let [options {:headers (headers-with-token openid-config credentials)}
           group (-> (client/get (format "%s/group-by-path/%s"
                                         api-root group-name)
-                                headers)
+                                options)
                     :body json/decode)
           members (-> (client/get (format "%s/groups/%s/members"
                                           api-root (get group "id"))
-                                  headers)
+                                  options)
                       :body json/decode)]
       (response members))
     (catch Exception e
@@ -136,12 +77,11 @@
     (assoc this :openid-config nil))
 
   UserManager
-  (users [this tenant-label authorization-header]
-    (fetch-users this tenant-label authorization-header))
-
-  #_(users [this tenant-label]
-    (println "@keycloak/users")
-    (get-users-by-group-path this tenant-label))
+  (users [this tenant-label roles]
+    (if (tenant-admin? tenant-label roles)
+      (fetch-users this tenant-label roles)
+      {:body "Forbidden"
+       :status 403}))
 
   (add-user [this tenant-label user authorization-header]
     (clojure.pprint/pprint this)
@@ -154,10 +94,4 @@
                        :api-root (format "%s/admin/realms/%s" url realm)
                        :credentials {"username" user
                                      "password" password
-                                     ;; "client_id" "akvo-lumen"
-                                     "client_id" "lumen-api"
-                                     "client_secret" "b10efc01-885e-43f9-8525-88b23f6acbb3"
-
-                                     ;; "client_id" "lumen-backend"
-                                     ;; "client_secret" "96bb449d-82c3-4d50-8da6-659d1662c424"
-                                     }}))
+                                     "client_id" "akvo-lumen"}}))
