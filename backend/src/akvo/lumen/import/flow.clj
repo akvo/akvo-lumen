@@ -1,9 +1,10 @@
 (ns akvo.lumen.import.flow
   (:require [akvo.commons.psql-util :as pg]
+            [akvo.lumen.import.common :as import]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
-            [hugsql.core :as hugsql]
-            [akvo.lumen.import.common :as import]))
+            [hugsql.core :as hugsql])
+  (:import [java.sql.Timestamp]))
 
 (hugsql/def-db-fns "akvo/lumen/import/flow.sql")
 
@@ -13,7 +14,8 @@
         question-groups (question-groups-by-survey-id conn {:survey-id survey-id})
         questions (questions-by-survey-id conn {:survey-id survey-id})
         questions (group-by :question_group_id questions)
-        question-groups (for [{:keys [id] :as question-group} (sort-by :display_order question-groups)]
+        question-groups (for [{:keys [id] :as question-group} (sort-by :display_order
+                                                                       question-groups)]
                           (assoc question-group
                                  :questions
                                  (vec (sort-by :display_order (get questions id)))))
@@ -34,9 +36,11 @@
     "GEO" "text"
     "DATE" "date"
     "NUMBER" "number"
-    "object"))
+    "text"))
 
-(defn dataset-columns [form]
+(defn dataset-columns
+  "Returns a sequence of (column) maps with keys :title, :type and :column-name"
+  [form]
   (let [common [{:title "Identifier" :type "text"}
                 {:title "Latitude" :type "number"}
                 {:title "Longitude" :type "number"}
@@ -55,7 +59,7 @@
 (defmethod render-response "DATE"
   [{:keys [value]}]
   (when (integer? value)
-    (long (/ value 1000.0))))
+    (java.sql.Timestamp. value)))
 
 (defmethod render-response "FREE_TEXT"
   [{:keys [value]}]
@@ -100,21 +104,19 @@
   [conn form-instance-id]
   (into {}
         (map (juxt :question-id identity)
-             (responses-by-form-instance-id
-              conn
-              {:form-instance-id form-instance-id}))))
+             (responses-by-form-instance-id conn {:form-instance-id form-instance-id}))))
 
 (defn form-instance-data-rows [conn form]
   (for [form-instance (form-instances-by-form-id conn {:form-id (:id form)})]
-    (let [responses (question-responses conn (:id form-instance))]
-      (map pg/val->jsonb-pgobj
-           (concat ((juxt :identifier :latitude :longitude :submitter :submitted_at)
-                    form-instance)
-                   (for [question (questions form)]
-                     (render-response (get responses (:id question)))))))))
+    (let [form-instance (update form-instance :submitted_at #(when % (java.sql.Timestamp. %)))
+          responses (question-responses conn (:id form-instance))]
+      (concat ((juxt :identifier :latitude :longitude :submitter :submitted_at)
+               form-instance)
+              (for [question (questions form)]
+                (render-response (get responses (:id question))))))))
 
 (defn form-data
-  "Returns a sequence of maps of the form {\"c1\" jsonb-obj, ...}"
+  "Returns a sequence of maps of the form {\"c1\" value, ...}"
   [conn form columns]
   (let [data-rows (form-instance-data-rows conn form)]
     (map (fn [columns data-row]
@@ -125,10 +127,17 @@
          (repeat columns)
          data-rows)))
 
-(defn create-data-table [table-name column-names]
+(defn create-data-table [table-name columns]
   (format "create table %s (rnum serial primary key, %s);"
           table-name
-          (str/join ", " (map #(str % " jsonb") column-names))))
+          (str/join ", " (map (fn [{:keys [column-name type]}]
+                                (format "%s %s"
+                                        column-name
+                                        (condp = type
+                                          "date" "timestamptz"
+                                          "number" "double precision"
+                                          "text" "text")))
+                              columns))))
 
 (defn create-dataset [tenant-conn table-name report-conn survey-id]
   (let [survey (survey-definition report-conn survey-id)
@@ -137,7 +146,7 @@
         form (-> survey :forms first val)
         columns (dataset-columns form)
         data-rows (form-data report-conn form columns)]
-    (jdbc/execute! tenant-conn [(create-data-table table-name (map :column-name columns))])
+    (jdbc/execute! tenant-conn [(create-data-table table-name columns)])
     (doseq [data-row data-rows]
       (jdbc/insert! tenant-conn table-name data-row))
     columns))
