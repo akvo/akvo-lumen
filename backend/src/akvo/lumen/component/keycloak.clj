@@ -32,6 +32,12 @@
                               {:form-params params})]
     (-> response :body json/decode (get "access_token"))))
 
+(defn fetch-access-token-with-token [openid-config token]
+  (let [params {"grant_type" "client_credentials"}
+        response (client/post (get (openid-config "token_endpoint")
+                                   {:form-params params}))]
+    (-> response :body json/decode)))
+
 (defn headers-with-token [openid-config credentials]
   {"Authorization" (str "bearer " (fetch-access-token openid-config credentials))
    "Content-Type" "application/json"})
@@ -80,13 +86,26 @@
 ;; tenant-group-path t1/
 ;; tenant-admin-group t1/admin
 
+
+
 (defn fetch-users
   "Return the users for a tenant. The tenant label here becomes the group-name."
-  [{:keys [api-root credentials openid-config]} group-name access-token]
+  [{:keys [api-root credentials openid-config]} group-name authorization-header]
   (try
-    (let [headers {:headers (headers-with-token openid-config credentials)}
-          ;; headers {"Authorization" access-token
+    (let [ headers {:headers (headers-with-token openid-config credentials)}
+          ;; headers {"authorization" ;; "yrVpUckbUesEEErh"
+          ;;          (format "Bearer: %s" "yrVpUckbUesEEErh")
           ;; "Content-Type" "application/json"}
+          ;; h (format "bearer %s" (subs authorization-header 7))
+
+
+          ;; headers {"Content-Type" "application/json"
+          ;;          "Authorization" h ;; authorization-header
+          ;;          }
+
+          x (do
+              (clojure.pprint/pprint headers))
+          ;; yrVpUckbUesEEErh
           group (-> (client/get (format "%s/group-by-path/%s"
                                         api-root group-name)
                                 headers)
@@ -100,9 +119,7 @@
       (let [ed (ex-data e)]
         (prn ed)
         (response {:status (:status ed)
-                   :body (:reason-phrase ed)}))
-      )
-    ))
+                   :body (:reason-phrase ed)})))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -119,14 +136,14 @@
     (assoc this :openid-config nil))
 
   UserManager
-  (users [this tenant-label access-token]
-    (fetch-users this tenant-label access-token))
+  (users [this tenant-label authorization-header]
+    (fetch-users this tenant-label authorization-header))
 
   #_(users [this tenant-label]
     (println "@keycloak/users")
     (get-users-by-group-path this tenant-label))
 
-  (add-user [this tenant-label user authorization-token]
+  (add-user [this tenant-label user authorization-header]
     (clojure.pprint/pprint this)
     ;; Make sure to noly invite users that is enabled and have verified email
     (println "Add user")
@@ -137,7 +154,9 @@
                        :api-root (format "%s/admin/realms/%s" url realm)
                        :credentials {"username" user
                                      "password" password
-                                     "client_id" "akvo-lumen"
+                                     ;; "client_id" "akvo-lumen"
+                                     "client_id" "lumen-api"
+                                     "client_secret" "b10efc01-885e-43f9-8525-88b23f6acbb3"
 
                                      ;; "client_id" "lumen-backend"
                                      ;; "client_secret" "96bb449d-82c3-4d50-8da6-659d1662c424"
