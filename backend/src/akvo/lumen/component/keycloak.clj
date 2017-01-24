@@ -14,7 +14,7 @@
 
 (defprotocol UserManager
   (users [this tenant-label roles] "List tenants users")
-  (invites [this tenant-label roles tenant-conn] "ist active invites ")
+  (invites [this tenant-label roles tenant-conn] "ist active invites")
   (invite [this tenant-label roles tenant-conn email] "Invite user to tenant"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
