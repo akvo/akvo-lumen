@@ -1,4 +1,5 @@
 import React, { Component, PropTypes } from 'react';
+import UserInviteButton from './users/UserInviteButton';
 import * as api from '../api';
 
 require('../styles/Users.scss');
