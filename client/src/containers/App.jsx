@@ -4,7 +4,7 @@ import Library from '../components/Library';
 import Visualisation from './Visualisation';
 import Dataset from './Dataset';
 import Dashboard from './Dashboard';
-import UserList from '../components/Users';
+import Users from '../components/Users';
 import Main from './Main';
 
 export default function App({ history }) {
@@ -19,7 +19,7 @@ export default function App({ history }) {
         <Route path="visualisation/:visualisationId" component={Visualisation} />
         <Route path="dashboard/create" component={Dashboard} />
         <Route path="dashboard/:dashboardId" component={Dashboard} />
-        <Route path="admin/users" component={UserList} />
+        <Route path="admin/users" component={Users} />
       </Route>
     </Router>
   );

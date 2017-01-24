@@ -2,20 +2,17 @@ import React, { Component, propTypes } from 'react';
 import { connect } from 'react-redux';
 import { fetchUsers } from '../actions/users';
 
-function UserList(props) {
+function UserList() {
   return (
-    <div className="userList">
-      <h1>List of users</h1>
-      <ul>
-        <li>Jonas</li>
-        <li>Daniel</li>
-        <li>Gabe</li>
-      </ul>
-    </div>
+    <ul>
+      <li>Jonas</li>
+      <li>Daniel</li>
+      <li>Gabe</li>
+    </ul>
   );
 }
 
-class UserListContainer extends Component {
+class Users extends Component {
 
   constructor() {
     super();
@@ -25,10 +22,20 @@ class UserListContainer extends Component {
   }
 
   componentDidMount() {
+    this.props.dispatch(fetchUsers());
+  }
+
+  render() {
+    return (
+      <div className="users">
+        <h1>User List</h1>
+        <UserList />
+      </div>
+    );
   }
 }
 
-UserListContainer.propTypes = {
+Users.propTypes = {
   dispatch: propTypes.func,
   params: propTypes.object,
 };
