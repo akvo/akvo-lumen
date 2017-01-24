@@ -24,7 +24,7 @@ export function init() {
     .then(({ keycloakURL }) => new Keycloak({
       url: keycloakURL,
       realm: 'akvo',
-      clientId: 'akvo-lumen',
+      clientId: 'lumen',
     }))
     .then(kc => new Promise((resolve, reject) =>
       kc.init({ onLoad: 'login-required' }).success((authenticated) => {

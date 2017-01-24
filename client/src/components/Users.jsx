@@ -34,16 +34,6 @@ UserList.propTypes = {
   users: PropTypes.array.isRequired,
 };
 
-const userList = [{
-  email: 'jonas@akvo.org',
-  name: 'Jonas',
-  admin: false,
-}, {
-  email: 'paul@akvo.org',
-  name: 'Paul',
-  admin: true,
-}];
-
 export default class Users extends Component {
 
   constructor() {
@@ -55,8 +45,7 @@ export default class Users extends Component {
 
   componentDidMount() {
     api.get('/api/users')
-      .then(users => this.setState({ users: users }))
-      .catch(() => this.setState({ users: userList }));
+      .then(users => this.setState({ users }));
   }
 
   render() {
