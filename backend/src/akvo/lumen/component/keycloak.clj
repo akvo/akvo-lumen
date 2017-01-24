@@ -1,6 +1,7 @@
 (ns akvo.lumen.component.keycloak
   "Keycloak component."
-  (:require [cheshire.core :as json]
+  (:require [akvo.lumen.auth :refer [tenant-admin?]]
+            [cheshire.core :as json]
             [com.stuartsierra.component :as component]
             [clj-http.client :as client]
             [clojure.set :as set]
@@ -13,6 +14,7 @@
 ;;;
 
 (defprotocol UserManager
+  #_(tenant-admin? [tenant-label roles] "Is user admin at tenant")
   (users [this tenant-label roles] "List tenants users")
   (invites [this tenant-label roles tenant-conn] "ist active invites")
   (invite [this tenant-label roles tenant-conn email] "Invite user to tenant"))
@@ -21,7 +23,7 @@
 ;;; Helpers
 ;;;
 
-(defn tenant-admin?
+#_(defn tenant-admin?
   [tenant-label claimed-roles]
   (contains? (set claimed-roles)
              (format "akvo:lumen:%s:admin" tenant-label)))
@@ -117,6 +119,10 @@
     (assoc this :openid-config nil))
 
   UserManager
+  #_(tenant-admin? [tenant-label claimed-roles]
+    (contains? (set claimed-roles)
+               (format "akvo:lumen:%s:admin" tenant-label)))
+
   (users [this tenant-label roles]
     (if (tenant-admin? tenant-label roles)
       (tenant-members this tenant-label)

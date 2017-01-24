@@ -1,17 +1,18 @@
 (ns akvo.lumen.lib.invite
-  (:require [akvo.lumen.lib.invite-impl :as impl]))
+  (:require [akvo.lumen.lib.invite-impl :as impl]
+            [akvo.lumen.auth :as auth]))
 
 (defn active-invites
   "Returns all active invites"
-  [tenant-conn]
-  (impl/active-invites tenant-conn))
+  [& args]
+  (apply impl/active-invites args))
 
 (defn create
   "Creates a new invite"
-  [tenant-conn body claims]
-  (impl/create tenant-conn body claims))
+  [& args]
+  (apply impl/create args))
 
-(defn accept-invite
+#_(defn accept-invite
   ""
-  [tenant-conn id]
-  (impl/accept-invite tenant-conn id))
+  [tenant-conn keycloak id]
+  (impl/accept-invite tenant-conn keycloak id))

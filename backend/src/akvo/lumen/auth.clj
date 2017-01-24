@@ -6,15 +6,21 @@
             [clojure.set :as set]
             [ring.util.response :as response]))
 
-(defn allowed?
+(defn tenant-user?
   "We need to pass in both admin and normal users"
   [tenant-label claimed-roles]
   (let [rules ["akvo:lumen:%s"
-               "akvo:lumen:%s:admin"]]
+               ;; "akvo:lumen:%s:admin"
+               ]]
     (not
      (empty?
       (set/intersection (set claimed-roles)
                         (set (map #(format % tenant-label) rules)))))))
+
+(defn tenant-admin?
+  [tenant-label claimed-roles]
+  (contains? (set claimed-roles)
+             (format "akvo:lumen:%s:admin" tenant-label)))
 
 (defn wrap-auth
   "Wrap authentication for API. Allow GET to root / and share urls at /s/<id>.
@@ -33,7 +39,7 @@
       (handler request)
       (if-let [claimed-roles (get-in request
                                      [:jwt-claims "realm_access" "roles"])]
-        (if (allowed? (:tenant request) claimed-roles)
+        (if (tenant-user? (:tenant request) claimed-roles)
           (handler request)
           (-> (response/response "Not authorized")
               (response/status 403)))
