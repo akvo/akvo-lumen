@@ -64,7 +64,8 @@
      ((m/wrap-auth test-handler)
       (-> (immutant-request :get "/api/resource")
           (assoc-in [:jwt-claims "realm_access" "roles"]
-                    ["akvo:lumen:t0:admin"])
+                    ["akvo:lumen:t0"
+                     "akvo:lumen:t0:admin"])
           (assoc :tenant "t0")))
      200))
 
