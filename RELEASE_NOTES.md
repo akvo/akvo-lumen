@@ -2,6 +2,50 @@
 
 ## 0.5.0 (unreleased)
 
+## 0.4.5
+
+Date 2017-01-23
+
+### New and noteworthy
+
+* Moved to a highly available keycloak (single sign-on) instance running on
+  the same cloud environment as the rest of lumen
+
+### Bugfixes
+
+* Fixed a bug whereby it was impossible to enter 0 as a default fallback value
+  when changing the type of a column
+
+
+## 0.4.4
+
+Date 2017-01-17
+
+### New and noteworthy
+
+* Client load times optimized by making server to client communication more
+  effcient.
+
+### Bugfixes
+
+* Fix transformation log rendering where the log could render the
+  wrong title or in some cases not show up at all.
+
+* Fix regression where applied transformations are not reflected in
+  the visualisation editor
+
+## 0.4.3
+
+Date 2017-01-10
+
+### Bugfixes
+
+* Fix file upload regression
+
+## 0.4.2
+
+Date 2017-01-10
+
 ### New and noteworthy
 
 * New transformation: Delete column

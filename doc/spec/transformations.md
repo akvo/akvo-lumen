@@ -172,7 +172,7 @@ Examples:
 ### core/combine
 
 * args
-  * columNames (vector): `["c1", "c2"]`
+  * columnNames (vector): `["c1", "c2"]`
   * newColumnTitle (string): `"New title"`
   * seperator (string): `","`
 * onError (string): `"fail"`

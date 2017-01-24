@@ -11,19 +11,16 @@ spec:
     spec:
       containers:
       - name: lumen-client
-        image: eu.gcr.io/akvo-lumen/lumen-client:latest
+        image: akvo/lumen-client:latest
         ports:
         - containerPort: 80
       - name: lumen-backend
-        image: eu.gcr.io/akvo-lumen/lumen-backend:latest
+        image: akvo/lumen-backend:latest
         ports:
         - containerPort: 3000
         env:
         - name: LUMEN_KEYCLOAK_URL
-          valueFrom:
-            configMapKeyRef:
-              name: akvo
-              key: keycloak.url
+          value: https://login.test.akvo-ops.org/auth
         - name: LUMEN_FILE_UPLOAD_PATH
           value: /tmp/akvo/lumen
         - name: LUMEN_DB_URL

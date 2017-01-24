@@ -6,7 +6,7 @@ machine:
   environment:
     PROJECT_NAME: akvo-lumen
     PROD_CLUSTER_NAME: lumen
-    DEV_CLUSTER_NAME: lumen-dev
+    DEV_CLUSTER_NAME: dev-cluster
     CLOUDSDK_COMPUTE_ZONE: europe-west1-d
     DEBIAN_FRONTEND: noninteractive
   services:

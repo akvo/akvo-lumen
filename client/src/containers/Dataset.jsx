@@ -2,6 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import Immutable from 'immutable';
 import { connect } from 'react-redux';
 import { showModal } from '../actions/activeModal';
+import { fetchDataset } from '../actions/dataset';
 import { getId, getTitle } from '../domain/entity';
 import { getTransformations, getRows, getColumns } from '../domain/dataset';
 import * as api from '../api';
@@ -14,22 +15,22 @@ class Dataset extends Component {
     super();
     this.state = {
       asyncComponents: null,
-      dataset: null,
       // Pending transformations are represented as
       // an oredered map from timestamp to transformation
       pendingTransformations: Immutable.OrderedMap(),
     };
     this.handleShowDatasetSettings = this.handleShowDatasetSettings.bind(this);
-    this.fetchDataset = this.fetchDataset.bind(this);
     this.transform = this.transform.bind(this);
     this.undo = this.undo.bind(this);
   }
 
   componentDidMount() {
-    const { params } = this.props;
+    const { params, dataset, dispatch } = this.props;
     const { datasetId } = params;
 
-    this.fetchDataset(datasetId);
+    if (dataset == null || dataset.get('rows') == null) {
+      dispatch(fetchDataset(datasetId));
+    }
 
     require.ensure([], () => {
       /* eslint-disable global-require */
@@ -59,35 +60,30 @@ class Dataset extends Component {
     });
   }
 
-  fetchDataset(datasetId) {
-    return api.get(`/api/datasets/${datasetId}`)
-      .then(dataset => this.setState({ dataset: Immutable.fromJS(dataset) }));
-  }
-
   removePending(timestamp) {
     const { pendingTransformations } = this.state;
     this.setState({ pendingTransformations: pendingTransformations.delete(timestamp) });
   }
 
   transform(transformation) {
-    const { dataset } = this.state;
+    const { dataset, dispatch } = this.props;
     const id = dataset.get('id');
     const now = Date.now();
 
     this.setPendingTransformation(now, transformation);
     api.post(`/api/transformations/${id}/transform`, transformation.toJS())
-      .then(() => this.fetchDataset(id))
+      .then(() => dispatch(fetchDataset(id)))
       .then(() => this.removePending(now));
   }
 
   undo() {
-    const { dataset } = this.state;
+    const { dataset, dispatch } = this.props;
     const id = dataset.get('id');
     const now = Date.now();
 
     this.setPendingUndo(now);
     api.post(`/api/transformations/${id}/undo`)
-      .then(() => this.fetchDataset(id))
+      .then(() => dispatch(fetchDataset(id)))
       .then(() => this.removePending(now));
   }
 
@@ -98,7 +94,8 @@ class Dataset extends Component {
   }
 
   render() {
-    const { dataset, pendingTransformations } = this.state;
+    const { pendingTransformations } = this.state;
+    const { dataset } = this.props;
     if (dataset == null || !this.state.asyncComponents) {
       return <div className="Dataset">Loading...</div>;
     }
@@ -126,9 +123,12 @@ class Dataset extends Component {
 }
 
 Dataset.propTypes = {
+  dataset: PropTypes.object,
   params: PropTypes.object.isRequired,
   dispatch: PropTypes.func.isRequired,
 };
 
 // Just inject `dispatch`
-export default connect(() => ({}))(Dataset);
+export default connect((state, props) => ({
+  dataset: state.library.datasets[props.params.datasetId],
+}))(Dataset);

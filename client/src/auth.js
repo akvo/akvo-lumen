@@ -1,7 +1,45 @@
+import fetch from 'isomorphic-fetch';
 import Keycloak from 'keycloak-js';
 
-export default new Keycloak({
-  url: process.env.LUMEN_KEYCLOAK_URL || 'http://localhost:8080/auth',
-  realm: 'akvo',
-  clientId: 'akvo-lumen',
-});
+let keycloak = null;
+
+export function token() {
+  if (keycloak == null) {
+    throw new Error('Keycloak not initialized');
+  }
+
+  return new Promise((resolve, reject) =>
+    keycloak.updateToken()
+      .success(() => resolve(keycloak.token))
+      .error(err => reject(err))
+  );
+}
+
+export function init() {
+  if (keycloak != null) {
+    throw new Error('Keycloak already initialized');
+  }
+  return fetch('/env')
+    .then(response => response.json())
+    .then(({ keycloakURL }) => new Keycloak({
+      url: keycloakURL,
+      realm: 'akvo',
+      clientId: 'akvo-lumen',
+    }))
+    .then(kc => new Promise((resolve, reject) =>
+      kc.init({ onLoad: 'login-required' }).success((authenticated) => {
+        if (authenticated) {
+          kc.loadUserProfile().success((profile) => {
+            keycloak = kc;
+            resolve(profile);
+          }).error(() => {
+            reject('Could not load user profile');
+          });
+        } else {
+          reject('Could not authenticate');
+        }
+      }).error(() => {
+        reject('Login attempt failed');
+      })
+  ));
+}

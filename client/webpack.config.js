@@ -63,8 +63,7 @@ module.exports = {
     new SystemBellPlugin(),
     new webpack.DefinePlugin({
       'process.env': {
-        'NODE_ENV': JSON.stringify(process.env.NODE_ENV),
-        'LUMEN_KEYCLOAK_URL': JSON.stringify(process.env.LUMEN_KEYCLOAK_URL)
+        'NODE_ENV': JSON.stringify(process.env.NODE_ENV)
       }
     })
   ]

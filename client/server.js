@@ -16,6 +16,10 @@ new WebpackDevServer(webpack(config), {
     '/s/**': {
       target: "http://t1.lumen.localhost:3000",
       secure: false
+    },
+    '/env': {
+      target: "http://t1.lumen.localhost:3000",
+      secure: false
     }
   }
 }).listen(3030, 'localhost', function (err, result) {
