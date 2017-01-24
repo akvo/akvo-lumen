@@ -1,15 +1,29 @@
-.Users h1 {
-  font-size: 3em;
-}
+@import 'modules/colors';
 
-.Users table {
-
-}
-
-.Users table tr {
-
-}
-
-.Users table tr th {
-  font-weight: bold;
+.Users {
+  padding: 10px;
+  h1 {
+    color: $strongBlue;
+    font-size: 1.5rem;
+    font-weight: bold;
+    line-height: 2.5rem;
+  }
+  table {
+    width: 500px;
+    & tr {
+      border-bottom: 1px solid $lightGrey;
+      & th, td {
+        padding: 20px 0 10px 0;
+      }
+      & th {
+        color: #aaa;
+        text-align: left;
+        font-size: 1.1rem;
+        font-weight: bold;
+      }
+      & td {
+        font-weight: bold;
+      }
+    }
+  }
 }

@@ -55,8 +55,8 @@ export default class Users extends Component {
 
   componentDidMount() {
     api.get('/api/users')
-      .then(users => this.setState({ userList: users }))
-      .catch(() => this.setState({ userList }));
+      .then(users => this.setState({ users: users }))
+      .catch(() => this.setState({ users: userList }));
   }
 
   render() {
