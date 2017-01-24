@@ -1,41 +1,75 @@
-import React, { Component, propTypes } from 'react';
-import { connect } from 'react-redux';
-import { fetchUsers } from '../actions/users';
+import React, { Component, PropTypes } from 'react';
+import * as api from '../api';
 
-function UserList() {
+require('../styles/Users.scss');
+
+function User({ email, name, admin }) {
   return (
-    <ul>
-      <li>Jonas</li>
-      <li>Daniel</li>
-      <li>Gabe</li>
-    </ul>
+    <tr>
+      <td>{name}</td>
+      <td>{email}</td>
+      <td>{admin ? 'admin' : 'user'}</td>
+    </tr>
   );
 }
 
-class Users extends Component {
+User.propTypes = {
+  name: PropTypes.string.isRequired,
+  email: PropTypes.string.isRequired,
+  admin: PropTypes.bool.isRequired,
+};
+
+function UserList({ users }) {
+  return (
+    <table>
+      <tr><th>Name</th><th>Email</th><th>Role</th></tr>
+      {users.map(({ email, admin, name }) => (
+        <User email={email} admin={admin} name={name} />
+      ))}
+    </table>
+  );
+}
+
+UserList.propTypes = {
+  users: PropTypes.array.isRequired,
+};
+
+const userList = [{
+  email: 'jonas@akvo.org',
+  name: 'Jonas',
+  admin: false,
+}, {
+  email: 'paul@akvo.org',
+  name: 'Paul',
+  admin: true,
+}];
+
+export default class Users extends Component {
 
   constructor() {
     super();
     this.state = {
-      userList: [],
+      users: [],
     };
   }
 
   componentDidMount() {
-    this.props.dispatch(fetchUsers());
+    api.get('/api/users')
+      .then(users => this.setState({ userList: users }))
+      .catch(() => this.setState({ userList }));
   }
 
   render() {
     return (
-      <div className="users">
-        <h1>User List</h1>
-        <UserList />
+      <div className="Users">
+        <h1>Members</h1>
+        <UserList users={this.state.users} />
       </div>
     );
   }
 }
 
 Users.propTypes = {
-  dispatch: propTypes.func,
-  params: propTypes.object,
+  dispatch: PropTypes.func,
+  params: PropTypes.object,
 };
