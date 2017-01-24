@@ -14,5 +14,26 @@ An open-source, easy to use data mashup, analysis and publishing platform.
 ## Backend
 [Readme](backend/README.md)
 
+## Keycloak
+The admin password for keycloak is "admin" / "password". There is an "akvo" realm, where two tenants (t1 & t2) and their are represesnted by the following groups:
+```
+- t1
+  - admin
+- t2
+  - admin
+```
+
+Available users are:
+
+- "lumen" service account
+- "jerome" t1 admin
+- "salim" t1 user
+- "ruth" t2 admin
+- "harry" t2 user
+- kaj keycloak user not on a tenant
+
+All passwords are "password".
+
+
 ## Legal
 Copyright © 2016 - present Akvo Foundation
