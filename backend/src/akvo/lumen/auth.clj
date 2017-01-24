@@ -7,15 +7,9 @@
             [ring.util.response :as response]))
 
 (defn tenant-user?
-  "We need to pass in both admin and normal users"
   [tenant-label claimed-roles]
-  (let [rules ["akvo:lumen:%s"
-               ;; "akvo:lumen:%s:admin"
-               ]]
-    (not
-     (empty?
-      (set/intersection (set claimed-roles)
-                        (set (map #(format % tenant-label) rules)))))))
+  (contains? (set claimed-roles)
+             (format "akvo:lumen:%s" tenant-label)))
 
 (defn tenant-admin?
   [tenant-label claimed-roles]

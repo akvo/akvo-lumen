@@ -23,11 +23,6 @@
 ;;; Helpers
 ;;;
 
-#_(defn tenant-admin?
-  [tenant-label claimed-roles]
-  (contains? (set claimed-roles)
-             (format "akvo:lumen:%s:admin" tenant-label)))
-
 (defn fetch-openid-configuration
   "Get the openid configuration"
   [issuer]
@@ -119,10 +114,6 @@
     (assoc this :openid-config nil))
 
   UserManager
-  #_(tenant-admin? [tenant-label claimed-roles]
-    (contains? (set claimed-roles)
-               (format "akvo:lumen:%s:admin" tenant-label)))
-
   (users [this tenant-label roles]
     (if (tenant-admin? tenant-label roles)
       (tenant-members this tenant-label)
