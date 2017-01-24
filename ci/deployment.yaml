@@ -20,7 +20,10 @@ spec:
         - containerPort: 3000
         env:
         - name: LUMEN_KEYCLOAK_URL
-          value: https://login.test.akvo-ops.org/auth
+          valueFrom:
+            configMapKeyRef:
+              name: akvo
+              key: keycloak.url
         - name: LUMEN_FILE_UPLOAD_PATH
           value: /tmp/akvo/lumen
         - name: LUMEN_DB_URL
