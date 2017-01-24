@@ -81,4 +81,4 @@
              :realm keycloak-realm
              :user keycloak-user
              :password keycloak-password
-             :client_id keycloak-client-id}}}
+             :client-id keycloak-client-id}}}

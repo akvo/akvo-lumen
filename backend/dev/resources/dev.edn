@@ -15,5 +15,5 @@
   :keycloak {:url "http://localhost:8080/auth"
              :realm "akvo"
              :user "lumen"
-             :password "lumen"
-             :client_id "akvo-lumen"}}}
+             :password "password"
+             :client-id "lumen"}}}

@@ -62,7 +62,7 @@
       :body json/decode))
 
 ;;; This is kinda fragile, this relies on that one user not belog to multiple
-;;; groups and does not support new sub groups!!!!!!
+;;; groups and does not support new swub groups!!!!!!
 (defn tenant-members
   "Return the users for a tenant. The tenant label here becomes the group-name"
   [keycloak tenant-label]
@@ -141,9 +141,9 @@
       {:body "Forbidden"
        :status 403})))
 
-(defn keycloak [{:keys [url realm user password]}]
+(defn keycloak [{:keys [client-id url realm user password]}]
   (map->KeycloakAgent {:issuer (format "%s/realms/%s" url realm)
                        :api-root (format "%s/admin/realms/%s" url realm)
                        :credentials {"username" user
                                      "password" password
-                                     "client_id" "akvo-lumen"}}))
+                                     "client_id" client-id}}))
