@@ -3,10 +3,10 @@ import * as api from '../api';
 
 require('../styles/Users.scss');
 
-function User({ email, name, admin }) {
+function User({ email, username, admin }) {
   return (
     <tr>
-      <td>{name}</td>
+      <td>{username}</td>
       <td>{email}</td>
       <td>{admin ? 'admin' : 'user'}</td>
     </tr>
@@ -14,7 +14,7 @@ function User({ email, name, admin }) {
 }
 
 User.propTypes = {
-  name: PropTypes.string.isRequired,
+  username: PropTypes.string.isRequired,
   email: PropTypes.string.isRequired,
   admin: PropTypes.bool.isRequired,
 };
@@ -23,8 +23,8 @@ function UserList({ users }) {
   return (
     <table>
       <tr><th>Name</th><th>Email</th><th>Role</th></tr>
-      {users.map(({ email, admin, name }) => (
-        <User email={email} admin={admin} name={name} />
+      {users.map(({ email, admin, username }) => (
+        <User email={email} admin={admin} username={username} />
       ))}
     </table>
   );
