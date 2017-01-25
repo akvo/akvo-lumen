@@ -1,5 +1,8 @@
 import React, { Component, PropTypes } from 'react';
 import ContextMenu from '../../common/ContextMenu';
+import ToggleInput from './ToggleInput';
+
+require('../../../styles/LayerMenuItem.scss');
 
 export default class LayerMenuItem extends Component {
 
@@ -7,7 +10,14 @@ export default class LayerMenuItem extends Component {
     super();
     this.state = {
       showOverflow: false,
+      workingTitle: '',
     };
+  }
+
+  componentWillMount() {
+    this.setState({
+      workingTitle: this.props.layer.title,
+    });
   }
 
   render() {
@@ -24,101 +34,73 @@ export default class LayerMenuItem extends Component {
 
     return (
       <li
-        style={{
-          display: 'flex',
-          flex: 1,
-          height: '6rem',
-          borderBottom: '0.1rem solid grey',
-        }}
+        className="LayerMenuItem"
       >
         {titleEditMode ?
           <div
-            style={{
-              display: 'flex',
-              flex: 1,
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              margin: '0 0.5rem 0 0.5rem',
-            }}
+            className="titleInputContainer"
           >
             <input
-              style={{
-                height: '2.4rem',
-                fontSize: '1rem',
-                lineHeight: '1.4rem',
-                padding: '0.5rem 1rem',
-              }}
               type="text"
-              value={layer.title}
-              onChange={evt => onChangeTitle(evt.target.value)}
+              value={this.state.workingTitle}
+              onChange={evt => this.setState({
+                workingTitle: evt.target.value,
+              })}
             />
             <button
               className="clickable"
-              style={{
-                height: '2.4rem',
-                fontSize: '1rem',
-                lineHeight: '1.4rem',
-                padding: '0.5rem 1rem',
+              onClick={() => {
+                onChangeTitle(this.state.workingTitle);
+                onEndTitleEdit();
               }}
-              onClick={onEndTitleEdit}
             >
               ✓
             </button>
           </div>
           :
           <div
-            style={{
-              display: 'flex',
-              flex: 1,
-              margin: '0 0.5rem',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-            }}
+            className="container"
           >
             <span
-              onClick={() => onSelectLayer(layerIndex)}
-              className="clickable"
-              style={{
-                flex: 4,
-                padding: '2rem 0 2rem 1rem',
-              }}
+              className="titleContainer"
             >
-              {layer.title}
+              <span
+                onClick={() => onSelectLayer(layerIndex)}
+                className="clickable title"
+              >
+                {layer.title}
+              </span>
             </span>
-            <input
-              style={{
-                flex: 1,
-              }}
-              type="checkbox"
-              checked={layer.visible}
-              onChange={() => this.props.onSetLayerVisible(!layer.visible)}
-            />
             <span
-              style={{
-                flex: 1,
-              }}
+              className="toggleContainer"
+            >
+              <ToggleInput
+                checked={layer.visible}
+                onChange={() => this.props.onSetLayerVisible(!layer.visible)}
+              />
+            </span>
+            <span
+              className="overflowButtonContainer"
             >
               <button
-                className="clickable"
-                style={{
-                  fontSize: '1.6rem',
-                  fontWeight: 'bold',
-                  padding: '0.5rem 1rem',
-
-                }}
+                className={`clickable overflowButton noSelect
+                  ${this.state.showOverflow ? 'active' : 'inactive'}`}
                 onClick={() => this.setState({ showOverflow: true })}
               >
-                ...
+                ● ● ●
               </button>
               {this.state.showOverflow &&
                 <ContextMenu
+                  style={{
+                    top: '1.8rem',
+                  }}
+                  arrowClass="topRight"
                   options={[
-                    { value: 'edit', label: 'Edit' },
+                    { value: 'rename', label: 'Rename' },
                     { value: 'delete', label: 'Delete' },
                   ]}
                   onOptionSelected={(option) => {
-                    if (option === 'edit') {
+                    if (option === 'rename') {
                       onBeginTitleEdit();
                     } else if (option === 'delete') {
                       onDeleteLayer();

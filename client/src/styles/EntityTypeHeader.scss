@@ -20,9 +20,20 @@
     border-right: 0.1rem solid $lightBlueGrey;
   }
   .entityTitle {
-    color: $strongBlue;
-    font-weight: bold;
-    font-size: 1.1em;
+    font-size: 1.1rem;
+
+    &.default {
+      font-style: italic;
+      color: $darkGrey;
+    }
+  }
+  .entityTitleInput{
+    font-size: 1.1rem;
+    font-style: italic;
+    width: 100%;
+    padding: 0;
+    border: none;
+    color: $darkGrey;
   }
   .controls {
     width: 40%;

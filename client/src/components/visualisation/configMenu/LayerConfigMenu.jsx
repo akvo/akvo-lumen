@@ -4,8 +4,11 @@ import SelectInput from './SelectInput';
 import { getPointColorValues } from '../../../utilities/chart';
 import defaultColors from '../../../utilities/defaultColors';
 import ButtonRowInput from './ButtonRowInput';
+import ToggleInput from './ToggleInput';
 import ColorLabels from './ColorLabels';
 import FilterMenu from './FilterMenu';
+
+require('../../../styles/LayerConfigMenu.scss');
 
 const getSelectMenuOptionsFromColumnList = columns => (columns == null ?
   [] : columns.map((column, index) => ({
@@ -19,34 +22,15 @@ const getSelectMenuOptionsFromColumnList = columns => (columns == null ?
 const TabMenu = ({ activeTab, tabs, onChangeTab }) => (
   <ul
     className="TabMenu"
-    style={{
-      display: 'flex',
-      justifyContent: 'space-around',
-      alignItems: 'center',
-      borderBottom: '0.1rem solid grey',
-    }}
   >
     {tabs.map((tab, index) =>
       <li
         key={index}
         className={`tab ${tab === activeTab ? 'active' : 'inactive'}`}
-        style={{
-          flex: 1,
-        }}
       >
         <button
-          className="clickable"
+          className="tabButton clickable"
           onClick={() => onChangeTab(tab)}
-          style={{
-            textTransform: 'uppercase',
-            width: '70%',
-            margin: '0 15%',
-            fontSize: '0.8rem',
-            textAlign: 'center',
-            height: '3rem',
-            color: tab === activeTab ? 'grey' : 'blue',
-            borderBottom: tab === activeTab ? '0.2rem solid grey' : '0.2rem solid transparent',
-          }}
         >
           {tab}
         </button>
@@ -83,9 +67,6 @@ export default class LayerConfigMenu extends Component {
         tabContent = (
           <div
             className="dataTab"
-            style={{
-              margin: '1rem',
-            }}
           >
             <div className="inputGroup">
               <label htmlFor="xDatasetMenu">Source dataset:</label>
@@ -142,7 +123,9 @@ export default class LayerConfigMenu extends Component {
                 name="xGroupColumnMenu"
                 options={columnOptions}
                 clearable
-                onChange={columnName => this.handlePointColorColumnChange(columnName)}
+                onChange={columnName =>
+                  this.handlePointColorColumnChange(columnName,
+                    columnOptions.find(option => option.value === columnName))}
               />
             </div>
             <FilterMenu
@@ -158,23 +141,17 @@ export default class LayerConfigMenu extends Component {
         tabContent = (
           <div
             className="legendTab"
-            style={{
-              margin: '1rem',
-            }}
           >
-            <div className="inputGroup">
-              <label
-                htmlFor="legend"
-              >
-                Legend
-              </label>
-              <input
-                id="legend"
-                type="checkbox"
-                checked
-                readOnly
-              />
-            </div>
+            <ToggleInput
+              checked={layer.legend.visible}
+              label="Legend"
+              onChange={(val) => {
+                const legend = Object.assign({}, layer.legend);
+                legend.visible = val;
+                this.props.onChangeMapLayer(layerIndex, { legend });
+              }}
+            />
+            <hr />
             <ButtonRowInput
               options={['top', 'right', 'bottom', 'left']}
               label="Position"
@@ -186,19 +163,13 @@ export default class LayerConfigMenu extends Component {
                 this.props.onChangeMapLayer(layerIndex, { legend });
               }}
             />
-            <div className="inputGroup">
-              <label
-                htmlFor="counters"
-              >
-                Counters
-              </label>
-              <input
-                id="counters"
-                type="checkbox"
-                checked={false}
-                readOnly
-              />
-            </div>
+            <hr />
+            <ToggleInput
+              disabled
+              checked={false}
+              label="Counters"
+              onChange={() => null}
+            />
           </div>
         );
         break;
@@ -207,47 +178,25 @@ export default class LayerConfigMenu extends Component {
           <div
             className="popupTab"
           >
-            <div
-              className="inputGroup"
-              style={{
-                borderBottom: '0.1rem solid whitesmoke',
-              }}
-            >
-              <label
-                htmlFor="popup"
-              >
-                Pop-up
-              </label>
-              <input
-                id="popup"
-                type="checkbox"
-                readOnly
-              />
-            </div>
+            <ToggleInput
+              disabled
+              checked
+              label="Pop-up"
+              onChange={() => null}
+            />
+            <hr />
             <div
               className="inputGroup"
             >
               {columnOptions.map((option, index) =>
                 <div
+                  className="optionContainer"
                   key={index}
-                  style={{
-                    display: 'flex',
-                    flex: 1,
-                    height: '2rem',
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                  }}
                 >
                   <span
-                    style={{
-                      flex: 1,
-                    }}
+                    className="controlContainer"
                   >
                     <input
-                      style={{
-                        fontSize: '1.2rem',
-                      }}
                       className="clickable"
                       type="checkbox"
                       checked={this.props.layer.popup.findIndex(entry =>
@@ -256,9 +205,7 @@ export default class LayerConfigMenu extends Component {
                     />
                   </span>
                   <span
-                    style={{
-                      flex: 11,
-                    }}
+                    className="columnLabelContainer"
                   >
                     {option.label}
                   </span>
@@ -272,9 +219,6 @@ export default class LayerConfigMenu extends Component {
         tabContent = (
           <div
             className="themeTab"
-            style={{
-              margin: '1rem',
-            }}
           >
             <h3>Marker</h3>
             <ButtonRowInput
@@ -332,18 +276,34 @@ export default class LayerConfigMenu extends Component {
     return tabContent;
   }
 
-  handlePointColorColumnChange(columnName) {
+  handlePointColorColumnChange(columnName = null, columnOption = null) {
     const { datasets } = this.props;
     const dataset = datasets[this.props.layer.datasetId];
-    const values = getPointColorValues(dataset, columnName, this.props.layer.filters);
+    let values;
+    let legend;
+
+    if (columnName != null) {
+      values = getPointColorValues(dataset, columnName, this.props.layer.filters);
+    }
+
+    if (columnOption != null) {
+      legend = Object.assign({}, this.props.layer.legend, { title: columnOption.label });
+    } else {
+      legend = Object.assign({}, this.props.layer.legend, { title: null });
+    }
 
     this.props.onChangeMapLayer(this.props.layerIndex, {
+      legend,
       pointColorColumn: columnName,
-      pointColorMapping: values.map((value, index) => ({
-        op: 'equals',
-        value,
-        color: defaultColors[index] || '#000000',
-      })),
+      pointColorMapping: values != null ?
+        values.map((value, index) => ({
+          op: 'equals',
+          value,
+          color: defaultColors[index] || '#000000',
+        }))
+        :
+        []
+      ,
     });
   }
 
@@ -383,41 +343,20 @@ export default class LayerConfigMenu extends Component {
     return (
       <div
         className="LayerConfigMenu"
-        style={{
-          position: 'relative',
-        }}
       >
         <div
           className="header"
-          style={{
-            display: 'flex',
-            justifyContent: 'space-around',
-            alignItems: 'center',
-            height: '4rem',
-            borderBottom: '0.1rem solid grey',
-          }}
         >
           <button
-            className="clickable"
+            className="clickable deselectLayer"
             onClick={this.props.onDeselectLayer}
-            style={{
-              fontSize: '1.6rem',
-              flex: 1,
-            }}
           >
             ←
           </button>
           <span
-            style={{
-              flex: 5,
-              padding: '0 0.5rem',
-            }}
+            className="layerTitleContainer"
           >
-            <h2
-              style={{
-                fontStyle: 'italic',
-              }}
-            >
+            <h2>
               {layer.title}
             </h2>
           </span>
@@ -429,38 +368,6 @@ export default class LayerConfigMenu extends Component {
         />
         <div className="tabContent">
           {this.getTabContent(columnOptions)}
-        </div>
-        <div
-          className="saveContainer"
-          style={{
-            position: 'fixed',
-            display: 'block',
-            height: '4rem',
-            width: '30%',
-            minWidth: 1024 * 0.3,
-            top: 'calc(100vh - 4rem)',
-            backgroundColor: 'white',
-          }}
-        >
-          <button
-            className="clickable"
-            style={{
-              backgroundColor: 'grey',
-              color: 'white',
-              fontSize: '1rem',
-              display: 'block',
-              position: 'absolute',
-              top: '0.5rem',
-              bottom: '0.5rem',
-              right: '0.5rem',
-              left: '0.5rem',
-              width: 'calc(100% - 1rem)',
-              borderRadius: '0.2rem',
-            }}
-            onClick={this.props.onSave}
-          >
-            Save
-          </button>
         </div>
       </div>
     );

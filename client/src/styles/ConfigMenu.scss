@@ -1,0 +1,12 @@
+@import 'modules/colors';
+
+.ConfigMenu {
+  .visualisationTypePicker {
+    .typeButton {
+      background-color: $lightGrey;
+      padding: 2rem 1rem;
+      border: 0.1rem solid $midGrey;
+      margin: 0.25rem;
+    }
+  }
+}

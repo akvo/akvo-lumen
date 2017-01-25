@@ -13,7 +13,6 @@ export default function VisualisationConfig(props) {
       <ConfigMenu
         visualisation={props.visualisation}
         datasets={props.datasets}
-        onChangeTitle={props.onChangeTitle}
         onChangeSourceDataset={props.onChangeSourceDataset}
         onChangeVisualisationSpec={props.onChangeVisualisationSpec}
         onChangeVisualisationType={props.onChangeVisualisationType}
@@ -26,7 +25,6 @@ export default function VisualisationConfig(props) {
 VisualisationConfig.propTypes = {
   visualisation: PropTypes.object.isRequired,
   datasets: PropTypes.object.isRequired,
-  onChangeTitle: PropTypes.func.isRequired,
   onChangeVisualisationType: PropTypes.func.isRequired,
   onChangeSourceDataset: PropTypes.func.isRequired,
   onChangeVisualisationSpec: PropTypes.func.isRequired,

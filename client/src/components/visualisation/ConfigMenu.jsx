@@ -12,6 +12,7 @@ import ScatterConfigMenu from './configMenu/ScatterConfigMenu';
 import MapConfigMenu from './configMenu/MapConfigMenu';
 import visualisationTypes from '../../containers/Visualisation/visualisationTypes';
 
+require('../../styles/ConfigMenu.scss');
 
 const sortFunction = (a, b) => {
   const string1 = entity.getTitle(a).toLowerCase();
@@ -169,45 +170,41 @@ export default function ConfigMenu(props) {
     <div className="ConfigMenu">
       {
         visualisation.visualisationType == null ?
-          <div>
+          <div className="visualisationTypePicker">
             <ul>
               {visualisationTypes.map((vType, index) =>
                 <li
+                  className="clickable typeButton"
                   key={index}
                   onClick={() => props.onChangeVisualisationType(vType)}
-                  style={{
-                    backgroundColor: 'whitesmoke',
-                    padding: '2rem 1rem',
-                    border: '0.1rem solid grey',
-                    margin: '0.25rem',
-                    cursor: 'pointer',
-                  }}
                 >
                   {vType}
                 </li>
-          )}
+              )}
             </ul>
           </div>
         :
           <div>
-            {
-            visualisation.visualisationType === 'map' ?
-              <div>
-                <MapConfigMenu
-                  visualisation={props.visualisation}
-                  onChangeSpec={props.onChangeVisualisationSpec}
-                  onChangeVisualisationType={props.onChangeVisualisationType}
-                  datasets={props.datasets}
-                  datasetOptions={getDatasetOptions(getDatasetArray(props.datasets))}
-                  columnOptions={columnOptions}
-                  aggregationOptions={aggregationOptions}
-                  getColumnMetadata={getColumnMetadata}
-                  onSave={props.onSaveVisualisation}
-                  onChangeSourceDataset={props.onChangeSourceDataset}
-                />
-              </div>
+            {visualisation.visualisationType === 'map' ?
+              <MapConfigMenu
+                visualisation={props.visualisation}
+                onChangeSpec={props.onChangeVisualisationSpec}
+                onChangeVisualisationType={props.onChangeVisualisationType}
+                datasets={props.datasets}
+                datasetOptions={getDatasetOptions(getDatasetArray(props.datasets))}
+                columnOptions={columnOptions}
+                aggregationOptions={aggregationOptions}
+                getColumnMetadata={getColumnMetadata}
+                onSave={props.onSaveVisualisation}
+                onChangeSourceDataset={props.onChangeSourceDataset}
+              />
             :
               <div>
+                <VisualisationTypeMenu
+                  onChangeVisualisationType={props.onChangeVisualisationType}
+                  visualisation={visualisation}
+                  disabled={visualisation.datasetId === null}
+                />
                 <div className="inputGroup">
                   <label htmlFor="xDatasetMenu">Source dataset:</label>
                   <SelectMenu
@@ -225,25 +222,6 @@ export default function ConfigMenu(props) {
                   filters={spec.filters}
                   columnOptions={columnOptions}
                 />
-                <VisualisationTypeMenu
-                  onChangeVisualisationType={props.onChangeVisualisationType}
-                  visualisation={visualisation}
-                  disabled={visualisation.datasetId === null}
-                />
-                {visualisation.visualisationType !== null &&
-                <div className="inputGroup">
-                  <label htmlFor="chartTitle">Chart title:</label>
-                  <input
-                    className="textInput"
-                    type="text"
-                    id="chartTitle"
-                    placeholder="Untitled chart"
-                    defaultValue={visualisation.name !== null ?
-                      visualisation.name.toString() : null}
-                    onChange={props.onChangeTitle}
-                  />
-                </div>
-              }
                 {(visualisation.datasetId && visualisation.visualisationType) &&
                 getChartTypeEditor(visualisation.visualisationType)
               }
@@ -268,7 +246,6 @@ Subtitle.propTypes = {
 ConfigMenu.propTypes = {
   visualisation: PropTypes.object.isRequired,
   datasets: PropTypes.object.isRequired,
-  onChangeTitle: PropTypes.func.isRequired,
   onChangeSourceDataset: PropTypes.func.isRequired,
   onChangeVisualisationSpec: PropTypes.func.isRequired,
   onChangeVisualisationType: PropTypes.func.isRequired,

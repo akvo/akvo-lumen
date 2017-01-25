@@ -10,6 +10,7 @@ const mapLayerSpec = {
   pointColorMapping: [],
   popup: [],
   legend: {
+    title: null,
     visible: true,
     position: 'bottom',
   },

@@ -52,7 +52,7 @@ class Visualisation extends Component {
       isUnsavedChanges: false,
       visualisation: {
         type: 'visualisation',
-        name: 'Untitled Chart',
+        name: 'Untitled visualisation',
         visualisationType: null,
         datasetId: null,
         spec: {},
@@ -226,8 +226,8 @@ class Visualisation extends Component {
     });
   }
 
-  handleChangeVisualisationTitle(event) {
-    this.handleChangeVisualisation({ name: event.target.value });
+  handleChangeVisualisationTitle(title) {
+    this.handleChangeVisualisation({ name: title });
   }
 
   toggleShareVisualisation() {
@@ -259,6 +259,7 @@ class Visualisation extends Component {
           isUnsavedChanges={this.state.isUnsavedChanges}
           visualisation={visualisation}
           onVisualisationAction={this.handleVisualisationAction}
+          onChangeTitle={this.handleChangeVisualisationTitle}
         />
         <VisualisationEditor
           visualisation={visualisation}

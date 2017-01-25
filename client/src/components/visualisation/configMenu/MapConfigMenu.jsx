@@ -2,45 +2,10 @@ import React, { PropTypes, Component } from 'react';
 import VisualisationTypeMenu from '../VisualisationTypeMenu';
 import LayerMenu from './LayerMenu';
 import LayerConfigMenu from './LayerConfigMenu';
+import ButtonRowInput from './ButtonRowInput';
 import mapLayerSpecTemplate from '../../../containers/Visualisation/mapLayerSpecTemplate';
 
-const BaseLayerMenu = ({ baseLayer, onChangeBaseLayer }) => (
-  <div>
-    <h4>
-        Base map
-      </h4>
-    <ul
-      style={{
-        display: 'flex',
-        flexDirection: 'row',
-        alignContent: 'space-between',
-      }}
-    >
-      {['street', 'satellite', 'terrain'].map((layer, index) =>
-        <li
-          key={index}
-          onClick={() => onChangeBaseLayer(layer)}
-          style={{
-            backgroundColor: layer === baseLayer ? 'black' : 'white',
-            color: layer === baseLayer ? 'white' : 'black',
-            display: 'flex-item',
-            flex: 1,
-            textAlign: 'center',
-            margin: '1rem 0',
-            padding: '0.5rem 0rem',
-          }}
-        >
-          {layer}
-        </li>
-        )}
-    </ul>
-  </div>
-  );
-
-BaseLayerMenu.propTypes = {
-  baseLayer: PropTypes.string.isRequired,
-  onChangeBaseLayer: PropTypes.func.isRequired,
-};
+require('../../../styles/MapConfigMenu.scss');
 
 export default class MapConfigMenu extends Component {
 
@@ -97,46 +62,60 @@ export default class MapConfigMenu extends Component {
     return (
       <div
         className="MapConfigMenu"
-        style={{
-          minHeight: 'calc(100vh - 4rem)',
-          paddingBottom: '4rem',
-        }}
       >
-        {this.state.selectedLayer === null ?
-          <div>
-            <div style={{ padding: '1rem' }}>
-              <VisualisationTypeMenu
-                onChangeVisualisationType={this.props.onChangeVisualisationType}
-                visualisation={visualisation}
-                disabled={false}
+        <div className="contents">
+          {this.state.selectedLayer === null ?
+            <div>
+              <div
+                className="drawer"
+              >
+                <VisualisationTypeMenu
+                  onChangeVisualisationType={this.props.onChangeVisualisationType}
+                  visualisation={visualisation}
+                  disabled={false}
+                />
+              </div>
+              <LayerMenu
+                layers={this.props.visualisation.spec.layers}
+                activeLayer={this.state.activeLayer}
+                onAddLayer={() => this.handleAddMapLayer()}
+                onDeleteMapLayer={layerIndex => this.handleDeleteMapLayer(layerIndex)}
+                onSelectLayer={layerIndex => this.setState({ selectedLayer: layerIndex })}
+                onChangeMapLayer={this.handleChangeMapLayer}
               />
+              <div
+                className="drawer"
+              >
+                <ButtonRowInput
+                  options={['street', 'satellite', 'terrain']}
+                  selected={visualisation.spec.baseLayer}
+                  label="Base map"
+                  onChange={baseLayer => onChangeSpec({ baseLayer })}
+                />
+              </div>
             </div>
-            <LayerMenu
-              layers={this.props.visualisation.spec.layers}
-              activeLayer={this.state.activeLayer}
-              onAddLayer={() => this.handleAddMapLayer()}
-              onDeleteMapLayer={layerIndex => this.handleDeleteMapLayer(layerIndex)}
-              onSelectLayer={layerIndex => this.setState({ selectedLayer: layerIndex })}
+          :
+            <LayerConfigMenu
+              layer={spec.layers[this.state.selectedLayer]}
+              layerIndex={this.state.selectedLayer}
+              onDeselectLayer={() => this.setState({ selectedLayer: null })}
+              datasets={this.props.datasets}
+              datasetOptions={this.props.datasetOptions}
               onChangeMapLayer={this.handleChangeMapLayer}
+              onSave={this.props.onSave}
             />
-            <div style={{ padding: '1rem' }}>
-              <BaseLayerMenu
-                baseLayer={visualisation.spec.baseLayer}
-                onChangeBaseLayer={baseLayer => onChangeSpec({ baseLayer })}
-              />
-            </div>
-          </div>
-        :
-          <LayerConfigMenu
-            layer={spec.layers[this.state.selectedLayer]}
-            layerIndex={this.state.selectedLayer}
-            onDeselectLayer={() => this.setState({ selectedLayer: null })}
-            datasets={this.props.datasets}
-            datasetOptions={this.props.datasetOptions}
-            onChangeMapLayer={this.handleChangeMapLayer}
-            onSave={this.props.onSave}
-          />
-      }
+          }
+        </div>
+        <div
+          className="saveContainer noSelect"
+        >
+          <button
+            className="saveButton clickable"
+            onClick={this.props.onSave}
+          >
+            Save
+          </button>
+        </div>
       </div>
     );
   }

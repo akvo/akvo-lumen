@@ -38,66 +38,65 @@ const DisplayLayer = ({ layerData }) => {
 
   return (
     <div>
-      {
-        chartValues.map((entry, index) =>
-          <CircleMarker
-            center={[entry.latitude, entry.longitude]}
-            radius={radius}
-            fillColor={entry.pointColor || '#000000'}
-            fillOpacity={1}
-            opacity={1}
-            color="#FFFFFF"
-            weight={1}
-            key={index}
-          >
-            {entry.popup.length > 0 &&
-              <Popup>
-                <ul
+      {chartValues.map((entry, index) =>
+        <CircleMarker
+          center={[entry.latitude, entry.longitude]}
+          radius={radius}
+          fillColor={entry.pointColor || '#000000'}
+          fillOpacity={1}
+          opacity={1}
+          color="#FFFFFF"
+          weight={1}
+          key={index}
+        >
+          {entry.popup.length > 0 &&
+          <Popup>
+            <ul
+              style={{
+                position: 'relative',
+                minWidth: '12rem',
+              }}
+            >
+              {entry.popup.map((popupObject, popupIndex) =>
+                <li
+                  key={popupIndex}
                   style={{
-                    position: 'relative',
-                    minWidth: '12rem',
+                    marginBottom: '0.5rem',
                   }}
                 >
-                  {entry.popup.map((popupObject, popupIndex) =>
-                    <li
-                      key={popupIndex}
-                      style={{
-                        marginBottom: '0.5rem',
-                      }}
-                    >
-                      <h4
-                        style={{
-                          fontWeight: 'bold',
-                        }}
-                      >{popupObject.title}</h4>
-                      <span>
-                        {isImage(popupObject.value) ?
-                          <a
-                            href={popupObject.value}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <img
-                              src={popupObject.value}
-                              role="presentation"
-                              style={{
-                                width: '100%',
-                                imageOrientation: 'from-image',
-                              }}
-                            />
-                          </a>
+                  <h4
+                    style={{
+                      fontWeight: 'bold',
+                    }}
+                  >{popupObject.title}</h4>
+                  <span>
+                    {isImage(popupObject.value) ?
+                      <a
+                        href={popupObject.value}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <img
+                          src={popupObject.value}
+                          role="presentation"
+                          style={{
+                            width: '100%',
+                            imageOrientation: 'from-image',
+                          }}
+                        />
+                      </a>
                           :
-                          <span>
-                            {popupObject.value}
-                          </span>
-                        }
+                      <span>
+                        {popupObject.value}
                       </span>
-                    </li>
+                        }
+                  </span>
+                </li>
                 )}
-                </ul>
-              </Popup>
+            </ul>
+          </Popup>
             }
-          </CircleMarker>
+        </CircleMarker>
         )
       }
     </div>
@@ -168,30 +167,26 @@ export default function MapVisualisation({ visualisation, datasets, width, heigh
     >
       {processedLayerArray.map((layerData, outerIndex) =>
         <div
+          className="legendContainer"
           key={outerIndex}
         >
-          {(layerData.pointColorMapping && layerData.pointColorMapping.length > 0) &&
+          {(layerData.pointColorMapping &&
+            layerData.pointColorMapping.length > 0 &&
+            layerData.legend.visible) &&
             <div
               className={`legend ${layerData.legend.position}`}
             >
+              <h4>{layerData.legend.title}</h4>
               <ul>
                 {layerData.pointColorMapping.map((mappingEntry, innerIndex) =>
                   <li
+                    className="legendEntry"
                     key={innerIndex}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      flex: 1,
-                    }}
                   >
                     <i
+                      className="colorIndicator"
                       style={{
-                        height: '0.5rem',
-                        width: '0.5rem',
-                        display: 'inline-block',
-                        borderRadius: '10rem',
                         backgroundColor: mappingEntry.color,
-                        opacity: 1,
                       }}
                     />
                     <span

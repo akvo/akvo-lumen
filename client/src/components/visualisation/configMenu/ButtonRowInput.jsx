@@ -1,33 +1,27 @@
 import React, { PropTypes } from 'react';
 
+require('../../../styles/ButtonRowInput.scss');
+
 export default function ButtonRowInput(props) {
   const { label, options, selected, disabled } = props;
   return (
-    <div className={`inputGroup${props.disabled ? ' disabled' : ''}`}>
+    <div className={`ButtonRowInput inputGroup${props.disabled ? ' disabled' : ''}`}>
       <h4>
         {label}
       </h4>
       <div
-        name="buttonRow"
-        style={{
-          display: 'flex',
-          flex: 1,
-          justifyContent: props.buttonSpacing ? 'initial' : 'space-between',
-          alignItems: 'flex-start',
-        }}
+        className={`row ${props.buttonSpacing ? 'manualSpacing' : ''}`}
       >
         {options.map((buttonText, index) =>
           <button
             key={index}
-            className={`${selected === buttonText ? 'selected' : 'unSelected'} ${disabled ? 'disabled' : 'clickable'}`}
+            className={`button
+              ${' '}
+              ${selected === buttonText ? 'selected' : 'unSelected'}
+              ${' '}
+              ${disabled ? 'disabled' : 'clickable'}`}
             style={{
-              padding: '0.5rem 1rem',
-              fontSize: '0.8rem',
-              border: '0.1rem solid whitesmoke',
-              textTransform: 'capitalize',
-              color: selected === buttonText ? 'white' : 'grey',
-              backgroundColor: selected === buttonText ? 'grey' : 'white',
-              marginRight: props.buttonSpacing ? props.buttonSpacing : '0',
+              marginRight: props.buttonSpacing ? props.buttonSpacing : 0,
             }}
             onClick={() => props.onChange(buttonText)}
           >

@@ -1,6 +1,8 @@
 import React, { Component, PropTypes } from 'react';
 import { GithubPicker } from 'react-color';
 
+require('../../../styles/ColorLabels.scss');
+
 export default function ColorLabels({ pointColorMapping, onChangeColor }) {
   return (
     <ul
@@ -9,10 +11,6 @@ export default function ColorLabels({ pointColorMapping, onChangeColor }) {
       {pointColorMapping.map(({ color, value }, idx) =>
         <li
           key={idx}
-          style={{
-            margin: '1rem 0',
-            height: '2rem',
-          }}
         >
           <ColorLabelItem
             color={color}
@@ -65,53 +63,24 @@ class ColorLabelItem extends Component {
     return (
       <div
         className="ColorLabelItem"
-        style={{
-          display: 'flex',
-          flex: 1,
-          alignItems: 'center',
-          position: 'relative',
-        }}
       >
         <span
-          className="clickable"
+          className="clickable colorIndicator"
+          style={{
+            backgroundColor: color,
+          }}
           onClick={() => {
             this.setState({ displayColorPicker: true, mountingClickReceived: false });
             window.addEventListener('click', this.windowListener);
           }}
-          style={{
-            display: 'inline-block',
-            backgroundColor: color,
-            width: '2rem',
-            height: '2rem',
-            marginRight: '0.75rem',
-            borderRadius: '0.2rem',
-            position: 'relative',
-          }}
         >
           {!displayColorPicker &&
-            <span
-              style={{
-                display: 'block',
-                position: 'absolute',
-                height: '0.5rem',
-                width: '0.5rem',
-                right: '0.3rem',
-                bottom: '0.3rem',
-                borderTop: '0.4rem solid white',
-                borderRight: '0.4rem solid transparent',
-                borderLeft: '0.4rem solid transparent',
-              }}
-            />
+            <span className="arrowOverlay" />
           }
         </span>
         {displayColorPicker &&
           <div
-            style={{
-              position: 'absolute',
-              left: '-0.15rem',
-              top: '2rem',
-              zIndex: 2,
-            }}
+            className="colorPickerContainer"
           >
             <GithubPicker
               color={color}
