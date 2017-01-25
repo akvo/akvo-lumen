@@ -2,6 +2,14 @@
 
 ## 0.5.0 (unreleased)
 
+## 0.4.6
+
+Date 2017-01-25
+
+### Bugfixes
+
+* Fixed regression where sharing and flow import where broken
+
 ## 0.4.5
 
 Date 2017-01-23
