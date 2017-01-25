@@ -1,4 +1,5 @@
 import React, { Component, PropTypes } from 'react';
+import { connect } from 'react-redux';
 // import UserInviteButton from './users/UserInviteButton';
 import * as api from '../api';
 
@@ -37,7 +38,7 @@ UserList.propTypes = {
   users: PropTypes.array.isRequired,
 };
 
-export default class Users extends Component {
+class Users extends Component {
 
   constructor() {
     super();
@@ -47,21 +48,33 @@ export default class Users extends Component {
   }
 
   componentDidMount() {
-    api.get('/api/users')
-      .then(users => this.setState({ users }));
+    if (this.props.profile.admin) {
+      api.get('/api/users')
+        .then(users => this.setState({ users }));
+    }
   }
 
   render() {
+    const { admin } = this.props.profile;
     return (
       <div className="Users">
         <h1>Members</h1>
-        <UserList users={this.state.users} />
+        { admin ?
+          <UserList users={this.state.users} />
+          :
+          <div>You need to be admin to view and invite users</div>
+        }
       </div>
     );
   }
 }
 
+export default connect(state => ({
+  profile: state.profile,
+}))(Users);
+
 Users.propTypes = {
-  dispatch: PropTypes.func,
-  params: PropTypes.object,
+  profile: PropTypes.shape({
+    admin: PropTypes.bool,
+  }).isRequired,
 };
