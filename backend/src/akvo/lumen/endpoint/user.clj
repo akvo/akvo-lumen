@@ -19,8 +19,7 @@
     (let-routes [roles (get-in jwt-claims ["realm_access" "roles"])]
 
       (GET "/" _
-        (keycloak/users keycloak tenant roles)))))
-
+        (keycloak/users keycloak tenant)))))
 
 ;; (defn user-invitation-endpoint [{:keys [tenant-manger]}]
 ;;   (context "/api/user-invitation" {:keys [params tenant] :as request}

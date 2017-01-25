@@ -26,4 +26,4 @@
   (context "/verify" {:keys [tenant]}
     (let-routes [tenant-conn (connection tenant-manager tenant)]
       (GET "/:id" [id]
-        (invite/accept-invite tenant-conn emailer keycloak id)))))
+        (invite/accept-invite tenant-conn tenant emailer keycloak id)))))
