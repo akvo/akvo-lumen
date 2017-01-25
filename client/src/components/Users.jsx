@@ -17,16 +17,18 @@ function User({ email, username, admin }) {
 User.propTypes = {
   username: PropTypes.string.isRequired,
   email: PropTypes.string.isRequired,
-  admin: PropTypes.bool.isRequired,
+  admin: PropTypes.bool,
 };
 
 function UserList({ users }) {
   return (
     <table>
-      <tr><th>Name</th><th>Email</th><th>Role</th></tr>
-      {users.map(({ email, admin, username }) => (
-        <User email={email} admin={admin} username={username} />
-      ))}
+      <tbody>
+        <tr><th>Name</th><th>Email</th><th>Role</th></tr>
+        {users.map(({ email, admin, username }) => (
+          <User key={username} email={email} admin={admin} username={username} />
+        ))}
+      </tbody>
     </table>
   );
 }
