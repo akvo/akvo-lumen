@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
-// import UserInviteButton from './users/UserInviteButton';
+import UserInviteButton from './users/UserInviteButton';
 import * as api from '../api';
 
 require('../styles/Users.scss');
@@ -58,6 +58,9 @@ class Users extends Component {
     const { admin } = this.props.profile;
     return (
       <div className="Users">
+        <UserInviteButton
+          onCreate={this.props.onCreate}
+        />
         <h1>Members</h1>
         { admin ?
           <UserList users={this.state.users} />
@@ -77,4 +80,5 @@ Users.propTypes = {
   profile: PropTypes.shape({
     admin: PropTypes.bool,
   }).isRequired,
+  onCreate: PropTypes.func.isRequired,
 };
