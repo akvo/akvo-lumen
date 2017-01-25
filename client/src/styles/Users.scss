@@ -11,7 +11,7 @@
   table {
     width: 800px;
     & tr {
-      border-bottom: 1px solid $lightGrey;
+      border-bottom: 0.1rem solid $lightGrey;
       & th, td {
         padding: 20px 0 10px 0;
       }

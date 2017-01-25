@@ -9,7 +9,7 @@ function User({ email, username, admin }) {
     <tr>
       <td>{username}</td>
       <td>{email}</td>
-      <td>{admin ? 'admin' : 'user'}</td>
+      <td>{admin ? 'Admin' : 'User'}</td>
     </tr>
   );
 }
