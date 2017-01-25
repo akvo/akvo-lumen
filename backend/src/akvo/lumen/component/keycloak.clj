@@ -97,7 +97,7 @@
 
 (defn add-user-to-group
   [api-root request-options user-id group-id]
-  (-> (client/put (format "%s/users/%s/groups/%s"
+  (:status (client/put (format "%s/users/%s/groups/%s"
                           api-root user-id group-id)
                   request-options)))
 
@@ -124,8 +124,8 @@
                        "id")
           group-id (get (group-by-path keycloak tenant-label request-options)
                         "id")
-          resp (add-user-to-group api-root request-options user-id group-id)]
-      (= (:status resp) 204)))
+          resp-code (add-user-to-group api-root request-options user-id group-id)]
+      (= resp-code 204)))
 
   (user? [keycloak email]
     (let [request-options (request-options keycloak)]
