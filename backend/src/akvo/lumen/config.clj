@@ -17,9 +17,9 @@
 
 (defn bindings []
   {'db-uri (:lumen-db-url env)
-   'email-host (:lumen-email-host)
-   'email-password (:lumen-email-password)
-   'email-user (:lumen-email-user)
+   'email-host (:lumen-email-host env)
+   'email-password (:lumen-email-password env)
+   'email-user (:lumen-email-user env)
    'http-port (Integer/parseInt (:port env "3000"))
    'keycloak-realm "akvo"
    'keycloak-client-id "akvo-lumen"

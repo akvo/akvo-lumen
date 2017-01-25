@@ -41,4 +41,4 @@
     "dev" (map->DevMailer {:config options})
     (map->SMTPEmailer {:host (:email-host options)
                        :user (:email-user options)
-                       :password (:email-passwprd options)})))
+                       :password (:email-password options)})))
