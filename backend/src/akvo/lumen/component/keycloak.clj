@@ -14,10 +14,9 @@
 ;;;
 
 (defprotocol UserManager
-  #_(tenant-admin? [tenant-label roles] "Is user admin at tenant")
-  (users [this tenant-label roles] "List tenants users")
-  (invites [this tenant-label roles tenant-conn] "ist active invites")
-  (invite [this tenant-label roles tenant-conn email] "Invite user to tenant"))
+  (users [this tenant-label] "List tenants users")
+  (add-user-with-email [this tenant-label email] "Add user to tenant")
+  (user? [this email] "Predicate to see if the email has a user in KC"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Helpers
@@ -57,7 +56,7 @@
       :body json/decode))
 
 ;;; This is kinda fragile, this relies on that one user not belog to multiple
-;;; groups and does not support new swub groups!!!!!!
+;;; groups and does not support new sub groups!!!!!!
 (defn tenant-members
   "Return the users for a tenant. The tenant label here becomes the group-name"
   [keycloak tenant-label]
@@ -78,27 +77,29 @@
                            "username"]]
       (response (map #(select-keys % response-filter) members)))
     (catch Exception e
+      (prn e)
       (let [ed (ex-data e)]
         (prn ed)
         (response {:status (:status ed)
                    :body (:reason-phrase ed)})))))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Helpers
-;;;
+(defn fetch-user-by-email
+  "Get user by email. Returns nil if none found."
+  [api-root request-options email]
+  (let [candidates (-> (client/get (format "%s/users?email=%s" api-root email)
+                                   request-options)
+                       :body json/decode)]
+    ;; Since the keycloak api does a search and not a key lookup on the email
+    ;; we need make sure that we have an exact match
+    (first (filter (fn [candidate]
+                     (= (get candidate "email") email))
+                   candidates))))
 
-(defn active-invites
-  [keycloak tenant-label tenant-conn]
-  (response []))
-
-(defn invite-user
-  [keycloak tenant-label body]
-  ;; Cases
-  ;; User already exists in tenant
-  ;; User with email have not yet verified their email, or is disabled
-  ;; There is no user with email in realm
-  ;; There is a user in the realm to invite
-  (response {"User to invite:" body}))
+(defn add-user-to-group
+  [api-root request-options user-id group-id]
+  (-> (client/put (format "%s/users/%s/groups/%s"
+                          api-root user-id group-id)
+                  request-options)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Component
@@ -114,23 +115,23 @@
     (assoc this :openid-config nil))
 
   UserManager
-  (users [this tenant-label roles]
-    (if (tenant-admin? tenant-label roles)
-      (tenant-members this tenant-label)
-      {:body "Forbidden"
-       :status 403}))
+  (users [this tenant-label]
+    (tenant-members this tenant-label))
 
-  (invites [this tenant-label roles conn]
-    (if (tenant-admin? tenant-label roles)
-      (active-invites this tenant-label conn)
-      {:body "Forbidden"
-       :status 403}))
+  (add-user-with-email [{:keys [api-root] :as keycloak} tenant-label email]
+    (let [request-options (request-options keycloak)
+          user-id (get (fetch-user-by-email api-root request-options email)
+                       "id")
+          group-id (get (group-by-path keycloak tenant-label request-options)
+                        "id")
+          resp (add-user-to-group api-root request-options user-id group-id)]
+      (= (:status resp) 204)))
 
-  (invite [this tenant-label roles conn body]
-    (if (tenant-admin? tenant-label roles)
-      (invite-user this tenant-label body)
-      {:body "Forbidden"
-       :status 403})))
+  (user? [keycloak email]
+    (let [request-options (request-options keycloak)]
+      (not (nil? (fetch-user-by-email (:api-root keycloak)
+                                      request-options
+                                      email))))))
 
 (defn keycloak [{:keys [client-id url realm user password]}]
   (map->KeycloakAgent {:issuer (format "%s/realms/%s" url realm)

@@ -15,4 +15,15 @@
         (invite/active-invites tenant tenant-conn keycloak roles))
 
       (POST "/" {:keys [body] :as request}
-        (invite/create tenant-conn emailer keycloak roles body jwt-claims)))))
+        (invite/create tenant-conn emailer keycloak roles body jwt-claims))
+
+      #_(context "/:id" [id]
+
+        (DELETE "/" _
+          (invite/...))))))
+
+(defn verify-endpoint [{:keys [emailer keycloak tenant-manager]}]
+  (context "/verify" {:keys [tenant]}
+    (let-routes [tenant-conn (connection tenant-manager tenant)]
+      (GET "/:id" [id]
+        (invite/accept-invite tenant-conn tenant emailer keycloak id)))))
