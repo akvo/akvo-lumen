@@ -37,7 +37,7 @@ export default class LayerMenu extends Component {
             <button
               className="addLayer clickable noSelect"
               onClick={onAddLayer}
-              disabled={layers.length >= 10}
+              disabled={layers.length >= 1}
             >
               Add
             </button>
