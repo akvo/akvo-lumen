@@ -6,34 +6,57 @@ require('../../styles/VisualisationPreview.scss');
 
 function shouldRender(visualisation, datasets) {
   const datasetId = visualisation.datasetId;
-  if (visualisation.visualisationType === 'map') {
-    return true;
+  const dataset = datasetId ? datasets[datasetId] : null;
+  const datasetLoaded = dataset ? Boolean(dataset.get('columns')) : false;
+  const vType = visualisation.visualisationType;
+  const { spec } = visualisation;
+
+  switch (vType) {
+    case 'map':
+      return true;
+
+    case 'bar':
+      if (!datasetLoaded) {
+        return false;
+      }
+      if (spec.metricColumnY == null || spec.bucketColumn == null) {
+        return false;
+      }
+      break;
+
+    case 'line':
+    case 'area':
+      if (!datasetLoaded) {
+        return false;
+      }
+      if (spec.metricColumnY == null) {
+        return false;
+      }
+      break;
+
+    case 'pie':
+    case 'donut':
+      if (!datasetLoaded) {
+        return false;
+      }
+      if (spec.bucketColumn == null) {
+        return false;
+      }
+      break;
+
+    case 'scatter':
+      if (!datasetLoaded) {
+        return false;
+      }
+      if (spec.metricColumnX == null || spec.metricColumnY == null) {
+        return false;
+      }
+      break;
+
+    default:
+      return false;
   }
-  if (datasetId == null) {
-    return false;
-  }
-  const dataset = datasets[datasetId];
-  if (dataset == null) {
-    return false;
-  }
-  if (dataset.get('columns') == null) {
-    return false;
-  }
-  const { spec, visualisationType } = visualisation;
-  const haveDataColumn = spec.metricColumnY != null || spec.longitude != null;
-  if (!haveDataColumn) {
-    return false;
-  }
-  const needSecondDataColumn = visualisationType === 'scatter';
-  const haveSecondDataColumn = spec.metricColumnX != null || spec.latitude !== null;
-  if (needSecondDataColumn && !haveSecondDataColumn) {
-    return false;
-  }
-  const needAggregation = visualisationType === 'bar' || visualisationType === 'pie' || visualisationType === 'donut';
-  const haveAggregation = spec.bucketColumn !== null;
-  if (needAggregation && !haveAggregation) {
-    return false;
-  }
+
   return true;
 }
 
