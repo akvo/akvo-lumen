@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import Select from 'react-select';
-import { get } from '../../../auth';
+import { get } from '../../../api';
 
 function findRootFolderIds(surveysAndFolders) {
   const folderIds = {};
