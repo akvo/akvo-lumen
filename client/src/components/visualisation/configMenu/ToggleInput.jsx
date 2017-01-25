@@ -24,7 +24,7 @@ export default function ToggleInput(props) {
 
 ToggleInput.propTypes = {
   disabled: PropTypes.bool,
-  checked: PropTypes.node.isRequired,
-  label: PropTypes.string.isRequired,
+  checked: PropTypes.bool.isRequired,
+  label: PropTypes.string,
   onChange: PropTypes.func.isRequired,
 };

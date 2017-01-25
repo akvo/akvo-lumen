@@ -251,6 +251,10 @@ export function getMapData(layer, datasets) {
   const { datasetId } = layer;
   const dataset = datasets[datasetId];
 
+  if (!dataset.get('columns')) {
+    return null;
+  }
+
   const longitudeIndex = getColumnIndex(dataset, layer.longitude);
   const latitudeIndex = getColumnIndex(dataset, layer.latitude);
   const pointColorIndex = getColumnIndex(dataset, layer.pointColorColumn);

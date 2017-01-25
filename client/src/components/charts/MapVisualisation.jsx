@@ -116,21 +116,24 @@ export default function MapVisualisation({ visualisation, datasets, width, heigh
   visualisation.spec.layers.forEach((layer) => {
     if (layer.visible && layer.datasetId && layer.latitude !== null && layer.longitude !== null) {
       const chartData = chart.getMapData(layer, datasets);
-      const chartValues = chartData.values;
-      const pointColorMapping = Object.keys(chartData.metadata.pointColorMapping).map(value => ({
-        value,
-        color: chartData.metadata.pointColorMapping[value],
-      }));
-      const bounds = chartData.metadata.bounds;
 
-      processedLayerArray.push({
-        chartData,
-        chartValues,
-        pointColorMapping,
-        bounds,
-        legend: layer.legend,
-        pointSize: layer.pointSize,
-      });
+      if (chartData) {
+        const chartValues = chartData.values;
+        const pointColorMapping = Object.keys(chartData.metadata.pointColorMapping).map(value => ({
+          value,
+          color: chartData.metadata.pointColorMapping[value],
+        }));
+        const bounds = chartData.metadata.bounds;
+
+        processedLayerArray.push({
+          chartData,
+          chartValues,
+          pointColorMapping,
+          bounds,
+          legend: layer.legend,
+          pointSize: layer.pointSize,
+        });
+      }
     }
   });
 
