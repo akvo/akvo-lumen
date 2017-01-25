@@ -1,5 +1,5 @@
 CREATE TABLE invite (
-     id text PRIMARY KEY,
+     id text PRIMARY KEY DEFAULT gen_random_uuid()::text,
      email text NOT NULL,
      expiration_time timestamptz,
      consumed_at timestamptz,
