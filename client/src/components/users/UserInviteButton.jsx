@@ -5,13 +5,13 @@ const options = [
   { value: 'send-invitation', label: 'Send invitation' },
 ];
 
-export default function UserInviteButton({ onCreate }) {
+export default function UserInviteButton({ onInvite }) {
   return (
     <div className="UserInviteButton">
       <SelectMenu
         name="user-invite-button"
         options={options}
-        onChange={onCreate}
+        onChange={onInvite}
         placeholder="Invite User"
       />
     </div>
@@ -19,5 +19,5 @@ export default function UserInviteButton({ onCreate }) {
 }
 
 UserInviteButton.propTypes = {
-  onCreate: PropTypes.func.isRequired,
+  onInvite: PropTypes.func.isRequired,
 };

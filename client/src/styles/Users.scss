@@ -1,33 +1,30 @@
 @import 'modules/colors';
 
-.Users {
-    padding: 10px;
-    h1 {
-        color: $strongBlue;
-        font-size: 1.5rem;
-        font-weight: bold;
-        line-height: 2.5rem;
-    }
-    table {
-        width: 800px;
-        & tr {
-            border-bottom: 0.1rem solid $lightGrey;
-            & th, td {
-                padding: 20px 0 10px 0;
-            }
-            & th {
-                color: $black;
-                text-align: left;
-                font-size: 1.1rem;
-                font-weight: bold;
-            }
-            & td {
-                font-weight: bold;
-            }
+.UsersContainer {
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+
+.UsersHeader {
+    height: 9rem;
+    border-bottom: 0.1rem solid rgba(0, 0, 0, 0.2);
+    .row {
+        width: 100%;
+        position: relative;
+        padding: 0 1rem;
+        > * {
+            vertical-align: top;
+            display: inline-block;
+            padding: 0.5rem 0.5rem;
         }
     }
+    .rowPrimary {
+        padding-top: 0.5rem;
+        height: 5rem;
+    }
     .UserInviteButton {
-        width: 7rem;
+        width: 12rem;
         margin-right: 1.5rem;
         height: 4.5rem;
         position: relative;
@@ -86,6 +83,35 @@
                     border: 0.1rem solid $lightGreen;
                     background-color: inherit;
                 }
+            }
+        }
+    }
+}
+
+.Users {
+    padding: 1rem;
+    h1 {
+        color: $strongBlue;
+        font-size: 1.5rem;
+        font-weight: bold;
+        line-height: 2.5rem;
+    }
+    table {
+        width: 100%;
+        & tr {
+            border-bottom: 0.1rem solid $lightGrey;
+            & th, td {
+                padding: 20px 0 10px 0;
+            }
+            & th {
+                color: $midGrey;
+                text-align: left;
+                font-size: 1.1rem;
+                font-weight: bold;
+            }
+            & td {
+                color: $black;
+                font-weight: bold;
             }
         }
     }

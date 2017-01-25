@@ -57,16 +57,23 @@ class Users extends Component {
   render() {
     const { admin } = this.props.profile;
     return (
-      <div className="Users">
-        <UserInviteButton
-          onCreate={this.props.onCreate}
-        />
-        <h1>Members</h1>
-        { admin ?
-          <UserList users={this.state.users} />
-          :
-          <div>You need to be admin to view and invite users</div>
-        }
+      <div className="UsersContainer">
+        <div className="UsersHeader">
+          <div className="row rowPrimary">
+            <UserInviteButton
+              onInvite={this.props.onInvite}
+            />
+          </div>
+        </div>
+        <div className="Users">
+          { admin ?
+            <UserList users={this.state.users} />
+            :
+            <div>
+              <p>You need to be an Admin users to view and invite users</p>
+            </div>
+          }
+        </div>
       </div>
     );
   }
@@ -80,5 +87,5 @@ Users.propTypes = {
   profile: PropTypes.shape({
     admin: PropTypes.bool,
   }).isRequired,
-  onCreate: PropTypes.func.isRequired,
+  onInvite: PropTypes.func.isRequired,
 };
