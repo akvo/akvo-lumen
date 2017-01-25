@@ -12,8 +12,8 @@
   [& args]
   (apply impl/create args))
 
-#_(defn accept-invite
+(defn accept-invite
   ""
-  [tenant-conn keycloak id]
-  (impl/accept-invite tenant-conn keycloak id))
+  [& args]
+  (apply impl/accept-invite args))
 

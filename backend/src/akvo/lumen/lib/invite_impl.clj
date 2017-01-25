@@ -29,11 +29,15 @@
 (defn create
   "Creates a new invite"
   [tenant-conn emailer keycloak roles {:strs [email]} claims]
-  ;; if not existing active invite on same email
+  ;; If existing user and no other active invite on same email
   (do-create-invite tenant-conn emailer email claims)
   (response {:invite-job-status "started"}))
 
-#_(defn accept-invite
+(defn accept-invite
   ""
-  [tenant-conn keycloak id]
-  [])
+  [tenant-conn emailer keycloak id]
+  (println "@accept-invite")
+  (let [{email :email} (first (consume-invite tenant-conn {:id id}))]
+    (prn email)
+    ;; setup user in keycloak
+    (response {:body "Accepted"})))
