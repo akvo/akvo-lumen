@@ -52,23 +52,16 @@ const DisplayLayer = ({ layerData }) => {
           {entry.popup.length > 0 &&
           <Popup>
             <ul
-              style={{
-                position: 'relative',
-                minWidth: '12rem',
-              }}
+              className="popupContainer"
             >
               {entry.popup.map((popupObject, popupIndex) =>
                 <li
+                  className="popupItem"
                   key={popupIndex}
-                  style={{
-                    marginBottom: '0.5rem',
-                  }}
                 >
-                  <h4
-                    style={{
-                      fontWeight: 'bold',
-                    }}
-                  >{popupObject.title}</h4>
+                  <h4>
+                    {popupObject.title}
+                  </h4>
                   <span>
                     {isImage(popupObject.value) ?
                       <a
@@ -76,14 +69,12 @@ const DisplayLayer = ({ layerData }) => {
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        <img
-                          src={popupObject.value}
-                          role="presentation"
-                          style={{
-                            width: '100%',
-                            imageOrientation: 'from-image',
-                          }}
-                        />
+                        <div className="imageContainer">
+                          <img
+                            src={popupObject.value}
+                            role="presentation"
+                          />
+                        </div>
                       </a>
                           :
                       <span>
@@ -163,7 +154,6 @@ export default function MapVisualisation({ visualisation, datasets, width, heigh
     <div
       className="MapVisualisation dashChart"
       style={{
-        position: 'relative',
         width,
         height,
       }}
@@ -193,9 +183,7 @@ export default function MapVisualisation({ visualisation, datasets, width, heigh
                       }}
                     />
                     <span
-                      style={{
-                        marginLeft: '0.5em',
-                      }}
+                      className="colorLabel"
                     >
                       {mappingEntry.value}
                     </span>
@@ -239,61 +227,3 @@ MapVisualisation.propTypes = {
   width: PropTypes.number,
   height: PropTypes.number,
 };
-
-/* {pointColorMapping.length >= 1 &&
-        <div
-          className="legend"
-          style={{
-            position: 'absolute',
-            display: 'flex',
-            left: '1rem',
-            bottom: '1rem',
-            backgroundColor: 'rgba(255, 255, 255, 0.8)',
-            width: '10rem',
-            height: '10rem',
-            fontSize: '0.8rem',
-            lineHeight: '1.4em',
-            zIndex: 1,
-          }}
-        >
-          <ul
-            style={{
-              padding: '0.5rem 1rem',
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-            }}
-          >
-            {pointColorMapping.map((mappingEntry, index) =>
-              <li
-                key={index}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  flex: 1,
-                }}
-              >
-                <i
-                  style={{
-                    height: '0.5rem',
-                    width: '0.5rem',
-                    display: 'inline-block',
-                    borderRadius: '10rem',
-                    backgroundColor: mappingEntry.color,
-                    opacity: 1,
-                  }}
-                />
-                <span
-                  style={{
-                    marginLeft: '0.5em',
-                  }}
-                >
-                  {mappingEntry.value}
-                </span>
-              </li>
-            )}
-          </ul>
-        </div>
-      }
-
-*/
