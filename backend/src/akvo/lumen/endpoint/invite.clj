@@ -6,7 +6,7 @@
             [akvo.lumen.component.keycloak :as keycloak]))
 
 
-(defn endpoint [{:keys [keycloak tenant-manager]}]
+(defn endpoint [{:keys [emailer keycloak tenant-manager]}]
   (context "/api/invites" {:keys [jwt-claims params tenant] :as request}
 
     (let-routes [tenant-conn (connection tenant-manager tenant)
@@ -15,4 +15,4 @@
         (invite/active-invites tenant tenant-conn keycloak roles))
 
       (POST "/" {:keys [body] :as request}
-        (invite/create tenant-conn keycloak roles body jwt-claims)))))
+        (invite/create tenant-conn emailer keycloak roles body jwt-claims)))))

@@ -7,6 +7,7 @@
     :arguments {:wrap-jwt {:keycloak-url "http://localhost:8080/auth"
                            :keycloak-realm "akvo"}}}}
   :db {:uri "jdbc:postgresql://localhost/lumen?user=lumen&password=password"}
+  :emailer {:type "dev"}
   :http {:port 3000}
   :config {:file-upload-path "/tmp/akvo/lumen"
            :flow-report-database-url ""

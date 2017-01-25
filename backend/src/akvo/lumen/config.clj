@@ -6,6 +6,9 @@
 
 (defn assert-bindings []
   (assert (:lumen-db-url env) (error-msg "LUMEN_DB_URL"))
+  (assert (:lumen-email-host env) (error-msg "LUMEN_EMAIL_HOST"))
+  (assert (:lumen-email-password env) (error-msg "LUMEN_EMAIL_PASSWORD"))
+  (assert (:lumen-email-user env) (error-msg "LUMEN_EMAIL_USER"))
   (assert (:lumen-keycloak-url env) (error-msg "LUMEN_KEYCLOAK_URL"))
   (assert (:lumen-keycloak-user env) (error-msg "LUMEN_KEYCLOAK_USER"))
   (assert (:lumen-keycloak-password env) (error-msg "LUMEN_KEYCLOAK_PASSWORD"))
@@ -14,6 +17,9 @@
 
 (defn bindings []
   {'db-uri (:lumen-db-url env)
+   'email-host (:lumen-email-host)
+   'email-password (:lumen-email-password)
+   'email-user (:lumen-email-user)
    'http-port (Integer/parseInt (:port env "3000"))
    'keycloak-realm "akvo"
    'keycloak-client-id "akvo-lumen"
