@@ -14,8 +14,9 @@
       (GET "/" _
         (invite/active-invites tenant tenant-conn keycloak roles))
 
-      (POST "/" {:keys [body] :as request}
-        (invite/create tenant-conn emailer keycloak roles body jwt-claims))
+      (POST "/" {:keys [body host] :as request}
+        (clojure.pprint/pprint request)
+        (invite/create tenant-conn emailer keycloak roles body jwt-claims host))
 
       #_(context "/:id" [id]
 
