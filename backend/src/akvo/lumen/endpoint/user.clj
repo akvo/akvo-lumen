@@ -14,7 +14,7 @@
 
 
 (defn endpoint [{:keys [keycloak tenant-manager]}]
-  (context "/api/users" {:keys [jwt-claims params tenant] :as request}
+  (context "/api/admin/users" {:keys [jwt-claims params tenant] :as request}
 
     (let-routes [roles (get-in jwt-claims ["realm_access" "roles"])]
 

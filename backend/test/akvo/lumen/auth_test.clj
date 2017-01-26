@@ -69,6 +69,25 @@
           (assoc :tenant "t0")))
      200))
 
+  (testing "GET admin resource as admin with claims and tenant"
+    (check-response
+     ((m/wrap-auth test-handler)
+      (-> (immutant-request :get "/api/admin/resource")
+          (assoc-in [:jwt-claims "realm_access" "roles"]
+                    ["akvo:lumen:t0"
+                     "akvo:lumen:t0:admin"])
+          (assoc :tenant "t0")))
+     200))
+
+  (testing "GET admin resource as non admin with claims and tenant"
+    (check-response
+     ((m/wrap-auth test-handler)
+      (-> (immutant-request :get "/api/admin/resource")
+          (assoc-in [:jwt-claims "realm_access" "roles"]
+                    ["akvo:lumen:t0"])
+          (assoc :tenant "t0")))
+     403))
+
   (testing "GET resource without claims"
     (let [response ((m/wrap-auth test-handler)
                     (immutant-request :get "/api/resource"))]
@@ -108,4 +127,4 @@
                     (assoc-in (immutant-request :get "/api/resource")
                               [:jwt-claims]
                               "realm_access"))]
-      (check-response response 401))))
+      (check-response response 403))))
