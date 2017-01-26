@@ -15,7 +15,7 @@ const getSelectMenuOptionsFromColumnList = columns => (columns == null ?
     value: `${column.get('columnName')}`,
     index: index.toString(),
     title: `${column.get('title')}`,
-    label: `${column.get('title')} [${column.get('type')}]`,
+    label: `${column.get('title')} (${column.get('type')})`,
     type: `${column.get('type')}`,
   })).toArray());
 
