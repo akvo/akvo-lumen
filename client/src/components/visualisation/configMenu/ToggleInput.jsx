@@ -5,8 +5,9 @@ require('../../../styles/ToggleInput.scss');
 export default function ToggleInput(props) {
   const { checked, disabled, label, onChange } = props;
   return (
-    <div className={`ToggleInput ${props.disabled ? ' disabled' : ''}
-      ${props.className ? props.className : ''}`}
+    <div
+      className={`ToggleInput ${props.disabled ? ' disabled' : ''}
+        ${props.className ? props.className : ''}`}
     >
       <h4 className="label">
         {label}
