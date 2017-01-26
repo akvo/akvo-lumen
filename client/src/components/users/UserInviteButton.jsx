@@ -1,13 +1,16 @@
-import React from 'react';
-// import UserInvite from '../modals/UserInvite';
+import React, { PropTypes } from 'react';
 
-export default function UserInviteButton() {
+export default function UserInviteButton({ onUserInvite }) {
   return (
     <button
       className="overflow clickable"
-      onClick={() => null}
+      onClick={onUserInvite}
     >
     Invite User
     </button>
   );
 }
+
+UserInviteButton.propTypes = {
+  onUserInvite: PropTypes.func.isRequired,
+};

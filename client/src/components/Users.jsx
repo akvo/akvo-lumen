@@ -1,10 +1,11 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
-// import EntityTypeHeader from './entity-editor/EntityTypeHeader';
+import EntityTypeHeader from './entity-editor/EntityTypeHeader';
 import UserInviteButton from './users/UserInviteButton';
+// import UserInvite from './modals/UserInvite';
 import * as api from '../api';
 
-// require('../styles/EntityTypeHeader.scss');
+require('../styles/EntityTypeHeader.scss');
 require('../styles/Users.scss');
 
 function User({ email, username, admin }) {
@@ -64,6 +65,11 @@ class Users extends Component {
     const { admin } = this.props.profile;
     return (
       <div className="UsersContainer">
+        <EntityTypeHeader
+          title="Members"
+          saveStatus
+          actionButtons={['invite']}
+        />
         <div className="UsersHeader">
           <div className="row rowPrimary">
             <UserInviteButton />

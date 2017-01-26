@@ -37,8 +37,8 @@ export default function UserInvite(props) {
           </div>
         </div>
       </div>
-      />
-    );
+    />
+  );
 }
 
 UserInvite.propTypes = {
