@@ -49,7 +49,7 @@ class Users extends Component {
 
   componentDidMount() {
     if (this.props.profile.admin) {
-      api.get('/api/users')
+      api.get('/api/admin/users')
         .then(users => this.setState({ users }));
     }
   }

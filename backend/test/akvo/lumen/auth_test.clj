@@ -127,4 +127,4 @@
                     (assoc-in (immutant-request :get "/api/resource")
                               [:jwt-claims]
                               "realm_access"))]
-      (check-response response 401))))
+      (check-response response 403))))
