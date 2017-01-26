@@ -1,10 +1,10 @@
 import React, { PropTypes } from 'react';
 
-export default function UserInviteButton({ onUserInvite }) {
+export default function UserInviteButton({ onUserInviteToggle }) {
   return (
     <button
       className="overflow clickable"
-      onClick={onUserInvite}
+      onClick={onUserInviteToggle}
     >
     Invite User
     </button>
@@ -12,5 +12,5 @@ export default function UserInviteButton({ onUserInvite }) {
 }
 
 UserInviteButton.propTypes = {
-  onUserInvite: PropTypes.func.isRequired,
+  onUserInviteToggle: PropTypes.func.isRequired,
 };

@@ -28,7 +28,7 @@ export default function UserInvite(props) {
           <h2 className="modalTitle">Invite User</h2>
           <div
             className="close clickable"
-            onClick={this.props.onClose}
+            onClick={props.onClose}
           >
           +
           </div>

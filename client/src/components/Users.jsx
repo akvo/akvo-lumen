@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import EntityTypeHeader from './entity-editor/EntityTypeHeader';
 import UserInviteButton from './users/UserInviteButton';
-// import UserInvite from './modals/UserInvite';
+import UserInvite from './modals/UserInvite';
 import * as api from '../api';
 
 require('../styles/EntityTypeHeader.scss');
@@ -50,6 +50,7 @@ class Users extends Component {
   constructor() {
     super();
     this.state = {
+      isInviteModalVisible: false,
       users: [],
     };
   }
@@ -63,6 +64,15 @@ class Users extends Component {
 
   render() {
     const { admin } = this.props.profile;
+
+    if (!admin) {
+      return (
+        <div>
+          <p>You need to be an Admin users to view and invite users</p>
+        </div>
+      );
+    }
+
     return (
       <div className="UsersContainer">
         <EntityTypeHeader
@@ -72,18 +82,19 @@ class Users extends Component {
         />
         <div className="UsersHeader">
           <div className="row rowPrimary">
-            <UserInviteButton />
+            <UserInviteButton
+              onUserInviteToggle={() => this.setState({ isInviteModalVisible: true })}
+            />
           </div>
         </div>
         <div className="Users">
-          { admin ?
-            <UserList users={this.state.users} />
-            :
-            <div>
-              <p>You need to be an Admin users to view and invite users</p>
-            </div>
-          }
+          <UserList users={this.state.users} />
         </div>
+        <UserInvite
+          isOpen={this.state.isInviteModalVisible}
+          onClose={() => this.setState({ isInviteModalVisible: false })}
+          onInviteUser={email => api.post()}
+        />
       </div>
     );
   }
