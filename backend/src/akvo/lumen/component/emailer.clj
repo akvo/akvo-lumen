@@ -1,19 +1,20 @@
 (ns akvo.lumen.component.emailer
   (:require [com.stuartsierra.component :as component]
-            [clojure.pprint :refer [pprint]]))
+            [clojure.pprint :refer [pprint]]
+            [postal.core :as postal]))
 
 (defprotocol SendEmail
   (send-email [this email] "Send email"))
 
 
-(defrecord DevMailer [config]
+
+
+(defrecord DevMailer []
 
   component/Lifecycle
   (start [this]
-    (println "@DevMail/start")
     this)
   (stop [this]
-    (println "@DevMail/stop")
     this)
 
   SendEmail
@@ -21,7 +22,7 @@
     (pprint email)))
 
 
-(defrecord SMTPEmailer [host user pass]
+(defrecord SMTPEmailer [host user password]
 
   component/Lifecycle
   (start [this]
@@ -33,12 +34,17 @@
 
   SendEmail
   (send-email [this email]
-    (println "Should send email via SMTP")))
+    (println "Should send email via SMTP")
+    (pprint this)
+    (pprint email)))
 
-
-(defn emailer [options]
-  (condp = (:type options)
-    "dev" (map->DevMailer {:config options})
-    (map->SMTPEmailer {:host (:email-host options)
-                       :user (:email-user options)
-                       :password (:email-password options)})))
+(defn emailer
+  [{:keys [email-host email-password email-user type] :as options}]
+  (if (= type "dev")
+    (DevMailer.)
+    (let [email-host "mhost"
+          email-user "muser"
+          email-password "mpassword"]
+      (map->SMTPEmailer {:host email-host
+                         :user email-user
+                         :password email-password}))))

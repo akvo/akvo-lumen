@@ -14,8 +14,9 @@
       (GET "/" _
         (invite/active-invites tenant tenant-conn keycloak roles))
 
-      (POST "/" {:keys [body] :as request}
-        (invite/create tenant-conn emailer keycloak roles body jwt-claims))
+      (POST "/" {:keys [body]}
+        (invite/create tenant-conn emailer keycloak roles body jwt-claims
+                       (get-in request [:headers "host"])))
 
       #_(context "/:id" [id]
 

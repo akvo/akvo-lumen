@@ -25,7 +25,7 @@
   (fn [req]
     (let [host (get-in req [:headers "host"])]
       (if (subdomain? host)
-        (assoc req :tenant (first (str/split host #"\.")))
+        (handler (assoc req :tenant (first (str/split host #"\."))))
         {:status 400
          :body "Not a tenant"}))))
 

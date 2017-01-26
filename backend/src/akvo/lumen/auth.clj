@@ -32,8 +32,6 @@
 (defn api-path? [{:keys [path-info]}]
   (s/starts-with? path-info "/api/"))
 
-
-
 (def not-authenticated
   (-> (response/response "Not authenticated")
       (response/status 401)))
@@ -41,7 +39,6 @@
 (def not-authorized
   (-> (response/response "Not authorized")
       (response/status 403)))
-
 
 (defn wrap-auth
   "Wrap authentication for API. Allow GET to root / and share urls at /s/<id>.
