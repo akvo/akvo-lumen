@@ -32,9 +32,62 @@ const calculateBounds = (layerArray) => {
   return [[minLat, minLong], [maxLat, maxLong]];
 };
 
-const DisplayLayer = ({ layerData }) => {
-  const { chartValues } = layerData;
-  const radius = 2 + (parseInt(layerData.pointSize, 10) * 2);
+const getDataLayers = (layers, datasets) => {
+  const displayLayers = [];
+
+  layers.forEach((layer) => {
+    if (layer.visible && layer.datasetId && layer.latitude !== null && layer.longitude !== null) {
+      const chartData = chart.getMapData(layer, datasets);
+
+      if (chartData) {
+        const chartValues = chartData.values;
+        const pointColorMapping = Object.keys(chartData.metadata.pointColorMapping).map(value => ({
+          value,
+          color: chartData.metadata.pointColorMapping[value],
+        }));
+        const bounds = chartData.metadata.bounds;
+
+        displayLayers.push(Object.assign({}, layer, {
+          chartValues,
+          pointColorMapping,
+          bounds,
+        }));
+      }
+    }
+  });
+
+  return displayLayers;
+};
+
+const getBaseLayerAttributes = ((baseLayer) => {
+  const attributes = {};
+
+  switch (baseLayer) {
+    case 'street':
+      attributes.tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+      attributes.tileAttribution = '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors';
+      break;
+
+    case 'satellite':
+      attributes.tileUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
+      attributes.tileAttribution = 'Esri, DigitalGlobe, GeoEye, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AeroGRID, IGN, and the GIS User Community';
+      break;
+
+    case 'terrain':
+      attributes.tileUrl = 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png';
+      attributes.tileAttribution = 'Map data: &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)';
+      break;
+
+    default:
+      throw new Error(`Unknown base layer type ${baseLayer}`);
+  }
+
+  return attributes;
+});
+
+const DataLayer = ({ displayLayer }) => {
+  const { chartValues } = displayLayer;
+  const radius = 2 + (parseInt(displayLayer.pointSize, 10) * 2);
 
   return (
     <div>
@@ -94,61 +147,14 @@ const DisplayLayer = ({ layerData }) => {
   );
 };
 
-DisplayLayer.propTypes = {
-  layerData: PropTypes.object.isRequired,
+DataLayer.propTypes = {
+  displayLayer: PropTypes.object.isRequired,
 };
 
 export default function MapVisualisation({ visualisation, datasets, width, height }) {
-  let tileLayerUrl;
-  let tileLayerAttribution;
-
-  const processedLayerArray = [];
-
-  visualisation.spec.layers.forEach((layer) => {
-    if (layer.visible && layer.datasetId && layer.latitude !== null && layer.longitude !== null) {
-      const chartData = chart.getMapData(layer, datasets);
-
-      if (chartData) {
-        const chartValues = chartData.values;
-        const pointColorMapping = Object.keys(chartData.metadata.pointColorMapping).map(value => ({
-          value,
-          color: chartData.metadata.pointColorMapping[value],
-        }));
-        const bounds = chartData.metadata.bounds;
-
-        processedLayerArray.push({
-          chartData,
-          chartValues,
-          pointColorMapping,
-          bounds,
-          legend: layer.legend,
-          pointSize: layer.pointSize,
-        });
-      }
-    }
-  });
-
-  const bounds = calculateBounds(processedLayerArray);
-
-  switch (visualisation.spec.baseLayer) {
-    case 'street':
-      tileLayerUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-      tileLayerAttribution = '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors';
-      break;
-
-    case 'satellite':
-      tileLayerUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
-      tileLayerAttribution = 'Esri, DigitalGlobe, GeoEye, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AeroGRID, IGN, and the GIS User Community';
-      break;
-
-    case 'terrain':
-      tileLayerUrl = 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png';
-      tileLayerAttribution = 'Map data: &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)';
-      break;
-
-    default:
-      throw new Error(`Unknown base layer type ${visualisation.spec.baseLayer}`);
-  }
+  const displayLayers = getDataLayers(visualisation.spec.layers, datasets);
+  const bounds = calculateBounds(displayLayers);
+  const { tileUrl, tileAttribution } = getBaseLayerAttributes(visualisation.spec.baseLayer);
 
   return (
     <div
@@ -158,20 +164,20 @@ export default function MapVisualisation({ visualisation, datasets, width, heigh
         height,
       }}
     >
-      {processedLayerArray.map((layerData, outerIndex) =>
+      {displayLayers.map((displayLayer, outerIndex) =>
         <div
           className="legendContainer"
           key={outerIndex}
         >
-          {(layerData.pointColorMapping &&
-            layerData.pointColorMapping.length > 0 &&
-            layerData.legend.visible) &&
+          {(displayLayer.pointColorMapping &&
+            displayLayer.pointColorMapping.length > 0 &&
+            displayLayer.legend.visible) &&
             <div
-              className={`legend ${layerData.legend.position}`}
+              className={`legend ${displayLayer.legend.position}`}
             >
-              <h4>{layerData.legend.title}</h4>
+              <h4>{displayLayer.legend.title}</h4>
               <ul>
-                {layerData.pointColorMapping.map((mappingEntry, innerIndex) =>
+                {displayLayer.pointColorMapping.map((mappingEntry, innerIndex) =>
                   <li
                     className="legendEntry"
                     key={innerIndex}
@@ -206,14 +212,14 @@ export default function MapVisualisation({ visualisation, datasets, width, heigh
         }}
       >
         <TileLayer
-          key={tileLayerUrl}
-          url={tileLayerUrl}
-          attribution={tileLayerAttribution}
+          key={tileUrl}
+          url={tileUrl}
+          attribution={tileAttribution}
         />
-        {processedLayerArray.map((layerData, index) =>
-          <DisplayLayer
+        {displayLayers.map((displayLayer, index) =>
+          <DataLayer
             key={index}
-            layerData={layerData}
+            displayLayer={displayLayer}
           />
         )}
       </Map>
