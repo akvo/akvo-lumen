@@ -3,7 +3,7 @@ import Modal from 'react-modal';
 
 require('../../styles/DashboardModal.scss');
 
-export default function UserInvite(props) {
+export default function InviteUser(props) {
   return (
     <Modal
       isOpen={props.isOpen}
@@ -24,7 +24,7 @@ export default function UserInvite(props) {
       }}
     >
       <div className="DashboardModal">
-        <div className="UserInvite">
+        <div className="InviteUserModal">
           <h2 className="modalTitle">Invite User</h2>
           <div
             className="close clickable"
@@ -41,7 +41,7 @@ export default function UserInvite(props) {
   );
 }
 
-UserInvite.propTypes = {
+InviteUser.propTypes = {
   onClose: PropTypes.func.isRequired,
   isOpen: PropTypes.bool.isRequired,
 };
