@@ -1,8 +1,10 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
+// import EntityTypeHeader from './entity-editor/EntityTypeHeader';
 import UserInviteButton from './users/UserInviteButton';
 import * as api from '../api';
 
+// require('../styles/EntityTypeHeader.scss');
 require('../styles/Users.scss');
 
 function User({ email, username, admin }) {
@@ -64,9 +66,7 @@ class Users extends Component {
       <div className="UsersContainer">
         <div className="UsersHeader">
           <div className="row rowPrimary">
-            <UserInviteButton
-              onInvite={this.props.onInvite}
-            />
+            <UserInviteButton />
           </div>
         </div>
         <div className="Users">
@@ -91,5 +91,4 @@ Users.propTypes = {
   profile: PropTypes.shape({
     admin: PropTypes.bool,
   }).isRequired,
-  onInvite: PropTypes.func.isRequired,
 };

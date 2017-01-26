@@ -1,23 +1,13 @@
-import React, { PropTypes } from 'react';
-import SelectMenu from '../common/SelectMenu';
+import React from 'react';
+// import UserInvite from '../modals/UserInvite';
 
-const options = [
-  { value: 'send-invitation', label: 'Send invitation' },
-];
-
-export default function UserInviteButton({ onInvite }) {
+export default function UserInviteButton() {
   return (
-    <div className="UserInviteButton">
-      <SelectMenu
-        name="user-invite-button"
-        options={options}
-        onChange={onInvite}
-        placeholder="Invite User"
-      />
-    </div>
+    <button
+      className="overflow clickable"
+      onClick={() => null}
+    >
+    Invite User
+    </button>
   );
 }
-
-UserInviteButton.propTypes = {
-  onInvite: PropTypes.func.isRequired,
-};

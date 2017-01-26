@@ -15,8 +15,8 @@ options:
 # File Options
 files:
   include: 'src/styles/**/*.s+(a|c)ss'
-  ignore:
-    - 'sass/vendor/**/*.*'
+# ignore:
+#   - 'sass/vendor/**/*.*'
 # Rule Configuration
 rules:
   extends-before-mixins: 2
