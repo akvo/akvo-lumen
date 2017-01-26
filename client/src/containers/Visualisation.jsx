@@ -6,69 +6,33 @@ import ShareEntity from '../components/modals/ShareEntity';
 import * as actions from '../actions/visualisation';
 import { fetchDataset } from '../actions/dataset';
 import { fetchLibrary } from '../actions/library';
+import genericSpecTemplate from './Visualisation/genericSpecTemplate';
+import mapSpecTemplate from './Visualisation/mapSpecTemplate';
+import pieSpecTemplate from './Visualisation/pieSpecTemplate';
+import lineSpecTemplate from './Visualisation/lineSpecTemplate';
 
 require('../styles/Visualisation.scss');
 
-const updateAxisLabels = (vType, spec) => {
-  let autoAxisLabelY = '';
-  let autoAxisLabelX = '';
+const updateAxisLabels = (spec) => {
+  let autoAxisLabelY = spec.metricColumnYName;
+  let autoAxisLabelX = spec.bucketColumn ? spec.bucketColumnName : '';
 
-  switch (vType) {
-    case 'bar':
-      autoAxisLabelY = spec.metricColumnYName;
-      autoAxisLabelX = spec.bucketColumn ? spec.bucketColumnName : autoAxisLabelX;
+  if (spec.bucketColumn !== null) {
+    autoAxisLabelY += ` - ${spec.metricAggregation}`;
 
-      if (spec.bucketColumn !== null) {
-        autoAxisLabelY += ` - ${spec.metricAggregation}`;
+    if (spec.truncateSize !== null) {
+      let truncateOrderIndicator;
 
-        if (spec.truncateSize !== null) {
-          let truncateOrderIndicator;
-
-          if (spec.sort === 'asc') {
-            truncateOrderIndicator = 'bottom';
-          } else if (spec.sort === 'dsc') {
-            truncateOrderIndicator = 'top';
-          } else {
-            truncateOrderIndicator = 'first';
-          }
-
-          autoAxisLabelX += ` - ${truncateOrderIndicator} ${spec.truncateSize}`;
-        }
-      }
-
-      break;
-
-    case 'line':
-    case 'area':
-      autoAxisLabelY = spec.metricColumnYName;
-      if (spec.bucketColumn !== null) {
-        autoAxisLabelY += ` - ${spec.metricAggregation}`;
-      }
-
-      if (spec.metricColumnX === null) {
-        autoAxisLabelX = 'Dataset row number';
+      if (spec.sort === 'asc') {
+        truncateOrderIndicator = 'bottom';
+      } else if (spec.sort === 'dsc') {
+        truncateOrderIndicator = 'top';
       } else {
-        autoAxisLabelX = spec.metricColumnXName;
+        truncateOrderIndicator = 'first';
       }
-      break;
 
-    case 'scatter':
-      autoAxisLabelY = spec.metricColumnYName;
-      autoAxisLabelX = spec.metricColumnXName;
-
-      if (spec.bucketColumn !== null) {
-        autoAxisLabelY += ` - ${spec.metricAggregation}`;
-        autoAxisLabelX += ` - ${spec.metricAggregation}`;
-      }
-      break;
-
-    case 'pie':
-    case 'map':
-      // No axis labels for these visualisation types
-      break;
-
-    default:
-      throw new Error(`Unknown visualisation type ${vType}`);
+      autoAxisLabelX += ` - ${truncateOrderIndicator} ${spec.truncateSize}`;
+    }
   }
 
   const axisLabelX = spec.axisLabelXFromUser ? spec.axisLabelX : autoAxisLabelX;
@@ -88,36 +52,10 @@ class Visualisation extends Component {
       isUnsavedChanges: false,
       visualisation: {
         type: 'visualisation',
-        name: 'Untitled Chart',
+        name: 'Untitled visualisation',
         visualisationType: null,
         datasetId: null,
-        spec: {
-          metricColumnY: null, // primary
-          metricColumnYName: null,
-          metricColumnYType: null,
-          metricColumnX: null, // secondary
-          metricColumnXName: null,
-          metricColumnXType: null,
-          datapointLabelColumn: null,
-          datapointLabelColumnName: null,
-          datapointLabelColumnType: null,
-          bucketColumn: null,
-          bucketColumnName: null,
-          bucketColumnType: null,
-          subBucketColumn: null,
-          subBucketColumnName: null,
-          subBucketColumnType: null,
-          subBucketMethod: 'split', // can be "split" or "stack"
-          metricAggregation: 'mean', // default to mean,
-          axisLabelX: null,
-          axisLabelXFromUser: false, // Has the label been manually entered by the user?
-          axisLabelY: null,
-          axisLabelYFromUser: false,
-          filters: [],
-          sort: null, // can be "asc", "dsc" or "null"
-          showLegend: null,
-          truncateSize: null,
-        },
+        spec: {},
       },
       asyncComponents: null,
     };
@@ -231,38 +169,65 @@ class Visualisation extends Component {
       'metricColumnX',
       'sort',
     ];
+
     const shouldUpdateAxisLabels = axisLabelUpdateTriggers.some(trigger =>
         Object.keys(value).some(key => key.toString() === trigger.toString())
     );
 
     let spec = update(this.state.visualisation.spec, { $merge: value });
 
-    if (shouldUpdateAxisLabels) {
+    if (this.state.visualisation.visualisationType === 'bar' && shouldUpdateAxisLabels) {
       spec = update(spec,
-        { $merge: updateAxisLabels(this.state.visualisation.visualisationType, spec) });
+        { $merge: updateAxisLabels(spec) });
     }
 
     const visualisation = Object.assign({}, this.state.visualisation, { spec });
 
-    this.setState({
-      isUnsavedChanges: true,
-      visualisation,
-    });
+    this.handleChangeVisualisation(visualisation);
   }
 
-  handleChangeVisualisationType(visualisationType) {
-    this.handleChangeVisualisation({ visualisationType });
-  }
-
-  handleChangeVisualisationTitle(event) {
-    this.handleChangeVisualisation({ name: event.target.value });
-  }
-
-  handleChangeSourceDataset(datasetId) {
+  handleChangeSourceDataset(datasetId, optionalSpecChanges = {}) {
     if (!this.props.library.datasets[datasetId].get('columns')) {
       this.props.dispatch(fetchDataset(datasetId));
     }
-    this.handleChangeVisualisation({ datasetId });
+    const spec = Object.assign({}, this.state.visualisation.spec, optionalSpecChanges);
+    const visualisation = Object.assign({}, this.state.visualisation, { datasetId }, { spec });
+    this.handleChangeVisualisation(visualisation);
+  }
+
+  handleChangeVisualisationType(visualisationType) {
+    let specTemplate;
+    switch (visualisationType) {
+      case 'map':
+        specTemplate = Object.assign({}, mapSpecTemplate);
+        break;
+
+      case 'pie':
+      case 'donut':
+        specTemplate = Object.assign({}, pieSpecTemplate);
+        break;
+
+      case 'line':
+      case 'area':
+        specTemplate = Object.assign({}, lineSpecTemplate);
+        break;
+
+      case 'bar':
+      case 'scatter':
+        specTemplate = Object.assign({}, genericSpecTemplate);
+        break;
+
+      default:
+        throw new Error(`Unknown visualisation type ${visualisationType}`);
+    }
+    this.handleChangeVisualisation({
+      visualisationType,
+      spec: specTemplate,
+    });
+  }
+
+  handleChangeVisualisationTitle(title) {
+    this.handleChangeVisualisation({ name: title });
   }
 
   toggleShareVisualisation() {
@@ -294,6 +259,7 @@ class Visualisation extends Component {
           isUnsavedChanges={this.state.isUnsavedChanges}
           visualisation={visualisation}
           onVisualisationAction={this.handleVisualisationAction}
+          onChangeTitle={this.handleChangeVisualisationTitle}
         />
         <VisualisationEditor
           visualisation={visualisation}

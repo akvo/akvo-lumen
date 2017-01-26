@@ -14,6 +14,9 @@ export default class ContextMenuItem extends Component {
     const onClick = item.subMenu ? null : (event) => {
       event.stopPropagation();
       this.props.handleItemClick(item.value);
+      if (this.props.onWindowClick) {
+        this.props.onWindowClick();
+      }
     };
 
     return (
@@ -40,6 +43,7 @@ export default class ContextMenuItem extends Component {
 ContextMenuItem.propTypes = {
   item: PropTypes.object.isRequired,
   handleItemClick: PropTypes.func.isRequired,
+  onWindowClick: PropTypes.func,
   onOptionSelected: PropTypes.func.isRequired,
   style: PropTypes.object,
   selectedClassName: PropTypes.string,

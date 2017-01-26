@@ -1,0 +1,43 @@
+@import 'modules/colors';
+
+.ColorLabels {
+  li {
+    margin: 1rem 0;
+    height: 2rem;
+  }
+  .ColorLabelItem {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    position: relative;
+
+    .colorIndicator {
+      display: inline-block;
+      width: 2rem;
+      height: 2rem;
+      margin-right: 0.75rem;
+      border-radius: 0.2rem;
+      position: relative;
+
+      .arrowOverlay {
+        display: block;
+        position: absolute;
+        height: 0.5rem;
+        width: 0.5rem;
+        right: 0.3rem;
+        bottom: 0.3rem;
+        /* Draw a triangle */
+        border-top: 0.4rem solid white;
+        border-right: 0.4rem solid transparent;
+        border-left: 0.4rem solid transparent;
+      }
+    }
+
+    .colorPickerContainer {
+      position: absolute;
+      left: -0.15rem;
+      top: 2rem;
+      z-index: 2;
+    }
+  }
+}

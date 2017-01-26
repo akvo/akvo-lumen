@@ -10,7 +10,6 @@ export default function VisualisationEditor(props) {
       <VisualisationConfig
         visualisation={props.visualisation}
         datasets={props.datasets}
-        onChangeTitle={props.onChangeTitle}
         onChangeVisualisationType={props.onChangeVisualisationType}
         onChangeSourceDataset={props.onChangeSourceDataset}
         onChangeVisualisationSpec={props.onChangeVisualisationSpec}
@@ -27,7 +26,6 @@ export default function VisualisationEditor(props) {
 VisualisationEditor.propTypes = {
   visualisation: PropTypes.object.isRequired,
   datasets: PropTypes.object.isRequired,
-  onChangeTitle: PropTypes.func.isRequired,
   onChangeVisualisationType: PropTypes.func.isRequired,
   onChangeSourceDataset: PropTypes.func.isRequired,
   onChangeVisualisationSpec: PropTypes.func.isRequired,

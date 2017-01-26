@@ -1,19 +1,15 @@
 import React, { PropTypes } from 'react';
 import SelectMenu from '../common/SelectMenu';
+import visualisationTypes from '../../containers/Visualisation/visualisationTypes';
 
 require('../../styles/VisualisationTypeMenu.scss');
 
-export default function VisualisationTypeMenu({ visualisation, onChangeVisualisationType }) {
-  const chartTypes = [
-    { value: 'bar', label: 'bar' },
-    { value: 'line', label: 'line' },
-    { value: 'area', label: 'area' },
-    { value: 'pie', label: 'pie' },
-    { value: 'donut', label: 'donut' },
-    { value: 'scatter', label: 'scatter' },
-    { value: 'map', label: 'map' },
-  ];
-
+export default function VisualisationTypeMenu(props) {
+  const { visualisation, onChangeVisualisationType, disabled } = props;
+  const chartTypes = visualisationTypes.map(item => ({
+    value: item,
+    label: item,
+  }));
   return (
     <div className="VisualisationTypeMenu">
       <label htmlFor="visualisationTypeMenu">
@@ -25,7 +21,7 @@ export default function VisualisationTypeMenu({ visualisation, onChangeVisualisa
         value={visualisation.visualisationType}
         options={chartTypes}
         onChange={onChangeVisualisationType}
-        disabled={visualisation.datasetId === null}
+        disabled={disabled}
       />
     </div>
   );
@@ -34,4 +30,5 @@ export default function VisualisationTypeMenu({ visualisation, onChangeVisualisa
 VisualisationTypeMenu.propTypes = {
   visualisation: PropTypes.object.isRequired,
   onChangeVisualisationType: PropTypes.func.isRequired,
+  disabled: PropTypes.bool.isRequired,
 };

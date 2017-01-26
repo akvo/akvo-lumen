@@ -2,6 +2,19 @@
 
 ## 0.5.0 (unreleased)
 
+Date 2017-01-25
+
+### New and noteworthy
+
+* New maps features
+  * Overhaul of maps UI
+  * Layers for maps (currently limited to single layer)
+  * Points on a map can be colored by a text column
+  * Custom colors for points
+  * Popup text can combine multiple columns, including dates and images
+
+* Visualisation editor simplified for Line and Pie charts
+
 ## 0.4.6
 
 Date 2017-01-25
