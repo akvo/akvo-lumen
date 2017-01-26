@@ -16,27 +16,34 @@
   (contains? (set claimed-roles)
              (format "akvo:lumen:%s:admin" tenant-label)))
 
+(defn admin-path?
+  [path-info]
+  )
+
 (defn wrap-auth
   "Wrap authentication for API. Allow GET to root / and share urls at /s/<id>.
   If request don't contain claims return 401. If current dns label (tenant) is
   not in claimed roles return 403.
   Otherwiese grant access. This implies that access is on tenant level."
   [handler]
-  (fn [request]
-    (if (let [{:keys [path-info request-method]} request]
-          (or (and (= "/api" path-info)
-                   (= :get request-method))
-              (and (= "/env" path-info)
-                   (= :get request-method))
-              (and (s/starts-with? path-info "/s/")
-                   (= :get request-method))
-              (and (s/starts-with? path-info "/verify/")
-                   (= :get request-method))))
+  (fn [{:keys [path-info request-method tenant] :as request}]
+    (if (or (and (= "/api" path-info)
+                 (= :get request-method))
+            (and (= "/env" path-info)
+                 (= :get request-method))
+            (and (s/starts-with? path-info "/s/")
+                 (= :get request-method))
+            (and (s/starts-with? path-info "/verify/")
+                 (= :get request-method)))
       (handler request)
-      (if-let [claimed-roles (get-in request
-                                     [:jwt-claims "realm_access" "roles"])]
+      (if-let [claimed-roles (get-in request [:jwt-claims "realm_access" "roles"])]
         (if (tenant-user? (:tenant request) claimed-roles)
-          (handler request)
+          (if (s/starts-with? path-info "/api/admin/")
+            (if (tenant-admin? tenant claimed-roles)
+              (handler request)
+              (-> (response/response "Not authorized")
+                  (response/status 403)))
+            (handler request))
           (-> (response/response "Not authorized")
               (response/status 403)))
         (-> (response/response "Not authenticated")

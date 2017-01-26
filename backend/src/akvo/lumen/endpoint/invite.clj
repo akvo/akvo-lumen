@@ -7,7 +7,7 @@
 
 
 (defn endpoint [{:keys [emailer keycloak tenant-manager]}]
-  (context "/api/invites" {:keys [jwt-claims params tenant] :as request}
+  (context "/api/admin/invites" {:keys [jwt-claims params tenant] :as request}
 
     (let-routes [tenant-conn (connection tenant-manager tenant)
                  roles (get-in jwt-claims ["realm_access" "roles"])]
