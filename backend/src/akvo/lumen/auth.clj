@@ -16,10 +16,6 @@
   (contains? (set claimed-roles)
              (format "akvo:lumen:%s:admin" tenant-label)))
 
-(defn admin-path?
-  [path-info]
-  )
-
 (defn wrap-auth
   "Wrap authentication for API. Allow GET to root / and share urls at /s/<id>.
   If request don't contain claims return 401. If current dns label (tenant) is
