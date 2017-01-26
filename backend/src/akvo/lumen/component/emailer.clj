@@ -4,10 +4,7 @@
             [postal.core :as postal]))
 
 (defprotocol SendEmail
-  (send-email [this email] "Send email"))
-
-
-
+  (send-email [this to subject body] "Send email"))
 
 (defrecord DevMailer []
 
@@ -18,11 +15,13 @@
     this)
 
   SendEmail
-  (send-email [this email]
-    (pprint email)))
+  (send-email [this to subject body]
+    (pprint {:to to
+             :subject subject
+             :body body})))
 
 
-(defrecord SMTPEmailer [host user password]
+(defrecord SMTPEmailer [host user pass]
 
   component/Lifecycle
   (start [this]
@@ -33,18 +32,21 @@
     this)
 
   SendEmail
-  (send-email [this email]
-    (println "Should send email via SMTP")
-    (pprint this)
-    (pprint email)))
+  (send-email [{:keys [host user pass]} to subject body]
+    (let [options {:host host
+                   :user user
+                   :pass pass
+                   :ssl true}
+          message {:from "noreply@akvolumen.org"
+                   :to to
+                   :subject subject
+                   :body body}]
+      (postal/send-message options message))))
 
 (defn emailer
   [{:keys [email-host email-password email-user type] :as options}]
   (if (= type "dev")
     (DevMailer.)
-    (let [email-host "mhost"
-          email-user "muser"
-          email-password "mpassword"]
-      (map->SMTPEmailer {:host email-host
-                         :user email-user
-                         :password email-password}))))
+    (map->SMTPEmailer {:host email-host
+                       :user email-user
+                       :pass email-password})))

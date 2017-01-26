@@ -15,9 +15,11 @@
   [host random]
   (str/join "\n"
             ["Hi,"
+             ""
              "You been invited to join a lumen tenant. Please visit the"
-             "following link to complet your invitation:"
+             "following link to complete your invitation:"
              (format "https://%s/verify/%s" host random)
+             ""
              "Thanks"
              "Akvo"]))
 
@@ -29,12 +31,13 @@
 (defn do-create-invite [tenant-conn emailer keycloak email claims host]
   (if (keycloak/user? keycloak email)
     (let [expiration-time (c/to-sql-time (t/plus (t/now) (t/weeks 2)))
-          db-rec (first (insert-invite tenant-conn
-                                       {:email email
-                                        :expiration_time expiration-time
-                                        :author claims}))
-          mail-body (email-body host (:id db-rec))]
-      (emailer/send-email emailer mail-body))
+          {id :id email-address :email}
+          (first (insert-invite tenant-conn {:email email
+                                             :expiration_time expiration-time
+                                             :author claims}))]
+      (future
+        (emailer/send-email emailer email-address
+                            "Akvo Lumen invite" (email-body host id))))
     (prn (format "Tried to invite non existing user with email (%s)" email))))
 
 (defn create
