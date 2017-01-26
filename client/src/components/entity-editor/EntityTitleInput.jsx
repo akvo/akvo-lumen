@@ -15,7 +15,6 @@ export default class EntityTitleInput extends Component {
     const titleIsDefault = title.toLowerCase().indexOf('untitled') > -1;
     const h3Class = `entityTitle
       ${onChangeTitle ? 'clickable' : ''}
-      ${' '}
       ${titleIsDefault ? 'default' : 'custom'}`;
 
     return (

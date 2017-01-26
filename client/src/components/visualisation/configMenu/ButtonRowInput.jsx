@@ -16,9 +16,7 @@ export default function ButtonRowInput(props) {
           <button
             key={index}
             className={`button
-              ${' '}
               ${selected === buttonText ? 'selected' : 'unSelected'}
-              ${' '}
               ${disabled ? 'disabled' : 'clickable'}`}
             style={{
               marginRight: props.buttonSpacing ? props.buttonSpacing : 0,
