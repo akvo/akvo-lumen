@@ -33,18 +33,15 @@
                                        {:email email
                                         :expiration_time expiration-time
                                         :author claims}))
-          ;; host "http://t1.lumen.localhost:3000"
-          ;; mail-body (format "%s/verify/%s" host (:id db-rec))
           mail-body (email-body host (:id db-rec))]
-
       (emailer/send-email emailer mail-body))
     (prn (format "Tried to invite non existing user with email (%s)" email))))
 
 (defn create
   "Creates a new invite"
-  [tenant-conn emailer keycloak roles {:strs [email]} claims]
+  [tenant-conn emailer keycloak roles {:strs [email]} claims host]
   ;; If existing user and no other active invite on same email
-  (do-create-invite tenant-conn emailer keycloak email claims)
+  (do-create-invite tenant-conn emailer keycloak email claims host)
   (response {:invite-job-status "started"}))
 
 (defn accept-invite
