@@ -21,6 +21,10 @@ User.propTypes = {
   admin: PropTypes.bool,
 };
 
+User.defaultProps = {
+  admin: false,
+};
+
 function UserList({ users }) {
   return (
     <table>
