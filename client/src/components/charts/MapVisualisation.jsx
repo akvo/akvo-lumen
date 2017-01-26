@@ -13,6 +13,10 @@ const isImage = (value) => {
 };
 
 const calculateBounds = (layerArray) => {
+  if (layerArray.length === 0) {
+    return null;
+  }
+
   let maxLat = -90;
   let minLat = 90;
   let maxLong = -180;
@@ -202,7 +206,7 @@ export default function MapVisualisation({ visualisation, datasets, width, heigh
       )}
       <Map
         center={[0, 0]}
-        bounds={bounds}
+        {... bounds ? { bounds } : {}} // Don't set a bounds prop if we have no bounds
         zoom={2}
         scrollWheelZoom={false}
         key={width}
