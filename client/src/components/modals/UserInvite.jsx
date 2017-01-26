@@ -22,13 +22,13 @@ export default function UserInvite(props) {
           backgroundColor: 'rgba(0,0,0,0.6)',
         },
       }}
-      >
+    >
       <div className="DashboardModal">
         <div className="UserInvite">
           <h2 className="modalTitle">Invite User</h2>
           <div
             className="close clickable"
-            onClick={onClose}
+            onClick={this.props.onClose}
           >
           +
           </div>
@@ -37,7 +37,7 @@ export default function UserInvite(props) {
           </div>
         </div>
       </div>
-    />
+    </Modal>
   );
 }
 
