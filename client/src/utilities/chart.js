@@ -39,9 +39,9 @@ const getFilterArray = (filters, columns) => {
 
       case 'isEmpty':
         if (filter.operation === 'remove') {
-          filterArray.push(row => row.get(columnIndex) !== null || row.get(columnIndex) !== '');
+          filterArray.push(row => row.get(columnIndex) !== null && row.get(columnIndex) !== '');
         } else if (filter.operation === 'keep') {
-          filterArray.push(row => row.get(columnIndex) === testValue);
+          filterArray.push(row => row.get(columnIndex) === null || row.get(columnIndex) === '');
         }
         break;
 
