@@ -143,6 +143,7 @@ export default class LayerConfigMenu extends Component {
             className="legendTab"
           >
             <ToggleInput
+              className="inputGroup"
               checked={layer.legend.visible}
               label="Legend"
               onChange={(val) => {
@@ -165,6 +166,7 @@ export default class LayerConfigMenu extends Component {
             />
             <hr />
             <ToggleInput
+              className="inputGroup"
               disabled
               checked={false}
               label="Counters"
@@ -179,6 +181,7 @@ export default class LayerConfigMenu extends Component {
             className="popupTab"
           >
             <ToggleInput
+              className="inputGroup"
               disabled
               checked
               label="Pop-up"

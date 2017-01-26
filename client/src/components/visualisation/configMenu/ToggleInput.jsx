@@ -5,7 +5,9 @@ require('../../../styles/ToggleInput.scss');
 export default function ToggleInput(props) {
   const { checked, disabled, label, onChange } = props;
   return (
-    <div className={`ToggleInput inputGroup ${props.disabled ? ' disabled' : ''}`}>
+    <div className={`ToggleInput ${props.disabled ? ' disabled' : ''}
+      ${props.className ? props.className : ''}`}
+    >
       <h4 className="label">
         {label}
       </h4>
@@ -23,6 +25,7 @@ export default function ToggleInput(props) {
 }
 
 ToggleInput.propTypes = {
+  className: PropTypes.string,
   disabled: PropTypes.bool,
   checked: PropTypes.bool.isRequired,
   label: PropTypes.string,
