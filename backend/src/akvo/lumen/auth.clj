@@ -2,19 +2,43 @@
   (:require [akvo.commons.jwt :as jwt]
             [cheshire.core :as json]
             [clj-http.client :as client]
-            [clojure.string :as s]
             [clojure.set :as set]
+            [clojure.string :as s]
             [ring.util.response :as response]))
 
+(defn claimed-roles [jwt-claims]
+  (set (get-in jwt-claims ["realm_access" "roles"])))
+
 (defn tenant-user?
-  [tenant-label claimed-roles]
-  (contains? (set claimed-roles)
-             (format "akvo:lumen:%s" tenant-label)))
+  [{:keys [tenant jwt-claims]}]
+  (contains? (claimed-roles jwt-claims)
+             (format "akvo:lumen:%s" tenant)))
 
 (defn tenant-admin?
-  [tenant-label claimed-roles]
-  (contains? (set claimed-roles)
-             (format "akvo:lumen:%s:admin" tenant-label)))
+  [{:keys [tenant jwt-claims]}]
+  (contains? (claimed-roles jwt-claims)
+             (format "akvo:lumen:%s:admin" tenant)))
+
+(defn public-path? [{:keys [path-info request-method]}]
+  (and (= :get request-method)
+       (or (= "/api" path-info)
+           (= "/env" path-info)
+           (s/starts-with? path-info "/s/")
+           (s/starts-with? path-info "/verify/"))))
+
+(defn admin-path? [{:keys [path-info]}]
+  (s/starts-with? path-info "/api/admin/"))
+
+(defn api-path? [{:keys [path-info]}]
+  (s/starts-with? path-info "/api/"))
+
+(def not-authenticated
+  (-> (response/response "Not authenticated")
+      (response/status 401)))
+
+(def not-authorized
+  (-> (response/response "Not authorized")
+      (response/status 403)))
 
 (defn wrap-auth
   "Wrap authentication for API. Allow GET to root / and share urls at /s/<id>.
@@ -22,29 +46,17 @@
   not in claimed roles return 403.
   Otherwiese grant access. This implies that access is on tenant level."
   [handler]
-  (fn [{:keys [path-info request-method tenant] :as request}]
-    (if (or (and (= "/api" path-info)
-                 (= :get request-method))
-            (and (= "/env" path-info)
-                 (= :get request-method))
-            (and (s/starts-with? path-info "/s/")
-                 (= :get request-method))
-            (and (s/starts-with? path-info "/verify/")
-                 (= :get request-method)))
-      (handler request)
-      (if-let [claimed-roles (get-in request [:jwt-claims "realm_access" "roles"])]
-        (if (tenant-user? (:tenant request) claimed-roles)
-          (if (s/starts-with? path-info "/api/admin/")
-            (if (tenant-admin? tenant claimed-roles)
-              (handler request)
-              (-> (response/response "Not authorized")
-                  (response/status 403)))
-            (handler request))
-          (-> (response/response "Not authorized")
-              (response/status 403)))
-        (-> (response/response "Not authenticated")
-            (response/status 401))))))
-
+  (fn [{:keys [jwt-claims] :as request}]
+    (cond
+      (public-path? request) (handler request)
+      (nil? jwt-claims) not-authenticated
+      (admin-path? request) (if (tenant-admin? request)
+                              (handler request)
+                              not-authorized)
+      (api-path? request) (if (tenant-user? request)
+                            (handler request)
+                            not-authorized)
+      :else not-authorized)))
 
 (defn wrap-jwt
   "Go get cert from Keycloak and feed it to wrap-jwt-claims. Keycloak url can
