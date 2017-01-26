@@ -1,4 +1,5 @@
 const genericSpec = {
+  version: 1,
   metricColumnY: null, // primary
   metricColumnYName: null,
   metricColumnYType: null,

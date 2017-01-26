@@ -1,4 +1,5 @@
 const lineSpec = {
+  version: 1,
   filters: [],
   metricColumnY: null,
   metricColumnX: null,
