@@ -167,7 +167,7 @@ export function getLineData(visualisation, datasets) {
   const valueArray = dataset.get('rows')
     .filter(row => rowFilter(row))
     .map((row, index) => {
-      let x = spec.metricColumnX === null ? index : row.get(xIndex);
+      const x = spec.metricColumnX === null ? index : row.get(xIndex);
 
       return ({
         x,
