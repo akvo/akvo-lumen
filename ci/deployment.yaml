@@ -26,22 +26,22 @@ spec:
               key: lumen_db_url
         - name: LUMEN_EMAIL_HOST
           valueFrom:
-            configKeyref:
+            configMapKeyRef:
               name: akvo
               key: email.host
         - name: LUMEN_EMAIL_PASSWORD
           valueFrom:
-            secretKeyref:
+            secretKeyRef:
               name: lumen
               key: email.password
         - name: LUMEN_EMAIL_USER
           valueFrom:
-            secretKeyref:
+            secretKeyRef:
               name: lumen
               key: email.user
         - name: LUMEN_KEYCLOAK_PASSWORD
           valueFrom:
-            secretMapKeyRef:
+            secretKeyRef:
               name: lumen
               key: keycloak.password
         - name: LUMEN_KEYCLOAK_URL
@@ -51,7 +51,7 @@ spec:
               key: keycloak.url
         - name: LUMEN_KEYCLOAK_USER
           valueFrom:
-            secretMapKeyRef:
+            secretKeyRef:
               name: lumen
               key: keycloak.user
         - name: LUMEN_FILE_UPLOAD_PATH
