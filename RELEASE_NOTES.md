@@ -15,6 +15,11 @@ Date 2017-01-25
 
 * Visualisation editor simplified for Line and Pie charts
 
+### Bugfixes
+
+* Fixed a bug where the maximum y-axis value was set incorrectly for stacked bar charts when
+  using an aggregation method other than "count"
+
 ## 0.4.6
 
 Date 2017-01-25
