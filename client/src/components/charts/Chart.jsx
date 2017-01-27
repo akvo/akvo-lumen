@@ -39,9 +39,25 @@ export default class Chart extends Component {
 
   renderChart(props) {
     const { visualisation, datasets, width, height } = props;
-    const chartData = chart.getChartData(visualisation, datasets);
     const containerHeight = height || 400;
     const containerWidth = width || 800;
+    let chartData;
+    switch (visualisation.visualisationType) {
+      case 'pie':
+      case 'donut':
+        chartData = chart.getPieData(visualisation, datasets);
+        break;
+      case 'area':
+      case 'line':
+        chartData = chart.getLineData(visualisation, datasets);
+        break;
+      case 'bar':
+      case 'scatter':
+        chartData = chart.getChartData(visualisation, datasets);
+        break;
+      default:
+        throw new Error(`Unknown visualisation type ${visualisation.visualisationType}`);
+    }
     const vegaSpec = chart.getVegaSpec(visualisation, chartData, containerHeight, containerWidth);
 
     vg.parse.spec(vegaSpec, (error, vegaChart) => {

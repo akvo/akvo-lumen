@@ -6,31 +6,57 @@ require('../../styles/VisualisationPreview.scss');
 
 function shouldRender(visualisation, datasets) {
   const datasetId = visualisation.datasetId;
-  if (datasetId == null) {
-    return false;
+  const dataset = datasetId ? datasets[datasetId] : null;
+  const datasetLoaded = dataset ? Boolean(dataset.get('columns')) : false;
+  const vType = visualisation.visualisationType;
+  const { spec } = visualisation;
+
+  switch (vType) {
+    case 'map':
+      return true;
+
+    case 'bar':
+      if (!datasetLoaded) {
+        return false;
+      }
+      if (spec.metricColumnY == null || spec.bucketColumn == null) {
+        return false;
+      }
+      break;
+
+    case 'line':
+    case 'area':
+      if (!datasetLoaded) {
+        return false;
+      }
+      if (spec.metricColumnY == null) {
+        return false;
+      }
+      break;
+
+    case 'pie':
+    case 'donut':
+      if (!datasetLoaded) {
+        return false;
+      }
+      if (spec.bucketColumn == null) {
+        return false;
+      }
+      break;
+
+    case 'scatter':
+      if (!datasetLoaded) {
+        return false;
+      }
+      if (spec.metricColumnX == null || spec.metricColumnY == null) {
+        return false;
+      }
+      break;
+
+    default:
+      return false;
   }
-  const dataset = datasets[datasetId];
-  if (dataset == null) {
-    return false;
-  }
-  if (dataset.get('columns') == null) {
-    return false;
-  }
-  const { spec, visualisationType } = visualisation;
-  const haveDataColumn = spec.metricColumnY != null;
-  if (!haveDataColumn) {
-    return false;
-  }
-  const needSecondDataColumn = visualisationType === 'scatter' || visualisationType === 'map';
-  const haveSecondDataColumn = spec.metricColumnX != null;
-  if (needSecondDataColumn && !haveSecondDataColumn) {
-    return false;
-  }
-  const needAggregation = visualisationType === 'bar' || visualisationType === 'pie';
-  const haveAggregation = spec.bucketColumn !== null;
-  if (needAggregation && !haveAggregation) {
-    return false;
-  }
+
   return true;
 }
 

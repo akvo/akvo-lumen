@@ -1,0 +1,40 @@
+@import 'modules/colors';
+
+.LayerMenu {
+  .controlRow {
+    display: flex;
+    flex-direction: row;
+    align-items: space-between;
+    justify-content: center;
+    height: 6rem;
+    background-color: $lightGrey;
+    font-size: 1.4rem;
+    padding: 0 1rem;
+  }
+  .titleContainer {
+    display: flex;
+    flex: 3;
+    align-items: center;
+
+    h3 {
+      height: 2.4rem;
+      line-height: 1.4rem;
+      padding: 0.5rem 0;
+    }
+  }
+  .buttonContainer {
+    display: flex;
+    flex: 1;
+    justify-content: flex-end;
+    align-items: center;
+
+    button {
+      font-size: 1rem;
+      background-color: white;
+      border: 0.1rem solid $midGrey;
+      height: 2.4rem;
+      line-height: 1.4em;
+      padding: 0.5rem 1rem;
+    }
+  }
+}
