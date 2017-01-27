@@ -52,6 +52,7 @@ class Users extends Component {
       isInviteModalVisible: false,
       users: [],
     };
+    this.getActionButtons = this.getActionButtons.bind(this);
   }
 
   componentDidMount() {
@@ -61,8 +62,20 @@ class Users extends Component {
     }
   }
 
+  getActionButtons() {
+    const invite = {
+      buttonText: 'Invite user',
+      onClick: () => this.setState({ isInviteModalVisible: true }),
+    };
+
+    return [invite];
+  }
+
   render() {
+    const actionButtons = this.getActionButtons();
     const { admin } = this.props.profile;
+    const saveStatus = '';
+    const title = 'Members';
 
     if (!admin) {
       return (
@@ -75,15 +88,9 @@ class Users extends Component {
     return (
       <div className="UsersContainer">
         <EntityTypeHeader
-          title="Members"
-          saveStatus=""
-          actionButtons={
-            [
-              {
-                buttonText: 'Invite user',
-                onClick: () => this.setState({ isInviteModalVisible: true }),
-              },
-            ]}
+          title={title}
+          saveStatus={saveStatus}
+          actionButtons={actionButtons}
         />
         <div className="UserList">
           <UserList users={this.state.users} />
