@@ -73,7 +73,7 @@ const getFilterDisplayValue = (value, columnName, columnOptions) => {
   let displayValue;
 
   if (columnType === 'date') {
-    displayValue = moment.unix(value).format('YYYY-MM-DD hh:mm');
+    displayValue = moment(value).format('YYYY-MM-DD hh:mm');
   } else {
     displayValue = value;
   }
