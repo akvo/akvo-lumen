@@ -23,7 +23,7 @@
    'file-upload-path (:lumen-file-upload-path env)
    'flow-report-database-url (:lumen-flow-report-database-url env)
    'http-port (Integer/parseInt (:port env "3000"))
-   'keycloak-client-id "akvo-lumen"
+   'keycloak-client-id "lumen"
    'keycloak-password (:lumen-keycloak-password env)
    'keycloak-realm "akvo"
    'keycloak-url (:lumen-keycloak-url env)
