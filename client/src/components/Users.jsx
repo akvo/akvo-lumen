@@ -49,10 +49,13 @@ class Users extends Component {
   constructor() {
     super();
     this.state = {
+      invitedUserEmail: '',
       isInviteModalVisible: false,
       users: [],
     };
     this.getActionButtons = this.getActionButtons.bind(this);
+    this.onChange = this.onChange.bind(this);
+    this.onInviteUser = this.onInviteUser.bind(this);
   }
 
   componentDidMount() {
@@ -60,6 +63,15 @@ class Users extends Component {
       api.get('/api/admin/users')
         .then(users => this.setState({ users }));
     }
+  }
+
+  onChange(event) {
+    this.setState({ invitedUserEmail: event.target.value.toLowerCase() });
+  }
+
+  onInviteUser(event) {
+    api.post('/api/admin/users/invites', this.state.invitedUserEmail);
+    event.preventDefault();
   }
 
   getActionButtons() {
@@ -96,9 +108,11 @@ class Users extends Component {
           <UserList users={this.state.users} />
         </div>
         <InviteUser
+          invitedUserEmail={this.state.invitedUserEmail}
           isOpen={this.state.isInviteModalVisible}
+          onChange={this.onChange}
           onClose={() => this.setState({ isInviteModalVisible: false })}
-          onInviteUser={email => api.post()}
+          onInviteUser={this.onInviteUser}
         />
       </div>
     );

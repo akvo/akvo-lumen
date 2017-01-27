@@ -33,7 +33,18 @@ export default function InviteUser(props) {
           +
           </div>
           <div className="contents">
-            <p>Modal contents go here</p>
+            <form onSubmit={props.onInviteUser}>
+              <label htmlFor>
+                Email:
+                <input
+                  type="text"
+                  placeholder="user@domain.org"
+                  value={props.invitedUserEmail}
+                  onChange={props.onChange}
+                />
+              </label>
+              <input type="submit" value="Send" />
+            </form>
           </div>
         </div>
       </div>
@@ -42,6 +53,9 @@ export default function InviteUser(props) {
 }
 
 InviteUser.propTypes = {
-  onClose: PropTypes.func.isRequired,
+  invitedUserEmail: PropTypes.string.isRequired,
   isOpen: PropTypes.bool.isRequired,
+  onChange: PropTypes.func.isRequired,
+  onClose: PropTypes.func.isRequired,
+  onInviteUser: PropTypes.func.isRequired,
 };
