@@ -422,10 +422,19 @@ export function getChartData(visualisation, datasets) {
   }
 
   if (vType === 'bar' && spec.subBucketMethod === 'stack') {
-    const max = Math.max(...output.values.map(item => item.parentMetric));
+    /* Sum the sub-bucket values for each bucket, then find the tallest "stack" in the chart,
+    /* so we can set the chart y-axis to the correct height. */
+    const summedBucketValues = dl.groupby(['bucketValue'])
+          .summarize([{
+            name: `${spec.metricAggregation}_y`,
+            ops: ['sum'],
+            as: ['total_bucket_value'],
+          }])
+          .execute(output.values);
+    const maxBucketValue = Math.max(...summedBucketValues.map(item => item.total_bucket_value));
 
     output.metadata = output.metadata || {};
-    output.metadata.max = max;
+    output.metadata.max = maxBucketValue;
   }
 
   output.name = 'table';
