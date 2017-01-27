@@ -63,10 +63,6 @@ class Users extends Component {
 
   render() {
     const { admin } = this.props.profile;
-    const inviteButton = {
-      buttonText: 'Invite user',
-      onClick: () => this.setState({ isInviteModalVisable: true }),
-    };
 
     if (!admin) {
       return (
@@ -81,7 +77,13 @@ class Users extends Component {
         <EntityTypeHeader
           title="Members"
           saveStatus=""
-          actionButtons={[inviteButton]}
+          actionButtons={
+            [
+              {
+                buttonText: 'Invite user',
+                onClick: () => this.setState({ isInviteModalVisible: true }),
+              },
+            ]}
         />
         <div className="UserList">
           <UserList users={this.state.users} />

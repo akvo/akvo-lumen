@@ -9,7 +9,7 @@ import { showModal } from '../actions/activeModal';
 
 require('../styles/WorkspaceNav.scss');
 
-const collapsedLocations = ['visualisation/', 'dataset/', 'dashboard/'];
+const collapsedLocations = ['visualisation/', 'dataset/', 'dashboard/', 'admin/users'];
 
 const getCollapsedStatus = (pathname) => {
   let collapsedStatus = false;
