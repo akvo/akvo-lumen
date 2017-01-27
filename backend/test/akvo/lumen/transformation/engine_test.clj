@@ -1,11 +1,11 @@
 (ns akvo.lumen.transformation.engine-test
-  (:require [cheshire.core :as json]
+  (:require [akvo.lumen.main]
+            [akvo.lumen.migrate :as migrate]
+            [akvo.lumen.transformation.engine :refer :all]
+            [cheshire.core :as json]
             [clojure.java.io :as io]
             [clojure.test :refer :all]
             [hugsql.core :as hugsql]
-            [akvo.lumen.main]
-            [akvo.lumen.migrate :as migrate]
-            [akvo.lumen.transformation.engine :refer :all]
             [reloaded.repl :refer [stop go]]))
 
 (hugsql/def-db-fns "akvo/lumen/transformation/engine_test.sql")
@@ -13,8 +13,6 @@
 (def columns (vec (take 3 (json/parse-string (slurp (io/resource "columns_test.json"))))))
 
 (def tenant-conn {:connection-uri "jdbc:postgresql://localhost/test_lumen_tenant_1?user=lumen&password=password"})
-
-
 
 (defn tf-engine-fixture
   [f]
@@ -121,73 +119,4 @@
             data (db-select-test-data tenant-conn)]
         (is (:success? result))
         (is (= 1 (count data)))
-        (is (zero? (:c1 (first data)))))
-
-
-      (db-delete-test-data tenant-conn)
-      (db-insert-invalid-data tenant-conn)
-
-      (let [result (apply-operation tenant-conn "ds_test_1" columns op2)
-            data (db-select-test-data tenant-conn)]
-        (is (:success? result))
-        (is (= 1 (count data)))
-        (is (zero? (:c1 (first data)))))))
-
-  (testing "Invalid data, on-error: delete-row"
-    (let [op1 (assoc (:to-number transformations) "onError" "delete-row")
-          op2 (assoc (:to-date transformations) "onError" "delete-row")]
-
-      (db-delete-test-data tenant-conn)
-      (db-insert-invalid-data tenant-conn)
-
-      (let [result (apply-operation tenant-conn "ds_test_1" columns op1)
-            data (db-select-test-data tenant-conn)]
-        (is (:success? result))
-        (is (zero? (count data))))
-
-      (db-delete-test-data tenant-conn)
-      (db-insert-invalid-data tenant-conn)
-
-      (let [result (apply-operation tenant-conn "ds_test_1" columns op2)
-            data (db-select-test-data tenant-conn)]
-        (is (:success? result))
-        (is (zero? (count data)))))))
-
-
-
-(deftest test-metadata-transformations
-  (testing "core/sort-column"
-    (let [op1 (:sort-column transformations)
-          op2 (assoc-in (:sort-column transformations) ["args" "columnName"] "c2")
-          result (-> columns
-                     (column-metadata-operation op1)
-                     (column-metadata-operation op2))
-          c1 (first result)
-          c2 (second result)]
-      (is (= "c1" (get c1 "columnName")))
-      (is (= 1 (get c1 "sort")))
-      (is (= "ASC" (get c1 "direction")))
-      (is (= "c2" (get c2 "columnName")))
-      (is (= 2 (get c2 "sort")))
-      (is (= "ASC" (get c2 "direction")))))
-
-  (testing "core/remove-sort"
-    (let [sort-it (:sort-column transformations)
-          remove-it (:remove-sort transformations)
-          result (-> columns
-                     (column-metadata-operation sort-it)
-                     (column-metadata-operation remove-it))
-          c1 (first result)]
-      (is (= "c1" (get c1 "columnName")))
-      (is (nil? (get c1 "sort")))
-      (is (nil? (get c1 "direction")))))
-
-  (testing "core/change-column-title"
-    (let [op (:change-title transformations)
-          result (column-metadata-operation columns op)
-          c1 (first result)
-          c2 (second result)]
-      (is (= "c1" (get c1 "columnName")))
-      (is (= "Column 1" (get c1 "title")))
-      (is (= "c2" (get c2 "columnName")))
-      (is (= "My column" (get c2 "title"))))))
+        (is (zero? (:c1 (first data))))))))

@@ -167,8 +167,7 @@ export function getLineData(visualisation, datasets) {
   const valueArray = dataset.get('rows')
     .filter(row => rowFilter(row))
     .map((row, index) => {
-      let x = spec.metricColumnX === null ? index : row.get(xIndex);
-      x = xAxisType === 'date' ? x * 1000 : x;
+      const x = spec.metricColumnX === null ? index : row.get(xIndex);
 
       return ({
         x,
@@ -295,7 +294,7 @@ export function getMapData(layer, datasets) {
         popup: popupIndexes.map(idx => ({
           title: dataset.getIn(['columns', idx, 'title']),
           value: dataset.getIn(['columns', idx, 'type']) === 'date' ?
-            new Date(row.get(idx) * 1000).toString()
+            new Date(row.get(idx)).toString()
             :
             row.get(idx),
         })),
@@ -346,17 +345,9 @@ export function getChartData(visualisation, datasets) {
   metricColumnY.forEach((entry, index) => {
     const row = dataset.get('rows').get(index);
 
-    let bucketValue = bucketValueColumn ? bucketValueColumn[index] : null;
-    bucketValue = spec.bucketColumnType === 'date' ?
-      parseFloat(bucketValue) * 1000 : bucketValue;
-
-    let subBucketValue = subBucketValueColumn ? subBucketValueColumn[index] : null;
-    subBucketValue = spec.bucketColumnType === 'date' ?
-      parseFloat(subBucketValue) * 1000 : subBucketValue;
-
-    let datapointLabelValue = datapointLabelValueColumn ? datapointLabelValueColumn[index] : null;
-    datapointLabelValue = spec.bucketColumnType === 'date' ?
-      parseFloat(datapointLabelValue) * 1000 : datapointLabelValue;
+    const bucketValue = bucketValueColumn ? bucketValueColumn[index] : null;
+    const subBucketValue = subBucketValueColumn ? subBucketValueColumn[index] : null;
+    const datapointLabelValue = datapointLabelValueColumn ? datapointLabelValueColumn[index] : null;
 
     let x = null; // Not all datapoints will have an 'x' value - sometimes we use the index instead
 

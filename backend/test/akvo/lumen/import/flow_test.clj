@@ -1,8 +1,8 @@
 (ns akvo.lumen.import.flow-test
-  (:require [clojure.test :refer :all]
-            [clojure.java.io :as io]
+  (:require [akvo.lumen.import.flow :refer :all]
             [clojure.edn :as edn]
-            [akvo.lumen.import.flow :refer :all]))
+            [clojure.java.io :as io]
+            [clojure.test :refer :all]))
 
 (comment
   (require 'clojure.tools.namespace.repl)
@@ -58,11 +58,11 @@
             {:title "Longitude", :type "number", :column-name "c3"}
             {:title "Submitter", :type "text", :column-name "c4"}
             {:title "Submitted at", :type "date", :column-name "c5"}
-            {:type "object", :title "Geoshape", :column-name "c6"}
-            {:type "object", :title "Barcode", :column-name "c7"}
+            {:type "text", :title "Geoshape", :column-name "c6"}
+            {:type "text", :title "Barcode", :column-name "c7"}
             {:type "date", :title "Date", :column-name "c8"}
-            {:type "object", :title "Video", :column-name "c9"}
-            {:type "object", :title "Photo", :column-name "c10"}
+            {:type "text", :title "Video", :column-name "c9"}
+            {:type "text", :title "Photo", :column-name "c10"}
             {:type "text", :title "Geolocation", :column-name "c11"}
             {:type "number", :title "Number", :column-name "c12"}
             {:type "text", :title "Cascade", :column-name "c13"}

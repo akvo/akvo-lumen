@@ -19,10 +19,10 @@
     "onError": "fail"
   },
   {
-    "op": "core/change-column-title",
+    "op": "core/rename-column",
     "args": {
       "columnName": "c2",
-      "columnTitle": "My number column"
+      "newColumnTitle": "My number column"
     },
     "onError": "fail"
   },

@@ -1,92 +1,21 @@
 (ns akvo.lumen.transformation.engine
-  (:require [akvo.commons.psql-util :refer (val->jsonb-pgobj)]
-            [akvo.lumen.transformation.js :as js]
-            [akvo.lumen.util :as util]
+  (:require [akvo.lumen.util :as util]
             [clojure.java.jdbc :as jdbc]
             [clojure.set :as set]
             [clojure.string :as str]
             [clojure.walk :as walk]
-            [hugsql.core :as hugsql])
-  (:import java.sql.SQLException
-           jdk.nashorn.api.scripting.ScriptObjectMirror))
+            [hugsql.core :as hugsql]))
 
-(hugsql/def-db-fns "akvo/lumen/transformation/engine.sql")
+(hugsql/def-db-fns "akvo/lumen/transformation.sql")
 
-(def available-ops
-  {"core/change-datatype" nil
-   "core/change-column-title" nil
-   "core/sort-column" nil
-   "core/remove-sort" nil
-   "core/filter-column" nil
-   "core/to-titlecase" nil
-   "core/to-lowercase" nil
-   "core/to-uppercase" nil
-   "core/trim" nil
-   "core/trim-doublespace" nil
-   "core/combine" nil
-   "core/derive" nil
-   "core/delete-column" nil
-   "core/rename-column" nil})
+(defmulti valid?
+  "Validate transformation spec"
+  (fn [op-spec]
+    (keyword (op-spec "op"))))
 
-(defn- get-column-name
-  "Returns the columnName from the operation specification"
+(defmethod valid? :default
   [op-spec]
-  (get-in op-spec ["args" "columnName"]))
-
-(defn- get-column-idx
-  "Returns the column index or a given columnName.
-  Throws an exception if not found"
-  [columns column-name]
-  (let [idx (first
-             (keep-indexed #(when (= column-name (get %2 "columnName")) %1) columns))]
-    (if (nil? idx)
-      (throw (Exception. (str "Column " column-name " not found")))
-      idx)))
-
-(defn- get-sort-idx
-  "Returns the next sort index for a given vector of columns"
-  [columns]
-  (inc (count (filter #(get % "sort") columns))))
-
-(defmulti column-metadata-operation
-  "Dispatch a columns metadata change"
-  (fn [columns op-spec]
-    (keyword (get op-spec "op"))))
-
-(defmethod column-metadata-operation :default
-  [columns op-spec]
-  (throw (ex-info (format "Column metadata changes not supported on operation [%s]"
-                          (op-spec "op"))
-                  {:columns columns
-                   :op-spec op-spec})))
-
-(defmethod column-metadata-operation :core/sort-column
-  [columns op-spec]
-  (let [col-name (get-column-name op-spec)
-        col-idx (get-column-idx columns col-name)
-        sort-idx (get-sort-idx columns)
-        sort-direction (get-in op-spec ["args" "sortDirection"])]
-    (update columns col-idx assoc "sort" sort-idx "direction" sort-direction)))
-
-(defmethod column-metadata-operation :core/remove-sort
-  [columns op-spec]
-  (let [col-name (get-column-name op-spec)
-        col-idx (get-column-idx columns col-name)]
-    (update columns col-idx assoc "sort" nil "direction" nil)))
-
-(defmethod column-metadata-operation :core/change-column-title
-  [columns op-spec]
-  (let [col-name (get-column-name op-spec)
-        col-idx (get-column-idx columns col-name)
-        col-title (get-in op-spec ["args" "columnTitle"])]
-    (update columns col-idx assoc "title" col-title)))
-
-(defmethod column-metadata-operation :core/change-datatype
-  [columns op-spec]
-  (let [col-name (get-column-name op-spec)
-        col-idx (get-column-idx columns col-name)
-        new-type (get-in op-spec ["args" "newType"])]
-    (update columns col-idx assoc "type" new-type)))
+  false)
 
 (defmulti apply-operation
   "Applies a particular operation based on `op` key from spec
@@ -106,106 +35,50 @@
   {:success? false
    :message (str "Unknown operation " (get op-spec "op"))})
 
-(defmethod apply-operation :core/to-titlecase
-  [tenant-conn table-name columns op-spec]
-  (db-to-titlecase tenant-conn {:table-name table-name
-                                 :column-name (get-column-name op-spec)})
-  {:success? true
-   :columns columns})
+(defn pg-escape-string [s]
+  (when-not (nil? s)
+    (when-not (string? s)
+      (throw (ex-info "Not a string" {:s s})))
+    (str/replace s "'" "''")))
 
-(defmethod apply-operation :core/to-lowercase
-  [tenant-conn table-name columns op-spec]
-  (db-to-lowercase tenant-conn {:table-name table-name
-                                 :column-name (get-column-name op-spec)})
-  {:success? true
-   :columns columns})
+(defn ensure-number [n]
+  (when-not (or (nil? n)
+                (number? n))
+    (throw (ex-info "Not a number" {:n n})))
+  n)
 
-(defmethod apply-operation :core/to-uppercase
-  [tenant-conn table-name columns op-spec]
-  (db-to-upercase tenant-conn {:table-name table-name
-                               :column-name (get-column-name op-spec)})
-  {:success? true
-   :columns columns})
+(defn valid-column-name? [s]
+  (and (string? s)
+       (boolean (re-find #"^(c|d)\d+$" s))))
 
+(defn valid-type? [s]
+  (boolean (#{"text" "number" "date"} s)))
 
-(defmethod apply-operation :core/trim
-  [tenant-conn table-name columns op-spec]
-  (db-trim tenant-conn {:table-name table-name
-                        :column-name (get-column-name op-spec)})
-  {:success? true
-   :columns columns})
+(defn column-index
+  "Returns the column index for a given column-name"
+  [columns column-name]
+  (let [idx (first
+             (keep-indexed #(when (= column-name (get %2 "columnName")) %1) columns))]
+    (if (nil? idx)
+      (throw (ex-info "Column not found" {:column-name column-name
+                                          :columns columns}))
+      idx)))
 
-(defmethod apply-operation :core/trim-doublespace
-  [tenant-conn table-name columns op-spec]
-  (db-trim-double tenant-conn {:table-name table-name
-                               :column-name (get-column-name op-spec)})
-  {:success? true
-   :columns columns})
+(defn column-type
+  "Lookup the type of a column"
+  [columns column-name]
+  (let [idx (column-index columns column-name)]
+    (get-in columns [idx "type"])))
 
-(defmethod apply-operation :core/sort-column
-  [tenant-conn table-name columns op-spec]
-  (let [col-name (get-column-name op-spec)
-        idx-name (str table-name "_" col-name)
-        new-cols (column-metadata-operation columns op-spec)]
-    (db-create-index tenant-conn {:index-name idx-name
-                                  :column-name col-name
-                                  :table-name table-name})
-    {:success? true
-     :columns new-cols}))
+(defn update-column [columns column-name f & args]
+  (let [idx (column-index columns column-name)]
+    (apply update columns idx f args)))
 
-(defmethod apply-operation :core/remove-sort
-  [tenant-conn table-name columns op-spec]
-  (let [col-name (get-column-name op-spec)
-        idx-name (str table-name "_" col-name)
-        new-cols (column-metadata-operation columns op-spec)]
-    (db-drop-index tenant-conn {:index-name idx-name})
-    {:success? true
-     :columns new-cols}))
+(defn error-strategy [op-spec]
+  (get op-spec "onError"))
 
-(defmethod apply-operation :core/change-column-title
-  [tenant-conn table-name columns op-spec]
-  (let [new-cols (column-metadata-operation columns op-spec)]
-    {:success? true
-     :columns new-cols}))
-
-
-(defmethod apply-operation :core/change-datatype
-  [tenant-conn table-name columns op-spec]
-  (let [new-cols (column-metadata-operation columns op-spec)]
-    (try
-      (let [result (db-change-data-type tenant-conn {:table-name table-name
-                                                     :args (get op-spec "args")
-                                                     :on-error (get op-spec "onError")})
-            exec-log (vec (:lumen_change_data_type result))]
-        {:success? true
-         :execution-log exec-log
-         :columns new-cols})
-      (catch SQLException e
-        {:success? false
-         :message (.getMessage e)}))))
-
-(defmethod apply-operation :core/filter-column
-  [tenant-conn table-name columns op-spec]
-  (try
-    (let [expr (first (get-in op-spec ["args" "expression"]))
-          expr-fn (first expr)
-          expr-val (second expr)
-          filter-fn (if (= "is" expr-fn) ;; TODO: logic only valid for text columns
-                      "="
-                      "ilike")
-          filter-val (if (= "contains" expr-fn)
-                       (str "\"%" expr-val "%\"")
-                       (str "\"" expr-val "\""))
-          result (db-filter-column tenant-conn {:table-name table-name
-                                                :column-name (get-column-name op-spec)
-                                                :filter-fn filter-fn
-                                                :filter-val filter-val})]
-      {:success? true
-       :execution-log [(str "Deleted " result " rows")]
-       :columns columns})
-    (catch Exception e
-      {:success? false
-       :message (.getMessage e)})))
+(defn args [op-spec]
+  (get op-spec "args"))
 
 (defn next-column-name [columns]
   (let [nums (->> columns
@@ -217,141 +90,6 @@
          (if (empty? nums)
            1
            (inc (apply max nums))))))
-
-(defmethod apply-operation :core/combine
-  [tenant-conn table-name columns op-spec]
-  (try
-    (let [new-column-name
-          (next-column-name columns)
-          first-column-name (get-in op-spec ["args" "columnNames" 0])
-          second-column-name (get-in op-spec ["args" "columnNames" 1])]
-      (add-column tenant-conn {:table-name table-name
-                               :new-column-name new-column-name})
-      (combine-columns tenant-conn
-                       {:table-name table-name
-                        :new-column-name new-column-name
-                        :first-column first-column-name
-                        :second-column second-column-name
-                        :separator (get-in op-spec ["args" "separator"])})
-      {:success? true
-       :execution-log [(format "Combined columns %s, %s into %s"
-                               first-column-name second-column-name new-column-name)]
-       :columns (conj columns {"title" (get-in op-spec ["args" "newColumnTitle"])
-                               "type" "text"
-                               "sort" nil
-                               "hidden" false
-                               "direction" nil
-                               "columnName" new-column-name})})
-    (catch Exception e
-      {:success? false
-       :message (:getMessage e)})))
-
-(defn throw-invalid-return-type [value]
-  (throw (ex-info "Invalid return type"
-                  {:value value
-                   :type (type value)})))
-
-(defn ensure-valid-value-type [value type]
-  (when-not (nil? value)
-    (condp = type
-      "number" (if (and (number? value)
-                        (if (float? value)
-                          (java.lang.Double/isFinite value)
-                          true))
-                 value
-                 (throw-invalid-return-type value))
-      "text" (if (string? value)
-               value
-               (throw-invalid-return-type value))
-      "date" (cond
-               (number? value)
-               (long value)
-
-               (and (instance? jdk.nashorn.api.scripting.ScriptObjectMirror value)
-                    (.containsKey value "getTime"))
-               (long (.callMember value "getTime" (object-array 0)))
-
-               :else
-               (throw-invalid-return-type value)))))
-
-(defn handle-transform-exception
-  [exn conn on-error table-name column-name rnum]
-  (condp = on-error
-    "leave-empty" (set-cell-value conn {:table-name table-name
-                                        :column-name column-name
-                                        :rnum rnum
-                                        :value nil})
-    "fail" (throw exn)
-    "delete-row" (delete-row conn {:table-name table-name
-                                   :rnum rnum})))
-
-(defmethod apply-operation :core/derive
-  [tenant-conn table-name columns op-spec]
-  (try
-    (let [code (get-in op-spec ["args" "code"])
-          column-title (get-in op-spec ["args" "newColumnTitle"])
-          column-type (get-in op-spec ["args" "newColumnType"])
-          on-error (get op-spec "onError")
-          column-name (next-column-name columns)
-          transform (js/row-transform code)
-          key-translation (into {}
-                                (map (fn [{:strs [columnName title]}]
-                                       [(keyword columnName) title])
-                                     columns))]
-      (let [data (->> (all-data tenant-conn {:table-name table-name})
-                      (map #(set/rename-keys % key-translation)))]
-        (jdbc/with-db-transaction [conn tenant-conn]
-          (add-column conn {:table-name table-name :new-column-name column-name})
-          (doseq [row data]
-            (try
-              (set-cell-value conn {:table-name table-name
-                                    :column-name column-name
-                                    :rnum (:rnum row)
-                                    :value (val->jsonb-pgobj
-                                            (ensure-valid-value-type (transform row)
-                                                                     column-type))})
-              (catch Exception e
-                (handle-transform-exception e conn on-error table-name column-name (:rnum row)))))))
-      {:success? true
-       :execution-log [(format "Derived columns using '%s'" code)]
-       :columns (conj columns {"title" column-title
-                               "type" column-type
-                               "sort" nil
-                               "hidden" false
-                               "direction" nil
-                               "columnName" column-name})})
-    (catch Exception e
-      {:success? false
-       :message (format "Failed to transform: %s" (.getMessage e))})))
-
-(defmethod apply-operation :core/delete-column
-  [tenant-conn table-name columns op-spec]
-  (try
-    (let [column-name (get-in op-spec ["args" "columnName"])
-          column-idx (get-column-idx columns column-name)]
-      (delete-column tenant-conn {:table-name table-name :column-name column-name})
-      {:success? true
-       :execution-log [(format "Deleted column %s" column-name)]
-       :columns (into (vec (take column-idx columns))
-                      (drop (inc column-idx) columns))})
-    (catch Exception e
-      {:success? false
-       :message (format "Failed to transform: %s" (.getMessage e))})))
-
-(defmethod apply-operation :core/rename-column
-  [tenant-conn table-name columns op-spec]
-  (try
-    (let [column-name (get-in op-spec ["args" "columnName"])
-          column-idx (get-column-idx columns column-name)
-          new-column-title (get-in op-spec ["args" "newColumnTitle"])]
-      {:success? true
-       :execution-log [(format "Renamed column %s to %s" column-name new-column-title)]
-       :columns (assoc-in columns [column-idx "title"] new-column-title)})
-    (catch Exception e
-      {:success? false
-       :message (format "Failed to transform: %s" (.getMessage e))})))
-
-(hugsql/def-db-fns "akvo/lumen/transformation.sql")
 
 (defn- deliver-promise-success [promise dataset-id dataset-version-id job-execution-id]
   (deliver promise {:status "OK"
@@ -489,7 +227,6 @@
                     job-id
                     dataset-id
                     current-dataset-version)))
-
     (catch Exception e
       (execute-transformation-failed completion-promise
                                      tenant-conn

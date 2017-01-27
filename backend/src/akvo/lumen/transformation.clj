@@ -1,133 +1,29 @@
 (ns akvo.lumen.transformation
   (:require [akvo.lumen.component.transformation-engine :refer (enqueue)]
             [akvo.lumen.transformation.engine :as engine]
-            [akvo.lumen.transformation.js :as js]
-            [akvo.lumen.util :refer (squuid gen-table-name)]
-            [clojure.string :as str]
+            [akvo.lumen.util :refer (squuid)]
             [hugsql.core :as hugsql]))
-
-;; TODO: Potential change op-spec validation `core.spec`
-;; TODO: Move the validation part to transformation.validation namespace
-
-(def ops-set (set (keys engine/available-ops)))
-(def on-error-set #{"fail" "default-value" "delete-row"})
-(def type-set #{"number" "text" "date"})
-(def sort-direction-set #{"ASC" "DESC"})
 
 (hugsql/def-db-fns "akvo/lumen/transformation.sql")
 
+(def transformation-namespaces
+  '[akvo.lumen.transformation.change-datatype
+    akvo.lumen.transformation.text
+    akvo.lumen.transformation.sort-column
+    akvo.lumen.transformation.filter-column
+    akvo.lumen.transformation.combine
+    akvo.lumen.transformation.derive
+    akvo.lumen.transformation.rename-column
+    akvo.lumen.transformation.delete-column])
 
-(defn- throw-invalid-op
-  [op-spec]
-  (throw (ex-info (str "Invalid transformation " op-spec) op-spec)))
-
-(defn required-keys
-  [{:strs [op args onError] :as op-spec}]
-  (or (boolean (and (ops-set op)
-                    (not-empty args)
-                    (on-error-set onError)))
-      (throw-invalid-op op-spec)))
-
-(defmulti validate-op
-  (fn [op-spec]
-    (keyword (op-spec "op"))))
-
-(defmethod validate-op :default
-  [op-spec]
-  (throw-invalid-op op-spec))
-
-(defmethod validate-op :core/change-datatype
-  [{:strs [op args] :as op-spec}]
-  (or (boolean (and (required-keys op-spec)
-                 (type-set (args "newType"))
-                 (if (= "date" (args "newType"))
-                   (not-empty (args "parseFormat"))
-                   true)))
-      (throw-invalid-op op-spec)))
-
-(defmethod validate-op :core/change-column-title
-  [{:strs [args] :as op-spec}]
-  (or (boolean (and (required-keys op-spec)
-                    (not-empty (args "columnTitle"))))
-      (throw-invalid-op op-spec)))
-
-(defmethod validate-op :core/sort-column
-  [{:strs [args] :as op-spec}]
-  (or (boolean (and (required-keys op-spec)
-                    (sort-direction-set (args "sortDirection"))))
-      (throw-invalid-op op-spec)))
-
-(defmethod validate-op :core/remove-sort
-  [op-spec]
-  (or (required-keys op-spec)
-      (throw-invalid-op op-spec)))
-
-(defmethod validate-op :core/to-titlecase
-  [op-spec]
-  (required-keys op-spec))
-
-(defmethod validate-op :core/to-lowercase
-  [op-spec]
-  (or (required-keys op-spec)
-      (throw-invalid-op op-spec)))
-
-(defmethod validate-op :core/to-uppercase
-  [op-spec]
-  (or (required-keys op-spec)
-      (throw-invalid-op op-spec)))
-
-(defmethod validate-op :core/trim
-  [op-spec]
-  (or (required-keys op-spec)
-      (throw-invalid-op op-spec)))
-
-(defmethod validate-op :core/trim-doublespace
-  [op-spec]
-  (or (required-keys op-spec)
-      (throw-invalid-op op-spec)))
-
-(defmethod validate-op :core/filter-column
-  [op-spec]
-  (or (boolean (and (required-keys op-spec)
-                    (not-empty (get-in op-spec ["args" "expression"]))))
-      (throw-invalid-op op-spec)))
-
-
-(defmethod validate-op :core/combine
-  [op-spec]
-  (or (boolean (and (every? string? (get-in op-spec ["args" "columnNames"]))
-                    (string? (get-in op-spec ["args" "newColumnTitle"]))
-                    (string? (get-in op-spec ["args" "separator"]))
-                    (= (get op-spec "onError") "fail")))
-      (throw-invalid-op op-spec)))
-
-(defmethod validate-op :core/derive
-  [op-spec]
-  (let [column-type (get-in op-spec ["args" "newColumnType"])
-        column-title (get-in op-spec ["args" "newColumnTitle"])
-        code (get-in op-spec ["args" "code"])
-        on-error (get op-spec "onError")]
-    (and (string? column-title)
-         (#{"text" "number" "date"} column-type)
-         (#{"fail" "leave-empty" "delete-row"} on-error)
-         (js/valid? code))))
-
-(defmethod validate-op :core/delete-column
-  [op-spec]
-  (or (string? (get-in op-spec ["args" "columnName"]))
-      (throw-invalid-op op-spec)))
-
-(defmethod validate-op :core/rename-column
-  [op-spec]
-  (or (and (string? (get-in op-spec ["args" "columnName"]))
-           (string? (get-in op-spec ["args" "newColumnTitle"])))
-      (throw-invalid-op op-spec)))
+;; Load transformation namespaces
+(apply require transformation-namespaces)
 
 (defn validate
   [command]
   (try
     (condp = (:type command)
-      :transformation (if (validate-op (:transformation command))
+      :transformation (if (engine/valid? (:transformation command))
                         {:valid? true}
                         {:valid? false
                          :message (str "Invalid transformation " (:transformation command))})
