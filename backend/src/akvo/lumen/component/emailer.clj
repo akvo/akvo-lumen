@@ -32,15 +32,15 @@
     this)
 
   SendEmail
-  (send-email [{:keys [host user pass]} to subject body]
+  (send-email [{:keys [host pass user]} to subject body]
     (let [options {:host host
-                   :user user
                    :pass pass
-                   :ssl true}
-          message {:from "noreply@akvolumen.org"
-                   :to to
+                   :ssl true
+                   :user user}
+          message {:body body
+                   :from "noreply@akvolumen.org"
                    :subject subject
-                   :body body}]
+                   :to to}]
       (postal/send-message options message))))
 
 (defn emailer
@@ -48,5 +48,5 @@
   (if (= type "dev")
     (DevMailer.)
     (map->SMTPEmailer {:host email-host
-                       :user email-user
-                       :pass email-password})))
+                       :pass email-password
+                       :user email-user})))
