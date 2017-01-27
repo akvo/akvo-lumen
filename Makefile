@@ -57,7 +57,7 @@ deploy-prod:
 	kubectl create -f ./ci/deployment.yaml
 
 ## Step 4
-expose-dev:
+expose-prod:
 	kubectl expose deployment lumen --target-port=80 --type=NodePort
 
 ## Step 5
