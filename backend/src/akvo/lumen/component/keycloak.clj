@@ -28,11 +28,27 @@
   (-> (client/get (format "%s/.well-known/openid-configuration" issuer))
       :body json/decode))
 
-(defn request-options [{:keys [openid-config credentials]}]
-  (let [params (merge {"grant_type" "password"} credentials)
-        response (client/post (get openid-config "token_endpoint")
-                              {:form-params params})
-        access-token (-> response :body json/decode (get "access_token"))]
+(defn password-grant?
+  [credentials]
+  (every? #(contains? credentials %) ["client_id" "password" "username"]))
+
+(defn client-credentials-grant?
+  [credentials]
+  (every? #(contains? credentials %) ["client_id" "client_secret"]))
+
+(defn request-options
+  [{:keys [openid-config credentials]}]
+  (let [params
+        (cond
+          (password-grant? credentials)
+          (merge {"grant_type" "password"} credentials)
+          (client-credentials-grant? credentials)
+          (merge {"grant_type" "client_credentials"} credentials)
+          :else (throw (Exception. "Unsupported oidc grant_type")))
+        resp (client/post (get openid-config "token_endpoint")
+                          {:form-params params})
+        access-token (-> resp
+                         :body json/decode (get "access_token"))]
     {:headers {"Authorization" (str "bearer " access-token)
                "Content-Type" "application/json"}}))
 
@@ -136,6 +152,9 @@
 (defn keycloak [{:keys [client-id url realm user password]}]
   (map->KeycloakAgent {:issuer (format "%s/realms/%s" url realm)
                        :api-root (format "%s/admin/realms/%s" url realm)
-                       :credentials {"username" user
-                                     "password" password
-                                     "client_id" client-id}}))
+                       :credentials {;; "username" user
+                                     ;; "password" password
+                                     ;; "client_id" client-id
+                                     "client_id" "lumen-confidential"
+                                     "client_secret"
+                                     "caed3964-09dd-4752-b0bb-22c8e8ffd631"}}))
