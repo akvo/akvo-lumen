@@ -81,7 +81,7 @@
       (let [ed (ex-data e)]
         (prn ed)
         (response {:status (:status ed)
-                   :body (:reason-phrase ed)})))))
+                   :body (:reasonPhrase ed)})))))
 
 (defn fetch-user-by-email
   "Get user by email. Returns nil if none found."

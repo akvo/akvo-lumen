@@ -1,4 +1,6 @@
-{:config
+{:components
+ {:emailer #var akvo.lumen.component.emailer/dev-emailer}
+ :config
  {:app
   {:middleware
    {:functions {:stacktrace #var ring.middleware.stacktrace/wrap-stacktrace}
@@ -7,12 +9,12 @@
     :arguments {:wrap-jwt {:keycloak-url "http://localhost:8080/auth"
                            :keycloak-realm "akvo"}}}}
   :db {:uri "jdbc:postgresql://localhost/lumen?user=lumen&password=password"}
-  :emailer {:type "dev"}
   :http {:port 3000}
   :config {:file-upload-path "/tmp/akvo/lumen"
            :flow-report-database-url ""
            :keycloak-realm "akvo"
            :keycloak-url "http://localhost:8080/auth"}
+  :emailer {}
   :keycloak {:url "http://localhost:8080/auth"
              :realm "akvo"
              :user "lumen"

@@ -3,10 +3,14 @@
             [clojure.pprint :refer [pprint]]
             [postal.core :as postal]))
 
+(defn email? [email]
+  (let [ks [:body :from :subject :to]]
+    (every? #(contains? email %) ks)))
+
 (defprotocol SendEmail
-  (send-email [this to subject body] "Send email"))
+  (send-email [this email] "Send email"))
 
-(defrecord DevMailer []
+(defrecord DevEmailer []
 
   component/Lifecycle
   (start [this]
@@ -15,38 +19,31 @@
     this)
 
   SendEmail
-  (send-email [this to subject body]
-    (pprint {:to to
-             :subject subject
-             :body body})))
+  (send-email [this email]
+    (assert (email? email) "Not a proper email (:body :from :subject :to)")
+    (pprint email)))
 
 
-(defrecord SMTPEmailer [host user pass]
+(defrecord SMTPEmailer [config]
 
   component/Lifecycle
   (start [this]
-    (println "@SMTPEmailer/start")
     this)
   (stop [this]
-    (println "@SMTPEmailer/stop")
     this)
 
   SendEmail
-  (send-email [{:keys [host pass user]} to subject body]
-    (let [options {:host host
-                   :pass pass
-                   :ssl true
-                   :user user}
-          message {:body body
-                   :from "noreply@akvolumen.org"
-                   :subject subject
-                   :to to}]
-      (postal/send-message options message))))
+  (send-email [{config :config} email]
+    (postal/send-message config email)))
 
-(defn emailer
-  [{:keys [email-host email-password email-user type] :as options}]
-  (if (= type "dev")
-    (DevMailer.)
-    (map->SMTPEmailer {:host email-host
-                       :pass email-password
-                       :user email-user})))
+(defn dev-emailer
+  "Emailer will pprint email. Included link will be https."
+  [options]
+  (->DevEmailer))
+
+(defn smtp-emailer
+  [{:keys [email-host email-password email-user]}]
+  (map->SMTPEmailer {:config {:host email-host
+                              :pass email-password
+                              :ssl true
+                              :user email-user}}))

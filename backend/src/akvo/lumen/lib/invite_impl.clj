@@ -34,10 +34,12 @@
           {id :id email-address :email}
           (first (insert-invite tenant-conn {:email email
                                              :expiration_time expiration-time
-                                             :author claims}))]
-      (future
-        (emailer/send-email emailer email-address
-                            "Akvo Lumen invite" (email-body host id))))
+                                             :author claims}))
+          email {:body (email-body host id)
+                 :from "noreply@akvolumen.org"
+                 :subject "Akvo Lumen invite"
+                 :to email-address}]
+      (emailer/send-email emailer email))
     (prn (format "Tried to invite non existing user with email (%s)" email))))
 
 (defn create
@@ -45,7 +47,7 @@
   [tenant-conn emailer keycloak roles {:strs [email]} claims host]
   ;; If existing user and no other active invite on same email
   (do-create-invite tenant-conn emailer keycloak email claims host)
-  (response {:invite-job-status "started"}))
+  (response {:invite "created"}))
 
 (defn accept-invite
   ""
