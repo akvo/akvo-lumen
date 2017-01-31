@@ -39,21 +39,16 @@ spec:
             secretKeyRef:
               name: lumen
               key: email.user
-        - name: LUMEN_KEYCLOAK_PASSWORD
+        - name: LUMEN_KEYCLOAK_CLIENT_SECRET
           valueFrom:
             secretKeyRef:
               name: lumen
-              key: keycloak.password
+              key: keycloak.client_secret
         - name: LUMEN_KEYCLOAK_URL
           valueFrom:
             configMapKeyRef:
               name: akvo
               key: keycloak.url
-        - name: LUMEN_KEYCLOAK_USER
-          valueFrom:
-            secretKeyRef:
-              name: lumen
-              key: keycloak.user
         - name: LUMEN_FILE_UPLOAD_PATH
           value: /tmp/akvo/lumen
         - name: LUMEN_FLOW_REPORT_DATABASE_URL
