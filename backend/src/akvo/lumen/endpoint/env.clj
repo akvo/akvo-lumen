@@ -4,5 +4,6 @@
 
 (defn endpoint [{:keys [config]}]
   (GET "/env" request
-    (response {"keycloakURL" (:keycloak-url config)
+    (response {"keycloakClient" (:keycloak-public-client-id config)
+               "keycloakURL" (:keycloak-url config)
                "tenant" (:tenant request)})))

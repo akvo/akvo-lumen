@@ -8,11 +8,6 @@
             [ring.util.response :refer [not-found response]]))
 
 
-;;; The "agent user account" needs to have the client role role mapping:
-;;; manage-realm
-;;; manage-users
-;;;
-
 (defprotocol UserManager
   (users [this tenant-label] "List tenants users")
   (add-user-with-email [this tenant-label email] "Add user to tenant")
@@ -28,34 +23,15 @@
   (-> (client/get (format "%s/.well-known/openid-configuration" issuer))
       :body json/decode))
 
-(defn password-grant?
-  [credentials]
-  (every? #(contains? credentials %) ["client_id" "password" "username"]))
-
-(defn client-credentials-grant?
-  [credentials]
-  (every? #(contains? credentials %) ["client_id" "client_secret"]))
-
 (defn request-options
   [{:keys [openid-config credentials]}]
-  (let [params
-        (cond
-          (password-grant? credentials)
-          (merge {"grant_type" "password"} credentials)
-          (client-credentials-grant? credentials)
-          (merge {"grant_type" "client_credentials"} credentials)
-          :else (throw (Exception. "Unsupported oidc grant_type")))
+  (let [params (merge {"grant_type" "client_credentials"}
+                      credentials)
         resp (client/post (get openid-config "token_endpoint")
                           {:form-params params})
-        access-token (-> resp
-                         :body json/decode (get "access_token"))]
+        access-token (-> resp :body json/decode (get "access_token"))]
     {:headers {"Authorization" (str "bearer " access-token)
                "Content-Type" "application/json"}}))
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Helpers
-;;;
 
 (defn group-by-path
   [{:keys [api-root credentials openid-config]} path request-options]
@@ -71,8 +47,15 @@
                   request-options)
       :body json/decode))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Helpers
+;;;
+
 ;;; This is kinda fragile, this relies on that one user not belog to multiple
-;;; groups and does not support new sub groups!!!!!!
+;;; groups in a tenant and does not support new sub groups!!!!!!
+;;; Hence making someone an admin would require us to add the user to t1/admin
+;;; and also remove the user from the t1 group
 (defn tenant-members
   "Return the users for a tenant. The tenant label here becomes the group-name"
   [keycloak tenant-label]
@@ -117,6 +100,7 @@
                           api-root user-id group-id)
                   request-options)))
 
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Component
 ;;;
@@ -149,12 +133,7 @@
                                       request-options
                                       email))))))
 
-(defn keycloak [{:keys [client-id url realm user password]}]
+(defn keycloak [{:keys [credentials url realm]}]
   (map->KeycloakAgent {:issuer (format "%s/realms/%s" url realm)
                        :api-root (format "%s/admin/realms/%s" url realm)
-                       :credentials {;; "username" user
-                                     ;; "password" password
-                                     ;; "client_id" client-id
-                                     "client_id" "lumen-confidential"
-                                     "client_secret"
-                                     "caed3964-09dd-4752-b0bb-22c8e8ffd631"}}))
+                       :credentials credentials}))

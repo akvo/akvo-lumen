@@ -85,10 +85,10 @@
   {:file-upload-path file-upload-path
    :flow-report-database-url flow-report-database-url
    :keycloak-url keycloak-url
-   :keycloak-realm keycloak-realm}
+   :keycloak-realm keycloak-realm
+   :keycloak-public-client-id keycloak-public-client-id}
   :keycloak
   {:url keycloak-url
    :realm keycloak-realm
-   :user keycloak-user
-   :password keycloak-password
-   :client-id keycloak-client-id}}}
+   :credentials {"client_id" keycloak-client-id
+                 "client_secret" keycloak-client-secret}}}}
