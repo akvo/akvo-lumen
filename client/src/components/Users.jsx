@@ -66,11 +66,11 @@ class Users extends Component {
   }
 
   onChange(event) {
-    this.setState({ invitedUserEmail: event.target.value.toLowerCase() });
+    this.setState({ invitedUserEmail: event.target.value });
   }
 
-  onInviteUser(event) {
-    api.post('/api/admin/invites', this.state.invitedUserEmail);
+  onInviteUser() {
+    api.post('/api/admin/invites', { email: this.state.invitedUserEmail.trim().toLowerCase() });
   }
 
   getActionButtons() {
