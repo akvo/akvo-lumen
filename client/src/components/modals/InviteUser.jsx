@@ -33,17 +33,15 @@ export default function InviteUser(props) {
           +
           </div>
           <div className="contents">
+            <p>Please enter the email address you would like to invite below.</p>
             <form onSubmit={props.onInviteUser}>
-              <label htmlFor>
-                Email:
-                <input
-                  type="text"
-                  placeholder="user@domain.org"
-                  value={props.invitedUserEmail}
-                  onChange={props.onChange}
-                />
-              </label>
-              <input type="submit" value="Send" />
+              <input
+                type="text"
+                placeholder="user@domain.org"
+                value={props.invitedUserEmail}
+                onChange={props.onChange}
+              />
+              <input type="submit" value="Send invitation" />
             </form>
           </div>
         </div>

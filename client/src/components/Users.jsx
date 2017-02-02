@@ -70,7 +70,7 @@ class Users extends Component {
   }
 
   onInviteUser(event) {
-    api.post('/api/admin/users/invites', this.state.invitedUserEmail);
+    api.post('/api/admin/invites', this.state.invitedUserEmail);
     event.preventDefault();
   }
 

@@ -38,9 +38,9 @@ rules:
     -
       style: uppercase
   indentation:
-    - 4
+    - 2
     -
-      size: 4
+      size: 2
   property-sort-order:
     - 1
     -
