@@ -71,7 +71,6 @@ class Users extends Component {
 
   onInviteUser(event) {
     api.post('/api/admin/invites', this.state.invitedUserEmail);
-    event.preventDefault();
   }
 
   getActionButtons() {
