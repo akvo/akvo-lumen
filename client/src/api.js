@@ -14,16 +14,21 @@ function requestHeaders(token, additionalHeaders = {}) {
   });
 }
 
-export function get(url, body, headers) {
-  return wrapUpdateToken(token => fetch(url, body == null ?
-    {
+function getQueryString(queryParams) {
+  return Object.keys(queryParams).map((key, index) =>
+    `${index > 0 ? '&' : ''}${key}=${encodeURIComponent(queryParams[key])}`
+  ).join('');
+}
+
+export function get(url, queryParams, headers) {
+  const urlWithOptionalParams = queryParams == null ? url : `${url}?${getQueryString(queryParams)}`;
+
+  return wrapUpdateToken(token =>
+    fetch(urlWithOptionalParams, {
       method: 'GET',
       headers: requestHeaders(token, headers),
-    } : {
-      method: 'GET',
-      headers: requestHeaders(token, headers),
-      body: JSON.stringify(body),
-    }));
+    })
+  );
 }
 
 export function post(url, body, headers) {
