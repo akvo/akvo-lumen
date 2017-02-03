@@ -77,8 +77,7 @@
                 "NOT NULL")))))
 
 (defmethod filter-sql :default [filter]
-  (throw (ex-info "Invalid filter" {:filter filter}))
-  (prn filter))
+  (throw (ex-info "Invalid filter strategy" {:filter filter})))
 
 (defn find-column [columns column-name]
   (first (filter #(= (get % "columnName") column-name) columns)))
@@ -118,7 +117,18 @@
       "columnType" "number"
       "value" "10"
       "operation" "remove"
-      "strategy" "isHigher"}])
+      "strategy" "isHigher"}
+     {"column" "c2"
+      "columnType" "number"
+      "value" "10"
+      "operation" "keep"
+      "strategy" "isLower"}
+     {"column" "c2"
+      "columnType" "number"
+      "value" "5"
+      "operation" "remove"
+      "strategy" "isLower"}
+     ])
 
   (sql-str columns filters)
   (sql-str columns [])
