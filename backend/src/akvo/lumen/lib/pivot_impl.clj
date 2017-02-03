@@ -47,7 +47,7 @@
                           (range categories-count)))
        ");"))
 
-(defn run-query [conn dataset query filter-str]
+(defn apply-pivot [conn dataset query filter-str]
   (let [categories (unique-values conn
                                   (:table-name dataset)
                                   (:category-column query)
@@ -65,9 +65,43 @@
                         {:as-arrays? true}))
      :columns columns}))
 
+(defn apply-empty-query [conn dataset filter-str]
+  (let [count (rest (jdbc/query conn
+                                [(format "SELECT count(rnum) FROM %s WHERE %s"
+                                         (:table-name dataset)
+                                         filter-str)]
+                                {:as-arrays? true}))]
+    {:columns [{"type" "number"
+                "title" "Total"}]
+     :rows count}))
+
+(defn apply-empty-category-query [conn dataset query filter-str]
+  {:rows []
+   :columns []})
+
+(defn apply-empty-row-query [conn dataset query filter-str]
+  {:rows []
+   :columns []})
+
+(defn apply-empty-value-query [conn dataset query filter-str]
+  {:rows []
+   :columns []})
+
+(defn apply-query [conn dataset query filter-str]
+  (cond
+    (and (nil? (:row-column query))
+         (nil? (:category-column query)))
+    (apply-empty-query conn dataset filter-str)
+    (nil? (:category-column query))
+    (apply-empty-category-query conn dataset query filter-str)
+    (nil? (:row-column query))
+    (apply-empty-row-query conn dataset query filter-str)
+    (nil? (:value-column query))
+    (apply-empty-value-query conn dataset query filter-str)
+    :else (apply-pivot conn dataset query filter-str)))
+
 (defn find-column [columns column-name]
-  (first (filter #(= column-name (get % "columnName"))
-                 columns)))
+  (first (filter #(= column-name (get % "columnName")) columns)))
 
 (defn build-query
   "Replace column names with proper column metadata from the dataset"
@@ -86,7 +120,11 @@
     (if-let [dataset (dataset-by-id conn {:id dataset-id})]
       (let [q (build-query (:columns dataset) query)]
         (if (valid-query? q)
-          (http/ok (run-query conn dataset q (filter/sql-str (:columns dataset) (:filters q))))
+          (try
+            (http/ok (apply-query conn dataset q (filter/sql-str (:columns dataset) (:filters q))))
+            (catch clojure.lang.ExceptionInfo e
+              (http/bad-request (merge {:message (.getMessage e)}
+                                       (ex-data e)))))
           (http/bad-request {"query" query})))
       (http/not-found {"datasetId" dataset-id}))))
 
@@ -100,11 +138,20 @@
   (def q {"categoryColumn" "c16"
           "rowColumn" "c4"
           "valueColumn" "c19"
-          "aggregation" "avg"})
+          "aggregation" "avg"
+          "filters" [{"column" "c2"
+                      "columnType" "text"
+                      "operation" "keep"
+                      "strategy" "is"
+                      "value" "Ethiopia"}]})
 
-  (run-query tenant-conn dataset {:category-column (second (:columns dataset))})
+  (def empty-q {"categoryColumn" nil
+                "rowColumn" nil
+                "valueColumn" nil
+                "aggregation" "count"
+                "filters" []})
 
-  (query tenant-conn dataset-id q)
+  (query tenant-conn dataset-id empty-q)
 
   (unique-categories tenant-conn dataset-id)
 
