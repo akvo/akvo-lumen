@@ -72,9 +72,11 @@
   (first (filter #(= (get % "columnName") column-name) columns)))
 
 (defn sql-str [columns filters]
-  (let [filters (map #(assoc % "column" (find-column columns (get % "column")))
-                     filters)]
-    (str/join " AND " (map filter-sql filters))))
+  (if (empty? filters)
+    "TRUE"
+    (let [filters (map #(assoc % "column" (find-column columns (get % "column")))
+                       filters)]
+      (str/join " AND " (map filter-sql filters)))))
 
 (comment
   (def columns [{"columnName" "c1"
@@ -107,5 +109,5 @@
       "strategy" "isHigher"}])
 
   (sql-str columns filters)
-
+  (sql-str columns [])
   )
