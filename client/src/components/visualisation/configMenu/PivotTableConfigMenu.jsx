@@ -21,13 +21,19 @@ export default function PivotTableConfigMenu(props) {
         choice={spec.aggregation !== null ? spec.aggregation.toString() : null}
         name="aggregationMethod"
         options={aggregationOptions}
-        onChange={value => onChangeSpec({
-          aggregation: value,
-        })}
+        onChange={(value) => {
+          const change = { aggregation: value };
+
+          if (value === 'count') {
+            change.valueColumn = null;
+          }
+
+          onChangeSpec(change);
+        }}
       />
-      {spec.aggregationMethod !== 'count' &&
+      {spec.aggregation !== 'count' &&
         <SelectInput
-          placeholder="Select an value column"
+          placeholder="Select a value column"
           labelText="Value column"
           choice={spec.valueColumn !== null ? spec.valueColumn.toString() : null}
           name="valueColumnInput"

@@ -1,0 +1,11 @@
+@import 'modules/colors';
+
+.PivotTable {
+  td, th {
+    border: 0.1rem solid $midGrey;
+    padding: 0.25rem;
+  }
+  th {
+    background-color: $lightBlueGrey;
+  }
+}
