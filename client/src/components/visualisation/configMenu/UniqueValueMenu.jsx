@@ -3,14 +3,50 @@ import ToggleInput from './ToggleInput';
 
 require('../../../styles/UniqueValueMenu.scss');
 
-const getColumnIndex = (dataset, columnName) =>
-  dataset.get('columns').findIndex(column => column.get('columnName') === columnName);
+const getValueStatus = (title, filters) => !filters.some(filter => filter.value === title);
 
-export default function UniqueValueMenu({ dataset, spec, column, filters, onAddFilter, onRemoveFilter, collapsed, toggleCollapsed }) {
-  const uniqueValues = dataset.get('rows')
-    .map(row => row.get(getColumnIndex(dataset, spec.categoryColumn)))
-    .toSet()
-    .toArray();
+const handleToggleValue = (title, column, filters, onChangeSpec) => {
+  const newFilters = filters.map(filter => filter);
+
+  if (getValueStatus(title, filters)) {
+    newFilters.push({
+      column,
+      value: title.toString(),
+      operation: 'remove',
+      strategy: 'is',
+      caseSensitive: true,
+      origin: 'pivot',
+    });
+  } else {
+    newFilters.splice(
+      newFilters.findIndex(filter => (filter.value === title && filter.origin === 'pivot')),
+      1
+    );
+  }
+
+
+  onChangeSpec({ filters: newFilters });
+};
+
+export default function UniqueValueMenu(props) {
+  const { tableData, dimension, filters, column, onChangeSpec, collapsed, toggleCollapsed } = props;
+  if (!tableData) {
+    return <div className="UniqueValueMenu" />;
+  }
+
+  let uniqueValues;
+
+  switch (dimension) {
+    case 'category':
+      uniqueValues = tableData.columns.map(entry => entry.title);
+      filters.filter(filter => filter.origin === 'pivot').forEach(filter => uniqueValues.push(filter.value));
+      break;
+
+    default:
+      // Do nothing for now
+  }
+
+  uniqueValues.sort();
 
   return (
     <div className="UniqueValueMenu">
@@ -31,9 +67,9 @@ export default function UniqueValueMenu({ dataset, spec, column, filters, onAddF
               key={index}
             >
               <ToggleInput
-                checked
+                checked={getValueStatus(item, filters)}
                 label={item}
-                onChange={() => null}
+                onChange={() => handleToggleValue(item, column, filters, onChangeSpec)}
               />
             </li>
           )}
@@ -44,5 +80,11 @@ export default function UniqueValueMenu({ dataset, spec, column, filters, onAddF
 }
 
 UniqueValueMenu.propTypes = {
-  // TODO
+  tableData: PropTypes.object,
+  dimension: PropTypes.oneOf(['category', 'row']).isRequired,
+  filters: PropTypes.array.isRequired,
+  column: PropTypes.string.isRequired,
+  onChangeSpec: PropTypes.func.isRequired,
+  collapsed: PropTypes.bool.isRequired,
+  toggleCollapsed: PropTypes.func.isRequired,
 };

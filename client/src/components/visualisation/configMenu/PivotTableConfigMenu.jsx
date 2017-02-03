@@ -19,10 +19,8 @@ export default class PivotTableConfigMenu extends Component {
       onChangeSpec,
       columnOptions,
       aggregationOptions,
-      datasets,
     } = this.props;
     const spec = visualisation.spec;
-    const dataset = visualisation.datasetId ? datasets[visualisation.datasetId] : null;
 
     return (
       <div>
@@ -72,10 +70,12 @@ export default class PivotTableConfigMenu extends Component {
         />
         {spec.categoryColumn !== null &&
           <UniqueValueMenu
-            dataset={dataset}
-            spec={spec}
-            column={spec.categoryColumn}
+            tableData={visualisation.data}
+            dimension="category"
             collapsed={this.state.catValMenuCollapsed}
+            onChangeSpec={this.props.onChangeSpec}
+            column={spec.categoryColumn}
+            filters={spec.filters}
             toggleCollapsed={() =>
               this.setState({ catValMenuCollapsed: !this.state.catValMenuCollapsed })
             }
