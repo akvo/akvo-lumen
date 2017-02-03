@@ -1,77 +1,102 @@
-import React, { PropTypes } from 'react';
+import React, { Component, PropTypes } from 'react';
 import SelectInput from './SelectInput';
 import Subtitle from './Subtitle';
+import UniqueValueMenu from './UniqueValueMenu';
 
-export default function PivotTableConfigMenu(props) {
-  const {
-    visualisation,
-    onChangeSpec,
-    columnOptions,
-    aggregationOptions,
-  } = props;
-  const spec = visualisation.spec;
+export default class PivotTableConfigMenu extends Component {
 
-  return (
-    <div>
-      <hr />
-      <Subtitle>Aggregation</Subtitle>
-      <SelectInput
-        placeholder="Select aggregation method"
-        labelText="Aggregation method"
-        choice={spec.aggregation !== null ? spec.aggregation.toString() : null}
-        name="aggregationMethod"
-        options={aggregationOptions}
-        onChange={(value) => {
-          const change = { aggregation: value };
+  constructor() {
+    super();
+    this.state = {
+      catValMenuCollapsed: true,
+      rowValMenuCollapsed: true,
+    };
+  }
 
-          if (value === 'count') {
-            change.valueColumn = null;
-          }
+  render() {
+    const {
+      visualisation,
+      onChangeSpec,
+      columnOptions,
+      aggregationOptions,
+      datasets,
+    } = this.props;
+    const spec = visualisation.spec;
+    const dataset = visualisation.datasetId ? datasets[visualisation.datasetId] : null;
 
-          onChangeSpec(change);
-        }}
-      />
-      {spec.aggregation !== 'count' &&
+    return (
+      <div>
+        <hr />
+        <Subtitle>Aggregation</Subtitle>
         <SelectInput
-          placeholder="Select a value column"
-          labelText="Value column"
-          choice={spec.valueColumn !== null ? spec.valueColumn.toString() : null}
-          name="valueColumnInput"
+          placeholder="Select aggregation method"
+          labelText="Aggregation method"
+          choice={spec.aggregation !== null ? spec.aggregation.toString() : null}
+          name="aggregationMethod"
+          options={aggregationOptions}
+          onChange={(value) => {
+            const change = { aggregation: value };
+
+            if (value === 'count') {
+              change.valueColumn = null;
+            }
+
+            onChangeSpec(change);
+          }}
+        />
+        {spec.aggregation !== 'count' &&
+          <SelectInput
+            placeholder="Select a value column"
+            labelText="Value column"
+            choice={spec.valueColumn !== null ? spec.valueColumn.toString() : null}
+            name="valueColumnInput"
+            options={columnOptions}
+            onChange={value => onChangeSpec({
+              valueColumn: value,
+            })}
+            clearable
+          />
+        }
+        <hr />
+        <Subtitle>Categories</Subtitle>
+        <SelectInput
+          placeholder="Select a category column"
+          labelText="Category column"
+          choice={spec.categoryColumn !== null ? spec.categoryColumn.toString() : null}
+          name="categoryColumnInput"
           options={columnOptions}
           onChange={value => onChangeSpec({
-            valueColumn: value,
+            categoryColumn: value,
           })}
           clearable
         />
-      }
-      <hr />
-      <Subtitle>Categories</Subtitle>
-      <SelectInput
-        placeholder="Select a category column"
-        labelText="Category column"
-        choice={spec.categoryColumn !== null ? spec.categoryColumn.toString() : null}
-        name="categoryColumnInput"
-        options={columnOptions}
-        onChange={value => onChangeSpec({
-          categoryColumn: value,
-        })}
-        clearable
-      />
-      <hr />
-      <Subtitle>Rows</Subtitle>
-      <SelectInput
-        placeholder="Select a row column"
-        labelText="Row column"
-        choice={spec.rowColumn !== null ? spec.rowColumn.toString() : null}
-        name="rowColumnInput"
-        options={columnOptions}
-        onChange={value => onChangeSpec({
-          rowColumn: value,
-        })}
-        clearable
-      />
-    </div>
-  );
+        {spec.categoryColumn !== null &&
+          <UniqueValueMenu
+            dataset={dataset}
+            spec={spec}
+            column={spec.categoryColumn}
+            collapsed={this.state.catValMenuCollapsed}
+            toggleCollapsed={() =>
+              this.setState({ catValMenuCollapsed: !this.state.catValMenuCollapsed })
+            }
+          />
+        }
+        <hr />
+        <Subtitle>Rows</Subtitle>
+        <SelectInput
+          placeholder="Select a row column"
+          labelText="Row column"
+          choice={spec.rowColumn !== null ? spec.rowColumn.toString() : null}
+          name="rowColumnInput"
+          options={columnOptions}
+          onChange={value => onChangeSpec({
+            rowColumn: value,
+          })}
+          clearable
+        />
+      </div>
+    );
+  }
 }
 
 PivotTableConfigMenu.propTypes = {

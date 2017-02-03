@@ -40,9 +40,16 @@ export default class PivotTable extends Component {
 
   fetchPivotData(datasetId, spec) {
     if (specIsValid(spec)) {
+      const requestId = Math.random();
+      this.latestRequestId = requestId;
+
       api.get(`/api/pivot/${datasetId}`, {
         query: JSON.stringify(spec),
-      }).then(response => this.setState({ tableData: response }));
+      }).then((response) => {
+        if (requestId === this.latestRequestId) {
+          this.setState({ tableData: response });
+        }
+      });
     }
   }
 
