@@ -20,49 +20,61 @@
 (defn escape-sql-str [s]
   (str/replace s "'" "''"))
 
+(defn comparison [op column-type column-name value]
+  (condp = column-type
+    "number" (format "%s %s %s"
+                     column-name
+                     op
+                     (parse-number value))
+    "date" (format "%s %s '%s'::timestamptz"
+                   column-name
+                   op
+                   (parse-date value))
+    (throw (ex-info "Invalid type" {:type column-type}))))
+
 (defmethod filter-sql "isHigher"
   [{:strs [column operation value]}]
-  (let [op (if (= operation "keep") ">" "<=")]
-    (condp = (get column "type")
-      "number" (format "%s %s %s"
-                       (get column "columnName")
-                       op
-                       (parse-number value))
-      "date" (format "%s %s '%s'::timestamptz"
-                     (get column "columnName")
-                     op
-                     (parse-date value))
-      (throw (ex-info "Invalid type" {:type (get column "type")})))))
+  (let [{column-type "type" column-name "columnName"} column
+        op (if (= operation "keep") ">" "<=")]
+    (comparison op column-type column-name value)))
+
+(defmethod filter-sql "isLower"
+  [{:strs [column operation value]}]
+  (let [{column-type "type" column-name "columnName"} column
+        op (if (= operation "keep") "<" ">=")]
+    (comparison op column-type column-name value)))
 
 (defmethod filter-sql "is"
   [{:strs [column operation value]}]
-  (let [op (if (= operation "keep") "=" "<>")]
-    (condp = (get column "type")
+  (let [{column-type "type" column-name "columnName"} column
+        op (if (= operation "keep") "=" "<>")]
+    (condp = column-type
       "number" (format "%s %s %s"
-                       (get column "columnName")
+                       column-name
                        op
                        (parse-number value))
       "date" (format "%s %s '%s'::timestamptz"
-                     (get column "columnName")
+                     column-name
                      op
                      (parse-date value))
       "text" (format "%s %s '%s'"
-                     (get column "columnName")
+                     column-name
                      op
                      (escape-sql-str value))
-      (throw (ex-info "Invalid type" {:type (get column "type")})))))
+      (throw (ex-info "Invalid type" {:type column-type})))))
 
 (defmethod filter-sql "isEmpty"
   [{:strs [column operation]}]
-  (if (= (get column "type") "text")
-    (format "coalesce(%s, '') %s ''"
-            (get column "columnName")
-            (if (= operation "keep") "<>" "="))
-    (format "%s IS %s"
-            (get column "columnName")
-            (if (= operation "keep")
-              "NULL"
-              "NOT NULL"))))
+  (let [{column-type "type" column-name "columnName"} column]
+    (if (= column-type "text")
+      (format "coalesce(%s, '') %s ''"
+              column-name
+              (if (= operation "keep") "<>" "="))
+      (format "%s IS %s"
+              column-name
+              (if (= operation "keep")
+                "NULL"
+                "NOT NULL")))))
 
 (defmethod filter-sql :default [filter]
   (throw (ex-info "Invalid filter" {:filter filter}))
