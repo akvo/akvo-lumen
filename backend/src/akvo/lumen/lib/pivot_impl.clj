@@ -20,7 +20,6 @@
        rest
        (map first)))
 
-;; TODO filter
 (defn source-sql [table-name
                   {:keys [category-column
                           row-column
@@ -135,7 +134,14 @@
   {:category-column (find-column columns (get query "categoryColumn"))
    :row-column (find-column columns (get query "rowColumn"))
    :value-column (find-column columns (get query "valueColumn"))
-   :aggregation (get query "aggregation")
+   :aggregation (condp = (get query "aggregation")
+                  "mean" "avg"
+                  "sum" "sum"
+                  "min" "min"
+                  "max" "max"
+                  "count" "count"
+                  (throw (ex-info "Unsupported aggregation function"
+                                  {:aggregation (get query "aggregation")})))
    :filters (get query "filters")})
 
 (defn valid-query? [query]
