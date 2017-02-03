@@ -23,7 +23,7 @@ export default class PivotTable extends Component {
   }
 
   componentDidMount() {
-    if (this.props.visualisation.datasetId) {
+    if (!this.props.visualisation.data && this.props.visualisation.datasetId) {
       this.fetchPivotData(this.props.visualisation.datasetId, this.props.visualisation.spec);
     }
   }
@@ -33,7 +33,7 @@ export default class PivotTable extends Component {
     const specChanged = !isEqual(this.props.visualisation.spec, newSpec);
     const datasetChanged = this.props.visualisation.datasetId !== newProps.visualisation.datasetId;
 
-    if (specChanged || datasetChanged) {
+    if (!this.props.visualisation.data && (specChanged || datasetChanged)) {
       this.fetchPivotData(newProps.visualisation.datasetId, newSpec);
     }
   }
@@ -47,9 +47,10 @@ export default class PivotTable extends Component {
   }
 
   render() {
-    const { width, height } = this.props;
+    const { width, height, visualisation } = this.props;
+    const data = visualisation.data ? visualisation.data : this.state.tableData;
 
-    if (!this.state.tableData) {
+    if (!data) {
       return (
         <div
           className="PivotTable dashChart"
@@ -74,11 +75,11 @@ export default class PivotTable extends Component {
         <table>
           <tbody>
             <tr>
-              {this.state.tableData.columns.map((cell, index) =>
+              {data.columns.map((cell, index) =>
                 <th key={index}>{cell.title}</th>
               )}
             </tr>
-            {this.state.tableData.rows.map((row, rowIndex) =>
+            {data.rows.map((row, rowIndex) =>
               <tr key={rowIndex}>
                 {row.map((cell, cellIndex) =>
                   <td key={cellIndex}>

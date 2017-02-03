@@ -31,6 +31,12 @@ export default class AsyncVisualisationViewer extends Component {
           },
         });
       }, 'reactLeaflet');
+    } else if (visualisation.visualisationType === 'pivot table') {
+      this.setState({
+        asyncComponents: {
+          output: require('./PivotTable').default,
+        },
+      });
     } else {
       require.ensure(['vega'], () => {
         /* eslint-disable global-require */
