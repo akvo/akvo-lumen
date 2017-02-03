@@ -10,6 +10,7 @@ import genericSpecTemplate from './Visualisation/genericSpecTemplate';
 import mapSpecTemplate from './Visualisation/mapSpecTemplate';
 import pieSpecTemplate from './Visualisation/pieSpecTemplate';
 import lineSpecTemplate from './Visualisation/lineSpecTemplate';
+import pivotTableSpecTemplate from './Visualisation/pivotTableSpecTemplate';
 
 require('../styles/Visualisation.scss');
 
@@ -215,6 +216,10 @@ class Visualisation extends Component {
       case 'bar':
       case 'scatter':
         specTemplate = Object.assign({}, genericSpecTemplate);
+        break;
+
+      case 'pivot table':
+        specTemplate = Object.assign({}, pivotTableSpecTemplate);
         break;
 
       default:

@@ -1,6 +1,7 @@
 import React, { PropTypes } from 'react';
 import Chart from './Chart';
 import MapVisualisation from './MapVisualisation';
+import PivotTable from './PivotTable';
 
 export default function VisualisationViewer(props) {
   switch (props.visualisation.visualisationType) {
@@ -19,6 +20,13 @@ export default function VisualisationViewer(props) {
     case 'map':
       return (
         <MapVisualisation
+          {...props}
+        />
+      );
+
+    case 'pivot table':
+      return (
+        <PivotTable
           {...props}
         />
       );

@@ -15,6 +15,12 @@ function shouldRender(visualisation, datasets) {
     case 'map':
       return true;
 
+    case 'pivot table':
+      if (!datasetLoaded) {
+        return false;
+      }
+      break;
+
     case 'bar':
       if (!datasetLoaded) {
         return false;
