@@ -20,7 +20,6 @@
        rest
        (map first)))
 
-;; TODO filter
 (defn source-sql [table-name
                   {:keys [category-column
                           row-column
@@ -76,16 +75,42 @@
      :rows count}))
 
 (defn apply-empty-category-query [conn dataset query filter-str]
-  {:rows []
-   :columns []})
+  (let [rows (rest (jdbc/query conn
+                               [(format "SELECT %s, count(rnum) FROM %s WHERE %s GROUP BY 1 ORDER BY 1"
+                                        (get (:row-column query) "columnName")
+                                        (:table-name dataset)
+                                        filter-str)]
+                               {:as-arrays? true}))]
+    {:columns [{"type" "text"
+                "title" (get (:row-column query) "title")}
+               {"type" "number"
+                "title" "Total"}]
+     :rows rows}))
 
 (defn apply-empty-row-query [conn dataset query filter-str]
-  {:rows []
-   :columns []})
+  (let [counts (map second
+                    (rest (jdbc/query conn
+                                      [(format "SELECT %s, count(rnum) FROM %s WHERE %s GROUP BY 1 ORDER BY 1"
+                                               (get (:category-column query) "columnName")
+                                               (:table-name dataset)
+                                               filter-str)]
+                                      {:as-arrays? true})))
+        categories (unique-values conn (:table-name dataset) (:category-column query) filter-str)]
+    {:columns (cons {"title" ""
+                     "type" "text"}
+                    (map (fn [category]
+                           {"title" category
+                            "type" "number"})
+                         categories))
+     :rows [(cons "Total" counts)]}))
 
 (defn apply-empty-value-query [conn dataset query filter-str]
-  {:rows []
-   :columns []})
+  (apply-pivot conn
+               dataset
+               (assoc query
+                      :value-column {"columnName" "rnum"}
+                      "aggregation" "count")
+               filter-str))
 
 (defn apply-query [conn dataset query filter-str]
   (cond
@@ -109,7 +134,14 @@
   {:category-column (find-column columns (get query "categoryColumn"))
    :row-column (find-column columns (get query "rowColumn"))
    :value-column (find-column columns (get query "valueColumn"))
-   :aggregation (get query "aggregation")
+   :aggregation (condp = (get query "aggregation")
+                  "mean" "avg"
+                  "sum" "sum"
+                  "min" "min"
+                  "max" "max"
+                  "count" "count"
+                  (throw (ex-info "Unsupported aggregation function"
+                                  {:aggregation (get query "aggregation")})))
    :filters (get query "filters")})
 
 (defn valid-query? [query]
@@ -151,7 +183,40 @@
                 "aggregation" "count"
                 "filters" []})
 
-  (query tenant-conn dataset-id empty-q)
+  (def empty-category-q
+    {"categoryColumn" nil
+     "rowColumn" "c4"
+     "valueColumn" nil
+     "aggregation" "count"
+     "filters" [{"column" "c2"
+                 "columnType" "text"
+                 "operation" "keep"
+                 "strategy" "is"
+                 "value" "Ethiopia"}]})
+
+  (def empty-row-q
+    {"categoryColumn" "c16"
+     "rowColumn" nil
+     "valueColumn" nil
+     "aggregation" "count"
+     "filters" [{"column" "c2"
+                 "columnType" "text"
+                 "operation" "keep"
+                 "strategy" "is"
+                 "value" "Ethiopia"}]})
+
+  (def empty-value-q
+    {"categoryColumn" "c16"
+     "rowColumn" "c4"
+     "valueColumn" nil
+     "aggregation" "count"
+     "filters" [{"column" "c2"
+                 "columnType" "text"
+                 "operation" "keep"
+                 "strategy" "is"
+                 "value" "Ethiopia"}]})
+
+  (query tenant-conn dataset-id empty-value-q)
 
   (unique-categories tenant-conn dataset-id)
 
