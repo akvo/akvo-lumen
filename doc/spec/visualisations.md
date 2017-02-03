@@ -51,3 +51,43 @@
 }
 ```
 
+### Filter array (used for all visualisation types)
+
+```
+{
+  "filters": [
+    {
+      "column": "c6",
+      "value": "10", // Always a string
+      "operation": "remove", // One of "keep" or "remove"
+      "strategy": "isHigher", // One of "isHigher", "isLower", "is", or "isEmpty"
+      "caseSensitive": true, // Default, only used when operation is "is"
+      "origin": "filterMenu", // Default indicating filter explicitly created by user
+    },
+    {
+      "column": "c2",
+      "value": "", // Value is ignored when strategy is "isEmpty"
+      "operation": "remove",
+      "strategy": "isEmpty",
+      "caseSensitive": true,
+      "origin": "filterMenu",
+    },
+    {
+      "column": "c10",
+      "value": "male",
+      "operation": "remove",
+      "strategy": "is", // "is" means "exactly matches",
+      "caseSensitive": false,
+      "origin": "filterMenu",
+    },
+    {
+      "column": "c10",
+      "value": "Egypt",
+      "operation": "remove",
+      "strategy": "is", // "is" means "exactly matches",
+      "caseSensitive": true,
+      "origin": "pivot", // Filter created by pivot table editor. Won't show in regular filter list
+    },
+  ],
+}
+```
