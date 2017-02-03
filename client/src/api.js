@@ -14,11 +14,16 @@ function requestHeaders(token, additionalHeaders = {}) {
   });
 }
 
-export function get(url, headers) {
-  return wrapUpdateToken(token => fetch(url, {
-    method: 'GET',
-    headers: requestHeaders(token, headers),
-  }));
+export function get(url, body, headers) {
+  return wrapUpdateToken(token => fetch(url, body == null ?
+    {
+      method: 'GET',
+      headers: requestHeaders(token, headers),
+    } : {
+      method: 'GET',
+      headers: requestHeaders(token, headers),
+      body: JSON.stringify(body),
+    }));
 }
 
 export function post(url, body, headers) {
