@@ -1,26 +1,11 @@
 (ns akvo.lumen.lib.pivot-impl
-  (:require [clojure.java.jdbc :as jdbc]
+  (:require [akvo.commons.psql-util]
+            [akvo.lumen.http :as http]
+            [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
-
-(defn not-found [body]
-  {:status 404
-   :body body})
-
-(defn bad-request [body]
-  {:status 400
-   :body body})
-
-
-;; {
-;;  "categoryColumn": "c16",
-;;  "rowColumn": "c4",
-;;  "valueColumn": "c19",
-;;  "aggregation": "avg"
-;;  "filter": [{"c2": "Ethiopia"}]
-;;  }
 
 (defn unique-values-sql [table-name category-column]
   (format "SELECT DISTINCT %s FROM %s ORDER BY 1"
@@ -32,9 +17,6 @@
                    {:as-arrays? true})
        rest
        (map first)))
-
-(defn escape-quotes [s]
-  (str/replace s "\"" "\"\""))
 
 ;; TODO filter
 (defn source-sql [table-name {:keys [category-column
@@ -76,7 +58,6 @@
                         {:as-arrays? true}))
      :columns columns}))
 
-
 (defn find-column [columns column-name]
   (first (filter #(= column-name (get % "columnName"))
                  columns)))
@@ -95,18 +76,12 @@
 
 (defn query [tenant-conn dataset-id query]
   (jdbc/with-db-transaction [conn tenant-conn]
-    (let [dataset (dataset-by-id conn {:id dataset-id})]
-      (if dataset
-        (let [q (build-query (:columns dataset) query)]
-          (if (valid-query? q)
-            (try
-              {:status 200
-               :body (run-query conn dataset q)}
-              (catch Exception e
-                {:status 500
-                 :body {"error" (.getMessage e)}}))
-            (bad-request {"query" query})))
-        (not-found {"datasetId" dataset-id})))))
+    (if-let [dataset (dataset-by-id conn {:id dataset-id})]
+      (let [q (build-query (:columns dataset) query)]
+        (if (valid-query? q)
+          (http/ok (run-query conn dataset q))
+          (http/bad-request {"query" query})))
+      (http/not-found {"datasetId" dataset-id}))))
 
 
 (comment
