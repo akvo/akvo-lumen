@@ -18,7 +18,7 @@ export default function PivotTableConfigMenu(props) {
       <SelectInput
         placeholder="Select aggregation method"
         labelText="Aggregation method"
-        choice={spec.aggregationMethod !== null ? spec.aggregationMethod.toString() : null}
+        choice={spec.aggregation !== null ? spec.aggregation.toString() : null}
         name="aggregationMethod"
         options={aggregationOptions}
         onChange={value => onChangeSpec({
