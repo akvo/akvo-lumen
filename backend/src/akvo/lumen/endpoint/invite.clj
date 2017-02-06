@@ -20,8 +20,8 @@
 
       #_(context "/:id" [id]
 
-        (DELETE "/" _
-          (invite/...))))))
+         (DELETE "/" _
+           (invite/...))))))
 
 (defn verify-endpoint [{:keys [emailer keycloak tenant-manager]}]
   (context "/verify" {:keys [tenant]}

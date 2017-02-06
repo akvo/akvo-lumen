@@ -70,7 +70,9 @@ class Users extends Component {
   }
 
   onInviteUser() {
-    api.post('/api/admin/invites', { email: this.state.invitedUserEmail.trim().toLowerCase() });
+    api.post('/api/admin/invites', {
+      email: this.state.invitedUserEmail.trim().toLowerCase(),
+    });
   }
 
   getActionButtons() {
