@@ -26,25 +26,20 @@
                           value-column
                           aggregation]}
                   filter-str]
-  (str
-   (format "SELECT %s, %s, %s(%s) FROM %s WHERE %s\n"
-           (get row-column "columnName")
-           (get category-column "columnName")
-           aggregation
-           (get value-column "columnName")
-           table-name
-           filter-str)
-   "GROUP BY 1,2 ORDER BY 1,2\n"))
+  (format "SELECT %s, %s, %s(%s) FROM %s WHERE %s GROUP BY 1,2 ORDER BY 1,2"
+          (get row-column "columnName")
+          (get category-column "columnName")
+          aggregation
+          (get value-column "columnName")
+          table-name
+          filter-str))
 
 (defn pivot-sql [table-name query filter-str categories-count]
-  (str "SELECT * FROM crosstab ($$\n"
-       (source-sql table-name query filter-str)
-       "$$,$$\n"
-       (unique-values-sql table-name (:category-column query) filter-str)
-       "$$) AS ct (c1 text, \n"
-       (str/join "," (map #(format "c%s double precision" (+ % 2))
-                          (range categories-count)))
-       ");"))
+  (format "SELECT * FROM crosstab ($$ %s $$, $$ %s $$) AS ct (c1 text, %s);"
+          (source-sql table-name query filter-str)
+          (unique-values-sql table-name (:category-column query) filter-str)
+          (str/join "," (map #(format "c%s double precision" (+ % 2))
+                             (range categories-count)))))
 
 (defn apply-pivot [conn dataset query filter-str]
   (let [categories (unique-values conn
@@ -75,12 +70,13 @@
      :rows count}))
 
 (defn apply-empty-category-query [conn dataset query filter-str]
-  (let [rows (rest (jdbc/query conn
-                               [(format "SELECT %s, count(rnum) FROM %s WHERE %s GROUP BY 1 ORDER BY 1"
-                                        (get (:row-column query) "columnName")
-                                        (:table-name dataset)
-                                        filter-str)]
-                               {:as-arrays? true}))]
+  (let [rows (rest
+              (jdbc/query conn
+                          [(format "SELECT %s, count(rnum) FROM %s WHERE %s GROUP BY 1 ORDER BY 1"
+                                   (get (:row-column query) "columnName")
+                                   (:table-name dataset)
+                                   filter-str)]
+                          {:as-arrays? true}))]
     {:columns [{"type" "text"
                 "title" (get (:row-column query) "title")}
                {"type" "number"
@@ -88,13 +84,15 @@
      :rows rows}))
 
 (defn apply-empty-row-query [conn dataset query filter-str]
-  (let [counts (map second
-                    (rest (jdbc/query conn
-                                      [(format "SELECT %s, count(rnum) FROM %s WHERE %s GROUP BY 1 ORDER BY 1"
-                                               (get (:category-column query) "columnName")
-                                               (:table-name dataset)
-                                               filter-str)]
-                                      {:as-arrays? true})))
+  (let [counts (->> (jdbc/query
+                     conn
+                     [(format "SELECT %s, count(rnum) FROM %s WHERE %s GROUP BY 1 ORDER BY 1"
+                              (get (:category-column query) "columnName")
+                              (:table-name dataset)
+                              filter-str)]
+                     {:as-arrays? true})
+                    rest
+                    (map second))
         categories (unique-values conn (:table-name dataset) (:category-column query) filter-str)]
     {:columns (cons {"title" ""
                      "type" "text"}
