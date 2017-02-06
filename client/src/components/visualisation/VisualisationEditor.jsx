@@ -20,16 +20,18 @@ export default class VisualisationEditor extends Component {
     this.state = {
       visualisation: null,
     };
-    this.fetchPivotData = this.fetchPivotData.bind(this);
-    this.getVisualisation = this.getVisualisation.bind(this);
+    this.fetchAggregatedData = this.fetchAggregatedData.bind(this);
+  }
+
+  componentWillMount() {
+    this.setState({ visualisation: this.props.visualisation });
   }
 
   componentWillReceiveProps(nextProps) {
-    this.setState({ visualisation: this.getVisualisation(nextProps.visualisation) });
-  }
+    const { visualisation } = nextProps;
+    const vType = visualisation.visualisationType;
 
-  getVisualisation(visualisation) {
-    switch (visualisation.visualisationType) {
+    switch (vType) {
       case null:
       case 'map':
       case 'bar':
@@ -38,36 +40,41 @@ export default class VisualisationEditor extends Component {
       case 'pie':
       case 'donut':
       case 'scatter':
-        return visualisation;
+        this.setState({ visualisation });
+        break;
 
       case 'pivot table':
-        this.fetchPivotData(visualisation.datasetId, visualisation.spec);
-        return visualisation;
+        if (visualisation.datasetId && specIsValid(visualisation.spec)) {
+          this.fetchAggregatedData(visualisation);
+        } else {
+          this.setState({ visualisation });
+        }
+
+        break;
 
       default: throw new Error(`Unknown visualisation type ${visualisation.visualisationType}`);
     }
   }
 
-  fetchPivotData(datasetId, spec) {
-    if (datasetId && specIsValid(spec)) {
-      const requestId = Math.random();
-      this.latestRequestId = requestId;
+  fetchAggregatedData(visualisation) {
+    const { spec, datasetId } = visualisation;
+    const requestId = Math.random();
+    this.latestRequestId = requestId;
 
-      api.get(`/api/pivot/${datasetId}`, {
-        query: JSON.stringify(spec),
-      }).then((response) => {
-        if (requestId === this.latestRequestId) {
-          this.setState({
-            visualisation: Object.assign({}, this.state.visualisation, { data: response }),
-          });
-        }
-      });
-    }
+    api.get(`/api/pivot/${datasetId}`, {
+      query: JSON.stringify(spec),
+    }).then((response) => {
+      if (requestId === this.latestRequestId) {
+        this.setState({
+          visualisation: Object.assign({}, visualisation, { data: response }),
+        });
+      }
+    });
   }
 
   render() {
     const { props } = this;
-    const visualisation = this.state.visualisation || this.props.visualisation;
+    const visualisation = this.state.visualisation;
 
     return (
       <div className="VisualisationEditor">
@@ -100,7 +107,7 @@ VisualisationEditor.propTypes = {
 /*
   componentDidMount() {
     if (this.props.visualisation.datasetId) {
-      this.fetchPivotData(this.props.visualisation.datasetId, this.props.visualisation.spec);
+      this.fetchAggregatedData(this.props.visualisation.datasetId, this.props.visualisation.spec);
     }
   }
 */
