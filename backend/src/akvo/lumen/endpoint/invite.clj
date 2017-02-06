@@ -9,14 +9,14 @@
 (defn endpoint [{:keys [emailer keycloak tenant-manager]}]
   (context "/api/admin/invites" {:keys [jwt-claims params tenant] :as request}
 
-    (let-routes [tenant-conn (connection tenant-manager tenant)
-                 roles (get-in jwt-claims ["realm_access" "roles"])]
+    (let-routes [tenant-conn (connection tenant-manager tenant)]
       (GET "/" _
-        (invite/active-invites tenant tenant-conn keycloak roles))
+        (invite/active-invites tenant-conn))
 
       (POST "/" {:keys [body]}
-        (invite/create tenant-conn emailer keycloak roles body jwt-claims
-                       (get-in request [:headers "host"])))
+        (invite/create tenant-conn emailer keycloak
+                       (select-keys request
+                                    [:body :jwt-claims :server-name :server-port])))
 
       #_(context "/:id" [id]
 
@@ -24,7 +24,8 @@
            (invite/...))))))
 
 (defn verify-endpoint [{:keys [emailer keycloak tenant-manager]}]
-  (context "/verify" {:keys [tenant]}
+  (context "/verify" {:keys [tenant] :as request}
     (let-routes [tenant-conn (connection tenant-manager tenant)]
       (GET "/:id" [id]
-        (invite/accept-invite tenant-conn tenant emailer keycloak id)))))
+        (invite/accept-invite tenant-conn tenant emailer keycloak id
+                              (select-keys request [:server-name]))))))
