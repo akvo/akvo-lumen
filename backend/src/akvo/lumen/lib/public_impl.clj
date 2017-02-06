@@ -20,7 +20,7 @@
   (let [dataset-id (:datasetId visualisation)
         {:keys [status body]} (pivot/query tenant-conn dataset-id (:spec visualisation))]
     (when (= status 200)
-      {"visualisations" {(:id visualisation) (assoc visualisation :data visualisation)}})))
+      {"visualisations" {(:id visualisation) (assoc visualisation :data body)}})))
 
 (defmethod visualisation :default
   [tenant-conn visualisation]
