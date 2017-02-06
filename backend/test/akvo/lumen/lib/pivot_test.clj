@@ -1,22 +1,15 @@
 (ns akvo.lumen.lib.pivot-test
   (:require [akvo.lumen.component.tenant-manager :refer [tenant-manager]]
             [akvo.lumen.component.transformation-engine :refer [transformation-engine]]
-            [akvo.lumen.fixtures :refer [test-conn
-                                         test-tenant-spec
+            [akvo.lumen.fixtures :refer [test-tenant-spec
                                          migrate-tenant
                                          rollback-tenant]]
-            [akvo.lumen.import :as imp]
             [akvo.lumen.import.csv-test :refer [import-file]]
             [akvo.lumen.lib.pivot :as pivot]
             [akvo.lumen.transformation :as tf]
-            [akvo.lumen.transformation.engine :as engine]
-            [akvo.lumen.util :refer (squuid)]
-            [cheshire.core :as json]
-            [clojure.java.io :as io]
             [clojure.test :refer :all]
             [com.stuartsierra.component :as component]
-            [duct.component.hikaricp :refer [hikaricp]]
-            [hugsql.core :as hugsql]))
+            [duct.component.hikaricp :refer [hikaricp]]))
 
 (def test-system
   (->
@@ -37,7 +30,7 @@
   (binding [*tenant-conn* (:spec (:db test-system))
             *dataset-id* (import-file "pivot.csv" {:dataset-name "pivot"
                                                    :has-column-headers? true})]
-    (tf/schedule test-conn
+    (tf/schedule *tenant-conn*
                  (:transformation-engine test-system)
                  *dataset-id*
                  {:type :transformation
