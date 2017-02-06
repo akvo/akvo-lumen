@@ -2,6 +2,13 @@
 
 ## 0.5.0 (unreleased)
 
+
+### New and noteworthy
+
+* Admin view in sidebar is now linked up to a simple overview of what users
+  keycloak currently knows about and a form for inviting a user by their
+  email address.
+
 ## 0.4.5
 
 Date 2017-01-23
