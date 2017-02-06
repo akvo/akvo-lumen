@@ -51,8 +51,10 @@ export default class Chart extends Component {
       case 'line':
         chartData = chart.getLineData(visualisation, datasets);
         break;
-      case 'bar':
       case 'scatter':
+        chartData = chart.getScatterData(visualisation, datasets);
+        break;
+      case 'bar':
         chartData = chart.getChartData(visualisation, datasets);
         break;
       default:

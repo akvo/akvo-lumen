@@ -198,6 +198,63 @@ export function getLineData(visualisation, datasets) {
   }];
 }
 
+export function getScatterData(visualisation, datasets) {
+  const { datasetId, spec } = visualisation;
+  const dataset = datasets[datasetId];
+  const haveAggregation = visualisation.spec.bucketColumn != null;
+  const yIndex = getColumnIndex(dataset, spec.metricColumnY);
+  const yAxisType = yIndex === -1 ? 'number' : dataset.get('columns').get(yIndex).get('type');
+  const xIndex = getColumnIndex(dataset, spec.metricColumnX);
+  const xAxisType = xIndex === -1 ? 'number' : dataset.get('columns').get(xIndex).get('type');
+  const bucketIndex = getColumnIndex(dataset, spec.bucketColumn);
+  const bucketType = bucketIndex === -1 ?
+    'number' : dataset.get('columns').get(bucketIndex).get('type');
+  const datapointLabelIndex = getColumnIndex(dataset, spec.datapointLabelColumn);
+  const datapointLabelType = datapointLabelIndex === -1 ?
+    'number' : dataset.get('columns').get(datapointLabelIndex).get('type');
+  const rowFilter = filterFn(spec.filters, dataset.get('columns'));
+
+  const valueArray = dataset.get('rows')
+    .filter(row => rowFilter(row))
+    .map(row => ({
+      x: row.get(xIndex),
+      y: row.get(yIndex),
+      bucketValue: bucketIndex === -1 ? null : row.get(bucketIndex),
+      datapointLabel: datapointLabelIndex === -1 ? null : row.get(datapointLabelIndex),
+    }))
+    .toArray();
+
+  let aggregatedValues;
+
+  if (haveAggregation) {
+    aggregatedValues = dl.groupby(['bucketValue'])
+      .summarize([
+        {
+          name: 'x',
+          ops: [spec.metricAggregation],
+          as: ['x'],
+        },
+        {
+          name: 'y',
+          ops: [spec.metricAggregation],
+          as: ['y'],
+        },
+      ])
+      .execute(valueArray);
+  }
+
+  return [{
+    name: 'table',
+    values: haveAggregation ? aggregatedValues : valueArray,
+    metadata: {
+      xAxisType,
+      yAxisType,
+      bucketType,
+      datapointLabelType,
+    },
+  }];
+}
+
 export function getPieData(visualisation, datasets) {
   const { datasetId, spec } = visualisation;
   const dataset = datasets[datasetId];

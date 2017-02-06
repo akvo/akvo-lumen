@@ -10,6 +10,7 @@ import genericSpecTemplate from './Visualisation/genericSpecTemplate';
 import mapSpecTemplate from './Visualisation/mapSpecTemplate';
 import pieSpecTemplate from './Visualisation/pieSpecTemplate';
 import lineSpecTemplate from './Visualisation/lineSpecTemplate';
+import scatterSpecTemplate from './Visualisation/scatterSpecTemplate';
 
 require('../styles/Visualisation.scss');
 
@@ -212,8 +213,11 @@ class Visualisation extends Component {
         specTemplate = Object.assign({}, lineSpecTemplate);
         break;
 
-      case 'bar':
       case 'scatter':
+        specTemplate = Object.assign({}, scatterSpecTemplate);
+        break;
+
+      case 'bar':
         specTemplate = Object.assign({}, genericSpecTemplate);
         break;
 
