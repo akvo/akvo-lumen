@@ -4,6 +4,7 @@
 
 ```
 {
+  version: 1,
   "filters": [],
   "showLegend": true,
   "latitude": "c1",
@@ -44,10 +45,29 @@
 
 ```
 {
+  version: 1,
   filters: [],
   bucketColumn: 'c1',
   sort: null, // can be "asc", "dsc" or "null"
   showLegend: null,
+}
+```
+
+### Scatter plot
+
+```
+{
+  version: 1,
+  metricColumnY: 'c4', // required
+  metricColumnX: 'c7', // required
+  datapointLabelColumn: null, // optional. Used for on-hover labels when no aggregation is defined
+  bucketColumn: null,
+  metricAggregation: 'mean', // default. Only used when bucketColumn is present
+  axisLabelX: null, // Optional string. Automatically generated if not defined by user
+  axisLabelXFromUser: false, // Has the label been manually entered by the user?
+  axisLabelY: null,
+  axisLabelYFromUser: false,
+  filters: [],
 }
 ```
 
