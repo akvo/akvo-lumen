@@ -1,64 +1,59 @@
 (ns akvo.lumen.lib.public-impl
-  (:require [cheshire.core :as json]
-            [hugsql.core :as hugsql]
+  (:require [akvo.lumen.lib.dashboard :as dashboard]
             [akvo.lumen.lib.dataset :as dataset]
+            [akvo.lumen.lib.pivot :as pivot]
             [akvo.lumen.lib.visualisation :as visualisation]
-            [akvo.lumen.lib.dashboard :as dashboard]
+            [cheshire.core :as json]
+            [hugsql.core :as hugsql]
             [ring.util.response :refer [content-type not-found response]]))
-
 
 (hugsql/def-db-fns "akvo/lumen/lib/public.sql")
 
+(defn get-share [tenant-conn id]
+  (public-by-id tenant-conn {:id id}))
 
-(defn get-share
-  [conn id]
-  (public-by-id conn {:id id}))
+(defmulti visualisation (fn [_ visualisation]
+                          (:visualisationType visualisation)))
 
-(defmulti response-data
-  (fn [_ share]
-    (cond
-      (not (nil? (:visualisation_id share))) :visualisation
-      (not (nil? (:dashboard_id share))) :dashboard)))
+(defmethod visualisation "pivot table"
+  [tenant-conn visualisation]
+  (let [dataset-id (:datasetId visualisation)
+        {:keys [status body]} (pivot/query tenant-conn dataset-id (:spec visualisation))]
+    (when (= status 200)
+      {"visualisations" {(:id visualisation) (assoc visualisation :data visualisation)}})))
 
-(defmethod response-data :visualisation
-  [tenant-conn share]
+(defmethod visualisation :default
+  [tenant-conn visualisation]
+  (let [dataset-id (:datasetId visualisation)
+        {:keys [status body]} (dataset/fetch tenant-conn dataset-id)]
+    (when (= status 200)
+      {"datasets" {dataset-id body}
+       "visualisations" {(:id visualisation) visualisation}})))
 
-  (let [v (:body (visualisation/fetch tenant-conn (:visualisation_id share)))
-        d (:body (dataset/fetch tenant-conn (:datasetId v)))]
-    {"visualisation" (dissoc v :id :created :modified)
-     "datasets" {(:id d) d}}))
+(defn visualisation-response-data [tenant-conn id]
+  (let [{:keys [status body]} (visualisation/fetch tenant-conn id)]
+    (when (= status 200)
+      (visualisation tenant-conn body))))
 
-(defn- visualisation-id-list
-  [dashboard]
-  (->> dashboard
-       :entities
-       vals
-       (filter #(= "visualisation" (get % "type")))
-       (mapv #(get % "id"))))
+(defn dashboard-response-data [tenant-conn id]
+  (let [{:keys [status body]} (dashboard/fetch tenant-conn id)]
+    (when (= status 200)
+      (let [deps (->> body
+                      :entities
+                      vals
+                      (filter #(= "visualisation" (get % "type")))
+                      (map #(get % "id"))
+                      (map #(visualisation-response-data tenant-conn %))
+                      (apply merge-with merge))]
+        (assoc deps "dashboards" {id body})))))
 
-(defn visualisation-list [tenant-conn visualisation-ids]
-  (reduce conj {} (map (fn [v-id]
-                         {v-id (:body (visualisation/fetch tenant-conn v-id))})
-                       visualisation-ids)))
-
-(defn dataset-list
-  [tenant-conn visualisations]
-  (let [dataset-ids (vec (reduce conj #{} (map :datasetId
-                                               (vals visualisations))))]
-    (reduce conj {} (map (fn [d-id]
-                           {d-id (:body (dataset/fetch tenant-conn d-id))})
-                         dataset-ids))))
-
-(defmethod response-data :dashboard
-  [tenant-conn share]
-  (let [dashboard (:body (dashboard/fetch tenant-conn (:dashboard_id share)))
-        visualisation-ids (visualisation-id-list dashboard)
-        visualisations (visualisation-list tenant-conn visualisation-ids)
-        datasets (dataset-list tenant-conn visualisations)]
-    {"dashboard" dashboard
-     "visualisations" visualisations
-     "datasets" datasets}))
-
+(defn response-data [tenant-conn share]
+  (if-let [dashboard-id (:dashboard-id share)]
+    (assoc (dashboard-response-data tenant-conn dashboard-id)
+           "dashboardId" dashboard-id)
+    (let [visualisation-id (:visualisation-id share)]
+      (assoc (visualisation-response-data tenant-conn visualisation-id)
+             "visualisationId" visualisation-id))))
 
 (defn html-response [data]
   (str "<!DOCTYPE html>\n"

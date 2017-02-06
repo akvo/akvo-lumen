@@ -14,20 +14,22 @@ const datasets = data.datasets;
 const immutableDatasets = {};
 
 // Transform datasets into immutable objects
-Object.keys(datasets).forEach((key) => {
-  const dataset = Immutable.fromJS(datasets[key]);
-  immutableDatasets[key] = dataset;
-});
+if (datasets != null) {
+  Object.keys(datasets).forEach((key) => {
+    const dataset = Immutable.fromJS(datasets[key]);
+    immutableDatasets[key] = dataset;
+  });
+}
 
 render(
   <div className="viewer">
-    {data.dashboard ?
+    {data.dashboardId ?
       <DashboardViewer
-        dashboard={data.dashboard}
+        dashboard={data.dashboards[data.dashboardId]}
         visualisations={data.visualisations}
         datasets={immutableDatasets}
       /> : <AsyncVisualisationViewer
-        visualisation={data.visualisation}
+        visualisation={data.visualisations[data.visualisationId]}
         datasets={immutableDatasets}
       />
     }
