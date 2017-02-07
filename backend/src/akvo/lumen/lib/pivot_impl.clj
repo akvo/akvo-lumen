@@ -124,7 +124,10 @@
     :else (apply-pivot conn dataset query filter-str)))
 
 (defn find-column [columns column-name]
-  (first (filter #(= column-name (get % "columnName")) columns)))
+  (when column-name
+    (if-let [column (first (filter #(= column-name (get % "columnName")) columns))]
+      column
+      (throw (ex-info "No such column" {:columnName column-name})))))
 
 (defn build-query
   "Replace column names with proper column metadata from the dataset"
@@ -142,18 +145,14 @@
                                   {:aggregation (get query "aggregation")})))
    :filters (get query "filters")})
 
-(defn valid-query? [query]
-  true)
-
 (defn query [tenant-conn dataset-id query]
   (jdbc/with-db-transaction [conn tenant-conn]
     (if-let [dataset (dataset-by-id conn {:id dataset-id})]
-      (let [q (build-query (:columns dataset) query)]
-        (if (valid-query? q)
-          (try
-            (http/ok (apply-query conn dataset q (filter/sql-str (:columns dataset) (:filters q))))
-            (catch clojure.lang.ExceptionInfo e
-              (http/bad-request (merge {:message (.getMessage e)}
-                                       (ex-data e)))))
-          (http/bad-request {"query" query})))
+      (try
+        (let [query (build-query (:columns dataset) query)
+              filter-str (filter/sql-str (:columns dataset) (:filters query))]
+          (http/ok (apply-query conn dataset query filter-str)))
+        (catch clojure.lang.ExceptionInfo e
+          (http/bad-request (merge {:message (.getMessage e)}
+                                   (ex-data e)))))
       (http/not-found {"datasetId" dataset-id}))))
