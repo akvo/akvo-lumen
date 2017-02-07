@@ -1,5 +1,11 @@
 # Release Notes
 
+## 0.6.0 (Unreleased)
+
+### Bugfixes
+
+* Fixed transformation log description for text transforms
+
 ## 0.5.1
 
 Date 2017-02-07
