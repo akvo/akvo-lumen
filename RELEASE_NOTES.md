@@ -1,5 +1,13 @@
 # Release Notes
 
+## 0.5.1
+
+Date 2017-02-07
+
+### Bugfixes
+
+* Improve character encoding detection for csv uploads
+
 ## 0.5.0
 
 Date 2017-01-27
