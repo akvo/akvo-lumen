@@ -1,7 +1,7 @@
 {:components
  {:app  #var duct.component.handler/handler-component
   :db #var duct.component.hikaricp/hikaricp
-  :emailer #var akvo.lumen.component.emailer/smtp-emailer
+  :emailer #var akvo.lumen.component.emailer/mailjet-emailer
   :http #var akvo.lumen.component.http/http
   :keycloak #var akvo.lumen.component.keycloak/keycloak
   :tenant-manager #var akvo.lumen.component.tenant-manager/tenant-manager

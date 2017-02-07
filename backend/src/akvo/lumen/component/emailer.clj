@@ -74,7 +74,7 @@
                     :body (json/encode body-data)}))))
 
 (defn mailjet-emailer
-  [{:keys [email-public-key email-private-key]}]
+  [{:keys [email-user email-password]}]
   (map->MailJetEmailer
-   {:config {:credentials [email-public-key email-private-key]
+   {:config {:credentials [email-user email-password]
              :api-url "https://api.mailjet.com/v3"}}))

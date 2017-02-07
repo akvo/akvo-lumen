@@ -6,7 +6,7 @@
 
 (defn assert-bindings []
   (assert (:lumen-db-url env) (error-msg "LUMEN_DB_URL"))
-  (assert (:lumen-email-host env) (error-msg "LUMEN_EMAIL_HOST"))
+  #_(assert (:lumen-email-host env) (error-msg "LUMEN_EMAIL_HOST"))
   (assert (:lumen-email-password env) (error-msg "LUMEN_EMAIL_PASSWORD"))
   (assert (:lumen-email-user env) (error-msg "LUMEN_EMAIL_USER"))
   (assert (:lumen-keycloak-client-secret env)
