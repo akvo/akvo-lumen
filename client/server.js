@@ -7,7 +7,9 @@ var config = require('./webpack.config');
 new WebpackDevServer(webpack(config), {
   publicPath: config.output.publicPath,
   hot: true,
-  historyApiFallback: true,
+  historyApiFallback: {
+    index: '/assets/index.html'
+  },
   proxy: {
     '/api/**': {
       target: "http://t1.lumen.localhost:3000",
