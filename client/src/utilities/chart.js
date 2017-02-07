@@ -291,8 +291,6 @@ export function getBarData(visualisation, datasets) {
   const bucketType = bucketIndex === -1 ?
     'number' : dataset.get('columns').get(bucketIndex).get('type');
   const subBucketIndex = getColumnIndex(dataset, spec.subBucketColumn);
-  const output = { name: 'table' };
-
   const rowFilter = filterFn(spec.filters, dataset.get('columns'));
 
   const valueArray = dataset.get('rows')
@@ -304,16 +302,16 @@ export function getBarData(visualisation, datasets) {
     }))
     .toArray();
 
+  /* If a sub-bucket aggregation is defined, include the raw values in the aggregated data,
+  /* as we will need the raw values to calculate the sub-buckets */
   const ops = subBucketIndex > -1 ? [spec.metricAggregation, 'values'] : [spec.metricAggregation];
 
   let aggregatedValues = dl.groupby(['bucketValue'])
-    .summarize([
-      {
-        name: 'y',
-        ops,
-        as: ['y'],
-      },
-    ])
+    .summarize([{
+      name: 'y',
+      ops,
+      as: ['y'],
+    }])
     .execute(valueArray);
 
   if (spec.sort) {
@@ -322,6 +320,7 @@ export function getBarData(visualisation, datasets) {
 
   if (spec.truncateSize !== null) {
     const limit = parseInt(spec.truncateSize, 10);
+
     aggregatedValues = aggregatedValues.slice(0, limit);
   }
 
@@ -352,6 +351,8 @@ export function getBarData(visualisation, datasets) {
     });
   }
 
+  let maxBucketValue = null;
+
   if (subBucketIndex > -1 && spec.subBucketMethod === 'stack') {
     /* Sum the sub-bucket values for each bucket, then find the tallest "stack" in the chart,
     /* so we can set the chart y-axis to the correct height. */
@@ -362,20 +363,19 @@ export function getBarData(visualisation, datasets) {
             as: ['total_bucket_value'],
           }])
           .execute(subBuckets);
-    const maxBucketValue = Math.max(...summedBucketValues.map(item => item.total_bucket_value));
-
-    output.metadata = output.metadata || {};
-    output.metadata.max = maxBucketValue;
-    output.yAxisType = yAxisType;
-    output.xAxisType = xAxisType;
-    output.bucketType = bucketType;
+    maxBucketValue = Math.max(...summedBucketValues.map(item => item.total_bucket_value));
   }
 
-  output.values = subBucketIndex > -1 ? subBuckets : aggregatedValues;
-
-  const chartData = [output];
-
-  return chartData;
+  return ([{
+    name: 'table',
+    values: subBucketIndex > -1 ? subBuckets : aggregatedValues,
+    metadata: {
+      yAxisType,
+      xAxisType,
+      bucketType,
+      max: maxBucketValue,
+    },
+  }]);
 }
 
 export function getVegaSpec(visualisation, data, containerHeight, containerWidth) {

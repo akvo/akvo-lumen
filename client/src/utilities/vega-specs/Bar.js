@@ -18,7 +18,6 @@ const getPaddingX = (data, maxLabelLengthX, meanPixelsPerChar, defaultPadding) =
 };
 
 export default function getVegaBarSpec(visualisation, data, containerHeight, containerWidth) {
-  const dataArray = data.map(item => item);
   const { spec } = visualisation;
 
   /* Padding calculation constants */
@@ -30,11 +29,11 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
   const dataSource = 'table';
   const fieldX = 'bucketValue';
   const fieldY = 'y';
-  const domainX = dataArray[0].values.map(item => item.bucketValue.toString());
+  const domainX = data[0].values.map(item => item.bucketValue.toString());
 
   if (spec.subBucketColumn !== null && spec.subBucketMethod === 'split') {
     return ({
-      data: dataArray,
+      data,
       width: containerWidth - 170,
       height: containerHeight - (26 + paddingX),
       padding: {
@@ -271,7 +270,7 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
 
   if (spec.subBucketColumn !== null && spec.subBucketMethod === 'stack') {
     return ({
-      data: dataArray,
+      data,
       width: containerWidth - 170,
       height: containerHeight - (26 + paddingX),
       padding: {
@@ -473,7 +472,7 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
   }
 
   return ({
-    data: dataArray,
+    data,
     width: containerWidth - 70,
     height: containerHeight - (26 + paddingX),
     padding: {
