@@ -1,6 +1,6 @@
 ## Visualisation Specifications
 
-### Map Visualisation
+### Map
 
 ```
 {
@@ -41,7 +41,7 @@
 }
 ```
 
-### Pie and Donut Visualisation
+### Pie and Donut chart
 
 ```
 {
@@ -63,12 +63,34 @@
   datapointLabelColumn: null, // optional. Used for on-hover labels when no aggregation is defined
   bucketColumn: null,
   metricAggregation: 'mean', // default. Only used when bucketColumn is present
-  axisLabelX: null, // Optional string. Automatically generated if not defined by user
+  axisLabelX: null, // optional string. Automatically generated if not defined by user
   axisLabelXFromUser: false, // Has the label been manually entered by the user?
   axisLabelY: null,
   axisLabelYFromUser: false,
   filters: [],
 }
+```
+
+### Bar chart
+
+```
+{
+  version: 1,
+  metricColumnY: 'c2', // required
+  metricColumnX: 'c6', // requijred
+  bucketColumn: 'c9', // required
+  subBucketColumn: null, // optional
+  subBucketMethod: 'split', // optional, can be "split" or "stack"
+  metricAggregation: 'mean', // default to mean,
+  axisLabelX: null, // optional string. Automatically generated if not defined by user
+  axisLabelXFromUser: false, // Has the label been manually entered by the user?
+  axisLabelY: null,
+  axisLabelYFromUser: false,
+  filters: [],
+  sort: null, // can be "asc", "dsc" or null
+  truncateSize: '10', // optional, used to indicate how many bars to show when
+}
+
 ```
 
 ### Filter array (used for all visualisation types)
