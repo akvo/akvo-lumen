@@ -1,5 +1,7 @@
 (ns akvo.lumen.component.emailer
   (:require [com.stuartsierra.component :as component]
+            [cheshire.core :as json]
+            [clj-http.client :as client]
             [clojure.pprint :refer [pprint]]
             [postal.core :as postal]))
 
@@ -72,7 +74,7 @@
                     :body (json/encode body-data)}))))
 
 (defn mailjet-emailer
-  [{:keys email-public-key email-private-key}]
+  [{:keys [email-public-key email-private-key]}]
   (map->MailJetEmailer
    {:config {:credentials [email-public-key email-private-key]
              :api-url "https://api.mailjet.com/v3"}}))
