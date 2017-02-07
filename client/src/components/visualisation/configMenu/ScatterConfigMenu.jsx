@@ -161,5 +161,4 @@ ScatterConfigMenu.propTypes = {
   onChangeSpec: PropTypes.func.isRequired,
   columnOptions: PropTypes.array.isRequired,
   aggregationOptions: PropTypes.array.isRequired,
-  getColumnMetadata: PropTypes.func.isRequired,
 };

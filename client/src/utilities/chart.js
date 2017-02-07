@@ -46,104 +46,10 @@ const getFilterArray = (filters, columns) => {
         break;
 
       default:
-        throw new Error(`Unknown filter strategy ${filter.strategy} supplied to getChartData`);
+        throw new Error(`Unknown filter strategy ${filter.strategy} supplied to getFilterArray`);
     }
   }
   return filterArray;
-};
-
-const applyBucketAggregation = (output, spec) => {
-  const includeValues = spec.subBucketColumn !== null;
-  const ops = includeValues ? [spec.metricAggregation, 'values'] : [spec.metricAggregation];
-  const aggregatedOutput = {};
-
-  const summarizeArray = [
-    {
-      name: 'y',
-      ops,
-    },
-  ];
-
-  // If X axis is also a metric axis, summarize that too
-  if (spec.metricColumnX !== null) {
-    summarizeArray.push({
-      name: 'x',
-      ops,
-    });
-  }
-
-  const aggregatedDataValues = dl.groupby(['bucketValue'])
-    .summarize(summarizeArray)
-    .execute(output.values);
-
-  aggregatedOutput.values = aggregatedDataValues;
-
-  return aggregatedOutput;
-};
-
-const applySubBucketAggregation = (output, spec) => {
-  const buckets = output.values;
-  const subBuckets = [];
-
-  buckets.forEach((bucket) => {
-    const parentMetric = bucket[`${spec.metricAggregation}_y`];
-    const parentBucketValue = bucket.bucketValue;
-
-    const parentSubBuckets = dl.groupby(['subBucketValue'])
-      .summarize([{
-        name: 'y',
-        ops: [spec.metricAggregation],
-        as: [`${spec.metricAggregation}_y`],
-      }])
-      .execute(bucket.values_y);
-
-    parentSubBuckets.forEach((subBucket) => {
-      const newSubBucket = Object.assign({}, subBucket);
-
-      newSubBucket.parentMetric = parentMetric;
-      newSubBucket.bucketValue = parentBucketValue;
-      subBuckets.push(newSubBucket);
-    });
-  });
-
-  return {
-    values: subBuckets,
-  };
-};
-
-const sortDataValues = (output, vType, spec) => {
-  const isLineType = vType === 'line' || vType === 'area';
-  const isLineAggregationType = (isLineType && spec.bucketColumn !== null);
-  let sortField;
-
-  if (isLineAggregationType) {
-    sortField = 'bucketValue';
-  } else if (isLineType) {
-    sortField = 'x';
-  } else {
-    sortField = `${spec.metricAggregation}_y`;
-  }
-
-  output.values.sort((a, b) => {
-    let returnValue;
-
-    if (a[sortField] > b[sortField]) {
-      returnValue = 1;
-    } else if (b[sortField] > a[sortField]) {
-      returnValue = -1;
-    } else {
-      returnValue = 0;
-    }
-
-    if (spec.sort === 'dsc') {
-      // reverse the sort
-      returnValue *= -1;
-    }
-
-    return returnValue;
-  });
-
-  return output;
 };
 
 function getColumnIndex(dataset, columnName) {
@@ -374,127 +280,98 @@ export function getMapData(layer, datasets) {
   });
 }
 
-function columnData(dataset, columnName) {
-  if (columnName == null) {
-    return null;
-  }
-  const idx = getColumnIndex(dataset, columnName);
-  return dataset.get('rows').map(row => row.get(idx)).toArray();
-}
-
-export function getChartData(visualisation, datasets) {
+export function getBarData(visualisation, datasets) {
   const { datasetId, spec } = visualisation;
   const dataset = datasets[datasetId];
-  const vType = visualisation.visualisationType;
-  const metricColumnY = columnData(dataset, spec.metricColumnY);
-  const metricColumnX = columnData(dataset, spec.metricColumnX);
-  const bucketValueColumn = columnData(dataset, spec.bucketColumn);
-  const subBucketValueColumn = columnData(dataset, spec.subBucketColumn);
-  const datapointLabelValueColumn = columnData(dataset, spec.datapointLabelColumn);
+  const yIndex = getColumnIndex(dataset, spec.metricColumnY);
+  const yAxisType = yIndex === -1 ? 'number' : dataset.get('columns').get(yIndex).get('type');
+  const xIndex = getColumnIndex(dataset, spec.metricColumnX);
+  const xAxisType = xIndex === -1 ? 'number' : dataset.get('columns').get(xIndex).get('type');
+  const bucketIndex = getColumnIndex(dataset, spec.bucketColumn);
+  const bucketType = bucketIndex === -1 ?
+    'number' : dataset.get('columns').get(bucketIndex).get('type');
+  const subBucketIndex = getColumnIndex(dataset, spec.subBucketColumn);
+  const output = { name: 'table' };
 
-  const dataValues = [];
   const rowFilter = filterFn(spec.filters, dataset.get('columns'));
-  let output = [];
 
-  /* All visulations have a metricColumnY, so we use this column to iterate through the dataset
-  /* row-by-row, collecting and computing the necessary values to build each datapoint for the
-  /* chartData */
-  metricColumnY.forEach((entry, index) => {
-    const row = dataset.get('rows').get(index);
+  const valueArray = dataset.get('rows')
+    .filter(row => rowFilter(row))
+    .map(row => ({
+      y: row.get(yIndex),
+      bucketValue: row.get(bucketIndex),
+      subBucketValue: subBucketIndex > -1 ? row.get(subBucketIndex) : null,
+    }))
+    .toArray();
 
-    const bucketValue = bucketValueColumn ? bucketValueColumn[index] : null;
-    const subBucketValue = subBucketValueColumn ? subBucketValueColumn[index] : null;
-    const datapointLabelValue = datapointLabelValueColumn ? datapointLabelValueColumn[index] : null;
+  const ops = subBucketIndex > -1 ? [spec.metricAggregation, 'values'] : [spec.metricAggregation];
 
-    let x = null; // Not all datapoints will have an 'x' value - sometimes we use the index instead
+  let aggregatedValues = dl.groupby(['bucketValue'])
+    .summarize([
+      {
+        name: 'y',
+        ops,
+        as: ['y'],
+      },
+    ])
+    .execute(valueArray);
 
-    if (metricColumnX !== null) {
-      x = metricColumnX[index];
-
-      if (spec.metricColumnXType === 'date') {
-        x *= 1000;
-      }
-    }
-
-    /* We will not include this datapoint if a required value is missing, or it is filtered out */
-    let includeDatapoint = true;
-
-    if (entry === null) {
-      includeDatapoint = false;
-    }
-
-    if ((vType === 'area' && spec.metricColumnX !== null) ||
-      (vType === 'line' && spec.metricColumnX !== null) ||
-      vType === 'scatter') {
-      if (x === null) {
-        includeDatapoint = false;
-      }
-    }
-
-    if (includeDatapoint && !rowFilter(row)) {
-      includeDatapoint = false;
-    }
-
-    if (includeDatapoint) {
-      dataValues.push({
-        index,
-        x,
-        y: parseFloat(entry),
-        bucketValue,
-        subBucketValue,
-        datapointLabelValue,
-      });
-    }
-  });
-
-  output = {
-    values: dataValues, // A raw array of all datapoints included datapoints, before aggregations
-  };
-
-  if (spec.bucketColumn !== null) {
-    output = applyBucketAggregation(output, spec);
+  if (spec.sort) {
+    aggregatedValues.sort((a, b) => (spec.sort === 'asc' ? a.y - b.y : b.y - a.y));
   }
 
-  /* Sort the aggregated values if a sort is defined by the user, or if a sort is necessary to show
-  /* a coherent chart, based on the spec */
-  if (spec.sort ||
-    (vType === 'area' && spec.metricColumnX !== null) ||
-    (vType === 'line' && spec.metricColumnX !== null)) {
-    output = sortDataValues(output, vType, spec);
-  }
-
-  const shouldTruncateValues = vType === 'bar' && spec.truncateSize !== null;
-
-  if (shouldTruncateValues) {
+  if (spec.truncateSize !== null) {
     const limit = parseInt(spec.truncateSize, 10);
-
-    output.values = output.values.slice(0, limit);
+    aggregatedValues = aggregatedValues.slice(0, limit);
   }
 
-  /* Only apply the sub-bucket aggregations after we have sorted and truncated based on the
-  /* bucket values */
+  let subBuckets;
 
-  if (vType === 'bar' && spec.subBucketColumn !== null) {
-    output = applySubBucketAggregation(output, spec);
+  if (subBucketIndex > -1) {
+    subBuckets = [];
+
+    aggregatedValues.forEach((bucket) => {
+      const parentMetric = bucket.y;
+      const parentBucketValue = bucket.bucketValue;
+
+      const parentSubBuckets = dl.groupby(['subBucketValue'])
+        .summarize([{
+          name: 'y',
+          ops: [spec.metricAggregation],
+          as: ['y'],
+        }])
+        .execute(bucket.values_y);
+
+      parentSubBuckets.forEach((subBucket) => {
+        const newSubBucket = Object.assign({}, subBucket);
+
+        newSubBucket.parentMetric = parentMetric;
+        newSubBucket.bucketValue = parentBucketValue;
+        subBuckets.push(newSubBucket);
+      });
+    });
   }
 
-  if (vType === 'bar' && spec.subBucketMethod === 'stack') {
+  if (subBucketIndex > -1 && spec.subBucketMethod === 'stack') {
     /* Sum the sub-bucket values for each bucket, then find the tallest "stack" in the chart,
     /* so we can set the chart y-axis to the correct height. */
     const summedBucketValues = dl.groupby(['bucketValue'])
           .summarize([{
-            name: `${spec.metricAggregation}_y`,
+            name: 'y',
             ops: ['sum'],
             as: ['total_bucket_value'],
           }])
-          .execute(output.values);
+          .execute(subBuckets);
     const maxBucketValue = Math.max(...summedBucketValues.map(item => item.total_bucket_value));
 
     output.metadata = output.metadata || {};
     output.metadata.max = maxBucketValue;
+    output.yAxisType = yAxisType;
+    output.xAxisType = xAxisType;
+    output.bucketType = bucketType;
   }
 
-  output.name = 'table';
+  output.values = subBucketIndex > -1 ? subBuckets : aggregatedValues;
 
   const chartData = [output];
 

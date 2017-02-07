@@ -90,16 +90,6 @@ export default function ConfigMenu(props) {
     props.datasets[visualisation.datasetId].get('columns') : Immutable.List();
   const columnOptions = getSelectMenuOptionsFromColumnList(columns);
 
-  const getColumnMetadata = (metadataName, index, options) => {
-    let metadata = null;
-
-    if (index !== null) {
-      metadata = options.find(option => option.value === index)[metadataName];
-    }
-
-    return metadata;
-  };
-
   const getChartTypeEditor = (visualisationType) => {
     let chartTypeEditor;
 
@@ -111,7 +101,6 @@ export default function ConfigMenu(props) {
           datasets={props.datasets}
           columnOptions={columnOptions}
           aggregationOptions={aggregationOptions}
-          getColumnMetadata={getColumnMetadata}
         />);
         break;
 
@@ -123,7 +112,6 @@ export default function ConfigMenu(props) {
           datasets={props.datasets}
           columnOptions={columnOptions}
           aggregationOptions={aggregationOptions}
-          getColumnMetadata={getColumnMetadata}
         />);
         break;
 
@@ -134,7 +122,6 @@ export default function ConfigMenu(props) {
           datasets={props.datasets}
           columnOptions={columnOptions}
           aggregationOptions={aggregationOptions}
-          getColumnMetadata={getColumnMetadata}
         />);
         break;
 
@@ -144,7 +131,6 @@ export default function ConfigMenu(props) {
           onChangeSpec={props.onChangeVisualisationSpec}
           datasets={props.datasets}
           aggregationOptions={aggregationOptions}
-          getColumnMetadata={getColumnMetadata}
         />);
         break;
 
@@ -156,7 +142,6 @@ export default function ConfigMenu(props) {
           datasets={props.datasets}
           columnOptions={columnOptions}
           aggregationOptions={aggregationOptions}
-          getColumnMetadata={getColumnMetadata}
         />);
         break;
 
@@ -194,7 +179,6 @@ export default function ConfigMenu(props) {
                 datasetOptions={getDatasetOptions(getDatasetArray(props.datasets))}
                 columnOptions={columnOptions}
                 aggregationOptions={aggregationOptions}
-                getColumnMetadata={getColumnMetadata}
                 onSave={props.onSaveVisualisation}
                 onChangeSourceDataset={props.onChangeSourceDataset}
               />

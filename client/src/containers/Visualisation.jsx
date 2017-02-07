@@ -6,43 +6,13 @@ import ShareEntity from '../components/modals/ShareEntity';
 import * as actions from '../actions/visualisation';
 import { fetchDataset } from '../actions/dataset';
 import { fetchLibrary } from '../actions/library';
-import genericSpecTemplate from './Visualisation/genericSpecTemplate';
 import mapSpecTemplate from './Visualisation/mapSpecTemplate';
 import pieSpecTemplate from './Visualisation/pieSpecTemplate';
 import lineSpecTemplate from './Visualisation/lineSpecTemplate';
 import scatterSpecTemplate from './Visualisation/scatterSpecTemplate';
+import barSpecTemplate from './Visualisation/barSpecTemplate';
 
 require('../styles/Visualisation.scss');
-
-const updateAxisLabels = (spec) => {
-  let autoAxisLabelY = spec.metricColumnYName;
-  let autoAxisLabelX = spec.bucketColumn ? spec.bucketColumnName : '';
-
-  if (spec.bucketColumn !== null) {
-    autoAxisLabelY += ` - ${spec.metricAggregation}`;
-
-    if (spec.truncateSize !== null) {
-      let truncateOrderIndicator;
-
-      if (spec.sort === 'asc') {
-        truncateOrderIndicator = 'bottom';
-      } else if (spec.sort === 'dsc') {
-        truncateOrderIndicator = 'top';
-      } else {
-        truncateOrderIndicator = 'first';
-      }
-
-      autoAxisLabelX += ` - ${truncateOrderIndicator} ${spec.truncateSize}`;
-    }
-  }
-
-  const axisLabelX = spec.axisLabelXFromUser ? spec.axisLabelX : autoAxisLabelX;
-  const axisLabelY = spec.axisLabelYFromUser ? spec.axisLabelY : autoAxisLabelY;
-
-  const out = Object.assign({}, spec, { axisLabelY, axisLabelX });
-
-  return out;
-};
 
 class Visualisation extends Component {
 
@@ -161,27 +131,7 @@ class Visualisation extends Component {
   }
 
   handleChangeVisualisationSpec(value) {
-    const axisLabelUpdateTriggers = [
-      'bucketColumn',
-      'subBucketColumn',
-      'truncateSize',
-      'metricAggregation',
-      'metricColumnY',
-      'metricColumnX',
-      'sort',
-    ];
-
-    const shouldUpdateAxisLabels = axisLabelUpdateTriggers.some(trigger =>
-        Object.keys(value).some(key => key.toString() === trigger.toString())
-    );
-
-    let spec = update(this.state.visualisation.spec, { $merge: value });
-
-    if (this.state.visualisation.visualisationType === 'bar' && shouldUpdateAxisLabels) {
-      spec = update(spec,
-        { $merge: updateAxisLabels(spec) });
-    }
-
+    const spec = update(this.state.visualisation.spec, { $merge: value });
     const visualisation = Object.assign({}, this.state.visualisation, { spec });
 
     this.handleChangeVisualisation(visualisation);
@@ -218,7 +168,7 @@ class Visualisation extends Component {
         break;
 
       case 'bar':
-        specTemplate = Object.assign({}, genericSpecTemplate);
+        specTemplate = Object.assign({}, barSpecTemplate);
         break;
 
       default:
