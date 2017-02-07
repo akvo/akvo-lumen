@@ -46,59 +46,80 @@
 (use-fixtures :once fixture)
 
 (deftest ^:functional test-pivot
-  (testing "Empty query"
-    (let [{:keys [status body]} (pivot/query *tenant-conn*
-                                             *dataset-id*
-                                             {"aggregation" "count"})]
-      (is (= status 200))
-      (is (= body {:columns [{"type" "number" "title" "Total"}]
-                   :rows [[8]]}))))
-  (testing "Category column only"
-    (let [{:keys [status body]} (pivot/query *tenant-conn*
-                                             *dataset-id*
-                                             {"aggregation" "count"
-                                              "categoryColumn" "c1"})]
-      (is (= status 200))
-      (is (= body {:columns [{"title" "" "type" "text"}
-                             {"title" "a1" "type" "number"}
-                             {"title" "a2" "type" "number"}]
-                   :rows [["Total" 4 4]]}))))
+  (let [query (partial pivot/query *tenant-conn* *dataset-id*)]
+    (testing "Empty query"
+      (let [{:keys [status body]} (query {"aggregation" "count"})]
+        (is (= status 200))
+        (is (= body {:columns [{"type" "number" "title" "Total"}]
+                     :rows [[8]]}))))
 
-  (testing "Row Column Only"
-    (let [{:keys [status body]} (pivot/query *tenant-conn*
-                                             *dataset-id*
-                                             {"aggregation" "count"
-                                              "rowColumn" "c2"})]
-      (is (= status 200))
-      (is (= body
-             {:columns [{"type" "text", "title" "B"}
-                        {"type" "number", "title" "Total"}],
-              :rows [["b1" 4] ["b2" 4]]}))))
+    (testing "Empty query with filter"
+      (let [{:keys [status body]} (query {"aggregation" "count"
+                                          "filters" [{"column" "c1"
+                                                      "value" "a1"
+                                                      "operation" "keep"
+                                                      "strategy" "is"}]})]
+        (is (= status 200))
+        (is (= body {:columns [{"type" "number" "title" "Total"}]
+                     :rows [[4]]}))))
 
-  (testing "Row & Category Column with count aggregation"
-    (let [{:keys [status body]} (pivot/query *tenant-conn*
-                                             *dataset-id*
-                                             {"aggregation" "count"
-                                              "categoryColumn" "c1"
-                                              "rowColumn" "c2"})]
-      (is (= status 200))
-      (is (= body
-             {:columns [{"title" "B", "type" "text"}
-                        {"title" "a1", "type" "number"}
-                        {"title" "a2", "type" "number"}]
-              :rows [["b1" 2.0 2.0]
-                     ["b2" 2.0 2.0]]}))))
+    (testing "Category column only"
+      (let [{:keys [status body]} (query {"aggregation" "count"
+                                          "categoryColumn" "c1"})]
+        (is (= status 200))
+        (is (= body {:columns [{"title" "" "type" "text"}
+                               {"title" "a1" "type" "number"}
+                               {"title" "a2" "type" "number"}]
+                     :rows [["Total" 4 4]]}))))
 
-  (testing "Row & Category Column with count aggregation"
-    (let [{:keys [status body]} (pivot/query *tenant-conn*
-                                             *dataset-id*
-                                             {"aggregation" "mean"
-                                              "categoryColumn" "c1"
-                                              "rowColumn" "c2"
-                                              "valueColumn" "c3"})]
-      (is (= status 200))
-      (is (= body
-             {:columns [{"title" "B", "type" "text"}
-                        {"title" "a1", "type" "number"}
-                        {"title" "a2", "type" "number"}]
-              :rows [["b1" 10.5 11.0] ["b2" 9.5 10.5]]})))))
+    (testing "Row Column Only"
+      (let [{:keys [status body]} (query {"aggregation" "count"
+                                          "rowColumn" "c2"})]
+        (is (= status 200))
+        (is (= body
+               {:columns [{"type" "text", "title" "B"}
+                          {"type" "number", "title" "Total"}],
+                :rows [["b1" 4]
+                       ["b2" 4]]}))))
+
+    (testing "Row & Category Column with count aggregation"
+      (let [{:keys [status body]} (query {"aggregation" "count"
+                                          "categoryColumn" "c1"
+                                          "rowColumn" "c2"})]
+        (is (= status 200))
+        (is (= body
+               {:columns [{"title" "B", "type" "text"}
+                          {"title" "a1", "type" "number"}
+                          {"title" "a2", "type" "number"}]
+                :rows [["b1" 2.0 2.0]
+                       ["b2" 2.0 2.0]]}))))
+
+    (testing "Row & Category Column with mean aggregation"
+      (let [{:keys [status body]} (query {"aggregation" "mean"
+                                          "categoryColumn" "c1"
+                                          "rowColumn" "c2"
+                                          "valueColumn" "c3"})]
+        (is (= status 200))
+        (is (= body
+               {:columns [{"title" "B", "type" "text"}
+                          {"title" "a1", "type" "number"}
+                          {"title" "a2", "type" "number"}]
+                :rows [["b1" 10.5 11.0]
+                       ["b2" 9.5 10.5]]}))))
+
+    (testing "Row & Category Column with mean aggregation and filter"
+      (let [{:keys [status body]} (query {"aggregation" "mean"
+                                          "categoryColumn" "c1"
+                                          "rowColumn" "c2"
+                                          "valueColumn" "c3"
+                                          "filters" [{"column" "c3"
+                                                      "value" "11"
+                                                      "operation" "remove"
+                                                      "strategy" "isHigher"}]})]
+        (is (= status 200))
+        (is (= body
+               {:columns [{"title" "B" "type" "text"}
+                          {"title" "a1" "type" "number"}
+                          {"title" "a2" "type" "number"}]
+                :rows [["b1" 10.5 10.0]
+                       ["b2" 9.5 10.5]]}))))))
