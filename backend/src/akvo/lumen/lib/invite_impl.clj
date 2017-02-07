@@ -46,7 +46,8 @@
                                              :expiration_time expiration-time
                                              :author claims}))
           email {:body (email-body request id)
-                 :from "noreply@akvolumen.org"
+                 ;; :from "noreply@akvolumen.org"
+                 :from "devops@akvo.org"
                  :subject "Akvo Lumen invite"
                  :to email-address}]
       (emailer/send-email emailer email))
