@@ -43,6 +43,20 @@ function combineTransformationDescription(transformations, index, columns) {
   return `Combined columns ${firstTitle} and ${secondTitle} into "${newColumnTitle}"`;
 }
 
+function textTransformationDescription(transformations, index, columns) {
+  const transformation = transformations.get(index);
+  const columnName = transformation.getIn(['args', 'columnName']);
+  const title = findTitle(columnName, transformations, index, columns);
+  const opDescription = ({
+    'core/to-lowercase': 'to lower case',
+    'core/to-uppercase': 'to upper case',
+    'core/to-titlecase': 'to title case',
+    'core/trim': 'trimmed whitespace',
+    'core/trim-doublespace': 'removed double spaces',
+  })[transformation.get('op')];
+  return `${title}: ${opDescription}`;
+}
+
 function transformationDescription(transformations, index, columns) {
   const transformation = transformations.get(index);
   const op = transformation.get('op');
@@ -50,15 +64,11 @@ function transformationDescription(transformations, index, columns) {
   const title = transformation.getIn(['changedColumns', columnName, 'before', 'title']);
   switch (op) {
     case 'core/to-lowercase':
-      return `${title} to lowercase`;
     case 'core/to-uppercase':
-      return `${title} to uppercase`;
     case 'core/to-titlecase':
-      return `${title} to titlecase`;
     case 'core/trim':
-      return `${title} trimmed whitespace`;
     case 'core/trim-doublespace':
-      return `${title} trimmed double spaces`;
+      return textTransformationDescription(transformations, index, columns);
     case 'core/change-datatype':
       return `${title} datatype to ${transformation.getIn(['args', 'newType'])}`;
     case 'core/sort-column':
