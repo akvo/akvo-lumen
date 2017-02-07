@@ -1,5 +1,13 @@
 # Release Notes
 
+## 0.5.2 (Unreleased)
+
+Date 2017-02-17
+
+### Bugfixes
+
+* The color key for maps is now always presented in the same order
+
 ## 0.5.1
 
 Date 2017-02-07
