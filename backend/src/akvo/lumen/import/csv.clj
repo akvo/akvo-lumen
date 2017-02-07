@@ -11,8 +11,6 @@
            org.postgresql.PGConnection
            org.postgresql.copy.CopyManager))
 
-
-
 (defn- get-cols
   ([num-cols]
    (get-cols num-cols nil))
@@ -61,7 +59,8 @@
   bytes from the file. It uses ICU's CharsetDetector"
   [path]
   (let [detector (CharsetDetector.)
-        ba (byte-array 4096)]
+        ;; 100kb
+        ba (byte-array 100000)]
     (with-open [is (io/input-stream path)]
       (.read is ba))
     (-> (.setText detector ba)
