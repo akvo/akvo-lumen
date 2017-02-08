@@ -11,6 +11,7 @@ Date 2017-02-08
 ### Bugfixes
 
 * Visualisation filters now work correctly for numeric columns and "exactly matches" filter
+* Fix barchart regression for datasets with missing labels
 
 ## 0.5.2
 
@@ -19,7 +20,6 @@ Date 2017-02-08
 ### Bugfixes
 
 * The color key for maps is now always presented in the same order
-* Fix barchart regression for datasets with missing labels
 
 ## 0.5.1
 
