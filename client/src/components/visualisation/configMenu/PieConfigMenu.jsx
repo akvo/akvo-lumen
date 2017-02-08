@@ -6,7 +6,6 @@ export default function PieConfigMenu(props) {
     visualisation,
     onChangeSpec,
     columnOptions,
-    getColumnMetadata,
   } = props;
   const spec = visualisation.spec;
 
@@ -22,8 +21,6 @@ export default function PieConfigMenu(props) {
         clearable
         onChange={value => onChangeSpec({
           bucketColumn: value,
-          bucketColumnName: getColumnMetadata('title', value, columnOptions),
-          bucketColumnType: getColumnMetadata('type', value, columnOptions),
         })}
       />
       <label
@@ -49,5 +46,4 @@ PieConfigMenu.propTypes = {
   onChangeSpec: PropTypes.func.isRequired,
   columnOptions: PropTypes.array.isRequired,
   aggregationOptions: PropTypes.array.isRequired,
-  getColumnMetadata: PropTypes.func.isRequired,
 };

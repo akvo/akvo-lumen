@@ -4,13 +4,65 @@ import LabelInput from './LabelInput';
 import Subtitle from './Subtitle';
 import SortInput from './SortInput';
 
+const getColumnTitle = (columnName, columnOptions) =>
+  columnOptions.find(obj => obj.value === columnName).title;
+
+const handleChangeSpec = (change, oldSpec, onChangeSpec, columnOptions) => {
+  const axisLabelUpdateTriggers = [
+    'bucketColumn',
+    'subBucketColumn',
+    'truncateSize',
+    'metricAggregation',
+    'metricColumnY',
+    'metricColumnX',
+    'sort',
+  ];
+
+  const shouldUpdateAxisLabels = axisLabelUpdateTriggers.some(trigger =>
+      Object.keys(change).some(key => key.toString() === trigger.toString())
+  );
+
+  if (!shouldUpdateAxisLabels) {
+    onChangeSpec(change);
+  }
+
+  const newSpec = Object.assign({}, oldSpec, change);
+
+  let autoAxisLabelY = getColumnTitle(newSpec.metricColumnY, columnOptions);
+  let autoAxisLabelX = newSpec.bucketColumn ? getColumnTitle(newSpec.bucketColumn, columnOptions) : '';
+
+  if (newSpec.bucketColumn !== null) {
+    autoAxisLabelY += ` - ${newSpec.metricAggregation}`;
+
+    if (newSpec.truncateSize !== null) {
+      let truncateOrderIndicator;
+
+      if (newSpec.sort === 'asc') {
+        truncateOrderIndicator = 'bottom';
+      } else if (newSpec.sort === 'dsc') {
+        truncateOrderIndicator = 'top';
+      } else {
+        truncateOrderIndicator = 'first';
+      }
+
+      autoAxisLabelX += ` - ${truncateOrderIndicator} ${newSpec.truncateSize}`;
+    }
+  }
+
+  const axisLabelX = newSpec.axisLabelXFromUser ? newSpec.axisLabelX : autoAxisLabelX;
+  const axisLabelY = newSpec.axisLabelYFromUser ? newSpec.axisLabelY : autoAxisLabelY;
+
+  const finalSpec = Object.assign({}, newSpec, { axisLabelY, axisLabelX });
+
+  onChangeSpec(finalSpec);
+};
+
 export default function BarConfigMenu(props) {
   const {
     visualisation,
     onChangeSpec,
     columnOptions,
     aggregationOptions,
-    getColumnMetadata,
   } = props;
   const spec = visualisation.spec;
 
@@ -23,11 +75,9 @@ export default function BarConfigMenu(props) {
         choice={spec.metricColumnY !== null ? spec.metricColumnY.toString() : null}
         name="metricColumnYInput"
         options={columnOptions}
-        onChange={value => onChangeSpec({
+        onChange={value => handleChangeSpec({
           metricColumnY: value,
-          metricColumnYName: getColumnMetadata('title', value, columnOptions),
-          metricColumnYType: getColumnMetadata('type', value, columnOptions),
-        })}
+        }, spec, onChangeSpec, columnOptions)}
       />
       <SelectInput
         placeholder={spec.bucketColumn !== null ?
@@ -38,18 +88,18 @@ export default function BarConfigMenu(props) {
         name="yAggregationMenu"
         options={aggregationOptions}
         disabled={spec.bucketColumn === null}
-        onChange={value => onChangeSpec({
+        onChange={value => handleChangeSpec({
           metricAggregation: value,
-        })}
+        }, spec, onChangeSpec, columnOptions)}
       />
       <LabelInput
         value={spec.axisLabelY !== null ? spec.axisLabelY.toString() : null}
         placeholder="Y Axis label"
         name="yLabel"
-        onChange={event => onChangeSpec({
+        onChange={event => handleChangeSpec({
           axisLabelY: event.target.value.toString(),
           axisLabelYFromUser: true,
-        })}
+        }, spec, onChangeSpec, columnOptions)}
       />
       <Subtitle>X-Axis</Subtitle>
       <SelectInput
@@ -60,11 +110,9 @@ export default function BarConfigMenu(props) {
         name="xGroupColumnMenu"
         options={columnOptions}
         clearable
-        onChange={value => onChangeSpec({
+        onChange={value => handleChangeSpec({
           bucketColumn: value,
-          bucketColumnName: getColumnMetadata('title', value, columnOptions),
-          bucketColumnType: getColumnMetadata('type', value, columnOptions),
-        })}
+        }, spec, onChangeSpec, columnOptions)}
       />
       {spec.bucketColumn !== null &&
         <div>
@@ -96,14 +144,14 @@ export default function BarConfigMenu(props) {
                 label: '200',
               },
             ]}
-            onChange={value => onChangeSpec({
+            onChange={value => handleChangeSpec({
               truncateSize: value,
-            })}
+            }, spec, onChangeSpec, columnOptions)}
           />
           <SortInput
             spec={spec}
             columnOptions={columnOptions}
-            onChangeSpec={onChangeSpec}
+            onChangeSpec={value => handleChangeSpec(value, spec, onChangeSpec, columnOptions)}
           />
           <SelectInput
             placeholder="Select a sub-bucket column"
@@ -114,11 +162,9 @@ export default function BarConfigMenu(props) {
             options={columnOptions}
             clearable
             disabled={spec.bucketColumn === null}
-            onChange={value => onChangeSpec({
+            onChange={value => handleChangeSpec({
               subBucketColumn: value,
-              subBucketName: getColumnMetadata('title', value, columnOptions),
-              subBucketColumnType: getColumnMetadata('type', value, columnOptions),
-            })}
+            }, spec, onChangeSpec, columnOptions)}
           />
           <SelectInput
             labelText="Sub-bucket method"
@@ -135,9 +181,9 @@ export default function BarConfigMenu(props) {
                 label: 'Stack bars',
               },
             ]}
-            onChange={value => onChangeSpec({
+            onChange={value => handleChangeSpec({
               subBucketMethod: value,
-            })}
+            }, spec, onChangeSpec, columnOptions)}
           />
         </div>
       }
@@ -145,10 +191,10 @@ export default function BarConfigMenu(props) {
         value={spec.axisLabelX !== null ? spec.axisLabelX.toString() : null}
         placeholder="X Axis label"
         name="xLabel"
-        onChange={event => onChangeSpec({
+        onChange={event => handleChangeSpec({
           axisLabelX: event.target.value.toString(),
           axisLabelXFromUser: true,
-        })}
+        }, spec, onChangeSpec, columnOptions)}
       />
     </div>
   );
@@ -160,5 +206,4 @@ BarConfigMenu.propTypes = {
   onChangeSpec: PropTypes.func.isRequired,
   columnOptions: PropTypes.array.isRequired,
   aggregationOptions: PropTypes.array.isRequired,
-  getColumnMetadata: PropTypes.func.isRequired,
 };
