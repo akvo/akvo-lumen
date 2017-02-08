@@ -1,5 +1,5 @@
 const getLongestLabelLength = (data) => {
-  const labels = data[0].values.map(item => item.bucketValue);
+  const labels = data[0].values.map(item => item.bucketValue).filter(value => value != null);
   let longestLength = 0;
 
   labels.forEach((label) => {
@@ -29,7 +29,9 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
   const dataSource = 'table';
   const fieldX = 'bucketValue';
   const fieldY = 'y';
-  const domainX = data[0].values.map(item => item.bucketValue.toString());
+  const domainX = data[0].values.map(item => (
+    item == null || item.bucketValue == null ? '' : item.bucketValue.toString()
+  ));
 
   if (spec.subBucketColumn !== null && spec.subBucketMethod === 'split') {
     return ({

@@ -4,6 +4,15 @@
 
 Date 2017-02-17
 
+## 0.5.3
+
+Date 2017-02-08
+
+### Bugfixes
+
+* Visualisation filters now work correctly for numeric columns and "exactly matches" filter
+* Fix barchart regression for datasets with missing labels
+
 ## 0.5.2
 
 Date 2017-02-08

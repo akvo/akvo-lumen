@@ -9,8 +9,23 @@ const getFilterArray = (filters, columns) => {
 
   for (let i = 0; i < filters.length; i += 1) {
     const filter = filters[i];
-    const testValue = filter.value;
     const columnIndex = columns.findIndex(col => col.get('columnName') === filter.column);
+    const columnType = columns.getIn([columnIndex, 'type']);
+    let testValue;
+    switch (columnType) {
+      case 'date':
+        testValue = parseInt(filter.value, 10);
+        break;
+      case 'number':
+        testValue = parseFloat(filter.value);
+        break;
+      case 'text':
+        testValue = filter.value;
+        break;
+      default:
+        throw new Error(`Invalid column type: ${columnType}`);
+    }
+
 
     switch (filter.strategy) {
       case 'isHigher':
