@@ -45,10 +45,15 @@ const getDataLayers = (layers, datasets) => {
 
       if (chartData) {
         const chartValues = chartData.values;
-        const pointColorMapping = Object.keys(chartData.metadata.pointColorMapping).map(value => ({
-          value,
-          color: chartData.metadata.pointColorMapping[value],
-        }));
+        const sortFunc = chartData.metadata.pointColorColumnType === 'text' ?
+          (a, b) => a.value > b.value : (a, b) => parseFloat(a.value) - parseFloat(b.value);
+        const pointColorMapping =
+          Object.keys(chartData.metadata.pointColorMapping).map(value => ({
+            value,
+            color: chartData.metadata.pointColorMapping[value],
+          }))
+          .sort(sortFunc);
+
         const bounds = chartData.metadata.bounds;
 
         displayLayers.push(Object.assign({}, layer, {

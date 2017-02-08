@@ -295,6 +295,13 @@ export default class LayerConfigMenu extends Component {
       legend = Object.assign({}, this.props.layer.legend, { title: null });
     }
 
+    let sortFunc;
+
+    if (columnOption != null) {
+      sortFunc = columnOption.type === 'text' ?
+      (a, b) => a.value > b.value : (a, b) => parseFloat(a.value) - parseFloat(b.value);
+    }
+
     this.props.onChangeMapLayer(this.props.layerIndex, {
       legend,
       pointColorColumn: columnName,
@@ -304,6 +311,7 @@ export default class LayerConfigMenu extends Component {
           value,
           color: defaultColors[index] || '#000000',
         }))
+        .sort(sortFunc)
         :
         []
       ,

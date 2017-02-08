@@ -313,6 +313,8 @@ export function getMapData(layer, datasets) {
         [maxLat, maxLong],
       ],
       pointColorMapping: filteredPointColorMapping,
+      pointColorColumnType: pointColorIndex > -1 ?
+        dataset.get('columns').get(pointColorIndex).get('type') : null,
     },
   });
 }
