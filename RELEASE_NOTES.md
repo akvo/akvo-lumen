@@ -11,6 +11,7 @@ Date 2017-02-08
 ### Bugfixes
 
 * The color key for maps is now always presented in the same order
+* Fix barchart regression for datasets with missing labels
 
 ## 0.5.1
 
