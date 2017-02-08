@@ -21,6 +21,7 @@ class Visualisation extends Component {
     this.state = {
       isShareModalVisible: false,
       isUnsavedChanges: false,
+      isSavePending: false,
       visualisation: {
         type: 'visualisation',
         name: 'Untitled visualisation',
@@ -106,6 +107,12 @@ class Visualisation extends Component {
         visualisation: nextProps.library.visualisations[visualisationId],
       });
     }
+
+    if (!this.props.params.visualisationId && nextProps.params.visualisationId) {
+      this.setState({
+        isSavePending: false,
+      });
+    }
   }
 
   onSave() {
@@ -115,8 +122,11 @@ class Visualisation extends Component {
     });
     if (this.state.visualisation.id) {
       dispatch(actions.saveVisualisationChanges(this.state.visualisation));
-    } else {
+    } else if (!this.state.isSavePending) {
+      this.setState({ isSavePending: true });
       dispatch(actions.createVisualisation(this.state.visualisation));
+    } else {
+        // Ignore save request for now
     }
   }
 

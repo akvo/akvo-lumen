@@ -12,6 +12,7 @@ Date 2017-02-08
 
 * Visualisation filters now work correctly for numeric columns and "exactly matches" filter
 * Fix barchart regression for datasets with missing labels
+* Fix bug where several copies of a new visualisation could be saved on first save
 
 ## 0.5.2
 
