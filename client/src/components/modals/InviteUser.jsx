@@ -4,9 +4,11 @@ import Modal from 'react-modal';
 require('../../styles/DashboardModal.scss');
 
 export default function InviteUser(props) {
+  const { invitedUserEmail, isOpen, onChange, onClose, onInviteUser } = props;
+
   return (
     <Modal
-      isOpen={props.isOpen}
+      isOpen={isOpen}
       contentLabel="userInviteModal"
       style={{
         content: {
@@ -28,20 +30,20 @@ export default function InviteUser(props) {
           <h2 className="modalTitle">Invite User</h2>
           <div
             className="close clickable"
-            onClick={props.onClose}
+            onClick={onClose}
           >
           +
           </div>
           <div className="contents">
             <p>Please enter the email address you would like to invite below.</p>
-            <form onSubmit={props.onInviteUser}>
+            <form onSubmit={onInviteUser}>
               <input
-                type="text"
-                placeholder="user@domain.org"
-                value={props.invitedUserEmail}
-                onChange={props.onChange}
+                onChange={onChange}
+                placeholder="e.g. user@domain.org"
+                type="email"
+                value={invitedUserEmail}
               />
-              <input type="submit" value="Send invitation" />
+              <input type="submit" value="Send" />
             </form>
           </div>
         </div>
