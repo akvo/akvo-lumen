@@ -31,6 +31,9 @@ export default class EntityTitleInput extends Component {
                 this.titleInput.style.display = 'initial';
                 this.titleInput.focus();
               }
+              if (this.props.onBeginEditTitle) {
+                this.props.onBeginEditTitle();
+              }
             }}
           >
             <input
@@ -69,4 +72,5 @@ export default class EntityTitleInput extends Component {
 EntityTitleInput.propTypes = {
   title: PropTypes.string.isRequired,
   onChangeTitle: PropTypes.func,
+  onBeginEditTitle: PropTypes.func,
 };

@@ -12,6 +12,8 @@ Date 2017-02-08
 
 * The color key for maps is now always presented in the same order
 
+* Don't show "All changes saved" while user is editing the title of a visualisation, as they are not
+
 ## 0.5.1
 
 Date 2017-02-07
