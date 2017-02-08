@@ -13,6 +13,7 @@ Date 2017-02-08
 * Visualisation filters now work correctly for numeric columns and "exactly matches" filter
 * Fix barchart regression for datasets with missing labels
 * Fix bug where several copies of a new visualisation could be saved on first save
+* Show "Unsaved changes" as soon as the user begins editing the title of a visualisation
 
 ## 0.5.2
 
@@ -21,6 +22,8 @@ Date 2017-02-08
 ### Bugfixes
 
 * The color key for maps is now always presented in the same order
+
+* Don't show "All changes saved" while user is editing the title of a visualisation, as they are not
 
 ## 0.5.1
 
