@@ -24,7 +24,6 @@ const handleToggleValue = (title, column, filters, onChangeSpec) => {
     );
   }
 
-
   onChangeSpec({ filters: newFilters });
 };
 
@@ -34,11 +33,13 @@ export default function UniqueValueMenu(props) {
     return <div className="UniqueValueMenu" />;
   }
 
-  let uniqueValues;
+  const uniqueValues = [];
 
   switch (dimension) {
     case 'category':
-      uniqueValues = tableData.columns.map(entry => entry.title);
+      for (let i = 1; i < tableData.columns.length; i += 1) {
+        uniqueValues.push(tableData.columns[i].title);
+      }
       filters.filter(filter => filter.origin === 'pivot').forEach(filter => uniqueValues.push(filter.value));
       break;
 
