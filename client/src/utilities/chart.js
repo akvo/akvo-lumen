@@ -4,6 +4,8 @@ import getVegaPieSpec from './vega-specs/Pie';
 import getVegaAreaSpec from './vega-specs/Area';
 import getVegaBarSpec from './vega-specs/Bar';
 
+/* Filtering */
+
 const getFilterArray = (filters, columns) => {
   const filterArray = [];
 
@@ -75,6 +77,19 @@ function filterFn(filters, columns) {
   const filterFns = getFilterArray(filters, columns);
   return row => filterFns.every(fn => fn(row));
 }
+
+/* Deal with blank values */
+
+const displayTextForNullValues = 'No data';
+
+export const replaceLabelIfValueEmpty = (label, getCssClassname) => {
+  if (label === null || label === 'null' || label === '') {
+    return getCssClassname ? 'emptyValue' : displayTextForNullValues;
+  }
+  return getCssClassname ? 'dataValue' : label;
+};
+
+/* Get formatted visualisation data */
 
 export function getLineData(visualisation, datasets) {
   const { datasetId, spec } = visualisation;
@@ -185,7 +200,7 @@ export function getPieData(visualisation, datasets) {
   const valueArray = dataset.get('rows')
     .filter(row => rowFilter(row))
     .map(row => ({
-      bucketValue: row.get(bucketIndex),
+      bucketValue: replaceLabelIfValueEmpty(row.get(bucketIndex)),
     }))
     .toArray();
 
@@ -202,6 +217,107 @@ export function getPieData(visualisation, datasets) {
     values: aggregatedValues,
   }];
 }
+
+export function getBarData(visualisation, datasets) {
+  const { datasetId, spec } = visualisation;
+  const dataset = datasets[datasetId];
+  const yIndex = getColumnIndex(dataset, spec.metricColumnY);
+  const yAxisType = yIndex === -1 ? 'number' : dataset.get('columns').get(yIndex).get('type');
+  const xIndex = getColumnIndex(dataset, spec.metricColumnX);
+  const xAxisType = xIndex === -1 ? 'number' : dataset.get('columns').get(xIndex).get('type');
+  const bucketIndex = getColumnIndex(dataset, spec.bucketColumn);
+  const bucketType = bucketIndex === -1 ?
+    'number' : dataset.get('columns').get(bucketIndex).get('type');
+  const subBucketIndex = getColumnIndex(dataset, spec.subBucketColumn);
+  const rowFilter = filterFn(spec.filters, dataset.get('columns'));
+
+  const valueArray = dataset.get('rows')
+    .filter(row => rowFilter(row))
+    .map(row => ({
+      y: row.get(yIndex),
+      bucketValue: replaceLabelIfValueEmpty(row.get(bucketIndex)),
+      subBucketValue: subBucketIndex > -1 ?
+        replaceLabelIfValueEmpty(row.get(subBucketIndex)) : null,
+    }))
+    .toArray();
+
+  /* If a sub-bucket aggregation is defined, include the raw values in the aggregated data,
+  /* as we will need the raw values to calculate the sub-buckets */
+  const ops = subBucketIndex > -1 ? [spec.metricAggregation, 'values'] : [spec.metricAggregation];
+
+  let aggregatedValues = dl.groupby(['bucketValue'])
+    .summarize([{
+      name: 'y',
+      ops,
+      as: ['y'],
+    }])
+    .execute(valueArray);
+
+  if (spec.sort) {
+    aggregatedValues.sort((a, b) => (spec.sort === 'asc' ? a.y - b.y : b.y - a.y));
+  }
+
+  if (spec.truncateSize !== null) {
+    const limit = parseInt(spec.truncateSize, 10);
+
+    aggregatedValues = aggregatedValues.slice(0, limit);
+  }
+
+  let subBuckets;
+
+  if (subBucketIndex > -1) {
+    subBuckets = [];
+
+    aggregatedValues.forEach((bucket) => {
+      const parentMetric = bucket.y;
+      const parentBucketValue = bucket.bucketValue;
+
+      const parentSubBuckets = dl.groupby(['subBucketValue'])
+        .summarize([{
+          name: 'y',
+          ops: [spec.metricAggregation],
+          as: ['y'],
+        }])
+        .execute(bucket.values_y);
+
+      parentSubBuckets.forEach((subBucket) => {
+        const newSubBucket = Object.assign({}, subBucket);
+
+        newSubBucket.parentMetric = parentMetric;
+        newSubBucket.bucketValue = parentBucketValue;
+        subBuckets.push(newSubBucket);
+      });
+    });
+  }
+
+  let maxBucketValue = null;
+
+  if (subBucketIndex > -1 && spec.subBucketMethod === 'stack') {
+    /* Sum the sub-bucket values for each bucket, then find the tallest "stack" in the chart,
+    /* so we can set the chart y-axis to the correct height. */
+    const summedBucketValues = dl.groupby(['bucketValue'])
+          .summarize([{
+            name: 'y',
+            ops: ['sum'],
+            as: ['totalvbucket_value'],
+          }])
+          .execute(subBuckets);
+    maxBucketValue = Math.max(...summedBucketValues.map(item => item.totalvbucket_value));
+  }
+
+  return ([{
+    name: 'table',
+    values: subBucketIndex > -1 ? subBuckets : aggregatedValues,
+    metadata: {
+      yAxisType,
+      xAxisType,
+      bucketType,
+      max: maxBucketValue,
+    },
+  }]);
+}
+
+/* Map helpers */
 
 const defaultColor = '#000';
 
@@ -223,6 +339,24 @@ export function getPointColorValues(dataset, columnName, filters) {
     .toSet()
     .toArray();
 }
+
+export const getPointColorMappingSortFunc = (columnType) => {
+  const sortText = (a, b) => {
+    const va = (a.value == null || a.value === 'null' || a.value === '') ? 'zzzzzzz' : a.value;
+    const vb = (b.value == null || b.value === 'null' || b.value === '') ? 'zzzzzzz' : b.value;
+
+    return va > vb;
+  };
+
+  const sortNonText = (a, b) => {
+    const va = a.value == null ? Infinity : parseFloat(a.value);
+    const vb = b.value == null ? Infinity : parseFloat(b.value);
+
+    return va - vb;
+  };
+
+  return columnType === 'text' ? sortText : sortNonText;
+};
 
 export function getMapData(layer, datasets) {
   const { datasetId } = layer;
@@ -295,104 +429,6 @@ export function getMapData(layer, datasets) {
         dataset.get('columns').get(pointColorIndex).get('type') : null,
     },
   });
-}
-
-export function getBarData(visualisation, datasets) {
-  const { datasetId, spec } = visualisation;
-  const dataset = datasets[datasetId];
-  const yIndex = getColumnIndex(dataset, spec.metricColumnY);
-  const yAxisType = yIndex === -1 ? 'number' : dataset.get('columns').get(yIndex).get('type');
-  const xIndex = getColumnIndex(dataset, spec.metricColumnX);
-  const xAxisType = xIndex === -1 ? 'number' : dataset.get('columns').get(xIndex).get('type');
-  const bucketIndex = getColumnIndex(dataset, spec.bucketColumn);
-  const bucketType = bucketIndex === -1 ?
-    'number' : dataset.get('columns').get(bucketIndex).get('type');
-  const subBucketIndex = getColumnIndex(dataset, spec.subBucketColumn);
-  const rowFilter = filterFn(spec.filters, dataset.get('columns'));
-
-  const valueArray = dataset.get('rows')
-    .filter(row => rowFilter(row))
-    .map(row => ({
-      y: row.get(yIndex),
-      bucketValue: row.get(bucketIndex),
-      subBucketValue: subBucketIndex > -1 ? row.get(subBucketIndex) : null,
-    }))
-    .toArray();
-
-  /* If a sub-bucket aggregation is defined, include the raw values in the aggregated data,
-  /* as we will need the raw values to calculate the sub-buckets */
-  const ops = subBucketIndex > -1 ? [spec.metricAggregation, 'values'] : [spec.metricAggregation];
-
-  let aggregatedValues = dl.groupby(['bucketValue'])
-    .summarize([{
-      name: 'y',
-      ops,
-      as: ['y'],
-    }])
-    .execute(valueArray);
-
-  if (spec.sort) {
-    aggregatedValues.sort((a, b) => (spec.sort === 'asc' ? a.y - b.y : b.y - a.y));
-  }
-
-  if (spec.truncateSize !== null) {
-    const limit = parseInt(spec.truncateSize, 10);
-
-    aggregatedValues = aggregatedValues.slice(0, limit);
-  }
-
-  let subBuckets;
-
-  if (subBucketIndex > -1) {
-    subBuckets = [];
-
-    aggregatedValues.forEach((bucket) => {
-      const parentMetric = bucket.y;
-      const parentBucketValue = bucket.bucketValue;
-
-      const parentSubBuckets = dl.groupby(['subBucketValue'])
-        .summarize([{
-          name: 'y',
-          ops: [spec.metricAggregation],
-          as: ['y'],
-        }])
-        .execute(bucket.values_y);
-
-      parentSubBuckets.forEach((subBucket) => {
-        const newSubBucket = Object.assign({}, subBucket);
-
-        newSubBucket.parentMetric = parentMetric;
-        newSubBucket.bucketValue = parentBucketValue;
-        subBuckets.push(newSubBucket);
-      });
-    });
-  }
-
-  let maxBucketValue = null;
-
-  if (subBucketIndex > -1 && spec.subBucketMethod === 'stack') {
-    /* Sum the sub-bucket values for each bucket, then find the tallest "stack" in the chart,
-    /* so we can set the chart y-axis to the correct height. */
-    const summedBucketValues = dl.groupby(['bucketValue'])
-          .summarize([{
-            name: 'y',
-            ops: ['sum'],
-            as: ['total_bucket_value'],
-          }])
-          .execute(subBuckets);
-    maxBucketValue = Math.max(...summedBucketValues.map(item => item.total_bucket_value));
-  }
-
-  return ([{
-    name: 'table',
-    values: subBucketIndex > -1 ? subBuckets : aggregatedValues,
-    metadata: {
-      yAxisType,
-      xAxisType,
-      bucketType,
-      max: maxBucketValue,
-    },
-  }]);
 }
 
 export function getVegaSpec(visualisation, data, containerHeight, containerWidth) {
