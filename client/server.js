@@ -5,15 +5,8 @@ var WebpackDevServer = require('webpack-dev-server');
 var config = require('./webpack.config');
 
 new WebpackDevServer(webpack(config), {
-  publicPath: config.output.publicPath,
   hot: true,
-  historyApiFallback: {
-    rewrites: [
-      { from: '^/s/.*$', to: '/assets/index-pub.html' },
-      { from: '^.*$', to: '/assets/index.html' }
-    ]
-//    index: '/assets/index.html'
-  },
+  publicPath: config.output.publicPath,
   proxy: {
     '/api/**': {
       target: "http://t1.lumen.localhost:3000",
@@ -27,7 +20,13 @@ new WebpackDevServer(webpack(config), {
       target: "http://t1.lumen.localhost:3000",
       secure: false
     }
-  }
+  },
+  historyApiFallback: {
+    rewrites: [
+      { from: '^/s/.*$', to: '/assets/index-pub.html' },
+      { from: '^.*$', to: '/assets/index.html' }
+    ]
+  },
 }).listen(3030, 'localhost', function (err, result) {
   if (err) {
     console.log(err);
