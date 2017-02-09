@@ -1,7 +1,6 @@
 FROM nginx:1.11
 MAINTAINER Akvo Foundation <devops@akvo.org>
 
-
 RUN apt-get update && \
     apt-get install -y -q --no-install-recommends curl xz-utils && \
     apt-get install -y -q --no-install-recommends libcairo2-dev libjpeg62-turbo-dev libpango1.0-dev libgif-dev build-essential g++ && \
@@ -10,7 +9,6 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-COPY index.html /usr/share/nginx/html
 COPY . /tmp/lumen/
 COPY default.conf /etc/nginx/conf.d/default.conf
 
