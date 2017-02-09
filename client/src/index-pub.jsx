@@ -10,8 +10,6 @@ require('./styles/reset.global.scss');
 require('./styles/style.global.scss');
 
 const rootElement = document.querySelector('#root');
-const pathMatch = window.location.pathname.match(/^\/s\/(.*)/);
-const shareId = pathMatch != null ? pathMatch[1] : null;
 
 function renderSuccessfulShare(data) {
   const datasets = data.datasets;
@@ -41,15 +39,19 @@ function renderSuccessfulShare(data) {
   );
 }
 
-function renderNoSuchShare(e) {
-  debugger;
+function renderNoSuchShare() {
   render(
-    <div>No such share</div>,
+    <div>No such public dashboard or visualisation</div>,
     rootElement
   );
 }
 
-fetch(`/share/${shareId}`)
-  .then(response => response.json())
-  .then(data => renderSuccessfulShare(data))
-  .catch(e => renderNoSuchShare(e));
+const pathMatch = window.location.pathname.match(/^\/s\/(.*)/);
+const shareId = pathMatch != null ? pathMatch[1] : null;
+
+if (shareId != null) {
+  fetch(`/share/${shareId}`)
+    .then(response => response.json())
+    .then(data => renderSuccessfulShare(data))
+    .catch(() => renderNoSuchShare());
+}
