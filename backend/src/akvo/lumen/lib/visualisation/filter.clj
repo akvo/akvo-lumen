@@ -2,6 +2,9 @@
   (:require [clojure.string :as str])
   (:import [java.sql.Timestamp]))
 
+(defn invalid-filter [msg map]
+  (throw (ex-info (format "Invalid filter: %s" msg) map)))
+
 (defmulti filter-sql (fn [filter]
                        (get filter "strategy")))
 
@@ -9,13 +12,13 @@
   (try
     (Double/parseDouble s)
     (catch NumberFormatException e
-      (throw (ex-info "Not a number" {:string s})))))
+      (invalid-filter "Not a number" {:string s}))))
 
 (defn parse-date [s]
   (try
     (java.sql.Timestamp. (Long/parseLong s))
     (catch NumberFormatException e
-      (throw (ex-info "Not a timestamp" {:string s})))))
+      (invalid-filter "Not a timestamp" {:string s}))))
 
 (defn escape-sql-str [s]
   (str/replace s "'" "''"))
@@ -30,7 +33,7 @@
                    column-name
                    op
                    (parse-date value))
-    (throw (ex-info "Invalid type" {:type column-type}))))
+    (invalid-filter "isHigher/isLower not supported on this column type" {:type column-type})))
 
 (defmethod filter-sql "isHigher"
   [{:strs [column operation value]}]
@@ -61,7 +64,7 @@
                      column-name
                      op
                      (escape-sql-str value))
-      (throw (ex-info "Invalid type" {:type column-type})))))
+      (invalid-filter "Type not supported" {:type column-type}))))
 
 (defmethod filter-sql "isEmpty"
   [{:strs [column operation]}]
@@ -77,7 +80,7 @@
                 "NOT NULL")))))
 
 (defmethod filter-sql :default [filter]
-  (throw (ex-info "Invalid filter strategy" {:filter filter})))
+  (invalid-filter "No such filter strategy" {:strategy (get filter "strategy")}))
 
 (defn find-column [columns column-name]
   (first (filter #(= (get % "columnName") column-name) columns)))
@@ -88,48 +91,3 @@
     (let [filters (map #(assoc % "column" (find-column columns (get % "column")))
                        filters)]
       (str/join " AND " (map filter-sql filters)))))
-
-(comment
-  (def columns [{"columnName" "c1"
-                 "type" "text"}
-                {"columnName" "c2"
-                 "type" "number"}
-                {"columnName" "c3"
-                 "type" "date"}])
-
-  (def filters
-    [{"column" "c1"
-      "columnType" "text"
-      "value" nil
-      "operation" "remove"
-      "strategy" "isEmpty"}
-     {"column" "c1"
-      "columnType" "text"
-      "value" "Male"
-      "operation" "keep"
-      "strategy" "is"}
-     {"column" "c2"
-      "columnType" "number"
-      "value" "5"
-      "operation" "remove"
-      "strategy" "is"}
-     {"column" "c2"
-      "columnType" "number"
-      "value" "10"
-      "operation" "remove"
-      "strategy" "isHigher"}
-     {"column" "c2"
-      "columnType" "number"
-      "value" "10"
-      "operation" "keep"
-      "strategy" "isLower"}
-     {"column" "c2"
-      "columnType" "number"
-      "value" "5"
-      "operation" "remove"
-      "strategy" "isLower"}
-     ])
-
-  (sql-str columns filters)
-  (sql-str columns [])
-  )
