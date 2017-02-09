@@ -299,10 +299,10 @@ export function getBarData(visualisation, datasets) {
           .summarize([{
             name: 'y',
             ops: ['sum'],
-            as: ['totalvbucket_value'],
+            as: ['total_bucket_value'],
           }])
           .execute(subBuckets);
-    maxBucketValue = Math.max(...summedBucketValues.map(item => item.totalvbucket_value));
+    maxBucketValue = Math.max(...summedBucketValues.map(item => item.total_bucket_value));
   }
 
   return ([{
