@@ -6,7 +6,8 @@ require('../../../node_modules/leaflet/dist/leaflet.css');
 require('../../styles/MapVisualisation.scss');
 
 const isImage = (value) => {
-  if (typeof value === 'string' && value.match(/\.(jp(e?)g|png|gif)$/) !== null) {
+  // For now, treat every link as an image, until we have something like an "image-url" type
+  if (typeof value === 'string' && value.match(/^https/) !== null) {
     return true;
   }
   return false;
