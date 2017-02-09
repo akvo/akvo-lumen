@@ -1,9 +1,9 @@
 (ns akvo.lumen.lib.public-impl
-  (:require [cheshire.core :as json]
-            [hugsql.core :as hugsql]
+  (:require [akvo.lumen.lib.dashboard :as dashboard]
             [akvo.lumen.lib.dataset :as dataset]
             [akvo.lumen.lib.visualisation :as visualisation]
-            [akvo.lumen.lib.dashboard :as dashboard]
+            [cheshire.core :as json]
+            [hugsql.core :as hugsql]
             [ring.util.response :refer [content-type not-found response]]))
 
 
@@ -59,33 +59,8 @@
      "visualisations" visualisations
      "datasets" datasets}))
 
-
-(defn html-response [data]
-  (str "<!DOCTYPE html>\n"
-       "<html>\n"
-       "  <head>\n"
-       "  <meta charset=\"utf-8\" />\n"
-       "  <meta name=\"robots\" content=\"none\" />\n"
-       "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
-       "  <title>Akvo Lumen</title>\n"
-       "  </head>\n"
-       "<body>\n"
-       "  <div id=\"root\"></div>\n"
-       "  <script>\n"
-       "window.LUMEN_DATA = "
-       (json/encode data)
-       ";"
-       "  </script>\n"
-       "  <script type=\"text/javascript\" src=\"/assets/pub.bundle.js\"></script>"
-       "  <link href=\"https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700\" rel=\"stylesheet\" type=\"text/css\">"
-       "</body>\n</html>"))
-
 (defn share
   [tenant-conn id]
   (if-let [share (get-share tenant-conn id)]
-    (-> (response-data tenant-conn share)
-        (html-response)
-        (response)
-        (content-type "text/html; charset=utf-8"))
-    (-> (not-found (str "No public share with id: " id))
-        (content-type "text/html; charset=utf-8"))))
+    (response (response-data tenant-conn share))
+    (not-found {"shareId" id})))

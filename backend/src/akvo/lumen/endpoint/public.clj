@@ -6,7 +6,7 @@
 
 
 (defn endpoint [{:keys [tenant-manager]}]
-  (context "/s" {:keys [params tenant] :as request}
+  (context "/share" {:keys [params tenant] :as request}
     (let-routes [tenant-conn (connection tenant-manager tenant)]
 
       (GET "/:id" [id]
