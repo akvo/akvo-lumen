@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import SelectMenu from '../../common/SelectMenu';
 import SelectInput from './SelectInput';
-import { getPointColorValues } from '../../../utilities/chart';
+import { getPointColorValues, getPointColorMappingSortFunc } from '../../../utilities/chart';
 import defaultColors from '../../../utilities/defaultColors';
 import ButtonRowInput from './ButtonRowInput';
 import ToggleInput from './ToggleInput';
@@ -260,7 +260,9 @@ export default class LayerConfigMenu extends Component {
               <div className="inputGroup">
                 <label
                   htmlFor="colors"
-                >Colors</label>
+                >
+                  Colors ({columnOptions.find(obj => obj.value === layer.pointColorColumn).title})
+                </label>
                 <ColorLabels
                   id="colors"
                   pointColorMapping={layer.pointColorMapping}
@@ -284,6 +286,7 @@ export default class LayerConfigMenu extends Component {
     const dataset = datasets[this.props.layer.datasetId];
     let values;
     let legend;
+    let sortFunc;
 
     if (columnName != null) {
       values = getPointColorValues(dataset, columnName, this.props.layer.filters);
@@ -295,11 +298,8 @@ export default class LayerConfigMenu extends Component {
       legend = Object.assign({}, this.props.layer.legend, { title: null });
     }
 
-    let sortFunc;
-
     if (columnOption != null) {
-      sortFunc = columnOption.type === 'text' ?
-      (a, b) => a.value > b.value : (a, b) => parseFloat(a.value) - parseFloat(b.value);
+      sortFunc = getPointColorMappingSortFunc(columnOption.type);
     }
 
     this.props.onChangeMapLayer(this.props.layerIndex, {

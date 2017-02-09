@@ -4,6 +4,14 @@
 
 Date 2017-02-17
 
+### New and noteworthy
+
+* Empty data values are now displayed as "No data" in maps, bar, pie and donut charts
+
+### Bugfixes
+
+* Fixed bug where color key for maps would not sort properly when it contained empty values
+
 ## 0.5.3
 
 Date 2017-02-08

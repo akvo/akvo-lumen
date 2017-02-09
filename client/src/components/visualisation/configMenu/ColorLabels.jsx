@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { GithubPicker } from 'react-color';
+import { replaceLabelIfValueEmpty } from '../../../utilities/chart';
 
 require('../../../styles/ColorLabels.scss');
 
@@ -89,7 +90,11 @@ class ColorLabelItem extends Component {
           </div>
         }
         {' '}
-        {value}
+        <span
+          className={`${replaceLabelIfValueEmpty(value, true)}`}
+        >
+          {replaceLabelIfValueEmpty(value)}
+        </span>
       </div>
     );
   }

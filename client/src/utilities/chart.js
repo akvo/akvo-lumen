@@ -4,6 +4,8 @@ import getVegaPieSpec from './vega-specs/Pie';
 import getVegaAreaSpec from './vega-specs/Area';
 import getVegaBarSpec from './vega-specs/Bar';
 
+/* Filtering */
+
 const getFilterArray = (filters, columns) => {
   const filterArray = [];
 
@@ -75,6 +77,19 @@ function filterFn(filters, columns) {
   const filterFns = getFilterArray(filters, columns);
   return row => filterFns.every(fn => fn(row));
 }
+
+/* Deal with blank values */
+
+const displayTextForNullValues = 'No data';
+
+export const replaceLabelIfValueEmpty = (label, getCssClassname) => {
+  if (label === null || label === 'null' || label === '') {
+    return getCssClassname ? 'emptyValue' : displayTextForNullValues;
+  }
+  return getCssClassname ? 'dataValue' : label;
+};
+
+/* Get formatted visualisation data */
 
 export function getLineData(visualisation, datasets) {
   const { datasetId, spec } = visualisation;
@@ -185,7 +200,7 @@ export function getPieData(visualisation, datasets) {
   const valueArray = dataset.get('rows')
     .filter(row => rowFilter(row))
     .map(row => ({
-      bucketValue: row.get(bucketIndex),
+      bucketValue: replaceLabelIfValueEmpty(row.get(bucketIndex)),
     }))
     .toArray();
 
@@ -201,100 +216,6 @@ export function getPieData(visualisation, datasets) {
     name: 'table',
     values: aggregatedValues,
   }];
-}
-
-const defaultColor = '#000';
-
-// Assume all 'equals' for now
-function colorMappingFn(pointColorMapping) {
-  return (value) => {
-    const idx = pointColorMapping.findIndex(mappingEntry => mappingEntry.value === value);
-    return idx < 0 ? defaultColor : pointColorMapping[idx].color;
-  };
-}
-
-// Get the unique point color values out of the dataset
-export function getPointColorValues(dataset, columnName, filters) {
-  const pointColorIndex = getColumnIndex(dataset, columnName);
-  const rowFilter = filterFn(filters, dataset.get('columns'));
-  return dataset.get('rows')
-    .filter(rowFilter)
-    .map(row => row.get(pointColorIndex))
-    .toSet()
-    .toArray();
-}
-
-export function getMapData(layer, datasets) {
-  const { datasetId } = layer;
-  const dataset = datasets[datasetId];
-
-  if (!dataset.get('columns')) {
-    return null;
-  }
-
-  const longitudeIndex = getColumnIndex(dataset, layer.longitude);
-  const latitudeIndex = getColumnIndex(dataset, layer.latitude);
-  const pointColorIndex = getColumnIndex(dataset, layer.pointColorColumn);
-  const colorMapper = colorMappingFn(layer.pointColorMapping);
-  const popupIndexes = layer.popup.map(obj => getColumnIndex(dataset, obj.column));
-  const rowFilter = filterFn(layer.filters, dataset.get('columns'));
-  const filteredPointColorMapping = {};
-
-  let maxLat = -90;
-  let minLat = 90;
-  let maxLong = -180;
-  let minLong = 180;
-
-  const values = dataset.get('rows')
-    .filter(row => rowFilter(row))
-    .map((row) => {
-      const lat = row.get(latitudeIndex);
-      const long = row.get(longitudeIndex);
-
-      if (lat !== null && long !== null) {
-        maxLat = Math.max(lat, maxLat);
-        minLat = Math.min(lat, minLat);
-        maxLong = Math.max(long, maxLong);
-        minLong = Math.min(long, minLong);
-      }
-
-      const pointColorValue = row.get(pointColorIndex);
-      const pointColor = pointColorIndex < 0 ? defaultColor : colorMapper(pointColorValue);
-
-      if (pointColor !== defaultColor) {
-        filteredPointColorMapping[pointColorValue] = pointColor;
-      }
-
-      return ({
-        latitude: lat,
-        longitude: long,
-        pointColor,
-        popup: popupIndexes.map(idx => ({
-          title: dataset.getIn(['columns', idx, 'title']),
-          value: dataset.getIn(['columns', idx, 'type']) === 'date' ?
-            new Date(row.get(idx)).toString()
-            :
-            row.get(idx),
-        })),
-      });
-    })
-    .filter(({ latitude, longitude }) =>
-      latitude != null && longitude != null
-    )
-    .toArray();
-
-  return ({
-    values,
-    metadata: {
-      bounds: [
-        [minLat, minLong],
-        [maxLat, maxLong],
-      ],
-      pointColorMapping: filteredPointColorMapping,
-      pointColorColumnType: pointColorIndex > -1 ?
-        dataset.get('columns').get(pointColorIndex).get('type') : null,
-    },
-  });
 }
 
 export function getBarData(visualisation, datasets) {
@@ -314,8 +235,9 @@ export function getBarData(visualisation, datasets) {
     .filter(row => rowFilter(row))
     .map(row => ({
       y: row.get(yIndex),
-      bucketValue: row.get(bucketIndex),
-      subBucketValue: subBucketIndex > -1 ? row.get(subBucketIndex) : null,
+      bucketValue: replaceLabelIfValueEmpty(row.get(bucketIndex)),
+      subBucketValue: subBucketIndex > -1 ?
+        replaceLabelIfValueEmpty(row.get(subBucketIndex)) : null,
     }))
     .toArray();
 
@@ -393,6 +315,120 @@ export function getBarData(visualisation, datasets) {
       max: maxBucketValue,
     },
   }]);
+}
+
+/* Map helpers */
+
+const defaultColor = '#000';
+
+// Assume all 'equals' for now
+function colorMappingFn(pointColorMapping) {
+  return (value) => {
+    const idx = pointColorMapping.findIndex(mappingEntry => mappingEntry.value === value);
+    return idx < 0 ? defaultColor : pointColorMapping[idx].color;
+  };
+}
+
+// Get the unique point color values out of the dataset
+export function getPointColorValues(dataset, columnName, filters) {
+  const pointColorIndex = getColumnIndex(dataset, columnName);
+  const rowFilter = filterFn(filters, dataset.get('columns'));
+  return dataset.get('rows')
+    .filter(rowFilter)
+    .map(row => row.get(pointColorIndex))
+    .toSet()
+    .toArray();
+}
+
+export const getPointColorMappingSortFunc = (columnType) => {
+  const sortText = (a, b) => {
+    const va = (a.value == null || a.value === 'null' || a.value === '') ? 'zzzzzzz' : a.value;
+    const vb = (b.value == null || b.value === 'null' || b.value === '') ? 'zzzzzzz' : b.value;
+
+    return va > vb;
+  };
+
+  const sortNonText = (a, b) => {
+    const va = a.value == null ? Infinity : parseFloat(a.value);
+    const vb = b.value == null ? Infinity : parseFloat(b.value);
+
+    return va - vb;
+  };
+
+  return columnType === 'text' ? sortText : sortNonText;
+};
+
+export function getMapData(layer, datasets) {
+  const { datasetId } = layer;
+  const dataset = datasets[datasetId];
+
+  if (!dataset.get('columns')) {
+    return null;
+  }
+
+  const longitudeIndex = getColumnIndex(dataset, layer.longitude);
+  const latitudeIndex = getColumnIndex(dataset, layer.latitude);
+  const pointColorIndex = getColumnIndex(dataset, layer.pointColorColumn);
+  const colorMapper = colorMappingFn(layer.pointColorMapping);
+  const popupIndexes = layer.popup.map(obj => getColumnIndex(dataset, obj.column));
+  const rowFilter = filterFn(layer.filters, dataset.get('columns'));
+  const filteredPointColorMapping = {};
+
+  let maxLat = -90;
+  let minLat = 90;
+  let maxLong = -180;
+  let minLong = 180;
+
+  const values = dataset.get('rows')
+    .filter(row => rowFilter(row))
+    .map((row) => {
+      const lat = row.get(latitudeIndex);
+      const long = row.get(longitudeIndex);
+
+      if (lat !== null && long !== null) {
+        maxLat = Math.max(lat, maxLat);
+        minLat = Math.min(lat, minLat);
+        maxLong = Math.max(long, maxLong);
+        minLong = Math.min(long, minLong);
+      }
+
+      const pointColorValue = row.get(pointColorIndex);
+      const pointColor = pointColorIndex < 0 ? defaultColor : colorMapper(pointColorValue);
+
+      if (pointColor !== defaultColor) {
+        filteredPointColorMapping[pointColorValue] = pointColor;
+      }
+
+      return ({
+        latitude: lat,
+        longitude: long,
+        pointColor,
+        popup: popupIndexes.map(idx => ({
+          title: dataset.getIn(['columns', idx, 'title']),
+          value: dataset.getIn(['columns', idx, 'type']) === 'date' ?
+            new Date(row.get(idx)).toString()
+            :
+            row.get(idx),
+        })),
+      });
+    })
+    .filter(({ latitude, longitude }) =>
+      latitude != null && longitude != null
+    )
+    .toArray();
+
+  return ({
+    values,
+    metadata: {
+      bounds: [
+        [minLat, minLong],
+        [maxLat, maxLong],
+      ],
+      pointColorMapping: filteredPointColorMapping,
+      pointColorColumnType: pointColorIndex > -1 ?
+        dataset.get('columns').get(pointColorIndex).get('type') : null,
+    },
+  });
 }
 
 export function getVegaSpec(visualisation, data, containerHeight, containerWidth) {
