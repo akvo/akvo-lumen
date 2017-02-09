@@ -19,4 +19,5 @@ RUN cd /tmp/lumen/ && \
     npm run build && \
     mkdir /usr/share/nginx/html/assets && \
     cp dist/* /usr/share/nginx/html/assets && \
+    rm /usr/share/nginx/html/index.html && \
     cd /tmp && rm -rf lumen
