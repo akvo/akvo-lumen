@@ -51,9 +51,11 @@ export default class Chart extends Component {
       case 'line':
         chartData = chart.getLineData(visualisation, datasets);
         break;
-      case 'bar':
       case 'scatter':
-        chartData = chart.getChartData(visualisation, datasets);
+        chartData = chart.getScatterData(visualisation, datasets);
+        break;
+      case 'bar':
+        chartData = chart.getBarData(visualisation, datasets);
         break;
       default:
         throw new Error(`Unknown visualisation type ${visualisation.visualisationType}`);

@@ -13,12 +13,13 @@ export default class EntityTypeHeader extends Component {
   }
 
   render() {
-    const { title, saveStatus, actionButtons, onChangeTitle } = this.props;
+    const { title, saveStatus, actionButtons, onChangeTitle, onBeginEditTitle } = this.props;
     return (
       <nav className="EntityTypeHeader">
         <div className="entityInfo">
           <EntityTitleInput
             title={title}
+            onBeginEditTitle={onBeginEditTitle}
             onChangeTitle={onChangeTitle}
           />
           {saveStatus &&
@@ -49,5 +50,6 @@ EntityTypeHeader.propTypes = {
   title: PropTypes.string.isRequired,
   saveStatus: PropTypes.string,
   actionButtons: PropTypes.array,
+  onBeginEditTitle: PropTypes.func,
   onChangeTitle: PropTypes.func,
 };

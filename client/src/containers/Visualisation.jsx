@@ -6,43 +6,14 @@ import ShareEntity from '../components/modals/ShareEntity';
 import * as actions from '../actions/visualisation';
 import { fetchDataset } from '../actions/dataset';
 import { fetchLibrary } from '../actions/library';
-import genericSpecTemplate from './Visualisation/genericSpecTemplate';
 import mapSpecTemplate from './Visualisation/mapSpecTemplate';
 import pieSpecTemplate from './Visualisation/pieSpecTemplate';
 import lineSpecTemplate from './Visualisation/lineSpecTemplate';
 import pivotTableSpecTemplate from './Visualisation/pivotTableSpecTemplate';
+import scatterSpecTemplate from './Visualisation/scatterSpecTemplate';
+import barSpecTemplate from './Visualisation/barSpecTemplate';
 
 require('../styles/Visualisation.scss');
-
-const updateAxisLabels = (spec) => {
-  let autoAxisLabelY = spec.metricColumnYName;
-  let autoAxisLabelX = spec.bucketColumn ? spec.bucketColumnName : '';
-
-  if (spec.bucketColumn !== null) {
-    autoAxisLabelY += ` - ${spec.metricAggregation}`;
-
-    if (spec.truncateSize !== null) {
-      let truncateOrderIndicator;
-
-      if (spec.sort === 'asc') {
-        truncateOrderIndicator = 'bottom';
-      } else if (spec.sort === 'dsc') {
-        truncateOrderIndicator = 'top';
-      } else {
-        truncateOrderIndicator = 'first';
-      }
-
-      autoAxisLabelX += ` - ${truncateOrderIndicator} ${spec.truncateSize}`;
-    }
-  }
-
-  const axisLabelX = spec.axisLabelXFromUser ? spec.axisLabelX : autoAxisLabelX;
-  const axisLabelY = spec.axisLabelYFromUser ? spec.axisLabelY : autoAxisLabelY;
-
-  const out = Object.assign({}, spec, { axisLabelY, axisLabelX });
-
-  return out;
-};
 
 class Visualisation extends Component {
 
@@ -51,6 +22,7 @@ class Visualisation extends Component {
     this.state = {
       isShareModalVisible: false,
       isUnsavedChanges: false,
+      isSavePending: false,
       visualisation: {
         type: 'visualisation',
         name: 'Untitled visualisation',
@@ -136,6 +108,12 @@ class Visualisation extends Component {
         visualisation: nextProps.library.visualisations[visualisationId],
       });
     }
+
+    if (!this.props.params.visualisationId && nextProps.params.visualisationId) {
+      this.setState({
+        isSavePending: false,
+      });
+    }
   }
 
   onSave() {
@@ -145,8 +123,11 @@ class Visualisation extends Component {
     });
     if (this.state.visualisation.id) {
       dispatch(actions.saveVisualisationChanges(this.state.visualisation));
-    } else {
+    } else if (!this.state.isSavePending) {
+      this.setState({ isSavePending: true });
       dispatch(actions.createVisualisation(this.state.visualisation));
+    } else {
+        // Ignore save request for now
     }
   }
 
@@ -161,27 +142,7 @@ class Visualisation extends Component {
   }
 
   handleChangeVisualisationSpec(value) {
-    const axisLabelUpdateTriggers = [
-      'bucketColumn',
-      'subBucketColumn',
-      'truncateSize',
-      'metricAggregation',
-      'metricColumnY',
-      'metricColumnX',
-      'sort',
-    ];
-
-    const shouldUpdateAxisLabels = axisLabelUpdateTriggers.some(trigger =>
-        Object.keys(value).some(key => key.toString() === trigger.toString())
-    );
-
-    let spec = update(this.state.visualisation.spec, { $merge: value });
-
-    if (this.state.visualisation.visualisationType === 'bar' && shouldUpdateAxisLabels) {
-      spec = update(spec,
-        { $merge: updateAxisLabels(spec) });
-    }
-
+    const spec = update(this.state.visualisation.spec, { $merge: value });
     const visualisation = Object.assign({}, this.state.visualisation, { spec });
 
     this.handleChangeVisualisation(visualisation);
@@ -213,9 +174,12 @@ class Visualisation extends Component {
         specTemplate = Object.assign({}, lineSpecTemplate);
         break;
 
-      case 'bar':
       case 'scatter':
-        specTemplate = Object.assign({}, genericSpecTemplate);
+        specTemplate = Object.assign({}, scatterSpecTemplate);
+        break;
+
+      case 'bar':
+        specTemplate = Object.assign({}, barSpecTemplate);
         break;
 
       case 'pivot table':
@@ -265,6 +229,7 @@ class Visualisation extends Component {
           visualisation={visualisation}
           onVisualisationAction={this.handleVisualisationAction}
           onChangeTitle={this.handleChangeVisualisationTitle}
+          onBeginEditTitle={() => this.setState({ isUnsavedChanges: true })}
         />
         <VisualisationEditor
           visualisation={visualisation}
