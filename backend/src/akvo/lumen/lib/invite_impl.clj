@@ -31,10 +31,6 @@
              "Thanks"
              "Akvo"]))
 
-(defn active-invites
-  "Returns all active invites"
-  [tenant-conn]
-  (response (select-active-invites tenant-conn)))
 
 (defn do-create-invite
   [tenant-conn emailer keycloak
@@ -51,7 +47,19 @@
                  :subject "Akvo Lumen invite"
                  :to email-address}]
       (emailer/send-email emailer email))
-    (prn (format "Tried to invite non existing user with email (%s)" email))))
+    (do
+      ;; Send email to user without an account
+      (prn (format "Tried to invite non existing user with email (%s)" email)))))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Resource fns
+;;;
+
+(defn active-invites
+  "Returns all active invites"
+  [tenant-conn]
+  (response (select-active-invites tenant-conn)))
 
 (defn create
   "Creates a new invite"
