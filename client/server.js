@@ -8,14 +8,18 @@ new WebpackDevServer(webpack(config), {
   publicPath: config.output.publicPath,
   hot: true,
   historyApiFallback: {
-    index: '/assets/index.html'
+    rewrites: [
+      { from: '^/s/.*$', to: '/assets/index-pub.html' },
+      { from: '^.*$', to: '/assets/index.html' }
+    ]
+//    index: '/assets/index.html'
   },
   proxy: {
     '/api/**': {
       target: "http://t1.lumen.localhost:3000",
       secure: false
     },
-    '/s/**': {
+    '/share/**': {
       target: "http://t1.lumen.localhost:3000",
       secure: false
     },
