@@ -2,7 +2,9 @@
 
 ## 0.6.0 (Unreleased)
 
-Date 2017-02-17
+## 0.5.4
+
+Date 2017-02-09
 
 ### New and noteworthy
 
