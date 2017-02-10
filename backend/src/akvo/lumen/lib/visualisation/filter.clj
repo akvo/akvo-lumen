@@ -52,15 +52,15 @@
   (let [{column-type "type" column-name "columnName"} column
         op (if (= operation "keep") "=" "<>")]
     (condp = column-type
-      "number" (format "%s %s %s"
+      "number" (format "%1$s IS NULL OR %1$s %2$s %3$s"
                        column-name
                        op
                        (parse-number value))
-      "date" (format "%s %s '%s'::timestamptz"
+      "date" (format "%1$s IS NULL OR %1$s %2$s '%3$s'::timestamptz"
                      column-name
                      op
                      (parse-date value))
-      "text" (format "%s %s '%s'"
+      "text" (format "%1$s IS NULL OR %1$s %2$s '%3$s'"
                      column-name
                      op
                      (escape-sql-str value))
