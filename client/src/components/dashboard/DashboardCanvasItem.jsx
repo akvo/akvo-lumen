@@ -19,8 +19,20 @@ const getItemLayout = (props) => {
   return output;
 };
 
-const getIsDatasetLoaded = props => Boolean(props.item.type === 'visualisation' &&
-    props.datasets[props.item.visualisation.datasetId].get('columns'));
+const getIsDatasetLoaded = (props) => {
+  if (props.item.type !== 'visualisation') {
+    return false;
+  }
+
+  switch (props.item.visualisation.visualisationType) {
+
+    case 'pivot table':
+      return true;
+
+    default:
+      return Boolean(props.datasets[props.item.visualisation.datasetId].get('columns'));
+  }
+};
 
 export default class DashboardCanvasItem extends Component {
 
@@ -56,6 +68,12 @@ export default class DashboardCanvasItem extends Component {
     const needDataset = this.props.item.type === 'visualisation';
     const datasetDependencyMet = needDataset ? getIsDatasetLoaded(this.props) : true;
     const styleTransitionFinished = this.state.style.boxShadow === 'none';
+
+    if (this.props.item.type === 'visualisation' &&
+        !this.props.item.visualisation.data
+        && nextProps.item.visualisation.data) {
+      return true;
+    }
 
     const shouldUpdate = Boolean(
         dimensionsChanged ||

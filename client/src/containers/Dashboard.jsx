@@ -4,6 +4,7 @@ import { isEmpty, cloneDeep } from 'lodash';
 import { push } from 'react-router-redux';
 import ShareEntity from '../components/modals/ShareEntity';
 import * as actions from '../actions/dashboard';
+import * as api from '../api';
 import { fetchLibrary } from '../actions/library';
 import { fetchDataset } from '../actions/dataset';
 
@@ -53,6 +54,7 @@ class Dashboard extends Component {
       isShareModalVisible: false,
       requestedDatasetIds: [],
       asyncComponents: null,
+      aggregatedDatasets: {},
     };
     this.loadDashboardIntoState = this.loadDashboardIntoState.bind(this);
     this.onAddVisualisation = this.onAddVisualisation.bind(this);
@@ -62,6 +64,7 @@ class Dashboard extends Component {
     this.onSave = this.onSave.bind(this);
     this.toggleShareDashboard = this.toggleShareDashboard.bind(this);
     this.handleDashboardAction = this.handleDashboardAction.bind(this);
+    this.addDataToVisualisations = this.addDataToVisualisations.bind(this);
   }
 
   componentWillMount() {
@@ -146,18 +149,36 @@ class Dashboard extends Component {
     dispatch(push('/library?filter=dashboards&sort=created'));
   }
 
-  onAddVisualisation(datasetId) {
-    const datasetLoaded = this.props.library.datasets[datasetId].columns;
-    const datasetRequested = this.state.requestedDatasetIds.some(id => id === datasetId);
+  onAddVisualisation(visualisation) {
+    const aggregationOnlyVisualisationTypes = ['pivot table'];
+    const { id, datasetId, spec } = visualisation;
+    const vType = visualisation.visualisationType;
 
-    if (!datasetLoaded && !datasetRequested) {
-      const newRequestedDatasetIds = this.state.requestedDatasetIds.slice(0);
+    if (aggregationOnlyVisualisationTypes.find(item => item === vType)) {
+      /* Only fetch the aggregated data */
 
-      newRequestedDatasetIds.push(datasetId);
-      this.setState({
-        requestedDatasetIds: newRequestedDatasetIds,
+      api.get(`/api/pivot/${datasetId}`, {
+        query: JSON.stringify(spec),
+      }).then((response) => {
+        const change = {};
+        change[id] = response;
+        const aggregatedDatasets = Object.assign({}, this.state.aggregatedDatasets, change);
+        this.setState({ aggregatedDatasets });
       });
-      this.props.dispatch(fetchDataset(datasetId));
+    } else {
+      /* Fetch the whole dataset */
+      const datasetLoaded = this.props.library.datasets[datasetId].columns;
+      const datasetRequested = this.state.requestedDatasetIds.some(dId => dId === datasetId);
+
+      if (!datasetLoaded && !datasetRequested) {
+        const newRequestedDatasetIds = this.state.requestedDatasetIds.slice(0);
+
+        newRequestedDatasetIds.push(datasetId);
+        this.setState({
+          requestedDatasetIds: newRequestedDatasetIds,
+        });
+        this.props.dispatch(fetchDataset(datasetId));
+      }
     }
   }
 
@@ -215,10 +236,27 @@ class Dashboard extends Component {
 
         if (!alreadyProcessed) {
           requestedDatasetIds.push(datasetId);
-          this.onAddVisualisation(datasetId);
+          this.onAddVisualisation(library.visualisations[key]);
         }
       }
     });
+  }
+
+  addDataToVisualisations(visualisations) {
+    const out = {};
+
+    Object.keys(visualisations).forEach((key) => {
+      if (this.state.aggregatedDatasets[key]) {
+        out[key] = Object.assign(
+          {},
+          visualisations[key],
+          { data: this.state.aggregatedDatasets[key] }
+        );
+      } else {
+        out[key] = visualisations[key];
+      }
+    });
+    return out;
   }
 
   render() {
@@ -238,7 +276,7 @@ class Dashboard extends Component {
         <DashboardEditor
           dashboard={dashboard}
           datasets={this.props.library.datasets}
-          visualisations={this.props.library.visualisations}
+          visualisations={this.addDataToVisualisations(this.props.library.visualisations)}
           onAddVisualisation={this.onAddVisualisation}
           onSave={this.onSave}
           onUpdateLayout={this.updateLayout}
