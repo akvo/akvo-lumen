@@ -20,16 +20,23 @@ export default class VisualisationEditor extends Component {
     this.state = {
       visualisation: null,
     };
+    this.handleProps = this.handleProps.bind(this);
     this.fetchAggregatedData = this.fetchAggregatedData.bind(this);
   }
 
   componentWillMount() {
-    this.setState({ visualisation: this.props.visualisation });
+    this.handleProps(this.props);
   }
 
   componentWillReceiveProps(nextProps) {
-    const { visualisation } = nextProps;
+    this.handleProps(nextProps);
+  }
+
+  handleProps(props) {
+    const { visualisation } = props;
     const vType = visualisation.visualisationType;
+
+    this.setState({ visualisation });
 
     switch (vType) {
       case null:
@@ -40,16 +47,12 @@ export default class VisualisationEditor extends Component {
       case 'pie':
       case 'donut':
       case 'scatter':
-        this.setState({ visualisation });
         break;
 
       case 'pivot table':
         if (visualisation.datasetId && specIsValid(visualisation.spec)) {
           this.fetchAggregatedData(visualisation);
-        } else {
-          this.setState({ visualisation });
         }
-
         break;
 
       default: throw new Error(`Unknown visualisation type ${visualisation.visualisationType}`);
