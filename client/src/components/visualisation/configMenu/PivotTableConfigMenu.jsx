@@ -94,6 +94,19 @@ export default class PivotTableConfigMenu extends Component {
           })}
           clearable
         />
+        {spec.rowColumn !== null &&
+          <UniqueValueMenu
+            tableData={visualisation.data}
+            dimension="row"
+            collapsed={this.state.rowValMenuCollapsed}
+            onChangeSpec={this.props.onChangeSpec}
+            column={spec.rowColumn}
+            filters={spec.filters}
+            toggleCollapsed={() =>
+              this.setState({ rowValMenuCollapsed: !this.state.rowValMenuCollapsed })
+            }
+          />
+        }
       </div>
     );
   }
@@ -105,5 +118,4 @@ PivotTableConfigMenu.propTypes = {
   onChangeSpec: PropTypes.func.isRequired,
   columnOptions: PropTypes.array.isRequired,
   aggregationOptions: PropTypes.array.isRequired,
-  getColumnMetadata: PropTypes.func.isRequired,
 };

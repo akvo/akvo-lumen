@@ -1,11 +1,12 @@
 import React, { PropTypes } from 'react';
 import ToggleInput from './ToggleInput';
+import { replaceLabelIfValueEmpty } from '../../../utilities/chart';
 
 require('../../../styles/UniqueValueMenu.scss');
 
 const getValueStatus = (title, filters) => !filters.some(filter => filter.value === title);
 
-const handleToggleValue = (title, column, filters, onChangeSpec) => {
+const handleToggleValue = (title, column, dimension, filters, onChangeSpec) => {
   const newFilters = filters.map(filter => filter);
 
   if (getValueStatus(title, filters)) {
@@ -15,7 +16,7 @@ const handleToggleValue = (title, column, filters, onChangeSpec) => {
       operation: 'remove',
       strategy: 'is',
       caseSensitive: true,
-      origin: 'pivot',
+      origin: `pivot-${dimension}`,
     });
   } else {
     newFilters.splice(
@@ -40,13 +41,18 @@ export default function UniqueValueMenu(props) {
       for (let i = 1; i < tableData.columns.length; i += 1) {
         uniqueValues.push(tableData.columns[i].title);
       }
-      filters.filter(filter => filter.origin === 'pivot').forEach(filter => uniqueValues.push(filter.value));
+      filters.filter(filter => filter.origin === 'pivot-category').forEach(filter => uniqueValues.push(filter.value));
       break;
 
+    case 'row':
+      for (let i = 1; i < tableData.rows.length; i += 1) {
+        uniqueValues.push(tableData.rows[i][0]);
+      }
+      filters.filter(filter => filter.origin === 'pivot-row').forEach(filter => uniqueValues.push(filter.value));
+      break;
     default:
       // Do nothing for now
   }
-
   uniqueValues.sort();
 
   return (
@@ -69,8 +75,8 @@ export default function UniqueValueMenu(props) {
             >
               <ToggleInput
                 checked={getValueStatus(item, filters)}
-                label={item}
-                onChange={() => handleToggleValue(item, column, filters, onChangeSpec)}
+                label={replaceLabelIfValueEmpty(item)}
+                onChange={() => handleToggleValue(item, column, dimension, filters, onChangeSpec)}
               />
             </li>
           )}

@@ -1,4 +1,5 @@
 import React, { PropTypes } from 'react';
+import { replaceLabelIfValueEmpty } from '../../utilities/chart';
 
 require('../../styles/PivotTable.scss');
 
@@ -31,14 +32,14 @@ export default function PivotTable({ width, height, visualisation }) {
         <tbody>
           <tr>
             {data.columns.map((cell, index) =>
-              <th key={index}>{cell.title}</th>
+              <th key={index}>{replaceLabelIfValueEmpty(cell.title)}</th>
             )}
           </tr>
           {data.rows.map((row, rowIndex) =>
             <tr key={rowIndex}>
               {row.map((cell, cellIndex) =>
                 <td key={cellIndex}>
-                  {cell}
+                  {cellIndex === 0 ? replaceLabelIfValueEmpty(cell) : cell}
                 </td>
               )}
             </tr>

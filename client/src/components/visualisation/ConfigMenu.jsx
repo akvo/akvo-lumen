@@ -153,7 +153,6 @@ export default function ConfigMenu(props) {
           datasets={props.datasets}
           columnOptions={columnOptions}
           aggregationOptions={aggregationOptions}
-          getColumnMetadata={getColumnMetadata}
         />);
         break;
 
