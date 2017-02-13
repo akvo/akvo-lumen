@@ -1,6 +1,15 @@
 @import 'modules/colors';
 
 .PivotTable {
+  position: relative;
+
+  table {
+    width: 100%;
+
+    * {
+      word-break: break-all;
+    }
+  }
   td, th {
     border: 0.1rem solid $midGrey;
     padding: 0.25rem;

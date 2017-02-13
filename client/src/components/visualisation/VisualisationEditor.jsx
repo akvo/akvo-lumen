@@ -36,8 +36,6 @@ export default class VisualisationEditor extends Component {
     const { visualisation } = props;
     const vType = visualisation.visualisationType;
 
-    this.setState({ visualisation });
-
     switch (vType) {
       case null:
       case 'map':
@@ -47,9 +45,13 @@ export default class VisualisationEditor extends Component {
       case 'pie':
       case 'donut':
       case 'scatter':
+        this.setState({ visualisation });
         break;
 
       case 'pivot table':
+        if (!this.state.visualisation) {
+          this.setState({ visualisation });
+        }
         if (visualisation.datasetId && specIsValid(visualisation.spec)) {
           this.fetchAggregatedData(visualisation);
         }
