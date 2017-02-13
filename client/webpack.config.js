@@ -2,6 +2,7 @@
 
 var webpack = require('webpack');
 var path = require('path');
+var HtmlWebpackPlugin = require('html-webpack-plugin');
 var SystemBellPlugin = require('system-bell-webpack-plugin');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
 
@@ -25,7 +26,7 @@ module.exports = {
   devtool: 'source-map',
   output: {
     path: path.join(__dirname, 'dist'),
-    filename: "[name].bundle.js",
+    filename: "[name].[hash].bundle.js",
     publicPath: '/assets/'
   },
   resolve: {
@@ -65,6 +66,15 @@ module.exports = {
       'process.env': {
         'NODE_ENV': JSON.stringify(process.env.NODE_ENV)
       }
+    }),
+    new HtmlWebpackPlugin({
+      template: 'index.ejs',
+      chunks: ['app']
+    }),
+    new HtmlWebpackPlugin({
+      template: 'index.ejs',
+      filename: 'index-pub.html',
+      chunks: ['pub']
     })
   ]
 };

@@ -1,6 +1,75 @@
 # Release Notes
 
-## 0.5.0 (unreleased)
+## 0.6.0 (Unreleased)
+
+## 0.5.4
+
+Date 2017-02-09
+
+### New and noteworthy
+
+* Empty data values are now displayed as "No data" in maps, bar, pie and donut charts
+
+### Bugfixes
+
+* Fixed bug where color key for maps would not sort properly when it contained empty values
+
+## 0.5.3
+
+Date 2017-02-08
+
+### Bugfixes
+
+* Visualisation filters now work correctly for numeric columns and "exactly matches" filter
+* Fix barchart regression for datasets with missing labels
+* Fix bug where several copies of a new visualisation could be saved on first save
+* Show "Unsaved changes" as soon as the user begins editing the title of a visualisation
+
+## 0.5.2
+
+Date 2017-02-08
+
+### Bugfixes
+
+* The color key for maps is now always presented in the same order
+
+* Don't show "All changes saved" while user is editing the title of a visualisation, as they are not
+
+## 0.5.1
+
+Date 2017-02-07
+
+### Bugfixes
+
+* Improve character encoding detection for csv uploads
+
+## 0.5.0
+
+Date 2017-01-27
+
+### New and noteworthy
+
+* New maps features
+  * Overhaul of maps UI
+  * Layers for maps (currently limited to single layer)
+  * Points on a map can be colored by a text column
+  * Custom colors for points
+  * Popup text can combine multiple columns, including dates and images
+
+* Visualisation editor simplified for Line and Pie charts
+
+### Bugfixes
+
+* Fixed a bug where the maximum y-axis value was set incorrectly for stacked bar charts when
+  using an aggregation method other than "count"
+
+## 0.4.6
+
+Date 2017-01-25
+
+### Bugfixes
+
+* Fixed regression where sharing and flow import where broken
 
 
 ### New and noteworthy

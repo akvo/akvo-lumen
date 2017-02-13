@@ -9,7 +9,13 @@ export default function SelectMenu(props) {
     <div className={`SelectMenu ${props.disabled ? 'disabled' : 'enabled'}`}>
       <Select
         {...props}
-        onChange={option => props.onChange(option ? option.value : null)}
+        onChange={(option) => {
+          if (option) {
+            props.onChange(props.multi ? option : option.value);
+          } else {
+            props.onChange(null);
+          }
+        }}
         clearable={props.clearable || false}
         searchable={props.searchable || false}
       />
@@ -27,5 +33,6 @@ SelectMenu.propTypes = {
   onChange: PropTypes.func,
   clearable: PropTypes.bool,
   searchable: PropTypes.bool,
+  multi: PropTypes.bool,
   disabled: PropTypes.bool,
 };

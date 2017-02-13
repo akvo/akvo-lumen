@@ -3,13 +3,38 @@ import SelectInput from './SelectInput';
 import LabelInput from './LabelInput';
 import Subtitle from './Subtitle';
 
+const getColumnTitle = (columnName, columnOptions) =>
+  columnOptions.find(obj => obj.value === columnName).title;
+
+const getAxisLabel = (axis, spec, columnOptions) => {
+  if (spec[`axisLabel${axis}FromUser`]) {
+    return spec[`axisLabel${axis}`];
+  }
+
+  let newAxisLabel = '';
+  if (axis === 'x') {
+    if (spec.metricColumnX == null) {
+      newAxisLabel = 'Dataset row number';
+    } else {
+      newAxisLabel = getColumnTitle(spec.metricColumnX, columnOptions);
+    }
+  } else {
+    newAxisLabel = getColumnTitle(spec.metricColumnY, columnOptions);
+
+    if (spec.metricAggregation != null) {
+      newAxisLabel += ` - ${spec.metricAggregation}`;
+    }
+  }
+
+  return newAxisLabel;
+};
+
 export default function LineConfigMenu(props) {
   const {
     visualisation,
     onChangeSpec,
     columnOptions,
     aggregationOptions,
-    getColumnMetadata,
   } = props;
   const spec = visualisation.spec;
 
@@ -24,21 +49,8 @@ export default function LineConfigMenu(props) {
         options={columnOptions}
         onChange={value => onChangeSpec({
           metricColumnY: value,
-          metricColumnYType: getColumnMetadata('type', value, columnOptions),
-          metricColumnYName: getColumnMetadata('title', value, columnOptions),
-        })}
-      />
-      <SelectInput
-        placeholder={spec.bucketColumn !== null ?
-          'Choose aggregation type...' : 'Must choose "Group by" column first'}
-        labelText="Aggregation type"
-        choice={spec.bucketColumn !== null ?
-          spec.metricAggregation.toString() : null}
-        name="yAggregationMenu"
-        options={aggregationOptions}
-        disabled={spec.metricColumnY === null || spec.metricColumnX === null}
-        onChange={value => onChangeSpec({
-          metricAggregation: value,
+          axisLabelY: getAxisLabel('y', Object.assign({}, spec, { metricColumnY: value }), columnOptions),
+          axisLabelX: getAxisLabel('x', Object.assign({}, spec, { metricColumnY: value }), columnOptions),
         })}
       />
       <LabelInput
@@ -59,13 +71,24 @@ export default function LineConfigMenu(props) {
         options={columnOptions}
         onChange={value => onChangeSpec({
           metricColumnX: value,
-          metricColumnXType: getColumnMetadata('type', value, columnOptions),
-          metricColumnXName: getColumnMetadata('title', value, columnOptions),
-          bucketColumn: value,
-          bucketColumnType: getColumnMetadata('type', value, columnOptions),
-          bucketColumnName: getColumnMetadata('title', value, columnOptions),
+          axisLabelX: getAxisLabel('x', Object.assign({}, spec, { metricColumnX: value }), columnOptions),
         })}
         clearable
+      />
+      <SelectInput
+        placeholder={spec.metricColumnX !== null ?
+          'Choose aggregation type...' : 'Must choose X-Axis column first'}
+        labelText="Aggregation type"
+        choice={(spec.metricColumnX !== null && spec.metricAggregation != null) ?
+          spec.metricAggregation.toString() : null}
+        name="metricAggregationInput"
+        options={aggregationOptions}
+        clearable
+        disabled={spec.metricColumnY === null || spec.metricColumnX === null}
+        onChange={value => onChangeSpec({
+          metricAggregation: value,
+          axisLabelY: getAxisLabel('y', Object.assign({}, spec, { metricAggregation: value }), columnOptions),
+        })}
       />
       <LabelInput
         value={spec.axisLabelX !== null ? spec.axisLabelX.toString() : null}
@@ -86,5 +109,4 @@ LineConfigMenu.propTypes = {
   onChangeSpec: PropTypes.func.isRequired,
   columnOptions: PropTypes.array.isRequired,
   aggregationOptions: PropTypes.array.isRequired,
-  getColumnMetadata: PropTypes.func.isRequired,
 };

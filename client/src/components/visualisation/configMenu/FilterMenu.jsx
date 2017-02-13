@@ -61,19 +61,19 @@ const strategies = {
 const getFilterOperationLabel =
   operation => operations.find(item => item.value.toString() === operation.toString()).label;
 
-const getFilterStrategyLabel = (strategy, columnIndex, columnOptions) => {
-  const columnType = columnOptions[columnIndex].type;
+const getFilterStrategyLabel = (strategy, columnName, columnOptions) => {
+  const columnType = columnOptions.find(col => col.value === columnName).type;
   const strat = strategies[columnType].find(item => item.value.toString() === strategy.toString());
 
   return strat.label;
 };
 
-const getFilterDisplayValue = (value, columnIndex, columnOptions) => {
-  const columnType = columnOptions[columnIndex].type;
+const getFilterDisplayValue = (value, columnName, columnOptions) => {
+  const columnType = columnOptions.find(col => col.value === columnName).type;
   let displayValue;
 
   if (columnType === 'date') {
-    displayValue = moment.unix(value).format('YYYY-MM-DD hh:mm');
+    displayValue = moment(value).format('YYYY-MM-DD hh:mm');
   } else {
     displayValue = value;
   }
@@ -116,7 +116,6 @@ export default class FilterMenu extends Component {
     let processedValue;
     if (type === 'date') {
       const inputDate = new Date(value);
-
       processedValue = Math.floor(inputDate.getTime() / 1000);
     } else {
       processedValue = value;
@@ -134,14 +133,16 @@ export default class FilterMenu extends Component {
   }
 
   saveFilter() {
-    const filters = this.props.spec.filters.map(item => item);
+    const { columnOptions } = this.props;
+    const { newFilterColumn, newFilterValue, newFilterOperation, newFilterStrategy } = this.state;
+    const filters = this.props.filters.map(item => item);
 
     filters.push({
-      column: this.state.newFilterColumn,
-      columnType: this.props.columnOptions[this.state.newFilterColumn].type,
-      value: this.state.newFilterValue,
-      operation: this.state.newFilterOperation,
-      strategy: this.state.newFilterStrategy,
+      column: newFilterColumn,
+      columnType: columnOptions.find(col => col.value === newFilterColumn).type,
+      value: newFilterValue,
+      operation: newFilterOperation,
+      strategy: newFilterStrategy,
     });
     this.props.onChangeSpec({
       filters,
@@ -156,7 +157,7 @@ export default class FilterMenu extends Component {
   }
 
   deleteFilter(index) {
-    const filters = this.props.spec.filters.map(item => item);
+    const filters = this.props.filters.map(item => item);
 
     filters.splice(index, 1);
 
@@ -166,10 +167,15 @@ export default class FilterMenu extends Component {
   }
 
   render() {
-    const { hasDataset, spec, columnOptions } = this.props;
-    const { filters } = spec;
-    const activeColumnType = this.state.newFilterColumn ?
-      columnOptions[this.state.newFilterColumn].type : null;
+    const { hasDataset, filters, columnOptions } = this.props;
+    const {
+      newFilterColumn,
+      newFilterStrategy,
+      newFilterOperation,
+      collapsed,
+      inputInProgress } = this.state;
+    const activeColumnType = newFilterColumn ?
+      columnOptions.find(col => col.value === newFilterColumn).type : null;
     return (
       <div
         className={`FilterMenu inputGroup ${hasDataset ? 'enabled' : 'disabled'}`}
@@ -178,12 +184,12 @@ export default class FilterMenu extends Component {
           Dataset Filters
           <button
             className="collapseToggle clickable"
-            onClick={() => { this.setState({ collapsed: !this.state.collapsed }); }}
+            onClick={() => { this.setState({ collapsed: !collapsed }); }}
           >
-            {this.state.collapsed ? '+' : '-'}
+            {collapsed ? '+' : '-'}
           </button>
         </h4>
-        { this.state.collapsed ?
+        { collapsed ?
           <div />
           :
           <div>
@@ -205,7 +211,7 @@ export default class FilterMenu extends Component {
                         </span>
                         {' '}
                         <span className="filterIndicator">
-                          {columnOptions[filter.column].title}
+                          {columnOptions.find(col => col.value === filter.column).title}
                         </span>
                         {' '}
                         <span>
@@ -226,7 +232,7 @@ export default class FilterMenu extends Component {
                   </ol>
                 </div>
               }
-              {this.state.inputInProgress ?
+              {inputInProgress ?
                 <div className="newFilterContainer">
                   <h4>New Filter</h4>
                   <div className="inputGroup">
@@ -238,7 +244,7 @@ export default class FilterMenu extends Component {
                         className="filterOperationInput"
                         name="filterOperationInput"
                         placeholder="Choose a filter operation..."
-                        value={this.state.newFilterOperation || null}
+                        value={newFilterOperation || null}
                         options={operations}
                         onChange={choice => this.updateNewFilter('newFilterOperation', choice)}
                       />
@@ -249,7 +255,7 @@ export default class FilterMenu extends Component {
                         className="filterColumnInput"
                         name="filterColumnInput"
                         placeholder="Choose a column to filter by..."
-                        value={this.state.newFilterColumn || null}
+                        value={newFilterColumn || null}
                         options={columnOptions}
                         onChange={choice => this.updateNewFilter('newFilterColumn', choice)}
                       />
@@ -258,12 +264,12 @@ export default class FilterMenu extends Component {
                       </label>
                       <SelectMenu
                         className={`filterStrategyInput
-                          ${this.state.newFilterColumn ? 'enabled' : 'disabled'}`}
-                        disabled={this.state.newFilterColumn === null}
+                          ${newFilterColumn ? 'enabled' : 'disabled'}`}
+                        disabled={newFilterColumn === null}
                         name="filterStrategyInput"
                         placeholder="Choose a match method..."
-                        value={this.state.newFilterStrategy || null}
-                        options={this.state.newFilterColumn ? strategies[activeColumnType] : []}
+                        value={newFilterStrategy || null}
+                        options={newFilterColumn ? strategies[activeColumnType] : []}
                         onChange={choice => this.updateNewFilter('newFilterStrategy', choice)}
                       />
                       <label htmlFor="filterMatchValueInput">
@@ -271,12 +277,9 @@ export default class FilterMenu extends Component {
                       </label>
                       <input
                         className={`filterMatchValueInput textInput
-                          ${this.state.newFilterColumn ? 'enabled' : 'disabled'}`}
-                        disabled={
-                          this.state.newFilterColumn === null
-                          || this.state.newFilterStrategy === 'isEmpty'
-                        }
-                        type={this.state.newFilterColumn ? activeColumnType : 'text'}
+                          ${newFilterColumn ? 'enabled' : 'disabled'}`}
+                        disabled={newFilterColumn === null || newFilterStrategy === 'isEmpty'}
+                        type={newFilterColumn ? activeColumnType : 'text'}
                         onChange={evt =>
                           this.updateNewFilter('newFilterValue', evt.target.value, activeColumnType)}
                       />
@@ -316,7 +319,7 @@ export default class FilterMenu extends Component {
 }
 
 FilterMenu.propTypes = {
-  spec: PropTypes.object.isRequired,
+  filters: PropTypes.array.isRequired,
   hasDataset: PropTypes.bool.isRequired,
   columnOptions: PropTypes.array.isRequired,
   onChangeSpec: PropTypes.func.isRequired,

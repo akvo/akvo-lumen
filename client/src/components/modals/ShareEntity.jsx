@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import Modal from 'react-modal';
 import CopyToClipboard from 'react-copy-to-clipboard';
-import { post } from '../../auth';
+import { post } from '../../api';
 
 require('../../styles/DashboardModal.scss');
 require('../../styles/ShareEntity.scss');

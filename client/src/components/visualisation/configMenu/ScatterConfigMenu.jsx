@@ -3,13 +3,48 @@ import SelectInput from './SelectInput';
 import LabelInput from './LabelInput';
 import Subtitle from './Subtitle';
 
+const getColumnTitle = (columnName, columnOptions) =>
+  columnOptions.find(obj => obj.value === columnName).title;
+
+const getAxisLabel = (axis, spec, columnOptions) => {
+  if (spec[`axisLabel${axis}FromUser`]) {
+    return spec[`axisLabel${axis}`];
+  }
+
+  let newAxisLabel = '';
+  if (axis === 'x') {
+    newAxisLabel = getColumnTitle(spec.metricColumnX, columnOptions);
+
+    if (spec.bucketColumn != null) {
+      newAxisLabel += ` - ${spec.metricAggregation}`;
+    }
+  } else {
+    newAxisLabel = getColumnTitle(spec.metricColumnY, columnOptions);
+
+    if (spec.bucketColumn != null) {
+      newAxisLabel += ` - ${spec.metricAggregation}`;
+    }
+  }
+
+  return newAxisLabel;
+};
+
+const getPopupLabelChoice = (spec) => {
+  if (spec.bucketColumn !== null) {
+    return spec.bucketColumn;
+  }
+  if (spec.datapointLabelColumn !== null) {
+    return spec.datapointLabelColumn.toString();
+  }
+  return null;
+};
+
 export default function ScatterConfigMenu(props) {
   const {
     visualisation,
     onChangeSpec,
     columnOptions,
     aggregationOptions,
-    getColumnMetadata,
   } = props;
   const spec = visualisation.spec;
 
@@ -21,25 +56,16 @@ export default function ScatterConfigMenu(props) {
         labelText="Metric column"
         choice={spec.metricColumnY !== null ? spec.metricColumnY.toString() : null}
         name="yColumnInput"
-        options={columnOptions}
-        onChange={value => onChangeSpec({
-          metricColumnY: value,
-          metricColumnYType: getColumnMetadata('type', value, columnOptions),
-          metricColumnYName: getColumnMetadata('title', value, columnOptions),
-        })}
-      />
-      <SelectInput
-        placeholder={spec.bucketColumn !== null ?
-          'Choose aggregation type...' : 'Must choose bucket column first'}
-        labelText="Aggregation type"
-        choice={spec.bucketColumn !== null ?
-          spec.metricAggregation.toString() : null}
-        name="yAggregationMenu"
-        options={aggregationOptions}
-        disabled={spec.bucketColumn === null}
-        onChange={value => onChangeSpec({
-          metricAggregation: value,
-        })}
+        options={columnOptions.filter(column => column.type === 'number' || column.type === 'date')}
+        onChange={(value) => {
+          const change = { metricColumnY: value };
+
+          if (spec.metricColumnX !== null) {
+            change.axisLabelX = getAxisLabel('x', Object.assign({}, spec, change), columnOptions);
+            change.axisLabelY = getAxisLabel('y', Object.assign({}, spec, change), columnOptions);
+          }
+          onChangeSpec(change);
+        }}
       />
       <LabelInput
         value={spec.axisLabelY !== null ? spec.axisLabelY.toString() : null}
@@ -56,26 +82,16 @@ export default function ScatterConfigMenu(props) {
         labelText="Metric column"
         choice={spec.metricColumnX !== null ? spec.metricColumnX.toString() : null}
         name="xColumnInput"
-        options={columnOptions}
-        onChange={value => onChangeSpec({
-          metricColumnX: value,
-          metricColumnXType: getColumnMetadata('type', value, columnOptions),
-          metricColumnXName: getColumnMetadata('title', value, columnOptions),
-        })}
-      />
-      <SelectInput
-        placeholder="Select a data column to group by"
-        labelText="Bucket column"
-        choice={spec.bucketColumn !== null ?
-          spec.bucketColumn.toString() : null}
-        name="xGroupColumnMenu"
-        options={columnOptions}
-        clearable
-        onChange={value => onChangeSpec({
-          bucketColumn: value,
-          bucketColumnName: getColumnMetadata('title', value, columnOptions),
-          bucketColumnType: getColumnMetadata('type', value, columnOptions),
-        })}
+        options={columnOptions.filter(column => column.type === 'number' || column.type === 'date')}
+        onChange={(value) => {
+          const change = { metricColumnX: value };
+
+          if (spec.metricColumnY !== null) {
+            change.axisLabelX = getAxisLabel('x', Object.assign({}, spec, change), columnOptions);
+            change.axisLabelY = getAxisLabel('y', Object.assign({}, spec, change), columnOptions);
+          }
+          onChangeSpec(change);
+        }}
       />
       <LabelInput
         value={spec.axisLabelX !== null ? spec.axisLabelX.toString() : null}
@@ -85,6 +101,55 @@ export default function ScatterConfigMenu(props) {
           axisLabelX: event.target.value.toString(),
           axisLabelXFromUser: true,
         })}
+      />
+      <Subtitle>Aggregation</Subtitle>
+      <SelectInput
+        placeholder="Select a data column to group by"
+        labelText="Bucket column"
+        choice={spec.bucketColumn !== null ?
+          spec.bucketColumn.toString() : null}
+        name="xGroupColumnMenu"
+        options={columnOptions}
+        clearable
+        onChange={(value) => {
+          const change = { bucketColumn: value };
+
+          if (spec.metricColumnY !== null) {
+            change.axisLabelX = getAxisLabel('x', Object.assign({}, spec, change), columnOptions);
+            change.axisLabelY = getAxisLabel('y', Object.assign({}, spec, change), columnOptions);
+          }
+          onChangeSpec(change);
+        }}
+      />
+      <SelectInput
+        placeholder={spec.bucketColumn !== null ?
+          'Choose aggregation type...' : 'Must choose bucket column first'}
+        labelText="Aggregation type"
+        choice={spec.bucketColumn !== null ?
+          spec.metricAggregation.toString() : null}
+        name="yAggregationMenu"
+        options={aggregationOptions}
+        disabled={spec.bucketColumn === null}
+        onChange={(value) => {
+          const change = { metricAggregation: value };
+
+          if (spec.metricColumnY !== null) {
+            change.axisLabelX = getAxisLabel('x', Object.assign({}, spec, change), columnOptions);
+            change.axisLabelY = getAxisLabel('y', Object.assign({}, spec, change), columnOptions);
+          }
+          onChangeSpec(change);
+        }}
+      />
+      <Subtitle>Popup Label</Subtitle>
+      <SelectInput
+        placeholder="Select a popup label column"
+        labelText="Popup label column"
+        choice={getPopupLabelChoice(spec)}
+        name="datapointLabelColumnMenu"
+        options={columnOptions}
+        clearable
+        onChange={value => onChangeSpec({ datapointLabelColumn: value })}
+        disabled={spec.bucketColumn !== null}
       />
     </div>
   );
@@ -96,5 +161,4 @@ ScatterConfigMenu.propTypes = {
   onChangeSpec: PropTypes.func.isRequired,
   columnOptions: PropTypes.array.isRequired,
   aggregationOptions: PropTypes.array.isRequired,
-  getColumnMetadata: PropTypes.func.isRequired,
 };

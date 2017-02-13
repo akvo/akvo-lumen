@@ -29,13 +29,12 @@ const sortListGroupEntities = (entities, sortOrder, isReverseSort) => {
   } else if (sortOrder === 'created' || sortOrder === 'last_modified') {
     const getTs = sortOrder === 'created' ? getCreatedTimestamp : getModifiedTimestamp;
     sortFunction = (a, b) => {
-      const n = getTs(a) - getTs(b);
+      const n = getTs(b) - getTs(a);
       return isReverseSort ? n * -1 : n;
     };
   }
 
   sortedEntities.sort(sortFunction);
-
   return sortedEntities;
 };
 

@@ -1,11 +1,9 @@
 export default function getVegaScatterSpec(visualisation, data, containerHeight, containerWidth) {
-  const hasAggregation = Boolean(visualisation.spec.bucketColumn &&
-    visualisation.spec.metricAggregation);
-  const dataArray = data.map(item => item);
-  const transformType = hasAggregation ? visualisation.spec.metricAggregation : null;
+  const hasAggregation = visualisation.spec.bucketColumn !== null;
   const dataSource = 'table';
-  const fieldX = hasAggregation ? `${transformType}_x` : 'x';
-  const fieldY = hasAggregation ? `${transformType}_y` : 'y';
+  const { metadata } = data[0];
+  const fieldX = 'x';
+  const fieldY = 'y';
 
   const scales = [
     {
@@ -31,20 +29,6 @@ export default function getVegaScatterSpec(visualisation, data, containerHeight,
     },
   ];
 
-  if (visualisation.spec.metricColumnXType === 'date') {
-    scales.push({
-      name: 'dateScale',
-      type: 'linear',
-      domain: {
-        data: dataSource,
-        field: 'dateLabelX',
-      },
-      range: 'width',
-      zero: false,
-      nice: false,
-    });
-  }
-
   const xAxis = {
     type: 'x',
     scale: 'xscale',
@@ -52,7 +36,7 @@ export default function getVegaScatterSpec(visualisation, data, containerHeight,
     title: visualisation.spec.axisLabelX,
   };
 
-  if (visualisation.spec.metricColumnXType === 'date') {
+  if (metadata.xAxisType === 'date') {
     xAxis.properties = {
       labels: {
         text: {
@@ -68,8 +52,28 @@ export default function getVegaScatterSpec(visualisation, data, containerHeight,
     };
   }
 
+  const yAxis = {
+    type: 'y',
+    scale: 'yscale',
+    orient: 'left',
+    title: visualisation.spec.axisLabelY,
+  };
+
+  if (metadata.yAxisType === 'date') {
+    yAxis.properties = {
+      labels: {
+        text: {
+          template: '{{ datum.data | time:"%Y-%b-%d %H-%M"}}',
+        },
+        align: {
+          value: 'right',
+        },
+      },
+    };
+  }
+
   return ({
-    data: dataArray,
+    data,
     width: containerWidth - 90,
     height: containerHeight - 100,
     padding: {
@@ -81,12 +85,7 @@ export default function getVegaScatterSpec(visualisation, data, containerHeight,
     scales,
     axes: [
       xAxis,
-      {
-        type: 'y',
-        scale: 'yscale',
-        orient: 'left',
-        title: visualisation.spec.axisLabelY,
-      },
+      yAxis,
     ],
     marks: [
       {
@@ -151,7 +150,7 @@ export default function getVegaScatterSpec(visualisation, data, containerHeight,
             },
             text: hasAggregation ?
               {
-                template: visualisation.spec.bucketColumnType === 'date' ?
+                template: metadata.bucketType === 'date' ?
                   '{{datum.bucketValue | time:"%Y-%b-%d %H-%M"}}'
                   :
                   '{{datum.bucketValue}}'
@@ -159,10 +158,10 @@ export default function getVegaScatterSpec(visualisation, data, containerHeight,
               }
               :
               {
-                template: visualisation.spec.datapointLabelType === 'date' ?
-                  '{{datum.label | time:"%Y-%b-%d %H-%M"}}'
+                template: metadata.datapointLabelType === 'date' ?
+                  '{{datum.datapointLabel | time:"%Y-%b-%d %H-%M"}}'
                   :
-                  '{{datum.label}}'
+                  '{{datum.datapointLabel}}'
                 ,
               },
             align: {

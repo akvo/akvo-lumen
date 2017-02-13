@@ -8,6 +8,7 @@
             [akvo.lumen.import :as imp]
             [akvo.lumen.import.csv-test :refer [import-file]]
             [akvo.lumen.transformation :as tf]
+            [akvo.lumen.transformation.engine :as engine]
             [akvo.lumen.util :refer (squuid)]
             [cheshire.core :as json]
             [clojure.java.io :as io]
@@ -17,10 +18,10 @@
             [hugsql.core :as hugsql]))
 
 (def ops (vec (json/parse-string (slurp (io/resource "ops.json")))))
+
 (def invalid-op (-> (take 3 ops)
                     vec
                     (update-in [1 "args"] dissoc "parseFormat")))
-
 
 (hugsql/def-db-fns "akvo/lumen/job-execution.sql")
 (hugsql/def-db-fns "akvo/lumen/transformation_test.sql")
@@ -58,7 +59,7 @@
 
 (deftest op-validation
   (testing "op validation"
-    (is (= true (every? true? (map tf/validate-op ops))))
+    (is (= true (every? true? (map engine/valid? ops))))
     (let [result (tf/validate {:type :transformation :transformation (second invalid-op)})]
       (is (= false (:valid? result)))
       (is (= (format "Invalid transformation %s" (second invalid-op)) (:message result))))))
@@ -250,9 +251,9 @@
 
     (testing "Import and initial transforms"
       (is (= (latest-data dataset-id)
-             [{:rnum 1 :c1 "a" :c2 1 :c3 2}
-              {:rnum 2 :c1 "b" :c2 3 :c3 nil}
-              {:rnum 3 :c1 nil :c2 4 :c3 5}])))
+             [{:rnum 1 :c1 "a" :c2 1.0 :c3 2.0}
+              {:rnum 2 :c1 "b" :c2 3.0 :c3 nil}
+              {:rnum 3 :c1 nil :c2 4.0 :c3 5.0}])))
 
     (testing "Basic text transform"
       (schedule (derive-column-transform {"args" {"code" "row['foo'].toUpperCase()"

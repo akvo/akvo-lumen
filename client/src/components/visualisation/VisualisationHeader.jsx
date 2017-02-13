@@ -50,6 +50,8 @@ export default class VisualisationHeader extends Component {
     return (
       <EntityTypeHeader
         title={this.props.visualisation.name || 'Untitled visualisation'}
+        onChangeTitle={this.props.onChangeTitle}
+        onBeginEditTitle={this.props.onBeginEditTitle}
         saveStatus={saveStatus}
         actionButtons={actionButtons}
       />
@@ -63,4 +65,6 @@ VisualisationHeader.propTypes = {
     name: PropTypes.string.isRequired,
   }).isRequired,
   onVisualisationAction: PropTypes.func.isRequired,
+  onChangeTitle: PropTypes.func,
+  onBeginEditTitle: PropTypes.func,
 };

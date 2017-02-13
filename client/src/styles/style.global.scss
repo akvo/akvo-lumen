@@ -74,3 +74,8 @@ p, h1, h2, h3, h4, h5, button, input {
 .Dashboard {
   width: 100%;
 }
+
+/* Style the "empty value" label for visualisations as italic text */
+.emptyValue {
+  font-style: italic;
+}

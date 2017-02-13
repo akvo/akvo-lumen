@@ -6,7 +6,6 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
   const hasAggregation = Boolean(visualisation.spec.bucketColumn &&
     visualisation.spec.metricAggregation);
   const dataArray = data.map(item => item);
-  const transformType = hasAggregation ? visualisation.spec.metricAggregation : null;
 
   const layoutTransform = {
     name: 'pie',
@@ -14,12 +13,12 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
     transform: [
       {
         type: 'pie',
-        field: `${transformType}_y`,
+        field: 'bucketCount',
       },
       {
         type: 'formula',
         field: 'rounded_value',
-        expr: `floor(datum.${transformType}_y * 1000) / 1000`, // round label to 3 decimal places
+        expr: 'floor(datum.bucketCount * 1000) / 1000', // round label to 3 decimal places
       },
       {
         type: 'formula',
@@ -39,8 +38,8 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
   dataArray.push(layoutTransform);
 
   const dataSource = 'pie';
-  const segmentLabelField = hasAggregation ? 'bucketValue' : 'label';
-  const fieldY = hasAggregation ? `${transformType}_y` : 'y';
+  const segmentLabelField = 'bucketValue';
+  const fieldY = 'bucketCount';
   const showLegend = visualisation.spec.showLegend;
 
   return ({
