@@ -27,7 +27,4 @@
   (context "/verify" {:keys [tenant] :as request}
     (let-routes [tenant-conn (connection tenant-manager tenant)]
       (GET "/:id" [id]
-        (println "@verify-endpoint")
-        (clojure.pprint/pprint request)
-        (invite/accept-invite tenant-conn tenant emailer keycloak id
-                              (select-keys request [:server-name]))))))
+        (invite/accept-invite tenant-conn tenant emailer keycloak id request)))))

@@ -31,7 +31,6 @@
              "Thanks"
              "Akvo"]))
 
-
 (defn do-create-invite
   [tenant-conn emailer keycloak
    {{:strs [email]} :body claims :jwt-claims :as request}]
@@ -47,9 +46,7 @@
                  :subject "Akvo Lumen invite"
                  :to email-address}]
       (emailer/send-email emailer email))
-    (do
-      ;; Send email to user without an account
-      (prn (format "Tried to invite non existing user with email (%s)" email)))))
+    (prn (format "Tried to invite non existing user with email (%s)" email))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -68,9 +65,10 @@
   (do-create-invite tenant-conn emailer keycloak request)
   (response {:invite "created"}))
 
+
 (defn accept-invite
   ""
-  [tenant-conn tenant emailer keycloak id {server-name :server-name}]
+  [tenant-conn tenant emailer keycloak id {:keys [server-name] :as request}]
   (if-let [{email :email} (first (consume-invite tenant-conn {:id id}))]
     (if-let [accept-status (keycloak/add-user-with-email keycloak tenant email)]
       (if (dev-env? server-name)
