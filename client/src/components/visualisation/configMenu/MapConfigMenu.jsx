@@ -126,7 +126,6 @@ MapConfigMenu.propTypes = {
   datasets: PropTypes.object.isRequired,
   onChangeSpec: PropTypes.func.isRequired,
   aggregationOptions: PropTypes.array.isRequired,
-  getColumnMetadata: PropTypes.func.isRequired,
   onChangeSourceDataset: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
   onChangeVisualisationType: PropTypes.func.isRequired,

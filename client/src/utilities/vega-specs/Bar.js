@@ -1,5 +1,5 @@
 const getLongestLabelLength = (data) => {
-  const labels = data[0].values.map(item => item.bucketValue);
+  const labels = data[0].values.map(item => item.bucketValue).filter(value => value != null);
   let longestLength = 0;
 
   labels.forEach((label) => {
@@ -18,9 +18,7 @@ const getPaddingX = (data, maxLabelLengthX, meanPixelsPerChar, defaultPadding) =
 };
 
 export default function getVegaBarSpec(visualisation, data, containerHeight, containerWidth) {
-  const dataArray = data.map(item => item);
   const { spec } = visualisation;
-  const transformType = spec.metricAggregation;
 
   /* Padding calculation constants */
   const maxLabelLengthX = 32; // In chars. Labels longer than this are truncated (...)
@@ -30,12 +28,14 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
 
   const dataSource = 'table';
   const fieldX = 'bucketValue';
-  const fieldY = `${transformType}_y`;
-  const domainX = dataArray[0].values.map(item => item.bucketValue.toString());
+  const fieldY = 'y';
+  const domainX = data[0].values.map(item => (
+    item == null || item.bucketValue == null ? '' : item.bucketValue.toString()
+  ));
 
   if (spec.subBucketColumn !== null && spec.subBucketMethod === 'split') {
     return ({
-      data: dataArray,
+      data,
       width: containerWidth - 170,
       height: containerHeight - (26 + paddingX),
       padding: {
@@ -257,7 +257,7 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
           streams: [
             {
               type: 'rect:mouseover',
-              expr: `floor(parent.${transformType}_y * 1000) / 1000`
+              expr: 'floor(parent.y * 1000) / 1000'
               ,
             },
             {
@@ -272,7 +272,7 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
 
   if (spec.subBucketColumn !== null && spec.subBucketMethod === 'stack') {
     return ({
-      data: dataArray,
+      data,
       width: containerWidth - 170,
       height: containerHeight - (26 + paddingX),
       padding: {
@@ -461,7 +461,7 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
           streams: [
             {
               type: 'rect:mouseover',
-              expr: `floor(datum.${transformType}_y * 1000) / 1000`,
+              expr: 'floor(datum.y * 1000) / 1000',
             },
             {
               type: 'rect:mouseout',
@@ -474,7 +474,7 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
   }
 
   return ({
-    data: dataArray,
+    data,
     width: containerWidth - 70,
     height: containerHeight - (26 + paddingX),
     padding: {
@@ -633,7 +633,7 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
         streams: [
           {
             type: 'rect:mouseover',
-            expr: `floor(datum.${transformType}_y * 1000) / 1000`,
+            expr: 'floor(datum.y * 1000) / 1000',
           },
           {
             type: 'rect:mouseout',

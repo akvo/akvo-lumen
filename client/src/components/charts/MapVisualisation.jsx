@@ -6,7 +6,8 @@ require('../../../node_modules/leaflet/dist/leaflet.css');
 require('../../styles/MapVisualisation.scss');
 
 const isImage = (value) => {
-  if (typeof value === 'string' && value.match(/\.(jp(e?)g|png|gif)$/) !== null) {
+  // For now, treat every link as an image, until we have something like an "image-url" type
+  if (typeof value === 'string' && value.match(/^https/) !== null) {
     return true;
   }
   return false;
@@ -45,10 +46,15 @@ const getDataLayers = (layers, datasets) => {
 
       if (chartData) {
         const chartValues = chartData.values;
-        const pointColorMapping = Object.keys(chartData.metadata.pointColorMapping).map(value => ({
-          value,
-          color: chartData.metadata.pointColorMapping[value],
-        }));
+        const sortFunc =
+          chart.getPointColorMappingSortFunc(chartData.metadata.pointColorColumnType);
+        const pointColorMapping =
+          Object.keys(chartData.metadata.pointColorMapping).map(value => ({
+            value,
+            color: chartData.metadata.pointColorMapping[value],
+          }))
+          .sort(sortFunc);
+
         const bounds = chartData.metadata.bounds;
 
         displayLayers.push(Object.assign({}, layer, {
@@ -193,9 +199,10 @@ export default function MapVisualisation({ visualisation, datasets, width, heigh
                       }}
                     />
                     <span
-                      className="colorLabel"
+                      className={`colorLabel
+                        ${chart.replaceLabelIfValueEmpty(mappingEntry.value, true)}`}
                     >
-                      {mappingEntry.value}
+                      {chart.replaceLabelIfValueEmpty(mappingEntry.value)}
                     </span>
                   </li>
                 )}
