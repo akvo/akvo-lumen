@@ -7,6 +7,7 @@ import * as api from '../api';
 require('../styles/EntityTypeHeader.scss');
 require('../styles/Users.scss');
 
+
 function User({ email, username, admin }) {
   return (
     <tr>
@@ -70,8 +71,9 @@ class Users extends Component {
   }
 
   onInviteUser() {
+    const cleanedEmail = this.state.invitedUserEmail.trim().toLowerCase();
     api.post('/api/admin/invites', {
-      email: this.state.invitedUserEmail.trim().toLowerCase(),
+      email: cleanedEmail,
     });
   }
 
