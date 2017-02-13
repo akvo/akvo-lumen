@@ -8,16 +8,29 @@
 
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
 
+(defn run-query [conn query-str]
+  (rest (jdbc/query conn [query-str] {:as-arrays? true})))
+
+(defn coalesce
+  "For pivot tables, `NULL` categories will always be empty because `crosstab` uses `=` and
+   `NULL = NULL` is `NULL`. To work around this, we must use another value to represent the
+   empty value."
+  [column]
+  (format "COALESCE(%s, %s)"
+          (get column "columnName")
+          (if (= "text" (get column "type"))
+            "''"
+            "'NaN'::double precision")))
+
 (defn unique-values-sql [table-name category-column filter-str]
   (format "SELECT DISTINCT %s FROM %s WHERE %s ORDER BY 1"
-          (get category-column "columnName") table-name
+          (coalesce category-column)
+          table-name
           filter-str))
 
 (defn unique-values [conn table-name category-column filter-str]
-  (->> (jdbc/query conn
-                   [(unique-values-sql table-name category-column filter-str)]
-                   {:as-arrays? true})
-       rest
+  (->> (unique-values-sql table-name category-column filter-str)
+       (run-query conn)
        (map first)))
 
 (defn source-sql [table-name
@@ -28,7 +41,7 @@
                   filter-str]
   (format "SELECT %s, %s, %s(%s) FROM %s WHERE %s GROUP BY 1,2 ORDER BY 1,2"
           (get row-column "columnName")
-          (get category-column "columnName")
+          (coalesce category-column)
           aggregation
           (get value-column "columnName")
           table-name
@@ -53,30 +66,22 @@
         columns (cons (select-keys (:row-column query)
                                    ["title" "type"])
                       category-columns)]
-    {:rows (rest
-            (jdbc/query conn
-                        [(pivot-sql (:table-name dataset) query filter-str (count categories))]
-                        {:as-arrays? true}))
+    {:rows (run-query conn (pivot-sql (:table-name dataset) query filter-str (count categories)))
      :columns columns}))
 
 (defn apply-empty-query [conn dataset filter-str]
-  (let [count (rest (jdbc/query conn
-                                [(format "SELECT count(rnum) FROM %s WHERE %s"
-                                         (:table-name dataset)
-                                         filter-str)]
-                                {:as-arrays? true}))]
+  (let [count (run-query conn (format "SELECT count(rnum) FROM %s WHERE %s"
+                                      (:table-name dataset)
+                                      filter-str))]
     {:columns [{"type" "number"
                 "title" "Total"}]
      :rows count}))
 
 (defn apply-empty-category-query [conn dataset query filter-str]
-  (let [rows (rest
-              (jdbc/query conn
-                          [(format "SELECT %s, count(rnum) FROM %s WHERE %s GROUP BY 1 ORDER BY 1"
-                                   (get (:row-column query) "columnName")
-                                   (:table-name dataset)
-                                   filter-str)]
-                          {:as-arrays? true}))]
+  (let [rows (run-query conn (format "SELECT %s, count(rnum) FROM %s WHERE %s GROUP BY 1 ORDER BY 1"
+                                     (get-in query [:row-column "columnName"])
+                                     (:table-name dataset)
+                                     filter-str))]
     {:columns [{"type" "text"
                 "title" (get (:row-column query) "title")}
                {"type" "number"
@@ -84,14 +89,11 @@
      :rows rows}))
 
 (defn apply-empty-row-query [conn dataset query filter-str]
-  (let [counts (->> (jdbc/query
-                     conn
-                     [(format "SELECT %s, count(rnum) FROM %s WHERE %s GROUP BY 1 ORDER BY 1"
-                              (get (:category-column query) "columnName")
-                              (:table-name dataset)
-                              filter-str)]
-                     {:as-arrays? true})
-                    rest
+  (let [counts (->> (format "SELECT %s, count(rnum) FROM %s WHERE %s GROUP BY 1 ORDER BY 1"
+                            (get-in query [:category-column "columnName"])
+                            (:table-name dataset)
+                            filter-str)
+                    (run-query conn)
                     (map second))
         categories (unique-values conn (:table-name dataset) (:category-column query) filter-str)]
     {:columns (cons {"title" ""
