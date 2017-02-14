@@ -1,5 +1,5 @@
 (ns akvo.lumen.component.keycloak
-  "Keycloak component."
+  "We leverage Keycloak groups for tenant partition and admin roles. More info can be found in the Keycloak integration doc spec."
   (:require [akvo.lumen.auth :refer [tenant-admin?]]
             [cheshire.core :as json]
             [com.stuartsierra.component :as component]
@@ -52,10 +52,6 @@
 ;;; Helpers
 ;;;
 
-;;; This is kinda fragile, this relies on that one user not belog to multiple
-;;; groups in a tenant and does not support new sub groups!!!!!!
-;;; Hence making someone an admin would require us to add the user to t1/admin
-;;; and also remove the user from the t1 group
 (defn tenant-members
   "Return the users for a tenant. The tenant label here becomes the group-name"
   [keycloak tenant-label]
