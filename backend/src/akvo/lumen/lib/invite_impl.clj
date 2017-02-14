@@ -79,7 +79,5 @@
                           "Problem completing your invite.")
             :status 422})
           (assoc :headers {"Content-Type" "text/html"})))
-    (do
-      (prn (format "Tried to verify invite with id: %s" id))
-      (response {:status 422
-                 :body "Could not verify invite."}))))
+    (response {:status 422
+               :body "Could not verify invite."})))
