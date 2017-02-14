@@ -21,11 +21,11 @@ export function init() {
   }
   return fetch('/env')
     .then(response => response.json())
-    .then(({ keycloakURL, tenant }) => new Promise((resolve, reject) => {
+        .then(({ keycloakClient, keycloakURL, tenant }) => new Promise((resolve, reject) => {
       keycloak = new Keycloak({
         url: keycloakURL,
         realm: 'akvo',
-        clientId: 'lumen',
+        clientId: keycloakClient,
       });
       keycloak.init({ onLoad: 'login-required' }).success((authenticated) => {
         if (authenticated) {

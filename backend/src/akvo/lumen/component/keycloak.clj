@@ -71,10 +71,8 @@
           response-filter ["admin" "email" "firstName" "id" "lastName"
                            "username"]]
       (response (map #(select-keys % response-filter) members)))
-    (catch Exception e
-      (prn e)
+    (catch ExceptionInfo e
       (let [ed (ex-data e)]
-        (prn ed)
         (response {:status (:status ed)
                    :body (:reasonPhrase ed)})))))
 
