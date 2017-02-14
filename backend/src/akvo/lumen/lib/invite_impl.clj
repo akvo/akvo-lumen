@@ -35,17 +35,17 @@
   [tenant-conn emailer keycloak
    {{:strs [email]} :body claims :jwt-claims :as request}]
   (if (keycloak/user? keycloak email)
-    (let [expiration-time (c/to-sql-time (t/plus (t/now) (t/weeks 2)))
+    (let [from-email "devops@akvo.org"
           {id :id email-address :email}
-          (first (insert-invite tenant-conn {:email email
-                                             :expiration_time expiration-time
-                                             :author claims}))
-          email {:body (email-body request id)
-                 ;; :from "noreply@akvolumen.org"
-                 :from "devops@akvo.org"
-                 :subject "Akvo Lumen invite"
-                 :to email-address}]
-      (emailer/send-email emailer email))
+          (first (insert-invite tenant-conn
+                                {:email email
+                                 :expire (c/to-sql-time (t/plus (t/now)
+                                                                (t/weeks 2)))
+                                 :author claims}))
+          recipients [email-address]
+          email {"Subject" "Akvo Lumen invite"
+                 "Text-part" (email-body request id)}]
+    (emailer/send-email emailer recipients email))
     (prn (format "Tried to invite non existing user with email (%s)" email))))
 
 

@@ -2,17 +2,17 @@
 -- :doc Return all invites
 SELECT id, email, created
 FROM invite
-WHERE consumed_at IS NULL AND (expiration_time > now());
+WHERE consumed IS NULL AND (expire > now());
 
 -- :name insert-invite :<!
 -- :doc Insert an invite
-INSERT INTO invite (email, expiration_time, author)
-VALUES (:email, :expiration_time, :author)
+INSERT INTO invite (email, expire, author)
+VALUES (:email, :expire, :author)
 RETURNING *;
 
 -- :name consume-invite :<!
 -- :doc Mark invite as used
 UPDATE invite
-SET consumed_at = now()
+SET consumed = now()
 WHERE id = :id
 RETURNING *;

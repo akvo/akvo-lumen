@@ -7,7 +7,6 @@
   :dependencies [[cheshire "5.6.3"]
                  [clj-http "3.4.1"]
                  [clj-time "0.12.2"]
-                 [com.draines/postal "2.0.2"]
                  [com.ibm.icu/icu4j "58.1"]
                  [com.layerware/hugsql "0.4.7"]
                  [com.stuartsierra/component "0.3.1"]

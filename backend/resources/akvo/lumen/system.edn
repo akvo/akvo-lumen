@@ -80,7 +80,9 @@
   :emailer
   {:email-host email-host
    :email-password email-password
-   :email-user email-user}
+   :email-user email-user
+   :from-email "devops@akvo.org"
+   :from-name "Akvo Lumen"}
   :config
   {:file-upload-path file-upload-path
    :flow-report-database-url flow-report-database-url

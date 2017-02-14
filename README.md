@@ -30,7 +30,7 @@ Available users are:
 - "salim" t1 user
 - "ruth" t2 admin
 - "harry" t2 user
-- kaj keycloak user not on a tenant
+- "kaj" keycloak user not on a tenant
 
 All passwords are "password".
 

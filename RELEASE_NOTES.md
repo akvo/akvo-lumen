@@ -2,6 +2,17 @@
 
 ## 0.6.0 (Unreleased)
 
+Date
+
+### New and noteworthy
+
+* Admin view in sidebar is now linked up to a simple overview of what users
+  keycloak currently knows about and a form for inviting a user by their
+  email address.
+
+### Bugfixes
+
+
 ## 0.5.4
 
 Date 2017-02-09
@@ -70,13 +81,6 @@ Date 2017-01-25
 ### Bugfixes
 
 * Fixed regression where sharing and flow import where broken
-
-
-### New and noteworthy
-
-* Admin view in sidebar is now linked up to a simple overview of what users
-  keycloak currently knows about and a form for inviting a user by their
-  email address.
 
 ## 0.4.5
 
