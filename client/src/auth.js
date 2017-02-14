@@ -22,28 +22,28 @@ export function init() {
   return fetch('/env')
     .then(response => response.json())
         .then(({ keycloakClient, keycloakURL, tenant }) => new Promise((resolve, reject) => {
-      keycloak = new Keycloak({
-        url: keycloakURL,
-        realm: 'akvo',
-        clientId: keycloakClient,
-      });
-      keycloak.init({ onLoad: 'login-required' }).success((authenticated) => {
-        if (authenticated) {
-          keycloak.loadUserProfile().success((profile) => {
-            resolve(Object.assign(
+          keycloak = new Keycloak({
+            url: keycloakURL,
+            realm: 'akvo',
+            clientId: keycloakClient,
+          });
+          keycloak.init({ onLoad: 'login-required' }).success((authenticated) => {
+            if (authenticated) {
+              keycloak.loadUserProfile().success((profile) => {
+                resolve(Object.assign(
               {},
               profile,
               { admin: keycloak.hasRealmRole(`akvo:lumen:${tenant}:admin`) }
             ));
+              }).error(() => {
+                reject(new Error('Could not load user profile'));
+              });
+            } else {
+              reject(new Error('Could not authenticate'));
+            }
           }).error(() => {
-            reject(new Error('Could not load user profile'));
+            reject(new Error('Login attempt failed'));
           });
-        } else {
-          reject(new Error('Could not authenticate'));
         }
-      }).error(() => {
-        reject(new Error('Login attempt failed'));
-      });
-    }
   ));
 }
