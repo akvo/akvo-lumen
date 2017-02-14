@@ -23,7 +23,7 @@
   (and (= :get request-method)
        (or (= "/api" path-info)
            (= "/env" path-info)
-           (s/starts-with? path-info "/s/")
+           (s/starts-with? path-info "/share/")
            (s/starts-with? path-info "/verify/"))))
 
 (defn admin-path? [{:keys [path-info]}]
