@@ -71,7 +71,7 @@
           response-filter ["admin" "email" "firstName" "id" "lastName"
                            "username"]]
       (response (map #(select-keys % response-filter) members)))
-    (catch ExceptionInfo e
+    (catch clojure.lang.ExceptionInfo e
       (let [ed (ex-data e)]
         (response {:status (:status ed)
                    :body (:reasonPhrase ed)})))))
