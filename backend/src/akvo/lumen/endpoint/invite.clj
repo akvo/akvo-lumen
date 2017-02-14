@@ -2,7 +2,6 @@
   (:require [akvo.lumen.component.tenant-manager :refer [connection]]
             [akvo.lumen.lib.invite :as invite]
             [compojure.core :refer :all]
-
             [akvo.lumen.component.keycloak :as keycloak]))
 
 
@@ -16,12 +15,7 @@
       (POST "/" {:keys [body]}
         (invite/create tenant-conn emailer keycloak
                        (select-keys request
-                                    [:body :jwt-claims :server-name :server-port])))
-
-      #_(context "/:id" [id]
-
-         (DELETE "/" _
-           (invite/...))))))
+                                    [:body :jwt-claims :server-name :server-port]))))))
 
 (defn verify-endpoint [{:keys [emailer keycloak tenant-manager]}]
   (context "/verify" {:keys [tenant] :as request}
