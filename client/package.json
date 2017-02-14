@@ -14,7 +14,6 @@
   },
   "author": "Akvo Foundation",
   "license": "AGPL-3.0",
-  "sasslintConfig": "./.sass-lint.yml",
   "dependencies": {
     "babel-core": "^6.18.2",
     "babel-loader": "^6.2.8",
