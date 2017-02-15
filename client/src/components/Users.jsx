@@ -50,12 +50,10 @@ class Users extends Component {
   constructor() {
     super();
     this.state = {
-      invitedUserEmail: '',
       isInviteModalVisible: false,
       users: [],
     };
     this.getActionButtons = this.getActionButtons.bind(this);
-    this.onChange = this.onChange.bind(this);
     this.onInviteUser = this.onInviteUser.bind(this);
   }
 
@@ -66,14 +64,10 @@ class Users extends Component {
     }
   }
 
-  onChange(event) {
-    this.setState({ invitedUserEmail: event.target.value });
-  }
-
-  onInviteUser() {
-    const cleanedEmail = this.state.invitedUserEmail.trim().toLowerCase();
+  onInviteUser(emailAddress) {
+    this.setState({ isInviteModalVisible: false });
     api.post('/api/admin/invites', {
-      email: cleanedEmail,
+      email: emailAddress,
     });
   }
 
@@ -95,7 +89,7 @@ class Users extends Component {
     if (!admin) {
       return (
         <div>
-          <p>You need to be an Admin user to view and invite other users</p>
+          <p>You need to be an admin user to view and invite other users.</p>
         </div>
       );
     }
@@ -111,9 +105,7 @@ class Users extends Component {
           <UserList users={this.state.users} />
         </div>
         <InviteUser
-          invitedUserEmail={this.state.invitedUserEmail}
           isOpen={this.state.isInviteModalVisible}
-          onChange={this.onChange}
           onClose={() => this.setState({ isInviteModalVisible: false })}
           onInviteUser={this.onInviteUser}
         />
