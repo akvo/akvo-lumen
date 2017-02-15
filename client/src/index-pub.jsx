@@ -26,11 +26,11 @@ function renderSuccessfulShare(data) {
     <div className="viewer">
       {data.dashboard ?
         <DashboardViewer
-          dashboard={data.dashboard}
+          dashboard={data.dashboards[data.dashbardId]}
           visualisations={data.visualisations}
           datasets={immutableDatasets}
         /> : <AsyncVisualisationViewer
-          visualisation={data.visualisation}
+          visualisation={data.visualisations[data.visualisationId]}
           datasets={immutableDatasets}
         />
       }
