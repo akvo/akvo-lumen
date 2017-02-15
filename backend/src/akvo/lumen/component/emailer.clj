@@ -26,7 +26,7 @@
 (defn dev-emailer
   "Emailer will pprint email."
   [options]
-  (->DevEmailer))
+  (map->DevEmailer (select-keys options [:from-email :from-name])))
 
 (defrecord MailJetEmailer [config]
   component/Lifecycle

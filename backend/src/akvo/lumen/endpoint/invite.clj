@@ -1,24 +1,22 @@
 (ns akvo.lumen.endpoint.invite
   (:require [akvo.lumen.component.tenant-manager :refer [connection]]
-            [akvo.lumen.lib.invite :as invite]
-            [compojure.core :refer :all]
-            [akvo.lumen.component.keycloak :as keycloak]))
+            [akvo.lumen.component.user-manager :as user-manager]
+            [compojure.core :refer :all]))
 
 
-(defn endpoint [{:keys [emailer keycloak tenant-manager]}]
-  (context "/api/admin/invites" {:keys [jwt-claims params tenant] :as request}
+(defn endpoint [{:keys [tenant-manager user-manager]}]
+  (context "/api/admin/invites" {:keys [jwt-claims params server-name tenant]}
 
     (let-routes [tenant-conn (connection tenant-manager tenant)]
       (GET "/" _
-        (invite/active-invites tenant-conn))
+        (user-manager/invites user-manager tenant-conn))
 
-      (POST "/" {:keys [body]}
-        (invite/create tenant-conn emailer keycloak
-                       (select-keys request
-                                    [:body :jwt-claims :server-name :server-port]))))))
+      (POST "/" {{:strs [email]} :body}
+        (println "@3")
+        (user-manager/invite user-manager tenant-conn server-name email jwt-claims)))))
 
-(defn verify-endpoint [{:keys [emailer keycloak tenant-manager]}]
-  (context "/verify" {:keys [tenant] :as request}
+(defn verify-endpoint [{:keys [tenant-manager user-manager]}]
+  (context "/verify" {:keys [tenant]}
     (let-routes [tenant-conn (connection tenant-manager tenant)]
       (GET "/:id" [id]
-        (invite/accept-invite tenant-conn tenant emailer keycloak id request)))))
+        (user-manager/verify-invite user-manager tenant-conn tenant id)))))

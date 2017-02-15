@@ -4,6 +4,7 @@
   :emailer #var akvo.lumen.component.emailer/mailjet-emailer
   :http #var akvo.lumen.component.http/http
   :keycloak #var akvo.lumen.component.keycloak/keycloak
+  :user-manager #var akvo.lumen.component.user-manager/user-manager
   :tenant-manager #var akvo.lumen.component.tenant-manager/tenant-manager
   :transformation-engine #var akvo.lumen.component.transformation-engine/transformation-engine}
  :endpoints
@@ -34,15 +35,16 @@
   :env [:config]
   :files [:config]
   :flow [:tenant-manager :config]
-  :invite [:emailer :keycloak :tenant-manager]
-  :invite-verify [:emailer :keycloak :tenant-manager]
+  :invite [:tenant-manager :user-manager]
+  :invite-verify [:tenant-manager :user-manager]
   :job-execution [:tenant-manager]
   :library [:tenant-manager]
   :public [:tenant-manager]
   :root [:tenant-manager]
   :share [:tenant-manager :config]
   :transformation [:transformation-engine :tenant-manager]
-  :user [:keycloak :tenant-manager]
+  :user [:user-manager]
+  :user-manager [:emailer :keycloak]
   :visualisation [:tenant-manager]}
  :config
  {:app
@@ -81,7 +83,7 @@
   {:email-host email-host
    :email-password email-password
    :email-user email-user
-   :from-email "devops@akvo.org"
+   :from-email "noreply@akvo.org"
    :from-name "Akvo Lumen"}
   :config
   {:file-upload-path file-upload-path

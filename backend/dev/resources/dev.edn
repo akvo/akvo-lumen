@@ -1,5 +1,6 @@
 {:components
- {:emailer #var akvo.lumen.component.emailer/dev-emailer}
+ {:emailer #var akvo.lumen.component.emailer/dev-emailer
+  :user-manager #var akvo.lumen.component.user-manager/dev-user-manager}
  :config
  {:app
   {:middleware
@@ -15,7 +16,8 @@
            :keycloak-realm "akvo"
            :keycloak-url "http://localhost:8080/auth"
            :keycloak-public-client-id "lumen"}
-  :emailer {}
+  :emailer {:from-email "devops@akvo.localhost"
+            :from-name "Akvo Lumen"}
   :keycloak {:url "http://localhost:8080/auth"
              :realm "akvo"
              :credentials
