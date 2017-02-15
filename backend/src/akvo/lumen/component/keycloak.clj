@@ -13,9 +13,6 @@
   (add-user-with-email [this tenant-label email] "Add user to tenant")
   (user? [this email] "Predicate to see if the email has a user in KC"))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Helpers
-;;;
 
 (defn fetch-openid-configuration
   "Get the openid configuration"
@@ -36,7 +33,7 @@
 (defn group-by-path
   [{:keys [api-root credentials openid-config]} path request-options]
   (-> (client/get (format "%s/group-by-path/%s"
-                          api-root path)
+                          api-root (format "akvo/lumen/%s" path))
                   request-options)
       :body json/decode))
 
@@ -47,10 +44,6 @@
                   request-options)
       :body json/decode))
 
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Helpers
-;;;
 
 (defn tenant-members
   "Return the users for a tenant. The tenant label here becomes the group-name"

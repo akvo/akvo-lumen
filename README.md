@@ -15,12 +15,15 @@ An open-source, easy to use data mashup, analysis and publishing platform.
 [Readme](backend/README.md)
 
 ## Keycloak
-The admin password for keycloak is "admin" / "password". There is an "akvo" realm, where two tenants (t1 & t2) and their are represesnted by the following groups:
+The admin password for keycloak is "admin" / "password". There is an "akvo" realm, where two tenants (t1 & t2) and they are represesnted by the following groups:
+
 ```
-- t1
-  - admin
-- t2
-  - admin
+akvo
+└── lumen
+    ├── t1
+    │   └── admin
+    └── t2
+        └── admin
 ```
 
 Available users are:

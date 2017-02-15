@@ -20,8 +20,7 @@
   (send-email [this recipients email]
     (println "DevEmailer:")
     (pprint recipients)
-    (pprint email)
-    (println "---")))
+    (pprint email)))
 
 (defn dev-emailer
   "Emailer will pprint email."
