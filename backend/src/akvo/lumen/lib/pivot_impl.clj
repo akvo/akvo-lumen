@@ -79,7 +79,7 @@
 
 (defn apply-empty-category-query [conn dataset query filter-str]
   (let [rows (run-query conn (format "SELECT %s, count(rnum) FROM %s WHERE %s GROUP BY 1 ORDER BY 1"
-                                     (get-in query [:row-column "columnName"])
+                                     (coalesce (get query :row-column))
                                      (:table-name dataset)
                                      filter-str))]
     {:columns [{"type" "text"
@@ -90,7 +90,7 @@
 
 (defn apply-empty-row-query [conn dataset query filter-str]
   (let [counts (->> (format "SELECT %s, count(rnum) FROM %s WHERE %s GROUP BY 1 ORDER BY 1"
-                            (get-in query [:category-column "columnName"])
+                            (coalesce (get query :category-column))
                             (:table-name dataset)
                             filter-str)
                     (run-query conn)
