@@ -30,7 +30,7 @@ export default class InviteUser extends Component {
         style={{
           content: {
             width: 500,
-            height: 300,
+            height: 200,
             marginLeft: 'auto',
             marginRight: 'auto',
             borderRadius: 0,
@@ -52,15 +52,29 @@ export default class InviteUser extends Component {
             +
             </div>
             <div className="contents">
-              <p>Please enter the email address you would like to invite below.</p>
+              <p>Please enter the email address you would like to invite.</p>
+            </div>
+            <div className="controls">
               <input
+                className="emailInput"
                 name="email"
                 onChange={this.onChange}
                 placeholder="e.g. user@domain.org"
                 type="email"
                 value={this.state.emailAddress}
               />
-              <button onClick={this.handleInvite}>Send</button>
+              <button
+                className="clickable negative"
+                onClick={this.props.onClose}
+              >
+              Cancel
+              </button>
+              <button
+                className="clickable positive"
+                onClick={this.handleInvite}
+              >
+              Send invitation
+              </button>
             </div>
           </div>
         </div>

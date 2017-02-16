@@ -36,10 +36,7 @@
 }
 
 .InviteUserModal {
-  .contents {
-    padding: 3rem 0 0 0;
-    form {
-      padding-top: 1rem;
-    }
+  .emailInput {
+    width: 250px;
   }
 }
