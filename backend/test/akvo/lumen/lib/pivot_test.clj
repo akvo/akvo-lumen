@@ -51,7 +51,8 @@
       (let [{:keys [status body]} (query {"aggregation" "count"})]
         (is (= status 200))
         (is (= body {:columns [{"type" "number" "title" "Total"}]
-                     :rows [[8]]}))))
+                     :rows [[8]]
+                     :metadata {"categoryColumnTitle" nil}}))))
 
     (testing "Empty query with filter"
       (let [{:keys [status body]} (query {"aggregation" "count"
@@ -61,7 +62,8 @@
                                                       "strategy" "is"}]})]
         (is (= status 200))
         (is (= body {:columns [{"type" "number" "title" "Total"}]
-                     :rows [[4]]}))))
+                     :rows [[4]]
+                     :metadata {"categoryColumnTitle" nil}}))))
 
     (testing "Category column only"
       (let [{:keys [status body]} (query {"aggregation" "count"
@@ -70,7 +72,8 @@
         (is (= body {:columns [{"title" "" "type" "text"}
                                {"title" "a1" "type" "number"}
                                {"title" "a2" "type" "number"}]
-                     :rows [["Total" 4 4]]}))))
+                     :rows [["Total" 4 4]]
+                     :metadata {"categoryColumnTitle" "A"}}))))
 
     (testing "Row Column Only"
       (let [{:keys [status body]} (query {"aggregation" "count"
@@ -80,7 +83,8 @@
                {:columns [{"type" "text", "title" "B"}
                           {"type" "number", "title" "Total"}],
                 :rows [["b1" 4]
-                       ["b2" 4]]}))))
+                       ["b2" 4]]
+                :metadata {"categoryColumnTitle" nil}}))))
 
     (testing "Row & Category Column with count aggregation"
       (let [{:keys [status body]} (query {"aggregation" "count"
@@ -92,7 +96,8 @@
                           {"title" "a1", "type" "number"}
                           {"title" "a2", "type" "number"}]
                 :rows [["b1" 2.0 2.0]
-                       ["b2" 2.0 2.0]]}))))
+                       ["b2" 2.0 2.0]]
+                :metadata {"categoryColumnTitle" "A"}}))))
 
     (testing "Row & Category Column with mean aggregation"
       (let [{:keys [status body]} (query {"aggregation" "mean"
@@ -105,7 +110,8 @@
                           {"title" "a1", "type" "number"}
                           {"title" "a2", "type" "number"}]
                 :rows [["b1" 10.5 11.0]
-                       ["b2" 9.5 10.5]]}))))
+                       ["b2" 9.5 10.5]]
+                :metadata {"categoryColumnTitle" "A"}}))))
 
     (testing "Row & Category Column with mean aggregation and filter"
       (let [{:keys [status body]} (query {"aggregation" "mean"
@@ -122,4 +128,5 @@
                           {"title" "a1" "type" "number"}
                           {"title" "a2" "type" "number"}]
                 :rows [["b1" 10.5 10.0]
-                       ["b2" 9.5 10.5]]}))))))
+                       ["b2" 9.5 10.5]]
+                :metadata {"categoryColumnTitle" "A"}}))))))

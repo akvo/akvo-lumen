@@ -153,7 +153,10 @@
       (try
         (let [query (build-query (:columns dataset) query)
               filter-str (filter/sql-str (:columns dataset) (:filters query))]
-          (http/ok (apply-query conn dataset query filter-str)))
+          (http/ok (merge (apply-query conn dataset query filter-str)
+                          {:metadata
+                           {"categoryColumnTitle" (get-in query
+                                                          [:category-column "title"])}})))
         (catch clojure.lang.ExceptionInfo e
           (http/bad-request (merge {:message (.getMessage e)}
                                    (ex-data e)))))
