@@ -5,7 +5,7 @@ import * as api from '../../api';
 
 require('../../styles/VisualisationEditor.scss');
 
-const specIsValid = (spec) => {
+const specIsValidForApi = (spec) => {
   if (spec.aggregation !== 'count' && spec.valueColumn == null) {
     return false;
   }
@@ -52,8 +52,13 @@ export default class VisualisationEditor extends Component {
         if (!this.state.visualisation || !this.state.visualisation.datasetId) {
           // Update immediately, without waiting for the api call
           this.setState({ visualisation });
+        } else if (!specIsValidForApi(visualisation.spec)) {
+          this.setState({
+            visualisation: Object.assign({},
+              visualisation, { data: this.state.visualisation.data }),
+          });
         }
-        if (visualisation.datasetId && specIsValid(visualisation.spec)) {
+        if (visualisation.datasetId && specIsValidForApi(visualisation.spec)) {
           this.fetchAggregatedData(visualisation);
         }
         break;
