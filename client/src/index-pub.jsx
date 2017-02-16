@@ -24,9 +24,9 @@ function renderSuccessfulShare(data) {
   }
   render(
     <div className="viewer">
-      {data.dashboard ?
+      {data.dashboards ?
         <DashboardViewer
-          dashboard={data.dashboards[data.dashbardId]}
+          dashboard={data.dashboards[data.dashboardId]}
           visualisations={data.visualisations}
           datasets={immutableDatasets}
         /> : <AsyncVisualisationViewer
