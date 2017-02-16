@@ -66,7 +66,10 @@
         columns (cons (select-keys (:row-column query)
                                    ["title" "type"])
                       category-columns)]
-    {:rows (run-query conn (pivot-sql (:table-name dataset) query filter-str (count categories)))
+    {:rows (run-query conn (pivot-sql (:table-name dataset)
+                                      query
+                                      filter-str
+                                      (count categories)))
      :columns columns}))
 
 (defn apply-empty-query [conn dataset filter-str]
@@ -78,12 +81,13 @@
      :rows count}))
 
 (defn apply-empty-category-query [conn dataset query filter-str]
-  (let [rows (run-query conn (format "SELECT %s, count(rnum) FROM %s WHERE %s GROUP BY 1 ORDER BY 1"
-                                     (coalesce (get query :row-column))
-                                     (:table-name dataset)
-                                     filter-str))]
+  (let [rows (->> (format "SELECT %s, count(rnum) FROM %s WHERE %s GROUP BY 1 ORDER BY 1"
+                          (coalesce (get query :row-column))
+                          (:table-name dataset)
+                          filter-str)
+                  (run-query conn))]
     {:columns [{"type" "text"
-                "title" (get (:row-column query) "title")}
+                "title" (get-in query [:row-column "title"])}
                {"type" "number"
                 "title" "Total"}]
      :rows rows}))
@@ -93,16 +97,14 @@
                             (coalesce (get query :category-column))
                             (:table-name dataset)
                             filter-str)
-                    (run-query conn)
-                    (map second))
-        categories (unique-values conn (:table-name dataset) (:category-column query) filter-str)]
+                    (run-query conn))]
     {:columns (cons {"title" ""
                      "type" "text"}
-                    (map (fn [category]
+                    (map (fn [[category]]
                            {"title" category
                             "type" "number"})
-                         categories))
-     :rows [(cons "Total" counts)]}))
+                         counts))
+     :rows [(cons "Total" (map second counts))]}))
 
 (defn apply-empty-value-query [conn dataset query filter-str]
   (apply-pivot conn
