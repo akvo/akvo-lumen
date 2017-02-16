@@ -83,7 +83,9 @@
   (invalid-filter "No such filter strategy" {:strategy (get filter "strategy")}))
 
 (defn find-column [columns column-name]
-  (first (filter #(= (get % "columnName") column-name) columns)))
+  (if-let [column (first (filter #(= (get % "columnName") column-name) columns))]
+    column
+    (invalid-filter "No such column" {:column column-name})))
 
 (defn sql-str [columns filters]
   (if (empty? filters)
