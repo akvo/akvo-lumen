@@ -60,7 +60,7 @@
                      column-name
                      op
                      (parse-date value))
-      "text" (format "%1$s IS NULL OR %1$s %2$s '%3$s'"
+      "text" (format "coalesce(%1$s, '') %2$s '%3$s'"
                      column-name
                      op
                      (escape-sql-str value))
@@ -72,7 +72,7 @@
     (if (= column-type "text")
       (format "coalesce(%s, '') %s ''"
               column-name
-              (if (= operation "keep") "<>" "="))
+              (if (= operation "keep") "=" "<>"))
       (format "%s IS %s"
               column-name
               (if (= operation "keep")
