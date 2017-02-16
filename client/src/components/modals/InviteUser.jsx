@@ -6,18 +6,19 @@ require('../../styles/DashboardModal.scss');
 export default class InviteUser extends Component {
   constructor(props) {
     super(props);
-    this.state = { emailAddress: '' };
+    this.state = { email: '' };
     this.onChange = this.onChange.bind(this);
     this.handleInvite = this.handleInvite.bind(this);
   }
 
   onChange(event) {
-    this.setState({ emailAddress: event.target.value });
+    const email = event.target.value.trim().toLowerCase();
+    this.setState({ email });
   }
 
   handleInvite() {
-    const emailAddress = this.state.emailAddress.trim().toLowerCase();
-    this.props.onInviteUser(emailAddress);
+    this.props.onInviteUser(this.state.email);
+    this.setState({ email: '' });
   }
 
   render() {
