@@ -70,10 +70,7 @@ export default class InviteUser extends Component {
 }
 
 InviteUser.propTypes = {
-  handleInvite: PropTypes.func.isRequired,
-  invitedUserEmail: PropTypes.string.isRequired,
   isOpen: PropTypes.bool.isRequired,
-  onChange: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
   onInviteUser: PropTypes.func.isRequired,
 };
