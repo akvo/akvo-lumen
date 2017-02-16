@@ -12,7 +12,7 @@ const handleToggleValue = (title, column, dimension, filters, onChangeSpec) => {
   if (getValueStatus(title, filters)) {
     newFilters.push({
       column,
-      value: title === null ? title.toString() : title,
+      value: title === null ? null : title.toString(),
       operation: 'remove',
       strategy: title === null ? 'isEmpty' : 'is',
       caseSensitive: true,
@@ -25,6 +25,7 @@ const handleToggleValue = (title, column, dimension, filters, onChangeSpec) => {
     );
   }
 
+  console.log(newFilters);
   onChangeSpec({ filters: newFilters });
 };
 
