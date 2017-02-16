@@ -43,17 +43,35 @@ export default class PivotTableConfigMenu extends Component {
           }}
         />
         {spec.aggregation !== 'count' &&
-          <SelectInput
-            placeholder="Select a value column"
-            labelText="Value column"
-            choice={spec.valueColumn !== null ? spec.valueColumn.toString() : null}
-            name="valueColumnInput"
-            options={columnOptions}
-            onChange={value => onChangeSpec({
-              valueColumn: value,
-            })}
-            clearable
-          />
+          <span>
+            <SelectInput
+              placeholder="Select a value column"
+              labelText="Value column"
+              choice={spec.valueColumn !== null ? spec.valueColumn.toString() : null}
+              name="valueColumnInput"
+              options={columnOptions}
+              onChange={value => onChangeSpec({
+                valueColumn: value,
+              })}
+              clearable
+            />
+            <div className="inputGroup">
+              <label htmlFor="decimalPlacesInput">
+                Number of decimal places
+              </label>
+              <input
+                className="numberInput"
+                id="decimalPlacesInput"
+                type="number"
+                value={spec.decimalPlaces}
+                min={0}
+                max={16}
+                onChange={evt => onChangeSpec({
+                  decimalPlaces: evt.target.value,
+                })}
+              />
+            </div>
+          </span>
         }
         <hr />
         <Subtitle>Categories</Subtitle>

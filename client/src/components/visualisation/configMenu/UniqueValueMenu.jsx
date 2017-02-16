@@ -12,15 +12,15 @@ const handleToggleValue = (title, column, dimension, filters, onChangeSpec) => {
   if (getValueStatus(title, filters)) {
     newFilters.push({
       column,
-      value: title.toString(),
+      value: title === null ? title.toString() : title,
       operation: 'remove',
-      strategy: 'is',
+      strategy: title === null ? 'isEmpty' : 'is',
       caseSensitive: true,
       origin: `pivot-${dimension}`,
     });
   } else {
     newFilters.splice(
-      newFilters.findIndex(filter => (filter.value === title && filter.origin === 'pivot')),
+      newFilters.findIndex(filter => (filter.value === title && filter.origin === `pivot-${dimension}`)),
       1
     );
   }
@@ -41,14 +41,14 @@ export default function UniqueValueMenu(props) {
       for (let i = 1; i < tableData.columns.length; i += 1) {
         uniqueValues.push(tableData.columns[i].title);
       }
-      filters.filter(filter => filter.origin === 'pivot-category').forEach(filter => uniqueValues.push(filter.value));
+      filters.filter(filter => filter.origin === `pivot-${dimension}`).forEach(filter => uniqueValues.push(filter.value));
       break;
 
     case 'row':
-      for (let i = 1; i < tableData.rows.length; i += 1) {
+      for (let i = 0; i < tableData.rows.length; i += 1) {
         uniqueValues.push(tableData.rows[i][0]);
       }
-      filters.filter(filter => filter.origin === 'pivot-row').forEach(filter => uniqueValues.push(filter.value));
+      filters.filter(filter => filter.origin === `pivot-${dimension}`).forEach(filter => uniqueValues.push(filter.value));
       break;
     default:
       // Do nothing for now
@@ -58,7 +58,7 @@ export default function UniqueValueMenu(props) {
   return (
     <div className="UniqueValueMenu">
       <div className="header">
-        <h4>Category Values</h4>
+        <h4>{`${dimension.substring(0, 1).toUpperCase()}${dimension.substring(1, dimension.length)}`} values</h4>
         <button
           className="collapseToggle clickable"
           onClick={toggleCollapsed}

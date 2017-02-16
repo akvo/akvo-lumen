@@ -5,7 +5,7 @@ const pivotTableSpec = {
   valueColumn: null,
   categoryColumn: null,
   rowColumn: null,
-  decimalPlaces: 2,
+  decimalPlaces: 3,
 };
 
 export default pivotTableSpec;

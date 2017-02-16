@@ -15,6 +15,20 @@ const getColumnHeaderClassname = (cell, index, spec) => {
   return 'uniqueColumnValue';
 };
 
+const formatCell = (index, cell, spec, columns) => {
+  const type = columns[index].type;
+
+  if (type === 'number') {
+    if (!spec.decimalPlaces) {
+      return Math.round(cell);
+    }
+    // eslint-disable-next-line no-restricted-properties
+    return Math.round(cell * Math.pow(10, spec.decimalPlaces)) / Math.pow(10, spec.decimalPlaces);
+  }
+
+  return cell;
+};
+
 export default function PivotTable({ width, height, visualisation }) {
   const data = visualisation.data;
 
@@ -74,7 +88,11 @@ export default function PivotTable({ width, height, visualisation }) {
             <tr key={rowIndex}>
               {row.map((cell, cellIndex) =>
                 <td key={cellIndex}>
-                  {cellIndex === 0 ? replaceLabelIfValueEmpty(cell) : cell}
+                  {cellIndex === 0 ?
+                    replaceLabelIfValueEmpty(cell)
+                    :
+                    formatCell(cellIndex, cell, visualisation.spec, data.columns)
+                  }
                 </td>
               )}
             </tr>
