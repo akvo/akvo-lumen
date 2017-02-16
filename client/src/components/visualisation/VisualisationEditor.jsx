@@ -49,7 +49,7 @@ export default class VisualisationEditor extends Component {
         break;
 
       case 'pivot table':
-        if (!this.state.visualisation.datasetId) {
+        if (!this.state.visualisation || !this.state.visualisation.datasetId) {
           // Update immediately, without waiting for the api call
           this.setState({ visualisation });
         }

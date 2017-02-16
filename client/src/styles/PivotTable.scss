@@ -3,6 +3,8 @@
 .PivotTable {
   position: relative;
   overflow-x: scroll;
+  padding: 0.5rem 1rem;
+
   table {
     width: 100%;
 
@@ -14,7 +16,17 @@
     border: 0.1rem solid $midGrey;
     padding: 0.25rem;
   }
-  th {
+  .categoryColumnTitle, .rowColumnTitle {
     background-color: $lightBlueGrey;
+  }
+  .spacer {
+    background-color: transparent;
+    border: none;
+  }
+  .title th {
+    background-color: $white;
+    line-height: 2em;
+    border: none;
+    font-weight: bold;
   }
 }
