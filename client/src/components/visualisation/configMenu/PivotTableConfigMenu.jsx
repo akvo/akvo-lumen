@@ -3,6 +3,30 @@ import SelectInput from './SelectInput';
 import Subtitle from './Subtitle';
 import UniqueValueMenu from './UniqueValueMenu';
 
+// For now, we only support a subset of the regular aggregation options
+const aggregationOptions = [
+  {
+    value: 'mean',
+    label: 'mean',
+  },
+  {
+    value: 'max',
+    label: 'max',
+  },
+  {
+    value: 'min',
+    label: 'min',
+  },
+  {
+    value: 'count',
+    label: 'count',
+  },
+  {
+    value: 'sum',
+    label: 'sum',
+  },
+];
+
 export default class PivotTableConfigMenu extends Component {
 
   constructor() {
@@ -18,7 +42,6 @@ export default class PivotTableConfigMenu extends Component {
       visualisation,
       onChangeSpec,
       columnOptions,
-      aggregationOptions,
     } = this.props;
     const spec = visualisation.spec;
 

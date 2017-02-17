@@ -25,7 +25,6 @@ const handleToggleValue = (title, column, dimension, filters, onChangeSpec) => {
     );
   }
 
-  console.log(newFilters);
   onChangeSpec({ filters: newFilters });
 };
 
