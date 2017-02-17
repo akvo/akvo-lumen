@@ -9,4 +9,37 @@
       margin: 0.25rem;
     }
   }
+  .helpText {
+    border: 0.1rem solid $warnYellow;
+    border-radius: 0.4rem;
+    font-size: 0.8rem;
+    .helpTextContainer {
+      padding: 0.5rem 0.25rem;
+    }
+  }
+  .aggregationHelpText {
+    height: 0;
+    border: 0.1rem solid transparent;
+    transition: border-color 0.5s ease, height 0.5s ease;
+    overflow: hidden;
+  }
+  .aggregationInputContainer {
+    cursor: pointer;
+  }
+  .aggregationInputContainer:hover .aggregationHelpText {
+    height: 2.5rem;
+    opacity: 1;
+    border: 0.1rem solid $warnYellow;
+  }
+  .alert {
+    height: 0.8rem;
+    width: 0.8rem;
+    background-color: $warnYellow;
+    color: white;
+    font-weight: bold;
+    display: inline-block;
+    border-radius: 100%;
+    text-align: center;
+    margin-right: 0.15rem;
+  }
 }

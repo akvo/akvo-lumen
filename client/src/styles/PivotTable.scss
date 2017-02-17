@@ -1,0 +1,34 @@
+@import 'modules/colors';
+
+.PivotTable {
+  position: relative;
+  overflow-x: scroll;
+  padding: 0.5rem 1rem;
+
+  table {
+    max-width: 100%;
+    min-width: 50%;
+    margin: 0 auto;
+
+    * {
+      word-break: break-word;
+    }
+  }
+  td, th {
+    border: 0.1rem solid $midGrey;
+    padding: 0.25rem;
+  }
+  .categoryColumnTitle, .rowColumnTitle {
+    background-color: $lightBlueGrey;
+  }
+  .spacer {
+    background-color: transparent;
+    border: none;
+  }
+  .title th {
+    background-color: $white;
+    line-height: 2em;
+    border: none;
+    font-weight: bold;
+  }
+}

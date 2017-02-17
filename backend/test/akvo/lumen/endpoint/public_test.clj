@@ -1,12 +1,12 @@
 (ns akvo.lumen.endpoint.public-test
-  (:require [clojure.test :refer :all]
-            [hugsql.core :as hugsql]
-            [akvo.lumen.lib.public-impl :as public-impl]
-            [akvo.lumen.endpoint
+  (:require [akvo.lumen.endpoint
              [public :as public]
              [share-test :as share-test]]
+            [akvo.lumen.fixtures :refer [db-fixture test-conn]]
+            [akvo.lumen.lib.public-impl :as public-impl]
             [akvo.lumen.lib.share :as share]
-            [akvo.lumen.fixtures :refer [db-fixture test-conn]]))
+            [clojure.test :refer :all]
+            [hugsql.core :as hugsql]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Tests
@@ -28,10 +28,12 @@
                                         {"visualisationId"
                                          (:visualisation-id share-test/test-spec)}))
           p         (public-impl/get-share test-conn (:id new-share))]
-      (is (= (:visualisation_id p)
+      (is (= (:visualisation-id p)
              (:visualisation-id share-test/test-spec)))
       (is (= (:id new-share)
              (:id p)))))
+
+
 
   (testing "Public dashboard share"
     (let [dashboard-id    (-> (all-dashboards test-conn) first :id)
@@ -40,7 +42,7 @@
           share           (public-impl/get-share test-conn (:id dashboard-share))
           share-data      (public-impl/response-data test-conn share)]
       (is (every? #(contains? share-data %)
-                  ["dashboard" "visualisations" "datasets"]))
+                  ["dashboardId" "dashboards" "visualisations" "datasets"]))
       (is (= 2
              (count (get share-data "datasets"))))
       (is (= 2

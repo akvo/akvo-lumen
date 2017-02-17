@@ -10,6 +10,7 @@ import LineConfigMenu from './configMenu/LineConfigMenu';
 import PieConfigMenu from './configMenu/PieConfigMenu';
 import ScatterConfigMenu from './configMenu/ScatterConfigMenu';
 import MapConfigMenu from './configMenu/MapConfigMenu';
+import PivotTableConfigMenu from './configMenu/PivotTableConfigMenu';
 import visualisationTypes from '../../containers/Visualisation/visualisationTypes';
 
 require('../../styles/ConfigMenu.scss');
@@ -137,6 +138,16 @@ export default function ConfigMenu(props) {
       case 'pie':
       case 'donut':
         chartTypeEditor = (<PieConfigMenu
+          visualisation={props.visualisation}
+          onChangeSpec={props.onChangeVisualisationSpec}
+          datasets={props.datasets}
+          columnOptions={columnOptions}
+          aggregationOptions={aggregationOptions}
+        />);
+        break;
+
+      case 'pivot table':
+        chartTypeEditor = (<PivotTableConfigMenu
           visualisation={props.visualisation}
           onChangeSpec={props.onChangeVisualisationSpec}
           datasets={props.datasets}

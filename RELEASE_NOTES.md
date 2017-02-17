@@ -6,6 +6,7 @@ Date 2017-02-17
 
 ### New and noteworthy
 
+* Pivot table visualisations
 * Better derived column formula UI feedback
 
 ### Bugfixes
