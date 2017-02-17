@@ -7,6 +7,34 @@
       padding: 2rem 1rem;
       border: 0.1rem solid $midGrey;
       margin: 0.25rem;
+      background-repeat: no-repeat;
+      background-size: contain;
+      background-position: right center;
+
+      &.bar {
+        background-image: url('img/icon-128-visualisation-bar.png');
+      }
+      &.map {
+        background-image: url('img/icon-128-visualisation-map.png');
+      }
+      &.pivottable {
+        background-image: url('img/icon-128-visualisation-pivot-table.png');
+      }
+      &.line {
+        background-image: url('img/icon-128-visualisation-line.png');
+      }
+      &.area {
+        background-image: url('img/icon-128-visualisation-area.png');
+      }
+      &.pie {
+        background-image: url('img/icon-128-visualisation-pie.png');
+      }
+      &.donut {
+        background-image: url('img/icon-128-visualisation-donut.png');
+      }
+      &.scatter {
+        background-image: url('img/icon-128-visualisation-scatter.png');
+      }
     }
   }
   .helpText {

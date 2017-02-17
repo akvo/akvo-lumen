@@ -170,7 +170,7 @@ export default function ConfigMenu(props) {
             <ul>
               {visualisationTypes.map((vType, index) =>
                 <li
-                  className="clickable typeButton"
+                  className={`clickable typeButton ${vType.replace(/ /, '')}`}
                   key={index}
                   onClick={() => props.onChangeVisualisationType(vType)}
                 >
