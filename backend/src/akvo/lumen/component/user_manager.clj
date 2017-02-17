@@ -20,19 +20,6 @@
   (verify-invite [this tenant-conn tenant id] "Add user to tenant."))
 
 
-(defn email-body
-  [server-name invite-id author-name]
-  (str/join
-   "\n"
-   ["Hi,"
-    ""
-    (format "You been invited to join %s by %s." server-name author-name)
-    "To complete your invite please visit:"
-    (format "https://%s/verify/%s" server-name invite-id)
-    ""
-    "Thanks"
-    "Akvo"]))
-
 (defn do-invite [tenant-conn {:keys [emailer keycloak] :as user-manager}
                  server-name email author-claims]
   (if (keycloak/user? keycloak email)
