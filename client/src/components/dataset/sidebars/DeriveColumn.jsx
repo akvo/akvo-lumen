@@ -105,16 +105,11 @@ class CodeFeedback extends Component {
   render() {
     const { code } = this.props;
     return (
-      <div style={{ fontSize: '0.8em' }}>
+      <div className="CodeFeedback">
         <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            marginTop: '2px',
-            marginBottom: '2px',
-          }}
+          className="container"
         >
-          <span style={{ color: '#f00' }}>
+          <span className="feedbackMessage">
             {code.trim() === '' || isValidCode(code) ?
               '' :
               'Invalid expression'}

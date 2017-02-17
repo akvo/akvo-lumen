@@ -15,6 +15,17 @@
     background-color: $midGrey;
     margin-top: 0.25rem;
   }
+  .CodeFeedback {
+    font-size: 0.8rem;
+    .container {
+      display: flex;
+      justify-content: space-between;
+      margin: 0.1rem 0;
+    }
+    .feedbackMessage {
+      color: $errorRed;
+    }
+  }
   .CodeMirror {
     border: 1px solid #eee;
     height: 100px;

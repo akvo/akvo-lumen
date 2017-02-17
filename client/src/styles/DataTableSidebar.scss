@@ -34,8 +34,9 @@
     .apply {
       color: $mintGreen;
       border: 0.1rem solid $mintGreen;
+      transition: color 0.7s ease, border-color 0.7s ease;
     }
-    .cancel {
+    .cancel, .apply.disabled {
       color: $blueGrey;
       border: 0.1rem solid $blueGrey;
     }
