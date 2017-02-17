@@ -8,7 +8,7 @@ export default function SidebarControls({
 }) {
   const isDisabled = onApply == null;
   return (
-    <div className="controls">
+    <div className="SidebarControls controls">
       <button
         className="apply clickable"
         onClick={onApply}

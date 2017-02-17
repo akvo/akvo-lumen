@@ -156,10 +156,6 @@ export default function TransformationLog({
   return (
     <div
       className="DataTableSidebar"
-      style={{
-        width: '300px',
-        height: 'calc(100vh - 8rem)',
-      }}
     >
       <SidebarHeader onClose={onClose}>
         Transformation Log

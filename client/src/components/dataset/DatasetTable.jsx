@@ -305,18 +305,18 @@ export default class DatasetTable extends Component {
             flexDirection: sidebarProps && sidebarProps.displayRight ? 'row-reverse' : 'row',
           }}
         >
-          {sidebarProps &&
-            <DataTableSidebar
-              {...sidebarProps}
-              transformations={transformations}
-              pendingTransformations={pendingTransformations}
-            />}
+          <div className={`sidebarWrapper ${sidebarProps ? 'expanded' : 'collapsed'}`}>
+            {sidebarProps &&
+              <DataTableSidebar
+                {...sidebarProps}
+                transformations={transformations}
+                pendingTransformations={pendingTransformations}
+              />
+            }
+          </div>
           <div
-            className="wrapper"
+            className={`wrapper ${sidebarProps ? 'hasSidebar' : 'noSidebar'}`}
             ref={(ref) => { this.wrappingDiv = ref; }}
-            style={{
-              width: sidebarProps ? 'calc(100% - 300px)' : '100%',
-            }}
           >
             {activeDataTypeContextMenu != null &&
               <DataTypeContextMenu

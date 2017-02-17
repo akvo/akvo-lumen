@@ -55,7 +55,7 @@ function isValidCode(code) {
 
 function Code({ children }) {
   return (
-    <code style={{ fontFamily: 'monospace' }}>
+    <code>
       {children}
     </code>
   );
@@ -67,7 +67,7 @@ Code.propTypes = {
 
 function HelpText() {
   return (
-    <div style={{ textAlign: 'justify' }}>
+    <div className="HelpText">
       Derived columns are formulas written using a subset of Javascript where a single expression
       is allowed and columns are referenced as <Code>{'row["Column Title"]'}</Code> or
       alternatively if the title is a valid javascript identifier: <Code>row.title</Code>.
@@ -78,16 +78,7 @@ function HelpText() {
 function HelpTextToggleButton({ onClick }) {
   return (
     <button
-      className="clickable"
-      style={{
-        display: 'block',
-        borderRadius: '50%',
-        width: '16px',
-        height: '16px',
-        fontWeight: 'bold',
-        backgroundColor: '#444',
-        color: 'white',
-      }}
+      className="HelpTextToggleButton clickable noSelect"
       onClick={onClick}
     >
       ?
@@ -185,11 +176,7 @@ export default class DeriveColumn extends Component {
     const code = args.get('code');
     return (
       <div
-        className="DataTableSidebar"
-        style={{
-          width: '300px',
-          height: 'calc(100vh - 4rem)',
-        }}
+        className="DataTableSidebar DeriveColumn"
       >
         <SidebarHeader onClose={onClose}>
           Derive Column
