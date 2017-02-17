@@ -2,6 +2,10 @@
 
 ## 0.6.0 (Unreleased)
 
+### New and noteworthy
+
+* Better derived column formula UI feedback
+
 ## 0.5.4
 
 Date 2017-02-09
