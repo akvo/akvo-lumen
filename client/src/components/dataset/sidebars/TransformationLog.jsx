@@ -9,8 +9,7 @@ function deriveTransformationDescription(transformation) {
   const code = transformation.getIn(['args', 'code']);
   return (
     <div>
-      Derived {newColumnTitle} using
-      <pre style={{ fontFamily: 'monospace' }}>{code}</pre>
+      Derived {newColumnTitle} using <code>{code}</code>
     </div>
   );
 }
