@@ -4,6 +4,7 @@
 
 ### New and noteworthy
 
+* Pivot table visualisations
 * Better derived column formula UI feedback
 
 ## 0.5.4
