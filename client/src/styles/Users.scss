@@ -36,6 +36,13 @@
 }
 
 .InviteUserModal {
+  .contents {
+    line-height: 2.5rem;
+    padding-left: 0;
+    p {
+      margin-top: 1.5rem;
+    }
+  }
   .emailInput {
     width: 250px;
   }

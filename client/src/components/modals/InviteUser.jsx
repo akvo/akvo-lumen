@@ -53,8 +53,6 @@ export default class InviteUser extends Component {
             </div>
             <div className="contents">
               <p>Please enter the email address you would like to invite.</p>
-            </div>
-            <div className="controls">
               <input
                 className="emailInput"
                 name="email"
@@ -63,6 +61,8 @@ export default class InviteUser extends Component {
                 type="email"
                 value={this.state.emailAddress}
               />
+            </div>
+            <div className="controls">
               <button
                 className="clickable negative"
                 onClick={this.props.onClose}
