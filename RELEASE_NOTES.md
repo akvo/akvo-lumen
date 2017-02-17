@@ -2,9 +2,15 @@
 
 ## 0.6.0 (Unreleased)
 
+Date 2017-02-17
+
 ### New and noteworthy
 
 * Better derived column formula UI feedback
+
+### Bugfixes
+
+* Fixed transformation log description for text transforms
 
 ## 0.5.4
 
