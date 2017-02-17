@@ -28,7 +28,6 @@ const aggregationOptions = [
 ];
 
 export default class PivotTableConfigMenu extends Component {
-
   constructor() {
     super();
     this.state = {
@@ -49,54 +48,68 @@ export default class PivotTableConfigMenu extends Component {
       <div>
         <hr />
         <Subtitle>Aggregation</Subtitle>
-        <SelectInput
-          placeholder="Select aggregation method"
-          labelText="Aggregation method"
-          choice={spec.aggregation !== null ? spec.aggregation.toString() : null}
-          name="aggregationMethod"
-          options={aggregationOptions}
-          onChange={(value) => {
-            const change = { aggregation: value };
-
-            if (value === 'count') {
-              change.valueColumn = null;
-            }
-
-            onChangeSpec(change);
-          }}
-        />
-        {spec.aggregation !== 'count' &&
-          <span>
+        <div>
+          <span
+            className="aggregationInputContainer"
+          >
             <SelectInput
-              placeholder="Select a value column"
-              labelText="Value column"
-              choice={spec.valueColumn !== null ? spec.valueColumn.toString() : null}
-              name="valueColumnInput"
-              options={columnOptions.filter(option =>
-                option.type === 'number' || option.type === 'date')}
-              onChange={value => onChangeSpec({
-                valueColumn: value,
-              })}
-              clearable
+              placeholder="Select aggregation method"
+              labelText="Aggregation method"
+              choice={spec.aggregation !== null ? spec.aggregation.toString() : null}
+              name="aggregationMethod"
+              options={aggregationOptions}
+              disabled={spec.rowColumn == null || spec.categoryColumn == null}
+              onChange={(value) => {
+                const change = { aggregation: value };
+
+                if (value === 'count') {
+                  change.valueColumn = null;
+                }
+                onChangeSpec(change);
+              }}
             />
-            <div className="inputGroup">
-              <label htmlFor="decimalPlacesInput">
-                Number of decimal places
-              </label>
-              <input
-                className="numberInput"
-                id="decimalPlacesInput"
-                type="number"
-                value={spec.decimalPlaces}
-                min={0}
-                max={16}
-                onChange={evt => onChangeSpec({
-                  decimalPlaces: evt.target.value,
-                })}
-              />
+            <div
+              className="helpText aggregationHelpText"
+            >
+              <div className="helpTextContainer">
+                <span className="alert">!</span>
+                Choose a category column and a row column to use aggregations other than count.
+              </div>
             </div>
           </span>
-        }
+          {spec.aggregation !== 'count' &&
+            <div>
+              <SelectInput
+                placeholder="Select a value column"
+                labelText="Value column"
+                choice={spec.valueColumn !== null ? spec.valueColumn.toString() : null}
+                name="valueColumnInput"
+                options={columnOptions.filter(option =>
+                  option.type === 'number' || option.type === 'date')}
+                onChange={value => onChangeSpec({
+                  valueColumn: value,
+                })}
+                clearable
+              />
+              <div className="inputGroup">
+                <label htmlFor="decimalPlacesInput">
+                  Number of decimal places
+                </label>
+                <input
+                  className="numberInput"
+                  id="decimalPlacesInput"
+                  type="number"
+                  value={spec.decimalPlaces}
+                  min={0}
+                  max={16}
+                  onChange={evt => onChangeSpec({
+                    decimalPlaces: evt.target.value,
+                  })}
+                />
+              </div>
+            </div>
+          }
+        </div>
         <hr />
         <Subtitle>Categories</Subtitle>
         <SelectInput
@@ -105,9 +118,15 @@ export default class PivotTableConfigMenu extends Component {
           choice={spec.categoryColumn !== null ? spec.categoryColumn.toString() : null}
           name="categoryColumnInput"
           options={columnOptions}
-          onChange={value => onChangeSpec({
-            categoryColumn: value,
-          })}
+          onChange={(value) => {
+            const change = { categoryColumn: value };
+
+            if (value == null && spec.aggregation !== 'count') {
+              change.aggregation = 'count';
+              change.valueColumn = null;
+            }
+            onChangeSpec(change);
+          }}
           clearable
         />
         {spec.categoryColumn !== null &&
@@ -131,9 +150,15 @@ export default class PivotTableConfigMenu extends Component {
           choice={spec.rowColumn !== null ? spec.rowColumn.toString() : null}
           name="rowColumnInput"
           options={columnOptions}
-          onChange={value => onChangeSpec({
-            rowColumn: value,
-          })}
+          onChange={(value) => {
+            const change = { rowColumn: value };
+
+            if (value == null && spec.aggregation !== 'count') {
+              change.aggregation = 'count';
+              change.valueColumn = null;
+            }
+            onChangeSpec(change);
+          }}
           clearable
         />
         {spec.rowColumn !== null &&

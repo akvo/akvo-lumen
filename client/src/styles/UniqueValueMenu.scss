@@ -7,7 +7,6 @@
 
     .header {
         position: relative;
-        margin-bottom: 1rem;
 
         h4, .collapseToggle {
             display: inline-block;
@@ -29,6 +28,12 @@
 
         &:last-child {
             border-bottom: none;
+        }
+    }
+
+    &.expanded {
+        .header {
+            margin-bottom: 1rem;
         }
     }
 }

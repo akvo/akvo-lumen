@@ -56,7 +56,7 @@ export default function UniqueValueMenu(props) {
   uniqueValues.sort();
 
   return (
-    <div className="UniqueValueMenu">
+    <div className={`UniqueValueMenu ${collapsed ? 'collapsed' : 'expanded'}`}>
       <div className="header">
         <h4>{`${dimension.substring(0, 1).toUpperCase()}${dimension.substring(1, dimension.length)}`} values</h4>
         <button
