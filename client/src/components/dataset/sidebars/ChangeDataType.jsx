@@ -114,10 +114,6 @@ export default class ChangeDataType extends Component {
     return (
       <div
         className="DataTableSidebar"
-        style={{
-          width: '300px',
-          height: 'calc(100vh - 4rem)',
-        }}
       >
         <SidebarHeader onClose={onClose}>
           Change data type for {column.get('title')}

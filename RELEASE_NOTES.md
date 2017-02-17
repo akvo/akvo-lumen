@@ -4,6 +4,10 @@
 
 Date 2017-02-17
 
+### New and noteworthy
+
+* Better derived column formula UI feedback
+
 ### Bugfixes
 
 * Fixed transformation log description for text transforms
@@ -40,7 +44,6 @@ Date 2017-02-08
 * The color key for maps is now always presented in the same order
 
 * Don't show "All changes saved" while user is editing the title of a visualisation, as they are not
->>>>>>> develop
 
 ## 0.5.1
 
