@@ -72,7 +72,8 @@ export default class PivotTableConfigMenu extends Component {
               labelText="Value column"
               choice={spec.valueColumn !== null ? spec.valueColumn.toString() : null}
               name="valueColumnInput"
-              options={columnOptions}
+              options={columnOptions.filter(option =>
+                option.type === 'number' || option.type === 'date')}
               onChange={value => onChangeSpec({
                 valueColumn: value,
               })}
