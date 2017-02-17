@@ -42,10 +42,6 @@ export default class RenameColumn extends Component {
     return (
       <div
         className="DataTableSidebar"
-        style={{
-          width: '300px',
-          height: 'calc(100vh - 4rem)',
-        }}
       >
         <SidebarHeader onClose={onClose}>
           Rename Column

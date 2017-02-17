@@ -9,8 +9,7 @@ function deriveTransformationDescription(transformation) {
   const code = transformation.getIn(['args', 'code']);
   return (
     <div>
-      Derived {newColumnTitle} using
-      <pre style={{ fontFamily: 'monospace' }}>{code}</pre>
+      Derived {newColumnTitle} using <code>{code}</code>
     </div>
   );
 }
@@ -156,10 +155,6 @@ export default function TransformationLog({
   return (
     <div
       className="DataTableSidebar"
-      style={{
-        width: '300px',
-        height: 'calc(100vh - 8rem)',
-      }}
     >
       <SidebarHeader onClose={onClose}>
         Transformation Log
