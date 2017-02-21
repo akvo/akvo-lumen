@@ -2,9 +2,6 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
   const chartRadius = containerHeight < containerWidth ? containerHeight / 3 : containerWidth / 3;
   const innerRadius = visualisation.visualisationType === 'donut' ?
     Math.floor(chartRadius / 1.75) : 0;
-
-  const hasAggregation = Boolean(visualisation.spec.bucketColumn &&
-    visualisation.spec.metricAggregation);
   const dataArray = data.map(item => item);
 
   const layoutTransform = {
@@ -192,15 +189,9 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
                 align: {
                   value: 'left',
                 },
-                text: hasAggregation ?
-                  {
-                    template: `{{datum[${segmentLabelField}]}}: {{datum.rounded_percentage}}% ({{datum.rounded_value}})`,
-                  }
-                  :
-                  {
-                    field: fieldY,
-                  }
-                ,
+                text: {
+                  template: `{{datum[${segmentLabelField}]}}: {{datum.rounded_value}} ({{datum.rounded_percentage}}%)`,
+                },
               }
               :
               {
@@ -230,15 +221,9 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
                 align: {
                   value: 'center',
                 },
-                text: hasAggregation ?
-                  {
-                    template: '{{datum.rounded_percentage}}% ({{datum.rounded_value}})',
-                  }
-                  :
-                  {
-                    field: fieldY,
-                  }
-                ,
+                text: {
+                  template: '{{datum.rounded_value}} ({{datum.rounded_percentage}}%)',
+                },
               }
             ,
         },
