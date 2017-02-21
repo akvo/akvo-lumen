@@ -1,6 +1,6 @@
 # Release Notes
 
-## 2017-03-10 (Unreleased)
+## 0.7.0 (Unreleased)
 
 ### Bugfixes
 
@@ -9,7 +9,7 @@
 
 ## 0.6.0
 
-Date 2017-02-17
+Date 2017-02-20
 
 ### New and noteworthy
 
