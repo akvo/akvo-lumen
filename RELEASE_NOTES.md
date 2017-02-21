@@ -1,8 +1,10 @@
 # Release Notes
 
-## 0.6.0 (Unreleased)
+## 0.7.0 (Unreleased)
 
-Date 2017-02-17
+## 0.6.0
+
+Date 2017-02-20
 
 ### New and noteworthy
 
