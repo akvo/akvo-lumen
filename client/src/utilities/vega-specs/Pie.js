@@ -106,15 +106,16 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
             },
           },
           update: {
-            fill: {
-              scale: 'c',
-              field: segmentLabelField,
-            },
-          },
-          hover: {
-            fill: {
-              value: 'pink',
-            },
+            fill: [
+              {
+                test: 'datum._id == tooltip._id || datum._id == textTooltip._id',
+                value: 'pink',
+              },
+              {
+                scale: 'c',
+                field: segmentLabelField,
+              },
+            ],
           },
         },
       },
