@@ -1,6 +1,12 @@
 # Release Notes
 
-## 0.6.0 (Unreleased)
+## 2017-03-10 (Unreleased)
+
+### Bugfixes
+
+* Fix bug where pie and donut chart labels would not show percentage values
+
+## 0.6.0
 
 Date 2017-02-17
 
