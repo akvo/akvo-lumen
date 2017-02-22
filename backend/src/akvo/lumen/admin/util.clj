@@ -17,5 +17,5 @@
           database (env :pgdatabase)
           user (env :pguser)
           password (env :pgpassword)}}]
-   (format "jdbc:postgresql://%s/%s?user=%s&password=%s&sslmode=require"
+   (format "jdbc:postgresql://%s/%s?user=%s&password=%s&ssl=true"
            host database user password)))

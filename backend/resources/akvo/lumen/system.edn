@@ -17,6 +17,7 @@
   :invite-verify #var akvo.lumen.endpoint.invite/verify-endpoint
   :job-execution #var akvo.lumen.endpoint.job-execution/endpoint
   :library #var akvo.lumen.endpoint.library/endpoint
+  :pivot #var akvo.lumen.endpoint.pivot/endpoint
   :public #var akvo.lumen.endpoint.public/endpoint
   :root #var akvo.lumen.endpoint.root/endpoint
   :share #var akvo.lumen.endpoint.share/endpoint
@@ -26,7 +27,7 @@
  :dependencies
  {:http [:app]
   :app [:dashboard :dataset :env :emailer :files :flow :invite :invite-verify
-        :job-execution :library :public :root :share :transformation :user
+        :job-execution :library :pivot :public :root :share :transformation :user
         :visualisation]
   :tenant-manager [:db]
   :transformation-engine [:tenant-manager]
@@ -39,6 +40,7 @@
   :invite-verify [:tenant-manager :user-manager]
   :job-execution [:tenant-manager]
   :library [:tenant-manager]
+  :pivot [:tenant-manager]
   :public [:tenant-manager]
   :root [:tenant-manager]
   :share [:tenant-manager :config]

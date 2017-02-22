@@ -1,9 +1,9 @@
 (ns akvo.lumen.admin.add-tenant
-  (:require [clojure.java.jdbc :as jdbc]
+  (:require [akvo.lumen.admin.util :as util]
+            [akvo.lumen.util :refer [squuid]]
+            [clojure.java.jdbc :as jdbc]
             [clojure.string :as s]
             [environ.core :refer [env]]
-            [akvo.lumen.admin.util :as util]
-            [akvo.lumen.util :refer [squuid]]
             [ragtime.jdbc]
             [ragtime.repl]))
 
@@ -37,5 +37,6 @@
                 tenant)
     (util/exec! tenant-db-uri-with-superuser "CREATE EXTENSION IF NOT EXISTS btree_gist WITH SCHEMA public;")
     (util/exec! tenant-db-uri-with-superuser "CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;")
+    (util/exec! tenant-db-uri-with-superuser "CREATE EXTENSION IF NOT EXISTS tablefunc WITH SCHEMA public;")
     (jdbc/insert! lumen-db-uri :tenants {:db_uri tenant-db-uri :label label :title title})
     (migrate-tenant tenant-db-uri)))

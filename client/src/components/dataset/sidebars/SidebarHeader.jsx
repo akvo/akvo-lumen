@@ -2,7 +2,7 @@ import React, { PropTypes } from 'react';
 
 export default function SidebarHeader({ onClose, children }) {
   return (
-    <div className="header">
+    <div className="SidebarHeader header">
       <h3>
         {children}
       </h3>
@@ -10,7 +10,7 @@ export default function SidebarHeader({ onClose, children }) {
         className="close clickable"
         onClick={onClose}
       >
-        X
+        ✖
       </button>
     </div>
   );

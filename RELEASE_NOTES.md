@@ -1,6 +1,19 @@
 # Release Notes
 
-## 0.6.0 (Unreleased)
+## 0.7.0 (Unreleased)
+
+## 0.6.0
+
+Date 2017-02-20
+
+### New and noteworthy
+
+* Pivot table visualisations
+* Better derived column formula UI feedback
+
+### Bugfixes
+
+* Fixed transformation log description for text transforms
 
 Date
 

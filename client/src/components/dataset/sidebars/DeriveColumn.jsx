@@ -53,6 +53,81 @@ function isValidCode(code) {
   }
 }
 
+function Code({ children }) {
+  return (
+    <code>
+      {children}
+    </code>
+  );
+}
+
+Code.propTypes = {
+  children: PropTypes.string.isRequired,
+};
+
+function HelpText() {
+  return (
+    <div className="HelpText">
+      Derived columns are formulas written using a subset of Javascript where a single expression
+      is allowed and columns are referenced as <Code>{'row["Column Title"]'}</Code> or
+      alternatively if the title is a valid javascript identifier: <Code>row.title</Code>.
+    </div>
+  );
+}
+
+function HelpTextToggleButton({ onClick }) {
+  return (
+    <button
+      className="HelpTextToggleButton clickable noSelect"
+      onClick={onClick}
+    >
+      ?
+    </button>
+  );
+}
+
+HelpTextToggleButton.propTypes = {
+  onClick: PropTypes.func.isRequired,
+};
+
+class CodeFeedback extends Component {
+  constructor() {
+    super();
+    this.state = {
+      showHelpText: false,
+    };
+  }
+
+  toggleShowHelpText() {
+    this.setState({ showHelpText: !this.state.showHelpText });
+  }
+
+  render() {
+    const { code } = this.props;
+    return (
+      <div className="CodeFeedback">
+        <div
+          className="container"
+        >
+          <span className="feedbackMessage">
+            {code.trim() === '' || isValidCode(code) ?
+              '' :
+              'Invalid expression'}
+          </span>
+          <span>
+            <HelpTextToggleButton onClick={() => this.toggleShowHelpText()} />
+          </span>
+        </div>
+        {this.state.showHelpText && <HelpText />}
+      </div>
+    );
+  }
+}
+
+CodeFeedback.propTypes = {
+  code: PropTypes.string.isRequired,
+};
+
 export default class DeriveColumn extends Component {
   constructor() {
     super();
@@ -93,30 +168,15 @@ export default class DeriveColumn extends Component {
     const { onClose, onApply /* columns */ } = this.props;
     const { transformation } = this.state;
     const args = transformation.get('args');
+    const code = args.get('code');
     return (
       <div
-        className="DataTableSidebar"
-        style={{
-          width: '300px',
-          height: 'calc(100vh - 4rem)',
-        }}
+        className="DataTableSidebar DeriveColumn"
       >
         <SidebarHeader onClose={onClose}>
           Derive Column
         </SidebarHeader>
         <div className="inputs">
-          <div className="inputGroup">
-            <label htmlFor="code">
-              Code
-            </label>
-            <CodeMirror
-              value={args.get('code')}
-              onChange={code => this.setTransformationProperty(['args', 'code'], code)}
-              options={{
-                mode: 'javascript',
-              }}
-            />
-          </div>
           <div className="inputGroup">
             <label
               htmlFor="titleTextInput"
@@ -157,6 +217,20 @@ export default class DeriveColumn extends Component {
               onChange={value => this.setTransformationProperty(['onError'], value)}
               options={errorStrategies}
             />
+          </div>
+          <div className="inputGroup">
+            <label htmlFor="code">
+              Javascript code
+            </label>
+            <CodeMirror
+              placeholder="type javascript expression here"
+              value={code}
+              onChange={c => this.setTransformationProperty(['args', 'code'], c)}
+              options={{
+                mode: 'javascript',
+              }}
+            />
+            <CodeFeedback code={code} />
           </div>
         </div>
         <SidebarControls
