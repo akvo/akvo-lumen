@@ -11,7 +11,9 @@
 (defprotocol UserManager
   (users [this tenant-label] "List tenants users")
   (add-user-with-email [this tenant-label email] "Add user to tenant")
-  (user? [this email] "Predicate to see if the email has a user in KC"))
+  (user? [this email] "Predicate to see if the email has a user in KC")
+
+  )
 
 
 (defn fetch-openid-configuration

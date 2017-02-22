@@ -12,7 +12,8 @@
         (user-manager/invites user-manager tenant-conn))
 
       (POST "/" {{:strs [email]} :body}
-        (user-manager/invite user-manager tenant-conn server-name email jwt-claims)))))
+        (user-manager/invite user-manager tenant-conn server-name email
+                             jwt-claims)))))
 
 (defn verify-endpoint [{:keys [tenant-manager user-manager]}]
   (context "/verify" {:keys [tenant]}

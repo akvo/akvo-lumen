@@ -12,7 +12,7 @@
 
 (defprotocol IUserManager
   (users [this tenant] "List users of tenant.")
-  (invite-email [this server-name invite-id author-name]
+  (tenant-invite-email [this server-name invite-id author-name]
     "Constructs the invite email body")
   (invite [this tenant-conn server-name email author-claims]
     "Invite user with email to tenant.")
@@ -20,23 +20,24 @@
   (verify-invite [this tenant-conn tenant id] "Add user to tenant."))
 
 
-(defn do-invite [tenant-conn {:keys [emailer keycloak] :as user-manager}
-                 server-name email author-claims]
-  (if (keycloak/user? keycloak email)
-    (let [{invite-id :id
-           :as invite}
-          (first (insert-invite tenant-conn
-                                {:email email
-                                 :expire (c/to-sql-time (t/plus (t/now)
-                                                                (t/weeks 2)))
-                                 :author author-claims}))
-          recipients [email]
-          text-part (invite-email user-manager server-name invite-id
-                                  (get author-claims "name"))
-          email {"Subject" "Akvo Lumen invite"
-                 "Text-part" text-part}]
-      (emailer/send-email emailer recipients email))
-    (prn (format "Tried to invite non existing user with email: %s" email))))
+(defn do-tenant-invite
+  [{emailer :emailer :as user-manager}
+   tenant-conn server-name email author-claims]
+  (let [{invite-id :id :as invite}
+        (first (insert-invite tenant-conn
+                              {:author author-claims
+                               :email email
+                               :expire (c/to-sql-time (t/plus (t/now)
+                                                              (t/weeks 2)))}))
+        recipients [email]
+        text-part (tenant-invite-email user-manager server-name invite-id
+                                       (get author-claims "name"))
+        email {"Subject" "Akvo Lumen invite"
+               "Text-part" text-part}]
+    (emailer/send-email emailer recipients email)))
+
+(defn do-user-and-tenant-invite [user-manager tenant-conn server-name email author-claims]
+  (println "Should invite user"))
 
 
 (defn do-verify-invite [tenant-conn keycloak tenant id location]
@@ -62,7 +63,7 @@
   (users [{:keys [keycloak]} tenant]
     (keycloak/users keycloak tenant))
 
-  (invite-email [this server-name invite-id author-name]
+  (tenant-invite-email [this server-name invite-id author-name]
     (str/join
      "\n"
      ["Hi,"
@@ -74,9 +75,14 @@
       "Thanks"
       "Akvo"]))
 
-  (invite [this tenant-conn server-name email author-claims]
-    (future
-      (do-invite tenant-conn this server-name email author-claims))
+  (invite [{keycloak :keycloak :as this}
+           tenant-conn server-name email author-claims]
+    #_(future
+        (do-invite tenant-conn this server-name email author-claims))
+
+    (if (keycloak/user? keycloak email)
+      (do-tenant-invite this tenant-conn server-name email author-claims)
+      (do-user-and-tenant-invite this tenant-conn server-name email author-claims))
     (response {:invite "created"}))
 
   (invites [this tenant-conn]
@@ -102,11 +108,14 @@
   (users [{:keys [keycloak]} tenant]
     (keycloak/users keycloak tenant))
 
-  (invite-email [this server-name invite-id author-name]
-    (format "http://%s:3000/verify/%s" server-name invite-id ))
+  (tenant-invite-email [this server-name invite-id author-name]
+    (format "http://%s:3000/verify/%s" server-name invite-id))
 
-  (invite [this tenant-conn server-name email author-claims]
-    (do-invite tenant-conn this server-name email author-claims)
+  (invite [{keycloak :keycloak :as this}
+           tenant-conn server-name email author-claims]
+    (if (keycloak/user? keycloak email)
+      (do-tenant-invite this tenant-conn server-name email author-claims)
+      (do-user-and-tenant-invite this tenant-conn server-name email author-claims))
     (response {:invite "created"}))
 
   (invites [this tenant-conn]
