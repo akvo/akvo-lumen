@@ -9,11 +9,21 @@
 
 
 (defprotocol UserManager
-  (users [this tenant-label] "List tenants users")
-  (add-user-with-email [this tenant-label email] "Add user to tenant")
-  (user? [this email] "Predicate to see if the email has a user in KC")
-
-  )
+  (add-user-with-email
+    [this tenant-label email]
+    "Add user to tenant")
+  (create-user
+    [this request-draft email]
+    "Create user")
+  (reset-password
+    [this request-draft user-id tmp-password]
+    "Set temporary user password")
+  (user?
+    [this email]
+    "Predicate to see if the email has a user in KC")
+  (users
+    [this tenant-label]
+    "List tenants users"))
 
 
 (defn fetch-openid-configuration
@@ -84,11 +94,16 @@
                    candidates))))
 
 (defn add-user-to-group
-  [api-root request-options user-id group-id]
+  [request-options api-root user-id group-id]
   (:status (client/put (format "%s/users/%s/groups/%s"
                           api-root user-id group-id)
                   request-options)))
 
+(defn set-user-have-verified-email
+  [request-draft api-root user-id]
+  (:status (client/put (format "%s/users/%s" api-root user-id)
+                       (assoc request-draft
+                              :body (json/encode {"emailVerified" true})))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Component
@@ -104,23 +119,41 @@
     (assoc this :openid-config nil))
 
   UserManager
-  (users [this tenant-label]
-    (tenant-members this tenant-label))
-
   (add-user-with-email [{:keys [api-root] :as keycloak} tenant-label email]
     (let [request-options (request-options keycloak)
           user-id (get (fetch-user-by-email api-root request-options email)
                        "id")
           group-id (get (group-by-path keycloak tenant-label request-options)
-                        "id")
-          resp-code (add-user-to-group api-root request-options user-id group-id)]
-      (= resp-code 204)))
+                        "id")]
+      (and (= 204 (add-user-to-group
+                   request-options api-root user-id group-id))
+           (= 204 (set-user-have-verified-email
+                   request-options api-root user-id)))))
+
+  (create-user [{api-root :api-root} request-draft email]
+    (client/post (format "%s/users" api-root)
+                 (assoc request-draft
+                        :body (json/encode
+                               {"username" email
+                                "email" email
+                                "emailVerified" false
+                                "enabled" true}))))
+
+  (reset-password [{api-root :api-root} request-draft user-id tmp-password]
+    (client/put (format "%s/users/%s/reset-password" api-root user-id)
+                (assoc request-draft
+                       :body (json/encode {"temporary" true
+                                           "type" "password"
+                                           "value" tmp-password}))))
 
   (user? [keycloak email]
     (let [request-options (request-options keycloak)]
       (not (nil? (fetch-user-by-email (:api-root keycloak)
                                       request-options
-                                      email))))))
+                                      email)))))
+
+  (users [this tenant-label]
+    (tenant-members this tenant-label)))
 
 (defn keycloak [{:keys [credentials url realm]}]
   (map->KeycloakAgent {:issuer (format "%s/realms/%s" url realm)
