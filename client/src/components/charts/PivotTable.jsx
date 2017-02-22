@@ -29,6 +29,14 @@ const formatCell = (index, cell, spec, columns) => {
   return cell;
 };
 
+const formatTitle = (title) => {
+  const maxTitleLength = 64;
+
+  if (title.length <= maxTitleLength) return title;
+
+  return `${title.substring(0, maxTitleLength - 1)}…`;
+};
+
 export default function PivotTable({ width, height, visualisation }) {
   const data = visualisation.data;
 
@@ -77,8 +85,9 @@ export default function PivotTable({ width, height, visualisation }) {
               <th
                 key={index}
                 className={getColumnHeaderClassname(cell, index, visualisation.spec)}
+                title={index === 0 ? cell.title : replaceLabelIfValueEmpty(cell.title)}
               >
-                {index === 0 ? cell.title : replaceLabelIfValueEmpty(cell.title)}
+                {formatTitle(index === 0 ? cell.title : replaceLabelIfValueEmpty(cell.title))}
               </th>
             )}
           </tr>
@@ -87,9 +96,15 @@ export default function PivotTable({ width, height, visualisation }) {
           {data.rows.map((row, rowIndex) =>
             <tr key={rowIndex}>
               {row.map((cell, cellIndex) =>
-                <td key={cellIndex}>
+                <td
+                  key={cellIndex}
+                  // Only set the title attribute if the index is 0
+                  {...cellIndex === 0 ?
+                    { title:  replaceLabelIfValueEmpty(cell) } : {}
+                  }
+                >
                   {cellIndex === 0 ?
-                    replaceLabelIfValueEmpty(cell)
+                    formatTitle(replaceLabelIfValueEmpty(cell))
                     :
                     formatCell(cellIndex, cell, visualisation.spec, data.columns)
                   }
