@@ -3,7 +3,7 @@ function set-lumen-request-token --description "Prepare lumen-request."
          set -g -x AKVO_LUMEN_ACCESS_TOKEN (
              http --form POST $url username='jerome' \
                   password='password' \
-                  client_id='lumen' \
+                  client_id='akvo-lumen' \
                   grant_type=password \
                   | jq '.access_token' | tr -d '"')
         echo $AKVO_LUMEN_ACCESS_TOKEN

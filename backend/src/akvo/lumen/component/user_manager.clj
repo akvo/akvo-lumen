@@ -31,7 +31,9 @@
     [this tenant-conn tenant id]
     "Add user to tenant."))
 
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Helper fns
+;;;
 
 (defn do-tenant-invite
   [{emailer :emailer :as user-manager}
@@ -60,7 +62,7 @@
 (defn do-user-and-tenant-invite
   [{:keys [api-root emailer keycloak] :as user-manager}
    tenant-conn server-name email author-claims]
-  (let [request-draft (keycloak/request-options keycloak)
+  (let [request-draft (keycloak/request-draft keycloak)
         user-id (yank-user-id keycloak request-draft
                               (keycloak/create-user keycloak request-draft email))
         tmp-password (random-url-safe-string 6)
@@ -79,6 +81,7 @@
     (keycloak/reset-password keycloak request-draft user-id tmp-password)
     (emailer/send-email emailer recipients email)))
 
+
 (defn do-verify-invite [tenant-conn keycloak tenant id location]
   (if-let [{email :email} (first (consume-invite tenant-conn {:id id}))]
     (if-let [accepted (keycloak/add-user-with-email keycloak tenant email)]
@@ -88,6 +91,11 @@
                  :status 422}))
     (response {:status 422
                :body "Could not verify invite."})))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; UserManager component
+;;;
 
 (defrecord UserManager []
 
@@ -147,6 +155,10 @@
 (defn user-manager [options]
   (map->UserManager options))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; DevUsermanager component
+;;;
 
 (defrecord DevUserManager []
 
