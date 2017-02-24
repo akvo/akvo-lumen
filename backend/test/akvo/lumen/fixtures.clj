@@ -10,7 +10,7 @@
             [reloaded.repl :refer [go stop]]))
 
 #_(def config
-  {:db {:uri "jdbc:postgresql://localhost/lumen?user=lumen&password=password"}})
+    {:db {:uri "jdbc:postgresql://localhost/lumen?user=lumen&password=password"}})
 
 (def test-tenant-spec
   (->> "seed.edn" io/resource slurp edn/read-string
@@ -38,6 +38,16 @@
   [tenant]
   (let [spec (ragtime-spec tenant)]
     (repl/rollback spec (count (:migrations spec)))))
+
+
+(defn- user-manager-ragtime-spec []
+  {:datastore
+   (jdbc/sql-database {:connection-uri "jdbc:postgresql://localhost/lumen?user=lumen&password=password"})
+   :migrations
+   (jdbc/load-resources "akvo/lumen/migrations/tenant_manager")})
+
+(defn migrate-user-manager []
+  (repl/migrate (user-manager-ragtime-spec)))
 
 (defn db-fixture
   "When we only want to have a migrated db and not run the system"
