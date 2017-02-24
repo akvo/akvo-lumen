@@ -11,7 +11,7 @@
 
 (hugsql/def-db-fns "akvo/lumen/component/user_manager.sql")
 
-(defprotocol IUserManager
+(defprotocol UserManagement
   (invite
     [this tenant-conn server-name email author-claims]
     "Invite user with email to tenant.")
@@ -106,7 +106,7 @@
   (stop [this]
     this)
 
-  IUserManager
+  UserManagement
   (invite [{keycloak :keycloak :as this}
            tenant-conn server-name email author-claims]
 
@@ -169,7 +169,7 @@
   (stop [this]
     this)
 
-  IUserManager
+  UserManagement
   (invite [{keycloak :keycloak :as this}
            tenant-conn server-name email author-claims]
     (if (keycloak/user? keycloak email)

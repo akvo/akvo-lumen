@@ -9,7 +9,7 @@
             [ring.util.response :refer [not-found response]]))
 
 
-(defprotocol UserManager
+(defprotocol KeycloakUserManagement
   (add-user-with-email
     [this tenant-label email]
     "Add user to tenant")
@@ -133,7 +133,7 @@
   (stop [this]
     (assoc this :openid-config nil))
 
-  UserManager
+  KeycloakUserManagement
   (add-user-with-email [{:keys [api-root] :as keycloak} tenant-label email]
     (let [request-draft (request-draft keycloak)
           user-id (get (fetch-user-by-email request-draft api-root email)

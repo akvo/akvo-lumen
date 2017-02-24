@@ -61,8 +61,7 @@
             *user-manager* (:user-manager test-system)]
     (f)
     (alter-var-root #'test-system component/stop)
-    (rollback-tenant test-tenant-spec)
-    ))
+    (rollback-tenant test-tenant-spec)))
 
 (use-fixtures :once fixture)
 

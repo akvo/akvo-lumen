@@ -1,6 +1,14 @@
 # Release Notes
 
-## 0.7.0 (Unreleased)
+## 0.6.1
+
+Date 2017-02-24
+
+### New and noteworthy
+
+* Admin view in sidebar is now linked up to a simple overview of what users
+  keycloak currently knows about and a form for inviting a user by their
+  email address.
 
 ## 0.6.0
 
@@ -14,17 +22,6 @@ Date 2017-02-20
 ### Bugfixes
 
 * Fixed transformation log description for text transforms
-
-Date
-
-### New and noteworthy
-
-* Admin view in sidebar is now linked up to a simple overview of what users
-  keycloak currently knows about and a form for inviting a user by their
-  email address.
-
-### Bugfixes
-
 
 ## 0.5.4
 

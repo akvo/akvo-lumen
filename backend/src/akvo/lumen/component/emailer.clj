@@ -4,7 +4,7 @@
             [clj-http.client :as client]
             [clojure.pprint :refer [pprint]]))
 
-(defprotocol ISendEmail
+(defprotocol SendEmail
   (send-email [this recipients email] "Send email"))
 
 (defrecord DevEmailer []
@@ -16,7 +16,7 @@
   (stop [this]
     this)
 
-  ISendEmail
+  SendEmail
   (send-email [this recipients email]
     (println "DevEmailer:")
     (pprint recipients)
@@ -35,7 +35,7 @@
   (stop [this]
     this)
 
-  ISendEmail
+  SendEmail
   (send-email [{{credentials :credentials
                  api-root :api-url
                  from-email :from-email
