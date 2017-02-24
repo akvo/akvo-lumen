@@ -2,6 +2,11 @@
 
 ## 0.7.0 (Unreleased)
 
+### Bugfixes
+
+* Fix bug where pie and donut chart labels would not show percentage values
+* Fix bug where pie and donut segments would not show "hover" color when cursor hovered label
+
 ## 0.6.0
 
 Date 2017-02-20
