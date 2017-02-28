@@ -195,6 +195,7 @@ export function getPieData(visualisation, datasets) {
   const { datasetId, spec } = visualisation;
   const dataset = datasets[datasetId];
   const bucketIndex = getColumnIndex(dataset, spec.bucketColumn);
+  const bucketColumnType = dataset.get('columns').get(bucketIndex).get('type');
   const rowFilter = filterFn(spec.filters, dataset.get('columns'));
 
   const valueArray = dataset.get('rows')
@@ -211,7 +212,24 @@ export function getPieData(visualisation, datasets) {
       as: ['bucketCount'],
     }])
     .execute(valueArray)
-    .sort((a, b) => a.bucketValue.localeCompare(b.bucketValue));
+    .sort((a, b) => {
+      if (bucketColumnType === 'text') {
+        const valA = a.bucketValue || 'zzzzzzz';
+        const valB = b.bucketValue || 'zzzzzzz';
+
+        return valA.bucketValue.localeCompare(valB);
+      }
+
+      // Bucket value might still be a string if this is the "empty value" bucket
+      let valA = parseFloat(a.bucketValue);
+      let valB = parseFloat(b.bucketValue);
+
+      // If this is the "empty value" bucket, make sure it comes last in the chart
+      if (isNaN(valA)) valA = Infinity;
+      if (isNaN(valB)) valB = Infinity;
+
+      return valA - valB;
+    });
 
   return [{
     name: 'table',
