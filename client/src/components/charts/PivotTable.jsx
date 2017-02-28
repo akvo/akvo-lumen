@@ -3,6 +3,9 @@ import { replaceLabelIfValueEmpty } from '../../utilities/chart';
 
 require('../../styles/PivotTable.scss');
 
+const meanPixelsPerChar = 7.5; // Used for calculating min-widths for columns
+const defaultCategoryWidth = 100; // Number of pixels to wrap category columns at
+
 const getColumnHeaderClassname = (cell, index, spec) => {
   if (index === 0) {
     if (spec.rowColumn !== null) {
@@ -14,6 +17,14 @@ const getColumnHeaderClassname = (cell, index, spec) => {
   }
   return 'uniqueColumnValue';
 };
+
+/* Returns the min column width that will limit wrapping to two lines.
+/* This is not currently possible with a stylesheet-only approach. */
+const getMinRowTitleWidth = text =>
+  Math.min(Math.ceil((text.length * meanPixelsPerChar) / 2), 32 * meanPixelsPerChar);
+
+const getMinCategoryTitleWidth = text =>
+  Math.min(text.length * meanPixelsPerChar, defaultCategoryWidth );
 
 const formatCell = (index, cell, spec, columns) => {
   const type = columns[index].type;
@@ -31,10 +42,10 @@ const formatCell = (index, cell, spec, columns) => {
 
 const formatTitle = (title) => {
   const maxTitleLength = 64;
+  if (!title) return title;
+  if (title.toString().length <= maxTitleLength) return title;
 
-  if (title.length <= maxTitleLength) return title;
-
-  return `${title.substring(0, maxTitleLength - 1)}…`;
+  return `${title.toString().substring(0, maxTitleLength - 1)}…`;
 };
 
 export default function PivotTable({ width, height, visualisation }) {
@@ -66,7 +77,9 @@ export default function PivotTable({ width, height, visualisation }) {
         <thead>
           <tr className="title">
             <th colSpan={data.columns.length}>
-              {visualisation.name}
+              <span>
+                {visualisation.name}
+              </span>
             </th>
           </tr>
           {data.metadata.categoryColumnTitle &&
@@ -76,7 +89,9 @@ export default function PivotTable({ width, height, visualisation }) {
                 colSpan={data.columns.length - 1}
                 className="categoryColumnTitle"
               >
-                {data.metadata.categoryColumnTitle}
+                <span>
+                  {data.metadata.categoryColumnTitle}
+                </span>
               </th>
             </tr>
           }
@@ -87,7 +102,13 @@ export default function PivotTable({ width, height, visualisation }) {
                 className={getColumnHeaderClassname(cell, index, visualisation.spec)}
                 title={index === 0 ? cell.title : replaceLabelIfValueEmpty(cell.title)}
               >
-                {formatTitle(index === 0 ? cell.title : replaceLabelIfValueEmpty(cell.title))}
+                <span
+                  style={{
+                    minWidth: getMinCategoryTitleWidth(formatTitle(index === 0 ? cell.title : replaceLabelIfValueEmpty(cell.title)))
+                  }}
+                >
+                  {formatTitle(index === 0 ? cell.title : replaceLabelIfValueEmpty(cell.title))}
+                </span>
               </th>
             )}
           </tr>
@@ -97,17 +118,29 @@ export default function PivotTable({ width, height, visualisation }) {
             <tr key={rowIndex}>
               {row.map((cell, cellIndex) =>
                 <td
+
                   key={cellIndex}
-                  // Only set the title attribute if the index is 0
+                  className={cellIndex === 0 ? 'uniqueRowValue' : 'cell'}
+                  // Only set the title  attribute if the index is 0
                   {...cellIndex === 0 ?
-                    { title:  replaceLabelIfValueEmpty(cell) } : {}
+                    {
+                      title:  replaceLabelIfValueEmpty(cell),
+                    } : {}
                   }
                 >
-                  {cellIndex === 0 ?
-                    formatTitle(replaceLabelIfValueEmpty(cell))
-                    :
-                    formatCell(cellIndex, cell, visualisation.spec, data.columns)
-                  }
+                  <span>
+                    {cellIndex === 0 ?
+                      <span
+                        style={{
+                          minWidth: getMinRowTitleWidth(cell)
+                        }}
+                      >
+                        {formatTitle(replaceLabelIfValueEmpty(cell))}
+                      </span>
+                      :
+                      formatCell(cellIndex, cell, visualisation.spec, data.columns)
+                    }
+                  </span>
                 </td>
               )}
             </tr>

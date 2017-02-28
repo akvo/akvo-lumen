@@ -2,7 +2,9 @@
 
 .PivotTable {
   position: relative;
-  overflow-x: auto;
+  overflow: auto;
+  width: 100%;
+  height: 100%;
   padding: 0.5rem 1rem;
 
   table {
@@ -18,8 +20,26 @@
     border: 0.1rem solid $midGrey;
     padding: 0.25rem;
   }
+  td.cell {
+    text-align: right;
+    vertical-align: bottom;
+  }
   .categoryColumnTitle, .rowColumnTitle {
     background-color: $lightBlueGrey;
+  }
+  .uniqueColumnValue {
+    span {
+      font-size: 0.9rem;
+      display: block;
+      line-height: 1.4em;
+    }
+  }
+  .uniqueRowValue {
+    span {
+      font-size: 0.9rem;
+      display: block;
+      line-height: 1.4em;
+    }
   }
   .spacer {
     background-color: transparent;
