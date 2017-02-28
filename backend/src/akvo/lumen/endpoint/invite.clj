@@ -1,6 +1,7 @@
 (ns akvo.lumen.endpoint.invite
   (:require [akvo.lumen.component.tenant-manager :refer [connection]]
             [akvo.lumen.component.user-manager :as user-manager]
+            [akvo.lumen.http :as http]
             [compojure.core :refer :all]))
 
 
@@ -13,7 +14,12 @@
 
       (POST "/" {{:strs [email]} :body}
         (user-manager/invite user-manager tenant-conn server-name email
-                             jwt-claims)))))
+                             jwt-claims))
+
+      (context "/:id" [id]
+
+        (DELETE "/" _
+          (http/not-implemented {}))))))
 
 (defn verify-endpoint [{:keys [tenant-manager user-manager]}]
   (context "/verify" {:keys [tenant]}

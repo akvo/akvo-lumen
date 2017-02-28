@@ -12,3 +12,4 @@
 (def bad-request (response 400))
 (def not-found (response 404))
 (def internal-server-error (response 500))
+(def not-implemented (response 501))
