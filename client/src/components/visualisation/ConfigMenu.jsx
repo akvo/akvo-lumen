@@ -10,6 +10,7 @@ import LineConfigMenu from './configMenu/LineConfigMenu';
 import PieConfigMenu from './configMenu/PieConfigMenu';
 import ScatterConfigMenu from './configMenu/ScatterConfigMenu';
 import MapConfigMenu from './configMenu/MapConfigMenu';
+import PivotTableConfigMenu from './configMenu/PivotTableConfigMenu';
 import visualisationTypes from '../../containers/Visualisation/visualisationTypes';
 
 require('../../styles/ConfigMenu.scss');
@@ -145,6 +146,16 @@ export default function ConfigMenu(props) {
         />);
         break;
 
+      case 'pivot table':
+        chartTypeEditor = (<PivotTableConfigMenu
+          visualisation={props.visualisation}
+          onChangeSpec={props.onChangeVisualisationSpec}
+          datasets={props.datasets}
+          columnOptions={columnOptions}
+          aggregationOptions={aggregationOptions}
+        />);
+        break;
+
       default:
         throw new Error(`Invalid visualisation type "${visualisationType}"`);
     }
@@ -159,7 +170,7 @@ export default function ConfigMenu(props) {
             <ul>
               {visualisationTypes.map((vType, index) =>
                 <li
-                  className="clickable typeButton"
+                  className={`clickable typeButton ${vType.replace(/ /, '')}`}
                   key={index}
                   onClick={() => props.onChangeVisualisationType(vType)}
                 >

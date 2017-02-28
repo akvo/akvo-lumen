@@ -9,6 +9,7 @@ import { fetchLibrary } from '../actions/library';
 import mapSpecTemplate from './Visualisation/mapSpecTemplate';
 import pieSpecTemplate from './Visualisation/pieSpecTemplate';
 import lineSpecTemplate from './Visualisation/lineSpecTemplate';
+import pivotTableSpecTemplate from './Visualisation/pivotTableSpecTemplate';
 import scatterSpecTemplate from './Visualisation/scatterSpecTemplate';
 import barSpecTemplate from './Visualisation/barSpecTemplate';
 
@@ -179,6 +180,10 @@ class Visualisation extends Component {
 
       case 'bar':
         specTemplate = Object.assign({}, barSpecTemplate);
+        break;
+
+      case 'pivot table':
+        specTemplate = Object.assign({}, pivotTableSpecTemplate);
         break;
 
       default:

@@ -18,7 +18,7 @@
   }
   .VisualisationConfig {
     display: block;
-    overflow: scroll;
+    overflow: auto;
     position: relative;
     width: 30%;
     padding-bottom: 4rem;
@@ -27,5 +27,6 @@
   }
   .VisualisationPreview {
     flex: 1;
+    max-width: 70%;
   }
 }

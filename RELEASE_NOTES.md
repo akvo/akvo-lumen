@@ -1,6 +1,32 @@
 # Release Notes
 
-## 0.6.0 (Unreleased)
+## 0.6.1
+
+Date 2017-02-24
+
+### New and noteworthy
+
+* Admin view in sidebar is now linked up to a simple overview of what users
+  keycloak currently knows about and a form for inviting a user by their
+  email address.
+
+### Bugfixes
+
+* Fix bug where pie and donut chart labels would not show percentage values
+* Fix bug where pie and donut segments would not show "hover" color when cursor hovered label
+
+## 0.6.0
+
+Date 2017-02-20
+
+### New and noteworthy
+
+* Pivot table visualisations
+* Better derived column formula UI feedback
+
+### Bugfixes
+
+* Fixed transformation log description for text transforms
 
 ## 0.5.4
 

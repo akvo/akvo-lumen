@@ -5,7 +5,7 @@ import collections from './collections';
 import activeModal from './activeModal';
 import notification from './notification';
 
-function user(state = {}, action) {
+function profile(state = {}, action) {
   switch (action.type) {
     default: return state;
   }
@@ -16,7 +16,7 @@ const rootReducer = combineReducers({
   library,
   collections,
   activeModal,
-  user,
+  profile,
   notification,
 });
 

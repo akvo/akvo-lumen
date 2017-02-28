@@ -134,7 +134,7 @@ export default class DashboardEditor extends Component {
     if (this.props.dashboard.entities[item.id]) {
       delete newEntities[item.id];
     } else if (itemType === 'visualisation') {
-      this.props.onAddVisualisation(this.props.visualisations[item.id].datasetId);
+      this.props.onAddVisualisation(this.props.visualisations[item.id]);
       newEntities[item.id] = {
         type: itemType,
         id: item.id,

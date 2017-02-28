@@ -15,16 +15,19 @@
 ;;; Middleware
 ;;;
 
+(defn subdomain? [host]
+  (>= (get (frequencies host) \.) 2))
+
 (defn wrap-label-tenant
   "Parses the first dns label as tenant id and adds it to the request map as
   tenant-id."
   [handler]
   (fn [req]
-    (handler (assoc req
-                    :tenant
-                    (first (str/split (get-in req [:headers "host"])
-                                      #"\."))))))
-
+    (let [host (get-in req [:headers "host"])]
+      (if (subdomain? host)
+        (handler (assoc req :tenant (first (str/split host #"\."))))
+        {:status 400
+         :body "Not a tenant"}))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Component

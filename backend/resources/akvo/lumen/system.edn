@@ -1,7 +1,10 @@
 {:components
  {:app  #var duct.component.handler/handler-component
   :db #var duct.component.hikaricp/hikaricp
+  :emailer #var akvo.lumen.component.emailer/mailjet-emailer
   :http #var akvo.lumen.component.http/http
+  :keycloak #var akvo.lumen.component.keycloak/keycloak
+  :user-manager #var akvo.lumen.component.user-manager/user-manager
   :tenant-manager #var akvo.lumen.component.tenant-manager/tenant-manager
   :transformation-engine #var akvo.lumen.component.transformation-engine/transformation-engine}
  :endpoints
@@ -10,17 +13,22 @@
   :env #var akvo.lumen.endpoint.env/endpoint
   :files #var akvo.lumen.endpoint.files/endpoint
   :flow #var akvo.lumen.endpoint.flow/endpoint
+  :invite #var akvo.lumen.endpoint.invite/endpoint
+  :invite-verify #var akvo.lumen.endpoint.invite/verify-endpoint
   :job-execution #var akvo.lumen.endpoint.job-execution/endpoint
   :library #var akvo.lumen.endpoint.library/endpoint
+  :pivot #var akvo.lumen.endpoint.pivot/endpoint
   :public #var akvo.lumen.endpoint.public/endpoint
   :root #var akvo.lumen.endpoint.root/endpoint
   :share #var akvo.lumen.endpoint.share/endpoint
   :transformation #var akvo.lumen.endpoint.transformation/endpoint
+  :user #var akvo.lumen.endpoint.user/endpoint
   :visualisation #var akvo.lumen.endpoint.visualisation/endpoint}
  :dependencies
  {:http [:app]
-  :app [:dashboard :dataset :env :files :flow :job-execution :library :public
-        :root :share :transformation :visualisation]
+  :app [:dashboard :dataset :env :emailer :files :flow :invite :invite-verify
+        :job-execution :library :pivot :public :root :share :transformation :user
+        :visualisation]
   :tenant-manager [:db]
   :transformation-engine [:tenant-manager]
   :dashboard [:tenant-manager]
@@ -28,12 +36,17 @@
   :env [:config]
   :files [:config]
   :flow [:tenant-manager :config]
+  :invite [:tenant-manager :user-manager]
+  :invite-verify [:tenant-manager :user-manager]
   :job-execution [:tenant-manager]
   :library [:tenant-manager]
+  :pivot [:tenant-manager]
   :public [:tenant-manager]
   :root [:tenant-manager]
   :share [:tenant-manager :config]
   :transformation [:transformation-engine :tenant-manager]
+  :user [:user-manager]
+  :user-manager [:emailer :keycloak]
   :visualisation [:tenant-manager]}
  :config
  {:app
@@ -53,21 +66,35 @@
     [:not-found :json-response :ring-defaults :json-body
      :wrap-auth :wrap-jwt :wrap-label-tenant :hide-errors]
     :arguments
-    {:not-found   "Resource Not Found"
+    {:not-found "Resource Not Found"
      :hide-errors "Internal Server Error"
-     :wrap-jwt {:keycloak-url   keycloak-url
+     :wrap-jwt {:keycloak-url keycloak-url
                 :keycloak-realm keycloak-realm}
      :ring-defaults
-     {:params    {:urlencoded true
-                  :keywordize true}
+     {:params {:urlencoded true
+               :keywordize true}
       :responses {:not-modified-responses true
-                  :absolute-redirects     true
-                  :content-types          true
-                  :default-charset        "utf-8"}}}}}
+                  :absolute-redirects true
+                  :content-types true
+                  :default-charset "utf-8"}}}}}
   :http
   {:port http-port}
   :db
   {:uri db-uri}
-  :config {:keycloak-url keycloak-url
-           :file-upload-path file-upload-path
-           :flow-report-database-url flow-report-database-url}}}
+  :emailer
+  {:email-host email-host
+   :email-password email-password
+   :email-user email-user
+   :from-email "noreply@akvo.org"
+   :from-name "Akvo Lumen"}
+  :config
+  {:file-upload-path file-upload-path
+   :flow-report-database-url flow-report-database-url
+   :keycloak-url keycloak-url
+   :keycloak-realm keycloak-realm
+   :keycloak-public-client-id keycloak-public-client-id}
+  :keycloak
+  {:url keycloak-url
+   :realm keycloak-realm
+   :credentials {"client_id" keycloak-client-id
+                 "client_secret" keycloak-client-secret}}}}
