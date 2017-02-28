@@ -2,6 +2,7 @@
   (:require [akvo.lumen.component.keycloak :as keycloak]
             [akvo.lumen.component.emailer :as emailer]
             [akvo.lumen.lib.share-impl :refer [random-url-safe-string]]
+            [akvo.lumen.http :as http]
             [clj-time.coerce :as c]
             [clj-time.core :as t]
             [clojure.string :as str]
@@ -18,6 +19,9 @@
   (invites
     [this tenant-conn]
     "List active invites.")
+  (delete-invite
+    [this tenant-conn id]
+    "Deletes invite")
   (tenant-invite-email
     [this server-name invite-id author-claims]
     "Constructs the tenant invite email body")
@@ -93,6 +97,17 @@
                :body "Could not verify invite."})))
 
 
+(defn do-delete-invite
+  [tenant-conn id]
+  (delete-active-invite-by-id tenant-conn {:id id})
+  (let [resp (select-invite-by-id tenant-conn {:id id})]
+    (clojure.pprint/pprint resp)
+    (if (empty? resp)
+      (http/gone {})
+      (http/no-content {})
+      )))
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; UserManager component
 ;;;
@@ -118,6 +133,9 @@
 
   (invites [this tenant-conn]
     (response (select-active-invites tenant-conn)))
+
+  (delete-invite [this tenant-conn id]
+    (do-delete-invite tenant-conn id))
 
   (tenant-invite-email [this server-name invite-id author-name]
     (str/join
@@ -179,6 +197,9 @@
 
   (invites [this tenant-conn]
     (response (select-active-invites tenant-conn)))
+
+  (delete-invite [this tenant-conn id]
+    (do-delete-invite tenant-conn id))
 
   (tenant-invite-email [this server-name invite-id author-name]
     (format "http://%s:3000/verify/%s" server-name invite-id))

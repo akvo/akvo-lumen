@@ -19,7 +19,7 @@
       (context "/:id" [id]
 
         (DELETE "/" _
-          (http/not-implemented {}))))))
+          (user-manager/delete-invite user-manager tenant-conn id))))))
 
 (defn verify-endpoint [{:keys [tenant-manager user-manager]}]
   (context "/verify" {:keys [tenant]}
