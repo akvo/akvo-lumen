@@ -210,7 +210,8 @@ export function getPieData(visualisation, datasets) {
       ops: ['count'],
       as: ['bucketCount'],
     }])
-    .execute(valueArray);
+    .execute(valueArray)
+    .sort((a, b) => a.bucketValue.localeCompare(b.bucketValue));
 
   return [{
     name: 'table',
