@@ -1,4 +1,4 @@
-(defproject org.akvo/lumen "0.6-SNAPSHOT"
+(defproject org.akvo/lumen "0.7-SNAPSHOT"
   :description "Akvo Lumen backend"
   :url "https://github.com/akvo/akvo-lumen"
   :license {:name "GNU Affero General Public License 3.0"
@@ -22,8 +22,8 @@
                  [org.clojure/clojure "1.8.0"]
                  [org.clojure/data.csv "0.1.3"]
                  [org.immutant/web "2.1.6"]
-                 [org.postgresql/postgresql "9.4.1212"]
-                 [org.slf4j/slf4j-nop "1.7.23"]
+                 [org.postgresql/postgresql "42.0.0"]
+                 [org.slf4j/slf4j-nop "1.7.24"]
                  [ragtime/ragtime.jdbc "0.6.4"]
                  [ring "1.5.1"]
                  [ring/ring-defaults "0.2.3"]
@@ -54,7 +54,7 @@
                                     [reloaded.repl "0.2.3"]
                                     [org.clojure/tools.namespace "0.2.11"]
                                     [org.clojure/tools.nrepl "0.2.12"]
-                                    [eftest "0.1.2"]
+                                    [eftest "0.1.3"]
                                     [com.gearswithingears/shrubbery "0.4.1"]
                                     [kerodon "0.8.0"]]
                    :source-paths   ["dev/src"]
