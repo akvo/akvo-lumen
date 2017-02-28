@@ -9,7 +9,7 @@ import { showModal } from '../actions/activeModal';
 
 require('../styles/WorkspaceNav.scss');
 
-const collapsedLocations = ['visualisation/', 'dataset/', 'dashboard/'];
+const collapsedLocations = ['visualisation/', 'dataset/', 'dashboard/', 'admin/users'];
 
 const getCollapsedStatus = (pathname) => {
   let collapsedStatus = false;
@@ -98,7 +98,7 @@ class WorkspaceNav extends Component {
             />
             <h1><Link to="/">Lumen</Link></h1>
           </div>
-          <OrganizationMenu user={this.props.user} />
+          <OrganizationMenu profile={this.props.profile} />
         </div>
         <div className="links">
           <NavLink
@@ -122,7 +122,7 @@ class WorkspaceNav extends Component {
             Activity
           </NavLink>
         </div>
-        <NavWorkspaceSwitch />
+        <NavWorkspaceSwitch profile={this.props.profile} />
       </nav>
     );
   }
@@ -130,7 +130,7 @@ class WorkspaceNav extends Component {
 
 WorkspaceNav.propTypes = {
   collections: PropTypes.array.isRequired,
-  user: PropTypes.object.isRequired,
+  profile: PropTypes.object.isRequired,
   location: PropTypes.object,
   dispatch: PropTypes.func.isRequired,
 };
@@ -139,7 +139,7 @@ function mapStateToProps(state) {
   const collections = Object.keys(state.collections).map(key => state.collections[key]);
   return {
     collections,
-    user: state.user,
+    profile: state.profile,
   };
 }
 

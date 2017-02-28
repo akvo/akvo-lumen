@@ -1,5 +1,6 @@
 {:tenant-manager
- {:tenants
+ {:db_uri "jdbc:postgresql://localhost/lumen?user=lumen&password=password"
+  :tenants
   [{:db_uri "jdbc:postgresql://localhost/lumen_tenant_1?user=lumen&password=password"
     :label "t1"
     :title "Tenant 1"}

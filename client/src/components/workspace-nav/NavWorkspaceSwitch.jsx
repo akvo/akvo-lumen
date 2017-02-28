@@ -1,9 +1,16 @@
-import React from 'react';
+import React, { PropTypes } from 'react';
+import { Link } from 'react-router';
 
-export default function NavWorkspaceSwitch() {
+export default function NavWorkspaceSwitch({ profile }) {
   return (
     <div className="NavWorkspaceSwitch">
-      <a className="disabled">Admin view</a>
+      {profile.admin && <Link to="/admin/users">Admin view</Link>}
     </div>
   );
 }
+
+NavWorkspaceSwitch.propTypes = {
+  profile: PropTypes.shape({
+    admin: PropTypes.bool.isRequired,
+  }).isRequired,
+};
