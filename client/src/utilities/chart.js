@@ -4,6 +4,9 @@ import getVegaPieSpec from './vega-specs/Pie';
 import getVegaAreaSpec from './vega-specs/Area';
 import getVegaBarSpec from './vega-specs/Bar';
 
+// Special value that will always come last alphabetically. Used for sorting.
+const lastValueAlphabetically = '';
+
 /* Filtering */
 
 const getFilterArray = (filters, columns) => {
@@ -214,8 +217,8 @@ export function getPieData(visualisation, datasets) {
     .execute(valueArray)
     .sort((a, b) => {
       if (bucketColumnType === 'text') {
-        const valA = a.bucketValue || 'zzzzzzz';
-        const valB = b.bucketValue || 'zzzzzzz';
+        const valA = a.bucketValue || lastValueAlphabetically;
+        const valB = b.bucketValue || lastValueAlphabetically;
 
         return valA.bucketValue.localeCompare(valB);
       }
@@ -361,8 +364,8 @@ export function getPointColorValues(dataset, columnName, filters) {
 
 export const getPointColorMappingSortFunc = (columnType) => {
   const sortText = (a, b) => {
-    const va = (a.value == null || a.value === 'null' || a.value === '') ? 'zzzzzzz' : a.value;
-    const vb = (b.value == null || b.value === 'null' || b.value === '') ? 'zzzzzzz' : b.value;
+    const va = (a.value == null || a.value === 'null' || a.value === '') ? lastValueAlphabetically : a.value;
+    const vb = (b.value == null || b.value === 'null' || b.value === '') ? lastValueAlphabetically : b.value;
 
     return va > vb;
   };
