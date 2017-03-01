@@ -31,6 +31,10 @@
     [this request-draft user-id tmp-password]
     "Set temporary user password")
 
+  (remove-user
+    [this tenant author-claims user-id]
+    "Remove user from tenant")
+
   (user?
     [this email]
     "Predicate to see if the email has a user in KC")
@@ -180,6 +184,25 @@
           (println (format "Tried to demote user: %s" user-id))
           (http/internal-server-error))))))
 
+(defn do-remove-user
+  [{:keys [api-root] :as keycloak} tenant author-claims user-id]
+  (if (= (get author-claims "sub") user-id)
+    (http/bad-request {"reason" "Tried to alter own tenant role"})
+    (let [request-draft (request-draft keycloak)
+          tenant-group-id (get (group-by-path keycloak request-draft tenant)
+                               "id")
+          admin-group-id (get (group-by-path keycloak request-draft
+                                             (format "%s/admin" tenant))
+                              "id")]
+      (if (and (= 204 (remove-user-from-group request-draft api-root user-id
+                                              admin-group-id))
+               (= 204 (remove-user-from-group request-draft api-root user-id
+                                              tenant-group-id)))
+        (http/no-content)
+        (do
+          (println (format "Tried to demote user: %s" user-id))
+          (http/internal-server-error))))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; KeycloakAgent Component
 ;;;
@@ -227,6 +250,9 @@
                        :body (json/encode {"temporary" true
                                            "type" "password"
                                            "value" tmp-password}))))
+  (remove-user
+    [this tenant author-claims user-id]
+    (do-remove-user this tenant author-claims user-id))
 
   (user? [keycloak email]
     (let [request-draft (request-draft keycloak)]

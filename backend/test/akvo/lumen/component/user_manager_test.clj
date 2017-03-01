@@ -97,36 +97,52 @@
       (is (= 0 (-> (user-manager/invites *user-manager* *tenant-conn*)
                    :body count)))))
 
-  #_(testing "Promote user"
+  (testing "Promote user"
     (let [admin-claims {"realm_access" {"roles" ["akvo:lumen:t1:admin"]}}
           users (:body (user-manager/users *user-manager* "t1"))
           admin-users (filter #(= true (get % "admin")) users)
           non-admin-users (filter #(= false (get % "admin")) users)
-          non-admin-user-id (get (first non-admin-users) "id")]
+          non-admin-user-id (get (first non-admin-users) "id")
+          resp (user-manager/promote-user-to-admin
+                *user-manager* "t1" admin-claims non-admin-user-id)]
+      (is (= 204 (:status resp)))
       (is (= 1 (count admin-users)))
       (let [users-v2 (:body (user-manager/users *user-manager* "t1"))]
         (is (= (count users) (count users-v2)))
         (is (= 2
                (count (filter #(= true (get % "admin"))
-                               users-v2)))))))
+                              users-v2)))))))
+
+  (testing "Demote user"
+    (let [admin-claims {"sub" "123"
+                        "realm_access" {"roles" ["akvo:lumen:t1:admin"]}}
+          users (:body (user-manager/users *user-manager* "t1"))
+          admin-users (filter #(= true (get % "admin")) users)
+          admin-user-id (get (first admin-users) "id")
+          resp (user-manager/demote-user-from-admin
+                *user-manager* "t1" admin-claims admin-user-id)]
+      (is (= 204 (:status resp)))
+      (is (= 2 (count admin-users)))
+      (let [users-v2 (:body (user-manager/users *user-manager* "t1"))]
+        (is (= 1
+               (count (filter #(= true (get % "admin"))
+                              users-v2))))))))
 
 
-  ;; Work in progress - we need to clean Keycloak for these to work properly
-  #_(testing "Accepting invite"
-    (let [original-users (user-manager/users *user-manager* "t1")
-          invite-id (-> (user-manager/invites *user-manager* *tenant-conn*)
-                        :body first :id)]
-      ;; Check inital state
-      (is (= 2 (-> original-users :body count)))
-      (is (not (contains?
-                (set (map #(get % "email")
-                          (-> original-users :body)))
-                ruth-email)))
-      ;; Verify invite
-      (let [resp (user-manager/verify-invite
-                  *user-manager* *tenant-conn* "t1" invite-id)]
-        (is (= 302
-               (:status resp)))
-        (is (= "http://t1.lumen.localhost:3030"
-               (get-in resp [:headers "Location"])))))))
-
+#_(testing "Accepting invite"
+  (let [original-users (user-manager/users *user-manager* "t1")
+        invite-id (-> (user-manager/invites *user-manager* *tenant-conn*)
+                      :body first :id)]
+    ;; Check inital state
+    (is (= 2 (-> original-users :body count)))
+    (is (not (contains?
+              (set (map #(get % "email")
+                        (-> original-users :body)))
+              ruth-email)))
+    ;; Verify invite
+    (let [resp (user-manager/verify-invite
+                *user-manager* *tenant-conn* "t1" invite-id)]
+      (is (= 302
+             (:status resp)))
+      (is (= "http://t1.lumen.localhost:3030"
+             (get-in resp [:headers "Location"]))))))

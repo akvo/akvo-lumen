@@ -39,6 +39,10 @@
     [this tenant author-claims user-id]
     "Promote existing user to admin")
 
+  (remove-user
+    [this tenant author-claims user-id]
+    "Remove user from tenant")
+
   (tenant-invite-email
     [this server-name invite-id author-claims]
     "Constructs the tenant invite email body")
@@ -189,6 +193,10 @@
     [{keycloak :keycloak} tenant author-claims user-id]
     (keycloak/promote-user-to-admin keycloak tenant author-claims user-id))
 
+  (remove-user
+    [{keycloak :keycloak} tenant author-claims user-id]
+    (keycloak/remove-user keycloak tenant author-claims user-id))
+
   (tenant-invite-email [this server-name invite-id author-name]
     (str/join
      "\n"
@@ -260,6 +268,10 @@
   (promote-user-to-admin
     [{keycloak :keycloak} tenant author-claims user-id]
     (keycloak/promote-user-to-admin keycloak tenant author-claims user-id))
+
+  (remove-user
+    [{keycloak :keycloak} tenant author-claims user-id]
+    (keycloak/remove-user keycloak tenant author-claims user-id))
 
   (tenant-invite-email [this server-name invite-id author-name]
     (format "http://%s:3000/verify/%s" server-name invite-id))
