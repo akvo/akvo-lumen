@@ -2,6 +2,7 @@
   (:require [akvo.lumen.component.keycloak :as keycloak]
             [akvo.lumen.component.emailer :as emailer]
             [akvo.lumen.lib.share-impl :refer [random-url-safe-string]]
+            [akvo.lumen.http :as http]
             [clj-time.coerce :as c]
             [clj-time.core :as t]
             [clojure.string :as str]
@@ -18,6 +19,14 @@
   (invites
     [this tenant-conn]
     "List active invites.")
+  (delete-invite
+    [this tenant-conn id]
+    "Deletes non consumed invites, returns 210 if invite was consumed and
+     204 in any other case (both delete of actual invite or non existing).
+
+     We don't want to delete invites that was used. This since we store who
+     created the invite in the \"author\" db field, and this provides
+     traceability. Hence we don't allow deletion of consumed invite.")
   (tenant-invite-email
     [this server-name invite-id author-claims]
     "Constructs the tenant invite email body")
@@ -30,6 +39,7 @@
   (verify-invite
     [this tenant-conn tenant id]
     "Add user to tenant."))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Helper fns
@@ -92,6 +102,14 @@
     (response {:status 422
                :body "Could not verify invite."})))
 
+(defn do-delete-invite
+  "Delete invites that have not been used"
+  [tenant-conn id]
+  (delete-non-consumed-invite-by-id tenant-conn {:id id})
+  (if (empty? (select-consumed-invite-by-id tenant-conn {:id id}))
+    (http/no-content)
+    (http/gone)))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; UserManager component
@@ -118,6 +136,9 @@
 
   (invites [this tenant-conn]
     (response (select-active-invites tenant-conn)))
+
+  (delete-invite [this tenant-conn id]
+    (do-delete-invite tenant-conn id))
 
   (tenant-invite-email [this server-name invite-id author-name]
     (str/join
@@ -179,6 +200,9 @@
 
   (invites [this tenant-conn]
     (response (select-active-invites tenant-conn)))
+
+  (delete-invite [this tenant-conn id]
+    (do-delete-invite tenant-conn id))
 
   (tenant-invite-email [this server-name invite-id author-name]
     (format "http://%s:3000/verify/%s" server-name invite-id))
