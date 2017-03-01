@@ -3,6 +3,11 @@ import Modal from 'react-modal';
 
 require('../../styles/DashboardModal.scss');
 
+function isValidEmail(email) {
+  const regex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
+  return regex.test(email);
+}
+
 export default class InviteUser extends Component {
   constructor(props) {
     super(props);
@@ -23,6 +28,7 @@ export default class InviteUser extends Component {
 
   render() {
     const { isOpen, onClose } = this.props;
+    const isDisabled = !isValidEmail(this.state.email);
     return (
       <Modal
         isOpen={isOpen}
@@ -57,9 +63,9 @@ export default class InviteUser extends Component {
                 className="emailInput"
                 name="email"
                 onChange={this.onChange}
-                placeholder="e.g. user@domain.org"
+                placeholder="Enter email address"
                 type="email"
-                value={this.state.emailAddress}
+                value={this.state.email}
               />
             </div>
             <div className="controls">
@@ -71,6 +77,7 @@ export default class InviteUser extends Component {
               </button>
               <button
                 className="clickable positive"
+                disabled={isDisabled}
                 onClick={this.handleInvite}
               >
               Send invitation
