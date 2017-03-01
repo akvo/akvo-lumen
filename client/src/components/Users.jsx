@@ -7,13 +7,25 @@ import * as api from '../api';
 require('../styles/EntityTypeHeader.scss');
 require('../styles/Users.scss');
 
+function UserActionButton({ id }) {
+  return (
+    <button className="showControls clickable">
+      ...
+    </button>
+  );
+}
 
-function User({ email, username, admin }) {
+UserActionButton.propTypes = {
+  id: PropTypes.string.isRequired,
+};
+
+function User({ email, username, admin, id }) {
   return (
     <tr>
       <td>{username}</td>
       <td>{email}</td>
       <td>{admin ? 'Admin' : 'User'}</td>
+      <td><UserActionButton id={id} /></td>
     </tr>
   );
 }
@@ -22,6 +34,7 @@ User.propTypes = {
   username: PropTypes.string.isRequired,
   email: PropTypes.string.isRequired,
   admin: PropTypes.bool,
+  id: PropTypes.string.isRequired,
 };
 
 User.defaultProps = {
@@ -32,9 +45,20 @@ function UserList({ users }) {
   return (
     <table>
       <tbody>
-        <tr><th>Name</th><th>Email</th><th>Role</th></tr>
-        {users.map(({ email, admin, username }) => (
-          <User key={username} email={email} admin={admin} username={username} />
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Actions</th>
+        </tr>
+        {users.map(({ admin, email, id, username }) => (
+          <User
+            admin={admin}
+            email={email}
+            id={id}
+            key={username}
+            username={username}
+          />
         ))}
       </tbody>
     </table>
