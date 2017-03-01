@@ -22,8 +22,12 @@
 
       (PATCH "/" {:keys [body]}
         (cond
+          (demote-user? body)
+          (user-manager/demote-user-from-admin user-manager tenant jwt-claims id)
+
           (promote-user? body)
           (user-manager/promote-user-to-admin user-manager tenant jwt-claims id)
+
           :else (http/not-implemented)))
 
       (DELETE "/" _

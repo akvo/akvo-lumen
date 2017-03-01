@@ -19,6 +19,10 @@
     [this request-draft email]
     "Create user")
 
+  (demote-user-from-admin
+    [this tenant author-claims user-id]
+    "Demote tenant admin to member")
+
   (promote-user-to-admin
     [this tenant author-claims user-id]
     "Promote existing tenant member to admin")
@@ -156,6 +160,26 @@
           (println (format "Tried to promote user: %s" user-id))
           (http/internal-server-error))))))
 
+
+(defn do-demote-user-from-admin
+  [{:keys [api-root] :as keycloak} tenant author-claims user-id]
+  (if (= (get author-claims "sub") user-id)
+    (http/bad-request {"reason" "Tried to alter own tenant role"})
+    (let [request-draft (request-draft keycloak)
+          tenant-group-id (get (group-by-path keycloak request-draft tenant)
+                               "id")
+          admin-group-id (get (group-by-path keycloak request-draft
+                                             (format "%s/admin" tenant))
+                              "id")]
+      (if (and (= 204 (remove-user-from-group request-draft api-root user-id
+                                              admin-group-id))
+               (= 204 (add-user-to-group request-draft api-root user-id
+                                         tenant-group-id)))
+        (http/no-content)
+        (do
+          (println (format "Tried to demote user: %s" user-id))
+          (http/internal-server-error))))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; KeycloakAgent Component
 ;;;
@@ -189,6 +213,9 @@
                                 "email" email
                                 "emailVerified" false
                                 "enabled" true}))))
+  (demote-user-from-admin
+    [this tenant author-claims user-id]
+    (do-demote-user-from-admin this tenant author-claims user-id))
 
   (promote-user-to-admin
     [this tenant author-claims user-id]

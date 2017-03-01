@@ -31,6 +31,10 @@
      created the invite in the \"author\" db field, and this provides
      traceability. Hence we don't allow deletion of consumed invite.")
 
+  (demote-user-from-admin
+    [this tenant author-claims user-id]
+    "Promote existing user to admin")
+
   (promote-user-to-admin
     [this tenant author-claims user-id]
     "Promote existing user to admin")
@@ -177,6 +181,14 @@
   (delete-invite [this tenant-conn id]
     (do-delete-invite tenant-conn id))
 
+  (demote-user-from-admin
+    [{keycloak :keycloak} tenant author-claims user-id]
+    (keycloak/demote-user-from-admin keycloak tenant author-claims user-id))
+
+  (promote-user-to-admin
+    [{keycloak :keycloak} tenant author-claims user-id]
+    (keycloak/promote-user-to-admin keycloak tenant author-claims user-id))
+
   (tenant-invite-email [this server-name invite-id author-name]
     (str/join
      "\n"
@@ -208,11 +220,7 @@
     (keycloak/users keycloak tenant))
 
   (verify-invite [{keycloak :keycloak} tenant-conn tenant id]
-    (do-verify-invite tenant-conn keycloak tenant id "/"))
-
-  (promote-user-to-admin
-    [{keycloak :keycloak} tenant author-claims user-id]
-    (keycloak/do-promote-user-to-admin keycloak tenant author-claims user-id)))
+    (do-verify-invite tenant-conn keycloak tenant id "/")))
 
 (defn user-manager [options]
   (map->UserManager options))
@@ -244,6 +252,10 @@
 
   (delete-invite [this tenant-conn id]
     (do-delete-invite tenant-conn id))
+
+  (demote-user-from-admin
+    [{keycloak :keycloak} tenant author-claims user-id]
+    (keycloak/demote-user-from-admin keycloak tenant author-claims user-id))
 
   (promote-user-to-admin
     [{keycloak :keycloak} tenant author-claims user-id]
