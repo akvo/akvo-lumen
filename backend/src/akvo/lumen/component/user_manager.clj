@@ -21,7 +21,12 @@
     "List active invites.")
   (delete-invite
     [this tenant-conn id]
-    "Deletes invite")
+    "Deletes non consumed invites, returns 210 if invite was consumed and
+     204 in any other case (both delete of actual invite or non existing).
+
+     We don't want to delete invites that was used. This since we store who
+     created the invite in the \"author\" db field, and this provides
+     traceability. Hence we don't allow deletion of consumed invite.")
   (tenant-invite-email
     [this server-name invite-id author-claims]
     "Constructs the tenant invite email body")
@@ -34,6 +39,7 @@
   (verify-invite
     [this tenant-conn tenant id]
     "Add user to tenant."))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Helper fns
