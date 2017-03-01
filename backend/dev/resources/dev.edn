@@ -1,4 +1,7 @@
-{:config
+{:components
+ {:emailer #var akvo.lumen.component.emailer/dev-emailer
+  :user-manager #var akvo.lumen.component.user-manager/dev-user-manager}
+ :config
  {:app
   {:middleware
    {:functions {:stacktrace #var ring.middleware.stacktrace/wrap-stacktrace}
@@ -8,6 +11,16 @@
                            :keycloak-realm "akvo"}}}}
   :db {:uri "jdbc:postgresql://localhost/lumen?user=lumen&password=password"}
   :http {:port 3000}
-  :config {:keycloak-url "http://localhost:8080/auth"
-           :file-upload-path "/tmp/akvo/lumen"
-           :flow-report-database-url ""}}}
+  :config {:file-upload-path "/tmp/akvo/lumen"
+           :flow-report-database-url ""
+           :keycloak-realm "akvo"
+           :keycloak-url "http://localhost:8080/auth"
+           :keycloak-public-client-id "akvo-lumen"
+           }
+  :emailer {:from-email "devops@akvo.localhost"
+            :from-name "Akvo Lumen"}
+  :keycloak {:url "http://localhost:8080/auth"
+             :realm "akvo"
+             :credentials
+             {"client_id" "akvo-lumen-confidential"
+              "client_secret" "caed3964-09dd-4752-b0bb-22c8e8ffd631"}}}}

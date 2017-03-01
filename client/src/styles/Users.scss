@@ -1,0 +1,49 @@
+@import 'modules/colors';
+
+.UsersContainer {
+  -webkit-flex: 1;
+  flex: 1;
+  overflow: auto;
+  .UserList {
+    margin-top: 4rem;
+    padding: 1rem;
+    h1 {
+      color: $strongBlue;
+      font-size: 1.5rem;
+      font-weight: bold;
+      line-height: 2.5rem;
+    }
+    table {
+      width: 100%;
+      & tr {
+        border-bottom: 0.1rem solid $lightGrey;
+        & th, td {
+          padding: 20px 0 10px 0;
+        }
+        & th {
+          color: $midGrey;
+          text-align: left;
+          font-size: 1.1rem;
+          font-weight: bold;
+        }
+        & td {
+          color: $black;
+          font-weight: bold;
+        }
+      }
+    }
+  }
+}
+
+.InviteUserModal {
+  .contents {
+    line-height: 2.5rem;
+    padding-left: 0;
+    p {
+      margin-top: 1.5rem;
+    }
+  }
+  .emailInput {
+    width: 250px;
+  }
+}
