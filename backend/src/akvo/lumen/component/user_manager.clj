@@ -2,6 +2,7 @@
   (:require [akvo.lumen.component.keycloak :as keycloak]
             [akvo.lumen.component.emailer :as emailer]
             [akvo.lumen.lib.share-impl :refer [random-url-safe-string]]
+            [akvo.lumen.auth :as auth]
             [akvo.lumen.http :as http]
             [clj-time.coerce :as c]
             [clj-time.core :as t]
@@ -16,9 +17,11 @@
   (invite
     [this tenant-conn server-name email author-claims]
     "Invite user with email to tenant.")
+
   (invites
     [this tenant-conn]
     "List active invites.")
+
   (delete-invite
     [this tenant-conn id]
     "Deletes non consumed invites, returns 210 if invite was consumed and
@@ -27,18 +30,26 @@
      We don't want to delete invites that was used. This since we store who
      created the invite in the \"author\" db field, and this provides
      traceability. Hence we don't allow deletion of consumed invite.")
+
   (tenant-invite-email
     [this server-name invite-id author-claims]
     "Constructs the tenant invite email body")
+
   (user-and-tenant-invite-email
     [this server-name invite-id author-claims email tmp-password]
     "Constructs user and tenant invite email body")
+
   (users
     [this tenant]
     "List users of tenant.")
+
   (verify-invite
     [this tenant-conn tenant id]
-    "Add user to tenant."))
+    "Add user to tenant.")
+
+  (promote-user-to-admin
+    [this tenant author-claims user-id]
+    "Promote existing user to admin"))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -110,6 +121,27 @@
     (http/no-content)
     (http/gone)))
 
+(defn do-promote-user-to-admin
+  [keycloak tenant author-claims user-id]
+  (clojure.pprint/pprint tenant)
+  (clojure.pprint/pprint author-claims)
+  (clojure.pprint/pprint user-id)
+
+  (if (= (get author-claims "sub") user-id)
+    (http/bad-request {"reason" "Tried to alter own tenant role"})
+    (if (auth/tenant-admin? {:jwt-claims author-claims :tenant tenant})
+      (http/not-implemented)
+      (http/not-authorized {"reason" "Not tenant admin"})))
+
+  ;; - Who promoted a user?
+  ;; - Can a user self promote (demote)?
+  ;; - Is user authorized to promote other user?
+  ;; - Is the user a tenant memeber?
+
+  ;; author = user-id -> 400
+
+  )
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; UserManager component
@@ -171,7 +203,11 @@
     (keycloak/users keycloak tenant))
 
   (verify-invite [{keycloak :keycloak} tenant-conn tenant id]
-    (do-verify-invite tenant-conn keycloak tenant id "/")))
+    (do-verify-invite tenant-conn keycloak tenant id "/"))
+
+  (promote-user-to-admin
+    [{keycloak :keycloak} tenant author-claims user-id]
+    (do-promote-user-to-admin keycloak tenant author-claims user-id)))
 
 (defn user-manager [options]
   (map->UserManager options))
@@ -217,7 +253,11 @@
 
   (verify-invite [{keycloak :keycloak} tenant-conn tenant id]
     (do-verify-invite tenant-conn keycloak tenant id
-                      (format "http://%s.lumen.localhost:3030" tenant))))
+                      (format "http://%s.lumen.localhost:3030" tenant)))
+
+  (promote-user-to-admin
+    [{keycloak :keycloak} tenant author-claims user-id]
+    (do-promote-user-to-admin keycloak tenant author-claims user-id)))
 
 (defn dev-user-manager [options]
   (map->DevUserManager options))
