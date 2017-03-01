@@ -31,4 +31,4 @@
           :else (http/not-implemented)))
 
       (DELETE "/" _
-        (http/not-implemented)))))
+        (user-manager/remove-user user-manager tenant jwt-claims id)))))
