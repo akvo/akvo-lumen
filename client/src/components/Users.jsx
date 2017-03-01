@@ -7,26 +7,44 @@ import * as api from '../api';
 require('../styles/EntityTypeHeader.scss');
 require('../styles/Users.scss');
 
-function UserActionButton({ id }) {
+const userActions = [
+  { action: 'delete', text: 'Delete', url: '/api/admin/delete' },
+  { action: 'promote', text: 'Enable admin privileges', url: '/api/admin/promote' },
+  { action: 'demote', text: 'Remove admin privileges', url: '/api/admin/demote' },
+];
+
+function UserAction({ text }) {
   return (
-    <button className="showControls userActionButton clickable">
-      -- (User ID is {id}) --
-    </button>
+    <option value={text}>{text}</option>
   );
 }
 
-UserActionButton.propTypes = {
-  action: PropTypes.string.isRequired,
+UserAction.propTypes = {
+  text: PropTypes.string.isRequired,
+};
+
+function UserActionSelector({ admin, id }) {
+  return (
+    <select className="userActionSelector">
+      {userActions.map(({ action, text, url }) => (
+        <UserAction admin={admin} id={id} key={action} text={text} url={url} />
+      ))}
+    </select>
+  );
+}
+
+UserActionSelector.propTypes = {
+  admin: PropTypes.bool,
   id: PropTypes.string.isRequired,
 };
 
-function User({ email, username, admin, id }) {
+function User({ admin, email, id, username }) {
   return (
     <tr>
       <td>{username}</td>
       <td>{email}</td>
       <td>{admin ? 'Admin' : 'User'}</td>
-      <td><UserActionButton id={id} /></td>
+      <td><UserActionSelector admin={admin} id={id} /></td>
     </tr>
   );
 }
@@ -127,7 +145,10 @@ class Users extends Component {
           actionButtons={actionButtons}
         />
         <div className="UserList">
-          <UserList users={this.state.users} />
+          <UserList
+            users={this.state.users}
+            onDeleteUser={this.onDeleteUser}
+          />
         </div>
         <InviteUser
           isOpen={this.state.isInviteModalVisible}
