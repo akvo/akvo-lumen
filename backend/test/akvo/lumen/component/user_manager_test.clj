@@ -87,6 +87,17 @@
       (is (= "ruth@t2.lumen.localhost"
              (-> resp :body first :email)))))
 
+  (testing "Delete non consumed invite"
+    (let [invite-id (-> (user-manager/invites *user-manager* *tenant-conn*)
+                        :body first :id)
+          resp (user-manager/delete-invite *user-manager* *tenant-conn* invite-id)]
+      (is (= 204 (:status resp)))
+      (is (map? (:body resp)))
+      (is (empty? (:body resp)))
+      (is (= 0 (-> (user-manager/invites *user-manager* *tenant-conn*)
+                   :body count)))))
+
+
   ;; Work in progress - we need to clean Keycloak for these to work properly
   #_(testing "Accepting invite"
     (let [original-users (user-manager/users *user-manager* "t1")
