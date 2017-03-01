@@ -9,13 +9,14 @@ require('../styles/Users.scss');
 
 function UserActionButton({ id }) {
   return (
-    <button className="showControls clickable">
-      ...
+    <button className="showControls userActionButton clickable">
+      -- (User ID is {id}) --
     </button>
   );
 }
 
 UserActionButton.propTypes = {
+  action: PropTypes.string.isRequired,
   id: PropTypes.string.isRequired,
 };
 
