@@ -24,7 +24,7 @@ const getMinRowTitleWidth = text =>
   Math.min(Math.ceil((text.length * meanPixelsPerChar) / 2), 32 * meanPixelsPerChar);
 
 const getMinCategoryTitleWidth = text =>
-  Math.min(text.length * meanPixelsPerChar, defaultCategoryWidth );
+  Math.min(text.length * meanPixelsPerChar, defaultCategoryWidth);
 
 const formatCell = (index, cell, spec, columns) => {
   const type = columns[index].type;
@@ -104,7 +104,9 @@ export default function PivotTable({ width, height, visualisation }) {
               >
                 <span
                   style={{
-                    minWidth: getMinCategoryTitleWidth(formatTitle(index === 0 ? cell.title : replaceLabelIfValueEmpty(cell.title)))
+                    minWidth: getMinCategoryTitleWidth(formatTitle(index === 0 ?
+                      cell.title.toString() : replaceLabelIfValueEmpty(cell.title.toString())
+                    )),
                   }}
                 >
                   {formatTitle(index === 0 ? cell.title : replaceLabelIfValueEmpty(cell.title))}
@@ -124,7 +126,7 @@ export default function PivotTable({ width, height, visualisation }) {
                   // Only set the title  attribute if the index is 0
                   {...cellIndex === 0 ?
                     {
-                      title:  replaceLabelIfValueEmpty(cell),
+                      title: replaceLabelIfValueEmpty(cell),
                     } : {}
                   }
                 >
@@ -132,7 +134,7 @@ export default function PivotTable({ width, height, visualisation }) {
                     {cellIndex === 0 ?
                       <span
                         style={{
-                          minWidth: getMinRowTitleWidth(cell)
+                          minWidth: getMinRowTitleWidth(cell ? cell.toString() : ''),
                         }}
                       >
                         {formatTitle(replaceLabelIfValueEmpty(cell))}

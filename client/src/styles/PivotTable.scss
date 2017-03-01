@@ -11,10 +11,17 @@
     max-width: 100%;
     min-width: 50%;
     margin: 0 auto;
-
-    * {
+  }
+  th, .uniqueRowValue,  {
+    span {
       word-break: break-word;
     }
+  }
+  .uniqueRowValue {
+    min-width: 2.6rem;
+  }
+  .uniqueColumnValue {
+    min-width: 2rem;
   }
   td, th {
     border: 0.1rem solid $midGrey;
