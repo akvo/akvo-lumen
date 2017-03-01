@@ -96,16 +96,13 @@
     (response {:status 422
                :body "Could not verify invite."})))
 
-
 (defn do-delete-invite
+  "Delete invites that have not been used"
   [tenant-conn id]
-  (delete-active-invite-by-id tenant-conn {:id id})
-  (let [resp (select-invite-by-id tenant-conn {:id id})]
-    (clojure.pprint/pprint resp)
-    (if (empty? resp)
-      (http/gone {})
-      (http/no-content {})
-      )))
+  (delete-non-consumed-invite-by-id tenant-conn {:id id})
+  (if (empty? (select-consumed-invite-by-id tenant-conn {:id id}))
+    (http/no-content)
+    (http/gone)))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

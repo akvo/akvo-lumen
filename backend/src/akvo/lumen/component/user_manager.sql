@@ -17,13 +17,13 @@ SET consumed = now()
 WHERE id = :id
 RETURNING *;
 
--- :name delete-active-invite-by-id :!
--- :doc Delete invite
+-- :name delete-non-consumed-invite-by-id :!
+-- :doc Delete invite that is not consumed
 DELETE FROM invite
-WHERE id = :id AND (expire >= now() OR consumed IS NOT NULL);
+WHERE id = :id AND consumed IS NULL;
 
--- :name select-invite-by-id :?
--- :doc Select invite even if it's consumed or expired
+-- :name select-consumed-invite-by-id :?
+-- :doc Select invite that is consumed
 SELECT id
 FROM invite
-WHERE id = :id;
+WHERE id = :id and consumed IS NOT NULL;

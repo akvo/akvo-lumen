@@ -13,7 +13,7 @@
     (context "/:id" [id]
 
       (PATCH "/" _
-        (http/not-implemented {}))
+        (http/not-implemented))
 
       (DELETE "/" _
-        (http/not-implemented {})))))
+        (http/not-implemented)))))
