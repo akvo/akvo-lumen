@@ -31,6 +31,10 @@
      created the invite in the \"author\" db field, and this provides
      traceability. Hence we don't allow deletion of consumed invite.")
 
+  (promote-user-to-admin
+    [this tenant author-claims user-id]
+    "Promote existing user to admin")
+
   (tenant-invite-email
     [this server-name invite-id author-claims]
     "Constructs the tenant invite email body")
@@ -45,11 +49,7 @@
 
   (verify-invite
     [this tenant-conn tenant id]
-    "Add user to tenant.")
-
-  (promote-user-to-admin
-    [this tenant author-claims user-id]
-    "Promote existing user to admin"))
+    "Add user to tenant."))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -121,17 +121,22 @@
     (http/no-content)
     (http/gone)))
 
-(defn do-promote-user-to-admin
+
+
+#_(defn do-promote-user-to-admin
   [keycloak tenant author-claims user-id]
   (clojure.pprint/pprint tenant)
   (clojure.pprint/pprint author-claims)
   (clojure.pprint/pprint user-id)
 
-  (if (= (get author-claims "sub") user-id)
-    (http/bad-request {"reason" "Tried to alter own tenant role"})
-    (if (auth/tenant-admin? {:jwt-claims author-claims :tenant tenant})
-      (http/not-implemented)
-      (http/not-authorized {"reason" "Not tenant admin"})))
+
+    (if (= (get author-claims "sub") user-id)
+      (http/bad-request {"reason" "Tried to alter own tenant role"})
+
+      (if (auth/tenant-admin? {:jwt-claims author-claims :tenant tenant})
+
+        (http/not-implemented)
+        (http/not-authorized {"reason" "Not tenant admin"})))
 
   ;; - Who promoted a user?
   ;; - Can a user self promote (demote)?
@@ -207,7 +212,7 @@
 
   (promote-user-to-admin
     [{keycloak :keycloak} tenant author-claims user-id]
-    (do-promote-user-to-admin keycloak tenant author-claims user-id)))
+    (keycloak/do-promote-user-to-admin keycloak tenant author-claims user-id)))
 
 (defn user-manager [options]
   (map->UserManager options))
@@ -240,6 +245,10 @@
   (delete-invite [this tenant-conn id]
     (do-delete-invite tenant-conn id))
 
+  (promote-user-to-admin
+    [{keycloak :keycloak} tenant author-claims user-id]
+    (keycloak/promote-user-to-admin keycloak tenant author-claims user-id))
+
   (tenant-invite-email [this server-name invite-id author-name]
     (format "http://%s:3000/verify/%s" server-name invite-id))
 
@@ -253,11 +262,7 @@
 
   (verify-invite [{keycloak :keycloak} tenant-conn tenant id]
     (do-verify-invite tenant-conn keycloak tenant id
-                      (format "http://%s.lumen.localhost:3030" tenant)))
-
-  (promote-user-to-admin
-    [{keycloak :keycloak} tenant author-claims user-id]
-    (do-promote-user-to-admin keycloak tenant author-claims user-id)))
+                      (format "http://%s.lumen.localhost:3030" tenant))))
 
 (defn dev-user-manager [options]
   (map->DevUserManager options))

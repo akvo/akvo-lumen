@@ -2,6 +2,7 @@
   "We leverage Keycloak groups for tenant partition and admin roles.
    More info can be found in the Keycloak integration doc spec."
   (:require [akvo.lumen.auth :refer [tenant-admin?]]
+            [akvo.lumen.http :as http]
             [cheshire.core :as json]
             [com.stuartsierra.component :as component]
             [clj-http.client :as client]
@@ -13,15 +14,23 @@
   (add-user-with-email
     [this tenant-label email]
     "Add user to tenant")
+
   (create-user
     [this request-draft email]
     "Create user")
+
+  (promote-user-to-admin
+    [this tenant author-claims user-id]
+    "Promote existing tenant member to admin")
+
   (reset-password
     [this request-draft user-id tmp-password]
     "Set temporary user password")
+
   (user?
     [this email]
     "Predicate to see if the email has a user in KC")
+
   (users
     [this tenant-label]
     "List tenants users"))
@@ -76,7 +85,8 @@
     (let [request-draft (request-draft keycloak)
           tenant-group (group-by-path keycloak request-draft tenant-label)
           group-id (get tenant-group "id")
-          users (group-members keycloak request-draft group-id)
+          users  (map #(assoc % "admin" false)
+                      (group-members keycloak request-draft group-id))
           admin-group-id (get (first (filter #(= "admin"
                                                  (get % "name"))
                                              (get-in tenant-group ["subGroups"])))
@@ -110,8 +120,15 @@
   "Returns status code from Keycloak response."
   [request-draft api-root user-id group-id]
   (:status (client/put (format "%s/users/%s/groups/%s"
-                          api-root user-id group-id)
-                  request-draft)))
+                               api-root user-id group-id)
+                       request-draft)))
+
+(defn remove-user-from-group
+  "Returns status code from Keycloak response."
+  [request-draft api-root user-id group-id]
+  (:status (client/delete (format "%s/users/%s/groups/%s"
+                                  api-root user-id group-id)
+                       request-draft)))
 
 (defn set-user-have-verified-email
   "Returns status code from Keycloak response."
@@ -119,6 +136,25 @@
   (:status (client/put (format "%s/users/%s" api-root user-id)
                        (assoc request-draft
                               :body (json/encode {"emailVerified" true})))))
+
+(defn do-promote-user-to-admin
+  [{:keys [api-root] :as keycloak} tenant author-claims user-id]
+  (if (= (get author-claims "sub") user-id)
+    (http/bad-request {"reason" "Tried to alter own tenant role"})
+    (let [request-draft (request-draft keycloak)
+          tenant-group-id (get (group-by-path
+                                keycloak request-draft tenant) "id")
+          admin-group-id (get (group-by-path
+                               keycloak request-draft (format "%s/admin" tenant))
+                              "id")]
+      (if (and (= 204 (add-user-to-group request-draft api-root user-id
+                                         admin-group-id))
+               (= 204 (remove-user-from-group request-draft api-root user-id
+                                              tenant-group-id)))
+        (http/no-content)
+        (do
+          (println (format "Tried to promote user: %s" user-id))
+          (http/internal-server-error))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; KeycloakAgent Component
@@ -153,6 +189,10 @@
                                 "email" email
                                 "emailVerified" false
                                 "enabled" true}))))
+
+  (promote-user-to-admin
+    [this tenant author-claims user-id]
+    (do-promote-user-to-admin this tenant author-claims user-id))
 
   (reset-password [{api-root :api-root} request-draft user-id tmp-password]
     (client/put (format "%s/users/%s/reset-password" api-root user-id)

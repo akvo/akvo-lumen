@@ -97,6 +97,19 @@
       (is (= 0 (-> (user-manager/invites *user-manager* *tenant-conn*)
                    :body count)))))
 
+  #_(testing "Promote user"
+    (let [admin-claims {"realm_access" {"roles" ["akvo:lumen:t1:admin"]}}
+          users (:body (user-manager/users *user-manager* "t1"))
+          admin-users (filter #(= true (get % "admin")) users)
+          non-admin-users (filter #(= false (get % "admin")) users)
+          non-admin-user-id (get (first non-admin-users) "id")]
+      (is (= 1 (count admin-users)))
+      (let [users-v2 (:body (user-manager/users *user-manager* "t1"))]
+        (is (= (count users) (count users-v2)))
+        (is (= 2
+               (count (filter #(= true (get % "admin"))
+                               users-v2)))))))
+
 
   ;; Work in progress - we need to clean Keycloak for these to work properly
   #_(testing "Accepting invite"
