@@ -41,7 +41,7 @@ function UserActionSelector({ active, admin, id }) {
       />
       <UserActionOption
         action="demote"
-        disabled={!admin}
+        disabled={(!admin || active)}
         id={id}
         key="user-demote"
         text="Remove admin privileges"
