@@ -2,33 +2,49 @@ import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import EntityTypeHeader from './entity-editor/EntityTypeHeader';
 import InviteUser from './modals/InviteUser';
+// import ConfirmUserAction from './modals/ConfirmUserAction';
 import * as api from '../api';
 
 require('../styles/EntityTypeHeader.scss');
 require('../styles/Users.scss');
 
-const userActions = [
-  { action: 'delete', text: 'Delete', url: '/api/admin/delete' },
-  { action: 'promote', text: 'Enable admin privileges', url: '/api/admin/promote' },
-  { action: 'demote', text: 'Remove admin privileges', url: '/api/admin/demote' },
-];
-
-function UserAction({ text }) {
+function UserActionOption({ action, text }) {
   return (
-    <option value={text}>{text}</option>
+    <option value={action}>{text}</option>
   );
 }
 
-UserAction.propTypes = {
+UserActionOption.propTypes = {
+  action: PropTypes.string.isRequired,
+  // id: PropTypes.string.isRequired,
   text: PropTypes.string.isRequired,
 };
 
 function UserActionSelector({ admin, id }) {
   return (
     <select className="userActionSelector">
-      {userActions.map(({ action, text, url }) => (
-        <UserAction admin={admin} id={id} key={action} text={text} url={url} />
-      ))}
+      <option value="">...</option>
+      <UserActionOption
+        action="delete"
+        id={id}
+        key="user-delete"
+        text="Delete user"
+      />
+      {!admin ?
+        <UserActionOption
+          action="promote"
+          id={id}
+          key="user-promote"
+          text="Enable admin privileges"
+        />
+        :
+        <UserActionOption
+          action="demote"
+          id={id}
+          key="user-demote"
+          text="Remove admin privileges"
+        />
+      }
     </select>
   );
 }
@@ -50,10 +66,10 @@ function User({ admin, email, id, username }) {
 }
 
 User.propTypes = {
-  username: PropTypes.string.isRequired,
-  email: PropTypes.string.isRequired,
   admin: PropTypes.bool,
+  email: PropTypes.string.isRequired,
   id: PropTypes.string.isRequired,
+  username: PropTypes.string.isRequired,
 };
 
 User.defaultProps = {
@@ -93,6 +109,7 @@ class Users extends Component {
   constructor() {
     super();
     this.state = {
+      isActionModalVisible: false,
       isInviteModalVisible: false,
       users: [],
     };
@@ -107,11 +124,9 @@ class Users extends Component {
     }
   }
 
-  onInviteUser(emailAddress) {
+  onInviteUser(email) {
     this.setState({ isInviteModalVisible: false });
-    api.post('/api/admin/invites', {
-      email: emailAddress,
-    });
+    api.post('/api/admin/invites', { email });
   }
 
   getActionButtons() {
