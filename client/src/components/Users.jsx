@@ -8,64 +8,67 @@ import * as api from '../api';
 require('../styles/EntityTypeHeader.scss');
 require('../styles/Users.scss');
 
-function UserActionOption({ action, text }) {
+function UserActionOption({ action, disabled, text }) {
   return (
-    <option value={action}>{text}</option>
+    <option disabled={disabled} value={action}>{text}</option>
   );
 }
 
 UserActionOption.propTypes = {
   action: PropTypes.string.isRequired,
+  disabled: PropTypes.bool,
   // id: PropTypes.string.isRequired,
   text: PropTypes.string.isRequired,
 };
 
-function UserActionSelector({ admin, id }) {
+function UserActionSelector({ active, admin, id }) {
   return (
     <select className="userActionSelector">
       <option value="">...</option>
       <UserActionOption
         action="delete"
+        disabled={active}
         id={id}
         key="user-delete"
         text="Delete user"
       />
-      {!admin ?
-        <UserActionOption
-          action="promote"
-          id={id}
-          key="user-promote"
-          text="Enable admin privileges"
-        />
-        :
-        <UserActionOption
-          action="demote"
-          id={id}
-          key="user-demote"
-          text="Remove admin privileges"
-        />
-      }
+      <UserActionOption
+        action="promote"
+        disabled={admin}
+        id={id}
+        key="user-promote"
+        text="Enable admin privileges"
+      />
+      <UserActionOption
+        action="demote"
+        disabled={!admin}
+        id={id}
+        key="user-demote"
+        text="Remove admin privileges"
+      />
     </select>
   );
 }
 
 UserActionSelector.propTypes = {
+  active: PropTypes.bool,
   admin: PropTypes.bool,
   id: PropTypes.string.isRequired,
 };
 
-function User({ admin, email, id, username }) {
+function User({ active, admin, email, id, username }) {
   return (
     <tr>
       <td>{username}</td>
       <td>{email}</td>
       <td>{admin ? 'Admin' : 'User'}</td>
-      <td><UserActionSelector admin={admin} id={id} /></td>
+      <td><UserActionSelector active={active} admin={admin} id={id} /></td>
     </tr>
   );
 }
 
 User.propTypes = {
+  active: PropTypes.bool,
   admin: PropTypes.bool,
   email: PropTypes.string.isRequired,
   id: PropTypes.string.isRequired,
@@ -76,7 +79,7 @@ User.defaultProps = {
   admin: false,
 };
 
-function UserList({ users }) {
+function UserList({ activeUserId, users }) {
   return (
     <table>
       <tbody>
@@ -88,6 +91,7 @@ function UserList({ users }) {
         </tr>
         {users.map(({ admin, email, id, username }) => (
           <User
+            active={id === activeUserId}
             admin={admin}
             email={email}
             id={id}
@@ -101,6 +105,7 @@ function UserList({ users }) {
 }
 
 UserList.propTypes = {
+  activeUserId: PropTypes.string.isRequired,
   users: PropTypes.array.isRequired,
 };
 
@@ -140,7 +145,7 @@ class Users extends Component {
 
   render() {
     const actionButtons = this.getActionButtons();
-    const { admin } = this.props.profile;
+    const { admin, id } = this.props.profile;
     const saveStatus = '';
     const title = 'Members';
 
@@ -161,6 +166,7 @@ class Users extends Component {
         />
         <div className="UserList">
           <UserList
+            activeUserId={id}
             users={this.state.users}
             onDeleteUser={this.onDeleteUser}
           />
@@ -182,5 +188,6 @@ export default connect(state => ({
 Users.propTypes = {
   profile: PropTypes.shape({
     admin: PropTypes.bool,
+    id: PropTypes.string.isRequired,
   }).isRequired,
 };
