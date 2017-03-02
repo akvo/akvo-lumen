@@ -4,6 +4,9 @@ import getVegaPieSpec from './vega-specs/Pie';
 import getVegaAreaSpec from './vega-specs/Area';
 import getVegaBarSpec from './vega-specs/Bar';
 
+// Special value that will always come last alphabetically. Used for sorting.
+const lastValueAlphabetically = '';
+
 /* Filtering */
 
 const getFilterArray = (filters, columns) => {
@@ -97,7 +100,7 @@ export function getLineData(visualisation, datasets) {
   const haveAggregation = visualisation.spec.metricAggregation != null;
   const yIndex = getColumnIndex(dataset, spec.metricColumnY);
   const xIndex = getColumnIndex(dataset, spec.metricColumnX);
-  const xAxisType = xIndex === -1 ? 'number' : dataset.get('columns').get(xIndex).get('type');
+  const xAxisType = xIndex === -1 ? 'number' : dataset.getIn(['columns', xIndex, 'type']);
   const rowFilter = filterFn(spec.filters, dataset.get('columns'));
 
   const valueArray = dataset.get('rows')
@@ -139,15 +142,15 @@ export function getScatterData(visualisation, datasets) {
   const dataset = datasets[datasetId];
   const haveAggregation = visualisation.spec.bucketColumn != null;
   const yIndex = getColumnIndex(dataset, spec.metricColumnY);
-  const yAxisType = yIndex === -1 ? 'number' : dataset.get('columns').get(yIndex).get('type');
+  const yAxisType = yIndex === -1 ? 'number' : dataset.getIn(['columns', yIndex, 'type']);
   const xIndex = getColumnIndex(dataset, spec.metricColumnX);
-  const xAxisType = xIndex === -1 ? 'number' : dataset.get('columns').get(xIndex).get('type');
+  const xAxisType = xIndex === -1 ? 'number' : dataset.getIn(['columns', xIndex, 'type']);
   const bucketIndex = getColumnIndex(dataset, spec.bucketColumn);
   const bucketType = bucketIndex === -1 ?
-    'number' : dataset.get('columns').get(bucketIndex).get('type');
+    'number' : dataset.getIn(['columns', bucketIndex, 'type']);
   const datapointLabelIndex = getColumnIndex(dataset, spec.datapointLabelColumn);
   const datapointLabelType = datapointLabelIndex === -1 ?
-    'number' : dataset.get('columns').get(datapointLabelIndex).get('type');
+    'number' : dataset.getIn(['columns', datapointLabelIndex, 'type']);
   const rowFilter = filterFn(spec.filters, dataset.get('columns'));
 
   const valueArray = dataset.get('rows')
@@ -195,6 +198,7 @@ export function getPieData(visualisation, datasets) {
   const { datasetId, spec } = visualisation;
   const dataset = datasets[datasetId];
   const bucketIndex = getColumnIndex(dataset, spec.bucketColumn);
+  const bucketColumnType = dataset.getIn(['columns', bucketIndex, 'type']);
   const rowFilter = filterFn(spec.filters, dataset.get('columns'));
 
   const valueArray = dataset.get('rows')
@@ -210,7 +214,25 @@ export function getPieData(visualisation, datasets) {
       ops: ['count'],
       as: ['bucketCount'],
     }])
-    .execute(valueArray);
+    .execute(valueArray)
+    .sort((a, b) => {
+      if (bucketColumnType === 'text') {
+        const valA = a.bucketValue || lastValueAlphabetically;
+        const valB = b.bucketValue || lastValueAlphabetically;
+
+        return valA.localeCompare(valB);
+      }
+
+      // Bucket value might still be a string if this is the "empty value" bucket
+      let valA = parseFloat(a.bucketValue);
+      let valB = parseFloat(b.bucketValue);
+
+      // If this is the "empty value" bucket, make sure it comes last in the chart
+      if (isNaN(valA)) valA = Infinity;
+      if (isNaN(valB)) valB = Infinity;
+
+      return valA - valB;
+    });
 
   return [{
     name: 'table',
@@ -222,12 +244,12 @@ export function getBarData(visualisation, datasets) {
   const { datasetId, spec } = visualisation;
   const dataset = datasets[datasetId];
   const yIndex = getColumnIndex(dataset, spec.metricColumnY);
-  const yAxisType = yIndex === -1 ? 'number' : dataset.get('columns').get(yIndex).get('type');
+  const yAxisType = yIndex === -1 ? 'number' : dataset.getIn(['columns', yIndex, 'type']);
   const xIndex = getColumnIndex(dataset, spec.metricColumnX);
-  const xAxisType = xIndex === -1 ? 'number' : dataset.get('columns').get(xIndex).get('type');
+  const xAxisType = xIndex === -1 ? 'number' : dataset.getIn(['columns', xIndex, 'type']);
   const bucketIndex = getColumnIndex(dataset, spec.bucketColumn);
   const bucketType = bucketIndex === -1 ?
-    'number' : dataset.get('columns').get(bucketIndex).get('type');
+    'number' : dataset.getIn(['columns', bucketIndex, 'type']);
   const subBucketIndex = getColumnIndex(dataset, spec.subBucketColumn);
   const rowFilter = filterFn(spec.filters, dataset.get('columns'));
 
@@ -342,8 +364,8 @@ export function getPointColorValues(dataset, columnName, filters) {
 
 export const getPointColorMappingSortFunc = (columnType) => {
   const sortText = (a, b) => {
-    const va = (a.value == null || a.value === 'null' || a.value === '') ? 'zzzzzzz' : a.value;
-    const vb = (b.value == null || b.value === 'null' || b.value === '') ? 'zzzzzzz' : b.value;
+    const va = (a.value == null || a.value === 'null' || a.value === '') ? lastValueAlphabetically : a.value;
+    const vb = (b.value == null || b.value === 'null' || b.value === '') ? lastValueAlphabetically : b.value;
 
     return va > vb;
   };
@@ -426,7 +448,7 @@ export function getMapData(layer, datasets) {
       ],
       pointColorMapping: filteredPointColorMapping,
       pointColorColumnType: pointColorIndex > -1 ?
-        dataset.get('columns').get(pointColorIndex).get('type') : null,
+        dataset.getIn(['columns', pointColorIndex, 'type']) : null,
     },
   });
 }
