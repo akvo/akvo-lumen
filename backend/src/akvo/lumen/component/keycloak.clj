@@ -220,7 +220,7 @@
                                               tenant-group-id)))
         (http/no-content)
         (do
-          (println (format "Tried to demote user: %s" user-id))
+          (println (format "Tried to remove user: %s" user-id))
           (http/internal-server-error))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

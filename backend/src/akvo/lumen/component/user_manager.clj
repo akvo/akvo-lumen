@@ -179,7 +179,7 @@
           (if (keycloak/user? keycloak email)
             (do-tenant-invite this tenant-conn server-name email author-claims)
             (do-user-and-tenant-invite this tenant-conn server-name email author-claims)))
-        (response {:invite "created"}))))
+        (http/no-content))))
 
   (invites [this tenant-conn]
     (response (select-active-invites tenant-conn)))
@@ -258,7 +258,7 @@
         (if (keycloak/user? keycloak email)
           (do-tenant-invite this tenant-conn server-name email author-claims)
           (do-user-and-tenant-invite this tenant-conn server-name email author-claims))
-        (response {:invite "created"}))))
+        (http/no-content))))
 
   (invites [this tenant-conn]
     (response (select-active-invites tenant-conn)))
