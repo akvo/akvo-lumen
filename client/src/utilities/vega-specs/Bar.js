@@ -1,3 +1,5 @@
+import defaultColors from '../defaultColors';
+
 const getLongestLabelLength = (data) => {
   const labels = data[0].values.map(item => item.bucketValue).filter(value => value != null);
   let longestLength = 0;
@@ -65,7 +67,7 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
         {
           name: 'sgc',
           type: 'ordinal',
-          range: 'category10',
+          range: defaultColors,
           domain: {
             data: dataSource,
             field: 'subBucketValue',
