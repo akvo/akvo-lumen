@@ -1,16 +1,16 @@
-(defproject org.akvo/lumen "0.6-SNAPSHOT"
+(defproject org.akvo/lumen "0.7-SNAPSHOT"
   :description "Akvo Lumen backend"
   :url "https://github.com/akvo/akvo-lumen"
   :license {:name "GNU Affero General Public License 3.0"
             :url  "https://www.gnu.org/licenses/agpl-3.0.html"}
   :min-lein-version "2.0.0"
-  :dependencies [[cheshire "5.6.3"]
+  :dependencies [[cheshire "5.7.0"]
                  [clj-http "3.4.1"]
-                 [clj-time "0.12.2"]
-                 [com.ibm.icu/icu4j "58.1"]
+                 [clj-time "0.13.0"]
+                 [com.ibm.icu/icu4j "58.2"]
                  [com.layerware/hugsql "0.4.7"]
-                 [com.stuartsierra/component "0.3.1"]
-                 [compojure "1.5.1" :exclusions [medley]]
+                 [com.stuartsierra/component "0.3.2"]
+                 [compojure "1.5.2" :exclusions [medley]]
                  [duct "0.8.2"]
                  [duct/hikaricp-component "0.1.0"]
                  [environ "1.1.0"]
@@ -21,13 +21,12 @@
                  [org.apache.tika/tika-core "1.14"]
                  [org.clojure/clojure "1.8.0"]
                  [org.clojure/data.csv "0.1.3"]
-                 [org.immutant/scheduling "2.1.5" :exclusions [ch.qos.logback/logback-classic]]
-                 [org.immutant/web "2.1.5"]
-                 [org.postgresql/postgresql "9.4.1212"]
-                 [org.slf4j/slf4j-nop "1.7.21"]
-                 [ragtime/ragtime.jdbc "0.6.3"]
-                 [ring "1.5.0"]
-                 [ring/ring-defaults "0.2.1"]
+                 [org.immutant/web "2.1.6"]
+                 [org.postgresql/postgresql "42.0.0"]
+                 [org.slf4j/slf4j-nop "1.7.24"]
+                 [ragtime/ragtime.jdbc "0.6.4"]
+                 [ring "1.5.1"]
+                 [ring/ring-defaults "0.2.3"]
                  [ring/ring-json "0.4.0"]]
   :uberjar-name "akvo-lumen.jar"
   :repl-options {:timeout 120000}
@@ -55,7 +54,7 @@
                                     [reloaded.repl "0.2.3"]
                                     [org.clojure/tools.namespace "0.2.11"]
                                     [org.clojure/tools.nrepl "0.2.12"]
-                                    [eftest "0.1.1"]
+                                    [eftest "0.1.3"]
                                     [com.gearswithingears/shrubbery "0.4.1"]
                                     [kerodon "0.8.0"]]
                    :source-paths   ["dev/src"]
