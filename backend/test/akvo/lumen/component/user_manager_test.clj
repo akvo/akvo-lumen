@@ -12,10 +12,7 @@
             [clojure.test :refer :all]
             [cheshire.core :as json]
             [com.stuartsierra.component :as component]
-            [duct.component.hikaricp :refer [hikaricp]]
-            [hugsql.core :as hugsql]))
-
-(hugsql/def-db-fns "akvo/lumen/component/user_manager_test.sql")
+            [duct.component.hikaricp :refer [hikaricp]]))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -75,8 +72,6 @@
 (def server-name "t1.lumen.localhost")
 
 
-
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Helpers
 ;;;
@@ -90,16 +85,14 @@
         tenant-group-id (get (keycloak/group-by-path
                               keycloak request-draft tenant)
                              "id")]
-    {:admin-ids (reduce (fn [ids user]
-                       (conj ids (get user "id")))
-                     #{}
-                     (keycloak/group-members keycloak request-draft
-                                             admin-group-id))
-     :member-ids (reduce (fn [ids user]
-                        (conj ids (get user "id")))
-                      #{}
+    {:admin-ids (into #{}
+                      (map #(get % "id"))
                       (keycloak/group-members keycloak request-draft
-                                              tenant-group-id))}))
+                                              admin-group-id))
+     :member-ids (into #{}
+                       (map #(get % "id"))
+                       (keycloak/group-members keycloak request-draft
+                                               tenant-group-id))}))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
