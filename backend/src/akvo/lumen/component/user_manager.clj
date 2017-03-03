@@ -15,7 +15,7 @@
 
 (defprotocol UserManagement
   (invite
-    [this tenant-conn server-name email author-claims]
+    [this tenant-conn tenant server-name email author-claims]
     "Invite user with email to tenant.")
 
   (invites
@@ -171,13 +171,15 @@
 
   UserManagement
   (invite [{keycloak :keycloak :as this}
-           tenant-conn server-name email author-claims]
-
-    (future (if (keycloak/user? keycloak email)
-              (do-tenant-invite this tenant-conn server-name email author-claims)
-              (do-user-and-tenant-invite
-               this tenant-conn server-name email author-claims)))
-    (response {:invite "created"}))
+           tenant-conn tenant server-name email author-claims]
+    (if (keycloak/tenant-member? keycloak tenant email)
+      (http/bad-request {"reson" "Already tenant member"})
+      (do
+        (future
+          (if (keycloak/user? keycloak email)
+            (do-tenant-invite this tenant-conn server-name email author-claims)
+            (do-user-and-tenant-invite this tenant-conn server-name email author-claims)))
+        (response {:invite "created"}))))
 
   (invites [this tenant-conn]
     (response (select-active-invites tenant-conn)))
@@ -248,12 +250,15 @@
     this)
 
   UserManagement
-  (invite [{keycloak :keycloak :as this}
-           tenant-conn server-name email author-claims]
-    (if (keycloak/user? keycloak email)
-      (do-tenant-invite this tenant-conn server-name email author-claims)
-      (do-user-and-tenant-invite this tenant-conn server-name email author-claims))
-    (response {:invite "created"}))
+  (invite [{{api-root :api-root :as keycloak} :keycloak :as this}
+           tenant-conn tenant server-name email author-claims]
+    (if (keycloak/tenant-member? keycloak tenant email)
+      (http/bad-request {"reson" "Already tenant member"})
+      (do
+        (if (keycloak/user? keycloak email)
+          (do-tenant-invite this tenant-conn server-name email author-claims)
+          (do-user-and-tenant-invite this tenant-conn server-name email author-claims))
+        (response {:invite "created"}))))
 
   (invites [this tenant-conn]
     (response (select-active-invites tenant-conn)))

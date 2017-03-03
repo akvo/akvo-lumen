@@ -13,7 +13,7 @@
         (user-manager/invites user-manager tenant-conn))
 
       (POST "/" {{:strs [email]} :body}
-        (user-manager/invite user-manager tenant-conn server-name email
+        (user-manager/invite user-manager tenant-conn tenant server-name email
                              jwt-claims))
 
       (context "/:id" [id]

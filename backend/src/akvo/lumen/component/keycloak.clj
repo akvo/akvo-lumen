@@ -124,6 +124,26 @@
                      (= (get candidate "email") email))
                    candidates))))
 
+(defn fetch-user-groups
+  "Get the groups of the user"
+  [request-draft api-root user-id]
+  (-> (client/get (format "%s/users/%s/groups" api-root user-id)
+                     request-draft)
+      :body json/decode))
+
+(defn tenant-member?
+  [{api-root :api-root :as keycloak} tenant email]
+  (let [possible-group-paths (set (map #(format % tenant)
+                                       ["/akvo/lumen/%s" "/akvo/lumen/%s/admin"]))
+        request-draft (request-draft keycloak)
+        user-id (get (fetch-user-by-email request-draft api-root email) "id")
+        users-group-paths (reduce (fn [path-set group]
+                                    (conj path-set (get group "path")))
+                                  #{}
+                                  (fetch-user-groups request-draft api-root user-id))]
+    (not (empty? (set/intersection possible-group-paths
+                                   users-group-paths)))))
+
 (defn add-user-to-group
   "Returns status code from Keycloak response."
   [request-draft api-root user-id group-id]

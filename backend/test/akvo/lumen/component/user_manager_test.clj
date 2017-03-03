@@ -73,7 +73,7 @@
 
   (testing "Create new invite"
     (let [server-name "t1.lumen.localhost"
-          resp (user-manager/invite *user-manager* *tenant-conn* server-name
+          resp (user-manager/invite *user-manager* *tenant-conn* "t1" server-name
                                     ruth-email author-claims)]
       (is (= 200 (:status resp)))
       (is (= "created" (-> resp :body :invite)))))
