@@ -10,7 +10,8 @@
   .itemContainer {
     &.text {
       line-height: 1.4rem;
-      white-space: pre;
+      white-space: pre-wrap;
+      word-break: break-word;
     }
   }
 }
