@@ -7,6 +7,7 @@ import * as actions from '../actions/dashboard';
 import * as api from '../api';
 import { fetchLibrary } from '../actions/library';
 import { fetchDataset } from '../actions/dataset';
+import aggregationOnlyVisualisationTypes from '../utilities/aggregationOnlyVisualisationTypes';
 
 const getEditingStatus = (location) => {
   const testString = 'create';
@@ -150,7 +151,6 @@ class Dashboard extends Component {
   }
 
   onAddVisualisation(visualisation) {
-    const aggregationOnlyVisualisationTypes = ['pivot table'];
     const { id, datasetId, spec } = visualisation;
     const vType = visualisation.visualisationType;
 
@@ -231,12 +231,23 @@ class Dashboard extends Component {
       const isVisualisation = entity.type === 'visualisation';
 
       if (isVisualisation) {
-        const datasetId = library.visualisations[key].datasetId;
-        const alreadyProcessed = requestedDatasetIds.some(id => id === datasetId);
+        const visualisation = library.visualisations[key];
 
-        if (!alreadyProcessed) {
-          requestedDatasetIds.push(datasetId);
-          this.onAddVisualisation(library.visualisations[key]);
+        if (aggregationOnlyVisualisationTypes.some(type =>
+          type === visualisation.visualisationType)) {
+          const alreadyProcessed = Boolean(visualisation.data);
+
+          if (!alreadyProcessed) {
+            this.onAddVisualisation(visualisation);
+          }
+        } else {
+          const datasetId = visualisation.datasetId;
+          const alreadyProcessed = requestedDatasetIds.some(id => id === datasetId);
+
+          if (!alreadyProcessed) {
+            requestedDatasetIds.push(datasetId);
+            this.onAddVisualisation(visualisation);
+          }
         }
       }
     });
