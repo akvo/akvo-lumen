@@ -59,3 +59,13 @@ export function del(url, headers) {
     })
   );
 }
+
+export function patch(url, body, headers) {
+  return wrapUpdateToken(token =>
+    fetch(url, {
+      method: 'PATCH',
+      headers: requestHeaders(token, headers),
+      body: JSON.stringify(body),
+    })
+  );
+}

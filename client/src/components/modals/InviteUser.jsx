@@ -1,12 +1,8 @@
 import React, { Component, PropTypes } from 'react';
 import Modal from 'react-modal';
+import isValidEmail from '../../utils';
 
 require('../../styles/DashboardModal.scss');
-
-function isValidEmail(email) {
-  const regex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
-  return regex.test(email);
-}
 
 export default class InviteUser extends Component {
   constructor(props) {

@@ -8,46 +8,61 @@ import * as api from '../api';
 require('../styles/EntityTypeHeader.scss');
 require('../styles/Users.scss');
 
-function UserActionOption({ action, disabled, text }) {
-  return (
-    <option disabled={disabled} value={action}>{text}</option>
-  );
+function executeAction(userId, action) {
+  const url = `/api/admin/users/${userId}`;
+  if (action === 'promote') {
+    api.patch(url, { admin: true });
+  } else if (action === 'demote') {
+    api.patch(url, { admin: false });
+  }
 }
 
-UserActionOption.propTypes = {
-  action: PropTypes.string.isRequired,
-  disabled: PropTypes.bool,
-  // id: PropTypes.string.isRequired,
-  text: PropTypes.string.isRequired,
-};
+class UserActionSelector extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { action: '' };
+    this.onChange = this.onChange.bind(this);
+  }
 
-function UserActionSelector({ active, admin, id }) {
-  return (
-    <select className="userActionSelector">
-      <option value="">...</option>
-      <UserActionOption
-        action="delete"
-        disabled={active}
-        id={id}
-        key="user-delete"
-        text="Delete user"
-      />
-      <UserActionOption
-        action="promote"
-        disabled={admin}
-        id={id}
-        key="user-promote"
-        text="Enable admin privileges"
-      />
-      <UserActionOption
-        action="demote"
-        disabled={(!admin || active)}
-        id={id}
-        key="user-demote"
-        text="Remove admin privileges"
-      />
-    </select>
-  );
+  onChange(event) {
+    const action = event.target.value;
+    this.setState({ action });
+    executeAction(this.props.id, action);
+  }
+
+  render() {
+    const { active, admin } = this.props;
+    return (
+      <select
+        className="userActionSelector"
+        onChange={this.onChange}
+        value={this.state.action}
+      >
+        <option value="">...</option>
+        <option
+          disabled={active}
+          key="user-delete"
+          value="delete"
+        >
+          Delete user
+        </option>
+        <option
+          disabled={admin}
+          key="user-promote"
+          value="promote"
+        >
+          Enable admin privileges
+        </option>
+        <option
+          disabled={(!admin || active)}
+          key="user-demote"
+          value="demote"
+        >
+          Remove admin privileges
+        </option>
+      </select>
+    );
+  }
 }
 
 UserActionSelector.propTypes = {
@@ -120,6 +135,7 @@ class Users extends Component {
     };
     this.getActionButtons = this.getActionButtons.bind(this);
     this.onInviteUser = this.onInviteUser.bind(this);
+    this.onUserActionConfirm = this.onUserActionConfirm.bind(this);
   }
 
   componentDidMount() {
@@ -134,13 +150,22 @@ class Users extends Component {
     api.post('/api/admin/invites', { email });
   }
 
-  getActionButtons() {
-    const invite = {
-      buttonText: 'Invite user',
-      onClick: () => this.setState({ isInviteModalVisible: true }),
-    };
+  onUserActionConfirm() {
+    this.setState({ isActionModalVisible: false });
+  }
 
-    return [invite];
+  getActionButtons() {
+    const buttons = [
+      {
+        buttonText: 'Manage invites',
+        onClick: () => null,
+      },
+      {
+        buttonText: 'Invite user',
+        onClick: () => this.setState({ isInviteModalVisible: true }),
+      },
+    ];
+    return buttons;
   }
 
   render() {
@@ -168,7 +193,6 @@ class Users extends Component {
           <UserList
             activeUserId={id}
             users={this.state.users}
-            onDeleteUser={this.onDeleteUser}
           />
         </div>
         <InviteUser
