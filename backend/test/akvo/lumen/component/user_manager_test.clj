@@ -8,22 +8,19 @@
             [akvo.lumen.component.keycloak :as keycloak]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.set :as set]
             [clojure.test :refer :all]
             [cheshire.core :as json]
             [com.stuartsierra.component :as component]
-            [duct.component.hikaricp :refer [hikaricp]]
-            [hugsql.core :as hugsql]))
+            [duct.component.hikaricp :refer [hikaricp]]))
 
-(hugsql/def-db-fns "akvo/lumen/component/user_manager_test.sql")
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; System setup
+;;;
 
 (def seed-data
   (->> "seed.edn" io/resource slurp edn/read-string))
-
-(def author-claims
-  {"name" "Jerome Eginla"})
-
-(def ruth-email
-  "ruth@t2.lumen.localhost")
 
 (def keycloak-config
   {:url "http://localhost:8080/auth"
@@ -47,12 +44,8 @@
 (def ^:dynamic *tenant-conn*)
 (def ^:dynamic *user-manager*)
 
-;; (defn cleanup-keycloak []
-;;   ;; Reset data or rebuild container???
-;;   )
 
 (defn fixture [f]
-  #_(cleanup-keycloak)
   (migrate-user-manager)
   (migrate-tenant test-tenant-spec)
   (alter-var-root #'test-system component/start)
@@ -63,86 +56,135 @@
     (alter-var-root #'test-system component/stop)
     (rollback-tenant test-tenant-spec)))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Test data
+;;;
+
+(def author-claims
+  {"name" "Jerome Eginla"})
+
+(def ruth-email
+  "ruth@t2.lumen.localhost")
+
+(def tenant "t1")
+
+(def server-name "t1.lumen.localhost")
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Helpers
+;;;
+
+(defn- admin-and-members
+  [keycloak tenant]
+  (let [request-draft (keycloak/request-draft keycloak)
+        admin-group-id (get (keycloak/group-by-path keycloak request-draft
+                                                    (format "%s/admin" tenant))
+                            "id")
+        tenant-group-id (get (keycloak/group-by-path
+                              keycloak request-draft tenant)
+                             "id")]
+    {:admin-ids (into #{}
+                      (map #(get % "id"))
+                      (keycloak/group-members keycloak request-draft
+                                              admin-group-id))
+     :member-ids (into #{}
+                       (map #(get % "id"))
+                       (keycloak/group-members keycloak request-draft
+                                               tenant-group-id))}))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Tests
+;;;
+
 (use-fixtures :once fixture)
 
-(deftest ^:functional user-invite
+(deftest ^:functional create-delete-invite
 
-  (testing "No initial invites"
-    (is (= 0 (-> (user-manager/invites *user-manager* *tenant-conn*)
-                 :body count))))
+  (testing "Create invite"
+    (let [number-of-initial-invites (-> (user-manager/invites *user-manager*
+                                                              *tenant-conn*)
+                                        :body count)
+          resp (user-manager/invite *user-manager* *tenant-conn* "t1"
+                                    server-name ruth-email author-claims)]
+      (is (= 204 (:status resp)))
+      (is (= (inc number-of-initial-invites)
+             (-> (user-manager/invites *user-manager*
+                                       *tenant-conn*)
+                 :body count)))))
 
-  (testing "Create new invite"
-    (let [server-name "t1.lumen.localhost"
-          resp (user-manager/invite *user-manager* *tenant-conn* "t1" server-name
-                                    ruth-email author-claims)]
-      (is (= 200 (:status resp)))
-      (is (= "created" (-> resp :body :invite)))))
-
-  (testing "Invites after new created"
-    (let [resp (user-manager/invites *user-manager* *tenant-conn*)]
-      (is (= 200 (:status resp)))
-      (is (= 1 (-> resp :body count)))
-      (is (every? #(contains? (-> resp :body first) %)
-                  [:id :email :created]))
-      (is (= "ruth@t2.lumen.localhost"
-             (-> resp :body first :email)))))
-
-  (testing "Delete non consumed invite"
-    (let [invite-id (-> (user-manager/invites *user-manager* *tenant-conn*)
+  (testing "Delete invite"
+    (let [number-of-initial-invites (-> (user-manager/invites *user-manager*
+                                                              *tenant-conn*)
+                                        :body count)
+          invite-id (-> (user-manager/invites *user-manager* *tenant-conn*)
                         :body first :id)
           resp (user-manager/delete-invite *user-manager* *tenant-conn* invite-id)]
       (is (= 204 (:status resp)))
-      (is (map? (:body resp)))
-      (is (empty? (:body resp)))
+      (is (= (dec number-of-initial-invites)
+             (-> (user-manager/invites *user-manager*
+                                       *tenant-conn*)
+                 :body count))))))
+
+
+(deftest ^:functional full-user-life-cycle
+
+  (testing "Invite user"
+
+    (let [invite-resp (user-manager/invite *user-manager* *tenant-conn* "t1"
+                                           server-name ruth-email author-claims)
+          number-of-original-users (-> (user-manager/users *user-manager* "t1")
+                                       :body count)
+          invite-id (-> (user-manager/invites *user-manager* *tenant-conn*)
+                        :body first :id)
+          resp (user-manager/verify-invite *user-manager* *tenant-conn* "t1"
+                                           invite-id)]
+      (is (= 302 (:status resp)))
+      (is (= "http://t1.lumen.localhost:3030"
+             (get-in resp [:headers "Location"])))
+      (is (= (inc number-of-original-users)
+             (-> (user-manager/users *user-manager* "t1")
+                 :body count)))
       (is (= 0 (-> (user-manager/invites *user-manager* *tenant-conn*)
                    :body count)))))
 
   (testing "Promote user"
-    (let [admin-claims {"realm_access" {"roles" ["akvo:lumen:t1:admin"]}}
-          users (:body (user-manager/users *user-manager* "t1"))
-          admin-users (filter #(= true (get % "admin")) users)
-          non-admin-users (filter #(= false (get % "admin")) users)
-          non-admin-user-id (get (first non-admin-users) "id")
+    (let [{{api-root :api-root :as keycloak} :keycloak} *user-manager*
+          admin-claims {"realm_access" {"roles" ["akvo:lumen:t1:admin"]}}
+          request-draft (keycloak/request-draft keycloak)
+          ruth-user (keycloak/fetch-user-by-email request-draft api-root ruth-email)
           resp (user-manager/promote-user-to-admin
-                *user-manager* "t1" admin-claims non-admin-user-id)]
+                *user-manager* tenant admin-claims (get ruth-user "id"))
+          ]
       (is (= 204 (:status resp)))
-      (is (= 1 (count admin-users)))
-      (let [users-v2 (:body (user-manager/users *user-manager* "t1"))]
-        (is (= (count users) (count users-v2)))
-        (is (= 2
-               (count (filter #(= true (get % "admin"))
-                              users-v2)))))))
+      (let [{:keys [admin-ids member-ids]} (admin-and-members keycloak tenant)
+            set-of-ruth  #{(get ruth-user "id")}]
+        (is (not (empty? (set/intersection admin-ids set-of-ruth))))
+        (is (empty? (set/intersection member-ids set-of-ruth))))))
 
   (testing "Demote user"
-    (let [admin-claims {"sub" "123"
-                        "realm_access" {"roles" ["akvo:lumen:t1:admin"]}}
-          users (:body (user-manager/users *user-manager* "t1"))
-          admin-users (filter #(= true (get % "admin")) users)
-          admin-user-id (get (first admin-users) "id")
+    (let [{{api-root :api-root :as keycloak} :keycloak} *user-manager*
+          admin-claims {"realm_access" {"roles" ["akvo:lumen:t1:admin"]}}
+          request-draft (keycloak/request-draft keycloak)
+          ruth-user (keycloak/fetch-user-by-email request-draft api-root ruth-email)
           resp (user-manager/demote-user-from-admin
-                *user-manager* "t1" admin-claims admin-user-id)]
+                *user-manager* tenant admin-claims (get ruth-user "id"))]
       (is (= 204 (:status resp)))
-      (is (= 2 (count admin-users)))
-      (let [users-v2 (:body (user-manager/users *user-manager* "t1"))]
-        (is (= 1
-               (count (filter #(= true (get % "admin"))
-                              users-v2))))))))
+      (let [{:keys [admin-ids member-ids]} (admin-and-members keycloak tenant)
+            set-of-ruth #{(get ruth-user "id")}]
+        (is (empty? (set/intersection admin-ids set-of-ruth)))
+        (is (not (empty? (set/intersection member-ids set-of-ruth)))))))
 
-
-#_(testing "Accepting invite"
-  (let [original-users (user-manager/users *user-manager* "t1")
-        invite-id (-> (user-manager/invites *user-manager* *tenant-conn*)
-                      :body first :id)]
-    ;; Check inital state
-    (is (= 2 (-> original-users :body count)))
-    (is (not (contains?
-              (set (map #(get % "email")
-                        (-> original-users :body)))
-              ruth-email)))
-    ;; Verify invite
-    (let [resp (user-manager/verify-invite
-                *user-manager* *tenant-conn* "t1" invite-id)]
-      (is (= 302
-             (:status resp)))
-      (is (= "http://t1.lumen.localhost:3030"
-             (get-in resp [:headers "Location"]))))))
+  (testing "Remove user"
+    (let [{{api-root :api-root :as keycloak} :keycloak} *user-manager*
+          request-draft (keycloak/request-draft keycloak)
+          ruth-user (keycloak/fetch-user-by-email request-draft api-root ruth-email)
+          resp (user-manager/remove-user *user-manager* tenant author-claims
+                                        (get ruth-user "id"))]
+      (is (= 204 (:status resp)))
+      (let [{:keys [admin-ids member-ids]} (admin-and-members keycloak tenant)
+            set-of-ruth #{(get ruth-user "id")}]
+        (is (empty? (set/intersection admin-ids set-of-ruth)))
+        (is (empty? (set/intersection member-ids set-of-ruth)))))))
