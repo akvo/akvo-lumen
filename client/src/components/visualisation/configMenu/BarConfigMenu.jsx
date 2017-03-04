@@ -8,6 +8,7 @@ const getColumnTitle = (columnName, columnOptions) =>
   columnOptions.find(obj => obj.value === columnName).title;
 
 const handleChangeSpec = (change, oldSpec, onChangeSpec, columnOptions) => {
+  const newSpec = Object.assign({}, oldSpec, change);
   const axisLabelUpdateTriggers = [
     'bucketColumn',
     'subBucketColumn',
@@ -20,13 +21,11 @@ const handleChangeSpec = (change, oldSpec, onChangeSpec, columnOptions) => {
 
   const shouldUpdateAxisLabels = axisLabelUpdateTriggers.some(trigger =>
       Object.keys(change).some(key => key.toString() === trigger.toString())
-  );
+  ) && (newSpec.metricColumnY !== null);
 
   if (!shouldUpdateAxisLabels) {
     onChangeSpec(change);
   }
-
-  const newSpec = Object.assign({}, oldSpec, change);
 
   let autoAxisLabelY = getColumnTitle(newSpec.metricColumnY, columnOptions);
   let autoAxisLabelX = newSpec.bucketColumn ? getColumnTitle(newSpec.bucketColumn, columnOptions) : '';
