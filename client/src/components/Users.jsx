@@ -8,8 +8,8 @@ import * as api from '../api';
 require('../styles/EntityTypeHeader.scss');
 require('../styles/Users.scss');
 
-function executeAction(userId, action) {
-  const url = `/api/admin/users/${userId}`;
+function executeUserAction(action, id) {
+  const url = `/api/admin/users/${id}`;
   if (action === 'promote') {
     api.patch(url, { admin: true });
   } else if (action === 'demote') {
@@ -20,14 +20,15 @@ function executeAction(userId, action) {
 class UserActionSelector extends Component {
   constructor(props) {
     super(props);
-    this.state = { action: '' };
+    this.state = { action: '?' };
     this.onChange = this.onChange.bind(this);
   }
 
   onChange(event) {
     const action = event.target.value;
+    const id = this.props.id;
     this.setState({ action });
-    executeAction(this.props.id, action);
+    executeUserAction(action, id);
   }
 
   render() {
@@ -77,7 +78,13 @@ function User({ active, admin, email, id, username }) {
       <td>{username}</td>
       <td>{email}</td>
       <td>{admin ? 'Admin' : 'User'}</td>
-      <td><UserActionSelector active={active} admin={admin} id={id} /></td>
+      <td>
+        <UserActionSelector
+          active={active}
+          admin={admin}
+          id={id}
+        />
+      </td>
     </tr>
   );
 }
@@ -94,33 +101,42 @@ User.defaultProps = {
   admin: false,
 };
 
-function UserList({ activeUserId, users }) {
-  return (
-    <table>
-      <tbody>
-        <tr>
-          <th>Name</th>
-          <th>Email</th>
-          <th>Role</th>
-          <th>Actions</th>
-        </tr>
-        {users.map(({ admin, email, id, username }) => (
-          <User
-            active={id === activeUserId}
-            admin={admin}
-            email={email}
-            id={id}
-            key={username}
-            username={username}
-          />
-        ))}
-      </tbody>
-    </table>
-  );
+class UserList extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasChanged: false };
+  }
+
+  render() {
+    const { activeUserId, users } = this.props;
+    return (
+      <table>
+        <tbody>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Actions</th>
+          </tr>
+          {users.map(({ admin, email, id, username }) => (
+            <User
+              active={id === activeUserId}
+              admin={admin}
+              email={email}
+              id={id}
+              key={username}
+              username={username}
+            />
+          ))}
+        </tbody>
+      </table>
+    );
+  }
 }
 
 UserList.propTypes = {
   activeUserId: PropTypes.string.isRequired,
+  onUserActionChange: PropTypes.func.isRequired,
   users: PropTypes.array.isRequired,
 };
 
@@ -135,7 +151,6 @@ class Users extends Component {
     };
     this.getActionButtons = this.getActionButtons.bind(this);
     this.onInviteUser = this.onInviteUser.bind(this);
-    this.onUserActionConfirm = this.onUserActionConfirm.bind(this);
   }
 
   componentDidMount() {
@@ -148,10 +163,6 @@ class Users extends Component {
   onInviteUser(email) {
     this.setState({ isInviteModalVisible: false });
     api.post('/api/admin/invites', { email });
-  }
-
-  onUserActionConfirm() {
-    this.setState({ isActionModalVisible: false });
   }
 
   getActionButtons() {
