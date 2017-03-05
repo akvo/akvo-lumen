@@ -136,7 +136,6 @@ class UserList extends Component {
 
 UserList.propTypes = {
   activeUserId: PropTypes.string.isRequired,
-  onUserActionChange: PropTypes.func.isRequired,
   users: PropTypes.array.isRequired,
 };
 
