@@ -197,7 +197,7 @@ export default class FilterMenu extends Component {
               {(!filters || filters.length === 0) ?
                 <div className="noFilters">No filters</div> : <div className="filterListContainer">
                   <ol className="filterList">
-                    {filters.map((filter, index) =>
+                    {filters.filter(item => item.origin === 'filterMenu').map((filter, index) =>
                       <li
                         key={index}
                         className="filterListItem"

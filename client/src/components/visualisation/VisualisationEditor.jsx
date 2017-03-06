@@ -1,4 +1,5 @@
 import React, { Component, PropTypes } from 'react';
+import isEqual from 'lodash/isEqual';
 import VisualisationConfig from './VisualisationConfig';
 import VisualisationPreview from './VisualisationPreview';
 import * as api from '../../api';
@@ -71,7 +72,8 @@ export default class VisualisationEditor extends Component {
             spec.aggregation !== lastSpec.aggregation ||
             spec.valueColumn !== lastSpec.valueColumn ||
             spec.categoryColumn !== lastSpec.categoryColumn ||
-            spec.rowColumn !== lastSpec.rowColumn
+            spec.rowColumn !== lastSpec.rowColumn ||
+            !isEqual(spec.filters, lastSpec.filters)
           );
           if (shouldRequestNewData) {
             this.fetchAggregatedData(visualisation);
