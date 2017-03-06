@@ -156,9 +156,11 @@
           request-draft (keycloak/request-draft keycloak)
           ruth-user (keycloak/fetch-user-by-email request-draft api-root ruth-email)
           resp (user-manager/promote-user-to-admin
-                *user-manager* tenant admin-claims (get ruth-user "id"))
-          ]
-      (is (= 204 (:status resp)))
+                *user-manager* tenant admin-claims (get ruth-user "id"))]
+      (is (= 200 (:status resp)))
+      (is (= (get ruth-user "id")
+             (-> resp :body (get "id"))))
+      (is (-> resp :body (get "admin")))
       (let [{:keys [admin-ids member-ids]} (admin-and-members keycloak tenant)
             set-of-ruth  #{(get ruth-user "id")}]
         (is (not (empty? (set/intersection admin-ids set-of-ruth))))
@@ -171,7 +173,10 @@
           ruth-user (keycloak/fetch-user-by-email request-draft api-root ruth-email)
           resp (user-manager/demote-user-from-admin
                 *user-manager* tenant admin-claims (get ruth-user "id"))]
-      (is (= 204 (:status resp)))
+      (is (= 200 (:status resp)))
+      (is (= (get ruth-user "id")
+             (-> resp :body (get "id"))))
+      #_(is (not (-> resp :body (get "admin"))))
       (let [{:keys [admin-ids member-ids]} (admin-and-members keycloak tenant)
             set-of-ruth #{(get ruth-user "id")}]
         (is (empty? (set/intersection admin-ids set-of-ruth)))
