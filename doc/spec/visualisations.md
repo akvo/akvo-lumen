@@ -93,6 +93,23 @@
 
 ```
 
+### Pivot table
+
+```
+{
+  version: 1,
+  filters: [],
+  aggregation: 'count',
+  valueColumn: null, // required if aggregation is other than 'count'
+  categoryColumn: null, // required
+  categoryTitle: null, // required
+  rowColumn: null, // Optional, will use categoryColumn title if ommited
+  rowTitle: null, // Optional, will use rowColumn title if ommited
+  decimalPlaces: 3, // Only used at render-time
+}
+
+```
+
 ### Filter array (used for all visualisation types)
 
 ```

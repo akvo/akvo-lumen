@@ -4,9 +4,9 @@ const pivotTableSpec = {
   aggregation: 'count',
   valueColumn: null,
   categoryColumn: null,
-  categoryColumnLabel: null,
+  categoryTitle: null,
   rowColumn: null,
-  rowColumnLabel: null,
+  rowTitle: null,
   decimalPlaces: 3,
 };
 
