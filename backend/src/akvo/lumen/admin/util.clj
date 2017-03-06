@@ -1,5 +1,6 @@
 (ns akvo.lumen.admin.util
-  (:require [clojure.java.jdbc :as jdbc]
+  (:require [akvo.lumen.component.keycloak :as keycloak]
+            [clojure.java.jdbc :as jdbc]
             [environ.core :refer [env]]))
 
 (defn exec!

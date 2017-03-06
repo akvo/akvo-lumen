@@ -1,8 +1,7 @@
 (ns akvo.lumen.component.keycloak
   "We leverage Keycloak groups for tenant partition and admin roles.
    More info can be found in the Keycloak integration doc spec."
-  (:require [akvo.lumen.auth :refer [tenant-admin?]]
-            [akvo.lumen.http :as http]
+  (:require [akvo.lumen.http :as http]
             [cheshire.core :as json]
             [com.stuartsierra.component :as component]
             [clj-http.client :as client]
@@ -111,6 +110,32 @@
         (response {:status (:status ed)
                    :body (:reasonPhrase ed)})))))
 
+(defn tenant-admin?
+  [request-draft api-root tenant user-id]
+  (let [admin-group-id (-> (client/get (format "%s/group-by-path/akvo/lumen/%s/admin"
+                                               api-root tenant)
+                                       request-draft)
+                           :body json/decode (get "id"))
+        admins (-> (client/get (format "%s/groups/%s/members" api-root admin-group-id)
+                               request-draft)
+                   :body json/decode)
+        admin-ids (into #{}
+                        (map #(get % "id"))
+                        (filter #(and (get % "emailVerified")
+                                      (get % "enabled"))
+                                admins))]
+    (not (empty? (set/intersection #{user-id} (set admin-ids))))))
+
+(defn fetch-user-by-id
+  "Get user by email. Returns nil if not found."
+  [request-draft api-root tenant user-id]
+  (let [resp (-> (client/get (format "%s/users/%s" api-root user-id)
+                             request-draft)
+                 :body json/decode)]
+    (assoc resp
+           "admin"
+           (tenant-admin? request-draft api-root tenant user-id))))
+
 (defn fetch-user-by-email
   "Get user by email. Returns nil if none found."
   [request-draft api-root email]
@@ -132,6 +157,7 @@
       :body json/decode))
 
 (defn tenant-member?
+  "Returns true for both members and admins."
   [{api-root :api-root :as keycloak} tenant email]
   (let [possible-group-paths (set (map #(format % tenant)
                                        ["/akvo/lumen/%s" "/akvo/lumen/%s/admin"]))
@@ -179,7 +205,7 @@
                                          admin-group-id))
                (= 204 (remove-user-from-group request-draft api-root user-id
                                               tenant-group-id)))
-        (http/no-content)
+        (http/ok (fetch-user-by-id request-draft api-root tenant user-id))
         (do
           (println (format "Tried to promote user: %s" user-id))
           (http/internal-server-error))))))
@@ -199,7 +225,7 @@
                                               admin-group-id))
                (= 204 (add-user-to-group request-draft api-root user-id
                                          tenant-group-id)))
-        (http/no-content)
+        (http/ok (fetch-user-by-id request-draft api-root tenant user-id))
         (do
           (println (format "Tried to demote user: %s" user-id))
           (http/internal-server-error))))))
