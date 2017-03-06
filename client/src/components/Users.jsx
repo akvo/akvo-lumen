@@ -34,36 +34,24 @@ class UserActionSelector extends Component {
   render() {
     const { active, admin } = this.props;
     return (
-      <form
-        className="userActionSelector"
-        onSubmit={this.onSubmit}
-      >
-        <select
-          onChange={this.onChange}
-          value={this.state.action}
-        >
+      <form className="userActionSelector" onSubmit={this.onSubmit} >
+        <select onChange={this.onChange} value={this.state.action} >
           <option value="?">...</option>
-          <option
-            disabled={active}
-            key="user-delete"
-            value="delete"
-          >
-            Delete user
+          <option disabled key="user-edit" value="edit">
+            Edit
           </option>
-          <option
-            disabled={admin}
-            key="user-promote"
-            value="promote"
-          >
-            Enable admin privileges
+          <option disabled={active} key="user-delete" value="delete">
+            Delete
           </option>
-          <option
-            disabled={(!admin || active)}
-            key="user-demote"
-            value="demote"
-          >
-            Remove admin privileges
-          </option>
+          {!admin ?
+            <option disabled={admin} key="user-promote" value="promote">
+              Enable admin privileges
+            </option>
+           :
+            <option disabled={(!admin || active)} key="user-demote" value="demote">
+              Remove admin privileges
+            </option>
+          }
         </select>
         <input type="submit" value="Go" />
       </form>
@@ -84,11 +72,7 @@ function User({ active, admin, email, id, username }) {
       <td>{email}</td>
       <td>{admin ? 'Admin' : 'User'}</td>
       <td>
-        <UserActionSelector
-          active={active}
-          admin={admin}
-          id={id}
-        />
+        <UserActionSelector active={active} admin={admin} id={id} />
       </td>
     </tr>
   );
@@ -137,7 +121,6 @@ UserList.propTypes = {
 };
 
 class Users extends Component {
-
   constructor() {
     super();
     this.state = {
@@ -197,10 +180,7 @@ class Users extends Component {
           actionButtons={actionButtons}
         />
         <div className="UserList">
-          <UserList
-            activeUserId={id}
-            users={this.state.users}
-          />
+          <UserList activeUserId={id} users={this.state.users} />
         </div>
         <InviteUser
           isOpen={this.state.isInviteModalVisible}

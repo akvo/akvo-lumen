@@ -4,7 +4,7 @@ import Modal from 'react-modal';
 require('../../styles/DashboardModal.scss');
 
 export default function ConfirmUserAction(props) {
-  const { action, isOpen, onClose, onConfirm } = props;
+  const { isOpen, onClose } = props;
   const baseQuestion = 'Are you sure you want to ';
   return (
     <Modal
@@ -44,8 +44,6 @@ export default function ConfirmUserAction(props) {
 }
 
 ConfirmUserAction.propTypes = {
-  action: PropTypes.string.isRequired,
-  isOpen: PropTypes.bool,
+  isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
-  onConfirm: PropTypes.func.isRequired,
 };
