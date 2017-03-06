@@ -132,7 +132,7 @@ export default class PivotTableConfigMenu extends Component {
         {spec.categoryColumn !== null &&
           <UniqueValueMenu
             tableData={visualisation.data}
-            dimension="category"
+            dimension="column"
             collapsed={this.state.catValMenuCollapsed}
             onChangeSpec={this.props.onChangeSpec}
             column={spec.categoryColumn}
