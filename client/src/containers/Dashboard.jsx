@@ -197,14 +197,11 @@ class Dashboard extends Component {
     const clonedLayout = cloneDeep(layout);
     const dashboard = Object.assign({}, this.state.dashboard, { layout: clonedLayout });
     const oldLayout = this.state.dashboard.layout;
-    let layoutChanged = false;
-
-    layout.forEach((item) => {
+    const layoutChanged = layout.some((item) => {
       const oldItem = oldLayout.find(oi => oi.i === item.i);
 
       if (oldItem === undefined) {
-        layoutChanged = true;
-        return;
+        return true;
       }
 
       const positionChanged = Boolean(oldItem.w !== item.w ||
@@ -213,8 +210,10 @@ class Dashboard extends Component {
         oldItem.y !== item.y);
 
       if (positionChanged) {
-        layoutChanged = true;
+        return true;
       }
+
+      return false;
     });
 
     this.setState({
