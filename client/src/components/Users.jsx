@@ -8,67 +8,72 @@ import * as api from '../api';
 require('../styles/EntityTypeHeader.scss');
 require('../styles/Users.scss');
 
-function executeUserAction(action, id) {
-  const url = `/api/admin/users/${id}`;
-  if (action === 'promote') {
-    api.patch(url, { admin: true });
-  } else if (action === 'demote') {
-    api.patch(url, { admin: false });
-  }
-}
-
 class UserActionSelector extends Component {
   constructor(props) {
     super(props);
     this.state = { action: '?' };
     this.onChange = this.onChange.bind(this);
+    this.onSubmit = this.onSubmit.bind(this);
   }
 
   onChange(event) {
-    const action = event.target.value;
-    const id = this.props.id;
-    this.setState({ action });
-    executeUserAction(action, id);
+    this.setState({ action: event.target.value });
+  }
+
+  onSubmit() {
+    const action = this.state.action;
+    const userId = this.props.id;
+    const url = `/api/admin/users/${userId}`;
+    if (action === 'promote') {
+      api.patch(url, { admin: true });
+    } else if (action === 'demote') {
+      api.patch(url, { admin: false });
+    }
   }
 
   render() {
     const { active, admin } = this.props;
     return (
-      <select
+      <form
         className="userActionSelector"
-        onChange={this.onChange}
-        value={this.state.action}
+        onSubmit={this.onSubmit}
       >
-        <option value="">...</option>
-        <option
-          disabled={active}
-          key="user-delete"
-          value="delete"
+        <select
+          onChange={this.onChange}
+          value={this.state.action}
         >
-          Delete user
-        </option>
-        <option
-          disabled={admin}
-          key="user-promote"
-          value="promote"
-        >
-          Enable admin privileges
-        </option>
-        <option
-          disabled={(!admin || active)}
-          key="user-demote"
-          value="demote"
-        >
-          Remove admin privileges
-        </option>
-      </select>
+          <option value="?">...</option>
+          <option
+            disabled={active}
+            key="user-delete"
+            value="delete"
+          >
+            Delete user
+          </option>
+          <option
+            disabled={admin}
+            key="user-promote"
+            value="promote"
+          >
+            Enable admin privileges
+          </option>
+          <option
+            disabled={(!admin || active)}
+            key="user-demote"
+            value="demote"
+          >
+            Remove admin privileges
+          </option>
+        </select>
+        <input type="submit" value="Go" />
+      </form>
     );
   }
 }
 
 UserActionSelector.propTypes = {
-  active: PropTypes.bool,
-  admin: PropTypes.bool,
+  active: PropTypes.bool.isRequired,
+  admin: PropTypes.bool.isRequired,
   id: PropTypes.string.isRequired,
 };
 
@@ -90,8 +95,8 @@ function User({ active, admin, email, id, username }) {
 }
 
 User.propTypes = {
-  active: PropTypes.bool,
-  admin: PropTypes.bool,
+  active: PropTypes.bool.isRequired,
+  admin: PropTypes.bool.isRequired,
   email: PropTypes.string.isRequired,
   id: PropTypes.string.isRequired,
   username: PropTypes.string.isRequired,
@@ -101,37 +106,29 @@ User.defaultProps = {
   admin: false,
 };
 
-class UserList extends Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasChanged: false };
-  }
-
-  render() {
-    const { activeUserId, users } = this.props;
-    return (
-      <table>
-        <tbody>
-          <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Role</th>
-            <th>Actions</th>
-          </tr>
-          {users.map(({ admin, email, id, username }) => (
-            <User
-              active={id === activeUserId}
-              admin={admin}
-              email={email}
-              id={id}
-              key={username}
-              username={username}
-            />
-          ))}
-        </tbody>
-      </table>
-    );
-  }
+function UserList({ activeUserId, users }) {
+  return (
+    <table>
+      <tbody>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Actions</th>
+        </tr>
+        {users.map(({ admin, email, id, username }) => (
+          <User
+            active={id === activeUserId}
+            admin={admin}
+            email={email}
+            id={id}
+            key={username}
+            username={username}
+          />
+        ))}
+      </tbody>
+    </table>
+  );
 }
 
 UserList.propTypes = {
