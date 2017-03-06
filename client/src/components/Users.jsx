@@ -68,7 +68,14 @@ UserActionSelector.propTypes = {
 function User({ active, admin, email, id, username }) {
   return (
     <tr>
-      <td>{username}</td>
+      <td>
+        {username}
+        {active ?
+          <span> (me)</span>
+         :
+          <span />
+        }
+      </td>
       <td>{email}</td>
       <td>{admin ? 'Admin' : 'User'}</td>
       <td>
