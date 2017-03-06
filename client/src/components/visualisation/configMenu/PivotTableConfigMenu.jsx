@@ -111,10 +111,10 @@ export default class PivotTableConfigMenu extends Component {
           }
         </div>
         <hr />
-        <Subtitle>Categories</Subtitle>
+        <Subtitle>Columns</Subtitle>
         <SelectInput
-          placeholder="Select a category column"
-          labelText="Category column"
+          placeholder="Select a column"
+          labelText="Columns"
           choice={spec.categoryColumn !== null ? spec.categoryColumn.toString() : null}
           name="categoryColumnInput"
           options={columnOptions}
