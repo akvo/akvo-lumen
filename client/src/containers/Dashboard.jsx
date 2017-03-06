@@ -1,7 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { isEmpty, cloneDeep } from 'lodash';
-import { push } from 'react-router-redux';
 import ShareEntity from '../components/modals/ShareEntity';
 import * as actions from '../actions/dashboard';
 import * as api from '../api';
@@ -147,7 +146,11 @@ class Dashboard extends Component {
     } else {
       dispatch(actions.createDashboard(dashboard));
     }
-    dispatch(push('/library?filter=dashboards&sort=created'));
+
+    // We should really check the save was successful, but for now let's assume it was
+    this.setState({
+      isUnsavedChanges: false,
+    });
   }
 
   onAddVisualisation(visualisation) {
@@ -184,18 +187,48 @@ class Dashboard extends Component {
 
   onUpdateName(title) {
     const dashboard = Object.assign({}, this.state.dashboard, { title });
-    this.setState({ dashboard });
+    this.setState({
+      dashboard,
+      isUnsavedChanges: true,
+    });
   }
 
   updateLayout(layout) {
     const clonedLayout = cloneDeep(layout);
     const dashboard = Object.assign({}, this.state.dashboard, { layout: clonedLayout });
-    this.setState({ dashboard });
+    const oldLayout = this.state.dashboard.layout;
+    let layoutChanged = false;
+
+    layout.forEach((item) => {
+      const oldItem = oldLayout.find(oi => oi.i === item.i);
+
+      if (oldItem === undefined) {
+        layoutChanged = true;
+        return;
+      }
+
+      const positionChanged = Boolean(oldItem.w !== item.w ||
+        oldItem.h !== item.h ||
+        oldItem.x !== item.x ||
+        oldItem.y !== item.y);
+
+      if (positionChanged) {
+        layoutChanged = true;
+      }
+    });
+
+    this.setState({
+      dashboard,
+      isUnsavedChanges: layoutChanged ? true : this.state.isUnsavedChanges,
+    });
   }
 
   updateEntities(entities) {
     const dashboard = Object.assign({}, this.state.dashboard, { entities });
-    this.setState({ dashboard });
+    this.setState({
+      dashboard,
+      isUnsavedChanges: true,
+    });
   }
 
   handleDashboardAction(action) {

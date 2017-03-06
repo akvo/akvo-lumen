@@ -1,4 +1,5 @@
 import { createAction } from 'redux-actions';
+import { push } from 'react-router-redux';
 import * as api from '../api';
 
 export const fetchDashboardsSuccess = createAction('FETCH_DASHBOARDS_SUCCESS');
@@ -12,7 +13,10 @@ export function createDashboard(dashboard) {
   return (dispatch) => {
     dispatch(createDashboardRequest(dashboard));
     api.post('/api/dashboards', dashboard)
-    .then(dash => dispatch(createDashboardSuccess(dash)))
+    .then((dash) => {
+      dispatch(createDashboardSuccess(dash));
+      dispatch(push(`/dashboard/${dash.id}`));
+    })
     .catch(err => dispatch(createDashboardFailure(err)));
   };
 }
