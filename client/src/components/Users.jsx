@@ -13,48 +13,41 @@ class UserActionSelector extends Component {
     super(props);
     this.state = { action: '?' };
     this.onChange = this.onChange.bind(this);
-    this.onSubmit = this.onSubmit.bind(this);
   }
 
   onChange(event) {
-    this.setState({ action: event.target.value });
-  }
-
-  onSubmit() {
-    const action = this.state.action;
-    const userId = this.props.id;
-    const url = `/api/admin/users/${userId}`;
-    if (action === 'promote') {
-      api.patch(url, { admin: true });
-    } else if (action === 'demote') {
-      api.patch(url, { admin: false });
-    }
+    const action = event.target.value;
+    const userId = this.props.userId;
+    this.setState({ action });
+    this.props.onChange(action, userId);
   }
 
   render() {
     const { active, admin } = this.props;
     return (
-      <form className="userActionSelector" onSubmit={this.onSubmit} >
-        <select onChange={this.onChange} value={this.state.action} >
-          <option value="?">...</option>
-          <option disabled key="user-edit" value="edit">
-            Edit
-          </option>
-          <option disabled={active} key="user-delete" value="delete">
-            Delete
-          </option>
-          {!admin ?
-            <option disabled={admin} key="user-promote" value="promote">
-              Enable admin privileges
-            </option>
+      <select
+        className="UserActionSelector"
+        onChange={this.onChange}
+        value={this.state.action}
+      >
+        <option value="?">...</option>
+        <option disabled key="user-edit" value="edit">
+          Edit
+        </option>
+        <option disabled={active} key="user-delete" value="delete">
+          Delete
+        </option>
+        {!admin
+           ?
+             <option disabled={admin} key="user-promote" value="promote">
+               Enable admin privileges
+             </option>
            :
-            <option disabled={(!admin || active)} key="user-demote" value="demote">
-              Remove admin privileges
-            </option>
-          }
-        </select>
-        <input type="submit" value="Go" />
-      </form>
+             <option disabled={(!admin || active)} key="user-demote" value="demote">
+               Remove admin privileges
+             </option>
+        }
+      </select>
     );
   }
 }
@@ -62,24 +55,29 @@ class UserActionSelector extends Component {
 UserActionSelector.propTypes = {
   active: PropTypes.bool.isRequired,
   admin: PropTypes.bool.isRequired,
-  id: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+  userId: PropTypes.string.isRequired,
 };
 
-function User({ active, admin, email, id, username }) {
+function User({ active, admin, email, onChange, userId, username }) {
   return (
     <tr>
       <td>
         {username}
-        {active ?
-          <span> (me)</span>
-         :
-          <span />
+        {active
+          ? <span> (me)</span>
+          : <span />
         }
       </td>
       <td>{email}</td>
       <td>{admin ? 'Admin' : 'User'}</td>
       <td>
-        <UserActionSelector active={active} admin={admin} id={id} />
+        <UserActionSelector
+          active={active}
+          admin={admin}
+          onChange={onChange}
+          userId={userId}
+        />
       </td>
     </tr>
   );
@@ -89,7 +87,8 @@ User.propTypes = {
   active: PropTypes.bool.isRequired,
   admin: PropTypes.bool.isRequired,
   email: PropTypes.string.isRequired,
-  id: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+  userId: PropTypes.string.isRequired,
   username: PropTypes.string.isRequired,
 };
 
@@ -97,7 +96,7 @@ User.defaultProps = {
   admin: false,
 };
 
-function UserList({ activeUserId, users }) {
+function UserList({ activeUserId, onChange, users }) {
   return (
     <table>
       <tbody>
@@ -112,8 +111,9 @@ function UserList({ activeUserId, users }) {
             active={id === activeUserId}
             admin={admin}
             email={email}
-            id={id}
             key={username}
+            onChange={onChange}
+            userId={id}
             username={username}
           />
         ))}
@@ -124,6 +124,7 @@ function UserList({ activeUserId, users }) {
 
 UserList.propTypes = {
   activeUserId: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
   users: PropTypes.array.isRequired,
 };
 
@@ -137,6 +138,7 @@ class Users extends Component {
     };
     this.getActionButtons = this.getActionButtons.bind(this);
     this.onInviteUser = this.onInviteUser.bind(this);
+    this.onUserActionChange = this.onUserActionChange.bind(this);
   }
 
   componentDidMount() {
@@ -149,6 +151,18 @@ class Users extends Component {
   onInviteUser(email) {
     this.setState({ isInviteModalVisible: false });
     api.post('/api/admin/invites', { email });
+  }
+
+  onUserActionChange(action, userId) {
+    const baseUrl = '/api/admin/users';
+    const userUrl = `${baseUrl}/${userId}`;
+    if (action === 'promote') {
+      api.patch(userUrl, { admin: true });
+    } else if (action === 'demote') {
+      api.patch(userUrl, { admin: false });
+    }
+    api.get(baseUrl)
+      .then(users => this.setState({ users }));
   }
 
   getActionButtons() {
@@ -187,7 +201,11 @@ class Users extends Component {
           actionButtons={actionButtons}
         />
         <div className="UserList">
-          <UserList activeUserId={id} users={this.state.users} />
+          <UserList
+            activeUserId={id}
+            onChange={this.onUserActionChange}
+            users={this.state.users}
+          />
         </div>
         <InviteUser
           isOpen={this.state.isInviteModalVisible}
