@@ -59,7 +59,32 @@ export default class VisualisationEditor extends Component {
           });
         }
         if (visualisation.datasetId && specIsValidForApi(visualisation.spec)) {
-          this.fetchAggregatedData(visualisation);
+          const lastSpec = this.lastPivotRequested && this.lastPivotRequested.spec ?
+            this.lastPivotRequested.spec : {};
+          const lastDataset = this.lastPivotRequested ?
+            this.lastPivotRequested.datasetId : null;
+          const spec = visualisation.spec;
+
+          // Only fetch new aggregated data if a relevant part of the spec has changed
+          const shouldRequestNewData = Boolean(
+            visualisation.datasetId !== lastDataset ||
+            spec.aggregation !== lastSpec.aggregation ||
+            spec.valueColumn !== lastSpec.valueColumn ||
+            spec.categoryColumn !== lastSpec.categoryColumn ||
+            spec.rowColumn !== lastSpec.rowColumn
+          );
+          if (shouldRequestNewData) {
+            this.fetchAggregatedData(visualisation);
+          } else {
+            // Update children without requesting new aggregated data
+            this.setState({
+              visualisation:
+                Object.assign({}, visualisation, { data: this.state.visualisation.data }),
+            });
+          }
+
+          // Store a copy of this visualisation to compare against on next update
+          this.lastPivotRequested = Object.assign({}, visualisation);
         }
         break;
 
