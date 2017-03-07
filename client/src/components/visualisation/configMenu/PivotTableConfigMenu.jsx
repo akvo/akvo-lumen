@@ -148,7 +148,7 @@ export default class PivotTableConfigMenu extends Component {
             />
             <LabelInput
               value={
-                spec.categoryTitle === null ?
+                spec.categoryTitle == null ?
                   columnOptions.find(item => item.value === spec.categoryColumn).title
                   :
                   spec.categoryTitle.toString()

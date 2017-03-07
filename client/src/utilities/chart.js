@@ -86,7 +86,7 @@ function filterFn(filters, columns) {
 const displayTextForNullValues = 'No data';
 
 export const replaceLabelIfValueEmpty = (label, getCssClassname) => {
-  if (label === null || label === 'null' || label === '') {
+  if (label == null || label === 'null' || label === '') {
     return getCssClassname ? 'emptyValue' : displayTextForNullValues;
   }
   return getCssClassname ? 'dataValue' : label;
