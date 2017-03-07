@@ -65,7 +65,7 @@ function User({ active, admin, email, onChange, userId, username }) {
       <td>
         {username}
         {active
-          ? <span> (me)</span>
+          ? <span className="isMe"> (me)</span>
           : <span />
         }
       </td>

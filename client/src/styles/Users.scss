@@ -31,11 +31,20 @@
           font-weight: bold;
         }
       }
+      .isMe {
+        color: $midGrey;
+      }
     }
   }
   .UserActionSelector {
-    margin-right: 0.5rem;
-    width: 75px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background: $white;
+    border: 0;
+    text-indent: 1px;
+    text-overflow: ellipsis;
+    text-weight: bold;
+    width: 50px;
   }
 }
 
