@@ -69,14 +69,17 @@ export default class PivotTableConfigMenu extends Component {
                 onChangeSpec(change);
               }}
             />
-            <div
-              className="helpText aggregationHelpText"
-            >
-              <div className="helpTextContainer">
-                <span className="alert">!</span>
-                Choose a category column and a row column to use aggregations other than count.
+            {spec.aggregation === 'count' &&
+              (spec.rowColumn == null || spec.categoryColumn == null) &&
+              <div
+                className="helpText aggregationHelpText"
+              >
+                <div className="helpTextContainer">
+                  <span className="alert">!</span>
+                  Choose a column and a row to pivot on to use aggregations other than count.
+                </div>
               </div>
-            </div>
+            }
           </span>
           {spec.aggregation !== 'count' &&
             <div>
