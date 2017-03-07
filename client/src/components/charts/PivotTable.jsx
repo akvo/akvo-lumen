@@ -117,14 +117,15 @@ export default function PivotTable({ width, height, visualisation }) {
                 key={index}
                 className={getColumnHeaderClassname(cell, index, visualisation.spec)}
                 title={index === 0 ? cell.title : replaceLabelIfValueEmpty(cell.title)}
+                style={{
+                  minWidth: index === 0 ?
+                    getMinRowTitleWidth(getColumnHeaderBody(cell, index, spec))
+                    :
+                    getMinCategoryTitleWidth(getColumnHeaderBody(cell, index, spec))
+                    ,
+                }}
               >
-                <span
-                  style={{
-                    minWidth: getMinCategoryTitleWidth(formatTitle(index === 0 ?
-                      cell.title : replaceLabelIfValueEmpty(cell.title)
-                    )),
-                  }}
-                >
+                <span>
                   {getColumnHeaderBody(cell, index, spec)}
                 </span>
               </th>
