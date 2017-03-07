@@ -28,6 +28,12 @@ const aggregationOptions = [
   },
 ];
 
+const getColumnTitle = (columnName, columnOptions = []) => {
+  const entry = columnOptions.find(item => item.value === columnName);
+
+  return entry ? entry.title : null;
+};
+
 export default class PivotTableConfigMenu extends Component {
   constructor() {
     super();
@@ -152,7 +158,7 @@ export default class PivotTableConfigMenu extends Component {
             <LabelInput
               value={
                 spec.categoryTitle == null ?
-                  columnOptions.find(item => item.value === spec.categoryColumn).title
+                  getColumnTitle(spec.categoryColumn, columnOptions)
                   :
                   spec.categoryTitle.toString()
               }
@@ -202,7 +208,7 @@ export default class PivotTableConfigMenu extends Component {
             <LabelInput
               value={
                 spec.rowTitle == null ?
-                  columnOptions.find(item => item.value === spec.rowColumn).title
+                  getColumnTitle(spec.rowColumn, columnOptions)
                   :
                   spec.rowTitle.toString()
               }
