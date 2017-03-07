@@ -19,7 +19,7 @@ class UserActionSelector extends Component {
     const action = event.target.value;
     const userId = this.props.userId;
     this.setState({ action });
-    this.props.onChange(action, userId);
+    this.props.onChange(userId, action);
   }
 
   render() {
@@ -111,7 +111,7 @@ function UserList({ activeUserId, onChange, users }) {
             active={id === activeUserId}
             admin={admin}
             email={email}
-            key={username}
+            key={id}
             onChange={onChange}
             userId={id}
             username={username}
@@ -137,14 +137,14 @@ class Users extends Component {
       users: [],
     };
     this.getActionButtons = this.getActionButtons.bind(this);
+    this.getUsers = this.getUsers.bind(this);
     this.onInviteUser = this.onInviteUser.bind(this);
     this.onUserActionChange = this.onUserActionChange.bind(this);
   }
 
   componentDidMount() {
     if (this.props.profile.admin) {
-      api.get('/api/admin/users')
-        .then(users => this.setState({ users }));
+      this.getUsers();
     }
   }
 
@@ -153,23 +153,22 @@ class Users extends Component {
     api.post('/api/admin/invites', { email });
   }
 
-  onUserActionChange(action, userId) {
-    const baseUrl = '/api/admin/users';
-    const userUrl = `${baseUrl}/${userId}`;
-    if (action === 'promote') {
-      api.patch(userUrl, { admin: true });
+  onUserActionChange(userId, action) {
+    const url = `/api/admin/users/${userId}`;
+    if (action === 'delete') {
+      api.delete(url).then(() => this.getUsers());
     } else if (action === 'demote') {
-      api.patch(userUrl, { admin: false });
+      api.patch(url, { admin: false }).then(() => this.getUsers());
+    } else if (action === 'promote') {
+      api.patch(url, { admin: true }).then(() => this.getUsers());
     }
-    api.get(baseUrl)
-      .then(users => this.setState({ users }));
   }
 
   getActionButtons() {
     const buttons = [
       {
         buttonText: 'Manage invites',
-        onClick: () => null,
+        onClick: null,
       },
       {
         buttonText: 'Invite user',
@@ -177,6 +176,11 @@ class Users extends Component {
       },
     ];
     return buttons;
+  }
+
+  getUsers() {
+    api.get('/api/admin/users')
+      .then(users => this.setState({ users }));
   }
 
   render() {
