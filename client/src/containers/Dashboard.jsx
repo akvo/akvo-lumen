@@ -1,7 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { isEmpty, cloneDeep } from 'lodash';
-import { push } from 'react-router-redux';
 import ShareEntity from '../components/modals/ShareEntity';
 import * as actions from '../actions/dashboard';
 import * as api from '../api';
@@ -51,6 +50,7 @@ class Dashboard extends Component {
         created: null,
         modified: null,
       },
+      isSavePending: null,
       isUnsavedChanges: null,
       isShareModalVisible: false,
       requestedDatasetIds: [],
@@ -135,6 +135,16 @@ class Dashboard extends Component {
         this.loadDashboardIntoState(dash, nextProps.library);
       }
     }
+
+    if (!this.props.params.dashboardId && nextProps.params.dashboardId) {
+      const dashboardId = nextProps.params.dashboardId;
+
+      this.setState({
+        isSavePending: false,
+        isUnsavedChanges: false,
+        dashboard: Object.assign({}, this.state.dashboard, { id: dashboardId }),
+      });
+    }
   }
 
   onSave() {
@@ -144,10 +154,17 @@ class Dashboard extends Component {
 
     if (isEditingExistingDashboard) {
       dispatch(actions.saveDashboardChanges(dashboard));
-    } else {
+
+      // We should really check the save was successful, but for now let's assume it was
+      this.setState({
+        isUnsavedChanges: false,
+      });
+    } else if (!this.state.isSavePending) {
+      this.setState({ isSavePending: true });
       dispatch(actions.createDashboard(dashboard));
+    } else {
+      // Ignore save request until the first "create dashboard" request succeeeds
     }
-    dispatch(push('/library?filter=dashboards&sort=created'));
   }
 
   onAddVisualisation(visualisation) {
@@ -184,18 +201,47 @@ class Dashboard extends Component {
 
   onUpdateName(title) {
     const dashboard = Object.assign({}, this.state.dashboard, { title });
-    this.setState({ dashboard });
+    this.setState({
+      dashboard,
+      isUnsavedChanges: true,
+    });
   }
 
   updateLayout(layout) {
     const clonedLayout = cloneDeep(layout);
     const dashboard = Object.assign({}, this.state.dashboard, { layout: clonedLayout });
-    this.setState({ dashboard });
+    const oldLayout = this.state.dashboard.layout;
+    const layoutChanged = layout.some((item) => {
+      const oldItem = oldLayout.find(oi => oi.i === item.i);
+
+      if (oldItem === undefined) {
+        return true;
+      }
+
+      const positionChanged = Boolean(oldItem.w !== item.w ||
+        oldItem.h !== item.h ||
+        oldItem.x !== item.x ||
+        oldItem.y !== item.y);
+
+      if (positionChanged) {
+        return true;
+      }
+
+      return false;
+    });
+
+    this.setState({
+      dashboard,
+      isUnsavedChanges: layoutChanged ? true : this.state.isUnsavedChanges,
+    });
   }
 
   updateEntities(entities) {
     const dashboard = Object.assign({}, this.state.dashboard, { entities });
-    this.setState({ dashboard });
+    this.setState({
+      dashboard,
+      isUnsavedChanges: true,
+    });
   }
 
   handleDashboardAction(action) {
