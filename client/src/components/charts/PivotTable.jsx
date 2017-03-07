@@ -38,10 +38,16 @@ const getColumnHeaderBody = (cell, index, spec) => {
 /* Returns the min column width that will limit wrapping to two lines.
 /* This is not currently possible with a stylesheet-only approach. */
 const getMinRowTitleWidth = text =>
-  Math.min(Math.ceil((text.length * meanPixelsPerChar) / 2), 32 * meanPixelsPerChar);
+  Math.min(
+    Math.ceil(((text != null ? text.toString().length : 0) * meanPixelsPerChar) / 2),
+    32 * meanPixelsPerChar
+  );
 
 const getMinCategoryTitleWidth = text =>
-  Math.min(text.length * meanPixelsPerChar, defaultCategoryWidth);
+  Math.min(
+    (text != null ? text.toString().length : 0) * meanPixelsPerChar,
+    defaultCategoryWidth
+  );
 
 const formatCell = (index, cell, spec, columns) => {
   const type = columns[index].type;
@@ -115,7 +121,7 @@ export default function PivotTable({ width, height, visualisation }) {
                 <span
                   style={{
                     minWidth: getMinCategoryTitleWidth(formatTitle(index === 0 ?
-                      cell.title.toString() : replaceLabelIfValueEmpty(cell.title.toString())
+                      cell.title : replaceLabelIfValueEmpty(cell.title)
                     )),
                   }}
                 >
