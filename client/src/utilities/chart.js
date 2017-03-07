@@ -217,8 +217,9 @@ export function getPieData(visualisation, datasets) {
     .execute(valueArray)
     .sort((a, b) => {
       if (bucketColumnType === 'text') {
-        const valA = a.bucketValue || lastValueAlphabetically;
-        const valB = b.bucketValue || lastValueAlphabetically;
+        const emptyValueText = replaceLabelIfValueEmpty(null);
+        const valA = a.bucketValue === emptyValueText ? lastValueAlphabetically : a.bucketValue;
+        const valB = b.bucketValue === emptyValueText ? lastValueAlphabetically : b.bucketValue;
 
         return valA.localeCompare(valB);
       }
