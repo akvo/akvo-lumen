@@ -31,13 +31,12 @@
     "dev" "http://localhost:8080/auth"))
 
 (defn create-keycloak []
-  (assert (:keycloak env) (error-msg "KEYCLOAK"))
-  (assert (:keycloak-id env) (error-msg "KEYCLOAK_ID"))
-  (assert (:keycloak-secret env) (error-msg "KEYCLOAK_SECRET"))
+  (assert (:keycloak env) (error-msg "Specify KEYCLOAK env var"))
+  (assert (:keycloak-secret env) (error-msg "Specify KEYCLOAK_SECRET env var"))
   (let [url (keycloak-url)
         issuer (format "%s/realms/akvo" url)]
     {:api-root (format "%s/admin/realms/akvo" url)
      :issuer issuer
      :openid-config (keycloak/fetch-openid-configuration issuer)
-     :credentials {"client_id" (:keycloak-id env)
+     :credentials {"client_id" (:keycloak-id env "akvo-lumen-confidential")
                    "client_secret" (:keycloak-secret env)}}))

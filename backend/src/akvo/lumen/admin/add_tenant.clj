@@ -3,10 +3,12 @@
   PGHOST,  PGDATABASE, PGUSER, PGPASSWORD
   These can be found in the ElephantSQL console for the appropriate instance
   Use this as follow
-  $ env PGHOST=***.db.elephantsql.com PGDATABASE=*** PGUSER=*** PGPASSWORD=*** \\
-    lein run -m akvo.lumen.admin.add-tenant <label> <description>"
+  $ env KEYCLOAK=dev KEYCLOAK_ID=akvo-lumen-confidential KEYCLOAK_SECRET=*** \\
+        PGHOST=***.db.elephantsql.com PGDATABASE=*** PGUSER=*** PGPASSWORD=*** \\
+        lein run -m akvo.lumen.admin.add-tenant <label> <description> <email>"
   (:require [akvo.lumen.admin.util :as util]
             [akvo.lumen.component.keycloak :as keycloak]
+            [akvo.lumen.lib.share-impl :refer [random-url-safe-string]]
             [akvo.lumen.util :refer [squuid]]
             [cheshire.core :as json]
             [clj-http.client :as client]
@@ -117,12 +119,35 @@
                                                "containerId" "Akvo"}])))]
     new-group-id))
 
-(defn setup-user
-  [request-draft api-root group-id email]
-  (let [user (keycloak/fetch-user-by-email request-draft api-root email)]
-    ;; Handle new user
-    (keycloak/add-user-to-group request-draft api-root (get user "id") group-id)
-    user))
+(defn create-new-user
+  [request-draft api-root email]
+  (let [tmp-password (random-url-safe-string 6)
+        user-id (-> (client/post (format "%s/users" api-root)
+                                 (assoc request-draft
+                                        :body (json/encode
+                                               {"username" email
+                                                "email" email
+                                                "emailVerified" false
+                                                "enabled" true})))
+                    (get-in [:headers "Location"])
+                    (s/split #"/")
+                    last)]
+    (client/put (format "%s/users/%s/reset-password" api-root user-id)
+                (assoc request-draft
+                       :body (json/encode {"temporary" true
+                                           "type" "password"
+                                           "value" tmp-password})))
+    {:email email
+     :user-id user-id
+     :tmp-password tmp-password}))
+
+(defn user-representation
+  [request-draft api-root email]
+  (if-let [{:strs [id] :as user} (keycloak/fetch-user-by-email request-draft
+                                                               api-root email)]
+    {:email email
+     :user-id id}
+    (create-new-user request-draft api-root email)))
 
 (defn setup-keycloak
   [label email]
@@ -134,19 +159,21 @@
         tenant-admin-id (create-group request-draft api-root tenant-id
                                       (format "akvo:lumen:%s:admin" label)
                                       "admin")
-        user (setup-user request-draft api-root tenant-admin-id email)]
-    {:user user
-     :password "abc123"}))
+        {:keys [user-id email tmp-password] :as user-rep}
+        (user-representation request-draft api-root email)]
+    (keycloak/add-user-to-group request-draft api-root user-id tenant-admin-id)
+    user-rep))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Main
 ;;;
 
-(defn -main [label title]
+(defn -main [label title email]
   (try
-    ;; (setup-database (conform-label label) title)
-    (let [user-creds (setup-keycloak label "salim@t1.lumen.localhost")]
+    (setup-database (conform-label label) title)
+    (let [user-creds (setup-keycloak label email)]
+      (println "User creds:")
       (pprint user-creds))
     (catch Exception e
       (println "Got error")
