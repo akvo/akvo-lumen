@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import SelectInput from './SelectInput';
+import LabelInput from './LabelInput';
 import Subtitle from './Subtitle';
 import UniqueValueMenu from './UniqueValueMenu';
 
@@ -111,10 +112,10 @@ export default class PivotTableConfigMenu extends Component {
           }
         </div>
         <hr />
-        <Subtitle>Categories</Subtitle>
+        <Subtitle>Columns</Subtitle>
         <SelectInput
-          placeholder="Select a category column"
-          labelText="Category column"
+          placeholder="Select a column"
+          labelText="Columns"
           choice={spec.categoryColumn !== null ? spec.categoryColumn.toString() : null}
           name="categoryColumnInput"
           options={columnOptions}
@@ -125,22 +126,40 @@ export default class PivotTableConfigMenu extends Component {
               change.aggregation = 'count';
               change.valueColumn = null;
             }
+            if (value !== spec.categoryColumn) {
+              change.categoryTitle = null;
+            }
             onChangeSpec(change);
           }}
           clearable
         />
         {spec.categoryColumn !== null &&
-          <UniqueValueMenu
-            tableData={visualisation.data}
-            dimension="category"
-            collapsed={this.state.catValMenuCollapsed}
-            onChangeSpec={this.props.onChangeSpec}
-            column={spec.categoryColumn}
-            filters={spec.filters}
-            toggleCollapsed={() =>
-              this.setState({ catValMenuCollapsed: !this.state.catValMenuCollapsed })
-            }
-          />
+          <div>
+            <UniqueValueMenu
+              tableData={visualisation.data}
+              dimension="column"
+              collapsed={this.state.catValMenuCollapsed}
+              onChangeSpec={this.props.onChangeSpec}
+              column={spec.categoryColumn}
+              filters={spec.filters}
+              toggleCollapsed={() =>
+                this.setState({ catValMenuCollapsed: !this.state.catValMenuCollapsed })
+              }
+            />
+            <LabelInput
+              value={
+                spec.categoryTitle === null ?
+                  columnOptions.find(item => item.value === spec.categoryColumn).title
+                  :
+                  spec.categoryTitle.toString()
+              }
+              placeholder="Columns title"
+              name="categoryTitle"
+              onChange={event => onChangeSpec({
+                categoryTitle: event.target.value.toString(),
+              })}
+            />
+          </div>
         }
         <hr />
         <Subtitle>Rows</Subtitle>
@@ -157,22 +176,40 @@ export default class PivotTableConfigMenu extends Component {
               change.aggregation = 'count';
               change.valueColumn = null;
             }
+            if (value !== spec.rowColumn) {
+              change.rowTitle = null;
+            }
             onChangeSpec(change);
           }}
           clearable
         />
         {spec.rowColumn !== null &&
-          <UniqueValueMenu
-            tableData={visualisation.data}
-            dimension="row"
-            collapsed={this.state.rowValMenuCollapsed}
-            onChangeSpec={this.props.onChangeSpec}
-            column={spec.rowColumn}
-            filters={spec.filters}
-            toggleCollapsed={() =>
-              this.setState({ rowValMenuCollapsed: !this.state.rowValMenuCollapsed })
-            }
-          />
+          <div>
+            <UniqueValueMenu
+              tableData={visualisation.data}
+              dimension="row"
+              collapsed={this.state.rowValMenuCollapsed}
+              onChangeSpec={this.props.onChangeSpec}
+              column={spec.rowColumn}
+              filters={spec.filters}
+              toggleCollapsed={() =>
+                this.setState({ rowValMenuCollapsed: !this.state.rowValMenuCollapsed })
+              }
+            />
+            <LabelInput
+              value={
+                spec.rowTitle == null ?
+                  columnOptions.find(item => item.value === spec.rowColumn).title
+                  :
+                  spec.rowTitle.toString()
+              }
+              placeholder="Row column title"
+              name="rowTitle"
+              onChange={event => onChangeSpec({
+                rowTitle: event.target.value.toString(),
+              })}
+            />
+          </div>
         }
       </div>
     );

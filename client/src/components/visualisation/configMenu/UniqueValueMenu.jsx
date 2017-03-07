@@ -37,7 +37,7 @@ export default function UniqueValueMenu(props) {
   const uniqueValues = [];
 
   switch (dimension) {
-    case 'category':
+    case 'column':
       for (let i = 1; i < tableData.columns.length; i += 1) {
         uniqueValues.push(tableData.columns[i].title);
       }
@@ -88,7 +88,7 @@ export default function UniqueValueMenu(props) {
 
 UniqueValueMenu.propTypes = {
   tableData: PropTypes.object,
-  dimension: PropTypes.oneOf(['category', 'row']).isRequired,
+  dimension: PropTypes.oneOf(['column', 'row']).isRequired,
   filters: PropTypes.array.isRequired,
   column: PropTypes.string.isRequired,
   onChangeSpec: PropTypes.func.isRequired,
