@@ -50,6 +50,7 @@ class Dashboard extends Component {
         created: null,
         modified: null,
       },
+      isSavePending: null,
       isUnsavedChanges: null,
       isShareModalVisible: false,
       requestedDatasetIds: [],
@@ -134,6 +135,16 @@ class Dashboard extends Component {
         this.loadDashboardIntoState(dash, nextProps.library);
       }
     }
+
+    if (!this.props.params.dashboardId && nextProps.params.dashboardId) {
+      const dashboardId = nextProps.params.dashboardId;
+
+      this.setState({
+        isSavePending: false,
+        isUnsavedChanges: false,
+        dashboard: Object.assign({}, this.state.dashboard, { id: dashboardId }),
+      });
+    }
   }
 
   onSave() {
@@ -143,14 +154,17 @@ class Dashboard extends Component {
 
     if (isEditingExistingDashboard) {
       dispatch(actions.saveDashboardChanges(dashboard));
-    } else {
-      dispatch(actions.createDashboard(dashboard));
-    }
 
-    // We should really check the save was successful, but for now let's assume it was
-    this.setState({
-      isUnsavedChanges: false,
-    });
+      // We should really check the save was successful, but for now let's assume it was
+      this.setState({
+        isUnsavedChanges: false,
+      });
+    } else if (!this.state.isSavePending) {
+      this.setState({ isSavePending: true });
+      dispatch(actions.createDashboard(dashboard));
+    } else {
+      // Ignore save request until the first "create dashboard" request succeeeds
+    }
   }
 
   onAddVisualisation(visualisation) {
