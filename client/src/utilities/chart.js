@@ -86,7 +86,7 @@ function filterFn(filters, columns) {
 const displayTextForNullValues = 'No data';
 
 export const replaceLabelIfValueEmpty = (label, getCssClassname) => {
-  if (label === null || label === 'null' || label === '') {
+  if (label == null || label === 'null' || label === '') {
     return getCssClassname ? 'emptyValue' : displayTextForNullValues;
   }
   return getCssClassname ? 'dataValue' : label;
@@ -217,8 +217,9 @@ export function getPieData(visualisation, datasets) {
     .execute(valueArray)
     .sort((a, b) => {
       if (bucketColumnType === 'text') {
-        const valA = a.bucketValue || lastValueAlphabetically;
-        const valB = b.bucketValue || lastValueAlphabetically;
+        const emptyValueText = replaceLabelIfValueEmpty(null);
+        const valA = a.bucketValue === emptyValueText ? lastValueAlphabetically : a.bucketValue;
+        const valB = b.bucketValue === emptyValueText ? lastValueAlphabetically : b.bucketValue;
 
         return valA.localeCompare(valB);
       }

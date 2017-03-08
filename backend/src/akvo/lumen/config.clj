@@ -1,7 +1,7 @@
 (ns akvo.lumen.config
   (:require [environ.core :refer [env]]))
 
-(defn- error-msg [env-var]
+(defn error-msg [env-var]
   (format "Failed to setup binding: %s environment variable missing" env-var))
 
 (defn assert-bindings []

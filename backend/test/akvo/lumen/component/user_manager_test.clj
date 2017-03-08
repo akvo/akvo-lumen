@@ -109,7 +109,7 @@
                                         :body count)
           resp (user-manager/invite *user-manager* *tenant-conn* "t1"
                                     server-name ruth-email author-claims)]
-      (is (= 204 (:status resp)))
+      (is (= 200 (:status resp)))
       (is (= (inc number-of-initial-invites)
              (-> (user-manager/invites *user-manager*
                                        *tenant-conn*)
@@ -122,7 +122,7 @@
           invite-id (-> (user-manager/invites *user-manager* *tenant-conn*)
                         :body first :id)
           resp (user-manager/delete-invite *user-manager* *tenant-conn* invite-id)]
-      (is (= 204 (:status resp)))
+      (is (= 200 (:status resp)))
       (is (= (dec number-of-initial-invites)
              (-> (user-manager/invites *user-manager*
                                        *tenant-conn*)
@@ -188,7 +188,7 @@
           ruth-user (keycloak/fetch-user-by-email request-draft api-root ruth-email)
           resp (user-manager/remove-user *user-manager* tenant author-claims
                                         (get ruth-user "id"))]
-      (is (= 204 (:status resp)))
+      (is (= 200 (:status resp)))
       (let [{:keys [admin-ids member-ids]} (admin-and-members keycloak tenant)
             set-of-ruth #{(get ruth-user "id")}]
         (is (empty? (set/intersection admin-ids set-of-ruth)))
