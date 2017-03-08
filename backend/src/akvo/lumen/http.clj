@@ -2,18 +2,14 @@
 
 (defn- response [response-code]
   {:pre [(pos? response-code)]}
-  (let [f (fn [body]
-            {:pre [(map? body)]}
-            {:status response-code
-             :body body})]
-    (fn
-      ([] (f {}))
-      ([body] (f body)))))
+  (fn [body]
+    {:pre [(map? body)]}
+    {:status response-code
+     :body body}))
 
 
 (def ok (response 200))
 (def created (response 201))
-(def no-content (response 204))
 (def bad-request (response 400))
 (def not-authenticated (response 401))
 (def not-authorized (response 403))

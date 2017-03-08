@@ -126,8 +126,8 @@
   [tenant-conn id]
   (delete-non-consumed-invite-by-id tenant-conn {:id id})
   (if (empty? (select-consumed-invite-by-id tenant-conn {:id id}))
-    (http/no-content)
-    (http/gone)))
+    (http/ok {})
+    (http/gone {})))
 
 
 
@@ -179,7 +179,7 @@
           (if (keycloak/user? keycloak email)
             (do-tenant-invite this tenant-conn server-name email author-claims)
             (do-user-and-tenant-invite this tenant-conn server-name email author-claims)))
-        (http/no-content))))
+        (http/ok {}))))
 
   (invites [this tenant-conn]
     (response (select-active-invites tenant-conn)))
@@ -258,7 +258,7 @@
         (if (keycloak/user? keycloak email)
           (do-tenant-invite this tenant-conn server-name email author-claims)
           (do-user-and-tenant-invite this tenant-conn server-name email author-claims))
-        (http/no-content))))
+        (http/ok {}))))
 
   (invites [this tenant-conn]
     (response (select-active-invites tenant-conn)))

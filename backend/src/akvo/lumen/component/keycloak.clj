@@ -244,7 +244,7 @@
                                               admin-group-id))
                (= 204 (remove-user-from-group request-draft api-root user-id
                                               tenant-group-id)))
-        (http/no-content)
+        (http/ok {})
         (do
           (println (format "Tried to remove user: %s" user-id))
           (http/internal-server-error))))))
