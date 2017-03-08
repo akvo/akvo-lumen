@@ -1,3 +1,5 @@
+import defaultColors from '../defaultColors';
+
 export default function getVegaPieSpec(visualisation, data, containerHeight, containerWidth) {
   const chartRadius = containerHeight < containerWidth ? containerHeight / 3 : containerWidth / 3;
   const innerRadius = visualisation.visualisationType === 'donut' ?
@@ -62,7 +64,7 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
       {
         name: 'c',
         type: 'ordinal',
-        range: 'category10',
+        range: defaultColors,
         domain: {
           data: dataSource,
           field: segmentLabelField,

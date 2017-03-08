@@ -34,7 +34,18 @@ export default class DashboardHeader extends Component {
 
   render() {
     const actionButtons = this.getActionButtons();
-    const saveStatus = '';
+    let saveStatus;
+
+    switch (this.props.isUnsavedChanges) {
+      case false:
+        saveStatus = 'All changes saved';
+        break;
+      case true:
+        saveStatus = 'Unsaved changes';
+        break;
+      default:
+        saveStatus = '';
+    }
 
     return (
       <EntityTypeHeader
