@@ -154,7 +154,7 @@ class Users extends Component {
   onUserActionChange(userId, action) {
     const url = `/api/admin/users/${userId}`;
     if (action === 'delete') {
-      api.delete(url).then(() => this.getUsers());
+      api.del(url).then(() => this.getUsers());
     } else if (action === 'demote') {
       api.patch(url, { admin: false }).then(() => this.getUsers());
     } else if (action === 'promote') {
