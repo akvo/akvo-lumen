@@ -2,7 +2,6 @@ import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import EntityTypeHeader from './entity-editor/EntityTypeHeader';
 import InviteUser from './modals/InviteUser';
-// import ConfirmUserAction from './modals/ConfirmUserAction';
 import * as api from '../api';
 
 require('../styles/EntityTypeHeader.scss');
@@ -132,7 +131,6 @@ class Users extends Component {
   constructor() {
     super();
     this.state = {
-      isActionModalVisible: false,
       isInviteModalVisible: false,
       users: [],
     };
