@@ -516,6 +516,84 @@ export function getVegaSpec(visualisation, data, containerHeight, containerWidth
   return vspec;
 }
 
+const percentageRow = (rows, spec) => {
+  const round = (num, places) =>
+      // eslint-disable-next-line no-restricted-properties
+      Math.round(num * Math.pow(10, places)) / Math.pow(10, places);
+
+  return rows.map((row) => {
+    const totalIndex = row.length - 1;
+    const rowTotal = row[totalIndex];
+    const clonedRow = row.slice(0);
+
+    for (let i = 1; i < row.length; i += 1) {
+      const cell = row[i];
+      const percentage = round((cell / rowTotal) * 100, 1);
+      const value = cell === null ? 0 : round(cell, spec.decimalPlaces);
+
+      clonedRow[i] = `${percentage}% (${value})`;
+    }
+
+    return clonedRow;
+  });
+};
+
+const percentageColumn = (rows, spec) => {
+  const round = (num, places) =>
+      // eslint-disable-next-line no-restricted-properties
+      Math.round(num * Math.pow(10, places)) / Math.pow(10, places);
+
+  const totalIndex = rows.length - 1;
+  const totalRow = rows[totalIndex];
+
+  return rows.map((row) => {
+    const clonedRow = row.slice(0);
+
+    for (let i = 1; i < row.length; i += 1) {
+      const columnTotal = totalRow[i];
+      const cell = row[i];
+      const percentage = round((cell / columnTotal) * 100, 1);
+      const value = cell === null ? 0 : round(cell, spec.decimalPlaces);
+
+      clonedRow[i] = `${percentage}% (${value})`;
+    }
+
+    return clonedRow;
+  });
+};
+
+const percentageTotal = (rows, spec) => {
+  const round = (num, places) =>
+      // eslint-disable-next-line no-restricted-properties
+      Math.round(num * Math.pow(10, places)) / Math.pow(10, places);
+
+  const totalRow = rows[rows.length - 1];
+  const total = totalRow[totalRow.length - 1];
+
+  return rows.map((row) => {
+    const clonedRow = row.slice(0);
+
+    for (let i = 1; i < row.length; i += 1) {
+      const cell = row[i];
+      const percentage = round((cell / total) * 100, 1);
+      const value = cell === null ? 0 : round(cell, spec.decimalPlaces);
+
+      clonedRow[i] = `${percentage}% (${value})`;
+    }
+
+    return clonedRow;
+  });
+};
+
+export function canShowPivotTotals(spec) {
+  const validCountSpec = spec.aggregation === 'count';
+  const validSumSpec = spec.aggregation === 'sum' && spec.valueColumn !== null;
+  const validTotalsSpec = validCountSpec || validSumSpec;
+  const haveBothDimensions = spec.categoryColumn && spec.rowColumn;
+
+  return validTotalsSpec && haveBothDimensions;
+}
+
 // Add totals to pivot data, where appropriate
 export function processPivotData(data, spec) {
   if (!data || !data.rows || data.rows.length === 0) {
@@ -530,12 +608,7 @@ export function processPivotData(data, spec) {
     }
   );
 
-  const validCountSpec = spec.aggregation === 'count';
-  const validSumSpec = spec.aggregation === 'sum' && spec.valueColumn !== null;
-  const validTotalsSpec = validCountSpec || validSumSpec;
-  const haveBothDimensions = spec.categoryColumn && spec.rowColumn;
-
-  if (validTotalsSpec && haveBothDimensions) {
+  if (canShowPivotTotals(spec)) {
     // Populate the "Total" row with a title cell and a 0 for each column
     // (including the new row-total column which we haven't built yet)
     const totalsRow = ['Total'];
@@ -544,7 +617,7 @@ export function processPivotData(data, spec) {
     // Build a new array of rows with a row-total cell appended to each row.
     // While iterating through the rows, also sum each cell value with
     // the corresponding column-total cell in `totalsRow`
-    const processedRows = out.rows.map((row) => {
+    let processedRows = out.rows.map((row) => {
       const clonedRow = row.map(item => item);
       let rowTotal = 0;
 
@@ -565,6 +638,14 @@ export function processPivotData(data, spec) {
     });
 
     processedRows.push(totalsRow);
+
+    if (spec.valueDisplay === 'percentageRow') {
+      processedRows = percentageRow(processedRows, spec);
+    } else if (spec.valueDisplay === 'percentageColumn') {
+      processedRows = percentageColumn(processedRows, spec);
+    } else if (spec.valueDisplay === 'percentageTotal') {
+      processedRows = percentageTotal(processedRows, spec);
+    }
 
     out.rows = processedRows;
     out.columns.push({

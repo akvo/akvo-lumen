@@ -106,6 +106,9 @@
   rowColumn: null, // Optional, will use categoryColumn title if ommited
   rowTitle: null, // Optional, will use rowColumn title if ommited
   decimalPlaces: 3, // Only used at render-time
+  valueDisplay: 'default', // One of "default", "percentageRow", "percentageColumn", "percentageTotal"
+  hideRowTotals: false, // Row and Column totals will still be calculated, but then hidden with css
+  hideColumnTotals: false,
 }
 
 ```

@@ -8,6 +8,8 @@ const pivotTableSpec = {
   rowColumn: null,
   rowTitle: null,
   decimalPlaces: 3,
+  valueDisplay: 'default',
+  hideTotals: null,
 };
 
 export default pivotTableSpec;

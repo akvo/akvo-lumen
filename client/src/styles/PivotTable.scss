@@ -58,17 +58,39 @@
     border: none;
     font-weight: bold;
   }
-  /* Highlight the "Total" column and row */
   &.hasTotals {
+    /* Highlight the "Total" column and row */
+    thead {
+      tr:last-child {
+        th:last-child {
+          font-weight: bold;
+        }
+      }
+    }
     tbody {
       tr:last-child, tr td:last-child {
         font-weight: bold;
       }
     }
-    thead {
-      tr:last-child {
-        th:last-child {
-          font-weight: bold;
+    /* Hide totals if needed */
+    &.hideRowTotals {
+      thead {
+        tr:last-child {
+          th:last-child {
+            display: none;
+          }
+        }
+      }
+      tbody {
+        tr td:last-child {
+          display: none;
+        }
+      }
+    }
+    &.hideColumnTotals {
+      tbody {
+        tr:last-child {
+          display: none;
         }
       }
     }
