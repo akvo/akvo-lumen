@@ -1,5 +1,5 @@
 import React, { PropTypes } from 'react';
-import { replaceLabelIfValueEmpty } from '../../utilities/chart';
+import { replaceLabelIfValueEmpty, processPivotData } from '../../utilities/chart';
 
 require('../../styles/PivotTable.scss');
 
@@ -64,7 +64,11 @@ const formatCell = (index, cell, spec, columns) => {
 };
 
 export default function PivotTable({ width, height, visualisation }) {
-  const { data, spec } = visualisation;
+  const { spec } = visualisation;
+  const data = processPivotData(visualisation.data, spec);
+  const totalsClass = data && data.metadata &&
+    data.metadata.hasRowTotals && data.metadata.hasColumnTotals ?
+    'hasTotals' : '';
 
   if (!data) {
     return (
@@ -82,7 +86,7 @@ export default function PivotTable({ width, height, visualisation }) {
 
   return (
     <div
-      className="PivotTable dashChart"
+      className={`PivotTable dashChart ${totalsClass}`}
       style={{
         width,
         height,

@@ -515,3 +515,67 @@ export function getVegaSpec(visualisation, data, containerHeight, containerWidth
 
   return vspec;
 }
+
+// Add totals to pivot data, where appropriate
+export function processPivotData(data, spec) {
+  if (!data || !data.rows || data.rows.length === 0) {
+    return data;
+  }
+
+  const out = Object.assign({}, data,
+    {
+      rows: data.rows.map(item => item),
+      columns: data.columns.map(item => item),
+      metadata: Object.assign({}, data.metadata),
+    }
+  );
+
+  const validCountSpec = spec.aggregation === 'count';
+  const validSumSpec = spec.aggregation === 'sum' && spec.valueColumn !== null;
+  const validTotalsSpec = validCountSpec || validSumSpec;
+  const haveBothDimensions = spec.categoryColumn && spec.rowColumn;
+
+  if (validTotalsSpec && haveBothDimensions) {
+    // Populate the "Total" row with a title cell and a 0 for each column
+    // (including the new row-total column which we haven't built yet)
+    const totalsRow = ['Total'];
+    out.rows[0].forEach(() => totalsRow.push(0));
+
+    // Build a new array of rows with a row-total cell appended to each row.
+    // While iterating through the rows, also sum each cell value with
+    // the corresponding column-total cell in `totalsRow`
+    const processedRows = out.rows.map((row) => {
+      const clonedRow = row.map(item => item);
+      let rowTotal = 0;
+
+      // Start from 1 because first cell is row title
+      for (let i = 1; i < clonedRow.length; i += 1) {
+        const cell = clonedRow[i];
+
+        totalsRow[i] += cell;
+        rowTotal += cell;
+      }
+      // Append the new row-total cell to the row
+      clonedRow.push(rowTotal);
+
+      // Sum the new row-total cell with last column-total cell in `totalsRow`
+      totalsRow[totalsRow.length - 1] += rowTotal;
+
+      return clonedRow;
+    });
+
+    processedRows.push(totalsRow);
+
+    out.rows = processedRows;
+    out.columns.push({
+      title: 'Total',
+      type: 'number',
+    });
+
+    out.metadata.hasRowTotals = true;
+    out.metadata.hasColumnTotals = true;
+  }
+
+  return out;
+}
+

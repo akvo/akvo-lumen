@@ -58,4 +58,19 @@
     border: none;
     font-weight: bold;
   }
+  /* Highlight the "Total" column and row */
+  &.hasTotals {
+    tbody {
+      tr:last-child, tr td:last-child {
+        font-weight: bold;
+      }
+    }
+    thead {
+      tr:last-child {
+        th:last-child {
+          font-weight: bold;
+        }
+      }
+    }
+  }
 }
