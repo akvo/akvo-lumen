@@ -202,7 +202,7 @@ export default class PivotTableConfigMenu extends Component {
             }
             if (value !== spec.categoryColumn) {
               change.categoryTitle = null;
-              change.filters = spec.filters.filter(filter => filter.origin !== 'pivot-column')
+              change.filters = spec.filters.filter(filter => filter.origin !== 'pivot-column');
             }
             onChangeSpec(change);
           }}
@@ -253,7 +253,7 @@ export default class PivotTableConfigMenu extends Component {
             }
             if (value !== spec.rowColumn) {
               change.rowTitle = null;
-              change.filters = spec.filters.filter(filter => filter.origin !== 'pivot-row')
+              change.filters = spec.filters.filter(filter => filter.origin !== 'pivot-row');
             }
             onChangeSpec(change);
           }}
