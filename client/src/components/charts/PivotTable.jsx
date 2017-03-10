@@ -5,6 +5,7 @@ require('../../styles/PivotTable.scss');
 
 const meanPixelsPerChar = 7.5; // Used for calculating min-widths for columns
 const defaultCategoryWidth = 100; // Number of pixels to wrap category columns at
+const columnLimit = 50; // Don't render a table if there are more columns than this
 
 const formatTitle = (title) => {
   const maxTitleLength = 64;
@@ -68,9 +69,10 @@ const formatCell = (index, cell, spec, columns) => {
   return cell;
 };
 
-export default function PivotTable({ width, height, visualisation }) {
+export default function PivotTable({ width, height, visualisation, context }) {
   const { spec } = visualisation;
   const data = processPivotData(visualisation.data, spec);
+  const tooManyColumns = data && data.columns && data.columns.length >= columnLimit;
   let totalsClass = data && data.metadata &&
     data.metadata.hasRowTotals && data.metadata.hasColumnTotals ?
     'hasTotals' : '';
@@ -91,6 +93,27 @@ export default function PivotTable({ width, height, visualisation }) {
         }}
       >
         Please choose a dataset.
+      </div>
+    );
+  }
+
+  if (tooManyColumns) {
+    return (
+      <div
+        className="PivotTable dashChart"
+        style={{
+          width,
+          height,
+        }}
+      >
+        <p>
+          There are {data.columns.length} columns in this table, which is too many to display.
+          {context === 'editor' &&
+            <span>
+              {' '}Please choose a different column, or use a dataset filter to reduce the number of unique values.
+            </span>
+          }
+        </p>
       </div>
     );
   }
@@ -189,4 +212,5 @@ PivotTable.propTypes = {
   datasets: PropTypes.object.isRequired,
   width: PropTypes.number,
   height: PropTypes.number,
+  context: PropTypes.string,
 };
