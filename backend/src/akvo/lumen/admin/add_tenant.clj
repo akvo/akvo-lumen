@@ -36,14 +36,18 @@
   [label]
   (cond
     (< (count label) 3)
-    (throw (Exception. "To short label, should be 3 or more characters."))
+    (throw
+     (ex-info "To short label, should be 3 or more characters."
+              {:label label}))
 
-    (not (empty? (set/intersection (set blacklist)
-                                   #{label})))
-    (throw (Exception. (format "Label in blacklist: [%s]"
-                               (s/join ", "  blacklist))))
+    (contains? (set blacklist) label)
+    (throw
+     (ex-info (format "Label in blacklist: [%s]"
+                      (s/join ", "  blacklist))
+              {:label label}))
 
     :else label))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Database
@@ -180,6 +184,7 @@
       (println "User creds:")
       (pprint user-creds))
     (catch Exception e
-      (println "Got error")
       (prn (.getMessage e))
+      (when (= (type e) clojure.lang.ExceptionInfo)
+        (prn (ex-data e)))
       (System/exit 0))))

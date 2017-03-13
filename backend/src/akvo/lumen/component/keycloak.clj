@@ -124,7 +124,7 @@
                         (filter #(and (get % "emailVerified")
                                       (get % "enabled"))
                                 admins))]
-    (not (empty? (set/intersection #{user-id} (set admin-ids))))))
+    (contains? (set admin-ids) user-id)))
 
 (defn fetch-user-by-id
   "Get user by email. Returns nil if not found."

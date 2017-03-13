@@ -130,32 +130,6 @@
     (http/gone {})))
 
 
-
-#_(defn do-promote-user-to-admin
-  [keycloak tenant author-claims user-id]
-  (clojure.pprint/pprint tenant)
-  (clojure.pprint/pprint author-claims)
-  (clojure.pprint/pprint user-id)
-
-
-    (if (= (get author-claims "sub") user-id)
-      (http/bad-request {"reason" "Tried to alter own tenant role"})
-
-      (if (auth/tenant-admin? {:jwt-claims author-claims :tenant tenant})
-
-        (http/not-implemented)
-        (http/not-authorized {"reason" "Not tenant admin"})))
-
-  ;; - Who promoted a user?
-  ;; - Can a user self promote (demote)?
-  ;; - Is user authorized to promote other user?
-  ;; - Is the user a tenant memeber?
-
-  ;; author = user-id -> 400
-
-  )
-
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; UserManager component
 ;;;
@@ -173,12 +147,11 @@
   (invite [{keycloak :keycloak :as this}
            tenant-conn tenant server-name email author-claims]
     (if (keycloak/tenant-member? keycloak tenant email)
-      (http/bad-request {"reson" "Already tenant member"})
+      (http/bad-request {"reason" "Already tenant member"})
       (do
-        (future
-          (if (keycloak/user? keycloak email)
-            (do-tenant-invite this tenant-conn server-name email author-claims)
-            (do-user-and-tenant-invite this tenant-conn server-name email author-claims)))
+        (if (keycloak/user? keycloak email)
+          (do-tenant-invite this tenant-conn server-name email author-claims)
+          (do-user-and-tenant-invite this tenant-conn server-name email author-claims))
         (http/ok {}))))
 
   (invites [this tenant-conn]
@@ -253,7 +226,7 @@
   (invite [{{api-root :api-root :as keycloak} :keycloak :as this}
            tenant-conn tenant server-name email author-claims]
     (if (keycloak/tenant-member? keycloak tenant email)
-      (http/bad-request {"reson" "Already tenant member"})
+      (http/bad-request {"reason" "Already tenant member"})
       (do
         (if (keycloak/user? keycloak email)
           (do-tenant-invite this tenant-conn server-name email author-claims)
