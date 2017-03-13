@@ -1,6 +1,8 @@
 (ns akvo.lumen.admin.add-tenant
   "The following env vars are assumed to be present:
-  KEYCLOAK, KEYCLOAK_SECRET, PGHOST, PGDATABASE, PGUSER, PGPASSWORD
+  KEYCLOAK, KEYCLOAK_SECRET These can be found in the Keycloak admin in the
+  akvo-lumen-confidential client section.
+  PGHOST, PGDATABASE, PGUSER, PGPASSWORD
   These can be found in the ElephantSQL console for the appropriate instance
   Use this as follow
   $ env KEYCLOAK=dev KEYCLOAK_ID=akvo-lumen-confidential KEYCLOAK_SECRET=*** \\
