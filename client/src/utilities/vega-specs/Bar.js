@@ -107,7 +107,7 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
         {
           fill: 'sgc',
           orient: 'right',
-          title: 'Legend',
+          title: spec.legendTitle ? spec.legendTitle : 'Legend',
           properties: {
             symbols: {
               shape: {
