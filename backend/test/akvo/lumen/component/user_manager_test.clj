@@ -78,20 +78,20 @@
 
 (defn- admin-and-members
   [keycloak tenant]
-  (let [request-draft (keycloak/request-draft keycloak)
-        admin-group-id (get (keycloak/group-by-path keycloak request-draft
+  (let [request-headers (keycloak/request-headers keycloak)
+        admin-group-id (get (keycloak/group-by-path keycloak request-headers
                                                     (format "%s/admin" tenant))
                             "id")
         tenant-group-id (get (keycloak/group-by-path
-                              keycloak request-draft tenant)
+                              keycloak request-headers tenant)
                              "id")]
     {:admin-ids (into #{}
                       (map #(get % "id"))
-                      (keycloak/group-members keycloak request-draft
+                      (keycloak/group-members keycloak request-headers
                                               admin-group-id))
      :member-ids (into #{}
                        (map #(get % "id"))
-                       (keycloak/group-members keycloak request-draft
+                       (keycloak/group-members keycloak request-headers
                                                tenant-group-id))}))
 
 
@@ -153,8 +153,8 @@
   (testing "Promote user"
     (let [{{api-root :api-root :as keycloak} :keycloak} *user-manager*
           admin-claims {"realm_access" {"roles" ["akvo:lumen:t1:admin"]}}
-          request-draft (keycloak/request-draft keycloak)
-          ruth-user (keycloak/fetch-user-by-email request-draft api-root ruth-email)
+          request-headers (keycloak/request-headers keycloak)
+          ruth-user (keycloak/fetch-user-by-email request-headers api-root ruth-email)
           resp (user-manager/promote-user-to-admin
                 *user-manager* tenant admin-claims (get ruth-user "id"))]
       (is (= 200 (:status resp)))
@@ -169,8 +169,8 @@
   (testing "Demote user"
     (let [{{api-root :api-root :as keycloak} :keycloak} *user-manager*
           admin-claims {"realm_access" {"roles" ["akvo:lumen:t1:admin"]}}
-          request-draft (keycloak/request-draft keycloak)
-          ruth-user (keycloak/fetch-user-by-email request-draft api-root ruth-email)
+          request-headers (keycloak/request-headers keycloak)
+          ruth-user (keycloak/fetch-user-by-email request-headers api-root ruth-email)
           resp (user-manager/demote-user-from-admin
                 *user-manager* tenant admin-claims (get ruth-user "id"))]
       (is (= 200 (:status resp)))
@@ -184,8 +184,8 @@
 
   (testing "Remove user"
     (let [{{api-root :api-root :as keycloak} :keycloak} *user-manager*
-          request-draft (keycloak/request-draft keycloak)
-          ruth-user (keycloak/fetch-user-by-email request-draft api-root ruth-email)
+          request-headers (keycloak/request-headers keycloak)
+          ruth-user (keycloak/fetch-user-by-email request-headers api-root ruth-email)
           resp (user-manager/remove-user *user-manager* tenant author-claims
                                         (get ruth-user "id"))]
       (is (= 200 (:status resp)))

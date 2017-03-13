@@ -81,7 +81,7 @@
     (emailer/send-email emailer recipients email)))
 
 (defmulti yank-user-id
-  (fn [keycloak request-draft response]
+  (fn [keycloak request-headers response]
     (:status response)))
 
 (defmethod yank-user-id 201
@@ -91,9 +91,9 @@
 (defn do-user-and-tenant-invite
   [{:keys [api-root emailer keycloak] :as user-manager}
    tenant-conn server-name email author-claims]
-  (let [request-draft (keycloak/request-draft keycloak)
-        user-id (yank-user-id keycloak request-draft
-                              (keycloak/create-user keycloak request-draft email))
+  (let [request-headers (keycloak/request-headers keycloak)
+        user-id (yank-user-id keycloak request-headers
+                              (keycloak/create-user keycloak request-headers email))
         tmp-password (random-url-safe-string 6)
         {invite-id :id}
         (first (insert-invite tenant-conn
@@ -107,7 +107,7 @@
                    email tmp-password)
         email {"Subject" "Akvo Lumen invite"
                "Text-part" text-part}]
-    (keycloak/reset-password keycloak request-draft user-id tmp-password)
+    (keycloak/reset-password keycloak request-headers user-id tmp-password)
     (emailer/send-email emailer recipients email)))
 
 
