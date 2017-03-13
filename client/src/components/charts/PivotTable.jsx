@@ -1,5 +1,5 @@
 import React, { PropTypes } from 'react';
-import { replaceLabelIfValueEmpty } from '../../utilities/chart';
+import { replaceLabelIfValueEmpty, processPivotData } from '../../utilities/chart';
 
 require('../../styles/PivotTable.scss');
 
@@ -50,6 +50,11 @@ const getMinCategoryTitleWidth = text =>
   );
 
 const formatCell = (index, cell, spec, columns) => {
+  if (spec.valueDisplay != null && spec.valueDisplay !== 'default') {
+    // Cell value has already been formatted, so just display as-is
+    return cell;
+  }
+
   const type = columns[index].type;
 
   if (type === 'number') {
@@ -64,7 +69,17 @@ const formatCell = (index, cell, spec, columns) => {
 };
 
 export default function PivotTable({ width, height, visualisation }) {
-  const { data, spec } = visualisation;
+  const { spec } = visualisation;
+  const data = processPivotData(visualisation.data, spec);
+  let totalsClass = data && data.metadata &&
+    data.metadata.hasRowTotals && data.metadata.hasColumnTotals ?
+    'hasTotals' : '';
+  if (spec.hideRowTotals) {
+    totalsClass = `${totalsClass} hideRowTotals`;
+  }
+  if (spec.hideColumnTotals) {
+    totalsClass = `${totalsClass} hideColumnTotals`;
+  }
 
   if (!data) {
     return (
@@ -82,7 +97,7 @@ export default function PivotTable({ width, height, visualisation }) {
 
   return (
     <div
-      className="PivotTable dashChart"
+      className={`PivotTable dashChart ${totalsClass}`}
       style={{
         width,
         height,
@@ -137,7 +152,6 @@ export default function PivotTable({ width, height, visualisation }) {
             <tr key={rowIndex}>
               {row.map((cell, cellIndex) =>
                 <td
-
                   key={cellIndex}
                   className={cellIndex === 0 ? 'uniqueRowValue' : 'cell'}
                   // Only set the title  attribute if the index is 0
