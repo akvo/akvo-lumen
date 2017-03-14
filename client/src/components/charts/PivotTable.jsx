@@ -1,10 +1,11 @@
 import React, { PropTypes } from 'react';
-import { replaceLabelIfValueEmpty } from '../../utilities/chart';
+import { replaceLabelIfValueEmpty, processPivotData } from '../../utilities/chart';
 
 require('../../styles/PivotTable.scss');
 
 const meanPixelsPerChar = 7.5; // Used for calculating min-widths for columns
 const defaultCategoryWidth = 100; // Number of pixels to wrap category columns at
+const columnLimit = 50; // Don't render a table if there are more columns than this
 
 const formatTitle = (title) => {
   const maxTitleLength = 64;
@@ -50,6 +51,11 @@ const getMinCategoryTitleWidth = text =>
   );
 
 const formatCell = (index, cell, spec, columns) => {
+  if (spec.valueDisplay != null && spec.valueDisplay !== 'default') {
+    // Cell value has already been formatted, so just display as-is
+    return cell;
+  }
+
   const type = columns[index].type;
 
   if (type === 'number') {
@@ -63,8 +69,19 @@ const formatCell = (index, cell, spec, columns) => {
   return cell;
 };
 
-export default function PivotTable({ width, height, visualisation }) {
-  const { data, spec } = visualisation;
+export default function PivotTable({ width, height, visualisation, context }) {
+  const { spec } = visualisation;
+  const data = processPivotData(visualisation.data, spec);
+  const tooManyColumns = data && data.columns && data.columns.length >= columnLimit;
+  let totalsClass = data && data.metadata &&
+    data.metadata.hasRowTotals && data.metadata.hasColumnTotals ?
+    'hasTotals' : '';
+  if (spec.hideRowTotals) {
+    totalsClass = `${totalsClass} hideRowTotals`;
+  }
+  if (spec.hideColumnTotals) {
+    totalsClass = `${totalsClass} hideColumnTotals`;
+  }
 
   if (!data) {
     return (
@@ -80,9 +97,30 @@ export default function PivotTable({ width, height, visualisation }) {
     );
   }
 
+  if (tooManyColumns) {
+    return (
+      <div
+        className="PivotTable dashChart"
+        style={{
+          width,
+          height,
+        }}
+      >
+        <p>
+          There are {data.columns.length} columns in this table, which is too many to display.
+          {context === 'editor' &&
+            <span>
+              {' '}Please choose a different column, or use a dataset filter to reduce the number of unique values.
+            </span>
+          }
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div
-      className="PivotTable dashChart"
+      className={`PivotTable dashChart ${totalsClass}`}
       style={{
         width,
         height,
@@ -137,7 +175,6 @@ export default function PivotTable({ width, height, visualisation }) {
             <tr key={rowIndex}>
               {row.map((cell, cellIndex) =>
                 <td
-
                   key={cellIndex}
                   className={cellIndex === 0 ? 'uniqueRowValue' : 'cell'}
                   // Only set the title  attribute if the index is 0
@@ -175,4 +212,5 @@ PivotTable.propTypes = {
   datasets: PropTypes.object.isRequired,
   width: PropTypes.number,
   height: PropTypes.number,
+  context: PropTypes.string,
 };
