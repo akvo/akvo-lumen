@@ -1,5 +1,31 @@
 # Release Notes
 
+## 0.7.0
+
+Date 2017-03-14
+
+### New and noteworthy
+
+* Text entities in dashboards now show line breaks entered by the user
+* Dashboard editor no longer redirects to library view when a dashboard is saved
+* Increased default visualisation color palette to 20 colors
+* Pie chart segments are now more consistent between visualisations, where possible
+* Pivot tables improvements:
+  * Better text wrapping in header cells
+  * Column and row titles are now user-editable
+  * Totals are now shown when using sum or count aggregation
+  * Cell values can be shown as percentages when using sum or count aggregation
+  * Pivot tables show a warning message when more than 50 columns would be generated
+
+### Bugfixes
+
+* Fix bug where pivot tables would fail to load in dashboard editor
+* Fix bug where dataset filters would not display correctly in filter list
+* Fix bug where percentage values would not display in pie charts
+* Fix bug where text entities in dashboards would not display line breaks
+* Fix bug where selecting an x-axis column before a y-axis column would break the dashboard editor
+* Fix bug where multiple scroll-bars would display when using windows or linux
+
 ## 0.6.1
 
 Date 2017-02-24
