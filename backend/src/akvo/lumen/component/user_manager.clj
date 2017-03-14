@@ -2,6 +2,8 @@
   (:require [akvo.lumen.component.keycloak :as keycloak]
             [akvo.lumen.component.emailer :as emailer]
             [akvo.lumen.lib.share-impl :refer [random-url-safe-string]]
+            [akvo.lumen.auth :as auth]
+            [akvo.lumen.http :as http]
             [clj-time.coerce :as c]
             [clj-time.core :as t]
             [clojure.string :as str]
@@ -13,23 +15,50 @@
 
 (defprotocol UserManagement
   (invite
-    [this tenant-conn server-name email author-claims]
+    [this tenant-conn tenant server-name email author-claims]
     "Invite user with email to tenant.")
+
   (invites
     [this tenant-conn]
     "List active invites.")
+
+  (delete-invite
+    [this tenant-conn id]
+    "Deletes non consumed invites, returns 210 if invite was consumed and
+     204 in any other case (both delete of actual invite or non existing).
+
+     We don't want to delete invites that was used. This since we store who
+     created the invite in the \"author\" db field, and this provides
+     traceability. Hence we don't allow deletion of consumed invite.")
+
+  (demote-user-from-admin
+    [this tenant author-claims user-id]
+    "Promote existing user to admin")
+
+  (promote-user-to-admin
+    [this tenant author-claims user-id]
+    "Promote existing user to admin")
+
+  (remove-user
+    [this tenant author-claims user-id]
+    "Remove user from tenant")
+
   (tenant-invite-email
     [this server-name invite-id author-claims]
     "Constructs the tenant invite email body")
+
   (user-and-tenant-invite-email
     [this server-name invite-id author-claims email tmp-password]
     "Constructs user and tenant invite email body")
+
   (users
     [this tenant]
     "List users of tenant.")
+
   (verify-invite
     [this tenant-conn tenant id]
     "Add user to tenant."))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Helper fns
@@ -52,7 +81,7 @@
     (emailer/send-email emailer recipients email)))
 
 (defmulti yank-user-id
-  (fn [keycloak request-draft response]
+  (fn [keycloak request-headers response]
     (:status response)))
 
 (defmethod yank-user-id 201
@@ -62,9 +91,9 @@
 (defn do-user-and-tenant-invite
   [{:keys [api-root emailer keycloak] :as user-manager}
    tenant-conn server-name email author-claims]
-  (let [request-draft (keycloak/request-draft keycloak)
-        user-id (yank-user-id keycloak request-draft
-                              (keycloak/create-user keycloak request-draft email))
+  (let [request-headers (keycloak/request-headers keycloak)
+        user-id (yank-user-id keycloak request-headers
+                              (keycloak/create-user keycloak request-headers email))
         tmp-password (random-url-safe-string 6)
         {invite-id :id}
         (first (insert-invite tenant-conn
@@ -78,7 +107,7 @@
                    email tmp-password)
         email {"Subject" "Akvo Lumen invite"
                "Text-part" text-part}]
-    (keycloak/reset-password keycloak request-draft user-id tmp-password)
+    (keycloak/reset-password keycloak request-headers user-id tmp-password)
     (emailer/send-email emailer recipients email)))
 
 
@@ -91,6 +120,14 @@
                  :status 422}))
     (response {:status 422
                :body "Could not verify invite."})))
+
+(defn do-delete-invite
+  "Delete invites that have not been used"
+  [tenant-conn id]
+  (delete-non-consumed-invite-by-id tenant-conn {:id id})
+  (if (empty? (select-consumed-invite-by-id tenant-conn {:id id}))
+    (http/ok {})
+    (http/gone {})))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -108,16 +145,32 @@
 
   UserManagement
   (invite [{keycloak :keycloak :as this}
-           tenant-conn server-name email author-claims]
-
-    (future (if (keycloak/user? keycloak email)
-              (do-tenant-invite this tenant-conn server-name email author-claims)
-              (do-user-and-tenant-invite
-               this tenant-conn server-name email author-claims)))
-    (response {:invite "created"}))
+           tenant-conn tenant server-name email author-claims]
+    (if (keycloak/tenant-member? keycloak tenant email)
+      (http/bad-request {"reason" "Already tenant member"})
+      (do
+        (if (keycloak/user? keycloak email)
+          (do-tenant-invite this tenant-conn server-name email author-claims)
+          (do-user-and-tenant-invite this tenant-conn server-name email author-claims))
+        (http/ok {}))))
 
   (invites [this tenant-conn]
     (response (select-active-invites tenant-conn)))
+
+  (delete-invite [this tenant-conn id]
+    (do-delete-invite tenant-conn id))
+
+  (demote-user-from-admin
+    [{keycloak :keycloak} tenant author-claims user-id]
+    (keycloak/demote-user-from-admin keycloak tenant author-claims user-id))
+
+  (promote-user-to-admin
+    [{keycloak :keycloak} tenant author-claims user-id]
+    (keycloak/promote-user-to-admin keycloak tenant author-claims user-id))
+
+  (remove-user
+    [{keycloak :keycloak} tenant author-claims user-id]
+    (keycloak/remove-user keycloak tenant author-claims user-id))
 
   (tenant-invite-email [this server-name invite-id author-name]
     (str/join
@@ -170,15 +223,33 @@
     this)
 
   UserManagement
-  (invite [{keycloak :keycloak :as this}
-           tenant-conn server-name email author-claims]
-    (if (keycloak/user? keycloak email)
-      (do-tenant-invite this tenant-conn server-name email author-claims)
-      (do-user-and-tenant-invite this tenant-conn server-name email author-claims))
-    (response {:invite "created"}))
+  (invite [{{api-root :api-root :as keycloak} :keycloak :as this}
+           tenant-conn tenant server-name email author-claims]
+    (if (keycloak/tenant-member? keycloak tenant email)
+      (http/bad-request {"reason" "Already tenant member"})
+      (do
+        (if (keycloak/user? keycloak email)
+          (do-tenant-invite this tenant-conn server-name email author-claims)
+          (do-user-and-tenant-invite this tenant-conn server-name email author-claims))
+        (http/ok {}))))
 
   (invites [this tenant-conn]
     (response (select-active-invites tenant-conn)))
+
+  (delete-invite [this tenant-conn id]
+    (do-delete-invite tenant-conn id))
+
+  (demote-user-from-admin
+    [{keycloak :keycloak} tenant author-claims user-id]
+    (keycloak/demote-user-from-admin keycloak tenant author-claims user-id))
+
+  (promote-user-to-admin
+    [{keycloak :keycloak} tenant author-claims user-id]
+    (keycloak/promote-user-to-admin keycloak tenant author-claims user-id))
+
+  (remove-user
+    [{keycloak :keycloak} tenant author-claims user-id]
+    (keycloak/remove-user keycloak tenant author-claims user-id))
 
   (tenant-invite-email [this server-name invite-id author-name]
     (format "http://%s:3000/verify/%s" server-name invite-id))

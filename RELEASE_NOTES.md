@@ -6,6 +6,8 @@ Date 2017-03-14
 
 ### New and noteworthy
 
+* In the Admin console admins can promote and demote users to admin.
+* Admin console now supports removing users from the tenant.
 * Text entities in dashboards now show line breaks entered by the user
 * Dashboard editor no longer redirects to library view when a dashboard is saved
 * Increased default visualisation color palette to 20 colors

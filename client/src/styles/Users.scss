@@ -31,7 +31,19 @@
           font-weight: bold;
         }
       }
+      .isMe {
+        color: $midGrey;
+      }
     }
+  }
+  .UserActionSelector {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background: $white;
+    border: 0;
+    text-indent: 1px;
+    text-overflow: ellipsis;
+    width: 100px;
   }
 }
 
