@@ -1,5 +1,14 @@
 # Release Notes
 
+## 0.6.2
+
+Date 2017-03-14
+
+### New and noteworthy
+
+* In the Admin console admins can promote and demote users to admin.
+* Admin console now supports removing users from the tenant.
+
 ## 0.6.1
 
 Date 2017-02-24
