@@ -1,25 +1,31 @@
 (ns akvo.lumen.admin.add-tenant
   "The following env vars are assumed to be present:
-  KEYCLOAK, KEYCLOAK_SECRET, PGHOST, PGDATABASE, PGUSER, PGPASSWORD
+  KC_URL, KC_SECRET, PGHOST, PGDATABASE, PGUSER, PGPASSWORD
   The PG* env vars can be found in the ElephantSQL console for the appropriate
-  instance. KEYCLOAK is one of (prod, test, dev), where dev is for local
-  development. The matching url can be found in akvo.lumen.admin.util/keycloak-url.
-  KEYCLOAK_SECRET is the client secret found in the Keycloak admin at
+  instance. KC_URL is the url to keycloak (without trailing /auth).
+  KC_SECRET is the client secret found in the Keycloak admin at
   > Realms > Akvo > Clients > akvo-lumen-confidential > Credentials > Secret.
   Use this as follow
-  $ env KEYCLOAK=dev KEYCLOAK_ID=akvo-lumen-confidential KEYCLOAK_SECRET=*** \\
-        PGHOST=***.db.elephantsql.com PGDATABASE=*** PGUSER=*** PGPASSWORD=*** \\
-        lein run -m akvo.lumen.admin.add-tenant <label> <description> <email>"
+  $ env KC_URL=https://*** KC_SECRET=***
+        PG_HOST=***.db.elephantsql.com PG_DATABASE=*** \\
+        PG_USER=*** PG_PASSWORD=*** \\
+        lein run -m akvo.lumen.admin.add-tenant <label> <description> <email>
+  KC_URL is probably one of:
+  - http://localhost:8080 for local development
+  - https://login.akvo.org for production
+  - https://kc.akvotest.org for the test environment"
   (:require [akvo.lumen.admin.util :as util]
+            [akvo.lumen.config :refer [error-msg]]
             [akvo.lumen.component.keycloak :as keycloak]
             [akvo.lumen.lib.share-impl :refer [random-url-safe-string]]
             [akvo.lumen.util :refer [squuid]]
             [cheshire.core :as json]
             [clj-http.client :as client]
+            [clojure.java.browse :as browse]
             [clojure.java.jdbc :as jdbc]
+            [clojure.pprint :refer [pprint]]
             [clojure.set :as set]
             [clojure.string :as s]
-            [clojure.pprint :refer [pprint]]
             [environ.core :refer [env]]
             [ragtime.jdbc]
             [ragtime.repl]))
@@ -177,13 +183,31 @@
 ;;; Main
 ;;;
 
+(defn check-input []
+  (assert (:kc-url env) (error-msg "Specify KC_URL env var"))
+  (assert (:kc-secret env)
+          (do
+            (browse/browse-url
+             (format "%s/auth/admin/master/console/#/realms/akvo/clients" (:kc-url env)))
+            (error-msg "Specify KC_SECRET env var from the Keycloak admin opened in the browser window at Client (akvo-lumen-confidential) -> Credentials -> Secret.")))
+  (assert (:pg-host env) (error-msg "Specify PG_HOST env var"))
+  (assert (:pg-database env) (error-msg "Specify PG_DATABASE env var"))
+  (assert (:pg-user env) (error-msg "Specify PG_USER env var"))
+  (when (not (= (:pg-host env) "localhost"))
+    (assert (:pg-password env) (error-msg "Specify PG_PASSWORD env var"))))
+
 (defn -main [label title email]
   (try
+    (check-input)
     (setup-database (conform-label label) title)
     (let [user-creds (setup-keycloak label email)]
       (println "User creds:")
       (pprint user-creds))
+    (catch java.lang.AssertionError e
+      (prn (.getMessage e))
+      (System/exit 0))
     (catch Exception e
+      (prn e)
       (prn (.getMessage e))
       (when (= (type e) clojure.lang.ExceptionInfo)
         (prn (ex-data e)))
