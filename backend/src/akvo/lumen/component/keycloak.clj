@@ -54,9 +54,8 @@
       :body json/decode))
 
 (defn request-headers
-  "Create a partial request with json content type and a valid bearer token.
-   This token can be used for a batch of requests. This enables us to not have
-   to get a new token for every request to Keycloak but one for task we have."
+  "Create a set of request headers to use for interaction with the Keycloak
+   REST API. This allows us to reuse the same token for multiple requests."
   [{:keys [openid-config credentials]}]
   (let [params (merge {"grant_type" "client_credentials"}
                       credentials)
@@ -158,7 +157,7 @@
 
 (defn tenant-member?
   "Return true for both members and admins."
-  [{api-root :api-root :as keycloak} tenant email]
+  [{:keys [api-root] :as keycloak} tenant email]
   (let [request-headers (request-headers keycloak)]
     (if-let [user-id
              (get (fetch-user-by-email request-headers api-root email) "id")]
@@ -277,7 +276,7 @@
            (= 204 (set-user-have-verified-email
                    request-headers api-root user-id)))))
 
-  (create-user [{api-root :api-root} request-headers email]
+  (create-user [{:keys [api-root]} request-headers email]
     (client/post (format "%s/users" api-root)
                  {:body (json/encode
                    {"username" email
@@ -293,7 +292,7 @@
     [this tenant author-claims user-id]
     (do-promote-user-to-admin this tenant author-claims user-id))
 
-  (reset-password [{api-root :api-root} request-headers user-id tmp-password]
+  (reset-password [{:keys [api-root]} request-headers user-id tmp-password]
     (client/put (format "%s/users/%s/reset-password" api-root user-id)
                 {:body (json/encode {"temporary" true
                                      "type" "password"
