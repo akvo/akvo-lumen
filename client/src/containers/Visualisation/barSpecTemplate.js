@@ -10,6 +10,7 @@ const barSpec = {
   axisLabelXFromUser: false, // Has the label been manually entered by the user?
   axisLabelY: null,
   axisLabelYFromUser: false,
+  legendTitle: null,
   filters: [],
   sort: null, // can be "asc", "dsc" or "null"
   truncateSize: null,
