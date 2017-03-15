@@ -47,7 +47,7 @@
   }
 }
 
-.InviteUserModal {
+.ConfirmUserActionModal, .InviteUserModal {
   .contents {
     line-height: 2.5rem;
     padding-left: 0;
@@ -55,6 +55,9 @@
       margin-top: 1.5rem;
     }
   }
+}
+
+.InviteUserModeal {
   .emailInput {
     width: 250px;
   }
