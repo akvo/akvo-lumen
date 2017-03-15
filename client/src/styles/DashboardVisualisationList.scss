@@ -11,6 +11,7 @@
     height: 10rem;
     border: 0.1rem solid $midGrey;
     position: relative;
+    overflow-y: auto;
 
     &.added {
       background-color: $lightGreen;
@@ -31,13 +32,17 @@
   h4, .visualisationType {
     padding: 0.5rem;
   }
+  .lastModified {
+    padding: 0 0.5rem 0.5rem 0.5rem;
+  }
   h4 {
     font-weight: bold;
     font-size: 1.25rem;
   }
-  .visualisationType {
+  .visualisationType, .lastModified  {
     color: $midGrey;
   }
+
   .isOnDashboardIndicator {
     padding: 0.5rem;
     font-size: 1.25rem;

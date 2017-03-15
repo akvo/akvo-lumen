@@ -2,6 +2,19 @@ import React, { PropTypes } from 'react';
 
 require('../../styles/DashboardVisualisationList.scss');
 
+const formatDate = (date) => {
+  let month = date.getMonth() + 1;
+  let day = date.getDate();
+  let hours = date.getHours();
+  let minutes = date.getMinutes();
+  if (month < 10) month = `0${month}`;
+  if (day < 10) day = `0${day}`;
+  if (hours < 10) hours = `0${hours}`;
+  if (minutes < 10) minutes = `0${minutes}`;
+
+  return `${date.getFullYear()}-${month}-${day} ${hours}:${minutes}`;
+};
+
 export default function DashboardVisualisationList(props) {
   const isOnDashboard = item => Boolean(props.dashboardItems[item.id]);
 
@@ -15,7 +28,7 @@ export default function DashboardVisualisationList(props) {
         >
           No visualisations to show.
         </div> : <ul className="list">
-          {props.visualisations.map(item =>
+          {props.visualisations.slice(0).sort((a, b) => b.modified - a.modified).map(item =>
             <li
               className={`listItem clickable ${item.visualisationType}
               ${isOnDashboard(item) ? 'added' : ''}`}
@@ -30,14 +43,17 @@ export default function DashboardVisualisationList(props) {
                   {isOnDashboard(item) ? '✔' : ''}
                 </span>
               </h4>
-              <span className="visualisationType">
+              <div className="visualisationType">
                 {item.visualisationType === 'map' ?
                 'Map'
                 :
                 `${item.visualisationType.charAt(0).toUpperCase() +
                     item.visualisationType.slice(1)} chart`
               }
-              </span>
+              </div>
+              <div className="lastModified">
+                {`Last modified: ${formatDate(new Date(item.modified))}`}
+              </div>
               <div className="background" />
             </li>
         )}
