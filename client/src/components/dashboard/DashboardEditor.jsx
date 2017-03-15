@@ -135,6 +135,9 @@ export default class DashboardEditor extends Component {
       delete newEntities[item.id];
     } else if (itemType === 'visualisation') {
       this.props.onAddVisualisation(this.props.visualisations[item.id]);
+
+      const visualisationType = this.props.visualisations[item.id].visualisationType;
+
       newEntities[item.id] = {
         type: itemType,
         id: item.id,
@@ -144,7 +147,7 @@ export default class DashboardEditor extends Component {
         w: 6,
         h: 4,
         minW: 4,
-        minH: 4,
+        minH: visualisationType === 'pivot table' ? 1 : 4,
         x: 0,
         y: getFirstBlankRowGroup(this.props.dashboard.layout, 4),
         i: item.id,
