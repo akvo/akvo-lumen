@@ -1,4 +1,4 @@
-import React, { PropTypes } from 'react';
+import React, { Component, PropTypes } from 'react';
 
 require('../../styles/DashboardVisualisationList.scss');
 
@@ -15,52 +15,115 @@ const formatDate = (date) => {
   return `${date.getFullYear()}-${month}-${day} ${hours}:${minutes}`;
 };
 
-export default function DashboardVisualisationList(props) {
-  const isOnDashboard = item => Boolean(props.dashboardItems[item.id]);
+const filterVisualisations = (visualisations, filterText) => {
+  // NB - this naive approach is fine with a few hundred visualisations, but we should replace
+  // with something more serious before users start to have thousands of visualisations
+  if (!filterText) {
+    return visualisations;
+  }
 
-  return (
-    <div
-      className="DashboardVisualisationList"
-    >
-      {props.visualisations.length === 0 ?
-        <div
-          className="noVisualisationsMessage"
-        >
-          No visualisations to show.
-        </div> : <ul className="list">
-          {props.visualisations.slice(0).sort((a, b) => b.modified - a.modified).map(item =>
-            <li
-              className={`listItem clickable ${item.visualisationType}
-              ${isOnDashboard(item) ? 'added' : ''}`}
-              key={item.id}
-              onClick={() => props.onEntityClick(item, 'visualisation')}
-            >
-              <h4>
-                {item.name}
-                <span
-                  className="isOnDashboardIndicator"
+  return visualisations.filter((visualisation) => {
+    let name = visualisation.name || '';
+    name = name.toString().toLowerCase();
+
+    return name.indexOf(filterText.toString().toLowerCase()) > -1;
+  });
+};
+
+export default class DashboardVisualisationList extends Component {
+  constructor() {
+    super();
+    this.state = {
+      filterText: '',
+    };
+  }
+
+  render() {
+    const { props } = this;
+    const isOnDashboard = item => Boolean(props.dashboardItems[item.id]);
+    let visualisations = props.visualisations.slice(0);
+    const showFilterInput = visualisations.length > 5;
+
+    visualisations = filterVisualisations(visualisations, this.state.filterText);
+    visualisations.sort((a, b) => b.modified - a.modified);
+
+    return (
+      <div
+        className="DashboardVisualisationList"
+      >
+        {props.visualisations.length === 0 ?
+          <div
+            className="noVisualisationsMessage"
+          >
+            No visualisations to show.
+          </div>
+          :
+          <div>
+            {showFilterInput &&
+              <div className="filterInput">
+                <label
+                  htmlFor="filterText"
                 >
-                  {isOnDashboard(item) ? '✔' : ''}
-                </span>
-              </h4>
-              <div className="visualisationType">
-                {item.visualisationType === 'map' ?
-                'Map'
-                :
-                `${item.visualisationType.charAt(0).toUpperCase() +
-                    item.visualisationType.slice(1)} chart`
-              }
+                  Filter list by title
+                </label>
+                <input
+                  type="text"
+                  name="filterText"
+                  placeholder="Visualisation title"
+                  value={this.state.filterText}
+                  onChange={evt => this.setState({ filterText: evt.target.value })}
+                />
               </div>
-              <div className="lastModified">
-                {`Last modified: ${formatDate(new Date(item.modified))}`}
+            }
+            <ul className="list">
+              {visualisations.map(item =>
+                <li
+                  className={`listItem clickable ${item.visualisationType}
+                  ${isOnDashboard(item) ? 'added' : ''}`}
+                  key={item.id}
+                  onClick={() => props.onEntityClick(item, 'visualisation')}
+                >
+                  <h4>
+                    {item.name}
+                    <span
+                      className="isOnDashboardIndicator"
+                    >
+                      {isOnDashboard(item) ? '✔' : ''}
+                    </span>
+                  </h4>
+                  <div className="visualisationType">
+                    {item.visualisationType === 'map' ?
+                    'Map'
+                    :
+                    `${item.visualisationType.charAt(0).toUpperCase() +
+                        item.visualisationType.slice(1)} chart`
+                  }
+                  </div>
+                  <div className="lastModified">
+                    {`Last modified: ${formatDate(new Date(item.modified))}`}
+                  </div>
+                  <div className="background" />
+                </li>
+            )}
+            </ul>
+            {(this.state.filterText && visualisations.length === 0) &&
+              <div className="filterHelpText">
+                No visualisations match your filter.
+                <div className="buttonContainer">
+                  <button
+                    className="clickable"
+                    onClick={() => this.setState({ filterText: '' })}
+                  >
+                    Clear filter
+                  </button>
+                </div>
               </div>
-              <div className="background" />
-            </li>
-        )}
-        </ul>
-      }
-    </div>
-  );
+            }
+          </div>
+        }
+      </div>
+    );
+  }
 }
 
 DashboardVisualisationList.propTypes = {
