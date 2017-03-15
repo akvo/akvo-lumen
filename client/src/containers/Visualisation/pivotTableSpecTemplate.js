@@ -9,7 +9,8 @@ const pivotTableSpec = {
   rowTitle: null,
   decimalPlaces: 3,
   valueDisplay: 'default',
-  hideTotals: null,
+  hideRowTotals: false,
+  hideColumnTotals: false,
 };
 
 export default pivotTableSpec;

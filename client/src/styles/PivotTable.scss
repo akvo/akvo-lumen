@@ -59,19 +59,6 @@
     font-weight: bold;
   }
   &.hasTotals {
-    /* Highlight the "Total" column and row */
-    thead {
-      tr:last-child {
-        th:last-child {
-          font-weight: bold;
-        }
-      }
-    }
-    tbody {
-      tr:last-child, tr td:last-child {
-        font-weight: bold;
-      }
-    }
     /* Hide totals if needed */
     &.hideRowTotals {
       thead {
