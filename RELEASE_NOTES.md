@@ -1,5 +1,13 @@
 # Release Notes
 
+## 0.7.1
+
+Date 2017-03-16
+
+### New and noteworthy
+
+* Admin user actions now present a confirmation dialog
+
 ## 0.7.0
 
 Date 2017-03-14
