@@ -8,47 +8,33 @@ import * as api from '../api';
 require('../styles/EntityTypeHeader.scss');
 require('../styles/Users.scss');
 
-class UserActionSelector extends Component {
-  constructor(props) {
-    super(props);
-    this.state = { action: '?' };
-    this.onChange = this.onChange.bind(this);
-  }
-
-  onChange(event) {
-    const action = event.target.value;
-    this.setState({ action });
-    this.props.onChange(this.props.user, action);
-  }
-
-  render() {
-    const { active, admin } = this.props.user;
-    return (
-      <select
-        className="UserActionSelector"
-        onChange={this.onChange}
-        value={this.state.action}
-      >
-        <option value="?">...</option>
-        <option disabled key="user-edit" value="edit">
-          Edit
-        </option>
-        <option disabled={active} key="user-delete" value="delete">
-          Delete
-        </option>
-        {!admin
-           ?
-             <option disabled={admin} key="user-promote" value="promote">
-               Enable admin privileges
-             </option>
-           :
-             <option disabled={(!admin || active)} key="user-demote" value="demote">
-               Remove admin privileges
-             </option>
-        }
-      </select>
-    );
-  }
+function UserActionSelector({ user, onChange }) {
+  const { active, admin } = user;
+  return (
+    <select
+      className="UserActionSelector"
+      onChange={event => onChange(user, event.target.value)}
+      value="?"
+    >
+      <option value="?">...</option>
+      <option disabled key="user-edit" value="edit">
+        Edit
+      </option>
+      <option disabled={active} key="user-delete" value="delete">
+        Delete
+      </option>
+      {!admin
+         ?
+           <option disabled={admin} key="user-promote" value="promote">
+             Enable admin privileges
+           </option>
+         :
+           <option disabled={(!admin || active)} key="user-demote" value="demote">
+             Remove admin privileges
+           </option>
+      }
+    </select>
+  );
 }
 
 UserActionSelector.propTypes = {
