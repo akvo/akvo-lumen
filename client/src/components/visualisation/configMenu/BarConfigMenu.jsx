@@ -190,6 +190,7 @@ export default function BarConfigMenu(props) {
             value={spec.legendTitle != null ? spec.legendTitle.toString() : null}
             placeholder="Legend title"
             name="legendLabel"
+            maxLength={32}
             onChange={event => handleChangeSpec({
               legendTitle: event.target.value.toString(),
             }, spec, onChangeSpec, columnOptions)}

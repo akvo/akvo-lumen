@@ -11,6 +11,7 @@ export default function LabelInput(props) {
         placeholder={props.placeholder}
         value={props.value || ''}
         onChange={props.onChange}
+        {... props.maxLength ? { maxLength: props.maxLength } : {}}
       />
     </div>
   );
@@ -21,4 +22,5 @@ LabelInput.propTypes = {
   placeholder: PropTypes.string,
   value: PropTypes.string,
   onChange: PropTypes.func.isRequired,
+  maxLength: PropTypes.number,
 };
