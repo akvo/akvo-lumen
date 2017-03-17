@@ -238,7 +238,7 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
           {
             fill: 'c',
             orient: 'right',
-            title: 'Legend',
+            title: visualisation.spec.legendTitle ? visualisation.spec.legendTitle : 'Legend',
             properties: {
               symbols: {
                 shape: {
