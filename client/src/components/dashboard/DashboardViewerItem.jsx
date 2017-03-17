@@ -60,7 +60,7 @@ export default class DashboardViewerItem extends Component {
 
     return (
       <div
-        className="DashboardViewerItem DashboardCanvasItem"
+        className={`DashboardViewerItem DashboardCanvasItem ${this.props.item.type}`}
         style={style}
       >
         {this.props.item.type === 'visualisation' &&
