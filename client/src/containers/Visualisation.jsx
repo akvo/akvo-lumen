@@ -217,7 +217,7 @@ class Visualisation extends Component {
 
   render() {
     if (this.state.visualisation == null || !this.state.asyncComponents) {
-      return <div className="Visualisation">Loading...</div>;
+      return <div className="Visualisation loadingIndicator">Loading...</div>;
     }
     const { VisualisationHeader, VisualisationEditor } = this.state.asyncComponents;
     const visualisation = this.state.visualisation;

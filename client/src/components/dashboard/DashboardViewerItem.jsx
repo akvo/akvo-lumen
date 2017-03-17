@@ -78,6 +78,10 @@ export default class DashboardViewerItem extends Component {
         {this.props.item.type === 'text' &&
           <div
             className="itemContainer text"
+            style={{
+              fontSize: Math.floor(20 * (this.props.canvasWidth / 1280)),
+              lineHeight: '1.6em',
+            }}
           >
             {this.props.item.content}
           </div>

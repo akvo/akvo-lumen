@@ -145,7 +145,7 @@ export default class DashboardEditor extends Component {
 
       newLayout.push({
         w: 6,
-        h: 4,
+        h: 6,
         minW: 4,
         minH: visualisationType === 'pivot table' ? 1 : 4,
         x: 0,

@@ -97,7 +97,7 @@ class Dataset extends Component {
     const { pendingTransformations } = this.state;
     const { dataset } = this.props;
     if (dataset == null || !this.state.asyncComponents) {
-      return <div className="Dataset">Loading...</div>;
+      return <div className="Dataset loadingIndicator">Loading...</div>;
     }
     const { DatasetHeader, DatasetTable } = this.state.asyncComponents;
 
