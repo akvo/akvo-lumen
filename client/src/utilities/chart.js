@@ -484,22 +484,27 @@ export function getVegaSpec(visualisation, data, containerHeight, containerWidth
   return vspec;
 }
 
-const percentageRow = (rows, spec) => {
-  const round = (num, places) =>
-      // eslint-disable-next-line no-restricted-properties
-      Math.round(num * Math.pow(10, places)) / Math.pow(10, places);
+const round = (num, places) =>
+    // eslint-disable-next-line no-restricted-properties
+    Math.round(num * Math.pow(10, places)) / Math.pow(10, places);
 
-  return rows.map((row) => {
-    const totalIndex = row.length - 1;
-    const rowTotal = row[totalIndex];
+const percentageRow = (rows, spec) => {
+  const totalsRowIndex = rows.length - 1;
+
+  return rows.map((row, index) => {
+    const totalCellIndex = row.length - 1;
+    const rowTotal = row[totalCellIndex];
     const clonedRow = row.slice(0);
+    const isTotalsRow = index === totalsRowIndex;
 
     for (let i = 1; i < row.length; i += 1) {
       const cell = row[i];
       const percentage = round((cell / rowTotal) * 100, 1);
       const value = cell === null ? 0 : round(cell, spec.decimalPlaces);
+      const isTotalCell = i === row.length - 1;
+      const includeCount = isTotalsRow || isTotalCell;
 
-      clonedRow[i] = `${percentage}% (${value})`;
+      clonedRow[i] = includeCount ? `${percentage}% (${value})` : `${percentage}%`;
     }
 
     return clonedRow;
@@ -507,23 +512,22 @@ const percentageRow = (rows, spec) => {
 };
 
 const percentageColumn = (rows, spec) => {
-  const round = (num, places) =>
-      // eslint-disable-next-line no-restricted-properties
-      Math.round(num * Math.pow(10, places)) / Math.pow(10, places);
+  const totalsRowIndex = rows.length - 1;
+  const totalRow = rows[totalsRowIndex];
 
-  const totalIndex = rows.length - 1;
-  const totalRow = rows[totalIndex];
-
-  return rows.map((row) => {
+  return rows.map((row, index) => {
     const clonedRow = row.slice(0);
+    const isTotalsRow = index === totalsRowIndex;
 
     for (let i = 1; i < row.length; i += 1) {
       const columnTotal = totalRow[i];
       const cell = row[i];
       const percentage = round((cell / columnTotal) * 100, 1);
       const value = cell === null ? 0 : round(cell, spec.decimalPlaces);
+      const isTotalCell = i === row.length - 1;
+      const includeCount = isTotalsRow || isTotalCell;
 
-      clonedRow[i] = `${percentage}% (${value})`;
+      clonedRow[i] = includeCount ? `${percentage}% (${value})` : `${percentage}%`;
     }
 
     return clonedRow;
@@ -531,22 +535,22 @@ const percentageColumn = (rows, spec) => {
 };
 
 const percentageTotal = (rows, spec) => {
-  const round = (num, places) =>
-      // eslint-disable-next-line no-restricted-properties
-      Math.round(num * Math.pow(10, places)) / Math.pow(10, places);
-
-  const totalRow = rows[rows.length - 1];
+  const totalsRowIndex = rows.length - 1;
+  const totalRow = rows[totalsRowIndex];
   const total = totalRow[totalRow.length - 1];
 
-  return rows.map((row) => {
+  return rows.map((row, index) => {
     const clonedRow = row.slice(0);
+    const isTotalsRow = index === rows.length - 1;
 
     for (let i = 1; i < row.length; i += 1) {
       const cell = row[i];
       const percentage = round((cell / total) * 100, 1);
       const value = cell === null ? 0 : round(cell, spec.decimalPlaces);
+      const isTotalCell = i === row.length - 1;
+      const includeCount = isTotalsRow || isTotalCell;
 
-      clonedRow[i] = `${percentage}% (${value})`;
+      clonedRow[i] = includeCount ? `${percentage}% (${value})` : `${percentage}%`;
     }
 
     return clonedRow;

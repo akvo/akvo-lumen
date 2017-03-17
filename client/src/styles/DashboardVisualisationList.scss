@@ -5,6 +5,34 @@
   .list, .noVisualisationsMessage {
     padding: 1rem;
   }
+  .filterInput {
+    padding: 1rem;
+    border-bottom: 0.1rem solid $lightGrey;
+
+    label, input {
+      display: block;
+      margin: 0.5rem 0;
+      width: 100%;
+    }
+    input {
+      padding: 0.5rem;
+      font-size: 1rem;
+    }
+  }
+  .filterHelpText {
+    padding: 1rem;
+    text-align: center;
+
+    .buttonContainer {
+      margin-top: 1rem;
+    }
+    button {
+      font-size: 1rem;
+      padding: 0.25rem 0.5rem;
+      border: 0.1rem solid black;
+      border-radius: 0.4rem;
+    }
+  }
   .listItem {
     margin: 1rem 0;
     width: 100%;
@@ -32,13 +60,17 @@
   h4, .visualisationType {
     padding: 0.5rem 1.5rem 0.5rem 0.5rem;
   }
+  .lastModified {
+    padding: 0 0.5rem 0.5rem 0.5rem;
+  }
   h4 {
     font-weight: bold;
     font-size: 1.25rem;
   }
-  .visualisationType {
+  .visualisationType, .lastModified  {
     color: $midGrey;
   }
+
   .isOnDashboardIndicator {
     padding: 0.5rem;
     font-size: 1.25rem;

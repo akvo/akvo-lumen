@@ -1,5 +1,9 @@
 import React, { PropTypes } from 'react';
 import SelectInput from './SelectInput';
+import LabelInput from './LabelInput';
+import ToggleInput from './ToggleInput';
+
+require('../../../styles/PieConfigMenu.scss');
 
 export default function PieConfigMenu(props) {
   const {
@@ -10,7 +14,7 @@ export default function PieConfigMenu(props) {
   const spec = visualisation.spec;
 
   return (
-    <div>
+    <div className="PieConfigMenu">
       <SelectInput
         placeholder="Select a data column to group by"
         labelText="Bucket column"
@@ -21,20 +25,27 @@ export default function PieConfigMenu(props) {
         clearable
         onChange={value => onChangeSpec({
           bucketColumn: value,
+          legendTitle: columnOptions.find(item => item.value === value) ?
+            columnOptions.find(item => item.value === value).title : null,
         })}
       />
-      <label
-        htmlFor="showLegend"
-      >
-        Show legend
-      </label>
-      <input
+      <ToggleInput
         name="showLegend"
         type="checkbox"
-        checked={spec.showLegend}
-        onChange={evt => onChangeSpec({
-          showLegend: evt.target.checked,
+        label="Show legend"
+        className="showLegend"
+        checked={Boolean(spec.showLegend)}
+        onChange={val => onChangeSpec({
+          showLegend: val,
         })}
+      />
+      <LabelInput
+        value={spec.legendTitle != null ? spec.legendTitle.toString() : null}
+        placeholder="Legend title"
+        name="legendLabel"
+        onChange={event => onChangeSpec({
+          legendTitle: event.target.value.toString(),
+        }, spec, onChangeSpec, columnOptions)}
       />
     </div>
   );
