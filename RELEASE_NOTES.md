@@ -8,7 +8,18 @@
 * Visualisations in the dashboard editor are now sorted by last-modified
 * Pivot tables in the dashboard editor can now be resized to a shorter minimum height
 * When showing cell values as percentages, pivot tables now only show the count under "Total"
+* Visualisations are now more size-responsive
+* Dashboard text entities are now more size-responsive
+* Visualisaiton titles are now rendered as HTML, with text wrapping
+* Bar and pie chart legends can now be given custom titles
+* Changed how bar charts resized to accomodate long bar labels and legend titles
+* Moved hover-text for Pie charts to bottom of chart when using "show legend"
+* Visualisation type is now shown for visualisations in the library view
 
+### Bugfixes
+
+* "Loading" indicator text is no longer hidden behind library menu
+* Fixed bug where Map legend entries for number types were sorted incorrectly
 
 ## 0.7.0
 
