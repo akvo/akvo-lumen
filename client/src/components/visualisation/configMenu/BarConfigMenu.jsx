@@ -163,6 +163,8 @@ export default function BarConfigMenu(props) {
             disabled={spec.bucketColumn === null}
             onChange={value => handleChangeSpec({
               subBucketColumn: value,
+              legendTitle: columnOptions.find(item => item.value === value) ?
+                columnOptions.find(item => item.value === value).title : null,
             }, spec, onChangeSpec, columnOptions)}
           />
           <SelectInput
@@ -182,6 +184,14 @@ export default function BarConfigMenu(props) {
             ]}
             onChange={value => handleChangeSpec({
               subBucketMethod: value,
+            }, spec, onChangeSpec, columnOptions)}
+          />
+          <LabelInput
+            value={spec.legendTitle != null ? spec.legendTitle.toString() : null}
+            placeholder="Legend title"
+            name="legendLabel"
+            onChange={event => handleChangeSpec({
+              legendTitle: event.target.value.toString(),
             }, spec, onChangeSpec, columnOptions)}
           />
         </div>
