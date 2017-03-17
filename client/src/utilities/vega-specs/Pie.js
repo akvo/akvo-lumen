@@ -285,7 +285,7 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
               },
               title: {
                 fontSize: {
-                  value: fontSize,
+                  value: fontSize - 2,
                 },
                 dy: {
                   value: fontSize * -0.6,
@@ -293,7 +293,7 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
               },
               labels: {
                 fontSize: {
-                  value: fontSize - 2,
+                  value: fontSize - 4,
                 },
               },
             },
