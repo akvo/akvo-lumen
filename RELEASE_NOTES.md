@@ -3,12 +3,11 @@
 ## 0.7.1 (Unreleased)
 
 ### New and noteworthy
-
+* Admin user actions now present a confirmation dialog
 * The list of visualisations in the dashboard editor can now be filtered on title
 * Visualisations in the dashboard editor are now sorted by last-modified
 * Pivot tables in the dashboard editor can now be resized to a shorter minimum height
 * When showing cell values as percentages, pivot tables now only show the count under "Total"
-
 
 ## 0.7.0
 
