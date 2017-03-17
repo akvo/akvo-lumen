@@ -21,14 +21,33 @@ const getPaddingX = (data, maxLabelLengthX, meanPixelsPerChar, defaultPadding) =
 
 /* Calculate how much right-padding we need to add to the chart to allow the last x-axis
 ** label to render inside the bounds */
-const getRightPadding = (data, meanPixelsPerChar) => {
+const getLabelPadding = (data, meanPixelsPerChar) => {
   const horizontalPixelsPerChar = meanPixelsPerChar / 1.1; // Account for angle
   const lastValue = data[0].values[data[0].values.length - 1] || {};
   const lastLabel = lastValue.bucketValue || '';
   let lastLabelLength = lastLabel.length > 5 ? (lastLabel.length - 5) : 0;
   lastLabelLength = lastLabelLength > 27 ? 27 : lastLabelLength; // Account for truncation
+  const labelPadding = Math.floor(lastLabelLength * horizontalPixelsPerChar);
 
-  return Math.floor(lastLabelLength * horizontalPixelsPerChar);
+  return labelPadding;
+};
+
+const getLegendPadding = (data, spec, meanPixelsPerChar) => {
+  /* If there is a custom legend title, make sure we add enough padding for that too */
+  const showLegend = spec.subBucketColumn !== null;
+  const horizontalPixelsPerChar = meanPixelsPerChar * 1.35;
+
+  if (showLegend) {
+    const legendText = spec.legendTitle || '';
+    let legendLength = legendText.length > 13 ? legendText.length - 13 : 0;
+    legendLength = legendLength > 19 ? 19 : legendLength;
+
+    const legendPadding = Math.floor(legendLength * horizontalPixelsPerChar);
+
+    return legendPadding;
+  }
+
+  return 0;
 };
 
 export default function getVegaBarSpec(visualisation, data, containerHeight, containerWidth,
@@ -40,7 +59,8 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
   const meanPixelsPerChar = (chartSize === 'small' || chartSize === 'xsmall') ? 3.9 : 4.25;
   const defaultPadding = 40;
   const paddingX = getPaddingX(data, maxLabelLengthX, meanPixelsPerChar, defaultPadding);
-  const rightPadding = getRightPadding(data, meanPixelsPerChar);
+  const legendPadding = getLegendPadding(data, visualisation.spec, meanPixelsPerChar);
+  const labelPadding = getLabelPadding(data, meanPixelsPerChar);
 
   const dataSource = 'table';
   const fieldX = 'bucketValue';
@@ -52,13 +72,13 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
   if (spec.subBucketColumn !== null && spec.subBucketMethod === 'split') {
     return ({
       data,
-      width: containerWidth - 170,
+      width: containerWidth - (170 + legendPadding),
       height: containerHeight - (26 + paddingX),
       padding: {
         top: 26,
         left: 60,
         bottom: paddingX,
-        right: 110,
+        right: 110 + legendPadding,
       },
       scales: [
         {
@@ -292,13 +312,13 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
   if (spec.subBucketColumn !== null && spec.subBucketMethod === 'stack') {
     return ({
       data,
-      width: containerWidth - 170,
+      width: containerWidth - (170 + legendPadding),
       height: containerHeight - (26 + paddingX),
       padding: {
         top: 26,
         left: 60,
         bottom: paddingX,
-        right: 110,
+        right: 110 + legendPadding,
       },
       scales: [
         {
@@ -361,7 +381,7 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
         {
           fill: 'sgc',
           orient: 'right',
-          title: 'Legend',
+          title: spec.legendTitle ? spec.legendTitle : 'Legend',
           properties: {
             symbols: {
               shape: {
@@ -497,13 +517,13 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
 
   return ({
     data,
-    width: containerWidth - (70 + rightPadding),
+    width: containerWidth - (70 + labelPadding),
     height: containerHeight - (26 + paddingX),
     padding: {
       top: 26,
       left: 60,
       bottom: paddingX,
-      right: (10 + rightPadding),
+      right: (10 + labelPadding),
     },
     scales: [
       {
