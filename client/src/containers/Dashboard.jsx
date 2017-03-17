@@ -318,7 +318,7 @@ class Dashboard extends Component {
 
   render() {
     if (!this.state.asyncComponents) {
-      return <div>Loading...</div>;
+      return <div className="loadingIndicator">Loading...</div>;
     }
     const { DashboardHeader, DashboardEditor } = this.state.asyncComponents;
     const dashboard = getDashboardFromState(this.state.dashboard, true);

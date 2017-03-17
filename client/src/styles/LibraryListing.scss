@@ -68,6 +68,12 @@
       vertical-align: top;
       width: calc(100% - 6.5rem);
     }
+    .VisualisationTypeLabel {
+      p {
+        color: $midGrey;
+        font-size: 80%;
+      }
+    }
     .entityName {
       color: $strongBlue;
       font-weight: bold;

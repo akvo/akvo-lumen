@@ -19,14 +19,28 @@ const getPaddingX = (data, maxLabelLengthX, meanPixelsPerChar, defaultPadding) =
   return defaultPadding + pixPadding;
 };
 
-export default function getVegaBarSpec(visualisation, data, containerHeight, containerWidth) {
+/* Calculate how much right-padding we need to add to the chart to allow the last x-axis
+** label to render inside the bounds */
+const getRightPadding = (data, meanPixelsPerChar) => {
+  const horizontalPixelsPerChar = meanPixelsPerChar / 1.1; // Account for angle
+  const lastValue = data[0].values[data[0].values.length - 1] || {};
+  const lastLabel = lastValue.bucketValue || '';
+  let lastLabelLength = lastLabel.length > 5 ? (lastLabel.length - 5) : 0;
+  lastLabelLength = lastLabelLength > 27 ? 27 : lastLabelLength; // Account for truncation
+
+  return Math.floor(lastLabelLength * horizontalPixelsPerChar);
+};
+
+export default function getVegaBarSpec(visualisation, data, containerHeight, containerWidth,
+  chartSize) {
   const { spec } = visualisation;
 
   /* Padding calculation constants */
   const maxLabelLengthX = 32; // In chars. Labels longer than this are truncated (...)
-  const meanPixelsPerChar = 4.75; // Used to calculate padding for labels in pixels
-  const defaultPadding = 50;
+  const meanPixelsPerChar = (chartSize === 'small' || chartSize === 'xsmall') ? 3.9 : 4.25;
+  const defaultPadding = 40;
   const paddingX = getPaddingX(data, maxLabelLengthX, meanPixelsPerChar, defaultPadding);
+  const rightPadding = getRightPadding(data, meanPixelsPerChar);
 
   const dataSource = 'table';
   const fieldX = 'bucketValue';
@@ -83,6 +97,9 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
           tickPadding: 0,
           properties: {
             labels: {
+              text: {
+                template: `{{datum.data | truncate:${maxLabelLengthX}}}`,
+              },
               angle: {
                 value: '45',
               },
@@ -317,6 +334,9 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
           tickPadding: 0,
           properties: {
             labels: {
+              text: {
+                template: `{{datum.data | truncate:${maxLabelLengthX}}}`,
+              },
               angle: {
                 value: '45',
               },
@@ -477,13 +497,13 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
 
   return ({
     data,
-    width: containerWidth - 70,
+    width: containerWidth - (70 + rightPadding),
     height: containerHeight - (26 + paddingX),
     padding: {
       top: 26,
       left: 60,
       bottom: paddingX,
-      right: 10,
+      right: (10 + rightPadding),
     },
     scales: [
       {
@@ -513,6 +533,12 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
         tickPadding: 0,
         properties: {
           labels: {
+            text: {
+              template: `{{datum.data | truncate:${maxLabelLengthX}}}`,
+            },
+            fontSize: {
+              value: (chartSize === 'small' || chartSize === 'xsmall') ? 9 : 11,
+            },
             angle: {
               value: '45',
             },

@@ -372,8 +372,8 @@ export const getPointColorMappingSortFunc = (columnType) => {
   };
 
   const sortNonText = (a, b) => {
-    const va = a.value == null ? Infinity : parseFloat(a.value);
-    const vb = b.value == null ? Infinity : parseFloat(b.value);
+    const va = a.value == null || a.value === 'null' ? Infinity : parseFloat(a.value);
+    const vb = b.value == null || b.value === 'null' ? Infinity : parseFloat(b.value);
 
     return va - vb;
   };
@@ -454,64 +454,32 @@ export function getMapData(layer, datasets) {
   });
 }
 
-export function getVegaSpec(visualisation, data, containerHeight, containerWidth) {
-  const { visualisationType, name } = visualisation;
+export function getVegaSpec(visualisation, data, containerHeight, containerWidth, chartSize) {
+  const { visualisationType } = visualisation;
   let vspec;
 
   switch (visualisationType) {
     case 'bar':
-      vspec = getVegaBarSpec(visualisation, data, containerHeight, containerWidth);
+      vspec = getVegaBarSpec(visualisation, data, containerHeight, containerWidth, chartSize);
       break;
 
     case 'area':
     case 'line':
-      vspec = getVegaAreaSpec(visualisation, data, containerHeight, containerWidth);
+      vspec = getVegaAreaSpec(visualisation, data, containerHeight, containerWidth, chartSize);
       break;
 
     case 'pie':
     case 'donut':
-      vspec = getVegaPieSpec(visualisation, data, containerHeight, containerWidth);
+      vspec = getVegaPieSpec(visualisation, data, containerHeight, containerWidth, chartSize);
       break;
 
     case 'scatter':
-      vspec = getVegaScatterSpec(visualisation, data, containerHeight, containerWidth);
+      vspec = getVegaScatterSpec(visualisation, data, containerHeight, containerWidth, chartSize);
       break;
 
     default:
       throw new Error(`Unknown chart type ${visualisationType} supplied to getVegaSpec()`);
   }
-
-  /* Set the properties common to all visualisation types */
-  vspec.marks.push({
-    type: 'text',
-    name: 'title',
-    properties: {
-      enter: {
-        x: {
-          signal: 'width',
-          mult: 0.5,
-        },
-        y: {
-          value: -10,
-        },
-        text: {
-          value: name,
-        },
-        fill: {
-          value: 'black',
-        },
-        fontSize: {
-          value: 16,
-        },
-        align: {
-          value: 'center',
-        },
-        fontWeight: {
-          value: 'bold',
-        },
-      },
-    },
-  });
 
   return vspec;
 }

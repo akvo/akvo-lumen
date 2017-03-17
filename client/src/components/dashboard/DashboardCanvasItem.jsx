@@ -132,6 +132,8 @@ export default class DashboardCanvasItem extends Component {
             style={{
               height: dimensions.height,
               width: dimensions.width,
+              fontSize: Math.floor(20 * (this.props.canvasWidth / 1280) * 0.9),
+              lineHeight: '1.4em',
             }}
           >
             <DashboardCanvasItemEditable
