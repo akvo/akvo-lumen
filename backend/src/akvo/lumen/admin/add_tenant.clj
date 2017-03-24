@@ -32,7 +32,11 @@
 
 
 (def blacklist ["admin"
+                "deck"
+                "ftp"
+                "mail"
                 "next"
+                "smtp"
                 "stage"
                 "test"
                 "www"])
