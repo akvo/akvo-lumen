@@ -4,7 +4,7 @@ import * as visualisationActions from './visualisation';
 import { hideModal } from './activeModal';
 import applyTransformation from '../reducers/transform';
 import { showNotification } from './notification';
-import { get, post, del } from '../api';
+import * as api from '../api';
 
 /*
  * Fetch a dataset by id
@@ -38,7 +38,7 @@ function fetchDatasetFailure(error, id) {
 export function fetchDataset(id) {
   return (dispatch) => {
     dispatch(fetchDatasetRequest(id));
-    get(`/api/datasets/${id}`)
+    api.get(`/api/datasets/${id}`)
       .then(response => response.json())
       .then(dataset => dispatch(fetchDatasetSuccess(Immutable.fromJS(dataset))))
       .catch(error => dispatch(fetchDatasetFailure(error, id)));
@@ -100,7 +100,7 @@ const pollInteval = 1000;
 function pollDatasetImportStatus(importId, name) {
   return (dispatch) => {
     dispatch(importDatasetPending(importId, name));
-    get(`/api/job_executions/${importId}`)
+    api.get(`/api/job_executions/${importId}`)
       .then(response => response.json())
       .then(({ status, reason, datasetId }) => {
         if (status === 'PENDING') {
@@ -131,7 +131,7 @@ export function clearImport() {
 export function importDataset(dataSource) {
   return (dispatch) => {
     dispatch(importDatasetRequest(dataSource));
-    post('/api/datasets', dataSource)
+    api.post('/api/datasets', dataSource)
       .then(response => response.json())
       .then(({ importId }) => {
         dispatch(pollDatasetImportStatus(importId, dataSource.name));
@@ -239,7 +239,7 @@ function deleteDatasetFailure(id, error) {
 export function deleteDataset(id) {
   return (dispatch) => {
     dispatch(deleteDatasetRequest(id));
-    del(`/api/datasets/${id}`)
+    api.del(`/api/datasets/${id}`)
       .then(response => response.json())
       .then(() => dispatch(deleteDatasetSuccess(id)))
       .catch(error => dispatch(deleteDatasetFailure(id, error)));
@@ -294,7 +294,7 @@ function transformationFailure(datasetId, reason) {
 
 function pollDatasetTransformationStatus(jobExecutionId, datasetId) {
   return (dispatch) => {
-    get(`/api/job_executions/${jobExecutionId}`)
+    api.get(`/api/job_executions/${jobExecutionId}`)
       .then(response => response.json())
       .then(({ status, reason }) => {
         if (status === 'PENDING') {
@@ -313,7 +313,7 @@ function pollDatasetTransformationStatus(jobExecutionId, datasetId) {
 export function sendTransformationLog(datasetId, transformations) {
   return (dispatch) => {
     dispatch(transformationLogRequestSent(datasetId));
-    post(`/api/transformations/${datasetId}`, transformations.toJSON())
+    api.post(`/api/transformations/${datasetId}`, transformations.toJSON())
       .then(response => response.json())
       .then(({ jobExecutionId }) =>
         dispatch(pollDatasetTransformationStatus(jobExecutionId, datasetId)));

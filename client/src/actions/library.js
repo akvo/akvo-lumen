@@ -4,7 +4,7 @@ import * as constants from '../constants/library';
 import { fetchDatasetsSuccess } from './dataset';
 import { fetchVisualisationsSuccess } from './visualisation';
 import { fetchDashboardsSuccess } from './dashboard';
-import { get } from '../api';
+import * as api from '../api';
 
 function fetchLibraryRequest() {
   return {
@@ -21,7 +21,7 @@ function fetchLibraryFailure() {
 export function fetchLibrary() {
   return (dispatch) => {
     dispatch(fetchLibraryRequest());
-    get('/api/library')
+    api.get('/api/library')
       .then(response => response.json())
       .then((library) => {
         dispatch(fetchDatasetsSuccess(Immutable.fromJS(library.datasets)));
