@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import Select from 'react-select';
-import { get } from '../../../api';
+import * as api from '../../../api';
 
 function findRootFolderIds(surveysAndFolders) {
   const folderIds = {};
@@ -42,7 +42,7 @@ export default class AkvoFlowDataSourceSettings extends Component {
   }
 
   componentDidMount() {
-    get('/api/flow/instances')
+    api.get('/api/flow/instances')
       .then(response => response.json())
       .then(instances => this.setState(instances));
   }
@@ -56,7 +56,7 @@ export default class AkvoFlowDataSourceSettings extends Component {
     this.setState(Object.assign({}, initialState, {
       instances: this.state.instances,
     }));
-    get(`/api/flow/folders-and-surveys/${instance.value}`)
+    api.get(`/api/flow/folders-and-surveys/${instance.value}`)
       .then(response => response.json())
       .then((foldersAndSurveys) => {
       /*
