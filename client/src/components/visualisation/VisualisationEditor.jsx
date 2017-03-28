@@ -101,13 +101,14 @@ export default class VisualisationEditor extends Component {
 
     api.get(`/api/pivot/${datasetId}`, {
       query: JSON.stringify(spec),
-    }).then((response) => {
-      if (requestId === this.latestRequestId) {
-        this.setState({
-          visualisation: Object.assign({}, visualisation, { data: response }),
-        });
-      }
-    });
+    }).then(response => response.json())
+      .then((response) => {
+        if (requestId === this.latestRequestId) {
+          this.setState({
+            visualisation: Object.assign({}, visualisation, { data: response }),
+          });
+        }
+      });
   }
 
   render() {

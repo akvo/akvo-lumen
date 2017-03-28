@@ -144,11 +144,13 @@ class Users extends Component {
 
   onInviteUser(email) {
     this.setState({ isInviteModalVisible: false });
-    api.post('/api/admin/invites', { email });
+    api.post('/api/admin/invites', { email })
+      .then(response => response.json());
   }
 
   getUsers() {
     api.get('/api/admin/users')
+      .then(response => response.json())
       .then(users => this.setState({ users }));
   }
 
@@ -178,11 +180,17 @@ class Users extends Component {
     this.setState({ isActionModalVisible: false });
     const url = `/api/admin/users/${id}`;
     if (action === 'delete') {
-      api.del(url).then(() => this.getUsers());
+      api.del(url)
+        .then(response => response.json())
+        .then(() => this.getUsers());
     } else if (action === 'demote') {
-      api.patch(url, { admin: false }).then(() => this.getUsers());
+      api.patch(url, { admin: false })
+        .then(response => response.json())
+        .then(() => this.getUsers());
     } else if (action === 'promote') {
-      api.patch(url, { admin: true }).then(() => this.getUsers());
+      api.patch(url, { admin: true })
+        .then(response => response.json())
+        .then(() => this.getUsers());
     }
   }
 

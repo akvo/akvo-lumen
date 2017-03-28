@@ -176,7 +176,7 @@ class Dashboard extends Component {
 
       api.get(`/api/pivot/${datasetId}`, {
         query: JSON.stringify(spec),
-      }).then((response) => {
+      }).then(response => response.json()).then((response) => {
         const change = {};
         change[id] = response;
         const aggregatedDatasets = Object.assign({}, this.state.aggregatedDatasets, change);
