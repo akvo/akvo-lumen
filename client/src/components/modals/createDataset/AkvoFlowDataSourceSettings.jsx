@@ -43,6 +43,7 @@ export default class AkvoFlowDataSourceSettings extends Component {
 
   componentDidMount() {
     get('/api/flow/instances')
+      .then(response => response.json())
       .then(instances => this.setState(instances));
   }
 
@@ -56,6 +57,7 @@ export default class AkvoFlowDataSourceSettings extends Component {
       instances: this.state.instances,
     }));
     get(`/api/flow/folders-and-surveys/${instance.value}`)
+      .then(response => response.json())
       .then((foldersAndSurveys) => {
       /*
        * Build 2 indexes to avoid repetetive calculation in render():

@@ -3,8 +3,7 @@ import * as auth from './auth';
 
 function wrapUpdateToken(fetchRequestThunk) {
   return auth.token()
-    .then(token => fetchRequestThunk(token))
-    .then(response => response.json());
+    .then(token => fetchRequestThunk(token));
 }
 
 function requestHeaders(token, additionalHeaders = {}) {

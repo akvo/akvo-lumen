@@ -39,6 +39,7 @@ export function fetchDataset(id) {
   return (dispatch) => {
     dispatch(fetchDatasetRequest(id));
     get(`/api/datasets/${id}`)
+      .then(response => response.json())
       .then(dataset => dispatch(fetchDatasetSuccess(Immutable.fromJS(dataset))))
       .catch(error => dispatch(fetchDatasetFailure(error, id)));
   };
@@ -100,6 +101,7 @@ function pollDatasetImportStatus(importId, name) {
   return (dispatch) => {
     dispatch(importDatasetPending(importId, name));
     get(`/api/job_executions/${importId}`)
+      .then(response => response.json())
       .then(({ status, reason, datasetId }) => {
         if (status === 'PENDING') {
           setTimeout(() => dispatch(pollDatasetImportStatus(importId, name)), pollInteval);
@@ -130,6 +132,7 @@ export function importDataset(dataSource) {
   return (dispatch) => {
     dispatch(importDatasetRequest(dataSource));
     post('/api/datasets', dataSource)
+      .then(response => response.json())
       .then(({ importId }) => {
         dispatch(pollDatasetImportStatus(importId, dataSource.name));
         dispatch(hideModal());
@@ -237,6 +240,7 @@ export function deleteDataset(id) {
   return (dispatch) => {
     dispatch(deleteDatasetRequest(id));
     del(`/api/datasets/${id}`)
+      .then(response => response.json())
       .then(() => dispatch(deleteDatasetSuccess(id)))
       .catch(error => dispatch(deleteDatasetFailure(id, error)));
   };
@@ -291,6 +295,7 @@ function transformationFailure(datasetId, reason) {
 function pollDatasetTransformationStatus(jobExecutionId, datasetId) {
   return (dispatch) => {
     get(`/api/job_executions/${jobExecutionId}`)
+      .then(response => response.json())
       .then(({ status, reason }) => {
         if (status === 'PENDING') {
           setTimeout(() =>
@@ -309,6 +314,7 @@ export function sendTransformationLog(datasetId, transformations) {
   return (dispatch) => {
     dispatch(transformationLogRequestSent(datasetId));
     post(`/api/transformations/${datasetId}`, transformations.toJSON())
+      .then(response => response.json())
       .then(({ jobExecutionId }) =>
         dispatch(pollDatasetTransformationStatus(jobExecutionId, datasetId)));
   };

@@ -22,6 +22,7 @@ export function fetchLibrary() {
   return (dispatch) => {
     dispatch(fetchLibraryRequest());
     get('/api/library')
+      .then(response => response.json())
       .then((library) => {
         dispatch(fetchDatasetsSuccess(Immutable.fromJS(library.datasets)));
         dispatch(fetchVisualisationsSuccess(library.visualisations));

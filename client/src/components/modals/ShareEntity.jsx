@@ -29,6 +29,7 @@ export default class ShareEntity extends Component {
 
     if (id != null) {
       post('/api/shares', { [`${entityType}Id`]: id })
+        .then(response => response.json())
         .then(response => this.setState({ id: response.id }));
     }
   }
