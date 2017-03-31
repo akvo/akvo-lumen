@@ -5,7 +5,7 @@
                                          migrate-tenant
                                          rollback-tenant]]
             [akvo.lumen.import.csv-test :refer [import-file]]
-            [akvo.lumen.lib.pivot :as pivot]
+            [akvo.lumen.lib.aggregation :as aggregation]
             [akvo.lumen.transformation :as tf]
             [clojure.test :refer :all]
             [com.stuartsierra.component :as component]
@@ -46,7 +46,7 @@
 (use-fixtures :once fixture)
 
 (deftest ^:functional test-pivot
-  (let [query (partial pivot/query *tenant-conn* *dataset-id*)]
+  (let [query (partial aggregation/query *tenant-conn* *dataset-id* "pivot")]
     (testing "Empty query"
       (let [{:keys [status body]} (query {"aggregation" "count"})]
         (is (= status 200))

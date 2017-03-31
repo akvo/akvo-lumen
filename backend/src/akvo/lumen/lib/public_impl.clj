@@ -1,7 +1,7 @@
 (ns akvo.lumen.lib.public-impl
-  (:require [akvo.lumen.lib.dashboard :as dashboard]
+  (:require [akvo.lumen.lib.aggregation :as aggregation]
+            [akvo.lumen.lib.dashboard :as dashboard]
             [akvo.lumen.lib.dataset :as dataset]
-            [akvo.lumen.lib.pivot :as pivot]
             [akvo.lumen.lib.visualisation :as visualisation]
             [cheshire.core :as json]
             [hugsql.core :as hugsql]
@@ -18,7 +18,20 @@
 (defmethod visualisation "pivot table"
   [tenant-conn visualisation]
   (let [dataset-id (:datasetId visualisation)
-        {:keys [status body]} (pivot/query tenant-conn dataset-id (:spec visualisation))]
+        {:keys [status body]} (aggregation/query tenant-conn
+                                                 dataset-id
+                                                 "pivot"
+                                                 (:spec visualisation))]
+    (when (= status 200)
+      {"visualisations" {(:id visualisation) (assoc visualisation :data body)}})))
+
+(defmethod visualisation "pie"
+  [tenant-conn visualisation]
+  (let [dataset-id (:datasetId visualisation)
+        {:keys [status body]} (aggregation/query tenant-conn
+                                                 dataset-id
+                                                 "pie"
+                                                 (:spec visualisation))]
     (when (= status 200)
       {"visualisations" {(:id visualisation) (assoc visualisation :data body)}})))
 
