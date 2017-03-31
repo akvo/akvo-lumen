@@ -4,19 +4,11 @@
             [akvo.lumen.lib.aggregation.utils :as utils]
             [clojure.java.jdbc :as jdbc]))
 
-(defn non-null-query [tenant-conn table-name column-name filter-sql]
+(defn run-query [tenant-conn table-name column-name filter-sql]
   (rest (jdbc/query tenant-conn
                     [(format "SELECT %s, count(*) FROM %s WHERE %s GROUP BY %s"
                              column-name table-name filter-sql column-name)]
                     {:as-arrays? true})) )
-
-(defn null-query [tenant-conn table-name column-name filter-sql]
-  (let [n (ffirst (rest (jdbc/query tenant-conn
-                                    [(format "SELECT count(*) FROM %s WHERE %s IS NULL AND %s"
-                                             table-name column-name filter-sql)]
-                                    {:as-arrays? true})) )]
-    (when-not (zero? n)
-      [[nil n]])))
 
 (defn query [tenant-conn dataset query]
   (let [columns (:columns dataset)
@@ -25,11 +17,7 @@
         bucket-column-name (get bucket-column "columnName")
         bucket-column-title (get bucket-column "title")
         table-name (:table-name dataset)
-        non-null-counts (non-null-query tenant-conn table-name bucket-column-name filter-sql)
-        null-counts (null-query tenant-conn table-name bucket-column-name filter-sql)
-        counts (if null-counts
-                 (concat non-null-counts null-counts)
-                 non-null-counts)]
+        counts (run-query tenant-conn table-name bucket-column-name filter-sql)]
     (http/ok {"metadata" {"bucketColumnTitle" bucket-column-title}
               "data" (mapv (fn [[bucket-value bucket-count]]
                              {"bucketValue" bucket-value
