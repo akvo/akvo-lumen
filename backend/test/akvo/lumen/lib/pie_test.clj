@@ -41,12 +41,14 @@
     (testing "Simple queries"
       (let [{:keys [status body]} (query {"bucketColumn" "c1"})]
         (is (= status 200))
-        (is (= body {"metadata" {"bucketColumnTitle" "A"},
+        (is (= body {"metadata" {"bucketColumnTitle" "A"
+                                 "bucketColumnType" "text"},
                      "data" [{"bucketValue" "a1", "bucketCount" 4}
                              {"bucketValue" "a2", "bucketCount" 4}]})))
 
       (let [{:keys [status body]} (query {"bucketColumn" "c2"})]
         (is (= status 200))
-        (is (= body {"metadata" {"bucketColumnTitle" "B"},
+        (is (= body {"metadata" {"bucketColumnTitle" "B"
+                                 "bucketColumnType" "text"},
                      "data" [{"bucketValue" "b1", "bucketCount" 5}
                              {"bucketValue" "b2", "bucketCount" 3}]}))))))

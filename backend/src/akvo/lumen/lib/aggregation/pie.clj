@@ -16,8 +16,10 @@
         bucket-column (utils/find-column columns (get query "bucketColumn"))
         bucket-column-name (get bucket-column "columnName")
         bucket-column-title (get bucket-column "title")
+        bucket-column-type (get bucket-column "type")
         counts (run-query tenant-conn table-name bucket-column-name filter-sql)]
-    (http/ok {"metadata" {"bucketColumnTitle" bucket-column-title}
+    (http/ok {"metadata" {"bucketColumnTitle" bucket-column-title
+                          "bucketColumnType" bucket-column-type}
               "data" (mapv (fn [[bucket-value bucket-count]]
                              {"bucketValue" bucket-value
                               "bucketCount" bucket-count})
