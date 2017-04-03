@@ -6,13 +6,24 @@
     height: 30rem;
   }
 
+  h2 {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    padding: 8px;
+
+    span {
+      font-weight: bold;
+      text-align: center;
+    }
+  }
+
   .legend {
     position: absolute;
     background-color: rgba(255, 255, 255, 0.8);
     font-size: 0.8rem;
     line-height: 1.4em;
     z-index: 1;
-    overflow: auto;
 
     h4 {
       font-size: 1rem;
@@ -26,6 +37,7 @@
       display: flex;
       flex-direction: column;
       align-items: flex-start;
+      overflow: auto;
     }
 
     .legendEntry {
@@ -34,6 +46,7 @@
       flex: 1;
       overflow: hidden;
       margin: 0 0.5rem 0 0;
+      min-width: 1.8rem;
 
       span {
         flex-shrink: 1;

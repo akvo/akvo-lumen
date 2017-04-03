@@ -3,9 +3,22 @@ import Modal from 'react-modal';
 
 require('../../styles/DashboardModal.scss');
 
-export default function ConfirmUserAction(props) {
-  const { isOpen, onClose } = props;
-  const baseQuestion = 'Are you sure you want to ';
+function getQuestion(username, action) {
+  const prefix = 'Are you sure you want to';
+  let suffix = '';
+  if (action === 'delete') {
+    suffix = 'delete user';
+  } else if (action === 'demote') {
+    suffix = 'remove admin privileges for user';
+  } else if (action === 'promote') {
+    suffix = 'enable admin privileges for user';
+  }
+  return `${prefix} ${suffix} ${username}?`;
+}
+
+export default function ConfirmUserAction({ isOpen, onChange, onClose, user }) {
+  const { action, username } = user;
+  const question = getQuestion(username, action);
   return (
     <Modal
       isOpen={isOpen}
@@ -35,7 +48,21 @@ export default function ConfirmUserAction(props) {
           +
           </div>
           <div className="contents">
-            <p>{baseQuestion}</p>
+            <p>{question}</p>
+          </div>
+          <div className="controls">
+            <button
+              className="clickable negative"
+              onClick={onClose}
+            >
+            Cancel
+            </button>
+            <button
+              className="clickable positive"
+              onClick={onChange}
+            >
+            Yes
+            </button>
           </div>
         </div>
       </div>
@@ -45,5 +72,10 @@ export default function ConfirmUserAction(props) {
 
 ConfirmUserAction.propTypes = {
   isOpen: PropTypes.bool.isRequired,
+  onChange: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
+  user: PropTypes.shape({
+    action: PropTypes.string.isRequired,
+    username: PropTypes.string.isRequired,
+  }).isRequired,
 };

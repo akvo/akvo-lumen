@@ -164,6 +164,10 @@ DataLayer.propTypes = {
 export default function MapVisualisation({ visualisation, datasets, width, height }) {
   const displayLayers = getDataLayers(visualisation.spec.layers, datasets);
   const bounds = calculateBounds(displayLayers);
+  const title = visualisation.name || '';
+  const titleLength = title.toString().length;
+  const titleHeight = titleLength > 48 ? 56 : 36;
+  const mapHeight = height - titleHeight;
   const { tileUrl, tileAttribution } = getBaseLayerAttributes(visualisation.spec.baseLayer);
 
   return (
@@ -211,6 +215,17 @@ export default function MapVisualisation({ visualisation, datasets, width, heigh
           }
         </div>
       )}
+      <h2
+        style={{
+          height: titleHeight,
+          lineHeight: titleLength > 96 ? '16px' : '20px',
+          fontSize: titleLength > 96 ? '14px' : '16px',
+        }}
+      >
+        <span>
+          {visualisation.name}
+        </span>
+      </h2>
       <Map
         center={[0, 0]}
         {... bounds ? { bounds } : {}} // Don't set a bounds prop if we have no bounds
@@ -219,7 +234,7 @@ export default function MapVisualisation({ visualisation, datasets, width, heigh
         key={width}
         style={{
           width,
-          height,
+          height: mapHeight,
         }}
       >
         <TileLayer

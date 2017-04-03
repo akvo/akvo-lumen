@@ -176,7 +176,7 @@ class Dashboard extends Component {
 
       api.get(`/api/pivot/${datasetId}`, {
         query: JSON.stringify(spec),
-      }).then((response) => {
+      }).then(response => response.json()).then((response) => {
         const change = {};
         change[id] = response;
         const aggregatedDatasets = Object.assign({}, this.state.aggregatedDatasets, change);
@@ -318,7 +318,7 @@ class Dashboard extends Component {
 
   render() {
     if (!this.state.asyncComponents) {
-      return <div>Loading...</div>;
+      return <div className="loadingIndicator">Loading...</div>;
     }
     const { DashboardHeader, DashboardEditor } = this.state.asyncComponents;
     const dashboard = getDashboardFromState(this.state.dashboard, true);

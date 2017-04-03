@@ -1,3 +1,4 @@
+
 @import 'modules/colors';
 
 html, body, #root, #root > div {
@@ -88,4 +89,8 @@ code {
 /* Style the "empty value" label for visualisations as italic text */
 .emptyValue {
   font-style: italic;
+}
+
+.loadingIndicator {
+  padding: 6rem 1rem;
 }

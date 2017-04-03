@@ -1,64 +1,55 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import EntityTypeHeader from './entity-editor/EntityTypeHeader';
+import ConfirmUserAction from './modals/ConfirmUserAction';
 import InviteUser from './modals/InviteUser';
 import * as api from '../api';
 
 require('../styles/EntityTypeHeader.scss');
 require('../styles/Users.scss');
 
-class UserActionSelector extends Component {
-  constructor(props) {
-    super(props);
-    this.state = { action: '?' };
-    this.onChange = this.onChange.bind(this);
-  }
-
-  onChange(event) {
-    const action = event.target.value;
-    const userId = this.props.userId;
-    this.setState({ action });
-    this.props.onChange(userId, action);
-  }
-
-  render() {
-    const { active, admin } = this.props;
-    return (
-      <select
-        className="UserActionSelector"
-        onChange={this.onChange}
-        value={this.state.action}
-      >
-        <option value="?">...</option>
-        <option disabled key="user-edit" value="edit">
-          Edit
-        </option>
-        <option disabled={active} key="user-delete" value="delete">
-          Delete
-        </option>
-        {!admin
-           ?
-             <option disabled={admin} key="user-promote" value="promote">
-               Enable admin privileges
-             </option>
-           :
-             <option disabled={(!admin || active)} key="user-demote" value="demote">
-               Remove admin privileges
-             </option>
-        }
-      </select>
-    );
-  }
+function UserActionSelector({ user, onChange }) {
+  const { active, admin } = user;
+  return (
+    <select
+      className="UserActionSelector"
+      onChange={event => onChange(user, event.target.value)}
+      value="?"
+    >
+      <option value="?">...</option>
+      <option disabled key="user-edit" value="edit">
+        Edit
+      </option>
+      <option disabled={active} key="user-delete" value="delete">
+        Delete
+      </option>
+      {!admin
+         ?
+           <option disabled={admin} key="user-promote" value="promote">
+             Enable admin privileges
+           </option>
+         :
+           <option disabled={(!admin || active)} key="user-demote" value="demote">
+             Remove admin privileges
+           </option>
+      }
+    </select>
+  );
 }
 
 UserActionSelector.propTypes = {
-  active: PropTypes.bool.isRequired,
-  admin: PropTypes.bool.isRequired,
   onChange: PropTypes.func.isRequired,
-  userId: PropTypes.string.isRequired,
+  user: PropTypes.shape({
+    active: PropTypes.bool.isRequired,
+    admin: PropTypes.bool.isRequired,
+    email: PropTypes.string.isRequired,
+    id: PropTypes.string.isRequired,
+    username: PropTypes.string.isRequired,
+  }),
 };
 
-function User({ active, admin, email, onChange, userId, username }) {
+function User({ onChange, user }) {
+  const { active, admin, email, username } = user;
   return (
     <tr>
       <td>
@@ -72,10 +63,8 @@ function User({ active, admin, email, onChange, userId, username }) {
       <td>{admin ? 'Admin' : 'User'}</td>
       <td>
         <UserActionSelector
-          active={active}
-          admin={admin}
           onChange={onChange}
-          userId={userId}
+          user={user}
         />
       </td>
     </tr>
@@ -83,16 +72,14 @@ function User({ active, admin, email, onChange, userId, username }) {
 }
 
 User.propTypes = {
-  active: PropTypes.bool.isRequired,
-  admin: PropTypes.bool.isRequired,
-  email: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
-  userId: PropTypes.string.isRequired,
-  username: PropTypes.string.isRequired,
-};
-
-User.defaultProps = {
-  admin: false,
+  user: PropTypes.shape({
+    active: PropTypes.bool.isRequired,
+    admin: PropTypes.bool.isRequired,
+    email: PropTypes.string.isRequired,
+    id: PropTypes.string.isRequired,
+    username: PropTypes.string.isRequired,
+  }).isRequired,
 };
 
 function UserList({ activeUserId, onChange, users }) {
@@ -107,13 +94,14 @@ function UserList({ activeUserId, onChange, users }) {
         </tr>
         {users.map(({ admin, email, id, username }) => (
           <User
-            active={id === activeUserId}
-            admin={admin}
-            email={email}
             key={id}
             onChange={onChange}
-            userId={id}
-            username={username}
+            user={{
+              active: id === activeUserId,
+              admin,
+              email,
+              id,
+              username }}
           />
         ))}
       </tbody>
@@ -131,13 +119,21 @@ class Users extends Component {
   constructor() {
     super();
     this.state = {
+      userAction: {
+        action: '',
+        email: '',
+        id: '',
+        username: '',
+      },
+      isActionModalVisible: false,
       isInviteModalVisible: false,
       users: [],
     };
     this.getActionButtons = this.getActionButtons.bind(this);
     this.getUsers = this.getUsers.bind(this);
+    this.handleUserAction = this.handleUserAction.bind(this);
+    this.handleUserActionSelect = this.handleUserActionSelect.bind(this);
     this.onInviteUser = this.onInviteUser.bind(this);
-    this.onUserActionChange = this.onUserActionChange.bind(this);
   }
 
   componentDidMount() {
@@ -148,18 +144,14 @@ class Users extends Component {
 
   onInviteUser(email) {
     this.setState({ isInviteModalVisible: false });
-    api.post('/api/admin/invites', { email });
+    api.post('/api/admin/invites', { email })
+      .then(response => response.json());
   }
 
-  onUserActionChange(userId, action) {
-    const url = `/api/admin/users/${userId}`;
-    if (action === 'delete') {
-      api.del(url).then(() => this.getUsers());
-    } else if (action === 'demote') {
-      api.patch(url, { admin: false }).then(() => this.getUsers());
-    } else if (action === 'promote') {
-      api.patch(url, { admin: true }).then(() => this.getUsers());
-    }
+  getUsers() {
+    api.get('/api/admin/users')
+      .then(response => response.json())
+      .then(users => this.setState({ users }));
   }
 
   getActionButtons() {
@@ -176,9 +168,30 @@ class Users extends Component {
     return buttons;
   }
 
-  getUsers() {
-    api.get('/api/admin/users')
-      .then(users => this.setState({ users }));
+  handleUserActionSelect({ id, username }, action) {
+    this.setState({
+      isActionModalVisible: true,
+      userAction: { action, id, username },
+    });
+  }
+
+  handleUserAction() {
+    const { action, id } = this.state.userAction;
+    this.setState({ isActionModalVisible: false });
+    const url = `/api/admin/users/${id}`;
+    if (action === 'delete') {
+      api.del(url)
+        .then(response => response.json())
+        .then(() => this.getUsers());
+    } else if (action === 'demote') {
+      api.patch(url, { admin: false })
+        .then(response => response.json())
+        .then(() => this.getUsers());
+    } else if (action === 'promote') {
+      api.patch(url, { admin: true })
+        .then(response => response.json())
+        .then(() => this.getUsers());
+    }
   }
 
   render() {
@@ -205,7 +218,7 @@ class Users extends Component {
         <div className="UserList">
           <UserList
             activeUserId={id}
-            onChange={this.onUserActionChange}
+            onChange={this.handleUserActionSelect}
             users={this.state.users}
           />
         </div>
@@ -213,6 +226,12 @@ class Users extends Component {
           isOpen={this.state.isInviteModalVisible}
           onClose={() => this.setState({ isInviteModalVisible: false })}
           onInviteUser={this.onInviteUser}
+        />
+        <ConfirmUserAction
+          isOpen={this.state.isActionModalVisible}
+          onChange={this.handleUserAction}
+          onClose={() => this.setState({ isActionModalVisible: false })}
+          user={this.state.userAction}
         />
       </div>
     );
@@ -226,6 +245,8 @@ export default connect(state => ({
 Users.propTypes = {
   profile: PropTypes.shape({
     admin: PropTypes.bool,
+    email: PropTypes.string.isRequired,
     id: PropTypes.string.isRequired,
+    username: PropTypes.string.isRequired,
   }).isRequired,
 };

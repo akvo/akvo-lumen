@@ -372,8 +372,8 @@ export const getPointColorMappingSortFunc = (columnType) => {
   };
 
   const sortNonText = (a, b) => {
-    const va = a.value == null ? Infinity : parseFloat(a.value);
-    const vb = b.value == null ? Infinity : parseFloat(b.value);
+    const va = a.value == null || a.value === 'null' ? Infinity : parseFloat(a.value);
+    const vb = b.value == null || b.value === 'null' ? Infinity : parseFloat(b.value);
 
     return va - vb;
   };
@@ -454,84 +454,57 @@ export function getMapData(layer, datasets) {
   });
 }
 
-export function getVegaSpec(visualisation, data, containerHeight, containerWidth) {
-  const { visualisationType, name } = visualisation;
+export function getVegaSpec(visualisation, data, containerHeight, containerWidth, chartSize) {
+  const { visualisationType } = visualisation;
   let vspec;
 
   switch (visualisationType) {
     case 'bar':
-      vspec = getVegaBarSpec(visualisation, data, containerHeight, containerWidth);
+      vspec = getVegaBarSpec(visualisation, data, containerHeight, containerWidth, chartSize);
       break;
 
     case 'area':
     case 'line':
-      vspec = getVegaAreaSpec(visualisation, data, containerHeight, containerWidth);
+      vspec = getVegaAreaSpec(visualisation, data, containerHeight, containerWidth, chartSize);
       break;
 
     case 'pie':
     case 'donut':
-      vspec = getVegaPieSpec(visualisation, data, containerHeight, containerWidth);
+      vspec = getVegaPieSpec(visualisation, data, containerHeight, containerWidth, chartSize);
       break;
 
     case 'scatter':
-      vspec = getVegaScatterSpec(visualisation, data, containerHeight, containerWidth);
+      vspec = getVegaScatterSpec(visualisation, data, containerHeight, containerWidth, chartSize);
       break;
 
     default:
       throw new Error(`Unknown chart type ${visualisationType} supplied to getVegaSpec()`);
   }
 
-  /* Set the properties common to all visualisation types */
-  vspec.marks.push({
-    type: 'text',
-    name: 'title',
-    properties: {
-      enter: {
-        x: {
-          signal: 'width',
-          mult: 0.5,
-        },
-        y: {
-          value: -10,
-        },
-        text: {
-          value: name,
-        },
-        fill: {
-          value: 'black',
-        },
-        fontSize: {
-          value: 16,
-        },
-        align: {
-          value: 'center',
-        },
-        fontWeight: {
-          value: 'bold',
-        },
-      },
-    },
-  });
-
   return vspec;
 }
 
-const percentageRow = (rows, spec) => {
-  const round = (num, places) =>
-      // eslint-disable-next-line no-restricted-properties
-      Math.round(num * Math.pow(10, places)) / Math.pow(10, places);
+const round = (num, places) =>
+    // eslint-disable-next-line no-restricted-properties
+    Math.round(num * Math.pow(10, places)) / Math.pow(10, places);
 
-  return rows.map((row) => {
-    const totalIndex = row.length - 1;
-    const rowTotal = row[totalIndex];
+const percentageRow = (rows, spec) => {
+  const totalsRowIndex = rows.length - 1;
+
+  return rows.map((row, index) => {
+    const totalCellIndex = row.length - 1;
+    const rowTotal = row[totalCellIndex];
     const clonedRow = row.slice(0);
+    const isTotalsRow = index === totalsRowIndex;
 
     for (let i = 1; i < row.length; i += 1) {
       const cell = row[i];
       const percentage = round((cell / rowTotal) * 100, 1);
       const value = cell === null ? 0 : round(cell, spec.decimalPlaces);
+      const isTotalCell = i === row.length - 1;
+      const includeCount = isTotalsRow || isTotalCell;
 
-      clonedRow[i] = `${percentage}% (${value})`;
+      clonedRow[i] = includeCount ? `${percentage}% (${value})` : `${percentage}%`;
     }
 
     return clonedRow;
@@ -539,23 +512,22 @@ const percentageRow = (rows, spec) => {
 };
 
 const percentageColumn = (rows, spec) => {
-  const round = (num, places) =>
-      // eslint-disable-next-line no-restricted-properties
-      Math.round(num * Math.pow(10, places)) / Math.pow(10, places);
+  const totalsRowIndex = rows.length - 1;
+  const totalRow = rows[totalsRowIndex];
 
-  const totalIndex = rows.length - 1;
-  const totalRow = rows[totalIndex];
-
-  return rows.map((row) => {
+  return rows.map((row, index) => {
     const clonedRow = row.slice(0);
+    const isTotalsRow = index === totalsRowIndex;
 
     for (let i = 1; i < row.length; i += 1) {
       const columnTotal = totalRow[i];
       const cell = row[i];
       const percentage = round((cell / columnTotal) * 100, 1);
       const value = cell === null ? 0 : round(cell, spec.decimalPlaces);
+      const isTotalCell = i === row.length - 1;
+      const includeCount = isTotalsRow || isTotalCell;
 
-      clonedRow[i] = `${percentage}% (${value})`;
+      clonedRow[i] = includeCount ? `${percentage}% (${value})` : `${percentage}%`;
     }
 
     return clonedRow;
@@ -563,22 +535,22 @@ const percentageColumn = (rows, spec) => {
 };
 
 const percentageTotal = (rows, spec) => {
-  const round = (num, places) =>
-      // eslint-disable-next-line no-restricted-properties
-      Math.round(num * Math.pow(10, places)) / Math.pow(10, places);
-
-  const totalRow = rows[rows.length - 1];
+  const totalsRowIndex = rows.length - 1;
+  const totalRow = rows[totalsRowIndex];
   const total = totalRow[totalRow.length - 1];
 
-  return rows.map((row) => {
+  return rows.map((row, index) => {
     const clonedRow = row.slice(0);
+    const isTotalsRow = index === rows.length - 1;
 
     for (let i = 1; i < row.length; i += 1) {
       const cell = row[i];
       const percentage = round((cell / total) * 100, 1);
       const value = cell === null ? 0 : round(cell, spec.decimalPlaces);
+      const isTotalCell = i === row.length - 1;
+      const includeCount = isTotalsRow || isTotalCell;
 
-      clonedRow[i] = `${percentage}% (${value})`;
+      clonedRow[i] = includeCount ? `${percentage}% (${value})` : `${percentage}%`;
     }
 
     return clonedRow;
