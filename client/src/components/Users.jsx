@@ -41,26 +41,30 @@ UserActionSelector.propTypes = {
   onChange: PropTypes.func.isRequired,
   user: PropTypes.shape({
     active: PropTypes.bool.isRequired,
-    admin: PropTypes.bool.isRequired,
+    admin: PropTypes.bool,
     email: PropTypes.string.isRequired,
     id: PropTypes.string.isRequired,
-    username: PropTypes.string.isRequired,
+    username: PropTypes.string,
   }),
 };
 
-function User({ onChange, user }) {
+function User({ invitationMode, onChange, user }) {
   const { active, admin, email, username } = user;
   return (
     <tr>
-      <td>
-        {username}
-        {active
-          ? <span className="isMe"> (me)</span>
-          : <span />
-        }
-      </td>
+      {!invitationMode &&
+        <td>
+          {username}
+          {active
+            ? <span className="isMe"> (me)</span>
+            : <span />
+          }
+        </td>
+      }
       <td>{email}</td>
-      <td>{admin ? 'Admin' : 'User'}</td>
+      {!invitationMode &&
+        <td>{admin ? 'Admin' : 'User'}</td>
+      }
       <td>
         <UserActionSelector
           onChange={onChange}
@@ -72,30 +76,32 @@ function User({ onChange, user }) {
 }
 
 User.propTypes = {
+  invitationMode: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
   user: PropTypes.shape({
     active: PropTypes.bool.isRequired,
-    admin: PropTypes.bool.isRequired,
+    admin: PropTypes.bool,
     email: PropTypes.string.isRequired,
     id: PropTypes.string.isRequired,
-    username: PropTypes.string.isRequired,
+    username: PropTypes.string,
   }).isRequired,
 };
 
-function UserList({ activeUserId, onChange, users }) {
+function UserList({ activeUserId, invitationMode, onChange, users }) {
   return (
     <table>
       <tbody>
         <tr>
-          <th>Name</th>
+          {!invitationMode && <th>Name</th>}
           <th>Email</th>
-          <th>Role</th>
+          {!invitationMode && <th>Role</th>}
           <th>Actions</th>
         </tr>
         {users.map(({ admin, email, id, username }) => (
           <User
             key={id}
             onChange={onChange}
+            invitationMode={invitationMode}
             user={{
               active: id === activeUserId,
               admin,
@@ -111,13 +117,14 @@ function UserList({ activeUserId, onChange, users }) {
 
 UserList.propTypes = {
   activeUserId: PropTypes.string.isRequired,
+  invitationMode: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
   users: PropTypes.array.isRequired,
 };
 
 class Users extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       userAction: {
         action: '',
@@ -125,11 +132,14 @@ class Users extends Component {
         id: '',
         username: '',
       },
+      invitationMode: false,
+      invitations: [],
       isActionModalVisible: false,
       isInviteModalVisible: false,
       users: [],
     };
     this.getActionButtons = this.getActionButtons.bind(this);
+    this.getInvitations = this.getInvitations.bind(this);
     this.getUsers = this.getUsers.bind(this);
     this.handleUserAction = this.handleUserAction.bind(this);
     this.handleUserActionSelect = this.handleUserActionSelect.bind(this);
@@ -138,6 +148,7 @@ class Users extends Component {
 
   componentDidMount() {
     if (this.props.profile.admin) {
+      this.getInvitations();
       this.getUsers();
     }
   }
@@ -145,7 +156,8 @@ class Users extends Component {
   onInviteUser(email) {
     this.setState({ isInviteModalVisible: false });
     api.post('/api/admin/invites', { email })
-      .then(response => response.json());
+      .then(response => response.json())
+      .then(() => this.getInvitations());
   }
 
   getUsers() {
@@ -154,18 +166,25 @@ class Users extends Component {
       .then(users => this.setState({ users }));
   }
 
+  getInvitations() {
+    api.get('/api/admin/invites')
+      .then(response => response.json())
+      .then(invitations => this.setState({ invitations }));
+  }
+
   getActionButtons() {
+    const invitationMode = this.state.invitationMode;
     const buttons = [
       {
-        buttonText: 'Manage invites',
-        onClick: null,
+        buttonText: invitationMode ? 'Manage users' : 'Manage invitations',
+        onClick: () => this.setState({ invitationMode: !invitationMode }),
       },
       {
         buttonText: 'Invite user',
         onClick: () => this.setState({ isInviteModalVisible: true }),
       },
     ];
-    return buttons;
+    return invitationMode ? buttons : [buttons[0]];
   }
 
   handleUserActionSelect({ id, username }, action) {
@@ -198,7 +217,8 @@ class Users extends Component {
     const actionButtons = this.getActionButtons();
     const { admin, id } = this.props.profile;
     const saveStatus = '';
-    const title = 'Members';
+    const invitationMode = this.state.invitationMode;
+    const title = invitationMode ? 'Invitations' : 'Members';
 
     if (!admin) {
       return (
@@ -219,7 +239,8 @@ class Users extends Component {
           <UserList
             activeUserId={id}
             onChange={this.handleUserActionSelect}
-            users={this.state.users}
+            invitationMode={invitationMode}
+            users={invitationMode ? this.state.invitations : this.state.users}
           />
         </div>
         <InviteUser
