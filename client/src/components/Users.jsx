@@ -8,8 +8,8 @@ import * as api from '../api';
 require('../styles/EntityTypeHeader.scss');
 require('../styles/Users.scss');
 
-function UserActionSelector({ user, onChange }) {
-  const { active, admin } = user;
+function UserActionSelector({ getActions, onChange, user }) {
+  const actions = getActions(user);
   return (
     <select
       className="UserActionSelector"
@@ -17,27 +17,15 @@ function UserActionSelector({ user, onChange }) {
       value="?"
     >
       <option value="?">...</option>
-      <option disabled key="user-edit" value="edit">
-        Edit
-      </option>
-      <option disabled={active} key="user-delete" value="delete">
-        Delete
-      </option>
-      {!admin
-         ?
-           <option disabled={admin} key="user-promote" value="promote">
-             Enable admin privileges
-           </option>
-         :
-           <option disabled={(!admin || active)} key="user-demote" value="demote">
-             Remove admin privileges
-           </option>
-      }
+      {actions.map(([value, text, disabled]) => (
+        <option disabled={disabled} key={value} value={value}>{text}</option>
+      ))}
     </select>
   );
 }
 
 UserActionSelector.propTypes = {
+  getActions: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
   user: PropTypes.shape({
     active: PropTypes.bool.isRequired,
@@ -48,7 +36,7 @@ UserActionSelector.propTypes = {
   }),
 };
 
-function User({ invitationMode, onChange, user }) {
+function User({ getActions, invitationMode, onChange, user }) {
   const { active, admin, email, username } = user;
   return (
     <tr>
@@ -67,6 +55,7 @@ function User({ invitationMode, onChange, user }) {
       }
       <td>
         <UserActionSelector
+          getActions={getActions}
           onChange={onChange}
           user={user}
         />
@@ -76,6 +65,7 @@ function User({ invitationMode, onChange, user }) {
 }
 
 User.propTypes = {
+  getActions: PropTypes.func.isRequired,
   invitationMode: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
   user: PropTypes.shape({
@@ -87,7 +77,7 @@ User.propTypes = {
   }).isRequired,
 };
 
-function UserList({ activeUserId, invitationMode, onChange, users }) {
+function UserList({ activeUserId, getActions, invitationMode, onChange, users }) {
   return (
     <table>
       <tbody>
@@ -99,6 +89,7 @@ function UserList({ activeUserId, invitationMode, onChange, users }) {
         </tr>
         {users.map(({ admin, email, id, username }) => (
           <User
+            getActions={getActions}
             key={id}
             onChange={onChange}
             invitationMode={invitationMode}
@@ -117,6 +108,7 @@ function UserList({ activeUserId, invitationMode, onChange, users }) {
 
 UserList.propTypes = {
   activeUserId: PropTypes.string.isRequired,
+  getActions: PropTypes.func.isRequired,
   invitationMode: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
   users: PropTypes.array.isRequired,
@@ -128,9 +120,7 @@ class Users extends Component {
     this.state = {
       userAction: {
         action: '',
-        email: '',
-        id: '',
-        username: '',
+        user: { email: '', id: '', username: '' },
       },
       invitationMode: false,
       invitations: [],
@@ -138,11 +128,12 @@ class Users extends Component {
       isInviteModalVisible: false,
       users: [],
     };
+    this.getActions = this.getActions.bind(this);
     this.getActionButtons = this.getActionButtons.bind(this);
     this.getInvitations = this.getInvitations.bind(this);
     this.getUsers = this.getUsers.bind(this);
     this.handleUserAction = this.handleUserAction.bind(this);
-    this.handleUserActionSelect = this.handleUserActionSelect.bind(this);
+    this.handleActionSelect = this.handleActionSelect.bind(this);
     this.onInviteUser = this.onInviteUser.bind(this);
   }
 
@@ -187,31 +178,57 @@ class Users extends Component {
     return invitationMode ? buttons : [buttons[0]];
   }
 
-  handleUserActionSelect({ id, username }, action) {
+  getActions(user) {
+    const { active, admin } = user;
+    let actions = [];
+    if (this.state.invitationMode) {
+      actions = [['revoke', 'Revoke invitation', false]];
+    } else {
+      actions = [
+        ['edit', 'Edit user', true],
+        ['delete', 'Delete user', active],
+      ];
+      if (admin) {
+        actions.push(['demote', 'Revoke admin privileges', (!admin || active)]);
+      } else {
+        actions.push(['promote', 'Enable admin privileges', admin]);
+      }
+    }
+    return actions;
+  }
+
+  handleActionSelect(user, action) {
     this.setState({
       isActionModalVisible: true,
-      userAction: { action, id, username },
+      userAction: { action, user },
     });
   }
 
   handleUserAction() {
-    const { action, id } = this.state.userAction;
+    const { action, user } = this.state.userAction;
+    const { id } = user;
     this.setState({ isActionModalVisible: false });
-    const url = `/api/admin/users/${id}`;
+    const usersUrl = `/api/admin/users/${id}`;
+    const invitesUrl = `/api/admin/invites/${id}`;
     if (action === 'delete') {
-      api.del(url)
+      api.del(usersUrl)
         .then(response => response.json())
         .then(() => this.getUsers());
     } else if (action === 'demote') {
-      api.patch(url, { admin: false })
+      api.patch(usersUrl, { admin: false })
         .then(response => response.json())
         .then(() => this.getUsers());
     } else if (action === 'promote') {
-      api.patch(url, { admin: true })
+      api.patch(usersUrl, { admin: true })
         .then(response => response.json())
         .then(() => this.getUsers());
+    } else if (action === 'revoke') {
+      api.del(invitesUrl)
+        .then(response => response.json())
+        .then(() => this.getInvitations());
     }
   }
+
 
   render() {
     const actionButtons = this.getActionButtons();
@@ -238,7 +255,8 @@ class Users extends Component {
         <div className="UserList">
           <UserList
             activeUserId={id}
-            onChange={this.handleUserActionSelect}
+            getActions={this.getActions}
+            onChange={this.handleActionSelect}
             invitationMode={invitationMode}
             users={invitationMode ? this.state.invitations : this.state.users}
           />
@@ -252,7 +270,7 @@ class Users extends Component {
           isOpen={this.state.isActionModalVisible}
           onChange={this.handleUserAction}
           onClose={() => this.setState({ isActionModalVisible: false })}
-          user={this.state.userAction}
+          userAction={this.state.userAction}
         />
       </div>
     );
