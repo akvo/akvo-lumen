@@ -8,8 +8,8 @@ import * as api from '../api';
 require('../styles/EntityTypeHeader.scss');
 require('../styles/Users.scss');
 
-function UserActionSelector({ getActions, onChange, user }) {
-  const actions = getActions(user);
+function UserActionSelector({ getUserActions, onChange, user }) {
+  const actions = getUserActions(user);
   return (
     <select
       className="UserActionSelector"
@@ -25,7 +25,7 @@ function UserActionSelector({ getActions, onChange, user }) {
 }
 
 UserActionSelector.propTypes = {
-  getActions: PropTypes.func.isRequired,
+  getUserActions: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
   user: PropTypes.shape({
     active: PropTypes.bool.isRequired,
@@ -36,7 +36,7 @@ UserActionSelector.propTypes = {
   }),
 };
 
-function User({ getActions, invitationMode, onChange, user }) {
+function User({ getUserActions, invitationMode, onChange, user }) {
   const { active, admin, email, username } = user;
   return (
     <tr>
@@ -55,7 +55,7 @@ function User({ getActions, invitationMode, onChange, user }) {
       }
       <td>
         <UserActionSelector
-          getActions={getActions}
+          getUserActions={getUserActions}
           onChange={onChange}
           user={user}
         />
@@ -65,7 +65,7 @@ function User({ getActions, invitationMode, onChange, user }) {
 }
 
 User.propTypes = {
-  getActions: PropTypes.func.isRequired,
+  getUserActions: PropTypes.func.isRequired,
   invitationMode: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
   user: PropTypes.shape({
@@ -77,7 +77,7 @@ User.propTypes = {
   }).isRequired,
 };
 
-function UserList({ activeUserId, getActions, invitationMode, onChange, users }) {
+function UserList({ activeUserId, getUserActions, invitationMode, onChange, users }) {
   return (
     <table>
       <tbody>
@@ -89,7 +89,7 @@ function UserList({ activeUserId, getActions, invitationMode, onChange, users })
         </tr>
         {users.map(({ admin, email, id, username }) => (
           <User
-            getActions={getActions}
+            getUserActions={getUserActions}
             key={id}
             onChange={onChange}
             invitationMode={invitationMode}
@@ -108,7 +108,7 @@ function UserList({ activeUserId, getActions, invitationMode, onChange, users })
 
 UserList.propTypes = {
   activeUserId: PropTypes.string.isRequired,
-  getActions: PropTypes.func.isRequired,
+  getUserActions: PropTypes.func.isRequired,
   invitationMode: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
   users: PropTypes.array.isRequired,
@@ -128,12 +128,12 @@ class Users extends Component {
       isInviteModalVisible: false,
       users: [],
     };
-    this.getActions = this.getActions.bind(this);
-    this.getActionButtons = this.getActionButtons.bind(this);
+    this.getUserActions = this.getUserActions.bind(this);
+    this.getUserActionButtons = this.getUserActionButtons.bind(this);
     this.getInvitations = this.getInvitations.bind(this);
     this.getUsers = this.getUsers.bind(this);
     this.handleUserAction = this.handleUserAction.bind(this);
-    this.handleActionSelect = this.handleActionSelect.bind(this);
+    this.handleUserActionSelect = this.handleUserActionSelect.bind(this);
     this.onInviteUser = this.onInviteUser.bind(this);
   }
 
@@ -163,7 +163,7 @@ class Users extends Component {
       .then(invitations => this.setState({ invitations }));
   }
 
-  getActionButtons() {
+  getUserActionButtons() {
     const invitationMode = this.state.invitationMode;
     const buttons = [
       {
@@ -178,7 +178,7 @@ class Users extends Component {
     return invitationMode ? buttons : [buttons[0]];
   }
 
-  getActions(user) {
+  getUserActions(user) {
     const { active, admin } = user;
     let actions = [];
     if (this.state.invitationMode) {
@@ -197,7 +197,7 @@ class Users extends Component {
     return actions;
   }
 
-  handleActionSelect(user, action) {
+  handleUserActionSelect(user, action) {
     this.setState({
       isActionModalVisible: true,
       userAction: { action, user },
@@ -229,9 +229,8 @@ class Users extends Component {
     }
   }
 
-
   render() {
-    const actionButtons = this.getActionButtons();
+    const actionButtons = this.getUserActionButtons();
     const { admin, id } = this.props.profile;
     const saveStatus = '';
     const invitationMode = this.state.invitationMode;
@@ -255,8 +254,8 @@ class Users extends Component {
         <div className="UserList">
           <UserList
             activeUserId={id}
-            getActions={this.getActions}
-            onChange={this.handleActionSelect}
+            getUserActions={this.getUserActions}
+            onChange={this.handleUserActionSelect}
             invitationMode={invitationMode}
             users={invitationMode ? this.state.invitations : this.state.users}
           />
