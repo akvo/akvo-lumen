@@ -36,6 +36,13 @@ UserActionSelector.propTypes = {
   }),
 };
 
+UserActionSelector.defaultProps = {
+  user: {
+    admin: false,
+    username: '',
+  },
+};
+
 function User({ getUserActions, invitationMode, onChange, user }) {
   const { active, admin, email, username } = user;
   return (
@@ -43,16 +50,11 @@ function User({ getUserActions, invitationMode, onChange, user }) {
       {!invitationMode &&
         <td>
           {username}
-          {active
-            ? <span className="isMe"> (me)</span>
-            : <span />
-          }
+          {active && <span className="isMe"> (me)</span>}
         </td>
       }
       <td>{email}</td>
-      {!invitationMode &&
-        <td>{admin ? 'Admin' : 'User'}</td>
-      }
+      {!invitationMode && <td>{admin ? 'Admin' : 'User'}</td>}
       <td>
         <UserActionSelector
           getUserActions={getUserActions}
@@ -75,6 +77,13 @@ User.propTypes = {
     id: PropTypes.string.isRequired,
     username: PropTypes.string,
   }).isRequired,
+};
+
+User.defaultProps = {
+  user: {
+    admin: false,
+    username: '',
+  },
 };
 
 function UserList({ activeUserId, getUserActions, invitationMode, onChange, users }) {
@@ -287,4 +296,11 @@ Users.propTypes = {
     id: PropTypes.string.isRequired,
     username: PropTypes.string.isRequired,
   }).isRequired,
+};
+
+Users.defaultProps = {
+  profile: {
+    admin: false,
+    username: '',
+  },
 };

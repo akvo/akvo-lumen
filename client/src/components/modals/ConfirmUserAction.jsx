@@ -3,17 +3,17 @@ import Modal from 'react-modal';
 
 require('../../styles/DashboardModal.scss');
 
-function getQuestion(user, action) {
+function getQuestion({ email, username }, action) {
   const prefix = 'Are you sure you want to';
   let suffix = '';
   if (action === 'delete') {
-    suffix = `delete user ${user.username}`;
+    suffix = `delete user ${username}`;
   } else if (action === 'revoke') {
-    suffix = `revoke invitation sent to ${user.email}`;
+    suffix = `revoke invitation sent to ${email}`;
   } else if (action === 'demote') {
-    suffix = `remove admin privileges for user ${user.username}`;
+    suffix = `remove admin privileges for user ${username}`;
   } else if (action === 'promote') {
-    suffix = `enable admin privileges for user ${user.username}`;
+    suffix = `enable admin privileges for user ${username}`;
   }
   return `${prefix} ${suffix}?`;
 }
