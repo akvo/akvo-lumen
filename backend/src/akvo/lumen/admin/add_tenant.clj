@@ -1,7 +1,7 @@
 (ns akvo.lumen.admin.add-tenant
   "The following env vars are assumed to be present:
-  KC_URL, KC_SECRET, PGHOST, PGDATABASE, PGUSER, PGPASSWORD
-  The PG* env vars can be found in the ElephantSQL console for the appropriate
+  KC_URL, KC_SECRET, PG_HOST, PG_DATABASE, PG_USER, PG_PASSWORD
+  The PG_* env vars can be found in the ElephantSQL console for the appropriate
   instance. KC_URL is the url to keycloak (without trailing /auth).
   KC_SECRET is the client secret found in the Keycloak admin at
   > Realms > Akvo > Clients > akvo-lumen-confidential > Credentials > Secret.
@@ -138,6 +138,8 @@
     new-group-id))
 
 (defn create-new-user
+  "Creates a new user and return a map containing email, and
+   new user-id and temporary password."
   [request-headers api-root email]
   (let [tmp-password (random-url-safe-string 6)
         user-id (-> (client/post (format "%s/users" api-root)
@@ -161,15 +163,15 @@
 
 (defn user-representation
   [request-headers api-root email]
-  (if-let [{:strs [id] :as user} (keycloak/fetch-user-by-email request-headers
-                                                               api-root email)]
+  (if-let [user (keycloak/fetch-user-by-email request-headers api-root email)]
     {:email email
-     :user-id id}
+     :user-id (get user "id")}
     (create-new-user request-headers api-root email)))
 
-(defn setup-keycloak
+(defn setup-tenant-in-keycloak
+  "Create two new groups as children to the akvo:lumen group"
   [label email]
-  (let [{api-root :api-root :as kc} (util/create-keycloak)
+  (let [{:keys [api-root] :as kc} (util/create-keycloak)
         request-headers (keycloak/request-headers kc)
         lumen-group-id (root-group-id request-headers api-root)
         tenant-id (create-group request-headers api-root lumen-group-id
@@ -181,6 +183,12 @@
         (user-representation request-headers api-root email)]
     (keycloak/add-user-to-group request-headers api-root user-id tenant-admin-id)
     user-rep))
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; New
+;;;
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -204,7 +212,7 @@
   (try
     (check-input)
     (setup-database (conform-label label) title)
-    (let [user-creds (setup-keycloak label email)]
+    (let [user-creds (setup-tenant-in-keycloak label email)]
       (println "User creds:")
       (pprint user-creds))
     (catch java.lang.AssertionError e
