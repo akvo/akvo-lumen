@@ -9,7 +9,7 @@
   $ env KC_URL=https://*** KC_SECRET=***
         PG_HOST=***.db.elephantsql.com PG_DATABASE=*** \\
         PG_USER=*** PG_PASSWORD=*** \\
-        lein run -m akvo.lumen.admin.add-tenant <label> <description> <email>
+        lein run -m akvo.lumen.admin.add-tenant <label> <description> <email> <url>
   KC_URL is probably one of:
   - http://localhost:8080 for local development
   - https://login.akvo.org for production
@@ -168,9 +168,40 @@
      :user-id (get user "id")}
     (create-new-user request-headers api-root email)))
 
+
+(defn fetch-client
+  [request-headers api-root client-id]
+  (-> (client/get (format "%s/clients" api-root)
+                  {:query-params {"clientId" client-id}
+                   :headers request-headers})
+      :body json/decode first))
+
+(defn update-client
+  [request-headers api-root {:strs [id] :as client}]
+  (-> (client/put (format "%s/clients/%s" api-root id)
+                  {:body (json/encode client)
+                   :headers request-headers})))
+
+(defn add-tenant-urls-to-client
+  [client url]
+  (-> client
+      (update-in ["webOrigins"] (fn [webOrigins]
+                                  (conj webOrigins url)))
+      (update-in ["redirectUris"] (fn [redirectUris]
+                                    (conj redirectUris (format "%s/*" url))))))
+
+(defn add-tenant-urls-to-clients
+  [{:keys [api-root]} request-headers url]
+  (let [confidential-client (fetch-client request-headers api-root "akvo-lumen-confidential")
+        public-client (fetch-client request-headers api-root "akvo-lumen")]
+    (update-client request-headers api-root
+                   (add-tenant-urls-to-client confidential-client url))
+    (update-client request-headers api-root
+                   (add-tenant-urls-to-client public-client url))))
+
 (defn setup-tenant-in-keycloak
   "Create two new groups as children to the akvo:lumen group"
-  [label email]
+  [label email url]
   (let [{:keys [api-root] :as kc} (util/create-keycloak)
         request-headers (keycloak/request-headers kc)
         lumen-group-id (root-group-id request-headers api-root)
@@ -181,21 +212,16 @@
                                       "admin")
         {:keys [user-id email tmp-password] :as user-rep}
         (user-representation request-headers api-root email)]
+    (add-tenant-urls-to-clients kc request-headers url)
     (keycloak/add-user-to-group request-headers api-root user-id tenant-admin-id)
-    user-rep))
-
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; New
-;;;
+    (assoc user-rep :url url)))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Main
 ;;;
 
-(defn check-input []
+(defn check-env-vars []
   (assert (:kc-url env) (error-msg "Specify KC_URL env var"))
   (assert (:kc-secret env)
           (do
@@ -208,12 +234,12 @@
   (when (not (= (:pg-host env) "localhost"))
     (assert (:pg-password env) (error-msg "Specify PG_PASSWORD env var"))))
 
-(defn -main [label title email]
+(defn -main [label title email url]
   (try
-    (check-input)
+    (check-env-vars)
     (setup-database (conform-label label) title)
-    (let [user-creds (setup-tenant-in-keycloak label email)]
-      (println "User creds:")
+    (let [user-creds (setup-tenant-in-keycloak label email url)]
+      (println "Credentials:")
       (pprint user-creds))
     (catch java.lang.AssertionError e
       (prn (.getMessage e))

@@ -27,7 +27,7 @@
              ""
              "&ssl=true"))))
 
-#_(defn create-keycloak []
+(defn create-keycloak []
   (let [url (format "%s/auth" (:kc-url env))
         issuer (format "%s/realms/akvo" url)]
     {:api-root (format "%s/admin/realms/akvo" url)
@@ -35,13 +35,3 @@
      :openid-config (keycloak/fetch-openid-configuration issuer)
      :credentials {"client_id" (:kc-id env "akvo-lumen-confidential")
                    "client_secret" (:kc-secret env)}}))
-
-(defn create-keycloak []
-  (let [url (format "%s/auth" "http://localhost:8080")
-        issuer] (format "%s/realms/akvo" url)
-       {:api-root (format "%s/admin/realms/akvo" )
-        :issuer issuer
-        :openid-config (keycloak/fetch-openid-configuration issuer)
-        :credentials {"client_id" (:kc-id env "akvo-lumen-confidential")
-                      "client_secret" (:kc-secret env)}})
-  )
