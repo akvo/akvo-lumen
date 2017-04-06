@@ -3,22 +3,24 @@ import Modal from 'react-modal';
 
 require('../../styles/DashboardModal.scss');
 
-function getQuestion(username, action) {
+function getQuestion({ email, username }, action) {
   const prefix = 'Are you sure you want to';
   let suffix = '';
   if (action === 'delete') {
-    suffix = 'delete user';
+    suffix = `delete user ${username}`;
+  } else if (action === 'revoke') {
+    suffix = `revoke invitation sent to ${email}`;
   } else if (action === 'demote') {
-    suffix = 'remove admin privileges for user';
+    suffix = `remove admin privileges for user ${username}`;
   } else if (action === 'promote') {
-    suffix = 'enable admin privileges for user';
+    suffix = `enable admin privileges for user ${username}`;
   }
-  return `${prefix} ${suffix} ${username}?`;
+  return `${prefix} ${suffix}?`;
 }
 
-export default function ConfirmUserAction({ isOpen, onChange, onClose, user }) {
-  const { action, username } = user;
-  const question = getQuestion(username, action);
+export default function ConfirmUserAction({ isOpen, onChange, onClose, userAction }) {
+  const { action, user } = userAction;
+  const question = getQuestion(user, action);
   return (
     <Modal
       isOpen={isOpen}
@@ -74,8 +76,12 @@ ConfirmUserAction.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onChange: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
-  user: PropTypes.shape({
+  userAction: PropTypes.shape({
     action: PropTypes.string.isRequired,
-    username: PropTypes.string.isRequired,
+    user: PropTypes.shape({
+      email: PropTypes.string.isRequired,
+      id: PropTypes.string.isRequired,
+      username: PropTypes.string,
+    }),
   }).isRequired,
 };
