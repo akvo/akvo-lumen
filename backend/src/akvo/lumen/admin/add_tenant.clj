@@ -178,9 +178,9 @@
 
 (defn update-client
   [request-headers api-root {:strs [id] :as client}]
-  (-> (client/put (format "%s/clients/%s" api-root id)
-                  {:body (json/encode client)
-                   :headers request-headers})))
+  (client/put (format "%s/clients/%s" api-root id)
+                {:body (json/encode client)
+                 :headers request-headers}))
 
 (defn add-tenant-urls-to-client
   [client url]
