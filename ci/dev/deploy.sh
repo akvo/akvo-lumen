@@ -11,4 +11,4 @@ sudo /opt/google-cloud-sdk/bin/gcloud docker -- push eu.gcr.io/${PROJECT_NAME}/l
 
 sudo chown -R ubuntu:ubuntu /home/ubuntu/.kube
 
-kubectl patch deployment lumen -p '{"spec":{"template":{"spec":{"containers":[{"name":"lumen-backend","image":"eu.gcr.io/akvo-lumen/lumen-backend:'"$CIRCLE_SHA1"'"},{"name":"lumen-client","image":"eu.gcr.io/akvo-lumen/lumen-client:'"$CIRCLE_SHA1"'"}]}}}}'
+# kubectl patch deployment lumen -p '{"spec":{"template":{"spec":{"containers":[{"name":"lumen-backend","image":"eu.gcr.io/akvo-lumen/lumen-backend:'"$CIRCLE_SHA1"'"},{"name":"lumen-client","image":"eu.gcr.io/akvo-lumen/lumen-client:'"$CIRCLE_SHA1"'"}]}}}}'
