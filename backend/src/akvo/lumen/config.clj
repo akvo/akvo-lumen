@@ -29,4 +29,4 @@
    'keycloak-public-client-id (:lumen-keycloak-public-client-id env "akvo-lumen")
    'keycloak-realm "akvo"
    'keycloak-url (:lumen-keycloak-url env)
-   'sentry-client-dsn (:lumen-sentry-client-dsn)})
+   'sentry-client-dsn (:lumen-sentry-client-dsn env)})
