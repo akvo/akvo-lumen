@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 set -e
-sudo chown -R $USER /home/ubuntu/.config
 sudo /opt/google-cloud-sdk/bin/gcloud --quiet components update #--version 146.0.0
 sudo /opt/google-cloud-sdk/bin/gcloud --quiet components install kubectl
 echo $GCLOUD_SERVICE_KEY | base64 --decode -i > ${HOME}/gcloud-service-key.json
@@ -11,3 +10,5 @@ sudo /opt/google-cloud-sdk/bin/gcloud --quiet config set container/cluster $DEV_
 
 sudo /opt/google-cloud-sdk/bin/gcloud config set compute/zone ${CLOUDSDK_COMPUTE_ZONE}
 sudo /opt/google-cloud-sdk/bin/gcloud --quiet container clusters get-credentials $DEV_CLUSTER_NAME
+
+sudo chown -R $USER /home/ubuntu/.config
