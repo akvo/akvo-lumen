@@ -56,3 +56,13 @@ spec:
             secretKeyRef:
               name: lumen
               key: lumen_flow_report_database_url
+        - name: LUMEN_BACKEND_DSN
+          valueFrom:
+            secretKeyRef:
+              name: lumen
+              key: sentry.backend_dsn
+        - name: LUMEN_CLIENT_DSN
+          valueFrom:
+            secretKeyRef:
+              name: lumen
+              key: sentry.client_dsn
