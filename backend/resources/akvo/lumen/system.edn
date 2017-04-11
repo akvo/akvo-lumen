@@ -92,7 +92,8 @@
    :flow-report-database-url flow-report-database-url
    :keycloak-url keycloak-url
    :keycloak-realm keycloak-realm
-   :keycloak-public-client-id keycloak-public-client-id}
+   :keycloak-public-client-id keycloak-public-client-id
+   :sentry-client-dsn sentry-client-dsn}
   :keycloak
   {:url keycloak-url
    :realm keycloak-realm

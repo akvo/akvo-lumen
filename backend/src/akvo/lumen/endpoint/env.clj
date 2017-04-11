@@ -6,4 +6,5 @@
   (GET "/env" request
     (response {"keycloakClient" (:keycloak-public-client-id config)
                "keycloakURL" (:keycloak-url config)
-               "tenant" (:tenant request)})))
+               "tenant" (:tenant request)
+               "sentryDSN" (:sentry-client-dsn config)})))

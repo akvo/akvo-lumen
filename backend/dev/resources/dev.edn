@@ -16,7 +16,7 @@
            :keycloak-realm "akvo"
            :keycloak-url "http://localhost:8080/auth"
            :keycloak-public-client-id "akvo-lumen"
-           }
+           :sentry-client-dsn "DEV"}
   :emailer {:from-email "devops@akvo.localhost"
             :from-name "Akvo Lumen"}
   :keycloak {:url "http://localhost:8080/auth"
