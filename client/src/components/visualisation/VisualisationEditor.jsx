@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react';
-import isEqual from 'lodash/isEqual';
+import { isEqual, cloneDeep } from 'lodash';
 import VisualisationConfig from './VisualisationConfig';
 import VisualisationPreview from './VisualisationPreview';
 import * as api from '../../api';
@@ -110,7 +110,7 @@ export default class VisualisationEditor extends Component {
           this.fetchAggregatedData(visualisation);
 
           // Store a copy of this visualisation to compare against on next update
-          this.lastVisualisationRequested = Object.assign({}, visualisation);
+          this.lastVisualisationRequested = cloneDeep(visualisation);
         }
         break;
 
