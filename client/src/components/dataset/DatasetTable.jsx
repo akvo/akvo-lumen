@@ -275,7 +275,11 @@ export default class DatasetTable extends Component {
           header={columnHeader}
           cell={props => (
             <Cell>
-              {formatCellValue(column.get('type'), rows.getIn([props.rowIndex, index]))}
+              <span
+                title={formatCellValue(column.get('type'), rows.getIn([props.rowIndex, index]))}
+              >
+                {formatCellValue(column.get('type'), rows.getIn([props.rowIndex, index]))}
+              </span>
             </Cell>
           )}
           width={200}
