@@ -9,7 +9,7 @@
   $ env KC_URL=https://*** KC_SECRET=***
         PG_HOST=***.db.elephantsql.com PG_DATABASE=*** \\
         PG_USER=*** PG_PASSWORD=*** \\
-        lein run -m akvo.lumen.admin.add-tenant <label> <description> <email> <url>
+        lein run -m akvo.lumen.admin.add-tenant <url> <description> <email>
   KC_URL is probably one of:
   - http://localhost:8080 for local development
   - https://login.akvo.org for production
@@ -28,8 +28,8 @@
             [clojure.string :as s]
             [environ.core :refer [env]]
             [ragtime.jdbc]
-            [ragtime.repl]))
-
+            [ragtime.repl])
+  (:import java.net.URL))
 
 (def blacklist ["admin"
                 "deck"
@@ -58,6 +58,18 @@
 
     :else label))
 
+(defn label [url]
+  (-> "http://tenant.akvo-lumen.org"
+      (s/split #"//")
+      second
+      (s/split #"\.")
+      first
+      conform-label))
+
+(defn normalize-url
+  "Make sure protocol is https and no trailing slash."
+  [url]
+  (format "https://%s" (-> url URL. .getHost)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Database
@@ -234,13 +246,15 @@
   (when (not (= (:pg-host env) "localhost"))
     (assert (:pg-password env) (error-msg "Specify PG_PASSWORD env var"))))
 
-(defn -main [label title email url]
+(defn -main [url title email]
   (try
     (check-env-vars)
-    (setup-database (conform-label label) title)
-    (let [user-creds (setup-tenant-in-keycloak label email url)]
-      (println "Credentials:")
-      (pprint user-creds))
+    (let [url (normalize-url url)
+          label (label url)]
+      (setup-database label title)
+      (let [user-creds (setup-tenant-in-keycloak label email url)]
+        (println "Credentials:")
+        (pprint user-creds)))
     (catch java.lang.AssertionError e
       (prn (.getMessage e))
       (System/exit 0))
