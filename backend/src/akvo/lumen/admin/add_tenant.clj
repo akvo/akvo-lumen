@@ -6,10 +6,10 @@
   KC_SECRET is the client secret found in the Keycloak admin at
   > Realms > Akvo > Clients > akvo-lumen-confidential > Credentials > Secret.
   Use this as follow
-  $ env KC_URL=https://*** KC_SECRET=***
+  $ env KC_URL=https://*** KC_SECRET=*** \\
         PG_HOST=***.db.elephantsql.com PG_DATABASE=*** \\
         PG_USER=*** PG_PASSWORD=*** \\
-        lein run -m akvo.lumen.admin.add-tenant <url> <description> <email>
+        lein run -m akvo.lumen.admin.add-tenant <url> <title> <email>
   KC_URL is probably one of:
   - http://localhost:8080 for local development
   - https://login.akvo.org for production
@@ -18,7 +18,7 @@
             [akvo.lumen.config :refer [error-msg]]
             [akvo.lumen.component.keycloak :as keycloak]
             [akvo.lumen.lib.share-impl :refer [random-url-safe-string]]
-            [akvo.lumen.util :refer [squuid]]
+            [akvo.lumen.util :refer [conform-email squuid]]
             [cheshire.core :as json]
             [clj-http.client :as client]
             [clojure.java.browse :as browse]
@@ -47,7 +47,12 @@
   (cond
     (< (count label) 3)
     (throw
-     (ex-info "To short label, should be 3 or more characters."
+     (ex-info "Too short label, should be 3 or more characters."
+              {:label label}))
+
+    (> (count label) 30)
+    (throw
+     (ex-info "Too long label, should be less than 30 or more characters."
               {:label label}))
 
     (contains? (set blacklist) label)
@@ -56,10 +61,20 @@
                       (s/join ", "  blacklist))
               {:label label}))
 
+    (not (Character/isLetter (get label 0)))
+    (throw
+     (ex-info "First letter should be a character"
+              {:label label}))
+
+    (nil? (re-matches #"^[a-z0-9\-]+" label))
+    (throw
+     (ex-info "Label is only allowed to be a-z 0-9 or hyphen"
+              {:label label}))
+
     :else label))
 
 (defn label [url]
-  (-> "http://tenant.akvo-lumen.org"
+  (-> url
       (s/split #"//")
       second
       (s/split #"\.")
@@ -70,6 +85,17 @@
   "Make sure protocol is https and no trailing slash."
   [url]
   (format "https://%s" (-> url URL. .getHost)))
+
+(defn conform-url
+  "Make sure https is used for non development mode and remove trailing slash."
+  [v]
+  (let [url (URL. v)]
+    (if (= (:kc-url env) "http://localhost:8080")
+      (when (= (.getProtocol v) "https")
+        (throw (ex-info "Use http in development mode" {:url v})))
+      (when (= (.getProtocol v) "https")
+        (throw (ex-info "Url should use https" {:url v}))))
+    (format "%s://%s" (.getProtocol url) (.getHost url))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Database
@@ -228,10 +254,16 @@
     (keycloak/add-user-to-group request-headers api-root user-id tenant-admin-id)
     (assoc user-rep :url url)))
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Main
 ;;;
+
+(defn conform-input [url title email]
+  (let [url (conform-url url)]
+    {:email (conform-email email)
+     :label (label url)
+     :title title
+     :url url}))
 
 (defn check-env-vars []
   (assert (:kc-url env) (error-msg "Specify KC_URL env var"))
@@ -249,8 +281,10 @@
 (defn -main [url title email]
   (try
     (check-env-vars)
-    (let [url (normalize-url url)
-          label (label url)]
+    (let [;; url (normalize-url url)
+          ;; label (label url)
+          {keys [email label title url]} (conform-input url title email)
+          ]
       (setup-database label title)
       (let [user-creds (setup-tenant-in-keycloak label email url)]
         (println "Credentials:")
