@@ -5,8 +5,74 @@
     .typeButton {
       background-color: $lightGrey;
       padding: 2rem 1rem;
-      border: 0.1rem solid $midGrey;
+      border: 0.1rem solid $strongBlue;
       margin: 0.25rem;
+      background-repeat: no-repeat;
+      background-size: auto 75%;
+      background-position: 95% center;
+      text-transform: capitalize;
+      transition: background-color 0.5s ease;
+      &:hover {
+        background-color: $lightBlueGrey;
+      }
+      &.bar {
+        background-image: url('img/icon-128-visualisation-bar.png');
+      }
+      &.map {
+        background-image: url('img/icon-128-visualisation-map.png');
+      }
+      &.pivottable {
+        background-image: url('img/icon-128-visualisation-pivot-table.png');
+      }
+      &.line {
+        background-image: url('img/icon-128-visualisation-line.png');
+      }
+      &.area {
+        background-image: url('img/icon-128-visualisation-area.png');
+      }
+      &.pie {
+        background-image: url('img/icon-128-visualisation-pie.png');
+      }
+      &.donut {
+        background-image: url('img/icon-128-visualisation-donut.png');
+      }
+      &.scatter {
+        background-image: url('img/icon-128-visualisation-scatter.png');
+      }
     }
+  }
+  .helpText {
+    border: 0.1rem solid $warnYellow;
+    border-radius: 0.4rem;
+    font-size: 0.8rem;
+    .helpTextContainer {
+      padding: 0.5rem 0.25rem;
+    }
+  }
+  .aggregationHelpText {
+    height: 0;
+    border: 0.1rem solid transparent;
+    transition: border-color 0.5s ease, height 0.5s ease;
+    transition-delay: 0.75s;
+    overflow: hidden;
+  }
+  .aggregationInputContainer {
+    cursor: pointer;
+  }
+  .aggregationInputContainer:hover .aggregationHelpText {
+    height: 2.5rem;
+    opacity: 1;
+    border: 0.1rem solid $warnYellow;
+  }
+  .alert {
+    height: 0.8rem;
+    width: 0.8rem;
+    background-color: $warnYellow;
+    color: white;
+    font-weight: bold;
+    display: inline-block;
+    border-radius: 100%;
+    text-align: center;
+    margin-right: 0.15rem;
   }
 }

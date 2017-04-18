@@ -1,10 +1,10 @@
-export default function getVegaPieSpec(visualisation, data, containerHeight, containerWidth) {
+import defaultColors from '../defaultColors';
+
+export default function getVegaPieSpec(visualisation, data, containerHeight, containerWidth,
+  chartSize) {
   const chartRadius = containerHeight < containerWidth ? containerHeight / 3 : containerWidth / 3;
   const innerRadius = visualisation.visualisationType === 'donut' ?
     Math.floor(chartRadius / 1.75) : 0;
-
-  const hasAggregation = Boolean(visualisation.spec.bucketColumn &&
-    visualisation.spec.metricAggregation);
   const dataArray = data.map(item => item);
 
   const layoutTransform = {
@@ -42,12 +42,35 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
   const fieldY = 'bucketCount';
   const showLegend = visualisation.spec.showLegend;
 
+  let fontSize;
+
+  switch (chartSize) {
+    case 'xsmall':
+      fontSize = 10;
+      break;
+
+    case 'small':
+      fontSize = 12;
+      break;
+
+    case 'medium':
+      fontSize = 14;
+      break;
+
+    case 'large':
+    case 'xlarge':
+    default:
+      fontSize = 16;
+      break;
+
+  }
+
   return ({
     data: dataArray,
     width: showLegend ? (chartRadius * 2) : containerWidth - 20,
-    height: containerHeight - 45,
+    height: containerHeight - 20,
     padding: {
-      top: 35,
+      top: 10,
       right: 10 + showLegend ? containerWidth - (chartRadius * 2) - 10 : 0,
       bottom: 10,
       left: 10,
@@ -65,7 +88,7 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
       {
         name: 'c',
         type: 'ordinal',
-        range: 'category10',
+        range: defaultColors,
         domain: {
           data: dataSource,
           field: segmentLabelField,
@@ -86,12 +109,17 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
               },
               mult: 0.5,
             },
-            y: {
-              field: {
-                group: 'height',
+            y: showLegend ?
+              {
+                value: chartRadius,
+              }
+              :
+              {
+                field: {
+                  group: 'height',
+                },
+                mult: 0.5,
               },
-              mult: 0.5,
-            },
             startAngle: {
               field: 'layout_start',
             },
@@ -109,15 +137,16 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
             },
           },
           update: {
-            fill: {
-              scale: 'c',
-              field: segmentLabelField,
-            },
-          },
-          hover: {
-            fill: {
-              value: 'pink',
-            },
+            fill: [
+              {
+                test: 'datum._id == tooltip._id || datum._id == textTooltip._id',
+                value: 'pink',
+              },
+              {
+                scale: 'c',
+                field: segmentLabelField,
+              },
+            ],
           },
         },
       },
@@ -148,7 +177,7 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
               radius: {
                 scale: 'r',
                 field: 'value',
-                offset: 30,
+                offset: chartSize === 'xsmall' ? 15 : 30,
               },
               theta: {
                 field: 'layout_mid',
@@ -161,6 +190,9 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
               },
               text: {
                 field: segmentLabelField,
+              },
+              fontSize: {
+                value: fontSize - 2,
               },
             },
           },
@@ -181,10 +213,10 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
             showLegend ?
               {
                 x: {
-                  value: (chartRadius * 2) + 20,
+                  value: (chartRadius) - (chartRadius / 3),
                 },
                 y: {
-                  value: chartRadius + 35,
+                  value: (chartRadius * 2) + 35,
                 },
                 fill: {
                   value: 'black',
@@ -192,15 +224,12 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
                 align: {
                   value: 'left',
                 },
-                text: hasAggregation ?
-                  {
-                    template: `{{datum[${segmentLabelField}]}}: {{datum.rounded_percentage}}% ({{datum.rounded_value}})`,
-                  }
-                  :
-                  {
-                    field: fieldY,
-                  }
-                ,
+                text: {
+                  template: `{{datum[${segmentLabelField}]}}: {{datum.rounded_value}} ({{datum.rounded_percentage}}%)`,
+                },
+                fontSize: {
+                  value: fontSize,
+                },
               }
               :
               {
@@ -230,15 +259,12 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
                 align: {
                   value: 'center',
                 },
-                text: hasAggregation ?
-                  {
-                    template: '{{datum.rounded_percentage}}% ({{datum.rounded_value}})',
-                  }
-                  :
-                  {
-                    field: fieldY,
-                  }
-                ,
+                text: {
+                  template: '{{datum.rounded_value}} ({{datum.rounded_percentage}}%)',
+                },
+                fontSize: {
+                  value: fontSize - 2,
+                },
               }
             ,
         },
@@ -250,11 +276,24 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
           {
             fill: 'c',
             orient: 'right',
-            title: 'Legend',
+            title: visualisation.spec.legendTitle ? visualisation.spec.legendTitle : 'Legend',
             properties: {
               symbols: {
                 shape: {
                   value: 'square',
+                },
+              },
+              title: {
+                fontSize: {
+                  value: fontSize - 2,
+                },
+                dy: {
+                  value: fontSize * -0.6,
+                },
+              },
+              labels: {
+                fontSize: {
+                  value: fontSize - 4,
                 },
               },
             },

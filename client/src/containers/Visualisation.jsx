@@ -9,6 +9,7 @@ import { fetchLibrary } from '../actions/library';
 import mapSpecTemplate from './Visualisation/mapSpecTemplate';
 import pieSpecTemplate from './Visualisation/pieSpecTemplate';
 import lineSpecTemplate from './Visualisation/lineSpecTemplate';
+import pivotTableSpecTemplate from './Visualisation/pivotTableSpecTemplate';
 import scatterSpecTemplate from './Visualisation/scatterSpecTemplate';
 import barSpecTemplate from './Visualisation/barSpecTemplate';
 
@@ -181,6 +182,10 @@ class Visualisation extends Component {
         specTemplate = Object.assign({}, barSpecTemplate);
         break;
 
+      case 'pivot table':
+        specTemplate = Object.assign({}, pivotTableSpecTemplate);
+        break;
+
       default:
         throw new Error(`Unknown visualisation type ${visualisationType}`);
     }
@@ -212,7 +217,7 @@ class Visualisation extends Component {
 
   render() {
     if (this.state.visualisation == null || !this.state.asyncComponents) {
-      return <div className="Visualisation">Loading...</div>;
+      return <div className="Visualisation loadingIndicator">Loading...</div>;
     }
     const { VisualisationHeader, VisualisationEditor } = this.state.asyncComponents;
     const visualisation = this.state.visualisation;

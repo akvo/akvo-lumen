@@ -1,5 +1,6 @@
 (ns akvo.lumen.admin.util
-  (:require [clojure.java.jdbc :as jdbc]
+  (:require [akvo.lumen.component.keycloak :as keycloak]
+            [clojure.java.jdbc :as jdbc]
             [environ.core :refer [env]]))
 
 (defn exec!
@@ -13,9 +14,24 @@
   "Build a db uri string using standard PG environment variables as fallback"
   ([] (db-uri {}))
   ([{:keys [host database user password]
-     :or {host (env :pghost)
-          database (env :pgdatabase)
-          user (env :pguser)
-          password (env :pgpassword)}}]
-   (format "jdbc:postgresql://%s/%s?user=%s&password=%s&sslmode=require"
-           host database user password)))
+     :or {host (env :pg-host)
+          database (env :pg-database)
+          user (env :pg-user)
+          password (env :pg-password)}}]
+   (format "jdbc:postgresql://%s/%s?user=%s%s%s"
+           host database user
+           (if (= host "localhost")
+             ""
+             (format "&password=%s" password))
+           (if (= host "localhost")
+             ""
+             "&ssl=true"))))
+
+(defn create-keycloak []
+  (let [url (format "%s/auth" (:kc-url env))
+        issuer (format "%s/realms/akvo" url)]
+    {:api-root (format "%s/admin/realms/akvo" url)
+     :issuer issuer
+     :openid-config (keycloak/fetch-openid-configuration issuer)
+     :credentials {"client_id" (:kc-id env "akvo-lumen-confidential")
+                   "client_secret" (:kc-secret env)}}))

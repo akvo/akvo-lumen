@@ -111,7 +111,7 @@ export default function getVegaScatterSpec(visualisation, data, containerHeight,
             opacity: [
               {
                 test: 'hover._id && hover._id !== datum._id',
-                value: 0.2,
+                value: visualisation.spec.datapointLabelColumn === null ? 0.8 : 0.4,
               },
               {
                 value: 0.8,

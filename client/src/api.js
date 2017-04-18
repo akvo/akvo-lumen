@@ -3,8 +3,7 @@ import * as auth from './auth';
 
 function wrapUpdateToken(fetchRequestThunk) {
   return auth.token()
-    .then(token => fetchRequestThunk(token))
-    .then(response => response.json());
+    .then(token => fetchRequestThunk(token));
 }
 
 function requestHeaders(token, additionalHeaders = {}) {
@@ -14,11 +13,21 @@ function requestHeaders(token, additionalHeaders = {}) {
   });
 }
 
-export function get(url, headers) {
-  return wrapUpdateToken(token => fetch(url, {
-    method: 'GET',
-    headers: requestHeaders(token, headers),
-  }));
+function getQueryString(queryParams) {
+  return Object.keys(queryParams).map((key, index) =>
+    `${index > 0 ? '&' : ''}${key}=${encodeURIComponent(queryParams[key])}`
+  ).join('');
+}
+
+export function get(url, queryParams, headers) {
+  const urlWithOptionalParams = queryParams == null ? url : `${url}?${getQueryString(queryParams)}`;
+
+  return wrapUpdateToken(token =>
+    fetch(urlWithOptionalParams, {
+      method: 'GET',
+      headers: requestHeaders(token, headers),
+    })
+  );
 }
 
 export function post(url, body, headers) {
@@ -46,6 +55,16 @@ export function del(url, headers) {
     fetch(url, {
       method: 'DELETE',
       headers: requestHeaders(token, headers),
+    })
+  );
+}
+
+export function patch(url, body, headers) {
+  return wrapUpdateToken(token =>
+    fetch(url, {
+      method: 'PATCH',
+      headers: requestHeaders(token, headers),
+      body: JSON.stringify(body),
     })
   );
 }

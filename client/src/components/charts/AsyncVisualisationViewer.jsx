@@ -31,11 +31,17 @@ export default class AsyncVisualisationViewer extends Component {
           },
         });
       }, 'reactLeaflet');
+    } else if (visualisation.visualisationType === 'pivot table') {
+      this.setState({
+        asyncComponents: {
+          // eslint-disable-next-line global-require
+          output: require('./PivotTable').default,
+        },
+      });
     } else {
       require.ensure(['vega'], () => {
-        /* eslint-disable global-require */
+        // eslint-disable-next-line global-require
         const Chart = require('./Chart').default;
-        /* eslint-enable global-require */
 
         switch (visualisation.visualisationType) {
           case 'bar':
@@ -62,7 +68,9 @@ export default class AsyncVisualisationViewer extends Component {
 
   render() {
     return this.state.asyncComponents ?
-      <this.state.asyncComponents.output {...this.props} /> : <div>Loading...</div>;
+      <this.state.asyncComponents.output {...this.props} />
+      :
+      <div className="loadingIndicator">Loading...</div>;
   }
 }
 

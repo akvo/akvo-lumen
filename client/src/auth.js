@@ -1,5 +1,6 @@
 import fetch from 'isomorphic-fetch';
 import Keycloak from 'keycloak-js';
+import Raven from 'raven-js';
 
 let keycloak = null;
 
@@ -21,25 +22,34 @@ export function init() {
   }
   return fetch('/env')
     .then(response => response.json())
-    .then(({ keycloakURL }) => new Keycloak({
-      url: keycloakURL,
-      realm: 'akvo',
-      clientId: 'akvo-lumen',
-    }))
-    .then(kc => new Promise((resolve, reject) =>
-      kc.init({ onLoad: 'login-required' }).success((authenticated) => {
+    .then(({ keycloakClient, keycloakURL, tenant, sentryDSN }) => new Promise((resolve, reject) => {
+      if (process.env.NODE_ENV === 'production') {
+        Raven.config(sentryDSN).install();
+        Raven.setExtraContext({ tenant });
+      }
+      keycloak = new Keycloak({
+        url: keycloakURL,
+        realm: 'akvo',
+        clientId: keycloakClient,
+      });
+      keycloak.init({ onLoad: 'login-required' }).success((authenticated) => {
         if (authenticated) {
-          kc.loadUserProfile().success((profile) => {
-            keycloak = kc;
-            resolve(profile);
+          keycloak.loadUserProfile().success((profile) => {
+            if (process.env.NODE_ENV === 'production') {
+              Raven.setUserContext(profile);
+            }
+            resolve(Object.assign({}, profile,
+              { admin: keycloak.hasRealmRole(`akvo:lumen:${tenant}:admin`) }
+            ));
           }).error(() => {
-            reject('Could not load user profile');
+            reject(new Error('Could not load user profile'));
           });
         } else {
-          reject('Could not authenticate');
+          reject(new Error('Could not authenticate'));
         }
       }).error(() => {
-        reject('Login attempt failed');
-      })
+        reject(new Error('Login attempt failed'));
+      });
+    }
   ));
 }

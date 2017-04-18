@@ -8,6 +8,7 @@ const getColumnTitle = (columnName, columnOptions) =>
   columnOptions.find(obj => obj.value === columnName).title;
 
 const handleChangeSpec = (change, oldSpec, onChangeSpec, columnOptions) => {
+  const newSpec = Object.assign({}, oldSpec, change);
   const axisLabelUpdateTriggers = [
     'bucketColumn',
     'subBucketColumn',
@@ -20,13 +21,11 @@ const handleChangeSpec = (change, oldSpec, onChangeSpec, columnOptions) => {
 
   const shouldUpdateAxisLabels = axisLabelUpdateTriggers.some(trigger =>
       Object.keys(change).some(key => key.toString() === trigger.toString())
-  );
+  ) && (newSpec.metricColumnY !== null);
 
   if (!shouldUpdateAxisLabels) {
     onChangeSpec(change);
   }
-
-  const newSpec = Object.assign({}, oldSpec, change);
 
   let autoAxisLabelY = getColumnTitle(newSpec.metricColumnY, columnOptions);
   let autoAxisLabelX = newSpec.bucketColumn ? getColumnTitle(newSpec.bucketColumn, columnOptions) : '';
@@ -164,6 +163,8 @@ export default function BarConfigMenu(props) {
             disabled={spec.bucketColumn === null}
             onChange={value => handleChangeSpec({
               subBucketColumn: value,
+              legendTitle: columnOptions.find(item => item.value === value) ?
+                columnOptions.find(item => item.value === value).title : null,
             }, spec, onChangeSpec, columnOptions)}
           />
           <SelectInput
@@ -183,6 +184,15 @@ export default function BarConfigMenu(props) {
             ]}
             onChange={value => handleChangeSpec({
               subBucketMethod: value,
+            }, spec, onChangeSpec, columnOptions)}
+          />
+          <LabelInput
+            value={spec.legendTitle != null ? spec.legendTitle.toString() : null}
+            placeholder="Legend title"
+            name="legendLabel"
+            maxLength={32}
+            onChange={event => handleChangeSpec({
+              legendTitle: event.target.value.toString(),
             }, spec, onChangeSpec, columnOptions)}
           />
         </div>

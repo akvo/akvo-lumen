@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import Modal from 'react-modal';
 import CopyToClipboard from 'react-copy-to-clipboard';
-import { post } from '../../api';
+import * as api from '../../api';
 
 require('../../styles/DashboardModal.scss');
 require('../../styles/ShareEntity.scss');
@@ -28,7 +28,8 @@ export default class ShareEntity extends Component {
     const entityType = this.props.type;
 
     if (id != null) {
-      post('/api/shares', { [`${entityType}Id`]: id })
+      api.post('/api/shares', { [`${entityType}Id`]: id })
+        .then(response => response.json())
         .then(response => this.setState({ id: response.id }));
     }
   }

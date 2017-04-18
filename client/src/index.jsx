@@ -7,12 +7,7 @@ import configureStore from './store/configureStore';
 import * as auth from './auth';
 
 function initAuthenticated(profile) {
-  const initialState = {
-    user: {
-      name: profile.username,
-      organization: 'Akvo Lumen',
-    },
-  };
+  const initialState = { profile };
 
   const store = configureStore(initialState);
   const history = syncHistoryWithStore(browserHistory, store);
@@ -20,10 +15,10 @@ function initAuthenticated(profile) {
   render(<Root store={store} history={history} />, rootElement);
 }
 
-function initNotAuthenticated() {
-  document.querySelector('#root').innerHTML = 'Authentication required.';
+function initNotAuthenticated(msg) {
+  document.querySelector('#root').innerHTML = msg;
 }
 
 auth.init()
   .then(profile => initAuthenticated(profile))
-  .catch(() => initNotAuthenticated());
+  .catch(err => initNotAuthenticated(err.message));

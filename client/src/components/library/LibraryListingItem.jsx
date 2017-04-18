@@ -37,6 +37,36 @@ function LibraryListingItemContextMenu({ onClick }) {
   );
 }
 
+const VisualisationTypeLabel = ({ vType }) => {
+  let typeLabel = '';
+
+  switch (vType) {
+    case 'map':
+    case 'pivot table':
+      typeLabel = vType;
+      break;
+
+    default:
+      typeLabel = `${vType} chart`;
+  }
+
+  typeLabel = `${typeLabel.substring(0, 1).toUpperCase()}${typeLabel.substring(1, typeLabel.length)}`;
+
+  return (
+    <div
+      className="VisualisationTypeLabel"
+    >
+      <p>
+        {typeLabel}
+      </p>
+    </div>
+  );
+};
+
+VisualisationTypeLabel.propTypes = {
+  vType: PropTypes.string.isRequired,
+};
+
 LibraryListingItemContextMenu.propTypes = {
   onClick: PropTypes.func.isRequired,
 };
@@ -59,6 +89,7 @@ export default class LibraryListingItem extends Component {
 
   render() {
     const { entity, onSelectEntity, onEntityAction } = this.props;
+
     return (
       <li
         onClick={() => {
@@ -83,6 +114,11 @@ export default class LibraryListingItem extends Component {
           </h3>
           {isFailed(entity) && <p>{getErrorMessage(entity)}</p>}
           {isPending(entity) && <p>Pending...</p>}
+          {getType(entity) === 'visualisation' &&
+            <VisualisationTypeLabel
+              vType={entity.visualisationType}
+            />
+          }
         </div>
         <div className="entityControls">
           <button

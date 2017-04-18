@@ -15,6 +15,12 @@ function shouldRender(visualisation, datasets) {
     case 'map':
       return true;
 
+    case 'pivot table':
+      if (!datasetLoaded) {
+        return false;
+      }
+      break;
+
     case 'bar':
       if (!datasetLoaded) {
         return false;
@@ -67,6 +73,9 @@ export default function CreateVisualisationPreview({ visualisation, datasets }) 
         <VisualisationViewer
           visualisation={visualisation}
           datasets={datasets}
+          context="editor"
+          height={400}
+          width={800}
         /> :
         null
       }
