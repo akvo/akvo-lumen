@@ -55,16 +55,17 @@
    :middleware
    {:functions
     {:hide-errors #var duct.middleware.errors/wrap-hide-errors
+     :json-body #var ring.middleware.json/wrap-json-body
+     :json-response #var ring.middleware.json/wrap-json-response
      :not-found #var duct.middleware.not-found/wrap-not-found
      :ring-defaults #var ring.middleware.defaults/wrap-defaults
-     :json-response #var ring.middleware.json/wrap-json-response
-     :json-body #var ring.middleware.json/wrap-json-body
-     :wrap-label-tenant #var akvo.lumen.component.tenant-manager/wrap-label-tenant
+     :wrap-auth #var akvo.lumen.auth/wrap-auth
      :wrap-jwt #var akvo.lumen.auth/wrap-jwt
-     :wrap-auth #var akvo.lumen.auth/wrap-auth}
+     :wrap-label-tenant #var akvo.lumen.component.tenant-manager/wrap-label-tenant
+     :wrap-sentry #var raven-clj.ring/wrap-sentry}
     :applied
     [:not-found :json-response :ring-defaults :json-body
-     :wrap-auth :wrap-jwt :wrap-label-tenant :hide-errors]
+     :wrap-auth :wrap-jwt :wrap-label-tenant :wrap-sentry :hide-errors]
     :arguments
     {:not-found "Resource Not Found"
      :hide-errors "Internal Server Error"
@@ -76,7 +77,8 @@
       :responses {:not-modified-responses true
                   :absolute-redirects true
                   :content-types true
-                  :default-charset "utf-8"}}}}}
+                  :default-charset "utf-8"}}
+     :wrap-sentry sentry-backend-dsn}}}
   :http
   {:port http-port}
   :db
@@ -92,7 +94,8 @@
    :flow-report-database-url flow-report-database-url
    :keycloak-url keycloak-url
    :keycloak-realm keycloak-realm
-   :keycloak-public-client-id keycloak-public-client-id}
+   :keycloak-public-client-id keycloak-public-client-id
+   :sentry-client-dsn sentry-client-dsn}
   :keycloak
   {:url keycloak-url
    :realm keycloak-realm

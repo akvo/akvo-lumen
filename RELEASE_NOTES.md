@@ -1,5 +1,12 @@
 # Release Notes
 
+## 0.8.0
+
+### New and noteworthy
+
+* User invitations can now be managed in the admin console
+* User invitations can now be revoked
+
 ## 0.7.1 (Unreleased)
 
 ### New and noteworthy
