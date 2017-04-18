@@ -1,12 +1,12 @@
 (ns akvo.lumen.endpoint.share-test
-  (:require [clojure.java.jdbc :as jdbc]
-            [clojure.test :refer :all]
-            [hugsql.core :as hugsql]
-            [akvo.lumen.component.tenant-manager :as tm]
+  (:require [akvo.lumen.component.tenant-manager :as tm]
+            [akvo.lumen.fixtures :refer [db-fixture test-conn]]
             [akvo.lumen.lib.dashboard :as dashboard]
             [akvo.lumen.lib.share :as share]
-            [akvo.lumen.fixtures :refer [db-fixture test-conn]]
-            [akvo.lumen.util :refer [squuid gen-table-name]]))
+            [akvo.lumen.util :refer [squuid gen-table-name]]
+            [clojure.java.jdbc :as jdbc]
+            [clojure.test :refer :all]
+            [hugsql.core :as hugsql]))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -97,7 +97,7 @@
                               :dataset-id (:dataset-id spec)
                               :name       "Visualisation"
                               :type       "pie"
-                              :spec       {}
+                              :spec       {"bucketColumn" "c1"}
                               :author     {}})
   (upsert-visualisation conn {:id         (:visualisation2-id spec)
                               :dataset-id (:dataset-id-2 spec)

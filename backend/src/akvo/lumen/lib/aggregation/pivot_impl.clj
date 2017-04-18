@@ -1,7 +1,8 @@
-(ns akvo.lumen.lib.pivot-impl
+(ns akvo.lumen.lib.aggregation.pivot-impl
   (:require [akvo.commons.psql-util]
             [akvo.lumen.http :as http]
-            [akvo.lumen.lib.visualisation.filter :as filter]
+            [akvo.lumen.lib.aggregation.filter :as filter]
+            [akvo.lumen.lib.aggregation.utils :as utils]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
             [hugsql.core :as hugsql]))
@@ -127,18 +128,12 @@
     (apply-empty-value-query conn dataset query filter-str)
     :else (apply-pivot conn dataset query filter-str)))
 
-(defn find-column [columns column-name]
-  (when column-name
-    (if-let [column (first (filter #(= column-name (get % "columnName")) columns))]
-      column
-      (throw (ex-info "No such column" {:columnName column-name})))))
-
 (defn build-query
   "Replace column names with proper column metadata from the dataset"
   [columns query]
-  {:category-column (find-column columns (get query "categoryColumn"))
-   :row-column (find-column columns (get query "rowColumn"))
-   :value-column (find-column columns (get query "valueColumn"))
+  {:category-column (utils/find-column columns (get query "categoryColumn"))
+   :row-column (utils/find-column columns (get query "rowColumn"))
+   :value-column (utils/find-column columns (get query "valueColumn"))
    :aggregation (condp = (get query "aggregation")
                   "mean" "avg"
                   "sum" "sum"
@@ -149,17 +144,10 @@
                                   {:aggregation (get query "aggregation")})))
    :filters (get query "filters")})
 
-(defn query [tenant-conn dataset-id query]
-  (jdbc/with-db-transaction [conn tenant-conn]
-    (if-let [dataset (dataset-by-id conn {:id dataset-id})]
-      (try
-        (let [query (build-query (:columns dataset) query)
-              filter-str (filter/sql-str (:columns dataset) (:filters query))]
-          (http/ok (merge (apply-query conn dataset query filter-str)
-                          {:metadata
-                           {"categoryColumnTitle" (get-in query
-                                                          [:category-column "title"])}})))
-        (catch clojure.lang.ExceptionInfo e
-          (http/bad-request (merge {:message (.getMessage e)}
-                                   (ex-data e)))))
-      (http/not-found {"datasetId" dataset-id}))))
+(defn query [tenant-conn dataset query]
+  (let [query (build-query (:columns dataset) query)
+        filter-str (filter/sql-str (:columns dataset) (:filters query))]
+    (http/ok (merge (apply-query tenant-conn dataset query filter-str)
+                    {:metadata
+                     {"categoryColumnTitle" (get-in query
+                                                    [:category-column "title"])}}))))

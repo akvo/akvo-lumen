@@ -51,6 +51,7 @@
   sort: null, // can be "asc", "dsc" or "null"
   showLegend: null,
   legendTitle: null, // optional string max 32 chars
+  data: {}, // Aggregated data response from backend. Never mutate this, clone it instead
 }
 ```
 
@@ -111,6 +112,7 @@
   valueDisplay: 'default', // One of "default", "percentageRow", "percentageColumn", "percentageTotal"
   hideRowTotals: false, // Row and Column totals will still be calculated, but then hidden with css
   hideColumnTotals: false,
+  data: {}, // Aggregated data response from backend. Never mutate this, clone it instead
 }
 
 ```

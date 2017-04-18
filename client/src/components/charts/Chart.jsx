@@ -103,7 +103,11 @@ export default class Chart extends Component {
     switch (visualisation.visualisationType) {
       case 'pie':
       case 'donut':
-        chartData = chart.getPieData(visualisation, datasets);
+        chartData = visualisation.data;
+        if (!chartData) {
+          // Aggregated data hasn't loaded yet - do nothing
+          return;
+        }
         break;
       case 'area':
       case 'line':
@@ -118,6 +122,8 @@ export default class Chart extends Component {
       default:
         throw new Error(`Unknown visualisation type ${visualisation.visualisationType}`);
     }
+    /* TODO - once we support backend aggregations for more vTypes, it doesn't make sense to
+    ** pass `chartData` separately, because we include it on the visualisation itself */
     const vegaSpec =
       chart.getVegaSpec(visualisation, chartData, containerHeight, containerWidth, chartSize);
 
