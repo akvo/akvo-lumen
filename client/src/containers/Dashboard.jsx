@@ -173,8 +173,20 @@ class Dashboard extends Component {
 
     if (aggregationOnlyVisualisationTypes.find(item => item === vType)) {
       /* Only fetch the aggregated data */
+      let aggType;
 
-      api.get(`/api/pivot/${datasetId}`, {
+      switch (vType) {
+        case 'pie':
+          aggType = 'pie';
+          break;
+        case 'pivot table':
+          aggType = 'pivot';
+          break;
+        default:
+          break;
+      }
+
+      api.get(`/api/aggregation/${datasetId}/${aggType}`, {
         query: JSON.stringify(spec),
       }).then(response => response.json()).then((response) => {
         const change = {};

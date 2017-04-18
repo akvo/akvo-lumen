@@ -1,4 +1,4 @@
-(ns akvo.lumen.lib.visualisation.filter
+(ns akvo.lumen.lib.aggregation.filter
   (:require [clojure.string :as str])
   (:import [java.sql.Timestamp]))
 

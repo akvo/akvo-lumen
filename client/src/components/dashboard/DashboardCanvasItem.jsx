@@ -25,8 +25,8 @@ const getIsDatasetLoaded = (props) => {
   }
 
   switch (props.item.visualisation.visualisationType) {
-
     case 'pivot table':
+    case 'pie':
       return true;
 
     default:
