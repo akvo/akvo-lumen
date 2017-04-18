@@ -33,7 +33,7 @@
   :transformation-engine [:tenant-manager]
   :dashboard [:tenant-manager]
   :dataset [:tenant-manager :config]
-  :env [:config]
+  :env [:config :tenant-manager]
   :files [:config]
   :flow [:tenant-manager :config]
   :invite [:tenant-manager :user-manager]
