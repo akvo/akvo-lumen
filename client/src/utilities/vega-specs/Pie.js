@@ -5,7 +5,7 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
   const chartRadius = containerHeight < containerWidth ? containerHeight / 3 : containerWidth / 3;
   const innerRadius = visualisation.visualisationType === 'donut' ?
     Math.floor(chartRadius / 1.75) : 0;
-  const dataArray = data.map(item => item);
+  const dataArray = data;
 
   const layoutTransform = {
     name: 'pie',

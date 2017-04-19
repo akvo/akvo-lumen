@@ -33,8 +33,6 @@
       (is (= (:id new-share)
              (:id p)))))
 
-
-
   (testing "Public dashboard share"
     (let [dashboard-id    (-> (all-dashboards test-conn) first :id)
           dashboard-share (:body (share/fetch test-conn
@@ -43,9 +41,9 @@
           share-data      (public-impl/response-data test-conn share)]
       (is (every? #(contains? share-data %)
                   ["dashboardId" "dashboards" "visualisations" "datasets"]))
-      (is (= 2
+      (is (= 1
              (count (get share-data "datasets"))))
-      (is (= 2
+      (is (= 1
              (count (get share-data "visualisations"))))
       (is (every? #(not (nil? %))
                   (vals share-data))))))
