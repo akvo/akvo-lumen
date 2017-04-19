@@ -64,8 +64,7 @@
     (let [headers (get-cols (get-num-cols path \, encoding))
           data (csv/read-csv reader :separator separator)
           rows (if headers? (rest data) data)]
-      (doseq [row rows]
-        (jdbc/insert! tenant-conn (keyword table-name) headers row)))))
+      (jdbc/insert-multi! tenant-conn (keyword table-name) headers rows))))
 
 (defmethod import/valid? "CSV"
   [{:strs [url fileName hasColumnHeaders]}]
