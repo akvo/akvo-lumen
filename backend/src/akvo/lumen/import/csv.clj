@@ -5,10 +5,7 @@
             [clojure.java.io :as io]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as s])
-  (:import com.ibm.icu.text.CharsetDetector
-           java.util.UUID
-           org.postgresql.PGConnection
-           org.postgresql.copy.CopyManager))
+  (:import com.ibm.icu.text.CharsetDetector))
 
 
 (defn- get-cols
