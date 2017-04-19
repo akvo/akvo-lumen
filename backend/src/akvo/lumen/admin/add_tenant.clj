@@ -281,10 +281,7 @@
 (defn -main [url title email]
   (try
     (check-env-vars)
-    (let [;; url (normalize-url url)
-          ;; label (label url)
-          {keys [email label title url]} (conform-input url title email)
-          ]
+    (let [{keys [email label title url]} (conform-input url title email)]
       (setup-database label title)
       (let [user-creds (setup-tenant-in-keycloak label email url)]
         (println "Credentials:")
