@@ -23,6 +23,7 @@ new WebpackDevServer(webpack(config), {
   },
   historyApiFallback: {
     rewrites: [
+      { from: '^/favicon.ico$', to: 'favicon.ico' },
       { from: '^/s/.*$', to: '/assets/index-pub.html' },
       { from: '^.*$', to: '/assets/index.html' }
     ]
