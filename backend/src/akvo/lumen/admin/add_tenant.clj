@@ -287,11 +287,9 @@
         (println "Credentials:")
         (pprint user-creds)))
     (catch java.lang.AssertionError e
-      (prn (.getMessage e))
-      (System/exit 0))
+      (prn (.getMessage e)))
     (catch Exception e
       (prn e)
       (prn (.getMessage e))
       (when (= (type e) clojure.lang.ExceptionInfo)
-        (prn (ex-data e)))
-      (System/exit 0))))
+        (prn (ex-data e))))))
