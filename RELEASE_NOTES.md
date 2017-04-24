@@ -1,13 +1,17 @@
 # Release Notes
 
-## 0.8.0
+## 0.8.0 (Unreleased)
 
 ### New and noteworthy
 
 * User invitations can now be managed in the admin console
 * User invitations can now be revoked
+* Added favicon
+* Pie chart aggregations are now performed on the backend
+* Error tracking with Sentry
+* Show full cell values on hover in the dataset view
 
-## 0.7.1 (Unreleased)
+## 0.7.1
 
 ### New and noteworthy
 * Admin user actions now present a confirmation dialog
