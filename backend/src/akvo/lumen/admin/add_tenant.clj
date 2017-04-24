@@ -282,7 +282,7 @@
   (try
     (check-env-vars)
     (let [{:keys [email label title url]} (conform-input url title email)]
-      #_(setup-database label title)
+      (setup-database label title)
       (let [user-creds (setup-tenant-in-keycloak label email url)]
         (println "Credentials:")
         (pprint user-creds)))
