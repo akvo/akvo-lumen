@@ -91,9 +91,9 @@
   [v]
   (let [url (URL. v)]
     (if (= (:kc-url env) "http://localhost:8080")
-      (when (= (.getProtocol v) "https")
+      (when (= (.getProtocol url) "https")
         (throw (ex-info "Use http in development mode" {:url v})))
-      (when (= (.getProtocol v) "https")
+      (when (= (.getProtocol url) "https")
         (throw (ex-info "Url should use https" {:url v}))))
     (format "%s://%s" (.getProtocol url) (.getHost url))))
 
@@ -281,8 +281,8 @@
 (defn -main [url title email]
   (try
     (check-env-vars)
-    (let [{keys [email label title url]} (conform-input url title email)]
-      (setup-database label title)
+    (let [{:keys [email label title url]} (conform-input url title email)]
+      #_(setup-database label title)
       (let [user-creds (setup-tenant-in-keycloak label email url)]
         (println "Credentials:")
         (pprint user-creds)))
