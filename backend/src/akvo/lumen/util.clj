@@ -19,3 +19,12 @@
   "Generates a table name using a UUID suffix"
   [prefix]
   (str prefix "_" (str/replace (java.util.UUID/randomUUID) "-" "_")))
+
+(defn conform-email
+  "Returns valid email or throws."
+  [v]
+  (let [rule #"(?i)[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?"
+        email (some->> v (re-matches rule))]
+    (when (nil? email)
+      (throw (ex-info "Email not valid." {:email v})))
+    email))
