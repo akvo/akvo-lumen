@@ -3,26 +3,6 @@
             [clojure.test :refer [deftest testing is]]))
 
 
-(deftest normalize-url
-  (let [valid-url "https://tenant.akvo-lumen.org"]
-
-    (testing "Valid url"
-      (is (= (at/normalize-url valid-url)
-             valid-url)))
-
-    (testing "http"
-      (is (= (at/normalize-url "http://tenant.akvo-lumen.org")
-             valid-url)))
-
-    (testing "Trailing slash"
-      (is (= (at/normalize-url "https://tenant.akvo-lumen.org/")
-             valid-url)))
-
-    (testing "Http & trailing slash"
-       (is (= (at/normalize-url "http://tenant.akvo-lumen.org/")
-              valid-url)))))
-
-
 (deftest conform-label
 
   (testing "Valid"

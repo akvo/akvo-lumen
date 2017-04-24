@@ -81,11 +81,6 @@
       first
       conform-label))
 
-(defn normalize-url
-  "Make sure protocol is https and no trailing slash."
-  [url]
-  (format "https://%s" (-> url URL. .getHost)))
-
 (defn conform-url
   "Make sure https is used for non development mode and remove trailing slash."
   [v]
@@ -223,10 +218,8 @@
 (defn add-tenant-urls-to-client
   [client url]
   (-> client
-      (update-in ["webOrigins"] (fn [webOrigins]
-                                  (conj webOrigins url)))
-      (update-in ["redirectUris"] (fn [redirectUris]
-                                    (conj redirectUris (format "%s/*" url))))))
+      (update "webOrigins" conj url)
+      (update "redirectUris" conj (format "%s/*" url))))
 
 (defn add-tenant-urls-to-clients
   [{:keys [api-root]} request-headers url]
