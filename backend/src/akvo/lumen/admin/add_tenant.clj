@@ -81,19 +81,14 @@
       first
       conform-label))
 
-(defn normalize-url
-  "Make sure protocol is https and no trailing slash."
-  [url]
-  (format "https://%s" (-> url URL. .getHost)))
-
 (defn conform-url
   "Make sure https is used for non development mode and remove trailing slash."
   [v]
   (let [url (URL. v)]
     (if (= (:kc-url env) "http://localhost:8080")
-      (when (= (.getProtocol v) "https")
+      (when (= (.getProtocol url) "https")
         (throw (ex-info "Use http in development mode" {:url v})))
-      (when (= (.getProtocol v) "https")
+      (when (= (.getProtocol url) "https")
         (throw (ex-info "Url should use https" {:url v}))))
     (format "%s://%s" (.getProtocol url) (.getHost url))))
 
@@ -223,10 +218,8 @@
 (defn add-tenant-urls-to-client
   [client url]
   (-> client
-      (update-in ["webOrigins"] (fn [webOrigins]
-                                  (conj webOrigins url)))
-      (update-in ["redirectUris"] (fn [redirectUris]
-                                    (conj redirectUris (format "%s/*" url))))))
+      (update "webOrigins" conj url)
+      (update "redirectUris" conj (format "%s/*" url))))
 
 (defn add-tenant-urls-to-clients
   [{:keys [api-root]} request-headers url]
@@ -281,17 +274,15 @@
 (defn -main [url title email]
   (try
     (check-env-vars)
-    (let [{keys [email label title url]} (conform-input url title email)]
+    (let [{:keys [email label title url]} (conform-input url title email)]
       (setup-database label title)
       (let [user-creds (setup-tenant-in-keycloak label email url)]
         (println "Credentials:")
         (pprint user-creds)))
     (catch java.lang.AssertionError e
-      (prn (.getMessage e))
-      (System/exit 0))
+      (prn (.getMessage e)))
     (catch Exception e
       (prn e)
       (prn (.getMessage e))
       (when (= (type e) clojure.lang.ExceptionInfo)
-        (prn (ex-data e)))
-      (System/exit 0))))
+        (prn (ex-data e))))))
