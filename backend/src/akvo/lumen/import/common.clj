@@ -42,7 +42,7 @@
              column-name is the name of the column in the generated
              table and type is the user visible type of the column
              data (text/number/date)"
-  (fn [tenant-conn config table-name spec]
+  (fn [tenant-conn claims config table-name spec]
     (dispatch-on-kind spec)))
 
 

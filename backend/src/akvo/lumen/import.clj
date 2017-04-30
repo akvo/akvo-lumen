@@ -1,15 +1,15 @@
 (ns akvo.lumen.import
   (:require [akvo.commons.psql-util :as pg]
-            [cheshire.core :as json]
-            [clj-http.client :as client]
-            [clojure.data.csv :as csv]
-            [clojure.string :as str]
-            [hugsql.core :as hugsql]
             [akvo.lumen.import.common :as import]
             [akvo.lumen.import.csv]
             [akvo.lumen.import.flow]
             [akvo.lumen.transformation :as t]
             [akvo.lumen.util :refer (squuid gen-table-name)]
+            [cheshire.core :as json]
+            [clj-http.client :as client]
+            [clojure.data.csv :as csv]
+            [clojure.string :as str]
+            [hugsql.core :as hugsql]
             [ring.util.response :as res]))
 
 (hugsql/def-db-fns "akvo/lumen/job-execution.sql")
@@ -47,11 +47,11 @@
   (update-failed-job-execution conn {:id job-execution-id
                                      :reason [reason]}))
 
-(defn do-import [conn config job-execution-id]
+(defn do-import [conn claims config job-execution-id]
   (try
     (let [table-name (gen-table-name "ds")
           spec (:spec (data-source-spec-by-job-execution-id conn {:job-execution-id job-execution-id}))
-          status (import/make-dataset-data-table conn config table-name (get spec "source"))]
+          status (import/make-dataset-data-table conn claims config table-name (get spec "source"))]
       (if (:success? status)
         (successful-import conn job-execution-id table-name status spec)
         (failed-import conn job-execution-id (:reason status))))
@@ -72,5 +72,5 @@
                                          :spec (json/generate-string data-source)})
         (insert-job-execution tenant-conn {:id job-execution-id
                                            :data-source-id data-source-id})
-        (future (do-import tenant-conn config job-execution-id))
+        (future (do-import tenant-conn claims config job-execution-id))
         (res/response {"importId" job-execution-id})))))
