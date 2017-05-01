@@ -20,7 +20,7 @@ function indexById(objects) {
 
 function parseInstance(text) {
   if (text == null) return null;
-  const match = text.trim().toLowerCase().match(/^(https?:\/\/)?([a-z_-]+)\.?.*$/);
+  const match = text.trim().toLowerCase().match(/^(https?:\/\/)?([a-z0-9_-]+)\.?.*$/);
   if (match != null) {
     return match[2];
   }
@@ -54,6 +54,9 @@ export default class AkvoFlowDataSourceSettings extends Component {
       selectedFolders: [],
       selectedSurveyId: null,
       selectedFormId: null,
+      folders: {},
+      surveys: {},
+      surveyDefinitions: {},
     });
   }
 
@@ -67,6 +70,7 @@ export default class AkvoFlowDataSourceSettings extends Component {
         if (instance == null) return;
         this.setState({ instance });
         api.get(rootFoldersUrl(instance), { parentId: 0 }, acceptHeader)
+          .then(response => response.json())
           .then(folders => this.setState({
             folders: merge(this.state.folders, indexById(folders)),
           }));
@@ -115,8 +119,8 @@ export default class AkvoFlowDataSourceSettings extends Component {
     const selectedFolder = this.state.folders[selectedFolderId];
     this.setState({ selectedFolders: selectedFolders.concat([selectedFolderId]) });
     Promise.all([
-      api.get(selectedFolder.foldersUrl, null, acceptHeader),
-      api.get(selectedFolder.surveysUrl, null, acceptHeader),
+      api.get(selectedFolder.foldersUrl, null, acceptHeader).then(response => response.json()),
+      api.get(selectedFolder.surveysUrl, null, acceptHeader).then(response => response.json()),
     ]).then(([folders, surveys]) => this.setState({
       surveys: merge(this.state.surveys, indexById(surveys)),
       folders: merge(this.state.folders, indexById(folders)),
@@ -128,6 +132,7 @@ export default class AkvoFlowDataSourceSettings extends Component {
     this.setState({ selectedSurveyId });
     const surveyUrl = surveys[selectedSurveyId].survey;
     api.get(surveyUrl, null, acceptHeader)
+      .then(response => response.json())
       .then(surveyDefinition => this.setState({
         surveyDefinitions: merge(surveyDefinitions, {
           [surveyDefinition.id]: surveyDefinition,
