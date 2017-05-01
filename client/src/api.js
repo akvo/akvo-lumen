@@ -1,5 +1,6 @@
 import fetch from 'isomorphic-fetch';
 import * as auth from './auth';
+import { omit } from 'lodash';
 
 function wrapUpdateToken(fetchRequestThunk) {
   return auth.token()
@@ -8,7 +9,7 @@ function wrapUpdateToken(fetchRequestThunk) {
 
 function requestHeaders(token, additionalHeaders = {}) {
   return Object.assign({}, additionalHeaders, {
-/*    'Content-Type': 'application/json', */
+    'Content-Type': 'application/json',
     Authorization: `Bearer ${token}`,
   });
 }
@@ -21,11 +22,10 @@ function getQueryString(queryParams) {
 
 export function get(url, queryParams, headers) {
   const urlWithOptionalParams = queryParams == null ? url : `${url}?${getQueryString(queryParams)}`;
-
   return wrapUpdateToken(token =>
     fetch(urlWithOptionalParams, {
       method: 'GET',
-      headers: requestHeaders(token, headers),
+      headers: omit(requestHeaders(token, headers), 'Content-Type'),
     })
   );
 }

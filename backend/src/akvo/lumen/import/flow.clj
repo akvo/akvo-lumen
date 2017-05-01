@@ -23,9 +23,11 @@
           coll))
 
 (defmethod import/valid? "AKVO_FLOW"
-  [{:strs [instance surveyId]}]
+  [{:strs [instance surveyId formId refreshToken]}]
   (and (string? instance)
-       (integer? surveyId)))
+       (string? surveyId)
+       (string? formId)
+       (string? refreshToken)))
 
 (defmethod import/authorized? "AKVO_FLOW"
   [claims {:keys []} {:strs [instance surveyId]}]
@@ -34,18 +36,28 @@
 (defn access-token
   "Fetch a new access token using a refresh token"
   [refresh-token]
-  ""
-  #_(-> (http/post "https://kc.akvotest.org/auth/realms/akvo/protocol/openid-connect/token"
-                   {:form-params {"client_id" "curl"
-                                  "refresh_token" refresh-token
-                                  "grant_type" "refresh_token"}
-                    :as :json})
-        :body
-        :access_token))
+  (-> (http/post "https://kc.akvotest.org/auth/realms/akvo/protocol/openid-connect/token"
+                 {:form-params {"client_id" "akvo-lumen"
+                                "refresh_token" refresh-token
+                                "grant_type" "refresh_token"}
+                  :as :json})
+      :body
+      :access_token))
+
+(defn offline-token
+  [refresh-token]
+  (-> (http/post "https://kc.akvotest.org/auth/realms/akvo/protocol/openid-connect/token"
+                 {:form-params {"client_id" "akvo-lumen"
+                                "refresh_token" refresh-token
+                                "scope" "offline_access"
+                                "grant_type" "refresh_token"}
+                  :as :json})
+      :body
+      :refresh_token))
 
 (defn flow-api-headers
-  [access-token]
-  {"Authorization" (format "Bearer %s" access-token)
+  [refresh-token]
+  {"Authorization" (format "Bearer %s" (access-token refresh-token))
    "User-Agent" "lumen"
    "Accept" "application/vnd.akvo.flow.v2+json"
    "X-Akvo-Email" "akvo.flow.user.test2@gmail.com"})
@@ -83,14 +95,14 @@
 
 (defn data-points
   "Returns all survey data points"
-  [access-token survey]
+  [refresh-token survey]
   (loop [all-data-points []
-         response (data-points* access-token
+         response (data-points* (access-token refresh-token)
                                 (str (:dataPointsUrl survey)
                                      "?pageSize=300"))]
     (if-let [url (get response "cursor")]
       (recur (into all-data-points (get response "dataPoints"))
-             (data-points* access-token url))
+             (data-points* (access-token refresh-token) url))
       all-data-points)))
 
 (defn question-type->lumen-type
@@ -195,9 +207,9 @@
 
 (defn form-data
   "Returns a lazy sequence of form data, ready to be inserted as a lumen dataset"
-  [access-token survey form-id]
+  [refresh-token survey form-id]
   (let [form (form survey form-id)
-        data-points (index-by "id" (data-points access-token survey))]
+        data-points (index-by "id" (data-points refresh-token survey))]
     (map (fn [form-instance]
            (let [data-point-id (get form-instance "dataPointId")]
              (assoc (response-data form (get form-instance "responses"))
@@ -207,19 +219,31 @@
                     "submitter" (get form-instance "submitter")
                     "submitted_at" (some-> (get form-instance "submissionDate")
                                            sql-timestamp))))
-         (form-instances access-token form))))
+         (form-instances refresh-token form))))
 
-(defn create-dataset [tenant-conn access-token table-name survey form-id]
+(defn create-dataset [tenant-conn refresh-token table-name survey form-id]
   (let [columns (dataset-columns (form survey form-id))
-        data-rows (form-data access-token survey form-id)]
+        data-rows (form-data refresh-token survey form-id)]
     (jdbc/execute! tenant-conn [(create-data-table table-name columns)])
     (doseq [data (partition-all 300 data-rows)]
       (jdbc/insert-multi! tenant-conn table-name data))
     columns))
 
 (defmethod import/make-dataset-data-table "AKVO_FLOW"
-  [tenant-conn claims {:keys [flow-api]} table-name {:strs [instance surveyId formId]}]
+  [tenant-conn claims {:keys [flow-api]} table-name {:strs [instance surveyId formId refreshToken]}]
   (try
+    (let [api-root "https://api.akvotest.org/flow"
+          refresh-token (offline-token refreshToken)]
+      {:success? true
+       :columns (let [survey (survey-definition api-root
+                                                (access-token refresh-token)
+                                                instance
+                                                surveyId)]
+                  (create-dataset tenant-conn
+                                  refresh-token
+                                  table-name
+                                  survey
+                                  formId))})
     (catch Exception e
       (.printStackTrace e)
       {:success? false
