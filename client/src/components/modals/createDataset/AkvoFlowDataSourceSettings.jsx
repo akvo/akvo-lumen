@@ -37,6 +37,7 @@ class AkvoFlowDataSourceSettings extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      errorMessage: null,
       instance: null,
       // selected folder ids,
       selectedFolders: [],
@@ -51,6 +52,8 @@ class AkvoFlowDataSourceSettings extends Component {
 
   resetSelections() {
     this.setState({
+      errorMessage: null,
+      instance: null,
       selectedFolders: [],
       selectedSurveyId: null,
       selectedFormId: null,
@@ -69,12 +72,23 @@ class AkvoFlowDataSourceSettings extends Component {
       () => {
         const instance = parseInstance(text);
         if (instance == null) return;
-        this.setState({ instance });
         api.get(rootFoldersUrl(flowApiRoot, instance), { parentId: 0 }, acceptHeader)
-          .then(response => response.json())
+          .then((response) => {
+            if (response.ok) {
+              return response.json();
+            } else if (response.status === 404) {
+              throw new Error(`No such flow instance: ${instance}`);
+            } else if (response.status === 403) {
+              throw new Error('Not authorized');
+            }
+            throw new Error(`Unexpected response ${response.status}`);
+          })
+          .catch(err => this.setState({ errorMessage: err.message }))
           .then(folders => this.setState({
+            instance,
             folders: merge(this.state.folders, indexById(folders)),
-          }));
+          })
+        );
       },
       delay
     );
@@ -176,11 +190,19 @@ class AkvoFlowDataSourceSettings extends Component {
 
   render() {
     const {
+      errorMessage,
+      instance,
       selectedFolders,
       selectedSurveyId,
       selectedFormId,
       folders,
     } = this.state;
+
+    const errorNotification = errorMessage != null && (
+      <div>
+        <span>{errorMessage}</span>
+      </div>
+    );
 
     const folderSelections = selectedFolders.map((id, idx) => {
       const selectedFolder = folders[id];
@@ -200,7 +222,7 @@ class AkvoFlowDataSourceSettings extends Component {
       '0' : selectedFolders[selectedFolders.length - 1];
 
     // Either a survey or a folder can be selected
-    const nextSelection = (
+    const nextSelection = instance != null && (
       <Select
         clearable={false}
         options={this.foldersAndSurveysSelectionOptions(lastSelectedFolderId)}
@@ -220,6 +242,7 @@ class AkvoFlowDataSourceSettings extends Component {
 
     return (
       <div>
+        {errorNotification}
         <input
           placeholder="Flow Application URL"
           onChange={evt => this.handleFlowInstanceChange(evt.target.value)}
