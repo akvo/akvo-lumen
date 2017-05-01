@@ -2,177 +2,228 @@ import React, { Component, PropTypes } from 'react';
 import Select from 'react-select';
 import * as api from '../../../api';
 
-function findRootFolderIds(surveysAndFolders) {
-  const folderIds = {};
-  const ids = [];
-  surveysAndFolders.forEach(({ id, folderId }) => {
-    folderIds[folderId] = null;
-    ids.push(id);
-  });
-  ids.forEach(id => delete folderIds[id]);
-  return Object.keys(folderIds).map(id => parseInt(id, 10));
+const FLOW_API_URL = 'https://api.akvotest.org/flow/orgs';
+
+const acceptHeader = { Accept: 'application/vnd.akvo.flow.v2+json' };
+
+function rootFoldersUrl(flowInstance) {
+  return `${FLOW_API_URL}/${flowInstance}/folders`;
 }
 
-function foldersAndSurveysComparator(a, b) {
-  if (a.type !== b.type) {
-    return a.type === 'folder' ? 1 : -1;
+function merge(a, b) {
+  return Object.assign({}, a, b);
+}
+
+function indexById(objects) {
+  return objects.reduce((index, obj) => merge(index, { [obj.id]: obj }), {});
+}
+
+function parseInstance(text) {
+  if (text == null) return null;
+  const match = text.trim().toLowerCase().match(/^(https?:\/\/)?([a-z0-9_-]+)\.?.*$/);
+  if (match != null) {
+    return match[2];
   }
-  return a.title.localeCompare(b.title);
+  return null;
 }
-
-const initialState = {
-  instances: [],
-  selectedFolders: [],
-  selectedSurveyId: null,
-  idIndex: {},
-  folderIdIndex: {},
-  rootFolderIds: [],
-};
 
 export default class AkvoFlowDataSourceSettings extends Component {
-  static isValidSource({ instance, surveyId }) {
-    return typeof instance === 'string' && typeof surveyId === 'number';
+  static isValidSource({ instance, surveyId, formId }) {
+    return typeof instance === 'string'
+      && typeof surveyId === 'string'
+      && typeof formId === 'string';
   }
 
   constructor(props) {
     super(props);
-    this.state = initialState;
-    this.handleSelectInstance = this.handleSelectInstance.bind(this);
-    this.handleHierarchySelection = this.handleHierarchySelection.bind(this);
+    this.state = {
+      instance: null,
+      // selected folder ids,
+      selectedFolders: [],
+      selectedSurveyId: null,
+      selectedFormId: null,
+      // store of all fetched folders, surveys and survey definitions
+      folders: {},
+      surveys: {},
+      surveyDefinitions: {},
+    };
   }
 
-  componentDidMount() {
-    api.get('/api/flow/instances')
-      .then(response => response.json())
-      .then(instances => this.setState(instances));
+  resetSelections() {
+    this.setState({
+      selectedFolders: [],
+      selectedSurveyId: null,
+      selectedFormId: null,
+      folders: {},
+      surveys: {},
+      surveyDefinitions: {},
+    });
   }
 
-  handleSelectInstance(instance) {
-    const { dataSource, onChange } = this.props;
-    onChange(Object.assign({}, dataSource, {
-      instance: instance.value,
-      surveyId: null,
-    }));
-    this.setState(Object.assign({}, initialState, {
-      instances: this.state.instances,
-    }));
-    api.get(`/api/flow/folders-and-surveys/${instance.value}`)
-      .then(response => response.json())
-      .then((foldersAndSurveys) => {
-      /*
-       * Build 2 indexes to avoid repetetive calculation in render():
-       * - id -> folder or surveyId
-       * - folderId -> sorted array of folders and surveys
-       */
-        const idIndex = {};
-        const folderIdIndex = {};
-        foldersAndSurveys.forEach((folderOrSurvey) => {
-          idIndex[folderOrSurvey.id] = folderOrSurvey;
-          let existingFoldersAndSurveys = folderIdIndex[folderOrSurvey.folderId];
-          if (existingFoldersAndSurveys === undefined) {
-            existingFoldersAndSurveys = [];
-          }
-          existingFoldersAndSurveys.push(folderOrSurvey);
-          folderIdIndex[folderOrSurvey.folderId] = existingFoldersAndSurveys;
-        });
-
-        Object.keys(folderIdIndex).forEach((folderId) => {
-          folderIdIndex[folderId].sort(foldersAndSurveysComparator);
-        });
-
-        const rootFolderIds = findRootFolderIds(foldersAndSurveys);
-
-        this.setState({ rootFolderIds, idIndex, folderIdIndex });
-      });
+  handleFlowInstanceChange(text) {
+    const delay = 900; // ms
+    clearTimeout(this.flowInstanceChangeTimeout);
+    this.resetSelections();
+    this.flowInstanceChangeTimeout = setTimeout(
+      () => {
+        const instance = parseInstance(text);
+        if (instance == null) return;
+        this.setState({ instance });
+        api.get(rootFoldersUrl(instance), { parentId: 0 }, acceptHeader)
+          .then(response => response.json())
+          .then(folders => this.setState({
+            folders: merge(this.state.folders, indexById(folders)),
+          }));
+      },
+      delay
+    );
   }
 
-  handleSurveySelection(survey) {
-    const { dataSource, onChange, onChangeSettings } = this.props;
-    this.setState({ selectedSurveyId: survey.id });
-    onChange(Object.assign({}, dataSource, {
-      surveyId: survey.id,
-    }));
-    onChangeSettings({ name: survey.title });
+  folderSelectionOptions(parentId) {
+    return Object
+      .values(this.state.folders)
+      .filter(folder => folder.parentId === parentId)
+      .map(folder => ({
+        label: folder.name,
+        value: folder.id,
+      }));
   }
 
-  handleFolderSelection(folder, idx) {
-    const { dataSource, onChange } = this.props;
-    const { selectedFolders } = this.state;
-    const nextSelectedFolders = selectedFolders.slice(0, idx);
-    nextSelectedFolders.push(folder.id);
-    this.setState({ selectedFolders: nextSelectedFolders, selectedSurveyId: null });
-    onChange(Object.assign({}, dataSource, {
-      surveyId: null,
-    }));
+  surveySelectionOptions(folderId) {
+    return Object
+     .values(this.state.surveys)
+     .filter(survey => survey.folderId === folderId)
+     .map(survey => ({
+       label: survey.name,
+       value: survey.id,
+     }));
   }
 
-  handleHierarchySelection(id, idx) {
-    const surveyOrFolder = this.state.idIndex[id.value];
-    if (surveyOrFolder.type === 'survey') {
-      this.handleSurveySelection(surveyOrFolder);
-    } else {
-      this.handleFolderSelection(surveyOrFolder, idx);
+  formSelectionOptions(surveyId) {
+    const surveyDefinition = this.state.surveyDefinitions[surveyId];
+    if (surveyDefinition != null) {
+      return surveyDefinition.forms.map(form => ({
+        label: form.name,
+        value: form.id,
+      }));
     }
+    return [];
+  }
+
+  foldersAndSurveysSelectionOptions(parentId) {
+    return this.folderSelectionOptions(parentId).concat(this.surveySelectionOptions(parentId));
+  }
+
+  handleFolderSelection(selectedFolderId) {
+    const { selectedFolders } = this.state;
+    const selectedFolder = this.state.folders[selectedFolderId];
+    this.setState({ selectedFolders: selectedFolders.concat([selectedFolderId]) });
+    Promise.all([
+      api.get(selectedFolder.foldersUrl, null, acceptHeader).then(response => response.json()),
+      api.get(selectedFolder.surveysUrl, null, acceptHeader).then(response => response.json()),
+    ]).then(([folders, surveys]) => this.setState({
+      surveys: merge(this.state.surveys, indexById(surveys)),
+      folders: merge(this.state.folders, indexById(folders)),
+    }));
+  }
+
+  handleSurveySelection(selectedSurveyId) {
+    const { surveys, surveyDefinitions } = this.state;
+    this.setState({ selectedSurveyId });
+    const surveyUrl = surveys[selectedSurveyId].survey;
+    api.get(surveyUrl, null, acceptHeader)
+      .then(response => response.json())
+      .then(surveyDefinition => this.setState({
+        surveyDefinitions: merge(surveyDefinitions, {
+          [surveyDefinition.id]: surveyDefinition,
+        }),
+      }));
+  }
+
+  handleFormSelection(selectedFormId) {
+    this.setState({ selectedFormId });
+    this.props.onChange({
+      kind: 'AKVO_FLOW',
+      instance: this.state.instance,
+      surveyId: this.state.selectedSurveyId,
+      formId: selectedFormId,
+    });
+  }
+
+  handleSelection(evt) {
+    const selectedId = evt.value;
+    const { folders } = this.state;
+
+    if (folders[selectedId] != null) {
+      this.handleFolderSelection(selectedId);
+    } else {
+      this.handleSurveySelection(selectedId);
+    }
+  }
+
+  changeFolderSelection(evt, idx) {
+    this.setState({
+      selectedFolders: this.state.selectedFolders.slice(0, idx),
+      selectedSurveyId: null,
+      selectedFormId: null,
+    }, () => this.handleSelection(evt));
   }
 
   render() {
-    const { dataSource } = this.props;
     const {
-      instances,
       selectedFolders,
-      rootFolderIds,
-      folderIdIndex,
       selectedSurveyId,
+      selectedFormId,
+      folders,
     } = this.state;
-    const instanceOptions = instances.map(instance => ({
-      value: instance,
-      label: instance,
-    }));
 
-    let hierarchyOptions = [];
-
-    if (rootFolderIds.length !== 0) {
-      hierarchyOptions.push(
-        [].concat([], ...rootFolderIds.map((rootFolderId) => {
-          const surveysAndFolders = folderIdIndex[rootFolderId];
-          return surveysAndFolders.map(({ id, title }) => ({
-            value: id,
-            label: title,
-          }));
-        }))
-      );
-
-      hierarchyOptions = hierarchyOptions.concat(selectedFolders.map((folderId) => {
-        const foldersAndSurveys = folderIdIndex[folderId];
-        return foldersAndSurveys.map(({ id, title }) => ({
-          value: id,
-          label: title,
-        }));
-      }));
-    }
-    const hierarchySelections = hierarchyOptions.map((options, idx) => {
-      const selectedId = selectedFolders[idx] || selectedSurveyId;
+    const folderSelections = selectedFolders.map((id, idx) => {
+      const selectedFolder = folders[id];
+      const parentId = selectedFolder.parentId;
+      const options = this.foldersAndSurveysSelectionOptions(parentId);
       return (
         <Select
-          placeholder="Select a folder or survey"
           clearable={false}
           options={options}
-          value={selectedId}
-          onChange={id => this.handleHierarchySelection(id, idx)}
+          value={id}
+          onChange={evt => this.changeFolderSelection(evt, idx)}
         />
       );
     });
 
+    const lastSelectedFolderId = selectedFolders.length === 0 ?
+      '0' : selectedFolders[selectedFolders.length - 1];
+
+    // Either a survey or a folder can be selected
+    const nextSelection = (
+      <Select
+        clearable={false}
+        options={this.foldersAndSurveysSelectionOptions(lastSelectedFolderId)}
+        value={selectedSurveyId}
+        onChange={evt => this.handleSelection(evt)}
+      />
+    );
+
+    const formSelection = selectedSurveyId != null && (
+      <Select
+        clearable={false}
+        options={this.formSelectionOptions(selectedSurveyId)}
+        value={selectedFormId}
+        onChange={evt => this.handleFormSelection(evt.value)}
+      />
+    );
+
     return (
       <div>
-        <Select
-          placeholder="Select a FLOW instance"
-          clearable={false}
-          options={instanceOptions}
-          value={dataSource.instance}
-          onChange={this.handleSelectInstance}
+        <input
+          placeholder="Flow Application URL"
+          onChange={evt => this.handleFlowInstanceChange(evt.target.value)}
+          type="text"
+          style={{ width: '300px' }}
         />
-        {hierarchySelections}
+        {folderSelections}
+        {nextSelection}
+        {formSelection}
       </div>
     );
   }
@@ -181,7 +232,8 @@ export default class AkvoFlowDataSourceSettings extends Component {
 AkvoFlowDataSourceSettings.propTypes = {
   dataSource: PropTypes.shape({
     instance: PropTypes.string,
-    surveyId: PropTypes.number,
+    surveyId: PropTypes.string,
+    formId: PropTypes.string,
   }).isRequired,
   onChange: PropTypes.func.isRequired,
   onChangeSettings: PropTypes.func.isRequired,
