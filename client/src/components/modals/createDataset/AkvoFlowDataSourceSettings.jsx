@@ -19,7 +19,7 @@ function indexById(objects) {
 }
 
 function parseInstance(text) {
-  if (text == null) return null;
+  if (text == null || text.trim() === '') return null;
   const match = text.trim().toLowerCase().match(/^(https?:\/\/)?([a-z0-9_-]+)\.?.*$/);
   if (match != null) {
     return match[2];
@@ -83,12 +83,11 @@ class AkvoFlowDataSourceSettings extends Component {
             }
             throw new Error(`Unexpected response ${response.status}`);
           })
-          .catch(err => this.setState({ errorMessage: err.message }))
           .then(folders => this.setState({
             instance,
             folders: merge(this.state.folders, indexById(folders)),
-          })
-        );
+          }))
+          .catch(err => this.setState({ errorMessage: err.message }));
       },
       delay
     );
