@@ -12,7 +12,7 @@
   :db {:uri "jdbc:postgresql://localhost/lumen?user=lumen&password=password"}
   :http {:port 3000}
   :config {:file-upload-path "/tmp/akvo/lumen"
-           :flow-report-database-url ""
+           :flow-api-root "https://api.akvotest.org/flow"
            :keycloak-realm "akvo"
            :keycloak-url "http://localhost:8080/auth"
            :keycloak-public-client-id "akvo-lumen"

@@ -1,14 +1,13 @@
 import React, { Component, PropTypes } from 'react';
 import Select from 'react-select';
+import { connect } from 'react-redux';
 import * as api from '../../../api';
 import * as keycloak from '../../../auth';
 
-const FLOW_API_URL = 'https://api.akvotest.org/flow/orgs';
-
 const acceptHeader = { Accept: 'application/vnd.akvo.flow.v2+json' };
 
-function rootFoldersUrl(flowInstance) {
-  return `${FLOW_API_URL}/${flowInstance}/folders`;
+function rootFoldersUrl(flowApiRoot, flowInstance) {
+  return `${flowApiRoot}/orgs/${flowInstance}/folders`;
 }
 
 function merge(a, b) {
@@ -28,7 +27,7 @@ function parseInstance(text) {
   return null;
 }
 
-export default class AkvoFlowDataSourceSettings extends Component {
+class AkvoFlowDataSourceSettings extends Component {
   static isValidSource({ instance, surveyId, formId }) {
     return typeof instance === 'string'
       && typeof surveyId === 'string'
@@ -62,6 +61,7 @@ export default class AkvoFlowDataSourceSettings extends Component {
   }
 
   handleFlowInstanceChange(text) {
+    const { flowApiRoot } = this.props;
     const delay = 900; // ms
     clearTimeout(this.flowInstanceChangeTimeout);
     this.resetSelections();
@@ -70,7 +70,7 @@ export default class AkvoFlowDataSourceSettings extends Component {
         const instance = parseInstance(text);
         if (instance == null) return;
         this.setState({ instance });
-        api.get(rootFoldersUrl(instance), { parentId: 0 }, acceptHeader)
+        api.get(rootFoldersUrl(flowApiRoot, instance), { parentId: 0 }, acceptHeader)
           .then(response => response.json())
           .then(folders => this.setState({
             folders: merge(this.state.folders, indexById(folders)),
@@ -234,7 +234,12 @@ export default class AkvoFlowDataSourceSettings extends Component {
   }
 }
 
+export default connect(state => ({
+  flowApiRoot: state.env.flowApiRoot,
+}))(AkvoFlowDataSourceSettings);
+
 AkvoFlowDataSourceSettings.propTypes = {
+  flowApiRoot: PropTypes.string.isRequired,
   dataSource: PropTypes.shape({
     instance: PropTypes.string,
     surveyId: PropTypes.string,

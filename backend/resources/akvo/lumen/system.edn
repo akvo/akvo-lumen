@@ -92,7 +92,8 @@
    :keycloak-url keycloak-url
    :keycloak-realm keycloak-realm
    :keycloak-public-client-id keycloak-public-client-id
-   :sentry-client-dsn sentry-client-dsn}
+   :sentry-client-dsn sentry-client-dsn
+   :flow-api-root "https://api.akvo.org/flow"}
   :keycloak
   {:url keycloak-url
    :realm keycloak-realm

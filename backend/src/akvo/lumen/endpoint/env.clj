@@ -7,6 +7,7 @@
     (response
      (cond-> {"keycloakClient" (:keycloak-public-client-id config)
               "keycloakURL" (:keycloak-url config)
+              "flowApiRoot" (:flow-api-root config)
               "tenant" (:tenant request)}
        (string? (:sentry-client-dsn config))
        (assoc "sentryDSN" (:sentry-client-dsn config))))))

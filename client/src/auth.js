@@ -29,7 +29,13 @@ export function init() {
   }
   return fetch('/env')
     .then(response => response.json())
-    .then(({ keycloakClient, keycloakURL, tenant, sentryDSN }) => new Promise((resolve, reject) => {
+    .then(({
+      keycloakClient,
+      keycloakURL,
+      tenant,
+      sentryDSN,
+      flowApiRoot,
+    }) => new Promise((resolve, reject) => {
       if (process.env.NODE_ENV === 'production') {
         Raven.config(sentryDSN).install();
         Raven.setExtraContext({ tenant });
@@ -45,9 +51,10 @@ export function init() {
             if (process.env.NODE_ENV === 'production') {
               Raven.setUserContext(profile);
             }
-            resolve(Object.assign({}, profile,
-              { admin: keycloak.hasRealmRole(`akvo:lumen:${tenant}:admin`) }
-            ));
+            resolve({
+              profile: Object.assign({}, profile, { admin: keycloak.hasRealmRole(`akvo:lumen:${tenant}:admin`) }),
+              env: { flowApiRoot },
+            });
           }).error(() => {
             reject(new Error('Could not load user profile'));
           });

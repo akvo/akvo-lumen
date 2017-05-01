@@ -77,7 +77,6 @@
                      :body)]
     (lazy-cat (get response "formInstances")
               (when-let [url (get response "cursor")]
-                (println "Fetching more")
                 (form-instances* refresh-token url)))))
 
 (defn form-instances
@@ -230,12 +229,11 @@
     columns))
 
 (defmethod import/make-dataset-data-table "AKVO_FLOW"
-  [tenant-conn {:keys [flow-api]} table-name {:strs [instance surveyId formId refreshToken]}]
+  [tenant-conn {:keys [flow-api-root]} table-name {:strs [instance surveyId formId refreshToken]}]
   (try
-    (let [api-root "https://api.akvotest.org/flow"
-          refresh-token (offline-token refreshToken)]
+    (let [refresh-token (offline-token refreshToken)]
       {:success? true
-       :columns (let [survey (survey-definition api-root
+       :columns (let [survey (survey-definition flow-api-root
                                                 (access-token refresh-token)
                                                 instance
                                                 surveyId)]
