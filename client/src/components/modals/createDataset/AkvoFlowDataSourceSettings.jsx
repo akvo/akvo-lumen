@@ -209,6 +209,7 @@ class AkvoFlowDataSourceSettings extends Component {
       const options = this.foldersAndSurveysSelectionOptions(parentId);
       return (
         <Select
+          key={idx}
           clearable={false}
           options={options}
           value={id}
