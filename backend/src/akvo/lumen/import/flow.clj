@@ -248,26 +248,3 @@
       (.printStackTrace e)
       {:success? false
        :reason (str "Unexpected error " (.getMessage e))})))
-
-
-(comment
-  (def user-id "343ef061-25ca-4808-841b-7218f8a26b7f")
-  (def refresh-token
-    (-> (jdbc/query "jdbc:postgresql://localhost/lumen_tenant_1?user=lumen&password=password"
-                    ["SELECT refresh_token FROM user_token WHERE user_id=?" user-id])
-        first
-        :refresh_token))
-  (def api-root "http://localhost:3001")
-  (def survey (survey-definition api-root
-                                 (access-token refresh-token)
-                                 "akvoflowsandbox"
-                                 152342023))
-
-  (take 5 (form-instances "" (form survey "146532016")))
-
-
-  (time (create-dataset "jdbc:postgresql://localhost/lumen_tenant_1?user=lumen&password=password"
-                        refresh-token
-                        "ds_uuid8"
-                        survey
-                        "146532016")) )

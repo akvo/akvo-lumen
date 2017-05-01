@@ -1,6 +1,6 @@
 import fetch from 'isomorphic-fetch';
-import * as auth from './auth';
 import { omit } from 'lodash';
+import * as auth from './auth';
 
 function wrapUpdateToken(fetchRequestThunk) {
   return auth.token()
