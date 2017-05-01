@@ -230,7 +230,7 @@
     columns))
 
 (defmethod import/make-dataset-data-table "AKVO_FLOW"
-  [tenant-conn claims {:keys [flow-api]} table-name {:strs [instance surveyId formId refreshToken]}]
+  [tenant-conn {:keys [flow-api]} table-name {:strs [instance surveyId formId refreshToken]}]
   (try
     (let [api-root "https://api.akvotest.org/flow"
           refresh-token (offline-token refreshToken)]

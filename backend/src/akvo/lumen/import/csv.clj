@@ -100,7 +100,7 @@
           url))))
 
 (defmethod import/make-dataset-data-table "CSV"
-  [tenant-conn claims {:keys [file-upload-path]} table-name spec]
+  [tenant-conn {:keys [file-upload-path]} table-name spec]
   (try
     (let [ ;; TODO a bit of "manual" integration work
           path (get-path spec file-upload-path)
