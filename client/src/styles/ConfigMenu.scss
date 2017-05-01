@@ -53,6 +53,7 @@
     height: 0;
     border: 0.1rem solid transparent;
     transition: border-color 0.5s ease, height 0.5s ease;
+    transition-delay: 0.75s;
     overflow: hidden;
   }
   .aggregationInputContainer {

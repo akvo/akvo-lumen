@@ -3,8 +3,7 @@ import * as auth from './auth';
 
 function wrapUpdateToken(fetchRequestThunk) {
   return auth.token()
-    .then(token => fetchRequestThunk(token))
-    .then(response => response.json());
+    .then(token => fetchRequestThunk(token));
 }
 
 function requestHeaders(token, additionalHeaders = {}) {
@@ -56,6 +55,16 @@ export function del(url, headers) {
     fetch(url, {
       method: 'DELETE',
       headers: requestHeaders(token, headers),
+    })
+  );
+}
+
+export function patch(url, body, headers) {
+  return wrapUpdateToken(token =>
+    fetch(url, {
+      method: 'PATCH',
+      headers: requestHeaders(token, headers),
+      body: JSON.stringify(body),
     })
   );
 }

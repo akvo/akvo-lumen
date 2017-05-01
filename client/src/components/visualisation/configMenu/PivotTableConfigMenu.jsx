@@ -1,7 +1,12 @@
 import React, { Component, PropTypes } from 'react';
 import SelectInput from './SelectInput';
+import LabelInput from './LabelInput';
 import Subtitle from './Subtitle';
 import UniqueValueMenu from './UniqueValueMenu';
+import ToggleInput from './ToggleInput';
+import { canShowPivotTotals } from '../../../utilities/chart';
+
+require('../../../styles/PivotTableConfigMenu.scss');
 
 // For now, we only support a subset of the regular aggregation options
 const aggregationOptions = [
@@ -27,6 +32,24 @@ const aggregationOptions = [
   },
 ];
 
+const getColumnTitle = (columnName, columnOptions = []) => {
+  const entry = columnOptions.find(item => item.value === columnName);
+
+  return entry ? entry.title : null;
+};
+
+const showValueDisplayInput = (spec) => {
+  if (spec.aggregation !== 'count' && spec.aggregation !== 'sum') {
+    return false;
+  }
+
+  if (spec.rowColumn === null || spec.categoryColumn === null) {
+    return false;
+  }
+
+  return true;
+};
+
 export default class PivotTableConfigMenu extends Component {
   constructor() {
     super();
@@ -45,7 +68,7 @@ export default class PivotTableConfigMenu extends Component {
     const spec = visualisation.spec;
 
     return (
-      <div>
+      <div className="PivotTableConfigMenu">
         <hr />
         <Subtitle>Aggregation</Subtitle>
         <div>
@@ -68,14 +91,17 @@ export default class PivotTableConfigMenu extends Component {
                 onChangeSpec(change);
               }}
             />
-            <div
-              className="helpText aggregationHelpText"
-            >
-              <div className="helpTextContainer">
-                <span className="alert">!</span>
-                Choose a category column and a row column to use aggregations other than count.
+            {spec.aggregation === 'count' &&
+              (spec.rowColumn == null || spec.categoryColumn == null) &&
+              <div
+                className="helpText aggregationHelpText"
+              >
+                <div className="helpTextContainer">
+                  <span className="alert">!</span>
+                  Choose a column and a row to pivot on to use aggregations other than count.
+                </div>
               </div>
-            </div>
+            }
           </span>
           {spec.aggregation !== 'count' &&
             <div>
@@ -109,12 +135,61 @@ export default class PivotTableConfigMenu extends Component {
               </div>
             </div>
           }
+          {showValueDisplayInput(spec) &&
+            <SelectInput
+              placeholder="Choose how cells are displayed"
+              labelText="Value display"
+              choice={spec.valueDisplay ? spec.valueDisplay : 'default'}
+              name="valueDisplay"
+              options={[
+                {
+                  value: 'default',
+                  label: 'Default',
+                },
+                {
+                  value: 'percentageRow',
+                  label: 'Cell as percentage of row',
+                },
+                {
+                  value: 'percentageColumn',
+                  label: 'Cell as percentage of column',
+                },
+                {
+                  value: 'percentageTotal',
+                  label: 'Cell as percentage of table total',
+                },
+              ]}
+              onChange={value => onChangeSpec({
+                valueDisplay: value,
+              })}
+            />
+          }
+          {canShowPivotTotals(spec) &&
+            <div>
+              <ToggleInput
+                className="totalToggle"
+                checked={spec.hideRowTotals !== true}
+                label="Show row totals"
+                onChange={() => onChangeSpec({
+                  hideRowTotals: !spec.hideRowTotals,
+                })}
+              />
+              <ToggleInput
+                className="totalToggle"
+                checked={spec.hideColumnTotals !== true}
+                label="Show column totals"
+                onChange={() => onChangeSpec({
+                  hideColumnTotals: !spec.hideColumnTotals,
+                })}
+              />
+            </div>
+          }
         </div>
         <hr />
-        <Subtitle>Categories</Subtitle>
+        <Subtitle>Columns</Subtitle>
         <SelectInput
-          placeholder="Select a category column"
-          labelText="Category column"
+          placeholder="Select a column"
+          labelText="Columns"
           choice={spec.categoryColumn !== null ? spec.categoryColumn.toString() : null}
           name="categoryColumnInput"
           options={columnOptions}
@@ -125,22 +200,41 @@ export default class PivotTableConfigMenu extends Component {
               change.aggregation = 'count';
               change.valueColumn = null;
             }
+            if (value !== spec.categoryColumn) {
+              change.categoryTitle = null;
+              change.filters = spec.filters.filter(filter => filter.origin !== 'pivot-column');
+            }
             onChangeSpec(change);
           }}
           clearable
         />
         {spec.categoryColumn !== null &&
-          <UniqueValueMenu
-            tableData={visualisation.data}
-            dimension="category"
-            collapsed={this.state.catValMenuCollapsed}
-            onChangeSpec={this.props.onChangeSpec}
-            column={spec.categoryColumn}
-            filters={spec.filters}
-            toggleCollapsed={() =>
-              this.setState({ catValMenuCollapsed: !this.state.catValMenuCollapsed })
-            }
-          />
+          <div>
+            <UniqueValueMenu
+              tableData={visualisation.data}
+              dimension="column"
+              collapsed={this.state.catValMenuCollapsed}
+              onChangeSpec={this.props.onChangeSpec}
+              column={spec.categoryColumn}
+              filters={spec.filters}
+              toggleCollapsed={() =>
+                this.setState({ catValMenuCollapsed: !this.state.catValMenuCollapsed })
+              }
+            />
+            <LabelInput
+              value={
+                spec.categoryTitle == null ?
+                  getColumnTitle(spec.categoryColumn, columnOptions)
+                  :
+                  spec.categoryTitle.toString()
+              }
+              placeholder="Columns title"
+              name="categoryTitle"
+              onChange={event => onChangeSpec({
+                categoryTitle: event.target.value.toString(),
+              })}
+            />
+          </div>
         }
         <hr />
         <Subtitle>Rows</Subtitle>
@@ -157,22 +251,41 @@ export default class PivotTableConfigMenu extends Component {
               change.aggregation = 'count';
               change.valueColumn = null;
             }
+            if (value !== spec.rowColumn) {
+              change.rowTitle = null;
+              change.filters = spec.filters.filter(filter => filter.origin !== 'pivot-row');
+            }
             onChangeSpec(change);
           }}
           clearable
         />
         {spec.rowColumn !== null &&
-          <UniqueValueMenu
-            tableData={visualisation.data}
-            dimension="row"
-            collapsed={this.state.rowValMenuCollapsed}
-            onChangeSpec={this.props.onChangeSpec}
-            column={spec.rowColumn}
-            filters={spec.filters}
-            toggleCollapsed={() =>
-              this.setState({ rowValMenuCollapsed: !this.state.rowValMenuCollapsed })
-            }
-          />
+          <div>
+            <UniqueValueMenu
+              tableData={visualisation.data}
+              dimension="row"
+              collapsed={this.state.rowValMenuCollapsed}
+              onChangeSpec={this.props.onChangeSpec}
+              column={spec.rowColumn}
+              filters={spec.filters}
+              toggleCollapsed={() =>
+                this.setState({ rowValMenuCollapsed: !this.state.rowValMenuCollapsed })
+              }
+            />
+            <LabelInput
+              value={
+                spec.rowTitle == null ?
+                  getColumnTitle(spec.rowColumn, columnOptions)
+                  :
+                  spec.rowTitle.toString()
+              }
+              placeholder="Row column title"
+              name="rowTitle"
+              onChange={event => onChangeSpec({
+                rowTitle: event.target.value.toString(),
+              })}
+            />
+          </div>
         }
       </div>
     );

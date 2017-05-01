@@ -3,6 +3,8 @@ import vg from 'vega';
 import isEqual from 'lodash/isEqual';
 import * as chart from '../../utilities/chart';
 
+require('../../styles/Chart.scss');
+
 function getSize(computedWidth) {
   let size;
 
@@ -21,10 +23,61 @@ function getSize(computedWidth) {
   return size;
 }
 
+const getTitleStyle = (title = '', chartSize) => {
+  const titleLength = title.toString().length;
+  const padding = 8;
+
+  let baseFontSize;
+
+  switch (chartSize) {
+    case 'xsmall':
+      baseFontSize = 12;
+      break;
+    case 'small':
+      baseFontSize = 14;
+      break;
+    case 'medium':
+    case 'large':
+      baseFontSize = 16;
+      break;
+    case 'xlarge':
+      baseFontSize = 20;
+      break;
+
+    default:
+      baseFontSize = 16;
+  }
+
+  if (titleLength > 96) {
+    baseFontSize -= 2;
+  }
+
+  const lineHeight = Math.floor(baseFontSize * 1.4);
+
+  return ({
+    height: titleLength <= 48 ? lineHeight + (padding * 2) : (lineHeight * 2) + (padding * 2),
+    fontSize: baseFontSize,
+    lineHeight: `${lineHeight}px`,
+  });
+};
+
 export default class Chart extends Component {
 
+  constructor() {
+    super();
+    this.state = {
+      chartHeight: null,
+      titleHeight: null,
+      titleLength: null,
+    };
+  }
+
   componentDidMount() {
-    this.renderChart(this.props);
+    const { visualisation, width } = this.props;
+    const titleHeight = getTitleStyle(visualisation.name, getSize(width)).height;
+    const chartHeight = this.props.height - titleHeight;
+
+    this.renderChart(this.props, chartHeight);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -33,19 +86,28 @@ export default class Chart extends Component {
       this.props.height !== nextProps.height;
 
     if (visualisationChanged || sizeChanged) {
-      this.renderChart(nextProps);
+      const { visualisation, width } = nextProps;
+      const titleHeight = getTitleStyle(visualisation.name, getSize(width)).height;
+      const chartHeight = nextProps.height - titleHeight;
+
+      this.renderChart(nextProps, chartHeight);
     }
   }
 
-  renderChart(props) {
-    const { visualisation, datasets, width, height } = props;
+  renderChart(props, height) {
+    const { visualisation, datasets, width } = props;
     const containerHeight = height || 400;
     const containerWidth = width || 800;
+    const chartSize = getSize(containerWidth);
     let chartData;
     switch (visualisation.visualisationType) {
       case 'pie':
       case 'donut':
-        chartData = chart.getPieData(visualisation, datasets);
+        chartData = visualisation.data;
+        if (!chartData) {
+          // Aggregated data hasn't loaded yet - do nothing
+          return;
+        }
         break;
       case 'area':
       case 'line':
@@ -60,7 +122,10 @@ export default class Chart extends Component {
       default:
         throw new Error(`Unknown visualisation type ${visualisation.visualisationType}`);
     }
-    const vegaSpec = chart.getVegaSpec(visualisation, chartData, containerHeight, containerWidth);
+    /* TODO - once we support backend aggregations for more vTypes, it doesn't make sense to
+    ** pass `chartData` separately, because we include it on the visualisation itself */
+    const vegaSpec =
+      chart.getVegaSpec(visualisation, chartData, containerHeight, containerWidth, chartSize);
 
     vg.parse.spec(vegaSpec, (error, vegaChart) => {
       this.vegaChart = vegaChart({ el: this.element });
@@ -84,6 +149,13 @@ export default class Chart extends Component {
           height: containerHeight,
         }}
       >
+        <h2
+          style={getTitleStyle(visualisation.name, chartSize)}
+        >
+          <span>
+            {visualisation.name}
+          </span>
+        </h2>
         <div
           ref={(el) => { this.element = el; }}
         />

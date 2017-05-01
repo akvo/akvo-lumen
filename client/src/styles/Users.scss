@@ -31,11 +31,23 @@
           font-weight: bold;
         }
       }
+      .isMe {
+        color: $midGrey;
+      }
     }
+  }
+  .UserActionSelector {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background: $white;
+    border: 0;
+    text-indent: 1px;
+    text-overflow: ellipsis;
+    width: 100px;
   }
 }
 
-.InviteUserModal {
+.ConfirmUserActionModal, .InviteUserModal {
   .contents {
     line-height: 2.5rem;
     padding-left: 0;
@@ -43,6 +55,9 @@
       margin-top: 1.5rem;
     }
   }
+}
+
+.InviteUserModeal {
   .emailInput {
     width: 250px;
   }

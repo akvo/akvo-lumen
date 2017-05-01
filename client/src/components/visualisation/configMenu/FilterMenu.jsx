@@ -58,6 +58,9 @@ const strategies = {
   ],
 };
 
+const getMenuFilters = filterArray =>
+  filterArray.filter(item => item.origin !== 'pivot-row' && item.origin !== 'pivot-column');
+
 const getFilterOperationLabel =
   operation => operations.find(item => item.value.toString() === operation.toString()).label;
 
@@ -135,18 +138,21 @@ export default class FilterMenu extends Component {
   saveFilter() {
     const { columnOptions } = this.props;
     const { newFilterColumn, newFilterValue, newFilterOperation, newFilterStrategy } = this.state;
-    const filters = this.props.filters.map(item => item);
+    const rawFilters = this.props.filters.slice(0);
 
-    filters.push({
+    rawFilters.push({
       column: newFilterColumn,
       columnType: columnOptions.find(col => col.value === newFilterColumn).type,
       value: newFilterValue,
       operation: newFilterOperation,
       strategy: newFilterStrategy,
+      origin: 'filterMenu',
     });
+
     this.props.onChangeSpec({
-      filters,
+      filters: rawFilters,
     });
+
     this.setState({
       inputInProgress: false,
       newFilterColumn: null,
@@ -157,17 +163,32 @@ export default class FilterMenu extends Component {
   }
 
   deleteFilter(index) {
-    const filters = this.props.filters.map(item => item);
+    const filters = getMenuFilters(this.props.filters);
+    const delFilter = filters[index];
+    const rawFilters = this.props.filters; // Raw filter array, including filters from other origins
 
-    filters.splice(index, 1);
+    const filterIndex = rawFilters.findIndex(entry => Boolean(
+      entry.column === delFilter.column &&
+      entry.value === delFilter.value &&
+      entry.operation === delFilter.operation &&
+      entry.strategy === delFilter.strategy &&
+      entry.origin === delFilter.origin
+    ));
 
-    this.props.onChangeSpec({
-      filters,
-    });
+    if (filterIndex === -1) {
+      throw new Error(`Cannot delete filter ${delFilter} as it does not appear in spec.filters`);
+    } else {
+      rawFilters.splice(filterIndex, 1);
+
+      this.props.onChangeSpec({
+        filters: rawFilters,
+      });
+    }
   }
 
   render() {
-    const { hasDataset, filters, columnOptions } = this.props;
+    const { hasDataset, columnOptions } = this.props;
+    const filters = getMenuFilters(this.props.filters);
     const {
       newFilterColumn,
       newFilterStrategy,
@@ -176,6 +197,7 @@ export default class FilterMenu extends Component {
       inputInProgress } = this.state;
     const activeColumnType = newFilterColumn ?
       columnOptions.find(col => col.value === newFilterColumn).type : null;
+
     return (
       <div
         className={`FilterMenu inputGroup ${hasDataset ? 'enabled' : 'disabled'}`}

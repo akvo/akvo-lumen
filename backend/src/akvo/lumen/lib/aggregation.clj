@@ -1,0 +1,40 @@
+(ns akvo.lumen.lib.aggregation
+  (:require [akvo.lumen.http :as http]
+            [akvo.lumen.lib.aggregation.pie :as pie]
+            [akvo.lumen.lib.aggregation.pivot :as pivot]
+            [clojure.java.jdbc :as jdbc]
+            [hugsql.core :as hugsql]))
+
+(hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
+
+(defmulti query*
+  (fn [tenant-conn dataset visualisation-type query]
+    visualisation-type))
+
+(defmethod query* :default
+  [tenant-conn dataset visualisation-type query]
+  (http/bad-request {"message" "Unsupported visualisation type"
+                     "visualisationType" visualisation-type
+                     "query" query}))
+
+(defn query [tenant-conn dataset-id visualisation-type query]
+  (jdbc/with-db-transaction [tenant-tx-conn tenant-conn {:read-only? true}]
+    (if-let [dataset (dataset-by-id tenant-tx-conn {:id dataset-id})]
+      (try
+        (query* tenant-tx-conn dataset visualisation-type query)
+        (catch clojure.lang.ExceptionInfo e
+          (http/bad-request (merge {:message (.getMessage e)}
+                                   (ex-data e)))))
+      (http/not-found {"datasetId" dataset-id}))))
+
+(defmethod query* "pivot"
+  [tenant-conn dataset _ query]
+  (pivot/query tenant-conn dataset query))
+
+(defmethod query* "pie"
+  [tenant-conn dataset _ query]
+  (pie/query tenant-conn dataset query))
+
+(defmethod query* "donut"
+  [tenant-conn dataset _ query]
+  (pie/query tenant-conn dataset query))

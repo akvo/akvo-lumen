@@ -25,6 +25,7 @@
                  [org.postgresql/postgresql "42.0.0"]
                  [org.slf4j/slf4j-nop "1.7.24"]
                  [ragtime/ragtime.jdbc "0.6.4"]
+                 [raven-clj "1.5.0"]
                  [ring "1.5.1"]
                  [ring/ring-defaults "0.2.3"]
                  [ring/ring-json "0.4.0"]]

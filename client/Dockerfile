@@ -21,4 +21,5 @@ RUN cd /tmp/lumen/ && \
     cp dist/* /usr/share/nginx/html/assets && \
     mv /usr/share/nginx/html/assets/index.html /usr/share/nginx/html/index.html && \
     mv /usr/share/nginx/html/assets/index-pub.html /usr/share/nginx/html/index-pub.html && \
+    cp favicon.ico /usr/share/nginx/html/favicon.ico && \
     cd /tmp && rm -rf lumen

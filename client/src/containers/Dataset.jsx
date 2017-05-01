@@ -72,6 +72,7 @@ class Dataset extends Component {
 
     this.setPendingTransformation(now, transformation);
     api.post(`/api/transformations/${id}/transform`, transformation.toJS())
+      .then(response => response.json())
       .then(() => dispatch(fetchDataset(id)))
       .then(() => this.removePending(now));
   }
@@ -83,6 +84,7 @@ class Dataset extends Component {
 
     this.setPendingUndo(now);
     api.post(`/api/transformations/${id}/undo`)
+      .then(response => response.json())
       .then(() => dispatch(fetchDataset(id)))
       .then(() => this.removePending(now));
   }
@@ -97,7 +99,7 @@ class Dataset extends Component {
     const { pendingTransformations } = this.state;
     const { dataset } = this.props;
     if (dataset == null || !this.state.asyncComponents) {
-      return <div className="Dataset">Loading...</div>;
+      return <div className="Dataset loadingIndicator">Loading...</div>;
     }
     const { DatasetHeader, DatasetTable } = this.state.asyncComponents;
 

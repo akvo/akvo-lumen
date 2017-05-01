@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import Modal from 'react-modal';
+import isValidEmail from '../../utils';
 
 require('../../styles/DashboardModal.scss');
 
@@ -23,6 +24,7 @@ export default class InviteUser extends Component {
 
   render() {
     const { isOpen, onClose } = this.props;
+    const isDisabled = !isValidEmail(this.state.email);
     return (
       <Modal
         isOpen={isOpen}
@@ -57,9 +59,9 @@ export default class InviteUser extends Component {
                 className="emailInput"
                 name="email"
                 onChange={this.onChange}
-                placeholder="e.g. user@domain.org"
+                placeholder="Enter email address"
                 type="email"
-                value={this.state.emailAddress}
+                value={this.state.email}
               />
             </div>
             <div className="controls">
@@ -71,6 +73,7 @@ export default class InviteUser extends Component {
               </button>
               <button
                 className="clickable positive"
+                disabled={isDisabled}
                 onClick={this.handleInvite}
               >
               Send invitation

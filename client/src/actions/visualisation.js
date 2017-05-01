@@ -15,11 +15,12 @@ export function createVisualisation(visualisation) {
   return (dispatch) => {
     dispatch(createVisualisationRequest(visualisation));
     api.post('/api/visualisations', visualisation)
-    .then((vis) => {
-      dispatch(createVisualisationSuccess(vis));
-      dispatch(push(`/visualisation/${vis.id}`));
-    })
-    .catch(err => dispatch(createVisualisationFailure(err)));
+      .then(response => response.json())
+      .then((vis) => {
+        dispatch(createVisualisationSuccess(vis));
+        dispatch(push(`/visualisation/${vis.id}`));
+      })
+      .catch(err => dispatch(createVisualisationFailure(err)));
   };
 }
 
@@ -32,15 +33,16 @@ export function fetchVisualisation(id) {
   return (dispatch) => {
     dispatch(fetchVisualisationRequest(id));
     api.get(`/api/visualisations/${id}`)
-    .then((visualisation) => {
-      // We also need to possibly fetch datasets.
-      const datasetId = visualisation.datasetId;
-      if (datasetId) {
-        dispatch(fetchDataset(datasetId));
-      }
-      dispatch(fetchVisualisationSuccess(visualisation));
-    })
-    .catch(err => dispatch(fetchVisualisationFailure(err)));
+      .then(response => response.json())
+      .then((visualisation) => {
+        // We also need to possibly fetch datasets.
+        const datasetId = visualisation.datasetId;
+        if (datasetId) {
+          dispatch(fetchDataset(datasetId));
+        }
+        dispatch(fetchVisualisationSuccess(visualisation));
+      })
+      .catch(err => dispatch(fetchVisualisationFailure(err)));
   };
 }
 
@@ -57,11 +59,12 @@ export function saveVisualisationChanges(visualisation) {
       status: 'PENDING',
     })));
     api.put(`/api/visualisations/${visualisation.id}`, visualisation)
-    .then(() => dispatch(saveVisualisationChangesSuccess(Object.assign({}, visualisation, {
-      modified: Date.now(),
-      status: 'OK',
-    }))))
-    .catch(() => dispatch(saveVisualisationChangesFailure(prevVisualisation)));
+      .then(response => response.json())
+      .then(() => dispatch(saveVisualisationChangesSuccess(Object.assign({}, visualisation, {
+        modified: Date.now(),
+        status: 'OK',
+      }))))
+      .catch(() => dispatch(saveVisualisationChangesFailure(prevVisualisation)));
   };
 }
 
@@ -74,7 +77,8 @@ export function deleteVisualisation(id) {
   return (dispatch) => {
     dispatch(deleteVisualisationRequest);
     api.del(`/api/visualisations/${id}`)
-    .then(() => dispatch(deleteVisualisationSuccess(id)))
-    .catch(error => dispatch(deleteVisualisationFailure(error)));
+      .then(response => response.json())
+      .then(() => dispatch(deleteVisualisationSuccess(id)))
+      .catch(error => dispatch(deleteVisualisationFailure(error)));
   };
 }

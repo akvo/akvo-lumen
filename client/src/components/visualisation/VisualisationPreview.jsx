@@ -73,6 +73,9 @@ export default function CreateVisualisationPreview({ visualisation, datasets }) 
         <VisualisationViewer
           visualisation={visualisation}
           datasets={datasets}
+          context="editor"
+          height={400}
+          width={800}
         /> :
         null
       }

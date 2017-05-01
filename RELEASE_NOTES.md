@@ -1,5 +1,65 @@
 # Release Notes
 
+## 0.8.0
+
+### New and noteworthy
+
+* User invitations can now be managed in the admin console
+* User invitations can now be revoked
+* Added favicon
+* Pie chart aggregations are now performed on the backend
+* Error tracking with Sentry
+* Show full cell values on hover in the dataset view
+
+## 0.7.1
+
+### New and noteworthy
+* Admin user actions now present a confirmation dialog
+* The list of visualisations in the dashboard editor can now be filtered on title
+* Visualisations in the dashboard editor are now sorted by last-modified
+* Pivot tables in the dashboard editor can now be resized to a shorter minimum height
+* When showing cell values as percentages, pivot tables now only show the count under "Total"
+* Visualisations are now more size-responsive
+* Dashboard text entities are now more size-responsive
+* Visualisaiton titles are now rendered as HTML, with text wrapping
+* Bar and pie chart legends can now be given custom titles
+* Changed how bar charts resized to accomodate long bar labels and legend titles
+* Moved hover-text for Pie charts to bottom of chart when using "show legend"
+* Visualisation type is now shown for visualisations in the library view
+
+### Bugfixes
+
+* "Loading" indicator text is no longer hidden behind library menu
+* Fixed bug where Map legend entries for number types were sorted incorrectly
+
+## 0.7.0
+
+Date 2017-03-14
+
+### New and noteworthy
+
+* In the Admin console admins can promote and demote users to admin.
+* Admin console now supports removing users from the tenant.
+* Text entities in dashboards now show line breaks entered by the user
+* Dashboard editor no longer redirects to library view when a dashboard is saved
+* Increased default visualisation color palette to 20 colors
+* Pie chart segments are now more consistent between visualisations, where possible
+* Pivot tables improvements:
+  * Better text wrapping in header cells
+  * Column and row titles are now user-editable
+  * Totals are now shown when using sum or count aggregation
+  * Cell values can be shown as percentages when using sum or count aggregation
+  * Pivot tables show a warning message when more than 50 columns would be generated
+
+### Bugfixes
+
+* Fix bug where pivot tables would fail to load in dashboard editor
+* Fix bug where dataset filters would not display correctly in filter list
+* Fix bug where percentage values would not display in pie charts
+* Fix bug where text entities in dashboards would not display line breaks
+* Fix bug where selecting an x-axis column before a y-axis column would break the dashboard editor
+* Fix bug where multiple scroll-bars would display when using windows or linux
+
 ## 0.6.1
 
 Date 2017-02-24

@@ -50,6 +50,8 @@
   bucketColumn: 'c1',
   sort: null, // can be "asc", "dsc" or "null"
   showLegend: null,
+  legendTitle: null, // optional string max 32 chars
+  data: {}, // Aggregated data response from backend. Never mutate this, clone it instead
 }
 ```
 
@@ -86,9 +88,31 @@
   axisLabelXFromUser: false, // Has the label been manually entered by the user?
   axisLabelY: null,
   axisLabelYFromUser: false,
+  legendTitle: null, // optional string max 32 chars
   filters: [],
   sort: null, // can be "asc", "dsc" or null
   truncateSize: '10', // optional, used to indicate how many bars to show when
+}
+
+```
+
+### Pivot table
+
+```
+{
+  version: 1,
+  filters: [],
+  aggregation: 'count',
+  valueColumn: null, // required if aggregation is other than 'count'
+  categoryColumn: null, // required
+  categoryTitle: null, // required
+  rowColumn: null, // Optional, will use categoryColumn title if ommited
+  rowTitle: null, // Optional, will use rowColumn title if ommited
+  decimalPlaces: 3, // Only used at render-time
+  valueDisplay: 'default', // One of "default", "percentageRow", "percentageColumn", "percentageTotal"
+  hideRowTotals: false, // Row and Column totals will still be calculated, but then hidden with css
+  hideColumnTotals: false,
+  data: {}, // Aggregated data response from backend. Never mutate this, clone it instead
 }
 
 ```

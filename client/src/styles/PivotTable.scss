@@ -58,4 +58,28 @@
     border: none;
     font-weight: bold;
   }
+  &.hasTotals {
+    /* Hide totals if needed */
+    &.hideRowTotals {
+      thead {
+        tr:last-child {
+          th:last-child {
+            display: none;
+          }
+        }
+      }
+      tbody {
+        tr td:last-child {
+          display: none;
+        }
+      }
+    }
+    &.hideColumnTotals {
+      tbody {
+        tr:last-child {
+          display: none;
+        }
+      }
+    }
+  }
 }
