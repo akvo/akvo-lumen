@@ -15,8 +15,7 @@
            :flow-report-database-url ""
            :keycloak-realm "akvo"
            :keycloak-url "http://localhost:8080/auth"
-           :keycloak-public-client-id "akvo-lumen"
-           }
+           :keycloak-public-client-id "akvo-lumen"           }
   :emailer {:from-email "devops@akvo.localhost"
             :from-name "Akvo Lumen"}
   :keycloak {:url "http://localhost:8080/auth"

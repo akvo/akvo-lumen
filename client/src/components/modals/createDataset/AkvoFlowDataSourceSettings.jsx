@@ -1,12 +1,13 @@
 import React, { Component, PropTypes } from 'react';
 import Select from 'react-select';
-import fetch from 'isomorphic-fetch';
-// import * as api from '../../../api';
+import * as api from '../../../api';
 
-const FLOW_API_URL = 'http://localhost:3333/flow/instance';
+const FLOW_API_URL = 'https://api.akvotest.org/flow/orgs';
+
+const acceptHeader = { Accept: 'application/vnd.akvo.flow.v2+json' };
 
 function rootFoldersUrl(flowInstance) {
-  return `${FLOW_API_URL}/${flowInstance}/folders?parentId=0`;
+  return `${FLOW_API_URL}/${flowInstance}/folders`;
 }
 
 function merge(a, b) {
@@ -15,6 +16,15 @@ function merge(a, b) {
 
 function indexById(objects) {
   return objects.reduce((index, obj) => merge(index, { [obj.id]: obj }), {});
+}
+
+function parseInstance(text) {
+  if (text == null) return null;
+  const match = text.trim().toLowerCase().match(/^(https?:\/\/)?([a-z_-]+)\.?.*$/);
+  if (match != null) {
+    return match[2];
+  }
+  return null;
 }
 
 export default class AkvoFlowDataSourceSettings extends Component {
@@ -53,13 +63,12 @@ export default class AkvoFlowDataSourceSettings extends Component {
     this.resetSelections();
     this.flowInstanceChangeTimeout = setTimeout(
       () => {
-        if (text.trim() === '') return;
-        this.setState({ instance: text });
-        fetch(rootFoldersUrl(text))
-          .then(response => (response.ok ? response.json() : new Error()))
-          .then(root => this.setState({
-            folders: merge(this.state.folders, indexById(root.folders)),
-            selectedFolders: [],
+        const instance = parseInstance(text);
+        if (instance == null) return;
+        this.setState({ instance });
+        api.get(rootFoldersUrl(instance), { parentId: 0 }, acceptHeader)
+          .then(folders => this.setState({
+            folders: merge(this.state.folders, indexById(folders)),
           }));
       },
       delay
@@ -106,9 +115,9 @@ export default class AkvoFlowDataSourceSettings extends Component {
     const selectedFolder = this.state.folders[selectedFolderId];
     this.setState({ selectedFolders: selectedFolders.concat([selectedFolderId]) });
     Promise.all([
-      fetch(selectedFolder.foldersUrl).then(resp => (resp.ok ? resp.json() : { folders: [] })),
-      fetch(selectedFolder.surveysUrl).then(resp => (resp.ok ? resp.json() : { surveys: [] })),
-    ]).then(([{ folders }, { surveys }]) => this.setState({
+      api.get(selectedFolder.foldersUrl, null, acceptHeader),
+      api.get(selectedFolder.surveysUrl, null, acceptHeader),
+    ]).then(([folders, surveys]) => this.setState({
       surveys: merge(this.state.surveys, indexById(surveys)),
       folders: merge(this.state.folders, indexById(folders)),
     }));
@@ -117,16 +126,13 @@ export default class AkvoFlowDataSourceSettings extends Component {
   handleSurveySelection(selectedSurveyId) {
     const { surveys, surveyDefinitions } = this.state;
     this.setState({ selectedSurveyId });
-    const surveyUrl = surveys[selectedSurveyId].surveyUrl;
-    fetch(surveyUrl)
-      .then(resp => (resp.ok ? resp.json() : null))
-      .then((surveyDefinition) => {
-        this.setState({
-          surveyDefinitions: merge(surveyDefinitions, {
-            [surveyDefinition.id]: surveyDefinition,
-          }),
-        });
-      });
+    const surveyUrl = surveys[selectedSurveyId].survey;
+    api.get(surveyUrl, null, acceptHeader)
+      .then(surveyDefinition => this.setState({
+        surveyDefinitions: merge(surveyDefinitions, {
+          [surveyDefinition.id]: surveyDefinition,
+        }),
+      }));
   }
 
   handleFormSelection(selectedFormId) {
@@ -150,6 +156,14 @@ export default class AkvoFlowDataSourceSettings extends Component {
     }
   }
 
+  changeFolderSelection(evt, idx) {
+    this.setState({
+      selectedFolders: this.state.selectedFolders.slice(0, idx),
+      selectedSurveyId: null,
+      selectedFormId: null,
+    }, () => this.handleSelection(evt));
+  }
+
   render() {
     const {
       selectedFolders,
@@ -158,14 +172,16 @@ export default class AkvoFlowDataSourceSettings extends Component {
       folders,
     } = this.state;
 
-    const folderSelections = selectedFolders.map((id) => {
+    const folderSelections = selectedFolders.map((id, idx) => {
       const selectedFolder = folders[id];
       const parentId = selectedFolder.parentId;
       const options = this.foldersAndSurveysSelectionOptions(parentId);
       return (
         <Select
+          clearable={false}
           options={options}
           value={id}
+          onChange={evt => this.changeFolderSelection(evt, idx)}
         />
       );
     });
@@ -176,6 +192,7 @@ export default class AkvoFlowDataSourceSettings extends Component {
     // Either a survey or a folder can be selected
     const nextSelection = (
       <Select
+        clearable={false}
         options={this.foldersAndSurveysSelectionOptions(lastSelectedFolderId)}
         value={selectedSurveyId}
         onChange={evt => this.handleSelection(evt)}
@@ -184,6 +201,7 @@ export default class AkvoFlowDataSourceSettings extends Component {
 
     const formSelection = selectedSurveyId != null && (
       <Select
+        clearable={false}
         options={this.formSelectionOptions(selectedSurveyId)}
         value={selectedFormId}
         onChange={evt => this.handleFormSelection(evt.value)}
@@ -200,7 +218,7 @@ export default class AkvoFlowDataSourceSettings extends Component {
         />
         {folderSelections}
         {nextSelection}
-        {selectedSurveyId != null && formSelection}
+        {formSelection}
       </div>
     );
   }

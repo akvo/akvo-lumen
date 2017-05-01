@@ -9,7 +9,7 @@ function wrapUpdateToken(fetchRequestThunk) {
 
 function requestHeaders(token, additionalHeaders = {}) {
   return Object.assign({}, additionalHeaders, {
-    'Content-Type': 'application/json',
+/*    'Content-Type': 'application/json', */
     Authorization: `Bearer ${token}`,
   });
 }
