@@ -16,6 +16,13 @@ export function token() {
   );
 }
 
+export function refreshToken() {
+  if (keycloak == null) {
+    throw new Error('Keycloak not initialized');
+  }
+  return keycloak.refreshToken;
+}
+
 export function init() {
   if (keycloak != null) {
     throw new Error('Keycloak already initialized');

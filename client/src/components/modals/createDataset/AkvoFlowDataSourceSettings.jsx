@@ -1,6 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import Select from 'react-select';
 import * as api from '../../../api';
+import * as keycloak from '../../../auth';
 
 const FLOW_API_URL = 'https://api.akvotest.org/flow/orgs';
 
@@ -141,13 +142,17 @@ export default class AkvoFlowDataSourceSettings extends Component {
   }
 
   handleFormSelection(selectedFormId) {
+    const { surveyDefinitions, selectedSurveyId, instance } = this.state;
+    const form = surveyDefinitions[selectedSurveyId].forms.find(f => f.id === selectedFormId);
     this.setState({ selectedFormId });
     this.props.onChange({
       kind: 'AKVO_FLOW',
-      instance: this.state.instance,
-      surveyId: this.state.selectedSurveyId,
+      instance,
+      surveyId: selectedSurveyId,
       formId: selectedFormId,
+      refreshToken: keycloak.refreshToken(),
     });
+    this.props.onChangeSettings({ name: form.name });
   }
 
   handleSelection(evt) {
