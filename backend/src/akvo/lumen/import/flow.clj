@@ -35,8 +35,8 @@
 
 (defn access-token
   "Fetch a new access token using a refresh token"
-  [refresh-token]
-  (-> (http/post "https://kc.akvotest.org/auth/realms/akvo/protocol/openid-connect/token"
+  [token-endpoint refresh-token]
+  (-> (http/post token-endpoint
                  {:form-params {"client_id" "akvo-lumen"
                                 "refresh_token" refresh-token
                                 "grant_type" "refresh_token"}
@@ -45,8 +45,8 @@
       :access_token))
 
 (defn offline-token
-  [refresh-token]
-  (-> (http/post "https://kc.akvotest.org/auth/realms/akvo/protocol/openid-connect/token"
+  [token-endpoint refresh-token]
+  (-> (http/post token-endpoint
                  {:form-params {"client_id" "akvo-lumen"
                                 "refresh_token" refresh-token
                                 "scope" "offline_access"
@@ -56,52 +56,52 @@
       :refresh_token))
 
 (defn flow-api-headers
-  [refresh-token]
-  {"Authorization" (format "Bearer %s" (access-token refresh-token))
+  [token-endpoint refresh-token]
+  {"Authorization" (format "Bearer %s" (access-token token-endpoint refresh-token))
    "User-Agent" "lumen"
    "Accept" "application/vnd.akvo.flow.v2+json"
    "X-Akvo-Email" "akvo.flow.user.test2@gmail.com"})
 
 (defn survey-definition
-  [api-root access-token instance survey-id]
+  [api-root headers-fn instance survey-id]
   (-> (format "%s/orgs/%s/surveys/%s"
               api-root instance survey-id)
-      (http/get {:headers (flow-api-headers access-token)
+      (http/get {:headers (headers-fn)
                  :as :json})
       :body))
 
-(defn form-instances* [refresh-token url]
+(defn form-instances* [headers-fn url]
   (let [response (-> url
-                     (http/get {:headers (flow-api-headers refresh-token)
+                     (http/get {:headers (headers-fn)
                                 :as :json-string-keys})
                      :body)]
     (lazy-cat (get response "formInstances")
               (when-let [url (get response "cursor")]
-                (form-instances* refresh-token url)))))
+                (form-instances* headers-fn url)))))
 
 (defn form-instances
   "Returns a lazy sequence of form instances"
-  [refresh-token form]
+  [headers-fn form]
   (let [initial-url (str (:formInstancesUrl form) "?pageSize=300")]
-    (form-instances* refresh-token initial-url)))
+    (form-instances* headers-fn initial-url)))
 
 (defn data-points*
-  [access-token url]
+  [headers-fn url]
   (-> url
-      (http/get {:headers (flow-api-headers access-token)
+      (http/get {:headers (headers-fn)
                  :as :json-string-keys})
       :body))
 
 (defn data-points
   "Returns all survey data points"
-  [refresh-token survey]
+  [headers-fn survey]
   (loop [all-data-points []
-         response (data-points* (access-token refresh-token)
+         response (data-points* headers-fn
                                 (str (:dataPointsUrl survey)
                                      "?pageSize=300"))]
     (if-let [url (get response "cursor")]
       (recur (into all-data-points (get response "dataPoints"))
-             (data-points* (access-token refresh-token) url))
+             (data-points* headers-fn url))
       all-data-points)))
 
 (defn question-type->lumen-type
@@ -214,9 +214,9 @@
 
 (defn form-data
   "Returns a lazy sequence of form data, ready to be inserted as a lumen dataset"
-  [refresh-token survey form-id]
+  [headers-fn survey form-id]
   (let [form (form survey form-id)
-        data-points (index-by "id" (data-points refresh-token survey))]
+        data-points (index-by "id" (data-points headers-fn survey))]
     (map (fn [form-instance]
            (let [data-point-id (get form-instance "dataPointId")]
              (assoc (response-data form (get form-instance "responses"))
@@ -226,27 +226,31 @@
                     "submitter" (get form-instance "submitter")
                     "submitted_at" (some-> (get form-instance "submissionDate")
                                            sql-timestamp))))
-         (form-instances refresh-token form))))
+         (form-instances headers-fn form))))
 
-(defn create-dataset [tenant-conn refresh-token table-name survey form-id]
+(defn create-dataset [tenant-conn headers-fn table-name survey form-id]
   (let [columns (dataset-columns (form survey form-id))
-        data-rows (form-data refresh-token survey form-id)]
+        data-rows (form-data headers-fn survey form-id)]
     (jdbc/execute! tenant-conn [(create-data-table table-name columns)])
     (doseq [data (partition-all 300 data-rows)]
       (jdbc/insert-multi! tenant-conn table-name data))
     columns))
 
 (defmethod import/make-dataset-data-table "AKVO_FLOW"
-  [tenant-conn {:keys [flow-api-root]} table-name {:strs [instance surveyId formId refreshToken]}]
+  [tenant-conn {:keys [flow-api-root keycloak-realm keycloak-url]} table-name {:strs [instance surveyId formId refreshToken]}]
   (try
-    (let [refresh-token (offline-token refreshToken)]
+    (let [token-endpoint (format "%s/realms/%s/protocol/openid-connect/token"
+                                 keycloak-url
+                                 keycloak-realm)
+          refresh-token (offline-token token-endpoint refreshToken)
+          headers-fn #(flow-api-headers token-endpoint refresh-token)]
       {:success? true
        :columns (let [survey (survey-definition flow-api-root
-                                                (access-token refresh-token)
+                                                headers-fn
                                                 instance
                                                 surveyId)]
                   (create-dataset tenant-conn
-                                  refresh-token
+                                  headers-fn
                                   table-name
                                   survey
                                   formId))})
