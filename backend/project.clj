@@ -14,6 +14,8 @@
                  [duct "0.8.2"]
                  [duct/hikaricp-component "0.1.0"]
                  [environ "1.1.0"]
+                 [incanter/incanter-core "1.9.1"]
+                 [incanter/incanter-io "1.9.1"]
                  [meta-merge "1.0.0"]
                  [org.akvo/commons "0.4.4-SNAPSHOT" :exclusions [org.postgresql/postgresql org.clojure/java.jdbc]]
                  [org.akvo/resumed "0.1.0-SNAPSHOT"]
