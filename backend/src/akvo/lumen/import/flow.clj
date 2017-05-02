@@ -181,6 +181,14 @@
                        (get item "name"))
                      response)))
 
+(defmethod render-response "PHOTO"
+  [_ response]
+  (get response "filename"))
+
+(defmethod render-response "VIDEO"
+  [_ response]
+  (get response "filename"))
+
 (defmethod render-response :default
   [type response]
   nil)
