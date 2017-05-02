@@ -19,6 +19,7 @@
   Defaults to 'text'."
   [value]
   (condp #(%1 %2) value
+    ;; date-string? :date
     nil? :nil
     number? :number
     :text))
@@ -27,13 +28,14 @@
   "Determines if all types in the given column are unified"
   [type-kw coll]
   {:pre [(contains? #{:date :number :text} type-kw)]}
-  (apply = (map #(contains? #{:nil type-kw} %) coll)))
+  (every? true? (map #(contains? #{:nil type-kw} %) coll)))
 
-(defn get-column-type
+(defn get-common-type
   "Determines the common type of the given coll of types.
   Defaults to 'text' if types cannot be unified."
   [coll]
   (condp #(all-of-type? %1 %2) coll
+    :date {:client "date" :psql "timestamptz"}
     :number {:client "number" :psql "double precision"}
     :text {:client "text" :psql "text"}
     {:client "text" :psql "text"}))
@@ -42,7 +44,7 @@
   "Returns a seq of the common types of each column in the given dataset"
   [{:keys [column-names] :as dataset}]
   (->> (map #(incanter/$map get-type % dataset) column-names)
-       (map get-column-type)))
+       (map get-common-type)))
 
 (defn get-column-tuples
   "Returns a sequence of maps containing column names, titles & types
