@@ -224,6 +224,7 @@ class AkvoFlowDataSourceSettings extends Component {
     // Either a survey or a folder can be selected
     const nextSelection = instance != null && (
       <Select
+        placeholder={'Select folder or survey'}
         clearable={false}
         options={this.foldersAndSurveysSelectionOptions(lastSelectedFolderId)}
         value={selectedSurveyId}
@@ -233,6 +234,7 @@ class AkvoFlowDataSourceSettings extends Component {
 
     const formSelection = selectedSurveyId != null && (
       <Select
+        placeholder={'Select form'}
         clearable={false}
         options={this.formSelectionOptions(selectedSurveyId)}
         value={selectedFormId}
@@ -247,7 +249,12 @@ class AkvoFlowDataSourceSettings extends Component {
           placeholder="Flow Application URL"
           onChange={evt => this.handleFlowInstanceChange(evt.target.value)}
           type="text"
-          style={{ width: '300px' }}
+          style={{
+            width: '100%',
+            fontSize: '1rem',
+            textAlign: 'center',
+            padding: '0.25rem 0.75rem',
+          }}
         />
         {folderSelections}
         {nextSelection}
