@@ -89,7 +89,7 @@ class AkvoFlowDataSourceSettings extends Component {
             }
             throw new Error(`Unexpected response ${response.status}`);
           })
-          .then(folders => this.setState({
+          .then(({ folders }) => this.setState({
             instance,
             folders: merge(this.state.folders, indexById(folders)),
           }))
@@ -144,7 +144,7 @@ class AkvoFlowDataSourceSettings extends Component {
     Promise.all([
       api.get(selectedFolder.foldersUrl, null, acceptHeader).then(response => response.json()),
       api.get(selectedFolder.surveysUrl, null, acceptHeader).then(response => response.json()),
-    ]).then(([folders, surveys]) => this.setState({
+    ]).then(([{ folders }, { surveys }]) => this.setState({
       isLoadingNext: false,
       surveys: merge(this.state.surveys, indexById(surveys)),
       folders: merge(this.state.folders, indexById(folders)),
@@ -154,7 +154,7 @@ class AkvoFlowDataSourceSettings extends Component {
   handleSurveySelection(selectedSurveyId) {
     const { surveys, surveyDefinitions } = this.state;
     this.setState({ selectedSurveyId, isLoadingForms: true });
-    const surveyUrl = surveys[selectedSurveyId].survey;
+    const surveyUrl = surveys[selectedSurveyId].surveyUrl;
     api.get(surveyUrl, null, acceptHeader)
       .then(response => response.json())
       .then(surveyDefinition => this.setState({
