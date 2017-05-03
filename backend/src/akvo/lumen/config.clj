@@ -11,11 +11,10 @@
   (assert (:lumen-keycloak-client-secret env)
           (error-msg "LUMEN_KEYCLOAK_CLIENT_SECRET"))
   (assert (:lumen-keycloak-url env) (error-msg "LUMEN_KEYCLOAK_URL"))
-  (assert (:lumen-flow-report-database-url env)
-          (error-msg "LUMEN_FLOW_REPORT_DATABASE_URL"))
   (assert (:lumen-file-upload-path env) (error-msg "LUMEN_FILE_UPLOAD_PATH"))
   (assert (:lumen-sentry-backend-dsn env) (error-msg "LUMEN_SENTRY_BACKEND_DSN"))
-  (assert (:lumen-sentry-client-dsn env) (error-msg "LUMEN_SENTRY_CLIENT_DSN")))
+  (assert (:lumen-sentry-client-dsn env) (error-msg "LUMEN_SENTRY_CLIENT_DSN"))
+  (assert (:lumen-flow-api-url env) (error-msg "LUMEN_FLOW_API_URL")))
 
 (defn bindings []
   {'db-uri (:lumen-db-url env)
@@ -23,7 +22,6 @@
    'email-password (:lumen-email-password env)
    'email-user (:lumen-email-user env)
    'file-upload-path (:lumen-file-upload-path env "/tmp/akvo/lumen")
-   'flow-report-database-url (:lumen-flow-report-database-url env)
    'http-port (Integer/parseInt (:port env "3000"))
    'keycloak-client-id (:lumen-keycloak-client-id env "akvo-lumen-confidential")
    'keycloak-client-secret (:lumen-keycloak-client-secret env)
@@ -31,4 +29,5 @@
    'keycloak-realm "akvo"
    'keycloak-url (:lumen-keycloak-url env)
    'sentry-backend-dsn (:lumen-sentry-backend-dsn env)
-   'sentry-client-dsn (:lumen-sentry-client-dsn env)})
+   'sentry-client-dsn (:lumen-sentry-client-dsn env)
+   'flow-api-url (:lumen-flow-api-url env)})

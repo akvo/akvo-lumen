@@ -1,133 +1,138 @@
 (ns akvo.lumen.import.flow
   (:require [akvo.commons.psql-util :as pg]
             [akvo.lumen.import.common :as import]
+            [clj-http.client :as http]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
             [hugsql.core :as hugsql])
-  (:import [java.sql.Timestamp]))
+  (:import [java.sql Timestamp]
+           [java.time Instant]))
 
-(hugsql/def-db-fns "akvo/lumen/import/flow.sql")
+(defn sql-timestamp
+  [iso-8601-string]
+  (-> iso-8601-string
+      Instant/parse
+      .toEpochMilli
+      Timestamp.))
 
-(defn survey-definition [conn survey-id]
-  (let [survey (survey-by-id conn {:id survey-id})
-        forms (forms-by-survey-id conn {:survey-id survey-id})
-        question-groups (question-groups-by-survey-id conn {:survey-id survey-id})
-        questions (questions-by-survey-id conn {:survey-id survey-id})
-        questions (group-by :question_group_id questions)
-        question-groups (for [{:keys [id] :as question-group} (sort-by :display_order
-                                                                       question-groups)]
-                          (assoc question-group
-                                 :questions
-                                 (vec (sort-by :display_order (get questions id)))))
-        question-groups (group-by :form_id question-groups)
-        forms (for [form forms]
-                (assoc form :question-groups (get question-groups (:id form))))]
-    (assoc survey :forms (into {} (map (juxt :id identity)) forms))))
+(defn index-by
+  [key coll]
+  (reduce (fn [index item]
+            (assoc index (get item key) item))
+          {}
+          coll))
 
-(defn questions [form]
-  (mapcat :questions (:question-groups form)))
+(defmethod import/valid? "AKVO_FLOW"
+  [{:strs [instance surveyId formId refreshToken]}]
+  (and (string? instance)
+       (string? surveyId)
+       (string? formId)
+       (string? refreshToken)))
 
-(defn question-type->lumen-type [question-type]
-  ;; A lot of this is TBD.
-  (condp = question-type
-    "FREE_TEXT" "text"
-    "CASCADE" "text"
-    "OPTION" "text"
-    "GEO" "text"
-    "DATE" "date"
+(defmethod import/authorized? "AKVO_FLOW"
+  [claims {:keys []} {:strs [instance surveyId]}]
+  true)
+
+(defn access-token
+  "Fetch a new access token using a refresh token"
+  [token-endpoint refresh-token]
+  (-> (http/post token-endpoint
+                 {:form-params {"client_id" "akvo-lumen"
+                                "refresh_token" refresh-token
+                                "grant_type" "refresh_token"}
+                  :as :json})
+      :body
+      :access_token))
+
+(defn offline-token
+  [token-endpoint refresh-token]
+  (-> (http/post token-endpoint
+                 {:form-params {"client_id" "akvo-lumen"
+                                "refresh_token" refresh-token
+                                "scope" "offline_access"
+                                "grant_type" "refresh_token"}
+                  :as :json})
+      :body
+      :refresh_token))
+
+(defn flow-api-headers
+  [token-endpoint refresh-token]
+  {"Authorization" (format "Bearer %s" (access-token token-endpoint refresh-token))
+   "User-Agent" "lumen"
+   "Accept" "application/vnd.akvo.flow.v2+json"
+   "X-Akvo-Email" "akvo.flow.user.test2@gmail.com"})
+
+(defn survey-definition
+  [api-root headers-fn instance survey-id]
+  (-> (format "%s/orgs/%s/surveys/%s"
+              api-root instance survey-id)
+      (http/get {:headers (headers-fn)
+                 :as :json})
+      :body))
+
+(defn form-instances* [headers-fn url]
+  (let [response (-> url
+                     (http/get {:headers (headers-fn)
+                                :as :json-string-keys})
+                     :body)]
+    (lazy-cat (get response "formInstances")
+              (when-let [url (get response "nextPageUrl")]
+                (form-instances* headers-fn url)))))
+
+(defn form-instances
+  "Returns a lazy sequence of form instances"
+  [headers-fn form]
+  (let [initial-url (str (:formInstancesUrl form) "?pageSize=300")]
+    (form-instances* headers-fn initial-url)))
+
+(defn data-points*
+  [headers-fn url]
+  (-> url
+      (http/get {:headers (headers-fn)
+                 :as :json-string-keys})
+      :body))
+
+(defn data-points
+  "Returns all survey data points"
+  [headers-fn survey]
+  (loop [all-data-points []
+         response (data-points* headers-fn
+                                (str (:dataPointsUrl survey)
+                                     "?pageSize=300"))]
+    (if-let [url (get response "nextPageUrl")]
+      (recur (into all-data-points (get response "dataPoints"))
+             (data-points* headers-fn url))
+      all-data-points)))
+
+(defn question-type->lumen-type
+  [question]
+  (condp = (:type question)
     "NUMBER" "number"
+    "DATE" "date"
     "text"))
 
-(defn dataset-columns
-  "Returns a sequence of (column) maps with keys :title, :type and :column-name"
+(defn questions
+  "Get the list of questions from a form"
   [form]
-  (let [common [{:title "Identifier" :type "text"}
-                {:title "Latitude" :type "number"}
-                {:title "Longitude" :type "number"}
-                {:title "Submitter" :type "text"}
-                {:title "Submitted at" :type "date"}]
-        qs (map (fn [q]
-                  {:type (question-type->lumen-type (:type q))
-                   :title (:display_text q)})
-                (questions form))]
-    (vec (map-indexed (fn [idx col]
-                        (assoc col :column-name (str "c" (inc idx))))
-                      (concat common qs)))))
+  (mapcat :questions (:questionGroups form)))
 
-(defmulti render-response :question-type)
+(defn dataset-columns
+  [form]
+  (let [questions (questions form)]
+    (into
+     [{:title "Identifier" :type "text" :column-name "identifier"}
+      {:title "Latitude" :type "number" :column-name "latitude"}
+      {:title "Longitude" :type "number" :column-name "longitude"}
+      {:title "Submitter" :type "text" :column-name "submitter"}
+      {:title "Submitted at" :type "date" :column-name "submitted_at"}]
+     (map (fn [question]
+            {:title (:name question)
+             :type (question-type->lumen-type question)
+             :column-name (format "c%s" (:id question))})
+          questions))))
 
-(defmethod render-response "DATE"
-  [{:keys [value]}]
-  (when (integer? value)
-    (java.sql.Timestamp. value)))
-
-(defmethod render-response "FREE_TEXT"
-  [{:keys [value]}]
-  (when (string? value)
-    value))
-
-(defmethod render-response "NUMBER"
-  [{:keys [value]}]
-  (when (number? value)
-    value))
-
-(defmethod render-response "OPTION"
-  [{:keys [value]}]
-  (str/join "|" (map (fn [{:strs [text code]}]
-                       (if code
-                         (str/join ":" [code text])
-                         text))
-                     value)))
-
-(defmethod render-response "GEO"
-  [{:keys [value]}]
-  (if (map? value)
-    (condp = (get-in value ["geometry" "type"])
-      "Point" (let [coords (get-in value ["geometry" "coordinates"])]
-                (str/join "," coords)))
-    ""))
-
-(defmethod render-response "CASCADE"
-  [{:keys [value]}]
-  (when (coll? value)
-    (str/join "|" (map (fn [item]
-                         (get item "name"))
-                       value))))
-
-(defmethod render-response :default
-  [response]
-  nil)
-
-(defn question-responses
-  "Returns responses indexed by question id. A respons map consists of
-  a :value and a :question-type"
-  [conn form-instance-id]
-  (into {}
-        (map (juxt :question-id identity)
-             (responses-by-form-instance-id conn {:form-instance-id form-instance-id}))))
-
-(defn form-instance-data-rows [conn form]
-  (for [form-instance (form-instances-by-form-id conn {:form-id (:id form)})]
-    (let [form-instance (update form-instance :submitted_at #(when % (java.sql.Timestamp. %)))
-          responses (question-responses conn (:id form-instance))]
-      (concat ((juxt :identifier :latitude :longitude :submitter :submitted_at)
-               form-instance)
-              (for [question (questions form)]
-                (render-response (get responses (:id question))))))))
-
-(defn form-data
-  "Returns a sequence of maps of the form {\"c1\" value, ...}"
-  [conn form columns]
-  (let [data-rows (form-instance-data-rows conn form)]
-    (map (fn [columns data-row]
-           (into {} (map (fn [column-name response]
-                           [column-name response])
-                         (map :column-name columns)
-                         data-row)))
-         (repeat columns)
-         data-rows)))
-
-(defn create-data-table [table-name columns]
+(defn create-data-table
+  [table-name columns]
   (format "create table %s (rnum serial primary key, %s);"
           table-name
           (str/join ", " (map (fn [{:keys [column-name type]}]
@@ -139,52 +144,116 @@
                                           "text" "text")))
                               columns))))
 
-(defn create-dataset [tenant-conn table-name report-conn survey-id]
-  (let [survey (survey-definition report-conn survey-id)
-        ;; For now we can assume that we only import non-monitoring
-        ;; surveys, so grap the first and only form
-        form (-> survey :forms first val)
-        columns (dataset-columns form)
-        data-rows (form-data report-conn form columns)]
+(defmulti render-response
+  (fn [type response]
+    type))
+
+(defmethod render-response "DATE"
+  [_ response]
+  (sql-timestamp response))
+
+(defmethod render-response "FREE_TEXT"
+  [_ response]
+  response)
+
+(defmethod render-response "NUMBER"
+  [_ response]
+  response)
+
+(defmethod render-response "OPTION"
+  [_ response]
+  (str/join "|" (map (fn [{:strs [text code]}]
+                       (if code
+                         (str/join ":" [code text])
+                         text))
+                     response)))
+
+(defmethod render-response "GEO"
+  [_ response]
+  (condp = (get-in response ["geometry" "type"])
+    "Point" (let [coords (get-in response ["geometry" "coordinates"])]
+              (str/join "," coords))
+    nil))
+
+(defmethod render-response "CASCADE"
+  [_ response]
+  (str/join "|" (map (fn [item]
+                       (get item "name"))
+                     response)))
+
+(defmethod render-response "PHOTO"
+  [_ response]
+  (get response "filename"))
+
+(defmethod render-response "VIDEO"
+  [_ response]
+  (get response "filename"))
+
+(defmethod render-response :default
+  [type response]
+  nil)
+
+(defn form
+  "Get a form by id from a survey"
+  [survey form-id]
+  (or (first (filter #(= form-id (:id %)) (:forms survey)))
+      (throw (ex-info "No such form"
+                      {:form-id form-id
+                       :survey-id (:id survey)}))))
+
+(defn response-data
+  [form responses]
+  (reduce (fn [response-data {:keys [type id]}]
+            (if-let [response (get-in responses [id "0"])]
+              (assoc response-data
+                     (format "c%s" id)
+                     (render-response type response))
+              response-data))
+          {}
+          (questions form)))
+
+(defn form-data
+  "Returns a lazy sequence of form data, ready to be inserted as a lumen dataset"
+  [headers-fn survey form-id]
+  (let [form (form survey form-id)
+        data-points (index-by "id" (data-points headers-fn survey))]
+    (map (fn [form-instance]
+           (let [data-point-id (get form-instance "dataPointId")]
+             (assoc (response-data form (get form-instance "responses"))
+                    "identifier" (get-in data-points [data-point-id "identifier"])
+                    "latitude" (get-in data-points [data-point-id "latitude"])
+                    "longitude" (get-in data-points [data-point-id "longitude"])
+                    "submitter" (get form-instance "submitter")
+                    "submitted_at" (some-> (get form-instance "submissionDate")
+                                           sql-timestamp))))
+         (form-instances headers-fn form))))
+
+(defn create-dataset [tenant-conn headers-fn table-name survey form-id]
+  (let [columns (dataset-columns (form survey form-id))
+        data-rows (form-data headers-fn survey form-id)]
     (jdbc/execute! tenant-conn [(create-data-table table-name columns)])
-    (doseq [data-row data-rows]
-      (jdbc/insert! tenant-conn table-name data-row))
+    (doseq [data (partition-all 300 data-rows)]
+      (jdbc/insert-multi! tenant-conn table-name data))
     columns))
 
-(defmethod import/valid? "AKVO_FLOW"
-  [{:strs [instance surveyId]}]
-  (and (string? instance)
-       (integer? surveyId)))
-
-(defn root-ids [instance claims]
-  (let [roles (get-in claims ["realm_access" "roles"])
-        pattern (re-pattern (format "akvo:flow:%s:(\\d+)" instance))]
-    (->> roles
-         (map (fn [role]
-                (when-let [id (second (re-find pattern role))]
-                  (Long/parseLong id))))
-         (remove nil?))))
-
-(defmethod import/authorized? "AKVO_FLOW"
-  [claims {:keys [flow-report-database-url]} {:strs [instance surveyId]}]
-  (let [folder-ids (root-ids instance claims)]
-    (contains? (->> (descendant-folders-and-surveys-by-folder-id (format flow-report-database-url instance)
-                                                                 {:folder-ids folder-ids}
-                                                                 {}
-                                                                 {:identifiers identity})
-                    (map :id)
-                    set)
-               surveyId)))
-
 (defmethod import/make-dataset-data-table "AKVO_FLOW"
-  [tenant-conn {:keys [flow-report-database-url]} table-name {:strs [instance surveyId]}]
+  [tenant-conn {:keys [flow-api-url keycloak-realm keycloak-url]} table-name {:strs [instance surveyId formId refreshToken]}]
   (try
-    (jdbc/with-db-connection [report-conn (format flow-report-database-url instance)]
+    (let [token-endpoint (format "%s/realms/%s/protocol/openid-connect/token"
+                                 keycloak-url
+                                 keycloak-realm)
+          refresh-token (offline-token token-endpoint refreshToken)
+          headers-fn #(flow-api-headers token-endpoint refresh-token)]
       {:success? true
-       :columns (create-dataset tenant-conn
-                                table-name
-                                report-conn
-                                surveyId)})
+       :columns (let [survey (survey-definition flow-api-url
+                                                headers-fn
+                                                instance
+                                                surveyId)]
+                  (create-dataset tenant-conn
+                                  headers-fn
+                                  table-name
+                                  survey
+                                  formId))})
     (catch Exception e
       (.printStackTrace e)
       {:success? false

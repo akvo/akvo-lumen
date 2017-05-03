@@ -13,7 +13,6 @@
   :dataset #var akvo.lumen.endpoint.dataset/endpoint
   :env #var akvo.lumen.endpoint.env/endpoint
   :files #var akvo.lumen.endpoint.files/endpoint
-  :flow #var akvo.lumen.endpoint.flow/endpoint
   :invite #var akvo.lumen.endpoint.invite/endpoint
   :invite-verify #var akvo.lumen.endpoint.invite/verify-endpoint
   :job-execution #var akvo.lumen.endpoint.job-execution/endpoint
@@ -26,7 +25,7 @@
   :visualisation #var akvo.lumen.endpoint.visualisation/endpoint}
  :dependencies
  {:http [:app]
-  :app [:aggregation :dashboard :dataset :env :emailer :files :flow :invite :invite-verify
+  :app [:aggregation :dashboard :dataset :env :emailer :files :invite :invite-verify
         :job-execution :library :public :root :share :transformation :user
         :visualisation]
   :tenant-manager [:db]
@@ -36,7 +35,6 @@
   :env [:config]
   :files [:config]
   :aggregation [:tenant-manager]
-  :flow [:tenant-manager :config]
   :invite [:tenant-manager :user-manager]
   :invite-verify [:tenant-manager :user-manager]
   :job-execution [:tenant-manager]
@@ -91,11 +89,11 @@
    :from-name "Akvo Lumen"}
   :config
   {:file-upload-path file-upload-path
-   :flow-report-database-url flow-report-database-url
    :keycloak-url keycloak-url
    :keycloak-realm keycloak-realm
    :keycloak-public-client-id keycloak-public-client-id
-   :sentry-client-dsn sentry-client-dsn}
+   :sentry-client-dsn sentry-client-dsn
+   :flow-api-url flow-api-url}
   :keycloak
   {:url keycloak-url
    :realm keycloak-realm

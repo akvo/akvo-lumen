@@ -51,11 +51,11 @@ spec:
               key: keycloak.url
         - name: LUMEN_FILE_UPLOAD_PATH
           value: /tmp/akvo/lumen
-        - name: LUMEN_FLOW_REPORT_DATABASE_URL
+        - name: LUMEN_FLOW_API_URL
           valueFrom:
-            secretKeyRef:
-              name: lumen
-              key: lumen_flow_report_database_url
+            configMapKeyRef:
+              name: flow-api
+              key: api.root
         - name: LUMEN_SENTRY_BACKEND_DSN
           valueFrom:
             secretKeyRef:
