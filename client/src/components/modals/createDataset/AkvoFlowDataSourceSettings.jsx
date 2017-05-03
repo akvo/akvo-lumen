@@ -6,8 +6,8 @@ import * as keycloak from '../../../auth';
 
 const acceptHeader = { Accept: 'application/vnd.akvo.flow.v2+json' };
 
-function rootFoldersUrl(flowApiRoot, flowInstance) {
-  return `${flowApiRoot}/orgs/${flowInstance}/folders`;
+function rootFoldersUrl(flowApiUrl, flowInstance) {
+  return `${flowApiUrl}/orgs/${flowInstance}/folders`;
 }
 
 function merge(a, b) {
@@ -68,7 +68,7 @@ class AkvoFlowDataSourceSettings extends Component {
   }
 
   handleFlowInstanceChange(text) {
-    const { flowApiRoot } = this.props;
+    const { flowApiUrl } = this.props;
     const delay = 900; // ms
     clearTimeout(this.flowInstanceChangeTimeout);
     this.resetSelections();
@@ -77,7 +77,7 @@ class AkvoFlowDataSourceSettings extends Component {
     this.setState({ instance, isLoadingNext: true });
     this.flowInstanceChangeTimeout = setTimeout(
       () => {
-        api.get(rootFoldersUrl(flowApiRoot, instance), { parentId: 0 }, acceptHeader)
+        api.get(rootFoldersUrl(flowApiUrl, instance), { parentId: 0 }, acceptHeader)
           .then((response) => {
             this.setState({ isLoadingNext: false });
             if (response.ok) {
@@ -284,12 +284,12 @@ class AkvoFlowDataSourceSettings extends Component {
 }
 
 export default connect(state => ({
-  flowApiRoot: state.env.flowApiRoot,
+  flowApiUrl: state.env.flowApiUrl,
   email: state.profile.email,
 }))(AkvoFlowDataSourceSettings);
 
 AkvoFlowDataSourceSettings.propTypes = {
-  flowApiRoot: PropTypes.string.isRequired,
+  flowApiUrl: PropTypes.string.isRequired,
   email: PropTypes.string.isRequired,
   dataSource: PropTypes.shape({
     instance: PropTypes.string,
