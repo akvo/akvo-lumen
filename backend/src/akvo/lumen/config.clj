@@ -13,7 +13,8 @@
   (assert (:lumen-keycloak-url env) (error-msg "LUMEN_KEYCLOAK_URL"))
   (assert (:lumen-file-upload-path env) (error-msg "LUMEN_FILE_UPLOAD_PATH"))
   (assert (:lumen-sentry-backend-dsn env) (error-msg "LUMEN_SENTRY_BACKEND_DSN"))
-  (assert (:lumen-sentry-client-dsn env) (error-msg "LUMEN_SENTRY_CLIENT_DSN")))
+  (assert (:lumen-sentry-client-dsn env) (error-msg "LUMEN_SENTRY_CLIENT_DSN"))
+  (assert (:flow-api-url env) (error-msg "FLOW_API_URL")))
 
 (defn bindings []
   {'db-uri (:lumen-db-url env)
@@ -28,4 +29,5 @@
    'keycloak-realm "akvo"
    'keycloak-url (:lumen-keycloak-url env)
    'sentry-backend-dsn (:lumen-sentry-backend-dsn env)
-   'sentry-client-dsn (:lumen-sentry-client-dsn env)})
+   'sentry-client-dsn (:lumen-sentry-client-dsn env)
+   'flow-api-url (:flow-api-url env)})

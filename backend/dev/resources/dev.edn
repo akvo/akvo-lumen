@@ -16,7 +16,7 @@
            :keycloak-realm "akvo"
            :keycloak-url "http://localhost:8080/auth"
            :keycloak-public-client-id "akvo-lumen"
-           :flow-api "https://api.akvotest.org/flow"}
+           :flow-api-url "https://api.akvotest.org/flow"}
   :emailer {:from-email "devops@akvo.localhost"
             :from-name "Akvo Lumen"}
   :keycloak {:url "http://localhost:8080/auth"

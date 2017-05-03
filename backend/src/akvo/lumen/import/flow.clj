@@ -237,7 +237,7 @@
     columns))
 
 (defmethod import/make-dataset-data-table "AKVO_FLOW"
-  [tenant-conn {:keys [flow-api-root keycloak-realm keycloak-url]} table-name {:strs [instance surveyId formId refreshToken]}]
+  [tenant-conn {:keys [flow-api-url keycloak-realm keycloak-url]} table-name {:strs [instance surveyId formId refreshToken]}]
   (try
     (let [token-endpoint (format "%s/realms/%s/protocol/openid-connect/token"
                                  keycloak-url
@@ -245,7 +245,7 @@
           refresh-token (offline-token token-endpoint refreshToken)
           headers-fn #(flow-api-headers token-endpoint refresh-token)]
       {:success? true
-       :columns (let [survey (survey-definition flow-api-root
+       :columns (let [survey (survey-definition flow-api-url
                                                 headers-fn
                                                 instance
                                                 surveyId)]
