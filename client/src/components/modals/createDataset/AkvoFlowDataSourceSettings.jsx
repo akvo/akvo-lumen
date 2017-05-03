@@ -210,7 +210,13 @@ class AkvoFlowDataSourceSettings extends Component {
 
     const errorNotification = errorMessage != null && (
       <div>
-        <span>{errorMessage}</span>
+        <span
+          style={{
+            color: 'red',
+          }}
+        >
+          {errorMessage}
+        </span>
       </div>
     );
 
@@ -233,7 +239,7 @@ class AkvoFlowDataSourceSettings extends Component {
       '0' : selectedFolders[selectedFolders.length - 1];
 
     // Either a survey or a folder can be selected
-    const nextSelection = instance != null && (
+    const nextSelection = instance != null && errorMessage == null && (
       <Select
         placeholder={'Select folder or survey'}
         isLoading={this.state.isLoadingNext}
@@ -257,7 +263,6 @@ class AkvoFlowDataSourceSettings extends Component {
 
     return (
       <div>
-        {errorNotification}
         <input
           placeholder="Flow Application URL"
           onChange={evt => this.handleFlowInstanceChange(evt.target.value)}
@@ -269,6 +274,7 @@ class AkvoFlowDataSourceSettings extends Component {
             padding: '0.25rem 0.75rem',
           }}
         />
+        {errorNotification}
         {folderSelections}
         {nextSelection}
         {formSelection}
