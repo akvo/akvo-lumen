@@ -37,6 +37,8 @@ class AkvoFlowDataSourceSettings extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      isLoadingNext: false,
+      isLoadingForms: false,
       errorMessage: null,
       instance: null,
       // selected folder ids,
@@ -52,6 +54,8 @@ class AkvoFlowDataSourceSettings extends Component {
 
   resetSelections() {
     this.setState({
+      isLoadingNext: false,
+      isLoadingForms: false,
       errorMessage: null,
       instance: null,
       selectedFolders: [],
@@ -68,12 +72,14 @@ class AkvoFlowDataSourceSettings extends Component {
     const delay = 900; // ms
     clearTimeout(this.flowInstanceChangeTimeout);
     this.resetSelections();
+    const instance = parseInstance(text);
+    if (instance == null) return;
+    this.setState({ instance, isLoadingNext: true });
     this.flowInstanceChangeTimeout = setTimeout(
       () => {
-        const instance = parseInstance(text);
-        if (instance == null) return;
         api.get(rootFoldersUrl(flowApiRoot, instance), { parentId: 0 }, acceptHeader)
           .then((response) => {
+            this.setState({ isLoadingNext: false });
             if (response.ok) {
               return response.json();
             } else if (response.status === 404) {
@@ -131,11 +137,15 @@ class AkvoFlowDataSourceSettings extends Component {
   handleFolderSelection(selectedFolderId) {
     const { selectedFolders } = this.state;
     const selectedFolder = this.state.folders[selectedFolderId];
-    this.setState({ selectedFolders: selectedFolders.concat([selectedFolderId]) });
+    this.setState({
+      isLoadingNext: true,
+      selectedFolders: selectedFolders.concat([selectedFolderId]),
+    });
     Promise.all([
       api.get(selectedFolder.foldersUrl, null, acceptHeader).then(response => response.json()),
       api.get(selectedFolder.surveysUrl, null, acceptHeader).then(response => response.json()),
     ]).then(([folders, surveys]) => this.setState({
+      isLoadingNext: false,
       surveys: merge(this.state.surveys, indexById(surveys)),
       folders: merge(this.state.folders, indexById(folders)),
     }));
@@ -143,11 +153,12 @@ class AkvoFlowDataSourceSettings extends Component {
 
   handleSurveySelection(selectedSurveyId) {
     const { surveys, surveyDefinitions } = this.state;
-    this.setState({ selectedSurveyId });
+    this.setState({ selectedSurveyId, isLoadingForms: true });
     const surveyUrl = surveys[selectedSurveyId].survey;
     api.get(surveyUrl, null, acceptHeader)
       .then(response => response.json())
       .then(surveyDefinition => this.setState({
+        isLoadingForms: false,
         surveyDefinitions: merge(surveyDefinitions, {
           [surveyDefinition.id]: surveyDefinition,
         }),
@@ -225,6 +236,7 @@ class AkvoFlowDataSourceSettings extends Component {
     const nextSelection = instance != null && (
       <Select
         placeholder={'Select folder or survey'}
+        isLoading={this.state.isLoadingNext}
         clearable={false}
         options={this.foldersAndSurveysSelectionOptions(lastSelectedFolderId)}
         value={selectedSurveyId}
@@ -235,6 +247,7 @@ class AkvoFlowDataSourceSettings extends Component {
     const formSelection = selectedSurveyId != null && (
       <Select
         placeholder={'Select form'}
+        isLoading={this.state.isLoadingForms}
         clearable={false}
         options={this.formSelectionOptions(selectedSurveyId)}
         value={selectedFormId}
