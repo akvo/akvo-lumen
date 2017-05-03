@@ -85,7 +85,7 @@ class AkvoFlowDataSourceSettings extends Component {
             } else if (response.status === 404) {
               throw new Error(`No such flow instance: ${instance}`);
             } else if (response.status === 403) {
-              throw new Error('Not authorized');
+              throw new Error(`Not authorized: ${this.props.email}`);
             }
             throw new Error(`Unexpected response ${response.status}`);
           })
@@ -285,10 +285,12 @@ class AkvoFlowDataSourceSettings extends Component {
 
 export default connect(state => ({
   flowApiRoot: state.env.flowApiRoot,
+  email: state.profile.email,
 }))(AkvoFlowDataSourceSettings);
 
 AkvoFlowDataSourceSettings.propTypes = {
   flowApiRoot: PropTypes.string.isRequired,
+  email: PropTypes.string.isRequired,
   dataSource: PropTypes.shape({
     instance: PropTypes.string,
     surveyId: PropTypes.string,
