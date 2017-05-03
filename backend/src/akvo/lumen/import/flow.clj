@@ -76,7 +76,7 @@
                                 :as :json-string-keys})
                      :body)]
     (lazy-cat (get response "formInstances")
-              (when-let [url (get response "cursor")]
+              (when-let [url (get response "nextPageUrl")]
                 (form-instances* headers-fn url)))))
 
 (defn form-instances
@@ -99,7 +99,7 @@
          response (data-points* headers-fn
                                 (str (:dataPointsUrl survey)
                                      "?pageSize=300"))]
-    (if-let [url (get response "cursor")]
+    (if-let [url (get response "nextPageUrl")]
       (recur (into all-data-points (get response "dataPoints"))
              (data-points* headers-fn url))
       all-data-points)))
