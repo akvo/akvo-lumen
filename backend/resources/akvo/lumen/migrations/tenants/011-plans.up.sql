@@ -97,18 +97,3 @@ VALUES (
        (SELECT id FROM policy WHERE title = 'max_number_of_visualisations'),
        '200'::json
 );
-
--- Enterprise
-INSERT INTO tier_policy (tier, policy, statement)
-VALUES (
-       (SELECT id FROM tier WHERE title = 'enterprise'),
-       (SELECT id FROM policy WHERE title = 'data_update'),
-       '"auto"'::json
-);
-
-INSERT INTO tier_policy (tier, policy, statement)
-VALUES (
-       (SELECT id FROM tier WHERE title = 'enterprise'),
-       (SELECT id FROM policy WHERE title = 'max_number_of_visualisations'),
-       '200'::json
-);
