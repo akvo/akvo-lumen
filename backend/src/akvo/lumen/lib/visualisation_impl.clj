@@ -1,6 +1,6 @@
 (ns akvo.lumen.lib.visualisation-impl
-  (:require [hugsql.core :as hugsql]
-            [akvo.lumen.util :refer [squuid]]
+  (:require [akvo.lumen.util :refer [squuid]]
+            [hugsql.core :as hugsql]
             [ring.util.response :refer [not-found response]])
   (:import [java.sql SQLException]))
 
@@ -10,9 +10,9 @@
 
 (defn all [tenant-conn]
   (response (all-visualisations tenant-conn
-                                 {}
-                                 {}
-                                 {:identifiers identity})))
+                                {}
+                                {}
+                                {:identifiers identity})))
 
 (defn create [tenant-conn body jwt-claims]
   (let [id (squuid)
