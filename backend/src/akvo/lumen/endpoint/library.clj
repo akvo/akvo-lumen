@@ -1,10 +1,11 @@
 (ns akvo.lumen.endpoint.library
-  (:require [compojure.core :refer :all]
-            [akvo.lumen.component.tenant-manager :refer [connection]]
+  (:require [akvo.lumen.component.tenant-manager :refer [connection]]
             [akvo.lumen.lib
              [dashboard :as dashboard]
              [dataset :as dataset]
-             [visualisation :as visualisation]]
+             [visualisation :as visualisation]
+             [collection :as collection]]
+            [compojure.core :refer :all]
             [ring.util.response :refer [response]]))
 
 
@@ -16,4 +17,5 @@
         (response
          {:dashboards (:body (dashboard/all tenant-conn))
           :datasets (:body (dataset/all tenant-conn))
-          :visualisations (:body (visualisation/all tenant-conn))})))))
+          :visualisations (:body (visualisation/all tenant-conn))
+          :collections (:body (collection/all tenant-conn))})))))

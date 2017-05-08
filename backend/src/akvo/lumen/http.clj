@@ -10,10 +10,14 @@
 
 (def ok (response 200))
 (def created (response 201))
+(defn no-content []
+  {:status 204
+   :body nil})
 (def bad-request (response 400))
 (def not-authenticated (response 401))
 (def not-authorized (response 403))
 (def not-found (response 404))
+(def conflict (response 409))
 (def gone (response 410))
 (def internal-server-error (response 500))
 (def not-implemented (response 501))
