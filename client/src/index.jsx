@@ -6,8 +6,8 @@ import Root from './containers/Root';
 import configureStore from './store/configureStore';
 import * as auth from './auth';
 
-function initAuthenticated(profile) {
-  const initialState = { profile };
+function initAuthenticated(profile, env) {
+  const initialState = { profile, env };
 
   const store = configureStore(initialState);
   const history = syncHistoryWithStore(browserHistory, store);
@@ -20,5 +20,5 @@ function initNotAuthenticated(msg) {
 }
 
 auth.init()
-  .then(profile => initAuthenticated(profile))
+  .then(({ profile, env }) => initAuthenticated(profile, env))
   .catch(err => initNotAuthenticated(err.message));
