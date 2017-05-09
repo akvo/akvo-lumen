@@ -15,8 +15,8 @@
   - https://login.akvo.org for production
   - https://kc.akvotest.org for the test environment"
   (:require [akvo.lumen.admin.util :as util]
-            [akvo.lumen.config :refer [error-msg]]
             [akvo.lumen.component.keycloak :as keycloak]
+            [akvo.lumen.config :refer [error-msg]]
             [akvo.lumen.lib.share-impl :refer [random-url-safe-string]]
             [akvo.lumen.util :refer [conform-email squuid]]
             [cheshire.core :as json]

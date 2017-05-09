@@ -15,7 +15,7 @@ $$ SELECT id FROM tier WHERE title = 'standard'; $$;
 CREATE TABLE plan (
      id text PRIMARY KEY DEFAULT gen_random_uuid()::text,
      tier text REFERENCES tier (id) DEFAULT standard_tier_id(),
-     starts timestamptz DEFAULT now(),
+     created timestamptz DEFAULT now(),
      ends timestamptz DEFAULT 'infinity',
      author jsonb
 );
@@ -51,7 +51,7 @@ CREATE TABLE tier_policy (
 -- ;;
 
 INSERT INTO policy (title) VALUES ('data_update');
-INSERT INTO policy (title) VALUES ('max_number_of_visualisations');
+INSERT INTO policy (title) VALUES ('number_of_visualisations');
 
 -- Lite
 INSERT INTO tier_policy (tier, policy, statement)
@@ -64,7 +64,7 @@ VALUES (
 INSERT INTO tier_policy (tier, policy, statement)
 VALUES (
        (SELECT id FROM tier WHERE title = 'lite'),
-       (SELECT id FROM policy WHERE title = 'max_number_of_visualisations'),
+       (SELECT id FROM policy WHERE title = 'number_of_visualisations'),
        '10'::json
 );
 
@@ -79,7 +79,7 @@ VALUES (
 INSERT INTO tier_policy (tier, policy, statement)
 VALUES (
        (SELECT id FROM tier WHERE title = 'standard'),
-       (SELECT id FROM policy WHERE title = 'max_number_of_visualisations'),
+       (SELECT id FROM policy WHERE title = 'number_of_visualisations'),
        '50'::json
 );
 
@@ -94,7 +94,7 @@ VALUES (
 INSERT INTO tier_policy (tier, policy, statement)
 VALUES (
        (SELECT id FROM tier WHERE title = 'pro'),
-       (SELECT id FROM policy WHERE title = 'max_number_of_visualisations'),
+       (SELECT id FROM policy WHERE title = 'number_of_visualisations'),
        '200'::json
 );
 
@@ -109,6 +109,6 @@ VALUES (
 INSERT INTO tier_policy (tier, policy, statement)
 VALUES (
        (SELECT id FROM tier WHERE title = 'enterprise'),
-       (SELECT id FROM policy WHERE title = 'max_number_of_visualisations'),
+       (SELECT id FROM policy WHERE title = 'number_of_visualisations'),
        '500'::json
 );

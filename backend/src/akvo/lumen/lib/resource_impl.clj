@@ -7,12 +7,12 @@
 (hugsql/def-db-fns "akvo/lumen/lib/resource.sql")
 
 
+(defn current-plan [tenant-conn]
+  (if-let [r (select-plan tenant-conn)]
+    r
+    "planless"))
+
 (defn all [tenant-conn]
-  #_(response {"tiers" (all-tiers tenant-conn
-                                  {}
-                                  {}
-                                  {:identifiers identity})})
-  (response {"current-tier" (select-plan tenant-conn)
-             "max_number_of_visualisations" {"limit" 50
-                                             "used" 25}})
-  )
+  (response {"plan" (current-plan tenant-conn)
+             "resources" {"numberOfVisualisations"
+                          (count-visualisations tenant-conn)}}))
