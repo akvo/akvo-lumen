@@ -177,6 +177,7 @@ class Dashboard extends Component {
 
       switch (vType) {
         case 'pie':
+        case 'donut':
           aggType = 'pie';
           break;
         case 'pivot table':
