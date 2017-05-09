@@ -60,8 +60,8 @@
     (testing "Create an empty collection"
       (let [response (collection/create *tenant-conn* {"title" "col1"})]
         (is (= 201 (:status response)))
-        (is #{:id :title :modified :created :entities}
-            (-> response :body keys set))
+        (is (= #{:id :title :modified :created :entities}
+               (-> response :body keys set)))
         (is (= 409 (:status (collection/create *tenant-conn* {"title" "col1"}))))
         (is (= 400 (:status (collection/create *tenant-conn* {"title" nil}))))
         (is (= 400 (:status (collection/create *tenant-conn* {"title" (apply str (repeat 129 "a"))}))))))
@@ -75,7 +75,7 @@
       (let [id (-> (collection/create *tenant-conn* {"title" "col3" "entities" [ds2 vs2 db2]})
                    :body :id)
             coll (-> (collection/fetch *tenant-conn* id) :body)]
-        (is #{ds2 vs2 db2} (-> coll :entities set))))
+        (is (= #{ds2 vs2 db2} (-> coll :entities set)))))
 
     (testing "Update collection"
       (let [id (-> (collection/create *tenant-conn* {"title" "col4" "entities" [ds2 vs2 db2]})
@@ -106,4 +106,4 @@
         (dataset/delete *tenant-conn* ds1)
         (is (= #{ds2 vs2 db2}
                (-> (collection/fetch *tenant-conn* id)
-                   :body :entities set))) ))))
+                   :body :entities set)))))))
