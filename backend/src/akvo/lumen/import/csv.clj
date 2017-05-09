@@ -3,30 +3,31 @@
             [clojure.java.io :as io]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as s]
-            [incanter.core :as incanter]
-            [incanter.io :refer [read-dataset]])
-  (:import [com.ibm.icu.text CharsetDetector]))
+            [incanter.core :refer [$ $map ncol to-vect]]
+            [incanter.io :refer [read-dataset]]))
 
 
 (defn- get-column-ids
-  "Returns a seq of generic, alphanumeric column names
-  of the form c1, c2, c3, ... for the given number of columns"
+  "Returns a seq of alphanumeric column names of the form
+  c1, c2, c3, ... for the given number of columns"
   [num-cols]
-  (map #(str "c" %) (range 1 (inc num-cols))))
+  (let [nums (range 1 (inc num-cols))]
+    (->> (map vector (repeat "c") nums)
+         (map s/join))))
 
 (defn get-type
-  "Determines the client and PostgreSQL type of the given value.
-  Defaults to 'text'."
+  "Returns a keyword representing the type of the given value.
+  Defaults to `:text`."
   [value]
   (condp #(%1 %2) value
-    ;; date-string? :date
+    ;; TODO date-string? :date
     nil? :nil
     number? :number
     :text))
 
 (defn all-of-type?
-  "Determines if all types in the given column are unified"
-  [type-kw coll]
+  "Determines if all types in the given column are the same or `:nil`"
+  [coll type-kw]
   {:pre [(contains? #{:date :number :text} type-kw)]}
   (every? true? (map #(contains? #{:nil type-kw} %) coll)))
 
@@ -34,20 +35,20 @@
   "Determines the common type of the given coll of types.
   Defaults to 'text' if types cannot be unified."
   [coll]
-  (condp #(all-of-type? %1 %2) coll
+  (condp #(all-of-type? %2 %1) coll
     :date {:client "date" :psql "timestamptz"}
     :number {:client "number" :psql "double precision"}
     :text {:client "text" :psql "text"}
     {:client "text" :psql "text"}))
 
-(defn get-column-types
+(defn get-dataset-types
   "Returns a seq of the common types of each column in the given dataset"
   [{:keys [column-names] :as dataset}]
-  (->> (map #(incanter/$map get-type % dataset) column-names)
+  (->> (map #($map get-type % dataset) column-names)
        (map get-common-type)))
 
 (defn get-column-tuples
-  "Returns a sequence of maps containing column names, titles & types
+  "Returns a vector of maps containing column names, titles & types
   for consumption by the client.
 
   Example output:
@@ -55,33 +56,20 @@
   [{:column-name \"c1\" :title \"Title\" :type \"text\"} ...]
   "
   [column-ids column-names column-types]
-  (mapv #(into {} {:column-name %1 :title %2 :type %3})
+  (mapv #(zipmap [:column-name :title :type] [%1 %2 %3])
         column-ids column-names column-types))
-
-(defn get-encoding
-  "Returns the character encoding reading some bytes from the given CSV file
-  using ICU's `CharsetDetector`"
-  [path]
-  (let [detector (CharsetDetector.)
-        ;; 100kb
-        ba (byte-array 100000)]
-    (with-open [input-stream (io/input-stream path)]
-      (.read input-stream ba))
-    (-> (.setText detector ba)
-        (.detect)
-        (.getName))))
 
 (defn- load-csv!
   "Imports the given CSV data into a PostgreSQL table"
-  [tenant-conn table-name path encoding headers?]
+  [tenant-conn table-name path headers?]
   (try
     (let [{:keys [column-names] :as dataset} (read-dataset path :header headers?)
-          column-ids (get-column-ids (incanter/ncol dataset))
+          column-ids (get-column-ids (ncol dataset))
           column-titles (if headers? (map name column-names) column-ids)
-          column-types (get-column-types dataset)
+          column-types (get-dataset-types dataset)
           client-types (mapv :client column-types)
           psql-types (mapv :psql column-types)
-          rows (incanter/to-vect (incanter/$ :all dataset))]
+          rows (to-vect ($ :all dataset))]
       (jdbc/db-do-commands tenant-conn
         (jdbc/create-table-ddl
           table-name
@@ -120,6 +108,5 @@
 (defmethod import/make-dataset-data-table "CSV"
   [tenant-conn {:keys [file-upload-path]} table-name spec]
   (let [path (get-path spec file-upload-path)
-        headers? (boolean (get spec "hasColumnHeaders"))
-        encoding (get-encoding path)]
-      (load-csv! tenant-conn table-name path encoding headers?)))
+        headers? (boolean (get spec "hasColumnHeaders"))]
+      (load-csv! tenant-conn table-name path headers?)))
