@@ -13,7 +13,7 @@ export default function App({ history }) {
       <Route path="/" component={Main}>
         <IndexRedirect from="" to="library" />
         <Route path="library" component={Library} />
-        <Route path="library/:collection" component={Library} />
+        <Route path="library/collections/:collectionId" component={Library} />
         <Route path="dataset/:datasetId" component={Dataset} />
         <Route path="visualisation/create" component={Visualisation} />
         <Route path="visualisation/:visualisationId" component={Visualisation} />

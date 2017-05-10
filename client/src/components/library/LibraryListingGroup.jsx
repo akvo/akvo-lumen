@@ -1,7 +1,7 @@
 import React, { PropTypes } from 'react';
 import moment from 'moment';
 import LibraryListingItem from './LibraryListingItem';
-import { getTitle, getCreatedTimestamp, getModifiedTimestamp } from '../../domain/entity';
+import { getTitle, getId, getCreatedTimestamp, getModifiedTimestamp } from '../../domain/entity';
 
 const getListGroupTitle = (listGroupName, sortOrder) => {
   switch (sortOrder) {
@@ -38,8 +38,10 @@ const sortListGroupEntities = (entities, sortOrder, isReverseSort) => {
   return sortedEntities;
 };
 
+const isEntityChecked = (entity, checkboxEntities = []) => checkboxEntities.indexOf(getId(entity)) > -1;
+
 export default function LibraryListingGroup({
-  listGroup, displayMode, sortOrder, isReverseSort, onSelectEntity, onEntityAction }) {
+  listGroup, displayMode, sortOrder, isReverseSort, checkboxEntities, onSelectEntity, onCheckEntity, onEntityAction }) {
   const listGroupTitle = getListGroupTitle(listGroup.listGroupName, sortOrder);
   const sortedEntities = sortListGroupEntities(listGroup.entities, sortOrder, isReverseSort);
 
@@ -51,8 +53,10 @@ export default function LibraryListingGroup({
           <LibraryListingItem
             key={index}
             entity={entity}
+            isChecked={isEntityChecked(entity, checkboxEntities)}
             displayMode={displayMode}
             onSelectEntity={onSelectEntity}
+            onCheckEntity={onCheckEntity}
             onEntityAction={onEntityAction}
           />
         )}

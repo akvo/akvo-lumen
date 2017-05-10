@@ -121,7 +121,9 @@ export default function LibraryListing({
   isReverseSort,
   displayMode,
   searchString,
+  checkboxEntities,
   onSelectEntity,
+  onCheckEntity,
   onEntityAction }) {
   const entities = filterEntities(library, filterBy,
     searchString);
@@ -137,7 +139,9 @@ export default function LibraryListing({
             displayMode={displayMode}
             sortOrder={sortOrder}
             isReverseSort={isReverseSort}
+            checkboxEntities={checkboxEntities}
             onSelectEntity={onSelectEntity}
+            onCheckEntity={onCheckEntity}
             onEntityAction={onEntityAction}
           />
         )}

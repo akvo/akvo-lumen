@@ -3,7 +3,6 @@
 .ContextMenu {
   position: absolute;
   background-color: white;
-  padding: 1rem 0;
   border: 1px solid black;
   z-index: 99;
   line-height: 1.4rem;
@@ -78,6 +77,6 @@
     display: inline-block;
     margin-right: 0;
     /* Offset padding of this + padding of parent + border*/
-    margin-top: calc(-1rem - 0.75rem - 1px);
+    margin-top: calc(-1rem + 3px);
   }
 }

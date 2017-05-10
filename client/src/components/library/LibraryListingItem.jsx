@@ -25,6 +25,12 @@ function LibraryListingItemContextMenu({ onClick }) {
         }, {
           label: 'Add to collection',
           value: 'add-to-collection',
+          subMenu: [
+            {
+              label: 'New collection',
+              value: 'add-to-new-collection',
+            },
+          ],
         }, {
           label: 'View details',
           value: 'view-details',
@@ -92,33 +98,49 @@ export default class LibraryListingItem extends Component {
 
     return (
       <li
-        onClick={() => {
-          if (isOk(entity)) {
-            onSelectEntity(getType(entity), getId(entity));
-          }
-        }}
+        onMouseLeave={() => this.setState({ contextMenuVisible: false })}
         key={getId(entity)}
-        className={`LibraryListingItem ${getType(entity)} ${getStatus(entity)}`}
+        className={`LibraryListingItem ${getType(entity)} ${getStatus(entity)} ${getId(entity)}`}
       >
         {isPending(entity) &&
           <div className="pendingOverlay">
             <LoadingSpinner />
           </div>
         }
-        <input type="checkbox" className="selectEntity disabled" />
-        <div className="entityIcon" />
-        <div className="textContents">
-          <h3 className="entityName">
-            {getTitle(entity)}
-            {isFailed(entity) && ' (Import failed)'}
-          </h3>
-          {isFailed(entity) && <p>{getErrorMessage(entity)}</p>}
-          {isPending(entity) && <p>Pending...</p>}
-          {getType(entity) === 'visualisation' &&
-            <VisualisationTypeLabel
-              vType={entity.visualisationType}
-            />
+        <div
+          className="checkboxContainer"
+          onClick={() => {
+            this.props.onCheckEntity(getId(entity));
           }
+          }
+        >
+          <input
+            type="checkbox"
+            checked={this.props.isChecked}
+          />
+        </div>
+        <div
+          className="entityBody clickable"
+          onClick={() => {
+            if (isOk(entity)) {
+              onSelectEntity(getType(entity), getId(entity));
+            }
+          }}
+        >
+          <div className="entityIcon" />
+          <div className="textContents">
+            <h3 className="entityName">
+              {getTitle(entity)}
+              {isFailed(entity) && ' (Import failed)'}
+            </h3>
+            {isFailed(entity) && <p>{getErrorMessage(entity)}</p>}
+            {isPending(entity) && <p>Pending...</p>}
+            {getType(entity) === 'visualisation' &&
+              <VisualisationTypeLabel
+                vType={entity.visualisationType}
+              />
+            }
+          </div>
         </div>
         <div className="entityControls">
           <button

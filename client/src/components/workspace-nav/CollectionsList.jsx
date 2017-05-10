@@ -21,12 +21,12 @@ export default function CollectionsList({
       <div className="subtitleRow">
         <h3 className={subtitleClassName}>
           Collections
-          <span
+          <button
             onClick={onShowCreateCollectionModal}
             className="addCollection clickable button"
           >
             +
-          </span>
+          </button>
         </h3>
       </div>
       <ul>{listItems}</ul>

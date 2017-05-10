@@ -20,9 +20,11 @@ class DashboardModal extends Component {
     this.props.dispatch(hideModal());
   }
 
-  handleOnSubmit(action) {
+  handleOnSubmit(action, keepModal) {
     this.props.dispatch(action);
-    this.props.dispatch(hideModal());
+    if (!keepModal) {
+      this.props.dispatch(hideModal());
+    }
   }
 
   renderActiveModal() {
@@ -47,6 +49,7 @@ class DashboardModal extends Component {
             onCancel={this.handleOnCancel}
             onSubmit={this.handleOnSubmit}
             containerClassName={containerClassName}
+            entities={this.props.activeModal.entities}
           />
         );
       case 'dataset-settings':

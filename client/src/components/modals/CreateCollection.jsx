@@ -1,21 +1,34 @@
 import React, { Component, PropTypes } from 'react';
 import Modal from 'react-modal';
-import createCollection from '../../actions/collection';
+import { createCollection } from '../../actions/collection';
+import LoadingSpinner from '../common/LoadingSpinner';
 
 
 export default class CreateCollection extends Component {
   constructor() {
     super();
-    this.state = { name: '' };
+    this.state = {
+      name: '',
+      createPending: false,
+    };
     this.handleInputChange = this.handleInputChange.bind(this);
+    this.handleCreate = this.handleCreate.bind(this);
   }
 
   handleInputChange(evt) {
     this.setState({ name: evt.target.value.trim() });
   }
 
+  handleCreate() {
+    this.setState({
+      name: '',
+      createPending: true,
+    });
+    this.props.onSubmit(createCollection(this.state.name, this.props.entities), Boolean('keepModal'));
+  }
+
   render() {
-    const { onCancel, onSubmit } = this.props;
+    const { onCancel } = this.props;
     return (
       <Modal
         isOpen
@@ -48,6 +61,9 @@ export default class CreateCollection extends Component {
               +
             </div>
             <div className="contents">
+              {this.props.entities &&
+                <span>Creating with {this.props.entities.length} entities</span>
+              }
               <label htmlFor="nameInput">Collection name:</label>
               <input
                 id="nameInput"
@@ -69,12 +85,14 @@ export default class CreateCollection extends Component {
               <button
                 className="create clickable positive"
                 disabled={this.state.name === ''}
-                onClick={() => {
-                  this.setState({ name: '' });
-                  onSubmit(createCollection(this.state.name));
-                }}
+                onClick={this.handleCreate}
               >
-                Create
+                {
+                  this.state.createPending ?
+                    <LoadingSpinner />
+                  :
+                    <span>Create</span>
+                }
               </button>
             </div>
           </div>

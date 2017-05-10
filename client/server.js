@@ -7,6 +7,7 @@ var config = require('./webpack.config');
 new WebpackDevServer(webpack(config), {
   hot: true,
   publicPath: config.output.publicPath,
+  disableHostCheck: true,
   proxy: {
     '/api/**': {
       target: "http://t1.lumen.localhost:3000",
