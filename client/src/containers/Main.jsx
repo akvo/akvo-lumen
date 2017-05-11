@@ -1,6 +1,5 @@
 import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
-import WorkspaceNav from '../components/WorkspaceNav';
 import DashboardModal from '../components/DashboardModal';
 import Notification from './Notification';
 
@@ -9,22 +8,23 @@ require('../styles/style.global.scss');
 require('../styles/Main.scss');
 require('fixed-data-table/dist/fixed-data-table.css');
 
-function Main({ location, children, notification }) {
+
+function Main({ content, navigation, notification }) {
   return (
     <div className="Main">
       {notification && <Notification {...notification} />}
-      <WorkspaceNav
-        location={location}
-      />
-      {children}
+      {navigation}
+      // {navigation location={location}}
+      {content}
       <DashboardModal />
     </div>
   );
 }
 
 Main.propTypes = {
-  children: PropTypes.element,
+  content: PropTypes.object,
   location: PropTypes.object,
+  navigation: PropTypes.object,
   notification: PropTypes.object,
 };
 
