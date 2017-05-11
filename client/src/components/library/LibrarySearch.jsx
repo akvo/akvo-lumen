@@ -2,9 +2,17 @@ import React, { Component, PropTypes } from 'react';
 
 export default class LibrarySearch extends Component {
 
-  handleClick() {
-    const input = this.search;
-    this.props.onSearch(input.value.trim());
+  constructor() {
+    super();
+    this.state = {
+      searchText: '',
+    };
+  }
+
+  componentWillMount() {
+    if (this.props.searchString) {
+      this.setState({ searchText: this.props.searchString });
+    }
   }
 
   render() {
@@ -12,13 +20,25 @@ export default class LibrarySearch extends Component {
       <div className="LibrarySearch">
         <input
           className="search"
-          ref={(ref) => { this.search = ref; }}
+          onChange={evt => this.setState({ searchText: evt.target.value })}
+          value={this.state.searchText}
           placeholder="Search"
-          defaultValue={this.props.searchString}
         />
         <button
-          onClick={evt => this.handleClick(evt)}
-          className="clickable"
+          style={{
+            opacity: this.state.searchText ? 1 : 0,
+          }}
+          className={`clickable clear ${this.state.searchText ? '' : 'noPointerEvents'}`}
+          onClick={() => {
+            this.setState({ searchText: '' });
+            this.props.onSearch('');
+          }}
+        >
+          ✕
+        </button>
+        <button
+          onClick={() => this.props.onSearch(this.state.searchText.trim())}
+          className="clickable submit"
         >
           Search
         </button>

@@ -5,10 +5,12 @@ import collections from './collections';
 import activeModal from './activeModal';
 import notification from './notification';
 
-function profile(state = {}, action) {
-  switch (action.type) {
-    default: return state;
-  }
+function profile(state = {}) {
+  return state;
+}
+
+function env(state = {}) {
+  return state;
 }
 
 const rootReducer = combineReducers({
@@ -17,6 +19,7 @@ const rootReducer = combineReducers({
   collections,
   activeModal,
   profile,
+  env,
   notification,
 });
 

@@ -236,11 +236,9 @@ class Library extends Component {
           }}
           searchString={searchString}
           onSetSearchString={(newSearchString) => {
-            if (newSearchString !== '') {
-              dispatch(updateQueryAction(location, {
-                search: newSearchString,
-              }));
-            }
+            dispatch(updateQueryAction(location, {
+              search: newSearchString,
+            }));
           }}
           onCreate={(type) => {
             if (type === 'dataset') {
