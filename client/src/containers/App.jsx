@@ -9,42 +9,50 @@ import Main from './Main';
 import WorkspaceNav from '../components/WorkspaceNav';
 import AdminNav from '../components/AdminNav';
 
-export default function App({ history }) {
+export default function App({ history, location }) {
   return (
     <Router history={history}>
       <Route path="/" component={Main}>
         <IndexRedirect from="" to="library" />
         <Route
           path="library"
-          components={{ navigation: WorkspaceNav, content: Library }}
+          components={{ sidebar: WorkspaceNav, content: Library }}
+          location={location}
         />
         <Route
           path="library/:collection"
-          components={{ navigation: WorkspaceNav, content: Library }}
+          components={{ sidebar: WorkspaceNav, content: Library }}
+          location={location}
         />
         <Route
           path="dataset/:datasetId"
-          components={{ navigation: WorkspaceNav, content: Dataset }}
+          components={{ sidebar: WorkspaceNav, content: Dataset }}
+          location={location}
         />
         <Route
           path="visualisation/create"
-          components={{ navigation: WorkspaceNav, content: Visualisation }}
+          components={{ sidebar: WorkspaceNav, content: Visualisation }}
+          location={location}
         />
         <Route
           path="visualisation/:visualisationId"
-          components={{ navigation: WorkspaceNav, content: Visualisation }}
+          components={{ sidebar: WorkspaceNav, content: Visualisation }}
+          location={location}
         />
         <Route
           path="dashboard/create"
-          components={{ navigation: WorkspaceNav, content: Dashboard }}
+          components={{ sidebar: WorkspaceNav, content: Dashboard }}
+          location={location}
         />
         <Route
           path="dashboard/:dashboardId"
-          components={{ navigation: WorkspaceNav, content: Dashboard }}
+          components={{ sidebar: WorkspaceNav, content: Dashboard }}
+          location={location}
         />
         <Route
           path="admin/users"
-          components={{ navigation: AdminNav, content: Users }}
+          components={{ sidebar: AdminNav, content: Users }}
+          location={location}
         />
       </Route>
     </Router>

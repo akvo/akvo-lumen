@@ -9,12 +9,11 @@ require('../styles/Main.scss');
 require('fixed-data-table/dist/fixed-data-table.css');
 
 
-function Main({ content, navigation, notification }) {
+function Main({ content, sidebar, notification }) {
   return (
     <div className="Main">
       {notification && <Notification {...notification} />}
-      {navigation}
-      // {navigation location={location}}
+      {sidebar}
       {content}
       <DashboardModal />
     </div>
@@ -23,8 +22,7 @@ function Main({ content, navigation, notification }) {
 
 Main.propTypes = {
   content: PropTypes.object,
-  location: PropTypes.object,
-  navigation: PropTypes.object,
+  sidebar: PropTypes.object,
   notification: PropTypes.object,
 };
 
