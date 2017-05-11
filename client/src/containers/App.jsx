@@ -1,5 +1,5 @@
 import React, { PropTypes } from 'react';
-import { Router, Route, IndexRedirect } from 'react-router';
+import { Router, Route, IndexRedirect, Redirect } from 'react-router';
 import Library from '../components/Library';
 import Visualisation from './Visualisation';
 import Dataset from './Dataset';
@@ -13,7 +13,7 @@ export default function App({ history, location }) {
   return (
     <Router history={history}>
       <Route path="/" component={Main}>
-        <IndexRedirect from="" to="library" />
+        <IndexRedirect to="library" />
         <Route
           path="library"
           components={{ sidebar: WorkspaceNav, content: Library }}
@@ -49,6 +49,7 @@ export default function App({ history, location }) {
           components={{ sidebar: WorkspaceNav, content: Dashboard }}
           location={location}
         />
+        <Redirect from="admin" to="/admin/users" />
         <Route
           path="admin/users"
           components={{ sidebar: AdminNav, content: Users }}

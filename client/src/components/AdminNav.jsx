@@ -12,14 +12,16 @@ class AdminNav extends Component {
         <div className="header">
           <div className="rowPrimary">
             <div
-              className="menuIcon"
+              className="menuIcon clickable"
             />
             <h1><Link to="/">Lumen</Link></h1>
           </div>
           <OrganizationMenu profile={this.props.profile} />
         </div>
+        <div className="NavWorkspaceSwitch">
+          {<Link to="/">Workspace</Link>}
+        </div>
       </nav>
-
     );
   }
 }
