@@ -119,6 +119,7 @@ export default function LibraryListing({
   filterBy,
   sortOrder,
   isReverseSort,
+  collections,
   displayMode,
   searchString,
   checkboxEntities,
@@ -136,6 +137,7 @@ export default function LibraryListing({
           <LibraryListingGroup
             key={index}
             listGroup={listGroup}
+            collections={collections}
             displayMode={displayMode}
             sortOrder={sortOrder}
             isReverseSort={isReverseSort}
@@ -159,4 +161,7 @@ LibraryListing.propTypes = {
   searchString: PropTypes.string.isRequired,
   onSelectEntity: PropTypes.func.isRequired,
   onEntityAction: PropTypes.func.isRequired,
+  collections: PropTypes.object.isRequired,
+  checkboxEntities: PropTypes.array.isRequired,
+  onCheckEntity: PropTypes.func.isRequired,
 };

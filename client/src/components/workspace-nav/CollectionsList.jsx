@@ -4,13 +4,15 @@ import CollectionListItem from './CollectionListItem';
 export default function CollectionsList({
   collections,
   onShowCreateCollectionModal,
+  onDeleteCollection,
   pathname,
   isSelected }) {
-  const listItems = collections.map(collection => (
+  const listItems = collections.sort((a, b) => b.modified - a.modified).map(collection => (
     <li key={collection.id}>
       <CollectionListItem
         collection={collection}
         pathname={pathname}
+        onDeleteCollection={onDeleteCollection}
       />
     </li>
   ));
@@ -39,4 +41,5 @@ CollectionsList.propTypes = {
   onShowCreateCollectionModal: PropTypes.func.isRequired,
   pathname: PropTypes.string.isRequired,
   isSelected: PropTypes.bool,
+  onDeleteCollection: PropTypes.func.isRequired,
 };

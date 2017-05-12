@@ -3,28 +3,51 @@ import Modal from 'react-modal';
 import { createCollection } from '../../actions/collection';
 import LoadingSpinner from '../common/LoadingSpinner';
 
+require('../../styles/CreateCollection.scss');
+
+const isTitleValid = (title, collections) => {
+  if (!title || title.length === 0 || title.trim().length === 0) {
+    return false;
+  }
+
+  const trimmedTitle = title.trim();
+  const isValid = Object.keys(collections).every(key =>
+    (collections[key].title !== title && collections[key].title !== trimmedTitle)
+  );
+
+  return isValid;
+};
 
 export default class CreateCollection extends Component {
   constructor() {
     super();
     this.state = {
-      name: '',
+      title: '',
       createPending: false,
+      titleValid: false,
     };
     this.handleInputChange = this.handleInputChange.bind(this);
     this.handleCreate = this.handleCreate.bind(this);
   }
 
   handleInputChange(evt) {
-    this.setState({ name: evt.target.value.trim() });
+    const newTitle = evt.target.value;
+    const titleValid = isTitleValid(newTitle, this.props.collections);
+
+    this.setState({ title: evt.target.value, titleValid });
   }
 
   handleCreate() {
     this.setState({
-      name: '',
+      title: '',
+      titleValid: false,
       createPending: true,
     });
-    this.props.onSubmit(createCollection(this.state.name, this.props.entities), Boolean('keepModal'));
+
+    const title = this.state.title.trim();
+    if (title && title.length > 0) {
+      this.props.onSubmit(createCollection(this.state.title, this.props.entities), Boolean('keepModal'));
+    }
   }
 
   render() {
@@ -49,34 +72,34 @@ export default class CreateCollection extends Component {
         }}
       >
         <div className={this.props.containerClassName}>
-          <div className="CreateCollectionModal">
+          <div className="CreateCollection">
             <h2 className="modalTitle">Create a new collection</h2>
             <div
               className="close clickable"
               onClick={() => {
-                this.setState({ name: '' });
+                this.setState({ title: '' });
                 onCancel();
               }}
             >
               +
             </div>
             <div className="contents">
-              {this.props.entities &&
-                <span>Creating with {this.props.entities.length} entities</span>
-              }
-              <label htmlFor="nameInput">Collection name:</label>
+              <label htmlFor="titleInput">Collection name</label>
               <input
-                id="nameInput"
-                onChange={this.handleInputChange}
+                id="titleInput"
+                onInput={this.handleInputChange}
+                value={this.state.title}
                 type="text"
-                placeholder="Collection name"
+                placeholder="Collection title"
+                autoFocus
+                maxLength={127}
               />
             </div>
             <div className="controls">
               <button
                 className="cancel clickable negative"
                 onClick={() => {
-                  this.setState({ name: '' });
+                  this.setState({ title: '' });
                   onCancel();
                 }}
               >
@@ -84,14 +107,19 @@ export default class CreateCollection extends Component {
               </button>
               <button
                 className="create clickable positive"
-                disabled={this.state.name === ''}
+                disabled={!this.state.titleValid}
                 onClick={this.handleCreate}
               >
+                <span
+                  style={{
+                    opacity: this.state.createPending ? 0 : 'initial',
+                  }}
+                >
+                  Create
+                </span>
                 {
-                  this.state.createPending ?
+                  this.state.createPending &&
                     <LoadingSpinner />
-                  :
-                    <span>Create</span>
                 }
               </button>
             </div>
@@ -106,4 +134,6 @@ CreateCollection.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
   containerClassName: PropTypes.string,
+  collections: PropTypes.object.isRequired,
+  entities: PropTypes.array.isRequired,
 };

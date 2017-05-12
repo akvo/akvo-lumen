@@ -7,10 +7,11 @@ import {
   isFailed, isOk, getStatus,
 } from '../../domain/entity';
 
-function LibraryListingItemContextMenu({ onClick }) {
+function LibraryListingItemContextMenu({ onClick, collections = {} }) {
   return (
     <ContextMenu
       style={{ width: 200 }}
+      subMenuSide="left"
       onOptionSelected={onClick}
       options={[
         {
@@ -24,11 +25,16 @@ function LibraryListingItemContextMenu({ onClick }) {
           value: 'add-to-dashboard',
         }, {
           label: 'Add to collection',
-          value: 'add-to-collection',
+          value: 'add-to-collection:new',
           subMenu: [
+            ...Object.keys(collections).map(key => ({
+              value: `add-to-collection:${key}`,
+              label: collections[key].title,
+            })),
             {
               label: 'New collection',
-              value: 'add-to-new-collection',
+              value: 'add-to-collection:new',
+              customClass: 'newCollection',
             },
           ],
         }, {
@@ -75,6 +81,7 @@ VisualisationTypeLabel.propTypes = {
 
 LibraryListingItemContextMenu.propTypes = {
   onClick: PropTypes.func.isRequired,
+  collections: PropTypes.object.isRequired,
 };
 
 export default class LibraryListingItem extends Component {
@@ -151,6 +158,7 @@ export default class LibraryListingItem extends Component {
           </button>
           {this.state.contextMenuVisible &&
             <LibraryListingItemContextMenu
+              collections={this.props.collections}
               onClick={(actionType) => {
                 this.setState({ contextMenuVisible: false });
                 onEntityAction(actionType, getType(entity), getId(entity));
@@ -166,4 +174,7 @@ LibraryListingItem.propTypes = {
   entity: PropTypes.object.isRequired,
   onSelectEntity: PropTypes.func.isRequired,
   onEntityAction: PropTypes.func.isRequired,
+  collections: PropTypes.object.isRequired,
+  onCheckEntity: PropTypes.func.isRequired,
+  isChecked: PropTypes.bool.isRequired,
 };

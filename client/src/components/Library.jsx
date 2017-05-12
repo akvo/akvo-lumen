@@ -68,15 +68,16 @@ class Library extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const collection = nextProps.params.collectionId ? nextProps.collections[nextProps.params.collectionId] : null;
+    const collectionId = nextProps.params.collectionId;
+    const collection = collectionId ? nextProps.collections[collectionId] : null;
 
     if (collection) {
       if (collection !== this.state.collection) {
-        console.log('setting new collection');
         this.setState({ collection: Object.assign({}, collection) });
       }
     } else if (this.state.collection) {
       this.setState({ collection: null });
+      this.props.dispatch(push('/library'));
     }
   }
 
@@ -84,7 +85,7 @@ class Library extends Component {
     let newCheckboxEntities = this.state.checkboxEntities.slice(0);
 
     if (newCheckboxEntities.indexOf(id) > -1) {
-      newCheckboxEntities = newCheckboxEntities.filter(e_id => e_id !== id);
+      newCheckboxEntities = newCheckboxEntities.filter(oldId => oldId !== id);
     } else {
       newCheckboxEntities.push(id);
     }
@@ -114,12 +115,18 @@ class Library extends Component {
         throw new Error(`Invalid entity type: ${entityType}`);
     }
   }
-  handleCreateCollection(optionalEntities) {
-    if (optionalEntities) {
-      console.log(`adding ${optionalEntities.length} optionalEntities`);
-      return this.props.dispatch(showModal('create-collection', { entities: optionalEntities }));
+  handleCreateCollection(optionalEntities = []) {
+    const entities = Array.isArray(optionalEntities) ? optionalEntities : [optionalEntities];
+
+    if (entities) {
+      return this.props.dispatch(showModal('create-collection', { entities }));
     }
     return this.props.dispatch(showModal('create-collection'));
+  }
+  handleDeleteCollection(collectionId) {
+    return this.props.dispatch(
+      showModal('delete-collection', { collection: this.props.collections[collectionId] })
+    );
   }
   handleAddEntitiesToCollection(entityIds, collectionId) {
     const collection = this.props.collections[collectionId];
@@ -132,7 +139,7 @@ class Library extends Component {
 
     // Add any new entities that are not already in the collection
     newEntities.forEach((newEntity) => {
-      if (oldEntities.every(oldEntity => oldEntity.id !== newEntity.id)) {
+      if (oldEntities.every(oldEntity => oldEntity !== newEntity)) {
         updatedEntityArray.push(newEntity);
       }
     });
@@ -159,15 +166,20 @@ class Library extends Component {
 
     const newCollection = Object.assign({}, collection, { entities: updatedEntityArray });
 
-    console.log(newCollection);
     this.props.dispatch(editCollection(newCollection));
   }
   handleEntityAction(actionType, entityType, entityId) {
     if (actionType === 'delete') {
       this.setState({ pendingDeleteEntity: { entityType, entityId } });
-    } else if (actionType === 'add-to-collection') {
+    } else if (actionType === 'add-to-collection:new') {
       if (!this.state.collection) {
-        console.log('hello');
+        this.handleCreateCollection(entityId);
+      }
+    } else if (actionType.indexOf('add-to-collection:') > -1) {
+      if (!this.state.collection) {
+        const collectionId = actionType.replace('add-to-collection:', '');
+
+        this.handleAddEntitiesToCollection(entityId, collectionId);
       }
     } else {
       throw new Error(`Action ${actionType} not yet implemented for entity type ${entityType}`);
@@ -175,7 +187,12 @@ class Library extends Component {
   }
 
   render() {
-    const { dispatch, location, params, datasets, visualisations, collections, dashboards } = this.props;
+    const { dispatch,
+      location,
+      datasets,
+      visualisations,
+      collections,
+      dashboards } = this.props;
     const { pendingDeleteEntity, collection } = this.state;
     const query = location.query;
     const displayMode = query.display || 'list';
@@ -203,7 +220,7 @@ class Library extends Component {
           /> : null
         }
         <LibraryHeader
-          location={collection ? collection.name : 'Library'}
+          location={collection ? collection.title : 'Library'}
           checkboxEntities={this.state.checkboxEntities}
           collections={collections}
           collection={collection}
@@ -259,6 +276,7 @@ class Library extends Component {
           filterBy={filterBy}
           searchString={searchString}
           collection={collection}
+          collections={collections}
           library={collection ? filterLibraryByCollection(this.props, collection) : this.props}
           checkboxEntities={this.state.checkboxEntities}
           onSelectEntity={this.handleSelectEntity}
@@ -279,6 +297,7 @@ Library.propTypes = {
   datasets: PropTypes.object.isRequired,
   visualisations: PropTypes.object.isRequired,
   dashboards: PropTypes.object.isRequired,
+  collections: PropTypes.object.isRequired,
 };
 
 export default connect(state => state.library)(Library);

@@ -26,12 +26,12 @@ const getCollapsedStatus = (pathname) => {
 const getActiveSubtitle = (pathname) => {
   let activeSubtitle;
 
-  if (pathname === 'library') {
-    activeSubtitle = 'library';
-  } else if (pathname.indexOf('library') > -1) {
+  if (pathname.indexOf('collections') > -1) {
     activeSubtitle = 'collections';
   } else if (pathname.indexOf('activity') > -1) {
     activeSubtitle = 'activity';
+  } else if (pathname.indexOf('library') > -1) {
+    activeSubtitle = 'library';
   }
 
   return activeSubtitle;
@@ -40,10 +40,12 @@ const getActiveSubtitle = (pathname) => {
 class WorkspaceNav extends Component {
   constructor() {
     super();
-    this.handleShowCreateCollectionModal = this.handleShowCreateCollectionModal.bind(this);
     this.state = {
       isManuallyInverted: false,
     };
+
+    this.handleShowCreateCollectionModal = this.handleShowCreateCollectionModal.bind(this);
+    this.handleShowDeleteCollectionModal = this.handleShowDeleteCollectionModal.bind(this);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -72,6 +74,10 @@ class WorkspaceNav extends Component {
 
   handleShowCreateCollectionModal() {
     this.props.dispatch(showModal('create-collection'));
+  }
+
+  handleShowDeleteCollectionModal(collection) {
+    this.props.dispatch(showModal('delete-collection', { collection }));
   }
 
   render() {
@@ -111,6 +117,7 @@ class WorkspaceNav extends Component {
           <CollectionsList
             collections={this.props.collections}
             onShowCreateCollectionModal={this.handleShowCreateCollectionModal}
+            onDeleteCollection={this.handleShowDeleteCollectionModal}
             isSelected={activeSubtitle === 'collections'}
             pathname={this.props.location.pathname}
           />

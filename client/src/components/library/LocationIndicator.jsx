@@ -2,7 +2,11 @@ import React, { PropTypes } from 'react';
 
 export default function LocationIndicator({ location }) {
   return (
-    <div className="LocationIndicator">{location}</div>
+    <div className="LocationIndicator">
+      <div className="contents">
+        {location}
+      </div>
+    </div>
   );
 }
 

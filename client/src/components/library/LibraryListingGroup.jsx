@@ -38,10 +38,19 @@ const sortListGroupEntities = (entities, sortOrder, isReverseSort) => {
   return sortedEntities;
 };
 
-const isEntityChecked = (entity, checkboxEntities = []) => checkboxEntities.indexOf(getId(entity)) > -1;
+const isEntityChecked = (entity, checkboxEntities = []) =>
+  checkboxEntities.indexOf(getId(entity)) > -1;
 
 export default function LibraryListingGroup({
-  listGroup, displayMode, sortOrder, isReverseSort, checkboxEntities, onSelectEntity, onCheckEntity, onEntityAction }) {
+  listGroup,
+  displayMode,
+  collections,
+  sortOrder,
+  isReverseSort,
+  checkboxEntities,
+  onSelectEntity,
+  onCheckEntity,
+  onEntityAction }) {
   const listGroupTitle = getListGroupTitle(listGroup.listGroupName, sortOrder);
   const sortedEntities = sortListGroupEntities(listGroup.entities, sortOrder, isReverseSort);
 
@@ -55,6 +64,7 @@ export default function LibraryListingGroup({
             entity={entity}
             isChecked={isEntityChecked(entity, checkboxEntities)}
             displayMode={displayMode}
+            collections={collections}
             onSelectEntity={onSelectEntity}
             onCheckEntity={onCheckEntity}
             onEntityAction={onEntityAction}
@@ -75,4 +85,7 @@ LibraryListingGroup.propTypes = {
   isReverseSort: PropTypes.bool.isRequired,
   onSelectEntity: PropTypes.func.isRequired,
   onEntityAction: PropTypes.func.isRequired,
+  collections: PropTypes.object.isRequired,
+  checkboxEntities: PropTypes.array.isRequired,
+  onCheckEntity: PropTypes.func.isRequired,
 };

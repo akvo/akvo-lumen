@@ -69,4 +69,11 @@ LibraryHeader.propTypes = {
   onSetSearchString: PropTypes.func.isRequired,
   onCreate: PropTypes.func.isRequired,
   location: PropTypes.string.isRequired,
+  checkboxEntities: PropTypes.array,
+  collections: PropTypes.object.isRequired,
+  onCreateCollection: PropTypes.func.isRequired,
+  onAddEntitiesToCollection: PropTypes.func.isRequired,
+  onRemoveEntitiesFromCollection: PropTypes.func.isRequired,
+  onDeselectEntities: PropTypes.func.isRequired,
+  collection: PropTypes.object,
 };

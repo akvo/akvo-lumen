@@ -20,13 +20,14 @@ export default class CheckboxEntityMenu extends Component {
     }
     this.props.onDeselectEntities();
   }
-  handleRemoveEntitiesFromCollection(collectionId) {
-    this.props.onRemoveEntitiesFromCollection(this.props.checkboxEntities, this.props.collection.id);
-    this.props.onDeselectEntities();
+  handleRemoveEntitiesFromCollection() {
+    const { props } = this;
+    props.onRemoveEntitiesFromCollection(props.checkboxEntities, props.collection.id);
+    props.onDeselectEntities();
   }
   render() {
     const { props } = this;
-    const { collections } = props;
+    const { collections, collection } = props;
     return (
       <div className="CheckboxEntityMenu">
         <span>
@@ -37,7 +38,7 @@ export default class CheckboxEntityMenu extends Component {
             position: 'relative',
           }}
         >
-          {this.props.collection ?
+          {collection ?
             <span>
               <button
                 className="removeFromCollection clickable"
@@ -64,7 +65,7 @@ export default class CheckboxEntityMenu extends Component {
                   options={[
                     ...Object.keys(collections).map(key => ({
                       value: key,
-                      label: collections[key].name,
+                      label: collections[key].title,
                     })),
                     {
                       value: 'newCollection',
@@ -91,3 +92,12 @@ export default class CheckboxEntityMenu extends Component {
     );
   }
 }
+
+CheckboxEntityMenu.propTypes = {
+  onCreateCollection: PropTypes.func.isRequired,
+  onAddEntitiesToCollection: PropTypes.func.isRequired,
+  onRemoveEntitiesFromCollection: PropTypes.func.isRequired,
+  onDeselectEntities: PropTypes.func.isRequired,
+  checkboxEntities: PropTypes.array.isRequired,
+  collection: PropTypes.object,
+};

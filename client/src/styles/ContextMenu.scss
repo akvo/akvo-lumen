@@ -79,4 +79,15 @@
     /* Offset padding of this + padding of parent + border*/
     margin-top: calc(-1rem + 3px);
   }
+  &.leftSubMenu .subMenu {
+    right: 0;
+    left: -10rem;
+  }
+  .newCollection {
+    border-top: 1px solid;
+
+    &:first-of-type {
+      border-top: 0;
+    }
+  }
 }
