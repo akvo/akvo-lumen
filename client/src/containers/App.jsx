@@ -62,4 +62,5 @@ export default function App({ history, location }) {
 
 App.propTypes = {
   history: PropTypes.object.isRequired,
+  location: PropTypes.object,
 };

@@ -43,15 +43,3 @@ function mapStateToProps(state) {
 export default connect(
   mapStateToProps
 )(AdminNav);
-/*
-export const AdminNav = () => (
-  <h1>Admin</h1>
-);
-
-AdminNav.propTypes = {
-  profile: PropTypes.object.isRequired,
-  location: PropTypes.object,
-};
-
-export { AdminNav as default };
-*/
