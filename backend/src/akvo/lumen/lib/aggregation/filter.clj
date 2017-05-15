@@ -92,4 +92,5 @@
     "TRUE"
     (let [filters (map #(assoc % "column" (find-column columns (get % "column")))
                        filters)]
-      (str/join " AND " (map filter-sql filters)))))
+      (str/join " AND " (map #(format "(%s)" (filter-sql %))
+                             filters)))))
