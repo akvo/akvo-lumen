@@ -9,11 +9,12 @@
 
 (defn transform-value
   "Transforms the given value according to its associated type label.
+  Blank strings are cast to nil.
   Numeric strings are cast to numbers, only if the type label matches."
-  [[value type-label]]
+  [[value psql-type]]
   (cond
     (string/blank? value) nil
-    (and (string/numeric? value) (= "double precision" type-label)) (Double/parseDouble value)
+    (and (string/numeric? value) (= "double precision" psql-type)) (Double/parseDouble value)
     :else value))
 
 (defn transform-rows
