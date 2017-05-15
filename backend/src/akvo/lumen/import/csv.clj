@@ -3,43 +3,53 @@
             [clojure.data.csv :as csv]
             [clojure.java.io :as io]
             [clojure.java.jdbc :as jdbc]
-            [cuerdas.core :as s])
+            [cuerdas.core :as string])
   (:import com.ibm.icu.text.CharsetDetector))
 
 
-(defn nilify
-  "Coerces blank string values to nil"
-  [value]
-  (if (s/blank? value) nil value))
+(defn transform-value
+  "Transforms the given value according to its associated type label.
+  Numeric strings are cast to numbers, only if the type label is 'number'"
+  [[value type-label]]
+  (cond
+    (string/blank? value) nil
+    (and (string/numeric? value) (= "number" type-label)) (Double/parseDouble value)
+    :else value))
+
+(defn transform-rows
+  "Transform values in the given rows based on the given column types"
+  [rows column-types]
+  (let [value-type-pairs (map #(map vector % column-types) rows)]
+    (map #(map transform-value %) value-type-pairs)))
 
 (defn get-column-names
   "Returns a seq of alphanumeric column names of the form
   c1, c2, c3, ... for the given number of columns"
   [num-cols]
-  (let [nums (range 1 (inc num-cols))]
-    (->> (map vector (repeat \c) nums)
-         (map s/join))))
+  (let [num-range (range 1 (inc num-cols))]
+    (->> (map vector (repeat \c) num-range)
+         (map string/join))))
 
 (defn get-column-titles
-  "Returns a seq of titles of the form
+  "Returns a seq of alphanumeric column titles of the form
   Column 1, Column 2, Column 3, ... for the given number of columns"
   [num-cols]
-  (let [nums (range 1 (inc num-cols))]
-    (->> (map vector (repeat "Column ") nums)
-         (map s/join))))
+  (let [num-range (range 1 (inc num-cols))]
+    (->> (map vector (repeat "Column ") num-range)
+         (map string/join))))
 
-(defn get-type-kw
-  "Returns a keyword representation of the type of the given value.
+(defn get-type-label
+  "Returns a keyword label representing the type of the given value.
   Defaults to `:text`."
   [value]
   (condp #(%1 %2) value
+    string/blank? :nil
     ;; TODO date-string? :date
-    nil? :nil
-    s/numeric? :number
+    string/numeric? :number
     :text))
 
 (defn all-of-type?
-  "Determines if all types in the given column are the same or `:nil`"
+  "Determines if all type labels for the given column are the same or `:nil`"
   [coll type-kw]
   {:pre [(contains? #{:date :number :text} type-kw)]}
   (every? true? (map #(contains? #{:nil type-kw} %) coll)))
@@ -55,10 +65,10 @@
     {:client "text" :psql "text"}))
 
 (defn get-column-types
-  "Returns a seq of types for each column in the given rows"
+  "Returns a seq of client & SQL types for each column in the given rows"
   [rows]
   (let [columns (apply map vector rows)]
-    (->> (map #(map get-type-kw %) columns)
+    (->> (map #(map get-type-label %) columns)
          (map get-common-type))))
 
 (defn get-column-tuples
@@ -68,9 +78,9 @@
 
   [{:column-name \"c1\" :title \"Column 1\" :type \"text\"} ...]
   "
-  [column-ids column-names column-types]
+  [column-names column-titles column-types]
   (map #(zipmap [:column-name :title :type] [%1 %2 %3])
-       column-ids column-names column-types))
+       column-names column-titles column-types))
 
 (defn- load-csv!
   "Imports the given CSV data into a PostgreSQL table"
@@ -86,7 +96,7 @@
             column-types (get-column-types rows)
             client-types (map :client column-types)
             psql-types (map :psql column-types)
-            transformed-rows (map #(transform-row % client-types) rows)]
+            transformed-rows (transform-rows rows client-types)]
         (jdbc/db-do-commands tenant-conn
           (jdbc/create-table-ddl table-name
                                  (apply vector [:rnum :serial :primary :key]
@@ -100,7 +110,7 @@
 
 (defn get-encoding
   "Returns the character encoding reading some bytes from the file
-  using ICU's CharsetDetector."
+  using ICU's CharsetDetector"
   [path]
   (let [detector (CharsetDetector.)
         ;; 100kb
@@ -130,7 +140,7 @@
         (if file-on-disk?
           (str file-upload-path
             "/resumed/"
-            (last (s/split url #"\/"))
+            (last (string/split url #"\/"))
             "/file")
           url))))
 
