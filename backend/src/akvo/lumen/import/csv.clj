@@ -9,11 +9,11 @@
 
 (defn transform-value
   "Transforms the given value according to its associated type label.
-  Numeric strings are cast to numbers, only if the type label is 'number'"
+  Numeric strings are cast to numbers, only if the type label matches."
   [[value type-label]]
   (cond
     (string/blank? value) nil
-    (and (string/numeric? value) (= "number" type-label)) (Double/parseDouble value)
+    (and (string/numeric? value) (= "double precision" type-label)) (Double/parseDouble value)
     :else value))
 
 (defn transform-rows
@@ -96,7 +96,7 @@
             column-types (get-column-types rows)
             client-types (map :client column-types)
             psql-types (map :psql column-types)
-            transformed-rows (transform-rows rows client-types)]
+            transformed-rows (transform-rows rows psql-types)]
         (jdbc/db-do-commands tenant-conn
           (jdbc/create-table-ddl table-name
                                  (apply vector [:rnum :serial :primary :key]
