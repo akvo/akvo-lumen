@@ -54,8 +54,8 @@ spec:
         - name: LUMEN_FLOW_API_URL
           valueFrom:
             configMapKeyRef:
-              name: flow-api
-              key: api.root
+              name: akvo
+              key: flow.api.root
         - name: LUMEN_SENTRY_BACKEND_DSN
           valueFrom:
             secretKeyRef:
@@ -66,3 +66,5 @@ spec:
             secretKeyRef:
               name: lumen
               key: sentry.client_dsn
+        - name: LUMEN_FLOW_REPORT_DATABASE_URL
+          value: foo
