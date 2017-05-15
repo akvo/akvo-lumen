@@ -268,16 +268,27 @@ export default class DatasetTable extends Component {
           onRemoveSort={transformation => this.props.onTransform(transformation)}
         />
       );
+      const formatCell = (props) => {
+        const formattedCellValue =
+          formatCellValue(column.get('type'), rows.getIn([props.rowIndex, index]));
+
+        return (
+          <Cell>
+            <span
+              title={formattedCellValue}
+            >
+              {formattedCellValue}
+            </span>
+          </Cell>
+        );
+      };
+
       return (
         <Column
           cellClassName={this.getCellClassName(column.get('title'))}
           key={index}
           header={columnHeader}
-          cell={props => (
-            <Cell>
-              {formatCellValue(column.get('type'), rows.getIn([props.rowIndex, index]))}
-            </Cell>
-          )}
+          cell={formatCell}
           width={200}
         />
       );

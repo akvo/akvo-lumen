@@ -1,4 +1,5 @@
 import fetch from 'isomorphic-fetch';
+import { omit } from 'lodash';
 import * as auth from './auth';
 
 function wrapUpdateToken(fetchRequestThunk) {
@@ -21,11 +22,10 @@ function getQueryString(queryParams) {
 
 export function get(url, queryParams, headers) {
   const urlWithOptionalParams = queryParams == null ? url : `${url}?${getQueryString(queryParams)}`;
-
   return wrapUpdateToken(token =>
     fetch(urlWithOptionalParams, {
       method: 'GET',
-      headers: requestHeaders(token, headers),
+      headers: omit(requestHeaders(token, headers), 'Content-Type'),
     })
   );
 }

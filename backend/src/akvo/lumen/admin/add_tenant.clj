@@ -1,15 +1,15 @@
 (ns akvo.lumen.admin.add-tenant
   "The following env vars are assumed to be present:
-  KC_URL, KC_SECRET, PGHOST, PGDATABASE, PGUSER, PGPASSWORD
-  The PG* env vars can be found in the ElephantSQL console for the appropriate
+  KC_URL, KC_SECRET, PG_HOST, PG_DATABASE, PG_USER, PG_PASSWORD
+  The PG_* env vars can be found in the ElephantSQL console for the appropriate
   instance. KC_URL is the url to keycloak (without trailing /auth).
   KC_SECRET is the client secret found in the Keycloak admin at
   > Realms > Akvo > Clients > akvo-lumen-confidential > Credentials > Secret.
   Use this as follow
-  $ env KC_URL=https://*** KC_SECRET=***
+  $ env KC_URL=https://*** KC_SECRET=*** \\
         PG_HOST=***.db.elephantsql.com PG_DATABASE=*** \\
         PG_USER=*** PG_PASSWORD=*** \\
-        lein run -m akvo.lumen.admin.add-tenant <label> <description> <email>
+        lein run -m akvo.lumen.admin.add-tenant <url> <title> <email>
   KC_URL is probably one of:
   - http://localhost:8080 for local development
   - https://login.akvo.org for production
@@ -18,7 +18,7 @@
             [akvo.lumen.config :refer [error-msg]]
             [akvo.lumen.component.keycloak :as keycloak]
             [akvo.lumen.lib.share-impl :refer [random-url-safe-string]]
-            [akvo.lumen.util :refer [squuid]]
+            [akvo.lumen.util :refer [conform-email squuid]]
             [cheshire.core :as json]
             [clj-http.client :as client]
             [clojure.java.browse :as browse]
@@ -28,8 +28,8 @@
             [clojure.string :as s]
             [environ.core :refer [env]]
             [ragtime.jdbc]
-            [ragtime.repl]))
-
+            [ragtime.repl])
+  (:import java.net.URL))
 
 (def blacklist ["admin"
                 "deck"
@@ -47,7 +47,12 @@
   (cond
     (< (count label) 3)
     (throw
-     (ex-info "To short label, should be 3 or more characters."
+     (ex-info "Too short label, should be 3 or more characters."
+              {:label label}))
+
+    (> (count label) 30)
+    (throw
+     (ex-info "Too long label, should be less than 30 or more characters."
               {:label label}))
 
     (contains? (set blacklist) label)
@@ -56,8 +61,36 @@
                       (s/join ", "  blacklist))
               {:label label}))
 
+    (not (Character/isLetter (get label 0)))
+    (throw
+     (ex-info "First letter should be a character"
+              {:label label}))
+
+    (nil? (re-matches #"^[a-z0-9\-]+" label))
+    (throw
+     (ex-info "Label is only allowed to be a-z 0-9 or hyphen"
+              {:label label}))
+
     :else label))
 
+(defn label [url]
+  (-> url
+      (s/split #"//")
+      second
+      (s/split #"\.")
+      first
+      conform-label))
+
+(defn conform-url
+  "Make sure https is used for non development mode and remove trailing slash."
+  [v]
+  (let [url (URL. v)]
+    (if (= (:kc-url env) "http://localhost:8080")
+      (when (= (.getProtocol url) "https")
+        (throw (ex-info "Use http in development mode" {:url v})))
+      (when (= (.getProtocol url) "https")
+        (throw (ex-info "Url should use https" {:url v}))))
+    (format "%s://%s" (.getProtocol url) (.getHost url))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Database
@@ -138,6 +171,8 @@
     new-group-id))
 
 (defn create-new-user
+  "Creates a new user and return a map containing email, and
+   new user-id and temporary password."
   [request-headers api-root email]
   (let [tmp-password (random-url-safe-string 6)
         user-id (-> (client/post (format "%s/users" api-root)
@@ -161,15 +196,44 @@
 
 (defn user-representation
   [request-headers api-root email]
-  (if-let [{:strs [id] :as user} (keycloak/fetch-user-by-email request-headers
-                                                               api-root email)]
+  (if-let [user (keycloak/fetch-user-by-email request-headers api-root email)]
     {:email email
-     :user-id id}
+     :user-id (get user "id")}
     (create-new-user request-headers api-root email)))
 
-(defn setup-keycloak
-  [label email]
-  (let [{api-root :api-root :as kc} (util/create-keycloak)
+
+(defn fetch-client
+  [request-headers api-root client-id]
+  (-> (client/get (format "%s/clients" api-root)
+                  {:query-params {"clientId" client-id}
+                   :headers request-headers})
+      :body json/decode first))
+
+(defn update-client
+  [request-headers api-root {:strs [id] :as client}]
+  (client/put (format "%s/clients/%s" api-root id)
+                {:body (json/encode client)
+                 :headers request-headers}))
+
+(defn add-tenant-urls-to-client
+  [client url]
+  (-> client
+      (update "webOrigins" conj url)
+      (update "redirectUris" conj (format "%s/*" url))))
+
+(defn add-tenant-urls-to-clients
+  [{:keys [api-root]} request-headers url]
+  (let [confidential-client (fetch-client request-headers api-root "akvo-lumen-confidential")
+        public-client (fetch-client request-headers api-root "akvo-lumen")]
+    (update-client request-headers api-root
+                   (add-tenant-urls-to-client confidential-client url))
+    (update-client request-headers api-root
+                   (add-tenant-urls-to-client public-client url))))
+
+(defn setup-tenant-in-keycloak
+  "Create two new groups as children to the akvo:lumen group"
+  [label email url]
+  (let [{:keys [api-root] :as kc} (util/create-keycloak)
         request-headers (keycloak/request-headers kc)
         lumen-group-id (root-group-id request-headers api-root)
         tenant-id (create-group request-headers api-root lumen-group-id
@@ -179,15 +243,22 @@
                                       "admin")
         {:keys [user-id email tmp-password] :as user-rep}
         (user-representation request-headers api-root email)]
+    (add-tenant-urls-to-clients kc request-headers url)
     (keycloak/add-user-to-group request-headers api-root user-id tenant-admin-id)
-    user-rep))
-
+    (assoc user-rep :url url)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Main
 ;;;
 
-(defn check-input []
+(defn conform-input [url title email]
+  (let [url (conform-url url)]
+    {:email (conform-email email)
+     :label (label url)
+     :title title
+     :url url}))
+
+(defn check-env-vars []
   (assert (:kc-url env) (error-msg "Specify KC_URL env var"))
   (assert (:kc-secret env)
           (do
@@ -200,19 +271,18 @@
   (when (not (= (:pg-host env) "localhost"))
     (assert (:pg-password env) (error-msg "Specify PG_PASSWORD env var"))))
 
-(defn -main [label title email]
+(defn -main [url title email]
   (try
-    (check-input)
-    (setup-database (conform-label label) title)
-    (let [user-creds (setup-keycloak label email)]
-      (println "User creds:")
-      (pprint user-creds))
+    (check-env-vars)
+    (let [{:keys [email label title url]} (conform-input url title email)]
+      (setup-database label title)
+      (let [user-creds (setup-tenant-in-keycloak label email url)]
+        (println "Credentials:")
+        (pprint user-creds)))
     (catch java.lang.AssertionError e
-      (prn (.getMessage e))
-      (System/exit 0))
+      (prn (.getMessage e)))
     (catch Exception e
       (prn e)
       (prn (.getMessage e))
       (when (= (type e) clojure.lang.ExceptionInfo)
-        (prn (ex-data e)))
-      (System/exit 0))))
+        (prn (ex-data e))))))

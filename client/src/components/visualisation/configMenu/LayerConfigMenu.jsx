@@ -209,8 +209,13 @@ export default class LayerConfigMenu extends Component {
                   </span>
                   <span
                     className="columnLabelContainer"
+                    title={option.label}
                   >
-                    {option.label}
+                    {(option.label && option.label.length > 128) ?
+                      `${option.label.substring(0, 128)}...`
+                      :
+                      option.label
+                    }
                   </span>
                 </div>
               )}

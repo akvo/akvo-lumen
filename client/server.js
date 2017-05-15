@@ -23,14 +23,15 @@ new WebpackDevServer(webpack(config), {
   },
   historyApiFallback: {
     rewrites: [
+      { from: '^/favicon.ico$', to: 'favicon.ico' },
       { from: '^/s/.*$', to: '/assets/index-pub.html' },
       { from: '^.*$', to: '/assets/index.html' }
     ]
   },
-}).listen(3030, 'localhost', function (err, result) {
+}).listen(3030, 't1.lumen.localhost', function (err, result) {
   if (err) {
     console.log(err);
   }
 
-  console.log('Listening at localhost:3030');
+  console.log('Listening at t1.lumen.localhost:3030');
 });

@@ -26,7 +26,7 @@ const supportedFormats = [{
 }, {
   kind: 'AKVO_FLOW',
   icon: '/assets/akvo-flow.png',
-  label: 'Akvo FLOW',
+  label: 'Akvo Flow',
   disabled: false,
 }, {
   kind: 'GITHUB',

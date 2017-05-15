@@ -11,3 +11,5 @@ sudo /opt/google-cloud-sdk/bin/gcloud --quiet config set container/cluster $PROD
 
 sudo /opt/google-cloud-sdk/bin/gcloud config set compute/zone ${CLOUDSDK_COMPUTE_ZONE}
 sudo /opt/google-cloud-sdk/bin/gcloud --quiet container clusters get-credentials $PROD_CLUSTER_NAME
+
+sudo chown -R $USER /home/ubuntu/.config

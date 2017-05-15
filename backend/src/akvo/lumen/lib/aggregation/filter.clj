@@ -1,4 +1,4 @@
-(ns akvo.lumen.lib.visualisation.filter
+(ns akvo.lumen.lib.aggregation.filter
   (:require [clojure.string :as str])
   (:import [java.sql.Timestamp]))
 
@@ -92,4 +92,5 @@
     "TRUE"
     (let [filters (map #(assoc % "column" (find-column columns (get % "column")))
                        filters)]
-      (str/join " AND " (map filter-sql filters)))))
+      (str/join " AND " (map #(format "(%s)" (filter-sql %))
+                             filters)))))

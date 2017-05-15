@@ -194,50 +194,40 @@ export function getScatterData(visualisation, datasets) {
   }];
 }
 
-export function getPieData(visualisation, datasets) {
-  const { datasetId, spec } = visualisation;
-  const dataset = datasets[datasetId];
-  const bucketIndex = getColumnIndex(dataset, spec.bucketColumn);
-  const bucketColumnType = dataset.getIn(['columns', bucketIndex, 'type']);
-  const rowFilter = filterFn(spec.filters, dataset.get('columns'));
+/* Format the aggregated data for display, including replacing null text and sorting */
+export function formatPieData(aggregationData) {
+  const bucketColumnType = aggregationData.metadata.bucketColumnType;
+  const formattedData = Object.assign({}, aggregationData);
 
-  const valueArray = dataset.get('rows')
-    .filter(row => rowFilter(row))
-    .map(row => ({
-      bucketValue: replaceLabelIfValueEmpty(row.get(bucketIndex)),
-    }))
-    .toArray();
+  formattedData.data = formattedData.data.map((item) => {
+    const cItem = Object.assign({}, item);
+    cItem.bucketValue = replaceLabelIfValueEmpty(cItem.bucketValue);
+    return cItem;
+  });
 
-  const aggregatedValues = dl.groupby(['bucketValue'])
-    .summarize([{
-      name: 'bucketValue',
-      ops: ['count'],
-      as: ['bucketCount'],
-    }])
-    .execute(valueArray)
-    .sort((a, b) => {
-      if (bucketColumnType === 'text') {
-        const emptyValueText = replaceLabelIfValueEmpty(null);
-        const valA = a.bucketValue === emptyValueText ? lastValueAlphabetically : a.bucketValue;
-        const valB = b.bucketValue === emptyValueText ? lastValueAlphabetically : b.bucketValue;
+  formattedData.data.sort((a, b) => {
+    if (bucketColumnType === 'text') {
+      const emptyValueText = replaceLabelIfValueEmpty(null);
+      const valA = a.bucketValue === emptyValueText ? lastValueAlphabetically : a.bucketValue;
+      const valB = b.bucketValue === emptyValueText ? lastValueAlphabetically : b.bucketValue;
 
-        return valA.localeCompare(valB);
-      }
+      return valA.localeCompare(valB);
+    }
 
-      // Bucket value might still be a string if this is the "empty value" bucket
-      let valA = parseFloat(a.bucketValue);
-      let valB = parseFloat(b.bucketValue);
+    // Bucket value might still be a string if this is the "empty value" bucket
+    let valA = parseFloat(a.bucketValue);
+    let valB = parseFloat(b.bucketValue);
 
-      // If this is the "empty value" bucket, make sure it comes last in the chart
-      if (isNaN(valA)) valA = Infinity;
-      if (isNaN(valB)) valB = Infinity;
+    // If this is the "empty value" bucket, make sure it comes last in the chart
+    if (isNaN(valA)) valA = Infinity;
+    if (isNaN(valB)) valB = Infinity;
 
-      return valA - valB;
-    });
+    return valA - valB;
+  });
 
   return [{
     name: 'table',
-    values: aggregatedValues,
+    values: formattedData.data,
   }];
 }
 
@@ -457,6 +447,7 @@ export function getMapData(layer, datasets) {
 export function getVegaSpec(visualisation, data, containerHeight, containerWidth, chartSize) {
   const { visualisationType } = visualisation;
   let vspec;
+  let displayData;
 
   switch (visualisationType) {
     case 'bar':
@@ -470,7 +461,10 @@ export function getVegaSpec(visualisation, data, containerHeight, containerWidth
 
     case 'pie':
     case 'donut':
-      vspec = getVegaPieSpec(visualisation, data, containerHeight, containerWidth, chartSize);
+      displayData = formatPieData(data);
+
+      vspec =
+        getVegaPieSpec(visualisation, displayData, containerHeight, containerWidth, chartSize);
       break;
 
     case 'scatter':
