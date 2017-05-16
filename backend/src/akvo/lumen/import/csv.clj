@@ -4,8 +4,7 @@
             [clojure.java.io :as io]
             [clojure.java.jdbc :as jdbc]
             [cuerdas.core :as string])
-  (:import com.ibm.icu.text.CharsetDetector))
-
+  (:import [org.apache.tika.detect AutoDetectReader]))
 
 (defn transform-value
   "Transforms the given value according to its associated type label.
@@ -85,9 +84,9 @@
 
 (defn- load-csv!
   "Imports the given CSV data into a PostgreSQL table"
-  [tenant-conn table-name path encoding headers?]
+  [tenant-conn table-name path headers?]
   (try
-    (with-open [r (io/reader path :encoding encoding)]
+    (with-open [r (-> path io/file io/input-stream AutoDetectReader.)]
       (let [data (csv/read-csv r)
             headers (when headers? (first data))
             rows (if headers? (rest data) data)
@@ -99,28 +98,15 @@
             psql-types (map :psql column-types)
             transformed-rows (transform-rows rows psql-types)]
         (jdbc/db-do-commands tenant-conn
-          (jdbc/create-table-ddl table-name
-                                 (apply vector [:rnum :serial :primary :key]
-                                        (map vector column-names psql-types))))
+                             (jdbc/create-table-ddl table-name
+                                                    (apply vector [:rnum :serial :primary :key]
+                                                           (map vector column-names psql-types))))
         (jdbc/insert-multi! tenant-conn table-name column-names transformed-rows)
         {:success? true
          :columns (get-column-tuples column-names column-titles client-types)}))
     (catch Exception e
       {:success? false
        :reason (format "Unexpected error: %s" (.getMessage e))})))
-
-(defn get-encoding
-  "Returns the character encoding reading some bytes from the file
-  using ICU's CharsetDetector"
-  [path]
-  (let [detector (CharsetDetector.)
-        ;; 100kb
-        ba (byte-array 100000)]
-       (with-open [is (io/input-stream path)]
-         (.read is ba))
-       (->  (.setText detector ba)
-            (.detect)
-            (.getName))))
 
 (defmethod import/valid? "CSV"
   [{:strs [url fileName hasColumnHeaders]}]
@@ -148,6 +134,5 @@
 (defmethod import/make-dataset-data-table "CSV"
   [tenant-conn {:keys [file-upload-path]} table-name spec]
   (let [path (get-path spec file-upload-path)
-        encoding (get-encoding path)
         headers? (boolean (get spec "hasColumnHeaders"))]
-    (load-csv! tenant-conn table-name path encoding headers?)))
+    (load-csv! tenant-conn table-name path headers?)))
