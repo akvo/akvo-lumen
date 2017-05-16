@@ -14,5 +14,7 @@
 
 (defn all [tenant-conn]
   (response {"plan" (current-plan tenant-conn)
-             "resources" {"numberOfVisualisations"
-                          (count-visualisations tenant-conn)}}))
+             "resources" (count-visualisations tenant-conn
+                                               {}
+                                               {}
+                                               {:identifiers identity})}))

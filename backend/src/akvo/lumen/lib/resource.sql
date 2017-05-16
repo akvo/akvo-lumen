@@ -8,5 +8,5 @@ WHERE plan.ends = 'infinity';
 
 -- :name count-visualisations :? :1
 -- :doc Returns the count of visualisations
-SELECT COUNT (*)
+SELECT COUNT (*) AS "numberOfVisualisations"
 FROM visualisation;

@@ -28,7 +28,7 @@ new WebpackDevServer(webpack(config), {
       { from: '^.*$', to: '/assets/index.html' }
     ]
   },
-}).listen(3030, 'localhost', function (err, result) {
+}).listen(3030, 't1.lumen.localhost', function (err, result) {
   if (err) {
     console.log(err);
   }

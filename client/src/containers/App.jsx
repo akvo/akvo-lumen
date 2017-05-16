@@ -5,6 +5,7 @@ import Visualisation from './Visualisation';
 import Dataset from './Dataset';
 import Dashboard from './Dashboard';
 import Users from '../components/Users';
+import Resources from '../components/Resources';
 import Main from './Main';
 import WorkspaceNav from '../components/WorkspaceNav';
 import AdminNav from '../components/AdminNav';
@@ -53,6 +54,11 @@ export default function App({ history, location }) {
         <Route
           path="admin/users"
           components={{ sidebar: AdminNav, content: Users }}
+          location={location}
+        />
+        <Route
+          path="admin/resources"
+          components={{ sidebar: AdminNav, content: Resources }}
           location={location}
         />
       </Route>
