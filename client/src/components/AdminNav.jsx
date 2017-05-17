@@ -1,5 +1,4 @@
-/*eslint no-console: "error"*/
-import React, { Component, PropTypes } from 'react';
+import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router';
 import NavLink from './workspace-nav/NavLink';
@@ -18,48 +17,46 @@ const getActiveSubtitle = (pathname) => {
   return activeSubtitle;
 };
 
-class AdminNav extends Component {
-  render() {
-    const activeSubtitle = getActiveSubtitle(this.props.location.pathname);
-    return (
-      <nav
-        className="WorkspaceNav noSelect"
-      >
-        <div className="header">
-          <div className="rowPrimary">
-            <div
-              className="menuIcon clickable"
-            />
-            <h1><Link to="/">Lumen</Link></h1>
-          </div>
-          <OrganizationMenu profile={this.props.profile} />
+const AdminNav = function AdminNav(props) {
+  const activeSubtitle = getActiveSubtitle(props.location.pathname);
+  return (
+    <nav
+      className="WorkspaceNav noSelect"
+    >
+      <div className="header">
+        <div className="rowPrimary">
+          <div
+            className="menuIcon clickable"
+          />
+          <h1><Link to="/">Lumen</Link></h1>
         </div>
-        <div className="links">
-          <NavLink
-            to="/admin/users"
-            className="users subtitle"
-            isSelected={activeSubtitle === 'users'}
-          >
-            Users
-          </NavLink>
-          <div>
-            <br />
-          </div>
-          <NavLink
-            to="/admin/resources"
-            className="resources subtitle"
-            isSelected={activeSubtitle === 'resources'}
-          >
-            Resources
-          </NavLink>
+        <OrganizationMenu profile={props.profile} />
+      </div>
+      <div className="links">
+        <NavLink
+          to="/admin/users"
+          className="users subtitle"
+          isSelected={activeSubtitle === 'users'}
+        >
+          Users
+        </NavLink>
+        <div>
+          <br />
         </div>
-        <div className="NavWorkspaceSwitch">
-          {<Link to="/">Workspace</Link>}
-        </div>
-      </nav>
-    );
-  }
-}
+        <NavLink
+          to="/admin/resources"
+          className="resources subtitle"
+          isSelected={activeSubtitle === 'resources'}
+        >
+          Resources
+        </NavLink>
+      </div>
+      <div className="NavWorkspaceSwitch">
+        {<Link to="/">Workspace</Link>}
+      </div>
+    </nav>
+  );
+};
 
 AdminNav.propTypes = {
   profile: PropTypes.object.isRequired,

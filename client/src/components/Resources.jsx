@@ -21,19 +21,16 @@ class Resources extends Component {
     api.get('/api/resources')
       .then(response => response.json())
       .then(resources => this.setState(resources));
-      // .then(resources => console.log(resources));
-      //.then(resources => this.setState({ resources }));
   }
 
   render() {
     const plan = this.state.plan;
     const resources = this.state.resources;
     const visualisations = resources.numberOfVisualisations;
-    // const numberOfVisualisations = this.state.resources.numberOfVisualisations;
     return (
       <div>
         Plan: {plan}<br />
-      Visualisations: {visualisations}
+        Visualisations: {visualisations}
       </div>
     );
   }
