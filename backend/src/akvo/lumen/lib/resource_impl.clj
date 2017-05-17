@@ -10,7 +10,7 @@
 (defn current-plan [tenant-conn]
   (if-let [r (select-plan tenant-conn)]
     r
-    "planless"))
+    {"tier" "planless"}))
 
 (defn all [tenant-conn]
   (response {"plan" (current-plan tenant-conn)

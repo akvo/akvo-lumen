@@ -1,11 +1,50 @@
 import React, { Component, PropTypes } from 'react';
 import * as api from '../api';
 
+function resourceRuleDescription(resourceKey) {
+  let description = null;
+  switch (resourceKey) {
+    case 'numberOfVisualisations':
+      description = 'Number of visualisations';
+      break;
+    default:
+      description = resourceKey;
+  }
+  return description;
+}
+
+function ResourceList({ resources }) {
+  return (
+    <table>
+      <thead>
+        <tr>
+          <th>Rule</th>
+          <th>Limit</th>
+        </tr>
+      </thead>
+      <tbody>
+        {Object.keys(resources).map(key =>
+          <tr key={key}>
+            <td>{resourceRuleDescription(key)}</td>
+            <td>{resources[key]}</td>
+          </tr>
+        )}
+      </tbody>
+    </table>
+  );
+}
+ResourceList.propTypes = {
+  resources: PropTypes.object,
+};
+
 class Resources extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      plan: 'none',
+      plan: {
+        created: 1495020745539,
+        tier: 'none',
+      },
       resources: {
         numberOfVisualisations: 99,
       },
@@ -24,17 +63,15 @@ class Resources extends Component {
   }
 
   render() {
-    const plan = this.state.plan;
+    const currentTier = this.state.plan.tier;
     const resources = this.state.resources;
-    const visualisations = resources.numberOfVisualisations;
     return (
       <div>
-        Plan: {plan}<br />
-        Visualisations: {visualisations}
+        Plan: {currentTier}
+        <ResourceList resources={resources} />
       </div>
     );
   }
-
 }
 
 Resources.propTypes = {
