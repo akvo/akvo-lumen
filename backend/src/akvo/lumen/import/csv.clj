@@ -1,80 +1,112 @@
 (ns akvo.lumen.import.csv
   (:require [akvo.lumen.import.common :as import]
-            [akvo.lumen.util :refer [squuid]]
             [clojure.data.csv :as csv]
             [clojure.java.io :as io]
             [clojure.java.jdbc :as jdbc]
-            [clojure.string :as s]
-            [hugsql.core :as hugsql])
-  (:import com.ibm.icu.text.CharsetDetector
-           java.util.UUID
-           org.postgresql.PGConnection
-           org.postgresql.copy.CopyManager))
+            [cuerdas.core :as string])
+  (:import [org.apache.tika.detect AutoDetectReader]))
 
-(defn- get-cols
-  ([num-cols]
-   (get-cols num-cols nil))
-  ([num-cols c-type]
-   (s/join ", "
-           (for [i (range 1 (inc num-cols))]
-             (str "c" i
-                  (if-not (nil? c-type)
-                    (str " " c-type)
-                    ""))))))
+(defn transform-value
+  "Transforms the given value according to its associated type label.
+  Blank strings are cast to nil.
+  Numeric strings are cast to numbers, only if the type label matches."
+  [[value psql-type]]
+  (cond
+    (string/blank? value) nil
+    (and (string/numeric? value) (= "double precision" psql-type)) (Double/parseDouble value)
+    :else value))
 
+(defn transform-rows
+  "Transform values in the given rows based on the given column types"
+  [rows column-types]
+  (let [value-type-pairs (map #(map vector % column-types) rows)]
+    (map #(map transform-value %) value-type-pairs)))
 
-(defn get-create-table-sql
-  "Returns a `CREATE TABLE` statement for
-  the given number table name and number of columns"
-  [t-name num-cols]
-  (format "CREATE TABLE %s (%s, %s)"
-          t-name
-          "rnum serial primary key"
-          (get-cols num-cols "text")))
+(defn get-column-names
+  "Returns a seq of alphanumeric column names of the form
+  c1, c2, c3, ... for the given number of columns"
+  [num-cols]
+  (let [num-range (range 1 (inc num-cols))]
+    (->> (map vector (repeat \c) num-range)
+         (map string/join))))
 
-(defn get-copy-sql
-  "Returns a `COPY` statement for the given
-  table and number of columns"
-  [t-name num-cols headers? encoding]
-  (format "COPY %s (%s) FROM STDIN WITH (FORMAT CSV, ENCODING '%s'%s)"
-          t-name
-          (get-cols num-cols)
-          encoding
-          (if headers? ", HEADER true" "")))
+(defn get-column-titles
+  "Returns a seq of alphanumeric column titles of the form
+  Column 1, Column 2, Column 3, ... for the given number of columns"
+  [num-cols]
+  (let [num-range (range 1 (inc num-cols))]
+    (->> (map vector (repeat "Column ") num-range)
+         (map string/join))))
 
-(defn get-headers
-  "Returns the first line CSV a file"
-  [path separator encoding]
-  (with-open [r (io/reader path :encoding encoding)]
-    (first (csv/read-csv r :separator separator))))
+(defn get-type-label
+  "Returns a keyword label representing the type of the given value.
+  Defaults to `:text`."
+  [value]
+  (condp #(%1 %2) value
+    string/blank? :nil
+    ;; TODO date-string? :date
+    string/numeric? :number
+    :text))
 
-(defn get-num-cols
-  "Returns the number of columns based on the
-  first line of a CSV file"
-  [path separator encoding]
-  (count (get-headers path separator encoding)))
+(defn all-of-type?
+  "Determines if all type labels for the given column are the same or `:nil`"
+  [coll type-kw]
+  {:pre [(contains? #{:date :number :text} type-kw)]}
+  (every? true? (map #(contains? #{:nil type-kw} %) coll)))
 
-(defn get-encoding
-  "Returns the character encoding reading some
-  bytes from the file. It uses ICU's CharsetDetector"
-  [path]
-  (let [detector (CharsetDetector.)
-        ;; 100kb
-        ba (byte-array 100000)]
-    (with-open [is (io/input-stream path)]
-      (.read is ba))
-    (-> (.setText detector ba)
-        (.detect)
-        (.getName))))
+(defn get-common-type
+  "Determines the common type of the given coll of types.
+  Defaults to 'text' if types cannot be unified."
+  [coll]
+  (condp #(all-of-type? %2 %1) coll
+    :date {:client "date" :psql "timestamptz"}
+    :number {:client "number" :psql "double precision"}
+    :text {:client "text" :psql "text"}
+    {:client "text" :psql "text"}))
+
+(defn get-column-types
+  "Returns a seq of client & SQL types for each column in the given rows"
+  [rows]
+  (let [columns (apply map vector rows)]
+    (->> (map #(map get-type-label %) columns)
+         (map get-common-type))))
 
 (defn get-column-tuples
-  [col-titles]
-  (vec
-   (map-indexed (fn [idx title]
-                  {:title title
-                   :column-name (str "c" (inc idx))
-                   :type "text"})
-                col-titles)))
+  "Returns a seq of maps containing column names, titles & types.
+
+  Example output:
+
+  [{:column-name \"c1\" :title \"Column 1\" :type \"text\"} ...]
+  "
+  [column-names column-titles column-types]
+  (map #(zipmap [:column-name :title :type] [%1 %2 %3])
+       column-names column-titles column-types))
+
+(defn- load-csv!
+  "Imports the given CSV data into a PostgreSQL table"
+  [tenant-conn table-name path headers?]
+  (try
+    (with-open [r (-> path io/file io/input-stream AutoDetectReader.)]
+      (let [data (csv/read-csv r)
+            headers (when headers? (first data))
+            rows (if headers? (rest data) data)
+            num-cols (count (first rows))
+            column-names (get-column-names num-cols)
+            column-titles (or headers (get-column-titles num-cols))
+            column-types (get-column-types rows)
+            client-types (map :client column-types)
+            psql-types (map :psql column-types)
+            transformed-rows (transform-rows rows psql-types)]
+        (jdbc/db-do-commands tenant-conn
+                             (jdbc/create-table-ddl table-name
+                                                    (apply vector [:rnum :serial :primary :key]
+                                                           (map vector column-names psql-types))))
+        (jdbc/insert-multi! tenant-conn table-name column-names transformed-rows)
+        {:success? true
+         :columns (get-column-tuples column-names column-titles client-types)}))
+    (catch Exception e
+      {:success? false
+       :reason (format "Unexpected error: %s" (.getMessage e))})))
 
 (defmethod import/valid? "CSV"
   [{:strs [url fileName hasColumnHeaders]}]
@@ -95,31 +127,12 @@
         (if file-on-disk?
           (str file-upload-path
             "/resumed/"
-            (last (s/split url #"\/"))
+            (last (string/split url #"\/"))
             "/file")
           url))))
 
 (defmethod import/make-dataset-data-table "CSV"
   [tenant-conn {:keys [file-upload-path]} table-name spec]
-  (try
-    (let [ ;; TODO a bit of "manual" integration work
-          path (get-path spec file-upload-path)
-          headers? (boolean (get spec "hasColumnHeaders"))
-          encoding (get-encoding path)
-          n-cols (get-num-cols path \, encoding)
-          col-titles (if headers?
-                       (get-headers path \, encoding)
-                       (vec (for [i (range 1 (inc n-cols))]
-                              (str "Column " i))))
-          copy-sql (get-copy-sql table-name n-cols headers? encoding)]
-      (jdbc/execute! tenant-conn [(get-create-table-sql table-name n-cols)])
-      (with-open [conn (-> tenant-conn :datasource .getConnection)
-                  input-stream (-> (io/input-stream path)
-                                   import/unix-line-ending-input-stream)]
-        (let [copy-manager (.getCopyAPI (.unwrap conn PGConnection))]
-          (.copyIn copy-manager copy-sql input-stream)))
-      {:success? true
-       :columns (get-column-tuples col-titles)})
-    (catch Exception e
-      {:success? false
-       :reason (str "Unexpected error: " (.getMessage e))})))
+  (let [path (get-path spec file-upload-path)
+        headers? (boolean (get spec "hasColumnHeaders"))]
+    (load-csv! tenant-conn table-name path headers?)))
