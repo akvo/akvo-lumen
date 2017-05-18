@@ -18,8 +18,8 @@ function ResourceList({ resources }) {
     <table>
       <thead>
         <tr>
-          <th>Rule</th>
-          <th>Limit</th>
+          <th>Metric</th>
+          <th>Current</th>
         </tr>
       </thead>
       <tbody>
