@@ -67,7 +67,8 @@
     .optionContainer {
       display: flex;
       flex: 1;
-      height: 2.5rem;
+      min-height: 2.5rem;
+      line-height: 1.25rem;
       flex-direction: row;
       justify-content: space-between;
       align-items: center;
