@@ -13,20 +13,22 @@ function resourceRuleDescription(resourceKey) {
   return description;
 }
 
-function ResourceList({ resources }) {
+function ResourceList({ resources, tier }) {
   return (
     <table>
       <thead>
         <tr>
-          <th>Metric</th>
+          <th>Policy</th>
           <th>Current</th>
+          <th>Limit</th>
         </tr>
       </thead>
       <tbody>
         {Object.keys(resources).map(key =>
           <tr key={key}>
             <td>{resourceRuleDescription(key)}</td>
-            <td>{resources[key]}</td>
+            <td>{resources && resources[key]}</td>
+            <td>{tier && tier[key]}</td>
           </tr>
         )}
       </tbody>
@@ -35,25 +37,24 @@ function ResourceList({ resources }) {
 }
 ResourceList.propTypes = {
   resources: PropTypes.object,
+  tier: PropTypes.object,
 };
 
 class Resources extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      plan: {
-        created: 1495020745539,
-        tier: 'none',
-      },
-      resources: {
-        numberOfVisualisations: 99,
-      },
+      plan: {},
+      resources: {},
+      tier: {},
     };
     this.getResources = this.getResources.bind(this);
+    this.getTiers = this.getTiers.bind(this);
   }
 
   componentWillMount() {
     this.getResources();
+    this.getTiers();
   }
 
   getResources() {
@@ -62,13 +63,28 @@ class Resources extends Component {
       .then(resources => this.setState(resources));
   }
 
+  getTiers() {
+    api.get('/api/tiers')
+      .then(response => response.json())
+      .then(tiers => this.setState(tiers));
+  }
+
   render() {
-    const currentTier = this.state.plan.tier;
+    const currentTierLabel = this.state.plan.tier;
+    const tiers = this.state.tiers;
     const resources = this.state.resources;
+    let currentTier = null;
+
+    if (tiers !== undefined && currentTierLabel !== undefined) {
+      currentTier = tiers.filter(tier =>
+        currentTierLabel === tier.tier
+      )[0];
+    }
+
     return (
       <div>
-        Plan: {currentTier}
-        <ResourceList resources={resources} />
+        Plan: {currentTierLabel}
+        <ResourceList resources={resources} tier={currentTier} />
       </div>
     );
   }
