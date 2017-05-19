@@ -38,3 +38,10 @@ SELECT COUNT(*) AS total
 
 -- :name get-data :? :*
 SELECT * FROM :i:table-name
+
+-- :name table-exists :? :1
+SELECT EXISTS (
+  SELECT 1
+  FROM pg_tables
+  WHERE tablename = :table-name
+);
