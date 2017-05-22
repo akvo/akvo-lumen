@@ -201,8 +201,8 @@
                                                    (:transformations current-dataset-version)))
                                 :columns columns})
           (update-job-success-execution tenant-conn {:id job-id :exec-log full-execution-log})
-          (deliver-promise-success completion-promise dataset-id new-dataset-version-id job-id)
-          (drop-table tenant-conn {:table-name previous-table-name}))
+          (drop-table tenant-conn {:table-name previous-table-name})
+          (deliver-promise-success completion-promise dataset-id new-dataset-version-id job-id))
         (let [{:keys [success? message columns execution-log]}
               (apply-operation tenant-conn table-name columns (first transformations))]
           (if success?
