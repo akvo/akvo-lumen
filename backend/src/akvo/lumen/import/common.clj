@@ -3,8 +3,8 @@
 (defprotocol DatasetImporter
   "
   A protocol for importing datasets into Lumen. A typical implementation
-  should also implement java.io.CLoseable because some data sources are
-  backed by resources that needs to be released.
+  should also implement `java.io.Closeable` since some data sources are
+  backed by resources that need to be released.
 
   Example:
   (reify
