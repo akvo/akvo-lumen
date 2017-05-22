@@ -8,29 +8,14 @@
 
 (defn transform-value
   "Transforms the given value according to its associated type label.
-  Blank strings are cast to nil.
-  Numeric strings are cast to numbers, only if the type label matches."
-  [[value psql-type]]
+  Blank strings are cast to nil. Numeric strings are cast to numbers"
+  [value type]
   (cond
     (string/blank? value) nil
-    (and (string/numeric? value) (= "double precision" psql-type)) (Double/parseDouble value)
+    (= type :number) (Double/parseDouble value)
     :else value))
 
-(defn transform-rows
-  "Transform values in the given rows based on the given column types"
-  [rows column-types]
-  (let [value-type-pairs (map #(map vector % column-types) rows)]
-    (map #(map transform-value %) value-type-pairs)))
-
-(defn get-column-names
-  "Returns a seq of alphanumeric column names of the form
-  c1, c2, c3, ... for the given number of columns"
-  [num-cols]
-  (let [num-range (range 1 (inc num-cols))]
-    (->> (map vector (repeat \c) num-range)
-         (map string/join))))
-
-(defn get-column-titles
+(defn gen-column-titles
   "Returns a seq of alphanumeric column titles of the form
   Column 1, Column 2, Column 3, ... for the given number of columns"
   [num-cols]
@@ -38,86 +23,58 @@
     (->> (map vector (repeat "Column ") num-range)
          (map string/join))))
 
-(defn get-type-label
-  "Returns a keyword label representing the type of the given value.
-  Defaults to `:text`."
-  [value]
-  (condp #(%1 %2) value
-    string/blank? :nil
-    ;; TODO date-string? :date
-    string/numeric? :number
-    :text))
-
-(defn all-of-type?
-  "Determines if all type labels for the given column are the same or `:nil`"
-  [coll type-kw]
-  {:pre [(contains? #{:date :number :text} type-kw)]}
-  (every? true? (map #(contains? #{:nil type-kw} %) coll)))
-
-(defn get-common-type
-  "Determines the common type of the given coll of types.
-  Defaults to 'text' if types cannot be unified."
-  [coll]
-  (condp #(all-of-type? %2 %1) coll
-    :date {:client "date" :psql "timestamptz"}
-    :number {:client "number" :psql "double precision"}
-    :text {:client "text" :psql "text"}
-    {:client "text" :psql "text"}))
+(defn numeric? [s]
+  (or (string/blank? s)
+      (string/numeric? s)))
 
 (defn get-column-types
-  "Returns a seq of client & SQL types for each column in the given rows"
+  "Returns a seq of types for each column in the given rows"
   [rows]
-  (let [columns (apply map vector rows)]
-    (->> (map #(map get-type-label %) columns)
-         (map get-common-type))))
+  (for [column-data (apply map vector rows)]
+    (if (every? numeric? column-data)
+      :number
+      :text)))
 
 (defn get-column-tuples
-  "Returns a seq of maps containing column names, titles & types.
+  "Returns a seq of maps containing column id, titles & types.
 
   Example output:
 
-  [{:column-name \"c1\" :title \"Column 1\" :type \"text\"} ...]
+  [{:id :c1 :title \"Column 1\" :type :text} ...]
   "
-  [column-names column-titles column-types]
-  (map #(zipmap [:column-name :title :type] [%1 %2 %3])
-       column-names column-titles column-types))
+  [column-titles column-types]
+  (mapv (fn [idx title type]
+          {:id (keyword (str "c" (inc idx)))
+           :title title
+           :type type})
+        (range)
+        column-titles
+        column-types))
 
-(defn- load-csv!
-  "Imports the given CSV data into a PostgreSQL table"
-  [tenant-conn table-name path headers?]
-  (try
-    (with-open [r (-> path io/file io/input-stream AutoDetectReader.)]
-      (let [data (csv/read-csv r)
-            headers (when headers? (first data))
-            rows (if headers? (rest data) data)
-            num-cols (count (first rows))
-            column-names (get-column-names num-cols)
-            column-titles (or headers (get-column-titles num-cols))
-            column-types (get-column-types rows)
-            client-types (map :client column-types)
-            psql-types (map :psql column-types)
-            transformed-rows (transform-rows rows psql-types)]
-        (jdbc/db-do-commands tenant-conn
-                             (jdbc/create-table-ddl table-name
-                                                    (apply vector [:rnum :serial :primary :key]
-                                                           (map vector column-names psql-types))))
-        (jdbc/insert-multi! tenant-conn table-name column-names transformed-rows)
-        {:success? true
-         :columns (get-column-tuples column-names column-titles client-types)}))
-    (catch Exception e
-      {:success? false
-       :reason (format "Unexpected error: %s" (.getMessage e))})))
+(defn data-records [column-spec rows]
+  (for [row rows]
+    (apply merge
+           (map (fn [{:keys [id type]} value]
+                  {id (transform-value value type)})
+                column-spec
+                row))))
 
-(defmethod import/valid? "CSV"
-  [{:strs [url fileName hasColumnHeaders]}]
-  (and (string? url)
-       (contains? #{true false nil} hasColumnHeaders)
-       (or (nil? fileName)
-           (string? fileName))))
-
-(defmethod import/authorized? "CSV"
-  [claims config spec]
-  true)
+(defn csv-importer [path headers?]
+  (let [reader (-> path io/input-stream AutoDetectReader.)
+        data (csv/read-csv reader)
+        column-count (count (first data))
+        column-titles (if headers? (first data) (gen-column-titles column-count))
+        rows (if headers? (rest data) data)
+        column-types (get-column-types rows)
+        column-spec (get-column-tuples column-titles column-types)]
+    (reify
+      import/DatasetImporter
+      (columns [this] column-spec)
+      (records [this]
+        (data-records column-spec rows))
+      java.io.Closeable
+      (close [this]
+        (.close reader)))))
 
 (defn- get-path
   [spec file-upload-path]
@@ -126,13 +83,13 @@
             url (get spec "url")]
         (if file-on-disk?
           (str file-upload-path
-            "/resumed/"
-            (last (string/split url #"\/"))
-            "/file")
+               "/resumed/"
+               (last (string/split url #"\/"))
+               "/file")
           url))))
 
-(defmethod import/make-dataset-data-table "CSV"
-  [tenant-conn {:keys [file-upload-path]} table-name spec]
+(defmethod import/dataset-importer "CSV"
+  [spec {:keys [file-upload-path]}]
   (let [path (get-path spec file-upload-path)
         headers? (boolean (get spec "hasColumnHeaders"))]
-    (load-csv! tenant-conn table-name path headers?)))
+    (csv-importer path headers?)))
