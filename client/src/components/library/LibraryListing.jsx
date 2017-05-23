@@ -120,6 +120,7 @@ export default function LibraryListing({
   sortOrder,
   isReverseSort,
   collections,
+  currentCollection,
   displayMode,
   searchString,
   checkboxEntities,
@@ -132,22 +133,31 @@ export default function LibraryListing({
   const sortedListGroups = sortGroups(listGroups, sortOrder, isReverseSort);
   return (
     <div className={`LibraryListing ${displayMode}`}>
-      <ul>
-        {sortedListGroups.map((listGroup, index) =>
-          <LibraryListingGroup
-            key={index}
-            listGroup={listGroup}
-            collections={collections}
-            displayMode={displayMode}
-            sortOrder={sortOrder}
-            isReverseSort={isReverseSort}
-            checkboxEntities={checkboxEntities}
-            onSelectEntity={onSelectEntity}
-            onCheckEntity={onCheckEntity}
-            onEntityAction={onEntityAction}
-          />
-        )}
-      </ul>
+      {(sortedListGroups.length === 0 && currentCollection) ?
+        <span
+          className="noItemsMessage"
+        >
+          There are no items in this collection.
+        </span>
+        :
+        <ul>
+          {sortedListGroups.map((listGroup, index) =>
+            <LibraryListingGroup
+              key={index}
+              listGroup={listGroup}
+              collections={collections}
+              currentCollection={currentCollection}
+              displayMode={displayMode}
+              sortOrder={sortOrder}
+              isReverseSort={isReverseSort}
+              checkboxEntities={checkboxEntities}
+              onSelectEntity={onSelectEntity}
+              onCheckEntity={onCheckEntity}
+              onEntityAction={onEntityAction}
+            />
+          )}
+        </ul>
+      }
     </div>
   );
 }
@@ -162,6 +172,7 @@ LibraryListing.propTypes = {
   onSelectEntity: PropTypes.func.isRequired,
   onEntityAction: PropTypes.func.isRequired,
   collections: PropTypes.object.isRequired,
+  currentCollection: PropTypes.object,
   checkboxEntities: PropTypes.array.isRequired,
   onCheckEntity: PropTypes.func.isRequired,
 };

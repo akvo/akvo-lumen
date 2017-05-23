@@ -45,6 +45,7 @@ export default function LibraryListingGroup({
   listGroup,
   displayMode,
   collections,
+  currentCollection,
   sortOrder,
   isReverseSort,
   checkboxEntities,
@@ -65,6 +66,7 @@ export default function LibraryListingGroup({
             isChecked={isEntityChecked(entity, checkboxEntities)}
             displayMode={displayMode}
             collections={collections}
+            currentCollection={currentCollection}
             onSelectEntity={onSelectEntity}
             onCheckEntity={onCheckEntity}
             onEntityAction={onEntityAction}
@@ -86,6 +88,7 @@ LibraryListingGroup.propTypes = {
   onSelectEntity: PropTypes.func.isRequired,
   onEntityAction: PropTypes.func.isRequired,
   collections: PropTypes.object.isRequired,
+  currentCollection: PropTypes.object,
   checkboxEntities: PropTypes.array.isRequired,
   onCheckEntity: PropTypes.func.isRequired,
 };

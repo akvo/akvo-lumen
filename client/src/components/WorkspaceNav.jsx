@@ -143,7 +143,9 @@ WorkspaceNav.propTypes = {
 };
 
 function mapStateToProps(state) {
-  const collections = Object.keys(state.collections).map(key => state.collections[key]);
+  const collections = state.collections ?
+    Object.keys(state.collections).map(key => state.collections[key]) : [];
+
   return {
     collections,
     profile: state.profile,

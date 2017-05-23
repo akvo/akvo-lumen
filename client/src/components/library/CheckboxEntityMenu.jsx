@@ -70,6 +70,7 @@ export default class CheckboxEntityMenu extends Component {
                     {
                       value: 'newCollection',
                       label: 'New Collection',
+                      customClass: 'newCollection',
                     },
                   ]}
                 />

@@ -7,7 +7,32 @@ import {
   isFailed, isOk, getStatus,
 } from '../../domain/entity';
 
-function LibraryListingItemContextMenu({ onClick, collections = {} }) {
+function getCollectionContextMenuItem(collections, currentCollection) {
+  if (currentCollection) {
+    return ({
+      label: `Remove from ${currentCollection.title}`,
+      value: `remove-from-collection:${currentCollection.id}`,
+    });
+  }
+
+  return ({
+    label: 'Add to collection',
+    value: 'add-to-collection:new',
+    subMenu: [
+      ...Object.keys(collections).map(key => ({
+        value: `add-to-collection:${key}`,
+        label: collections[key].title,
+      })),
+      {
+        label: 'New collection',
+        value: 'add-to-collection:new',
+        customClass: 'newCollection',
+      },
+    ],
+  });
+}
+
+function LibraryListingItemContextMenu({ onClick, collections = {}, currentCollection }) {
   return (
     <ContextMenu
       style={{ width: 200 }}
@@ -23,21 +48,9 @@ function LibraryListingItemContextMenu({ onClick, collections = {} }) {
         }, {
           label: 'Add to dashboard',
           value: 'add-to-dashboard',
-        }, {
-          label: 'Add to collection',
-          value: 'add-to-collection:new',
-          subMenu: [
-            ...Object.keys(collections).map(key => ({
-              value: `add-to-collection:${key}`,
-              label: collections[key].title,
-            })),
-            {
-              label: 'New collection',
-              value: 'add-to-collection:new',
-              customClass: 'newCollection',
-            },
-          ],
-        }, {
+        },
+        getCollectionContextMenuItem(collections, currentCollection),
+        {
           label: 'View details',
           value: 'view-details',
         }, {
@@ -82,6 +95,7 @@ VisualisationTypeLabel.propTypes = {
 LibraryListingItemContextMenu.propTypes = {
   onClick: PropTypes.func.isRequired,
   collections: PropTypes.object.isRequired,
+  currentCollection: PropTypes.object,
 };
 
 export default class LibraryListingItem extends Component {
@@ -159,6 +173,7 @@ export default class LibraryListingItem extends Component {
           {this.state.contextMenuVisible &&
             <LibraryListingItemContextMenu
               collections={this.props.collections}
+              currentCollection={this.props.currentCollection}
               onClick={(actionType) => {
                 this.setState({ contextMenuVisible: false });
                 onEntityAction(actionType, getType(entity), getId(entity));
@@ -175,6 +190,7 @@ LibraryListingItem.propTypes = {
   onSelectEntity: PropTypes.func.isRequired,
   onEntityAction: PropTypes.func.isRequired,
   collections: PropTypes.object.isRequired,
+  currentCollection: PropTypes.object,
   onCheckEntity: PropTypes.func.isRequired,
   isChecked: PropTypes.bool.isRequired,
 };

@@ -2,22 +2,25 @@ import { handleActions } from 'redux-actions';
 import update from 'react-addons-update';
 import * as actions from '../actions/collection';
 
-export const initialState = {};
+export const initialState = null;
 
 function createCollection(state, { payload }) {
+  const initiatedState = state || {};
   const id = payload.id;
-  return update(state, {
+  return update(initiatedState, {
     [id]: { $set: payload },
   });
 }
 
 function saveCollections(state, { payload }) {
+  const initiatedState = state || {};
+
   return payload.reduce((result, collection) => {
     const id = collection.id;
     return update(result, {
       [id]: { $set: update(collection, { $merge: { type: 'collection' } }) },
     });
-  }, state);
+  }, initiatedState);
 }
 
 function editCollection(state, { payload }) {

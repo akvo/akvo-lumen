@@ -10,6 +10,7 @@ import { deleteVisualisation } from '../actions/visualisation';
 import { deleteDataset } from '../actions/dataset';
 import { deleteDashboard } from '../actions/dashboard';
 import { editCollection } from '../actions/collection';
+import { showNotification } from '../actions/notification';
 import * as entity from '../domain/entity';
 
 require('../styles/Library.scss');
@@ -68,16 +69,22 @@ class Library extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const collectionId = nextProps.params.collectionId;
-    const collection = collectionId ? nextProps.collections[collectionId] : null;
+    if (nextProps.collections) {
+      const collectionId = nextProps.params.collectionId;
+      const collection = collectionId ? nextProps.collections[collectionId] : null;
 
-    if (collection) {
-      if (collection !== this.state.collection) {
-        this.setState({ collection: Object.assign({}, collection) });
+      if (collection) {
+        if (collection !== this.state.collection) {
+          this.setState({ collection: Object.assign({}, collection) });
+        }
+      } else if (this.state.collection) {
+        this.setState({ collection: null });
+        this.props.dispatch(push('/library'));
       }
-    } else if (this.state.collection) {
-      this.setState({ collection: null });
-      this.props.dispatch(push('/library'));
+
+      if (collectionId && !collection) {
+        this.props.dispatch(push('/library'));
+      }
     }
   }
 
@@ -147,6 +154,9 @@ class Library extends Component {
     const newCollection = Object.assign({}, collection, { entities: updatedEntityArray });
 
     this.props.dispatch(editCollection(newCollection));
+
+    // Show a notification because there is no other visual feedback on adding item to collection
+    this.props.dispatch(showNotification('info', `Added to ${collection.title}`, true));
   }
   handleRemoveEntitiesFromCollection(entityIds, collectionId) {
     const collection = this.props.collections[collectionId];
@@ -181,6 +191,10 @@ class Library extends Component {
 
         this.handleAddEntitiesToCollection(entityId, collectionId);
       }
+    } else if (actionType.indexOf('remove-from-collection:') > -1) {
+      const collectionId = actionType.replace('remove-from-collection:', '');
+
+      this.handleRemoveEntitiesFromCollection(entityId, collectionId);
     } else {
       throw new Error(`Action ${actionType} not yet implemented for entity type ${entityType}`);
     }
@@ -191,8 +205,8 @@ class Library extends Component {
       location,
       datasets,
       visualisations,
-      collections,
       dashboards } = this.props;
+    const collections = this.props.collections ? this.props.collections : {};
     const { pendingDeleteEntity, collection } = this.state;
     const query = location.query;
     const displayMode = query.display || 'list';
@@ -200,6 +214,7 @@ class Library extends Component {
     const isReverseSort = query.reverse === 'true';
     const filterBy = query.filter || 'all';
     const searchString = query.search || '';
+
 
     return (
       <div className="Library">
@@ -275,8 +290,8 @@ class Library extends Component {
           isReverseSort={isReverseSort}
           filterBy={filterBy}
           searchString={searchString}
-          collection={collection}
           collections={collections}
+          currentCollection={collection}
           library={collection ? filterLibraryByCollection(this.props, collection) : this.props}
           checkboxEntities={this.state.checkboxEntities}
           onSelectEntity={this.handleSelectEntity}
@@ -297,7 +312,7 @@ Library.propTypes = {
   datasets: PropTypes.object.isRequired,
   visualisations: PropTypes.object.isRequired,
   dashboards: PropTypes.object.isRequired,
-  collections: PropTypes.object.isRequired,
+  collections: PropTypes.object,
 };
 
 export default connect(state => state.library)(Library);

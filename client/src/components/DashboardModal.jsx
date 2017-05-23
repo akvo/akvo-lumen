@@ -51,7 +51,7 @@ class DashboardModal extends Component {
             onSubmit={this.handleOnSubmit}
             containerClassName={containerClassName}
             entities={this.props.activeModal.entities}
-            collections={this.props.collections}
+            collections={this.props.collections || {}}
           />
         );
       case 'delete-collection':
@@ -60,7 +60,7 @@ class DashboardModal extends Component {
             onCancel={this.handleOnCancel}
             onSubmit={this.handleOnSubmit}
             containerClassName={containerClassName}
-            collection={this.props.activeModal.collection}
+            collection={this.props.activeModal.collection || {}}
           />
         );
       case 'dataset-settings':

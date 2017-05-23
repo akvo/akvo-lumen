@@ -135,5 +135,5 @@ CreateCollection.propTypes = {
   onCancel: PropTypes.func.isRequired,
   containerClassName: PropTypes.string,
   collections: PropTypes.object.isRequired,
-  entities: PropTypes.array.isRequired,
+  entities: PropTypes.array,
 };
