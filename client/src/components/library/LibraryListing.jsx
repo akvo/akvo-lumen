@@ -127,8 +127,7 @@ export default function LibraryListing({
   onSelectEntity,
   onCheckEntity,
   onEntityAction }) {
-  const entities = filterEntities(library, filterBy,
-    searchString);
+  const entities = filterEntities(library, filterBy, searchString);
   const listGroups = groupEntities(entities, sortOrder);
   const sortedListGroups = sortGroups(listGroups, sortOrder, isReverseSort);
   return (
