@@ -34,7 +34,7 @@ const filterLibraryByCollection = (library, collection) => {
 
   collection.entities.forEach((entityId) => {
     if (library.visualisations[entityId]) {
-      filteredLibrary.visualisations[entity.id] = library.visualisations[entityId];
+      filteredLibrary.visualisations[entityId] = library.visualisations[entityId];
     } else if (library.datasets[entityId]) {
       filteredLibrary.datasets[entityId] = library.datasets[entityId];
     } else if (library.dashboards[entityId]) {
@@ -152,7 +152,6 @@ class Library extends Component {
     });
 
     const newCollection = Object.assign({}, collection, { entities: updatedEntityArray });
-
     this.props.dispatch(editCollection(newCollection));
 
     // Show a notification because there is no other visual feedback on adding item to collection
