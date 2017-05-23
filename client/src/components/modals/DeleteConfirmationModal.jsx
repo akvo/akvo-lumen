@@ -96,7 +96,7 @@ export default function DeleteConfirmationModal({
               Cancel
             </button>
             <button
-              className="create clickable positive"
+              className="create clickable positive dangerous"
               onClick={onDelete}
             >
               Delete

@@ -1,0 +1,11 @@
+.CheckboxEntityMenu {
+  margin: 0 1.5rem;
+  height: 4rem;
+  display: flex;
+  justify-content: space-between;
+
+  > * {
+      line-height: 4rem;
+      padding: 0;
+  }
+}

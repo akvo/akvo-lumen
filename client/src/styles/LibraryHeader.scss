@@ -22,11 +22,16 @@
     }
     .LocationIndicator {
         color: $strongBlue;
-        width: 15%;
-        margin-right: 40%;
+        width: 55%;
+        height: 100%;
         font-weight: bold;
         font-size: 1.5rem;
         line-height: 2rem;
+        overflow: hidden;
+
+        .contents {
+            padding-right: 1rem;
+        }
     }
     .LibraryCreateButton {
         width: 7rem;

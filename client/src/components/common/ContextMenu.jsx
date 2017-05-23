@@ -70,7 +70,9 @@ export default class ContextMenu extends Component {
     return (
       <div
         className={`ContextMenu noSelect
-          ${props.containerClass} ${props.arrowClass ? 'hasArrow' : ''}`}
+          ${props.containerClass} ${props.arrowClass ? 'hasArrow' : ''}
+          ${props.subMenuSide === 'left' ? 'leftSubMenu' : ''}
+        `}
         style={props.style}
       >
         <span
@@ -89,6 +91,7 @@ export default class ContextMenu extends Component {
                 handleItemClick={handleItemClick}
                 onOptionSelected={props.onOptionSelected}
                 onWindowClick={props.onWindowClick ? props.onWindowClick : null}
+                customClass={item.customClass}
               />
             );
           })}
@@ -108,4 +111,5 @@ ContextMenu.propTypes = {
   itemClass: PropTypes.string,
   arrowClass: PropTypes.oneOf(['topLeft', 'topRight', 'bottomLeft', 'bottomRight']),
   arrowOffset: PropTypes.string,
+  subMenuSide: PropTypes.oneOf(['right', 'left']),
 };

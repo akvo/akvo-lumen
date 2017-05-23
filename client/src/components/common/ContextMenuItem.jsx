@@ -22,7 +22,8 @@ export default class ContextMenuItem extends Component {
     return (
       <li
         className={`contextMenuItem ${this.props.itemClass}
-          clickable ${this.props.selectedClassName}`}
+          clickable ${this.props.selectedClassName} ${this.props.customClass ? this.props.customClass : ''}
+        `}
         onClick={onClick}
         onMouseEnter={() => this.setState({ isHovered: true })}
         onMouseLeave={() => this.setState({ isHovered: false })}
@@ -49,4 +50,5 @@ ContextMenuItem.propTypes = {
   selectedClassName: PropTypes.string,
   containerClass: PropTypes.string,
   itemClass: PropTypes.string,
+  customClass: PropTypes.string,
 };

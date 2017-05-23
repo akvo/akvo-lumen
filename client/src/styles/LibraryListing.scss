@@ -10,14 +10,14 @@
     }
   }
   .LibraryListingItem {
-    display: inline-block;
+    display: inline-flex;
+    flex-direction: row;
     margin: 1rem 2.5%;
-    cursor: pointer;
     position: relative;
     min-height: 5rem;
     padding: 0.5rem 0;
     /*overflow: hidden;*/
-    transition: background-color 0.3s ease;
+    transition: background-color 0.1s ease;
     &:hover {
       background-color: $lightGreen;
     }
@@ -32,11 +32,16 @@
         background-color: transparent;
       }
     }
-    .selectEntity {
-      position: absolute;
-      top: 0.75rem;
-      left: 0.25rem;
-      margin: 0;
+    .checkboxContainer {
+      display: flex;
+      width: 2rem;
+      padding-left: 1rem;
+      justify-content: space-around;
+      align-items: center;
+      cursor: pointer;
+    }
+    .entityBody {
+      flex: 1;
     }
     .entityIcon {
       height: 4rem;
@@ -80,9 +85,11 @@
       text-transform: capitalize;
     }
     .entityControls {
-      display: inline-block;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: flex-start;
       width: 1rem;
-      vertical-align: top;
       opacity: 0;
       transition: opacity 0.3s ease;
       .showControls {
@@ -117,5 +124,10 @@
         margin-bottom: 0;
       }
     }
+  }
+  .noItemsMessage {
+    display: block;
+    text-align: center;
+    padding-top: 4rem;
   }
 }

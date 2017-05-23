@@ -9,6 +9,12 @@
   z-index: 3;
   overflow: hidden;
   color: $white;
+  transition: transform 0.5s ease;
+
+  &.offscreen {
+    transform: translate(0, -3rem);
+  }
+
   &.error {
     background-color: $errorRed;
   }
@@ -16,7 +22,9 @@
     background-color: $warnYellow;
   }
   &.info {
-    background-color: $mintGreen;
+    background-color: $white;
+    border-bottom: solid 1px $black;
+    color: $black;
   }
   .message {
     padding: 0.5rem 1rem 0.5rem 1rem;
