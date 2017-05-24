@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import LayerMenuItem from './LayerMenuItem';
 
-require('../../../styles/LayerMenu.scss');
+require('./LayerMenu.scss');
 
 export default class LayerMenu extends Component {
 

@@ -5,7 +5,7 @@ import LayerConfigMenu from './LayerConfigMenu';
 import ButtonRowInput from './ButtonRowInput';
 import mapLayerSpecTemplate from '../../../containers/Visualisation/mapLayerSpecTemplate';
 
-require('../../../styles/MapConfigMenu.scss');
+require('./MapConfigMenu.scss');
 
 export default class MapConfigMenu extends Component {
 

@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import AsyncVisualisationViewer from '../charts/AsyncVisualisationViewer';
 
-require('../../styles/DashboardViewerItem.scss');
+require('./DashboardViewerItem.scss');
 
 const cMargin = 10; // margin between containers (in px)
 const cPadding = 10; // padding inside container (in px)

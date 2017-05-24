@@ -8,7 +8,7 @@ import SidebarControls from './SidebarControls';
 
 require('codemirror/lib/codemirror.css');
 require('codemirror/mode/javascript/javascript');
-require('../../../styles/DeriveColumn.scss');
+require('./DeriveColumn.scss');
 
 
 const typeOptions = [

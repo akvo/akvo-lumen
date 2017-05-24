@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import Immutable from 'immutable';
 
-require('../../styles/ColumnHeader.scss');
+require('./ColumnHeader.scss');
 
 export default class ColumnHeader extends Component {
 

@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import Modal from 'react-modal';
 import isValidEmail from '../../utils';
 
-require('../../styles/DashboardModal.scss');
+require('./DashboardModal.scss');
 
 export default class InviteUser extends Component {
   constructor(props) {

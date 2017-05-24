@@ -1,5 +1,4 @@
-
-@import 'modules/colors';
+@import "modules/importAll";
 
 html, body, #root, #root > div {
     height: 100%;
@@ -16,34 +15,37 @@ html, body, #root {
 /* Very basic text styling */
 
 body, button, input {
-    font-family: 'Source Sans Pro', sans-serif;
+    font-family: $bodyFont;
     color: rgb(30, 30, 30);
 }
 
 p, h1, h2, h3, h4, h5, button, input {
     line-height: 1.4em;
-    font-family: 'Source Sans Pro', sans-serif;
+    font-family: $bodyFont;
     color: rgb(30, 30, 30);
 }
 
 code {
-  font-family: monospace;
-  background-color: rgb(250, 250, 250);
-  padding: 0 0.25rem;
-  border: 1px solid $lightBlueGrey !important;
-  border-radius: 0.2rem;
+    font-family: $codeFont;
+    background-color: rgb(250, 250, 250);
+    padding: 0 0.25rem;
+    border: 1px solid $lightBlueGrey !important;
+    border-radius: 0.2rem;
 }
 
 /* Identify elements that can be clicked or tap to interact with */
 
 .clickable, a {
     cursor: pointer;
+
     &:hover {
         opacity: 0.8;
     }
+
     &:active {
         opacity: 0.6;
     }
+
     &:disabled {
         opacity: 1;
         cursor: not-allowed;
@@ -55,16 +57,16 @@ code {
 }
 
 .noPointerEvents {
-  pointer-events: none;
+    pointer-events: none;
 }
 
 .noSelect {
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 /* Always show modals on top of the stack */
@@ -83,14 +85,14 @@ code {
 /* tmp for dashboards */
 
 .Dashboard {
-  width: 100%;
+    width: 100%;
 }
 
 /* Style the "empty value" label for visualisations as italic text */
 .emptyValue {
-  font-style: italic;
+    font-style: italic;
 }
 
 .loadingIndicator {
-  padding: 6rem 1rem;
+    padding: 6rem 1rem;
 }

@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import ContextMenu from '../../common/ContextMenu';
 import ToggleInput from './ToggleInput';
 
-require('../../../styles/LayerMenuItem.scss');
+require('./LayerMenuItem.scss');
 
 export default class LayerMenuItem extends Component {
 

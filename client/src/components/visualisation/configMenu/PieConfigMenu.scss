@@ -1,0 +1,13 @@
+@import "../../../styles/modules/importAll";
+
+.PieConfigMenu {
+    .showLegend {
+        display: block;
+        margin-bottom: 1rem;
+
+        h4 {
+            font-size: 0.8rem;
+            color: #9596b8;
+        }
+    }
+}

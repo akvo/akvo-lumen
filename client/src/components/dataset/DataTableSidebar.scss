@@ -1,0 +1,107 @@
+@import "../../styles/modules/importAll";
+
+.DataTableSidebar {
+    position: relative;
+    height: calc(100vh - 8rem);
+    width: 300px;
+
+    .SidebarHeader {
+        padding: 1rem;
+        border-bottom: 0.1rem solid $lightBlueGrey;
+        height: 4rem;
+
+        h3, button {
+            line-height: 2rem;
+        }
+    }
+
+    .SidebarControls {
+        display: flex;
+        position: absolute;
+        bottom: 0;
+        background-color: white;
+        border-top: 1px solid $lightBlueGrey;
+        flex-direction: row;
+        justify-content: space-between;
+        width: 100%;
+        padding: 0.8rem 1rem;
+        height: 4rem;
+
+        .apply, .cancel {
+            text-align: center;
+            padding: 0 2rem;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            border-radius: 0.6rem;
+        }
+
+        .apply {
+            color: $mintGreen;
+            border: 0.1rem solid $mintGreen;
+            transition: color 0.7s ease, border-color 0.7s ease;
+        }
+
+        .cancel, .apply.disabled {
+            color: $blueGrey;
+            border: 0.1rem solid $blueGrey;
+        }
+    }
+
+    .inputs {
+        height: calc(100% - 8rem);
+        padding: 1rem;
+        line-height: 1.4rem;
+        overflow-y: auto;
+    }
+
+    .inputGroup {
+        margin-bottom: 1.25rem;
+
+        label {
+            font-size: 0.8rem;
+            margin-bottom: 0.25rem;
+        }
+
+        input {
+            display: block;
+            width: 100%;
+            padding: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .SelectMenu, input {
+            height: 2.6rem;
+            color: #333;
+        }
+    }
+
+    h3 {
+        display: inline-block;
+    }
+
+    .columnTitle {
+        font-weight: bold;
+    }
+
+    .close {
+        float: right;
+        line-height: 1.4rem;
+        font-size: 1rem;
+    }
+
+    .TransformationList {
+        height: calc(100vh - 16rem);
+        overflow-y: auto;
+        padding: 1rem;
+
+        ol {
+            list-style: initial;
+            list-style-type: decimal;
+
+            li {
+                margin-left: 1.25rem;
+                padding: 0.5rem;
+            }
+        }
+    }
+}

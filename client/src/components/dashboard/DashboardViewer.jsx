@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import DashboardViewerItem from './DashboardViewerItem';
 
 
-require('../../styles/DashboardViewer.scss');
+require('./DashboardViewer.scss');
 
 const viewportLimits = [
   {

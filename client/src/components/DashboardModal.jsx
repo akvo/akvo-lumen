@@ -6,7 +6,7 @@ import CreateCollection from './modals/CreateCollection';
 import DatasetSettings from './modals/DatasetSettings';
 import { hideModal } from '../actions/activeModal';
 
-require('../styles/DashboardModal.scss');
+require('./modals/DashboardModal.scss');
 
 class DashboardModal extends Component {
 

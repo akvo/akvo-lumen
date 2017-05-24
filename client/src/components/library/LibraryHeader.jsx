@@ -6,7 +6,7 @@ import LibrarySearch from './LibrarySearch';
 import LibraryTabList from './LibraryTabList';
 import LibraryDisplayMenu from './LibraryDisplayMenu';
 
-require('../../styles/LibraryHeader.scss');
+require('./LibraryHeader.scss');
 
 export default function LibraryHeader(props) {
   return (

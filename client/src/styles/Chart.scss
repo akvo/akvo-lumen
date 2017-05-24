@@ -1,15 +1,15 @@
-@import 'modules/colors';
+@import "modules/importAll";
 
 .Chart {
-  h2 {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-    padding: 8px;
+    h2 {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        padding: 8px;
 
-    span {
-      font-weight: bold;
-      text-align: center;
+        span {
+            font-weight: bold;
+            text-align: center;
+        }
     }
-  }
 }

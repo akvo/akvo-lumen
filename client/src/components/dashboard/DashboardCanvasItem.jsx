@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import VisualisationViewer from '../charts/VisualisationViewer';
 import DashboardCanvasItemEditable from './DashboardCanvasItemEditable';
 
-require('../../styles/DashboardCanvasItem.scss');
+require('./DashboardCanvasItem.scss');
 
 const getItemLayout = (props) => {
   let output = null;

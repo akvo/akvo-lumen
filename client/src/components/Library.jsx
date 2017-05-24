@@ -11,7 +11,7 @@ import { deleteDataset } from '../actions/dataset';
 import { deleteDashboard } from '../actions/dashboard';
 import * as entity from '../domain/entity';
 
-require('../styles/Library.scss');
+require('./Library.scss');
 
 function mergeQuery(location, query) {
   return Object.assign({}, location, {

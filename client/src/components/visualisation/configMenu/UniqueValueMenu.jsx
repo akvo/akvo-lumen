@@ -2,7 +2,7 @@ import React, { PropTypes } from 'react';
 import ToggleInput from './ToggleInput';
 import { replaceLabelIfValueEmpty } from '../../../utilities/chart';
 
-require('../../../styles/UniqueValueMenu.scss');
+require('./UniqueValueMenu.scss');
 
 const getValueStatus = (title, filters) => !filters.some(filter => filter.value === title);
 

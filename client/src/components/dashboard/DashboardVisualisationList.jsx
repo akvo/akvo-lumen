@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 
-require('../../styles/DashboardVisualisationList.scss');
+require('./DashboardVisualisationList.scss');
 
 const formatDate = (date) => {
   let month = date.getMonth() + 1;

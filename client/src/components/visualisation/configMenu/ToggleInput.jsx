@@ -1,6 +1,6 @@
 import React, { PropTypes } from 'react';
 
-require('../../../styles/ToggleInput.scss');
+require('./ToggleInput.scss');
 
 export default function ToggleInput(props) {
   const { checked, disabled, label, onChange } = props;

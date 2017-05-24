@@ -1,0 +1,38 @@
+@import "../../../styles/modules/importAll";
+
+.DeriveColumn {
+    .HelpText {
+        text-align: justify;
+    }
+
+    .HelpTextToggleButton {
+        display: block;
+        border-radius: 100%;
+        width: 1.4rem;
+        height: 1.4rem;
+        font-size: 1.1rem;
+        font-weight: bold;
+        color: white;
+        background-color: $midGrey;
+        margin-top: 0.25rem;
+    }
+
+    .CodeFeedback {
+        font-size: 0.8rem;
+
+        .container {
+            display: flex;
+            justify-content: space-between;
+            margin: 0.1rem 0;
+        }
+
+        .feedbackMessage {
+            color: $errorRed;
+        }
+    }
+
+    .CodeMirror {
+        border: 1px solid #eee;
+        height: 100px;
+    }
+}
