@@ -86,7 +86,10 @@
                "/resumed/"
                (last (string/split url #"\/"))
                "/file")
-          url))))
+          (let [url (io/as-url url)]
+            (when-not (#{"http" "https"} (.getProtocol url))
+              (throw (ex-info (str "Invalid url: " url) {:url url})))
+            url)))))
 
 (defmethod import/dataset-importer "CSV"
   [spec {:keys [file-upload-path]}]
