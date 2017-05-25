@@ -143,6 +143,7 @@
             width: 3.5rem;
             margin-left: 0.5rem;
             height: 100%;
+            font-size: 0.7rem;
             text-transform: uppercase;
             color: $mintGreen;
             border: 0.1rem solid $mintGreen;
@@ -196,13 +197,13 @@
         .sortOrderLabel {
             color: $blueGrey;
             line-height: 2.5rem;
-            width: 3.5rem;
+            width: 4rem;
             display: inline-block;
         }
 
         .SelectMenu {
             width: 8rem;
-            margin-right: calc(100% - 17.5rem);
+            margin-right: calc(100% - 18rem);
             height: 2.5rem;
             display: inline-block;
             vertical-align: top;

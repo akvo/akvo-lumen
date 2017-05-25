@@ -2,7 +2,7 @@ import React, { PropTypes } from 'react';
 import Modal from 'react-modal';
 import { getTitle, getId } from '../../domain/entity';
 
-require('./DashboardModal.scss');
+require('../DashboardModal.scss');
 require('./DeleteConfirmationModal.scss');
 
 function getEntity(entityId, entityType, library) {

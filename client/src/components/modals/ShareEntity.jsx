@@ -3,7 +3,7 @@ import Modal from 'react-modal';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import * as api from '../../api';
 
-require('./DashboardModal.scss');
+require('../DashboardModal.scss');
 require('./ShareEntity.scss');
 
 export default class ShareEntity extends Component {
