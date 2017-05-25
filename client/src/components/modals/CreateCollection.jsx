@@ -3,7 +3,7 @@ import Modal from 'react-modal';
 import { createCollection } from '../../actions/collection';
 import LoadingSpinner from '../common/LoadingSpinner';
 
-require('../../styles/CreateCollection.scss');
+require('./CreateCollection.scss');
 
 const isTitleValid = (title, collections) => {
   if (!title || title.length === 0 || title.trim().length === 0) {

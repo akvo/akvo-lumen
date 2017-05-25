@@ -198,23 +198,4 @@
             padding-bottom: 6rem;
         }
     }
-
-    .CreateCollectionModal {
-        .contents {
-            padding-top: 7rem;
-            padding-left: 0;
-            padding-right: 0;
-        }
-
-        label {
-            color: $blueGrey;
-        }
-
-        #nameInput {
-            margin-left: 0.5rem;
-            font-size: 1rem;
-            padding: 0.25rem 0.5rem;
-            width: 15rem;
-        }
-    }
 }

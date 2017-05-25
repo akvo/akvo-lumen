@@ -2,7 +2,7 @@ import React, { PropTypes, Component } from 'react';
 import { connect } from 'react-redux';
 import { hideNotification } from '../actions/notification';
 
-require('../styles/Notification.scss');
+require('./Notification.scss');
 
 // When autohide is used, how long to wait in ms before hiding the notification with no user input
 const autohideDelay = 3000;
