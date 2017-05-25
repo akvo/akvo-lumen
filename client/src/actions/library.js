@@ -4,6 +4,9 @@ import * as constants from '../constants/library';
 import { fetchDatasetsSuccess } from './dataset';
 import { fetchVisualisationsSuccess } from './visualisation';
 import { fetchDashboardsSuccess } from './dashboard';
+import { fetchCollectionsSuccess } from './collection';
+
+
 import * as api from '../api';
 
 function fetchLibraryRequest() {
@@ -27,6 +30,7 @@ export function fetchLibrary() {
         dispatch(fetchDatasetsSuccess(Immutable.fromJS(library.datasets)));
         dispatch(fetchVisualisationsSuccess(library.visualisations));
         dispatch(fetchDashboardsSuccess(library.dashboards));
+        dispatch(fetchCollectionsSuccess(library.collections));
       })
       .catch((error) => {
         warning(false, 'Failed to fetch library: %s', error.message);

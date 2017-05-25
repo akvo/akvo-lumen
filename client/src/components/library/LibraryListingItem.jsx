@@ -7,10 +7,36 @@ import {
   isFailed, isOk, getStatus,
 } from '../../domain/entity';
 
-function LibraryListingItemContextMenu({ onClick }) {
+function getCollectionContextMenuItem(collections, currentCollection) {
+  if (currentCollection) {
+    return ({
+      label: `Remove from ${currentCollection.title}`,
+      value: `remove-from-collection:${currentCollection.id}`,
+    });
+  }
+
+  return ({
+    label: 'Add to collection',
+    value: 'add-to-collection:new',
+    subMenu: [
+      ...Object.keys(collections).map(key => ({
+        value: `add-to-collection:${key}`,
+        label: collections[key].title,
+      })),
+      {
+        label: 'New collection',
+        value: 'add-to-collection:new',
+        customClass: 'newCollection',
+      },
+    ],
+  });
+}
+
+function LibraryListingItemContextMenu({ onClick, collections = {}, currentCollection }) {
   return (
     <ContextMenu
       style={{ width: 200 }}
+      subMenuSide="left"
       onOptionSelected={onClick}
       options={[
         {
@@ -22,10 +48,9 @@ function LibraryListingItemContextMenu({ onClick }) {
         }, {
           label: 'Add to dashboard',
           value: 'add-to-dashboard',
-        }, {
-          label: 'Add to collection',
-          value: 'add-to-collection',
-        }, {
+        },
+        getCollectionContextMenuItem(collections, currentCollection),
+        {
           label: 'View details',
           value: 'view-details',
         }, {
@@ -69,6 +94,8 @@ VisualisationTypeLabel.propTypes = {
 
 LibraryListingItemContextMenu.propTypes = {
   onClick: PropTypes.func.isRequired,
+  collections: PropTypes.object.isRequired,
+  currentCollection: PropTypes.object,
 };
 
 export default class LibraryListingItem extends Component {
@@ -92,33 +119,49 @@ export default class LibraryListingItem extends Component {
 
     return (
       <li
-        onClick={() => {
-          if (isOk(entity)) {
-            onSelectEntity(getType(entity), getId(entity));
-          }
-        }}
+        onMouseLeave={() => this.setState({ contextMenuVisible: false })}
         key={getId(entity)}
-        className={`LibraryListingItem ${getType(entity)} ${getStatus(entity)}`}
+        className={`LibraryListingItem ${getType(entity)} ${getStatus(entity)} ${getId(entity)}`}
       >
         {isPending(entity) &&
           <div className="pendingOverlay">
             <LoadingSpinner />
           </div>
         }
-        <input type="checkbox" className="selectEntity disabled" />
-        <div className="entityIcon" />
-        <div className="textContents">
-          <h3 className="entityName">
-            {getTitle(entity)}
-            {isFailed(entity) && ' (Import failed)'}
-          </h3>
-          {isFailed(entity) && <p>{getErrorMessage(entity)}</p>}
-          {isPending(entity) && <p>Pending...</p>}
-          {getType(entity) === 'visualisation' &&
-            <VisualisationTypeLabel
-              vType={entity.visualisationType}
-            />
+        <div
+          className="checkboxContainer"
+          onClick={() => {
+            this.props.onCheckEntity(getId(entity));
           }
+          }
+        >
+          <input
+            type="checkbox"
+            checked={this.props.isChecked}
+          />
+        </div>
+        <div
+          className="entityBody clickable"
+          onClick={() => {
+            if (isOk(entity)) {
+              onSelectEntity(getType(entity), getId(entity));
+            }
+          }}
+        >
+          <div className="entityIcon" />
+          <div className="textContents">
+            <h3 className="entityName">
+              {getTitle(entity)}
+              {isFailed(entity) && ' (Import failed)'}
+            </h3>
+            {isFailed(entity) && <p>{getErrorMessage(entity)}</p>}
+            {isPending(entity) && <p>Pending...</p>}
+            {getType(entity) === 'visualisation' &&
+              <VisualisationTypeLabel
+                vType={entity.visualisationType}
+              />
+            }
+          </div>
         </div>
         <div className="entityControls">
           <button
@@ -129,6 +172,8 @@ export default class LibraryListingItem extends Component {
           </button>
           {this.state.contextMenuVisible &&
             <LibraryListingItemContextMenu
+              collections={this.props.collections}
+              currentCollection={this.props.currentCollection}
               onClick={(actionType) => {
                 this.setState({ contextMenuVisible: false });
                 onEntityAction(actionType, getType(entity), getId(entity));
@@ -144,4 +189,8 @@ LibraryListingItem.propTypes = {
   entity: PropTypes.object.isRequired,
   onSelectEntity: PropTypes.func.isRequired,
   onEntityAction: PropTypes.func.isRequired,
+  collections: PropTypes.object.isRequired,
+  currentCollection: PropTypes.object,
+  onCheckEntity: PropTypes.func.isRequired,
+  isChecked: PropTypes.bool.isRequired,
 };

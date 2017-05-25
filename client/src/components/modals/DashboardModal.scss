@@ -5,6 +5,11 @@
     min-height: 100%;
     overflow: visible;
 
+    input {
+        font-size: inherit;
+        line-height: inherit;
+    }
+
     .modalTitle {
         position: absolute;
         top: 0.5rem;
@@ -21,7 +26,7 @@
         font-size: 3rem;
         font-weight: bold;
         transform: rotate(45deg);
-        color: $mintGreen;
+        color: $black;
         line-height: 1.5rem;
         padding: 0;
     }
@@ -66,6 +71,9 @@
         right: 0rem;
         color: $white;
         background-color: $mintGreen;
+        &.dangerous {
+            background-color: $errorRed;
+        }
     }
 
     .negative {
