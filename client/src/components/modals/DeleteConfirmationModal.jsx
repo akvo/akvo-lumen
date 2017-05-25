@@ -78,7 +78,7 @@ export default function DeleteConfirmationModal({
             className="close clickable"
             onClick={onCancel}
           >
-            +
+            ✕
           </div>
           <div className="contents">
             {entityType === 'dataset' ?

@@ -81,7 +81,7 @@ export default class CreateCollection extends Component {
                 onCancel();
               }}
             >
-              +
+              ✕
             </div>
             <div className="contents">
               <label htmlFor="titleInput">Collection name</label>

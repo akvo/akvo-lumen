@@ -76,7 +76,7 @@ export default class ColumnHeader extends Component {
               className="cancelSort"
               onClick={event => this.handleRemoveSort(event, column)}
             >
-              +
+              ✕
             </span>
           </div>
           : null

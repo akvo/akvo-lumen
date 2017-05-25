@@ -147,7 +147,7 @@ export default class DashboardCanvasItem extends Component {
           className="clickable deleteButton noSelect"
           onClick={() => this.props.onDeleteClick(this.props.item)}
         >
-          +
+          ✕
         </button>
       </div>
     );

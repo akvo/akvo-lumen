@@ -64,7 +64,7 @@ export default class ShareEntity extends Component {
               className="close clickable"
               onClick={onClose}
             >
-              +
+              ✕
             </div>
             <div className="contents">
               <label htmlFor="shareUrlCopyButton">Share {type} {title}</label>

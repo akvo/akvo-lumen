@@ -50,7 +50,7 @@ class Notification extends Component {
           className="close clickable"
           onClick={() => dispatch(hideNotification())}
         >
-          +
+          ✕
         </span>
       </div>
     );

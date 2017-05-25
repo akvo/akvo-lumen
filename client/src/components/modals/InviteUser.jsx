@@ -51,7 +51,7 @@ export default class InviteUser extends Component {
               className="close clickable"
               onClick={onClose}
             >
-            +
+            ✕
             </div>
             <div className="contents">
               <p>Please enter the email address you would like to invite.</p>

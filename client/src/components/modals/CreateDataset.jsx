@@ -93,7 +93,7 @@ class CreateDataset extends Component {
                 onCancel();
               }}
             >
-              +
+              ✕
             </div>
             <ul className="tabMenu">
               <li
