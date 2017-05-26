@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import ContextMenuItem from './ContextMenuItem';
 
-require('../../styles/ContextMenu.scss');
+require('./ContextMenu.scss');
 
 const getArrowStyle = (className, offset = '0px') => {
   const style = {};

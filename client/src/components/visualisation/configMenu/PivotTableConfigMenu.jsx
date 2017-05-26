@@ -6,7 +6,7 @@ import UniqueValueMenu from './UniqueValueMenu';
 import ToggleInput from './ToggleInput';
 import { canShowPivotTotals } from '../../../utilities/chart';
 
-require('../../../styles/PivotTableConfigMenu.scss');
+require('./PivotTableConfigMenu.scss');
 
 // For now, we only support a subset of the regular aggregation options
 const aggregationOptions = [

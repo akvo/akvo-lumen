@@ -1,0 +1,199 @@
+@import "../styles/modules/importAll";
+
+.DashboardModal {
+    position: relative;
+    min-height: 100%;
+    overflow: visible;
+
+    input {
+        font-size: inherit;
+        line-height: inherit;
+    }
+
+    .modalTitle {
+        position: absolute;
+        top: 0.5rem;
+        left: 0rem;
+        font-size: 1.25rem;
+        font-weight: bold;
+        line-height: 1rem;
+    }
+
+    .close {
+        position: absolute;
+        top: 0rem;
+        right: 0rem;
+        font-size: 1.5rem;
+        color: $black;
+        line-height: 1.5rem;
+        padding: 0;
+    }
+
+    .controls {
+        position: absolute;
+        height: 3rem;
+        bottom: 0;
+        left: 0rem;
+        right: 0rem;
+        background-color: white;
+    }
+
+    .contents {
+        padding: 1rem;
+    }
+
+    .buttonContainer {
+        position: relative;
+        width: 100%;
+        height: 100%;
+    }
+
+    .positive, .negative {
+        position: absolute;
+        bottom: 0rem;
+        font-size: 1rem;
+        padding: 0.5rem 1rem;
+        border-radius: 0.4rem;
+        font-weight: bold;
+        transition: color 0.3s, background-color 0.3s, border 0.3s;
+        transition-timing-function: ease;
+
+        &[disabled] {
+            background-color: transparent;
+            color: $lightBlueGrey;
+            border: 0.1rem solid $lightBlueGrey;
+        }
+    }
+
+    .positive {
+        right: 0rem;
+        color: $white;
+        background-color: $mintGreen;
+        &.dangerous {
+            background-color: $errorRed;
+        }
+    }
+
+    .negative {
+        left: 0rem;
+        color: $midGrey;
+        border: 0.1rem solid $lightGreen;
+    }
+
+    .Settings {
+        dt, dd {
+            display: inline-block;
+            line-height: 1.4rem;
+            margin-bottom: 2rem;
+        }
+
+        dt {
+            width: 25%;
+            max-width: 12rem;
+            padding-right: 1rem;
+            text-align: right;
+            color: $blueGrey;
+        }
+
+        dd {
+            width: 70%;
+            min-width: calc(100% - 12rem);
+        }
+
+        .datasetNameInput {
+            width: 20rem;
+            padding: 0.25rem 0.5rem;
+            font-size: 1rem;
+        }
+    }
+
+    .DatasetSettings .Settings {
+        padding-top: 4rem;
+    }
+
+    .CreateDataset {
+        .tabMenu {
+            padding: 3rem 0;
+        }
+
+        .tab {
+            display: inline-block;
+            width: 27%;
+            margin-left: calc(19% / 6);
+            margin-right: calc(19% / 6);
+            text-align: center;
+            padding: 0.75rem 0.75rem;
+            color: $midGrey;
+            border-bottom: 0.3rem solid $midGrey;
+            font-weight: bold;
+            transition: color 0.3s, border 0.3s;
+            transition-timing-function: ease;
+
+            &.selected {
+                color: $mintGreen;
+                border-color: $mintGreen;
+            }
+        }
+
+        .SourceSelection {
+            display: relative;
+            margin: 0;
+
+            .sourceOptionContainer {
+                display: inline-block;
+                width: 20%;
+                height: 6rem;
+                margin: 1rem calc(20% / 8);
+                padding: 1rem;
+                text-align: center;
+                background-color: whitesmoke;
+                vertical-align: bottom;
+
+                input {
+                    margin-right: 0.5rem;
+                }
+            }
+        }
+
+        .FileSelection {
+            width: 100%;
+            min-height: 15rem;
+            display: table;
+
+            .contents {
+                vertical-align: middle;
+                text-align: center;
+                display: table-cell;
+            }
+        }
+
+        .LinkFileSelection {
+            .linkFileInput, .linkFileInputLabel {
+                font-size: 1.25rem;
+            }
+
+            .linkFileInputLabel {
+                margin-right: 0.5rem;
+            }
+
+            .linkFileInput {
+                padding: 0.25rem 0.5rem;
+            }
+        }
+
+        .DataFileFileSelection {
+            .dataFileUploadMessage, .dataFileUploadInput {
+                font-size: 1rem;
+            }
+
+            .dataFileUploadMessage {
+                line-height: 2rem;
+            }
+        }
+
+        .Preview {
+            padding-top: 1rem;
+            padding-bottom: 6rem;
+        }
+    }
+}

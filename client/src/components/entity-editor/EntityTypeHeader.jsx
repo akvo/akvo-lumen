@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import EntityTitleInput from './EntityTitleInput';
 
-require('../../styles/EntityTypeHeader.scss');
+require('./EntityTypeHeader.scss');
 
 export default class EntityTypeHeader extends Component {
 

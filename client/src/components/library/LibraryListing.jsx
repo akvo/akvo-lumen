@@ -3,7 +3,7 @@ import moment from 'moment';
 import LibraryListingGroup from './LibraryListingGroup';
 import * as entity from '../../domain/entity';
 
-require('../../styles/LibraryListing.scss');
+require('./LibraryListing.scss');
 
 const mapEntityObjectsToArray = (...objects) => {
   // Convert one or more entity objects into an array of entities

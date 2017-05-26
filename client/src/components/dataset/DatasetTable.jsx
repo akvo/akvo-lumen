@@ -7,7 +7,7 @@ import DatasetControls from './DatasetControls';
 import DataTypeContextMenu from './context-menus/DataTypeContextMenu';
 import ColumnContextMenu from './context-menus/ColumnContextMenu';
 
-require('../../styles/DatasetTable.scss');
+require('./DatasetTable.scss');
 
 function formatCellValue(type, value) {
   switch (type) {

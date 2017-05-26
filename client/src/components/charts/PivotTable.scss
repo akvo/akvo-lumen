@@ -1,0 +1,98 @@
+@import "../../styles/modules/importAll";
+
+.PivotTable {
+    position: relative;
+    overflow: auto;
+    width: 100%;
+    height: 100%;
+    padding: 0.5rem 1rem;
+
+    table {
+        max-width: 100%;
+        min-width: 50%;
+        margin: 0 auto;
+    }
+
+    th, .uniqueRowValue {
+        span {
+            word-break: break-word;
+        }
+    }
+
+    .uniqueRowValue {
+        min-width: 2.6rem;
+    }
+
+    .uniqueColumnValue {
+        min-width: 2rem;
+    }
+
+    td, th {
+        border: 0.1rem solid $midGrey;
+        padding: 0.25rem;
+    }
+
+    td.cell {
+        text-align: right;
+        vertical-align: bottom;
+    }
+
+    .categoryColumnTitle, .rowColumnTitle {
+        background-color: $lightBlueGrey;
+    }
+
+    .uniqueColumnValue {
+        span {
+            font-size: 0.9rem;
+            display: block;
+            line-height: 1.4em;
+        }
+    }
+
+    .uniqueRowValue {
+        span {
+            font-size: 0.9rem;
+            display: block;
+            line-height: 1.4em;
+        }
+    }
+
+    .spacer {
+        background-color: transparent;
+        border: none;
+    }
+
+    .title th {
+        background-color: $white;
+        line-height: 2em;
+        border: none;
+        font-weight: bold;
+    }
+
+    &.hasTotals {
+        /* Hide totals if needed */
+        &.hideRowTotals {
+            thead {
+                tr:last-child {
+                    th:last-child {
+                        display: none;
+                    }
+                }
+            }
+
+            tbody {
+                tr td:last-child {
+                    display: none;
+                }
+            }
+        }
+
+        &.hideColumnTotals {
+            tbody {
+                tr:last-child {
+                    display: none;
+                }
+            }
+        }
+    }
+}

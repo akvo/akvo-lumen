@@ -1,6 +1,6 @@
 import React from 'react';
 
-require('../../styles/LoadingSpinner.scss');
+require('./LoadingSpinner.scss');
 
 export default function LoadingSpinner() {
   return (

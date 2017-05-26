@@ -1,0 +1,50 @@
+@import "../../styles/modules/importAll";
+
+.ProgressBar {
+    position: relative;
+    width: 100%;
+
+    .textContent {
+        display: none;
+    }
+
+    .errorText, .completionText {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        font-size: 80%;
+        line-height: 125%;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    .errorText {
+        color: $errorRed;
+    }
+
+    .completionText {
+        color: $white;
+    }
+
+    .progressBar {
+        height: 1.25rem;
+        width: 100%;
+        position: relative;
+        border-radius: 0.4rem;
+        border: 0.1rem solid $mintGreen;
+        overflow: hidden;
+        transition: border-color 0.5s;
+
+        &.error {
+            border-color: $errorRed;
+        }
+    }
+
+    .progressIndicator {
+        background-color: $mintGreen;
+        display: block;
+        height: 1.25rem;
+        transition: width 0.5s;
+    }
+}

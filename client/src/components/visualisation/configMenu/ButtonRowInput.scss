@@ -1,0 +1,32 @@
+@import "../../../styles/modules/importAll";
+
+.ButtonRowInput {
+    .row {
+        display: flex;
+        flex: 1;
+        justify-content: space-between;
+        align-items: flex-start;
+
+        &.manualSpacing {
+            justify-content: initial;
+        }
+
+        .button {
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+            border: 0.1rem solid $lightGrey;
+            text-transform: capitalize;
+            color: $midGrey;
+            background-color: white;
+
+            &.selected {
+                color: white;
+                background-color: grey;
+            }
+        }
+    }
+
+    h4 {
+        margin-bottom: 0.5rem;
+    }
+}

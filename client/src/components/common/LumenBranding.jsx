@@ -1,6 +1,6 @@
 import React from 'react';
 
-require('../../styles/LumenBranding.scss');
+require('./LumenBranding.scss');
 
 export default function LumenBranding() {
   return (

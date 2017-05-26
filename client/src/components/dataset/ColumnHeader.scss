@@ -1,0 +1,83 @@
+@import "../../styles/modules/importAll";
+
+.ColumnHeader {
+    vertical-align: top;
+
+    * {
+        vertical-align: top;
+    }
+
+    &:after {
+        content: '';
+        display: block;
+        width: 0;
+        height: 0;
+        border-right: 10px solid transparent;
+        border-left: 10px solid transparent;
+        border-top: 10px solid $blueGrey;
+        border-bottom: none;
+        position: absolute;
+        right: 0.5rem;
+        top: 25px;
+    }
+
+    &.columnMenuActive {
+        background-color: rgba(0, 0, 0, 0.125);
+
+        &:after {
+            border-top: none;
+            border-bottom: 10px solid $blueGrey;
+        }
+    }
+
+    * {
+        line-height: 60px;
+    }
+
+    .columnType {
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        margin: 0 0.5rem;
+        color: $blueGrey;
+    }
+
+    .columnType, .columnTypeToggle {
+        display: inline-block;
+    }
+
+    .columnTypeToggle {
+        padding-top: 2px;
+    }
+
+    .columnTitleText {
+        max-width: 7.75rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        display: inline-block;
+    }
+
+    .sortLabel {
+        display: block;
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0rem;
+        line-height: 0.7rem;
+        padding: 0.125rem 0.5rem 0.18rem 0.5rem;
+        background-color: rgba(0, 0, 0, 0.25);
+        color: $black;
+        text-align: left;
+
+        * {
+            line-height: 0.7rem;
+            font-size: 0.75rem;
+        }
+
+        .cancelSort {
+            float: right;
+            font-size: 1rem;
+            margin-right: -0.25rem;
+        }
+    }
+}

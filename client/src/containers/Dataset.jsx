@@ -7,7 +7,7 @@ import { getId, getTitle } from '../domain/entity';
 import { getTransformations, getRows, getColumns } from '../domain/dataset';
 import * as api from '../api';
 
-require('../styles/Dataset.scss');
+require('../components/dataset/Dataset.scss');
 
 class Dataset extends Component {
 
