@@ -34,7 +34,7 @@ function DefaultValueInput({ defaultValue, onChange, newType }) {
 }
 
 DefaultValueInput.propTypes = {
-  defaultValue: PropTypes.oneOfType([PropTypes.number.string]),
+  defaultValue: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   onChange: PropTypes.func.isRequired,
   newType: PropTypes.oneOf(['date', 'text', 'number']).isRequired,
 };
