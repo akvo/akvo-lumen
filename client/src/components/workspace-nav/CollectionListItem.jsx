@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router';
 
-require('../../styles/CollectionListItem.scss');
+require('./CollectionListItem.scss');
 
 export default function CollectionListItem({ collection, onDeleteCollection, pathname }) {
   const isActive = pathname.indexOf(`${collection.id}`) > -1;

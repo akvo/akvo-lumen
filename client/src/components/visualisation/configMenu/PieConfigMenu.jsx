@@ -4,7 +4,7 @@ import SelectInput from './SelectInput';
 import LabelInput from './LabelInput';
 import ToggleInput from './ToggleInput';
 
-require('../../../styles/PieConfigMenu.scss');
+require('./PieConfigMenu.scss');
 
 export default function PieConfigMenu(props) {
   const {

@@ -4,7 +4,7 @@ import vg from 'vega';
 import isEqual from 'lodash/isEqual';
 import * as chart from '../../utilities/chart';
 
-require('../../styles/Chart.scss');
+require('./Chart.scss');
 
 function getSize(computedWidth) {
   let size;

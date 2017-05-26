@@ -14,7 +14,7 @@ import { editCollection } from '../actions/collection';
 import { showNotification } from '../actions/notification';
 import * as entity from '../domain/entity';
 
-require('../styles/Library.scss');
+require('./Library.scss');
 
 function mergeQuery(location, query) {
   return Object.assign({}, location, {

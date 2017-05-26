@@ -9,7 +9,7 @@ import ToggleInput from './ToggleInput';
 import ColorLabels from './ColorLabels';
 import FilterMenu from './FilterMenu';
 
-require('../../../styles/LayerConfigMenu.scss');
+require('./LayerConfigMenu.scss');
 
 const getSelectMenuOptionsFromColumnList = columns => (columns == null ?
   [] : columns.map((column, index) => ({

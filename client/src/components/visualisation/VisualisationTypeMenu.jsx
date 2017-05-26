@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import SelectMenu from '../common/SelectMenu';
 import visualisationTypes from '../../containers/Visualisation/visualisationTypes';
 
-require('../../styles/VisualisationTypeMenu.scss');
+require('./VisualisationTypeMenu.scss');
 
 export default function VisualisationTypeMenu(props) {
   const { visualisation, onChangeVisualisationType, disabled } = props;

@@ -1,0 +1,181 @@
+@import "../styles/modules/importAll";
+
+.WorkspaceNav {
+    border-right: 0.1rem solid rgba(0, 0, 0, 0.05);
+    width: 16rem;
+    z-index: 2;
+    transition: width 0.3s, height 0.3s;
+    transition-timing-function: ease;
+    background-color: $bg1;
+
+    .header {
+        height: 9rem;
+        border-bottom: 0.1rem solid $bg2;
+
+        .rowPrimary {
+            width: 100%;
+            height: 4rem;
+        }
+
+        .menuIcon, h1 {
+            display: inline-block;
+        }
+
+        .menuIcon {
+            margin: 0.625rem 0.375rem;
+            height: 2.5rem;
+            width: 2.5rem;
+            border-radiums: 0.25rem;
+            background-image: url("../styles/img/icon-64-menu.png");
+            background-size: contain;
+            background-repeat: no-repeat;
+        }
+
+        h1 {
+            width: calc(100% - 3.25rem);
+            height: 4rem;
+            vertical-align: top;
+
+            a {
+                height: 80%;
+                width: 80%;
+                margin: 0.75rem auto 0.75rem 1rem;
+                color: $textPrimary;
+                background-image: url("../styles/img/logo.png");
+                background-size: contain;
+                background-repeat: no-repeat;
+                color: transparent;
+                display: block;
+            }
+        }
+    }
+
+    .OrganizationMenu {
+        padding: 1.5rem 1rem 1rem 1rem;
+
+        .name {
+            padding-bottom: 0.25rem;
+            font-weight: bold;
+            color: $textPrimary;
+        }
+
+        .organization {
+            color: $textSecondary;
+        }
+    }
+
+    .links {
+        padding: 1rem;
+    }
+
+    .subtitle {
+        color: $textSecondary;
+        font-size: 1.25rem;
+        text-decoration: none;
+        text-transform: capitalize;
+
+        &.selected {
+            color: $textHighlight;
+        }
+    }
+
+    .NavLink, .CollectionsList {
+        padding: 2rem 0;
+    }
+
+    .NavLink {
+        .selected {
+            font-weight: bold;
+        }
+
+        border-bottom: 0.1rem solid rgba(0, 0, 0, 0.1);
+
+        &:first-child {
+            padding-top: 0;
+        }
+
+        &:last-child {
+            border-bottom: 0;
+            border-top: 0.1rem solid rgba(0, 0, 0, 0.1);
+            padding-bottom: 0;
+        }
+    }
+
+    .CollectionsList {
+        h3 {
+            padding-bottom: 1rem;
+            display: inline-block;
+            position: relative;
+            padding-right: 2.5rem;
+        }
+
+        .addCollection {
+            color: $textSecondary;
+            font-size: 2.5rem;
+            line-height: 1rem;
+            font-weight: bold;
+            background-color: transparent;
+            border: none;
+            position: absolute;
+            right: 0;
+        }
+
+        li {
+            padding: 0.5rem 0;
+            margin-left: 1.25rem;
+
+            &:first-child {
+                padding-top: 0;
+            }
+
+            a {
+                color: $textPrimary;
+                font-weight: bold;
+                text-decoration: none;
+            }
+        }
+
+        .selected {
+            color: $textHighlight;
+        }
+    }
+
+    .NavWorkspaceSwitch {
+        padding: 1rem;
+        text-align: center;
+
+        a {
+            padding: 0.5rem 1.7rem;
+            margin-top: 3rem;
+            border: 0.1rem solid $textHighlight;
+            border-radius: 0.5rem;
+            display: inline-block;
+            color: $textHighlight;
+            text-transform: uppercase;
+        }
+    }
+
+    &.collapsed {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 4rem;
+        min-height: 0;
+        width: 4rem;
+        overflow: hidden;
+        border-right: none;
+
+        .menuIcon {
+            margin-left: 0.75rem;
+            margin-right: 0.75rem;
+        }
+    }
+
+    &.floating {
+        position: absolute;
+        z-index: 100;
+        top: 0;
+        left: 0;
+        bottom: 0;
+    }
+}

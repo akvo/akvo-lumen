@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import ContextMenu from '../common/ContextMenu';
 
-require('../../styles/DatasetControls.scss');
+require('./DatasetControls.scss');
 
 export default class DatasetControls extends Component {
   constructor() {

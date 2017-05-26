@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import VisualisationViewer from '../charts/VisualisationViewer';
 import DashboardCanvasItemEditable from './DashboardCanvasItemEditable';
 
-require('../../styles/DashboardCanvasItem.scss');
+require('./DashboardCanvasItem.scss');
 
 const getItemLayout = (props) => {
   let output = null;
@@ -148,7 +148,7 @@ export default class DashboardCanvasItem extends Component {
           className="clickable deleteButton noSelect"
           onClick={() => this.props.onDeleteClick(this.props.item)}
         >
-          +
+          ✕
         </button>
       </div>
     );

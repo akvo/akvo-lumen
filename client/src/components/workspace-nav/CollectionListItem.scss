@@ -1,0 +1,30 @@
+@import "../../styles/modules/importAll";
+
+.CollectionListItem {
+  display: flex;
+  flex: 1;
+  align-items: flex-start;
+  overflow: hidden;
+  word-wrap: break-word;
+
+  a {
+    flex: 1;
+    line-height: 1.4rem;
+    max-width: 85%
+  }
+
+  .delete {
+    font-size: 1.2rem;
+    line-height: 1.4rem;
+    color: $midGrey;
+    width: 1rem;
+    margin-left: 0.5rem;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
+  &:hover .delete {
+    opacity: inherit;
+    pointer-events: initial;
+  }
+}

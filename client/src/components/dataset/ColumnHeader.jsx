@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Immutable from 'immutable';
 
-require('../../styles/ColumnHeader.scss');
+require('./ColumnHeader.scss');
 
 export default class ColumnHeader extends Component {
 
@@ -77,7 +77,7 @@ export default class ColumnHeader extends Component {
               className="cancelSort"
               onClick={event => this.handleRemoveSort(event, column)}
             >
-              +
+              ✕
             </span>
           </div>
           : null

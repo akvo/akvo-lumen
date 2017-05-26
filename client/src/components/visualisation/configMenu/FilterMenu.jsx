@@ -248,7 +248,7 @@ export default class FilterMenu extends Component {
                           className="deleteFilter clickable"
                           onClick={() => this.deleteFilter(index)}
                         >
-                        +
+                        ✕
                         </button>
                       </li>
                   )}

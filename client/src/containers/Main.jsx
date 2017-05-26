@@ -7,7 +7,7 @@ import Notification from './Notification';
 
 require('../styles/reset.global.scss');
 require('../styles/style.global.scss');
-require('../styles/Main.scss');
+require('./Main.scss');
 require('fixed-data-table-2/dist/fixed-data-table.css');
 
 function Main({ location, children, notification }) {

@@ -48,7 +48,7 @@ class DatasetSettings extends Component {
                 onCancel();
               }}
             >
-              +
+              ✕
             </div>
             <Settings
               dataset={dataset}

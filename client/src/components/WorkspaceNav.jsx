@@ -8,7 +8,7 @@ import CollectionsList from './workspace-nav/CollectionsList';
 import NavWorkspaceSwitch from './workspace-nav/NavWorkspaceSwitch';
 import { showModal } from '../actions/activeModal';
 
-require('../styles/WorkspaceNav.scss');
+require('./WorkspaceNav.scss');
 
 const collapsedLocations = ['visualisation/', 'dataset/', 'dashboard/', 'admin/users'];
 

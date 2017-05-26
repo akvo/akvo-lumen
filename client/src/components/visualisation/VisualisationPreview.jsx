@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import VisualisationViewer from '../charts/VisualisationViewer';
 
-require('../../styles/VisualisationPreview.scss');
+require('./VisualisationPreview.scss');
 
 
 function shouldRender(visualisation, datasets) {

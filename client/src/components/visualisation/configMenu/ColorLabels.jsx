@@ -4,7 +4,7 @@ import { GithubPicker } from 'react-color';
 import defaultColors from '../../../utilities/defaultColors';
 import { replaceLabelIfValueEmpty } from '../../../utilities/chart';
 
-require('../../../styles/ColorLabels.scss');
+require('./ColorLabels.scss');
 
 export default function ColorLabels({ pointColorMapping, onChangeColor }) {
   return (

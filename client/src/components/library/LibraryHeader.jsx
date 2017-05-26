@@ -8,7 +8,7 @@ import LibraryTabList from './LibraryTabList';
 import LibraryDisplayMenu from './LibraryDisplayMenu';
 import CheckboxEntityMenu from './CheckboxEntityMenu';
 
-require('../../styles/LibraryHeader.scss');
+require('./LibraryHeader.scss');
 
 export default function LibraryHeader(props) {
   return (

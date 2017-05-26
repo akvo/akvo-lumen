@@ -14,7 +14,7 @@ import pivotTableSpecTemplate from './Visualisation/pivotTableSpecTemplate';
 import scatterSpecTemplate from './Visualisation/scatterSpecTemplate';
 import barSpecTemplate from './Visualisation/barSpecTemplate';
 
-require('../styles/Visualisation.scss');
+require('../components/visualisation/Visualisation.scss');
 
 class Visualisation extends Component {
 
@@ -83,7 +83,7 @@ class Visualisation extends Component {
           require('../components/visualisation/VisualisationHeader').default;
         const VisualisationEditor =
           require('../components/visualisation/VisualisationEditor').default;
-        require('../styles/Visualisation.scss');
+        require('../components/visualisation/Visualisation.scss');
         /* eslint-enable global-require */
 
         this.setState({

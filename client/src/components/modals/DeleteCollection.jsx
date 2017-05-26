@@ -44,7 +44,7 @@ export default class DeleteCollection extends Component {
                 onCancel();
               }}
             >
-              +
+              ✕
             </div>
             <div className="contents" />
             <div className="controls">

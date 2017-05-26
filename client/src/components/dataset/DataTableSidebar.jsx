@@ -7,7 +7,7 @@ import CombineColumns from './sidebars/CombineColumns';
 import DeriveColumn from './sidebars/DeriveColumn';
 import RenameColumn from './sidebars/RenameColumn';
 
-require('../../styles/DataTableSidebar.scss');
+require('./DataTableSidebar.scss');
 
 export default function DataTableSidebar(props) {
   switch (props.type) {

@@ -8,7 +8,7 @@ import DataSourceSettings from './createDataset/DataSourceSettings';
 import Settings from '../dataset/Settings';
 import * as actionCreators from '../../actions/dataset';
 
-require('../../styles/CreateDataset.scss');
+require('./CreateDataset.scss');
 
 class CreateDataset extends Component {
 
@@ -94,7 +94,7 @@ class CreateDataset extends Component {
                 onCancel();
               }}
             >
-              +
+              ✕
             </div>
             <ul className="tabMenu">
               <li

@@ -14,7 +14,7 @@ import MapConfigMenu from './configMenu/MapConfigMenu';
 import PivotTableConfigMenu from './configMenu/PivotTableConfigMenu';
 import visualisationTypes from '../../containers/Visualisation/visualisationTypes';
 
-require('../../styles/ConfigMenu.scss');
+require('./ConfigMenu.scss');
 
 const sortFunction = (a, b) => {
   const string1 = entity.getTitle(a).toLowerCase();

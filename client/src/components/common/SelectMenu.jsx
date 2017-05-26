@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import Select from 'react-select';
 
 require('../../../node_modules/react-select/dist/react-select.css');
-require('../../styles/SelectMenu.scss');
+require('./SelectMenu.scss');
 
 export default function SelectMenu(props) {
   return (
