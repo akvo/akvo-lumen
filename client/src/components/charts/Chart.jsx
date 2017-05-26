@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import vg from 'vega';
 import isEqual from 'lodash/isEqual';
 import * as chart from '../../utilities/chart';

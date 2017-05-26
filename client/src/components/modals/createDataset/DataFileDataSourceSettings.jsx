@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import * as tus from 'tus-js-client';
 import * as auth from '../../../auth';
 import ProgressBar from '../../common/ProgressBar';

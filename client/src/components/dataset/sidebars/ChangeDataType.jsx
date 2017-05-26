@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import Immutable from 'immutable';
 import SelectMenu from '../../common/SelectMenu';
 import SidebarHeader from './SidebarHeader';
@@ -33,7 +34,7 @@ function DefaultValueInput({ defaultValue, onChange, newType }) {
 }
 
 DefaultValueInput.propTypes = {
-  defaultValue: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  defaultValue: PropTypes.oneOfType([PropTypes.number.string]),
   onChange: PropTypes.func.isRequired,
   newType: PropTypes.oneOf(['date', 'text', 'number']).isRequired,
 };

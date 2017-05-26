@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { Table, Column, Cell } from 'fixed-data-table';
 import moment from 'moment';
 import ColumnHeader from './ColumnHeader';

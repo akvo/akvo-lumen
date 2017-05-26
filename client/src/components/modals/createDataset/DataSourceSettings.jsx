@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import DataFileDataSourceSettings from './DataFileDataSourceSettings';
 import LinkDataSourceSettings from './LinkDataSourceSettings';
 import AkvoFlowDataSourceSettings from './AkvoFlowDataSourceSettings';

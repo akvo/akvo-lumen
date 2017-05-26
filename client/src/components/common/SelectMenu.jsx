@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import Select from 'react-select';
 
 require('../../../node_modules/react-select/dist/react-select.css');
@@ -24,7 +25,7 @@ export default function SelectMenu(props) {
 }
 
 SelectMenu.propTypes = {
-  options: PropTypes.arrayOf(React.PropTypes.shape({
+  options: PropTypes.arrayOf(PropTypes.shape({
     value: PropTypes.string,
     label: PropTypes.string.isRequired,
   })).isRequired,
