@@ -8,7 +8,9 @@ $codeFont: monospace;
     padding: 5px 8px;
     background-color: $btnColor;
     color: white !important;
-    font-size: 0.95em;
+    font-size: 0.90em;
+    text-decoration: none;
+    text-transform: uppercase;
 
     @include border-radius(3px);
 
@@ -66,4 +68,8 @@ $codeFont: monospace;
             border: 1px solid rgba(128, 128, 128, 0.4);
         }
     }
+}
+
+input, textarea {
+    font-size: 0.95em;
 }

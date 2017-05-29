@@ -10,6 +10,8 @@ html, body, #root, #root > div {
 
 html, body, #root {
     min-width: 1024px;
+    font-size: 14px;
+    line-height: 1.42857;
 }
 
 /* Very basic text styling */
@@ -30,7 +32,8 @@ code {
     background-color: rgb(250, 250, 250);
     padding: 0 0.25rem;
     border: 1px solid $lightBlueGrey !important;
-    border-radius: 0.2rem;
+
+    @include border-radius(3px);
 }
 
 /* Identify elements that can be clicked or tap to interact with */

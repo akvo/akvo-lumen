@@ -14,8 +14,6 @@
         position: absolute;
         top: 0.5rem;
         left: 0rem;
-        font-size: 1.25rem;
-        font-weight: bold;
         line-height: 1rem;
     }
 
@@ -23,7 +21,6 @@
         position: absolute;
         top: 0rem;
         right: 0rem;
-        font-size: 1.5rem;
         color: $black;
         line-height: 1.5rem;
         padding: 0;
@@ -51,10 +48,8 @@
     .positive, .negative {
         position: absolute;
         bottom: 0rem;
-        font-size: 1rem;
         padding: 0.5rem 1rem;
         border-radius: 0.4rem;
-        font-weight: bold;
         transition: color 0.3s, background-color 0.3s, border 0.3s;
         transition-timing-function: ease;
 
@@ -69,6 +64,7 @@
         right: 0rem;
         color: $white;
         background-color: $mintGreen;
+
         &.dangerous {
             background-color: $errorRed;
         }
@@ -103,7 +99,6 @@
         .datasetNameInput {
             width: 20rem;
             padding: 0.25rem 0.5rem;
-            font-size: 1rem;
         }
     }
 
@@ -125,7 +120,6 @@
             padding: 0.75rem 0.75rem;
             color: $midGrey;
             border-bottom: 0.3rem solid $midGrey;
-            font-weight: bold;
             transition: color 0.3s, border 0.3s;
             transition-timing-function: ease;
 
@@ -168,9 +162,7 @@
         }
 
         .LinkFileSelection {
-            .linkFileInput, .linkFileInputLabel {
-                font-size: 1.25rem;
-            }
+            .linkFileInput, .linkFileInputLabel {}
 
             .linkFileInputLabel {
                 margin-right: 0.5rem;
@@ -182,9 +174,7 @@
         }
 
         .DataFileFileSelection {
-            .dataFileUploadMessage, .dataFileUploadInput {
-                font-size: 1rem;
-            }
+            .dataFileUploadMessage, .dataFileUploadInput {}
 
             .dataFileUploadMessage {
                 line-height: 2rem;

@@ -1,0 +1,136 @@
+@mixin offSet($marginLeft, $marginRight) {
+    margin-left: $marginLeft;
+    margin-right: $marginRight;
+}
+
+@mixin border-radius($property) {
+    -moz-border-radius: $property;
+    -o-border-radius: $property;
+    -webkit-border-radius: $property;
+    border-radius: $property;
+}
+
+@mixin box-shadow($boxshadow...) {
+    -moz-box-shadow: $boxshadow;
+    -o-box-shadow: $boxshadow;
+    -webkit-box-shadow: $boxshadow;
+    box-shadow: $boxshadow;
+}
+
+@mixin background-size($backgroundSize...) {
+    -moz-background-size: $backgroundSize;
+    -o-background-size: $backgroundSize;
+    -webkit-background-size: $backgroundSize;
+    background-size: $backgroundSize;
+}
+
+@mixin transition($transitonProperties) {
+    -moz-transition: $transitonProperties;
+    -o-transition: $transitonProperties;
+    -webkit-transition: $transitonProperties;
+    transition: $transitonProperties;
+}
+
+@mixin noWrapTxt {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@mixin opacity($opacity) {
+    opacity: $opacity;
+
+    $opacity-ie: $opacity * 100;
+
+    filter: alpha(opacity = $opacity-ie);
+
+    //IE8
+}
+
+$width-small: 768px;
+$width-medium: 992px;
+$width-large: 1200px;
+
+@mixin responsive($width) {
+    @if $width == wide-screens {
+        @media only screen and (min-width: $width-large) {
+            @content;
+        }
+    }
+    @else if $width == medium-screens {
+        @media only screen and (min-width: $width-medium) {
+            @content;
+        }
+    }
+    @else if $width == small-screens {
+        @media only screen and (min-width: $width-small) {
+            @content;
+        }
+    }
+    @else if $width == wide-max-screens {
+        @media only screen and (max-width: $width-large) {
+            @content;
+        }
+    }
+    @else if $width == medium-max-screens {
+        @media only screen and (max-width: $width-medium) {
+            @content;
+        }
+    }
+    @else if $width == small-max-screens {
+        @media only screen and (max-width: $width-small) {
+            @content;
+        }
+    }
+}
+
+@mixin placeholder-color($color) {
+    &.placeholder {
+        color: $color;
+    }
+
+    &:-moz-placeholder {
+        color: $color;
+    }
+
+    &::-webkit-input-placeholder {
+        color: $color;
+    }
+
+    &:-ms-input-placeholder {
+        color: $color;
+    }
+
+    &::-moz-placeholder {
+        color: $color;
+    }
+
+    &::-moz-placeholder {
+        /* Firefox 19+ */
+        color: $color;
+    }
+}
+
+@mixin flexbox {
+    display: -webkit-box;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+}
+
+@mixin flex($values) {
+    -webkit-box-flex: $values;
+    -moz-box-flex: $values;
+    -webkit-flex: $values;
+    -ms-flex: $values;
+    flex: $values;
+}
+
+@mixin order($val) {
+    -webkit-box-ordinal-group: $val;
+    -moz-box-ordinal-group: $val;
+    -ms-flex-order: $val;
+    -webkit-order: $val;
+    order: $val;
+}

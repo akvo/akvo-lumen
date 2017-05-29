@@ -1,19 +1,14 @@
 @import "../../styles/modules/importAll";
 
 .VisualisationConfig {
-    h3 {
-        font-size: 1.2rem;
-    }
+    h3 {}
 
-    h4 {
-        font-size: 1rem;
-    }
+    h4 {}
 
     .textInput, .numberInput {
         height: 2.5rem;
         border: 0.1rem solid $lightBlueGrey;
         padding: 0.5rem;
-        font-size: 1rem;
         background-color: $white;
 
         &:disabled {
@@ -33,7 +28,6 @@
 
     label, .inputSeperator {
         color: $blueGrey;
-        font-size: 0.8rem;
     }
 
     .inputSeperator {
@@ -51,7 +45,8 @@
     .ColumnGroupingInput, .FilterMenu {
         padding: 0.5rem;
         background-color: $lightGrey;
-        border-radius: 0.4rem;
+
+        @include border-radius(3px);
     }
 
     .FilterMenu {
@@ -73,8 +68,6 @@
         .collapseToggle {
             position: absolute;
             right: 0;
-            font-size: 1.5rem;
-            font-weight: bold;
             line-height: 1.5rem;
             width: 1.5rem;
             text-align: center;
@@ -93,7 +86,9 @@
             background-color: $white;
             padding: 0.5rem 2rem 0.5rem 0.5rem;
             border: 0.1rem solid $lightBlueGrey;
-            border-radius: 0.4rem;
+
+            @include border-radius(3px);
+
             margin-bottom: 0.75rem;
             line-height: 1.4em;
 
@@ -101,16 +96,13 @@
                 margin-bottom: 0;
             }
 
-            .filterIndicator {
-                font-weight: bold;
-            }
+            .filterIndicator {}
 
             .deleteFilter {
                 position: absolute;
                 line-height: 1em;
                 right: 0.3rem;
                 top: 0.3rem;
-                font-size: 1rem;
             }
         }
 
@@ -124,7 +116,9 @@
             padding: 0.4rem 1.2rem;
             text-transform: uppercase;
             border: 0.1rem solid $black;
-            border-radius: 0.4rem;
+
+            @include border-radius(3px);
+
             background-color: $white;
         }
 
@@ -137,7 +131,9 @@
             position: absolute;
             bottom: 0;
             line-height: 1.4em;
-            border-radius: 0.4rem;
+
+            @include border-radius(3px);
+
             padding: 0.4rem 0.8rem;
             text-transform: uppercase;
         }
@@ -162,7 +158,9 @@
 
         .newFilterContainer {
             padding: 1rem 0.5rem;
-            border-radius: 0.4rem;
+
+            @include border-radius(3px);
+
             border: 0.1rem solid $blueGrey;
             background-color: $white;
         }
@@ -181,6 +179,7 @@
         font-size: 0.9rem;
         color: $mintGreen;
         border: 0.1rem solid $mintGreen;
-        border-radius: 0.6rem;
+
+        @include border-radius(3px);
     }
 }

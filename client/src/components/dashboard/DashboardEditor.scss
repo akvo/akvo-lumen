@@ -42,10 +42,10 @@
             color: $mintGreen;
             background-color: $white;
             border: 0.1rem solid $mintGreen;
-            font-size: 1rem;
             line-height: 1.4rem;
-            border-radius: 0.4rem;
-            font-weight: bold;
+
+            @include border-radius(3px);
+
             margin-right: 1rem;
         }
 
@@ -68,8 +68,6 @@
             border: 0.1rem solid $lightGrey;
             background-color: inherit;
             padding: 0.5rem;
-            font-size: 1.15rem;
-            font-weight: bold;
             text-align: center;
         }
 

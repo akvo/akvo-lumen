@@ -53,8 +53,8 @@
 
     .helpText {
         border: 0.1rem solid $warnYellow;
-        border-radius: 0.4rem;
-        font-size: 0.8rem;
+
+        @include border-radius(3px);
 
         .helpTextContainer {
             padding: 0.5rem 0.25rem;
@@ -84,9 +84,10 @@
         width: 0.8rem;
         background-color: $warnYellow;
         color: white;
-        font-weight: bold;
         display: inline-block;
-        border-radius: 100%;
+
+        @include border-radius(100%);
+
         text-align: center;
         margin-right: 0.15rem;
     }

@@ -1,5 +1,6 @@
 import React, { PropTypes } from 'react';
 import { Link } from 'react-router';
+require('./NavWorkspaceSwitch.scss');
 
 export default function NavWorkspaceSwitch({ profile }) {
   return (

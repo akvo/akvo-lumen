@@ -17,7 +17,9 @@
             width: 2rem;
             height: 2rem;
             margin-right: 0.75rem;
-            border-radius: 0.2rem;
+
+            @include border-radius(3px);
+
             position: relative;
 
             .arrowOverlay {

@@ -15,7 +15,6 @@
         padding: 8px;
 
         span {
-            font-weight: bold;
             text-align: center;
         }
     }
@@ -23,12 +22,10 @@
     .legend {
         position: absolute;
         background-color: rgba(255, 255, 255, 0.8);
-        font-size: 0.8rem;
         line-height: 1.4em;
         z-index: 1;
 
         h4 {
-            font-size: 1rem;
             line-height: 1.4em;
             margin: 0.5rem 1rem;
         }
@@ -118,9 +115,7 @@
     .popupItem {
         margin-bottom: 0.5rem;
 
-        h4 {
-            font-weight: bold;
-        }
+        h4 {}
 
         .imageContainer {
             width: 100%;

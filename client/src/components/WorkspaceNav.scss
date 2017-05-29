@@ -55,7 +55,6 @@
 
         .name {
             padding-bottom: 0.25rem;
-            font-weight: bold;
             color: $textPrimary;
         }
 
@@ -70,7 +69,6 @@
 
     .subtitle {
         color: $textSecondary;
-        font-size: 1.25rem;
         text-decoration: none;
         text-transform: capitalize;
 
@@ -84,9 +82,7 @@
     }
 
     .NavLink {
-        .selected {
-            font-weight: bold;
-        }
+        .selected {}
 
         border-bottom: 0.1rem solid rgba(0, 0, 0, 0.1);
 
@@ -111,9 +107,7 @@
 
         .addCollection {
             color: $textSecondary;
-            font-size: 2.5rem;
             line-height: 1rem;
-            font-weight: bold;
             background-color: transparent;
             border: none;
             position: absolute;
@@ -130,7 +124,6 @@
 
             a {
                 color: $textPrimary;
-                font-weight: bold;
                 text-decoration: none;
             }
         }
@@ -148,7 +141,9 @@
             padding: 0.5rem 1.7rem;
             margin-top: 3rem;
             border: 0.1rem solid $textHighlight;
-            border-radius: 0.5rem;
+
+            @include border-radius(3px);
+
             display: inline-block;
             color: $textHighlight;
             text-transform: uppercase;
