@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 
 const capitalize = string => `${string[0].toUpperCase()}${string.slice(1)}`;
 const tabs = ['all', 'datasets', 'visualisations', 'dashboards'];

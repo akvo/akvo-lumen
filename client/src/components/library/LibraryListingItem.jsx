@@ -1,4 +1,5 @@
-import React, { PropTypes, Component } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import LoadingSpinner from '../common/LoadingSpinner';
 import ContextMenu from '../common/ContextMenu';
 import {

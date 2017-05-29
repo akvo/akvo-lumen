@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 
 /* This component should render the same markup as the regular VisualisationViewer, but only loads
 /* the dependencies needed to render a given chart type, rather than loading all dependencies for

@@ -1,5 +1,6 @@
-import React, { Component, PropTypes } from 'react';
-import { Table, Column, Cell } from 'fixed-data-table';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import { Table, Column, Cell } from 'fixed-data-table-2';
 import moment from 'moment';
 import ColumnHeader from './ColumnHeader';
 import DataTableSidebar from './DataTableSidebar';
