@@ -27,7 +27,7 @@ export default function CollectionsList({
             onClick={onShowCreateCollectionModal}
             className="addCollection clickable button"
           >
-            <i className="fa fa-plus-square-o" aria-hidden="true"></i>
+            <i className="fa fa-plus-square-o" aria-hidden="true" />
           </button>
         </h3>
       </div>

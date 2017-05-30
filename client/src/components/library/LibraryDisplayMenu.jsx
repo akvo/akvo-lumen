@@ -27,13 +27,13 @@ export default function LibraryDisplayMenu(props) {
           className="clickable displayGrid control"
           onClick={() => onChangeDisplayMode('grid')}
         >
-            <i className="fa fa-th-large" aria-hidden="true"></i>
+          <i className="fa fa-th-large" aria-hidden="true" />
         </div>
         <div
           className="clickable displayList control"
           onClick={() => onChangeDisplayMode('list')}
         >
-          <i className="fa fa-th-list" aria-hidden="true"></i>
+          <i className="fa fa-th-list" aria-hidden="true" />
         </div>
       </div>
     </div>
