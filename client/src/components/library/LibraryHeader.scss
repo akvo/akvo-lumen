@@ -23,6 +23,7 @@
     .rowSecondary {
         height: 3.5rem;
         border-bottom: 1px solid $blueGrey;
+        background: rgba($blueGrey, 0.05);
     }
 
     .LocationIndicator {
@@ -168,6 +169,7 @@
                     border-bottom: 1px solid white;
                     margin-top: 1px;
                     position: relative;
+                    background: white;
                 }
             }
         }
