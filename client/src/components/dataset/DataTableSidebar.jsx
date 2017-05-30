@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import ChangeDataType from './sidebars/ChangeDataType';
 import Filter from './sidebars/Filter';
 import TransformationLog from './sidebars/TransformationLog';

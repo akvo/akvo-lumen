@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import SelectMenu from '../../common/SelectMenu';
 import SelectInput from './SelectInput';
 import { getPointColorValues, getPointColorMappingSortFunc } from '../../../utilities/chart';
