@@ -112,6 +112,7 @@
             display: inline-block;
             position: relative;
             padding-right: 2.5rem;
+            color: rgba(255, 255, 255, 0.25);
         }
 
         .addCollection {
@@ -139,6 +140,7 @@
 
                 a {
                     text-decoration: none;
+                    color: $textSecondary;
                 }
             }
         }
