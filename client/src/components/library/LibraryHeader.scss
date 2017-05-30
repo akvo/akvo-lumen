@@ -40,7 +40,6 @@
     .LibraryCreateButton {
         width: 7rem;
         margin-right: 1.5rem;
-        height: 3.5rem;
         position: relative;
 
         .SelectMenu {
@@ -187,7 +186,7 @@
     .LibraryDisplayMenu {
         width: 36%;
         position: relative;
-        padding-top: 10px;
+        padding-top: 13px;
         height: 100%;
 
         @media (max-width: 1200px) {
@@ -257,18 +256,21 @@
             height: 2.5rem;
             position: relative;
             vertical-align: top;
+            text-align: right;
 
             .control {
                 display: inline-block;
-                color: black;
+                color: $strongBlue;
                 width: 2rem;
                 height: 2rem;
-                font-size: 1rem;
+                font-size: 1.5rem;
             }
 
             .displayGrid {}
 
-            .displayList {}
+            .displayList {
+                margin-left: 1rem;
+            }
         }
     }
 }
