@@ -22,7 +22,7 @@
 
     .rowSecondary {
         height: 3.5rem;
-        border-bottom: 1px solid $strongBlue;
+        border-bottom: 1px solid $blueGrey;
     }
 
     .LocationIndicator {
@@ -46,7 +46,7 @@
             height: 100%;
 
             .Select-control {
-                @include button($mintGreen);
+                @include button($blueGrey);
 
                 text-align: left;
 
@@ -162,16 +162,16 @@
                 }
 
                 &.selected {
-                    color: $strongBlue;
-                    border: 1px solid $strongBlue;
+                    color: $mintGreen;
+                    border: 1px solid $blueGrey;
+                    border-top: 2px solid $mintGreen;
                     border-bottom: 1px solid white;
                     margin-top: 1px;
                     position: relative;
-
-                    @include border-radius(3px 3px 0 0);
                 }
             }
         }
+
         @media (max-width: 1200px) {
             width: 50%;
 
