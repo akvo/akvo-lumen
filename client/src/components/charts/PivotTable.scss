@@ -43,7 +43,6 @@
 
     .uniqueColumnValue {
         span {
-            font-size: 0.9rem;
             display: block;
             line-height: 1.4em;
         }
@@ -51,7 +50,6 @@
 
     .uniqueRowValue {
         span {
-            font-size: 0.9rem;
             display: block;
             line-height: 1.4em;
         }
@@ -66,7 +64,6 @@
         background-color: $white;
         line-height: 2em;
         border: none;
-        font-weight: bold;
     }
 
     &.hasTotals {

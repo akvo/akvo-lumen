@@ -19,7 +19,6 @@
 
         input {
             padding: 0.5rem;
-            font-size: 1rem;
         }
     }
 
@@ -32,10 +31,10 @@
         }
 
         button {
-            font-size: 1rem;
             padding: 0.25rem 0.5rem;
             border: 0.1rem solid black;
-            border-radius: 0.4rem;
+
+            @include border-radius(3px);
         }
     }
 
@@ -73,10 +72,7 @@
         padding: 0 0.5rem 0.5rem 0.5rem;
     }
 
-    h4 {
-        font-weight: bold;
-        font-size: 1.25rem;
-    }
+    h4 {}
 
     .visualisationType, .lastModified {
         color: $midGrey;
@@ -84,7 +80,6 @@
 
     .isOnDashboardIndicator {
         padding: 0.5rem;
-        font-size: 1.25rem;
         position: absolute;
         top: 0;
         right: 0;

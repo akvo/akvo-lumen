@@ -23,8 +23,6 @@
     }
 
     .entityTitle {
-        font-size: 1.1rem;
-
         &.default {
             font-style: italic;
             color: $darkGrey;
@@ -32,7 +30,6 @@
     }
 
     .entityTitleInput {
-        font-size: 1.1rem;
         font-style: italic;
         width: 100%;
         padding: 0;
@@ -48,13 +45,14 @@
 
     .saveStatus {
         color: $blueGrey;
-        font-size: 0.7rem;
         margin-top: 0.3rem;
     }
 
     .overflow {
         border: 0.1rem solid $lightBlueGrey;
-        border-radius: 0.4rem;
+
+        @include border-radius(3px);
+
         padding: 0.5rem;
         margin: 0.25rem 0.5rem;
     }

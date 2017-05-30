@@ -1,7 +1,6 @@
 @import "../styles/modules/importAll";
 
 .UsersContainer {
-    -webkit-flex: 1;
     flex: 1;
     overflow: auto;
 
@@ -11,8 +10,6 @@
 
         h1 {
             color: $strongBlue;
-            font-size: 1.5rem;
-            font-weight: bold;
             line-height: 2.5rem;
         }
 
@@ -29,13 +26,10 @@
                 & th {
                     color: $midGrey;
                     text-align: left;
-                    font-size: 1.1rem;
-                    font-weight: bold;
                 }
 
                 & td {
                     color: $black;
-                    font-weight: bold;
                 }
             }
 
@@ -46,8 +40,7 @@
     }
 
     .UserActionSelector {
-        -webkit-appearance: none;
-        -moz-appearance: none;
+        appearance: none;
         background: $white;
         border: 0;
         text-indent: 1px;

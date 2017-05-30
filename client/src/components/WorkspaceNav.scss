@@ -10,7 +10,6 @@
 
     .header {
         height: 9rem;
-        border-bottom: 0.1rem solid $bg2;
 
         .rowPrimary {
             width: 100%;
@@ -52,10 +51,10 @@
 
     .OrganizationMenu {
         padding: 1.5rem 1rem 1rem 1rem;
+        background: rgba($lightBlueGrey, 0.05);
 
         .name {
             padding-bottom: 0.25rem;
-            font-weight: bold;
             color: $textPrimary;
         }
 
@@ -65,28 +64,35 @@
     }
 
     .links {
-        padding: 1rem;
+        margin-top: 2.5rem;
+
+        ul {
+            border-top: 1px solid rgba(black, 0.9);
+            border-bottom: 1px solid rgba($lightBlueGrey, 0.05);
+
+            li {
+                padding: 10px 5px 10px 1rem;
+                margin-bottom: 0px;
+                border-bottom: 1px solid rgba(black, 0.9);
+                border-top: 1px solid rgba($lightBlueGrey, 0.05);
+            }
+        }
     }
 
     .subtitle {
         color: $textSecondary;
-        font-size: 1.25rem;
         text-decoration: none;
         text-transform: capitalize;
 
         &.selected {
-            color: $textHighlight;
-        }
-    }
-
-    .NavLink, .CollectionsList {
-        padding: 2rem 0;
-    }
-
-    .NavLink {
-        .selected {
             font-weight: bold;
         }
+    }
+
+    .NavLink, .CollectionsList {}
+
+    .NavLink {
+        .selected {}
 
         border-bottom: 0.1rem solid rgba(0, 0, 0, 0.1);
 
@@ -103,7 +109,6 @@
 
     .CollectionsList {
         h3 {
-            padding-bottom: 1rem;
             display: inline-block;
             position: relative;
             padding-right: 2.5rem;
@@ -111,27 +116,30 @@
 
         .addCollection {
             color: $textSecondary;
-            font-size: 2.5rem;
             line-height: 1rem;
-            font-weight: bold;
+            font-size: 1.4rem;
             background-color: transparent;
             border: none;
             position: absolute;
             right: 0;
         }
 
-        li {
-            padding: 0.5rem 0;
-            margin-left: 1.25rem;
+        ul {
+            border: none;
 
-            &:first-child {
-                padding-top: 0;
-            }
+            li {
+                padding: 2px 5px 2px 5px;
+                margin: 1px 0;
+                background: none;
+                border: none;
 
-            a {
-                color: $textPrimary;
-                font-weight: bold;
-                text-decoration: none;
+                &:first-child {
+                    margin-top: 5px;
+                }
+
+                a {
+                    text-decoration: none;
+                }
             }
         }
 
@@ -148,7 +156,9 @@
             padding: 0.5rem 1.7rem;
             margin-top: 3rem;
             border: 0.1rem solid $textHighlight;
-            border-radius: 0.5rem;
+
+            @include border-radius(3px);
+
             display: inline-block;
             color: $textHighlight;
             text-transform: uppercase;

@@ -6,9 +6,7 @@ html, body, #root {
 
 .DashboardViewer {
     h1 {
-        font-size: 2rem;
         line-height: 1.4em;
-        font-weight: bold;
         padding: 0.5em;
         width: 95%;
         max-width: 50rem;
@@ -16,12 +14,12 @@ html, body, #root {
         display: block;
         text-align: center;
 
-        @media (max-width: 1024px) {
+        @mixin responsive($medium-max-screens) {
             font-size: 1.6rem;
         }
 
-        @media (max-width: 720px) {
-            font-size: 1.4em;
+        @mixin responsive($small-max-screens) {
+            font-size: 1.4rem;
         }
     }
 }

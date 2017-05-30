@@ -3,7 +3,8 @@
 .UniqueValueMenu {
     padding: 0.5rem;
     background-color: $lightGrey;
-    border-radius: 0.4rem;
+
+    @include border-radius(3px);
 
     .header {
         position: relative;
@@ -15,8 +16,6 @@
         .collapseToggle {
             position: absolute;
             right: 0;
-            font-size: 1.5rem;
-            font-weight: bold;
             line-height: 1.5rem;
             width: 1.5rem;
             text-align: center;

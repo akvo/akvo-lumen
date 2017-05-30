@@ -33,9 +33,7 @@
             max-width: 60%;
         }
 
-        .linkFileInput, .linkFileLabel {
-            font-size: 1.25rem;
-        }
+        .linkFileInput, .linkFileLabel {}
 
         div {
             padding: 1rem;
@@ -47,9 +45,7 @@
     }
 
     .DataFileFileSelection {
-        .dataFileUploadMessage, .dataFileUploadInput {
-            font-size: 1rem;
-        }
+        .dataFileUploadMessage, .dataFileUploadInput {}
 
         .dataFileUploadMessage {
             line-height: 2rem;
@@ -75,7 +71,6 @@
         }
 
         .errorText {
-            font-weight: bold;
             color: $errorRed;
         }
     }

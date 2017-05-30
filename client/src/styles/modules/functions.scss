@@ -1,0 +1,83 @@
+@mixin border-radius($property) {
+    border-radius: $property;
+}
+
+@mixin noWrapTxt {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@mixin opacity($opacity) {
+    opacity: $opacity;
+
+    $opacity-ie: $opacity * 100;
+
+    filter: alpha(opacity = $opacity-ie);
+
+    //IE8
+}
+
+$width-small: 768px;
+$width-medium: 992px;
+$width-large: 1200px;
+
+@mixin responsive($width) {
+    @if $width == wide-screens {
+        @media only screen and (min-width: $width-large) {
+            @content;
+        }
+    }
+    @else if $width == medium-screens {
+        @media only screen and (min-width: $width-medium) {
+            @content;
+        }
+    }
+    @else if $width == small-screens {
+        @media only screen and (min-width: $width-small) {
+            @content;
+        }
+    }
+    @else if $width == wide-max-screens {
+        @media only screen and (max-width: $width-large) {
+            @content;
+        }
+    }
+    @else if $width == medium-max-screens {
+        @media only screen and (max-width: $width-medium) {
+            @content;
+        }
+    }
+    @else if $width == small-max-screens {
+        @media only screen and (max-width: $width-small) {
+            @content;
+        }
+    }
+}
+
+@mixin placeholder-color($color) {
+    &.placeholder {
+        color: $color;
+    }
+
+    &:-moz-placeholder {
+        color: $color;
+    }
+
+    &::-webkit-input-placeholder {
+        color: $color;
+    }
+
+    &:-ms-input-placeholder {
+        color: $color;
+    }
+
+    &::-moz-placeholder {
+        color: $color;
+    }
+
+    &::-moz-placeholder {
+        /* Firefox 19+ */
+        color: $color;
+    }
+}

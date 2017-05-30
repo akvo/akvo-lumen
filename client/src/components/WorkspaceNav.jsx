@@ -108,27 +108,35 @@ class WorkspaceNav extends Component {
           <OrganizationMenu profile={this.props.profile} />
         </div>
         <div className="links">
-          <NavLink
-            to="/library"
-            className="library subtitle"
-            isSelected={activeSubtitle === 'library'}
-          >
-            Library
-          </NavLink>
-          <CollectionsList
-            collections={this.props.collections}
-            onShowCreateCollectionModal={this.handleShowCreateCollectionModal}
-            onDeleteCollection={this.handleShowDeleteCollectionModal}
-            isSelected={activeSubtitle === 'collections'}
-            pathname={this.props.location.pathname}
-          />
-          <NavLink
-            to="/activity"
-            className="activity subtitle disabled"
-            isSelected={activeSubtitle === 'activity'}
-          >
-            Activity
-          </NavLink>
+          <ul>
+            <li>
+              <NavLink
+                to="/library"
+                className="library subtitle"
+                isSelected={activeSubtitle === 'library'}
+              >
+                Library
+              </NavLink>
+            </li>
+            <li>
+              <CollectionsList
+                collections={this.props.collections}
+                onShowCreateCollectionModal={this.handleShowCreateCollectionModal}
+                onDeleteCollection={this.handleShowDeleteCollectionModal}
+                isSelected={activeSubtitle === 'collections'}
+                pathname={this.props.location.pathname}
+              />
+            </li>
+            <li>
+              <NavLink
+                to="/activity"
+                className="activity subtitle disabled"
+                isSelected={activeSubtitle === 'activity'}
+              >
+                Activity
+              </NavLink>
+            </li>
+          </ul>
         </div>
         <NavWorkspaceSwitch profile={this.props.profile} />
       </nav>
