@@ -18,18 +18,19 @@
     .rowPrimary {
         padding-top: 0.5rem;
         height: 5rem;
+        background: rgba($blueGrey, 0.1);
     }
 
     .rowSecondary {
         height: 3.5rem;
-        border-bottom: 1px solid $strongBlue;
+        border-bottom: 1px solid $blueGrey;
+        background: rgba($blueGrey, 0.1);
     }
 
     .LocationIndicator {
         color: $strongBlue;
         width: 55%;
         height: 100%;
-        line-height: 2rem;
         overflow: hidden;
 
         .contents {
@@ -46,7 +47,7 @@
             height: 100%;
 
             .Select-control {
-                @include button($mintGreen);
+                @include button($mintGreen, black);
 
                 text-align: left;
 
@@ -57,11 +58,13 @@
 
             .Select-placeholder {
                 color: $white;
+                margin-top: -2px;
             }
 
             .Select-arrow {
                 border-color: $white transparent transparent;
-                border-width: 12px 8px 6px;
+                border-width: 10px 6px 6px;
+                margin-top: -2px;
             }
 
             .Select.is-open {
@@ -134,7 +137,7 @@
         }
 
         .submit {
-            @include btnOutline($mintGreen);
+            @include btnOutline($mintGreen, $mintGreen);
 
             border-left: none;
             max-width: 6rem;
@@ -162,16 +165,17 @@
                 }
 
                 &.selected {
-                    color: $strongBlue;
-                    border: 1px solid $strongBlue;
+                    color: $mintGreen;
+                    border: 1px solid $blueGrey;
+                    border-top: 2px solid $mintGreen;
                     border-bottom: 1px solid white;
                     margin-top: 1px;
                     position: relative;
-
-                    @include border-radius(3px 3px 0 0);
+                    background: white;
                 }
             }
         }
+
         @media (max-width: 1200px) {
             width: 50%;
 
@@ -193,7 +197,7 @@
         }
 
         .sortOrderLabel {
-            color: $blueGrey;
+            color: rgba(black, 0.3);
             line-height: 2.5rem;
             width: 4rem;
             display: inline-block;
@@ -215,7 +219,6 @@
                 text-align: right;
                 padding-right: 1.75rem;
                 padding-left: 0;
-                line-height: 2.5rem;
             }
 
             .Select-arrow-zone {

@@ -52,15 +52,13 @@
     .OrganizationMenu {
         padding: 1.5rem 1rem 1rem 1rem;
         background: rgba($lightBlueGrey, 0.05);
+        color: rgba(white, 0.3);
 
         .name {
             padding-bottom: 0.25rem;
-            color: $textPrimary;
         }
 
-        .organization {
-            color: $textSecondary;
-        }
+        .organization {}
     }
 
     .links {
@@ -75,6 +73,8 @@
                 margin-bottom: 0px;
                 border-bottom: 1px solid rgba(black, 0.9);
                 border-top: 1px solid rgba($lightBlueGrey, 0.05);
+
+                a {}
             }
         }
     }
@@ -86,6 +86,7 @@
 
         &.selected {
             font-weight: bold;
+            color: $mintGreen;
         }
     }
 
@@ -112,6 +113,7 @@
             display: inline-block;
             position: relative;
             padding-right: 2.5rem;
+            color: rgba(255, 255, 255, 0.25);
         }
 
         .addCollection {
@@ -139,6 +141,7 @@
 
                 a {
                     text-decoration: none;
+                    color: $textSecondary;
                 }
             }
         }
@@ -152,17 +155,7 @@
         padding: 1rem;
         text-align: center;
 
-        a {
-            padding: 0.5rem 1.7rem;
-            margin-top: 3rem;
-            border: 0.1rem solid $textHighlight;
-
-            @include border-radius(3px);
-
-            display: inline-block;
-            color: $textHighlight;
-            text-transform: uppercase;
-        }
+        a {}
     }
 
     &.collapsed {
