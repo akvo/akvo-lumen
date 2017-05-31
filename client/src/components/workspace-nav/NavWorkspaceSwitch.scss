@@ -2,6 +2,6 @@
 
 .NavWorkspaceSwitch {
     a {
-        @include btnOutline($blueGrey);
+        @include button($mintGreen, black);
     }
 }

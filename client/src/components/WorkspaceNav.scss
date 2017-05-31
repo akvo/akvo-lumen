@@ -52,15 +52,13 @@
     .OrganizationMenu {
         padding: 1.5rem 1rem 1rem 1rem;
         background: rgba($lightBlueGrey, 0.05);
+        color: rgba(white, 0.3);
 
         .name {
             padding-bottom: 0.25rem;
-            color: $textPrimary;
         }
 
-        .organization {
-            color: $textSecondary;
-        }
+        .organization {}
     }
 
     .links {
@@ -75,6 +73,8 @@
                 margin-bottom: 0px;
                 border-bottom: 1px solid rgba(black, 0.9);
                 border-top: 1px solid rgba($lightBlueGrey, 0.05);
+
+                a {}
             }
         }
     }
