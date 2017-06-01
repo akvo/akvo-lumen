@@ -2,8 +2,8 @@
 
 .ContextMenu {
   position: absolute;
-  background-color: white;
-  border: 1px solid black;
+  background-color: $white;
+  box-shadow:0 0 6px rgba($black,0.5) ;
   z-index: 99;
   line-height: 1.4rem;
   /* Default positioning... */
@@ -24,35 +24,35 @@
     left: 0px;
     border-left: 10px solid transparent;
     border-right: 10px solid transparent;
-    border-bottom: 10px solid black;
+    border-bottom: 10px solid $black;
   }
   .arrow.arrow-topRight {
     top: -10px;
     right: 0px;
     border-left: 10px solid transparent;
     border-right: 10px solid transparent;
-    border-bottom: 10px solid black;
+    border-bottom: 10px solid $black;
   }
   .arrow.arrow-bottomLeft {
     bottom: 10px;
     left: 0px;
     border-left: 10px solid transparent;
     border-right: 10px solid transparent;
-    border-top: 10px solid black;
+    border-top: 10px solid $black;
   }
   .arrow.arrow-bottomRight {
     bottom: -10px;
     right: 0px;
     border-left: 10px solid transparent;
     border-right: 10px solid transparent;
-    border-top: 10px solid black;
+    border-top: 10px solid $black;
   }
   .contextMenuItem {
-    background-color: white;
+    background-color: $white;
     padding: 0.75rem 1rem;
     width: 100%;
     &:hover {
-      background-color: $lightGrey;
+      background-color: rgba($textSecondary, 0.2);
     }
     &.selected {
       &:after {

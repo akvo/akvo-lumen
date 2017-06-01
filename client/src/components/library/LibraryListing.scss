@@ -4,6 +4,11 @@
     .LibraryListingGroup {
         margin: 1em auto;
         padding: 0.5rem 1.5rem;
+
+        h3 {
+            color: $textSecondary;
+            margin-top: 1rem;
+        }
     }
 
     .LibraryListingItem {
@@ -65,8 +70,6 @@
             margin-left: 1rem;
             margin-top: 0.25rem;
             display: inline-block;
-            background-size: cover;
-            background-repeat: no-repeat;
             color: $white;
 
             &:before {
@@ -89,7 +92,7 @@
         &.dashboard {
             .entityIcon {
                 &:before {
-                    content: "\f0e4";
+                    content: "\f1ea";
                 }
             }
         }
@@ -130,7 +133,8 @@
 
             .showControls {
                 transform: rotate(90deg);
-                color: $akvoPurple;
+                font-size: 2.5rem;
+                font-weight: bold;
             }
         }
 
