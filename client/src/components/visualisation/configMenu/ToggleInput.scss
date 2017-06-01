@@ -19,9 +19,7 @@
         height: 1.6rem;
         width: 3rem;
         background-color: $midGrey;
-
-        @include border-radius(3px);
-
+        border-radius: 3px;
         transition: background-color 0.25s ease-out;
 
         &.active {
@@ -32,14 +30,13 @@
     .indicator {
         height: 1.2rem;
         width: 1.2rem;
-
-        @include border-radius(99rem);
-
+        border-radius: 0.6rem;
         background-color: white;
         display: block;
         position: absolute;
-        top: 0.2rem;
         left: 0.2rem;
+        top: 0.2rem;
+        top: calc(50% - 0.6rem);
         transition: left 0.1s ease-out;
     }
 

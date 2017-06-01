@@ -33,7 +33,7 @@ export default class EntityTypeHeader extends Component {
           {actionButtons &&
             actionButtons.map((button, index) =>
               <button
-                className="overflow clickable"
+                className={`overflow clickable ${button.customClass ? button.customClass : ''}`}
                 onClick={button.onClick}
                 key={index}
               >

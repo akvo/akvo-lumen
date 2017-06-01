@@ -146,6 +146,13 @@
                 input {
                     margin-right: 0.5rem;
                 }
+
+                &.notImplemented {
+                    background-color: rgba(black, 0.25);
+                    input {
+                        cursor: not-allowed;
+                    }
+                }
             }
         }
 

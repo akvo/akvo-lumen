@@ -130,7 +130,7 @@ class WorkspaceNav extends Component {
             <li>
               <NavLink
                 to="/activity"
-                className="activity subtitle disabled"
+                className="activity subtitle notImplemented"
                 isSelected={activeSubtitle === 'activity'}
               >
                 Activity

@@ -7,6 +7,7 @@ export default class DatasetHeader extends Component {
     const settings = {
       buttonText: 'Settings',
       onClick: this.props.onShowDatasetSettings,
+      customClass: 'notImplemented',
     };
 
     return [settings];

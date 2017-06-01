@@ -13,9 +13,11 @@ export default class DashboardHeader extends Component {
     const { onDashboardAction } = this.props;
     const user = {
       buttonText: 'User',
+      customClass: 'notImplemented',
     };
     const download = {
       buttonText: 'Download',
+      customClass: 'notImplemented',
     };
     const share = {
       buttonText: 'Share',
@@ -23,6 +25,7 @@ export default class DashboardHeader extends Component {
     };
     const overflow = {
       buttonText: 'Overflow',
+      customClass: 'notImplemented',
     };
 
     return ([
