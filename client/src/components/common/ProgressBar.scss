@@ -31,7 +31,7 @@
 
         @include border-radius(3px);
 
-        border: 0.1rem solid $mintGreen;
+        border: 0.1rem solid $lumenGreen;
         overflow: hidden;
         transition: border-color 0.5s;
 
@@ -41,7 +41,7 @@
     }
 
     .progressIndicator {
-        background-color: $mintGreen;
+        background-color: $lumenGreen;
         display: block;
         height: 1.25rem;
         transition: width 0.5s;

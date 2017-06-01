@@ -6,7 +6,8 @@
     .row {
         width: 100%;
         position: relative;
-        padding: 0 1rem;
+        padding: 0;
+        background: rgba($lightGrey, 0.5);
 
         > * {
             vertical-align: top;
@@ -18,17 +19,15 @@
     .rowPrimary {
         padding-top: 0.5rem;
         height: 5rem;
-        background: rgba($blueGrey, 0.1);
     }
 
     .rowSecondary {
         height: 3.5rem;
-        border-bottom: 1px solid $blueGrey;
-        background: rgba($blueGrey, 0.1);
+        border-bottom: 1px solid rgba($lightGrey, 1);
     }
 
     .LocationIndicator {
-        color: $strongBlue;
+        color: $lumenGreen;
         width: 55%;
         height: 100%;
         overflow: hidden;
@@ -47,7 +46,7 @@
             height: 100%;
 
             .Select-control {
-                @include button($mintGreen, black);
+                @include button($anchorLink, $white);
 
                 text-align: left;
 
@@ -69,16 +68,16 @@
 
             .Select.is-open {
                 .Select-control {
-                    background-color: $lightGreen;
+                    background-color: $white;
                 }
 
                 .Select-placeholder {
-                    color: $mintGreen;
+                    color: $anchorLink;
                 }
 
                 .Select-arrow {
                     top: 0px;
-                    border-color: $mintGreen transparent transparent;
+                    border-color: $anchorLink transparent transparent;
                 }
             }
 
@@ -94,20 +93,20 @@
                 width: 12rem;
                 right: 0;
                 top: 115%;
-                border-color: $lightGreen;
+                border-color: $white;
                 box-shadow: 0rem 0rem 0.25rem rgba(0, 0, 0, 0.15) !important;
                 border-radius: 0;
             }
 
             .Select-option {
                 padding: 0.8rem;
-                color: $strongBlue;
+                color: $anchorLink;
                 box-sizing: border-box;
                 border: 0.1rem solid transparent;
 
                 &:hover {
-                    color: $mintGreen;
-                    border: 0.1rem solid $lightGreen;
+                    color: $anchorLink;
+                    border: 1px solid $anchorLink;
                     background-color: inherit;
                 }
             }
@@ -129,7 +128,7 @@
 
         .clear {
             position: absolute;
-            color: $blueGrey;
+            color: $black;
             line-height: 1.5rem;
             margin-left: -2rem;
             padding: 0.5rem;
@@ -137,7 +136,7 @@
         }
 
         .submit {
-            @include btnOutline($mintGreen, $mintGreen);
+            @include btnOutline($anchorLink, $anchorLink);
 
             border-left: none;
             max-width: 6rem;
@@ -157,7 +156,6 @@
                 display: inline-block;
                 padding: 0.75rem 1.5rem;
                 text-align: center;
-                color: $blueGrey;
                 transition: background-color 0.5s ease;
 
                 &:hover {
@@ -165,13 +163,14 @@
                 }
 
                 &.selected {
-                    color: $mintGreen;
-                    border: 1px solid $blueGrey;
-                    border-top: 2px solid $mintGreen;
+                    color: $lumenGreen;
+                    border: 1px solid rgba($lightGrey, 1);
+                    border-top: 2px solid $lumenGreen;
                     border-bottom: 1px solid white;
-                    margin-top: 1px;
+                    margin-top: 2px;
                     position: relative;
                     background: white;
+                    box-shadow: 0 -2px 5px rgba($black, 0.1);
                 }
             }
         }
@@ -206,16 +205,32 @@
         .SelectMenu {
             width: 8rem;
             margin-right: calc(100% - 18rem);
-            height: 2.5rem;
+            height: 2rem;
             display: inline-block;
             vertical-align: top;
+            margin-top: 3px;
 
             .Select-control {
                 border: 0;
+                background: transparent;
+                border: 1px solid $anchorLink;
+                border-radius: 3px;
+
+                .Select-multi-value-wrapper {
+                    .Select-value {
+                        top: -5px;
+                        margin-right: 5px;
+
+                        .Select-value-label {
+                            color: $anchorLink;
+                            font-size: 0.85rem;
+                        }
+                    }
+                }
             }
 
             .Select-placeholder {
-                color: $strongBlue;
+                color: $anchorLink;
                 text-align: right;
                 padding-right: 1.75rem;
                 padding-left: 0;
@@ -225,7 +240,7 @@
                 padding-left: 25px;
 
                 .Select-arrow {
-                    border-color: $strongBlue transparent transparent;
+                    border-color: $anchorLink transparent transparent;
                 }
             }
 
@@ -233,20 +248,20 @@
                 width: 10rem;
                 right: 0;
                 top: 115%;
-                border-color: $blueGrey;
+                border-color: $black;
                 box-shadow: 0rem 0rem 0.25rem rgba(0, 0, 0, 0.15) !important;
                 border-radius: 0;
             }
 
             .Select-option {
                 padding: 0.8rem;
-                color: $blueGrey;
+                color: $black;
                 box-sizing: border-box;
                 border: 0.1rem solid transparent;
 
                 &:hover {
-                    color: $strongBlue;
-                    border: 0.1rem solid $strongBlue;
+                    color: $akvoPurple;
+                    border: 0.1rem solid $akvoPurple;
                     background-color: inherit;
                 }
             }
@@ -262,10 +277,9 @@
 
             .control {
                 display: inline-block;
-                color: $strongBlue;
                 width: 2rem;
                 height: 2rem;
-                font-size: 1.5rem;
+                font-size: 1.7rem;
             }
 
             .displayGrid {}

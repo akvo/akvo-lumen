@@ -39,9 +39,9 @@
 
         button {
             padding: 0.5rem 1rem;
-            color: $mintGreen;
+            color: $lumenGreen;
             background-color: $white;
-            border: 0.1rem solid $mintGreen;
+            border: 0.1rem solid $lumenGreen;
             line-height: 1.4rem;
 
             @include border-radius(3px);
@@ -51,7 +51,7 @@
 
         button.save {
             margin-right: 0;
-            background-color: $mintGreen;
+            background-color: $lumenGreen;
             color: white;
             border: none;
         }

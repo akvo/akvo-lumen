@@ -1,11 +1,23 @@
-$white: white;
-$black: black;
-$strongBlue: rgb(43, 46, 113);
-$anchorLink: #218B91;
-$blueGrey: rgb(149, 150, 184);
+$white: rgb(255, 255, 255);
+$black: rgb(32, 32, 36);
+$textPrimary: lighten($black, 20%);
+$textSecondary: lighten($black, 60%);
+
+$lumenGreen: rgb(108, 164, 41);
+$complementary: complement($lumenGreen);
+$invert: invert($lumenGreen);
+
+$darkLime: rgb(66, 100, 25);
+$darkLime2: rgb(91, 138, 35);
+$lime2: rgb(116, 177, 44);
+$lightLime: rgb(158, 240, 60);
+
+$akvoPurple: rgb(43, 46, 113);
+$anchorLink: rgb(12, 66, 69);
+$anchorLinkLight: rgb(33, 139, 145);
+
 $lightBlueGrey: rgb(229, 230, 237);
 $lightGrey: rgb(241, 242, 242);
-$mintGreen: rgb(43, 182, 115);
 $lightGreen: rgb(223, 244, 234);
 $midGrey: rgb(109, 110, 113);
 $darkGrey: rgb(54, 55, 57);
@@ -13,23 +25,3 @@ $lightBrown: rgb(156, 133, 121);
 $errorRed: rgb(192, 57, 43);
 $lightErrorRed: rgba(192, 57, 43, 0.2);
 $warnYellow: rgb(243, 156, 18);
-
-$bg1: rgb(26, 29, 36);
-
-/* Medium blue */
-$bg2: rgb(32, 37, 45);
-
-/* Light blue */
-$bg3: rgb(22, 24, 26);
-
-/* Dark blue */
-
-$textPrimary: rgb(167, 169, 172);
-
-/* Light gray */
-$textSecondary: rgb(152, 154, 158);
-
-/* Slightly darker gray */
-$textHighlight: rgb(41, 166, 107);
-
-/* Mint green */

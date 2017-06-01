@@ -2,27 +2,33 @@
 
 .LibraryListing {
     .LibraryListingGroup {
-        margin: 1rem;
-        padding: 1rem;
-
-        h3 {
-            color: $midGrey;
-        }
+        margin: 1em auto;
+        padding: 0.5rem 1.5rem;
     }
 
     .LibraryListingItem {
         display: inline-flex;
         flex-direction: row;
-        margin: 1rem 2.5%;
+        margin: 1rem 0.25rem;
         position: relative;
         min-height: 5rem;
         padding: 0.5rem 0;
+        background-color: rgba($textSecondary, 0.3);
 
         /*overflow: hidden;*/
         transition: background-color 0.1s ease;
 
+        h3 {
+            color: $textSecondary;
+            margin-top: 1rem;
+        }
+
         &:hover {
-            background-color: $lightGreen;
+            background-color: rgba($textSecondary, 0.6);
+
+            h3 {
+                color: $black;
+            }
         }
 
         &.FAILED {
@@ -55,28 +61,56 @@
         .entityIcon {
             height: 4rem;
             width: 4rem;
-            margin-left: 1.5rem;
+            margin-left: 1rem;
             margin-top: 0.25rem;
             display: inline-block;
             background-size: cover;
             background-repeat: no-repeat;
+            color: $white;
         }
 
         &.visualisation {
             .entityIcon {
-                background-image: url("../../styles/img/icon-256-library-listing-visualisation.png");
+                position: relative;
+
+                &:before {
+                    content: "\f1fe";
+                    font-size: 3.5rem;
+                    font-family: FontAwesome;
+                    left: -5px;
+                    position: absolute;
+                    top: -6px;
+                }
             }
         }
 
         &.dashboard {
             .entityIcon {
-                background-image: url("../../styles/img/icon-256-library-listing-dashboard.png");
+                position: relative;
+
+                &:before {
+                    content: "\f0e4";
+                    font-size: 3.5rem;
+                    font-family: FontAwesome;
+                    left: -5px;
+                    position: absolute;
+                    top: -6px;
+                }
             }
         }
 
         &.dataset {
             .entityIcon {
-                background-image: url("../../styles/img/icon-256-library-listing-dataset.png");
+                position: relative;
+
+                &:before {
+                    content: "\f1c0";
+                    font-size: 3.5rem;
+                    font-family: FontAwesome;
+                    left: -5px;
+                    position: absolute;
+                    top: -6px;
+                }
             }
         }
 
@@ -89,12 +123,11 @@
 
         .VisualisationTypeLabel {
             p {
-                color: $midGrey;
+                color: $textPrimary;
             }
         }
 
         .entityName {
-            color: $strongBlue;
             text-transform: capitalize;
         }
 
@@ -109,7 +142,7 @@
 
             .showControls {
                 transform: rotate(90deg);
-                color: $strongBlue;
+                color: $akvoPurple;
             }
         }
 
@@ -136,7 +169,7 @@
 
     &.list {
         .LibraryListingItem {
-            width: 95%;
+            width: 100%;
 
             &:last-child {
                 margin-bottom: 0;

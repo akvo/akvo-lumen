@@ -30,7 +30,7 @@
 
         .copyButton {
             margin-top: 1rem;
-            background-color: $mintGreen;
+            background-color: $lumenGreen;
             text-align: center;
             width: 14rem;
             color: white;
@@ -41,8 +41,8 @@
             transition: background-color 0.5s ease, border 0.5s ease;
 
             &.copied {
-                color: $mintGreen;
-                border: 0.1rem solid $mintGreen;
+                color: $lumenGreen;
+                border: 0.1rem solid $lumenGreen;
                 background-color: white;
             }
         }

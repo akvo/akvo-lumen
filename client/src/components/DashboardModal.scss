@@ -63,7 +63,7 @@
     .positive {
         right: 0rem;
         color: $white;
-        background-color: $mintGreen;
+        background-color: $lumenGreen;
 
         &.dangerous {
             background-color: $errorRed;
@@ -88,7 +88,7 @@
             max-width: 12rem;
             padding-right: 1rem;
             text-align: right;
-            color: $blueGrey;
+            color: $black;
         }
 
         dd {
@@ -124,8 +124,8 @@
             transition-timing-function: ease;
 
             &.selected {
-                color: $mintGreen;
-                border-color: $mintGreen;
+                color: $lumenGreen;
+                border-color: $lumenGreen;
             }
         }
 
