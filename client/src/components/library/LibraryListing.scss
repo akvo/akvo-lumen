@@ -59,6 +59,7 @@
         }
 
         .entityIcon {
+            position: relative;
             height: 4rem;
             width: 4rem;
             margin-left: 1rem;
@@ -67,49 +68,36 @@
             background-size: cover;
             background-repeat: no-repeat;
             color: $white;
+
+            &:before {
+                font-size: 3.5rem;
+                font-family: FontAwesome;
+                left: -5px;
+                position: absolute;
+                top: -6px;
+            }
         }
 
         &.visualisation {
             .entityIcon {
-                position: relative;
-
                 &:before {
                     content: "\f1fe";
-                    font-size: 3.5rem;
-                    font-family: FontAwesome;
-                    left: -5px;
-                    position: absolute;
-                    top: -6px;
                 }
             }
         }
 
         &.dashboard {
             .entityIcon {
-                position: relative;
-
                 &:before {
                     content: "\f0e4";
-                    font-size: 3.5rem;
-                    font-family: FontAwesome;
-                    left: -5px;
-                    position: absolute;
-                    top: -6px;
                 }
             }
         }
 
         &.dataset {
             .entityIcon {
-                position: relative;
-
                 &:before {
                     content: "\f1c0";
-                    font-size: 3.5rem;
-                    font-family: FontAwesome;
-                    left: -5px;
-                    position: absolute;
-                    top: -6px;
                 }
             }
         }
