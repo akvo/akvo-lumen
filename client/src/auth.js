@@ -45,7 +45,7 @@ export function init() {
         realm: 'akvo',
         clientId: keycloakClient,
       });
-      keycloak.init({ onLoad: 'login-required' }).success((authenticated) => {
+      keycloak.init({ onLoad: 'login-required', checkLoginIframe: false }).success((authenticated) => {
         if (authenticated) {
           keycloak.loadUserProfile().success((profile) => {
             if (process.env.NODE_ENV === 'production') {
