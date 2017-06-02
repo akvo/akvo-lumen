@@ -5,11 +5,12 @@
 ### New and noteworthy
 
 * Improved typography
-* Added collections to help user group their library
+* Added collections support
+* Numeric values are now auto-detected when importing CSV data. Note that if there is any
+  data of mixed types, it will be imported as text.
 
 ### Bugfixes
 
-* CSV imports have been improved and made more reliable
 
 ## 0.9.0
 
