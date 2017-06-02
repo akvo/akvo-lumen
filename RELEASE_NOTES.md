@@ -1,5 +1,16 @@
 # Release Notes
 
+## 0.9.1
+
+### New and noteworthy
+
+* Improved typography
+* Added collections to help user group their library
+
+### Bugfixes
+
+* CSV imports have been improved and made more reliable
+
 ## 0.9.0
 
 ### New and noteworthy
