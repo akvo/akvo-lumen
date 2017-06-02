@@ -5,10 +5,12 @@ const supportedFormats = [{
   kind: 'DATA_FILE',
   icon: '/assets/data-file.png',
   label: 'Data file',
+  disabled: false,
 }, {
   kind: 'LINK',
   icon: '/assets/link.png',
   label: 'Link',
+  disabled: false,
 }, {
   kind: 'DROPBOX',
   icon: '/assets/dropbox.png',
@@ -64,7 +66,7 @@ const defaultDataSources = {
 export default function SourceSelection({ dataSourceKind, onChangeDataSource }) {
   const sources = supportedFormats.map(source => (
     <div
-      className={`sourceOptionContainer ${source.kind} ${source.disabled ? 'disabled' : ''}`}
+      className={`sourceOptionContainer ${source.kind} ${source.disabled ? 'notImplemented' : ''}`}
       key={source.kind}
     >
       <input

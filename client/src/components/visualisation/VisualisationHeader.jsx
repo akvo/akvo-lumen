@@ -13,9 +13,11 @@ export default class VisualisationHeader extends Component {
     const { onVisualisationAction } = this.props;
     const user = {
       buttonText: 'User',
+      customClass: 'notImplemented',
     };
     const download = {
       buttonText: 'Download',
+      customClass: 'notImplemented',
     };
     const share = {
       buttonText: 'Share',
@@ -23,6 +25,7 @@ export default class VisualisationHeader extends Component {
     };
     const overflow = {
       buttonText: 'Overflow',
+      customClass: 'notImplemented',
     };
 
     return ([

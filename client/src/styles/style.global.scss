@@ -95,3 +95,9 @@ code {
 .loadingIndicator {
     padding: 6rem 1rem;
 }
+
+/* Features that have not been implemented yet */
+.notImplemented {
+    cursor: not-allowed;
+    filter: grayscale(100%);
+}

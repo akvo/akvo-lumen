@@ -43,17 +43,21 @@ function LibraryListingItemContextMenu({ onClick, collections = {}, currentColle
         {
           label: 'Duplicate',
           value: 'duplicate',
+          customClass: 'notImplemented',
         }, {
           label: 'Set permissions',
           value: 'set-permissions',
+          customClass: 'notImplemented',
         }, {
           label: 'Add to dashboard',
           value: 'add-to-dashboard',
+          customClass: 'notImplemented',
         },
         getCollectionContextMenuItem(collections, currentCollection),
         {
           label: 'View details',
           value: 'view-details',
+          customClass: 'notImplemented',
         }, {
           label: 'Delete',
           value: 'delete',
