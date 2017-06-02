@@ -148,7 +148,8 @@
                 }
 
                 &.notImplemented {
-                    background-color: rgba(black, 0.25);
+                    background-color: rgba($black, 0.25);
+
                     input {
                         cursor: not-allowed;
                     }
