@@ -12,7 +12,6 @@ import WorkspaceNav from '../components/WorkspaceNav';
 import AdminNav from '../components/AdminNav';
 
 export default function App({ history, location }) {
-  debugger;
   return (
     <Router history={history}>
       <Route path="/" component={Main}>
