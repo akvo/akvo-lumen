@@ -74,7 +74,6 @@ class Resources extends Component {
     const currentTierLabel = this.state.plan.tier;
     const tiers = this.state.tiers;
     const resources = this.state.resources;
-    const location = this.state.location;
     let currentTier = null;
 
     if (tiers !== undefined && currentTierLabel !== undefined) {
