@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import SelectInput from './SelectInput';
 import LabelInput from './LabelInput';
 import Subtitle from './Subtitle';
@@ -6,7 +7,7 @@ import UniqueValueMenu from './UniqueValueMenu';
 import ToggleInput from './ToggleInput';
 import { canShowPivotTotals } from '../../../utilities/chart';
 
-require('../../../styles/PivotTableConfigMenu.scss');
+require('./PivotTableConfigMenu.scss');
 
 // For now, we only support a subset of the regular aggregation options
 const aggregationOptions = [

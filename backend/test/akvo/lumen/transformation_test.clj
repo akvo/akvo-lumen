@@ -129,6 +129,8 @@
 
 (deftest ^:functional test-undo
   (let [dataset-id (import-file "GDP.csv" {:dataset-name "GDP Undo Test"})
+        {previous-table-name :table-name} (latest-dataset-version-by-dataset-id test-conn
+                                                                                {:dataset-id dataset-id})
         schedule (partial tf/schedule test-conn *transformation-engine* dataset-id)]
     (is (= 200 (:status (schedule {:type :undo}))))
     (let [{:keys [status body]} (do (schedule {:type :transformation
@@ -143,6 +145,7 @@
                                                                 "onError" "default-value"}})
                                     (schedule {:type :undo}))]
       (is (= 200 status))
+      (is (not (:exists (table-exists test-conn {:table-name previous-table-name}))))
       (is (= (:columns (dataset-version-by-dataset-id test-conn
                                                       {:dataset-id dataset-id :version 2}))
              (:columns (latest-dataset-version-by-dataset-id test-conn

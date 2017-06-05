@@ -1,0 +1,50 @@
+@import "../../styles/modules/importAll";
+
+.ShareEntity {
+    position: relative;
+    min-height: 100%;
+
+    .contents {
+        padding-top: 4rem;
+
+        label {
+            display: block;
+            color: $midGrey;
+            padding: 0.25rem 0;
+        }
+
+        .shareUrl {
+            margin-top: 0.25rem;
+            padding: 0.75rem 0.25rem;
+            border: 0.1rem solid $lightGrey;
+            max-width: 100%;
+
+            @include border-radius(3px);
+
+            a {
+                color: inherit;
+                text-decoration: none;
+                word-wrap: break-word;
+            }
+        }
+
+        .copyButton {
+            margin-top: 1rem;
+            background-color: $mintGreen;
+            text-align: center;
+            width: 14rem;
+            color: white;
+
+            @include border-radius(3px);
+
+            padding: 0.5rem 0;
+            transition: background-color 0.5s ease, border 0.5s ease;
+
+            &.copied {
+                color: $mintGreen;
+                border: 0.1rem solid $mintGreen;
+                background-color: white;
+            }
+        }
+    }
+}

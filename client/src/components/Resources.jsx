@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import * as api from '../api';
 
 function resourceRuleDescription(resourceKey) {
@@ -73,6 +74,7 @@ class Resources extends Component {
     const currentTierLabel = this.state.plan.tier;
     const tiers = this.state.tiers;
     const resources = this.state.resources;
+    const location = this.state.location;
     let currentTier = null;
 
     if (tiers !== undefined && currentTierLabel !== undefined) {

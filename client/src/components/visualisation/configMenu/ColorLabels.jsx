@@ -1,9 +1,10 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { GithubPicker } from 'react-color';
 import defaultColors from '../../../utilities/defaultColors';
 import { replaceLabelIfValueEmpty } from '../../../utilities/chart';
 
-require('../../../styles/ColorLabels.scss');
+require('./ColorLabels.scss');
 
 export default function ColorLabels({ pointColorMapping, onChangeColor }) {
   return (

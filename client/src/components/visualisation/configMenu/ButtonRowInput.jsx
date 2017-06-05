@@ -1,6 +1,7 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 
-require('../../../styles/ButtonRowInput.scss');
+require('./ButtonRowInput.scss');
 
 export default function ButtonRowInput(props) {
   const { label, options, selected, disabled } = props;

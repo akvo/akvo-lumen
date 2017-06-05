@@ -173,6 +173,7 @@
 
 (defn- apply-undo [completion-promise tenant-conn job-id dataset-id current-dataset-version]
   (let [imported-table-name (:imported-table-name current-dataset-version)
+        previous-table-name (:table-name current-dataset-version)
         initial-columns (vec (:columns (dataset-version-by-dataset-id tenant-conn
                                                                       {:dataset-id dataset-id
                                                                        :version 1})))
@@ -200,6 +201,7 @@
                                                    (:transformations current-dataset-version)))
                                 :columns columns})
           (update-job-success-execution tenant-conn {:id job-id :exec-log full-execution-log})
+          (drop-table tenant-conn {:table-name previous-table-name})
           (deliver-promise-success completion-promise dataset-id new-dataset-version-id job-id))
         (let [{:keys [success? message columns execution-log]}
               (apply-operation tenant-conn table-name columns (first transformations))]

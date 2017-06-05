@@ -1,0 +1,75 @@
+$bodyFont: "Helvetica Neue", Helvetica, Arial, sans-serif;
+$titleFont: "Helvetica Neue", Helvetica, Arial, sans-serif;
+$codeFont: monospace;
+
+@mixin button($btnColor, $color) {
+    /* use @extend .button on any element ( a or button) or use directly in markup class="button" */
+    display: inline-block;
+    padding: 5px 8px;
+    background-color: $btnColor;
+    color: $color !important;
+    font-size: 0.90em;
+    text-decoration: none;
+    text-transform: uppercase;
+
+    @include border-radius(3px);
+
+    border: 1px solid transparent;
+    text-align: center;
+
+    &:hover {
+        background: darken($btnColor, 10%);
+        color: white;
+    }
+
+    &.disabled {
+        cursor: not-allowed;
+        background-color: rgba(128, 128, 128, 0.1) !important;
+        color: rgba(128, 128, 128, 0.4) !important;
+        border: 1px solid transparent;
+
+        &:hover {
+            cursor: not-allowed;
+            background-color: rgba(128, 128, 128, 0.1) !important;
+            color: rgba(128, 128, 128, 0.4) !important;
+            border: 1px solid transparent;
+        }
+    }
+}
+
+@mixin smallButton($btnColor, $color) {
+    @include button($btnColor, $color);
+
+    font-size: 0.8em;
+    padding: 3px 6px;
+}
+
+@mixin btnOutline($btnColor, $color) {
+    @include button($btnColor, $color);
+
+    background-color: transparent;
+    color: $btnColor !important;
+    border: 1px solid $btnColor;
+
+    &:hover {
+        color: white !important;
+        border: none;
+        border: 1px solid $btnColor;
+    }
+
+    &.disabled {
+        cursor: not-allowed;
+        color: rgba(128, 128, 128, 0.4) !important;
+        border: 1px solid rgba(128, 128, 128, 0.4);
+
+        &:hover {
+            cursor: not-allowed;
+            color: rgba(128, 128, 128, 0.4) !important;
+            border: 1px solid rgba(128, 128, 128, 0.4);
+        }
+    }
+}
+
+input, textarea {
+    font-size: 0.95em;
+}

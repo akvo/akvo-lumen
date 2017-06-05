@@ -1,10 +1,11 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { Link } from 'react-router';
 import NavLink from './workspace-nav/NavLink';
 import OrganizationMenu from './workspace-nav/OrganizationMenu';
 
-require('../styles/WorkspaceNav.scss');
+require('./WorkspaceNav.scss');
 
 const getActiveSubtitle = (pathname) => {
   let activeSubtitle;

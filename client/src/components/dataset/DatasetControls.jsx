@@ -1,7 +1,8 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import ContextMenu from '../common/ContextMenu';
 
-require('../../styles/DatasetControls.scss');
+require('./DatasetControls.scss');
 
 export default class DatasetControls extends Component {
   constructor() {
@@ -39,10 +40,12 @@ export default class DatasetControls extends Component {
                   {
                     label: 'Bulk row editor',
                     value: 'bulk-row-editor',
+                    customClass: 'notImplemented',
                   },
                   {
                     label: 'Bulk column editor',
                     value: 'bulk-column-editor',
+                    customClass: 'notImplemented',
                   },
                   {
                     label: 'Combine Columns',
@@ -55,6 +58,7 @@ export default class DatasetControls extends Component {
                   {
                     label: 'Merge datasets',
                     value: 'merge-datasets',
+                    customClass: 'notImplemented',
                   },
                 ]}
                 onOptionSelected={(item) => {

@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import moment from 'moment';
 import SelectMenu from '../../common/SelectMenu';
 
@@ -247,7 +248,7 @@ export default class FilterMenu extends Component {
                           className="deleteFilter clickable"
                           onClick={() => this.deleteFilter(index)}
                         >
-                        +
+                        ✕
                         </button>
                       </li>
                   )}

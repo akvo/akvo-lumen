@@ -1,12 +1,13 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import EntityTypeHeader from './entity-editor/EntityTypeHeader';
 import ConfirmUserAction from './modals/ConfirmUserAction';
 import InviteUser from './modals/InviteUser';
 import * as api from '../api';
 
-require('../styles/EntityTypeHeader.scss');
-require('../styles/Users.scss');
+require('./entity-editor/EntityTypeHeader.scss');
+require('./Users.scss');
 
 function UserActionSelector({ getUserActions, onChange, user }) {
   const actions = getUserActions(user);

@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import Immutable from 'immutable';
 import { connect } from 'react-redux';
 import { showModal } from '../actions/activeModal';
@@ -7,7 +8,7 @@ import { getId, getTitle } from '../domain/entity';
 import { getTransformations, getRows, getColumns } from '../domain/dataset';
 import * as api from '../api';
 
-require('../styles/Dataset.scss');
+require('../components/dataset/Dataset.scss');
 
 class Dataset extends Component {
 

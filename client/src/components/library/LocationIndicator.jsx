@@ -1,27 +1,16 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 
-const getLocation = (pathname) => {
-  let location;
-
-  if (pathname === 'library') {
-    location = 'Library';
-  } else if (pathname.indexOf('library') > -1) {
-    location = 'Collection';
-  } else if (pathname.indexOf('activity') > -1) {
-    location = 'Activity';
-  }
-
-  return location;
-};
-
-export default function LocationIndicator({ pathname }) {
-  const location = getLocation(pathname);
-
+export default function LocationIndicator({ location }) {
   return (
-    <div className="LocationIndicator">{location}</div>
+    <div className="LocationIndicator">
+      <div className="contents">
+        {location}
+      </div>
+    </div>
   );
 }
 
 LocationIndicator.propTypes = {
-  pathname: PropTypes.string.isRequired,
+  location: PropTypes.string.isRequired,
 };

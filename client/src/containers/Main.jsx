@@ -1,12 +1,13 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import DashboardModal from '../components/DashboardModal';
 import Notification from './Notification';
 
 require('../styles/reset.global.scss');
 require('../styles/style.global.scss');
-require('../styles/Main.scss');
-require('fixed-data-table/dist/fixed-data-table.css');
+require('./Main.scss');
+require('fixed-data-table-2/dist/fixed-data-table.css');
 
 
 function Main({ content, sidebar, notification }) {

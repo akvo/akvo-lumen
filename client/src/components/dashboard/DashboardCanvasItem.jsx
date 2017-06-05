@@ -1,8 +1,9 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import VisualisationViewer from '../charts/VisualisationViewer';
 import DashboardCanvasItemEditable from './DashboardCanvasItemEditable';
 
-require('../../styles/DashboardCanvasItem.scss');
+require('./DashboardCanvasItem.scss');
 
 const getItemLayout = (props) => {
   let output = null;
@@ -27,6 +28,7 @@ const getIsDatasetLoaded = (props) => {
   switch (props.item.visualisation.visualisationType) {
     case 'pivot table':
     case 'pie':
+    case 'donut':
       return true;
 
     default:
@@ -146,7 +148,7 @@ export default class DashboardCanvasItem extends Component {
           className="clickable deleteButton noSelect"
           onClick={() => this.props.onDeleteClick(this.props.item)}
         >
-          +
+          ✕
         </button>
       </div>
     );

@@ -10,7 +10,6 @@
 (hugsql/def-db-fns "akvo/lumen/job-execution.sql")
 (hugsql/def-db-fns "akvo/lumen/transformation.sql")
 
-
 (defn import-file
   "Import a file and return the dataset-id"
   [file {:keys [dataset-name has-column-headers?]}]
@@ -32,3 +31,13 @@
           dataset (dataset-version-by-dataset-id test-conn {:dataset-id dataset-id
                                                             :version 1})]
       (is (= 2 (count (:columns dataset)))))))
+
+(deftest ^:functional test-mixed-columns
+  (testing "Import of mixed-type data"
+    (let [dataset-id (import-file "mixed-columns.csv" {:dataset-name "Mixed Columns"})
+          dataset (dataset-version-by-dataset-id test-conn {:dataset-id dataset-id
+                                                            :version 1})
+          columns (:columns dataset)]
+      (is (= "text" (get (first columns) "type")))
+      (is (= "number" (get (second columns) "type")))
+      (is (= "text" (get (last columns) "type"))))))

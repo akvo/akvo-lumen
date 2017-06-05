@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import EntityTypeHeader from '../entity-editor/EntityTypeHeader';
 
 export default class DashboardHeader extends Component {
@@ -12,9 +13,11 @@ export default class DashboardHeader extends Component {
     const { onDashboardAction } = this.props;
     const user = {
       buttonText: 'User',
+      customClass: 'notImplemented',
     };
     const download = {
       buttonText: 'Download',
+      customClass: 'notImplemented',
     };
     const share = {
       buttonText: 'Share',
@@ -22,6 +25,7 @@ export default class DashboardHeader extends Component {
     };
     const overflow = {
       buttonText: 'Overflow',
+      customClass: 'notImplemented',
     };
 
     return ([

@@ -1,7 +1,8 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import EntityTitleInput from './EntityTitleInput';
 
-require('../../styles/EntityTypeHeader.scss');
+require('./EntityTypeHeader.scss');
 
 export default class EntityTypeHeader extends Component {
 
@@ -32,7 +33,7 @@ export default class EntityTypeHeader extends Component {
           {actionButtons &&
             actionButtons.map((button, index) =>
               <button
-                className="overflow clickable"
+                className={`overflow clickable ${button.customClass ? button.customClass : ''}`}
                 onClick={button.onClick}
                 key={index}
               >

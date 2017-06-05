@@ -1,0 +1,33 @@
+@import "../../styles/modules/importAll";
+
+.DashboardCanvasItem {
+    position: relative;
+    overflow: hidden;
+    padding: 10px;
+    margin: 10px;
+    background-color: white;
+    border: 0.1rem solid $midGrey;
+
+    .itemContainer {
+        &.text {
+            position: relative;
+        }
+    }
+
+    .deleteButton {
+        position: absolute;
+        top: 0;
+        right: 5px;
+        display: block;
+        z-index: 2;
+    }
+
+    .DashboardCanvasItemEditable {
+        height: 100%;
+
+        textarea {
+            font-size: inherit;
+            line-height: inherit;
+        }
+    }
+}

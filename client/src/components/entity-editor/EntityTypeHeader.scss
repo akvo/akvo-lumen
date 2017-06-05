@@ -1,0 +1,59 @@
+@import "../../styles/modules/importAll";
+
+.EntityTypeHeader {
+    height: 4em;
+    position: absolute;
+    margin-left: 4em;
+    left: 0;
+    top: 0;
+    right: 0;
+    border-bottom: 0.1rem solid $lightBlueGrey;
+
+    .entityInfo, .controls {
+        display: inline-block;
+        height: 100%;
+        vertical-align: top;
+        padding: 0.5rem;
+    }
+
+    .entityInfo {
+        width: 60%;
+        background-color: white;
+        border-right: 0.1rem solid $lightBlueGrey;
+    }
+
+    .entityTitle {
+        &.default {
+            font-style: italic;
+            color: $darkGrey;
+        }
+    }
+
+    .entityTitleInput {
+        font-style: italic;
+        width: 100%;
+        padding: 0;
+        border: none;
+        color: $darkGrey;
+    }
+
+    .controls {
+        width: 40%;
+        text-align: right;
+        line-height: 3rem;
+    }
+
+    .saveStatus {
+        color: $blueGrey;
+        margin-top: 0.3rem;
+    }
+
+    .overflow {
+        border: 0.1rem solid $lightBlueGrey;
+
+        @include border-radius(3px);
+
+        padding: 0.5rem;
+        margin: 0.25rem 0.5rem;
+    }
+}

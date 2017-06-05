@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { isEmpty, cloneDeep } from 'lodash';
 import ShareEntity from '../components/modals/ShareEntity';
@@ -177,6 +178,7 @@ class Dashboard extends Component {
 
       switch (vType) {
         case 'pie':
+        case 'donut':
           aggType = 'pie';
           break;
         case 'pivot table':

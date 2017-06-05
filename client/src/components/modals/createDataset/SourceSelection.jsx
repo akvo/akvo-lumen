@@ -1,13 +1,16 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 
 const supportedFormats = [{
   kind: 'DATA_FILE',
   icon: '/assets/data-file.png',
   label: 'Data file',
+  disabled: false,
 }, {
   kind: 'LINK',
   icon: '/assets/link.png',
   label: 'Link',
+  disabled: false,
 }, {
   kind: 'DROPBOX',
   icon: '/assets/dropbox.png',
@@ -26,7 +29,7 @@ const supportedFormats = [{
 }, {
   kind: 'AKVO_FLOW',
   icon: '/assets/akvo-flow.png',
-  label: 'Akvo FLOW',
+  label: 'Akvo Flow',
   disabled: false,
 }, {
   kind: 'GITHUB',
@@ -63,7 +66,7 @@ const defaultDataSources = {
 export default function SourceSelection({ dataSourceKind, onChangeDataSource }) {
   const sources = supportedFormats.map(source => (
     <div
-      className={`sourceOptionContainer ${source.kind} ${source.disabled ? 'disabled' : ''}`}
+      className={`sourceOptionContainer ${source.kind} ${source.disabled ? 'notImplemented' : ''}`}
       key={source.kind}
     >
       <input

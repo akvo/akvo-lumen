@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import update from 'react-addons-update';
 import { isEmpty } from 'lodash';
@@ -13,7 +14,7 @@ import pivotTableSpecTemplate from './Visualisation/pivotTableSpecTemplate';
 import scatterSpecTemplate from './Visualisation/scatterSpecTemplate';
 import barSpecTemplate from './Visualisation/barSpecTemplate';
 
-require('../styles/Visualisation.scss');
+require('../components/visualisation/Visualisation.scss');
 
 class Visualisation extends Component {
 
@@ -82,7 +83,7 @@ class Visualisation extends Component {
           require('../components/visualisation/VisualisationHeader').default;
         const VisualisationEditor =
           require('../components/visualisation/VisualisationEditor').default;
-        require('../styles/Visualisation.scss');
+        require('../components/visualisation/Visualisation.scss');
         /* eslint-enable global-require */
 
         this.setState({

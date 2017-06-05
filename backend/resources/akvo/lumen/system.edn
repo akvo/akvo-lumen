@@ -9,6 +9,7 @@
   :transformation-engine #var akvo.lumen.component.transformation-engine/transformation-engine}
  :endpoints
  {:aggregation #var akvo.lumen.endpoint.aggregation/endpoint
+  :collection #var akvo.lumen.endpoint.collection/endpoint
   :dashboard #var akvo.lumen.endpoint.dashboard/endpoint
   :dataset #var akvo.lumen.endpoint.dataset/endpoint
   :env #var akvo.lumen.endpoint.env/endpoint
@@ -27,16 +28,17 @@
   :visualisation #var akvo.lumen.endpoint.visualisation/endpoint}
  :dependencies
  {:http [:app]
-  :app [:aggregation :dashboard :dataset :env :emailer :files :invite
+  :app [:aggregation :collection :dashboard :dataset :env :emailer :files :invite
         :invite-verify :job-execution :library :public :resource :root :share
         :tier :transformation :user :visualisation]
   :tenant-manager [:db]
   :transformation-engine [:tenant-manager]
+  :aggregation [:tenant-manager]
+  :collection [:tenant-manager]
   :dashboard [:tenant-manager]
   :dataset [:tenant-manager :config]
   :env [:config :tenant-manager]
   :files [:config]
-  :aggregation [:tenant-manager]
   :invite [:tenant-manager :user-manager]
   :invite-verify [:tenant-manager :user-manager]
   :job-execution [:tenant-manager]

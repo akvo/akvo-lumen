@@ -1,0 +1,25 @@
+@import "../../styles/modules/importAll";
+
+html, body, #root {
+    min-width: initial !important;
+}
+
+.DashboardViewer {
+    h1 {
+        line-height: 1.4em;
+        padding: 0.5em;
+        width: 95%;
+        max-width: 50rem;
+        margin: 0.5em auto;
+        display: block;
+        text-align: center;
+
+        @mixin responsive($medium-max-screens) {
+            font-size: 1.6rem;
+        }
+
+        @mixin responsive($small-max-screens) {
+            font-size: 1.4rem;
+        }
+    }
+}

@@ -1,7 +1,8 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import { replaceLabelIfValueEmpty, processPivotData } from '../../utilities/chart';
 
-require('../../styles/PivotTable.scss');
+require('./PivotTable.scss');
 
 const meanPixelsPerChar = 7.5; // Used for calculating min-widths for columns
 const defaultCategoryWidth = 100; // Number of pixels to wrap category columns at

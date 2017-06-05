@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import EntityTypeHeader from '../entity-editor/EntityTypeHeader';
 
 export default class DatasetHeader extends Component {
@@ -6,6 +7,7 @@ export default class DatasetHeader extends Component {
     const settings = {
       buttonText: 'Settings',
       onClick: this.props.onShowDatasetSettings,
+      customClass: 'notImplemented',
     };
 
     return [settings];

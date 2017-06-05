@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import ChangeDataType from './sidebars/ChangeDataType';
 import Filter from './sidebars/Filter';
 import TransformationLog from './sidebars/TransformationLog';
@@ -6,7 +7,7 @@ import CombineColumns from './sidebars/CombineColumns';
 import DeriveColumn from './sidebars/DeriveColumn';
 import RenameColumn from './sidebars/RenameColumn';
 
-require('../../styles/DataTableSidebar.scss');
+require('./DataTableSidebar.scss');
 
 export default function DataTableSidebar(props) {
   switch (props.type) {

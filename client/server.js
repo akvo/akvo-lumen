@@ -7,6 +7,7 @@ var config = require('./webpack.config');
 new WebpackDevServer(webpack(config), {
   hot: true,
   publicPath: config.output.publicPath,
+  disableHostCheck: true,
   proxy: {
     '/api/**': {
       target: "http://t1.lumen.localhost:3000",
@@ -33,5 +34,5 @@ new WebpackDevServer(webpack(config), {
     console.log(err);
   }
 
-  console.log('Listening at localhost:3030');
+  console.log('Listening at t1.lumen.localhost:3030');
 });

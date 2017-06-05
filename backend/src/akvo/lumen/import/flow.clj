@@ -3,17 +3,8 @@
             [akvo.lumen.import.common :as import]
             [clj-http.client :as http]
             [clojure.java.jdbc :as jdbc]
-            [clojure.string :as str]
-            [hugsql.core :as hugsql])
-  (:import [java.sql Timestamp]
-           [java.time Instant]))
-
-(defn sql-timestamp
-  [iso-8601-string]
-  (-> iso-8601-string
-      Instant/parse
-      .toEpochMilli
-      Timestamp.))
+            [clojure.string :as str])
+  (:import [java.time Instant]))
 
 (defn index-by
   [key coll]
@@ -21,17 +12,6 @@
             (assoc index (get item key) item))
           {}
           coll))
-
-(defmethod import/valid? "AKVO_FLOW"
-  [{:strs [instance surveyId formId refreshToken]}]
-  (and (string? instance)
-       (string? surveyId)
-       (string? formId)
-       (string? refreshToken)))
-
-(defmethod import/authorized? "AKVO_FLOW"
-  [claims {:keys []} {:strs [instance surveyId]}]
-  true)
 
 (defn access-token
   "Fetch a new access token using a refresh token"
@@ -107,9 +87,9 @@
 (defn question-type->lumen-type
   [question]
   (condp = (:type question)
-    "NUMBER" "number"
-    "DATE" "date"
-    "text"))
+    "NUMBER" :number
+    "DATE" :date
+    :text))
 
 (defn questions
   "Get the list of questions from a form"
@@ -120,29 +100,16 @@
   [form]
   (let [questions (questions form)]
     (into
-     [{:title "Identifier" :type "text" :column-name "identifier"}
-      {:title "Latitude" :type "number" :column-name "latitude"}
-      {:title "Longitude" :type "number" :column-name "longitude"}
-      {:title "Submitter" :type "text" :column-name "submitter"}
-      {:title "Submitted at" :type "date" :column-name "submitted_at"}]
+     [{:title "Identifier" :type :text :id :identifier}
+      {:title "Latitude" :type :number :id :latitude}
+      {:title "Longitude" :type :number :id :longitude}
+      {:title "Submitter" :type :text :id :submitter}
+      {:title "Submitted at" :type :date :id :submitted_at}]
      (map (fn [question]
             {:title (:name question)
              :type (question-type->lumen-type question)
-             :column-name (format "c%s" (:id question))})
+             :id (keyword (format "c%s" (:id question)))})
           questions))))
-
-(defn create-data-table
-  [table-name columns]
-  (format "create table %s (rnum serial primary key, %s);"
-          table-name
-          (str/join ", " (map (fn [{:keys [column-name type]}]
-                                (format "%s %s"
-                                        column-name
-                                        (condp = type
-                                          "date" "timestamptz"
-                                          "number" "double precision"
-                                          "text" "text")))
-                              columns))))
 
 (defmulti render-response
   (fn [type response]
@@ -150,7 +117,7 @@
 
 (defmethod render-response "DATE"
   [_ response]
-  (sql-timestamp response))
+  (Instant/parse response))
 
 (defmethod render-response "FREE_TEXT"
   [_ response]
@@ -206,7 +173,7 @@
   (reduce (fn [response-data {:keys [type id]}]
             (if-let [response (get-in responses [id "0"])]
               (assoc response-data
-                     (format "c%s" id)
+                     (keyword (format "c%s" id))
                      (render-response type response))
               response-data))
           {}
@@ -220,41 +187,31 @@
     (map (fn [form-instance]
            (let [data-point-id (get form-instance "dataPointId")]
              (assoc (response-data form (get form-instance "responses"))
-                    "identifier" (get-in data-points [data-point-id "identifier"])
-                    "latitude" (get-in data-points [data-point-id "latitude"])
-                    "longitude" (get-in data-points [data-point-id "longitude"])
-                    "submitter" (get form-instance "submitter")
-                    "submitted_at" (some-> (get form-instance "submissionDate")
-                                           sql-timestamp))))
+                    :identifier (get-in data-points [data-point-id "identifier"])
+                    :latitude (get-in data-points [data-point-id "latitude"])
+                    :longitude (get-in data-points [data-point-id "longitude"])
+                    :submitter (get form-instance "submitter")
+                    :submitted_at (some-> (get form-instance "submissionDate")
+                                          Instant/parse))))
          (form-instances headers-fn form))))
 
-(defn create-dataset [tenant-conn headers-fn table-name survey form-id]
-  (let [columns (dataset-columns (form survey form-id))
-        data-rows (form-data headers-fn survey form-id)]
-    (jdbc/execute! tenant-conn [(create-data-table table-name columns)])
-    (doseq [data (partition-all 300 data-rows)]
-      (jdbc/insert-multi! tenant-conn table-name data))
-    columns))
-
-(defmethod import/make-dataset-data-table "AKVO_FLOW"
-  [tenant-conn {:keys [flow-api-url keycloak-realm keycloak-url]} table-name {:strs [instance surveyId formId refreshToken]}]
-  (try
-    (let [token-endpoint (format "%s/realms/%s/protocol/openid-connect/token"
-                                 keycloak-url
-                                 keycloak-realm)
-          refresh-token (offline-token token-endpoint refreshToken)
-          headers-fn #(flow-api-headers token-endpoint refresh-token)]
-      {:success? true
-       :columns (let [survey (survey-definition flow-api-url
-                                                headers-fn
-                                                instance
-                                                surveyId)]
-                  (create-dataset tenant-conn
-                                  headers-fn
-                                  table-name
-                                  survey
-                                  formId))})
-    (catch Exception e
-      (.printStackTrace e)
-      {:success? false
-       :reason (str "Unexpected error " (.getMessage e))})))
+(defmethod import/dataset-importer "AKVO_FLOW"
+  [{:strs [instance surveyId formId refreshToken] :as spec}
+   {:keys [flow-api-url keycloak-realm keycloak-url] :as config}]
+  (let [token-endpoint (format "%s/realms/%s/protocol/openid-connect/token"
+                               keycloak-url
+                               keycloak-realm)
+        refresh-token (delay (offline-token token-endpoint refreshToken))
+        headers-fn #(flow-api-headers token-endpoint @refresh-token)
+        survey (delay (survey-definition flow-api-url
+                                         headers-fn
+                                         instance
+                                         surveyId))]
+    (reify
+      java.io.Closeable
+      (close [this])
+      import/DatasetImporter
+      (columns [this]
+        (dataset-columns (form @survey formId)))
+      (records [this]
+        (form-data headers-fn @survey formId)))))

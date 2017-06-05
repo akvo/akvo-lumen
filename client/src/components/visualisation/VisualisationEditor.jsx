@@ -1,10 +1,11 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { isEqual, cloneDeep } from 'lodash';
 import VisualisationConfig from './VisualisationConfig';
 import VisualisationPreview from './VisualisationPreview';
 import * as api from '../../api';
 
-require('../../styles/VisualisationEditor.scss');
+require('./VisualisationEditor.scss');
 
 const specIsValidForApi = (spec, vType) => {
   switch (vType) {

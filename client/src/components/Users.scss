@@ -1,0 +1,67 @@
+@import "../styles/modules/importAll";
+
+.UsersContainer {
+    flex: 1;
+    overflow: auto;
+
+    .UserList {
+        margin-top: 4rem;
+        padding: 1rem;
+
+        h1 {
+            color: $strongBlue;
+            line-height: 2.5rem;
+        }
+
+        table {
+            width: 100%;
+
+            & tr {
+                border-bottom: 0.1rem solid $lightGrey;
+
+                & th, td {
+                    padding: 20px 0 10px 0;
+                }
+
+                & th {
+                    color: $midGrey;
+                    text-align: left;
+                }
+
+                & td {
+                    color: $black;
+                }
+            }
+
+            .isMe {
+                color: $midGrey;
+            }
+        }
+    }
+
+    .UserActionSelector {
+        appearance: none;
+        background: $white;
+        border: 0;
+        text-indent: 1px;
+        text-overflow: ellipsis;
+        width: 100px;
+    }
+}
+
+.ConfirmUserActionModal, .InviteUserModal {
+    .contents {
+        line-height: 2.5rem;
+        padding-left: 0;
+
+        p {
+            margin-top: 1.5rem;
+        }
+    }
+}
+
+.InviteUserModeal {
+    .emailInput {
+        width: 250px;
+    }
+}

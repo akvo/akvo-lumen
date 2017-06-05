@@ -1,6 +1,7 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 
-require('../../styles/ProgressBar.scss');
+require('./ProgressBar.scss');
 
 export default function ProgressBar(props) {
   const isErrorState = props.progressPercentage === -1;

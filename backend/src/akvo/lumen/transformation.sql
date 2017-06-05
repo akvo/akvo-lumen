@@ -58,3 +58,7 @@ VALUES (:id, :dataset-id, :job-execution-id, :version,
 CREATE TABLE :i:dest-table (LIKE :i:source-table INCLUDING ALL);
 INSERT INTO :i:dest-table SELECT * FROM :i:source-table;
 VACUUM ANALYZE :i:dest-table;
+
+-- :name drop-table :!
+-- :doc Drop table
+DROP TABLE :i:table-name CASCADE;

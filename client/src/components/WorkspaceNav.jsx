@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { Link } from 'react-router';
 import NavLink from './workspace-nav/NavLink';
@@ -7,7 +8,7 @@ import CollectionsList from './workspace-nav/CollectionsList';
 import NavWorkspaceSwitch from './workspace-nav/NavWorkspaceSwitch';
 import { showModal } from '../actions/activeModal';
 
-require('../styles/WorkspaceNav.scss');
+require('./WorkspaceNav.scss');
 
 const collapsedLocations = ['visualisation/', 'dataset/', 'dashboard/', 'admin/users'];
 
@@ -26,12 +27,12 @@ const getCollapsedStatus = (pathname) => {
 const getActiveSubtitle = (pathname) => {
   let activeSubtitle;
 
-  if (pathname === 'library') {
-    activeSubtitle = 'library';
-  } else if (pathname.indexOf('library') > -1) {
+  if (pathname.indexOf('collections') > -1) {
     activeSubtitle = 'collections';
   } else if (pathname.indexOf('activity') > -1) {
     activeSubtitle = 'activity';
+  } else if (pathname.indexOf('library') > -1) {
+    activeSubtitle = 'library';
   }
 
   return activeSubtitle;
@@ -40,10 +41,12 @@ const getActiveSubtitle = (pathname) => {
 class WorkspaceNav extends Component {
   constructor() {
     super();
-    this.handleShowCreateCollectionModal = this.handleShowCreateCollectionModal.bind(this);
     this.state = {
       isManuallyInverted: false,
     };
+
+    this.handleShowCreateCollectionModal = this.handleShowCreateCollectionModal.bind(this);
+    this.handleShowDeleteCollectionModal = this.handleShowDeleteCollectionModal.bind(this);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -74,6 +77,10 @@ class WorkspaceNav extends Component {
     this.props.dispatch(showModal('create-collection'));
   }
 
+  handleShowDeleteCollectionModal(collection) {
+    this.props.dispatch(showModal('delete-collection', { collection }));
+  }
+
   render() {
     const activeSubtitle = getActiveSubtitle(this.props.location.pathname);
     const isFloatOnTop = getCollapsedStatus(this.props.location.pathname);
@@ -101,26 +108,35 @@ class WorkspaceNav extends Component {
           <OrganizationMenu profile={this.props.profile} />
         </div>
         <div className="links">
-          <NavLink
-            to="/library"
-            className="library subtitle"
-            isSelected={activeSubtitle === 'library'}
-          >
-            Library
-          </NavLink>
-          <CollectionsList
-            collections={this.props.collections}
-            onShowCreateCollectionModal={this.handleShowCreateCollectionModal}
-            isSelected={activeSubtitle === 'collections'}
-            pathname={this.props.location.pathname}
-          />
-          <NavLink
-            to="/activity"
-            className="activity subtitle disabled"
-            isSelected={activeSubtitle === 'activity'}
-          >
-            Activity
-          </NavLink>
+          <ul>
+            <li>
+              <NavLink
+                to="/library"
+                className="library subtitle"
+                isSelected={activeSubtitle === 'library'}
+              >
+                Library
+              </NavLink>
+            </li>
+            <li>
+              <CollectionsList
+                collections={this.props.collections}
+                onShowCreateCollectionModal={this.handleShowCreateCollectionModal}
+                onDeleteCollection={this.handleShowDeleteCollectionModal}
+                isSelected={activeSubtitle === 'collections'}
+                pathname={this.props.location.pathname}
+              />
+            </li>
+            <li>
+              <NavLink
+                to="/activity"
+                className="activity subtitle notImplemented"
+                isSelected={activeSubtitle === 'activity'}
+              >
+                Activity
+              </NavLink>
+            </li>
+          </ul>
         </div>
         <NavWorkspaceSwitch profile={this.props.profile} />
       </nav>
@@ -136,7 +152,9 @@ WorkspaceNav.propTypes = {
 };
 
 function mapStateToProps(state) {
-  const collections = Object.keys(state.collections).map(key => state.collections[key]);
+  const collections = state.collections ?
+    Object.keys(state.collections).map(key => state.collections[key]) : [];
+
   return {
     collections,
     profile: state.profile,

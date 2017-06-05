@@ -1,9 +1,10 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import SelectInput from './SelectInput';
 import LabelInput from './LabelInput';
 import ToggleInput from './ToggleInput';
 
-require('../../../styles/PieConfigMenu.scss');
+require('./PieConfigMenu.scss');
 
 export default function PieConfigMenu(props) {
   const {

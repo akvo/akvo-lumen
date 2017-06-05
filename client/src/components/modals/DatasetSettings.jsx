@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Modal from 'react-modal';
 import Settings from '../dataset/Settings';
@@ -47,7 +48,7 @@ class DatasetSettings extends Component {
                 onCancel();
               }}
             >
-              +
+              ✕
             </div>
             <Settings
               dataset={dataset}

@@ -1,0 +1,89 @@
+@import "../../../styles/modules/importAll";
+
+.LayerConfigMenu {
+    position: 'relative';
+
+    .header {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        height: 4rem;
+        border-bottom: 0.1rem solid $midGrey;
+    }
+
+    .deselectLayer {
+        flex: 1;
+    }
+
+    .layerTitleContainer {
+        flex: 5;
+        padding: 0 0.5rem;
+    }
+
+    .TabMenu {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        border-bottom: 0.1rem solid $midGrey;
+
+        .tab {
+            flex: 1;
+        }
+
+        .tabButton {
+            text-transform: uppercase;
+            width: 70%;
+            margin: 0 15%;
+            text-align: center;
+            height: 3rem;
+            color: $strongBlue;
+            border-bottom: 0.2rem solid transparent;
+        }
+
+        .tab.active .tabButton {
+            color: $midGrey;
+            border-bottom: 0.2rem solid $midGrey;
+        }
+    }
+
+    .tabContent {
+        margin: 1rem;
+
+        .ButtonRowInput, .ToggleInput {
+            margin: 1.5rem 0;
+        }
+
+        h4 {
+            font-weight: initial;
+            color: $blueGrey;
+        }
+
+        hr {
+            border: none;
+            border-bottom: 0.1rem solid $lightBlueGrey;
+            margin: 0.5rem 0;
+        }
+    }
+
+    .popupTab {
+        .optionContainer {
+            display: flex;
+            flex: 1;
+            min-height: 2.5rem;
+            line-height: 1.25rem;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .controlContainer {
+            flex: 1;
+
+            input {}
+        }
+
+        .columnLabelContainer {
+            flex: 11;
+        }
+    }
+}

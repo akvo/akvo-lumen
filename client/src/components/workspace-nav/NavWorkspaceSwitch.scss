@@ -1,0 +1,7 @@
+@import "../../styles/modules/importAll";
+
+.NavWorkspaceSwitch {
+    a {
+        @include button($mintGreen, black);
+    }
+}

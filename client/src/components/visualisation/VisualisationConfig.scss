@@ -1,0 +1,185 @@
+@import "../../styles/modules/importAll";
+
+.VisualisationConfig {
+    h3 {}
+
+    h4 {}
+
+    .textInput, .numberInput {
+        height: 2.5rem;
+        border: 0.1rem solid $lightBlueGrey;
+        padding: 0.5rem;
+        background-color: $white;
+
+        &:disabled {
+            background-color: #F9F9F9;
+        }
+    }
+
+    .SelectMenu {
+        height: 2.5rem;
+    }
+
+    label, select, input {
+        display: block;
+        margin: 0.5rem 0;
+        width: 100%;
+    }
+
+    label, .inputSeperator {
+        color: $blueGrey;
+    }
+
+    .inputSeperator {
+        text-align: center;
+    }
+
+    .inputGroup {
+        padding-bottom: 0.5rem;
+
+        &:first-child {
+            padding-top: 0.5rem;
+        }
+    }
+
+    .ColumnGroupingInput, .FilterMenu {
+        padding: 0.5rem;
+        background-color: $lightGrey;
+
+        @include border-radius(3px);
+    }
+
+    .FilterMenu {
+        &.disabled {
+            cursor: not-allowed;
+            filter: grayscale(100%);
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .container {
+            padding: 1rem 0 0.5rem 0;
+        }
+
+        .title {
+            position: relative;
+        }
+
+        .collapseToggle {
+            position: absolute;
+            right: 0;
+            line-height: 1.5rem;
+            width: 1.5rem;
+            text-align: center;
+        }
+
+        .noFilters {
+            font-size: 0.8rem;
+            line-height: 1.4rem;
+            text-align: center;
+            color: $blueGrey;
+            text-transform: uppercase;
+        }
+
+        .filterListItem {
+            position: relative;
+            background-color: $white;
+            padding: 0.5rem 2rem 0.5rem 0.5rem;
+            border: 0.1rem solid $lightBlueGrey;
+
+            @include border-radius(3px);
+
+            margin-bottom: 0.75rem;
+            line-height: 1.4em;
+
+            &:last-item {
+                margin-bottom: 0;
+            }
+
+            .filterIndicator {}
+
+            .deleteFilter {
+                position: absolute;
+                line-height: 1em;
+                right: 0.3rem;
+                top: 0.3rem;
+            }
+        }
+
+        .addFilterContainer {
+            padding: 1rem 0 0 0;
+            width: 100%;
+            text-align: center;
+        }
+
+        .addFilter {
+            padding: 0.4rem 1.2rem;
+            text-transform: uppercase;
+            border: 0.1rem solid $black;
+
+            @include border-radius(3px);
+
+            background-color: $white;
+        }
+
+        .buttonContainer {
+            position: relative;
+            height: 2rem;
+        }
+
+        .saveFilter, .cancelFilter {
+            position: absolute;
+            bottom: 0;
+            line-height: 1.4em;
+
+            @include border-radius(3px);
+
+            padding: 0.4rem 0.8rem;
+            text-transform: uppercase;
+        }
+
+        .saveFilter {
+            right: 0;
+            background-color: $mintGreen;
+            color: $white;
+            transition: background-color 0.4s ease;
+
+            &.disabled {
+                background-color: $midGrey;
+            }
+        }
+
+        .cancelFilter {
+            left: 0;
+            border: 0.1rem solid;
+            border-color: $black;
+            color: $black;
+        }
+
+        .newFilterContainer {
+            padding: 1rem 0.5rem;
+
+            @include border-radius(3px);
+
+            border: 0.1rem solid $blueGrey;
+            background-color: $white;
+        }
+
+        .filterColumnInput {
+            margin-bottom: 1rem;
+        }
+    }
+
+    .saveChanges {
+        bottom: 1rem;
+        display: block;
+        padding: 0.6rem 1.2rem;
+        margin: 0.75rem auto;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        color: $mintGreen;
+        border: 0.1rem solid $mintGreen;
+
+        @include border-radius(3px);
+    }
+}

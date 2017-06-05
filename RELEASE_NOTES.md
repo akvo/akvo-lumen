@@ -1,5 +1,23 @@
 # Release Notes
 
+## 0.9.0
+
+### New and noteworthy
+
+* Updated favicon to new design
+* Initial implementation of Flow integration with importing of flow forms
+
+### Bugfixes
+
+* Fixed bug where long column names would overlap in the Popup editor
+  for map visualisations
+* Fixed bug where it was not possible to "clear" a search done in the
+  Library view
+* Use the new spelling of Akvo Flow
+* Fix bug where multiple numeric filters would fail to filter the data
+  correctly
+* Fixed bug where donut charts would not appear in the Dashboard editor
+
 ## 0.8.0
 
 ### New and noteworthy

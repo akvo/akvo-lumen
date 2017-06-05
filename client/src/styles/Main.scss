@@ -1,9 +1,0 @@
-.Main {
-  display: -webkit-flex;
-	display: flex;
-	height: 100%;
-
-  .WorkspaceNav.collapsed.noFloat + .Library {
-    margin-left: 4rem;
-  }
-}

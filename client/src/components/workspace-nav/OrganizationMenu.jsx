@@ -1,9 +1,11 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 
 export default function OrganizationMenu({ profile }) {
   return (
     <div className="OrganizationMenu">
-      <div className="name">{profile.username}</div>
+      <div className="name"><i className="fa fa-user-o" aria-hidden="true" /> {profile.username}
+      </div>
       <div className="organization">Akvo Lumen</div>
     </div>
   );

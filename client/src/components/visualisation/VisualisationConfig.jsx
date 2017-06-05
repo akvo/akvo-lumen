@@ -1,7 +1,8 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import ConfigMenu from './ConfigMenu';
 
-require('../../styles/VisualisationConfig.scss');
+require('./VisualisationConfig.scss');
 
 export default function VisualisationConfig(props) {
   const vType = props.visualisation.visualisationType ?

@@ -1,11 +1,12 @@
-import React, { PropTypes, Component } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import VisualisationTypeMenu from '../VisualisationTypeMenu';
 import LayerMenu from './LayerMenu';
 import LayerConfigMenu from './LayerConfigMenu';
 import ButtonRowInput from './ButtonRowInput';
 import mapLayerSpecTemplate from '../../../containers/Visualisation/mapLayerSpecTemplate';
 
-require('../../../styles/MapConfigMenu.scss');
+require('./MapConfigMenu.scss');
 
 export default class MapConfigMenu extends Component {
 

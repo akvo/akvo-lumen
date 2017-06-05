@@ -1,0 +1,21 @@
+@import "../../styles/modules/importAll";
+
+.DashboardCanvasItem {
+  position: relative;
+  overflow: hidden;
+  vertical-align: top;
+  background-color: white;
+  border: 0.1rem solid $midGrey;
+
+  &.text {
+    overflow-y: auto;
+  }
+
+  .itemContainer {
+    &.text {
+      line-height: 1.4rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+  }
+}

@@ -1,0 +1,76 @@
+@import "../../../styles/modules/importAll";
+
+.LayerMenuItem {
+    display: flex;
+    flex: 1;
+    height: 6rem;
+    border-bottom: 0.1rem solid $midGrey;
+    position: relative;
+
+    .titleInputContainer {
+        display: flex;
+        flex: 1;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+
+        input {
+            height: 2.8em;
+            line-height: 1.4em;
+            padding: 0.5rem;
+            margin-left: 0.5rem;
+        }
+
+        button {
+            height: 2.8em;
+            line-height: 1.4rem;
+            padding: 0.5rem 1rem;
+        }
+    }
+
+    .container {
+        display: flex;
+        flex: 1;
+        padding: 0.5rem 1rem;
+        align-items: center;
+        justify-content: space-between;
+
+        .titleContainer, .toggleContainer, .overflowButtonContainer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .titleContainer {
+            flex: 4;
+            border: 2px solid transparent;
+
+            /* So text position is same as input mode */
+
+            .title {
+                flex: 1;
+                line-height: 1.4em;
+            }
+        }
+
+        .toggleContainer, .overflowButtonContainer {
+            position: relative;
+            flex: 1;
+
+            .ToggleInput, .overflowButton {
+                padding-top: 0;
+                padding-bottom: 0;
+                height: 2.8rem;
+                line-height: 2.8rem;
+            }
+        }
+
+        .overflowButtonContainer {
+            justify-content: flex-end;
+
+            button.active {
+                color: $midGrey;
+            }
+        }
+    }
+}

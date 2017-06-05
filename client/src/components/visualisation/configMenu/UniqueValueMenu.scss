@@ -1,0 +1,39 @@
+@import "../../../styles/modules/importAll";
+
+.UniqueValueMenu {
+    padding: 0.5rem;
+    background-color: $lightGrey;
+
+    @include border-radius(3px);
+
+    .header {
+        position: relative;
+
+        h4, .collapseToggle {
+            display: inline-block;
+        }
+
+        .collapseToggle {
+            position: absolute;
+            right: 0;
+            line-height: 1.5rem;
+            width: 1.5rem;
+            text-align: center;
+        }
+    }
+
+    .uniqueValueItem {
+        padding: 1rem 0;
+        border-bottom: 0.1rem solid $midGrey;
+
+        &:last-child {
+            border-bottom: none;
+        }
+    }
+
+    &.expanded {
+        .header {
+            margin-bottom: 1rem;
+        }
+    }
+}

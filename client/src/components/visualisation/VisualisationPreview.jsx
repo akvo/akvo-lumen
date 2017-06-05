@@ -1,7 +1,8 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import VisualisationViewer from '../charts/VisualisationViewer';
 
-require('../../styles/VisualisationPreview.scss');
+require('./VisualisationPreview.scss');
 
 
 function shouldRender(visualisation, datasets) {

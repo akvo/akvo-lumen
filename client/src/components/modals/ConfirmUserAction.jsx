@@ -1,7 +1,8 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import Modal from 'react-modal';
 
-require('../../styles/DashboardModal.scss');
+require('../DashboardModal.scss');
 
 function getQuestion({ email, username }, action) {
   const prefix = 'Are you sure you want to';

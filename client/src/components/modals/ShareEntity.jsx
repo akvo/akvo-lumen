@@ -1,10 +1,11 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import Modal from 'react-modal';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import * as api from '../../api';
 
-require('../../styles/DashboardModal.scss');
-require('../../styles/ShareEntity.scss');
+require('../DashboardModal.scss');
+require('./ShareEntity.scss');
 
 export default class ShareEntity extends Component {
 
@@ -64,7 +65,7 @@ export default class ShareEntity extends Component {
               className="close clickable"
               onClick={onClose}
             >
-              +
+              ✕
             </div>
             <div className="contents">
               <label htmlFor="shareUrlCopyButton">Share {type} {title}</label>

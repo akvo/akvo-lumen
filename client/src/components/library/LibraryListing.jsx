@@ -1,9 +1,10 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import moment from 'moment';
 import LibraryListingGroup from './LibraryListingGroup';
 import * as entity from '../../domain/entity';
 
-require('../../styles/LibraryListing.scss');
+require('./LibraryListing.scss');
 
 const mapEntityObjectsToArray = (...objects) => {
   // Convert one or more entity objects into an array of entities
@@ -119,29 +120,44 @@ export default function LibraryListing({
   filterBy,
   sortOrder,
   isReverseSort,
+  collections,
+  currentCollection,
   displayMode,
   searchString,
+  checkboxEntities,
   onSelectEntity,
+  onCheckEntity,
   onEntityAction }) {
-  const entities = filterEntities(library, filterBy,
-    searchString);
+  const entities = filterEntities(library, filterBy, searchString);
   const listGroups = groupEntities(entities, sortOrder);
   const sortedListGroups = sortGroups(listGroups, sortOrder, isReverseSort);
   return (
     <div className={`LibraryListing ${displayMode}`}>
-      <ul>
-        {sortedListGroups.map((listGroup, index) =>
-          <LibraryListingGroup
-            key={index}
-            listGroup={listGroup}
-            displayMode={displayMode}
-            sortOrder={sortOrder}
-            isReverseSort={isReverseSort}
-            onSelectEntity={onSelectEntity}
-            onEntityAction={onEntityAction}
-          />
-        )}
-      </ul>
+      {(sortedListGroups.length === 0 && currentCollection) ?
+        <span
+          className="noItemsMessage"
+        >
+          There are no items in this collection.
+        </span>
+        :
+        <ul>
+          {sortedListGroups.map((listGroup, index) =>
+            <LibraryListingGroup
+              key={index}
+              listGroup={listGroup}
+              collections={collections}
+              currentCollection={currentCollection}
+              displayMode={displayMode}
+              sortOrder={sortOrder}
+              isReverseSort={isReverseSort}
+              checkboxEntities={checkboxEntities}
+              onSelectEntity={onSelectEntity}
+              onCheckEntity={onCheckEntity}
+              onEntityAction={onEntityAction}
+            />
+          )}
+        </ul>
+      }
     </div>
   );
 }
@@ -155,4 +171,8 @@ LibraryListing.propTypes = {
   searchString: PropTypes.string.isRequired,
   onSelectEntity: PropTypes.func.isRequired,
   onEntityAction: PropTypes.func.isRequired,
+  collections: PropTypes.object.isRequired,
+  currentCollection: PropTypes.object,
+  checkboxEntities: PropTypes.array.isRequired,
+  onCheckEntity: PropTypes.func.isRequired,
 };

@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import Immutable from 'immutable';
 import CodeMirror from 'react-codemirror';
 import esprima from 'esprima';
@@ -8,7 +9,7 @@ import SidebarControls from './SidebarControls';
 
 require('codemirror/lib/codemirror.css');
 require('codemirror/mode/javascript/javascript');
-require('../../../styles/DeriveColumn.scss');
+require('./DeriveColumn.scss');
 
 
 const typeOptions = [

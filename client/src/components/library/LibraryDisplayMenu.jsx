@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import SelectMenu from '../common/SelectMenu';
 
 export default function LibraryDisplayMenu(props) {
@@ -27,13 +28,13 @@ export default function LibraryDisplayMenu(props) {
           className="clickable displayGrid control"
           onClick={() => onChangeDisplayMode('grid')}
         >
-          Grid
+          <i className="fa fa-th-large" aria-hidden="true" />
         </div>
         <div
           className="clickable displayList control"
           onClick={() => onChangeDisplayMode('list')}
         >
-          List
+          <i className="fa fa-th-list" aria-hidden="true" />
         </div>
       </div>
     </div>
