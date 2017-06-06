@@ -18,18 +18,23 @@
         position: relative;
         min-height: 5rem;
         padding: 0.5rem 0;
-        background-color: rgba($textSecondary, 0.3);
+        background-color: rgba($textSecondary, 0);
+        border: 1px solid rgba($textSecondary, 0.3);
 
         /*overflow: hidden;*/
         transition: background-color 0.1s ease;
 
         h3 {
-            color: $textSecondary;
+            color: rgba($black, 0.6);
             margin-top: 1rem;
         }
 
         &:hover {
             background-color: rgba($textSecondary, 0.6);
+
+            .entityIcon {
+                opacity: 1;
+            }
 
             h3 {
                 color: $black;
@@ -71,37 +76,46 @@
             margin-top: 0.25rem;
             display: inline-block;
             color: $white;
+            margin-top: 0.25rem;
+            display: inline-block;
+            background-size: cover;
+            background-repeat: no-repeat;
+            opacity: 0.5;
 
-            &:before {
-                font-size: 3.5rem;
-                font-family: FontAwesome;
-                left: -5px;
-                position: absolute;
-                top: -6px;
-            }
+            /*             &:before {
+                            font-size: 3.5rem;
+                            font-family: FontAwesome;
+                            left: -5px;
+                            position: absolute;
+                            top: -6px;
+                        } */
         }
 
         &.visualisation {
             .entityIcon {
-                &:before {
-                    content: "\f1fe";
-                }
+                // &:before {
+                //     content: "\f1fe";
+                // }
+
+                background-image: url("../../styles/img/icon-256-library-listing-visualisation.png");
             }
         }
 
         &.dashboard {
             .entityIcon {
-                &:before {
-                    content: "\f1ea";
-                }
+                // &:before {
+                //     content: "\f1ea";
+                // }
+                background-image: url("../../styles/img/icon-256-library-listing-dashboard.png");
             }
         }
 
         &.dataset {
             .entityIcon {
-                &:before {
-                    content: "\f1c0";
-                }
+                // &:before {
+                //     content: "\f1c0";
+                // }
+                background-image: url("../../styles/img/icon-256-library-listing-dataset.png");
             }
         }
 
