@@ -4,7 +4,7 @@
 
 ### New and noteworthy
 
-* Improved typography
+* Improved typography, colors and icons
 * Added collections support
 * Numeric values are now auto-detected when importing CSV data. Note that if there is any
   data of mixed types, it will be imported as text.
