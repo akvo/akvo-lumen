@@ -1,5 +1,17 @@
 # Release Notes
 
+## 0.10.0
+
+### New and noteworthy
+
+* Improved typography, colors and icons
+* Added collections support
+* Numeric values are now auto-detected when importing CSV data. Note that if there is any
+  data of mixed types, it will be imported as text.
+
+### Bugfixes
+
+
 ## 0.9.0
 
 ### New and noteworthy
