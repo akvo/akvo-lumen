@@ -14,7 +14,7 @@
         height: 0;
         border-right: 10px solid transparent;
         border-left: 10px solid transparent;
-        border-top: 10px solid $blueGrey;
+        border-top: 10px solid $black;
         border-bottom: none;
         position: absolute;
         right: 0.5rem;
@@ -26,7 +26,7 @@
 
         &:after {
             border-top: none;
-            border-bottom: 10px solid $blueGrey;
+            border-bottom: 10px solid $black;
         }
     }
 
@@ -37,7 +37,7 @@
     .columnType {
         text-transform: uppercase;
         margin: 0 0.5rem;
-        color: $blueGrey;
+        color: $black;
     }
 
     .columnType, .columnTypeToggle {

@@ -102,7 +102,7 @@ class WorkspaceNav extends Component {
             <div
               className="menuIcon clickable"
               onClick={onClick}
-            />
+            ><i className="fa fa-bars" aria-hidden="true" /></div>
             <h1><Link to="/">Lumen</Link></h1>
           </div>
           <OrganizationMenu profile={this.props.profile} />

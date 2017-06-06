@@ -27,7 +27,7 @@
     }
 
     label, .inputSeperator {
-        color: $blueGrey;
+        color: $black;
     }
 
     .inputSeperator {
@@ -77,7 +77,7 @@
             font-size: 0.8rem;
             line-height: 1.4rem;
             text-align: center;
-            color: $blueGrey;
+            color: $black;
             text-transform: uppercase;
         }
 
@@ -140,7 +140,7 @@
 
         .saveFilter {
             right: 0;
-            background-color: $mintGreen;
+            background-color: $lumenGreen;
             color: $white;
             transition: background-color 0.4s ease;
 
@@ -161,7 +161,7 @@
 
             @include border-radius(3px);
 
-            border: 0.1rem solid $blueGrey;
+            border: 0.1rem solid $black;
             background-color: $white;
         }
 
@@ -177,8 +177,8 @@
         margin: 0.75rem auto;
         text-transform: uppercase;
         font-size: 0.9rem;
-        color: $mintGreen;
-        border: 0.1rem solid $mintGreen;
+        color: $lumenGreen;
+        border: 0.1rem solid $lumenGreen;
 
         @include border-radius(3px);
     }
