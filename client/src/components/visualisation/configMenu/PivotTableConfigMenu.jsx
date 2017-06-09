@@ -9,6 +9,8 @@ import { canShowPivotTotals } from '../../../utilities/chart';
 
 require('./PivotTableConfigMenu.scss');
 
+const bug741fixed = false; // turn off unique value menus until this is fixed
+
 // For now, we only support a subset of the regular aggregation options
 const aggregationOptions = [
   {
@@ -211,17 +213,19 @@ export default class PivotTableConfigMenu extends Component {
         />
         {spec.categoryColumn !== null &&
           <div>
-            <UniqueValueMenu
-              tableData={visualisation.data}
-              dimension="column"
-              collapsed={this.state.catValMenuCollapsed}
-              onChangeSpec={this.props.onChangeSpec}
-              column={spec.categoryColumn}
-              filters={spec.filters}
-              toggleCollapsed={() =>
-                this.setState({ catValMenuCollapsed: !this.state.catValMenuCollapsed })
-              }
-            />
+            {bug741fixed &&
+              <UniqueValueMenu
+                tableData={visualisation.data}
+                dimension="column"
+                collapsed={this.state.catValMenuCollapsed}
+                onChangeSpec={this.props.onChangeSpec}
+                column={spec.categoryColumn}
+                filters={spec.filters}
+                toggleCollapsed={() =>
+                  this.setState({ catValMenuCollapsed: !this.state.catValMenuCollapsed })
+                }
+              />
+            }
             <LabelInput
               value={
                 spec.categoryTitle == null ?
@@ -262,17 +266,19 @@ export default class PivotTableConfigMenu extends Component {
         />
         {spec.rowColumn !== null &&
           <div>
-            <UniqueValueMenu
-              tableData={visualisation.data}
-              dimension="row"
-              collapsed={this.state.rowValMenuCollapsed}
-              onChangeSpec={this.props.onChangeSpec}
-              column={spec.rowColumn}
-              filters={spec.filters}
-              toggleCollapsed={() =>
-                this.setState({ rowValMenuCollapsed: !this.state.rowValMenuCollapsed })
-              }
-            />
+            {bug741fixed &&
+              <UniqueValueMenu
+                tableData={visualisation.data}
+                dimension="row"
+                collapsed={this.state.rowValMenuCollapsed}
+                onChangeSpec={this.props.onChangeSpec}
+                column={spec.rowColumn}
+                filters={spec.filters}
+                toggleCollapsed={() =>
+                  this.setState({ rowValMenuCollapsed: !this.state.rowValMenuCollapsed })
+                }
+              />
+            }
             <LabelInput
               value={
                 spec.rowTitle == null ?
