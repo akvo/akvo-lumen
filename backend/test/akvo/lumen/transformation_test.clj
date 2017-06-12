@@ -385,3 +385,20 @@
         (let [{:strs [before after]} (get-in (last transformations) ["changedColumns" "c2"])]
           (is (= "dd/mm/yyyy" (get before "title")))
           (is (= "New Title" (get after "title"))))))))
+
+;; Regression #808
+(deftest valid-column-names
+  (is (engine/valid? {"op" "core/sort-column"
+                      "args" {"columnName" "submitted_at"
+                              "sortDirection" "ASC"}
+                      "onError" "fail"}))
+
+  (is (engine/valid? {"op" "core/remove-sort"
+                      "args" {"columnName" "c3"}
+                      "onError" "fail"}))
+
+  (are [derived cols] (= derived (engine/next-column-name cols))
+    "d1" []
+    "d1" [{"columnName" "dx"}]
+    "d2" [{"columnName" "d1"}]
+    "d6" [{"columnName" "submitter"} {"columnName" "d5"} {"columnName" "dx"}]))
