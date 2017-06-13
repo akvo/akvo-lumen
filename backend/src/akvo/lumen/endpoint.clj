@@ -60,5 +60,5 @@
   (http/unprocessable-entity entity))
 
 (defmethod variant->response ::lib/redirect
-  [[_ localtion] _]
+  [[_ location] _]
   (http/redirect location))
