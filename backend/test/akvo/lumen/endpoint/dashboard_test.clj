@@ -1,12 +1,12 @@
 (ns akvo.lumen.endpoint.dashboard-test
-  (:require [clojure.test :refer :all]
-            [hugsql.core :as hugsql]
+  (:require [akvo.lumen.endpoint.share :as share]
+            [akvo.lumen.endpoint.share-test :as share-test]
             [akvo.lumen.fixtures :refer [db-fixture test-conn]]
-            [akvo.lumen.endpoint.share :as share]
             [akvo.lumen.lib.dashboard :as dashboard]
             [akvo.lumen.lib.dashboard-impl :as dashboard-impl]
-            [akvo.lumen.endpoint.share-test :as share-test]
-            [akvo.lumen.util :refer [squuid]]))
+            [akvo.lumen.util :refer [squuid]]
+            [clojure.test :refer :all]
+            [hugsql.core :as hugsql]))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -72,11 +72,11 @@
   (testing "Dashboard"
     (let [v-id               (-> (all-visualisations test-conn) first :id)
           d-spec             (dashboard-spec v-id)
-          {dashboard-id :id} (:body (dashboard/create test-conn d-spec))]
+          {dashboard-id :id} (second (dashboard/create test-conn d-spec))]
       (is (not (nil? dashboard-id)))
 
       (testing "Get dashboard"
-        (let [d (:body (dashboard/fetch test-conn dashboard-id))]
+        (let [d (second (dashboard/fetch test-conn dashboard-id))]
           (is (not (nil? d)))
           (is (every? #(contains? d %)
                       [:id :title :entities :layout :type :status :created
@@ -98,7 +98,7 @@
                            (assoc-in ["layout" "text-1" "h"] 1))]
 
           (dashboard/upsert test-conn dashboard-id new-spec)
-          (let [updated-d (:body (dashboard/fetch test-conn dashboard-id))]
+          (let [updated-d (second (dashboard/fetch test-conn dashboard-id))]
             (is (= (:title updated-d)
                    "My updated dashboard"))
             (is (= (get-in updated-d [:entities "text-1" "content"])

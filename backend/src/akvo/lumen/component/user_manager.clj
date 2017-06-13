@@ -1,9 +1,9 @@
 (ns akvo.lumen.component.user-manager
-  (:require [akvo.lumen.component.keycloak :as keycloak]
+  (:require [akvo.lumen.auth :as auth]
             [akvo.lumen.component.emailer :as emailer]
+            [akvo.lumen.component.keycloak :as keycloak]
+            [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.share-impl :refer [random-url-safe-string]]
-            [akvo.lumen.auth :as auth]
-            [akvo.lumen.http :as http]
             [clj-time.coerce :as c]
             [clj-time.core :as t]
             [clojure.string :as str]
@@ -114,20 +114,18 @@
 (defn do-verify-invite [tenant-conn keycloak tenant id location]
   (if-let [{email :email} (first (consume-invite tenant-conn {:id id}))]
     (if-let [accepted (keycloak/add-user-with-email keycloak tenant email)]
-      (redirect location)
-      (response {:body (format "<html><body>%s</body></html>"
-                               "Problem completing your invite.")
-                 :status 422}))
-    (response {:status 422
-               :body "Could not verify invite."})))
+      (lib/redirect location)
+      (lib/unprocessable-entity (format "<html><body>%s</body></html>"
+                                        "Problem completing your invite.")))
+    (lib/unprocessable-entity "Could not verify invite.")))
 
 (defn do-delete-invite
   "Delete invites that have not been used"
   [tenant-conn id]
   (delete-non-consumed-invite-by-id tenant-conn {:id id})
   (if (empty? (select-consumed-invite-by-id tenant-conn {:id id}))
-    (http/ok {})
-    (http/gone {})))
+    (lib/ok {})
+    (lib/gone {})))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -147,15 +145,15 @@
   (invite [{keycloak :keycloak :as this}
            tenant-conn tenant server-name email author-claims]
     (if (keycloak/tenant-member? keycloak tenant email)
-      (http/bad-request {"reason" "Already tenant member"})
+      (lib/bad-request {"reason" "Already tenant member"})
       (do
         (if (keycloak/user? keycloak email)
           (do-tenant-invite this tenant-conn server-name email author-claims)
           (do-user-and-tenant-invite this tenant-conn server-name email author-claims))
-        (http/ok {}))))
+        (lib/ok {}))))
 
   (invites [this tenant-conn]
-    (response (select-active-invites tenant-conn)))
+    (lib/ok (select-active-invites tenant-conn)))
 
   (delete-invite [this tenant-conn id]
     (do-delete-invite tenant-conn id))
@@ -226,15 +224,15 @@
   (invite [{{api-root :api-root :as keycloak} :keycloak :as this}
            tenant-conn tenant server-name email author-claims]
     (if (keycloak/tenant-member? keycloak tenant email)
-      (http/bad-request {"reason" "Already tenant member"})
+      (lib/bad-request {"reason" "Already tenant member"})
       (do
         (if (keycloak/user? keycloak email)
           (do-tenant-invite this tenant-conn server-name email author-claims)
           (do-user-and-tenant-invite this tenant-conn server-name email author-claims))
-        (http/ok {}))))
+        (lib/ok {}))))
 
   (invites [this tenant-conn]
-    (response (select-active-invites tenant-conn)))
+    (lib/ok (select-active-invites tenant-conn)))
 
   (delete-invite [this tenant-conn id]
     (do-delete-invite tenant-conn id))
