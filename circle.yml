@@ -2,7 +2,7 @@ machine:
   java:
     version: openjdk8
   node:
-    version: 6.9.1
+    version: 8.1.1
   environment:
     PROJECT_NAME: akvo-lumen
     PROD_CLUSTER_NAME: lumen
@@ -14,7 +14,9 @@ machine:
 
 dependencies:
   cache_directories:
-    - "~/docker"
+    - "~/docker" # Docker
+    - "~/.m2" # Leiningen
+    - "~/.package_cache" # NPM
 
   override:
     - if [[ -e ~/docker/keycloak.tar ]]; then docker load -i ~/docker/keycloak.tar; fi
@@ -37,7 +39,8 @@ dependencies:
     # Client
     - npm config set spin false:
         pwd: client
-    - npm install:
+    - npm install -g npm-cache
+    - npm-cache install:
         pwd: client
 
 test:
