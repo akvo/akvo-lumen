@@ -7,7 +7,6 @@
 
 (def ok (variant ::ok))
 (def created (variant ::created))
-(defn no-content [] [::no-content])
 (def bad-request (variant ::bad-request))
 (def not-authenticated (variant ::not-authenticated))
 (def not-authorized (variant ::not-authorized))
@@ -18,3 +17,4 @@
 (def not-implemented (variant ::not-implemented))
 (def unprocessable-entity (variant ::unprocessable-entity))
 (def redirect (variant ::redirect))
+(defn no-content [] [::no-content nil])

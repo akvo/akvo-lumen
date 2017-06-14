@@ -4,8 +4,7 @@
             [akvo.lumen.lib :as lib]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
-            [hugsql.core :as hugsql]
-            [ring.util.response :refer [not-found response]]))
+            [hugsql.core :as hugsql]))
 
 
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")

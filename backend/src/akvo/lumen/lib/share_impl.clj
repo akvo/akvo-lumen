@@ -1,8 +1,7 @@
 (ns akvo.lumen.lib.share-impl
   (:require [akvo.lumen.lib :as lib]
             [clojure.string :as string]
-            [hugsql.core :as hugsql]
-            [ring.util.response :refer [not-found response status]])
+            [hugsql.core :as hugsql])
   (:import (java.security SecureRandom)
            (java.util Base64)))
 

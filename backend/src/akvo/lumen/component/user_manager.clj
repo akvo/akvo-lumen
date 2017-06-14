@@ -8,8 +8,7 @@
             [clj-time.core :as t]
             [clojure.string :as str]
             [com.stuartsierra.component :as component]
-            [hugsql.core :as hugsql]
-            [ring.util.response :refer [not-found response redirect]]))
+            [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/component/user_manager.sql")
 
@@ -153,7 +152,7 @@
         (lib/ok {}))))
 
   (invites [this tenant-conn]
-    (lib/ok (select-active-invites tenant-conn)))
+    (lib/ok {:invites (select-active-invites tenant-conn)}))
 
   (delete-invite [this tenant-conn id]
     (do-delete-invite tenant-conn id))
@@ -232,7 +231,7 @@
         (lib/ok {}))))
 
   (invites [this tenant-conn]
-    (lib/ok (select-active-invites tenant-conn)))
+    (lib/ok {:invites (select-active-invites tenant-conn)}))
 
   (delete-invite [this tenant-conn id]
     (do-delete-invite tenant-conn id))

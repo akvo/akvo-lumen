@@ -1,12 +1,13 @@
 (ns akvo.lumen.endpoint.library
   (:require [akvo.lumen.component.tenant-manager :refer [connection]]
+            [akvo.lumen.lib :as lib]
             [akvo.lumen.lib
              [dashboard :as dashboard]
              [dataset :as dataset]
              [visualisation :as visualisation]
              [collection :as collection]]
-            [compojure.core :refer :all]
-            [ring.util.response :refer [response]]))
+            [akvo.lumen.variant :as variant]
+            [compojure.core :refer :all]))
 
 
 (defn endpoint [{:keys [tenant-manager]}]
@@ -14,8 +15,8 @@
     (let-routes [tenant-conn (connection tenant-manager tenant)]
 
       (GET "/" _
-        (response
-         {:dashboards (second (dashboard/all tenant-conn))
-          :datasets (second (dataset/all tenant-conn))
-          :visualisations (second (visualisation/all tenant-conn))
-          :collections (second (collection/all tenant-conn))})))))
+        (lib/ok
+         {:dashboards (variant/value (dashboard/all tenant-conn))
+          :datasets (variant/value (dataset/all tenant-conn))
+          :visualisations (variant/value (visualisation/all tenant-conn))
+          :collections (variant/value (collection/all tenant-conn))})))))

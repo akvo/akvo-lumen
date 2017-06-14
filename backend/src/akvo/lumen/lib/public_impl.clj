@@ -5,8 +5,7 @@
             [akvo.lumen.lib.dataset :as dataset]
             [akvo.lumen.lib.visualisation :as visualisation]
             [cheshire.core :as json]
-            [hugsql.core :as hugsql]
-            [ring.util.response :refer [content-type not-found response]]))
+            [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/public.sql")
 

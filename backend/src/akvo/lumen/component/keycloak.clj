@@ -6,7 +6,7 @@
             [clj-http.client :as client]
             [clojure.set :as set]
             [com.stuartsierra.component :as component]
-            [ring.util.response :refer [not-found response]]))
+            [ring.util.response :refer [response]]))
 
 
 (defprotocol KeycloakUserManagement
@@ -103,7 +103,7 @@
                           (concat admins users))
           response-filter ["admin" "email" "firstName" "id" "lastName"
                            "username"]]
-      (lib/ok (map #(select-keys % response-filter) members)))
+      (lib/ok {:users (map #(select-keys % response-filter) members)}))
     (catch clojure.lang.ExceptionInfo e
       (let [ed (ex-data e)]
         ;; TODO??
