@@ -52,18 +52,16 @@ test:
     - npm test:
         pwd: client
 
-# compile:
-#   override:
-#     - lein uberjar:
-#         pwd: backend
+compile:
+  override:
+    - lein uberjar:
+        pwd: backend
 
 deployment:
   dev:
     branch: develop
     commands:
       - ./ci/dev/setup_gcloud.sh
-      - lein uberjar:
-          pwd: backend
       - ./ci/dev/build_containers.sh
       - ./ci/dev/deploy.sh
 
