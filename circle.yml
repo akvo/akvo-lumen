@@ -14,10 +14,14 @@ machine:
 
 dependencies:
   cache_directories:
+    - "~/docker"
     - "~/.package_cache"
 
   pre:
     # Keycloak
+    - if [[ -e ~/docker/keycloak.tar ]]; then docker load -i ~/docker/keycloak.tar; fi
+    - docker build --rm=false -t jboss/keycloak:3.1.0.Final ./keycloak
+    - mkdir -p ~/docker; docker save jboss/keycloak > ~/docker/keycloak.tar
     - ./server.sh build:
         pwd: keycloak
     - ./server.sh run:

@@ -4,6 +4,7 @@ set -e
 
 cd backend
 lein uberjar
+mv /home/ubuntu/akvo-lumen/backend/target/uberjar/akvo-lumen.jar ~/akvo-lumen/backend/akvo-lumen.jar
 cd ..
 
 docker build -t eu.gcr.io/${PROJECT_NAME}/lumen-backend:$CIRCLE_SHA1 ./backend
