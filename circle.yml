@@ -13,6 +13,14 @@ machine:
     - docker
 
 dependencies:
+  cache_directories:
+    - "~/docker"
+
+  override:
+    - if [[ -e ~/docker/keycloak.tar ]]; then docker load -i ~/docker/keycloak.tar; fi
+    - docker build --rm=false -t akvo/keycloak ./keycloak
+    - mkdir -p ~/docker; docker save akvo/keycloak > ~/docker/keycloak.tar
+
   pre:
     ## App specific
     - ./server.sh build:
