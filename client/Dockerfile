@@ -1,4 +1,4 @@
-FROM nginx:1.11
+FROM nginx:1.13.1
 MAINTAINER Akvo Foundation <devops@akvo.org>
 
 RUN apt-get update && \
