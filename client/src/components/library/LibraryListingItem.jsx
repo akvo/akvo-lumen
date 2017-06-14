@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { Link } from 'react-router';
 import LoadingSpinner from '../common/LoadingSpinner';
 import ContextMenu from '../common/ContextMenu';
 import {
@@ -120,7 +121,7 @@ export default class LibraryListingItem extends Component {
   }
 
   render() {
-    const { entity, onSelectEntity, onEntityAction } = this.props;
+    const { entity, onEntityAction } = this.props;
 
     return (
       <li
@@ -145,11 +146,13 @@ export default class LibraryListingItem extends Component {
             checked={this.props.isChecked}
           />
         </div>
-        <div
+        <Link
+          to={`/${getType(entity)}/${getId(entity)}`}
           className="entityBody clickable"
-          onClick={() => {
-            if (isOk(entity)) {
-              onSelectEntity(getType(entity), getId(entity));
+          onClick={(e) => {
+            if (!isOk(entity)) {
+              // prevent navigation - unfortunately this is the only way to "disable" a <Link />
+              e.preventDefault();
             }
           }}
         >
@@ -167,7 +170,7 @@ export default class LibraryListingItem extends Component {
               />
             }
           </div>
-        </div>
+        </Link>
         <div className="entityControls">
           <button
             className="showControls clickable"
@@ -192,7 +195,6 @@ export default class LibraryListingItem extends Component {
 
 LibraryListingItem.propTypes = {
   entity: PropTypes.object.isRequired,
-  onSelectEntity: PropTypes.func.isRequired,
   onEntityAction: PropTypes.func.isRequired,
   collections: PropTypes.object.isRequired,
   currentCollection: PropTypes.object,
