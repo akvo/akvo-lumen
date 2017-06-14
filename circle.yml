@@ -18,8 +18,8 @@ dependencies:
 
   override:
     - if [[ -e ~/docker/keycloak.tar ]]; then docker load -i ~/docker/keycloak.tar; fi
-    - docker build --rm=false -t akvo/keycloak ./keycloak
-    - mkdir -p ~/docker; docker save akvo/keycloak > ~/docker/keycloak.tar
+    - docker build --rm=false -t jboss/keycloak:3.1.0.Final ./keycloak
+    - mkdir -p ~/docker; docker save jboss/keycloak > ~/docker/keycloak.tar
 
   pre:
     ## App specific
