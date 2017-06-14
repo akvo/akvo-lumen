@@ -14,10 +14,14 @@ machine:
 
 dependencies:
   cache_directories:
-    - "~/target"
     - "~/docker" # Docker
-    - "~/.m2" # Leiningen
     - "~/.package_cache" # NPM
+
+  override:
+    - ./server.sh build:
+        pwd: keycloak
+    - ./server.sh run:
+        pwd: keycloak
 
   pre:
     - if [[ -e ~/docker/keycloak.tar ]]; then docker load -i ~/docker/keycloak.tar; fi
@@ -39,11 +43,6 @@ dependencies:
     - npm install -g npm-cache
     - npm-cache install:
         pwd: client
-  post:
-    - ./server.sh build:
-        pwd: keycloak
-    - ./server.sh run:
-        pwd: keycloak
 
 test:
   override:
