@@ -36,9 +36,6 @@ dependencies:
     - lein deps:
         pwd: backend
     # Client
-    - if [[ -e ~/docker/nginx_1.13.1-alpine.tar ]]; then docker load -i ~/docker/nginx_1.13.1-alpine.tar; fi
-    - docker build --rm=false -t nginx:1.13.1-alpine ./client
-    - mkdir -p ~/docker; docker save nginx:1.13.1-alpine > ~/docker/nginx_1.13.1-alpine.tar
     - npm config set spin false:
         pwd: client
     - npm install -g npm-cache
