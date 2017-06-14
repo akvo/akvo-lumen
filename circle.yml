@@ -30,7 +30,8 @@ dependencies:
         pwd: backend/provision
     - mkdir -p $HOME/.lein
     - echo '{:user {:plugins [[jonase/eastwood "0.2.3"]]}}' > $HOME/.lein/profiles.clj
-    - lein deps
+    - lein deps:
+        pwd: backend
     # Client
     - npm config set spin false:
         pwd: client
@@ -51,6 +52,11 @@ test:
         pwd: client
     - npm test:
         pwd: client
+
+compile:
+  override:
+    - lein uberjar:
+        pwd: backend
 
 deployment:
   dev:
