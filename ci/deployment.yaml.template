@@ -1,0 +1,70 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: lumen
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: lumen
+    spec:
+      containers:
+      - name: lumen-client
+        image: eu.gcr.io/akvo-lumen/lumen-client:${BUILD_HASH}
+        ports:
+        - containerPort: 80
+      - name: lumen-backend
+        image: eu.gcr.io/akvo-lumen/lumen-backend:${BUILD_HASH}
+        ports:
+        - containerPort: 3000
+        env:
+        - name: LUMEN_DB_URL
+          valueFrom:
+            secretKeyRef:
+              name: lumen
+              key: lumen_db_url
+        - name: LUMEN_EMAIL_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: akvo
+              key: email.host
+        - name: LUMEN_EMAIL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: lumen
+              key: email.password
+        - name: LUMEN_EMAIL_USER
+          valueFrom:
+            secretKeyRef:
+              name: lumen
+              key: email.user
+        - name: LUMEN_KEYCLOAK_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: lumen
+              key: keycloak.client_secret
+        - name: LUMEN_KEYCLOAK_URL
+          valueFrom:
+            configMapKeyRef:
+              name: akvo
+              key: keycloak.url
+        - name: LUMEN_FILE_UPLOAD_PATH
+          value: /tmp/akvo/lumen
+        - name: LUMEN_FLOW_API_URL
+          valueFrom:
+            configMapKeyRef:
+              name: akvo
+              key: flow.api.root
+        - name: LUMEN_SENTRY_BACKEND_DSN
+          valueFrom:
+            secretKeyRef:
+              name: lumen
+              key: sentry.backend_dsn
+        - name: LUMEN_SENTRY_CLIENT_DSN
+          valueFrom:
+            secretKeyRef:
+              name: lumen
+              key: sentry.client_dsn
+        - name: LUMEN_FLOW_REPORT_DATABASE_URL
+          value: foo
