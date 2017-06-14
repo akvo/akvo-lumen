@@ -116,7 +116,12 @@ const dataTypeOptions = {
   date: [],
 };
 
-export default function ColumnContextMenu({ column, dimensions, onContextMenuItemSelected }) {
+export default function ColumnContextMenu({
+  column,
+  dimensions,
+  onContextMenuItemSelected,
+  onWindowClick,
+}) {
   return (
     <ContextMenu
       options={commonOptions.concat(dataTypeOptions[column.get('type')])}
@@ -131,6 +136,7 @@ export default function ColumnContextMenu({ column, dimensions, onContextMenuIte
         column,
         action: actions.get(op).setIn(['args', 'columnName'], column.get('columnName')),
       })}
+      onWindowClick={onWindowClick}
     />
   );
 }
@@ -143,4 +149,5 @@ ColumnContextMenu.propTypes = {
     left: PropTypes.number.isRequired,
   }).isRequired,
   onContextMenuItemSelected: PropTypes.func.isRequired,
+  onWindowClick: PropTypes.func.isRequired,
 };

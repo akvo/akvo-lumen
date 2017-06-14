@@ -42,6 +42,9 @@ export default class DatasetTable extends Component {
     this.handleDataTypeContextMenuClicked = this.handleDataTypeContextMenuClicked.bind(this);
     this.handleColumnContextMenuClicked = this.handleColumnContextMenuClicked.bind(this);
 
+    this.dismissDataTypeContextMenu = this.dismissDataTypeContextMenu.bind(this);
+    this.dismissColumnContextMenu = this.dismissColumnContextMenu.bind(this);
+
     this.handleToggleTransformationLog = this.handleToggleTransformationLog.bind(this);
     this.handleToggleCombineColumnSidebar = this.handleToggleCombineColumnSidebar.bind(this);
     this.handleToggleDeriveColumnSidebar = this.handleToggleDeriveColumnSidebar.bind(this);
@@ -248,6 +251,14 @@ export default class DatasetTable extends Component {
     });
   }
 
+  dismissDataTypeContextMenu() {
+    this.setState({ activeDataTypeContextMenu: null });
+  }
+
+  dismissColumnContextMenu() {
+    this.setState({ activeColumnContextMenu: null });
+  }
+
   render() {
     const { rows, columns, pendingTransformations, transformations } = this.props;
     const {
@@ -335,12 +346,14 @@ export default class DatasetTable extends Component {
                 column={activeDataTypeContextMenu.column}
                 dimensions={activeDataTypeContextMenu.dimensions}
                 onContextMenuItemSelected={this.handleDataTypeContextMenuClicked}
+                onWindowClick={this.dismissDataTypeContextMenu}
               />}
             {activeColumnContextMenu &&
               <ColumnContextMenu
                 column={activeColumnContextMenu.column}
                 dimensions={activeColumnContextMenu.dimensions}
                 onContextMenuItemSelected={this.handleColumnContextMenuClicked}
+                onWindowClick={this.dismissColumnContextMenu}
               />}
             <Table
               headerHeight={60}

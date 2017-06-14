@@ -18,7 +18,12 @@ const options = [
 ];
 
 /* "The job of a context menu is to create props for the sidebar" */
-export default function DataTypeContextMenu({ column, dimensions, onContextMenuItemSelected }) {
+export default function DataTypeContextMenu({
+  column,
+  dimensions,
+  onContextMenuItemSelected,
+  onWindowClick,
+}) {
   return (
     <ContextMenu
       options={options}
@@ -37,6 +42,7 @@ export default function DataTypeContextMenu({ column, dimensions, onContextMenuI
         })}
       arrowClass="topLeft"
       arrowOffset="15px"
+      onWindowClick={onWindowClick}
     />
   );
 }
@@ -48,4 +54,5 @@ DataTypeContextMenu.propTypes = {
     left: PropTypes.number.isRequired,
   }).isRequired,
   onContextMenuItemSelected: PropTypes.func.isRequired,
+  onWindowClick: PropTypes.func.isRequired,
 };

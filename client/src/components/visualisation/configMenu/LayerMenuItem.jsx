@@ -86,7 +86,10 @@ export default class LayerMenuItem extends Component {
               <button
                 className={`clickable overflowButton noSelect
                   ${this.state.showOverflow ? 'active' : 'inactive'}`}
-                onClick={() => this.setState({ showOverflow: true })}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  this.setState({ showOverflow: true });
+                }}
               >
                 ● ● ●
               </button>
