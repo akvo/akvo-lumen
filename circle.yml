@@ -14,6 +14,7 @@ machine:
 
 dependencies:
   cache_directories:
+    - "~/target"
     - "~/docker" # Docker
     - "~/.m2" # Leiningen
     - "~/.package_cache" # NPM
@@ -22,7 +23,7 @@ dependencies:
     - if [[ -e ~/docker/keycloak.tar ]]; then docker load -i ~/docker/keycloak.tar; fi
     - docker build --rm=false -t jboss/keycloak:3.1.0.Final ./keycloak
     - mkdir -p ~/docker; docker save jboss/keycloak > ~/docker/keycloak.tar
-
+    - mkdir -p ~/target
     # Backend
     - cp profiles.clj.template profiles.clj:
         pwd: backend
@@ -52,11 +53,6 @@ test:
         pwd: client
     - npm test:
         pwd: client
-
-compile:
-  override:
-    - lein uberjar:
-        pwd: backend
 
 deployment:
   dev:
