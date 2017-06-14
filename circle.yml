@@ -54,7 +54,7 @@ test:
 
 compile:
   override:
-    - lein uberjar
+    - lein uberjar:
         pwd: backend
 
 deployment:
