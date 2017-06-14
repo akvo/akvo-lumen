@@ -18,17 +18,11 @@ dependencies:
     - "~/.m2" # Leiningen
     - "~/.package_cache" # NPM
 
-  override:
+  pre:
     - if [[ -e ~/docker/keycloak.tar ]]; then docker load -i ~/docker/keycloak.tar; fi
     - docker build --rm=false -t jboss/keycloak:3.1.0.Final ./keycloak
     - mkdir -p ~/docker; docker save jboss/keycloak > ~/docker/keycloak.tar
 
-  pre:
-    ## App specific
-    - ./server.sh build:
-        pwd: keycloak
-    - ./server.sh run:
-        pwd: keycloak
     # Backend
     - cp profiles.clj.template profiles.clj:
         pwd: backend
@@ -36,12 +30,18 @@ dependencies:
         pwd: backend/provision
     - mkdir -p $HOME/.lein
     - echo '{:user {:plugins [[jonase/eastwood "0.2.3"]]}}' > $HOME/.lein/profiles.clj
+    - lein deps
     # Client
     - npm config set spin false:
         pwd: client
     - npm install -g npm-cache
     - npm-cache install:
         pwd: client
+  post:
+    - ./server.sh build:
+        pwd: keycloak
+    - ./server.sh run:
+        pwd: keycloak
 
 test:
   override:
@@ -57,8 +57,6 @@ deployment:
     branch: develop
     commands:
       - ./ci/dev/setup_gcloud.sh
-      - lein uberjar:
-          pwd: backend
       - ./ci/dev/build_containers.sh
       - ./ci/dev/deploy.sh
 
