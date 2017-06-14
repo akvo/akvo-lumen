@@ -27,9 +27,6 @@ dependencies:
     - ./server.sh run:
         pwd: keycloak
     # Backend
-    - if [[ -e ~/docker/openjdk_8-jre-alpine.tar ]]; then docker load -i ~/docker/openjdk_8-jre-alpine.tar; fi
-    - docker build --rm=false -t openjdk:8-jre-alpine ./backend
-    - mkdir -p ~/docker; docker save openjdk:8-jre-alpine > ~/docker/openjdk_8-jre-alpine.tar
     - cp profiles.clj.template profiles.clj:
         pwd: backend
     - ./setup.sh:
@@ -39,6 +36,9 @@ dependencies:
     - lein deps:
         pwd: backend
     # Client
+    - if [[ -e ~/docker/nginx_1.13.1-alpine.tar ]]; then docker load -i ~/docker/nginx_1.13.1-alpine.tar; fi
+    - docker build --rm=false -t nginx:1.13.1-alpine ./client
+    - mkdir -p ~/docker; docker save nginx:1.13.1-alpine > ~/docker/nginx_1.13.1-alpine.tar
     - npm config set spin false:
         pwd: client
     - npm install -g npm-cache
