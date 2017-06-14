@@ -1,4 +1,4 @@
-FROM openjdk:8u131-jre-alpine
+FROM openjdk:8-jre-alpine
 MAINTAINER Akvo Foundation <devops@akvo.org>
 
 WORKDIR /app
