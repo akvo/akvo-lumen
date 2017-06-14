@@ -14,15 +14,14 @@ machine:
 
 dependencies:
   cache_directories:
-    - "~/.package_cache" # NPM
+    - "~/.package_cache"
 
-  override:
+  pre:
+    # Keycloak
     - ./server.sh build:
         pwd: keycloak
     - ./server.sh run:
         pwd: keycloak
-
-  pre:
     # Backend
     - cp profiles.clj.template profiles.clj:
         pwd: backend
