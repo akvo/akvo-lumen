@@ -11,6 +11,6 @@ sudo /opt/google-cloud-sdk/bin/gcloud docker -- push eu.gcr.io/${PROJECT_NAME}/l
 
 sudo chown -R ubuntu:ubuntu /home/ubuntu/.kube
 
-sed -e "s/\${BUILD_HASH}/$CIRCLE_SHA1/" ../deployment.yaml.template > deployment.yaml
+sed -e "s/\${BUILD_HASH}/$CIRCLE_SHA1/" ci/deployment.yaml.template > deployment.yaml
 
 kubectl apply -f deployment.yaml
