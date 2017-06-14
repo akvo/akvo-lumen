@@ -52,6 +52,11 @@ test:
     - npm test:
         pwd: client
 
+compile:
+  override:
+    - lein uberjar
+        pwd: backend
+
 deployment:
   dev:
     branch: develop
