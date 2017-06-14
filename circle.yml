@@ -27,6 +27,9 @@ dependencies:
     - ./server.sh run:
         pwd: keycloak
     # Backend
+    - if [[ -e ~/docker/openjdk-8u131-jre-alpine.tar ]]; then docker load -i ~/docker/openjdk-8u131-jre-alpine.tar; fi
+    - docker build --rm=false -t openjdk:8u131-jdk-alpine ./backend
+    - mkdir -p ~/docker; docker save openjdk:8u131-jdk-alpine > ~/docker/openjdk-8u131-jre-alpine.tar
     - cp profiles.clj.template profiles.clj:
         pwd: backend
     - ./setup.sh:
