@@ -11,6 +11,6 @@ MAINTAINER Akvo Foundation <devops@akvo.org>
 #     rm -rf ~/.m2
 
 WORKDIR /app
-COPY ./target/uberjar/akvo-lumen.jar /app/akvo-lumen.jar
+COPY ~/akvo-lumen/backend/target/uberjar/akvo-lumen.jar /app/akvo-lumen.jar
 
 CMD ["java", "-jar", "akvo-lumen.jar"]
