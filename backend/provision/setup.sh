@@ -35,7 +35,7 @@ psql -d test_lumen_tenant_2 -f $DIR/helpers/create-extensions.sql
 
 # Migrate, seed tenant manager with tenants & migrate added tenants
 # lein do migrate, seed, migrate
-lein do migrate, seed, migrate
+lein trampoline do migrate, seed, migrate
 
 
 echo ""

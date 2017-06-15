@@ -9,6 +9,7 @@ machine:
     DEV_CLUSTER_NAME: dev-cluster
     CLOUDSDK_COMPUTE_ZONE: europe-west1-d
     DEBIAN_FRONTEND: noninteractive
+    LEIN_FAST_TRAMPOLINE: true
   services:
     - docker
 
