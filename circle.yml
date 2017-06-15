@@ -34,8 +34,6 @@ dependencies:
         pwd: backend/provision
     - mkdir -p $HOME/.lein
     - echo '{:user {:plugins [[jonase/eastwood "0.2.3"]]}}' > $HOME/.lein/profiles.clj
-    - lein deps:
-        pwd: backend
     # Client
     - npm config set spin false:
         pwd: client
