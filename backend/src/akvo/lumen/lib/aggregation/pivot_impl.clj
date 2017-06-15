@@ -1,6 +1,6 @@
 (ns akvo.lumen.lib.aggregation.pivot-impl
   (:require [akvo.commons.psql-util]
-            [akvo.lumen.http :as http]
+            [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.aggregation.filter :as filter]
             [akvo.lumen.lib.aggregation.utils :as utils]
             [clojure.java.jdbc :as jdbc]
@@ -147,7 +147,7 @@
 (defn query [tenant-conn dataset query]
   (let [query (build-query (:columns dataset) query)
         filter-str (filter/sql-str (:columns dataset) (:filters query))]
-    (http/ok (merge (apply-query tenant-conn dataset query filter-str)
-                    {:metadata
-                     {"categoryColumnTitle" (get-in query
-                                                    [:category-column "title"])}}))))
+    (lib/ok (merge (apply-query tenant-conn dataset query filter-str)
+                   {:metadata
+                    {"categoryColumnTitle" (get-in query
+                                                   [:category-column "title"])}}))))

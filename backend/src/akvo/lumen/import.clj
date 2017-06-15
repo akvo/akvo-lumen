@@ -3,6 +3,7 @@
             [akvo.lumen.import.common :as import]
             [akvo.lumen.import.csv]
             [akvo.lumen.import.flow]
+            [akvo.lumen.lib :as lib]
             [akvo.lumen.transformation :as t]
             [akvo.lumen.util :refer (squuid gen-table-name)]
             [cheshire.core :as json]
@@ -10,8 +11,7 @@
             [clojure.data.csv :as csv]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
-            [hugsql.core :as hugsql]
-            [ring.util.response :as res]))
+            [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/job-execution.sql")
 
@@ -106,4 +106,4 @@
     (insert-job-execution tenant-conn {:id job-execution-id
                                        :data-source-id data-source-id})
     (future (do-import tenant-conn config job-execution-id))
-    (res/response {"importId" job-execution-id})))
+    (lib/ok {"importId" job-execution-id})))

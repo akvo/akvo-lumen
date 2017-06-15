@@ -1,6 +1,6 @@
 (ns akvo.lumen.lib.collection-impl
   (:refer-clojure :exclude [update])
-  (:require [akvo.lumen.http :as http]
+  (:require [akvo.lumen.lib :as lib]
             [clojure.java.jdbc :as jdbc]
             [clojure.set :as set]
             [hugsql.core :as hugsql])
@@ -11,15 +11,14 @@
 (hugsql/def-db-fns "akvo/lumen/lib/collection.sql")
 
 (defn all [tenant-conn]
-  {:status 200
-   :body (mapv (fn [collection]
-                 (core/update collection :entities #(vec (.getArray %))))
-               (all-collections tenant-conn {}))})
+  (lib/ok (mapv (fn [collection]
+                  (core/update collection :entities #(vec (.getArray %))))
+                (all-collections tenant-conn {}))))
 
 (defn fetch [tenant-conn id]
   (if-let [collection (fetch-collection tenant-conn {:id id})]
-    (http/ok (core/update collection :entities #(vec (.getArray %))))
-    (http/not-found {:id id})))
+    (lib/ok (core/update collection :entities #(vec (.getArray %))))
+    (lib/not-found {:id id})))
 
 (defn- text-array
   "Creates the sql type text[] from a collection of strings"
@@ -48,9 +47,9 @@
 
 (defn create [tenant-conn {:strs [title entities]}]
   (cond
-    (empty? title) (http/bad-request {:error "Title is missing"})
-    (> (count title) 128) (http/bad-request {:error "Title is too long"
-                                             :title title})
+    (empty? title) (lib/bad-request {:error "Title is missing"})
+    (> (count title) 128) (lib/bad-request {:error "Title is too long"
+                                            :title title})
     :else
     (jdbc/with-db-transaction [tx-conn tenant-conn]
       (try
@@ -58,11 +57,11 @@
           (when entities
             (doseq [entity (categorize-entities tx-conn entities)]
               (insert-collection-entity tx-conn (assoc entity :collection-id id))))
-          (http/created (:body (fetch tx-conn id))))
+          (lib/created (second (fetch tx-conn id))))
         (catch SQLException e
           (if (unique-violation? e)
-            (http/conflict {:title title
-                            :error "Collection title already exists"})
+            (lib/conflict {:title title
+                           :error "Collection title already exists"})
             (throw e)))))))
 
 (defn update
@@ -85,4 +84,4 @@
   "Delete a collection by id"
   [tenant-conn id]
   (delete-collection tenant-conn {:id id})
-  (http/no-content))
+  (lib/no-content))

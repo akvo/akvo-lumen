@@ -1,7 +1,8 @@
 (ns akvo.lumen.component.tenant-manager
   "Component that controll the tenants,
   We use the first domain label e.g. t1 in t1.lumen.akvo.org to dispatch."
-  (:require [clojure.string :as str]
+  (:require [akvo.lumen.lib :as lib]
+            [clojure.string :as str]
             [com.stuartsierra.component :as component]
             [hugsql.core :as hugsql]
             [ragtime
@@ -26,8 +27,8 @@
     (let [host (get-in req [:headers "host"])]
       (if (subdomain? host)
         (handler (assoc req :tenant (first (str/split host #"\."))))
-        {:status 400
-         :body "Not a tenant"}))))
+
+        (lib/bad-request "Not a tenant")))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Component

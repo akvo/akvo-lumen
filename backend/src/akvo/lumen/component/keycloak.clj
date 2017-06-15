@@ -1,12 +1,12 @@
 (ns akvo.lumen.component.keycloak
   "We leverage Keycloak groups for tenant partition and admin roles.
    More info can be found in the Keycloak integration doc spec."
-  (:require [akvo.lumen.http :as http]
+  (:require [akvo.lumen.lib :as lib]
             [cheshire.core :as json]
-            [com.stuartsierra.component :as component]
             [clj-http.client :as client]
             [clojure.set :as set]
-            [ring.util.response :refer [not-found response]]))
+            [com.stuartsierra.component :as component]
+            [ring.util.response :refer [response]]))
 
 
 (defprotocol KeycloakUserManagement
@@ -103,9 +103,10 @@
                           (concat admins users))
           response-filter ["admin" "email" "firstName" "id" "lastName"
                            "username"]]
-      (response (map #(select-keys % response-filter) members)))
+      (lib/ok {:users (map #(select-keys % response-filter) members)}))
     (catch clojure.lang.ExceptionInfo e
       (let [ed (ex-data e)]
+        ;; TODO??
         (response {:status (:status ed)
                    :body (:reasonPhrase ed)})))))
 
@@ -196,7 +197,7 @@
 (defn do-promote-user-to-admin
   [{:keys [api-root] :as keycloak} tenant author-claims user-id]
   (if (= (get author-claims "sub") user-id)
-    (http/bad-request {"reason" "Tried to alter own tenant role"})
+    (lib/bad-request {"reason" "Tried to alter own tenant role"})
     (let [request-headers (request-headers keycloak)
           tenant-group-id (get (group-by-path
                                 keycloak request-headers tenant) "id")
@@ -207,16 +208,16 @@
                                          admin-group-id))
                (= 204 (remove-user-from-group request-headers api-root user-id
                                               tenant-group-id)))
-        (http/ok (fetch-user-by-id request-headers api-root tenant user-id))
+        (lib/ok (fetch-user-by-id request-headers api-root tenant user-id))
         (do
           (println (format "Tried to promote user: %s" user-id))
-          (http/internal-server-error))))))
+          (lib/internal-server-error))))))
 
 
 (defn do-demote-user-from-admin
   [{:keys [api-root] :as keycloak} tenant author-claims user-id]
   (if (= (get author-claims "sub") user-id)
-    (http/bad-request {"reason" "Tried to alter own tenant role"})
+    (lib/bad-request {"reason" "Tried to alter own tenant role"})
     (let [request-headers (request-headers keycloak)
           tenant-group-id (get (group-by-path keycloak request-headers tenant)
                                "id")
@@ -227,15 +228,15 @@
                                               admin-group-id))
                (= 204 (add-user-to-group request-headers api-root user-id
                                          tenant-group-id)))
-        (http/ok (fetch-user-by-id request-headers api-root tenant user-id))
+        (lib/ok (fetch-user-by-id request-headers api-root tenant user-id))
         (do
           (println (format "Tried to demote user: %s" user-id))
-          (http/internal-server-error))))))
+          (lib/internal-server-error))))))
 
 (defn do-remove-user
   [{:keys [api-root] :as keycloak} tenant author-claims user-id]
   (if (= (get author-claims "sub") user-id)
-    (http/bad-request {"reason" "Tried to alter own tenant role"})
+    (lib/bad-request {"reason" "Tried to alter own tenant role"})
     (let [request-headers (request-headers keycloak)
           tenant-group-id (get (group-by-path keycloak request-headers tenant)
                                "id")
@@ -246,10 +247,10 @@
                                               admin-group-id))
                (= 204 (remove-user-from-group request-headers api-root user-id
                                               tenant-group-id)))
-        (http/ok {})
+        (lib/ok {})
         (do
           (println (format "Tried to remove user: %s" user-id))
-          (http/internal-server-error))))))
+          (lib/internal-server-error))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; KeycloakAgent Component
