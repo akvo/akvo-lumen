@@ -13,14 +13,15 @@
   * { \"status\": \"OK\", \"jobExecutionId\": <id>, \"datasetId\": <dataset-id> }
   Returns nil if the job execution does not exist"
   [conn id]
-  (if-let [{:keys [dataset_id]} (dataset-id-by-job-execution-id conn {:id id})]
-    (lib/ok
-     {"jobExecutionId" id
-      "status" "OK"
-      "datasetId" dataset_id})
-    (if-let [{:keys [status error-message]} (job-execution-by-id conn {:id id})]
+  (let [{:keys [dataset_id]} (dataset-id-by-job-execution-id conn {:id id})]
+    (if dataset_id
       (lib/ok
        {"jobExecutionId" id
-        "status" status
-        "reason" error-message})
-      (lib/not-found {:error "not-found"}))))
+        "status" "OK"
+        "datasetId" dataset_id})
+      (if-let [{:keys [status error-message]} (job-execution-by-id conn {:id id})]
+        (lib/ok
+         {"jobExecutionId" id
+          "status" status
+          "reason" error-message})
+        (lib/not-found {:error "not-found"})))))

@@ -13,8 +13,8 @@ VALUES (:id, :title, :description)
 
 -- :name insert-dataset-version :! :n
 -- :doc Insert new dataset version
-INSERT INTO dataset_version(id, dataset_id, job_execution_id, table_name, imported_table_name, version, columns)
-VALUES (:id, :dataset-id, :job-execution-id, :table-name, :imported-table-name, :version, :columns)
+INSERT INTO dataset_version(id, dataset_id, table_name, imported_table_name, version, columns)
+VALUES (:id, :dataset-id, :table-name, :imported-table-name, :version, :columns)
 
 -- :name clone-data-table :! :n
 -- :doc Clone a data table
@@ -39,7 +39,8 @@ UPDATE job_execution
 -- :name update-successful-job-execution :! :n
 -- :doc Update successful job execution
 UPDATE job_execution
-   SET status = 'OK'
+   SET status = 'OK',
+       dataset_id = :dataset-id
  WHERE id = :id
 
 -- :name job-execution-by-id :? :1
@@ -50,8 +51,8 @@ SELECT status, error_log->>0 as "error-message"
 -- :name dataset-id-by-job-execution-id :? :1
 -- :doc Find the dataset id corresponding to the job execution id
 SELECT dataset_id
-  FROM dataset_version
- WHERE dataset_version.job_execution_id = :id
+  FROM job_execution
+ WHERE id = :id
 
 -- :name job-execution-status :? :1
 -- :doc Get job execution status for a given job execution id
@@ -64,4 +65,3 @@ SELECT status
 DELETE
   FROM job_execution
  WHERE id = :id AND status = 'FAILED'
-

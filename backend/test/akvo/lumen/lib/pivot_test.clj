@@ -32,7 +32,6 @@
             *dataset-id* (import-file "pivot.csv" {:dataset-name "pivot"
                                                    :has-column-headers? true})]
     (tf/schedule *tenant-conn*
-                 (:transformation-engine test-system)
                  *dataset-id*
                  {:type :transformation
                   :transformation {"op" "core/change-datatype"

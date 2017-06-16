@@ -29,7 +29,6 @@
                       {:transaction? false})
     (insert-dataset-version conn {:id (squuid)
                                   :dataset-id dataset-id
-                                  :job-execution-id job-execution-id
                                   :table-name table-name
                                   :imported-table-name imported-table-name
                                   :version 1
@@ -41,7 +40,8 @@
                                                     :direction nil
                                                     :hidden false})
                                                  columns)})
-    (update-successful-job-execution conn {:id job-execution-id})))
+    (update-successful-job-execution conn {:id job-execution-id
+                                           :dataset-id dataset-id})))
 
 (defn failed-import [conn job-execution-id reason]
   (update-failed-job-execution conn {:id job-execution-id

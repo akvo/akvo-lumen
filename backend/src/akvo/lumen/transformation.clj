@@ -3,6 +3,7 @@
             [akvo.lumen.lib :as lib]
             [akvo.lumen.transformation.engine :as engine]
             [akvo.lumen.util :refer (squuid)]
+            [clojure.java.jdbc :as jdbc]
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/transformation.sql")
@@ -36,20 +37,17 @@
        :message (.getMessage e)})))
 
 (defn schedule
-  [tenant-conn transformation-engine dataset-id command]
+  [tenant-conn dataset-id command]
   (if-let [dataset (dataset-by-id tenant-conn {:id dataset-id})]
     (let [v (validate command)]
       (if (:valid? v)
-        (let [job-id (str (squuid))]
-          (new-transformation-job-execution tenant-conn {:id job-id
-                                                         :dataset-id dataset-id})
-          (let [{:keys [status] :as resp} @(enqueue transformation-engine
-                                                    {:tenant-conn tenant-conn
-                                                     :job-id job-id
-                                                     :dataset-id dataset-id
-                                                     :command command})]
-            (if (= status "OK")
-              (lib/ok (dissoc resp :status))
-              (lib/conflict (dissoc resp :status)))))
+        (try
+          (jdbc/with-db-transaction [tx-conn tenant-conn]
+            (condp = (:type command)
+              :transformation (engine/execute-transformation tx-conn dataset-id (:transformation command))
+              :undo (engine/execute-undo tenant-conn dataset-id)))
+          (catch Exception e
+            ;; Call sentry!
+            (lib/conflict {})))
         (lib/bad-request {:message (:message v)})))
     (lib/bad-request {:message "Dataset not found"})))

@@ -3,20 +3,18 @@
             [akvo.lumen.transformation :as t]
             [compojure.core :refer :all]))
 
-(defn endpoint [{:keys [tenant-manager transformation-engine]}]
+(defn endpoint [{:keys [tenant-manager]}]
   (context "/api/transformations" {:keys [tenant] :as request}
     (let-routes [tenant-conn (connection tenant-manager tenant)]
       (context "/:dataset-id" [dataset-id]
 
         (POST "/transform" {:keys [body] :as request}
           (t/schedule tenant-conn
-                      transformation-engine
                       dataset-id
                       {:type :transformation
                        :transformation body}))
 
         (POST "/undo" _
           (t/schedule tenant-conn
-                      transformation-engine
                       dataset-id
                       {:type :undo}))))))

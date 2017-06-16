@@ -68,11 +68,11 @@
 (deftest ^:functional test-transformations
   (testing "Transformation application"
     (is (= [::lib/bad-request {:message "Dataset not found"}]
-           (tf/schedule test-conn *transformation-engine* "Not-valid-id" []))))
+           (tf/schedule test-conn "Not-valid-id" []))))
   (testing "Valid log"
     (let [[tag _] (last (for [transformation ops]
-                          (tf/schedule test-conn *transformation-engine* "ds-1" {:type :transformation
-                                                                                 :transformation transformation})))]
+                          (tf/schedule test-conn "ds-1" {:type :transformation
+                                                         :transformation transformation})))]
       (is (= ::lib/ok tag)))))
 
 (deftest ^:functional test-import-and-transform
@@ -106,7 +106,6 @@
       (let [dataset-id (:dataset_id (dataset-id-by-job-execution-id test-conn {:id job-id}))
             [tag transformation-job] (last (for [transformation t-log]
                                              (tf/schedule test-conn
-                                                          *transformation-engine*
                                                           dataset-id
                                                           {:type :transformation
                                                            :transformation transformation})))
@@ -132,7 +131,7 @@
   (let [dataset-id (import-file "GDP.csv" {:dataset-name "GDP Undo Test"})
         {previous-table-name :table-name} (latest-dataset-version-by-dataset-id test-conn
                                                                                 {:dataset-id dataset-id})
-        schedule (partial tf/schedule test-conn *transformation-engine* dataset-id)]
+        schedule (partial tf/schedule test-conn dataset-id)]
     (is (= ::lib/ok (first (schedule {:type :undo}))))
     (let [[tag _] (do (schedule {:type :transformation
                                  :transformation {"op" "core/to-lowercase"
@@ -171,7 +170,7 @@
 
 (deftest ^:functional combine-transformation-test
   (let [dataset-id (import-file "name.csv" {:has-column-headers? true})
-        schedule (partial tf/schedule test-conn *transformation-engine* dataset-id)]
+        schedule (partial tf/schedule test-conn dataset-id)]
     (let [[tag _] (schedule {:type :transformation
                              :transformation {"op" "core/combine"
                                               "args" {"columnNames" ["c1" "c2"]
@@ -199,7 +198,7 @@
 
 (deftest ^:functional date-parsing-test
   (let [dataset-id (import-file "dates.csv" {:has-column-headers? true})
-        schedule (partial tf/schedule test-conn *transformation-engine* dataset-id)]
+        schedule (partial tf/schedule test-conn dataset-id)]
     (let [[tag _] (do (schedule (date-transformation "c1" "YYYY"))
                       (schedule (date-transformation "c2" "DD/MM/YYYY"))
                       (schedule (date-transformation "c3" "YYYY-MM-DD")))]
@@ -249,7 +248,7 @@
 
 (deftest ^:functional derived-column-test
   (let [dataset-id (import-file "derived-column.csv" {:has-column-headers? true})
-        schedule (partial tf/schedule test-conn *transformation-engine* dataset-id)]
+        schedule (partial tf/schedule test-conn dataset-id)]
     (do (schedule (change-datatype-transformation "c2"))
         (schedule (change-datatype-transformation "c3")))
 
@@ -358,7 +357,7 @@
 
 (deftest ^:functional delete-column-test
   (let [dataset-id (import-file "dates.csv" {:has-column-headers? true})
-        schedule (partial tf/schedule test-conn *transformation-engine* dataset-id)]
+        schedule (partial tf/schedule test-conn dataset-id)]
     (let [[tag _] (schedule {:type :transformation
                              :transformation {"op" "core/delete-column"
                                               "args" {"columnName" "c2"}
@@ -373,7 +372,7 @@
 
 (deftest ^:functional rename-column-test
   (let [dataset-id (import-file "dates.csv" {:has-column-headers? true})
-        schedule (partial tf/schedule test-conn *transformation-engine* dataset-id)]
+        schedule (partial tf/schedule test-conn dataset-id)]
     (let [[tag _] (schedule {:type :transformation
                              :transformation {"op" "core/rename-column"
                                               "args" {"columnName" "c2"
