@@ -5,7 +5,7 @@ RUN apt-get update && \
     apt-get install -y -q --no-install-recommends curl xz-utils && \
     apt-get install -y -q --no-install-recommends libcairo2-dev libjpeg62-turbo-dev libpango1.0-dev libgif-dev build-essential g++ && \
     apt-get install -y -q --no-install-recommends python && \
-    curl https://nodejs.org/dist/v5.7.0/node-v5.7.0-linux-x64.tar.xz | tar -xJf - --strip-components=1 -C /usr && \
+    curl https://nodejs.org/dist/v8.1.2/node-v8.1.2-linux-x64.tar.xz | tar -xJf - --strip-components=1 -C /usr && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
