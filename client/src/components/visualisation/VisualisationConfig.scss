@@ -59,6 +59,7 @@
 
         .container {
             padding: 1rem 0 0.5rem 0;
+            position: relative;
         }
 
         .title {
@@ -74,6 +75,7 @@
         }
 
         .noFilters {
+            display: none;
             font-size: 0.8rem;
             line-height: 1.4rem;
             text-align: center;
@@ -107,19 +109,15 @@
         }
 
         .addFilterContainer {
-            padding: 1rem 0 0 0;
             width: 100%;
-            text-align: center;
+            text-align: right;
         }
 
         .addFilter {
+            position: absolute;
             padding: 0.4rem 1.2rem;
-            text-transform: uppercase;
-            border: 0.1rem solid $black;
-
-            @include border-radius(3px);
-
-            background-color: $white;
+            top: -24px;
+            right: 30px;
         }
 
         .buttonContainer {

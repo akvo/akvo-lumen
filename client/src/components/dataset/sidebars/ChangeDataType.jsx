@@ -7,21 +7,21 @@ import SidebarControls from './SidebarControls';
 import DateFormatSelect from './DateFormatSelect';
 
 function DefaultValueInput({ defaultValue, onChange, newType }) {
-  const emptyValue = newType === 'number' ? 0 : '';
+  const emptyValue = newType === 'num' ? 0 : '';
   return (
     <div className="inputGroup">
       <label htmlFor="defaultValueInput">
         Default value:
       </label>
       <input
-        type={newType === 'number' ? 'number' : 'text'}
+        type={newType === 'num' ? 'num' : 'text'}
         value={(defaultValue !== null && !isNaN(defaultValue)) ? defaultValue : emptyValue}
         onChange={(event) => {
           const value = event.target.value;
           if (newType === 'date') {
             const n = isNaN(value) ? null : parseInt(value, 10);
             onChange(n);
-          } else if (newType === 'number') {
+          } else if (newType === 'num') {
             const n = parseFloat(value);
             onChange(n);
           } else {
@@ -36,7 +36,7 @@ function DefaultValueInput({ defaultValue, onChange, newType }) {
 DefaultValueInput.propTypes = {
   defaultValue: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   onChange: PropTypes.func.isRequired,
-  newType: PropTypes.oneOf(['date', 'text', 'number']).isRequired,
+  newType: PropTypes.oneOf(['date', 'text', 'num']).isRequired,
 };
 
 

@@ -56,7 +56,6 @@
             }
 
             .Select-placeholder {
-                color: $white;
                 margin-top: -2px;
             }
 
@@ -71,9 +70,7 @@
                     background-color: $white;
                 }
 
-                .Select-placeholder {
-                    color: $anchorLink;
-                }
+                .Select-placeholder {}
 
                 .Select-arrow {
                     top: 0px;
@@ -122,7 +119,6 @@
         input {
             width: calc(100% - 6rem);
             padding: 0.25rem 0.75rem;
-            color: $darkGrey;
             vertical-align: top;
         }
 
@@ -157,14 +153,15 @@
                 padding: 0.75rem 1.5rem;
                 text-align: center;
                 transition: background-color 0.5s ease;
+                color: rgba($black, 0.7);
 
                 &:hover {
-                    color: $midGrey;
+                    color: rgba($black, 1);
                 }
 
                 &.selected {
-                    color: $lumenGreen;
-                    border-bottom: 2px solid $lumenGreen;
+                    color: rgba($black, 1);
+                    border-bottom: 4px solid rgba($black, 1);
                     margin-top: 2px;
                     position: relative;
                 }
@@ -208,8 +205,6 @@
 
             .Select-control {
                 border: 0;
-                background: $white;
-                border: 1px solid $anchorLink;
                 border-radius: 3px;
 
                 .Select-multi-value-wrapper {
@@ -218,7 +213,6 @@
                         margin-right: 5px;
 
                         .Select-value-label {
-                            color: $anchorLink;
                             font-size: 0.85rem;
                         }
                     }
@@ -226,7 +220,7 @@
             }
 
             .Select-placeholder {
-                color: $anchorLink;
+                color: $black;
                 text-align: right;
                 padding-right: 1.75rem;
                 padding-left: 0;

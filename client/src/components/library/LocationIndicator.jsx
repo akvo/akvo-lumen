@@ -4,9 +4,9 @@ import PropTypes from 'prop-types';
 export default function LocationIndicator({ location }) {
   return (
     <div className="LocationIndicator">
-      <div className="contents">
+      <h2 className="contents">
         {location}
-      </div>
+      </h2>
     </div>
   );
 }

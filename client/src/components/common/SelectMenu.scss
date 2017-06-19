@@ -4,6 +4,7 @@
     * {
         box-shadow: none !important;
         border-radius: 0;
+        color: $black !important;
     }
 
     &.disabled {
@@ -16,11 +17,40 @@
         height: 100%;
     }
 
+    .is-open {
+        .combobox {
+            border: 1px solid $black;
+        }
+    }
+
+    .is-disabled {
+        .Select-control {
+            border: 1px solid rgba($black, 0.2);
+            color: rgba($black, 0.2) !important;
+        }
+
+        .Select-placeholder {
+            color: rgba($black, 0.2) !important;
+        }
+    }
+
+    .is-focused {
+        .Select-control, .combobox {
+            border: 1px solid $black;
+        }
+    }
+
     .Select-control {
+        border: 1px solid rgba($black, 0.45);
         transition: background-color 0.3s ease;
+
+        &:focus {
+            border: 1px solid $black;
+        }
     }
 
     .Select-placeholder {
+        color: $black !important;
         transition: color 0.3s ease;
     }
 

@@ -8,7 +8,7 @@ const options = [
     value: 'text',
   },
   {
-    label: 'number',
+    label: 'num',
     value: 'number',
   },
   {

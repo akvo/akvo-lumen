@@ -23,7 +23,7 @@ export default class EntityTitleInput extends Component {
         className="EntityTitleInput"
       >
         {onChangeTitle ?
-          <h3
+          <h1
             className={h3Class}
             onClick={() => {
               if (!this.state.editMode) {
@@ -57,13 +57,13 @@ export default class EntityTitleInput extends Component {
             >
               {title}
             </span>
-          </h3>
+          </h1>
           :
-          <h3
+          <h1
             className={h3Class}
           >
             {title}
-          </h3>
+          </h1>
         }
       </div>
     );
