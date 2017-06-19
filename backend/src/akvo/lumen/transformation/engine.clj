@@ -49,7 +49,7 @@
 
 (defn valid-column-name? [s]
   (and (string? s)
-       (boolean (re-find #"^(c|d)\d+$" s))))
+       (boolean (re-find #"^[a-z][a-z0-9_]*$" s))))
 
 (defn valid-type? [s]
   (boolean (#{"text" "number" "date"} s)))
@@ -83,7 +83,7 @@
 (defn next-column-name [columns]
   (let [nums (->> columns
                   (map #(get % "columnName"))
-                  (filter #(str/starts-with? % "d"))
+                  (filter #(re-find #"^d\d+$" %))
                   (map #(subs % 1))
                   (map #(Long/parseLong %)))]
     (str "d"

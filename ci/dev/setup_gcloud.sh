@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 set -e
+
 sudo /opt/google-cloud-sdk/bin/gcloud --quiet components update
 sudo /opt/google-cloud-sdk/bin/gcloud --quiet components update kubectl
 echo $GCLOUD_SERVICE_KEY | base64 --decode -i > ${HOME}/gcloud-service-key.json

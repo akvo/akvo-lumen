@@ -1,16 +1,17 @@
 (ns dev
   (:refer-clojure :exclude [test])
-  (:require [clojure.edn :as edn]
-            [clojure.repl :refer :all]
-            [clojure.pprint :refer [pprint]]
-            [clojure.tools.namespace.repl :refer [refresh]]
+  (:require [akvo.lumen.endpoint]
+            [akvo.lumen.migrate :as lumen-migrate]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.java.jdbc :as jdbc]
+            [clojure.pprint :refer [pprint]]
+            [clojure.repl :refer :all]
+            [clojure.tools.namespace.repl :refer [refresh]]
             [com.stuartsierra.component :as component]
             [duct.generate :as gen]
             [duct.util.repl :refer [setup test cljs-repl] :as duct-repl]
             [duct.util.system :refer [load-system]]
-            [akvo.lumen.migrate :as lumen-migrate]
             [reloaded.repl :refer [system init start stop go reset]])
   (:import  org.postgresql.util.PSQLException))
 

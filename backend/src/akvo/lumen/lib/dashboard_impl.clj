@@ -1,16 +1,16 @@
 (ns akvo.lumen.lib.dashboard-impl
-  (:require [hugsql.core :as hugsql]
+  (:require [akvo.lumen.lib :as lib]
+            [akvo.lumen.util :refer [squuid]]
+            [akvo.lumen.util :refer [squuid]]
             [clojure.java.jdbc :as jdbc]
-            [akvo.lumen.util :refer [squuid]]
-            [akvo.lumen.util :refer [squuid]]
-            [ring.util.response :refer [not-found response status]]))
+            [hugsql.core :as hugsql]))
 
 
 (hugsql/def-db-fns "akvo/lumen/lib/dashboard.sql")
 
 
 (defn all [tenant-conn]
-  (response (all-dashboards tenant-conn)))
+  (lib/ok (all-dashboards tenant-conn)))
 
 (defn dashboard-keys-match?
   "Make sure each key in entity have a matching key in layout."
@@ -89,14 +89,13 @@
              tx {:dashboard-id dashboard-id
                  :visualisation-id visualisation-id
                  :layout layout}))))
-      (response (handle-dashboard-by-id tenant-conn dashboard-id)))
-    (-> (response {:error "Entities and layout dashboard keys does not match."})
-        (status 400))))
+      (lib/ok (handle-dashboard-by-id tenant-conn dashboard-id)))
+    (lib/bad-request {:error "Entities and layout dashboard keys does not match."})))
 
 (defn fetch [tenant-conn id]
   (if-let [d (dashboard-by-id tenant-conn {:id id})]
-    (response (handle-dashboard-by-id tenant-conn id))
-    (not-found {:error "Not found"})))
+    (lib/ok (handle-dashboard-by-id tenant-conn id))
+    (lib/not-found {:error "Not found"})))
 
 (defn upsert
   "We update a dashboard via upsert of dashboard and clean - insert of
@@ -123,10 +122,10 @@
            tx {:dashboard-id id
                :visualisation-id visualisation-id
                :layout visualisations-layout}))))
-    (response (handle-dashboard-by-id tenant-conn id))))
+    (lib/ok (handle-dashboard-by-id tenant-conn id))))
 
 (defn delete [tenant-conn id]
   (delete-dashboard_visualisation tenant-conn {:dashboard-id id})
   (if (zero? (delete-dashboard-by-id tenant-conn {:id id}))
-    (not-found {:error "Not round"})
-    (response {:id id})))
+    (lib/not-found {:error "Not round"})
+    (lib/ok {:id id})))

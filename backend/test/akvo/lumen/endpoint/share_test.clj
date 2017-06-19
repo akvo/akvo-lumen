@@ -4,6 +4,7 @@
             [akvo.lumen.lib.dashboard :as dashboard]
             [akvo.lumen.lib.share :as share]
             [akvo.lumen.util :refer [squuid gen-table-name]]
+            [akvo.lumen.variant :as variant]
             [clojure.java.jdbc :as jdbc]
             [clojure.test :refer :all]
             [hugsql.core :as hugsql]))
@@ -140,33 +141,33 @@
 (deftest ^:functional share
 
   (testing "Empty collection"
-    (is (empty? (:body (share/all test-conn)))))
+    (is (empty? (variant/value (share/all test-conn)))))
 
   (testing "Insert visualisation share"
     (seed test-conn test-spec)
-    (let [new-share (:body (share/fetch test-conn
-                                        {"visualisationId"
-                                         (:visualisation-id test-spec)}))
-          r (:body (share/all test-conn))]
+    (let [new-share (variant/value (share/fetch test-conn
+                                                {"visualisationId"
+                                                 (:visualisation-id test-spec)}))
+          r (variant/value (share/all test-conn))]
       (is (= 1 (count r)))
       (is (= (:id new-share) (:id (first r))))))
 
   (testing "New share on same item"
-    (let [old-share-id (:id (first (:body (share/all test-conn))))
-          new-share-id (:id (:body (share/fetch test-conn
-                                                {"visualisationId"
-                                                 (:visualisation-id test-spec)})))]
+    (let [old-share-id (:id (first (variant/value (share/all test-conn))))
+          new-share-id (:id (variant/value (share/fetch test-conn
+                                                        {"visualisationId"
+                                                         (:visualisation-id test-spec)})))]
       (is (= new-share-id old-share-id))))
 
   (testing "Remove share"
-    (let [shares (:body (share/all test-conn))]
+    (let [shares (variant/value (share/all test-conn))]
       (share/delete test-conn (:id (first shares)))
-      (is (empty? (:body (share/all test-conn))))))
+      (is (empty? (variant/value (share/all test-conn))))))
 
   (testing "Insert dashboard share"
     (let [dashboard-id (-> (all-dashboards test-conn) first :id)
-          dashboard-share (:body (share/fetch test-conn
-                                              {"dashboardId" dashboard-id}))]
+          dashboard-share (variant/value (share/fetch test-conn
+                                                      {"dashboardId" dashboard-id}))]
       (is (contains? dashboard-share :id))))
 
   (testing "History"

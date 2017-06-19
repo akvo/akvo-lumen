@@ -29,30 +29,20 @@ const getArrowStyle = (className, offset = '0px') => {
 };
 
 export default class ContextMenu extends Component {
-
-  constructor() {
-    super();
-    this.state = {
-      windowListener: null,
-      mountingClickReceived: false, // the click that caused this component to mount
-    };
-  }
-
   componentDidMount() {
     if (this.props.onWindowClick) {
-      this.windowListener = () => {
-        if (!this.state.mountingClickReceived) {
-          this.setState({ mountingClickReceived: true });
-        } else {
-          this.props.onWindowClick();
-        }
-      };
-      window.addEventListener('click', this.windowListener);
+      this.windowListener = () => this.props.onWindowClick();
+      /* Wrapping in a setTimeout prevents the case where the same click event that caused the
+      ** context menu to be mounted is also immediately heard by the new event listener, closing
+      ** the menu instantly */
+      setTimeout(() => {
+        window.addEventListener('click', this.windowListener);
+      }, 0);
     }
   }
 
   componentWillUnmount() {
-    if (this.props.onWindowClick) {
+    if (this.windowListener) {
       window.removeEventListener('click', this.windowListener);
     }
   }
@@ -104,7 +94,7 @@ export default class ContextMenu extends Component {
 
 ContextMenu.propTypes = {
   onOptionSelected: PropTypes.func.isRequired,
-  onWindowClick: PropTypes.func,
+  onWindowClick: PropTypes.func.isRequired,
   style: PropTypes.object,
   options: PropTypes.array.isRequired,
   selected: PropTypes.string,

@@ -33,7 +33,12 @@ function getCollectionContextMenuItem(collections, currentCollection) {
   });
 }
 
-function LibraryListingItemContextMenu({ onClick, collections = {}, currentCollection }) {
+function LibraryListingItemContextMenu({
+  onClick,
+  collections = {},
+  currentCollection,
+  onWindowClick,
+}) {
   return (
     <ContextMenu
       style={{ width: 200 }}
@@ -63,6 +68,7 @@ function LibraryListingItemContextMenu({ onClick, collections = {}, currentColle
           value: 'delete',
         },
       ]}
+      onWindowClick={onWindowClick}
     />
   );
 }
@@ -101,6 +107,7 @@ LibraryListingItemContextMenu.propTypes = {
   onClick: PropTypes.func.isRequired,
   collections: PropTypes.object.isRequired,
   currentCollection: PropTypes.object,
+  onWindowClick: PropTypes.func.isRequired,
 };
 
 export default class LibraryListingItem extends Component {
@@ -183,6 +190,7 @@ export default class LibraryListingItem extends Component {
                 this.setState({ contextMenuVisible: false });
                 onEntityAction(actionType, getType(entity), getId(entity));
               }}
+              onWindowClick={() => this.setState({ contextMenuVisible: false })}
             />}
         </div>
       </li>

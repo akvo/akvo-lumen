@@ -1,10 +1,10 @@
 (ns akvo.lumen.lib.dataset-impl
-  (:require [clojure.java.jdbc :as jdbc]
-            [clojure.string :as str]
-            [hugsql.core :as hugsql]
+  (:require [akvo.lumen.endpoint.job-execution :as job-execution]
             [akvo.lumen.import :as import]
-            [akvo.lumen.endpoint.job-execution :as job-execution]
-            [ring.util.response :refer [not-found response]]))
+            [akvo.lumen.lib :as lib]
+            [clojure.java.jdbc :as jdbc]
+            [clojure.string :as str]
+            [hugsql.core :as hugsql]))
 
 
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
@@ -12,7 +12,7 @@
 
 
 (defn all [tenant-conn]
-  (response (all-datasets tenant-conn)))
+  (lib/ok (all-datasets tenant-conn)))
 
 (defn create [tenant-conn config jwt-claims body]
   (import/handle-import-request tenant-conn config jwt-claims body))
@@ -38,7 +38,7 @@
           data (rest (jdbc/query conn
                                  [(select-data-sql (:table-name dataset) columns)]
                                  {:as-arrays? true}))]
-      (response
+      (lib/ok
        {:id id
         :name (:title dataset)
         :modified (:modified dataset)
@@ -47,7 +47,7 @@
         :transformations (:transformations dataset)
         :columns columns
         :rows data}))
-    (not-found {:error "Not found"})))
+    (lib/not-found {:error "Not found"})))
 
 
 (defn delete [tenant-conn id]
@@ -55,5 +55,5 @@
     (if (zero? c)
       (do
         (delete-failed-job-execution-by-id tenant-conn {:id id})
-        (not-found {:error "Not found"}))
-      (response  {:id id}))))
+        (lib/not-found {:error "Not found"}))
+      (lib/ok {:id id}))))

@@ -5,6 +5,7 @@
             [akvo.lumen.fixtures :refer [db-fixture test-conn]]
             [akvo.lumen.lib.public-impl :as public-impl]
             [akvo.lumen.lib.share :as share]
+            [akvo.lumen.variant :as variant]
             [clojure.test :refer :all]
             [hugsql.core :as hugsql]))
 
@@ -24,9 +25,9 @@
 
   (testing "Public visualiation share."
     (share-test/seed test-conn share-test/test-spec)
-    (let [new-share (:body (share/fetch test-conn
-                                        {"visualisationId"
-                                         (:visualisation-id share-test/test-spec)}))
+    (let [new-share (variant/value (share/fetch test-conn
+                                                {"visualisationId"
+                                                 (:visualisation-id share-test/test-spec)}))
           p         (public-impl/get-share test-conn (:id new-share))]
       (is (= (:visualisation-id p)
              (:visualisation-id share-test/test-spec)))
@@ -35,8 +36,8 @@
 
   (testing "Public dashboard share"
     (let [dashboard-id    (-> (all-dashboards test-conn) first :id)
-          dashboard-share (:body (share/fetch test-conn
-                                              {"dashboardId" dashboard-id}))
+          dashboard-share (variant/value (share/fetch test-conn
+                                                      {"dashboardId" dashboard-id}))
           share           (public-impl/get-share test-conn (:id dashboard-share))
           share-data      (public-impl/response-data test-conn share)]
       (is (every? #(contains? share-data %)

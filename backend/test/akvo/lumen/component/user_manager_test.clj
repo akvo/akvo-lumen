@@ -1,16 +1,18 @@
 (ns akvo.lumen.component.user-manager-test
   (:require [akvo.commons.psql-util]
-            [akvo.lumen.fixtures :refer [migrate-tenant migrate-user-manager
-                                         rollback-tenant test-tenant-spec]]
-            [akvo.lumen.component.tenant-manager :as tenant-manager]
-            [akvo.lumen.component.user-manager :as user-manager]
             [akvo.lumen.component.emailer :as emailer]
             [akvo.lumen.component.keycloak :as keycloak]
+            [akvo.lumen.component.tenant-manager :as tenant-manager]
+            [akvo.lumen.component.user-manager :as user-manager]
+            [akvo.lumen.fixtures :refer [migrate-tenant migrate-user-manager
+                                         rollback-tenant test-tenant-spec]]
+            [akvo.lumen.lib :as lib]
+            [akvo.lumen.variant :as variant]
+            [cheshire.core :as json]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.set :as set]
             [clojure.test :refer :all]
-            [cheshire.core :as json]
             [com.stuartsierra.component :as component]
             [duct.component.hikaricp :refer [hikaricp]]))
 
@@ -106,27 +108,27 @@
   (testing "Create invite"
     (let [number-of-initial-invites (-> (user-manager/invites *user-manager*
                                                               *tenant-conn*)
-                                        :body count)
+                                        variant/value :invites count)
           resp (user-manager/invite *user-manager* *tenant-conn* "t1"
                                     server-name ruth-email author-claims)]
-      (is (= 200 (:status resp)))
+      (is (= ::lib/ok (variant/tag resp)))
       (is (= (inc number-of-initial-invites)
              (-> (user-manager/invites *user-manager*
                                        *tenant-conn*)
-                 :body count)))))
+                 variant/value :invites count)))))
 
   (testing "Delete invite"
     (let [number-of-initial-invites (-> (user-manager/invites *user-manager*
                                                               *tenant-conn*)
-                                        :body count)
+                                        variant/value :invites count)
           invite-id (-> (user-manager/invites *user-manager* *tenant-conn*)
-                        :body first :id)
+                        variant/value :invites first :id)
           resp (user-manager/delete-invite *user-manager* *tenant-conn* invite-id)]
-      (is (= 200 (:status resp)))
+      (is (= ::lib/ok (variant/tag resp)))
       (is (= (dec number-of-initial-invites)
              (-> (user-manager/invites *user-manager*
                                        *tenant-conn*)
-                 :body count))))))
+                 variant/value :invites count))))))
 
 
 (deftest ^:functional full-user-life-cycle
@@ -136,19 +138,19 @@
     (let [invite-resp (user-manager/invite *user-manager* *tenant-conn* "t1"
                                            server-name ruth-email author-claims)
           number-of-original-users (-> (user-manager/users *user-manager* "t1")
-                                       :body count)
+                                       variant/value :users count)
           invite-id (-> (user-manager/invites *user-manager* *tenant-conn*)
-                        :body first :id)
+                        variant/value :invites first :id)
           resp (user-manager/verify-invite *user-manager* *tenant-conn* "t1"
                                            invite-id)]
-      (is (= 302 (:status resp)))
+      (is (= ::lib/redirect (variant/tag resp)))
       (is (= "http://t1.lumen.localhost:3030"
-             (get-in resp [:headers "Location"])))
+             (variant/value resp)))
       (is (= (inc number-of-original-users)
              (-> (user-manager/users *user-manager* "t1")
-                 :body count)))
+                 variant/value :users count)))
       (is (= 0 (-> (user-manager/invites *user-manager* *tenant-conn*)
-                   :body count)))))
+                   variant/value :invites count)))))
 
   (testing "Promote user"
     (let [{{api-root :api-root :as keycloak} :keycloak} *user-manager*
@@ -157,10 +159,10 @@
           ruth-user (keycloak/fetch-user-by-email request-headers api-root ruth-email)
           resp (user-manager/promote-user-to-admin
                 *user-manager* tenant admin-claims (get ruth-user "id"))]
-      (is (= 200 (:status resp)))
+      (is (= ::lib/ok (variant/tag resp)))
       (is (= (get ruth-user "id")
-             (-> resp :body (get "id"))))
-      (is (-> resp :body (get "admin")))
+             (-> resp variant/value (get "id"))))
+      (is (-> resp variant/value (get "admin")))
       (let [{:keys [admin-ids member-ids]} (admin-and-members keycloak tenant)
             set-of-ruth  #{(get ruth-user "id")}]
         (is (not (empty? (set/intersection admin-ids set-of-ruth))))
@@ -173,9 +175,9 @@
           ruth-user (keycloak/fetch-user-by-email request-headers api-root ruth-email)
           resp (user-manager/demote-user-from-admin
                 *user-manager* tenant admin-claims (get ruth-user "id"))]
-      (is (= 200 (:status resp)))
+      (is (= ::lib/ok (variant/tag resp)))
       (is (= (get ruth-user "id")
-             (-> resp :body (get "id"))))
+             (-> resp variant/value (get "id"))))
       #_(is (not (-> resp :body (get "admin"))))
       (let [{:keys [admin-ids member-ids]} (admin-and-members keycloak tenant)
             set-of-ruth #{(get ruth-user "id")}]
@@ -187,8 +189,8 @@
           request-headers (keycloak/request-headers keycloak)
           ruth-user (keycloak/fetch-user-by-email request-headers api-root ruth-email)
           resp (user-manager/remove-user *user-manager* tenant author-claims
-                                        (get ruth-user "id"))]
-      (is (= 200 (:status resp)))
+                                         (get ruth-user "id"))]
+      (is (= ::lib/ok (variant/tag resp)))
       (let [{:keys [admin-ids member-ids]} (admin-and-members keycloak tenant)
             set-of-ruth #{(get ruth-user "id")}]
         (is (empty? (set/intersection admin-ids set-of-ruth)))
