@@ -107,6 +107,9 @@
     }
 
     .CreateDataset {
+        display: flex;
+        flex-direction: column;
+
         .tabMenu {
             padding: 3rem 0;
         }
@@ -160,10 +163,9 @@
         .FileSelection {
             display: flex;
             width: 100%;
-            height: calc(65vh - 40px);
+            flex: 1;
             background: rgba($akvoPurple, 0.05);
             border: 2px dotted rgba($akvoPurple, 1);
-
             @include border-radius(6px);
 
             .contents {
@@ -204,6 +206,11 @@
         .Preview {
             padding-top: 1rem;
             padding-bottom: 6rem;
+        }
+
+        .controls {
+            position: initial;
+            margin-top: auto;
         }
     }
 }
