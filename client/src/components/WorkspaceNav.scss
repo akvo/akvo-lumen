@@ -6,7 +6,7 @@
     z-index: 2;
     transition: width 0.3s, height 0.3s;
     transition-timing-function: ease;
-    background-color: $bg1;
+    background-color: $black;
 
     .header {
         height: 9rem;
@@ -21,17 +21,19 @@
         }
 
         .menuIcon {
-            margin: 0.625rem 0.375rem;
-            height: 2.5rem;
-            width: 2.5rem;
+            margin: 0.25rem 0.335rem 0.525rem 0.5rem;
+            height: 2.75rem;
+            width: 2.75rem;
             border-radiums: 0.25rem;
-            background-image: url("../styles/img/icon-64-menu.png");
-            background-size: contain;
-            background-repeat: no-repeat;
+            background-color: $black;
+            color: white;
+            font-size: 2.1rem;
+            text-align: center;
+            vertical-align: middle;
         }
 
         h1 {
-            width: calc(100% - 3.25rem);
+            width: calc(100% - 3.585rem);
             height: 4rem;
             vertical-align: top;
 
@@ -50,9 +52,9 @@
     }
 
     .OrganizationMenu {
-        padding: 1.5rem 1rem 1rem 1rem;
+        padding: 1rem;
         background: rgba($lightBlueGrey, 0.05);
-        color: rgba(white, 0.3);
+        color: $textPrimary;
 
         .name {
             padding-bottom: 0.25rem;
@@ -65,14 +67,14 @@
         margin-top: 2.5rem;
 
         ul {
-            border-top: 1px solid rgba(black, 0.9);
-            border-bottom: 1px solid rgba($lightBlueGrey, 0.05);
+            border-top: 1px solid rgba(black, 1);
+            border-bottom: 1px solid rgba($white, 0.05);
 
             li {
                 padding: 10px 5px 10px 1rem;
                 margin-bottom: 0px;
-                border-bottom: 1px solid rgba(black, 0.9);
-                border-top: 1px solid rgba($lightBlueGrey, 0.05);
+                border-bottom: 1px solid rgba(black, 1);
+                border-top: 1px solid rgba($white, 0.05);
 
                 a {}
             }
@@ -80,20 +82,24 @@
     }
 
     .subtitle {
-        color: $textSecondary;
+        color: $textPrimary;
         text-decoration: none;
         text-transform: capitalize;
 
         &.selected {
             font-weight: bold;
-            color: $mintGreen;
+            color: $lumenGreen;
         }
     }
 
     .NavLink, .CollectionsList {}
 
     .NavLink {
-        .selected {}
+        color: $white;
+
+        .selected {
+            color: $lumenGreen;
+        }
 
         border-bottom: 0.1rem solid rgba(0, 0, 0, 0.1);
 
@@ -113,17 +119,16 @@
             display: inline-block;
             position: relative;
             padding-right: 2.5rem;
-            color: rgba(255, 255, 255, 0.25);
         }
 
         .addCollection {
-            color: $textSecondary;
             line-height: 1rem;
             font-size: 1.4rem;
             background-color: transparent;
             border: none;
             position: absolute;
             right: 0;
+            color: $white;
         }
 
         ul {
@@ -141,13 +146,13 @@
 
                 a {
                     text-decoration: none;
-                    color: $textSecondary;
+                    color: $white;
+
+                    &.selected {
+                        color: $lumenGreen;
+                    }
                 }
             }
-        }
-
-        .selected {
-            color: $textHighlight;
         }
     }
 
@@ -169,8 +174,7 @@
         border-right: none;
 
         .menuIcon {
-            margin-left: 0.75rem;
-            margin-right: 0.75rem;
+            margin: 0.25rem 0.335rem 0.525rem 0.5rem;
         }
     }
 

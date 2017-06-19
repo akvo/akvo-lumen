@@ -18,13 +18,13 @@ html, body, #root {
 
 body, button, input {
     font-family: $bodyFont;
-    color: rgb(30, 30, 30);
+    color: $black;
 }
 
 p, h1, h2, h3, h4, h5, button, input {
     line-height: 1.4em;
     font-family: $bodyFont;
-    color: rgb(30, 30, 30);
+    color: $black;
 }
 
 code {

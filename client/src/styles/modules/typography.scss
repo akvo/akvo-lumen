@@ -52,7 +52,7 @@ $codeFont: monospace;
     border: 1px solid $btnColor;
 
     &:hover {
-        color: white !important;
+        color: invert(white) !important;
         border: none;
         border: 1px solid $btnColor;
     }

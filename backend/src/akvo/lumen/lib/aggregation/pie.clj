@@ -1,5 +1,5 @@
 (ns akvo.lumen.lib.aggregation.pie
-  (:require [akvo.lumen.http :as http]
+  (:require [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.aggregation.filter :as filter]
             [akvo.lumen.lib.aggregation.utils :as utils]
             [clojure.java.jdbc :as jdbc]))
@@ -18,9 +18,9 @@
         bucket-column-title (get bucket-column "title")
         bucket-column-type (get bucket-column "type")
         counts (run-query tenant-conn table-name bucket-column-name filter-sql)]
-    (http/ok {"metadata" {"bucketColumnTitle" bucket-column-title
-                          "bucketColumnType" bucket-column-type}
-              "data" (mapv (fn [[bucket-value bucket-count]]
-                             {"bucketValue" bucket-value
-                              "bucketCount" bucket-count})
-                           counts)})))
+    (lib/ok {"metadata" {"bucketColumnTitle" bucket-column-title
+                         "bucketColumnType" bucket-column-type}
+             "data" (mapv (fn [[bucket-value bucket-count]]
+                            {"bucketValue" bucket-value
+                             "bucketCount" bucket-count})
+                          counts)})))

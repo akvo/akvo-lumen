@@ -164,13 +164,13 @@ class Users extends Component {
   getUsers() {
     api.get('/api/admin/users')
       .then(response => response.json())
-      .then(users => this.setState({ users }));
+      .then(({ users }) => this.setState({ users }));
   }
 
   getInvitations() {
     api.get('/api/admin/invites')
       .then(response => response.json())
-      .then(invitations => this.setState({ invitations }));
+      .then(({ invites }) => this.setState({ invitations: invites }));
   }
 
   getUserActionButtons() {

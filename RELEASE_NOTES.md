@@ -1,5 +1,25 @@
 # Release Notes
 
+## 0.10.1
+
+### Bugfixes
+
+* Fixed bug where the user would stop being authenticated after keeping lumen open but
+  not using it for 30 minutes
+* Fixed a bug where some columns for flow imported datasets could not be transformed
+
+## 0.10.0
+
+### New and noteworthy
+
+* Improved typography, colors and icons
+* Added collections support
+* Numeric values are now auto-detected when importing CSV data. Note that if there is any
+  data of mixed types, it will be imported as text.
+
+### Bugfixes
+
+
 ## 0.9.0
 
 ### New and noteworthy

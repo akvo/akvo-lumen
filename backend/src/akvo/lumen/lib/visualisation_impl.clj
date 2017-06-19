@@ -1,7 +1,7 @@
 (ns akvo.lumen.lib.visualisation-impl
-  (:require [akvo.lumen.util :refer [squuid]]
-            [hugsql.core :as hugsql]
-            [ring.util.response :refer [not-found response]])
+  (:require [akvo.lumen.lib :as lib]
+            [akvo.lumen.util :refer [squuid]]
+            [hugsql.core :as hugsql])
   (:import [java.sql SQLException]))
 
 
@@ -9,33 +9,34 @@
 
 
 (defn all [tenant-conn]
-  (response (all-visualisations tenant-conn
-                                {}
-                                {}
-                                {:identifiers identity})))
+  (lib/ok (all-visualisations tenant-conn
+            {}
+            {}
+            {:identifiers identity})))
+
 
 (defn create [tenant-conn body jwt-claims]
   (let [id (squuid)
         v (first (upsert-visualisation tenant-conn
-                                       {:id id
-                                        :dataset-id (get body "datasetId")
-                                        :type (get body "visualisationType")
-                                        :name (get body "name")
-                                        :spec (get body "spec")
-                                        :author jwt-claims}))]
-    (response (assoc body
-                     "id" (str id)
-                     "status" "OK"
-                     "created" (:created v)
-                     "modified" (:modified v)))))
+                   {:id id
+                    :dataset-id (get body "datasetId")
+                    :type (get body "visualisationType")
+                    :name (get body "name")
+                    :spec (get body "spec")
+                    :author jwt-claims}))]
+    (lib/ok (assoc body
+              "id" (str id)
+              "status" "OK"
+              "created" (:created v)
+              "modified" (:modified v)))))
 
 (defn fetch [tenant-conn id]
   (if-let [v (visualisation-by-id tenant-conn
-                                  {:id id}
-                                  {}
-                                  {:identifiers identity})]
-    (response (dissoc v :author))
-    (not-found {:error "Not found"})))
+               {:id id}
+               {}
+               {:identifiers identity})]
+    (lib/ok (dissoc v :author))
+    (lib/not-found {:error "Not found"})))
 
 (defn upsert [tenant-conn body jwt-claims]
   (let [v (upsert-visualisation tenant-conn
@@ -45,9 +46,9 @@
                                  :name (get body "name")
                                  :spec (get body "spec")
                                  :author jwt-claims})]
-    (response {:id (-> v first :id)})))
+    (lib/ok {:id (-> v first :id)})))
 
 (defn delete [tenant-conn id]
   (if (zero? (delete-visualisation-by-id tenant-conn {:id id}))
-    (not-found {:error "Not found"})
-    (response {:id id})))
+    (lib/not-found {:error "Not found"})
+    (lib/ok {:id id})))

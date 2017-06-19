@@ -62,7 +62,7 @@ export default class CheckboxEntityMenu extends Component {
                     marginTop: '-1em',
                   }}
                   onOptionSelected={this.handleAddEntitiesToCollection}
-                  onWindowClick={() => this.setState({ menuActive: !this.state.menuActive })}
+                  onWindowClick={() => this.setState({ menuActive: false })}
                   options={[
                     ...Object.keys(collections).map(key => ({
                       value: key,

@@ -1,16 +1,16 @@
 (ns akvo.lumen.lib.share-impl
-  (:require [clojure.string :as string]
-            [hugsql.core :as hugsql]
-            [ring.util.response :refer [not-found response status]])
-  (:import (java.util Base64)
-           (java.security SecureRandom)))
+  (:require [akvo.lumen.lib :as lib]
+            [clojure.string :as string]
+            [hugsql.core :as hugsql])
+  (:import (java.security SecureRandom)
+           (java.util Base64)))
 
 
 (hugsql/def-db-fns "akvo/lumen/lib/share.sql")
 
 
 (defn all [tenant-conn]
-  (response (all-shares tenant-conn)))
+  (lib/ok (all-shares tenant-conn)))
 
 (defn random-url-safe-string
   "Returns a url safe random string of provided size. Defaults to size 8 bytes."
@@ -40,14 +40,13 @@
   (cond
     (contains? spec "visualisationId")
     (if-let [v (visualisation tenant-conn (get spec "visualisationId"))]
-      (response v)
-      (not-found {:error "Not found"}))
+      (lib/ok v)
+      (lib/not-found {:error "Not found"}))
 
     (contains? spec "dashboardId")
     (if-let [d (dashboard tenant-conn (get spec "dashboardId"))]
-      (response d)
-      (not-found {:error "Not found"}))
+      (lib/ok d)
+      (lib/not-found {:error "Not found"}))
 
     :else
-    (-> (response {:error "Required key not provided"})
-        (status 400))))
+    (lib/bad-request {:error "Required key not provided"})))

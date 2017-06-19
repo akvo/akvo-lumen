@@ -1,13 +1,7 @@
-FROM clojure:lein-2.7.1
+FROM openjdk:8-jre-alpine
 MAINTAINER Akvo Foundation <devops@akvo.org>
 
-COPY . /tmp/lumen
 WORKDIR /app
-RUN cd /tmp/lumen && \
-    lein deps && \
-    lein uberjar && \
-    mv target/uberjar/akvo-lumen.jar /app/akvo-lumen.jar && \
-    rm -rf /tmp/lumen && \
-    rm -rf ~/.m2
+COPY akvo-lumen.jar /app/akvo-lumen.jar
 
 CMD ["java", "-jar", "akvo-lumen.jar"]

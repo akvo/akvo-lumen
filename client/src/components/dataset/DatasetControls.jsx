@@ -32,7 +32,7 @@ export default class DatasetControls extends Component {
               className="datasetEditorToggle clickable"
               onClick={() => this.onEditorToggleClick()}
             >
-            Dataset editor
+            + Transform
             </button>
             {this.state.editorMenuActive &&
               <ContextMenu
@@ -69,6 +69,7 @@ export default class DatasetControls extends Component {
                   left: 0,
                   width: '16rem',
                 }}
+                onWindowClick={this.onEditorToggleClick}
               />
             }
           </span>

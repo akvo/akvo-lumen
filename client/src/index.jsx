@@ -12,6 +12,11 @@ function initAuthenticated(profile, env) {
   const store = configureStore(initialState);
   const history = syncHistoryWithStore(browserHistory, store);
   const rootElement = document.querySelector('#root');
+
+  // Refreshing the token on a fixed schedule (every 10 minutes)
+  // will disable SSO Idle Timeout
+  setInterval(auth.token, 1000 * 60 * 10);
+
   render(<Root store={store} history={history} />, rootElement);
 }
 

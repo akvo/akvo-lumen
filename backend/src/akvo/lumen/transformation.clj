@@ -1,5 +1,6 @@
 (ns akvo.lumen.transformation
   (:require [akvo.lumen.component.transformation-engine :refer (enqueue)]
+            [akvo.lumen.lib :as lib]
             [akvo.lumen.transformation.engine :as engine]
             [akvo.lumen.util :refer (squuid)]
             [hugsql.core :as hugsql]))
@@ -48,11 +49,7 @@
                                                      :dataset-id dataset-id
                                                      :command command})]
             (if (= status "OK")
-              {:status 200
-               :body (dissoc resp :status)}
-              {:status 409
-               :body (dissoc resp :status)})))
-        {:status 400
-         :body {:message (:message v)}}))
-    {:status 400
-     :body {:message "Dataset not found"}}))
+              (lib/ok (dissoc resp :status))
+              (lib/conflict (dissoc resp :status)))))
+        (lib/bad-request {:message (:message v)})))
+    (lib/bad-request {:message "Dataset not found"})))

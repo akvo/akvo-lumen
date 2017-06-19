@@ -1,5 +1,5 @@
 (ns akvo.lumen.lib.aggregation
-  (:require [akvo.lumen.http :as http]
+  (:require [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.aggregation.pie :as pie]
             [akvo.lumen.lib.aggregation.pivot :as pivot]
             [clojure.java.jdbc :as jdbc]
@@ -13,9 +13,9 @@
 
 (defmethod query* :default
   [tenant-conn dataset visualisation-type query]
-  (http/bad-request {"message" "Unsupported visualisation type"
-                     "visualisationType" visualisation-type
-                     "query" query}))
+  (lib/bad-request {"message" "Unsupported visualisation type"
+                    "visualisationType" visualisation-type
+                    "query" query}))
 
 (defn query [tenant-conn dataset-id visualisation-type query]
   (jdbc/with-db-transaction [tenant-tx-conn tenant-conn {:read-only? true}]
@@ -23,9 +23,9 @@
       (try
         (query* tenant-tx-conn dataset visualisation-type query)
         (catch clojure.lang.ExceptionInfo e
-          (http/bad-request (merge {:message (.getMessage e)}
-                                   (ex-data e)))))
-      (http/not-found {"datasetId" dataset-id}))))
+          (lib/bad-request (merge {:message (.getMessage e)}
+                                  (ex-data e)))))
+      (lib/not-found {"datasetId" dataset-id}))))
 
 (defmethod query* "pivot"
   [tenant-conn dataset _ query]

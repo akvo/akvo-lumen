@@ -2,19 +2,27 @@ machine:
   java:
     version: openjdk8
   node:
-    version: 6.9.1
+    version: 8.1.2
   environment:
     PROJECT_NAME: akvo-lumen
     PROD_CLUSTER_NAME: lumen
     DEV_CLUSTER_NAME: dev-cluster
     CLOUDSDK_COMPUTE_ZONE: europe-west1-d
     DEBIAN_FRONTEND: noninteractive
+    LEIN_FAST_TRAMPOLINE: true
   services:
     - docker
 
 dependencies:
+  cache_directories:
+    - "~/docker"
+    - "~/.package_cache"
+
   pre:
-    ## App specific
+    # Keycloak
+    - if [[ -e ~/docker/keycloak.tar ]]; then docker load -i ~/docker/keycloak.tar; fi
+    - docker build --rm=false -t jboss/keycloak:3.1.0.Final ./keycloak
+    - mkdir -p ~/docker; docker save jboss/keycloak > ~/docker/keycloak.tar
     - ./server.sh build:
         pwd: keycloak
     - ./server.sh run:
@@ -29,7 +37,8 @@ dependencies:
     # Client
     - npm config set spin false:
         pwd: client
-    - npm install:
+    - npm install -g npm-cache
+    - npm-cache install:
         pwd: client
 
 test:

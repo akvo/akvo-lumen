@@ -36,14 +36,14 @@
         }
 
         .apply {
-            color: $mintGreen;
-            border: 0.1rem solid $mintGreen;
+            color: $lumenGreen;
+            border: 0.1rem solid $lumenGreen;
             transition: color 0.7s ease, border-color 0.7s ease;
         }
 
         .cancel, .apply.disabled {
-            color: $blueGrey;
-            border: 0.1rem solid $blueGrey;
+            color: $black;
+            border: 0.1rem solid $black;
         }
     }
 
