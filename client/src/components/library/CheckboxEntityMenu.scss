@@ -1,3 +1,5 @@
+@import "../../styles/modules/importAll";
+
 .CheckboxEntityMenu {
   position: fixed;
   bottom: 0rem;
@@ -6,15 +8,15 @@
   z-index: 3;
   display: flex;
   justify-content: space-around;
+  align-items: center;
   height: 4rem;
   border: 1px solid black;
   background-color: white;
 
-  > * {
-      line-height: 4rem;
-      padding: 0;
-  }
   .ContextMenu {
     bottom: 3rem;
+  }
+  button {
+    @include button($darkGrey, white);
   }
 }

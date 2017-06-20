@@ -3,7 +3,7 @@ $titleFont: "Helvetica Neue", Helvetica, Arial, sans-serif;
 $codeFont: monospace;
 
 @mixin button($btnColor, $color) {
-    /* use @extend .button on any element ( a or button) or use directly in markup class="button" */
+    /* use @extend .button on any element (a or button) or use directly in markup class="button" */
     display: inline-block;
     padding: 5px 8px;
     background-color: $btnColor;
