@@ -31,9 +31,15 @@ export default class CheckboxEntityMenu extends Component {
     const { collections, collection } = props;
     return (
       <div className="CheckboxEntityMenu offscreen">
-        <span>
+        <span className="SelectCount">
           {props.checkboxEntities.length} Selected
         </span>
+        <button
+          className="deselect clickable"
+          onClick={props.onDeselectEntities}
+        >
+          Deselect
+        </button>
         <span
           style={{
             position: 'relative',
@@ -54,7 +60,7 @@ export default class CheckboxEntityMenu extends Component {
                 className="addToCollection clickable"
                 onClick={() => this.setState({ menuActive: !this.state.menuActive })}
               >
-                Add to collection ▴
+                Add to collection <em>▴</em>
               </button>
               {this.state.menuActive &&
                 <ContextMenu
@@ -81,12 +87,7 @@ export default class CheckboxEntityMenu extends Component {
         >
           Delete
         </button>
-        <button
-          className="deselect clickable"
-          onClick={props.onDeselectEntities}
-        >
-          Deselect
-        </button>
+
       </div>
     );
   }
