@@ -2,39 +2,9 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import VisualisationViewer from '../charts/VisualisationViewer';
 import DashboardCanvasItemEditable from './DashboardCanvasItemEditable';
+import { getIsDatasetLoaded, getItemLayout } from '../../utilities/dashboard';
 
 require('./DashboardCanvasItem.scss');
-
-const getItemLayout = (props) => {
-  let output = null;
-
-  props.canvasLayout.some((item, index) => {
-    let test = false;
-    if (item.i === props.item.id) {
-      output = props.canvasLayout[index];
-      test = true;
-    }
-    return test;
-  });
-
-  return output;
-};
-
-const getIsDatasetLoaded = (props) => {
-  if (props.item.type !== 'visualisation') {
-    return false;
-  }
-
-  switch (props.item.visualisation.visualisationType) {
-    case 'pivot table':
-    case 'pie':
-    case 'donut':
-      return true;
-
-    default:
-      return Boolean(props.datasets[props.item.visualisation.datasetId].get('columns'));
-  }
-};
 
 export default class DashboardCanvasItem extends Component {
 

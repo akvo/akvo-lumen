@@ -3,70 +3,11 @@ import PropTypes from 'prop-types';
 import ReactGridLayout from 'react-grid-layout';
 import DashboardVisualisationList from './DashboardVisualisationList';
 import DashboardCanvasItem from './DashboardCanvasItem';
+import { getArrayFromObject, getNewEntityId, getFirstBlankRowGroup } from '../../utilities/dashboard';
 
 require('./DashboardEditor.scss');
 require('../../../node_modules/react-grid-layout/css/styles.css');
 require('../../../node_modules/react-resizable/css/styles.css');
-
-const getArrayFromObject = object => Object.keys(object).map(key => object[key]);
-
-const getNewEntityId = (entities, itemType) => {
-  const entityArray = getArrayFromObject(entities);
-  let highestIdInt = 0;
-
-  entityArray.forEach((item) => {
-    if (item.type === itemType) {
-      const idInt = parseInt(item.id.substring(itemType.length + 1), 10);
-      if (idInt > highestIdInt) highestIdInt = idInt;
-    }
-  });
-
-  const newIdInt = highestIdInt + 1;
-
-  return `${itemType}-${newIdInt}`;
-};
-
-const getFirstBlankRowGroup = (layout, height) => {
-  /* Function to find the first collection of blank rows big enough for the
-  /* default height of the entity about to be inserted. */
-
-  /* If layout is empty, return the first row */
-  if (layout.length === 0) return 0;
-
-  const occupiedRows = {};
-  let lastRow = 0;
-
-  /* Build an object of all occupied rows, and record the last currently
-  /* occupied row. */
-  layout.forEach((item) => {
-    for (let row = item.y; row < (item.y + item.h); row += 1) {
-      occupiedRows[row] = true;
-      if (row > lastRow) lastRow = row;
-    }
-  });
-
-  /* Loop through every row from 0 to the last occupied. If we encounter a blank
-  /* row i, check the next sequential rows until we have enough blank rows to
-  /* fit our height. If we do, return row i. */
-  for (let i = 0; i < lastRow; i += 1) {
-    if (!occupiedRows[i]) {
-      let haveSpace = true;
-
-      for (let y = i + 1; y < (i + height); y += 1) {
-        if (occupiedRows[y]) {
-          haveSpace = false;
-        }
-      }
-
-      if (haveSpace) {
-        return i;
-      }
-    }
-  }
-
-  /* Otherwise, just return the row after the last currently occupied row. */
-  return lastRow + 1;
-};
 
 export default class DashboardEditor extends Component {
 
