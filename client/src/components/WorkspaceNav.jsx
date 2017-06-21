@@ -7,36 +7,9 @@ import OrganizationMenu from './workspace-nav/OrganizationMenu';
 import CollectionsList from './workspace-nav/CollectionsList';
 import NavWorkspaceSwitch from './workspace-nav/NavWorkspaceSwitch';
 import { showModal } from '../actions/activeModal';
+import { getActiveSubtitle, getCollapsedStatus } from '../utilities/workspace';
 
 require('./WorkspaceNav.scss');
-
-const collapsedLocations = ['visualisation/', 'dataset/', 'dashboard/', 'admin/users'];
-
-const getCollapsedStatus = (pathname) => {
-  let collapsedStatus = false;
-
-  collapsedLocations.forEach((location) => {
-    if (pathname.indexOf(location) > -1) {
-      collapsedStatus = true;
-    }
-  });
-
-  return collapsedStatus;
-};
-
-const getActiveSubtitle = (pathname) => {
-  let activeSubtitle;
-
-  if (pathname.indexOf('collections') > -1) {
-    activeSubtitle = 'collections';
-  } else if (pathname.indexOf('activity') > -1) {
-    activeSubtitle = 'activity';
-  } else if (pathname.indexOf('library') > -1) {
-    activeSubtitle = 'library';
-  }
-
-  return activeSubtitle;
-};
 
 class WorkspaceNav extends Component {
   constructor() {
