@@ -1,4 +1,4 @@
-export const getActiveSubtitle = (pathname) => {
+const getActiveSubtitle = (pathname) => {
   let activeSubtitle;
 
   if (pathname.indexOf('collections') > -1) {
@@ -12,7 +12,7 @@ export const getActiveSubtitle = (pathname) => {
   return activeSubtitle;
 };
 
-export const getCollapsedStatus = (pathname) => {
+const getCollapsedStatus = (pathname) => {
   const collapsedLocations = ['visualisation/', 'dataset/', 'dashboard/', 'admin/users'];
   let collapsedStatus = false;
 
@@ -24,3 +24,5 @@ export const getCollapsedStatus = (pathname) => {
 
   return collapsedStatus;
 };
+
+export default { getActiveSubtitle, getCollapsedStatus };
