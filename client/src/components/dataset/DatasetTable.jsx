@@ -1,23 +1,14 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Table, Column, Cell } from 'fixed-data-table-2';
-import moment from 'moment';
 import ColumnHeader from './ColumnHeader';
 import DataTableSidebar from './DataTableSidebar';
 import DatasetControls from './DatasetControls';
 import DataTypeContextMenu from './context-menus/DataTypeContextMenu';
 import ColumnContextMenu from './context-menus/ColumnContextMenu';
+import formatCellValue from '../../utilities/dataset';
 
 require('./DatasetTable.scss');
-
-function formatCellValue(type, value) {
-  switch (type) {
-    case 'date':
-      return value == null ? null : moment(value).format();
-    default:
-      return value;
-  }
-}
 
 export default class DatasetTable extends Component {
 
