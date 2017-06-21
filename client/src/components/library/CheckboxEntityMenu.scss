@@ -3,11 +3,11 @@
 .CheckboxEntityMenu {
     position: fixed;
     bottom: 0rem;
-    left: 2rem;
-    right: 2rem;
+    left: 16rem;
+    right: 0rem;
     z-index: 3;
     display: flex;
-    justify-content: flex-start;
+    justify-content: flex-end;
     align-items: center;
     height: 4rem;
     background-color: rgba($white, 1);
@@ -18,8 +18,9 @@
     }
 
     .SelectCount {
-        color: rgba($black, 0.5);
+        color: rgba($black, 0.8);
         margin-left: 20px;
+        margin-right: auto;
     }
 
     button {
@@ -37,5 +38,13 @@
         }
 
         &.delete {}
+
+        &.deselect {
+            border-left: 1px solid $black;
+            padding-left: 20px;
+            margin-left: 20px;
+            border-radius: 0px;
+            margin-right: 20px;
+        }
     }
 }

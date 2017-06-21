@@ -34,12 +34,7 @@ export default class CheckboxEntityMenu extends Component {
         <span className="SelectCount">
           {props.checkboxEntities.length} Selected
         </span>
-        <button
-          className="deselect clickable"
-          onClick={props.onDeselectEntities}
-        >
-          Deselect
-        </button>
+
         <span
           style={{
             position: 'relative',
@@ -87,7 +82,12 @@ export default class CheckboxEntityMenu extends Component {
         >
           Delete
         </button>
-
+        <button
+          className="deselect clickable"
+          onClick={props.onDeselectEntities}
+        >
+          Deselect
+        </button>
       </div>
     );
   }
