@@ -1,5 +1,6 @@
 (ns akvo.lumen.transformation.engine
   (:require [akvo.lumen.lib :as lib]
+            [akvo.lumen.lib.dataset-version :as dataset-version]
             [akvo.lumen.util :as util]
             [clojure.java.jdbc :as jdbc]
             [clojure.set :as set]
@@ -143,17 +144,18 @@
       (when-not success? (throw (ex-info "Failed to transform" {})))
       (let [new-dataset-version-id (str (util/squuid))]
         (clear-dataset-version-data-table tenant-conn {:id (:id dataset-version)})
-        (new-dataset-version tenant-conn
-                             {:id new-dataset-version-id
-                              :dataset-id dataset-id
-                              :table-name source-table
-                              :imported-table-name (:imported-table-name dataset-version)
-                              :version (inc (:version dataset-version))
-                              :transformations (conj (vec (:transformations dataset-version))
-                                                     (assoc transformation
-                                                            "changedColumns" (diff-columns previous-columns columns)))
-                              :columns columns})
-        (lib/ok {})))))
+        (let [next-dataset-version {:id new-dataset-version-id
+                                    :dataset-id dataset-id
+                                    :table-name source-table
+                                    :imported-table-name (:imported-table-name dataset-version)
+                                    :version (inc (:version dataset-version))
+                                    :transformations (conj (vec (:transformations dataset-version))
+                                                           (assoc transformation
+                                                                  "changedColumns" (diff-columns previous-columns
+                                                                                                 columns)))
+                                    :columns columns}]
+          (new-dataset-version tenant-conn next-dataset-version)
+          (dataset-version/created next-dataset-version))))))
 
 (defn- apply-undo [tenant-conn dataset-id current-dataset-version]
   (let [imported-table-name (:imported-table-name current-dataset-version)
@@ -173,18 +175,19 @@
       (if (empty? transformations)
         (let [new-dataset-version-id (str (util/squuid))]
           (clear-dataset-version-data-table tenant-conn {:id (:id current-dataset-version)})
-          (new-dataset-version tenant-conn
-                               {:id new-dataset-version-id
-                                :dataset-id dataset-id
-                                :table-name table-name
-                                :imported-table-name (:imported-table-name current-dataset-version)
-                                :version (inc (:version current-dataset-version))
-                                :transformations (vec
-                                                  (butlast
-                                                   (:transformations current-dataset-version)))
-                                :columns columns})
-          (drop-table tenant-conn {:table-name previous-table-name})
-          (lib/ok {}))
+          (let [next-dataset-version {:id new-dataset-version-id
+                                      :dataset-id dataset-id
+                                      :table-name table-name
+                                      :imported-table-name (:imported-table-name current-dataset-version)
+                                      :version (inc (:version current-dataset-version))
+                                      :transformations (vec
+                                                        (butlast
+                                                         (:transformations current-dataset-version)))
+                                      :columns columns}]
+            (new-dataset-version tenant-conn
+                                 next-dataset-version)
+            (drop-table tenant-conn {:table-name previous-table-name})
+            (dataset-version/created next-dataset-version)))
         (let [{:keys [success? message columns execution-log]}
               (apply-operation tenant-conn table-name columns (first transformations))]
           (if success?
@@ -196,7 +199,7 @@
                                                                       {:dataset-id dataset-id})
         current-version (:version current-dataset-version)]
     (if (= current-version 1)
-      (lib/ok {})
+      (dataset-version/created (assoc current-dataset-version :dataset-id dataset-id))
       (apply-undo tenant-conn
                   dataset-id
                   current-dataset-version))))
