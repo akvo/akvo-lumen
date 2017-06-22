@@ -1,3 +1,5 @@
+import { defaultPrimaryColor } from '../visualisationColors';
+
 export default function getVegaAreaSpec(visualisation, data, containerHeight, containerWidth) {
   const { visualisationType } = visualisation;
   const dataSource = 'table';
@@ -89,7 +91,7 @@ export default function getVegaAreaSpec(visualisation, data, containerHeight, co
                 value: 0,
               },
               fill: {
-                value: 'rgb(149, 150, 184)',
+                value: defaultPrimaryColor,
               },
             },
           },
@@ -115,7 +117,7 @@ export default function getVegaAreaSpec(visualisation, data, containerHeight, co
                 value: 0,
               },
               stroke: {
-                value: 'rgb(149, 150, 184)',
+                value: defaultPrimaryColor,
               },
             },
           },
