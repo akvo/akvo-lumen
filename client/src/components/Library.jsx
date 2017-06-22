@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import { push } from 'react-router-redux';
 import LibraryHeader from './library/LibraryHeader';
 import LibraryListing from './library/LibraryListing';
+import CheckboxEntityMenu from './library/CheckboxEntityMenu';
 import DeleteConfirmationModal from './modals/DeleteConfirmationModal';
 import { showModal } from '../actions/activeModal';
 import { fetchLibrary } from '../actions/library';
@@ -236,9 +237,6 @@ class Library extends Component {
         }
         <LibraryHeader
           location={collection ? collection.title : 'Library'}
-          checkboxEntities={this.state.checkboxEntities}
-          collections={collections}
-          collection={collection}
           onCreateCollection={this.handleCreateCollection}
           onAddEntitiesToCollection={this.handleAddEntitiesToCollection}
           onRemoveEntitiesFromCollection={this.handleRemoveEntitiesFromCollection}
@@ -282,7 +280,6 @@ class Library extends Component {
               dispatch(push(`/${type}/create`));
             }
           }}
-          onDeselectEntities={() => this.setState({ checkboxEntities: [] })}
         />
         <LibraryListing
           displayMode={displayMode}
@@ -299,6 +296,17 @@ class Library extends Component {
           onEntityAction={this.handleEntityAction}
         />
         {this.props.children}
+        {this.state.checkboxEntities.length > 0 &&
+          <CheckboxEntityMenu
+            collections={collections}
+            collection={collection}
+            onCreateCollection={this.handleCreateCollection}
+            onAddEntitiesToCollection={this.handleAddEntitiesToCollection}
+            onRemoveEntitiesFromCollection={this.handleRemoveEntitiesFromCollection}
+            checkboxEntities={this.state.checkboxEntities}
+            onDeselectEntities={() => this.setState({ checkboxEntities: [] })}
+          />
+        }
       </div>
     );
   }

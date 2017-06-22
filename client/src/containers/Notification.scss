@@ -2,17 +2,18 @@
 
 .Notification {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3rem;
-  z-index: 3;
+  left: 2rem;
+  bottom: 2rem;
+  height: 4rem;
+  min-width: 30rem;
+  max-width: calc(100vh - 4rem);
+  z-index: 4;
   overflow: hidden;
   color: $white;
   transition: transform 0.5s ease;
 
   &.offscreen {
-    transform: translate(0, -3rem);
+    transform: translate(0, 6rem);
   }
 
   &.error {
@@ -23,18 +24,18 @@
   }
   &.info {
     background-color: $white;
-    border-bottom: solid 1px $black;
+    border: 1px solid $black;
     color: $black;
   }
   .message {
     padding: 0.5rem 1rem 0.5rem 1rem;
     margin-right: 2rem;
-    line-height: 3rem;
+    line-height: 4rem;
   }
   .close {
     position: absolute;
     font-size: 1.5rem;
-    line-height: 3rem;
+    line-height: 4rem;
     right: 1rem;
     top: 0;
     display: block;
