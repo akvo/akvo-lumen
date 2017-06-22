@@ -55,7 +55,7 @@ export default class CheckboxEntityMenu extends Component {
                 className="addToCollection clickable"
                 onClick={() => this.setState({ menuActive: !this.state.menuActive })}
               >
-                Add to collection <em>▴</em>
+                Add to collection
               </button>
               {this.state.menuActive &&
                 <ContextMenu
