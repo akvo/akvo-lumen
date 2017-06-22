@@ -5,8 +5,7 @@
   :http #var akvo.lumen.component.http/http
   :keycloak #var akvo.lumen.component.keycloak/keycloak
   :user-manager #var akvo.lumen.component.user-manager/user-manager
-  :tenant-manager #var akvo.lumen.component.tenant-manager/tenant-manager
-  :transformation-engine #var akvo.lumen.component.transformation-engine/transformation-engine}
+  :tenant-manager #var akvo.lumen.component.tenant-manager/tenant-manager}
  :endpoints
  {:aggregation #var akvo.lumen.endpoint.aggregation/endpoint
   :collection #var akvo.lumen.endpoint.collection/endpoint
@@ -30,7 +29,6 @@
         :invite-verify :job-execution :library :public :root :share :transformation
         :user :visualisation]
   :tenant-manager [:db]
-  :transformation-engine [:tenant-manager]
   :aggregation [:tenant-manager]
   :collection [:tenant-manager]
   :dashboard [:tenant-manager]
@@ -44,7 +42,7 @@
   :public [:tenant-manager]
   :root [:tenant-manager]
   :share [:tenant-manager :config]
-  :transformation [:transformation-engine :tenant-manager]
+  :transformation [:tenant-manager]
   :user [:user-manager]
   :user-manager [:emailer :keycloak]
   :visualisation [:tenant-manager]}

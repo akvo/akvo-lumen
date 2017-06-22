@@ -1,6 +1,5 @@
 (ns akvo.lumen.transformation
-  (:require [akvo.lumen.component.transformation-engine :refer (enqueue)]
-            [akvo.lumen.lib :as lib]
+  (:require [akvo.lumen.lib :as lib]
             [akvo.lumen.transformation.engine :as engine]
             [akvo.lumen.util :refer (squuid)]
             [clojure.java.jdbc :as jdbc]

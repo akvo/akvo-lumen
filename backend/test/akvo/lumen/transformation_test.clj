@@ -1,6 +1,5 @@
 (ns akvo.lumen.transformation-test
   (:require [akvo.lumen.component.tenant-manager :refer [tenant-manager]]
-            [akvo.lumen.component.transformation-engine :refer [transformation-engine]]
             [akvo.lumen.fixtures :refer [test-conn
                                          test-tenant-spec
                                          migrate-tenant
@@ -29,30 +28,23 @@
 (hugsql/def-db-fns "akvo/lumen/transformation_test.sql")
 (hugsql/def-db-fns "akvo/lumen/transformation.sql")
 
-(def ^:dynamic *transformation-engine*)
-
 (def transformation-test-system
   (->
    (component/system-map
-    :transformation-engine (transformation-engine {})
     :tenant-manager (tenant-manager {})
     :db (hikaricp {:uri (:db_uri test-tenant-spec)}))
    (component/system-using
-    {:transformation-engine [:tenant-manager]
-     :tenant-manager [:db]})))
+    {:tenant-manager [:db]})))
 
 (defn new-fixture [f]
   (alter-var-root #'transformation-test-system component/start)
-  (binding [*transformation-engine*
-            (:transformation-engine transformation-test-system)]
-    (f)
-    (alter-var-root #'transformation-test-system component/stop)))
+  (f)
+  (alter-var-root #'transformation-test-system component/stop))
 
 (defn test-fixture
   [f]
   (rollback-tenant test-tenant-spec)
   (migrate-tenant test-tenant-spec)
-
   (f))
 
 (use-fixtures :once test-fixture new-fixture)
