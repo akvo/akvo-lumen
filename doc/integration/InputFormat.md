@@ -1,6 +1,6 @@
 # Lumen data input format
 
-Lumen currently supports input of data in CSV from either a file or from a URL.
+Lumen currently supports import of data in CSV format from either a file or from a web address (URL). Lumen will import your data and, to it's best capacity, guess the correct datatype of the CSV columns when importing it, thus saving you time in the data cleaning step.
 
 ## File format
 
