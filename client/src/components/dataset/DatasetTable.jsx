@@ -1,14 +1,23 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import moment from 'moment';
 import { Table, Column, Cell } from 'fixed-data-table-2';
 import ColumnHeader from './ColumnHeader';
 import DataTableSidebar from './DataTableSidebar';
 import DatasetControls from './DatasetControls';
 import DataTypeContextMenu from './context-menus/DataTypeContextMenu';
 import ColumnContextMenu from './context-menus/ColumnContextMenu';
-import formatCellValue from '../../utilities/dataset';
 
 require('./DatasetTable.scss');
+
+const formatCellValue = (type, value) => {
+  switch (type) {
+    case 'date':
+      return value == null ? null : moment(value).format();
+    default:
+      return value;
+  }
+};
 
 export default class DatasetTable extends Component {
 
@@ -273,7 +282,10 @@ export default class DatasetTable extends Component {
       );
       const formatCell = (props) => {
         const formattedCellValue =
-          formatCellValue(column.get('type'), rows.getIn([props.rowIndex, index]));
+          formatCellValue(
+            column.get('type'),
+            rows.getIn([props.rowIndex, index])
+          );
 
         return (
           <Cell>

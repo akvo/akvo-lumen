@@ -1,7 +1,7 @@
 import { createAction } from 'redux-actions';
 import { push } from 'react-router-redux';
 import { fetchDataset } from './dataset';
-import * as api from '../api';
+import * as api from '../utilities/api';
 
 /* Fetched all visualisations */
 export const fetchVisualisationsSuccess = createAction('FETCH_VISUALISATIONS_SUCCESS');

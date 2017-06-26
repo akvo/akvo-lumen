@@ -6,7 +6,7 @@ import { showModal } from '../actions/activeModal';
 import { fetchDataset } from '../actions/dataset';
 import { getId, getTitle } from '../domain/entity';
 import { getTransformations, getRows, getColumns } from '../domain/dataset';
-import * as api from '../api';
+import * as api from '../utilities/api';
 
 require('../components/dataset/Dataset.scss');
 

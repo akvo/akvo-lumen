@@ -1,4 +1,4 @@
-const getItemLayout = (props) => {
+export function getItemLayout(props) {
   let output = null;
 
   props.canvasLayout.some((item, index) => {
@@ -11,9 +11,9 @@ const getItemLayout = (props) => {
   });
 
   return output;
-};
+}
 
-const getIsDatasetLoaded = (props) => {
+export function getIsDatasetLoaded(props) {
   if (props.item.type !== 'visualisation') {
     return false;
   }
@@ -27,11 +27,13 @@ const getIsDatasetLoaded = (props) => {
     default:
       return Boolean(props.datasets[props.item.visualisation.datasetId].get('columns'));
   }
-};
+}
 
-const getArrayFromObject = object => Object.keys(object).map(key => object[key]);
+export function getArrayFromObject(object) {
+  return Object.keys(object).map(key => object[key]);
+}
 
-const getNewEntityId = (entities, itemType) => {
+export function getNewEntityId(entities, itemType) {
   const entityArray = getArrayFromObject(entities);
   let highestIdInt = 0;
 
@@ -45,9 +47,9 @@ const getNewEntityId = (entities, itemType) => {
   const newIdInt = highestIdInt + 1;
 
   return `${itemType}-${newIdInt}`;
-};
+}
 
-const getFirstBlankRowGroup = (layout, height) => {
+export function getFirstBlankRowGroup(layout, height) {
   /* Function to find the first collection of blank rows big enough for the
   /* default height of the entity about to be inserted. */
 
@@ -87,7 +89,7 @@ const getFirstBlankRowGroup = (layout, height) => {
 
   /* Otherwise, just return the row after the last currently occupied row. */
   return lastRow + 1;
-};
+}
 
 const viewportLimits = [
   {
@@ -103,26 +105,30 @@ const viewportLimits = [
     name: 'large',
   },
 ];
+export { viewportLimits };
 
-const getSortFunc = layout => (a, b) => {
-  const ay = layout[a.id].y;
-  const by = layout[b.id].y;
-  const ax = layout[a.id].x;
-  const bx = layout[b.id].x;
+export function getSortFunc(layout) {
+  const sortFunc = (a, b) => {
+    const ay = layout[a.id].y;
+    const by = layout[b.id].y;
+    const ax = layout[a.id].x;
+    const bx = layout[b.id].x;
 
-  if (ay < by) {
-    return -1;
-  } else if (ay > by) {
-    return 1;
-  } else if (ax < bx) {
-    return -1;
-  } else if (ax > bx) {
-    return 1;
-  }
-  return 0;
-};
+    if (ay < by) {
+      return -1;
+    } else if (ay > by) {
+      return 1;
+    } else if (ax < bx) {
+      return -1;
+    } else if (ax > bx) {
+      return 1;
+    }
+    return 0;
+  };
+  return sortFunc;
+}
 
-const formatDate = (date) => {
+export function formatDate(date) {
   let month = date.getMonth() + 1;
   let day = date.getDate();
   let hours = date.getHours();
@@ -133,9 +139,9 @@ const formatDate = (date) => {
   if (minutes < 10) minutes = `0${minutes}`;
 
   return `${date.getFullYear()}-${month}-${day} ${hours}:${minutes}`;
-};
+}
 
-const filterVisualisations = (visualisations, filterText) => {
+export function filterVisualisations(visualisations, filterText) {
   // NB - this naive approach is fine with a few hundred visualisations, but we should replace
   // with something more serious before users start to have thousands of visualisations
   if (!filterText) {
@@ -148,16 +154,4 @@ const filterVisualisations = (visualisations, filterText) => {
 
     return name.indexOf(filterText.toString().toLowerCase()) > -1;
   });
-};
-
-export default {
-  getItemLayout,
-  getIsDatasetLoaded,
-  getArrayFromObject,
-  getFirstBlankRowGroup,
-  getNewEntityId,
-  viewportLimits,
-  getSortFunc,
-  filterVisualisations,
-  formatDate,
-};
+}

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { isEqual, cloneDeep } from 'lodash';
 import VisualisationConfig from './VisualisationConfig';
 import VisualisationPreview from './VisualisationPreview';
-import * as api from '../../api';
+import * as api from '../../utilities/api';
 
 require('./VisualisationEditor.scss');
 

@@ -1,6 +1,6 @@
 import { createAction } from 'redux-actions';
 import { push } from 'react-router-redux';
-import * as api from '../api';
+import * as api from '../utilities/api';
 
 export const fetchDashboardsSuccess = createAction('FETCH_DASHBOARDS_SUCCESS');
 

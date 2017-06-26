@@ -4,7 +4,7 @@ import * as visualisationActions from './visualisation';
 import { hideModal } from './activeModal';
 import applyTransformation from '../reducers/transform';
 import { showNotification } from './notification';
-import * as api from '../api';
+import * as api from '../utilities/api';
 
 /*
  * Fetch a dataset by id

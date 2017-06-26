@@ -1,14 +1,16 @@
 import { push } from 'react-router-redux';
 
-const mergeQuery = (location, query) =>
-  Object.assign({}, location, {
+function mergeQuery(location, query) {
+  return Object.assign({}, location, {
     query: Object.assign({}, location.query, query),
   });
+}
 
-const updateQueryAction = (location, query) =>
-  push(mergeQuery(location, query));
+export function updateQueryAction(location, query) {
+  return push(mergeQuery(location, query));
+}
 
-const filterLibraryByCollection = (library, collection) => {
+export function filterLibraryByCollection(library, collection) {
   const filteredLibrary = {};
 
   filteredLibrary.datasets = {};
@@ -26,6 +28,4 @@ const filterLibraryByCollection = (library, collection) => {
   });
 
   return Object.assign({}, library, filteredLibrary);
-};
-
-export default { updateQueryAction, filterLibraryByCollection };
+}

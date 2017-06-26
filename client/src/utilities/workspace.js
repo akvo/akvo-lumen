@@ -1,4 +1,4 @@
-const getActiveSubtitle = (pathname) => {
+export function getActiveSubtitle(pathname) {
   let activeSubtitle;
 
   if (pathname.indexOf('collections') > -1) {
@@ -10,9 +10,9 @@ const getActiveSubtitle = (pathname) => {
   }
 
   return activeSubtitle;
-};
+}
 
-const getCollapsedStatus = (pathname) => {
+export function getCollapsedStatus(pathname) {
   const collapsedLocations = ['visualisation/', 'dataset/', 'dashboard/', 'admin/users'];
   let collapsedStatus = false;
 
@@ -23,6 +23,4 @@ const getCollapsedStatus = (pathname) => {
   });
 
   return collapsedStatus;
-};
-
-export default { getActiveSubtitle, getCollapsedStatus };
+}

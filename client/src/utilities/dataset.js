@@ -1,15 +1,4 @@
-import moment from 'moment';
-
-const formatCellValue = (type, value) => {
-  switch (type) {
-    case 'date':
-      return value == null ? null : moment(value).format();
-    default:
-      return value;
-  }
-};
-
-const fileName = (source) => {
+export default function fileName(source) {
   switch (source.kind) {
     case 'DATA_FILE':
       return source.fileName;
@@ -17,8 +6,7 @@ const fileName = (source) => {
       return source.url.substring(source.url.lastIndexOf('/') + 1);
     case 'AKVO_FLOW':
       return 'Survey';
-    default: return 'Unknown';
+    default:
+      return 'Unknown';
   }
-};
-
-export default { formatCellValue, fileName };
+}
