@@ -48,6 +48,7 @@
             .Select-control {
                 @include button($anchorLink, $white);
 
+                color: $white !important;
                 text-align: left;
 
                 &:hover {

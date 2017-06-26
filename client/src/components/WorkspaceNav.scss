@@ -137,10 +137,11 @@
             display: inline-block;
             position: relative;
             padding-right: 2.5rem;
+            font-size: 1rem;
         }
 
         .subtitle {
-            color: rgba($textPrimary, 0.4);
+            color: rgba($black, 0.4);
         }
 
         .addCollection {
