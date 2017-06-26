@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import SelectMenu from '../../common/SelectMenu';
 import SelectInput from './SelectInput';
 import { getPointColorValues, getPointColorMappingSortFunc } from '../../../utilities/chart';
-import defaultColors from '../../../utilities/defaultColors';
+import { palette } from '../../../utilities/visualisationColors';
 import ButtonRowInput from './ButtonRowInput';
 import ToggleInput from './ToggleInput';
 import ColorLabels from './ColorLabels';
@@ -315,7 +315,7 @@ export default class LayerConfigMenu extends Component {
         values.map((value, index) => ({
           op: 'equals',
           value,
-          color: defaultColors[index] || '#000000',
+          color: palette[index] || '#000000',
         }))
         .sort(sortFunc)
         :
