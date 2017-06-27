@@ -1,4 +1,5 @@
 (ns akvo.lumen.transformation
+  (:refer-clojure :exclude [apply])
   (:require [akvo.lumen.lib :as lib]
             [akvo.lumen.transformation.engine :as engine]
             [akvo.lumen.util :refer (squuid)]
@@ -19,7 +20,7 @@
     akvo.lumen.transformation.delete-column])
 
 ;; Load transformation namespaces
-(apply require transformation-namespaces)
+(clojure.core/apply require transformation-namespaces)
 
 (defn validate
   [command]
@@ -36,7 +37,7 @@
       {:valid? false
        :message (.getMessage e)})))
 
-(defn schedule
+(defn apply
   [tenant-conn dataset-id command]
   (if-let [dataset (dataset-by-id tenant-conn {:id dataset-id})]
     (let [v (validate command)

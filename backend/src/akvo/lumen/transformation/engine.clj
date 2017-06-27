@@ -1,10 +1,8 @@
 (ns akvo.lumen.transformation.engine
   (:require [akvo.lumen.lib :as lib]
             [akvo.lumen.util :as util]
-            [clojure.java.jdbc :as jdbc]
             [clojure.set :as set]
             [clojure.string :as str]
-            [clojure.walk :as walk]
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/transformation.sql")

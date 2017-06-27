@@ -58,12 +58,12 @@
 (deftest ^:functional test-transformations
   (testing "Transformation application"
     (is (= [::lib/bad-request {"message" "Dataset not found"}]
-           (tf/schedule test-conn "Not-valid-id" []))))
+           (tf/apply test-conn "Not-valid-id" []))))
   (testing "Valid log"
     (let [dataset-id (import-file "transformation_test.csv" {:name "Transformation Test"
                                                              :has-column-headers? true})
           [tag _] (last (for [transformation ops]
-                          (tf/schedule test-conn dataset-id {:type :transformation
+                          (tf/apply test-conn dataset-id {:type :transformation
                                                              :transformation transformation})))]
       (is (= ::lib/ok tag)))))
 
@@ -83,7 +83,7 @@
                   "onError" "fail"}]
           dataset-id (import-file "GDP.csv" {:name "GDP Test" :has-column-headers? false})]
       (let [[tag {:strs [datasetId]}] (last (for [transformation t-log]
-                                              (tf/schedule test-conn
+                                              (tf/apply test-conn
                                                            dataset-id
                                                            {:type :transformation
                                                             :transformation transformation})))]
@@ -106,19 +106,19 @@
   (let [dataset-id (import-file "GDP.csv" {:dataset-name "GDP Undo Test"})
         {previous-table-name :table-name} (latest-dataset-version-by-dataset-id test-conn
                                                                                 {:dataset-id dataset-id})
-        schedule (partial tf/schedule test-conn dataset-id)]
-    (is (= ::lib/ok (first (schedule {:type :undo}))))
-    (let [[tag _] (do (schedule {:type :transformation
+        apply (partial tf/apply test-conn dataset-id)]
+    (is (= ::lib/ok (first (apply {:type :undo}))))
+    (let [[tag _] (do (apply {:type :transformation
                                  :transformation {"op" "core/to-lowercase"
                                                   "args" {"columnName" "c1"}
                                                   "onError" "fail"}})
-                      (schedule {:type :transformation
+                      (apply {:type :transformation
                                  :transformation {"op" "core/change-datatype"
                                                   "args" {"columnName" "c5"
                                                           "newType" "number"
                                                           "defaultValue" 0}
                                                   "onError" "default-value"}})
-                      (schedule {:type :undo}))]
+                      (apply {:type :undo}))]
       (is (= ::lib/ok tag))
       (is (not (:exists (table-exists test-conn {:table-name previous-table-name}))))
       (is (= (:columns (dataset-version-by-dataset-id test-conn
@@ -133,7 +133,7 @@
                                         {:rnum 1
                                          :column-name "c1"
                                          :table-name table-name})))))
-      (schedule {:type :undo})
+      (apply {:type :undo})
       (let [table-name (:table-name
                         (latest-dataset-version-by-dataset-id test-conn
                                                               {:dataset-id dataset-id}))]
@@ -145,8 +145,8 @@
 
 (deftest ^:functional combine-transformation-test
   (let [dataset-id (import-file "name.csv" {:has-column-headers? true})
-        schedule (partial tf/schedule test-conn dataset-id)]
-    (let [[tag _] (schedule {:type :transformation
+        apply (partial tf/apply test-conn dataset-id)]
+    (let [[tag _] (apply {:type :transformation
                              :transformation {"op" "core/combine"
                                               "args" {"columnNames" ["c1" "c2"]
                                                       "newColumnTitle" "full name"
@@ -173,10 +173,10 @@
 
 (deftest ^:functional date-parsing-test
   (let [dataset-id (import-file "dates.csv" {:has-column-headers? true})
-        schedule (partial tf/schedule test-conn dataset-id)]
-    (let [[tag {:strs [datasetId]}] (do (schedule (date-transformation "c1" "YYYY"))
-                                        (schedule (date-transformation "c2" "DD/MM/YYYY"))
-                                        (schedule (date-transformation "c3" "YYYY-MM-DD")))]
+        apply (partial tf/apply test-conn dataset-id)]
+    (let [[tag {:strs [datasetId]}] (do (apply (date-transformation "c1" "YYYY"))
+                                        (apply (date-transformation "c2" "DD/MM/YYYY"))
+                                        (apply (date-transformation "c3" "YYYY-MM-DD")))]
       (is (= ::lib/ok tag))
       (let [table-name (:table-name (latest-dataset-version-by-dataset-id test-conn
                                                                           {:dataset-id datasetId}))
@@ -222,9 +222,9 @@
 
 (deftest ^:functional derived-column-test
   (let [dataset-id (import-file "derived-column.csv" {:has-column-headers? true})
-        schedule (partial tf/schedule test-conn dataset-id)]
-    (do (schedule (change-datatype-transformation "c2"))
-        (schedule (change-datatype-transformation "c3")))
+        apply (partial tf/apply test-conn dataset-id)]
+    (do (apply (change-datatype-transformation "c2"))
+        (apply (change-datatype-transformation "c3")))
 
     (testing "Import and initial transforms"
       (is (= (latest-data dataset-id)
@@ -233,26 +233,26 @@
               {:rnum 3 :c1 nil :c2 4.0 :c3 5.0}])))
 
     (testing "Basic text transform"
-      (schedule (derive-column-transform {"args" {"code" "row['foo'].toUpperCase()"
-                                                  "newColumnTitle" "Derived 1"
-                                                  "newColumnType" "text"}
-                                          "onError" "leave-empty"}))
+      (apply (derive-column-transform {"args" {"code" "row['foo'].toUpperCase()"
+                                               "newColumnTitle" "Derived 1"
+                                               "newColumnType" "text"}
+                                       "onError" "leave-empty"}))
       (is (= ["A" "B" nil] (map :d1 (latest-data dataset-id)))))
 
     (testing "Basic text transform with drop row on error"
-      (schedule (derive-column-transform {"args" {"code" "row['foo'].replace('a', 'b')"
-                                                  "newColumnTitle" "Derived 3"
-                                                  "newColumnType" "text"}
-                                          "onError" "delete-row"}))
+      (apply (derive-column-transform {"args" {"code" "row['foo'].replace('a', 'b')"
+                                               "newColumnTitle" "Derived 3"
+                                               "newColumnType" "text"}
+                                       "onError" "delete-row"}))
       (is (= ["b" "b"] (map :d2 (latest-data dataset-id))))
       ;; Undo this so we have all the rows in the remaining tests
-      (schedule {:type :undo}))
+      (apply {:type :undo}))
 
     (testing "Basic text transform with abort"
-      (schedule (derive-column-transform {"args" {"code" "row['foo'].length"
-                                                  "newColumnTitle" "Derived 2"
-                                                  "newColumnType" "number"}
-                                          "onError" "fail"}))
+      (apply (derive-column-transform {"args" {"code" "row['foo'].length"
+                                               "newColumnTitle" "Derived 2"
+                                               "newColumnType" "number"}
+                                       "onError" "fail"}))
       (is (-> (latest-data dataset-id)
               first
               keys
@@ -261,81 +261,81 @@
               not)))
 
     (testing "Nested string transform"
-      (schedule (derive-column-transform {"args" {"code" "row['foo'].toUpperCase()"
-                                                  "newColumnType" "text"
-                                                  "newColumnTitle" "Derived 4"}}))
+      (apply (derive-column-transform {"args" {"code" "row['foo'].toUpperCase()"
+                                               "newColumnType" "text"
+                                               "newColumnTitle" "Derived 4"}}))
       (is (= ["A" "B" nil] (map :d2 (latest-data dataset-id))))
 
-      (schedule (derive-column-transform {"args" {"code" "row['Derived 4'].toLowerCase()"
-                                                  "newColumnType" "text"
-                                                  "newColumnTitle" "Derived 5"}}))
+      (apply (derive-column-transform {"args" {"code" "row['Derived 4'].toLowerCase()"
+                                               "newColumnType" "text"
+                                               "newColumnTitle" "Derived 5"}}))
       (is (= ["a" "b" nil] (map :d3 (latest-data dataset-id)))))
 
     (testing "Date transform"
-      (let [[tag _] (schedule (derive-column-transform {"args" {"code" "new Date()"
-                                                                "newColumnType" "date"
-                                                                "newColumnTitle" "Derived 5"}
-                                                        "onError" "fail"}))]
+      (let [[tag _] (apply (derive-column-transform {"args" {"code" "new Date()"
+                                                             "newColumnType" "date"
+                                                             "newColumnTitle" "Derived 5"}
+                                                     "onError" "fail"}))]
         (is (= tag ::lib/ok))
         (is (every? number? (map :d4 (latest-data dataset-id))))))
 
     (testing "Valid type check"
-      (let [[tag _] (schedule (derive-column-transform {"args" {"code" "new Date()"
-                                                                "newColumnType" "number"
-                                                                "newColumnTitle" "Derived 6"}
-                                                        "onError" "fail"}))]
+      (let [[tag _] (apply (derive-column-transform {"args" {"code" "new Date()"
+                                                             "newColumnType" "number"
+                                                             "newColumnTitle" "Derived 6"}
+                                                     "onError" "fail"}))]
         (is (= tag ::lib/conflict))))
 
     (testing "Sandboxing java interop"
-      (let [[tag _] (schedule (derive-column-transform {"args" {"code" "new java.util.Date()"
-                                                                "newColumnType" "number"
-                                                                "newColumnTitle" "Derived 7"}
-                                                        "onError" "fail"}))]
+      (let [[tag _] (apply (derive-column-transform {"args" {"code" "new java.util.Date()"
+                                                             "newColumnType" "number"
+                                                             "newColumnTitle" "Derived 7"}
+                                                     "onError" "fail"}))]
         (is (= tag ::lib/conflict))))
 
     (testing "Sandboxing dangerous js functions"
-      (let [[tag _] (schedule (derive-column-transform {"args" {"code" "quit()"
-                                                                "newColumnType" "number"
-                                                                "newColumnTitle" "Derived 7"}
-                                                        "onError" "fail"}))]
+      (let [[tag _] (apply (derive-column-transform {"args" {"code" "quit()"
+                                                             "newColumnType" "number"
+                                                             "newColumnTitle" "Derived 7"}
+                                                     "onError" "fail"}))]
         (is (= tag ::lib/conflict))))
 
     (testing "Fail early on syntax error"
-      (let [[tag _] (schedule (derive-column-transform {"args" {"code" ")"
-                                                                "newColumnType" "text"
-                                                                "newColumnTitle" "Derived 8"}
-                                                        "onError" "fail"}))]
+      (let [[tag _] (apply (derive-column-transform {"args" {"code" ")"
+                                                             "newColumnType" "text"
+                                                             "newColumnTitle" "Derived 8"}
+                                                     "onError" "fail"}))]
         (is (= tag ::lib/bad-request))))
 
     (testing "Fail infinite loop"
-      (let [[tag _] (schedule (derive-column-transform {"args" {"code" "while(true) {}"
-                                                                "newColumnType" "text"
-                                                                "newColumnTitle" "Derived 9"}
-                                                        "onError" "fail"}))]
+      (let [[tag _] (apply (derive-column-transform {"args" {"code" "while(true) {}"
+                                                             "newColumnType" "text"
+                                                             "newColumnTitle" "Derived 9"}
+                                                     "onError" "fail"}))]
         (is (= tag ::lib/bad-request))))
 
 
     (testing "Disallow anonymous functions"
-      (let [[tag _] (schedule (derive-column-transform {"args" {"code" "(function() {})()"
-                                                                "newColumnType" "text"
-                                                                "newColumnTitle" "Derived 10"}
-                                                        "onError" "fail"}))]
+      (let [[tag _] (apply (derive-column-transform {"args" {"code" "(function() {})()"
+                                                             "newColumnType" "text"
+                                                             "newColumnTitle" "Derived 10"}
+                                                     "onError" "fail"}))]
         (is (= tag ::lib/bad-request)))
 
-      (let [[tag _] (schedule (derive-column-transform {"args" {"code" "(() => 'foo')()"
-                                                                "newColumnType" "text"
-                                                                "newColumnTitle" "Derived 11"}
-                                                        "onError" "fail"}))]
+      (let [[tag _] (apply (derive-column-transform {"args" {"code" "(() => 'foo')()"
+                                                             "newColumnType" "text"
+                                                             "newColumnTitle" "Derived 11"}
+                                                     "onError" "fail"}))]
         (is (= tag ::lib/bad-request))))))
 
 
 (deftest ^:functional delete-column-test
   (let [dataset-id (import-file "dates.csv" {:has-column-headers? true})
-        schedule (partial tf/schedule test-conn dataset-id)]
-    (let [[tag _] (schedule {:type :transformation
-                             :transformation {"op" "core/delete-column"
-                                              "args" {"columnName" "c2"}
-                                              "onError" "fail"}})]
+        apply (partial tf/apply test-conn dataset-id)]
+    (let [[tag _] (apply {:type :transformation
+                          :transformation {"op" "core/delete-column"
+                                           "args" {"columnName" "c2"}
+                                           "onError" "fail"}})]
       (is (= ::lib/ok tag))
       (let [{:keys [columns transformations]} (latest-dataset-version-by-dataset-id test-conn
                                                                                     {:dataset-id dataset-id})]
@@ -346,12 +346,12 @@
 
 (deftest ^:functional rename-column-test
   (let [dataset-id (import-file "dates.csv" {:has-column-headers? true})
-        schedule (partial tf/schedule test-conn dataset-id)]
-    (let [[tag _] (schedule {:type :transformation
-                             :transformation {"op" "core/rename-column"
-                                              "args" {"columnName" "c2"
-                                                      "newColumnTitle" "New Title"}
-                                              "onError" "fail"}})]
+        apply (partial tf/apply test-conn dataset-id)]
+    (let [[tag _] (apply {:type :transformation
+                          :transformation {"op" "core/rename-column"
+                                           "args" {"columnName" "c2"
+                                                   "newColumnTitle" "New Title"}
+                                           "onError" "fail"}})]
       (is (= ::lib/ok tag))
       (let [{:keys [columns transformations]} (latest-dataset-version-by-dataset-id test-conn
                                                                                     {:dataset-id dataset-id})]

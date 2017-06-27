@@ -28,14 +28,14 @@
   (binding [*tenant-conn* (:spec (:db test-system))
             *dataset-id* (import-file "pivot.csv" {:dataset-name "pivot"
                                                    :has-column-headers? true})]
-    (tf/schedule *tenant-conn*
-                 *dataset-id*
-                 {:type :transformation
-                  :transformation {"op" "core/change-datatype"
-                                   "args" {"columnName" "c3"
-                                           "newType" "number"
-                                           "defaultValue" 0}
-                                   "onError" "default-value"}})
+    (tf/apply *tenant-conn*
+              *dataset-id*
+              {:type :transformation
+               :transformation {"op" "core/change-datatype"
+                                "args" {"columnName" "c3"
+                                        "newType" "number"
+                                        "defaultValue" 0}
+                                "onError" "default-value"}})
     (f)
     (alter-var-root #'test-system component/stop)
     (rollback-tenant test-tenant-spec)))

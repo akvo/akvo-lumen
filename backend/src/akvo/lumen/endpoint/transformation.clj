@@ -9,12 +9,12 @@
       (context "/:dataset-id" [dataset-id]
 
         (POST "/transform" {:keys [body] :as request}
-          (t/schedule tenant-conn
-                      dataset-id
-                      {:type :transformation
-                       :transformation body}))
+          (t/apply tenant-conn
+                   dataset-id
+                   {:type :transformation
+                    :transformation body}))
 
         (POST "/undo" _
-          (t/schedule tenant-conn
-                      dataset-id
-                      {:type :undo}))))))
+          (t/apply tenant-conn
+                   dataset-id
+                   {:type :undo}))))))
