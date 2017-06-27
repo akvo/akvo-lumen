@@ -1,0 +1,29 @@
+@import "../../../styles/modules/importAll";
+
+.SourceSelection {
+    display: relative;
+    margin: 0;
+
+    .sourceOptionContainer {
+        display: inline-block;
+        width: 20%;
+        height: 6rem;
+        margin: 1rem calc(20% / 8);
+        padding: 1rem;
+        text-align: center;
+        background-color: whitesmoke;
+        vertical-align: bottom;
+
+        input {
+            margin-right: 0.5rem;
+        }
+
+        &.notImplemented {
+            background-color: rgba($black, 0.25);
+
+            input {
+                cursor: not-allowed;
+            }
+        }
+    }
+}

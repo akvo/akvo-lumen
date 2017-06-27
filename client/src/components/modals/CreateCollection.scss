@@ -1,18 +1,9 @@
 @import "../../styles/modules/importAll";
 
 .CreateCollection {
-    height: 100%;
-    position: relative;
-
-    .contents {
-        width: 100%;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        padding: 0;
+    .ModalContents {
         justify-content: center;
     }
-
     input, label {
         display: block;
     }
