@@ -11,6 +11,9 @@ The first row can include column headers or not. If the file is imported without
 ## File source
 A file on your local hard drive or a file stream on a URL with http or https.
 
+## How to import data into Lumen
+CSV data is imported using `New->Dataset` in the Lumen user interface. Functionality will be added to refresh external data, both manually and on a schedule.
+
 ## What you can't do right now
 
 #### Authentication
