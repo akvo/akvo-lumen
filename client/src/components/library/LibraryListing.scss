@@ -7,7 +7,6 @@
 
         h3 {
             color: $textSecondary;
-            margin-top: 1rem;
         }
     }
 
@@ -24,7 +23,6 @@
 
         h3 {
             color: rgba($black, 1);
-            margin-top: 1rem;
         }
 
         &:hover {
@@ -55,11 +53,19 @@
 
         .checkboxContainer {
             display: flex;
-            width: 2rem;
-            padding-left: 1rem;
             justify-content: space-around;
             align-items: center;
             cursor: pointer;
+            margin-left: 3px;
+
+            input[type="checkbox"] {
+                width: 17px;
+                height: 17px;
+
+                @include border-radius(3px);
+
+                border: 1px solid black;
+            }
         }
 
         .entityBody {

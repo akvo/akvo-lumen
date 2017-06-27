@@ -46,9 +46,9 @@
             height: 100%;
 
             .Select-control {
-                @include button($anchorLink, $white);
+                @include button($anchorLink, white);
 
-                color: $white !important;
+                color: white !important;
                 text-align: left;
 
                 &:hover {
@@ -58,6 +58,7 @@
 
             .Select-placeholder {
                 margin-top: -2px;
+                color: white !important;
             }
 
             .Select-arrow {
@@ -71,7 +72,9 @@
                     background-color: $white;
                 }
 
-                .Select-placeholder {}
+                .Select-placeholder {
+                    color: $anchorLink !important;
+                }
 
                 .Select-arrow {
                     top: 0px;
