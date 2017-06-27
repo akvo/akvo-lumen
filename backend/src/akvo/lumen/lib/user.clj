@@ -29,34 +29,26 @@
   [keycloak tenant-conn tenant id]
   (impl/verify-invite keycloak tenant-conn tenant id))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Todo
-
-
-;; (defn tenant-invite-email
-;;   "Constructs the tenant invite email body"
-;;   [keycloak server-name invite-id author-claims])
-
-;; (defn user-and-tenant-invite-email
-;;   "Constructs user and tenant invite email body"
-;;   [keycloak server-name invite-id author-claims email tmp-password])
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; User management
+;; Invites
 
 (defn users
   "List users of tenant."
-  [keycloak tenant])
+  [keycloak tenant]
+  (impl/users keycloak tenant))
 
 (defn remove-user
   "Remove user from tenant."
-  [keycloak tenant author-claims user-id])
+  [keycloak tenant author-claims user-id]
+  (impl/remove-user keycloak tenant author-claims user-id))
 
 (defn demote-user-from-admin
-  "Promote existing user to admin."
-  [keycloak tenant author-claims user-id])
+  "Demote existing user from admin."
+  [keycloak tenant author-claims user-id]
+  (impl/demote-user-from-admin keycloak tenant author-claims user-id))
 
 (defn promote-user-to-admin
-  "Promote existing user to admin."
-  [keycloak tenant author-claims user-id])
+  "Demote existing user from admin."
+  [keycloak tenant author-claims user-id]
+  (impl/promote-user-to-admin keycloak tenant author-claims user-id))

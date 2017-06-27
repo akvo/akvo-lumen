@@ -56,7 +56,6 @@
   ""
   [emailer keycloak tenant-conn server-name email
    {:strs [name] :as author-claims}]
-  (println "@create-new-account-and-invite-to-tenant-1")
   (let [request-headers (keycloak/request-headers keycloak)
         user-id (as-> (keycloak/create-user keycloak request-headers email) x
                   (:headers x)
@@ -72,7 +71,6 @@
                       first :id)
         text-part (create-new-account-and-invite-to-tenant-email-text
                    name email invite-id server-name tmp-password)]
-    (println "@create-new-account-and-invite-to-tenant-1")
     (keycloak/reset-password keycloak request-headers user-id tmp-password)
     (emailer/send-email emailer [email] {"Subject" "Akvo Lumen invite"
                                          "Text-part" text-part})))
@@ -112,6 +110,23 @@
       (lib/unprocessable-entity (format "<html><body>%s</body></html>"
                                         "Problem completing your invite.")))
     (lib/unprocessable-entity "Could not verify invite.")))
+
+(defn users
+  [keycloak tenant]
+  (keycloak/users keycloak tenant))
+
+(defn remove-user
+  [keycloak tenant author-claims user-id]
+  (keycloak/remove-user keycloak tenant author-claims user-id))
+
+(defn demote-user-from-admin
+  [keycloak tenant author-claims user-id]
+  (keycloak/demote-user-from-admin keycloak tenant author-claims user-id))
+
+(defn promote-user-to-admin
+  [keycloak tenant author-claims user-id]
+  (keycloak/promote-user-to-admin keycloak tenant author-claims user-id))
+
 
 
 ;;;

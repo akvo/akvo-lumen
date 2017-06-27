@@ -45,7 +45,7 @@
   :root [:tenant-manager]
   :share [:tenant-manager :config]
   :transformation [:transformation-engine :tenant-manager]
-  :user [:user-manager]
+  :user [:keycloak :user-manager]
   :user-manager [:emailer :keycloak]
   :visualisation [:tenant-manager]}
  :config
