@@ -31,7 +31,7 @@ class Notification extends Component {
     // Force one additional render so we can change the className and animate position with css.
     //  Lint exception is OK here - it's designed to prevent re-renders, but we want the re-render.
     //  eslint-disable-next-line react/no-did-mount-set-state
-    this.setState({ onscreen: true });
+    setTimeout(() => this.setState({ onscreen: true }), 0);
   }
   componentWillUnmount() {
     clearTimeout(this.timeout);

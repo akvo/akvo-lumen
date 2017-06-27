@@ -2,7 +2,7 @@ machine:
   java:
     version: openjdk8
   node:
-    version: 8.1.1
+    version: 5.7.0
   environment:
     PROJECT_NAME: akvo-lumen
     PROD_CLUSTER_NAME: lumen

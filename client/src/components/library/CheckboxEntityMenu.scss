@@ -1,11 +1,45 @@
-.CheckboxEntityMenu {
-  margin: 0 1.5rem;
-  height: 4rem;
-  display: flex;
-  justify-content: space-between;
+@import "../../styles/modules/importAll";
 
-  > * {
-      line-height: 4rem;
-      padding: 0;
-  }
+.CheckboxEntityMenu {
+    position: fixed;
+    bottom: 0rem;
+    left: 16rem;
+    right: 0rem;
+    z-index: 3;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    height: 5rem;
+    background-color: rgba($white, 1);
+    box-shadow: 0 0px 10px rgba($black, 0.3);
+
+    .ContextMenu {
+        bottom: 3rem;
+    }
+
+    .SelectCount {
+        color: rgba($black, 0.8);
+        margin-left: 20px;
+        margin-right: auto;
+    }
+
+    button {
+        @include button(transparent, $anchorLink);
+
+        text-transform: initial;
+
+        &.addToCollection {
+            margin-left: 100px;
+        }
+
+        &.delete {}
+
+        &.deselect {
+            border-left: 1px solid $black;
+            padding-left: 20px;
+            margin-left: 20px;
+            border-radius: 0px;
+            margin-right: 20px;
+        }
+    }
 }

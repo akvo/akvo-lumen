@@ -107,6 +107,9 @@
     }
 
     .CreateDataset {
+        display: flex;
+        flex-direction: column;
+
         .tabMenu {
             padding: 3rem 0;
         }
@@ -158,14 +161,16 @@
         }
 
         .FileSelection {
+            display: flex;
             width: 100%;
-            min-height: 15rem;
-            display: table;
+            flex: 1;
+            background: rgba($akvoPurple, 0.05);
+            border: 2px dotted rgba($akvoPurple, 1);
+            @include border-radius(6px);
 
             .contents {
-                vertical-align: middle;
-                text-align: center;
-                display: table-cell;
+                width: 100%;
+                height: 100%;
             }
         }
 
@@ -182,16 +187,30 @@
         }
 
         .DataFileFileSelection {
+            width: 100%;
+            min-height: 100%;
+
             .dataFileUploadMessage, .dataFileUploadInput {}
 
+            .dataFileUploadInput {
+                margin-left: 90px;
+            }
+
             .dataFileUploadMessage {
-                line-height: 2rem;
+                &:first-child {
+                    line-height: 2rem;
+                }
             }
         }
 
         .Preview {
             padding-top: 1rem;
             padding-bottom: 6rem;
+        }
+
+        .controls {
+            position: initial;
+            margin-top: auto;
         }
     }
 }
