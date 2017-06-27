@@ -182,10 +182,9 @@
             }
         }
     }
-
-    .noItemsMessage {
+    .noItemsMessage, .noSearchResults {
         display: block;
         text-align: center;
-        padding-top: 4rem;
+        padding-top: 8rem;
     }
 }

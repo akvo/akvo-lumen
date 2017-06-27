@@ -133,13 +133,27 @@ export default function LibraryListing({
   const sortedListGroups = sortGroups(listGroups, sortOrder, isReverseSort);
   return (
     <div className={`LibraryListing ${displayMode}`}>
-      {(sortedListGroups.length === 0 && currentCollection) ?
+      {(sortedListGroups.length === 0 && currentCollection) &&
         <span
           className="noItemsMessage"
         >
           There are no items in this collection.
         </span>
-        :
+      }
+      {(sortedListGroups.length === 0 && !currentCollection) &&
+        <span
+          className="noItemsMessage"
+        >
+          There are no items yet.
+        </span>
+      }
+      {(searchString && sortedListGroups.length === 0) &&
+        <div className="noSearchResults">
+          <h3>No results found</h3>
+          <p>Please update your search and try again.</p>
+        </div>
+      }
+      {sortedListGroups.length > 0 &&
         <ul>
           {sortedListGroups.map((listGroup, index) =>
             <LibraryListingGroup
