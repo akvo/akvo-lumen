@@ -84,8 +84,12 @@ export default class DataFileDataSourceSettings extends Component {
         onDragOver={handleDragOver}
         onDrop={this.handleDrop}
       >
-        <p className="dataFileUploadMessage">Drop file anywhere to upload</p>
-        <p className="dataFileUploadMessage">or</p>
+        <p className="dataFileUploadMessage">
+          <i className="fa fa-download" aria-hidden="true" /> Drop file anywhere to upload
+        </p>
+        <p className="dataFileUploadMessage">
+          or
+        </p>
         <input
           className={`dataFileUploadInput${this.isProgressBarVisible() ? ' progressActive' : ''}`}
           ref={(ref) => { this.fileInput = ref; }}
@@ -95,7 +99,6 @@ export default class DataFileDataSourceSettings extends Component {
           }}
         />
         <p className="dataFileUploadHeaderToggle">
-          File has column headers:
           <input
             type="checkbox"
             className="datasetHeaderStatusToggle"
@@ -106,7 +109,7 @@ export default class DataFileDataSourceSettings extends Component {
                 hasColumnHeaders: this.datasetHeaderStatusToggle.checked,
               });
             }}
-          />
+          /> File has column headers
         </p>
         {this.isProgressBarVisible() &&
           <div>

@@ -27,13 +27,30 @@
             font-style: italic;
             color: $darkGrey;
         }
+
+        span {
+            padding: 0 4px;
+        }
+
+        &.clickable {
+            span {
+                height: 21px;
+                border: 1px solid transparent;
+
+                &:hover {
+                    border: 1px solid $textSecondary;
+                    cursor: text;
+                }
+            }
+        }
     }
 
     .entityTitleInput {
+        font-size: 1rem;
         font-style: italic;
         width: 100%;
-        padding: 0;
-        border: none;
+        padding: 0 0 0 4px;
+        border: 1px solid $textSecondary;
         color: $darkGrey;
     }
 
@@ -46,6 +63,7 @@
     .saveStatus {
         color: $black;
         margin-top: 0.3rem;
+        margin-left: 6px;
     }
 
     .overflow {
