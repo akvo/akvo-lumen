@@ -6,6 +6,7 @@
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/transformation.sql")
+(hugsql/def-db-fns "akvo/lumen/job-execution.sql")
 
 (def transformation-namespaces
   '[akvo.lumen.transformation.change-datatype
@@ -38,15 +39,20 @@
 (defn schedule
   [tenant-conn dataset-id command]
   (if-let [dataset (dataset-by-id tenant-conn {:id dataset-id})]
-    (let [v (validate command)]
+    (let [v (validate command)
+          job-execution-id (str (squuid))]
       (if (:valid? v)
         (try
+          (new-transformation-job-execution tenant-conn {:id job-execution-id :dataset-id dataset-id})
           (jdbc/with-db-transaction [tx-conn tenant-conn]
             (condp = (:type command)
-              :transformation (engine/execute-transformation tx-conn dataset-id (:transformation command))
-              :undo (engine/execute-undo tenant-conn dataset-id)))
+              :transformation (engine/execute-transformation tx-conn dataset-id job-execution-id (:transformation command))
+              :undo (engine/execute-undo tx-conn dataset-id job-execution-id)))
+          (update-successful-job-execution tenant-conn {:id job-execution-id})
+          (lib/ok {"jobExecutionId" job-execution-id "datasetId" dataset-id})
           (catch Exception e
-            ;; Call sentry!
-            (lib/conflict {})))
-        (lib/bad-request {:message (:message v)})))
-    (lib/bad-request {:message "Dataset not found"})))
+            (let [msg (.getMessage e)]
+              (update-failed-job-execution tenant-conn {:id job-execution-id :reason [msg]})
+              (lib/conflict {"jobExecutionId" job-execution-id "datasetId" dataset-id "message" msg}))))
+        (lib/bad-request {"message" (:message v)})))
+    (lib/bad-request {"message" "Dataset not found"})))

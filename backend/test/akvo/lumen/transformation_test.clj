@@ -7,7 +7,6 @@
             [akvo.lumen.import :as imp]
             [akvo.lumen.import.csv-test :refer [import-file]]
             [akvo.lumen.lib :as lib]
-            [akvo.lumen.lib.dataset-version :as dataset-version]
             [akvo.lumen.transformation :as tf]
             [akvo.lumen.transformation.engine :as engine]
             [akvo.lumen.util :refer (squuid)]
@@ -58,7 +57,7 @@
 
 (deftest ^:functional test-transformations
   (testing "Transformation application"
-    (is (= [::lib/bad-request {:message "Dataset not found"}]
+    (is (= [::lib/bad-request {"message" "Dataset not found"}]
            (tf/schedule test-conn "Not-valid-id" []))))
   (testing "Valid log"
     (let [dataset-id (import-file "transformation_test.csv" {:name "Transformation Test"
@@ -66,7 +65,7 @@
           [tag _] (last (for [transformation ops]
                           (tf/schedule test-conn dataset-id {:type :transformation
                                                              :transformation transformation})))]
-      (is (= ::dataset-version/created tag)))))
+      (is (= ::lib/ok tag)))))
 
 (deftest ^:functional test-import-and-transform
   (testing "Import CSV and transform"
@@ -83,15 +82,16 @@
                           "expression" {"contains" "broken"}}
                   "onError" "fail"}]
           dataset-id (import-file "GDP.csv" {:name "GDP Test" :has-column-headers? false})]
-      (let [[tag dataset-version] (last (for [transformation t-log]
-                                          (tf/schedule test-conn
-                                                       dataset-id
-                                                       {:type :transformation
-                                                        :transformation transformation})))]
+      (let [[tag {:strs [datasetId]}] (last (for [transformation t-log]
+                                              (tf/schedule test-conn
+                                                           dataset-id
+                                                           {:type :transformation
+                                                            :transformation transformation})))]
 
-        (is (= ::dataset-version/created tag))
+        (is (= ::lib/ok tag))
 
-        (let [table-name (:table-name dataset-version)]
+        (let [table-name (:table-name (latest-dataset-version-by-dataset-id test-conn
+                                                                            {:dataset-id datasetId}))]
           (is (zero? (:c5 (get-val-from-table test-conn
                                               {:rnum 196
                                                :column-name "c5"
@@ -107,7 +107,7 @@
         {previous-table-name :table-name} (latest-dataset-version-by-dataset-id test-conn
                                                                                 {:dataset-id dataset-id})
         schedule (partial tf/schedule test-conn dataset-id)]
-    (is (= ::dataset-version/created (first (schedule {:type :undo}))))
+    (is (= ::lib/ok (first (schedule {:type :undo}))))
     (let [[tag _] (do (schedule {:type :transformation
                                  :transformation {"op" "core/to-lowercase"
                                                   "args" {"columnName" "c1"}
@@ -119,7 +119,7 @@
                                                           "defaultValue" 0}
                                                   "onError" "default-value"}})
                       (schedule {:type :undo}))]
-      (is (= ::dataset-version/created tag))
+      (is (= ::lib/ok tag))
       (is (not (:exists (table-exists test-conn {:table-name previous-table-name}))))
       (is (= (:columns (dataset-version-by-dataset-id test-conn
                                                       {:dataset-id dataset-id :version 2}))
@@ -152,7 +152,7 @@
                                                       "newColumnTitle" "full name"
                                                       "separator" " "}
                                               "onError" "fail"}})]
-      (is (= ::dataset-version/created tag))
+      (is (= ::lib/ok tag))
       (let [table-name (:table-name
                         (latest-dataset-version-by-dataset-id test-conn
                                                               {:dataset-id dataset-id}))]
@@ -174,11 +174,12 @@
 (deftest ^:functional date-parsing-test
   (let [dataset-id (import-file "dates.csv" {:has-column-headers? true})
         schedule (partial tf/schedule test-conn dataset-id)]
-    (let [[tag dataset-version] (do (schedule (date-transformation "c1" "YYYY"))
-                                    (schedule (date-transformation "c2" "DD/MM/YYYY"))
-                                    (schedule (date-transformation "c3" "YYYY-MM-DD")))]
-      (is (= ::dataset-version/created tag))
-      (let [table-name (:table-name dataset-version)
+    (let [[tag {:strs [datasetId]}] (do (schedule (date-transformation "c1" "YYYY"))
+                                        (schedule (date-transformation "c2" "DD/MM/YYYY"))
+                                        (schedule (date-transformation "c3" "YYYY-MM-DD")))]
+      (is (= ::lib/ok tag))
+      (let [table-name (:table-name (latest-dataset-version-by-dataset-id test-conn
+                                                                          {:dataset-id datasetId}))
             first-date (:c1 (get-val-from-table test-conn
                                                 {:rnum 1
                                                  :column-name "c1"
@@ -275,7 +276,7 @@
                                                                 "newColumnType" "date"
                                                                 "newColumnTitle" "Derived 5"}
                                                         "onError" "fail"}))]
-        (is (= tag ::dataset-version/created))
+        (is (= tag ::lib/ok))
         (is (every? number? (map :d4 (latest-data dataset-id))))))
 
     (testing "Valid type check"
@@ -335,7 +336,7 @@
                              :transformation {"op" "core/delete-column"
                                               "args" {"columnName" "c2"}
                                               "onError" "fail"}})]
-      (is (= ::dataset-version/created tag))
+      (is (= ::lib/ok tag))
       (let [{:keys [columns transformations]} (latest-dataset-version-by-dataset-id test-conn
                                                                                     {:dataset-id dataset-id})]
         (is (= ["c1" "c3" "c4"] (map #(get % "columnName") columns)))
@@ -351,7 +352,7 @@
                                               "args" {"columnName" "c2"
                                                       "newColumnTitle" "New Title"}
                                               "onError" "fail"}})]
-      (is (= ::dataset-version/created tag))
+      (is (= ::lib/ok tag))
       (let [{:keys [columns transformations]} (latest-dataset-version-by-dataset-id test-conn
                                                                                     {:dataset-id dataset-id})]
         (is (= "New Title" (get-in (vec columns) [1 "title"])))

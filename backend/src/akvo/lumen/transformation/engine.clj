@@ -1,6 +1,5 @@
 (ns akvo.lumen.transformation.engine
   (:require [akvo.lumen.lib :as lib]
-            [akvo.lumen.lib.dataset-version :as dataset-version]
             [akvo.lumen.util :as util]
             [clojure.java.jdbc :as jdbc]
             [clojure.set :as set]
@@ -105,10 +104,6 @@
                     :jobExecutionId job-id
                     :message message}))
 
-(defn- execute-transformation-failed [completion-promise tenant-conn dataset-id job-id message]
-  (update-job-failed-execution tenant-conn {:id job-id :error-log [message]})
-  (deliver-promise-failure completion-promise dataset-id job-id message))
-
 (defn index-by [key coll]
   (reduce (fn [index item]
             (assoc index (get item key) item))
@@ -133,7 +128,7 @@
             changed-columns)))
 
 (defn execute-transformation
-  [tenant-conn dataset-id transformation]
+  [tenant-conn dataset-id job-execution-id transformation]
   (let [dataset-version (latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})
         previous-columns (vec (:columns dataset-version))
         source-table (:table-name dataset-version)]
@@ -146,6 +141,7 @@
         (clear-dataset-version-data-table tenant-conn {:id (:id dataset-version)})
         (let [next-dataset-version {:id new-dataset-version-id
                                     :dataset-id dataset-id
+                                    :job-execution-id job-execution-id
                                     :table-name source-table
                                     :imported-table-name (:imported-table-name dataset-version)
                                     :version (inc (:version dataset-version))
@@ -155,9 +151,9 @@
                                                                                                  columns)))
                                     :columns columns}]
           (new-dataset-version tenant-conn next-dataset-version)
-          (dataset-version/created next-dataset-version))))))
+          (lib/created next-dataset-version))))))
 
-(defn- apply-undo [tenant-conn dataset-id current-dataset-version]
+(defn- apply-undo [tenant-conn dataset-id job-execution-id current-dataset-version]
   (let [imported-table-name (:imported-table-name current-dataset-version)
         previous-table-name (:table-name current-dataset-version)
         initial-columns (vec (:columns (dataset-version-by-dataset-id tenant-conn
@@ -177,6 +173,7 @@
           (clear-dataset-version-data-table tenant-conn {:id (:id current-dataset-version)})
           (let [next-dataset-version {:id new-dataset-version-id
                                       :dataset-id dataset-id
+                                      :job-execution-id job-execution-id
                                       :table-name table-name
                                       :imported-table-name (:imported-table-name current-dataset-version)
                                       :version (inc (:version current-dataset-version))
@@ -187,19 +184,20 @@
             (new-dataset-version tenant-conn
                                  next-dataset-version)
             (drop-table tenant-conn {:table-name previous-table-name})
-            (dataset-version/created next-dataset-version)))
+            (lib/created next-dataset-version)))
         (let [{:keys [success? message columns execution-log]}
               (apply-operation tenant-conn table-name columns (first transformations))]
           (if success?
             (recur (rest transformations) columns (into full-execution-log execution-log))
             (throw (ex-info "Failed to undo" {}))))))))
 
-(defn execute-undo [tenant-conn dataset-id]
+(defn execute-undo [tenant-conn dataset-id job-execution-id]
   (let [current-dataset-version (latest-dataset-version-by-dataset-id tenant-conn
                                                                       {:dataset-id dataset-id})
         current-version (:version current-dataset-version)]
     (if (= current-version 1)
-      (dataset-version/created (assoc current-dataset-version :dataset-id dataset-id))
+      (lib/created (assoc current-dataset-version :dataset-id dataset-id))
       (apply-undo tenant-conn
                   dataset-id
+                  job-execution-id
                   current-dataset-version))))
