@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { GithubPicker } from 'react-color';
-import defaultColors from '../../../utilities/defaultColors';
+import { palette } from '../../../utilities/visualisationColors';
 import { replaceLabelIfValueEmpty } from '../../../utilities/chart';
 
 require('./ColorLabels.scss');
@@ -87,7 +87,7 @@ class ColorLabelItem extends Component {
           >
             <GithubPicker
               color={color}
-              colors={defaultColors}
+              colors={palette}
               onChangeComplete={evt => this.handleOnChangeColor(evt.hex)}
             />
           </div>

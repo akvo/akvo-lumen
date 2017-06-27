@@ -1,4 +1,4 @@
-import defaultColors from '../defaultColors';
+import { palette } from '../visualisationColors';
 
 export default function getVegaPieSpec(visualisation, data, containerHeight, containerWidth,
   chartSize) {
@@ -88,7 +88,7 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
       {
         name: 'c',
         type: 'ordinal',
-        range: defaultColors,
+        range: palette,
         domain: {
           data: dataSource,
           field: segmentLabelField,
