@@ -26,8 +26,8 @@
 
 (defn verify-invite
   "Add user to tenant."
-  [keycloak tenant-conn tenant id]
-  (impl/verify-invite keycloak tenant-conn tenant id))
+  [keycloak tenant-conn tenant id location]
+  (impl/verify-invite keycloak tenant-conn tenant id location))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

@@ -11,41 +11,41 @@
 (hugsql/def-db-fns "akvo/lumen/lib/user.sql")
 
 (defn invite-to-tenant-email-text
-  [server-name invite-id author-name]
+  [location invite-id author-name]
   (str/join
    "\n"
    ["Hi,"
     ""
-    (format "You been invited to join %s by %s." server-name author-name)
+    (format "You been invited to join %s by %s." location author-name)
     "To complete your invite please visit:"
-    (format "https://%s/verify/%s" server-name invite-id)
+    (format "%s/verify/%s" location invite-id)
     ""
     "Thanks"
     "Akvo"]))
 
 (defn invite-to-tenant
   "Create an invite and use provider emailer to send an invitation email."
-  [emailer tenant-conn server-name email author-claims]
+  [emailer tenant-conn location email author-claims]
   (let [invite-id (-> (insert-invite tenant-conn
                                      {:author author-claims
                                       :email email
                                       :expire (c/to-sql-time (t/plus (t/now)
                                                                      (t/weeks 2)))})
                       first :id)
-        text-part (invite-to-tenant-email-text server-name invite-id
+        text-part (invite-to-tenant-email-text location invite-id
                                                (get author-claims "name"))]
     (emailer/send-email emailer [email] {"Subject" "Akvo Lumen invite"
                                          "Text-part" text-part})))
 
 (defn create-new-account-and-invite-to-tenant-email-text
-  [author-name email invite-id server-name tmp-password]
+  [author-name email invite-id location tmp-password]
   (str/join
    "\n"
    ["Hi,"
     ""
-    (format "You been invited to join %s by %s." server-name author-name)
+    (format "You been invited to join %s by %s." location author-name)
     "To complete your invite please visit:"
-    (format "https://%s/verify/%s" server-name invite-id)
+    (format "%s/verify/%s" location invite-id)
     (format "Using your email: %s" email)
     (format "and the temporary password: %s to login." tmp-password)
     ""
@@ -54,7 +54,7 @@
 
 (defn create-new-account-and-invite-to-tenant
   ""
-  [emailer keycloak tenant-conn server-name email
+  [emailer keycloak tenant-conn location email
    {:strs [name] :as author-claims}]
   (let [request-headers (keycloak/request-headers keycloak)
         user-id (as-> (keycloak/create-user keycloak request-headers email) x
@@ -70,7 +70,7 @@
                                                                      (t/weeks 2)))})
                       first :id)
         text-part (create-new-account-and-invite-to-tenant-email-text
-                   name email invite-id server-name tmp-password)]
+                   name email invite-id location tmp-password)]
     (keycloak/reset-password keycloak request-headers user-id tmp-password)
     (emailer/send-email emailer [email] {"Subject" "Akvo Lumen invite"
                                          "Text-part" text-part})))
@@ -80,17 +80,17 @@
   Then check if user has an account, if so invite to tenant. As a last resort
   setup an invitation to the provided email address for both an account and to
   the tenant."
-  [emailer keycloak tenant-conn tenant server-name email author-claims]
+  [emailer keycloak tenant-conn tenant location email author-claims]
   (cond
     (keycloak/tenant-member?
      keycloak tenant email) (lib/bad-request
                              {"reason" "Already tenant member"})
     (keycloak/user?
-     keycloak email) (invite-to-tenant emailer tenant-conn server-name email
+     keycloak email) (invite-to-tenant emailer tenant-conn location email
                                        author-claims)
     :else
     (create-new-account-and-invite-to-tenant
-     emailer keycloak tenant-conn server-name email author-claims))
+     emailer keycloak tenant-conn location email author-claims))
   (lib/ok {}))
 
 (defn active-invites [tenant-conn]
@@ -103,10 +103,10 @@
 
 (defn verify-invite
   "Try and consume invite; Add user to keycloak; redirect to app."
-  [keycloak tenant-conn tenant id]
+  [keycloak tenant-conn tenant id location]
   (if-let [{:keys [email]} (first (consume-invite tenant-conn {:id id}))]
     (if-let [accepted (keycloak/add-user-with-email keycloak tenant email)]
-      (lib/redirect "/")
+      (lib/redirect location)
       (lib/unprocessable-entity (format "<html><body>%s</body></html>"
                                         "Problem completing your invite.")))
     (lib/unprocessable-entity "Could not verify invite.")))

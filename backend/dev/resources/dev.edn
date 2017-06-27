@@ -15,7 +15,10 @@
            :keycloak-realm "akvo"
            :keycloak-url "http://localhost:8080/auth"
            :keycloak-public-client-id "akvo-lumen"
-           :flow-api-url "https://api.akvotest.org/flow"}
+           :flow-api-url "https://api.akvotest.org/flow"
+           :root-redirect {:api-port 3000
+                           :client-port 3030
+                           :scheme "http"}}
   :emailer {:from-email "devops@akvo.localhost"
             :from-name "Akvo Lumen"}
   :keycloak {:url "http://localhost:8080/auth"
