@@ -3,7 +3,8 @@ import PropTypes from 'prop-types';
 import ReactGridLayout from 'react-grid-layout';
 import DashboardVisualisationList from './DashboardVisualisationList';
 import DashboardCanvasItem from './DashboardCanvasItem';
-import { getArrayFromObject, getNewEntityId, getFirstBlankRowGroup } from '../../utilities/dashboard';
+import { getNewEntityId, getFirstBlankRowGroup } from '../../utilities/dashboard';
+import getArrayFromObject from '../../utilities/general';
 
 require('./DashboardEditor.scss');
 require('../../../node_modules/react-grid-layout/css/styles.css');

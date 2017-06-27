@@ -1,3 +1,5 @@
+import getArrayFromObject from './general';
+
 export function getItemLayout(props) {
   let output = null;
 
@@ -27,10 +29,6 @@ export function getIsDatasetLoaded(props) {
     default:
       return Boolean(props.datasets[props.item.visualisation.datasetId].get('columns'));
   }
-}
-
-export function getArrayFromObject(object) {
-  return Object.keys(object).map(key => object[key]);
 }
 
 export function getNewEntityId(entities, itemType) {

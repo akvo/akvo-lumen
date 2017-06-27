@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import DashboardViewerItem from './DashboardViewerItem';
-import { getArrayFromObject, getSortFunc, viewportLimits } from '../../utilities/dashboard';
+import { getSortFunc, viewportLimits } from '../../utilities/dashboard';
+import getArrayFromObject from '../../utilities/general';
 
 require('./DashboardViewer.scss');
 

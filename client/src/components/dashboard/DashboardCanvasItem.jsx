@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import VisualisationViewer from '../charts/VisualisationViewer';
 import DashboardCanvasItemEditable from './DashboardCanvasItemEditable';
-import { getIsDatasetLoaded, getItemLayout } from '../../utilities/dashboard';
+import { getItemLayout, getIsDatasetLoaded } from '../../utilities/dashboard';
 
 require('./DashboardCanvasItem.scss');
 
