@@ -203,6 +203,10 @@
         }
     }
 
+    .LibraryListingGroup:last-child .LibraryListingItem:last-child {
+        margin-bottom: 6rem;
+    }
+
     .noItemsMessage {
         display: block;
         text-align: center;
