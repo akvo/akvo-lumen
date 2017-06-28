@@ -64,7 +64,7 @@ export default function DeleteConfirmationModal({
       style={{
         content: {
           width: 500,
-          height: 200,
+          height: entityType === 'dataset' ? 400 : 200,
           marginLeft: 'auto',
           marginRight: 'auto',
           borderRadius: 0,
