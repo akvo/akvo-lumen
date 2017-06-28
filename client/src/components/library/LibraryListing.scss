@@ -26,8 +26,6 @@
         position: relative;
         height: 6rem;
         padding: 0.5rem 0;
-        background-color: rgba($textSecondary, 0);
-        border: 1px solid rgba($textSecondary, 0.3);
         transition: background-color 0.1s ease;
 
         h3 {
@@ -35,7 +33,7 @@
         }
 
         &:hover {
-            background-color: rgba($textSecondary, 0.6);
+            background-color: rgba($black, 0.05);
 
             .entityIcon {
                 opacity: 1;

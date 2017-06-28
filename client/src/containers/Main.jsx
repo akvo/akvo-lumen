@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import WorkspaceNav from '../components/WorkspaceNav';
-import DashboardModal from '../components/DashboardModal';
+import Modal from './Modal';
 import Notification from './Notification';
 
 require('../styles/reset.global.scss');
@@ -18,7 +18,7 @@ function Main({ location, children, notification }) {
         location={location}
       />
       {children}
-      <DashboardModal />
+      <Modal />
     </div>
   );
 }

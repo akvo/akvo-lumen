@@ -1,5 +1,5 @@
 $white: rgb(247, 247, 250);
-$black: rgb(32, 32, 36);
+$black: rgb(32, 32, 34);
 $textPrimary: lighten($black, 30%);
 $textSecondary: lighten($black, 60%);
 
@@ -13,9 +13,10 @@ $lime2: rgb(116, 177, 44);
 $lightLime: rgb(158, 240, 60);
 
 $akvoPurple: rgb(43, 46, 113);
-$anchorLink: rgb(3, 41, 92);
+$anchorLink: $lumenGreen;
 $anchorLinkLight: rgb(8, 104, 232);
 
+//Unused ??
 $lightBlueGrey: rgb(229, 230, 237);
 $lightGrey: rgb(241, 242, 242);
 $lightGreen: rgb(223, 244, 234);

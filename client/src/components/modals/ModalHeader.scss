@@ -1,0 +1,11 @@
+@import "../../styles/modules/importAll";
+
+.ModalHeader {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.ModalContents {
+    margin-top: 10px;
+}

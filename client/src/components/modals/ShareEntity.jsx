@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import Modal from 'react-modal';
 import CopyToClipboard from 'react-copy-to-clipboard';
+import ModalHeader from './ModalHeader';
 import * as api from '../../api';
 
-require('../DashboardModal.scss');
 require('./ShareEntity.scss');
 
 export default class ShareEntity extends Component {
@@ -39,62 +38,37 @@ export default class ShareEntity extends Component {
     const { type, title, onClose } = this.props;
     const shareUrl = `${window.location.origin}/s/${this.state.id}`;
     return (
-      <Modal
-        isOpen={this.props.isOpen}
-        contentLabel="shareEntityModal"
-        onAfterOpen={this.fetchShareId}
-        style={{
-          content: {
-            width: 500,
-            height: 300,
-            marginLeft: 'auto',
-            marginRight: 'auto',
-            borderRadius: 0,
-            border: '0.1rem solid rgb(223, 244, 234)',
-          },
-          overlay: {
-            zIndex: 1000,
-            backgroundColor: 'rgba(0,0,0,0.6)',
-          },
-        }}
-      >
-        <div className="DashboardModal">
-          <div className="ShareEntity">
-            <h2 className="modalTitle">{`Share ${type} "${title}"`}</h2>
-            <div
-              className="close clickable"
-              onClick={onClose}
+      <div className="ShareEntity">
+        <ModalHeader
+          title={`Share ${type}: ${title}`}
+          onCloseModal={onClose}
+        />
+        <div className="ModalContents">
+          <label htmlFor="shareUrlCopyButton">URL for {type}: {title}</label>
+          <div
+            className="shareUrl"
+          >
+            <a
+              href={shareUrl}
+              target="_blank"
+              rel="noopener noreferrer"
             >
-              ✕
-            </div>
-            <div className="contents">
-              <label htmlFor="shareUrlCopyButton">Share {type} {title}</label>
-              <div
-                className="shareUrl"
-              >
-                <a
-                  href={shareUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {shareUrl}
-                </a>
-              </div>
-              <CopyToClipboard
-                text={shareUrl}
-                onCopy={() => this.setState({ copiedToClipboard: true })}
-              >
-                <button
-                  id="shareUrlCopyButton"
-                  className={`copyButton clickable ${this.state.copiedToClipboard ? 'copied' : ''}`}
-                >
-                  {this.state.copiedToClipboard ? 'Copied!' : 'Copy to clipboard'}
-                </button>
-              </CopyToClipboard>
-            </div>
+              {shareUrl}
+            </a>
           </div>
+          <CopyToClipboard
+            text={shareUrl}
+            onCopy={() => this.setState({ copiedToClipboard: true })}
+          >
+            <button
+              id="shareUrlCopyButton"
+              className={`copyButton clickable ${this.state.copiedToClipboard ? 'copied' : ''}`}
+            >
+              {this.state.copiedToClipboard ? 'Copied!' : 'Copy to clipboard'}
+            </button>
+          </CopyToClipboard>
         </div>
-      </Modal>
+      </div>
     );
   }
 }
