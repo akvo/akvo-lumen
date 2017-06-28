@@ -110,7 +110,8 @@
                                                               *tenant-conn*)
                                         variant/value :invites count)
           resp (user-manager/invite *user-manager* *tenant-conn* "t1"
-                                    server-name ruth-email author-claims)]
+                                    server-name ruth-email author-claims)
+          ]
       (is (= ::lib/ok (variant/tag resp)))
       (is (= (inc number-of-initial-invites)
              (-> (user-manager/invites *user-manager*
