@@ -132,14 +132,13 @@ export default function LibraryListing({
   const listGroups = groupEntities(entities, sortOrder);
   const sortedListGroups = sortGroups(listGroups, sortOrder, isReverseSort);
   const results = sortedListGroups.length > 0;
+
   return (
     <div className={`LibraryListing ${displayMode}`}>
       {(!results && !currentCollection && !searchString) &&
         <span
           className="noItemsMessage"
-        >
-          <p>There are no items yet.</p>
-        </span>
+        />
       }
       {(!results && currentCollection && !searchString) &&
         <span
