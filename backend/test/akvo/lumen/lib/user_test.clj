@@ -30,9 +30,9 @@
 (def keycloak-config (:keycloak seed-data))
 
 (def test-system
-  (-> (component/system-map
-       :emailer (emailer/dev-emailer {})
-       :keycloak (keycloak/keycloak keycloak-config))))
+  (component/system-map
+   :emailer (emailer/dev-emailer {})
+   :keycloak (keycloak/keycloak keycloak-config)))
 
 (def ^:dynamic *emailer*)
 (def ^:dynamic *keycloak*)
