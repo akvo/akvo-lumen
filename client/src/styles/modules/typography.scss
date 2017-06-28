@@ -2,6 +2,31 @@ $bodyFont: "Helvetica Neue", Helvetica, Arial, sans-serif;
 $titleFont: "Helvetica Neue", Helvetica, Arial, sans-serif;
 $codeFont: monospace;
 
+h1 {
+    font-size: 1.55rem;
+}
+
+h2 {
+    font-size: 1.4rem;
+}
+
+h3 {
+    font-size: 1.25rem;
+}
+
+h4 {
+    font-size: 1.15rem;
+}
+
+hr {
+    display: block;
+    height: 1px;
+    border: 0;
+    border-top: 1px solid rgba($black, 0.3);
+    margin: 1em 0;
+    padding: 0;
+}
+
 @mixin button($btnColor, $color) {
     /* use @extend .button on any element (a or button) or use directly in markup class="button" */
     display: inline-block;
@@ -10,7 +35,6 @@ $codeFont: monospace;
     color: $color !important;
     font-size: 0.90em;
     text-decoration: none;
-    text-transform: uppercase;
     cursor: pointer;
 
     @include border-radius(3px);
@@ -53,9 +77,10 @@ $codeFont: monospace;
     border: 1px solid $btnColor;
 
     &:hover {
-        background-color: $btnColor;
         color: white !important;
+        border: none;
         border: 1px solid $btnColor;
+        background-color: $btnColor;
     }
 
     &.disabled {
@@ -73,4 +98,5 @@ $codeFont: monospace;
 
 input, textarea {
     font-size: 0.95em;
+    color: $black;
 }

@@ -7,7 +7,6 @@
 
         h3 {
             color: $textSecondary;
-            margin-top: 1rem;
         }
     }
 
@@ -18,19 +17,16 @@
         position: relative;
         min-height: 5rem;
         padding: 0.5rem 0;
-        background-color: rgba($textSecondary, 0);
-        border: 1px solid rgba($textSecondary, 0.3);
 
         /*overflow: hidden;*/
         transition: background-color 0.1s ease;
 
         h3 {
-            color: rgba($black, 0.6);
-            margin-top: 1rem;
+            color: rgba($black, 1);
         }
 
         &:hover {
-            background-color: rgba($textSecondary, 0.6);
+            background-color: rgba($black, 0.05);
 
             .entityIcon {
                 opacity: 1;
@@ -57,11 +53,19 @@
 
         .checkboxContainer {
             display: flex;
-            width: 2rem;
-            padding-left: 1rem;
             justify-content: space-around;
             align-items: center;
             cursor: pointer;
+            margin-left: 3px;
+
+            input[type="checkbox"] {
+                width: 17px;
+                height: 17px;
+
+                @include border-radius(3px);
+
+                border: 1px solid black;
+            }
         }
 
         .entityBody {
@@ -76,11 +80,9 @@
             margin-top: 0.25rem;
             display: inline-block;
             color: $white;
-            margin-top: 0.25rem;
-            display: inline-block;
             background-size: cover;
             background-repeat: no-repeat;
-            opacity: 0.7;
+            opacity: 0.6;
 
             /*             &:before {
                             font-size: 3.5rem;

@@ -103,7 +103,7 @@ export default class DatasetControls extends Component {
               className="transformationLogToggle clickable"
               onClick={this.props.onToggleTransformationLog}
             >
-              Transformation log {pendingTransformationsCount > 0 && `(${pendingTransformationsCount})`}
+              <i className="fa fa-list-ol" aria-hidden="true" /> {pendingTransformationsCount > 0 && `(${pendingTransformationsCount})`}
             </button>
           </span>
         </span>

@@ -13,7 +13,7 @@ const formatDate = (date) => {
   if (hours < 10) hours = `0${hours}`;
   if (minutes < 10) minutes = `0${minutes}`;
 
-  return `${date.getFullYear()}-${month}-${day} ${hours}:${minutes}`;
+  return `${date.getFullYear()}-${month}-${day}`;
 };
 
 const filterVisualisations = (visualisations, filterText) => {
@@ -92,6 +92,7 @@ export default class DashboardVisualisationList extends Component {
                       {isOnDashboard(item) ? '✔' : ''}
                     </span>
                   </h4>
+
                   <div className="visualisationType">
                     {item.visualisationType === 'map' ?
                     'Map'
@@ -101,9 +102,8 @@ export default class DashboardVisualisationList extends Component {
                   }
                   </div>
                   <div className="lastModified">
-                    {`Last modified: ${formatDate(new Date(item.modified))}`}
+                    {`${formatDate(new Date(item.modified))}`}
                   </div>
-                  <div className="background" />
                 </li>
             )}
             </ul>
