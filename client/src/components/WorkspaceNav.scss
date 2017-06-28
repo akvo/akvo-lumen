@@ -163,26 +163,7 @@
         a {}
     }
 
-    &.collapsed {
-        position: absolute;
-        top: 0;
-        left: 0;
-        height: 4rem;
-        min-height: 0;
-        width: 4rem;
-        overflow: hidden;
-        border-right: none;
-
-        .menuIcon {
-            margin: 0.25rem 0.335rem 0.525rem 0.5rem;
-        }
-    }
-
-    &.floating {
-        position: absolute;
-        z-index: 100;
-        top: 0;
-        left: 0;
-        bottom: 0;
+    &.hidden {
+        display: none;
     }
 }

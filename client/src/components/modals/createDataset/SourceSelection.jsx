@@ -1,6 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+require('./SourceSelection.scss');
+
 const supportedFormats = [{
   kind: 'DATA_FILE',
   icon: '/assets/data-file.png',

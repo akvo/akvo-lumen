@@ -1,0 +1,19 @@
+@import "../../styles/modules/importAll";
+
+.ModalFooter {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+
+    button {
+        &:last-child {
+            margin-left: 2rem;
+        }
+
+        @include button($anchorLink, $white);
+
+        &.cancel {
+            @include btnOutline($anchorLink, $anchorLink);
+        }
+    }
+}

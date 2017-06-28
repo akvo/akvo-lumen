@@ -3,11 +3,28 @@
 .EntityTypeHeader {
     height: 4em;
     position: absolute;
-    margin-left: 4em;
     left: 0;
     top: 0;
     right: 0;
     border-bottom: 0.1rem solid $lightBlueGrey;
+    display: flex;
+
+    .backButton {
+        background-color: $black;
+        width: 4rem;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-decoration: none;
+
+        i {
+            color: $white;
+            font-size: 2rem;
+            text-decoration: none;
+            border: 0;
+        }
+    }
 
     .entityInfo, .controls {
         display: inline-block;

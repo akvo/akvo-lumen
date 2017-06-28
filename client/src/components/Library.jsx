@@ -219,7 +219,7 @@ class Library extends Component {
 
     return (
       <div className="Library">
-        {this.state.pendingDeleteEntity ?
+        {this.state.pendingDeleteEntity &&
           <DeleteConfirmationModal
             isOpen
             entityId={pendingDeleteEntity.entityId}
@@ -233,7 +233,7 @@ class Library extends Component {
                 pendingDeleteEntity.entityId
               );
             }}
-          /> : null
+          />
         }
         <LibraryHeader
           location={collection ? collection.title : 'Library'}
