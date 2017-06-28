@@ -14,6 +14,9 @@ An open-source, easy to use data mashup, analysis and publishing platform.
 ## Backend
 [Readme](backend/README.md)
 
+## Integration
+[Data import - Readme](doc/integration/InputFormat.md)
+
 ## Keycloak
 The admin password for keycloak is "admin" / "password". There is an "akvo" realm, where two tenants (t1 & t2) and they are represesnted by the following groups:
 
