@@ -1,6 +1,5 @@
 {:components
- {:emailer #var akvo.lumen.component.emailer/dev-emailer
-  :user-manager #var akvo.lumen.component.user-manager/dev-user-manager}
+ {:emailer #var akvo.lumen.component.emailer/dev-emailer}
  :config
  {:app
   {:middleware

@@ -1,3 +1,3 @@
 (ns akvo.lumen.component.transformation-engine-test
-  (:require [clojure.test :refer :all]
-            [akvo.lumen.component.transformation-engine :refer :all]))
+  (:require [akvo.lumen.component.transformation-engine :refer :all]
+            [clojure.test :refer :all]))

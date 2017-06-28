@@ -4,7 +4,6 @@
   :emailer #var akvo.lumen.component.emailer/mailjet-emailer
   :http #var akvo.lumen.component.http/http
   :keycloak #var akvo.lumen.component.keycloak/keycloak
-  :user-manager #var akvo.lumen.component.user-manager/user-manager
   :tenant-manager #var akvo.lumen.component.tenant-manager/tenant-manager
   :transformation-engine #var akvo.lumen.component.transformation-engine/transformation-engine}
  :endpoints
@@ -37,16 +36,15 @@
   :dataset [:tenant-manager :config]
   :env [:config]
   :files [:config]
-  :invite [:tenant-manager :user-manager :keycloak :emailer :config]
-  :invite-verify [:keycloak :tenant-manager :user-manager :config]
+  :invite [:tenant-manager :keycloak :emailer :config]
+  :invite-verify [:keycloak :tenant-manager :config]
   :job-execution [:tenant-manager]
   :library [:tenant-manager]
   :public [:tenant-manager]
   :root [:tenant-manager]
   :share [:tenant-manager :config]
   :transformation [:transformation-engine :tenant-manager]
-  :user [:keycloak :user-manager]
-  :user-manager [:emailer :keycloak]
+  :user [:keycloak]
   :visualisation [:tenant-manager]}
  :config
  {:app

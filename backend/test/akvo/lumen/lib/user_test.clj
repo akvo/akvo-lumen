@@ -63,20 +63,18 @@
 (defn- admin-and-members
   [keycloak tenant]
   (let [request-headers (keycloak/request-headers keycloak)
-        admin-group-id (get (keycloak/group-by-path keycloak request-headers
-                                                    (format "%s/admin" tenant))
+        admin-group-id (get (keycloak/group-by-path
+                             keycloak request-headers (format "%s/admin" tenant))
                             "id")
         tenant-group-id (get (keycloak/group-by-path
                               keycloak request-headers tenant)
                              "id")]
     {:admin-ids (into #{}
                       (map #(get % "id"))
-                      (keycloak/group-members keycloak request-headers
-                                              admin-group-id))
+                      (keycloak/group-members keycloak request-headers admin-group-id))
      :member-ids (into #{}
                        (map #(get % "id"))
-                       (keycloak/group-members keycloak request-headers
-                                               tenant-group-id))}))
+                       (keycloak/group-members keycloak request-headers tenant-group-id))}))
 
 (deftest ^:functional create-delete-invite
   (testing "Create invite"
