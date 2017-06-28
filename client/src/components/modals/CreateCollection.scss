@@ -4,12 +4,14 @@
     .ModalContents {
         justify-content: center;
     }
+
     input, label {
         display: block;
     }
 
     label {
         color: $black;
+        display: none;
     }
 
     input {

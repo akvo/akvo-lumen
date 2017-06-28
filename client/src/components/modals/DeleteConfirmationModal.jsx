@@ -25,12 +25,12 @@ function VisualisationsList({ datasetId, visualisations }) {
   if (dependentVisualisations.length > 0) {
     return (
       <div>
-        <span>
+        <p>
           The following
           {dependentVisualisations.length === 1 ?
             ' visualisation ' : ` ${dependentVisualisations.length} visualisations `}
           will also be deleted:
-        </span>
+        </p>
         <ul>
           {dependentVisualisations}
         </ul>
@@ -80,7 +80,7 @@ export default function DeleteConfirmationModal({
     >
       <div className="DeleteConfirmationModal">
         <ModalHeader
-          title={`Delete ${entityType}: ${getTitle(entity)}`}
+          title={`Delete ${entityType} ${getTitle(entity)}?`}
           onCloseModal={onCancel}
         />
         <div className="ModalContents">

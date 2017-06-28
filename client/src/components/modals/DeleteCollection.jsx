@@ -19,7 +19,7 @@ export default class DeleteCollection extends Component {
     return (
       <div className="DeleteCollectionModal">
         <ModalHeader
-          title={`Delete collection: ${collection.title}`}
+          title={`Delete collection ${collection.title}?`}
           onCloseModal={onCancel}
         />
         <div className="ModalContents" />

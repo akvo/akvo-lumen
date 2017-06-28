@@ -6,7 +6,7 @@ require('./ModalHeader.scss');
 export default function ModalHeader({ title, onCloseModal }) {
   return (
     <header className="ModalHeader">
-      <h2 className="modalTitle">{title}</h2>
+      <h1 className="modalTitle">{title}</h1>
       <button
         className="close clickable"
         onClick={onCloseModal}

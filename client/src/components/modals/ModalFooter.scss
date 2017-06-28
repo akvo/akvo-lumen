@@ -6,9 +6,14 @@
     justify-content: flex-end;
 
     button {
-      &:last-child {
-        margin-left: 2rem;
-      }
-      @include button($anchorLink, $white);
+        &:last-child {
+            margin-left: 2rem;
+        }
+
+        @include button($anchorLink, $white);
+
+        &.cancel {
+            @include btnOutline($anchorLink, $anchorLink);
+        }
     }
 }

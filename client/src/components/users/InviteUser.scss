@@ -1,14 +1,14 @@
 @import "../../styles/modules/importAll";
 
 .InviteUser {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-
-  .ModalContents {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    flex: 1;
-    justify-content: center;
-  }
+
+    .ModalContents {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        justify-content: center;
+    }
 }
