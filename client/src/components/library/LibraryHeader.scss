@@ -58,7 +58,6 @@
             flex: 1;
             padding: 0.25rem 0.75rem;
             color: $darkGrey;
-            vertical-align: top;
         }
 
         .clear {
@@ -92,27 +91,17 @@
                 padding: 0.75rem 1.5rem;
                 text-align: center;
                 transition: background-color 0.5s ease;
-                color: rgba($black, 0.7);
 
                 &:hover {
-                    color: rgba($black, 1);
+                    color: $midGrey;
                 }
 
                 &.selected {
-                    color: rgba($black, 1);
-                    border-bottom: 4px solid rgba($black, 1);
+                    color: $lumenGreen;
+                    border-bottom: 2px solid $lumenGreen;
                     margin-top: 2px;
                     position: relative;
                 }
-            }
-        }
-
-        @media (max-width: 1200px) {
-            width: 50%;
-
-            ul li {
-                padding-left: 0.5rem;
-                padding-right: 0.5rem;
             }
         }
     }

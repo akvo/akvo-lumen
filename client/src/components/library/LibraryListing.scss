@@ -26,10 +26,11 @@
         position: relative;
         height: 6rem;
         padding: 0.5rem 0;
+        background-color: rgba($textSecondary, 0);
         transition: background-color 0.1s ease;
 
         h3 {
-            color: rgba($black, 0.6);
+            color: rgba($black, 1);
         }
 
         &:hover {
