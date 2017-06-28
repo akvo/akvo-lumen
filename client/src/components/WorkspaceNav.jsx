@@ -10,18 +10,18 @@ import { showModal } from '../actions/activeModal';
 
 require('./WorkspaceNav.scss');
 
-const collapsedLocations = ['visualisation/', 'dataset/', 'dashboard/', 'admin/users'];
+const hiddenLocations = ['visualisation/', 'dataset/', 'dashboard/', 'admin/users'];
 
-const getCollapsedStatus = (pathname) => {
-  let collapsedStatus = false;
+const getHiddenStatus = (pathname) => {
+  let hiddenStatus = false;
 
-  collapsedLocations.forEach((location) => {
+  hiddenLocations.forEach((location) => {
     if (pathname.indexOf(location) > -1) {
-      collapsedStatus = true;
+      hiddenStatus = true;
     }
   });
 
-  return collapsedStatus;
+  return hiddenStatus;
 };
 
 const getActiveSubtitle = (pathname) => {
@@ -41,36 +41,9 @@ const getActiveSubtitle = (pathname) => {
 class WorkspaceNav extends Component {
   constructor() {
     super();
-    this.state = {
-      isManuallyInverted: false,
-    };
 
     this.handleShowCreateCollectionModal = this.handleShowCreateCollectionModal.bind(this);
     this.handleShowDeleteCollectionModal = this.handleShowDeleteCollectionModal.bind(this);
-  }
-
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.location.pathname !== this.props.location.pathname) {
-      this.setState({
-        isManuallyInverted: false,
-      });
-    }
-  }
-
-  getClassName(isFloatOnTop) {
-    let className = 'WorkspaceNav noSelect';
-
-    if (isFloatOnTop) {
-      if (this.state.isManuallyInverted) {
-        className = `${className} floating`;
-      } else {
-        className = `${className} collapsed`;
-      }
-    } else if (this.state.isManuallyInverted) {
-      className = `${className} collapsed noFloat`;
-    }
-
-    return className;
   }
 
   handleShowCreateCollectionModal() {
@@ -83,26 +56,19 @@ class WorkspaceNav extends Component {
 
   render() {
     const activeSubtitle = getActiveSubtitle(this.props.location.pathname);
-    const isFloatOnTop = getCollapsedStatus(this.props.location.pathname);
-    const className = this.getClassName(isFloatOnTop);
-    const onClick = () => {
-      if (this.state.isManuallyInverted) {
-        this.setState({ isManuallyInverted: false });
-      } else {
-        this.setState({ isManuallyInverted: true });
-      }
-    };
+    const isHidden = getHiddenStatus(this.props.location.pathname);
 
     return (
       <nav
-        className={className}
+        className={`WorkspaceNav noSelect ${isHidden ? 'hidden' : ''}`}
       >
         <div className="header">
           <div className="rowPrimary">
             <div
               className="menuIcon clickable"
-              onClick={onClick}
-            ><i className="fa fa-bars" aria-hidden="true" /></div>
+            >
+              <i className="fa fa-bars" aria-hidden="true" />
+            </div>
             <h1><Link to="/">Lumen</Link></h1>
           </div>
           <OrganizationMenu profile={this.props.profile} />

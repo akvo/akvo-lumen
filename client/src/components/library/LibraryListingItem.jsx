@@ -160,7 +160,10 @@ export default class LibraryListingItem extends Component {
             }
           }}
         >
-          <div className="entityIcon" />
+          <div
+            className={`entityIcon ${getType(entity) === 'visualisation' ?
+              entity.visualisationType.replace(' ', '-') : ''}`}
+          />
           <div className="textContents">
             <h3 className="entityName">
               {getTitle(entity)}

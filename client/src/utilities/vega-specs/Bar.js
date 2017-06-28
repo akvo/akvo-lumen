@@ -1,4 +1,4 @@
-import defaultColors from '../defaultColors';
+import { palette, defaultPrimaryColor, defaultHighlightColor } from '../visualisationColors';
 
 const getLongestLabelLength = (data) => {
   const labels = data[0].values.map(item => item.bucketValue).filter(value => value != null);
@@ -101,7 +101,7 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
         {
           name: 'sgc',
           type: 'ordinal',
-          range: defaultColors,
+          range: palette,
           domain: {
             data: dataSource,
             field: 'subBucketValue',
@@ -226,7 +226,7 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
                 },
                 hover: {
                   fill: {
-                    value: 'rgb(43, 182, 115)',
+                    value: defaultHighlightColor,
                   },
                 },
               },
@@ -338,7 +338,7 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
         {
           name: 'sgc',
           type: 'ordinal',
-          range: 'category10',
+          range: palette,
           domain: {
             data: dataSource,
             field: 'subBucketValue',
@@ -434,7 +434,7 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
             },
             hover: {
               fill: {
-                value: 'rgb(43, 182, 115)',
+                value: defaultHighlightColor,
               },
             },
           },
@@ -608,12 +608,12 @@ export default function getVegaBarSpec(visualisation, data, containerHeight, con
           },
           update: {
             fill: {
-              value: 'rgb(149, 150, 184)',
+              value: defaultPrimaryColor,
             },
           },
           hover: {
             fill: {
-              value: 'rgb(43, 182, 115)',
+              value: defaultHighlightColor,
             },
           },
         },

@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import EntityTypeHeader from './entity-editor/EntityTypeHeader';
-import ConfirmUserAction from './modals/ConfirmUserAction';
-import InviteUser from './modals/InviteUser';
+import ConfirmUserAction from './users/ConfirmUserAction';
+import InviteUser from './users/InviteUser';
 import * as api from '../api';
 
 require('./entity-editor/EntityTypeHeader.scss');

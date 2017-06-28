@@ -59,10 +59,16 @@
                 column-spec
                 row))))
 
+(defn get-column-count [data]
+  (let [counts (distinct (map count data))]
+    (if (= 1 (count counts))
+      (first counts)
+      (throw (ex-info "Invalid csv file. Varying number of columns" {})))))
+
 (defn csv-importer [path headers?]
   (let [reader (-> path io/input-stream AutoDetectReader.)
         data (csv/read-csv reader)
-        column-count (count (first data))
+        column-count (get-column-count data)
         column-titles (if headers? (first data) (gen-column-titles column-count))
         rows (if headers? (rest data) data)
         column-types (get-column-types rows)

@@ -1,6 +1,5 @@
 (ns akvo.lumen.lib.pie-test
   (:require [akvo.lumen.component.tenant-manager :refer [tenant-manager]]
-            [akvo.lumen.component.transformation-engine :refer [transformation-engine]]
             [akvo.lumen.fixtures :refer [test-tenant-spec
                                          migrate-tenant
                                          rollback-tenant]]
@@ -15,12 +14,10 @@
 (def test-system
   (->
    (component/system-map
-    :transformation-engine (transformation-engine {})
     :tenant-manager (tenant-manager {})
     :db (hikaricp {:uri (:db_uri test-tenant-spec)}))
    (component/system-using
-    {:transformation-engine [:tenant-manager]
-     :tenant-manager [:db]})))
+    {:tenant-manager [:db]})))
 
 (def ^:dynamic *tenant-conn*)
 (def ^:dynamic *dataset-id*)

@@ -41,3 +41,10 @@
       (is (= "text" (get (first columns) "type")))
       (is (= "number" (get (second columns) "type")))
       (is (= "text" (get (last columns) "type"))))))
+
+(deftest ^:functional test-varying-column-count
+  (testing "Should fail to import csv file with varying number of columns"
+    (is (thrown-with-msg? clojure.lang.ExceptionInfo
+                          #"Invalid csv file. Varying number of columns"
+                          (import-file "mixed-column-counts.csv"
+                                       {:dataset-name "Mixed Column Counts"})))))

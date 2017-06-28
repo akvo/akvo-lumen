@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import Modal from 'react-modal';
+import ModalWrapper from 'react-modal';
 import isValidEmail from '../../utils';
+import ModalHeader from '../modals/ModalHeader';
+import ModalFooter from '../modals/ModalFooter';
 
-require('../DashboardModal.scss');
+require('./InviteUser.scss');
 
 export default class InviteUser extends Component {
   constructor(props) {
@@ -27,17 +29,18 @@ export default class InviteUser extends Component {
     const { isOpen, onClose } = this.props;
     const isDisabled = !isValidEmail(this.state.email);
     return (
-      <Modal
+      <ModalWrapper
         isOpen={isOpen}
         contentLabel="userInviteModal"
         style={{
           content: {
             width: 500,
-            height: 200,
+            height: 180,
             marginLeft: 'auto',
             marginRight: 'auto',
             borderRadius: 0,
             border: '0.1rem solid rgb(223, 244, 234)',
+            display: 'flex',
           },
           overlay: {
             zIndex: 1000,
@@ -45,44 +48,35 @@ export default class InviteUser extends Component {
           },
         }}
       >
-        <div className="DashboardModal">
-          <div className="InviteUserModal">
-            <h2 className="modalTitle">Invite User</h2>
-            <div
-              className="close clickable"
-              onClick={onClose}
-            >
-            ✕
-            </div>
-            <div className="contents">
-              <p>Please enter the email address you would like to invite.</p>
-              <input
-                className="emailInput"
-                name="email"
-                onChange={this.onChange}
-                placeholder="Enter email address"
-                type="email"
-                value={this.state.email}
-              />
-            </div>
-            <div className="controls">
-              <button
-                className="clickable negative"
-                onClick={this.props.onClose}
-              >
-              Cancel
-              </button>
-              <button
-                className="clickable positive"
-                disabled={isDisabled}
-                onClick={this.handleInvite}
-              >
-              Send invitation
-              </button>
-            </div>
+        <div className="InviteUser">
+          <ModalHeader
+            title="Invite user"
+            onCloseModal={onClose}
+          />
+          <div className="ModalContents">
+            <p>Please enter the email address you would like to invite.</p>
+            <input
+              className="emailInput"
+              name="email"
+              onChange={this.onChange}
+              placeholder="Enter email address"
+              type="email"
+              value={this.state.email}
+            />
           </div>
+          <ModalFooter
+            leftButton={{
+              text: 'Cancel',
+              onClick: this.props.onClose,
+            }}
+            rightButton={{
+              text: 'Invite user',
+              disabled: isDisabled,
+              onClick: this.handleInvite,
+            }}
+          />
         </div>
-      </Modal>
+      </ModalWrapper>
     );
   }
 }

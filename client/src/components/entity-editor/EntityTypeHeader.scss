@@ -3,11 +3,28 @@
 .EntityTypeHeader {
     height: 4em;
     position: absolute;
-    margin-left: 4em;
     left: 0;
     top: 0;
     right: 0;
     border-bottom: 0.1rem solid $lightBlueGrey;
+    display: flex;
+
+    .backButton {
+        background-color: $black;
+        width: 4rem;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-decoration: none;
+
+        i {
+            color: $white;
+            font-size: 2rem;
+            text-decoration: none;
+            border: 0;
+        }
+    }
 
     .entityInfo, .controls {
         display: inline-block;
@@ -27,13 +44,30 @@
             font-style: italic;
             color: $darkGrey;
         }
+
+        span {
+            padding: 0 4px;
+        }
+
+        &.clickable {
+            span {
+                height: 21px;
+                border: 1px solid transparent;
+
+                &:hover {
+                    border: 1px solid $textSecondary;
+                    cursor: text;
+                }
+            }
+        }
     }
 
     .entityTitleInput {
+        font-size: 1rem;
         font-style: italic;
         width: 100%;
-        padding: 0;
-        border: none;
+        padding: 0 0 0 4px;
+        border: 1px solid $textSecondary;
         color: $darkGrey;
     }
 
@@ -45,8 +79,9 @@
 
     .saveStatus {
         color: $black;
-        margin-top: -0.3rem;
+        margin-top: 0.3rem;
         font-size: 0.9rem;
+        margin-left: 6px;
     }
 
     .overflow {

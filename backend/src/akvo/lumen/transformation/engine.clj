@@ -1,9 +1,8 @@
 (ns akvo.lumen.transformation.engine
-  (:require [akvo.lumen.util :as util]
-            [clojure.java.jdbc :as jdbc]
+  (:require [akvo.lumen.lib :as lib]
+            [akvo.lumen.util :as util]
             [clojure.set :as set]
             [clojure.string :as str]
-            [clojure.walk :as walk]
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/transformation.sql")
@@ -103,10 +102,6 @@
                     :jobExecutionId job-id
                     :message message}))
 
-(defn- execute-transformation-failed [completion-promise tenant-conn dataset-id job-id message]
-  (update-job-failed-execution tenant-conn {:id job-id :error-log [message]})
-  (deliver-promise-failure completion-promise dataset-id job-id message))
-
 (defn index-by [key coll]
   (reduce (fn [index item]
             (assoc index (get item key) item))
@@ -131,47 +126,32 @@
             changed-columns)))
 
 (defn execute-transformation
-  [completion-promise tenant-conn job-id dataset-id transformation]
-  (try
-    (let [dataset-version (latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})
-          previous-columns (vec (:columns dataset-version))
-          source-table (:table-name dataset-version)]
-      (let [{:keys [success? message columns execution-log]} (apply-operation tenant-conn
-                                                                              source-table
-                                                                              previous-columns
-                                                                              transformation)]
-        (if success?
-          (let [new-dataset-version-id (str (util/squuid))]
-            (clear-dataset-version-data-table tenant-conn {:id (:id dataset-version)})
-            (new-dataset-version tenant-conn
-                                 {:id new-dataset-version-id
-                                  :dataset-id dataset-id
-                                  :job-execution-id job-id
-                                  :table-name source-table
-                                  :imported-table-name (:imported-table-name dataset-version)
-                                  :version (inc (:version dataset-version))
-                                  :transformations (conj (vec (:transformations dataset-version))
-                                                         (assoc transformation
-                                                                "changedColumns" (diff-columns previous-columns columns)))
-                                  :columns columns})
-            (update-job-success-execution tenant-conn {:id job-id :exec-log (vec execution-log)})
-            (deliver-promise-success completion-promise dataset-id new-dataset-version-id job-id))
-          (execute-transformation-failed completion-promise
-                                         tenant-conn dataset-id
-                                         job-id
-                                         message))))
-    (catch Exception e
-      (execute-transformation-failed completion-promise
-                                     tenant-conn
-                                     dataset-id
-                                     job-id
-                                     (.getMessage e)))))
+  [tenant-conn dataset-id job-execution-id transformation]
+  (let [dataset-version (latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})
+        previous-columns (vec (:columns dataset-version))
+        source-table (:table-name dataset-version)]
+    (let [{:keys [success? message columns execution-log]} (apply-operation tenant-conn
+                                                                            source-table
+                                                                            previous-columns
+                                                                            transformation)]
+      (when-not success? (throw (ex-info "Failed to transform" {})))
+      (let [new-dataset-version-id (str (util/squuid))]
+        (clear-dataset-version-data-table tenant-conn {:id (:id dataset-version)})
+        (let [next-dataset-version {:id new-dataset-version-id
+                                    :dataset-id dataset-id
+                                    :job-execution-id job-execution-id
+                                    :table-name source-table
+                                    :imported-table-name (:imported-table-name dataset-version)
+                                    :version (inc (:version dataset-version))
+                                    :transformations (conj (vec (:transformations dataset-version))
+                                                           (assoc transformation
+                                                                  "changedColumns" (diff-columns previous-columns
+                                                                                                 columns)))
+                                    :columns columns}]
+          (new-dataset-version tenant-conn next-dataset-version)
+          (lib/created next-dataset-version))))))
 
-(defn- nothing-to-undo [completion-promise tenant-conn dataset-id dataset-version-id job-id]
-  (update-job-success-execution tenant-conn {:id job-id :exec-log []})
-  (deliver-promise-success completion-promise dataset-id dataset-version-id job-id))
-
-(defn- apply-undo [completion-promise tenant-conn job-id dataset-id current-dataset-version]
+(defn- apply-undo [tenant-conn dataset-id job-execution-id current-dataset-version]
   (let [imported-table-name (:imported-table-name current-dataset-version)
         previous-table-name (:table-name current-dataset-version)
         initial-columns (vec (:columns (dataset-version-by-dataset-id tenant-conn
@@ -189,49 +169,33 @@
       (if (empty? transformations)
         (let [new-dataset-version-id (str (util/squuid))]
           (clear-dataset-version-data-table tenant-conn {:id (:id current-dataset-version)})
-          (new-dataset-version tenant-conn
-                               {:id new-dataset-version-id
-                                :dataset-id dataset-id
-                                :job-execution-id job-id
-                                :table-name table-name
-                                :imported-table-name (:imported-table-name current-dataset-version)
-                                :version (inc (:version current-dataset-version))
-                                :transformations (vec
-                                                  (butlast
-                                                   (:transformations current-dataset-version)))
-                                :columns columns})
-          (update-job-success-execution tenant-conn {:id job-id :exec-log full-execution-log})
-          (drop-table tenant-conn {:table-name previous-table-name})
-          (deliver-promise-success completion-promise dataset-id new-dataset-version-id job-id))
+          (let [next-dataset-version {:id new-dataset-version-id
+                                      :dataset-id dataset-id
+                                      :job-execution-id job-execution-id
+                                      :table-name table-name
+                                      :imported-table-name (:imported-table-name current-dataset-version)
+                                      :version (inc (:version current-dataset-version))
+                                      :transformations (vec
+                                                        (butlast
+                                                         (:transformations current-dataset-version)))
+                                      :columns columns}]
+            (new-dataset-version tenant-conn
+                                 next-dataset-version)
+            (drop-table tenant-conn {:table-name previous-table-name})
+            (lib/created next-dataset-version)))
         (let [{:keys [success? message columns execution-log]}
               (apply-operation tenant-conn table-name columns (first transformations))]
           (if success?
             (recur (rest transformations) columns (into full-execution-log execution-log))
-            (execute-transformation-failed completion-promise
-                                           tenant-conn
-                                           dataset-id
-                                           job-id
-                                           message)))))))
+            (throw (ex-info "Failed to undo" {}))))))))
 
-(defn execute-undo [completion-promise tenant-conn job-id dataset-id]
-  (try
-    (let [current-dataset-version (latest-dataset-version-by-dataset-id tenant-conn
-                                                                        {:dataset-id dataset-id})
-          current-version (:version current-dataset-version)]
-      (if (= current-version 1)
-        (nothing-to-undo completion-promise
-                         tenant-conn
-                         dataset-id
-                         (:id current-dataset-version)
-                         job-id)
-        (apply-undo completion-promise
-                    tenant-conn
-                    job-id
-                    dataset-id
-                    current-dataset-version)))
-    (catch Exception e
-      (execute-transformation-failed completion-promise
-                                     tenant-conn
-                                     dataset-id
-                                     job-id
-                                     (.getMessage e)))))
+(defn execute-undo [tenant-conn dataset-id job-execution-id]
+  (let [current-dataset-version (latest-dataset-version-by-dataset-id tenant-conn
+                                                                      {:dataset-id dataset-id})
+        current-version (:version current-dataset-version)]
+    (if (= current-version 1)
+      (lib/created (assoc current-dataset-version :dataset-id dataset-id))
+      (apply-undo tenant-conn
+                  dataset-id
+                  job-execution-id
+                  current-dataset-version))))

@@ -52,7 +52,7 @@ export default class EntityTitleInput extends Component {
             />
             <span
               style={{
-                display: this.state.editMode ? 'none' : 'initial',
+                display: this.state.editMode ? 'none' : 'block',
               }}
             >
               {title}
