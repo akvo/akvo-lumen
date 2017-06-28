@@ -209,7 +209,7 @@ export default class FilterMenu extends Component {
             className="collapseToggle clickable"
             onClick={() => { this.setState({ collapsed: !collapsed }); }}
           >
-            {collapsed ? '⋁' : '⋀'}
+            {collapsed ? <i className="fa fa-angle-down" aria-hidden="true" /> :  <i className="fa fa-angle-up" aria-hidden="true" />}
           </button>
         </h4>
         { collapsed ?
