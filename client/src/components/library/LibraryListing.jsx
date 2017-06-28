@@ -73,44 +73,23 @@ const groupEntities = (entities, sortOrder) => {
 // Accepts an object containing list groups, and returns a sorted array of list groups
 const sortGroups = (listGroups, sortOrder, isReverseSort) => {
   const listGroupArray = [];
-  let sortFunction;
 
   // Convert the listGroup objects into an unsorted listGroup array
   Object.keys(listGroups).forEach((key) => {
     listGroupArray.push(listGroups[key]);
   });
 
-  // Prepare the appropriate sort function based on sortOrder
-  if (sortOrder === 'name') {
-    sortFunction = (a, b) => {
-      const string1 = a.listGroupName.toLowerCase();
-      const string2 = b.listGroupName.toLowerCase();
-      let out;
+  const sortFunction = (a, b) => {
+    let out;
 
-      if (string1 > string2) {
-        out = 1;
-      } else if (string1 === string2) {
-        out = 0;
-      } else {
-        out = -1;
-      }
+    if (isReverseSort) {
+      out = new Date(a.listGroupName) - new Date(b.listGroupName);
+    } else {
+      out = new Date(b.listGroupName) - new Date(a.listGroupName);
+    }
 
-      if (isReverseSort) out *= -1;
-      return out;
-    };
-  } else if (sortOrder === 'created' || sortOrder === 'last_modified') {
-    sortFunction = (a, b) => {
-      let out;
-
-      if (isReverseSort) {
-        out = new Date(a.listGroupName) - new Date(b.listGroupName);
-      } else {
-        out = new Date(b.listGroupName) - new Date(a.listGroupName);
-      }
-
-      return out;
-    };
-  }
+    return out;
+  };
 
   return listGroupArray.sort(sortFunction);
 };

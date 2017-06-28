@@ -210,7 +210,7 @@ class Library extends Component {
     const collections = this.props.collections ? this.props.collections : {};
     const { pendingDeleteEntity, collection } = this.state;
     const query = location.query;
-    const displayMode = query.display || 'list';
+    const displayMode = query.display || 'grid';
     const sortOrder = query.sort || 'last_modified';
     const isReverseSort = query.reverse === 'true';
     const filterBy = query.filter || 'all';

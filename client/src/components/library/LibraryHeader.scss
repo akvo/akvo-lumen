@@ -2,128 +2,61 @@
 
 .LibraryHeader {
     height: 9rem;
+    display: flex;
+    flex-direction: column;
 
     .row {
+        display: flex;
         width: 100%;
         position: relative;
-        padding: 0;
-        background: rgba($lightGrey, 0.5);
-
-        > * {
-            vertical-align: top;
-            display: inline-block;
-            padding: 0.5rem 0.5rem;
-        }
+        align-items: center;
     }
 
     .rowPrimary {
-        padding-top: 0.5rem;
-        height: 5rem;
+        flex: 5;
+        padding: 0 1rem;
+        background: rgba($lightGrey, 0.5);
+        border-bottom: 1px solid $lightGrey;
     }
 
     .rowSecondary {
-        height: 3.5rem;
+        flex: 3;
         border-bottom: 1px solid rgba($lightGrey, 1);
     }
 
     .LocationIndicator {
-        color: $lumenGreen;
-        width: 55%;
-        height: 100%;
+        flex: 2;
+        display: flex;
+        align-items: center;
         overflow: hidden;
 
-        .contents {
-            padding-right: 1rem;
+        .location {
+            color: $lumenGreen;
         }
     }
 
     .LibraryCreateButton {
-        width: 7rem;
-        margin-right: 1.5rem;
-        position: relative;
-
-        .SelectMenu {
-            height: 100%;
-
-            .Select-control {
-                @include button($anchorLink, $white);
-
-                text-align: left;
-
-                &:hover {
-                    opacity: 0.8;
-                }
-            }
-
-            .Select-placeholder {
-                color: $white;
-                margin-top: -2px;
-            }
-
-            .Select-arrow {
-                border-color: $white transparent transparent;
-                border-width: 10px 6px 6px;
-                margin-top: -2px;
-            }
-
-            .Select.is-open {
-                .Select-control {
-                    background-color: $white;
-                }
-
-                .Select-placeholder {
-                    color: $anchorLink;
-                }
-
-                .Select-arrow {
-                    top: 0px;
-                    border-color: $anchorLink transparent transparent;
-                }
-            }
-
-            .Select-arrow-zone {
-                position: absolute;
-                top: 1px;
-                right: 0;
-                padding-top: 10px;
-                padding-right: 10px;
-            }
-
-            .Select-menu-outer {
-                width: 12rem;
-                right: 0;
-                top: 115%;
-                border-color: $white;
-                box-shadow: 0rem 0rem 0.25rem rgba(0, 0, 0, 0.15) !important;
-                border-radius: 0;
-            }
-
-            .Select-option {
-                padding: 0.8rem;
-                color: $anchorLink;
-                box-sizing: border-box;
-                border: 0.1rem solid transparent;
-
-                &:hover {
-                    color: $anchorLink;
-                    border: 1px solid $anchorLink;
-                    background-color: inherit;
-                }
-            }
+        display: flex;
+        flex: 3;
+        max-width: 340px;
+        flex-direction: row;
+        justify-content: space-between;
+        margin-right: 1rem;
+        button {
+            flex: 1;
+            text-align: center;
         }
     }
 
     .LibrarySearch {
-        width: calc(45% - 8.5rem);
-        height: 3.5rem;
-        position: relative;
-        text-align: right;
+        display: flex;
+        flex: 3;
+        justify-content: space-around;
 
         input {
-            width: calc(100% - 6rem);
+            flex: 1;
             padding: 0.25rem 0.75rem;
             color: $darkGrey;
-            vertical-align: top;
         }
 
         .clear {
@@ -137,9 +70,8 @@
 
         .submit {
             @include btnOutline($anchorLink, $anchorLink);
-
-            border-left: none;
-            max-width: 6rem;
+            width: 6rem;
+            margin-left: 1rem;
         }
     }
 
@@ -168,120 +100,6 @@
                     margin-top: 2px;
                     position: relative;
                 }
-            }
-        }
-
-        @media (max-width: 1200px) {
-            width: 50%;
-
-            ul li {
-                padding-left: 0.5rem;
-                padding-right: 0.5rem;
-            }
-        }
-    }
-
-    .LibraryDisplayMenu {
-        width: 36%;
-        position: relative;
-        padding-top: 13px;
-        height: 100%;
-
-        @media (max-width: 1200px) {
-            width: 50%;
-        }
-
-        .sortOrderLabel {
-            color: rgba(black, 0.3);
-            line-height: 2.5rem;
-            width: 4rem;
-            display: inline-block;
-        }
-
-        .SelectMenu {
-            width: 8rem;
-            margin-right: calc(100% - 18rem);
-            height: 2rem;
-            display: inline-block;
-            vertical-align: top;
-            margin-top: 3px;
-
-            .Select-control {
-                border: 0;
-                background: $white;
-                border: 1px solid $anchorLink;
-                border-radius: 3px;
-
-                .Select-multi-value-wrapper {
-                    .Select-value {
-                        top: -5px;
-                        margin-right: 5px;
-
-                        .Select-value-label {
-                            color: $anchorLink;
-                            font-size: 0.85rem;
-                        }
-                    }
-                }
-            }
-
-            .Select-placeholder {
-                color: $anchorLink;
-                text-align: right;
-                padding-right: 1.75rem;
-                padding-left: 0;
-            }
-
-            .Select-arrow-zone {
-                padding-left: 25px;
-
-                .Select-arrow {
-                    border-color: $anchorLink transparent transparent;
-                }
-            }
-
-            .Select-menu-outer {
-                width: 10rem;
-                right: 0;
-                top: 115%;
-                border-color: $black;
-                box-shadow: 0rem 0rem 0.25rem rgba(0, 0, 0, 0.15) !important;
-                border-radius: 0;
-            }
-
-            .Select-option {
-                padding: 0.8rem;
-                color: $black;
-                box-sizing: border-box;
-                border: 0.1rem solid transparent;
-
-                &:hover {
-                    color: $akvoPurple;
-                    border: 0.1rem solid $akvoPurple;
-                    background-color: inherit;
-                }
-            }
-        }
-
-        .displayControls {
-            display: inline-block;
-            width: 6rem;
-            height: 2.5rem;
-            position: relative;
-            vertical-align: top;
-            text-align: right;
-
-            .control {
-                display: inline-block;
-                width: 2rem;
-                height: 2rem;
-                font-size: 1.7rem;
-            }
-
-            .displayGrid {}
-
-            .displayList {
-                margin-left: 1rem;
             }
         }
     }
