@@ -5,9 +5,7 @@ import { fetchDatasetsSuccess } from './dataset';
 import { fetchVisualisationsSuccess } from './visualisation';
 import { fetchDashboardsSuccess } from './dashboard';
 import { fetchCollectionsSuccess } from './collection';
-
-
-import * as api from '../api';
+import * as api from '../utilities/api';
 
 function fetchLibraryRequest() {
   return {

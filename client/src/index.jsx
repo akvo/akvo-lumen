@@ -4,7 +4,7 @@ import { browserHistory } from 'react-router';
 import { syncHistoryWithStore } from 'react-router-redux';
 import Root from './containers/Root';
 import configureStore from './store/configureStore';
-import * as auth from './auth';
+import * as auth from './utilities/auth';
 
 function initAuthenticated(profile, env) {
   const initialState = { profile, env };

@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import EntityTypeHeader from './entity-editor/EntityTypeHeader';
 import ConfirmUserAction from './modals/ConfirmUserAction';
 import InviteUser from './modals/InviteUser';
-import * as api from '../api';
+import * as api from '../utilities/api';
 
 require('./entity-editor/EntityTypeHeader.scss');
 require('./Users.scss');

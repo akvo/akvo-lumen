@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { isEmpty, cloneDeep } from 'lodash';
 import ShareEntity from '../components/modals/ShareEntity';
 import * as actions from '../actions/dashboard';
-import * as api from '../api';
+import * as api from '../utilities/api';
 import { fetchLibrary } from '../actions/library';
 import { fetchDataset } from '../actions/dataset';
 import aggregationOnlyVisualisationTypes from '../utilities/aggregationOnlyVisualisationTypes';

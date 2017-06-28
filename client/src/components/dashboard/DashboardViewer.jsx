@@ -1,44 +1,10 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import DashboardViewerItem from './DashboardViewerItem';
-
+import { getSortFunc, viewportLimits } from '../../utilities/dashboard';
+import getArrayFromObject from '../../utilities/general';
 
 require('./DashboardViewer.scss');
-
-const viewportLimits = [
-  {
-    limit: 720,
-    name: 'small',
-  },
-  {
-    limit: 1024,
-    name: 'medium',
-  },
-  {
-    limit: Infinity,
-    name: 'large',
-  },
-];
-
-const getArrayFromObject = object => Object.keys(object).map(key => object[key]);
-
-const getSortFunc = layout => (a, b) => {
-  const ay = layout[a.id].y;
-  const by = layout[b.id].y;
-  const ax = layout[a.id].x;
-  const bx = layout[b.id].x;
-
-  if (ay < by) {
-    return -1;
-  } else if (ay > by) {
-    return 1;
-  } else if (ax < bx) {
-    return -1;
-  } else if (ax > bx) {
-    return 1;
-  }
-  return 0;
-};
 
 export default class DashboardViewer extends Component {
   constructor() {

@@ -1,35 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { filterVisualisations, formatDate } from '../../utilities/dashboard';
 
 require('./DashboardVisualisationList.scss');
-
-const formatDate = (date) => {
-  let month = date.getMonth() + 1;
-  let day = date.getDate();
-  let hours = date.getHours();
-  let minutes = date.getMinutes();
-  if (month < 10) month = `0${month}`;
-  if (day < 10) day = `0${day}`;
-  if (hours < 10) hours = `0${hours}`;
-  if (minutes < 10) minutes = `0${minutes}`;
-
-  return `${date.getFullYear()}-${month}-${day} ${hours}:${minutes}`;
-};
-
-const filterVisualisations = (visualisations, filterText) => {
-  // NB - this naive approach is fine with a few hundred visualisations, but we should replace
-  // with something more serious before users start to have thousands of visualisations
-  if (!filterText) {
-    return visualisations;
-  }
-
-  return visualisations.filter((visualisation) => {
-    let name = visualisation.name || '';
-    name = name.toString().toLowerCase();
-
-    return name.indexOf(filterText.toString().toLowerCase()) > -1;
-  });
-};
 
 export default class DashboardVisualisationList extends Component {
   constructor() {

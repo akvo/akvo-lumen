@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Select from 'react-select';
 import { connect } from 'react-redux';
-import * as api from '../../../api';
-import * as keycloak from '../../../auth';
+import * as api from '../../../utilities/api';
+import * as keycloak from '../../../utilities/auth';
 
 const acceptHeader = { Accept: 'application/vnd.akvo.flow.v2+json' };
 

@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import fileName from '../../utilities/dataset';
 
-function sourceComponent(source) {
+const sourceComponent = (source) => {
   switch (source.kind) {
     case 'DATA_FILE':
       return <span>Data file</span>;
@@ -12,19 +13,7 @@ function sourceComponent(source) {
     default:
       return <span>{source.kind}</span>;
   }
-}
-
-function fileName(source) {
-  switch (source.kind) {
-    case 'DATA_FILE':
-      return source.fileName;
-    case 'LINK':
-      return source.url.substring(source.url.lastIndexOf('/') + 1);
-    case 'AKVO_FLOW':
-      return 'Survey';
-    default: return 'Unknown';
-  }
-}
+};
 
 export default class Settings extends Component {
 

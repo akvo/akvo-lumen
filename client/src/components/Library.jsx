@@ -14,38 +14,9 @@ import { deleteDashboard } from '../actions/dashboard';
 import { editCollection } from '../actions/collection';
 import { showNotification } from '../actions/notification';
 import * as entity from '../domain/entity';
+import { filterLibraryByCollection, updateQueryAction } from '../utilities/library';
 
 require('./Library.scss');
-
-function mergeQuery(location, query) {
-  return Object.assign({}, location, {
-    query: Object.assign({}, location.query, query),
-  });
-}
-
-function updateQueryAction(location, query) {
-  return push(mergeQuery(location, query));
-}
-
-const filterLibraryByCollection = (library, collection) => {
-  const filteredLibrary = {};
-
-  filteredLibrary.datasets = {};
-  filteredLibrary.visualisations = {};
-  filteredLibrary.dashboards = {};
-
-  collection.entities.forEach((entityId) => {
-    if (library.visualisations[entityId]) {
-      filteredLibrary.visualisations[entityId] = library.visualisations[entityId];
-    } else if (library.datasets[entityId]) {
-      filteredLibrary.datasets[entityId] = library.datasets[entityId];
-    } else if (library.dashboards[entityId]) {
-      filteredLibrary.dashboards[entityId] = library.dashboards[entityId];
-    }
-  });
-
-  return Object.assign({}, library, filteredLibrary);
-};
 
 class Library extends Component {
 
