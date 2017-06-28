@@ -1,6 +1,5 @@
 (ns akvo.lumen.lib.pivot-test
   (:require [akvo.lumen.component.tenant-manager :refer [tenant-manager]]
-            [akvo.lumen.component.transformation-engine :refer [transformation-engine]]
             [akvo.lumen.fixtures :refer [test-tenant-spec
                                          migrate-tenant
                                          rollback-tenant]]
@@ -15,12 +14,10 @@
 (def test-system
   (->
    (component/system-map
-    :transformation-engine (transformation-engine {})
     :tenant-manager (tenant-manager {})
     :db (hikaricp {:uri (:db_uri test-tenant-spec)}))
    (component/system-using
-    {:transformation-engine [:tenant-manager]
-     :tenant-manager [:db]})))
+    {:tenant-manager [:db]})))
 
 (def ^:dynamic *tenant-conn*)
 (def ^:dynamic *dataset-id*)
@@ -31,15 +28,14 @@
   (binding [*tenant-conn* (:spec (:db test-system))
             *dataset-id* (import-file "pivot.csv" {:dataset-name "pivot"
                                                    :has-column-headers? true})]
-    (tf/schedule *tenant-conn*
-                 (:transformation-engine test-system)
-                 *dataset-id*
-                 {:type :transformation
-                  :transformation {"op" "core/change-datatype"
-                                   "args" {"columnName" "c3"
-                                           "newType" "number"
-                                           "defaultValue" 0}
-                                   "onError" "default-value"}})
+    (tf/apply *tenant-conn*
+              *dataset-id*
+              {:type :transformation
+               :transformation {"op" "core/change-datatype"
+                                "args" {"columnName" "c3"
+                                        "newType" "number"
+                                        "defaultValue" 0}
+                                "onError" "default-value"}})
     (f)
     (alter-var-root #'test-system component/stop)
     (rollback-tenant test-tenant-spec)))

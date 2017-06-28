@@ -93,11 +93,39 @@
 
         &.visualisation {
             .entityIcon {
-                // &:before {
-                //     content: "\f1fe";
-                // }
-
                 background-image: url("../../styles/img/icon-256-library-listing-visualisation.png");
+
+                &.area {
+                    background-image: url("../../styles/img/icon-128-visualisation-area.png");
+                }
+
+                &.bar {
+                    background-image: url("../../styles/img/icon-128-visualisation-bar.png");
+                }
+
+                &.donut {
+                    background-image: url("../../styles/img/icon-128-visualisation-donut.png");
+                }
+
+                &.line {
+                    background-image: url("../../styles/img/icon-128-visualisation-line.png");
+                }
+
+                &.map {
+                    background-image: url("../../styles/img/icon-128-visualisation-map.png");
+                }
+
+                &.pie {
+                    background-image: url("../../styles/img/icon-128-visualisation-pie.png");
+                }
+
+                &.pivot-table {
+                    background-image: url("../../styles/img/icon-128-visualisation-pivot-table.png");
+                }
+
+                &.scatter {
+                    background-image: url("../../styles/img/icon-128-visualisation-scatter.png");
+                }
             }
         }
 
@@ -183,9 +211,13 @@
         }
     }
 
-    .noItemsMessage {
+    .noItemsMessage, .noSearchResults {
         display: block;
         text-align: center;
-        padding-top: 4rem;
+        padding-top: 8rem;
+    }
+
+    .LibraryListingGroup:last-child .LibraryListingItem:last-child {
+        margin-bottom: 6rem;
     }
 }

@@ -131,15 +131,29 @@ export default function LibraryListing({
   const entities = filterEntities(library, filterBy, searchString);
   const listGroups = groupEntities(entities, sortOrder);
   const sortedListGroups = sortGroups(listGroups, sortOrder, isReverseSort);
+  const results = sortedListGroups.length > 0;
+
   return (
     <div className={`LibraryListing ${displayMode}`}>
-      {(sortedListGroups.length === 0 && currentCollection) ?
+      {(!results && !currentCollection && !searchString) &&
+        <span
+          className="noItemsMessage"
+        />
+      }
+      {(!results && currentCollection && !searchString) &&
         <span
           className="noItemsMessage"
         >
-          There are no items in this collection.
+          <p>There are no items in this collection.</p>
         </span>
-        :
+      }
+      {(!results && searchString) &&
+        <div className="noSearchResults">
+          <h3>No results found</h3>
+          <p>Please update your search and try again.</p>
+        </div>
+      }
+      {results &&
         <ul>
           {sortedListGroups.map((listGroup, index) =>
             <LibraryListingGroup
