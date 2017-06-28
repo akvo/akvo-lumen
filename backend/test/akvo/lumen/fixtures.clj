@@ -1,9 +1,9 @@
 (ns akvo.lumen.fixtures
-  (:require [clojure.edn :as edn]
+  (:require [akvo.lumen.component.tenant-manager :as tm]
+            [akvo.lumen.migrate :as migrate]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [hugsql.core :as hugsql]
-            [akvo.lumen.component.tenant-manager :as tm]
-            [akvo.lumen.migrate :as migrate]
             [ragtime
              [jdbc :as jdbc]
              [repl :as repl]]
