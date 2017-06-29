@@ -142,11 +142,10 @@ export default class LibraryListingItem extends Component {
           </div>
         }
         <div
-          className="checkboxContainer"
+          className={`checkboxContainer ${this.props.showCheckbox ? 'show' : ''}`}
           onClick={() => {
             this.props.onCheckEntity(getId(entity));
-          }
-          }
+          }}
         >
           <input
             type="checkbox"
@@ -211,4 +210,5 @@ LibraryListingItem.propTypes = {
   currentCollection: PropTypes.object,
   onCheckEntity: PropTypes.func.isRequired,
   isChecked: PropTypes.bool.isRequired,
+  showCheckbox: PropTypes.bool,
 };
