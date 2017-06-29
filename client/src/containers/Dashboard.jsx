@@ -343,6 +343,8 @@ class Dashboard extends Component {
           title={dashboard.title}
           isUnsavedChanges={this.state.isUnsavedChanges}
           onDashboardAction={this.handleDashboardAction}
+          onChangeTitle={this.onUpdateName}
+          onBeginEditTitle={() => this.setState({ isUnsavedChanges: true })}
         />
         <DashboardEditor
           dashboard={dashboard}
