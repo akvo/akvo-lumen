@@ -104,7 +104,6 @@ export default function LibraryListing({
   displayMode,
   searchString,
   checkboxEntities,
-  onSelectEntity,
   onCheckEntity,
   onEntityAction }) {
   const entities = filterEntities(library, filterBy, searchString);
@@ -144,7 +143,6 @@ export default function LibraryListing({
               sortOrder={sortOrder}
               isReverseSort={isReverseSort}
               checkboxEntities={checkboxEntities}
-              onSelectEntity={onSelectEntity}
               onCheckEntity={onCheckEntity}
               onEntityAction={onEntityAction}
             />
@@ -162,7 +160,6 @@ LibraryListing.propTypes = {
   isReverseSort: PropTypes.bool.isRequired,
   displayMode: PropTypes.oneOf(['grid', 'list']).isRequired,
   searchString: PropTypes.string.isRequired,
-  onSelectEntity: PropTypes.func.isRequired,
   onEntityAction: PropTypes.func.isRequired,
   collections: PropTypes.object.isRequired,
   currentCollection: PropTypes.object,

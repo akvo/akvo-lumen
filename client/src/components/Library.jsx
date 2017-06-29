@@ -57,7 +57,6 @@ class Library extends Component {
       checkboxEntities: [],
     };
 
-    this.handleSelectEntity = this.handleSelectEntity.bind(this);
     this.handleCheckEntity = this.handleCheckEntity.bind(this);
     this.handleEntityAction = this.handleEntityAction.bind(this);
     this.handleDeleteEntity = this.handleDeleteEntity.bind(this);
@@ -100,10 +99,6 @@ class Library extends Component {
     }
 
     this.setState({ checkboxEntities: newCheckboxEntities });
-  }
-
-  handleSelectEntity(entityType, id) {
-    this.props.dispatch(push(`/${entityType}/${id}`));
   }
 
   handleDeleteEntity(entityType, id) {
@@ -291,7 +286,6 @@ class Library extends Component {
           currentCollection={collection}
           library={collection ? filterLibraryByCollection(this.props, collection) : this.props}
           checkboxEntities={this.state.checkboxEntities}
-          onSelectEntity={this.handleSelectEntity}
           onCheckEntity={this.handleCheckEntity}
           onEntityAction={this.handleEntityAction}
         />
