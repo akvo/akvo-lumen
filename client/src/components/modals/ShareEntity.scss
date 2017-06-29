@@ -1,8 +1,15 @@
 @import "../../styles/modules/importAll";
 
 .ShareEntity {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
     position: relative;
     min-height: 100%;
+
+    .ModalContents {
+        flex: 1;
+    }
 
     .contents {
         padding-top: 4rem;
@@ -25,25 +32,6 @@
                 color: inherit;
                 text-decoration: none;
                 word-wrap: break-word;
-            }
-        }
-
-        .copyButton {
-            margin-top: 1rem;
-            background-color: $lumenGreen;
-            text-align: center;
-            width: 14rem;
-            color: white;
-
-            @include border-radius(3px);
-
-            padding: 0.5rem 0;
-            transition: background-color 0.5s ease, border 0.5s ease;
-
-            &.copied {
-                color: $lumenGreen;
-                border: 0.1rem solid $lumenGreen;
-                background-color: white;
             }
         }
     }
