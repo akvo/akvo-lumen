@@ -1,32 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import ContextMenuItem from './ContextMenuItem';
+import getArrowStyle from '../../utilities/contextMenu';
 
 require('./ContextMenu.scss');
-
-const getArrowStyle = (className, offset = '0px') => {
-  const style = {};
-  let direction;
-
-  switch (className) {
-    case 'topLeft':
-    case 'bottomLeft':
-      direction = 'left';
-      break;
-
-    case 'topRight':
-    case 'bottomRight':
-      direction = 'right';
-      break;
-
-    default:
-      throw new Error(`Unknown direction ${className} supplied to getArrowStyle`);
-  }
-
-  style[direction] = offset;
-
-  return style;
-};
 
 export default class ContextMenu extends Component {
   componentDidMount() {

@@ -6,62 +6,6 @@ import * as chart from '../../utilities/chart';
 
 require('./Chart.scss');
 
-function getSize(computedWidth) {
-  let size;
-
-  if (computedWidth < 240) {
-    size = 'xsmall';
-  } else if (computedWidth < 480) {
-    size = 'small';
-  } else if (computedWidth < 720) {
-    size = 'medium';
-  } else if (computedWidth < 860) {
-    size = 'large';
-  } else {
-    size = 'xlarge';
-  }
-
-  return size;
-}
-
-const getTitleStyle = (title = '', chartSize) => {
-  const titleLength = title.toString().length;
-  const padding = 8;
-
-  let baseFontSize;
-
-  switch (chartSize) {
-    case 'xsmall':
-      baseFontSize = 12;
-      break;
-    case 'small':
-      baseFontSize = 14;
-      break;
-    case 'medium':
-    case 'large':
-      baseFontSize = 16;
-      break;
-    case 'xlarge':
-      baseFontSize = 20;
-      break;
-
-    default:
-      baseFontSize = 16;
-  }
-
-  if (titleLength > 96) {
-    baseFontSize -= 2;
-  }
-
-  const lineHeight = Math.floor(baseFontSize * 1.4);
-
-  return ({
-    height: titleLength <= 48 ? lineHeight + (padding * 2) : (lineHeight * 2) + (padding * 2),
-    fontSize: baseFontSize,
-    lineHeight: `${lineHeight}px`,
-  });
-};
-
 export default class Chart extends Component {
 
   constructor() {
@@ -75,7 +19,7 @@ export default class Chart extends Component {
 
   componentDidMount() {
     const { visualisation, width } = this.props;
-    const titleHeight = getTitleStyle(visualisation.name, getSize(width)).height;
+    const titleHeight = chart.getTitleStyle(visualisation.name, chart.getSize(width)).height;
     const chartHeight = this.props.height - titleHeight;
 
     this.renderChart(this.props, chartHeight);
@@ -88,7 +32,7 @@ export default class Chart extends Component {
 
     if (visualisationChanged || sizeChanged) {
       const { visualisation, width } = nextProps;
-      const titleHeight = getTitleStyle(visualisation.name, getSize(width)).height;
+      const titleHeight = chart.getTitleStyle(visualisation.name, chart.getSize(width)).height;
       const chartHeight = nextProps.height - titleHeight;
 
       this.renderChart(nextProps, chartHeight);
@@ -99,7 +43,7 @@ export default class Chart extends Component {
     const { visualisation, datasets, width } = props;
     const containerHeight = height || 400;
     const containerWidth = width || 800;
-    const chartSize = getSize(containerWidth);
+    const chartSize = chart.getSize(containerWidth);
     let chartData;
     switch (visualisation.visualisationType) {
       case 'pie':
@@ -139,7 +83,7 @@ export default class Chart extends Component {
     const { visualisationType } = visualisation;
     const containerHeight = height || 400;
     const containerWidth = width || 800;
-    const chartSize = getSize(containerWidth);
+    const chartSize = chart.getSize(containerWidth);
     const className = `Chart ${visualisationType} ${chartSize}`;
 
     return (
@@ -151,7 +95,7 @@ export default class Chart extends Component {
         }}
       >
         <h2
-          style={getTitleStyle(visualisation.name, chartSize)}
+          style={chart.getTitleStyle(visualisation.name, chartSize)}
         >
           <span>
             {visualisation.name}
