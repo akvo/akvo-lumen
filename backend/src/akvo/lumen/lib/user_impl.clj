@@ -107,7 +107,3 @@
 (defn promote-user-to-admin
   [keycloak tenant author-claims user-id]
   (keycloak/promote-user-to-admin keycloak tenant author-claims user-id))
-
-
-
-;;;

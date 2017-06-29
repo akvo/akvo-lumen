@@ -6,7 +6,7 @@
 
 
 (defn redirect-location
-  "Unfortually local development is done by running the api at port 3000
+  "Unfortunately local development is done by running the api at port 3000
   and the client at 3030. To solve this we extend the config map with a
   root-redirect key."
   [tier {:keys [api-port client-port scheme] :as config} {:keys [server-name]}]
