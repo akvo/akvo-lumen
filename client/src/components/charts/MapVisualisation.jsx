@@ -2,17 +2,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Map, CircleMarker, Popup, TileLayer } from 'react-leaflet';
 import * as chart from '../../utilities/chart';
+import isImage from '../../utilities/general';
 
 require('../../../node_modules/leaflet/dist/leaflet.css');
 require('./MapVisualisation.scss');
-
-const isImage = (value) => {
-  // For now, treat every link as an image, until we have something like an "image-url" type
-  if (typeof value === 'string' && value.match(/^https/) !== null) {
-    return true;
-  }
-  return false;
-};
 
 const calculateBounds = (layerArray) => {
   if (layerArray.length === 0) {

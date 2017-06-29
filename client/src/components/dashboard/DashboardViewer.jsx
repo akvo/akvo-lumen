@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import DashboardViewerItem from './DashboardViewerItem';
-
+import getArrayFromObject from '../../utilities/general';
 
 require('./DashboardViewer.scss');
 
@@ -19,8 +19,6 @@ const viewportLimits = [
     name: 'large',
   },
 ];
-
-const getArrayFromObject = object => Object.keys(object).map(key => object[key]);
 
 const getSortFunc = layout => (a, b) => {
   const ay = layout[a.id].y;

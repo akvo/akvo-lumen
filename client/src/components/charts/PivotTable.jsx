@@ -1,20 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { replaceLabelIfValueEmpty, processPivotData } from '../../utilities/chart';
+import formatTitle from '../../utilities/general';
 
 require('./PivotTable.scss');
 
 const meanPixelsPerChar = 7.5; // Used for calculating min-widths for columns
 const defaultCategoryWidth = 100; // Number of pixels to wrap category columns at
 const columnLimit = 50; // Don't render a table if there are more columns than this
-
-const formatTitle = (title) => {
-  const maxTitleLength = 64;
-  if (!title) return title;
-  if (title.toString().length <= maxTitleLength) return title;
-
-  return `${title.toString().substring(0, maxTitleLength - 1)}…`;
-};
 
 const getColumnHeaderClassname = (cell, index, spec) => {
   if (index === 0) {
@@ -35,7 +28,6 @@ const getColumnHeaderBody = (cell, index, spec) => {
 
   return formatTitle(spec.rowTitle ? spec.rowTitle : cell.title);
 };
-
 
 /* Returns the min column width that will limit wrapping to two lines.
 /* This is not currently possible with a stylesheet-only approach. */
