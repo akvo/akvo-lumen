@@ -46,7 +46,9 @@
         button {
             flex: 1;
             text-align: center;
-            margin-right: 10px;
+            @media (min-width: 1100px) {
+                margin-right: 10px;
+            }
         }
     }
 
