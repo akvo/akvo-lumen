@@ -1,3 +1,5 @@
+import { push } from 'react-router-redux';
+
 export function getArrayFromObject(object) {
   return Object.keys(object).map(key => object[key]);
 }
@@ -15,4 +17,14 @@ export function formatTitle(title, maxTitleLength = 64) {
   if (title.toString().length <= maxTitleLength) return title;
 
   return `${title.toString().substring(0, maxTitleLength - 1)}…`;
+}
+
+function mergeQuery(location, query) {
+  return Object.assign({}, location, {
+    query: Object.assign({}, location.query, query),
+  });
+}
+
+export function updateQueryAction(location, query) {
+  return push(mergeQuery(location, query));
 }

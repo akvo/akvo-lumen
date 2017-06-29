@@ -14,18 +14,9 @@ import { deleteDashboard } from '../actions/dashboard';
 import { editCollection } from '../actions/collection';
 import { showNotification } from '../actions/notification';
 import * as entity from '../domain/entity';
+import updateQueryAction from '../utilities/general';
 
 require('./Library.scss');
-
-function mergeQuery(location, query) {
-  return Object.assign({}, location, {
-    query: Object.assign({}, location.query, query),
-  });
-}
-
-function updateQueryAction(location, query) {
-  return push(mergeQuery(location, query));
-}
 
 const filterLibraryByCollection = (library, collection) => {
   const filteredLibrary = {};
