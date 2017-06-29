@@ -6,22 +6,10 @@
             [clj-time.coerce :as c]
             [clj-time.core :as t]
             [clojure.string :as str]
-            [hugsql.core :as hugsql]))
+            [hugsql.core :as hugsql]
+            [selmer.parser :as selmer]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/user.sql")
-
-(defn invite-to-tenant-email-text
-  [location invite-id author-name]
-  (str/join
-   "\n"
-   ["Hi,"
-    ""
-    (format "You been invited to join %s by %s." location author-name)
-    "To complete your invite please visit:"
-    (format "%s/verify/%s" location invite-id)
-    ""
-    "Thanks"
-    "Akvo"]))
 
 (defn invite-to-tenant
   "Create an invite and use provider emailer to send an invitation email."
@@ -32,25 +20,12 @@
                                       :expire (c/to-sql-time (t/plus (t/now)
                                                                      (t/weeks 2)))})
                       first :id)
-        text-part (invite-to-tenant-email-text location invite-id
-                                               (get author-claims "name"))]
+        text-part (selmer/render-file "akvo/lumen/email/invite_to_tenant.txt"
+                                      {:location location
+                                       :invite-id invite-id
+                                       :author-name (get author-claims "name")} )]
     (emailer/send-email emailer [email] {"Subject" "Akvo Lumen invite"
                                          "Text-part" text-part})))
-
-(defn create-new-account-and-invite-to-tenant-email-text
-  [author-name email invite-id location tmp-password]
-  (str/join
-   "\n"
-   ["Hi,"
-    ""
-    (format "You been invited to join %s by %s." location author-name)
-    "To complete your invite please visit:"
-    (format "%s/verify/%s" location invite-id)
-    (format "Using your email: %s" email)
-    (format "and the temporary password: %s to login." tmp-password)
-    ""
-    "Thanks"
-    "Akvo"]))
 
 (defn create-new-account-and-invite-to-tenant
   ""
@@ -69,8 +44,14 @@
                                       :expire (c/to-sql-time (t/plus (t/now)
                                                                      (t/weeks 2)))})
                       first :id)
-        text-part (create-new-account-and-invite-to-tenant-email-text
-                   name email invite-id location tmp-password)]
+
+        text-part (selmer/render-file
+                   "akvo/lumen/email/create_new_account_and_invite_to_tenant.txt"
+                   {:author-name (get author-claims "name")
+                    :email email
+                    :invite-id invite-id
+                    :location location
+                    :tmp-password tmp-password})]
     (keycloak/reset-password keycloak request-headers user-id tmp-password)
     (emailer/send-email emailer [email] {"Subject" "Akvo Lumen invite"
                                          "Text-part" text-part})))

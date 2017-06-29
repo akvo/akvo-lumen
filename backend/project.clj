@@ -30,7 +30,8 @@
                  [raven-clj "1.5.0"]
                  [ring "1.5.1"]
                  [ring/ring-defaults "0.2.3"]
-                 [ring/ring-json "0.4.0"]]
+                 [ring/ring-json "0.4.0"]
+                 [selmer "1.10.8"]]
   :uberjar-name "akvo-lumen.jar"
   :repl-options {:timeout 120000}
   ;; :pedantic? :abort
