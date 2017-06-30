@@ -6,12 +6,12 @@ import ModalFooter from '../modals/ModalFooter';
 
 require('./ConfirmUserAction.scss');
 
-function getQuestion({ username }, action) {
+function getQuestion({ email, username }, action) {
   let question = '';
   if (action === 'delete') {
     question = `Remove user: ${username}`;
   } else if (action === 'revoke') {
-    question = `Revoke invitation sent to: ${username}`;
+    question = `Revoke invitation sent to: ${email}`;
   } else if (action === 'demote') {
     question = `Remove admin privileges for user: ${username}`;
   } else if (action === 'promote') {
