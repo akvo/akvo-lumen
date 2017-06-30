@@ -56,6 +56,7 @@ export default class ShareEntity extends Component {
     return (
       <ModalWrapper
         isOpen={isOpen}
+        onAfterOpen={this.fetchShareId}
         contentLabel="userInviteModal"
         style={{
           content: {
