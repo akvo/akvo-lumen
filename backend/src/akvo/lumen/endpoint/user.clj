@@ -1,6 +1,6 @@
 (ns akvo.lumen.endpoint.user
-  (:require [akvo.lumen.component.user-manager :as user-manager]
-            [akvo.lumen.http :as http]
+  (:require [akvo.lumen.http :as http]
+            [akvo.lumen.lib.user :as user]
             [compojure.core :refer :all]))
 
 
@@ -12,23 +12,23 @@
   (and (contains? body "admin")
        (not (get body "admin"))))
 
-(defn endpoint [{:keys [user-manager]}]
+(defn endpoint [{:keys [keycloak]}]
   (context "/api/admin/users" {:keys [jwt-claims tenant]}
 
     (GET "/" _
-      (user-manager/users user-manager tenant))
+      (user/users keycloak tenant))
 
     (context "/:id" [id]
 
       (PATCH "/" {:keys [body]}
         (cond
           (demote-user? body)
-          (user-manager/demote-user-from-admin user-manager tenant jwt-claims id)
+          (user/demote-user-from-admin keycloak tenant jwt-claims id)
 
           (promote-user? body)
-          (user-manager/promote-user-to-admin user-manager tenant jwt-claims id)
+          (user/promote-user-to-admin keycloak tenant jwt-claims id)
 
           :else (http/not-implemented)))
 
       (DELETE "/" _
-        (user-manager/remove-user user-manager tenant jwt-claims id)))))
+        (user/remove-user keycloak tenant jwt-claims id)))))

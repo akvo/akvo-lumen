@@ -1,0 +1,8 @@
+Hi,
+
+You been invited to join {{location}} by {{author-name}}.
+To complete your invite please visit:
+{{location}}/verify/{{invite-id}}
+
+Thanks
+Akvo

@@ -1,10 +1,9 @@
 {:components
- {:app  #var duct.component.handler/handler-component
+ {:app #var duct.component.handler/handler-component
   :db #var duct.component.hikaricp/hikaricp
   :emailer #var akvo.lumen.component.emailer/mailjet-emailer
   :http #var akvo.lumen.component.http/http
   :keycloak #var akvo.lumen.component.keycloak/keycloak
-  :user-manager #var akvo.lumen.component.user-manager/user-manager
   :tenant-manager #var akvo.lumen.component.tenant-manager/tenant-manager}
  :endpoints
  {:aggregation #var akvo.lumen.endpoint.aggregation/endpoint
@@ -35,16 +34,15 @@
   :dataset [:tenant-manager :config]
   :env [:config]
   :files [:config]
-  :invite [:tenant-manager :user-manager]
-  :invite-verify [:tenant-manager :user-manager]
+  :invite [:tenant-manager :keycloak :emailer :config]
+  :invite-verify [:keycloak :tenant-manager :config]
   :job-execution [:tenant-manager]
   :library [:tenant-manager]
   :public [:tenant-manager]
   :root [:tenant-manager]
   :share [:tenant-manager :config]
   :transformation [:tenant-manager]
-  :user [:user-manager]
-  :user-manager [:emailer :keycloak]
+  :user [:keycloak]
   :visualisation [:tenant-manager]}
  :config
  {:app
