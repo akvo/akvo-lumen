@@ -23,8 +23,12 @@
             border-radius: 0px !important;
             border-right: 0px !important;
 
-            &:nth-child(3) {
+            &:last-child {
                 border-right: 1px solid rgba($black, 0.7) !important;
+
+                &.disabled {
+                    border-right: 1px solid rgba(128, 128, 128, 0.4) !important;
+                }
             }
 
             &.selected {
