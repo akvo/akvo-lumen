@@ -5,16 +5,12 @@
             [compojure.core :refer :all]))
 
 
-(defn redirect-location
-  "Unfortunately local development is done by running the api at port 3000
-  and the client at 3030. To solve this we extend the config map with a
-  root-redirect key."
-  [tier {:keys [api-port client-port scheme] :as config} {:keys [server-name]}]
+(defn location
+  ""
+  [{:keys [client-port scheme] :as config} {:keys [server-name]}]
   (if (nil? config)
-    (format "https://%s/" server-name)
-    (condp = tier
-      :client (format "%s://%s:%s" scheme server-name client-port)
-      :api (format "%s://%s:%s" scheme server-name api-port))))
+    (format "https://%s" server-name)
+    (format "%s://%s:%s" (name scheme) server-name client-port)))
 
 (defn endpoint [{:keys [config emailer keycloak tenant-manager]}]
   (context "/api/admin/invites" {:keys [jwt-claims params tenant] :as request}
@@ -24,7 +20,7 @@
 
       (POST "/" {{:strs [email]} :body}
         (user/invite emailer keycloak tenant-conn tenant
-                     (redirect-location :api (:root-redirect config) request)
+                     (location (:invite-redirect config) request)
                      email jwt-claims))
 
       (context "/:id" [id]
@@ -36,5 +32,4 @@
     (let-routes [tenant-conn (connection tenant-manager tenant)]
       (GET "/:id" [id]
         (user/verify-invite keycloak tenant-conn tenant id
-                            (redirect-location :client (:root-redirect config)
-                                               request))))))
+                            (location (:invite-redirect config) request))))))
