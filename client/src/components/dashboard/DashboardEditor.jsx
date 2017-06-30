@@ -1,16 +1,16 @@
+import _ from 'lodash';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import ReactGridLayout from 'react-grid-layout';
 import DashboardVisualisationList from './DashboardVisualisationList';
 import DashboardCanvasItem from './DashboardCanvasItem';
-import getArrayFromObject from '../../utilities/general';
 
 require('./DashboardEditor.scss');
 require('../../../node_modules/react-grid-layout/css/styles.css');
 require('../../../node_modules/react-resizable/css/styles.css');
 
 const getNewEntityId = (entities, itemType) => {
-  const entityArray = getArrayFromObject(entities);
+  const entityArray = _.values(entities);
   let highestIdInt = 0;
 
   entityArray.forEach((item) => {
@@ -214,7 +214,7 @@ export default class DashboardEditor extends Component {
     return (
       <div className="DashboardEditor">
         <DashboardVisualisationList
-          visualisations={getArrayFromObject(this.props.visualisations)}
+          visualisations={_.values(this.props.visualisations)}
           onEntityClick={this.handleEntityToggle}
           dashboardItems={dashboard.entities}
         />
@@ -247,7 +247,7 @@ export default class DashboardEditor extends Component {
               onChange={this.handleChangeName}
             />
           </div>
-          {getArrayFromObject(dashboard.entities).length === 0 &&
+          {_.values(dashboard.entities).length === 0 &&
             <div className="blankDashboardHelpText">
               Click a visualisation in the visualisation list to add it to the dashboard.
             </div>
@@ -274,7 +274,7 @@ export default class DashboardEditor extends Component {
               /* a margin on the grid item themselves for now. */
               margin={[0, 0]}
             >
-              {getArrayFromObject(dashboard.entities).map(item =>
+              {_.values(dashboard.entities).map(item =>
                 <div
                   key={item.id}
                 >

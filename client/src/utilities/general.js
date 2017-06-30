@@ -1,8 +1,4 @@
-import { push } from 'react-router-redux';
-
-export function getArrayFromObject(object) {
-  return Object.keys(object).map(key => object[key]);
-}
+import push from 'react-router-redux';
 
 export function isImage(value) {
   // For now, treat every link as an image, until we have something like an "image-url" type

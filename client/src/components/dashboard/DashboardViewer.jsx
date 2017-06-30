@@ -1,7 +1,7 @@
+import _ from 'lodash';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import DashboardViewerItem from './DashboardViewerItem';
-import getArrayFromObject from '../../utilities/general';
 
 require('./DashboardViewer.scss');
 
@@ -99,7 +99,7 @@ export default class DashboardViewer extends Component {
     const { dashboard, datasets } = this.props;
     const layout = dashboard.layout;
     const sortFunc = getSortFunc(layout);
-    const sortedDashboard = getArrayFromObject(dashboard.entities).sort(sortFunc);
+    const sortedDashboard = _.values(dashboard.entities).sort(sortFunc);
 
     return (
       <div
