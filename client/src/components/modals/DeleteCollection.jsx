@@ -19,10 +19,12 @@ export default class DeleteCollection extends Component {
     return (
       <div className="DeleteCollectionModal">
         <ModalHeader
-          title={`Delete collection ${collection.title}?`}
+          title={`Delete collection: ${collection.title}?`}
           onCloseModal={onCancel}
         />
-        <div className="ModalContents" />
+        <div className="ModalContents">
+        Items in this collection will still be accessible in the Library
+        </div>
         <ModalFooter
           leftButton={{
             text: 'Cancel',
@@ -31,7 +33,6 @@ export default class DeleteCollection extends Component {
           }}
           rightButton={{
             className: 'delete',
-            disabled: !this.state.titleValid,
             onClick: this.handleDelete,
             text: 'Delete collection',
           }}
