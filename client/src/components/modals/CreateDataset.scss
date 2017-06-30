@@ -31,11 +31,7 @@
         display: flex;
         width: 100%;
         flex: 1;
-        background: rgba($akvoPurple, 0.05);
-        border: 2px dotted rgba($akvoPurple, 1);
         margin-bottom: 1rem;
-        @include border-radius(6px);
-
 
         .contents {
             width: 100%;
@@ -69,8 +65,14 @@
     }
 
     .DataFileFileSelection {
-        padding-top: 1rem;
         width: 100%;
+        background: rgba($akvoPurple, 0.05);
+        border: 2px dotted rgba($akvoPurple, 1);
+        margin-bottom: 1rem;
+        padding-top: 1rem;
+
+        @include border-radius(6px);
+
         min-height: 100%;
         text-align: center;
 
