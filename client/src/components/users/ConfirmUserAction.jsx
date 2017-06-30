@@ -6,12 +6,12 @@ import ModalFooter from '../modals/ModalFooter';
 
 require('./ConfirmUserAction.scss');
 
-function getQuestion({ username }, action) {
+function getQuestion({ username, email }, action) {
   let question = '';
   if (action === 'delete') {
     question = `Remove user: ${username}`;
   } else if (action === 'revoke') {
-    question = `Revoke invitation sent to: ${username}`;
+    question = `Revoke invitation sent to: ${email}`;
   } else if (action === 'demote') {
     question = `Remove admin privileges for user: ${username}`;
   } else if (action === 'promote') {
@@ -25,7 +25,7 @@ const getButtonText = (action) => {
     case 'delete':
       return 'Remove';
     default:
-      return `${action.substring(0, 1).toUpperCase()}${action.substring(1, action.substring.length)}`;
+      return `${action.substring(0, 1).toUpperCase()}${action.substring(1, action.length)}`;
   }
 };
 
@@ -39,7 +39,7 @@ export default function ConfirmUserAction({ isOpen, onChange, onClose, userActio
       contentLabel="userInviteModal"
       style={{
         content: {
-          width: 300,
+          width: 400,
           height: 140,
           marginLeft: 'auto',
           marginRight: 'auto',
