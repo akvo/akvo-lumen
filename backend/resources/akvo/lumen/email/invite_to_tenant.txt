@@ -1,8 +1,9 @@
-Hi,
+Hi!
 
-You been invited to join {{location}} by {{author-name}}.
-To complete your invite please visit:
+You have been invited to join {{location}} by {{author-name}}.
+To accept and complete the invitation process please visit:
 {{location}}/verify/{{invite-id}}
 
-Thanks
+Thank you
+
 Akvo
