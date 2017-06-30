@@ -3,12 +3,11 @@ import PropTypes from 'prop-types';
 import ReactGridLayout from 'react-grid-layout';
 import DashboardVisualisationList from './DashboardVisualisationList';
 import DashboardCanvasItem from './DashboardCanvasItem';
+import getArrayFromObject from '../../utilities/general';
 
 require('./DashboardEditor.scss');
 require('../../../node_modules/react-grid-layout/css/styles.css');
 require('../../../node_modules/react-resizable/css/styles.css');
-
-const getArrayFromObject = object => Object.keys(object).map(key => object[key]);
 
 const getNewEntityId = (entities, itemType) => {
   const entityArray = getArrayFromObject(entities);

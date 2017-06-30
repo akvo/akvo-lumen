@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import ModalWrapper from 'react-modal';
-import isValidEmail from '../../utils';
+import isValidEmail from '../../utilities/validators';
 import ModalHeader from '../modals/ModalHeader';
 import ModalFooter from '../modals/ModalFooter';
 
