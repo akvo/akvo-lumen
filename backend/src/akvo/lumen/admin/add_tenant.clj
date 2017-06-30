@@ -15,8 +15,8 @@
   - https://login.akvo.org for production
   - https://kc.akvotest.org for the test environment"
   (:require [akvo.lumen.admin.util :as util]
-            [akvo.lumen.config :refer [error-msg]]
             [akvo.lumen.component.keycloak :as keycloak]
+            [akvo.lumen.config :refer [error-msg]]
             [akvo.lumen.lib.share-impl :refer [random-url-safe-string]]
             [akvo.lumen.util :refer [conform-email squuid]]
             [cheshire.core :as json]
@@ -88,7 +88,7 @@
     (if (= (:kc-url env) "http://localhost:8080")
       (when (= (.getProtocol url) "https")
         (throw (ex-info "Use http in development mode" {:url v})))
-      (when (= (.getProtocol url) "https")
+      (when (not= (.getProtocol url) "https")
         (throw (ex-info "Url should use https" {:url v}))))
     (format "%s://%s" (.getProtocol url) (.getHost url))))
 
