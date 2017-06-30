@@ -8,13 +8,13 @@
 
     .contents {
         overflow: auto;
+        flex: 1;
     }
 
     .saveContainer {
         display: flex;
         height: 4rem;
         width: 100%;
-        bottom: -4rem;
         justify-content: space-around;
         align-items: 'center';
         border-top: 1px solid $lightBlueGrey;
