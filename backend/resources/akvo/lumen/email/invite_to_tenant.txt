@@ -1,9 +1,9 @@
 Hi!
 
 You have been invited to join {{location}} by {{author-name}}.
-To accept and complete the invitation process please visit:
+To complete the invitation process please visit:
 {{location}}/verify/{{invite-id}}
 
 Thank you
 
-Akvo
+The Akvo Lumen Team
