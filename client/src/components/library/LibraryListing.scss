@@ -59,7 +59,17 @@
             }
         }
 
+        &:hover .checkboxContainer {
+            opacity: 1;
+        }
+
+        .checkboxContainer.show {
+            opacity: 1;
+        }
+
         .checkboxContainer {
+            transition: opacity 0.1s ease;
+            opacity: 0;
             display: flex;
             width: 2rem;
             justify-content: space-around;

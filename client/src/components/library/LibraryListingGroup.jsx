@@ -69,6 +69,7 @@ export default function LibraryListingGroup({
             currentCollection={currentCollection}
             onCheckEntity={onCheckEntity}
             onEntityAction={onEntityAction}
+            showCheckbox={checkboxEntities.length > 0}
           />
         )}
       </ol>
