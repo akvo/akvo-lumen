@@ -1,8 +1,9 @@
-Hi,
+Hi!
 
-You been invited to join {{location}} by {{author-name}}.
-To complete your invite please visit:
+You have been invited to join {{location}} by {{author-name}}.
+To complete the invitation process please visit:
 {{location}}/verify/{{invite-id}}
 
-Thanks
-Akvo
+Thank you
+
+The Akvo Lumen Team
