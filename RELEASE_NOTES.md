@@ -1,5 +1,23 @@
 # Release Notes
 
+## 0.11.0
+
+### New and noteworthy
+
+* Give user feedback on search with no results
+* Validate that imported csv files has the same number of columns in each row
+* Moved checkbox menu in the Library to the bottom of the screen
+* Updated the palette of colors used in visualisations
+* On file upload the dropping area is clearly marked
+* Renamed "Dataset Editor" menu to "+ Transform"
+* Improved transformation performance
+
+### Bugfixes
+
+* Fixed bug where the user would stop being authenticated after keeping lumen open but not using it for 30 minutes
+* Fixed a bug where invitation emails to users didn't include the person who invited
+* Fixed a bug where some columns for flow imported datasets could not be transformed
+
 ## 0.10.1
 
 ### Bugfixes
