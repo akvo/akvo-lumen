@@ -11,6 +11,7 @@
 * On file upload the dropping area is clearly marked
 * Renamed "Dataset Editor" menu to "+ Transform"
 * Improved transformation performance
+* Moved dashboard title input to the header, to match the visualisation title input
 
 ### Bugfixes
 
