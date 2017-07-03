@@ -1,5 +1,11 @@
 # Release Notes
 
+## 0.11.1
+
+### Bugfixes
+
+* Fixed bug in production deployment
+
 ## 0.11.0
 
 ### New and noteworthy
