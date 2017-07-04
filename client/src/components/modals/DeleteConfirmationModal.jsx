@@ -1,9 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Modal from 'react-modal';
+import ModalWrapper from 'react-modal';
+import ModalHeader from './ModalHeader';
+import ModalFooter from './ModalFooter';
 import { getTitle, getId } from '../../domain/entity';
 
-require('../DashboardModal.scss');
 require('./DeleteConfirmationModal.scss');
 
 function getEntity(entityId, entityType, library) {
@@ -19,24 +20,26 @@ function VisualisationsList({ datasetId, visualisations }) {
   const dependentVisualisations = Object.keys(visualisations)
     .map(id => visualisations[id])
     .filter(vis => vis.datasetId === datasetId)
-    .map((vis, idx) => <li key={idx}>{vis.name}</li>);
+    .map((vis, idx) => (<li key={idx}>{vis.name}</li>));
 
   if (dependentVisualisations.length > 0) {
     return (
       <div>
-        <span>
+        <p>
           The following
           {dependentVisualisations.length === 1 ?
             ' visualisation ' : ` ${dependentVisualisations.length} visualisations `}
           will also be deleted:
-        </span>
+        </p>
         <ul>
           {dependentVisualisations}
         </ul>
       </div>
     );
   }
-  return <div><span>No visualisations depend on this datataset</span></div>;
+  return (
+    <div><span>No visualisations depend on this datataset</span></div>
+  );
 }
 
 VisualisationsList.propTypes = {
@@ -45,6 +48,7 @@ VisualisationsList.propTypes = {
 };
 
 export default function DeleteConfirmationModal({
+  isOpen,
   onCancel,
   onDelete,
   entityId,
@@ -54,9 +58,9 @@ export default function DeleteConfirmationModal({
   const entity = getEntity(entityId, entityType, library);
 
   return (
-    <Modal
-      isOpen
-      contentLabel="deleteConfirmationModal"
+    <ModalWrapper
+      isOpen={isOpen}
+      contentLabel="userInviteModal"
       style={{
         content: {
           width: 500,
@@ -65,47 +69,42 @@ export default function DeleteConfirmationModal({
           marginRight: 'auto',
           borderRadius: 0,
           border: '0.1rem solid rgb(223, 244, 234)',
+          display: 'flex',
+          flexDirection: 'column',
         },
         overlay: {
-          zIndex: 99,
+          zIndex: 1000,
           backgroundColor: 'rgba(0,0,0,0.6)',
         },
       }}
     >
-      <div className="DashboardModal">
-        <div className="DeleteConfirmationModal">
-          <h2 className="modalTitle">{`Delete ${entityType} ${getTitle(entity)}`}</h2>
-          <div
-            className="close clickable"
-            onClick={onCancel}
-          >
-            ✕
-          </div>
-          <div className="contents">
-            {entityType === 'dataset' ?
-              <VisualisationsList
-                datasetId={getId(entity)}
-                visualisations={library.visualisations}
-              /> : null
-            }
-          </div>
-          <div className="controls">
-            <button
-              className="cancel clickable negative"
-              onClick={onCancel}
-            >
-              Cancel
-            </button>
-            <button
-              className="create clickable positive dangerous"
-              onClick={onDelete}
-            >
-              Delete
-            </button>
-          </div>
+      <div className="DeleteConfirmationModal">
+        <ModalHeader
+          title={`Delete ${entityType} ${getTitle(entity)}?`}
+          onCloseModal={onCancel}
+        />
+        <div className="ModalContents">
+          {entityType === 'dataset' &&
+            <VisualisationsList
+              datasetId={getId(entity)}
+              visualisations={library.visualisations}
+            />
+          }
         </div>
+        <ModalFooter
+          leftButton={{
+            text: 'Cancel',
+            className: 'cancel',
+            onClick: onCancel,
+          }}
+          rightButton={{
+            className: 'delete',
+            onClick: onDelete,
+            text: `Delete ${entityType}`,
+          }}
+        />
       </div>
-    </Modal>
+    </ModalWrapper>
   );
 }
 

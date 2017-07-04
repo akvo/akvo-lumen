@@ -1,12 +1,10 @@
 {:components
- {:app  #var duct.component.handler/handler-component
+ {:app #var duct.component.handler/handler-component
   :db #var duct.component.hikaricp/hikaricp
   :emailer #var akvo.lumen.component.emailer/mailjet-emailer
   :http #var akvo.lumen.component.http/http
   :keycloak #var akvo.lumen.component.keycloak/keycloak
-  :user-manager #var akvo.lumen.component.user-manager/user-manager
-  :tenant-manager #var akvo.lumen.component.tenant-manager/tenant-manager
-  :transformation-engine #var akvo.lumen.component.transformation-engine/transformation-engine}
+  :tenant-manager #var akvo.lumen.component.tenant-manager/tenant-manager}
  :endpoints
  {:aggregation #var akvo.lumen.endpoint.aggregation/endpoint
   :collection #var akvo.lumen.endpoint.collection/endpoint
@@ -32,15 +30,14 @@
         :invite-verify :job-execution :library :public :resource :root :share
         :tier :transformation :user :visualisation]
   :tenant-manager [:db]
-  :transformation-engine [:tenant-manager]
   :aggregation [:tenant-manager]
   :collection [:tenant-manager]
   :dashboard [:tenant-manager]
   :dataset [:tenant-manager :config]
   :env [:config :tenant-manager]
   :files [:config]
-  :invite [:tenant-manager :user-manager]
-  :invite-verify [:tenant-manager :user-manager]
+  :invite [:tenant-manager :keycloak :emailer :config]
+  :invite-verify [:keycloak :tenant-manager :config]
   :job-execution [:tenant-manager]
   :library [:tenant-manager]
   :public [:tenant-manager]
@@ -48,9 +45,8 @@
   :root [:tenant-manager]
   :share [:tenant-manager :config]
   :tier [:tenant-manager]
-  :transformation [:transformation-engine :tenant-manager]
-  :user [:user-manager]
-  :user-manager [:emailer :keycloak]
+  :transformation [:tenant-manager]
+  :user [:keycloak]
   :visualisation [:tenant-manager]}
  :config
  {:app

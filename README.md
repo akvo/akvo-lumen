@@ -14,6 +14,9 @@ An open-source, easy to use data mashup, analysis and publishing platform.
 ## Backend
 [Readme](backend/README.md)
 
+## Integration
+[Data import - Readme](doc/integration/InputFormat.md)
+
 ## Keycloak
 The admin password for keycloak is "admin" / "password". There is an "akvo" realm, where two tenants (t1 & t2) and they are represesnted by the following groups:
 
@@ -40,3 +43,9 @@ All passwords are "password".
 
 ## Legal
 Copyright © 2016 - present Akvo Foundation
+
+
+### Thanks
+<img src="http://www.browserstack.com/images/layout/browserstack-logo-600x315.png" width="280"/>
+
+[BrowserStack](http://www.browserstack.com) is supporting Akvo, allowing us to use their service and infrastructure to test the code in this repository. Thank you for supporting the open source community!

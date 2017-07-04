@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import Modal from 'react-modal';
+import ModalHeader from './ModalHeader';
+import ModalFooter from './ModalFooter';
 import SourceSelection from './createDataset/SourceSelection';
 import DataSourceSettings from './createDataset/DataSourceSettings';
 import Settings from '../dataset/Settings';
@@ -68,70 +69,45 @@ class CreateDataset extends Component {
     const { currentPage, uploadRunning } = datasetImport;
 
     return (
-      <Modal
-        isOpen
-        contentLabel="createDataset"
-        style={{
-          content: {
-            borderRadius: 0,
-            border: '0.1rem solid rgb(223, 244, 234)',
-            marginLeft: '7rem',
-            marginRight: '7rem',
-          },
-          overlay: {
-            zIndex: 99,
-            backgroundColor: 'rgba(0,0,0,0.6)',
-          },
-        }}
-      >
-        <div className={this.props.containerClassName}>
-          <div className="CreateDataset">
-            <h3 className="modalTitle">New Dataset</h3>
-            <div
-              className="btn close clickable"
-              onClick={() => {
-                clearImport();
-                onCancel();
-              }}
+      <div className="CreateDataset">
+        <ModalHeader
+          title="New Dataset"
+          onCloseModal={() => {
+            clearImport();
+            onCancel();
+          }}
+        />
+        <div className="ModalContents">
+          <ul className="tabMenu">
+            <li
+              className={`tab ${currentPage === 'select-data-source-type' ? 'selected' : null}`}
             >
-              ✕
-            </div>
-            <ul className="tabMenu">
-              <li
-                className={`tab ${currentPage === 'select-data-source-type' ? 'selected' : null}`}
-              >
-                Source
-              </li>
-              <li className={`tab ${currentPage === 'define-data-source' ? 'selected' : null}`}>
-                File / Project
-              </li>
-              <li className={`tab ${currentPage === 'define-dataset' ? 'selected' : null}`}>
-                Settings
-              </li>
-            </ul>
-            {this.pageComponent(currentPage)}
-            <div className={`controls ${currentPage}`}>
-              <div className="buttonContainer">
-                <button
-                  className="btn previous clickable negative"
-                  disabled={currentPage === 'select-data-source-type' || uploadRunning}
-                  onClick={this.props.previousPage}
-                >
-                  Previous
-                </button>
-                <button
-                  className="btn next clickable positive"
-                  disabled={currentPage === 'define-dataset' ? !this.isValidImport() : false
-                    || uploadRunning}
-                  onClick={this.handleNextOrImport}
-                >
-                  {currentPage === 'define-dataset' ? 'Import' : 'Next'}
-                </button>
-              </div>
-            </div>
-          </div>
+              Source
+            </li>
+            <li className={`tab ${currentPage === 'define-data-source' ? 'selected' : null}`}>
+              File / Project
+            </li>
+            <li className={`tab ${currentPage === 'define-dataset' ? 'selected' : null}`}>
+              Settings
+            </li>
+          </ul>
+          {this.pageComponent(currentPage)}
         </div>
-      </Modal>
+        <ModalFooter
+          leftButton={{
+            text: 'Previous',
+            disabled: currentPage === 'select-data-source-type' || uploadRunning,
+            onClick: this.props.previousPage,
+          }}
+          rightButton={{
+            text: currentPage === 'define-dataset' ? 'Import' : 'Next',
+            className: 'btn next clickable positive',
+            disabled: currentPage === 'define-dataset' ? !this.isValidImport() : false
+                || uploadRunning,
+            onClick: this.handleNextOrImport,
+          }}
+        />
+      </div>
     );
   }
 }

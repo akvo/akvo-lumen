@@ -5,6 +5,9 @@ import { connect } from 'react-redux';
 import * as api from '../../../api';
 import * as keycloak from '../../../auth';
 
+require('../../../../node_modules/react-select/dist/react-select.css');
+// TODO: we should use the "SelectMenu" wrapper component in the "common" folder in this component
+
 const acceptHeader = { Accept: 'application/vnd.akvo.flow.v2+json' };
 
 function rootFoldersUrl(flowApiUrl, flowInstance) {

@@ -73,44 +73,23 @@ const groupEntities = (entities, sortOrder) => {
 // Accepts an object containing list groups, and returns a sorted array of list groups
 const sortGroups = (listGroups, sortOrder, isReverseSort) => {
   const listGroupArray = [];
-  let sortFunction;
 
   // Convert the listGroup objects into an unsorted listGroup array
   Object.keys(listGroups).forEach((key) => {
     listGroupArray.push(listGroups[key]);
   });
 
-  // Prepare the appropriate sort function based on sortOrder
-  if (sortOrder === 'name') {
-    sortFunction = (a, b) => {
-      const string1 = a.listGroupName.toLowerCase();
-      const string2 = b.listGroupName.toLowerCase();
-      let out;
+  const sortFunction = (a, b) => {
+    let out;
 
-      if (string1 > string2) {
-        out = 1;
-      } else if (string1 === string2) {
-        out = 0;
-      } else {
-        out = -1;
-      }
+    if (isReverseSort) {
+      out = new Date(a.listGroupName) - new Date(b.listGroupName);
+    } else {
+      out = new Date(b.listGroupName) - new Date(a.listGroupName);
+    }
 
-      if (isReverseSort) out *= -1;
-      return out;
-    };
-  } else if (sortOrder === 'created' || sortOrder === 'last_modified') {
-    sortFunction = (a, b) => {
-      let out;
-
-      if (isReverseSort) {
-        out = new Date(a.listGroupName) - new Date(b.listGroupName);
-      } else {
-        out = new Date(b.listGroupName) - new Date(a.listGroupName);
-      }
-
-      return out;
-    };
-  }
+    return out;
+  };
 
   return listGroupArray.sort(sortFunction);
 };
@@ -125,21 +104,34 @@ export default function LibraryListing({
   displayMode,
   searchString,
   checkboxEntities,
-  onSelectEntity,
   onCheckEntity,
   onEntityAction }) {
   const entities = filterEntities(library, filterBy, searchString);
   const listGroups = groupEntities(entities, sortOrder);
   const sortedListGroups = sortGroups(listGroups, sortOrder, isReverseSort);
+  const results = sortedListGroups.length > 0;
+
   return (
     <div className={`LibraryListing ${displayMode}`}>
-      {(sortedListGroups.length === 0 && currentCollection) ?
+      {(!results && !currentCollection && !searchString) &&
+        <span
+          className="noItemsMessage"
+        />
+      }
+      {(!results && currentCollection && !searchString) &&
         <span
           className="noItemsMessage"
         >
-          There are no items in this collection.
+          <p>There are no items in this collection.</p>
         </span>
-        :
+      }
+      {(!results && searchString) &&
+        <div className="noSearchResults">
+          <h3>No results found</h3>
+          <p>Please update your search and try again.</p>
+        </div>
+      }
+      {results &&
         <ul>
           {sortedListGroups.map((listGroup, index) =>
             <LibraryListingGroup
@@ -151,7 +143,6 @@ export default function LibraryListing({
               sortOrder={sortOrder}
               isReverseSort={isReverseSort}
               checkboxEntities={checkboxEntities}
-              onSelectEntity={onSelectEntity}
               onCheckEntity={onCheckEntity}
               onEntityAction={onEntityAction}
             />
@@ -169,7 +160,6 @@ LibraryListing.propTypes = {
   isReverseSort: PropTypes.bool.isRequired,
   displayMode: PropTypes.oneOf(['grid', 'list']).isRequired,
   searchString: PropTypes.string.isRequired,
-  onSelectEntity: PropTypes.func.isRequired,
   onEntityAction: PropTypes.func.isRequired,
   collections: PropTypes.object.isRequired,
   currentCollection: PropTypes.object,

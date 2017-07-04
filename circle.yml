@@ -2,7 +2,7 @@ machine:
   java:
     version: openjdk8
   node:
-    version: 8.1.2
+    version: 5.7.0
   environment:
     PROJECT_NAME: akvo-lumen
     PROD_CLUSTER_NAME: lumen
@@ -15,14 +15,10 @@ machine:
 
 dependencies:
   cache_directories:
-    - "~/docker"
     - "~/.package_cache"
 
   pre:
     # Keycloak
-    - if [[ -e ~/docker/keycloak.tar ]]; then docker load -i ~/docker/keycloak.tar; fi
-    - docker build --rm=false -t jboss/keycloak:3.1.0.Final ./keycloak
-    - mkdir -p ~/docker; docker save jboss/keycloak > ~/docker/keycloak.tar
     - ./server.sh build:
         pwd: keycloak
     - ./server.sh run:

@@ -7,30 +7,34 @@
 
         h3 {
             color: $textSecondary;
-            margin-top: 1rem;
+        }
+
+        ol {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
         }
     }
 
     .LibraryListingItem {
-        display: inline-flex;
+        width: 370px;
+        width: calc((100vw - 20.5rem) / 3);
+        min-width: 370px;
+        display: flex;
         flex-direction: row;
         margin: 1rem 0.25rem;
         position: relative;
-        min-height: 5rem;
+        height: 6rem;
         padding: 0.5rem 0;
         background-color: rgba($textSecondary, 0);
-        border: 1px solid rgba($textSecondary, 0.3);
-
-        /*overflow: hidden;*/
         transition: background-color 0.1s ease;
 
         h3 {
-            color: rgba($black, 0.6);
-            margin-top: 1rem;
+            color: rgba($black, 1);
         }
 
         &:hover {
-            background-color: rgba($textSecondary, 0.6);
+            background-color: rgba($black, 0.05);
 
             .entityIcon {
                 opacity: 1;
@@ -55,49 +59,89 @@
             }
         }
 
+        &:hover .checkboxContainer {
+            opacity: 1;
+        }
+
+        .checkboxContainer.show {
+            opacity: 1;
+        }
+
         .checkboxContainer {
+            transition: opacity 0.1s ease;
+            opacity: 0;
             display: flex;
             width: 2rem;
-            padding-left: 1rem;
             justify-content: space-around;
             align-items: center;
             cursor: pointer;
+
+            input[type="checkbox"] {
+                width: 17px;
+                height: 17px;
+
+                @include border-radius(3px);
+
+                border: 1px solid black;
+            }
+
+            input {
+                cursor: pointer;
+            }
         }
 
         .entityBody {
             flex: 1;
+            display: flex;
+            text-decoration: none;
         }
 
         .entityIcon {
             position: relative;
             height: 4rem;
             width: 4rem;
-            margin-left: 1rem;
-            margin-top: 0.25rem;
-            display: inline-block;
             color: $white;
-            margin-top: 0.25rem;
-            display: inline-block;
+            align-self: center;
             background-size: cover;
             background-repeat: no-repeat;
             opacity: 0.7;
-
-            /*             &:before {
-                            font-size: 3.5rem;
-                            font-family: FontAwesome;
-                            left: -5px;
-                            position: absolute;
-                            top: -6px;
-                        } */
         }
 
         &.visualisation {
             .entityIcon {
-                // &:before {
-                //     content: "\f1fe";
-                // }
-
                 background-image: url("../../styles/img/icon-256-library-listing-visualisation.png");
+
+                &.area {
+                    background-image: url("../../styles/img/icon-128-visualisation-area.png");
+                }
+
+                &.bar {
+                    background-image: url("../../styles/img/icon-128-visualisation-bar.png");
+                }
+
+                &.donut {
+                    background-image: url("../../styles/img/icon-128-visualisation-donut.png");
+                }
+
+                &.line {
+                    background-image: url("../../styles/img/icon-128-visualisation-line.png");
+                }
+
+                &.map {
+                    background-image: url("../../styles/img/icon-128-visualisation-map.png");
+                }
+
+                &.pie {
+                    background-image: url("../../styles/img/icon-128-visualisation-pie.png");
+                }
+
+                &.pivot-table {
+                    background-image: url("../../styles/img/icon-128-visualisation-pivot-table.png");
+                }
+
+                &.scatter {
+                    background-image: url("../../styles/img/icon-128-visualisation-scatter.png");
+                }
             }
         }
 
@@ -120,10 +164,16 @@
         }
 
         .textContents {
-            display: inline-block;
-            padding-left: 1rem;
+            flex: 1;
             vertical-align: top;
-            width: calc(100% - 6.5rem);
+            overflow: hidden;
+            padding-left: 1rem;
+            padding-top: 0.25rem;
+
+            p {
+                /* Withouth this, long URLs in error messages willl break layout */
+                word-break: break-word;
+            }
         }
 
         .VisualisationTypeLabel {
@@ -166,26 +216,13 @@
         }
     }
 
-    &.grid {
-        .LibraryListingItem {
-            width: calc(85% / 3);
-            min-width: 15rem;
-        }
-    }
-
-    &.list {
-        .LibraryListingItem {
-            width: 100%;
-
-            &:last-child {
-                margin-bottom: 0;
-            }
-        }
-    }
-
-    .noItemsMessage {
+    .noItemsMessage, .noSearchResults {
         display: block;
         text-align: center;
-        padding-top: 4rem;
+        padding-top: 8rem;
+    }
+
+    .LibraryListingGroup:last-child .LibraryListingItem:last-child {
+        margin-bottom: 6rem;
     }
 }

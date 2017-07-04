@@ -237,17 +237,6 @@ export default class DashboardEditor extends Component {
               Save
             </button>
           </div>
-          <div
-            className={`DashboardNameInputContainer ${this.state.saveError ? 'error' : ''}`}
-          >
-            <input
-              type="text"
-              name="Dashboard name"
-              value={dashboard.title}
-              placeholder="Enter dashboard name"
-              onChange={this.handleChangeName}
-            />
-          </div>
           {getArrayFromObject(dashboard.entities).length === 0 &&
             <div className="blankDashboardHelpText">
               Click a visualisation in the visualisation list to add it to the dashboard.

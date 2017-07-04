@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { Link } from 'react-router';
 import EntityTitleInput from './EntityTitleInput';
 
 require('./EntityTypeHeader.scss');
@@ -17,6 +18,12 @@ export default class EntityTypeHeader extends Component {
     const { title, saveStatus, actionButtons, onChangeTitle, onBeginEditTitle } = this.props;
     return (
       <nav className="EntityTypeHeader">
+        <Link
+          className="backButton"
+          to="/library"
+        >
+          <i className="fa fa-arrow-left" aria-hidden="true" />
+        </Link>
         <div className="entityInfo">
           <EntityTitleInput
             title={title}

@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import DashboardModal from '../components/DashboardModal';
+import Modal from './Modal';
 import Notification from './Notification';
 
 require('../styles/reset.global.scss');
@@ -16,7 +16,7 @@ function Main({ content, sidebar, notification }) {
       {notification && <Notification {...notification} />}
       {sidebar}
       {content}
-      <DashboardModal />
+      <Modal />
     </div>
   );
 }

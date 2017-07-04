@@ -1,14 +1,12 @@
 @import "../../styles/modules/importAll";
 
-.DashboardModal {
-    height: 100%;
-}
-
 .DeleteConfirmationModal {
-    height: 100%;
-    padding-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
 
-    .contents {
+    .ModalContents {
+        flex: 1;
         overflow-y: auto;
         max-height: 100%;
     }

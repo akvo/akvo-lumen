@@ -4,31 +4,32 @@
     height: calc(100vh - 4rem);
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
     position: relative;
 
     .contents {
-        height: calc(100vh - 8rem);
         overflow: auto;
+        flex: 1;
     }
 
     .saveContainer {
         display: flex;
         height: 4rem;
         width: 100%;
-        bottom: -4rem;
-        background-color: white;
         justify-content: space-around;
         align-items: 'center';
         border-top: 1px solid $lightBlueGrey;
 
         .saveButton {
-            background-color: $midGrey;
-            color: white;
-            width: 100%;
-            margin: 0.5rem;
-            border-radius: 0.2rem;
-            text-align: center;
+            bottom: 1rem;
+            display: block;
+            padding: 0.6rem 1.2rem;
+            margin: 0.75rem auto;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            color: $lumenGreen;
+            border: 0.1rem solid $lumenGreen;
+
+            @include border-radius(3px);
         }
     }
 

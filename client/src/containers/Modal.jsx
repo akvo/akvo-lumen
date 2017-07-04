@@ -1,17 +1,29 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-
-import CreateDataset from './modals/CreateDataset';
-import CreateCollection from './modals/CreateCollection';
-import DeleteCollection from './modals/DeleteCollection';
-import DatasetSettings from './modals/DatasetSettings';
+import ModalWrapper from 'react-modal';
+import CreateDataset from '../components/modals/CreateDataset';
+import CreateCollection from '../components/modals/CreateCollection';
+import DeleteCollection from '../components/modals/DeleteCollection';
 import { hideModal } from '../actions/activeModal';
 
-require('./DashboardModal.scss');
+require('./Modal.scss');
 
-class DashboardModal extends Component {
+const getWidth = (modal) => {
+  switch (modal) {
+    case 'create-dataset': return 800;
+    default: return 500;
+  }
+};
 
+const getHeight = (modal) => {
+  switch (modal) {
+    case 'create-dataset': return 600;
+    default: return 250;
+  }
+};
+
+class Modal extends Component {
   constructor() {
     super();
     this.handleOnCancel = this.handleOnCancel.bind(this);
@@ -30,8 +42,6 @@ class DashboardModal extends Component {
   }
 
   renderActiveModal() {
-    const containerClassName = 'DashboardModal';
-
     if (!this.props.activeModal) {
       // No modal active
       return null;
@@ -42,7 +52,6 @@ class DashboardModal extends Component {
           <CreateDataset
             onCancel={this.handleOnCancel}
             onSubmit={this.handleOnSubmit}
-            containerClassName={containerClassName}
           />
         );
       case 'create-collection':
@@ -50,7 +59,6 @@ class DashboardModal extends Component {
           <CreateCollection
             onCancel={this.handleOnCancel}
             onSubmit={this.handleOnSubmit}
-            containerClassName={containerClassName}
             entities={this.props.activeModal.entities}
             collections={this.props.collections || {}}
           />
@@ -60,17 +68,7 @@ class DashboardModal extends Component {
           <DeleteCollection
             onCancel={this.handleOnCancel}
             onSubmit={this.handleOnSubmit}
-            containerClassName={containerClassName}
             collection={this.props.activeModal.collection || {}}
-          />
-        );
-      case 'dataset-settings':
-        return (
-          <DatasetSettings
-            onCancel={this.handleOnCancel}
-            onSubmit={this.handleOnSubmit}
-            id={this.props.activeModal.id}
-            containerClassName={containerClassName}
           />
         );
       default: return null;
@@ -78,11 +76,37 @@ class DashboardModal extends Component {
   }
 
   render() {
-    return this.renderActiveModal();
+    return (
+      <ModalWrapper
+        isOpen={Boolean(this.props.activeModal)}
+        contentLabel="createCollectionModal"
+        style={{
+          content: {
+            width: this.props.activeModal ? getWidth(this.props.activeModal.modal) : 0,
+            maxWidth: '90%',
+            height: this.props.activeModal ? getHeight(this.props.activeModal.modal) : 0,
+            marginLeft: 'auto',
+            marginRight: 'auto',
+            borderRadius: 0,
+            border: '0.1rem solid rgb(223, 244, 234)',
+            display: 'flex',
+            flexDirection: 'column',
+          },
+          overlay: {
+            zIndex: 99,
+            backgroundColor: 'rgba(0,0,0,0.6)',
+          },
+        }}
+      >
+        <div className="Modal">
+          { this.renderActiveModal() }
+        </div>
+      </ModalWrapper>
+    );
   }
 }
 
-DashboardModal.propTypes = {
+Modal.propTypes = {
   activeModal: PropTypes.shape({
     modal: PropTypes.string.isRequired,
     id: PropTypes.number,
@@ -102,4 +126,4 @@ function mapStateToProps(state) {
 
 export default connect(
   mapStateToProps
-)(DashboardModal);
+)(Modal);

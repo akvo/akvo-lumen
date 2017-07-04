@@ -88,7 +88,7 @@
     (if (= (:kc-url env) "http://localhost:8080")
       (when (= (.getProtocol url) "https")
         (throw (ex-info "Use http in development mode" {:url v})))
-      (when (= (.getProtocol url) "https")
+      (when (not= (.getProtocol url) "https")
         (throw (ex-info "Url should use https" {:url v}))))
     (format "%s://%s" (.getProtocol url) (.getHost url))))
 

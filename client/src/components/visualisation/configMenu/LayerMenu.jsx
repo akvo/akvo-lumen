@@ -40,7 +40,7 @@ export default class LayerMenu extends Component {
               onClick={onAddLayer}
               disabled={layers.length >= 1}
             >
-              Add
+              <i className="fa fa-plus" aria-hidden="true" />
             </button>
           </span>
         </div>

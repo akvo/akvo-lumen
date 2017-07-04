@@ -1,0 +1,16 @@
+@import "../../styles/modules/importAll";
+
+.ModalHeader {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+
+    .close {
+      margin-left: 0.5rem;
+    }
+}
+
+.ModalContents {
+    margin-top: 10px;
+}

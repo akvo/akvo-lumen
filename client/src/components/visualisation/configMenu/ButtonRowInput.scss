@@ -4,7 +4,7 @@
     .row {
         display: flex;
         flex: 1;
-        justify-content: space-between;
+        justify-content: flex-start;
         align-items: flex-start;
 
         &.manualSpacing {
@@ -15,12 +15,24 @@
             padding: 0.5rem 1rem;
             border: 0.1rem solid $lightGrey;
             text-transform: capitalize;
-            color: $midGrey;
+            color: $black;
             background-color: white;
 
+            @include btnOutline(rgba($black, 0.7), rgba($black, 0.7));
+
+            border-radius: 0px !important;
+            border-right: 0px !important;
+
+            &:last-child {
+                border-right: 1px solid rgba($black, 0.7) !important;
+
+                &.disabled {
+                    border-right: 1px solid rgba(128, 128, 128, 0.4) !important;
+                }
+            }
+
             &.selected {
-                color: white;
-                background-color: grey;
+                @include button(rgba($black, 0.7), white);
             }
         }
     }

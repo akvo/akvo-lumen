@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import { push } from 'react-router-redux';
 import LibraryHeader from './library/LibraryHeader';
 import LibraryListing from './library/LibraryListing';
+import CheckboxEntityMenu from './library/CheckboxEntityMenu';
 import DeleteConfirmationModal from './modals/DeleteConfirmationModal';
 import { showModal } from '../actions/activeModal';
 import { fetchLibrary } from '../actions/library';
@@ -56,7 +57,6 @@ class Library extends Component {
       checkboxEntities: [],
     };
 
-    this.handleSelectEntity = this.handleSelectEntity.bind(this);
     this.handleCheckEntity = this.handleCheckEntity.bind(this);
     this.handleEntityAction = this.handleEntityAction.bind(this);
     this.handleDeleteEntity = this.handleDeleteEntity.bind(this);
@@ -99,10 +99,6 @@ class Library extends Component {
     }
 
     this.setState({ checkboxEntities: newCheckboxEntities });
-  }
-
-  handleSelectEntity(entityType, id) {
-    this.props.dispatch(push(`/${entityType}/${id}`));
   }
 
   handleDeleteEntity(entityType, id) {
@@ -209,7 +205,7 @@ class Library extends Component {
     const collections = this.props.collections ? this.props.collections : {};
     const { pendingDeleteEntity, collection } = this.state;
     const query = location.query;
-    const displayMode = query.display || 'list';
+    const displayMode = query.display || 'grid';
     const sortOrder = query.sort || 'last_modified';
     const isReverseSort = query.reverse === 'true';
     const filterBy = query.filter || 'all';
@@ -218,7 +214,7 @@ class Library extends Component {
 
     return (
       <div className="Library">
-        {this.state.pendingDeleteEntity ?
+        {this.state.pendingDeleteEntity &&
           <DeleteConfirmationModal
             isOpen
             entityId={pendingDeleteEntity.entityId}
@@ -232,13 +228,10 @@ class Library extends Component {
                 pendingDeleteEntity.entityId
               );
             }}
-          /> : null
+          />
         }
         <LibraryHeader
           location={collection ? collection.title : 'Library'}
-          checkboxEntities={this.state.checkboxEntities}
-          collections={collections}
-          collection={collection}
           onCreateCollection={this.handleCreateCollection}
           onAddEntitiesToCollection={this.handleAddEntitiesToCollection}
           onRemoveEntitiesFromCollection={this.handleRemoveEntitiesFromCollection}
@@ -282,7 +275,6 @@ class Library extends Component {
               dispatch(push(`/${type}/create`));
             }
           }}
-          onDeselectEntities={() => this.setState({ checkboxEntities: [] })}
         />
         <LibraryListing
           displayMode={displayMode}
@@ -294,11 +286,21 @@ class Library extends Component {
           currentCollection={collection}
           library={collection ? filterLibraryByCollection(this.props, collection) : this.props}
           checkboxEntities={this.state.checkboxEntities}
-          onSelectEntity={this.handleSelectEntity}
           onCheckEntity={this.handleCheckEntity}
           onEntityAction={this.handleEntityAction}
         />
         {this.props.children}
+        {this.state.checkboxEntities.length > 0 &&
+          <CheckboxEntityMenu
+            collections={collections}
+            collection={collection}
+            onCreateCollection={this.handleCreateCollection}
+            onAddEntitiesToCollection={this.handleAddEntitiesToCollection}
+            onRemoveEntitiesFromCollection={this.handleRemoveEntitiesFromCollection}
+            checkboxEntities={this.state.checkboxEntities}
+            onDeselectEntities={() => this.setState({ checkboxEntities: [] })}
+          />
+        }
       </div>
     );
   }

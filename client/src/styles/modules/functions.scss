@@ -81,3 +81,11 @@ $width-large: 1200px;
         color: $color;
     }
 }
+
+@mixin flexbox {
+    display: flex;
+}
+
+@mixin flex($values) {
+    flex: $values;
+}
