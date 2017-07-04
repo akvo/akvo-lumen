@@ -153,7 +153,7 @@ export default function getVegaScatterSpec(visualisation, data, containerHeight,
                 template: metadata.bucketType === 'date' ?
                   '{{datum.bucketValue | time:"%Y-%b-%d %H-%M"}}'
                   :
-                  '{{datum.bucketValue}}'
+                  `${metadata.bucketName.substring(0, 64)}: {{datum.bucketValue}}`
                 ,
               }
               :

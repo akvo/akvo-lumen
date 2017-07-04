@@ -148,6 +148,8 @@ export function getScatterData(visualisation, datasets) {
   const bucketIndex = getColumnIndex(dataset, spec.bucketColumn);
   const bucketType = bucketIndex === -1 ?
     'number' : dataset.getIn(['columns', bucketIndex, 'type']);
+  const bucketName = bucketIndex === -1 ?
+    '' : dataset.getIn(['columns', bucketIndex, 'title']);
   const datapointLabelIndex = getColumnIndex(dataset, spec.datapointLabelColumn);
   const datapointLabelType = datapointLabelIndex === -1 ?
     'number' : dataset.getIn(['columns', datapointLabelIndex, 'type']);
@@ -189,6 +191,7 @@ export function getScatterData(visualisation, datasets) {
       xAxisType,
       yAxisType,
       bucketType,
+      bucketName,
       datapointLabelType,
     },
   }];
