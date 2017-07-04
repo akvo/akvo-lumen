@@ -299,7 +299,7 @@ export default class LayerConfigMenu extends Component {
     }
 
     if (columnOption != null) {
-      legend = Object.assign({}, this.props.layer.legend, { title: columnOption.label });
+      legend = Object.assign({}, this.props.layer.legend, { title: columnOption.title });
     } else {
       legend = Object.assign({}, this.props.layer.legend, { title: null });
     }
