@@ -15,15 +15,15 @@
   "Create an invite and use provider emailer to send an invitation email."
   [emailer tenant-conn location email author-claims]
   (let [invite-id (-> (insert-invite tenant-conn
-                                     {:author author-claims
-                                      :email email
-                                      :expire (c/to-sql-time (t/plus (t/now)
-                                                                     (t/weeks 2)))})
-                      first :id)
+                        {:author author-claims
+                         :email email
+                         :expire (c/to-sql-time (t/plus (t/now)
+                                                  (t/weeks 2)))})
+                    first :id)
         text-part (selmer/render-file "akvo/lumen/email/invite_to_tenant.txt"
-                                      {:location location
-                                       :invite-id invite-id
-                                       :author-name (get author-claims "name")} )]
+                    {:author-email (get author-claims "email")
+                     :invite-id invite-id
+                     :location location})]
     (emailer/send-email emailer [email] {"Subject" "Akvo Lumen invite"
                                          "Text-part" text-part})))
 
@@ -39,19 +39,19 @@
                   (last x))
         tmp-password (random-url-safe-string 6)
         invite-id (-> (insert-invite tenant-conn
-                                     {:author author-claims
-                                      :email email
-                                      :expire (c/to-sql-time (t/plus (t/now)
-                                                                     (t/weeks 2)))})
-                      first :id)
+                        {:author author-claims
+                         :email email
+                         :expire (c/to-sql-time (t/plus (t/now)
+                                                  (t/weeks 2)))})
+                    first :id)
 
         text-part (selmer/render-file
-                   "akvo/lumen/email/create_new_account_and_invite_to_tenant.txt"
-                   {:author-name (get author-claims "name")
-                    :email email
-                    :invite-id invite-id
-                    :location location
-                    :tmp-password tmp-password})]
+                    "akvo/lumen/email/create_new_account_and_invite_to_tenant.txt"
+                    {:author-email (get author-claims "email")
+                     :email email
+                     :invite-id invite-id
+                     :location location
+                     :tmp-password tmp-password})]
     (keycloak/reset-password keycloak request-headers user-id tmp-password)
     (emailer/send-email emailer [email] {"Subject" "Akvo Lumen invite"
                                          "Text-part" text-part})))

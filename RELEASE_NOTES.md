@@ -1,5 +1,17 @@
 # Release Notes
 
+## 0.11.3
+
+### Bugfixes
+
+* Invitation email now use email as reference
+
+## 0.11.2
+
+### Bugfixes
+
+* Fix UI issue in the Flow import
+
 ## 0.11.1
 
 ### Bugfixes

@@ -8,7 +8,7 @@
   "Invite user with email to tenant."
   [emailer keycloak tenant-conn tenant server-name email author-claims]
   (impl/create-invite
-   emailer keycloak tenant-conn tenant server-name email author-claims))
+    emailer keycloak tenant-conn tenant server-name email author-claims))
 
 (defn invites
   "List active invites."
