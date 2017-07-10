@@ -1,7 +1,7 @@
 (ns akvo.lumen.endpoint.dataset
-  (:require [compojure.core :refer :all]
-            [akvo.lumen.component.tenant-manager :refer [connection]]
-            [akvo.lumen.lib.dataset :as dataset]))
+  (:require [akvo.lumen.component.tenant-manager :refer [connection]]
+            [akvo.lumen.lib.dataset :as dataset]
+            [compojure.core :refer :all]))
 
 
 (defn endpoint [{:keys [tenant-manager config]}]
@@ -19,4 +19,7 @@
           (dataset/fetch tenant-conn id))
 
         (DELETE "/" _
-          (dataset/delete tenant-conn id))))))
+          (dataset/delete tenant-conn id))
+
+        (POST "/update" _
+          (dataset/update tenant-conn config id))))))

@@ -21,3 +21,8 @@
   "Delete dataset with id"
   [tenant-conn id]
   (impl/delete tenant-conn id))
+
+(defn update
+  "Update dataset with id"
+  [tenant-conn config id]
+  (impl/update tenant-conn config id))
