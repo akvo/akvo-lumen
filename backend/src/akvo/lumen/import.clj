@@ -16,6 +16,7 @@
 
 (hugsql/def-db-fns "akvo/lumen/job-execution.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
+(hugsql/def-db-fns "akvo/lumen/transformation.sql")
 
 (defn successful-import [conn job-execution-id table-name columns spec]
   (let [dataset-id (squuid)
@@ -50,14 +51,14 @@
    and imported-table-name. We also delete the previous table-name and imported-table-name
    so we don't accumulate unused datasets on each update."
   [conn job-execution-id dataset-id table-name imported-table-name]
-  (let [dataset-version (dataset-by-id conn {:dataset-id dataset-id})]
+  (let [dataset-version (latest-dataset-version-by-dataset-id conn {:dataset-id dataset-id})]
     (insert-dataset-version conn {:id (str (squuid))
                                   :dataset-id dataset-id
                                   :job-execution-id job-execution-id
                                   :table-name table-name
                                   :imported-table-name imported-table-name
                                   :version (inc (:version dataset-version))
-                                  :columns (:columns dataset-version)}))
+                                  :columns (vec (:columns dataset-version))}))
   (update-successful-job-execution conn {:id job-execution-id}))
 
 (defn failed-import [conn job-execution-id reason]
@@ -135,16 +136,30 @@
         (recur (rest transformations) columns))
       columns)))
 
+(defn compatible-columns? [imported-columns columns]
+  (let [imported-columns (reduce (fn [m column]
+                                   (let [column-id (keyword (get column "columnName"))
+                                         column-type (keyword (get column "type"))
+                                         column-title (get column "title")]
+                                     (assoc m column-id {:id column-id
+                                                         :type column-type
+                                                         :title column-title})))
+                                 {}
+                                 imported-columns)]
+    (every? (fn [column]
+              (= column (get imported-columns (:id column))))
+            columns)))
+
 (defn do-update [conn config dataset-id data-source-id job-execution-id data-source-spec]
   (try
     (let [table-name (gen-table-name "ds")
           imported-table-name (gen-table-name "imported")
-          imported-columns (imported-dataset-columns-by-dataset-id conn
-                                                                   {:dataset-id dataset-id})
-          {:keys [transformations]} (dataset-by-id conn {:dataset-id dataset-id})]
+          imported-columns (:columns (imported-dataset-columns-by-dataset-id conn
+                                                                             {:dataset-id dataset-id}))
+          {:keys [transformations]} (dataset-by-id conn {:id dataset-id})]
       (with-open [importer (import/dataset-importer (get data-source-spec "source") config)]
         (let [columns (import/columns importer)]
-          (if (not= columns imported-columns)
+          (if-not (compatible-columns? imported-columns columns)
             (failed-update conn job-execution-id "Column mismatch")
             (do (create-dataset-table conn table-name columns)
                 (doseq [record (map coerce-to-sql (import/records importer))]
@@ -180,8 +195,8 @@
 
 (defn update-dataset [tenant-conn config dataset-id data-source-id data-source-spec]
   (let [job-execution-id (str (squuid))]
-    (insert-dataset-update-job-execution {:id job-execution-id
-                                          :data-source-id data-source-id})
+    (insert-dataset-update-job-execution tenant-conn {:id job-execution-id
+                                                      :data-source-id data-source-id})
     (future (do-update tenant-conn
                        config
                        dataset-id

@@ -64,8 +64,9 @@ SELECT dataset_version.columns
 
 -- :name data-source-by-dataset-id :? :1
 SELECT data_source.*
-  FROM data_source, job_execution
- WHERE job_execution.dataset_id = :dataset-id
+  FROM data_source, dataset_version, job_execution
+ WHERE dataset_version.dataset_id = :dataset-id
+   AND dataset_version.job_execution_id = job_execution.id
    AND job_execution.type = 'IMPORT'
    AND job_execution.status = 'OK'
    AND job_execution.data_source_id = data_source.id;
