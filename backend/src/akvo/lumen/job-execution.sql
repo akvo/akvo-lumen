@@ -17,8 +17,8 @@ VALUES (:id, :title, :description);
 
 -- :name insert-dataset-version :! :n
 -- :doc Insert new dataset version
-INSERT INTO dataset_version(id, dataset_id, job_execution_id, table_name, imported_table_name, version, columns)
-VALUES (:id, :dataset-id, :job-execution-id, :table-name, :imported-table-name, :version, :columns);
+INSERT INTO dataset_version(id, dataset_id, job_execution_id, table_name, imported_table_name, version, columns, transformations)
+VALUES (:id, :dataset-id, :job-execution-id, :table-name, :imported-table-name, :version, :columns, :transformations);
 
 -- :name clone-data-table :! :n
 -- :doc Clone a data table

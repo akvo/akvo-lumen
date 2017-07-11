@@ -42,7 +42,8 @@
                                                     :sort nil
                                                     :direction nil
                                                     :hidden false})
-                                                 columns)})
+                                                 columns)
+                                  :transformations []})
     (update-successful-job-execution conn {:id job-execution-id})))
 
 (defn successful-update
@@ -58,7 +59,8 @@
                                   :table-name table-name
                                   :imported-table-name imported-table-name
                                   :version (inc (:version dataset-version))
-                                  :columns (vec (:columns dataset-version))}))
+                                  :columns (vec (:columns dataset-version))
+                                  :transformations (vec (:transformations dataset-version))}))
   (update-successful-job-execution conn {:id job-execution-id}))
 
 (defn failed-import [conn job-execution-id reason]
@@ -156,7 +158,7 @@
           imported-table-name (gen-table-name "imported")
           imported-columns (:columns (imported-dataset-columns-by-dataset-id conn
                                                                              {:dataset-id dataset-id}))
-          {:keys [transformations]} (dataset-by-id conn {:id dataset-id})]
+          {:keys [transformations]} (latest-dataset-version-by-dataset-id conn {:dataset-id dataset-id})]
       (with-open [importer (import/dataset-importer (get data-source-spec "source") config)]
         (let [columns (import/columns importer)]
           (if-not (compatible-columns? imported-columns columns)
@@ -169,7 +171,7 @@
                                    :to-table imported-table-name}
                                   {}
                                   {:transaction? false})
-                (apply-transformation-log conn table-name columns transformations)
+                (apply-transformation-log conn table-name imported-columns transformations)
                 (successful-update conn
                                    job-execution-id
                                    dataset-id
