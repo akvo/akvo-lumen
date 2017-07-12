@@ -3,7 +3,7 @@ import * as constants from '../constants/dataset';
 import * as visualisationActions from './visualisation';
 import { hideModal } from './activeModal';
 import applyTransformation from '../reducers/transform';
-import { showNotification } from './notification';
+import { showNotification, hideNotification } from './notification';
 import * as api from '../api';
 
 /*
@@ -96,7 +96,7 @@ function importDatasetSuccess(datasetId, importId) {
   };
 }
 
-const pollInteval = 1000;
+const POLL_INTERVAL = 1000;
 function pollDatasetImportStatus(importId, name) {
   return (dispatch) => {
     dispatch(importDatasetPending(importId, name));
@@ -104,7 +104,7 @@ function pollDatasetImportStatus(importId, name) {
       .then(response => response.json())
       .then(({ status, reason, datasetId }) => {
         if (status === 'PENDING') {
-          setTimeout(() => dispatch(pollDatasetImportStatus(importId, name)), pollInteval);
+          setTimeout(() => dispatch(pollDatasetImportStatus(importId, name)), POLL_INTERVAL);
         } else if (status === 'FAILED') {
           dispatch(importDatasetFailure(importId, reason));
         } else if (status === 'OK') {
@@ -247,6 +247,62 @@ export function deleteDataset(id) {
 }
 
 /*
+ * Update a dataset by dispatching `updateDataset(datasetId)`
+ */
+function updateDatasetRequest(id) {
+  return {
+    type: constants.UPDATE_DATASET_REQUEST,
+    id,
+  };
+}
+
+function updateDatasetFailure(id) {
+  return {
+    type: constants.UPDATE_DATASET_FAILURE,
+    id,
+  };
+}
+
+function updateDatasetSuccess(id) {
+  return {
+    type: constants.UPDATE_DATASET_SUCCESS,
+    id,
+  };
+}
+
+function pollDatasetUpdateStatus(updateId, datasetId) {
+  return (dispatch) => {
+    api.get(`/api/job_executions/${updateId}`)
+      .then(response => response.json())
+      .then(({ status, reason }) => {
+        if (status === 'PENDING') {
+          setTimeout(() => dispatch(pollDatasetUpdateStatus(updateId, datasetId)), POLL_INTERVAL);
+        } else if (status === 'FAILED') {
+          dispatch(updateDatasetFailure(updateId, datasetId, reason));
+          dispatch(showNotification('error', 'Failed', true));
+        } else if (status === 'OK') {
+          dispatch(updateDatasetSuccess(updateId, datasetId));
+          dispatch(fetchDataset(datasetId));
+          dispatch(hideNotification());
+        }
+      })
+      .catch(error => dispatch(error));
+  };
+}
+
+export function updateDataset(id) {
+  return (dispatch) => {
+    dispatch(updateDatasetRequest(id));
+    dispatch(showNotification('info', '`Updating dataset`'));
+    api.post(`/api/datasets/${id}/update`)
+      .then(response => response.json())
+      .then(({ updateId }) => {
+        dispatch(pollDatasetUpdateStatus(updateId, id));
+      });
+  };
+}
+
+/*
  * The reducer is run in the action creator to be able to
  * properly catch exceptions in the case of { onError: 'fail' }
  * See: https://github.com/zalmoxisus/redux-devtools-instrument/issues/5
@@ -299,7 +355,7 @@ function pollDatasetTransformationStatus(jobExecutionId, datasetId) {
       .then(({ status, reason }) => {
         if (status === 'PENDING') {
           setTimeout(() =>
-            dispatch(pollDatasetTransformationStatus(jobExecutionId, datasetId)), pollInteval);
+            dispatch(pollDatasetTransformationStatus(jobExecutionId, datasetId)), POLL_INTERVAL);
         } else if (status === 'FAILED') {
           dispatch(transformationFailure(datasetId, reason));
         } else if (status === 'OK') {

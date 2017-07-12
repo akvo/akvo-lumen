@@ -65,6 +65,9 @@ function LibraryListingItemContextMenu({
           value: 'view-details',
           customClass: 'notImplemented',
         }, {
+          label: 'Update',
+          value: 'update-dataset',
+        }, {
           label: 'Delete',
           value: 'delete',
         },
