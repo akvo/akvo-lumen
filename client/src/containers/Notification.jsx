@@ -15,27 +15,43 @@ class Notification extends Component {
       onscreen: false,
     };
   }
+
   componentWillMount() {
     if (this.props.autohide) {
-      const { dispatch } = this.props;
-      const unmount = () => dispatch(hideNotification());
-      const hide = () => {
-        this.setState({ onscreen: false });
-        this.timeout = setTimeout(unmount, 500);
-      };
-
-      this.timeout = setTimeout(hide, autohideDelay);
+      this.scheduleAutoHide();
     }
   }
+
   componentDidMount() {
     // Force one additional render so we can change the className and animate position with css.
     //  Lint exception is OK here - it's designed to prevent re-renders, but we want the re-render.
     //  eslint-disable-next-line react/no-did-mount-set-state
     setTimeout(() => this.setState({ onscreen: true }), 0);
   }
+
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.autohide) {
+      this.scheduleAutoHide();
+    } else {
+      clearTimeout(this.timeout);
+    }
+  }
+
   componentWillUnmount() {
     clearTimeout(this.timeout);
   }
+
+  scheduleAutoHide() {
+    const { dispatch } = this.props;
+    const unmount = () => dispatch(hideNotification());
+    const hide = () => {
+      this.setState({ onscreen: false });
+      this.timeout = setTimeout(unmount, 500);
+    };
+
+    this.timeout = setTimeout(hide, autohideDelay);
+  }
+
   render() {
     const { level, message, dispatch } = this.props;
     return (

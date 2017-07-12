@@ -3,7 +3,7 @@ import * as constants from '../constants/dataset';
 import * as visualisationActions from './visualisation';
 import { hideModal } from './activeModal';
 import applyTransformation from '../reducers/transform';
-import { showNotification, hideNotification } from './notification';
+import { showNotification } from './notification';
 import * as api from '../api';
 
 /*
@@ -38,7 +38,7 @@ function fetchDatasetFailure(error, id) {
 export function fetchDataset(id) {
   return (dispatch) => {
     dispatch(fetchDatasetRequest(id));
-    api.get(`/api/datasets/${id}`)
+    return api.get(`/api/datasets/${id}`)
       .then(response => response.json())
       .then(dataset => dispatch(fetchDatasetSuccess(Immutable.fromJS(dataset))))
       .catch(error => dispatch(fetchDatasetFailure(error, id)));
@@ -249,41 +249,21 @@ export function deleteDataset(id) {
 /*
  * Update a dataset by dispatching `updateDataset(datasetId)`
  */
-function updateDatasetRequest(id) {
-  return {
-    type: constants.UPDATE_DATASET_REQUEST,
-    id,
-  };
-}
-
-function updateDatasetFailure(id) {
-  return {
-    type: constants.UPDATE_DATASET_FAILURE,
-    id,
-  };
-}
-
-function updateDatasetSuccess(id) {
-  return {
-    type: constants.UPDATE_DATASET_SUCCESS,
-    id,
-  };
-}
-
-function pollDatasetUpdateStatus(updateId, datasetId) {
+function pollDatasetUpdateStatus(updateId, datasetId, title) {
   return (dispatch) => {
     api.get(`/api/job_executions/${updateId}`)
       .then(response => response.json())
       .then(({ status, reason }) => {
         if (status === 'PENDING') {
-          setTimeout(() => dispatch(pollDatasetUpdateStatus(updateId, datasetId)), POLL_INTERVAL);
+          setTimeout(
+            () => dispatch(pollDatasetUpdateStatus(updateId, datasetId, title)),
+            POLL_INTERVAL
+          );
         } else if (status === 'FAILED') {
-          dispatch(updateDatasetFailure(updateId, datasetId, reason));
-          dispatch(showNotification('error', 'Failed', true));
+          dispatch(showNotification('error', `Failed to update "${title}": ${reason}`));
         } else if (status === 'OK') {
-          dispatch(updateDatasetSuccess(updateId, datasetId));
-          dispatch(fetchDataset(datasetId));
-          dispatch(hideNotification());
+          dispatch(fetchDataset(datasetId))
+            .then(() => dispatch(showNotification('info', `Successfully updated "${title}"`, true)));
         }
       })
       .catch(error => dispatch(error));
@@ -291,13 +271,13 @@ function pollDatasetUpdateStatus(updateId, datasetId) {
 }
 
 export function updateDataset(id) {
-  return (dispatch) => {
-    dispatch(updateDatasetRequest(id));
-    dispatch(showNotification('info', '`Updating dataset`'));
+  return (dispatch, getState) => {
+    const title = getState().library.datasets[id].get('name');
+    dispatch(showNotification('info', `Updating "${title}"`));
     api.post(`/api/datasets/${id}/update`)
       .then(response => response.json())
       .then(({ updateId }) => {
-        dispatch(pollDatasetUpdateStatus(updateId, id));
+        dispatch(pollDatasetUpdateStatus(updateId, id, title));
       });
   };
 }

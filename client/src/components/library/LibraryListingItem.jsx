@@ -34,44 +34,56 @@ function getCollectionContextMenuItem(collections, currentCollection) {
   });
 }
 
+function contextMenuOptions(entityType, collections, currentCollection) {
+  const options = [
+    {
+      label: 'Duplicate',
+      value: 'duplicate',
+      customClass: 'notImplemented',
+    }, {
+      label: 'Set permissions',
+      value: 'set-permissions',
+      customClass: 'notImplemented',
+    }, {
+      label: 'Add to dashboard',
+      value: 'add-to-dashboard',
+      customClass: 'notImplemented',
+    },
+    getCollectionContextMenuItem(collections, currentCollection),
+    {
+      label: 'View details',
+      value: 'view-details',
+      customClass: 'notImplemented',
+    }, {
+      label: 'Delete',
+      value: 'delete',
+    },
+  ];
+
+  if (entityType === 'dataset') {
+    options.push({
+      label: 'Update',
+      value: 'update-dataset',
+    });
+  }
+
+  return options;
+}
+
 function LibraryListingItemContextMenu({
+  entityType,
   onClick,
   collections = {},
   currentCollection,
   onWindowClick,
 }) {
+  const options = contextMenuOptions(entityType, collections, currentCollection);
   return (
     <ContextMenu
       style={{ width: 200 }}
       subMenuSide="left"
       onOptionSelected={onClick}
-      options={[
-        {
-          label: 'Duplicate',
-          value: 'duplicate',
-          customClass: 'notImplemented',
-        }, {
-          label: 'Set permissions',
-          value: 'set-permissions',
-          customClass: 'notImplemented',
-        }, {
-          label: 'Add to dashboard',
-          value: 'add-to-dashboard',
-          customClass: 'notImplemented',
-        },
-        getCollectionContextMenuItem(collections, currentCollection),
-        {
-          label: 'View details',
-          value: 'view-details',
-          customClass: 'notImplemented',
-        }, {
-          label: 'Update',
-          value: 'update-dataset',
-        }, {
-          label: 'Delete',
-          value: 'delete',
-        },
-      ]}
+      options={options}
       onWindowClick={onWindowClick}
     />
   );
@@ -108,6 +120,7 @@ VisualisationTypeLabel.propTypes = {
 };
 
 LibraryListingItemContextMenu.propTypes = {
+  entityType: PropTypes.string.isRequired,
   onClick: PropTypes.func.isRequired,
   collections: PropTypes.object.isRequired,
   currentCollection: PropTypes.object,
@@ -192,6 +205,7 @@ export default class LibraryListingItem extends Component {
           </button>
           {this.state.contextMenuVisible &&
             <LibraryListingItemContextMenu
+              entityType={getType(entity)}
               collections={this.props.collections}
               currentCollection={this.props.currentCollection}
               onClick={(actionType) => {
