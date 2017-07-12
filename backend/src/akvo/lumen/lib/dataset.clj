@@ -1,4 +1,5 @@
 (ns akvo.lumen.lib.dataset
+  (:refer-clojure :exclude [update])
   (:require [akvo.lumen.lib.dataset-impl :as impl]))
 
 

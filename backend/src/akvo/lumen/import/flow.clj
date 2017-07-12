@@ -25,8 +25,10 @@
       :access_token))
 
 (defn offline-token
-  [token-endpoint refresh-token]
-  (-> (http/post token-endpoint
+  [refresh-token {:keys [keycloak-realm keycloak-url] :as config}]
+  (-> (http/post (format "%s/realms/%s/protocol/openid-connect/token"
+                         keycloak-url
+                         keycloak-realm)
                  {:form-params {"client_id" "akvo-lumen"
                                 "refresh_token" refresh-token
                                 "scope" "offline_access"
@@ -201,8 +203,7 @@
   (let [token-endpoint (format "%s/realms/%s/protocol/openid-connect/token"
                                keycloak-url
                                keycloak-realm)
-        refresh-token (delay (offline-token token-endpoint refreshToken))
-        headers-fn #(flow-api-headers token-endpoint @refresh-token)
+        headers-fn #(flow-api-headers token-endpoint refreshToken)
         survey (delay (survey-definition flow-api-url
                                          headers-fn
                                          instance
