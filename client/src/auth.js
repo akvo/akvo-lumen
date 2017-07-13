@@ -13,8 +13,8 @@ export function token() {
     keycloak.updateToken()
       .success(() => resolve(keycloak.token))
       .error(() => {
-        // Refreshing will redirect to login page
-        window.location.reload(true);
+        // Redirect to login page
+        keycloak.login();
       })
   );
 }
