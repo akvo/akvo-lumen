@@ -9,10 +9,13 @@ export function token() {
     throw new Error('Keycloak not initialized');
   }
 
-  return new Promise((resolve, reject) =>
+  return new Promise(resolve =>
     keycloak.updateToken()
       .success(() => resolve(keycloak.token))
-      .error(err => reject(err))
+      .error(() => {
+        // Refreshing will redirect to login page
+        window.location.reload(true);
+      })
   );
 }
 
