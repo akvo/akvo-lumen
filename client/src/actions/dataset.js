@@ -142,10 +142,6 @@ export function importDataset(dataSource) {
   };
 }
 
-/*
- *
- */
-
 // Currently only name
 export function saveDatasetSettings(id, { name }) {
   return {
@@ -250,6 +246,14 @@ export function deleteDataset(id) {
 /*
  * Update a dataset by dispatching `updateDataset(datasetId)`
  */
+
+function updateDatasetTogglePending(datasetId) {
+  return {
+    type: constants.TOGGLE_DATASET_UPDATE_PENDING,
+    id: datasetId,
+  };
+}
+
 function pollDatasetUpdateStatus(updateId, datasetId, title) {
   return (dispatch) => {
     api.get(`/api/job_executions/${updateId}`)
@@ -261,6 +265,7 @@ function pollDatasetUpdateStatus(updateId, datasetId, title) {
             POLL_INTERVAL
           );
         } else if (status === 'FAILED') {
+          dispatch(updateDatasetTogglePending(datasetId));
           dispatch(showNotification('error', `Failed to update "${title}": ${reason}`));
         } else if (status === 'OK') {
           dispatch(fetchDataset(datasetId))
@@ -275,6 +280,7 @@ export function updateDataset(id) {
   return (dispatch, getState) => {
     const title = getState().library.datasets[id].get('name');
     dispatch(showNotification('info', `Updating "${title}"`));
+    dispatch(updateDatasetTogglePending(id));
     api.post(`/api/datasets/${id}/update`,
       // Send the refreshToken as part of the update request as a workaround
       // for not being able to get an offline token to the backend. It's TBD
