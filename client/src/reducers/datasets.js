@@ -104,6 +104,14 @@ function undoDatasetTransformation(state, id) {
   return state;
 }
 
+function toggleDatasetUpdatePending(state, id) {
+  const dataset = state[id];
+  const newStatus = dataset.get('status') === 'PENDING' ? 'OK' : 'PENDING';
+  return Object.assign({}, state, {
+    [id]: dataset.setIn(['status'], newStatus),
+  });
+}
+
 export default function datasets(state = initialState, action) {
   switch (action.type) {
     case constants.CREATE:
@@ -132,6 +140,8 @@ export default function datasets(state = initialState, action) {
       return transformationFailure(state, action);
     case constants.UNDO_TRANSFORMATION:
       return undoDatasetTransformation(state, action.id);
+    case constants.TOGGLE_DATASET_UPDATE_PENDING:
+      return toggleDatasetUpdatePending(state, action.id);
     default: return state;
   }
 }

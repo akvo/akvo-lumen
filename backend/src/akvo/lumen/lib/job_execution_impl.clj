@@ -8,8 +8,7 @@
   "Get the status of a job execution. There are three different states:
   * { \"status\": \"PENDING\", \"jobExecytionId\": <id> }
   * { \"status\": \"FAILED\", \"jobExecutionId\": <id>, \"reason\": <reason> }
-  * { \"status\": \"OK\", \"jobExecutionId\": <id>, \"datasetId\": <dataset-id> }
-  Returns nil if the job execution does not exist"
+  * { \"status\": \"OK\", \"jobExecutionId\": <id>, \"datasetId\": <dataset-id> }"
   [conn id]
   (if-let [{:keys [dataset_id]} (dataset-id-by-job-execution-id conn {:id id})]
     (lib/ok
