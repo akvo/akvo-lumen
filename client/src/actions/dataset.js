@@ -294,7 +294,6 @@ export function updateDataset(id) {
         } else {
           dispatch(showNotification('error', `Update failed: ${error}`));
         }
-
       });
   };
 }
