@@ -24,19 +24,6 @@
       :body
       :access_token))
 
-(defn offline-token
-  [refresh-token {:keys [keycloak-realm keycloak-url] :as config}]
-  (-> (http/post (format "%s/realms/%s/protocol/openid-connect/token"
-                         keycloak-url
-                         keycloak-realm)
-                 {:form-params {"client_id" "akvo-lumen"
-                                "refresh_token" refresh-token
-                                "scope" "offline_access"
-                                "grant_type" "refresh_token"}
-                  :as :json})
-      :body
-      :refresh_token))
-
 (defn flow-api-headers
   [token-endpoint refresh-token]
   {"Authorization" (format "Bearer %s" (access-token token-endpoint refresh-token))

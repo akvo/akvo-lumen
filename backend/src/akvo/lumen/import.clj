@@ -187,14 +187,7 @@
 (defn handle-import-request [tenant-conn config claims data-source]
   (let [data-source-id (str (squuid))
         job-execution-id (str (squuid))
-        table-name (gen-table-name "ds")
-        data-source (if (= "AKVO_FLOW" (get data-source "kind"))
-                      ;; Update refreshToken to use an offline token
-                      (update data-source
-                              ["source" "refreshToken"]
-                              akvo.lumen.import.flow/offline-token
-                              config)
-                      data-source)]
+        table-name (gen-table-name "ds")]
     (insert-data-source tenant-conn {:id data-source-id
                                      :spec (json/generate-string data-source)})
     (insert-job-execution tenant-conn {:id job-execution-id

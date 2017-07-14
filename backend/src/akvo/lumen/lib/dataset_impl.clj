@@ -57,12 +57,18 @@
         (lib/not-found {:error "Not found"}))
       (lib/ok {:id id}))))
 
-(defn update [tenant-conn config dataset-id]
+(defn update [tenant-conn config dataset-id {refresh-token "refreshToken"}]
   (if-let [{data-source-spec :spec
             data-source-id :id} (data-source-by-dataset-id tenant-conn
                                                            {:dataset-id dataset-id})]
     (if-not (= (get-in data-source-spec ["source" "kind"])
                "DATA_FILE")
-      (import/update-dataset tenant-conn config dataset-id data-source-id data-source-spec)
+      (import/update-dataset tenant-conn
+                             config
+                             dataset-id
+                             data-source-id
+                             (assoc-in data-source-spec
+                                       ["source" "refreshToken"]
+                                       refresh-token))
       (lib/bad-request {:error "Can't update uploaded dataset"}))
     (lib/not-found {:id dataset-id})))

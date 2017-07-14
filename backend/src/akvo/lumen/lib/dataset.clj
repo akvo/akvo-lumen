@@ -25,5 +25,5 @@
 
 (defn update
   "Update dataset with id"
-  [tenant-conn config id]
-  (impl/update tenant-conn config id))
+  [tenant-conn config id body]
+  (impl/update tenant-conn config id body))

@@ -5,6 +5,7 @@ import { hideModal } from './activeModal';
 import applyTransformation from '../reducers/transform';
 import { showNotification } from './notification';
 import * as api from '../api';
+import * as auth from '../auth';
 
 /*
  * Fetch a dataset by id
@@ -274,7 +275,12 @@ export function updateDataset(id) {
   return (dispatch, getState) => {
     const title = getState().library.datasets[id].get('name');
     dispatch(showNotification('info', `Updating "${title}"`));
-    api.post(`/api/datasets/${id}/update`)
+    api.post(`/api/datasets/${id}/update`,
+      // Send the refreshToken as part of the update request as a workaround
+      // for not being able to get an offline token to the backend. It's TBD
+      // how we want to do that.
+      { refreshToken: auth.refreshToken() }
+    )
       .then(response => response.json())
       .then(({ updateId }) => {
         dispatch(pollDatasetUpdateStatus(updateId, id, title));
