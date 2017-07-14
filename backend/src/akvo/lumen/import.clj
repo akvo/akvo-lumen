@@ -51,16 +51,17 @@
    of the previous one, except with an updated :version and pointing to the new table-name
    and imported-table-name. We also delete the previous table-name and imported-table-name
    so we don't accumulate unused datasets on each update."
-  [conn job-execution-id dataset-id table-name imported-table-name]
-  (let [dataset-version (latest-dataset-version-by-dataset-id conn {:dataset-id dataset-id})]
-    (insert-dataset-version conn {:id (str (squuid))
-                                  :dataset-id dataset-id
-                                  :job-execution-id job-execution-id
-                                  :table-name table-name
-                                  :imported-table-name imported-table-name
-                                  :version (inc (:version dataset-version))
-                                  :columns (vec (:columns dataset-version))
-                                  :transformations (vec (:transformations dataset-version))}))
+  [conn job-execution-id dataset-id table-name imported-table-name dataset-version]
+  (insert-dataset-version conn {:id (str (squuid))
+                                :dataset-id dataset-id
+                                :job-execution-id job-execution-id
+                                :table-name table-name
+                                :imported-table-name imported-table-name
+                                :version (inc (:version dataset-version))
+                                :columns (vec (:columns dataset-version))
+                                :transformations (vec (:transformations dataset-version))})
+  (drop-table (:imported-table-name dataset-version))
+  (drop-table (:table-name dataset-version))
   (update-successful-job-execution conn {:id job-execution-id}))
 
 (defn failed-import [conn job-execution-id reason]
@@ -100,7 +101,6 @@
     (java.sql.Timestamp. (.toEpochMilli value))))
 
 (defn coerce-to-sql [record]
-
   (reduce-kv
    (fn [result k v]
      (assoc result k (when v (coerce v))))
@@ -158,7 +158,8 @@
           imported-table-name (gen-table-name "imported")
           imported-columns (:columns (imported-dataset-columns-by-dataset-id conn
                                                                              {:dataset-id dataset-id}))
-          {:keys [transformations]} (latest-dataset-version-by-dataset-id conn {:dataset-id dataset-id})]
+          {:keys [transformations] :as dataset-version} (latest-dataset-version-by-dataset-id
+                                                         conn {:dataset-id dataset-id})]
       (with-open [importer (import/dataset-importer (get data-source-spec "source") config)]
         (let [columns (import/columns importer)]
           (if-not (compatible-columns? imported-columns columns)
@@ -176,7 +177,8 @@
                                    job-execution-id
                                    dataset-id
                                    table-name
-                                   imported-table-name))))))
+                                   imported-table-name
+                                   dataset-version))))))
     (catch clojure.lang.ExceptionInfo e
       (failed-update conn job-execution-id (.getMessage e))
       (throw e))
