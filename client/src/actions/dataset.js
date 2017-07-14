@@ -280,7 +280,6 @@ export function updateDataset(id) {
   return (dispatch, getState) => {
     const title = getState().library.datasets[id].get('name');
     dispatch(showNotification('info', `Updating "${title}"`));
-    dispatch(updateDatasetTogglePending(id));
     api.post(`/api/datasets/${id}/update`,
       // Send the refreshToken as part of the update request as a workaround
       // for not being able to get an offline token to the backend. It's TBD
@@ -288,8 +287,14 @@ export function updateDataset(id) {
       { refreshToken: auth.refreshToken() }
     )
       .then(response => response.json())
-      .then(({ updateId }) => {
-        dispatch(pollDatasetUpdateStatus(updateId, id, title));
+      .then(({ updateId, error }) => {
+        if (updateId != null) {
+          dispatch(updateDatasetTogglePending(id));
+          dispatch(pollDatasetUpdateStatus(updateId, id, title));
+        } else {
+          dispatch(showNotification('error', `Update failed: ${error}`));
+        }
+
       });
   };
 }
