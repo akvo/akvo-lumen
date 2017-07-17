@@ -22,8 +22,8 @@ services:
       - "47480:47480"
       - "3000:3000"
  client:
-   build: client
-     context: ./backend
+   build:
+     context: ./client
      dockerfile: Dockerfile-dev
    volumes:
       - ./client:/lumen
