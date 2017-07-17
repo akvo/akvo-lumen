@@ -35,7 +35,7 @@ enviroment variable with the proper settings, e.g.
 
 ```sh
 $ export PGUSER=postgres
-$ ./provision/set-up.sh
+$ ./provision/setup.sh
 ```
 
 More info at: [Environment
@@ -54,6 +54,7 @@ created earlier we need to run the provision/setup-localhost.sh script to add:
 ``` sh
 127.0.0.1 t1.lumen.localhost
 127.0.0.1 t2.lumen.localhost
+127.0.0.1 auth.lumen.localhost
 ```
 
 The tenants api root should be accessable at

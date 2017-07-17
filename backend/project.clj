@@ -63,7 +63,15 @@
                                     [kerodon "0.8.0"]]
                    :source-paths   ["dev/src"]
                    :resource-paths ["dev/resources" "test/resources"]
-                   :repl-options   {:init-ns user}
+                   :repl-options   {:init-ns dev
+                                    :init (do
+                                             (println "Starting BackEnd ...")
+                                             (go)
+                                             (migrate)
+                                             (seed)
+                                             (migrate))
+                                    :host "0.0.0.0"
+                                    :port 47480}
                    :env            {:port "3000"}}
    :project/test  {:resource-paths ["test/resources"]
                    :env
