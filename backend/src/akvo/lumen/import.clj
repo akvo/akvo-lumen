@@ -156,8 +156,9 @@
   (try
     (let [table-name (gen-table-name "ds")
           imported-table-name (gen-table-name "imported")
-          imported-columns (:columns (imported-dataset-columns-by-dataset-id conn
-                                                                             {:dataset-id dataset-id}))
+          imported-columns (vec
+                            (:columns (imported-dataset-columns-by-dataset-id conn
+                                                                              {:dataset-id dataset-id})))
           {:keys [transformations] :as dataset-version} (latest-dataset-version-by-dataset-id
                                                          conn {:dataset-id dataset-id})]
       (with-open [importer (import/dataset-importer (get data-source-spec "source") config)]
