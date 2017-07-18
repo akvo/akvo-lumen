@@ -1,0 +1,65 @@
+FROM ubuntu:xenial
+
+RUN apt-get update && \
+    apt-get install -yq \
+    vim locales
+
+RUN locale-gen en_US.UTF-8
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
+
+# Install required packages
+
+RUN apt-get update && \
+  apt-get install -yq \
+  build-essential \
+  curl \
+  git \
+  libmapnik-dev \
+  pkg-config \
+  python-dev \
+  libcairo2-dev \
+  libjpeg-dev \
+  libpango1.0-dev \
+  libgif-dev \
+  g++
+
+ENV NVM_DIR /usr/local/nvm
+ENV NODE_VERSION 6.9.5
+
+RUN curl -o- \
+    https://raw.githubusercontent.com/creationix/nvm/v0.33.2/install.sh \
+    | bash \
+    && . $NVM_DIR/nvm.sh \
+    && nvm install $NODE_VERSION \
+    && nvm alias default $NODE_VERSION \
+    && nvm use default
+
+ENV NODE_PATH $NVM_DIR/versions/node/v$NODE_VERSION/lib/node_modules
+ENV PATH      $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
+
+RUN node --version
+RUN npm --version
+
+# Build server
+
+ADD server /tiler
+RUN cd /tiler && rm -rf node_modules* && make
+
+# Add config
+
+ADD config /config
+
+# Debugging mode on
+ENV DEBUG windshaft*
+
+# ENV variables (for some reason environment isn't working)
+ENV PGHOST postgres
+ENV PGUSER lumen
+ENV PGPASSWORD password
+
+EXPOSE 4000
+
+# Start server
+CMD cd /tiler && while :; do node server.js; sleep 10; done
