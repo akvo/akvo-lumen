@@ -1,0 +1,33 @@
+{
+  "version": "1.5.0",
+  "layers": [
+    {
+      "type": "mapnik",
+      "options": {
+        "sql": "select instance, geom, yearcons::integer as yearcons from liberia where yearcons ~ '^\\d{4}$';",
+        "geom_column": "geom",
+        "srid": 4326,
+        "cartocss": "#s { marker-width: 5; marker-fill:#f45; marker-line-color:#813; marker-allow-overlap:true; marker-fill-opacity: 0.3;} #s[yearcons>=2009] {marker-fill: #1F78B4; marker-line-color: #0000FF;}",
+        "cartocss_version": "2.0.0",
+        "interactivity": "instance"
+      }
+    }
+  ]
+}
+
+{
+  "version": "1.5.0",
+  "layers": [
+    {
+      "type": "mapnik",
+      "options": {
+        "sql": "SELECT 1 as instance, ST_SetSRID(ST_GeomFromGeoJSON('{\"type\":\"Polygon\",\"coordinates\":[[[-1.6630446910858154,42.810167986844675],[-1.665651798248291,42.808814198960945],[-1.6621971130371094,42.80705895311637],[-1.660759449005127,42.80925497036223],[-1.6630446910858154,42.810167986844675]]]}}'), 4326) as geom;",
+        "geom_column": "geom",
+        "srid": 4326,
+        "cartocss": "#s { polygon-fill: blue; polygon-opacity: 0.8;}",
+        "cartocss_version": "2.0.0",
+        "interactivity": "instance"
+      }
+    }
+  ]
+}

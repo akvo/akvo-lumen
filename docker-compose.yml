@@ -29,3 +29,7 @@ services:
       - ./client:/lumen
    ports:
       - "3030:3030"
+ redis:
+   image: redis:3.2.9
+ windshaft:
+   build: windshaft
