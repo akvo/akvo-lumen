@@ -9,6 +9,8 @@ This Docker Compose environment will have:
 - A PostgreSQL DB
 - A Backend server with a REPL
 - A Client with hot reloading
+- A Windshaft server
+- A Redis DB
 
 ## Start development environment
 
@@ -92,6 +94,17 @@ To run the tests, either do it from the REPL or run:
 ```sh
 docker exec -i -t akvolumen_backend_1 lein test
 ```
+
+## Windshaft
+
+This container has a development version of the Windshaft container, with plenty of hardcoded assumptions.
+
+The Windshaft server is not exposed directly to the external world, but it is proxied by the Webpack server 
+on the url http://t1.lumen.localhost:3030/maps/**. That url forwards the requests to "windshaft:4000".
+
+The PostgreSQL has a "liberia" table in the "lumen_tenant_1" DB with some data to be able to test the Windshaft server.
+
+Testing can be done through the UI that is available at http://t1.lumen.localhost:3030/viewer/index.html
 
 ## Legal
 Copyright © 2016 - present Akvo Foundation
