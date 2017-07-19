@@ -16,6 +16,7 @@
                  [duct "0.8.2"]
                  [duct/hikaricp-component "0.1.0"]
                  [environ "1.1.0"]
+                 [garden "1.3.2"]
                  [meta-merge "1.0.0"]
                  [org.akvo/commons "0.4.4-SNAPSHOT" :exclusions [org.postgresql/postgresql org.clojure/java.jdbc]]
                  [org.akvo/resumed "0.1.0-SNAPSHOT"]
@@ -31,7 +32,8 @@
                  [ring "1.5.1"]
                  [ring/ring-defaults "0.2.3"]
                  [ring/ring-json "0.4.0"]
-                 [selmer "1.10.8"]]
+                 [selmer "1.10.8"]
+                 [com.rpl/specter "1.0.2"]]
   :uberjar-name "akvo-lumen.jar"
   :repl-options {:timeout 120000}
   ;; :pedantic? :abort
