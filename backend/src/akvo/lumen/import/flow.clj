@@ -1,6 +1,7 @@
 (ns akvo.lumen.import.flow
   (:require [akvo.commons.psql-util :as pg]
             [akvo.lumen.import.common :as import]
+            [cheshire.core :as json]
             [clj-http.client :as http]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str])
@@ -144,6 +145,10 @@
 (defmethod render-response "VIDEO"
   [_ response]
   (get response "filename"))
+
+(defmethod render-response "CADDISFLY"
+  [_ response]
+  (json/generate-string response))
 
 (defmethod render-response :default
   [type response]
