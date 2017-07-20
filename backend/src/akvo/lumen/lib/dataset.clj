@@ -1,4 +1,5 @@
 (ns akvo.lumen.lib.dataset
+  (:refer-clojure :exclude [update])
   (:require [akvo.lumen.lib.dataset-impl :as impl]))
 
 
@@ -21,3 +22,8 @@
   "Delete dataset with id"
   [tenant-conn id]
   (impl/delete tenant-conn id))
+
+(defn update
+  "Update dataset with id"
+  [tenant-conn config id body]
+  (impl/update tenant-conn config id body))

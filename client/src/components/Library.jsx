@@ -9,7 +9,7 @@ import DeleteConfirmationModal from './modals/DeleteConfirmationModal';
 import { showModal } from '../actions/activeModal';
 import { fetchLibrary } from '../actions/library';
 import { deleteVisualisation } from '../actions/visualisation';
-import { deleteDataset } from '../actions/dataset';
+import { deleteDataset, updateDataset } from '../actions/dataset';
 import { deleteDashboard } from '../actions/dashboard';
 import { editCollection } from '../actions/collection';
 import { showNotification } from '../actions/notification';
@@ -119,6 +119,12 @@ class Library extends Component {
         throw new Error(`Invalid entity type: ${entityType}`);
     }
   }
+
+  handleUpdateDataset(id) {
+    const { dispatch } = this.props;
+    dispatch(updateDataset(id));
+  }
+
   handleCreateCollection(optionalEntities = []) {
     const entities = Array.isArray(optionalEntities) ? optionalEntities : [optionalEntities];
 
@@ -177,6 +183,8 @@ class Library extends Component {
   handleEntityAction(actionType, entityType, entityId) {
     if (actionType === 'delete') {
       this.setState({ pendingDeleteEntity: { entityType, entityId } });
+    } else if (actionType === 'update-dataset') {
+      this.handleUpdateDataset(entityId);
     } else if (actionType === 'add-to-collection:new') {
       if (!this.state.collection) {
         this.handleCreateCollection(entityId);

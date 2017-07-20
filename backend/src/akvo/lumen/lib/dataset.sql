@@ -29,12 +29,6 @@ SELECT id, title, NULL, 'OK', modified, created
 -- :doc delete dataset
 DELETE FROM dataset WHERE id=:id;
 
--- :name insert-dataset :<!
--- :doc insert dataset
-INSERT INTO datasets (id, "name", datasource, author)
-VALUES (:id, :name, :datasource, :author::jsonb)
-RETURNING *;
-
 -- :name update-dataset-data :! :n
 -- :doc Update dataset with data
 UPDATE datasets
@@ -45,7 +39,7 @@ WHERE id = :id;
 -- :doc Update dataset name
 UPDATE datasets
 SET "name" = :name
-WHERE id = :id
+WHERE id = :id;
 
 -- :name dataset-by-id :? :1
 SELECT dataset_version.table_name AS "table-name",
@@ -62,10 +56,17 @@ SELECT dataset_version.table_name AS "table-name",
                   FROM dataset_version
                  WHERE dataset_version.dataset_id=:id);
 
--- :name dataset-columns-by-dataset-id :? :*
-SELECT title,
-       type,
-       column_name AS "column-name",
-       column_order AS "column-order"
-  FROM dataset_column
- WHERE dataset_id=:id
+-- :name imported-dataset-columns-by-dataset-id :? :1
+SELECT dataset_version.columns
+  FROM dataset_version
+ WHERE dataset_id = :dataset-id
+   AND version = 1;
+
+-- :name data-source-by-dataset-id :? :1
+SELECT data_source.*
+  FROM data_source, dataset_version, job_execution
+ WHERE dataset_version.dataset_id = :dataset-id
+   AND dataset_version.job_execution_id = job_execution.id
+   AND job_execution.type = 'IMPORT'
+   AND job_execution.status = 'OK'
+   AND job_execution.data_source_id = data_source.id;
