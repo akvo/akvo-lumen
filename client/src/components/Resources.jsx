@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import * as api from '../api';
 
+require('./Resources.scss');
+
 function resourceRuleDescription(resourceKey) {
   let description = null;
   switch (resourceKey) {
@@ -20,16 +22,16 @@ function ResourceList({ resources, tier }) {
       <thead>
         <tr>
           <th>Policy</th>
-          <th>Current</th>
           <th>Limit</th>
+          <th>Current</th>
         </tr>
       </thead>
       <tbody>
         {Object.keys(resources).map(key =>
           <tr key={key}>
             <td>{resourceRuleDescription(key)}</td>
-            <td>{resources && resources[key]}</td>
             <td>{tier && tier[key]}</td>
+            <td>{resources && resources[key]}</td>
           </tr>
         )}
       </tbody>
@@ -83,7 +85,7 @@ class Resources extends Component {
     }
 
     return (
-      <div>
+      <div className="resourceContainer">
         Plan: {currentTierLabel}
         <ResourceList resources={resources} tier={currentTier} />
       </div>
