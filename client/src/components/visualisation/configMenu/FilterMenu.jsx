@@ -77,7 +77,7 @@ const getFilterDisplayValue = (value, columnName, columnOptions) => {
   let displayValue;
 
   if (columnType === 'date') {
-    displayValue = moment(value).format('YYYY-MM-DD hh:mm');
+    displayValue = value ? moment(parseInt(value, 10)).format('YYYY-MM-DD') : 'Invalid date';
   } else {
     displayValue = value;
   }
