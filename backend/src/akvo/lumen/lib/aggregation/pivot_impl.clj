@@ -67,10 +67,12 @@
         columns (cons (select-keys (:row-column query)
                                    ["title" "type"])
                       category-columns)]
-    {:rows (run-query conn (pivot-sql (:table-name dataset)
-                                      query
-                                      filter-str
-                                      (count categories)))
+    {:rows (if (empty? categories)
+             []
+             (run-query conn (pivot-sql (:table-name dataset)
+                                        query
+                                        filter-str
+                                        (count categories))))
      :columns columns}))
 
 (defn apply-empty-query [conn dataset filter-str]
