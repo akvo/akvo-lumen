@@ -60,6 +60,11 @@ export default class DatasetControls extends Component {
                     value: 'merge-datasets',
                     customClass: 'notImplemented',
                   },
+                  {
+                    label: 'Add geometry',
+                    value: 'add-geometry',
+                    customClass: 'notImplemented',
+                  },
                 ]}
                 onOptionSelected={(item) => {
                   this.onEditorToggleClick();
