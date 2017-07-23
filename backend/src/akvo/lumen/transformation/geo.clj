@@ -10,7 +10,7 @@
          column-name-long "columnNameLong"
          column-type-lat "columnTypeLat"
          column-type-long "columnTypeLong"} (engine/args op-spec)]
-    (and (every? number? [column-type-lat column-type-long])
+    (and (every? #(= "number" %) [column-type-lat column-type-long])
          (every? engine/valid-column-name? [column-name-lat column-name-long]))))
 
 (defmethod engine/valid? :core/add-geometry [op-spec]
@@ -32,10 +32,3 @@
        :message (.getMessage e)}))
   {:success? true
    :columns columns})
-
-(comment
-  (add-geometry
-    ;tenant-conn
-    {:table-name "596cf77d-3e84-4853-8890-c1971a699ee1"
-     :column-name-lat "c2"
-     :column-name-long "c3"}))
