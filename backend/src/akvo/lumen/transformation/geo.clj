@@ -6,12 +6,10 @@
 (hugsql/def-db-fns "akvo/lumen/transformation/geo.sql")
 
 (defn valid? [op-spec]
-  (let [{column-name-lat "columnNameLat"
-         column-name-long "columnNameLong"
-         column-type-lat "columnTypeLat"
-         column-type-long "columnTypeLong"} (engine/args op-spec)]
-    (and (every? #(= "number" %) [column-type-lat column-type-long])
-         (every? engine/valid-column-name? [column-name-lat column-name-long]))))
+  (let [{:strs [columnNameLat columnNameLong columnTypeLat columnTypeLong]}
+        (engine/args op-spec)]
+    (and (every? #(= "number" %) [columnTypeLat columnTypeLong])
+         (every? engine/valid-column-name? [columnNameLat columnNameLong]))))
 
 (defmethod engine/valid? :core/add-geometry [op-spec]
   (valid? op-spec))
