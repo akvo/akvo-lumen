@@ -1,4 +1,4 @@
--- :name add-geometry-column :!
+-- :name add-geometry :!
 /* :doc Adds a PostGIS geometry column for the given table
         from the given longitude and latitude columns
 */

@@ -7,23 +7,25 @@
 
 (defn valid? [op-spec]
   (let [{column-name-lat "columnNameLat"
-         column-name-long "columnNameLong"} (engine/args op-spec)]
-    ;; check types are numbers
-    (every? engine/valid-column-name? [column-name-lat column-name-long])))
+         column-name-long "columnNameLong"
+         column-type-lat "columnTypeLat"
+         column-type-long "columnTypeLong"} (engine/args op-spec)]
+    (and (every? number? [column-type-lat column-type-long])
+         (every? engine/valid-column-name? [column-name-lat column-name-long]))))
 
-(defmethod engine/valid? :core/generate-geometry [op-spec]
+(defmethod engine/valid? :core/add-geometry [op-spec]
   (valid? op-spec))
 
-(defmethod engine/apply-operation :core/generate-geometry
+(defmethod engine/apply-operation :core/add-geometry
   [tenant-conn table-name columns op-spec]
   (try
     (let [{column-name-lat "columnNameLat"
            column-name-long "columnNameLong"} (engine/args op-spec)]
-      (add-geometry-column tenant-conn {:table-name table-name
-                                        :column-name-lat column-name-lat
-                                        :column-name-long column-name-long})
+      (add-geometry tenant-conn {:table-name table-name
+                                 :column-name-lat column-name-lat
+                                 :column-name-long column-name-long})
       {:success? true
-       :execution-log [(format "Generated geometry for %s" table-name)]
+       :execution-log [(format "Added geometry to %s" table-name)]
        :columns columns})
     (catch Exception e
       {:success? false
@@ -32,7 +34,7 @@
    :columns columns})
 
 (comment
-  (add-geometry-column
+  (add-geometry
     ;tenant-conn
     {:table-name "596cf77d-3e84-4853-8890-c1971a699ee1"
      :column-name-lat "c2"
