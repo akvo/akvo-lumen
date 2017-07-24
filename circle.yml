@@ -19,10 +19,15 @@ dependencies:
 
   pre:
     # Keycloak
+    - sudo apt-get install python3-dev
     - sudo pip install --upgrade docker-compose==1.14.0
     - docker version
     - docker-compose version
     - docker-compose -p lumen-testing -f docker-compose-test.yml up keycloak postgres
+
+  post:
+    - docker version
+    - docker-compose version
 
 test:
   override:
