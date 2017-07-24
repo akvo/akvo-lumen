@@ -19,6 +19,7 @@ dependencies:
 
   pre:
     # Keycloak
+    - sudo apt-get install python-dev
     - sudo apt-get install python3-dev
     - sudo pip install --upgrade docker-compose==1.14.0
     - docker version
