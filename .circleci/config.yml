@@ -2,7 +2,7 @@ version: 2
 jobs:
     build:
         docker:
-          - image: circleci/clojure‚‚
+          - image: circleci/clojure
             environment:
                 PROJECT_NAME: akvo-lumen
                 PROD_CLUSTER_NAME: lumen
