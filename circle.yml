@@ -23,6 +23,8 @@ dependencies:
         pwd: keycloak
     - ./server.sh run:
         pwd: keycloak
+    - docker run -d --name lumen-db -p 5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=password -e POSTGRES_DB=db -t akvo/lumen-db:
+        pwd: postgres
     # Backend
     - cp profiles.clj.template profiles.clj:
         pwd: backend
