@@ -22,6 +22,7 @@ dependencies:
     - "~/.package_cache"
 
   pre:
+    - sudo service postgresql stop
     # Keycloak
     - ./server.sh build:
         pwd: keycloak
@@ -38,11 +39,6 @@ dependencies:
     - npm install -g npm-cache
     - npm-cache install:
         pwd: client
-
-database:
-  override:
-    - mv config/circleci.database.yml config/database.yml
-    - bundle exec rake db:create db:schema:load --trace
 
 test:
   override:
