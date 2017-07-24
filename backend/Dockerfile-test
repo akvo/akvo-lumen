@@ -1,5 +1,6 @@
 FROM clojure:lein-2.7.1
 MAINTAINER Akvo Foundation <devops@akvo.org>
 
+COPY . /APP
 WORKDIR /app
 CMD [ "./ci-test.sh" ]
