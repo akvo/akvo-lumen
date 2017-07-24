@@ -16,11 +16,10 @@ machine:
 dependencies:
   cache_directories:
     - "~/.package_cache"
-  override:
-    - sudo pip install --upgrade docker-compose==1.14.0
 
   pre:
     # Keycloak
+    - sudo pip install --upgrade docker-compose==1.14.0
     - docker version
     - docker-compose version
     - docker-compose -p lumen-testing -f docker-compose-test.yml up keycloak postgres
