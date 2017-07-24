@@ -1,0 +1,29 @@
+version: "3"
+services:
+ postgres:
+   build: postgres
+   ports:
+    - "5432"
+ keycloak:
+   build: keycloak
+   ports:
+    - "8080"
+ backend:
+   build:
+     context: ./backend
+     dockerfile: Dockerfile-test
+   volumes:
+      - ./backend:/app
+      - ~/.m2:/root/.m2
+   links:
+      - keycloak:auth.lumen.localhost
+   ports:
+      - "3000"
+ client:
+   build:
+     context: ./client
+     dockerfile: Dockerfile-test
+   volumes:
+      - ./client:/lumen
+   ports:
+      - "3030"

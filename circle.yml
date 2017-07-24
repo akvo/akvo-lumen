@@ -16,35 +16,17 @@ machine:
 dependencies:
   cache_directories:
     - "~/.package_cache"
+  override:
+    - sudo pip install --upgrade docker-compose==1.14.0
 
   pre:
     # Keycloak
-    - ./server.sh build:
-        pwd: keycloak
-    - ./server.sh run:
-        pwd: keycloak
-    # Backend
-    - cp profiles.clj.template profiles.clj:
-        pwd: backend
-    - ./setup.sh:
-        pwd: backend/provision
-    - mkdir -p $HOME/.lein
-    - echo '{:user {:plugins [[jonase/eastwood "0.2.3"]]}}' > $HOME/.lein/profiles.clj
-    # Client
-    - npm config set spin false:
-        pwd: client
-    - npm install -g npm-cache
-    - npm-cache install:
-        pwd: client
+    - docker-compose -p lumen-testing -f docker-compose-test.yml up keycloak postgres
 
 test:
   override:
-    - lein do clean, check, test :all, eastwood '{:source-paths ["src" "test"]}':
-        pwd: backend
-    - npm run lint:
-        pwd: client
-    - npm test:
-        pwd: client
+    - docker-compose -p lumen-testing -f docker-compose-test.yml up backend
+    - docker-compose -p lumen-testing -f docker-compose-test.yml up client
 
 deployment:
   dev:
