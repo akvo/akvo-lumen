@@ -12,9 +12,6 @@ services:
    build:
      context: ./backend
      dockerfile: Dockerfile-test
-   volumes:
-      - ./backend:/app
-      - ~/.m2:/root/.m2
    links:
       - keycloak:auth.lumen.localhost
    ports:
