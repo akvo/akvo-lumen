@@ -3,4 +3,5 @@ MAINTAINER Akvo Foundation <devops@akvo.org>
 
 COPY . /app
 WORKDIR /app
+RUN chmod u+x ci-test.sh
 CMD [ "./ci-test.sh" ]
