@@ -15,7 +15,7 @@ jobs:
           - setup_remote_docker
           - run:
               name: start deps
-              command: docker-compose -p lumen-testing -f docker-compose-test.yml up keycloak postgres
+              command: docker-compose -p lumen-testing -f docker-compose-test.yml up -d keycloak postgres
           - run:
               name: test backend
               command: docker-compose -p lumen-testing -f docker-compose-test.yml up backend
