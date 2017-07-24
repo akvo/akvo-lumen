@@ -10,6 +10,10 @@ machine:
     CLOUDSDK_COMPUTE_ZONE: europe-west1-d
     DEBIAN_FRONTEND: noninteractive
     LEIN_FAST_TRAMPOLINE: true
+    DATABASE_URL: postgresql://ubuntu:@127.0.0.1:5435/circle_test
+  hosts:
+    postgres: 127.0.0.1
+    auth.lumen.localhost: 127.0.0.1
   services:
     - docker
 
@@ -28,14 +32,17 @@ dependencies:
     # Backend
     - cp profiles.clj.template profiles.clj:
         pwd: backend
-    - ./setup.sh:
-        pwd: backend/provision
     # Client
     - npm config set spin false:
         pwd: client
     - npm install -g npm-cache
     - npm-cache install:
         pwd: client
+
+database:
+  override:
+    - mv config/database.ci.yml config/database.yml
+    - bundle exec rake db:create db:schema:load --trace
 
 test:
   override:
