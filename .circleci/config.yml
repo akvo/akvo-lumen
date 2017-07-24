@@ -25,8 +25,6 @@ jobs:
                 mv /tmp/docker/* /usr/bin
                 curl -L https://github.com/docker/compose/releases/download/1.14.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
                 chmod +x /usr/local/bin/docker-compose
-          - setup_remote_docker:
-                version: 17.05.0-ce
           - run:
               name: start deps
               command: docker-compose -p lumen-testing -f docker-compose-test.yml up keycloak postgres
