@@ -9,6 +9,7 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+COPY . "/lumen"
 WORKDIR "/lumen"
 
 CMD [ "./ci-test.sh" ]

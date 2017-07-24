@@ -20,7 +20,5 @@ services:
    build:
      context: ./client
      dockerfile: Dockerfile-test
-   volumes:
-      - ./client:/lumen
    ports:
       - "3030"
