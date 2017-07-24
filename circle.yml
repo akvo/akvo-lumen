@@ -41,7 +41,7 @@ dependencies:
 
 database:
   override:
-    - mv ci/circleci.database.yml config/database.yml
+    - mv config/circleci.database.yml config/database.yml
     - bundle exec rake db:create db:schema:load --trace
 
 test:
