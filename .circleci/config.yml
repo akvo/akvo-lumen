@@ -1,26 +1,17 @@
 version: 2
 jobs:
     build:
-        machine:
-            java:
-              version: openjdk8
-            node:
-              version: 5.7.0
+        docker:
+          - image: circleci/cci-demo-docker-primary-mine:0.0.2
             environment:
-              PROJECT_NAME: akvo-lumen
-              PROD_CLUSTER_NAME: lumen
-              DEV_CLUSTER_NAME: dev-cluster
-              CLOUDSDK_COMPUTE_ZONE: europe-west1-d
-              DEBIAN_FRONTEND: noninteractive
-              LEIN_FAST_TRAMPOLINE: true
+                PROJECT_NAME: akvo-lumen
+                PROD_CLUSTER_NAME: lumen
+                DEV_CLUSTER_NAME: dev-cluster
+                CLOUDSDK_COMPUTE_ZONE: europe-west1-d
+                DEBIAN_FRONTEND: noninteractive
+                LEIN_FAST_TRAMPOLINE: true
         steps:
           - checkout
-          - run:
-              name: Install Docker Compose
-              command: |
-                set -x
-                docker version
-                docker-compose version
           - run:
               name: start deps
               command: docker-compose -p lumen-testing -f docker-compose-test.yml up keycloak postgres
