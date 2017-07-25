@@ -191,8 +191,8 @@ module.exports = function(opts) {
 };
 
 function validateOptions(opts) {
-    if (!_.isString(opts.base_url) || !_.isFunction(opts.req2params) || !_.isString(opts.base_url_mapconfig)) {
-        throw new Error("Must initialise Windshaft with: 'base_url'/'base_url_mapconfig' URLs and req2params function");
+    if (!_.isFunction(opts.req2params) || !_.isString(opts.base_url_mapconfig)) {
+        throw new Error("Must initialise Windshaft with: 'base_url_mapconfig' URLs and req2params function");
     }
 
     // Be nice and warn if configured mapnik version is != instaled mapnik version

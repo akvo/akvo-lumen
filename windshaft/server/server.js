@@ -14,7 +14,6 @@ var PORT = 4000;
 global.environment  = require('../config/environments/' + ENV);
 
 var config = {
-    base_url: '/:dbname/table/:table',
     base_url_mapconfig: '/:dbname/layergroup',
     grainstore: {
        datasource: global.environment.postgres
