@@ -11,6 +11,7 @@
             [clj-http.client :as client]
             [clojure.data.csv :as csv]
             [clojure.java.jdbc :as jdbc]
+            [clojure.set :as set]
             [clojure.string :as str]
             [hugsql.core :as hugsql]))
 
@@ -47,18 +48,19 @@
     (update-successful-job-execution conn {:id job-execution-id})))
 
 (defn successful-update
-  "On a successful update we need to create a new dataset-version that is an exact copy
-   of the previous one, except with an updated :version and pointing to the new table-name
-   and imported-table-name. We also delete the previous table-name and imported-table-name
-   so we don't accumulate unused datasets on each update."
-  [conn job-execution-id dataset-id table-name imported-table-name dataset-version]
+  "On a successful update we need to create a new dataset-version that
+  is similar to the previous one, except with an updated :version and
+  pointing to the new table-name, imported-table-name and columns. We
+  also delete the previous table-name and imported-table-name so we
+  don't accumulate unused datasets on each update."
+  [conn job-execution-id dataset-id table-name imported-table-name dataset-version new-columns]
   (insert-dataset-version conn {:id (str (squuid))
                                 :dataset-id dataset-id
                                 :job-execution-id job-execution-id
                                 :table-name table-name
                                 :imported-table-name imported-table-name
                                 :version (inc (:version dataset-version))
-                                :columns (vec (:columns dataset-version))
+                                :columns new-columns
                                 :transformations (vec (:transformations dataset-version))})
   (drop-table (:imported-table-name dataset-version))
   (drop-table (:table-name dataset-version))
@@ -139,18 +141,13 @@
       columns)))
 
 (defn compatible-columns? [imported-columns columns]
-  (let [imported-columns (reduce (fn [m column]
-                                   (let [column-id (keyword (get column "columnName"))
-                                         column-type (keyword (get column "type"))
-                                         column-title (get column "title")]
-                                     (assoc m column-id {:id column-id
-                                                         :type column-type
-                                                         :title column-title})))
-                                 {}
-                                 imported-columns)]
-    (every? (fn [column]
-              (= column (get imported-columns (:id column))))
-            columns)))
+  (let [imported-columns (map (fn [column]
+                                {:id (keyword (get column "columnName"))
+                                 :type (keyword (get column "type"))
+                                 :title (get column "title")})
+                              imported-columns)]
+    (set/subset? (set imported-columns)
+                 (set columns))))
 
 (defn do-update [conn config dataset-id data-source-id job-execution-id data-source-spec]
   (try
@@ -173,13 +170,24 @@
                                    :to-table imported-table-name}
                                   {}
                                   {:transaction? false})
-                (apply-transformation-log conn table-name imported-columns transformations)
-                (successful-update conn
-                                   job-execution-id
-                                   dataset-id
-                                   table-name
-                                   imported-table-name
-                                   dataset-version))))))
+                (let [new-columns (apply-transformation-log conn
+                                                            table-name
+                                                            (mapv (fn [{:keys [title id type]}]
+                                                                    {"type" (name type)
+                                                                     "title" title
+                                                                     "columnName" (name id)
+                                                                     "sort" nil
+                                                                     "direction" nil
+                                                                     "hidden" false})
+                                                                  columns)
+                                                            transformations)]
+                  (successful-update conn
+                                     job-execution-id
+                                     dataset-id
+                                     table-name
+                                     imported-table-name
+                                     dataset-version
+                                     new-columns)))))))
     (catch clojure.lang.ExceptionInfo e
       (failed-update conn job-execution-id (.getMessage e))
       (throw e))
