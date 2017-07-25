@@ -9,10 +9,19 @@ module.exports.millstone = {
     cache_basedir: '/tmp/windshaft-dev/millstone'
 };
 module.exports.redis = {
+// TODO: it emits some events. See if they are published somewhere already of it we should subscribe to them
+// see https://github.com/CartoDB/node-redis-mpool/blob/master/index.js#L26
+// and https://github.com/coopernurse/node-pool
     host: 'redis',
     port: 6379,
-    idleTimeoutMillis: 1,
-    reapIntervalMillis: 1
+    log: true,
+    max: 50, //TODO: review, depends on load and server
+    idleTimeoutMillis: 60000,
+    returnToHead: true,
+    reapIntervalMillis: 60000
+    // This config is for node-pool v3
+//    maxWaitingClients: 10,
+//    acquireTimeoutMillis: 100
 };
 module.exports.renderer = {
     mapnik: {
