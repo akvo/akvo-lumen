@@ -19,7 +19,7 @@ var config = {
        datasource: global.environment.postgres
     }, //see grainstore npm for other options
     redis: global.environment.redis,
-    enable_cors: true,
+    enable_cors: false,
     req2params: function(req, callback){
 
         //console.log("req2param received req: ", req);

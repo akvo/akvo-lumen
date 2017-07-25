@@ -55,7 +55,7 @@ module.exports.renderer = {
 };
 module.exports.mapnik_version = undefined; // will be looked up at runtime if undefined
 module.exports.windshaft_port = 8080;
-module.exports.enable_cors = true;
+module.exports.enable_cors = false;
 module.exports.enabledFeatures = {
     // whether in mapconfig is available stats & metadata for each layer
     layerMetadata: false
