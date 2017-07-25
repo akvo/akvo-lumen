@@ -232,7 +232,7 @@ function bootstrap(opts) {
     app.enable('jsonp callback');
     app.use(bodyParser.json());
 
-    app.use(morgan('combined'));
+    app.use(morgan('tiny'));
 
     return app;
 }
