@@ -26,7 +26,7 @@ RUN apt-get update && \
   g++
 
 ENV NVM_DIR /usr/local/nvm
-ENV NODE_VERSION 6.9.5
+ENV NODE_VERSION 6.11.1
 
 RUN curl -o- \
     https://raw.githubusercontent.com/creationix/nvm/v0.33.2/install.sh \
