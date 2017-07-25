@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 
 export default class LibrarySearch extends Component {
 
@@ -41,7 +42,7 @@ export default class LibrarySearch extends Component {
           onClick={() => this.props.onSearch(this.state.searchText.trim())}
           className="clickable submit"
         >
-          Search
+          <FormattedMessage id="search" />
         </button>
       </div>
     );

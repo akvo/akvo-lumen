@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { push } from 'react-router-redux';
+import { FormattedMessage } from 'react-intl';
 import LibraryHeader from './library/LibraryHeader';
 import LibraryListing from './library/LibraryListing';
 import CheckboxEntityMenu from './library/CheckboxEntityMenu';
@@ -205,7 +206,8 @@ class Library extends Component {
   }
 
   render() {
-    const { dispatch,
+    const {
+      dispatch,
       location,
       datasets,
       visualisations,
@@ -239,7 +241,7 @@ class Library extends Component {
           />
         }
         <LibraryHeader
-          location={collection ? collection.title : 'Library'}
+          location={collection ? collection.title : <FormattedMessage id="library" />}
           onCreateCollection={this.handleCreateCollection}
           onAddEntitiesToCollection={this.handleAddEntitiesToCollection}
           onRemoveEntitiesFromCollection={this.handleRemoveEntitiesFromCollection}

@@ -1,10 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 
 const options = [
-  { value: 'dataset', label: 'Dataset' },
-  { value: 'visualisation', label: 'Visualisation' },
-  { value: 'dashboard', label: 'Dashboard' },
+  { value: 'dataset', label: <FormattedMessage id="dataset" /> },
+  { value: 'visualisation', label: <FormattedMessage id="visualisation" /> },
+  { value: 'dashboard', label: <FormattedMessage id="dashboard" /> },
 ];
 
 export default function LibraryCreateButton({ onCreate }) {
