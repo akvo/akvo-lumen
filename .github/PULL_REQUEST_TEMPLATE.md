@@ -1,1 +1,1 @@
-- [ ] **Update release notes**
+- [ ] **Update release notes if necessary**
