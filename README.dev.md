@@ -66,6 +66,15 @@ The Akvo Lumen UI should be accessible at:
 The Docker Compose file mounts the "client" directory, so any changes in the source directory should 
 be picked up automatically by the Webpack server.
 
+
+#### Tests
+
+Run:
+
+```sh
+docker exec -i -t akvolumen_client_1  npm test
+```
+
 ## Backend
 
 The tenants api root should be accessible at
@@ -75,6 +84,14 @@ The tenants api root should be accessible at
 Hitting that endpoint should print the tenants dns label and connection pool.
 
 A Clojure REPL should be available on port 47480.
+
+#### Tests
+
+To run the tests, either do it from the REPL or run:
+
+```sh
+docker exec -i -t akvolumen_backend_1 lein test
+```
 
 ## Legal
 Copyright © 2016 - present Akvo Foundation
