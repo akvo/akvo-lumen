@@ -10,7 +10,6 @@ machine:
     CLOUDSDK_COMPUTE_ZONE: europe-west1-d
     DEBIAN_FRONTEND: noninteractive
     LEIN_FAST_TRAMPOLINE: true
-    DATABASE_URL: postgresql://ubuntu:@127.0.0.1:5435/circle_test
   hosts:
     postgres: 127.0.0.1
     auth.lumen.localhost: 127.0.0.1
@@ -22,6 +21,7 @@ dependencies:
     - "~/.package_cache"
 
   pre:
+    # Stopping the default postgres so we can start our own.
     - sudo service postgresql stop
     # Keycloak
     - ./server.sh build:
