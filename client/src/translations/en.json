@@ -1,13 +1,13 @@
 {
-  "search": "Search",
-  "dataset": "Dataset",
-  "datasets": "Datasets",
-  "visualisation": "Visualisation",
-  "visualisations": "Visualisations",
+  "activity": "Activity",
+  "all": "All",
+  "collections": "Collections",
   "dashboard": "Dashboard",
   "dashboards": "Dashboards",
-  "all": "All",
+  "dataset": "Dataset",
+  "datasets": "Datasets",
   "library": "Library",
-  "activity": "Activity",
-  "collections": "Collections"
+  "search": "Search",
+  "visualisation": "Visualisation",
+  "visualisations": "Visualisations"
 }

@@ -1,10 +1,13 @@
 {
-  "search": "Chercher",
-  "dataset": "Données",
-  "visualisation": "Visualisation",
-  "dashboard": "Tableau de bord",
-  "all": "Alle",
-  "library": "Librare",
   "activity": "Activité",
-  "collections": "Collections"
+  "all": "Alle",
+  "collections": "Collections",
+  "dashboard": "Tableau de bord",
+  "dashboards": "<missing>",
+  "dataset": "Données",
+  "datasets": "<missing>",
+  "library": "Librare",
+  "search": "Chercher",
+  "visualisation": "Visualisation",
+  "visualisations": "<missing>"
 }
