@@ -2,32 +2,36 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 
-const tabs = [{
-  label: <FormattedMessage id="all" />,
-  tabname: 'all',
-}, {
-  label: <FormattedMessage id="dataset" />,
-  tabname: 'datasets',
-}, {
-  label: <FormattedMessage id="visualisation" />,
-  tabname: 'visualisations',
-}, {
-  label: <FormattedMessage id="dashboard" />,
-  tabname: 'dashboards',
-}];
+function Tab({ tabname, isSelected, onSelect }) {
+  return (
+    <li
+      key={tabname}
+      onClick={() => onSelect(tabname)}
+      className={`clickable  ${isSelected && 'selected'}`}
+    >
+      <FormattedMessage id={tabname} />
+    </li>
+  );
+}
+
+Tab.propTypes = {
+  tabname: PropTypes.string.isRequired,
+  isSelected: PropTypes.bool.isRequired,
+  onSelect: PropTypes.func.isRequired,
+};
+
+const tabs = ['all', 'datasets', 'visualisations', 'dashboards'];
 
 export default function LibraryTabList(props) {
   return (
     <div className="LibraryTabList">
       <ul>
-        {tabs.map(({ tabname, label }, index) =>
-          <li
-            key={index}
-            onClick={() => props.onSelect(tabname)}
-            className={`clickable  ${tabname === props.selected && 'selected'}`}
-          >
-            {label}
-          </li>
+        {tabs.map(tabname =>
+          <Tab
+            tabname={tabname}
+            isSelected={props.selected === tabname}
+            onSelect={props.onSelect}
+          />
         )}
       </ul>
     </div>
@@ -36,5 +40,5 @@ export default function LibraryTabList(props) {
 
 LibraryTabList.propTypes = {
   onSelect: PropTypes.func,
-  selected: PropTypes.oneOf(['all', 'datasets', 'visualisations', 'dashboards']),
+  selected: PropTypes.oneOf(tabs),
 };

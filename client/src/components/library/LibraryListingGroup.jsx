@@ -1,12 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import moment from 'moment';
 import { FormattedDate } from 'react-intl';
 import LibraryListingItem from './LibraryListingItem';
 import { getTitle, getId, getCreatedTimestamp, getModifiedTimestamp } from '../../domain/entity';
 
 const getListGroupTitle = (listGroupName, sortOrder) => {
-
   switch (sortOrder) {
     case 'name':
       return listGroupName.toUpperCase();

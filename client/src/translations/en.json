@@ -1,8 +1,11 @@
 {
   "search": "Search",
   "dataset": "Dataset",
+  "datasets": "Datasets",
   "visualisation": "Visualisation",
+  "visualisations": "Visualisations",
   "dashboard": "Dashboard",
+  "dashboards": "Dashboards",
   "all": "All",
   "library": "Library",
   "activity": "Activity",
