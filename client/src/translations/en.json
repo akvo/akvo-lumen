@@ -1,12 +1,17 @@
 {
   "activity": "Activity",
   "all": "All",
+  "cancel": "Cancel",
+  "collection_name": "Collection Name",
   "collections": "Collections",
+  "create": "Create",
+  "creating": "Creating",
   "dashboard": "Dashboard",
   "dashboards": "Dashboards",
   "dataset": "Dataset",
   "datasets": "Datasets",
   "library": "Library",
+  "new_collection": "New Collection",
   "search": "Search",
   "visualisation": "Visualisation",
   "visualisations": "Visualisations"

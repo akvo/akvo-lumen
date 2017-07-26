@@ -87,7 +87,7 @@ export default class CreateCollection extends Component {
             className: 'create',
             disabled: !this.state.titleValid,
             onClick: this.handleCreate,
-            text: this.state.createPending ? <FormattedMessage id="creating" /> : <FormattedMessage id="create" />,
+            text: <FormattedMessage id={this.state.createPending ? 'creating' : 'create'} />,
           }}
         />
       </div>
