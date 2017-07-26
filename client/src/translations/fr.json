@@ -3,11 +3,8 @@
   "all": "Alle",
   "collections": "Collections",
   "dashboard": "Tableau de bord",
-  "dashboards": "<missing>",
   "dataset": "Données",
-  "datasets": "<missing>",
   "library": "Librare",
   "search": "Chercher",
-  "visualisation": "Visualisation",
-  "visualisations": "<missing>"
+  "visualisation": "Visualisation"
 }

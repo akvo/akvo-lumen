@@ -44,5 +44,5 @@ LibraryHeader.propTypes = {
   searchString: PropTypes.string,
   onSetSearchString: PropTypes.func.isRequired,
   onCreate: PropTypes.func.isRequired,
-  location: PropTypes.string.isRequired,
+  location: PropTypes.element.isRequired,
 };

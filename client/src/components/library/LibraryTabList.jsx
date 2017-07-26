@@ -5,7 +5,6 @@ import { FormattedMessage } from 'react-intl';
 function Tab({ tabname, isSelected, onSelect }) {
   return (
     <li
-      key={tabname}
       onClick={() => onSelect(tabname)}
       className={`clickable  ${isSelected && 'selected'}`}
     >
@@ -28,6 +27,7 @@ export default function LibraryTabList(props) {
       <ul>
         {tabs.map(tabname =>
           <Tab
+            key={tabname}
             tabname={tabname}
             isSelected={props.selected === tabname}
             onSelect={props.onSelect}

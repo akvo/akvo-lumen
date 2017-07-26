@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 import { createCollection } from '../../actions/collection';
 import ModalHeader from './ModalHeader';
 import ModalFooter from './ModalFooter';
@@ -56,11 +57,13 @@ export default class CreateCollection extends Component {
     return (
       <div className="CreateCollection">
         <ModalHeader
-          title="New collection"
+          title={<FormattedMessage id="new_collection" />}
           onCloseModal={onCancel}
         />
         <div className="ModalContents">
-          <label htmlFor="titleInput">Collection name</label>
+          <label htmlFor="titleInput">
+            <FormattedMessage id="collection_name" />
+          </label>
           <input
             id="titleInput"
             onInput={this.handleInputChange}
@@ -73,7 +76,7 @@ export default class CreateCollection extends Component {
         </div>
         <ModalFooter
           leftButton={{
-            text: 'Cancel',
+            text: <FormattedMessage id="cancel" />,
             className: 'cancel',
             onClick: () => {
               this.setState({ title: '' });
@@ -84,7 +87,7 @@ export default class CreateCollection extends Component {
             className: 'create',
             disabled: !this.state.titleValid,
             onClick: this.handleCreate,
-            text: this.state.createPending ? 'Creating...' : 'Create',
+            text: this.state.createPending ? <FormattedMessage id="creating" /> : <FormattedMessage id="create" />,
           }}
         />
       </div>
