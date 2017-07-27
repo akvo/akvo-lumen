@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Select from 'react-select';
 import { connect } from 'react-redux';
+import { injectIntl, intlShape } from 'react-intl';
 import * as api from '../../../api';
 import * as keycloak from '../../../auth';
 
@@ -212,6 +213,8 @@ class AkvoFlowDataSourceSettings extends Component {
       folders,
     } = this.state;
 
+    const { formatMessage } = this.props.intl;
+
     const errorNotification = errorMessage != null && (
       <div>
         <span
@@ -245,7 +248,7 @@ class AkvoFlowDataSourceSettings extends Component {
     // Either a survey or a folder can be selected
     const nextSelection = instance != null && errorMessage == null && (
       <Select
-        placeholder={'Select folder or survey'}
+        placeholder={formatMessage({ id: 'select_survey_or_folder' })}
         isLoading={this.state.isLoadingNext}
         clearable={false}
         options={this.foldersAndSurveysSelectionOptions(lastSelectedFolderId)}
@@ -256,7 +259,7 @@ class AkvoFlowDataSourceSettings extends Component {
 
     const formSelection = selectedSurveyId != null && (
       <Select
-        placeholder={'Select form'}
+        placeholder={formatMessage({ id: 'select_form' })}
         isLoading={this.state.isLoadingForms}
         clearable={false}
         options={this.formSelectionOptions(selectedSurveyId)}
@@ -268,7 +271,7 @@ class AkvoFlowDataSourceSettings extends Component {
     return (
       <div>
         <input
-          placeholder="Flow Application URL"
+          placeholder={formatMessage({ id: 'flow_application_url' })}
           onChange={evt => this.handleFlowInstanceChange(evt.target.value)}
           type="text"
           style={{
@@ -290,9 +293,10 @@ class AkvoFlowDataSourceSettings extends Component {
 export default connect(state => ({
   flowApiUrl: state.env.flowApiUrl,
   email: state.profile.email,
-}))(AkvoFlowDataSourceSettings);
+}))(injectIntl(AkvoFlowDataSourceSettings));
 
 AkvoFlowDataSourceSettings.propTypes = {
+  intl: intlShape.isRequired,
   flowApiUrl: PropTypes.string.isRequired,
   email: PropTypes.string.isRequired,
   dataSource: PropTypes.shape({

@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
+import { FormattedMessage } from 'react-intl';
 import ModalHeader from './ModalHeader';
 import ModalFooter from './ModalFooter';
 import SourceSelection from './createDataset/SourceSelection';
@@ -71,7 +72,7 @@ class CreateDataset extends Component {
     return (
       <div className="CreateDataset">
         <ModalHeader
-          title="New Dataset"
+          title={<FormattedMessage id="new_dataset" />}
           onCloseModal={() => {
             clearImport();
             onCancel();
@@ -82,25 +83,25 @@ class CreateDataset extends Component {
             <li
               className={`tab ${currentPage === 'select-data-source-type' ? 'selected' : null}`}
             >
-              Source
+              <FormattedMessage id="source" />
             </li>
             <li className={`tab ${currentPage === 'define-data-source' ? 'selected' : null}`}>
-              File / Project
+              <FormattedMessage id="file_project" />
             </li>
             <li className={`tab ${currentPage === 'define-dataset' ? 'selected' : null}`}>
-              Settings
+              <FormattedMessage id="settings" />
             </li>
           </ul>
           {this.pageComponent(currentPage)}
         </div>
         <ModalFooter
           leftButton={{
-            text: 'Previous',
+            text: <FormattedMessage id="previous" />,
             disabled: currentPage === 'select-data-source-type' || uploadRunning,
             onClick: this.props.previousPage,
           }}
           rightButton={{
-            text: currentPage === 'define-dataset' ? 'Import' : 'Next',
+            text: <FormattedMessage id={currentPage === 'define-dataset' ? 'import' : 'next'} />,
             className: 'btn next clickable positive',
             disabled: currentPage === 'define-dataset' ? !this.isValidImport() : false
                 || uploadRunning,
