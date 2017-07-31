@@ -15,15 +15,15 @@ const handleDragOver = (evt) => {
   evt.preventDefault();
 };
 
-export default class DataFileDataSourceSettings extends Component {
+export function isValidSource(source) {
+  return (
+    source.kind === 'DATA_FILE' &&
+    source.url &&
+    source.fileName
+  );
+}
 
-  static isValidSource(source) {
-    return (
-      source.kind === 'DATA_FILE' &&
-      source.url &&
-      source.fileName
-    );
-  }
+export default class DataFileDataSourceSettings extends Component {
 
   constructor() {
     super();

@@ -2,14 +2,14 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 
-class LinkDataSourceSettings extends Component {
+export function isValidSource(source) {
+  return (
+    source.kind === 'LINK' &&
+    source.url
+  );
+}
 
-  static isValidSource(source) {
-    return (
-      source.kind === 'LINK' &&
-      source.url
-    );
-  }
+class LinkDataSourceSettings extends Component {
 
   constructor() {
     super();

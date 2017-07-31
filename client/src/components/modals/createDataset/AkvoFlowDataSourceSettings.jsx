@@ -32,12 +32,13 @@ function parseInstance(text) {
   return null;
 }
 
+export function isValidSource({ instance, surveyId, formId }) {
+  return typeof instance === 'string'
+    && typeof surveyId === 'string'
+    && typeof formId === 'string';
+}
+
 class AkvoFlowDataSourceSettings extends Component {
-  static isValidSource({ instance, surveyId, formId }) {
-    return typeof instance === 'string'
-      && typeof surveyId === 'string'
-      && typeof formId === 'string';
-  }
 
   constructor(props) {
     super(props);
