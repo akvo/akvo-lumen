@@ -225,8 +225,8 @@ export default function ConfigMenu(props) {
                   className="saveChanges clickable"
                   onClick={props.onSaveVisualisation}
                 >
-                Save
-              </button>
+                  Save
+                </button>
               </div>
           }
           </div>
