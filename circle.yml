@@ -10,6 +10,9 @@ machine:
     CLOUDSDK_COMPUTE_ZONE: europe-west1-d
     DEBIAN_FRONTEND: noninteractive
     LEIN_FAST_TRAMPOLINE: true
+  hosts:
+    postgres: 127.0.0.1
+    auth.lumen.localhost: 127.0.0.1
   services:
     - docker
 
@@ -18,18 +21,20 @@ dependencies:
     - "~/.package_cache"
 
   pre:
+    # Stopping the default postgres so we can start our own.
+    - sudo service postgresql stop
     # Keycloak
     - ./server.sh build:
         pwd: keycloak
     - ./server.sh run:
         pwd: keycloak
+    - docker build -t akvo/lumen-db .:
+        pwd: postgres
+    - docker run -d --name lumen-db -p 5432:5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=password -e POSTGRES_DB=db -t akvo/lumen-db:
+        pwd: postgres
     # Backend
     - cp profiles.clj.template profiles.clj:
         pwd: backend
-    - ./setup.sh:
-        pwd: backend/provision
-    - mkdir -p $HOME/.lein
-    - echo '{:user {:plugins [[jonase/eastwood "0.2.3"]]}}' > $HOME/.lein/profiles.clj
     # Client
     - npm config set spin false:
         pwd: client

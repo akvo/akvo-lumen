@@ -12,7 +12,7 @@
 
 (def columns (vec (take 3 (json/parse-string (slurp (io/resource "columns_test.json"))))))
 
-(def tenant-conn {:connection-uri "jdbc:postgresql://localhost/test_lumen_tenant_1?user=lumen&password=password"})
+(def tenant-conn {:connection-uri "jdbc:postgresql://postgres/test_lumen_tenant_1?user=lumen&password=password"})
 
 (defn tf-engine-fixture
   [f]
