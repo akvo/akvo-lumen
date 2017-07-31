@@ -6,23 +6,27 @@ var config = require('./webpack.config');
 
 new WebpackDevServer(webpack(config), {
   hot: true,
+  public: "localhost:3030",
+  watchOptions: {
+    ignored: "/lumen/node_modules"
+  },
   publicPath: config.output.publicPath,
   disableHostCheck: true,
   proxy: {
     '/api/**': {
-      target: "http://t1.lumen.localhost:3000",
+      target: "http://backend:3000",
       secure: false
     },
     '/share/**': {
-      target: "http://t1.lumen.localhost:3000",
+      target: "http://backend:3000",
       secure: false
     },
     '/verify/**': {
-      target: "http://t1.lumen.localhost:3000",
+      target: "http://backend:3000",
       secure: false
       },
     '/env': {
-      target: "http://t1.lumen.localhost:3000",
+      target: "http://backend:3000",
       secure: false
     }
   },
@@ -33,7 +37,7 @@ new WebpackDevServer(webpack(config), {
       { from: '^.*$', to: '/assets/index.html' }
     ]
   },
-}).listen(3030, 't1.lumen.localhost', function (err, result) {
+}).listen(3030, '0.0.0.0', function (err, result) {
   if (err) {
     console.log(err);
   }
