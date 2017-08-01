@@ -39,6 +39,12 @@ const getColumnTitle = (columnName, columnOptions = []) => {
   return entry ? entry.title : null;
 };
 
+const getColumnType = (columnName, columnOptions = []) => {
+  const entry = columnOptions.find(item => item.value === columnName);
+
+  return entry ? entry.type : null;
+};
+
 const showValueDisplayInput = (spec) => {
   if (spec.aggregation !== 'count' && spec.aggregation !== 'sum') {
     return false;
@@ -67,6 +73,8 @@ export default class PivotTableConfigMenu extends Component {
       columnOptions,
     } = this.props;
     const spec = visualisation.spec;
+    const categoryColumnType = getColumnType(spec.categoryColumn, columnOptions);
+    const rowColumnType = getColumnType(spec.rowColumn, columnOptions);
 
     return (
       <div className="PivotTableConfigMenu">
@@ -211,17 +219,20 @@ export default class PivotTableConfigMenu extends Component {
         />
         {spec.categoryColumn !== null &&
           <div>
-            <UniqueValueMenu
-              tableData={visualisation.data}
-              dimension="column"
-              collapsed={this.state.catValMenuCollapsed}
-              onChangeSpec={this.props.onChangeSpec}
-              column={spec.categoryColumn}
-              filters={spec.filters}
-              toggleCollapsed={() =>
-                this.setState({ catValMenuCollapsed: !this.state.catValMenuCollapsed })
-              }
-            />
+            {(categoryColumnType === 'text' || categoryColumnType === 'number') &&
+              <UniqueValueMenu
+                tableData={visualisation.data}
+                dimension="column"
+                collapsed={this.state.catValMenuCollapsed}
+                onChangeSpec={this.props.onChangeSpec}
+                column={spec.categoryColumn}
+                columnType={categoryColumnType}
+                filters={spec.filters}
+                toggleCollapsed={() =>
+                  this.setState({ catValMenuCollapsed: !this.state.catValMenuCollapsed })
+                }
+              />
+            }
             <LabelInput
               value={
                 spec.categoryTitle == null ?
@@ -262,17 +273,20 @@ export default class PivotTableConfigMenu extends Component {
         />
         {spec.rowColumn !== null &&
           <div>
-            <UniqueValueMenu
-              tableData={visualisation.data}
-              dimension="row"
-              collapsed={this.state.rowValMenuCollapsed}
-              onChangeSpec={this.props.onChangeSpec}
-              column={spec.rowColumn}
-              filters={spec.filters}
-              toggleCollapsed={() =>
-                this.setState({ rowValMenuCollapsed: !this.state.rowValMenuCollapsed })
-              }
-            />
+            {(rowColumnType === 'text' || rowColumnType === 'number') &&
+              <UniqueValueMenu
+                tableData={visualisation.data}
+                dimension="row"
+                collapsed={this.state.rowValMenuCollapsed}
+                onChangeSpec={this.props.onChangeSpec}
+                column={spec.rowColumn}
+                columnType={rowColumnType}
+                filters={spec.filters}
+                toggleCollapsed={() =>
+                  this.setState({ rowValMenuCollapsed: !this.state.rowValMenuCollapsed })
+                }
+              />
+            }
             <LabelInput
               value={
                 spec.rowTitle == null ?
