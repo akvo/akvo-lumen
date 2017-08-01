@@ -1,18 +1,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 import ContextMenu from '../../common/ContextMenu';
 
 const options = [
   {
-    label: 'text',
+    label: <FormattedMessage id="text" />,
     value: 'text',
   },
   {
-    label: 'num',
+    label: <FormattedMessage id="number" />,
     value: 'number',
   },
   {
-    label: 'date',
+    label: <FormattedMessage id="date" />,
     value: 'date',
   },
 ];

@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 import Immutable from 'immutable';
 import SelectMenu from '../../common/SelectMenu';
 import SidebarHeader from './SidebarHeader';
@@ -11,7 +12,7 @@ function DefaultValueInput({ defaultValue, onChange, newType }) {
   return (
     <div className="inputGroup">
       <label htmlFor="defaultValueInput">
-        Default value:
+        <FormattedMessage id="default_value" />:
       </label>
       <input
         type={newType === 'num' ? 'num' : 'text'}
@@ -43,19 +44,19 @@ DefaultValueInput.propTypes = {
 const errorOptions = [
   {
     value: 'empty-cell',
-    label: 'Leave empty',
+    label: <FormattedMessage id="leave_cell_empty" />,
   },
   {
     value: 'default-value',
-    label: 'Pick a default value',
+    label: <FormattedMessage id="pick_a_default_value" />,
   },
   {
     value: 'fail',
-    label: 'Abort transformation',
+    label: <FormattedMessage id="abort_transformation" />,
   },
   {
     value: 'delete-row',
-    label: 'Delete the row',
+    label: <FormattedMessage id="delete_row" />,
   },
 ];
 
@@ -117,12 +118,15 @@ export default class ChangeDataType extends Component {
         className="DataTableSidebar"
       >
         <SidebarHeader onClose={onClose}>
-          Change data type for {column.get('title')}
+          <FormattedMessage
+            id="change_datatype_for"
+            values={{ title: column.get('title') }}
+          />
         </SidebarHeader>
         <div className="inputs">
           <div className="inputGroup">
             <label htmlFor="dataTypeMenu">
-              Change data type to:
+              <FormattedMessage id="change_datatype_to" />:
             </label>
             <SelectMenu
               name="dataTypeMenu"
@@ -142,7 +146,7 @@ export default class ChangeDataType extends Component {
             /> : null}
           <div className="inputGroup">
             <label htmlFor="ifInvalidInput">
-              If cell format is invalid:
+              <FormattedMessage id="if_cell_format_is_invalid" />:
             </label>
             <SelectMenu
               name="dataTypeMenu"
