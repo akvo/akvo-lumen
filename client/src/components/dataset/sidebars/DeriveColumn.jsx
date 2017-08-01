@@ -229,7 +229,7 @@ class DeriveColumn extends Component {
               <FormattedMessage id="javascript_code" />
             </label>
             <CodeMirror
-              placeholder={intl.formatMessage({ id:'type_javascript_expression_here' })}
+              placeholder={intl.formatMessage({ id: 'type_javascript_expression_here' })}
               value={code}
               onChange={c => this.setTransformationProperty(['args', 'code'], c)}
               options={{

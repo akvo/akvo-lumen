@@ -1,11 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { intlShape, injectIntl } from 'react-intl';
 import Select from 'react-select';
 
 require('../../../node_modules/react-select/dist/react-select.css');
 require('./SelectMenu.scss');
 
-export default function SelectMenu(props) {
+function SelectMenu(props) {
   return (
     <div className={`SelectMenu ${props.disabled ? 'disabled' : 'enabled'}`}>
       <Select
@@ -19,12 +20,14 @@ export default function SelectMenu(props) {
         }}
         clearable={props.clearable || false}
         searchable={props.searchable || false}
+        placeholder={props.placeholder || `${props.intl.formatMessage({ id: 'select' })}...`}
       />
     </div>
   );
 }
 
 SelectMenu.propTypes = {
+  intl: intlShape.isRequired,
   options: PropTypes.arrayOf(PropTypes.shape({
     value: PropTypes.string,
     label: PropTypes.oneOfType([PropTypes.string, PropTypes.element]).isRequired,
@@ -37,3 +40,5 @@ SelectMenu.propTypes = {
   multi: PropTypes.bool,
   disabled: PropTypes.bool,
 };
+
+export default injectIntl(SelectMenu);
