@@ -93,6 +93,13 @@ To run the tests, either do it from the REPL or run:
 docker exec -i -t akvolumen_backend_1 lein test
 ```
 
+#### Postgres
+
+To connect to the postgres server connect using something like:
+```sh
+psql --host=localhost --port=5432 --dbname=lumen_tenant_1 --username=lumen --password
+```
+
 ## Legal
 Copyright © 2016 - present Akvo Foundation
 

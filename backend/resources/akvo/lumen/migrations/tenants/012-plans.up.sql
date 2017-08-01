@@ -112,3 +112,7 @@ VALUES (
        (SELECT id FROM policy WHERE title = 'number_of_visualisations'),
        '500'::json
 );
+
+-- Defaults
+INSERT INTO plan (tier)
+SELECT id FROM tier WHERE title = 'lite';
