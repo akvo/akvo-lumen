@@ -58,14 +58,13 @@ function textTransformationDescription(transformations, index, columns) {
   const transformation = transformations.get(index);
   const columnName = transformation.getIn(['args', 'columnName']);
   const title = findTitle(columnName, transformations, index, columns);
-  const opDescription = ({
-    'core/to-lowercase': 'to lower case',
-    'core/to-uppercase': 'to upper case',
-    'core/to-titlecase': 'to title case',
-    'core/trim': 'trimmed whitespace',
-    'core/trim-doublespace': 'removed double spaces',
+  return ({
+    'core/to-lowercase': <FormattedMessage id="to_lowercase" values={{ title }} />,
+    'core/to-uppercase': <FormattedMessage id="to_uppercase" values={{ title }} />,
+    'core/to-titlecase': <FormattedMessage id="to_titlecase" values={{ title }} />,
+    'core/trim': <FormattedMessage id="trimmed_whitespace" values={{ title }} />,
+    'core/trim-doublespace': <FormattedMessage id="removed_double_space" values={{ title }} />,
   })[transformation.get('op')];
-  return `${title}: ${opDescription}`;
 }
 
 function transformationDescription(transformations, index, columns) {

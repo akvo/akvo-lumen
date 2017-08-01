@@ -27,7 +27,7 @@ export default function SelectMenu(props) {
 SelectMenu.propTypes = {
   options: PropTypes.arrayOf(PropTypes.shape({
     value: PropTypes.string,
-    label: PropTypes.string.isRequired,
+    label: PropTypes.oneOfType([PropTypes.string, PropTypes.element]).isRequired,
   })).isRequired,
   placeholder: PropTypes.string,
   name: PropTypes.string,
