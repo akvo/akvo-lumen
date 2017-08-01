@@ -52,7 +52,6 @@ function combineTransformationDescription(transformations, index, columns) {
       }}
     />
   );
-  return ``;
 }
 
 function textTransformationDescription(transformations, index, columns) {
