@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 import ContextMenu from '../common/ContextMenu';
 
 require('./DatasetControls.scss');
 
-export default class DatasetControls extends Component {
+class DatasetControls extends Component {
   constructor() {
     super();
     this.state = {
@@ -18,7 +19,7 @@ export default class DatasetControls extends Component {
     });
   }
   render() {
-    const { pendingTransformationsCount } = this.props;
+    const { pendingTransformationsCount, intl } = this.props;
     return (
       <div className="DatasetControls">
         <span className="controlGroup1">
@@ -32,31 +33,31 @@ export default class DatasetControls extends Component {
               className="datasetEditorToggle clickable"
               onClick={() => this.onEditorToggleClick()}
             >
-            + Transform
+            + <FormattedMessage id="transform" />
             </button>
             {this.state.editorMenuActive &&
               <ContextMenu
                 options={[
                   {
-                    label: 'Bulk row editor',
+                    label: <FormattedMessage id="bulk_row_editor" />,
                     value: 'bulk-row-editor',
                     customClass: 'notImplemented',
                   },
                   {
-                    label: 'Bulk column editor',
+                    label: <FormattedMessage id="bulk_column_editor" />,
                     value: 'bulk-column-editor',
                     customClass: 'notImplemented',
                   },
                   {
-                    label: 'Combine Columns',
+                    label: <FormattedMessage id="combine_columns" />,
                     value: 'combineColumns',
                   },
                   {
-                    label: 'Derive column',
+                    label: <FormattedMessage id="derive_column" />,
                     value: 'deriveColumn',
                   },
                   {
-                    label: 'Merge datasets',
+                    label: <FormattedMessage id="merge_datasets" />,
                     value: 'merge-datasets',
                     customClass: 'notImplemented',
                   },
@@ -79,21 +80,21 @@ export default class DatasetControls extends Component {
             className="columnCount"
           >
             <span>
-              {this.props.columns.size} Columns
+              {this.props.columns.size} <FormattedMessage id="columns" />
             </span>
           </span>
           {' | '}
           <span
             className="rowCount"
           >
-            {this.props.rowsCount} Rows
+            {this.props.rowsCount} <FormattedMessage id="rows" />
           </span>
           <span
             className="search"
           >
             <input
               type="text"
-              placeholder="Search not yet implemented"
+              placeholder={intl.formatMessage({ id: 'search_not_implemented_yet' })}
             />
           </span>
           <span
@@ -113,9 +114,12 @@ export default class DatasetControls extends Component {
 }
 
 DatasetControls.propTypes = {
+  intl: intlShape.isRequired,
   onToggleTransformationLog: PropTypes.func.isRequired,
   pendingTransformationsCount: PropTypes.number.isRequired,
   onClickMenuItem: PropTypes.func.isRequired,
   columns: PropTypes.object.isRequired,
   rowsCount: PropTypes.number.isRequired,
 };
+
+export default injectIntl(DatasetControls);
