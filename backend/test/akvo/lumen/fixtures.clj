@@ -42,7 +42,7 @@
 
 (defn- user-manager-ragtime-spec []
   {:datastore
-   (jdbc/sql-database {:connection-uri "jdbc:postgresql://localhost/lumen?user=lumen&password=password"})
+   (jdbc/sql-database {:connection-uri "jdbc:postgresql://postgres/lumen?user=lumen&password=password"})
    :migrations
    (jdbc/load-resources "akvo/lumen/migrations/tenant_manager")})
 

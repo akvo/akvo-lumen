@@ -52,7 +52,7 @@
                                  (complement :functional))
                    :all     (constantly true)}
   :profiles
-  {:dev           [:project/dev  :profiles/dev]
+  {:dev           [:project/dev :profiles/dev]
    :test          [:project/test :profiles/test]
    :uberjar       {:aot :all}
    :profiles/dev  {}
@@ -64,10 +64,19 @@
                                     [eftest "0.1.3"]
                                     [com.gearswithingears/shrubbery "0.4.1"]
                                     [kerodon "0.8.0"]]
+                   :plugins        [[jonase/eastwood "0.2.3"]]
                    :source-paths   ["dev/src"]
                    :resource-paths ["dev/resources" "test/resources"]
-                   :repl-options   {:init-ns user}
+                   :repl-options   {:init-ns dev
+                                    :init (do
+                                             (println "Starting BackEnd ...")
+                                             (go)
+                                             (migrate)
+                                             (seed)
+                                             (migrate))
+                                    :host "0.0.0.0"
+                                    :port 47480}
                    :env            {:port "3000"}}
    :project/test  {:resource-paths ["test/resources"]
                    :env
-                   {:db {:uri "jdbc:postgresql://localhost/lumen?user=lumen&password=password"}}}})
+                                   {:db {:uri "jdbc:postgresql://postgres/lumen?user=lumen&password=password"}}}})
