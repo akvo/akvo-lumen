@@ -261,10 +261,10 @@
 (defn check-env-vars []
   (assert (:kc-url env) (error-msg "Specify KC_URL env var"))
   (assert (:kc-secret env)
-          (do
-            (browse/browse-url
-             (format "%s/auth/admin/master/console/#/realms/akvo/clients" (:kc-url env)))
-            (error-msg "Specify KC_SECRET env var from the Keycloak admin opened in the browser window at Client (akvo-lumen-confidential) -> Credentials -> Secret.")))
+    (do
+      (browse/browse-url
+        (format "%s/auth/admin/master/console/#/realms/akvo/clients" (:kc-url env)))
+      (error-msg "Specify KC_SECRET env var from the Keycloak admin opened in the browser window at Client (akvo-lumen-confidential) -> Credentials -> Secret.")))
   (assert (:pg-host env) (error-msg "Specify PG_HOST env var"))
   (assert (:pg-database env) (error-msg "Specify PG_DATABASE env var"))
   (assert (:pg-user env) (error-msg "Specify PG_USER env var"))
