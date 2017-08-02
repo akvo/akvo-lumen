@@ -1,25 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { setLanguage } from '../../actions/translations';
 
-function OrganizationMenu({ profile, dispatch }) {
+function OrganizationMenu({ profile }) {
   return (
     <div className="OrganizationMenu">
-      <div className="name"><i className="fa fa-user-o" aria-hidden="true" /> {profile.username}
-      </div>
-      <div>
-        <button
-          onClick={() => dispatch(setLanguage('en'))}
-        >
-          en
-        </button>
-        {' '}
-        <button
-          onClick={() => dispatch(setLanguage('fr'))}
-        >
-          fr
-        </button>
+      <div className="name">
+        <a href="http://auth.lumen.localhost:8080/auth/realms/akvo/account">
+          <i className="fa fa-user-o" aria-hidden="true" /> {profile.username}
+        </a>
       </div>
       <div className="organization">Akvo Lumen</div>
     </div>

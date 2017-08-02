@@ -26,7 +26,7 @@ IntlWrapper.propTypes = {
 
 function mapStateToProps(state) {
   return {
-    locale: state.translations.language,
+    locale: state.profile.attributes.locale[0] || 'en',
   };
 }
 
