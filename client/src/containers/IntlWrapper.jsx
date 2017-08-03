@@ -25,9 +25,11 @@ IntlWrapper.propTypes = {
 };
 
 function mapStateToProps(state) {
-  return {
-    locale: state.profile.attributes.locale[0] || 'en',
-  };
+  const { attributes } = state.profile;
+  if (attributes && attributes.locale && typeof attributes.locale[0] === 'string') {
+    return { locale: attributes.locale[0] };
+  }
+  return { locale: 'en' };
 }
 
 export default connect(
