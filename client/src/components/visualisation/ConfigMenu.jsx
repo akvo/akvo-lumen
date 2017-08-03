@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Immutable from 'immutable';
+import { FormattedMessage } from 'react-intl';
 import SelectMenu from '../common/SelectMenu';
 import FilterMenu from './configMenu/FilterMenu';
 import Subtitle from './configMenu/Subtitle';
@@ -45,39 +46,39 @@ const getSelectMenuOptionsFromColumnList = (columns = Immutable.List()) =>
 const aggregationOptions = [
   {
     value: 'mean',
-    label: 'mean',
+    label: <FormattedMessage id="mean" />,
   },
   {
     value: 'median',
-    label: 'median',
+    label: <FormattedMessage id="median" />,
   },
   {
     value: 'max',
-    label: 'max',
+    label: <FormattedMessage id="max" />,
   },
   {
     value: 'min',
-    label: 'min',
+    label: <FormattedMessage id="min" />,
   },
   {
     value: 'count',
-    label: 'count',
+    label: <FormattedMessage id="count" />,
   },
   {
     value: 'distinct',
-    label: 'count unique',
+    label: <FormattedMessage id="count_unique" />,
   },
   {
     value: 'sum',
-    label: 'sum',
+    label: <FormattedMessage id="sum" />,
   },
   {
     value: 'q1',
-    label: 'lower quartile',
+    label: <FormattedMessage id="lower_quartile" />,
   },
   {
     value: 'q3',
-    label: 'upper quartile',
+    label: <FormattedMessage id="upper_quartile" />,
   },
 ];
 
@@ -171,11 +172,11 @@ export default function ConfigMenu(props) {
             <ul>
               {visualisationTypes.map((vType, index) =>
                 <li
-                  className={`clickable typeButton ${vType.replace(/ /, '')}`}
+                  className={`clickable typeButton ${vType}`}
                   key={index}
                   onClick={() => props.onChangeVisualisationType(vType)}
                 >
-                  {vType}
+                  <FormattedMessage id={vType} />
                 </li>
               )}
             </ul>

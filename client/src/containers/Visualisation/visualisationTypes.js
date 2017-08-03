@@ -1,6 +1,6 @@
 const visualisationTypes = [
   'map',
-  'pivot table',
+  'pivottable',
   'bar',
   'line',
   'area',

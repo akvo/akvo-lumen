@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 import SelectMenu from '../common/SelectMenu';
 import visualisationTypes from '../../containers/Visualisation/visualisationTypes';
 
@@ -9,12 +10,12 @@ export default function VisualisationTypeMenu(props) {
   const { visualisation, onChangeVisualisationType, disabled } = props;
   const chartTypes = visualisationTypes.map(item => ({
     value: item,
-    label: item,
+    label: <FormattedMessage id={item} />,
   }));
   return (
     <div className="VisualisationTypeMenu">
       <label htmlFor="visualisationTypeMenu">
-        Visualisation type:
+        <FormattedMessage id="visualisation_type" />:
       </label>
       <SelectMenu
         name="visualisationTypeMenu"
