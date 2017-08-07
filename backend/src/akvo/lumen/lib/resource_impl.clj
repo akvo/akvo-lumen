@@ -12,9 +12,28 @@
     r
     {"tier" "planless"}))
 
+(defn count-visualisation-fn [tenant-conn _]
+  (:numberOfVisualisations (count-visualisations tenant-conn
+                                                 {}
+                                                 {}
+                                                 {:identifiers identity})))
+
+(defn data-update-fn [_ _]
+  "auto")
+
+(def policy-map
+  {"number_of_visualisations" count-visualisation-fn
+   "data_update" data-update-fn})
+
+(defn get-resources [tenant-conn tier]
+  (let [policies (select-policies tenant-conn)]
+    (reduce merge
+            (map (fn [{:keys [title]}]
+                   {title ((get policy-map title) tenant-conn tier)})
+                 policies))))
+
 (defn all [tenant-conn]
-  (response {"plan" (current-plan tenant-conn)
-             "resources" (count-visualisations tenant-conn
-                                               {}
-                                               {}
-                                               {:identifiers identity})}))
+  (let [plan (current-plan tenant-conn)]
+    (response {"plan" plan
+               "resources" (get-resources tenant-conn (:tier plan))
+               })))

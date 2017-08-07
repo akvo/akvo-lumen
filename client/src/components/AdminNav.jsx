@@ -26,31 +26,31 @@ const AdminNav = function AdminNav(props) {
     >
       <div className="header">
         <div className="rowPrimary">
-          <div
-            className="menuIcon clickable"
-          />
           <h1><Link to="/">Lumen</Link></h1>
         </div>
         <OrganizationMenu profile={props.profile} />
       </div>
       <div className="links">
-        <NavLink
-          to="/admin/users"
-          className="users subtitle"
-          isSelected={activeSubtitle === 'users'}
-        >
-          Users
-        </NavLink>
-        <div>
-          <br />
-        </div>
-        <NavLink
-          to="/admin/resources"
-          className="resources subtitle"
-          isSelected={activeSubtitle === 'resources'}
-        >
-          Resources
-        </NavLink>
+        <ul>
+          <li>
+            <NavLink
+              to="/admin/users"
+              className="users subtitle"
+              isSelected={activeSubtitle === 'users'}
+            >
+              Users
+            </NavLink>
+          </li>
+          <li>
+            <NavLink
+              to="/admin/resources"
+              className="resources subtitle"
+              isSelected={activeSubtitle === 'resources'}
+            >
+              Resources
+            </NavLink>
+          </li>
+        </ul>
       </div>
       <div className="NavWorkspaceSwitch">
         {<Link to="/">Workspace</Link>}
