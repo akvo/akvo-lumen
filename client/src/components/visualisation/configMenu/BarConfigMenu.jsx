@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 import SelectInput from './SelectInput';
 import LabelInput from './LabelInput';
 import Subtitle from './Subtitle';
@@ -68,10 +69,10 @@ export default function BarConfigMenu(props) {
 
   return (
     <div>
-      <Subtitle>Y-Axis</Subtitle>
+      <Subtitle><FormattedMessage id="y_axis" /></Subtitle>
       <SelectInput
-        placeholder="Select a metric column"
-        labelText="Metric column"
+        placeholderId="select_a_metric_column"
+        labelTextId="metric_column"
         choice={spec.metricColumnY !== null ? spec.metricColumnY.toString() : null}
         name="metricColumnYInput"
         options={columnOptions}
@@ -80,9 +81,9 @@ export default function BarConfigMenu(props) {
         }, spec, onChangeSpec, columnOptions)}
       />
       <SelectInput
-        placeholder={spec.bucketColumn !== null ?
-          'Choose aggregation type...' : 'Must choose bucket column first'}
-        labelText="Aggregation type"
+        placeholderId={spec.bucketColumn !== null ?
+          'choose_aggregation_type' : 'must_choose_bucket_column_first'}
+        labelTextId="aggregation_type"
         choice={spec.bucketColumn !== null ?
           spec.metricAggregation.toString() : null}
         name="yAggregationMenu"
@@ -94,17 +95,17 @@ export default function BarConfigMenu(props) {
       />
       <LabelInput
         value={spec.axisLabelY !== null ? spec.axisLabelY.toString() : null}
-        placeholder="Y Axis label"
+        placeholderId="y_axis_label"
         name="yLabel"
         onChange={event => handleChangeSpec({
           axisLabelY: event.target.value.toString(),
           axisLabelYFromUser: true,
         }, spec, onChangeSpec, columnOptions)}
       />
-      <Subtitle>X-Axis</Subtitle>
+      <Subtitle><FormattedMessage id="x_axis" /></Subtitle>
       <SelectInput
-        placeholder="Select a data column to group by"
-        labelText="Bucket column"
+        placeholderId="select_a_data_column_to_group_by"
+        labelTextId="bucket_column"
         choice={spec.bucketColumn !== null ?
           spec.bucketColumn.toString() : null}
         name="xGroupColumnMenu"
@@ -117,7 +118,7 @@ export default function BarConfigMenu(props) {
       {spec.bucketColumn !== null &&
         <div>
           <SelectInput
-            labelText="Number of buckets to show"
+            labelTextId="number_of_buckets_to_show"
             choice={spec.truncateSize !== null ? spec.truncateSize.toString() : null}
             name="truncateSizeInput"
             disabled={spec.bucketColumn === null}
@@ -154,8 +155,8 @@ export default function BarConfigMenu(props) {
             onChangeSpec={value => handleChangeSpec(value, spec, onChangeSpec, columnOptions)}
           />
           <SelectInput
-            placeholder="Select a sub-bucket column"
-            labelText="Sub-bucket column"
+            placeholderId="select_a_sub_bucket_column"
+            labelTextId="sub_bucket_column"
             choice={spec.subBucketColumn !== null ?
               spec.subBucketColumn.toString() : null}
             name="subGroupColumnMenu"
@@ -169,18 +170,18 @@ export default function BarConfigMenu(props) {
             }, spec, onChangeSpec, columnOptions)}
           />
           <SelectInput
-            labelText="Sub-bucket method"
+            labelTextId="sub_bucket_method"
             choice={spec.subBucketMethod !== null ? spec.subBucketMethod.toString() : null}
             name="subBucketMethodInput"
             disabled={spec.bucketColumn === null || spec.subBucketColumn === null}
             options={[
               {
                 value: 'split',
-                label: 'Split bars',
+                labelId: 'split_bars',
               },
               {
                 value: 'stack',
-                label: 'Stack bars',
+                labelId: 'stack_bars',
               },
             ]}
             onChange={value => handleChangeSpec({
@@ -189,7 +190,7 @@ export default function BarConfigMenu(props) {
           />
           <LabelInput
             value={spec.legendTitle != null ? spec.legendTitle.toString() : null}
-            placeholder="Legend title"
+            placeholderId="legend_title"
             name="legendLabel"
             maxLength={32}
             onChange={event => handleChangeSpec({
@@ -200,7 +201,7 @@ export default function BarConfigMenu(props) {
       }
       <LabelInput
         value={spec.axisLabelX !== null ? spec.axisLabelX.toString() : null}
-        placeholder="X Axis label"
+        placeholderId="x_axis_label"
         name="xLabel"
         onChange={event => handleChangeSpec({
           axisLabelX: event.target.value.toString(),

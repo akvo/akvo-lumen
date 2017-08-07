@@ -1,17 +1,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
 import SelectMenu from '../../common/SelectMenu';
 
-export default function SelectInput(props) {
+function SelectInput(props) {
   return (
     <div className={`inputGroup${props.disabled ? ' disabled' : ''}`}>
       <label htmlFor={props.name}>
-        {props.labelText}:
+        {props.labelTextId ? <FormattedMessage id={props.labelTextId} /> : props.labelText}:
       </label>
       <SelectMenu
         name={props.name}
         disabled={props.disabled || false}
         placeholder={props.placeholder}
+        placeholderId={props.placeholderId}
         value={props.choice}
         options={props.options}
         onChange={props.onChange}
@@ -23,8 +25,11 @@ export default function SelectInput(props) {
 }
 
 SelectInput.propTypes = {
+  intl: intlShape.isRequired,
   placeholder: PropTypes.string,
-  labelText: PropTypes.string.isRequired,
+  placeholderId: PropTypes.string,
+  labelText: PropTypes.string,
+  labelTextId: PropTypes.string,
   name: PropTypes.string.isRequired,
   choice: PropTypes.node,
   options: PropTypes.array.isRequired,
@@ -33,3 +38,5 @@ SelectInput.propTypes = {
   multi: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
 };
+
+export default injectIntl(SelectInput);
