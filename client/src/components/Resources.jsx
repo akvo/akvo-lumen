@@ -10,6 +10,9 @@ function resourceRuleDescription(resourceKey) {
     case 'numberOfVisualisations':
       description = 'Number of visualisations';
       break;
+    case 'dataUpdate':
+      description = 'Data update mode';
+      break;
     default:
       description = resourceKey;
   }

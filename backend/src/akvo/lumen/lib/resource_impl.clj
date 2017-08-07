@@ -18,22 +18,24 @@
                                                  {}
                                                  {:identifiers identity})))
 
-(defn data-update-fn [_ _]
-  "auto")
+(defn data-update-fn [tenant-conn tier]
+  (-> (select-data-update-by-tier tenant-conn
+                                  {:tier tier}
+                                  {}
+                                  {:identifiers identity})
+      first :dataUpdate))
 
 (def policy-map
-  {"number_of_visualisations" count-visualisation-fn
-   "data_update" data-update-fn})
+  {"numberOfVisualisations" count-visualisation-fn
+   "dataUpdate" data-update-fn})
 
 (defn get-resources [tenant-conn tier]
-  (let [policies (select-policies tenant-conn)]
-    (reduce merge
-            (map (fn [{:keys [title]}]
-                   {title ((get policy-map title) tenant-conn tier)})
-                 policies))))
+  (reduce merge
+          (map (fn [{:keys [title]}]
+                 {title ((get policy-map title) tenant-conn tier)})
+               (select-policies tenant-conn))))
 
 (defn all [tenant-conn]
   (let [plan (current-plan tenant-conn)]
     (response {"plan" plan
-               "resources" (get-resources tenant-conn (:tier plan))
-               })))
+               "resources" (get-resources tenant-conn (:tier plan))})))

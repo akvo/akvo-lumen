@@ -50,21 +50,21 @@ CREATE TABLE tier_policy (
 
 -- ;;
 
-INSERT INTO policy (title) VALUES ('data_update');
-INSERT INTO policy (title) VALUES ('number_of_visualisations');
+INSERT INTO policy (title) VALUES ('dataUpdate');
+INSERT INTO policy (title) VALUES ('numberOfVisualisations');
 
 -- Lite
 INSERT INTO tier_policy (tier, policy, statement)
 VALUES (
        (SELECT id FROM tier WHERE title = 'lite'),
-       (SELECT id FROM policy WHERE title = 'data_update'),
+       (SELECT id FROM policy WHERE title = 'dataUpdate'),
        '"manual"'::json
 );
 
 INSERT INTO tier_policy (tier, policy, statement)
 VALUES (
        (SELECT id FROM tier WHERE title = 'lite'),
-       (SELECT id FROM policy WHERE title = 'number_of_visualisations'),
+       (SELECT id FROM policy WHERE title = 'numberOfVisualisations'),
        '10'::json
 );
 
@@ -72,14 +72,14 @@ VALUES (
 INSERT INTO tier_policy (tier, policy, statement)
 VALUES (
        (SELECT id FROM tier WHERE title = 'standard'),
-       (SELECT id FROM policy WHERE title = 'data_update'),
+       (SELECT id FROM policy WHERE title = 'dataUpdate'),
        '"manual"'::json
 );
 
 INSERT INTO tier_policy (tier, policy, statement)
 VALUES (
        (SELECT id FROM tier WHERE title = 'standard'),
-       (SELECT id FROM policy WHERE title = 'number_of_visualisations'),
+       (SELECT id FROM policy WHERE title = 'numberOfVisualisations'),
        '50'::json
 );
 
@@ -87,14 +87,14 @@ VALUES (
 INSERT INTO tier_policy (tier, policy, statement)
 VALUES (
        (SELECT id FROM tier WHERE title = 'pro'),
-       (SELECT id FROM policy WHERE title = 'data_update'),
+       (SELECT id FROM policy WHERE title = 'dataUpdate'),
        '"auto"'::json
 );
 
 INSERT INTO tier_policy (tier, policy, statement)
 VALUES (
        (SELECT id FROM tier WHERE title = 'pro'),
-       (SELECT id FROM policy WHERE title = 'number_of_visualisations'),
+       (SELECT id FROM policy WHERE title = 'numberOfVisualisations'),
        '200'::json
 );
 
@@ -102,14 +102,14 @@ VALUES (
 INSERT INTO tier_policy (tier, policy, statement)
 VALUES (
        (SELECT id FROM tier WHERE title = 'enterprise'),
-       (SELECT id FROM policy WHERE title = 'data_update'),
+       (SELECT id FROM policy WHERE title = 'dataUpdate'),
        '"auto"'::json
 );
 
 INSERT INTO tier_policy (tier, policy, statement)
 VALUES (
        (SELECT id FROM tier WHERE title = 'enterprise'),
-       (SELECT id FROM policy WHERE title = 'number_of_visualisations'),
+       (SELECT id FROM policy WHERE title = 'numberOfVisualisations'),
        '500'::json
 );
 
