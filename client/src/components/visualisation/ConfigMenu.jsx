@@ -148,7 +148,7 @@ export default function ConfigMenu(props) {
         />);
         break;
 
-      case 'pivottable':
+      case 'pivot table':
         chartTypeEditor = (<PivotTableConfigMenu
           visualisation={props.visualisation}
           onChangeSpec={props.onChangeVisualisationSpec}
@@ -172,7 +172,7 @@ export default function ConfigMenu(props) {
             <ul>
               {visualisationTypes.map((vType, index) =>
                 <li
-                  className={`clickable typeButton ${vType}`}
+                  className={`clickable typeButton ${vType.replace(' ', '')}`}
                   key={index}
                   onClick={() => props.onChangeVisualisationType(vType)}
                 >

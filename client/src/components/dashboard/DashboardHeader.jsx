@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 import EntityTypeHeader from '../entity-editor/EntityTypeHeader';
 
 export default class DashboardHeader extends Component {
@@ -12,19 +13,19 @@ export default class DashboardHeader extends Component {
   getActionButtons() {
     const { onDashboardAction } = this.props;
     const user = {
-      buttonText: 'User',
+      buttonText: <FormattedMessage id="user" />,
       customClass: 'notImplemented',
     };
     const download = {
-      buttonText: 'Download',
+      buttonText: <FormattedMessage id="download" />,
       customClass: 'notImplemented',
     };
     const share = {
-      buttonText: 'Share',
+      buttonText: <FormattedMessage id="share" />,
       onClick: () => onDashboardAction('share'),
     };
     const overflow = {
-      buttonText: 'Overflow',
+      buttonText: <FormattedMessage id="overflow" />,
       customClass: 'notImplemented',
     };
 
@@ -38,17 +39,17 @@ export default class DashboardHeader extends Component {
 
   render() {
     const actionButtons = this.getActionButtons();
-    let saveStatus;
+    let saveStatusId;
 
     switch (this.props.isUnsavedChanges) {
       case false:
-        saveStatus = 'All changes saved';
+        saveStatusId = 'All changes saved';
         break;
       case true:
-        saveStatus = 'Unsaved changes';
+        saveStatusId = 'Unsaved changes';
         break;
       default:
-        saveStatus = '';
+        saveStatusId = null;
     }
 
     return (
@@ -56,7 +57,7 @@ export default class DashboardHeader extends Component {
         title={this.props.title || 'Untitled dashboard'}
         onChangeTitle={this.props.onChangeTitle}
         onBeginEditTitle={this.props.onBeginEditTitle}
-        saveStatus={saveStatus}
+        saveStatusId={saveStatusId}
         actionButtons={actionButtons}
       />
     );

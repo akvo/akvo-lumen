@@ -100,7 +100,7 @@ const VisualisationTypeLabel = ({ vType }) => {
 
   switch (vType) {
     case 'map':
-    case 'pivottable':
+    case 'pivot table':
       typeLabel = vType;
       break;
 

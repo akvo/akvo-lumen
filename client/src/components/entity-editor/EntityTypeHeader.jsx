@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 import { Link } from 'react-router';
 import EntityTitleInput from './EntityTitleInput';
 
@@ -15,7 +16,7 @@ export default class EntityTypeHeader extends Component {
   }
 
   render() {
-    const { title, saveStatus, actionButtons, onChangeTitle, onBeginEditTitle } = this.props;
+    const { title, saveStatusId, actionButtons, onChangeTitle, onBeginEditTitle } = this.props;
     return (
       <nav className="EntityTypeHeader">
         <Link
@@ -30,9 +31,9 @@ export default class EntityTypeHeader extends Component {
             onBeginEditTitle={onBeginEditTitle}
             onChangeTitle={onChangeTitle}
           />
-          {saveStatus &&
+          {saveStatusId &&
             <div className="saveStatus">
-              {saveStatus}
+              <FormattedMessage id={saveStatusId} />
             </div>
           }
         </div>
@@ -56,7 +57,7 @@ export default class EntityTypeHeader extends Component {
 
 EntityTypeHeader.propTypes = {
   title: PropTypes.string.isRequired,
-  saveStatus: PropTypes.string,
+  saveStatusId: PropTypes.string,
   actionButtons: PropTypes.array,
   onBeginEditTitle: PropTypes.func,
   onChangeTitle: PropTypes.func,

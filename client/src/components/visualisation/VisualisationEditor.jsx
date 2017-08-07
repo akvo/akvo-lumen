@@ -9,7 +9,7 @@ require('./VisualisationEditor.scss');
 
 const specIsValidForApi = (spec, vType) => {
   switch (vType) {
-    case 'pivottable':
+    case 'pivot table':
       if (spec.aggregation !== 'count' && spec.valueColumn == null) {
         return false;
       }
@@ -31,7 +31,7 @@ const getNeedNewAggregation = (newV, oldV = { spec: {} }) => {
   const vType = newV.visualisationType;
 
   switch (vType) {
-    case 'pivottable':
+    case 'pivot table':
       return Boolean(
         newV.datasetId !== oldV.datasetId ||
         newV.spec.aggregation !== oldV.spec.aggregation ||
@@ -89,7 +89,7 @@ export default class VisualisationEditor extends Component {
         this.setState({ visualisation });
         break;
 
-      case 'pivottable':
+      case 'pivot table':
       case 'pie':
       case 'donut':
         // Data aggregated on the backend for these types
@@ -126,7 +126,7 @@ export default class VisualisationEditor extends Component {
     this.latestRequestId = requestId;
 
     switch (vType) {
-      case 'pivottable':
+      case 'pivot table':
         api.get(`/api/aggregation/${datasetId}/pivot`, {
           query: JSON.stringify(spec),
         }).then(response => response.json())
