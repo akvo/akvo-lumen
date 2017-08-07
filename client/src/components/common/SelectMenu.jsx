@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
+import { intlShape, injectIntl } from 'react-intl';
 import Select from 'react-select';
 
 require('../../../node_modules/react-select/dist/react-select.css');
