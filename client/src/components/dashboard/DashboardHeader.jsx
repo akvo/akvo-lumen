@@ -43,10 +43,10 @@ export default class DashboardHeader extends Component {
 
     switch (this.props.isUnsavedChanges) {
       case false:
-        saveStatusId = 'All changes saved';
+        saveStatusId = 'all_changes_saved';
         break;
       case true:
-        saveStatusId = 'Unsaved changes';
+        saveStatusId = 'unsaved_changes';
         break;
       default:
         saveStatusId = null;

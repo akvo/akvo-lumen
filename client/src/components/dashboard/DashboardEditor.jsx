@@ -241,7 +241,6 @@ export default class DashboardEditor extends Component {
           {getArrayFromObject(dashboard.entities).length === 0 &&
             <div className="blankDashboardHelpText">
               <FormattedMessage id="blank_dashboard_help_text" />
-              Click a visualisation in the visualisation list to add it to the dashboard.
             </div>
           }
           <div
