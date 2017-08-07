@@ -16,7 +16,7 @@ function shouldRender(visualisation, datasets) {
     case 'map':
       return true;
 
-    case 'pivot table':
+    case 'pivottable':
       if (!datasetLoaded) {
         return false;
       }

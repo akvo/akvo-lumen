@@ -183,7 +183,7 @@ class Visualisation extends Component {
         specTemplate = Object.assign({}, barSpecTemplate);
         break;
 
-      case 'pivot table':
+      case 'pivottable':
         specTemplate = Object.assign({}, pivotTableSpecTemplate);
         break;
 

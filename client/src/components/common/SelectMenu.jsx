@@ -42,7 +42,8 @@ SelectMenu.propTypes = {
   intl: intlShape.isRequired,
   options: PropTypes.arrayOf(PropTypes.shape({
     value: PropTypes.string,
-    label: PropTypes.oneOfType([PropTypes.string, PropTypes.element]).isRequired,
+    label: PropTypes.oneOfType([PropTypes.string, PropTypes.element]),
+    labelId: PropTypes.string,
   })).isRequired,
   placeholder: PropTypes.string,
   placeholderId: PropTypes.string,

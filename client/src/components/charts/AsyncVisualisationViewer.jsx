@@ -32,7 +32,7 @@ export default class AsyncVisualisationViewer extends Component {
           },
         });
       }, 'reactLeaflet');
-    } else if (visualisation.visualisationType === 'pivot table') {
+    } else if (visualisation.visualisationType === 'pivottable') {
       this.setState({
         asyncComponents: {
           // eslint-disable-next-line global-require

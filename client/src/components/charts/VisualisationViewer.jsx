@@ -25,7 +25,7 @@ export default function VisualisationViewer(props) {
         />
       );
 
-    case 'pivot table':
+    case 'pivottable':
       return (
         <PivotTable
           {...props}

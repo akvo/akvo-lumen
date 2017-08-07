@@ -46,39 +46,39 @@ const getSelectMenuOptionsFromColumnList = (columns = Immutable.List()) =>
 const aggregationOptions = [
   {
     value: 'mean',
-    label: <FormattedMessage id="mean" />,
+    labelId: 'mean',
   },
   {
     value: 'median',
-    label: <FormattedMessage id="median" />,
+    labelId: 'median',
   },
   {
     value: 'max',
-    label: <FormattedMessage id="max" />,
+    labelId: 'max',
   },
   {
     value: 'min',
-    label: <FormattedMessage id="min" />,
+    labelId: 'min',
   },
   {
     value: 'count',
-    label: <FormattedMessage id="count" />,
+    labelId: 'count',
   },
   {
     value: 'distinct',
-    label: <FormattedMessage id="count_unique" />,
+    labelId: 'count_unique',
   },
   {
     value: 'sum',
-    label: <FormattedMessage id="sum" />,
+    labelId: 'sum',
   },
   {
     value: 'q1',
-    label: <FormattedMessage id="lower_quartile" />,
+    labelId: 'lower_quartile',
   },
   {
     value: 'q3',
-    label: <FormattedMessage id="upper_quartile" />,
+    labelId: 'upper_quartile',
   },
 ];
 
@@ -148,7 +148,7 @@ export default function ConfigMenu(props) {
         />);
         break;
 
-      case 'pivot table':
+      case 'pivottable':
         chartTypeEditor = (<PivotTableConfigMenu
           visualisation={props.visualisation}
           onChangeSpec={props.onChangeVisualisationSpec}
@@ -203,10 +203,10 @@ export default function ConfigMenu(props) {
                   disabled={visualisation.datasetId === null}
                 />
                 <div className="inputGroup">
-                  <label htmlFor="xDatasetMenu">Source dataset:</label>
+                  <label htmlFor="xDatasetMenu"><FormattedMessage id="source_dataset" />:</label>
                   <SelectMenu
                     name="xDatasetMenu"
-                    placeholder="Choose dataset..."
+                    placeholderId="choose_dataset"
                     value={visualisation.datasetId !== null ?
                     visualisation.datasetId.toString() : null}
                     options={datasetOptions}
@@ -226,7 +226,7 @@ export default function ConfigMenu(props) {
                   className="saveChanges clickable"
                   onClick={props.onSaveVisualisation}
                 >
-                  Save
+                  <FormattedMessage id="save" />
                 </button>
               </div>
           }
