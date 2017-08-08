@@ -100,4 +100,5 @@ code {
 .notImplemented {
     cursor: not-allowed;
     filter: grayscale(100%);
+    display: none !important;
 }
