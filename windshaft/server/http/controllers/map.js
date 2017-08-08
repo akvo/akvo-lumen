@@ -34,7 +34,6 @@ MapController.prototype.register = function(app) {
     app.get(app.base_url_mapconfig + '/:token/:z/:x/:y.:format', this.tile.bind(this));
     app.get(app.base_url_mapconfig + '/:token/:layer/:z/:x/:y.(:format)', this.layer.bind(this));
     app.options(app.base_url_mapconfig, this.cors.bind(this));
-    //app.get(app.base_url_mapconfig, this.createGet.bind(this));
     app.post(app.base_url_mapconfig, this.createPost.bind(this));
     app.get(app.base_url_mapconfig + '/:token/:layer/attributes/:fid', this.attributes.bind(this));
 };
@@ -162,8 +161,10 @@ MapController.prototype.create = function(req, res, prepareConfigFn) {
                 mapConfig, req.params, new DummyMapConfigProvider(mapConfig, req.params), this
             );
         },
-        function addLastModifiedTimestamp(err, response) {
+        function addLastModifiedTimestamp(err, response, times) {
             assert.ifError(err);
+            // TODO: monitor performance
+            // console.log("The times" + JSON.stringify(times));
             //console.log("XXXX(pre) response is: ", util.inspect(response, false, null));
             return self.addLastModifiedTimestamp(req, response, this);
         },
@@ -178,17 +179,6 @@ MapController.prototype.create = function(req, res, prepareConfigFn) {
     );
 };
 
-MapController.prototype.createGet = function(req, res){
-    this.create(req, res, function createGet$prepareConfig(err, req) {
-        assert.ifError(err);
-        if ( ! req.params.config ) {
-            throw new Error('layergroup GET needs a "config" parameter');
-        }
-        return JSON.parse(req.params.config);
-    });
-};
-
-// TODO rewrite this so it is possible to share code with `MapController::create` method
 MapController.prototype.createPost = function(req, res) {
     this.create(req, res, function createPost$prepareConfig(err, req) {
         assert.ifError(err);
@@ -226,7 +216,9 @@ MapController.prototype.tileOrLayer = function (req, res) {
             }
             self.tileBackend.getTile(new MapStoreMapConfigProvider(self.mapStore, req.params), req.params, this);
         },
-        function mapController$finalize(err, tile, headers) {
+        function mapController$finalize(err, tile, headers, times) {
+            // TODO: monitor performance
+            // console.log("Times again " + JSON.stringify(times));
             self.finalizeGetTileOrGrid(err, req, res, tile, headers);
             return null;
         },
