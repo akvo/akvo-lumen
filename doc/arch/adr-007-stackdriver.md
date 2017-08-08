@@ -57,5 +57,6 @@ Preliminary decision by head of software development after discussion with lead 
 * Application monitoring for Windshaft can be set up
 * Operations and support handled by third party
 * An added SaaS cost
+* Added software development cost for identity hashing functionality. Estimated to be around 3 days of work.
 * Added process cost for reviewing monitoring data before any code changes to systems utilizing monitoring functionality
 * A step in the right direction on the long term strategy of unification of supporting software services in Akvo
