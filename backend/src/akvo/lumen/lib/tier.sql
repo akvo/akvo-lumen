@@ -9,5 +9,5 @@ FROM CROSSTAB (
      LEFT JOIN tier ON tier.id = tier_policy.tier
      LEFT JOIN policy ON policy.id = tier_policy.policy
      ORDER BY 1',
-$$VALUES ('data_update'), ('number_of_visualisations')$$
+$$VALUES ('dataUpdate'), ('numberOfVisualisations')$$
 ) AS ct ("tier" text, "data_update" jsonb, "number_of_visualisations" jsonb);
