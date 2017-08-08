@@ -10,7 +10,7 @@ Supporting services and systems, for example CI, logging, monitoring and DBMS, o
 
 Regardless of if the systems are hosted on premise or as a service some costs of ownership still remain. One significant cost among these is the cost of knowing and utilizing the tools that need to be distributed among team members. It is for us imperative to keep the number of services and tools (especially ones that are in some way overlapping) to a minimum.
 
-In the case of monitoring the recommendation from ops engineering and others has been to use Google Stackdriver. The reasons being that XXX and YYY. [Oriol]
+In the case of monitoring the recommendation from ops engineering and others has been to use [Google Stackdriver](https://cloud.google.com/stackdriver/). The reasons being that it's a very complete monitoring, logging, error reporting and alerting solution natively integrated with Google Cloud Platform, as well as it's quite simple and cheap compared to all alternatives.
 
 Stackdriver is already available in our Kubernetes cluster for the other services in Akvo Lumen. Choosing a different monitoring solution for Windshaft would add a learning cost and also introduce risks that the individual monitoring systems would need to share the attention of the responsible system owner, thus increasing the risk of fatal problems going unnoticed.
 
