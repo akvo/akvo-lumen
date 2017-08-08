@@ -55,4 +55,4 @@ ENV PGPASSWORD password
 EXPOSE 4000
 
 # Start server
-CMD cd /tiler && make && nodemon
+CMD cd /tiler && make && nodemon --inspect ./server.js

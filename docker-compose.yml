@@ -38,3 +38,5 @@ services:
    volumes:
       - ./windshaft/server:/tiler
       - ./windshaft/config:/config
+   ports:
+      - "9229:9229"
