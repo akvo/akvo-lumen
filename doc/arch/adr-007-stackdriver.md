@@ -34,17 +34,17 @@ Question: how will SQL queries be handled in the monitoring system? [Dan]
 Stackdriver supports consuming monitoring data in statsd format. This should be used so that someone that wants to host Lumen in their own premises could switch monitoring system to another one that uses statsd or collectd.
 
 ### Cost
-The total cost of ownership is deemed to be significantly lower when a hosted service is being used, compared to the cost of operating, supporting, maintaining and updating a monitoring solution by ourselves. [XXX]
+The total cost of ownership is deemed to be significantly lower when a hosted service is being used, compared to the cost of operating, supporting, maintaining and updating a monitoring solution by ourselves.
 
 ## Decision
 
-After discussing with members from the platform team and the operations engineer and taking into account XXX, we have decided that YYY and ZZZZ
+After discussing with members from the platform team and the operations engineer and taking into account the aspects mentioned above, we have decided:
 
-* Use Stackdriver as the monitoring solution for Windshaft.
+* To use Stackdriver as the monitoring solution for Windshaft.
 
-* No user identities in the monitoring data. Hash the identity values to ensure anonymous data in Stackdriver.
+* That no identity values should be visible in the monitoring data. To ensure anonymous data in Stackdriver, the identities will be hashed.
 
-* Use statsd format for the monitoring.
+* Use statsd format for the monitoring if possible. Otherwise, research and document other strategies for making monitoring interchangeable and take a decision on when such a strategy can be implemented.
 
 * Review all data sent to Stackdriver as part of code review.
 
