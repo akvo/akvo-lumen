@@ -61,8 +61,8 @@ export default class DatasetControls extends Component {
                     customClass: 'notImplemented',
                   },
                   {
-                    label: 'Add geometry',
-                    value: 'add-geometry',
+                    label: 'Generate geopoints',
+                    value: 'generate-geopoints',
                     customClass: 'notImplemented',
                   },
                 ]}

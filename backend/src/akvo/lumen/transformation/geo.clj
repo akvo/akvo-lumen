@@ -1,32 +1,49 @@
 (ns akvo.lumen.transformation.geo
   "Geometry data transformations"
-  (:require [akvo.lumen.transformation.engine :as engine]
+  (:require [clojure.java.jdbc :as jdbc]
+            [akvo.lumen.transformation.engine :as engine]
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/transformation/geo.sql")
 
-(defn valid? [op-spec]
-  (let [{:strs [columnNameLat columnNameLong columnTypeLat columnTypeLong]}
-        (engine/args op-spec)]
-    (and (every? #(= "number" %) [columnTypeLat columnTypeLong])
-         (every? engine/valid-column-name? [columnNameLat columnNameLong]))))
+(defn- valid?
+  "Predicate to determine if given op-spec is valid for geo transformation"
+  [op-spec]
+  (let [{:strs [columnNameLat columnNameLong
+                columnTypeLat columnTypeLong]} (engine/args op-spec)]
+    (boolean
+      (and (every? engine/valid-column-name? [columnNameLat columnNameLong])
+           (every? #(= "number" %) [columnTypeLat columnTypeLong])))))
 
-(defmethod engine/valid? :core/add-geometry [op-spec]
+(defmethod engine/valid? :core/generate-geopoints [op-spec]
   (valid? op-spec))
 
-(defmethod engine/apply-operation :core/add-geometry
+(defmethod engine/apply-operation :core/generate-geopoints
   [tenant-conn table-name columns op-spec]
   (try
-    (let [{column-name-lat "columnNameLat"
-           column-name-long "columnNameLong"} (engine/args op-spec)]
-      (add-geometry tenant-conn {:table-name table-name
-                                 :column-name-lat column-name-lat
-                                 :column-name-long column-name-long})
+    (let [{:strs [columnNameLat columnNameLong]} (engine/args op-spec)
+          column-name-geo (engine/next-column-name columns)
+          column-title-geo (format "Geopoints (%s)" column-name-geo)
+          opts {:table-name table-name :column-name-geo column-name-geo}]
+      (jdbc/with-db-transaction [conn tenant-conn]
+        (add-geometry-column conn (conj opts {:column-title-geo column-title-geo}))
+        (generate-geopoints conn (conj opts {:column-name-lat columnNameLat
+                                             :column-name-long columnNameLong})))
       {:success? true
        :execution-log [(format "Added geometry to %s" table-name)]
-       :columns columns})
+       :columns (conj columns {"title" column-title-geo
+                               "type" "text"
+                               "sort" nil
+                               "hidden" false
+                               "direction" nil
+                               "columnName" column-name-geo})})
     (catch Exception e
       {:success? false
        :message (.getMessage e)}))
   {:success? true
    :columns columns})
+
+(comment
+  (let [conn nil]
+    (add-geometry-column conn {:table-name ""}
+                              :column-name-geo "c10")))

@@ -389,3 +389,15 @@
     "d1" [{"columnName" "dx"}]
     "d2" [{"columnName" "d1"}]
     "d6" [{"columnName" "submitter"} {"columnName" "d5"} {"columnName" "dx"}]))
+
+(deftest ^:functional generate-geopoints-test
+  (let [dataset-id (import-file "geopoints.csv" {:has-column-headers? true})
+        apply-transformation (partial tf/apply test-conn dataset-id)]
+    (let [[tag _] (apply-transformation {:type :transformation
+                                         :transformation {"op" "core/generate-geopoints"
+                                                          "args" {"columnNameLat" "c2"
+                                                                  "columnNameLong" "c3"
+                                                                  "columnTypeLat" "number"
+                                                                  "columnTypeLong" "number"}
+                                                          "onError" "fail"}})]
+      (is (= ::lib/ok tag)))))
