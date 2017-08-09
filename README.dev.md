@@ -97,7 +97,7 @@ docker exec -i -t akvolumen_backend_1 lein test
 
 To connect to the postgres server connect using something like:
 ```sh
-psql --host=localhost --port=5432 --dbname=lumen_tenant_1 --username=lumen --password
+psql --host=akvolumen_postgres_1 --port=5432 --dbname=lumen_tenant_1 --username=lumen --password
 ```
 
 ## Legal

@@ -1,11 +1,11 @@
 (ns akvo.lumen.migrate
   (:require
+   [akvo.lumen.config :refer [bindings]]
    [clojure.java.io :as io]
    [duct.util.system :refer [read-config]]
    [environ.core :refer [env]]
    [hugsql.core :as hugsql]
    [meta-merge.core :refer [meta-merge]]
-   [akvo.lumen.config :refer [bindings]]
    [ragtime
     [jdbc :as ragtime-jdbc]
     [repl :as ragtime-repl]]))

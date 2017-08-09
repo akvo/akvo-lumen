@@ -1,0 +1,3 @@
+-- CREATE TYPE tier AS ENUM ('standard', 'pro');
+-- ALTER TABLE tenants ADD COLUMN plan tier DEFAULT 'standard';
+-- ALTER TABLE tenants ADD COlUMN plan text DEFAULT 'standard';
