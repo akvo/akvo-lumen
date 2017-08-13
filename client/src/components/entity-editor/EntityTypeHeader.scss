@@ -47,6 +47,8 @@
 
         span {
             padding: 0 4px;
+
+            @include noWrapTxt;
         }
 
         &.clickable {
