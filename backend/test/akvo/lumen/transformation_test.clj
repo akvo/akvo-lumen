@@ -400,4 +400,7 @@
                                                                   "columnTypeLat" "number"
                                                                   "columnTypeLong" "number"}
                                                           "onError" "fail"}})]
-      (is (= ::lib/ok tag)))))
+      (is (= ::lib/ok tag))
+      (let [dataset (latest-dataset-version-by-dataset-id test-conn {:dataset-id dataset-id})
+            {:keys [columns _]} dataset
+            _ (prn columns)]))))

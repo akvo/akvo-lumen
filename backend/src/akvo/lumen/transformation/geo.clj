@@ -30,9 +30,9 @@
         (generate-geopoints conn (conj opts {:column-name-lat columnNameLat
                                              :column-name-long columnNameLong})))
       {:success? true
-       :execution-log [(format "Added geometry to %s" table-name)]
+       :execution-log [(format "Generated geopoints for %s" table-name)]
        :columns (conj columns {"title" column-title-geo
-                               "type" "text"
+                               "type" "geopoint"
                                "sort" nil
                                "hidden" false
                                "direction" nil
@@ -42,8 +42,3 @@
        :message (.getMessage e)}))
   {:success? true
    :columns columns})
-
-(comment
-  (let [conn nil]
-    (add-geometry-column conn {:table-name ""}
-                              :column-name-geo "c10")))
