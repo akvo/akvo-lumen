@@ -54,11 +54,6 @@ ADD config /config
 # Debugging mode on
 ENV DEBUG windshaft*
 
-# ENV variables (for some reason environment isn't working)
-ENV PGHOST postgres
-ENV PGUSER lumen
-ENV PGPASSWORD password
-
 EXPOSE 4000
 
 # Start server
