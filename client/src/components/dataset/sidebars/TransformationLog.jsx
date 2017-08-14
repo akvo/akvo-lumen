@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Immutable from 'immutable';
+import { FormattedMessage } from 'react-intl';
 import SidebarHeader from './SidebarHeader';
 import SidebarControls from './SidebarControls';
 import { columnTitle } from '../../../domain/dataset';
@@ -9,9 +10,10 @@ function deriveTransformationDescription(transformation) {
   const newColumnTitle = transformation.getIn(['args', 'newColumnTitle']);
   const code = transformation.getIn(['args', 'code']);
   return (
-    <div>
-      Derived {newColumnTitle} using <code>{code}</code>
-    </div>
+    <FormattedMessage
+      id="derived_transform_description"
+      values={{ newColumnTitle, code: <code>{code}</code> }}
+    />
   );
 }
 
@@ -40,21 +42,29 @@ function combineTransformationDescription(transformations, index, columns) {
   const firstTitle = findTitle(firstColumnName, transformations, index, columns);
   const secondTitle = findTitle(secondColumnName, transformations, index, columns);
   const newColumnTitle = transformation.getIn(['args', 'newColumnTitle']);
-  return `Combined columns ${firstTitle} and ${secondTitle} into "${newColumnTitle}"`;
+  return (
+    <FormattedMessage
+      id="combine_transform_description"
+      values={{
+        firstTitle,
+        secondTitle,
+        newColumnTitle,
+      }}
+    />
+  );
 }
 
 function textTransformationDescription(transformations, index, columns) {
   const transformation = transformations.get(index);
   const columnName = transformation.getIn(['args', 'columnName']);
   const title = findTitle(columnName, transformations, index, columns);
-  const opDescription = ({
-    'core/to-lowercase': 'to lower case',
-    'core/to-uppercase': 'to upper case',
-    'core/to-titlecase': 'to title case',
-    'core/trim': 'trimmed whitespace',
-    'core/trim-doublespace': 'removed double spaces',
+  return ({
+    'core/to-lowercase': <FormattedMessage id="to_lowercase" values={{ title }} />,
+    'core/to-uppercase': <FormattedMessage id="to_uppercase" values={{ title }} />,
+    'core/to-titlecase': <FormattedMessage id="to_titlecase" values={{ title }} />,
+    'core/trim': <FormattedMessage id="trimmed_whitespace" values={{ title }} />,
+    'core/trim-doublespace': <FormattedMessage id="removed_double_space" values={{ title }} />,
   })[transformation.get('op')];
-  return `${title}: ${opDescription}`;
 }
 
 function transformationDescription(transformations, index, columns) {
@@ -168,14 +178,14 @@ export default function TransformationLog({
       className="DataTableSidebar"
     >
       <SidebarHeader onClose={onClose}>
-        Transformation Log
+        <FormattedMessage id="transformation_log" />
       </SidebarHeader>
       <TransformationList
         transformations={allTransformations}
         columns={columns}
       />
       <SidebarControls
-        positiveButtonText="Undo"
+        positiveButtonText={<FormattedMessage id="undo" />}
         onApply={
           allTransformations.every(transformation => transformation.get('undo')) ? null : onUndo
         }

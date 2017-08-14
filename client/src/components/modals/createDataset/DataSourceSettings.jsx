@@ -1,16 +1,16 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import DataFileDataSourceSettings from './DataFileDataSourceSettings';
-import LinkDataSourceSettings from './LinkDataSourceSettings';
-import AkvoFlowDataSourceSettings from './AkvoFlowDataSourceSettings';
+import DataFileDataSourceSettings, { isValidSource as isValidFileSource } from './DataFileDataSourceSettings';
+import LinkDataSourceSettings, { isValidSource as isValidLinkSource } from './LinkDataSourceSettings';
+import AkvoFlowDataSourceSettings, { isValidSource as isValidFlowSource } from './AkvoFlowDataSourceSettings';
 
 export default class DataSourceSettings extends Component {
 
   static isValidSource(dataSource) {
     switch (dataSource.kind) {
-      case 'DATA_FILE': return DataFileDataSourceSettings.isValidSource(dataSource);
-      case 'LINK': return LinkDataSourceSettings.isValidSource(dataSource);
-      case 'AKVO_FLOW': return AkvoFlowDataSourceSettings.isValidSource(dataSource);
+      case 'DATA_FILE': return isValidFileSource(dataSource);
+      case 'LINK': return isValidLinkSource(dataSource);
+      case 'AKVO_FLOW': return isValidFlowSource(dataSource);
       default: throw new Error(`Unknown data source kind: ${dataSource.kind}`);
     }
   }

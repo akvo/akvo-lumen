@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 import SelectInput from './SelectInput';
 import LabelInput from './LabelInput';
 import Subtitle from './Subtitle';
@@ -41,10 +42,10 @@ export default function LineConfigMenu(props) {
 
   return (
     <div>
-      <Subtitle>Y-Axis</Subtitle>
+      <Subtitle><FormattedMessage id="y_axis" /></Subtitle>
       <SelectInput
-        placeholder="Select a metric column"
-        labelText="Metric column"
+        placeholderId="select_a_metric_column"
+        labelTextId="metric_column"
         choice={spec.metricColumnY !== null ? spec.metricColumnY.toString() : null}
         name="metricColumnYInput"
         options={columnOptions}
@@ -56,17 +57,17 @@ export default function LineConfigMenu(props) {
       />
       <LabelInput
         value={spec.axisLabelY !== null ? spec.axisLabelY.toString() : null}
-        placeholder="Y Axis label"
+        placeholderId="y_axis_label"
         name="yLabel"
         onChange={event => onChangeSpec({
           axisLabelY: event.target.value.toString(),
           axisLabelYFromUser: true,
         })}
       />
-      <Subtitle>X-Axis</Subtitle>
+      <Subtitle><FormattedMessage id="x_axis" /></Subtitle>
       <SelectInput
-        placeholder="Select a metric column"
-        labelText="Metric column"
+        placeholderId="select_a_metric_column"
+        labelTextId="metric_column"
         choice={spec.metricColumnX !== null ? spec.metricColumnX.toString() : null}
         name="metricColumnXInput"
         options={columnOptions}
@@ -77,9 +78,9 @@ export default function LineConfigMenu(props) {
         clearable
       />
       <SelectInput
-        placeholder={spec.metricColumnX !== null ?
-          'Choose aggregation type...' : 'Must choose X-Axis column first'}
-        labelText="Aggregation type"
+        placeholderId={spec.metricColumnX !== null ?
+          'choose_aggregation_type' : 'must_choose_x_axis_column_first'}
+        labelTextId="aggregation_type"
         choice={(spec.metricColumnX !== null && spec.metricAggregation != null) ?
           spec.metricAggregation.toString() : null}
         name="metricAggregationInput"
@@ -93,7 +94,7 @@ export default function LineConfigMenu(props) {
       />
       <LabelInput
         value={spec.axisLabelX !== null ? spec.axisLabelX.toString() : null}
-        placeholder="X Axis label"
+        placeholderId="x_axis_label"
         name="xLabel"
         onChange={event => onChangeSpec({
           axisLabelX: event.target.value.toString(),

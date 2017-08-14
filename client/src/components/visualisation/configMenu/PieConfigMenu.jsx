@@ -17,8 +17,8 @@ export default function PieConfigMenu(props) {
   return (
     <div className="PieConfigMenu">
       <SelectInput
-        placeholder="Select a data column to group by"
-        labelText="Bucket column"
+        placeholderId="select_a_data_column_to_group_by"
+        labelTextId="bucket_column"
         choice={spec.bucketColumn !== null ?
           spec.bucketColumn.toString() : null}
         name="xGroupColumnMenu"
@@ -33,7 +33,7 @@ export default function PieConfigMenu(props) {
       <ToggleInput
         name="showLegend"
         type="checkbox"
-        label="Show legend"
+        labelId="show_legend"
         className="showLegend"
         checked={Boolean(spec.showLegend)}
         onChange={val => onChangeSpec({
@@ -42,7 +42,7 @@ export default function PieConfigMenu(props) {
       />
       <LabelInput
         value={spec.legendTitle != null ? spec.legendTitle.toString() : null}
-        placeholder="Legend title"
+        placeholderId="legend_title"
         name="legendLabel"
         maxLength={32}
         onChange={event => onChangeSpec({

@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import moment from 'moment';
+import { FormattedDate } from 'react-intl';
 import LibraryListingItem from './LibraryListingItem';
 import { getTitle, getId, getCreatedTimestamp, getModifiedTimestamp } from '../../domain/entity';
 
@@ -10,7 +10,14 @@ const getListGroupTitle = (listGroupName, sortOrder) => {
       return listGroupName.toUpperCase();
     case 'created':
     case 'last_modified':
-      return moment(listGroupName, 'YYYY-MM-DD').format('MMMM Do YYYY');
+      return (
+        <FormattedDate
+          value={new Date(listGroupName)}
+          year="numeric"
+          month="long"
+          day="2-digit"
+        />
+      );
     default:
       throw new Error(`Invalid sort order ${sortOrder}`);
   }

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router';
+import { FormattedMessage } from 'react-intl';
 import LoadingSpinner from '../common/LoadingSpinner';
 import ContextMenu from '../common/ContextMenu';
 import {
@@ -12,13 +13,18 @@ import {
 function getCollectionContextMenuItem(collections, currentCollection) {
   if (currentCollection) {
     return ({
-      label: `Remove from ${currentCollection.title}`,
+      label: (
+        <FormattedMessage
+          id="remove_collection"
+          values={{ title: currentCollection.title }}
+        />
+      ),
       value: `remove-from-collection:${currentCollection.id}`,
     });
   }
 
   return ({
-    label: 'Add to collection',
+    label: <FormattedMessage id="add_to_collection" />,
     value: 'add-to-collection:new',
     subMenu: [
       ...Object.keys(collections).map(key => ({
@@ -26,7 +32,7 @@ function getCollectionContextMenuItem(collections, currentCollection) {
         label: collections[key].title,
       })),
       {
-        label: 'New collection',
+        label: <FormattedMessage id="new_collection" />,
         value: 'add-to-collection:new',
         customClass: 'newCollection',
       },
@@ -37,32 +43,32 @@ function getCollectionContextMenuItem(collections, currentCollection) {
 function contextMenuOptions(entityType, collections, currentCollection) {
   const options = [
     {
-      label: 'Duplicate',
+      label: <FormattedMessage id="duplicate" />,
       value: 'duplicate',
       customClass: 'notImplemented',
     }, {
-      label: 'Set permissions',
+      label: <FormattedMessage id="set_permissions" />,
       value: 'set-permissions',
       customClass: 'notImplemented',
     }, {
-      label: 'Add to dashboard',
+      label: <FormattedMessage id="add_to_dashboard" />,
       value: 'add-to-dashboard',
       customClass: 'notImplemented',
     },
     getCollectionContextMenuItem(collections, currentCollection),
     {
-      label: 'View details',
+      label: <FormattedMessage id="view_details" />,
       value: 'view-details',
       customClass: 'notImplemented',
     }, {
-      label: 'Delete',
+      label: <FormattedMessage id="delete" />,
       value: 'delete',
     },
   ];
 
   if (entityType === 'dataset') {
     options.push({
-      label: 'Update',
+      label: <FormattedMessage id="update" />,
       value: 'update-dataset',
     });
   }
@@ -188,7 +194,7 @@ export default class LibraryListingItem extends Component {
               {isFailed(entity) && ' (Import failed)'}
             </h3>
             {isFailed(entity) && <p>{getErrorMessage(entity)}</p>}
-            {isPending(entity) && <p>Pending...</p>}
+            {isPending(entity) && <p><FormattedMessage id="pending" />...</p>}
             {getType(entity) === 'visualisation' &&
               <VisualisationTypeLabel
                 vType={entity.visualisationType}

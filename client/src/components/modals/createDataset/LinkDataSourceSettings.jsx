@@ -1,14 +1,15 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 
-export default class LinkDataSourceSettings extends Component {
+export function isValidSource(source) {
+  return (
+    source.kind === 'LINK' &&
+    source.url
+  );
+}
 
-  static isValidSource(source) {
-    return (
-      source.kind === 'LINK' &&
-      source.url
-    );
-  }
+class LinkDataSourceSettings extends Component {
 
   constructor() {
     super();
@@ -24,6 +25,7 @@ export default class LinkDataSourceSettings extends Component {
   }
 
   render() {
+    const { formatMessage } = this.props.intl;
     return (
       <div className="LinkFileSelection">
         <div>
@@ -31,13 +33,13 @@ export default class LinkDataSourceSettings extends Component {
             className="linkFileInputLabel"
             htmlFor="linkFileInput"
           >
-              Link:
+            <FormattedMessage id="link" />:
           </label>
           <input
             className="linkFileInput"
             id="linkFileInput"
             type="text"
-            placeholder="Paste url here"
+            placeholder={formatMessage({ id: 'paste_url_here' })}
             defaultValue={this.props.dataSource.url}
             onChange={this.handleLink}
           />
@@ -47,7 +49,7 @@ export default class LinkDataSourceSettings extends Component {
             className="linkFileToggleLabel"
             htmlFor="dataHasColumnHeadersCheckbox"
           >
-            Data has column headers:
+            <FormattedMessage id="data_has_column_headers" />:
           </label>
           <input
             id="dataHasColumnHeadersCheckbox"
@@ -67,6 +69,7 @@ export default class LinkDataSourceSettings extends Component {
 }
 
 LinkDataSourceSettings.propTypes = {
+  intl: intlShape.isRequired,
   onChange: PropTypes.func.isRequired,
   dataSource: PropTypes.shape({
     kind: PropTypes.oneOf(['LINK']).isRequired,
@@ -74,3 +77,5 @@ LinkDataSourceSettings.propTypes = {
     hasColumnHeaders: PropTypes.bool.isRequired,
   }),
 };
+
+export default injectIntl(LinkDataSourceSettings);

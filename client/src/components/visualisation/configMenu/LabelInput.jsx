@@ -1,15 +1,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { injectIntl, intlShape } from 'react-intl';
 
-export default function LabelInput(props) {
+function LabelInput(props) {
+  const placeholder = props.placeholderId ?
+    props.intl.formatMessage({ id: props.placeholderId }) : props.placeholder;
   return (
     <div className="inputGroup">
-      <label htmlFor={props.name}>{`${props.placeholder}:`}</label>
+      <label htmlFor={props.name}>{`${placeholder}:`}</label>
       <input
         className="textInput"
         name={props.name}
         type="text"
-        placeholder={props.placeholder}
+        placeholder={placeholder}
         value={props.value || ''}
         onChange={props.onChange}
         {... props.maxLength ? { maxLength: props.maxLength } : {}}
@@ -19,9 +22,13 @@ export default function LabelInput(props) {
 }
 
 LabelInput.propTypes = {
+  intl: intlShape.isRequired,
   name: PropTypes.string.isRequired,
   placeholder: PropTypes.string,
+  placeholderId: PropTypes.string,
   value: PropTypes.string,
   onChange: PropTypes.func.isRequired,
   maxLength: PropTypes.number,
 };
+
+export default injectIntl(LabelInput);
