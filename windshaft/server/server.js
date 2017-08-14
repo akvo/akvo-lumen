@@ -13,13 +13,19 @@ var PORT = 4000;
 // set environment specific variables
 global.environment  = require('../config/environments/' + ENV);
 
+// TODO: Fix XXX LastModified fetch error: TypeError: Cannot read property 'length' of undefined
+// TODO: mml-builder has a use_workers flag in line 40
+
+
 var config = {
     base_url_mapconfig: '/:dbname/layergroup',
     grainstore: {
-       datasource: global.environment.postgres
     }, //see grainstore npm for other options
     redis: global.environment.redis,
+    renderer: global.environment.renderer,
     enable_cors: false,
+    statsd: global.environment.statsd,
+    renderCache: global.environment.renderCache,
     req2params: function(req, callback){
 
         //console.log("req2param received req: ", req);

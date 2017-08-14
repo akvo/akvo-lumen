@@ -1,5 +1,11 @@
+var appmetrics = require('appmetrics');
+
+appmetrics.configure({'com.ibm.diagnostics.healthcenter.mqtt': 'off'});
+var appmonitor = appmetrics.monitor();
+
 var debug = require('debug')('windshaft:server');
 var express = require('express');
+var expressStatsd = require('express-statsd');
 var bodyParser = require('body-parser');
 var RedisPool = require('redis-mpool');
 var _ = require('underscore');
@@ -10,6 +16,9 @@ var windshaft = require('windshaft');
 
 var StaticMapsController = require('./controllers/static_maps');
 var MapController = require('./controllers/map');
+
+var StatsClient = require('./stats/client');
+var RendererStatsReporter = require('./stats/reporter');
 
 //
 // @param opts server options object. Example value:
@@ -62,6 +71,8 @@ var MapController = require('./controllers/map');
 module.exports = function(opts) {
     opts = opts || {};
 
+    global.statsClient = StatsClient.getInstance(opts.statsd);
+
     opts.grainstore = opts.grainstore || {};
     opts.grainstore.mapnik_version = mapnikVersion(opts);
 
@@ -77,7 +88,7 @@ module.exports = function(opts) {
 
     var map_store  = new windshaft.storage.MapStore({
         pool: redisPool,
-        expire_time: opts.grainstore.default_layergroup_ttl
+        expire_time: opts.redis.default_layergroup_ttl
     });
 
     opts.renderer = opts.renderer || {};
@@ -88,8 +99,7 @@ module.exports = function(opts) {
             grainstore: opts.grainstore,
             mapnik: opts.renderer.mapnik || opts.mapnik
         },
-        torque: opts.renderer.torque,
-        http: opts.renderer.http
+        torque: opts.renderer.torque
     });
 
     // initialize render cache
@@ -187,6 +197,12 @@ module.exports = function(opts) {
         }
     });
 
+    /***************
+     * Monitoring
+     ****************/
+     var rendererStatsReporter = new RendererStatsReporter(rendererCache, redisPool, mapController, appmonitor, rendererCacheOpts.statsInterval);
+     rendererStatsReporter.start();
+
     return app;
 };
 
@@ -230,6 +246,7 @@ function bootstrap(opts) {
     }
 
     app.enable('jsonp callback');
+    app.use(expressStatsd({client: global.statsClient }));
     app.use(bodyParser.json());
 
     app.use(morgan('tiny'));

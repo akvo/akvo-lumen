@@ -4,6 +4,7 @@ var step = require('step');
 var windshaft = require('windshaft/lib/windshaft');
 var PSQL = require('cartodb-psql'); // dependency of windshaft
 var _ = require('underscore');
+var EventEmitter = require('events').EventEmitter
 
 var MapConfig = windshaft.model.MapConfig;
 var DummyMapConfigProvider = require('windshaft/lib/windshaft/models/providers/dummy_mapconfig_provider');
@@ -24,18 +25,27 @@ function MapController(app, mapStore, mapBackend, tileBackend, attributesBackend
     this.mapBackend = mapBackend;
     this.tileBackend = tileBackend;
     this.attributesBackend = attributesBackend;
+    EventEmitter.call(this);
 }
 
+util.inherits(MapController, EventEmitter);
 module.exports = MapController;
 
+function statsd (path) {
+  return function (req, res, next) {
+    var method = req.method || 'unknown_method';
+    req.statsdKey = ['http', method.toLowerCase(), path, req.params['format']].join('.');
+    next();
+  };
+}
 
 MapController.prototype.register = function(app) {
-    app.get(app.base_url_mapconfig + '/:token/:z/:x/:y@:scale_factor?x.:format', this.tile.bind(this));
-    app.get(app.base_url_mapconfig + '/:token/:z/:x/:y.:format', this.tile.bind(this));
-    app.get(app.base_url_mapconfig + '/:token/:layer/:z/:x/:y.(:format)', this.layer.bind(this));
+    app.get(app.base_url_mapconfig + '/:token/:z/:x/:y@:scale_factor?x.:format', statsd('tile'), this.tile.bind(this));
+    app.get(app.base_url_mapconfig + '/:token/:z/:x/:y.:format', statsd('tile'), this.tile.bind(this));
+    app.get(app.base_url_mapconfig + '/:token/:layer/:z/:x/:y.(:format)', statsd('layer'), this.layer.bind(this));
     app.options(app.base_url_mapconfig, this.cors.bind(this));
-    app.post(app.base_url_mapconfig, this.createPost.bind(this));
-    app.get(app.base_url_mapconfig + '/:token/:layer/attributes/:fid', this.attributes.bind(this));
+    app.post(app.base_url_mapconfig, statsd('create'), this.createPost.bind(this));
+    app.get(app.base_url_mapconfig + '/:token/:layer/attributes/:fid', statsd('attributes'), this.attributes.bind(this));
 };
 
 // send CORS headers when client send options.
@@ -163,13 +173,10 @@ MapController.prototype.create = function(req, res, prepareConfigFn) {
         },
         function addLastModifiedTimestamp(err, response, times) {
             assert.ifError(err);
-            // TODO: monitor performance
-            // console.log("The times" + JSON.stringify(times));
-            //console.log("XXXX(pre) response is: ", util.inspect(response, false, null));
+            self.emit('perf', times);
             return self.addLastModifiedTimestamp(req, response, this);
         },
         function finish(err, response){
-            //console.log("XXXX(post) response is: ", util.inspect(response, false, null));
             if (err) {
                 self._app.sendError(res, { errors: [ err.message ] }, self._app.findStatusCode(err), 'LAYERGROUP', err);
             } else {
@@ -217,8 +224,7 @@ MapController.prototype.tileOrLayer = function (req, res) {
             self.tileBackend.getTile(new MapStoreMapConfigProvider(self.mapStore, req.params), req.params, this);
         },
         function mapController$finalize(err, tile, headers, times) {
-            // TODO: monitor performance
-            // console.log("Times again " + JSON.stringify(times));
+            self.emit('perf', times);
             self.finalizeGetTileOrGrid(err, req, res, tile, headers);
             return null;
         },
