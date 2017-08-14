@@ -224,3 +224,21 @@ Examples:
  "args": {"columnName": "c4",
           "newColumnTitle": "New Title"}}
 ```
+
+### core/generate-geopoints
+
+* args
+  * columnNameLat (string): The column containing latitude data
+  * columnNameLong (string): The column containing longitude data
+  * columnTitleGeo (string): The title of the geopoint column to be generated
+  * columnTypeLat (string): The client data type of the latitude column
+  * columnTypeLong (string): The client data type of the longitude column
+
+```
+{"op": "core/generate-geopoints",
+ "args": {"columnNameLat": "c2",
+          "columnNameLong": "c3",
+          "columnTitleGeo": "Geopoints"
+          "columnTypeLat": "number"
+          "columnTypeLong": "number"}}
+```
