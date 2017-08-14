@@ -397,9 +397,7 @@
                                          :transformation {"op" "core/generate-geopoints"
                                                           "args" {"columnNameLat" "c2"
                                                                   "columnNameLong" "c3"
-                                                                  "columnTitleGeo" "Geopoints"
-                                                                  "columnTypeLat" "number"
-                                                                  "columnTypeLong" "number"}
+                                                                  "columnTitleGeo" "Geopoints"}
                                                           "onError" "fail"}})]
       (is (= ::lib/ok tag))
       (let [dataset (latest-dataset-version-by-dataset-id test-conn {:dataset-id dataset-id})

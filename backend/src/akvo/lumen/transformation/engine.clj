@@ -51,7 +51,7 @@
        (boolean (re-find #"^[a-z][a-z0-9_]*$" s))))
 
 (defn valid-type? [s]
-  (boolean (#{"text" "number" "date"} s)))
+  (boolean (#{"text" "number" "date" "geopoint"} s)))
 
 (defn column-index
   "Returns the column index for a given column-name"
