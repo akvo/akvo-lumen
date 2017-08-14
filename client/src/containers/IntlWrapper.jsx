@@ -4,13 +4,29 @@ import { connect } from 'react-redux';
 import { addLocaleData, IntlProvider } from 'react-intl';
 import fr from 'react-intl/locale-data/fr';
 import en from 'react-intl/locale-data/en';
+import es from 'react-intl/locale-data/es';
 import enTranslations from '../translations/en.json';
 import frTranslations from '../translations/fr.json';
+import esTranslations from '../translations/es.json';
 
-addLocaleData(fr, en);
+addLocaleData(en);
+addLocaleData(fr);
+addLocaleData(es);
 
 function IntlWrapper({ locale, children }) {
-  const messages = locale === 'en' ? enTranslations : frTranslations;
+  let messages;
+  switch (locale) {
+    case 'fr':
+      messages = frTranslations;
+      break;
+    case 'es':
+      messages = esTranslations;
+      break;
+    default:
+      // Default to english
+      messages = enTranslations;
+      break;
+  }
 
   return (
     <IntlProvider locale={locale} messages={messages}>
