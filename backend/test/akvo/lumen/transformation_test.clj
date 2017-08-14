@@ -402,5 +402,7 @@
                                                           "onError" "fail"}})]
       (is (= ::lib/ok tag))
       (let [dataset (latest-dataset-version-by-dataset-id test-conn {:dataset-id dataset-id})
-            {:keys [columns _]} dataset
-            _ (prn columns)]))))
+            {:keys [columns _]} dataset]
+        (is (= 4 (count columns)))
+        (is (= "geopoint" (get (last columns) "type")))
+        (is (= "d1" (get (last columns) "columnName")))))))

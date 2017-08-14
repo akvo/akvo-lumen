@@ -26,9 +26,10 @@
           column-title-geo (format "Geopoints (%s)" column-name-geo)
           opts {:table-name table-name :column-name-geo column-name-geo}]
       (jdbc/with-db-transaction [conn tenant-conn]
-        (add-geometry-column conn (conj opts {:column-title-geo column-title-geo}))
+        (add-geometry-column conn opts)
         (generate-geopoints conn (conj opts {:column-name-lat columnNameLat
                                              :column-name-long columnNameLong})))
+      ;; TODO - remove original lat/long columns
       {:success? true
        :execution-log [(format "Generated geopoints for %s" table-name)]
        :columns (conj columns {"title" column-title-geo
@@ -39,6 +40,4 @@
                                "columnName" column-name-geo})})
     (catch Exception e
       {:success? false
-       :message (.getMessage e)}))
-  {:success? true
-   :columns columns})
+       :message (.getMessage e)})))
