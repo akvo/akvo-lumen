@@ -3,5 +3,5 @@
 
 (defn all
   "Returns resources."
-  [tenant-conn]
-  (impl/all tenant-conn))
+  [tenant-conn current-plan]
+  (impl/all tenant-conn current-plan))

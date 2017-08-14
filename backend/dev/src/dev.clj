@@ -35,7 +35,11 @@
   "Helper function that will seed tenant to the tenants table."
   [db tenant]
   (try
-    #_(jdbc/insert! db "tenants" tenant)
+    (let [{:keys [id]} (first (jdbc/insert! db "tenants" (dissoc tenant :plan)))]
+      (jdbc/insert! db "plan" {:tenant id
+                               :tier (doto (org.postgresql.util.PGobject.)
+                                       (.setType "tier")
+                                       (.setValue (:plan tenant)))}))
     (catch PSQLException e
       (println "Seed data already loaded."))))
 
