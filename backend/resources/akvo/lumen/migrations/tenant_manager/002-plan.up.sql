@@ -12,6 +12,12 @@ CREATE TABLE plan (
 );
 -- ;;
 
+-- Default plan
+INSERT INTO plan (tenant, tier)
+SELECT id, 'standard'
+FROM tenants
+
+
 -- CREATE OR REPLACE FUNCTION public.end_plan (t int)
 -- RETURNS trigger AS
 -- $$
