@@ -1,17 +1,6 @@
 (ns akvo.lumen.lib.tier-impl
-  (:require [akvo.lumen.util :refer [squuid]]
-            [hugsql.core :as hugsql]
-            [ring.util.response :refer [not-found response]])
-  (:import [java.sql SQLException]))
-
-(hugsql/def-db-fns "akvo/lumen/lib/tier.sql")
-
-
-#_(defn all [tenant-conn]
-    (response {"tiers" (all-tiers tenant-conn
-                                  {}
-                                  {}
-                                  {:identifiers identity})}))
+  (:require
+   [ring.util.response :refer [not-found response]]))
 
 
 (def policies ["numberOfExternaldatasets" "numberOfVisualisations"])
@@ -20,7 +9,6 @@
   (into {} (map (fn [p]
                   {p (get m p)})
                 policies)))
-
 
 (defn all [tenant-conn]
   (response {"tiers" {"standard" (tier-policy {"numberOfExternaldatasets" 5
