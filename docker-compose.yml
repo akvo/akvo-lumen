@@ -35,6 +35,8 @@ services:
    build:
      context: ./windshaft
      dockerfile: Dockerfile-dev
+   environment:
+     - NODE_HEAPDUMP_OPTIONS=nosignal
    volumes:
       - ./windshaft/server:/tiler
       - ./windshaft/config:/config
