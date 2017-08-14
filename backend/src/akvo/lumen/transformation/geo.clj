@@ -21,9 +21,8 @@
 (defmethod engine/apply-operation :core/generate-geopoints
   [tenant-conn table-name columns op-spec]
   (try
-    (let [{:strs [columnNameLat columnNameLong]} (engine/args op-spec)
+    (let [{:strs [columnNameLat columnNameLong columnTitleGeo]} (engine/args op-spec)
           column-name-geo (engine/next-column-name columns)
-          column-title-geo (format "Geopoints (%s)" column-name-geo)
           opts {:table-name table-name :column-name-geo column-name-geo}]
       (jdbc/with-db-transaction [conn tenant-conn]
         (add-geometry-column conn opts)
@@ -32,7 +31,7 @@
       ;; TODO - remove original lat/long columns
       {:success? true
        :execution-log [(format "Generated geopoints for %s" table-name)]
-       :columns (conj columns {"title" column-title-geo
+       :columns (conj columns {"title" columnTitleGeo
                                "type" "geopoint"
                                "sort" nil
                                "hidden" false

@@ -397,6 +397,7 @@
                                          :transformation {"op" "core/generate-geopoints"
                                                           "args" {"columnNameLat" "c2"
                                                                   "columnNameLong" "c3"
+                                                                  "columnTitleGeo" "Geopoints"
                                                                   "columnTypeLat" "number"
                                                                   "columnTypeLong" "number"}
                                                           "onError" "fail"}})]
