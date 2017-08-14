@@ -2,10 +2,6 @@
 -- :doc Creates a PostGIS geometry column (identifiers must be quoted)
 SELECT AddGeometryColumn (:table-name, :column-name-geo, 4326, 'POINT', 2)
 
--- :name set-column-title :!
--- :doc Sets a column title on the given column
--- ??
-
 -- :name generate-geopoints :!
 -- :doc Populates the given PostGIS geometry column from the given latitude and longitude columns
 UPDATE :i:table-name
