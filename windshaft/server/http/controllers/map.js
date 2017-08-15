@@ -166,6 +166,20 @@ MapController.prototype.create = function(req, res, prepareConfigFn) {
         prepareConfigFn,
         function initLayergroup(err, requestMapConfig) {
             assert.ifError(err);
+
+            // Making it available to downstream
+            req.params.dbhost = req.headers['x-db-host'];
+            req.params.dbuser = req.headers['x-db-user'];
+            req.params.dbpassword = req.headers['x-db-password'];
+            req.params.dbport = req.headers['x-db-port'];
+
+            // Storing it in Redis
+            requestMapConfig.db_credential = { dbhost: req.headers['x-db-host'],
+                                               dbuser: req.headers['x-db-user'],
+                                               dbpassword: req.headers['x-db-password'],
+                                               dbport: req.headers['x-db-port']};
+
+
             var mapConfig = MapConfig.create(requestMapConfig);
             self.mapBackend.createLayergroup(
                 mapConfig, req.params, new DummyMapConfigProvider(mapConfig, req.params), this
@@ -217,10 +231,28 @@ MapController.prototype.tileOrLayer = function (req, res) {
         function mapController$prepareParams() {
             self._app.req2params(req, this);
         },
-        function mapController$getTile(err) {
+        function loadMapConfig(err) {
             if ( err ) {
                 throw err;
             }
+            mapConfigProvider = new MapStoreMapConfigProvider(self.mapStore, req.params);
+            mapConfigProvider.getMapConfig(this);
+        },
+        function setDbConfig(err, mapConfig, params, context) {
+                if (err) {
+                        throw err;
+                }
+                req.params.dbhost = mapConfig.obj().db_credential.dbhost;
+                req.params.dbuser = mapConfig.obj().db_credential.dbuser;
+                req.params.dbpassword = mapConfig.obj().db_credential.dbpassword;
+                req.params.dbport = mapConfig.obj().db_credential.dbport;
+                return 2;
+        },
+        function mapController$getTile(err, mapConfigProvider) {
+            if ( err ) {
+                throw err;
+            }
+            // TODO: we are creating the map config twice
             self.tileBackend.getTile(new MapStoreMapConfigProvider(self.mapStore, req.params), req.params, this);
         },
         function mapController$finalize(err, tile, headers, times) {

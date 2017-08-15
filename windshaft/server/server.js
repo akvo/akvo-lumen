@@ -16,7 +16,6 @@ global.environment  = require('../config/environments/' + ENV);
 // TODO: Fix XXX LastModified fetch error: TypeError: Cannot read property 'length' of undefined
 // TODO: mml-builder has a use_workers flag in line 40
 
-
 var config = {
     base_url_mapconfig: '/:dbname/layergroup',
     grainstore: {
@@ -33,12 +32,6 @@ var config = {
 
         // this is in case you want to test sql parameters eg ...png?sql=select * from my_table limit 10
         req.params =  _.extend({}, req.params);
-
-        // Set PostgreSQL setting (from environment)
-        req.params.dbhost = global.environment.postgres.host;
-        req.params.dbuser = global.environment.postgres.user;
-        req.params.dbpassword = global.environment.postgres.password;
-        req.params.dbport = global.environment.postgres.port;
 
         _.extend(req.params, req.query);
 

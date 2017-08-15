@@ -71,12 +71,14 @@
 
                 var baseUrl = $('#baseurl').val();
                 var mapConfig = $('#mapconfig').val().replace(/[\r\n]/gm,"");
-                var authToken = $('#authtoken').val();
 
                 $.ajax({
                   url: baseUrl,
                   headers: {
-                    'Authorization': 'Bearer ' + authToken,
+                    'X-DB-HOST': $('#dbhost').val(),
+                    'X-DB-USER': $('#dbuser').val(),
+                    'X-DB-PASSWORD': $('#dbpassword').val(),
+                    'X-DB-PORT': $('#dbport').val(),
                     'Content-Type': 'application/json',
                   },
                   type: 'POST',
@@ -114,7 +116,10 @@ to default value
 </p>
 
 <p>
-Auth token: <input id="authtoken" type="text" size="42">
+DB host: <input id="dbhost" type="text" size="20" value="postgres">
+DB user: <input id="dbuser" type="text" size="20" value="lumen">
+DB password: <input id="dbpassword" type="text" size="20" value="password">
+DB port: <input id="dbport" type="text" size="5" value="5432">
 <br />
 Base URL: <input type="text" size="40" id="baseurl">
 <input type="button" id="update_map" value="Go">

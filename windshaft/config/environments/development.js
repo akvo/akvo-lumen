@@ -1,10 +1,4 @@
 module.exports.name = 'development';
-module.exports.postgres = {
-    user: 'lumen',
-    password: 'password',
-    host: 'postgres',
-    port: 5432
-};
 module.exports.redis = {
 // TODO: it emits some events. See if they are published somewhere already of it we should subscribe to them
 // see https://github.com/CartoDB/node-redis-mpool/blob/master/index.js#L26
