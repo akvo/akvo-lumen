@@ -61,6 +61,11 @@ class DatasetControls extends Component {
                     value: 'merge-datasets',
                     customClass: 'notImplemented',
                   },
+                  {
+                    label: 'Generate geopoints',
+                    value: 'generate-geopoints',
+                    customClass: 'notImplemented',
+                  },
                 ]}
                 onOptionSelected={(item) => {
                   this.onEditorToggleClick();

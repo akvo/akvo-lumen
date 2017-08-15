@@ -1,3 +1,3 @@
-FROM postgres:9.5
+FROM mdillon/postgis:9.6
 
 ADD ./provision /docker-entrypoint-initdb.d/
