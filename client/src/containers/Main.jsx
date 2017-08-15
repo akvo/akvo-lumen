@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import WorkspaceNav from '../components/WorkspaceNav';
 import Modal from './Modal';
 import Notification from './Notification';
 
@@ -10,22 +9,21 @@ require('../styles/style.global.scss');
 require('./Main.scss');
 require('fixed-data-table-2/dist/fixed-data-table.css');
 
-function Main({ location, children, notification }) {
+
+function Main({ content, sidebar, notification }) {
   return (
     <div className="Main">
       {notification && <Notification {...notification} />}
-      <WorkspaceNav
-        location={location}
-      />
-      {children}
+      {sidebar}
+      {content}
       <Modal />
     </div>
   );
 }
 
 Main.propTypes = {
-  children: PropTypes.element,
-  location: PropTypes.object,
+  content: PropTypes.object,
+  sidebar: PropTypes.object,
   notification: PropTypes.object,
 };
 

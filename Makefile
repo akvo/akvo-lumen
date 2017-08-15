@@ -2,6 +2,8 @@
 gcloud-auth:
 	gcloud auth application-default login
 
+project-switch:
+	gcloud config set project akvo-lumen
 
 # Dev
 

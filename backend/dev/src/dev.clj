@@ -13,7 +13,7 @@
             [duct.util.repl :refer [setup test cljs-repl] :as duct-repl]
             [duct.util.system :refer [load-system]]
             [reloaded.repl :refer [system init start stop go reset]])
-  (:import  org.postgresql.util.PSQLException))
+  (:import [org.postgresql.util PSQLException PGobject]))
 
 (defn new-system []
   (load-system (keep io/resource
@@ -35,7 +35,11 @@
   "Helper function that will seed tenant to the tenants table."
   [db tenant]
   (try
-    (jdbc/insert! db "tenants" tenant)
+    (let [{:keys [id]} (first (jdbc/insert! db "tenants" (dissoc tenant :plan)))]
+      (jdbc/insert! db "plan" {:tenant id
+                               :tier (doto (org.postgresql.util.PGobject.)
+                                       (.setType "tier")
+                                       (.setValue (:plan tenant)))}))
     (catch PSQLException e
       (println "Seed data already loaded."))))
 
@@ -45,7 +49,7 @@
   (let [db-uri (-> (lumen-migrate/construct-system)
                    :config :db :uri)]
     (doseq [tenant (->> "seed.edn" io/resource slurp edn/read-string
-                         :tenant-manager :tenants)]
+                        :tenant-manager :tenants)]
       (seed-tenant {:connection-uri db-uri} tenant))))
 
 
