@@ -1,6 +1,6 @@
 (ns akvo.lumen.lib.resource-impl
   (:require [hugsql.core :as hugsql]
-            [ring.util.response :refer [not-found response]]))
+            [ring.util.response :refer [response]]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/resource.sql")
 

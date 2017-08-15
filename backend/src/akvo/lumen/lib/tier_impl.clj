@@ -1,6 +1,6 @@
 (ns akvo.lumen.lib.tier-impl
   (:require
-   [ring.util.response :refer [not-found response]]))
+   [ring.util.response :refer [response]]))
 
 (defn all [tenant-conn]
   (response {"tiers" {"standard" {"numberOfExternalDatasets" 5
