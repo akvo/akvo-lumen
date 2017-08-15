@@ -16,25 +16,3 @@ CREATE TABLE plan (
 INSERT INTO plan (tenant, tier)
 SELECT id, 'standard'
 FROM tenants
-
-
--- CREATE OR REPLACE FUNCTION public.end_plan (t int)
--- RETURNS trigger AS
--- $$
--- BEGIN
-
---         UPDATE plan SET ends = now() WHERE tenant = OLD.t AND ends = 'infinity';
---         RETURN NULL;
--- END;
--- $$
--- LANGUAGE 'plpgsql';
-
--- CREATE TRIGGER end_plan
--- BEFORE INSERT ON plan
--- EXECUTE PROCEDURE end_plan();
-
--- DROP TRIGGER IF EXISTS tenants_history ON tenants CASCADE;
--- DROP TABLE IF EXISTS history.tenants;
-
--- ALTER TABLE tenants ADD COLUMN plan tier DEFAULT 'standard';
--- ALTER TABLE tenants ADD COlUMN plan text DEFAULT 'standard';

@@ -10,7 +10,7 @@ function resourceRuleDescription(resourceKey) {
     case 'numberOfVisualisations':
       description = 'Number of visualisations';
       break;
-    case 'dataOfExternalDatasets':
+    case 'numberOfExternalDatasets':
       description = 'Number of external datasets';
       break;
     default:
@@ -52,7 +52,7 @@ class Resources extends Component {
     this.state = {
       plan: {},
       resources: {},
-      tier: {},
+      tiers: {},
     };
     this.getResources = this.getResources.bind(this);
     this.getTiers = this.getTiers.bind(this);
@@ -76,32 +76,14 @@ class Resources extends Component {
   }
 
   render() {
-    /* const currentTierLabel = this.state.plan.tier; */
-    let currentPlan = null;
-    currentPlan = this.state.plan;
-    let currentTierLabel = null;
-    currentTierLabel = this.state.plan.tier;
-
-    /* const tiers = this.state.tiers; */
+    const currentPlan = this.state.plan.tier;
+    const tiers = this.state.tiers;
     const resources = this.state.resources;
-    /* let currentTier = null;
-    console.log(this.currentTierLabel);
-    */
-    // console.log(this.state);
-    console.log(currentTierLabel);
-
-    /*
-    if (tiers !== undefined && currentTierLabel !== undefined) {
-      currentTier = tiers.filter(tier =>
-        currentTierLabel === tier.tier
-      )[0];
-    }
-    */
 
     return (
       <div className="resourceContainer">
-        Plan: {currentTierLabel}
-        <ResourceList resources={resources} tier={currentPlan} />
+        Plan: {currentPlan}
+        <ResourceList resources={resources} tier={tiers[currentPlan]} />
       </div>
     );
   }
