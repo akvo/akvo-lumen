@@ -10,31 +10,31 @@
 
 (defn all [tenant-conn]
   (lib/ok (all-visualisations tenant-conn
-            {}
-            {}
-            {:identifiers identity})))
+                              {}
+                              {}
+                              {:identifiers identity})))
 
 
 (defn create [tenant-conn body jwt-claims]
   (let [id (squuid)
         v (first (upsert-visualisation tenant-conn
-                   {:id id
-                    :dataset-id (get body "datasetId")
-                    :type (get body "visualisationType")
-                    :name (get body "name")
-                    :spec (get body "spec")
-                    :author jwt-claims}))]
+                                       {:id id
+                                        :dataset-id (get body "datasetId")
+                                        :type (get body "visualisationType")
+                                        :name (get body "name")
+                                        :spec (get body "spec")
+                                        :author jwt-claims}))]
     (lib/ok (assoc body
-              "id" (str id)
-              "status" "OK"
-              "created" (:created v)
-              "modified" (:modified v)))))
+                   "id" (str id)
+                   "status" "OK"
+                   "created" (:created v)
+                   "modified" (:modified v)))))
 
 (defn fetch [tenant-conn id]
   (if-let [v (visualisation-by-id tenant-conn
-               {:id id}
-               {}
-               {:identifiers identity})]
+                                  {:id id}
+                                  {}
+                                  {:identifiers identity})]
     (lib/ok (dissoc v :author))
     (lib/not-found {:error "Not found"})))
 
