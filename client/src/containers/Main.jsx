@@ -30,6 +30,7 @@ Main.propTypes = {
 function mapStateToProps(state) {
   return {
     notification: state.notification,
+    modalVisible: state.activeModal != null,
   };
 }
 

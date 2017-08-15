@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 import * as tus from 'tus-js-client';
 import * as auth from '../../../auth';
 import ProgressBar from '../../common/ProgressBar';
@@ -14,15 +15,15 @@ const handleDragOver = (evt) => {
   evt.preventDefault();
 };
 
-export default class DataFileDataSourceSettings extends Component {
+export function isValidSource(source) {
+  return (
+    source.kind === 'DATA_FILE' &&
+    source.url &&
+    source.fileName
+  );
+}
 
-  static isValidSource(source) {
-    return (
-      source.kind === 'DATA_FILE' &&
-      source.url &&
-      source.fileName
-    );
-  }
+export default class DataFileDataSourceSettings extends Component {
 
   constructor() {
     super();
@@ -85,10 +86,11 @@ export default class DataFileDataSourceSettings extends Component {
         onDrop={this.handleDrop}
       >
         <p className="dataFileUploadMessage">
-          <i className="fa fa-download" aria-hidden="true" /> Drop file anywhere to upload
+          <i className="fa fa-download" aria-hidden="true" />{' '}
+          <FormattedMessage id="drop_file_anywhere" />
         </p>
         <p className="dataFileUploadMessage">
-          or
+          <FormattedMessage id="or" />
         </p>
         <input
           className={`dataFileUploadInput${this.isProgressBarVisible() ? ' progressActive' : ''}`}
@@ -109,7 +111,7 @@ export default class DataFileDataSourceSettings extends Component {
                 hasColumnHeaders: this.datasetHeaderStatusToggle.checked,
               });
             }}
-          /> File has column headers
+          /> <FormattedMessage id="file_has_column_headers" />
         </p>
         {this.isProgressBarVisible() &&
           <div>

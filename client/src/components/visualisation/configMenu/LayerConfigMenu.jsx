@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 import SelectMenu from '../../common/SelectMenu';
 import SelectInput from './SelectInput';
 import { getPointColorValues, getPointColorMappingSortFunc } from '../../../utilities/chart';
@@ -81,7 +82,13 @@ export default class LayerConfigMenu extends Component {
               />
             </div>
             <ButtonRowInput
-              options={['geo-location', 'geo-shape']}
+              options={[{
+                label: <FormattedMessage id="geo_location" />,
+                value: 'geo-location',
+              }, {
+                label: <FormattedMessage id="geo_shape" />,
+                value: 'geo-shape',
+              }]}
               disabled
               selected="geo-location"
               label="Layer type"
@@ -155,7 +162,10 @@ export default class LayerConfigMenu extends Component {
             />
             <hr />
             <ButtonRowInput
-              options={['top', 'right', 'bottom', 'left']}
+              options={['top', 'right', 'bottom', 'left'].map(item => ({
+                label: <FormattedMessage id={item} />,
+                value: item,
+              }))}
               label="Position"
               disabled={false}
               selected={layer.legend.position}
@@ -231,14 +241,20 @@ export default class LayerConfigMenu extends Component {
           >
             <h3>Marker</h3>
             <ButtonRowInput
-              options={['circle', 'square', 'triangle']}
+              options={['circle', 'square', 'triangle'].map(item => ({
+                label: <FormattedMessage id={item} />,
+                value: item,
+              }))}
               disabled
               selected="circle"
               label="Shape"
               onChange={() => null}
             />
             <ButtonRowInput
-              options={['fill', 'outline']}
+              options={['fill', 'outline'].map(item => ({
+                label: <FormattedMessage id={item} />,
+                value: item,
+              }))}
               disabled
               selected="fill"
               label="Style"
@@ -246,7 +262,10 @@ export default class LayerConfigMenu extends Component {
               buttonSpacing="2rem"
             />
             <ButtonRowInput
-              options={['1', '2', '3', '4', '5']}
+              options={['1', '2', '3', '4', '5'].map(item => ({
+                label: item,
+                value: item,
+              }))}
               disabled={false}
               selected={layer.pointSize ? layer.pointSize.toString() : null}
               label="Size"
@@ -255,7 +274,10 @@ export default class LayerConfigMenu extends Component {
             <hr />
             <h3>Color</h3>
             <ButtonRowInput
-              options={['solid', 'gradient']}
+              options={['solid', 'gradient'].map(item => ({
+                label: <FormattedMessage id={item} />,
+                value: item,
+              }))}
               disabled
               selected="solid"
               label="Color option"

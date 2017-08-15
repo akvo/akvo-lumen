@@ -19,5 +19,5 @@ export default function ModalHeader({ title, onCloseModal }) {
 
 ModalHeader.propTypes = {
   onCloseModal: PropTypes.func.isRequired,
-  title: PropTypes.string,
+  title: PropTypes.oneOfType([PropTypes.string, PropTypes.element]),
 };

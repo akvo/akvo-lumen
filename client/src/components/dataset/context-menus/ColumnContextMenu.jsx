@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 import Immutable from 'immutable';
 import ContextMenu from '../../common/ContextMenu';
 
@@ -67,48 +68,48 @@ const actions = Immutable.fromJS({
 });
 
 const commonOptions = [{
-  label: 'Sort',
+  label: <FormattedMessage id="sort" />,
   value: 'sort',
   subMenu: [{
-    label: 'Ascending',
+    label: <FormattedMessage id="ascending" />,
     value: 'sort-ascending',
   }, {
-    label: 'Descending',
+    label: <FormattedMessage id="descending" />,
     value: 'sort-descending',
   }],
 }, {
-  label: 'Rename Column',
+  label: <FormattedMessage id="rename_column" />,
   value: 'rename-column',
 }, {
-  label: 'Delete Column',
+  label: <FormattedMessage id="delete_column" />,
   value: 'delete-column',
 }];
 
 const dataTypeOptions = {
   text: [{
-    label: 'Filter',
+    label: <FormattedMessage id="filter" />,
     value: 'core/filter-column',
   }, {
-    label: 'Whitespace',
+    label: <FormattedMessage id="whitespace" />,
     value: 'whitespace',
     subMenu: [{
-      label: 'Remove leading and trailing whitespace',
+      label: <FormattedMessage id="remove_leading_and_trailing_whitespace" />,
       value: 'core/trim',
     }, {
-      label: 'Remove double spaces',
+      label: <FormattedMessage id="remove_double_space" />,
       value: 'core/trim-doublespace',
     }],
   }, {
-    label: 'Change case',
+    label: <FormattedMessage id="change_case" />,
     value: 'change-case',
     subMenu: [{
-      label: 'To Uppercase',
+      label: <FormattedMessage id="to_uppercase_label" />,
       value: 'core/to-uppercase',
     }, {
-      label: 'To Lowercase',
+      label: <FormattedMessage id="to_lowercase_label" />,
       value: 'core/to-lowercase',
     }, {
-      label: 'To Titlecase',
+      label: <FormattedMessage id="to_titlecase_label" />,
       value: 'core/to-titlecase',
     }],
   }],

@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { Link } from 'react-router';
+import { FormattedMessage } from 'react-intl';
 import NavLink from './workspace-nav/NavLink';
 import OrganizationMenu from './workspace-nav/OrganizationMenu';
 import CollectionsList from './workspace-nav/CollectionsList';
@@ -76,7 +77,7 @@ class WorkspaceNav extends Component {
                 className="library subtitle"
                 isSelected={activeSubtitle === 'library'}
               >
-                Library
+                <FormattedMessage id="library" />
               </NavLink>
             </li>
             <li>
@@ -94,7 +95,7 @@ class WorkspaceNav extends Component {
                 className="activity subtitle notImplemented"
                 isSelected={activeSubtitle === 'activity'}
               >
-                Activity
+                <FormattedMessage id="activity" />
               </NavLink>
             </li>
           </ul>

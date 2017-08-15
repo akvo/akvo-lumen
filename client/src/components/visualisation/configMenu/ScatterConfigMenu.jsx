@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 import SelectInput from './SelectInput';
 import LabelInput from './LabelInput';
 import Subtitle from './Subtitle';
@@ -51,10 +52,10 @@ export default function ScatterConfigMenu(props) {
 
   return (
     <div>
-      <Subtitle>Y-Axis</Subtitle>
+      <Subtitle><FormattedMessage id="y_axis" /></Subtitle>
       <SelectInput
-        placeholder="Select a metric column"
-        labelText="Metric column"
+        placeholderId="select_a_metric_column"
+        labelTextId="metric_column"
         choice={spec.metricColumnY !== null ? spec.metricColumnY.toString() : null}
         name="yColumnInput"
         options={columnOptions.filter(column => column.type === 'number' || column.type === 'date')}
@@ -70,17 +71,17 @@ export default function ScatterConfigMenu(props) {
       />
       <LabelInput
         value={spec.axisLabelY !== null ? spec.axisLabelY.toString() : null}
-        placeholder="Y Axis label"
+        placeholderId="y_axis_label"
         name="yLabel"
         onChange={event => onChangeSpec({
           axisLabelY: event.target.value.toString(),
           axisLabelYFromUser: true,
         })}
       />
-      <Subtitle>X-Axis</Subtitle>
+      <Subtitle><FormattedMessage id="x_axis" /></Subtitle>
       <SelectInput
-        placeholder="Select a metric column"
-        labelText="Metric column"
+        placeholderId="select_a_metric_column"
+        labelTextId="metric_column"
         choice={spec.metricColumnX !== null ? spec.metricColumnX.toString() : null}
         name="xColumnInput"
         options={columnOptions.filter(column => column.type === 'number' || column.type === 'date')}
@@ -96,17 +97,17 @@ export default function ScatterConfigMenu(props) {
       />
       <LabelInput
         value={spec.axisLabelX !== null ? spec.axisLabelX.toString() : null}
-        placeholder="X Axis label"
+        placeholderId="x_axis_label"
         name="xLabel"
         onChange={event => onChangeSpec({
           axisLabelX: event.target.value.toString(),
           axisLabelXFromUser: true,
         })}
       />
-      <Subtitle>Aggregation</Subtitle>
+      <Subtitle><FormattedMessage id="aggregation" /></Subtitle>
       <SelectInput
-        placeholder="Select a data column to group by"
-        labelText="Bucket column"
+        placeholderId="select_a_data_column_to_group_by"
+        labelTextId="bucket_column"
         choice={spec.bucketColumn !== null ?
           spec.bucketColumn.toString() : null}
         name="xGroupColumnMenu"
@@ -123,9 +124,9 @@ export default function ScatterConfigMenu(props) {
         }}
       />
       <SelectInput
-        placeholder={spec.bucketColumn !== null ?
-          'Choose aggregation type...' : 'Must choose bucket column first'}
-        labelText="Aggregation type"
+        placeholderId={spec.bucketColumn !== null ?
+          'choose_aggregation_type' : 'must_choose_bucket_column_first'}
+        labelTextId="aggregation_type"
         choice={spec.bucketColumn !== null ?
           spec.metricAggregation.toString() : null}
         name="yAggregationMenu"
@@ -141,10 +142,10 @@ export default function ScatterConfigMenu(props) {
           onChangeSpec(change);
         }}
       />
-      <Subtitle>Popup Label</Subtitle>
+      <Subtitle><FormattedMessage id="popup_label" /></Subtitle>
       <SelectInput
-        placeholder="Select a popup label column"
-        labelText="Popup label column"
+        placeholderId="select_a_popup_label_column"
+        labelTextId="popup_label_column"
         choice={getPopupLabelChoice(spec)}
         name="datapointLabelColumnMenu"
         options={columnOptions}

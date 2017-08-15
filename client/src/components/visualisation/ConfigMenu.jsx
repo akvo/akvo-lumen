@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Immutable from 'immutable';
+import { FormattedMessage } from 'react-intl';
 import SelectMenu from '../common/SelectMenu';
 import FilterMenu from './configMenu/FilterMenu';
 import Subtitle from './configMenu/Subtitle';
@@ -45,39 +46,39 @@ const getSelectMenuOptionsFromColumnList = (columns = Immutable.List()) =>
 const aggregationOptions = [
   {
     value: 'mean',
-    label: 'mean',
+    labelId: 'mean',
   },
   {
     value: 'median',
-    label: 'median',
+    labelId: 'median',
   },
   {
     value: 'max',
-    label: 'max',
+    labelId: 'max',
   },
   {
     value: 'min',
-    label: 'min',
+    labelId: 'min',
   },
   {
     value: 'count',
-    label: 'count',
+    labelId: 'count',
   },
   {
     value: 'distinct',
-    label: 'count unique',
+    labelId: 'count_unique',
   },
   {
     value: 'sum',
-    label: 'sum',
+    labelId: 'sum',
   },
   {
     value: 'q1',
-    label: 'lower quartile',
+    labelId: 'lower_quartile',
   },
   {
     value: 'q3',
-    label: 'upper quartile',
+    labelId: 'upper_quartile',
   },
 ];
 
@@ -171,11 +172,11 @@ export default function ConfigMenu(props) {
             <ul>
               {visualisationTypes.map((vType, index) =>
                 <li
-                  className={`clickable typeButton ${vType.replace(/ /, '')}`}
+                  className={`clickable typeButton ${vType.replace(' ', '')}`}
                   key={index}
                   onClick={() => props.onChangeVisualisationType(vType)}
                 >
-                  {vType}
+                  <FormattedMessage id={vType} />
                 </li>
               )}
             </ul>
@@ -202,10 +203,10 @@ export default function ConfigMenu(props) {
                   disabled={visualisation.datasetId === null}
                 />
                 <div className="inputGroup">
-                  <label htmlFor="xDatasetMenu">Source dataset:</label>
+                  <label htmlFor="xDatasetMenu"><FormattedMessage id="source_dataset" />:</label>
                   <SelectMenu
                     name="xDatasetMenu"
-                    placeholder="Choose dataset..."
+                    placeholderId="choose_dataset"
                     value={visualisation.datasetId !== null ?
                     visualisation.datasetId.toString() : null}
                     options={datasetOptions}
@@ -225,8 +226,8 @@ export default function ConfigMenu(props) {
                   className="saveChanges clickable"
                   onClick={props.onSaveVisualisation}
                 >
-                Save
-              </button>
+                  <FormattedMessage id="save" />
+                </button>
               </div>
           }
           </div>

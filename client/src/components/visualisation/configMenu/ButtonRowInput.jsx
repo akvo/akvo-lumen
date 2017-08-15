@@ -13,16 +13,16 @@ export default function ButtonRowInput(props) {
       <div
         className={`row ${props.buttonSpacing ? 'manualSpacing' : ''}`}
       >
-        {options.map((buttonText, index) =>
+        {options.map(({ value, label: buttonText }, index) =>
           <button
             key={index}
             className={`button
-              ${selected === buttonText ? 'selected' : 'unSelected'}
+              ${selected === value ? 'selected' : 'unSelected'}
               ${disabled ? 'disabled' : 'clickable'}`}
             style={{
               marginRight: props.buttonSpacing ? props.buttonSpacing : 0,
             }}
-            onClick={() => props.onChange(buttonText)}
+            onClick={() => props.onChange(value)}
           >
             {buttonText}
           </button>

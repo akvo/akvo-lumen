@@ -199,7 +199,7 @@ Examples:
 {"op": "core/derive",
  "args": {"newColumnTitle": "New title",
           "newColumnType": "text", // or "date", "number"
-	  "code": "row['a'] + row['b']"},
+          "code": "row['a'] + row['b']"},
  "onError": "fail"}
 ````
 
@@ -223,4 +223,18 @@ Examples:
 {"op": "core/rename-column",
  "args": {"columnName": "c4",
           "newColumnTitle": "New Title"}}
+```
+
+### core/generate-geopoints
+
+* args
+  * columnNameLat (string): The column containing latitude data
+  * columnNameLong (string): The column containing longitude data
+  * columnTitleGeo (string): The title of the geopoint column to be generated
+
+```
+{"op": "core/generate-geopoints",
+ "args": {"columnNameLat": "c2",
+          "columnNameLong": "c3",
+          "columnTitleGeo": "Geopoints"}}
 ```

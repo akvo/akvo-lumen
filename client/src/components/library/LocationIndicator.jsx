@@ -12,5 +12,5 @@ export default function LocationIndicator({ location }) {
 }
 
 LocationIndicator.propTypes = {
-  location: PropTypes.string.isRequired,
+  location: PropTypes.element.isRequired,
 };

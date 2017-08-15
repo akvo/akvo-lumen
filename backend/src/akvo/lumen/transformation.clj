@@ -17,7 +17,8 @@
     akvo.lumen.transformation.combine
     akvo.lumen.transformation.derive
     akvo.lumen.transformation.rename-column
-    akvo.lumen.transformation.delete-column])
+    akvo.lumen.transformation.delete-column
+    akvo.lumen.transformation.geo])
 
 ;; Load transformation namespaces
 (clojure.core/apply require transformation-namespaces)

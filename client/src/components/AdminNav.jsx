@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { Link } from 'react-router';
+import { FormattedMessage } from 'react-intl';
 import NavLink from './workspace-nav/NavLink';
 import OrganizationMenu from './workspace-nav/OrganizationMenu';
 
@@ -38,7 +39,7 @@ const AdminNav = function AdminNav(props) {
               className="users subtitle"
               isSelected={activeSubtitle === 'users'}
             >
-              Users
+              <FormattedMessage id="users" />
             </NavLink>
           </li>
           <li>
@@ -47,7 +48,7 @@ const AdminNav = function AdminNav(props) {
               className="resources subtitle"
               isSelected={activeSubtitle === 'resources'}
             >
-              Resources
+              <FormattedMessage id="resources" />
             </NavLink>
           </li>
         </ul>

@@ -1,7 +1,7 @@
 @import "../../styles/modules/importAll";
 
 .LibraryHeader {
-    height: 9rem;
+    height: 4.1rem;
     display: flex;
     flex-direction: column;
 
@@ -20,6 +20,7 @@
     }
 
     .rowSecondary {
+        display: none;
         flex: 3;
         border-bottom: 1px solid rgba($lightGrey, 1);
     }
@@ -46,6 +47,7 @@
         button {
             flex: 1;
             text-align: center;
+
             @media (min-width: 1100px) {
                 margin-right: 10px;
             }
