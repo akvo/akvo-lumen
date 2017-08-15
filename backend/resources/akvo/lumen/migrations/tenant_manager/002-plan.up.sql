@@ -8,8 +8,11 @@ CREATE TABLE plan (
        tenant int REFERENCES tenants (id) NOT NULL,
        tier tier DEFAULT 'standard',
        created timestamptz DEFAULT now(),
-       ends timestamptz DEFAULT 'infinity'
+       ends timestamptz DEFAULT 'infinity',
+       UNIQUE(tenant, ends)
 );
+
+
 -- ;;
 
 -- Default plan
