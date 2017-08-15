@@ -21,7 +21,7 @@ WHERE tenants.label = :label AND ends = 'infinity';
 UPDATE plan p
 SET ends = now()
 FROM tenants t
-WHERE p.tenant = t.id AND t.label = :label;
+WHERE p.tenant = t.id AND t.label = :label AND p.ends = 'infinity';
 
 -- :name add-new-plan :! :n
 -- :doc Add plan

@@ -13,7 +13,6 @@ CREATE TABLE plan (
 
 CREATE UNIQUE INDEX plan_tenant_ends_key ON plan (tenant, ends)
 WHERE ends = 'infinity';
-
 -- ;;
 
 -- Default plan
