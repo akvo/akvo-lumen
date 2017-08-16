@@ -167,17 +167,16 @@ MapController.prototype.create = function(req, res, prepareConfigFn) {
         function initLayergroup(err, requestMapConfig) {
             assert.ifError(err);
 
-            // Making it available to downstream
-            req.params.dbhost = req.headers['x-db-host'];
-            req.params.dbuser = req.headers['x-db-user'];
-            req.params.dbpassword = req.headers['x-db-password'];
-            req.params.dbport = req.headers['x-db-port'];
 
             // Storing it in Redis
             requestMapConfig.db_credentials = { dbhost: req.headers['x-db-host'],
                                                 dbuser: req.headers['x-db-user'],
                                                 dbpassword: req.headers['x-db-password'],
                                                 dbport: req.headers['x-db-port']};
+
+            // Making it available to downstream
+            _.extend(req.params, requestMapConfig.db_credentials);
+
 
 
             var mapConfig = MapConfig.create(requestMapConfig);
