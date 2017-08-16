@@ -1,14 +1,15 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 
 function sourceComponent(source) {
   switch (source.kind) {
     case 'DATA_FILE':
-      return <span>Data file</span>;
+      return <span><FormattedMessage id="data_file" /></span>;
     case 'LINK':
-      return <span>Link</span>;
+      return <span><FormattedMessage id="link" /></span>;
     case 'AKVO_FLOW':
-      return <span>Akvo Flow</span>;
+      return <span><FormattedMessage id="akvo_flow" /></span>;
     default:
       return <span>{source.kind}</span>;
   }
@@ -45,13 +46,13 @@ export default class Settings extends Component {
     return (
       <div className="Settings">
         <dl>
-          <dt>Source: </dt>
+          <dt><FormattedMessage id="source" />: </dt>
           <dd>{sourceComponent(dataset.source)}</dd>
 
-          <dt>File name: </dt>
+          <dt><FormattedMessage id="file_name" />: </dt>
           <dd>{fileName(dataset.source)}</dd>
 
-          <dt>Dataset name: </dt>
+          <dt><FormattedMessage id="dataset_name" />: </dt>
           <dd>
             <input
               defaultValue={dataset.name}

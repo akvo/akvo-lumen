@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 import ReactGridLayout from 'react-grid-layout';
 import DashboardVisualisationList from './DashboardVisualisationList';
 import DashboardCanvasItem from './DashboardCanvasItem';
@@ -228,18 +229,18 @@ export default class DashboardEditor extends Component {
               className="clickable addText"
               onClick={() => this.handleEntityToggle({ content: '' }, 'text')}
             >
-              Add new text element
+              <FormattedMessage id="add_new_text_element" />
             </button>
             <button
               className="clickable save"
               onClick={this.handleSave}
             >
-              Save
+              <FormattedMessage id="save" />
             </button>
           </div>
           {getArrayFromObject(dashboard.entities).length === 0 &&
             <div className="blankDashboardHelpText">
-              Click a visualisation in the visualisation list to add it to the dashboard.
+              <FormattedMessage id="blank_dashboard_help_text" />
             </div>
           }
           <div

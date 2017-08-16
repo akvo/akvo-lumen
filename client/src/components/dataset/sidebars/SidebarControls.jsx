@@ -1,11 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 
 export default function SidebarControls({
   onClose,
   onApply,
-  positiveButtonText = 'Apply',
-  negativeButtonText = 'Cancel',
+  positiveButtonText = <FormattedMessage id="apply" />,
+  negativeButtonText = <FormattedMessage id="cancel" />,
 }) {
   const isDisabled = onApply == null;
   return (
@@ -28,8 +29,8 @@ export default function SidebarControls({
 }
 
 SidebarControls.propTypes = {
-  positiveButtonText: PropTypes.string,
-  negativeButtonText: PropTypes.string,
+  positiveButtonText: PropTypes.element,
+  negativeButtonText: PropTypes.element,
   onClose: PropTypes.func.isRequired,
   onApply: PropTypes.func,
 };

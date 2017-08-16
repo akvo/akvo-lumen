@@ -50,6 +50,7 @@
     "react-copy-to-clipboard": "^4.2.3",
     "react-dom": "15.5.4",
     "react-grid-layout": "^0.14.6",
+    "react-intl": "^2.3.0",
     "react-leaflet": "^1.2.0",
     "react-modal": "^1.5.2",
     "react-redux": "^4.4.6",
@@ -90,7 +91,7 @@
     "react-test-renderer": "^15.5.4",
     "system-bell-webpack-plugin": "^1.0.0",
     "webpack": "^1.13.3",
-    "webpack-dev-server": "^1.16.2"
+    "webpack-dev-server": "1.16.2"
   },
   "babel": {
     "env": {

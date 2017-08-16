@@ -56,7 +56,7 @@ export function init() {
             }
             resolve({
               profile: Object.assign({}, profile, { admin: keycloak.hasRealmRole(`akvo:lumen:${tenant}:admin`) }),
-              env: { flowApiUrl },
+              env: { flowApiUrl, keycloakURL },
             });
           }).error(() => {
             reject(new Error('Could not load user profile'));

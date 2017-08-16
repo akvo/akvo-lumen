@@ -1,47 +1,48 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 
 require('./SourceSelection.scss');
 
 const supportedFormats = [{
   kind: 'DATA_FILE',
   icon: '/assets/data-file.png',
-  label: 'Data file',
+  label: <FormattedMessage id="data_file" />,
   disabled: false,
 }, {
   kind: 'LINK',
   icon: '/assets/link.png',
-  label: 'Link',
+  label: <FormattedMessage id="link" />,
   disabled: false,
 }, {
   kind: 'DROPBOX',
   icon: '/assets/dropbox.png',
-  label: 'Dropbox',
+  label: <FormattedMessage id="dropbox" />,
   disabled: true,
 }, {
   kind: 'WORLD_BANK',
   icon: '/assets/world-bank.png',
-  label: 'World Bank',
+  label: <FormattedMessage id="world_bank" />,
   disabled: true,
 }, {
   kind: 'AKVO_RSR',
   icon: '/assets/akvo-rsr.png',
-  label: 'Akvo RSR',
+  label: <FormattedMessage id="akvo_rsr" />,
   disabled: true,
 }, {
   kind: 'AKVO_FLOW',
   icon: '/assets/akvo-flow.png',
-  label: 'Akvo Flow',
+  label: <FormattedMessage id="akvo_flow" />,
   disabled: false,
 }, {
   kind: 'GITHUB',
   icon: '/assets/github.png',
-  label: 'Github',
+  label: <FormattedMessage id="github" />,
   disabled: true,
 }, {
   kind: 'GOOGLE_DRIVE',
   icon: '/assets/google-drive.png',
-  label: 'Google Drive',
+  label: <FormattedMessage id="google_drive" />,
   disabled: true,
 }];
 

@@ -20,5 +20,5 @@ NavLink.propTypes = {
   to: PropTypes.string.isRequired,
   className: PropTypes.string,
   isSelected: PropTypes.bool,
-  children: PropTypes.string.isRequired,
+  children: PropTypes.element.isRequired,
 };

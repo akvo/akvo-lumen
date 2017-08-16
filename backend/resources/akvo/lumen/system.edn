@@ -17,30 +17,34 @@
   :job-execution #var akvo.lumen.endpoint.job-execution/endpoint
   :library #var akvo.lumen.endpoint.library/endpoint
   :public #var akvo.lumen.endpoint.public/endpoint
+  :resource #var akvo.lumen.endpoint.resource/endpoint
   :root #var akvo.lumen.endpoint.root/endpoint
   :share #var akvo.lumen.endpoint.share/endpoint
+  :tier #var akvo.lumen.endpoint.tier/endpoint
   :transformation #var akvo.lumen.endpoint.transformation/endpoint
   :user #var akvo.lumen.endpoint.user/endpoint
   :visualisation #var akvo.lumen.endpoint.visualisation/endpoint}
  :dependencies
  {:http [:app]
   :app [:aggregation :collection :dashboard :dataset :env :emailer :files :invite
-        :invite-verify :job-execution :library :public :root :share :transformation
-        :user :visualisation]
+        :invite-verify :job-execution :library :public :resource :root :share
+        :tier :transformation :user :visualisation]
   :tenant-manager [:db]
   :aggregation [:tenant-manager]
   :collection [:tenant-manager]
   :dashboard [:tenant-manager]
   :dataset [:tenant-manager :config]
-  :env [:config]
+  :env [:config :tenant-manager]
   :files [:config]
   :invite [:tenant-manager :keycloak :emailer :config]
   :invite-verify [:keycloak :tenant-manager :config]
   :job-execution [:tenant-manager]
   :library [:tenant-manager]
   :public [:tenant-manager]
+  :resource [:tenant-manager]
   :root [:tenant-manager]
   :share [:tenant-manager :config]
+  :tier [:tenant-manager]
   :transformation [:tenant-manager]
   :user [:keycloak]
   :visualisation [:tenant-manager]}

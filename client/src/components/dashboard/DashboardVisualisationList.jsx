@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 
 require('./DashboardVisualisationList.scss');
 
@@ -56,7 +57,7 @@ export default class DashboardVisualisationList extends Component {
           <div
             className="noVisualisationsMessage"
           >
-            No visualisations to show.
+            <FormattedMessage id="no_visualisations_to_show" />
           </div>
           :
           <div>
@@ -65,7 +66,7 @@ export default class DashboardVisualisationList extends Component {
                 <label
                   htmlFor="filterText"
                 >
-                  Filter list by title
+                  <FormattedMessage id="filter_list_by_title" />
                 </label>
                 <input
                   type="text"
@@ -79,7 +80,7 @@ export default class DashboardVisualisationList extends Component {
             <ul className="list">
               {visualisations.map(item =>
                 <li
-                  className={`listItem clickable ${item.visualisationType}
+                  className={`listItem clickable ${item.visualisationType.replace(' ', '')}
                   ${isOnDashboard(item) ? 'added' : ''}`}
                   key={item.id}
                   onClick={() => props.onEntityClick(item, 'visualisation')}
@@ -109,13 +110,13 @@ export default class DashboardVisualisationList extends Component {
             </ul>
             {(this.state.filterText && visualisations.length === 0) &&
               <div className="filterHelpText">
-                No visualisations match your filter.
+                <FormattedMessage id="no_visualisations_match_your_filter" />
                 <div className="buttonContainer">
                   <button
                     className="clickable"
                     onClick={() => this.setState({ filterText: '' })}
                   >
-                    Clear filter
+                    <FormattedMessage id="clear_filter" />
                   </button>
                 </div>
               </div>

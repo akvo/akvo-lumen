@@ -66,14 +66,14 @@
                    :resource-paths ["dev/resources" "test/resources"]
                    :repl-options   {:init-ns dev
                                     :init (do
-                                             (println "Starting BackEnd ...")
-                                             (go)
-                                             (migrate)
-                                             (seed)
-                                             (migrate))
+                                            (println "Starting BackEnd ...")
+                                            (go)
+                                            (migrate)
+                                            (seed)
+                                            (migrate))
                                     :host "0.0.0.0"
                                     :port 47480}
                    :env            {:port "3000"}}
    :project/test  {:resource-paths ["test/resources"]
                    :env
-                                   {:db {:uri "jdbc:postgresql://postgres/lumen?user=lumen&password=password"}}}})
+                   {:db {:uri "jdbc:postgresql://postgres/lumen?user=lumen&password=password"}}}})

@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 import CollectionListItem from './CollectionListItem';
 
 export default function CollectionsList({
@@ -23,7 +24,7 @@ export default function CollectionsList({
     <div className="CollectionsList">
       <div className="subtitleRow">
         <h3 className={subtitleClassName}>
-          Collections
+          <FormattedMessage id="collections" />
           <button
             onClick={onShowCreateCollectionModal}
             className="addCollection clickable button"

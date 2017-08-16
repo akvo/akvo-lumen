@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 import Immutable from 'immutable';
 import CodeMirror from 'react-codemirror';
 import esprima from 'esprima';
@@ -14,26 +15,26 @@ require('./DeriveColumn.scss');
 
 const typeOptions = [
   {
-    label: 'Text',
+    label: <FormattedMessage id="text" />,
     value: 'text',
   }, {
-    label: 'Number',
+    label: <FormattedMessage id="number" />,
     value: 'number',
   }, {
-    label: 'Date',
+    label: <FormattedMessage id="date" />,
     value: 'date',
   },
 ];
 
 const errorStrategies = [
   {
-    label: 'Leave cell empty',
+    label: <FormattedMessage id="leave_cell_empty" />,
     value: 'leave-empty',
   }, {
-    label: 'Abort transformation',
+    label: <FormattedMessage id="abort_transformation" />,
     value: 'fail',
   }, {
-    label: 'Delete row',
+    label: <FormattedMessage id="delete_row" />,
     value: 'delete-row',
   },
 ];
@@ -69,9 +70,13 @@ Code.propTypes = {
 function HelpText() {
   return (
     <div className="HelpText">
-      Derived columns are formulas written using a subset of Javascript where a single expression
-      is allowed and columns are referenced as <Code>{'row["Column Title"]'}</Code> or
-      alternatively if the title is a valid javascript identifier: <Code>row.title</Code>.
+      <FormattedMessage
+        id="js_helptext"
+        values={{
+          columnSyntax: <Code>{'row["Column Title"]'}</Code>,
+          title: <Code>row.title</Code>,
+        }}
+      />
     </div>
   );
 }
@@ -113,7 +118,7 @@ class CodeFeedback extends Component {
           <span className="feedbackMessage">
             {code.trim() === '' || isValidCode(code) ?
               '' :
-              'Invalid expression'}
+              <FormattedMessage id="invalid_expression" />}
           </span>
           <span>
             <HelpTextToggleButton onClick={() => this.toggleShowHelpText()} />
@@ -129,7 +134,7 @@ CodeFeedback.propTypes = {
   code: PropTypes.string.isRequired,
 };
 
-export default class DeriveColumn extends Component {
+class DeriveColumn extends Component {
   constructor() {
     super();
     this.state = {
@@ -166,7 +171,7 @@ export default class DeriveColumn extends Component {
   }
 
   render() {
-    const { onClose, onApply /* columns */ } = this.props;
+    const { onClose, onApply, intl } = this.props;
     const { transformation } = this.state;
     const args = transformation.get('args');
     const code = args.get('code');
@@ -175,14 +180,14 @@ export default class DeriveColumn extends Component {
         className="DataTableSidebar DeriveColumn"
       >
         <SidebarHeader onClose={onClose}>
-          Derive Column
+          <FormattedMessage id="derive_column" />
         </SidebarHeader>
         <div className="inputs">
           <div className="inputGroup">
             <label
               htmlFor="titleTextInput"
             >
-              New column title
+              <FormattedMessage id="new_column_title" />
             </label>
             <input
               value={args.get('newColumnTitle')}
@@ -197,7 +202,7 @@ export default class DeriveColumn extends Component {
             <label
               htmlFor="typeSelectInput"
             >
-              New column type
+              <FormattedMessage id="new_column_type" />
             </label>
             <SelectMenu
               name="columnName"
@@ -210,7 +215,7 @@ export default class DeriveColumn extends Component {
             <label
               htmlFor="errorStrategy"
             >
-              If transformation fails
+              <FormattedMessage id="if_transformation_fails" />
             </label>
             <SelectMenu
               name="errorStrategy"
@@ -221,10 +226,10 @@ export default class DeriveColumn extends Component {
           </div>
           <div className="inputGroup">
             <label htmlFor="code">
-              Javascript code
+              <FormattedMessage id="javascript_code" />
             </label>
             <CodeMirror
-              placeholder="type javascript expression here"
+              placeholder={intl.formatMessage({ id: 'type_javascript_expression_here' })}
               value={code}
               onChange={c => this.setTransformationProperty(['args', 'code'], c)}
               options={{
@@ -235,7 +240,7 @@ export default class DeriveColumn extends Component {
           </div>
         </div>
         <SidebarControls
-          positiveButtonText="Derive"
+          positiveButtonText={<FormattedMessage id="derive" />}
           onApply={this.isValidTransformation() ? () => onApply(this.state.transformation) : null}
           onClose={onClose}
         />
@@ -245,7 +250,10 @@ export default class DeriveColumn extends Component {
 }
 
 DeriveColumn.propTypes = {
+  intl: intlShape.isRequired,
   onClose: PropTypes.func.isRequired,
   onApply: PropTypes.func.isRequired,
   columns: PropTypes.object.isRequired,
 };
+
+export default injectIntl(DeriveColumn);

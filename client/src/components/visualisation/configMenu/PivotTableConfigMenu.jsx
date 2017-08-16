@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 import SelectInput from './SelectInput';
 import LabelInput from './LabelInput';
 import Subtitle from './Subtitle';
@@ -13,23 +14,23 @@ require('./PivotTableConfigMenu.scss');
 const aggregationOptions = [
   {
     value: 'mean',
-    label: 'mean',
+    labelId: 'mean',
   },
   {
     value: 'max',
-    label: 'max',
+    labelId: 'max',
   },
   {
     value: 'min',
-    label: 'min',
+    labelId: 'min',
   },
   {
     value: 'count',
-    label: 'count',
+    labelId: 'count',
   },
   {
     value: 'sum',
-    label: 'sum',
+    labelId: 'sum',
   },
 ];
 
@@ -71,14 +72,14 @@ export default class PivotTableConfigMenu extends Component {
     return (
       <div className="PivotTableConfigMenu">
         <hr />
-        <Subtitle>Aggregation</Subtitle>
+        <Subtitle><FormattedMessage id="aggregation" /></Subtitle>
         <div>
           <span
             className="aggregationInputContainer"
           >
             <SelectInput
-              placeholder="Select aggregation method"
-              labelText="Aggregation method"
+              placeholderId="select_aggregation_method"
+              labelTextId="aggregation_method"
               choice={spec.aggregation !== null ? spec.aggregation.toString() : null}
               name="aggregationMethod"
               options={aggregationOptions}
@@ -99,7 +100,7 @@ export default class PivotTableConfigMenu extends Component {
               >
                 <div className="helpTextContainer">
                   <span className="alert">!</span>
-                  Choose a column and a row to pivot on to use aggregations other than count.
+                  <FormattedMessage id="pivot_help_text" />
                 </div>
               </div>
             }
@@ -107,8 +108,8 @@ export default class PivotTableConfigMenu extends Component {
           {spec.aggregation !== 'count' &&
             <div>
               <SelectInput
-                placeholder="Select a value column"
-                labelText="Value column"
+                placeholderId="select_a_value_column"
+                labelText="value_column"
                 choice={spec.valueColumn !== null ? spec.valueColumn.toString() : null}
                 name="valueColumnInput"
                 options={columnOptions.filter(option =>
@@ -120,7 +121,7 @@ export default class PivotTableConfigMenu extends Component {
               />
               <div className="inputGroup">
                 <label htmlFor="decimalPlacesInput">
-                  Number of decimal places
+                  <FormattedMessage id="number_of_decimal_places" />
                 </label>
                 <input
                   className="numberInput"
@@ -138,26 +139,26 @@ export default class PivotTableConfigMenu extends Component {
           }
           {showValueDisplayInput(spec) &&
             <SelectInput
-              placeholder="Choose how cells are displayed"
-              labelText="Value display"
+              placeholderId="choose_how_cells_are_displayed"
+              labelTextId="value_display"
               choice={spec.valueDisplay ? spec.valueDisplay : 'default'}
               name="valueDisplay"
               options={[
                 {
                   value: 'default',
-                  label: 'Default',
+                  labelId: 'default',
                 },
                 {
                   value: 'percentageRow',
-                  label: 'Cell as percentage of row',
+                  labelId: 'cell_as_percentage_of_row',
                 },
                 {
                   value: 'percentageColumn',
-                  label: 'Cell as percentage of column',
+                  labelId: 'cell_as_percentage_of_column',
                 },
                 {
                   value: 'percentageTotal',
-                  label: 'Cell as percentage of table total',
+                  labelId: 'cell_as_percentage_of_table_total',
                 },
               ]}
               onChange={value => onChangeSpec({
@@ -170,7 +171,7 @@ export default class PivotTableConfigMenu extends Component {
               <ToggleInput
                 className="totalToggle"
                 checked={spec.hideRowTotals !== true}
-                label="Show row totals"
+                labelId="show_row_totals"
                 onChange={() => onChangeSpec({
                   hideRowTotals: !spec.hideRowTotals,
                 })}
@@ -178,7 +179,7 @@ export default class PivotTableConfigMenu extends Component {
               <ToggleInput
                 className="totalToggle"
                 checked={spec.hideColumnTotals !== true}
-                label="Show column totals"
+                labelId="show_column_totals"
                 onChange={() => onChangeSpec({
                   hideColumnTotals: !spec.hideColumnTotals,
                 })}
@@ -187,10 +188,10 @@ export default class PivotTableConfigMenu extends Component {
           }
         </div>
         <hr />
-        <Subtitle>Columns</Subtitle>
+        <Subtitle><FormattedMessage id="columns" /></Subtitle>
         <SelectInput
-          placeholder="Select a column"
-          labelText="Columns"
+          placeholderId="select_a_column"
+          labelTextId="columns"
           choice={spec.categoryColumn !== null ? spec.categoryColumn.toString() : null}
           name="categoryColumnInput"
           options={columnOptions}
@@ -229,7 +230,7 @@ export default class PivotTableConfigMenu extends Component {
                   :
                   spec.categoryTitle.toString()
               }
-              placeholder="Columns title"
+              placeholderId="columns_title"
               name="categoryTitle"
               onChange={event => onChangeSpec({
                 categoryTitle: event.target.value.toString(),
@@ -238,16 +239,15 @@ export default class PivotTableConfigMenu extends Component {
           </div>
         }
         <hr />
-        <Subtitle>Rows</Subtitle>
+        <Subtitle><FormattedMessage id="rows" /></Subtitle>
         <SelectInput
-          placeholder="Select a row column"
-          labelText="Row column"
+          placeholderId="select_a_row_column"
+          labelTextId="row_column"
           choice={spec.rowColumn !== null ? spec.rowColumn.toString() : null}
           name="rowColumnInput"
           options={columnOptions}
           onChange={(value) => {
             const change = { rowColumn: value };
-
             if (value == null && spec.aggregation !== 'count') {
               change.aggregation = 'count';
               change.valueColumn = null;
@@ -280,7 +280,7 @@ export default class PivotTableConfigMenu extends Component {
                   :
                   spec.rowTitle.toString()
               }
-              placeholder="Row column title"
+              placeholderId="row_column_title"
               name="rowTitle"
               onChange={event => onChangeSpec({
                 rowTitle: event.target.value.toString(),

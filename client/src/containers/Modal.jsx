@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import ModalWrapper from 'react-modal';
+import IntlWrapper from './IntlWrapper';
 import CreateDataset from '../components/modals/CreateDataset';
 import CreateCollection from '../components/modals/CreateCollection';
 import DeleteCollection from '../components/modals/DeleteCollection';
@@ -98,9 +99,11 @@ class Modal extends Component {
           },
         }}
       >
-        <div className="Modal">
-          { this.renderActiveModal() }
-        </div>
+        <IntlWrapper>
+          <div className="Modal">
+            { this.renderActiveModal() }
+          </div>
+        </IntlWrapper>
       </ModalWrapper>
     );
   }
@@ -121,6 +124,7 @@ function mapStateToProps(state) {
   return {
     activeModal: state.activeModal,
     collections: state.collections,
+    translations: state.translations,
   };
 }
 

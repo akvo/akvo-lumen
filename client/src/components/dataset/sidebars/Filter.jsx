@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 import Immutable from 'immutable';
 import SelectMenu from '../../common/SelectMenu';
 import SidebarHeader from './SidebarHeader';
@@ -60,14 +61,14 @@ export default class Filter extends Component {
         className="DataTableSidebar"
       >
         <SidebarHeader onClose={onClose}>
-          Filter column {column.get('title')}
+          <FormattedMessage id="filter_column" values={{ title: column.get('title') }} />
         </SidebarHeader>
         <div className="inputs">
           <div className="inputGroup">
             <label
               htmlFor="filterTypeMenu"
             >
-              Show rows whose
+              <FormattedMessage id="show_rows_whose" />
             </label>
             <SelectMenu
               name="filterTypeMenu"
@@ -75,11 +76,11 @@ export default class Filter extends Component {
               onChange={this.handleChangeExpressionOperator}
               options={[
                 {
-                  label: 'Value contains',
+                  label: <FormattedMessage id="value_contains" />,
                   value: 'contains',
                 },
                 {
-                  label: 'Value is',
+                  label: <FormattedMessage id="value_is" />,
                   value: 'is',
                 },
               ]}
@@ -89,7 +90,7 @@ export default class Filter extends Component {
             <label
               htmlFor="filterTextInput"
             >
-              Filter text
+              <FormattedMessage id="filter_text" />
             </label>
             <input
               value={expressionValue}
@@ -100,7 +101,7 @@ export default class Filter extends Component {
           </div>
         </div>
         <SidebarControls
-          positiveButtonText="Filter"
+          positiveButtonText={<FormattedMessage id="filter" />}
           onApply={() => onApply(transformation)}
           onClose={onClose}
         />

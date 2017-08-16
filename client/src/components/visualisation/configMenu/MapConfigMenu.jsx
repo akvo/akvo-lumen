@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 import VisualisationTypeMenu from '../VisualisationTypeMenu';
 import LayerMenu from './LayerMenu';
 import LayerConfigMenu from './LayerConfigMenu';
@@ -88,7 +89,10 @@ export default class MapConfigMenu extends Component {
                 className="drawer"
               >
                 <ButtonRowInput
-                  options={['street', 'satellite', 'terrain']}
+                  options={['street', 'satellite', 'terrain'].map(item => ({
+                    label: <FormattedMessage id={item} />,
+                    value: item,
+                  }))}
                   selected={visualisation.spec.baseLayer}
                   label="Base map"
                   onChange={baseLayer => onChangeSpec({ baseLayer })}
@@ -114,7 +118,7 @@ export default class MapConfigMenu extends Component {
             className="saveButton clickable"
             onClick={this.props.onSave}
           >
-            Save
+            <FormattedMessage id="save" />
           </button>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Immutable from 'immutable';
+import { FormattedMessage } from 'react-intl';
 import SelectMenu from '../../common/SelectMenu';
 import SidebarHeader from './SidebarHeader';
 import SidebarControls from './SidebarControls';
@@ -20,7 +21,10 @@ function SelectColumn({ columns, idx, onChange, value }) {
       <label
         htmlFor="columnName"
       >
-        Select {idx === 0 ? 'first' : 'second'} column
+        <FormattedMessage
+          id="select_n_column"
+          values={{ idx }}
+        />
       </label>
       <SelectMenu
         name="columnName"
@@ -90,18 +94,18 @@ export default class CombineColumns extends Component {
         className="DataTableSidebar"
       >
         <SidebarHeader onClose={onClose}>
-          Combine columns
+          <FormattedMessage id="combine_columns" />
         </SidebarHeader>
         <div className="inputs">
           <SelectColumn
             columns={columns}
-            idx={0}
+            idx={1}
             onChange={value => this.handleSelectColumn(0, value)}
             value={args.getIn(['columnNames', 0])}
           />
           <SelectColumn
             columns={columns}
-            idx={1}
+            idx={2}
             onChange={value => this.handleSelectColumn(1, value)}
             value={args.getIn(['columnNames', 1])}
           />
@@ -109,7 +113,7 @@ export default class CombineColumns extends Component {
             <label
               htmlFor="separator"
             >
-              Select separator
+              <FormattedMessage id="select_separator" />
             </label>
             <SelectMenu
               name="separator"
@@ -117,15 +121,15 @@ export default class CombineColumns extends Component {
               onChange={value => this.handleSelectSeparator(value)}
               options={[
                 {
-                  label: 'Whitespace',
+                  label: <FormattedMessage id="whitespace" />,
                   value: ' ',
                 },
                 {
-                  label: 'Comma (,)',
+                  label: <span><FormattedMessage id="comma" /> (,)</span>,
                   value: ',',
                 },
                 {
-                  label: 'None',
+                  label: <FormattedMessage id="none" />,
                   value: '',
                 },
               ]}
@@ -135,7 +139,7 @@ export default class CombineColumns extends Component {
             <label
               htmlFor="titleTextInput"
             >
-              New column title
+              <FormattedMessage id="new_column_title" />
             </label>
             <input
               value={args.get('newColumnTitle')}
@@ -146,7 +150,7 @@ export default class CombineColumns extends Component {
           </div>
         </div>
         <SidebarControls
-          positiveButtonText="Combine"
+          positiveButtonText={<FormattedMessage id="combine" />}
           onApply={this.isValidTransformation() ? () => onApply(this.state.transformation) : null}
           onClose={onClose}
         />

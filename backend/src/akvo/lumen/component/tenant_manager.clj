@@ -38,6 +38,8 @@
   (connection [this label] "Connection based on a tenant dns label.")
   (uri [this label] "Database URI based on a tenant dns label."))
 
+(defprotocol TenantAdmin
+  (current-plan [this label] "Get the current plan."))
 
 (defn pool
   "Created a Hikari connection pool."
@@ -89,8 +91,11 @@
       (:uri tenant)
       (do
         (load-tenant db tenants label)
-        (:uri (get @tenants label))))))
+        (:uri (get @tenants label)))))
 
+  TenantAdmin
+  (current-plan [{:keys [db]} label]
+    (:tier (select-current-plan (:spec db) {:label label}))))
 
 (defn tenant-manager [options]
   (map->TenantManager options))
