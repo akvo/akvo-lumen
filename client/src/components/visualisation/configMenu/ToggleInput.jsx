@@ -6,13 +6,22 @@ require('./ToggleInput.scss');
 
 export default function ToggleInput(props) {
   const { checked, disabled, label, labelId, onChange } = props;
+  let labelValue;
+  if (label != null) {
+    labelValue = label;
+  } else if (labelId != null) {
+    labelValue = <FormattedMessage id={labelId} />;
+  } else {
+    labelValue = '';
+  }
+
   return (
     <div
       className={`ToggleInput ${props.disabled ? ' disabled' : ''}
         ${props.className ? props.className : ''}`}
     >
       <h4 className="label">
-        {label || <FormattedMessage id={labelId} />}
+        { labelValue }
       </h4>
       <button
         className={`toggle clickable ${checked ? 'active' : ''}`}

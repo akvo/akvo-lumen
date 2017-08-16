@@ -26,7 +26,7 @@ export default function App({ history, location }) {
           <Route
             path="library/collections/:collectionId"
             components={{ sidebar: WorkspaceNav, content: Library }}
-            component={Library}
+            location={location}
           />
           <Route
             path="dataset/:datasetId"
