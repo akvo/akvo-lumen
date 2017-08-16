@@ -174,10 +174,10 @@ MapController.prototype.create = function(req, res, prepareConfigFn) {
             req.params.dbport = req.headers['x-db-port'];
 
             // Storing it in Redis
-            requestMapConfig.db_credential = { dbhost: req.headers['x-db-host'],
-                                               dbuser: req.headers['x-db-user'],
-                                               dbpassword: req.headers['x-db-password'],
-                                               dbport: req.headers['x-db-port']};
+            requestMapConfig.db_credentials = { dbhost: req.headers['x-db-host'],
+                                                dbuser: req.headers['x-db-user'],
+                                                dbpassword: req.headers['x-db-password'],
+                                                dbport: req.headers['x-db-port']};
 
 
             var mapConfig = MapConfig.create(requestMapConfig);
@@ -242,13 +242,10 @@ MapController.prototype.tileOrLayer = function (req, res) {
                 if (err) {
                         throw err;
                 }
-                req.params.dbhost = mapConfig.obj().db_credential.dbhost;
-                req.params.dbuser = mapConfig.obj().db_credential.dbuser;
-                req.params.dbpassword = mapConfig.obj().db_credential.dbpassword;
-                req.params.dbport = mapConfig.obj().db_credential.dbport;
+                _.extend(req.params, mapConfig.obj().db_credentials);
                 return 2;
         },
-        function mapController$getTile(err, mapConfigProvider) {
+        function mapController$getTile(err, nothing) {
             if ( err ) {
                 throw err;
             }
