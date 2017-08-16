@@ -112,11 +112,13 @@ function rendererCacheErrorListener() {
 }
 
 function perfStats(times) {
-    setImmediate(function () {
-        Object.keys(times).forEach(function (key) {
-         global.statsClient.timing('windshaft.perf.' + key, times[key]);
-       });
-    });
+    if (times) {
+        setImmediate(function () {
+            Object.keys(times).forEach(function (key) {
+             global.statsClient.timing('windshaft.perf.' + key, times[key]);
+           });
+        });
+    }
 }
 
 function redisStats(stats) {
