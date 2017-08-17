@@ -7,8 +7,7 @@ test -z "$1" && {
   exit 1
 }
 
-FIELDS=`head -1 $INPUT | tr [A-Z] [a-z] |
-  sed 's/ //g;s/\?//;s/^/"/;s/$/" varchar/;s/,/" varchar, "/g'`
+FIELDS=`head -1 $INPUT | tr [A-Z] [a-z] | tr -d ' ?' | sed 's/^/"/;s/$/" varchar/;s/,/" varchar, "/g'`
 TABLE=`basename $INPUT | sed 's/\.[^.]*//' | tr '[A-Z]' '[a-z]'`
 
 echo "BEGIN;"
