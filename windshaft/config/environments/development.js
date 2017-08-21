@@ -1,12 +1,9 @@
 module.exports.name = 'development';
 module.exports.redis = {
-// TODO: it emits some events. See if they are published somewhere already of it we should subscribe to them
-// see https://github.com/CartoDB/node-redis-mpool/blob/master/index.js#L26
-// and https://github.com/coopernurse/node-pool
     host: 'redis',
     port: 6379,
     log: false, // should be false in prod
-    max: 50, //TODO: review, depends on load and server
+    max: 10,
     idleTimeoutMillis: 60000,
     default_layergroup_ttl: 900, // in seconds, this config is not used by Redis itself but by /windshaft/storages/mapstore.js
     returnToHead: true,
@@ -29,7 +26,7 @@ module.exports.redis = {
 module.exports.renderer = {
     mapnik: {
         poolSize: require('os').cpus().length,
-        statsInterval: 1000, // need to do something like lib/cartodb/stats/reporter/renderer.js
+        statsInterval: 1000,
         metatile: 4,
         metatileCache: {
             ttl: 60000,
@@ -72,10 +69,6 @@ module.exports.renderer = {
 };
 module.exports.mapnik_version = undefined; // will be looked up at runtime if undefined
 module.exports.enable_cors = false;
-module.exports.enabledFeatures = {
-    // whether in mapconfig is available stats & metadata for each layer
-    layerMetadata: true
-};
 module.exports.statsd = {
         host: 'statsd-server',
         port: 8125,
