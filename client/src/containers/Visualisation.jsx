@@ -22,7 +22,7 @@ class Visualisation extends Component {
     super();
     this.state = {
       isShareModalVisible: false,
-      isUnsavedChanges: false,
+      isUnsavedChanges: null,
       isSavePending: false,
       visualisation: {
         type: 'visualisation',

@@ -10,7 +10,7 @@ export default class DashboardHeader extends Component {
     this.getActionButtons = this.getActionButtons.bind(this);
   }
 
-  getActionButtons() {
+  getActionButtons(isUnsavedChanges) {
     const { onDashboardAction } = this.props;
     const user = {
       buttonText: <FormattedMessage id="user" />,
@@ -20,9 +20,12 @@ export default class DashboardHeader extends Component {
       buttonText: <FormattedMessage id="download" />,
       customClass: 'notImplemented',
     };
+    const disableShare = isUnsavedChanges == null || isUnsavedChanges;
     const share = {
       buttonText: <FormattedMessage id="share" />,
       onClick: () => onDashboardAction('share'),
+      disabled: disableShare,
+      tooltipId: disableShare ? 'save_your_dashboard_before_sharing' : null,
     };
     const overflow = {
       buttonText: <FormattedMessage id="overflow" />,
@@ -38,10 +41,12 @@ export default class DashboardHeader extends Component {
   }
 
   render() {
-    const actionButtons = this.getActionButtons();
+    const { isUnsavedChanges } = this.props;
+
+    const actionButtons = this.getActionButtons(isUnsavedChanges);
     let saveStatusId;
 
-    switch (this.props.isUnsavedChanges) {
+    switch (isUnsavedChanges) {
       case false:
         saveStatusId = 'all_changes_saved';
         break;
