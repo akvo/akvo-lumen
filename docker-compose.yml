@@ -39,7 +39,7 @@ services:
      - NODE_HEAPDUMP_OPTIONS=nosignal
    volumes:
       - ./windshaft/server:/tiler
-      - ./windshaft/config:/config
+      - ./windshaft/config/dev:/config
    ports:
       - "9229:9229"
 # statsd-server:

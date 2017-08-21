@@ -3,12 +3,10 @@ var _         = require('underscore');
 var merge = require('merge-deep');
 var default_environment = require('./default-config.js');
 
-// Force 'development' environment
-var ENV = 'development';
 var PORT = 4000;
 
-// set environment specific variables
-global.environment  = require('../config/environments/' + ENV);
+global.environment  = require('/config/environment.js');
+
 just_global_properties = {
     redis: {
         idleTimeoutMillis: global.environment.global_cache_ttl,
