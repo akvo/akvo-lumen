@@ -75,9 +75,10 @@ var config = {
         // send the finished req object on
         callback(null,req);
     }
+
 };
 
-var server = new Server(config);
+var server = new Server(config, global.environment.default_layergroup_ttl);
 server.listen(PORT, function() {
     console.log("map tiles are now being served out of: http://localhost:" + PORT + config.base_url_mapconfig);
 });

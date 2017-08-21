@@ -68,7 +68,7 @@ var RendererStatsReporter = require('./stats/reporter');
 //        }
 //     }
 //
-module.exports = function(opts) {
+module.exports = function(opts, default_layergroup_ttl) {
     opts = opts || {};
 
     global.statsClient = StatsClient.getInstance(opts.statsd);
@@ -88,7 +88,7 @@ module.exports = function(opts) {
 
     var map_store  = new windshaft.storage.MapStore({
         pool: redisPool,
-        expire_time: opts.redis.default_layergroup_ttl
+        expire_time: default_layergroup_ttl / 1000
     });
 
     opts.renderer = opts.renderer || {};

@@ -9,7 +9,6 @@ module.exports.redis = {
 //    max: no sensible default,
     log: false, // should be false in prod
     idleTimeoutMillis: 60000,
-    default_layergroup_ttl: 900, // in seconds, this config is not used by Redis itself but by /windshaft/storages/mapstore.js
     returnToHead: true,
     reapIntervalMillis: 10000,
     emitter: {
