@@ -19,6 +19,16 @@ function resourceRuleDescription(resourceKey) {
   return description;
 }
 
+function resourceDescription(limit) {
+  let l = null;
+  if (limit == null) {
+    l = 'unlimited';
+  } else {
+    l = limit;
+  }
+  return l;
+}
+
 function ResourceList({ resources, tier }) {
   return (
     <table>
@@ -33,7 +43,7 @@ function ResourceList({ resources, tier }) {
         {Object.keys(resources).map(key =>
           <tr key={key}>
             <td>{resourceRuleDescription(key)}</td>
-            <td>{tier && tier[key]}</td>
+            <td>{resourceDescription(tier[key])}</td>
             <td>{resources && resources[key]}</td>
           </tr>
         )}
