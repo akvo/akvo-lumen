@@ -10,7 +10,7 @@ export default class VisualisationHeader extends Component {
     this.getActionButtons = this.getActionButtons.bind(this);
   }
 
-  getActionButtons() {
+  getActionButtons(isUnsavedChanges) {
     const { onVisualisationAction } = this.props;
     const user = {
       buttonText: <FormattedMessage id="user" />,
@@ -20,9 +20,12 @@ export default class VisualisationHeader extends Component {
       buttonText: <FormattedMessage id="download" />,
       customClass: 'notImplemented',
     };
+    const disableShare = isUnsavedChanges || isUnsavedChanges == null;
     const share = {
       buttonText: <FormattedMessage id="share" />,
       onClick: () => onVisualisationAction('share'),
+      disabled: disableShare,
+      tooltipId: disableShare ? 'save_your_visualisation_before_sharing' : null,
     };
     const overflow = {
       buttonText: <FormattedMessage id="overflow" />,
@@ -38,10 +41,12 @@ export default class VisualisationHeader extends Component {
   }
 
   render() {
-    const actionButtons = this.getActionButtons();
+    const { visualisation, onChangeTitle, onBeginEditTitle, isUnsavedChanges } = this.props;
+
+    const actionButtons = this.getActionButtons(isUnsavedChanges);
     let saveStatusId;
 
-    switch (this.props.isUnsavedChanges) {
+    switch (isUnsavedChanges) {
       case false:
         saveStatusId = 'all_changes_saved';
         break;
@@ -54,9 +59,9 @@ export default class VisualisationHeader extends Component {
 
     return (
       <EntityTypeHeader
-        title={this.props.visualisation.name || 'Untitled visualisation'}
-        onChangeTitle={this.props.onChangeTitle}
-        onBeginEditTitle={this.props.onBeginEditTitle}
+        title={visualisation.name || 'Untitled visualisation'}
+        onChangeTitle={onChangeTitle}
+        onBeginEditTitle={onBeginEditTitle}
         saveStatusId={saveStatusId}
         actionButtons={actionButtons}
       />
@@ -65,7 +70,7 @@ export default class VisualisationHeader extends Component {
 }
 
 VisualisationHeader.propTypes = {
-  isUnsavedChanges: PropTypes.bool.isRequired,
+  isUnsavedChanges: PropTypes.bool,
   visualisation: PropTypes.shape({
     name: PropTypes.string.isRequired,
   }).isRequired,
