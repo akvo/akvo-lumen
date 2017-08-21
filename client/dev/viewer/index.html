@@ -79,6 +79,7 @@
                     'X-DB-USER': $('#dbuser').val(),
                     'X-DB-PASSWORD': $('#dbpassword').val(),
                     'X-DB-PORT': $('#dbport').val(),
+                    'X-DB-LAST-UPDATE': $('#dblastupdate').val(),
                     'Content-Type': 'application/json',
                   },
                   type: 'POST',
@@ -120,6 +121,7 @@ DB host: <input id="dbhost" type="text" size="20" value="postgres">
 DB user: <input id="dbuser" type="text" size="20" value="lumen">
 DB password: <input id="dbpassword" type="text" size="20" value="password">
 DB port: <input id="dbport" type="text" size="5" value="5432">
+Last DB update timestamp: <input id="dblastupdate" type="text" size="13" value="1000">
 <br />
 Base URL: <input type="text" size="40" id="baseurl">
 <input type="button" id="update_map" value="Go">
