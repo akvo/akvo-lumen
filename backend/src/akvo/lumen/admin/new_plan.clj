@@ -8,7 +8,8 @@
   $ env PG_HOST=***.db.elephantsql.com PG_DATABASE=*** \\
         PG_USER=*** PG_PASSWORD=*** \\
         lein run -m akvo.lumen.admin.new-plan example-tenant standard"
-  (:require [akvo.lumen.config :refer [error-msg]]
+  (:require [akvo.lumen.admin.util :refer [db-uri]]
+            [akvo.lumen.config :refer [error-msg]]
             [clojure.java.jdbc :refer [print-sql-exception-chain
                                        with-db-transaction]]
             [environ.core :refer [env]]
@@ -19,21 +20,17 @@
 
 (hugsql/def-db-fns "akvo/lumen/component/tenant_manager.sql")
 
+
 (defn check-env-vars []
   (assert (:pg-database env) (error-msg "Specify PG_DATABASE env var"))
   (assert (:pg-host env) (error-msg "Specify PG_HOST env var"))
   (assert (:pg-password env) (error-msg "Specify PG_PASSWORD env var"))
   (assert (:pg-user env) (error-msg "Specify PG_USER env var")))
 
-(defn db-uri []
-  (check-env-vars)
-  (format "jdbc:postgres://%s:5432/%s?user=%s&password=%s"
-          (:pg-host env) (:pg-database env)
-          (:pg-user env) (:pg-password env)))
-
 (defn -main [label tier]
   (try
-    (with-db-transaction [tx (db-uri)]
+    (check-env-vars)
+    (with-db-transaction [tx (db-uri {:database "lumen" :user "lumen"})]
       (end-tenant-plan tx {:label label})
       (add-new-plan tx {:label label
                         :tier (doto (PGobject.)

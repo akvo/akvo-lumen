@@ -6,8 +6,8 @@
 
 (defn endpoint [{:keys [tenant-manager]}]
   (context "/api/resources" {:keys [params tenant] :as request}
-    (let-routes [tenant-conn (connection tenant-manager tenant)
-                 current-plan (current-plan tenant-manager tenant)]
+           (let-routes [tenant-conn (connection tenant-manager tenant)
+                        current-plan (current-plan tenant-manager tenant)]
 
-      (GET "/" _
-        (resource/all tenant-conn current-plan)))))
+             (GET "/" _
+                  (resource/all tenant-conn current-plan)))))
