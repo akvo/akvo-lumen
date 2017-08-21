@@ -1,5 +1,7 @@
 var Server = require('./http/server');
 var _         = require('underscore');
+var merge = require('merge-deep');
+var default_environment = require('./default-config.js');
 
 // Force 'development' environment
 var ENV = 'development';
@@ -7,9 +9,43 @@ var PORT = 4000;
 
 // set environment specific variables
 global.environment  = require('../config/environments/' + ENV);
+just_global_properties = {
+    redis: {
+        idleTimeoutMillis: global.environment.global_cache_ttl,
+        reapIntervalMillis: global.environment.global_reap_interval,
+        emitter: {
+          statusInterval: global.environment.global_emit_stats_interval
+        }
+    },
+    renderer: {
+        mapnik: {
+            statsInterval: global.environment.global_emit_stats_interval,
+            metatileCache: {
+                ttl: global.environment.global_cache_ttl
+             },
+            geojson: {
+               dbPoolParams: {
+                  idleTimeout: global.environment.global_cache_ttl,
+                  reapInterval: global.environment.global_reap_interval
+               }
+            }
+        },
+        torque: {
+            dbPoolParams: {
+                idleTimeout: global.environment.global_cache_ttl,
+                reapInterval: global.environment.global_reap_interval
+            }
+        }
+    },
+    renderCache: {
+        ttl: global.environment.global_cache_ttl,
+        statsInterval: global.environment.global_emit_stats_interval
+    }
+};
+
+global.environment = merge(merge(default_environment,just_global_properties), global.environment);
 
 // TODO: mml-builder has a use_workers flag in line 40
-
 var config = {
     base_url_mapconfig: '/:dbname/layergroup',
     grainstore: {
