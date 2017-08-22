@@ -249,7 +249,15 @@ function bootstrap(opts) {
     app.use(expressStatsd({client: global.statsClient }));
     app.use(bodyParser.json());
 
-    app.use(morgan('tiny'));
+    morgan.token('url', function (req, res) {
+        var token = req.params['token'];
+        if (!opts.log_full_layergroup_token && token) {
+            return req.url.replace(token, token.substring(0,8) + '*'.repeat(token.length - 8));
+        } else {
+            return req.url;
+        }
+    });
+    app.use(morgan(':date[iso] - info: :method :url :status :response-time ms'));
 
     return app;
 }

@@ -60,6 +60,7 @@ winston.debug('Using configuration', global.environment);
 // TODO: mml-builder has a use_workers flag in line 40
 var config = {
     base_url_mapconfig: '/:dbname/layergroup',
+    log_full_layergroup_token: global.environment.log_full_layergroup_token,
     grainstore: {
     }, //see grainstore npm for other options
     redis: global.environment.redis,

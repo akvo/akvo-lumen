@@ -3,6 +3,7 @@ module.exports.global_cache_ttl = 60000;
 module.exports.global_reap_interval = 10000;
 module.exports.global_emit_stats_interval = 10000;
 module.exports.default_layergroup_ttl = 900000;
+module.exports.log_full_layergroup_token = false;
 
 module.exports.redis = {
 //    host: no sensible default,
