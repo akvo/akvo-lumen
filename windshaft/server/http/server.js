@@ -139,8 +139,11 @@ module.exports = function(opts, default_layergroup_ttl) {
           tolog = err;
       }
       var log_msg = olabel + " -- " + statusCode + ": " + tolog;
-      //if ( tolog.stack ) log_msg += "\n" + tolog.stack;
-      winston.debug(log_msg);
+      if (statusCode < 500) {
+        winston.info(log_msg);
+      } else {
+        winston.warn(log_msg);
+      }
       // If a callback was requested, force status to 200
       if ( res.req ) {
         // NOTE: res.req can be undefined when we fake a call to
