@@ -160,6 +160,7 @@ MapController.prototype.tileOrLayer = function (req, res) {
     var self = this;
 
     this._app.doCORS(res);
+    var mapConfigProvider = null;
     step(
         function mapController$prepareParams() {
             self._app.req2params(req, this);
@@ -183,7 +184,7 @@ MapController.prototype.tileOrLayer = function (req, res) {
                 throw err;
             }
             // TODO: we are creating the map config twice
-            self.tileBackend.getTile(new MapStoreMapConfigProvider(self.mapStore, req.params), req.params, this);
+            self.tileBackend.getTile(mapConfigProvider, req.params, this);
         },
         function mapController$finalize(err, tile, headers, times) {
             self.emit('perf', times);
