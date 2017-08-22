@@ -88,6 +88,12 @@ MapController.prototype.addLastModifiedTimestamp = function(req, response, cb) {
     cb(null, response);
 }
 
+function assertHeaderExists(req, header) {
+    if ( ! req.headers[header]) {
+        throw new Error('layergroup POST data must have header ' + header);
+    }
+}
+
 MapController.prototype.create = function(req, res, prepareConfigFn) {
     var self = this;
 
@@ -100,7 +106,10 @@ MapController.prototype.create = function(req, res, prepareConfigFn) {
         prepareConfigFn,
         function initLayergroup(err, requestMapConfig) {
             assert.ifError(err);
-
+            assertHeaderExists(req, 'x-db-host');
+            assertHeaderExists(req, 'x-db-user');
+            assertHeaderExists(req, 'x-db-password');
+            assertHeaderExists(req, 'x-db-port');
 
             // Storing it in Redis
             requestMapConfig.db_credentials = { dbhost: req.headers['x-db-host'],
@@ -110,8 +119,6 @@ MapController.prototype.create = function(req, res, prepareConfigFn) {
 
             // Making it available to downstream
             _.extend(req.params, requestMapConfig.db_credentials);
-
-
 
             var mapConfig = MapConfig.create(requestMapConfig);
             self.mapBackend.createLayergroup(
