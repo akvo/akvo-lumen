@@ -157,7 +157,7 @@ module.exports = function(opts, default_layergroup_ttl) {
       err = err.replace(/is the server.*encountered/im, 'encountered');
       err = JSON.parse(err);
 
-      res.send(err, statusCode);
+      res.status(statusCode).send(err);
     };
 
     /*******************************************************************************************************************
