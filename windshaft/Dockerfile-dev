@@ -45,7 +45,7 @@ RUN npm --version
 RUN npm install nodemon -g
 
 # Debugging mode on
-ENV DEBUG windshaft*
+ENV NODE_ENV development
 
 EXPOSE 4000
 

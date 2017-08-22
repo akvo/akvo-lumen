@@ -52,9 +52,9 @@ RUN cd /tiler && rm -rf node_modules* && make
 ADD config /config
 
 # Debugging mode on
-ENV DEBUG windshaft*
+ENV NODE_ENV production
 
 EXPOSE 4000
 
 # Start server
-CMD cd /tiler && while :; do node server.js; sleep 10; done
+CMD cd /tiler && node server.js
