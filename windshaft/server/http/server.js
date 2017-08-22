@@ -309,6 +309,8 @@ function statusFromErrorMessage(errMsg) {
         } else {
             statusCode = 404;
         }
+    } else if ( -1 !== errMsg.indexOf('TypeError') ) {
+        statusCode = 500;
     }
     return statusCode;
 }
