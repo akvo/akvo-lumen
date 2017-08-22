@@ -1,6 +1,7 @@
 var Server = require('./http/server');
 var _         = require('underscore');
 var merge = require('merge-deep');
+var assert = require('assert');
 var default_environment = require('./default-config.js');
 var winston = require('winston');
 
@@ -43,6 +44,9 @@ just_global_properties = {
 };
 
 global.environment = merge(merge(default_environment,just_global_properties), global.environment);
+
+assert.ok(global.environment.redis.host, "Must specify Redis host in configuration");
+assert.ok(global.environment.redis.max, "Must specify Redis max number of connections in configuration");
 
 winston.configure({
   level: global.environment.log_level,
