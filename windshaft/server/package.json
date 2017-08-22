@@ -21,6 +21,7 @@
         "lynx": "0.2.0",
         "appmetrics": "3.0.2",
         "merge-deep": "3.0.0",
+        "winston": "2.3.1",
         "underscore": "1.6.0"
     },
     "engine": { "node": "6.11.1" }

@@ -1,4 +1,5 @@
 module.exports.name = 'development';
+module.exports.log_level = 'debug';
 module.exports.global_cache_ttl = 60000;
 module.exports.global_reap_interval = 10000;
 module.exports.global_emit_stats_interval = 10000;

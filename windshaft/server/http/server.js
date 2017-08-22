@@ -1,9 +1,9 @@
 var appmetrics = require('appmetrics');
+var winston = require('winston');
 
 appmetrics.configure({'com.ibm.diagnostics.healthcenter.mqtt': 'off'});
 var appmonitor = appmetrics.monitor();
 
-var debug = require('debug')('windshaft:server');
 var express = require('express');
 var expressStatsd = require('express-statsd');
 var bodyParser = require('body-parser');
@@ -140,7 +140,7 @@ module.exports = function(opts, default_layergroup_ttl) {
       }
       var log_msg = olabel + " -- " + statusCode + ": " + tolog;
       //if ( tolog.stack ) log_msg += "\n" + tolog.stack;
-      debug(log_msg); // use console.log for statusCode != 500 ?
+      winston.debug(log_msg);
       // If a callback was requested, force status to 200
       if ( res.req ) {
         // NOTE: res.req can be undefined when we fake a call to
@@ -213,7 +213,7 @@ function validateOptions(opts) {
 
     // Be nice and warn if configured mapnik version is != instaled mapnik version
     if (mapnik.versions.mapnik !== opts.grainstore.mapnik_version) {
-        console.warn('WARNING: detected mapnik version (' + mapnik.versions.mapnik + ')' +
+        winston.warn('WARNING: detected mapnik version (' + mapnik.versions.mapnik + ')' +
             ' != configured mapnik version (' + opts.grainstore.mapnik_version + ')');
     }
 }

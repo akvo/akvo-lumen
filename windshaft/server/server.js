@@ -2,6 +2,7 @@ var Server = require('./http/server');
 var _         = require('underscore');
 var merge = require('merge-deep');
 var default_environment = require('./default-config.js');
+var winston = require('winston');
 
 var PORT = 4000;
 
@@ -43,6 +44,19 @@ just_global_properties = {
 
 global.environment = merge(merge(default_environment,just_global_properties), global.environment);
 
+winston.configure({
+  level: global.environment.log_level,
+  transports: [
+    new (winston.transports.Console)({
+      timestamp: function() {
+        return new Date().toISOString();
+      }
+    })
+  ]
+});
+
+winston.debug('Using configuration', global.environment);
+
 // TODO: mml-builder has a use_workers flag in line 40
 var config = {
     base_url_mapconfig: '/:dbname/layergroup',
@@ -78,5 +92,5 @@ var config = {
 
 var server = new Server(config, global.environment.default_layergroup_ttl);
 server.listen(PORT, function() {
-    console.log("map tiles are now being served out of: http://localhost:" + PORT + config.base_url_mapconfig);
+    winston.info("map tiles are now being served out of: http://localhost:" + PORT + config.base_url_mapconfig);
 });

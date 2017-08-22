@@ -1,5 +1,4 @@
 var _ = require('underscore');
-var debug = require('debug')('windshaft:stats_client');
 var Lynx = require('lynx');
 
 module.exports = {

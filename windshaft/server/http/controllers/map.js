@@ -1,4 +1,5 @@
 const util = require('util')
+var winston = require('winston');
 var assert = require('assert');
 var step = require('step');
 var windshaft = require('windshaft/lib/windshaft');
@@ -191,7 +192,7 @@ MapController.prototype.tileOrLayer = function (req, res) {
         },
         function finish(err) {
             if ( err ) {
-                console.error("windshaft.tiles: " + err);
+                winston.error("windshaft.tiles: " + err);
             }
         }
     );
