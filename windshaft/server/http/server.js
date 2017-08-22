@@ -142,6 +142,7 @@ module.exports = function(opts, default_layergroup_ttl) {
       if (statusCode < 500) {
         winston.info(log_msg);
       } else {
+        if ( tolog.stack ) log_msg += "\n" + tolog.stack;
         winston.warn(log_msg);
       }
       // If a callback was requested, force status to 200
