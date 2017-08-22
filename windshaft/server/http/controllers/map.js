@@ -183,7 +183,6 @@ MapController.prototype.tileOrLayer = function (req, res) {
             if ( err ) {
                 throw err;
             }
-            // TODO: we are creating the map config twice
             self.tileBackend.getTile(mapConfigProvider, req.params, this);
         },
         function mapController$finalize(err, tile, headers, times) {
