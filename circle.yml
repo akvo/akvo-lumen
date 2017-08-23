@@ -22,8 +22,8 @@ dependencies:
     - "~/docker"
 
   pre:
-      # Stopping the default postgres so we can start our own.
-      - sudo service postgresql stop
+    # Stopping the default postgres so we can start our own.
+    - sudo service postgresql stop
     # Keycloak
     - ./server.sh build:
         pwd: keycloak
