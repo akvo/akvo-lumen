@@ -628,4 +628,3 @@ export function processPivotData(data, spec) {
 
   return out;
 }
-
