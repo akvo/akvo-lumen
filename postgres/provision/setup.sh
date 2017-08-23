@@ -45,4 +45,4 @@ echo "ALTER TABLE spatial_ref_sys OWNER TO lumen;" | psql -d lumen_tenant_1
 
 echo ""
 echo "----------"
-echo "Done!"
+echo "Done!!"
