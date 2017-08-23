@@ -3,16 +3,19 @@
             [akvo.lumen.fixtures :refer [test-tenant-spec
                                          migrate-tenant
                                          rollback-tenant]]
-            [akvo.lumen.import.csv-test :refer [import-file]]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.collection :as collection]
             [akvo.lumen.lib.dashboard :as dashboard]
             [akvo.lumen.lib.dataset :as dataset]
             [akvo.lumen.lib.visualisation :as visualisation]
+            ;; [akvo.lumen.import.csv-test :refer [import-file]]
+            [akvo.lumen.test-utils :refer [import-file-2]]
             [akvo.lumen.variant :as variant]
             [clojure.test :refer :all]
             [com.stuartsierra.component :as component]
             [duct.component.hikaricp :refer [hikaricp]]))
+
+
 
 (def test-system
   (->
@@ -52,8 +55,8 @@
 
 (deftest ^:functional collection-test
   (let [;; Import a few datasets
-        ds1 (import-file "GDP.csv" {})
-        ds2 (import-file "dates.csv" {})
+        ds1 (import-file-2 *tenant-conn* "GDP.csv" {})
+        ds2 (import-file-2 *tenant-conn* "dates.csv" {})
         vs1 (create-visualisation *tenant-conn* ds1)
         vs2 (create-visualisation *tenant-conn* ds2)
         db1 (create-dashboard *tenant-conn*)

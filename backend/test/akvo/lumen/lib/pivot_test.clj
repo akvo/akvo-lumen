@@ -6,44 +6,69 @@
             [akvo.lumen.import.csv-test :refer [import-file]]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.aggregation :as aggregation]
+            [akvo.lumen.test-utils :refer [import-file-2 test-tenant test-tenant-conn]]
             [akvo.lumen.transformation :as tf]
             [clojure.test :refer :all]
             [com.stuartsierra.component :as component]
             [duct.component.hikaricp :refer [hikaricp]]))
 
-(def test-system
-  (->
-   (component/system-map
-    :tenant-manager (tenant-manager {})
-    :db (hikaricp {:uri (:db_uri test-tenant-spec)}))
-   (component/system-using
-    {:tenant-manager [:db]})))
+;; (def test-system
+;;   (->
+;;    (component/system-map
+;;     :tenant-manager (tenant-manager {})
+;;     :db (hikaricp {:uri (:db_uri test-tenant-spec)}))
+;;    (component/system-using
+;;     {:tenant-manager [:db]})))
 
 (def ^:dynamic *tenant-conn*)
-(def ^:dynamic *dataset-id*)
+#_(def ^:dynamic *dataset-id*)
+
+#_(defn fixture [f]
+    (migrate-tenant test-tenant-spec)
+    (alter-var-root #'test-system component/start)
+    (binding [*tenant-conn* (:spec (:db test-system))
+              *dataset-id* (import-file "pivot.csv" {:dataset-name "pivot"
+                                                     :has-column-headers? true})]
+      (tf/apply *tenant-conn*
+                *dataset-id*
+                {:type :transformation
+                 :transformation {"op" "core/change-datatype"
+                                  "args" {"columnName" "c3"
+                                          "newType" "number"
+                                          "defaultValue" 0}
+                                  "onError" "default-value"}})
+      (f)
+      (alter-var-root #'test-system component/stop)
+      (rollback-tenant test-tenant-spec)))
 
 (defn fixture [f]
-  (migrate-tenant test-tenant-spec)
-  (alter-var-root #'test-system component/start)
-  (binding [*tenant-conn* (:spec (:db test-system))
-            *dataset-id* (import-file "pivot.csv" {:dataset-name "pivot"
-                                                   :has-column-headers? true})]
+  (migrate-tenant test-tenant)
+  (binding [*tenant-conn* (test-tenant-conn test-tenant)]
+    (f)
+    (rollback-tenant test-tenant-spec)))
+
+(use-fixtures :once fixture)
+
+(deftest ^:functional test-pivot
+  (let [dataset-id (import-file-2 *tenant-conn* "pivot.csv" {:dataset-name "pivot"
+                                                             :has-column-headers? true})
+        ;; _ (tf/apply *tenant-conn*
+        ;;             dataset-id
+        ;;             {:type :transformation
+        ;;              :transformation {"op" "core/change-datatype"
+        ;;                               "args" {"columnName" "c3"
+        ;;                                       "newType" "number"
+        ;;                                       "defaultValue" 0}
+        ;;                               "onError" "default-value"}})
+        query (partial aggregation/query *tenant-conn* dataset-id "pivot")]
     (tf/apply *tenant-conn*
-              *dataset-id*
+              dataset-id
               {:type :transformation
                :transformation {"op" "core/change-datatype"
                                 "args" {"columnName" "c3"
                                         "newType" "number"
                                         "defaultValue" 0}
                                 "onError" "default-value"}})
-    (f)
-    (alter-var-root #'test-system component/stop)
-    (rollback-tenant test-tenant-spec)))
-
-(use-fixtures :once fixture)
-
-(deftest ^:functional test-pivot
-  (let [query (partial aggregation/query *tenant-conn* *dataset-id* "pivot")]
     (testing "Empty query"
       (let [[tag query-result] (query {"aggregation" "count"})]
         (is (= tag ::lib/ok))
