@@ -20,19 +20,14 @@
                  (:tenants seed-data))))
 
 (let [cache (atom {:connection nil})]
-  (defn test-tenant-conn [tenant]
+  (defn test-tenant-conn
+    "This should be updated to operate on the provided tenant spec."
+    [tenant]
     (let [connection (:connection @cache)]
       (if-not (nil? connection)
         connection
         (:connection (swap! cache assoc :connection (pool tenant)))))))
 
-
-#_(let [p (atom {:conn nil})]
-    (defn test-tenant-conn [tenant]
-      (when (nil? (:conn @p))
-        (swap! p assoc :conn (pool tenant))
-        )
-      (pool tenant)))
 
 (defn import-file-2
   "Import a file and return the dataset-id"

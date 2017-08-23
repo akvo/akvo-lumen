@@ -1,9 +1,12 @@
 (ns akvo.lumen.endpoint.dashboard-test
   (:require [akvo.lumen.endpoint.share :as share]
             [akvo.lumen.endpoint.share-test :as share-test]
-            [akvo.lumen.fixtures :refer [db-fixture test-conn]]
+            ;; [akvo.lumen.fixtures :refer [db-fixture test-conn]]
+            [akvo.lumen.fixtures :refer [;; db-fixture test-conn
+                                         migrate-tenant rollback-tenant]]
             [akvo.lumen.lib.dashboard :as dashboard]
             [akvo.lumen.lib.dashboard-impl :as dashboard-impl]
+            [akvo.lumen.test-utils :refer [import-file-2 test-tenant test-tenant-conn]]
             [akvo.lumen.util :refer [squuid]]
             [akvo.lumen.variant :as variant]
             [clojure.test :refer :all]
@@ -49,7 +52,18 @@
 ;;; Tests
 ;;;
 
-(use-fixtures :once db-fixture)
+#_(use-fixtures :once db-fixture)
+
+(def ^:dynamic *tenant-conn*)
+
+(defn fixture [f]
+  (migrate-tenant test-tenant)
+  (binding [*tenant-conn* (test-tenant-conn test-tenant)]
+    (f)
+    (rollback-tenant test-tenant)))
+
+(use-fixtures :once fixture)
+
 
 (hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/dashboard.sql")
@@ -68,16 +82,16 @@
 
 
 (deftest ^:functional dashboard
-  (share-test/seed test-conn share-test/test-spec)
+  (share-test/seed *tenant-conn* share-test/test-spec)
 
   (testing "Dashboard"
-    (let [v-id               (-> (all-visualisations test-conn) first :id)
+    (let [v-id               (-> (all-visualisations *tenant-conn*) first :id)
           d-spec             (dashboard-spec v-id)
-          {dashboard-id :id} (variant/value (dashboard/create test-conn d-spec))]
+          {dashboard-id :id} (variant/value (dashboard/create *tenant-conn* d-spec))]
       (is (not (nil? dashboard-id)))
 
       (testing "Get dashboard"
-        (let [d (variant/value (dashboard/fetch test-conn dashboard-id))]
+        (let [d (variant/value (dashboard/fetch *tenant-conn* dashboard-id))]
           (is (not (nil? d)))
           (is (every? #(contains? d %)
                       [:id :title :entities :layout :type :status :created
@@ -98,8 +112,8 @@
                                      "Updated text entity")
                            (assoc-in ["layout" "text-1" "h"] 1))]
 
-          (dashboard/upsert test-conn dashboard-id new-spec)
-          (let [updated-d (variant/value (dashboard/fetch test-conn dashboard-id))]
+          (dashboard/upsert *tenant-conn* dashboard-id new-spec)
+          (let [updated-d (variant/value (dashboard/fetch *tenant-conn* dashboard-id))]
             (is (= (:title updated-d)
                    "My updated dashboard"))
             (is (= (get-in updated-d [:entities "text-1" "content"])
@@ -108,9 +122,9 @@
                    1)))))
 
       (testing "Delete dashboard"
-        (dashboard/delete test-conn dashboard-id)
-        (is (nil? (dashboard-by-id test-conn {:id dashboard-id})))
+        (dashboard/delete *tenant-conn* dashboard-id)
+        (is (nil? (dashboard-by-id *tenant-conn* {:id dashboard-id})))
         (is (empty? (dashboard_visualisation-by-dashboard-id
-                     test-conn {:dashboard-id dashboard-id})))
-        (is (= (count (all-dashboards test-conn))
+                     *tenant-conn* {:dashboard-id dashboard-id})))
+        (is (= (count (all-dashboards *tenant-conn*))
                1))))))

@@ -53,6 +53,4 @@
 
   (testing "Test scheme"
     (is (= "tenant"
-           (at/label "https://tenant.akvotest.org"))))
-
-  )
+           (at/label "https://tenant.akvotest.org")))))

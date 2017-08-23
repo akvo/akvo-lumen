@@ -9,31 +9,41 @@
             [akvo.lumen.lib.dataset :as dataset]
             [akvo.lumen.lib.visualisation :as visualisation]
             ;; [akvo.lumen.import.csv-test :refer [import-file]]
-            [akvo.lumen.test-utils :refer [import-file-2]]
+            [akvo.lumen.test-utils :refer [import-file-2 test-tenant test-tenant-conn]]
             [akvo.lumen.variant :as variant]
             [clojure.test :refer :all]
             [com.stuartsierra.component :as component]
             [duct.component.hikaricp :refer [hikaricp]]))
 
 
+;; (def test-system
+;;   (->
+;;    (component/system-map
+;;     :tenant-manager (tenant-manager {})
+;;     :db (hikaricp {:uri (:db_uri test-tenant-spec)}))
+;;    (component/system-using
+;;     {:tenant-manager [:db]})))
 
-(def test-system
-  (->
-   (component/system-map
-    :tenant-manager (tenant-manager {})
-    :db (hikaricp {:uri (:db_uri test-tenant-spec)}))
-   (component/system-using
-    {:tenant-manager [:db]})))
+;; (def ^:dynamic *tenant-conn*)
+
+;; (defn fixture [f]
+;;   (migrate-tenant test-tenant-spec)
+;;   (alter-var-root #'test-system component/start)
+;;   (binding [*tenant-conn* (:spec (:db test-system))]
+;;     (f)
+;;     (alter-var-root #'test-system component/stop)
+;;     (rollback-tenant test-tenant-spec)))
+
+;; (use-fixtures :once fixture)
+
 
 (def ^:dynamic *tenant-conn*)
 
 (defn fixture [f]
-  (migrate-tenant test-tenant-spec)
-  (alter-var-root #'test-system component/start)
-  (binding [*tenant-conn* (:spec (:db test-system))]
+  (migrate-tenant test-tenant)
+  (binding [*tenant-conn* (test-tenant-conn test-tenant)]
     (f)
-    (alter-var-root #'test-system component/stop)
-    (rollback-tenant test-tenant-spec)))
+    (rollback-tenant test-tenant)))
 
 (use-fixtures :once fixture)
 
