@@ -29,7 +29,7 @@ dependencies:
         pwd: keycloak
     - ./server.sh run:
         pwd: keycloak
-    - build-container-ci.sh:
+    - ./build-container-ci.sh:
         pwd: postgres
     - docker run -d --name lumen-db -p 5432:5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=password -e POSTGRES_DB=db -t akvo/lumen-db:$CIRCLE_SHA1
     # Backend
