@@ -19,19 +19,21 @@ machine:
 dependencies:
   cache_directories:
     - "~/.package_cache"
+    - "~/docker-images"
 
   pre:
     # Stopping the default postgres so we can start our own.
     - sudo service postgresql stop
     # Keycloak
-    - ./server.sh build:
+    - chmod u+x keycloak/build-container-ci.sh
+    - ./build-container-ci.sh:
         pwd: keycloak
-    - ./server.sh run:
-        pwd: keycloak
-    - docker build -t akvo/lumen-db .:
+    - docker run -d -p 8080:8080 --name lumen-keycloak -t akvo/keycloak:$CIRCLE_SHA1
+    # Postgres
+    - chmod u+x postgres/build-container-ci.sh
+    - ./build-container-ci.sh:
         pwd: postgres
-    - docker run -d --name lumen-db -p 5432:5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=password -e POSTGRES_DB=db -t akvo/lumen-db:
-        pwd: postgres
+    - docker run -d --name lumen-db -p 5432:5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=password -e POSTGRES_DB=db -t akvo/lumen-db:$CIRCLE_SHA1
     # Backend
     - cp profiles.clj.template profiles.clj:
         pwd: backend
