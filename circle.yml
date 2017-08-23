@@ -24,15 +24,14 @@ dependencies:
   pre:
     # Stopping the default postgres so we can start our own.
     - sudo service postgresql stop
+    - chmod u+x keycloak/build-container-ci.sh
+    - ./build-container-ci.sh:
+        pwd: keycloak
+    - docker run -d -p 8080:8080 --name lumen-keycloak -t akvo/keycloak:$CIRCLE_SHA1
     - chmod u+x postgres/build-container-ci.sh
     - ./build-container-ci.sh:
         pwd: postgres
     - docker run -d --name lumen-db -p 5432:5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=password -e POSTGRES_DB=db -t akvo/lumen-db:$CIRCLE_SHA1
-    # Keycloak
-    - ./server.sh build:
-        pwd: keycloak
-    - ./server.sh run:
-        pwd: keycloak
     # Backend
     - cp profiles.clj.template profiles.clj:
         pwd: backend
