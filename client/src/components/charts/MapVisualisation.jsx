@@ -35,6 +35,19 @@ const calculateBounds = (layerArray) => {
     maxLong = Math.max(maxLong, maxArray[1]);
   });
 
+  /*
+   * If there's a single geo point (or if all the geo points happens to overlap) the min/max
+   * coordinates will be the same. Expand them so that we get a sensible bounding box.
+   */
+  if (minLat === maxLat) {
+    minLat -= 1;
+    maxLat += 1;
+  }
+  if (minLong === maxLong) {
+    minLong -= 1;
+    maxLong += 1;
+  }
+
   return [[minLat, minLong], [maxLat, maxLong]];
 };
 
@@ -229,7 +242,7 @@ export default function MapVisualisation({ visualisation, datasets, width, heigh
       </h2>
       <Map
         center={[0, 0]}
-        {... bounds ? { bounds } : {}} // Don't set a bounds prop if we have no bounds
+        {... bounds ? { bounds } : {}} // Do not set a bounds prop if we have no bounds
         zoom={2}
         scrollWheelZoom={false}
         key={width}
