@@ -9,3 +9,4 @@ of the image with something like this:
 TIP=`docker inspect akvo-tiler | grep '"IPAddress":' | head -1 | sed 's/.*: "//;s/".*//'`
 firefox ../../viewer/index.html?url=http://${TIP}:4000/akvo/layergroup
 ```
+
