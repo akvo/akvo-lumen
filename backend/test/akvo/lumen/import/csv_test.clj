@@ -1,13 +1,10 @@
 (ns akvo.lumen.import.csv-test
-  (:require [akvo.lumen.component.tenant-manager :refer [pool]]
-            [akvo.lumen.fixtures :refer [;; db-fixture test-conn
-                                         migrate-tenant rollback-tenant]]
+  (:require [akvo.lumen.fixtures :refer [migrate-tenant rollback-tenant]]
             [akvo.lumen.import :refer [do-import]]
-            [akvo.lumen.import.csv :refer :all]
-            [akvo.lumen.test-utils :refer [import-file-2 test-tenant test-tenant-conn]]
+            [akvo.lumen.test-utils
+             :refer
+             [import-file-2 test-tenant test-tenant-conn]]
             [akvo.lumen.util :refer [squuid]]
-            [clojure.edn :as edn]
-            [clojure.java.io :as io]
             [clojure.java.io :as io]
             [clojure.test :refer :all]
             [hugsql.core :as hugsql]))

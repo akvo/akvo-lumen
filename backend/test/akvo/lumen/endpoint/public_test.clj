@@ -1,8 +1,5 @@
 (ns akvo.lumen.endpoint.public-test
-  (:require [akvo.lumen.endpoint
-             [public :as public]
-             [share-test :as share-test]]
-            ;; [akvo.lumen.fixtures :refer [db-fixture test-conn]]
+  (:require [akvo.lumen.endpoint.share-test :as share-test]
             [akvo.lumen.fixtures :refer [migrate-tenant rollback-tenant]]
             [akvo.lumen.lib.public-impl :as public-impl]
             [akvo.lumen.lib.share :as share]

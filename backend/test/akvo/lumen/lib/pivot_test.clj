@@ -1,16 +1,14 @@
 (ns akvo.lumen.lib.pivot-test
-  (:require [akvo.lumen.component.tenant-manager :refer [tenant-manager]]
-            [akvo.lumen.fixtures :refer [test-tenant-spec
-                                         migrate-tenant
-                                         rollback-tenant]]
-            [akvo.lumen.import.csv-test :refer [import-file]]
+  (:require [akvo.lumen.fixtures
+             :refer
+             [migrate-tenant rollback-tenant test-tenant-spec]]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.aggregation :as aggregation]
-            [akvo.lumen.test-utils :refer [import-file-2 test-tenant test-tenant-conn]]
+            [akvo.lumen.test-utils
+             :refer
+             [import-file-2 test-tenant test-tenant-conn]]
             [akvo.lumen.transformation :as tf]
-            [clojure.test :refer :all]
-            [com.stuartsierra.component :as component]
-            [duct.component.hikaricp :refer [hikaricp]]))
+            [clojure.test :refer :all]))
 
 ;; (def test-system
 ;;   (->

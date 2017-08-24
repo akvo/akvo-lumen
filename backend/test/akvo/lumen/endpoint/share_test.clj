@@ -1,16 +1,13 @@
 (ns akvo.lumen.endpoint.share-test
-  (:require [akvo.lumen.component.tenant-manager :as tm]
-            ;; [akvo.lumen.fixtures :refer [db-fixture test-conn]]
-            [akvo.lumen.fixtures :refer [migrate-tenant rollback-tenant]]
+  (:require [akvo.lumen.fixtures :refer [migrate-tenant rollback-tenant]]
             [akvo.lumen.lib.dashboard :as dashboard]
             [akvo.lumen.lib.share :as share]
             [akvo.lumen.test-utils :refer [test-tenant test-tenant-conn]]
-            [akvo.lumen.util :refer [squuid gen-table-name]]
+            [akvo.lumen.util :refer [gen-table-name squuid]]
             [akvo.lumen.variant :as variant]
             [clojure.java.jdbc :as jdbc]
             [clojure.test :refer :all]
             [hugsql.core :as hugsql]))
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Helpers

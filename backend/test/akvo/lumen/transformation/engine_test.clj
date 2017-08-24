@@ -1,14 +1,11 @@
 (ns akvo.lumen.transformation.engine-test
   (:require [akvo.lumen.fixtures :refer [migrate-tenant rollback-tenant]]
-            [akvo.lumen.main]
-            [akvo.lumen.migrate :as migrate]
-            [akvo.lumen.test-utils :refer [import-file-2 test-tenant test-tenant-conn]]
+            [akvo.lumen.test-utils :refer [test-tenant test-tenant-conn]]
             [akvo.lumen.transformation.engine :refer :all]
             [cheshire.core :as json]
             [clojure.java.io :as io]
             [clojure.test :refer :all]
-            [hugsql.core :as hugsql]
-            [reloaded.repl :refer [stop go]]))
+            [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/transformation/engine_test.sql")
 

@@ -1,21 +1,16 @@
 (ns akvo.lumen.transformation-test
-  (:require [akvo.lumen.component.tenant-manager :refer [tenant-manager]]
-            [akvo.lumen.fixtures :refer [;; tenant-conn
-                                         test-tenant-spec
-                                         migrate-tenant
-                                         rollback-tenant]]
-            [akvo.lumen.import :as imp]
-            ;; [akvo.lumen.import.csv-test :refer [import-file]]
+  (:require [akvo.lumen.fixtures
+             :refer
+             [migrate-tenant rollback-tenant test-tenant-spec]]
             [akvo.lumen.lib :as lib]
-            [akvo.lumen.test-utils :refer [import-file-2 test-tenant test-tenant-conn]]
+            [akvo.lumen.test-utils
+             :refer
+             [import-file-2 test-tenant test-tenant-conn]]
             [akvo.lumen.transformation :as tf]
             [akvo.lumen.transformation.engine :as engine]
-            [akvo.lumen.util :refer (squuid)]
             [cheshire.core :as json]
             [clojure.java.io :as io]
             [clojure.test :refer :all]
-            [com.stuartsierra.component :as component]
-            [duct.component.hikaricp :refer [hikaricp]]
             [hugsql.core :as hugsql]))
 
 (def ops (vec (json/parse-string (slurp (io/resource "ops.json")))))

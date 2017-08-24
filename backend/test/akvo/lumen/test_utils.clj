@@ -19,15 +19,13 @@
   (first (filter #(= "t1" (:label %))
                  (:tenants seed-data))))
 
-(let [cache (atom {:connection nil})]
+(let [conn-cache (atom {})]
   (defn test-tenant-conn
-    "This should be updated to operate on the provided tenant spec."
-    [tenant]
-    (let [connection (:connection @cache)]
-      (if-not (nil? connection)
-        connection
-        (:connection (swap! cache assoc :connection (pool tenant)))))))
-
+    "Returns a Hikaricp for provided tenant, connections are cached."
+    [{:keys [label] :as tenant}]
+    (if-let [tenant-conn (get @conn-cache label)]
+      tenant-conn
+      (get (swap! conn-cache assoc label (pool tenant)) label))))
 
 (defn import-file-2
   "Import a file and return the dataset-id"

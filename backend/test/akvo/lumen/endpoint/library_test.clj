@@ -1,6 +1,5 @@
 (ns akvo.lumen.endpoint.library-test
-  (:require [clojure.test :refer :all]
-            [akvo.lumen.endpoint.library :as library]))
+  (:require [akvo.lumen.endpoint.library :as library]))
 
 (def handler
   (library/endpoint {}))

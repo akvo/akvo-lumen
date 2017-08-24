@@ -1,9 +1,4 @@
-(ns akvo.lumen.functional-test
-  (:require
-   ;; [akvo.lumen.fixtures :refer [system-fixture]]
-   [clj-http.client :as client]
-   [clojure.test :refer :all]))
-
+(ns akvo.lumen.functional-test)
 
 #_(use-fixtures :once system-fixture)
 
