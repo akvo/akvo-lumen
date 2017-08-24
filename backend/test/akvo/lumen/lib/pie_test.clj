@@ -44,7 +44,6 @@
   (migrate-tenant test-tenant)
   (binding [;;*tenant-conn* {:connection-uri (:db_uri test-tenant)}
             *tenant-conn* (test-tenant-conn test-tenant)]
-    (prn *tenant-conn*)
     (f)
     (rollback-tenant test-tenant)))
 

@@ -1,8 +1,10 @@
 (ns akvo.lumen.endpoint.share-test
   (:require [akvo.lumen.component.tenant-manager :as tm]
-            [akvo.lumen.fixtures :refer [db-fixture test-conn]]
+            ;; [akvo.lumen.fixtures :refer [db-fixture test-conn]]
+            [akvo.lumen.fixtures :refer [migrate-tenant rollback-tenant]]
             [akvo.lumen.lib.dashboard :as dashboard]
             [akvo.lumen.lib.share :as share]
+            [akvo.lumen.test-utils :refer [test-tenant test-tenant-conn]]
             [akvo.lumen.util :refer [squuid gen-table-name]]
             [akvo.lumen.variant :as variant]
             [clojure.java.jdbc :as jdbc]
@@ -115,8 +117,6 @@
 ;;; Test data
 ;;;
 
-
-
 (def test-spec
   {:data-source-id        (str (squuid))
    :job-execution-id      (str (squuid))
@@ -135,7 +135,17 @@
 ;;; Tests
 ;;;
 
-(use-fixtures :once db-fixture)
+(def ^:dynamic *tenant-conn*)
+
+(defn fixture [f]
+  (migrate-tenant test-tenant)
+  (binding [*tenant-conn* (test-tenant-conn test-tenant)]
+    (f)
+    (rollback-tenant test-tenant)))
+
+(use-fixtures :once fixture)
+
+#_(use-fixtures :once db-fixture)
 
 (hugsql/def-db-fns "akvo/lumen/endpoint/share_test.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/dashboard.sql")
@@ -143,34 +153,34 @@
 (deftest ^:functional share
 
   (testing "Empty collection"
-    (is (empty? (variant/value (share/all test-conn)))))
+    (is (empty? (variant/value (share/all *tenant-conn*)))))
 
   (testing "Insert visualisation share"
-    (seed test-conn test-spec)
-    (let [new-share (variant/value (share/fetch test-conn
+    (seed *tenant-conn* test-spec)
+    (let [new-share (variant/value (share/fetch *tenant-conn*
                                                 {"visualisationId"
                                                  (:visualisation-id test-spec)}))
-          r (variant/value (share/all test-conn))]
+          r (variant/value (share/all *tenant-conn*))]
       (is (= 1 (count r)))
       (is (= (:id new-share) (:id (first r))))))
 
   (testing "New share on same item"
-    (let [old-share-id (:id (first (variant/value (share/all test-conn))))
-          new-share-id (:id (variant/value (share/fetch test-conn
+    (let [old-share-id (:id (first (variant/value (share/all *tenant-conn*))))
+          new-share-id (:id (variant/value (share/fetch *tenant-conn*
                                                         {"visualisationId"
                                                          (:visualisation-id test-spec)})))]
       (is (= new-share-id old-share-id))))
 
   (testing "Remove share"
-    (let [shares (variant/value (share/all test-conn))]
-      (share/delete test-conn (:id (first shares)))
-      (is (empty? (variant/value (share/all test-conn))))))
+    (let [shares (variant/value (share/all *tenant-conn*))]
+      (share/delete *tenant-conn* (:id (first shares)))
+      (is (empty? (variant/value (share/all *tenant-conn*))))))
 
   (testing "Insert dashboard share"
-    (let [dashboard-id (-> (all-dashboards test-conn) first :id)
-          dashboard-share (variant/value (share/fetch test-conn
+    (let [dashboard-id (-> (all-dashboards *tenant-conn*) first :id)
+          dashboard-share (variant/value (share/fetch *tenant-conn*
                                                       {"dashboardId" dashboard-id}))]
       (is (contains? dashboard-share :id))))
 
   (testing "History"
-    (is (not (empty? (share-history test-conn))))))
+    (is (not (empty? (share-history *tenant-conn*))))))
