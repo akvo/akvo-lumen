@@ -11,18 +11,6 @@
 
 (def columns (vec (take 3 (json/parse-string (slurp (io/resource "columns_test.json"))))))
 
-;; (def tenant-conn {:connection-uri "jdbc:postgresql://postgres/test_lumen_tenant_1?user=lumen&password=password"})
-
-;; (defn tf-engine-fixture
-;;   [f]
-;;   (migrate/migrate-tenant tenant-conn)
-;;   (db-drop-test-table tenant-conn)
-;;   (db-test-table tenant-conn)
-;;   (db-test-data tenant-conn)
-;;   (f))
-
-;; (use-fixtures :once tf-engine-fixture)
-
 (def ^:dynamic *tenant-conn*)
 
 (defn fixture [f]

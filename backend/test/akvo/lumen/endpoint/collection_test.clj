@@ -1,41 +1,15 @@
 (ns akvo.lumen.endpoint.collection-test
-  (:require [akvo.lumen.component.tenant-manager :refer [tenant-manager]]
-            [akvo.lumen.fixtures :refer [test-tenant-spec
-                                         migrate-tenant
-                                         rollback-tenant]]
+  (:require [akvo.lumen.fixtures :refer [migrate-tenant rollback-tenant]]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.collection :as collection]
             [akvo.lumen.lib.dashboard :as dashboard]
             [akvo.lumen.lib.dataset :as dataset]
             [akvo.lumen.lib.visualisation :as visualisation]
-            ;; [akvo.lumen.import.csv-test :refer [import-file]]
-            [akvo.lumen.test-utils :refer [import-file-2 test-tenant test-tenant-conn]]
+            [akvo.lumen.test-utils
+             :refer
+             [import-file test-tenant test-tenant-conn]]
             [akvo.lumen.variant :as variant]
-            [clojure.test :refer :all]
-            [com.stuartsierra.component :as component]
-            [duct.component.hikaricp :refer [hikaricp]]))
-
-
-;; (def test-system
-;;   (->
-;;    (component/system-map
-;;     :tenant-manager (tenant-manager {})
-;;     :db (hikaricp {:uri (:db_uri test-tenant-spec)}))
-;;    (component/system-using
-;;     {:tenant-manager [:db]})))
-
-;; (def ^:dynamic *tenant-conn*)
-
-;; (defn fixture [f]
-;;   (migrate-tenant test-tenant-spec)
-;;   (alter-var-root #'test-system component/start)
-;;   (binding [*tenant-conn* (:spec (:db test-system))]
-;;     (f)
-;;     (alter-var-root #'test-system component/stop)
-;;     (rollback-tenant test-tenant-spec)))
-
-;; (use-fixtures :once fixture)
-
+            [clojure.test :refer :all]))
 
 (def ^:dynamic *tenant-conn*)
 
@@ -65,8 +39,8 @@
 
 (deftest ^:functional collection-test
   (let [;; Import a few datasets
-        ds1 (import-file-2 *tenant-conn* "GDP.csv" {})
-        ds2 (import-file-2 *tenant-conn* "dates.csv" {})
+        ds1 (import-file *tenant-conn* "GDP.csv" {})
+        ds2 (import-file *tenant-conn* "dates.csv" {})
         vs1 (create-visualisation *tenant-conn* ds1)
         vs2 (create-visualisation *tenant-conn* ds2)
         db1 (create-dashboard *tenant-conn*)

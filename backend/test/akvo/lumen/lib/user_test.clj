@@ -10,15 +10,10 @@
             [clojure.test :refer :all]
             [com.stuartsierra.component :as component]))
 
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; System setup
 ;;;
-
-;; (def seed-data
-;;   (->> "test-seed.edn" io/resource slurp edn/read-string))
-
-;; (def t1 (first (filter #(= "t1" (:label %))
-;;                        (:tenants seed-data))))
 
 (def keycloak-config (:keycloak seed-data))
 

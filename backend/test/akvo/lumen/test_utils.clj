@@ -15,6 +15,9 @@
        slurp
        edn/read-string))
 
+(def test-tenant-manager
+  (:tenant-manager seed-data))
+
 (def test-tenant
   (first (filter #(= "t1" (:label %))
                  (:tenants seed-data))))
@@ -27,7 +30,7 @@
       tenant-conn
       (get (swap! conn-cache assoc label (pool tenant)) label))))
 
-(defn import-file-2
+(defn import-file
   "Import a file and return the dataset-id"
   [tenant-conn file {:keys [dataset-name has-column-headers?]}]
   (let [data-source-id (str (squuid))

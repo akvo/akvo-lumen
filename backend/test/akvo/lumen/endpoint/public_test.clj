@@ -12,7 +12,6 @@
 ;;; Tests
 ;;;
 
-;; (use-fixtures :once db-fixture)
 
 (def ^:dynamic *tenant-conn*)
 

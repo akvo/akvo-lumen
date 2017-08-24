@@ -1,17 +1,12 @@
 (ns akvo.lumen.endpoint.dashboard-test
-  (:require [akvo.lumen.endpoint.share :as share]
-            [akvo.lumen.endpoint.share-test :as share-test]
-            ;; [akvo.lumen.fixtures :refer [db-fixture test-conn]]
-            [akvo.lumen.fixtures :refer [;; db-fixture test-conn
-                                         migrate-tenant rollback-tenant]]
+  (:require [akvo.lumen.endpoint.share-test :as share-test]
+            [akvo.lumen.fixtures :refer [migrate-tenant rollback-tenant]]
             [akvo.lumen.lib.dashboard :as dashboard]
             [akvo.lumen.lib.dashboard-impl :as dashboard-impl]
-            [akvo.lumen.test-utils :refer [import-file-2 test-tenant test-tenant-conn]]
-            [akvo.lumen.util :refer [squuid]]
+            [akvo.lumen.test-utils :refer [test-tenant test-tenant-conn]]
             [akvo.lumen.variant :as variant]
             [clojure.test :refer :all]
             [hugsql.core :as hugsql]))
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Test data

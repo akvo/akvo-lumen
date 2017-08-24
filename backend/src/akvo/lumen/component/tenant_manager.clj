@@ -4,10 +4,7 @@
   (:require [akvo.lumen.lib :as lib]
             [clojure.string :as str]
             [com.stuartsierra.component :as component]
-            [hugsql.core :as hugsql]
-            [ragtime
-             [jdbc :as ragtime-jdbc]
-             [repl :as ragtime-repl]])
+            [hugsql.core :as hugsql])
   (:import [com.zaxxer.hikari HikariConfig HikariDataSource]))
 
 (hugsql/def-db-fns "akvo/lumen/component/tenant_manager.sql")

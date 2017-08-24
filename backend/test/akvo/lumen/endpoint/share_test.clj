@@ -142,7 +142,6 @@
 
 (use-fixtures :once fixture)
 
-#_(use-fixtures :once db-fixture)
 
 (hugsql/def-db-fns "akvo/lumen/endpoint/share_test.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/dashboard.sql")
