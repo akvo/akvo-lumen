@@ -14,6 +14,7 @@
   "apply": "Appliquer",
   "area": "Zone",
   "ascending": "Ascendant",
+  "autodetect_column_types": "Detecter automatiquement type de donnée",
   "bar": "Barre",
   "blank_dashboard_help_text": "Cliquez une visualisation dans la liste pour l'ajouter au tableau de bord",
   "bottom": "Bas",

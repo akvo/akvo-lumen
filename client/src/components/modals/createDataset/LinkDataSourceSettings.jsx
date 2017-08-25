@@ -44,24 +44,31 @@ class LinkDataSourceSettings extends Component {
             onChange={this.handleLink}
           />
         </div>
-        <div>
-          <label
-            className="linkFileToggleLabel"
-            htmlFor="dataHasColumnHeadersCheckbox"
-          >
-            <FormattedMessage id="data_has_column_headers" />:
-          </label>
-          <input
-            id="dataHasColumnHeadersCheckbox"
-            type="checkbox"
-            defaultChecked={this.props.dataSource.hasColumnHeaders}
-            ref={(ref) => { this.datasetHeaderStatusToggle = ref; }}
-            onClick={() => {
-              this.props.onChange({
-                hasColumnHeaders: this.datasetHeaderStatusToggle.checked,
-              });
-            }}
-          />
+        <div className="dataFileUploadHeaderToggle">
+          <p>
+            <input
+              type="checkbox"
+              defaultChecked={this.props.dataSource.hasColumnHeaders}
+              ref={(ref) => { this.datasetHeaderStatusToggle = ref; }}
+              onClick={() => {
+                this.props.onChange({
+                  hasColumnHeaders: this.datasetHeaderStatusToggle.checked,
+                });
+              }}
+            /> <FormattedMessage id="file_has_column_headers" />
+          </p>
+          <p>
+            <input
+              type="checkbox"
+              defaultChecked={this.props.dataSource.guessColumnTypes}
+              ref={(ref) => { this.guessColumnTypes = ref; }}
+              onClick={() => {
+                this.props.onChange({
+                  guessColumnTypes: this.guessColumnTypes.checked,
+                });
+              }}
+            /> <FormattedMessage id="autodetect_column_types" />
+          </p>
         </div>
       </div>
     );
@@ -75,6 +82,7 @@ LinkDataSourceSettings.propTypes = {
     kind: PropTypes.oneOf(['LINK']).isRequired,
     url: PropTypes.string.isRequired,
     hasColumnHeaders: PropTypes.bool.isRequired,
+    guessColumnTypes: PropTypes.bool.isRequired,
   }),
 };
 
