@@ -106,7 +106,5 @@
   [spec {:keys [file-upload-path]}]
   (let [path (get-path spec file-upload-path)
         headers? (boolean (get spec "hasColumnHeaders"))
-        guess-types? (if-some [guess-types? (get spec "guessColumnTypes")]
-                       guess-types?
-                       true)]
+        guess-types? (-> (get spec "guessColumnTypes") not false?)]
     (csv-importer path headers? guess-types?)))
