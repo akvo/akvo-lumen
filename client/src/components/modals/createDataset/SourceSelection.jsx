@@ -49,12 +49,15 @@ const supportedFormats = [{
 const defaultDataSources = {
   DATA_FILE: {
     kind: 'DATA_FILE',
+    hasColumnHeaders: true,
+    guessColumnTypes: true,
   },
 
   LINK: {
     kind: 'LINK',
     url: '',
     hasColumnHeaders: true,
+    guessColumnTypes: true,
   },
 
   AKVO_FLOW: {

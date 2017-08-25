@@ -14,6 +14,7 @@
   "apply": "Apply",
   "area": "Area",
   "ascending": "Ascending",
+  "autodetect_column_types": "Autodetect column types",
   "bar": "Bar",
   "blank_dashboard_help_text": "Click a visualisation in the visualisation list to add it to the dashboard",
   "bottom": "Bottom",
