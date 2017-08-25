@@ -29,7 +29,7 @@ const handleChangeSpec = (change, oldSpec, onChangeSpec, columnOptions) => {
     onChangeSpec(change);
   }
 
-  let autoAxisLabelY = getColumnTitle(newSpec.metricColumnY, columnOptions);
+  let autoAxisLabelY = newSpec.metricColumnY ? getColumnTitle(newSpec.metricColumnY, columnOptions) : '';
   let autoAxisLabelX = newSpec.bucketColumn ? getColumnTitle(newSpec.bucketColumn, columnOptions) : '';
 
   if (newSpec.bucketColumn !== null) {
