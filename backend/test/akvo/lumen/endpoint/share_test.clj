@@ -1,8 +1,8 @@
 (ns akvo.lumen.endpoint.share-test
-  (:require [akvo.lumen.fixtures :refer [migrate-tenant rollback-tenant]]
+  (:require [akvo.lumen.fixtures :refer [*tenant-conn*
+                                         tenant-conn-fixture]]
             [akvo.lumen.lib.dashboard :as dashboard]
             [akvo.lumen.lib.share :as share]
-            [akvo.lumen.test-utils :refer [test-tenant test-tenant-conn]]
             [akvo.lumen.util :refer [gen-table-name squuid]]
             [akvo.lumen.variant :as variant]
             [clojure.java.jdbc :as jdbc]
@@ -132,15 +132,7 @@
 ;;; Tests
 ;;;
 
-(def ^:dynamic *tenant-conn*)
-
-(defn fixture [f]
-  (migrate-tenant test-tenant)
-  (binding [*tenant-conn* (test-tenant-conn test-tenant)]
-    (f)
-    (rollback-tenant test-tenant)))
-
-(use-fixtures :once fixture)
+(use-fixtures :once tenant-conn-fixture)
 
 
 (hugsql/def-db-fns "akvo/lumen/endpoint/share_test.sql")

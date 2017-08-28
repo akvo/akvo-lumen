@@ -1,8 +1,7 @@
 (ns akvo.lumen.import.csv-test
-  (:require [akvo.lumen.fixtures :refer [migrate-tenant rollback-tenant]]
-            [akvo.lumen.test-utils
-             :refer
-             [import-file test-tenant test-tenant-conn]]
+  (:require [akvo.lumen.fixtures :refer [*tenant-conn*
+                                         tenant-conn-fixture]]
+            [akvo.lumen.test-utils :refer [import-file]]
             [clojure.test :refer :all]
             [hugsql.core :as hugsql]))
 
@@ -10,15 +9,7 @@
 (hugsql/def-db-fns "akvo/lumen/transformation.sql")
 
 
-(def ^:dynamic *tenant-conn*)
-
-(defn fixture [f]
-  (migrate-tenant test-tenant)
-  (binding [*tenant-conn* (test-tenant-conn test-tenant)]
-    (f)
-    (rollback-tenant test-tenant)))
-
-(use-fixtures :once fixture)
+(use-fixtures :once tenant-conn-fixture)
 
 
 (deftest ^:functional test-dos-file

@@ -1,9 +1,9 @@
 (ns akvo.lumen.endpoint.dashboard-test
   (:require [akvo.lumen.endpoint.share-test :as share-test]
-            [akvo.lumen.fixtures :refer [migrate-tenant rollback-tenant]]
+            [akvo.lumen.fixtures :refer [*tenant-conn*
+                                         tenant-conn-fixture]]
             [akvo.lumen.lib.dashboard :as dashboard]
             [akvo.lumen.lib.dashboard-impl :as dashboard-impl]
-            [akvo.lumen.test-utils :refer [test-tenant test-tenant-conn]]
             [akvo.lumen.variant :as variant]
             [clojure.test :refer :all]
             [hugsql.core :as hugsql]))
@@ -47,17 +47,7 @@
 ;;; Tests
 ;;;
 
-#_(use-fixtures :once db-fixture)
-
-(def ^:dynamic *tenant-conn*)
-
-(defn fixture [f]
-  (migrate-tenant test-tenant)
-  (binding [*tenant-conn* (test-tenant-conn test-tenant)]
-    (f)
-    (rollback-tenant test-tenant)))
-
-(use-fixtures :once fixture)
+(use-fixtures :once tenant-conn-fixture)
 
 
 (hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")

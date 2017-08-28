@@ -1,11 +1,10 @@
 (ns akvo.lumen.fixtures
   (:require [akvo.lumen.test-utils :as test-utils]
-            [hugsql.core :as hugsql]
+            [akvo.lumen.test-utils
+             :refer
+             [import-file test-tenant test-tenant-conn]]
             [ragtime.jdbc :as jdbc]
             [ragtime.repl :as repl]))
-
-
-(hugsql/def-db-fns "akvo/lumen/fixtures.sql")
 
 
 (defn- ragtime-spec
@@ -30,3 +29,13 @@
 
 (defn migrate-user-manager []
   (repl/migrate (user-manager-ragtime-spec)))
+
+(def ^:dynamic *tenant-conn*)
+
+(defn tenant-conn-fixture
+  "Returns a fixture that binds a connection pool to *tenant-conn*"
+  [f]
+  (migrate-tenant test-tenant)
+  (binding [*tenant-conn* (test-tenant-conn test-tenant)]
+    (f)
+    (rollback-tenant test-tenant)))

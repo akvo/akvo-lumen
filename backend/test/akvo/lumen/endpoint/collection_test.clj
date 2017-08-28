@@ -1,25 +1,17 @@
 (ns akvo.lumen.endpoint.collection-test
-  (:require [akvo.lumen.fixtures :refer [migrate-tenant rollback-tenant]]
+  (:require [akvo.lumen.fixtures :refer [*tenant-conn*
+                                         tenant-conn-fixture]]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.collection :as collection]
             [akvo.lumen.lib.dashboard :as dashboard]
             [akvo.lumen.lib.dataset :as dataset]
             [akvo.lumen.lib.visualisation :as visualisation]
-            [akvo.lumen.test-utils
-             :refer
-             [import-file test-tenant test-tenant-conn]]
+            [akvo.lumen.test-utils :refer [import-file]]
             [akvo.lumen.variant :as variant]
             [clojure.test :refer :all]))
 
-(def ^:dynamic *tenant-conn*)
 
-(defn fixture [f]
-  (migrate-tenant test-tenant)
-  (binding [*tenant-conn* (test-tenant-conn test-tenant)]
-    (f)
-    (rollback-tenant test-tenant)))
-
-(use-fixtures :once fixture)
+(use-fixtures :once tenant-conn-fixture)
 
 (defn visualisation-body [dataset-id]
   {"datasetId" dataset-id
@@ -46,14 +38,20 @@
         db1 (create-dashboard *tenant-conn*)
         db2 (create-dashboard *tenant-conn*)]
     (testing "Create an empty collection"
-      (let [[tag collection] (collection/create *tenant-conn* {"title" "col1"})]
+      (let [[tag collection] (collection/create *tenant-conn*
+                                                {"title" "col1"})]
         (is (= ::lib/created tag))
         (is (= #{:id :title :modified :created :entities}
                (-> collection keys set)))
-        (is (= ::lib/conflict (first (collection/create *tenant-conn* {"title" "col1"}))))
-        (is (= ::lib/bad-request (first (collection/create *tenant-conn* {"title" nil}))))
-        (is (= ::lib/bad-request (first (collection/create *tenant-conn*
-                                                           {"title" (apply str (repeat 129 "a"))}))))))
+        (is (= ::lib/conflict
+               (first (collection/create *tenant-conn*
+                                         {"title" "col1"}))))
+        (is (= ::lib/bad-request
+               (first (collection/create *tenant-conn*
+                                         {"title" nil}))))
+        (is (= ::lib/bad-request
+               (first (collection/create *tenant-conn*
+                                         {"title" (apply str (repeat 129 "a"))}))))))
     (testing "Create a collection with entities"
       (let [[tag collection] (collection/create *tenant-conn* {"title" "col2"
                                                                "entities" [ds1 vs1 db1]})]
@@ -61,7 +59,8 @@
         (is (= #{ds1 vs1 db1} (-> collection :entities set)))))
 
     (testing "Fetch collection"
-      (let [id (-> (collection/create *tenant-conn* {"title" "col3" "entities" [ds2 vs2 db2]})
+      (let [id (-> (collection/create *tenant-conn*
+                                      {"title" "col3" "entities" [ds2 vs2 db2]})
                    variant/value :id)
             coll (variant/value (collection/fetch *tenant-conn* id))]
         (is (= #{ds2 vs2 db2} (-> coll :entities set)))))
@@ -71,7 +70,8 @@
                    variant/value :id)]
         (let [coll (variant/value (collection/update *tenant-conn* id {"title" "col4 renamed"}))]
           (is (= (:title coll) "col4 renamed"))
-          (is (= (-> coll :entities set) #{ds2 vs2 db2}))
+          (is (= (-> coll :entities set)
+                 #{ds2 vs2 db2}))
           (collection/update *tenant-conn* id {"entities" []})
           (is (= [] (-> (collection/fetch *tenant-conn* id) variant/value :entities)))
           (collection/update *tenant-conn* id {"entities" [ds1 vs1]})

@@ -1,25 +1,14 @@
 (ns akvo.lumen.lib.pivot-test
-  (:require [akvo.lumen.fixtures
-             :refer
-             [migrate-tenant rollback-tenant]]
+  (:require [akvo.lumen.fixtures :refer [*tenant-conn*
+                                         tenant-conn-fixture]]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.aggregation :as aggregation]
-            [akvo.lumen.test-utils
-             :refer
-             [import-file test-tenant test-tenant-conn]]
+            [akvo.lumen.test-utils :refer [import-file]]
             [akvo.lumen.transformation :as tf]
             [clojure.test :refer :all]))
 
-(def ^:dynamic *tenant-conn*)
 
-
-(defn fixture [f]
-  (migrate-tenant test-tenant)
-  (binding [*tenant-conn* (test-tenant-conn test-tenant)]
-    (f)
-    (rollback-tenant test-tenant)))
-
-(use-fixtures :once fixture)
+(use-fixtures :once tenant-conn-fixture)
 
 (deftest ^:functional test-pivot
   (let [dataset-id (import-file *tenant-conn* "pivot.csv" {:dataset-name "pivot"
