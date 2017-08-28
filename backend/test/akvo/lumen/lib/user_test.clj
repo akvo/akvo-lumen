@@ -1,31 +1,19 @@
 (ns akvo.lumen.lib.user-test
   (:require [akvo.lumen.component.emailer :as emailer]
             [akvo.lumen.component.keycloak :as keycloak]
-            [akvo.lumen.component.tenant-manager :refer [pool]]
-            [akvo.lumen.fixtures :refer [migrate-tenant rollback-tenant]]
+            [akvo.lumen.fixtures :refer [migrate-tenant]]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.user :as user]
+            [akvo.lumen.test-utils :refer [seed-data test-tenant test-tenant-conn]]
             [akvo.lumen.variant :as variant]
-            [clojure.edn :as edn]
-            [clojure.java.io :as io]
-            [clojure.pprint :refer [pprint]]
             [clojure.set :as set]
             [clojure.test :refer :all]
-            [com.stuartsierra.component :as component]
-            [duct.component.hikaricp :refer [hikaricp]]
-            [ragtime.jdbc :as rjdbc]
-            [ragtime.repl :as rrepl]))
+            [com.stuartsierra.component :as component]))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; System setup
 ;;;
-
-(def seed-data
-  (->> "test-seed.edn" io/resource slurp edn/read-string))
-
-(def t1 (first (filter #(= "t1" (:label %))
-                       (:tenants seed-data))))
 
 (def keycloak-config (:keycloak seed-data))
 
@@ -39,11 +27,11 @@
 (def ^:dynamic *tenant-conn*)
 
 (defn fixture [f]
-  (migrate-tenant t1)
+  (migrate-tenant test-tenant)
   (alter-var-root #'test-system component/start)
   (binding [*emailer* (:emailer test-system)
             *keycloak* (:keycloak test-system)
-            *tenant-conn* (pool t1)]
+            *tenant-conn* (test-tenant-conn test-tenant)]
     (f)
     (alter-var-root #'test-system component/stop)))
 
