@@ -92,27 +92,42 @@ export default class DataFileDataSourceSettings extends Component {
         <p className="dataFileUploadMessage">
           <FormattedMessage id="or" />
         </p>
-        <input
-          className={`dataFileUploadInput${this.isProgressBarVisible() ? ' progressActive' : ''}`}
-          ref={(ref) => { this.fileInput = ref; }}
-          type="file"
-          onChange={() => {
-            this.uploadFile(this.fileInput.files[0]);
-          }}
-        />
-        <p className="dataFileUploadHeaderToggle">
+        <p>
           <input
-            type="checkbox"
-            className="datasetHeaderStatusToggle"
-            defaultChecked={this.props.dataSource.hasColumnHeaders}
-            ref={(ref) => { this.datasetHeaderStatusToggle = ref; }}
-            onClick={() => {
-              this.props.onChange({
-                hasColumnHeaders: this.datasetHeaderStatusToggle.checked,
-              });
+            className={`dataFileUploadInput${this.isProgressBarVisible() ? ' progressActive' : ''}`}
+            ref={(ref) => { this.fileInput = ref; }}
+            type="file"
+            onChange={() => {
+              this.uploadFile(this.fileInput.files[0]);
             }}
-          /> <FormattedMessage id="file_has_column_headers" />
+          />
         </p>
+        <div className="dataFileUploadHeaderToggle">
+          <p>
+            <input
+              type="checkbox"
+              defaultChecked={this.props.dataSource.hasColumnHeaders}
+              ref={(ref) => { this.datasetHeaderStatusToggle = ref; }}
+              onClick={() => {
+                this.props.onChange({
+                  hasColumnHeaders: this.datasetHeaderStatusToggle.checked,
+                });
+              }}
+            /> <FormattedMessage id="file_has_column_headers" />
+          </p>
+          <p>
+            <input
+              type="checkbox"
+              defaultChecked={this.props.dataSource.guessColumnTypes}
+              ref={(ref) => { this.guessColumnTypes = ref; }}
+              onClick={() => {
+                this.props.onChange({
+                  guessColumnTypes: this.guessColumnTypes.checked,
+                });
+              }}
+            /> <FormattedMessage id="autodetect_column_types" />
+          </p>
+        </div>
         {this.isProgressBarVisible() &&
           <div>
             <ProgressBar

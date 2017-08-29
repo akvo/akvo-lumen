@@ -65,13 +65,15 @@
       (first counts)
       (throw (ex-info "Invalid csv file. Varying number of columns" {})))))
 
-(defn csv-importer [path headers?]
+(defn csv-importer [path headers? guess-types?]
   (let [reader (-> path io/input-stream AutoDetectReader.)
         data (csv/read-csv reader)
         column-count (get-column-count data)
         column-titles (if headers? (first data) (gen-column-titles column-count))
         rows (if headers? (rest data) data)
-        column-types (get-column-types rows)
+        column-types (if guess-types?
+                       (get-column-types rows)
+                       (repeat column-count :text))
         column-spec (get-column-tuples column-titles column-types)]
     (reify
       import/DatasetImporter
@@ -103,5 +105,6 @@
 (defmethod import/dataset-importer "CSV"
   [spec {:keys [file-upload-path]}]
   (let [path (get-path spec file-upload-path)
-        headers? (boolean (get spec "hasColumnHeaders"))]
-    (csv-importer path headers?)))
+        headers? (boolean (get spec "hasColumnHeaders"))
+        guess-types? (-> (get spec "guessColumnTypes") false? not)]
+    (csv-importer path headers? guess-types?)))

@@ -12,6 +12,21 @@ This Docker Compose environment will have:
 - A Windshaft server
 - A Redis DB
 
+## Hosts
+Akvo Lumen is a multi tenant system and to do enable local routing to the tenants 
+the following hosts must be defined in your /etc/hosts file:
+
+``` sh
+127.0.0.1 t1.lumen.localhost
+127.0.0.1 t2.lumen.localhost
+127.0.0.1 auth.lumen.localhost
+```
+Or just
+
+``` sh
+sudo sh -c 'echo "127.0.0.1 t1.lumen.localhost t2.lumen.localhost auth.lumen.localhost" >> /etc/hosts'
+```
+
 ## Start development environment
 
 Before starting the following ports that must be free: 8080, 3000, 3030, 47480, 5432
@@ -21,16 +36,6 @@ To start:
 ``sh
 docker-compose -f docker-compose.yml up -d ; docker-compose logs -f --tail=10
 ``
-
-## Hosts
-Akvo Lumen is a multi tenant system and to do enable local routing to the tenants we
-created earlier we need to run the backend/provision/setup-localhost.sh script to add:
-
-``` sh
-127.0.0.1 t1.lumen.localhost
-127.0.0.1 t2.lumen.localhost
-127.0.0.1 auth.lumen.localhost
-```
 
 ## Keycloak
 

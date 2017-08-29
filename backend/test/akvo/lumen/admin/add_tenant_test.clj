@@ -1,7 +1,6 @@
 (ns akvo.lumen.admin.add-tenant-test
   (:require [akvo.lumen.admin.add-tenant :as at]
-            [clojure.test :refer [deftest testing is]]))
-
+            [clojure.test :refer [deftest is testing]]))
 
 (deftest conform-label
 
@@ -53,6 +52,4 @@
 
   (testing "Test scheme"
     (is (= "tenant"
-           (at/label "https://tenant.akvotest.org"))))
-
-  )
+           (at/label "https://tenant.akvotest.org")))))

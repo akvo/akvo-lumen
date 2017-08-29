@@ -1,41 +1,17 @@
 (ns akvo.lumen.lib.pie-test
-  (:require [akvo.lumen.component.tenant-manager :refer [tenant-manager]]
-            [akvo.lumen.fixtures :refer [test-tenant-spec
-                                         migrate-tenant
-                                         rollback-tenant]]
-            [akvo.lumen.import.csv-test :refer [import-file]]
+  (:require [akvo.lumen.fixtures :refer [*tenant-conn*
+                                         tenant-conn-fixture]]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.aggregation :as aggregation]
-            [akvo.lumen.transformation :as tf]
-            [clojure.test :refer :all]
-            [com.stuartsierra.component :as component]
-            [duct.component.hikaricp :refer [hikaricp]]))
+            [akvo.lumen.test-utils :refer [import-file]]
+            [clojure.test :refer :all]))
 
-(def test-system
-  (->
-   (component/system-map
-    :tenant-manager (tenant-manager {})
-    :db (hikaricp {:uri (:db_uri test-tenant-spec)}))
-   (component/system-using
-    {:tenant-manager [:db]})))
-
-(def ^:dynamic *tenant-conn*)
-(def ^:dynamic *dataset-id*)
-
-(defn fixture [f]
-  (migrate-tenant test-tenant-spec)
-  (alter-var-root #'test-system component/start)
-  (binding [*tenant-conn* (:spec (:db test-system))
-            *dataset-id* (import-file "pie.csv" {:dataset-name "pie"
-                                                 :has-column-headers? true})]
-    (f)
-    (alter-var-root #'test-system component/stop)
-    (rollback-tenant test-tenant-spec)))
-
-(use-fixtures :once fixture)
+(use-fixtures :once tenant-conn-fixture)
 
 (deftest ^:functional test-pie
-  (let [query (partial aggregation/query *tenant-conn* *dataset-id* "pie")]
+  (let [dataset-id (import-file *tenant-conn* "pie.csv" {:dataset-name "pie"
+                                                           :has-column-headers? true})
+        query (partial aggregation/query *tenant-conn* dataset-id "pie")]
     (testing "Simple queries"
       (let [[tag query-result] (query {"bucketColumn" "c1"})]
         (is (= tag ::lib/ok))

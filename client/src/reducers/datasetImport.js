@@ -7,6 +7,7 @@ export const initialState = {
     source: {
       kind: 'DATA_FILE',
       hasColumnHeaders: true,
+      guessColumnTypes: true,
     },
     name: '',
   },

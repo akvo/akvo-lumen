@@ -60,7 +60,7 @@
             width: 100%;
             max-width: 30rem;
             margin: 0 auto;
-            text-align: center;
+            text-align: left;
         }
     }
 
@@ -87,6 +87,8 @@
         }
 
         .dataFileUploadHeaderToggle {
+            display: inline-block;
+            text-align: left;
             padding: 1rem;
             padding-bottom: 3.25rem;
 
