@@ -41,11 +41,6 @@ new WebpackDevServer(webpack(config), {
     rewrites: [
       { from: '^/favicon.ico$', to: 'favicon.ico' },
       { from: '^/s/.*$', to: '/assets/index-pub.html' },
-      { from: '^/viewer/index.html', to: 'dev/viewer/index.html' },
-      { from: '^/viewer/leaflet.css', to: 'dev/viewer/leaflet.css' },
-      { from: '^/viewer/leaflet.js', to: 'dev/viewer/leaflet.js' },
-      { from: '^/viewer/leaflet.utfgrid.js', to: 'dev/viewer/leaflet.utfgrid.js' },
-      { from: '^/viewer/samples.txt', to: 'dev/viewer/samples.txt' },
       { from: '^.*$', to: '/assets/index.html' }
     ]
   },
