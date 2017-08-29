@@ -5,6 +5,7 @@ import update from 'react-addons-update';
 import { isEmpty } from 'lodash';
 import ShareEntity from '../components/modals/ShareEntity';
 import * as actions from '../actions/visualisation';
+import * as entity from '../domain/entity';
 import { fetchDataset } from '../actions/dataset';
 import { fetchLibrary } from '../actions/library';
 import mapSpecTemplate from './Visualisation/mapSpecTemplate';
@@ -216,6 +217,17 @@ class Visualisation extends Component {
     }
   }
 
+  // Filter datasets to only include status OK datasets
+  datasets() {
+    const datasets = Object.assign({}, this.props.library.datasets);
+    Object.keys(datasets).forEach((datasetId) => {
+      if (entity.getStatus(datasets[datasetId]) !== 'OK') {
+        delete datasets[datasetId];
+      }
+    });
+    return datasets;
+  }
+
   render() {
     if (this.state.visualisation == null || !this.state.asyncComponents) {
       return <div className="Visualisation loadingIndicator">Loading...</div>;
@@ -234,7 +246,7 @@ class Visualisation extends Component {
         />
         <VisualisationEditor
           visualisation={visualisation}
-          datasets={this.props.library.datasets}
+          datasets={this.datasets()}
           onChangeTitle={this.handleChangeVisualisationTitle}
           onChangeVisualisationType={this.handleChangeVisualisationType}
           onChangeSourceDataset={this.handleChangeSourceDataset}
