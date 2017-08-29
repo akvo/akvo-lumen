@@ -32,17 +32,6 @@ psql -d lumen_tenant_2 -f $DIR/helpers/create-extensions.sql
 psql -d test_lumen_tenant_1 -f $DIR/helpers/create-extensions.sql
 psql -d test_lumen_tenant_2 -f $DIR/helpers/create-extensions.sql
 
-sh -c "$DIR/helpers/import_csv.sh $DIR/helpers/liberia.csv | psql -d lumen_tenant_1";
-echo "SELECT AddGeometryColumn('liberia', 'geom', 4326, 'point', 2);" \
-     "UPDATE liberia SET geom = " \
-     "  ST_SetSRID(ST_MakePoint(longitude::float8, latitude::float8), 4326)" \
-     " WHERE longitude != '' and latitude != '';" \
-     "CREATE INDEX ON liberia USING GIST (geom);" \
-     | psql --set ON_ERROR_STOP=1 -d lumen_tenant_1
-
-echo "ALTER TABLE liberia OWNER TO lumen;" | psql -d lumen_tenant_1
-echo "ALTER TABLE spatial_ref_sys OWNER TO lumen;" | psql -d lumen_tenant_1
-
 echo ""
 echo "----------"
-echo "Done!!"
+echo "Done!"
