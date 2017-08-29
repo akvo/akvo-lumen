@@ -32,19 +32,8 @@ services:
  redis:
    image: redis:3.2.9
  windshaft:
-   build:
-     context: ./windshaft
-     dockerfile: Dockerfile-dev
+   image: akvo/akvo-maps:2469ae0cb95ba090412f042fdfa8c7038273fe0e
    environment:
-     - NODE_HEAPDUMP_OPTIONS=nosignal
+     - NODE_ENV=development
    volumes:
-      - ./windshaft/server:/tiler
       - ./windshaft/config/dev:/config
-   ports:
-      - "9229:9229"
-# statsd-server:
-#    image: hopsoft/graphite-statsd
-#    expose:
-#          - "8125"
-#    ports:
-#       - 8550:80
