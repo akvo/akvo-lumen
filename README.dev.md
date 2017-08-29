@@ -114,10 +114,6 @@ This container has a development version of the Windshaft container, with plenty
 The Windshaft server is not exposed directly to the external world, but it is proxied by the Webpack server 
 on the url http://t1.lumen.localhost:3030/maps/**. That url forwards the requests to "windshaft:4000".
 
-The PostgreSQL has a "liberia" table in the "lumen_tenant_1" DB with some data to be able to test the Windshaft server.
-
-Testing can be done through the UI that is available at http://t1.lumen.localhost:3030/viewer/index.html
-
 ## Legal
 Copyright © 2016 - present Akvo Foundation
 
