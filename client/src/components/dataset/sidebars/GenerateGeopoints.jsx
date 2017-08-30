@@ -17,7 +17,7 @@ function numberColumnOptions(columns) {
 }
 
 function SelectColumn({ columns, latOrLong, onChange, value }) {
-  const columnName = "columnName".concat(_.capitalize(latOrLong));
+  const columnName = 'columnName'.concat(_.capitalize(latOrLong));
   const translationId = `select_${latOrLong}_column`;
   return (
     <div className="inputGroup">
