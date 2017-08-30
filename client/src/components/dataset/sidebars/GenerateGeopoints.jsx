@@ -18,7 +18,7 @@ function numberColumnOptions(columns) {
 
 function SelectColumn({ columns, latOrLong, onChange, value }) {
   const columnName = 'columnName'.concat(_.capitalize(latOrLong));
-  const translationId = `select_${latOrLong}_column`;
+  const translationId = `select_column_${latOrLong}`;
   return (
     <div className="inputGroup">
       <label
@@ -99,13 +99,13 @@ export default class GenerateGeopoints extends Component {
         <div className="inputs">
           <SelectColumn
             columns={columns}
-            latOrLong='lat'
+            latOrLong="lat"
             onChange={value => this.handleSelectColumn(value, 'lat')}
             value={args.get('columnNameLat')}
           />
           <SelectColumn
             columns={columns}
-            latOrLong='long'
+            latOrLong="long"
             onChange={value => this.handleSelectColumn(value, 'long')}
             value={args.get('columnNameLong')}
           />
@@ -113,7 +113,7 @@ export default class GenerateGeopoints extends Component {
             <label
               htmlFor="titleTextInput"
             >
-              <FormattedMessage id="geo_column_title" />
+              <FormattedMessage id="column_title_geo" />
             </label>
             <input
               value={args.get('columnTitleGeo')}

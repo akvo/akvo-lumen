@@ -74,6 +74,7 @@
   "filter_text": "Filtrar texto",
   "filter": "Filtrar",
   "flow_application_url": "URL de la aplicación Flow",
+  "generate": "Generar",
   "generate_geopoints": "Generar geografía",
   "geo_location": "Ubicación geográfica",
   "geo_shape": "Forma geográfica",
