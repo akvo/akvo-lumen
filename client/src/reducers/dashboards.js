@@ -43,10 +43,47 @@ function removeDashboard(state, { payload }) {
   return newState;
 }
 
+
+function removeVisualisationFromDashboardLayout(layout, visualisationId) {
+  const newLayout = Object.assign({}, layout);
+  delete newLayout[visualisationId];
+  return newLayout;
+}
+
+function removeVisualisationFromDashboardEntities(entities, visualisationId) {
+  const newEntities = Object.assign({}, entities);
+  delete newEntities[visualisationId];
+  return newEntities;
+}
+
+function removeVisualisationFromDashboard(dashboard, visualisationId) {
+  return Object.assign({}, dashboard, {
+    layout: removeVisualisationFromDashboardLayout(dashboard.layout, visualisationId),
+    entities: removeVisualisationFromDashboardEntities(dashboard.entities, visualisationId),
+  });
+}
+
+function containsVisualisation(dashboard, visualisationId) {
+  return dashboard.entities[visualisationId] != null;
+}
+
+function removeVisualisation(state, { payload }) {
+  const visualisationId = payload;
+  const dashboards = Object.assign({}, state);
+  Object.keys(dashboards).forEach((dashboardId) => {
+    const dashboard = dashboards[dashboardId];
+    if (containsVisualisation(dashboard, visualisationId)) {
+      dashboards[dashboardId] = removeVisualisationFromDashboard(dashboard, visualisationId);
+    }
+  });
+  return dashboards;
+}
+
 export default handleActions({
   [actions.createDashboardSuccess]: createDashboard,
   [actions.fetchDashboardsSuccess]: saveDashboards,
   [actions.fetchDashboardSuccess]: saveDashboard,
   [actions.editDashboardSuccess]: editDashboard,
   [actions.deleteDashboardSuccess]: removeDashboard,
+  [actions.removeVisualisation]: removeVisualisation,
 }, initialState);
