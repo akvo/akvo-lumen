@@ -21,12 +21,8 @@ function SelectColumn({ columns, latOrLong, onChange, value }) {
   const translationId = `select_column_${latOrLong}`;
   return (
     <div className="inputGroup">
-      <label
-        htmlFor={columnName}
-      >
-        <FormattedMessage
-          id={translationId}
-        />
+      <label htmlFor={columnName}>
+        <FormattedMessage id={translationId} />
       </label>
       <SelectMenu
         name={columnName}

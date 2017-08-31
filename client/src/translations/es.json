@@ -150,6 +150,8 @@
   "select_separator": "Selecciona un separador",
   "select_survey_or_folder": "Selecciona una encuesta o carpeta",
   "select": "Selecciona",
+  "select_column_lat": "Selecciona una columna de latitud",
+  "select_column_long": "Selecciona una columna de longitud",
   "set_permissions": "Establecer permisos",
   "settings": "Ajustes",
   "share": "Compartir",
