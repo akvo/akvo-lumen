@@ -79,6 +79,7 @@
   "generate_geopoints": "Generate geopoints",
   "geo_location": "Geo location",
   "geo_shape": "Geo shape",
+  "geo_transform_description": "Generated geopoint column {columnTitleGeo} from columns {columnTitleLat} and {columnTitleLong}",
   "github": "Github",
   "google_drive": "Google Drive",
   "gradient": "Gradient",
