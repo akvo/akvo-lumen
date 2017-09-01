@@ -8,6 +8,7 @@ sudo /opt/google-cloud-sdk/bin/gcloud config set container/use_client_certificat
 
 sudo /opt/google-cloud-sdk/bin/gcloud docker -- push eu.gcr.io/${PROJECT_NAME}/lumen-backend
 sudo /opt/google-cloud-sdk/bin/gcloud docker -- push eu.gcr.io/${PROJECT_NAME}/lumen-client
+sudo /opt/google-cloud-sdk/bin/gcloud docker -- push eu.gcr.io/${PROJECT_NAME}/lumen-maps
 
 sudo chown -R ubuntu:ubuntu /home/ubuntu/.kube
 
