@@ -112,7 +112,7 @@ export default class GenerateGeopoints extends Component {
               <FormattedMessage id="column_title_geo" />
             </label>
             <input
-              value={args.get('columnTitleGeo')}
+              value={args.get('columnTitleGeo') || ''}
               type="text"
               className="titleTextInput"
               onChange={evt => this.handleChangeColumnTitleGeo(evt.target.value)}
