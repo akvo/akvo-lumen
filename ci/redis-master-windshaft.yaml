@@ -1,15 +1,15 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: redis-master
+  name: redis-master-windshaft
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: redis
+        run: redis
         role: master
-        tier: backend
+        client: windshaft
     spec:
       containers:
       - name: master
@@ -24,14 +24,16 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: redis-master
+  name: redis-master-windshaft
   labels:
-    app: redis
+    run: redis
     role: master
+    client: windshaft
 spec:
   ports:
   - port: 6379
     targetPort: 6379
   selector:
-    app: redis
+    run: redis
     role: master
+    client: windshaft

@@ -1,5 +1,5 @@
 module.exports.redis = {
-    host: 'redis-master',
+    host: 'redis-master-windshaft',
     max: 10
 };
 module.exports.renderer = {
