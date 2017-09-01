@@ -15,4 +15,4 @@ sudo chown -R ubuntu:ubuntu /home/ubuntu/.kube
 sed -e "s/\${BUILD_HASH}/$CIRCLE_SHA1/" ci/deployment.yaml.template > deployment.yaml
 
 kubectl apply -f deployment.yaml
-kubectl apply -f redis-master-windshaft.yaml
+kubectl apply -f ci/redis-master-windshaft.yaml
