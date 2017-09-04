@@ -8,9 +8,8 @@
 
 ;; Run query in lumen (tenant manager)
 (defn -main [query]
-  (let [uri (util/db-uri {:database "lumen"})
-        resp
-        (json/generate-stream
-         (jdbc/with-db-connection [conn uri {:read-only? true}]
-           (jdbc/query conn [query]))
-         *out*)]))
+  (let [uri (util/db-uri {:database "lumen"})]
+    (json/generate-stream
+     (jdbc/with-db-connection [conn uri {:read-only? true}]
+       (jdbc/query conn [query]))
+     *out*)))
