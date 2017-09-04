@@ -83,7 +83,7 @@ class AkvoFlowDataSourceSettings extends Component {
     this.setState({ instance, isLoadingNext: true });
     this.flowInstanceChangeTimeout = setTimeout(
       () => {
-        api.get(rootFoldersUrl(flowApiUrl, instance), { parentId: 0 }, acceptHeader)
+        api.get(rootFoldersUrl(flowApiUrl, instance), { parent_id: 0 }, acceptHeader)
           .then((response) => {
             this.setState({ isLoadingNext: false });
             if (response.ok) {
