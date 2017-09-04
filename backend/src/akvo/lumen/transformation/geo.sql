@@ -1,5 +1,5 @@
 -- :name add-geometry-column :?
--- :doc Creates a PostGIS geometry column (identifiers must be quoted)
+-- :doc Creates a PostGIS geometry column
 SELECT AddGeometryColumn (:table-name, :column-name-geo, 4326, 'POINT', 2)
 
 -- :name generate-geopoints :!
