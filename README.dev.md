@@ -9,6 +9,8 @@ This Docker Compose environment will have:
 - A PostgreSQL DB
 - A Backend server with a REPL
 - A Client with hot reloading
+- A Windshaft server
+- A Redis DB
 
 ## Hosts
 Akvo Lumen is a multi tenant system and to do enable local routing to the tenants 
@@ -104,6 +106,13 @@ To connect to the postgres server connect using something like:
 ```sh
 psql --host=akvolumen_postgres_1 --port=5432 --dbname=lumen_tenant_1 --username=lumen --password
 ```
+
+## Windshaft
+
+This container has a development version of the Windshaft container, with plenty of hardcoded assumptions.
+
+The Windshaft server is not exposed directly to the external world, but it is proxied by the Webpack server 
+on the url http://t1.lumen.localhost:3030/maps/**. That url forwards the requests to "windshaft:4000".
 
 ## Legal
 Copyright © 2016 - present Akvo Foundation
