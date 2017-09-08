@@ -6,6 +6,7 @@ import TransformationLog from './sidebars/TransformationLog';
 import CombineColumns from './sidebars/CombineColumns';
 import DeriveColumn from './sidebars/DeriveColumn';
 import RenameColumn from './sidebars/RenameColumn';
+import GenerateGeopoints from './sidebars/GenerateGeopoints';
 
 require('./DataTableSidebar.scss');
 
@@ -23,6 +24,8 @@ export default function DataTableSidebar(props) {
       return <DeriveColumn {...props} />;
     case 'renameColumn':
       return <RenameColumn {...props} />;
+    case 'generateGeopoints':
+      return <GenerateGeopoints {...props} />;
     default:
       throw new Error(`Unknown sidebar type ${props.type}`);
   }
@@ -37,6 +40,7 @@ DataTableSidebar.propTypes = {
       'combineColumns',
       'deriveColumn',
       'renameColumn',
+      'generateGeopoints',
     ]
   ).isRequired,
   onClose: PropTypes.func.isRequired,

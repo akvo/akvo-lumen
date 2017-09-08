@@ -199,6 +199,8 @@ export default class FilterMenu extends Component {
     const activeColumnType = newFilterColumn ?
       columnOptions.find(col => col.value === newFilterColumn).type : null;
 
+    const isFilterReady = this.getIsFilterReady();
+
     return (
       <div
         className={`FilterMenu inputGroup ${hasDataset ? 'enabled' : 'disabled'}`}
@@ -312,7 +314,8 @@ export default class FilterMenu extends Component {
                   <div className="buttonContainer">
                     <button
                       className={`saveFilter clickable
-                        ${this.getIsFilterReady() ? 'enabled' : 'disabled'}`}
+                        ${isFilterReady ? 'enabled' : 'disabled'}`}
+                      disabled={!isFilterReady}
                       onClick={() => this.saveFilter()}
                     >
                       Save Filter
