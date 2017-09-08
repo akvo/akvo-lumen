@@ -32,7 +32,7 @@ services:
  redis:
    image: redis:3.2.9
  windshaft:
-   image: akvo/akvo-maps:eb3a66b5cd908c0e6ea4da98ad9ab60320688388
+   build: windshaft
    environment:
      - NODE_ENV=development
      - PGSSLMODE=allow
