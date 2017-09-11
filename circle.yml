@@ -68,13 +68,6 @@ deployment:
       - ./ci/dev/build_containers.sh
       - ./ci/dev/deploy.sh
 
-  dantest:
-    branch: windshaft-k8s
-    commands:
-      - ./ci/dev/setup_gcloud.sh
-      - ./ci/dev/build_containers.sh
-      - ./ci/dev/deploy.sh
-
   prod:
     branch: master
     commands:
