@@ -1,4 +1,4 @@
-(ns akvo.lumen.admin.stats.report
+(ns akvo.lumen.admin.stats.d2d
   "The following env vars are assumed to be present:
   PG_HOST, PG_DATABASE, PG_USER, PG_PASSWORD
   The PG_* env vars can be found in the ElephantSQL console for the appropriate
