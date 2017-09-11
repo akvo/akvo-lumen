@@ -1,4 +1,17 @@
 (ns akvo.lumen.admin.stats.report
+  "The following env vars are assumed to be present:
+  PG_HOST, PG_DATABASE, PG_USER, PG_PASSWORD
+  The PG_* env vars can be found in the ElephantSQL console for the appropriate
+  instance.
+  Use this as follow
+  $ env PG_HOST=***.db.elephantsql.com PG_DATABASE=*** \\
+        PG_USER=*** PG_PASSWORD=*** \\
+        lein run -m akvo.lumen.admin.stats.report
+  Script can be executed with optional arguments
+  lein run -m akvo.lumen.admin.stats.report \"2017-09-01\"
+  or
+  lein run -m akvo.lumen.admin.stats.report now \"t1,t2\""
+
   "Same env vars as the rest of admin scripts
   report
   report \"2017-04-01\"
