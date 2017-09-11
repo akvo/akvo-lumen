@@ -11,13 +11,6 @@
   lein run -m akvo.lumen.admin.stats.report \"2017-09-01\"
   or
   lein run -m akvo.lumen.admin.stats.report now \"t1,t2\""
-
-  "Same env vars as the rest of admin scripts
-  report
-  report \"2017-04-01\"
-  report \"now\" \"t1\"
-  report \"2017-04-01\" \"t1,t2\"
-  "
   (:require [akvo.lumen.admin.util :as util]
             [cheshire.core :as json]
             [clojure.java.jdbc :as jdbc]
