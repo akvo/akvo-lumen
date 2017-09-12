@@ -16,7 +16,7 @@
                  [environ "1.1.0"]
                  [funcool/cuerdas "2.0.3"]
                  [meta-merge "1.0.0"]
-                 [org.akvo/commons "0.4.4-SNAPSHOT" :exclusions [org.postgresql/postgresql org.clojure/java.jdbc]]
+                 [org.akvo/commons "0.4.5" :exclusions [org.postgresql/postgresql org.clojure/java.jdbc]]
                  [org.akvo/resumed "0.1.0-SNAPSHOT"]
                  [org.apache.tika/tika-core "1.16"]
                  [org.apache.tika/tika-parsers "1.16"]
