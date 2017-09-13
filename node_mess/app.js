@@ -1,6 +1,7 @@
 var crypto = require('crypto'),
     // algorithm = 'aes-256-ctr',
     algorithm = 'aes-128-ecb',
+    // algorithm = 'aes128',
     password = 'a-shared-secret!';
 //password = 'd6F3Efeq';
 
@@ -13,12 +14,12 @@ function encrypt(text){
 
 function decrypt(text){
     var decipher = crypto.createDecipher(algorithm,password)
-    var dec = decipher.update(text,'hex','utf8')
-    dec += decipher.final('utf8');
+    var dec = decipher.update(text)
+    dec += decipher.final();
     return dec;
 }
 
-var hw = encrypt("hello world")
+var hw = encrypt("hello world");
 // outputs hello world
 console.log(decrypt(hw));
 
