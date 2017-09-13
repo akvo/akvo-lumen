@@ -91,7 +91,7 @@
     (if-let [tenant (get @tenants label)]
       (:uri tenant)
       (do
-        (load-tenant db tenants label)
+        (load-tenant db (:encryption-key config) tenants label)
         (:uri (get @tenants label)))))
 
   TenantAdmin
