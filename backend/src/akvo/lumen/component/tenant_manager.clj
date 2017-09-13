@@ -53,13 +53,15 @@
 
 
 (defn load-tenant [db encryption-key tenants label]
-  (if-let [tenant (tenant-by-id (:spec db)
-                                {:label label})]
-    (swap! tenants
-           assoc
-           label
-           {:uri  (aes/decrypt encryption-key (:db_uri tenant))
-            :spec (pool tenant)})
+  (if-let [{:keys [db_uri label]} (tenant-by-id (:spec db)
+                                                {:label label})]
+    (let [decrypted-db-uri (aes/decrypt encryption-key db_uri)]
+      (swap! tenants
+             assoc
+             label
+             {:uri decrypted-db-uri
+              :spec (pool {:db_uri decrypted-db-uri
+                           :label label})}))
     (throw (Exception. "Could not match dns label with tenant from tenats."))))
 
 

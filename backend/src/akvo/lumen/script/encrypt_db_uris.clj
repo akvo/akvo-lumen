@@ -9,5 +9,5 @@
         db (util/db-uri {:database "lumen"})
         tenants (jdbc/query db ["SELECT id, db_uri FROM tenants;"])]
     (doseq [{:keys [db_uri id]} tenants]
-      (when-not (s/starts-with? db_uri "jdbc:postgresql://")
+      (when (s/starts-with? db_uri "jdbc:postgresql://")
         (util/exec! db "UPDATE tenants SET db_uri = '%s' WHERE id = %s" (aes/encrypt secret db_uri) id)))))
