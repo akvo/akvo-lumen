@@ -2,6 +2,7 @@
   "Component that controll the tenants,
   We use the first domain label e.g. t1 in t1.lumen.akvo.org to dispatch."
   (:require [akvo.lumen.lib :as lib]
+            [akvo.lumen.lib.aes :as aes]
             [clojure.string :as str]
             [com.stuartsierra.component :as component]
             [hugsql.core :as hugsql]
@@ -51,18 +52,18 @@
     {:datasource (HikariDataSource. cfg)}))
 
 
-(defn load-tenant [db tenants label]
+(defn load-tenant [db encryption-key tenants label]
   (if-let [tenant (tenant-by-id (:spec db)
                                 {:label label})]
     (swap! tenants
            assoc
            label
-           {:uri  (:db_uri tenant)
+           {:uri  (aes/decrypt encryption-key (:db_uri tenant))
             :spec (pool tenant)})
     (throw (Exception. "Could not match dns label with tenant from tenats."))))
 
 
-(defrecord TenantManager [db]
+(defrecord TenantManager [db config]
 
   component/Lifecycle
   (start [this]
@@ -79,11 +80,11 @@
       this))
 
   TenantConnection
-  (connection [{:keys [db tenants]} label]
+  (connection [{:keys [tenants]} label]
     (if-let [tenant (get @tenants label)]
       (:spec tenant)
       (do
-        (load-tenant db tenants label)
+        (load-tenant db (:encryption-key config) tenants label)
         (:spec (get @tenants label)))))
 
   (uri [{:keys [db tenants]} label]
