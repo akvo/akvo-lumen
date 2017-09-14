@@ -14,10 +14,6 @@ spec:
         image: eu.gcr.io/akvo-lumen/lumen-client:${BUILD_HASH}
         ports:
         - containerPort: 80
-      - name: lumen-maps
-        image: eu.gcr.io/akvo-lumen/lumen-maps:${BUILD_HASH}
-        ports:
-        - containerPort: 4000
       - name: lumen-backend
         image: eu.gcr.io/akvo-lumen/lumen-backend:${BUILD_HASH}
         ports:
