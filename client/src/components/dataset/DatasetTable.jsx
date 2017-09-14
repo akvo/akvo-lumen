@@ -48,6 +48,7 @@ export default class DatasetTable extends Component {
     this.handleToggleTransformationLog = this.handleToggleTransformationLog.bind(this);
     this.handleToggleCombineColumnSidebar = this.handleToggleCombineColumnSidebar.bind(this);
     this.handleToggleDeriveColumnSidebar = this.handleToggleDeriveColumnSidebar.bind(this);
+    this.handleToggleGeoColumnSidebar = this.handleToggleGeoColumnSidebar.bind(this);
   }
 
   componentDidMount() {
@@ -132,6 +133,28 @@ export default class DatasetTable extends Component {
       });
       this.showSidebar({
         type: 'combineColumns',
+        displayRight: false,
+        onClose: this.hideSidebar,
+        onApply: (transformation) => {
+          this.hideSidebar();
+          this.props.onTransform(transformation);
+        },
+        columns: this.props.columns,
+      });
+    }
+  }
+
+  handleToggleGeoColumnSidebar() {
+    if (this.state.sidebarProps &&
+      this.state.sidebarProps.type === 'generateGeopoints') {
+      this.hideSidebar();
+    } else {
+      this.setState({
+        activeDataTypeContextMenu: null,
+        activeColumnContextMenu: null,
+      });
+      this.showSidebar({
+        type: 'generateGeopoints',
         displayRight: false,
         onClose: this.hideSidebar,
         onApply: (transformation) => {
@@ -317,6 +340,8 @@ export default class DatasetTable extends Component {
               this.handleToggleCombineColumnSidebar();
             } else if (menuItem === 'deriveColumn') {
               this.handleToggleDeriveColumnSidebar();
+            } else if (menuItem === 'generateGeopoints') {
+              this.handleToggleGeoColumnSidebar();
             } else {
               throw new Error(`Not yet implemented: ${menuItem}`);
             }

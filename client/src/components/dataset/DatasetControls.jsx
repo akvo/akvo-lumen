@@ -62,8 +62,8 @@ class DatasetControls extends Component {
                     customClass: 'notImplemented',
                   },
                   {
-                    label: 'Generate geopoints',
-                    value: 'generate-geopoints',
+                    label: <FormattedMessage id="generate_geopoints" />,
+                    value: 'generateGeopoints',
                     customClass: 'notImplemented',
                   },
                 ]}

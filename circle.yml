@@ -23,7 +23,14 @@ dependencies:
 
   pre:
     # Stopping the default postgres so we can start our own.
-    - sudo service postgresql stop
+    # See https://discuss.circleci.com/t/how-to-permanently-shutdown-circleci-default-postgres-mongodb-etc/7329
+    - |
+        echo manual | sudo tee /etc/init/postgresql.override
+        while sudo lsof -Pi :5432 -sTCP:LISTEN -t; do
+          echo "Waiting for postgresql to stop for real."
+          sudo service postgresql stop;
+          sleep 1;
+        done
     # Keycloak
     - chmod u+x keycloak/build-container-ci.sh
     - ./build-container-ci.sh:

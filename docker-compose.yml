@@ -29,3 +29,11 @@ services:
       - ./client:/lumen
    ports:
       - "3030:3030"
+ redis:
+   image: redis:3.2.9
+ windshaft:
+   image: akvo/akvo-maps:2469ae0cb95ba090412f042fdfa8c7038273fe0e
+   environment:
+     - NODE_ENV=development
+   volumes:
+      - ./windshaft/config/dev:/config

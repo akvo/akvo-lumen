@@ -54,6 +54,25 @@ function combineTransformationDescription(transformations, index, columns) {
   );
 }
 
+function geoTransformationDescription(transformations, index, columns) {
+  const transformation = transformations.get(index);
+  const columnNameLat = transformation.getIn(['args', 'columnNameLat']);
+  const columnNameLong = transformation.getIn(['args', 'columnNameLong']);
+  const columnTitleLat = findTitle(columnNameLat, transformations, index, columns);
+  const columnTitleLong = findTitle(columnNameLong, transformations, index, columns);
+  const columnTitleGeo = transformation.getIn(['args', 'columnTitleGeo']);
+  return (
+    <FormattedMessage
+      id="geo_transform_description"
+      values={{
+        columnTitleLat,
+        columnTitleLong,
+        columnTitleGeo,
+      }}
+    />
+  );
+}
+
 function textTransformationDescription(transformations, index, columns) {
   const transformation = transformations.get(index);
   const columnName = transformation.getIn(['args', 'columnName']);
@@ -91,6 +110,8 @@ function transformationDescription(transformations, index, columns) {
       return combineTransformationDescription(transformations, index, columns);
     case 'core/derive':
       return deriveTransformationDescription(transformation);
+    case 'core/generate-geopoints':
+      return geoTransformationDescription(transformations, index, columns);
     default:
       return op;
   }

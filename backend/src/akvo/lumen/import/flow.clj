@@ -52,7 +52,7 @@
 (defn form-instances
   "Returns a lazy sequence of form instances"
   [headers-fn form]
-  (let [initial-url (str (:formInstancesUrl form) "?pageSize=300")]
+  (let [initial-url (str (:formInstancesUrl form) "&page_size=300")]
     (form-instances* headers-fn initial-url)))
 
 (defn data-points*
@@ -68,7 +68,7 @@
   (loop [all-data-points []
          response (data-points* headers-fn
                                 (str (:dataPointsUrl survey)
-                                     "?pageSize=300"))]
+                                     "&page_size=300"))]
     (if-let [url (get response "nextPageUrl")]
       (recur (into all-data-points (get response "dataPoints"))
              (data-points* headers-fn url))
@@ -162,16 +162,28 @@
                       {:form-id form-id
                        :survey-id (:id survey)}))))
 
+;; Transforms the structure
+;; {question-group-id -> [{question-id -> response}]
+;; to
+;; {question-id -> first-response}
+(defn question-responses
+  "Returns a map from question-id to the first response iteration"
+  [responses]
+  (->> (vals responses)
+       (map first)
+       (apply merge)))
+
 (defn response-data
   [form responses]
-  (reduce (fn [response-data {:keys [type id]}]
-            (if-let [response (get-in responses [id "0"])]
-              (assoc response-data
-                     (keyword (format "c%s" id))
-                     (render-response type response))
-              response-data))
-          {}
-          (questions form)))
+  (let [responses (question-responses responses)]
+    (reduce (fn [response-data {:keys [type id]}]
+              (if-let [response (get responses id)]
+                (assoc response-data
+                       (keyword (format "c%s" id))
+                       (render-response type response))
+                response-data))
+            {}
+            (questions form))))
 
 (defn form-data
   "Returns a lazy sequence of form data, ready to be inserted as a lumen dataset"

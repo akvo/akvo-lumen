@@ -219,7 +219,7 @@ function deleteDatasetSuccess(id) {
     const visualisations = getState().library.visualisations;
     Object.keys(visualisations).forEach((visualisationId) => {
       if (visualisations[visualisationId].datasetId === id) {
-        dispatch(visualisationActions.deleteVisualisationSuccess(visualisationId));
+        dispatch(visualisationActions.removeVisualisation(visualisationId));
       }
     });
   };

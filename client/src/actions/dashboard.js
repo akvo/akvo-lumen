@@ -72,3 +72,6 @@ export function deleteDashboard(id) {
       .catch(error => dispatch(deleteDashboardFailure(error)));
   };
 }
+
+/* Remove visualisation from dashboard */
+export const removeVisualisation = createAction('REMOVE_VISUALISATION_FROM_DASHBOARD');

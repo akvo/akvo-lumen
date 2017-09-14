@@ -1,6 +1,7 @@
 import { createAction } from 'redux-actions';
 import { push } from 'react-router-redux';
 import { fetchDataset } from './dataset';
+import * as dashboardActions from './dashboard';
 import * as api from '../api';
 
 /* Fetched all visualisations */
@@ -73,12 +74,20 @@ export const deleteVisualisationRequest = createAction('DELETE_VISUALISATION_REQ
 export const deleteVisualisationFailure = createAction('DELETE_VISUALISATION_FAILURE');
 export const deleteVisualisationSuccess = createAction('DELETE_VISUALISATION_SUCCESS');
 
+/* Remove visualisation from library */
+export function removeVisualisation(id) {
+  return (dispatch) => {
+    dispatch(deleteVisualisationSuccess(id));
+    dispatch(dashboardActions.removeVisualisation(id));
+  };
+}
+
 export function deleteVisualisation(id) {
   return (dispatch) => {
-    dispatch(deleteVisualisationRequest);
+    dispatch(deleteVisualisationRequest(id));
     api.del(`/api/visualisations/${id}`)
       .then(response => response.json())
-      .then(() => dispatch(deleteVisualisationSuccess(id)))
+      .then(() => dispatch(removeVisualisation(id)))
       .catch(error => dispatch(deleteVisualisationFailure(error)));
   };
 }

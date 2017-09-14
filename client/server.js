@@ -25,6 +25,13 @@ new WebpackDevServer(webpack(config), {
       target: "http://backend:3000",
       secure: false
       },
+    '/maps/**': {
+      target: "http://windshaft:4000",
+      secure: false,
+      pathRewrite: {
+        '/maps' : ''
+      }
+      },
     '/env': {
       target: "http://backend:3000",
       secure: false
