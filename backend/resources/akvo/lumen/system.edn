@@ -90,7 +90,8 @@
    :from-email "noreply@akvo.org"
    :from-name "Akvo Lumen"}
   :config
-  {:file-upload-path file-upload-path
+  {:encryption-key encryption-key
+   :file-upload-path file-upload-path
    :keycloak-url keycloak-url
    :keycloak-realm keycloak-realm
    :keycloak-public-client-id keycloak-public-client-id
