@@ -78,6 +78,7 @@ class Dashboard extends Component {
     }
 
     if (isEditingExistingDashboard) {
+      this.setState({ isUnsavedChanges: false });
       const dashboardId = this.props.params.dashboardId;
       const existingDashboardLoaded =
         isLibraryLoaded && !isEmpty(this.props.library.dashboards[dashboardId].layout);
