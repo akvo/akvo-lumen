@@ -42,7 +42,7 @@ spec:
         - name: LUMEN_ENCRYPTION_KEY
           valueFrom:
             secretKeyRef:
-              name: akvo
+              name: lumen
               key: encryption_key
         - name: LUMEN_KEYCLOAK_CLIENT_SECRET
           valueFrom:
