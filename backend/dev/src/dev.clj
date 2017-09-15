@@ -1,6 +1,7 @@
 (ns dev
   (:refer-clojure :exclude [test])
   (:require [akvo.lumen.endpoint]
+            [akvo.lumen.lib.aes :as aes]
             [akvo.lumen.migrate :as lumen-migrate]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
@@ -35,7 +36,8 @@
   "Helper function that will seed tenant to the tenants table."
   [db tenant]
   (try
-    (let [{:keys [id]} (first (jdbc/insert! db "tenants" (dissoc tenant :plan)))]
+    (let [{:keys [id]} (first (jdbc/insert! db "tenants" (update (dissoc tenant :plan)
+                                                                 :db_uri #(aes/encrypt "secret" %))))]
       (jdbc/insert! db "plan" {:tenant id
                                :tier (doto (org.postgresql.util.PGobject.)
                                        (.setType "tier")
