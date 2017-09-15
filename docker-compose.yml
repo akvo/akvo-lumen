@@ -16,6 +16,7 @@ services:
       - ./backend:/app
       - ~/.m2:/root/.m2
       - ~/.lein:/root/.lein
+      - ./postgres/provision:/pg-certs
    links:
       - keycloak:auth.lumen.localhost
    ports:
