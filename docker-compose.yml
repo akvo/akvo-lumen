@@ -37,6 +37,7 @@ services:
    environment:
      - NODE_ENV=development
      - PGSSLROOTCERT=/pg-certs/server.crt
+     - LUMEN_ENCRYPTION_KEY=supersecret
    volumes:
       - ./windshaft/config/dev:/config
       - ./postgres/provision:/pg-certs
