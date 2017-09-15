@@ -18,14 +18,11 @@
           database (env :pg-database)
           user (env :pg-user)
           password (env :pg-password)}}]
-   (format "jdbc:postgresql://%s/%s?user=%s%s%s"
+   (format "jdbc:postgresql://%s/%s?ssl=true&user=%s%s%s"
            host database user
            (if (= host "localhost")
              ""
-             (format "&password=%s" password))
-           (if (= host "localhost")
-             ""
-             "&ssl=true"))))
+             (format "&password=%s" password)))))
 
 (defn create-keycloak []
   (let [url (format "%s/auth" (:kc-url env))

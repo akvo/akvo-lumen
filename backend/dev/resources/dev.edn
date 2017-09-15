@@ -8,7 +8,7 @@
                           :wrap-auth :wrap-jwt :wrap-label-tenant :stacktrace]
     :arguments {:wrap-jwt {:keycloak-url "http://auth.lumen.localhost:8080/auth"
                            :keycloak-realm "akvo"}}}}
-  :db {:uri "jdbc:postgresql://postgres/lumen?user=lumen&password=password"}
+  :db {:uri "jdbc:postgresql://postgres/lumen?user=lumen&password=password&ssl=true"}
   :http {:port 3000}
   :config {:file-upload-path "/tmp/akvo/lumen"
            :keycloak-realm "akvo"
