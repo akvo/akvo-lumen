@@ -45,7 +45,7 @@ dependencies:
     - cp profiles.clj.template profiles.clj:
         pwd: backend
     # Installing self-signed certificate to be able to talk with Postgres
-    - $JAVA_HOME/jre/bin/keytool -import -trustcacerts -keystore $JAVA_HOME/jre/lib/security/cacerts -storepass changeit -noprompt -alias postgrescert -file postgres/provision/server.crt
+    - sudo $JAVA_HOME/jre/bin/keytool -import -trustcacerts -keystore $JAVA_HOME/jre/lib/security/cacerts -storepass changeit -noprompt -alias postgrescert -file postgres/provision/server.crt
     # Client
     - npm config set spin false:
         pwd: client
