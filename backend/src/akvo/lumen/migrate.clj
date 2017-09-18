@@ -1,6 +1,7 @@
 (ns akvo.lumen.migrate
   (:require
    [akvo.lumen.config :refer [bindings]]
+   [akvo.lumen.lib.aes :as aes]
    [clojure.java.io :as io]
    [duct.util.system :refer [read-config]]
    [environ.core :refer [env]]
@@ -47,7 +48,9 @@
      (do-migrate (ragtime-jdbc/sql-database tenant-manager-db)
                  (:tenant-manager migrations))
      (doseq [tenant (all-tenants tenant-manager-db)]
-       (do-migrate (ragtime-jdbc/sql-database {:connection-uri (:db_uri tenant)})
+       (do-migrate (ragtime-jdbc/sql-database
+                    {:connection-uri (aes/decrypt (get-in system [:config :config :encryption-key])
+                                                  (:db_uri tenant))})
                    (:tenants migrations))))))
 
 

@@ -29,7 +29,7 @@
   :app [:aggregation :collection :dashboard :dataset :env :emailer :files :invite
         :invite-verify :job-execution :library :public :resource :root :share
         :tier :transformation :user :visualisation]
-  :tenant-manager [:db]
+  :tenant-manager [:config :db]
   :aggregation [:tenant-manager]
   :collection [:tenant-manager]
   :dashboard [:tenant-manager]
@@ -90,7 +90,8 @@
    :from-email "noreply@akvo.org"
    :from-name "Akvo Lumen"}
   :config
-  {:file-upload-path file-upload-path
+  {:encryption-key encryption-key
+   :file-upload-path file-upload-path
    :keycloak-url keycloak-url
    :keycloak-realm keycloak-realm
    :keycloak-public-client-id keycloak-public-client-id

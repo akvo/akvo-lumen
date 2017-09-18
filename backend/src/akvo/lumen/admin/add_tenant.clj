@@ -1,12 +1,15 @@
 (ns akvo.lumen.admin.add-tenant
   "The following env vars are assumed to be present:
-  KC_URL, KC_SECRET, PG_HOST, PG_DATABASE, PG_USER, PG_PASSWORD
+  ENCRYPTION_KEY, KC_URL, KC_SECRET, PG_HOST, PG_DATABASE, PG_USER, PG_PASSWORD
+  ENCRYPTION_KEY is a key specific for the environment used for encrypting
+  the db_uri.
   The PG_* env vars can be found in the ElephantSQL console for the appropriate
   instance. KC_URL is the url to keycloak (without trailing /auth).
   KC_SECRET is the client secret found in the Keycloak admin at
   > Realms > Akvo > Clients > akvo-lumen-confidential > Credentials > Secret.
   Use this as follow
-  $ env KC_URL=https://*** KC_SECRET=*** \\
+  $ env ENCRYPTION_KEY=*** \\
+        KC_URL=https://*** KC_SECRET=*** \\
         PG_HOST=***.db.elephantsql.com PG_DATABASE=*** \\
         PG_USER=*** PG_PASSWORD=*** \\
         lein run -m akvo.lumen.admin.add-tenant <url> <title> <email>
@@ -17,6 +20,7 @@
   (:require [akvo.lumen.admin.util :as util]
             [akvo.lumen.component.keycloak :as keycloak]
             [akvo.lumen.config :refer [error-msg]]
+            [akvo.lumen.lib.aes :as aes]
             [akvo.lumen.lib.share-impl :refer [random-url-safe-string]]
             [akvo.lumen.util :refer [conform-email squuid]]
             [cheshire.core :as json]
@@ -85,7 +89,8 @@
   "Make sure https is used for non development mode and remove trailing slash."
   [v]
   (let [url (URL. v)]
-    (if (= (:kc-url env) "http://localhost:8080")
+    (if (or (= (:kc-url env) "http://localhost:8080")
+            (= (:kc-url env) "http://keycloak:8080"))
       (when (= (.getProtocol url) "https")
         (throw (ex-info "Use http in development mode" {:url v})))
       (when (not= (.getProtocol url) "https")
@@ -124,7 +129,7 @@
                 "CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;")
     (util/exec! tenant-db-uri-with-superuser
                 "CREATE EXTENSION IF NOT EXISTS tablefunc WITH SCHEMA public;")
-    (jdbc/insert! lumen-db-uri :tenants {:db_uri tenant-db-uri :label label :title title})
+    (jdbc/insert! lumen-db-uri :tenants {:db_uri (aes/encrypt (:encryption-key env) tenant-db-uri) :label label :title title})
     (migrate-tenant tenant-db-uri)))
 
 
@@ -259,12 +264,13 @@
      :url url}))
 
 (defn check-env-vars []
+  (assert (:encryption-key env) (error-msg "Specify ENCRYPTION_KEY env var"))
   (assert (:kc-url env) (error-msg "Specify KC_URL env var"))
   (assert (:kc-secret env)
-    (do
-      (browse/browse-url
-        (format "%s/auth/admin/master/console/#/realms/akvo/clients" (:kc-url env)))
-      (error-msg "Specify KC_SECRET env var from the Keycloak admin opened in the browser window at Client (akvo-lumen-confidential) -> Credentials -> Secret.")))
+          (do
+            (browse/browse-url
+             (format "%s/auth/admin/master/console/#/realms/akvo/clients" (:kc-url env)))
+            (error-msg "Specify KC_SECRET env var from the Keycloak admin opened in the browser window at Client (akvo-lumen-confidential) -> Credentials -> Secret.")))
   (assert (:pg-host env) (error-msg "Specify PG_HOST env var"))
   (assert (:pg-database env) (error-msg "Specify PG_DATABASE env var"))
   (assert (:pg-user env) (error-msg "Specify PG_USER env var"))

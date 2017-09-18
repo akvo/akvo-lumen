@@ -1,9 +1,11 @@
 (ns akvo.lumen.admin.stats.run-query
   (:require [akvo.lumen.admin.util :as util]
+            [akvo.lumen.lib.aes :as aes]
             [cheshire.core :as json]
             [clojure.java.jdbc :as jdbc]
             [clojure.pprint :refer [pprint]]
-            [clojure.string :as s]))
+            [clojure.string :as s]
+            [environ.core :refer [env]]))
 
 ;; Same env vars as the rest of admin scripts
 
@@ -15,6 +17,6 @@
                   (filter #((set tenant-labels) (:tenant-label %))))]
     (json/generate-stream
      (for [{:keys [db-uri tenant-label]} uris]
-       (jdbc/with-db-transaction [conn db-uri {:read-only? true}]
+       (jdbc/with-db-transaction [conn (aes/decrypt (:encryption-key env) db-uri) {:read-only? true}]
          [tenant-label (jdbc/query conn [query])]))
      *out*)))
