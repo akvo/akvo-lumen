@@ -90,11 +90,14 @@
   [form]
   (let [questions (questions form)]
     (into
-     [{:title "Identifier" :type :text :id :identifier}
+     [{:title "Instance id" :type :text :id :instance_id}
+      {:title "Identifier" :type :text :id :identifier}
+      {:title "Display name" :type :text :id :display_name}
       {:title "Latitude" :type :number :id :latitude}
       {:title "Longitude" :type :number :id :longitude}
       {:title "Submitter" :type :text :id :submitter}
-      {:title "Submitted at" :type :date :id :submitted_at}]
+      {:title "Submitted at" :type :date :id :submitted_at}
+      {:title "Surveyal time" :type :number :id :surveyal_time}]
      (map (fn [question]
             {:title (:name question)
              :type (question-type->lumen-type question)
@@ -193,12 +196,15 @@
     (map (fn [form-instance]
            (let [data-point-id (get form-instance "dataPointId")]
              (assoc (response-data form (get form-instance "responses"))
+                    :instance_id (get form-instance "id")
+                    :display_name (get-in data-points [data-point-id "displayName"])
                     :identifier (get-in data-points [data-point-id "identifier"])
                     :latitude (get-in data-points [data-point-id "latitude"])
                     :longitude (get-in data-points [data-point-id "longitude"])
                     :submitter (get form-instance "submitter")
                     :submitted_at (some-> (get form-instance "submissionDate")
-                                          Instant/parse))))
+                                          Instant/parse)
+                    :surveyal_time (get form-instance "surveyalTime"))))
          (form-instances headers-fn form))))
 
 (defmethod import/dataset-importer "AKVO_FLOW"
