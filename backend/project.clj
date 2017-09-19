@@ -20,7 +20,7 @@
                  [org.akvo/resumed "0.1.0-SNAPSHOT"]
                  [org.apache.tika/tika-core "1.16"]
                  [org.apache.tika/tika-parsers "1.16"]
-                 [org.clojure/clojure "1.8.0"]
+                 [org.clojure/clojure "1.9.0-beta1"]
                  [org.clojure/data.csv "0.1.4"]
                  [org.immutant/web "2.1.9"]
                  [org.postgresql/postgresql "42.1.4"]
