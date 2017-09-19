@@ -64,7 +64,6 @@
                                     [eftest "0.3.1"]
                                     [com.gearswithingears/shrubbery "0.4.1"]
                                     [kerodon "0.8.0"]]
-                   :plugins        [[jonase/eastwood "0.2.3"]]
                    :source-paths   ["dev/src"]
                    :resource-paths ["dev/resources" "test/resources"]
                    :repl-options   {:init-ns dev

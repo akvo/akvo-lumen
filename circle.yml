@@ -53,7 +53,7 @@ dependencies:
 
 test:
   override:
-    - lein do clean, check, test :all, eastwood '{:source-paths ["src" "test"]}':
+    - lein do clean, check, test :all:
         pwd: backend
     - npm run lint:
         pwd: client
