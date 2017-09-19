@@ -100,3 +100,11 @@ expose-local:
 
 url:
 	minikube service lumen --url
+
+backend-test:
+	docker exec -i -t akvolumen_backend_1 lein test :all
+
+client-test:
+	docker exec -i -t akvolumen_client_1 npm test
+
+test: backend-test client-test
