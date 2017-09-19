@@ -4,7 +4,12 @@
   :license {:name "GNU Affero General Public License 3.0"
             :url  "https://www.gnu.org/licenses/agpl-3.0.html"}
   :min-lein-version "2.0.0"
-  :dependencies [[cheshire "5.8.0"]
+  :dependencies [[ch.qos.logback/logback-classic "1.2.3"]
+                 [org.clojure/tools.logging "0.4.0"]
+                 [org.slf4j/log4j-over-slf4j "1.7.25"]
+                 [org.slf4j/jcl-over-slf4j "1.7.25"]
+                 [org.slf4j/jul-to-slf4j "1.7.25"]
+                 [cheshire "5.8.0"]
                  [clj-http "3.7.0"]
                  [clj-time "0.14.0"]
                  [com.layerware/hugsql "0.4.7"]
@@ -24,8 +29,6 @@
                  [org.clojure/data.csv "0.1.4"]
                  [org.immutant/web "2.1.9" :exclusions [ch.qos.logback/logback-classic]]
                  [org.postgresql/postgresql "42.1.4"]
-                 [ch.qos.logback/logback-classic "1.2.3"]
-                 [org.clojure/tools.logging "0.4.0"]
                  [ragtime/ragtime.jdbc "0.6.4"]
                  [raven-clj "1.5.0"]
                  [ring "1.6.2"]
