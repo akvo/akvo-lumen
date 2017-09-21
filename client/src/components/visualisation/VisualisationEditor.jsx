@@ -82,13 +82,14 @@ export default class VisualisationEditor extends Component {
       case null:
       case 'map':
         this.setState({ visualisation });
-        api.post('/api/visualisations/maps').then(response => response.json()).then(({ layergroupid }) => {
-          this.setState({
-            visualisation: Object.assign({},
-              visualisation, { layergroupid }
-            ),
+        api.post('/api/visualisations/maps', visualisation).then(response => response.json()).then(
+          ({ dbHost, layergroupid }) => {
+            this.setState({
+              visualisation: Object.assign({},
+                visualisation, { dbHost, layergroupid }
+              ),
+            });
           });
-        });
         break;
       case 'bar':
       case 'line':

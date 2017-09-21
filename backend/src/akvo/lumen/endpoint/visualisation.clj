@@ -4,6 +4,10 @@
             [akvo.lumen.lib.visualisation.maps :as maps]
             [compojure.core :refer :all]))
 
+(defn- db-host
+  "Stub"
+  [tenant]
+  (get {"t1" "lumen_tenant_1"} tenant))
 
 (defn endpoint [{:keys [tenant-manager]}]
 
@@ -16,8 +20,8 @@
         (visualisation/create tenant-conn body jwt-claims))
 
       (context "/maps" _
-        (POST "/" _
-          (maps/create)))
+        (POST "/" request
+          (maps/create (db-host tenant) (:body request))))
 
       (context "/:id" [id]
 
