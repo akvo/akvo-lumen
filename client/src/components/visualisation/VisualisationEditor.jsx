@@ -81,6 +81,15 @@ export default class VisualisationEditor extends Component {
     switch (vType) {
       case null:
       case 'map':
+        this.setState({ visualisation });
+        api.post('/api/visualisations/maps').then(response => response.json()).then(({ layergroupid }) => {
+          this.setState({
+            visualisation: Object.assign({},
+              visualisation, { layergroupid }
+            ),
+          });
+        });
+        break;
       case 'bar':
       case 'line':
       case 'area':

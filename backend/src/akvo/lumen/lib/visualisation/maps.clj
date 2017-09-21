@@ -7,7 +7,6 @@
 ;; Localhost to keep within pod?
 (def url "http://windshaft:4000/lumen_tenant_1/layergroup")
 
-
 (defn headers []
   {"x-db-host" "postgres"
    "x-db-port" 5432
@@ -39,6 +38,5 @@
 
 
 (comment
-  (prn (create))
-
+  (create)
   )
