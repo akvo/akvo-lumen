@@ -24,14 +24,14 @@ new WebpackDevServer(webpack(config), {
     '/verify/**': {
       target: "http://backend:3000",
       secure: false
-      },
+    },
     '/maps/**': {
       target: "http://windshaft:4000",
       secure: false,
       pathRewrite: {
         '/maps' : ''
       }
-      },
+    },
     '/env': {
       target: "http://backend:3000",
       secure: false

@@ -1,18 +1,23 @@
 (ns akvo.lumen.endpoint.visualisation
   (:require [akvo.lumen.component.tenant-manager :refer [connection]]
             [akvo.lumen.lib.visualisation :as visualisation]
+            [akvo.lumen.lib.visualisation.maps :as maps]
             [compojure.core :refer :all]))
 
 
 (defn endpoint [{:keys [tenant-manager]}]
+
   (context "/api/visualisations" {:keys [params tenant] :as request}
     (let-routes [tenant-conn (connection tenant-manager tenant)]
-
       (GET "/" _
         (visualisation/all tenant-conn))
 
       (POST "/" {:keys [jwt-claims body]}
         (visualisation/create tenant-conn body jwt-claims))
+
+      (context "/maps" _
+        (POST "/" _
+          (maps/create)))
 
       (context "/:id" [id]
 
