@@ -2,20 +2,46 @@
   (:require [akvo.lumen.lib :as lib]
             [cheshire.core :as json]
             [clj-http.client :as client]
-            [clojure.pprint :refer [pprint]]))
+            [clojure.pprint :refer [pprint]]
+            [clojure.string :as s]))
 
-;; Localhost to keep within pod?
-(def url "http://windshaft:4000/lumen_tenant_1/layergroup")
 
-(defn headers []
+
+(defn- url
+  "WIP, should talk over localhost within the pod"
+  [tenant-db]
+  (format "http://windshaft:4000/%s/layergroup" tenant-db))
+
+(defn headers
+  "WIP, should get this from tenant-manger"
+  []
   {"x-db-host" "postgres"
    "x-db-last-update" (quot (System/currentTimeMillis) 1000)
    "x-db-password" "password"
    "x-db-port" 5432
    "x-db-user" "lumen"})
 
-(def sql-statement
-  "SELECT 'Batman cave' as label, ST_SetSRID(ST_MakePoint(12.069034,57.74119), 4326) AS geom;")
+(def locations
+  '({:label "HQ"
+     :longitude 4.908075
+     :latitude 52.372189}
+    {:label "Bat cave"
+     :longitude 12.069034
+     :latitude 57.74119}))
+
+
+(defn sql-values [locations]
+  (s/join ", "
+          (map (fn [{:keys [label longitude latitude]}]
+                 (format "('%s', ST_SetSRID(ST_MakePoint(%s,%s), 4326))"
+                         label longitude latitude))
+               locations)))
+
+(defn sql-statement
+  [locations]
+  (format "SELECT * FROM (VALUES %s ) AS t (label, geom);"
+          (sql-values locations)))
+
 
 (def cartocss
   "#s { marker-width: 10; marker-fill: #e00050;}")
@@ -32,12 +58,14 @@
 
 (defn create [tenant-db visualisation-spec]
   (prn tenant-db)
-  (pprint visualisation-spec)
+  #_(pprint visualisation-spec)
   ;; Handle if available
   ;; dataset -> yank out relevant ds_<...>,
   ;; geom
   ;; interactivity
-  (let [resp (client/post url
+  (let [sql-statement (sql-statement locations)
+        _ (prn sql-statement)
+        resp (client/post (url tenant-db)
                           {:body (json/encode (map-config cartocss
                                                           "geom"
                                                           "label"
@@ -51,6 +79,7 @@
 
 
 (comment
+
   ;; Example map spec
   {"type" "visualisation",
    "name" "Untitled visualisation",
