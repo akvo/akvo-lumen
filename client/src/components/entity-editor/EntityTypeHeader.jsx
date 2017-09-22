@@ -15,17 +15,14 @@ class EntityTypeHeader extends Component {
     };
   }
 
-  render() {
-    const {
-      title,
-      saveStatusId,
-      actionButtons,
-      onChangeTitle,
-      onBeginEditTitle,
-      intl } = this.props;
+  actionButtons() {
+    const { actionButtons, intl } = this.props;
 
+    if (actionButtons == null) {
+      return [];
+    }
 
-    const actions = actionButtons &&
+    return (
       actionButtons.map((button, index) =>
         <button
           className={`overflow clickable ${button.customClass ? button.customClass : ''}`}
@@ -36,10 +33,22 @@ class EntityTypeHeader extends Component {
         >
           {button.buttonText}
         </button>
-      );
+      )
+    );
+  }
+
+  render() {
+    const {
+      title,
+      saveStatusId,
+      onChangeTitle,
+      onBeginEditTitle } = this.props;
 
     return (
-      <Header className="EntityTypeHeader" actions={actions}>
+      <Header
+        className="EntityTypeHeader"
+        actions={this.actionButtons()}
+      >
         <EntityTitleInput
           title={title}
           onBeginEditTitle={onBeginEditTitle}
