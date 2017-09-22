@@ -284,7 +284,7 @@ export default function MapVisualisation({ visualisation, datasets, width, heigh
           attribution="&amp;copy <a href=&quot;http://osm.org/copyright&quot;>OpenStreetMap</a> contributors"
           url="http://{s}.tile.osm.org/{z}/{x}/{y}.png"
         />
-      {(layerGroupId != null) && (tenantDB != null) &&
+        {(layerGroupId != null) && (tenantDB != null) &&
           <TileLayer
             url={`${baseURL}/${layerGroupId}/{z}/{x}/{y}.png`}
           />
