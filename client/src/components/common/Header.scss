@@ -1,0 +1,45 @@
+@import "../../styles/modules/importAll";
+
+.Header {
+    height: 4em;
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    border-bottom: 0.1rem solid $lightBlueGrey;
+    display: flex;
+
+    .backButton {
+        background-color: $black;
+        width: 4rem;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-decoration: none;
+        margin-right: 0.5em;
+
+        i {
+            color: $white;
+            font-size: 2rem;
+            text-decoration: none;
+            border: 0;
+        }
+    }
+
+    .content {
+        width: 60%;
+        background-color: white;
+        border-right: 0.1rem solid $lightBlueGrey;
+    }
+
+    .actions {
+        display: inline-block;
+        height: 100%;
+        vertical-align: top;
+        padding: 0.5rem;
+        width: 40%;
+        text-align: right;
+        line-height: 3rem;
+    }
+}
