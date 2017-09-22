@@ -3,12 +3,16 @@ import PropTypes from 'prop-types';
 import { Link, withRouter } from 'react-router';
 import './Header.scss';
 
-function Header({ children, actions, router, className = '' }) {
+function Header({ children, actions, router, className = '', backButtonTarget }) {
+  const target = backButtonTarget == null ?
+    { onClick: () => router.goBack() } :
+    { to: backButtonTarget };
+
   return (
     <nav className={`Header ${className}`}>
       <Link
         className="backButton"
-        onClick={() => router.goBack()}
+        {...target}
       >
         <i className="fa fa-arrow-left" aria-hidden="true" />
       </Link>
@@ -24,6 +28,7 @@ function Header({ children, actions, router, className = '' }) {
 
 Header.propTypes = {
   router: PropTypes.object.isRequired,
+  backButtonTarget: PropTypes.string,
   children: PropTypes.node,
   actions: PropTypes.node,
   className: PropTypes.string,

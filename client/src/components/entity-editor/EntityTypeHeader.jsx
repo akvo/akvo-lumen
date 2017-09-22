@@ -47,6 +47,7 @@ class EntityTypeHeader extends Component {
     return (
       <Header
         className="EntityTypeHeader"
+        backButtonTarget="/library"
         actions={this.actionButtons()}
       >
         <EntityTitleInput
