@@ -30,8 +30,8 @@
                          "sql" sql-statement
                          "srid" 4326}}]})
 
-(defn create [db-host visualisation-spec]
-  (prn db-host)
+(defn create [tenant-db visualisation-spec]
+  (prn tenant-db)
   (pprint visualisation-spec)
   ;; Handle if available
   ;; dataset -> yank out relevant ds_<...>,
@@ -46,10 +46,36 @@
                            :content-type :json})]
     (case (:status resp)
       200 (lib/ok (assoc (json/decode (:body resp))
-                         "dbHost" db-host))
+                         "tenantDB" tenant-db))
       (prn resp))))
 
 
 (comment
+  ;; Example map spec
+  {"type" "visualisation",
+   "name" "Untitled visualisation",
+   "visualisationType" "map",
+   "datasetId" "59c3ab16-34e8-44df-957e-6c1c38fbf465",
+   "spec"
+   {"version" 1,
+    "baseLayer" "street",
+    "layers"
+    [{"popup" [{"column" "c4"}],
+      "longitude" "c7",
+      "pointSize" 1,
+      "legend" {"title" "City", "visible" true, "position" "bottom"},
+      "filters" [],
+      "latitude" "c6",
+      "visible" true,
+      "pointColorMapping"
+      [{"op" "equals", "value" "Finland", "color" "#86AA90"}
+       {"op" "equals", "value" "Gothenburg", "color" "#BF2932"}
+       {"op" "equals", "value" "London", "color" "#19A99D"}
+       {"op" "equals", "value" "Netherlands", "color" "#66608F"}
+       {"op" "equals", "value" "Vaasa", "color" "#95734B"}],
+      "pointColorColumn" "c5",
+      "datasetId" "59c3ab16-34e8-44df-957e-6c1c38fbf465",
+      "title" "Untitled Layer 1"}]}}
+
   (create)
   )

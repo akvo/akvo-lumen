@@ -185,8 +185,8 @@ export default function MapVisualisation({ visualisation, datasets, width, heigh
   const { tileUrl, tileAttribution } = getBaseLayerAttributes(visualisation.spec.baseLayer);
 
   // Windshaft map
-  const dbHost = visualisation.dbHost;
-  const baseURL = `/maps/${dbHost}/layergroup`;
+  const tenantDB = visualisation.tenantDB;
+  const baseURL = `/maps/${tenantDB}/layergroup`;
   const layerGroupId = visualisation.layergroupid;
   const xCenter = [0, 0];
   const xWidth = 800;
@@ -284,7 +284,7 @@ export default function MapVisualisation({ visualisation, datasets, width, heigh
           attribution="&amp;copy <a href=&quot;http://osm.org/copyright&quot;>OpenStreetMap</a> contributors"
           url="http://{s}.tile.osm.org/{z}/{x}/{y}.png"
         />
-        {(layerGroupId != null) && (dbHost != null) &&
+      {(layerGroupId != null) && (tenantDB != null) &&
           <TileLayer
             url={`${baseURL}/${layerGroupId}/{z}/{x}/{y}.png`}
           />

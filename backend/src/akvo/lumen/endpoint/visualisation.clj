@@ -4,7 +4,7 @@
             [akvo.lumen.lib.visualisation.maps :as maps]
             [compojure.core :refer :all]))
 
-(defn- db-host
+(defn- tenant-db
   "Stub"
   [tenant]
   (get {"t1" "lumen_tenant_1"} tenant))
@@ -21,7 +21,7 @@
 
       (context "/maps" _
         (POST "/" request
-          (maps/create (db-host tenant) (:body request))))
+          (maps/create (tenant-db tenant) (:body request))))
 
       (context "/:id" [id]
 

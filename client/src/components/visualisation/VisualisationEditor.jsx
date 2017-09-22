@@ -83,10 +83,10 @@ export default class VisualisationEditor extends Component {
       case 'map':
         this.setState({ visualisation });
         api.post('/api/visualisations/maps', visualisation).then(response => response.json()).then(
-          ({ dbHost, layergroupid }) => {
+          ({ tenantDB, layergroupid }) => {
             this.setState({
               visualisation: Object.assign({},
-                visualisation, { dbHost, layergroupid }
+                visualisation, { tenantDB, layergroupid }
               ),
             });
           });
