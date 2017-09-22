@@ -1,37 +1,6 @@
 @import "../../styles/modules/importAll";
 
 .EntityTypeHeader {
-    height: 4em;
-    position: absolute;
-    left: 0;
-    top: 0;
-    right: 0;
-    border-bottom: 0.1rem solid $lightBlueGrey;
-    display: flex;
-
-    .backButton {
-        background-color: $black;
-        width: 4rem;
-        height: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        text-decoration: none;
-
-        i {
-            color: $white;
-            font-size: 2rem;
-            text-decoration: none;
-            border: 0;
-        }
-    }
-
-    .entityInfo, .controls {
-        display: inline-block;
-        height: 100%;
-        vertical-align: top;
-        padding: 0.5rem;
-    }
 
     .entityInfo {
         width: 60%;
@@ -70,12 +39,6 @@
         padding: 0 0 0 4px;
         border: 1px solid $textSecondary;
         color: $darkGrey;
-    }
-
-    .controls {
-        width: 40%;
-        text-align: right;
-        line-height: 3rem;
     }
 
     .saveStatus {
