@@ -42,23 +42,27 @@
                locations)))
 
 (defn sql-statement
-  [locations]
-  (format "SELECT * FROM (VALUES %s ) AS t (label, geom);"
-          (sql-values locations)))
+  "Dummy data"
+  ([]
+   "SELECT * FROM (VALUES ('label', ST_SetSRID(ST_MakePoint(4.908075,52.372189), 4326))) AS t (label, geom) LIMIT 0;")
+  ([locations]
+   (format "SELECT * FROM (VALUES %s ) AS t (label, geom);"
+           (sql-values locations))))
+
 
 ;;;  Dummy sql stop
 
 (def cartocss
   "#s { marker-width: 10; marker-fill: #e00050;}")
 
-(defn map-config [cartocss geom-column label sql-statement]
+(defn map-config [cartocss geom-column label sql]
   {"version" "1.6.0"
    "layers" [{"type" "mapnik"
               "options" {"cartocss" cartocss
                          "cartocss_version" "2.0.0"
                          "geom_column" geom-column
                          "interactivity" label
-                         "sql" sql-statement
+                         "sql" sql
                          "srid" 4326}}]})
 
 
@@ -69,17 +73,21 @@
   (let [{:keys [db-name headers]} (connection-details tenant-conn)
         akvo-maps-url "http://windshaft:4000"
         url (format "%s/%s/layergroup" akvo-maps-url db-name)
-        sql-statement (sql-statement locations)
+        sql (sql-statement) ;; No dataset
+        ;; sql-statement (sql-statement locations)
+        ;; sql-statement (sql-statement)
+        ;; sql-v (sql)
+        ;; _ (prn sql-v)
         resp (client/post url
                           {:body (json/encode (map-config cartocss
                                                           "geom"
                                                           "label"
-                                                          sql-statement))
+                                                          sql))
                            :headers headers
                            :content-type :json})]
     (case (:status resp)
       200 (lib/ok (assoc (json/decode (:body resp))
-                         "tenantDB" "lumen_tenant_1"))
+                         "tenantDB" db-name))
       (prn resp))))
 
 
