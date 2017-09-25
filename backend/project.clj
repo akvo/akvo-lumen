@@ -20,6 +20,7 @@
                  [duct/hikaricp-component "0.1.1" :exclusions [org.slf4j/slf4j-nop]]
                  [environ "1.1.0"]
                  [funcool/cuerdas "2.0.3"]
+                 [honeysql "0.9.1"]
                  [meta-merge "1.0.0"]
                  [org.akvo/commons "0.4.5" :exclusions [org.postgresql/postgresql org.clojure/java.jdbc]]
                  [org.akvo/resumed "0.1.0-SNAPSHOT"]

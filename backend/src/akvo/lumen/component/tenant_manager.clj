@@ -86,11 +86,11 @@
         (load-tenant db (:encryption-key config) tenants label)
         (:spec (get @tenants label)))))
 
-  (uri [{:keys [db tenants]} label]
+  (uri [{:keys [tenants]} label]
     (if-let [tenant (get @tenants label)]
       (:uri tenant)
       (do
-        (load-tenant db (:encryption-key config) tenants label)
+        (load-tenant (:encryption-key config) tenants label)
         (:uri (get @tenants label)))))
 
   TenantAdmin
