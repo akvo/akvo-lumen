@@ -1,0 +1,19 @@
+@import "../../../styles/modules/importAll";
+
+.SourceMergeOptions {
+  flex: 1;
+  padding-left: 3em;
+  padding-right: 3em;
+  h1 {
+    font-size: 1.2em;
+  }
+  fieldset {
+    margin-top: 1em;
+    border: 1px solid rgba($black, 0.5);
+    padding-left: 0.5em;
+    legend {
+      padding-left: 0.5em;
+      padding-right: 0.5em;
+    }
+  }
+}
