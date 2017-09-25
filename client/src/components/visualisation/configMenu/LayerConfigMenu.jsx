@@ -175,9 +175,11 @@ export default class LayerConfigMenu extends Component {
                 this.props.onChangeMapLayer(layerIndex, { legend });
               }}
             />
-            <hr />
+            <hr
+              className="notImplemented"
+            />
             <ToggleInput
-              className="inputGroup"
+              className="inputGroup notImplemented"
               disabled
               checked={false}
               label="Counters"
