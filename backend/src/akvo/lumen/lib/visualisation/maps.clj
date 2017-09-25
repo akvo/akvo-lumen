@@ -6,7 +6,10 @@
             [clojure.pprint :refer [pprint]]
             [clojure.string :as s]
             [honeysql.core :as sql]
-            [honeysql.helpers :refer [values]]))
+            [honeysql.helpers :refer [values]]
+            [hugsql.core :as hugsql]))
+
+(hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
 
 (defn- headers [uri]
   (let [{:keys [password user]} (util/query-map (.getQuery uri))
@@ -50,6 +53,9 @@
            (sql-values locations))))
 
 
+(defn build-sql [table]
+  (format "SELECT c2 as label, d1 as geom FROM %s;" table))
+
 ;;;  Dummy sql stop
 
 (def cartocss
@@ -67,17 +73,20 @@
 
 
 (defn create [tenant-conn visualisation-spec]
+  (clojure.pprint/pprint visualisation-spec)
   ;; Handle dataset if available, yank out relevant ds_<...>,
   ;; geom
   ;; interactivity
   (let [{:keys [db-name headers]} (connection-details tenant-conn)
-        akvo-maps-url "http://windshaft:4000"
+        akvo-maps-url "http://windshaft:4000" ;; localhost in production
         url (format "%s/%s/layergroup" akvo-maps-url db-name)
-        sql (sql-statement) ;; No dataset
-        ;; sql-statement (sql-statement locations)
-        ;; sql-statement (sql-statement)
-        ;; sql-v (sql)
-        ;; _ (prn sql-v)
+        dataset-id (get visualisation-spec "datasetId")
+        sql (if (nil? dataset-id)
+              (sql-statement)
+              (let [dataset (dataset-by-id tenant-conn {:id dataset-id})
+                    table (:table-name dataset)]
+                (build-sql table)))
+        _ (prn sql)
         resp (client/post url
                           {:body (json/encode (map-config cartocss
                                                           "geom"
