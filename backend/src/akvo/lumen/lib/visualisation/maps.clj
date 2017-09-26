@@ -61,14 +61,13 @@
   "Takes a tenant connection and a visualisation spec. Will get a layergroupid
   from Windshaft and compose a response with the db-name attached under the key
   tenantDB."
-  [tenant-conn visualisation-spec]
+  [tenant-conn windshaft-url visualisation-spec]
   (prn "\n\n-------------------------------------------------------------------")
   (prn "@maps/create")
   (clojure.pprint/pprint visualisation-spec)
   (try
     (let [{:keys [db-name headers]} (connection-details tenant-conn)
-          akvo-maps-url "http://windshaft:4000" ;; localhost in production
-          url (format "%s/%s/layergroup" akvo-maps-url db-name)
+          url (format "%s/%s/layergroup" windshaft-url db-name)
           dataset-id (get visualisation-spec "datasetId")
           geom-column "d1"
           label-column "c2"

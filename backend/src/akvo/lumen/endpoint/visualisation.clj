@@ -5,7 +5,7 @@
             [compojure.core :refer :all]))
 
 
-(defn endpoint [{:keys [tenant-manager]}]
+(defn endpoint [{:keys [config tenant-manager]}]
 
   (context "/api/visualisations" {:keys [params tenant] :as request}
     (let-routes [tenant-conn (connection tenant-manager tenant)]
@@ -17,7 +17,7 @@
 
       (context "/maps" _
         (POST "/" request
-          (maps/create tenant-conn (:body request))))
+          (maps/create tenant-conn (:windshaft-url config) (:body request))))
 
       (context "/:id" [id]
 

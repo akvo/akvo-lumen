@@ -47,7 +47,7 @@
   :tier [:tenant-manager]
   :transformation [:tenant-manager]
   :user [:keycloak]
-  :visualisation [:tenant-manager]}
+  :visualisation [:config :tenant-manager]}
  :config
  {:app
   {:migrations {:tenant-manager "akvo/lumen/migrations/tenant_manager"
@@ -96,7 +96,8 @@
    :keycloak-realm keycloak-realm
    :keycloak-public-client-id keycloak-public-client-id
    :sentry-client-dsn sentry-client-dsn
-   :flow-api-url flow-api-url}
+   :flow-api-url flow-api-url
+   :windshaft-url "http://localhost:4000"}
   :keycloak
   {:url keycloak-url
    :realm keycloak-realm
