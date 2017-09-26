@@ -87,12 +87,13 @@
   (mapcat :questions (:questionGroups form)))
 
 (defn dataset-columns
-  [form]
+  [form version]
   (let [questions (questions form)]
     (into
-     [{:title "Instance id" :type :text :id :instance_id :key true}
+     [(cond-> {:title "Instance id" :type :text :id :instance_id}
+        (<= 2 version) (assoc :key true))
       (let [identifier {:title "Identifier" :type :text :id :identifier}]
-        (if (:registration-form? form)
+        (if (and (:registration-form? form) (<= 2 version))
           (assoc identifier :key true)
           identifier))
       {:title "Display name" :type :text :id :display_name}
@@ -213,9 +214,10 @@
          (form-instances headers-fn form))))
 
 (defmethod import/dataset-importer "AKVO_FLOW"
-  [{:strs [instance surveyId formId refreshToken] :as spec}
+  [{:strs [instance surveyId formId refreshToken version] :as spec}
    {:keys [flow-api-url keycloak-realm keycloak-url] :as config}]
-  (let [token-endpoint (format "%s/realms/%s/protocol/openid-connect/token"
+  (let [version (if version version 1)
+        token-endpoint (format "%s/realms/%s/protocol/openid-connect/token"
                                keycloak-url
                                keycloak-realm)
         headers-fn #(flow-api-headers token-endpoint refreshToken)
@@ -228,6 +230,6 @@
       (close [this])
       import/DatasetImporter
       (columns [this]
-        (dataset-columns (form @survey formId)))
+        (dataset-columns (form @survey formId) version))
       (records [this]
         (form-data headers-fn @survey formId)))))
