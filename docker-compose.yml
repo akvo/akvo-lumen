@@ -16,6 +16,7 @@ services:
       - ./backend:/app
       - ~/.m2:/root/.m2
       - ~/.lein:/root/.lein
+      - ./postgres/provision:/pg-certs
    links:
       - keycloak:auth.lumen.localhost
    ports:
@@ -35,6 +36,8 @@ services:
    build: windshaft
    environment:
      - NODE_ENV=development
-     - PGSSLMODE=allow
+     - PGSSLROOTCERT=/pg-certs/server.crt
+     - LUMEN_ENCRYPTION_KEY=supersecret
    volumes:
       - ./windshaft/config/dev:/config
+      - ./postgres/provision:/pg-certs

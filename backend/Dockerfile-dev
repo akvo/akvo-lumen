@@ -2,4 +2,6 @@ FROM clojure:lein-2.7.1
 MAINTAINER Akvo Foundation <devops@akvo.org>
 
 WORKDIR /app
-CMD ["lein", "repl", ":headless"]
+COPY import-and-run.sh /app
+RUN chmod 777 /app/import-and-run.sh
+CMD ./import-and-run.sh
