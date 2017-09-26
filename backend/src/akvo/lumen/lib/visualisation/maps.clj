@@ -5,6 +5,7 @@
             [clj-http.client :as client]
             [clojure.pprint :refer [pprint]]
             [clojure.string :as s]
+            [clojure.string :as str]
             [honeysql.core :as sql]
             [honeysql.helpers :refer [values]]
             [hugsql.core :as hugsql]))
@@ -28,94 +29,73 @@
     {:headers (headers db-uri)
      :db-name db-name}))
 
-;;;  Dummy sql start
-(def locations
-  '({:label "HQ"
-     :longitude 4.908075
-     :latitude 52.372189}
-    {:label "Bat cave"
-     :longitude 12.069034
-     :latitude 57.74119}))
+(defn- no-dataset-sql
+  "SQL to use when there is no dataset in the visualisation spec."
+  []
+  "SELECT * FROM (VALUES ('label', ST_SetSRID(ST_MakePoint(4.908075,52.372189), 4326))) AS t (label, geom) LIMIT 0;")
 
-(defn sql-values [locations]
-  (s/join ", "
-          (map (fn [{:keys [label longitude latitude]}]
-                 (format "('%s', ST_SetSRID(ST_MakePoint(%s,%s), 4326))"
-                         label longitude latitude))
-               locations)))
-
-(defn sql-statement
-  "Dummy data"
-  ([]
-   "SELECT * FROM (VALUES ('label', ST_SetSRID(ST_MakePoint(4.908075,52.372189), 4326))) AS t (label, geom) LIMIT 0;")
-  ([locations]
-   (format "SELECT * FROM (VALUES %s ) AS t (label, geom);"
-           (sql-values locations))))
-
-
-(defn build-sql [table]
-  (format "SELECT c2 as label, d1 as geom FROM %s;" table))
-
-;;;  Dummy sql stop
+(defn- compile-sql
+  "Takes table geom-column & label-column strings and returns a SQL string."
+  [table geom-column label-column]
+  (let [[prepared-statement & args] (sql/format {:select [[geom-column "geom"]
+                                                          [label-column "label"]]
+                                                 :from [table]})
+        fmt-string (str/replace prepared-statement #"\?" "%s")]
+    (apply (partial format fmt-string) args)))
 
 (def cartocss
   "#s { marker-width: 10; marker-fill: #e00050;}")
 
-(defn map-config [cartocss geom-column label sql]
+(defn map-config
+  [cartocss geom-column label-column sql]
   {"version" "1.6.0"
    "layers" [{"type" "mapnik"
               "options" {"cartocss" cartocss
                          "cartocss_version" "2.0.0"
                          "geom_column" geom-column
-                         "interactivity" label
+                         "interactivity" [label-column]
                          "sql" sql
                          "srid" 4326}}]})
 
-
-(defn create [tenant-conn visualisation-spec]
+(defn create
+  "Takes a tenant connection and a visualisation spec. Will get a layergroupid
+  from Windshaft and compose a response with the db-name attached under the key
+  tenantDB."
+  [tenant-conn visualisation-spec]
+  (prn "\n\n-------------------------------------------------------------------")
+  (prn "@maps/create")
   (clojure.pprint/pprint visualisation-spec)
-  ;; Handle dataset if available, yank out relevant ds_<...>,
-  ;; geom
-  ;; interactivity
-  (let [{:keys [db-name headers]} (connection-details tenant-conn)
-        akvo-maps-url "http://windshaft:4000" ;; localhost in production
-        url (format "%s/%s/layergroup" akvo-maps-url db-name)
-        dataset-id (get visualisation-spec "datasetId")
-        sql (if (nil? dataset-id)
-              (sql-statement)
-              (let [dataset (dataset-by-id tenant-conn {:id dataset-id})
-                    table (:table-name dataset)]
-                (build-sql table)))
-        _ (prn sql)
-        resp (client/post url
-                          {:body (json/encode (map-config cartocss
-                                                          "geom"
-                                                          "label"
-                                                          sql))
-                           :headers headers
-                           :content-type :json})]
-    (case (:status resp)
-      200 (lib/ok (assoc (json/decode (:body resp))
-                         "tenantDB" db-name))
-      (prn resp))))
+  (try
+    (let [{:keys [db-name headers]} (connection-details tenant-conn)
+          akvo-maps-url "http://windshaft:4000" ;; localhost in production
+          url (format "%s/%s/layergroup" akvo-maps-url db-name)
+          dataset-id (get visualisation-spec "datasetId")
+          geom-column "d1"
+          label-column "c2"
+          sql (if (nil? dataset-id)
+                (no-dataset-sql)
+                (let [dataset (dataset-by-id tenant-conn {:id dataset-id})
+                      table (:table-name dataset)]
+                  (compile-sql table geom-column label-column)))
+          _ (prn sql)
+          map-config (map-config cartocss "geom" "label" sql)
+          windshaft-resp (client/post url
+                                      {:body (json/encode map-config)
+                                       :headers headers
+                                       :content-type :json})]
+      (lib/ok (assoc (json/decode (:body windshaft-resp))
+                     "tenantDB" db-name)))
+    (catch Exception e
+      (prn (ex-data e)))))
+
+
 
 
 (comment
 
-  ;; Playing with Honeysql as a form of AST
   (sql/format {:select [:a :b :c]
                :from [:foo]
                :where [:= :f.a "baz"]})
-
-  ;; "SELECT * FROM (VALUES %s ) AS t (label, geom);"
-  (sql/format {:select [:*]
-               :from (values [["a" 1] ["b" 2]])
-               })
-
-
-
-
-  ;; --
 
   ;; Example map spec
   {"type" "visualisation",
@@ -142,6 +122,5 @@
       "pointColorColumn" "c5",
       "datasetId" "59c3ab16-34e8-44df-957e-6c1c38fbf465",
       "title" "Untitled Layer 1"}]}}
-
 
   )
