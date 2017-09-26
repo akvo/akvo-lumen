@@ -84,7 +84,7 @@ export default class ColumnHeader extends Component {
         }
         {column.get('key') ?
           <span className="columnKey">
-            <i className="fa fa-key" ariaHidden />
+            <i className="fa fa-key" aria-hidden />
           </span> :
           <span
             className="columnType clickable"

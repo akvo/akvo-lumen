@@ -12,7 +12,7 @@ function KeyColumnSelector({ onChange, columns, keyColumn }) {
     <div>
       <h1>Key column</h1>
       <SelectColumn
-        columns={columns}
+        columns={columns.filter(column => column.get('key'))}
         placeholder="Select key column"
         value={keyColumn}
         onChange={onChange}
@@ -55,8 +55,18 @@ function MergeColumnSelector({ onChange, columns, selected }) {
 MergeColumnSelector.propTypes = {
   onChange: PropTypes.func.isRequired,
   columns: PropTypes.object.isRequired,
-  selected: PropTypes.object,
+  selected: PropTypes.array,
 };
+
+function guessKeyColumn(dataset) {
+  const columns = dataset.get('columns').filter(column => column.get('key'));
+  if (columns.size === 1) {
+    return columns.get(0);
+  }
+  const identifierColumn = columns.find(column => column.get('columnName') === 'identifier');
+
+  return identifierColumn;
+}
 
 class SourceMergeOptions extends Component {
 
@@ -78,15 +88,16 @@ class SourceMergeOptions extends Component {
     const id = dataset.get('id');
     dispatch(ensureDatasetFullyLoaded(id))
       .then((ds) => {
+        const guessedKeyColumn = guessKeyColumn(ds);
         this.setState({
           loadingDataset: false,
           dataset: ds,
-          keyColumn: null,
+          keyColumn: guessedKeyColumn,
           mergeColumns: [],
         });
         onChange({
           datasetId: ds.get('id'),
-          keyColumn: null,
+          keyColumn: guessedKeyColumn == null ? null : guessedKeyColumn.get('columnName'),
           mergeColumns: [],
         });
       });
