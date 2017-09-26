@@ -44,7 +44,9 @@
     (apply (partial format fmt-string) args)))
 
 (def cartocss
-  "#s { marker-width: 10; marker-fill: #e00050;}")
+  "#s { marker-width: 8; marker-fill: #6ca429; marker-line-color: #888; marker-fill-opacity: 0.6; marker-allow-overlap: true;}
+  #s[label='Daniel']{marker-fill: #FFA500;}
+")
 
 (defn map-config
   [cartocss geom-column label-column sql]
