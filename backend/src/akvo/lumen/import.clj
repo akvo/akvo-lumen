@@ -36,14 +36,14 @@
                                   :table-name table-name
                                   :imported-table-name imported-table-name
                                   :version 1
-                                  :columns (mapv (fn [{:keys [title id type key]}]
-                                                   {:type (name type)
-                                                    :title title
-                                                    :columnName (name id)
-                                                    :sort nil
-                                                    :key (boolean key)
-                                                    :direction nil
-                                                    :hidden false})
+                                  :columns (mapv (fn [{:keys [title id type key] :as columns}]
+                                                   (cond-> {:type (name type)
+                                                            :title title
+                                                            :columnName (name id)
+                                                            :sort nil
+                                                            :direction nil
+                                                            :hidden false}
+                                                     (contains? columns :key) (assoc :key (boolean key))))
                                                  columns)
                                   :transformations []})
     (update-successful-job-execution conn {:id job-execution-id})))
@@ -155,10 +155,12 @@
       columns)))
 
 (defn compatible-columns? [imported-columns columns]
+
   (let [imported-columns (map (fn [column]
-                                {:id (keyword (get column "columnName"))
-                                 :type (keyword (get column "type"))
-                                 :title (get column "title")})
+                                (cond-> {:id (keyword (get column "columnName"))
+                                         :type (keyword (get column "type"))
+                                         :title (get column "title")}
+                                  (contains? column "key") (assoc :key (boolean (get column "key")))))
                               imported-columns)]
     (set/subset? (set imported-columns)
                  (set columns))))
@@ -187,13 +189,14 @@
                                   {:transaction? false})
                 (let [new-columns (apply-transformation-log conn
                                                             table-name
-                                                            (mapv (fn [{:keys [title id type]}]
-                                                                    {"type" (name type)
-                                                                     "title" title
-                                                                     "columnName" (name id)
-                                                                     "sort" nil
-                                                                     "direction" nil
-                                                                     "hidden" false})
+                                                            (mapv (fn [{:keys [title id type key] :as column}]
+                                                                    (cond-> {"type" (name type)
+                                                                             "title" title
+                                                                             "columnName" (name id)
+                                                                             "sort" nil
+                                                                             "direction" nil
+                                                                             "hidden" false}
+                                                                      (contains? column :key) (assoc "key" (boolean key))) )
                                                                   columns)
                                                             transformations)]
                   (successful-update conn
