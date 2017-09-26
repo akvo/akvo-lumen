@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import * as api from '../api';
 import { ensureLibraryLoaded } from '../actions/library';
+import { fetchDataset } from '../actions/dataset';
 import MergeTransformation from '../components/transformation/MergeTransformation';
 
 const transformationComponent = {
@@ -14,9 +16,19 @@ class Transformation extends Component {
     super(props);
     this.state = {
       loading: true,
+      transforming: false,
     };
     this.props.dispatch(ensureLibraryLoaded())
       .then(() => this.setState({ loading: false }));
+  }
+
+  handleApplyTransformation(transformation) {
+    const { dispatch, datasetId } = this.props;
+    this.setState({ transforming: true });
+    api.post(`/api/transformations/${datasetId}/transform`, transformation)
+      .then(response => response.json())
+      .then(() => dispatch(fetchDataset(datasetId)))
+      .then(() => null);
   }
 
   render() {
@@ -29,7 +41,7 @@ class Transformation extends Component {
         <TransformationComponent
           datasetId={datasetId}
           datasets={datasets}
-          onApplyTransformation={() => null}
+          onApplyTransformation={transformation => this.handleApplyTransformation(transformation)}
         />
       </div>
     );

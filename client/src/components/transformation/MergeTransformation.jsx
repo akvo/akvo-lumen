@@ -12,7 +12,7 @@ export default class MergeTransformation extends Component {
     super(props);
     this.state = {
       transformation: {
-        op: 'core/merge-dataset',
+        op: 'core/merge-datasets',
         args: {
           source: {
             datasetId: null,
