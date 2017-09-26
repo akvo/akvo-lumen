@@ -90,8 +90,11 @@
   [form]
   (let [questions (questions form)]
     (into
-     [{:title "Instance id" :type :text :id :instance_id}
-      {:title "Identifier" :type :text :id :identifier}
+     [{:title "Instance id" :type :text :id :instance_id :key true}
+      (let [identifier {:title "Identifier" :type :text :id :identifier}]
+        (if (:registration-form? form)
+          (assoc identifier :key true)
+          identifier))
       {:title "Display name" :type :text :id :display_name}
       {:title "Latitude" :type :number :id :latitude}
       {:title "Longitude" :type :number :id :longitude}
@@ -160,10 +163,12 @@
 (defn form
   "Get a form by id from a survey"
   [survey form-id]
-  (or (first (filter #(= form-id (:id %)) (:forms survey)))
-      (throw (ex-info "No such form"
-                      {:form-id form-id
-                       :survey-id (:id survey)}))))
+  (let [form (or (first (filter #(= form-id (:id %)) (:forms survey)))
+                 (throw (ex-info "No such form"
+                                 {:form-id form-id
+                                  :survey-id (:id survey)})))]
+    (assoc form
+           :registration-form? (= form-id (:registrationFormId survey)))))
 
 ;; Transforms the structure
 ;; {question-group-id -> [{question-id -> response}]

@@ -29,10 +29,14 @@
     "Returns a sequence of column specifications of the dataset to be imported.
      A column specification is a map with keys
 
+     Required:
        :type - The lumen type of the column. Currently :text, :number or :date
        :title - The title of the column
        :id - The internal id of the column (as a keyword). The id must be
-             lowercase alphanumeric ([a-z][a-z0-9]*)")
+             lowercase alphanumeric ([a-z][a-z0-9]*)
+
+     Optional:
+       :key - True if this column is required to be non-null and unique")
   (records [this]
     "Returns a sequence of record data. A record is a map of column ids to values.
      The type of the value depends on the type of the column where

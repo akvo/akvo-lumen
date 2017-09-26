@@ -36,11 +36,12 @@
                                   :table-name table-name
                                   :imported-table-name imported-table-name
                                   :version 1
-                                  :columns (mapv (fn [{:keys [title id type]}]
+                                  :columns (mapv (fn [{:keys [title id type key]}]
                                                    {:type (name type)
                                                     :title title
                                                     :columnName (name id)
                                                     :sort nil
+                                                    :key (boolean key)
                                                     :direction nil
                                                     :hidden false})
                                                  columns)
@@ -90,6 +91,18 @@
 (defn create-dataset-table [conn table-name columns]
   (jdbc/execute! conn [(dataset-table-sql table-name columns)]))
 
+(defn add-key-constraints [conn table-name columns]
+  (doseq [column columns
+          :when (:key column)]
+    (jdbc/execute! conn
+                   (format "ALTER TABLE \"%s\" ADD UNIQUE (%s)"
+                           table-name
+                           (name (:id column))))
+    (jdbc/execute! conn
+                   (format "ALTER TABLE \"%s\" ALTER COLUMN %s SET NOT NULL"
+                           table-name
+                           (name (:id column))))))
+
 (defprotocol CoerceToSql
   (coerce [this]))
 
@@ -116,6 +129,7 @@
       (with-open [importer (import/dataset-importer (get spec "source") config)]
         (let [columns (import/columns importer)]
           (create-dataset-table conn table-name columns)
+          (add-key-constraints conn table-name columns)
           (doseq [record (map coerce-to-sql (import/records importer))]
             (jdbc/insert! conn table-name record))
           (successful-import conn job-execution-id table-name columns spec))))
@@ -163,6 +177,7 @@
           (if-not (compatible-columns? imported-columns columns)
             (failed-update conn job-execution-id "Column mismatch")
             (do (create-dataset-table conn table-name columns)
+                (add-key-constraints conn table-name columns)
                 (doseq [record (map coerce-to-sql (import/records importer))]
                   (jdbc/insert! conn table-name record))
                 (clone-data-table conn
