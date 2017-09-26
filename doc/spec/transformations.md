@@ -238,3 +238,20 @@ Examples:
           "columnNameLong": "c3",
           "columnTitleGeo": "Geopoints"}}
 ```
+
+### core/merge-datasets
+
+* args
+  * source.datasetId (string): The dataset from where columns will be merged
+  * source.keyColumn (string): The key column in the source dataset
+  * source.mergeColumns (array or strings): Columns to be added to the target dataset
+  * target.keyColumn (string): The key column in the target dataset
+
+```
+{"op": "core/merge-datasets",
+ "args": {"source": {"datasetId" "fjdos-dfios-dkso"
+                     "keyColumn": "c1"
+					 "mergeColumns": ["c2", "c3"]}
+          "target": {"keyColumn": "c1"}}}
+
+```
