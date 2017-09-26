@@ -6,23 +6,6 @@ import SourceMergeOptions from './merge/SourceMergeOptions';
 
 import './MergeTransformation.scss';
 
-// Returns null if transformation is "incomplete",
-// otherwise returns the transformation.
-function validateTransformation(transformation) {
-  const { source, target } = transformation.args;
-
-  if (
-    source.datasetId == null ||
-    source.keyColumn == null ||
-    source.mergeColumns.length === 0 ||
-    target.keyColumn == null
-  ) {
-    return null;
-  }
-
-  return transformation;
-}
-
 export default class MergeTransformation extends Component {
 
   constructor(props) {
@@ -44,20 +27,30 @@ export default class MergeTransformation extends Component {
     };
   }
 
-  handleTargetChange(target) {
+  isValidTransformation() {
+    const { transformation: { args: { source, target } } } = this.state;
+    return (
+      source.datasetId != null &&
+      source.keyColumn != null &&
+      source.mergeColumns.length > 0 &&
+      target.keyColumn != null
+    );
+  }
+
+  handleArgsChange(changedArgs) {
     const { transformation } = this.state;
     const { args } = transformation;
-    const newArgs = Object.assign({}, args, { target });
+    const newArgs = Object.assign({}, args, changedArgs);
     const newTransformation = Object.assign({}, transformation, { args: newArgs });
     this.setState({ transformation: newTransformation });
   }
 
+  handleTargetChange(target) {
+    this.handleArgsChange({ target });
+  }
+
   handleSourceChange(source) {
-    const { transformation } = this.state;
-    const { args } = transformation;
-    const newArgs = Object.assign({}, args, { source });
-    const newTransformation = Object.assign({}, transformation, { args: newArgs });
-    this.setState({ transformation: newTransformation });
+    this.handleArgsChange({ source });
   }
 
   render() {
@@ -67,7 +60,7 @@ export default class MergeTransformation extends Component {
       <div className="MergeTransformation">
         <TransformationHeader
           datasetId={datasetId}
-          transformation={validateTransformation(transformation)}
+          isValidTransformation={this.isValidTransformation()}
           onApply={() => onApplyTransformation(transformation)}
           buttonText="Merge"
           titleText="Merge Datasets"

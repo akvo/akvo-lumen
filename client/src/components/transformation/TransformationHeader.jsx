@@ -23,7 +23,7 @@ ApplyButton.propTypes = {
 };
 
 export default function TransformationHeader({
-  datasetId, buttonText, titleText, onApply, transformation,
+  datasetId, buttonText, titleText, onApply, isValidTransformation,
 }) {
   return (
     <Header
@@ -32,8 +32,8 @@ export default function TransformationHeader({
       actions={
         <ApplyButton
           buttonText={buttonText || 'Apply'}
-          isValidTransformation={transformation != null}
-          onApply={() => onApply(transformation)}
+          isValidTransformation={isValidTransformation}
+          onApply={onApply}
         />
       }
     >
@@ -47,6 +47,5 @@ TransformationHeader.propTypes = {
   buttonText: PropTypes.string,
   titleText: PropTypes.string.isRequired,
   onApply: PropTypes.func.isRequired,
-  // Transformation should be null if it's not "valid"
-  transformation: PropTypes.object,
+  isValidTransformation: PropTypes.bool.isRequired,
 };
