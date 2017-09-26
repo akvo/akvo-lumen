@@ -54,13 +54,13 @@ export default class MergeTransformation extends Component {
   }
 
   render() {
-    const { datasetId, datasets, onApplyTransformation } = this.props;
+    const { datasetId, datasets, onApplyTransformation, transforming } = this.props;
     const { transformation } = this.state;
     return (
       <div className="MergeTransformation">
         <TransformationHeader
           datasetId={datasetId}
-          isValidTransformation={this.isValidTransformation()}
+          isValidTransformation={this.isValidTransformation() && !transforming}
           onApply={() => onApplyTransformation(transformation)}
           buttonText="Merge"
           titleText="Merge Datasets"
@@ -85,4 +85,6 @@ MergeTransformation.propTypes = {
   datasets: PropTypes.object.isRequired,
   datasetId: PropTypes.string.isRequired,
   onApplyTransformation: PropTypes.func.isRequired,
+  // Are we currently applying a transformation.
+  transforming: PropTypes.bool.isRequired,
 };
