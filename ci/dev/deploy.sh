@@ -20,6 +20,12 @@ cat <<EOF >> deployment.yaml
         image: eu.gcr.io/akvo-lumen/lumen-maps:\${BUILD_HASH}
         ports:
         - containerPort: 4000
+        env:
+        - name: LUMEN_ENCRYPTION_KEY
+          valueFrom:
+            secretKeyRef:
+              name: lumen
+              key: encryption_key
 EOF
 sed "s/\${BUILD_HASH}/$CIRCLE_SHA1/" -i deployment.yaml
 
