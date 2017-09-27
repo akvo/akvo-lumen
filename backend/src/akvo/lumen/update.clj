@@ -37,21 +37,30 @@
                                      :reason [reason]}))
 
 (defn apply-transformation-log [conn table-name columns transformations]
-  (loop [transformations transformations columns columns]
-    (if-let [transformation (first transformations)]
-      (let [{:keys [success?
-                    message
-                    columns
-                    execution-log]} (transformation/apply-operation conn
-                                                                    table-name
-                                                                    columns
-                                                                    transformation)]
-        (when-not success?
-          (throw (ex-info (format "Failed to update due to transformation mismatch: %s"
-                                  message)
-                          {})))
-        (recur (rest transformations) columns))
-      columns)))
+  (let [;; Translate columns vector into a form that the transformation engine understands
+        columns (mapv (fn [{:keys [title id type key] :as column}]
+                        (cond-> {"type" (name type)
+                                 "title" title
+                                 "columnName" (name id)
+                                 "sort" nil
+                                 "direction" nil
+                                 "hidden" false}
+                          (contains? column :key) (assoc "key" (boolean key))) )
+                      columns)]
+    (loop [transformations transformations columns columns]
+      (if-let [transformation (first transformations)]
+        (let [{:keys [success?
+                      message
+                      columns]} (transformation/apply-operation conn
+                                                                table-name
+                                                                columns
+                                                                transformation)]
+          (when-not success?
+            (throw (ex-info (format "Failed to update due to transformation mismatch: %s"
+                                    message)
+                            {})))
+          (recur (rest transformations) columns))
+        columns))))
 
 (defn compatible-columns? [imported-columns columns]
   (let [imported-columns (map (fn [column]
@@ -87,15 +96,7 @@
                                   {:transaction? false})
                 (let [new-columns (apply-transformation-log conn
                                                             table-name
-                                                            (mapv (fn [{:keys [title id type key] :as column}]
-                                                                    (cond-> {"type" (name type)
-                                                                             "title" title
-                                                                             "columnName" (name id)
-                                                                             "sort" nil
-                                                                             "direction" nil
-                                                                             "hidden" false}
-                                                                      (contains? column :key) (assoc "key" (boolean key))) )
-                                                                  columns)
+                                                            columns
                                                             transformations)]
                   (successful-update conn
                                      job-execution-id
