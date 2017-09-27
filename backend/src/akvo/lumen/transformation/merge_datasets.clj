@@ -29,10 +29,9 @@
                (conj columns new-merge-column)
                (rest merge-columns))))))
 
-
-;; :identifiers
 (defn fetch-data
-  "Returns a map from key-column-value -> ..."
+  "Fetch data from the source dataset and returns a map with the shape
+  {<key-column-value> {<new-column-nam> <value>}}"
   [conn table-name column-names-mapping key-column-name merge-column-names]
   (let [data (rest
               (jdbc/query conn
@@ -49,18 +48,20 @@
             {}
             data)))
 
-(defn add-columns [conn table-name columns]
+(defn add-columns
+  "Add the new columns to the target dataset"
+  [conn table-name columns]
   (doseq [column columns]
     (add-column conn {:table-name table-name
                       :new-column-name (get column "columnName")
                       :column-type (condp = (get column "type")
                                      "text" "text"
                                      "number" "double precision"
-                                     "date" "timestamptz"
-                                     ;; TODO GEO
-                                     )})))
+                                     "date" "timestamptz")})))
 
-(defn insert-merged-data [conn table-name target-key-column-name data]
+(defn insert-merged-data
+  "Insert the merged values into the target dataset"
+  [conn table-name target-key-column-name data]
   (doseq [[key-value data-map] data]
     (jdbc/update! conn
                   table-name
@@ -95,7 +96,10 @@
     (add-columns conn table-name target-merge-columns)
     (insert-merged-data conn table-name target-key-column-name data)
     {:success? true
-     :execution-log ["merged"]
+     :execution-log [(format "Merged columns %s from %s into %s"
+                             source-merge-column-names
+                             source-table-name
+                             table-name)]
      :columns (into columns target-merge-columns)}))
 
 (defmethod engine/apply-operation :core/merge-datasets

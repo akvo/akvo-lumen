@@ -251,7 +251,7 @@ Examples:
 {"op": "core/merge-datasets",
  "args": {"source": {"datasetId" "fjdos-dfios-dkso"
                      "keyColumn": "c1"
-					 "mergeColumns": ["c2", "c3"]}
+                     "mergeColumns": ["c2", "c3"]}
           "target": {"keyColumn": "c1"}}}
 
 ```
