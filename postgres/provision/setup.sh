@@ -35,3 +35,10 @@ psql -d test_lumen_tenant_2 -f $DIR/helpers/create-extensions.sql
 echo ""
 echo "----------"
 echo "Done!"
+
+cp pg.conf /var/lib/postgresql/data/postgresql.conf
+cp pg_hba.conf /var/lib/postgresql/data/pg_hba.conf
+cp server.crt /var/lib/postgresql/data/
+cp server.key /var/lib/postgresql/data/
+
+chmod 0600 /var/lib/postgresql/data/server.key
