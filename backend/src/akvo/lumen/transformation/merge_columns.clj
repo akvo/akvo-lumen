@@ -71,7 +71,10 @@
   [conn table-name columns op-spec]
   (let [source (get-in op-spec ["args" "source"])
         source-dataset-id (get source "datasetId")
-        source-dataset (latest-dataset-version-by-dataset-id conn {:dataset-id source-dataset-id})
+        source-dataset (if-let [source-dataset (latest-dataset-version-by-dataset-id conn {:dataset-id source-dataset-id})]
+                         source-dataset
+                         (throw (ex-info (format "Dataset %s does not exist" source-dataset-id)
+                                         {:spec op-spec})))
         source-table-name (:table-name source-dataset)
         source-key-column-name (get source "keyColumn")
         source-merge-column-names (get source "mergeColumns")
