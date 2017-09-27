@@ -1,4 +1,4 @@
-(ns akvo.lumen.transformation.merge-columns
+(ns akvo.lumen.transformation.merge-datasets
   (:require [akvo.lumen.transformation.engine :as engine]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as s]
