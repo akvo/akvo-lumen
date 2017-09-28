@@ -13,6 +13,10 @@ new WebpackDevServer(webpack(config), {
   publicPath: config.output.publicPath,
   disableHostCheck: true,
   proxy: {
+    '/healthz': {
+      target: "http://backend:3000",
+      secure: false
+    },
     '/api/**': {
       target: "http://backend:3000",
       secure: false

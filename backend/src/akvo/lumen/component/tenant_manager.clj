@@ -17,16 +17,20 @@
 (defn subdomain? [host]
   (>= (get (frequencies host) \.) 2))
 
+(defn healthz? [{:keys [request-method path-info]}]
+  (and (= request-method :get)
+       (= path-info "/healthz")))
+
 (defn wrap-label-tenant
   "Parses the first dns label as tenant id and adds it to the request map as
   tenant-id."
   [handler]
   (fn [req]
     (let [host (get-in req [:headers "host"])]
-      (if (subdomain? host)
-        (handler (assoc req :tenant (first (str/split host #"\."))))
-
-        (lib/bad-request "Not a tenant")))))
+      (cond
+        (healthz? req) (handler req)
+        (subdomain? host) (handler (assoc req :tenant (first (str/split host #"\."))))
+        :else (lib/bad-request "Not a tenant")))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Component
