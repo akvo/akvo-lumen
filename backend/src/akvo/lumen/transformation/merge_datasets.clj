@@ -13,11 +13,16 @@
         target (get-in op-spec ["args" "target"])]
     (and (engine/valid-column-name? (get source "keyColumn"))
          (every? engine/valid-column-name? (get source "mergeColumns"))
-         (string? (get source "datasetId"))
+         (engine/valid-dataset-id? (get source "datasetId"))
+         (let [order-by-column (get source "orderByColumn")]
+           (or (nil? order-by-column)
+               (engine/valid-column-name? order-by-column)))
+         (#{"ASC" "DESC"} (get source "direction"))
          (engine/valid-column-name? (get target "keyColumn")))))
 
 (defn merge-column-names-map
-  "Returns a map translating merge column names to new column names that can be used in the target dataset"
+  "Returns a map translating source merge column names to new column names that can be used
+  in the target dataset"
   [columns merge-columns]
   (loop [m {} columns columns merge-columns merge-columns]
     (if (empty? merge-columns)
@@ -29,21 +34,27 @@
                (conj columns new-merge-column)
                (rest merge-columns))))))
 
+(defn fetch-sql
+  [table-name {:strs [keyColumn mergeColumns orderByColumn direction]}]
+  (format "SELECT DISTINCT ON (%1$s) %1$s, %2$s FROM %3$s ORDER BY %1$s, %4$s %5$s NULLS LAST"
+          keyColumn
+          (s/join ", " mergeColumns)
+          table-name
+          (or orderByColumn keyColumn)
+          direction))
+
 (defn fetch-data
   "Fetch data from the source dataset and returns a map with the shape
   {<key-column-value> {<new-column-nam> <value>}}"
-  [conn table-name column-names-mapping key-column-name merge-column-names]
+  [conn table-name column-names-mapping source]
   (let [data (rest
               (jdbc/query conn
-                          [(format "SELECT %s, %s FROM %s"
-                                   key-column-name
-                                   (s/join ", " merge-column-names)
-                                   table-name)]
+                          [(fetch-sql table-name source)]
                           {:as-arrays? true}))]
     (reduce (fn [result data-row]
               (assoc result
                      (first data-row)
-                     (zipmap (map column-names-mapping merge-column-names)
+                     (zipmap (map column-names-mapping (get source "mergeColumns"))
                              (rest data-row))))
             {}
             data)))
@@ -77,7 +88,6 @@
                          (throw (ex-info (format "Dataset %s does not exist" source-dataset-id)
                                          {:spec op-spec})))
         source-table-name (:table-name source-dataset)
-        source-key-column-name (get source "keyColumn")
         source-merge-column-names (get source "mergeColumns")
         source-merge-columns (filterv (fn [column]
                                         (contains? (set source-merge-column-names)
@@ -91,8 +101,8 @@
                                                "key" false
                                                "hidden" false))
                                    source-merge-columns)
-        target-key-column-name (get-in op-spec ["args" "source" "keyColumn"])
-        data (fetch-data conn source-table-name column-names-mapping source-key-column-name source-merge-column-names)]
+        target-key-column-name (get-in op-spec ["args" "target" "keyColumn"])
+        data (fetch-data conn source-table-name column-names-mapping source)]
     (add-columns conn table-name target-merge-columns)
     (insert-merged-data conn table-name target-key-column-name data)
     {:success? true

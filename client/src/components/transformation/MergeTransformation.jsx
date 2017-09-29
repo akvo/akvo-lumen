@@ -17,6 +17,8 @@ export default class MergeTransformation extends Component {
           source: {
             datasetId: null,
             keyColumn: null,
+            orderByColumn: null,
+            direction: 'DESC',
             mergeColumns: [], // Array of column names.
           },
           target: {
