@@ -33,9 +33,13 @@
           config (map-config/build tenant-conn visualisation-spec)
           windshaft-resp (client/post url {:body (json/encode config)
                                            :headers headers
-                                           :content-type :json})]
-      (lib/ok (assoc (json/decode (:body windshaft-resp))
-                     "tenantDB" db-name)))
+                                           :content-type :json})
+          layer-group-id (-> windshaft-resp
+                             :body
+                             json/decode
+                             (get "layergroupid"))]
+      (lib/ok {"layerGroupId" layer-group-id
+               "tenantDB" db-name}))
     (catch Exception e
       (prn (ex-data e)))))
 

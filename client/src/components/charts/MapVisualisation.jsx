@@ -187,7 +187,7 @@ export default function MapVisualisation({ visualisation, datasets, width, heigh
   // Windshaft map
   const tenantDB = visualisation.tenantDB;
   const baseURL = `/maps/${tenantDB}/layergroup`;
-  const layerGroupId = visualisation.layergroupid;
+  const layerGroupId = visualisation.layerGroupId;
   const xCenter = [0, 0];
   const xWidth = 800;
   const xHeight = 600;
