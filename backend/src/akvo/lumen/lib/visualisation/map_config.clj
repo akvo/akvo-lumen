@@ -7,9 +7,9 @@
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
 
 (defn marker-width [point-size]
-  (get {"1" 4
-        "2" 8
-        "3" 12
+  (get {"1" 8
+        "2" 12
+        "3" 16
         "4" 18
         "5" 24} point-size 1))
 
@@ -34,16 +34,12 @@
         fmt-string (str/replace prepared-statement #"\?" "%s")]
     (apply (partial format fmt-string) args)))
 
+
 #_(defn point-colors
     [tenant-conn table-name pointColorColumn]
-    (prn tenant-conn)
-    (prn table-name)
-    (prn pointColorColumn)
-    (jdbc/query tenant-conn (sql/format {:select [[pointColorColumn "options"]
-                                                  [:%count.* "n"]]
-                                         :from [table-name]
-                                         :group-by [pointColorColumn]
-                                         :limit 5})))
+    (let [query-str (format "SELECT %s AS options, count(*) as n FROM %s GROUP BY %s LIMIT 5"
+                            pointColorColumn table-name pointColorColumn)]
+      (jdbc/query tenant-conn [query-str])))
 
 (defn map-config-layer
   [tenant-conn {:strs [datasetId popup pointSize pointColorColumn]}]

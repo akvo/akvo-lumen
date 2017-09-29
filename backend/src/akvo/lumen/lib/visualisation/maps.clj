@@ -27,21 +27,18 @@
   a layergroupid from Windshaft and compose a response with the db-name attached
   under the key tenantDB."
   [tenant-conn windshaft-url visualisation-spec]
-  (try
-    (let [{:keys [db-name headers]} (connection-details tenant-conn)
-          url (format "%s/%s/layergroup" windshaft-url db-name)
-          config (map-config/build tenant-conn visualisation-spec)
-          windshaft-resp (client/post url {:body (json/encode config)
-                                           :headers headers
-                                           :content-type :json})
-          layer-group-id (-> windshaft-resp
-                             :body
-                             json/decode
-                             (get "layergroupid"))]
-      (lib/ok {"layerGroupId" layer-group-id
-               "tenantDB" db-name}))
-    (catch Exception e
-      (prn (ex-data e)))))
+  (let [{:keys [db-name headers]} (connection-details tenant-conn)
+        url (format "%s/%s/layergroup" windshaft-url db-name)
+        config (map-config/build tenant-conn visualisation-spec)
+        windshaft-resp (client/post url {:body (json/encode config)
+                                         :headers headers
+                                         :content-type :json})
+        layer-group-id (-> windshaft-resp
+                           :body
+                           json/decode
+                           (get "layergroupid"))]
+    (lib/ok {"layerGroupId" layer-group-id
+             "tenantDB" db-name})))
 
 
 (comment
