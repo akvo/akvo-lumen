@@ -1,5 +1,6 @@
 (ns akvo.lumen.lib.visualisation.map-config
-  (:require [clojure.string :as str]
+  (:require [clojure.java.jdbc :as jdbc]
+            [clojure.string :as str]
             [honeysql.core :as sql]
             [hugsql.core :as hugsql]))
 
@@ -25,7 +26,6 @@
 (defn compile-sql
   [table geom-column popups]
   (let [geom-spec [geom-column "geom"]
-
         selects (vec (map #(let [[alias column] (first %)]
                              [column alias])
                           popups))
@@ -34,11 +34,25 @@
         fmt-string (str/replace prepared-statement #"\?" "%s")]
     (apply (partial format fmt-string) args)))
 
+#_(defn point-colors
+    [tenant-conn table-name pointColorColumn]
+    (prn tenant-conn)
+    (prn table-name)
+    (prn pointColorColumn)
+    (jdbc/query tenant-conn (sql/format {:select [[pointColorColumn "options"]
+                                                  [:%count.* "n"]]
+                                         :from [table-name]
+                                         :group-by [pointColorColumn]
+                                         :limit 5})))
+
 (defn map-config-layer
-  [tenant-conn {:strs [datasetId popup pointSize]}]
+  [tenant-conn {:strs [datasetId popup pointSize pointColorColumn]}]
   (let [dataset (dataset-by-id tenant-conn {:id datasetId})
         table-name (:table-name dataset)
-        geom-column "d1"]
+        geom-column "d1"
+        ;; point-options (point-colors tenant-conn table-name pointColorColumn)
+        ;; _ (prn point-options)
+        ]
     {"type" "mapnik"
      "options" {"cartocss" (cartocss pointSize)
                 "cartocss_version" "2.0.1"
