@@ -1,6 +1,7 @@
 (ns akvo.lumen.lib.visualisation.maps
   (:require [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.visualisation.map-config :as map-config]
+            [akvo.lumen.lib.visualisation.map-metadata :as map-metadata]
             [akvo.lumen.util :as util]
             [cheshire.core :as json]
             [clj-http.client :as client]
@@ -32,11 +33,12 @@
   [tenant-conn windshaft-url {:strs [datasetId] :as visualisation-spec}]
   (if (nil? datasetId)
     (lib/bad-request {"reason" "No datasetID"})
-    (let [{:keys [db-name headers]} (connection-details tenant-conn)
+    (let [map-spec (assoc-in visualisation-spec ["spec" "layers" 0 "geomColumn"] "d1")
+          {:keys [db-name headers]} (connection-details tenant-conn)
           url (format "%s/%s/layergroup" windshaft-url db-name)
-          ;; meta-data (....)
           table-name (:table-name (dataset-by-id tenant-conn {:id datasetId}))
-          config (map-config/build table-name (assoc-in visualisation-spec ["spec" "layers" 0 "geomColumn"] "d1"))
+          metadata (map-metadata/build tenant-conn table-name map-spec)
+          config (map-config/build table-name map-spec)
           windshaft-resp (client/post url {:body (json/encode config)
                                            :headers headers
                                            :content-type :json})
@@ -45,6 +47,7 @@
                              json/decode
                              (get "layergroupid"))]
       (lib/ok {"layerGroupId" layer-group-id
+               "metadata" metadata
                "tenantDB" db-name}))))
 
 (comment
