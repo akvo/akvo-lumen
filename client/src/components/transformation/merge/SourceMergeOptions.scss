@@ -16,4 +16,21 @@
       padding-right: 0.5em;
     }
   }
+
+  .SelectOrderBy {
+    .orderByContainer {
+      display: flex;
+
+      .orderByColumn {
+        flex: 3;
+      }
+
+      .direction {
+        margin-left: 1rem;
+        flex: 1;
+      }
+
+    }
+  }
+
 }

@@ -7,14 +7,13 @@ import SelectColumn from './SelectColumn';
 import SelectMenu from '../../common/SelectMenu';
 import './SourceMergeOptions.scss';
 
-
-function KeyColumnSelector({ onChange, columns, keyColumn }) {
+function SelectKeyColumn({ onChange, columns, keyColumn }) {
   return (
     <div>
       <h1>Key column</h1>
       <SelectColumn
-        columns={columns}
         placeholder="Select key column"
+        columns={columns}
         value={keyColumn}
         onChange={onChange}
       />
@@ -22,62 +21,62 @@ function KeyColumnSelector({ onChange, columns, keyColumn }) {
   );
 }
 
-KeyColumnSelector.propTypes = {
+SelectKeyColumn.propTypes = {
   onChange: PropTypes.func.isRequired,
   columns: PropTypes.object.isRequired,
   keyColumn: PropTypes.object,
 };
 
-function OrderByColumnSelector({ onChange, columns, orderByColumn }) {
+function directionLabels(column) {
+  const defaultLabels = { asc: 'first', desc: 'last' };
+  if (column == null) return defaultLabels;
+  switch (column.get('type')) {
+    case 'date': return { asc: 'earliest', desc: 'latest' };
+    case 'number': return { asc: 'lowest', desc: 'highest' };
+    default: return defaultLabels;
+  }
+}
+
+function SelectOrderBy({ orderByColumn, direction, dataset, onChangeColumn, onChangeDirection }) {
+  const { asc, desc } = directionLabels(orderByColumn);
   return (
-    <div>
+    <div className="SelectOrderBy">
       <h1>In case of conflict, select values according to</h1>
-      <SelectColumn
-        columns={columns}
-        placeholder="Select conflict resolution column"
-        value={orderByColumn}
-        onChange={onChange}
-      />
+      <div className="orderByContainer">
+        <span className="orderByColumn">
+          <SelectColumn
+            placeholder="Select conflict resolution column"
+            columns={dataset.get('columns')}
+            value={orderByColumn}
+            onChange={onChangeColumn}
+          />
+        </span>
+        {orderByColumn != null &&
+          <span className="direction">
+            <SelectMenu
+              options={[
+                { label: asc, value: 'ASC' },
+                { label: desc, value: 'DESC' },
+              ]}
+              value={direction}
+              onChange={onChangeDirection}
+            />
+          </span>
+        }
+      </div>
     </div>
   );
 }
 
-OrderByColumnSelector.propTypes = {
-  onChange: PropTypes.func.isRequired,
-  columns: PropTypes.object.isRequired,
+SelectOrderBy.propTypes = {
   orderByColumn: PropTypes.object,
-};
-
-function directionLabels(column) {
-  switch (column.get('type')) {
-    case 'date': return { asc: 'earliest', desc: 'latest' };
-    case 'number': return { asc: 'lowest', desc: 'highest' };
-    default: return { asc: 'first', desc: 'last' };
-  }
-}
-
-function DirectionSelector({ onChange, direction, column }) {
-  const { asc, desc } = directionLabels(column);
-  return (
-    <SelectMenu
-      options={[
-        { label: asc, value: 'ASC' },
-        { label: desc, value: 'DESC' },
-      ]}
-      value={direction}
-      onChange={onChange}
-    />
-  );
-}
-
-DirectionSelector.propTypes = {
-  onChange: PropTypes.func.isRequired,
   direction: PropTypes.string.isRequired,
-  column: PropTypes.object.isRequired,
+  dataset: PropTypes.object.isRequired,
+  onChangeColumn: PropTypes.func.isRequired,
+  onChangeDirection: PropTypes.func.isRequired,
 };
 
-
-function MergeColumnSelector({ onChange, columns, selected }) {
+function SelectMergeColumns({ onChange, columns, selected }) {
   return (
     <fieldset>
       <legend><h1>Choose which columns to merge ({selected.length} / {columns.size})</h1></legend>
@@ -102,7 +101,7 @@ function MergeColumnSelector({ onChange, columns, selected }) {
   );
 }
 
-MergeColumnSelector.propTypes = {
+SelectMergeColumns.propTypes = {
   onChange: PropTypes.func.isRequired,
   columns: PropTypes.object.isRequired,
   selected: PropTypes.array,
@@ -113,9 +112,7 @@ function guessKeyColumn(dataset) {
   if (columns.size === 1) {
     return columns.get(0);
   }
-  const identifierColumn = columns.find(column => column.get('columnName') === 'identifier');
-
-  return identifierColumn;
+  return columns.find(column => column.get('columnName') === 'identifier');
 }
 
 class SourceMergeOptions extends Component {
@@ -135,9 +132,8 @@ class SourceMergeOptions extends Component {
   handleSelectDataset(dataset) {
     const { dispatch, onChange } = this.props;
     const { direction } = this.state;
-    this.setState({
-      loadingDataset: true,
-    });
+
+    this.setState({ loadingDataset: true });
     const id = dataset.get('id');
     dispatch(ensureDatasetFullyLoaded(id))
       .then((ds) => {
@@ -146,6 +142,8 @@ class SourceMergeOptions extends Component {
           loadingDataset: false,
           dataset: ds,
           keyColumn: guessedKeyColumn,
+          orderByColumn: null,
+          direction: 'DESC',
           mergeColumns: [],
         });
         onChange({
@@ -161,6 +159,7 @@ class SourceMergeOptions extends Component {
   handleSelectKeyColumn(column) {
     const { onChange } = this.props;
     const { dataset, mergeColumns, orderByColumn, direction } = this.state;
+
     this.setState({ keyColumn: column });
     onChange({
       datasetId: dataset.get('id'),
@@ -188,6 +187,7 @@ class SourceMergeOptions extends Component {
   handleSelectDirection(direction) {
     const { onChange } = this.props;
     const { dataset, keyColumn, mergeColumns, orderByColumn } = this.state;
+
     this.setState({ direction });
     onChange({
       datasetId: dataset.get('id'),
@@ -240,28 +240,23 @@ class SourceMergeOptions extends Component {
           value={dataset}
         />
         {dataset != null && !loadingDataset &&
-          <KeyColumnSelector
+          <SelectKeyColumn
             columns={dataset.get('columns')}
             keyColumn={keyColumn}
             onChange={column => this.handleSelectKeyColumn(column)}
           />
         }
         {keyColumn != null && !keyColumn.get('key') &&
-          <OrderByColumnSelector
-            columns={dataset.get('columns')}
+          <SelectOrderBy
+            onChangeColumn={column => this.handleSelectOrderByColumn(column)}
+            onChangeDirection={dir => this.handleSelectDirection(dir)}
             orderByColumn={orderByColumn}
-            onChange={column => this.handleSelectOrderByColumn(column)}
-          />
-        }
-        {orderByColumn != null &&
-          <DirectionSelector
             direction={direction}
-            column={orderByColumn}
-            onChange={dir => this.handleSelectDirection(dir)}
+            dataset={dataset}
           />
         }
         {keyColumn != null &&
-          <MergeColumnSelector
+          <SelectMergeColumns
             columns={dataset.get('columns')}
             selected={mergeColumns}
             onChange={column => this.handleToggleMergeColumn(column)}

@@ -20,6 +20,9 @@ class Transformation extends Component {
       loading: true,
       transforming: false,
     };
+  }
+
+  componentWillMount() {
     this.props.dispatch(ensureLibraryLoaded())
       .then(() => this.setState({ loading: false }));
   }
