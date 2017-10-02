@@ -3,8 +3,10 @@
             [akvo.lumen.lib.visualisation.map-config :as map-config]
             [akvo.lumen.util :as util]
             [cheshire.core :as json]
-            [clj-http.client :as client]))
+            [clj-http.client :as client]
+            [hugsql.core :as hugsql]))
 
+(hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
 
 (defn- headers [uri]
   (let [{:keys [password user]} (util/query-map (.getQuery uri))
@@ -22,24 +24,28 @@
     {:db-name db-name
      :headers (headers db-uri)}))
 
+
 (defn create
   "Takes a tenant connection, a windshaft url and a visualisation spec. Will get
   a layergroupid from Windshaft and compose a response with the db-name attached
   under the key tenantDB."
-  [tenant-conn windshaft-url visualisation-spec]
-  (let [{:keys [db-name headers]} (connection-details tenant-conn)
-        url (format "%s/%s/layergroup" windshaft-url db-name)
-        config (map-config/build tenant-conn visualisation-spec)
-        windshaft-resp (client/post url {:body (json/encode config)
-                                         :headers headers
-                                         :content-type :json})
-        layer-group-id (-> windshaft-resp
-                           :body
-                           json/decode
-                           (get "layergroupid"))]
-    (lib/ok {"layerGroupId" layer-group-id
-             "tenantDB" db-name})))
-
+  [tenant-conn windshaft-url {:strs [datasetId] :as visualisation-spec}]
+  (if (nil? datasetId)
+    (lib/bad-request {"reason" "No datasetID"})
+    (let [{:keys [db-name headers]} (connection-details tenant-conn)
+          url (format "%s/%s/layergroup" windshaft-url db-name)
+          ;; meta-data (....)
+          table-name (:table-name (dataset-by-id tenant-conn {:id datasetId}))
+          config (map-config/build table-name (assoc-in visualisation-spec ["spec" "layers" 0 "geomColumn"] "d1"))
+          windshaft-resp (client/post url {:body (json/encode config)
+                                           :headers headers
+                                           :content-type :json})
+          layer-group-id (-> windshaft-resp
+                             :body
+                             json/decode
+                             (get "layergroupid"))]
+      (lib/ok {"layerGroupId" layer-group-id
+               "tenantDB" db-name}))))
 
 (comment
 
