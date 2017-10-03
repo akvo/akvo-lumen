@@ -26,6 +26,7 @@
     {:db-name db-name
      :headers (headers db-uri)}))
 
+
 (defn create
   "Takes a tenant connection, a windshaft url and a visualisation spec. Will get
   a layergroupid from Windshaft and compose a response with the db-name attached

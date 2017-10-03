@@ -1,6 +1,8 @@
 (ns akvo.lumen.lib.visualisation.map-config
   (:require [clojure.string :as str]))
 
+
+
 (defn marker-width [point-size]
   (let [point-size (if (string? point-size)
                      (Long/parseLong point-size)
