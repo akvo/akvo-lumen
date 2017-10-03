@@ -13,12 +13,10 @@
      [(Double/parseDouble east) (Double/parseDouble north)]]))
 
 (defn bounds [tenant-conn table-name geom-column]
-  (let [box (:st_extent (first (jdbc/query tenant-conn
-                                           (format "SELECT ST_Extent(%s) FROM %s" geom-column table-name))))]
-    (parse-box box)))
+  (-> (jdbc/query tenant-conn
+                  (format "SELECT ST_Extent(%s) FROM %s" geom-column table-name))
+      first :st_extent parse-box))
 
-(defn build [tenant-conn columns table-name map-spec]
+(defn build [tenant-conn table-name map-spec]
   {:boundingBox (bounds tenant-conn table-name
-                        (get-in map-spec ["spec" "layers" 0 "geomColumn"]))
-   :popupColumns (map #(select-keys % ["columnName" "title" "type"])
-                      columns)})
+                        (get-in map-spec ["spec" "layers" 0 "geomColumn"]))})

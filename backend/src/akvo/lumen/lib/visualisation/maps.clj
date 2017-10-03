@@ -36,8 +36,8 @@
                              "d1")
           {:keys [db-name headers]} (connection-details tenant-conn)
           url (format "%s/%s/layergroup" windshaft-url db-name)
-          {:keys [columns table-name]} (dataset-by-id tenant-conn {:id datasetId})
-          metadata (map-metadata/build tenant-conn columns table-name map-spec)
+          table-name (:table-name (dataset-by-id tenant-conn {:id datasetId}))
+          metadata (map-metadata/build tenant-conn table-name map-spec)
           config (map-config/build table-name map-spec)
           windshaft-resp (client/post url {:body (json/encode config)
                                            :headers headers
