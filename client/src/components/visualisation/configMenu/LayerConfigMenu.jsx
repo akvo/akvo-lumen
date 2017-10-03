@@ -121,6 +121,20 @@ export default class LayerConfigMenu extends Component {
                 })}
               />
             </div>
+            <hr />
+            <div className="inputGroup">
+              <SelectInput
+                disabled={layer.datasetId === null}
+                placeholder="Select a geom column"
+                labelText="Geom column"
+                choice={layer.geom !== null ? layer.geom.toString() : null}
+                name="geomInput"
+                options={columnOptions.filter(column => column.type === 'geopoint')}
+                onChange={value => onChangeMapLayer(layerIndex, {
+                  geom: value,
+                })}
+              />
+            </div>
             <div className="inputGroup">
               <SelectInput
                 disabled={layer.latitude == null || layer.longitude == null}

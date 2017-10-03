@@ -5,6 +5,7 @@ const mapLayerSpec = {
   title: '', // *Layer* title
   latitude: null,
   longitude: null,
+  geom: null,
   pointColorColumn: null,
   pointSize: 1,
   pointColorMapping: [],
