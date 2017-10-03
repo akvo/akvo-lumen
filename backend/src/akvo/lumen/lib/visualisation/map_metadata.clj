@@ -9,8 +9,8 @@
         [left right] (str/split box-string #",")
         [west south] (str/split left #" ")
         [east north] (str/split right #" ")]
-    [[(Double/parseDouble west) (Double/parseDouble south)]
-     [(Double/parseDouble east) (Double/parseDouble north)]]))
+    [[(Double/parseDouble south) (Double/parseDouble west)]
+     [(Double/parseDouble north) (Double/parseDouble east)]]))
 
 (defn bounds [tenant-conn table-name geom-column where-clause]
   (-> (jdbc/query tenant-conn
