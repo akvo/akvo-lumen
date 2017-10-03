@@ -25,12 +25,13 @@
    (str/replace #"\n" "")
    (str/replace #" +" " ")))
 
-(defn sql [table-name geom-column popup-columns]
-  (format "select %s from %s"
+(defn sql [table-name geom-column popup-columns where-clause]
+  (format "select %s from %s where %s"
           (str/join ", " (conj popup-columns geom-column))
-          table-name))
+          table-name
+          where-clause))
 
-(defn build [table-name visualisation-spec]
+(defn build [table-name visualisation-spec where-clause]
   (clojure.pprint/pprint visualisation-spec)
   (let [layer-spec (first (get-in visualisation-spec ["spec" "layers"]))
         geom-column (get layer-spec "geomColumn")
@@ -42,5 +43,5 @@
                            "cartocss_version" "2.0.0"
                            "geom_column" geom-column
                            "interactivity" popup-columns
-                           "sql" (sql table-name geom-column popup-columns)
+                           "sql" (sql table-name geom-column popup-columns where-clause)
                            "srid" "4326"}}]}))

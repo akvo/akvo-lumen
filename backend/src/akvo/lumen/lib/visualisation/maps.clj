@@ -1,5 +1,6 @@
 (ns akvo.lumen.lib.visualisation.maps
   (:require [akvo.lumen.lib :as lib]
+            [akvo.lumen.lib.aggregation.filter :as filter]
             [akvo.lumen.lib.visualisation.map-config :as map-config]
             [akvo.lumen.lib.visualisation.map-metadata :as map-metadata]
             [akvo.lumen.util :as util]
@@ -34,11 +35,13 @@
     (lib/bad-request {"reason" "No datasetID"})
     (let [map-spec (assoc-in visualisation-spec ["spec" "layers" 0 "geomColumn"]
                              "d1")
+          filters (get-in visualisation-spec ["spec" "layers" 0 "filters"])
           {:keys [db-name headers]} (connection-details tenant-conn)
           url (format "%s/%s/layergroup" windshaft-url db-name)
-          table-name (:table-name (dataset-by-id tenant-conn {:id datasetId}))
-          metadata (map-metadata/build tenant-conn table-name map-spec)
-          config (map-config/build table-name map-spec)
+          {:keys [table-name columns]} (dataset-by-id tenant-conn {:id datasetId})
+          where-clause (filter/sql-str columns filters)
+          metadata (map-metadata/build tenant-conn table-name map-spec where-clause)
+          config (map-config/build table-name map-spec where-clause)
           windshaft-resp (client/post url {:body (json/encode config)
                                            :headers headers
                                            :content-type :json})
@@ -51,7 +54,6 @@
                "tenantDB" db-name}))))
 
 (comment
-
   ;; Example map spec
   {"type" "visualisation",
    "name" "Untitled visualisation",

@@ -12,11 +12,12 @@
     [[(Double/parseDouble west) (Double/parseDouble south)]
      [(Double/parseDouble east) (Double/parseDouble north)]]))
 
-(defn bounds [tenant-conn table-name geom-column]
+(defn bounds [tenant-conn table-name geom-column where-clause]
   (-> (jdbc/query tenant-conn
-                  (format "SELECT ST_Extent(%s) FROM %s" geom-column table-name))
+                  (format "SELECT ST_Extent(%s) FROM %s WHERE %s" geom-column table-name where-clause))
       first :st_extent parse-box))
 
-(defn build [tenant-conn table-name map-spec]
+(defn build [tenant-conn table-name map-spec where-clause]
   {:boundingBox (bounds tenant-conn table-name
-                        (get-in map-spec ["spec" "layers" 0 "geomColumn"]))})
+                        (get-in map-spec ["spec" "layers" 0 "geomColumn"])
+                        where-clause)})
