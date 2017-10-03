@@ -130,4 +130,42 @@
             }
         }
     }
+
+    .mapContainer {
+        position: relative;
+    }
+    .Legend {
+        padding: 0.5rem 1rem;
+        z-index: 999;
+        position: absolute;
+        bottom: 1rem;
+        display: flex;
+        width: 80%;
+        margin: 0 10%;
+        height: 6rem;
+        background-color: rgba(255, 255, 255, 0.8);
+        flex-direction: column;
+
+        h4 {
+
+        }
+
+        ul {
+            flex: 1;
+            display: flex;
+            height: 6rem;
+
+            li {
+                display: flex;
+                flex: 1;
+                align-items: center;
+                justify-content: flex-start;
+                min-width: 2.5rem;
+
+                p {
+                    margin-left: 0.5rem;
+                }
+            }
+        }
+    }
 }

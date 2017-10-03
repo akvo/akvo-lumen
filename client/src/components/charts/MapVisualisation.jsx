@@ -119,6 +119,37 @@ const getBaseLayerAttributes = ((baseLayer) => {
   return attributes;
 });
 
+const Legend = ({ pointColorMapping, title = '' }) => (
+  <div className="Legend">
+    <h4>{title}</h4>
+    <ul>
+      {pointColorMapping.map(item =>
+        <li
+          key={item.value}
+        >
+          <div
+            style={{
+              display: 'block',
+              height: '1rem',
+              width: '1rem',
+              borderRadius: '0.5rem',
+              backgroundColor: item.color,
+            }}
+          />
+          <p>
+            {item.value}
+          </p>
+        </li>
+        )}
+    </ul>
+  </div>
+  );
+
+Legend.propTypes = {
+  pointColorMapping: PropTypes.object.isRequired,
+  title: PropTypes.string,
+};
+
 const DataLayer = ({ displayLayer }) => {
   const { chartValues } = displayLayer;
   const radius = 2 + (parseInt(displayLayer.pointSize, 10) * 2);
@@ -411,10 +442,18 @@ export default class MapVisualisation extends Component {
           )}
         </Map>
         <hr />
-        <div
-          className="leafletMap"
-          ref={(ref) => { this.leafletMapNode = ref; }}
-        />
+        <div className="mapContainer">
+          <div
+            className="leafletMap"
+            ref={(ref) => { this.leafletMapNode = ref; }}
+          />
+          {visualisation.metadata && visualisation.metadata.pointColorMapping &&
+            <Legend
+              title={visualisation.spec.layers[0].legend.title}
+              pointColorMapping={visualisation.metadata.pointColorMapping}
+            />
+          }
+        </div>
       </div>
     );
   }
