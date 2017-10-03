@@ -11,6 +11,11 @@ require('./MapVisualisation.scss');
 
 const L = leafletUtfGrid(leaflet);
 
+const getColumnTitle = (dataset, columnName) =>
+  dataset.get('columns')
+  .find(item => item.get('columnName') === columnName)
+  .get('title');
+
 const isImage = (value) => {
   // For now, treat every link as an image, until we have something like an "image-url" type
   if (typeof value === 'string' && value.match(/^https/) !== null) {
@@ -193,8 +198,12 @@ export default class MapVisualisation extends Component {
     this.renderLeafletMap(nextProps);
   }
   renderLeafletMap(nextProps) {
-    const { visualisation } = nextProps;
+    const { visualisation, datasets } = nextProps;
     const { tileUrl, tileAttribution } = getBaseLayerAttributes(visualisation.spec.baseLayer);
+    const layer = visualisation.spec.layers[0];
+    const layerDataset = datasets[layer.datasetId];
+
+    window.foo = layerDataset;
 
     // Windshaft map
     const tenantDB = visualisation.tenantDB;
@@ -298,11 +307,13 @@ export default class MapVisualisation extends Component {
       this.utfGrid = new L.utfGrid(`${baseURL}/${layerGroupId}/0/{z}/{x}/{y}.grid.json?callback={cb}`, {
         resolution: 4,
       });
+      // TODO: This method of rendering strings as html is UNSAFE. Use React for popup el?
       this.utfGrid.on('click', (e) => {
         if (e.data) {
           L.popup()
           .setLatLng(e.latlng)
-          .setContent(`<ul>${Object.keys(e.data).map(key => `<li>${key} - ${e.data[key]}</li>`).join('')}</ul>`)
+          .setContent(`<ul>${Object.keys(e.data).map(key =>
+            `<li>${getColumnTitle(layerDataset, key)} - ${e.data[key]}</li>`).join('')}</ul>`)
           .openOn(map);
         }
       });
