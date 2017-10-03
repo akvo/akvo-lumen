@@ -146,14 +146,11 @@
         background-color: rgba(255, 255, 255, 0.8);
         flex-direction: column;
 
-        h4 {
-
-        }
-
         ul {
             flex: 1;
             display: flex;
             height: 6rem;
+            overflow-x: auto;
 
             li {
                 display: flex;
@@ -161,6 +158,19 @@
                 align-items: center;
                 justify-content: flex-start;
                 min-width: 2.5rem;
+                font-size: 0.9rem;
+                margin-right: 0.5rem;
+
+                &:last-child {
+                    margin-right: 0;
+                }
+
+                .colorMarker {
+                    display: block;
+                    height: 1rem;
+                    width: 1rem;
+                    border-radius: 0.5rem;
+                }
 
                 p {
                     margin-left: 0.5rem;

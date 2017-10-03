@@ -128,11 +128,8 @@ const Legend = ({ pointColorMapping, title = '' }) => (
           key={item.value}
         >
           <div
+            className="colorMarker"
             style={{
-              display: 'block',
-              height: '1rem',
-              width: '1rem',
-              borderRadius: '0.5rem',
               backgroundColor: item.color,
             }}
           />
