@@ -3,10 +3,13 @@ import PropTypes from 'prop-types';
 import { Map, CircleMarker, Popup, TileLayer } from 'react-leaflet';
 import leaflet from 'leaflet';
 import { isEqual, cloneDeep } from 'lodash';
+import leafletUtfGrid from '../../vendor/leaflet.utfgrid';
 import * as chart from '../../utilities/chart';
 
 require('../../../node_modules/leaflet/dist/leaflet.css');
 require('./MapVisualisation.scss');
+
+const L = leafletUtfGrid(leaflet);
 
 const isImage = (value) => {
   // For now, treat every link as an image, until we have something like an "image-url" type
@@ -200,9 +203,7 @@ export default class MapVisualisation extends Component {
     const xCenter = [0, 0];
     const xZoom = 2;
 
-
     const node = this.leafletMapNode;
-    const L = leaflet;
 
     let map;
 
@@ -245,7 +246,7 @@ export default class MapVisualisation extends Component {
       const boundingBoxChanged =
         !isEqual(this.storedBoundingBox, visualisation.metadata.boundingBox);
       if (!this.storedBoundingBox || boundingBoxChanged) {
-        this.storedBoundingBox = visualisation.metadata.boundingBox.slice[0];
+        this.storedBoundingBox = visualisation.metadata.boundingBox.slice(0);
         map.fitBounds(visualisation.metadata.boundingBox);
       }
     }
@@ -256,12 +257,20 @@ export default class MapVisualisation extends Component {
         this.dataLayer = L.tileLayer(`${baseURL}/${layerGroupId}/{z}/{x}/{y}.png`);
         this.dataLayer.addTo(map);
       } else {
-        // Check to see if we need to update the map
-        const datasetIdChanged =
-          nextProps.visualisation.datasetId !== this.props.visualisation.datasetId;
-        const specChanged = !isEqual(nextProps.visualisation.spec.layers[0], this.storedSpec);
+        const newSpec = nextProps.visualisation.spec.layers[0];
+        const oldSpec = this.storedSpec;
 
-        if (datasetIdChanged || specChanged) {
+        const needToUpdate = Boolean(
+          newSpec.datasetId !== oldSpec.datasetId ||
+          !isEqual(newSpec.filters, oldSpec.filters) ||
+          newSpec.geom !== newSpec.geom ||
+          newSpec.pointColorColumn !== oldSpec.pointColorColumn ||
+          !isEqual(newSpec.pointColorMapping, oldSpec.pointColorMapping) ||
+          newSpec.pointSize !== oldSpec.pointSize ||
+          newSpec.visible !== oldSpec.visible
+        );
+
+        if (needToUpdate) {
           this.storedSpec = cloneDeep(this.props.visualisation.spec.layers[0]);
 
           map.removeLayer(this.dataLayer);
@@ -270,7 +279,37 @@ export default class MapVisualisation extends Component {
         }
       }
     }
+    const popup = nextProps.visualisation.spec.layers[0].popup;
+    const havePopupData = popup && popup.length > 0;
+    const needToAddOrUpdate = havePopupData && (!this.popup || !isEqual(popup, this.popup));
+    const haveUtfGrid = Boolean(this.utfGrid);
+    const windshaftAvailable = tenantDB && layerGroupId;
+
+    if (needToAddOrUpdate && windshaftAvailable) {
+      if (haveUtfGrid) {
+        // Remove the existing grid
+
+        this.map.closePopup();
+        map.removeLayer(this.utfGrid);
+      }
+
+      this.popup = cloneDeep(popup);
+      // eslint-disable-next-line new-cap
+      this.utfGrid = new L.utfGrid(`${baseURL}/${layerGroupId}/0/{z}/{x}/{y}.grid.json?callback={cb}`, {
+        resolution: 4,
+      });
+      this.utfGrid.on('click', (e) => {
+        if (e.data) {
+          L.popup()
+          .setLatLng(e.latlng)
+          .setContent(`<ul>${Object.keys(e.data).map(key => `<li>${key} - ${e.data[key]}</li>`).join('')}</ul>`)
+          .openOn(map);
+        }
+      });
+      map.addLayer(this.utfGrid);
+    }
   }
+
   render() {
     const { visualisation, datasets, width, height } = this.props;
     const displayLayers = getDataLayers(visualisation.spec.layers, datasets);
