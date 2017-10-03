@@ -25,18 +25,22 @@
    (str/replace #"\n" "")
    (str/replace #" +" " ")))
 
-(defn sql [geom-column table-name]
-  (format "select %s from %s" geom-column table-name))
+(defn sql [table-name geom-column popup-columns]
+  (format "select %s from %s"
+          (str/join ", " (conj popup-columns geom-column))
+          table-name))
 
 (defn build [table-name visualisation-spec]
   (clojure.pprint/pprint visualisation-spec)
   (let [layer-spec (first (get-in visualisation-spec ["spec" "layers"]))
-        geom-column (get layer-spec "geomColumn")]
+        geom-column (get layer-spec "geomColumn")
+        popup-columns (mapv #(get % "column")
+                            (get layer-spec "popup"))]
     {"version" "1.6.0"
      "layers" [{"type" "mapnik"
                 "options" {"cartocss" (cartocss (get layer-spec "pointSize"))
                            "cartocss_version" "2.0.0"
                            "geom_column" geom-column
-                           ;; "interactivity" []
-                           "sql" (sql geom-column table-name)
+                           "interactivity" popup-columns
+                           "sql" (sql table-name geom-column popup-columns)
                            "srid" "4326"}}]}))
