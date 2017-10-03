@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Map, CircleMarker, Popup, TileLayer } from 'react-leaflet';
+import leaflet from 'leaflet';
+import { isEqual, cloneDeep } from 'lodash';
 import * as chart from '../../utilities/chart';
 
 require('../../../node_modules/leaflet/dist/leaflet.css');
@@ -175,123 +177,197 @@ DataLayer.propTypes = {
   displayLayer: PropTypes.object.isRequired,
 };
 
-export default function MapVisualisation({ visualisation, datasets, width, height }) {
-  const displayLayers = getDataLayers(visualisation.spec.layers, datasets);
-  const bounds = calculateBounds(displayLayers);
-  const title = visualisation.name || '';
-  const titleLength = title.toString().length;
-  const titleHeight = titleLength > 48 ? 56 : 36;
-  const mapHeight = height - titleHeight;
-  const { tileUrl, tileAttribution } = getBaseLayerAttributes(visualisation.spec.baseLayer);
+export default class MapVisualisation extends Component {
 
-  // Windshaft map
-  const tenantDB = visualisation.tenantDB;
-  const baseURL = `/maps/${tenantDB}/layergroup`;
-  const layerGroupId = visualisation.layerGroupId;
-  const xCenter = [0, 0];
-  const xWidth = 800;
-  const xHeight = 600;
-  const xZoom = 2;
+  constructor() {
+    super();
+    this.renderLeafletMap = this.renderLeafletMap.bind(this);
+  }
+  componentDidMount() {
+    this.renderLeafletMap(this.props);
+  }
+  componentWillReceiveProps(nextProps) {
+    this.renderLeafletMap(nextProps);
+  }
+  renderLeafletMap(nextProps) {
+    const { visualisation } = nextProps;
+    const { tileUrl, tileAttribution } = getBaseLayerAttributes(visualisation.spec.baseLayer);
 
-  return (
-    <div
-      className="MapVisualisation dashChart"
-      style={{
-        width,
-        height,
-      }}
-    >
-      {displayLayers.map((displayLayer, outerIndex) =>
-        <div
-          className="legendContainer"
-          key={outerIndex}
-        >
-          {(displayLayer.pointColorMapping &&
-            displayLayer.pointColorMapping.length > 0 &&
-            displayLayer.legend.visible) &&
-            <div
-              className={`legend ${displayLayer.legend.position}`}
-            >
-              <h4>{displayLayer.legend.title}</h4>
-              <ul>
-                {displayLayer.pointColorMapping.map((mappingEntry, innerIndex) =>
-                  <li
-                    className="legendEntry"
-                    key={innerIndex}
-                  >
-                    <i
-                      className="colorIndicator"
-                      style={{
-                        backgroundColor: mappingEntry.color,
-                      }}
-                    />
-                    <span
-                      className={`colorLabel
-                        ${chart.replaceLabelIfValueEmpty(mappingEntry.value, true)}`}
-                    >
-                      {chart.replaceLabelIfValueEmpty(mappingEntry.value)}
-                    </span>
-                  </li>
-                )}
-              </ul>
-            </div>
-          }
-        </div>
-      )}
-      <h2
-        style={{
-          height: titleHeight,
-          lineHeight: titleLength > 96 ? '16px' : '20px',
-          fontSize: titleLength > 96 ? '14px' : '16px',
-        }}
-      >
-        <span>
-          {visualisation.name}
-        </span>
-      </h2>
-      <Map
-        center={[0, 0]}
-        {... bounds ? { bounds } : {}} // Do not set a bounds prop if we have no bounds
-        zoom={2}
-        scrollWheelZoom={false}
-        key={width}
+    // Windshaft map
+    const tenantDB = visualisation.tenantDB;
+    const baseURL = `/maps/${tenantDB}/layergroup`;
+    const layerGroupId = visualisation.layerGroupId;
+    const xCenter = [0, 0];
+    const xZoom = 2;
+
+
+    const node = this.leafletMapNode;
+    const L = leaflet;
+
+    let map;
+
+    if (!this.storedSpec) {
+      // Store a copy of the layer spec to compare to future changes so we know when to re-render
+      this.storedSpec = cloneDeep(this.props.visualisation.spec.layers[0]);
+    }
+
+    if (!this.storedBaseLayer) {
+      // Do the same thing for the baselayer
+      this.storedBaseLayer = cloneDeep(this.props.visualisation.spec.baseLayer);
+    }
+
+    if (!this.map) {
+      map = L.map(node).setView(xCenter, xZoom);
+      this.map = map;
+    } else {
+      map = this.map;
+    }
+
+    // Display or update the baselayer tiles
+    if (!this.baseLayer) {
+      this.baseLayer = L.tileLayer(tileUrl, { attribution: tileAttribution });
+      this.baseLayer.addTo(map);
+    } else {
+      const oldTileUrl = getBaseLayerAttributes(this.storedBaseLayer).tileUrl;
+      const newTileUrl = tileUrl;
+
+      if (oldTileUrl !== newTileUrl) {
+        this.storedBaseLayer = cloneDeep(nextProps.visualisation.spec.baseLayer);
+
+        map.removeLayer(this.baseLayer);
+        this.baseLayer = L.tileLayer(tileUrl, { attribution: tileAttribution });
+        this.baseLayer.addTo(map).bringToBack();
+      }
+    }
+
+    // Update the bounding box if necessary
+    if (visualisation.metadata && visualisation.metadata.boundingBox) {
+      const boundingBoxChanged =
+        !isEqual(this.storedBoundingBox, visualisation.metadata.boundingBox);
+      if (!this.storedBoundingBox || boundingBoxChanged) {
+        this.storedBoundingBox = visualisation.metadata.boundingBox.slice[0];
+        map.fitBounds(visualisation.metadata.boundingBox);
+      }
+    }
+
+    // Add or update the windshaft tile layer if necessary
+    if (tenantDB && layerGroupId) {
+      if (!this.dataLayer) {
+        this.dataLayer = L.tileLayer(`${baseURL}/${layerGroupId}/{z}/{x}/{y}.png`);
+        this.dataLayer.addTo(map);
+      } else {
+        // Check to see if we need to update the map
+        const datasetIdChanged =
+          nextProps.visualisation.datasetId !== this.props.visualisation.datasetId;
+        const specChanged = !isEqual(nextProps.visualisation.spec.layers[0], this.storedSpec);
+
+        if (datasetIdChanged || specChanged) {
+          this.storedSpec = cloneDeep(this.props.visualisation.spec.layers[0]);
+
+          map.removeLayer(this.dataLayer);
+          this.dataLayer = L.tileLayer(`${baseURL}/${layerGroupId}/{z}/{x}/{y}.png`);
+          this.dataLayer.addTo(map);
+        }
+      }
+    }
+  }
+  render() {
+    const { visualisation, datasets, width, height } = this.props;
+    const displayLayers = getDataLayers(visualisation.spec.layers, datasets);
+    const bounds = calculateBounds(displayLayers);
+    const title = visualisation.name || '';
+    const titleLength = title.toString().length;
+    const titleHeight = titleLength > 48 ? 56 : 36;
+    const mapHeight = height - titleHeight;
+    const { tileUrl, tileAttribution } = getBaseLayerAttributes(visualisation.spec.baseLayer);
+
+    return (
+      <div
+        className="MapVisualisation dashChart"
         style={{
           width,
-          height: mapHeight,
+          height,
         }}
       >
-        <TileLayer
-          key={tileUrl}
-          url={tileUrl}
-          attribution={tileAttribution}
-        />
-        {displayLayers.map((displayLayer, index) =>
-          <DataLayer
-            key={index}
-            displayLayer={displayLayer}
-          />
+        {displayLayers.map((displayLayer, outerIndex) =>
+          <div
+            className="legendContainer"
+            key={outerIndex}
+          >
+            {(displayLayer.pointColorMapping &&
+              displayLayer.pointColorMapping.length > 0 &&
+              displayLayer.legend.visible) &&
+              <div
+                className={`legend ${displayLayer.legend.position}`}
+              >
+                <h4>{displayLayer.legend.title}</h4>
+                <ul>
+                  {displayLayer.pointColorMapping.map((mappingEntry, innerIndex) =>
+                    <li
+                      className="legendEntry"
+                      key={innerIndex}
+                    >
+                      <i
+                        className="colorIndicator"
+                        style={{
+                          backgroundColor: mappingEntry.color,
+                        }}
+                      />
+                      <span
+                        className={`colorLabel
+                          ${chart.replaceLabelIfValueEmpty(mappingEntry.value, true)}`}
+                      >
+                        {chart.replaceLabelIfValueEmpty(mappingEntry.value)}
+                      </span>
+                    </li>
+                  )}
+                </ul>
+              </div>
+            }
+          </div>
         )}
-      </Map>
-      <hr />
-      <Map
-        center={xCenter}
-        zoom={xZoom}
-        scrollWheelZoom={false}
-        key={layerGroupId}
-        style={{ width: xWidth, height: xHeight }}
-      >
-        <TileLayer
-          attribution="&amp;copy <a href=&quot;http://osm.org/copyright&quot;>OpenStreetMap</a> contributors"
-          url="http://{s}.tile.osm.org/{z}/{x}/{y}.png"
-        />
-        {(layerGroupId != null) && (tenantDB != null) &&
+        <h2
+          style={{
+            height: titleHeight,
+            lineHeight: titleLength > 96 ? '16px' : '20px',
+            fontSize: titleLength > 96 ? '14px' : '16px',
+          }}
+        >
+          <span>
+            {visualisation.name}
+          </span>
+        </h2>
+        <Map
+          center={[0, 0]}
+          {... bounds ? { bounds } : {}} // Do not set a bounds prop if we have no bounds
+          zoom={2}
+          scrollWheelZoom={false}
+          key={width}
+          style={{
+            width,
+            height: mapHeight,
+          }}
+        >
           <TileLayer
-            url={`${baseURL}/${layerGroupId}/{z}/{x}/{y}.png`}
+            key={tileUrl}
+            url={tileUrl}
+            attribution={tileAttribution}
           />
-        }
-      </Map>
-    </div>
-  );
+          {displayLayers.map((displayLayer, index) =>
+            <DataLayer
+              key={index}
+              displayLayer={displayLayer}
+            />
+          )}
+        </Map>
+        <hr />
+        <div
+          className="leafletMap"
+          ref={(ref) => { this.leafletMapNode = ref; }}
+        />
+      </div>
+    );
+  }
 }
 
 MapVisualisation.propTypes = {
