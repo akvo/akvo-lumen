@@ -134,7 +134,7 @@ const Legend = ({ pointColorMapping, title = '' }) => (
             }}
           />
           <p>
-            {item.value}
+            {item.value ? item.value : <span className="italic">No data</span>}
           </p>
         </li>
         )}
