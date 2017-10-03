@@ -1,4 +1,5 @@
-(ns akvo.lumen.lib.visualisation.map-config)
+(ns akvo.lumen.lib.visualisation.map-config
+  (:require [clojure.string :as str]))
 
 (defn marker-width [point-size]
   (let [point-size (if (string? point-size)
@@ -11,15 +12,21 @@
           5 13} point-size 8)))
 
 (defn cartocss [point-size]
-  (format "#s {
-               marker-width: %s;
-               marker-fill: #6ca429;
-               marker-line-color: #888;
-               marker-fill-opacity: 0.6;
-               marker-allow-overlap: true;
-              }"
-          (marker-width point-size)))
+  (->
+   (format "#s {
+              marker-allow-overlap: true;
+              marker-fill-opacity: 0.6;
+              marker-fill: #6ca429;
+              marker-line-color: #888;
+              marker-width: %s;
+            }"
+           (marker-width point-size))
+   str/trim
+   (str/replace #"\n" "")
+   (str/replace #" +" " ")))
 
+(defn sql [geom-column table-name]
+  (format "select %s from %s" geom-column table-name))
 
 (defn build [table-name visualisation-spec]
   (clojure.pprint/pprint visualisation-spec)
@@ -31,5 +38,5 @@
                            "cartocss_version" "2.0.0"
                            "geom_column" geom-column
                            ;; "interactivity" []
-                           "sql" (format "select %s from %s" geom-column table-name)
+                           "sql" (sql geom-column table-name)
                            "srid" "4326"}}]}))

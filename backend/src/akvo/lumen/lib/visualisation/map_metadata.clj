@@ -17,5 +17,8 @@
                                            (format "SELECT ST_Extent(%s) FROM %s" geom-column table-name))))]
     (parse-box box)))
 
-(defn build [tenant-conn table-name map-spec]
-  {:boundingBox (bounds tenant-conn table-name (get-in map-spec ["spec" "layers" 0 "geomColumn"]))})
+(defn build [tenant-conn columns table-name map-spec]
+  {:boundingBox (bounds tenant-conn table-name
+                        (get-in map-spec ["spec" "layers" 0 "geomColumn"]))
+   :popupColumns (map #(select-keys % ["columnName" "title" "type"])
+                      columns)})

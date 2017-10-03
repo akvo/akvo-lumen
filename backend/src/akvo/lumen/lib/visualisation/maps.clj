@@ -25,7 +25,6 @@
     {:db-name db-name
      :headers (headers db-uri)}))
 
-
 (defn create
   "Takes a tenant connection, a windshaft url and a visualisation spec. Will get
   a layergroupid from Windshaft and compose a response with the db-name attached
@@ -33,11 +32,12 @@
   [tenant-conn windshaft-url {:strs [datasetId] :as visualisation-spec}]
   (if (nil? datasetId)
     (lib/bad-request {"reason" "No datasetID"})
-    (let [map-spec (assoc-in visualisation-spec ["spec" "layers" 0 "geomColumn"] "d1")
+    (let [map-spec (assoc-in visualisation-spec ["spec" "layers" 0 "geomColumn"]
+                             "d1")
           {:keys [db-name headers]} (connection-details tenant-conn)
           url (format "%s/%s/layergroup" windshaft-url db-name)
-          table-name (:table-name (dataset-by-id tenant-conn {:id datasetId}))
-          metadata (map-metadata/build tenant-conn table-name map-spec)
+          {:keys [columns table-name]} (dataset-by-id tenant-conn {:id datasetId})
+          metadata (map-metadata/build tenant-conn columns table-name map-spec)
           config (map-config/build table-name map-spec)
           windshaft-resp (client/post url {:body (json/encode config)
                                            :headers headers
