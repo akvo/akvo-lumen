@@ -17,8 +17,8 @@
   ([]
    (cartocss "1"))
   ([point-size]
-   (format "#s { marker-width: %s; marker-fill: #6ca429; marker-line-color: #888; marker-fill-opacity: 0.6; marker-allow-overlap: true;}
-  " (marker-width point-size))))
+   (format "#s { marker-width: %s; marker-fill: #6ca429; marker-line-color: #888; marker-fill-opacity: 0.6; marker-allow-overlap: true;}"
+           (marker-width point-size))))
 
 (def no-dataset-sql
   "SELECT * FROM (VALUES ('label', ST_SetSRID(ST_MakePoint(4.908075,52.372189), 4326))) AS t (label, geom) LIMIT 0;")

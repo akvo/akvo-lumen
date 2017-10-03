@@ -25,24 +25,34 @@
               "#B8385E"
               "#9E4962"])
 
-#_(defn point-colors
-    [tenant-conn table-name pointColorColumn]
-    (when (not (nil? pointColorColumn))
-      (let [query-str (format "SELECT %s AS options, count(*) as n FROM %s GROUP BY %s LIMIT 5"
-                              pointColorColumn table-name pointColorColumn)]
-        (jdbc/query tenant-conn [query-str]))))
+(defn next-color [used-colors]
+  (some (fn [color] (if (contains? used-colors color) false color)) palette))
 
-(defn color-point-mapping
+(defn point-color-mapping
   [tenant-conn table-name {:strs [pointColorMapping pointColorColumn]}]
   (when pointColorColumn
     (let [distinct-values (map :value
                                (jdbc/query tenant-conn
-                                           (format "SELECT distinct %s AS value FROM %s LIMIT 22" pointColorColumn table-name)))]
-      (for [value distinct-values]
-
-        )
-      )
-    ))
+                                           (format "SELECT distinct %s AS value FROM %s LIMIT 22" pointColorColumn table-name)))
+          used-colors (set (map #(get "color" %) pointColorMapping))
+          color-map (reduce (fn [m {:strs [value color]}]
+                              (assoc m value color))
+                            {}
+                            pointColorMapping)]
+      (loop [result []
+             values distinct-values
+             used-colors used-colors]
+        (if (empty? values)
+          result
+          (let [value (first values)]
+            (if-some [color (get color-map value)]
+              (recur (conj result {"op" "equals" "value" value "color" color})
+                     (rest values)
+                     used-colors)
+              (let [color (next-color used-colors)]
+                (recur (conj result {"op" "equals" "value" value "color" color})
+                       (rest values)
+                       (conj used-colors color))))))))))
 
 ;; "BOX(-0.127758 51.507351,24.938379 63.095089)"
 (defn parse-box [s]
@@ -60,7 +70,9 @@
       first :st_extent parse-box))
 
 (defn build [tenant-conn table-name map-spec where-clause]
-  {:boundingBox (bounds tenant-conn table-name
-                        (get-in map-spec ["spec" "layers" 0 "geomColumn"])
-                        where-clause)
-   :availableColors palette})
+  (let [layer (get-in map-spec ["spec" "layers" 0])]
+    {"boundingBox" (bounds tenant-conn table-name
+                           (get layer "geomColumn")
+                           where-clause)
+     "pointColorMapping" (point-color-mapping tenant-conn table-name layer)
+     "availableColors" palette}))

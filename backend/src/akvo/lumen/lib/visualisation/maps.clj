@@ -42,7 +42,7 @@
           {:keys [table-name columns]} (dataset-by-id tenant-conn {:id datasetId})
           where-clause (filter/sql-str columns filters)
           metadata (map-metadata/build tenant-conn table-name map-spec where-clause)
-          config (map-config/build table-name map-spec where-clause)
+          config (map-config/build table-name map-spec where-clause metadata)
           windshaft-resp (client/post url {:body (json/encode config)
                                            :headers headers
                                            :content-type :json})
