@@ -3,8 +3,6 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import SelectMenu from '../../common/SelectMenu';
 import SelectInput from './SelectInput';
-import { getPointColorValues, getPointColorMappingSortFunc } from '../../../utilities/chart';
-import { palette } from '../../../utilities/visualisationColors';
 import ButtonRowInput from './ButtonRowInput';
 import ToggleInput from './ToggleInput';
 import ColorLabels from './ColorLabels';
@@ -326,15 +324,7 @@ export default class LayerConfigMenu extends Component {
   }
 
   handlePointColorColumnChange(columnName = null, columnOption = null) {
-    const { datasets } = this.props;
-    const dataset = datasets[this.props.layer.datasetId];
-    let values;
     let legend;
-    let sortFunc;
-
-    if (columnName != null) {
-      values = getPointColorValues(dataset, columnName, this.props.layer.filters);
-    }
 
     if (columnOption != null) {
       legend = Object.assign({}, this.props.layer.legend, { title: columnOption.title });
@@ -342,23 +332,10 @@ export default class LayerConfigMenu extends Component {
       legend = Object.assign({}, this.props.layer.legend, { title: null });
     }
 
-    if (columnOption != null) {
-      sortFunc = getPointColorMappingSortFunc(columnOption.type);
-    }
-
     this.props.onChangeMapLayer(this.props.layerIndex, {
       legend,
       pointColorColumn: columnName,
-      pointColorMapping: values != null ?
-        values.map((value, index) => ({
-          op: 'equals',
-          value,
-          color: palette[index] || '#000000',
-        }))
-        .sort(sortFunc)
-        :
-        []
-      ,
+      pointColorMapping: [],
     });
   }
 

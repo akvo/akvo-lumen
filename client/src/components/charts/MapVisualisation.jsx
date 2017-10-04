@@ -143,7 +143,7 @@ const Legend = ({ pointColorMapping, title = '' }) => (
   );
 
 Legend.propTypes = {
-  pointColorMapping: PropTypes.object.isRequired,
+  pointColorMapping: PropTypes.array.isRequired,
   title: PropTypes.string,
 };
 
