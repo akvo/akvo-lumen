@@ -27,9 +27,9 @@
 (defn cartocss [point-size point-color-column point-color-mapping]
   (format "#s {
               marker-allow-overlap: true;
-              marker-fill-opacity: 0.6;
+              marker-fill-opacity: 0.8;
               marker-fill: #6ca429;
-              marker-line-color: #888;
+              marker-line-color: #ddd;
               marker-width: %s;
             %s }"
           (marker-width point-size)
