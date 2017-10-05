@@ -17,20 +17,18 @@
     }
   }
 
-  .SelectOrderBy {
-    .orderByContainer {
+  .SelectAggregation {
+    .aggregationContainer {
       display: flex;
 
-      .orderByColumn {
+      .aggregationColumn {
         flex: 3;
       }
 
-      .direction {
+      .aggregationDirection {
         margin-left: 1rem;
         flex: 1;
       }
-
     }
   }
-
 }

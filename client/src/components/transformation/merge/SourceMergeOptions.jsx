@@ -5,7 +5,7 @@ import { ensureDatasetFullyLoaded } from '../../../actions/dataset';
 import SelectDataset from './SelectDataset';
 import SelectColumn from './SelectColumn';
 import SelectMenu from '../../common/SelectMenu';
-import { guessMergeColumn, getColumnName } from './utils';
+import { guessMergeColumn, getColumnName, directionLabels } from './utils';
 import './SourceMergeOptions.scss';
 
 function SelectMergeColumn({ onChange, columns, mergeColumn }) {
@@ -27,16 +27,6 @@ SelectMergeColumn.propTypes = {
   columns: PropTypes.object.isRequired,
   mergeColumn: PropTypes.object,
 };
-
-function directionLabels(column) {
-  const defaultLabels = { asc: 'First', desc: 'Last' };
-  if (column == null) return defaultLabels;
-  switch (column.get('type')) {
-    case 'date': return { asc: 'Earliest', desc: 'Latest' };
-    case 'number': return { asc: 'Lowest', desc: 'Highest' };
-    default: return defaultLabels;
-  }
-}
 
 function SelectAggregation({
   aggregationColumn,
@@ -60,7 +50,7 @@ function SelectAggregation({
           />
         </span>
         {aggregationColumn != null &&
-          <span className="direction">
+          <span className="aggregationDirection">
             <SelectMenu
               options={[
                 { label: asc, value: 'ASC' },

@@ -1,10 +1,13 @@
-import React from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Immutable from 'immutable';
+import { connect } from 'react-redux';
 import { FormattedMessage } from 'react-intl';
+import { ensureDatasetFullyLoaded } from '../../../actions/dataset';
 import SidebarHeader from './SidebarHeader';
 import SidebarControls from './SidebarControls';
 import { columnTitle } from '../../../domain/dataset';
+import * as mergeTrainsformationUtils from '../../transformation/merge/utils';
 
 function deriveTransformationDescription(transformation) {
   const newColumnTitle = transformation.getIn(['args', 'newColumnTitle']);
@@ -86,7 +89,49 @@ function textTransformationDescription(transformations, index, columns) {
   })[transformation.get('op')];
 }
 
-function transformationDescription(transformations, index, columns) {
+function mergeDatasetsDescription(transformation, dependentDatasets) {
+  const source = transformation.getIn(['args', 'source']);
+  const sourceDatasetId = source.get('datasetId');
+  const sourceMergeColumnNames = source.get('mergeColumns').toSet();
+  const sourceAggregationColumnName = source.get('aggregationColumn');
+  const sourceAggregationDirection = source.get('aggregationDirection');
+  const sourceDataset = dependentDatasets[sourceDatasetId];
+
+  if (sourceDataset == null) {
+    // Show a simpler description if we haven't loaded the source dataset yet
+    return `Merged columns from dataset ${sourceDatasetId}`;
+  }
+
+  const sourceColumns = sourceDataset.get('columns');
+  const sourceDatasetTitle = sourceDataset.get('name');
+  const mergedColumnsTitles = sourceDataset
+    .get('columns')
+    .filter(column => sourceMergeColumnNames.has(column.get('columnName')))
+    .map(column => column.get('title'));
+  const sourceAggregationColumn =
+    sourceAggregationColumnName == null ?
+      null :
+      sourceColumns.find(column => column.get('columnName') === sourceAggregationColumnName);
+
+  const directionLabels = mergeTrainsformationUtils.directionLabels(sourceAggregationColumn);
+  const directionLabel = sourceAggregationDirection === 'ASC' ? directionLabels.asc : directionLabels.desc;
+
+  return (
+    <div>
+      <span>Merged columns from <em>{sourceDatasetTitle}</em>:</span>
+      <ul>
+        {mergedColumnsTitles.map((title, idx) => <li key={idx}>{title}</li>)}
+      </ul>
+      { sourceAggregationColumn &&
+        <span>
+          aggregated by <em>{directionLabel} {sourceAggregationColumn.get('title')}</em>
+        </span>
+      }
+    </div>
+  );
+}
+
+function transformationDescription(transformations, index, columns, dependentDatasets) {
   const transformation = transformations.get(index);
   const op = transformation.get('op');
   const columnName = transformation.getIn(['args', 'columnName']);
@@ -112,12 +157,14 @@ function transformationDescription(transformations, index, columns) {
       return deriveTransformationDescription(transformation);
     case 'core/generate-geopoints':
       return geoTransformationDescription(transformations, index, columns);
+    case 'core/merge-datasets':
+      return mergeDatasetsDescription(transformation, dependentDatasets);
     default:
       return op;
   }
 }
 
-function TransformationListItem({ transformations, index, columns }) {
+function TransformationListItem({ transformations, index, columns, dependentDatasets }) {
   const transformation = transformations.get(index);
   const isUndoingTransformation = transformation.get('undo');
   const isPendingTransformation = transformation.get('pending') && !isUndoingTransformation;
@@ -125,7 +172,7 @@ function TransformationListItem({ transformations, index, columns }) {
   return (
     <div style={{ opacity: isUndoingTransformation ? 0.5 : 1 }}>
       <div>
-        {transformationDescription(transformations, index, columns)}
+        {transformationDescription(transformations, index, columns, dependentDatasets)}
       </div>
       {isPendingTransformation && <div style={{ fontSize: '0.6em', marginTop: 4 }}>APPLYING TRANSFORMATION</div>}
       {isUndoingTransformation && <div style={{ fontSize: '0.6em', marginTop: 4 }}>UNDOING TRANSFORMATION</div>}
@@ -136,32 +183,71 @@ TransformationListItem.propTypes = {
   transformations: PropTypes.object.isRequired,
   index: PropTypes.number.isRequired,
   columns: PropTypes.object.isRequired,
+  dependentDatasets: PropTypes.object.isRequired,
 };
 
-function TransformationList({ transformations, columns }) {
-  return (
-    <div
-      className="TransformationList"
-    >
-      <ol>
-        {transformations.map((transformation, index) => (
-          <li key={index}>
-            <TransformationListItem
-              transformations={transformations}
-              columns={columns}
-              index={index}
-            />
-          </li>
-        ))}
-      </ol>
-    </div>
-  );
+class TransformationList extends Component {
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      dependentDatasets: {},
+    };
+  }
+
+  componentWillMount() {
+    // Fetch all dependent datasets (currently  only due to merge transformations)
+    const { transformations, dispatch } = this.props;
+
+    const dependentDatasetIds = transformations
+      .filter(transformation => transformation.get('op') === 'core/merge-datasets')
+      .map(transformation => transformation.getIn(['args', 'source', 'datasetId']))
+      .toSet();
+
+    Promise.all(
+      dependentDatasetIds.map(id => dispatch(ensureDatasetFullyLoaded(id)))
+    ).then((dependentDatasets) => {
+      const indexedById = dependentDatasets.reduce(
+        (index, dataset) => Object.assign({}, index, { [dataset.get('id')]: dataset }),
+        {}
+      );
+      this.setState({ dependentDatasets: indexedById });
+    });
+  }
+
+  render() {
+    const { transformations, columns } = this.props;
+    const { dependentDatasets } = this.state;
+    return (
+      <div
+        className="TransformationList"
+      >
+        <ol>
+          {transformations.map((transformation, index) => (
+            <li key={index}>
+              <TransformationListItem
+                transformations={transformations}
+                dependentDatasets={dependentDatasets}
+                columns={columns}
+                index={index}
+              />
+            </li>
+          ))}
+        </ol>
+      </div>
+    );
+  }
 }
 
 TransformationList.propTypes = {
   transformations: PropTypes.object.isRequired,
   columns: PropTypes.object.isRequired,
+  dispatch: PropTypes.func.isRequired,
 };
+
+// Inject dispatch only
+const ConnectedTransformationList = connect()(TransformationList);
 
 function markUndo(transformations, idx) {
   if (idx < 0) {
@@ -201,7 +287,7 @@ export default function TransformationLog({
       <SidebarHeader onClose={onClose}>
         <FormattedMessage id="transformation_log" />
       </SidebarHeader>
-      <TransformationList
+      <ConnectedTransformationList
         transformations={allTransformations}
         columns={columns}
       />

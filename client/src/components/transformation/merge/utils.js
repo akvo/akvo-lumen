@@ -24,3 +24,13 @@ export function guessMergeColumn(dataset) {
 export function getColumnName(column) {
   return column == null ? null : column.get('columnName');
 }
+
+export function directionLabels(column) {
+  const defaultLabels = { asc: 'first', desc: 'last' };
+  if (column == null) return defaultLabels;
+  switch (column.get('type')) {
+    case 'date': return { asc: 'earliest', desc: 'latest' };
+    case 'number': return { asc: 'lowest', desc: 'highest' };
+    default: return defaultLabels;
+  }
+}
