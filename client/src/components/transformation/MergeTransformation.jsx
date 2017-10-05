@@ -16,13 +16,13 @@ export default class MergeTransformation extends Component {
         args: {
           source: {
             datasetId: null,
-            keyColumn: null,
-            orderByColumn: null,
-            direction: 'DESC',
+            mergeColumn: null,
+            aggregationColumn: null,
+            aggregationDirection: 'DESC',
             mergeColumns: [], // Array of column names.
           },
           target: {
-            keyColumn: null,
+            mergeColumn: null,
           },
         },
       },

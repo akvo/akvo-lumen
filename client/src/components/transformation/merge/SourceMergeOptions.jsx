@@ -5,60 +5,67 @@ import { ensureDatasetFullyLoaded } from '../../../actions/dataset';
 import SelectDataset from './SelectDataset';
 import SelectColumn from './SelectColumn';
 import SelectMenu from '../../common/SelectMenu';
+import { guessMergeColumn, getColumnName } from './utils';
 import './SourceMergeOptions.scss';
 
-function SelectKeyColumn({ onChange, columns, keyColumn }) {
+function SelectMergeColumn({ onChange, columns, mergeColumn }) {
   return (
     <div>
       <h1>Key column</h1>
       <SelectColumn
         placeholder="Select key column"
         columns={columns}
-        value={keyColumn}
+        value={mergeColumn}
         onChange={onChange}
       />
     </div>
   );
 }
 
-SelectKeyColumn.propTypes = {
+SelectMergeColumn.propTypes = {
   onChange: PropTypes.func.isRequired,
   columns: PropTypes.object.isRequired,
-  keyColumn: PropTypes.object,
+  mergeColumn: PropTypes.object,
 };
 
 function directionLabels(column) {
-  const defaultLabels = { asc: 'first', desc: 'last' };
+  const defaultLabels = { asc: 'First', desc: 'Last' };
   if (column == null) return defaultLabels;
   switch (column.get('type')) {
-    case 'date': return { asc: 'earliest', desc: 'latest' };
-    case 'number': return { asc: 'lowest', desc: 'highest' };
+    case 'date': return { asc: 'Earliest', desc: 'Latest' };
+    case 'number': return { asc: 'Lowest', desc: 'Highest' };
     default: return defaultLabels;
   }
 }
 
-function SelectOrderBy({ orderByColumn, direction, dataset, onChangeColumn, onChangeDirection }) {
-  const { asc, desc } = directionLabels(orderByColumn);
+function SelectAggregation({
+  aggregationColumn,
+  aggregationDirection,
+  dataset,
+  onChangeColumn,
+  onChangeDirection,
+}) {
+  const { asc, desc } = directionLabels(aggregationColumn);
   return (
-    <div className="SelectOrderBy">
-      <h1>In case of conflict, select values according to</h1>
-      <div className="orderByContainer">
-        <span className="orderByColumn">
+    <div className="SelectAggregation">
+      <h1>Aggregation strategy</h1>
+      <div className="aggregationContainer">
+        <span className="aggregationColumn">
           <SelectColumn
-            placeholder="Select conflict resolution column"
+            placeholder="Select aggregation column"
             columns={dataset.get('columns')}
-            value={orderByColumn}
+            value={aggregationColumn}
             onChange={onChangeColumn}
           />
         </span>
-        {orderByColumn != null &&
+        {aggregationColumn != null &&
           <span className="direction">
             <SelectMenu
               options={[
                 { label: asc, value: 'ASC' },
                 { label: desc, value: 'DESC' },
               ]}
-              value={direction}
+              value={aggregationDirection}
               onChange={onChangeDirection}
             />
           </span>
@@ -68,9 +75,9 @@ function SelectOrderBy({ orderByColumn, direction, dataset, onChangeColumn, onCh
   );
 }
 
-SelectOrderBy.propTypes = {
-  orderByColumn: PropTypes.object,
-  direction: PropTypes.string.isRequired,
+SelectAggregation.propTypes = {
+  aggregationColumn: PropTypes.object,
+  aggregationDirection: PropTypes.string.isRequired,
   dataset: PropTypes.object.isRequired,
   onChangeColumn: PropTypes.func.isRequired,
   onChangeDirection: PropTypes.func.isRequired,
@@ -107,14 +114,6 @@ SelectMergeColumns.propTypes = {
   selected: PropTypes.array,
 };
 
-function guessKeyColumn(dataset) {
-  const columns = dataset.get('columns').filter(column => column.get('key'));
-  if (columns.size === 1) {
-    return columns.get(0);
-  }
-  return columns.find(column => column.get('columnName') === 'identifier');
-}
-
 class SourceMergeOptions extends Component {
 
   constructor(props) {
@@ -122,85 +121,95 @@ class SourceMergeOptions extends Component {
     this.state = {
       loadingDataset: false,
       dataset: null,
-      keyColumn: null,
-      orderByColumn: null,
-      direction: 'DESC',
+      mergeColumn: null,
+      aggregationColumn: null,
+      aggregationDirection: 'DESC',
       mergeColumns: [],
     };
   }
 
   handleSelectDataset(dataset) {
     const { dispatch, onChange } = this.props;
-    const { direction } = this.state;
+    const { aggregationDirection } = this.state;
 
     this.setState({ loadingDataset: true });
     const id = dataset.get('id');
     dispatch(ensureDatasetFullyLoaded(id))
       .then((ds) => {
-        const guessedKeyColumn = guessKeyColumn(ds);
+        // Preselect sensible defaults for Flow datasets
+        const guessedMergeColumn = guessMergeColumn(ds);
+        const guessedAggregationColumn = guessedMergeColumn != null && !guessedMergeColumn.get('key') ?
+          ds.get('columns').find(column => column.get('columnName') === 'submitted_at') : null;
+
         this.setState({
           loadingDataset: false,
           dataset: ds,
-          keyColumn: guessedKeyColumn,
-          orderByColumn: null,
+          mergeColumn: guessedMergeColumn,
+          aggregationColumn: guessedAggregationColumn,
           direction: 'DESC',
           mergeColumns: [],
         });
+
         onChange({
           datasetId: ds.get('id'),
-          keyColumn: guessedKeyColumn == null ? null : guessedKeyColumn.get('columnName'),
-          orderByColumn: null,
-          direction,
+          mergeColumn: getColumnName(guessedMergeColumn),
+          aggregationColumn: getColumnName(guessedAggregationColumn),
+          aggregationDirection,
           mergeColumns: [],
         });
       });
   }
 
-  handleSelectKeyColumn(column) {
+  handleSelectMergeColumn(column) {
     const { onChange } = this.props;
-    const { dataset, mergeColumns, orderByColumn, direction } = this.state;
+    const { dataset, mergeColumns, aggregationColumn, aggregationDirection } = this.state;
 
-    this.setState({ keyColumn: column });
+    this.setState({ mergeColumn: column });
     onChange({
       datasetId: dataset.get('id'),
-      keyColumn: column.get('columnName'),
-      orderByColumn: orderByColumn == null ? null : orderByColumn.get('columnName'),
-      direction,
+      mergeColumn: column.get('columnName'),
+      aggregationColumn: getColumnName(aggregationColumn),
+      aggregationDirection,
       mergeColumns: mergeColumns.map(col => col.get('columnName')),
     });
   }
 
-  handleSelectOrderByColumn(column) {
+  handleSelectAggregationColumn(column) {
     const { onChange } = this.props;
-    const { dataset, keyColumn, mergeColumns, direction } = this.state;
+    const { dataset, mergeColumn, mergeColumns, aggregationDirection } = this.state;
 
-    this.setState({ orderByColumn: column });
+    this.setState({ aggregationColumn: column });
     onChange({
       datasetId: dataset.get('id'),
-      keyColumn: keyColumn.get('columnName'),
-      orderByColumn: column.get('columnName'),
-      direction,
+      mergeColumn: mergeColumn.get('columnName'),
+      aggregationColumn: column.get('columnName'),
+      aggregationDirection,
       mergeColumns: mergeColumns.map(col => col.get('columnName')),
     });
   }
 
-  handleSelectDirection(direction) {
+  handleSelectDirection(aggregationDirection) {
     const { onChange } = this.props;
-    const { dataset, keyColumn, mergeColumns, orderByColumn } = this.state;
+    const { dataset, mergeColumn, mergeColumns, aggregationColumn } = this.state;
 
-    this.setState({ direction });
+    this.setState({ aggregationDirection });
     onChange({
       datasetId: dataset.get('id'),
-      keyColumn: keyColumn.get('columnName'),
-      orderByColumn: orderByColumn.get('columnName'),
-      direction,
+      mergeColumn: mergeColumn.get('columnName'),
+      aggregationColumn: aggregationColumn.get('columnName'),
+      aggregationDirection,
       mergeColumns: mergeColumns.map(col => col.get('columnName')),
     });
   }
 
   handleToggleMergeColumn(column) {
     const { onChange } = this.props;
-    const { mergeColumns, keyColumn, orderByColumn, direction, dataset } = this.state;
+    const {
+      mergeColumns,
+      mergeColumn,
+      aggregationColumn,
+      aggregationDirection,
+      dataset } = this.state;
 
     const newMergeColumns = mergeColumns.includes(column) ?
       mergeColumns.filter(col => col !== column) :
@@ -212,9 +221,9 @@ class SourceMergeOptions extends Component {
 
     onChange({
       datasetId: dataset.get('id'),
-      keyColumn: keyColumn.get('columnName'),
-      orderByColumn: orderByColumn == null ? null : orderByColumn.get('columnName'),
-      direction,
+      mergeColumn: mergeColumn.get('columnName'),
+      aggregationColumn: getColumnName(aggregationColumn),
+      aggregationDirection,
       mergeColumns: newMergeColumns.map(col => col.get('columnName')),
     });
   }
@@ -224,10 +233,10 @@ class SourceMergeOptions extends Component {
     const {
       dataset,
       loadingDataset,
-      keyColumn,
+      mergeColumn,
       mergeColumns,
-      orderByColumn,
-      direction,
+      aggregationColumn,
+      aggregationDirection,
     } = this.state;
 
     return (
@@ -240,22 +249,22 @@ class SourceMergeOptions extends Component {
           value={dataset}
         />
         {dataset != null && !loadingDataset &&
-          <SelectKeyColumn
+          <SelectMergeColumn
             columns={dataset.get('columns')}
-            keyColumn={keyColumn}
-            onChange={column => this.handleSelectKeyColumn(column)}
+            mergeColumn={mergeColumn}
+            onChange={column => this.handleSelectMergeColumn(column)}
           />
         }
-        {keyColumn != null && !keyColumn.get('key') &&
-          <SelectOrderBy
-            onChangeColumn={column => this.handleSelectOrderByColumn(column)}
-            onChangeDirection={dir => this.handleSelectDirection(dir)}
-            orderByColumn={orderByColumn}
-            direction={direction}
+        {mergeColumn != null && !mergeColumn.get('key') &&
+          <SelectAggregation
+            onChangeColumn={column => this.handleSelectAggregationColumn(column)}
+            onChangeDirection={dir => this.handleSelectAggregationDirection(dir)}
+            aggregationColumn={aggregationColumn}
+            aggregationDirection={aggregationDirection}
             dataset={dataset}
           />
         }
-        {keyColumn != null &&
+        {mergeColumn != null &&
           <SelectMergeColumns
             columns={dataset.get('columns')}
             selected={mergeColumns}

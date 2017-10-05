@@ -14,10 +14,10 @@
     (and (engine/valid-column-name? (get source "keyColumn"))
          (every? engine/valid-column-name? (get source "mergeColumns"))
          (engine/valid-dataset-id? (get source "datasetId"))
-         (let [order-by-column (get source "orderByColumn")]
-           (or (nil? order-by-column)
-               (engine/valid-column-name? order-by-column)))
-         (#{"ASC" "DESC"} (get source "direction"))
+         (let [aggregation-column (get source "aggregationColumn")]
+           (or (nil? aggregation-column)
+               (engine/valid-column-name? aggregation-column)))
+         (#{"ASC" "DESC"} (get source "aggregationDirection"))
          (engine/valid-column-name? (get target "keyColumn")))))
 
 (defn merge-column-names-map
@@ -35,13 +35,13 @@
                (rest merge-columns))))))
 
 (defn fetch-sql
-  [table-name {:strs [keyColumn mergeColumns orderByColumn direction]}]
+  [table-name {:strs [keyColumn mergeColumns aggregationColumn aggregationDirection]}]
   (format "SELECT DISTINCT ON (%1$s) %1$s, %2$s FROM %3$s ORDER BY %1$s, %4$s %5$s NULLS LAST"
           keyColumn
           (s/join ", " mergeColumns)
           table-name
-          (or orderByColumn keyColumn)
-          direction))
+          (or aggregationColumn keyColumn)
+          aggregationDirection))
 
 (defn fetch-data
   "Fetch data from the source dataset and returns a map with the shape

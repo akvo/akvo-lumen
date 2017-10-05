@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { ensureDatasetFullyLoaded } from '../../../actions/dataset';
 import SelectColumn from './SelectColumn';
+import { guessMergeColumn, getColumnName } from './utils';
 import './TargetMergeOptions.scss';
 
 class TargetMergeOptions extends Component {
@@ -11,14 +12,19 @@ class TargetMergeOptions extends Component {
     super(props);
     this.state = {
       loading: true,
-      keyColumn: null,
+      mergeColumn: null,
     };
   }
 
   componentWillMount() {
-    const { dispatch, dataset } = this.props;
+    const { dispatch, dataset, onChange } = this.props;
     dispatch(ensureDatasetFullyLoaded(dataset.get('id')))
-      .then(() => this.setState({ loading: false }));
+      .then((ds) => {
+        // Preselect sensible defaults for Flow datasets
+        const guessedMergeColumn = guessMergeColumn(ds);
+        this.setState({ loading: false, keyColumn: guessedMergeColumn });
+        onChange({ mergeColumn: getColumnName(guessedMergeColumn) });
+      });
   }
 
   handleSelectKeyColumn(column) {
@@ -30,18 +36,18 @@ class TargetMergeOptions extends Component {
   }
 
   render() {
-    const { loading, keyColumn } = this.state;
+    const { loading, mergeColumn } = this.state;
     if (loading) return null;
     const { dataset } = this.props;
     return (
       <div className="TargetMergeOptions">
         <h1>Dataset 1</h1>
         <p>{dataset.get('name')} ({dataset.get('columns').size} columns)</p>
-        <h1>Key column</h1>
+        <h1>Merge column</h1>
         <SelectColumn
           placeholder="Select merge column"
           columns={dataset.get('columns')}
-          value={keyColumn}
+          value={mergeColumn}
           onChange={column => this.handleSelectKeyColumn(column)}
         />
       </div>

@@ -243,15 +243,20 @@ Examples:
 
 * args
   * source.datasetId (string): The dataset from where columns will be merged
-  * source.keyColumn (string): The key column in the source dataset
+  * source.mergeColumn (string): The merge column in the source dataset
+  * source.aggregationColumn (string): If the source merge column is not non-null & unique,
+    this column and the aggregation direction determines which row to select for merging
+  * source.aggregationDirection (ASC|DESC): sort direction for the aggregation column
   * source.mergeColumns (array or strings): Columns to be added to the target dataset
-  * target.keyColumn (string): The key column in the target dataset
+  * target.mergeColumn (string): The merge column in the target dataset
 
 ```
 {"op": "core/merge-datasets",
  "args": {"source": {"datasetId" "fjdos-dfios-dkso"
-                     "keyColumn": "c1"
+                     "mergeColumn": "c1",
+					 "aggregationColumn: "c3",
+					 "aggregationDirection: "ASC", // or "DESC"
                      "mergeColumns": ["c2", "c3"]}
-          "target": {"keyColumn": "c1"}}}
+          "target": {"mergeColumn": "c1"}}}
 
 ```
