@@ -11,7 +11,7 @@ import './SourceMergeOptions.scss';
 function SelectMergeColumn({ onChange, columns, mergeColumn }) {
   return (
     <div>
-      <h1>Key column</h1>
+      <h1>Merge column</h1>
       <SelectColumn
         placeholder="Select key column"
         columns={columns}
@@ -53,6 +53,7 @@ function SelectAggregation({
         <span className="aggregationColumn">
           <SelectColumn
             placeholder="Select aggregation column"
+            showColumnType
             columns={dataset.get('columns')}
             value={aggregationColumn}
             onChange={onChangeColumn}
