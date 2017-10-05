@@ -111,6 +111,7 @@ export default class DashboardCanvasItem extends Component {
 
     return (
       <div
+        data-test-id="dashboard-canvas-item"
         className="DashboardCanvasItem"
         style={this.state.style}
       >

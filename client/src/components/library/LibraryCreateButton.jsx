@@ -13,6 +13,7 @@ export default function LibraryCreateButton({ onCreate }) {
     <div className="LibraryCreateButton">
       {options.map((option, idx) =>
         <button
+		  data-test-id = {option.value}
           className="clickable"
           key={idx}
           onClick={() => onCreate(option.value)}

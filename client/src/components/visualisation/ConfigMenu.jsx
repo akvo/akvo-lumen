@@ -172,6 +172,7 @@ export default function ConfigMenu(props) {
             <ul>
               {visualisationTypes.map((vType, index) =>
                 <li
+                  data-test-id={`button-${vType.replace(' ', '-')}`}
                   className={`clickable typeButton ${vType.replace(' ', '')}`}
                   key={index}
                   onClick={() => props.onChangeVisualisationType(vType)}
@@ -202,8 +203,13 @@ export default function ConfigMenu(props) {
                   visualisation={visualisation}
                   disabled={visualisation.datasetId === null}
                 />
-                <div className="inputGroup">
-                  <label htmlFor="xDatasetMenu"><FormattedMessage id="source_dataset" />:</label>
+                <div
+                  className="inputGroup"
+                  data-test-id="input-group">
+                  <label
+                    htmlFor="xDatasetMenu"
+                    data-test-id="dataset-menu">
+                  <FormattedMessage id="source_dataset" />:</label>
                   <SelectMenu
                     name="xDatasetMenu"
                     placeholderId="choose_dataset"
@@ -223,6 +229,7 @@ export default function ConfigMenu(props) {
                 getChartTypeEditor(visualisation.visualisationType)
               }
                 <button
+                  data-test-id="save-changes"
                   className="saveChanges clickable"
                   onClick={props.onSaveVisualisation}
                 >

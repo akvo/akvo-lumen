@@ -130,4 +130,3 @@ LayerMenuItem.propTypes = {
   onSetLayerVisible: PropTypes.func.isRequired,
 
 };
-

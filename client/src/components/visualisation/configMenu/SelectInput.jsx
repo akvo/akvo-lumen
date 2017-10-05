@@ -6,7 +6,9 @@ import SelectMenu from '../../common/SelectMenu';
 function SelectInput(props) {
   return (
     <div className={`inputGroup${props.disabled ? ' disabled' : ''}`}>
-      <label htmlFor={props.name}>
+      <label
+        htmlFor={props.name}
+        data-test-id={props.name}>
         {props.labelTextId ? <FormattedMessage id={props.labelTextId} /> : props.labelText}:
       </label>
       <SelectMenu

@@ -70,15 +70,20 @@ export default class LayerConfigMenu extends Component {
           <div
             className="dataTab"
           >
-            <div className="inputGroup">
-              <label htmlFor="xDatasetMenu">Source dataset:</label>
+            <div
+              className="inputGroup"
+              data-test-id="source-dataset">
+              <label
+                htmlFor="xDatasetMenu"
+                data-test-id="dataset-menu">Source dataset:</label>
               <SelectMenu
                 name="datasetMenu"
-                placeholder="Choose dataset..."
+                placeholder={PropTypes.array.isRequired}
                 value={layer.datasetId !== null ?
                 layer.datasetId.toString() : null}
                 options={this.props.datasetOptions}
                 onChange={datasetId => onChangeMapLayer(this.props.layerIndex, { datasetId })}
+                data-test-id="source-dataset"
               />
             </div>
             <ButtonRowInput
