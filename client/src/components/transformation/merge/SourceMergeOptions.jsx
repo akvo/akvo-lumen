@@ -189,7 +189,7 @@ class SourceMergeOptions extends Component {
     });
   }
 
-  handleSelectDirection(aggregationDirection) {
+  handleSelectAggregationDirection(aggregationDirection) {
     const { onChange } = this.props;
     const { dataset, mergeColumn, mergeColumns, aggregationColumn } = this.state;
 

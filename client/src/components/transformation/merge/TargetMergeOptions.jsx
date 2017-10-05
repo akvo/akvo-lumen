@@ -22,16 +22,16 @@ class TargetMergeOptions extends Component {
       .then((ds) => {
         // Preselect sensible defaults for Flow datasets
         const guessedMergeColumn = guessMergeColumn(ds);
-        this.setState({ loading: false, keyColumn: guessedMergeColumn });
+        this.setState({ loading: false, mergeColumn: guessedMergeColumn });
         onChange({ mergeColumn: getColumnName(guessedMergeColumn) });
       });
   }
 
-  handleSelectKeyColumn(column) {
+  handleSelectMergeColumn(column) {
     const { onChange } = this.props;
-    this.setState({ keyColumn: column });
+    this.setState({ mergeColumn: column });
     onChange({
-      keyColumn: column.get('columnName'),
+      mergeColumn: column.get('columnName'),
     });
   }
 
@@ -48,7 +48,7 @@ class TargetMergeOptions extends Component {
           placeholder="Select merge column"
           columns={dataset.get('columns')}
           value={mergeColumn}
-          onChange={column => this.handleSelectKeyColumn(column)}
+          onChange={column => this.handleSelectMergeColumn(column)}
         />
       </div>
     );

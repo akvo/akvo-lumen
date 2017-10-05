@@ -33,9 +33,9 @@ export default class MergeTransformation extends Component {
     const { transformation: { args: { source, target } } } = this.state;
     return (
       source.datasetId != null &&
-      source.keyColumn != null &&
+      source.mergeColumn != null &&
       source.mergeColumns.length > 0 &&
-      target.keyColumn != null
+      target.mergeColumn != null
     );
   }
 

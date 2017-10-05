@@ -21,6 +21,6 @@ export function guessMergeColumn(dataset) {
 }
 
 /* Returns the column name, or null if column is null */
-export function columnName(column) {
+export function getColumnName(column) {
   return column == null ? null : column.get('columnName');
 }
