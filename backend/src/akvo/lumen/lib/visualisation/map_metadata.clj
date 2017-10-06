@@ -64,15 +64,19 @@
     [[(Double/parseDouble south) (Double/parseDouble west)]
      [(Double/parseDouble north) (Double/parseDouble east)]]))
 
-(defn bounds [tenant-conn table-name geom-column where-clause]
-  (-> (jdbc/query tenant-conn
-                  (format "SELECT ST_Extent(%s) FROM %s WHERE %s" geom-column table-name where-clause))
-      first :st_extent parse-box))
+(defn bounds [tenant-conn table-name layer where-clause]
+  (let [geom (or (get layer "geom")
+                 (format "ST_SetSRID(ST_MakePoint(%s, %s), 4326)"
+                         (get layer "longitude")
+                         (get layer "latitude")))]
+    (-> (jdbc/query tenant-conn
+                    (format "SELECT ST_Extent(%s) FROM %s WHERE %s" geom table-name where-clause))
+        first :st_extent parse-box)))
 
 (defn build [tenant-conn table-name map-spec where-clause]
   (let [layer (get-in map-spec ["spec" "layers" 0])]
     {"boundingBox" (bounds tenant-conn table-name
-                           (get layer "geom")
+                           layer
                            where-clause)
      "pointColorMapping" (point-color-mapping tenant-conn table-name layer)
      "availableColors" palette}))

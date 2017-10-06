@@ -48,9 +48,15 @@
             table-name
             where-clause)))
 
+(defn get-geom-column [layer-spec]
+  (if-let [geom (get layer-spec "geom")]
+    geom
+    (let [{:strs [latitude longitude]} layer-spec]
+      (format "ST_SetSRID(ST_MakePoint(%s, %s), 4326) AS latlong" longitude latitude))))
+
 (defn build [table-name visualisation-spec where-clause metadata]
   (let [layer-spec (first (get-in visualisation-spec ["spec" "layers"]))
-        geom-column (get layer-spec "geom")
+        geom-column (get-geom-column layer-spec)
         popup-columns (mapv #(get % "column")
                             (get layer-spec "popup"))
         point-color-column (get layer-spec "pointColorColumn")]
@@ -60,7 +66,7 @@
                                                           (get layer-spec "pointColorColumn")
                                                           (get metadata "pointColorMapping")))
                            "cartocss_version" "2.0.0"
-                           "geom_column" geom-column
+                           "geom_column" (or (get layer-spec "geom") "latlong")
                            "interactivity" popup-columns
                            "sql" (sql table-name geom-column popup-columns point-color-column where-clause)
                            "srid" "4326"}}]}))
