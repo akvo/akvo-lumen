@@ -5,21 +5,20 @@
   (let [point-size (if (string? point-size)
                      (Long/parseLong point-size)
                      point-size)]
-    (get {1 3
-          2 4
-          3 7
-          4 10
-          5 13} point-size 8)))
+    ({1 3
+      2 4
+      3 7
+      4 10
+      5 13} point-size 8)))
 
 (defn point-color-css [point-color-column point-color-mapping]
-  ;; #s [ c2 = 'Vaasa' ] { marked-fill: }
   (when point-color-column
     (for [{:strs [value color]} point-color-mapping]
       (format "[ %s = %s ] { marker-fill: %s }"
               point-color-column
               (if (number? value)
                 value
-                (str "'" value "'"))
+                (format "'%s'" value))
               (pr-str color)))))
 
 (defn cartocss [point-size point-color-column point-color-mapping]
@@ -29,7 +28,8 @@
               marker-fill: #6ca429;
               marker-line-color: #ddd;
               marker-width: %s;
-            %s }"
+              %s
+           }"
           (marker-width point-size)
           (str/join " " (point-color-css point-color-column point-color-mapping))))
 
@@ -40,15 +40,15 @@
       (str/replace #" +" " ")))
 
 (defn sql [table-name geom-column popup-columns point-color-column where-clause]
-  (format "select %s from %s where %s"
-          (str/join ", " (if point-color-column
-                           (into popup-columns [geom-column point-color-column])
-                           (conj popup-columns geom-column)) )
-          table-name
-          where-clause))
+  (let [columns (distinct
+                 (cond-> (conj popup-columns geom-column)
+                   point-color-column (conj point-color-column)))]
+    (format "select %s from %s where %s"
+            (str/join ", " columns)
+            table-name
+            where-clause)))
 
 (defn build [table-name visualisation-spec where-clause metadata]
-  (clojure.pprint/pprint visualisation-spec)
   (let [layer-spec (first (get-in visualisation-spec ["spec" "layers"]))
         geom-column (get layer-spec "geom")
         popup-columns (mapv #(get % "column")
