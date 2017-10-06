@@ -9,6 +9,8 @@ import SidebarControls from './SidebarControls';
 import { columnTitle } from '../../../domain/dataset';
 import * as mergeTrainsformationUtils from '../../transformation/merge/utils';
 
+require('./TransformationLog.scss');
+
 function deriveTransformationDescription(transformation) {
   const newColumnTitle = transformation.getIn(['args', 'newColumnTitle']);
   const code = transformation.getIn(['args', 'code']);
@@ -117,15 +119,15 @@ function mergeDatasetsDescription(transformation, dependentDatasets) {
   const directionLabel = sourceAggregationDirection === 'ASC' ? directionLabels.asc : directionLabels.desc;
 
   return (
-    <div>
-      <span>Merged columns from <em>{sourceDatasetTitle}</em>:</span>
-      <ul>
+    <div className="mergedColumnsInfo">
+      <p>Merged columns from <em>{sourceDatasetTitle}</em>:</p>
+      <ul className="mergedColumnTitles">
         {mergedColumnsTitles.map((title, idx) => <li key={idx}>{title}</li>)}
       </ul>
       { sourceAggregationColumn &&
-        <span>
+        <p className="aggregationInfo">
           aggregated by <em>{directionLabel} {sourceAggregationColumn.get('title')}</em>
-        </span>
+        </p>
       }
     </div>
   );
@@ -282,7 +284,7 @@ export default function TransformationLog({
 
   return (
     <div
-      className="DataTableSidebar"
+      className="DataTableSidebar TransformationLog"
     >
       <SidebarHeader onClose={onClose}>
         <FormattedMessage id="transformation_log" />
