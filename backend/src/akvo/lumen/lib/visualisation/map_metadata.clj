@@ -28,6 +28,21 @@
 (defn next-color [used-colors]
   (some (fn [color] (if (contains? used-colors color) false color)) palette))
 
+(defn move-last
+  "Move the first element in coll last. Returns a vector"
+  [coll]
+  (if (empty? coll)
+    coll
+    (let [[first & rest] coll]
+      (conj (vec rest) first))))
+
+(defn sort-point-color-mapping
+  [point-color-mapping]
+  (let [sorted (sort-by #(get % "value") point-color-mapping)]
+    (if (nil? (-> sorted first (get "value")))
+      (move-last sorted)
+      sorted)))
+
 (defn point-color-mapping
   [tenant-conn table-name {:strs [pointColorMapping pointColorColumn]}]
   (when pointColorColumn
@@ -38,21 +53,22 @@
           color-map (reduce (fn [m {:strs [value color]}]
                               (assoc m value color))
                             {}
-                            pointColorMapping)]
-      (loop [result []
-             values distinct-values
-             used-colors used-colors]
-        (if (empty? values)
-          result
-          (let [value (first values)]
-            (if-some [color (get color-map value)]
-              (recur (conj result {"op" "equals" "value" value "color" color})
-                     (rest values)
-                     used-colors)
-              (let [color (next-color used-colors)]
-                (recur (conj result {"op" "equals" "value" value "color" color})
-                       (rest values)
-                       (conj used-colors color))))))))))
+                            pointColorMapping)
+          color-mapping (loop [result []
+                               values distinct-values
+                               used-colors used-colors]
+                          (if (empty? values)
+                            result
+                            (let [value (first values)]
+                              (if-some [color (get color-map value)]
+                                (recur (conj result {"op" "equals" "value" value "color" color})
+                                       (rest values)
+                                       used-colors)
+                                (let [color (next-color used-colors)]
+                                  (recur (conj result {"op" "equals" "value" value "color" color})
+                                         (rest values)
+                                         (conj used-colors color)))))))]
+      (sort-point-color-mapping color-mapping))))
 
 ;; "BOX(-0.127758 51.507351,24.938379 63.095089)"
 (defn parse-box [s]
