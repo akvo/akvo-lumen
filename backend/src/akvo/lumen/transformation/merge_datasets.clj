@@ -58,15 +58,15 @@
   {<merge-column-value> {<new-column-name> <value>}}"
   [conn table-name merge-columns column-names-translation source]
   (let [merge-column-name (get source "mergeColumn")
-        [columns & data] (jdbc/query conn (fetch-sql table-name source)
-                                     {:as-arrays? true :identifiers identity})
-        rows (map zipmap (repeat (map name columns)) data)]
+        rows (jdbc/query conn
+                         (fetch-sql table-name source)
+                         {:keywordize? false})]
     (reduce (fn [result row]
               (let [merge-column-value (get row merge-column-name)
-                    data-to-merge (as-> row r
-                                    (dissoc r merge-column-name)
-                                    (set/rename-keys r column-names-translation)
-                                    (to-sql-types r merge-columns))]
+                    data-to-merge (-> row
+                                      (dissoc merge-column-name)
+                                      (set/rename-keys column-names-translation)
+                                      (to-sql-types merge-columns))]
                 (assoc result merge-column-value data-to-merge)))
             {}
             rows)))
@@ -92,35 +92,50 @@
                     data-map
                     [(str target-merge-column "= ?") merge-value]))))
 
+(defn get-source-dataset [conn source]
+  (let [source-dataset-id (get source "datasetId")]
+    (if-let [source-dataset (latest-dataset-version-by-dataset-id conn {:dataset-id source-dataset-id})]
+      source-dataset
+      (throw (ex-info (format "Dataset %s does not exist" source-dataset-id)
+                      {:source source})))))
+
+(defn get-source-merge-columns [source source-dataset]
+  (let [column-names (set (get source "mergeColumns"))]
+    (filterv (fn [column]
+               (contains? column-names
+                          (get column "columnName")))
+             (:columns source-dataset))))
+
+(defn get-target-merge-columns [source-merge-columns column-names-translation]
+  (mapv #(-> %
+             (update "columnName" column-names-translation)
+             (assoc "sort" nil
+                    "direction" nil
+                    "key" false
+                    "hidden" false))
+        source-merge-columns))
+
 (defn apply-merge-operation
   [conn table-name columns op-spec]
   (let [source (get-in op-spec ["args" "source"])
         target (get-in op-spec ["args" "target"])
-        source-dataset-id (get source "datasetId")
-        source-dataset (if-let [source-dataset (latest-dataset-version-by-dataset-id conn {:dataset-id source-dataset-id})]
-                         source-dataset
-                         (throw (ex-info (format "Dataset %s does not exist" source-dataset-id)
-                                         {:spec op-spec})))
+        source-dataset (get-source-dataset conn source)
         source-table-name (:table-name source-dataset)
-        source-merge-column-names (get source "mergeColumns")
-        source-merge-columns (filterv (fn [column]
-                                        (contains? (set source-merge-column-names)
-                                                   (get column "columnName")))
-                                      (:columns source-dataset))
-        column-names-translation (merge-column-names-map columns source-merge-columns)
-        target-merge-columns (mapv #(-> %
-                                        (update "columnName" column-names-translation)
-                                        (assoc "sort" nil
-                                               "direction" nil
-                                               "key" false
-                                               "hidden" false))
-                                   source-merge-columns)
-        data (fetch-data conn source-table-name target-merge-columns column-names-translation source)]
+        source-merge-columns (get-source-merge-columns source
+                                                       source-dataset)
+        column-names-translation (merge-column-names-map columns
+                                                         source-merge-columns)
+        target-merge-columns (get-target-merge-columns source-merge-columns
+                                                       column-names-translation)
+        data (fetch-data conn
+                         source-table-name
+                         target-merge-columns
+                         column-names-translation
+                         source)]
     (add-columns conn table-name target-merge-columns)
     (insert-merged-data conn table-name target data)
     {:success? true
-     :execution-log [(format "Merged columns %s from %s into %s"
-                             source-merge-column-names
+     :execution-log [(format "Merged columns from %s into %s"
                              source-table-name
                              table-name)]
      :columns (into columns target-merge-columns)}))
