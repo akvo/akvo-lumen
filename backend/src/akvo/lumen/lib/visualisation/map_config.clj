@@ -1,8 +1,6 @@
 (ns akvo.lumen.lib.visualisation.map-config
   (:require [clojure.string :as str]))
 
-
-
 (defn marker-width [point-size]
   (let [point-size (if (string? point-size)
                      (Long/parseLong point-size)
@@ -52,7 +50,7 @@
 (defn build [table-name visualisation-spec where-clause metadata]
   (clojure.pprint/pprint visualisation-spec)
   (let [layer-spec (first (get-in visualisation-spec ["spec" "layers"]))
-        geom-column (get layer-spec "geomColumn")
+        geom-column (get layer-spec "geom")
         popup-columns (mapv #(get % "column")
                             (get layer-spec "popup"))
         point-color-column (get layer-spec "pointColorColumn")]

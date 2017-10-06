@@ -72,7 +72,7 @@
 (defn build [tenant-conn table-name map-spec where-clause]
   (let [layer (get-in map-spec ["spec" "layers" 0])]
     {"boundingBox" (bounds tenant-conn table-name
-                           (get layer "geomColumn")
+                           (get layer "geom")
                            where-clause)
      "pointColorMapping" (point-color-mapping tenant-conn table-name layer)
      "availableColors" palette}))
