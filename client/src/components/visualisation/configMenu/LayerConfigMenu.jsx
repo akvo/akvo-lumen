@@ -72,10 +72,12 @@ export default class LayerConfigMenu extends Component {
           >
             <div
               className="inputGroup"
-              data-test-id="source-dataset">
+              data-test-id="source-dataset"
+            >
               <label
                 htmlFor="xDatasetMenu"
-                data-test-id="dataset-menu">Source dataset:</label>
+                data-test-id="dataset-menu"
+              >Source dataset:</label>
               <SelectMenu
                 name="datasetMenu"
                 placeholder={PropTypes.array.isRequired}

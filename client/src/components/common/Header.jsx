@@ -17,7 +17,8 @@ function Header({ children, actions, router, className = '', backButtonTarget })
         <i
           className="fa fa-arrow-left"
           aria-hidden="true"
-          data-test-id="fa-arrow"/>
+          data-test-id="fa-arrow"
+        />
       </Link>
       <div className="content">
         {children}

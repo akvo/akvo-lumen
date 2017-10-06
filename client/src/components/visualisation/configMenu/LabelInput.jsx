@@ -6,8 +6,10 @@ function LabelInput(props) {
   const placeholder = props.placeholderId ?
     props.intl.formatMessage({ id: props.placeholderId }) : props.placeholder;
   return (
-    <div className="inputGroup"
-         data-test-id="input-group">
+    <div
+      className="inputGroup"
+      data-test-id="input-group"
+    >
       <label htmlFor={props.name}>{`${placeholder}:`}</label>
       <input
         className="textInput"

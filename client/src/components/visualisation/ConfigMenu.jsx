@@ -205,11 +205,13 @@ export default function ConfigMenu(props) {
                 />
                 <div
                   className="inputGroup"
-                  data-test-id="input-group">
+                  data-test-id="input-group"
+                >
                   <label
                     htmlFor="xDatasetMenu"
-                    data-test-id="dataset-menu">
-                  <FormattedMessage id="source_dataset" />:</label>
+                    data-test-id="dataset-menu"
+                  >
+                    <FormattedMessage id="source_dataset" />:</label>
                   <SelectMenu
                     name="xDatasetMenu"
                     placeholderId="choose_dataset"

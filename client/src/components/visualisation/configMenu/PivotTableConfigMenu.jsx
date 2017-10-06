@@ -73,7 +73,7 @@ export default class PivotTableConfigMenu extends Component {
       <div
         className="PivotTableConfigMenu"
         data-test-id="pivot-table-config"
-        >
+      >
         <hr />
         <Subtitle><FormattedMessage id="aggregation" /></Subtitle>
         <div>

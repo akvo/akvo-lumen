@@ -8,7 +8,8 @@ function SelectInput(props) {
     <div className={`inputGroup${props.disabled ? ' disabled' : ''}`}>
       <label
         htmlFor={props.name}
-        data-test-id={props.name}>
+        data-test-id={props.name}
+      >
         {props.labelTextId ? <FormattedMessage id={props.labelTextId} /> : props.labelText}:
       </label>
       <SelectMenu

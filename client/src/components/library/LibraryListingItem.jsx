@@ -157,6 +157,7 @@ export default class LibraryListingItem extends Component {
         onMouseLeave={() => this.setState({ contextMenuVisible: false })}
         key={getId(entity)}
         className={`LibraryListingItem ${getType(entity)} ${getStatus(entity)} ${getId(entity)}`}
+        data-test-name={getTitle(entity)}
         data-test-id={getId(entity)}
       >
         {isPending(entity) &&
