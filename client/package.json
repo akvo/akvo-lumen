@@ -42,7 +42,6 @@
     "node-sass": "^3.13.0",
     "postcss-loader": "^2.0.5",
     "prop-types": "^15.5.10",
-    "puppeteer": "^0.11.0",
     "raven-js": "^3.14.0",
     "react": "15.5.4",
     "react-addons-update": "15.5.2",
