@@ -41,8 +41,25 @@ export function fetchDataset(id) {
     dispatch(fetchDatasetRequest(id));
     return api.get(`/api/datasets/${id}`)
       .then(response => response.json())
-      .then(dataset => dispatch(fetchDatasetSuccess(Immutable.fromJS(dataset))))
+      .then((dataset) => {
+        const immutableDataset = Immutable.fromJS(dataset);
+        dispatch(fetchDatasetSuccess(immutableDataset));
+        return immutableDataset;
+      })
       .catch(error => dispatch(fetchDatasetFailure(error, id)));
+  };
+}
+
+export function ensureDatasetFullyLoaded(id) {
+  return (dispatch, getState) => {
+    const { datasets } = getState().library;
+    if (
+      datasets == null ||
+      datasets[id] == null ||
+      datasets[id].get('columns') == null) {
+      return dispatch(fetchDataset(id));
+    }
+    return Promise.resolve(datasets[id]);
   };
 }
 

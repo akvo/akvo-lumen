@@ -42,26 +42,20 @@ class DatasetControls extends Component {
                     label: <FormattedMessage id="bulk_row_editor" />,
                     value: 'bulk-row-editor',
                     customClass: 'notImplemented',
-                  },
-                  {
+                  }, {
                     label: <FormattedMessage id="bulk_column_editor" />,
                     value: 'bulk-column-editor',
                     customClass: 'notImplemented',
-                  },
-                  {
+                  }, {
                     label: <FormattedMessage id="combine_columns" />,
                     value: 'combineColumns',
-                  },
-                  {
+                  }, {
                     label: <FormattedMessage id="derive_column" />,
                     value: 'deriveColumn',
-                  },
-                  {
+                  }, {
                     label: <FormattedMessage id="merge_datasets" />,
-                    value: 'merge-datasets',
-                    customClass: 'notImplemented',
-                  },
-                  {
+                    value: 'mergeDatasets',
+                  }, {
                     label: <FormattedMessage id="generate_geopoints" />,
                     value: 'generateGeopoints',
                     customClass: 'notImplemented',

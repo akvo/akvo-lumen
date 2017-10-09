@@ -3,6 +3,7 @@
   (:require [akvo.lumen.endpoint.job-execution :as job-execution]
             [akvo.lumen.import :as import]
             [akvo.lumen.lib :as lib]
+            [akvo.lumen.update :as update]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
             [hugsql.core :as hugsql]))
@@ -63,7 +64,7 @@
                                                            {:dataset-id dataset-id})]
     (if-not (= (get-in data-source-spec ["source" "kind"])
                "DATA_FILE")
-      (import/update-dataset tenant-conn
+      (update/update-dataset tenant-conn
                              config
                              dataset-id
                              data-source-id

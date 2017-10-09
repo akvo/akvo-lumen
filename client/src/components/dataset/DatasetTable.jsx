@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Table, Column, Cell } from 'fixed-data-table-2';
 import moment from 'moment';
+import { withRouter } from 'react-router';
 import ColumnHeader from './ColumnHeader';
 import DataTableSidebar from './DataTableSidebar';
 import DatasetControls from './DatasetControls';
@@ -19,7 +20,7 @@ function formatCellValue(type, value) {
   }
 }
 
-export default class DatasetTable extends Component {
+class DatasetTable extends Component {
 
   constructor() {
     super();
@@ -188,6 +189,12 @@ export default class DatasetTable extends Component {
     }
   }
 
+  // Redirect to merge transform page
+  handleMergeDataset() {
+    const { location, router } = this.props;
+    router.push(`${location.pathname}/transformation/merge`);
+  }
+
   handleDataTypeContextMenuClicked({ column, dataTypeOptions, newColumnType }) {
     this.setState({ activeDataTypeContextMenu: null });
     if (newColumnType !== column.get('type')) {
@@ -342,6 +349,8 @@ export default class DatasetTable extends Component {
               this.handleToggleDeriveColumnSidebar();
             } else if (menuItem === 'generateGeopoints') {
               this.handleToggleGeoColumnSidebar();
+            } else if (menuItem === 'mergeDatasets') {
+              this.handleMergeDataset();
             } else {
               throw new Error(`Not yet implemented: ${menuItem}`);
             }
@@ -404,4 +413,8 @@ DatasetTable.propTypes = {
   pendingTransformations: PropTypes.object.isRequired,
   onTransform: PropTypes.func.isRequired,
   onUndoTransformation: PropTypes.func.isRequired,
+  location: PropTypes.object.isRequired,
+  router: PropTypes.object.isRequired,
 };
+
+export default withRouter(DatasetTable);
