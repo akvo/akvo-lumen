@@ -12,6 +12,7 @@
   :dataset #var akvo.lumen.endpoint.dataset/endpoint
   :env #var akvo.lumen.endpoint.env/endpoint
   :files #var akvo.lumen.endpoint.files/endpoint
+  :healthz #var akvo.lumen.endpoint.healthz/endpoint
   :invite #var akvo.lumen.endpoint.invite/endpoint
   :invite-verify #var akvo.lumen.endpoint.invite/verify-endpoint
   :job-execution #var akvo.lumen.endpoint.job-execution/endpoint
@@ -26,8 +27,8 @@
   :visualisation #var akvo.lumen.endpoint.visualisation/endpoint}
  :dependencies
  {:http [:app]
-  :app [:aggregation :collection :dashboard :dataset :env :emailer :files :invite
-        :invite-verify :job-execution :library :public :resource :root :share
+  :app [:aggregation :collection :dashboard :dataset :env :emailer :files :healthz
+        :invite :invite-verify :job-execution :library :public :resource :root :share
         :tier :transformation :user :visualisation]
   :tenant-manager [:config :db]
   :aggregation [:tenant-manager]
@@ -65,7 +66,8 @@
      :wrap-sentry #var raven-clj.ring/wrap-sentry}
     :applied
     [:not-found :json-response :ring-defaults :json-body
-     :wrap-auth :wrap-jwt :wrap-label-tenant :wrap-sentry :hide-errors]
+     :wrap-auth :wrap-jwt :wrap-label-tenant :wrap-sentry
+     :hide-errors]
     :arguments
     {:not-found "Resource Not Found"
      :hide-errors "Internal Server Error"

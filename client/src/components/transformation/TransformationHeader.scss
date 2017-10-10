@@ -1,0 +1,25 @@
+@import "../../styles/modules/importAll";
+
+.TransformationHeader {
+  .title {
+    display: flex;
+    align-items: center;
+    height: 100%;
+  }
+
+  .transformButton {
+      border: 0.1rem solid $lightBlueGrey;
+
+      @include border-radius(3px);
+
+      padding: 0.5rem;
+      margin: 0.25rem 0.5rem;
+      background-color: $lumenGreen;
+      color: white;
+  }
+
+  .transformButton:disabled {
+    background-color: white;
+    color: $black;
+  }
+}
