@@ -6,7 +6,7 @@ function options(datasets) {
   return Object.keys(datasets).map(datasetId => ({
     label: datasets[datasetId].get('name'),
     value: datasetId,
-  }));
+  })).slice().sort((a, b) => a.label.localeCompare(b.label));
 }
 
 export default function SelectDataset({ datasets, value, onChange, placeholder = 'Select dataset' }) {
