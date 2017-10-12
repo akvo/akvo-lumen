@@ -41,7 +41,7 @@
   :invite-verify [:keycloak :tenant-manager :config]
   :job-execution [:tenant-manager]
   :library [:tenant-manager]
-  :public [:tenant-manager]
+  :public [:tenant-manager :config]
   :resource [:tenant-manager]
   :root [:tenant-manager]
   :share [:tenant-manager :config]

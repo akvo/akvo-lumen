@@ -4,7 +4,9 @@
             [akvo.lumen.lib.dashboard :as dashboard]
             [akvo.lumen.lib.dataset :as dataset]
             [akvo.lumen.lib.visualisation :as visualisation]
+            [akvo.lumen.lib.visualisation.maps :as maps]
             [cheshire.core :as json]
+            [clojure.set :as set]
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/public.sql")
@@ -12,11 +14,11 @@
 (defn get-share [tenant-conn id]
   (public-by-id tenant-conn {:id id}))
 
-(defmulti visualisation (fn [_ visualisation]
+(defmulti visualisation (fn [_ visualisation config]
                           (:visualisationType visualisation)))
 
 (defmethod visualisation "pivot table"
-  [tenant-conn visualisation]
+  [tenant-conn visualisation config]
   (let [dataset-id (:datasetId visualisation)
         [tag query-result] (aggregation/query tenant-conn
                                               dataset-id
@@ -26,7 +28,7 @@
       {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}})))
 
 (defmethod visualisation "pie"
-  [tenant-conn visualisation]
+  [tenant-conn visualisation config]
   (let [dataset-id (:datasetId visualisation)
         [tag query-result] (aggregation/query tenant-conn
                                               dataset-id
@@ -36,7 +38,7 @@
       {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}})))
 
 (defmethod visualisation "donut"
-  [tenant-conn visualisation]
+  [tenant-conn visualisation config]
   (let [dataset-id (:datasetId visualisation)
         [tag query-result] (aggregation/query tenant-conn
                                               dataset-id
@@ -44,6 +46,15 @@
                                               (:spec visualisation))]
     (when (= tag ::lib/ok)
       {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}})))
+
+(defmethod visualisation "map"
+  [tenant-conn visualisation {:keys [windshaft-url]}]
+  (let [dataset-id (:datasetId visualisation)
+        [tag map-data] (maps/create tenant-conn windshaft-url (set/rename-keys visualisation {:datasetId "datasetId" :spec "spec"}))
+        [tag dataset] (dataset/fetch tenant-conn dataset-id)]
+    (when (= tag ::lib/ok)
+      {"datasets" {dataset-id (dissoc dataset :rows)}
+       "visualisations" {(:id visualisation) (merge visualisation map-data)}})))
 
 (defmethod visualisation :default
   [tenant-conn visualisation]
@@ -53,12 +64,12 @@
       {"datasets" {dataset-id dataset}
        "visualisations" {(:id visualisation) visualisation}})))
 
-(defn visualisation-response-data [tenant-conn id]
+(defn visualisation-response-data [tenant-conn id config]
   (let [[tag vis] (visualisation/fetch tenant-conn id)]
     (when (= tag ::lib/ok)
-      (visualisation tenant-conn vis))))
+      (visualisation tenant-conn vis config))))
 
-(defn dashboard-response-data [tenant-conn id]
+(defn dashboard-response-data [tenant-conn id config]
   (let [[tag dashboard] (dashboard/fetch tenant-conn id)]
     (when (= tag ::lib/ok)
       (let [deps (->> dashboard
@@ -66,20 +77,20 @@
                       vals
                       (filter #(= "visualisation" (get % "type")))
                       (map #(get % "id"))
-                      (map #(visualisation-response-data tenant-conn %))
+                      (map #(visualisation-response-data tenant-conn % config))
                       (apply merge-with merge))]
         (assoc deps "dashboards" {id dashboard})))))
 
-(defn response-data [tenant-conn share]
+(defn response-data [tenant-conn share config]
   (if-let [dashboard-id (:dashboard-id share)]
-    (assoc (dashboard-response-data tenant-conn dashboard-id)
+    (assoc (dashboard-response-data tenant-conn dashboard-id config)
            "dashboardId" dashboard-id)
     (let [visualisation-id (:visualisation-id share)]
-      (assoc (visualisation-response-data tenant-conn visualisation-id)
+      (assoc (visualisation-response-data tenant-conn visualisation-id config)
              "visualisationId" visualisation-id))))
 
 (defn share
-  [tenant-conn id]
+  [tenant-conn config id]
   (if-let [share (get-share tenant-conn id)]
-    (lib/ok (response-data tenant-conn share))
+    (lib/ok (response-data tenant-conn share config))
     (lib/not-found {"shareId" id})))

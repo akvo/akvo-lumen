@@ -4,5 +4,5 @@
 
 (defn share
   "Return public share with id."
-  [tenant-conn id]
-  (impl/share tenant-conn id))
+  [tenant-conn config id]
+  (impl/share tenant-conn config id))
