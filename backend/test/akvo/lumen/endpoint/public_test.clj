@@ -39,7 +39,7 @@
           dashboard-share (variant/value (share/fetch *tenant-conn*
                                                       {"dashboardId" dashboard-id}))
           share           (public-impl/get-share *tenant-conn* (:id dashboard-share))
-          share-data      (public-impl/response-data *tenant-conn* share)]
+          share-data      (public-impl/response-data *tenant-conn* share {})]
       (is (every? #(contains? share-data %)
                   ["dashboardId" "dashboards" "visualisations" "datasets"]))
       (is (= 1
