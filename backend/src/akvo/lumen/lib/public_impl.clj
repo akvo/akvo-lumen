@@ -57,7 +57,7 @@
        "visualisations" {(:id visualisation) (merge visualisation map-data)}})))
 
 (defmethod visualisation :default
-  [tenant-conn visualisation]
+  [tenant-conn visualisation config]
   (let [dataset-id (:datasetId visualisation)
         [tag dataset] (dataset/fetch tenant-conn dataset-id)]
     (when (= tag ::lib/ok)
