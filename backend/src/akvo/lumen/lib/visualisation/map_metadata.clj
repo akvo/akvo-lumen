@@ -89,10 +89,9 @@
                     (format "SELECT ST_Extent(%s) FROM %s WHERE %s" geom table-name where-clause))
         first :st_extent parse-box)))
 
-(defn build [tenant-conn table-name map-spec where-clause]
-  (let [layer (get-in map-spec ["spec" "layers" 0])]
-    {"boundingBox" (bounds tenant-conn table-name
-                           layer
-                           where-clause)
-     "pointColorMapping" (point-color-mapping tenant-conn table-name layer)
-     "availableColors" palette}))
+(defn build [tenant-conn table-name layer where-clause]
+  {"boundingBox" (bounds tenant-conn table-name
+                         layer
+                         where-clause)
+   "pointColorMapping" (point-color-mapping tenant-conn table-name layer)
+   "availableColors" palette})

@@ -50,9 +50,11 @@
 (defmethod visualisation "map"
   [tenant-conn visualisation {:keys [windshaft-url]}]
   (let [dataset-id (:datasetId visualisation)
-        [tag map-data] (maps/create tenant-conn windshaft-url (set/rename-keys visualisation {:datasetId "datasetId" :spec "spec"}))
-        [tag dataset] (dataset/fetch tenant-conn dataset-id)]
-    (when (= tag ::lib/ok)
+        layer (get-in visualisation ["spec" "layers" 0])
+        [map-data-tag map-data] (maps/create tenant-conn windshaft-url dataset-id layer)
+        [dataset-tag dataset] (dataset/fetch tenant-conn dataset-id)]
+    (when (and (= map-data-tag ::lib/ok)
+               (= dataset-tag ::lib/ok))
       {"datasets" {dataset-id (dissoc dataset :rows)}
        "visualisations" {(:id visualisation) (merge visualisation map-data)}})))
 

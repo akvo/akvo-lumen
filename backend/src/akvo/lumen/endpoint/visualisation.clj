@@ -16,8 +16,9 @@
         (visualisation/create tenant-conn body jwt-claims))
 
       (context "/maps" _
-        (POST "/" request
-          (maps/create tenant-conn (:windshaft-url config) (:body request))))
+        (POST "/" {{:strs [datasetId spec]} :body}
+          (let [layer (get-in spec ["layers" 0])]
+            (maps/create tenant-conn (:windshaft-url config) datasetId layer))))
 
       (context "/:id" [id]
 

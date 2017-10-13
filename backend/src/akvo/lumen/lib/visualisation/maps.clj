@@ -26,30 +26,28 @@
     {:db-name db-name
      :headers (headers db-uri)}))
 
+(defn do-create [tenant-conn windshaft-url dataset-id layer]
+  (let [{:keys [table-name columns]} (dataset-by-id tenant-conn {:id dataset-id})
+        where-clause (filter/sql-str columns (get layer "filters"))
+        metadata (map-metadata/build tenant-conn table-name layer where-clause)
+        {:keys [db-name headers]} (connection-details tenant-conn)
+        url (format "%s/%s/layergroup" windshaft-url db-name)
+        map-config (map-config/build table-name layer where-clause metadata)
+        layer-group-id (-> (client/post url {:body (json/encode map-config)
+                                             :headers headers
+                                             :content-type :json})
+                           :body json/decode (get "layergroupid"))]
+    (lib/ok {"layerGroupId" layer-group-id
+             "metadata" metadata
+             "tenantDB" db-name})))
+
 (defn create
-  "Takes a tenant connection, a windshaft url and a visualisation spec. Will get
-  a layergroupid from Windshaft and compose a response with the db-name attached
-  under the key tenantDB."
-  [tenant-conn windshaft-url {:strs [datasetId] :as map-spec}]
-  (if (nil? datasetId)
+  [tenant-conn windshaft-url dataset-id layer]
+  (if (nil? dataset-id)
     (lib/bad-request {"reason" "No datasetID"})
-    (let [filters (get-in map-spec ["spec" "layers" 0 "filters"])
-          {:keys [db-name headers]} (connection-details tenant-conn)
-          url (format "%s/%s/layergroup" windshaft-url db-name)
-          {:keys [table-name columns]} (dataset-by-id tenant-conn {:id datasetId})
-          where-clause (filter/sql-str columns filters)
-          metadata (map-metadata/build tenant-conn table-name map-spec where-clause)
-          config (map-config/build table-name map-spec where-clause metadata)
-          windshaft-resp (client/post url {:body (json/encode config)
-                                           :headers headers
-                                           :content-type :json})
-          layer-group-id (-> windshaft-resp
-                             :body
-                             json/decode
-                             (get "layergroupid"))]
-      (lib/ok {"layerGroupId" layer-group-id
-               "metadata" metadata
-               "tenantDB" db-name}))))
+    (do-create tenant-conn windshaft-url dataset-id layer)))
+
+
 
 (comment
   ;; Example map spec
