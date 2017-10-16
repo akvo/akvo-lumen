@@ -41,11 +41,32 @@
              "metadata" metadata
              "tenantDB" db-name})))
 
+(defn invalid-location-spec? [layer]
+  false)
+
+(defn conform-create-args [dataset-id layer]
+  (clojure.pprint/pprint layer)
+  (cond
+    (nil? dataset-id)
+    (throw (ex-info "No datasetID"
+                    {"reason" "No datasetID"}))
+    (nil? layer)
+    (throw (ex-info "No layer"
+                    {"reason" "No layer"}))
+    (invalid-location-spec? layer)
+    (throw (ex-info "No geom"
+                    {"reason" "No geom"}))
+    :else [dataset-id layer]))
+
+
 (defn create
   [tenant-conn windshaft-url dataset-id layer]
-  (if (nil? dataset-id)
-    (lib/bad-request {"reason" "No datasetID"})
-    (do-create tenant-conn windshaft-url dataset-id layer)))
+  (try
+    (let [[dataset-id layer] (conform-create-args dataset-id layer)]
+      (do-create tenant-conn windshaft-url dataset-id layer))
+    (catch Exception e
+      (lib/bad-request (ex-data e)))))
+
 
 
 
