@@ -18,9 +18,9 @@
           database (env :pg-database)
           user (env :pg-user)
           password (env :pg-password)}}]
-   (format "jdbc:postgresql://%s/%s?ssl=true&user=%s%s%s"
+   (format "jdbc:postgresql://%s/%s?ssl=true&user=%s%s"
            host database user
-           (if (or (= host "localhost") (= host "postgres") )
+           (if (or (= host "localhost") (= host "postgres"))
              ""
              (format "&password=%s" password)))))
 
