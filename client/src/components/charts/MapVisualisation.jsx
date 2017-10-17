@@ -289,18 +289,19 @@ export default class MapVisualisation extends Component {
       }
     }
 
+    const newSpec = nextProps.visualisation.spec.layers[0];
+    const oldSpec = this.storedSpec;
+    const filtersChanged = !isEqual(newSpec.filters, oldSpec.filters);
+
     // Add or update the windshaft tile layer if necessary
     if (tenantDB && layerGroupId) {
       if (!this.dataLayer) {
         this.dataLayer = L.tileLayer(`${baseURL}/${layerGroupId}/{z}/{x}/{y}.png`);
         this.dataLayer.addTo(map);
       } else {
-        const newSpec = nextProps.visualisation.spec.layers[0];
-        const oldSpec = this.storedSpec;
-
         const needToUpdate = Boolean(
           newSpec.datasetId !== oldSpec.datasetId ||
-          !isEqual(newSpec.filters, oldSpec.filters) ||
+          filtersChanged ||
           newSpec.geom !== newSpec.geom ||
           newSpec.pointColorColumn !== oldSpec.pointColorColumn ||
           !isEqual(newSpec.pointColorMapping, oldSpec.pointColorMapping) ||
@@ -317,36 +318,44 @@ export default class MapVisualisation extends Component {
         }
       }
     }
-    const popup = nextProps.visualisation.spec.layers[0].popup;
-    const havePopupData = popup && popup.length > 0;
-    const needToAddOrUpdate = havePopupData && (!this.popup || !isEqual(popup, this.popup));
-    const haveUtfGrid = Boolean(this.utfGrid);
-    const windshaftAvailable = tenantDB && layerGroupId;
 
-    if (needToAddOrUpdate && windshaftAvailable) {
+    const popup = newSpec.popup;
+    const havePopupData = popup && popup.length > 0;
+    const haveUtfGrid = Boolean(this.utfGrid);
+    const needToRemovePopup = this.utfGrid && !havePopupData;
+    const popupChanged = (!this.popup || !isEqual(popup, this.popup));
+    const needToAddOrUpdate =
+      havePopupData && (popupChanged || filtersChanged);
+    const windshaftAvailable = tenantDB && layerGroupId;
+    const canUpdate = windshaftAvailable || needToRemovePopup;
+
+    if ((needToAddOrUpdate || needToRemovePopup) && canUpdate) {
       if (haveUtfGrid) {
         // Remove the existing grid
-
         this.map.closePopup();
         map.removeLayer(this.utfGrid);
+        this.utfGrid = null;
       }
 
-      this.popup = cloneDeep(popup);
-      // eslint-disable-next-line new-cap
-      this.utfGrid = new L.utfGrid(`${baseURL}/${layerGroupId}/0/{z}/{x}/{y}.grid.json?callback={cb}`, {
-        resolution: 4,
-      });
-      // TODO: This method of rendering strings as html is UNSAFE. Use React for popup el?
-      this.utfGrid.on('click', (e) => {
-        if (e.data) {
-          L.popup()
-          .setLatLng(e.latlng)
-          .setContent(`<ul>${Object.keys(e.data).map(key =>
-            `<li>${getColumnTitle(layerDataset, key)} - ${e.data[key]}</li>`).join('')}</ul>`)
-          .openOn(map);
-        }
-      });
-      map.addLayer(this.utfGrid);
+      if (havePopupData) {
+        this.popup = cloneDeep(popup);
+        // eslint-disable-next-line new-cap
+        this.utfGrid = new L.utfGrid(`${baseURL}/${layerGroupId}/0/{z}/{x}/{y}.grid.json?callback={cb}`, {
+          resolution: 4,
+        });
+
+        // TODO: This method of rendering strings as html is UNSAFE. Use React for popup el?
+        this.utfGrid.on('click', (e) => {
+          if (e.data) {
+            L.popup()
+            .setLatLng(e.latlng)
+            .setContent(`<ul>${Object.keys(e.data).map(key =>
+              `<li>${getColumnTitle(layerDataset, key)} - ${e.data[key]}</li>`).join('')}</ul>`)
+            .openOn(map);
+          }
+        });
+        map.addLayer(this.utfGrid);
+      }
     }
   }
 
