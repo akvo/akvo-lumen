@@ -20,6 +20,11 @@ cat <<EOF >> deployment.yaml
         image: eu.gcr.io/akvo-lumen/lumen-maps:\${BUILD_HASH}
         ports:
         - containerPort: 4000
+        resources:
+          requests:
+            cpu: "50m"
+          limits:
+            cpu: "1000m"
         env:
         - name: LUMEN_ENCRYPTION_KEY
           valueFrom:
