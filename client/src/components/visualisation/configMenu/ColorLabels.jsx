@@ -86,6 +86,7 @@ class ColorLabelItem extends Component {
             className="colorPickerContainer"
           >
             <GithubPicker
+              disabled={this.props.disabled}
               color={color}
               colors={palette}
               onChangeComplete={evt => this.handleOnChangeColor(evt.hex)}
@@ -107,4 +108,5 @@ ColorLabelItem.propTypes = {
   color: PropTypes.string.isRequired,
   value: PropTypes.any,
   onChangeColor: PropTypes.func.isRequired,
+  disabled: PropTypes.bool,
 };

@@ -5,6 +5,7 @@ import leaflet from 'leaflet';
 import { isEqual, cloneDeep } from 'lodash';
 import leafletUtfGrid from '../../vendor/leaflet.utfgrid';
 import * as chart from '../../utilities/chart';
+import Spinner from '../common/LoadingSpinner';
 
 require('../../../node_modules/leaflet/dist/leaflet.css');
 require('./MapVisualisation.scss');
@@ -449,6 +450,10 @@ export default class MapVisualisation extends Component {
               title={visualisation.spec.layers[0].legend.title}
               pointColorMapping={visualisation.metadata.pointColorMapping}
             />
+          }
+          {
+            visualisation.awaitingResponse &&
+            <Spinner />
           }
         </div>
       </div>

@@ -59,7 +59,7 @@ export default class LayerConfigMenu extends Component {
   }
 
   getTabContent(columnOptions) {
-    const { layer, layerIndex, onChangeMapLayer } = this.props;
+    const { layer, layerIndex, onChangeMapLayer, disabled } = this.props;
     let tabContent;
 
     switch (this.state.activeTab) {
@@ -71,6 +71,7 @@ export default class LayerConfigMenu extends Component {
             <div className="inputGroup">
               <label htmlFor="xDatasetMenu">Source dataset:</label>
               <SelectMenu
+                disabled={disabled}
                 name="datasetMenu"
                 placeholder="Choose dataset..."
                 value={layer.datasetId !== null ?
@@ -95,7 +96,7 @@ export default class LayerConfigMenu extends Component {
             />
             <div className="inputGroup">
               <SelectInput
-                disabled={layer.datasetId === null}
+                disabled={layer.datasetId === null || disabled}
                 placeholder="Select a latitude column"
                 labelText="Latitude column"
                 choice={layer.latitude !== null ? layer.latitude.toString() : null}
@@ -108,7 +109,7 @@ export default class LayerConfigMenu extends Component {
             </div>
             <div className="inputGroup">
               <SelectInput
-                disabled={layer.datasetId === null}
+                disabled={layer.datasetId === null || disabled}
                 placeholder="Select a longitude column"
                 labelText="Longitude column"
                 choice={layer.longitude !== null ? layer.longitude.toString() : null}
@@ -122,7 +123,7 @@ export default class LayerConfigMenu extends Component {
             <hr />
             <div className="inputGroup">
               <SelectInput
-                disabled={layer.datasetId === null}
+                disabled={layer.datasetId === null || disabled}
                 placeholder="Select a geom column"
                 labelText="Geom column"
                 choice={layer.geom !== null ? layer.geom.toString() : null}
@@ -135,7 +136,7 @@ export default class LayerConfigMenu extends Component {
             </div>
             <div className="inputGroup">
               <SelectInput
-                disabled={layer.latitude == null || layer.longitude == null}
+                disabled={layer.latitude == null || layer.longitude == null || disabled}
                 placeholder="Select a data column to color points by"
                 labelText="Color coding column"
                 choice={layer.pointColorColumn !== null ?
@@ -163,6 +164,7 @@ export default class LayerConfigMenu extends Component {
             className="legendTab"
           >
             <ToggleInput
+              disabled={disabled}
               className="inputGroup"
               checked={layer.legend.visible}
               label="Legend"
@@ -179,7 +181,7 @@ export default class LayerConfigMenu extends Component {
                 value: item,
               }))}
               label="Position"
-              disabled={false}
+              disabled={disabled}
               selected={layer.legend.position}
               onChange={(option) => {
                 const legend = Object.assign({}, layer.legend);
@@ -230,6 +232,7 @@ export default class LayerConfigMenu extends Component {
                       checked={this.props.layer.popup.findIndex(entry =>
                         entry.column === option.value) > -1}
                       onChange={() => this.handlePopupChange(option.value)}
+                      disabled={disabled}
                     />
                   </span>
                   <span
@@ -280,7 +283,7 @@ export default class LayerConfigMenu extends Component {
                 label: item,
                 value: item,
               }))}
-              disabled={false}
+              disabled={disabled}
               selected={layer.pointSize ? layer.pointSize.toString() : null}
               label="Size"
               onChange={option => onChangeMapLayer(layerIndex, { pointSize: option })}
@@ -306,6 +309,7 @@ export default class LayerConfigMenu extends Component {
                   Colors ({columnOptions.find(obj => obj.value === layer.pointColorColumn).title})
                 </label>
                 <ColorLabels
+                  disabled={disabled}
                   id="colors"
                   pointColorMapping={layer.pointColorMapping}
                   onChangeColor={(value, newColor) => this.handleChangeLabelColor(value, newColor)}
@@ -414,4 +418,5 @@ LayerConfigMenu.propTypes = {
   onDeselectLayer: PropTypes.func.isRequired,
   layerIndex: PropTypes.number.isRequired,
   onSave: PropTypes.func.isRequired,
+  disabled: PropTypes.bool,
 };

@@ -181,4 +181,9 @@
             font-style: italic;
         }
     }
+    .LoadingSpinner {
+        z-index: 999;
+        position: absolute;
+        background: rgba(0, 0, 0, 0.1);
+    }
 }

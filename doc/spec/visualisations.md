@@ -5,6 +5,7 @@
 ```
 {
   version: 1,
+  awaitingResponse: false, // True when requested update from backend/windshaft but not received yet
   "filters": [],
   "showLegend": true,
   "latitude": "c1",
