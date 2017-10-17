@@ -6,6 +6,7 @@
             [akvo.lumen.util :as util]
             [cheshire.core :as json]
             [clj-http.client :as client]
+            [clojure.core.match :refer [match]]
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
@@ -41,8 +42,20 @@
              "metadata" metadata
              "tenantDB" db-name})))
 
-(defn invalid-location-spec? [layer]
-  false)
+(defn valid-location?
+  "Validates that we have either geom or latitude & longitude keys with values
+  that satisfies the provided predicate p."
+  [layer p]
+  (match [(select-keys layer ["geom" "latitude" "longitude"])]
+         [({"geom" geom}
+           :only ["geom"])] (p geom)
+
+         [({"latitude" latitude
+            "longitude" longitude}
+           :only ["latitude" "longitude"])] (and (p latitude)
+                                                 (p longitude)
+                                                 (not= latitude longitude))
+         :else false))
 
 (defn conform-create-args [dataset-id layer]
   (clojure.pprint/pprint layer)
@@ -50,14 +63,12 @@
     (nil? dataset-id)
     (throw (ex-info "No datasetID"
                     {"reason" "No datasetID"}))
-    (nil? layer)
-    (throw (ex-info "No layer"
-                    {"reason" "No layer"}))
-    (invalid-location-spec? layer)
-    (throw (ex-info "No geom"
-                    {"reason" "No geom"}))
-    :else [dataset-id layer]))
 
+    (not (valid-location? layer string?))
+    (throw (ex-info "Location spec not valid"
+                    {"reason" "Location spec not valid"}))
+
+    :else [dataset-id layer]))
 
 (defn create
   [tenant-conn windshaft-url dataset-id layer]
@@ -66,8 +77,6 @@
       (do-create tenant-conn windshaft-url dataset-id layer))
     (catch Exception e
       (lib/bad-request (ex-data e)))))
-
-
 
 
 (comment
