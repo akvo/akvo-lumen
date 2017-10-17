@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 import { Map, CircleMarker, Popup, TileLayer } from 'react-leaflet';
 import leaflet from 'leaflet';
@@ -214,6 +215,24 @@ DataLayer.propTypes = {
   displayLayer: PropTypes.object.isRequired,
 };
 
+const PopupContent = ({ data, layerDataset }) => (
+  <ul className="PopupContent">
+    { Object.keys(data).sort().map(key =>
+      <li
+        key={key}
+      >
+        <h4>{getColumnTitle(layerDataset, key)}</h4>
+        {data[key]}
+      </li>
+      )}
+  </ul>
+);
+
+PopupContent.propTypes = {
+  data: PropTypes.object.isRequired,
+  layerDataset: PropTypes.object.isRequired,
+};
+
 export default class MapVisualisation extends Component {
 
   constructor() {
@@ -344,14 +363,20 @@ export default class MapVisualisation extends Component {
           resolution: 4,
         });
 
-        // TODO: This method of rendering strings as html is UNSAFE. Use React for popup el?
         this.utfGrid.on('click', (e) => {
           if (e.data) {
-            L.popup()
+            this.popupElement = L.popup()
             .setLatLng(e.latlng)
-            .setContent(`<ul>${Object.keys(e.data).map(key =>
-              `<li>${getColumnTitle(layerDataset, key)} - ${e.data[key]}</li>`).join('')}</ul>`)
             .openOn(map);
+
+            // Although we use leaflet to create the popup, we can still render the contents
+            // with react-dom
+            render(
+              <PopupContent data={e.data} layerDataset={layerDataset} />,
+              // eslint-disable-next-line no-underscore-dangle
+              this.popupElement._contentNode
+            );
+            this.popupElement.update();
           }
         });
         map.addLayer(this.utfGrid);
