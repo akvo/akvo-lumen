@@ -6,7 +6,7 @@ machine:
   environment:
     PROJECT_NAME: akvo-lumen
     PROD_CLUSTER_NAME: lumen
-    DEV_CLUSTER_NAME: dev-cluster
+    DEV_CLUSTER_NAME: test
     CLOUDSDK_COMPUTE_ZONE: europe-west1-d
     DEBIAN_FRONTEND: noninteractive
     LEIN_FAST_TRAMPOLINE: true

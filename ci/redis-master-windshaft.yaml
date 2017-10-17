@@ -16,8 +16,10 @@ spec:
         image: redis:3.2.9
         resources:
           requests:
-            cpu: 100m
+            cpu: "50m"
             memory: 100Mi
+          limits:
+            cpu: "1000m"
         ports:
         - containerPort: 6379
 ---
