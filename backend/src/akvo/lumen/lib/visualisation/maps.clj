@@ -43,11 +43,34 @@
              "metadata" metadata
              "tenantDB" db-name})))
 
-
-
+(defn- check-columns
+  "Make sure supplied columns are distinct and satisfy predicate."
+  [p & columns]
+  (and (= (count columns)
+          (count (into #{} columns)))
+       (every? p columns)))
 
 (defn valid-location? [layer p]
-  true)
+  "Validate map spec layer."
+  (let [m (into {} (remove (comp nil? val)
+                           (select-keys layer ["geom" "latitude" "longitude"])))]
+    (match [m]
+           [({"geom" geom} :only ["geom"])] (p geom)
+
+           [({"geom" geom "latitude" latitude} :only ["geom" "latitude"])]
+           (check-columns p geom latitude)
+
+           [({"geom" geom "longitude" longitude} :only ["geom" "longitude"])]
+           (check-columns p geom longitude)
+
+           [({"latitude" latitude "longitude" longitude}
+             :only ["latitude" "longitude"])]
+           (check-columns p latitude longitude)
+
+           [{"geom" geom "latitude" latitude "longitude" longitude}]
+           (check-columns p geom latitude longitude)
+
+           :else false)))
 
 (defn conform-create-args [dataset-id layer]
   (cond
