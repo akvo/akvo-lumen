@@ -44,11 +44,11 @@
       sorted)))
 
 (defn point-color-mapping
-  [tenant-conn table-name {:strs [pointColorMapping pointColorColumn]}]
+  [tenant-conn table-name {:strs [pointColorMapping pointColorColumn]} where-clause]
   (when pointColorColumn
     (let [distinct-values (map :value
                                (jdbc/query tenant-conn
-                                           (format "SELECT distinct %s AS value FROM %s LIMIT 22" pointColorColumn table-name)))
+                                           (format "SELECT distinct %s AS value FROM %s WHERE %s LIMIT 22" pointColorColumn table-name where-clause)))
           used-colors (set (map #(get "color" %) pointColorMapping))
           color-map (reduce (fn [m {:strs [value color]}]
                               (assoc m value color))
@@ -93,5 +93,5 @@
   {"boundingBox" (bounds tenant-conn table-name
                          layer
                          where-clause)
-   "pointColorMapping" (point-color-mapping tenant-conn table-name layer)
+   "pointColorMapping" (point-color-mapping tenant-conn table-name layer where-clause)
    "availableColors" palette})
