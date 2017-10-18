@@ -3,6 +3,7 @@
             [akvo.lumen.lib.aggregation.filter :as filter]
             [akvo.lumen.lib.visualisation.map-config :as map-config]
             [akvo.lumen.lib.visualisation.map-metadata :as map-metadata]
+            [akvo.lumen.transformation.engine :as engine]
             [akvo.lumen.util :as util]
             [cheshire.core :as json]
             [clj-http.client :as client]
@@ -42,29 +43,19 @@
              "metadata" metadata
              "tenantDB" db-name})))
 
-(defn valid-location?
-  "Validates that we have either geom or latitude & longitude keys with values
-  that satisfies the provided predicate p."
-  [layer p]
-  (match [(select-keys layer ["geom" "latitude" "longitude"])]
-         [({"geom" geom}
-           :only ["geom"])] (p geom)
 
-         [({"latitude" latitude
-            "longitude" longitude}
-           :only ["latitude" "longitude"])] (and (p latitude)
-                                                 (p longitude)
-                                                 (not= latitude longitude))
-         :else false))
+
+
+(defn valid-location? [layer p]
+  true)
 
 (defn conform-create-args [dataset-id layer]
-  (clojure.pprint/pprint layer)
   (cond
-    (nil? dataset-id)
-    (throw (ex-info "No datasetID"
-                    {"reason" "No datasetID"}))
+    (not (engine/valid-dataset-id? dataset-id))
+    (throw (ex-info "No valid datasetID"
+                    {"reason" "No valid datasetID"}))
 
-    (not (valid-location? layer string?))
+    (not (valid-location? layer engine/valid-column-name?))
     (throw (ex-info "Location spec not valid"
                     {"reason" "Location spec not valid"}))
 
