@@ -124,32 +124,35 @@ const getBaseLayerAttributes = ((baseLayer) => {
   return attributes;
 });
 
-const Legend = ({ pointColorMapping, title = '' }) => (
-  <div className="Legend">
+const Legend = ({ pointColorMapping, position = 'bottom', title = '' }) => (
+  <div className={`Legend ${position}`}>
     <h4>{title}</h4>
-    <ul>
-      {pointColorMapping.map(item =>
-        <li
-          key={item.value}
-        >
-          <div
-            className="colorMarker"
-            style={{
-              backgroundColor: item.color,
-            }}
-          />
-          <p>
-            {item.value ? item.value : <span className="italic">No data</span>}
-          </p>
-        </li>
-        )}
-    </ul>
+    <div className="listContainer">
+      <ul>
+        {pointColorMapping.map(item =>
+          <li
+            key={item.value}
+          >
+            <div
+              className="colorMarker"
+              style={{
+                backgroundColor: item.color,
+              }}
+            />
+            <p className="label">
+              {chart.replaceLabelIfValueEmpty(item.value)}
+            </p>
+          </li>
+          )}
+      </ul>
+    </div>
   </div>
   );
 
 Legend.propTypes = {
   pointColorMapping: PropTypes.array.isRequired,
   title: PropTypes.string,
+  position: PropTypes.string,
 };
 
 const DataLayer = ({ displayLayer }) => {
@@ -515,6 +518,7 @@ export default class MapVisualisation extends Component {
           />
           {visualisation.metadata && visualisation.metadata.pointColorMapping &&
             <Legend
+              position={visualisation.spec.layers[0].legend.position}
               title={visualisation.spec.layers[0].legend.title}
               pointColorMapping={visualisation.metadata.pointColorMapping}
             />

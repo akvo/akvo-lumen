@@ -145,20 +145,69 @@
         background-color: rgba(255, 255, 255, 0.8);
         flex-direction: column;
 
-        ul {
+        &.top {
+            bottom: initial;
+            top: 1rem;
+        }
+
+        &.right, &.left {
+            top: 1rem;
+            bottom: initial;
+            width: initial;
+            height: initial;
+            margin: 0;
+
+            h4 {
+                margin-bottom: 0.5rem;
+            }
+
+            .listContainer {
+                height: initial;
+                overflow-x: initial;
+                overflow-y: auto;
+
+                ul {
+                    flex-direction: column;
+
+                    li {
+                        margin-right: 0;
+                        margin-bottom: 0.5rem;
+
+                        &:last-child {
+                            margin-bottom: 0;
+                        }
+                    }
+                }
+            }
+        }
+        &.right {
+            right: 1rem;
+        }
+        &.left {
+            /* bigger margin to avoid map controls */
+            left: 1rem;
+            top: 6rem;
+        }
+
+        .listContainer {
             flex: 1;
             display: flex;
             height: 6rem;
             overflow-x: auto;
+            overflow-y: hidden;
+
+            ul {
+                display: flex;
+                justify-content: flex-start;
+            }
 
             li {
                 display: flex;
-                flex: 1;
-                align-items: center;
                 justify-content: flex-start;
-                min-width: 2.5rem;
                 font-size: 0.9rem;
-                margin-right: 0.5rem;
+                margin-right: 1rem;
+                flex-shrink: 0;
+                align-items: center;
 
                 &:last-child {
                     margin-right: 0;
@@ -166,13 +215,11 @@
 
                 .colorMarker {
                     display: block;
-                    height: 1rem;
-                    width: 1rem;
-                    border-radius: 0.5rem;
-                }
-
-                p {
-                    margin-left: 0.5rem;
+                    height: 0.75rem;
+                    width: 0.75rem;
+                    border-radius: 0.375rem;
+                    flex-shrink: 0;
+                    margin-right: 0.3rem;
                 }
             }
         }
