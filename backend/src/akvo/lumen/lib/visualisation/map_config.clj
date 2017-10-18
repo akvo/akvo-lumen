@@ -67,5 +67,6 @@
                            "cartocss_version" "2.0.0"
                            "geom_column" (or (get layer "geom") "latlong")
                            "interactivity" popup-columns
-                           "sql" (sql table-name geom-column popup-columns point-color-column where-clause)
+                           "sql" (sql table-name geom-column popup-columns point-color-column
+                                      where-clause)
                            "srid" "4326"}}]}))
