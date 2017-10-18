@@ -107,12 +107,12 @@
         bottom: 1rem;
     }
 
-    .popupContainer {
+    .popupContainer, .PopupContent {
         position: relative;
         min-width: 12rem;
     }
 
-    .popupItem {
+    .popupItem, .PopupContent  {
         margin-bottom: 0.5rem;
 
         h4 {}
@@ -130,7 +130,6 @@
             }
         }
     }
-
     .mapContainer {
         position: relative;
     }

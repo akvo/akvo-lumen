@@ -13,6 +13,9 @@ require('./MapVisualisation.scss');
 
 const L = leafletUtfGrid(leaflet);
 
+// We need to use leaflet private methods which have underscore dangle
+/* eslint no-underscore-dangle: "off" */
+
 const getColumnTitle = (dataset, columnName) =>
   dataset.get('columns')
   .find(item => item.get('columnName') === columnName)
@@ -215,14 +218,34 @@ DataLayer.propTypes = {
   displayLayer: PropTypes.object.isRequired,
 };
 
-const PopupContent = ({ data, layerDataset }) => (
+const PopupContent = ({ data, layerDataset, onImageLoad }) => (
   <ul className="PopupContent">
     { Object.keys(data).sort().map(key =>
       <li
         key={key}
       >
         <h4>{getColumnTitle(layerDataset, key)}</h4>
-        {data[key]}
+        <span>
+          {isImage(data[key]) ?
+            <a
+              href={data[key]}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <div className="imageContainer">
+                <img
+                  src={data[key]}
+                  role="presentation"
+                  onLoad={onImageLoad}
+                />
+              </div>
+            </a>
+                :
+            <span>
+              {data[key]}
+            </span>
+          }
+        </span>
       </li>
       )}
   </ul>
@@ -231,6 +254,7 @@ const PopupContent = ({ data, layerDataset }) => (
 PopupContent.propTypes = {
   data: PropTypes.object.isRequired,
   layerDataset: PropTypes.object.isRequired,
+  onImageLoad: PropTypes.func.isRequired,
 };
 
 export default class MapVisualisation extends Component {
@@ -367,14 +391,26 @@ export default class MapVisualisation extends Component {
             .setLatLng(e.latlng)
             .openOn(map);
 
+            // Adjust size of popup and map position to make popup contents visible
+            const adjustLayoutForPopup = () => {
+              this.popupElement.update();
+              if (this.popupElement._map && this.popupElement._map._panAnim) {
+                this.popupElement._map._panAnim = undefined;
+              }
+              this.popupElement._adjustPan();
+            };
+
             // Although we use leaflet to create the popup, we can still render the contents
             // with react-dom
             render(
-              <PopupContent data={e.data} layerDataset={layerDataset} />,
-              // eslint-disable-next-line no-underscore-dangle
-              this.popupElement._contentNode
+              <PopupContent
+                data={e.data}
+                layerDataset={layerDataset}
+                onImageLoad={adjustLayoutForPopup}
+              />,
+              this.popupElement._contentNode,
+              adjustLayoutForPopup
             );
-            this.popupElement.update();
           }
         });
         map.addLayer(this.utfGrid);
