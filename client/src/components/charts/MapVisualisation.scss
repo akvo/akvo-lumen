@@ -186,4 +186,27 @@
         position: absolute;
         background: rgba(0, 0, 0, 0.1);
     }
+    .failedIndicator {
+        z-index: 999;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.1);
+
+        &:after {
+            position: absolute;
+            height: 2rem;
+            width: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            content: '✖';
+            left: calc(50% - 1rem);
+            top: calc(50% - 1rem);
+            color: rgba(0,0,0,0.2);
+            font-size: 2rem;
+        }
+    }
 }

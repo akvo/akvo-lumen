@@ -487,6 +487,10 @@ export default class MapVisualisation extends Component {
             visualisation.awaitingResponse &&
             <Spinner />
           }
+          {
+            visualisation.failedToLoad &&
+            <div className="failedIndicator" />
+          }
         </div>
       </div>
     );

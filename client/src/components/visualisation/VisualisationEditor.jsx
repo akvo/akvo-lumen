@@ -78,6 +78,68 @@ export default class VisualisationEditor extends Component {
     let specValid;
     let needNewAggregation;
 
+    const updateMapVisualisation = ({ tenantDB, layerGroupId, metadata }) => {
+      this.setState({
+        visualisation: Object.assign(
+          {},
+          visualisation,
+          {
+            awaitingResponse: false,
+            failedToLoad: false,
+          },
+          {
+            tenantDB,
+            layerGroupId,
+            metadata,
+          },
+          {
+            spec: Object.assign(
+              {},
+              visualisation.spec,
+              {
+                layers: visualisation.spec.layers.map((item, idx) => {
+                  if (idx === 0 && metadata && metadata.pointColorMapping) {
+                    return Object.assign(
+                      {},
+                      item,
+                      { pointColorMapping: metadata.pointColorMapping }
+                    );
+                  }
+                  return item;
+                }),
+              }
+            ),
+          }
+        ),
+      });
+    };
+
+    const setMapVisualisationError = () => {
+      this.setState(
+        {
+          visualisation:
+            Object.assign(
+              {},
+              visualisation,
+              {
+                awaitingResponse: false,
+                failedToLoad: true,
+              }
+            ),
+        }
+      );
+    };
+
+    const updateIf200 = (response) => {
+      if (response.status === 200) {
+        response
+          .json()
+          .then(json => updateMapVisualisation(json));
+      } else {
+        setMapVisualisationError();
+      }
+    };
+
     switch (vType) {
       case null:
       case 'map':
@@ -86,65 +148,9 @@ export default class VisualisationEditor extends Component {
         );
         api.post('/api/visualisations/maps', visualisation)
           .then((response) => {
-            if (response.status !== 200) {
-              this.setState(
-                {
-                  visualisation:
-                    Object.assign(
-                      {},
-                      visualisation,
-                      {
-                        awaitingResponse: false,
-                        failedToLoad: true,
-                      }
-                    ),
-                }
-              );
-            }
-
-            return response.json();
-          }).then(
-            ({ tenantDB, layerGroupId, metadata }) => {
-              this.setState({
-                visualisation: Object.assign(
-                  {},
-                  visualisation,
-                  {
-                    awaitingResponse: false,
-                    failedToLoad: false,
-                  },
-                  {
-                    tenantDB,
-                    layerGroupId,
-                    metadata,
-                  },
-                  {
-                    spec: Object.assign(
-                      {},
-                      visualisation.spec,
-                      {
-                        layers: visualisation.spec.layers.map((item, idx) => {
-                          if (idx === 0 && metadata && metadata.pointColorMapping) {
-                            return Object.assign(
-                              {},
-                              item,
-                              { pointColorMapping: metadata.pointColorMapping }
-                            );
-                          }
-                          return item;
-                        }),
-                      }
-                    ),
-                  }
-                ),
-              });
-            })
-          .catch(() => {
-            this.setState(
-              { visualisation: Object.assign(
-                {}, visualisation, { awaitingResponse: false, failedToLoad: true }
-              ) }
-            );
+            updateIf200(response);
+          }).catch(() => {
+            setMapVisualisationError();
           });
         break;
       case 'bar':
