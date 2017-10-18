@@ -249,9 +249,7 @@ export default class MapVisualisation extends Component {
     const { visualisation, datasets } = nextProps;
     const { tileUrl, tileAttribution } = getBaseLayerAttributes(visualisation.spec.baseLayer);
     const layer = visualisation.spec.layers[0];
-    const layerDataset = datasets[layer.datasetId];
-
-    window.foo = layerDataset;
+    const layerDataset = layer ? datasets[layer.datasetId] : null;
 
     // Windshaft map
     const tenantDB = visualisation.tenantDB;
@@ -308,8 +306,8 @@ export default class MapVisualisation extends Component {
       }
     }
 
-    const newSpec = nextProps.visualisation.spec.layers[0];
-    const oldSpec = this.storedSpec;
+    const newSpec = nextProps.visualisation.spec.layers[0] || {};
+    const oldSpec = this.storedSpec || {};
     const filtersChanged = !isEqual(newSpec.filters, oldSpec.filters);
 
     // Add or update the windshaft tile layer if necessary

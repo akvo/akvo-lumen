@@ -85,7 +85,25 @@ export default class VisualisationEditor extends Component {
           { visualisation: Object.assign({}, visualisation, { awaitingResponse: true }) }
         );
         api.post('/api/visualisations/maps', visualisation)
-          .then(response => response.json()).then(
+          .then((response) => {
+            if (response.status !== 200) {
+              this.setState(
+                {
+                  visualisation:
+                    Object.assign(
+                      {},
+                      visualisation,
+                      {
+                        awaitingResponse: false,
+                        failedToLoad: true,
+                      }
+                    ),
+                }
+              );
+            }
+
+            return response.json();
+          }).then(
             ({ tenantDB, layerGroupId, metadata }) => {
               this.setState({
                 visualisation: Object.assign(
@@ -93,6 +111,7 @@ export default class VisualisationEditor extends Component {
                   visualisation,
                   {
                     awaitingResponse: false,
+                    failedToLoad: false,
                   },
                   {
                     tenantDB,
@@ -122,7 +141,9 @@ export default class VisualisationEditor extends Component {
             })
           .catch(() => {
             this.setState(
-              { visualisation: Object.assign({}, visualisation, { awaitingResponse: false }) }
+              { visualisation: Object.assign(
+                {}, visualisation, { awaitingResponse: false, failedToLoad: true }
+              ) }
             );
           });
         break;
