@@ -38,13 +38,18 @@
                               "latitude" "c2"
                               "longitude" "c3"} p))
 
-      #_(is (not  (m/valid-location? {"geom" "c1"
-                                      "latitude" "c1"
-                                      "longitude" "c2"} p)))
+      (is (not (m/valid-location? {"geom" "c1"
+                                   "latitude" "c1"
+                                   "longitude" "c2"} p)))
 
       (is (m/valid-location? {"geom" "c1"
                               "latitude" "c2"
                               "longitude" nil} p))
+
+      (is (m/valid-location? {"geom" "c1"
+                              "longitude" "c2"} p))
+
+
 
       )
 

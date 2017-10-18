@@ -28,6 +28,47 @@
     {:db-name db-name
      :headers (headers db-uri)}))
 
+(defn- check-columns
+  "Make sure supplied columns are distinct and satisfy predicate."
+  [p & columns]
+  (and (= (count columns)
+          (count (into #{} columns)))
+       (every? p columns)))
+
+(defn valid-location? [layer p]
+  "Validate map spec layer."
+  (let [m (into {} (remove (comp nil? val)
+                           (select-keys layer ["geom" "latitude" "longitude"])))]
+    (match [m]
+           [({"geom" geom} :only ["geom"])] (p geom)
+
+           [({"geom" geom "latitude" latitude} :only ["geom" "latitude"])]
+           (check-columns p geom latitude)
+
+           [({"geom" geom "longitude" longitude} :only ["geom" "longitude"])]
+           (check-columns p geom longitude)
+
+           [({"latitude" latitude "longitude" longitude}
+             :only ["latitude" "longitude"])]
+           (check-columns p latitude longitude)
+
+           [{"geom" geom "latitude" latitude "longitude" longitude}]
+           (check-columns p geom latitude longitude)
+
+           :else false)))
+
+(defn conform-create-args [dataset-id layer]
+  (cond
+    (not (engine/valid-dataset-id? dataset-id))
+    (throw (ex-info "No valid datasetID"
+                    {"reason" "No valid datasetID"}))
+
+    (not (valid-location? layer engine/valid-column-name?))
+    (throw (ex-info "Location spec not valid"
+                    {"reason" "Location spec not valid"}))
+
+    :else [dataset-id layer]))
+
 (defn do-create [tenant-conn windshaft-url dataset-id layer]
   (let [{:keys [table-name columns]} (dataset-by-id tenant-conn {:id dataset-id})
         where-clause (filter/sql-str columns (get layer "filters"))
@@ -42,24 +83,6 @@
     (lib/ok {"layerGroupId" layer-group-id
              "metadata" metadata
              "tenantDB" db-name})))
-
-
-
-
-(defn valid-location? [layer p]
-  true)
-
-(defn conform-create-args [dataset-id layer]
-  (cond
-    (not (engine/valid-dataset-id? dataset-id))
-    (throw (ex-info "No valid datasetID"
-                    {"reason" "No valid datasetID"}))
-
-    (not (valid-location? layer engine/valid-column-name?))
-    (throw (ex-info "Location spec not valid"
-                    {"reason" "Location spec not valid"}))
-
-    :else [dataset-id layer]))
 
 (defn create
   [tenant-conn windshaft-url dataset-id layer]
