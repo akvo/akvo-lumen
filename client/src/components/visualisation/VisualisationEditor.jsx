@@ -178,6 +178,7 @@ export default class VisualisationEditor extends Component {
               {
                 awaitingResponse: false,
                 failedToLoad: true,
+                metadata: Object.assign({}, checkUndefined(this.state.visualisation, 'metadata')),
               }
             ),
         }
@@ -233,7 +234,17 @@ export default class VisualisationEditor extends Component {
     switch (vType) {
       case 'map':
         this.setState(
-          { visualisation: Object.assign({}, visualisation, { awaitingResponse: true }) }
+          {
+            visualisation:
+              Object.assign(
+                {},
+                visualisation,
+                {
+                  awaitingResponse: true,
+                  metadata: Object.assign({}, checkUndefined(this.state.visualisation, 'metadata')),
+                }
+              ),
+          }
         );
         api.post('/api/visualisations/maps', visualisation)
           .then((response) => {

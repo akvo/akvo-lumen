@@ -352,7 +352,6 @@ export default class MapVisualisation extends Component {
           newSpec.pointSize !== oldSpec.pointSize ||
           newSpec.visible !== oldSpec.visible
         );
-
         if (needToUpdate) {
           this.storedSpec = cloneDeep(this.props.visualisation.spec.layers[0]);
 
