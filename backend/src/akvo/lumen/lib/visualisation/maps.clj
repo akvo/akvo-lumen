@@ -8,29 +8,17 @@
             [cheshire.core :as json]
             [clj-http.client :as client]
             [clojure.core.match :refer [match]]
-            [hugsql.core :as hugsql]))
+            [hugsql.core :as hugsql])
+  (:import [com.zaxxer.hikari HikariDataSource]
+           [java.net URI]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
 
-#_(defn- headers [uri db-name]
-  (let [{:keys [password user]} (util/query-map (.getQuery uri))
-        port (let [p (.getPort uri)]
-               (if (pos? p) p 5432))]
-    {"x-db-host" (.getHost uri)
-     "x-db-last-update" (quot (System/currentTimeMillis) 1000)
-     "x-db-password" password
-     "x-db-port" port
-     "X-db-name" db-name
-     "x-db-user" user}))
-
-#_(defn- connection-details [tenant-conn]
-  (let [db-uri (java.net.URI. (subs (-> tenant-conn :datasource .getJdbcUrl) 5))
-        db-name (subs (.getPath db-uri) 1)
-        ]
-    {:headers (headers db-uri db-name)}))
-
 (defn- headers [tenant-conn]
-  (let [db-uri (java.net.URI. (subs (-> tenant-conn :datasource .getJdbcUrl) 5))
+  (let [db-uri (-> ^HikariDataSource (:datasource tenant-conn)
+                   .getJdbcUrl
+                   (subs 5)
+                   URI.)
         {:keys [password user]} (util/query-map (.getQuery db-uri))
         port (let [p (.getPort db-uri)]
                (if (pos? p) p 5432))
