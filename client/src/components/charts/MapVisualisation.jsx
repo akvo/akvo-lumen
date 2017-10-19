@@ -423,12 +423,14 @@ export default class MapVisualisation extends Component {
 
   render() {
     const { visualisation, datasets, width, height } = this.props;
+    /*
     const displayLayers = getDataLayers(visualisation.spec.layers, datasets);
     const bounds = calculateBounds(displayLayers);
     const title = visualisation.name || '';
     const titleLength = title.toString().length;
     const titleHeight = titleLength > 48 ? 56 : 36;
     const mapHeight = height - titleHeight;
+    */
     const { tileUrl, tileAttribution } = getBaseLayerAttributes(visualisation.spec.baseLayer);
 
     return (
@@ -439,6 +441,7 @@ export default class MapVisualisation extends Component {
           height,
         }}
       >
+        {/*
         {displayLayers.map((displayLayer, outerIndex) =>
           <div
             className="legendContainer"
@@ -511,6 +514,7 @@ export default class MapVisualisation extends Component {
           )}
         </Map>
         <hr />
+      */}
         <div className="mapContainer">
           <div
             className="leafletMap"
