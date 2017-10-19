@@ -3,6 +3,11 @@
 .MapVisualisation {
     position: relative;
 
+    .leaflet-container {
+        height: 80vh;
+        width: 100%;
+    }
+
     h2 {
         display: flex;
         flex-direction: column;
