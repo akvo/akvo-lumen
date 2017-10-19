@@ -94,49 +94,58 @@ export default class LayerConfigMenu extends Component {
               onChange={() => null}
               buttonSpacing="2rem"
             />
+            {(layer.latitude !== null || layer.longitude !== null) &&
+              <div>
+                <div className="inputGroup">
+                  <SelectInput
+                    disabled={layer.datasetId === null || disabled}
+                    placeholder="Select a latitude column"
+                    labelText="Latitude column"
+                    choice={layer.latitude !== null ? layer.latitude.toString() : null}
+                    name="latitudeInput"
+                    options={columnOptions.filter(column => column.type === 'number')}
+                    onChange={value => onChangeMapLayer(layerIndex, {
+                      latitude: value,
+                    })}
+                  />
+                </div>
+                <div className="inputGroup">
+                  <SelectInput
+                    disabled={layer.datasetId === null || disabled}
+                    placeholder="Select a longitude column"
+                    labelText="Longitude column"
+                    choice={layer.longitude !== null ? layer.longitude.toString() : null}
+                    name="longitudeInput"
+                    options={columnOptions.filter(column => column.type === 'number')}
+                    onChange={value => onChangeMapLayer(layerIndex, {
+                      longitude: value,
+                    })}
+                  />
+                </div>
+                <hr />
+              </div>
+            }
             <div className="inputGroup">
               <SelectInput
                 disabled={layer.datasetId === null || disabled}
-                placeholder="Select a latitude column"
-                labelText="Latitude column"
-                choice={layer.latitude !== null ? layer.latitude.toString() : null}
-                name="latitudeInput"
-                options={columnOptions.filter(column => column.type === 'number')}
-                onChange={value => onChangeMapLayer(layerIndex, {
-                  latitude: value,
-                })}
-              />
-            </div>
-            <div className="inputGroup">
-              <SelectInput
-                disabled={layer.datasetId === null || disabled}
-                placeholder="Select a longitude column"
-                labelText="Longitude column"
-                choice={layer.longitude !== null ? layer.longitude.toString() : null}
-                name="longitudeInput"
-                options={columnOptions.filter(column => column.type === 'number')}
-                onChange={value => onChangeMapLayer(layerIndex, {
-                  longitude: value,
-                })}
-              />
-            </div>
-            <hr />
-            <div className="inputGroup">
-              <SelectInput
-                disabled={layer.datasetId === null || disabled}
-                placeholder="Select a geom column"
-                labelText="Geom column"
+                placeholder="Select a geopoint column"
+                labelText="Geopoint column"
                 choice={layer.geom !== null ? layer.geom.toString() : null}
                 name="geomInput"
                 options={columnOptions.filter(column => column.type === 'geopoint')}
                 onChange={value => onChangeMapLayer(layerIndex, {
                   geom: value,
+                  latitude: null,
+                  longitude: null,
                 })}
               />
             </div>
             <div className="inputGroup">
               <SelectInput
-                disabled={layer.latitude == null || layer.longitude == null || disabled}
+                disabled={
+                  ((layer.latitude == null || layer.longitude == null) && layer.geom == null) ||
+                  disabled
+                }
                 placeholder="Select a data column to color points by"
                 labelText="Color coding column"
                 choice={layer.pointColorColumn !== null ?
