@@ -78,7 +78,7 @@ export default class VisualisationEditor extends Component {
     let specValid;
     let needNewAggregation;
 
-    const updateMapVisualisation = ({ tenantDB, layerGroupId, metadata }) => {
+    const updateMapVisualisation = ({ layerGroupId, metadata }) => {
       this.setState({
         visualisation: Object.assign(
           {},
@@ -88,7 +88,6 @@ export default class VisualisationEditor extends Component {
             failedToLoad: false,
           },
           {
-            tenantDB,
             layerGroupId,
             metadata,
           },
@@ -259,4 +258,3 @@ VisualisationEditor.propTypes = {
   onChangeVisualisationSpec: PropTypes.func.isRequired,
   onSaveVisualisation: PropTypes.func.isRequired,
 };
-
