@@ -19,6 +19,21 @@ spec:
             cpu: "50m"
           limits:
             cpu: "1000m"
+      - name: lumen-maps
+        image: eu.gcr.io/akvo-lumen/lumen-maps:${BUILD_HASH}
+        ports:
+        - containerPort: 4000
+        resources:
+          requests:
+            cpu: "50m"
+          limits:
+            cpu: "1000m"
+        env:
+        - name: LUMEN_ENCRYPTION_KEY
+          valueFrom:
+            secretKeyRef:
+              name: lumen
+              key: encryption_key
       - name: lumen-backend
         image: eu.gcr.io/akvo-lumen/lumen-backend:${BUILD_HASH}
         ports:
