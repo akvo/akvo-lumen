@@ -279,8 +279,8 @@ export default class MapVisualisation extends Component {
     const layerDataset = layer ? datasets[layer.datasetId] : null;
 
     // Windshaft map
-    const tenantDB = visualisation.tenantDB;
-    const baseURL = `/maps/${tenantDB}/layergroup`;
+    // const tenantDB = visualisation.tenantDB;
+    const baseURL = '/maps/layergroup';
     const layerGroupId = visualisation.layerGroupId;
     const xCenter = [0, 0];
     const xZoom = 2;
@@ -338,7 +338,7 @@ export default class MapVisualisation extends Component {
     const filtersChanged = !isEqual(newSpec.filters, oldSpec.filters);
 
     // Add or update the windshaft tile layer if necessary
-    if (tenantDB && layerGroupId) {
+    if (layerGroupId) {
       if (!this.dataLayer) {
         this.dataLayer = L.tileLayer(`${baseURL}/${layerGroupId}/{z}/{x}/{y}.png`);
         this.dataLayer.addTo(map);
@@ -369,7 +369,7 @@ export default class MapVisualisation extends Component {
     const popupChanged = (!this.popup || !isEqual(popup, this.popup));
     const needToAddOrUpdate =
       havePopupData && (popupChanged || filtersChanged);
-    const windshaftAvailable = tenantDB && layerGroupId;
+    const windshaftAvailable = layerGroupId;
     const canUpdate = windshaftAvailable || needToRemovePopup;
 
     if ((needToAddOrUpdate || needToRemovePopup) && canUpdate) {

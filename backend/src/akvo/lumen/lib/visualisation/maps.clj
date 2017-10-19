@@ -12,7 +12,7 @@
 
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
 
-(defn- headers [uri]
+#_(defn- headers [uri db-name]
   (let [{:keys [password user]} (util/query-map (.getQuery uri))
         port (let [p (.getPort uri)]
                (if (pos? p) p 5432))]
@@ -20,13 +20,27 @@
      "x-db-last-update" (quot (System/currentTimeMillis) 1000)
      "x-db-password" password
      "x-db-port" port
+     "X-db-name" db-name
      "x-db-user" user}))
 
-(defn- connection-details [tenant-conn]
+#_(defn- connection-details [tenant-conn]
   (let [db-uri (java.net.URI. (subs (-> tenant-conn :datasource .getJdbcUrl) 5))
+        db-name (subs (.getPath db-uri) 1)
+        ]
+    {:headers (headers db-uri db-name)}))
+
+(defn- headers [tenant-conn]
+  (let [db-uri (java.net.URI. (subs (-> tenant-conn :datasource .getJdbcUrl) 5))
+        {:keys [password user]} (util/query-map (.getQuery db-uri))
+        port (let [p (.getPort db-uri)]
+               (if (pos? p) p 5432))
         db-name (subs (.getPath db-uri) 1)]
-    {:db-name db-name
-     :headers (headers db-uri)}))
+    {"x-db-host" (.getHost db-uri)
+     "x-db-last-update" (quot (System/currentTimeMillis) 1000)
+     "x-db-password" password
+     "x-db-port" port
+     "X-db-name" db-name
+     "x-db-user" user}))
 
 (defn- check-columns
   "Make sure supplied columns are distinct and satisfy predicate."
@@ -73,16 +87,15 @@
   (let [{:keys [table-name columns]} (dataset-by-id tenant-conn {:id dataset-id})
         where-clause (filter/sql-str columns (get layer "filters"))
         metadata (map-metadata/build tenant-conn table-name layer where-clause)
-        {:keys [db-name headers]} (connection-details tenant-conn)
-        url (format "%s/%s/layergroup" windshaft-url db-name)
+        headers (headers tenant-conn)
+        url (format "%s/layergroup" windshaft-url)
         map-config (map-config/build table-name layer where-clause metadata)
         layer-group-id (-> (client/post url {:body (json/encode map-config)
                                              :headers headers
                                              :content-type :json})
                            :body json/decode (get "layergroupid"))]
     (lib/ok {"layerGroupId" layer-group-id
-             "metadata" metadata
-             "tenantDB" db-name})))
+             "metadata" metadata})))
 
 (defn create
   [tenant-conn windshaft-url dataset-id layer]
