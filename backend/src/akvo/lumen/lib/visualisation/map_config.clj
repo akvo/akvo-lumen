@@ -5,8 +5,8 @@
   (let [point-size (if (string? point-size)
                      (Long/parseLong point-size)
                      point-size)]
-    ({1 3
-      2 4
+    ({1 4
+      2 5
       3 7
       4 10
       5 13} point-size 8)))
