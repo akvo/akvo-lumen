@@ -21,7 +21,6 @@ const specIsValidForApi = (spec, vType) => {
         return false;
       }
       break;
-
     case 'map':
       if (spec.layers.length === 0) {
         return false;
@@ -29,8 +28,7 @@ const specIsValidForApi = (spec, vType) => {
       if (!spec.layers[0].geom && (!spec.layers[0].latitude || !spec.layers[0].longitude)) {
         return false;
       }
-
-      return true;
+      break;
     default:
       return false;
   }
