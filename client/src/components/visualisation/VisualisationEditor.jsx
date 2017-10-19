@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { isEqual, cloneDeep } from 'lodash';
 import VisualisationConfig from './VisualisationConfig';
 import VisualisationPreview from './VisualisationPreview';
+import { checkUndefined } from '../../utilities/utils';
 import * as api from '../../api';
 
 require('./VisualisationEditor.scss');
@@ -21,14 +22,23 @@ const specIsValidForApi = (spec, vType) => {
       }
       break;
 
+    case 'map':
+      if (spec.layers.length === 0) {
+        return false;
+      }
+      if (!spec.layers[0].geom && (!spec.layers[0].latitude || !spec.layers[0].longitude)) {
+        return false;
+      }
+
+      return true;
     default:
       return false;
   }
   return true;
 };
 
-const getNeedNewAggregation = (newV, oldV = { spec: {} }) => {
-  const vType = newV.visualisationType;
+const getNeedNewAggregation = (newV = { spec: {} }, oldV = { spec: {} }, optionalVizType) => {
+  const vType = newV.visualisationType || optionalVizType;
 
   switch (vType) {
     case 'pivot table':
@@ -47,7 +57,17 @@ const getNeedNewAggregation = (newV, oldV = { spec: {} }) => {
         newV.spec.bucketColumn !== oldV.spec.bucketColumn ||
         !isEqual(newV.spec.filters, oldV.spec.filters)
       );
-
+    case 'map':
+      return Boolean(
+        newV.datasetId !== oldV.datasetId ||
+        newV.latitude !== oldV.latitude ||
+        newV.longitude !== oldV.longitude ||
+        newV.geom !== oldV.geom ||
+        newV.pointColorColumn !== oldV.pointColorColumn ||
+        newV.pointSize !== oldV.pointSize ||
+        !isEqual(newV.filters, oldV.filters) ||
+        !isEqual(newV.popup, oldV.popup)
+      );
     default:
       throw new Error(`Unknown visualisation type ${vType} supplied to getNeedNewAggregation`);
   }
@@ -77,6 +97,92 @@ export default class VisualisationEditor extends Component {
     const vType = visualisation.visualisationType;
     let specValid;
     let needNewAggregation;
+
+    switch (vType) {
+      case null:
+      case 'bar':
+      case 'line':
+      case 'area':
+      case 'scatter':
+        // Data aggregated client-side
+        this.setState({ visualisation });
+        break;
+
+      case 'map':
+        specValid = specIsValidForApi(visualisation.spec, vType);
+        needNewAggregation =
+          getNeedNewAggregation(
+            checkUndefined(visualisation, 'spec', 'layers', 0),
+            checkUndefined(this.lastVisualisationRequested, 'spec', 'layers', 0), 'map'
+          );
+
+        if (!this.state.visualisation || !this.state.visualisation.datasetId) {
+          // Update immediately, without waiting for the api call
+          this.setState({ visualisation: Object.assign({}, visualisation) });
+        }
+
+        if (needNewAggregation && specValid) {
+          this.fetchAggregatedData(visualisation);
+          this.lastVisualisationRequested = cloneDeep(visualisation);
+        } else {
+          // Update the visualisation in the editor, but don't make a request to the backend
+          this.setState({ visualisation:
+            Object.assign({}, visualisation, { metadata: this.state.visualisation.metadata }),
+          });
+        }
+
+        break;
+      case 'pivot table':
+      case 'pie':
+      case 'donut':
+        // Data aggregated on the backend for these types
+
+        specValid = specIsValidForApi(visualisation.spec, vType);
+        needNewAggregation = getNeedNewAggregation(visualisation, this.lastVisualisationRequested);
+
+        if (!this.state.visualisation || !this.state.visualisation.datasetId) {
+          // Update immediately, without waiting for the api call
+          this.setState({ visualisation });
+        } else if (!specValid || !needNewAggregation) {
+          this.setState({
+            visualisation: Object.assign({},
+              visualisation, { data: this.state.visualisation.data }),
+          });
+        }
+
+        if (visualisation.datasetId && specValid && needNewAggregation) {
+          this.fetchAggregatedData(visualisation);
+
+          // Store a copy of this visualisation to compare against on next update
+          this.lastVisualisationRequested = cloneDeep(visualisation);
+        }
+        break;
+
+      default: throw new Error(`Unknown visualisation type ${visualisation.visualisationType}`);
+    }
+  }
+
+  fetchAggregatedData(visualisation) {
+    const { spec, datasetId } = visualisation;
+    const vType = visualisation.visualisationType;
+    const requestId = Math.random();
+    this.latestRequestId = requestId;
+
+    const setMapVisualisationError = () => {
+      this.setState(
+        {
+          visualisation:
+            Object.assign(
+              {},
+              visualisation,
+              {
+                awaitingResponse: false,
+                failedToLoad: true,
+              }
+            ),
+        }
+      );
+    };
 
     const updateMapVisualisation = ({ tenantDB, layerGroupId, metadata }) => {
       this.setState({
@@ -114,24 +220,8 @@ export default class VisualisationEditor extends Component {
       });
     };
 
-    const setMapVisualisationError = () => {
-      this.setState(
-        {
-          visualisation:
-            Object.assign(
-              {},
-              visualisation,
-              {
-                awaitingResponse: false,
-                failedToLoad: true,
-              }
-            ),
-        }
-      );
-    };
-
-    const updateIf200 = (response) => {
-      if (response.status === 200) {
+    const updateMapIfSuccess = (response) => {
+      if (response.status >= 200 && response.status < 300) {
         response
           .json()
           .then(json => updateMapVisualisation(json));
@@ -141,63 +231,17 @@ export default class VisualisationEditor extends Component {
     };
 
     switch (vType) {
-      case null:
       case 'map':
         this.setState(
           { visualisation: Object.assign({}, visualisation, { awaitingResponse: true }) }
         );
         api.post('/api/visualisations/maps', visualisation)
           .then((response) => {
-            updateIf200(response);
+            updateMapIfSuccess(response);
           }).catch(() => {
             setMapVisualisationError();
           });
         break;
-      case 'bar':
-      case 'line':
-      case 'area':
-      case 'scatter':
-        // Data aggregated client-side
-        this.setState({ visualisation });
-        break;
-
-      case 'pivot table':
-      case 'pie':
-      case 'donut':
-        // Data aggregated on the backend for these types
-
-        specValid = specIsValidForApi(visualisation.spec, vType);
-        needNewAggregation = getNeedNewAggregation(visualisation, this.lastVisualisationRequested);
-
-        if (!this.state.visualisation || !this.state.visualisation.datasetId) {
-          // Update immediately, without waiting for the api call
-          this.setState({ visualisation });
-        } else if (!specValid || !needNewAggregation) {
-          this.setState({
-            visualisation: Object.assign({},
-              visualisation, { data: this.state.visualisation.data }),
-          });
-        }
-
-        if (visualisation.datasetId && specValid && needNewAggregation) {
-          this.fetchAggregatedData(visualisation);
-
-          // Store a copy of this visualisation to compare against on next update
-          this.lastVisualisationRequested = cloneDeep(visualisation);
-        }
-        break;
-
-      default: throw new Error(`Unknown visualisation type ${visualisation.visualisationType}`);
-    }
-  }
-
-  fetchAggregatedData(visualisation) {
-    const { spec, datasetId } = visualisation;
-    const vType = visualisation.visualisationType;
-    const requestId = Math.random();
-    this.latestRequestId = requestId;
-
-    switch (vType) {
       case 'pivot table':
         api.get(`/api/aggregation/${datasetId}/pivot`, {
           query: JSON.stringify(spec),
