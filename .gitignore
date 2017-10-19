@@ -7,6 +7,9 @@ npm-debug.log
 client/dist
 client/yarn.lock
 
+# docker-compose
+.env
+
 # Backend
 backend/target
 backend/classes

@@ -14,10 +14,20 @@ spec:
         image: eu.gcr.io/akvo-lumen/lumen-client:${BUILD_HASH}
         ports:
         - containerPort: 80
+        resources:
+          requests:
+            cpu: "50m"
+          limits:
+            cpu: "1000m"
       - name: lumen-backend
         image: eu.gcr.io/akvo-lumen/lumen-backend:${BUILD_HASH}
         ports:
         - containerPort: 3000
+        resources:
+          requests:
+            cpu: "50m"
+          limits:
+            cpu: "1000m"
         env:
         - name: LUMEN_DB_URL
           valueFrom:

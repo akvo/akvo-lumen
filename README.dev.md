@@ -13,7 +13,7 @@ This Docker Compose environment will have:
 - A Redis DB
 
 ## Hosts
-Akvo Lumen is a multi tenant system and to do enable local routing to the tenants 
+Akvo Lumen is a multi tenant system and to do enable local routing to the tenants
 the following hosts must be defined in your /etc/hosts file:
 
 ``` sh
@@ -23,19 +23,26 @@ the following hosts must be defined in your /etc/hosts file:
 ```
 Or just
 
-``` sh
-sudo sh -c 'echo "127.0.0.1 t1.lumen.localhost t2.lumen.localhost auth.lumen.localhost" >> /etc/hosts'
-```
+
+    sudo sh -c 'echo "127.0.0.1 t1.lumen.localhost t2.lumen.localhost auth.lumen.localhost" >> /etc/hosts'
+
 
 ## Start development environment
 
 Before starting the following ports that must be free: 8080, 3000, 3030, 47480, 5432
 
+Setup your environment user and group id (only needs to be done once):
+
+
+    echo "HOST_UID=$(id -u)" >> .env
+    echo "HOST_GID=$(id -g)" >> .env
+
+
 To start:
 
-``sh
-docker-compose -f docker-compose.yml up -d ; docker-compose logs -f --tail=10
-``
+
+    docker-compose -f docker-compose.yml up -d ; docker-compose logs -f --tail=10
+
 
 ## Keycloak
 
@@ -70,7 +77,7 @@ The Akvo Lumen UI should be accessible at:
  - http://t1.lumen.localhost:3030/
  - http://t2.lumen.localhost:3030/
 
-The Docker Compose file mounts the "client" directory, so any changes in the source directory should 
+The Docker Compose file mounts the "client" directory, so any changes in the source directory should
 be picked up automatically by the Webpack server.
 
 
@@ -111,7 +118,7 @@ psql --host=akvolumen_postgres_1 --port=5432 --dbname=lumen_tenant_1 --username=
 
 This container has a development version of the Windshaft container, with plenty of hardcoded assumptions.
 
-The Windshaft server is not exposed directly to the external world, but it is proxied by the Webpack server 
+The Windshaft server is not exposed directly to the external world, but it is proxied by the Webpack server
 on the url http://t1.lumen.localhost:3030/maps/**. That url forwards the requests to "windshaft:4000".
 
 ## Legal

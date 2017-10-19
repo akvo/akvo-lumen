@@ -14,14 +14,17 @@ services:
      dockerfile: Dockerfile-dev
    volumes:
       - ./backend:/app
-      - ~/.m2:/root/.m2
-      - ~/.lein:/root/.lein
+      - ~/.m2:/home/akvo/.m2
+      - ~/.lein:/home/akvo/.lein
       - ./postgres/provision:/pg-certs
    links:
       - keycloak:auth.lumen.localhost
    ports:
       - "47480:47480"
       - "3000:3000"
+   environment:
+     - HOST_UID
+     - HOST_GID
  client:
    build:
      context: ./client
