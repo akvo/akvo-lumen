@@ -31,6 +31,8 @@ const getIsDatasetLoaded = (props) => {
     case 'donut':
       return true;
 
+    case 'map':
+      return Boolean(props.item.visualisation.metadata);
     default:
       return Boolean(props.datasets[props.item.visualisation.datasetId].get('columns'));
   }

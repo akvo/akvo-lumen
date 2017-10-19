@@ -273,10 +273,14 @@ export default class MapVisualisation extends Component {
     this.renderLeafletMap(nextProps);
   }
   renderLeafletMap(nextProps) {
-    const { visualisation, datasets } = nextProps;
+    const { visualisation, datasets, width, height } = nextProps;
     const { tileUrl, tileAttribution } = getBaseLayerAttributes(visualisation.spec.baseLayer);
     const layer = visualisation.spec.layers[0];
     const layerDataset = layer ? datasets[layer.datasetId] : null;
+    const title = visualisation.name || '';
+    const titleLength = title.toString().length;
+    const titleHeight = titleLength > 48 ? 56 : 36;
+    const mapHeight = height - titleHeight;
 
     // Windshaft map
     // const tenantDB = visualisation.tenantDB;
@@ -301,9 +305,22 @@ export default class MapVisualisation extends Component {
 
     if (!this.map) {
       map = L.map(node).setView(xCenter, xZoom);
+      map.scrollWheelZoom.disable();
       this.map = map;
     } else {
       map = this.map;
+    }
+
+    const haveDimensions = Boolean(this.oldHeight && this.oldWidth);
+    const dimensionsChanged = Boolean(height !== this.oldHeight || width !== this.oldWidth);
+
+    if (!haveDimensions || dimensionsChanged) {
+      node.style.width = `${width}px`;
+      node.style.height = `${mapHeight}px`;
+      this.map.invalidateSize();
+
+      this.oldHeight = height;
+      this.oldWidth = width;
     }
 
     // Display or update the baselayer tiles
@@ -425,11 +442,11 @@ export default class MapVisualisation extends Component {
     /*
     const displayLayers = getDataLayers(visualisation.spec.layers, datasets);
     const bounds = calculateBounds(displayLayers);
+    */
     const title = visualisation.name || '';
     const titleLength = title.toString().length;
     const titleHeight = titleLength > 48 ? 56 : 36;
     const mapHeight = height - titleHeight;
-    */
     const { tileUrl, tileAttribution } = getBaseLayerAttributes(visualisation.spec.baseLayer);
 
     return (
@@ -477,7 +494,7 @@ export default class MapVisualisation extends Component {
               </div>
             }
           </div>
-        )}
+        )} */}
         <h2
           style={{
             height: titleHeight,
@@ -489,6 +506,7 @@ export default class MapVisualisation extends Component {
             {visualisation.name}
           </span>
         </h2>
+        {/*
         <Map
           center={[0, 0]}
           {... bounds ? { bounds } : {}} // Do not set a bounds prop if we have no bounds
