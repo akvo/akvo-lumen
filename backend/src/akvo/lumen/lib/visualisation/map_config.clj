@@ -5,11 +5,11 @@
   (let [point-size (if (string? point-size)
                      (Long/parseLong point-size)
                      point-size)]
-    ({1 4
-      2 5
-      3 7
+    ({1 5
+      2 7
+      3 9
       4 10
-      5 13} point-size 8)))
+      5 13} point-size 5)))
 
 (defn point-color-css [point-color-column point-color-mapping]
   (when point-color-column
@@ -26,7 +26,7 @@
               marker-allow-overlap: true;
               marker-fill-opacity: 0.8;
               marker-fill: #6ca429;
-              marker-line-color: #ddd;
+              marker-line-color: #fff;
               marker-width: %s;
               %s
            }"
