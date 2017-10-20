@@ -141,10 +141,6 @@ export default class MapVisualisation extends Component {
     const { tileUrl, tileAttribution } = getBaseLayerAttributes(visualisation.spec.baseLayer);
     const layer = visualisation.spec.layers[0];
     const layerDataset = layer ? datasets[layer.datasetId] : null;
-    const title = visualisation.name || '';
-    const titleLength = title.toString().length;
-    const titleHeight = titleLength > 48 ? 56 : 36;
-    const mapHeight = height - titleHeight;
 
     // Windshaft map
     // const tenantDB = visualisation.tenantDB;
@@ -179,10 +175,7 @@ export default class MapVisualisation extends Component {
     const dimensionsChanged = Boolean(height !== this.oldHeight || width !== this.oldWidth);
 
     if (!haveDimensions || dimensionsChanged) {
-      node.style.width = `${width}px`;
-      node.style.height = `${mapHeight}px`;
       this.map.invalidateSize();
-
       this.oldHeight = height;
       this.oldWidth = width;
     }
@@ -306,6 +299,8 @@ export default class MapVisualisation extends Component {
     const title = visualisation.name || '';
     const titleLength = title.toString().length;
     const titleHeight = titleLength > 48 ? 56 : 36;
+    const mapWidth = width || '100%';
+    const mapHeight = height ? height - titleHeight : `calc(100% - ${titleHeight}px)`;
 
     return (
       <div
@@ -326,7 +321,13 @@ export default class MapVisualisation extends Component {
             {visualisation.name}
           </span>
         </h2>
-        <div className="mapContainer">
+        <div
+          className="mapContainer"
+          style={{
+            height: mapHeight,
+            width: mapWidth,
+          }}
+        >
           <div
             className="leafletMap"
             ref={(ref) => { this.leafletMapNode = ref; }}

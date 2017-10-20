@@ -2,10 +2,11 @@
 
 .MapVisualisation {
     position: relative;
+    height: 100%;
 
     .leaflet-container {
-        height: 80vh;
         width: 100%;
+        height: 100%;
     }
 
     h2 {
@@ -129,9 +130,6 @@
                 image-orientation: from-image;
             }
         }
-    }
-    .mapContainer {
-        position: relative;
     }
     .Legend {
         padding: 0.5rem 1rem;
