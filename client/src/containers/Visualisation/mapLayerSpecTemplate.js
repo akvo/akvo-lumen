@@ -7,7 +7,7 @@ const mapLayerSpec = {
   longitude: null,
   geom: null,
   pointColorColumn: null,
-  pointSize: 1,
+  pointSize: 3,
   pointColorMapping: [],
   popup: [],
   legend: {
