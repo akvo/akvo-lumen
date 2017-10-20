@@ -181,6 +181,7 @@ class AkvoFlowDataSourceSettings extends Component {
       surveyId: selectedSurveyId,
       formId: selectedFormId,
       refreshToken: keycloak.refreshToken(),
+      version: 2,
     });
     this.props.onChangeSettings({ name: form.name });
   }

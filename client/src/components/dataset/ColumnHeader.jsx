@@ -82,17 +82,22 @@ export default class ColumnHeader extends Component {
           </div>
           : null
         }
-        <span
-          className="columnType clickable"
-        >
+        {column.get('key') ?
+          <span className="columnKey">
+            <i className="fa fa-key" aria-hidden />
+          </span> :
           <span
-            className="columnTypeToggle"
-            onClick={this.handleDataTypeMenuClick}
-            ref={(ref) => { this.columnTypeLabel = ref; }}
+            className="columnType clickable"
           >
-            {column.get('type')}
+            <span
+              className="columnTypeToggle"
+              onClick={this.handleDataTypeMenuClick}
+              ref={(ref) => { this.columnTypeLabel = ref; }}
+            >
+              {column.get('type')}
+            </span>
           </span>
-        </span>
+        }
         <span
           className="columnTitleText"
           title={column.get('title')}

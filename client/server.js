@@ -17,22 +17,26 @@ new WebpackDevServer(webpack(config), {
       target: "http://backend:3000",
       secure: false
     },
-    '/share/**': {
+    '/env': {
       target: "http://backend:3000",
       secure: false
     },
-    '/verify/**': {
+    '/healthz': {
       target: "http://backend:3000",
       secure: false
-      },
+    },
     '/maps/**': {
       target: "http://windshaft:4000",
       secure: false,
       pathRewrite: {
         '/maps' : ''
       }
-      },
-    '/env': {
+    },
+    '/share/**': {
+      target: "http://backend:3000",
+      secure: false
+    },
+    '/verify/**': {
       target: "http://backend:3000",
       secure: false
     }

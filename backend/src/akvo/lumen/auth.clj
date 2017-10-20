@@ -23,6 +23,7 @@
   (and (= :get request-method)
        (or (= "/api" path-info)
            (= "/env" path-info)
+           (= "/healthz" path-info)
            (s/starts-with? path-info "/share/")
            (s/starts-with? path-info "/verify/"))))
 

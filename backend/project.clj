@@ -27,6 +27,7 @@
                  [org.apache.tika/tika-parsers "1.16" :exclusions [org.slf4j/slf4j-api]]
                  [org.clojure/clojure "1.9.0-beta1"]
                  [org.clojure/data.csv "0.1.4"]
+                 [org.clojure/java.jdbc "0.7.3"]
                  [org.immutant/web "2.1.9" :exclusions [ch.qos.logback/logback-classic]]
                  [org.postgresql/postgresql "42.1.4"]
                  [ragtime/ragtime.jdbc "0.6.4"]
