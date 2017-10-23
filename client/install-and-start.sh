@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 npm install
 npm rebuild node-sass
