@@ -33,6 +33,9 @@ services:
       - ./client:/lumen
    ports:
       - "3030:3030"
+   environment:
+     - HOST_UID
+     - HOST_GID
  redis:
    image: redis:3.2.9
  windshaft:
