@@ -85,10 +85,12 @@
   (let [geom (or (get layer "geom")
                  (format "ST_SetSRID(ST_MakePoint(%s, %s), 4326)"
                          (get layer "longitude")
-                         (get layer "latitude")))]
-    (-> (jdbc/query tenant-conn
-                    (format "SELECT ST_Extent(%s) FROM %s WHERE %s" geom table-name where-clause))
-        first :st_extent parse-box)))
+                         (get layer "latitude")))
+        sql-str (format "SELECT ST_Extent(%s) FROM %s WHERE %s"
+                        geom table-name where-clause)]
+    (when-some [st-extent (-> (jdbc/query tenant-conn sql-str)
+                              first :st_extent)]
+      (parse-box st-extent))))
 
 (defn build [tenant-conn table-name layer where-clause]
   {"boundingBox" (bounds tenant-conn table-name
