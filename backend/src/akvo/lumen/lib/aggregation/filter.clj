@@ -33,7 +33,7 @@
 
 (defn parse-date [s]
   (try
-    (java.sql.Timestamp. (Long/parseLong s))
+    (java.sql.Timestamp. (/ s 1000))
     (catch NumberFormatException e
       (invalid-filter "Not a timestamp" {:string s}))))
 
