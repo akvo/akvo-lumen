@@ -1,6 +1,5 @@
 (ns akvo.lumen.lib.aggregation.filter
-  (:require [akvo.lumen.lib.share-impl :refer [random-url-safe-string]]
-            [clojure.string :as str])
+  (:require [clojure.string :as str])
   (:import [java.sql.Timestamp]))
 
 (defn invalid-filter [msg map]
@@ -9,8 +8,21 @@
 (defmulti filter-sql (fn [filter]
                        (get filter "strategy")))
 
+(defn- char-range [start end]
+  (map char (range (int start) (inc (int end)))))
+
+(def alphanumerics (concat (char-range \a \z)
+                           (char-range \A \Z)
+                           (take 10 (range))))
+
+(defn random-tag []
+  (format "tag_%s" (->> #(rand-nth alphanumerics)
+                        repeatedly
+                        (take 10)
+                        (apply str))))
+
 (defn $ize [v]
-  (let [tag (format "tag_%s" (random-url-safe-string))]
+  (let [tag (random-tag)]
     (format "$%s$%s$%s$" tag v tag)))
 
 (defn parse-number [s]
