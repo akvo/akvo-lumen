@@ -77,7 +77,7 @@
         metadata (map-metadata/build tenant-conn table-name layer where-clause)
         headers (headers tenant-conn)
         url (format "%s/layergroup" windshaft-url)
-        map-config (map-config/build table-name layer where-clause metadata)
+        map-config (map-config/build table-name layer where-clause metadata columns)
         layer-group-id (-> (client/post url {:body (json/encode map-config)
                                              :headers headers
                                              :content-type :json})
