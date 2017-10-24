@@ -50,7 +50,7 @@
                           pointColorColumn table-name where-clause)
           distinct-values (map :value
                                (jdbc/query tenant-conn sql-str))
-          used-colors (set (map #(get "color" %) pointColorMapping))
+          used-colors (set (map #(get % "color") pointColorMapping))
           color-map (reduce (fn [m {:strs [value color]}]
                               (assoc m value color))
                             {}
