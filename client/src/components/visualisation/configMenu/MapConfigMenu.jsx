@@ -108,6 +108,7 @@ export default class MapConfigMenu extends Component {
               datasetOptions={this.props.datasetOptions}
               onChangeMapLayer={this.handleChangeMapLayer}
               onSave={this.props.onSave}
+              disabled={visualisation.awaitingResponse}
             />
           }
         </div>

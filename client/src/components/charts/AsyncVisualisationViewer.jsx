@@ -20,7 +20,7 @@ export default class AsyncVisualisationViewer extends Component {
     let output;
 
     if (visualisation.visualisationType === 'map') {
-      require.ensure(['react-leaflet'], () => {
+      require.ensure(['leaflet'], () => {
         // eslint-disable-next-line global-require
         const MapVisualisation = require('./MapVisualisation').default;
 
@@ -31,7 +31,7 @@ export default class AsyncVisualisationViewer extends Component {
             output,
           },
         });
-      }, 'reactLeaflet');
+      }, 'leaflet');
     } else if (visualisation.visualisationType === 'pivot table') {
       this.setState({
         asyncComponents: {

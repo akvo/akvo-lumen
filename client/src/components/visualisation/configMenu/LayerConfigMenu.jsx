@@ -3,8 +3,6 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import SelectMenu from '../../common/SelectMenu';
 import SelectInput from './SelectInput';
-import { getPointColorValues, getPointColorMappingSortFunc } from '../../../utilities/chart';
-import { palette } from '../../../utilities/visualisationColors';
 import ButtonRowInput from './ButtonRowInput';
 import ToggleInput from './ToggleInput';
 import ColorLabels from './ColorLabels';
@@ -61,7 +59,7 @@ export default class LayerConfigMenu extends Component {
   }
 
   getTabContent(columnOptions) {
-    const { layer, layerIndex, onChangeMapLayer } = this.props;
+    const { layer, layerIndex, onChangeMapLayer, disabled } = this.props;
     let tabContent;
 
     switch (this.state.activeTab) {
@@ -73,6 +71,7 @@ export default class LayerConfigMenu extends Component {
             <div className="inputGroup">
               <label htmlFor="xDatasetMenu">Source dataset:</label>
               <SelectMenu
+                disabled={disabled}
                 name="datasetMenu"
                 placeholder="Choose dataset..."
                 value={layer.datasetId !== null ?
@@ -95,35 +94,58 @@ export default class LayerConfigMenu extends Component {
               onChange={() => null}
               buttonSpacing="2rem"
             />
+            {(layer.latitude !== null || layer.longitude !== null) &&
+              <div>
+                <div className="inputGroup">
+                  <SelectInput
+                    disabled={layer.datasetId === null || disabled}
+                    placeholder="Select a latitude column"
+                    labelText="Latitude column"
+                    choice={layer.latitude !== null ? layer.latitude.toString() : null}
+                    name="latitudeInput"
+                    options={columnOptions.filter(column => column.type === 'number')}
+                    onChange={value => onChangeMapLayer(layerIndex, {
+                      latitude: value,
+                    })}
+                  />
+                </div>
+                <div className="inputGroup">
+                  <SelectInput
+                    disabled={layer.datasetId === null || disabled}
+                    placeholder="Select a longitude column"
+                    labelText="Longitude column"
+                    choice={layer.longitude !== null ? layer.longitude.toString() : null}
+                    name="longitudeInput"
+                    options={columnOptions.filter(column => column.type === 'number')}
+                    onChange={value => onChangeMapLayer(layerIndex, {
+                      longitude: value,
+                    })}
+                  />
+                </div>
+                <hr />
+              </div>
+            }
             <div className="inputGroup">
               <SelectInput
-                disabled={layer.datasetId === null}
-                placeholder="Select a latitude column"
-                labelText="Latitude column"
-                choice={layer.latitude !== null ? layer.latitude.toString() : null}
-                name="latitudeInput"
-                options={columnOptions.filter(column => column.type === 'number')}
+                disabled={layer.datasetId === null || disabled}
+                placeholder="Select a geopoint column"
+                labelText="Geopoint column"
+                choice={layer.geom !== null ? layer.geom.toString() : null}
+                name="geomInput"
+                options={columnOptions.filter(column => column.type === 'geopoint')}
                 onChange={value => onChangeMapLayer(layerIndex, {
-                  latitude: value,
+                  geom: value,
+                  latitude: null,
+                  longitude: null,
                 })}
               />
             </div>
             <div className="inputGroup">
               <SelectInput
-                disabled={layer.datasetId === null}
-                placeholder="Select a longitude column"
-                labelText="Longitude column"
-                choice={layer.longitude !== null ? layer.longitude.toString() : null}
-                name="longitudeInput"
-                options={columnOptions.filter(column => column.type === 'number')}
-                onChange={value => onChangeMapLayer(layerIndex, {
-                  longitude: value,
-                })}
-              />
-            </div>
-            <div className="inputGroup">
-              <SelectInput
-                disabled={layer.latitude == null || layer.longitude == null}
+                disabled={
+                  ((layer.latitude == null || layer.longitude == null) && layer.geom == null) ||
+                  disabled
+                }
                 placeholder="Select a data column to color points by"
                 labelText="Color coding column"
                 choice={layer.pointColorColumn !== null ?
@@ -151,6 +173,7 @@ export default class LayerConfigMenu extends Component {
             className="legendTab"
           >
             <ToggleInput
+              disabled={disabled}
               className="inputGroup"
               checked={layer.legend.visible}
               label="Legend"
@@ -167,7 +190,7 @@ export default class LayerConfigMenu extends Component {
                 value: item,
               }))}
               label="Position"
-              disabled={false}
+              disabled={disabled}
               selected={layer.legend.position}
               onChange={(option) => {
                 const legend = Object.assign({}, layer.legend);
@@ -218,6 +241,7 @@ export default class LayerConfigMenu extends Component {
                       checked={this.props.layer.popup.findIndex(entry =>
                         entry.column === option.value) > -1}
                       onChange={() => this.handlePopupChange(option.value)}
+                      disabled={disabled}
                     />
                   </span>
                   <span
@@ -268,7 +292,7 @@ export default class LayerConfigMenu extends Component {
                 label: item,
                 value: item,
               }))}
-              disabled={false}
+              disabled={disabled}
               selected={layer.pointSize ? layer.pointSize.toString() : null}
               label="Size"
               onChange={option => onChangeMapLayer(layerIndex, { pointSize: option })}
@@ -294,6 +318,7 @@ export default class LayerConfigMenu extends Component {
                   Colors ({columnOptions.find(obj => obj.value === layer.pointColorColumn).title})
                 </label>
                 <ColorLabels
+                  disabled={disabled}
                   id="colors"
                   pointColorMapping={layer.pointColorMapping}
                   onChangeColor={(value, newColor) => this.handleChangeLabelColor(value, newColor)}
@@ -312,15 +337,7 @@ export default class LayerConfigMenu extends Component {
   }
 
   handlePointColorColumnChange(columnName = null, columnOption = null) {
-    const { datasets } = this.props;
-    const dataset = datasets[this.props.layer.datasetId];
-    let values;
     let legend;
-    let sortFunc;
-
-    if (columnName != null) {
-      values = getPointColorValues(dataset, columnName, this.props.layer.filters);
-    }
 
     if (columnOption != null) {
       legend = Object.assign({}, this.props.layer.legend, { title: columnOption.title });
@@ -328,23 +345,10 @@ export default class LayerConfigMenu extends Component {
       legend = Object.assign({}, this.props.layer.legend, { title: null });
     }
 
-    if (columnOption != null) {
-      sortFunc = getPointColorMappingSortFunc(columnOption.type);
-    }
-
     this.props.onChangeMapLayer(this.props.layerIndex, {
       legend,
       pointColorColumn: columnName,
-      pointColorMapping: values != null ?
-        values.map((value, index) => ({
-          op: 'equals',
-          value,
-          color: palette[index] || '#000000',
-        }))
-        .sort(sortFunc)
-        :
-        []
-      ,
+      pointColorMapping: [],
     });
   }
 
@@ -423,4 +427,5 @@ LayerConfigMenu.propTypes = {
   onDeselectLayer: PropTypes.func.isRequired,
   layerIndex: PropTypes.number.isRequired,
   onSave: PropTypes.func.isRequired,
+  disabled: PropTypes.bool,
 };

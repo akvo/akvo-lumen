@@ -178,6 +178,23 @@ class Dashboard extends Component {
       let aggType;
 
       switch (vType) {
+        case 'map':
+          api.post('/api/visualisations/maps', visualisation)
+            .then((response) => {
+              if (response.status >= 200 && response.status < 300) {
+                response
+                  .json()
+                  .then((json) => {
+                    const change = {};
+                    change[id] = json;
+                    const aggregatedDatasets =
+                      Object.assign({}, this.state.aggregatedDatasets, change);
+                    this.setState({ aggregatedDatasets });
+                  });
+              }
+            });
+          /* Maps hit a different endpoint than other aggregations, so bail out now */
+          return;
         case 'pie':
         case 'donut':
           aggType = 'pie';
@@ -319,11 +336,42 @@ class Dashboard extends Component {
 
     Object.keys(visualisations).forEach((key) => {
       if (this.state.aggregatedDatasets[key]) {
-        out[key] = Object.assign(
-          {},
-          visualisations[key],
-          { data: this.state.aggregatedDatasets[key] }
-        );
+        if (visualisations[key].visualisationType === 'map') {
+          const { tenantDB, layerGroupId, metadata } = this.state.aggregatedDatasets[key];
+          out[key] = Object.assign(
+            {},
+            visualisations[key],
+            {
+              tenantDB,
+              layerGroupId,
+              metadata,
+            },
+            {
+              spec: Object.assign(
+                {},
+                visualisations[key].spec,
+                {
+                  layers: visualisations[key].spec.layers.map((item, idx) => {
+                    if (idx === 0 && metadata && metadata.pointColorMapping) {
+                      return Object.assign(
+                        {},
+                        item,
+                        { pointColorMapping: metadata.pointColorMapping }
+                      );
+                    }
+                    return item;
+                  }),
+                }
+              ),
+            }
+          );
+        } else {
+          out[key] = Object.assign(
+            {},
+            visualisations[key],
+            { data: this.state.aggregatedDatasets[key] }
+          );
+        }
       } else {
         out[key] = visualisations[key];
       }
