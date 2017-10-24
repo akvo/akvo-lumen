@@ -21,19 +21,20 @@
                         (take 10)
                         (apply str))))
 
-(defn $ize [v]
+(defn dollar-quote
+  [v]
   (let [tag (random-tag)]
     (format "$%s$%s$%s$" tag v tag)))
 
 (defn parse-number [s]
   (try
-    ($ize (Double/parseDouble s))
+    (dollar-quote (Double/parseDouble s))
     (catch NumberFormatException e
       (invalid-filter "Not a number" {:string s}))))
 
 (defn parse-date [s]
   (try
-    (java.sql.Timestamp. (/ s 1000))
+    (java.sql.Timestamp. (* s 1000))
     (catch NumberFormatException e
       (invalid-filter "Not a timestamp" {:string s}))))
 
@@ -77,7 +78,7 @@
       "text" (format "coalesce(%1$s, '') %2$s %3$s"
                      column-name
                      op
-                     ($ize value))
+                     (dollar-quote value))
       (invalid-filter "Type not supported" {:type column-type}))))
 
 (defmethod filter-sql "isEmpty"
