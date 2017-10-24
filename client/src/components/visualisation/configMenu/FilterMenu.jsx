@@ -79,7 +79,7 @@ const getFilterDisplayValue = (value, columnName, columnOptions) => {
   if (columnType === 'date') {
     const secondsToMilliseconds = 1000;
 
-    displayValue = moment(parseInt(value, 10) * secondsToMilliseconds).format('YYYY-MM-DD hh:mm');
+    displayValue = moment(parseInt(value, 10) * secondsToMilliseconds).format('YYYY-MM-DD');
   } else {
     displayValue = value;
   }
