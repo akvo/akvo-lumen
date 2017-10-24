@@ -39,12 +39,19 @@
       (str/replace #"\n" " ")
       (str/replace #" +" " ")))
 
-(defn sql [table-name geom-column popup-columns point-color-column where-clause]
-  (let [columns (distinct
-                 (cond-> (conj popup-columns geom-column)
-                   point-color-column (conj point-color-column)))]
+(defn sql [columns table-name geom-column popup-columns point-color-column where-clause]
+  (let [date-column-set (reduce (fn [m c]
+                                  (if (= "date" (get c "type"))
+                                    (conj m (get c "columnName"))
+                                    m)) #{} columns)
+        cols (distinct
+              (cond-> (conj (map (fn [c]
+                                   (if (contains? date-column-set c)
+                                     (str c "::text")
+                                     c)) popup-columns) geom-column)
+                point-color-column (conj point-color-column)))]
     (format "select %s from %s where %s"
-            (str/join ", " columns)
+            (str/join ", " cols)
             table-name
             where-clause)))
 
@@ -54,7 +61,7 @@
     (let [{:strs [latitude longitude]} layer-spec]
       (format "ST_SetSRID(ST_MakePoint(%s, %s), 4326) AS latlong" longitude latitude))))
 
-(defn build [table-name layer where-clause metadata]
+(defn build [table-name layer where-clause metadata columns]
   (let [geom-column (get-geom-column layer)
         popup-columns (mapv #(get % "column")
                             (get layer "popup"))
@@ -67,6 +74,6 @@
                            "cartocss_version" "2.0.0"
                            "geom_column" (or (get layer "geom") "latlong")
                            "interactivity" popup-columns
-                           "sql" (sql table-name geom-column popup-columns point-color-column
+                           "sql" (sql columns table-name geom-column popup-columns point-color-column
                                       where-clause)
                            "srid" "4326"}}]}))
