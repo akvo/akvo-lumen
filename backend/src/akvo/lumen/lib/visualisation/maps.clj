@@ -92,33 +92,3 @@
       (do-create tenant-conn windshaft-url dataset-id layer))
     (catch Exception e
       (lib/bad-request (ex-data e)))))
-
-
-(comment
-  ;; Example map spec
-  {"type" "visualisation",
-   "name" "Untitled visualisation",
-   "visualisationType" "map",
-   "datasetId" "59c3ab16-34e8-44df-957e-6c1c38fbf465",
-   "spec"
-   {"version" 1,
-    "baseLayer" "street",
-    "layers"
-    [{"popup" [{"column" "c4"}],
-      "longitude" "c7",
-      "pointSize" 1,
-      "legend" {"title" "City", "visible" true, "position" "bottom"},
-      "filters" [],
-      "latitude" "c6",
-      "visible" true,
-      "pointColorMapping"
-      [{"op" "equals", "value" "Finland", "color" "#86AA90"}
-       {"op" "equals", "value" "Gothenburg", "color" "#BF2932"}
-       {"op" "equals", "value" "London", "color" "#19A99D"}
-       {"op" "equals", "value" "Netherlands", "color" "#66608F"}
-       {"op" "equals", "value" "Vaasa", "color" "#95734B"}],
-      "pointColorColumn" "c5",
-      "datasetId" "59c3ab16-34e8-44df-957e-6c1c38fbf465",
-      "title" "Untitled Layer 1"}]}}
-
-  )

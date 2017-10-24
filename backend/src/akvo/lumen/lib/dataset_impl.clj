@@ -24,8 +24,7 @@
   (get column "sort"))
 
 (defn select-data-sql [table-name columns]
-  (let [
-        select-expr (->> columns
+  (let [select-expr (->> columns
                          (map (fn [{:strs [type columnName]}]
                                 (if (= type "geopoint")
                                   (format "ST_AsText(%s)" columnName)
