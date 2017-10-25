@@ -22,6 +22,36 @@ export default class MapConfigMenu extends Component {
     this.handleChangeMapLayer = this.handleChangeMapLayer.bind(this);
   }
 
+  componentWillReceiveProps(next) {
+    const prev = this.props;
+
+    /* If only one geopoint column exists in dataset, select it for map.
+    ** Complexity here is due to needing to wait until the dataset columns have loaded before
+    ** we can check type of each column.
+    */
+    const haveVisualisation = next.visualisation && next.visualisation.spec.layers;
+    if (haveVisualisation) {
+      next.visualisation.spec.layers.forEach((layer, idx) => {
+        const { datasetId } = layer;
+
+        if (datasetId) {
+          const datasetWasLoaded = prev.datasets[datasetId] && prev.datasets[datasetId].get('columns');
+          const datasetIsLoaded = next.datasets[datasetId] && next.datasets[datasetId].get('columns');
+
+          if (!datasetWasLoaded && datasetIsLoaded) {
+            const columns = next.datasets[datasetId].get('columns');
+            const geopointColumns = columns.filter(column => column.get('type') === 'geopoint').toArray();
+
+            if (geopointColumns.length === 1) {
+              // If there is exactly 1 geopoint column, set it as the layer geom for convenience
+              this.handleChangeMapLayer(idx, { geom: geopointColumns[0].get('columnName') });
+            }
+          }
+        }
+      });
+    }
+  }
+
   handleAddMapLayer() {
     const title = `Untitled Layer ${this.props.visualisation.spec.layers.length + 1}`;
     const layers = this.props.visualisation.spec.layers.map(item => item);
@@ -43,7 +73,8 @@ export default class MapConfigMenu extends Component {
 
     // Temporary shim while we still define datasetId on the top-level visualisation
     if (Object.keys(value).indexOf('datasetId') > -1) {
-      const datasetId = value.datasetId;
+      const { datasetId } = value;
+
       this.props.onChangeSourceDataset(datasetId, { layers });
     } else {
       this.props.onChangeSpec({ layers });
