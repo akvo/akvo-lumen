@@ -64,7 +64,8 @@ const getNeedNewAggregation = (newV = { spec: {} }, oldV = { spec: {} }, optiona
         newV.pointColorColumn !== oldV.pointColorColumn ||
         newV.pointSize !== oldV.pointSize ||
         !isEqual(newV.filters, oldV.filters) ||
-        !isEqual(newV.popup, oldV.popup)
+        !isEqual(newV.popup, oldV.popup) ||
+        !isEqual(newV.pointColorMapping, oldV.pointColorMapping)
       );
     default:
       throw new Error(`Unknown visualisation type ${vType} supplied to getNeedNewAggregation`);
