@@ -185,6 +185,21 @@ export default class VisualisationEditor extends Component {
     };
 
     const updateMapVisualisation = ({ layerGroupId, metadata }) => {
+      const needPointColorMapping = visualisation.spec.layers[0].pointColorColumn;
+      const havePointColorMapping = checkUndefined(metadata, 'pointColorMapping', 'length') > 0;
+      const parentHasPointColorMapping = visualisation.spec.layers[0].pointColorMapping.length > 0;
+
+      if (needPointColorMapping && havePointColorMapping && !parentHasPointColorMapping) {
+        const clonedLayer = Object.assign(
+          {},
+          this.props.visualisation.spec.layers[0],
+          { pointColorMapping: metadata.pointColorMapping });
+
+        const layers = this.props.visualisation.spec.layers.slice(0);
+        layers[0] = clonedLayer;
+        this.props.onChangeVisualisationSpec({ layers });
+      }
+
       this.setState({
         visualisation: Object.assign(
           {},
