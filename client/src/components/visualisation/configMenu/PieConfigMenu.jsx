@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import SelectInput from './SelectInput';
 import LabelInput from './LabelInput';
 import ToggleInput from './ToggleInput';
+import { filterColumns } from '../../../utilities/utils';
 
 require('./PieConfigMenu.scss');
 
@@ -22,7 +23,7 @@ export default function PieConfigMenu(props) {
         choice={spec.bucketColumn !== null ?
           spec.bucketColumn.toString() : null}
         name="xGroupColumnMenu"
-        options={columnOptions}
+        options={filterColumns(columnOptions, ['number', 'date', 'text'])}
         clearable
         onChange={value => onChangeSpec({
           bucketColumn: value,

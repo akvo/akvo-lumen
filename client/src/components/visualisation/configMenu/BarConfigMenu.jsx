@@ -5,6 +5,7 @@ import SelectInput from './SelectInput';
 import LabelInput from './LabelInput';
 import Subtitle from './Subtitle';
 import SortInput from './SortInput';
+import { filterColumns } from '../../../utilities/utils';
 
 const getColumnTitle = (columnName, columnOptions) =>
   columnOptions.find(obj => obj.value === columnName).title;
@@ -75,7 +76,7 @@ export default function BarConfigMenu(props) {
         labelTextId="metric_column"
         choice={spec.metricColumnY !== null ? spec.metricColumnY.toString() : null}
         name="metricColumnYInput"
-        options={columnOptions}
+        options={filterColumns(columnOptions, ['number', 'date', 'text'])}
         onChange={value => handleChangeSpec({
           metricColumnY: value,
         }, spec, onChangeSpec, columnOptions)}
@@ -109,7 +110,7 @@ export default function BarConfigMenu(props) {
         choice={spec.bucketColumn !== null ?
           spec.bucketColumn.toString() : null}
         name="xGroupColumnMenu"
-        options={columnOptions}
+        options={filterColumns(columnOptions, ['number', 'date', 'text'])}
         clearable
         onChange={value => handleChangeSpec({
           bucketColumn: value,
@@ -151,7 +152,7 @@ export default function BarConfigMenu(props) {
           />
           <SortInput
             spec={spec}
-            columnOptions={columnOptions}
+            columnOptions={filterColumns(columnOptions, ['number', 'date', 'text'])}
             onChangeSpec={value => handleChangeSpec(value, spec, onChangeSpec, columnOptions)}
           />
           <SelectInput
@@ -160,7 +161,7 @@ export default function BarConfigMenu(props) {
             choice={spec.subBucketColumn !== null ?
               spec.subBucketColumn.toString() : null}
             name="subGroupColumnMenu"
-            options={columnOptions}
+            options={filterColumns(columnOptions, ['number', 'date', 'text'])}
             clearable
             disabled={spec.bucketColumn === null}
             onChange={value => handleChangeSpec({
