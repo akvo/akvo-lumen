@@ -29,7 +29,7 @@ export function checkUndefined(object = {}, ...keys) {
 }
 
 /*
-# argumentss
+# arguments
 columns: an array of objects, each of which has a "type" property
 acceptableTypes: a single string or an array of strings
 
