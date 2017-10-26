@@ -27,3 +27,12 @@ export function checkUndefined(object, ...keys) {
 
   return currentObject;
 }
+
+// columns should be an array of objects, each of which has a "type" property
+// acceptableTypes should be a single string or an array of strings
+export function filterColumns(columns = [], acceptableTypes = []) {
+  const types = Array.isArray(acceptableTypes) ? acceptableTypes : [ acceptableTypes ];
+  return columns.filter(column => {
+    return types.some(type => type === column.type);
+  });
+}

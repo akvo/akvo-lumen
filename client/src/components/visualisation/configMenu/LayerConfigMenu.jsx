@@ -7,6 +7,7 @@ import ButtonRowInput from './ButtonRowInput';
 import ToggleInput from './ToggleInput';
 import ColorLabels from './ColorLabels';
 import FilterMenu from './FilterMenu';
+import { filterColumns } from '../../../utilities/utils';
 
 require('./LayerConfigMenu.scss');
 
@@ -103,7 +104,7 @@ export default class LayerConfigMenu extends Component {
                     labelText="Latitude column"
                     choice={layer.latitude !== null ? layer.latitude.toString() : null}
                     name="latitudeInput"
-                    options={columnOptions.filter(column => column.type === 'number')}
+                    options={filterColumns(columnOptions, 'number')}
                     onChange={value => onChangeMapLayer(layerIndex, {
                       latitude: value,
                     })}
@@ -116,7 +117,7 @@ export default class LayerConfigMenu extends Component {
                     labelText="Longitude column"
                     choice={layer.longitude !== null ? layer.longitude.toString() : null}
                     name="longitudeInput"
-                    options={columnOptions.filter(column => column.type === 'number')}
+                    options={filterColumns(columnOptions, 'number')}
                     onChange={value => onChangeMapLayer(layerIndex, {
                       longitude: value,
                     })}
@@ -132,7 +133,7 @@ export default class LayerConfigMenu extends Component {
                 labelText="Geopoint column"
                 choice={layer.geom !== null ? layer.geom.toString() : null}
                 name="geomInput"
-                options={columnOptions.filter(column => column.type === 'geopoint')}
+                options={filterColumns(columnOptions, 'geopoint')}
                 onChange={value => onChangeMapLayer(layerIndex, {
                   geom: value,
                   latitude: null,
@@ -151,7 +152,7 @@ export default class LayerConfigMenu extends Component {
                 choice={layer.pointColorColumn !== null ?
                   layer.pointColorColumn.toString() : null}
                 name="xGroupColumnMenu"
-                options={columnOptions}
+                options={filterColumns(columnOptions, ['text', 'number'])}
                 clearable
                 onChange={columnName =>
                   this.handlePointColorColumnChange(columnName,
@@ -161,7 +162,7 @@ export default class LayerConfigMenu extends Component {
             <FilterMenu
               filters={layer.filters}
               hasDataset={layer.datasetId !== null}
-              columnOptions={columnOptions}
+              columnOptions={filterColumns(columnOptions, ['text', 'number', 'date'])}
               onChangeSpec={object => onChangeMapLayer(layerIndex, object)}
             />
           </div>
@@ -227,7 +228,7 @@ export default class LayerConfigMenu extends Component {
             <div
               className="inputGroup"
             >
-              {columnOptions.map((option, index) =>
+              {filterColumns(columnOptions, ['text', 'number', 'date']).map((option, index) =>
                 <div
                   className="optionContainer"
                   key={index}
