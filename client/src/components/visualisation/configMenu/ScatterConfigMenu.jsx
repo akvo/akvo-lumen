@@ -4,6 +4,7 @@ import { FormattedMessage } from 'react-intl';
 import SelectInput from './SelectInput';
 import LabelInput from './LabelInput';
 import Subtitle from './Subtitle';
+import { filterColumns } from '../../../utilities/utils';
 
 const getColumnTitle = (columnName, columnOptions) =>
   columnOptions.find(obj => obj.value === columnName).title;
@@ -58,7 +59,7 @@ export default function ScatterConfigMenu(props) {
         labelTextId="metric_column"
         choice={spec.metricColumnY !== null ? spec.metricColumnY.toString() : null}
         name="yColumnInput"
-        options={columnOptions.filter(column => column.type === 'number' || column.type === 'date')}
+        options={filterColumns(columnOptions, ['number', 'date'])}
         onChange={(value) => {
           const change = { metricColumnY: value };
 
@@ -84,7 +85,7 @@ export default function ScatterConfigMenu(props) {
         labelTextId="metric_column"
         choice={spec.metricColumnX !== null ? spec.metricColumnX.toString() : null}
         name="xColumnInput"
-        options={columnOptions.filter(column => column.type === 'number' || column.type === 'date')}
+        options={filterColumns(columnOptions, ['number', 'date'])}
         onChange={(value) => {
           const change = { metricColumnX: value };
 
@@ -111,7 +112,7 @@ export default function ScatterConfigMenu(props) {
         choice={spec.bucketColumn !== null ?
           spec.bucketColumn.toString() : null}
         name="xGroupColumnMenu"
-        options={columnOptions}
+        options={filterColumns(columnOptions, ['number', 'date', 'text'])}
         clearable
         onChange={(value) => {
           const change = { bucketColumn: value };
@@ -148,7 +149,7 @@ export default function ScatterConfigMenu(props) {
         labelTextId="popup_label_column"
         choice={getPopupLabelChoice(spec)}
         name="datapointLabelColumnMenu"
-        options={columnOptions}
+        options={filterColumns(columnOptions, ['number', 'date', 'text'])}
         clearable
         onChange={value => onChangeSpec({ datapointLabelColumn: value })}
         disabled={spec.bucketColumn !== null}

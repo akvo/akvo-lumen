@@ -4,6 +4,7 @@ import { FormattedMessage } from 'react-intl';
 import SelectInput from './SelectInput';
 import LabelInput from './LabelInput';
 import Subtitle from './Subtitle';
+import { filterColumns } from '../../../utilities/utils';
 
 const getColumnTitle = (columnName, columnOptions) =>
   columnOptions.find(obj => obj.value === columnName).title;
@@ -48,7 +49,7 @@ export default function LineConfigMenu(props) {
         labelTextId="metric_column"
         choice={spec.metricColumnY !== null ? spec.metricColumnY.toString() : null}
         name="metricColumnYInput"
-        options={columnOptions}
+        options={filterColumns(columnOptions, ['number', 'date', 'text'])}
         onChange={value => onChangeSpec({
           metricColumnY: value,
           axisLabelY: getAxisLabel('y', Object.assign({}, spec, { metricColumnY: value }), columnOptions),
@@ -70,7 +71,7 @@ export default function LineConfigMenu(props) {
         labelTextId="metric_column"
         choice={spec.metricColumnX !== null ? spec.metricColumnX.toString() : null}
         name="metricColumnXInput"
-        options={columnOptions}
+        options={filterColumns(columnOptions, ['number', 'date'])}
         onChange={value => onChangeSpec({
           metricColumnX: value,
           axisLabelX: getAxisLabel('x', Object.assign({}, spec, { metricColumnX: value }), columnOptions),
