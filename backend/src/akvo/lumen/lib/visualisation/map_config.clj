@@ -16,9 +16,9 @@
     (for [{:strs [value color]} point-color-mapping]
       (format "[ %s = %s ] { marker-fill: %s }"
               point-color-column
-              (if (number? value)
-                value
-                (format "'%s'" value))
+              (if (string? value)
+                (format "'%s'" value)
+                value)
               (pr-str color)))))
 
 (defn cartocss [point-size point-color-column point-color-mapping]
