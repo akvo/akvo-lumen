@@ -118,7 +118,7 @@
     (util/exec! db-uri
                 (str "CREATE DATABASE %1$s "
                      "WITH OWNER = %1$s "
-                     "TEMPLATE = template0 "
+                     "TEMPLATE = template1 "
                      "ENCODING = 'UTF8' "
                      "LC_COLLATE = 'en_US.UTF-8' "
                      "LC_CTYPE = 'en_US.UTF-8';")
