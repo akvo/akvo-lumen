@@ -203,7 +203,7 @@ export default class MapVisualisation extends Component {
         !isEqual(this.storedBoundingBox, visualisation.metadata.boundingBox);
       if (!this.storedBoundingBox || boundingBoxChanged) {
         this.storedBoundingBox = visualisation.metadata.boundingBox.slice(0);
-        map.fitBounds(visualisation.metadata.boundingBox);
+        map.fitBounds(visualisation.metadata.boundingBox, { maxZoom: 12 });
       }
     }
 
