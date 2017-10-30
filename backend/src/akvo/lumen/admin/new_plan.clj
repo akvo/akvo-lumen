@@ -1,11 +1,12 @@
 (ns akvo.lumen.admin.new-plan
   "The following env vars are assumed to be present:
-  PG_HOST, PG_DATABASE, PG_USER, PG_PASSWORD
+  ENCRYPTION_KEY, PG_HOST, PG_DATABASE, PG_USER, PG_PASSWORD
   The PG_* env vars can be found in the ElephantSQL console for the appropriate
   instance.
   Arguments are tenant (label) and tier of new plan.
   Use this as follow
-  $ env PG_HOST=***.db.elephantsql.com PG_DATABASE=*** \\
+  $ env ENCRYPTION_KEY=*** \\
+        PG_HOST=***.db.elephantsql.com PG_DATABASE=*** \\
         PG_USER=*** PG_PASSWORD=*** \\
         lein run -m akvo.lumen.admin.new-plan example-tenant standard"
   (:require [akvo.lumen.admin.util :refer [db-uri]]
