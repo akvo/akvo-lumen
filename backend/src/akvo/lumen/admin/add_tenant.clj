@@ -284,7 +284,8 @@
       (setup-database label title)
       (let [user-creds (setup-tenant-in-keycloak label email url)]
         (println "Credentials:")
-        (pprint user-creds)))
+        (pprint user-creds)
+        (println "Remember to add a new plan to the new tenant.")))
     (catch java.lang.AssertionError e
       (prn (.getMessage e)))
     (catch Exception e
