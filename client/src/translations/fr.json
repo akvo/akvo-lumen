@@ -96,7 +96,7 @@
   "max": "Max",
   "mean": "Moyenne",
   "median": "Médiane",
-  "merge_datasets": "fusionner les jeux de données",
+  "merge_datasets": "Fusionner les jeux de données",
   "metric_column": "Colonne numérique",
   "min": "Min",
   "must_choose_bucket_column_first": "Doit choisir la colonne contenant d'abord",
