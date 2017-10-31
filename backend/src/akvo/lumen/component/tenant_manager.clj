@@ -49,7 +49,7 @@
   (let [cfg (HikariConfig.)]
     (.setJdbcUrl cfg (:db_uri tenant))
     (.setPoolName cfg (:label tenant))
-    (.setMaximumPoolSize cfg 2)
+    (.setMinimumIdle cfg 2)
     {:datasource (HikariDataSource. cfg)}))
 
 
