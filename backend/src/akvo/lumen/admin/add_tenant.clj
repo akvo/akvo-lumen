@@ -124,6 +124,8 @@
                      "LC_CTYPE = 'en_US.UTF-8';")
                 tenant)
     (util/exec! tenant-db-uri-with-superuser
+                "CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA public;")
+    (util/exec! tenant-db-uri-with-superuser
                 "CREATE EXTENSION IF NOT EXISTS btree_gist WITH SCHEMA public;")
     (util/exec! tenant-db-uri-with-superuser
                 "CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;")
