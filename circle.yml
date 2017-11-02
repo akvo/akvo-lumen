@@ -12,7 +12,10 @@ machine:
     LEIN_FAST_TRAMPOLINE: true
   hosts:
     postgres: 127.0.0.1
-    auth.lumen.localhost: 127.0.0.1
+    auth.lumen.local: 127.0.0.1
+    t1.lumen.local: 127.0.0.1
+    postgres: 127.0.0.1
+    backend: 127.0.0.1
   services:
     - docker
 
@@ -52,6 +55,8 @@ dependencies:
     - npm install -g npm-cache
     - npm-cache install:
         pwd: client
+    # Puppeteer
+    - docker pull alekzonder/puppeteer:0.12.0
 
 test:
   override:
@@ -61,6 +66,31 @@ test:
         pwd: client
     - npm test:
         pwd: client
+    - ./install-and-start.sh &
+        pwd: client
+    - lein repl &
+        pwd: backend
+    - |
+        BACKEND=""
+        while [ -z $BACKEND ]; do
+          echo "Waiting for backend to start."
+          sleep 1;
+          let BACKEND=$(sudo lsof -Pi :3000 -sTCP:LISTEN -t)
+        done
+    - |
+        CLIENT=""
+        while [ -z $CLIENT ]; do
+          echo "Waiting for client to start."
+          sleep 1;
+          let CLIENT=$(sudo lsof -Pi :3030 -sTCP:LISTEN -t)
+        done
+    - |
+        cd client/ui-test
+        export ETH0="$(ip link | awk -F: '$0 ~ "enp"{print $2;getline}' | cut -c2-)"
+        export HOST_IP="$(ip address show $ETH0 | awk '$0 ~ "inet " {print $2}' | cut -d'/' -f1)"
+        docker run --interactive --tty --shm-size 1G --rm -v "$PWD/test.js":/app/index.js --sysctl net.ipv6.conf.all.disable_ipv6=1 \
+           --add-host="t1.lumen.local:$HOST_IP" --add-host="auth.lumen.local:$HOST_IP" --add-host="backend:$HOST_IP" \
+           --add-host="postgres:$HOST_IP" alekzonder/puppeteer:0.12.0
 
 deployment:
   dev:
