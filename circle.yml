@@ -66,10 +66,12 @@ test:
         pwd: client
     - npm test:
         pwd: client
-    - ./install-and-start.sh &
+    - ./install-and-start.sh:
         pwd: client
-    - lein repl &
+        background: true
+    - lein repl:
         pwd: backend
+        background: true
     - |
         BACKEND=""
         while [ -z $BACKEND ]; do
