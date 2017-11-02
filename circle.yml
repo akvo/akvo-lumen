@@ -90,7 +90,8 @@ test:
         cd client/ui-test
         export ETH0="$(ip link | awk -F: '$0 ~ "enp"{print $2;getline}' | cut -c2-)"
         export HOST_IP="$(ip address show $ETH0 | awk '$0 ~ "inet " {print $2}' | cut -d'/' -f1)"
-        docker run --interactive --tty --shm-size 1G --rm -v "$PWD/test.js":/app/index.js --sysctl net.ipv6.conf.all.disable_ipv6=1 \
+        docker run --interactive --tty --shm-size=1G --rm --volume="$PWD/test.js":/app/index.js \
+           --sysctl net.ipv6.conf.all.disable_ipv6=1 \
            --add-host="t1.lumen.local:$HOST_IP" --add-host="auth.lumen.local:$HOST_IP" --add-host="backend:$HOST_IP" \
            --add-host="postgres:$HOST_IP" alekzonder/puppeteer:0.12.0
 
