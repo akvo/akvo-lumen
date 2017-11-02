@@ -74,17 +74,17 @@ test:
         background: true
     - |
         BACKEND=""
-        while [ -z $BACKEND ]; do
+        while [ -z "$BACKEND" ]; do
           echo "Waiting for backend to start."
           sleep 1;
-          let BACKEND=$(sudo lsof -Pi :3000 -sTCP:LISTEN -t)
+          BACKEND=$(sudo lsof -Pi :3000 -sTCP:LISTEN -t)
         done
     - |
         CLIENT=""
-        while [ -z $CLIENT ]; do
+        while [ -z "$CLIENT" ]; do
           echo "Waiting for client to start."
           sleep 1;
-          let CLIENT=$(sudo lsof -Pi :3030 -sTCP:LISTEN -t)
+          CLIENT=$(sudo lsof -Pi :3030 -sTCP:LISTEN -t)
         done
     - |
         cd client/ui-test
