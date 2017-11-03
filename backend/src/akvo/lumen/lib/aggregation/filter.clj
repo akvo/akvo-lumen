@@ -71,7 +71,7 @@
                      column-name
                      op
                      (parse-date value))
-      "text" (format "coalesce(%1$s, '') %2$s %3$s"
+      "text" (format "coalesce(%1$s, '') %2$s '%3$s'"
                      column-name
                      op
                      (engine/pg-escape-string value))

@@ -12,7 +12,7 @@
 
 (deftest ^:functional test-pivot
   (let [dataset-id (import-file *tenant-conn* "pivot.csv" {:dataset-name "pivot"
-                                                             :has-column-headers? true})
+                                                           :has-column-headers? true})
         query (partial aggregation/query *tenant-conn* dataset-id "pivot")]
     (tf/apply *tenant-conn*
               dataset-id
