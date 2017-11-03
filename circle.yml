@@ -27,6 +27,9 @@ dependencies:
   pre:
     # Stopping the default postgres so we can start our own.
     # See https://discuss.circleci.com/t/how-to-permanently-shutdown-circleci-default-postgres-mongodb-etc/7329
+    - export ETH0="$(ip link | awk -F: '$0 ~ "lxcbr"{print $2;getline}' | cut -c2-)"
+    - export HOST_IP="$(ip address show $ETH0 | awk '$0 ~ "inet " {print $2}' | cut -d'/' -f1)"
+    - echo "$ETH0 - $HOST_IP"
     - |
         echo manual | sudo tee /etc/init/postgresql.override
         while sudo lsof -Pi :5432 -sTCP:LISTEN -t; do
@@ -88,13 +91,9 @@ test:
         done
     - |
         cd client/ui-test
-        ip address show
-        #export ETH0="$(ip link | awk -F: '$0 ~ "enp"{print $2;getline}' | cut -c2-)"
-        #export HOST_IP="$(ip address show $ETH0 | awk '$0 ~ "inet " {print $2}' | cut -d'/' -f1)"
-        #echo "$ETH0 - $HOST_IP"
-        #docker run --interactive --tty --rm --volume="$PWD/test.js":/app/index.js \
-        #   --add-host="t1.lumen.local:$HOST_IP" --add-host="auth.lumen.local:$HOST_IP" --add-host="backend:$HOST_IP" \
-        #   --add-host="postgres:$HOST_IP" alekzonder/puppeteer:0.12.0
+        docker run --interactive --tty --rm --volume="$PWD/test.js":/app/index.js \
+           --add-host="t1.lumen.local:$HOST_IP" --add-host="auth.lumen.local:$HOST_IP" --add-host="backend:$HOST_IP" \
+           --add-host="postgres:$HOST_IP" alekzonder/puppeteer:0.12.0
 
 deployment:
   dev:
