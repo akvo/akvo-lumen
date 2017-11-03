@@ -34,25 +34,25 @@ const name = 'AJI';
 	//Login
 	try{
 		await page.setViewport({width: 1024, height: 768});
-		await console.log("Accessing to http://t1.lumen.local:3030...\n");
+		await console.log("Accessing to http://t1.lumen.local:3030...");
 		await page.goto('http://t1.lumen.local:3030/');
 		await page.waitForSelector('#username', {timeout:5000});
-		await console.log("Typing username...\n");
+		await console.log("Typing username...");
 		await page.type('#username','jerome');
-		await console.log("Typing password...\n");
+		await console.log("Typing password...");
 		await page.type('#password','password');
-		await console.log("Trying login...\n");
+		await console.log("Trying login...");
 		await page.click('#kc-login');
 		await page.waitForSelector('button[data-test-id="dataset"]', {timeout:5000});
 		
 		//Dataset adding
 		//Click Dataset+ option
-		await console.log("Accessing to dataset creation...\n");
+		await console.log("Accessing to dataset creation...");
 		await page.click('button[data-test-id="dataset"]');
 		
 		await page.waitForSelector('button[data-test-id="btn next clickable positive-footer"]', {timeout:5000});
 		//Select link option
-		await console.log("Typing dataset link...\n");
+		await console.log("Typing dataset link...");
 		await page.click('input[data-test-id="source-option"][value="LINK"]');
 		await page.click('button[data-test-id="btn next clickable positive-footer"]');
 		await page.waitForSelector('#linkFileInput', {timeout:5000});
@@ -61,17 +61,17 @@ const name = 'AJI';
 		await page.click('button[data-test-id="btn next clickable positive-footer"]');
 		await page.waitForSelector('input[data-test-id="dataset-name"]', {timeout:5000});
 		//Insert name
-		await console.log("Typing dataset name...\n");
+		await console.log("Typing dataset name...");
 		await page.type('input[data-test-id="dataset-name"]', 'Dataset '+name);
 		//Import
-		await console.log("Saving dataset...\n");
+		await console.log("Saving dataset...");
 		await page.click('button[data-test-id="btn next clickable positive-footer"]');
 
 
 		await page.waitForNavigation({timeout:5000, waitUntil: 'networkidle'});
 		
 		//BÚSQUEDA DEL ID
-		await console.log("Extracting dataset ID...\n");
+		await console.log("Extracting dataset ID...");
 		id = await page.evaluate(() => {
 			var tags = Array.from(document.getElementsByTagName("h3"));
 			for (var i = 0; i < tags.length; i++) {
@@ -82,7 +82,7 @@ const name = 'AJI';
 			}
 			return found.parentElement.parentElement.parentElement.getAttribute('data-test-id');
 		});
-		await console.log(id);
+		await console.log("ID extracted: "+id);
 
 		//Visualisation
 		await page.click('button[data-test-id="visualisation"]');
@@ -104,7 +104,6 @@ const name = 'AJI';
 		await page.click('div[data-test-id="entity-title"]');
 		await page.type('input[data-test-id="entity-title"]', 'Visualizacion de '+name);
 		await page.click('button[data-test-id="save-changes"]');
-		await page.screenshot({path: 'VIS.png', fullPage: true});
 		await page.click('i[data-test-id="fa-arrow"]');
 		//Dashboard
 		
@@ -113,11 +112,9 @@ const name = 'AJI';
 		await page.waitForSelector('li[class^="listItem"]', {timeout:5000});
 		await page.click('li[class^="listItem"]');
 		await page.waitForSelector('div[data-test-id="dashboard-canvas-item"]', {timeout:5000});
-		await page.screenshot({path: 'after.png', fullPage: true});
 		await page.click('div[data-test-id="entity-title"]');
 		await page.type('input[data-test-id="entity-title"]', 'Dashboard de '+name);
 		await page.click('button[data-test-id="save-changes"]');
-		await page.screenshot({path: 'list.png', fullPage: true});
 		await page.click('i[data-test-id="fa-arrow"]');
 		await page.waitForSelector('div[data-test-id="library"]', {timeout:5000});
 		//Delete
