@@ -1,5 +1,6 @@
 (ns akvo.lumen.lib.aggregation.filter
-  (:require [clojure.string :as str])
+  (:require [akvo.lumen.transformation.engine :as engine]
+            [clojure.string :as str])
   (:import [java.sql.Timestamp]))
 
 (defn invalid-filter [msg map]
@@ -21,14 +22,9 @@
                         (take 10)
                         (apply str))))
 
-(defn dollar-quote
-  [v]
-  (let [tag (random-tag)]
-    (format "$%s$%s$%s$" tag v tag)))
-
 (defn parse-number [s]
   (try
-    (dollar-quote (Double/parseDouble s))
+    (Double/parseDouble s)
     (catch NumberFormatException e
       (invalid-filter "Not a number" {:string s}))))
 
@@ -78,7 +74,7 @@
       "text" (format "coalesce(%1$s, '') %2$s %3$s"
                      column-name
                      op
-                     (dollar-quote value))
+                     (engine/pg-escape-string value))
       (invalid-filter "Type not supported" {:type column-type}))))
 
 (defmethod filter-sql "isEmpty"
