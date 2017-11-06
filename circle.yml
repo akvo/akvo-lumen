@@ -57,6 +57,7 @@ dependencies:
         pwd: client
     # Puppeteer
     - docker pull alekzonder/puppeteer:0.12.0
+    - docker pull multicloud/netcat
 
 test:
   override:
@@ -92,9 +93,15 @@ test:
         export ETH0="$(ip link | awk -F: '$0 ~ "lxc"{print $2;getline}' | cut -c2-)"
         export HOST_IP="$(ip address show $ETH0 | awk '$0 ~ "inet " {print $2}' | cut -d'/' -f1)"
         echo $HOST_IP
-        docker run --interactive --tty --rm --volume="$PWD/test.js":/app/index.js \
-           --add-host="t1.lumen.local:$HOST_IP" --add-host="auth.lumen.local:$HOST_IP" \
-           --add-host="backend:$HOST_IP" --add-host="postgres:$HOST_IP" -entrypoint /bin/cat alekzonder/puppeteer:0.12.0 /etc/hosts
+        docker run -ti --add-host="t1.lumen.local:$HOST_IP" --add-host="auth.lumen.local:$HOST_IP" \
+           --add-host="backend:$HOST_IP" --add-host="postgres:$HOST_IP" \
+           multicloud/netcat -v -z -w 3 backend 3000 &> /dev/null && echo "Backend is Online" || echo "Backend is Offline" \
+           nc -v -z -w 3 postgres 3000 &> /dev/null && echo "Postgres is Online" || echo "Postgres is Offline" \
+           nc -v -z -w 3 t1.lumen.local 3000 &> /dev/null && echo "t1 is Online" || echo "t1 is Offline" \
+           nc -v -z -w 3 auth.lumen.local 3000 &> /dev/null && echo "auth is Online" || echo "auth is Offline"
+        #docker run --interactive --tty --rm --volume="$PWD/test.js":/app/index.js \
+        #   --add-host="t1.lumen.local:$HOST_IP" --add-host="auth.lumen.local:$HOST_IP" \
+        #   --add-host="backend:$HOST_IP" --add-host="postgres:$HOST_IP" --entrypoint /bin/cat alekzonder/puppeteer:0.12.0 /etc/hosts
 
 deployment:
   dev:
