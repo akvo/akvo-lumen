@@ -95,7 +95,7 @@ test:
         echo $HOST_IP
         docker run --interactive --tty --rm  --add-host="t1.lumen.local:$HOST_IP" \
         --add-host="auth.lumen.local:$HOST_IP" --add-host="backend:$HOST_IP" \
-        --add-host="postgres:$HOST_IP" --entrypoint=/usr/bin/curl alekzonder/puppeteer:0.12.0 t1.lumen.local:3030/env
+        --add-host="postgres:$HOST_IP" --entrypoint=/usr/bin/curl alekzonder/puppeteer:0.12.0 -v "http://t1.lumen.local:3030/env"
 
         #docker run -ti --add-host="t1.lumen.local:$HOST_IP" --add-host="auth.lumen.local:$HOST_IP" \
         #   --add-host="backend:$HOST_IP" --add-host="postgres:$HOST_IP" \
