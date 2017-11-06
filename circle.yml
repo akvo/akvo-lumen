@@ -57,7 +57,6 @@ dependencies:
         pwd: client
     # Puppeteer
     - docker pull alekzonder/puppeteer:0.12.0
-    - docker pull multicloud/netcat
 
 test:
   override:
@@ -90,7 +89,7 @@ test:
     - |
         cd client/ui-test
         ip address show
-        export ETH0="$(ip link | awk -F: '$0 ~ "lxc"{print $2;getline}' | cut -c2-)"
+        export ETH0="$(ip link | awk -F: '$0 ~ "eth0"{print $2;getline}' | cut -c2-)"
         export HOST_IP="$(ip address show $ETH0 | awk '$0 ~ "inet " {print $2}' | cut -d'/' -f1)"
         echo $HOST_IP
         docker run --interactive --tty --rm  --add-host="t1.lumen.local:$HOST_IP" \
