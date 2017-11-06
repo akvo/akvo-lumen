@@ -95,14 +95,14 @@ export default class LayerConfigMenu extends Component {
               onChange={() => null}
               buttonSpacing="2rem"
             />
-            {(layer.latitude !== null || layer.longitude !== null) &&
+            {(layer.latitude != null || layer.longitude != null) &&
               <div>
                 <div className="inputGroup">
                   <SelectInput
                     disabled={layer.datasetId === null || disabled}
                     placeholder="Select a latitude column"
                     labelText="Latitude column"
-                    choice={layer.latitude !== null ? layer.latitude.toString() : null}
+                    choice={layer.latitude != null ? layer.latitude.toString() : null}
                     name="latitudeInput"
                     options={filterColumns(columnOptions, 'number')}
                     onChange={value => onChangeMapLayer(layerIndex, {
@@ -115,7 +115,7 @@ export default class LayerConfigMenu extends Component {
                     disabled={layer.datasetId === null || disabled}
                     placeholder="Select a longitude column"
                     labelText="Longitude column"
-                    choice={layer.longitude !== null ? layer.longitude.toString() : null}
+                    choice={layer.longitude != null ? layer.longitude.toString() : null}
                     name="longitudeInput"
                     options={filterColumns(columnOptions, 'number')}
                     onChange={value => onChangeMapLayer(layerIndex, {
@@ -131,7 +131,7 @@ export default class LayerConfigMenu extends Component {
                 disabled={layer.datasetId === null || disabled}
                 placeholder="Select a geopoint column"
                 labelText="Geopoint column"
-                choice={layer.geom !== null ? layer.geom.toString() : null}
+                choice={layer.geom != null ? layer.geom.toString() : null}
                 name="geomInput"
                 options={filterColumns(columnOptions, 'geopoint')}
                 onChange={value => onChangeMapLayer(layerIndex, {
@@ -149,7 +149,7 @@ export default class LayerConfigMenu extends Component {
                 }
                 placeholder="Select a data column to color points by"
                 labelText="Color coding column"
-                choice={layer.pointColorColumn !== null ?
+                choice={layer.pointColorColumn != null ?
                   layer.pointColorColumn.toString() : null}
                 name="xGroupColumnMenu"
                 options={filterColumns(columnOptions, ['text', 'number'])}
