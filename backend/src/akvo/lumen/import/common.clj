@@ -1,6 +1,7 @@
 (ns akvo.lumen.import.common
   (:require [clojure.java.jdbc :as jdbc]
-            [clojure.string :as str]))
+            [clojure.string :as str])
+  (:import [org.postgis PGgeometry]))
 
 (defprotocol DatasetImporter
   "
@@ -32,7 +33,7 @@
      A column specification is a map with keys
 
      Required:
-       :type - The lumen type of the column. Currently :text, :number or :date
+       :type - The lumen type of the column. Currently :text, :number, :date or :geoshape
        :title - The title of the column
        :id - The internal id of the column (as a keyword). The id must be
              lowercase alphanumeric ([a-z][a-z0-9]*)
@@ -45,7 +46,9 @@
 
        :text - java.lang.String
        :number - java.lang.Number
-       :date - java.time.Instant"))
+       :date - java.time.Instant
+       :geoshape - java.lang.String
+                   Well-known text (WKT) shape (POLYGON or MULTIPOLYGON)"))
 
 (defn dispatch-on-kind [spec]
   (let [kind (get spec "kind")]
@@ -68,6 +71,8 @@
                                         (condp = type
                                           :date "timestamptz"
                                           :number "double precision"
+                                          ;; Note not `POLYGON` so we can support `MULTIPOLYGON` as well
+                                          :geoshape "geometry(GEOMETRY, 4326)"
                                           :text "text")))
                               columns))))
 
@@ -86,6 +91,8 @@
                            table-name
                            (name (:id column))))))
 
+(defrecord Geoshape [wkt-string])
+
 (defprotocol CoerceToSql
   (coerce [this]))
 
@@ -96,7 +103,12 @@
   (coerce [value] value)
   java.time.Instant
   (coerce [value]
-    (java.sql.Timestamp. (.toEpochMilli value))))
+    (java.sql.Timestamp. (.toEpochMilli value)))
+  Geoshape
+  (coerce [value]
+    (let [geom (PGgeometry/geomFromString (:wkt-string value))]
+      (.setSrid geom 4326)
+      geom)))
 
 (defn coerce-to-sql [record]
   (reduce-kv

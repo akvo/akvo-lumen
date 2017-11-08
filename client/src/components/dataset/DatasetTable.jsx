@@ -15,6 +15,8 @@ function formatCellValue(type, value) {
   switch (type) {
     case 'date':
       return value == null ? null : moment(value).format();
+    case 'geoshape':
+      return '<geoshape>';
     default:
       return value;
   }
