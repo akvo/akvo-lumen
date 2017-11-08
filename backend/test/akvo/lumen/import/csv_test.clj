@@ -32,9 +32,22 @@
       (is (= "number" (get (second columns) "type")))
       (is (= "text" (get (last columns) "type"))))))
 
+(deftest ^:functional test-geoshape-csv
+  (testing "Import csv file generated from a shapefile"
+    (let [dataset-id (import-file *tenant-conn* "liberia_adm2.csv" {:dataset-name "Liberia shapefile"
+                                                                    :has-column-headers? true})
+          dataset (dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id
+                                                                :version 1})
+          columns (:columns dataset)]
+      (is (= "geoshape" (get (first columns) "type")))
+      (is (= "number" (get (second columns) "type")))
+      (is (= "text" (get (last columns) "type")))
+      (is (= (count columns) 15)))))
+
+
 (deftest ^:functional test-varying-column-count
   (testing "Should fail to import csv file with varying number of columns"
     (is (thrown-with-msg? clojure.lang.ExceptionInfo
                           #"Invalid csv file. Varying number of columns"
                           (import-file *tenant-conn* "mixed-column-counts.csv"
-                                         {:dataset-name "Mixed Column Counts"})))))
+                                       {:dataset-name "Mixed Column Counts"})))))

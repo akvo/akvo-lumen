@@ -73,7 +73,6 @@
           (successful-import conn job-execution-id table-name columns spec))))
     (catch Exception e
       (failed-import conn job-execution-id (str "Failed to import: " (.getMessage e)))
-      (.printStackTrace e)
       (throw e))))
 
 (defn handle-import-request [tenant-conn config claims data-source]
