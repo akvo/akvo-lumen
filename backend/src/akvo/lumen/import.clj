@@ -7,7 +7,7 @@
              [cheshire.core :as json]
              [clojure.java.jdbc :as jdbc]
              [hugsql.core :as hugsql])
-  (:import [org.postgresql PGConnection]
+  (:import [org.postgis Polygon MultiPolygon]
            [org.postgresql.util PGobject]))
 
 (hugsql/def-db-fns "akvo/lumen/job-execution.sql")
