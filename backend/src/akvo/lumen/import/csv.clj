@@ -13,6 +13,7 @@
   (cond
     (string/blank? value) nil
     (= type :number) (Double/parseDouble value)
+    (= type :geoshape) (import/->Geoshape value)
     :else value))
 
 (defn gen-column-titles
@@ -27,12 +28,17 @@
   (or (string/blank? s)
       (string/numeric? s)))
 
+(defn wkt-shape? [s]
+  (or (string/starts-with? s "MULTIPOLYGON")
+      (string/starts-with? s "POLYGON")))
+
 (defn get-column-types
   "Returns a seq of types for each column in the given rows"
   [rows]
   (for [column-data (apply map vector rows)]
-    (if (every? numeric? column-data)
-      :number
+    (condp every? column-data
+      numeric? :number
+      wkt-shape? :geoshape
       :text)))
 
 (defn get-column-tuples

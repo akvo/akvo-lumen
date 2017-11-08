@@ -6,7 +6,9 @@
              [akvo.lumen.util :as util]
              [cheshire.core :as json]
              [clojure.java.jdbc :as jdbc]
-             [hugsql.core :as hugsql]))
+             [hugsql.core :as hugsql])
+  (:import [org.postgresql PGConnection]
+           [org.postgresql.util PGobject]))
 
 (hugsql/def-db-fns "akvo/lumen/job-execution.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
@@ -45,6 +47,19 @@
   (update-failed-job-execution conn {:id job-execution-id
                                      :reason [reason]}))
 
+
+(defn val->geometry-pgobj
+  [v]
+  (doto (PGobject.)
+    (.setType "geometry")
+    (.setValue (.toString v))))
+
+(extend-protocol jdbc/ISQLValue
+  org.postgis.Polygon
+  (sql-value [v] (val->geometry-pgobj v))
+  org.postgis.MultiPolygon
+  (sql-value [v] (val->geometry-pgobj v)))
+
 (defn do-import [conn config job-execution-id]
   (try
     (let [table-name (util/gen-table-name "ds")
@@ -58,6 +73,7 @@
           (successful-import conn job-execution-id table-name columns spec))))
     (catch Exception e
       (failed-import conn job-execution-id (str "Failed to import: " (.getMessage e)))
+      (.printStackTrace e)
       (throw e))))
 
 (defn handle-import-request [tenant-conn config claims data-source]
