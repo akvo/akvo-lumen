@@ -26,8 +26,9 @@
 (defn select-data-sql [table-name columns]
   (let [select-expr (->> columns
                          (map (fn [{:strs [type columnName]}]
-                                (if (= type "geopoint")
-                                  (format "ST_AsText(%s)" columnName)
+                                (condp = type
+                                  "geopoint" (format "ST_AsText(%s)" columnName)
+                                  "geoshape" "NULL" ;; We don't send shapes to the dataset view due to size
                                   columnName)))
                          (str/join ", "))
         order-by-expr (as-> columns cols
