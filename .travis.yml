@@ -13,8 +13,8 @@ services:
   - docker
 
 before_install:
-  - mkdir -p "$HOME/.m2"
-  - mkdir -p "$HOME/.lein"
+  - if [[ ! -d "$HOME/.m2" ]]; then mkdir "$HOME/.m2"; done;
+  - if [[ ! -d "$HOME/.lein" ]]; then mkdir "$HOME/.lein"; done;
   - echo "HOST_UID=$(id -u)" >> .env
   - echo "HOST_GID=$(id -g)" >> .env
   - docker pull alekzonder/puppeteer:0.12.0
