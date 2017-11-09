@@ -2,13 +2,13 @@
 
 set -eu
 
-docker-compose up --build -d
+docker-compose up --no-color --build
 
 BACKEND=""
 while [ -z "${BACKEND}" ] ; do
     echo "Waiting for backend to start ..."
     sleep 5
-    BACKEND=$(docker-compose logs --no-color backend | grep "nREPL" || echo "")
+    BACKEND=$(docker-compose logs --no-color backend | grep "nREPL server started" || echo "")
 done
 
 CLIENT=""
