@@ -8,13 +8,14 @@ BACKEND=""
 while [ -z "${BACKEND}" ] ; do
     echo "Waiting for backend to start ..."
     sleep 5
-    BACKEND=$(docker-compose exec -T backend netstat -l -t -n | grep 3000 || echo "")
+    BACKEND=$(docker-compose logs --no-color backend | grep "nREPL" || echo "")
 done
 
 CLIENT=""
 while [ -z "${CLIENT}" ] ; do
     echo "Waiting for client to start ..."
-    CLIENT=$(curl -s "http://t1.lumen.local:3030/" || echo "")
+    sleep 5
+    CLIENT=$(docker-compose logs --no-color client | grep "webpack: Compiled successfully" || echo "")
 done
 
 docker run --interactive --tty --shm-size 1G --rm --network=akvolumen_default \
