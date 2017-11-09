@@ -2,7 +2,7 @@
 
 set -eu
 
-docker-compose up --no-color --build
+docker-compose up --no-color --build -d
 
 BACKEND=""
 while [ -z "${BACKEND}" ] ; do
