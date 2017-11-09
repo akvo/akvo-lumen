@@ -14,8 +14,8 @@ services:
 
 cache:
   directories:
-    - "$HOME/.m2/"
-    - "$HOME/.lein/"
+    - $HOME/.m2
+    - $HOME/.lein
 
 before_install:
   - if [[ ! -d "$HOME/.m2" ]]; then mkdir "$HOME/.m2"; fi;
