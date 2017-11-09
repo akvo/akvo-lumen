@@ -8,7 +8,7 @@ BACKEND=""
 while [ -z "${BACKEND}" ] ; do
     echo "Waiting for backend to start ..."
     sleep 5
-    BACKEND=$(curl -s --connect-timeout 1 "http://t1.lumen.local:3030/env" || echo "")
+    BACKEND=$(docker-compose exec -T backend netstat -l -t -n | grep 3000 || echo "")
 done
 
 CLIENT=""
