@@ -76,8 +76,27 @@
                                           :text "text")))
                               columns))))
 
+(defn index-name [table-name column-name]
+  (format "%s_%s_idx" table-name column-name))
+
+(defn geo-index [table-name column-name]
+  (format "CREATE INDEX %s ON %s USING GIST(%s)"
+          (index-name table-name column-name)
+          table-name
+          column-name))
+
+(defn create-indexes [conn table-name columns]
+  (doseq [column columns]
+    (condp = (:type column)
+      :geoshape
+      (jdbc/execute! conn (geo-index table-name (name (:id column))))
+
+      ;; else
+      nil)))
+
 (defn create-dataset-table [conn table-name columns]
-  (jdbc/execute! conn [(dataset-table-sql table-name columns)]))
+  (jdbc/execute! conn [(dataset-table-sql table-name columns)])
+  (create-indexes conn table-name columns))
 
 (defn add-key-constraints [conn table-name columns]
   (doseq [column columns
