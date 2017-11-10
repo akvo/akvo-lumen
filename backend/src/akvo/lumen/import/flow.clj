@@ -135,8 +135,10 @@
 
 (defmethod render-response "GEO"
   [_ response]
-  (import/->Geopoint
-   (format "POINT (%s %s)" (get response "long") (get response "lat"))))
+  (let [{:strs [long lat]} response]
+    (when (and long lat)
+      (import/->Geopoint
+       (format "POINT (%s %s)" long lat)))))
 
 (defmethod render-response "CASCADE"
   [_ response]
