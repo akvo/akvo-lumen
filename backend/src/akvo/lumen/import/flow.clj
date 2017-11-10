@@ -79,6 +79,7 @@
   (condp = (:type question)
     "NUMBER" :number
     "DATE" :date
+    "GEO" :geopoint
     :text))
 
 (defn questions
@@ -97,8 +98,8 @@
           (assoc identifier :key true)
           identifier))
       {:title "Display name" :type :text :id :display_name}
-      {:title "Latitude" :type :number :id :latitude}
-      {:title "Longitude" :type :number :id :longitude}
+      ;;{:title "Latitude" :type :number :id :latitude}
+      ;;{:title "Longitude" :type :number :id :longitude}
       {:title "Submitter" :type :text :id :submitter}
       {:title "Submitted at" :type :date :id :submitted_at}
       {:title "Surveyal time" :type :number :id :surveyal_time}]
@@ -134,10 +135,8 @@
 
 (defmethod render-response "GEO"
   [_ response]
-  (condp = (get-in response ["geometry" "type"])
-    "Point" (let [coords (get-in response ["geometry" "coordinates"])]
-              (str/join "," coords))
-    nil))
+  (import/->Geopoint
+   (format "POINT (%s %s)" (get response "long") (get response "lat"))))
 
 (defmethod render-response "CASCADE"
   [_ response]
@@ -205,8 +204,8 @@
                     :instance_id (get form-instance "id")
                     :display_name (get-in data-points [data-point-id "displayName"])
                     :identifier (get-in data-points [data-point-id "identifier"])
-                    :latitude (get-in data-points [data-point-id "latitude"])
-                    :longitude (get-in data-points [data-point-id "longitude"])
+                    ;;:latitude (get-in data-points [data-point-id "latitude"])
+                    ;;:longitude (get-in data-points [data-point-id "longitude"])
                     :submitter (get form-instance "submitter")
                     :submitted_at (some-> (get form-instance "submissionDate")
                                           Instant/parse)

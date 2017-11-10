@@ -58,6 +58,8 @@
   org.postgis.Polygon
   (sql-value [v] (val->geometry-pgobj v))
   org.postgis.MultiPolygon
+  (sql-value [v] (val->geometry-pgobj v))
+  org.postgis.Point
   (sql-value [v] (val->geometry-pgobj v)))
 
 (defn do-import [conn config job-execution-id]
