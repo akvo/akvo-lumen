@@ -75,4 +75,4 @@ deployment:
     commands:
       - ./ci/prod/setup_gcloud.sh
       - ./ci/prod/build_containers.sh
-- ./ci/prod/deploy.sh
+      - ./ci/prod/deploy.sh
