@@ -76,7 +76,7 @@
         data (csv/read-csv reader)
         column-count (get-column-count data)
         column-titles (if headers?
-                        (map string/trim (first data))
+                        (first data)
                         (gen-column-titles column-count))
         rows (if headers? (rest data) data)
         column-types (if guess-types?
