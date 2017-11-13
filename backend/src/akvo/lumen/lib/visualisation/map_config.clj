@@ -67,6 +67,11 @@
                             (get layer "popup"))
         point-color-column (get layer "pointColorColumn")]
     {"version" "1.6.0"
+     "buffersize" {
+      "png" 8
+      "grid.json" 8
+      "mvt" 0
+     }
      "layers" [{"type" "mapnik"
                 "options" {"cartocss" (trim-css (cartocss (get layer "pointSize")
                                                           (get layer "pointColorColumn")
