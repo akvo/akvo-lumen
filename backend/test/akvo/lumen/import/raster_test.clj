@@ -9,7 +9,7 @@
 
 (deftest ^:functional import-raster
   (testing "Import raster"
-    (let [filename "LBR14adjv1.tif"
+    (let [filename "SLV_ppp_v2b_2015_UNadj.tif"
           path (.getAbsolutePath (.getParentFile (io/file (io/resource filename))))
           projection (project-to-web-mercator path filename)]
       (is (zero? (-> projection :shell :exit)))
