@@ -22,6 +22,7 @@ dependencies:
     - "~/docker-images"
 
   pre:
+    - sudo apt-get update; sudo apt-get install postgis gdal-bin
     # Stopping the default postgres so we can start our own.
     # See https://discuss.circleci.com/t/how-to-permanently-shutdown-circleci-default-postgres-mongodb-etc/7329
     - |
