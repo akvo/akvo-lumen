@@ -17,8 +17,6 @@
 'use strict';
 
 const puppeteer = require('puppeteer');
-/* Si se cambia la variable name, también hay que cambiar el nombre en la
-   búsqueda del ID  */
 const name = 'puppeteer test';
 (async() => {
 	const browser = await puppeteer.launch({
@@ -47,25 +45,25 @@ const name = 'puppeteer test';
 		//Click Dataset+ option
 		await console.log("Accessing to dataset creation...");
 		await page.click('button[data-test-id="dataset"]');
-		await page.waitForSelector('button[data-test-id="btn next clickable positive-footer"]', {timeout:10000});
+		await page.waitForSelector('button[data-test-id="next"]', {timeout:10000});
 		//Select link option
 		await console.log("Typing dataset link...");
 		await page.click('input[data-test-id="source-option"][value="LINK"]');
-		await page.click('button[data-test-id="btn next clickable positive-footer"]');
+		await page.click('button[data-test-id="next"]');
 		await page.waitForSelector('#linkFileInput', {timeout:10000});
 		//Insert link
 		await page.type('#linkFileInput','https://github.com/lawlesst/vivo-sample-data/raw/master/data/csv/people.csv');
-		await page.click('button[data-test-id="btn next clickable positive-footer"]');
+		await page.click('button[data-test-id="next"]');
 		await page.waitForSelector('input[data-test-id="dataset-name"]', {timeout:10000});
 		//Insert name
 		await console.log("Typing dataset name...");
 		await page.type('input[data-test-id="dataset-name"]', 'Dataset '+name);
 		//Import
 		await console.log("Saving dataset...");
-		await page.click('button[data-test-id="btn next clickable positive-footer"]');
+		await page.click('button[data-test-id="next"]');
 		await console.log("Dataset "+name+" was successfully created.\n");
 		await page.waitForNavigation({timeout:5000, waitUntil: 'networkidle'});
-		//BÚSQUEDA DEL ID
+		//Search of the ID
 		await console.log("Extracting dataset ID...");
 		id = await page.evaluate(() => {
 			var tags = Array.from(document.getElementsByTagName("h3"));
@@ -120,14 +118,10 @@ const name = 'puppeteer test';
 		await page.click('i[data-test-id="fa-arrow"]');
 		await console.log("Dashboard "+name+" was successfully created.\n");
 		await console.log("THE TEST WAS SUCCESSFUL");
-		//Delete
-		/*await page.click('li[data-test-id="'+id+'"] button[data-test-id="show-controls"]');
-		await page.waitForSelector('button[data-test-id="delete-dataset"]', {timeout:5000});
-		await page.click('button[data-test-id="delete-dataset"]');
-		await page.waitForSelector('button[data-test-id="delete-footer"]', {timeout:5000});
-		await page.click('button[data-test-id="delete-footer"]');*/
+		
 	}catch(err){
 		await console.log("THE TEST FAILED\n"+err);
+		process.exit(1);
 	} finally{
 		await browser.close();
 	}

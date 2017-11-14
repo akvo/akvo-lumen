@@ -20,7 +20,7 @@ export default function ModalFooter({ leftButton, rightButton }) {
           disabled={rightButton.disabled}
           onClick={rightButton.onClick}
           className={rightButton.className}
-          data-test-id={`${rightButton.className}-footer`}
+          data-test-id="next"
         >
           {rightButton.text}
         </button>
