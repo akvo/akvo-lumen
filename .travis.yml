@@ -2,12 +2,12 @@ language: java
 
 sudo: required
 
-addons:
-  hosts:
-  - t1.lumen.local
-  - auth.lumen.local
-  - backend
-  - postgres
+#addons:
+#  hosts:
+#  - t1.lumen.local
+#  - auth.lumen.local
+#  - backend
+#  - postgres
 
 services:
   - docker
