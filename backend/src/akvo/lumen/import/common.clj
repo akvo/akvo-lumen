@@ -33,7 +33,7 @@
      A column specification is a map with keys
 
      Required:
-       :type - The lumen type of the column. Currently :text, :number, :date or :geoshape
+       :type - The lumen type of the column. Currently :text, :number, :date, :geoshape or :geopoint
        :title - The title of the column
        :id - The internal id of the column (as a keyword). The id must be
              lowercase alphanumeric ([a-z][a-z0-9]*)
@@ -47,8 +47,10 @@
        :text - java.lang.String
        :number - java.lang.Number
        :date - java.time.Instant
-       :geoshape - java.lang.String
-                   Well-known text (WKT) shape (POLYGON or MULTIPOLYGON)"))
+       :geoshape - Geoshape
+                   Well-known text (WKT) shape (POLYGON or MULTIPOLYGON)
+       :geopoint - Geopoint
+                   Well-known text (WKT) shape (POINT)"))
 
 (defn dispatch-on-kind [spec]
   (let [kind (get spec "kind")]
@@ -73,6 +75,7 @@
                                           :number "double precision"
                                           ;; Note not `POLYGON` so we can support `MULTIPOLYGON` as well
                                           :geoshape "geometry(GEOMETRY, 4326)"
+                                          :geopoint "geometry(POINT, 4326)"
                                           :text "text")))
                               columns))))
 
@@ -89,6 +92,8 @@
   (doseq [column columns]
     (condp = (:type column)
       :geoshape
+      (jdbc/execute! conn (geo-index table-name (name (:id column))))
+      :geopoint
       (jdbc/execute! conn (geo-index table-name (name (:id column))))
 
       ;; else
@@ -112,6 +117,8 @@
 
 (defrecord Geoshape [wkt-string])
 
+(defrecord Geopoint [wkt-string])
+
 (defprotocol CoerceToSql
   (coerce [this]))
 
@@ -124,6 +131,11 @@
   (coerce [value]
     (java.sql.Timestamp. (.toEpochMilli value)))
   Geoshape
+  (coerce [value]
+    (let [geom (PGgeometry/geomFromString (:wkt-string value))]
+      (.setSrid geom 4326)
+      geom))
+  Geopoint
   (coerce [value]
     (let [geom (PGgeometry/geomFromString (:wkt-string value))]
       (.setSrid geom 4326)
