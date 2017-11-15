@@ -6,6 +6,7 @@
              [akvo.lumen.util :as util]
              [cheshire.core :as json]
              [clojure.java.jdbc :as jdbc]
+             [clojure.string :as string]
              [hugsql.core :as hugsql])
   (:import [org.postgis Polygon MultiPolygon]
            [org.postgresql.util PGobject]))
@@ -33,7 +34,7 @@
                                   :version 1
                                   :columns (mapv (fn [{:keys [title id type key] :as columns}]
                                                    (cond-> {:type (name type)
-                                                            :title title
+                                                            :title (string/trim title)
                                                             :columnName (name id)
                                                             :sort nil
                                                             :direction nil

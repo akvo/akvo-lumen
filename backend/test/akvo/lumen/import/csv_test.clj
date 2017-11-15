@@ -2,6 +2,7 @@
   (:require [akvo.lumen.fixtures :refer [*tenant-conn*
                                          tenant-conn-fixture]]
             [akvo.lumen.test-utils :refer [import-file]]
+            [clojure.string :as string]
             [clojure.test :refer :all]
             [hugsql.core :as hugsql]))
 
@@ -51,3 +52,12 @@
                           #"Invalid csv file. Varying number of columns"
                           (import-file *tenant-conn* "mixed-column-counts.csv"
                                        {:dataset-name "Mixed Column Counts"})))))
+
+(deftest ^:functional test-trimmed-columns
+  (testing "Testing if whitespace is removed from beginning & end of column titles"
+    (let [dataset-id (import-file *tenant-conn* "whitespace.csv" {:dataset-name "Padded titles"})
+          dataset (dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id
+                                                                :version 1})
+          titles (map :title (:rows dataset))
+          trimmable? #(or (string/starts-with? " " %) (string/ends-with? " " %))]
+      (is (every? trimmable? titles) false))))
