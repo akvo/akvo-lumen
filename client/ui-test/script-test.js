@@ -14,116 +14,118 @@
  * limitations under the License.
  */
 
-'use strict';
+/* global __datasetName */
+/* eslint-disable import/no-extraneous-dependencies */
+/* eslint-disable import/no-unresolved */
+/* eslint-disable no-console */
 
 const puppeteer = require('puppeteer');
-const name = 'puppeteer test';
-(async() => {
-	const browser = await puppeteer.launch({
-        args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox'
-        ]
+
+const datasetName = Date.now().toString();
+
+(async () => {
+  const browser = await puppeteer.launch({
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+    ],
+  });
+  const page = await browser.newPage();
+
+  try {
+    // Login
+    console.log('\nSTARTING LUMEN TEST WITH PUPPETEER\n');
+    await page.setViewport({ width: 1024, height: 768 });
+    console.log('Accessing to http://t1.lumen.local:3030...');
+    await page.goto('http://t1.lumen.local:3030/');
+    await page.waitForSelector('#username', { timeout: 10000 });
+    console.log('Typing username...');
+    await page.type('#username', 'jerome');
+    console.log('Typing password...');
+    await page.type('#password', 'password');
+    console.log('Trying login...');
+    await page.click('#kc-login');
+    await page.screenshot({ path: 'a.png', fullPage: true });
+    await page.waitForSelector('button[data-test-id="dataset"]', { timeout: 10000 });
+    await page.evaluate(`window.__datasetName = "${datasetName}"`);
+
+    // Dataset adding
+    // Click Dataset+ option
+    console.log('Accessing to dataset creation...');
+    await page.click('button[data-test-id="dataset"]');
+    await page.waitForSelector('button[data-test-id="next"]', { timeout: 10000 });
+    // Select link option
+    console.log('Typing dataset link...');
+    await page.click('input[data-test-id="source-option"][value="LINK"]');
+    await page.click('button[data-test-id="next"]');
+    await page.waitForSelector('#linkFileInput', { timeout: 10000 });
+    // Insert link
+    await page.type('#linkFileInput', 'https://github.com/lawlesst/vivo-sample-data/raw/master/data/csv/people.csv');
+    await page.click('button[data-test-id="next"]');
+    await page.waitForSelector('input[data-test-id="dataset-name"]', { timeout: 10000 });
+    // Insert name
+    console.log('Typing dataset name...');
+    await page.type('input[data-test-id="dataset-name"]', datasetName);
+    // Import
+    console.log('Saving dataset...');
+    await page.click('button[data-test-id="next"]');
+    console.log(`Dataset ${datasetName} was successfully created.\n`);
+    await page.waitForNavigation({ timeout: 5000, waitUntil: 'networkidle' });
+
+    // Search of the ID
+    console.log('Extracting dataset ID...');
+    const id = await page.evaluate(() => {
+      const found = document.querySelector(`[data-test-name="${__datasetName}"]`);
+      return Promise.resolve(found.getAttribute('data-test-id'));
     });
-	const page = await browser.newPage();
-	var id;
-	//Login
-	try{
-		await console.log("\nSTARTING LUMEN TEST WITH PUPPETEER\n");
-		await page.setViewport({width: 1024, height: 768});
-		await console.log("Accessing to http://t1.lumen.local:3030...");
-		await page.goto('http://t1.lumen.local:3030/');
-		await page.waitForSelector('#username', {timeout:10000});
-		await console.log("Typing username...");
-		await page.type('#username','jerome');
-		await console.log("Typing password...");
-		await page.type('#password','password');
-		await console.log("Trying login...");
-		await page.click('#kc-login');
-		await page.waitForSelector('button[data-test-id="dataset"]', {timeout:10000});
-		//Dataset adding
-		//Click Dataset+ option
-		await console.log("Accessing to dataset creation...");
-		await page.click('button[data-test-id="dataset"]');
-		await page.waitForSelector('button[data-test-id="next"]', {timeout:10000});
-		//Select link option
-		await console.log("Typing dataset link...");
-		await page.click('input[data-test-id="source-option"][value="LINK"]');
-		await page.click('button[data-test-id="next"]');
-		await page.waitForSelector('#linkFileInput', {timeout:10000});
-		//Insert link
-		await page.type('#linkFileInput','https://github.com/lawlesst/vivo-sample-data/raw/master/data/csv/people.csv');
-		await page.click('button[data-test-id="next"]');
-		await page.waitForSelector('input[data-test-id="dataset-name"]', {timeout:10000});
-		//Insert name
-		await console.log("Typing dataset name...");
-		await page.type('input[data-test-id="dataset-name"]', 'Dataset '+name);
-		//Import
-		await console.log("Saving dataset...");
-		await page.click('button[data-test-id="next"]');
-		await console.log("Dataset "+name+" was successfully created.\n");
-		await page.waitForNavigation({timeout:5000, waitUntil: 'networkidle'});
-		//Search of the ID
-		await console.log("Extracting dataset ID...");
-		id = await page.evaluate(() => {
-			var tags = Array.from(document.getElementsByTagName("h3"));
-			for (var i = 0; i < tags.length; i++) {
-			  if (tags[i].textContent == 'Dataset puppeteer test') {
-				var found = tags[i];
-				break;
-			  }
-			}
-			return found.parentElement.parentElement.parentElement.getAttribute('data-test-id');
-		});
-		await console.log("ID extracted: "+id+"\n");
+    console.log(`ID extracted: ${id}\n`);
 
-		//Visualisation
-		await console.log("Accessing to visualisation creation...");
-		await page.click('button[data-test-id="visualisation"]');
-		await console.log("Selecting pivot table option...");
-		await page.waitForSelector('li[data-test-id="button-pivot-table"]', {timeout:10000});
-		await page.click('li[data-test-id="button-pivot-table"]');
-		await console.log("Selecting dataset...");
-		await page.waitForSelector('label[data-test-id="dataset-menu"]+div', {timeout:10000});
-		await page.click('label[data-test-id="dataset-menu"]+div');
-		await page.waitForSelector('div[data-test-id="input-group"]>div>div>div:nth-of-type(2)', {timeout:10000});
-		await page.click('div[data-test-id="input-group"]>div>div>div:nth-of-type(2)');
-		await page.waitForSelector('label[data-test-id="categoryColumnInput"]+div', {timeout:10000});
-		await page.click('label[data-test-id="categoryColumnInput"]+div');
-		await page.waitForSelector('label[data-test-id="categoryColumnInput"]+div>div>div:nth-of-type(2)', {timeout:10000});
-		await page.click('label[data-test-id="categoryColumnInput"]+div>div>div:nth-of-type(2)');
-		await page.waitForSelector('input[name="categoryColumnInput"]', {timeout:10000});
-		await console.log("Selecting columns...");
-		await page.$eval('input[name="categoryColumnInput"]', el => el.value='c9');
-		await page.click('div[data-test-id="entity-title"]');
-		await console.log("Typing visualisation name...");
-		await page.type('input[data-test-id="entity-title"]', 'Visualisation of '+name);
-		await console.log("Saving visualisation...");
-		await page.click('button[data-test-id="save-changes"]');
-		await page.goto('http://t1.lumen.local:3030/library');
-		await page.waitForSelector('button[data-test-id="dashboard"]', {timeout:10000});
-		await console.log("Visualisation "+name+" was successfully created.\n");
-		//Dashboard
-		await console.log("Accessing to dashboard creation...");
-		await page.click('button[data-test-id="dashboard"]');
-		await console.log("Selecting visualisation...");
-		await page.waitForSelector('li[class^="listItem"]', {timeout:10000});
-		await page.click('li[class^="listItem"]');
-		await console.log("Typing dashboard name...");
-		await page.waitForSelector('div[data-test-id="dashboard-canvas-item"]', {timeout:10000});
-		await page.click('div[data-test-id="entity-title"]');
-		await page.type('input[data-test-id="entity-title"]', 'Dashboard of '+name);
-		await console.log("Saving dashboard...");
-		await page.click('button[data-test-id="save-changes"]');
-		await page.click('i[data-test-id="fa-arrow"]');
-		await console.log("Dashboard "+name+" was successfully created.\n");
-		await console.log("THE TEST WAS SUCCESSFUL");
-		
-	}catch(err){
-		await console.log("THE TEST FAILED\n"+err);
-		process.exit(1);
-	} finally{
-		await browser.close();
-	}
+    // Visualisation
+    console.log('Accessing to visualisation creation...');
+    await page.click('button[data-test-id="visualisation"]');
+    console.log('Selecting pivot table option...');
+    await page.waitForSelector('li[data-test-id="button-pivot-table"]', { timeout: 10000 });
+    await page.click('li[data-test-id="button-pivot-table"]');
+    console.log('Selecting dataset...');
+    await page.waitForSelector('label[data-test-id="dataset-menu"]+div', { timeout: 10000 });
+    await page.click('label[data-test-id="dataset-menu"]+div');
+    await page.waitForSelector('div[data-test-id="input-group"]>div>div>div:nth-of-type(2)', { timeout: 10000 });
+    await page.click('div[data-test-id="input-group"]>div>div>div:nth-of-type(2)');
+    await page.waitForSelector('label[data-test-id="categoryColumnInput"]+div', { timeout: 10000 });
+    await page.click('label[data-test-id="categoryColumnInput"]+div');
+    await page.waitForSelector('label[data-test-id="categoryColumnInput"]+div>div>div:nth-of-type(2)', { timeout: 10000 });
+    await page.click('label[data-test-id="categoryColumnInput"]+div>div>div:nth-of-type(2)');
+    await page.waitForSelector('input[name="categoryColumnInput"]', { timeout: 10000 });
+    console.log('Selecting columns...');
+    await page.$eval('input[name="categoryColumnInput"]', (el) => { el.setAttribute('value', 'c9'); });
+    await page.click('div[data-test-id="entity-title"]');
+    console.log('Typing visualisation name...');
+    await page.type('input[data-test-id="entity-title"]', `Visualisation of ${datasetName}`);
+    console.log('Saving visualisation...');
+    await page.click('button[data-test-id="save-changes"]');
+    await page.goto('http://t1.lumen.local:3030/library');
+    await page.waitForSelector('button[data-test-id="dashboard"]', { timeout: 10000 });
+    console.log(`Visualisation ${datasetName} was successfully created.\n`);
 
+    // Dashboard
+    console.log('Accessing to dashboard creation...');
+    await page.click('button[data-test-id="dashboard"]');
+    console.log('Selecting visualisation...');
+    await page.waitForSelector('li[class^="listItem"]', { timeout: 10000 });
+    await page.click('li[class^="listItem"]');
+    console.log('Typing dashboard name...');
+    await page.waitForSelector('div[data-test-id="dashboard-canvas-item"]', { timeout: 10000 });
+    await page.click('div[data-test-id="entity-title"]');
+    await page.type('input[data-test-id="entity-title"]', `Dashboard of ${datasetName}`);
+    console.log('Saving dashboard...');
+    await page.click('button[data-test-id="save-changes"]');
+    await page.click('i[data-test-id="fa-arrow"]');
+    console.log(`Dashboard ${datasetName} was successfully created.\n`);
+    console.log('THE TEST WAS SUCCESSFUL');
+  } catch (err) {
+    console.log(`THE TEST FAILED\n${err}`);
+    process.exit(1);
+  } finally {
+    await browser.close();
+  }
 })();
