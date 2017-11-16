@@ -15,7 +15,7 @@ before_install:
   - if [[ ! -d "$HOME/.lein" ]]; then mkdir "$HOME/.lein"; fi;
   - echo "HOST_UID=$(id -u)" >> .env
   - echo "HOST_GID=$(id -g)" >> .env
-  - docker pull alekzonder/puppeteer:0.12.0
+  - docker pull alekzonder/puppeteer:0.13.0
   - |
       while sudo lsof -Pi :5432 -sTCP:LISTEN -t; do
          echo "Waiting for postgresql to stop for real."

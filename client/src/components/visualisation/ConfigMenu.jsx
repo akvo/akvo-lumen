@@ -82,6 +82,8 @@ const aggregationOptions = [
   },
 ];
 
+const selectProps = {"data-test-id": "select-menu"};
+
 export default function ConfigMenu(props) {
   const datasetArray = getDatasetArray(props.datasets);
   const datasetOptions = getDatasetOptions(datasetArray);
@@ -209,7 +211,6 @@ export default function ConfigMenu(props) {
                 >
                   <label
                     htmlFor="xDatasetMenu"
-                    data-test-id="dataset-menu"
                   >
                     <FormattedMessage id="source_dataset" />:</label>
                   <SelectMenu
@@ -219,6 +220,7 @@ export default function ConfigMenu(props) {
                     visualisation.datasetId.toString() : null}
                     options={datasetOptions}
                     onChange={props.onChangeSourceDataset}
+                    inputProps={selectProps}
                   />
                 </div>
                 <FilterMenu

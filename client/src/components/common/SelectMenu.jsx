@@ -33,6 +33,7 @@ function SelectMenu(props) {
         clearable={props.clearable || false}
         searchable={props.searchable || false}
         placeholder={placeholder}
+        inputProps={props.inputProps}
       />
     </div>
   );
@@ -53,6 +54,7 @@ SelectMenu.propTypes = {
   searchable: PropTypes.bool,
   multi: PropTypes.bool,
   disabled: PropTypes.bool,
+  inputProps: PropTypes.object,
 };
 
 export default injectIntl(SelectMenu);
