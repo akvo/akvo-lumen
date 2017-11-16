@@ -45,7 +45,6 @@ const datasetName = Date.now().toString();
     await page.type('#password', 'password');
     console.log('Trying login...');
     await page.click('#kc-login');
-    await page.screenshot({ path: 'a.png', fullPage: true });
     await page.waitForSelector('button[data-test-id="dataset"]', { timeout: 10000 });
     await page.evaluate(`window.__datasetName = "${datasetName}"`);
 
@@ -70,7 +69,7 @@ const datasetName = Date.now().toString();
     console.log('Saving dataset...');
     await page.click('button[data-test-id="next"]');
     console.log(`Dataset ${datasetName} was successfully created.\n`);
-    await page.waitForNavigation({ timeout: 5000, waitUntil: 'networkidle' });
+    await page.waitForSelector(`[data-test-name="${datasetName}"]`);
 
     // Search of the ID
     console.log('Extracting dataset ID...');
