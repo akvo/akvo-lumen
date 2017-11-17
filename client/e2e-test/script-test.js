@@ -25,7 +25,6 @@ const datasetName = Date.now().toString();
 
 (async () => {
   const browser = await puppeteer.launch({
-    headless: false,
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
