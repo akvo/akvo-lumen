@@ -161,7 +161,7 @@ export default class LibraryListingItem extends Component {
         data-test-id={getId(entity)}
       >
         {isPending(entity) &&
-          <div className="pendingOverlay">
+          <div className="pendingOverlay" data-test-id="pending">
             <LoadingSpinner />
           </div>
         }

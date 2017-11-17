@@ -25,6 +25,7 @@ const datasetName = Date.now().toString();
 
 (async () => {
   const browser = await puppeteer.launch({
+    headless: false,
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
@@ -78,7 +79,10 @@ const datasetName = Date.now().toString();
       return Promise.resolve(found.getAttribute('data-test-id'));
     });
     console.log(`ID extracted: ${id}\n`);
-
+    let pending;
+    do {
+      pending = await page.$(`[data-test-name="${datasetName}"] [data-test-id="pending"]`);
+    } while (pending);
     // Visualisation
     console.log('Accessing to visualisation creation...');
     await page.click('button[data-test-id="visualisation"]');
@@ -86,18 +90,25 @@ const datasetName = Date.now().toString();
     await page.waitForSelector('li[data-test-id="button-pivot-table"]', { timeout: 10000 });
     await page.click('li[data-test-id="button-pivot-table"]');
     console.log('Selecting dataset...');
-    await page.waitForSelector('[data-test-id="dataset-menu"]', { timeout: 10000 });
-    await page.click('label[data-test-id="dataset-menu"]+div');
-    await keyboard.press('Enter');
-    //await page.waitForSelector('div[data-test-id="input-group"]>div>div>div:nth-of-type(2)', { timeout: 10000 });
-    //await page.click('div[data-test-id="input-group"]>div>div>div:nth-of-type(2)');
+    await page.waitForSelector('[data-test-id="select-menu"]', { timeout: 10000 });
+    await page.click('[data-test-id="select-menu"]');
+    const optionId = await page.evaluate(() => {
+      const elements = document.querySelectorAll('[role="option"]');
+      const options = Array.from(elements);
+      const found = options.find(e => e.textContent === __datasetName);
+      return Promise.resolve(found.getAttribute('id'));
+    });
+    await page.click(`#${optionId}`);
     await page.waitForSelector('label[data-test-id="categoryColumnInput"]+div', { timeout: 10000 });
     await page.click('label[data-test-id="categoryColumnInput"]+div');
-    await page.waitForSelector('label[data-test-id="categoryColumnInput"]+div>div>div:nth-of-type(2)', { timeout: 10000 });
-    await page.click('label[data-test-id="categoryColumnInput"]+div>div>div:nth-of-type(2)');
-    await page.waitForSelector('input[name="categoryColumnInput"]', { timeout: 10000 });
     console.log('Selecting columns...');
-    await page.$eval('input[name="categoryColumnInput"]', (el) => { el.setAttribute('value', 'c9'); });
+    const columnId = await page.evaluate(() => {
+      const elements = document.querySelectorAll('[role="option"]');
+      const options = Array.from(elements);
+      const found = options.find(e => e.textContent === 'title (text)');
+      return Promise.resolve(found.getAttribute('id'));
+    });
+    await page.click(`#${columnId}`);
     await page.click('div[data-test-id="entity-title"]');
     console.log('Typing visualisation name...');
     await page.type('input[data-test-id="entity-title"]', `Visualisation of ${datasetName}`);

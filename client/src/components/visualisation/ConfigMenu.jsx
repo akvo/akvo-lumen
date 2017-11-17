@@ -82,7 +82,7 @@ const aggregationOptions = [
   },
 ];
 
-const selectProps = {"data-test-id": "select-menu"};
+const selectProps = { 'data-test-id': 'select-menu' };
 
 export default function ConfigMenu(props) {
   const datasetArray = getDatasetArray(props.datasets);
