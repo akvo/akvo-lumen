@@ -1,7 +1,8 @@
 (ns akvo.lumen.transformation.geo
   "Geometry data transformations"
-  (:require [clojure.java.jdbc :as jdbc]
+  (:require [akvo.lumen.import.common :as import]
             [akvo.lumen.transformation.engine :as engine]
+            [clojure.java.jdbc :as jdbc]
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/transformation/geo.sql")
@@ -17,6 +18,9 @@
   [op-spec]
   (valid? op-spec))
 
+(defn add-index [conn table-name column-name]
+  (jdbc/execute! conn (import/geo-index table-name column-name)))
+
 (defmethod engine/apply-operation :core/generate-geopoints
   [tenant-conn table-name columns op-spec]
   (let [{:strs [columnNameLat columnNameLong columnTitleGeo]} (engine/args op-spec)
@@ -28,6 +32,7 @@
               opts {:table-name table-name :column-name-geo column-name-geo}]
           (jdbc/with-db-transaction [conn tenant-conn]
             (add-geometry-column conn opts)
+            (add-index conn table-name column-name-geo)
             (generate-geopoints conn (conj opts {:column-name-lat columnNameLat
                                                  :column-name-long columnNameLong})))
           {:success? true

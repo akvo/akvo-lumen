@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
 import SelectMenu from '../../common/SelectMenu';
+import { filterColumns } from '../../../utilities/utils';
 
 const operations = [
   {
@@ -77,7 +78,9 @@ const getFilterDisplayValue = (value, columnName, columnOptions) => {
   let displayValue;
 
   if (columnType === 'date') {
-    displayValue = moment(value).format('YYYY-MM-DD hh:mm');
+    const secondsToMilliseconds = 1000;
+
+    displayValue = moment(parseInt(value, 10) * secondsToMilliseconds).format('YYYY-MM-DD');
   } else {
     displayValue = value;
   }
@@ -282,7 +285,7 @@ export default class FilterMenu extends Component {
                         name="filterColumnInput"
                         placeholder="Choose a column to filter by..."
                         value={newFilterColumn || null}
-                        options={columnOptions}
+                        options={filterColumns(columnOptions, ['text', 'number', 'date'])}
                         onChange={choice => this.updateNewFilter('newFilterColumn', choice)}
                       />
                       <label htmlFor="filterStrategyInput">

@@ -2,6 +2,7 @@
   (:require [akvo.lumen.fixtures :refer [*tenant-conn*
                                          tenant-conn-fixture]]
             [akvo.lumen.test-utils :refer [import-file]]
+            [clojure.string :as string]
             [clojure.test :refer :all]
             [hugsql.core :as hugsql]))
 
@@ -32,9 +33,31 @@
       (is (= "number" (get (second columns) "type")))
       (is (= "text" (get (last columns) "type"))))))
 
+(deftest ^:functional test-geoshape-csv
+  (testing "Import csv file generated from a shapefile"
+    (let [dataset-id (import-file *tenant-conn* "liberia_adm2.csv" {:dataset-name "Liberia shapefile"
+                                                                    :has-column-headers? true})
+          dataset (dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id
+                                                                :version 1})
+          columns (:columns dataset)]
+      (is (= "geoshape" (get (first columns) "type")))
+      (is (= "number" (get (second columns) "type")))
+      (is (= "text" (get (last columns) "type")))
+      (is (= (count columns) 15)))))
+
+
 (deftest ^:functional test-varying-column-count
   (testing "Should fail to import csv file with varying number of columns"
     (is (thrown-with-msg? clojure.lang.ExceptionInfo
                           #"Invalid csv file. Varying number of columns"
                           (import-file *tenant-conn* "mixed-column-counts.csv"
-                                         {:dataset-name "Mixed Column Counts"})))))
+                                       {:dataset-name "Mixed Column Counts"})))))
+
+(deftest ^:functional test-trimmed-columns
+  (testing "Testing if whitespace is removed from beginning & end of column titles"
+    (let [dataset-id (import-file *tenant-conn* "whitespace.csv" {:dataset-name "Padded titles"})
+          dataset (dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id
+                                                                :version 1})
+          titles (map :title (:rows dataset))
+          trimmable? #(or (string/starts-with? " " %) (string/ends-with? " " %))]
+      (is (every? trimmable? titles) false))))

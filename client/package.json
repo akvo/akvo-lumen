@@ -9,8 +9,8 @@
     "test:watch": "npm test -- --watch",
     "start": "node server.js",
     "build": "NODE_ENV=production webpack -p",
-    "lint": "./node_modules/.bin/eslint --ext .jsx --ext .js src test e2e-test",
-    "lint:fix": "./node_modules/.bin/eslint --fix --ext .jsx --ext .js src test e2e-test"
+    "lint": "./node_modules/.bin/eslint --ext .jsx --ext .js src test e2e-test --ignore-pattern src/vendor/*.js",
+    "lint:fix": "./node_modules/.bin/eslint --fix --ext .jsx --ext .js src test e2e-test --ignore-pattern src/vendor/*.js"
   },
   "author": "Akvo Foundation",
   "license": "AGPL-3.0",

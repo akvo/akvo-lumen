@@ -20,6 +20,7 @@
                  [duct/hikaricp-component "0.1.1" :exclusions [org.slf4j/slf4j-nop]]
                  [environ "1.1.0"]
                  [funcool/cuerdas "2.0.3"]
+                 [honeysql "0.9.1"]
                  [meta-merge "1.0.0"]
                  [org.akvo/commons "0.4.5" :exclusions [org.postgresql/postgresql org.clojure/java.jdbc]]
                  [org.akvo/resumed "0.1.0-SNAPSHOT"]
@@ -27,6 +28,7 @@
                  [org.apache.tika/tika-parsers "1.16" :exclusions [org.slf4j/slf4j-api]]
                  [org.clojure/clojure "1.9.0-beta1"]
                  [org.clojure/data.csv "0.1.4"]
+                 [org.clojure/core.match "0.3.0-alpha5"]
                  [org.clojure/java.jdbc "0.7.3"]
                  [org.immutant/web "2.1.9" :exclusions [ch.qos.logback/logback-classic]]
                  [org.postgresql/postgresql "42.1.4"]
@@ -35,7 +37,8 @@
                  [ring "1.6.2"]
                  [ring/ring-defaults "0.3.1"]
                  [ring/ring-json "0.4.0"]
-                 [selmer "1.11.1"]]
+                 [selmer "1.11.1"]
+                 [net.postgis/postgis-jdbc "2.2.1" :exclusions [org.postgresql/postgresql]]]
   :uberjar-name "akvo-lumen.jar"
   :repl-options {:timeout 120000}
   ;; :pedantic? :abort

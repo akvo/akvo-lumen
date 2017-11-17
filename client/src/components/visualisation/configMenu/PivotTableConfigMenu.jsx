@@ -7,6 +7,7 @@ import Subtitle from './Subtitle';
 import UniqueValueMenu from './UniqueValueMenu';
 import ToggleInput from './ToggleInput';
 import { canShowPivotTotals } from '../../../utilities/chart';
+import { filterColumns } from '../../../utilities/utils';
 
 require('./PivotTableConfigMenu.scss');
 
@@ -115,8 +116,7 @@ export default class PivotTableConfigMenu extends Component {
                 labelText="value_column"
                 choice={spec.valueColumn !== null ? spec.valueColumn.toString() : null}
                 name="valueColumnInput"
-                options={columnOptions.filter(option =>
-                  option.type === 'number' || option.type === 'date')}
+                options={filterColumns(columnOptions, ['number', 'date'])}
                 onChange={value => onChangeSpec({
                   valueColumn: value,
                 })}
@@ -197,7 +197,7 @@ export default class PivotTableConfigMenu extends Component {
           labelTextId="columns"
           choice={spec.categoryColumn !== null ? spec.categoryColumn.toString() : null}
           name="categoryColumnInput"
-          options={columnOptions}
+          options={filterColumns(columnOptions, ['number', 'date', 'text'])}
           onChange={(value) => {
             const change = { categoryColumn: value };
 
@@ -248,7 +248,7 @@ export default class PivotTableConfigMenu extends Component {
           labelTextId="row_column"
           choice={spec.rowColumn !== null ? spec.rowColumn.toString() : null}
           name="rowColumnInput"
-          options={columnOptions}
+          options={filterColumns(columnOptions, ['number', 'date', 'text'])}
           onChange={(value) => {
             const change = { rowColumn: value };
             if (value == null && spec.aggregation !== 'count') {

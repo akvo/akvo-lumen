@@ -3,13 +3,12 @@ import PropTypes from 'prop-types';
 import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
 import SelectMenu from '../../common/SelectMenu';
 
+require('./SelectInput.scss');
+
 function SelectInput(props) {
   return (
     <div className={`inputGroup${props.disabled ? ' disabled' : ''}`}>
-      <label
-        htmlFor={props.name}
-        data-test-id={props.name}
-      >
+      <label htmlFor={props.name} data-test-id={props.name}>
         {props.labelTextId ? <FormattedMessage id={props.labelTextId} /> : props.labelText}:
       </label>
       <SelectMenu

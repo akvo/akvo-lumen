@@ -1,0 +1,8 @@
+@import "../../../styles/modules/importAll";
+
+.SelectInput {
+    .Select-menu-outer, .Select-menu {
+        /* Column lists can get really long, so don't set a max height for select inputs */
+        max-height: initial;
+    }
+}

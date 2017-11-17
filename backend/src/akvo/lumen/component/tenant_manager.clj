@@ -49,7 +49,7 @@
   (let [cfg (HikariConfig.)]
     (.setJdbcUrl cfg (:db_uri tenant))
     (.setPoolName cfg (:label tenant))
-    (.setMaximumPoolSize cfg 2)
+    (.setMinimumIdle cfg 2)
     {:datasource (HikariDataSource. cfg)}))
 
 
@@ -90,11 +90,11 @@
         (load-tenant db (:encryption-key config) tenants label)
         (:spec (get @tenants label)))))
 
-  (uri [{:keys [db tenants]} label]
+  (uri [{:keys [tenants]} label]
     (if-let [tenant (get @tenants label)]
       (:uri tenant)
       (do
-        (load-tenant db (:encryption-key config) tenants label)
+        (load-tenant (:encryption-key config) tenants label)
         (:uri (get @tenants label)))))
 
   TenantAdmin

@@ -28,3 +28,11 @@
     (when (nil? email)
       (throw (ex-info "Email not valid." {:email v})))
     email))
+
+(defn query-map
+  "Takes a query-string \"a=1&b=2\" and returns a hash-map {:a 1 :b 2}"
+  [query-string]
+  (->> (str/split query-string #"&")
+       (map #(str/split % #"="))
+       (map (fn [[k v]] [(keyword k) v]))
+       (into {})))

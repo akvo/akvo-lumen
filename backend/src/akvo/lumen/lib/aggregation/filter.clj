@@ -1,5 +1,6 @@
 (ns akvo.lumen.lib.aggregation.filter
-  (:require [clojure.string :as str])
+  (:require [akvo.lumen.transformation.engine :as engine]
+            [clojure.string :as str])
   (:import [java.sql.Timestamp]))
 
 (defn invalid-filter [msg map]
@@ -7,6 +8,19 @@
 
 (defmulti filter-sql (fn [filter]
                        (get filter "strategy")))
+
+(defn- char-range [start end]
+  (map char (range (int start) (inc (int end)))))
+
+(def alphanumerics (concat (char-range \a \z)
+                           (char-range \A \Z)
+                           (take 10 (range))))
+
+(defn random-tag []
+  (format "tag_%s" (->> #(rand-nth alphanumerics)
+                        repeatedly
+                        (take 10)
+                        (apply str))))
 
 (defn parse-number [s]
   (try
@@ -16,12 +30,9 @@
 
 (defn parse-date [s]
   (try
-    (java.sql.Timestamp. (Long/parseLong s))
+    (java.sql.Timestamp. (* s 1000))
     (catch NumberFormatException e
       (invalid-filter "Not a timestamp" {:string s}))))
-
-(defn escape-sql-str [s]
-  (str/replace s "'" "''"))
 
 (defn comparison [op column-type column-name value]
   (condp = column-type
@@ -63,7 +74,7 @@
       "text" (format "coalesce(%1$s, '') %2$s '%3$s'"
                      column-name
                      op
-                     (escape-sql-str value))
+                     (engine/pg-escape-string value))
       (invalid-filter "Type not supported" {:type column-type}))))
 
 (defmethod filter-sql "isEmpty"

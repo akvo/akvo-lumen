@@ -5,6 +5,12 @@ gcloud-auth:
 project-switch:
 	gcloud config set project akvo-lumen
 
+# Test
+
+## Config kubectl
+kube-test-cred:
+	gcloud container clusters get-credentials test --zone europe-west1-d --project akvo-lumen
+
 # Dev
 
 ## Create dev cluster

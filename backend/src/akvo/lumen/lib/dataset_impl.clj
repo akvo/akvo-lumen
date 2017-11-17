@@ -17,20 +17,30 @@
 (defn create [tenant-conn config jwt-claims body]
   (import/handle-import-request tenant-conn config jwt-claims body))
 
+(defn column-sort-order
+  "Return this columns sort order (an integer) or nil if the dataset
+  is not sorted by this column"
+  [column]
+  (get column "sort"))
+
 (defn select-data-sql [table-name columns]
-  (let [column-names (map #(get % "columnName") columns)
-        f (fn [m] (get m "sort"))
-        sort-columns (conj
-                      (vec
-                       (for [c (sort-by f (filter f columns))]
-                         (str (get c "columnName") " " (get c "direction"))))
-                      "rnum")
-        order-by-expr (str/join "," sort-columns)
-        sql (format "SELECT %s FROM %s ORDER BY %s"
-                    (str/join "," column-names)
-                    table-name
-                    order-by-expr)]
-    sql))
+  (let [select-expr (->> columns
+                         (map (fn [{:strs [type columnName]}]
+                                (condp = type
+                                  "geopoint" (format "ST_AsText(%s)" columnName)
+                                  "geoshape" "NULL" ;; We don't send shapes to the dataset view due to size
+                                  columnName)))
+                         (str/join ", "))
+        order-by-expr (as-> columns cols
+                        (filter column-sort-order cols)
+                        (sort-by column-sort-order cols)
+                        (mapv #(format "%s %s" (get % "columnName") (get % "direction")) cols)
+                        (conj cols "rnum")
+                        (str/join ", " cols))]
+    (format "SELECT %s FROM %s ORDER BY %s"
+            select-expr
+            table-name
+            order-by-expr)))
 
 (defn fetch [conn id]
   (if-let [dataset (dataset-by-id conn {:id id})]

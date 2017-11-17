@@ -1,6 +1,7 @@
 (ns akvo.lumen.import.common
   (:require [clojure.java.jdbc :as jdbc]
-            [clojure.string :as str]))
+            [clojure.string :as str])
+  (:import [org.postgis PGgeometry]))
 
 (defprotocol DatasetImporter
   "
@@ -32,7 +33,7 @@
      A column specification is a map with keys
 
      Required:
-       :type - The lumen type of the column. Currently :text, :number or :date
+       :type - The lumen type of the column. Currently :text, :number, :date, :geoshape or :geopoint
        :title - The title of the column
        :id - The internal id of the column (as a keyword). The id must be
              lowercase alphanumeric ([a-z][a-z0-9]*)
@@ -45,7 +46,11 @@
 
        :text - java.lang.String
        :number - java.lang.Number
-       :date - java.time.Instant"))
+       :date - java.time.Instant
+       :geoshape - Geoshape
+                   Well-known text (WKT) shape (POLYGON or MULTIPOLYGON)
+       :geopoint - Geopoint
+                   Well-known text (WKT) shape (POINT)"))
 
 (defn dispatch-on-kind [spec]
   (let [kind (get spec "kind")]
@@ -68,11 +73,35 @@
                                         (condp = type
                                           :date "timestamptz"
                                           :number "double precision"
+                                          ;; Note not `POLYGON` so we can support `MULTIPOLYGON` as well
+                                          :geoshape "geometry(GEOMETRY, 4326)"
+                                          :geopoint "geometry(POINT, 4326)"
                                           :text "text")))
                               columns))))
 
+(defn index-name [table-name column-name]
+  (format "%s_%s_idx" table-name column-name))
+
+(defn geo-index [table-name column-name]
+  (format "CREATE INDEX %s ON %s USING GIST(%s)"
+          (index-name table-name column-name)
+          table-name
+          column-name))
+
+(defn create-indexes [conn table-name columns]
+  (doseq [column columns]
+    (condp = (:type column)
+      :geoshape
+      (jdbc/execute! conn (geo-index table-name (name (:id column))))
+      :geopoint
+      (jdbc/execute! conn (geo-index table-name (name (:id column))))
+
+      ;; else
+      nil)))
+
 (defn create-dataset-table [conn table-name columns]
-  (jdbc/execute! conn [(dataset-table-sql table-name columns)]))
+  (jdbc/execute! conn [(dataset-table-sql table-name columns)])
+  (create-indexes conn table-name columns))
 
 (defn add-key-constraints [conn table-name columns]
   (doseq [column columns
@@ -86,6 +115,10 @@
                            table-name
                            (name (:id column))))))
 
+(defrecord Geoshape [wkt-string])
+
+(defrecord Geopoint [wkt-string])
+
 (defprotocol CoerceToSql
   (coerce [this]))
 
@@ -96,7 +129,17 @@
   (coerce [value] value)
   java.time.Instant
   (coerce [value]
-    (java.sql.Timestamp. (.toEpochMilli value))))
+    (java.sql.Timestamp. (.toEpochMilli value)))
+  Geoshape
+  (coerce [value]
+    (let [geom (PGgeometry/geomFromString (:wkt-string value))]
+      (.setSrid geom 4326)
+      geom))
+  Geopoint
+  (coerce [value]
+    (let [geom (PGgeometry/geomFromString (:wkt-string value))]
+      (.setSrid geom 4326)
+      geom)))
 
 (defn coerce-to-sql [record]
   (reduce-kv
