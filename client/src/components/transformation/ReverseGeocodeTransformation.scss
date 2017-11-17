@@ -1,0 +1,20 @@
+.ReverseGeocodeTransformation {
+  .container {
+    display: flex;
+    justify-content: space-around;
+    position: absolute;
+    top: 4em;
+    right: 0;
+    left: 0;
+    line-height: 2.5em;
+    padding: 2rem 0;
+
+    h1 {
+      font-size: 1.2em;
+    }
+
+    input {
+      padding: .6em;
+    }
+  }
+}

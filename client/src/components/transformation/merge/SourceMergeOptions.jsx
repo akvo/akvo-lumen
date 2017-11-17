@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { ensureDatasetFullyLoaded } from '../../../actions/dataset';
 import SelectDataset from './SelectDataset';
-import SelectColumn from './SelectColumn';
+import SelectColumn from '../SelectColumn';
 import SelectMenu from '../../common/SelectMenu';
 import { guessMergeColumn, getColumnName, directionLabels } from './utils';
 import './SourceMergeOptions.scss';

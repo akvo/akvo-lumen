@@ -58,6 +58,9 @@ class DatasetControls extends Component {
                   }, {
                     label: <FormattedMessage id="generate_geopoints" />,
                     value: 'generateGeopoints',
+                  }, {
+                    label: <FormattedMessage id="reverse_geocode" />,
+                    value: 'reverseGeocode',
                   },
                 ]}
                 onOptionSelected={(item) => {

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { ensureDatasetFullyLoaded } from '../../../actions/dataset';
-import SelectColumn from './SelectColumn';
+import SelectColumn from '../SelectColumn';
 import { guessMergeColumn, getColumnName } from './utils';
 import './TargetMergeOptions.scss';
 

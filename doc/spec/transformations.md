@@ -260,3 +260,14 @@ Examples:
           "target": {"mergeColumn": "c1"}}}
 
 ```
+
+### core/reverse-geocode
+
+```
+{"op": "core/reverse-geocode"
+ "args": {"datasetId" "abc", // null means "world" table
+          "geoColumnName" "def", // null means world.geom
+		  "columnName": "ghi", // null means world.adm2_name. Can also be adm1_name or adm0_name
+		  }}
+
+```
