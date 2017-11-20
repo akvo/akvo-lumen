@@ -45,6 +45,7 @@ export default class DashboardViewer extends Component {
     super();
     this.state = {
       canvasWidth: 1080,
+      canvasHeight: 800,
       viewportType: 'large',
     };
 
@@ -54,7 +55,9 @@ export default class DashboardViewer extends Component {
 
   componentDidMount() {
     this.handleResize();
-    window.addEventListener('resize', this.handleResize);
+    window.addEventListener(
+      'resize', (width, height) => this.handleResize(width, height)
+    );
   }
 
   componentWillUnmount() {
@@ -78,8 +81,10 @@ export default class DashboardViewer extends Component {
     }
   }
 
-  handleResize() {
-    const width = this.DashboardViewer.clientWidth;
+  handleResize(
+    width = this.DashboardViewer.clientWidth,
+    height = this.DashboardViewer.canvasHeight
+  ) {
     let viewport;
 
     for (let i = 0; i < viewportLimits.length; i += 1) {
@@ -92,6 +97,7 @@ export default class DashboardViewer extends Component {
     }
 
     this.setState({
+      canvasHeight: height,
       canvasWidth: width,
       viewportType: viewport,
     });
@@ -123,6 +129,7 @@ export default class DashboardViewer extends Component {
               key={item.id}
               item={this.getItemFromProps(item)}
               layout={layout[item.id]}
+              canvasHeight={this.state.canvasHeight}
               canvasWidth={this.state.canvasWidth}
               viewportType={this.state.viewportType}
               datasets={datasets}
