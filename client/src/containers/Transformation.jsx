@@ -56,8 +56,8 @@ class Transformation extends Component {
     const { loading, transforming } = this.state;
     if (loading) return null;
 
-    const { datasetId, datasets } = this.props;
-    const TransformationComponent = transformationComponent[this.props.routeParams.transformationType];
+    const { datasetId, datasets, routeParams } = this.props;
+    const TransformationComponent = transformationComponent[routeParams.transformationType];
     return (
       <div className="Transformation">
         <TransformationComponent
@@ -73,6 +73,7 @@ class Transformation extends Component {
 
 Transformation.propTypes = {
   router: PropTypes.object.isRequired,
+  routeParams: PropTypes.object.isRequired,
   datasets: PropTypes.object,
   datasetId: PropTypes.string.isRequired,
   dispatch: PropTypes.func.isRequired,

@@ -9,7 +9,7 @@ import { ensureDatasetFullyLoaded } from '../../actions/dataset';
 
 import './ReverseGeocodeTransformation.scss';
 
-export class ReverseGeocodeTransformation extends Component {
+class ReverseGeocodeTransformation extends Component {
 
   constructor(props) {
     super(props);
