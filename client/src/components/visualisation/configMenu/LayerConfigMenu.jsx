@@ -80,7 +80,7 @@ export default class LayerConfigMenu extends Component {
               <SelectMenu
                 disabled={disabled}
                 name="datasetMenu"
-                placeholder={PropTypes.array.isRequired}
+                placeholder="Choose dataset..."
                 value={layer.datasetId !== null ?
                 layer.datasetId.toString() : null}
                 options={this.props.datasetOptions}
