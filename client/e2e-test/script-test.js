@@ -46,6 +46,7 @@ const datasetName = Date.now().toString();
     console.log('Trying login...');
     await page.click('#kc-login');
     await page.waitForSelector('button[data-test-id="dataset"]', { timeout: 10000 });
+    console.log('Login was successful.\n');
     await page.evaluate(`window.__datasetName = "${datasetName}"`);
 
     // Dataset adding
@@ -79,9 +80,11 @@ const datasetName = Date.now().toString();
     });
     console.log(`ID extracted: ${id}\n`);
     let pending;
+    const timeOut = setTimeout(() => { console.log('Error waiting for pending dataset'); process.exit(1); }, 60 * 1000);
     do {
       pending = await page.$(`[data-test-name="${datasetName}"] [data-test-id="pending"]`);
     } while (pending);
+    clearTimeout(timeOut);
     // Visualisation
     console.log('Accessing to visualisation creation...');
     await page.click('button[data-test-id="visualisation"]');
