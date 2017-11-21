@@ -1,5 +1,5 @@
 {:keycloak
- {:url "http://auth.lumen.localhost:8080/auth"
+ {:url "http://auth.lumen.local:8080/auth"
   :realm "akvo"
   :credentials
   {"client_id" "akvo-lumen-confidential"

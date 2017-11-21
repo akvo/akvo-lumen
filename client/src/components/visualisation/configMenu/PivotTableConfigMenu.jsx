@@ -71,7 +71,10 @@ export default class PivotTableConfigMenu extends Component {
     const spec = visualisation.spec;
 
     return (
-      <div className="PivotTableConfigMenu">
+      <div
+        className="PivotTableConfigMenu"
+        data-test-id="pivot-table-config"
+      >
         <hr />
         <Subtitle><FormattedMessage id="aggregation" /></Subtitle>
         <div>

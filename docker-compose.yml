@@ -18,7 +18,7 @@ services:
       - ~/.lein:/home/akvo/.lein
       - ./postgres/provision:/pg-certs
    links:
-      - keycloak:auth.lumen.localhost
+      - keycloak:auth.lumen.local
    ports:
       - "47480:47480"
       - "3000:3000"

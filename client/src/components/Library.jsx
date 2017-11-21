@@ -223,7 +223,10 @@ class Library extends Component {
 
 
     return (
-      <div className="Library">
+      <div
+        className="Library"
+        data-test-id="library"
+      >
         {this.state.pendingDeleteEntity &&
           <DeleteConfirmationModal
             isOpen

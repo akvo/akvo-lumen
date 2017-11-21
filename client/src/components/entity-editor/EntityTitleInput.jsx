@@ -21,6 +21,7 @@ export default class EntityTitleInput extends Component {
     return (
       <div
         className="EntityTitleInput"
+        data-test-id="entity-title"
       >
         {onChangeTitle ?
           <h1
@@ -39,6 +40,7 @@ export default class EntityTitleInput extends Component {
           >
             <input
               className="entityTitleInput"
+              data-test-id="entity-title"
               style={{ display: 'none' }}
               type="text"
               ref={(titleInput) => { this.titleInput = titleInput; }}
