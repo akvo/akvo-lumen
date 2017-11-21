@@ -46,6 +46,178 @@ TabMenu.propTypes = {
   onChangeTab: PropTypes.func.isRequired,
 };
 
+const GeopointDataTab = (props) => {
+  const { layer,
+    layerIndex,
+    onChangeMapLayer,
+    columnOptions,
+    handlePointColorColumnChange,
+    disabled,
+  } = props;
+
+  return (
+    <div className="GeopointDataTab">
+      {(layer.latitude != null || layer.longitude != null) &&
+        <div>
+          <div className="inputGroup">
+            <SelectInput
+              disabled={layer.datasetId === null || disabled}
+              placeholder="Select a latitude column"
+              labelText="Latitude column"
+              choice={layer.latitude != null ? layer.latitude.toString() : null}
+              name="latitudeInput"
+              options={filterColumns(columnOptions, 'number')}
+              onChange={value => onChangeMapLayer(layerIndex, {
+                latitude: value,
+              })}
+            />
+          </div>
+          <div className="inputGroup">
+            <SelectInput
+              disabled={layer.datasetId === null || disabled}
+              placeholder="Select a longitude column"
+              labelText="Longitude column"
+              choice={layer.longitude != null ? layer.longitude.toString() : null}
+              name="longitudeInput"
+              options={filterColumns(columnOptions, 'number')}
+              onChange={value => onChangeMapLayer(layerIndex, {
+                longitude: value,
+              })}
+            />
+          </div>
+          <hr />
+        </div>
+      }
+      <div className="inputGroup">
+        <SelectInput
+          disabled={layer.datasetId === null || disabled}
+          placeholder="Select a geopoint column"
+          labelText="Geopoint column"
+          choice={layer.geom != null ? layer.geom.toString() : null}
+          name="geomInput"
+          options={filterColumns(columnOptions, 'geopoint')}
+          onChange={value => onChangeMapLayer(layerIndex, {
+            geom: value,
+            latitude: null,
+            longitude: null,
+          })}
+        />
+      </div>
+      <div className="inputGroup">
+        <SelectInput
+          disabled={
+            ((layer.latitude == null || layer.longitude == null) && layer.geom == null) ||
+            disabled
+          }
+          placeholder="Select a data column to color points by"
+          labelText="Color coding column"
+          choice={layer.pointColorColumn != null ?
+            layer.pointColorColumn.toString() : null}
+          name="xGroupColumnMenu"
+          options={filterColumns(columnOptions, ['text', 'number'])}
+          clearable
+          onChange={columnName =>
+            handlePointColorColumnChange(columnName,
+              columnOptions.find(option => option.value === columnName))}
+        />
+      </div>
+    </div>
+  );
+};
+
+GeopointDataTab.propTypes = {
+  layer: PropTypes.object.isRequired,
+  layerIndex: PropTypes.number.isRequired,
+  onChangeMapLayer: PropTypes.func.isRequired,
+  columnOptions: PropTypes.array.isRequired,
+  handlePointColorColumnChange: PropTypes.func.isRequired,
+  disabled: PropTypes.bool,
+};
+
+const GeoshapeDataTab = (props) => {
+  const { layer,
+    layerIndex,
+    onChangeMapLayer,
+    columnOptions,
+    datasetOptions,
+    disabled,
+  } = props;
+
+  return (
+    <div className="GeoshapeDataTab">
+      <div className="inputGroup">
+        <SelectInput
+          disabled={layer.datasetId === null || disabled}
+          placeholder="Select a geoshape column"
+          labelText="Geoshape column"
+          choice={layer.geom != null ? layer.geom.toString() : null}
+          name="geomInput"
+          options={filterColumns(columnOptions, 'geoshape')}
+          onChange={value => onChangeMapLayer(layerIndex, {
+            geom: value,
+            latitude: null,
+            longitude: null,
+          })}
+        />
+      </div>
+      <div className="inputGroup">
+        <SelectInput
+          disabled={(layer.datasetId == null) || disabled}
+          placeholder="Select a styling dataset"
+          labelText="Styling dataset"
+          choice={layer.aggregationDataset != null ?
+            layer.aggregationDataset.toString() : null}
+          name="aggregationDataset"
+          options={datasetOptions}
+          clearable
+          onChange={value => onChangeMapLayer(layerIndex, {
+            aggregationDataset: value,
+          })}
+        />
+      </div>
+      <div className="inputGroup">
+        <SelectInput
+          disabled={(layer.aggregationDataset == null) || disabled}
+          placeholder="Select styling indicator"
+          labelText="Styling indicator"
+          choice={layer.pointColorColumn != null ?
+            layer.pointColorColumn.toString() : null}
+          name="aggregationColumn"
+          options={filterColumns(columnOptions, ['number'])}
+          clearable
+          onChange={value => onChangeMapLayer(layerIndex, {
+            aggregationColumn: value,
+          })}
+        />
+      </div>
+      <div className="inputGroup">
+        <SelectInput
+          disabled={(layer.aggregationDataset == null) || disabled}
+          placeholder="Select styling indicator geopoint column"
+          labelText="Styling indicator geopoint column"
+          choice={layer.pointColorColumn != null ?
+            layer.pointColorColumn.toString() : null}
+          name="aggregationColumn"
+          options={filterColumns(columnOptions, ['geopoint'])}
+          clearable
+          onChange={value => onChangeMapLayer(layerIndex, {
+            aggregationGeomColumn: value,
+          })}
+        />
+      </div>
+    </div>
+  );
+};
+
+GeoshapeDataTab.propTypes = {
+  layer: PropTypes.object.isRequired,
+  layerIndex: PropTypes.number.isRequired,
+  onChangeMapLayer: PropTypes.func.isRequired,
+  columnOptions: PropTypes.array.isRequired,
+  datasetOptions: PropTypes.array.isRequired,
+  disabled: PropTypes.bool,
+};
+
 export default class LayerConfigMenu extends Component {
   constructor() {
     super();
@@ -79,6 +251,7 @@ export default class LayerConfigMenu extends Component {
                 layer.datasetId.toString() : null}
                 options={this.props.datasetOptions}
                 onChange={datasetId => onChangeMapLayer(this.props.layerIndex, { datasetId })}
+                buttonSpacing="0"
               />
             </div>
             <ButtonRowInput
@@ -89,76 +262,32 @@ export default class LayerConfigMenu extends Component {
                 label: <FormattedMessage id="geo_shape" />,
                 value: 'geo-shape',
               }]}
-              disabled
-              selected="geo-location"
+              selected={layer.layerType || 'geo-location'}
               label="Layer type"
-              onChange={() => null}
-              buttonSpacing="2rem"
+              onChange={value => onChangeMapLayer(layerIndex, {
+                layerType: value,
+              })}
+              buttonSpacing="0"
             />
-            {(layer.latitude != null || layer.longitude != null) &&
-              <div>
-                <div className="inputGroup">
-                  <SelectInput
-                    disabled={layer.datasetId === null || disabled}
-                    placeholder="Select a latitude column"
-                    labelText="Latitude column"
-                    choice={layer.latitude != null ? layer.latitude.toString() : null}
-                    name="latitudeInput"
-                    options={filterColumns(columnOptions, 'number')}
-                    onChange={value => onChangeMapLayer(layerIndex, {
-                      latitude: value,
-                    })}
-                  />
-                </div>
-                <div className="inputGroup">
-                  <SelectInput
-                    disabled={layer.datasetId === null || disabled}
-                    placeholder="Select a longitude column"
-                    labelText="Longitude column"
-                    choice={layer.longitude != null ? layer.longitude.toString() : null}
-                    name="longitudeInput"
-                    options={filterColumns(columnOptions, 'number')}
-                    onChange={value => onChangeMapLayer(layerIndex, {
-                      longitude: value,
-                    })}
-                  />
-                </div>
-                <hr />
-              </div>
+            {(layer.layerType === 'geo-shape') ?
+              <GeoshapeDataTab
+                layer={layer}
+                layerIndex={layerIndex}
+                onChangeMapLayer={onChangeMapLayer}
+                columnOptions={columnOptions}
+                datasetOptions={this.props.datasetOptions}
+                disabled={disabled}
+              />
+              :
+              <GeopointDataTab
+                layer={layer}
+                layerIndex={layerIndex}
+                onChangeMapLayer={onChangeMapLayer}
+                columnOptions={columnOptions}
+                handlePointColorColumnChange={this.handlePointColorColumnChange}
+                disabled={disabled}
+              />
             }
-            <div className="inputGroup">
-              <SelectInput
-                disabled={layer.datasetId === null || disabled}
-                placeholder="Select a geopoint column"
-                labelText="Geopoint column"
-                choice={layer.geom != null ? layer.geom.toString() : null}
-                name="geomInput"
-                options={filterColumns(columnOptions, 'geopoint')}
-                onChange={value => onChangeMapLayer(layerIndex, {
-                  geom: value,
-                  latitude: null,
-                  longitude: null,
-                })}
-              />
-            </div>
-            <div className="inputGroup">
-              <SelectInput
-                disabled={
-                  ((layer.latitude == null || layer.longitude == null) && layer.geom == null) ||
-                  disabled
-                }
-                placeholder="Select a data column to color points by"
-                labelText="Color coding column"
-                choice={layer.pointColorColumn != null ?
-                  layer.pointColorColumn.toString() : null}
-                name="xGroupColumnMenu"
-                options={filterColumns(columnOptions, ['text', 'number'])}
-                clearable
-                onChange={columnName =>
-                  this.handlePointColorColumnChange(columnName,
-                    columnOptions.find(option => option.value === columnName))}
-              />
-            </div>
             <FilterMenu
               filters={layer.filters}
               hasDataset={layer.datasetId !== null}
