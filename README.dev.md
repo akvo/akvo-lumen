@@ -99,6 +99,14 @@ Hitting that endpoint should print the tenants dns label and connection pool.
 
 A Clojure REPL should be available on port 47480.
 
+## Puppeteer
+
+To run the test of the puppeteer user simulator, just go to lumen main
+folder and run:
+```sh
+./ci/e2e-test.sh
+```
+
 #### Tests
 
 To run the tests, either do it from the REPL or run:
