@@ -103,8 +103,7 @@ export default class GeoTIFFDataSourceSettings extends Component {
             }}
           />
         </p>
-        <div className="dataFileUploadHeaderToggle">
-        </div>
+        <div className="dataFileUploadHeaderToggle" />
         {this.isProgressBarVisible() &&
           <div>
             <ProgressBar

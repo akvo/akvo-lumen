@@ -48,7 +48,7 @@ const supportedFormats = [{
   kind: 'GEOTIFF',
   icon: '/assets/geotiff.png',
   label: <FormattedMessage id="geotiff" />,
-  disabled: false
+  disabled: false,
 }];
 
 const defaultDataSources = {
@@ -72,7 +72,7 @@ const defaultDataSources = {
   },
 
   GEOTIFF: {
-    kind: 'GEOTIFF'
+    kind: 'GEOTIFF',
   },
 };
 

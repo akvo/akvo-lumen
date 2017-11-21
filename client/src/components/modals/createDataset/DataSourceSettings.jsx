@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import DataFileDataSourceSettings, { isValidSource as isValidFileSource } from './DataFileDataSourceSettings';
 import LinkDataSourceSettings, { isValidSource as isValidLinkSource } from './LinkDataSourceSettings';
 import AkvoFlowDataSourceSettings, { isValidSource as isValidFlowSource } from './AkvoFlowDataSourceSettings';
-import GeoTIFFDataSourceSettings, {isValidSource as isValidGeoTIFFSource} from './GeoTIFFDataSourceSettings';
+import GeoTIFFDataSourceSettings, { isValidSource as isValidGeoTIFFSource } from './GeoTIFFDataSourceSettings';
 
 export default class DataSourceSettings extends Component {
 
@@ -44,13 +44,13 @@ export default class DataSourceSettings extends Component {
           />
         );
       case 'GEOTIFF':
-      return (
-        <GeoTIFFDataSourceSettings
-          dataSource={dataSource}
-          onChange={onChange}
-          updateUploadStatus={updateUploadStatus}
-        />
-      );
+        return (
+          <GeoTIFFDataSourceSettings
+            dataSource={dataSource}
+            onChange={onChange}
+            updateUploadStatus={updateUploadStatus}
+          />
+        );
       default:
         throw new Error(`Data source definition for ${dataSource.type} is not yet implemented`);
     }
