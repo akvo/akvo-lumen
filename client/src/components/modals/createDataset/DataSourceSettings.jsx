@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import DataFileDataSourceSettings, { isValidSource as isValidFileSource } from './DataFileDataSourceSettings';
 import LinkDataSourceSettings, { isValidSource as isValidLinkSource } from './LinkDataSourceSettings';
 import AkvoFlowDataSourceSettings, { isValidSource as isValidFlowSource } from './AkvoFlowDataSourceSettings';
+import GeoTIFFDataSourceSettings, {isValidSource as isValidGeoTIFFSource} from './GeoTIFFDataSourceSettings';
 
 export default class DataSourceSettings extends Component {
 
@@ -11,6 +12,7 @@ export default class DataSourceSettings extends Component {
       case 'DATA_FILE': return isValidFileSource(dataSource);
       case 'LINK': return isValidLinkSource(dataSource);
       case 'AKVO_FLOW': return isValidFlowSource(dataSource);
+      case 'GEOTIFF': return isValidGeoTIFFSource(dataSource);
       default: throw new Error(`Unknown data source kind: ${dataSource.kind}`);
     }
   }
@@ -41,6 +43,14 @@ export default class DataSourceSettings extends Component {
             onChangeSettings={onChangeSettings}
           />
         );
+      case 'GEOTIFF':
+      return (
+        <GeoTIFFDataSourceSettings
+          dataSource={dataSource}
+          onChange={onChange}
+          updateUploadStatus={updateUploadStatus}
+        />
+      );
       default:
         throw new Error(`Data source definition for ${dataSource.type} is not yet implemented`);
     }
@@ -59,7 +69,7 @@ export default class DataSourceSettings extends Component {
 
 DataSourceSettings.propTypes = {
   dataSource: PropTypes.shape({
-    kind: PropTypes.oneOf(['DATA_FILE', 'LINK', 'AKVO_FLOW']).isRequired,
+    kind: PropTypes.oneOf(['DATA_FILE', 'LINK', 'AKVO_FLOW', 'GEOTIFF']).isRequired,
     // Other props are data source specific.
   }),
   onChange: PropTypes.func.isRequired,

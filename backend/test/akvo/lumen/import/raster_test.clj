@@ -22,8 +22,8 @@
       (let [table-name (str "t_" (System/currentTimeMillis))
             sql (get-raster-data-as-sql (:path prj) (:filename prj) table-name)
             file (str "/tmp/" (System/currentTimeMillis) ".sql")]
-        (prn table-name)
         (create-raster-table *tenant-conn* {:table-name table-name})
         (create-raster-index *tenant-conn* {:table-name table-name})
         (add-raster-constraints *tenant-conn* {:table-name table-name})
-        (jdbc/execute! *tenant-conn* [sql])))))
+        (jdbc/execute! *tenant-conn* [sql])
+        (is (= 84 (:c (raster-count *tenant-conn* {:table-name table-name}))))))))

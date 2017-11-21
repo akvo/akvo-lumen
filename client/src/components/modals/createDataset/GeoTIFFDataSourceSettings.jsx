@@ -17,13 +17,13 @@ const handleDragOver = (evt) => {
 
 export function isValidSource(source) {
   return (
-    source.kind === 'DATA_FILE' &&
+    source.kind === 'GEOTIFF' &&
     source.url &&
     source.fileName
   );
 }
 
-export default class DataFileDataSourceSettings extends Component {
+export default class GeoTIFFDataSourceSettings extends Component {
 
   constructor() {
     super();
@@ -66,7 +66,7 @@ export default class DataFileDataSourceSettings extends Component {
         onSuccess() {
           updateUploadStatus(false);
           onChange({
-            kind: 'DATA_FILE',
+            kind: 'GEOTIFF',
             url: upload.url,
             fileName: upload.file.name,
           });
@@ -104,30 +104,6 @@ export default class DataFileDataSourceSettings extends Component {
           />
         </p>
         <div className="dataFileUploadHeaderToggle">
-          <p>
-            <input
-              type="checkbox"
-              defaultChecked={this.props.dataSource.hasColumnHeaders}
-              ref={(ref) => { this.datasetHeaderStatusToggle = ref; }}
-              onClick={() => {
-                this.props.onChange({
-                  hasColumnHeaders: this.datasetHeaderStatusToggle.checked,
-                });
-              }}
-            /> <FormattedMessage id="file_has_column_headers" />
-          </p>
-          <p>
-            <input
-              type="checkbox"
-              defaultChecked={this.props.dataSource.guessColumnTypes}
-              ref={(ref) => { this.guessColumnTypes = ref; }}
-              onClick={() => {
-                this.props.onChange({
-                  guessColumnTypes: this.guessColumnTypes.checked,
-                });
-              }}
-            /> <FormattedMessage id="autodetect_column_types" />
-          </p>
         </div>
         {this.isProgressBarVisible() &&
           <div>
@@ -138,7 +114,7 @@ export default class DataFileDataSourceSettings extends Component {
             />
             {this.state.uploadProgressPercentage === -1 &&
               <span className="errorText">
-                CSV file upload failed. Please try again.
+                GEOTIFF file upload failed. Please try again.
               </span>
             }
           </div>
@@ -148,7 +124,7 @@ export default class DataFileDataSourceSettings extends Component {
   }
 }
 
-DataFileDataSourceSettings.propTypes = {
+GeoTIFFDataSourceSettings.propTypes = {
   dataSource: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,
   updateUploadStatus: PropTypes.func.isRequired,
