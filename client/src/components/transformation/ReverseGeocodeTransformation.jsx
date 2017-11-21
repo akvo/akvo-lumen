@@ -34,10 +34,11 @@ class ReverseGeocodeTransformation extends Component {
 
   componentWillMount() {
     const { dispatch, datasetId } = this.props;
+    const { spec } = this.state;
     dispatch(ensureDatasetFullyLoaded(datasetId))
       .then(() => {
-        const spec = this.state.spec.setIn(['target', 'geopointColumn'], this.targetGeopointColumns().first());
-        this.setState({ loading: false, spec });
+        const newSpec = spec.setIn(['target', 'geopointColumn'], this.targetGeopointColumns().first());
+        this.setState({ loading: false, spec: newSpec });
       });
   }
 
