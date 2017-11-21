@@ -80,9 +80,12 @@ const datasetName = Date.now().toString();
     });
     console.log(`ID extracted: ${id}\n`);
     let pending;
-    const timeOut = setTimeout(() => { console.log('Error waiting for pending dataset'); process.exit(1); }, 60 * 1000);
+    const timeOut = setTimeout(() => { console.log('Error waiting for pending dataset'); process.exit(1); }, 15 * 1000);
+    const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
     do {
+      await sleep(1000);
       pending = await page.$(`[data-test-name="${datasetName}"] [data-test-id="pending"]`);
+      console.log('Pending...');
     } while (pending);
     clearTimeout(timeOut);
     // Visualisation
