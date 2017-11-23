@@ -12,7 +12,7 @@ machine:
     LEIN_FAST_TRAMPOLINE: true
   hosts:
     postgres: 127.0.0.1
-    auth.lumen.localhost: 127.0.0.1
+    auth.lumen.local: 127.0.0.1
   services:
     - docker
 

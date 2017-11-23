@@ -83,6 +83,7 @@ export default function SourceSelection({ dataSourceKind, onChangeDataSource }) 
       key={source.kind}
     >
       <input
+        data-test-id="source-option"
         className="sourceOption"
         type="radio"
         name="choose_data_source"

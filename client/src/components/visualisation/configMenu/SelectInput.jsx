@@ -7,8 +7,8 @@ require('./SelectInput.scss');
 
 function SelectInput(props) {
   return (
-    <div className={`SelectInput inputGroup${props.disabled ? ' disabled' : ''}`}>
-      <label htmlFor={props.name}>
+    <div className={`inputGroup${props.disabled ? ' disabled' : ''}`}>
+      <label htmlFor={props.name} data-test-id={props.name}>
         {props.labelTextId ? <FormattedMessage id={props.labelTextId} /> : props.labelText}:
       </label>
       <SelectMenu

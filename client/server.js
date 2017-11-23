@@ -53,5 +53,5 @@ new WebpackDevServer(webpack(config), {
     console.log(err);
   }
 
-  console.log('Listening at t1.lumen.localhost:3030');
+  console.log('Listening at t1.lumen.local:3030');
 });
