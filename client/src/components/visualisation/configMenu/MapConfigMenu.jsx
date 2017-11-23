@@ -61,9 +61,10 @@ export default class MapConfigMenu extends Component {
 
   handleDeleteMapLayer(layerIndex) {
     const layers = this.props.visualisation.spec.layers.map(item => item);
-    layers.splice(layerIndex, 1);
+    const newLayers = layers.slice();
 
-    this.props.onChangeSpec({ layers });
+    newLayers.splice(layerIndex, 1);
+    this.props.onChangeSpec({ layers: newLayers });
   }
 
   handleChangeMapLayer(layerIndex, value) {
@@ -71,14 +72,17 @@ export default class MapConfigMenu extends Component {
     const layers = this.props.visualisation.spec.layers.map(item => item);
     layers[layerIndex] = clonedLayer;
 
-    // Temporary shim while we still define datasetId on the top-level visualisation
     if (Object.keys(value).indexOf('datasetId') > -1) {
       const { datasetId } = value;
 
-      this.props.onChangeSourceDataset(datasetId, { layers });
-    } else {
-      this.props.onChangeSpec({ layers });
+      this.props.loadDataset(datasetId);
+    } else if (Object.keys(value).indexOf('aggregationDataset') > -1) {
+      const { aggregationDataset } = value;
+
+      this.props.loadDataset(aggregationDataset);
     }
+
+    this.props.onChangeSpec({ layers });
   }
 
   handlePopupChange(columnNames) {
@@ -167,4 +171,5 @@ MapConfigMenu.propTypes = {
   onSave: PropTypes.func.isRequired,
   onChangeVisualisationType: PropTypes.func.isRequired,
   datasetOptions: PropTypes.array.isRequired,
+  loadDataset: PropTypes.func.isRequired,
 };

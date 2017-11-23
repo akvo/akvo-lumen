@@ -134,14 +134,34 @@ GeopointDataTab.propTypes = {
   disabled: PropTypes.bool,
 };
 
+const getAggregationColumns = (layer, datasets) => {
+  const out = [];
+
+  if (!layer.aggregationDataset) {
+    return out;
+  }
+
+  if (!datasets[layer.aggregationDataset].get('columns')) {
+    return out;
+  }
+
+  const aggregationColumnOptions =
+    getSelectMenuOptionsFromColumnList(datasets[layer.aggregationDataset].get('columns'));
+
+  return aggregationColumnOptions;
+};
+
 const GeoshapeDataTab = (props) => {
   const { layer,
     layerIndex,
     onChangeMapLayer,
     columnOptions,
     datasetOptions,
+    datasets,
     disabled,
   } = props;
+
+  const aggregationColumns = getAggregationColumns(layer, datasets);
 
   return (
     <div className="GeoshapeDataTab">
@@ -180,10 +200,10 @@ const GeoshapeDataTab = (props) => {
           disabled={(layer.aggregationDataset == null) || disabled}
           placeholder="Select styling indicator"
           labelText="Styling indicator"
-          choice={layer.pointColorColumn != null ?
-            layer.pointColorColumn.toString() : null}
+          choice={layer.aggregationColumn != null ?
+            layer.aggregationColumn.toString() : null}
           name="aggregationColumn"
-          options={filterColumns(columnOptions, ['number'])}
+          options={filterColumns(aggregationColumns, ['number'])}
           clearable
           onChange={value => onChangeMapLayer(layerIndex, {
             aggregationColumn: value,
@@ -195,10 +215,10 @@ const GeoshapeDataTab = (props) => {
           disabled={(layer.aggregationDataset == null) || disabled}
           placeholder="Select styling indicator geopoint column"
           labelText="Styling indicator geopoint column"
-          choice={layer.pointColorColumn != null ?
-            layer.pointColorColumn.toString() : null}
-          name="aggregationColumn"
-          options={filterColumns(columnOptions, ['geopoint'])}
+          choice={layer.aggregationGeomColumn != null ?
+            layer.aggregationGeomColumn.toString() : null}
+          name="aggregationGeomColumn"
+          options={filterColumns(aggregationColumns, ['geopoint'])}
           clearable
           onChange={value => onChangeMapLayer(layerIndex, {
             aggregationGeomColumn: value,
@@ -215,6 +235,7 @@ GeoshapeDataTab.propTypes = {
   onChangeMapLayer: PropTypes.func.isRequired,
   columnOptions: PropTypes.array.isRequired,
   datasetOptions: PropTypes.array.isRequired,
+  datasets: PropTypes.array.isRequired,
   disabled: PropTypes.bool,
 };
 
@@ -276,6 +297,7 @@ export default class LayerConfigMenu extends Component {
                 onChangeMapLayer={onChangeMapLayer}
                 columnOptions={columnOptions}
                 datasetOptions={this.props.datasetOptions}
+                datasets={this.props.datasets}
                 disabled={disabled}
               />
               :

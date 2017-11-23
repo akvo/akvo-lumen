@@ -96,5 +96,5 @@
   {"boundingBox" (bounds tenant-conn table-name
                          layer
                          where-clause)
-   "pointColorMapping" (point-color-mapping tenant-conn table-name layer where-clause)
+   "pointColorMapping" (if (= (get layer "layerType") "geo-shape") {} (point-color-mapping tenant-conn table-name layer where-clause))
    "availableColors" palette})

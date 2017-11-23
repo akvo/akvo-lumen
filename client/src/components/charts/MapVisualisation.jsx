@@ -128,6 +128,7 @@ export default class MapVisualisation extends Component {
 
   constructor() {
     super();
+    this.renderLeafletLayer = this.renderLeafletLayer.bind(this);
     this.renderLeafletMap = this.renderLeafletMap.bind(this);
   }
   componentDidMount() {
@@ -159,8 +160,8 @@ export default class MapVisualisation extends Component {
       if (haveUtfGrid) {
         // Remove the existing grid
         this.map.closePopup();
-        map.removeLayer(this[`utfgrid${id}`]);
-        this[`utfgrid${id}`] = null;
+        map.removeLayer(this[`utfGrid${id}`]);
+        this[`utfGrid${id}`] = null;
       }
 
       if (!havePopupData) {
@@ -260,14 +261,29 @@ export default class MapVisualisation extends Component {
       }
     }
 
+    if (visualisation.layerMetadata) {
+      const mergedBoundingBox = [[90, 180], [-90, -180]];
 
-    // Update the bounding box if necessary
-    if (visualisation.metadata && visualisation.metadata.boundingBox) {
-      const boundingBoxChanged =
-        !isEqual(this.storedBoundingBox, visualisation.metadata.boundingBox);
-      if (!this.storedBoundingBox || boundingBoxChanged) {
-        this.storedBoundingBox = visualisation.metadata.boundingBox.slice(0);
-        // map.fitBounds(visualisation.metadata.boundingBox, { maxZoom: 12 });
+      visualisation.layerMetadata.forEach((layer) => {
+        if (layer.boundingBox) {
+          if (layer.boundingBox[0][0] < mergedBoundingBox[0][0]) {
+            mergedBoundingBox[0][0] = layer.boundingBox[0][0];
+          }
+          if (layer.boundingBox[0][1] < mergedBoundingBox[0][1]) {
+            mergedBoundingBox[0][1] = layer.boundingBox[0][1];
+          }
+          if (layer.boundingBox[1][0] > mergedBoundingBox[1][0]) {
+            mergedBoundingBox[1][0] = layer.boundingBox[1][0];
+          }
+          if (layer.boundingBox[1][1] > mergedBoundingBox[1][1]) {
+            mergedBoundingBox[1][1] = layer.boundingBox[1][1];
+          }
+        }
+      });
+
+      if (!isEqual(mergedBoundingBox, this.storedBoundingBox)) {
+        this.storedBoundingBox = mergedBoundingBox;
+        map.fitBounds(mergedBoundingBox, { maxZoom: 12 });
       }
     }
 
@@ -296,6 +312,9 @@ export default class MapVisualisation extends Component {
           this.dataLayer.addTo(map);
         }
       }
+    } else if (newSpec.layers.length === 0 && this.dataLayer) {
+      map.removeLayer(this.dataLayer);
+      this.dataLayer = null;
     }
 
     visualisation.spec.layers.forEach((layer, idx) => {

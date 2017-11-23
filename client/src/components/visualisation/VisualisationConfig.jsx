@@ -18,6 +18,7 @@ export default function VisualisationConfig(props) {
         onChangeVisualisationSpec={props.onChangeVisualisationSpec}
         onChangeVisualisationType={props.onChangeVisualisationType}
         onSaveVisualisation={props.onSaveVisualisation}
+        loadDataset={props.loadDataset}
       />
     </div>
   );
@@ -30,4 +31,5 @@ VisualisationConfig.propTypes = {
   onChangeSourceDataset: PropTypes.func.isRequired,
   onChangeVisualisationSpec: PropTypes.func.isRequired,
   onSaveVisualisation: PropTypes.func.isRequired,
+  loadDataset: PropTypes.func.isRequired,
 };

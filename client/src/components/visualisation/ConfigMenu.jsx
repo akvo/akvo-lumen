@@ -194,6 +194,7 @@ export default function ConfigMenu(props) {
                 aggregationOptions={aggregationOptions}
                 onSave={props.onSaveVisualisation}
                 onChangeSourceDataset={props.onChangeSourceDataset}
+                loadDataset={props.loadDataset}
               />
             :
               <div>
@@ -247,4 +248,5 @@ ConfigMenu.propTypes = {
   onChangeVisualisationSpec: PropTypes.func.isRequired,
   onChangeVisualisationType: PropTypes.func.isRequired,
   onSaveVisualisation: PropTypes.func.isRequired,
+  loadDataset: PropTypes.func.isRequired,
 };
