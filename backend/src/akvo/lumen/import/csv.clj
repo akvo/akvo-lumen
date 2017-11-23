@@ -92,27 +92,9 @@
       (close [this]
         (.close reader)))))
 
-(defn- get-path
-  [spec file-upload-path]
-  (or (get spec "path")
-      (let [file-on-disk? (contains? spec "fileName")
-            url (get spec "url")]
-        (if file-on-disk?
-          (let [filename (last (string/split url #"\/"))]
-            (when-not (re-matches #"[a-zA-Z0-9-]+" filename)
-              (throw (ex-info "Invalid file" {:filename filename})))
-            (io/file (str file-upload-path
-                          "/resumed/"
-                          filename
-                          "/file")))
-          (let [url (io/as-url url)]
-            (when-not (#{"http" "https"} (.getProtocol url))
-              (throw (ex-info (str "Invalid url: " url) {:url url})))
-            url)))))
-
 (defmethod import/dataset-importer "CSV"
   [spec {:keys [file-upload-path]}]
-  (let [path (get-path spec file-upload-path)
+  (let [path (import/get-path spec file-upload-path)
         headers? (boolean (get spec "hasColumnHeaders"))
         guess-types? (-> (get spec "guessColumnTypes") false? not)]
     (csv-importer path headers? guess-types?)))
