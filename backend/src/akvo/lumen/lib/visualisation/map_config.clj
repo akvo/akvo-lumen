@@ -72,7 +72,6 @@
           (layer-point-color layer-index)))
 
 (defn cartocss [layer layer-index metadata-array]
-  (println "FOO " (get layer "layerType"))
   (cond
     (and (get layer "aggregationDataset")(get layer "aggregationColumn")(get layer "aggregationGeomColumn"))
     (shape-aggregation-cartocss layer-index)
