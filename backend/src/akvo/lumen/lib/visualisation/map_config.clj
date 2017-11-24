@@ -124,7 +124,23 @@
               CASE WHEN aggregation IS NULL THEN
                   'grey'
                 ELSE
-                  concat('rgb(255,', 255 - floor(((aggregation::decimal - (select min(aggregation) from temp_table)::decimal) / ((select max(aggregation) from temp_table)::decimal - (select min(aggregation) from temp_table)::decimal)) * 255),',', 255 - floor(((aggregation::decimal - (select min(aggregation) from temp_table)::decimal) / ((select max(aggregation) from temp_table)::decimal - (select min(aggregation) from temp_table)::decimal)) * 255),')')
+                  concat(
+                    'rgb(255,',
+                    255 - floor(
+                      (
+                        (aggregation::decimal - (select min(aggregation) from temp_table)::decimal) /
+                        ((select max(aggregation) from temp_table)::decimal - (select min(aggregation) from temp_table)::decimal)
+                      ) * 255
+                    ),
+                    ',',
+                    255 - floor(
+                      (
+                        (aggregation::decimal - (select min(aggregation) from temp_table)::decimal) /
+                        ((select max(aggregation) from temp_table)::decimal - (select min(aggregation) from temp_table)::decimal)
+                      ) * 255
+                    ),
+                    ')'
+                  )
               END as shapefill
             from
               temp_table;
