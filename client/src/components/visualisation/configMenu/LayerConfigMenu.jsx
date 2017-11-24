@@ -225,6 +225,35 @@ const GeoshapeDataTab = (props) => {
           })}
         />
       </div>
+      <div className="inputGroup">
+        <ButtonRowInput
+          options={[{
+            label: 'Average',
+            value: 'avg',
+          }, {
+            label: 'Sum',
+            value: 'sum',
+          },
+            {
+              label: 'Min',
+              value: 'min',
+            },
+            {
+              label: 'Max',
+              value: 'max',
+            },
+            {
+              label: 'Count',
+              value: 'count',
+            }]}
+          selected={layer.aggregationMethod || 'avg'}
+          label="Aggregation"
+          onChange={value => onChangeMapLayer(layerIndex, {
+            aggregationMethod: value,
+          })}
+          buttonSpacing="0"
+        />
+      </div>
     </div>
   );
 };
@@ -235,7 +264,7 @@ GeoshapeDataTab.propTypes = {
   onChangeMapLayer: PropTypes.func.isRequired,
   columnOptions: PropTypes.array.isRequired,
   datasetOptions: PropTypes.array.isRequired,
-  datasets: PropTypes.array.isRequired,
+  datasets: PropTypes.object.isRequired,
   disabled: PropTypes.bool,
 };
 

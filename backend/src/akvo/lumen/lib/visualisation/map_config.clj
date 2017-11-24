@@ -63,7 +63,7 @@
               line-color: rgba(0,0,0,0.3);
            }
            #s::labels {
-            text-name: [avg];
+            text-name: [aggregation];
             text-face-name: 'DejaVu Sans Book';
             text-size: 10;
             text-fill: #000;
@@ -97,8 +97,8 @@
     point-columns columns
     {:keys [table-name columns]} (dataset-by-id tenant-conn {:id (get current-layer "datasetId")})
     shape-table-name table-name
-    foo (println table-name)
     shape-columns columns
+    aggregation-method (get current-layer "aggregationMethod" "avg")
     date-column-set (reduce (fn [m c]
                                   (if (= "date" (get c "type"))
                                     (conj m (get c "columnName"))
@@ -113,24 +113,25 @@
     (format "with temp_table as
               (select
                   %s.%s,
-                  avg(pointTable.%s::decimal) AS avg
+                  %s(pointTable.%s::decimal) AS aggregation
                 from %s
                 left join (select * from %s)pointTable on
                 st_contains(%s.%s, pointTable.%s)
                 GROUP BY %s.%s)
             select
               %s,
-              avg,
-              CASE WHEN avg IS NULL THEN
+              aggregation,
+              CASE WHEN aggregation IS NULL THEN
                   'grey'
                 ELSE
-                  concat('rgb(255,', 255 - floor(((avg::decimal - (select min(avg) from temp_table)::decimal) / ((select max(avg) from temp_table)::decimal - (select min(avg) from temp_table)::decimal)) * 255),',', 255 - floor(((avg::decimal - (select min(avg) from temp_table)::decimal) / ((select max(avg) from temp_table)::decimal - (select min(avg) from temp_table)::decimal)) * 255),')')
+                  concat('rgb(255,', 255 - floor(((aggregation::decimal - (select min(aggregation) from temp_table)::decimal) / ((select max(aggregation) from temp_table)::decimal - (select min(aggregation) from temp_table)::decimal)) * 255),',', 255 - floor(((aggregation::decimal - (select min(aggregation) from temp_table)::decimal) / ((select max(aggregation) from temp_table)::decimal - (select min(aggregation) from temp_table)::decimal)) * 255),')')
               END as shapefill
             from
               temp_table;
             "
             shape-table-name
             (get current-layer "geom")
+            aggregation-method
             (get current-layer "aggregationColumn")
             shape-table-name
             point-table-name
