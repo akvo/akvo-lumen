@@ -330,21 +330,23 @@ export default class LayerConfigMenu extends Component {
                 disabled={disabled}
               />
               :
-              <GeopointDataTab
-                layer={layer}
-                layerIndex={layerIndex}
-                onChangeMapLayer={onChangeMapLayer}
-                columnOptions={columnOptions}
-                handlePointColorColumnChange={this.handlePointColorColumnChange}
-                disabled={disabled}
-              />
+              <div>
+                <GeopointDataTab
+                  layer={layer}
+                  layerIndex={layerIndex}
+                  onChangeMapLayer={onChangeMapLayer}
+                  columnOptions={columnOptions}
+                  handlePointColorColumnChange={this.handlePointColorColumnChange}
+                  disabled={disabled}
+                />
+                <FilterMenu
+                  filters={layer.filters}
+                  hasDataset={layer.datasetId !== null}
+                  columnOptions={filterColumns(columnOptions, ['text', 'number', 'date'])}
+                  onChangeSpec={object => onChangeMapLayer(layerIndex, object)}
+                />
+              </div>
             }
-            <FilterMenu
-              filters={layer.filters}
-              hasDataset={layer.datasetId !== null}
-              columnOptions={filterColumns(columnOptions, ['text', 'number', 'date'])}
-              onChangeSpec={object => onChangeMapLayer(layerIndex, object)}
-            />
           </div>
         );
         break;
