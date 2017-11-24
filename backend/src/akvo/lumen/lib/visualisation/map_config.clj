@@ -190,7 +190,6 @@
   )))
 
 (defn get-sql [columns table-name geom-column popup-columns point-color-column where-clause layer tenant-conn]
-
   (cond
     (and (get layer "aggregationDataset")(get layer "aggregationColumn")(get layer "aggregationGeomColumn"))
     (shape-aggregation-sql columns table-name geom-column popup-columns point-color-column where-clause layer tenant-conn)

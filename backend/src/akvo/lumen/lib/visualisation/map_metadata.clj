@@ -92,9 +92,40 @@
                               first :st_extent)]
       (parse-box st-extent))))
 
-(defn build [tenant-conn table-name layer where-clause]
+(defn point-metadata [tenant-conn table-name layer where-clause]
   {"boundingBox" (bounds tenant-conn table-name
                          layer
                          where-clause)
    "pointColorMapping" (if (= (get layer "layerType") "geo-shape") {} (point-color-mapping tenant-conn table-name layer where-clause))
-   "availableColors" palette})
+   "availableColors" palette}
+)
+
+(defn shape-aggregation-metadata [tenant-conn table-name layer where-clause]
+  {"boundingBox" (bounds tenant-conn table-name
+                         layer
+                         where-clause)}
+)
+
+(defn shape-metadata [tenant-conn table-name layer where-clause]
+  {"boundingBox" (bounds tenant-conn table-name
+                         layer
+                         where-clause)}
+)
+
+
+(defn get-metadata [layer]
+  (cond
+    (and (get layer "aggregationDataset")(get layer "aggregationColumn")(get layer "aggregationGeomColumn"))
+    shape-aggregation-metadata
+
+    (= (get layer "layerType") "geo-shape")
+    shape-metadata
+
+    :else
+    point-metadata
+  )
+)
+
+(defn build [tenant-conn table-name layer where-clause]
+  ((get-metadata layer) tenant-conn table-name layer where-clause)
+)
