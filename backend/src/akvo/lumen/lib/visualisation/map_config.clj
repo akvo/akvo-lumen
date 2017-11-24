@@ -58,7 +58,7 @@
 (defn shape-aggregation-cartocss [layer-index]
   (format "#s {
               polygon-opacity: 0.8;
-              polygon-fill: [shapeFill];
+              polygon-fill: [shapefill];
               line-width: 0.5;
               line-color: rgba(0,0,0,0.3);
            }
@@ -125,7 +125,7 @@
                   'grey'
                 ELSE
                   concat('rgb(255,', 255 - floor(((avg::decimal - (select min(avg) from temp_table)::decimal) / ((select max(avg) from temp_table)::decimal - (select min(avg) from temp_table)::decimal)) * 255),',', 255 - floor(((avg::decimal - (select min(avg) from temp_table)::decimal) / ((select max(avg) from temp_table)::decimal - (select min(avg) from temp_table)::decimal)) * 255),')')
-              END as shapeFill
+              END as shapefill
             from
               temp_table;
             "
