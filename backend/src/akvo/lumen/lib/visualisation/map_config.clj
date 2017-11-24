@@ -125,21 +125,14 @@
                   'grey'
                 ELSE
                   concat(
-                    'rgb(255,',
-                    255 - floor(
+                    'hsl(0, 100%%, ',
+                    100 - floor(
                       (
                         (aggregation::decimal - (select min(aggregation) from temp_table)::decimal) /
                         ((select max(aggregation) from temp_table)::decimal - (select min(aggregation) from temp_table)::decimal)
-                      ) * 255
+                      ) * 50
                     ),
-                    ',',
-                    255 - floor(
-                      (
-                        (aggregation::decimal - (select min(aggregation) from temp_table)::decimal) /
-                        ((select max(aggregation) from temp_table)::decimal - (select min(aggregation) from temp_table)::decimal)
-                      ) * 255
-                    ),
-                    ')'
+                    '%%)'
                   )
               END as shapefill
             from
