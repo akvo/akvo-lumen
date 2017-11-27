@@ -23,6 +23,6 @@ done
 
 docker-compose exec client su-exec akvo npm run lint
 docker-compose exec client su-exec akvo npm run test
-docker-compose exec backend su-exec akvo lein do clean, check, test :all
+docker-compose exec backend gosu akvo lein do clean, check, test :all
 
 ./ci/e2e-test.sh
