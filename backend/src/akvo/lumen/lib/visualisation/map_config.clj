@@ -140,7 +140,7 @@
                   'grey'
                 ELSE
                   concat(
-                    'hsl(%s, 100%%, ',
+                    'hsl(%s, 75%%, ',
                     100 - floor(
                       (
                         (aggregation::decimal - (select min(aggregation) from temp_table)::decimal) /
