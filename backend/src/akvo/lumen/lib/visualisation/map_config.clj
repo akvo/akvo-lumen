@@ -90,6 +90,19 @@
       (str/replace #"\n" " ")
       (str/replace #" +" " ")))
 
+(defn color-to-hue [s]
+  (cond
+    (= s "red")
+    "0"
+
+    (= s "green")
+    "120"
+
+    (= s "blue")
+    "240"
+  )
+)
+
 (defn shape-aggregation-sql [columns table-name geom-column popup-columns point-color-column where-clause current-layer tenant-conn]
   (let [
     {:keys [table-name columns]} (dataset-by-id tenant-conn {:id (get current-layer "aggregationDataset")})
@@ -108,7 +121,9 @@
                                    (if (contains? date-column-set c)
                                      (str c "::text")
                                      c)) popup-columns) geom-column)
-                point-color-column (conj point-color-column)))]
+                point-color-column (conj point-color-column)))
+    hue (color-to-hue (get current-layer "gradientColor" "red"))
+    ]
 
     (format "with temp_table as
               (select
@@ -125,7 +140,7 @@
                   'grey'
                 ELSE
                   concat(
-                    'hsl(0, 100%%, ',
+                    'hsl(%s, 100%%, ',
                     100 - floor(
                       (
                         (aggregation::decimal - (select min(aggregation) from temp_table)::decimal) /
@@ -150,6 +165,7 @@
             shape-table-name
             (get current-layer "geom")
             (get current-layer "geom")
+            hue
             )))
 
 (defn point-sql [columns table-name geom-column popup-columns point-color-column where-clause current-layer tenant-conn]

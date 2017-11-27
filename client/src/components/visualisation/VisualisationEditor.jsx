@@ -69,6 +69,7 @@ const getNeedNewAggregation = (newV = { spec: {} }, oldV = { spec: {} }, optiona
         newV.geom !== oldV.geom ||
         newV.pointColorColumn !== oldV.pointColorColumn ||
         newV.pointSize !== oldV.pointSize ||
+        newV.gradientColor !== oldV.gradientColor ||
         !isEqual(newV.filters, oldV.filters) ||
         !isEqual(newV.popup, oldV.popup) ||
         !isEqual(newV.pointColorMapping, oldV.pointColorMapping)

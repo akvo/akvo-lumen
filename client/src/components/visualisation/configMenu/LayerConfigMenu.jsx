@@ -268,6 +268,129 @@ GeoshapeDataTab.propTypes = {
   disabled: PropTypes.bool,
 };
 
+const GeopointThemeTab = (props) => {
+  const {
+    onChangeMapLayer,
+    layer,
+    layerIndex,
+    columnOptions,
+    handleChangeLabelColor,
+    disabled,
+  } = props;
+
+  return (
+    <div
+      className="themeTab"
+    >
+      <h3>Marker</h3>
+      <ButtonRowInput
+        options={['circle', 'square', 'triangle'].map(item => ({
+          label: <FormattedMessage id={item} />,
+          value: item,
+        }))}
+        disabled
+        selected="circle"
+        label="Shape"
+        onChange={() => null}
+      />
+      <ButtonRowInput
+        options={['fill', 'outline'].map(item => ({
+          label: <FormattedMessage id={item} />,
+          value: item,
+        }))}
+        disabled
+        selected="fill"
+        label="Style"
+        onChange={() => null}
+        buttonSpacing="2rem"
+      />
+      <ButtonRowInput
+        options={['1', '2', '3', '4', '5'].map(item => ({
+          label: item,
+          value: item,
+        }))}
+        disabled={disabled}
+        selected={layer.pointSize ? layer.pointSize.toString() : null}
+        label="Size"
+        onChange={option => onChangeMapLayer(layerIndex, { pointSize: option })}
+      />
+      <hr />
+      <h3>Color</h3>
+      <ButtonRowInput
+        options={['solid', 'gradient'].map(item => ({
+          label: <FormattedMessage id={item} />,
+          value: item,
+        }))}
+        disabled
+        selected="solid"
+        label="Color option"
+        onChange={() => null}
+        buttonSpacing="2rem"
+      />
+      {layer.pointColorColumn &&
+        <div className="inputGroup">
+          <label
+            htmlFor="colors"
+          >
+            Colors ({columnOptions.find(obj => obj.value === layer.pointColorColumn).title})
+          </label>
+          <ColorLabels
+            disabled={disabled}
+            id="colors"
+            pointColorMapping={layer.pointColorMapping}
+            onChangeColor={(value, newColor) => handleChangeLabelColor(value, newColor)}
+          />
+        </div>
+      }
+    </div>
+  );
+};
+
+GeopointThemeTab.propTypes = {
+  layer: PropTypes.object.isRequired,
+  layerIndex: PropTypes.number.isRequired,
+  onChangeMapLayer: PropTypes.func.isRequired,
+  handleChangeLabelColor: PropTypes.func.isRequired,
+  columnOptions: PropTypes.array.isRequired,
+  datasetOptions: PropTypes.array.isRequired,
+  datasets: PropTypes.object.isRequired,
+  disabled: PropTypes.bool,
+};
+
+const GeoshapeThemeTab = (props) => {
+  const {
+    onChangeMapLayer,
+    layer,
+    layerIndex,
+  } = props;
+
+  return (
+    <div
+      className="themeTab"
+    >
+      {layer.aggregationColumn &&
+        <ButtonRowInput
+          options={['red', 'green', 'blue'].map(item => ({
+            label: <FormattedMessage id={item} />,
+            value: item,
+          }))}
+          selected={layer.gradientColor ? layer.gradientColor : 'red'}
+          label="Gradient color"
+          onChange={val => onChangeMapLayer(layerIndex, { gradientColor: val })}
+          buttonSpacing="0"
+        />
+      }
+    </div>
+  );
+};
+
+
+GeoshapeThemeTab.propTypes = {
+  layer: PropTypes.object.isRequired,
+  layerIndex: PropTypes.number.isRequired,
+  onChangeMapLayer: PropTypes.func.isRequired,
+};
+
 export default class LayerConfigMenu extends Component {
   constructor() {
     super();
@@ -444,72 +567,24 @@ export default class LayerConfigMenu extends Component {
         );
         break;
       case 'theme':
-        tabContent = (
-          <div
-            className="themeTab"
-          >
-            <h3>Marker</h3>
-            <ButtonRowInput
-              options={['circle', 'square', 'triangle'].map(item => ({
-                label: <FormattedMessage id={item} />,
-                value: item,
-              }))}
-              disabled
-              selected="circle"
-              label="Shape"
-              onChange={() => null}
-            />
-            <ButtonRowInput
-              options={['fill', 'outline'].map(item => ({
-                label: <FormattedMessage id={item} />,
-                value: item,
-              }))}
-              disabled
-              selected="fill"
-              label="Style"
-              onChange={() => null}
-              buttonSpacing="2rem"
-            />
-            <ButtonRowInput
-              options={['1', '2', '3', '4', '5'].map(item => ({
-                label: item,
-                value: item,
-              }))}
-              disabled={disabled}
-              selected={layer.pointSize ? layer.pointSize.toString() : null}
-              label="Size"
-              onChange={option => onChangeMapLayer(layerIndex, { pointSize: option })}
-            />
-            <hr />
-            <h3>Color</h3>
-            <ButtonRowInput
-              options={['solid', 'gradient'].map(item => ({
-                label: <FormattedMessage id={item} />,
-                value: item,
-              }))}
-              disabled
-              selected="solid"
-              label="Color option"
-              onChange={() => null}
-              buttonSpacing="2rem"
-            />
-            {layer.pointColorColumn &&
-              <div className="inputGroup">
-                <label
-                  htmlFor="colors"
-                >
-                  Colors ({columnOptions.find(obj => obj.value === layer.pointColorColumn).title})
-                </label>
-                <ColorLabels
-                  disabled={disabled}
-                  id="colors"
-                  pointColorMapping={layer.pointColorMapping}
-                  onChangeColor={(value, newColor) => this.handleChangeLabelColor(value, newColor)}
-                />
-              </div>
-            }
-          </div>
-        );
+        tabContent = layer.layerType === 'geo-shape' ?
+          (<GeoshapeThemeTab
+            onChangeMapLayer={this.props.onChangeMapLayer}
+            layer={layer}
+            disabled={disabled}
+            layerIndex={layerIndex}
+            columnOption={columnOptions}
+            handleChangeLabelColorValue={this.handleChangeLabelColorValue}
+          />)
+          :
+          (<GeopointThemeTab
+            onChangeMapLayer={this.props.onChangeMapLayer}
+            layer={layer}
+            disabled={disabled}
+            layerIndex={layerIndex}
+            columnOption={columnOptions}
+            handleChangeLabelColorValue={this.handleChangeLabelColorValue}
+          />);
         break;
 
       default:
