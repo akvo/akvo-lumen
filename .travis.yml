@@ -25,3 +25,6 @@ before_install:
 
 script:
   - ./ci/build.sh
+
+after_failure:
+  - docker-compose logs --no-color
