@@ -2,7 +2,7 @@
 -- :doc All datasets. Including pending datasets and datasets that failed to import
 WITH
 failed_imports AS (
-         --TODO name->title
+  --TODO name->title
   SELECT j.id, d.spec->>'name' AS name, j.error_log->>0 AS error_log, j.status, j.created, j.modified
     FROM data_source d, job_execution j
    WHERE j.data_source_id = d.id
@@ -15,13 +15,6 @@ pending_imports AS (
    WHERE j.data_source_id = d.id
      AND j.type = 'IMPORT'
      AND j.status = 'PENDING'
-),
-rasters AS (
-  SELECT j.id, concat(d.spec->>'name', ' (', d.spec->'source'->>'fileName', ')') as name, j.status, j.created, j.modified
-   FROM data_source d, job_execution j
-  WHERE j.data_source_id = d.id
-    AND j.type = 'IMPORT'
-    AND j.status = 'OK'
 )
 SELECT id, name, error_log as reason, status, modified, created
   FROM failed_imports
@@ -30,10 +23,7 @@ SELECT id, name, NULL, status, modified, created
   FROM pending_imports
  UNION
 SELECT id, title, NULL, 'OK', modified, created
-  FROM dataset
- UNION
-SELECT id, name, NULL, status, modified, created
-  FROM rasters;
+  FROM dataset;
 
 -- :name delete-dataset-by-id :! :n
 -- :doc delete dataset

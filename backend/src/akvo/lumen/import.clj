@@ -2,8 +2,8 @@
   (:require  [akvo.lumen.import.common :as import]
              [akvo.lumen.import.csv]
              [akvo.lumen.import.flow]
-             [akvo.lumen.import.raster :as raster]
              [akvo.lumen.lib :as lib]
+             [akvo.lumen.lib.raster :as raster]
              [akvo.lumen.util :as util]
              [cheshire.core :as json]
              [clojure.java.jdbc :as jdbc]
@@ -89,6 +89,7 @@
     (insert-job-execution tenant-conn {:id job-execution-id
                                        :data-source-id data-source-id})
     (if (= "GEOTIFF" kind)
-      (future (raster/do-import tenant-conn config job-execution-id))
+      (future (raster/create tenant-conn config data-source job-execution-id))
       (future (do-import tenant-conn config job-execution-id)))
-    (lib/ok {"importId" job-execution-id})))
+    (lib/ok {"importId" job-execution-id
+             "kind" kind})))

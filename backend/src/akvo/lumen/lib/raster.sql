@@ -1,3 +1,12 @@
+
+-- :name all-rasters :? :*
+SELECT * FROM raster_dataset;
+
+-- :name insert-raster :! :n
+-- :doc Insert new raster dataset
+INSERT INTO raster_dataset (id, title, description, raster_table)
+VALUES (:id, :title, :description, :raster-table);
+
 -- :name create-raster-table :!
 -- :doc Creates a raster table
 CREATE TABLE :i:table-name (

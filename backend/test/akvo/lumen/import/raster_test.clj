@@ -2,13 +2,13 @@
   (:require [clojure.test :refer :all]
             [akvo.lumen.fixtures :refer [*tenant-conn*
                                          tenant-conn-fixture]]
-            [akvo.lumen.import.raster :refer :all]
+            #_[akvo.lumen.import.raster :refer :all]
             [clojure.java.io :as io]
             [clojure.java.jdbc :as jdbc]))
 
 (use-fixtures :once tenant-conn-fixture)
 
-(deftest ^:functional import-raster
+#_(deftest ^:functional import-raster
   (testing "Import raster"
     (let [filename "SLV_ppp_v2b_2015_UNadj.tif"
           path (.getAbsolutePath (.getParentFile (io/file (io/resource filename))))

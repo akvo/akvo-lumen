@@ -46,9 +46,10 @@ UPDATE job_execution
  WHERE id = :id;
 
 -- :name job-execution-by-id :? :1
-SELECT status, error_log->>0 as "error-message"
-  FROM job_execution
- WHERE id = :id
+SELECT j.status, j.error_log->>0 as "error-message", d.spec->'source'->>'kind' as kind
+  FROM data_source d, job_execution j
+ WHERE d.id = j.data_source_id
+   AND j.id = :id;
 
 -- :name dataset-id-by-job-execution-id :? :1
 -- :doc Find the dataset id corresponding to the job execution id
