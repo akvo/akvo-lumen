@@ -23,6 +23,8 @@ function fileName(source) {
       return source.url.substring(source.url.lastIndexOf('/') + 1);
     case 'AKVO_FLOW':
       return 'Survey';
+    case 'GEOTIFF':
+      return source.fileName;
     default: return 'Unknown';
   }
 }

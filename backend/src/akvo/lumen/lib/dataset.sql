@@ -8,6 +8,7 @@ failed_imports AS (
    WHERE j.data_source_id = d.id
      AND j.type = 'IMPORT'
      AND j.status = 'FAILED'
+     AND d.spec->'source'->>'kind' != 'GEOTIFF'
 ),
 pending_imports AS (
   SELECT j.id, d.spec->>'name' AS name, j.status, j.created, j.modified
@@ -15,6 +16,7 @@ pending_imports AS (
    WHERE j.data_source_id = d.id
      AND j.type = 'IMPORT'
      AND j.status = 'PENDING'
+     AND d.spec->'source'->>'kind' != 'GEOTIFF'
 )
 SELECT id, name, error_log as reason, status, modified, created
   FROM failed_imports
