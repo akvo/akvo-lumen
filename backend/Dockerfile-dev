@@ -4,7 +4,7 @@ MAINTAINER Akvo Foundation <devops@akvo.org>
 RUN set -ex && \
     apt-get update && \
     apt-get install -y --no-install-recommends --no-install-suggests \
-    gosu postgis gdal-bin curl netcat && \
+    gosu postgis gdal-bin curl postgresql-client-9.6 && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
