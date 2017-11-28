@@ -131,6 +131,7 @@
   "remove_leading_and_trailing_whitespace": "Eliminar los espacios en blanco",
   "removed_double_space": "{title} espacio doble eliminado",
   "rename_column": "Renombrar columna",
+  "reverse_geocode": "Geocodificación inversa",
   "resources": "Recursos",
   "right": "Derecha",
   "row_column_title": "Título de columna de fila",
