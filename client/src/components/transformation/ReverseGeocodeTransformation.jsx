@@ -3,9 +3,9 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Immutable from 'immutable';
 import TransformationHeader from './TransformationHeader';
-import SelectColumn from './SelectColumn';
+import TargetReverseGeocodeOptions from './reverse-geocode/TargetReverseGeocodeOptions';
+import SourceReverseGeocodeOptions from './reverse-geocode/SourceReverseGeocodeOptions';
 import { ensureDatasetFullyLoaded } from '../../actions/dataset';
-
 
 import './ReverseGeocodeTransformation.scss';
 
@@ -25,8 +25,8 @@ class ReverseGeocodeTransformation extends Component {
         source: null,
         // {
         //   datasetId: null,
-        //   geopointColumnName: null,
-        //   columnName: null, // Column name containing the "text"
+        //   geopointColumn: null,
+        //   mergeColumn: null, // Column name containing the "text"
         // }
       }),
     };
@@ -44,6 +44,13 @@ class ReverseGeocodeTransformation extends Component {
 
   getSpec() {
     const { spec } = this.state;
+
+    const source = spec.get('source') == null ? null : {
+      datasetId: spec.getIn(['source', 'datasetId']),
+      geoshapeColumn: spec.getIn(['source', 'geoshapeColumn', 'columnName']),
+      mergeColumn: spec.getIn(['source', 'mergeColumn', 'columnName']),
+    };
+
     return {
       op: 'core/reverse-geocode',
       args: {
@@ -51,7 +58,7 @@ class ReverseGeocodeTransformation extends Component {
           geopointColumn: spec.getIn(['target', 'geopointColumn', 'columnName']),
           title: spec.getIn(['target', 'title']),
         },
-        source: null,
+        source,
       },
     };
   }
@@ -69,18 +76,12 @@ class ReverseGeocodeTransformation extends Component {
       .filter(column => column.get('type') === 'geopoint');
   }
 
-  handleChangeGeopointColumn(column) {
-    const newSpec = this.state.spec.setIn(['target', 'geopointColumn'], column);
-    this.setState(Object.assign({}, this.state, { spec: newSpec }));
-  }
-
-  handleChangeColumnTitle(title) {
-    const newSpec = this.state.spec.setIn(['target', 'title'], title);
-    this.setState(Object.assign({}, this.state, { spec: newSpec }));
+  handleChangeSpec(spec) {
+    this.setState(Object.assign({}, this.state, { spec }));
   }
 
   render() {
-    const { datasetId, /* datasets,*/ onApplyTransformation, transforming } = this.props;
+    const { datasetId, datasets, onApplyTransformation, transforming } = this.props;
     const { loading, spec } = this.state;
     if (loading) return null;
 
@@ -94,20 +95,17 @@ class ReverseGeocodeTransformation extends Component {
           titleText="Reverse Geocode"
         />
         <div className="container">
-          <div>
-            <h1>Geopoint column</h1>
-            <SelectColumn
-              columns={this.targetGeopointColumns()}
-              onChange={column => this.handleChangeGeopointColumn(column)}
-              value={spec.getIn(['target', 'geopointColumn'])}
-            />
-            <h1>New column title</h1>
-            <input
-              type="text"
-              onChange={evt => this.handleChangeColumnTitle(evt.target.value)}
-              value={spec.getIn(['target', 'title'])}
-            />
-          </div>
+          <TargetReverseGeocodeOptions
+            dataset={datasets[datasetId]}
+            spec={spec}
+            onChangeSpec={s => this.handleChangeSpec(s)}
+          />
+          <div className="separator" />
+          <SourceReverseGeocodeOptions
+            datasets={datasets}
+            spec={spec}
+            onChangeSpec={s => this.handleChangeSpec(s)}
+          />
         </div>
       </div>
     );

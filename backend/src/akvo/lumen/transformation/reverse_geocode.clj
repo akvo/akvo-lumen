@@ -25,7 +25,7 @@
 (defn source-table-name [conn source-spec]
   (if (nil? source-spec)
     "world"
-    (latest-dataset-version-by-dataset-id conn {:dataset-id (get source-spec "datasetId")})))
+    (:table-name (latest-dataset-version-by-dataset-id conn {:dataset-id (get source-spec "datasetId")}))))
 
 (defn source-merge-column [source-spec]
   (if (nil? source-spec)

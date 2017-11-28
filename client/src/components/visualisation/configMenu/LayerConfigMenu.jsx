@@ -4,7 +4,7 @@ import { FormattedMessage } from 'react-intl';
 import SelectMenu from '../../common/SelectMenu';
 import SelectInput from './SelectInput';
 import ButtonRowInput from './ButtonRowInput';
-import ToggleInput from './ToggleInput';
+import ToggleInput from '../../common/ToggleInput';
 import ColorLabels from './ColorLabels';
 import FilterMenu from './FilterMenu';
 import { filterColumns } from '../../../utilities/utils';

@@ -5,7 +5,7 @@ import SelectInput from './SelectInput';
 import LabelInput from './LabelInput';
 import Subtitle from './Subtitle';
 import UniqueValueMenu from './UniqueValueMenu';
-import ToggleInput from './ToggleInput';
+import ToggleInput from '../../common/ToggleInput';
 import { canShowPivotTotals } from '../../../utilities/chart';
 import { filterColumns } from '../../../utilities/utils';
 

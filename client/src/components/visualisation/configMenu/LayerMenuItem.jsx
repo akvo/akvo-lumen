@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import ContextMenu from '../../common/ContextMenu';
-import ToggleInput from './ToggleInput';
+import ToggleInput from '../../common/ToggleInput';
 
 require('./LayerMenuItem.scss');
 
@@ -130,4 +130,3 @@ LayerMenuItem.propTypes = {
   onSetLayerVisible: PropTypes.func.isRequired,
 
 };
-
