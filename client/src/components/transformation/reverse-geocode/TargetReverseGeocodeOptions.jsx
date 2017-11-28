@@ -7,6 +7,8 @@ import './TargetReverseGeocodeOptions.scss';
 export default function TargetReverseGeocodeOptions({ spec, onChangeSpec, dataset }) {
   return (
     <div className="TargetReverseGeocodeOptions">
+      <h1>Dataset</h1>
+      <p>{dataset.get('name')} ({dataset.get('columns').size} columns)</p>
       <h1>Geopoint column</h1>
       <SelectColumn
         columns={dataset.get('columns').filter(column => column.get('type') === 'geopoint')}
