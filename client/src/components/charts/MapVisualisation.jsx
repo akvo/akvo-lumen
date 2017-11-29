@@ -207,13 +207,13 @@ export default class MapVisualisation extends Component {
     }
   }
   renderLeafletMap(nextProps) {
-    const { visualisation, datasets, width, height } = nextProps;
+    const { visualisation, metadata, datasets, width, height } = nextProps;
     const { tileUrl, tileAttribution } = getBaseLayerAttributes(visualisation.spec.baseLayer);
 
     // Windshaft map
     // const tenantDB = visualisation.tenantDB;
     const baseURL = '/maps/layergroup';
-    const layerGroupId = visualisation.layerGroupId;
+    const layerGroupId = metadata.layerGroupId;
     const xCenter = [0, 0];
     const xZoom = 2;
 
@@ -261,10 +261,10 @@ export default class MapVisualisation extends Component {
       }
     }
 
-    if (visualisation.layerMetadata) {
+    if (metadata && metadata.layerMetadata && metadata.layerMetadata.length) {
       const mergedBoundingBox = [[90, 180], [-90, -180]];
 
-      visualisation.layerMetadata.forEach((layer) => {
+      metadata.layerMetadata.forEach((layer) => {
         if (layer.boundingBox) {
           if (layer.boundingBox[0][0] < mergedBoundingBox[0][0]) {
             mergedBoundingBox[0][0] = layer.boundingBox[0][0];
@@ -323,7 +323,7 @@ export default class MapVisualisation extends Component {
   }
 
   render() {
-    const { visualisation, width, height } = this.props;
+    const { visualisation, metadata, width, height } = this.props;
     const title = visualisation.name || '';
     const titleLength = title.toString().length;
     const titleHeight = titleLength > 48 ? 56 : 36;
@@ -360,11 +360,11 @@ export default class MapVisualisation extends Component {
             className="leafletMap"
             ref={(ref) => { this.leafletMapNode = ref; }}
           />
-          {visualisation.metadata && visualisation.metadata.pointColorMapping &&
+          {(metadata && metadata.layerMetadata && metadata.layerMetadata.length && metadata.layerMetadata.filter(l => Boolean(l.pointColorMapping)).length) &&
             <Legend
               position={visualisation.spec.layers[0].legend.position}
               title={visualisation.spec.layers[0].legend.title}
-              pointColorMapping={visualisation.metadata.pointColorMapping}
+              pointColorMapping={metadata.layerMetadata.filter(l => Boolean(l.pointColorMapping))[0].pointColorMapping}
             />
           }
           {
@@ -383,6 +383,7 @@ export default class MapVisualisation extends Component {
 
 MapVisualisation.propTypes = {
   visualisation: PropTypes.object.isRequired,
+  metadata: PropTypes.object,
   datasets: PropTypes.object.isRequired,
   width: PropTypes.number,
   height: PropTypes.number,

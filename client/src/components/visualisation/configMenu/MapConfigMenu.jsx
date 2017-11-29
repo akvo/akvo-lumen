@@ -114,6 +114,7 @@ export default class MapConfigMenu extends Component {
               </div>
               <LayerMenu
                 layers={this.props.visualisation.spec.layers}
+                metadata={this.props.metadata}
                 activeLayer={this.state.activeLayer}
                 onAddLayer={() => this.handleAddMapLayer()}
                 onDeleteMapLayer={layerIndex => this.handleDeleteMapLayer(layerIndex)}
@@ -138,6 +139,7 @@ export default class MapConfigMenu extends Component {
             <LayerConfigMenu
               layer={spec.layers[this.state.selectedLayer]}
               layerIndex={this.state.selectedLayer}
+              metadata={this.props.metadata}
               onDeselectLayer={() => this.setState({ selectedLayer: null })}
               datasets={this.props.datasets}
               datasetOptions={this.props.datasetOptions}
@@ -164,6 +166,7 @@ export default class MapConfigMenu extends Component {
 
 MapConfigMenu.propTypes = {
   visualisation: PropTypes.object.isRequired,
+  metadata: PropTypes.object,
   datasets: PropTypes.object.isRequired,
   onChangeSpec: PropTypes.func.isRequired,
   aggregationOptions: PropTypes.array.isRequired,

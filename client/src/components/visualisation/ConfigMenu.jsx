@@ -186,6 +186,7 @@ export default function ConfigMenu(props) {
             {visualisation.visualisationType === 'map' ?
               <MapConfigMenu
                 visualisation={props.visualisation}
+                metadata={props.metadata}
                 onChangeSpec={props.onChangeVisualisationSpec}
                 onChangeVisualisationType={props.onChangeVisualisationType}
                 datasets={props.datasets}
@@ -243,6 +244,7 @@ Subtitle.propTypes = {
 
 ConfigMenu.propTypes = {
   visualisation: PropTypes.object.isRequired,
+  metadata: PropTypes.object,
   datasets: PropTypes.object.isRequired,
   onChangeSourceDataset: PropTypes.func.isRequired,
   onChangeVisualisationSpec: PropTypes.func.isRequired,

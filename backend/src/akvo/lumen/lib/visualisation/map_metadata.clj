@@ -25,7 +25,7 @@
               "#B8385E"
               "#9E4962"])
 
-(defn next-color [used-colors]
+(defn next-point-color [used-colors]
   (some (fn [color] (if (contains? used-colors color) false color)) palette))
 
 (defn move-last
@@ -65,7 +65,7 @@
                                 (recur (conj result {"op" "equals" "value" value "color" color})
                                        (rest values)
                                        used-colors)
-                                (let [color (next-color used-colors)]
+                                (let [color (next-point-color used-colors)]
                                   (recur (conj result {"op" "equals" "value" value "color" color})
                                          (rest values)
                                          (conj used-colors color)))))))]
@@ -96,7 +96,7 @@
   {"boundingBox" (bounds tenant-conn table-name
                          layer
                          where-clause)
-   "pointColorMapping" (if (= (get layer "layerType") "geo-shape") {} (point-color-mapping tenant-conn table-name layer where-clause))
+   "pointColorMapping" (point-color-mapping tenant-conn table-name layer where-clause)
    "availableColors" palette}
 )
 

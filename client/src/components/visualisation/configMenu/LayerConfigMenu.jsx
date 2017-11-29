@@ -7,7 +7,7 @@ import ButtonRowInput from './ButtonRowInput';
 import ToggleInput from './ToggleInput';
 import ColorLabels from './ColorLabels';
 import FilterMenu from './FilterMenu';
-import { filterColumns } from '../../../utilities/utils';
+import { filterColumns, checkUndefined } from '../../../utilities/utils';
 
 require('./LayerConfigMenu.scss');
 
@@ -271,9 +271,10 @@ GeoshapeDataTab.propTypes = {
 const GeopointThemeTab = (props) => {
   const {
     onChangeMapLayer,
+    columnOptions,
     layer,
     layerIndex,
-    columnOptions,
+    pointColorMapping,
     handleChangeLabelColor,
     disabled,
   } = props;
@@ -327,7 +328,7 @@ const GeopointThemeTab = (props) => {
         onChange={() => null}
         buttonSpacing="2rem"
       />
-      {layer.pointColorColumn &&
+      {pointColorMapping &&
         <div className="inputGroup">
           <label
             htmlFor="colors"
@@ -337,8 +338,8 @@ const GeopointThemeTab = (props) => {
           <ColorLabels
             disabled={disabled}
             id="colors"
-            pointColorMapping={layer.pointColorMapping}
-            onChangeColor={(value, newColor) => handleChangeLabelColor(value, newColor)}
+            pointColorMapping={pointColorMapping}
+            onChangeColor={(value, newColor) => handleChangeLabelColor(pointColorMapping, value, newColor)}
           />
         </div>
       }
@@ -351,10 +352,9 @@ GeopointThemeTab.propTypes = {
   layerIndex: PropTypes.number.isRequired,
   onChangeMapLayer: PropTypes.func.isRequired,
   handleChangeLabelColor: PropTypes.func.isRequired,
-  columnOptions: PropTypes.array.isRequired,
-  datasetOptions: PropTypes.array.isRequired,
-  datasets: PropTypes.object.isRequired,
   disabled: PropTypes.bool,
+  pointColorMapping: PropTypes.array.isRequired,
+  columnOptions: PropTypes.array.isRequired,
 };
 
 const GeoshapeThemeTab = (props) => {
@@ -405,7 +405,7 @@ export default class LayerConfigMenu extends Component {
   }
 
   getTabContent(columnOptions) {
-    const { layer, layerIndex, onChangeMapLayer, disabled } = this.props;
+    const { layer, layerIndex, metadata, onChangeMapLayer, disabled } = this.props;
     let tabContent;
 
     switch (this.state.activeTab) {
@@ -574,16 +574,17 @@ export default class LayerConfigMenu extends Component {
             disabled={disabled}
             layerIndex={layerIndex}
             columnOption={columnOptions}
-            handleChangeLabelColorValue={this.handleChangeLabelColorValue}
+            handleChangeLabelColor={this.handleChangeLabelColor}
           />)
           :
           (<GeopointThemeTab
             onChangeMapLayer={this.props.onChangeMapLayer}
             layer={layer}
+            pointColorMapping={checkUndefined(metadata, 'layerMetadata', layerIndex, 'pointColorMapping') || []}
             disabled={disabled}
             layerIndex={layerIndex}
-            columnOption={columnOptions}
-            handleChangeLabelColorValue={this.handleChangeLabelColorValue}
+            columnOptions={columnOptions}
+            handleChangeLabelColor={this.handleChangeLabelColor}
           />);
         break;
 
@@ -606,20 +607,29 @@ export default class LayerConfigMenu extends Component {
     this.props.onChangeMapLayer(this.props.layerIndex, {
       legend,
       pointColorColumn: columnName,
-      pointColorMapping: [],
     });
   }
 
-  handleChangeLabelColor(value, color) {
-    const pointColorMapping = this.props.layer.pointColorMapping;
+  handleChangeLabelColor(pointColorMapping = [], value, color) {
+    /* TODO - we should change the name of the array of custom layer colors from
+    ** "pointColorMapping" to something else - like "customPointColors" - because it's
+    ** needlessly confusing to use the same name for the metadata returned by the maps backend
+    ** and the permanent record of custom colors picked by the users.
+    ** Leaving as-is for now because it will involve nontrivial compatibility work.
+    */
+    const newMapping = pointColorMapping.map((o) => {
+      if (o.value === value) {
+        return Object.assign(
+          {},
+          o,
+          { color }
+        );
+      }
+      return o;
+    });
 
     this.props.onChangeMapLayer(this.props.layerIndex, {
-      pointColorMapping: pointColorMapping.map((mapping) => {
-        if (mapping.value === value) {
-          return Object.assign({}, mapping, { color });
-        }
-        return mapping;
-      }),
+      pointColorMapping: newMapping,
     });
   }
 
@@ -679,6 +689,7 @@ export default class LayerConfigMenu extends Component {
 
 LayerConfigMenu.propTypes = {
   layer: PropTypes.object.isRequired,
+  metadata: PropTypes.object,
   datasets: PropTypes.object.isRequired,
   datasetOptions: PropTypes.array.isRequired,
   onChangeMapLayer: PropTypes.func.isRequired,

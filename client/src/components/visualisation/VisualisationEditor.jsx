@@ -85,6 +85,7 @@ export default class VisualisationEditor extends Component {
     super();
     this.state = {
       visualisation: null,
+      metadata: { layerGroupId: '', layerMetadata: [] },
     };
     this.handleProps = this.handleProps.bind(this);
     this.fetchAggregatedData = this.fetchAggregatedData.bind(this);
@@ -143,19 +144,7 @@ export default class VisualisationEditor extends Component {
           this.fetchAggregatedData(visualisation);
           this.lastVisualisationRequested = cloneDeep(visualisation);
         } else {
-          // Update the visualisation in the editor, but don't make a request to the backend
-          this.setState({ visualisation:
-            Object.assign({}, visualisation,
-              {
-                metadata: this.state.visualisation ?
-                  this.state.visualisation.metadata
-                  :
-                  [],
-                layerMetadata: checkUndefined(this.state.visualisation, 'layerMetadata') ?
-                    this.state.visualisation.layerMetadata : [],
-              }
-            ),
-          });
+          //
         }
 
         break;
@@ -205,37 +194,13 @@ export default class VisualisationEditor extends Component {
               {
                 awaitingResponse: false,
                 failedToLoad: true,
-                metadata: Object.assign({}, checkUndefined(this.state.visualisation, 'metadata')),
-                layerMetadata: checkUndefined(this.state.visualisation, 'layerMetadata') ?
-                  this.state.visualisation.layerMetadata : [],
               }
             ),
         }
       );
     };
 
-    const updateMapVisualisation = ({ layerGroupId, metadata, layerMetadata }) => {
-      const needPointColorMapping = visualisation.spec.layers.some(layer => layer.pointColorColumn);
-      const havePointColorMapping = layerMetadata && layerMetadata.length && layerMetadata.some(layer => checkUndefined(layer, 'pointColorMapping', 'length') > 0);
-
-      if (needPointColorMapping && havePointColorMapping) {
-        const layers = this.props.visualisation.spec.layers;
-        const clonedLayers = layers.map((layer, idx) => {
-          if (checkUndefined(layerMetadata, idx, 'pointColorMapping', 'length') > 0) {
-            return (
-              Object.assign(
-                {},
-                layer,
-                { pointColorMapping: layerMetadata[idx].pointColorMapping }
-              )
-            );
-          }
-          return layer;
-        });
-
-        this.props.onChangeVisualisationSpec({ layers: clonedLayers });
-      }
-
+    const updateMapVisualisation = (metadata) => {
       this.setState({
         visualisation: Object.assign(
           {},
@@ -243,31 +208,9 @@ export default class VisualisationEditor extends Component {
           {
             awaitingResponse: false,
             failedToLoad: false,
-          },
-          {
-            layerGroupId,
-            metadata,
-            layerMetadata,
-          },
-          {
-            spec: Object.assign(
-              {},
-              visualisation.spec,
-              {
-                layers: visualisation.spec.layers.map((item, idx) => {
-                  if (layerMetadata && layerMetadata[idx] && layerMetadata[idx].pointColorMapping) {
-                    return Object.assign(
-                      {},
-                      item,
-                      { pointColorMapping: layerMetadata[idx].pointColorMapping }
-                    );
-                  }
-                  return item;
-                }),
-              }
-            ),
           }
         ),
+        metadata,
       });
     };
 
@@ -291,9 +234,6 @@ export default class VisualisationEditor extends Component {
                 visualisation,
                 {
                   awaitingResponse: true,
-                  metadata: Object.assign({}, checkUndefined(this.state.visualisation, 'metadata')),
-                  layerMetadata: checkUndefined(this.state.visualisation, 'layerMetadata') ?
-                    this.state.visualisation.layerMetadata : [],
                 }
               ),
           }
@@ -337,12 +277,13 @@ export default class VisualisationEditor extends Component {
 
   render() {
     const { props } = this;
-    const visualisation = this.state.visualisation;
+    const { visualisation, metadata } = this.state;
 
     return (
       <div className="VisualisationEditor">
         <VisualisationConfig
           visualisation={visualisation}
+          metadata={metadata}
           datasets={props.datasets}
           onChangeVisualisationType={props.onChangeVisualisationType}
           onChangeSourceDataset={props.onChangeSourceDataset}
@@ -352,6 +293,7 @@ export default class VisualisationEditor extends Component {
         />
         <VisualisationPreview
           visualisation={visualisation}
+          metadata={metadata}
           datasets={props.datasets}
         />
       </div>

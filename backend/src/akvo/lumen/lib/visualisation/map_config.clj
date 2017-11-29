@@ -80,7 +80,7 @@
     (shape-cartocss layer-index)
 
     :else
-    (point-cartocss (get layer :pointSize) (get layer :pointColorColumn) (get (nth metadata-array layer-index) :pointColorMapping) layer-index)
+    (point-cartocss (get layer "pointSize") (get layer "pointColorColumn") (get (nth metadata-array layer-index) "pointColorMapping") layer-index)
   )
 )
 
