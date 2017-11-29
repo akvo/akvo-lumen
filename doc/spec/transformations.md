@@ -263,11 +263,29 @@ Examples:
 
 ### core/reverse-geocode
 
+This transformation relies on a "world" table being available in all tenant databases. The following steps will create this table
+
+* Download and unzip the file `g2015_2014_2.zip` from https://console.cloud.google.com/storage/browser/shapefiles?project=akvo-lumen
+* Run the command
+```
+shp2pgsql -I -D -s 4326 -W LATIN1 g2015_2014_2.shp world | psql <tenant-connection-string>
+```
+* The tenant connection string can be found in the elephantsql dashboard. Replace the default database name with the database name of the tenant.
+
+* args
+  * target.datasetId (string): The dataset being reverse geocoded
+  * target.geopointColumn (string): The geopoint column to use for reverse geocoding
+  * target.title (string): The new column title
+  * source.datasetId (string): The dataset id for the shape dataset (source = null) means we will default to the world table
+  * source.geoshapeColumn (string): The geoshape column to use for reverse geocoding
+  * source.mergeColumn (string): The column to move to the target dataset
+
 ```
 {"op": "core/reverse-geocode"
- "args": {"datasetId" "abc", // null means "world" table
-          "geoColumnName" "def", // null means world.geom
-		  "columnName": "ghi", // null means world.adm2_name. Can also be adm1_name or adm0_name
-		  }}
-
+ "args": {"target": {"datasetId" "fid-dis-gid"
+                     "title": "Adminstrative level 2"},
+          // null source means "world" table
+          "source": {"datasetId" "abc-sda-dgs",
+                     "geoshapeColumn": "d2",
+                     "mergeColumn": "c4"}}}
 ```
