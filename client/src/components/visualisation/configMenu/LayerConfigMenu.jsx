@@ -11,6 +11,12 @@ import { filterColumns } from '../../../utilities/utils';
 
 require('./LayerConfigMenu.scss');
 
+const sourceDataset = { 'data-test-id': 'source-dataset-select' };
+
+const geopoint = { 'data-test-id': 'geopoint-select' };
+
+const colorCoding = { 'data-test-id': 'color-coding-select' };
+
 const getSelectMenuOptionsFromColumnList = columns => (columns == null ?
   [] : columns.map((column, index) => ({
     value: `${column.get('columnName')}`,
@@ -71,11 +77,9 @@ export default class LayerConfigMenu extends Component {
           >
             <div
               className="inputGroup"
-              data-test-id="source-dataset"
             >
               <label
                 htmlFor="xDatasetMenu"
-                data-test-id="dataset-menu"
               >Source dataset:</label>
               <SelectMenu
                 disabled={disabled}
@@ -86,6 +90,7 @@ export default class LayerConfigMenu extends Component {
                 options={this.props.datasetOptions}
                 onChange={datasetId => onChangeMapLayer(this.props.layerIndex, { datasetId })}
                 data-test-id="source-dataset"
+                inputProps={sourceDataset}
               />
             </div>
             <ButtonRowInput
@@ -146,6 +151,7 @@ export default class LayerConfigMenu extends Component {
                   latitude: null,
                   longitude: null,
                 })}
+                inputProps={geopoint}
               />
             </div>
             <div className="inputGroup">
@@ -164,6 +170,7 @@ export default class LayerConfigMenu extends Component {
                 onChange={columnName =>
                   this.handlePointColorColumnChange(columnName,
                     columnOptions.find(option => option.value === columnName))}
+                inputProps={colorCoding}
               />
             </div>
             <FilterMenu

@@ -32,6 +32,7 @@ class DatasetControls extends Component {
             <button
               className="datasetEditorToggle clickable"
               onClick={() => this.onEditorToggleClick()}
+              data-test-id="transform"
             >
             + <FormattedMessage id="transform" />
             </button>
