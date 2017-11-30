@@ -68,6 +68,7 @@ export default class LayerMenuItem extends Component {
               <span
                 onClick={() => onSelectLayer(layerIndex)}
                 className="clickable title"
+                data-test-id="layer"
               >
                 {layer.title}
               </span>

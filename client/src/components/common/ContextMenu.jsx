@@ -64,6 +64,7 @@ export default class ContextMenu extends Component {
           ${props.containerClass} ${props.arrowClass ? 'hasArrow' : ''}
           ${props.subMenuSide === 'left' ? 'leftSubMenu' : ''}
         `}
+        data-test-id="context-menu"
         style={props.style}
       >
         <span

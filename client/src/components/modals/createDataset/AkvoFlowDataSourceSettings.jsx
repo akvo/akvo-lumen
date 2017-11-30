@@ -256,6 +256,7 @@ class AkvoFlowDataSourceSettings extends Component {
         options={this.foldersAndSurveysSelectionOptions(lastSelectedFolderId)}
         value={selectedSurveyId}
         onChange={evt => this.handleSelection(evt)}
+        data-test-id="survey-folder"
       />
     );
 
@@ -267,6 +268,7 @@ class AkvoFlowDataSourceSettings extends Component {
         options={this.formSelectionOptions(selectedSurveyId)}
         value={selectedFormId}
         onChange={evt => this.handleFormSelection(evt.value)}
+        data-test-id="survey-folder"
       />
     );
 
@@ -282,6 +284,7 @@ class AkvoFlowDataSourceSettings extends Component {
             textAlign: 'center',
             padding: '0.25rem 0.75rem',
           }}
+          data-test-id="flow-url"
         />
         {errorNotification}
         {folderSelections}
