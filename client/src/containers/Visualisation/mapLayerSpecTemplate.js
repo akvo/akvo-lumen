@@ -1,3 +1,5 @@
+// TODO: we should have a separate layer spec template for different layer types (eg shape vs point)
+
 const mapLayerSpec = {
   datasetId: null,
   visible: true,
@@ -10,6 +12,7 @@ const mapLayerSpec = {
   pointSize: 3,
   pointColorMapping: [],
   popup: [],
+  aggregationMethod: 'avg',
   legend: {
     title: null,
     visible: true,

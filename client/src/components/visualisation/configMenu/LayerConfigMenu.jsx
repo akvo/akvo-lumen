@@ -365,7 +365,7 @@ const GeoshapeThemeTab = (props) => {
     layerIndex,
     colors,
     gradientColor,
-    disabled
+    disabled,
   } = props;
 
   return (

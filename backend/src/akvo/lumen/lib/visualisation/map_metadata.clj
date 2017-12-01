@@ -116,7 +116,20 @@
                          layer
                          where-clause)
    "pointColorMapping" (point-color-mapping tenant-conn table-name layer where-clause)
-   "availableColors" palette}
+   "availableColors" palette
+   "pointColorMappingTitle" (get
+                              (first
+                                (filter
+                                  (fn [object] (if (= (get object "columnName") (get layer "pointColorColumn")) true false))
+                                  (get
+                                    (first (jdbc/query tenant-conn (format "SELECT columns FROM dataset_version WHERE table_name='%s'" table-name)))
+                                    :columns
+                                  )
+                                )
+                              )
+                              "title"
+                            )
+  }
 )
 
 (defn shape-aggregation-metadata [tenant-conn table-name layer where-clause]
@@ -125,6 +138,18 @@
                          where-clause)
    "shapeColorMapping" (shape-color-mapping layer)
    "availableColors" gradient-palette
+   "shapeColorMappingTitle" (get
+                              (first
+                                (filter
+                                  (fn [object] (if (= (get object "columnName") (get layer "aggregationColumn")) true false))
+                                  (get
+                                    (first (jdbc/query tenant-conn (format "SELECT columns FROM dataset_version WHERE dataset_id='%s'" (get layer "aggregationDataset"))))
+                                    :columns
+                                  )
+                                )
+                              )
+                              "title"
+                            )
   }
 )
 

@@ -54,7 +54,7 @@ export default class MapConfigMenu extends Component {
 
   handleAddMapLayer() {
     const title = `Untitled Layer ${this.props.visualisation.spec.layers.length + 1}`;
-    const layers = this.props.visualisation.spec.layers.map(item => item);
+    const layers = this.props.visualisation.spec.layers.slice();
     layers.push(Object.assign({}, mapLayerSpecTemplate, { title }));
     this.props.onChangeSpec({ layers });
   }

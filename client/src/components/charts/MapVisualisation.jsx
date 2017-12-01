@@ -54,11 +54,12 @@ const getBaseLayerAttributes = ((baseLayer) => {
   return attributes;
 });
 
-const LegendEntry = ({ layer, singleMetadata, title}) => (
+const LegendEntry = ({ layer, singleMetadata, title }) => (
   <div className="LegendEntry">
     <h4>{title}</h4>
     {Boolean(singleMetadata.pointColorMapping) &&
-      <div class="listContainer">
+      <div className="listContainer">
+        <h4>{`${singleMetadata.pointColorMappingTitle}`}</h4>
         <ul>
           {singleMetadata.pointColorMapping.map(item =>
             <li
@@ -80,17 +81,17 @@ const LegendEntry = ({ layer, singleMetadata, title}) => (
     }
     {Boolean(singleMetadata.shapeColorMapping) &&
       <div>
+        <h4>{`${singleMetadata.shapeColorMappingTitle} (${layer.aggregationMethod})`}</h4>
         <div className="gradientContainer">
           <div
             className="gradientDisplay"
             style={{
               background: `linear-gradient(90deg,${singleMetadata.shapeColorMapping.map(o => o.color).join(',')})`,
-              width: "200px",
-              height: "16px",
-              border: '1px solid #000'
+              width: '200px',
+              height: '16px',
+              border: '1px solid #000',
             }}
-          >
-          </div>
+          />
         </div>
       </div>
     }
@@ -100,8 +101,7 @@ const LegendEntry = ({ layer, singleMetadata, title}) => (
 const Legend = ({ layers, layerMetadata, position = 'bottom', title = '' }) => (
   <div className={`Legend ${position}`}>
     {
-      layers.map((layer, idx) => {
-        return layer.legend.visible ?
+      layers.map((layer, idx) => layer.legend.visible ?
           (<LegendEntry
             key={idx}
             layer={layer}
@@ -109,8 +109,6 @@ const Legend = ({ layers, layerMetadata, position = 'bottom', title = '' }) => (
           />)
           :
           null
-        ;
-        }
       )
     }
   </div>

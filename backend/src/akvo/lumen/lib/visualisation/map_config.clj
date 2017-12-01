@@ -92,7 +92,6 @@
 
 ; Should convert hex string to hue for hsl color. Use string matching as proof of concept for now
 (defn color-to-hue [s]
-  (println s)
   (cond
     (= s "#FF0000")
     "0"
