@@ -7,6 +7,7 @@ import ButtonRowInput from './ButtonRowInput';
 import ToggleInput from './ToggleInput';
 import ColorLabels from './ColorLabels';
 import FilterMenu from './FilterMenu';
+import { GithubPicker } from 'react-color';
 import { filterColumns, checkUndefined } from '../../../utilities/utils';
 
 require('./LayerConfigMenu.scss');
@@ -362,22 +363,21 @@ const GeoshapeThemeTab = (props) => {
     onChangeMapLayer,
     layer,
     layerIndex,
+    colors,
+    gradientColor,
+    disabled
   } = props;
 
   return (
     <div
       className="themeTab"
     >
-      {layer.aggregationColumn &&
-        <ButtonRowInput
-          options={['red', 'green', 'blue'].map(item => ({
-            label: <FormattedMessage id={item} />,
-            value: item,
-          }))}
-          selected={layer.gradientColor ? layer.gradientColor : 'red'}
-          label="Gradient color"
-          onChange={val => onChangeMapLayer(layerIndex, { gradientColor: val })}
-          buttonSpacing="0"
+      {colors &&
+        <GithubPicker
+          disabled={disabled}
+          color={gradientColor}
+          colors={colors}
+          onChangeComplete={evt => onChangeMapLayer(layerIndex, { gradientColor: evt.hex })}
         />
       }
     </div>
@@ -574,7 +574,8 @@ export default class LayerConfigMenu extends Component {
             disabled={disabled}
             layerIndex={layerIndex}
             columnOption={columnOptions}
-            handleChangeLabelColor={this.handleChangeLabelColor}
+            colors={checkUndefined(metadata, 'layerMetadata', layerIndex, 'availableColors') || null}
+            gradientColor={checkUndefined(metadata, 'layerMetadata', layerIndex, 'shapeColorMapping', 1, 'color') || null}
           />)
           :
           (<GeopointThemeTab

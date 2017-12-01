@@ -54,33 +54,69 @@ const getBaseLayerAttributes = ((baseLayer) => {
   return attributes;
 });
 
-const Legend = ({ pointColorMapping, position = 'bottom', title = '' }) => (
-  <div className={`Legend ${position}`}>
+const LegendEntry = ({ layer, singleMetadata, title}) => (
+  <div className="LegendEntry">
     <h4>{title}</h4>
-    <div className="listContainer">
-      <ul>
-        {pointColorMapping.map(item =>
-          <li
-            key={item.value}
+    {Boolean(singleMetadata.pointColorMapping) &&
+      <div class="listContainer">
+        <ul>
+          {singleMetadata.pointColorMapping.map(item =>
+            <li
+              key={item.value}
+            >
+              <div
+                className="colorMarker"
+                style={{
+                  backgroundColor: item.color,
+                }}
+              />
+              <p className="label">
+                {chart.replaceLabelIfValueEmpty(item.value)}
+              </p>
+            </li>
+            )}
+        </ul>
+      </div>
+    }
+    {Boolean(singleMetadata.shapeColorMapping) &&
+      <div>
+        <div className="gradientContainer">
+          <div
+            className="gradientDisplay"
+            style={{
+              background: `linear-gradient(90deg,${singleMetadata.shapeColorMapping.map(o => o.color).join(',')})`,
+              width: "200px",
+              height: "16px",
+              border: '1px solid #000'
+            }}
           >
-            <div
-              className="colorMarker"
-              style={{
-                backgroundColor: item.color,
-              }}
-            />
-            <p className="label">
-              {chart.replaceLabelIfValueEmpty(item.value)}
-            </p>
-          </li>
-          )}
-      </ul>
-    </div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+);
+
+const Legend = ({ layers, layerMetadata, position = 'bottom', title = '' }) => (
+  <div className={`Legend ${position}`}>
+    {
+      layers.map((layer, idx) => {
+        return layer.legend.visible ?
+          (<LegendEntry
+            key={idx}
+            layer={layer}
+            singleMetadata={layerMetadata[idx]}
+          />)
+          :
+          null
+        ;
+        }
+      )
+    }
   </div>
   );
 
 Legend.propTypes = {
-  pointColorMapping: PropTypes.array.isRequired,
   title: PropTypes.string,
   position: PropTypes.string,
 };
@@ -360,11 +396,11 @@ export default class MapVisualisation extends Component {
             className="leafletMap"
             ref={(ref) => { this.leafletMapNode = ref; }}
           />
-          {(metadata && metadata.layerMetadata && metadata.layerMetadata.length && metadata.layerMetadata.filter(l => Boolean(l.pointColorMapping)).length) &&
+          {Boolean(visualisation.spec.layers && visualisation.spec.layers.filter(l => l.legend.visible).length && metadata && metadata.layerMetadata && metadata.layerMetadata.length) &&
             <Legend
+              layers={visualisation.spec.layers}
+              layerMetadata={metadata.layerMetadata}
               position={visualisation.spec.layers[0].legend.position}
-              title={visualisation.spec.layers[0].legend.title}
-              pointColorMapping={metadata.layerMetadata.filter(l => Boolean(l.pointColorMapping))[0].pointColorMapping}
             />
           }
           {

@@ -25,6 +25,10 @@
               "#B8385E"
               "#9E4962"])
 
+(def gradient-palette ["#FF0000"
+              "#00FF00"
+              "#0000FF"])
+
 (defn next-point-color [used-colors]
   (some (fn [color] (if (contains? used-colors color) false color)) palette))
 
@@ -71,6 +75,21 @@
                                          (conj used-colors color)))))))]
       (sort-point-color-mapping color-mapping))))
 
+(defn shape-color-mapping [layer]
+  [
+    {
+      "op" "heatmap"
+      "stop" 0
+      "color" "#FFFFFF"
+    }
+    {
+      "op" "heatmap"
+      "stop" 100
+      "color" (if (get layer "gradientColor") (get layer "gradientColor") (get gradient-palette 0))
+    }
+  ]
+)
+
 ;; "BOX(-0.127758 51.507351,24.938379 63.095089)"
 (defn parse-box [s]
   (let [end (str/index-of s ")")
@@ -103,7 +122,10 @@
 (defn shape-aggregation-metadata [tenant-conn table-name layer where-clause]
   {"boundingBox" (bounds tenant-conn table-name
                          layer
-                         where-clause)}
+                         where-clause)
+   "shapeColorMapping" (shape-color-mapping layer)
+   "availableColors" gradient-palette
+  }
 )
 
 (defn shape-metadata [tenant-conn table-name layer where-clause]

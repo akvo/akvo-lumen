@@ -90,15 +90,17 @@
       (str/replace #"\n" " ")
       (str/replace #" +" " ")))
 
+; Should convert hex string to hue for hsl color. Use string matching as proof of concept for now
 (defn color-to-hue [s]
+  (println s)
   (cond
-    (= s "red")
+    (= s "#FF0000")
     "0"
 
-    (= s "green")
+    (= s "#00FF00")
     "120"
 
-    (= s "blue")
+    (= s "#0000FF")
     "240"
   )
 )
@@ -122,7 +124,7 @@
                                      (str c "::text")
                                      c)) popup-columns) geom-column)
                 point-color-column (conj point-color-column)))
-    hue (color-to-hue (get current-layer "gradientColor" "red"))
+    hue (color-to-hue (clojure.string/upper-case (get current-layer "gradientColor" "#FF0000")))
     ]
 
     (format "with temp_table as
