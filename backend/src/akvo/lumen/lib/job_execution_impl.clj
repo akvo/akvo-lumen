@@ -15,10 +15,15 @@
      {"jobExecutionId" id
       "status" "OK"
       "datasetId" dataset_id})
-    (if-let [{:keys [status error-message kind]} (job-execution-by-id conn {:id id})]
+    (if-let [{:keys [raster_id]} (raster-id-by-job-execution-id conn {:id id})]
       (lib/ok
        {"jobExecutionId" id
-        "status" status
-        "kind" kind
-        "reason" error-message})
-      (lib/not-found {:error "not-found"}))))
+        "status" "OK"
+        "rasterId" raster_id})
+      (if-let [{:keys [status error-message kind]} (job-execution-by-id conn {:id id})]
+        (lib/ok
+         {"jobExecutionId" id
+          "status" status
+          "kind" kind
+          "reason" error-message})
+        (lib/not-found {:error "not-found"})))))

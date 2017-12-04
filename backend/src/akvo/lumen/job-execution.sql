@@ -57,6 +57,13 @@ SELECT dataset_id
   FROM dataset_version
   WHERE dataset_version.job_execution_id = :id;
 
+
+-- :name raster-id-by-job-execution-id :? :1
+-- :doc Find a raster id corresponding to the job execution id
+SELECT id AS raster_id
+  FROM raster_dataset
+ WHERE raster_dataset.job_execution_id = :id;
+
 -- :name job-execution-status :? :1
 -- :doc Get job execution status for a given job execution id
 SELECT status

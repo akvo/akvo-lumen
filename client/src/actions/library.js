@@ -6,6 +6,7 @@ import { fetchDatasetsSuccess } from './dataset';
 import { fetchVisualisationsSuccess } from './visualisation';
 import { fetchDashboardsSuccess } from './dashboard';
 import { fetchCollectionsSuccess } from './collection';
+import { fetchRastersSuccess } from './raster';
 
 
 import * as api from '../api';
@@ -30,7 +31,8 @@ export function fetchLibrary() {
     return api.get('/api/library')
       .then(response => response.json())
       .then((library) => {
-        dispatch(fetchDatasetsSuccess(Immutable.fromJS(library.datasets.concat(library.rasters))));
+        dispatch(fetchDatasetsSuccess(Immutable.fromJS(library.datasets)));
+        dispatch(fetchRastersSuccess(Immutable.fromJS(library.rasters)));
         dispatch(fetchVisualisationsSuccess(library.visualisations));
         dispatch(fetchDashboardsSuccess(library.dashboards));
         dispatch(fetchCollectionsSuccess(library.collections));

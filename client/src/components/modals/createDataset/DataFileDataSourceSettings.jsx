@@ -98,6 +98,7 @@ export default class DataFileDataSourceSettings extends Component {
             className={`dataFileUploadInput${this.isProgressBarVisible() ? ' progressActive' : ''}`}
             ref={(ref) => { this.fileInput = ref; }}
             type="file"
+            accept=".csv"
             onChange={() => {
               this.uploadFile(this.fileInput.files[0]);
             }}

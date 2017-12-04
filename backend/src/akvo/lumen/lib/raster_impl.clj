@@ -4,6 +4,7 @@
             [akvo.lumen.lib :as lib]
             [akvo.lumen.update :as update]
             [akvo.lumen.util :as util]
+            [cheshire.core :as json]
             [clojure.java.jdbc :as jdbc]
             [clojure.java.shell :as shell]
             [clojure.string :as str]
@@ -34,7 +35,7 @@
 (defn all [conn]
   (lib/ok (all-rasters conn)))
 
-(defn create [conn config data-source job-execution-id]
+(defn do-import [conn config data-source job-execution-id]
   (let [source (get data-source "source")
         file (import/get-path source (:file-upload-path config))
         path (.getAbsolutePath (.getParentFile file))
@@ -50,24 +51,32 @@
     (insert-raster conn {:id (util/squuid)
                          :title (data-source "name")
                          :description (get-in data-source ["source" "fileName"])
+                         :job-execution-id job-execution-id
                          :raster-table table-name})
     (update-successful-job-execution conn {:id job-execution-id})))
 
+(defn create [conn config claims data-source]
+  (let [data-source-id (str (util/squuid))
+        job-execution-id (str (util/squuid))
+        table-name (util/gen-table-name "ds")
+        kind (get-in data-source ["source" "kind"])]
+    (insert-data-source conn {:id data-source-id
+                              :spec (json/generate-string data-source)})
+    (insert-job-execution conn {:id job-execution-id
+                                :data-source-id data-source-id})
+    (future (do-import conn config data-source job-execution-id))
+    (lib/ok {"importId" job-execution-id
+             "kind" kind})))
+
 (defn fetch [conn id]
-  #_(if-let [dataset (dataset-by-id conn {:id id})]
-    (let [columns (remove #(get % "hidden") (:columns dataset))
-          data (rest (jdbc/query conn
-                                 [(select-data-sql (:table-name dataset) columns)]
-                                 {:as-arrays? true}))]
-      (lib/ok
-       {:id id
-        :name (:title dataset)
-        :modified (:modified dataset)
-        :created (:created dataset)
-        :status "OK"
-        :transformations (:transformations dataset)
-        :columns columns
-        :rows data}))
+  (if-let [raster (raster-by-id conn {:id id})]
+    (lib/ok
+     {:id id
+      :name (:title raster)
+      :modified (:modified raster)
+      :created (:created raster)
+      :status "OK"
+      :raster_table (:raster_table raster)})
     (lib/not-found {:error "Not found"})))
 
 

@@ -88,8 +88,6 @@
                                      :spec (json/generate-string data-source)})
     (insert-job-execution tenant-conn {:id job-execution-id
                                        :data-source-id data-source-id})
-    (if (= "GEOTIFF" kind)
-      (future (raster/create tenant-conn config data-source job-execution-id))
-      (future (do-import tenant-conn config job-execution-id)))
+    (future (do-import tenant-conn config job-execution-id))
     (lib/ok {"importId" job-execution-id
              "kind" kind})))

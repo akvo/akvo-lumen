@@ -3,6 +3,7 @@ CREATE TABLE raster_dataset (
     title text NOT NULL,
     description text NOT NULL DEFAULT '',
     raster_table text NOT NULL,
+    job_execution_id text NOT NULL REFERENCES job_execution ON DELETE CASCADE,
     created timestamptz NOT NULL DEFAULT now(),
     modified timestamptz NOT NULL DEFAULT now()
 );

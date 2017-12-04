@@ -27,8 +27,8 @@ SELECT id, title, NULL, 'OK', modified, created
 
 -- :name insert-raster :! :n
 -- :doc Insert new raster dataset
-INSERT INTO raster_dataset (id, title, description, raster_table)
-VALUES (:id, :title, :description, :raster-table);
+INSERT INTO raster_dataset (id, title, description, job_execution_id, raster_table)
+VALUES (:id, :title, :description, :job-execution-id, :raster-table);
 
 -- :name create-raster-table :!
 -- :doc Creates a raster table
@@ -48,3 +48,8 @@ SELECT AddRasterConstraints('',:table-name,'rast',TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,
 -- :name raster-count :? :1
 -- :doc returns the count of elements in a raster table
 SELECT COUNT(*) AS c FROM :i:table-name;
+
+
+-- :name raster-by-id :? :1
+-- :doc Returns a raster table by id
+SELECT * FROM raster_dataset WHERE id = :id
