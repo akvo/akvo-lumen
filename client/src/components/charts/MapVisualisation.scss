@@ -44,16 +44,41 @@
     }
 
     .Legend {
-        padding: 0.5rem 1rem;
         z-index: 999;
         position: absolute;
         bottom: 1rem;
         display: flex;
         max-width: 80%;
         margin: 0 10%;
-        height: 6rem;
         background-color: rgba(255, 255, 255, 0.8);
-        flex-direction: column;
+        flex-direction: row;
+        flex-wrap: wrap;
+
+        .LegendEntry {
+            min-width: 50%;
+            display: flex;
+            flex: 1;
+            padding: 0.5rem;
+            flex-direction: column;
+            max-height: 6rem;
+            $borderColor: rgba(0,0,0,0.1);
+            &:nth-child(2) {
+                border-left: 1px solid $borderColor;
+            }
+            &:nth-child(3), &:nth-child(5) {
+                border-top: 1px solid $borderColor;
+            }
+            &:nth-child(4), &:nth-child(6){
+                border-top: 1px solid $borderColor;
+                border-left: 1px solid $borderColor;
+            }
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
 
         &.top {
             bottom: initial;
@@ -102,13 +127,15 @@
         .listContainer {
             flex: 1;
             display: flex;
-            height: 6rem;
             overflow-x: auto;
             overflow-y: hidden;
 
             ul {
                 display: flex;
                 justify-content: flex-start;
+                flex-wrap: wrap;
+                align-items: center;
+                flex: 1;
             }
 
             li {
@@ -116,7 +143,6 @@
                 justify-content: flex-start;
                 font-size: 0.9rem;
                 margin-right: 1rem;
-                flex-shrink: 0;
                 align-items: center;
 
                 &:last-child {
@@ -125,16 +151,48 @@
 
                 .colorMarker {
                     display: block;
-                    height: 0.75rem;
-                    width: 0.75rem;
-                    border-radius: 0.375rem;
+                    height: 12px;
+                    width: 12px;
+                    border-radius: 50%;
                     flex-shrink: 0;
-                    margin-right: 0.3rem;
+                    margin-right: 4px;
                 }
             }
         }
         .italic {
             font-style: italic;
+        }
+        .contents {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .gradientContainer {
+            width: 256px;
+            position: relative;
+            margin: 0 0.5rem;
+            height: 2rem;
+        }
+        .gradientDisplay {
+            width: 100%;
+            height: 1rem;
+            border: 1px solid black;
+        }
+        .gradientLabel {
+            position: absolute;
+            font-size: 0.75rem;
+            top: 1.5rem;
+            text-transform: uppercase;
+            width: 2rem;
+            text-align: center;
+
+            &.min {
+                left: -1rem;
+            }
+            &.max {
+                right: -1rem;
+            }
         }
     }
     .LoadingSpinner {

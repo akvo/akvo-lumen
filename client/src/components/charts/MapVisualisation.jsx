@@ -54,68 +54,90 @@ const getBaseLayerAttributes = ((baseLayer) => {
   return attributes;
 });
 
-const LegendEntry = ({ layer, singleMetadata, title }) => (
+const LegendEntry = ({ layer, singleMetadata }) => (
   <div className="LegendEntry">
-    <h4>{title}</h4>
     {Boolean(singleMetadata.pointColorMapping) &&
-      <div className="listContainer">
+      <div className="container">
         <h4>{`${singleMetadata.pointColorMappingTitle}`}</h4>
-        <ul>
-          {singleMetadata.pointColorMapping.map(item =>
-            <li
-              key={item.value}
-            >
-              <div
-                className="colorMarker"
-                style={{
-                  backgroundColor: item.color,
-                }}
-              />
-              <p className="label">
-                {chart.replaceLabelIfValueEmpty(item.value)}
-              </p>
-            </li>
-            )}
-        </ul>
+        <div className="listContainer">
+          <ul>
+            {singleMetadata.pointColorMapping.map(item =>
+              <li
+                key={item.value}
+              >
+                <div
+                  className="colorMarker"
+                  style={{
+                    backgroundColor: item.color,
+                  }}
+                />
+                <p className="label">
+                  {chart.replaceLabelIfValueEmpty(item.value)}
+                </p>
+              </li>
+              )}
+          </ul>
+        </div>
       </div>
     }
     {Boolean(singleMetadata.shapeColorMapping) &&
-      <div>
+      <div className="container">
         <h4>{`${singleMetadata.shapeColorMappingTitle} (${layer.aggregationMethod})`}</h4>
-        <div className="gradientContainer">
-          <div
-            className="gradientDisplay"
-            style={{
-              background: `linear-gradient(90deg,${singleMetadata.shapeColorMapping.map(o => o.color).join(',')})`,
-              width: '200px',
-              height: '16px',
-              border: '1px solid #000',
-            }}
-          />
+        <div className="contents">
+          <div className="gradientContainer">
+            <div
+              className="gradientDisplay"
+              style={{
+                background: `linear-gradient(90deg,${singleMetadata.shapeColorMapping.map(o => o.color).join(',')})`,
+              }}
+            />
+            <p className="gradientLabel min">
+              Min
+            </p>
+            <p className="gradientLabel max">
+              Max
+            </p>
+          </div>
         </div>
       </div>
     }
   </div>
 );
 
-const Legend = ({ layers, layerMetadata, position = 'bottom', title = '' }) => (
-  <div className={`Legend ${position}`}>
-    {
-      layers.map((layer, idx) => layer.legend.visible ?
-          (<LegendEntry
+const Legend = ({ layers, layerMetadata, position = 'bottom' }) => {
+
+  const legendLayers = layers.map((layer, idx) => {
+    const metadata = layerMetadata[idx];
+    const showLayer = Boolean(layer.legend.visible && metadata && (metadata.pointColorMapping || metadata.shapeColorMapping));
+
+    return showLayer ? layer : null;
+  });
+
+  const numRows = Math.ceil(legendLayers.filter(layer => Boolean(layer)).length / 2);
+
+  return (
+    <div
+      className={`Legend ${position} rows${numRows}`}
+      style={{
+        height: `${numRows * 6}rem`
+      }}
+    >
+      {
+        legendLayers.map((layer, idx) => Boolean(layer) ?
+          <LegendEntry
             key={idx}
             layer={layer}
             singleMetadata={layerMetadata[idx]}
-          />)
+          />
           :
           null
-      )
-    }
-  </div>
+        )
+      }
+    </div>
   );
+};
 
 Legend.propTypes = {
-  title: PropTypes.string,
   position: PropTypes.string,
 };
 
@@ -196,6 +218,7 @@ export default class MapVisualisation extends Component {
         this.map.closePopup();
         map.removeLayer(this[`utfGrid${id}`]);
         this[`utfGrid${id}`] = null;
+        this[`popup${id}`] = null;
       }
 
       if (!havePopupData) {
@@ -351,9 +374,12 @@ export default class MapVisualisation extends Component {
       this.dataLayer = null;
     }
 
-    visualisation.spec.layers.forEach((layer, idx) => {
-      this.renderLeafletLayer(layer, idx, layerGroupId, datasets, baseURL, map);
-    });
+    if (layerGroupId !== this.storedLayerGroupId) {
+      visualisation.spec.layers.forEach((layer, idx) => {
+        this.renderLeafletLayer(layer, idx, layerGroupId, datasets, baseURL, map);
+      });
+    }
+    this.storedLayerGroupId = layerGroupId;
   }
 
   render() {
