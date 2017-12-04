@@ -78,6 +78,7 @@
   "geo_shape": "Forme geographique",
   "github": "Github",
   "google_drive": "Google Drive",
+  "geotiff": "GeoTIFF",
   "gradient": "Gradient",
   "if_cell_format_is_invalid": "Si le format de cellule est invalide",
   "if_transformation_fails": "Si la transformation echoue",

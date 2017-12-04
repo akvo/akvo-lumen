@@ -12,6 +12,7 @@ import { fetchLibrary } from '../actions/library';
 import { deleteVisualisation } from '../actions/visualisation';
 import { deleteDataset, updateDataset } from '../actions/dataset';
 import { deleteDashboard } from '../actions/dashboard';
+import { deleteRaster } from '../actions/raster';
 import { editCollection } from '../actions/collection';
 import { showNotification } from '../actions/notification';
 import * as entity from '../domain/entity';
@@ -34,6 +35,7 @@ const filterLibraryByCollection = (library, collection) => {
   filteredLibrary.datasets = {};
   filteredLibrary.visualisations = {};
   filteredLibrary.dashboards = {};
+  filteredLibrary.rasters = {};
 
   collection.entities.forEach((entityId) => {
     if (library.visualisations[entityId]) {
@@ -42,6 +44,8 @@ const filterLibraryByCollection = (library, collection) => {
       filteredLibrary.datasets[entityId] = library.datasets[entityId];
     } else if (library.dashboards[entityId]) {
       filteredLibrary.dashboards[entityId] = library.dashboards[entityId];
+    } else if (library.rasters[entityId]) {
+      filteredLibrary.rasters[entityId] = library.rasters[entityId];
     }
   });
 
@@ -103,7 +107,7 @@ class Library extends Component {
   }
 
   handleDeleteEntity(entityType, id) {
-    const { dispatch, datasets } = this.props;
+    const { dispatch, datasets, rasters } = this.props;
     switch (entityType) {
       case 'dataset':
         if (!entity.isPending(datasets[id])) {
@@ -115,6 +119,11 @@ class Library extends Component {
         break;
       case 'dashboard':
         dispatch(deleteDashboard(id));
+        break;
+      case 'raster':
+        if (!entity.isPending(rasters[id])) {
+          dispatch(deleteRaster(id));
+        }
         break;
       default:
         throw new Error(`Invalid entity type: ${entityType}`);
@@ -211,7 +220,8 @@ class Library extends Component {
       location,
       datasets,
       visualisations,
-      dashboards } = this.props;
+      dashboards,
+      rasters } = this.props;
     const collections = this.props.collections ? this.props.collections : {};
     const { pendingDeleteEntity, collection } = this.state;
     const query = location.query;
@@ -232,7 +242,7 @@ class Library extends Component {
             isOpen
             entityId={pendingDeleteEntity.entityId}
             entityType={pendingDeleteEntity.entityType}
-            library={{ datasets, visualisations, dashboards }}
+            library={{ datasets, visualisations, dashboards, rasters }}
             onCancel={() => this.setState({ pendingDeleteEntity: null })}
             onDelete={() => {
               this.setState({ pendingDeleteEntity: null });
@@ -327,6 +337,7 @@ Library.propTypes = {
   datasets: PropTypes.object.isRequired,
   visualisations: PropTypes.object.isRequired,
   dashboards: PropTypes.object.isRequired,
+  rasters: PropTypes.object.isRequired,
   collections: PropTypes.object,
 };
 

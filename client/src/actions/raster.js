@@ -2,9 +2,7 @@ import Immutable from 'immutable';
 import * as constants from '../constants/raster';
 import * as visualisationActions from './visualisation';
 import { hideModal } from './activeModal';
-import { showNotification } from './notification';
 import * as api from '../api';
-import * as auth from '../auth';
 
 /*
  * Fetch a raster by id
@@ -255,60 +253,5 @@ export function deleteRaster(id) {
       .then(response => response.json())
       .then(() => dispatch(deleteRasterSuccess(id)))
       .catch(error => dispatch(deleteRasterFailure(id, error)));
-  };
-}
-
-/*
- * Update a raster by dispatching `updateRaster(rasterId)`
- */
-
-function updateRasterTogglePending(rasterId) {
-  return {
-    type: constants.TOGGLE_RASTER_UPDATE_PENDING,
-    id: rasterId,
-  };
-}
-
-function pollRasterUpdateStatus(updateId, rasterId, title) {
-  return (dispatch) => {
-    api.get(`/api/job_executions/${updateId}`)
-      .then(response => response.json())
-      .then(({ status, reason }) => {
-        if (status === 'PENDING') {
-          setTimeout(
-            () => dispatch(pollRasterUpdateStatus(updateId, rasterId, title)),
-            constants.POLL_INTERVAL
-          );
-        } else if (status === 'FAILED') {
-          dispatch(updateRasterTogglePending(rasterId));
-          dispatch(showNotification('error', `Failed to update "${title}": ${reason}`));
-        } else if (status === 'OK') {
-          dispatch(fetchRaster(rasterId))
-            .then(() => dispatch(showNotification('info', `Successfully updated "${title}"`, true)));
-        }
-      })
-      .catch(error => dispatch(error));
-  };
-}
-
-export function updateRaster(id) {
-  return (dispatch, getState) => {
-    const title = getState().library.rasters[id].get('name');
-    dispatch(showNotification('info', `Updating "${title}"`));
-    api.post(`/api/rasters/${id}/update`,
-      // Send the refreshToken as part of the update request as a workaround
-      // for not being able to get an offline token to the backend. It's TBD
-      // how we want to do that.
-      { refreshToken: auth.refreshToken() }
-    )
-      .then(response => response.json())
-      .then(({ updateId, error }) => {
-        if (updateId != null) {
-          dispatch(updateRasterTogglePending(id));
-          dispatch(pollRasterUpdateStatus(updateId, id, title));
-        } else {
-          dispatch(showNotification('error', `Update failed: ${error}`));
-        }
-      });
   };
 }

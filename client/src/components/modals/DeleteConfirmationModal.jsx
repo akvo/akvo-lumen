@@ -12,6 +12,7 @@ function getEntity(entityId, entityType, library) {
     case 'dataset': return library.datasets[entityId];
     case 'visualisation': return library.visualisations[entityId];
     case 'dashboard': return library.dashboards[entityId];
+    case 'raster': return library.rasters[entityId];
     default: throw new Error(`Unknown entity type ${entityType}`);
   }
 }

@@ -23,7 +23,7 @@ const filterEntities = (library, filterBy, searchString) => {
   let searchedEntities = [];
   if (filterBy === 'all') {
     unsearchedEntities = mapEntityObjectsToArray(library.datasets,
-      library.visualisations, library.dashboards);
+      library.visualisations, library.dashboards, library.rasters);
   } else {
     unsearchedEntities = mapEntityObjectsToArray(library[filterBy]);
   }
@@ -155,7 +155,7 @@ export default function LibraryListing({
 
 LibraryListing.propTypes = {
   library: PropTypes.object.isRequired,
-  filterBy: PropTypes.oneOf(['all', 'datasets', 'visualisations', 'dashboards']).isRequired,
+  filterBy: PropTypes.oneOf(['all', 'datasets', 'visualisations', 'dashboards', 'rasters']).isRequired,
   sortOrder: PropTypes.oneOf(['created', 'last_modified', 'name']).isRequired,
   isReverseSort: PropTypes.bool.isRequired,
   displayMode: PropTypes.oneOf(['grid', 'list']).isRequired,

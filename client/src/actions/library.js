@@ -54,7 +54,8 @@ export function ensureLibraryLoaded() {
       // TODO What's a good way to check if library has been loaded?
       isEmpty(library.datasets) ||
       isEmpty(library.visualisations) ||
-      isEmpty(library.dashboards)
+      isEmpty(library.dashboards) ||
+      isEmpty(library.rasters)
     ) {
       return dispatch(fetchLibrary());
     }
