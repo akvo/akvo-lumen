@@ -29,13 +29,9 @@ class WrappedCustomDatasetOptions extends Component {
     this.setState({ isLoadingDataset: true });
     dispatch(ensureDatasetFullyLoaded(dataset.get('id')))
       .then(() => this.setState({ isLoadingDataset: false }));
-    /** Something to do with datasetId being null? */
-    if (!spec.getIn('source', 'datasetId')) {
-      onChangeSpec(
-          spec.setIn(['source', 'datasetId'],
-            dataset.get('id'))
-      );
-    }
+    onChangeSpec(
+        spec.setIn(['source'], Immutable.Map({ datasetId: dataset.get('id') }))
+    );
   }
 
   handleSelectMergeColumn(column) {
