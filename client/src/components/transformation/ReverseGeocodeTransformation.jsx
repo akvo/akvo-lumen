@@ -67,7 +67,7 @@ class ReverseGeocodeTransformation extends Component {
     const { args: { target, source } } = this.getSpec();
 
     const validTarget = target.geopointColumn != null && target.title != null;
-    const validSource = source == null ? true :
+    const validSource = source == null ? false :
       source.datasetId != null && source.geoshapeColumn != null && source.mergeColumn != null;
 
     return validTarget && validSource;

@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Immutable from 'immutable';
 import { ensureDatasetFullyLoaded } from '../../../actions/dataset';
-import ToggleInput from '../../common/ToggleInput';
 import SelectDataset from '../merge/SelectDataset';
 import SelectColumn from '../SelectColumn';
 
@@ -30,7 +29,13 @@ class WrappedCustomDatasetOptions extends Component {
     this.setState({ isLoadingDataset: true });
     dispatch(ensureDatasetFullyLoaded(dataset.get('id')))
       .then(() => this.setState({ isLoadingDataset: false }));
-    onChangeSpec(spec.setIn(['source', 'datasetId'], dataset.get('id')));
+    /** Something to do with datasetId being null? */
+    if (!spec.getIn('source', 'datasetId')) {
+      onChangeSpec(
+          spec.setIn(['source', 'datasetId'],
+            dataset.get('id'))
+      );
+    }
   }
 
   handleSelectMergeColumn(column) {
@@ -93,7 +98,7 @@ export default class SourceReverseGeocodeOptions extends Component {
   constructor(props) {
     super(props);
 
-    this.state = { isCustomDataset: false };
+    this.state = { isCustomDataset: true };
   }
 
   handleToggleCustomDataset() {
@@ -110,21 +115,13 @@ export default class SourceReverseGeocodeOptions extends Component {
       onChangeSpec,
     } = this.props;
 
-    const { isCustomDataset } = this.state;
-
     return (
       <div className="SourceReverseGeocodeOptions">
-        <ToggleInput
-          checked={isCustomDataset}
-          label="Use custom shape dataset?"
-          onChange={() => this.handleToggleCustomDataset()}
+        <CustomDatasetOptions
+          datasets={datasets}
+          spec={spec}
+          onChangeSpec={onChangeSpec}
         />
-        {isCustomDataset &&
-          <CustomDatasetOptions
-            datasets={datasets}
-            spec={spec}
-            onChangeSpec={onChangeSpec}
-          />}
       </div>
     );
   }
