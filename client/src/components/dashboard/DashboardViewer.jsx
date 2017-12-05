@@ -56,7 +56,7 @@ export default class DashboardViewer extends Component {
   componentDidMount() {
     this.handleResize();
     window.addEventListener(
-      'resize', (width, height) => this.handleResize(width, height)
+      'resize', () => this.handleResize
     );
   }
 
@@ -81,10 +81,9 @@ export default class DashboardViewer extends Component {
     }
   }
 
-  handleResize(
-    width = this.DashboardViewer.clientWidth,
-    height = this.DashboardViewer.canvasHeight
-  ) {
+  handleResize() {
+    const height = this.DashboardViewer.canvasHeight;
+    const width = this.DashboardViewer.clientWidth;
     let viewport;
 
     for (let i = 0; i < viewportLimits.length; i += 1) {
