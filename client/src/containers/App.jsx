@@ -5,6 +5,7 @@ import IntlWrapper from './IntlWrapper';
 import Library from '../components/Library';
 import Visualisation from './Visualisation';
 import Dataset from './Dataset';
+import Raster from './Raster';
 import Transformation from './Transformation';
 import Dashboard from './Dashboard';
 import Users from '../components/Users';
@@ -32,6 +33,11 @@ export default function App({ history, location }) {
           <Route
             path="dataset/:datasetId"
             components={{ sidebar: WorkspaceNav, content: Dataset }}
+            location={location}
+          />
+          <Route
+            path="raster/:rasterId"
+            components={{ sidebar: WorkspaceNav, content: Raster }}
             location={location}
           />
           <Route
