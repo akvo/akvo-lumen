@@ -96,6 +96,7 @@
   :config
   {:encryption-key encryption-key
    :file-upload-path file-upload-path
+   :max-upload-size 100
    :keycloak-url keycloak-url
    :keycloak-realm keycloak-realm
    :keycloak-public-client-id keycloak-public-client-id

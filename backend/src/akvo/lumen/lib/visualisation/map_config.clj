@@ -82,3 +82,14 @@
                            "sql" (sql columns table-name geom-column popup-columns point-color-column
                                       where-clause)
                            "srid" "4326"}}]}))
+
+(defn build-raster [table-name]
+  {"version" "1.6.0"
+   "layers" [{"type" "mapnik"
+              "options" {"cartocss" "#r {raster-opacity: 0.5}"
+                         "cartocss_version" "2.3.0"
+                         "geom_column" "rast"
+                         "geom_type" "raster"
+                         "raster_band" 0
+                         "sql" (format "SELECT * FROM %s" table-name)
+                         "srid" "3857"}}]})

@@ -13,6 +13,7 @@
            [java.net URI]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/raster.sql")
 
 (defn- headers [tenant-conn]
   (let [db-uri (-> ^HikariDataSource (:datasource tenant-conn)
@@ -84,6 +85,17 @@
                            :body json/decode (get "layergroupid"))]
     (lib/ok {"layerGroupId" layer-group-id
              "metadata" metadata})))
+
+(defn create-raster [tenant-conn windshaft-url raster-id]
+  (let [{:keys [raster_table]} (raster-by-id tenant-conn {:id raster-id})
+        headers (headers tenant-conn)
+        url (format "%s/layergroup" windshaft-url)
+        map-config (map-config/build-raster raster_table)
+        layer-group-id (-> (client/post url {:body (json/encode map-config)
+                                             :headers headers
+                                             :content-type :json})
+                           :body json/decode (get "layergroupid"))]
+    (lib/ok {"layerGroupId" layer-group-id})))
 
 (defn create
   [tenant-conn windshaft-url dataset-id layer]
