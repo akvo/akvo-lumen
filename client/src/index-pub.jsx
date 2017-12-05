@@ -2,7 +2,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import Immutable from 'immutable';
 import fetch from 'isomorphic-fetch';
-import AsyncVisualisationViewer from './components/charts/AsyncVisualisationViewer';
+import VisualisationViewerContainer from './components/visualisation/VisualisationViewerContainer';
 import DashboardViewer from './components/dashboard/DashboardViewer';
 import LumenBranding from './components/common/LumenBranding';
 
@@ -29,7 +29,9 @@ function renderSuccessfulShare(data) {
           dashboard={data.dashboards[data.dashboardId]}
           visualisations={data.visualisations}
           datasets={immutableDatasets}
-        /> : <AsyncVisualisationViewer
+        />
+          :
+        <VisualisationViewerContainer
           visualisation={data.visualisations[data.visualisationId]}
           datasets={immutableDatasets}
         />
