@@ -1,15 +1,23 @@
 @import "../../styles/modules/importAll";
 
 .LumenBranding {
+    .logoColor {
+        color: $lumenGreen;
+    }
     position: fixed;
-    bottom: 1rem;
-    right: 2.5rem;
-    padding: 1rem;
     background-color: rgba(255, 255, 255, 0.4);
     pointer-events: none;
     z-index: 2;
 
-    .logoColor {
-        color: $lumenGreen;
+    &.large {
+        bottom: 1rem;
+        right: 2.5rem;
+        padding: 1rem;
+    }
+    &.small {
+        bottom: 0.5rem;
+        right: 0.5rem;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
     }
 }

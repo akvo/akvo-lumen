@@ -25,8 +25,8 @@ export default class VisualisationViewerContainer extends Component {
   }
 
   handleResize() {
-    const height = this.VisualisationViewerContainer.clientHeight;
-    const width = this.VisualisationViewerContainer.clientWidth;
+    const height = this.sizeNode.clientHeight;
+    const width = this.sizeNode.clientWidth;
 
     this.setState({
       clientHeight: height,
@@ -37,16 +37,18 @@ export default class VisualisationViewerContainer extends Component {
   render() {
     const { datasets, visualisation } = this.props;
     return (
-      <div
-        className="VisualisationViewerContainer"
-        ref={(ref) => { this.VisualisationViewerContainer = ref; }}
-      >
-        <AsyncVisualisationViewer
-          datasets={datasets}
-          visualisation={visualisation}
-          height={this.state.clientHeight}
-          width={this.state.clientWidth}
-        />
+      <div className="VisualisationViewerContainer">
+        <div
+          className="sizeNode"
+          ref={(ref) => { this.sizeNode = ref; }}
+        >
+          <AsyncVisualisationViewer
+            datasets={datasets}
+            visualisation={visualisation}
+            height={this.state.clientHeight}
+            width={this.state.clientWidth}
+          />
+        </div>
       </div>
     );
   }
