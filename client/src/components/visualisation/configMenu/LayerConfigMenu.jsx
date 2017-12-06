@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
+import { GithubPicker } from 'react-color';
 import SelectMenu from '../../common/SelectMenu';
 import SelectInput from './SelectInput';
 import ButtonRowInput from './ButtonRowInput';
 import ToggleInput from './ToggleInput';
 import ColorLabels from './ColorLabels';
 import FilterMenu from './FilterMenu';
-import { GithubPicker } from 'react-color';
 import { filterColumns, checkUndefined } from '../../../utilities/utils';
 
 require('./LayerConfigMenu.scss');
@@ -340,7 +340,9 @@ const GeopointThemeTab = (props) => {
             disabled={disabled}
             id="colors"
             pointColorMapping={pointColorMapping}
-            onChangeColor={(value, newColor) => handleChangeLabelColor(pointColorMapping, value, newColor)}
+            onChangeColor={
+              (value, newColor) => handleChangeLabelColor(pointColorMapping, value, newColor)
+            }
           />
         </div>
       }
@@ -361,7 +363,6 @@ GeopointThemeTab.propTypes = {
 const GeoshapeThemeTab = (props) => {
   const {
     onChangeMapLayer,
-    layer,
     layerIndex,
     colors,
     gradientColor,
@@ -389,6 +390,9 @@ GeoshapeThemeTab.propTypes = {
   layer: PropTypes.object.isRequired,
   layerIndex: PropTypes.number.isRequired,
   onChangeMapLayer: PropTypes.func.isRequired,
+  colors: PropTypes.arr,
+  gradientColor: PropTypes.string,
+  disabled: PropTypes.bool,
 };
 
 export default class LayerConfigMenu extends Component {

@@ -54,7 +54,7 @@ const getBaseLayerAttributes = ((baseLayer) => {
   return attributes;
 });
 
-const LegendEntry = ({ layer, singleMetadata }) => (
+const LegendEntry = ({ singleMetadata }) => (
   <div className="LegendEntry">
     {Boolean(singleMetadata.pointColorMapping) &&
       <div className="container">
@@ -104,11 +104,19 @@ const LegendEntry = ({ layer, singleMetadata }) => (
   </div>
 );
 
-const Legend = ({ layers, layerMetadata, position = 'bottom' }) => {
+LegendEntry.propTypes = {
+  singleMetadata: PropTypes.object,
+};
 
+const Legend = ({ layers, layerMetadata, position = 'bottom' }) => {
   const legendLayers = layers.map((layer, idx) => {
     const metadata = layerMetadata[idx];
-    const showLayer = Boolean(layer.legend.visible && metadata && (metadata.pointColorMapping || metadata.shapeColorMapping));
+    const showLayer =
+      Boolean(
+        layer.legend.visible &&
+        metadata &&
+        (metadata.pointColorMapping || metadata.shapeColorMapping)
+      );
 
     return showLayer ? layer : null;
   });
@@ -119,25 +127,31 @@ const Legend = ({ layers, layerMetadata, position = 'bottom' }) => {
     <div
       className={`Legend ${position} rows${numRows}`}
       style={{
-        height: `${numRows * 6}rem`
+        height: `${numRows * 6}rem`,
       }}
     >
       {
-        legendLayers.map((layer, idx) => Boolean(layer) ?
-          <LegendEntry
-            key={idx}
-            layer={layer}
-            singleMetadata={layerMetadata[idx]}
-          />
-          :
-          null
-        )
+        legendLayers.map((layer, idx) => {
+          const haveLayer = Boolean(layer);
+          if (!haveLayer) {
+            return null;
+          }
+          return (
+            <LegendEntry
+              key={idx}
+              layer={layer}
+              singleMetadata={layerMetadata[idx]}
+            />
+          );
+        })
       }
     </div>
   );
 };
 
 Legend.propTypes = {
+  layers: PropTypes.array,
+  layerMetadata: PropTypes.array,
   position: PropTypes.string,
 };
 
@@ -146,11 +160,11 @@ const PopupContent = ({ data, layerDataset, onImageLoad, layerMetadata }) => {
     const isMeta = key.substring(0, 1) === '_'; // We set meta columns to start with _ on backend
 
     if (isMeta) {
-      const layerIndex = data['_layer_index'];
+      const layerIndex = data._layer_index;
       return layerMetadata[layerIndex].shapeColorMappingTitle;
     }
     return getColumnTitle(layerDataset, key);
-  }
+  };
 
   return (
     <ul className="PopupContent">
@@ -183,13 +197,14 @@ const PopupContent = ({ data, layerDataset, onImageLoad, layerMetadata }) => {
         </li>
         )}
     </ul>
-  )
+  );
 };
 
 PopupContent.propTypes = {
   data: PropTypes.object.isRequired,
   layerDataset: PropTypes.object.isRequired,
   onImageLoad: PropTypes.func.isRequired,
+  layerMetadata: PropTypes.array,
 };
 
 export default class MapVisualisation extends Component {
@@ -216,7 +231,7 @@ export default class MapVisualisation extends Component {
     const filtersChanged = !isEqual(newSpec.filters, oldSpec.filters);
     const popup = newSpec.popup;
     const haveAggregation = layer.aggregationGeomColumn;
-    const havePopupData = Boolean(popup && popup.length > 0) || haveAggregation; // Always show aggregated value as popup when there's an aggregation
+    const havePopupData = Boolean(popup && popup.length > 0) || haveAggregation;
     const haveUtfGrid = Boolean(this[`utfGrid${id}`]);
     const needToRemovePopup = this[`utfGrid${id}`] && !havePopupData;
     const popupChanged = (!this[`popup${id}`] || !isEqual(popup, this[`popup${id}`]));
@@ -390,7 +405,9 @@ export default class MapVisualisation extends Component {
 
     if (layerGroupId !== this.storedLayerGroupId) {
       visualisation.spec.layers.forEach((layer, idx) => {
-        this.renderLeafletLayer(layer, idx, layerGroupId, datasets, metadata.layerMetadata, baseURL, map);
+        this.renderLeafletLayer(
+          layer, idx, layerGroupId, datasets, metadata.layerMetadata, baseURL, map
+        );
       });
     }
     this.storedLayerGroupId = layerGroupId;
@@ -403,6 +420,13 @@ export default class MapVisualisation extends Component {
     const titleHeight = titleLength > 48 ? 56 : 36;
     const mapWidth = width || '100%';
     const mapHeight = height ? height - titleHeight : `calc(100% - ${titleHeight}px)`;
+    const needLegend = Boolean(
+      visualisation.spec.layers &&
+      visualisation.spec.layers.filter(l => l.legend.visible).length &&
+      metadata &&
+      metadata.layerMetadata &&
+      metadata.layerMetadata.length
+    );
 
     return (
       <div
@@ -434,7 +458,7 @@ export default class MapVisualisation extends Component {
             className="leafletMap"
             ref={(ref) => { this.leafletMapNode = ref; }}
           />
-          {Boolean(visualisation.spec.layers && visualisation.spec.layers.filter(l => l.legend.visible).length && metadata && metadata.layerMetadata && metadata.layerMetadata.length) &&
+          {needLegend &&
             <Legend
               layers={visualisation.spec.layers}
               layerMetadata={metadata.layerMetadata}
