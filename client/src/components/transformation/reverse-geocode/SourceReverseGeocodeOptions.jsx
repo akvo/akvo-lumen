@@ -30,7 +30,7 @@ class WrappedCustomDatasetOptions extends Component {
     dispatch(ensureDatasetFullyLoaded(dataset.get('id')))
       .then(() => this.setState({ isLoadingDataset: false }));
     onChangeSpec(
-        spec.setIn(['source'], Immutable.Map({ datasetId: dataset.get('id') }))
+        spec.setIn(['source', 'datasetId'], dataset.get('id'))
     );
   }
 
