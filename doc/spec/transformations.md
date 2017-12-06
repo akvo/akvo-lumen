@@ -263,15 +263,6 @@ Examples:
 
 ### core/reverse-geocode
 
-This transformation relies on a "world" table being available in all tenant databases. The following steps will create this table
-
-* Download and unzip the file `g2015_2014_2.zip` from https://console.cloud.google.com/storage/browser/shapefiles?project=akvo-lumen
-* Run the command
-```
-shp2pgsql -I -D -s 4326 -W LATIN1 g2015_2014_2.shp world | psql <tenant-connection-string>
-```
-* The tenant connection string can be found in the elephantsql dashboard. Replace the default database name with the database name of the tenant.
-
 * args
   * target.datasetId (string): The dataset being reverse geocoded
   * target.geopointColumn (string): The geopoint column to use for reverse geocoding
@@ -283,8 +274,8 @@ shp2pgsql -I -D -s 4326 -W LATIN1 g2015_2014_2.shp world | psql <tenant-connecti
 ```
 {"op": "core/reverse-geocode"
  "args": {"target": {"datasetId" "fid-dis-gid"
-                     "title": "Adminstrative level 2"},
-          // null source means "world" table
+                     "geopointColumn" "a3"
+                     "title": "Locations"},
           "source": {"datasetId" "abc-sda-dgs",
                      "geoshapeColumn": "d2",
                      "mergeColumn": "c4"}}}
