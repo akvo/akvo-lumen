@@ -21,13 +21,11 @@ class ReverseGeocodeTransformation extends Component {
           geopointColumn: null,
           title: '',
         },
-        // null means table "world" table and adm2 level
-        source: null,
-        // {
-        //   datasetId: null,
-        //   geopointColumn: null,
-        //   mergeColumn: null, // Column name containing the "text"
-        // }
+        source: {
+          datasetId: null,
+          geopointColumn: null,
+          mergeColumn: null,
+        },
       }),
     };
   }
