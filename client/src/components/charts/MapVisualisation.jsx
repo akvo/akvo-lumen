@@ -82,7 +82,7 @@ const LegendEntry = ({ layer, singleMetadata }) => (
     }
     {Boolean(singleMetadata.shapeColorMapping) &&
       <div className="container">
-        <h4>{`${singleMetadata.shapeColorMappingTitle} (${layer.aggregationMethod})`}</h4>
+        <h4>{singleMetadata.shapeColorMappingTitle}</h4>
         <div className="contents">
           <div className="gradientContainer">
             <div
@@ -141,38 +141,50 @@ Legend.propTypes = {
   position: PropTypes.string,
 };
 
-const PopupContent = ({ data, layerDataset, onImageLoad }) => (
-  <ul className="PopupContent">
-    { Object.keys(data).sort().map(key =>
-      <li
-        key={key}
-      >
-        <h4>{getColumnTitle(layerDataset, key)}</h4>
-        <span>
-          {isImage(data[key]) ?
-            <a
-              href={data[key]}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <div className="imageContainer">
-                <img
-                  src={data[key]}
-                  role="presentation"
-                  onLoad={onImageLoad}
-                />
-              </div>
-            </a>
-                :
-            <span>
-              {data[key]}
-            </span>
-          }
-        </span>
-      </li>
-      )}
-  </ul>
-);
+const PopupContent = ({ data, layerDataset, onImageLoad, layerMetadata }) => {
+  const getTitle = (key) => {
+    const isMeta = key.substring(0, 1) === '_'; // We set meta columns to start with _ on backend
+
+    if (isMeta) {
+      const layerIndex = data['_layer_index'];
+      return layerMetadata[layerIndex].shapeColorMappingTitle;
+    }
+    return getColumnTitle(layerDataset, key);
+  }
+
+  return (
+    <ul className="PopupContent">
+      { Object.keys(data).filter(key => key !== '_layer_index').sort().map(key =>
+        <li
+          key={key}
+        >
+          <h4>{getTitle(key)}</h4>
+          <span>
+            {isImage(data[key]) ?
+              <a
+                href={data[key]}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <div className="imageContainer">
+                  <img
+                    src={data[key]}
+                    role="presentation"
+                    onLoad={onImageLoad}
+                  />
+                </div>
+              </a>
+                  :
+              <span>
+                {data[key] === null ? 'No data' : data[key]}
+              </span>
+            }
+          </span>
+        </li>
+        )}
+    </ul>
+  )
+};
 
 PopupContent.propTypes = {
   data: PropTypes.object.isRequired,
@@ -193,7 +205,7 @@ export default class MapVisualisation extends Component {
   componentWillReceiveProps(nextProps) {
     this.renderLeafletMap(nextProps);
   }
-  renderLeafletLayer(layer, id, layerGroupId, datasets, baseURL, map) {
+  renderLeafletLayer(layer, id, layerGroupId, datasets, layerMetadata, baseURL, map) {
     if (!this[`storedSpec${id}`]) {
       // Store a copy of the layer spec to compare to future changes so we know when to re-render
       this[`storedSpec${id}`] = cloneDeep(layer);
@@ -203,7 +215,8 @@ export default class MapVisualisation extends Component {
     const oldSpec = this[`storedSpec${id}`] || {};
     const filtersChanged = !isEqual(newSpec.filters, oldSpec.filters);
     const popup = newSpec.popup;
-    const havePopupData = popup && popup.length > 0;
+    const haveAggregation = layer.aggregationGeomColumn;
+    const havePopupData = Boolean(popup && popup.length > 0) || haveAggregation; // Always show aggregated value as popup when there's an aggregation
     const haveUtfGrid = Boolean(this[`utfGrid${id}`]);
     const needToRemovePopup = this[`utfGrid${id}`] && !havePopupData;
     const popupChanged = (!this[`popup${id}`] || !isEqual(popup, this[`popup${id}`]));
@@ -253,6 +266,7 @@ export default class MapVisualisation extends Component {
             <PopupContent
               data={e.data}
               layerDataset={datasets[layer.datasetId]}
+              layerMetadata={layerMetadata}
               onImageLoad={adjustLayoutForPopup}
             />,
             this.popupElement._contentNode,
@@ -376,7 +390,7 @@ export default class MapVisualisation extends Component {
 
     if (layerGroupId !== this.storedLayerGroupId) {
       visualisation.spec.layers.forEach((layer, idx) => {
-        this.renderLeafletLayer(layer, idx, layerGroupId, datasets, baseURL, map);
+        this.renderLeafletLayer(layer, idx, layerGroupId, datasets, metadata.layerMetadata, baseURL, map);
       });
     }
     this.storedLayerGroupId = layerGroupId;

@@ -138,17 +138,22 @@
                          where-clause)
    "shapeColorMapping" (shape-color-mapping layer)
    "availableColors" gradient-palette
-   "shapeColorMappingTitle" (get
-                              (first
-                                (filter
-                                  (fn [object] (if (= (get object "columnName") (get layer "aggregationColumn")) true false))
-                                  (get
-                                    (first (jdbc/query tenant-conn (format "SELECT columns FROM dataset_version WHERE dataset_id='%s'" (get layer "aggregationDataset"))))
-                                    :columns
+   "shapeColorMappingTitle" (str
+                              (get
+                                (first
+                                  (filter
+                                    (fn [object] (if (= (get object "columnName") (get layer "aggregationColumn")) true false))
+                                    (get
+                                      (first (jdbc/query tenant-conn (format "SELECT columns FROM dataset_version WHERE dataset_id='%s'" (get layer "aggregationDataset"))))
+                                      :columns
+                                    )
                                   )
                                 )
+                                "title"
                               )
-                              "title"
+                              " ("
+                              (get layer "aggregationMethod")
+                              ")"
                             )
   }
 )

@@ -63,7 +63,7 @@
               line-color: rgba(0,0,0,0.3);
            }
            #s::labels {
-            text-name: [aggregation];
+            text-name: [_aggregation];
             text-face-name: 'DejaVu Sans Book';
             text-size: 10;
             text-fill: #000;
@@ -112,7 +112,7 @@
   )
 )
 
-(defn shape-aggregation-sql [columns table-name geom-column popup-columns point-color-column where-clause current-layer tenant-conn]
+(defn shape-aggregation-sql [columns table-name geom-column popup-columns point-color-column where-clause current-layer layer-index tenant-conn]
   (let [
     {:keys [table-name columns]} (dataset-by-id tenant-conn {:id (get current-layer "aggregationDataset")})
     point-table-name table-name
@@ -146,7 +146,8 @@
             select
               %s
               %s,
-              aggregation,
+              aggregation as _aggregation,
+              %s as _layer_index,
               CASE WHEN aggregation IS NULL THEN
                   'grey'
                 ELSE
@@ -180,6 +181,7 @@
             (shape-aggregagation-popup-sql (get current-layer "popup") shape-table-name "," "")
             (shape-aggregagation-popup-sql (get current-layer "popup") "temp_table" "" ",")
             (get current-layer "geom")
+            layer-index
             hue
             )))
 
@@ -213,16 +215,24 @@
               )
   )))
 
-(defn get-sql [columns table-name geom-column popup-columns point-color-column where-clause layer tenant-conn]
+(defn get-sql [columns table-name geom-column popup-columns point-color-column where-clause layer layer-index tenant-conn]
   (cond
     (and (get layer "aggregationDataset")(get layer "aggregationColumn")(get layer "aggregationGeomColumn"))
-    (shape-aggregation-sql columns table-name geom-column popup-columns point-color-column where-clause layer tenant-conn)
+    (shape-aggregation-sql columns table-name geom-column popup-columns point-color-column where-clause layer layer-index tenant-conn)
 
     (= (get layer "layerType") "geo-shape")
     (point-sql columns table-name geom-column popup-columns point-color-column where-clause layer tenant-conn)
 
     :else
     (point-sql columns table-name geom-column popup-columns point-color-column where-clause layer tenant-conn)
+  )
+)
+
+(defn get-interactivity [layer popup-columns]
+  (if
+    (and (get layer "aggregationDataset")(get layer "aggregationColumn")(get layer "aggregationGeomColumn"))
+    (into ["_layer_index" "_aggregation"] popup-columns)
+    popup-columns
   )
 )
 
@@ -245,8 +255,8 @@
                     "cartocss" (trim-css (cartocss current-layer idx metadata-array))
                     "cartocss_version" "2.0.0"
                     "geom_column" (or (get current-layer "geom") "latlong")
-                    "interactivity" popup-columns
-                    "sql" (get-sql columns table-name geom-column popup-columns point-color-column where-clause current-layer conn)
+                    "interactivity" (get-interactivity current-layer popup-columns)
+                    "sql" (get-sql columns table-name geom-column popup-columns point-color-column where-clause current-layer idx conn)
                     "srid" "4326"
                   }})) layers))
 
