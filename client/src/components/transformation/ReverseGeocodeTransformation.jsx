@@ -19,7 +19,7 @@ class ReverseGeocodeTransformation extends Component {
       spec: Immutable.fromJS({
         target: {
           geopointColumn: null,
-          title: 'Administrative level 2',
+          title: '',
         },
         // null means table "world" table and adm2 level
         source: null,
@@ -65,6 +65,7 @@ class ReverseGeocodeTransformation extends Component {
 
   isValidSpec() {
     const { args: { target, source } } = this.getSpec();
+    console.log("@isValidSpec");
 
     const validTarget = target.geopointColumn != null && target.title != null;
     const validSource = source == null ? false :
