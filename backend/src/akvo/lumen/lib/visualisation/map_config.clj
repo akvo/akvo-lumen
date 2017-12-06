@@ -104,6 +104,14 @@
   )
 )
 
+(defn shape-aggregagation-popup-sql [popup table-name prefix postfix]
+  (if
+    (= (count popup) 0)
+    ""
+    (str prefix (clojure.string/join "," (map (fn [popupObj] (str table-name "." (get popupObj "column"))) popup)) postfix)
+  )
+)
+
 (defn shape-aggregation-sql [columns table-name geom-column popup-columns point-color-column where-clause current-layer tenant-conn]
   (let [
     {:keys [table-name columns]} (dataset-by-id tenant-conn {:id (get current-layer "aggregationDataset")})
@@ -128,13 +136,15 @@
 
     (format "with temp_table as
               (select
+                  %s
                   %s.%s,
                   %s(pointTable.%s::decimal) AS aggregation
                 from %s
                 left join (select * from %s)pointTable on
                 st_contains(%s.%s, pointTable.%s)
-                GROUP BY %s.%s)
+                GROUP BY %s.%s %s)
             select
+              %s
               %s,
               aggregation,
               CASE WHEN aggregation IS NULL THEN
@@ -154,6 +164,8 @@
             from
               temp_table;
             "
+
+            (shape-aggregagation-popup-sql (get current-layer "popup") shape-table-name "" ",")
             shape-table-name
             (get current-layer "geom")
             aggregation-method
@@ -165,6 +177,8 @@
             (get current-layer "aggregationGeomColumn")
             shape-table-name
             (get current-layer "geom")
+            (shape-aggregagation-popup-sql (get current-layer "popup") shape-table-name "," "")
+            (shape-aggregagation-popup-sql (get current-layer "popup") "temp_table" "" ",")
             (get current-layer "geom")
             hue
             )))
