@@ -36,7 +36,9 @@ function renderSuccessfulShare(data) {
           datasets={immutableDatasets}
         />
       }
-      <LumenBranding />
+      <LumenBranding
+        size={data.dashboards ? 'large' : 'small'}
+      />
     </div>,
     rootElement
   );
