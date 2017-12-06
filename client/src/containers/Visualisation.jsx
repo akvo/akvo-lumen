@@ -64,8 +64,8 @@ class Visualisation extends Component {
       } else {
         const datasetsRequired = [];
         if (visualisation.visualisationType === 'map') {
-          if (visualisation.layers) {
-            visualisation.layers.forEach((layer) => {
+          if (visualisation.spec && visualisation.spec.layers) {
+            visualisation.spec.layers.forEach((layer) => {
               if (layer.datasetId) {
                 datasetsRequired.push(layer.datasetId);
               }
