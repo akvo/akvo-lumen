@@ -356,7 +356,7 @@ const GeopointThemeTab = (props) => {
         onChange={() => null}
         buttonSpacing="2rem"
       />
-      {pointColorMapping &&
+      {Boolean(pointColorMapping && pointColorMapping.length) &&
         <div className="inputGroup">
           <label
             htmlFor="colors"

@@ -85,18 +85,18 @@ const LegendEntry = ({ singleMetadata }) => (
         <h4>{singleMetadata.shapeColorMappingTitle}</h4>
         <div className="contents">
           <div className="gradientContainer">
-            <div
-              className="gradientDisplay"
-              style={{
-                background: `linear-gradient(90deg,${singleMetadata.shapeColorMapping.map(o => o.color).join(',')})`,
-              }}
-            />
             <p className="gradientLabel min">
               Min
             </p>
             <p className="gradientLabel max">
               Max
             </p>
+            <div
+              className="gradientDisplay"
+              style={{
+                background: `linear-gradient(90deg,${singleMetadata.shapeColorMapping.map(o => o.color).join(',')})`,
+              }}
+            />
           </div>
         </div>
       </div>
