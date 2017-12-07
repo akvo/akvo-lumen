@@ -162,6 +162,9 @@ class Visualisation extends Component {
   }
 
   loadDataset(datasetId) {
+    if (!datasetId) {
+      return;
+    }
     if (!this.props.library.datasets[datasetId]
       || !this.props.library.datasets[datasetId].get('columns')) {
       this.props.dispatch(fetchDataset(datasetId));

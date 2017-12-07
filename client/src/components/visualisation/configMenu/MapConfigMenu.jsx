@@ -79,7 +79,11 @@ export default class MapConfigMenu extends Component {
     } else if (Object.keys(value).indexOf('aggregationDataset') > -1) {
       const { aggregationDataset } = value;
 
-      this.props.loadDataset(aggregationDataset);
+      if (aggregationDataset) {
+        // Can be null when user is *removing* the aggregation dataset
+        this.props.loadDataset(aggregationDataset);
+      }
+
     }
 
     this.props.onChangeSpec({ layers });
