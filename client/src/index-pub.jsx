@@ -31,6 +31,7 @@ function renderSuccessfulShare(data) {
           datasets={immutableDatasets}
         /> : <AsyncVisualisationViewer
           visualisation={data.visualisations[data.visualisationId]}
+          metadata={data.metadata ? data.metadata : null}
           datasets={immutableDatasets}
         />
       }

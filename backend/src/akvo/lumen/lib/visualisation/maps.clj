@@ -60,10 +60,9 @@
            :else false)))
 
 (defn conform-create-args [layers]
-  (let [first-layer (get-in layers [0])
-        dataset-id (get-in first-layer ["datasetId"])]
+  (let [dataset-id (get (first (filter (fn[layer] (engine/valid-dataset-id? (get layer "datasetId"))) layers)) "datasetId")]
     (cond
-      (not (engine/valid-dataset-id? dataset-id))
+      (not dataset-id)
       (throw (ex-info "No valid datasetID"
                       {"reason" "No valid datasetID"}))
 
@@ -71,9 +70,9 @@
       (throw (ex-info "Location spec not valid"
                       {"reason" "Location spec not valid"}))
 
-      :else [dataset-id (get-in layers [0])])))
+      :else [dataset-id])))
 
-(defn do-create [tenant-conn windshaft-url dataset-id layer layers]
+(defn do-create [tenant-conn windshaft-url dataset-id layers]
   (let [{:keys [table-name columns]} (dataset-by-id tenant-conn {:id dataset-id})
         metadata-array (map (fn [current-layer]
           (let [  current-dataset-id (get current-layer "datasetId")
@@ -93,8 +92,8 @@
 (defn create
   [tenant-conn windshaft-url layers]
   (try
-    (let [[dataset-id layer] (conform-create-args layers)]
-      (do-create tenant-conn windshaft-url dataset-id layer layers))
+    (let [[dataset-id] (conform-create-args layers)]
+      (do-create tenant-conn windshaft-url dataset-id layers))
     (catch Exception e
       (println e)
       (lib/bad-request (ex-data e)))))
