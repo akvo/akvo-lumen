@@ -64,26 +64,29 @@
           (get layer "shapeLabelColumn"))))
 )
 
-(defn shape-aggregation-cartocss [layer-index]
-  (format "#s {
+(defn shape-aggregation-cartocss [layer-index layer]
+  (cond-> (format "#s {
               polygon-opacity: 0.8;
               polygon-fill: [shapefill];
               line-width: 0.5;
               line-color: rgba(0,0,0,0.3);
            }
-           #s::labels {
-            text-name: [_aggregation];
+           "
+          (layer-point-color layer-index))
+          (get layer "shapeLabelColumn")
+          (str (format "#s::labels {
+            text-name: [%s];
             text-face-name: 'DejaVu Sans Book';
             text-size: 10;
             text-fill: #000;
-           }
-           "
-          (layer-point-color layer-index)))
+          }"
+          (get layer "shapeLabelColumn"))))
+)
 
 (defn cartocss [layer layer-index metadata-array]
   (cond
     (and (get layer "aggregationDataset")(get layer "aggregationColumn")(get layer "aggregationGeomColumn"))
-    (shape-aggregation-cartocss layer-index)
+    (shape-aggregation-cartocss layer-index layer)
 
     (= (get layer "layerType") "geo-shape")
     (shape-cartocss layer-index layer)
@@ -113,11 +116,27 @@
   )
 )
 
-(defn shape-aggregagation-popup-sql [popup table-name prefix postfix]
+(defn shape-aggregagation-extra-cols-sql [popup table-name prefix postfix]
   (if
     (= (count popup) 0)
     ""
     (str prefix (clojure.string/join "," (map (fn [popupObj] (str table-name "." (get popupObj "column"))) popup)) postfix)
+  )
+)
+
+(defn popup-and-label-cols [popup-cols label-col]
+  (cond
+    (and (boolean popup-cols) (boolean label-col))
+    (conj popup-cols {"column" label-col})
+
+    (boolean popup-cols)
+    popup-cols
+
+    (boolean label-col)
+    [{"column" label-col}]
+
+    :else
+    []
   )
 )
 
@@ -141,6 +160,7 @@
                                      c)) popup-columns) geom-column)
                 point-color-column (conj point-color-column)))
     hue (color-to-hue (clojure.string/upper-case (get current-layer "gradientColor" "#FF0000")))
+    extra-cols (popup-and-label-cols (get current-layer "popup") (get current-layer "shapeLabelColumn"))
     ]
 
     (format "with temp_table as
@@ -174,7 +194,7 @@
               temp_table;
             "
 
-            (shape-aggregagation-popup-sql (get current-layer "popup") shape-table-name "" ",")
+            (shape-aggregagation-extra-cols-sql extra-cols shape-table-name "" ",")
             shape-table-name
             (get current-layer "geom")
             aggregation-method
@@ -186,8 +206,8 @@
             (get current-layer "aggregationGeomColumn")
             shape-table-name
             (get current-layer "geom")
-            (shape-aggregagation-popup-sql (get current-layer "popup") shape-table-name "," "")
-            (shape-aggregagation-popup-sql (get current-layer "popup") "temp_table" "" ",")
+            (shape-aggregagation-extra-cols-sql extra-cols shape-table-name "," "")
+            (shape-aggregagation-extra-cols-sql extra-cols "temp_table" "" ",")
             (get current-layer "geom")
             hue
             )))
