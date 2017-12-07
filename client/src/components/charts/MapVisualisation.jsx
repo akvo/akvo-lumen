@@ -155,20 +155,19 @@ Legend.propTypes = {
   position: PropTypes.string,
 };
 
-const PopupContent = ({ data, layerDataset, onImageLoad, layerMetadata }) => {
+const PopupContent = ({ data, singleMetadata, onImageLoad, layerDataset }) => {
   const getTitle = (key) => {
     const isMeta = key.substring(0, 1) === '_'; // We set meta columns to start with _ on backend
 
     if (isMeta) {
-      const layerIndex = data._layer_index;
-      return layerMetadata[layerIndex].shapeColorMappingTitle;
+      return singleMetadata.shapeColorMappingTitle;
     }
     return getColumnTitle(layerDataset, key);
   };
 
   return (
     <ul className="PopupContent">
-      { Object.keys(data).filter(key => key !== '_layer_index').sort().map(key =>
+      { Object.keys(data).sort().map(key =>
         <li
           key={key}
         >
@@ -204,7 +203,7 @@ PopupContent.propTypes = {
   data: PropTypes.object.isRequired,
   layerDataset: PropTypes.object.isRequired,
   onImageLoad: PropTypes.func.isRequired,
-  layerMetadata: PropTypes.array,
+  singleMetadata: PropTypes.object,
 };
 
 export default class MapVisualisation extends Component {
@@ -281,7 +280,7 @@ export default class MapVisualisation extends Component {
             <PopupContent
               data={e.data}
               layerDataset={datasets[layer.datasetId]}
-              layerMetadata={layerMetadata}
+              singleMetadata={layerMetadata[id]}
               onImageLoad={adjustLayoutForPopup}
             />,
             this.popupElement._contentNode,

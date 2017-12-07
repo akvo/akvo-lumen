@@ -147,7 +147,6 @@
               %s
               %s,
               aggregation as _aggregation,
-              %s as _layer_index,
               CASE WHEN aggregation IS NULL THEN
                   'grey'
                 ELSE
@@ -181,7 +180,6 @@
             (shape-aggregagation-popup-sql (get current-layer "popup") shape-table-name "," "")
             (shape-aggregagation-popup-sql (get current-layer "popup") "temp_table" "" ",")
             (get current-layer "geom")
-            layer-index
             hue
             )))
 
@@ -231,7 +229,7 @@
 (defn get-interactivity [layer popup-columns]
   (if
     (and (get layer "aggregationDataset")(get layer "aggregationColumn")(get layer "aggregationGeomColumn"))
-    (into ["_layer_index" "_aggregation"] popup-columns)
+    (into ["_aggregation"] popup-columns)
     popup-columns
   )
 )
