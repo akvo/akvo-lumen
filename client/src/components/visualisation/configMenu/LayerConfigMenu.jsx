@@ -226,35 +226,37 @@ const GeoshapeDataTab = (props) => {
           })}
         />
       </div>
-      <div className="inputGroup">
-        <ButtonRowInput
-          options={[{
-            label: 'Average',
-            value: 'avg',
-          }, {
-            label: 'Sum',
-            value: 'sum',
-          },
-            {
-              label: 'Min',
-              value: 'min',
+      {Boolean(layer.aggregationGeomColumn) &&
+        <div className="inputGroup">
+          <ButtonRowInput
+            options={[{
+              label: 'Average',
+              value: 'avg',
+            }, {
+              label: 'Sum',
+              value: 'sum',
             },
-            {
-              label: 'Max',
-              value: 'max',
-            },
-            {
-              label: 'Count',
-              value: 'count',
-            }]}
-          selected={layer.aggregationMethod || 'avg'}
-          label="Aggregation"
-          onChange={value => onChangeMapLayer(layerIndex, {
-            aggregationMethod: value,
-          })}
-          buttonSpacing="0"
-        />
-      </div>
+              {
+                label: 'Min',
+                value: 'min',
+              },
+              {
+                label: 'Max',
+                value: 'max',
+              },
+              {
+                label: 'Count',
+                value: 'count',
+              }]}
+            selected={layer.aggregationMethod || 'avg'}
+            label="Aggregation"
+            onChange={value => onChangeMapLayer(layerIndex, {
+              aggregationMethod: value,
+            })}
+            buttonSpacing="0"
+          />
+        </div>
+      }
     </div>
   );
 };

@@ -99,7 +99,6 @@ export default class MapConfigMenu extends Component {
         // Can be null when user is *removing* the aggregation dataset
         this.props.loadDataset(aggregationDataset);
       }
-
     }
 
     this.props.onChangeSpec({ layers });
