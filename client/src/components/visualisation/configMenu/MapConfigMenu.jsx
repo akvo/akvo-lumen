@@ -9,6 +9,21 @@ import mapLayerSpecTemplate from '../../../containers/Visualisation/mapLayerSpec
 
 require('./MapConfigMenu.scss');
 
+// For making additional, automatic spec changes in response to user-initiated changes
+const applyAutomaticSpecChanges = (value) => {
+  const newValue = Object.assign({}, value);
+
+  if (Object.keys(newValue).indexOf('aggregationDataset') > -1) {
+    newValue.aggregationColumn = null;
+  }
+
+  if (Object.keys(newValue).indexOf('aggregationColumn') > -1) {
+    newValue.aggregationGeomColumn = null;
+  }
+
+  return newValue;
+};
+
 export default class MapConfigMenu extends Component {
 
   constructor() {
@@ -67,23 +82,8 @@ export default class MapConfigMenu extends Component {
     this.props.onChangeSpec({ layers: newLayers });
   }
 
-  // For making additional, automatic spec changes in response to user-initiated changes
-  handleAutomaticSpecChanges(value) {
-    const newValue = Object.assign({}, value);
-
-    if (Object.keys(newValue).indexOf('aggregationDataset') > -1) {
-      newValue.aggregationColumn = null;
-    }
-
-    if (Object.keys(newValue).indexOf('aggregationColumn') > -1) {
-      newValue.aggregationGeomColumn = null;
-    }
-
-    return newValue;
-  }
-
   handleChangeMapLayer(layerIndex, userChange) {
-    const value = this.handleAutomaticSpecChanges(userChange);
+    const value = applyAutomaticSpecChanges(userChange);
     const clonedLayer = Object.assign({}, this.props.visualisation.spec.layers[layerIndex], value);
     const layers = this.props.visualisation.spec.layers.map(item => item);
     layers[layerIndex] = clonedLayer;
