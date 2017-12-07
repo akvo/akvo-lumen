@@ -233,7 +233,13 @@ export default class MapVisualisation extends Component {
     const havePopupData = Boolean(popup && popup.length > 0) || haveAggregation;
     const haveUtfGrid = Boolean(this[`utfGrid${id}`]);
     const needToRemovePopup = this[`utfGrid${id}`] && !havePopupData;
-    const popupChanged = (!this[`popup${id}`] || !isEqual(popup, this[`popup${id}`]));
+    const aggregationChanged = Boolean(
+        newSpec.aggregationDataset !== oldSpec.aggregationDataset ||
+        newSpec.aggregationColumn !== oldSpec.aggregationColumn ||
+        newSpec.aggregationGeomColumn !== oldSpec.aggregationGeomColumn ||
+        newSpec.aggregationMethod !== oldSpec.aggregationMethod
+    );
+    const popupChanged = Boolean(!this[`popup${id}`] || !isEqual(popup, this[`popup${id}`])) || aggregationChanged;
     const needToAddOrUpdate =
       havePopupData && (popupChanged || filtersChanged);
     const windshaftAvailable = Boolean(layerGroupId);
