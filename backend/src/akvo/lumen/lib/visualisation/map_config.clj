@@ -45,15 +45,24 @@
           (marker-width point-size)
           (str/join " " (point-color-css point-color-column point-color-mapping))))
 
-(defn shape-cartocss [layer-index]
-  (format "#s {
+(defn shape-cartocss [layer-index layer]
+  (cond-> (format "#s {
               polygon-opacity: 0.8;
               polygon-fill: transparent;
               line-width: 2;
               line-color: rgba(0,0,0,0.3);
            }
            "
-          (layer-point-color layer-index)))
+          (layer-point-color layer-index))
+          (get layer "shapeLabelColumn")
+          (str (format "#s::labels {
+            text-name: [%s];
+            text-face-name: 'DejaVu Sans Book';
+            text-size: 10;
+            text-fill: #000;
+          }"
+          (get layer "shapeLabelColumn"))))
+)
 
 (defn shape-aggregation-cartocss [layer-index]
   (format "#s {
@@ -77,7 +86,7 @@
     (shape-aggregation-cartocss layer-index)
 
     (= (get layer "layerType") "geo-shape")
-    (shape-cartocss layer-index)
+    (shape-cartocss layer-index layer)
 
     :else
     (point-cartocss (get layer "pointSize") (get layer "pointColorColumn") (get (nth metadata-array layer-index) "pointColorMapping") layer-index)
@@ -202,16 +211,23 @@
             where-clause)))
 
 (defn shape-sql [columns table-name geom-column popup-columns point-color-column where-clause current-layer tenant-conn]
-  (let [{:keys [table-name columns]} (dataset-by-id tenant-conn {:id (get current-layer "datasetId")})]
-    (if (and ((boolean (get-in current-layer "aggregationDataset"))) ((boolean (get-in current-layer "aggregationColumn"))) ((boolean (get-in current-layer "aggregationGeomColumn"))) )
-
-    (shape-aggregation-sql [columns table-name geom-column popup-columns point-color-column where-clause current-layer tenant-conn])
-
-        (format "select %s from %s"
-              (get current-layer "geom")
-              table-name
-              )
-  )))
+  (let [
+    {:keys [table-name columns]} (dataset-by-id tenant-conn {:id (get current-layer "datasetId")})
+    date-column-set (reduce (fn [m c]
+                                  (if (= "date" (get c "type"))
+                                    (conj m (get c "columnName"))
+                                    m)) #{} columns)
+        cols (distinct
+              (cond-> (conj (map (fn [c]
+                                   (if (contains? date-column-set c)
+                                     (str c "::text")
+                                     c)) popup-columns) geom-column)
+                point-color-column (conj point-color-column)
+                (get current-layer "shapeLabelColumn") (conj (get current-layer "shapeLabelColumn"))))]
+    (format "select %s from %s where %s"
+            (str/join ", " cols)
+            table-name
+            where-clause)))
 
 (defn get-sql [columns table-name geom-column popup-columns point-color-column where-clause layer layer-index tenant-conn]
   (cond
@@ -219,7 +235,7 @@
     (shape-aggregation-sql columns table-name geom-column popup-columns point-color-column where-clause layer layer-index tenant-conn)
 
     (= (get layer "layerType") "geo-shape")
-    (point-sql columns table-name geom-column popup-columns point-color-column where-clause layer tenant-conn)
+    (shape-sql columns table-name geom-column popup-columns point-color-column where-clause layer tenant-conn)
 
     :else
     (point-sql columns table-name geom-column popup-columns point-color-column where-clause layer tenant-conn)

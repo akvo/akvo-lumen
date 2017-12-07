@@ -8,9 +8,12 @@ require('./SelectInput.scss');
 function SelectInput(props) {
   return (
     <div className={`SelectInput inputGroup${props.disabled ? ' disabled' : ''}`}>
-      <label htmlFor={props.name}>
-        {props.labelTextId ? <FormattedMessage id={props.labelTextId} /> : props.labelText}:
-      </label>
+      {
+        Boolean(props.labelText || props.labelTextId) &&
+        <label htmlFor={props.name}>
+          {props.labelTextId ? <FormattedMessage id={props.labelTextId} /> : props.labelText}:
+        </label>
+      }
       <SelectMenu
         name={props.name}
         disabled={props.disabled || false}

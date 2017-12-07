@@ -64,6 +64,7 @@ const getNeedNewAggregation = (newV = { spec: {} }, oldV = { spec: {} }, optiona
         newV.aggregationColumn !== oldV.aggregationColumn ||
         newV.aggregationGeomColumn !== oldV.aggregationGeomColumn ||
         newV.aggregationMethod !== oldV.aggregationMethod ||
+        newV.shapeLabelColumn !== oldV.shapeLabelColumn ||
         newV.latitude !== oldV.latitude ||
         newV.longitude !== oldV.longitude ||
         newV.geom !== oldV.geom ||

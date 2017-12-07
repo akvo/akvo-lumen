@@ -12,13 +12,18 @@ require('./MapConfigMenu.scss');
 // For making additional, automatic spec changes in response to user-initiated changes
 const applyAutomaticSpecChanges = (value) => {
   const newValue = Object.assign({}, value);
+  const valueHasKey = key => Object.keys(newValue).indexOf(key) > -1;
 
-  if (Object.keys(newValue).indexOf('aggregationDataset') > -1) {
+  if (valueHasKey('aggregationDataset')) {
     newValue.aggregationColumn = null;
   }
 
-  if (Object.keys(newValue).indexOf('aggregationColumn') > -1) {
+  if (valueHasKey('aggregationColumn')) {
     newValue.aggregationGeomColumn = null;
+  }
+
+  if (valueHasKey('showShapeLabelInput')) {
+    newValue.shapeLabelColumn = null;
   }
 
   return newValue;

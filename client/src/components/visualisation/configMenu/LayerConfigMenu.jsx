@@ -181,6 +181,28 @@ const GeoshapeDataTab = (props) => {
           })}
         />
       </div>
+      <ToggleInput
+        disabled={disabled}
+        className="inputGroup"
+        checked={Boolean(layer.showShapeLabelInput)}
+        label="Geoshape labels"
+        onChange={(val) => {
+          onChangeMapLayer(layerIndex, { showShapeLabelInput: val });
+        }}
+      />
+      {layer.showShapeLabelInput &&
+        <SelectInput
+          clearable
+          disabled={layer.datasetId === null || disabled}
+          placeholder="Select a geoshape label column"
+          choice={layer.shapeLabelColumn != null ? layer.shapeLabelColumn.toString() : null}
+          name="shapeLabelInput"
+          options={filterColumns(columnOptions, 'text')}
+          onChange={value => onChangeMapLayer(layerIndex, {
+            shapeLabelColumn: value,
+          })}
+        />
+      }
       <div className="inputGroup">
         <SelectInput
           disabled={(layer.datasetId == null) || disabled}
