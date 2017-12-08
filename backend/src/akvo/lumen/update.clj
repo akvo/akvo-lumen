@@ -69,7 +69,7 @@
                                         :type (keyword (:type %))
                                         :title (:title %)}
                                  (contains? % :key) (assoc :key (boolean (:key %))))
-                              (map keywordzie-keys imported-columns))
+                              (map keywordize-keys imported-columns))
         columns (map #(update % :title string/trim) (map keywordize-keys columns))]
     (set/subset? (set imported-columns)
                  (set columns))))
