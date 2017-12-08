@@ -369,7 +369,7 @@ export default class MapVisualisation extends Component {
 
       if (!isEqual(mergedBoundingBox, this.storedBoundingBox)) {
         this.storedBoundingBox = mergedBoundingBox;
-        map.fitBounds(mergedBoundingBox, { maxZoom: 12 });
+        map.fitBounds(mergedBoundingBox, { maxZoom: 12, minZoom: 1 });
       }
     }
 
