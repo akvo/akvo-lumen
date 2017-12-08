@@ -15,11 +15,6 @@ const L = leafletUtfGrid(leaflet);
 // We need to use leaflet private methods which have underscore dangle
 /* eslint no-underscore-dangle: "off" */
 
-const getColumnTitle = (dataset, columnName) =>
-  dataset.get('columns')
-  .find(item => item.get('columnName') === columnName)
-  .get('title');
-
 const isImage = (value) => {
   // For now, treat every link as an image, until we have something like an "image-url" type
   if (typeof value === 'string' && value.match(/^https/) !== null) {
@@ -155,14 +150,16 @@ Legend.propTypes = {
   position: PropTypes.string,
 };
 
-const PopupContent = ({ data, singleMetadata, onImageLoad, layerDataset }) => {
+const getColumnTitle = (titles, key) => titles.find(obj => obj.columnName === key).title;
+
+const PopupContent = ({ data, singleMetadata, onImageLoad }) => {
   const getTitle = (key) => {
     const isMeta = key.substring(0, 1) === '_'; // We set meta columns to start with _ on backend
 
     if (isMeta) {
       return singleMetadata.shapeColorMappingTitle;
     }
-    return getColumnTitle(layerDataset, key);
+    return getColumnTitle(singleMetadata.columnTitles, key);
   };
 
   return (
@@ -201,7 +198,6 @@ const PopupContent = ({ data, singleMetadata, onImageLoad, layerDataset }) => {
 
 PopupContent.propTypes = {
   data: PropTypes.object.isRequired,
-  layerDataset: PropTypes.object.isRequired,
   onImageLoad: PropTypes.func.isRequired,
   singleMetadata: PropTypes.object,
 };
@@ -219,7 +215,7 @@ export default class MapVisualisation extends Component {
   componentWillReceiveProps(nextProps) {
     this.renderLeafletMap(nextProps);
   }
-  renderLeafletLayer(layer, id, layerGroupId, datasets, layerMetadata, baseURL, map) {
+  renderLeafletLayer(layer, id, layerGroupId, layerMetadata, baseURL, map) {
     if (!this[`storedSpec${id}`]) {
       // Store a copy of the layer spec to compare to future changes so we know when to re-render
       this[`storedSpec${id}`] = cloneDeep(layer);
@@ -285,7 +281,6 @@ export default class MapVisualisation extends Component {
           render(
             <PopupContent
               data={e.data}
-              layerDataset={datasets[layer.datasetId]}
               singleMetadata={layerMetadata[id]}
               onImageLoad={adjustLayoutForPopup}
             />,
@@ -298,7 +293,7 @@ export default class MapVisualisation extends Component {
     }
   }
   renderLeafletMap(nextProps) {
-    const { visualisation, metadata, datasets, width, height } = nextProps;
+    const { visualisation, metadata, width, height } = nextProps;
     const { tileUrl, tileAttribution } = getBaseLayerAttributes(visualisation.spec.baseLayer);
 
     // Windshaft map
@@ -411,7 +406,7 @@ export default class MapVisualisation extends Component {
     if (layerGroupId !== this.storedLayerGroupId) {
       visualisation.spec.layers.forEach((layer, idx) => {
         this.renderLeafletLayer(
-          layer, idx, layerGroupId, datasets, metadata.layerMetadata, baseURL, map
+          layer, idx, layerGroupId, metadata.layerMetadata, baseURL, map
         );
       });
     }
@@ -487,7 +482,6 @@ export default class MapVisualisation extends Component {
 MapVisualisation.propTypes = {
   visualisation: PropTypes.object.isRequired,
   metadata: PropTypes.object,
-  datasets: PropTypes.object.isRequired,
   width: PropTypes.number,
   height: PropTypes.number,
 };

@@ -111,57 +111,56 @@
                               first :st_extent)]
       (parse-box st-extent))))
 
+(defn get-column-titles [tenant-conn selector-name selector-value]
+  (map
+    (fn [column-object] { "columnName" (get column-object "columnName") "title" (get column-object "title")})
+    (get
+      (first (jdbc/query tenant-conn (format "SELECT columns FROM dataset_version WHERE %s='%s'" selector-name selector-value)))
+      :columns
+    )
+  )
+)
+
+(defn get-column-title-for-name [collection column-name]
+  (get (first (filter (fn [object] (boolean (= (get object "columnName") column-name))) collection)) "title")
+)
+
+
 (defn point-metadata [tenant-conn table-name layer where-clause]
-  {"boundingBox" (bounds tenant-conn table-name
-                         layer
-                         where-clause)
-   "pointColorMapping" (point-color-mapping tenant-conn table-name layer where-clause)
-   "availableColors" palette
-   "pointColorMappingTitle" (get
-                              (first
-                                (filter
-                                  (fn [object] (if (= (get object "columnName") (get layer "pointColorColumn")) true false))
-                                  (get
-                                    (first (jdbc/query tenant-conn (format "SELECT columns FROM dataset_version WHERE table_name='%s'" table-name)))
-                                    :columns
-                                  )
-                                )
-                              )
-                              "title"
-                            )
-  }
+  (let [column-titles (get-column-titles tenant-conn "table_name" table-name)]
+    {"boundingBox" (bounds tenant-conn table-name
+                           layer
+                           where-clause)
+     "pointColorMapping" (point-color-mapping tenant-conn table-name layer where-clause)
+     "availableColors" palette
+     "pointColorMappingTitle" (get-column-title-for-name column-titles (get layer "pointColorColumn"))
+     "columnTitles" column-titles
+    })
 )
 
 (defn shape-aggregation-metadata [tenant-conn table-name layer where-clause]
-  {"boundingBox" (bounds tenant-conn table-name
+  (let [column-titles (get-column-titles tenant-conn "table_name" table-name)]
+    {"boundingBox" (bounds tenant-conn table-name
                          layer
                          where-clause)
    "shapeColorMapping" (shape-color-mapping layer)
    "availableColors" gradient-palette
+   "columnTitles" column-titles
    "shapeColorMappingTitle" (str
-                              (get
-                                (first
-                                  (filter
-                                    (fn [object] (if (= (get object "columnName") (get layer "aggregationColumn")) true false))
-                                    (get
-                                      (first (jdbc/query tenant-conn (format "SELECT columns FROM dataset_version WHERE dataset_id='%s'" (get layer "aggregationDataset"))))
-                                      :columns
-                                    )
-                                  )
-                                )
-                                "title"
-                              )
+                              (get-column-title-for-name (get-column-titles tenant-conn "dataset_id" (get layer "aggregationDataset")) (get layer "aggregationColumn"))
                               " ("
                               (get layer "aggregationMethod")
                               ")"
                             )
-  }
+  })
 )
 
 (defn shape-metadata [tenant-conn table-name layer where-clause]
-  {"boundingBox" (bounds tenant-conn table-name
-                         layer
-                         where-clause)}
+  (let [column-titles (get-column-titles tenant-conn "table_name" table-name)]
+    { "columnTitles" column-titles
+      "boundingBox" (bounds tenant-conn table-name
+                           layer
+                           where-clause)})
 )
 
 
