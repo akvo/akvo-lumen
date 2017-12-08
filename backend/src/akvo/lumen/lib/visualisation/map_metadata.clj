@@ -30,7 +30,7 @@
               "#0000FF"])
 
 (defn next-point-color [used-colors]
-  (some (fn [color] (if (contains? used-colors color) false color)) palette))
+  (or (some (fn [color] (if (contains? used-colors color) false color)) palette) "#000000"))
 
 (defn move-last
   "Move the first element in coll last. Returns a vector"

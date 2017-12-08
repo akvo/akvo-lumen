@@ -26,6 +26,10 @@ const applyAutomaticSpecChanges = (value) => {
     newValue.shapeLabelColumn = null;
   }
 
+  if (valueHasKey('pointColorColumn')) {
+    newValue.pointColorMapping = [];
+  }
+
   return newValue;
 };
 

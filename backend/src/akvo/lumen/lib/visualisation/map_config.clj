@@ -6,11 +6,12 @@
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
 
 (defn layer-point-color [layer-index]
-    ({0 "#2ca409"
+    (get
+     {0 "#2ca409"
       1 "#096ba4"
       2 "#7a09a4"
       3 "#a4092a"
-      4 "#fff721" } layer-index))
+      4 "#fff721" } layer-index "#000000"))
 
 (defn marker-width [point-size]
   (let [point-size (if (string? point-size)
