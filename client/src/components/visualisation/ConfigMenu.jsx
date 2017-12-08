@@ -82,6 +82,8 @@ const aggregationOptions = [
   },
 ];
 
+const selectProps = { 'data-test-id': 'select-menu' };
+
 export default function ConfigMenu(props) {
   const datasetArray = getDatasetArray(props.datasets);
   const datasetOptions = getDatasetOptions(datasetArray);
@@ -172,6 +174,7 @@ export default function ConfigMenu(props) {
             <ul>
               {visualisationTypes.map((vType, index) =>
                 <li
+                  data-test-id={`button-${vType.replace(' ', '-')}`}
                   className={`clickable typeButton ${vType.replace(' ', '')}`}
                   key={index}
                   onClick={() => props.onChangeVisualisationType(vType)}
@@ -204,8 +207,14 @@ export default function ConfigMenu(props) {
                   visualisation={visualisation}
                   disabled={visualisation.datasetId === null}
                 />
-                <div className="inputGroup">
-                  <label htmlFor="xDatasetMenu"><FormattedMessage id="source_dataset" />:</label>
+                <div
+                  className="inputGroup"
+                  data-test-id="input-group"
+                >
+                  <label
+                    htmlFor="xDatasetMenu"
+                  >
+                    <FormattedMessage id="source_dataset" />:</label>
                   <SelectMenu
                     name="xDatasetMenu"
                     placeholderId="choose_dataset"
@@ -213,6 +222,7 @@ export default function ConfigMenu(props) {
                     visualisation.datasetId.toString() : null}
                     options={datasetOptions}
                     onChange={props.onChangeSourceDataset}
+                    inputProps={selectProps}
                   />
                 </div>
                 <FilterMenu
@@ -225,6 +235,7 @@ export default function ConfigMenu(props) {
                 getChartTypeEditor(visualisation.visualisationType)
               }
                 <button
+                  data-test-id="save-changes"
                   className="saveChanges clickable"
                   onClick={props.onSaveVisualisation}
                 >

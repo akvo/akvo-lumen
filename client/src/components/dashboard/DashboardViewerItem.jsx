@@ -57,6 +57,8 @@ export default class DashboardViewerItem extends Component {
   }
 
   render() {
+    const isText = this.props.item.type === 'text';
+    const isVisualisation = this.props.item.type === 'visualisation';
     const style = this.getItemStyle();
 
     return (
@@ -64,7 +66,7 @@ export default class DashboardViewerItem extends Component {
         className={`DashboardViewerItem DashboardCanvasItem ${this.props.item.type}`}
         style={style}
       >
-        {this.props.item.type === 'visualisation' &&
+        {isVisualisation &&
           <div
             className="itemContainer visualisation"
           >
@@ -76,7 +78,7 @@ export default class DashboardViewerItem extends Component {
             />
           </div>
         }
-        {this.props.item.type === 'text' &&
+        {isText &&
           <div
             className="itemContainer text"
             style={{

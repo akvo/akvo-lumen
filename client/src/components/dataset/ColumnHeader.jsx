@@ -101,6 +101,7 @@ export default class ColumnHeader extends Component {
         <span
           className="columnTitleText"
           title={column.get('title')}
+          data-test-id={column.get('title')}
         >
           {column.get('title')}
         </span>

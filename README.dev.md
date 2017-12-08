@@ -17,14 +17,14 @@ Akvo Lumen is a multi tenant system and to do enable local routing to the tenant
 the following hosts must be defined in your /etc/hosts file:
 
 ``` sh
-127.0.0.1 t1.lumen.localhost
-127.0.0.1 t2.lumen.localhost
-127.0.0.1 auth.lumen.localhost
+127.0.0.1 t1.lumen.local
+127.0.0.1 t2.lumen.local
+127.0.0.1 auth.lumen.local
 ```
 Or just
 
 
-    sudo sh -c 'echo "127.0.0.1 t1.lumen.localhost t2.lumen.localhost auth.lumen.localhost" >> /etc/hosts'
+    sudo sh -c 'echo "127.0.0.1 t1.lumen.local t2.lumen.local auth.lumen.local" >> /etc/hosts'
 
 
 ## Start development environment
@@ -46,7 +46,7 @@ To start:
 
 ## Keycloak
 
-Keycloack is available at http://auth.lumen.localhost:8080/
+Keycloack is available at http://auth.lumen.local:8080/
 
 The admin password for keycloak is "admin" / "password". There is an "akvo" realm, where two tenants (t1 & t2) and they are represesnted by the following groups:
 
@@ -74,8 +74,8 @@ All passwords are "password".
 
 The Akvo Lumen UI should be accessible at:
 
- - http://t1.lumen.localhost:3030/
- - http://t2.lumen.localhost:3030/
+ - http://t1.lumen.local:3030/
+ - http://t2.lumen.local:3030/
 
 The Docker Compose file mounts the "client" directory, so any changes in the source directory should
 be picked up automatically by the Webpack server.
@@ -92,12 +92,20 @@ docker exec -i -t akvolumen_client_1  npm test
 ## Backend
 
 The tenants api root should be accessible at
- - http://t1.lumen.localhost:3000/api
- - http://t2.lumen.localhost:3000/api
+ - http://t1.lumen.local:3000/api
+ - http://t2.lumen.local:3000/api
 
 Hitting that endpoint should print the tenants dns label and connection pool.
 
 A Clojure REPL should be available on port 47480.
+
+## Puppeteer
+
+To run the test of the puppeteer user simulator, just go to lumen main
+folder and run:
+```sh
+./ci/e2e-test.sh
+```
 
 #### Tests
 
@@ -119,7 +127,7 @@ psql --host=akvolumen_postgres_1 --port=5432 --dbname=lumen_tenant_1 --username=
 This container has a development version of the Windshaft container, with plenty of hardcoded assumptions.
 
 The Windshaft server is not exposed directly to the external world, but it is proxied by the Webpack server
-on the url http://t1.lumen.localhost:3030/maps/**. That url forwards the requests to "windshaft:4000".
+on the url http://t1.lumen.local:3030/maps/**. That url forwards the requests to "windshaft:4000".
 
 ## Legal
 Copyright © 2016 - present Akvo Foundation

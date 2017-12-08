@@ -55,6 +55,7 @@ export default class Settings extends Component {
           <dt><FormattedMessage id="dataset_name" />: </dt>
           <dd>
             <input
+              data-test-id="dataset-name"
               defaultValue={dataset.name}
               className="datasetNameInput"
               onChange={this.handleUpdate}

@@ -12,6 +12,12 @@ import { filterColumns, checkUndefined } from '../../../utilities/utils';
 
 require('./LayerConfigMenu.scss');
 
+const sourceDataset = { 'data-test-id': 'source-dataset-select' };
+
+const geopoint = { 'data-test-id': 'geopoint-select' };
+
+const colorCoding = { 'data-test-id': 'color-coding-select' };
+
 const getSelectMenuOptionsFromColumnList = columns => (columns == null ?
   [] : columns.map((column, index) => ({
     value: `${column.get('columnName')}`,
@@ -445,8 +451,12 @@ export default class LayerConfigMenu extends Component {
           <div
             className="dataTab"
           >
-            <div className="inputGroup">
-              <label htmlFor="xDatasetMenu">Source dataset:</label>
+            <div
+              className="inputGroup"
+            >
+              <label
+                htmlFor="xDatasetMenu"
+              >Source dataset:</label>
               <SelectMenu
                 disabled={disabled}
                 name="datasetMenu"
@@ -456,6 +466,8 @@ export default class LayerConfigMenu extends Component {
                 options={this.props.datasetOptions}
                 onChange={datasetId => onChangeMapLayer(this.props.layerIndex, { datasetId })}
                 buttonSpacing="0"
+                data-test-id="source-dataset"
+                inputProps={sourceDataset}
               />
             </div>
             <ButtonRowInput

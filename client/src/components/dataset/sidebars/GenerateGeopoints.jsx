@@ -115,6 +115,7 @@ export default class GenerateGeopoints extends Component {
               value={args.get('columnTitleGeo') || ''}
               type="text"
               className="titleTextInput"
+              data-test-id="columnTitle"
               onChange={evt => this.handleChangeColumnTitleGeo(evt.target.value)}
             />
           </div>

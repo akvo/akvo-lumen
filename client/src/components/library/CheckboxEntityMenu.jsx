@@ -43,6 +43,7 @@ export default class CheckboxEntityMenu extends Component {
           {collection ?
             <span>
               <button
+                data-test-id="remove-from-collection"
                 className="removeFromCollection clickable"
                 onClick={this.handleRemoveEntitiesFromCollection}
               >
@@ -52,6 +53,7 @@ export default class CheckboxEntityMenu extends Component {
             :
             <span>
               <button
+                data-test-id="dataset-add-to-collection"
                 className="addToCollection clickable"
                 onClick={() => this.setState({ menuActive: !this.state.menuActive })}
               >
@@ -78,6 +80,7 @@ export default class CheckboxEntityMenu extends Component {
           }
         </span>
         <button
+          data-test-id="delete-dataset"
           className="delete clickable notImplemented"
         >
           Delete
