@@ -81,7 +81,7 @@
                       (filter #(= "visualisation" (get % "type")))
                       (map #(get % "id"))
                       (map #(visualisation-response-data tenant-conn % config))
-                      (sort-by #(-> % (get "datasets") vals first (get :rows)))
+                      (sort-by #(-> % (get "datasets") vals first (get :rows) boolean))
                       (apply merge-with merge))]
         (assoc deps "dashboards" {id dashboard})))))
 
