@@ -98,7 +98,7 @@ export default class DashboardViewer extends Component {
   }
 
   render() {
-    const { dashboard, datasets } = this.props;
+    const { dashboard, datasets, metadata } = this.props;
     const layout = dashboard.layout;
     const sortFunc = getSortFunc(layout);
     const sortedDashboard = getArrayFromObject(dashboard.entities).sort(sortFunc);
@@ -126,6 +126,7 @@ export default class DashboardViewer extends Component {
               canvasWidth={this.state.canvasWidth}
               viewportType={this.state.viewportType}
               datasets={datasets}
+              metadata={metadata}
             />
           )}
         </div>
@@ -137,6 +138,7 @@ export default class DashboardViewer extends Component {
 DashboardViewer.propTypes = {
   visualisations: PropTypes.object,
   datasets: PropTypes.object,
+  metadata: PropTypes.object,
   dashboard: PropTypes.shape({
     entities: PropTypes.object.isRequired,
     layout: PropTypes.object.isRequired,

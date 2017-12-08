@@ -108,6 +108,7 @@ const GeopointDataTab = (props) => {
             latitude: null,
             longitude: null,
           })}
+          inputProps={geopoint}
         />
       </div>
       <div className="inputGroup">
@@ -126,6 +127,7 @@ const GeopointDataTab = (props) => {
           onChange={columnName =>
             handlePointColorColumnChange(columnName,
               columnOptions.find(option => option.value === columnName))}
+          inputProps={colorCoding}
         />
       </div>
     </div>

@@ -57,7 +57,7 @@
                (= dataset-tag ::lib/ok))
       {"datasets" {dataset-id (dissoc dataset :rows)}
        "visualisations" {(:id visualisation) (merge visualisation map-data)}
-       "metadata" map-data})))
+       "metadata" {(:id visualisation) map-data}})))
 
 (defmethod visualisation :default
   [tenant-conn visualisation config]

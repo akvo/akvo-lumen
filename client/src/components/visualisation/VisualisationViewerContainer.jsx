@@ -35,7 +35,7 @@ export default class VisualisationViewerContainer extends Component {
   }
 
   render() {
-    const { datasets, visualisation } = this.props;
+    const { datasets, visualisation, metadata } = this.props;
     return (
       <div className="VisualisationViewerContainer">
         <div
@@ -43,6 +43,7 @@ export default class VisualisationViewerContainer extends Component {
           ref={(ref) => { this.sizeNode = ref; }}
         >
           <AsyncVisualisationViewer
+            metadata={metadata}
             datasets={datasets}
             visualisation={visualisation}
             height={this.state.clientHeight}
@@ -57,4 +58,5 @@ export default class VisualisationViewerContainer extends Component {
 VisualisationViewerContainer.propTypes = {
   datasets: PropTypes.object.isRequired,
   visualisation: PropTypes.object.isRequired,
+  metadata: PropTypes.object,
 };
