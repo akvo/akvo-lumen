@@ -7,6 +7,8 @@
             [akvo.lumen.util :as util]
             [clojure.java.jdbc :as jdbc]
             [clojure.set :as set]
+            [clojure.string :as string]
+            [clojure.walk :refer [keywordize-keys]]
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/job-execution.sql")
@@ -63,12 +65,12 @@
         columns))))
 
 (defn compatible-columns? [imported-columns columns]
-  (let [imported-columns (map (fn [column]
-                                (cond-> {:id (keyword (get column "columnName"))
-                                         :type (keyword (get column "type"))
-                                         :title (get column "title")}
-                                  (contains? column "key") (assoc :key (boolean (get column "key")))))
-                              imported-columns)]
+  (let [imported-columns (map #(cond-> {:id (keyword (:columnName %))
+                                        :type (keyword (:type %))
+                                        :title (:title %)}
+                                 (contains? % :key) (assoc :key (boolean (:key %))))
+                              (map keywordzie-keys imported-columns))
+        columns (map #(update % :title string/trim) (map keywordize-keys columns))]
     (set/subset? (set imported-columns)
                  (set columns))))
 
