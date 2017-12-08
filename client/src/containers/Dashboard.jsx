@@ -189,7 +189,18 @@ class Dashboard extends Component {
                     change[id] = json;
                     const aggregatedDatasets =
                       Object.assign({}, this.state.aggregatedDatasets, change);
-                    this.setState({ aggregatedDatasets });
+
+                    const metadataChange = {};
+                    metadataChange[id] = json;
+
+                    const metadata =
+                      Object.assign(
+                        {},
+                        this.state.metadata,
+                        metadataChange
+                      );
+
+                    this.setState({ aggregatedDatasets, metadata });
                   });
               }
             });
@@ -399,6 +410,7 @@ class Dashboard extends Component {
           dashboard={dashboard}
           datasets={this.props.library.datasets}
           visualisations={this.addDataToVisualisations(this.props.library.visualisations)}
+          metadata={this.state.metadata}
           onAddVisualisation={this.onAddVisualisation}
           onSave={this.onSave}
           onUpdateLayout={this.updateLayout}

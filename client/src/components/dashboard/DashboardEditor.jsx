@@ -272,6 +272,7 @@ export default class DashboardEditor extends Component {
                   <DashboardCanvasItem
                     item={this.getItemFromLibrary(item)}
                     datasets={this.props.datasets}
+                    metadata={this.props.metadata}
                     canvasLayout={dashboard.layout}
                     canvasWidth={canvasWidth}
                     onDeleteClick={this.handleEntityToggle}
@@ -296,6 +297,7 @@ DashboardEditor.propTypes = {
     layout: PropTypes.array.isRequired,
     title: PropTypes.string.isRequired,
   }).isRequired,
+  metadata: PropTypes.object,
   onUpdateLayout: PropTypes.func.isRequired,
   onUpdateEntities: PropTypes.func.isRequired,
   onUpdateName: PropTypes.func.isRequired,
