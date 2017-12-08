@@ -73,6 +73,12 @@ class WrappedCustomDatasetOptions extends Component {
               onChange={column => this.handleSelectMergeColumn(column)}
               value={spec.getIn(['source', 'mergeColumn'])}
             />
+            <h1>New column title</h1>
+            <input
+              type="text"
+              onChange={evt => onChangeSpec(spec.setIn(['target', 'title'], evt.target.value))}
+              value={spec.getIn(['target', 'title'])}
+            />
           </div>
         }
       </div>

@@ -15,12 +15,6 @@ export default function TargetReverseGeocodeOptions({ spec, onChangeSpec, datase
         onChange={column => onChangeSpec(spec.setIn(['target', 'geopointColumn'], column))}
         value={spec.getIn(['target', 'geopointColumn'])}
       />
-      <h1>New column title</h1>
-      <input
-        type="text"
-        onChange={evt => onChangeSpec(spec.setIn(['target', 'title'], evt.target.value))}
-        value={spec.getIn(['target', 'title'])}
-      />
     </div>
   );
 }
