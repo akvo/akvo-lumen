@@ -114,7 +114,7 @@ LegendEntry.propTypes = {
   layer: PropTypes.object,
 };
 
-const Legend = ({ layers, layerMetadata, position = 'bottom' }) => {
+const Legend = ({ layers, layerMetadata }) => {
   const legendLayers = layers.map((layer, idx) => {
     const metadata = layerMetadata[idx];
     const showLayer =
@@ -129,7 +129,7 @@ const Legend = ({ layers, layerMetadata, position = 'bottom' }) => {
 
   return (
     <div
-      className={`Legend ${position}`}
+      className={'Legend'}
     >
       <div className="container">
         {
@@ -155,7 +155,6 @@ const Legend = ({ layers, layerMetadata, position = 'bottom' }) => {
 Legend.propTypes = {
   layers: PropTypes.array,
   layerMetadata: PropTypes.array,
-  position: PropTypes.string,
 };
 
 const getColumnTitle = (titles, key) => titles.find(obj => obj.columnName === key).title;
@@ -470,7 +469,6 @@ export default class MapVisualisation extends Component {
             <Legend
               layers={visualisation.spec.layers}
               layerMetadata={metadata.layerMetadata}
-              position={visualisation.spec.layers[0].legend.position}
             />
           }
           {

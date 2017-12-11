@@ -527,38 +527,14 @@ export default class LayerConfigMenu extends Component {
               disabled={disabled}
               className="inputGroup"
               checked={layer.legend.visible}
-              label="Legend"
+              label="Show legend"
               onChange={(val) => {
                 const legend = Object.assign({}, layer.legend);
                 legend.visible = val;
                 this.props.onChangeMapLayer(layerIndex, { legend });
               }}
             />
-            <hr />
-            <ButtonRowInput
-              options={['top', 'right', 'bottom', 'left'].map(item => ({
-                label: <FormattedMessage id={item} />,
-                value: item,
-              }))}
-              label="Position"
-              disabled={disabled}
-              selected={layer.legend.position}
-              onChange={(option) => {
-                const legend = Object.assign({}, layer.legend);
-                legend.position = option;
-                this.props.onChangeMapLayer(layerIndex, { legend });
-              }}
-            />
-            <hr
-              className="notImplemented"
-            />
-            <ToggleInput
-              className="inputGroup notImplemented"
-              disabled
-              checked={false}
-              label="Counters"
-              onChange={() => null}
-            />
+
           </div>
         );
         break;

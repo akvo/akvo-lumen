@@ -16,7 +16,6 @@ const mapLayerSpec = {
   legend: {
     title: null,
     visible: true,
-    position: 'bottom',
   },
 };
 
