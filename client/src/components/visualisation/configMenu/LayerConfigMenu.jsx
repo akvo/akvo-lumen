@@ -318,28 +318,6 @@ const GeopointThemeTab = (props) => {
     <div
       className="themeTab"
     >
-      <h3>Marker</h3>
-      <ButtonRowInput
-        options={['circle', 'square', 'triangle'].map(item => ({
-          label: <FormattedMessage id={item} />,
-          value: item,
-        }))}
-        disabled
-        selected="circle"
-        label="Shape"
-        onChange={() => null}
-      />
-      <ButtonRowInput
-        options={['fill', 'outline'].map(item => ({
-          label: <FormattedMessage id={item} />,
-          value: item,
-        }))}
-        disabled
-        selected="fill"
-        label="Style"
-        onChange={() => null}
-        buttonSpacing="2rem"
-      />
       <ButtonRowInput
         options={['1', '2', '3', '4', '5'].map(item => ({
           label: item,
@@ -347,22 +325,11 @@ const GeopointThemeTab = (props) => {
         }))}
         disabled={disabled}
         selected={layer.pointSize ? layer.pointSize.toString() : null}
-        label="Size"
+        label="Point size"
         onChange={option => onChangeMapLayer(layerIndex, { pointSize: option })}
       />
       <hr />
       <h3>Color</h3>
-      <ButtonRowInput
-        options={['solid', 'gradient'].map(item => ({
-          label: <FormattedMessage id={item} />,
-          value: item,
-        }))}
-        disabled
-        selected="solid"
-        label="Color option"
-        onChange={() => null}
-        buttonSpacing="2rem"
-      />
       {Boolean(pointColorMapping && pointColorMapping.length) &&
         <div className="inputGroup">
           <label
