@@ -46,107 +46,71 @@
     .Legend {
         z-index: 999;
         position: absolute;
-        bottom: 1rem;
-        display: flex;
-        max-width: 80%;
-        margin: 0 10%;
-        background-color: rgba(255, 255, 255, 0.8);
-        flex-direction: row;
-        flex-wrap: wrap;
+        top: 0.5rem;
+        right: 0.5rem;
+        max-height: 95%;
+        max-height: calc(100% - 2rem);
+        background-color: white;
+        overflow-y: auto;
+        width: 25%;
+        max-width: 16rem;
+        min-width: 10rem;
+        background: rgb(245,245,245);
+        border: 1px solid $lightGrey;
+
+        > .container {
+            position: relative;
+            max-width: 100%;
+        }
 
         .LegendEntry {
-            min-width: 50%;
+            margin: 0.25rem;
             display: flex;
-            flex: 1;
+            padding: 0.25rem;
+            max-width: 100%;
+            border: 1px solid $lightGrey;
+            background: white;
+            position: relative;
+
+            h4, h5 {
+                margin-bottom: 0.25em;
+            }
+        }
+
+        .LegendEntry > .container {
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            width: 100%;
             padding: 0.5rem;
-            flex-direction: column;
-            max-height: 6rem;
-            $borderColor: rgba(0,0,0,0.1);
-            &:nth-child(2) {
-                border-left: 1px solid $borderColor;
-            }
-            &:nth-child(3), &:nth-child(5) {
-                border-top: 1px solid $borderColor;
-            }
-            &:nth-child(4), &:nth-child(6){
-                border-top: 1px solid $borderColor;
-                border-left: 1px solid $borderColor;
-            }
-        }
-
-        .container {
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-        }
-
-        &.top {
-            bottom: initial;
-            top: 1rem;
-        }
-
-        &.right, &.left {
-            top: 1rem;
-            bottom: initial;
-            width: initial;
-            height: initial;
-            margin: 0;
-
-            h4 {
-                margin-bottom: 0.5rem;
-            }
-
-            .listContainer {
-                height: initial;
-                overflow-x: initial;
-                overflow-y: auto;
-
-                ul {
-                    flex-direction: column;
-
-                    li {
-                        margin-right: 0;
-                        margin-bottom: 0.5rem;
-
-                        &:last-child {
-                            margin-bottom: 0;
-                        }
-                    }
-                }
-            }
-        }
-        &.right {
-            right: 1rem;
-        }
-        &.left {
-            /* bigger margin to avoid map controls */
-            left: 1rem;
-            top: 6rem;
         }
 
         .listContainer {
-            flex: 1;
+            margin-top: 0.5rem;
             display: flex;
-            overflow-x: auto;
-            overflow-y: hidden;
+            overflow-y: auto;
+            overflow-x: hidden;
+            position: relative;
+            max-width: 100%;
 
             ul {
                 display: flex;
                 justify-content: flex-start;
-                flex-wrap: wrap;
-                align-items: center;
+                flex-direction: column;
+                align-items: flex-start;
                 flex: 1;
+                position: relative;
+                max-width: 100%;
             }
 
             li {
                 display: flex;
                 justify-content: flex-start;
                 font-size: 0.9rem;
-                margin-right: 1rem;
                 align-items: center;
-
+                margin-bottom: 0.5rem;
                 &:last-child {
-                    margin-right: 0;
+                    margin-bottom: 0;
                 }
 
                 .colorMarker {
@@ -169,9 +133,9 @@
             justify-content: center;
         }
         .gradientContainer {
-            width: 256px;
+            width: 100%;
             position: relative;
-            margin: 0;
+            margin: 0.5rem 0;
             height: 2rem;
         }
         .gradientDisplay {

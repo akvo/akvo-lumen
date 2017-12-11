@@ -49,11 +49,20 @@ const getBaseLayerAttributes = ((baseLayer) => {
   return attributes;
 });
 
-const LegendEntry = ({ singleMetadata }) => (
+// returns true if we need to set "word-break: break-all" on el to avoid x-overflow
+const wrapLabel = (str) => {
+  if (!str) {
+    return false;
+  }
+  return Boolean(str.toString().split(' ').some(word => word.length > 18));
+};
+
+const LegendEntry = ({ singleMetadata, layer }) => (
   <div className="LegendEntry">
     {Boolean(singleMetadata.pointColorMapping) &&
       <div className="container">
-        <h4>{`${singleMetadata.pointColorMappingTitle}`}</h4>
+        <h4>{layer.title}</h4>
+        <h5>{`${singleMetadata.pointColorMappingTitle}`}</h5>
         <div className="listContainer">
           <ul>
             {singleMetadata.pointColorMapping.map(item =>
@@ -66,7 +75,7 @@ const LegendEntry = ({ singleMetadata }) => (
                     backgroundColor: item.color,
                   }}
                 />
-                <p className="label">
+                <p className={`label ${wrapLabel(item.value) ? 'breakAll' : ''}`}>
                   {chart.replaceLabelIfValueEmpty(item.value)}
                 </p>
               </li>
@@ -77,7 +86,8 @@ const LegendEntry = ({ singleMetadata }) => (
     }
     {Boolean(singleMetadata.shapeColorMapping) &&
       <div className="container">
-        <h4>{singleMetadata.shapeColorMappingTitle}</h4>
+        <h4>{layer.title}</h4>
+        <h5>{singleMetadata.shapeColorMappingTitle}</h5>
         <div className="contents">
           <div className="gradientContainer">
             <p className="gradientLabel min">
@@ -101,6 +111,7 @@ const LegendEntry = ({ singleMetadata }) => (
 
 LegendEntry.propTypes = {
   singleMetadata: PropTypes.object,
+  layer: PropTypes.object,
 };
 
 const Legend = ({ layers, layerMetadata, position = 'bottom' }) => {
@@ -116,30 +127,27 @@ const Legend = ({ layers, layerMetadata, position = 'bottom' }) => {
     return showLayer ? layer : null;
   });
 
-  const numRows = Math.ceil(legendLayers.filter(layer => Boolean(layer)).length / 2);
-
   return (
     <div
-      className={`Legend ${position} rows${numRows}`}
-      style={{
-        height: `${numRows * 6}rem`,
-      }}
+      className={`Legend ${position}`}
     >
-      {
-        legendLayers.map((layer, idx) => {
-          const haveLayer = Boolean(layer);
-          if (!haveLayer) {
-            return null;
-          }
-          return (
-            <LegendEntry
-              key={idx}
-              layer={layer}
-              singleMetadata={layerMetadata[idx]}
-            />
-          );
-        })
-      }
+      <div className="container">
+        {
+          legendLayers.map((layer, idx) => {
+            const haveLayer = Boolean(layer);
+            if (!haveLayer) {
+              return null;
+            }
+            return (
+              <LegendEntry
+                key={idx}
+                layer={layer}
+                singleMetadata={layerMetadata[idx]}
+              />
+            );
+          })
+        }
+      </div>
     </div>
   );
 };
