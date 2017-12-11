@@ -115,7 +115,7 @@
   (map
     (fn [column-object] { "columnName" (get column-object "columnName") "title" (get column-object "title")})
     (get
-      (first (jdbc/query tenant-conn (format "SELECT columns FROM dataset_version WHERE %s='%s'" selector-name selector-value)))
+      (first (jdbc/query tenant-conn (format "SELECT columns, modified FROM dataset_version WHERE %s='%s' ORDER BY modified DESC LIMIT 1" selector-name selector-value)))
       :columns
     )
   )
