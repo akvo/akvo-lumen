@@ -4,7 +4,8 @@
             [clojure.set :as set]
             [clojure.string :as s]
             [hugsql.core :as hugsql])
-  (:import [java.sql Timestamp]))
+  (:import [akvo.lumen.import.common Geoshape Geopoint]
+           [java.sql Timestamp]))
 
 (hugsql/def-db-fns "akvo/lumen/transformation.sql")
 (hugsql/def-db-fns "akvo/lumen/transformation/engine.sql")
@@ -45,13 +46,26 @@
           (or aggregationColumn mergeColumn)
           aggregationDirection))
 
+#_(defn to-sql-types [row merge-columns]
+    ;; For now we only need to change date types.
+    (let [date-columns (filter #(= "date" (get % "type")) merge-columns)]
+      (reduce (fn [result-row {:strs [columnName]}]
+                (update result-row columnName #(when % (Timestamp. %))))
+              row
+              date-columns)))
+
 (defn to-sql-types [row merge-columns]
-  ;; For now we only need to change date types.
-  (let [date-columns (filter #(= "date" (get % "type")) merge-columns)]
-    (reduce (fn [result-row {:strs [columnName]}]
-              (update result-row columnName #(when % (Timestamp. %))))
+  (let [columns-requiring-cast (filter #(contains? #{"date" "geoshape" "geopoint" }
+                                                   (get % "type"))
+                                       merge-columns)]
+    (reduce (fn [result-row {:strs [columnName type]}]
+              (update result-row columnName (fn [v]
+                                              (when v (case type
+                                                        "date" (Timestamp. v)
+                                                        "geoshape" (Geoshape. v)
+                                                        "geopoint" (Geopoint. v))))))
             row
-            date-columns)))
+            columns-requiring-cast)))
 
 (defn fetch-data
   "Fetch data from the source dataset and returns a map with the shape
@@ -78,9 +92,11 @@
     (add-column conn {:table-name table-name
                       :new-column-name (get column "columnName")
                       :column-type (condp = (get column "type")
-                                     "text" "text"
+                                     "date" "timestamptz"
+                                     "geopoint" "geometry(POINT, 4326)"
+                                     "geoshape" "geometry(GEOMETRY, 4326)"
                                      "number" "double precision"
-                                     "date" "timestamptz")})))
+                                     "text" "text")})))
 
 (defn insert-merged-data
   "Insert the merged values into the target dataset"
