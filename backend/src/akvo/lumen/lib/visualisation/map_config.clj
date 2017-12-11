@@ -128,7 +128,7 @@
 (defn popup-and-label-cols [popup-cols label-col]
   (cond
     (and (boolean popup-cols) (boolean label-col))
-    (conj popup-cols {"column" label-col})
+    (distinct (conj popup-cols {"column" label-col}))
 
     (boolean popup-cols)
     popup-cols
