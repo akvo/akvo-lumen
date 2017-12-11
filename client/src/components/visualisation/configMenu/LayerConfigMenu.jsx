@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { GithubPicker } from 'react-color';
 import SelectMenu from '../../common/SelectMenu';
 import SelectInput from './SelectInput';
 import ButtonRowInput from './ButtonRowInput';
@@ -409,11 +408,11 @@ const GeoshapeThemeTab = (props) => {
       className="themeTab"
     >
       {colors &&
-        <GithubPicker
+        <ColorLabels
+          pointColorMapping={[{ value: 'Gradient color', color: gradientColor }]}
+          colorPalette={colors}
           disabled={disabled}
-          color={gradientColor}
-          colors={colors}
-          onChangeComplete={evt => onChangeMapLayer(layerIndex, { gradientColor: evt.hex })}
+          onChangeColor={(ignore, color) => onChangeMapLayer(layerIndex, { gradientColor: color })}
         />
       }
     </div>
@@ -425,7 +424,7 @@ GeoshapeThemeTab.propTypes = {
   layer: PropTypes.object.isRequired,
   layerIndex: PropTypes.number.isRequired,
   onChangeMapLayer: PropTypes.func.isRequired,
-  colors: PropTypes.arr,
+  colors: PropTypes.array,
   gradientColor: PropTypes.string,
   disabled: PropTypes.bool,
 };
