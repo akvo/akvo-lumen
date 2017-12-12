@@ -6,12 +6,11 @@
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
 
 (defn layer-point-color [layer-index]
-    (get
-     {0 "#2ca409"
-      1 "#096ba4"
-      2 "#7a09a4"
-      3 "#a4092a"
-      4 "#fff721" } layer-index "#000000"))
+  ({0 "#2ca409"
+    1 "#096ba4"
+    2 "#7a09a4"
+    3 "#a4092a"
+    4 "#fff721"} layer-index "#000000"))
 
 (defn marker-width [point-size]
   (let [point-size (if (string? point-size)
@@ -33,69 +32,92 @@
                 value)
               (pr-str color)))))
 
-(defn point-cartocss [point-size point-color-column point-color-mapping layer-index]
-  (format "#s {
-              marker-allow-overlap: true;
-              marker-fill-opacity: 0.8;
-              marker-fill: %s;
-              marker-line-color: #fff;
-              marker-width: %s;
-              %s
-           }"
-          (layer-point-color layer-index)
-          (marker-width point-size)
-          (str/join " " (point-color-css point-color-column point-color-mapping))))
+(defn point-cartocss
+  [point-size point-color-column point-color-mapping layer-index]
+  (let [s-template "
+#s {
+    marker-allow-overlap: true;
+    marker-fill-opacity: 0.8;
+    marker-fill: %s;
+    marker-line-color: #fff;
+    marker-width: %s;
+    %s
+}\n"]
+    (format s-template
+            (layer-point-color layer-index)
+            (marker-width point-size)
+            (str/join " "
+                      (point-color-css point-color-column point-color-mapping)))))
 
-(defn shape-cartocss [layer-index layer]
-  (cond-> (format "#s {
-              polygon-opacity: 0.8;
-              polygon-fill: transparent;
-              line-width: 2;
-              line-color: rgba(0,0,0,0.3);
-           }
-           "
-          (layer-point-color layer-index))
-          (get layer "shapeLabelColumn")
-          (str (format "#s::labels {
-            text-name: [%s];
-            text-face-name: 'DejaVu Sans Book';
-            text-size: 10;
-            text-fill: #000;
-          }"
-          (get layer "shapeLabelColumn"))))
-)
+(defn shape-cartocss [layer-index {:strs [shapeLabelColumn] :as layer}]
+  (let [s-template "
+#s {
+    polygon-opacity: 0.8;
+    polygon-fill: transparent;
+    line-width: 2;
+    line-color: rgba(0,0,0,0.3);
+}\n"
+        labels-template "
+#s::labels {
+    text-name: [%s];
+    text-face-name: 'DejaVu Sans Book';
+    text-size: 10;
+    text-fill: #000;
+}\n"]
+    (cond-> (format s-template (layer-point-color layer-index))
+      shapeLabelColumn (str (format labels-template shapeLabelColumn)))))
 
-(defn shape-aggregation-cartocss [layer-index layer]
-  (cond-> (format "#s {
-              polygon-opacity: 0.8;
-              polygon-fill: [shapefill];
-              line-width: 0.5;
-              line-color: rgba(0,0,0,0.3);
-           }
-           "
-          (layer-point-color layer-index))
-          (get layer "shapeLabelColumn")
-          (str (format "#s::labels {
-            text-name: [%s];
-            text-face-name: 'DejaVu Sans Book';
-            text-size: 10;
-            text-fill: #000;
-          }"
-          (get layer "shapeLabelColumn"))))
-)
+(defn shape-aggregation-cartocss [layer-index {:strs [shapeLabelColumn]}]
+  (let [s-template "
+#s {
+    polygon-opacity: 0.8;
+    polygon-fill: [shapefill];
+    line-width: 0.5;
+    line-color: rgba(0,0,0,0.3);
+}\n"
+        labels-template "
+#s::labels {
+    text-name: [%s];
+    text-face-name: 'DejaVu Sans Book';
+    text-size: 10;
+    text-fill: #000;
+}\n"]
+    (cond-> (format s-template (layer-point-color layer-index))
+      shapeLabelColumn
+      (str (format labels-template shapeLabelColumn)))))
 
-(defn cartocss [layer layer-index metadata-array]
+#_(defn cartocss [layer layer-index metadata-array]
+    (cond
+      (and (get layer "aggregationDataset")
+           (get layer "aggregationColumn")
+           (get layer "aggregationGeomColumn"))
+      (shape-aggregation-cartocss layer-index layer)
+
+      (= (get layer "layerType") "geo-shape")
+      (shape-cartocss layer-index layer)
+
+      :else
+      (point-cartocss (get layer "pointSize")
+                      (get layer "pointColorColumn")
+                      (get (nth metadata-array layer-index) "pointColorMapping")
+                      layer-index)))
+
+(defn cartocss
+  [{:strs [aggregationColumn aggregationDataset aggregationGeomColumn
+           layerType pointColorColumn pointSize] :as layer}
+   layer-index metadata-array]
   (cond
-    (and (get layer "aggregationDataset")(get layer "aggregationColumn")(get layer "aggregationGeomColumn"))
-    (shape-aggregation-cartocss layer-index layer)
+    (and aggregationColumn
+         aggregationDataset
+         aggregationGeomColumn) (shape-aggregation-cartocss layer-index layer)
 
-    (= (get layer "layerType") "geo-shape")
-    (shape-cartocss layer-index layer)
+    (= layerType "geo-shape") (shape-cartocss layer-index layer)
 
-    :else
-    (point-cartocss (get layer "pointSize") (get layer "pointColorColumn") (get (nth metadata-array layer-index) "pointColorMapping") layer-index)
-  )
-)
+    :else (point-cartocss pointSize
+                          pointColorColumn
+                          (get (nth metadata-array layer-index)
+                               "pointColorMapping")
+                          layer-index)))
 
 (defn trim-css [s]
   (-> s
@@ -103,54 +125,43 @@
       (str/replace #"\n" " ")
       (str/replace #" +" " ")))
 
-; Should convert hex string to hue for hsl color. Use string matching as proof of concept for now
+;; Should convert hex string to hue for hsl color. Use string matching as proof of concept for now
 (defn color-to-hue [s]
-  (cond
-    (= s "#FF0000")
-    "0"
-
-    (= s "#00FF00")
-    "120"
-
-    (= s "#0000FF")
-    "240"
-  )
-)
+  (case s
+    "#FF0000" "0"
+    "#00FF00" "120"
+    "#0000FF" "240"))
 
 (defn shape-aggregagation-extra-cols-sql [popup table-name prefix postfix]
-  (if
-    (= (count popup) 0)
+  (if (= (count popup) 0)
     ""
-    (str prefix (clojure.string/join "," (map (fn [popupObj] (str table-name "." (get popupObj "column"))) popup)) postfix)
-  )
-)
+    (str prefix
+         (clojure.string/join "," (map (fn [{:strs [column]}]
+                                         (str table-name "." column))
+                                       popup))
+         postfix)))
 
 (defn popup-and-label-cols [popup-cols label-col]
   (cond
-    (and (boolean popup-cols) (boolean label-col))
-    (distinct (conj popup-cols {"column" label-col}))
+    (and (boolean popup-cols)
+         (boolean label-col)) (distinct (conj popup-cols {"column" label-col}))
 
-    (boolean popup-cols)
-    popup-cols
+    (boolean popup-cols) popup-cols
 
-    (boolean label-col)
-    [{"column" label-col}]
+    (boolean label-col) [{"column" label-col}]
 
-    :else
-    []
-  )
-)
+    :else []))
 
-(defn shape-aggregation-sql [columns table-name geom-column popup-columns point-color-column where-clause current-layer layer-index tenant-conn]
-  (let [
-    {:keys [table-name columns]} (dataset-by-id tenant-conn {:id (get current-layer "aggregationDataset")})
-    point-table-name table-name
-    point-columns columns
-    {:keys [table-name columns]} (dataset-by-id tenant-conn {:id (get current-layer "datasetId")})
-    shape-table-name table-name
-    shape-columns columns
-    aggregation-method (get current-layer "aggregationMethod" "avg")
-    date-column-set (reduce (fn [m c]
+(defn shape-aggregation-sql
+  [columns table-name geom-column popup-columns point-color-column where-clause current-layer layer-index tenant-conn]
+  (let [{:keys [table-name columns]} (dataset-by-id tenant-conn {:id (get current-layer "aggregationDataset")})
+        point-table-name table-name
+        point-columns columns
+        {:keys [table-name columns]} (dataset-by-id tenant-conn {:id (get current-layer "datasetId")})
+        shape-table-name table-name
+        shape-columns columns
+        aggregation-method (get current-layer "aggregationMethod" "avg")
+        date-column-set (reduce (fn [m c]
                                   (if (= "date" (get c "type"))
                                     (conj m (get c "columnName"))
                                     m)) #{} point-columns)
@@ -160,9 +171,9 @@
                                      (str c "::text")
                                      c)) popup-columns) geom-column)
                 point-color-column (conj point-color-column)))
-    hue (color-to-hue (clojure.string/upper-case (get current-layer "gradientColor" "#FF0000")))
-    extra-cols (popup-and-label-cols (get current-layer "popup") (get current-layer "shapeLabelColumn"))
-    ]
+        hue (color-to-hue (clojure.string/upper-case (get current-layer "gradientColor" "#FF0000")))
+        extra-cols (popup-and-label-cols (get current-layer "popup") (get current-layer "shapeLabelColumn"))
+        ]
 
     (format "with temp_table as
               (select
