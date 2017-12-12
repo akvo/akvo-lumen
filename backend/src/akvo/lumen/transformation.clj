@@ -19,7 +19,8 @@
     akvo.lumen.transformation.rename-column
     akvo.lumen.transformation.delete-column
     akvo.lumen.transformation.geo
-    akvo.lumen.transformation.merge-datasets])
+    akvo.lumen.transformation.merge-datasets
+    akvo.lumen.transformation.reverse-geocode])
 
 ;; Load transformation namespaces
 (clojure.core/apply require transformation-namespaces)

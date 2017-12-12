@@ -7,9 +7,11 @@ import { ensureLibraryLoaded } from '../actions/library';
 import { fetchDataset } from '../actions/dataset';
 import { showNotification } from '../actions/notification';
 import MergeTransformation from '../components/transformation/MergeTransformation';
+import ReverseGeocodeTransformation from '../components/transformation/ReverseGeocodeTransformation';
 
 const transformationComponent = {
   merge: MergeTransformation,
+  'reverse-geocode': ReverseGeocodeTransformation,
 };
 
 class Transformation extends Component {
@@ -30,7 +32,7 @@ class Transformation extends Component {
   handleApplyTransformation(transformation) {
     const { dispatch, datasetId, router } = this.props;
     this.setState({ transforming: true });
-    dispatch(showNotification('info', 'Merging...'));
+    dispatch(showNotification('info', 'Applying transformation...'));
     api.post(`/api/transformations/${datasetId}/transform`, transformation)
       .then((response) => {
         if (response.ok) {
@@ -41,12 +43,12 @@ class Transformation extends Component {
       .then(() => dispatch(fetchDataset(datasetId)))
       .then(() => {
         this.setState({ transforming: false });
-        dispatch(showNotification('info', 'Successfully merged datasets', true));
+        dispatch(showNotification('info', 'Transformation success', true));
         router.push(`/dataset/${datasetId}`);
       })
       .catch((err) => {
         this.setState({ transforming: false });
-        dispatch(showNotification('error', `Failed to merge: ${err.message}`));
+        dispatch(showNotification('error', `Transformation failed: ${err.message}`));
       });
   }
 
@@ -54,8 +56,8 @@ class Transformation extends Component {
     const { loading, transforming } = this.state;
     if (loading) return null;
 
-    const { datasetId, datasets } = this.props;
-    const TransformationComponent = transformationComponent.merge;
+    const { datasetId, datasets, routeParams } = this.props;
+    const TransformationComponent = transformationComponent[routeParams.transformationType];
     return (
       <div className="Transformation">
         <TransformationComponent
@@ -71,6 +73,7 @@ class Transformation extends Component {
 
 Transformation.propTypes = {
   router: PropTypes.object.isRequired,
+  routeParams: PropTypes.object.isRequired,
   datasets: PropTypes.object,
   datasetId: PropTypes.string.isRequired,
   dispatch: PropTypes.func.isRequired,
