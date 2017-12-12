@@ -184,7 +184,7 @@
                     'hsl(%s, 75%%, ',
                     100 - floor(
                       CASE
-                        WHEN (select max(aggregation) from temp_table)::decimal=(select min(aggregation) from temp_table)::decimal THEN 0
+                        WHEN (select max(aggregation) from temp_table)::decimal=(select min(aggregation) from temp_table)::decimal THEN 50
                         ELSE
                           (
                             (aggregation::decimal - (select min(aggregation) from temp_table)::decimal) /
