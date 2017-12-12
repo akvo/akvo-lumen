@@ -50,7 +50,7 @@
 (defmethod visualisation "map"
   [tenant-conn visualisation {:keys [windshaft-url]}]
   (let [layers (get-in visualisation [:spec "layers"])
-        dataset-id (get (first (filter (fn[layer] (boolean (get layer "datasetId"))) layers)) "datasetId")
+        dataset-id (some #(get % "datasetId") layers)
         [map-data-tag map-data] (maps/create tenant-conn windshaft-url layers)
         [dataset-tag dataset] (dataset/fetch tenant-conn dataset-id)]
     (when (and (= map-data-tag ::lib/ok)

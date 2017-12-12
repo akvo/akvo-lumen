@@ -1,6 +1,6 @@
 (ns akvo.lumen.lib.visualisation.map-config
-  (:require [clojure.string :as str]
-            [akvo.lumen.lib.aggregation.filter :as filter]
+  (:require [akvo.lumen.lib.aggregation.filter :as filter]
+            [clojure.string :as str]
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
