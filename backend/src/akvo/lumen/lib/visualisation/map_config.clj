@@ -183,10 +183,14 @@
                   concat(
                     'hsl(%s, 75%%, ',
                     100 - floor(
-                      (
-                        (aggregation::decimal - (select min(aggregation) from temp_table)::decimal) /
-                        ((select max(aggregation) from temp_table)::decimal - (select min(aggregation) from temp_table)::decimal)
-                      ) * 50
+                      CASE
+                        WHEN (select max(aggregation) from temp_table)::decimal=(select min(aggregation) from temp_table)::decimal THEN 0
+                        ELSE
+                          (
+                            (aggregation::decimal - (select min(aggregation) from temp_table)::decimal) /
+                            ((select max(aggregation) from temp_table)::decimal - (select min(aggregation) from temp_table)::decimal)
+                          ) * 50
+                      END
                     ),
                     '%%)'
                   )
