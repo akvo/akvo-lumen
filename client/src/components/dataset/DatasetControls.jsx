@@ -70,6 +70,7 @@ class DatasetControls extends Component {
                   width: '16rem',
                 }}
                 onWindowClick={this.onEditorToggleClick}
+
               />
             }
           </span>
