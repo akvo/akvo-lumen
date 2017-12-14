@@ -83,7 +83,7 @@
           {:keys [transformations] :as dataset-version} (latest-dataset-version-by-dataset-id
                                                          conn {:dataset-id dataset-id})]
       (with-open [importer (import/dataset-importer (get data-source-spec "source") config)]
-        (let [columns (map #(update-in % [:title] string/trim)
+        (let [columns (map #(update % :title string/trim)
                            (import/columns importer))]
           (if-not (compatible-columns? imported-columns columns)
             (failed-update conn job-execution-id "Column mismatch")
