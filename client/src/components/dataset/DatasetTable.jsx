@@ -197,6 +197,11 @@ class DatasetTable extends Component {
     router.push(`${location.pathname}/transformation/merge`);
   }
 
+  handleReverseGeocode() {
+    const { location, router } = this.props;
+    router.push(`${location.pathname}/transformation/reverse-geocode`);
+  }
+
   handleDataTypeContextMenuClicked({ column, dataTypeOptions, newColumnType }) {
     this.setState({ activeDataTypeContextMenu: null });
     if (newColumnType !== column.get('type')) {
@@ -353,6 +358,8 @@ class DatasetTable extends Component {
               this.handleToggleGeoColumnSidebar();
             } else if (menuItem === 'mergeDatasets') {
               this.handleMergeDataset();
+            } else if (menuItem === 'reverseGeocode') {
+              this.handleReverseGeocode();
             } else {
               throw new Error(`Not yet implemented: ${menuItem}`);
             }

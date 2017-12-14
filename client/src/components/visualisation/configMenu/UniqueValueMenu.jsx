@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import ToggleInput from './ToggleInput';
+import ToggleInput from '../../common/ToggleInput';
 import { replaceLabelIfValueEmpty } from '../../../utilities/chart';
 
 require('./UniqueValueMenu.scss');

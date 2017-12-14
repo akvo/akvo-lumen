@@ -127,6 +127,7 @@
   "remove_leading_and_trailing_whitespace": "Retirer espace blanc avancé et en aval",
   "removed_double_space": "{title} espace double supprimé",
   "rename_column": "Renommer colonne",
+  "reverse_geocode": "Géocodage inversé",
   "right": "Droite",
   "row_column_title": "Titre de la colonne en rangée",
   "row_column": "colonne rangée",
