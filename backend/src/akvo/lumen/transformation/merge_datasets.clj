@@ -1,11 +1,12 @@
 (ns akvo.lumen.transformation.merge-datasets
   (:require [akvo.lumen.transformation.engine :as engine]
+            [akvo.lumen.import.common :as import]
             [clojure.java.jdbc :as jdbc]
             [clojure.set :as set]
             [clojure.string :as s]
             [hugsql.core :as hugsql])
-  (:import [akvo.lumen.import.common Geoshape Geopoint]
-           [java.sql Timestamp]))
+  (:import [java.sql Timestamp]
+           [org.postgis PGgeometry]))
 
 (hugsql/def-db-fns "akvo/lumen/transformation.sql")
 (hugsql/def-db-fns "akvo/lumen/transformation/engine.sql")
@@ -46,24 +47,25 @@
           (or aggregationColumn mergeColumn)
           aggregationDirection))
 
-#_(defn to-sql-types [row merge-columns]
-    ;; For now we only need to change date types.
-    (let [date-columns (filter #(= "date" (get % "type")) merge-columns)]
-      (reduce (fn [result-row {:strs [columnName]}]
-                (update result-row columnName #(when % (Timestamp. %))))
-              row
-              date-columns)))
+(defn ->pggeometry [value]
+  (doto
+    (PGgeometry/geomFromString value)
+    (.setSrid 4326)))
 
-(defn to-sql-types [row merge-columns]
-  (let [columns-requiring-cast (filter #(contains? #{"date" "geoshape" "geopoint" }
-                                                   (get % "type"))
-                                       merge-columns)]
+(defn ->timestamp [value]
+  (Timestamp. value))
+
+(defn to-sql-types
+  [row merge-columns]
+  (let [requires-cast? #(contains? #{"date" "geopoint" "geoshape"} (get % "type"))
+        columns-requiring-cast (filter requires-cast? merge-columns)]
     (reduce (fn [result-row {:strs [columnName type]}]
-              (update result-row columnName (fn [v]
-                                              (when v (case type
-                                                        "date" (Timestamp. v)
-                                                        "geoshape" (Geoshape. v)
-                                                        "geopoint" (Geopoint. v))))))
+              (update result-row columnName
+                      (fn [v]
+                        (when v (case type
+                                  "date" (->timestamp v)
+                                  "geopoint" (->pggeometry v)
+                                  "geoshape" (->pggeometry v))))))
             row
             columns-requiring-cast)))
 
