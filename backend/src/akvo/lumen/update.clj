@@ -8,7 +8,6 @@
             [clojure.java.jdbc :as jdbc]
             [clojure.set :as set]
             [clojure.string :as string]
-            [clojure.walk :refer [keywordize-keys]]
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/job-execution.sql")
@@ -65,14 +64,12 @@
         columns))))
 
 (defn compatible-columns? [imported-columns columns]
-  (let [imported-columns (map #(cond-> {:id (keyword (:columnName %))
-                                        :type (keyword (:type %))
-                                        :title (:title %)}
-                                 (contains? % :key) (assoc :key (boolean (:key %))))
-                              (->> imported-columns
-                                   (map keywordize-keys)
-                                   (map #(update % :title string/trim))))
-        columns (map keywordize-keys columns)]
+  (let [imported-columns (map (fn [column]
+                                (cond-> {:id (keyword (get column "columnName"))
+                                         :type (keyword (get column "type"))
+                                         :title (string/trim (get column "title"))}
+                                  (contains? column "key") (assoc :key (boolean (get column "key")))))
+                              imported-columns)]
     (set/subset? (set imported-columns)
                  (set columns))))
 
@@ -81,12 +78,13 @@
     (let [table-name (util/gen-table-name "ds")
           imported-table-name (util/gen-table-name "imported")
           imported-columns (vec
-                            (:columns (imported-dataset-columns-by-dataset-id conn
-                                                                              {:dataset-id dataset-id})))
+                            (:columns (imported-dataset-columns-by-dataset-id
+                                       conn {:dataset-id dataset-id})))
           {:keys [transformations] :as dataset-version} (latest-dataset-version-by-dataset-id
                                                          conn {:dataset-id dataset-id})]
       (with-open [importer (import/dataset-importer (get data-source-spec "source") config)]
-        (let [columns (import/columns importer)]
+        (let [columns (map #(update-in % [:title] string/trim)
+                           (import/columns importer))]
           (if-not (compatible-columns? imported-columns columns)
             (failed-update conn job-execution-id "Column mismatch")
             (do (import/create-dataset-table conn table-name columns)
