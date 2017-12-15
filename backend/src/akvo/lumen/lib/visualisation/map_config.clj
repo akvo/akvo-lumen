@@ -1,5 +1,7 @@
 (ns akvo.lumen.lib.visualisation.map-config
   (:require [akvo.lumen.lib.aggregation.filter :as filter]
+            [akvo.lumen.lib.share-impl :refer [random-url-safe-string]]
+            [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
             [hugsql.core :as hugsql]))
 
@@ -16,7 +18,7 @@
   (let [point-size (if (string? point-size)
                      (Long/parseLong point-size)
                      point-size)]
-    ({1 5
+    ({1 2
       2 7
       3 9
       4 10
@@ -37,9 +39,9 @@
   (let [s-template "
 #s {
     marker-allow-overlap: true;
-    marker-fill-opacity: 0.8;
+    marker-fill-opacity: 0.4;
     marker-fill: %s;
-    marker-line-color: #fff;
+    marker-line-color: rgba(255, 255, 255, 0.5);
     marker-width: %s;
     %s
 }\n"]
@@ -173,16 +175,132 @@
                 point-color-column (conj point-color-column)))
         hue (color-to-hue (clojure.string/upper-case (get current-layer "gradientColor" "#FF0000")))
         extra-cols (popup-and-label-cols (get current-layer "popup") (get current-layer "shapeLabelColumn"))
-        ]
+        materialized-view (or
+                            (get (first (jdbc/query tenant-conn (format
+                              "SELECT
+                                view_id
+                                FROM materialized_map_view
+                                WHERE
+                                  point_dataset_id='%s'
+                                AND
+                                  point_dataset_column='%s'
+                                AND
+                                  point_dataset_modified=
+                                    (SELECT modified FROM dataset_version WHERE dataset_id='%s' ORDER BY modified DESC LIMIT 1)
+                                AND
+                                  shape_dataset_id='%s'
+                                AND
+                                  shape_dataset_column='%s'
+                                AND
+                                  shape_dataset_modified=
+                                    (SELECT modified FROM dataset_version WHERE dataset_id='%s' ORDER BY modified DESC LIMIT 1)
+                              "
+                              (get current-layer "aggregationDataset")
+                              (get current-layer "aggregationGeomColumn")
+                              (get current-layer "aggregationDataset")
+                              (get current-layer "datasetId")
+                              (get current-layer "geom")
+                              (get current-layer "datasetId")
+                              ))) :view_id)
 
+
+                              (try ((jdbc/execute! tenant-conn
+                                    (format
+                                      "
+                                        DELETE FROM materialized_map_view
+                                        WHERE
+                                          point_dataset_id='%s'
+                                        AND
+                                          point_dataset_column='%s'
+                                        AND
+                                          shape_dataset_id='%s'
+                                        AND
+                                          shape_dataset_column='%s'
+                                      "
+                                      (get current-layer "aggregationDataset")
+                                      (get current-layer "aggregationGeomColumn")
+                                      (get current-layer "datasetId")
+                                      (get current-layer "geom")
+                                    )
+                                  ) (str "mv_" (rand-int 999999999))) (catch Exception e (prn "@002")))
+
+                              (str "mv_" (rand-int 999999999)))
+        ]
+    (prn materialized-view)
+    (try
+      (jdbc/query tenant-conn (format "SELECT 1 FROM %s" materialized-view))
+      (catch Exception e
+              (prn "@Creating materialized view")
+              (jdbc/execute! tenant-conn
+                (format
+                  "
+                    CREATE MATERIALIZED VIEW IF NOT EXISTS %s
+                    AS (
+                      SELECT
+                        %s.rnum AS pointRow,
+                        %s.rnum AS shapeRow
+                      FROM
+                        %s
+                      LEFT JOIN
+                        %s
+                      ON
+                        ST_CONTAINS(%s.%s, %s.%s)
+                    )
+                  "
+                  materialized-view
+                  point-table-name
+                  shape-table-name
+                  point-table-name
+                  shape-table-name
+                  shape-table-name
+                  (get current-layer "geom")
+                  point-table-name
+                  (get current-layer "aggregationGeomColumn")
+                )
+              )
+              (jdbc/execute! tenant-conn
+                (format
+                  "
+                    INSERT INTO materialized_map_view VALUES
+                    (
+                      DEFAULT,
+                      '%s',
+                      '%s',
+                      '%s',
+                      (SELECT modified FROM dataset_version WHERE dataset_id='%s' ORDER BY modified DESC LIMIT 1),
+                      '%s',
+                      '%s',
+                      (SELECT modified FROM dataset_version WHERE dataset_id='%s' ORDER BY modified DESC LIMIT 1)
+                    )
+                  "
+                  materialized-view
+                  (get current-layer "aggregationDataset")
+                  (get current-layer "aggregationGeomColumn")
+                  (get current-layer "aggregationDataset")
+                  (get current-layer "datasetId")
+                  (get current-layer "geom")
+                  (get current-layer "datasetId")
+                )
+              )
+            )
+    )
     (format "with temp_table as
               (select
                   %s
                   %s.%s,
                   %s(pointTable.%s::decimal) AS aggregation
                 from %s
-                left join (select * from %s)pointTable on
-                st_contains(%s.%s, pointTable.%s)
+                left join (
+                  SELECT
+                    *
+                  FROM
+                    %s
+                  LEFT JOIN
+                    %s
+                  ON
+                    %s.rnum=%s.pointRow
+                )pointTable on
+                %s.rnum=pointTable.shapeRow
                 GROUP BY %s.%s %s)
             select
               %s
@@ -207,7 +325,8 @@
                   )
               END as shapefill
             from
-              temp_table;
+              temp_table
+              ;
             "
 
             (shape-aggregagation-extra-cols-sql extra-cols shape-table-name "" ",")
@@ -217,9 +336,12 @@
             (get current-layer "aggregationColumn")
             shape-table-name
             point-table-name
+            materialized-view
+            point-table-name
+            materialized-view
+
             shape-table-name
-            (get current-layer "geom")
-            (get current-layer "aggregationGeomColumn")
+
             shape-table-name
             (get current-layer "geom")
             (shape-aggregagation-extra-cols-sql extra-cols shape-table-name "," "")
@@ -300,6 +422,7 @@
                       popup-columns (mapv #(get % "column")
                                          (get current-layer "popup"))
                      point-color-column (get current-layer "pointColorColumn")]
+                     (prn (get-sql columns table-name geom-column popup-columns point-color-column where-clause current-layer idx conn))
                 { "type" "mapnik"
                   "options" {
                     "cartocss" (trim-css (cartocss current-layer idx metadata-array))
@@ -314,7 +437,7 @@
   {"version" "1.6.0"
    "buffersize" {
     "png" 8
-    "grid.json" 8
+    "grid.json" 0
     "mvt" 0
    }
    "layers" (get-layers layers metadata-array table-name tenant-conn)})
