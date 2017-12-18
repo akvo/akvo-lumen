@@ -158,44 +158,60 @@
         hue (color-to-hue (clojure.string/upper-case (get current-layer "gradientColor" "#FF0000")))
         extra-cols (popup-and-label-cols (get current-layer "popup") (get current-layer "shapeLabelColumn"))]
 
-    (format "with temp_table as
-              (select
-                  %s
-                  %s.%s,
-                  %s(pointTable.%s::decimal) AS aggregation
-                from %s
-                left join (select * from %s)pointTable on
-                st_contains(%s.%s, pointTable.%s)
-                GROUP BY %s.%s %s)
-            select
+    (format "
+            SELECT
               %s
-              %s,
-              aggregation as _aggregation,
-              CASE WHEN aggregation IS NULL THEN
-                  'grey'
-                ELSE
-                  concat(
-                    'hsl(%s, 75%%, ',
-                    100 - floor(
-                      CASE
-                        WHEN (select max(aggregation) from temp_table)::decimal=(select min(aggregation) from temp_table)::decimal THEN 50
-                        ELSE
-                          (
-                            (aggregation::decimal - (select min(aggregation) from temp_table)::decimal) /
-                            ((select max(aggregation) from temp_table)::decimal - (select min(aggregation) from temp_table)::decimal)
-                          ) * 50
-                      END
-                    ),
-                    '%%)'
-                  )
-              END as shapefill
-            from
-              temp_table;
+              _aggregation,
+              shapefill,
+              %s.%s
+            FROM
+              (
+                with temp_table as
+                  (select
+                      %s
+                      %s.rnum AS shapeRowNum,
+                      %s(pointTable.%s::decimal) AS aggregation
+                    from %s
+                    left join (select * from %s)pointTable on
+                    st_contains(%s.%s, pointTable.%s)
+                    GROUP BY %s.rnum %s)
+                select
+                  %s
+                  shapeRowNum,
+                  aggregation as _aggregation,
+                  CASE WHEN aggregation IS NULL THEN
+                      'grey'
+                    ELSE
+                      concat(
+                        'hsl(%s, 75%%, ',
+                        100 - floor(
+                          CASE
+                            WHEN (select max(aggregation) from temp_table)::decimal=(select min(aggregation) from temp_table)::decimal THEN 50
+                            ELSE
+                              (
+                                (aggregation::decimal - (select min(aggregation) from temp_table)::decimal) /
+                                ((select max(aggregation) from temp_table)::decimal - (select min(aggregation) from temp_table)::decimal)
+                              ) * 50
+                          END
+                        ),
+                        '%%)'
+                      )
+                  END as shapefill
+                from
+                  temp_table
+              )row_query
+            LEFT JOIN
+              %s
+            ON
+              row_query.shapeRowNum = %s.rnum
+            ;
             "
 
-            (shape-aggregagation-extra-cols-sql extra-cols shape-table-name "" ",")
+            (shape-aggregagation-extra-cols-sql extra-cols "row_query" "" ",")
             shape-table-name
             (get current-layer "geom")
+            (shape-aggregagation-extra-cols-sql extra-cols shape-table-name "" ",")
+            shape-table-name
             aggregation-method
             (get current-layer "aggregationColumn")
             shape-table-name
@@ -204,11 +220,11 @@
             (get current-layer "geom")
             (get current-layer "aggregationGeomColumn")
             shape-table-name
-            (get current-layer "geom")
             (shape-aggregagation-extra-cols-sql extra-cols shape-table-name "," "")
             (shape-aggregagation-extra-cols-sql extra-cols "temp_table" "" ",")
-            (get current-layer "geom")
-            hue)))
+            hue
+            shape-table-name
+            shape-table-name)))
 
 (defn point-sql [tenant-conn columns table-name geom-column popup-columns
                  point-color-column where-clause {:strs [datasetId] :as layer}]
