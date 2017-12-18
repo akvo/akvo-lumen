@@ -75,13 +75,14 @@
 (defn do-create [tenant-conn windshaft-url dataset-id layers]
   (let [{:keys [table-name columns]} (dataset-by-id tenant-conn {:id dataset-id})
         metadata-array (map (fn [current-layer]
-          (let [  current-dataset-id (get current-layer "datasetId")
-                  {:keys [table-name columns]} (dataset-by-id tenant-conn {:id current-dataset-id})
-                  current-where-clause (filter/sql-str columns (get current-layer "filters"))]
-                  (map-metadata/build tenant-conn table-name current-layer current-where-clause))) layers)
+                              (let [ current-dataset-id (get current-layer "datasetId")
+                                    {:keys [table-name columns]} (dataset-by-id tenant-conn {:id current-dataset-id})
+                                    current-where-clause (filter/sql-str columns (get current-layer "filters"))]
+                                (map-metadata/build tenant-conn table-name current-layer current-where-clause)))
+                            layers)
         headers (headers tenant-conn)
         url (format "%s/layergroup" windshaft-url)
-        map-config (map-config/build table-name layers metadata-array tenant-conn)
+        map-config (map-config/build tenant-conn table-name layers metadata-array)
         layer-group-id (-> (client/post url {:body (json/encode map-config)
                                              :headers headers
                                              :content-type :json})

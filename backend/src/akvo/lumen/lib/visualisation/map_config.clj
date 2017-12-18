@@ -88,22 +88,6 @@
       shapeLabelColumn
       (str (format labels-template shapeLabelColumn)))))
 
-#_(defn cartocss [layer layer-index metadata-array]
-    (cond
-      (and (get layer "aggregationDataset")
-           (get layer "aggregationColumn")
-           (get layer "aggregationGeomColumn"))
-      (shape-aggregation-cartocss layer-index layer)
-
-      (= (get layer "layerType") "geo-shape")
-      (shape-cartocss layer-index layer)
-
-      :else
-      (point-cartocss (get layer "pointSize")
-                      (get layer "pointColorColumn")
-                      (get (nth metadata-array layer-index) "pointColorMapping")
-                      layer-index)))
-
 (defn cartocss
   [{:strs [aggregationColumn aggregationDataset aggregationGeomColumn
            layerType pointColorColumn pointSize] :as layer}
@@ -155,7 +139,7 @@
     :else []))
 
 (defn shape-aggregation-sql
-  [columns table-name geom-column popup-columns point-color-column where-clause current-layer layer-index tenant-conn]
+  [tenant-conn columns table-name geom-column popup-columns point-color-column where-clause current-layer layer-index]
   (let [{:keys [table-name columns]} (dataset-by-id tenant-conn {:id (get current-layer "aggregationDataset")})
         point-table-name table-name
         point-columns columns
@@ -176,8 +160,8 @@
         hue (color-to-hue (clojure.string/upper-case (get current-layer "gradientColor" "#FF0000")))
         extra-cols (popup-and-label-cols (get current-layer "popup") (get current-layer "shapeLabelColumn"))
         materialized-view (or
-                            (get (first (jdbc/query tenant-conn (format
-                              "SELECT
+                           (get (first (jdbc/query tenant-conn (format
+                                                                "SELECT
                                 view_id
                                 FROM materialized_map_view
                                 WHERE
@@ -195,18 +179,18 @@
                                   shape_dataset_modified=
                                     (SELECT modified FROM dataset_version WHERE dataset_id='%s' ORDER BY modified DESC LIMIT 1)
                               "
-                              (get current-layer "aggregationDataset")
-                              (get current-layer "aggregationGeomColumn")
-                              (get current-layer "aggregationDataset")
-                              (get current-layer "datasetId")
-                              (get current-layer "geom")
-                              (get current-layer "datasetId")
-                              ))) :view_id)
+                                                                (get current-layer "aggregationDataset")
+                                                                (get current-layer "aggregationGeomColumn")
+                                                                (get current-layer "aggregationDataset")
+                                                                (get current-layer "datasetId")
+                                                                (get current-layer "geom")
+                                                                (get current-layer "datasetId")
+                                                                ))) :view_id)
 
 
-                              (try ((jdbc/execute! tenant-conn
-                                    (format
-                                      "
+                           (try ((jdbc/execute! tenant-conn
+                                                (format
+                                                 "
                                         DELETE FROM materialized_map_view
                                         WHERE
                                           point_dataset_id='%s'
@@ -217,23 +201,23 @@
                                         AND
                                           shape_dataset_column='%s'
                                       "
-                                      (get current-layer "aggregationDataset")
-                                      (get current-layer "aggregationGeomColumn")
-                                      (get current-layer "datasetId")
-                                      (get current-layer "geom")
-                                    )
-                                  ) (str "mv_" (rand-int 999999999))) (catch Exception e (prn "@002")))
+                                                 (get current-layer "aggregationDataset")
+                                                 (get current-layer "aggregationGeomColumn")
+                                                 (get current-layer "datasetId")
+                                                 (get current-layer "geom")
+                                                 )
+                                                ) (str "mv_" (rand-int 999999999))) (catch Exception e (prn "@002")))
 
-                              (str "mv_" (rand-int 999999999)))
+                           (str "mv_" (rand-int 999999999)))
         ]
     (prn materialized-view)
     (try
       (jdbc/query tenant-conn (format "SELECT 1 FROM %s" materialized-view))
       (catch Exception e
-              (prn "@Creating materialized view")
-              (jdbc/execute! tenant-conn
-                (format
-                  "
+        (prn "@Creating materialized view")
+        (jdbc/execute! tenant-conn
+                       (format
+                        "
                     CREATE MATERIALIZED VIEW IF NOT EXISTS %s
                     AS (
                       SELECT
@@ -247,20 +231,20 @@
                         ST_CONTAINS(%s.%s, %s.%s)
                     )
                   "
-                  materialized-view
-                  point-table-name
-                  shape-table-name
-                  point-table-name
-                  shape-table-name
-                  shape-table-name
-                  (get current-layer "geom")
-                  point-table-name
-                  (get current-layer "aggregationGeomColumn")
-                )
-              )
-              (jdbc/execute! tenant-conn
-                (format
-                  "
+                        materialized-view
+                        point-table-name
+                        shape-table-name
+                        point-table-name
+                        shape-table-name
+                        shape-table-name
+                        (get current-layer "geom")
+                        point-table-name
+                        (get current-layer "aggregationGeomColumn")
+                        )
+                       )
+        (jdbc/execute! tenant-conn
+                       (format
+                        "
                     INSERT INTO materialized_map_view VALUES
                     (
                       DEFAULT,
@@ -273,17 +257,17 @@
                       (SELECT modified FROM dataset_version WHERE dataset_id='%s' ORDER BY modified DESC LIMIT 1)
                     )
                   "
-                  materialized-view
-                  (get current-layer "aggregationDataset")
-                  (get current-layer "aggregationGeomColumn")
-                  (get current-layer "aggregationDataset")
-                  (get current-layer "datasetId")
-                  (get current-layer "geom")
-                  (get current-layer "datasetId")
-                )
-              )
-            )
-    )
+                        materialized-view
+                        (get current-layer "aggregationDataset")
+                        (get current-layer "aggregationGeomColumn")
+                        (get current-layer "aggregationDataset")
+                        (get current-layer "datasetId")
+                        (get current-layer "geom")
+                        (get current-layer "datasetId")
+                        )
+                       )
+        )
+      )
     (format "with temp_table as
               (select
                   %s
@@ -347,97 +331,104 @@
             (shape-aggregagation-extra-cols-sql extra-cols shape-table-name "," "")
             (shape-aggregagation-extra-cols-sql extra-cols "temp_table" "" ",")
             (get current-layer "geom")
-            hue
-            )))
+            hue)))
 
-(defn point-sql [columns table-name geom-column popup-columns point-color-column where-clause current-layer tenant-conn]
-  (let [
-    {:keys [table-name columns]} (dataset-by-id tenant-conn {:id (get current-layer "datasetId")})
-    date-column-set (reduce (fn [m c]
-                                  (if (= "date" (get c "type"))
-                                    (conj m (get c "columnName"))
-                                    m)) #{} columns)
+(defn point-sql [tenant-conn columns table-name geom-column popup-columns
+                 point-color-column where-clause {:strs [datasetId] :as layer}]
+  (let [{:keys [table-name columns]} (dataset-by-id tenant-conn {:id datasetId})
+        date-column-set (reduce (fn [m {:strs [columnName type]}]
+                                  (if (= "date" type) (conj m columnName) m))
+                                #{} columns)
         cols (distinct
               (cond-> (conj (map (fn [c]
                                    (if (contains? date-column-set c)
                                      (str c "::text")
-                                     c)) popup-columns) geom-column)
+                                     c))
+                                 popup-columns)
+                            geom-column)
                 point-color-column (conj point-color-column)))]
     (format "select %s from %s where %s"
             (str/join ", " cols)
             table-name
             where-clause)))
 
-(defn shape-sql [columns table-name geom-column popup-columns point-color-column where-clause current-layer tenant-conn]
-  (let [
-    {:keys [table-name columns]} (dataset-by-id tenant-conn {:id (get current-layer "datasetId")})
-    date-column-set (reduce (fn [m c]
-                                  (if (= "date" (get c "type"))
-                                    (conj m (get c "columnName"))
-                                    m)) #{} columns)
+(defn shape-sql [tenant-conn columns table-name geom-column popup-columns point-color-column where-clause
+                 {:strs [datasetId shapeLabelColumn ] :as layer}]
+  (let [{:keys [table-name columns]} (dataset-by-id tenant-conn {:id datasetId})
+        date-column-set (reduce (fn [m {:strs [columnName type]}]
+                                  (if (= "date" type) (conj m columnName) m))
+                                #{} columns)
         cols (distinct
               (cond-> (conj (map (fn [c]
                                    (if (contains? date-column-set c)
                                      (str c "::text")
-                                     c)) popup-columns) geom-column)
+                                     c))
+                                 popup-columns)
+                            geom-column)
                 point-color-column (conj point-color-column)
-                (get current-layer "shapeLabelColumn") (conj (get current-layer "shapeLabelColumn"))))]
+                shapeLabelColumn (conj shapeLabelColumn)))]
     (format "select %s from %s where %s"
             (str/join ", " cols)
             table-name
             where-clause)))
 
-(defn get-sql [columns table-name geom-column popup-columns point-color-column where-clause layer layer-index tenant-conn]
+(defn get-sql
+  [tenant-conn columns table-name geom-column popup-columns point-color-column
+   where-clause {:strs [aggregationDataset aggregationColumn
+                        aggregationGeomColumn layerType]
+                 :as layer} layer-index]
   (cond
-    (and (get layer "aggregationDataset")(get layer "aggregationColumn")(get layer "aggregationGeomColumn"))
-    (shape-aggregation-sql columns table-name geom-column popup-columns point-color-column where-clause layer layer-index tenant-conn)
+    (and aggregationDataset aggregationColumn aggregationGeomColumn)
+    (shape-aggregation-sql tenant-conn columns table-name geom-column
+                           popup-columns point-color-column where-clause layer
+                           layer-index)
 
-    (= (get layer "layerType") "geo-shape")
-    (shape-sql columns table-name geom-column popup-columns point-color-column where-clause layer tenant-conn)
+    (= layerType "geo-shape")
+    (shape-sql tenant-conn columns table-name geom-column popup-columns
+               point-color-column where-clause layer)
 
     :else
-    (point-sql columns table-name geom-column popup-columns point-color-column where-clause layer tenant-conn)
-  )
-)
+    (point-sql tenant-conn columns table-name geom-column popup-columns
+               point-color-column where-clause layer)))
 
-(defn get-interactivity [layer popup-columns]
-  (if
-    (and (get layer "aggregationDataset")(get layer "aggregationColumn")(get layer "aggregationGeomColumn"))
+(defn get-interactivity
+  [{:strs [aggregationDataset aggregationColumn aggregationGeomColumn] :as layer}
+   popup-columns]
+  (if (and aggregationDataset aggregationColumn aggregationGeomColumn)
     (into ["_aggregation"] popup-columns)
-    popup-columns
-  )
-)
+    popup-columns))
 
 (defn get-geom-column [layer-spec]
   (if-let [geom (get layer-spec "geom")]
     geom
     (let [{:strs [latitude longitude]} layer-spec]
-      (format "ST_SetSRID(ST_MakePoint(%s, %s), 4326) AS latlong" longitude latitude))))
+      (format "ST_SetSRID(ST_MakePoint(%s, %s), 4326) AS latlong"
+              longitude latitude))))
 
-(defn get-layers [layers metadata-array table-name conn]
-  (map-indexed (fn [idx, current-layer]
-                (let [geom-column (get-geom-column current-layer)
-                      {:keys [columns]} (dataset-by-id conn {:id (get current-layer "datasetId")})
-                      where-clause (filter/sql-str columns (get current-layer "filters"))
-                      popup-columns (mapv #(get % "column")
-                                         (get current-layer "popup"))
-                     point-color-column (get current-layer "pointColorColumn")]
-                     (prn (get-sql columns table-name geom-column popup-columns point-color-column where-clause current-layer idx conn))
-                { "type" "mapnik"
-                  "options" {
-                    "cartocss" (trim-css (cartocss current-layer idx metadata-array))
-                    "cartocss_version" "2.0.0"
-                    "geom_column" (or (get current-layer "geom") "latlong")
-                    "interactivity" (get-interactivity current-layer popup-columns)
-                    "sql" (get-sql columns table-name geom-column popup-columns point-color-column where-clause current-layer idx conn)
-                    "srid" "4326"
-                  }})) layers))
+(defn get-layers [tenant-conn layers metadata-array table-name]
+  (map-indexed (fn [idx {:strs [datasetId filters geom popup pointColorColumn]
+                         :as layer}]
+                 (let [geom-column (get-geom-column layer)
+                       {:keys [columns]} (dataset-by-id tenant-conn {:id datasetId})
+                       where-clause (filter/sql-str columns filters)
+                       popup-columns (mapv #(get % "column") popup)
+                       point-color-column pointColorColumn
+                       sql (get-sql tenant-conn columns table-name geom-column
+                                    popup-columns point-color-column
+                                    where-clause layer idx)]
+                   #_(prn (get-sql columns table-name geom-column popup-columns point-color-column where-clause layer idx conn))
+                   {"type" "mapnik"
+                    "options" {"cartocss" (trim-css (cartocss layer idx metadata-array))
+                               "cartocss_version" "2.0.0"
+                               "geom_column" (or geom "latlong")
+                               "interactivity" (get-interactivity layer popup-columns)
+                               "sql" sql
+                               "srid" "4326"}}))
+               layers))
 
-(defn build [table-name layers metadata-array tenant-conn]
+(defn build [tenant-conn table-name layers metadata-array]
   {"version" "1.6.0"
-   "buffersize" {
-    "png" 8
-    "grid.json" 0
-    "mvt" 0
-   }
-   "layers" (get-layers layers metadata-array table-name tenant-conn)})
+   "buffersize" {"png" 8
+                 "grid.json" 0
+                 "mvt" 0}
+   "layers" (get-layers tenant-conn layers metadata-array table-name)})
