@@ -14,14 +14,15 @@ export default class ShareEntity extends Component {
     super();
     this.state = {
       id: '',
-      copiedToClipboard: false,
+      copiedToClipboard: null,
+      showEmbed: false,
     };
     this.fetchShareId = this.fetchShareId.bind(this);
   }
 
   componentWillReceiveProps(nextProps) {
     if (!nextProps.isOpen) {
-      this.setState({ copiedToClipboard: false });
+      this.setState({ copiedToClipboard: null, showEmbed: false });
     }
   }
 
@@ -39,19 +40,8 @@ export default class ShareEntity extends Component {
   render() {
     const { type, title, onClose, isOpen } = this.props;
     const shareUrl = `${window.location.origin}/s/${this.state.id}`;
-    const copyButton = (
-      <CopyToClipboard
-        text={shareUrl}
-        onCopy={() => this.setState({ copiedToClipboard: true })}
-      >
-        <span
-          id="shareUrlCopyButton"
-          className={`copyButton ${this.state.copiedToClipboard ? 'copied' : ''}`}
-        >
-          {this.state.copiedToClipboard ? 'Copied!' : 'Copy to clipboard'}
-        </span>
-      </CopyToClipboard>
-    );
+    const defaultHeight = type === 'visualisation' ? '500px' : '1000px';
+    const embedCode = `<iframe width="100%" height="${defaultHeight}" src="${shareUrl}" frameborder="0" allow="encrypted-media"></iframe>`;
 
     return (
       <ModalWrapper
@@ -61,7 +51,7 @@ export default class ShareEntity extends Component {
         style={{
           content: {
             width: 500,
-            height: 180,
+            height: 320,
             marginLeft: 'auto',
             marginRight: 'auto',
             borderRadius: 0,
@@ -80,26 +70,80 @@ export default class ShareEntity extends Component {
             onCloseModal={onClose}
           />
           <div className="ModalContents">
-            <label htmlFor="shareUrlCopyButton">URL for {type}: {title}</label>
-            <div
-              className="shareUrl"
-            >
-              <a
-                href={shareUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {shareUrl}
-              </a>
+            <div className="row">
+              <div className="rowContainer">
+                <label htmlFor="shareUrlCopyButton">URL for {type}: {title}</label>
+                <div
+                  className="shareUrl"
+                >
+                  <a
+                    href={shareUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {shareUrl}
+                  </a>
+                </div>
+              </div>
+              <div className="rowContainer">
+                <CopyToClipboard
+                  text={shareUrl}
+                  onCopy={() => this.setState({ copiedToClipboard: 'link' })}
+                >
+                  <button
+                    className={`copyButton ${this.state.copiedToClipboard === 'link' ? 'copied' : ''}`}
+                  >
+                    {this.state.copiedToClipboard === 'link' ? 'Copied!' : 'Copy to clipboard'}
+                  </button>
+                </CopyToClipboard>
+              </div>
             </div>
+            {this.state.showEmbed ?
+              <div className="row">
+                <div className="rowContainer">
+                  <h5>Embed code</h5>
+                  <textarea
+                    ref={(node) => { this.textAreaNode = node; }}
+                    onClick={() => {
+                      try {
+                        this.textAreaNode.setSelectionRange(0, embedCode.length);
+                      } catch (e) {
+                        // Some browsers lack support for setSelectionRange
+                      }
+                    }}
+                    cols="40"
+                    rows="5"
+                    defaultValue={embedCode}
+                  />
+                </div>
+                <div className="rowContainer">
+                  <CopyToClipboard
+                    text={embedCode}
+                    onCopy={() => this.setState({ copiedToClipboard: 'embed' })}
+                  >
+                    <button
+                      className={`copyButton ${this.state.copiedToClipboard === 'embed' ? 'copied' : ''}`}
+                    >
+                      {this.state.copiedToClipboard === 'embed' ? 'Copied!' : 'Copy to clipboard'}
+                    </button>
+                  </CopyToClipboard>
+                </div>
+              </div>
+              :
+              <div className="row">
+                <button
+                  className="showEmbedButton"
+                  onClick={() => this.setState({ showEmbed: true })}
+                >
+                  Get embed code
+                </button>
+              </div>
+            }
           </div>
           <ModalFooter
-            leftButton={{
+            rightButton={{
               text: 'Close',
               onClick: onClose,
-            }}
-            rightButton={{
-              text: copyButton,
             }}
           />
         </div>
