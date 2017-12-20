@@ -196,6 +196,7 @@ class DeriveColumn extends Component {
               onChange={evt =>
                 this.setTransformationProperty(['args', 'newColumnTitle'], evt.target.value)
               }
+              data-test-id="column-title"
             />
           </div>
           <div className="inputGroup">
@@ -224,7 +225,7 @@ class DeriveColumn extends Component {
               options={errorStrategies}
             />
           </div>
-          <div className="inputGroup">
+          <div className="inputGroup" data-test-id="code">
             <label htmlFor="code">
               <FormattedMessage id="javascript_code" />
             </label>

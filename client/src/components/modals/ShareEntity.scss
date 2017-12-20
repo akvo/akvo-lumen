@@ -11,6 +11,27 @@
         flex: 1;
     }
 
+    .row {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        margin-top: 2rem;
+        align-items: center;
+    }
+
+    .copyButton {
+        @include btnOutline($black, $white);
+    }
+
+    .showEmbedButton {
+        @include btnOutline($black, $black);
+    }
+
+    textarea {
+        padding: 0;
+        margin: 0;
+    }
+
     .contents {
         padding-top: 4rem;
 

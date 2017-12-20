@@ -260,3 +260,23 @@ Examples:
           "target": {"mergeColumn": "c1"}}}
 
 ```
+
+### core/reverse-geocode
+
+* args
+  * target.datasetId (string): The dataset being reverse geocoded
+  * target.geopointColumn (string): The geopoint column to use for reverse geocoding
+  * target.title (string): The new column title
+  * source.datasetId (string): The dataset id for the shape dataset (source = null) means we will default to the world table
+  * source.geoshapeColumn (string): The geoshape column to use for reverse geocoding
+  * source.mergeColumn (string): The column to move to the target dataset
+
+```
+{"op": "core/reverse-geocode"
+ "args": {"target": {"datasetId" "fid-dis-gid"
+                     "geopointColumn" "a3"
+                     "title": "Locations"},
+          "source": {"datasetId" "abc-sda-dgs",
+                     "geoshapeColumn": "d2",
+                     "mergeColumn": "c4"}}}
+```

@@ -1,6 +1,6 @@
 @import "../../../styles/modules/importAll";
 
-.TargetMergeOptions {
+.SourceReverseGeocodeOptions {
   flex: 1;
   padding-left: 3em;
   padding-right: 3em;
@@ -10,5 +10,10 @@
   p {
     border: 1px solid rgba($black, 0.5);
     padding: 0.6em;
+  }
+  input {
+    width: 100%;
+    padding: 0.6em;
+    border: 1px solid rgba(32, 32, 34, 0.45);
   }
 }

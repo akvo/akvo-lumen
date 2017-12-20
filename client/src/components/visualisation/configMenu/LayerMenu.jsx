@@ -37,6 +37,7 @@ export default class LayerMenu extends Component {
           >
             <button
               className="addLayer clickable noSelect"
+              data-test-id="add-layer"
               onClick={onAddLayer}
             >
               <i className="fa fa-plus" aria-hidden="true" />
