@@ -64,7 +64,7 @@ test:
 
 deployment:
   dev:
-    branch: issue/1142-admin-boundaries-3
+    branch: develop
     commands:
       - ./ci/dev/setup_gcloud.sh
       - ./ci/dev/build_containers.sh
