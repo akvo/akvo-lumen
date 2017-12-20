@@ -13,11 +13,13 @@ export default function VisualisationConfig(props) {
     >
       <ConfigMenu
         visualisation={props.visualisation}
+        metadata={props.metadata}
         datasets={props.datasets}
         onChangeSourceDataset={props.onChangeSourceDataset}
         onChangeVisualisationSpec={props.onChangeVisualisationSpec}
         onChangeVisualisationType={props.onChangeVisualisationType}
         onSaveVisualisation={props.onSaveVisualisation}
+        loadDataset={props.loadDataset}
       />
     </div>
   );
@@ -25,9 +27,11 @@ export default function VisualisationConfig(props) {
 
 VisualisationConfig.propTypes = {
   visualisation: PropTypes.object.isRequired,
+  metadata: PropTypes.object,
   datasets: PropTypes.object.isRequired,
   onChangeVisualisationType: PropTypes.func.isRequired,
   onChangeSourceDataset: PropTypes.func.isRequired,
   onChangeVisualisationSpec: PropTypes.func.isRequired,
   onSaveVisualisation: PropTypes.func.isRequired,
+  loadDataset: PropTypes.func.isRequired,
 };

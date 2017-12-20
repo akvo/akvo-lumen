@@ -86,4 +86,18 @@
             flex: 11;
         }
     }
+
+    .shapeLabel {
+        .label {
+            font-size: inherit;
+            order: 2;
+        }
+        .toggle {
+            order: 1;
+            margin-right: 0.5em;
+        }
+        .ToggleInput {
+            margin: 0.5rem 0;
+        }
+    }
 }

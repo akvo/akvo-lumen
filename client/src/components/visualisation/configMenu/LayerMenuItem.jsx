@@ -74,7 +74,7 @@ export default class LayerMenuItem extends Component {
               </span>
             </span>
             <span
-              className="toggleContainer"
+              className="toggleContainer notImplemented"
             >
               <ToggleInput
                 checked={layer.visible}

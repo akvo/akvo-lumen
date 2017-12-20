@@ -18,7 +18,8 @@ export default function ToggleInput(props) {
   return (
     <div
       className={`ToggleInput ${props.disabled ? ' disabled' : ''}
-        ${props.className ? props.className : ''}`}
+        ${props.className ? props.className : ''}
+        ${props.size ? props.size : 'default'}`}
     >
       <h4 className="label">
         { labelValue }
@@ -38,6 +39,7 @@ export default function ToggleInput(props) {
 
 ToggleInput.propTypes = {
   className: PropTypes.string,
+  size: PropTypes.oneOf(['small']),
   disabled: PropTypes.bool,
   checked: PropTypes.bool.isRequired,
   label: PropTypes.string,

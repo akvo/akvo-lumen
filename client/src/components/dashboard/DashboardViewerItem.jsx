@@ -72,6 +72,8 @@ export default class DashboardViewerItem extends Component {
           >
             <AsyncVisualisationViewer
               visualisation={this.props.item.visualisation}
+              metadata={this.props.metadata ?
+                this.props.metadata[this.props.item.visualisation.id] : null}
               datasets={this.props.datasets}
               width={style.width - (cPadding * 2)}
               height={style.height - (cPadding * 2)}
@@ -100,5 +102,6 @@ DashboardViewerItem.propTypes = {
   canvasWidth: PropTypes.number.isRequired,
   viewportType: PropTypes.oneOf(['small', 'medium', 'large']),
   datasets: PropTypes.object,
+  metadata: PropTypes.object,
 };
 

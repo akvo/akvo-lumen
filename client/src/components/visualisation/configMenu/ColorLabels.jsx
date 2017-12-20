@@ -6,7 +6,7 @@ import { replaceLabelIfValueEmpty } from '../../../utilities/chart';
 
 require('./ColorLabels.scss');
 
-export default function ColorLabels({ pointColorMapping, onChangeColor }) {
+export default function ColorLabels({ pointColorMapping, onChangeColor, colorPalette = palette }) {
   return (
     <ul
       className="ColorLabels"
@@ -19,6 +19,7 @@ export default function ColorLabels({ pointColorMapping, onChangeColor }) {
             color={color}
             value={value}
             onChangeColor={newColor => onChangeColor(value, newColor)}
+            colorPalette={colorPalette}
           />
         </li>
       )}
@@ -27,6 +28,7 @@ export default function ColorLabels({ pointColorMapping, onChangeColor }) {
 }
 
 ColorLabels.propTypes = {
+  colorPalette: PropTypes.array,
   pointColorMapping: PropTypes.array.isRequired,
   onChangeColor: PropTypes.func.isRequired,
 };
@@ -61,7 +63,7 @@ class ColorLabelItem extends Component {
   }
 
   render() {
-    const { color, value } = this.props;
+    const { color, value, colorPalette } = this.props;
     const { displayColorPicker } = this.state;
     return (
       <div
@@ -88,7 +90,7 @@ class ColorLabelItem extends Component {
             <GithubPicker
               disabled={this.props.disabled}
               color={color}
-              colors={palette}
+              colors={colorPalette}
               onChangeComplete={evt => this.handleOnChangeColor(evt.hex)}
             />
           </div>
@@ -105,6 +107,7 @@ class ColorLabelItem extends Component {
 }
 
 ColorLabelItem.propTypes = {
+  colorPalette: PropTypes.array,
   color: PropTypes.string.isRequired,
   value: PropTypes.any,
   onChangeColor: PropTypes.func.isRequired,
