@@ -149,7 +149,7 @@ const getAggregationColumns = (layer, datasets) => {
     return out;
   }
 
-  if (!datasets[layer.aggregationDataset].get('columns')) {
+  if (!datasets[layer.aggregationDataset] || !datasets[layer.aggregationDataset].get('columns')) {
     return out;
   }
 
