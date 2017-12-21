@@ -23,7 +23,7 @@
                  [honeysql "0.9.1"]
                  [meta-merge "1.0.0"]
                  [org.akvo/commons "0.4.5" :exclusions [org.postgresql/postgresql org.clojure/java.jdbc]]
-                 [org.akvo/resumed "0.1.0-SNAPSHOT"]
+                 [org.akvo/resumed "1.17.be5e74d2518253bb87ce087c15f5e04bd4b8b824"]
                  [org.apache.tika/tika-core "1.16"]
                  [org.apache.tika/tika-parsers "1.16" :exclusions [org.slf4j/slf4j-api]]
                  [org.clojure/clojure "1.9.0-beta1"]

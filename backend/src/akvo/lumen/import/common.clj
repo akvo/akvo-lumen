@@ -1,7 +1,8 @@
 (ns akvo.lumen.import.common
   (:require [clojure.java.io :as io]
             [clojure.java.jdbc :as jdbc]
-            [clojure.string :as str])
+            [clojure.string :as str]
+            [org.akvo.resumed :as resumed])
   (:import [org.postgis PGgeometry]))
 
 (defprotocol DatasetImporter
@@ -155,13 +156,7 @@
       (let [file-on-disk? (contains? spec "fileName")
             url (get spec "url")]
         (if file-on-disk?
-          (let [filename (last (str/split url #"\/"))]
-            (when-not (re-matches #"[a-zA-Z0-9-]+" filename)
-              (throw (ex-info "Invalid file" {:filename filename})))
-            (io/file (str file-upload-path
-                          "/resumed/"
-                          filename
-                          "/file")))
+          (resumed/file-for-upload file-upload-path url)
           (let [url (io/as-url url)]
             (when-not (#{"http" "https"} (.getProtocol url))
               (throw (ex-info (str "Invalid url: " url) {:url url})))
