@@ -19,7 +19,17 @@ function getEntity(entityId, entityType, library) {
 function VisualisationsList({ datasetId, visualisations }) {
   const dependentVisualisations = Object.keys(visualisations)
     .map(id => visualisations[id])
-    .filter(vis => vis.datasetId === datasetId)
+    .filter((vis) => {
+      if (vis.datasetId === datasetId) {
+        return true;
+      }
+      if (vis.visualisationType === 'map'
+        && vis.spec && vis.spec.layers
+        && vis.spec.layers.some(layer => layer.datasetId === datasetId)) {
+        return true;
+      }
+      return false;
+    })
     .map((vis, idx) => (<li key={idx}>{vis.name}</li>));
 
   if (dependentVisualisations.length > 0) {

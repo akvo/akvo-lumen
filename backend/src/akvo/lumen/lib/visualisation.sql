@@ -13,6 +13,10 @@ WHERE id = :id;
 -- :doc delete visualisation by id
 DELETE FROM visualisation WHERE id = :id;
 
+-- :name delete-maps-by-dataset-id :! :n
+-- :doc delete maps by dataset id
+DELETE FROM visualisation WHERE spec::varchar LIKE concat('%', :id, '%');
+
 -- :name upsert-visualisation :<!
 -- :doc Upsert a single visualisation
 INSERT INTO visualisation (id, dataset_id, "name", "type", spec, author)
