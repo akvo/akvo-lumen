@@ -2,7 +2,12 @@
 
 set -eu
 
-keytool -import -trustcacerts -keystore "${JAVA_HOME}/jre/lib/security/cacerts" -storepass changeit -noprompt -alias postgrescert -file /pg-certs/server.crt
+CERT_INSTALLED=$((keytool -list -trustcacerts -keystore "${JAVA_HOME}/jre/lib/security/cacerts" -storepass changeit | grep postgrescert) || echo "not found")
+
+if [ "${CERT_INSTALLED}" = "not found" ]; then
+    echo "Importing postgres cert"
+    keytool -import -trustcacerts -keystore "${JAVA_HOME}/jre/lib/security/cacerts" -storepass changeit -noprompt -alias postgrescert -file /pg-certs/server.crt
+fi
 
 MAX_ATTEMPTS=30
 KEYCLOAK=""
