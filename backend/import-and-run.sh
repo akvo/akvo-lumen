@@ -9,7 +9,7 @@ if [ "${CERT_INSTALLED}" = "not found" ]; then
     keytool -import -trustcacerts -keystore "${JAVA_HOME}/jre/lib/security/cacerts" -storepass changeit -noprompt -alias postgrescert -file /pg-certs/server.crt
 fi
 
-MAX_ATTEMPTS=30
+MAX_ATTEMPTS=60
 KEYCLOAK=""
 ATTEMPTS=0
 
