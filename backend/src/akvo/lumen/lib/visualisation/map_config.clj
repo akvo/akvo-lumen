@@ -28,7 +28,7 @@
       (format "[ %s = %s ] { marker-fill: %s }"
               point-color-column
               (if (string? value)
-                (format "'%s'" value)
+                (format "\"%s\"" value)
                 value)
               (pr-str color)))))
 
