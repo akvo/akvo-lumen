@@ -238,6 +238,13 @@ function deleteDatasetSuccess(id) {
       if (visualisations[visualisationId].datasetId === id) {
         dispatch(visualisationActions.removeVisualisation(visualisationId));
       }
+      if (visualisations[visualisationId].visualisationType === 'map') {
+        const viz = visualisations[visualisationId];
+
+        if (viz.spec && viz.spec.layers && viz.spec.layers.some(layer => layer.datasetId === id)) {
+          dispatch(visualisationActions.removeVisualisation(visualisationId));
+        }
+      }
     });
   };
 }

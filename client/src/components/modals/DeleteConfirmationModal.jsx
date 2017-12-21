@@ -19,7 +19,7 @@ function getEntity(entityId, entityType, library) {
 function VisualisationsList({ datasetId, visualisations }) {
   const dependentVisualisations = Object.keys(visualisations)
     .map(id => visualisations[id])
-    .filter(vis => {
+    .filter((vis) => {
       if (vis.datasetId === datasetId) {
         return true;
       }
