@@ -83,13 +83,24 @@
                                       where-clause)
                            "srid" "4326"}}]}))
 
+(defn raster-css []
+"#r {
+  raster-colorizer-epsilon: 0.5;
+  raster-opacity: 0.5;
+  raster-colorizer-default-mode: linear;
+  raster-colorizer-default-color: transparent;
+  raster-colorizer-stops:
+    stop(0, yellow)
+    stop(240, green);
+}")
+
 (defn build-raster [table-name]
   {"version" "1.6.0"
    "layers" [{"type" "mapnik"
-              "options" {"cartocss" "#r {raster-opacity: 0.5}"
+              "options" {"cartocss" (raster-css)
                          "cartocss_version" "2.3.0"
                          "geom_column" "rast"
                          "geom_type" "raster"
-                         "raster_band" 0
+                         "raster_band" 1
                          "sql" (format "SELECT * FROM %s" table-name)
                          "srid" "3857"}}]})
