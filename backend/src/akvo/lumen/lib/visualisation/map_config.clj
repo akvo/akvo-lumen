@@ -161,7 +161,7 @@
     (format "
             SELECT
               %s
-              _aggregation,
+              round(_aggregation, 5) as _aggregation,
               shapefill,
               %s.%s
             FROM
