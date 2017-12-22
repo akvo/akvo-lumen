@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { L } from 'leaflet';
+import L from 'leaflet';
 import warning from 'warning';
 import { showModal } from '../actions/activeModal';
 import { fetchRaster } from '../actions/raster';
