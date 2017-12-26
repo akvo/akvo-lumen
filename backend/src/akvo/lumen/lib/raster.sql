@@ -43,7 +43,7 @@ CREATE INDEX ON :i:table-name USING gist (st_convexhull("rast"));
 
 -- :name add-raster-constraints :!
 -- :doc Add more constraints on `rast` column for a given table
-SELECT AddRasterConstraints('',:table-name,'rast',TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,TRUE,TRUE,TRUE,TRUE,TRUE);
+SELECT AddRasterConstraints(:table-name::name,'rast'::name);
 
 -- :name raster-count :? :1
 -- :doc returns the count of elements in a raster table

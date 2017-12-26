@@ -46,8 +46,8 @@
     ;; FIXME this is the happy path
     (create-raster-table conn {:table-name table-name})
     (create-raster-index conn {:table-name table-name})
-    (add-raster-constraints conn {:table-name table-name})
     (jdbc/execute! conn [sql])
+    (add-raster-constraints conn {:table-name table-name})
     (insert-raster conn {:id (util/squuid)
                          :title (data-source "name")
                          :description (get-in data-source ["source" "fileName"])
