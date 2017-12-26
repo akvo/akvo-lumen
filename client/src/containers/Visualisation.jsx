@@ -43,6 +43,7 @@ class Visualisation extends Component {
     this.handleChangeVisualisationType = this.handleChangeVisualisationType.bind(this);
     this.handleVisualisationAction = this.handleVisualisationAction.bind(this);
     this.toggleShareVisualisation = this.toggleShareVisualisation.bind(this);
+    this.loadDataset = this.loadDataset.bind(this);
   }
 
   componentWillMount() {
@@ -61,13 +62,23 @@ class Visualisation extends Component {
       if (visualisation == null) {
         dispatch(actions.fetchVisualisation(visualisationId));
       } else {
-        const datasetId = visualisation.datasetId;
-        if (datasetId != null) {
-          if (library.datasets[datasetId] == null ||
-              library.datasets[datasetId].get('rows') == null) {
-            dispatch(fetchDataset(datasetId));
+        const datasetsRequired = [];
+        if (visualisation.visualisationType === 'map') {
+          if (visualisation.spec && visualisation.spec.layers) {
+            visualisation.spec.layers.forEach((layer) => {
+              if (layer.datasetId) {
+                datasetsRequired.push(layer.datasetId);
+              }
+              if (layer.aggregationDataset) {
+                datasetsRequired.push(layer.aggregationDataset);
+              }
+            });
           }
+        } else {
+          datasetsRequired.push(visualisation.datasetId);
         }
+        datasetsRequired.forEach(datasetId => this.loadDataset(datasetId));
+
         this.setState({
           visualisation,
           isUnsavedChanges: false,
@@ -150,10 +161,18 @@ class Visualisation extends Component {
     this.handleChangeVisualisation(visualisation);
   }
 
-  handleChangeSourceDataset(datasetId, optionalSpecChanges = {}) {
-    if (!this.props.library.datasets[datasetId].get('columns')) {
+  loadDataset(datasetId) {
+    if (!datasetId) {
+      return;
+    }
+    if (!this.props.library.datasets[datasetId]
+      || !this.props.library.datasets[datasetId].get('columns')) {
       this.props.dispatch(fetchDataset(datasetId));
     }
+  }
+
+  handleChangeSourceDataset(datasetId, optionalSpecChanges = {}) {
+    this.loadDataset(datasetId);
     const spec = Object.assign({}, this.state.visualisation.spec, optionalSpecChanges);
     const visualisation = Object.assign({}, this.state.visualisation, { datasetId }, { spec });
     this.handleChangeVisualisation(visualisation);
@@ -252,6 +271,7 @@ class Visualisation extends Component {
           onChangeSourceDataset={this.handleChangeSourceDataset}
           onChangeVisualisationSpec={this.handleChangeVisualisationSpec}
           onSaveVisualisation={this.onSave}
+          loadDataset={this.loadDataset}
         />
         <ShareEntity
           isOpen={this.state.isShareModalVisible}

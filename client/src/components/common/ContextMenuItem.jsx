@@ -26,6 +26,7 @@ export default class ContextMenuItem extends Component {
           clickable ${this.props.selectedClassName} ${this.props.customClass ? this.props.customClass : ''}
         `}
         onClick={onClick}
+        data-test-id={this.className}
         onMouseEnter={() => this.setState({ isHovered: true })}
         onMouseLeave={() => this.setState({ isHovered: false })}
       >

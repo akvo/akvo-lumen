@@ -13,6 +13,7 @@ export default function SidebarControls({
     <div className="SidebarControls controls">
       <button
         className={`apply clickable ${isDisabled ? 'disabled' : ''}`}
+        data-test-id="generate"
         onClick={onApply}
         disabled={isDisabled}
       >

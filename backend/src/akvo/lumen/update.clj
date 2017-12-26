@@ -7,6 +7,7 @@
             [akvo.lumen.util :as util]
             [clojure.java.jdbc :as jdbc]
             [clojure.set :as set]
+            [clojure.string :as string]
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/job-execution.sql")
@@ -66,7 +67,7 @@
   (let [imported-columns (map (fn [column]
                                 (cond-> {:id (keyword (get column "columnName"))
                                          :type (keyword (get column "type"))
-                                         :title (get column "title")}
+                                         :title (string/trim (get column "title"))}
                                   (contains? column "key") (assoc :key (boolean (get column "key")))))
                               imported-columns)]
     (set/subset? (set imported-columns)
@@ -77,12 +78,13 @@
     (let [table-name (util/gen-table-name "ds")
           imported-table-name (util/gen-table-name "imported")
           imported-columns (vec
-                            (:columns (imported-dataset-columns-by-dataset-id conn
-                                                                              {:dataset-id dataset-id})))
+                            (:columns (imported-dataset-columns-by-dataset-id
+                                       conn {:dataset-id dataset-id})))
           {:keys [transformations] :as dataset-version} (latest-dataset-version-by-dataset-id
                                                          conn {:dataset-id dataset-id})]
       (with-open [importer (import/dataset-importer (get data-source-spec "source") config)]
-        (let [columns (import/columns importer)]
+        (let [columns (map #(update % :title string/trim)
+                           (import/columns importer))]
           (if-not (compatible-columns? imported-columns columns)
             (failed-update conn job-execution-id "Column mismatch")
             (do (import/create-dataset-table conn table-name columns)

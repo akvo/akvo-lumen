@@ -7,10 +7,13 @@ require('./SelectInput.scss');
 
 function SelectInput(props) {
   return (
-    <div className={`inputGroup${props.disabled ? ' disabled' : ''}`}>
-      <label htmlFor={props.name} data-test-id={props.name}>
-        {props.labelTextId ? <FormattedMessage id={props.labelTextId} /> : props.labelText}:
-      </label>
+    <div className={`SelectInput inputGroup${props.disabled ? ' disabled' : ''}`}>
+      {
+        Boolean(props.labelText || props.labelTextId) &&
+        <label htmlFor={props.name} data-test-id={props.name}>
+          {props.labelTextId ? <FormattedMessage id={props.labelTextId} /> : props.labelText}:
+        </label>
+      }
       <SelectMenu
         name={props.name}
         disabled={props.disabled || false}
@@ -21,6 +24,7 @@ function SelectInput(props) {
         onChange={props.onChange}
         clearable={props.clearable}
         multi={props.multi}
+        inputProps={props.inputProps}
       />
     </div>
   );
@@ -39,6 +43,7 @@ SelectInput.propTypes = {
   clearable: PropTypes.bool,
   multi: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
+  inputProps: PropTypes.object,
 };
 
 export default injectIntl(SelectInput);

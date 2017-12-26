@@ -41,6 +41,26 @@ export function fetchVisualisation(id) {
         if (datasetId) {
           dispatch(fetchDataset(datasetId));
         }
+        // ...which might be stored on layers if it's a map
+        if (visualisation.visualisationType === 'map') {
+          const { spec } = visualisation;
+
+          if (spec.layers && spec.layers.length) {
+            const { layers } = spec;
+            const datasetsToLoad = [];
+
+            layers.forEach((layer) => {
+              if (layer.datasetId) {
+                datasetsToLoad.push(layer.datasetId);
+              }
+              if (layer.aggregationDataset) {
+                datasetsToLoad.push(layer.aggregationDataset);
+              }
+            });
+
+            datasetsToLoad.forEach(depId => dispatch(fetchDataset(depId)));
+          }
+        }
         dispatch(fetchVisualisationSuccess(visualisation));
       })
       .catch(err => dispatch(fetchVisualisationFailure(err)));

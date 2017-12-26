@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import SelectMenu from '../../common/SelectMenu';
+import SelectMenu from '../common/SelectMenu';
 
 function options(columns, showColumnType) {
   return columns.map((column) => {

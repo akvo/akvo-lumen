@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import ContextMenu from '../../common/ContextMenu';
-import ToggleInput from './ToggleInput';
+import ToggleInput from '../../common/ToggleInput';
 
 require('./LayerMenuItem.scss');
 
@@ -68,12 +68,13 @@ export default class LayerMenuItem extends Component {
               <span
                 onClick={() => onSelectLayer(layerIndex)}
                 className="clickable title"
+                data-test-id="layer"
               >
                 {layer.title}
               </span>
             </span>
             <span
-              className="toggleContainer"
+              className="toggleContainer notImplemented"
             >
               <ToggleInput
                 checked={layer.visible}

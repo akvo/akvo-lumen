@@ -9,6 +9,30 @@ import mapLayerSpecTemplate from '../../../containers/Visualisation/mapLayerSpec
 
 require('./MapConfigMenu.scss');
 
+// For making additional, automatic spec changes in response to user-initiated changes
+const applyAutomaticSpecChanges = (value) => {
+  const newValue = Object.assign({}, value);
+  const valueHasKey = key => Object.keys(newValue).indexOf(key) > -1;
+
+  if (valueHasKey('aggregationDataset')) {
+    newValue.aggregationColumn = null;
+  }
+
+  if (valueHasKey('aggregationColumn')) {
+    newValue.aggregationGeomColumn = null;
+  }
+
+  if (valueHasKey('showShapeLabelInput')) {
+    newValue.shapeLabelColumn = null;
+  }
+
+  if (valueHasKey('pointColorColumn')) {
+    newValue.pointColorMapping = [];
+  }
+
+  return newValue;
+};
+
 export default class MapConfigMenu extends Component {
 
   constructor() {
@@ -54,31 +78,39 @@ export default class MapConfigMenu extends Component {
 
   handleAddMapLayer() {
     const title = `Untitled Layer ${this.props.visualisation.spec.layers.length + 1}`;
-    const layers = this.props.visualisation.spec.layers.map(item => item);
+    const layers = this.props.visualisation.spec.layers.slice();
     layers.push(Object.assign({}, mapLayerSpecTemplate, { title }));
     this.props.onChangeSpec({ layers });
   }
 
   handleDeleteMapLayer(layerIndex) {
     const layers = this.props.visualisation.spec.layers.map(item => item);
-    layers.splice(layerIndex, 1);
+    const newLayers = layers.slice();
 
-    this.props.onChangeSpec({ layers });
+    newLayers.splice(layerIndex, 1);
+    this.props.onChangeSpec({ layers: newLayers });
   }
 
-  handleChangeMapLayer(layerIndex, value) {
+  handleChangeMapLayer(layerIndex, userChange) {
+    const value = applyAutomaticSpecChanges(userChange);
     const clonedLayer = Object.assign({}, this.props.visualisation.spec.layers[layerIndex], value);
     const layers = this.props.visualisation.spec.layers.map(item => item);
     layers[layerIndex] = clonedLayer;
 
-    // Temporary shim while we still define datasetId on the top-level visualisation
     if (Object.keys(value).indexOf('datasetId') > -1) {
       const { datasetId } = value;
 
-      this.props.onChangeSourceDataset(datasetId, { layers });
-    } else {
-      this.props.onChangeSpec({ layers });
+      this.props.loadDataset(datasetId);
+    } else if (Object.keys(value).indexOf('aggregationDataset') > -1) {
+      const { aggregationDataset } = value;
+
+      if (aggregationDataset) {
+        // Can be null when user is *removing* the aggregation dataset
+        this.props.loadDataset(aggregationDataset);
+      }
     }
+
+    this.props.onChangeSpec({ layers });
   }
 
   handlePopupChange(columnNames) {
@@ -110,6 +142,7 @@ export default class MapConfigMenu extends Component {
               </div>
               <LayerMenu
                 layers={this.props.visualisation.spec.layers}
+                metadata={this.props.metadata}
                 activeLayer={this.state.activeLayer}
                 onAddLayer={() => this.handleAddMapLayer()}
                 onDeleteMapLayer={layerIndex => this.handleDeleteMapLayer(layerIndex)}
@@ -134,6 +167,7 @@ export default class MapConfigMenu extends Component {
             <LayerConfigMenu
               layer={spec.layers[this.state.selectedLayer]}
               layerIndex={this.state.selectedLayer}
+              metadata={this.props.metadata}
               onDeselectLayer={() => this.setState({ selectedLayer: null })}
               datasets={this.props.datasets}
               datasetOptions={this.props.datasetOptions}
@@ -148,6 +182,7 @@ export default class MapConfigMenu extends Component {
         >
           <button
             className="saveButton clickable"
+            data-test-id="save-button"
             onClick={this.props.onSave}
           >
             <FormattedMessage id="save" />
@@ -160,6 +195,7 @@ export default class MapConfigMenu extends Component {
 
 MapConfigMenu.propTypes = {
   visualisation: PropTypes.object.isRequired,
+  metadata: PropTypes.object,
   datasets: PropTypes.object.isRequired,
   onChangeSpec: PropTypes.func.isRequired,
   aggregationOptions: PropTypes.array.isRequired,
@@ -167,4 +203,5 @@ MapConfigMenu.propTypes = {
   onSave: PropTypes.func.isRequired,
   onChangeVisualisationType: PropTypes.func.isRequired,
   datasetOptions: PropTypes.array.isRequired,
+  loadDataset: PropTypes.func.isRequired,
 };

@@ -4,12 +4,18 @@ import { FormattedMessage } from 'react-intl';
 import SelectMenu from '../../common/SelectMenu';
 import SelectInput from './SelectInput';
 import ButtonRowInput from './ButtonRowInput';
-import ToggleInput from './ToggleInput';
+import ToggleInput from '../../common/ToggleInput';
 import ColorLabels from './ColorLabels';
 import FilterMenu from './FilterMenu';
-import { filterColumns } from '../../../utilities/utils';
+import { filterColumns, checkUndefined } from '../../../utilities/utils';
 
 require('./LayerConfigMenu.scss');
+
+const sourceDataset = { 'data-test-id': 'source-dataset-select' };
+
+const geopoint = { 'data-test-id': 'geopoint-select' };
+
+const colorCoding = { 'data-test-id': 'color-coding-select' };
 
 const getSelectMenuOptionsFromColumnList = columns => (columns == null ?
   [] : columns.map((column, index) => ({
@@ -46,6 +52,350 @@ TabMenu.propTypes = {
   onChangeTab: PropTypes.func.isRequired,
 };
 
+const GeopointDataTab = (props) => {
+  const { layer,
+    layerIndex,
+    onChangeMapLayer,
+    columnOptions,
+    handlePointColorColumnChange,
+    disabled,
+  } = props;
+
+  return (
+    <div className="GeopointDataTab">
+      {(layer.latitude != null || layer.longitude != null) &&
+        <div>
+          <div className="inputGroup">
+            <SelectInput
+              disabled={layer.datasetId === null || disabled}
+              placeholder="Select a latitude column"
+              labelText="Latitude column"
+              choice={layer.latitude != null ? layer.latitude.toString() : null}
+              name="latitudeInput"
+              options={filterColumns(columnOptions, 'number')}
+              onChange={value => onChangeMapLayer(layerIndex, {
+                latitude: value,
+              })}
+            />
+          </div>
+          <div className="inputGroup">
+            <SelectInput
+              disabled={layer.datasetId === null || disabled}
+              placeholder="Select a longitude column"
+              labelText="Longitude column"
+              choice={layer.longitude != null ? layer.longitude.toString() : null}
+              name="longitudeInput"
+              options={filterColumns(columnOptions, 'number')}
+              onChange={value => onChangeMapLayer(layerIndex, {
+                longitude: value,
+              })}
+            />
+          </div>
+          <hr />
+        </div>
+      }
+      <div className="inputGroup">
+        <SelectInput
+          disabled={layer.datasetId === null || disabled}
+          placeholder="Select a geopoint column"
+          labelText="Geopoint column"
+          choice={layer.geom != null ? layer.geom.toString() : null}
+          name="geomInput"
+          options={filterColumns(columnOptions, 'geopoint')}
+          onChange={value => onChangeMapLayer(layerIndex, {
+            geom: value,
+            latitude: null,
+            longitude: null,
+          })}
+          inputProps={geopoint}
+        />
+      </div>
+      <div className="inputGroup">
+        <SelectInput
+          disabled={
+            ((layer.latitude == null || layer.longitude == null) && layer.geom == null) ||
+            disabled
+          }
+          placeholder="Select a data column to color points by"
+          labelText="Color coding column"
+          choice={layer.pointColorColumn != null ?
+            layer.pointColorColumn.toString() : null}
+          name="xGroupColumnMenu"
+          options={filterColumns(columnOptions, ['text', 'number'])}
+          clearable
+          onChange={columnName =>
+            handlePointColorColumnChange(columnName,
+              columnOptions.find(option => option.value === columnName))}
+          inputProps={colorCoding}
+        />
+      </div>
+    </div>
+  );
+};
+
+GeopointDataTab.propTypes = {
+  layer: PropTypes.object.isRequired,
+  layerIndex: PropTypes.number.isRequired,
+  onChangeMapLayer: PropTypes.func.isRequired,
+  columnOptions: PropTypes.array.isRequired,
+  handlePointColorColumnChange: PropTypes.func.isRequired,
+  disabled: PropTypes.bool,
+};
+
+const getAggregationColumns = (layer, datasets) => {
+  const out = [];
+
+  if (!layer.aggregationDataset) {
+    return out;
+  }
+
+  if (!datasets[layer.aggregationDataset] || !datasets[layer.aggregationDataset].get('columns')) {
+    return out;
+  }
+
+  const aggregationColumnOptions =
+    getSelectMenuOptionsFromColumnList(datasets[layer.aggregationDataset].get('columns'));
+
+  return aggregationColumnOptions;
+};
+
+const GeoshapeDataTab = (props) => {
+  const { layer,
+    layerIndex,
+    onChangeMapLayer,
+    columnOptions,
+    datasetOptions,
+    datasets,
+    disabled,
+  } = props;
+
+  const aggregationColumns = getAggregationColumns(layer, datasets);
+
+  return (
+    <div className="GeoshapeDataTab">
+      <div className="inputGroup">
+        <SelectInput
+          disabled={layer.datasetId === null || disabled}
+          placeholder="Select a geoshape column"
+          labelText="Geoshape column"
+          choice={layer.geom != null ? layer.geom.toString() : null}
+          name="geomInput"
+          options={filterColumns(columnOptions, 'geoshape')}
+          onChange={value => onChangeMapLayer(layerIndex, {
+            geom: value,
+            latitude: null,
+            longitude: null,
+          })}
+        />
+      </div>
+      <div className="shapeLabel">
+        <ToggleInput
+          className="shapeLabelToggle"
+          size="small"
+          label="Geoshape labels"
+          disabled={disabled}
+          checked={Boolean(layer.showShapeLabelInput)}
+          onChange={(val) => {
+            onChangeMapLayer(layerIndex, { showShapeLabelInput: val });
+          }}
+        />
+        {layer.showShapeLabelInput &&
+          <SelectInput
+            clearable
+            disabled={layer.datasetId === null || disabled}
+            placeholder="Select a geoshape label column"
+            choice={layer.shapeLabelColumn != null ? layer.shapeLabelColumn.toString() : null}
+            name="shapeLabelInput"
+            options={filterColumns(columnOptions, 'text')}
+            onChange={value => onChangeMapLayer(layerIndex, {
+              shapeLabelColumn: value,
+            })}
+          />
+        }
+      </div>
+      <div className="inputGroup">
+        <SelectInput
+          disabled={(layer.datasetId == null) || disabled}
+          placeholder="Select a styling dataset"
+          labelText="Styling dataset"
+          choice={layer.aggregationDataset != null ?
+            layer.aggregationDataset.toString() : null}
+          name="aggregationDataset"
+          options={datasetOptions}
+          clearable
+          onChange={value => onChangeMapLayer(layerIndex, {
+            aggregationDataset: value,
+          })}
+        />
+      </div>
+      <div className="inputGroup">
+        <SelectInput
+          disabled={(layer.aggregationDataset == null) || disabled}
+          placeholder="Select styling indicator"
+          labelText="Styling indicator"
+          choice={layer.aggregationColumn != null ?
+            layer.aggregationColumn.toString() : null}
+          name="aggregationColumn"
+          options={filterColumns(aggregationColumns, ['number'])}
+          clearable
+          onChange={value => onChangeMapLayer(layerIndex, {
+            aggregationColumn: value,
+          })}
+        />
+      </div>
+      <div className="inputGroup">
+        <SelectInput
+          disabled={(layer.aggregationDataset == null) || disabled}
+          placeholder="Select styling indicator geopoint column"
+          labelText="Styling indicator geopoint column"
+          choice={layer.aggregationGeomColumn != null ?
+            layer.aggregationGeomColumn.toString() : null}
+          name="aggregationGeomColumn"
+          options={filterColumns(aggregationColumns, ['geopoint'])}
+          clearable
+          onChange={value => onChangeMapLayer(layerIndex, {
+            aggregationGeomColumn: value,
+          })}
+        />
+      </div>
+      {Boolean(layer.aggregationGeomColumn) &&
+        <div className="inputGroup">
+          <ButtonRowInput
+            options={[{
+              label: 'Average',
+              value: 'avg',
+            }, {
+              label: 'Sum',
+              value: 'sum',
+            },
+              {
+                label: 'Min',
+                value: 'min',
+              },
+              {
+                label: 'Max',
+                value: 'max',
+              },
+              {
+                label: 'Count',
+                value: 'count',
+              }]}
+            selected={layer.aggregationMethod || 'avg'}
+            label="Aggregation"
+            onChange={value => onChangeMapLayer(layerIndex, {
+              aggregationMethod: value,
+            })}
+            buttonSpacing="0"
+          />
+        </div>
+      }
+    </div>
+  );
+};
+
+GeoshapeDataTab.propTypes = {
+  layer: PropTypes.object.isRequired,
+  layerIndex: PropTypes.number.isRequired,
+  onChangeMapLayer: PropTypes.func.isRequired,
+  columnOptions: PropTypes.array.isRequired,
+  datasetOptions: PropTypes.array.isRequired,
+  datasets: PropTypes.object.isRequired,
+  disabled: PropTypes.bool,
+};
+
+const GeopointThemeTab = (props) => {
+  const {
+    onChangeMapLayer,
+    columnOptions,
+    layer,
+    layerIndex,
+    pointColorMapping,
+    handleChangeLabelColor,
+    disabled,
+  } = props;
+
+  return (
+    <div
+      className="themeTab"
+    >
+      <ButtonRowInput
+        options={['1', '2', '3', '4', '5'].map(item => ({
+          label: item,
+          value: item,
+        }))}
+        disabled={disabled}
+        selected={layer.pointSize ? layer.pointSize.toString() : null}
+        label="Point size"
+        onChange={option => onChangeMapLayer(layerIndex, { pointSize: option })}
+      />
+      <hr />
+      <h3>Color</h3>
+      {Boolean(pointColorMapping && pointColorMapping.length) &&
+        <div className="inputGroup">
+          <label
+            htmlFor="colors"
+          >
+            Colors ({columnOptions.find(obj => obj.value === layer.pointColorColumn).title})
+          </label>
+          <ColorLabels
+            disabled={disabled}
+            id="colors"
+            pointColorMapping={pointColorMapping}
+            onChangeColor={
+              (value, newColor) => handleChangeLabelColor(pointColorMapping, value, newColor)
+            }
+          />
+        </div>
+      }
+    </div>
+  );
+};
+
+GeopointThemeTab.propTypes = {
+  layer: PropTypes.object.isRequired,
+  layerIndex: PropTypes.number.isRequired,
+  onChangeMapLayer: PropTypes.func.isRequired,
+  handleChangeLabelColor: PropTypes.func.isRequired,
+  disabled: PropTypes.bool,
+  pointColorMapping: PropTypes.array.isRequired,
+  columnOptions: PropTypes.array.isRequired,
+};
+
+const GeoshapeThemeTab = (props) => {
+  const {
+    onChangeMapLayer,
+    layerIndex,
+    colors,
+    gradientColor,
+    disabled,
+  } = props;
+
+  return (
+    <div
+      className="themeTab"
+    >
+      {colors &&
+        <ColorLabels
+          pointColorMapping={[{ value: 'Gradient color', color: gradientColor }]}
+          colorPalette={colors}
+          disabled={disabled}
+          onChangeColor={(ignore, color) => onChangeMapLayer(layerIndex, { gradientColor: color })}
+        />
+      }
+    </div>
+  );
+};
+
+
+GeoshapeThemeTab.propTypes = {
+  layer: PropTypes.object.isRequired,
+  layerIndex: PropTypes.number.isRequired,
+  onChangeMapLayer: PropTypes.func.isRequired,
+  colors: PropTypes.array,
+  gradientColor: PropTypes.string,
+  disabled: PropTypes.bool,
+};
+
 export default class LayerConfigMenu extends Component {
   constructor() {
     super();
@@ -60,7 +410,7 @@ export default class LayerConfigMenu extends Component {
   }
 
   getTabContent(columnOptions) {
-    const { layer, layerIndex, onChangeMapLayer, disabled } = this.props;
+    const { layer, layerIndex, metadata, onChangeMapLayer, disabled } = this.props;
     let tabContent;
 
     switch (this.state.activeTab) {
@@ -71,11 +421,9 @@ export default class LayerConfigMenu extends Component {
           >
             <div
               className="inputGroup"
-              data-test-id="source-dataset"
             >
               <label
                 htmlFor="xDatasetMenu"
-                data-test-id="dataset-menu"
               >Source dataset:</label>
               <SelectMenu
                 disabled={disabled}
@@ -85,7 +433,9 @@ export default class LayerConfigMenu extends Component {
                 layer.datasetId.toString() : null}
                 options={this.props.datasetOptions}
                 onChange={datasetId => onChangeMapLayer(this.props.layerIndex, { datasetId })}
+                buttonSpacing="0"
                 data-test-id="source-dataset"
+                inputProps={sourceDataset}
               />
             </div>
             <ButtonRowInput
@@ -96,82 +446,41 @@ export default class LayerConfigMenu extends Component {
                 label: <FormattedMessage id="geo_shape" />,
                 value: 'geo-shape',
               }]}
-              disabled
-              selected="geo-location"
+              selected={layer.layerType || 'geo-location'}
               label="Layer type"
-              onChange={() => null}
-              buttonSpacing="2rem"
+              onChange={value => onChangeMapLayer(layerIndex, {
+                layerType: value,
+              })}
+              buttonSpacing="0"
             />
-            {(layer.latitude != null || layer.longitude != null) &&
+            {(layer.layerType === 'geo-shape') ?
+              <GeoshapeDataTab
+                layer={layer}
+                layerIndex={layerIndex}
+                onChangeMapLayer={onChangeMapLayer}
+                columnOptions={columnOptions}
+                datasetOptions={this.props.datasetOptions}
+                datasets={this.props.datasets}
+                disabled={disabled}
+              />
+              :
               <div>
-                <div className="inputGroup">
-                  <SelectInput
-                    disabled={layer.datasetId === null || disabled}
-                    placeholder="Select a latitude column"
-                    labelText="Latitude column"
-                    choice={layer.latitude != null ? layer.latitude.toString() : null}
-                    name="latitudeInput"
-                    options={filterColumns(columnOptions, 'number')}
-                    onChange={value => onChangeMapLayer(layerIndex, {
-                      latitude: value,
-                    })}
-                  />
-                </div>
-                <div className="inputGroup">
-                  <SelectInput
-                    disabled={layer.datasetId === null || disabled}
-                    placeholder="Select a longitude column"
-                    labelText="Longitude column"
-                    choice={layer.longitude != null ? layer.longitude.toString() : null}
-                    name="longitudeInput"
-                    options={filterColumns(columnOptions, 'number')}
-                    onChange={value => onChangeMapLayer(layerIndex, {
-                      longitude: value,
-                    })}
-                  />
-                </div>
-                <hr />
+                <GeopointDataTab
+                  layer={layer}
+                  layerIndex={layerIndex}
+                  onChangeMapLayer={onChangeMapLayer}
+                  columnOptions={columnOptions}
+                  handlePointColorColumnChange={this.handlePointColorColumnChange}
+                  disabled={disabled}
+                />
+                <FilterMenu
+                  filters={layer.filters}
+                  hasDataset={layer.datasetId !== null}
+                  columnOptions={filterColumns(columnOptions, ['text', 'number', 'date'])}
+                  onChangeSpec={object => onChangeMapLayer(layerIndex, object)}
+                />
               </div>
             }
-            <div className="inputGroup">
-              <SelectInput
-                disabled={layer.datasetId === null || disabled}
-                placeholder="Select a geopoint column"
-                labelText="Geopoint column"
-                choice={layer.geom != null ? layer.geom.toString() : null}
-                name="geomInput"
-                options={filterColumns(columnOptions, 'geopoint')}
-                onChange={value => onChangeMapLayer(layerIndex, {
-                  geom: value,
-                  latitude: null,
-                  longitude: null,
-                })}
-              />
-            </div>
-            <div className="inputGroup">
-              <SelectInput
-                disabled={
-                  ((layer.latitude == null || layer.longitude == null) && layer.geom == null) ||
-                  disabled
-                }
-                placeholder="Select a data column to color points by"
-                labelText="Color coding column"
-                choice={layer.pointColorColumn != null ?
-                  layer.pointColorColumn.toString() : null}
-                name="xGroupColumnMenu"
-                options={filterColumns(columnOptions, ['text', 'number'])}
-                clearable
-                onChange={columnName =>
-                  this.handlePointColorColumnChange(columnName,
-                    columnOptions.find(option => option.value === columnName))}
-              />
-            </div>
-            <FilterMenu
-              filters={layer.filters}
-              hasDataset={layer.datasetId !== null}
-              columnOptions={filterColumns(columnOptions, ['text', 'number', 'date'])}
-              onChangeSpec={object => onChangeMapLayer(layerIndex, object)}
-            />
           </div>
         );
         break;
@@ -184,38 +493,14 @@ export default class LayerConfigMenu extends Component {
               disabled={disabled}
               className="inputGroup"
               checked={layer.legend.visible}
-              label="Legend"
+              label="Show legend"
               onChange={(val) => {
                 const legend = Object.assign({}, layer.legend);
                 legend.visible = val;
                 this.props.onChangeMapLayer(layerIndex, { legend });
               }}
             />
-            <hr />
-            <ButtonRowInput
-              options={['top', 'right', 'bottom', 'left'].map(item => ({
-                label: <FormattedMessage id={item} />,
-                value: item,
-              }))}
-              label="Position"
-              disabled={disabled}
-              selected={layer.legend.position}
-              onChange={(option) => {
-                const legend = Object.assign({}, layer.legend);
-                legend.position = option;
-                this.props.onChangeMapLayer(layerIndex, { legend });
-              }}
-            />
-            <hr
-              className="notImplemented"
-            />
-            <ToggleInput
-              className="inputGroup notImplemented"
-              disabled
-              checked={false}
-              label="Counters"
-              onChange={() => null}
-            />
+
           </div>
         );
         break;
@@ -269,72 +554,26 @@ export default class LayerConfigMenu extends Component {
         );
         break;
       case 'theme':
-        tabContent = (
-          <div
-            className="themeTab"
-          >
-            <h3>Marker</h3>
-            <ButtonRowInput
-              options={['circle', 'square', 'triangle'].map(item => ({
-                label: <FormattedMessage id={item} />,
-                value: item,
-              }))}
-              disabled
-              selected="circle"
-              label="Shape"
-              onChange={() => null}
-            />
-            <ButtonRowInput
-              options={['fill', 'outline'].map(item => ({
-                label: <FormattedMessage id={item} />,
-                value: item,
-              }))}
-              disabled
-              selected="fill"
-              label="Style"
-              onChange={() => null}
-              buttonSpacing="2rem"
-            />
-            <ButtonRowInput
-              options={['1', '2', '3', '4', '5'].map(item => ({
-                label: item,
-                value: item,
-              }))}
-              disabled={disabled}
-              selected={layer.pointSize ? layer.pointSize.toString() : null}
-              label="Size"
-              onChange={option => onChangeMapLayer(layerIndex, { pointSize: option })}
-            />
-            <hr />
-            <h3>Color</h3>
-            <ButtonRowInput
-              options={['solid', 'gradient'].map(item => ({
-                label: <FormattedMessage id={item} />,
-                value: item,
-              }))}
-              disabled
-              selected="solid"
-              label="Color option"
-              onChange={() => null}
-              buttonSpacing="2rem"
-            />
-            {layer.pointColorColumn &&
-              <div className="inputGroup">
-                <label
-                  htmlFor="colors"
-                >
-                  Colors ({columnOptions.find(obj => obj.value === layer.pointColorColumn).title})
-                </label>
-                <ColorLabels
-                  disabled={disabled}
-                  id="colors"
-                  pointColorMapping={layer.pointColorMapping}
-                  onChangeColor={(value, newColor) => this.handleChangeLabelColor(value, newColor)}
-                />
-              </div>
-            }
-          </div>
-        );
+        tabContent = layer.layerType === 'geo-shape' ?
+          (<GeoshapeThemeTab
+            onChangeMapLayer={this.props.onChangeMapLayer}
+            layer={layer}
+            disabled={disabled}
+            layerIndex={layerIndex}
+            columnOption={columnOptions}
+            colors={checkUndefined(metadata, 'layerMetadata', layerIndex, 'availableColors') || null}
+            gradientColor={checkUndefined(metadata, 'layerMetadata', layerIndex, 'shapeColorMapping', 1, 'color') || null}
+          />)
+          :
+          (<GeopointThemeTab
+            onChangeMapLayer={this.props.onChangeMapLayer}
+            layer={layer}
+            pointColorMapping={checkUndefined(metadata, 'layerMetadata', layerIndex, 'pointColorMapping') || []}
+            disabled={disabled}
+            layerIndex={layerIndex}
+            columnOptions={columnOptions}
+            handleChangeLabelColor={this.handleChangeLabelColor}
+          />);
         break;
 
       default:
@@ -356,20 +595,29 @@ export default class LayerConfigMenu extends Component {
     this.props.onChangeMapLayer(this.props.layerIndex, {
       legend,
       pointColorColumn: columnName,
-      pointColorMapping: [],
     });
   }
 
-  handleChangeLabelColor(value, color) {
-    const pointColorMapping = this.props.layer.pointColorMapping;
+  handleChangeLabelColor(pointColorMapping = [], value, color) {
+    /* TODO - we should change the name of the array of custom layer colors from
+    ** "pointColorMapping" to something else - like "customPointColors" - because it's
+    ** needlessly confusing to use the same name for the metadata returned by the maps backend
+    ** and the permanent record of custom colors picked by the users.
+    ** Leaving as-is for now because it will involve nontrivial compatibility work.
+    */
+    const newMapping = pointColorMapping.map((o) => {
+      if (o.value === value) {
+        return Object.assign(
+          {},
+          o,
+          { color }
+        );
+      }
+      return o;
+    });
 
     this.props.onChangeMapLayer(this.props.layerIndex, {
-      pointColorMapping: pointColorMapping.map((mapping) => {
-        if (mapping.value === value) {
-          return Object.assign({}, mapping, { color });
-        }
-        return mapping;
-      }),
+      pointColorMapping: newMapping,
     });
   }
 
@@ -429,6 +677,7 @@ export default class LayerConfigMenu extends Component {
 
 LayerConfigMenu.propTypes = {
   layer: PropTypes.object.isRequired,
+  metadata: PropTypes.object,
   datasets: PropTypes.object.isRequired,
   datasetOptions: PropTypes.array.isRequired,
   onChangeMapLayer: PropTypes.func.isRequired,

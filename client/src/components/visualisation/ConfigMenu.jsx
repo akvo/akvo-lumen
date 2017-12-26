@@ -189,6 +189,7 @@ export default function ConfigMenu(props) {
             {visualisation.visualisationType === 'map' ?
               <MapConfigMenu
                 visualisation={props.visualisation}
+                metadata={props.metadata}
                 onChangeSpec={props.onChangeVisualisationSpec}
                 onChangeVisualisationType={props.onChangeVisualisationType}
                 datasets={props.datasets}
@@ -197,6 +198,7 @@ export default function ConfigMenu(props) {
                 aggregationOptions={aggregationOptions}
                 onSave={props.onSaveVisualisation}
                 onChangeSourceDataset={props.onChangeSourceDataset}
+                loadDataset={props.loadDataset}
               />
             :
               <div>
@@ -253,9 +255,11 @@ Subtitle.propTypes = {
 
 ConfigMenu.propTypes = {
   visualisation: PropTypes.object.isRequired,
+  metadata: PropTypes.object,
   datasets: PropTypes.object.isRequired,
   onChangeSourceDataset: PropTypes.func.isRequired,
   onChangeVisualisationSpec: PropTypes.func.isRequired,
   onChangeVisualisationType: PropTypes.func.isRequired,
   onSaveVisualisation: PropTypes.func.isRequired,
+  loadDataset: PropTypes.func.isRequired,
 };

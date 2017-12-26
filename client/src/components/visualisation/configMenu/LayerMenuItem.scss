@@ -42,13 +42,18 @@
         }
 
         .titleContainer {
+            align-self: stretch;
+            display: flex;
             flex: 4;
             border: 2px solid transparent;
 
             /* So text position is same as input mode */
 
             .title {
+                display: flex;
                 flex: 1;
+                align-self: stretch;
+                align-items: center;
                 line-height: 1.4em;
             }
         }

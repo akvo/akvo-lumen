@@ -32,7 +32,7 @@ const getIsDatasetLoaded = (props) => {
       return true;
 
     case 'map':
-      return Boolean(props.item.visualisation.metadata);
+      return Boolean(props.metadata && props.metadata[props.item.visualisation.id]);
     default:
       return Boolean(props.datasets[props.item.visualisation.datasetId].get('columns'));
   }
@@ -123,6 +123,7 @@ export default class DashboardCanvasItem extends Component {
           >
             {getIsDatasetLoaded(this.props) ?
               <VisualisationViewer
+                metadata={this.props.metadata[this.props.item.visualisation.id]}
                 visualisation={this.props.item.visualisation}
                 datasets={this.props.datasets}
                 width={dimensions.width}
@@ -163,6 +164,7 @@ DashboardCanvasItem.propTypes = {
   item: PropTypes.object.isRequired,
   canvasWidth: PropTypes.number.isRequired,
   datasets: PropTypes.object.isRequired,
+  metadata: PropTypes.object,
   onEntityUpdate: PropTypes.func.isRequired,
   onDeleteClick: PropTypes.func.isRequired,
 };

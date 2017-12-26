@@ -82,6 +82,7 @@ export default class DashboardVisualisationList extends Component {
                 <li
                   className={`listItem clickable ${item.visualisationType.replace(' ', '')}
                   ${isOnDashboard(item) ? 'added' : ''}`}
+                  data-test-name={item.name}
                   key={item.id}
                   onClick={() => props.onEntityClick(item, 'visualisation')}
                 >

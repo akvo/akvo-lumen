@@ -49,14 +49,15 @@
 
 (defmethod visualisation "map"
   [tenant-conn visualisation {:keys [windshaft-url]}]
-  (let [dataset-id (:datasetId visualisation)
-        layer (get-in visualisation [:spec "layers" 0])
-        [map-data-tag map-data] (maps/create tenant-conn windshaft-url dataset-id layer)
+  (let [layers (get-in visualisation [:spec "layers"])
+        dataset-id (some #(get % "datasetId") layers)
+        [map-data-tag map-data] (maps/create tenant-conn windshaft-url layers)
         [dataset-tag dataset] (dataset/fetch tenant-conn dataset-id)]
     (when (and (= map-data-tag ::lib/ok)
                (= dataset-tag ::lib/ok))
       {"datasets" {dataset-id (dissoc dataset :rows)}
-       "visualisations" {(:id visualisation) (merge visualisation map-data)}})))
+       "visualisations" {(:id visualisation) (merge visualisation map-data)}
+       "metadata" {(:id visualisation) map-data}})))
 
 (defmethod visualisation :default
   [tenant-conn visualisation config]
@@ -80,6 +81,7 @@
                       (filter #(= "visualisation" (get % "type")))
                       (map #(get % "id"))
                       (map #(visualisation-response-data tenant-conn % config))
+                      (sort-by #(-> % (get "datasets") vals first (get :rows) boolean))
                       (apply merge-with merge))]
         (assoc deps "dashboards" {id dashboard})))))
 

@@ -133,6 +133,7 @@
   "remove_leading_and_trailing_whitespace": "Remove leading and trailing whitespace",
   "removed_double_space": "{title} removed double space",
   "rename_column": "Rename column",
+  "reverse_geocode": "Reverse geocode",
   "resources": "Resources",
   "right": "Right",
   "row_column_title": "Row column title",

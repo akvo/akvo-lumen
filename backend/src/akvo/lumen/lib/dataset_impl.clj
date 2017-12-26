@@ -9,6 +9,7 @@
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
 (hugsql/def-db-fns "akvo/lumen/job-execution.sql")
 
 (defn all [tenant-conn]
@@ -66,7 +67,7 @@
       (do
         (delete-failed-job-execution-by-id tenant-conn {:id id})
         (lib/not-found {:error "Not found"}))
-      (lib/ok {:id id}))))
+      (let [v (delete-maps-by-dataset-id tenant-conn {:id id})](lib/ok {:id id})))))
 
 (defn update [tenant-conn config dataset-id {refresh-token "refreshToken"}]
   (if-let [{data-source-spec :spec

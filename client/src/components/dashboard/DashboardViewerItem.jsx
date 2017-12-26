@@ -57,6 +57,8 @@ export default class DashboardViewerItem extends Component {
   }
 
   render() {
+    const isText = this.props.item.type === 'text';
+    const isVisualisation = this.props.item.type === 'visualisation';
     const style = this.getItemStyle();
 
     return (
@@ -64,19 +66,21 @@ export default class DashboardViewerItem extends Component {
         className={`DashboardViewerItem DashboardCanvasItem ${this.props.item.type}`}
         style={style}
       >
-        {this.props.item.type === 'visualisation' &&
+        {isVisualisation &&
           <div
             className="itemContainer visualisation"
           >
             <AsyncVisualisationViewer
               visualisation={this.props.item.visualisation}
+              metadata={this.props.metadata ?
+                this.props.metadata[this.props.item.visualisation.id] : null}
               datasets={this.props.datasets}
               width={style.width - (cPadding * 2)}
               height={style.height - (cPadding * 2)}
             />
           </div>
         }
-        {this.props.item.type === 'text' &&
+        {isText &&
           <div
             className="itemContainer text"
             style={{
@@ -98,5 +102,6 @@ DashboardViewerItem.propTypes = {
   canvasWidth: PropTypes.number.isRequired,
   viewportType: PropTypes.oneOf(['small', 'medium', 'large']),
   datasets: PropTypes.object,
+  metadata: PropTypes.object,
 };
 

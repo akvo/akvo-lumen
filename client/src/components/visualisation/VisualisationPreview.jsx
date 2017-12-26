@@ -67,12 +67,13 @@ function shouldRender(visualisation, datasets) {
   return true;
 }
 
-export default function CreateVisualisationPreview({ visualisation, datasets }) {
+export default function CreateVisualisationPreview({ visualisation, metadata, datasets }) {
   return (
     <div className="VisualisationPreview">
       {shouldRender(visualisation, datasets) ?
         <VisualisationViewer
           visualisation={visualisation}
+          metadata={metadata}
           datasets={datasets}
           context="editor"
           height={visualisation.visualisationType === 'map' ? null : 400}
@@ -86,5 +87,6 @@ export default function CreateVisualisationPreview({ visualisation, datasets }) 
 
 CreateVisualisationPreview.propTypes = {
   visualisation: PropTypes.object.isRequired,
+  metadata: PropTypes.object,
   datasets: PropTypes.object.isRequired,
 };
