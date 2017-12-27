@@ -9,3 +9,9 @@ module.exports.renderer = {
         bufferSize: 0 // no need for a buffer as it is just useful if we have labels/tags in the map.
     }
 };
+
+module.exports.grainstore = {
+    datasource: {
+	use_overviews: true
+    }
+};
