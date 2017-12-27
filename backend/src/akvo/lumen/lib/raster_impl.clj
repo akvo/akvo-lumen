@@ -14,6 +14,17 @@
 (hugsql/def-db-fns "akvo/lumen/lib/raster.sql")
 (hugsql/def-db-fns "akvo/lumen/job-execution.sql")
 
+(defn get-raster-info
+  "Returns a JSON representation of gdalinfo output or nil if
+  something goes wrong"
+  [path filename]
+  (let [src (str path "/" filename)
+        info (try
+               (shell/sh "gdalinfo" "-json" src)
+               (catch Exception _))]
+    (when info
+      (json/parse-string (:out info)))))
+
 (defn project-and-compress
   "Reprojects and compress a GeoTIFF using ESPG:3857 and LZW"
   [path filename]
@@ -22,7 +33,7 @@
         dst (str path "/" new-file)]
     {:filename new-file
      :path path
-     :shell (shell/sh "gdalwarp" "-ot" "Byte" "-co" "COMPRESS=LZW" "-t_srs" "EPSG:3857" src dst)}))
+     :shell (shell/sh "gdalwarp" "-co" "COMPRESS=LZW" "-t_srs" "EPSG:3857" src dst)}))
 
 (defn get-raster-data-as-sql
   [path filename table-name]
