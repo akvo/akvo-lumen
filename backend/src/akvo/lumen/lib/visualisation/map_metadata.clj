@@ -149,9 +149,15 @@
     {"columnTitles" column-titles
      "boundingBox" (bounds tenant-conn table-name layer where-clause)}))
 
+(defn raster-metadata [tenant-conn table-name layer where-clause]
+{})
+
 (defn get-metadata [{:strs [aggregationDataset aggregationColumn aggregationGeomColumn layerType]
                      :as layer}]
   (cond
+    (= layerType "raster")
+    raster-metadata
+
     (and aggregationDataset aggregationColumn aggregationGeomColumn)
     shape-aggregation-metadata
 

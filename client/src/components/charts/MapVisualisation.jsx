@@ -106,6 +106,28 @@ const LegendEntry = ({ singleMetadata, layer }) => (
         </div>
       </div>
     }
+    {Boolean(layer.layerType === 'raster') &&
+      <div className="container">
+        <h4>{layer.title}</h4>
+        <h5>Raster layer</h5>
+        <div className="contents">
+          <div className="gradientContainer">
+            <p className="gradientLabel min">
+              Min
+            </p>
+            <p className="gradientLabel max">
+              Max
+            </p>
+            <div
+              className="gradientDisplay"
+              style={{
+                background: `linear-gradient(90deg,${layer.startColor},${layer.endColor})`,
+              }}
+            />
+          </div>
+        </div>
+      </div>
+    }
   </div>
 );
 
@@ -122,7 +144,8 @@ const Legend = ({ layers, layerMetadata }) => {
         layer.legend.visible &&
         metadata &&
         (metadata.pointColorMapping || metadata.shapeColorMapping)
-      );
+      ) ||
+      layer.layerType === 'raster';
 
     return showLayer ? layer : null;
   });

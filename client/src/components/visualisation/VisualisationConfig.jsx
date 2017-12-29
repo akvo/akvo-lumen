@@ -15,6 +15,7 @@ export default function VisualisationConfig(props) {
         visualisation={props.visualisation}
         metadata={props.metadata}
         datasets={props.datasets}
+        rasters={props.rasters}
         onChangeSourceDataset={props.onChangeSourceDataset}
         onChangeVisualisationSpec={props.onChangeVisualisationSpec}
         onChangeVisualisationType={props.onChangeVisualisationType}

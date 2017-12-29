@@ -193,6 +193,7 @@ export default function ConfigMenu(props) {
                 onChangeSpec={props.onChangeVisualisationSpec}
                 onChangeVisualisationType={props.onChangeVisualisationType}
                 datasets={props.datasets}
+                rasters={props.rasters}
                 datasetOptions={getDatasetOptions(getDatasetArray(props.datasets))}
                 columnOptions={columnOptions}
                 aggregationOptions={aggregationOptions}

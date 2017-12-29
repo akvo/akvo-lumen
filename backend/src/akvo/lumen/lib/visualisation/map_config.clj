@@ -4,6 +4,7 @@
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/raster.sql")
 
 (defn layer-point-color [layer-index]
   ({0 "#2ca409"
@@ -271,6 +272,10 @@
                         aggregationGeomColumn layerType]
                  :as layer} layer-index]
   (cond
+
+    (= layerType "raster")
+    (format "SELECT * FROM %s" table-name)
+
     (and aggregationDataset aggregationColumn aggregationGeomColumn)
     (shape-aggregation-sql tenant-conn columns table-name geom-column
                            popup-columns point-color-column where-clause layer
@@ -298,8 +303,19 @@
       (format "ST_SetSRID(ST_MakePoint(%s, %s), 4326) AS latlong"
               longitude latitude))))
 
+(defn raster-css [start-color end-color]
+(format "#r {
+  raster-colorizer-epsilon: 0.5;
+  raster-opacity: 0.8;
+  raster-colorizer-default-mode: linear;
+  raster-colorizer-default-color: transparent;
+  raster-colorizer-stops:
+    stop(0, %s)
+    stop(240, %s);
+}" (if start-color start-color "white") (if end-color end-color "green")))
+
 (defn get-layers [tenant-conn layers metadata-array table-name]
-  (map-indexed (fn [idx {:strs [datasetId filters geom popup pointColorColumn]
+  (map-indexed (fn [idx {:strs [datasetId rasterId filters geom popup pointColorColumn]
                          :as layer}]
                  (let [geom-column (get-geom-column layer)
                        {:keys [columns]} (dataset-by-id tenant-conn {:id datasetId})
@@ -310,13 +326,29 @@
                                     popup-columns point-color-column
                                     where-clause layer idx)]
                    #_(prn (get-sql columns table-name geom-column popup-columns point-color-column where-clause layer idx conn))
-                   {"type" "mapnik"
+                   (if (= (get layer "layerType") "raster")
+
+                    (let [{:keys [raster_table]} (raster-by-id tenant-conn {:id (get layer "rasterId")})]
+                      (prn "@debugging")
+                      (prn raster_table)
+                    {"type" "mapnik"
+                    "options" {"cartocss" (raster-css (get layer "startColor") (get layer "endColor"))
+                               "cartocss_version" "2.3.0"
+                               "geom_column" "rast"
+                               "geom_type" "raster"
+                               "raster_band" 1
+                               "sql" (format "SELECT * FROM %s" raster_table)
+                               "srid" "3857"}})
+
+                    {"type" "mapnik"
                     "options" {"cartocss" (trim-css (cartocss layer idx metadata-array))
                                "cartocss_version" "2.0.0"
                                "geom_column" (or geom "latlong")
                                "interactivity" (get-interactivity layer popup-columns)
                                "sql" sql
-                               "srid" "4326"}}))
+                               "srid" "4326"}})
+
+                   ))
                layers))
 
 (defn build [tenant-conn table-name layers metadata-array]
@@ -326,21 +358,10 @@
                  "mvt" 0}
    "layers" (get-layers tenant-conn layers metadata-array table-name)})
 
-(defn raster-css []
-"#r {
-  raster-colorizer-epsilon: 0.5;
-  raster-opacity: 0.5;
-  raster-colorizer-default-mode: linear;
-  raster-colorizer-default-color: transparent;
-  raster-colorizer-stops:
-    stop(0, yellow)
-    stop(240, green);
-}")
-
 (defn build-raster [table-name]
   {"version" "1.6.0"
    "layers" [{"type" "mapnik"
-              "options" {"cartocss" (raster-css)
+              "options" {"cartocss" (raster-css nil nil)
                          "cartocss_version" "2.3.0"
                          "geom_column" "rast"
                          "geom_type" "raster"

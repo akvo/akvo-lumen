@@ -170,6 +170,7 @@ export default class MapConfigMenu extends Component {
               metadata={this.props.metadata}
               onDeselectLayer={() => this.setState({ selectedLayer: null })}
               datasets={this.props.datasets}
+              rasters={this.props.rasters}
               datasetOptions={this.props.datasetOptions}
               onChangeMapLayer={this.handleChangeMapLayer}
               onSave={this.props.onSave}

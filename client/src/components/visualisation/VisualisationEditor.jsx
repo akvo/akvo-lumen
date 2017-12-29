@@ -26,7 +26,7 @@ const specIsValidForApi = (spec, vType) => {
         return false;
       }
       if (spec.layers.some(
-        layer => Boolean(!layer.geom && (!layer.latitude || !layer.longitude)))
+        layer => Boolean(!layer.geom && (!layer.latitude || !layer.longitude) && !layer.rasterId))
       ) {
         return false;
       }
@@ -60,6 +60,7 @@ const getNeedNewAggregation = (newV = { spec: {} }, oldV = { spec: {} }, optiona
     case 'map':
       return Boolean(
         newV.datasetId !== oldV.datasetId ||
+        newV.rasterId !== oldV.rasterId ||
         newV.aggregationDataset !== oldV.aggregationDataset ||
         newV.aggregationColumn !== oldV.aggregationColumn ||
         newV.aggregationGeomColumn !== oldV.aggregationGeomColumn ||
@@ -71,6 +72,8 @@ const getNeedNewAggregation = (newV = { spec: {} }, oldV = { spec: {} }, optiona
         newV.pointColorColumn !== oldV.pointColorColumn ||
         newV.pointSize !== oldV.pointSize ||
         newV.gradientColor !== oldV.gradientColor ||
+        newV.startColor !== oldV.startColor ||
+        newV.endColor !== oldV.endColor ||
         !isEqual(newV.filters, oldV.filters) ||
         !isEqual(newV.popup, oldV.popup) ||
         !isEqual(newV.pointColorMapping, oldV.pointColorMapping)
@@ -286,6 +289,7 @@ export default class VisualisationEditor extends Component {
           visualisation={visualisation}
           metadata={metadata}
           datasets={props.datasets}
+          rasters={props.rasters}
           onChangeVisualisationType={props.onChangeVisualisationType}
           onChangeSourceDataset={props.onChangeSourceDataset}
           onChangeVisualisationSpec={props.onChangeVisualisationSpec}
