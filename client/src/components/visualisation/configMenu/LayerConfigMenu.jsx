@@ -764,7 +764,7 @@ export default class LayerConfigMenu extends Component {
 RasterThemeTab.propTypes = {
   startColor: PropTypes.string,
   endColor: PropTypes.string,
-  onChangeMapLayer: PropTypes.fun.isRequired,
+  onChangeMapLayer: PropTypes.func.isRequired,
   disabled: PropTypes.bool,
   layerIndex: PropTypes.number.isRequired,
 };
