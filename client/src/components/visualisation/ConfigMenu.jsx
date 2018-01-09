@@ -258,6 +258,7 @@ ConfigMenu.propTypes = {
   visualisation: PropTypes.object.isRequired,
   metadata: PropTypes.object,
   datasets: PropTypes.object.isRequired,
+  rasters: PropTypes.object.isRequired,
   onChangeSourceDataset: PropTypes.func.isRequired,
   onChangeVisualisationSpec: PropTypes.func.isRequired,
   onChangeVisualisationType: PropTypes.func.isRequired,

@@ -198,11 +198,13 @@ MapConfigMenu.propTypes = {
   visualisation: PropTypes.object.isRequired,
   metadata: PropTypes.object,
   datasets: PropTypes.object.isRequired,
+  rasters: PropTypes.object.isRequired,
   onChangeSpec: PropTypes.func.isRequired,
   aggregationOptions: PropTypes.array.isRequired,
   onChangeSourceDataset: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
   onChangeVisualisationType: PropTypes.func.isRequired,
+  onChangeMapLayer: PropTypes.func.isRequired,
   datasetOptions: PropTypes.array.isRequired,
   loadDataset: PropTypes.func.isRequired,
 };

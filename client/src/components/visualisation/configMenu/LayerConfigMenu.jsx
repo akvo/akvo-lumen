@@ -305,26 +305,14 @@ GeoshapeDataTab.propTypes = {
   disabled: PropTypes.bool,
 };
 
-const RasterDataTab = (props) => {
-  const { layer,
-    layerIndex,
-    onChangeMapLayer,
-    columnOptions,
-    datasetOptions,
-    datasets,
-    disabled,
-  } = props;
-
-  const aggregationColumns = getAggregationColumns(layer, datasets);
-
-  return (
+const RasterDataTab = () =>
+  (
     <div className="RasterDataTab">
       <div className="inputGroup">
       (no options yet)
       </div>
     </div>
   );
-};
 
 RasterDataTab.propTypes = {
   layer: PropTypes.object.isRequired,
@@ -433,7 +421,6 @@ const RasterThemeTab = (props) => {
   const {
     onChangeMapLayer,
     layerIndex,
-    gradientColor,
     disabled,
     startColor,
     endColor,
@@ -444,7 +431,7 @@ const RasterThemeTab = (props) => {
       className="themeTab"
     >
       <ColorLabels
-        pointColorMapping={[{ value: 'startColor', color: startColor || '#FFFFFF' }, { value: 'endColor', color: endColor || '#000000' }, ]}
+        pointColorMapping={[{ value: 'startColor', color: startColor || '#FFFFFF' }, { value: 'endColor', color: endColor || '#000000' }]}
         colorPalette={palette}
         disabled={disabled}
         onChangeColor={(value, color) => {
@@ -774,12 +761,23 @@ export default class LayerConfigMenu extends Component {
   }
 }
 
+RasterThemeTab.propTypes = {
+  startColor: PropTypes.string,
+  endColor: PropTypes.string,
+  onChangeMapLayer: PropTypes.fun.isRequired,
+  disabled: PropTypes.bool,
+  layerIndex: PropTypes.number.isRequired,
+};
+
 LayerConfigMenu.propTypes = {
   layer: PropTypes.object.isRequired,
   metadata: PropTypes.object,
   datasets: PropTypes.object.isRequired,
-  datasetOptions: PropTypes.array.isRequired,
+  rasters: PropTypes.object.isRequired,
+  startColor: PropTypes.string,
+  endColor: PropTypes.string,
   onChangeMapLayer: PropTypes.func.isRequired,
+  datasetOptions: PropTypes.array.isRequired,
   onDeselectLayer: PropTypes.func.isRequired,
   layerIndex: PropTypes.number.isRequired,
   onSave: PropTypes.func.isRequired,
