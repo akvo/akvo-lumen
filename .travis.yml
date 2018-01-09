@@ -16,8 +16,14 @@ before_install:
   - echo "HOST_UID=$(id -u)" >> .env
   - echo "HOST_GID=$(id -g)" >> .env
   - docker pull alekzonder/puppeteer:0.13.0
-  - for c in $(find -name 'Dockerfile*' -exec grep FROM {} \; | sed 's/^FROM //'); do docker pull "$c"; done;
-  - for c in $(grep 'image:' docker-compose.yml | sed 's/^.*image: //'); do docker pull "$c"; done;
+  - |
+      for c in $(find -name 'Dockerfile*' -exec grep FROM {} \; | sed 's/^FROM //'); do
+        docker pull "$c"
+      done
+  - |
+      for c in $(grep 'image:' docker-compose.yml | sed 's/^.*image: //'); do
+        docker pull "$c"
+      done
   - |
       while sudo lsof -Pi :5432 -sTCP:LISTEN -t; do
          echo "Waiting for postgresql to stop for real."
