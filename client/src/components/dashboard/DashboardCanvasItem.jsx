@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import VisualisationViewer from '../charts/VisualisationViewer';
 import DashboardCanvasItemEditable from './DashboardCanvasItemEditable';
+import { checkUndefined } from '../../utilities/utils';
 
 require('./DashboardCanvasItem.scss');
 
@@ -123,7 +124,7 @@ export default class DashboardCanvasItem extends Component {
           >
             {getIsDatasetLoaded(this.props) ?
               <VisualisationViewer
-                metadata={this.props.metadata[this.props.item.visualisation.id]}
+                metadata={checkUndefined(this.props, 'metadata', this.props.item.visualisation.id)}
                 visualisation={this.props.item.visualisation}
                 datasets={this.props.datasets}
                 width={dimensions.width}
