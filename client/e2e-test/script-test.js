@@ -21,6 +21,10 @@
 
 const puppeteer = require('puppeteer');
 
+const util = require('util');
+
+const exec = util.promisify(require('child_process').exec);
+
 const datasetName = Date.now().toString();
 
 const TIMEOUT = {
@@ -128,10 +132,11 @@ const TIMEOUT = {
     console.log(`Visualisation ${datasetName} was successfully created.\n`);
 
     // Dashboard
+    console.log('Back to library');
     await page.click('[data-test-id="back-button"]');
-    await page.waitForSelector('button[data-test-id="dashboard"]', { timeout: TIMEOUT.waitFor });
+    await page.waitForSelector('[data-test-id="dashboard"]', { timeout: TIMEOUT.waitFor });
     console.log('Accessing to dashboard creation...');
-    await page.click('button[data-test-id="dashboard"]');
+    await page.click('[data-test-id="dashboard"]');
     console.log('Selecting visualisation...');
     await page.waitForSelector(`[data-test-name="Visualisation of ${datasetName}"]`, { timeout: TIMEOUT.waitFor });
     await page.click(`[data-test-name="Visualisation of ${datasetName}"]`);
@@ -145,6 +150,13 @@ const TIMEOUT = {
     await page.click('[data-test-id="back-button"]');
     console.log(`Dashboard ${datasetName} was successfully created.\n`);
   } catch (err) {
+    try {
+      await page.screenshot({ path: `/tmp/${datasetName}.png` });
+      const { stdout } = await exec(`curl --upload-file /tmp/${datasetName}.png "https://transfer.sh/${datasetName}.png"`);
+      console.log(stdout);
+    } catch (err2) {
+      console.log(err2);
+    }
     console.log(err);
     process.exit(1);
   } finally {
