@@ -18,7 +18,7 @@ before_install:
   - echo "HOST_UID=$(id -u)" >> .env
   - echo "HOST_GID=$(id -g)" >> .env
   - if [[ -f "$HOME/.docker/puppeteer.tar" ]]; then docker load -i "$HOME/.docker/puppeteer.tar"; fi;
-  - if [[ -f "$HOME/.docker/base-images.tar" ]]; then; docker load -i "$HOME/.docker/base-images.tar"; fi;
+  - if [[ -f "$HOME/.docker/base-images.tar" ]]; then docker load -i "$HOME/.docker/base-images.tar"; fi;
   - |
       find -name 'Dockerfile*' -exec grep FROM {} \; | sed 's/^FROM //' >> /tmp/base-images.txt
       grep 'image:' docker-compose.yml | sed 's/^.*image: //' >> /tmp/base-images.txt
