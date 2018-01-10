@@ -37,11 +37,34 @@
 
 (defn get-raster-data-as-sql
   [path filename table-name]
-  (let [shell (shell/sh "raster2pgsql" "-a" "-t" "256x256" "-s" "3857" (str path "/" filename) table-name)]
+  (let [shell (shell/sh "raster2pgsql" "-a" "-t" "128x128" "-s" "3857" (str path "/" filename) table-name)]
     (if (zero? (:exit shell))
       (:out shell)
       (prn (:err shell)))))
 
+;; https://github.com/CartoDB/cartodb/wiki/Automatic-raster-overviews
+;; For PostGIS-Rasters-Support, the importer could use 'gdalinfo' to
+;; extract the raster size in pixel and then specify overviews as
+;; powers of 2 (2,4,8,16...) until the one that would result in a
+;; single 256 tile being generated.
+;; Example:
+;; * gdalinfo HYP_HR.tif | grep '^Size is ' # Size is 21600, 10800
+;; * take larger dimension: 21600
+;; * compute max power of 2 needed: ceil(log2(21600/256)) == 7
+;; * overviews are: 2^1, 2^2, 2^3, 2^4, 2^5, 2^6, 2^7,
+;; * so: raster2pgsql -l 2,4,8,16,32,64,128
+;; We can play with the parameters to for example
+;; stop when we have a 4-tiles coverage:
+;; ceil(log2(max_dim/tile_size*max_tiles_per_side))
+
+(defn get-overviews
+  [raster-info]
+  (let [tile-size 256
+        max-size (apply max (raster-info "size"))
+        log-2 (/ (Math/log (/ max-size tile-size)) (Math/log 2))
+        ceil (int (Math/ceil log-2))]
+    (for [i (range 1 (inc ceil))]
+      (int (Math/pow 2 i)))))
 
 (defn all [conn]
   (lib/ok (all-rasters conn)))
