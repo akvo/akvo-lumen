@@ -6,6 +6,7 @@ services:
   - docker
 
 cache:
+  timeout: 600 # 10min
   directories:
     - $HOME/.m2
     - $HOME/.lein
