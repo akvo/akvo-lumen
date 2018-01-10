@@ -9,21 +9,23 @@ cache:
   directories:
     - $HOME/.m2
     - $HOME/.lein
+    - $HOME/.docker
 
 before_install:
   - if [[ ! -d "$HOME/.m2" ]]; then mkdir "$HOME/.m2"; fi;
   - if [[ ! -d "$HOME/.lein" ]]; then mkdir "$HOME/.lein"; fi;
+  - if [[ ! -d "$HOME/.docker" ]]; then mkdir "$HOME/.docker"; fi;
   - echo "HOST_UID=$(id -u)" >> .env
   - echo "HOST_GID=$(id -g)" >> .env
-  - docker pull alekzonder/puppeteer:0.13.0
+  - if [[ -f "$HOME/.docker/puppeteer.tar" ]]; then docker load -i "$HOME/.docker/puppeteer.tar"; fi;
+  - if [[ -f "$HOME/.docker/base-images.tar" ]]; then; docker load -i "$HOME/.docker/base-images.tar"; fi;
   - |
-      for c in $(find -name 'Dockerfile*' -exec grep FROM {} \; | sed 's/^FROM //'); do
+      find -name 'Dockerfile*' -exec grep FROM {} \; | sed 's/^FROM //' >> /tmp/base-images.txt
+      grep 'image:' docker-compose.yml | sed 's/^.*image: //' >> /tmp/base-images.txt
+      for c in $(cat /tmp/base-images.txt); do
         docker pull "$c"
       done
-  - |
-      for c in $(grep 'image:' docker-compose.yml | sed 's/^.*image: //'); do
-        docker pull "$c"
-      done
+      docker pull alekzonder/puppeteer:0.13.0
   - |
       while sudo lsof -Pi :5432 -sTCP:LISTEN -t; do
          echo "Waiting for postgresql to stop for real."
@@ -33,6 +35,9 @@ before_install:
 
 script:
   - ./ci/build.sh
+
+before_cache:
+  - if [[ -f "/tmp/base-images.txt" ]]; then docker save -o "$HOME/.docker/base-images.tar" $(cat /tmp/base-images.txt); fi;
 
 after_failure:
   - docker-compose logs --no-color
