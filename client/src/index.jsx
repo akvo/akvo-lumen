@@ -5,6 +5,7 @@ import { syncHistoryWithStore } from 'react-router-redux';
 import Root from './containers/Root';
 import configureStore from './store/configureStore';
 import * as auth from './auth';
+import polyfill from './polyfill/polyfill';
 
 function initAuthenticated(profile, env) {
   const initialState = { profile, env };
@@ -24,6 +25,8 @@ function initNotAuthenticated(msg) {
   document.querySelector('#root').innerHTML = msg;
 }
 
-auth.init()
-  .then(({ profile, env }) => initAuthenticated(profile, env))
-  .catch(err => initNotAuthenticated(err.message));
+polyfill(() => {
+  auth.init()
+    .then(({ profile, env }) => initAuthenticated(profile, env))
+    .catch(err => initNotAuthenticated(err.message));
+});
