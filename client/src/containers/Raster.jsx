@@ -37,7 +37,8 @@ class Raster extends Component {
     api.post('/api/visualisations/rasters', { rasterId })
       .then(response => response.json())
       .then((layergroup) => {
-        this.setState({ layerGroupId: layergroup.layerGroupId });
+        this.setState({ layerGroupId: layergroup.layerGroupId,
+          layerMetadata: layergroup.layerMetadata });
         this.renderLeafletMap();
       })
       .catch((error) => {
@@ -52,7 +53,7 @@ class Raster extends Component {
   }
 
   renderLeafletMap() {
-    const { layerGroupId } = this.state;
+    const { layerGroupId, layerMetadata } = this.state;
 
     const baseURL = '/maps/layergroup';
     const xCenter = [0, 0];
@@ -65,6 +66,10 @@ class Raster extends Component {
     if (!this.map) {
       map = L.map(node).setView(xCenter, xZoom);
       map.scrollWheelZoom.disable();
+      map.setMaxZoom(12);
+      if (layerMetadata.boundingBox) {
+        map.fitBounds(layerMetadata.boundingBox);
+      }
       this.map = map;
     } else {
       map = this.map;
