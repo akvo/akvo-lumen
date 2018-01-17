@@ -312,7 +312,7 @@
   raster-colorizer-stops:
     stop(0, %s)
     stop(240, %s);
-}" (if start-color start-color "white") (if end-color end-color "green")))
+}" (if start-color start-color "#aeaeae") (if end-color end-color "black")))
 
 (defn get-layers [tenant-conn layers metadata-array table-name]
   (map-indexed (fn [idx {:strs [datasetId rasterId filters geom popup pointColorColumn]
@@ -325,12 +325,8 @@
                        sql (get-sql tenant-conn columns table-name geom-column
                                     popup-columns point-color-column
                                     where-clause layer idx)]
-                   #_(prn (get-sql columns table-name geom-column popup-columns point-color-column where-clause layer idx conn))
                    (if (= (get layer "layerType") "raster")
-
                     (let [{:keys [raster_table]} (raster-by-id tenant-conn {:id (get layer "rasterId")})]
-                      (prn "@debugging")
-                      (prn raster_table)
                     {"type" "mapnik"
                     "options" {"cartocss" (raster-css (get layer "startColor") (get layer "endColor"))
                                "cartocss_version" "2.3.0"

@@ -9,7 +9,8 @@
             [clojure.java.shell :as shell]
             [clojure.string :as str]
             [hugsql.core :as hugsql])
-  (:import [java.util UUID]))
+  (:import [java.util UUID]
+           [org.postgresql.util PGobject]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/raster.sql")
 (hugsql/def-db-fns "akvo/lumen/job-execution.sql")
@@ -24,6 +25,10 @@
                (catch Exception _))]
     (when info
       (json/parse-string (:out info)))))
+
+(defn bbox [{:strs [cornerCoordinates]}]
+  (when cornerCoordinates
+    [(cornerCoordinates "lowerLeft") (cornerCoordinates "upperRight")]))
 
 (defn project-and-compress
   "Reprojects and compress a GeoTIFF using ESPG:3857 and LZW"
@@ -75,19 +80,34 @@
         path (.getAbsolutePath (.getParentFile file))
         filename (.getName file)
         table-name (util/gen-table-name "raster")
+        raster-info (get-raster-info path filename)
         prj (project-and-compress path filename)
         sql (get-raster-data-as-sql (:path prj) (:filename prj) table-name)]
-    ;; FIXME this is the happy path
-    (create-raster-table conn {:table-name table-name})
-    (create-raster-index conn {:table-name table-name})
-    (jdbc/execute! conn [sql])
-    (add-raster-constraints conn {:table-name table-name})
-    (insert-raster conn {:id (util/squuid)
-                         :title (data-source "name")
-                         :description (get-in data-source ["source" "fileName"])
-                         :job-execution-id job-execution-id
-                         :raster-table table-name})
-    (update-successful-job-execution conn {:id job-execution-id})))
+
+    (try
+      (create-raster-table conn {:table-name table-name})
+      (create-raster-index conn {:table-name table-name})
+      (jdbc/execute! conn [sql])
+      (add-raster-constraints conn {:table-name table-name})
+      (vacuum-raster-table conn
+                           {:table-name table-name}
+                           {}
+                           {:transaction? false})
+      (let [stats (raster-stats conn {:table-name table-name})
+            metadata (merge {:bbox (bbox raster-info)}
+                            stats)]
+        (insert-raster conn {:id (util/squuid)
+                             :title (data-source "name")
+                             :description (get-in data-source ["source" "fileName"])
+                             :job-execution-id job-execution-id
+                             :metadata (doto (PGobject.)
+                                         (.setType "jsonb")
+                                         (.setValue (json/generate-string metadata)))
+                             :raster-table table-name})
+        (update-successful-job-execution conn {:id job-execution-id}))
+      (catch Exception e
+        (update-failed-job-execution conn {:id job-execution-id
+                                           :reason (.getMessage e)})))))
 
 (defn create [conn config claims data-source]
   (let [data-source-id (str (util/squuid))

@@ -27,8 +27,8 @@ SELECT id, title, NULL, 'OK', modified, created
 
 -- :name insert-raster :! :n
 -- :doc Insert new raster dataset
-INSERT INTO raster_dataset (id, title, description, job_execution_id, raster_table)
-VALUES (:id, :title, :description, :job-execution-id, :raster-table);
+INSERT INTO raster_dataset (id, title, description, job_execution_id, raster_table, metadata)
+VALUES (:id, :title, :description, :job-execution-id, :raster-table, :metadata);
 
 -- :name create-raster-table :!
 -- :doc Creates a raster table
@@ -52,4 +52,13 @@ SELECT COUNT(*) AS c FROM :i:table-name;
 
 -- :name raster-by-id :? :1
 -- :doc Returns a raster table by id
-SELECT * FROM raster_dataset WHERE id = :id
+SELECT * FROM raster_dataset WHERE id = :id;
+
+-- :name vacuum-raster-table :!
+-- :doc Executes VACUUM on a table - https://www.postgresql.org/docs/9.6/static/sql-vacuum.html
+VACUUM ANALYZE :i:table-name;
+
+-- :name raster-stats :? :1
+-- :doc selects count,sum,mean,stddev,min,max
+SELECT stats.count, stats.sum, stats.mean, stats.stddev, stats.min, stats.max
+  FROM ST_SummaryStats(:table-name::name, 'rast'::name, 1, true) AS stats;
