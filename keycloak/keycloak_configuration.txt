@@ -1,0 +1,2 @@
+embed-server --server-config=standalone.xml --std-out=echo
+/subsystem=keycloak-server/theme=defaults/:write-attribute(name=default,value=akvo)
