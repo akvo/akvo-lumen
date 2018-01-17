@@ -1,0 +1,13 @@
+body {
+  background-image: url("../img/pattern.png");
+  background-repeat: repeat;
+  background-color: #0f0f0f;
+  background-size: auto;
+}
+
+.login-pf body {
+  background-image: url("../img/pattern.png");
+  background-repeat: repeat;
+  background-color: #0f0f0f;
+  background-size: auto;
+}
