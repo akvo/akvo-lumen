@@ -62,8 +62,7 @@
 
 (defn conform-create-args [layers]
   (let [dataset-id (get (first (filter (fn[layer] (engine/valid-dataset-id? (get layer "datasetId"))) layers)) "datasetId")
-        raster-id (get (first (filter (fn[layer] (engine/valid-dataset-id? (get layer "rasterId"))) layers)) "rasterId")
-        ]
+        raster-id (get (first (filter (fn[layer] (engine/valid-dataset-id? (get layer "rasterId"))) layers)) "rasterId")]
     (cond
       (and (not dataset-id) (not raster-id))
       (throw (ex-info "No valid datasetID"
@@ -101,8 +100,10 @@
         layer-group-id (-> (client/post url {:body (json/encode map-config)
                                              :headers headers
                                              :content-type :json})
-                           :body json/decode (get "layergroupid"))]
-    (lib/ok {"layerGroupId" layer-group-id})))
+                           :body json/decode (get "layergroupid"))
+        layer-meta (map-metadata/build tenant-conn raster_table {"layerType" "raster"} nil)]
+    (lib/ok {"layerGroupId" layer-group-id
+             "layerMetadata" layer-meta})))
 
 (defn create
   [tenant-conn windshaft-url layers]

@@ -1,7 +1,7 @@
 -- :name all-rasters :? :*
 WITH
 failed_imports AS (
-  SELECT j.id, d.spec->>'name' AS name, j.error_log->>0 AS error_log, j.status, j.created, j.modified
+  SELECT j.id, d.spec->>'name' AS name, j.error_log->>0 AS error_log, j.status, j.created, j.modified, '{}'::jsonb AS metadata
     FROM data_source d, job_execution j
    WHERE j.data_source_id = d.id
      AND j.type = 'IMPORT'
@@ -9,20 +9,20 @@ failed_imports AS (
      AND d.spec->'source'->>'kind' = 'GEOTIFF'
 ),
 pending_imports AS (
-  SELECT j.id, d.spec->>'name' AS name, j.status, j.created, j.modified
+  SELECT j.id, d.spec->>'name' AS name, j.status, j.created, j.modified, '{}'::jsonb AS metadata
     FROM data_source d, job_execution j
    WHERE j.data_source_id = d.id
      AND j.type = 'IMPORT'
      AND j.status = 'PENDING'
      AND d.spec->'source'->>'kind' = 'GEOTIFF'
 )
-SELECT id, name, error_log as reason, status, modified, created
+SELECT id, name, error_log as reason, status, modified, created, metadata
   FROM failed_imports
  UNION
-SELECT id, name, NULL, status, modified, created
+SELECT id, name, NULL, status, modified, created, metadata
   FROM pending_imports
  UNION
-SELECT id, title, NULL, 'OK', modified, created
+SELECT id, title, NULL, 'OK', modified, created, metadata
   FROM raster_dataset;
 
 -- :name insert-raster :! :n
