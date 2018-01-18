@@ -283,7 +283,7 @@ export default class VisualisationEditor extends Component {
     return (
       <div className="VisualisationEditor">
         <VisualisationConfig
-          visualisation={visualisation}
+          visualisation={props.visualisation}
           metadata={metadata}
           datasets={props.datasets}
           onChangeVisualisationType={props.onChangeVisualisationType}
