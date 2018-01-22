@@ -278,12 +278,14 @@ export default class VisualisationEditor extends Component {
 
   render() {
     const { props } = this;
-    const { visualisation, metadata } = this.state;
+    const { metadata } = this.state;
+    const visualisationToRender = this.state.visualisation; // most recent version that is valid
+    const visualisation = props.visualisation; // up-to-date visualisation (may be unrenderable)
 
     return (
       <div className="VisualisationEditor">
         <VisualisationConfig
-          visualisation={props.visualisation}
+          visualisation={visualisation}
           metadata={metadata}
           datasets={props.datasets}
           onChangeVisualisationType={props.onChangeVisualisationType}
@@ -293,7 +295,7 @@ export default class VisualisationEditor extends Component {
           loadDataset={props.loadDataset}
         />
         <VisualisationPreview
-          visualisation={visualisation}
+          visualisation={visualisationToRender}
           metadata={metadata}
           datasets={props.datasets}
         />
