@@ -5,6 +5,7 @@ import fetch from 'isomorphic-fetch';
 import VisualisationViewerContainer from './components/visualisation/VisualisationViewerContainer';
 import DashboardViewer from './components/dashboard/DashboardViewer';
 import LumenBranding from './components/common/LumenBranding';
+import polyfill from './polyfill/polyfill';
 
 require('./styles/reset.global.scss');
 require('./styles/style.global.scss');
@@ -57,8 +58,10 @@ const pathMatch = window.location.pathname.match(/^\/s\/(.*)/);
 const shareId = pathMatch != null ? pathMatch[1] : null;
 
 if (shareId != null) {
-  fetch(`/share/${shareId}`)
-    .then(response => response.json())
-    .then(data => renderSuccessfulShare(data))
-    .catch(() => renderNoSuchShare());
+  polyfill(() => {
+    fetch(`/share/${shareId}`)
+      .then(response => response.json())
+      .then(data => renderSuccessfulShare(data))
+      .catch(() => renderNoSuchShare());
+  });
 }

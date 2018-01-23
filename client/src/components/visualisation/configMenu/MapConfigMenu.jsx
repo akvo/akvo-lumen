@@ -18,8 +18,8 @@ const applyAutomaticSpecChanges = (value) => {
     newValue.aggregationColumn = null;
   }
 
-  if (valueHasKey('aggregationColumn')) {
-    newValue.aggregationGeomColumn = null;
+  if (valueHasKey('aggregationGeomColumn')) {
+    newValue.aggregationColumn = null;
   }
 
   if (valueHasKey('showShapeLabelInput')) {

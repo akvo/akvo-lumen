@@ -233,21 +233,6 @@ const GeoshapeDataTab = (props) => {
       <div className="inputGroup">
         <SelectInput
           disabled={(layer.aggregationDataset == null) || disabled}
-          placeholder="Select styling indicator"
-          labelText="Styling indicator"
-          choice={layer.aggregationColumn != null ?
-            layer.aggregationColumn.toString() : null}
-          name="aggregationColumn"
-          options={filterColumns(aggregationColumns, ['number'])}
-          clearable
-          onChange={value => onChangeMapLayer(layerIndex, {
-            aggregationColumn: value,
-          })}
-        />
-      </div>
-      <div className="inputGroup">
-        <SelectInput
-          disabled={(layer.aggregationDataset == null) || disabled}
           placeholder="Select styling indicator geopoint column"
           labelText="Styling indicator geopoint column"
           choice={layer.aggregationGeomColumn != null ?
@@ -257,6 +242,21 @@ const GeoshapeDataTab = (props) => {
           clearable
           onChange={value => onChangeMapLayer(layerIndex, {
             aggregationGeomColumn: value,
+          })}
+        />
+      </div>
+      <div className="inputGroup">
+        <SelectInput
+          disabled={(layer.aggregationDataset == null) || disabled}
+          placeholder="Select styling indicator"
+          labelText="Styling indicator"
+          choice={layer.aggregationColumn != null ?
+            layer.aggregationColumn.toString() : null}
+          name="aggregationColumn"
+          options={filterColumns(aggregationColumns, ['number'])}
+          clearable
+          onChange={value => onChangeMapLayer(layerIndex, {
+            aggregationColumn: value,
           })}
         />
       </div>
