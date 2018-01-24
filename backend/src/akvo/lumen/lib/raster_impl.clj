@@ -135,9 +135,9 @@
 
 
 (defn delete [conn id]
-  #_(let [c (delete-dataset-by-id tenant-conn {:id id})]
+  (let [c (delete-raster-by-id conn {:id id})]
     (if (zero? c)
       (do
-        (delete-failed-job-execution-by-id tenant-conn {:id id})
+        (delete-failed-job-execution-by-id conn {:id id})
         (lib/not-found {:error "Not found"}))
       (lib/ok {:id id}))))

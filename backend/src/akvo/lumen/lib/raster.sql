@@ -62,3 +62,7 @@ VACUUM ANALYZE :i:table-name;
 -- :doc selects count,sum,mean,stddev,min,max
 SELECT stats.count, stats.sum, stats.mean, stats.stddev, stats.min, stats.max
   FROM ST_SummaryStats(:table-name::name, 'rast'::name, 1, true) AS stats;
+
+-- :name delete-raster-by-id :! :n
+-- :doc delete raster
+DELETE FROM raster_dataset WHERE id=:id;
