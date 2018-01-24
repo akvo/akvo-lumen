@@ -95,7 +95,7 @@ export default class ContextMenu extends Component {
 
 ContextMenu.propTypes = {
   onOptionSelected: PropTypes.func.isRequired,
-  onWindowClick: PropTypes.func.isRequired,
+  onWindowClick: PropTypes.func,
   style: PropTypes.object,
   options: PropTypes.array.isRequired,
   selected: PropTypes.string,
