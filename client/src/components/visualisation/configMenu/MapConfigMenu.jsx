@@ -204,7 +204,7 @@ MapConfigMenu.propTypes = {
   onChangeSourceDataset: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
   onChangeVisualisationType: PropTypes.func.isRequired,
-  onChangeMapLayer: PropTypes.func.isRequired,
+  onChangeMapLayer: PropTypes.func,
   datasetOptions: PropTypes.array.isRequired,
   loadDataset: PropTypes.func.isRequired,
 };
