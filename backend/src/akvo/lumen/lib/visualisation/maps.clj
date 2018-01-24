@@ -93,10 +93,10 @@
              "layerMetadata" metadata-array})))
 
 (defn create-raster [tenant-conn windshaft-url raster-id]
-  (let [{:keys [raster_table]} (raster-by-id tenant-conn {:id raster-id})
+  (let [{:keys [raster_table metadata]} (raster-by-id tenant-conn {:id raster-id})
         headers (headers tenant-conn)
         url (format "%s/layergroup" windshaft-url)
-        map-config (map-config/build-raster raster_table)
+        map-config (map-config/build-raster raster_table (:min metadata) (:max metadata))
         layer-group-id (-> (client/post url {:body (json/encode map-config)
                                              :headers headers
                                              :content-type :json})

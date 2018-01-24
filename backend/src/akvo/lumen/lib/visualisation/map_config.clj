@@ -303,16 +303,23 @@
       (format "ST_SetSRID(ST_MakePoint(%s, %s), 4326) AS latlong"
               longitude latitude))))
 
-(defn raster-css [start-color end-color]
-(format "#r {
+(def raster-css-template
+  "#r {
   raster-colorizer-epsilon: 0.5;
-  raster-opacity: 0.8;
+  raster-opacity: 0.85;
   raster-colorizer-default-mode: linear;
   raster-colorizer-default-color: transparent;
   raster-colorizer-stops:
-    stop(0, %s)
-    stop(240, %s);
-}" (if start-color start-color "#aeaeae") (if end-color end-color "black")))
+    stop(%s, %s)
+    stop(%s, %s);
+  }")
+
+(defn raster-css [start-color end-color min max]
+  (format raster-css-template
+          (or min "0")
+          (or start-color "#ffffff")
+          (or max "255")
+          (or end-color "#000000")))
 
 (defn get-layers [tenant-conn layers metadata-array table-name]
   (map-indexed (fn [idx {:strs [datasetId rasterId filters geom popup pointColorColumn]
@@ -354,10 +361,10 @@
                  "mvt" 0}
    "layers" (get-layers tenant-conn layers metadata-array table-name)})
 
-(defn build-raster [table-name]
+(defn build-raster [table-name min max]
   {"version" "1.6.0"
    "layers" [{"type" "mapnik"
-              "options" {"cartocss" (raster-css nil nil)
+              "options" {"cartocss" (raster-css nil nil min max)
                          "cartocss_version" "2.3.0"
                          "geom_column" "rast"
                          "geom_type" "raster"
