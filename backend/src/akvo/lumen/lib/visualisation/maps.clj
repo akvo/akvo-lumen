@@ -77,10 +77,14 @@
 (defn do-create [tenant-conn windshaft-url dataset-id layers]
   (let [metadata-array (map (fn [current-layer]
                               (let [current-layer-type (get current-layer "layerType")
-                                    current-dataset-id (if (= current-layer-type "raster") (get current-layer "rasterId") (get current-layer "datasetId"))
-                                    {:keys [table-name columns]} (if (= current-layer-type "raster")(raster-by-id tenant-conn {:id current-dataset-id}) (dataset-by-id tenant-conn {:id current-dataset-id}))
+                                    current-dataset-id (if (= current-layer-type "raster")
+                                                         (get current-layer "rasterId")
+                                                         (get current-layer "datasetId"))
+                                    {:keys [table-name columns raster_table]} (if (= current-layer-type "raster")
+                                                                                (raster-by-id tenant-conn {:id current-dataset-id})
+                                                                                (dataset-by-id tenant-conn {:id current-dataset-id}))
                                     current-where-clause (filter/sql-str columns (get current-layer "filters"))]
-                                (map-metadata/build tenant-conn table-name current-layer current-where-clause)))
+                                (map-metadata/build tenant-conn (or raster_table table-name) current-layer current-where-clause)))
                             layers)
         headers (headers tenant-conn)
         url (format "%s/layergroup" windshaft-url)

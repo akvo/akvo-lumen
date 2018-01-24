@@ -324,34 +324,33 @@
 (defn get-layers [tenant-conn layers metadata-array table-name]
   (map-indexed (fn [idx {:strs [datasetId rasterId filters geom popup pointColorColumn]
                          :as layer}]
-                 (let [geom-column (get-geom-column layer)
-                       {:keys [columns]} (dataset-by-id tenant-conn {:id datasetId})
-                       where-clause (filter/sql-str columns filters)
-                       popup-columns (mapv #(get % "column") popup)
-                       point-color-column pointColorColumn
-                       sql (get-sql tenant-conn columns table-name geom-column
-                                    popup-columns point-color-column
-                                    where-clause layer idx)]
-                   (if (= (get layer "layerType") "raster")
-                    (let [{:keys [raster_table]} (raster-by-id tenant-conn {:id (get layer "rasterId")})]
-                    {"type" "mapnik"
-                    "options" {"cartocss" (raster-css (get layer "startColor") (get layer "endColor"))
-                               "cartocss_version" "2.3.0"
-                               "geom_column" "rast"
-                               "geom_type" "raster"
-                               "raster_band" 1
-                               "sql" (format "SELECT * FROM %s" raster_table)
-                               "srid" "3857"}})
+                 (if (= (get layer "layerType") "raster")
+                   (let [{:keys [raster_table metadata]} (raster-by-id tenant-conn {:id (get layer "rasterId")})]
+                     {"type" "mapnik"
+                      "options" {"cartocss" (raster-css (get layer "startColor") (get layer "endColor") (:min metadata) (:max metadata))
+                                 "cartocss_version" "2.3.0"
+                                 "geom_column" "rast"
+                                 "geom_type" "raster"
+                                 "raster_band" 1
+                                 "sql" (format "SELECT * FROM %s" raster_table)
+                                 "srid" "3857"}})
+                   (let [geom-column (get-geom-column layer)
+                         {:keys [columns]} (dataset-by-id tenant-conn {:id datasetId})
+                         where-clause (filter/sql-str columns filters)
+                         popup-columns (mapv #(get % "column") popup)
+                         point-color-column pointColorColumn
+                         sql (get-sql tenant-conn columns table-name geom-column
+                                      popup-columns point-color-column
+                                      where-clause layer idx)]
 
-                    {"type" "mapnik"
-                    "options" {"cartocss" (trim-css (cartocss layer idx metadata-array))
-                               "cartocss_version" "2.0.0"
-                               "geom_column" (or geom "latlong")
-                               "interactivity" (get-interactivity layer popup-columns)
-                               "sql" sql
-                               "srid" "4326"}})
 
-                   ))
+                     {"type" "mapnik"
+                      "options" {"cartocss" (trim-css (cartocss layer idx metadata-array))
+                                 "cartocss_version" "2.0.0"
+                                 "geom_column" (or geom "latlong")
+                                 "interactivity" (get-interactivity layer popup-columns)
+                                 "sql" sql
+                                 "srid" "4326"}})))
                layers))
 
 (defn build [tenant-conn table-name layers metadata-array]
