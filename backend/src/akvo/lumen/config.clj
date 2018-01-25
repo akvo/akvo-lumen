@@ -21,6 +21,7 @@
   {'db-uri (:lumen-db-url env)
    'email-host (:lumen-email-host env)
    'email-password (:lumen-email-password env)
+   'mailjet-url (:lumen-mailjet-url env)
    'email-user (:lumen-email-user env)
    'encryption-key (:lumen-encryption-key env)
    'file-upload-path (:lumen-file-upload-path env "/tmp/akvo/lumen")
