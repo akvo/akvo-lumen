@@ -1,0 +1,14 @@
+version: "3"
+services:
+ postgres:
+ keycloak:
+ backend:
+   image: "eu.gcr.io/${PROJECT_NAME}/lumen-backend:${TRAVIS_COMMIT}"
+   environment:
+     - WAIT_FOR_DB=true
+ client:
+   image: "eu.gcr.io/${PROJECT_NAME}/lumen-client:${TRAVIS_COMMIT}"
+ redis:
+ windshaft:
+   image: "eu.gcr.io/${PROJECT_NAME}/lumen-maps:${TRAVIS_COMMIT}"
+

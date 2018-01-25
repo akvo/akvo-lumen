@@ -1,0 +1,33 @@
+version: "3"
+services:
+ postgres:
+   ports:
+    - "5432:5432"
+ keycloak:
+   ports:
+    - "8080:8080"
+ backend:
+   build:
+     context: ./backend
+     dockerfile: Dockerfile-dev
+   volumes:
+      - ./backend:/app
+      - ~/.m2:/home/akvo/.m2
+      - ~/.lein:/home/akvo/.lein
+   ports:
+      - "47480:47480"
+      - "3000:3000"
+ client:
+   build:
+     context: ./client
+     dockerfile: Dockerfile-dev
+   volumes:
+      - ./client:/lumen
+   ports:
+      - "3030:3030"
+ windshaft:
+   build: windshaft
+   environment:
+     - NODE_ENV=development
+   volumes:
+      - ./windshaft/config/dev:/config
