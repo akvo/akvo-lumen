@@ -2,6 +2,11 @@
 
 set -e
 
+function log {
+   echo "`date +"%T"` - INFO - $@"
+}
+
+
 BRANCH_NAME="${TRAVIS_BRANCH:=unknown}"
 export PROJECT_NAME=akvo-lumen
 
@@ -9,16 +14,26 @@ if [ -z "$TRAVIS_COMMIT" ]; then
     export TRAVIS_COMMIT=local
 fi
 
+log Bulding container to run tests
 docker build --rm=false -t akvo-lumen-dev:develop backend -f backend/Dockerfile-dev
+log Running Backend unit tests and building uberjar
 docker run --env-file=.env -v $HOME/.m2:/home/akvo/.m2 -v `pwd`/backend:/app akvo-lumen-dev:develop /app/run-as-user.sh lein do test, uberjar
 
 cp backend/target/uberjar/akvo-lumen.jar backend
 
+log Creating Production Backend image
 docker build --rm=false -t eu.gcr.io/${PROJECT_NAME}/lumen-backend:${TRAVIS_COMMIT} ./backend
 docker tag eu.gcr.io/${PROJECT_NAME}/lumen-backend:${TRAVIS_COMMIT} eu.gcr.io/${PROJECT_NAME}/lumen-backend:develop
 
+rm backend/akvo-lumen.jar
+
+log Creating Production Client image
 docker build --rm=false -t eu.gcr.io/${PROJECT_NAME}/lumen-client:${TRAVIS_COMMIT} ./client
 docker tag eu.gcr.io/${PROJECT_NAME}/lumen-client:${TRAVIS_COMMIT} eu.gcr.io/${PROJECT_NAME}/lumen-client:develop
 
+log Creating Production Windshaft image
 docker build --rm=false -t eu.gcr.io/${PROJECT_NAME}/lumen-maps:${TRAVIS_COMMIT} ./windshaft
 docker tag eu.gcr.io/${PROJECT_NAME}/lumen-maps:${TRAVIS_COMMIT} eu.gcr.io/${PROJECT_NAME}/lumen-maps:develop
+
+log Starting Docker Compose environment
+docker-compose -p akvo-lumen-ci -f docker-compose.yml -f docker-compose.ci.yml up --no-color -d --build
