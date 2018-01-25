@@ -2,7 +2,7 @@
 
 set -e
 
-function log {
+log () {
    echo "`date +"%T"` - INFO - $@"
 }
 
