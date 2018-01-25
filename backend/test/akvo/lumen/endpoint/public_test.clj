@@ -1,4 +1,5 @@
 (ns akvo.lumen.endpoint.public-test
+  {:functional true}
   (:require [akvo.lumen.endpoint.share-test :as share-test]
             [akvo.lumen.fixtures :refer [*tenant-conn*
                                          tenant-conn-fixture]]

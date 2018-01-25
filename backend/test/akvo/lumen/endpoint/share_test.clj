@@ -1,4 +1,5 @@
 (ns akvo.lumen.endpoint.share-test
+  {:functional true}
   (:require [akvo.lumen.fixtures :refer [*tenant-conn*
                                          tenant-conn-fixture]]
             [akvo.lumen.lib.dashboard :as dashboard]
