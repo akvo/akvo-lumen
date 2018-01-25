@@ -62,6 +62,10 @@
 (defn migrate []
   (lumen-migrate/migrate))
 
+(defn migrate-and-seed []
+  (migrate)
+  (seed)
+  (migrate))
 
 (defn rollback
   ([] (lumen-migrate/rollback {}))
