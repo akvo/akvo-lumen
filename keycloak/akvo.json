@@ -2215,7 +2215,7 @@
     "enabled" : true,
     "clientAuthenticatorType" : "client-secret",
     "secret" : "fb4c01dc-2e7c-46d0-9dab-495d479ecd6e",
-    "redirectUris" : [ "http://t2.lumen.local:3030/*", "http://t1.lumen.local:3030/*" ],
+    "redirectUris" : [ "http://t2.lumen.local:3030/*", "http://t1.lumen.local:3030/*", "http://t1.lumen.local:8081/*", "http://t1.lumen.local/*" , "http://t2.lumen.local/*" ],
     "webOrigins" : [ "+" ],
     "notBefore" : 0,
     "bearerOnly" : false,
