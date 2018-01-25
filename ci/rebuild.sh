@@ -28,6 +28,7 @@ rm backend/akvo-lumen.jar
 
 log Building container to run the client tests
 docker build --rm=false -t akvo-lumen-client-dev:develop client -f client/Dockerfile-dev
+log Running Client linting, unit tests and creating production assets
 docker run --env-file=.env -v `pwd`/client:/lumen --rm=false -t akvo-lumen-client-dev:develop /lumen/run-as-user.sh /lumen/ci-build.sh
 
 log Creating Production Client image
@@ -40,3 +41,10 @@ docker tag eu.gcr.io/${PROJECT_NAME}/lumen-maps:${TRAVIS_COMMIT} eu.gcr.io/${PRO
 
 log Starting Docker Compose environment
 docker-compose -p akvo-lumen-ci -f docker-compose.yml -f docker-compose.ci.yml up --no-color -d --build
+
+bash ci/wait-for-docker-compose-to-start.sh
+
+log Running Backend functional tests
+docker-compose -p akvo-lumen-ci -f docker-compose.yml -f docker-compose.ci.yml run --no-deps backend-functional-tests /app/import-and-run.sh functional
+
+#docker-compose -p akvo-lumen-ci -f docker-compose.yml -f docker-compose.ci.yml down
