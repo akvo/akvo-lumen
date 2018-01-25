@@ -12,3 +12,16 @@ services:
  windshaft:
    image: "eu.gcr.io/${PROJECT_NAME}/lumen-maps:${TRAVIS_COMMIT}"
 
+ backend-functional-tests:
+   image: akvo-lumen-backend-dev:develop
+   volumes:
+      - ./postgres/provision:/pg-certs
+      - ./backend:/app
+      - ~/.m2:/home/akvo/.m2
+      - ~/.lein:/home/akvo/.lein
+   environment:
+     - HOST_UID
+     - HOST_GID
+   links:
+      - keycloak:auth.lumen.local
+   command: "true"

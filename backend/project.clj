@@ -54,6 +54,7 @@
             "seed"    ["run" "-m" "dev/seed"]}
   :test-selectors {:default (and (constantly true)
                                  (complement :functional))
+                   :functional :functional
                    :all     (constantly true)}
   :profiles
   {:dev           [:project/dev :profiles/dev]
