@@ -26,9 +26,9 @@ gcloud config set compute/zone europe-west1-d
 gcloud config set container/use_client_certificate True
 
 if [[ "${TRAVIS_BRANCH}" == "master" ]]; then
-    gcloud container clusters get-credentials test
-else
     gcloud container clusters get-credentials lumen
+else
+    gcloud container clusters get-credentials test
 fi
 
 # Pushing images
