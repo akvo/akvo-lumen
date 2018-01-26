@@ -18,19 +18,7 @@ services:
    environment:
      - HOST_UID
      - HOST_GID
-     - LUMEN_DB_URL=jdbc:postgresql://postgres/lumen?user=lumen&password=password&ssl=true
-     - LUMEN_FLOW_API_URL=https://api.akvotest.org/flow
-     - LUMEN_SENTRY_CLIENT_DSN=one
-     - LUMEN_SENTRY_BACKEND_DSN=two
-     - LUMEN_FILE_UPLOAD_PATH=/tmp/akvo/lumen
-     - LUMEN_KEYCLOAK_URL=http://auth.lumen.local:8080/auth
-     - LUMEN_KEYCLOAK_CLIENT_SECRET=caed3964-09dd-4752-b0bb-22c8e8ffd631
-     - LUMEN_EMAIL_USER=devops@akvo.localhost
-     - LUMEN_EMAIL_PASSWORD=unknown
-     - LUMEN_ENCRYPTION_KEY=secret
  client:
-   expose:
-      - 3030
    environment:
      - HOST_UID
      - HOST_GID
