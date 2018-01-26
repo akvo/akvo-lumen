@@ -4,7 +4,7 @@ set -eu
 
 export PROJECT_NAME=akvo-lumen
 
-if [[ "${TRAVIS_BRANCH}" != "develop" ]] && [[ "${TRAVIS_BRANCH}" != "master" ]]; then
+if [[ "${TRAVIS_BRANCH}" != "issues-1239/move-to-travis" ]] && [[ "${TRAVIS_BRANCH}" != "master" ]]; then
     exit 0
 fi
 
