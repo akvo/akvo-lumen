@@ -20,6 +20,8 @@ services:
    depends_on:
      - backend
      - windshaft
+   command: >
+      sh -c "sed -i /etc/nginx/conf.d/default.conf -e 's/localhost:3000/backend:3000/' -e 's/localhost:4000/windshaft:4000/' && nginx -g 'daemon off;'"
  redis:
  windshaft:
    image: "eu.gcr.io/${PROJECT_NAME}/lumen-maps:${TRAVIS_COMMIT}"
