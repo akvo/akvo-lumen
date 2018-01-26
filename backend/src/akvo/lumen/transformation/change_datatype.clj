@@ -2,6 +2,7 @@
   (:require [akvo.lumen.transformation.engine :as engine]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
+            [clojure.tools.logging :as log]
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/transformation/change_datatype.sql")
@@ -109,5 +110,6 @@
                                column-name (engine/column-type columns column-name) new-type)]
        :columns (engine/update-column columns column-name assoc "type" new-type)})
     (catch Exception e
+      (log/debug e)
       {:success? false
        :message (.getMessage e)})))

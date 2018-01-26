@@ -3,6 +3,7 @@
             [akvo.lumen.util :as util]
             [clojure.set :as set]
             [clojure.string :as str]
+            [clojure.tools.logging :as log]
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/transformation.sql")
@@ -31,8 +32,10 @@
 
 (defmethod apply-operation :default
   [tenant-conn table-name columns op-spec]
-  {:success? false
-   :message (str "Unknown operation " (get op-spec "op"))})
+  (let [msg (str "Unknown operation " (get op-spec "op"))]
+    (log/debug msg)
+    {:success? false
+     :message msg}))
 
 (defn pg-escape-string [s]
   (when-not (nil? s)
@@ -191,7 +194,11 @@
               (apply-operation tenant-conn table-name columns (first transformations))]
           (if success?
             (recur (rest transformations) columns (into full-execution-log execution-log))
-            (throw (ex-info "Failed to undo" {}))))))))
+            (do
+              (log/info (str "Unsuccessful undo of dataset: " dataset-id))
+              (log/debug message)
+              (log/debug "Job executionid: " job-execution-id)
+              (throw (ex-info "Failed to undo" {})))))))))
 
 (defn execute-undo [tenant-conn dataset-id job-execution-id]
   (let [current-dataset-version (latest-dataset-version-by-dataset-id tenant-conn

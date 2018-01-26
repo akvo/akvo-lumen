@@ -1,5 +1,6 @@
 (ns akvo.lumen.transformation.filter-column
   (:require [akvo.lumen.transformation.engine :as engine]
+            [clojure.tools.logging :as log]
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/transformation/filter_column.sql")
@@ -29,5 +30,6 @@
        :execution-log [(str "Deleted " result " rows")]
        :columns columns})
     (catch Exception e
+      (log/debug e)
       {:success? false
        :message (.getMessage e)})))
