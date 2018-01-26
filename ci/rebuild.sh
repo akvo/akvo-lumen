@@ -50,4 +50,5 @@ docker-compose -p akvo-lumen-ci -f docker-compose.yml -f docker-compose.ci.yml r
 log Running the end to end tests
 ./ci/e2e-test.sh
 
+log Done
 #docker-compose -p akvo-lumen-ci -f docker-compose.yml -f docker-compose.ci.yml down
