@@ -47,7 +47,8 @@
   "Created a Hikari connection pool."
   [tenant]
   (let [cfg (HikariConfig.)]
-    (.setJdbcUrl cfg (:db_uri tenant))
+    (.setJdbcUrl cfg (str (:db_uri tenant)
+                          "&prepareThreshold=0"))
     (.setPoolName cfg (:label tenant))
     (.setMinimumIdle cfg 2)
     {:datasource (HikariDataSource. cfg)}))
