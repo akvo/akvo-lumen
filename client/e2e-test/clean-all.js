@@ -33,8 +33,6 @@
 
 const puppeteer = require('puppeteer');
 
-const assert = require('assert');
-
 const lumenUrl = process.env.LUMEN_URL;
 const username = process.env.LUMEN_USER;
 const password = process.env.LUMEN_PASSWORD;
@@ -67,7 +65,7 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
     await page.type('#password', password);
     console.log('Trying login...');
     await page.click('#kc-login');
-    await page.waitForSelector('button[data-test-id="dataset"]', { timeout: selectorTimeout, visible: true});
+    await page.waitForSelector('button[data-test-id="dataset"]', { timeout: selectorTimeout, visible: true });
     console.log('Login was successful.\n');
 
     // Delete
@@ -77,15 +75,15 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
     let dataTestName = await page.$('[data-test-id="show-controls"]');
 
     while (dataTestName !== null) {
-          console.log(`Deleting element ${count + 1}... `);
-          await page.click('[data-test-id="show-controls"]');
-          await page.waitForSelector('[data-test-id="delete"]', { timeout: selectorTimeout, visible:true });
-          await page.click('[data-test-id="delete"]');
-          await page.waitForSelector('[data-test-id="next"]', { timeout: selectorTimeout, visible:true });
-          await page.click('[data-test-id="next"]');
-          await sleep(300);
-          dataTestName = await page.$('[data-test-id="show-controls"]');
-          count += 1;
+      console.log(`Deleting element ${count + 1}... `);
+      await page.click('[data-test-id="show-controls"]');
+      await page.waitForSelector('[data-test-id="delete"]', { timeout: selectorTimeout, visible: true });
+      await page.click('[data-test-id="delete"]');
+      await page.waitForSelector('[data-test-id="next"]', { timeout: selectorTimeout, visible: true });
+      await page.click('[data-test-id="next"]');
+      await sleep(300);
+      dataTestName = await page.$('[data-test-id="show-controls"]');
+      count += 1;
     }
 
     console.log(`${count} elements deleted.\n`);
