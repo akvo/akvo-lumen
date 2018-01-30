@@ -35,6 +35,7 @@
             (add-index conn table-name column-name-geo)
             (generate-geopoints conn (conj opts {:column-name-lat columnNameLat
                                                  :column-name-long columnNameLong})))
+          (jdbc/execute! tenant-conn "DEALLOCATE ALL")
           {:success? true
            :execution-log [(format "Generated geopoints for %s" table-name)]
            :columns (conj columns {"title" columnTitleGeo

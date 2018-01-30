@@ -25,6 +25,7 @@
 
 (defn- change-datatype [tenant-conn table-name column-name on-error alter-table-sql]
   (jdbc/execute! tenant-conn alter-table-sql)
+  (jdbc/execute! tenant-conn "DEALLOCATE ALL")
   (when (= on-error "delete-row")
     (drop-null-rows tenant-conn
                     {:table-name table-name
