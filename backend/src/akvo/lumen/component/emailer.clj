@@ -1,7 +1,6 @@
 (ns akvo.lumen.component.emailer
   (:require [cheshire.core :as json]
             [clj-http.client :as client]
-            [clojure.pprint :refer [pprint]]
             [clojure.tools.logging :as log]
             [com.stuartsierra.component :as component]))
 
@@ -23,7 +22,7 @@
     (log/info email)))
 
 (defn dev-emailer
-  "Emailer will pprint email."
+  "Dev emailer logs email."
   [options]
   (map->DevEmailer (select-keys options [:from-email :from-name])))
 
