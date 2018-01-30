@@ -49,7 +49,7 @@ kubectl apply -f deployment.yaml
 kubectl apply -f ci/redis-master-windshaft.yaml
 
 if [[ "${TRAVIS_BRANCH}" = "master" ]]; then
-    exit 0º
+    exit 0
 fi
 
 log Waiting for k8s to finish
