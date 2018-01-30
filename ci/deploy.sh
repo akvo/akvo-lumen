@@ -52,6 +52,6 @@ log Waiting for k8s to finish
 ./ci/wait-for-k8s-deployment-to-be-ready.sh
 
 log Running end to end tests
-./ci/e2e-test.sh script-test.js akvolumenci http://t1.lumen.local/ $USERNAME $PASSWORD
+./ci/e2e-test.sh script-test akvolumenci http://t1.lumen.local/ $USERNAME $PASSWORD
 log Cleaning up environment
-./ci/e2e-test.sh clean-all.js akvolumenci http://t1.lumen.local/ $USERNAME $PASSWORD
+./ci/e2e-test.sh clean-all akvolumenci http://t1.lumen.local/ $USERNAME $PASSWORD
