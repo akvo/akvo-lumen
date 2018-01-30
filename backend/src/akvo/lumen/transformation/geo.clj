@@ -3,6 +3,7 @@
   (:require [akvo.lumen.import.common :as import]
             [akvo.lumen.transformation.engine :as engine]
             [clojure.java.jdbc :as jdbc]
+            [clojure.tools.logging :as log]
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/transformation/geo.sql")
@@ -44,7 +45,10 @@
                                    "direction" nil
                                    "columnName" column-name-geo})})
         (catch Exception e
+          (log/debug e)
           {:success? false
            :message (.getMessage e)}))
-      {:success? false
-       :message "Selected columns are not all numeric"})))
+      (let [msg "Selected columns are not all numeric"]
+        (log/debug msg)
+        {:success? false
+         :message msg}))))

@@ -1,6 +1,7 @@
 (ns akvo.lumen.transformation.text
   "Simple text transforms"
   (:require [akvo.lumen.transformation.engine :as engine]
+            [clojure.tools.logging :as log]
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/transformation/text.sql")
@@ -16,6 +17,7 @@
        :execution-log [(format "Text transform %s on %s" fn column-name)]
        :columns columns})
     (catch Exception e
+      (log/debug e)
       {:success? false
        :message (.getMessage e)})))
 
@@ -63,6 +65,7 @@
        :execution-log [(format "Text transform trim-doublespace on %s" column-name)]
        :columns columns})
     (catch Exception e
+      (log/debug e)
       {:success? false
        :message (.getMessage e)}))
   {:success? true

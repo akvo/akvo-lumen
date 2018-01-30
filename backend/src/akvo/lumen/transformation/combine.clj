@@ -1,5 +1,6 @@
 (ns akvo.lumen.transformation.combine
   (:require [akvo.lumen.transformation.engine :as engine]
+            [clojure.tools.logging :as log]
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/transformation/combine.sql")
@@ -41,5 +42,6 @@
                                "direction" nil
                                "columnName" new-column-name})})
     (catch Exception e
+      (log/debug e)
       {:success? false
        :message (.getMessage e)})))

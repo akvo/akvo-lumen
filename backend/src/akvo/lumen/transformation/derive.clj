@@ -3,6 +3,7 @@
             [clojure.java.jdbc :as jdbc]
             [clojure.set :as set]
             [clojure.string :as str]
+            [clojure.tools.logging :as log]
             [hugsql.core :as hugsql])
   (:import [javax.script ScriptEngineManager ScriptEngine Invocable ScriptContext Bindings]
            [jdk.nashorn.api.scripting NashornScriptEngineFactory ClassFilter]))
@@ -133,5 +134,6 @@
                                "direction" nil
                                "columnName" column-name})})
     (catch Exception e
+      (log/debug e)
       {:success? false
        :message (format "Failed to transform: %s" (.getMessage e))})))
