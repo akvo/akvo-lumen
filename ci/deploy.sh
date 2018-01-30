@@ -48,8 +48,14 @@ sed -e "s/\${BUILD_HASH}/$TRAVIS_COMMIT/" ci/deployment.yaml.template > deployme
 kubectl apply -f deployment.yaml
 kubectl apply -f ci/redis-master-windshaft.yaml
 
+if [[ "${TRAVIS_BRANCH}" = "master" ]]; then
+    exit 0º
+fi
+
 log Waiting for k8s to finish
 ./ci/wait-for-k8s-deployment-to-be-ready.sh
+log Waiting for k8s to be healthy
+./ci/wait-for-k8s-deployment-to-be-healthy.sh
 
 log Running end to end tests
 ./ci/e2e-test.sh script-test akvolumenci https://lumencitest.akvotest.org/ $USERNAME $PASSWORD
