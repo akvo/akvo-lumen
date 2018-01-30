@@ -12,7 +12,7 @@ spec:
     metadata:
       labels:
         run: lumen
-        lumen-version: $TRAVIS_COMMIT
+        lumen-version: ${BUILD_HASH}
         app: lumen
     spec:
       containers:
