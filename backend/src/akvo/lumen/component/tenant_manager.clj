@@ -52,7 +52,6 @@
     (.setMinimumIdle cfg 2)
     {:datasource (HikariDataSource. cfg)}))
 
-
 (defn load-tenant [db encryption-key tenants label]
   (if-let [{:keys [db_uri label]} (tenant-by-id (:spec db)
                                                 {:label label})]
