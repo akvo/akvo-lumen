@@ -41,3 +41,8 @@ sed -e "s/\${BUILD_HASH}/$TRAVIS_COMMIT/" ci/deployment.yaml.template > deployme
 
 kubectl apply -f deployment.yaml
 kubectl apply -f ci/redis-master-windshaft.yaml
+
+./ci/wait-for-k8s-deployment-to-be-ready.sh
+
+./ci/e2e-test.sh script-test.js akvolumenci http://t1.lumen.local/ $USERNAME $PASSWORD
+./ci/e2e-test.sh clean-all.js akvolumenci http://t1.lumen.local/ $USERNAME $PASSWORD
