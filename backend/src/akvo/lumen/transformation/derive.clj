@@ -123,11 +123,7 @@
                                     :value (ensure-valid-value-type (transform row)
                                                                     column-type)})
               (catch Exception e
-                (handle-transform-exception e conn on-error table-name column-name (:rnum row))))))
-        #_(let [statement-sql (format "SELECT * FROM %s" table-name)
-                sql-string "select * from pg_prepared_statements where statement = ?"]
-            (when (not (empty? (jdbc/query tenant-conn [sql-string statement-sql])))
-              (jdbc/execute! tenant-conn "DEALLOCATE ALL"))))
+                (handle-transform-exception e conn on-error table-name column-name (:rnum row)))))))
       {:success? true
        :execution-log [(format "Derived columns using '%s'" code)]
        :columns (conj columns {"title" column-title
