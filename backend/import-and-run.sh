@@ -7,8 +7,6 @@ if [ -z "$1" ]; then
 elif [ "$1" == "functional-and-seed" ]; then
     # Two thing in one so that we avoid starting yet another JVM
     ./run-as-user.sh lein do test :functional, run -m dev/migrate-and-seed
-elif [ "$1" == "kubernetes-test" ]; then
-    ./run-as-user.sh lein test :kubernetes-test
 else
     true
 fi
