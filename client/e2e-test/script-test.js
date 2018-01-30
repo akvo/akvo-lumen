@@ -24,6 +24,8 @@ const puppeteer = require('puppeteer');
 const datasetName = Date.now().toString();
 
 const lumenUrl = process.env.LUMEN_URL;
+const username = process.env.LUMEN_USER;
+const password = process.env.LUMEN_PASSWORD;
 
 (async () => {
   const browser = await puppeteer.launch({
@@ -42,9 +44,9 @@ const lumenUrl = process.env.LUMEN_URL;
     await page.goto(lumenUrl);
     await page.waitForSelector('#username', { timeout: 10000 });
     console.log('Typing username...');
-    await page.type('#username', 'jerome');
+    await page.type('#username', username);
     console.log('Typing password...');
-    await page.type('#password', 'password');
+    await page.type('#password', password);
     console.log('Trying login...');
     await page.click('#kc-login');
     await page.waitForSelector('button[data-test-id="dataset"]', { timeout: 10000 });
