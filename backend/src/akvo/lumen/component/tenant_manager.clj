@@ -47,12 +47,10 @@
   "Created a Hikari connection pool."
   [tenant]
   (let [cfg (HikariConfig.)]
-    (.setJdbcUrl cfg (str (:db_uri tenant)
-                          "&prepareThreshold=0"))
+    (.setJdbcUrl cfg (:db_uri tenant))
     (.setPoolName cfg (:label tenant))
     (.setMinimumIdle cfg 2)
     {:datasource (HikariDataSource. cfg)}))
-
 
 (defn load-tenant [db encryption-key tenants label]
   (if-let [{:keys [db_uri label]} (tenant-by-id (:spec db)
