@@ -4,7 +4,7 @@ if [ -f "/pg-certs/server.crt" ]; then
     keytool -import -trustcacerts -keystore /usr/lib/jvm/default-jvm/jre/lib/security/cacerts -storepass changeit -noprompt -alias postgrescert -file /pg-certs/server.crt
 fi
 
-if [ ${WAIT_FOR_DB} = "true" ]; then
+if [ "${WAIT_FOR_DB}" = "true" ]; then
     MAX=30
     TRIES=0
     nc -z postgres 5432
