@@ -31,7 +31,7 @@
                  [org.clojure/core.match "0.3.0-alpha5"]
                  [org.clojure/java.jdbc "0.7.5"]
                  [org.immutant/web "2.1.9" :exclusions [ch.qos.logback/logback-classic]]
-                 [org.postgresql/postgresql "42.1.4"]
+                 [org.postgresql/postgresql "42.2.1"]
                  [ragtime/ragtime.jdbc "0.6.4"]
                  [raven-clj "1.5.1"]
                  [ring "1.6.3"]
