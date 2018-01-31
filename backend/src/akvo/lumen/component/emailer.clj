@@ -53,9 +53,10 @@
                     :body (json/encode body)}))))
 
 (defn mailjet-emailer
-  [{:keys [email-user email-password from-email from-name]}]
+  [{:keys [email-user email-password from-email from-name mailjet-url]
+    :or {mailjet-url "https://api.mailjet.com/v3"}}]
   (map->MailJetEmailer
    {:config {:credentials [email-user email-password]
              :from-email from-email
              :from-name from-name
-             :api-url "https://api.mailjet.com/v3"}}))
+             :api-url mailjet-url}}))

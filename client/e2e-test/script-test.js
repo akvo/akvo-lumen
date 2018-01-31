@@ -23,6 +23,10 @@ const puppeteer = require('puppeteer');
 
 const datasetName = Date.now().toString();
 
+const lumenUrl = process.env.LUMEN_URL;
+const username = process.env.LUMEN_USER;
+const password = process.env.LUMEN_PASSWORD;
+
 (async () => {
   const browser = await puppeteer.launch({
     args: [
@@ -36,13 +40,13 @@ const datasetName = Date.now().toString();
     // Login
     console.log('\nSTARTING LUMEN TEST WITH PUPPETEER\n');
     await page.setViewport({ width: 1024, height: 768 });
-    console.log('Accessing to http://t1.lumen.local:3030...');
-    await page.goto('http://t1.lumen.local:3030/');
+    console.log(`Accessing to ${lumenUrl}...`);
+    await page.goto(lumenUrl);
     await page.waitForSelector('#username', { timeout: 10000 });
     console.log('Typing username...');
-    await page.type('#username', 'jerome');
+    await page.type('#username', username);
     console.log('Typing password...');
-    await page.type('#password', 'password');
+    await page.type('#password', password);
     console.log('Trying login...');
     await page.click('#kc-login');
     await page.waitForSelector('button[data-test-id="dataset"]', { timeout: 10000 });
@@ -119,7 +123,7 @@ const datasetName = Date.now().toString();
     await page.type('input[data-test-id="entity-title"]', `Visualisation of ${datasetName}`);
     console.log('Saving visualisation...');
     await page.click('button[data-test-id="save-changes"]');
-    await page.goto('http://t1.lumen.local:3030/library');
+    await page.goto(lumenUrl);
     await page.waitForSelector('button[data-test-id="dashboard"]', { timeout: 10000 });
     console.log(`Visualisation ${datasetName} was successfully created.\n`);
 

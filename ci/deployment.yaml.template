@@ -4,10 +4,16 @@ metadata:
   name: lumen
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      run: lumen
+      app: lumen
   template:
     metadata:
       labels:
         run: lumen
+        lumen-version: ${BUILD_HASH}
+        app: lumen
     spec:
       containers:
       - name: lumen-client

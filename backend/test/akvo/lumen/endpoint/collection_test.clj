@@ -1,4 +1,5 @@
 (ns akvo.lumen.endpoint.collection-test
+  {:functional true}
   (:require [akvo.lumen.fixtures :refer [*tenant-conn*
                                          tenant-conn-fixture]]
             [akvo.lumen.lib :as lib]

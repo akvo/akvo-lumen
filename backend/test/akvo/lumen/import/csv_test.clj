@@ -1,4 +1,5 @@
 (ns akvo.lumen.import.csv-test
+  {:functional true}
   (:require [akvo.lumen.fixtures :refer [*tenant-conn*
                                          tenant-conn-fixture]]
             [akvo.lumen.test-utils :refer [import-file]]

@@ -1,0 +1,41 @@
+version: "3"
+services:
+ postgres:
+ keycloak:
+ backend:
+   image: "eu.gcr.io/${PROJECT_NAME}/lumen-backend:${TRAVIS_COMMIT}"
+   environment:
+     - WAIT_FOR_DB=true
+     - LUMEN_DB_URL=jdbc:postgresql://postgres/lumen?user=lumen&password=password&ssl=true
+     - CI_BUILD=yes
+     - LUMEN_FILE_UPLOAD_PATH=/tmp/akvo/lumen
+     - LUMEN_KEYCLOAK_URL=http://auth.lumen.local:8080/auth
+     - LUMEN_KEYCLOAK_CLIENT_SECRET=caed3964-09dd-4752-b0bb-22c8e8ffd631
+     - LUMEN_ENCRYPTION_KEY=secret
+     - LUMEN_SENTRY_BACKEND_DSN=anything
+ client:
+   image: "eu.gcr.io/${PROJECT_NAME}/lumen-client:${TRAVIS_COMMIT}"
+   expose:
+      - 80
+   depends_on:
+     - backend
+     - windshaft
+   command: >
+      sh -c "sed -i /etc/nginx/conf.d/default.conf -e 's/localhost:3000/backend:3000/' -e 's/localhost:4000/windshaft:4000/' && nginx -g 'daemon off;'"
+ redis:
+ windshaft:
+   image: "eu.gcr.io/${PROJECT_NAME}/lumen-maps:${TRAVIS_COMMIT}"
+
+ backend-functional-tests:
+   image: akvo-lumen-backend-dev:develop
+   volumes:
+      - ./postgres/provision:/pg-certs
+      - ./backend:/app
+      - ~/.m2:/home/akvo/.m2
+      - ~/.lein:/home/akvo/.lein
+   environment:
+     - HOST_UID
+     - HOST_GID
+   links:
+      - keycloak:auth.lumen.local
+   command: "true"

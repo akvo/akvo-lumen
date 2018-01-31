@@ -54,6 +54,7 @@
             "seed"    ["run" "-m" "dev/seed"]}
   :test-selectors {:default (and (constantly true)
                                  (complement :functional))
+                   :functional :functional
                    :all     (constantly true)}
   :profiles
   {:dev           [:project/dev :profiles/dev]
@@ -74,9 +75,7 @@
                                     :init (do
                                             (println "Starting BackEnd ...")
                                             (go)
-                                            (migrate)
-                                            (seed)
-                                            (migrate))
+                                            (migrate-and-seed))
                                     :host "0.0.0.0"
                                     :port 47480}
                    :env            {:port "3000"}}
