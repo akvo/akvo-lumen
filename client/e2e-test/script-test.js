@@ -22,14 +22,13 @@
 const puppeteer = require('puppeteer');
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
-const datasetName = Date.now().toString();
 
+const datasetName = Date.now().toString();
 const TIMEOUT = {
   waitFor: 10 * 1000,
   datasetImport: 15 * 1000,
   datasetPending: 2 * 1000,
 };
-
 const lumenUrl = process.env.LUMEN_URL;
 const username = process.env.LUMEN_USER;
 const password = process.env.LUMEN_PASSWORD;
