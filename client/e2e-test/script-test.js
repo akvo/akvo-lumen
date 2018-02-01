@@ -20,6 +20,8 @@
 /* eslint-disable no-console */
 
 const puppeteer = require('puppeteer');
+const util = require('util');
+const exec = util.promisify(require('child_process').exec);
 
 const datasetName = Date.now().toString();
 
@@ -35,7 +37,9 @@ const password = process.env.LUMEN_PASSWORD;
     ],
   });
   const page = await browser.newPage();
+  page.on('console', msg => console.log('PAGE LOG:', msg.text()));
 
+  await page.tracing.start({screenshots: true, path: 'trace.json'});
   try {
     // Login
     console.log('\nSTARTING LUMEN TEST WITH PUPPETEER\n');
@@ -143,7 +147,17 @@ const password = process.env.LUMEN_PASSWORD;
     console.log(`Dashboard ${datasetName} was successfully created.\n`);
     console.log('THE TEST WAS SUCCESSFUL');
   } catch (err) {
+    await page.tracing.stop();
     console.log(`THE TEST FAILED\n${err}`);
+    try {
+       console.log("Uploading debug file to transfer.sh");
+       const { stdout } = await exec(`curl --upload-file trace.json "https://transfer.sh/${datasetName}.json"`);
+       console.log("Debug file can be found at:");
+       console.log(stdout);
+       console.log("Open it in the Chrome Dev Tools, in the performance panel");
+    } catch (err2) {
+        console.log(err2);
+    }
     process.exit(1);
   } finally {
     await browser.close();
