@@ -4,9 +4,9 @@ services:
 - docker
 cache:
   directories:
-  - $HOME/.m2
-  - $HOME/.lein
-  - ${HOME}/google-cloud-sdk
+  - "$HOME/.m2"
+  - "$HOME/.lein"
+  - "${HOME}/google-cloud-sdk"
 before_install:
 - openssl aes-256-cbc -K $encrypted_13abf95e958f_key -iv $encrypted_13abf95e958f_iv
   -in ci/gcloud-service-account.json.enc -out ci/gcloud-service-account.json -d
@@ -17,7 +17,7 @@ before_install:
 - if [[ ! -f "${HOME}/google-cloud-sdk/bin/gcloud" ]]; then rm -rf "${HOME}/google-cloud-sdk";
   curl https://sdk.cloud.google.com | bash > /dev/null; fi
 script:
-- ./ci/build.sh && ./ci/deploy.sh
+- "./ci/build.sh && ./ci/deploy.sh"
 after_failure:
 - PROJECT_NAME=akvo-lumen docker-compose -p akvo-lumen-ci -f docker-compose.yml -f
   docker-compose.ci.yml logs
@@ -25,3 +25,6 @@ env:
   global:
   - PATH=${HOME}/google-cloud-sdk/bin:$PATH
   - CLOUDSDK_CORE_DISABLE_PROMPTS=1
+notifications:
+  slack:
+    secure: m64b8CBfZtyonlLWBPbCBkjNeMFaEm/xTH6AFMiu+vD+19w6Qa6s9nO7Q9dAW6SbYpMqbHIWG5rTvYvRRQ1oR9zPWUEP+m92v84jzsHrLJYC3YKwFecEH9oEYvk11Pwau6k9sRk1qnG02uzKDX9LdSi1l/HxrJ0ejYSdNm18dvwZ84EFMndVvSXFo2RVRLc4r8H+DgORZvRJ5orp9AWOYQEHVIFKhxXYW91WNFZG9O15a1k93TVeYSc43bRxUihq+qfL/HHOOAm2z/+wiQJc0lJM1cd0kfl34sBh4QQ28Zq66Ear0fbjmBjBhq+GISFRLS45EronlsH4upKpsm955Nxyyk3SCMGDgOybc8AWUduukviJAt+CSOjt8UJQLbS+lWPSDRebDVHwEUNhnFWcX+bPJUAWyP1af2UemBFUYfkjN3y7Iif1K05eqORQgpq5AL8A0dDCNRb7CYfRSDuwTqWp9ZlbI8C4t8TviiE1BCkrNvPDNXXje1HkiES+/Y/l3vi4KdbCi20nih6/nllHr635Cya/9m6/e2it8OMVVu/4KjGREBYINThxQpB9QP3JYrJrmbUQkyc/yo2YMGGXASiOUonmGaEwucSIiR2uQbhbv1ZJflCBbCnTs4KfC0pUq4V10kwi7JFNe069uIUbSYqbnjL0HzuzLWNcaaR6rog=
