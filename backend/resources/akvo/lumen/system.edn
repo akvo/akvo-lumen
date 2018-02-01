@@ -91,6 +91,7 @@
   {:email-host email-host
    :email-password email-password
    :email-user email-user
+   :mailjet-url mailjet-url
    :from-email "noreply@akvo.org"
    :from-name "Akvo Lumen"}
   :config

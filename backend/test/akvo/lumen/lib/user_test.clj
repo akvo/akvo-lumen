@@ -1,4 +1,5 @@
 (ns akvo.lumen.lib.user-test
+  {:functional true}
   (:require [akvo.lumen.component.emailer :as emailer]
             [akvo.lumen.component.keycloak :as keycloak]
             [akvo.lumen.fixtures :refer [migrate-tenant]]

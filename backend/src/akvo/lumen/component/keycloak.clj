@@ -5,6 +5,7 @@
             [cheshire.core :as json]
             [clj-http.client :as client]
             [clojure.set :as set]
+            [clojure.tools.logging :as log]
             [com.stuartsierra.component :as component]
             [ring.util.response :refer [response]]))
 
@@ -260,7 +261,9 @@
 
   component/Lifecycle
   (start [this]
-    (assoc this :openid-config (fetch-openid-configuration issuer)))
+    (let [openid-config (fetch-openid-configuration issuer)]
+      (log/info "Successfully got openid-config from provider.")
+      (assoc this :openid-config openid-config)))
 
   (stop [this]
     (assoc this :openid-config nil))
@@ -280,10 +283,10 @@
   (create-user [{:keys [api-root]} request-headers email]
     (client/post (format "%s/users" api-root)
                  {:body (json/encode
-                   {"username" email
-                    "email" email
-                    "emailVerified" false
-                    "enabled" true})
+                         {"username" email
+                          "email" email
+                          "emailVerified" false
+                          "enabled" true})
                   :headers request-headers}))
   (demote-user-from-admin
     [this tenant author-claims user-id]

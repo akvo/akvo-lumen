@@ -6,21 +6,23 @@
 
 (defn assert-bindings []
   (assert (:lumen-db-url env) (error-msg "LUMEN_DB_URL"))
-  (assert (:lumen-email-password env) (error-msg "LUMEN_EMAIL_PASSWORD"))
-  (assert (:lumen-email-user env) (error-msg "LUMEN_EMAIL_USER"))
   (assert (:lumen-encryption-key env) (error-msg "LUMEN_ENCRYPTION_KEY"))
   (assert (:lumen-keycloak-client-secret env)
           (error-msg "LUMEN_KEYCLOAK_CLIENT_SECRET"))
   (assert (:lumen-keycloak-url env) (error-msg "LUMEN_KEYCLOAK_URL"))
   (assert (:lumen-file-upload-path env) (error-msg "LUMEN_FILE_UPLOAD_PATH"))
-  (assert (:lumen-sentry-backend-dsn env) (error-msg "LUMEN_SENTRY_BACKEND_DSN"))
-  (assert (:lumen-sentry-client-dsn env) (error-msg "LUMEN_SENTRY_CLIENT_DSN"))
-  (assert (:lumen-flow-api-url env) (error-msg "LUMEN_FLOW_API_URL")))
+  (when-not (= "yes" (:ci-build env))
+    (assert (:lumen-email-password env) (error-msg "LUMEN_EMAIL_PASSWORD"))
+    (assert (:lumen-email-user env) (error-msg "LUMEN_EMAIL_USER"))
+    (assert (:lumen-sentry-backend-dsn env) (error-msg "LUMEN_SENTRY_BACKEND_DSN"))
+    (assert (:lumen-sentry-client-dsn env) (error-msg "LUMEN_SENTRY_CLIENT_DSN"))
+    (assert (:lumen-flow-api-url env) (error-msg "LUMEN_FLOW_API_URL"))))
 
 (defn bindings []
   {'db-uri (:lumen-db-url env)
    'email-host (:lumen-email-host env)
    'email-password (:lumen-email-password env)
+   'mailjet-url (:lumen-mailjet-url env)
    'email-user (:lumen-email-user env)
    'encryption-key (:lumen-encryption-key env)
    'file-upload-path (:lumen-file-upload-path env "/tmp/akvo/lumen")

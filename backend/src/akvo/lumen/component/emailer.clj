@@ -1,8 +1,8 @@
 (ns akvo.lumen.component.emailer
-  (:require [com.stuartsierra.component :as component]
-            [cheshire.core :as json]
+  (:require [cheshire.core :as json]
             [clj-http.client :as client]
-            [clojure.pprint :refer [pprint]]))
+            [clojure.tools.logging :as log]
+            [com.stuartsierra.component :as component]))
 
 (defprotocol SendEmail
   (send-email [this recipients email] "Send email"))
@@ -11,19 +11,18 @@
 
   component/Lifecycle
   (start [this]
-    (println "Using dev emailer")
+    (log/info  "Using std out emailer")
     this)
   (stop [this]
     this)
 
   SendEmail
   (send-email [this recipients email]
-    (println "DevEmailer:")
-    (pprint recipients)
-    (pprint email)))
+    (log/info recipients)
+    (log/info email)))
 
 (defn dev-emailer
-  "Emailer will pprint email."
+  "Dev emailer logs email."
   [options]
   (map->DevEmailer (select-keys options [:from-email :from-name])))
 
@@ -54,9 +53,10 @@
                     :body (json/encode body)}))))
 
 (defn mailjet-emailer
-  [{:keys [email-user email-password from-email from-name]}]
+  [{:keys [email-user email-password from-email from-name mailjet-url]
+    :or {mailjet-url "https://api.mailjet.com/v3"}}]
   (map->MailJetEmailer
    {:config {:credentials [email-user email-password]
              :from-email from-email
              :from-name from-name
-             :api-url "https://api.mailjet.com/v3"}}))
+             :api-url mailjet-url}}))

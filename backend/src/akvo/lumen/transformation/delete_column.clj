@@ -1,5 +1,6 @@
 (ns akvo.lumen.transformation.delete-column
   (:require [akvo.lumen.transformation.engine :as engine]
+            [clojure.tools.logging :as log]
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/transformation/engine.sql")
@@ -22,5 +23,6 @@
        :columns (into (vec (take column-idx columns))
                       (drop (inc column-idx) columns))})
     (catch Exception e
+      (log/debug e)
       {:success? false
        :message (format "Failed to transform: %s" (.getMessage e))})))

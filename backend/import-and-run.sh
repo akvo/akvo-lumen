@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -eu
+set -e
 
 CERT_INSTALLED=$((keytool -list -trustcacerts -keystore "${JAVA_HOME}/jre/lib/security/cacerts" -storepass changeit | grep postgrescert) || echo "not found")
 
@@ -32,7 +32,7 @@ ATTEMPTS=0
 PG=""
 SQL="SELECT ST_AsText(ST_MakeLine(ST_MakePoint(1,2), ST_MakePoint(3,4)))" # Verify that *PostGIS* is available
 
-echo "Waititng for PostgreSQL ..."
+echo "Waiting for PostgreSQL ..."
 while [[ -z "${PG}" && "${ATTEMPTS}" -lt "${MAX_ATTEMPTS}" ]]; do
     sleep 5
     PG=$((psql --username=lumen --host=postgres --dbname=lumen_tenant_1 -c "${SQL}" 2>&1 | grep "LINESTRING(1 2,3 4)") || echo "")
@@ -48,4 +48,11 @@ echo "PostgreSQL is ready!"
 
 echo "Starting REPL ..."
 
-./run-as-user.sh lein repl :headless
+if [[ -z "$1" ]]; then
+    ./run-as-user.sh lein repl :headless
+elif [[ "$1" == "functional-and-seed" ]]; then
+    # Two thing in one so that we avoid starting yet another JVM
+    ./run-as-user.sh lein do test :functional, run -m dev/migrate-and-seed
+else
+    true
+fi

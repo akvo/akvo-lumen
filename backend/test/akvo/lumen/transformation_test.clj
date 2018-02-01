@@ -1,4 +1,5 @@
 (ns akvo.lumen.transformation-test
+  {:functional true}
   (:require [akvo.lumen.fixtures :refer [*tenant-conn*
                                          tenant-conn-fixture]]
             [akvo.lumen.lib :as lib]

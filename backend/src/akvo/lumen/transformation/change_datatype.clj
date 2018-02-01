@@ -2,6 +2,7 @@
   (:require [akvo.lumen.transformation.engine :as engine]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
+            [clojure.tools.logging :as log]
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/transformation/change_datatype.sql")
@@ -25,6 +26,7 @@
 
 (defn- change-datatype [tenant-conn table-name column-name on-error alter-table-sql]
   (jdbc/execute! tenant-conn alter-table-sql)
+  (jdbc/execute! tenant-conn "DEALLOCATE ALL")
   (when (= on-error "delete-row")
     (drop-null-rows tenant-conn
                     {:table-name table-name
@@ -109,5 +111,6 @@
                                column-name (engine/column-type columns column-name) new-type)]
        :columns (engine/update-column columns column-name assoc "type" new-type)})
     (catch Exception e
+      (log/debug e)
       {:success? false
        :message (.getMessage e)})))

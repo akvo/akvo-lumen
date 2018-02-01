@@ -1,4 +1,5 @@
 (ns akvo.lumen.transformation.engine-test
+  {:functional true}
   (:require [akvo.lumen.fixtures :refer [migrate-tenant rollback-tenant]]
             [akvo.lumen.test-utils :refer [test-tenant test-tenant-conn]]
             [akvo.lumen.transformation.engine :refer :all]
