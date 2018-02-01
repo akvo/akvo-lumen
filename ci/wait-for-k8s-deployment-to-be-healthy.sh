@@ -4,7 +4,7 @@ starttime=`date +%s`
 
 while [ $(( $(date +%s) - 60 )) -lt ${starttime} ]; do
 
-    wget https://lumencitest.akvotest.org/healthz -O /dev/null -q
+    wget https://lumencitest.akvotest.org/healthz -O - -nv
     if [ $? -eq 0 ]; then
         exit 0
     else
