@@ -39,7 +39,7 @@ const password = process.env.LUMEN_PASSWORD;
   const page = await browser.newPage();
   page.on('console', msg => console.log('PAGE LOG:', msg.text()));
 
-  await page.tracing.start({screenshots: true, path: 'trace.json'});
+  await page.tracing.start( {screenshots: true, path: 'trace.json'} );
   try {
     // Login
     console.log('\nSTARTING LUMEN TEST WITH PUPPETEER\n');
@@ -150,11 +150,11 @@ const password = process.env.LUMEN_PASSWORD;
     await page.tracing.stop();
     console.log(`THE TEST FAILED\n${err}`);
     try {
-       console.log("Uploading debug file to transfer.sh");
-       const { stdout } = await exec(`curl --upload-file trace.json "https://transfer.sh/${datasetName}.json"`);
-       console.log("Debug file can be found at:");
-       console.log(stdout);
-       console.log("Open it in the Chrome Dev Tools, in the performance panel");
+      console.log('Uploading debug file to transfer.sh');
+      const { stdout } = await exec(`curl --upload-file trace.json 'https://transfer.sh/${datasetName}.json'`);
+      console.log('Debug file can be found at:');
+      console.log(stdout);
+      console.log('Open it in the Chrome Dev Tools, in the performance panel');
     } catch (err2) {
         console.log(err2);
     }
