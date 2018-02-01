@@ -5,16 +5,14 @@ if [ -f "/pg-certs/server.crt" ]; then
 fi
 
 if [ "${WAIT_FOR_DB}" = "true" ]; then
-    MAX=30
-    TRIES=0
-    nc -z postgres 5432
-    DB_UP=$?
-    while [[ ${TRIES} -lt ${MAX} ]] && [[ ${DB_UP} -ne 0 ]]; do
-        echo "Waiting for DB to start ..."
-        sleep 3
-        nc -z postgres 5432
-        DB_UP=$?
-        let TRIES=${TRIES}+1;
+    MAX_ATTEMPTS=60
+    ATTEMPTS=0
+    PG=""
+    SQL="SELECT ST_AsText(ST_MakeLine(ST_MakePoint(1,2), ST_MakePoint(3,4)))" # Verify that *PostGIS* is available
+    while [[ -z "${PG}" && "${ATTEMPTS}" -lt "${MAX_ATTEMPTS}" ]]; do
+        sleep 5
+        PG=$((psql --username=lumen --host=postgres --dbname=lumen_tenant_1 -c "${SQL}" 2>&1 | grep "LINESTRING(1 2,3 4)") || echo "")
+        let ATTEMPTS+=1
     done
 fi
 
