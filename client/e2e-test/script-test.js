@@ -23,7 +23,7 @@ const puppeteer = require('puppeteer');
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 
-const datasetName = Date.now().toString();
+datasetName = Date.now().toString();
 const TIMEOUT = {
   waitFor: 10 * 1000,
   datasetImport: 15 * 1000,
@@ -33,11 +33,7 @@ const lumenUrl = process.env.LUMEN_URL;
 const username = process.env.LUMEN_USER;
 const password = process.env.LUMEN_PASSWORD;
 
-async function test(page) {
-    console.log('\nSTARTING LUMEN TEST WITH PUPPETEER\n');
-    await page.setViewport({ width: 1024, height: 768 });
-    console.log(`Accessing to ${lumenUrl}...`);
-    await page.goto(lumenUrl);
+async function login(page) {
     await page.waitForSelector('#username', { timeout: TIMEOUT.waitFor });
     console.log('Typing username...');
     await page.type('#username', username);
@@ -45,6 +41,16 @@ async function test(page) {
     await page.type('#password', password);
     console.log('Trying login...');
     await page.click('#kc-login');
+};
+
+async function test(page, login) {
+    console.log('\nSTARTING LUMEN TEST WITH PUPPETEER\n');
+    await page.setViewport({ width: 1024, height: 768 });
+    console.log(`Accessing to ${lumenUrl}...`);
+    await page.goto(lumenUrl);
+    if (login) {
+        await login(page);
+    }
     await page.waitForSelector('button[data-test-id="dataset"]', { timeout: TIMEOUT.waitFor });
     console.log('Login was successful.\n');
     await page.evaluate(`window.__datasetName = "${datasetName}"`);
@@ -149,6 +155,7 @@ let page;
 
 let pagePromise =
   puppeteer.launch({
+  // headless: false,
    args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
@@ -157,7 +164,8 @@ let pagePromise =
         return browser.newPage();
    }).then(p => page = p);
 
-//test(page);
+//datasetName = Date.now().toString();
+//pagePromise.then(p => test(page, false)).catch(e => console.log(e));
 
 (async () => {
   page.on('console', msg => console.log('PAGE LOG:', msg.text));
