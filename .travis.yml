@@ -21,12 +21,6 @@ before_install:
       docker pull "$c"
     done
     docker pull alekzonder/puppeteer:0.13.0
-- |
-    while sudo lsof -Pi :5432 -sTCP:LISTEN -t; do
-       echo "Waiting for postgresql to stop for real."
-       sudo service postgresql stop;
-       sleep 1;
-    done
 - if [[ ! -f "${HOME}/google-cloud-sdk/bin/gcloud" ]]; then rm -rf "${HOME}/google-cloud-sdk";
   curl https://sdk.cloud.google.com | bash > /dev/null; fi
 script:
