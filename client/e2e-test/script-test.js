@@ -41,7 +41,7 @@ const password = process.env.LUMEN_PASSWORD;
     ],
   });
   const page = await browser.newPage();
-  page.on('console', msg => console.log('PAGE LOG:', msg.text()));
+  page.on('console', msg => console.log('PAGE LOG:', msg.text));
 
   await page.tracing.start({ screenshots: true, path: 'trace.json' });
   try {
