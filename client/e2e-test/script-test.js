@@ -33,19 +33,7 @@ const lumenUrl = process.env.LUMEN_URL;
 const username = process.env.LUMEN_USER;
 const password = process.env.LUMEN_PASSWORD;
 
-(async () => {
-  const browser = await puppeteer.launch({
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-    ],
-  });
-  const page = await browser.newPage();
-  page.on('console', msg => console.log('PAGE LOG:', msg.text));
-
-  await page.tracing.start({ screenshots: true, path: 'trace.json' });
-  try {
-    // Login
+async function test(page) {
     console.log('\nSTARTING LUMEN TEST WITH PUPPETEER\n');
     await page.setViewport({ width: 1024, height: 768 });
     console.log(`Accessing to ${lumenUrl}...`);
@@ -153,6 +141,30 @@ const password = process.env.LUMEN_PASSWORD;
     await page.click('button[data-test-id="save-changes"]');
     await page.click('[data-test-id="back-button"]');
     console.log(`Dashboard ${datasetName} was successfully created.\n`);
+};
+
+
+let browser;
+let page;
+
+let pagePromise =
+  puppeteer.launch({
+   args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+   ]}).then(b => {
+        browser = b;
+        return browser.newPage();
+   }).then(p => page = p);
+
+//test(page);
+
+(async () => {
+  page.on('console', msg => console.log('PAGE LOG:', msg.text));
+
+  await page.tracing.start({ screenshots: true, path: 'trace.json' });
+  try {
+    await test();
   } catch (err) {
     await page.tracing.stop();
     console.log(`THE TEST FAILED\n${err}`);
