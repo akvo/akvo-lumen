@@ -43,12 +43,12 @@ async function login(page) {
     await page.click('#kc-login');
 };
 
-async function test(page, login) {
+async function test(page, shouldLogin) {
     console.log('\nSTARTING LUMEN TEST WITH PUPPETEER\n');
     await page.setViewport({ width: 1024, height: 768 });
     console.log(`Accessing to ${lumenUrl}...`);
     await page.goto(lumenUrl);
-    if (login) {
+    if (shouldLogin) {
         await login(page);
     }
     await page.waitForSelector('button[data-test-id="dataset"]', { timeout: TIMEOUT.waitFor });
@@ -125,13 +125,11 @@ async function test(page, login) {
     await page.type('input[data-test-id="entity-title"]', `Visualisation of ${datasetName}`);
     console.log('Saving visualisation...');
     await page.click('button[data-test-id="save-changes"]');
-    await page.goto(lumenUrl);
-    await page.waitForSelector('button[data-test-id="dashboard"]', { timeout: TIMEOUT.waitFor });
     console.log(`Visualisation ${datasetName} was successfully created.\n`);
 
-    // Dashboard
     console.log('Back to library');
-    await page.click('[data-test-id="back-button"]');
+    await page.goto(lumenUrl);
+//     Dashboard
     await page.waitForSelector('[data-test-id="dashboard"]', { timeout: TIMEOUT.waitFor });
     console.log('Accessing to dashboard creation...');
     await page.click('[data-test-id="dashboard"]');
@@ -155,7 +153,7 @@ let page;
 
 let pagePromise =
   puppeteer.launch({
-  // headless: false,
+//   headless: false,
    args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
@@ -167,12 +165,12 @@ let pagePromise =
 //datasetName = Date.now().toString();
 //pagePromise.then(p => test(page, false)).catch(e => console.log(e));
 
-(async () => {
+async function runTest() {
   page.on('console', msg => console.log('PAGE LOG:', msg.text));
 
   await page.tracing.start({ screenshots: true, path: 'trace.json' });
   try {
-    await test();
+    await test(page, true);
   } catch (err) {
     await page.tracing.stop();
     console.log(`THE TEST FAILED\n${err}`);
@@ -189,4 +187,6 @@ let pagePromise =
   } finally {
     await browser.close();
   }
-})();
+};
+
+pagePromise.then(p => runTest());
