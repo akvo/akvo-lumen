@@ -15,6 +15,7 @@ export default function VisualisationConfig(props) {
         visualisation={props.visualisation}
         metadata={props.metadata}
         datasets={props.datasets}
+        rasters={props.rasters}
         onChangeSourceDataset={props.onChangeSourceDataset}
         onChangeVisualisationSpec={props.onChangeVisualisationSpec}
         onChangeVisualisationType={props.onChangeVisualisationType}
@@ -29,6 +30,7 @@ VisualisationConfig.propTypes = {
   visualisation: PropTypes.object.isRequired,
   metadata: PropTypes.object,
   datasets: PropTypes.object.isRequired,
+  rasters: PropTypes.object.isRequired,
   onChangeVisualisationType: PropTypes.func.isRequired,
   onChangeSourceDataset: PropTypes.func.isRequired,
   onChangeVisualisationSpec: PropTypes.func.isRequired,

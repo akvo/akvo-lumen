@@ -80,6 +80,7 @@
   "geo_location": "Ubicación geográfica",
   "geo_shape": "Forma geográfica",
   "geo_transform_description": "Se ha generado la columna {columnTitleGeo} a partir de las columnas {columnTitleLat} y {columnTitleLong}",
+  "geotiff": "GeoTIFF",
   "github": "Github",
   "google_drive": "Google Drive",
   "gradient": "Gradiente",

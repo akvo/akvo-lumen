@@ -20,7 +20,7 @@ script:
 - "./ci/build.sh && ./ci/deploy.sh"
 after_failure:
 - PROJECT_NAME=akvo-lumen docker-compose -p akvo-lumen-ci -f docker-compose.yml -f
-  docker-compose.ci.yml logs
+  docker-compose.ci.yml logs --no-color
 env:
   global:
   - PATH=${HOME}/google-cloud-sdk/bin:$PATH

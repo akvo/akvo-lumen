@@ -21,3 +21,8 @@ module.exports.statsd = {
     prefix: 'dev.'+ require("os").hostname() + ".",
     cacheDns: true
 };
+module.exports.grainstore = {
+    datasource: {
+	use_overviews: true
+    }
+};

@@ -9,6 +9,7 @@ import SourceSelection from './createDataset/SourceSelection';
 import DataSourceSettings from './createDataset/DataSourceSettings';
 import Settings from '../dataset/Settings';
 import * as actionCreators from '../../actions/dataset';
+import { importRaster } from '../../actions/raster';
 
 require('./CreateDataset.scss');
 
@@ -53,7 +54,11 @@ class CreateDataset extends Component {
   handleNextOrImport() {
     const { currentPage, dataset } = this.props.datasetImport;
     if (currentPage === 'define-dataset') {
-      this.props.importDataset(dataset);
+      if (dataset.source.kind === 'GEOTIFF') {
+        this.props.importRaster(dataset);
+      } else {
+        this.props.importDataset(dataset);
+      }
       this.props.clearImport();
     } else {
       this.props.nextPage();
@@ -123,6 +128,7 @@ CreateDataset.propTypes = {
   defineDataSource: PropTypes.func.isRequired,
   selectDataSource: PropTypes.func.isRequired,
   importDataset: PropTypes.func.isRequired,
+  importRaster: PropTypes.func.isRequired,
   clearImport: PropTypes.func.isRequired,
   datasetImport: PropTypes.shape({
     currentPage: PropTypes.string.isRequired,
@@ -141,7 +147,7 @@ function mapStateToProps(state, ownProps) {
 }
 
 function mapDispatchToProps(dispatch) {
-  return bindActionCreators(actionCreators, dispatch);
+  return bindActionCreators(Object.assign({}, actionCreators, { importRaster }), dispatch);
 }
 
 export default connect(

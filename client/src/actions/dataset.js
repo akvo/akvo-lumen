@@ -114,7 +114,6 @@ function importDatasetSuccess(datasetId, importId) {
   };
 }
 
-const POLL_INTERVAL = 1000;
 function pollDatasetImportStatus(importId, name) {
   return (dispatch) => {
     dispatch(importDatasetPending(importId, name));
@@ -122,7 +121,8 @@ function pollDatasetImportStatus(importId, name) {
       .then(response => response.json())
       .then(({ status, reason, datasetId }) => {
         if (status === 'PENDING') {
-          setTimeout(() => dispatch(pollDatasetImportStatus(importId, name)), POLL_INTERVAL);
+          setTimeout(() => dispatch(pollDatasetImportStatus(importId, name)),
+          constants.POLL_INTERVAL);
         } else if (status === 'FAILED') {
           dispatch(importDatasetFailure(importId, reason));
         } else if (status === 'OK') {
@@ -286,7 +286,7 @@ function pollDatasetUpdateStatus(updateId, datasetId, title) {
         if (status === 'PENDING') {
           setTimeout(
             () => dispatch(pollDatasetUpdateStatus(updateId, datasetId, title)),
-            POLL_INTERVAL
+            constants.POLL_INTERVAL
           );
         } else if (status === 'FAILED') {
           dispatch(updateDatasetTogglePending(datasetId));
@@ -375,7 +375,8 @@ function pollDatasetTransformationStatus(jobExecutionId, datasetId) {
       .then(({ status, reason }) => {
         if (status === 'PENDING') {
           setTimeout(() =>
-            dispatch(pollDatasetTransformationStatus(jobExecutionId, datasetId)), POLL_INTERVAL);
+            dispatch(pollDatasetTransformationStatus(jobExecutionId, datasetId)),
+            constants.POLL_INTERVAL);
         } else if (status === 'FAILED') {
           dispatch(transformationFailure(datasetId, reason));
         } else if (status === 'OK') {

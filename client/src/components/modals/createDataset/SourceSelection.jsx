@@ -44,6 +44,11 @@ const supportedFormats = [{
   icon: '/assets/google-drive.png',
   label: <FormattedMessage id="google_drive" />,
   disabled: true,
+}, {
+  kind: 'GEOTIFF',
+  icon: '/assets/geotiff.png',
+  label: <FormattedMessage id="geotiff" />,
+  disabled: false,
 }];
 
 const defaultDataSources = {
@@ -66,7 +71,9 @@ const defaultDataSources = {
     surveyId: null,
   },
 
-  // TODO the rest.
+  GEOTIFF: {
+    kind: 'GEOTIFF',
+  },
 };
 
 export default function SourceSelection({ dataSourceKind, onChangeDataSource }) {

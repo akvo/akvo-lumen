@@ -13,6 +13,7 @@
            [java.net URI]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/raster.sql")
 
 (defn- headers [tenant-conn]
   (let [db-uri (-> ^HikariDataSource (:datasource tenant-conn)
@@ -60,35 +61,53 @@
            :else false)))
 
 (defn conform-create-args [layers]
-  (let [dataset-id (get (first (filter (fn[layer] (engine/valid-dataset-id? (get layer "datasetId"))) layers)) "datasetId")]
+  (let [dataset-id (get (first (filter (fn[layer] (engine/valid-dataset-id? (get layer "datasetId"))) layers)) "datasetId")
+        raster-id (get (first (filter (fn[layer] (engine/valid-dataset-id? (get layer "rasterId"))) layers)) "rasterId")]
     (cond
-      (not dataset-id)
+      (and (not dataset-id) (not raster-id))
       (throw (ex-info "No valid datasetID"
                       {"reason" "No valid datasetID"}))
 
-      (some (fn [layer] (not (valid-location? layer engine/valid-column-name?))) layers)
+      (some (fn [layer] (not (valid-location? layer engine/valid-column-name?))) (filter (fn [layer] (not (= (get layer "layerType") "raster"))) layers))
       (throw (ex-info "Location spec not valid"
                       {"reason" "Location spec not valid"}))
 
-      :else [dataset-id])))
+      :else [(if (not dataset-id) raster-id dataset-id)])))
 
 (defn do-create [tenant-conn windshaft-url dataset-id layers]
-  (let [{:keys [table-name columns]} (dataset-by-id tenant-conn {:id dataset-id})
-        metadata-array (map (fn [current-layer]
-                              (let [ current-dataset-id (get current-layer "datasetId")
-                                    {:keys [table-name columns]} (dataset-by-id tenant-conn {:id current-dataset-id})
+  (let [metadata-array (map (fn [current-layer]
+                              (let [current-layer-type (get current-layer "layerType")
+                                    current-dataset-id (if (= current-layer-type "raster")
+                                                         (get current-layer "rasterId")
+                                                         (get current-layer "datasetId"))
+                                    {:keys [table-name columns raster_table]} (if (= current-layer-type "raster")
+                                                                                (raster-by-id tenant-conn {:id current-dataset-id})
+                                                                                (dataset-by-id tenant-conn {:id current-dataset-id}))
                                     current-where-clause (filter/sql-str columns (get current-layer "filters"))]
-                                (map-metadata/build tenant-conn table-name current-layer current-where-clause)))
+                                (map-metadata/build tenant-conn (or raster_table table-name) current-layer current-where-clause)))
                             layers)
         headers (headers tenant-conn)
         url (format "%s/layergroup" windshaft-url)
-        map-config (map-config/build tenant-conn table-name layers metadata-array)
+        map-config (map-config/build tenant-conn "todo: remove this" layers metadata-array)
         layer-group-id (-> (client/post url {:body (json/encode map-config)
                                              :headers headers
                                              :content-type :json})
                            :body json/decode (get "layergroupid"))]
     (lib/ok {"layerGroupId" layer-group-id
              "layerMetadata" metadata-array})))
+
+(defn create-raster [tenant-conn windshaft-url raster-id]
+  (let [{:keys [raster_table metadata]} (raster-by-id tenant-conn {:id raster-id})
+        headers (headers tenant-conn)
+        url (format "%s/layergroup" windshaft-url)
+        map-config (map-config/build-raster raster_table (:min metadata) (:max metadata))
+        layer-group-id (-> (client/post url {:body (json/encode map-config)
+                                             :headers headers
+                                             :content-type :json})
+                           :body json/decode (get "layergroupid"))
+        layer-meta (map-metadata/build tenant-conn raster_table {"layerType" "raster"} nil)]
+    (lib/ok {"layerGroupId" layer-group-id
+             "layerMetadata" layer-meta})))
 
 (defn create
   [tenant-conn windshaft-url layers]

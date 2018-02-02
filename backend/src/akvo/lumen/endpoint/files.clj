@@ -4,7 +4,8 @@
 
 
 (defn endpoint
-  [{{:keys [file-upload-path]} :config}]
-  (let [file-upload-handler (make-handler {:save-dir file-upload-path})]
+  [{{:keys [file-upload-path max-upload-size]} :config}]
+  (let [file-upload-handler (make-handler {:save-dir file-upload-path
+                                           :max-upload-size max-upload-size})]
     (ANY "/api/files*" req
       (file-upload-handler req))))

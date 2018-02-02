@@ -193,6 +193,7 @@ export default function ConfigMenu(props) {
                 onChangeSpec={props.onChangeVisualisationSpec}
                 onChangeVisualisationType={props.onChangeVisualisationType}
                 datasets={props.datasets}
+                rasters={props.rasters}
                 datasetOptions={getDatasetOptions(getDatasetArray(props.datasets))}
                 columnOptions={columnOptions}
                 aggregationOptions={aggregationOptions}
@@ -257,6 +258,7 @@ ConfigMenu.propTypes = {
   visualisation: PropTypes.object.isRequired,
   metadata: PropTypes.object,
   datasets: PropTypes.object.isRequired,
+  rasters: PropTypes.object.isRequired,
   onChangeSourceDataset: PropTypes.func.isRequired,
   onChangeVisualisationSpec: PropTypes.func.isRequired,
   onChangeVisualisationType: PropTypes.func.isRequired,

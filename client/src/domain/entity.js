@@ -32,7 +32,7 @@ export function getId(entity) {
 export function getType(entity) {
   const type = get(entity, 'type');
   invariant(
-    ['dataset', 'visualisation', 'dashboard'].indexOf(type) >= 0,
+    ['dataset', 'visualisation', 'dashboard', 'raster'].indexOf(type) >= 0,
     'Entity %s (%s) unknown entity type %s',
     getTitle(entity), getId(entity), type
   );
@@ -49,6 +49,10 @@ export function isVisualisation(entity) {
 
 export function isDashboard(entity) {
   return getType(entity) === 'dashboard';
+}
+
+export function isRaster(entity) {
+  return getType(entity) === 'raster';
 }
 
 export function getStatus(entity) {

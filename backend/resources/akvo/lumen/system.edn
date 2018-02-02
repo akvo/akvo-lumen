@@ -10,6 +10,7 @@
   :collection #var akvo.lumen.endpoint.collection/endpoint
   :dashboard #var akvo.lumen.endpoint.dashboard/endpoint
   :dataset #var akvo.lumen.endpoint.dataset/endpoint
+  :raster #var akvo.lumen.endpoint.raster/endpoint
   :env #var akvo.lumen.endpoint.env/endpoint
   :files #var akvo.lumen.endpoint.files/endpoint
   :healthz #var akvo.lumen.endpoint.healthz/endpoint
@@ -27,7 +28,7 @@
   :visualisation #var akvo.lumen.endpoint.visualisation/endpoint}
  :dependencies
  {:http [:app]
-  :app [:aggregation :collection :dashboard :dataset :env :emailer :files :healthz
+  :app [:aggregation :collection :dashboard :dataset :raster :env :emailer :files :healthz
         :invite :invite-verify :job-execution :library :public :resource :root :share
         :tier :transformation :user :visualisation]
   :tenant-manager [:config :db]
@@ -35,6 +36,7 @@
   :collection [:tenant-manager]
   :dashboard [:tenant-manager]
   :dataset [:tenant-manager :config]
+  :raster [:tenant-manager :config]
   :env [:config :tenant-manager]
   :files [:config]
   :invite [:tenant-manager :keycloak :emailer :config]
@@ -95,6 +97,7 @@
   :config
   {:encryption-key encryption-key
    :file-upload-path file-upload-path
+   :max-upload-size 100
    :keycloak-url keycloak-url
    :keycloak-realm keycloak-realm
    :keycloak-public-client-id keycloak-public-client-id

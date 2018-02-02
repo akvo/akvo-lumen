@@ -5,7 +5,8 @@
              [dashboard :as dashboard]
              [dataset :as dataset]
              [visualisation :as visualisation]
-             [collection :as collection]]
+             [collection :as collection]
+             [raster :as raster]]
             [akvo.lumen.variant :as variant]
             [compojure.core :refer :all]))
 
@@ -18,5 +19,6 @@
         (lib/ok
          {:dashboards (variant/value (dashboard/all tenant-conn))
           :datasets (variant/value (dataset/all tenant-conn))
+          :rasters (variant/value (raster/all tenant-conn))
           :visualisations (variant/value (visualisation/all tenant-conn))
           :collections (variant/value (collection/all tenant-conn))})))))

@@ -8,6 +8,8 @@ import ToggleInput from '../../common/ToggleInput';
 import ColorLabels from './ColorLabels';
 import FilterMenu from './FilterMenu';
 import { filterColumns, checkUndefined } from '../../../utilities/utils';
+import * as entity from '../../../domain/entity';
+import { palette } from '../../../utilities/visualisationColors';
 
 require('./LayerConfigMenu.scss');
 
@@ -303,6 +305,25 @@ GeoshapeDataTab.propTypes = {
   disabled: PropTypes.bool,
 };
 
+const RasterDataTab = () =>
+  (
+    <div className="RasterDataTab">
+      <div className="inputGroup">
+      (no options yet)
+      </div>
+    </div>
+  );
+
+RasterDataTab.propTypes = {
+  layer: PropTypes.object.isRequired,
+  layerIndex: PropTypes.number.isRequired,
+  onChangeMapLayer: PropTypes.func.isRequired,
+  columnOptions: PropTypes.array.isRequired,
+  datasetOptions: PropTypes.array.isRequired,
+  datasets: PropTypes.object.isRequired,
+  disabled: PropTypes.bool,
+};
+
 const GeopointThemeTab = (props) => {
   const {
     onChangeMapLayer,
@@ -396,6 +417,35 @@ GeoshapeThemeTab.propTypes = {
   disabled: PropTypes.bool,
 };
 
+const RasterThemeTab = (props) => {
+  const {
+    onChangeMapLayer,
+    layerIndex,
+    disabled,
+    startColor,
+    endColor,
+  } = props;
+
+  return (
+    <div
+      className="themeTab"
+    >
+      <ColorLabels
+        pointColorMapping={[{ value: 'startColor', color: startColor || '#FFFFFF' }, { value: 'endColor', color: endColor || '#000000' }]}
+        colorPalette={palette}
+        disabled={disabled}
+        onChangeColor={(value, color) => {
+          if (value === 'startColor') {
+            onChangeMapLayer(layerIndex, { startColor: color });
+          } else {
+            onChangeMapLayer(layerIndex, { endColor: color });
+          }
+        }}
+      />
+    </div>
+  );
+};
+
 export default class LayerConfigMenu extends Component {
   constructor() {
     super();
@@ -431,8 +481,15 @@ export default class LayerConfigMenu extends Component {
                 placeholder="Choose dataset..."
                 value={layer.datasetId !== null ?
                 layer.datasetId.toString() : null}
-                options={this.props.datasetOptions}
-                onChange={datasetId => onChangeMapLayer(this.props.layerIndex, { datasetId })}
+                options={this.props.datasetOptions.concat(Object.keys(this.props.rasters).map(key => this.props.rasters[key]).map(raster => ({ value: `raster-${entity.getId(raster)}`, label: entity.getTitle(raster) })))}
+                onChange={(datasetId) => {
+                  if (datasetId.indexOf('raster') > -1) {
+                    onChangeMapLayer(this.props.layerIndex, { rasterId: datasetId.replace('raster-', '') });
+                  } else {
+                    onChangeMapLayer(this.props.layerIndex, { datasetId });
+                  }
+                }
+                }
                 buttonSpacing="0"
                 data-test-id="source-dataset"
                 inputProps={sourceDataset}
@@ -445,6 +502,9 @@ export default class LayerConfigMenu extends Component {
               }, {
                 label: <FormattedMessage id="geo_shape" />,
                 value: 'geo-shape',
+              }, {
+                label: 'raster',
+                value: 'raster',
               }]}
               selected={layer.layerType || 'geo-location'}
               label="Layer type"
@@ -453,7 +513,7 @@ export default class LayerConfigMenu extends Component {
               })}
               buttonSpacing="0"
             />
-            {(layer.layerType === 'geo-shape') ?
+            {(layer.layerType === 'geo-shape') &&
               <GeoshapeDataTab
                 layer={layer}
                 layerIndex={layerIndex}
@@ -463,7 +523,19 @@ export default class LayerConfigMenu extends Component {
                 datasets={this.props.datasets}
                 disabled={disabled}
               />
-              :
+            }
+            {(layer.layerType === 'raster') &&
+              <RasterDataTab
+                layer={layer}
+                layerIndex={layerIndex}
+                onChangeMapLayer={onChangeMapLayer}
+                columnOptions={columnOptions}
+                datasetOptions={this.props.datasetOptions}
+                datasets={this.props.datasets}
+                disabled={disabled}
+              />
+            }
+            {(layer.layerType === 'geo-location') &&
               <div>
                 <GeopointDataTab
                   layer={layer}
@@ -554,26 +626,40 @@ export default class LayerConfigMenu extends Component {
         );
         break;
       case 'theme':
-        tabContent = layer.layerType === 'geo-shape' ?
-          (<GeoshapeThemeTab
-            onChangeMapLayer={this.props.onChangeMapLayer}
-            layer={layer}
-            disabled={disabled}
-            layerIndex={layerIndex}
-            columnOption={columnOptions}
-            colors={checkUndefined(metadata, 'layerMetadata', layerIndex, 'availableColors') || null}
-            gradientColor={checkUndefined(metadata, 'layerMetadata', layerIndex, 'shapeColorMapping', 1, 'color') || null}
-          />)
-          :
-          (<GeopointThemeTab
-            onChangeMapLayer={this.props.onChangeMapLayer}
-            layer={layer}
-            pointColorMapping={checkUndefined(metadata, 'layerMetadata', layerIndex, 'pointColorMapping') || []}
-            disabled={disabled}
-            layerIndex={layerIndex}
-            columnOptions={columnOptions}
-            handleChangeLabelColor={this.handleChangeLabelColor}
-          />);
+        if (layer.layerType === 'geo-shape') {
+          tabContent =
+            (<GeoshapeThemeTab
+              onChangeMapLayer={this.props.onChangeMapLayer}
+              layer={layer}
+              disabled={disabled}
+              layerIndex={layerIndex}
+              columnOption={columnOptions}
+              colors={checkUndefined(metadata, 'layerMetadata', layerIndex, 'availableColors') || null}
+              gradientColor={checkUndefined(metadata, 'layerMetadata', layerIndex, 'shapeColorMapping', 1, 'color') || null}
+            />);
+        } else if (layer.layerType === 'raster') {
+          tabContent =
+            (<RasterThemeTab
+              onChangeMapLayer={this.props.onChangeMapLayer}
+              layer={layer}
+              disabled={disabled}
+              layerIndex={layerIndex}
+              handleChangeLabelColor={this.handleChangeLabelColor}
+              startColor={layer.startColor}
+              endColor={layer.endColor}
+            />);
+        } else {
+          tabContent =
+            (<GeopointThemeTab
+              onChangeMapLayer={this.props.onChangeMapLayer}
+              layer={layer}
+              pointColorMapping={checkUndefined(metadata, 'layerMetadata', layerIndex, 'pointColorMapping') || []}
+              disabled={disabled}
+              layerIndex={layerIndex}
+              columnOptions={columnOptions}
+              handleChangeLabelColor={this.handleChangeLabelColor}
+            />);
+        }
         break;
 
       default:
@@ -675,12 +761,23 @@ export default class LayerConfigMenu extends Component {
   }
 }
 
+RasterThemeTab.propTypes = {
+  startColor: PropTypes.string,
+  endColor: PropTypes.string,
+  onChangeMapLayer: PropTypes.func.isRequired,
+  disabled: PropTypes.bool,
+  layerIndex: PropTypes.number.isRequired,
+};
+
 LayerConfigMenu.propTypes = {
   layer: PropTypes.object.isRequired,
   metadata: PropTypes.object,
   datasets: PropTypes.object.isRequired,
-  datasetOptions: PropTypes.array.isRequired,
+  rasters: PropTypes.object.isRequired,
+  startColor: PropTypes.string,
+  endColor: PropTypes.string,
   onChangeMapLayer: PropTypes.func.isRequired,
+  datasetOptions: PropTypes.array.isRequired,
   onDeselectLayer: PropTypes.func.isRequired,
   layerIndex: PropTypes.number.isRequired,
   onSave: PropTypes.func.isRequired,

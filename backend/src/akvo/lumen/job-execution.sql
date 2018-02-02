@@ -46,15 +46,23 @@ UPDATE job_execution
  WHERE id = :id;
 
 -- :name job-execution-by-id :? :1
-SELECT status, error_log->>0 as "error-message"
-  FROM job_execution
- WHERE id = :id
+SELECT j.status, j.error_log->>0 as "error-message", d.spec->'source'->>'kind' as kind
+  FROM data_source d, job_execution j
+ WHERE d.id = j.data_source_id
+   AND j.id = :id;
 
 -- :name dataset-id-by-job-execution-id :? :1
 -- :doc Find the dataset id corresponding to the job execution id
 SELECT dataset_id
   FROM dataset_version
   WHERE dataset_version.job_execution_id = :id;
+
+
+-- :name raster-id-by-job-execution-id :? :1
+-- :doc Find a raster id corresponding to the job execution id
+SELECT id AS raster_id
+  FROM raster_dataset
+ WHERE raster_dataset.job_execution_id = :id;
 
 -- :name job-execution-status :? :1
 -- :doc Get job execution status for a given job execution id

@@ -163,6 +163,12 @@
             }
         }
 
+        &.raster {
+            .entityIcon {
+                background-image: url("../../styles/img/icon-256-library-listing-dataset.png");
+            }
+        }
+
         .textContents {
             flex: 1;
             vertical-align: top;

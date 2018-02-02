@@ -52,6 +52,7 @@ export default class DataFileDataSourceSettings extends Component {
     const handleProgress = this.handleProgress;
     auth.token().then((token) => {
       const upload = new tus.Upload(file, {
+        chunkSize: 1 * 1024 * 1024,
         headers: { Authorization: `Bearer ${token}` },
         endpoint: '/api/files',
         onError() {
@@ -97,6 +98,7 @@ export default class DataFileDataSourceSettings extends Component {
             className={`dataFileUploadInput${this.isProgressBarVisible() ? ' progressActive' : ''}`}
             ref={(ref) => { this.fileInput = ref; }}
             type="file"
+            accept=".csv"
             onChange={() => {
               this.uploadFile(this.fileInput.files[0]);
             }}

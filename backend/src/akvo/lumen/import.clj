@@ -3,6 +3,7 @@
              [akvo.lumen.import.csv]
              [akvo.lumen.import.flow]
              [akvo.lumen.lib :as lib]
+             [akvo.lumen.lib.raster :as raster]
              [akvo.lumen.util :as util]
              [cheshire.core :as json]
              [clojure.java.jdbc :as jdbc]
@@ -81,10 +82,12 @@
 (defn handle-import-request [tenant-conn config claims data-source]
   (let [data-source-id (str (util/squuid))
         job-execution-id (str (util/squuid))
-        table-name (util/gen-table-name "ds")]
+        table-name (util/gen-table-name "ds")
+        kind (get-in data-source ["source" "kind"])]
     (insert-data-source tenant-conn {:id data-source-id
                                      :spec (json/generate-string data-source)})
     (insert-job-execution tenant-conn {:id job-execution-id
                                        :data-source-id data-source-id})
     (future (do-import tenant-conn config job-execution-id))
-    (lib/ok {"importId" job-execution-id})))
+    (lib/ok {"importId" job-execution-id
+             "kind" kind})))

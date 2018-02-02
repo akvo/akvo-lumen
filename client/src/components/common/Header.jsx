@@ -12,12 +12,12 @@ function Header({ children, actions, router, className = '', backButtonTarget })
     <nav className={`Header ${className}`}>
       <Link
         className="backButton"
+        data-test-id="back-button"
         {...target}
       >
         <i
           className="fa fa-arrow-left"
           aria-hidden="true"
-          data-test-id="fa-arrow"
         />
       </Link>
       <div className="content">

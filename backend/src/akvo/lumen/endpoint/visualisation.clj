@@ -20,6 +20,10 @@
           (let [layers (get-in spec ["layers"])]
             (maps/create tenant-conn (:windshaft-url config) layers))))
 
+      (context "/rasters" _
+        (POST "/" {{:strs [rasterId spec]} :body}
+          (maps/create-raster tenant-conn (:windshaft-url config) rasterId)))
+
       (context "/:id" [id]
 
         (GET "/" _

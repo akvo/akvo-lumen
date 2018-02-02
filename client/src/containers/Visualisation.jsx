@@ -266,6 +266,7 @@ class Visualisation extends Component {
         <VisualisationEditor
           visualisation={visualisation}
           datasets={this.datasets()}
+          rasters={this.props.library.rasters}
           onChangeTitle={this.handleChangeVisualisationTitle}
           onChangeVisualisationType={this.handleChangeVisualisationType}
           onChangeSourceDataset={this.handleChangeSourceDataset}

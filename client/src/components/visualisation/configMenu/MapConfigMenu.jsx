@@ -170,6 +170,7 @@ export default class MapConfigMenu extends Component {
               metadata={this.props.metadata}
               onDeselectLayer={() => this.setState({ selectedLayer: null })}
               datasets={this.props.datasets}
+              rasters={this.props.rasters}
               datasetOptions={this.props.datasetOptions}
               onChangeMapLayer={this.handleChangeMapLayer}
               onSave={this.props.onSave}
@@ -197,11 +198,13 @@ MapConfigMenu.propTypes = {
   visualisation: PropTypes.object.isRequired,
   metadata: PropTypes.object,
   datasets: PropTypes.object.isRequired,
+  rasters: PropTypes.object.isRequired,
   onChangeSpec: PropTypes.func.isRequired,
   aggregationOptions: PropTypes.array.isRequired,
   onChangeSourceDataset: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
   onChangeVisualisationType: PropTypes.func.isRequired,
+  onChangeMapLayer: PropTypes.func,
   datasetOptions: PropTypes.array.isRequired,
   loadDataset: PropTypes.func.isRequired,
 };

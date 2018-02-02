@@ -6,6 +6,7 @@ import { fetchDatasetsSuccess } from './dataset';
 import { fetchVisualisationsSuccess } from './visualisation';
 import { fetchDashboardsSuccess } from './dashboard';
 import { fetchCollectionsSuccess } from './collection';
+import { fetchRastersSuccess } from './raster';
 
 
 import * as api from '../api';
@@ -31,6 +32,7 @@ export function fetchLibrary() {
       .then(response => response.json())
       .then((library) => {
         dispatch(fetchDatasetsSuccess(Immutable.fromJS(library.datasets)));
+        dispatch(fetchRastersSuccess(Immutable.fromJS(library.rasters)));
         dispatch(fetchVisualisationsSuccess(library.visualisations));
         dispatch(fetchDashboardsSuccess(library.dashboards));
         dispatch(fetchCollectionsSuccess(library.collections));
@@ -52,7 +54,8 @@ export function ensureLibraryLoaded() {
       // TODO What's a good way to check if library has been loaded?
       isEmpty(library.datasets) ||
       isEmpty(library.visualisations) ||
-      isEmpty(library.dashboards)
+      isEmpty(library.dashboards) ||
+      isEmpty(library.rasters)
     ) {
       return dispatch(fetchLibrary());
     }
