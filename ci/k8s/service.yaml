@@ -31,7 +31,6 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-# To rename this to simply "lumen" to match the existing ingress
   name: lumen-blue-green-gateway
 spec:
   type: NodePort
