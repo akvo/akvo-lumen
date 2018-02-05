@@ -30,13 +30,13 @@ spec:
           name: lumen-blue-green-config
         livenessProbe:
           httpGet:
-            path: /nginx-healthz
+            path: /
             port: 8080
           initialDelaySeconds: 5
           timeoutSeconds: 1
         readinessProbe:
           httpGet:
-            path: /nginx-healthz
+            path: /
             port: 8080
           initialDelaySeconds: 5
           timeoutSeconds: 1
@@ -83,10 +83,6 @@ data:
                 proxy_pass          http://lumen-live;
             }
 
-            location /nginx-healthz {
-                access_log off;
-                return 200 "healthy\n";
-            }
         }
 
         server {
