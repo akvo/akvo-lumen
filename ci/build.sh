@@ -41,7 +41,7 @@ docker tag eu.gcr.io/${PROJECT_NAME}/lumen-maps:${TRAVIS_COMMIT} eu.gcr.io/${PRO
 log Starting Docker Compose environment
 docker-compose -p akvo-lumen-ci -f docker-compose.yml -f docker-compose.ci.yml up --no-color -d --build
 
-bash ci/wait-for-docker-compose-to-start.sh
+bash ci/helpers/wait-for-docker-compose-to-start.sh
 
 log Running Backend functional tests
 docker-compose -p akvo-lumen-ci -f docker-compose.yml -f docker-compose.ci.yml run --no-deps backend-functional-tests /app/import-and-run.sh functional-and-seed
