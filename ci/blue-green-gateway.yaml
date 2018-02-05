@@ -1,0 +1,107 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: lumen-blue-green-gateway
+spec:
+  template:
+    metadata:
+      labels:
+        run: lumen-blue-green-gateway
+    spec:
+      containers:
+      - image: rosskukulinski/nginx-kubernetes-reload:v2.0.1
+        imagePullPolicy: Always
+        name: gateway
+        resources:
+          requests:
+            cpu: "50m"
+          limits:
+            cpu: "1000m"
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        - containerPort: 8080
+          protocol: TCP
+        env:
+          - name: WATCH_PATHS
+            value: "/etc/nginx /etc/nginx/conf.d"
+        volumeMounts:
+        - mountPath: /etc/nginx/conf.d/
+          name: lumen-blue-green-config
+        livenessProbe:
+          httpGet:
+            path: /nginx-healthz
+            port: 8080
+          initialDelaySeconds: 5
+          timeoutSeconds: 1
+        readinessProbe:
+          httpGet:
+            path: /nginx-healthz
+            port: 8080
+          initialDelaySeconds: 5
+          timeoutSeconds: 1
+      restartPolicy: Always
+      volumes:
+      - name: lumen-blue-green-config
+        configMap:
+          name: lumen-blue-green-config
+---
+apiVersion: v1
+data:
+  current-live: green
+  default.conf: |-
+        client_max_body_size 50M;
+        large_client_header_buffers 16 32k;
+
+        gzip on;
+        gzip_comp_level    5;
+        gzip_min_length    256;
+        gzip_proxied       any;
+        gzip_vary          on;
+        gzip_types
+            application/javascript
+            application/json
+            application/x-font-ttf
+            application/xml
+            font/opentype
+            image/bmp
+            image/svg+xml
+            image/x-icon
+            text/css
+            text/plain
+            text/html;
+
+        server {
+            listen       80 default_server;
+
+            location / {
+                proxy_set_header    Host $host;
+                proxy_set_header    X-Real-IP $remote_addr;
+                proxy_set_header    X-Forwarded-Host $host;
+                proxy_set_header    X-Forwarded-Proto $http_x_forwarded_proto;
+                proxy_set_header    X-Blue-Green-State 'live';
+                proxy_pass          http://lumen-live;
+            }
+
+            location /nginx-healthz {
+                access_log off;
+                return 200 "healthy\n";
+            }
+        }
+
+        server {
+            listen       80;
+            server_name  ~^dark-.+$;
+
+            location / {
+                proxy_set_header    Host $host;
+                proxy_set_header    X-Real-IP $remote_addr;
+                proxy_set_header    X-Forwarded-Host $host;
+                proxy_set_header    X-Blue-Green-State 'dark';
+                proxy_set_header    X-Forwarded-Proto $http_x_forwarded_proto;
+                proxy_pass          http://lumen-dark;
+            }
+        }
+kind: ConfigMap
+metadata:
+  name: lumen-blue-green-config
