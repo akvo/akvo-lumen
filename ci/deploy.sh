@@ -52,6 +52,7 @@ sed -e "s/\${BUILD_HASH}/$TRAVIS_COMMIT/" -e "s/\${COLOR}/${DARK_COLOR}/" ci/k8s
 
 kubectl apply -f deployment.yaml
 kubectl apply -f ci/k8s/redis-master-windshaft.yaml
+kubectl apply -f ci/k8s/blue-green-gateway.yaml
 
 if [[ "${TRAVIS_BRANCH}" = "master" ]]; then
     exit 0
