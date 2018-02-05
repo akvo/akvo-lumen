@@ -21,6 +21,12 @@
   (and (= request-method :get)
        (= path-info "/healthz")))
 
+(defn tenant-host [host]
+  (-> host
+      (str/replace-first #"^dark-" "")
+      (str/split #"\.")
+      first))
+
 (defn wrap-label-tenant
   "Parses the first dns label as tenant id and adds it to the request map as
   tenant-id."
@@ -29,7 +35,7 @@
     (let [host (get-in req [:headers "host"])]
       (cond
         (healthz? req) (handler req)
-        (subdomain? host) (handler (assoc req :tenant (first (str/split host #"\."))))
+        (subdomain? host) (handler (assoc req :tenant (tenant-host host)))
         :else (lib/bad-request "Not a tenant")))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
