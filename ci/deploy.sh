@@ -59,7 +59,7 @@ if [[ "${TRAVIS_BRANCH}" = "master" ]]; then
 fi
 
 log Waiting for k8s to finish
-./ci/helpers/wait-for-k8s-deployment-to-be-ready.sh
+./ci/helpers/wait-for-k8s-deployment-to-be-ready.sh $DARK_COLOR
 log Waiting for k8s to be healthy
 ./ci/helpers/wait-for-k8s-deployment-to-be-healthy.sh
 
