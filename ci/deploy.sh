@@ -42,8 +42,13 @@ gcloud docker -- push eu.gcr.io/${PROJECT_NAME}/lumen-backend
 gcloud docker -- push eu.gcr.io/${PROJECT_NAME}/lumen-client
 gcloud docker -- push eu.gcr.io/${PROJECT_NAME}/lumen-maps
 
-log Deploying
-sed -e "s/\${BUILD_HASH}/$TRAVIS_COMMIT/" ci/deployment.yaml.template > deployment.yaml
+log Finding blue/green state
+LIVE_COLOR=$(./ci/live-color.sh)
+log LIVE is ${LIVE_COLOR}
+DARK_COLOR=$(./ci/dark-color.sh $LIVE_COLOR)
+
+log Deploying to dark ($DARK_COLOR)
+sed -e "s/\${BUILD_HASH}/$TRAVIS_COMMIT/" -e "s/\${COLOR}/${DARK_COLOR}/" ci/deployment.yaml.template > deployment.yaml
 
 kubectl apply -f deployment.yaml
 kubectl apply -f ci/redis-master-windshaft.yaml
