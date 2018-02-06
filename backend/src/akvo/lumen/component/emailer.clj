@@ -59,4 +59,4 @@
    {:config {:credentials [email-user email-password]
              :from-email from-email
              :from-name from-name
-             :api-url mailjet-url}}))
+             :api-url "https://api.mailjet.com/v3"}}))
