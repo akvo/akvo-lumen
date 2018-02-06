@@ -121,7 +121,7 @@ const LegendEntry = ({ singleMetadata, layer }) => (
             <div
               className="gradientDisplay"
               style={{
-                background: `linear-gradient(90deg,${layer.startColor},${layer.endColor})`,
+                background: `linear-gradient(90deg,${layer.startColor || 'white'},${layer.endColor || 'black'})`,
               }}
             />
           </div>
