@@ -3,7 +3,7 @@
 set -eu
 
 function log {
-   echo "`date +"%T"` - INFO - $@"
+   echo "$(date +"%T") - INFO - $*"
 }
 
 export PROJECT_NAME=akvo-lumen
@@ -44,10 +44,10 @@ gcloud docker -- push eu.gcr.io/${PROJECT_NAME}/lumen-maps
 
 log Finding blue/green state
 LIVE_COLOR=$(./ci/live-color.sh)
-log LIVE is ${LIVE_COLOR}
-DARK_COLOR=$(./ci/helpers/dark-color.sh $LIVE_COLOR)
+log LIVE is "${LIVE_COLOR}"
+DARK_COLOR=$(./ci/helpers/dark-color.sh "$LIVE_COLOR")
 
-log Deploying to dark ($DARK_COLOR)
+log "Deploying to dark ($DARK_COLOR)"
 sed -e "s/\${BUILD_HASH}/$TRAVIS_COMMIT/" -e "s/\${COLOR}/${DARK_COLOR}/" ci/k8s/deployment.yaml.template > deployment.yaml
 
 kubectl apply -f deployment.yaml
@@ -59,11 +59,11 @@ if [[ "${TRAVIS_BRANCH}" = "master" ]]; then
 fi
 
 log Waiting for k8s to finish
-./ci/helpers/wait-for-k8s-deployment-to-be-ready.sh $DARK_COLOR
+./ci/helpers/wait-for-k8s-deployment-to-be-ready.sh "$DARK_COLOR"
 log Waiting for k8s to be healthy
 ./ci/helpers/wait-for-k8s-deployment-to-be-healthy.sh
 
 log Running end to end tests against the Kubernetes TEST environment
-./ci/e2e-test.sh script-test akvolumenci https://dark-lumencitest.akvotest.org/ $USERNAME $PASSWORD
+./ci/e2e-test.sh script-test akvolumenci https://dark-lumencitest.akvotest.org/ "$USERNAME" "$PASSWORD"
 log Cleaning up environment
-./ci/e2e-test.sh clean-all akvolumenci https://dark-lumencitest.akvotest.org/ $USERNAME $PASSWORD || echo "Ignoring error during cleanup"
+./ci/e2e-test.sh clean-all akvolumenci https://dark-lumencitest.akvotest.org/ "$USERNAME" "$PASSWORD" || echo "Ignoring error during cleanup"

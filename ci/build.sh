@@ -2,10 +2,9 @@
 set -eu
 
 function log {
-   echo "`date +"%T"` - INFO - $@"
+   echo "$(date +"%T") - INFO - $*"
 }
 
-BRANCH_NAME="${TRAVIS_BRANCH:=unknown}"
 export PROJECT_NAME=akvo-lumen
 
 if [ -z "$TRAVIS_COMMIT" ]; then
@@ -15,7 +14,7 @@ fi
 log Bulding container to run the backend tests
 docker build --rm=false -t akvo-lumen-backend-dev:develop backend -f backend/Dockerfile-dev
 log Running Backend unit tests and building uberjar
-docker run --env-file=.env -v $HOME/.m2:/home/akvo/.m2 -v `pwd`/backend:/app akvo-lumen-backend-dev:develop /app/run-as-user.sh lein do test, uberjar
+docker run --env-file=.env -v "$HOME/.m2:/home/akvo/.m2" -v "$(pwd)/backend:/app" akvo-lumen-backend-dev:develop /app/run-as-user.sh lein "do" test, uberjar
 
 cp backend/target/uberjar/akvo-lumen.jar backend
 
@@ -28,7 +27,7 @@ docker tag eu.gcr.io/${PROJECT_NAME}/lumen-backend:${TRAVIS_COMMIT} eu.gcr.io/${
 log Building container to run the client tests
 docker build --rm=false -t akvo-lumen-client-dev:develop client -f client/Dockerfile-dev
 log Running Client linting, unit tests and creating production assets
-docker run --env-file=.env -v `pwd`/client:/lumen --rm=false -t akvo-lumen-client-dev:develop /lumen/run-as-user.sh /lumen/ci-build.sh
+docker run --env-file=.env -v "$(pwd)/client:/lumen" --rm=false -t akvo-lumen-client-dev:develop /lumen/run-as-user.sh /lumen/ci-build.sh
 
 log Creating Production Client image
 docker build --rm=false -t eu.gcr.io/${PROJECT_NAME}/lumen-client:${TRAVIS_COMMIT} ./client
