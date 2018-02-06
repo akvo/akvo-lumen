@@ -8,12 +8,10 @@ starttime=`date +%s`
 while [ $(( $(date +%s) - 300 )) -lt ${starttime} ]; do
 
    lumen_status=`kubectl get pods -l "lumen-version=$TRAVIS_COMMIT,run=lumen-blue-green,color=${COLOR}" -ao jsonpath='{range .items[*].status.containerStatuses[*]}{@.name}{" ready="}{@.ready}{"\n"}{end}'`
-   echo "lumen status ${lumen_status}"
 # We want to make sure that when we hit the ingress from the integration test, we are hitting the new containers,
 # hence we wait until the old pods are gone.
 # Another possibility could be to check that the service is pointing just to the new containers.
    old_lumen_status=`kubectl get pods -l "lumen-version!=$TRAVIS_COMMIT,run=lumen-blue-green,color=${COLOR}" -ao jsonpath='{range .items[*].status.containerStatuses[*]}{@.name}{" ready="}{@.ready}{"\n"}{end}'`
-   echo "old lumen status ${old_lumen_status}"
 
     if [[ ${lumen_status} =~ "ready=true" ]] && ! [[ ${lumen_status} =~ "ready=false" ]] && ! [[ ${old_lumen_status} =~ "ready" ]] ; then
         echo "all good!"
