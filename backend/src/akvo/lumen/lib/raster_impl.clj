@@ -104,7 +104,7 @@
                                          (.setValue (json/generate-string metadata)))
                              :raster-table table-name})
         (update-successful-job-execution conn {:id job-execution-id})))
-    (catch Exception e
+    (catch Throwable e
       (update-failed-job-execution conn {:id job-execution-id
                                          :reason (.getMessage e)}))))
 
