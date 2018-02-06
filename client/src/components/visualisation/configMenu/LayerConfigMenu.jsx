@@ -25,7 +25,7 @@ const getDatasetOrRasterId = (layer) => {
   }
 
   return layer.datasetId ? layer.datasetId.toString() : null;
-}
+};
 
 const getSelectMenuOptionsFromColumnList = columns => (columns == null ?
   [] : columns.map((column, index) => ({
@@ -317,8 +317,7 @@ const RasterDataTab = () =>
   // No options yet
   (
     <div className="RasterDataTab">
-      <div className="inputGroup">
-      </div>
+      <div className="inputGroup" />
     </div>
   );
 

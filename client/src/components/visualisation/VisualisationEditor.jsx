@@ -26,15 +26,15 @@ const specIsValidForApi = (spec, vType) => {
         return false;
       }
       if (spec.layers.some(
-        layer => {
+        (layer) => {
           if (layer.layerType === 'geo-location') {
-            return !Boolean(layer.datasetId && (layer.geom || (layer.latitude && layer.longitude)));
+            return !layer.datasetId && (layer.geom || (layer.latitude && layer.longitude));
           }
           if (layer.layerType === 'geo-shape') {
-            return !Boolean(layer.datasetId && layer.geom);
+            return !layer.datasetId && layer.geom;
           }
           if (layer.layerType === 'raster') {
-            return !Boolean(layer.rasterId);
+            return !layer.rasterId;
           }
           return true;
         }
