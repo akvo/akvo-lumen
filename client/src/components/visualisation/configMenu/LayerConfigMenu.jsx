@@ -19,6 +19,14 @@ const geopoint = { 'data-test-id': 'geopoint-select' };
 
 const colorCoding = { 'data-test-id': 'color-coding-select' };
 
+const getDatasetOrRasterId = (layer) => {
+  if (layer.rasterId) {
+    return `raster-${layer.rasterId.toString()}`;
+  }
+
+  return layer.datasetId ? layer.datasetId.toString() : null;
+}
+
 const getSelectMenuOptionsFromColumnList = columns => (columns == null ?
   [] : columns.map((column, index) => ({
     value: `${column.get('columnName')}`,
@@ -306,10 +314,10 @@ GeoshapeDataTab.propTypes = {
 };
 
 const RasterDataTab = () =>
+  // No options yet
   (
     <div className="RasterDataTab">
       <div className="inputGroup">
-      (no options yet)
       </div>
     </div>
   );
@@ -479,14 +487,13 @@ export default class LayerConfigMenu extends Component {
                 disabled={disabled}
                 name="datasetMenu"
                 placeholder="Choose dataset..."
-                value={layer.datasetId !== null ?
-                layer.datasetId.toString() : null}
+                value={getDatasetOrRasterId(layer)}
                 options={this.props.datasetOptions.concat(Object.keys(this.props.rasters).map(key => this.props.rasters[key]).map(raster => ({ value: `raster-${entity.getId(raster)}`, label: entity.getTitle(raster) })))}
                 onChange={(datasetId) => {
                   if (datasetId.indexOf('raster') > -1) {
-                    onChangeMapLayer(this.props.layerIndex, { rasterId: datasetId.replace('raster-', '') });
+                    onChangeMapLayer(this.props.layerIndex, { rasterId: datasetId.replace('raster-', ''), datasetId: null });
                   } else {
-                    onChangeMapLayer(this.props.layerIndex, { datasetId });
+                    onChangeMapLayer(this.props.layerIndex, { datasetId, rasterId: null });
                   }
                 }
                 }
