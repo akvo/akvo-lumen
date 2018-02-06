@@ -75,16 +75,15 @@
   (lib/ok (all-rasters conn)))
 
 (defn do-import [conn config data-source job-execution-id]
-  (let [source (get data-source "source")
-        file (import/get-path source (:file-upload-path config))
-        path (.getAbsolutePath (.getParentFile file))
-        filename (.getName file)
-        table-name (util/gen-table-name "raster")
-        raster-info (get-raster-info path filename)
-        prj (project-and-compress path filename)
-        sql (get-raster-data-as-sql (:path prj) (:filename prj) table-name)]
-
-    (try
+  (try
+    (let [source (get data-source "source")
+          file (import/get-path source (:file-upload-path config))
+          path (.getAbsolutePath (.getParentFile file))
+          filename (.getName file)
+          table-name (util/gen-table-name "raster")
+          raster-info (get-raster-info path filename)
+          prj (project-and-compress path filename)
+          sql (get-raster-data-as-sql (:path prj) (:filename prj) table-name)]
       (create-raster-table conn {:table-name table-name})
       (create-raster-index conn {:table-name table-name})
       (jdbc/execute! conn [sql])
@@ -104,10 +103,10 @@
                                          (.setType "jsonb")
                                          (.setValue (json/generate-string metadata)))
                              :raster-table table-name})
-        (update-successful-job-execution conn {:id job-execution-id}))
-      (catch Exception e
-        (update-failed-job-execution conn {:id job-execution-id
-                                           :reason (.getMessage e)})))))
+        (update-successful-job-execution conn {:id job-execution-id})))
+    (catch Exception e
+      (update-failed-job-execution conn {:id job-execution-id
+                                         :reason (.getMessage e)}))))
 
 (defn create [conn config claims data-source]
   (let [data-source-id (str (util/squuid))
