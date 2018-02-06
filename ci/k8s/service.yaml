@@ -2,6 +2,9 @@ apiVersion: v1
 kind: Service
 metadata:
   name: lumen-live
+  annotations:
+      flipDate: ${UTCDATE}
+      flipBy: ${ACCOUNT}
 spec:
   type: NodePort
   ports:
@@ -17,6 +20,9 @@ apiVersion: v1
 kind: Service
 metadata:
   name: lumen-dark
+  annotations:
+    flipDate: ${UTCDATE}
+    flipBy: ${ACCOUNT}
 spec:
   type: NodePort
   ports:
