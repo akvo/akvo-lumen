@@ -2,6 +2,30 @@
 	display: flex;
 	height: 100%;
 
+  &.blur {
+    filter: blur(3px);
+  }
+
+  .failedToLoadMessage {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: rgba(155, 155, 155, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 3;
+
+    .message {
+      padding: 2rem;
+      background: white;
+      max-width: 90%;
+      text-align: center;
+    }
+  }
+
   .WorkspaceNav.collapsed.noFloat + .Library {
     margin-left: 4rem;
   }
