@@ -1,5 +1,6 @@
 import { combineReducers } from 'redux';
 import { routerReducer } from 'react-router-redux';
+import loadStatus from './loadStatus';
 import library from './library';
 import collections from './collections';
 import activeModal from './activeModal';
@@ -15,6 +16,7 @@ function env(state = {}) {
 
 const rootReducer = combineReducers({
   routing: routerReducer,
+  loadStatus,
   library,
   collections,
   activeModal,
