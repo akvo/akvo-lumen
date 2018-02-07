@@ -7,5 +7,5 @@ while [[ -z "${BACKEND}" && ${TRIES} -lt ${MAX} ]]; do
     echo "Waiting for backend to start ..."
     sleep 5
     BACKEND=$(docker-compose -p akvo-lumen-ci logs --no-color backend | grep "Registered web context" || echo "")
-    let TRIES=${TRIES}+1
+    (( TRIES=TRIES+1 ))
 done

@@ -175,3 +175,7 @@ Session.vim
 # IntelliJ IDE
 *.iml
 .idea
+
+# Temporal deployment files
+/deployment.yaml
+/service.yaml

@@ -1,19 +1,21 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: lumen
+  name: lumen-${COLOR}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      run: lumen
+      run: lumen-blue-green
       app: lumen
+      color: ${COLOR}
   template:
     metadata:
       labels:
-        run: lumen
+        run: lumen-blue-green
         lumen-version: ${BUILD_HASH}
         app: lumen
+        color: ${COLOR}
     spec:
       containers:
       - name: lumen-client
@@ -104,3 +106,7 @@ spec:
               key: sentry.client_dsn
         - name: LUMEN_FLOW_REPORT_DATABASE_URL
           value: foo
+        - name: POD_NAME
+          valueFrom:
+             fieldRef:
+               fieldPath: metadata.name
