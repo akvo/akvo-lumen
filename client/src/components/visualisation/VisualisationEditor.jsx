@@ -26,8 +26,19 @@ const specIsValidForApi = (spec, vType) => {
         return false;
       }
       if (spec.layers.some(
-        layer => Boolean(!layer.geom && (!layer.latitude || !layer.longitude) && !layer.rasterId))
-      ) {
+        (layer) => {
+          if (layer.layerType === 'geo-location') {
+            return !layer.datasetId && (layer.geom || (layer.latitude && layer.longitude));
+          }
+          if (layer.layerType === 'geo-shape') {
+            return !layer.datasetId && layer.geom;
+          }
+          if (layer.layerType === 'raster') {
+            return !layer.rasterId;
+          }
+          return true;
+        }
+      )) {
         return false;
       }
       break;

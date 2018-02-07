@@ -6,6 +6,7 @@ import warning from 'warning';
 import { showModal } from '../actions/activeModal';
 import { fetchRaster } from '../actions/raster';
 import { getId, getTitle } from '../domain/entity';
+import EntityTypeHeader from '../components/entity-editor/EntityTypeHeader';
 import * as api from '../api';
 
 
@@ -101,20 +102,28 @@ class Raster extends Component {
 
     const { raster } = this.props;
     const title = getTitle(raster) || '';
-    const titleLength = title.toString().length;
-    const titleHeight = titleLength > 48 ? 56 : 36;
-    const mapWidth = '100%';
-    const mapHeight = `calc(100% - ${titleHeight}px)`;
 
     return (
       <div
-        className="leafletMap"
-        ref={(ref) => { this.leafletMapNode = ref; }}
+        className="Raster"
         style={{
-          height: mapHeight,
-          width: mapWidth,
+          flex: 1,
+          position: 'relative',
+          display: 'flex',
         }}
-      />
+      >
+        <EntityTypeHeader
+          title={title}
+        />
+        <div
+          className="leafletMap"
+          ref={(ref) => { this.leafletMapNode = ref; }}
+          style={{
+            flex: 1,
+            marginTop: '4rem',
+          }}
+        />
+      </div>
     );
   }
 }

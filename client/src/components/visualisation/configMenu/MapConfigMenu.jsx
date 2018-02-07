@@ -56,9 +56,9 @@ export default class MapConfigMenu extends Component {
     const haveVisualisation = next.visualisation && next.visualisation.spec.layers;
     if (haveVisualisation) {
       next.visualisation.spec.layers.forEach((layer, idx) => {
-        const { datasetId } = layer;
+        const { datasetId, layerType } = layer;
 
-        if (datasetId) {
+        if (datasetId && layerType === 'geo-location') {
           const datasetWasLoaded = prev.datasets[datasetId] && prev.datasets[datasetId].get('columns');
           const datasetIsLoaded = next.datasets[datasetId] && next.datasets[datasetId].get('columns');
 

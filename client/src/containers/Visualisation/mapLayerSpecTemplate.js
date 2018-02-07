@@ -13,6 +13,7 @@ const mapLayerSpec = {
   pointColorMapping: [],
   popup: [],
   aggregationMethod: 'avg',
+  layerType: 'geo-location',
   legend: {
     title: null,
     visible: true,
