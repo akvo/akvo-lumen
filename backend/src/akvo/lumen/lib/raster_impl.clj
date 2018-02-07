@@ -5,9 +5,11 @@
             [akvo.lumen.update :as update]
             [akvo.lumen.util :as util]
             [cheshire.core :as json]
+            [clojure.java.io :as io]
             [clojure.java.jdbc :as jdbc]
             [clojure.java.shell :as shell]
             [clojure.string :as str]
+            [clojure.tools.logging :as log]
             [hugsql.core :as hugsql])
   (:import [java.util UUID]
            [org.postgresql.util PGobject]))
@@ -22,7 +24,8 @@
   (let [src (str path "/" filename)
         info (try
                (shell/sh "gdalinfo" "-json" src)
-               (catch Exception _))]
+               (catch Exception e
+                 (log/errorf e "Error trying to obtain raster info for: %s" src)))]
     (when info
       (json/parse-string (:out info)))))
 
@@ -35,17 +38,17 @@
   [path filename]
   (let [src (str path "/" filename)
         new-file (str (UUID/randomUUID) ".tif")
-        dst (str path "/" new-file)]
-    {:filename new-file
-     :path path
-     :shell (shell/sh "gdalwarp" "-co" "COMPRESS=LZW" "-t_srs" "EPSG:3857" src dst)}))
+        dst (str path "/" new-file)
+        shell (shell/sh "gdalwarp" "-co" "COMPRESS=LZW" "-t_srs" "EPSG:3857" src dst)]
+    (if (zero? (:exit shell))
+      new-file
+      (throw (:err shell)))))
 
 (defn get-raster-data-as-sql
   [path filename table-name]
-  (let [shell (shell/sh "raster2pgsql" "-a" "-t" "128x128" "-s" "3857" (str path "/" filename) table-name)]
-    (if (zero? (:exit shell))
-      (:out shell)
-      (prn (:err shell)))))
+  (-> (Runtime/getRuntime)
+      (.exec (format "raster2pgsql -a -t 128x128 -s 3867 %s %s" (str path "/" filename) table-name))
+      (.getInputStream)))
 
 ;; https://github.com/CartoDB/cartodb/wiki/Automatic-raster-overviews
 ;; For PostGIS-Rasters-Support, the importer could use 'gdalinfo' to
@@ -82,11 +85,13 @@
           filename (.getName file)
           table-name (util/gen-table-name "raster")
           raster-info (get-raster-info path filename)
-          prj (project-and-compress path filename)
-          sql (get-raster-data-as-sql (:path prj) (:filename prj) table-name)]
+          prj-file (project-and-compress path filename)]
       (create-raster-table conn {:table-name table-name})
       (create-raster-index conn {:table-name table-name})
-      (jdbc/execute! conn [sql])
+      (with-open [rdr (io/reader (get-raster-data-as-sql path prj-file table-name))]
+        (jdbc/with-db-transaction [tx conn]
+          (doseq [line (line-seq rdr)]
+            (jdbc/execute! tx [line] {:transaction? false}))))
       (add-raster-constraints conn {:table-name table-name})
       (vacuum-raster-table conn
                            {:table-name table-name}
@@ -105,8 +110,10 @@
                              :raster-table table-name})
         (update-successful-job-execution conn {:id job-execution-id})))
     (catch Throwable e
+      (log/errorf e "Error importing raster: %s" (.getMessage e))
       (update-failed-job-execution conn {:id job-execution-id
-                                         :reason (.getMessage e)}))))
+                                         :reason (.getMessage e)})
+      (throw e))))
 
 (defn create [conn config claims data-source]
   (let [data-source-id (str (util/squuid))
