@@ -6,10 +6,10 @@ metadata:
 spec:
   tls:
   - hosts:
-    - lumen.akvotest.org
+    - *.akvotest.org
     secretName: tls
   rules:
-    - host: lumen.akvotest.org
+    - host: *.akvotest.org
       http:
         paths:
         - backend:
