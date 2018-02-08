@@ -63,10 +63,12 @@
      (do-migrate (ragtime-jdbc/sql-database tenant-manager-db)
                  (:tenant-manager migrations))
      (doseq [tenant (all-tenants tenant-manager-db)]
-       (do-migrate (ragtime-jdbc/sql-database
-                    {:connection-uri (aes/decrypt (get-in system [:config :config :encryption-key])
-                                                  (:db_uri tenant))})
-                   (:tenants migrations))))))
+       (try
+         (do-migrate (ragtime-jdbc/sql-database
+                          {:connection-uri (aes/decrypt (get-in system [:config :config :encryption-key])
+                                                        (:db_uri tenant))})
+                        (:tenants migrations))
+         (catch Exception e (throw (ex-info "Migration failed" {:tenant (:label tenant)} e))))))))
 
 
 (defn migrate-tenant
