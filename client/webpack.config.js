@@ -21,6 +21,33 @@ const entry = {
 
 const jsLoaders = isProd ? ['babel-loader'] : ['react-hot', 'babel-loader'];
 
+const basePlugins = [
+  new webpack.HotModuleReplacementPlugin(),
+  new SystemBellPlugin(),
+  new webpack.DefinePlugin({
+    'process.env': {
+      'NODE_ENV': JSON.stringify(process.env.NODE_ENV)
+    }
+  }),
+  new HtmlWebpackPlugin({
+    template: 'index.ejs',
+    chunks: ['app']
+  }),
+  new HtmlWebpackPlugin({
+    template: 'index.ejs',
+    filename: 'index-pub.html',
+    chunks: ['pub']
+  })
+];
+
+const productionPlugins = basePlugins.concat([
+  new webpack.optimize.UglifyJsPlugin({
+      compress: {
+          warnings: false
+      }
+  })
+]);
+
 module.exports = {
   entry: entry,
   devtool: 'source-map',
@@ -59,27 +86,5 @@ module.exports = {
       },
     ]
   },
-  plugins: [
-    new webpack.HotModuleReplacementPlugin(),
-    new SystemBellPlugin(),
-    new webpack.DefinePlugin({
-      'process.env': {
-        'NODE_ENV': JSON.stringify(process.env.NODE_ENV)
-      }
-    }),
-    new webpack.optimize.UglifyJsPlugin({
-        compress: {
-            warnings: false
-        }
-    }),
-    new HtmlWebpackPlugin({
-      template: 'index.ejs',
-      chunks: ['app']
-    }),
-    new HtmlWebpackPlugin({
-      template: 'index.ejs',
-      filename: 'index-pub.html',
-      chunks: ['pub']
-    })
-  ]
+  plugins: isProd ? productionPlugins : basePlugins,
 };
