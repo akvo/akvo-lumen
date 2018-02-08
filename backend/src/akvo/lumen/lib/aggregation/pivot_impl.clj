@@ -26,9 +26,9 @@
               "'NaN'::double precision"))))
 
 (defn unique-values-sql [table-name category-column filter-str]
-  (format "SELECT DISTINCT %s::%s FROM %s WHERE %s ORDER BY 1"
+  (format "SELECT DISTINCT %s%s FROM %s WHERE %s ORDER BY 1"
           (coalesce category-column)
-          (if (= "timestamptz" (get category-column "type")) "timestamptz::date" "varchar")
+          (if (= "timestamptz" (get category-column "type")) "::timestamptz::date" "")
           table-name
           filter-str))
 
