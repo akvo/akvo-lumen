@@ -3,6 +3,7 @@
    [akvo.lumen.config :refer [bindings]]
    [akvo.lumen.lib.aes :as aes]
    [clojure.java.io :as io]
+   [clojure.tools.logging :as log]
    [duct.util.system :refer [read-config]]
    [environ.core :refer [env]]
    [hugsql.core :as hugsql]
@@ -16,8 +17,11 @@
 (def source-files ["akvo/lumen/system.edn" "dev.edn" "local.edn"])
 
 (defn do-migrate [datastore migrations]
-  (ragtime-repl/migrate {:datastore datastore
-                         :migrations migrations}))
+  (try
+    (ragtime-repl/migrate {:datastore datastore
+                           :migrations migrations})
+    (catch Exception e
+      (log/info (.getMessage e)))))
 
 (defn construct-system
   "Create a system definition."
