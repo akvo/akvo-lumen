@@ -71,6 +71,11 @@ data:
             text/plain
             text/html;
 
+        log_format without_url '$remote_addr - $remote_user [$time_local] "$request_method" '
+                          '$status $body_bytes_sent "$http_referer" ';
+
+        access_log  /var/log/nginx/access.log  without_url;
+
         server {
             listen       80 default_server;
 
