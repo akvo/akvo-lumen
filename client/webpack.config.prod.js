@@ -18,7 +18,10 @@ export default {
     extensions: ['*', '.js', '.jsx', '.json'],
   },
   devtool: 'source-map', // more info:https://webpack.js.org/guides/production/#source-mapping and https://webpack.js.org/configuration/devtool/
-  entry: path.resolve(__dirname, 'src/index'),
+  entry: {
+    app: path.resolve(__dirname, 'src/index.jsx'), // Defining path seems necessary for this to work consistently on Windows machines.
+    pub: path.resolve(__dirname, 'src/index-pub.jsx'),
+  },
   target: 'web',
   output: {
     path: path.resolve(__dirname, 'dist'),
