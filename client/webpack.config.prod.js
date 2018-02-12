@@ -13,6 +13,27 @@ const GLOBALS = {
   __DEV__: false,
 };
 
+const HTML_CONFIG = {
+  // favicon: 'src/favicon.ico',
+  template: 'src/index.ejs',
+  minify: {
+    removeComments: true,
+    collapseWhitespace: true,
+    removeRedundantAttributes: true,
+    useShortDoctype: true,
+    removeEmptyAttributes: true,
+    removeStyleLinkTypeAttributes: true,
+    keepClosingSlash: true,
+    minifyJS: true,
+    minifyCSS: true,
+    minifyURLs: true,
+  },
+  inject: false,
+  // Note that you can add custom options here if you need to handle other custom logic in index.html
+  // To track JavaScript errors via TrackJS, sign up for a free trial at TrackJS.com and enter your token below.
+  trackJSToken: '',
+};
+
 export default {
   resolve: {
     extensions: ['*', '.js', '.jsx', '.json'],
@@ -40,24 +61,14 @@ export default {
 
     // Generate HTML file that contains references to generated bundles. See here for how this works: https://github.com/ampedandwired/html-webpack-plugin#basic-usage
     new HtmlWebpackPlugin({
-      template: 'src/index.ejs',
-      favicon: 'src/favicon.ico',
-      minify: {
-        removeComments: true,
-        collapseWhitespace: true,
-        removeRedundantAttributes: true,
-        useShortDoctype: true,
-        removeEmptyAttributes: true,
-        removeStyleLinkTypeAttributes: true,
-        keepClosingSlash: true,
-        minifyJS: true,
-        minifyCSS: true,
-        minifyURLs: true,
-      },
-      inject: true,
-      // Note that you can add custom options here if you need to handle other custom logic in index.html
-      // To track JavaScript errors via TrackJS, sign up for a free trial at TrackJS.com and enter your token below.
-      trackJSToken: '',
+      ...HTML_CONFIG,
+      chunks: ['app'],
+    }),
+
+    new HtmlWebpackPlugin({
+      ...HTML_CONFIG,
+      filename: 'index-pub.html',
+      chunks: ['pub'],
     }),
 
     // Minify JS
