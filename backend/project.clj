@@ -44,7 +44,8 @@
   ;; :pedantic? :abort
   :plugins [[lein-ancient "0.6.15"]
             [lein-codox "0.9.6"]
-            [lein-environ "1.0.3"]]
+            [lein-environ "1.0.3"]
+            [jonase/eastwood "0.2.5"]]
   :codox {:doc-paths   ["resources/akvo/lumen/doc"]
           :output-path "../docs"}
   :main ^:skip-aot akvo.lumen.main
