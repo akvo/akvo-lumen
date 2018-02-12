@@ -56,6 +56,7 @@
                                  (complement :functional))
                    :functional :functional
                    :all     (constantly true)}
+  :eastwood {:config-files ["eastwood_cfg.clj"]}
   :profiles
   {:dev           [:project/dev :profiles/dev]
    :test          [:project/test :profiles/test]
