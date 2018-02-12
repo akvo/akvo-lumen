@@ -1,6 +1,8 @@
+/* eslint-disable import/default, global-require */
 import React from 'react';
 import { render } from 'react-dom';
 import { browserHistory } from 'react-router';
+import { AppContainer } from 'react-hot-loader';
 import { syncHistoryWithStore } from 'react-router-redux';
 import Root from './containers/Root';
 import configureStore from './store/configureStore';
@@ -18,7 +20,24 @@ function initAuthenticated(profile, env) {
   // will disable SSO Idle Timeout
   setInterval(auth.token, 1000 * 60 * 10);
 
-  render(<Root store={store} history={history} />, rootElement);
+  render(
+    <AppContainer>
+      <Root store={store} history={history} />
+    </AppContainer>,
+    rootElement
+  );
+
+  if (module.hot) {
+    module.hot.accept('./containers/Root', () => {
+      const NewRoot = require('./containers/Root').default;
+      render(
+        <AppContainer>
+          <NewRoot store={store} history={history} />
+        </AppContainer>,
+        rootElement
+      );
+    });
+  }
 }
 
 function initNotAuthenticated(msg) {

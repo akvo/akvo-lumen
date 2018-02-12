@@ -1,22 +1,22 @@
 {
   "extends": "airbnb",
+  "env": {
+    "browser": true,
+    "node": true
+  },
   "plugins": [
     "react"
   ],
-  "settings": {
-    "react": {
-      "pragma": "React"
-    },
-    "parserOptions": {
-      "ecmaFeatures": {
-        "jsx": true
-      }
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true
     }
   },
   "rules": {
-    "new-cap": [2, {"capIsNewExceptions": [
-      "Immutable.Map", "Immutable.Set", "Immutable.List", "Immutable.OrderedMap"
-      ]}],
+    "new-cap": [
+      2, 
+      { "capIsNewExceptions": ["Immutable.Map", "Immutable.Set", "Immutable.List", "Immutable.OrderedMap"] }
+    ],
     "react/forbid-prop-types": 0,
     "react/no-unused-prop-types": 0,
     "react/no-multi-comp": 0,

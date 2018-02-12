@@ -71,57 +71,57 @@ export default function getVegaAreaSpec(visualisation, data, containerHeight, co
     ],
     marks: [
       visualisationType === 'area' ?
-        {
-          type: 'area',
-          from: {
-            data: dataSource,
-          },
-          properties: {
-            enter: {
-              x: {
-                scale: 'x',
-                field: fieldX,
-              },
-              y: {
-                scale: 'y',
-                field: fieldY,
-              },
-              y2: {
-                scale: 'y',
-                value: 0,
-              },
-              fill: {
-                value: defaultPrimaryColor,
-              },
+      {
+        type: 'area',
+        from: {
+          data: dataSource,
+        },
+        properties: {
+          enter: {
+            x: {
+              scale: 'x',
+              field: fieldX,
             },
-          },
-        }
-        :
-        {
-          type: 'line',
-          from: {
-            data: dataSource,
-          },
-          properties: {
-            enter: {
-              x: {
-                scale: 'x',
-                field: fieldX,
-              },
-              y: {
-                scale: 'y',
-                field: fieldY,
-              },
-              y2: {
-                scale: 'y',
-                value: 0,
-              },
-              stroke: {
-                value: defaultPrimaryColor,
-              },
+            y: {
+              scale: 'y',
+              field: fieldY,
+            },
+            y2: {
+              scale: 'y',
+              value: 0,
+            },
+            fill: {
+              value: defaultPrimaryColor,
             },
           },
         },
+      }
+        :
+      {
+        type: 'line',
+        from: {
+          data: dataSource,
+        },
+        properties: {
+          enter: {
+            x: {
+              scale: 'x',
+              field: fieldX,
+            },
+            y: {
+              scale: 'y',
+              field: fieldY,
+            },
+            y2: {
+              scale: 'y',
+              value: 0,
+            },
+            stroke: {
+              value: defaultPrimaryColor,
+            },
+          },
+        },
+      },
     ],
   });
 }

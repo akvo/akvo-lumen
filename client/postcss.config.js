@@ -1,4 +1,5 @@
 const autoprefixer = require('autoprefixer');
+
 const autoprefixerWithConfig = autoprefixer({
   browsers: [
     'Android >= 2',
@@ -15,7 +16,7 @@ const autoprefixerWithConfig = autoprefixer({
 });
 
 module.exports = {
-    plugins: [
-      autoprefixerWithConfig,
-    ]
-}
+  plugins: [
+    autoprefixerWithConfig,
+  ],
+};

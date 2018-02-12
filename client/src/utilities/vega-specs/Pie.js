@@ -110,16 +110,16 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
               mult: 0.5,
             },
             y: showLegend ?
-              {
-                value: chartRadius,
-              }
+            {
+              value: chartRadius,
+            }
               :
-              {
-                field: {
-                  group: 'height',
-                },
-                mult: 0.5,
+            {
+              field: {
+                group: 'height',
               },
+              mult: 0.5,
+            },
             startAngle: {
               field: 'layout_start',
             },
@@ -151,52 +151,52 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
         },
       },
       showLegend ?
-        {
-          type: 'text',
-        }
+      {
+        type: 'text',
+      }
         :
-        {
-          type: 'text',
-          from: {
-            data: dataSource,
-          },
-          properties: {
-            enter: {
-              x: {
-                field: {
-                  group: 'width',
-                },
-                mult: 0.5,
+      {
+        type: 'text',
+        from: {
+          data: dataSource,
+        },
+        properties: {
+          enter: {
+            x: {
+              field: {
+                group: 'width',
               },
-              y: {
-                field: {
-                  group: 'height',
-                },
-                mult: 0.5,
+              mult: 0.5,
+            },
+            y: {
+              field: {
+                group: 'height',
               },
-              radius: {
-                scale: 'r',
-                field: 'value',
-                offset: chartSize === 'xsmall' ? 15 : 30,
-              },
-              theta: {
-                field: 'layout_mid',
-              },
-              fill: {
-                value: 'black',
-              },
-              align: {
-                value: 'center',
-              },
-              text: {
-                field: segmentLabelField,
-              },
-              fontSize: {
-                value: fontSize - 2,
-              },
+              mult: 0.5,
+            },
+            radius: {
+              scale: 'r',
+              field: 'value',
+              offset: chartSize === 'xsmall' ? 15 : 30,
+            },
+            theta: {
+              field: 'layout_mid',
+            },
+            fill: {
+              value: 'black',
+            },
+            align: {
+              value: 'center',
+            },
+            text: {
+              field: segmentLabelField,
+            },
+            fontSize: {
+              value: fontSize - 2,
             },
           },
         },
+      },
       {
         type: 'text',
         from: {
@@ -211,94 +211,94 @@ export default function getVegaPieSpec(visualisation, data, containerHeight, con
         properties: {
           enter:
             showLegend ?
-              {
-                x: {
-                  value: (chartRadius) - (chartRadius / 3),
-                },
-                y: {
-                  value: (chartRadius * 2) + 35,
-                },
-                fill: {
-                  value: 'black',
-                },
-                align: {
-                  value: 'left',
-                },
-                text: {
-                  template: `{{datum[${segmentLabelField}]}}: {{datum.rounded_value}} ({{datum.rounded_percentage}}%)`,
-                },
-                fontSize: {
-                  value: fontSize,
-                },
-              }
+            {
+              x: {
+                value: (chartRadius) - (chartRadius / 3),
+              },
+              y: {
+                value: (chartRadius * 2) + 35,
+              },
+              fill: {
+                value: 'black',
+              },
+              align: {
+                value: 'left',
+              },
+              text: {
+                template: `{{datum[${segmentLabelField}]}}: {{datum.rounded_value}} ({{datum.rounded_percentage}}%)`,
+              },
+              fontSize: {
+                value: fontSize,
+              },
+            }
               :
-              {
-                x: {
-                  field: {
-                    group: 'width',
-                  },
-                  mult: 0.5,
+            {
+              x: {
+                field: {
+                  group: 'width',
                 },
-                y: {
-                  field: {
-                    group: 'height',
-                  },
-                  mult: 0.5,
+                mult: 0.5,
+              },
+              y: {
+                field: {
+                  group: 'height',
                 },
-                radius: {
-                  scale: 'r',
-                  field: 'a',
-                  offset: -1 * (chartRadius / 5),
-                },
-                theta: {
-                  field: 'layout_mid',
-                },
-                fill: {
-                  value: 'black',
-                },
-                align: {
-                  value: 'center',
-                },
-                text: {
-                  template: '{{datum.rounded_value}} ({{datum.rounded_percentage}}%)',
-                },
-                fontSize: {
-                  value: fontSize - 2,
-                },
-              }
+                mult: 0.5,
+              },
+              radius: {
+                scale: 'r',
+                field: 'a',
+                offset: -1 * (chartRadius / 5),
+              },
+              theta: {
+                field: 'layout_mid',
+              },
+              fill: {
+                value: 'black',
+              },
+              align: {
+                value: 'center',
+              },
+              text: {
+                template: '{{datum.rounded_value}} ({{datum.rounded_percentage}}%)',
+              },
+              fontSize: {
+                value: fontSize - 2,
+              },
+            }
             ,
         },
       },
     ],
     legends:
       showLegend ?
-        [
-          {
-            fill: 'c',
-            orient: 'right',
-            title: visualisation.spec.legendTitle ? visualisation.spec.legendTitle : 'Legend',
-            properties: {
-              symbols: {
-                shape: {
-                  value: 'square',
-                },
+      [
+        {
+          fill: 'c',
+          orient: 'right',
+          title: visualisation.spec.legendTitle ? visualisation.spec.legendTitle : 'Legend',
+          properties: {
+            symbols: {
+              shape: {
+                value: 'square',
               },
-              title: {
-                fontSize: {
-                  value: fontSize - 2,
-                },
-                dy: {
-                  value: fontSize * -0.6,
-                },
+            },
+            title: {
+              fontSize: {
+                value: fontSize - 2,
               },
-              labels: {
-                fontSize: {
-                  value: fontSize - 4,
-                },
+              dy: {
+                value: fontSize * -0.6,
+              },
+            },
+            labels: {
+              fontSize: {
+                value: fontSize - 4,
               },
             },
           },
-        ]
+        },
+      ]
         :
         [],
     signals: [

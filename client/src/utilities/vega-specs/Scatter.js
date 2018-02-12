@@ -149,21 +149,21 @@ export default function getVegaScatterSpec(visualisation, data, containerHeight,
               offset: -8,
             },
             text: hasAggregation ?
-              {
-                template: metadata.bucketType === 'date' ?
+            {
+              template: metadata.bucketType === 'date' ?
                   '{{datum.bucketValue | time:"%Y-%b-%d %H-%M"}}'
                   :
                   `${metadata.bucketName.substring(0, 64)}: {{datum.bucketValue}}`
                 ,
-              }
+            }
               :
-              {
-                template: metadata.datapointLabelType === 'date' ?
+            {
+              template: metadata.datapointLabelType === 'date' ?
                   '{{datum.datapointLabel | time:"%Y-%b-%d %H-%M"}}'
                   :
                   '{{datum.datapointLabel}}'
                 ,
-              },
+            },
             align: {
               value: 'center',
             },
