@@ -44,7 +44,8 @@
   ;; :pedantic? :abort
   :plugins [[lein-ancient "0.6.15"]
             [lein-codox "0.9.6"]
-            [lein-environ "1.0.3"]]
+            [lein-environ "1.0.3"]
+            [jonase/eastwood "0.2.5"]]
   :codox {:doc-paths   ["resources/akvo/lumen/doc"]
           :output-path "../docs"}
   :main ^:skip-aot akvo.lumen.main
@@ -56,6 +57,7 @@
                                  (complement :functional))
                    :functional :functional
                    :all     (constantly true)}
+  :eastwood {:config-files ["eastwood_cfg.clj"]}
   :profiles
   {:dev           [:project/dev :profiles/dev]
    :test          [:project/test :profiles/test]

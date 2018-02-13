@@ -61,4 +61,4 @@
                                                                 :version 1})
           titles (map :title (:rows dataset))
           trimmable? #(or (string/starts-with? " " %) (string/ends-with? " " %))]
-      (is (every? trimmable? titles) false))))
+      (is (every? trimmable? titles)))))

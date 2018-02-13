@@ -38,8 +38,9 @@
           (count (into #{} columns)))
        (every? p columns)))
 
-(defn valid-location? [layer p]
+(defn valid-location?
   "Validate map spec layer."
+  [layer p]
   (let [m (into {} (remove (comp nil? val)
                            (select-keys layer ["geom" "latitude" "longitude"])))]
     (match [m]
