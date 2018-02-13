@@ -28,7 +28,7 @@ const HTML_CONFIG = {
     minifyCSS: true,
     minifyURLs: true,
   },
-  inject: false,
+  inject: true,
   // Note that you can add custom options here if you need to handle other custom logic in index.html
   // To track JavaScript errors via TrackJS, sign up for a free trial at TrackJS.com and enter your token below.
   trackJSToken: '',
