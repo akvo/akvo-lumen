@@ -10,39 +10,14 @@ import webpack from 'webpack';
 import webpackDevMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
 import proxy from 'http-proxy-middleware';
+import { chalkProcessing } from './chalkConfig';
 
 import config from '../webpack.config.dev';
+import proxyTargets from './proxyTargets';
 
 const bundler = webpack(config);
-const proxyTargets = [
-  {
-    source: '/api/**',
-    target: 'http://backend:3000',
-  },
-  {
-    source: '/env',
-    target: 'http://backend:3000',
-  },
-  {
-    source: '/healthz',
-    target: 'http://backend:3000',
-  },
-  {
-    source: '/maps/**',
-    target: 'http://windshaft:4000',
-    pathRewrite: {
-      '/maps': '',
-    },
-  },
-  {
-    source: '/share/**',
-    target: 'http://backend:3000',
-  },
-  {
-    source: '/verify/**',
-    target: 'http://backend:3000',
-  },
-];
+
+console.log(chalkProcessing('Starting dev server...'));
 
 // Run Browsersync and use middleware for Hot Module Replacement
 browserSync({
