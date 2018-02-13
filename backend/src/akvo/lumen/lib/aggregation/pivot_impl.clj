@@ -15,17 +15,20 @@
 (defn coalesce
   "For pivot tables, `NULL` categories will always be empty because `crosstab` uses `=` and
    `NULL = NULL` is `NULL`. To work around this, we must use another value to represent the
-   empty value."
+   empty value. For dates, we use 1001-01-01 01:00:00"
   [column]
   (format "COALESCE(%s, %s)"
           (get column "columnName")
           (if (= "text" (get column "type"))
             "''"
-            "'NaN'::double precision")))
+            (if (= "date" (get column "type"))
+              "'1001-01-01 01:00:00'::timestamptz"
+              "'NaN'::double precision"))))
 
 (defn unique-values-sql [table-name category-column filter-str]
-  (format "SELECT DISTINCT %s FROM %s WHERE %s ORDER BY 1"
+  (format "SELECT DISTINCT %s%s FROM %s WHERE %s ORDER BY 1"
           (coalesce category-column)
+          (if (= "timestamptz" (get category-column "type")) "::timestamptz::date" "")
           table-name
           filter-str))
 

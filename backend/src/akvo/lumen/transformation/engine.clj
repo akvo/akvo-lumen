@@ -141,7 +141,9 @@
                                                                             source-table
                                                                             previous-columns
                                                                             transformation)]
-      (when-not success? (throw (ex-info "Failed to transform" {})))
+      (when-not success?
+        (log/errorf "Failed to transform: %s, columns: %s, execution-log: %s" message columns execution-log)
+        (throw (ex-info "Failed to transform" {})))
       (let [new-dataset-version-id (str (util/squuid))]
         (clear-dataset-version-data-table tenant-conn {:id (:id dataset-version)})
         (let [next-dataset-version {:id new-dataset-version-id
