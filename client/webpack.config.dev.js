@@ -16,7 +16,7 @@ export default {
       'webpack-hot-middleware/client?reload=true&http://0.0.0.0:3030',
       path.resolve(__dirname, 'src/index.jsx'), // Defining path seems necessary for this to work consistently on Windows machines.
     ],
-    pub: path.resolve(__dirname, 'src/index.jsx'),
+    pub: path.resolve(__dirname, 'src/index-pub.jsx'),
   },
   target: 'web',
   output: {
