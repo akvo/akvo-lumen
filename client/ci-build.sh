@@ -18,4 +18,4 @@ log Building prod assets
 npm run build
 
 log Starting static test server
-forever start -c "npm run start:static"
+npm run start:static:forever
