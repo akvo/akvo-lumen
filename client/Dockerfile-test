@@ -5,4 +5,4 @@ RUN apk add --no-cache build-base su-exec python cairo-dev pango-dev xz jpeg-dev
 
 WORKDIR "/lumen"
 
-CMD [ "./run-as-user.sh", "./install-and-start-test.sh" ]
+CMD [ "./run-as-user.sh", "./install-and-start-static.sh" ]

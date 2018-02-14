@@ -16,3 +16,6 @@ npm rebuild node-sass
 
 log Building prod assets
 npm run build
+
+log Starting static test server
+npm run start:static
