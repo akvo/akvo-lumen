@@ -170,7 +170,27 @@ pagePromise.then((p) => {
 // pagePromise.then(p => test(page, false)).catch(e => console.log(e));
 
 async function runTest() {
+  page.on('load', () => console.log('PAGE LOADED'));
+  page.on('domcontentloaded', () => console.log('DOM CONTENT LOADED'));
   page.on('console', msg => console.log('PAGE LOG:', msg.text));
+  page.on('pageerror', (err) => {
+    console.log(`PAGE ERROR: ${err.toString()}`);
+  });
+  page.on('error', (err) => {
+    console.log(`ERROR: ${err.toString()}`);
+  });
+  page.on('request', (request) => {
+    console.log(`REQUEST: ${request.method} ${request.url}`);
+  });
+  page.on('requestfailed', (request) => {
+    console.log(`REQUEST FAILED: ${request.method} ${request.url}`);
+  });
+  page.on('requestfinished', (request) => {
+    console.log(`REQUEST FINISHED: ${request.method} ${request.url}`);
+  });
+  page.on('response', (response) => {
+    console.log(`RESPONSE: ${response.status} ${response.url}`);
+  });
 
   await page.tracing.start({ screenshots: true, path: 'trace.json' });
   try {

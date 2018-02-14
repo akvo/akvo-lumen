@@ -21,8 +21,7 @@
     "build:dev": "babel-node tools/buildDev.js",
     "test": "NODE_ENV=test mocha test/.setup.js \"test/**/*.@(js|jsx)\"",
     "test:watch": "npm test -- --watch",
-    "analyze-bundle": "babel-node ./tools/analyzeBundle.js",
-    "ping": "sh ./tools/pingStaticServer.sh"
+    "analyze-bundle": "babel-node ./tools/analyzeBundle.js"
   },
   "author": "Akvo Foundation",
   "license": "AGPL-3.0",
