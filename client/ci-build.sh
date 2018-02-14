@@ -19,3 +19,6 @@ npm run build
 
 log Starting static test server
 npm run start:static:forever
+
+log TODO remove this
+npm run ping
