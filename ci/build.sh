@@ -25,7 +25,7 @@ docker tag eu.gcr.io/${PROJECT_NAME}/lumen-backend:${TRAVIS_COMMIT} eu.gcr.io/${
 #rm backend/akvo-lumen.jar
 
 log Building container to run the client unit tests
-docker build --rm=false -t akvo-lumen-client-dev:develop client -f client/Dockerfile-test
+docker build --rm=false -t akvo-lumen-client-dev:develop client -f client/Dockerfile-dev
 
 log Running Client linting, unit tests and creating production assets
 docker run --env-file=.env -v "$(pwd)/client:/lumen" --rm=false -t akvo-lumen-client-dev:develop /lumen/run-as-user.sh /lumen/ci-build.sh

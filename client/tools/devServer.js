@@ -13,8 +13,36 @@ import proxy from 'http-proxy-middleware';
 import { chalkProcessing } from './chalkConfig';
 
 import config from '../webpack.config.dev';
-import proxyTargets from './proxyTargets';
 
+const proxyTargets = [
+  {
+    source: '/api/**',
+    target: 'http://backend:3000',
+  },
+  {
+    source: '/env',
+    target: 'http://backend:3000',
+  },
+  {
+    source: '/healthz',
+    target: 'http://backend:3000',
+  },
+  {
+    source: '/maps/**',
+    target: 'http://windshaft:4000',
+    pathRewrite: {
+      '/maps': '',
+    },
+  },
+  {
+    source: '/share/**',
+    target: 'http://backend:3000',
+  },
+  {
+    source: '/verify/**',
+    target: 'http://backend:3000',
+  },
+];
 const bundler = webpack(config);
 
 console.log(chalkProcessing('Starting dev server...'));
