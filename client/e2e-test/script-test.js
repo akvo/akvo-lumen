@@ -182,7 +182,7 @@ const logStackTrace = async (error) => {
       resolve(newStack);
     })
   ), typeof error.stack === 'string' ? error.stack : error.stack.join('\n')).then((result) => {
-    console.log('ERROR:', error.message, result[0]);
+    console.log('ERROR:', error.message, result);
   });
 };
 
