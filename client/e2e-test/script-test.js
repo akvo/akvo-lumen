@@ -43,11 +43,18 @@ async function login(page) {
   await page.click('#kc-login');
 }
 
+async function goto(page, url) {
+  await page.goto(url);
+  await page.addScriptTag({
+    url: 'https://cdn.jsdelivr.net/npm/sourcemapped-stacktrace@1.1.8/dist/sourcemapped-stacktrace.js',
+  });
+}
+
 async function test(page, shouldLogin) {
   console.log('\nSTARTING LUMEN TEST WITH PUPPETEER\n');
   await page.setViewport({ width: 1024, height: 768 });
   console.log(`Accessing to ${lumenUrl}...`);
-  await page.goto(lumenUrl);
+  await goto(page, lumenUrl);
   if (shouldLogin) {
     await login(page);
   }
@@ -128,7 +135,7 @@ async function test(page, shouldLogin) {
   console.log(`Visualisation ${datasetName} was successfully created.\n`);
 
   console.log('Back to library');
-  await page.goto(lumenUrl);
+  await goto(page, lumenUrl);
 //   Dashboard
   await page.waitForSelector('[data-test-id="dashboard"]', { timeout: TIMEOUT.waitFor });
   console.log('Accessing to dashboard creation...');
@@ -160,36 +167,29 @@ const pagePromise =
     ] }).then((b) => {
       browser = b;
       return browser.newPage();
+    })
+    .then((p) => {
+      page = p;
     });
 
-pagePromise.then((p) => {
-  page = p;
-});
-
-// datasetName = Date.now().toString();
-// pagePromise.then(p => test(page, false)).catch(e => console.log(e));
+const logStackTrace = async (error) => {
+  page.evaluate(stack => new Promise(resolve =>
+    window.sourceMappedStackTrace.mapStackTrace(stack, (newStack) => {
+      resolve(newStack);
+    })
+  ), typeof error.stack === 'string' ? error.stack : error.stack.join('\n')).then((result) => {
+    console.log('ERROR:', error.message, result[0]);
+  });
+};
 
 async function runTest() {
   page.on('load', () => console.log('PAGE LOADED'));
   page.on('domcontentloaded', () => console.log('DOM CONTENT LOADED'));
   page.on('console', msg => console.log('PAGE LOG:', msg.text));
-  page.on('pageerror', (err) => {
-    console.log(`PAGE ERROR: ${err.toString()}`);
-  });
-  page.on('error', (err) => {
-    console.log(`ERROR: ${err.toString()}`);
-  });
-  page.on('request', (request) => {
-    console.log(`REQUEST: ${request.method} ${request.url}`);
-  });
+  page.on('pageerror', logStackTrace);
+  page.on('error', logStackTrace);
   page.on('requestfailed', (request) => {
     console.log(`REQUEST FAILED: ${request.method} ${request.url}`);
-  });
-  page.on('requestfinished', (request) => {
-    console.log(`REQUEST FINISHED: ${request.method} ${request.url}`);
-  });
-  page.on('response', (response) => {
-    console.log(`RESPONSE: ${response.status} ${response.url}`);
   });
 
   await page.tracing.start({ screenshots: true, path: 'trace.json' });
