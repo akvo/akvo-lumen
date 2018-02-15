@@ -58,7 +58,7 @@ export default {
 
     // Generate an external css file with a hash in the filename
     new ExtractTextPlugin({
-      filename: '[name].[chunkhash].css',
+      filename: '[name].[contenthash].css',
       allChunks: true,
     }),
 
