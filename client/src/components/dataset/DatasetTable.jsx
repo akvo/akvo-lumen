@@ -348,6 +348,7 @@ class DatasetTable extends Component {
           columns={columns}
           rowsCount={rows.size}
           onToggleTransformationLog={this.handleToggleTransformationLog}
+          onNavigateToVisualise={this.props.onNavigateToVisualise}
           pendingTransformationsCount={pendingTransformations.size}
           onClickMenuItem={(menuItem) => {
             if (menuItem === 'combineColumns') {
@@ -424,6 +425,7 @@ DatasetTable.propTypes = {
   onUndoTransformation: PropTypes.func.isRequired,
   location: PropTypes.object.isRequired,
   router: PropTypes.object.isRequired,
+  onNavigateToVisualise: PropTypes.func.isRequired,
 };
 
 export default withRouter(DatasetTable);
