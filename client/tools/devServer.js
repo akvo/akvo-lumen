@@ -57,13 +57,7 @@ browserSync({
 
     middleware: [
 
-      history({
-        rewrites: [
-          { from: '^/favicon.ico$', to: 'favicon.ico' },
-          { from: '^/s/.*$', to: '/index-pub.html' },
-          // { from: '^.*$', to: '/index.html' },
-        ],
-      }),
+      history(),
 
       ...proxyTargets.reduce((acc, { source, ...rest }) => acc.concat(
         proxy(source, {
