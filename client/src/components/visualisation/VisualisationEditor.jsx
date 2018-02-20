@@ -9,6 +9,8 @@ import * as api from '../../api';
 require('./VisualisationEditor.scss');
 
 const specIsValidForApi = (spec, vType) => {
+  let anyLayerInvalid;
+
   switch (vType) {
     case 'pivot table':
       if (spec.aggregation !== 'count' && spec.valueColumn == null) {
@@ -25,20 +27,25 @@ const specIsValidForApi = (spec, vType) => {
       if (spec.layers.length === 0) {
         return false;
       }
-      if (spec.layers.some(
+      anyLayerInvalid = spec.layers.some(
         (layer) => {
+          const missingDatasetId = !layer.datasetId;
+          const missingRasterId = !layer.rasterId;
+
           if (layer.layerType === 'geo-location') {
-            return !layer.datasetId && (layer.geom || (layer.latitude && layer.longitude));
+            return missingDatasetId || !layer.geom || (layer.latitude && layer.longitude);
           }
           if (layer.layerType === 'geo-shape') {
-            return !layer.datasetId && layer.geom;
+            return missingDatasetId || !layer.geom;
           }
           if (layer.layerType === 'raster') {
-            return !layer.rasterId;
+            return missingRasterId;
           }
           return true;
         }
-      )) {
+      );
+
+      if (anyLayerInvalid) {
         return false;
       }
       break;
@@ -104,6 +111,7 @@ export default class VisualisationEditor extends Component {
     };
     this.handleProps = this.handleProps.bind(this);
     this.fetchAggregatedData = this.fetchAggregatedData.bind(this);
+    window.state = this.state;
   }
 
   componentWillMount() {
@@ -153,6 +161,16 @@ export default class VisualisationEditor extends Component {
         if (!this.state.visualisation || !this.state.visualisation.datasetId) {
           // Update immediately, without waiting for the api call
           this.setState({ visualisation: Object.assign({}, visualisation) });
+        }
+
+        if (checkUndefined(visualisation, 'spec', 'layers', 'length') === 0) {
+          // Normally, the new metadata api response overwrites the old one, but when length is
+          // zero, there is no new metadata api respnonse. We need to manually set it to empty
+          this.lastVisualisationRequested = null;
+          this.setState({
+            visualisation: Object.assign({}, visualisation),
+            metadata: {},
+          });
         }
 
         if (needNewAggregation && specValid) {
