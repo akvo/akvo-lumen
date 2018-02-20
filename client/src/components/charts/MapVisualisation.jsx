@@ -412,7 +412,10 @@ export default class MapVisualisation extends Component {
     const oldSpec = this.storedSpec || {};
 
     // Add or update the windshaft tile layer if necessary
-    if (layerGroupId) {
+    if (newSpec.layers.length === 0 && this.dataLayer) {
+      map.removeLayer(this.dataLayer);
+      this.dataLayer = null;
+    } else if (layerGroupId) {
       if (!this.dataLayer) {
         this.dataLayer = L.tileLayer(`${baseURL}/${layerGroupId}/all/{z}/{x}/{y}.png`);
         this.dataLayer.addTo(map);
@@ -428,9 +431,6 @@ export default class MapVisualisation extends Component {
           this.dataLayer.addTo(map);
         }
       }
-    } else if (newSpec.layers.length === 0 && this.dataLayer) {
-      map.removeLayer(this.dataLayer);
-      this.dataLayer = null;
     }
 
     if (layerGroupId !== this.storedLayerGroupId) {

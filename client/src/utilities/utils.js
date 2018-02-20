@@ -15,17 +15,17 @@ export function checkUndefined(object = {}, ...keys) {
 
   let currentObject = object;
 
-  for (let i = 0; i < keys.length; i += 1) {
+  for (let i = 0; i < (keys.length - 1); i += 1) {
     const key = keys[i];
 
-    if (!currentObject[key]) {
+    if (!currentObject[key] || typeof currentObject[key] !== 'object') {
       return undefined;
     }
 
     currentObject = currentObject[key];
   }
 
-  return currentObject;
+  return currentObject[keys[keys.length - 1]];
 }
 
 /*
