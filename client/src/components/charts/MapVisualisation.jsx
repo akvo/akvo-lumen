@@ -113,10 +113,10 @@ const LegendEntry = ({ singleMetadata, layer }) => (
         <div className="contents">
           <div className="gradientContainer">
             <p className="gradientLabel min">
-              Min
+              {singleMetadata.min !== undefined ? chart.round(singleMetadata.min, 2) : 'Min'}
             </p>
             <p className="gradientLabel max">
-              Max
+              {singleMetadata.max !== undefined ? chart.round(singleMetadata.max, 2) : 'Max'}
             </p>
             <div
               className="gradientDisplay"
