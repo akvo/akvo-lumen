@@ -8,6 +8,7 @@
    [hugsql.core :as hugsql]
    [meta-merge.core :refer [meta-merge]]
    [ragtime
+    strategy
     [jdbc :as ragtime-jdbc]
     [repl :as ragtime-repl]]))
 
@@ -15,9 +16,23 @@
 
 (def source-files ["akvo/lumen/system.edn" "dev.edn" "local.edn"])
 
+(defn ignore-future-migrations
+  "A strategy that raises an error if there are any conflicts between the
+  applied migrations and the defined migration list, unless the conflicts are
+  just future migrations."
+  [applied migrations]
+  (let [[conflicts unapplied] (#'ragtime.strategy/split-at-conflict applied migrations)]
+    (if (and (seq conflicts)
+             (seq unapplied))
+      (throw (Exception.
+               (str "Conflict! Expected " (first unapplied)
+                    " but " (first conflicts) " was applied.")))
+      (for [m unapplied] [:migrate m]))))
+
 (defn do-migrate [datastore migrations]
   (ragtime-repl/migrate {:datastore datastore
-                         :migrations migrations}))
+                         :migrations migrations
+                         :strategy ignore-future-migrations}))
 
 (defn construct-system
   "Create a system definition."
@@ -48,10 +63,12 @@
      (do-migrate (ragtime-jdbc/sql-database tenant-manager-db)
                  (:tenant-manager migrations))
      (doseq [tenant (all-tenants tenant-manager-db)]
-       (do-migrate (ragtime-jdbc/sql-database
-                    {:connection-uri (aes/decrypt (get-in system [:config :config :encryption-key])
-                                                  (:db_uri tenant))})
-                   (:tenants migrations))))))
+       (try
+         (do-migrate (ragtime-jdbc/sql-database
+                          {:connection-uri (aes/decrypt (get-in system [:config :config :encryption-key])
+                                                        (:db_uri tenant))})
+                        (:tenants migrations))
+         (catch Exception e (throw (ex-info "Migration failed" {:tenant (:label tenant)} e))))))))
 
 
 (defn migrate-tenant
