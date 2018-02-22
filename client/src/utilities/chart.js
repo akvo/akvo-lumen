@@ -484,7 +484,7 @@ export function getVegaSpec(visualisation, data, containerHeight, containerWidth
   return vspec;
 }
 
-const round = (num, places) =>
+export const round = (num, places) =>
     // eslint-disable-next-line no-restricted-properties
     Math.round(num * Math.pow(10, places)) / Math.pow(10, places);
 

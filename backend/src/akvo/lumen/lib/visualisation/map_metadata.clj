@@ -152,9 +152,12 @@
 (defn raster-metadata [tenant-conn table-name layer where-clause]
   (let [raster-meta (jdbc/query tenant-conn ["SELECT metadata FROM raster_dataset WHERE raster_table = ?" table-name])
         {{:strs [bbox]} :metadata} (first raster-meta)]
-    (if bbox
-      {"boundingBox" [(reverse (first bbox)) (reverse (second bbox))]}
-      {})))
+    (merge
+      {"max" (get (:metadata (first raster-meta)) "max")
+       "min" (get (:metadata (first raster-meta)) "min")}
+      (if bbox
+        {"boundingBox" [(reverse (first bbox)) (reverse (second bbox))]}
+        {}))))
 
 (defn get-metadata [{:strs [aggregationDataset aggregationColumn aggregationGeomColumn layerType]
                      :as layer}]
