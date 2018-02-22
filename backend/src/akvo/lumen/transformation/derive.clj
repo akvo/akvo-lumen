@@ -1,5 +1,6 @@
 (ns akvo.lumen.transformation.derive
   (:require [akvo.lumen.transformation.engine :as engine]
+            [cheshire.core :as json]
             [clojure.java.jdbc :as jdbc]
             [clojure.set :as set]
             [clojure.string :as str]
@@ -27,6 +28,10 @@
   (let [factory (NashornScriptEngineFactory.)
         engine (.getScriptEngine factory class-filter)
         bindings (.getBindings engine ScriptContext/ENGINE_SCOPE)]
+    (.eval ^ScriptEngine engine ^String "load('nashorn:parser.js');")
+    (clojure.pprint/pprint
+      (json/decode
+        (.eval ^ScriptEngine engine ^String (format "JSON.stringify(parse('%s'))" code))))
     (remove-bindings bindings)
     (.eval ^ScriptEngine engine ^String (derive-column-function code))
     (fn [row]
@@ -43,8 +48,8 @@
 
 (defn throw-invalid-return-type [value]
   (throw (ex-info "Invalid return type"
-                  {:value value
-                   :type (type value)})))
+           {:value value
+            :type (type value)})))
 
 (defn ensure-valid-value-type [value type]
   (when-not (nil? value)
