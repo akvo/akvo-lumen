@@ -18,10 +18,12 @@
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable import/no-unresolved */
 /* eslint-disable no-console */
+/* eslint-disable no-shadow */
 
 const puppeteer = require('puppeteer');
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
+const https = require('https');
 
 const datasetName = Date.now().toString();
 const TIMEOUT = {
@@ -33,6 +35,10 @@ const lumenUrl = process.env.LUMEN_URL;
 const username = process.env.LUMEN_USER;
 const password = process.env.LUMEN_PASSWORD;
 
+let browser;
+let page;
+let sourcemapScript;
+
 async function login(page) {
   await page.waitForSelector('#username', { timeout: TIMEOUT.waitFor });
   console.log('Typing username...');
@@ -43,11 +49,20 @@ async function login(page) {
   await page.click('#kc-login');
 }
 
+async function addSourcemapScript(page) {
+  try {
+    await page.addScriptTag({
+      content: sourcemapScript,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+  return Promise.resolve();
+}
+
 async function goto(page, url) {
   await page.goto(url);
-  await page.addScriptTag({
-    url: 'https://cdn.jsdelivr.net/npm/sourcemapped-stacktrace@1.1.8/dist/sourcemapped-stacktrace.js',
-  });
+  await addSourcemapScript(page);
 }
 
 async function test(page, shouldLogin) {
@@ -59,9 +74,7 @@ async function test(page, shouldLogin) {
     await login(page);
   }
   await page.waitForSelector('button[data-test-id="dataset"]', { timeout: TIMEOUT.waitFor });
-  await page.addScriptTag({
-    url: 'https://raw.githubusercontent.com/akvo/akvo-lumen/develop/client/vendor/sourcemapped-stacktrace.js',
-  });
+  await addSourcemapScript(page);
 
   console.log('Login was successful.\n');
   await page.evaluate(`window.__datasetName = "${datasetName}"`);
@@ -140,7 +153,7 @@ async function test(page, shouldLogin) {
 
   console.log('Back to library');
   await goto(page, lumenUrl);
-//   Dashboard
+  //   Dashboard
   await page.waitForSelector('[data-test-id="dashboard"]', { timeout: TIMEOUT.waitFor });
   console.log('Accessing to dashboard creation...');
   await page.click('[data-test-id="dashboard"]');
@@ -158,9 +171,19 @@ async function test(page, shouldLogin) {
   console.log(`Dashboard ${datasetName} was successfully created.\n`);
 }
 
-
-let browser;
-let page;
+const getSourcemapsScript = () => new Promise((resolve) => {
+  https.get('https://raw.githubusercontent.com/akvo/akvo-lumen/develop/client/vendor/sourcemapped-stacktrace.js', (res) => {
+    res.setEncoding('utf8');
+    let body = '';
+    res.on('data', (data) => {
+      body += data;
+    });
+    res.on('end', () => {
+      sourcemapScript = body;
+      resolve(body);
+    });
+  });
+});
 
 const pagePromise =
   puppeteer.launch({
@@ -220,4 +243,6 @@ async function runTest() {
   }
 }
 
-pagePromise.then(runTest);
+pagePromise
+  .then(getSourcemapsScript)
+  .then(runTest);
