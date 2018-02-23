@@ -4,18 +4,15 @@
     .LibraryListingGroup {
         margin: 1em auto;
         padding: 0.5rem 1.5rem;
-
         h3 {
             color: $textSecondary;
         }
-
         ol {
             display: flex;
             flex-direction: row;
             flex-wrap: wrap;
         }
     }
-
     .LibraryListingItem {
         width: 370px;
         width: calc((100vw - 20.5rem) / 3);
@@ -28,45 +25,35 @@
         padding: 0.5rem 0;
         background-color: rgba($textSecondary, 0);
         transition: background-color 0.1s ease;
-
         h3 {
             color: rgba($black, 1);
         }
-
         &:hover {
             background-color: rgba($black, 0.05);
-
             .entityIcon {
                 opacity: 1;
             }
-
             h3 {
                 color: $black;
             }
         }
-
         &.FAILED {
             background-color: $lightErrorRed;
-
             &:hover {
                 background: $lightErrorRed;
             }
         }
-
         &.PENDING {
             &:hover {
                 background-color: transparent;
             }
         }
-
         &:hover .checkboxContainer {
             opacity: 1;
         }
-
         .checkboxContainer.show {
             opacity: 1;
         }
-
         .checkboxContainer {
             transition: opacity 0.1s ease;
             opacity: 0;
@@ -75,27 +62,21 @@
             justify-content: space-around;
             align-items: center;
             cursor: pointer;
-
             input[type="checkbox"] {
                 width: 17px;
                 height: 17px;
-
                 @include border-radius(3px);
-
                 border: 1px solid black;
             }
-
             input {
                 cursor: pointer;
             }
         }
-
         .entityBody {
             flex: 1;
             display: flex;
             text-decoration: none;
         }
-
         .entityIcon {
             position: relative;
             height: 4rem;
@@ -106,45 +87,35 @@
             background-repeat: no-repeat;
             opacity: 0.7;
         }
-
         &.visualisation {
             .entityIcon {
                 background-image: url("../../styles/img/icon-256-library-listing-visualisation.png");
-
                 &.area {
                     background-image: url("../../styles/img/icon-128-visualisation-area.png");
                 }
-
                 &.bar {
                     background-image: url("../../styles/img/icon-128-visualisation-bar.png");
                 }
-
                 &.donut {
                     background-image: url("../../styles/img/icon-128-visualisation-donut.png");
                 }
-
                 &.line {
                     background-image: url("../../styles/img/icon-128-visualisation-line.png");
                 }
-
                 &.map {
                     background-image: url("../../styles/img/icon-128-visualisation-map.png");
                 }
-
                 &.pie {
                     background-image: url("../../styles/img/icon-128-visualisation-pie.png");
                 }
-
                 &.pivot-table {
                     background-image: url("../../styles/img/icon-128-visualisation-pivot-table.png");
                 }
-
                 &.scatter {
                     background-image: url("../../styles/img/icon-128-visualisation-scatter.png");
                 }
             }
         }
-
         &.dashboard {
             .entityIcon {
                 // &:before {
@@ -153,7 +124,6 @@
                 background-image: url("../../styles/img/icon-256-library-listing-dashboard.png");
             }
         }
-
         &.dataset {
             .entityIcon {
                 // &:before {
@@ -162,36 +132,30 @@
                 background-image: url("../../styles/img/icon-256-library-listing-dataset.png");
             }
         }
-
         &.raster {
             .entityIcon {
-                background-image: url("../../styles/img/icon-256-library-listing-dataset.png");
+                background-image: url("../../styles/img/icon-256-visualisation-raster.png");
             }
         }
-
         .textContents {
             flex: 1;
             vertical-align: top;
             overflow: hidden;
             padding-left: 1rem;
             padding-top: 0.25rem;
-
             p {
                 /* Withouth this, long URLs in error messages willl break layout */
                 word-break: break-word;
             }
         }
-
         .VisualisationTypeLabel {
             p {
                 color: $textPrimary;
             }
         }
-
         .entityName {
             text-transform: capitalize;
         }
-
         .entityControls {
             display: flex;
             flex-direction: column;
@@ -200,18 +164,15 @@
             width: 1rem;
             opacity: 0;
             transition: opacity 0.3s ease;
-
             .showControls {
                 transform: rotate(90deg);
                 font-size: 2.5rem;
                 font-weight: bold;
             }
         }
-
         &:hover .entityControls {
             opacity: 1;
         }
-
         .pendingOverlay {
             position: absolute;
             top: 0;
@@ -221,13 +182,11 @@
             background-color: rgba(0, 0, 0, 0.1);
         }
     }
-
     .noItemsMessage, .noSearchResults {
         display: block;
         text-align: center;
         padding-top: 8rem;
     }
-
     .LibraryListingGroup:last-child .LibraryListingItem:last-child {
         margin-bottom: 6rem;
     }
