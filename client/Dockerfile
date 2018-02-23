@@ -1,4 +1,4 @@
-FROM nginx:1.13-alpine
+FROM nginx:1.13.8-alpine
 MAINTAINER Akvo Foundation <devops@akvo.org>
 
 COPY default.conf /etc/nginx/conf.d/default.conf
