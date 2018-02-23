@@ -3,6 +3,15 @@ import webpack from 'webpack';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import path from 'path';
 
+const HTML_CONFIG = {
+  minify: {
+    removeComments: true,
+    collapseWhitespace: true,
+  },
+  inject: true,
+  template: 'src/index.ejs',
+};
+
 export default {
   resolve: {
     extensions: ['*', '.js', '.jsx', '.json'],
@@ -31,13 +40,14 @@ export default {
     }),
     new webpack.HotModuleReplacementPlugin(),
     new webpack.NoEmitOnErrorsPlugin(),
-    new HtmlWebpackPlugin({     // Create HTML file that includes references to bundled CSS and JS.
-      template: 'src/index.ejs',
-      minify: {
-        removeComments: true,
-        collapseWhitespace: true,
-      },
-      inject: true,
+    new HtmlWebpackPlugin({
+      ...HTML_CONFIG,
+      chunks: ['app'],
+    }),
+    new HtmlWebpackPlugin({
+      ...HTML_CONFIG,
+      chunks: ['pub'],
+      filename: 'index-pub.html',
     }),
   ],
   module: {

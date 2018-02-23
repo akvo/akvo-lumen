@@ -57,7 +57,11 @@ browserSync({
 
     middleware: [
 
-      history(),
+      history({
+        rewrites: [
+          { from: '^/s/.*$', to: '/../dist/index-pub.html' },
+        ],
+      }),
 
       ...proxyTargets.reduce((acc, { source, ...rest }) => acc.concat(
         proxy(source, {
