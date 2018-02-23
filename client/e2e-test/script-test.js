@@ -60,7 +60,7 @@ async function test(page, shouldLogin) {
   }
   await page.waitForSelector('button[data-test-id="dataset"]', { timeout: TIMEOUT.waitFor });
   await page.addScriptTag({
-    url: 'https://cdn.jsdelivr.net/npm/sourcemapped-stacktrace@1.1.8/dist/sourcemapped-stacktrace.js',
+    url: 'https://raw.githubusercontent.com/novocaine/sourcemapped-stacktrace/master/sourcemapped-stacktrace.js',
   });
 
   console.log('Login was successful.\n');
