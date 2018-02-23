@@ -60,7 +60,7 @@ async function test(page, shouldLogin) {
   }
   await page.waitForSelector('button[data-test-id="dataset"]', { timeout: TIMEOUT.waitFor });
   await page.addScriptTag({
-    url: 'https://raw.githubusercontent.com/novocaine/sourcemapped-stacktrace/master/sourcemapped-stacktrace.js',
+    url: 'https://raw.githubusercontent.com/akvo/akvo-lumen/develop/client/vendor/sourcemapped-stacktrace.js',
   });
 
   console.log('Login was successful.\n');
@@ -177,11 +177,14 @@ const pagePromise =
     });
 
 const logStackTrace = async (error) => {
-  page.evaluate(stack => new Promise(resolve =>
+  page.evaluate(stack => new Promise((resolve) => {
+    if (!window.sourceMappedStackTrace) {
+      resolve('sourcemaps lib not loaded');
+    }
     window.sourceMappedStackTrace.mapStackTrace(stack, (newStack) => {
       resolve(newStack);
-    })
-  ), typeof error.stack === 'string' ? error.stack : error.stack.join('\n')).then((result) => {
+    });
+  }), typeof error.stack === 'string' ? error.stack : error.stack.join('\n')).then((result) => {
     console.log('ERROR:', error.message, result);
   });
 };
