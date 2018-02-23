@@ -297,7 +297,13 @@ class DatasetTable extends Component {
   }
 
   render() {
-    const { rows, columns, pendingTransformations, transformations } = this.props;
+    const {
+      rows,
+      columns,
+      pendingTransformations,
+      transformations,
+      onNavigateToVisualise,
+    } = this.props;
     const {
       activeDataTypeContextMenu,
       activeColumnContextMenu,
@@ -348,7 +354,7 @@ class DatasetTable extends Component {
           columns={columns}
           rowsCount={rows.size}
           onToggleTransformationLog={this.handleToggleTransformationLog}
-          onNavigateToVisualise={this.props.onNavigateToVisualise}
+          onNavigateToVisualise={onNavigateToVisualise}
           pendingTransformationsCount={pendingTransformations.size}
           onClickMenuItem={(menuItem) => {
             if (menuItem === 'combineColumns') {

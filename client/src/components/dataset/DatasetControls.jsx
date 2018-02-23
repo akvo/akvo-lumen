@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
-import { withRouter } from 'react-router';
 import ContextMenu from '../common/ContextMenu';
 
 require('./DatasetControls.scss');
@@ -20,7 +19,7 @@ class DatasetControls extends Component {
     });
   }
   render() {
-    const { pendingTransformationsCount, intl, params } = this.props;
+    const { pendingTransformationsCount, intl, onNavigateToVisualise } = this.props;
     return (
       <div className="DatasetControls">
 
@@ -81,9 +80,7 @@ class DatasetControls extends Component {
 
           <button
             className="datasetEditorButton clickable"
-            onClick={() => {
-              this.props.onNavigateToVisualise({ datasetId: params.datasetId });
-            }}
+            onClick={onNavigateToVisualise}
             data-test-id="visualise"
           >
             <FormattedMessage id="create_visualization" />
@@ -138,4 +135,4 @@ DatasetControls.propTypes = {
   onNavigateToVisualise: PropTypes.func.isRequired,
 };
 
-export default withRouter(injectIntl(DatasetControls));
+export default injectIntl(DatasetControls);

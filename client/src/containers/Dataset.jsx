@@ -98,11 +98,11 @@ class Dataset extends Component {
     }));
   }
 
-  handleNavigateToVisualise({ datasetId }) {
+  handleNavigateToVisualise() {
     this.props.dispatch(
       push({
         pathname: '/visualisation/create',
-        state: { preselectedDatasetId: datasetId },
+        state: { preselectedDatasetId: this.props.params.datasetId },
       })
     );
   }
