@@ -180,7 +180,7 @@ const getSourcemapsScript = () => new Promise((resolve) => {
     });
     res.on('end', () => {
       sourcemapScript = body;
-      resolve(body);
+      resolve();
     });
   });
 });
