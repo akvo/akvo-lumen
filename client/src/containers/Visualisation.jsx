@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import update from 'react-addons-update';
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import get from 'lodash/get';
 import ShareEntity from '../components/modals/ShareEntity';
 import * as actions from '../actions/visualisation';
 import * as entity from '../domain/entity';
@@ -88,6 +89,8 @@ class Visualisation extends Component {
   }
 
   componentDidMount() {
+    this.handleChangeSourceDataset(get(this.props, 'location.state.preselectedDatasetId'));
+
     require.ensure(['../components/charts/VisualisationViewer'], () => {
       require.ensure([], () => {
         /* eslint-disable global-require */
@@ -172,6 +175,7 @@ class Visualisation extends Component {
   }
 
   handleChangeSourceDataset(datasetId, optionalSpecChanges = {}) {
+    if (!datasetId) return;
     this.loadDataset(datasetId);
     const spec = Object.assign({}, this.state.visualisation.spec, optionalSpecChanges);
     const visualisation = Object.assign({}, this.state.visualisation, { datasetId }, { spec });

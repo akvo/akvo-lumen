@@ -19,9 +19,10 @@ class DatasetControls extends Component {
     });
   }
   render() {
-    const { pendingTransformationsCount, intl } = this.props;
+    const { pendingTransformationsCount, intl, onNavigateToVisualise } = this.props;
     return (
       <div className="DatasetControls">
+
         <span className="controlGroup1">
           <span
             className="datasetEditorContainer"
@@ -30,8 +31,8 @@ class DatasetControls extends Component {
             }}
           >
             <button
-              className="datasetEditorToggle clickable"
-              onClick={() => this.onEditorToggleClick()}
+              className="datasetEditorToggle datasetEditorButton clickable"
+              onClick={this.onEditorToggleClick}
               data-test-id="transform"
             >
             + <FormattedMessage id="transform" />
@@ -73,15 +74,21 @@ class DatasetControls extends Component {
                   width: '16rem',
                 }}
                 onWindowClick={this.onEditorToggleClick}
-
               />
             }
           </span>
-        </span>
-        <span className="controlGroup2">
-          <span
-            className="columnCount"
+
+          <button
+            className="datasetEditorButton clickable"
+            onClick={onNavigateToVisualise}
+            data-test-id="visualise"
           >
+            <FormattedMessage id="create_visualization" />
+          </button>
+        </span>
+
+        <span className="controlGroup2">
+          <span className="columnCount">
             <span>
               {this.props.columns.size} <FormattedMessage id="columns" />
             </span>
@@ -111,6 +118,7 @@ class DatasetControls extends Component {
             </button>
           </span>
         </span>
+
       </div>
     );
   }
@@ -122,7 +130,9 @@ DatasetControls.propTypes = {
   pendingTransformationsCount: PropTypes.number.isRequired,
   onClickMenuItem: PropTypes.func.isRequired,
   columns: PropTypes.object.isRequired,
+  params: PropTypes.object.isRequired,
   rowsCount: PropTypes.number.isRequired,
+  onNavigateToVisualise: PropTypes.func.isRequired,
 };
 
 export default injectIntl(DatasetControls);

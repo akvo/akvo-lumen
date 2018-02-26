@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Immutable from 'immutable';
 import { connect } from 'react-redux';
+import { push } from 'react-router-redux';
 import { showModal } from '../actions/activeModal';
 import { fetchDataset } from '../actions/dataset';
 import { getId, getTitle } from '../domain/entity';
@@ -21,6 +22,7 @@ class Dataset extends Component {
       pendingTransformations: Immutable.OrderedMap(),
     };
     this.handleShowDatasetSettings = this.handleShowDatasetSettings.bind(this);
+    this.handleNavigateToVisualise = this.handleNavigateToVisualise.bind(this);
     this.transform = this.transform.bind(this);
     this.undo = this.undo.bind(this);
   }
@@ -96,6 +98,15 @@ class Dataset extends Component {
     }));
   }
 
+  handleNavigateToVisualise() {
+    this.props.dispatch(
+      push({
+        pathname: '/visualisation/create',
+        state: { preselectedDatasetId: this.props.params.datasetId },
+      })
+    );
+  }
+
   render() {
     const { pendingTransformations } = this.state;
     const { dataset } = this.props;
@@ -119,6 +130,7 @@ class Dataset extends Component {
             pendingTransformations={pendingTransformations.valueSeq()}
             onTransform={transformation => this.transform(transformation)}
             onUndoTransformation={() => this.undo()}
+            onNavigateToVisualise={this.handleNavigateToVisualise}
           />}
       </div>
     );

@@ -27,12 +27,16 @@
         line-height: 1.4rem;
     }
 
-    .datasetEditorToggle {
+    .datasetEditorButton {
         text-align: left;
-        padding: 0.5rem 2.5rem 0.5rem 1.5rem;
+        padding: 0.5rem 1.5rem;
         position: relative;
         background-color: white;
+        margin-right: 1rem;
+    }
 
+    .datasetEditorToggle {
+        padding: 0.5rem 2.5rem 0.5rem 1.5rem;
         &:after {
             content: '';
             height: 0px;
