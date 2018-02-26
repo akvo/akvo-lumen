@@ -40,7 +40,8 @@
     marker-allow-overlap: true;
     marker-fill-opacity: 0.8;
     marker-fill: %s;
-    marker-line-color: #fff;
+    marker-line-color: rgba(255, 255, 255, 0.8);
+    marker-line-width: 0.4;
     marker-width: %s;
     %s
 }\n"]
