@@ -17,6 +17,6 @@ ACCOUNT=$(echo -n $(gcloud config get-value core/account))
 sed -e "s/\${LIVE_COLOR}/${COLOR}/" -e "s/\${DARK_COLOR}/${DARK_COLOR}/" \
   -e "s/\${UTCDATE}/${FLIP_DATE}/" \
   -e "s/\${ACCOUNT}/${ACCOUNT}/" \
-  "${DIR}"/ci/k8s/service.yaml > "${DIR}"/service.yaml
+  "${DIR}"/k8s/service.yaml > "${DIR}"/service.yaml
 
 kubectl apply -f service.yaml
