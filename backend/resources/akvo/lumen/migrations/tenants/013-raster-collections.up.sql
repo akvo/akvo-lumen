@@ -1,10 +1,13 @@
--- # Done
 DROP TRIGGER IF EXISTS collection_entity_history ON collection_entity CASCADE;
+
 DROP TABLE IF EXISTS history.collection_entity cascade;
+
 ALTER TABLE public.collection_entity
-      ADD COLUMN raster_dataset_id text REFERENCES raster_dataset (id) ON UPDATE CASCADE ON DELETE CASCADE;
+      ADD COLUMN IF NOT EXISTS raster_dataset_id text REFERENCES raster_dataset (id) ON UPDATE CASCADE ON DELETE CASCADE;
+
 ALTER TABLE public.collection_entity
       ADD UNIQUE (collection_id, raster_dataset_id);
+
 ALTER TABLE public.collection_entity
       DROP CONSTRAINT IF EXISTS one_entity;
 
