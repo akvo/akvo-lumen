@@ -179,3 +179,4 @@ Session.vim
 # Temporal deployment files
 /deployment.yaml
 /service.yaml
+/flipped.service.yaml
