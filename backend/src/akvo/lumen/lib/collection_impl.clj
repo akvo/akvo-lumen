@@ -31,16 +31,19 @@
 
    {:dataset-id
     :visualisation-id
-    :dashboard-id}
+    :dashboard-id
+    :raster-dataset-id}
 
    where only one of the individual map ids will be non-nil"
   [conn entities]
   (let [entity-array (text-array conn entities)]
     (->> (concat
-          (fetch-dataset-ids conn {:ids entity-array})
-          (fetch-visualisation-ids conn {:ids entity-array})
-          (fetch-dashboard-ids conn {:ids entity-array}))
-         (map #(merge {:dataset-id nil :visualisation-id nil :dashboard-id nil} %)))))
+           (fetch-dataset-ids conn {:ids entity-array})
+           (fetch-visualisation-ids conn {:ids entity-array})
+           (fetch-dashboard-ids conn {:ids entity-array})
+           (fetch-raster-dataset-ids conn {:ids entity-array}))
+      (map #(merge {:dataset-id nil :visualisation-id nil :dashboard-id nil
+                    :raster-dataset-id nil} %)))))
 
 (defn unique-violation? [^SQLException e]
   (= (.getSQLState e) "23505"))

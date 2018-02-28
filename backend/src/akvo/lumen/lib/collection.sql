@@ -44,12 +44,14 @@ INSERT INTO collection_entity (
     collection_id,
     dataset_id,
     visualisation_id,
-    dashboard_id
+    dashboard_id,
+    raster_dataset_id
 ) VALUES (
     :collection-id,
     :dataset-id,
     :visualisation-id,
-    :dashboard-id
+    :dashboard-id,
+    :raster-dataset-id
 );
 
 -- :name fetch-collection-entities
@@ -59,6 +61,7 @@ INSERT INTO collection_entity (
 SELECT dataset_id AS "dataset-id"
        visualisation_id AS "visualisation-id"
        dashboard_id AS "dashboard-id"
+       raster_dataset_id AS "raster-dataset-id"
 FROM collection_entity
 WHERE collection_id = :id;
 
@@ -70,6 +73,9 @@ SELECT id AS "visualisation-id" FROM visualisation WHERE id=ANY(:ids)
 
 -- :name fetch-dashboard-ids
 SELECT id AS "dashboard-id" FROM dashboard WHERE id=ANY(:ids)
+
+-- :name fetch-raster-dataset-ids
+SELECT id AS "raster-dataset-id" FROM raster_dataset WHERE id=ANY(:ids)
 
 -- :name delete-collection :!
 -- :doc Delete a collection, including all entities
