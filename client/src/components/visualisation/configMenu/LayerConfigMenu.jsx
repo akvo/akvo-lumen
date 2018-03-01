@@ -541,7 +541,7 @@ export default class LayerConfigMenu extends Component {
                 disabled={disabled}
               />
             }
-            {(layer.layerType === 'geo-location') &&
+            {(layer.layerType === 'geo-location' || !layer.layerType) &&
               <div>
                 <GeopointDataTab
                   layer={layer}
