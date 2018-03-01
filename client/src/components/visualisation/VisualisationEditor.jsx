@@ -28,20 +28,23 @@ const specIsValidForApi = (spec, vType) => {
         return false;
       }
       anyLayerInvalid = spec.layers.some(
+        // Function that should return true if the current layer is invalid
         (layer) => {
           const missingDatasetId = !layer.datasetId;
           const missingRasterId = !layer.rasterId;
 
-          if (layer.layerType === 'geo-location') {
-            return missingDatasetId || !layer.geom || (layer.latitude && layer.longitude);
-          }
           if (layer.layerType === 'geo-shape') {
             return missingDatasetId || !layer.geom;
-          }
-          if (layer.layerType === 'raster') {
+          } else if (layer.layerType === 'raster') {
             return missingRasterId;
           }
-          return true;
+
+          // Some old maps don't have a layer-type in the layer spec, so just assume it's geopoint
+          const missingGeom = !layer.geom;
+          const missingLatLong = !(layer.latitude && layer.longitude);
+          const missingAnyValidLocation = (missingGeom && missingLatLong);
+
+          return (missingDatasetId || missingAnyValidLocation);
         }
       );
 
