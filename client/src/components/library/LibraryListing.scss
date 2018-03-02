@@ -17,8 +17,6 @@
         width: 370px;
         width: calc((100vw - 20.5rem) / 3);
         min-width: 370px;
-        display: flex;
-        flex-direction: row;
         margin: 1rem 0.25rem;
         position: relative;
         height: 6rem;
@@ -57,35 +55,38 @@
         .checkboxContainer {
             transition: opacity 0.1s ease;
             opacity: 0;
-            display: flex;
             width: 2rem;
-            justify-content: space-around;
-            align-items: center;
             cursor: pointer;
+            position: absolute;
+            height: 100%;
+            left: 0;
+            top: 0;
             input[type="checkbox"] {
                 width: 17px;
                 height: 17px;
                 @include border-radius(3px);
                 border: 1px solid black;
+                margin-top: 33px;
+                margin-left: 8px;
             }
             input {
                 cursor: pointer;
             }
         }
         .entityBody {
-            flex: 1;
-            display: flex;
             text-decoration: none;
+            max-width: 100%;
         }
         .entityIcon {
-            position: relative;
+            position: absolute;
             height: 4rem;
             width: 4rem;
-            color: $white;
-            align-self: center;
+            color: #f7f7fa;
             background-size: cover;
             background-repeat: no-repeat;
             opacity: 0.7;
+            left: 30px;
+            top: 15px;
         }
         &.visualisation {
             .entityIcon {
@@ -138,11 +139,9 @@
             }
         }
         .textContents {
-            flex: 1;
             vertical-align: top;
             overflow: hidden;
-            padding-left: 1rem;
-            padding-top: 0.25rem;
+            padding: 8px 20px 0 100px;
             p {
                 /* Withouth this, long URLs in error messages willl break layout */
                 word-break: break-word;
@@ -155,15 +154,20 @@
         }
         .entityName {
             text-transform: capitalize;
+            text-overflow: ellipsis;
+            overflow: hidden;
         }
         .entityControls {
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: flex-start;
             width: 1rem;
             opacity: 0;
             transition: opacity 0.3s ease;
+            position: absolute;
+            height: 100%;
+            right: 0;
+            top: 0;
+            padding: 15px 6px;
+            width: 20px;
+            opacity: 0;
             .showControls {
                 transform: rotate(90deg);
                 font-size: 2.5rem;

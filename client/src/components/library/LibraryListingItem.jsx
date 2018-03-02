@@ -165,17 +165,6 @@ export default class LibraryListingItem extends Component {
             <LoadingSpinner />
           </div>
         }
-        <div
-          className={`checkboxContainer ${this.props.showCheckbox ? 'show' : ''}`}
-          onClick={() => {
-            this.props.onCheckEntity(getId(entity));
-          }}
-        >
-          <input
-            type="checkbox"
-            checked={this.props.isChecked}
-          />
-        </div>
         <Link
           to={`/${getType(entity)}/${getId(entity)}`}
           className="entityBody clickable"
@@ -204,6 +193,17 @@ export default class LibraryListingItem extends Component {
             }
           </div>
         </Link>
+        <div
+          className={`checkboxContainer ${this.props.showCheckbox ? 'show' : ''}`}
+          onClick={() => {
+            this.props.onCheckEntity(getId(entity));
+          }}
+        >
+          <input
+            type="checkbox"
+            checked={this.props.isChecked}
+          />
+        </div>
         <div className="entityControls">
           <button
             className="showControls clickable"
