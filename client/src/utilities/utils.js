@@ -39,3 +39,11 @@ export function filterColumns(columns = [], acceptableTypes = []) {
   const types = Array.isArray(acceptableTypes) ? acceptableTypes : [acceptableTypes];
   return columns.filter(column => types.some(type => type === column.type));
 }
+
+export const sortAlphabetically = (a, b, accessor = val => val) => {
+  const nameA = accessor(a).toLowerCase();
+  const nameB = accessor(b).toLowerCase();
+  if (nameA < nameB) return -1;
+  if (nameA > nameB) return 1;
+  return 0;
+};

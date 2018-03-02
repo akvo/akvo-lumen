@@ -7,7 +7,7 @@ import ButtonRowInput from './ButtonRowInput';
 import ToggleInput from '../../common/ToggleInput';
 import ColorLabels from './ColorLabels';
 import FilterMenu from './FilterMenu';
-import { filterColumns, checkUndefined } from '../../../utilities/utils';
+import { filterColumns, checkUndefined, sortAlphabetically } from '../../../utilities/utils';
 import * as entity from '../../../domain/entity';
 import { palette } from '../../../utilities/visualisationColors';
 
@@ -487,7 +487,17 @@ export default class LayerConfigMenu extends Component {
                 name="datasetMenu"
                 placeholder="Choose dataset..."
                 value={getDatasetOrRasterId(layer)}
-                options={this.props.datasetOptions.concat(Object.keys(this.props.rasters).map(key => this.props.rasters[key]).map(raster => ({ value: `raster-${entity.getId(raster)}`, label: entity.getTitle(raster) })))}
+                options={
+                  this.props.datasetOptions.concat(
+                    Object.keys(this.props.rasters)
+                      .map(key => this.props.rasters[key])
+                      .map(raster => ({
+                        value: `raster-${entity.getId(raster)}`,
+                        label: entity.getTitle(raster),
+                      }))
+                  )
+                  .sort((a, b) => sortAlphabetically(a, b, ({ label }) => label))
+                }
                 onChange={(datasetId) => {
                   if (datasetId.indexOf('raster') > -1) {
                     onChangeMapLayer(this.props.layerIndex, { rasterId: datasetId.replace('raster-', ''), datasetId: null });
