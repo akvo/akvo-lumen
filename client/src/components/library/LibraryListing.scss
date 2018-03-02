@@ -17,8 +17,6 @@
         width: 370px;
         width: calc((100vw - 20.5rem) / 3);
         min-width: 370px;
-        display: flex;
-        flex-direction: row;
         margin: 1rem 0.25rem;
         position: relative;
         height: 6rem;
@@ -69,7 +67,7 @@
                 @include border-radius(3px);
                 border: 1px solid black;
                 margin-top: 33px;
-                margin-left: 8px;            
+                margin-left: 8px;
             }
             input {
                 cursor: pointer;
