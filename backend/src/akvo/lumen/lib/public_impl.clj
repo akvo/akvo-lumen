@@ -60,9 +60,9 @@
              "visualisations" {(:id visualisation) (merge visualisation map-data)}
              "metadata" {(:id visualisation) map-data}}))
       (let [[map-data-tag map-data] (maps/create tenant-conn windshaft-url layers)]
-          (when (= map-data-tag ::lib/ok))
+          (when (= map-data-tag ::lib/ok)
             {"visualisations" {(:id visualisation) (merge visualisation map-data)}
-             "metadata" {(:id visualisation) map-data}}))))
+             "metadata" {(:id visualisation) map-data}})))))
 
 (defmethod visualisation :default
   [tenant-conn visualisation config]
