@@ -8,6 +8,8 @@ import { fetchDataset } from '../actions/dataset';
 import { getId, getTitle } from '../domain/entity';
 import { getTransformations, getRows, getColumns } from '../domain/dataset';
 import * as api from '../api';
+import { FETCHING } from '../reducers/datasets';
+import LoadingSpinner from '../components/common/LoadingSpinner';
 
 require('../components/dataset/Dataset.scss');
 
@@ -110,8 +112,8 @@ class Dataset extends Component {
   render() {
     const { pendingTransformations } = this.state;
     const { dataset } = this.props;
-    if (dataset == null || !this.state.asyncComponents) {
-      return <div className="Dataset loadingIndicator">Loading...</div>;
+    if (dataset == null || !this.state.asyncComponents || dataset === FETCHING) {
+      return <LoadingSpinner />;
     }
     const { DatasetHeader, DatasetTable } = this.state.asyncComponents;
 
@@ -144,6 +146,9 @@ Dataset.propTypes = {
 };
 
 // Just inject `dispatch`
-export default connect((state, props) => ({
-  dataset: state.library.datasets[props.params.datasetId],
-}))(Dataset);
+export default connect((state, props) => {
+  console.log(state);
+  return ({
+    dataset: state.library.datasets[props.params.datasetId],
+  });
+})(Dataset);

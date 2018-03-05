@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 /* This component should render the same markup as the regular VisualisationViewer, but only loads
 /* the dependencies needed to render a given chart type, rather than loading all dependencies for
@@ -71,7 +72,7 @@ export default class AsyncVisualisationViewer extends Component {
     return this.state.asyncComponents ?
       <this.state.asyncComponents.output {...this.props} />
       :
-      <div className="loadingIndicator">Loading...</div>;
+      <LoadingSpinner />;
   }
 }
 

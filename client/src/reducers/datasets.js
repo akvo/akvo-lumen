@@ -1,6 +1,7 @@
 import * as constants from '../constants/dataset';
 
 export const initialState = {};
+export const FETCHING = 'FETCHING';
 
 function createDataset(state, dataset) {
   const id = dataset.get('id');
@@ -44,9 +45,17 @@ function importDatasetSuccess(state, { importId }) {
 
 function saveDataset(state, dataset) {
   const id = dataset.get('id');
-  return Object.assign({}, state, {
+  return {
+    ...state,
     [id]: dataset.set('type', 'dataset'),
-  });
+  };
+}
+
+function fetchingDataset(state, action) {
+  return {
+    ...state,
+    [action.id]: FETCHING,
+  };
 }
 
 function saveDatasets(state, ds) {
@@ -124,6 +133,8 @@ export default function datasets(state = initialState, action) {
       return importDatasetFailure(state, action);
     case constants.IMPORT_DATASET_SUCCESS:
       return importDatasetSuccess(state, action);
+    case constants.FETCH_DATASET_REQUEST:
+      return fetchingDataset(state, action);
     case constants.FETCH_DATASET_SUCCESS:
       return saveDataset(state, action.dataset);
     case constants.FETCH_DATASETS_SUCCESS:

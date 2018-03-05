@@ -1,9 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import VisualisationViewer from '../charts/VisualisationViewer';
+import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 require('./VisualisationPreview.scss');
-
 
 function shouldRender(visualisation, datasets) {
   const datasetId = visualisation.datasetId;
@@ -78,8 +78,9 @@ export default function CreateVisualisationPreview({ visualisation, metadata, da
           context="editor"
           height={visualisation.visualisationType === 'map' ? null : 400}
           width={visualisation.visualisationType === 'map' ? null : 800}
-        /> :
-        null
+        /> : (
+          <LoadingSpinner />
+        )
       }
     </div>
   );
