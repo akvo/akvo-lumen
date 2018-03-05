@@ -140,15 +140,12 @@ class Dataset extends Component {
 }
 
 Dataset.propTypes = {
-  dataset: PropTypes.object,
+  dataset: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
   params: PropTypes.object.isRequired,
   dispatch: PropTypes.func.isRequired,
 };
 
 // Just inject `dispatch`
-export default connect((state, props) => {
-  console.log(state);
-  return ({
-    dataset: state.library.datasets[props.params.datasetId],
-  });
-})(Dataset);
+export default connect((state, props) => ({
+  dataset: state.library.datasets[props.params.datasetId],
+}))(Dataset);

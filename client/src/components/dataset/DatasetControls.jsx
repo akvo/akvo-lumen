@@ -130,7 +130,6 @@ DatasetControls.propTypes = {
   pendingTransformationsCount: PropTypes.number.isRequired,
   onClickMenuItem: PropTypes.func.isRequired,
   columns: PropTypes.object.isRequired,
-  params: PropTypes.object.isRequired,
   rowsCount: PropTypes.number.isRequired,
   onNavigateToVisualise: PropTypes.func.isRequired,
 };

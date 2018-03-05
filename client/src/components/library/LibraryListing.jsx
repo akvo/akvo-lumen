@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import moment from 'moment';
 import LibraryListingGroup from './LibraryListingGroup';
 import * as entity from '../../domain/entity';
+import { FETCHING } from '../../reducers/datasets';
 
 require('./LibraryListing.scss');
 
@@ -28,10 +29,11 @@ const filterEntities = (library, filterBy, searchString) => {
     unsearchedEntities = mapEntityObjectsToArray(library[filterBy]);
   }
   if (searchString === '') {
-    searchedEntities = unsearchedEntities;
+    searchedEntities = unsearchedEntities.filter(ent => ent !== FETCHING);
   } else {
     // Basic, proof-of-concept string matching for search function
     unsearchedEntities.forEach((ent) => {
+      if (ent === FETCHING) return;
       const entityTitle = entity.getTitle(ent);
       if (entityTitle.toLowerCase().indexOf(searchString.toLowerCase()) > -1) {
         searchedEntities.push(ent);

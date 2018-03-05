@@ -26,14 +26,14 @@ function importDatasetPending(state, dataset) {
 }
 
 function importDatasetFailure(state, { importId, reason, modified }) {
-  const dataset = state[importId].merge({
+  const dataset = {
     status: 'FAILED',
     reason,
     modified,
-  });
+  };
 
   return Object.assign({}, state, {
-    [importId]: dataset,
+    [importId]: state[importId] ? state[importId].merge(dataset) : dataset,
   });
 }
 
