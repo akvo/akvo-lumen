@@ -49,15 +49,20 @@
 
 (defmethod visualisation "map"
   [tenant-conn visualisation {:keys [windshaft-url]}]
-  (let [layers (get-in visualisation [:spec "layers"])
-        dataset-id (some #(get % "datasetId") layers)
-        [map-data-tag map-data] (maps/create tenant-conn windshaft-url layers)
-        [dataset-tag dataset] (dataset/fetch tenant-conn dataset-id)]
-    (when (and (= map-data-tag ::lib/ok)
-               (= dataset-tag ::lib/ok))
-      {"datasets" {dataset-id (dissoc dataset :rows)}
-       "visualisations" {(:id visualisation) (merge visualisation map-data)}
-       "metadata" {(:id visualisation) map-data}})))
+  (let [layers (get-in visualisation [:spec "layers"])]
+    (if (some #(get % "datasetId") layers)
+      (let [dataset-id (some #(get % "datasetId") layers)
+              [map-data-tag map-data] (maps/create tenant-conn windshaft-url layers)
+              [dataset-tag dataset] (dataset/fetch tenant-conn dataset-id)]
+          (when (and (= map-data-tag ::lib/ok)
+                     (= dataset-tag ::lib/ok))
+            {"datasets" {dataset-id (dissoc dataset :rows)}
+             "visualisations" {(:id visualisation) (merge visualisation map-data)}
+             "metadata" {(:id visualisation) map-data}}))
+      (let [[map-data-tag map-data] (maps/create tenant-conn windshaft-url layers)]
+          (when (= map-data-tag ::lib/ok)
+            {"visualisations" {(:id visualisation) (merge visualisation map-data)}
+             "metadata" {(:id visualisation) map-data}})))))
 
 (defmethod visualisation :default
   [tenant-conn visualisation config]
