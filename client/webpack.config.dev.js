@@ -9,7 +9,6 @@ const HTML_CONFIG = {
     collapseWhitespace: true,
   },
   inject: true,
-  template: 'src/index.ejs',
 };
 
 export default {
@@ -42,10 +41,12 @@ export default {
     new webpack.NoEmitOnErrorsPlugin(),
     new HtmlWebpackPlugin({
       ...HTML_CONFIG,
+      template: 'src/index.ejs',
       chunks: ['app'],
     }),
     new HtmlWebpackPlugin({
       ...HTML_CONFIG,
+      template: 'src/index-pub.ejs',
       chunks: ['pub'],
       filename: 'index-pub.html',
     }),

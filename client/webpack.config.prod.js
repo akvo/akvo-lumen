@@ -14,8 +14,6 @@ const GLOBALS = {
 };
 
 const HTML_CONFIG = {
-  // favicon: 'src/favicon.ico',
-  template: 'src/index.ejs',
   minify: {
     removeComments: true,
     collapseWhitespace: true,
@@ -29,8 +27,6 @@ const HTML_CONFIG = {
     minifyURLs: true,
   },
   inject: true,
-  // Note that you can add custom options here if you need to handle other custom logic in index.html
-  // To track JavaScript errors via TrackJS, sign up for a free trial at TrackJS.com and enter your token below.
   trackJSToken: '',
 };
 
@@ -65,11 +61,13 @@ export default {
     // Generate HTML file that contains references to generated bundles. See here for how this works: https://github.com/ampedandwired/html-webpack-plugin#basic-usage
     new HtmlWebpackPlugin({
       ...HTML_CONFIG,
+      template: 'src/index.ejs',
       chunks: ['app'],
     }),
 
     new HtmlWebpackPlugin({
       ...HTML_CONFIG,
+      template: 'src/index-pub.ejs',
       filename: 'index-pub.html',
       chunks: ['pub'],
     }),
