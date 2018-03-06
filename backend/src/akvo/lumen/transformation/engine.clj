@@ -158,6 +158,7 @@
                                                                                                  columns)))
                                     :columns columns}]
           (new-dataset-version tenant-conn next-dataset-version)
+          (dataset-touch tenant-conn {:id dataset-id})
           (lib/created next-dataset-version))))))
 
 (defn- apply-undo [tenant-conn dataset-id job-execution-id current-dataset-version]
