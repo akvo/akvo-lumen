@@ -1,6 +1,7 @@
 FROM nginx:1.13.8-alpine
 MAINTAINER Akvo Foundation <devops@akvo.org>
 
+RUN sed -i -e '/.*access_log.*main;$/d' /etc/nginx/nginx.conf;
 COPY default.conf /etc/nginx/conf.d/default.conf
 COPY favicon.ico /usr/share/nginx/html/favicon.ico
 COPY dist/* /usr/share/nginx/html/assets/
