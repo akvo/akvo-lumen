@@ -4,8 +4,9 @@ import PropTypes from 'prop-types';
 import leaflet from 'leaflet';
 import { isEqual, cloneDeep } from 'lodash';
 import leafletUtfGrid from '../../vendor/leaflet.utfgrid';
-import * as chart from '../../utilities/chart';
 import Spinner from '../common/LoadingSpinner';
+import Legend from './mapVisualization/Legend';
+import PopupContent from './mapVisualization/PopupContent';
 
 require('../../../node_modules/leaflet/dist/leaflet.css');
 require('./MapVisualisation.scss');
@@ -14,14 +15,6 @@ const L = leafletUtfGrid(leaflet);
 
 // We need to use leaflet private methods which have underscore dangle
 /* eslint no-underscore-dangle: "off" */
-
-const isImage = (value) => {
-  // For now, treat every link as an image, until we have something like an "image-url" type
-  if (typeof value === 'string' && value.match(/^https/) !== null) {
-    return true;
-  }
-  return false;
-};
 
 const getBaseLayerAttributes = ((baseLayer) => {
   const attributes = {};
@@ -48,189 +41,6 @@ const getBaseLayerAttributes = ((baseLayer) => {
 
   return attributes;
 });
-
-// returns true if we need to set "word-break: break-all" on el to avoid x-overflow
-const wrapLabel = (str) => {
-  if (!str) {
-    return false;
-  }
-  return Boolean(str.toString().split(' ').some(word => word.length > 18));
-};
-
-const LegendEntry = ({ singleMetadata, layer }) => (
-  <div className="LegendEntry">
-    {Boolean(singleMetadata.pointColorMapping) &&
-      <div className="container">
-        <h4>{layer.title}</h4>
-        <h5>{`${singleMetadata.pointColorMappingTitle}`}</h5>
-        <div className="listContainer">
-          <ul>
-            {singleMetadata.pointColorMapping.map(item =>
-              <li
-                key={item.value}
-              >
-                <div
-                  className="colorMarker"
-                  style={{
-                    backgroundColor: item.color,
-                  }}
-                />
-                <p className={`label ${wrapLabel(item.value) ? 'breakAll' : ''}`}>
-                  {chart.replaceLabelIfValueEmpty(item.value)}
-                </p>
-              </li>
-              )}
-          </ul>
-        </div>
-      </div>
-    }
-    {Boolean(singleMetadata.shapeColorMapping) &&
-      <div className="container">
-        <h4>{layer.title}</h4>
-        <h5>{singleMetadata.shapeColorMappingTitle}</h5>
-        <div className="contents">
-          <div className="gradientContainer">
-            <p className="gradientLabel min">
-              Min
-            </p>
-            <p className="gradientLabel max">
-              Max
-            </p>
-            <div
-              className="gradientDisplay"
-              style={{
-                background: `linear-gradient(90deg,${singleMetadata.shapeColorMapping.map(o => o.color).join(',')})`,
-              }}
-            />
-          </div>
-        </div>
-      </div>
-    }
-    {Boolean(layer.layerType === 'raster') &&
-      <div className="container">
-        <h4>{layer.title}</h4>
-        <h5>Raster layer</h5>
-        <div className="contents">
-          <div className="gradientContainer">
-            <p className="gradientLabel min">
-              {singleMetadata.min !== undefined ? chart.round(singleMetadata.min, 2) : 'Min'}
-            </p>
-            <p className="gradientLabel max">
-              {singleMetadata.max !== undefined ? chart.round(singleMetadata.max, 2) : 'Max'}
-            </p>
-            <div
-              className="gradientDisplay"
-              style={{
-                background: `linear-gradient(90deg,${layer.startColor || 'white'},${layer.endColor || 'black'})`,
-              }}
-            />
-          </div>
-        </div>
-      </div>
-    }
-  </div>
-);
-
-LegendEntry.propTypes = {
-  singleMetadata: PropTypes.object,
-  layer: PropTypes.object,
-};
-
-const Legend = ({ layers, layerMetadata }) => {
-  const legendLayers = layers.map((layer, idx) => {
-    const metadata = layerMetadata[idx];
-    const showLayer =
-      Boolean(
-        layer.legend.visible &&
-        metadata &&
-        (metadata.pointColorMapping || metadata.shapeColorMapping)
-      ) ||
-      layer.layerType === 'raster';
-
-    return showLayer ? layer : null;
-  });
-
-  return (
-    <div
-      className={'Legend'}
-    >
-      <div className="container">
-        {
-          legendLayers.map((layer, idx) => {
-            const haveLayer = Boolean(layer);
-            if (!haveLayer) {
-              return null;
-            }
-            return (
-              <LegendEntry
-                key={idx}
-                layer={layer}
-                singleMetadata={layerMetadata[idx]}
-              />
-            );
-          })
-        }
-      </div>
-    </div>
-  );
-};
-
-Legend.propTypes = {
-  layers: PropTypes.array,
-  layerMetadata: PropTypes.array,
-};
-
-const getColumnTitle = (titles, key) => titles.find(obj => obj.columnName === key).title;
-
-const PopupContent = ({ data, singleMetadata, onImageLoad }) => {
-  const getTitle = (key) => {
-    const isMeta = key.substring(0, 1) === '_'; // We set meta columns to start with _ on backend
-
-    if (isMeta) {
-      return singleMetadata.shapeColorMappingTitle;
-    }
-    return getColumnTitle(singleMetadata.columnTitles, key);
-  };
-
-  return (
-    <ul className="PopupContent">
-      { Object.keys(data).sort().map(key =>
-        <li
-          key={key}
-        >
-          <h4>{getTitle(key)}</h4>
-          <span>
-            {isImage(data[key]) ?
-              <a
-                href={data[key]}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <div className="imageContainer">
-                  <img
-                    src={data[key]}
-                    role="presentation"
-                    onLoad={onImageLoad}
-                  />
-                </div>
-              </a>
-                  :
-              <span>
-                {data[key] === null ? 'No data' : data[key]}
-              </span>
-            }
-          </span>
-        </li>
-        )}
-    </ul>
-  );
-};
-
-PopupContent.propTypes = {
-  data: PropTypes.object.isRequired,
-  onImageLoad: PropTypes.func.isRequired,
-  singleMetadata: PropTypes.object,
-};
 
 export default class MapVisualisation extends Component {
 
