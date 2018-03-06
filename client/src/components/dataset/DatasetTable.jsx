@@ -139,8 +139,9 @@ class DatasetTable extends Component {
         displayRight: false,
         onClose: this.hideSidebar,
         onApply: (transformation) => {
-          this.hideSidebar();
-          this.props.onTransform(transformation);
+          this.props.onTransform(transformation).then(() => {
+            this.hideSidebar();
+          });
         },
         columns: this.props.columns,
       });
@@ -161,8 +162,9 @@ class DatasetTable extends Component {
         displayRight: false,
         onClose: this.hideSidebar,
         onApply: (transformation) => {
-          this.hideSidebar();
-          this.props.onTransform(transformation);
+          this.props.onTransform(transformation).then(() => {
+            this.hideSidebar();
+          });
         },
         columns: this.props.columns,
       });
@@ -183,8 +185,9 @@ class DatasetTable extends Component {
         displayRight: false,
         onClose: this.hideSidebar,
         onApply: (transformation) => {
-          this.hideSidebar();
-          this.props.onTransform(transformation);
+          this.props.onTransform(transformation).then(() => {
+            this.hideSidebar();
+          });
         },
         columns: this.props.columns,
       });
