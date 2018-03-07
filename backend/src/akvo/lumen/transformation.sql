@@ -4,6 +4,12 @@
 INSERT INTO job_execution (id, dataset_id, type)
 VALUES (:id, :dataset-id, 'TRANSFORMATION')
 
+-- :name touch-dataset :! :n
+-- :doc Updates the dataset's modified value to current_timestamp
+UPDATE dataset
+   SET modified=current_timestamp
+ WHERE id = :id
+
 -- :name dataset-by-id :? :1
 -- :doc Checks the existence of a dataset for a given id
 SELECT id FROM dataset WHERE id = :id
