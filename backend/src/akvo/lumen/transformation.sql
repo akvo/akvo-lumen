@@ -4,7 +4,7 @@
 INSERT INTO job_execution (id, dataset_id, type)
 VALUES (:id, :dataset-id, 'TRANSFORMATION')
 
--- :name dataset-touch :! :n
+-- :name touch-dataset :! :n
 -- :doc Updates the dataset's modified value to current_timestamp
 UPDATE dataset
    SET modified=current_timestamp
