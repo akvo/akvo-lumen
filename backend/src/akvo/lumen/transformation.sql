@@ -1,4 +1,3 @@
-
 -- :name new-transformation-job-execution :! :n
 -- :doc Inserts a new transformation job execution
 INSERT INTO job_execution (id, dataset_id, type)
@@ -52,4 +51,4 @@ INSERT INTO :i:dest-table SELECT * FROM :i:source-table;
 
 -- :name drop-table :!
 -- :doc Drop table
-DROP TABLE :i:table-name CASCADE;
+DROP TABLE IF EXISTS :i:table-name CASCADE;

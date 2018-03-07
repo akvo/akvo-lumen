@@ -68,9 +68,9 @@
   (sql-value [v] (val->geometry-pgobj v)))
 
 (defn do-import
-  "Import runs within a future and since this is not taking part of ring request
-  - response cycle we need to make sure to capture errors."
-  [conn {:keys [:sentry-backend-dsn] :as config} job-execution-id]
+  "Import runs within a future and since this is not taking part of ring
+  request / response cycle we need to make sure to capture errors."
+  [conn {:keys [sentry-backend-dsn] :as config} job-execution-id]
   (let [table-name (util/gen-table-name "ds")]
     (try
       (let [spec (:spec (data-source-spec-by-job-execution-id conn {:job-execution-id job-execution-id}))]
@@ -84,7 +84,7 @@
       (catch Exception e
         (failed-import conn job-execution-id (.getMessage e) table-name)
         (log/error e)
-        (when sentry-backend-dsn
+        (when (not (empty? sentry-backend-dsn))
           (raven/capture sentry-backend-dsn e))
         (throw e)))))
 

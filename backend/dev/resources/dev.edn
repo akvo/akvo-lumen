@@ -18,6 +18,8 @@
            :flow-api-url "https://api.akvotest.org/flow"
            :invite-redirect {:client-port 3030
                              :scheme :http}
+           :sentry-backend-dsn ""
+           :sentry-client-dsn ""
            :windshaft-url "http://windshaft:4000"}
   :emailer {:from-email "devops@akvo.localhost"
             :from-name "Akvo Lumen"}
