@@ -158,6 +158,7 @@
                                                                                                  columns)))
                                     :columns columns}]
           (new-dataset-version tenant-conn next-dataset-version)
+          (touch-dataset tenant-conn {:id dataset-id})
           (lib/created next-dataset-version))))))
 
 (defn- apply-undo [tenant-conn dataset-id job-execution-id current-dataset-version]
@@ -190,6 +191,7 @@
                                       :columns columns}]
             (new-dataset-version tenant-conn
                                  next-dataset-version)
+            (touch-dataset tenant-conn {:id dataset-id})                                 
             (drop-table tenant-conn {:table-name previous-table-name})
             (lib/created next-dataset-version)))
         (let [{:keys [success? message columns execution-log]}
