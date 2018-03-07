@@ -72,7 +72,7 @@
     (if-let [url (get response "nextPageUrl")]
       (recur (into all-data-points (get response "dataPoints"))
              (data-points* headers-fn url))
-      all-data-points)))
+      (into all-data-points (get response "dataPoints")))))
 
 (defn questions
   "Get the list of questions from a form"

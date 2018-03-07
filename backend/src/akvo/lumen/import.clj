@@ -8,7 +8,9 @@
              [cheshire.core :as json]
              [clojure.java.jdbc :as jdbc]
              [clojure.string :as string]
-             [hugsql.core :as hugsql])
+             [clojure.tools.logging :as log]
+             [hugsql.core :as hugsql]
+             [raven-clj.core :as raven])
   (:import [org.postgis Polygon MultiPolygon]
            [org.postgresql.util PGobject]))
 
@@ -45,9 +47,10 @@
                                   :transformations []})
     (update-successful-job-execution conn {:id job-execution-id})))
 
-(defn failed-import [conn job-execution-id reason]
+(defn failed-import [conn job-execution-id reason table-name]
   (update-failed-job-execution conn {:id job-execution-id
-                                     :reason [reason]}))
+                                     :reason [reason]})
+  (drop-table conn {:table-name table-name}))
 
 
 (defn val->geometry-pgobj
@@ -64,20 +67,26 @@
   org.postgis.Point
   (sql-value [v] (val->geometry-pgobj v)))
 
-(defn do-import [conn config job-execution-id]
-  (try
-    (let [table-name (util/gen-table-name "ds")
-          spec (:spec (data-source-spec-by-job-execution-id conn {:job-execution-id job-execution-id}))]
-      (with-open [importer (import/dataset-importer (get spec "source") config)]
-        (let [columns (import/columns importer)]
-          (import/create-dataset-table conn table-name columns)
-          (import/add-key-constraints conn table-name columns)
-          (doseq [record (map import/coerce-to-sql (import/records importer))]
-            (jdbc/insert! conn table-name record))
-          (successful-import conn job-execution-id table-name columns spec))))
-    (catch Exception e
-      (failed-import conn job-execution-id (str "Failed to import: " (.getMessage e)))
-      (throw e))))
+(defn do-import
+  "Import runs within a future and since this is not taking part of ring request
+  - response cycle we need to make sure to capture errors."
+  [conn {:keys [:sentry-backend-dsn] :as config} job-execution-id]
+  (let [table-name (util/gen-table-name "ds")]
+    (try
+      (let [spec (:spec (data-source-spec-by-job-execution-id conn {:job-execution-id job-execution-id}))]
+        (with-open [importer (import/dataset-importer (get spec "source") config)]
+          (let [columns (import/columns importer)]
+            (import/create-dataset-table conn table-name columns)
+            (import/add-key-constraints conn table-name columns)
+            (doseq [record (map import/coerce-to-sql (import/records importer))]
+              (jdbc/insert! conn table-name record))
+            (successful-import conn job-execution-id table-name columns spec))))
+      (catch Exception e
+        (failed-import conn job-execution-id (.getMessage e) table-name)
+        (log/error e)
+        (when sentry-backend-dsn
+          (raven/capture sentry-backend-dsn e))
+        (throw e)))))
 
 (defn handle-import-request [tenant-conn config claims data-source]
   (let [data-source-id (str (util/squuid))
