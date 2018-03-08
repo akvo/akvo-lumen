@@ -15,8 +15,8 @@
 (defn all [tenant-conn]
   (lib/ok (all-datasets tenant-conn)))
 
-(defn create [tenant-conn config claims data-source]
-  (import/handle-import-request tenant-conn config claims data-source))
+(defn create [tenant-conn config error-tracker claims data-source]
+  (import/handle-import-request tenant-conn config error-tracker claims data-source))
 
 (defn column-sort-order
   "Return this columns sort order (an integer) or nil if the dataset

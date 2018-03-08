@@ -1,5 +1,6 @@
 (ns akvo.lumen.import
-  (:require  [akvo.lumen.import.common :as import]
+  (:require  [akvo.lumen.boundary.error-tracker :as error-tracker]
+             [akvo.lumen.import.common :as import]
              [akvo.lumen.import.csv]
              [akvo.lumen.import.flow]
              [akvo.lumen.lib :as lib]
@@ -9,8 +10,7 @@
              [clojure.java.jdbc :as jdbc]
              [clojure.string :as string]
              [clojure.tools.logging :as log]
-             [hugsql.core :as hugsql]
-             [raven-clj.core :as raven])
+             [hugsql.core :as hugsql])
   (:import [org.postgis Polygon MultiPolygon]
            [org.postgresql.util PGobject]))
 
@@ -70,7 +70,7 @@
 (defn do-import
   "Import runs within a future and since this is not taking part of ring
   request / response cycle we need to make sure to capture errors."
-  [conn {:keys [sentry-backend-dsn] :as config} job-execution-id]
+  [conn {:keys [sentry-backend-dsn] :as config} error-tracker job-execution-id]
   (let [table-name (util/gen-table-name "ds")]
     (try
       (let [spec (:spec (data-source-spec-by-job-execution-id conn {:job-execution-id job-execution-id}))]
@@ -84,11 +84,10 @@
       (catch Exception e
         (failed-import conn job-execution-id (.getMessage e) table-name)
         (log/error e)
-        (when (not (empty? sentry-backend-dsn))
-          (raven/capture sentry-backend-dsn e))
+        (error-tracker/track error-tracker e)
         (throw e)))))
 
-(defn handle-import-request [tenant-conn config claims data-source]
+(defn handle-import-request [tenant-conn config error-tracker claims data-source]
   (let [data-source-id (str (util/squuid))
         job-execution-id (str (util/squuid))
         table-name (util/gen-table-name "ds")
@@ -97,6 +96,6 @@
                                      :spec (json/generate-string data-source)})
     (insert-job-execution tenant-conn {:id job-execution-id
                                        :data-source-id data-source-id})
-    (future (do-import tenant-conn config job-execution-id))
+    (future (do-import tenant-conn config error-tracker job-execution-id))
     (lib/ok {"importId" job-execution-id
              "kind" kind})))

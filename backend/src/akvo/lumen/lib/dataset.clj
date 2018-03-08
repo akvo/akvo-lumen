@@ -10,8 +10,8 @@
 
 (defn create
   "Create new dataset. Body should conform..."
-  [tenant-conn config jwt-claims body]
-  (impl/create tenant-conn config jwt-claims body))
+  [tenant-conn config error-tracker jwt-claims body]
+  (impl/create tenant-conn config error-tracker jwt-claims body))
 
 (defn fetch
   "Fetch dataset with id"
