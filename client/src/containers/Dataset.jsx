@@ -8,7 +8,6 @@ import { fetchDataset } from '../actions/dataset';
 import { getId, getTitle } from '../domain/entity';
 import { getTransformations, getRows, getColumns } from '../domain/dataset';
 import * as api from '../api';
-import { FETCHING } from '../reducers/datasets';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 
 require('../components/dataset/Dataset.scss');
@@ -112,11 +111,10 @@ class Dataset extends Component {
   render() {
     const { pendingTransformations } = this.state;
     const { dataset } = this.props;
-    if (dataset == null || !this.state.asyncComponents || dataset === FETCHING) {
+    if (dataset == null || !this.state.asyncComponents) {
       return <LoadingSpinner />;
     }
     const { DatasetHeader, DatasetTable } = this.state.asyncComponents;
-
     return (
       <div className="Dataset">
         <DatasetHeader
@@ -124,7 +122,7 @@ class Dataset extends Component {
           name={getTitle(dataset)}
           id={getId(dataset)}
         />
-        {getRows(dataset) != null &&
+        {getRows(dataset) != null ? (
           <DatasetTable
             columns={getColumns(dataset)}
             rows={getRows(dataset)}
@@ -133,7 +131,10 @@ class Dataset extends Component {
             onTransform={transformation => this.transform(transformation)}
             onUndoTransformation={() => this.undo()}
             onNavigateToVisualise={this.handleNavigateToVisualise}
-          />}
+          />
+        ) : (
+          <LoadingSpinner />
+        )}
       </div>
     );
   }
