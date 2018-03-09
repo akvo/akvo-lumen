@@ -54,6 +54,7 @@
         :name (:title dataset)
         :modified (:modified dataset)
         :created (:created dataset)
+        :updated (:updated dataset)
         :status "OK"
         :transformations (:transformations dataset)
         :columns columns

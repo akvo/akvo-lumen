@@ -1,5 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
+import moment from 'moment';
 import { replaceLabelIfValueEmpty, processPivotData } from '../../utilities/chart';
 
 require('./PivotTable.scss');
@@ -70,7 +72,7 @@ const formatCell = (index, cell, spec, columns) => {
   return cell;
 };
 
-export default function PivotTable({ width, height, visualisation, context }) {
+export default function PivotTable({ width, height, visualisation, context, datasets }) {
   const { spec } = visualisation;
   const data = processPivotData(visualisation.data, spec);
   const tooManyColumns = data && data.columns && data.columns.length >= columnLimit;
@@ -134,6 +136,12 @@ export default function PivotTable({ width, height, visualisation, context }) {
               <span>
                 {visualisation.name}
               </span>
+              <br />
+              <p className="chartMeta">
+                <span className="capitalize">
+                  <FormattedMessage id="last_updated" />
+                </span>: {moment(datasets[visualisation.datasetId].get('updated')).format('Do MMM YYYY - HH:mm')}
+              </p>
             </th>
           </tr>
           {data.metadata.categoryColumnTitle &&

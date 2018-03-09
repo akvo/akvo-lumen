@@ -87,6 +87,7 @@
   "invalid_expression": "Expression invalide",
   "javascript_code": "Code javascript",
   "js_helptext": "Les colonnes dérivées sont des formules écrites en utilisant un sous-ensemble de Javascript où une seule expression est autorisée et les colonnes sont référencées comme {columnSyntax} ou, en variante, si le titre est un identifiant de javascript valide: {title}.",
+  "last_updated": "Dernière mise à jour",  
   "leave_cell_empty": "Laisser la cellule vide",
   "left": "Gauche",
   "legend_title": "Titre de la légende",
