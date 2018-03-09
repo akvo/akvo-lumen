@@ -13,11 +13,22 @@ export default class DatasetHeader extends Component {
 
     return [settings];
   }
+
   render() {
+    const { onChangeTitle, onBeginEditTitle, isUnsavedChanges } = this.props;
+
+    const saveStatusId = ({
+      false: 'all_changes_saved',
+      true: 'unsaved_changes',
+    })[isUnsavedChanges] || null;
+
     return (
       <EntityTypeHeader
         title={this.props.name}
         actionButtons={this.getActionButtions()}
+        onChangeTitle={onChangeTitle}
+        onBeginEditTitle={onBeginEditTitle}
+        saveStatusId={saveStatusId}
       />
     );
   }
@@ -26,4 +37,7 @@ export default class DatasetHeader extends Component {
 DatasetHeader.propTypes = {
   name: PropTypes.string.isRequired,
   onShowDatasetSettings: PropTypes.func.isRequired,
+  isUnsavedChanges: PropTypes.bool,
+  onChangeTitle: PropTypes.func,
+  onBeginEditTitle: PropTypes.func,
 };

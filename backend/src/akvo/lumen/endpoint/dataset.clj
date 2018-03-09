@@ -21,5 +21,8 @@
         (DELETE "/" _
           (dataset/delete tenant-conn id))
 
+        (PUT "/" {:keys [body]}
+          (dataset/update-meta tenant-conn id body))
+
         (POST "/update" {:keys [body] :as request}
           (dataset/update tenant-conn config id body))))))
