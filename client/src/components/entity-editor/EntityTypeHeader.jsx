@@ -6,6 +6,8 @@ import Header from '../common/Header';
 
 require('./EntityTypeHeader.scss');
 
+const IS_PRIMARY = true;
+
 class EntityTypeHeader extends Component {
 
   constructor() {
@@ -15,25 +17,29 @@ class EntityTypeHeader extends Component {
     };
   }
 
-  actionButtons() {
+  actionButtons(isPrimary = false) {
     const { actionButtons, intl } = this.props;
 
-    if (actionButtons == null) {
-      return [];
-    }
+    if (actionButtons == null) return null;
 
     return (
-      actionButtons.map((button, index) =>
-        <button
-          className={`overflow clickable ${button.customClass ? button.customClass : ''}`}
-          onClick={button.onClick}
-          key={index}
-          title={button.tooltipId && intl.formatMessage({ id: button.tooltipId })}
-          disabled={button.disabled}
-        >
-          {button.buttonText}
-        </button>
-      )
+      <ul>
+        {actionButtons
+          .filter(({ primary = false }) => (isPrimary && primary) || (!isPrimary && !primary))
+          .map((button, index) =>
+            <li key={index}>
+              <button
+                className={`overflow clickable ${button.customClass ? button.customClass : ''}`}
+                onClick={button.onClick}
+                title={button.tooltipId && intl.formatMessage({ id: button.tooltipId })}
+                disabled={button.disabled}
+              >
+                {button.buttonText}
+              </button>
+            </li>
+          )
+        }
+      </ul>
     );
   }
 
@@ -49,6 +55,7 @@ class EntityTypeHeader extends Component {
         className="EntityTypeHeader"
         backButtonTarget="/library"
         actions={this.actionButtons()}
+        primaryActions={this.actionButtons(IS_PRIMARY)}
       >
         <EntityTitleInput
           title={title}

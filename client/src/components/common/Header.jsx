@@ -3,7 +3,14 @@ import PropTypes from 'prop-types';
 import { Link, withRouter } from 'react-router';
 import './Header.scss';
 
-function Header({ children, actions, router, className = '', backButtonTarget }) {
+function Header({
+  children,
+  actions,
+  primaryActions,
+  router,
+  className = '',
+  backButtonTarget,
+}) {
   const target = backButtonTarget == null ?
     { onClick: () => router.goBack() } :
     { to: backButtonTarget };
@@ -23,6 +30,9 @@ function Header({ children, actions, router, className = '', backButtonTarget })
       <div className="content">
         {children}
       </div>
+      <div className="primary-actions">
+        {primaryActions}
+      </div>
       <div className="actions">
         {actions}
       </div>
@@ -35,6 +45,7 @@ Header.propTypes = {
   backButtonTarget: PropTypes.string,
   children: PropTypes.node,
   actions: PropTypes.node,
+  primaryActions: PropTypes.node,
   className: PropTypes.string,
 };
 
