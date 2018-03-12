@@ -20,6 +20,9 @@ export default class DashboardHeader extends Component {
         this.props.onSaveDashboard();
       },
       customClass: 'primaryButton',
+      props: {
+        'data-test-id': 'save-changes',
+      },
     };
 
     const user = {

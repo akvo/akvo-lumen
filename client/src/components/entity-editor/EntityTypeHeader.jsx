@@ -33,6 +33,7 @@ class EntityTypeHeader extends Component {
                 onClick={button.onClick}
                 title={button.tooltipId && intl.formatMessage({ id: button.tooltipId })}
                 disabled={button.disabled}
+                {...(button.props || {})}
               >
                 {button.buttonText}
               </button>

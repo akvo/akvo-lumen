@@ -236,7 +236,6 @@ export default function ConfigMenu(props) {
                 getChartTypeEditor(visualisation.visualisationType)
               }
                 <button
-                  data-test-id="save-changes"
                   className="saveChanges clickable"
                   onClick={props.onSaveVisualisation}
                 >

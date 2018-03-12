@@ -19,6 +19,9 @@ export default class VisualisationHeader extends Component {
         this.props.onSaveVisualisation();
       },
       customClass: 'primaryButton',
+      props: {
+        'data-test-id': 'save-changes',
+      },
     };
     const user = {
       buttonText: <FormattedMessage id="user" />,
