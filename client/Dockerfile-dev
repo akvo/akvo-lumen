@@ -1,4 +1,4 @@
-FROM mhart/alpine-node:6
+FROM mhart/alpine-node:8
 MAINTAINER Akvo Foundation <devops@akvo.org>
 
 RUN apk add --no-cache build-base su-exec python cairo-dev pango-dev xz jpeg-dev

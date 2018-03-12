@@ -6,6 +6,6 @@ exec('node -v', function (err, stdout) {
   if (err) throw err;
 
   if (parseFloat(stdout.slice(1)) < 7.6) {
-    throw new Error('requires node 4.0 or greater.');
+    throw new Error('requires node 7.6 or greater.');
   }
 });
