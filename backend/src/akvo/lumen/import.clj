@@ -67,6 +67,8 @@
   org.postgis.Point
   (sql-value [v] (val->geometry-pgobj v)))
 
+
+
 (defn do-import
   "Import runs within a future and since this is not taking part of ring
   request / response cycle we need to make sure to capture errors."
@@ -81,7 +83,7 @@
             (doseq [record (map import/coerce-to-sql (import/records importer))]
               (jdbc/insert! conn table-name record))
             (successful-import conn job-execution-id table-name columns spec))))
-      (catch Exception e
+      (catch Throwable e
         (failed-import conn job-execution-id (.getMessage e) table-name)
         (log/error e)
         (error-tracker/track error-tracker e)
