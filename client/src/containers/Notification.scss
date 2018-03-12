@@ -28,9 +28,10 @@
     color: $black;
   }
   .message {
-    padding: 0.5rem 1rem 0.5rem 1rem;
+    display: block;
+    padding: 1rem;
     margin-right: 2rem;
-    line-height: 4rem;
+    line-height: 2rem;
   }
   .close {
     position: absolute;
