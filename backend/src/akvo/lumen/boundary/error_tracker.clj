@@ -7,15 +7,18 @@
 (defprotocol IErrorTracker
   (track [this error]))
 
+(defn event-map [error]
+  (let [text (str (ex-data error))]
+    {:extra {:ex-data (subs text 0 (min (count text) 4096))}
+     :message (.getMessage error)}))
+
 (extend-protocol IErrorTracker
 
   SentryErrorTracker
   (track [{:keys [dsn]} error]
     (let [app-namespaces ["org.akvo" "akvo"]
-          event-info (raven-interface/stacktrace
-                      {:message (.getMessage error)
-                       :extra {:ex-data (truncate-extra-str (str (ex-data error)))}}
-                      error app-namespaces)]
+          event-map (event-map error)
+          event-info (raven-interface/stacktrace event-map error app-namespaces)]
       (future (raven/capture dsn event-info))))
 
   LocalErrorTracker
