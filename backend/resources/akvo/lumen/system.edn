@@ -2,6 +2,7 @@
  {:app #var duct.component.handler/handler-component
   :db #var duct.component.hikaricp/hikaricp
   :emailer #var akvo.lumen.component.emailer/mailjet-emailer
+  :error-tracker #var akvo.lumen.component.error-tracker/sentry-error-tracker
   :http #var akvo.lumen.component.http/http
   :keycloak #var akvo.lumen.component.keycloak/keycloak
   :tenant-manager #var akvo.lumen.component.tenant-manager/tenant-manager}
@@ -35,8 +36,8 @@
   :aggregation [:tenant-manager]
   :collection [:tenant-manager]
   :dashboard [:tenant-manager]
-  :dataset [:tenant-manager :config]
-  :raster [:tenant-manager :config]
+  :dataset [:config :error-tracker :tenant-manager]
+  :raster [:config :tenant-manager]
   :env [:config :tenant-manager]
   :files [:config]
   :invite [:tenant-manager :keycloak :emailer :config]
@@ -82,7 +83,7 @@
                   :absolute-redirects true
                   :content-types true
                   :default-charset "utf-8"}}
-     :wrap-sentry sentry-backend-dsn}}}
+     :wrap-sentry [sentry-backend-dsn {:namespaces ["org.akvo" "akvo"]}]}}}
   :http
   {:port http-port}
   :db
@@ -94,6 +95,7 @@
    :mailjet-url mailjet-url
    :from-email "noreply@akvo.org"
    :from-name "Akvo Lumen"}
+  :error-tracker {:dsn sentry-backend-dsn}
   :config
   {:encryption-key encryption-key
    :file-upload-path file-upload-path
@@ -102,6 +104,7 @@
    :keycloak-realm keycloak-realm
    :keycloak-public-client-id keycloak-public-client-id
    :sentry-client-dsn sentry-client-dsn
+   :sentry-backend-dsn sentry-backend-dsn
    :flow-api-url flow-api-url
    :windshaft-url "http://localhost:4000"}
   :keycloak

@@ -52,19 +52,25 @@
             (flow-common/questions form))))
 
 (defn form-data
-  ""
+  "First pulls all data-points belonging to the survey. Then map over all form
+  instances and pulls additional data-point data using the forms data-point-id."
   [headers-fn survey form-id]
   (let [form (flow-common/form survey form-id)
-        data-points (flow-common/index-by "id" (flow-common/data-points headers-fn
-                                                                        survey))]
+        data-points (flow-common/index-by
+                     "id" (flow-common/data-points headers-fn survey))]
     (map (fn [form-instance]
            (let [data-point-id (get form-instance "dataPointId")]
-             (assoc (response-data form (get form-instance "responses"))
-                    :instance_id (get form-instance "id")
-                    :display_name (get-in data-points [data-point-id "displayName"])
-                    :identifier (get-in data-points [data-point-id "identifier"])
-                    :submitter (get form-instance "submitter")
-                    :submitted_at (some-> (get form-instance "submissionDate")
-                                          Instant/parse)
-                    :surveyal_time (get form-instance "surveyalTime"))))
+             (if-let [data-point (get data-points data-point-id)]
+               (assoc (response-data form (get form-instance "responses"))
+                      :instance_id (get form-instance "id")
+                      :display_name (get data-point "displayName")
+                      :identifier (get data-point "identifier")
+                      :submitter (get form-instance "submitter")
+                      :submitted_at (some-> (get form-instance "submissionDate")
+                                            Instant/parse)
+                      :surveyal_time (get form-instance "surveyalTime"))
+               (throw (ex-info "Flow form (dataPointId) referenced data point not in survey"
+                               {:form-instance-id (get form-instance "id")
+                                :data-point-id data-point-id
+                                :survey-id (:id survey)})))))
          (flow-common/form-instances headers-fn form))))

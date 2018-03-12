@@ -1,7 +1,9 @@
 (ns akvo.lumen.endpoint.collection-test
   {:functional true}
   (:require [akvo.lumen.fixtures :refer [*tenant-conn*
-                                         tenant-conn-fixture]]
+                                         tenant-conn-fixture
+                                         *error-tracker*
+                                         error-tracker-fixture]]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.collection :as collection]
             [akvo.lumen.lib.dashboard :as dashboard]
@@ -12,7 +14,7 @@
             [clojure.test :refer :all]))
 
 
-(use-fixtures :once tenant-conn-fixture)
+(use-fixtures :once tenant-conn-fixture error-tracker-fixture)
 
 (defn visualisation-body [dataset-id]
   {"datasetId" dataset-id
@@ -32,8 +34,8 @@
 
 (deftest ^:functional collection-test
   (let [;; Import a few datasets
-        ds1 (import-file *tenant-conn* "GDP.csv" {})
-        ds2 (import-file *tenant-conn* "dates.csv" {})
+        ds1 (import-file *tenant-conn* *error-tracker* "GDP.csv" {})
+        ds2 (import-file *tenant-conn* *error-tracker* "dates.csv" {})
         vs1 (create-visualisation *tenant-conn* ds1)
         vs2 (create-visualisation *tenant-conn* ds2)
         db1 (create-dashboard *tenant-conn*)
