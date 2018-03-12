@@ -83,7 +83,7 @@
                   :absolute-redirects true
                   :content-types true
                   :default-charset "utf-8"}}
-     :wrap-sentry sentry-backend-dsn {:namespaces ["org.akvo" "akvo"]}}}}
+     :wrap-sentry [sentry-backend-dsn {:namespaces ["org.akvo" "akvo"]}]}}}
   :http
   {:port http-port}
   :db
