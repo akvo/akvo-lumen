@@ -1,5 +1,6 @@
 import { createAction } from 'redux-actions';
 import { hideModal } from './activeModal';
+import { showNotification } from './notification';
 import * as api from '../api';
 
 /* Fetched all collections */
@@ -58,5 +59,72 @@ export function deleteCollection(id) {
       // No response expected
       .then(() => dispatch(deleteCollectionSuccess(id)))
       .catch(error => dispatch(deleteCollectionFailure(error)));
+  };
+}
+
+export function addEntitiesToCollection(entityIds, collectionId) {
+  return (dispatch, getState) => {
+    const collection = getState().library.collections[collectionId];
+
+    // Convenience conversion so that "entityIds" can be a naked single ID
+    const newEntities = Array.isArray(entityIds) ? entityIds : [entityIds];
+    const oldEntities = collection.entities || [];
+
+    const updatedEntityArray = oldEntities.slice(0);
+
+    // Add any new entities that are not already in the collection
+    newEntities.forEach((newEntity) => {
+      if (oldEntities.every(oldEntity => oldEntity !== newEntity)) {
+        updatedEntityArray.push(newEntity);
+      }
+    });
+
+    const newCollection = Object.assign({}, collection, { entities: updatedEntityArray });
+    dispatch(editCollection(newCollection));
+
+    // Show a notification because there is no other visual feedback on adding item to collection
+    dispatch(showNotification('info', `Added to ${collection.title}`, true));
+  };
+}
+
+export function addTemporaryEntitiesToCollection(entityIds, collectionId) {
+  return (dispatch, getState) => {
+    const collection = getState().library.collections[collectionId];
+
+    // Convenience conversion so that "entityIds" can be a naked single ID
+    const newEntities = Array.isArray(entityIds) ? entityIds : [entityIds];
+    const oldEntities = collection.entities || [];
+
+    const updatedEntityArray = oldEntities.slice(0);
+
+    // Add any new entities that are not already in the collection
+    newEntities.forEach((newEntity) => {
+      if (oldEntities.every(oldEntity => oldEntity !== newEntity)) {
+        updatedEntityArray.push(newEntity);
+      }
+    });
+
+    const newCollection = Object.assign({}, collection, { entities: updatedEntityArray });
+    dispatch(editCollectionSuccess(newCollection));
+  };
+}
+
+export function removeTemporaryEntitiesFromCollection(entityIds, collectionId) {
+  return (dispatch, getState) => {
+    const collection = getState().library.collections[collectionId];
+
+    if (!collection) return;
+
+    const newCollection = { ...collection };
+
+    if (Array.isArray(entityIds)) {
+      entityIds.forEach((entityId) => {
+        delete newCollection[entityId];
+      });
+    } else {
+      delete newCollection[entityIds];
+    }
+
+    dispatch(editCollectionSuccess(newCollection));
   };
 }

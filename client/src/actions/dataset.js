@@ -4,6 +4,11 @@ import * as visualisationActions from './visualisation';
 import { hideModal } from './activeModal';
 import applyTransformation from '../reducers/transform';
 import { showNotification } from './notification';
+import {
+  addEntitiesToCollection,
+  addTemporaryEntitiesToCollection,
+  removeTemporaryEntitiesFromCollection,
+} from './collection';
 import * as api from '../api';
 import * as auth from '../auth';
 
@@ -103,7 +108,7 @@ function importDatasetFailure(importId, reason) {
   };
 }
 
-function importDatasetSuccess(datasetId, importId) {
+function importDatasetSuccess(datasetId, importId, collectionId) {
   return (dispatch) => {
     dispatch(fetchDataset(datasetId));
     dispatch({
@@ -111,22 +116,29 @@ function importDatasetSuccess(datasetId, importId) {
       datasetId,
       importId,
     });
+    if (collectionId) {
+      dispatch(removeTemporaryEntitiesFromCollection(importId, collectionId));
+      dispatch(addEntitiesToCollection(datasetId, collectionId));
+    }
   };
 }
 
-function pollDatasetImportStatus(importId, name) {
+function pollDatasetImportStatus(importId, name, collectionId) {
   return (dispatch) => {
     dispatch(importDatasetPending(importId, name));
+    if (collectionId) {
+      dispatch(addTemporaryEntitiesToCollection(importId, collectionId));
+    }
     api.get(`/api/job_executions/${importId}`)
       .then(response => response.json())
       .then(({ status, reason, datasetId }) => {
         if (status === 'PENDING') {
-          setTimeout(() => dispatch(pollDatasetImportStatus(importId, name)),
+          setTimeout(() => dispatch(pollDatasetImportStatus(importId, name, collectionId)),
           constants.POLL_INTERVAL);
         } else if (status === 'FAILED') {
           dispatch(importDatasetFailure(importId, reason));
         } else if (status === 'OK') {
-          dispatch(importDatasetSuccess(datasetId, importId));
+          dispatch(importDatasetSuccess(datasetId, importId, collectionId));
         }
       })
       .catch(error => dispatch(error));
@@ -146,13 +158,13 @@ export function clearImport() {
   };
 }
 
-export function importDataset(dataSource) {
+export function importDataset(dataSource, collectionId) {
   return (dispatch) => {
-    dispatch(importDatasetRequest(dataSource));
+    dispatch(importDatasetRequest(dataSource, collectionId));
     api.post('/api/datasets', dataSource)
       .then(response => response.json())
       .then(({ importId }) => {
-        dispatch(pollDatasetImportStatus(importId, dataSource.name));
+        dispatch(pollDatasetImportStatus(importId, dataSource.name, collectionId));
         dispatch(hideModal());
         dispatch(clearImport());
       });

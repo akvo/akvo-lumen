@@ -52,12 +52,13 @@ class CreateDataset extends Component {
   }
 
   handleNextOrImport() {
-    const { currentPage, dataset } = this.props.datasetImport;
+    const { datasetImport, collectionId } = this.props;
+    const { currentPage, dataset } = datasetImport;
     if (currentPage === 'define-dataset') {
       if (dataset.source.kind === 'GEOTIFF') {
-        this.props.importRaster(dataset);
+        this.props.importRaster(dataset, collectionId);
       } else {
-        this.props.importDataset(dataset);
+        this.props.importDataset(dataset, collectionId);
       }
       this.props.clearImport();
     } else {
@@ -119,7 +120,6 @@ class CreateDataset extends Component {
 }
 
 CreateDataset.propTypes = {
-  onSubmit: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
   previousPage: PropTypes.func.isRequired,
   nextPage: PropTypes.func.isRequired,
@@ -135,13 +135,13 @@ CreateDataset.propTypes = {
     dataset: PropTypes.object.isRequired, // TODO: shape?
   }),
   containerClassName: PropTypes.string,
+  collectionId: PropTypes.string,
 };
 
 
-function mapStateToProps(state, ownProps) {
+function mapStateToProps(state) {
   return {
-    onSubmit: ownProps.onSubmit,
-    onCancel: ownProps.onCancel,
+    collectionId: state.activeModal.collectionId,
     datasetImport: state.library.datasetImport,
   };
 }

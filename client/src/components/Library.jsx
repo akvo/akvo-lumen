@@ -13,8 +13,7 @@ import { deleteVisualisation } from '../actions/visualisation';
 import { deleteDataset, updateDataset } from '../actions/dataset';
 import { deleteDashboard } from '../actions/dashboard';
 import { deleteRaster } from '../actions/raster';
-import { editCollection } from '../actions/collection';
-import { showNotification } from '../actions/notification';
+import { editCollection, addEntitiesToCollection } from '../actions/collection';
 import * as entity from '../domain/entity';
 
 require('./Library.scss');
@@ -66,8 +65,8 @@ class Library extends Component {
     this.handleEntityAction = this.handleEntityAction.bind(this);
     this.handleDeleteEntity = this.handleDeleteEntity.bind(this);
     this.handleCreateCollection = this.handleCreateCollection.bind(this);
-    this.handleAddEntitiesToCollection = this.handleAddEntitiesToCollection.bind(this);
     this.handleRemoveEntitiesFromCollection = this.handleRemoveEntitiesFromCollection.bind(this);
+    this.handleAddEntitiesToCollection = this.handleAddEntitiesToCollection.bind(this);
   }
 
   componentDidMount() {
@@ -92,6 +91,10 @@ class Library extends Component {
         this.props.dispatch(push('/library'));
       }
     }
+  }
+
+  handleAddEntitiesToCollection(entityId, collectionId) {
+    this.props.dispatch(addEntitiesToCollection(entityId, collectionId));
   }
 
   handleCheckEntity(id) {
@@ -148,28 +151,6 @@ class Library extends Component {
       showModal('delete-collection', { collection: this.props.collections[collectionId] })
     );
   }
-  handleAddEntitiesToCollection(entityIds, collectionId) {
-    const collection = this.props.collections[collectionId];
-
-    // Convenience conversion so that "entityIds" can be a naked single ID
-    const newEntities = Array.isArray(entityIds) ? entityIds : [entityIds];
-    const oldEntities = collection.entities || [];
-
-    const updatedEntityArray = oldEntities.slice(0);
-
-    // Add any new entities that are not already in the collection
-    newEntities.forEach((newEntity) => {
-      if (oldEntities.every(oldEntity => oldEntity !== newEntity)) {
-        updatedEntityArray.push(newEntity);
-      }
-    });
-
-    const newCollection = Object.assign({}, collection, { entities: updatedEntityArray });
-    this.props.dispatch(editCollection(newCollection));
-
-    // Show a notification because there is no other visual feedback on adding item to collection
-    this.props.dispatch(showNotification('info', `Added to ${collection.title}`, true));
-  }
   handleRemoveEntitiesFromCollection(entityIds, collectionId) {
     const collection = this.props.collections[collectionId];
 
@@ -221,7 +202,9 @@ class Library extends Component {
       datasets,
       visualisations,
       dashboards,
-      rasters } = this.props;
+      rasters,
+    } = this.props;
+
     const collections = this.props.collections ? this.props.collections : {};
     const { pendingDeleteEntity, collection } = this.state;
     const query = location.query;
@@ -230,7 +213,6 @@ class Library extends Component {
     const isReverseSort = query.reverse === 'true';
     const filterBy = query.filter || 'all';
     const searchString = query.search || '';
-
 
     return (
       <div
@@ -289,13 +271,15 @@ class Library extends Component {
             }));
           }}
           onCreate={(type) => {
+            const { params } = this.props;
+            const meta = { collectionId: params.collectionId };
             if (type === 'dataset') {
               // Data set creation is handled in a modal
-              dispatch(showModal('create-dataset'));
+              dispatch(showModal('create-dataset', meta));
             } else if (type === 'collection') {
               dispatch(showModal('create-collection'));
             } else {
-              dispatch(push(`/${type}/create`));
+              dispatch(push({ pathname: `/${type}/create`, state: meta }));
             }
           }}
         />
@@ -332,7 +316,7 @@ class Library extends Component {
 Library.propTypes = {
   dispatch: PropTypes.func,
   location: PropTypes.object,
-  params: PropTypes.object,
+  params: PropTypes.object.isRequired,
   children: PropTypes.element,
   datasets: PropTypes.object.isRequired,
   visualisations: PropTypes.object.isRequired,

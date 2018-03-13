@@ -133,7 +133,7 @@ class Visualisation extends Component {
   }
 
   onSave() {
-    const { dispatch } = this.props;
+    const { dispatch, location } = this.props;
     this.setState({
       isUnsavedChanges: false,
     });
@@ -141,7 +141,9 @@ class Visualisation extends Component {
       dispatch(actions.saveVisualisationChanges(this.state.visualisation));
     } else if (!this.state.isSavePending) {
       this.setState({ isSavePending: true });
-      dispatch(actions.createVisualisation(this.state.visualisation));
+      dispatch(
+        actions.createVisualisation(this.state.visualisation, get(location, 'state.collectionId'))
+      );
     } else {
         // Ignore save request for now
     }

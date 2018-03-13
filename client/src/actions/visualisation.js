@@ -2,6 +2,7 @@ import { createAction } from 'redux-actions';
 import { push } from 'react-router-redux';
 import { fetchDataset } from './dataset';
 import * as dashboardActions from './dashboard';
+import { addEntitiesToCollection } from './collection';
 import * as api from '../api';
 
 /* Fetched all visualisations */
@@ -12,13 +13,16 @@ export const createVisualisationRequest = createAction('CREATE_VISUALISATION_REQ
 export const createVisualisationSuccess = createAction('CREATE_VISUALISATION_SUCCESS');
 export const createVisualisationFailure = createAction('CREATE_VISUALISATION_FAILURE');
 
-export function createVisualisation(visualisation) {
+export function createVisualisation(visualisation, collectionId) {
   return (dispatch) => {
     dispatch(createVisualisationRequest(visualisation));
     api.post('/api/visualisations', visualisation)
       .then(response => response.json())
       .then((vis) => {
         dispatch(createVisualisationSuccess(vis));
+        if (collectionId) {
+          dispatch(addEntitiesToCollection(vis.id, collectionId));
+        }
         dispatch(push(`/visualisation/${vis.id}`));
       })
       .catch(err => dispatch(createVisualisationFailure(err)));
