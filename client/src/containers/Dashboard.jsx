@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { isEmpty, cloneDeep } from 'lodash';
+import get from 'lodash/get';
 import ShareEntity from '../components/modals/ShareEntity';
 import * as actions from '../actions/dashboard';
 import * as api from '../api';
@@ -150,7 +151,7 @@ class Dashboard extends Component {
   }
 
   onSave() {
-    const { dispatch } = this.props;
+    const { dispatch, location } = this.props;
     const dashboard = getDashboardFromState(this.state.dashboard, false);
     const isEditingExistingDashboard = getEditingStatus(this.props.location);
 
@@ -163,7 +164,7 @@ class Dashboard extends Component {
       });
     } else if (!this.state.isSavePending) {
       this.setState({ isSavePending: true });
-      dispatch(actions.createDashboard(dashboard));
+      dispatch(actions.createDashboard(dashboard, get(location, 'state.collectionId')));
     } else {
       // Ignore save request until the first "create dashboard" request succeeeds
     }

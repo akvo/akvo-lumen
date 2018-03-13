@@ -1,5 +1,6 @@
 import { createAction } from 'redux-actions';
 import { push } from 'react-router-redux';
+import { addEntitiesToCollection } from './collection';
 import * as api from '../api';
 
 export const fetchDashboardsSuccess = createAction('FETCH_DASHBOARDS_SUCCESS');
@@ -9,13 +10,16 @@ export const createDashboardRequest = createAction('CREATE_DASHBOARD_REQUEST');
 export const createDashboardFailure = createAction('CREATE_DASHBOARD_FAILURE');
 export const createDashboardSuccess = createAction('CREATE_DASHBOARD_SUCCESS');
 
-export function createDashboard(dashboard) {
+export function createDashboard(dashboard, collectionId) {
   return (dispatch) => {
     dispatch(createDashboardRequest(dashboard));
     api.post('/api/dashboards', dashboard)
       .then(response => response.json())
       .then((dash) => {
         dispatch(createDashboardSuccess(dash));
+        if (collectionId) {
+          dispatch(addEntitiesToCollection(dash.id, collectionId));
+        }
         dispatch(push(`/dashboard/${dash.id}`));
       })
       .catch(err => dispatch(createDashboardFailure(err)));

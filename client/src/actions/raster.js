@@ -3,6 +3,11 @@ import * as constants from '../constants/raster';
 import * as visualisationActions from './visualisation';
 import { hideModal } from './activeModal';
 import * as api from '../api';
+import {
+  addEntitiesToCollection,
+  addTemporaryEntitiesToCollection,
+  removeTemporaryEntitiesFromCollection,
+} from './collection';
 
 /*
  * Fetch a raster by id
@@ -99,7 +104,7 @@ function importRasterFailure(importId, reason) {
   };
 }
 
-function importRasterSuccess(rasterId, importId) {
+function importRasterSuccess(rasterId, importId, collectionId) {
   return (dispatch) => {
     dispatch(fetchRaster(rasterId));
     dispatch({
@@ -107,32 +112,38 @@ function importRasterSuccess(rasterId, importId) {
       rasterId,
       importId,
     });
+    if (collectionId) {
+      dispatch(removeTemporaryEntitiesFromCollection(importId, collectionId));
+      dispatch(addEntitiesToCollection(rasterId, collectionId));
+    }
   };
 }
 
-function pollRasterImportStatus(importId, name) {
+function pollRasterImportStatus(importId, name, collectionId) {
   return (dispatch) => {
-    dispatch(importRasterPending(importId, name));
+    dispatch(importRasterPending(importId, name, collectionId));
+    dispatch(addTemporaryEntitiesToCollection(importId, collectionId));
     api.get(`/api/job_executions/${importId}`)
       .then(response => response.json())
       .then(({ status, reason, rasterId }) => {
         if (status === 'PENDING') {
-          setTimeout(() => dispatch(pollRasterImportStatus(importId, name)),
+          setTimeout(() => dispatch(pollRasterImportStatus(importId, name, collectionId)),
           constants.POLL_INTERVAL);
         } else if (status === 'FAILED') {
-          dispatch(importRasterFailure(importId, reason));
+          dispatch(importRasterFailure(importId, reason, collectionId));
         } else if (status === 'OK') {
-          dispatch(importRasterSuccess(rasterId, importId));
+          dispatch(importRasterSuccess(rasterId, importId, collectionId));
         }
       })
       .catch(error => dispatch(error));
   };
 }
 
-function importRasterRequest(dataSource) {
+function importRasterRequest(dataSource, collectionId) {
   return {
     type: constants.IMPORT_RASTER_REQUEST,
     dataSource,
+    collectionId,
   };
 }
 
@@ -142,13 +153,13 @@ export function clearImport() {
   };
 }
 
-export function importRaster(dataSource) {
+export function importRaster(dataSource, collectionId) {
   return (dispatch) => {
-    dispatch(importRasterRequest(dataSource));
+    dispatch(importRasterRequest(dataSource, collectionId));
     api.post('/api/rasters', dataSource)
       .then(response => response.json())
       .then(({ importId }) => {
-        dispatch(pollRasterImportStatus(importId, dataSource.name));
+        dispatch(pollRasterImportStatus(importId, dataSource.name, collectionId));
         dispatch(hideModal());
         dispatch(clearImport());
       });
