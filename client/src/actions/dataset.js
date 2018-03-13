@@ -126,7 +126,9 @@ function importDatasetSuccess(datasetId, importId, collectionId) {
 function pollDatasetImportStatus(importId, name, collectionId) {
   return (dispatch) => {
     dispatch(importDatasetPending(importId, name));
-    dispatch(addTemporaryEntitiesToCollection(importId, collectionId));
+    if (collectionId) {
+      dispatch(addTemporaryEntitiesToCollection(importId, collectionId));
+    }
     api.get(`/api/job_executions/${importId}`)
       .then(response => response.json())
       .then(({ status, reason, datasetId }) => {

@@ -122,7 +122,9 @@ function importRasterSuccess(rasterId, importId, collectionId) {
 function pollRasterImportStatus(importId, name, collectionId) {
   return (dispatch) => {
     dispatch(importRasterPending(importId, name, collectionId));
-    dispatch(addTemporaryEntitiesToCollection(importId, collectionId));
+    if (collectionId) {
+      dispatch(addTemporaryEntitiesToCollection(importId, collectionId));
+    }
     api.get(`/api/job_executions/${importId}`)
       .then(response => response.json())
       .then(({ status, reason, rasterId }) => {
