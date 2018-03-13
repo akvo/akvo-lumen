@@ -49,6 +49,7 @@ SELECT dataset_version.table_name AS "table-name",
        dataset.created,
        dataset.modified,
        dataset.id,
+       dataset_version.created AS "updated",
        dataset_version.columns,
        dataset_version.transformations
   FROM dataset_version, dataset
