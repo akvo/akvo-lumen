@@ -5,6 +5,7 @@ import { connect } from 'react-redux';
 import { push } from 'react-router-redux';
 import { showModal } from '../actions/activeModal';
 import { fetchDataset } from '../actions/dataset';
+import { showNotification } from '../actions/notification';
 import { getId, getTitle } from '../domain/entity';
 import { getTransformations, getRows, getColumns } from '../domain/dataset';
 import * as api from '../api';
@@ -74,10 +75,21 @@ class Dataset extends Component {
     const now = Date.now();
 
     this.setPendingTransformation(now, transformation);
-    api.post(`/api/transformations/${id}/transform`, transformation.toJS())
-      .then(response => response.json())
+    return api.post(`/api/transformations/${id}/transform`, transformation.toJS())
+      .then((response) => {
+        if (!response.ok) {
+          return response.json().then(({ message }) => {
+            throw new Error(message);
+          });
+        }
+        return response.json();
+      })
       .then(() => dispatch(fetchDataset(id)))
-      .then(() => this.removePending(now));
+      .then(() => this.removePending(now))
+      .catch((error) => {
+        dispatch(showNotification('error', error.message));
+        throw error;
+      });
   }
 
   undo() {
