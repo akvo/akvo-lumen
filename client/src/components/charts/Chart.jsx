@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import vg from 'vega';
+import moment from 'moment';
 import isEqual from 'lodash/isEqual';
+import { FormattedMessage } from 'react-intl';
 import * as chart from '../../utilities/chart';
 
 require('./Chart.scss');
@@ -28,39 +30,41 @@ const getTitleStyle = (title = '', chartSize) => {
   const titleLength = title.toString().length;
   const padding = 8;
 
-  let baseFontSize;
+  let fontSize;
 
   switch (chartSize) {
     case 'xsmall':
-      baseFontSize = 12;
+      fontSize = 12;
       break;
     case 'small':
-      baseFontSize = 14;
+      fontSize = 14;
       break;
     case 'medium':
     case 'large':
-      baseFontSize = 16;
+      fontSize = 16;
       break;
     case 'xlarge':
-      baseFontSize = 20;
+      fontSize = 20;
       break;
 
     default:
-      baseFontSize = 16;
+      fontSize = 16;
   }
 
   if (titleLength > 96) {
-    baseFontSize -= 2;
+    fontSize -= 2;
   }
 
-  const lineHeight = Math.floor(baseFontSize * 1.4);
+  const lineHeight = Math.floor(fontSize * 1.4);
 
   return ({
     height: titleLength <= 48 ? lineHeight + (padding * 2) : (lineHeight * 2) + (padding * 2),
-    fontSize: baseFontSize,
+    fontSize,
     lineHeight: `${lineHeight}px`,
   });
 };
+
+const META_SCALE = 0.5;
 
 export default class Chart extends Component {
 
@@ -74,11 +78,7 @@ export default class Chart extends Component {
   }
 
   componentDidMount() {
-    const { visualisation, width } = this.props;
-    const titleHeight = getTitleStyle(visualisation.name, getSize(width)).height;
-    const chartHeight = this.props.height - titleHeight;
-
-    this.renderChart(this.props, chartHeight);
+    this.renderChart(this.props);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -87,17 +87,20 @@ export default class Chart extends Component {
       this.props.height !== nextProps.height;
 
     if (visualisationChanged || sizeChanged) {
-      const { visualisation, width } = nextProps;
-      const titleHeight = getTitleStyle(visualisation.name, getSize(width)).height;
-      const chartHeight = nextProps.height - titleHeight;
-
-      this.renderChart(nextProps, chartHeight);
+      this.renderChart(nextProps);
     }
   }
 
-  renderChart(props, height) {
-    const { visualisation, datasets, width } = props;
-    const containerHeight = height || 400;
+  getDataset(nextProps) {
+    const { datasets, visualisation } = nextProps || this.props;
+    return datasets[visualisation.datasetId];
+  }
+
+  renderChart(props) {
+    const dataset = this.getDataset(props);
+    const { visualisation, width, height } = props;
+    const titleHeight = getTitleStyle(visualisation.name, getSize(width)).height * (1 + META_SCALE);
+    const containerHeight = (height - titleHeight) || 400;
     const containerWidth = width || 800;
     const chartSize = getSize(containerWidth);
     let chartData;
@@ -112,13 +115,13 @@ export default class Chart extends Component {
         break;
       case 'area':
       case 'line':
-        chartData = chart.getLineData(visualisation, datasets);
+        chartData = chart.getLineData(visualisation, dataset);
         break;
       case 'scatter':
-        chartData = chart.getScatterData(visualisation, datasets);
+        chartData = chart.getScatterData(visualisation, dataset);
         break;
       case 'bar':
-        chartData = chart.getBarData(visualisation, datasets);
+        chartData = chart.getBarData(visualisation, dataset);
         break;
       default:
         throw new Error(`Unknown visualisation type ${visualisation.visualisationType}`);
@@ -141,6 +144,13 @@ export default class Chart extends Component {
     const containerWidth = width || 800;
     const chartSize = getSize(containerWidth);
     const className = `Chart ${visualisationType} ${chartSize}`;
+    const dataset = this.getDataset();
+    const titleStyle = getTitleStyle(visualisation.name, chartSize);
+    const metaStyle = {
+      height: titleStyle.height * META_SCALE,
+      fontSize: titleStyle.fontSize * META_SCALE,
+      lineHeight: `${parseFloat(titleStyle.lineHeight) * META_SCALE}px`,
+    };
 
     return (
       <div
@@ -150,13 +160,16 @@ export default class Chart extends Component {
           height: containerHeight,
         }}
       >
-        <h2
-          style={getTitleStyle(visualisation.name, chartSize)}
-        >
+        <h2 style={titleStyle}>
           <span>
             {visualisation.name}
           </span>
         </h2>
+        <p className="chartMeta" style={metaStyle}>
+          <span className="capitalize">
+            <FormattedMessage id="last_updated" />
+          </span>: {moment(dataset.updated).format('Do MMM YYYY - HH:mm')}
+        </p>
         <div
           ref={(el) => { this.element = el; }}
         />

@@ -92,6 +92,7 @@
   "invalid_expression": "Invalid expression",
   "javascript_code": "Javascript code",
   "js_helptext": "Derived columns are formulas written using a subset of Javascript where a single expression is allowed and columns are referenced as {columnSyntax} or alternatively if the title is a valid javascript identifier: {title}.",
+  "last_updated": "Last updated",  
   "leave_cell_empty": "Leave cell empty",
   "left": "Left",
   "legend_title": "Legend title",

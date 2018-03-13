@@ -66,6 +66,12 @@
         border: none;
     }
 
+    .chartMeta {
+        text-align: center;
+        color: #aaa;
+        font-size: 0.7em;
+    }
+
     &.hasTotals {
         /* Hide totals if needed */
         &.hideRowTotals {

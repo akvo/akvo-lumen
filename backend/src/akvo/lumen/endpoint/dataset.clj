@@ -4,7 +4,7 @@
             [compojure.core :refer :all]))
 
 
-(defn endpoint [{:keys [tenant-manager config]}]
+(defn endpoint [{:keys [config error-tracker tenant-manager]}]
   (context "/api/datasets" {:keys [params tenant] :as request}
     (let-routes [tenant-conn (connection tenant-manager tenant)]
 
@@ -12,7 +12,7 @@
         (dataset/all tenant-conn))
 
       (POST "/" {:keys [tenant body jwt-claims] :as request}
-        (dataset/create tenant-conn config jwt-claims body))
+        (dataset/create tenant-conn config error-tracker jwt-claims body))
 
       (context "/:id" [id]
         (GET "/" _

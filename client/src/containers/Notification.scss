@@ -4,7 +4,7 @@
   position: absolute;
   left: 2rem;
   bottom: 2rem;
-  height: 4rem;
+  min-height: 4rem;
   min-width: 30rem;
   max-width: calc(100vh - 4rem);
   z-index: 4;
@@ -28,9 +28,10 @@
     color: $black;
   }
   .message {
-    padding: 0.5rem 1rem 0.5rem 1rem;
+    display: block;
+    padding: 1rem;
     margin-right: 2rem;
-    line-height: 4rem;
+    line-height: 2rem;
   }
   .close {
     position: absolute;

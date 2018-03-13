@@ -1,7 +1,9 @@
 (ns akvo.lumen.import.csv-test
   {:functional true}
   (:require [akvo.lumen.fixtures :refer [*tenant-conn*
-                                         tenant-conn-fixture]]
+                                         tenant-conn-fixture
+                                         *error-tracker*
+                                         error-tracker-fixture]]
             [akvo.lumen.test-utils :refer [import-file]]
             [clojure.string :as string]
             [clojure.test :refer :all]
@@ -11,13 +13,13 @@
 (hugsql/def-db-fns "akvo/lumen/transformation.sql")
 
 
-(use-fixtures :once tenant-conn-fixture)
+(use-fixtures :once tenant-conn-fixture error-tracker-fixture)
 
 
 (deftest ^:functional test-dos-file
   (testing "Import of DOS-formatted CSV file"
     (try
-      (let [dataset-id (import-file *tenant-conn* "dos.csv" {:dataset-name "DOS data"})
+      (let [dataset-id (import-file *tenant-conn* *error-tracker* "dos.csv" {:dataset-name "DOS data"})
             dataset (dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id
                                                                   :version 1})]
         (is (= 2 (count (:columns dataset)))))
@@ -26,7 +28,7 @@
 
 (deftest ^:functional test-mixed-columns
   (testing "Import of mixed-type data"
-    (let [dataset-id (import-file *tenant-conn* "mixed-columns.csv" {:dataset-name "Mixed Columns"})
+    (let [dataset-id (import-file *tenant-conn* *error-tracker* "mixed-columns.csv" {:dataset-name "Mixed Columns"})
           dataset (dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id
                                                                 :version 1})
           columns (:columns dataset)]
@@ -36,8 +38,8 @@
 
 (deftest ^:functional test-geoshape-csv
   (testing "Import csv file generated from a shapefile"
-    (let [dataset-id (import-file *tenant-conn* "liberia_adm2.csv" {:dataset-name "Liberia shapefile"
-                                                                    :has-column-headers? true})
+    (let [dataset-id (import-file *tenant-conn* *error-tracker* "liberia_adm2.csv" {:dataset-name "Liberia shapefile"
+                                                                                    :has-column-headers? true})
           dataset (dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id
                                                                 :version 1})
           columns (:columns dataset)]
@@ -51,12 +53,13 @@
   (testing "Should fail to import csv file with varying number of columns"
     (is (thrown-with-msg? clojure.lang.ExceptionInfo
                           #"Invalid csv file. Varying number of columns"
-                          (import-file *tenant-conn* "mixed-column-counts.csv"
+                          (import-file *tenant-conn* *error-tracker* "mixed-column-counts.csv"
                                        {:dataset-name "Mixed Column Counts"})))))
 
 (deftest ^:functional test-trimmed-columns
   (testing "Testing if whitespace is removed from beginning & end of column titles"
-    (let [dataset-id (import-file *tenant-conn* "whitespace.csv" {:dataset-name "Padded titles"})
+    (let [dataset-id (import-file *tenant-conn* *error-tracker* "whitespace.csv"
+                                  {:dataset-name "Padded titles"})
           dataset (dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id
                                                                 :version 1})
           titles (map :title (:rows dataset))

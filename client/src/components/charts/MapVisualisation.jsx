@@ -3,6 +3,8 @@ import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 import leaflet from 'leaflet';
 import { isEqual, cloneDeep } from 'lodash';
+import { FormattedMessage } from 'react-intl';
+import moment from 'moment';
 import leafletUtfGrid from '../../vendor/leaflet.utfgrid';
 import * as chart from '../../utilities/chart';
 import Spinner from '../common/LoadingSpinner';
@@ -11,6 +13,7 @@ require('../../../node_modules/leaflet/dist/leaflet.css');
 require('./MapVisualisation.scss');
 
 const L = leafletUtfGrid(leaflet);
+const META_SCALE = 0.5;
 
 // We need to use leaflet private methods which have underscore dangle
 /* eslint no-underscore-dangle: "off" */
@@ -245,6 +248,17 @@ export default class MapVisualisation extends Component {
   componentWillReceiveProps(nextProps) {
     this.renderLeafletMap(nextProps);
   }
+
+  getMostRecentlyUpdatedLayerDataset() {
+    const { visualisation, datasets } = this.props;
+    return visualisation.spec.layers.map(({ datasetId }) => datasets[datasetId])
+      .sort((a, b) => {
+        if (a.get('updated') < b.get('updated')) return 1;
+        if (a.get('updated') > b.get('updated')) return -1;
+        return 0;
+      })[0];
+  }
+
   renderLeafletLayer(layer, id, layerGroupId, layerMetadata, baseURL, map) {
     if (!this[`storedSpec${id}`]) {
       // Store a copy of the layer spec to compare to future changes so we know when to re-render
@@ -449,7 +463,9 @@ export default class MapVisualisation extends Component {
     const titleLength = title.toString().length;
     const titleHeight = titleLength > 48 ? 56 : 36;
     const mapWidth = width || '100%';
-    const mapHeight = height ? height - titleHeight : `calc(100% - ${titleHeight}px)`;
+    const mapHeight = height ?
+      height - (titleHeight * (1 + META_SCALE)) :
+      `calc(100% - ${(titleHeight * (1 + META_SCALE))}px)`;
     const needLegend = Boolean(
       visualisation.spec.layers &&
       visualisation.spec.layers.filter(l => l.legend.visible).length &&
@@ -457,7 +473,7 @@ export default class MapVisualisation extends Component {
       metadata.layerMetadata &&
       metadata.layerMetadata.length
     );
-
+    const mostRecentlyUpdatedLayerDataset = this.getMostRecentlyUpdatedLayerDataset();
     return (
       <div
         className="MapVisualisation dashChart"
@@ -477,6 +493,20 @@ export default class MapVisualisation extends Component {
             {visualisation.name}
           </span>
         </h2>
+        {mostRecentlyUpdatedLayerDataset && (
+          <p
+            className="chartMeta"
+            style={{
+              height: titleHeight * META_SCALE,
+              lineHeight: titleLength > 96 ? '12px' : '16px',
+              fontSize: titleLength > 96 ? '10px' : '12px',
+            }}
+          >
+            <span className="capitalize">
+              <FormattedMessage id="last_updated" />
+            </span>: {moment(mostRecentlyUpdatedLayerDataset.get('updated')).format('Do MMM YYYY - HH:mm')}
+          </p>
+        )}
         <div
           className="mapContainer"
           style={{
@@ -510,6 +540,7 @@ export default class MapVisualisation extends Component {
 
 MapVisualisation.propTypes = {
   visualisation: PropTypes.object.isRequired,
+  datasets: PropTypes.object.isRequired,
   metadata: PropTypes.object,
   width: PropTypes.number,
   height: PropTypes.number,

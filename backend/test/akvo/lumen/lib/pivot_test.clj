@@ -1,6 +1,8 @@
 (ns akvo.lumen.lib.pivot-test
   (:require [akvo.lumen.fixtures :refer [*tenant-conn*
-                                         tenant-conn-fixture]]
+                                         tenant-conn-fixture
+                                         *error-tracker*
+                                         error-tracker-fixture]]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.aggregation :as aggregation]
             [akvo.lumen.test-utils :refer [import-file]]
@@ -8,11 +10,11 @@
             [clojure.test :refer :all]))
 
 
-(use-fixtures :once tenant-conn-fixture)
+(use-fixtures :once tenant-conn-fixture error-tracker-fixture)
 
 (deftest ^:functional test-pivot
-  (let [dataset-id (import-file *tenant-conn* "pivot.csv" {:dataset-name "pivot"
-                                                             :has-column-headers? true})
+  (let [dataset-id (import-file *tenant-conn* *error-tracker* "pivot.csv" {:dataset-name "pivot"
+                                                                           :has-column-headers? true})
         query (partial aggregation/query *tenant-conn* dataset-id "pivot")]
     (tf/apply *tenant-conn*
               dataset-id

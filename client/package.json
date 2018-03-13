@@ -4,7 +4,7 @@
   "description": "Akvo Lumen client application",
   "repository": "https://github.com/akvo/akvo-lumen",
   "engines": {
-    "node": ">=4",
+    "node": ">=7.6",
     "npm": ">=3"
   },
   "keywords": [],

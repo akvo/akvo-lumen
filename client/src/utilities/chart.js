@@ -97,9 +97,8 @@ export const replaceLabelIfValueEmpty = (label, getCssClassname) => {
 
 /* Get formatted visualisation data */
 
-export function getLineData(visualisation, datasets) {
-  const { datasetId, spec } = visualisation;
-  const dataset = datasets[datasetId];
+export function getLineData(visualisation, dataset) {
+  const { spec } = visualisation;
   const haveAggregation = visualisation.spec.metricAggregation != null;
   const yIndex = getColumnIndex(dataset, spec.metricColumnY);
   const xIndex = getColumnIndex(dataset, spec.metricColumnX);
@@ -140,9 +139,8 @@ export function getLineData(visualisation, datasets) {
   }];
 }
 
-export function getScatterData(visualisation, datasets) {
-  const { datasetId, spec } = visualisation;
-  const dataset = datasets[datasetId];
+export function getScatterData(visualisation, dataset) {
+  const { spec } = visualisation;
   const haveAggregation = visualisation.spec.bucketColumn != null;
   const yIndex = getColumnIndex(dataset, spec.metricColumnY);
   const yAxisType = yIndex === -1 ? 'number' : dataset.getIn(['columns', yIndex, 'type']);
@@ -237,9 +235,8 @@ export function formatPieData(aggregationData) {
   }];
 }
 
-export function getBarData(visualisation, datasets) {
-  const { datasetId, spec } = visualisation;
-  const dataset = datasets[datasetId];
+export function getBarData(visualisation, dataset) {
+  const { spec } = visualisation;
   const yIndex = getColumnIndex(dataset, spec.metricColumnY);
   const yAxisType = yIndex === -1 ? 'number' : dataset.getIn(['columns', yIndex, 'type']);
   const xIndex = getColumnIndex(dataset, spec.metricColumnX);

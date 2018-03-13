@@ -1,5 +1,6 @@
 (ns akvo.lumen.fixtures
-  (:require [akvo.lumen.test-utils :as test-utils]
+  (:require [akvo.lumen.component.error-tracker :refer [local-error-tracker]]
+            [akvo.lumen.test-utils :as test-utils]
             [akvo.lumen.test-utils
              :refer
              [import-file test-tenant test-tenant-conn]]
@@ -39,3 +40,11 @@
   (binding [*tenant-conn* (test-tenant-conn test-tenant)]
     (f)
     (rollback-tenant test-tenant)))
+
+(def ^:dynamic *error-tracker*)
+
+(defn error-tracker-fixture
+  "Returns a fixture that binds a local error tracker to *error-tracker*"
+  [f]
+  (binding [*error-tracker* (local-error-tracker {})]
+    (f)))
