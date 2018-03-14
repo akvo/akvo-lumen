@@ -31,6 +31,10 @@ SELECT id, title, NULL, 'OK', modified, created
 -- :doc delete dataset
 DELETE FROM dataset WHERE id=:id;
 
+-- :name update-dataset-meta :! :n
+-- :doc update dataset meta
+UPDATE dataset SET title = :title WHERE id = :id;
+
 -- :name update-dataset-data :! :n
 -- :doc Update dataset with data
 UPDATE datasets

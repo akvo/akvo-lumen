@@ -61,6 +61,13 @@ function saveDatasets(state, ds) {
   }, state);
 }
 
+function updateDatasetSuccess(state, datasetId, data) {
+  const dataset = state[datasetId];
+  return Object.assign({}, state, {
+    [datasetId]: dataset.merge(data),
+  });
+}
+
 function removeDataset(state, id) {
   const newState = Object.assign({}, state);
   delete newState[id];
@@ -128,6 +135,8 @@ export default function datasets(state = initialState, action) {
       return saveDataset(state, action.dataset);
     case constants.FETCH_DATASETS_SUCCESS:
       return saveDatasets(state, action.datasets);
+    case constants.UPDATE_DATASET_META_SUCCESS:
+      return updateDatasetSuccess(state, action.id, action.meta);
     case constants.REMOVE_DATASET:
       return removeDataset(state, action.id);
     case constants.REPLACE_DATASET:

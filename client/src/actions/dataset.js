@@ -279,6 +279,43 @@ export function deleteDataset(id) {
   };
 }
 
+export function updateDatasetMetaRequest(id) {
+  return {
+    type: constants.UPDATE_DATASET_META_REQUEST,
+    id,
+  };
+}
+
+export function updateDatasetMetaSuccess(id, meta) {
+  return {
+    type: constants.UPDATE_DATASET_META_SUCCESS,
+    id,
+    meta,
+  };
+}
+
+export function updateDatasetMetaFailure(id, error) {
+  return {
+    type: constants.UPDATE_DATASET_META_FAILURE,
+    id,
+    error,
+  };
+}
+
+export function updateDatasetMeta(id, meta) {
+  return (dispatch, getState) => {
+    dispatch(updateDatasetMetaRequest(id));
+    api.put(`/api/datasets/${id}`, meta)
+      .then(response => response.json())
+      .then(() => dispatch(updateDatasetMetaSuccess(id, meta)))
+      .catch((error) => {
+        const title = getState().library.datasets[id].get('name');
+        dispatch(showNotification('error', `Failed to update "${title}": ${error.message}`));
+        dispatch(updateDatasetMetaFailure(id, error));
+      });
+  };
+}
+
 /*
  * Update a dataset by dispatching `updateDataset(datasetId)`
  */

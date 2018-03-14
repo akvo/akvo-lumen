@@ -23,6 +23,11 @@
   [tenant-conn id]
   (impl/delete tenant-conn id))
 
+(defn update-meta
+  "Update dataset meta with id. Body should conform..."
+  [tenant-conn id body]
+  (impl/update-meta tenant-conn id body))
+
 (defn update
   "Update dataset with id"
   [tenant-conn config id body]

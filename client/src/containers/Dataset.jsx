@@ -4,7 +4,7 @@ import Immutable from 'immutable';
 import { connect } from 'react-redux';
 import { push } from 'react-router-redux';
 import { showModal } from '../actions/activeModal';
-import { fetchDataset } from '../actions/dataset';
+import { fetchDataset, updateDatasetMeta } from '../actions/dataset';
 import { showNotification } from '../actions/notification';
 import { getId, getTitle } from '../domain/entity';
 import { getTransformations, getRows, getColumns } from '../domain/dataset';
@@ -18,12 +18,14 @@ class Dataset extends Component {
     super();
     this.state = {
       asyncComponents: null,
+      isUnsavedChanges: false,
       // Pending transformations are represented as
       // an oredered map from timestamp to transformation
       pendingTransformations: Immutable.OrderedMap(),
     };
     this.handleShowDatasetSettings = this.handleShowDatasetSettings.bind(this);
     this.handleNavigateToVisualise = this.handleNavigateToVisualise.bind(this);
+    this.handleChangeDatasetTitle = this.handleChangeDatasetTitle.bind(this);
     this.transform = this.transform.bind(this);
     this.undo = this.undo.bind(this);
   }
@@ -104,6 +106,13 @@ class Dataset extends Component {
       .then(() => this.removePending(now));
   }
 
+  handleChangeDatasetTitle(name) {
+    console.log(this.props.dataset.toJS(), name, this);
+    const { dispatch, params } = this.props;
+    dispatch(updateDatasetMeta(params.datasetId, { name }));
+    // this.handleChangeVisualisation({ name: title });
+  }
+
   handleShowDatasetSettings() {
     this.props.dispatch(showModal('dataset-settings', {
       id: getId(this.state.dataset),
@@ -133,6 +142,9 @@ class Dataset extends Component {
           onShowDatasetSettings={this.handleShowDatasetSettings}
           name={getTitle(dataset)}
           id={getId(dataset)}
+          isUnsavedChanges={this.state.isUnsavedChanges}
+          onChangeTitle={this.handleChangeDatasetTitle}
+          onBeginEditTitle={() => this.setState({ isUnsavedChanges: true })}
         />
         {getRows(dataset) != null &&
           <DatasetTable

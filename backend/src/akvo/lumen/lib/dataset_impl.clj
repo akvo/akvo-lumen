@@ -85,3 +85,7 @@
                                        refresh-token))
       (lib/bad-request {:error "Can't update uploaded dataset"}))
     (lib/not-found {:id dataset-id})))
+
+(defn update-meta [tenant-conn id {:strs [name]}]
+  (update-dataset-meta tenant-conn {:id id :title name})
+  (lib/ok {}))
