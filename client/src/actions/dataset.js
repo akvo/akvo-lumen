@@ -141,7 +141,7 @@ function pollDatasetImportStatus(importId, name, collectionId) {
           dispatch(importDatasetSuccess(datasetId, importId, collectionId));
         }
       })
-      .catch(error => dispatch(error));
+      .catch(error => dispatch(importDatasetFailure(importId, error.message)));
   };
 }
 

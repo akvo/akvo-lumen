@@ -8,7 +8,7 @@ import { fetchRaster } from '../actions/raster';
 import { getId, getTitle } from '../domain/entity';
 import EntityTypeHeader from '../components/entity-editor/EntityTypeHeader';
 import * as api from '../api';
-
+import LoadingSpinner from '../components/common/LoadingSpinner';
 
 require('../../node_modules/leaflet/dist/leaflet.css');
 require('../components/charts/MapVisualisation.scss');
@@ -97,7 +97,7 @@ class Raster extends Component {
     const { layerGroupId } = this.state;
 
     if (layerGroupId == null) {
-      return <div className="Dataset loadingIndicator">Loading...</div>;
+      return <LoadingSpinner />;
     }
 
     const { raster } = this.props;

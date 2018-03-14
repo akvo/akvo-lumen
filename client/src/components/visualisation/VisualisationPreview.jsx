@@ -4,7 +4,6 @@ import VisualisationViewer from '../charts/VisualisationViewer';
 
 require('./VisualisationPreview.scss');
 
-
 function shouldRender(visualisation, datasets) {
   const datasetId = visualisation.datasetId;
   const dataset = datasetId ? datasets[datasetId] : null;
@@ -78,8 +77,7 @@ export default function CreateVisualisationPreview({ visualisation, metadata, da
           context="editor"
           height={visualisation.visualisationType === 'map' ? null : 400}
           width={visualisation.visualisationType === 'map' ? null : 800}
-        /> :
-        null
+        /> : null
       }
     </div>
   );

@@ -9,6 +9,7 @@ import * as api from '../api';
 import { fetchLibrary } from '../actions/library';
 import { fetchDataset } from '../actions/dataset';
 import aggregationOnlyVisualisationTypes from '../utilities/aggregationOnlyVisualisationTypes';
+import LoadingSpinner from '../components/common/LoadingSpinner';
 
 const getEditingStatus = (location) => {
   const testString = 'create';
@@ -393,7 +394,7 @@ class Dashboard extends Component {
 
   render() {
     if (!this.state.asyncComponents) {
-      return <div className="loadingIndicator">Loading...</div>;
+      return <LoadingSpinner />;
     }
     const { DashboardHeader, DashboardEditor } = this.state.asyncComponents;
     const dashboard = getDashboardFromState(this.state.dashboard, true);

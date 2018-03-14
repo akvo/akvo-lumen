@@ -9,6 +9,7 @@ import { showNotification } from '../actions/notification';
 import { getId, getTitle } from '../domain/entity';
 import { getTransformations, getRows, getColumns } from '../domain/dataset';
 import * as api from '../api';
+import LoadingSpinner from '../components/common/LoadingSpinner';
 
 require('../components/dataset/Dataset.scss');
 
@@ -132,10 +133,9 @@ class Dataset extends Component {
     const { pendingTransformations } = this.state;
     const { dataset } = this.props;
     if (dataset == null || !this.state.asyncComponents) {
-      return <div className="Dataset loadingIndicator">Loading...</div>;
+      return <LoadingSpinner />;
     }
     const { DatasetHeader, DatasetTable } = this.state.asyncComponents;
-
     return (
       <div className="Dataset">
         <DatasetHeader
@@ -146,7 +146,7 @@ class Dataset extends Component {
           onChangeTitle={this.handleChangeDatasetTitle}
           onBeginEditTitle={() => this.setState({ isUnsavedChanges: true })}
         />
-        {getRows(dataset) != null &&
+        {getRows(dataset) != null ? (
           <DatasetTable
             columns={getColumns(dataset)}
             rows={getRows(dataset)}
@@ -155,14 +155,17 @@ class Dataset extends Component {
             onTransform={transformation => this.transform(transformation)}
             onUndoTransformation={() => this.undo()}
             onNavigateToVisualise={this.handleNavigateToVisualise}
-          />}
+          />
+        ) : (
+          <LoadingSpinner />
+        )}
       </div>
     );
   }
 }
 
 Dataset.propTypes = {
-  dataset: PropTypes.object,
+  dataset: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
   params: PropTypes.object.isRequired,
   dispatch: PropTypes.func.isRequired,
 };

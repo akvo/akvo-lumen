@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import VisualisationViewer from '../charts/VisualisationViewer';
 import DashboardCanvasItemEditable from './DashboardCanvasItemEditable';
 import { checkUndefined } from '../../utilities/utils';
+import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 require('./DashboardCanvasItem.scss');
 
@@ -129,7 +130,7 @@ export default class DashboardCanvasItem extends Component {
                 datasets={this.props.datasets}
                 width={dimensions.width}
                 height={dimensions.height}
-              /> : <div>Loading dataset...</div>
+              /> : <LoadingSpinner />
             }
           </div>
         }

@@ -5,6 +5,7 @@ import update from 'react-addons-update';
 import isEmpty from 'lodash/isEmpty';
 import get from 'lodash/get';
 import ShareEntity from '../components/modals/ShareEntity';
+import LoadingSpinner from '../components/common/LoadingSpinner';
 import * as actions from '../actions/visualisation';
 import * as entity from '../domain/entity';
 import { fetchDataset } from '../actions/dataset';
@@ -255,7 +256,7 @@ class Visualisation extends Component {
 
   render() {
     if (this.state.visualisation == null || !this.state.asyncComponents) {
-      return <div className="Visualisation loadingIndicator">Loading...</div>;
+      return <LoadingSpinner />;
     }
     const { VisualisationHeader, VisualisationEditor } = this.state.asyncComponents;
     const visualisation = this.state.visualisation;

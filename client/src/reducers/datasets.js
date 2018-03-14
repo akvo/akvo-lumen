@@ -25,14 +25,14 @@ function importDatasetPending(state, dataset) {
 }
 
 function importDatasetFailure(state, { importId, reason, modified }) {
-  const dataset = state[importId].merge({
+  const dataset = {
     status: 'FAILED',
     reason,
     modified,
-  });
+  };
 
   return Object.assign({}, state, {
-    [importId]: dataset,
+    [importId]: state[importId] ? state[importId].merge(dataset) : dataset,
   });
 }
 
@@ -44,9 +44,10 @@ function importDatasetSuccess(state, { importId }) {
 
 function saveDataset(state, dataset) {
   const id = dataset.get('id');
-  return Object.assign({}, state, {
+  return {
+    ...state,
     [id]: dataset.set('type', 'dataset'),
-  });
+  };
 }
 
 function saveDatasets(state, ds) {
