@@ -1,11 +1,14 @@
 import React from 'react';
 import { render } from 'react-dom';
+import { Provider } from 'react-redux';
 import Immutable from 'immutable';
 import fetch from 'isomorphic-fetch';
+import IntlWrapper from './containers/IntlWrapper';
 import VisualisationViewerContainer from './components/visualisation/VisualisationViewerContainer';
 import DashboardViewer from './components/dashboard/DashboardViewer';
 import LumenBranding from './components/common/LumenBranding';
 import polyfill from './polyfill/polyfill';
+import configureStore from './store/configureStore';
 
 require('./styles/reset.global.scss');
 require('./styles/style.global.scss');
@@ -24,25 +27,29 @@ function renderSuccessfulShare(data) {
     });
   }
   render(
-    <div className="viewer">
-      {data.dashboards ?
-        <DashboardViewer
-          dashboard={data.dashboards[data.dashboardId]}
-          visualisations={data.visualisations}
-          datasets={immutableDatasets}
-          metadata={data.metadata ? data.metadata : null}
-        />
-          :
-          <VisualisationViewerContainer
-            visualisation={data.visualisations[data.visualisationId]}
-            metadata={data.metadata ? data.metadata[data.visualisationId] : null}
-            datasets={immutableDatasets}
+    <Provider store={configureStore()}>
+      <IntlWrapper>
+        <div className="viewer">
+          {data.dashboards ?
+            <DashboardViewer
+              dashboard={data.dashboards[data.dashboardId]}
+              visualisations={data.visualisations}
+              datasets={immutableDatasets}
+              metadata={data.metadata ? data.metadata : null}
+            />
+              :
+              <VisualisationViewerContainer
+                visualisation={data.visualisations[data.visualisationId]}
+                metadata={data.metadata ? data.metadata[data.visualisationId] : null}
+                datasets={immutableDatasets}
+              />
+          }
+          <LumenBranding
+            size={data.dashboards ? 'large' : 'small'}
           />
-      }
-      <LumenBranding
-        size={data.dashboards ? 'large' : 'small'}
-      />
-    </div>,
+        </div>
+      </IntlWrapper>
+    </Provider>,
     rootElement
   );
 }
@@ -62,6 +69,9 @@ if (shareId != null) {
     fetch(`/share/${shareId}`)
       .then(response => response.json())
       .then(data => renderSuccessfulShare(data))
-      .catch(() => renderNoSuchShare());
+      .catch((error) => {
+        renderNoSuchShare();
+        throw error;
+      });
   });
 }
