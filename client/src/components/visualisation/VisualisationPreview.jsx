@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import VisualisationViewer from '../charts/VisualisationViewer';
-import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 require('./VisualisationPreview.scss');
 
