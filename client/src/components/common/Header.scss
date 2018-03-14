@@ -28,19 +28,40 @@
     }
 
     .content {
-        width: 60%;
         background-color: white;
-        border-right: 0.1rem solid $lightBlueGrey;
+        flex-grow: 1;
+        display: flex;
     }
 
+    .primary-actions,
     .actions {
+        text-align: right;
         display: inline-block;
         height: 100%;
         vertical-align: top;
         padding: 0.5rem;
-        width: 40%;
         text-align: right;
         line-height: 3rem;
-        
+        flex-shrink: 1;    
+
+        .primaryButton {
+            text-transform: uppercase;
+            color: $lumenGreen;
+            border: 0.1rem solid $lumenGreen;
+
+            &:hover,
+            &:active {
+                background: $lumenGreen;
+                color: white;
+            }
+        }    
+    }
+
+    .primary-actions {
+        margin-left: 20px;
+    }
+
+    .actions {
+        border-left: 0.1rem solid $lightBlueGrey;
     }
 }

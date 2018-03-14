@@ -12,6 +12,19 @@ export default class DashboardHeader extends Component {
 
   getActionButtons(isUnsavedChanges) {
     const { onDashboardAction } = this.props;
+
+    const save = {
+      buttonText: <FormattedMessage id="save" />,
+      primary: true,
+      onClick: () => {
+        this.props.onSaveDashboard();
+      },
+      customClass: 'primaryButton',
+      props: {
+        'data-test-id': 'save-changes',
+      },
+    };
+
     const user = {
       buttonText: <FormattedMessage id="user" />,
       customClass: 'notImplemented',
@@ -33,6 +46,7 @@ export default class DashboardHeader extends Component {
     };
 
     return ([
+      save,
       user,
       download,
       share,
@@ -74,5 +88,6 @@ DashboardHeader.propTypes = {
   title: PropTypes.string.isRequired,
   onDashboardAction: PropTypes.func.isRequired,
   onChangeTitle: PropTypes.func.isRequired,
+  onSaveDashboard: PropTypes.func.isRequired,
   onBeginEditTitle: PropTypes.func.isRequired,
 };

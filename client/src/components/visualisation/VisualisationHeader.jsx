@@ -12,6 +12,17 @@ export default class VisualisationHeader extends Component {
 
   getActionButtons(isUnsavedChanges) {
     const { onVisualisationAction } = this.props;
+    const save = {
+      buttonText: <FormattedMessage id="save" />,
+      primary: true,
+      onClick: () => {
+        this.props.onSaveVisualisation();
+      },
+      customClass: 'primaryButton',
+      props: {
+        'data-test-id': 'save-changes',
+      },
+    };
     const user = {
       buttonText: <FormattedMessage id="user" />,
       customClass: 'notImplemented',
@@ -32,12 +43,18 @@ export default class VisualisationHeader extends Component {
       customClass: 'notImplemented',
     };
 
-    return ([
+    const result = [
       user,
       download,
       share,
       overflow,
-    ]);
+    ];
+
+    if (isUnsavedChanges) {
+      result.unshift(save);
+    }
+
+    return result;
   }
 
   render() {
@@ -75,6 +92,7 @@ VisualisationHeader.propTypes = {
     name: PropTypes.string.isRequired,
   }).isRequired,
   onVisualisationAction: PropTypes.func.isRequired,
+  onSaveVisualisation: PropTypes.func.isRequired,
   onChangeTitle: PropTypes.func,
   onBeginEditTitle: PropTypes.func,
 };

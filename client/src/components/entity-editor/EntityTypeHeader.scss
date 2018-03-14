@@ -32,21 +32,31 @@
         }
     }
 
-    .entityTitleInput {
+    .EntityTitleInput {
         font-size: 1.55rem;
-        font-style: italic;
-        width: 100%;
-        padding: 0 0 0 4px;
-        border: 1px solid $textSecondary;
+        line-height: 2em;
         color: $darkGrey;
+        flex-grow: 1;
+        flex-direction: column;
+        height: 35px;
+        margin-top: 10px;
+        margin-right: 20px;
+
+        input {
+            width: 100%;
+            font-size: 1.55rem;
+        }
+
+        span,
+        input {
+            line-height: 1.55em;
+        }
     }
 
     .saveStatus {
-        color: $black;
-        margin-top: 0.3rem;
+        color: $textSecondary;
         font-size: 0.9rem;
-        margin-left: 6px;
-        margin-top: -2px;
+        line-height: 56px;
     }
 
     .overflow {

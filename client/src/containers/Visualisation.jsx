@@ -268,6 +268,7 @@ class Visualisation extends Component {
           onVisualisationAction={this.handleVisualisationAction}
           onChangeTitle={this.handleChangeVisualisationTitle}
           onBeginEditTitle={() => this.setState({ isUnsavedChanges: true })}
+          onSaveVisualisation={this.onSave}
         />
         <VisualisationEditor
           visualisation={visualisation}

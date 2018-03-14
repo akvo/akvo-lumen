@@ -231,13 +231,6 @@ export default class DashboardEditor extends Component {
             >
               <FormattedMessage id="add_new_text_element" />
             </button>
-            <button
-              data-test-id="save-changes"
-              className="clickable save"
-              onClick={this.handleSave}
-            >
-              <FormattedMessage id="save" />
-            </button>
           </div>
           {getArrayFromObject(dashboard.entities).length === 0 &&
             <div className="blankDashboardHelpText">
