@@ -78,9 +78,7 @@ export default function CreateVisualisationPreview({ visualisation, metadata, da
           context="editor"
           height={visualisation.visualisationType === 'map' ? null : 400}
           width={visualisation.visualisationType === 'map' ? null : 800}
-        /> : (
-          <LoadingSpinner />
-        )
+        /> : null
       }
     </div>
   );
