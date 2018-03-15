@@ -20,32 +20,41 @@
 (defmethod visualisation "pivot table"
   [tenant-conn visualisation config]
   (let [dataset-id (:datasetId visualisation)
+        [dataset-tag dataset] (dataset/fetch tenant-conn dataset-id)
         [tag query-result] (aggregation/query tenant-conn
                                               dataset-id
                                               "pivot"
                                               (:spec visualisation))]
-    (when (= tag ::lib/ok)
-      {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}})))
+    (when (and (= tag ::lib/ok)
+               (= dataset-tag ::lib/ok))
+      {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}
+        "datasets" { dataset-id (dissoc dataset :rows)}})))
 
 (defmethod visualisation "pie"
   [tenant-conn visualisation config]
   (let [dataset-id (:datasetId visualisation)
+        [dataset-tag dataset] (dataset/fetch tenant-conn dataset-id)
         [tag query-result] (aggregation/query tenant-conn
                                               dataset-id
                                               "pie"
                                               (:spec visualisation))]
-    (when (= tag ::lib/ok)
-      {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}})))
+    (when (and (= tag ::lib/ok)
+               (= dataset-tag ::lib/ok))
+      {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}
+        "datasets" { dataset-id (dissoc dataset :rows)}})))
 
 (defmethod visualisation "donut"
   [tenant-conn visualisation config]
   (let [dataset-id (:datasetId visualisation)
+        [dataset-tag dataset] (dataset/fetch tenant-conn dataset-id)
         [tag query-result] (aggregation/query tenant-conn
                                               dataset-id
                                               "pie"
                                               (:spec visualisation))]
-    (when (= tag ::lib/ok)
-      {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}})))
+    (when (and (= tag ::lib/ok)
+               (= dataset-tag ::lib/ok))
+      {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}
+        "datasets" { dataset-id (dissoc dataset :rows)}})))
 
 (defmethod visualisation "map"
   [tenant-conn visualisation {:keys [windshaft-url]}]
