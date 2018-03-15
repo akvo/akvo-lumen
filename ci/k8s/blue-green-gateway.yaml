@@ -71,13 +71,14 @@ data:
             text/plain
             text/html;
 
-        log_format without_url '$remote_addr - $remote_user [$time_local] "$request_method" '
-                          '$status $body_bytes_sent "$http_referer" ';
-
-        access_log  /var/log/nginx/access.log  without_url;
-
+        log_format upstream_time '$remote_addr - $remote_user [$time_local] "$request_method"'
+                                     ' $status $body_bytes_sent '
+                                     '"$http_referer" "$http_user_agent"'
+                                     'rt=$request_time urt="$upstream_response_time"';
         server {
             listen       80 default_server;
+
+            access_log  /var/log/nginx/access.log  upstream_time;
 
             location / {
                 proxy_set_header    Host $host;
@@ -93,6 +94,8 @@ data:
         server {
             listen       80;
             server_name  ~^dark-.+$;
+
+            access_log  /var/log/nginx/access.log  upstream_time;
 
             location / {
                 proxy_set_header    Host $host;
