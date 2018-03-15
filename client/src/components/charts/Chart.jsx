@@ -167,8 +167,8 @@ export default class Chart extends Component {
         </h2>
         <p className="chartMeta" style={metaStyle}>
           <span className="capitalize">
-            <FormattedMessage id="last_updated" />
-          </span>: {moment(dataset.updated).format('Do MMM YYYY - HH:mm')}
+            <FormattedMessage id="data_last_updated" />
+          </span>: {moment(dataset.get('updated')).format('Do MMM YYYY - HH:mm')}
         </p>
         <div
           ref={(el) => { this.element = el; }}

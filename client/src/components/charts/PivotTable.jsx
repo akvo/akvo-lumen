@@ -139,7 +139,7 @@ export default function PivotTable({ width, height, visualisation, context, data
               <br />
               <p className="chartMeta">
                 <span className="capitalize">
-                  <FormattedMessage id="last_updated" />
+                  <FormattedMessage id="data_last_updated" />
                 </span>: {moment(datasets[visualisation.datasetId].get('updated')).format('Do MMM YYYY - HH:mm')}
               </p>
             </th>
