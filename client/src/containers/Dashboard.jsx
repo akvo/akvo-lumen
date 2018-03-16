@@ -46,7 +46,7 @@ class Dashboard extends Component {
     this.state = {
       dashboard: {
         type: 'dashboard',
-        title: '',
+        title: 'Untitled dashboard',
         entities: {},
         layout: [],
         id: null,

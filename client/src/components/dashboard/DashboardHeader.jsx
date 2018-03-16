@@ -10,7 +10,7 @@ export default class DashboardHeader extends Component {
     this.getActionButtons = this.getActionButtons.bind(this);
   }
 
-  getActionButtons(isUnsavedChanges) {
+  getActionButtons(isUnsavedChanges, haveTitle) {
     const { onDashboardAction } = this.props;
 
     const save = {
@@ -19,7 +19,8 @@ export default class DashboardHeader extends Component {
       onClick: () => {
         this.props.onSaveDashboard();
       },
-      customClass: 'primaryButton',
+      customClass: `primaryButton ${haveTitle ? '' : 'disabled'}`,
+      disabled: !haveTitle,
       props: {
         'data-test-id': 'save-changes',
       },
@@ -56,8 +57,9 @@ export default class DashboardHeader extends Component {
 
   render() {
     const { isUnsavedChanges } = this.props;
+    const haveTitle = Boolean(this.props.title);
 
-    const actionButtons = this.getActionButtons(isUnsavedChanges);
+    const actionButtons = this.getActionButtons(isUnsavedChanges, haveTitle);
     let saveStatusId;
 
     switch (isUnsavedChanges) {
