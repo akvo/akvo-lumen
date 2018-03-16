@@ -23,6 +23,7 @@ const polyfill = (callback) => {
       require('core-js/es6/array');
       require('core-js/es6/object');
       require('core-js/es6/number');
+      require('core-js/modules/es7.object.values');
       require('intl');
       require('intl/locale-data/jsonp/en.js');
       require('intl/locale-data/jsonp/fr.js');
