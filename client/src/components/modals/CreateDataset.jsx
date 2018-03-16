@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { FormattedMessage } from 'react-intl';
+import get from 'lodash/get';
 import ModalHeader from './ModalHeader';
 import ModalFooter from './ModalFooter';
 import SourceSelection from './createDataset/SourceSelection';
@@ -141,7 +142,7 @@ CreateDataset.propTypes = {
 
 function mapStateToProps(state) {
   return {
-    collectionId: state.activeModal.collectionId,
+    collectionId: get(state, 'activeModal.collectionId'),
     datasetImport: state.library.datasetImport,
   };
 }
