@@ -35,16 +35,16 @@
             [ragtime.repl])
   (:import java.net.URL))
 
-(def blacklist ["admin"
-                "console"
-                "deck"
-                "ftp"
-                "mail"
-                "next"
-                "smtp"
-                "stage"
-                "test"
-                "www"])
+(def blacklist #{"admin"
+                 "console"
+                 "deck"
+                 "ftp"
+                 "mail"
+                 "next"
+                 "smtp"
+                 "stage"
+                 "test"
+                 "www"})
 
 (defn conform-label
   "First fence on label names, uniques are enforced in db."
@@ -60,7 +60,7 @@
      (ex-info "Too long label, should be less than 30 or more characters."
               {:label label}))
 
-    (contains? (set blacklist) label)
+    (contains? blacklist label)
     (throw
      (ex-info (format "Label in blacklist: [%s]"
                       (s/join ", "  blacklist))
@@ -140,8 +140,7 @@
                 "CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;")
     (util/exec! tenant-db-uri-with-superuser
                 "CREATE EXTENSION IF NOT EXISTS tablefunc WITH SCHEMA public;")
-    (jdbc/insert! lumen-db-uri :tenants {:db_uri (aes/encrypt (:encryption-key env)
-                                                              tenant-db-uri)
+    (jdbc/insert! lumen-db-uri :tenants {:db_uri (aes/encrypt (:encryption-key env) tenant-db-uri)
                                          :label label :title title})
     (migrate-tenant tenant-db-uri)))
 
