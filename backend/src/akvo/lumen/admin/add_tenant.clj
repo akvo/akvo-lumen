@@ -36,6 +36,7 @@
   (:import java.net.URL))
 
 (def blacklist ["admin"
+                "console"
                 "deck"
                 "ftp"
                 "mail"
@@ -75,6 +76,11 @@
      (ex-info "Label is only allowed to be a-z 0-9 or hyphen"
               {:label label}))
 
+    (s/starts-with? label "dark-")
+    (throw
+     (ex-info "Label is not allowed to start with dark-"
+              {:label label}))
+
     :else label))
 
 (defn label [url]
@@ -108,13 +114,16 @@
 
 (defn setup-database
   [label title]
-  (let [tenant (str "tenant_" label)
+  (let [tenant (str "tenant_" (s/replace label "-" "_"))
         tenant-password (s/replace (squuid) "-" "")
         db-uri (util/db-uri)
         lumen-db-uri (util/db-uri {:database "lumen" :user "lumen"})
-        tenant-db-uri (util/db-uri {:database tenant :user tenant :password tenant-password})
+        tenant-db-uri (util/db-uri {:database tenant
+                                    :user tenant
+                                    :password tenant-password})
         tenant-db-uri-with-superuser (util/db-uri {:database tenant})]
-    (util/exec! db-uri "CREATE ROLE %s WITH PASSWORD '%s' LOGIN;" tenant tenant-password)
+    (util/exec! db-uri "CREATE ROLE \"%s\" WITH PASSWORD '%s' LOGIN;"
+                tenant tenant-password)
     (util/exec! db-uri
                 (str "CREATE DATABASE %1$s "
                      "WITH OWNER = %1$s "
@@ -131,7 +140,9 @@
                 "CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;")
     (util/exec! tenant-db-uri-with-superuser
                 "CREATE EXTENSION IF NOT EXISTS tablefunc WITH SCHEMA public;")
-    (jdbc/insert! lumen-db-uri :tenants {:db_uri (aes/encrypt (:encryption-key env) tenant-db-uri) :label label :title title})
+    (jdbc/insert! lumen-db-uri :tenants {:db_uri (aes/encrypt (:encryption-key env)
+                                                              tenant-db-uri)
+                                         :label label :title title})
     (migrate-tenant tenant-db-uri)))
 
 
