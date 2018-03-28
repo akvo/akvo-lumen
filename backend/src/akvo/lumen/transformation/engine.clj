@@ -132,6 +132,15 @@
             {}
             changed-columns)))
 
+(defmulti pre-hook
+  ""
+  (fn [{:strs [op]} columns]
+    (keyword op)))
+
+(defmethod pre-hook :default
+  [transformation columns]
+  transformation)
+
 (defn execute-transformation
   [tenant-conn dataset-id job-execution-id transformation]
   (let [dataset-version (latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})
@@ -140,7 +149,8 @@
     (let [{:keys [success? message columns execution-log]} (apply-operation tenant-conn
                                                                             source-table
                                                                             previous-columns
-                                                                            transformation)]
+                                                                            (pre-hook transformation
+                                                                                      previous-columns))]
       (when-not success?
         (log/errorf "Failed to transform: %s, columns: %s, execution-log: %s" message columns execution-log)
         (throw (ex-info "Failed to transform" {})))
@@ -191,7 +201,7 @@
                                       :columns columns}]
             (new-dataset-version tenant-conn
                                  next-dataset-version)
-            (touch-dataset tenant-conn {:id dataset-id})                                 
+            (touch-dataset tenant-conn {:id dataset-id})
             (drop-table tenant-conn {:table-name previous-table-name})
             (lib/created next-dataset-version)))
         (let [{:keys [success? message columns execution-log]}

@@ -1,5 +1,6 @@
 (ns akvo.lumen.transformation.derive
   (:require [akvo.lumen.transformation.engine :as engine]
+            [akvo.lumen.util :as util]
             [clojure.java.jdbc :as jdbc]
             [clojure.set :as set]
             [clojure.string :as str]
@@ -10,6 +11,8 @@
 
 (hugsql/def-db-fns "akvo/lumen/transformation/derive.sql")
 (hugsql/def-db-fns "akvo/lumen/transformation/engine.sql")
+
+
 
 (defn derive-column-function [code]
   (format "var deriveColumn = function(row) {  return %s; }" code))
@@ -97,6 +100,20 @@
          (#{"fail" "leave-empty" "delete-row"} on-error)
          (valid? code))))
 
+(defn build-js
+  [columns transformation]
+  (get-in (reduce (fn [transformation {:strs [id column-name] :as reference}]
+                    (let [column-title (-> (filter #(= (get % "columnName")
+                                                       column-name)
+                                                   columns)
+                                           first (get "title"))]
+                      (update-in transformation ["prepared" "code"]
+                                 #(str/replace % id (format "row['%s']"
+                                                            column-title)))))
+                  transformation
+                  (get-in transformation ["prepared" "references"]))
+          ["prepared" "code"]))
+
 (defmethod engine/apply-operation :core/derive
   [tenant-conn table-name columns op-spec]
   (try
@@ -105,7 +122,7 @@
            column-type "newColumnType"} (engine/args op-spec)
           on-error (engine/error-strategy op-spec)
           column-name (engine/next-column-name columns)
-          transform (row-transform code)
+          transform (row-transform (build-js columns op-spec))
           key-translation (into {}
                                 (map (fn [{:strs [columnName title]}]
                                        [(keyword columnName) title])
@@ -137,3 +154,84 @@
       (log/debug e)
       {:success? false
        :message (format "Failed to transform: %s" (.getMessage e))})))
+
+(defn row-references
+  "Takes JavaScript and return a sequence of string tuples
+  [<reference-pattern> <column-title>] e.g. \"row['a'];\" -> ([\"row['a']\"] \"a\")"
+  [code]
+  (map (fn [[reference-pattern _ column-title _]]
+         [reference-pattern column-title])
+       (re-seq #"row(\.|\['|\[\")(\w+)('\]|\"\]|)"
+               code)))
+(comment
+  (row-references "row.a") ;; (["row.a" "a"])
+  (row-references "row['a'];") ;; (["row['a']" "a"])
+  (row-references "row[\"a\"].replace(\"a\", \"b\")") ;; (["row[\"a\"]" "a"])
+  (row-references " row.b + row['c'];") ;; (["row.b" "b"] ["row['c']" "c"])
+  )
+
+
+(defmethod engine/pre-hook :core/derive
+  [transformation columns]
+  (reduce (fn [t [reference-pattern column-title]]
+            (let [id (str (util/squuid))
+                  column-name (-> (filter (fn [{:strs [title]}]
+                                            (= title column-title))
+                                          columns)
+                                  first
+                                  (get "columnName"))]
+              (-> (if (nil? (get-in t ["prepared"]))
+                    (assoc-in t ["prepared"]
+                              {"code" (str/replace (get-in transformation ["args" "code"])
+                                                   reference-pattern id)
+                               "references" []})
+                    (update-in t ["prepared" "code"]
+                               #(str/replace % reference-pattern id)))
+                  (update-in ["prepared" "references"] #(conj % {"id" id
+                                                                 "pattern" reference-pattern
+                                                                 "column-name" column-name})))))
+          transformation
+          (row-references (get-in transformation ["args" "code"]))))
+
+(comment
+
+  (let [columns [{"columnTitle" "A"
+                  "columnName" "c1"}
+                 {"columnTitle" "B"
+                  "columnName" "c2"}
+                 {"columnTitle" "C"
+                  "columnName" "d1"}]
+        transformation {"op" "core/derive"
+                        "args" {"code" "row.[' B'];"}
+                        "prepared" {"code" "abc123;"
+                                    "references" [{"id" "abc123"
+                                                   "pattern" "row[' B']"
+                                                   "column-name" "c2"}]}}]
+    (build-js columns transformation)
+    )
+  )
+
+
+
+
+
+
+(comment
+  (let [transform {"op" "core/derive"
+                   "args" {"code" "row['a'] + row.b;"}}
+        columns [{"title" "a"
+                  "columnName" "c1"}
+                 {"title" "b"
+                  "columnName" "c2"}]]
+    (reduce (fn [t ref]
+              (let [column-name (-> (filter #(= (get % "title") (second ref))
+                                            columns)
+                                    first (get "columnName"))
+                    id (str (util/squuid))]
+                (-> t
+                    (assoc-in ["tmap" id] {"pattern" (first ref)})
+                    (assoc-in ["tmap" id "column"] column-name)
+                    (update-in ["args" "code"] #(str/replace % (first ref) id)))))
+            transform
+            (parse-code (get-in transform ["args" "code"]))))
+  )
