@@ -44,6 +44,7 @@ export default class PieChart extends Component {
     marginTop: PropTypes.number,
     marginBottom: PropTypes.number,
     opacity: PropTypes.number,
+    style: PropTypes.object,
   }
 
   static defaultProps = {
@@ -124,13 +125,16 @@ export default class PieChart extends Component {
       marginTop,
       marginBottom,
       opacity,
+      style,
     } = this.props;
+
     if (!get(this.props.data, 'data')) return null;
 
     const data = this.getData();
 
     return (
       <ChartLayout
+        style={style}
         width={width}
         height={height}
         legendVisible

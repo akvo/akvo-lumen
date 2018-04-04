@@ -53,22 +53,29 @@ storiesOf('Charts', module)
     }, {});
 
     return (
-      <PieChart
-        style={{ border: '1px solid black' }}
-        data={{
-          data,
-          metadata: {
-            bucketColumnTitle: text('props.data.metadata.bucketColumnTitle', 'Legend Title'),
-          },
-        }}
-        colors={colors}
-        innerRadius={number('props.innerRadius', 0)}
-        onChangeVisualisationSpec={action('vis-spec-change')}
-        width={number('props.width', 600)}
-        height={number('props.height', 600)}
-        print={boolean('props.print', false)}
-        interactive={boolean('props.interactive', true)}
-      />
+      <div>
+        <PieChart
+          style={{ border: '1px solid black' }}
+          data={{
+            data,
+            metadata: {
+              bucketColumnTitle: text('props.data.metadata.bucketColumnTitle', 'Legend Title'),
+            },
+          }}
+          colors={colors}
+          innerRadius={number('props.innerRadius', 0)}
+          onChangeVisualisationSpec={action('vis-spec-change')}
+          width={number('props.width', 600)}
+          height={number('props.height', 600)}
+          print={boolean('props.print', false)}
+          interactive={boolean('props.interactive', true)}
+        />
+        <pre>
+          <code>
+            {JSON.stringify(data, null, 2)}
+          </code>
+        </pre>
+      </div>
     );
   })
 
@@ -99,8 +106,9 @@ storiesOf('Charts', module)
     }, {});
 
     return (
-      <div style={{ border: '1px solid black', display: 'inline-block' }}>
+      <div>
         <ScatterChart
+          style={{ border: '1px solid black' }}
           data={{
             data,
             metadata: {
@@ -121,6 +129,11 @@ storiesOf('Charts', module)
           print={boolean('props.print', false)}
           interactive={boolean('props.interactive', true)}
         />
+        <pre>
+          <code>
+            {JSON.stringify(data, null, 2)}
+          </code>
+        </pre>
       </div>
     );
   })
@@ -146,26 +159,25 @@ storiesOf('Charts', module)
 
     return (
       <div>
-        <div style={{ border: '1px solid black', display: 'inline-block' }}>
-          <AreaChart
-            data={{
-              data,
-              metadata: {
-                bucketColumnTitle: text('props.data.metatdata.bucketColumnTitle', 'Legend Title'),
-              },
-            }}
-            color={color('props.color', '#5744B8')}
-            onChangeVisualisationSpec={action('vis-spec-change')}
-            width={number('props.width', 600)}
-            height={number('props.height', 600)}
-            marginTop={number('props.marginTop', 0.1)}
-            marginRight={number('props.marginRight', 0.1)}
-            marginBottom={number('props.marginBottom', 0.1)}
-            marginLeft={number('props.marginLeft', 0.1)}
-            print={boolean('props.print', false)}
-            interactive={boolean('props.interactive', true)}
-          />
-        </div>
+        <AreaChart
+          style={{ border: '1px solid black' }}
+          data={{
+            data,
+            metadata: {
+              bucketColumnTitle: text('props.data.metatdata.bucketColumnTitle', 'Legend Title'),
+            },
+          }}
+          color={color('props.color', '#5744B8')}
+          onChangeVisualisationSpec={action('vis-spec-change')}
+          width={number('props.width', 600)}
+          height={number('props.height', 600)}
+          marginTop={number('props.marginTop', 0.1)}
+          marginRight={number('props.marginRight', 0.1)}
+          marginBottom={number('props.marginBottom', 0.1)}
+          marginLeft={number('props.marginLeft', 0.1)}
+          print={boolean('props.print', false)}
+          interactive={boolean('props.interactive', true)}
+        />
         <pre>
           <code>
             {JSON.stringify(data, null, 2)}
@@ -205,26 +217,25 @@ storiesOf('Charts', module)
 
     return (
       <div>
-        <div style={{ border: '1px solid black', display: 'inline-block' }}>
-          <BarChart
-            data={{
-              data,
-              metadata: {
-                bucketColumnTitle: text('props.data.metatdata.bucketColumnTitle', 'Legend Title'),
-              },
-            }}
-            colors={colors}
-            onChangeVisualisationSpec={action('vis-spec-change')}
-            width={number('props.width', 600)}
-            height={number('props.height', 600)}
-            marginTop={number('props.marginTop', 0.1)}
-            marginRight={number('props.marginRight', 0.1)}
-            marginBottom={number('props.marginBottom', 0.2)}
-            marginLeft={number('props.marginLeft', 0.1)}
-            print={boolean('props.print', false)}
-            interactive={boolean('props.interactive', true)}
-          />
-        </div>
+        <BarChart
+          style={{ border: '1px solid black' }}
+          data={{
+            data,
+            metadata: {
+              bucketColumnTitle: text('props.data.metatdata.bucketColumnTitle', 'Legend Title'),
+            },
+          }}
+          colors={colors}
+          onChangeVisualisationSpec={action('vis-spec-change')}
+          width={number('props.width', 600)}
+          height={number('props.height', 600)}
+          marginTop={number('props.marginTop', 0.1)}
+          marginRight={number('props.marginRight', 0.1)}
+          marginBottom={number('props.marginBottom', 0.2)}
+          marginLeft={number('props.marginLeft', 0.1)}
+          print={boolean('props.print', false)}
+          interactive={boolean('props.interactive', true)}
+        />
         <pre>
           <code>
             {JSON.stringify(data, null, 2)}

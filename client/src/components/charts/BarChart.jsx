@@ -36,6 +36,7 @@ export default class PieChart extends Component {
     marginRight: PropTypes.number,
     marginTop: PropTypes.number,
     marginBottom: PropTypes.number,
+    style: PropTypes.object,
   }
 
   static defaultProps = {
@@ -111,16 +112,17 @@ export default class PieChart extends Component {
       marginRight,
       marginBottom,
       marginLeft,
+      style,
     } = this.props;
 
     if (!get(this.props.data, 'data')) return null;
 
     const data = this.getData();
     const dataCount = data.length;
-    console.log(colors);
 
     return (
       <ChartLayout
+        style={style}
         width={width}
         height={height}
         legendVisible
