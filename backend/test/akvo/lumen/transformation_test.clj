@@ -261,7 +261,7 @@
                                                     "newColumnType" "date"
                                                     "newColumnTitle" "Derived 5"}
                                             "onError" "fail"}))]
-        (is (= tag ::lib/ok))
+        (is (= ::lib/ok tag))
         (is (every? number? (map :d4 (latest-data dataset-id))))))
 
     (testing "Valid type check"
@@ -270,7 +270,7 @@
                                                     "newColumnType" "number"
                                                     "newColumnTitle" "Derived 6"}
                                             "onError" "fail"}))]
-        (is (= tag ::lib/conflict))))
+        (is (= ::lib/conflict tag))))
 
     (testing "Sandboxing java interop"
       (let [[tag _] (apply-transformation (derive-column-transform
@@ -278,7 +278,7 @@
                                                     "newColumnType" "number"
                                                     "newColumnTitle" "Derived 7"}
                                             "onError" "fail"}))]
-        (is (= tag ::lib/conflict))))
+        (is (= ::lib/conflict tag))))
 
     (testing "Sandboxing dangerous js functions"
       (let [[tag _] (apply-transformation (derive-column-transform
@@ -286,7 +286,7 @@
                                                     "newColumnType" "number"
                                                     "newColumnTitle" "Derived 7"}
                                             "onError" "fail"}))]
-        (is (= tag ::lib/conflict))))
+        (is (= ::lib/conflict tag))))
 
     (testing "Fail early on syntax error"
       (let [[tag _] (apply-transformation (derive-column-transform
@@ -294,7 +294,7 @@
                                                     "newColumnType" "text"
                                                     "newColumnTitle" "Derived 8"}
                                             "onError" "fail"}))]
-        (is (= tag ::lib/bad-request))))
+        (is (= ::lib/bad-request tag))))
 
     (testing "Fail infinite loop"
       (let [[tag _] (apply-transformation (derive-column-transform
@@ -302,8 +302,7 @@
                                                     "newColumnType" "text"
                                                     "newColumnTitle" "Derived 9"}
                                             "onError" "fail"}))]
-        (is (= tag ::lib/bad-request))))
-
+        (is (= ::lib/bad-request tag))))
 
     (testing "Disallow anonymous functions"
       (let [[tag _] (apply-transformation (derive-column-transform
@@ -311,14 +310,14 @@
                                                     "newColumnType" "text"
                                                     "newColumnTitle" "Derived 10"}
                                             "onError" "fail"}))]
-        (is (= tag ::lib/bad-request)))
+        (is (= ::lib/bad-request tag)))
 
       (let [[tag _] (apply-transformation (derive-column-transform
                                            {"args" {"code" "(() => 'foo')()"
                                                     "newColumnType" "text"
                                                     "newColumnTitle" "Derived 11"}
                                             "onError" "fail"}))]
-        (is (= tag ::lib/bad-request))))))
+        (is (= ::lib/bad-request tag))))))
 
 
 (deftest ^:functional delete-column-test

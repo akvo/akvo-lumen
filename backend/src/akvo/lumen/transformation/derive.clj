@@ -100,19 +100,25 @@
          (#{"fail" "leave-empty" "delete-row"} on-error)
          (valid? code))))
 
+(defn column-title
+  [columns column-name]
+  (-> (filter #(= (get % "columnName") column-name)
+              columns)
+      first
+      (get "title")))
+
 (defn build-js
+  "Replace column references and fall back to use code pattern if there is no
+  references."
   [columns transformation]
-  (get-in (reduce (fn [transformation {:strs [id column-name] :as reference}]
-                    (let [column-title (-> (filter #(= (get % "columnName")
-                                                       column-name)
-                                                   columns)
-                                           first (get "title"))]
-                      (update-in transformation ["prepared" "code"]
-                                 #(str/replace % id (format "row['%s']"
-                                                            column-title)))))
-                  transformation
-                  (get-in transformation ["prepared" "references"]))
-          ["prepared" "code"]))
+  (reduce (fn [code {:strs [column-name id pattern]}]
+            (let [column-title (column-title columns column-name)]
+              (if column-name
+                (str/replace code id (format "row['%s']" column-title))
+                (str/replace code id pattern))))
+          (get-in transformation ["prepared" "code"])
+          (get-in transformation ["prepared" "references"])))
+
 
 (defmethod engine/apply-operation :core/derive
   [tenant-conn table-name columns op-spec]
@@ -159,15 +165,30 @@
   "Takes JavaScript and return a sequence of string tuples
   [<reference-pattern> <column-title>] e.g. \"row['a'];\" -> ([\"row['a']\"] \"a\")"
   [code]
-  (map (fn [[reference-pattern _ column-title _]]
-         [reference-pattern column-title])
-       (re-seq #"row(\.|\['|\[\")(\w+)('\]|\"\]|)"
-               code)))
+  (let [re #"row(\.|\['|\[\")([\w\s]+)('\]|\"\]|)" ;; Valid \w & \s ?
+        refs (map (fn [[reference-pattern _ column-title _]]
+                    [reference-pattern column-title])
+                  (re-seq re code))]
+    (if (empty? refs)
+      `([~code ~code])
+      refs)))
+
 (comment
   (row-references "row.a") ;; (["row.a" "a"])
   (row-references "row['a'];") ;; (["row['a']" "a"])
   (row-references "row[\"a\"].replace(\"a\", \"b\")") ;; (["row[\"a\"]" "a"])
   (row-references " row.b + row['c'];") ;; (["row.b" "b"] ["row['c']" "c"])
+  (row-references "row['foo'].toUpperCase()") ;; (["row['foo']" "foo"])
+  (row-references "row['Derived 4'].toLowerCase()") ;; (["row['Derived" "Derived"])
+  (row-references "new Date()") ;; (["new Date()" "new Date()"])
+
+  ;; ????
+  (row-references "row['No.4']") ;; (["row['No" "No"])
+  (row-references "row[' ']") ;; (["row[' ']" " "])
+  (row-references "row['%&']") ;; (["row['%&']" "row['%&']"])
+  (row-references "row['ÅÄÖ']") ;; (["row['ÅÄÖ']" "row['ÅÄÖ']"])
+  (row-references "row['e`']") ;; (["row['e" "e"])
+
   )
 
 
@@ -210,7 +231,6 @@
     (build-js columns transformation)
     )
   )
-
 
 
 
