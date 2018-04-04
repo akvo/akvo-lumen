@@ -1,0 +1,35 @@
+@import "../styles/modules/importAll";
+
+.popover {
+  .popover-header {
+    font-family: $bodyFont;
+    font-size: 14px;
+  }
+  &.bs-popover-left,
+  &.bs-popover-right {
+    .arrow {
+      top: 50%;
+      margin-top: -7px;
+    }
+  }
+  &.bs-popover-top,
+  &.bs-popover-bottom {
+    .arrow {
+      left: 50%;
+      margin-left: -7px;
+    }
+  }
+  &.popover-top-left,
+  &.popover-bottom-left {
+    .arrow {
+      left: auto;
+      right: 0%;
+    }
+  }
+  &.popover-top-right,
+  &.popover-bottom-right {
+    .arrow {
+      left: 14px;
+    }
+  }
+}

@@ -1,5 +1,10 @@
 @import "modules/importAll";
 
+@import "~bootstrap/scss/_functions.scss";
+@import "~bootstrap/scss/_variables.scss"; 
+@import "~bootstrap/scss/_mixins.scss";
+@import "~bootstrap/scss/_popover.scss";
+
 html, body, #root, #root > div {
     height: 100%;
 }
