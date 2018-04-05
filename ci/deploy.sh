@@ -31,7 +31,7 @@ gcloud config set container/cluster europe-west1-d
 gcloud config set compute/zone europe-west1-d
 gcloud config set container/use_client_certificate True
 
-if [[ "${TRAVIS_BRANCH}" == "master" ]]; then
+if [[ "${TRAVIS_BRANCH}" == "prod-cluster" ]]; then
     log Environment is production
     gcloud container clusters get-credentials production
 else
@@ -56,7 +56,7 @@ kubectl apply -f deployment.yaml
 kubectl apply -f ci/k8s/redis-master-windshaft.yaml
 kubectl apply -f ci/k8s/blue-green-gateway.yaml
 
-if [[ "${TRAVIS_BRANCH}" = "master" ]]; then
+if [[ "${TRAVIS_BRANCH}" = "prod-cluster" ]]; then
     exit 0
 fi
 
