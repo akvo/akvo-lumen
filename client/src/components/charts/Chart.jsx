@@ -135,8 +135,6 @@ export default class Chart extends Component {
         chartData = chart.getBarData(visualisation, dataset);
         break;
       // no default
-      // default:
-      //   throw new Error(`Unknown visualisation type ${visualisation.visualisationType}`);
     }
 
     if (!chartData) return;

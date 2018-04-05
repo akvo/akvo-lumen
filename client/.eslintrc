@@ -29,7 +29,8 @@
       "imports": "always-multiline",
       "exports": "never",
       "functions": "never"
-    }]
+    }],
+    "class-methods-use-this": 1
   },
   "globals": {
     "window": true,

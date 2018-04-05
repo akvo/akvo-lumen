@@ -69,6 +69,8 @@ storiesOf('Charts', module)
           height={number('props.height', 600)}
           print={boolean('props.print', false)}
           interactive={boolean('props.interactive', true)}
+          edit={boolean('props.edit', true)}
+          legendVisible={boolean('props.legendVisible', true)}
         />
         <pre>
           <code>
@@ -128,6 +130,8 @@ storiesOf('Charts', module)
           marginLeft={number('props.marginLeft', 0.1)}
           print={boolean('props.print', false)}
           interactive={boolean('props.interactive', true)}
+          edit={boolean('props.edit', true)}
+          legendVisible={boolean('props.legendVisible', false)}
         />
         <pre>
           <code>
@@ -177,6 +181,7 @@ storiesOf('Charts', module)
           marginLeft={number('props.marginLeft', 0.1)}
           print={boolean('props.print', false)}
           interactive={boolean('props.interactive', true)}
+          edit={boolean('props.edit', true)}
         />
         <pre>
           <code>
@@ -235,6 +240,65 @@ storiesOf('Charts', module)
           marginLeft={number('props.marginLeft', 0.1)}
           print={boolean('props.print', false)}
           interactive={boolean('props.interactive', true)}
+          edit={boolean('props.edit', true)}
+          legendVisible={boolean('props.legendVisible', false)}
+        />
+        <pre>
+          <code>
+            {JSON.stringify(data, null, 2)}
+          </code>
+        </pre>
+      </div>
+    );
+  })
+
+  .add('BarChart (Stacked)', () => {
+    const nodeCount = number('node count', 20);
+    const minVal = number('min value', 1);
+    const maxVal = number('max value', 100);
+    const labelLength = number('label length', 10);
+
+    const generateNodes = () => {
+      const nodes = [];
+      for (let i = 0; i < nodeCount; i++) {
+        nodes.push({
+          key: randomString(labelLength),
+          values: [
+            randomIntFromInterval(minVal, maxVal),
+            randomIntFromInterval(minVal, maxVal),
+            randomIntFromInterval(minVal, maxVal),
+          ],
+        });
+      }
+      return nodes;
+    };
+
+    const data = generateNodes();
+
+    const colors = getFills(data.map(({ key }) => key), {});
+
+    return (
+      <div>
+        <BarChart
+          style={{ border: '1px solid black' }}
+          data={{
+            data,
+            metadata: {
+              bucketColumnTitle: text('props.data.metatdata.bucketColumnTitle', 'Legend Title'),
+            },
+          }}
+          colors={colors}
+          onChangeVisualisationSpec={action('vis-spec-change')}
+          width={number('props.width', 600)}
+          height={number('props.height', 600)}
+          marginTop={number('props.marginTop', 0.1)}
+          marginRight={number('props.marginRight', 0.1)}
+          marginBottom={number('props.marginBottom', 0.2)}
+          marginLeft={number('props.marginLeft', 0.1)}
+          print={boolean('props.print', false)}
+          interactive={boolean('props.interactive', true)}
+          edit={boolean('props.edit', true)}
+          legendVisible={boolean('props.legendVisible', true)}
         />
         <pre>
           <code>

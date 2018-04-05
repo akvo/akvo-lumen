@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Collection } from '@potion/layout'; // TODO: see if can optimize this
-import { Circle, Svg, Group, Text, Rect, Area } from '@potion/element';
+import { Circle, Svg, Group, Area } from '@potion/element';
 import { AxisBottom, AxisLeft } from '@vx/axis';
 import get from 'lodash/get';
 import { scaleLinear } from 'd3-scale';
@@ -10,7 +10,7 @@ import { extent } from 'd3-array';
 import ResponsiveWrapper from '../ResponsiveWrapper';
 import ColorPicker from '../ColorPicker';
 import ChartLayout from './ChartLayout';
-import { labelFont } from '../../constants/chart';
+import Tooltip from './Tooltip';
 
 export default class PieChart extends Component {
 
@@ -35,6 +35,7 @@ export default class PieChart extends Component {
     legendPosition: PropTypes.oneOf(['right']),
     print: PropTypes.bool,
     interactive: PropTypes.bool,
+    edit: PropTypes.bool,
     marginLeft: PropTypes.number,
     marginRight: PropTypes.number,
     marginTop: PropTypes.number,
@@ -49,6 +50,7 @@ export default class PieChart extends Component {
     marginTop: 0.1,
     marginBottom: 0.2,
     opacity: 0.9,
+    edit: false,
   }
 
   state = {
@@ -63,51 +65,51 @@ export default class PieChart extends Component {
     });
   }
 
-  handleMouseEnterNode({ key }) {
-    const { interactive, print } = this.props;
-    if (!interactive || print) return;
-    this.setState({ hoveredNode: key });
-  }
+  handleShowTooltip(event, { xLabel, x, yLabel, y }) {
+    const { clientX, clientY } = event;
+    const bounds = this.wrap.getBoundingClientRect();
 
-  handleMouseLeaveNode({ key }) {
-    // const { interactive, print } = this.props;
-    // if (!interactive || print) return;
-    // if (this.state.hoveredNode === key) {
-    //   this.setState({ hoveredNode: null });
-    // }
-  }
+    const xPos = clientX - bounds.left;
+    const yPos = clientY - bounds.top;
 
-  handleClickNode({ key, event }) {
-    const { interactive, print } = this.props;
-    if (!interactive || print) return;
-    event.stopPropagation();
+    const tooltipPosition = {};
+
+    if (xPos < bounds.width / 2) tooltipPosition.left = xPos + 20;
+    else tooltipPosition.right = (bounds.width - xPos) + 20;
+
+    if (yPos < bounds.height / 2) tooltipPosition.top = yPos - 12;
+    else tooltipPosition.bottom = bounds.height - yPos - 12;
+
     this.setState({
-      isPickingColor: true,
-      hoveredNode: key,
+      tooltipVisible: true,
+      tooltipItems: [
+        { key: xLabel, value: x },
+        { key: yLabel, value: y },
+      ],
+      tooltipPosition,
     });
   }
 
-  renderLabel({ key, x, y, normalizedX, normalizedY }) {
-    const { print, interactive } = this.props;
-    const labelLength = `[${x}, ${y}]`.length;
-    return (print || !interactive || get(this.state, 'hoveredNode') === key) ? (
-      <Group transform={{ translate: [normalizedX, normalizedY - 12] }}>
-        <Rect
-          x={-(labelLength * labelFont.fontSize) / 4}
-          y={-10}
-          width={(labelLength * labelFont.fontSize) / 2}
-          height={20}
-          fill="white"
-          opacity={0.3}
-        />
-        <Text
-          textAnchor="middle"
-          {...labelFont}
-        >
-          [{x}, {y}]
-        </Text>
-      </Group>
-    ) : null;
+  handleMouseEnterNode({ key, x, y }, event) {
+    const { interactive, print } = this.props;
+    if (!interactive || print) return;
+    if (this.state.isPickingColor) return;
+    this.handleShowTooltip(event, { x, y, xLabel: 'x', yLabel: 'y' });
+    this.setState({ hoveredNode: key });
+  }
+
+  handleMouseLeaveNode() {
+    this.setState({ labelVisible: false });
+  }
+
+  handleClickNode({ key }, event) {
+    const { interactive, print, edit } = this.props;
+    if (!interactive || print) return;
+    event.stopPropagation();
+    this.setState({
+      isPickingColor: edit,
+      hoveredNode: key,
+    });
   }
 
   render() {
@@ -125,6 +127,7 @@ export default class PieChart extends Component {
     if (!get(this.props.data, 'data')) return null;
 
     const data = this.getData();
+    const { tooltipItems, tooltipVisible, tooltipPosition } = this.state;
 
     return (
       <ChartLayout
@@ -154,7 +157,19 @@ export default class PieChart extends Component {
             const radius = Math.min((5 / data.length) * 20, 5);
 
             return (
-              <div style={{ position: 'relative' }}>
+              <div
+                style={{ position: 'relative' }}
+                ref={(c) => {
+                  this.wrap = c;
+                }}
+              >
+                {tooltipVisible && (
+                  <Tooltip
+                    items={tooltipItems}
+                    {...tooltipPosition}
+                  />
+                )}
+
                 {this.state.isPickingColor && (
                   <ColorPicker
                     title="Pick color"
@@ -182,7 +197,7 @@ export default class PieChart extends Component {
                         fill={color}
                         fillOpacity={0.8}
                         onClick={(event) => {
-                          this.handleClickNode({ key: null, event });
+                          this.handleClickNode({ key: null }, event);
                         }}
                       />
 
@@ -200,24 +215,16 @@ export default class PieChart extends Component {
                               stroke={color}
                               strokeWidth={2}
                               onClick={(event) => {
-                                this.handleClickNode({ key, event });
+                                this.handleClickNode({ key }, event);
                               }}
-                              onMouseEnter={() => {
-                                if (this.state.isPickingColor) return;
-                                this.handleMouseEnterNode({ key });
+                              onMouseEnter={(event) => {
+                                this.handleMouseEnterNode({ key, x, y }, event);
                               }}
-                              onMouseLeave={() => {
-                                if (this.state.isPickingColor) return;
-                                this.handleMouseLeaveNode({ key });
-                              }}
+                              // onMouseLeave={() => {
+                              //   if (this.state.isPickingColor) return;
+                              //   this.handleMouseLeaveNode({ key });
+                              // }}
                             />
-                            {this.renderLabel({
-                              key,
-                              x,
-                              y,
-                              normalizedX,
-                              normalizedY,
-                            })}
                           </Group>
                         );
                       })}

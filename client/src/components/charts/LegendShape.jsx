@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 const LegendShape = ({ isActive, width = 15, height = 15, fill }) => (
-  <svg width={width} height={height}>
+  <svg width={width} height={height} className="legend-shape">
     <circle
       r={width * (isActive ? 0.5 : 0.4)}
       cx={width / 2}
