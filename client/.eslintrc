@@ -30,7 +30,8 @@
       "exports": "never",
       "functions": "never"
     }],
-    "class-methods-use-this": 1
+    "class-methods-use-this": 1,
+    "no-plusplus": ["error", { "allowForLoopAfterthoughts": true }]
   },
   "globals": {
     "window": true,

@@ -5,3 +5,7 @@ export const labelFont = {
   fontWeight: 600,
   dy: 3,
 };
+
+export default {
+  labelFont,
+};

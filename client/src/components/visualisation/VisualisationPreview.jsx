@@ -93,4 +93,5 @@ CreateVisualisationPreview.propTypes = {
   visualisation: PropTypes.object.isRequired,
   metadata: PropTypes.object,
   datasets: PropTypes.object.isRequired,
+  onChangeVisualisationSpec: PropTypes.func,
 };
