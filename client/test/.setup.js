@@ -2,8 +2,12 @@
 
 require('babel-register')();
 require('ignore-styles');
+const Enzyme = require('enzyme');
+const Adapter = require('enzyme-adapter-react-16');
 
 var jsdom = require('jsdom').jsdom;
+
+Enzyme.configure({ adapter: new Adapter() });
 
 var exposedProperties = ['window', 'navigator', 'document'];
 

@@ -3,6 +3,7 @@ import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { withKnobs, number, text, boolean, color } from '@storybook/addon-knobs/react';
+import { getPalette } from '@potion/color';
 
 import '../../styles/reset.global.scss';
 import '../../styles/style.global.scss';
@@ -10,7 +11,7 @@ import PieChart from './PieChart';
 import ScatterChart from './ScatterChart';
 import AreaChart from './AreaChart';
 import BarChart from './BarChart';
-import { palette, randomColor, getFills } from '../../utilities/visualisationColors';
+import { getFills, palette, randomColor } from '../../utilities/visualisationColors';
 
 const letters = 'abcdef ghijklmn opqrstuvwxyz 123456789'.split('');
 const letterCount = letters.length;
@@ -44,10 +45,11 @@ storiesOf('Charts', module)
       return nodes;
     };
     const data = generateNodes();
+    const p = getPalette({ count: nodeCount });
     const colors = data.reduce((acc, datum, i) => {
       const result = { ...acc };
       if (!result[datum.bucketValue]) {
-        result[datum.bucketValue] = palette[i] || randomColor();
+        result[datum.bucketValue] = p[i];
       }
       return result;
     }, {});
@@ -211,15 +213,6 @@ storiesOf('Charts', module)
 
     const data = generateNodes();
 
-    const colors = getFills(data.map(({ key }) => key), {});
-    // const colors = data.reduce((acc, datum, i) => {
-    //   const result = { ...acc };
-    //   if (!result[datum.key]) {
-    //     result[datum.key] = paletteWithPatterns[i];
-    //   }
-    //   return result;
-    // }, {});
-
     return (
       <div>
         <BarChart
@@ -230,7 +223,6 @@ storiesOf('Charts', module)
               bucketColumnTitle: text('props.data.metatdata.bucketColumnTitle', 'Legend Title'),
             },
           }}
-          colors={colors}
           onChangeVisualisationSpec={action('vis-spec-change')}
           width={number('props.width', 600)}
           height={number('props.height', 600)}
