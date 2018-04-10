@@ -140,15 +140,19 @@ export default class PieChart extends Component {
         }}
         chart={
           <ResponsiveWrapper>{(dimensions) => {
+            const xExtent = extent(data, ({ x }) => x);
+            if (xExtent[0] > 0) xExtent[0] = 0;
             const xScale = scaleLinear()
-              .domain(extent(data, ({ x }) => x))
+              .domain(xExtent)
               .range([
                 dimensions.width * marginLeft,
                 dimensions.width * (1 - marginRight),
               ]);
 
+            const yExtent = extent(data, ({ y }) => y);
+            if (yExtent[0] > 0) yExtent[0] = 0;
             const yScale = scaleLinear()
-              .domain(extent(data, ({ y }) => y))
+              .domain(yExtent)
               .range([
                 dimensions.height * (1 - marginBottom),
                 dimensions.height * marginTop,

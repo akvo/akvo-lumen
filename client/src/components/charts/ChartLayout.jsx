@@ -75,7 +75,7 @@ const ChartLayout = ({
       )}
     </div>
   ) : (
-    <div style={{ height, width }} {...rest}>
+    <div style={{ height, width, ...style }} {...rest}>
       {children}
       {dimensions.chartBeforeLegend && (
         <div style={{ height: dimensions.chart, width }}>

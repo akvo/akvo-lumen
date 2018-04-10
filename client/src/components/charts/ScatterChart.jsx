@@ -34,7 +34,7 @@ export default class PieChart extends Component {
     onChangeVisualisationSpec: PropTypes.func.isRequired,
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
-    maxRadius: PropTypes.number,
+    // maxRadius: PropTypes.number,
     legendPosition: PropTypes.oneOf(['right']),
     print: PropTypes.bool,
     interactive: PropTypes.bool,
@@ -172,29 +172,24 @@ export default class PieChart extends Component {
         )}
         chart={
           <ResponsiveWrapper>{(dimensions) => {
+            const xExtent = extent(data, ({ x }) => x);
+            if (xExtent[0] > 0) xExtent[0] = 0;
             const xScale = scaleLinear()
-              .domain(extent(data, ({ x }) => x))
+              .domain(xExtent)
               .range([
                 dimensions.width * marginLeft,
                 dimensions.width * (1 - marginRight),
               ]);
 
+            const yExtent = extent(data, ({ y }) => y);
+            if (yExtent[0] > 0) yExtent[0] = 0;
             const yScale = scaleLinear()
-              .domain(extent(data, ({ y }) => y))
+              .domain(yExtent)
               .range([
                 dimensions.height * (1 - marginBottom),
                 dimensions.height * marginTop,
               ]);
 
-            /*
-            const area = (dimensions.width * (1 - marginLeft - marginRight)) *
-              (dimensions.height * (1 - marginTop - marginBottom));
-
-            const radius = 5 || maxRadius || area * (0.0005 / dataCount);
-
-            const smallerDimension = Math.min(dimensions.width, dimensions.height);
-            const radius = maxRadius || smallerDimension * (0.1 / (dataCount / 10));
-            */
             const radius = 5;
 
             return (

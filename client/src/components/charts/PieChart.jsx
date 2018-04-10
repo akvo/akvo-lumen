@@ -135,6 +135,7 @@ export default class PieChart extends Component {
       innerRadius,
       style,
       legendVisible,
+      edit,
     } = this.props;
 
     if (!get(this.props.data, 'data')) return null;
@@ -236,6 +237,7 @@ export default class PieChart extends Component {
                                 endAngle={endAngle}
                                 fill={colors[bucketValue]}
                                 stroke="white"
+                                cursor={edit ? 'pointer' : 'default'}
                                 onClick={(event) => {
                                   this.handleClickNode({ bucketValue }, event);
                                 }}

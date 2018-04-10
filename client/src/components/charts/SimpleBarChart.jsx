@@ -8,8 +8,6 @@ import { extent } from 'd3-array';
 import { AxisLeft } from '@vx/axis';
 import { Portal } from 'react-portal';
 
-import { sortAlphabetically } from '../../utilities/utils';
-import { getFillDefs, getFill, getStroke } from '../../utilities/visualisationColors';
 import Legend from './Legend';
 import ResponsiveWrapper from '../ResponsiveWrapper';
 import ColorPicker from '../ColorPicker';
@@ -65,6 +63,7 @@ export default class PieChart extends Component {
     marginBottom: 0.2,
     legendVisible: false,
     edit: false,
+    padding: 0.1,
   }
 
   state = {
@@ -72,9 +71,7 @@ export default class PieChart extends Component {
   }
 
   getData() {
-    return this.props.data.data.sort((a, b) =>
-      sortAlphabetically(a, b, ({ key }) => key)
-    );
+    return this.props.data.data;
   }
 
   handleShowTooltip(event, content) {
@@ -128,9 +125,34 @@ export default class PieChart extends Component {
     });
   }
 
-  renderLabel({ key, nodeWidth, x, y, height }) {
+  renderLabel({ key, nodeWidth, x, y, domain, value }) {
     const labelX = x + (nodeWidth / 2);
-    const labelY = y + height + 10;
+    if (domain[0] < 0) {
+      const labelY = value < 0 ? y - 10 : y + 10;
+      return (
+        <Text
+          textAnchor={value < 0 ? 'end' : 'start'}
+          transform={[
+            { type: 'rotate', value: [90, labelX, labelY] },
+            { type: 'translate', value: [labelX, labelY] },
+          ]}
+          {...labelFont}
+          fontWeight={get(this.state, 'hoveredNode') === key ? 700 : 400}
+          onMouseEnter={(event) => {
+            this.handleMouseEnterNode({ key, value }, event);
+          }}
+          onMouseMove={(event) => {
+            this.handleMouseEnterNode({ key, value }, event);
+          }}
+          onMouseLeave={() => {
+            this.handleMouseLeaveNode({ key });
+          }}
+        >
+          {key}
+        </Text>
+      );
+    }
+    const labelY = y + 10;
     return (
       <Text
         textAnchor="start"
@@ -140,6 +162,15 @@ export default class PieChart extends Component {
         ]}
         {...labelFont}
         fontWeight={get(this.state, 'hoveredNode') === key ? 700 : 400}
+        onMouseEnter={(event) => {
+          this.handleMouseEnterNode({ key, value }, event);
+        }}
+        onMouseMove={(event) => {
+          this.handleMouseEnterNode({ key, value }, event);
+        }}
+        onMouseLeave={() => {
+          this.handleMouseLeaveNode({ key });
+        }}
       >
         {key}
       </Text>
@@ -158,6 +189,8 @@ export default class PieChart extends Component {
       marginLeft,
       style,
       legendVisible,
+      edit,
+      padding,
     } = this.props;
 
     if (!get(this.props.data, 'data')) return null;
@@ -190,10 +223,6 @@ export default class PieChart extends Component {
               if (this.state.isPickingColor) return;
               this.handleMouseEnterLegendNode(getDatum(data, datum));
             }}
-            // onMouseLeave={({ datum }) => () => {
-            //   if (this.state.isPickingColor) return;
-            //   this.handleMouseLeaveNode(getDatum(data, datum));
-            // }}
           />
         )}
         chart={
@@ -202,12 +231,12 @@ export default class PieChart extends Component {
 
             const domain = extent(data, ({ value }) => value);
             if (domain[0] > 0) domain[0] = 0;
+
             const heightScale = scaleLinear()
-              .domain(domain)
-              .range([
-                availableHeight,
-                0,
-              ]);
+              .domain([0, domain[1] - domain[0]])
+              .range([availableHeight, 0]);
+
+            const origin = heightScale(Math.abs(domain[0]));
 
             return (
               <div
@@ -224,8 +253,6 @@ export default class PieChart extends Component {
                 )}
                 <Svg width={dimensions.width} height={dimensions.height}>
 
-                  {getFillDefs(colors)}
-
                   <Grid
                     data={data}
                     bands
@@ -237,11 +264,18 @@ export default class PieChart extends Component {
                     // nodeEnter={d => ({ ...d, value: 0 })}
                     // animate
                   >{nodes => (
-                    <Group transform={{ translate: [dimensions.width * marginLeft, 0] }}>
+                    <Group
+                      transform={{
+                        translate: [
+                          dimensions.width * marginLeft,
+                          dimensions.height * marginTop,
+                        ],
+                      }}
+                    >
                       {nodes.map(({ nodeWidth, x, key, value }, i) => {
-                        const normalizedHeight = availableHeight - heightScale(value);
-                        const y = (dimensions.height * (1 - marginBottom)) - normalizedHeight;
+                        const normalizedHeight = availableHeight - heightScale(Math.abs(value));
                         const colorpickerPlacement = i < dataCount / 2 ? 'right' : 'left';
+                        const y = (value < 0) ? origin : origin - normalizedHeight;
                         return (
                           <Group>
                             {(this.state.isPickingColor === key) && (
@@ -254,7 +288,7 @@ export default class PieChart extends Component {
                                       (dimensions.width * marginLeft) + x + nodeWidth :
                                       (dimensions.width * marginLeft) + x
                                   }
-                                  top={y + (normalizedHeight / 2)}
+                                  top={y + (normalizedHeight / 2) + (dimensions.height * marginTop)}
                                   placement={colorpickerPlacement}
                                   onChange={({ hex }) => {
                                     onChangeVisualisationSpec({
@@ -267,12 +301,13 @@ export default class PieChart extends Component {
                             )}
                             <Rect
                               key={key}
-                              x={x}
+                              x={x + (nodeWidth * padding)}
                               y={y}
-                              width={nodeWidth}
+                              width={nodeWidth - (nodeWidth * padding * 2)}
                               height={normalizedHeight}
-                              fill={getFill(colors[key])}
-                              stroke={getStroke(colors[key])}
+                              fill={colors[key]}
+                              stroke={colors[key]}
+                              cursor={edit ? 'pointer' : 'default'}
                               onClick={(event) => {
                                 this.handleClickNode({ key }, event);
                               }}
@@ -291,7 +326,8 @@ export default class PieChart extends Component {
                               value,
                               nodeWidth,
                               x,
-                              y,
+                              y: origin,
+                              domain,
                               height: normalizedHeight,
                             })}
                           </Group>
@@ -301,12 +337,13 @@ export default class PieChart extends Component {
                   )}</Grid>
 
                   <AxisLeft
-                    scale={heightScale}
+                    scale={scaleLinear().domain(domain).range([0, availableHeight].reverse())}
                     left={dimensions.width * marginLeft}
                     top={dimensions.height * marginTop}
                     label={'Y Axis'}
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}
+                    numTicks={20}
                   />
 
                 </Svg>
