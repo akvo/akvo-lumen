@@ -10,7 +10,7 @@
 
   (testing "Label from blacklist"
     (is (thrown? clojure.lang.ExceptionInfo
-                 (at/conform-label (rand-nth at/blacklist)))))
+                 (at/conform-label (rand-nth (seq at/blacklist))))))
 
   (testing "Too short"
     (is (thrown? clojure.lang.ExceptionInfo

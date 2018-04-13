@@ -6,9 +6,9 @@ function log {
    echo "$(date +"%T") - INFO - $*"
 }
 
-read -r -p "Probably is either test or lumen (for production): " CLUSTER
+read -r -p "Probably is either test or production: " CLUSTER
 
-if [ "${CLUSTER}" == "lumen" ]; then
+if [ "${CLUSTER}" == "production" ]; then
  read -r -e -p "Are you sure you want to flip production? [yn] " CONFIRM
  if [ "${CONFIRM}" != "y" ]; then
     log "Nothing done"
