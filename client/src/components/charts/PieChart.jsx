@@ -5,6 +5,7 @@ import { positionFromAngle } from '@nivo/core'; // TODO: move this to potion
 import { Arc, Svg, Group, Text } from '@potion/element';
 import get from 'lodash/get';
 import { Portal } from 'react-portal';
+import merge from 'lodash/merge';
 
 import { sortAlphabetically } from '../../utilities/utils';
 import { round } from '../../utilities/chart';
@@ -13,9 +14,9 @@ import ResponsiveWrapper from '../ResponsiveWrapper';
 import ColorPicker from '../ColorPicker';
 import ChartLayout from './ChartLayout';
 import Tooltip from './Tooltip';
-import { labelFont } from '../../constants/chart';
+import { keyFont } from '../../constants/chart';
 
-const getDatum = (data, datum) => data.filter(({ bucketValue }) => bucketValue === datum)[0];
+const getDatum = (data, datum) => data.filter(({ key }) => key === datum)[0];
 
 export default class PieChart extends Component {
 
@@ -24,7 +25,8 @@ export default class PieChart extends Component {
       data: PropTypes.array,
       metadata: PropTypes.object,
     }),
-    colors: PropTypes.object.isRequired,
+    colors: PropTypes.array.isRequired,
+    colorMappings: PropTypes.object,
     onChangeVisualisationSpec: PropTypes.func.isRequired,
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
@@ -42,6 +44,7 @@ export default class PieChart extends Component {
     interactive: true,
     legendVisible: true,
     edit: false,
+    colorMappings: {},
   }
 
   state = {
@@ -49,9 +52,23 @@ export default class PieChart extends Component {
   }
 
   getData() {
-    return this.props.data.data.sort((a, b) =>
-      sortAlphabetically(a, b, ({ bucketValue }) => bucketValue)
-    );
+    const { data } = this.props;
+
+    if (!get(data, 'series[0]')) return false;
+
+    const series = merge({}, data.common, data.series[0]);
+
+    return {
+      ...series,
+      data: series.data
+        .sort((a, b) => sortAlphabetically(a, b, ({ key }) => key))
+        .map(datum => ({ ...datum, value: Math.abs(datum.value) })),
+    };
+  }
+
+  getColor(key, index) {
+    const { colorMappings, colors } = this.props;
+    return colorMappings[key] || colors[index];
   }
 
   handleShowTooltip(event, content) {
@@ -75,53 +92,53 @@ export default class PieChart extends Component {
     });
   }
 
-  handleMouseEnterNode({ bucketValue, bucketCount }, event) {
+  handleMouseEnterNode({ key, value }, event) {
     const { interactive, print, colors } = this.props;
     if (!interactive || print) return;
     this.handleShowTooltip(event, {
-      key: bucketValue,
-      color: colors[bucketValue],
-      value: bucketCount,
+      key,
+      color: colors[key],
+      value,
     });
-    this.setState({ hoveredNode: bucketValue });
+    this.setState({ hoveredNode: key });
   }
 
-  handleMouseEnterLegendNode({ bucketValue }) {
+  handleMouseEnterLegendNode({ key }) {
     if (this.state.isPickingColor) return;
     const { interactive, print } = this.props;
     if (!interactive || print) return;
-    this.setState({ hoveredNode: bucketValue });
+    this.setState({ hoveredNode: key });
   }
 
-  handleMouseLeaveNode({ bucketValue }) {
+  handleMouseLeaveNode({ key }) {
     const { interactive, print } = this.props;
     if (!interactive || print) return;
-    if (this.state.hoveredNode === bucketValue) {
+    if (this.state.hoveredNode === key) {
       this.setState({ hoveredNode: null, tooltipVisible: false });
     }
   }
 
-  handleClickNode({ bucketValue }, event) {
+  handleClickNode({ key }, event) {
     const { interactive, print, edit } = this.props;
     if (!interactive || print) return;
     event.stopPropagation();
     this.setState({
-      isPickingColor: edit ? bucketValue : null,
-      hoveredNode: bucketValue,
+      isPickingColor: edit ? key : null,
+      hoveredNode: key,
     });
   }
 
-  renderLabel({ bucketValue, bucketCount, labelPosition, midAngle, totalCount }) {
+  renderkey({ key, value, labelPosition, midAngle, totalCount }) {
     const { print, interactive, legendVisible } = this.props;
     return (print || !interactive) ? (
       <Text
         textAnchor={midAngle > Math.PI / 2 ? 'end' : 'start'}
         transform={{ translate: [labelPosition.x, labelPosition.y] }}
-        {...labelFont}
+        {...keyFont}
       >
-        {(!print && interactive && !legendVisible) && `${bucketValue}: `}
-        {bucketCount}
-        &nbsp;({round((bucketCount / totalCount) * 100, 2)}%)
+        {(!print && interactive && !legendVisible) && `${key}: `}
+        {value}
+        &nbsp;({round((value / totalCount) * 100, 2)}%)
       </Text>
     ) : null;
   }
@@ -138,10 +155,11 @@ export default class PieChart extends Component {
       edit,
     } = this.props;
 
-    if (!get(this.props.data, 'data')) return null;
+    const series = this.getData();
 
-    const data = this.getData();
-    const totalCount = data.reduce((total, datum) => total + datum.bucketCount, 0);
+    if (!series) return null;
+
+    const totalCount = series.data.reduce((total, datum) => total + datum.value, 0);
     const { tooltipItems, tooltipVisible, tooltipPosition } = this.state;
 
     return (
@@ -157,18 +175,23 @@ export default class PieChart extends Component {
           <Legend
             horizontal={!horizontal}
             title={get(this.props, 'data.metadata.bucketColumnTitle')}
-            data={data.map(({ bucketValue }) => bucketValue)}
-            colors={colors}
+            data={series.data.map(({ key }) => key)}
+            colorMappings={
+              series.data.reduce((acc, { key }, i) => ({
+                ...acc,
+                [key]: this.getColor(key, i),
+              }), {})
+            }
             activeItem={get(this.state, 'hoveredNode')}
             onClick={({ datum }) => (event) => {
-              this.handleClickNode({ ...getDatum(data, datum) }, event);
+              this.handleClickNode({ ...getDatum(series.data, datum) }, event);
             }}
             onMouseEnter={({ datum }) => () => {
-              this.handleMouseEnterLegendNode(getDatum(data, datum));
+              this.handleMouseEnterLegendNode(getDatum(series.data, datum));
             }}
             onMouseLeave={({ datum }) => () => {
               if (this.state.isPickingColor) return;
-              this.handleMouseLeaveNode(getDatum(data, datum));
+              this.handleMouseLeaveNode(getDatum(series.data, datum));
             }}
           />
         )}
@@ -192,17 +215,20 @@ export default class PieChart extends Component {
                 <Svg width={dimensions.width} height={dimensions.height}>
                   <Group transform={{ translate: [dimensions.width / 2, dimensions.height / 2] }}>
                     <Pie
-                      data={data}
-                      value={datum => datum.bucketCount}
-                      id={datum => datum.bucketValue}
-                      sort={() => 1}
+                      data={series.data}
+                      value={datum => datum.value}
+                      id={datum => datum.key}
+                      sort={(a, b) =>
+                        sortAlphabetically(a, b, ({ key }) => key)
+                      }
                     >{nodes => (
                       <Group>
                         {nodes.map(({
                           startAngle,
                           endAngle,
-                          data: { bucketValue, bucketCount },
+                          data: { key, value },
                         }, i) => {
+                          const color = this.getColor(key, i);
                           const midAngle = (((endAngle - startAngle) / 2) + startAngle) -
                             (Math.PI / 2);
                           const labelPosition = positionFromAngle(midAngle, diameter * 0.35);
@@ -212,14 +238,14 @@ export default class PieChart extends Component {
 
                           return (
                             <Group>
-                              {(this.state.isPickingColor === bucketValue) && (
+                              {(this.state.isPickingColor === key) && (
                                 <Portal node={this.wrap}>
                                   <ColorPicker
                                     left={dimensions.width / 2}
                                     top={dimensions.height / 2}
                                     placement={colorpickerPlacement}
-                                    title={`Pick color: ${bucketValue}`}
-                                    color={colors[this.state.isPickingColor]}
+                                    title={`Pick color: ${key}`}
+                                    color={color}
                                     onChange={({ hex }) => {
                                       onChangeVisualisationSpec({
                                         colors: { ...colors, [this.state.isPickingColor]: hex },
@@ -232,28 +258,28 @@ export default class PieChart extends Component {
                               <Arc
                                 key={i}
                                 innerRadius={innerRadius}
-                                outerRadius={diameter * (get(this.state, 'hoveredNode') === bucketValue ? 0.31 : 0.3)}
+                                outerRadius={diameter * (get(this.state, 'hoveredNode') === key ? 0.31 : 0.3)}
                                 startAngle={startAngle}
                                 endAngle={endAngle}
-                                fill={colors[bucketValue]}
+                                fill={color}
                                 stroke="white"
                                 cursor={edit ? 'pointer' : 'default'}
                                 onClick={(event) => {
-                                  this.handleClickNode({ bucketValue }, event);
+                                  this.handleClickNode({ key }, event);
                                 }}
                                 onMouseEnter={(event) => {
-                                  this.handleMouseEnterNode({ bucketValue, bucketCount }, event);
+                                  this.handleMouseEnterNode({ key, value }, event);
                                 }}
                                 onMouseMove={(event) => {
-                                  this.handleMouseEnterNode({ bucketValue, bucketCount }, event);
+                                  this.handleMouseEnterNode({ key, value }, event);
                                 }}
                                 onMouseLeave={() => {
-                                  this.handleMouseLeaveNode({ bucketValue });
+                                  this.handleMouseLeaveNode({ key });
                                 }}
                               />
-                              {this.renderLabel({
-                                bucketValue,
-                                bucketCount,
+                              {this.renderkey({
+                                key,
+                                value,
                                 midAngle,
                                 labelPosition,
                                 totalCount,

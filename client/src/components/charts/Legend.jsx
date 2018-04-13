@@ -8,10 +8,10 @@ import LegendShape from './LegendShape';
 
 const Legend = ({
   data,
-  colors,
   title,
   horizontal = false,
   activeItem,
+  colorMappings = {},
   ...rest
 }) => {
   const ordinalColor = scaleOrdinal({ domain: data, range: [] });
@@ -20,8 +20,6 @@ const Legend = ({
       {title && <h4>{title}</h4>}
       <LegendOrdinal
         {...rest}
-        // direction={horizontal ? 'row' : undefined}
-        // itemDirection={horizontal ? 'row' : undefined}
         shapeMargin="0"
         labelMargin="0 0 0 4px"
         itemMargin="0 5px"
@@ -29,13 +27,7 @@ const Legend = ({
         shape={({ label: { datum }, ...shapeRest }) => (
           <LegendShape isActive={activeItem === datum} {...shapeRest} />
         )}
-        fill={({ datum }) => colors[datum]}
-        // onMouseOver={data => event => {
-        //   console.log(
-        //     `mouse over: ${data.text}`,
-        //     `index: ${data.index}`,
-        //   );
-        // }}
+        fill={({ datum }) => colorMappings[datum]}
       />
     </div>
   );
@@ -43,7 +35,7 @@ const Legend = ({
 
 Legend.propTypes = {
   data: PropTypes.arrayOf(PropTypes.string),
-  colors: PropTypes.object.isRequired,
+  colorMappings: PropTypes.object.isRequired,
   onClick: PropTypes.func,
   horizontal: PropTypes.bool,
   title: PropTypes.string,

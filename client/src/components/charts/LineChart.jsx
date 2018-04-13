@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Collection } from '@potion/layout'; // TODO: see if can optimize this
-import { Circle, Svg, Group, Area } from '@potion/element';
+import { Circle, Svg, Group, Area, Polyline } from '@potion/element';
 import { AxisBottom, AxisLeft } from '@vx/axis';
 import get from 'lodash/get';
 import { scaleLinear } from 'd3-scale';
@@ -42,6 +42,9 @@ export default class PieChart extends Component {
     marginBottom: PropTypes.number,
     opacity: PropTypes.number,
     style: PropTypes.object,
+    area: PropTypes.bool,
+    xAxisLabel: PropTypes.string,
+    yAxisLabel: PropTypes.string,
   }
 
   static defaultProps = {
@@ -51,6 +54,7 @@ export default class PieChart extends Component {
     marginBottom: 0.2,
     opacity: 0.9,
     edit: false,
+    area: false,
   }
 
   state = {
@@ -123,6 +127,9 @@ export default class PieChart extends Component {
       marginTop,
       marginBottom,
       style,
+      area,
+      xAxisLabel,
+      yAxisLabel,
     } = this.props;
     if (!get(this.props.data, 'data')) return null;
 
@@ -158,6 +165,7 @@ export default class PieChart extends Component {
                 dimensions.height * marginTop,
               ]);
 
+            const origin = yScale(0);
             const radius = Math.min((5 / data.length) * 20, 5);
 
             return (
@@ -185,7 +193,6 @@ export default class PieChart extends Component {
                     left={dimensions.width / 2}
                     top={dimensions.height / 2}
                     style={{ transform: 'translateX(-50%) translateY(-50%)' }}
-                    // placement={colorpickerPlacement}
                   />
                 )}
 
@@ -193,13 +200,27 @@ export default class PieChart extends Component {
 
                   <Collection data={data}>{nodes => (
                     <Group>
-                      <Area
+                      {area && (
+                        <Area
+                          points={data}
+                          x={d => xScale(d.x)}
+                          y1={d => yScale(d.y)}
+                          y0={origin}
+                          fill={color}
+                          fillOpacity={0.6}
+                          onClick={(event) => {
+                            this.handleClickNode({ key: null }, event);
+                          }}
+                        />
+                      )}
+
+                      <Polyline
                         points={data}
                         x={d => xScale(d.x)}
-                        y1={d => yScale(d.y)}
-                        y0={dimensions.height * (1 - marginBottom)}
-                        fill={color}
-                        fillOpacity={0.8}
+                        y={d => yScale(d.y)}
+                        fill="none"
+                        stroke={color}
+                        strokeWidth={2}
                         onClick={(event) => {
                           this.handleClickNode({ key: null }, event);
                         }}
@@ -224,10 +245,6 @@ export default class PieChart extends Component {
                               onMouseEnter={(event) => {
                                 this.handleMouseEnterNode({ key, x, y }, event);
                               }}
-                              // onMouseLeave={() => {
-                              //   if (this.state.isPickingColor) return;
-                              //   this.handleMouseLeaveNode({ key });
-                              // }}
                             />
                           </Group>
                         );
@@ -237,16 +254,16 @@ export default class PieChart extends Component {
 
                   <AxisLeft
                     scale={yScale}
-                    left={dimensions.width * marginLeft}
-                    label={'Y Axis'}
+                    left={xScale(0)}
+                    label={yAxisLabel || ''}
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}
                   />
 
                   <AxisBottom
                     scale={xScale}
-                    top={dimensions.height * (1 - marginBottom)}
-                    label={'X Axis'}
+                    top={origin}
+                    label={xAxisLabel || ''}
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}
                   />

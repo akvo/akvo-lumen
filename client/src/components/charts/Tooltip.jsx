@@ -20,7 +20,6 @@ const Tooltip = ({ items, ...rest }) => (items.length ? (
 
 Tooltip.propTypes = {
   items: PropTypes.array,
-  children: PropTypes.func.isRequired,
 };
 
 export default Tooltip;

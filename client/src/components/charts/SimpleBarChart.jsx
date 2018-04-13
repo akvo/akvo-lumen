@@ -47,12 +47,14 @@ export default class PieChart extends Component {
     print: PropTypes.bool,
     interactive: PropTypes.bool,
     edit: PropTypes.bool,
+    padding: PropTypes.number,
     marginLeft: PropTypes.number,
     marginRight: PropTypes.number,
     marginTop: PropTypes.number,
     marginBottom: PropTypes.number,
     style: PropTypes.object,
     legendVisible: PropTypes.bool,
+    yAxisLabel: PropTypes.string,
   }
 
   static defaultProps = {
@@ -191,6 +193,7 @@ export default class PieChart extends Component {
       legendVisible,
       edit,
       padding,
+      yAxisLabel,
     } = this.props;
 
     if (!get(this.props.data, 'data')) return null;
@@ -340,7 +343,7 @@ export default class PieChart extends Component {
                     scale={scaleLinear().domain(domain).range([0, availableHeight].reverse())}
                     left={dimensions.width * marginLeft}
                     top={dimensions.height * marginTop}
-                    label={'Y Axis'}
+                    label={yAxisLabel || ''}
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}
                     numTicks={20}

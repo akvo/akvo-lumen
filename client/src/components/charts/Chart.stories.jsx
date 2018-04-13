@@ -11,9 +11,8 @@ import '../../styles/reset.global.scss';
 import '../../styles/style.global.scss';
 import PieChart from './PieChart';
 import ScatterChart from './ScatterChart';
-import AreaChart from './AreaChart';
+import LineChart from './LineChart';
 import BarChart from './BarChart';
-import { sortAlphabetically } from '../../utilities/utils';
 
 const letters = 'abcdef ghijklmn opqrstuvwxyz 123456789'.split('');
 const letterCount = letters.length;
@@ -35,7 +34,31 @@ for (let i = 0; i < intervals; i++) {
   const c = hsl(interpolateSpectral(i * increment));
   rainbowColors.push(`${c}`);
 }
-const p = generatePalette({ colors: rainbowColors });
+const palette = generatePalette({ colors: rainbowColors });
+
+const generateData = ({ seriesCount, nodeCount, minVal, maxVal, labelLength }) => {
+  const result = {
+    series: [],
+    common: { data: [] },
+  };
+
+  for (let s = 0; s < seriesCount; s++) {
+    const series = { data: [] };
+    result.series.push(series);
+    for (let i = 0; i < nodeCount; i++) {
+      series.data.push({
+        value: randomIntFromInterval(minVal, maxVal),
+      });
+    }
+  }
+
+  for (let i = 0; i < nodeCount; i++) {
+    result.common.data.push({
+      key: randomString(labelLength || 10),
+    });
+  }
+  return result;
+};
 
 storiesOf('Charts', module)
   .addDecorator(withKnobs)
@@ -46,37 +69,26 @@ storiesOf('Charts', module)
     const minVal = number('min value', 1);
     const maxVal = number('max value', 100);
 
-    const generateNodes = () => {
-      const nodes = [];
-      for (let i = 0; i < nodeCount; i++) {
-        nodes.push({
-          bucketCount: randomIntFromInterval(minVal, maxVal),
-          bucketValue: randomString(labelLength),
-        });
-      }
-      return nodes.sort((a, b) => sortAlphabetically(a, b, ({ bucketValue }) => bucketValue));
-    };
-    const data = generateNodes();
-    const c = p(nodeCount);
-    const colors = data.reduce((acc, datum, i) => {
-      const result = { ...acc };
-      if (!result[datum.bucketValue]) {
-        result[datum.bucketValue] = c[i];
-      }
-      return result;
-    }, {});
+    const data = generateData({
+      seriesCount: 1,
+      nodeCount,
+      labelLength,
+      minVal,
+      maxVal,
+    });
 
     return (
       <div>
         <PieChart
           style={{ border: '1px solid black' }}
           data={{
-            data,
+            ...data,
             metadata: {
               bucketColumnTitle: text('props.data.metadata.bucketColumnTitle', 'Legend Title'),
             },
           }}
-          colors={colors}
+          colors={palette(nodeCount)}
+          colorMappings={{ [data.common.data[0].key]: color('props.colorMappings[key]', 'rgb(158, 1, 66)') }}
           innerRadius={number('props.innerRadius', 0)}
           onChangeVisualisationSpec={action('vis-spec-change')}
           width={number('props.width', 600)}
@@ -100,39 +112,46 @@ storiesOf('Charts', module)
     const labelLength = number('label length', 10);
     const minVal = number('min value', 1);
     const maxVal = number('max value', 100);
-    const generateNodes = () => {
-      const nodes = [];
-      for (let i = 0; i < nodeCount; i++) {
-        nodes.push({
-          key: randomString(labelLength),
-          x: randomIntFromInterval(minVal, maxVal),
-          y: randomIntFromInterval(minVal, maxVal),
-          r: randomIntFromInterval(minVal, maxVal),
-        });
-      }
-      return nodes;
-    };
-    const data = generateNodes();
-    const c = p(nodeCount);
-    const colors = data.reduce((acc, datum, i) => {
-      const result = { ...acc };
-      if (!result[datum.key]) {
-        result[datum.key] = c[i];
-      }
-      return result;
-    }, {});
+    const data = generateData({
+      seriesCount: 1,
+      nodeCount,
+      labelLength,
+      minVal,
+      maxVal,
+    });
+    // const generateNodes = () => {
+    //   const nodes = [];
+    //   for (let i = 0; i < nodeCount; i++) {
+    //     nodes.push({
+    //       key: randomString(labelLength),
+    //       x: randomIntFromInterval(minVal, maxVal),
+    //       y: randomIntFromInterval(minVal, maxVal),
+    //       r: randomIntFromInterval(minVal, maxVal),
+    //     });
+    //   }
+    //   return nodes;
+    // };
+    // const data = generateNodes();
+    // const c = p(nodeCount);
+    // const colors = data.reduce((acc, datum, i) => {
+    //   const result = { ...acc };
+    //   if (!result[datum.key]) {
+    //     result[datum.key] = c[i];
+    //   }
+    //   return result;
+    // }, {});
 
     return (
       <div>
         <ScatterChart
           style={{ border: '1px solid black' }}
           data={{
-            data,
+            ...data,
             metadata: {
               bucketColumnTitle: text('props.data.metatdata.bucketColumnTitle', 'Legend Title'),
             },
           }}
-          colors={colors}
+          colors={palette(nodeCount)}
           onChangeVisualisationSpec={action('vis-spec-change')}
           width={number('props.width', 600)}
           height={number('props.height', 600)}
@@ -157,31 +176,38 @@ storiesOf('Charts', module)
     );
   })
 
-  .add('AreaChart', () => {
+  .add('LineChart/AreaChart', () => {
     const nodeCount = number('node count', 20);
     const minVal = number('min value', 1);
     const maxVal = number('max value', 100);
+    const data = generateData({
+      seriesCount: 1,
+      nodeCount,
+      minVal,
+      maxVal,
+    });
 
-    const generateNodes = () => {
-      const nodes = [];
-      for (let i = 0; i < nodeCount; i++) {
-        nodes.push({
-          key: i,
-          x: i,
-          y: randomIntFromInterval(minVal, maxVal),
-        });
-      }
-      return nodes;
-    };
+    // const generateNodes = () => {
+    //   const nodes = [];
+    //   for (let i = 0; i < nodeCount; i++) {
+    //     nodes.push({
+    //       key: i,
+    //       x: i,
+    //       y: randomIntFromInterval(minVal, maxVal),
+    //     });
+    //   }
+    //   return nodes;
+    // };
 
-    const data = generateNodes();
+    // const data = generateNodes();
 
     return (
       <div>
-        <AreaChart
+        <LineChart
+          area={boolean('props.area', false)}
           style={{ border: '1px solid black' }}
           data={{
-            data,
+            ...data,
             metadata: {
               bucketColumnTitle: text('props.data.metatdata.bucketColumnTitle', 'Legend Title'),
             },
@@ -197,6 +223,8 @@ storiesOf('Charts', module)
           print={boolean('props.print', false)}
           interactive={boolean('props.interactive', true)}
           edit={boolean('props.edit', true)}
+          xAxisLabel={text('props.xAxisLabel', 'X Axis')}
+          yAxisLabel={text('props.yAxisLabel', 'Y Axis')}
         />
         <pre>
           <code>
@@ -212,41 +240,48 @@ storiesOf('Charts', module)
     const minVal = number('min value', 1);
     const maxVal = number('max value', 100);
     const labelLength = number('label length', 10);
+    const data = generateData({
+      seriesCount: 1,
+      nodeCount,
+      labelLength,
+      minVal,
+      maxVal,
+    });
 
-    const generateNodes = () => {
-      const nodes = [];
-      for (let i = 0; i < nodeCount; i++) {
-        nodes.push({
-          key: randomString(labelLength),
-          value: randomIntFromInterval(minVal, maxVal),
-        });
-      }
-      return nodes.sort((a, b) =>
-        sortAlphabetically(a, b, ({ key }) => key)
-      );
-    };
+    // const generateNodes = () => {
+    //   const nodes = [];
+    //   for (let i = 0; i < nodeCount; i++) {
+    //     nodes.push({
+    //       key: randomString(labelLength),
+    //       value: randomIntFromInterval(minVal, maxVal),
+    //     });
+    //   }
+    //   return nodes.sort((a, b) =>
+    //     sortAlphabetically(a, b, ({ key }) => key)
+    //   );
+    // };
 
-    const data = generateNodes();
-    const c = p(nodeCount);
-    const colors = data.reduce((acc, datum, i) => {
-      const result = { ...acc };
-      if (!result[datum.key]) {
-        result[datum.key] = c[i];
-      }
-      return result;
-    }, {});
+    // const data = generateNodes();
+    // const c = p(nodeCount);
+    // const colors = data.reduce((acc, datum, i) => {
+    //   const result = { ...acc };
+    //   if (!result[datum.key]) {
+    //     result[datum.key] = c[i];
+    //   }
+    //   return result;
+    // }, {});
 
     return (
       <div>
         <BarChart
           style={{ border: '1px solid black' }}
           data={{
-            data,
+            ...data,
             metadata: {
               bucketColumnTitle: text('props.data.metatdata.bucketColumnTitle', 'Legend Title'),
             },
           }}
-          colors={colors}
+          colors={palette(nodeCount)}
           onChangeVisualisationSpec={action('vis-spec-change')}
           width={number('props.width', 600)}
           height={number('props.height', 600)}
@@ -259,6 +294,7 @@ storiesOf('Charts', module)
           interactive={boolean('props.interactive', true)}
           edit={boolean('props.edit', true)}
           legendVisible={boolean('props.legendVisible', false)}
+          yAxisLabel={text('props.yAxisLabel', 'Y Axis')}
         />
         <pre>
           <code>
@@ -274,43 +310,50 @@ storiesOf('Charts', module)
     const minVal = number('min value', 1);
     const maxVal = number('max value', 100);
     const labelLength = number('label length', 10);
+    const data = generateData({
+      seriesCount: 1,
+      nodeCount,
+      labelLength,
+      minVal,
+      maxVal,
+    });
 
-    const generateNodes = () => {
-      const nodes = [];
-      for (let i = 0; i < nodeCount; i++) {
-        nodes.push({
-          key: randomString(labelLength),
-          values: [
-            randomIntFromInterval(minVal, maxVal),
-            randomIntFromInterval(minVal, maxVal),
-            randomIntFromInterval(minVal, maxVal),
-          ],
-        });
-      }
-      return nodes;
-    };
+    // const generateNodes = () => {
+    //   const nodes = [];
+    //   for (let i = 0; i < nodeCount; i++) {
+    //     nodes.push({
+    //       key: randomString(labelLength),
+    //       values: [
+    //         randomIntFromInterval(minVal, maxVal),
+    //         randomIntFromInterval(minVal, maxVal),
+    //         randomIntFromInterval(minVal, maxVal),
+    //       ],
+    //     });
+    //   }
+    //   return nodes;
+    // };
 
-    const data = generateNodes();
-    const c = p(nodeCount);
-    const colors = data.reduce((acc, datum, i) => {
-      const result = { ...acc };
-      if (!result[datum.key]) {
-        result[datum.key] = c[i];
-      }
-      return result;
-    }, {});
+    // const data = generateNodes();
+    // const c = p(nodeCount);
+    // const colors = data.reduce((acc, datum, i) => {
+    //   const result = { ...acc };
+    //   if (!result[datum.key]) {
+    //     result[datum.key] = c[i];
+    //   }
+    //   return result;
+    // }, {});
 
     return (
       <div>
         <BarChart
           style={{ border: '1px solid black' }}
           data={{
-            data,
+            ...data,
             metadata: {
               bucketColumnTitle: text('props.data.metatdata.bucketColumnTitle', 'Legend Title'),
             },
           }}
-          colors={colors}
+          colors={palette(nodeCount)}
           onChangeVisualisationSpec={action('vis-spec-change')}
           width={number('props.width', 600)}
           height={number('props.height', 600)}
