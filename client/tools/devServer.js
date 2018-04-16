@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 // This file configures the development web server
 // which supports hot reloading and synchronized testing.
 

@@ -4,15 +4,17 @@ import { Collection } from '@potion/layout'; // TODO: see if can optimize this
 import { Circle, Svg, Group, Area, Polyline } from '@potion/element';
 import { AxisBottom, AxisLeft } from '@vx/axis';
 import get from 'lodash/get';
-import { scaleLinear } from 'd3-scale';
+import { scaleLinear, scaleTime } from 'd3-scale';
 import { extent } from 'd3-array';
+import merge from 'lodash/merge';
 
+import { sortChronologically } from '../../utilities/utils';
 import ResponsiveWrapper from '../ResponsiveWrapper';
 import ColorPicker from '../ColorPicker';
 import ChartLayout from './ChartLayout';
 import Tooltip from './Tooltip';
 
-export default class PieChart extends Component {
+export default class LineChart extends Component {
 
   static propTypes = {
     data: PropTypes.shape({
@@ -62,11 +64,16 @@ export default class PieChart extends Component {
   }
 
   getData() {
-    return this.props.data.data.sort((a, b) => {
-      if (a.x < b.x) return 1;
-      if (a.x > b.x) return -1;
-      return 0;
-    });
+    const { data } = this.props;
+
+    if (!get(data, 'series[0]')) return false;
+
+    const series = merge({}, data.common, data.series[0]);
+
+    return {
+      ...series,
+      data: series.data.sort((a, b) => sortChronologically(a, b, ({ timestamp }) => timestamp)),
+    };
   }
 
   handleShowTooltip(event, { xLabel, x, yLabel, y }) {
@@ -131,10 +138,11 @@ export default class PieChart extends Component {
       xAxisLabel,
       yAxisLabel,
     } = this.props;
-    if (!get(this.props.data, 'data')) return null;
-
-    const data = this.getData();
     const { tooltipItems, tooltipVisible, tooltipPosition } = this.state;
+
+    const series = this.getData();
+
+    if (!series) return null;
 
     return (
       <ChartLayout
@@ -147,16 +155,14 @@ export default class PieChart extends Component {
         }}
         chart={
           <ResponsiveWrapper>{(dimensions) => {
-            const xExtent = extent(data, ({ x }) => x);
-            if (xExtent[0] > 0) xExtent[0] = 0;
-            const xScale = scaleLinear()
-              .domain(xExtent)
+            const xScale = scaleTime()
+              .domain([series.data[0].timestamp, series.data[series.data.length - 1].timestamp])
               .range([
                 dimensions.width * marginLeft,
                 dimensions.width * (1 - marginRight),
               ]);
 
-            const yExtent = extent(data, ({ y }) => y);
+            const yExtent = extent(series.data, ({ value }) => value);
             if (yExtent[0] > 0) yExtent[0] = 0;
             const yScale = scaleLinear()
               .domain(yExtent)
@@ -166,7 +172,7 @@ export default class PieChart extends Component {
               ]);
 
             const origin = yScale(0);
-            const radius = Math.min((5 / data.length) * 20, 5);
+            const radius = Math.min((5 / series.data.length) * 20, 5);
 
             return (
               <div
@@ -196,13 +202,19 @@ export default class PieChart extends Component {
                   />
                 )}
 
-                <Svg width={dimensions.width} height={dimensions.height}>
+                <Svg
+                  width={dimensions.width}
+                  height={dimensions.height}
+                  onClick={() => {
+                    this.setState({ hoveredNode: null, tooltipVisible: false });
+                  }}
+                >
 
-                  <Collection data={data}>{nodes => (
+                  <Collection data={series.data}>{nodes => (
                     <Group>
                       {area && (
                         <Area
-                          points={data}
+                          points={series.data}
                           x={d => xScale(d.x)}
                           y1={d => yScale(d.y)}
                           y0={origin}
@@ -215,9 +227,9 @@ export default class PieChart extends Component {
                       )}
 
                       <Polyline
-                        points={data}
-                        x={d => xScale(d.x)}
-                        y={d => yScale(d.y)}
+                        points={series.data}
+                        x={d => xScale(d.timestamp)}
+                        y={d => yScale(d.value)}
                         fill="none"
                         stroke={color}
                         strokeWidth={2}
@@ -226,9 +238,9 @@ export default class PieChart extends Component {
                         }}
                       />
 
-                      {nodes.map(({ key, x, y }, i) => {
-                        const normalizedX = xScale(x);
-                        const normalizedY = yScale(y);
+                      {nodes.map(({ key, timestamp, value }, i) => {
+                        const normalizedX = xScale(timestamp);
+                        const normalizedY = yScale(value);
                         return (
                           <Group>
                             <Circle
@@ -243,7 +255,7 @@ export default class PieChart extends Component {
                                 this.handleClickNode({ key }, event);
                               }}
                               onMouseEnter={(event) => {
-                                this.handleMouseEnterNode({ key, x, y }, event);
+                                this.handleMouseEnterNode({ key, x: timestamp, y: value }, event);
                               }}
                             />
                           </Group>
@@ -254,7 +266,7 @@ export default class PieChart extends Component {
 
                   <AxisLeft
                     scale={yScale}
-                    left={xScale(0)}
+                    left={xScale(series.data[0].timestamp)}
                     label={yAxisLabel || ''}
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}

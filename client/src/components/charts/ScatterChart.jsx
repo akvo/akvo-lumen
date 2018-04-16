@@ -7,7 +7,9 @@ import get from 'lodash/get';
 import { scaleLinear } from 'd3-scale';
 import { extent } from 'd3-array';
 import { Portal } from 'react-portal';
+import merge from 'lodash/merge';
 
+import { sortAlphabetically } from '../../utilities/utils';
 import Legend from './Legend';
 import ResponsiveWrapper from '../ResponsiveWrapper';
 import ColorPicker from '../ColorPicker';
@@ -16,7 +18,7 @@ import ChartLayout from './ChartLayout';
 
 const getDatum = (data, datum) => data.filter(({ key }) => key === datum)[0];
 
-export default class PieChart extends Component {
+export default class ScatterChart extends Component {
 
   static propTypes = {
     data: PropTypes.shape({
@@ -30,7 +32,8 @@ export default class PieChart extends Component {
       ),
       metadata: PropTypes.object,
     }),
-    colors: PropTypes.object.isRequired,
+    colors: PropTypes.array.isRequired,
+    colorMappings: PropTypes.object,
     onChangeVisualisationSpec: PropTypes.func.isRequired,
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
@@ -56,6 +59,7 @@ export default class PieChart extends Component {
     opacity: 0.9,
     legendVisible: false,
     edit: false,
+    colorMappings: {},
   }
 
   state = {
@@ -63,11 +67,27 @@ export default class PieChart extends Component {
   }
 
   getData() {
-    return this.props.data.data.sort((a, b) => {
-      if (a.r < b.r) return 1;
-      if (a.r > b.r) return -1;
-      return 0;
-    });
+    const { data } = this.props;
+
+    if (!get(data, 'series[0]')) return false;
+
+    const values = data.series[0].data
+      .map(({ value, ...rest }, i) => ({
+        ...rest,
+        x: Math.abs(value),
+        y: Math.abs(data.series[1].data[i].value),
+      }));
+    const series = merge({}, data.common, { ...data.series[0], data: values });
+
+    return {
+      ...series,
+      data: series.data.sort((a, b) => sortAlphabetically(a, b, ({ key }) => key)),
+    };
+  }
+
+  getColor(key, index) {
+    const { colorMappings, colors } = this.props;
+    return colorMappings[key] || colors[index];
   }
 
   handleShowTooltip(event, tooltipItems) {
@@ -92,11 +112,11 @@ export default class PieChart extends Component {
     });
   }
 
-  handleMouseEnterNode({ key, x, y }, event) {
-    const { interactive, print, colors } = this.props;
+  handleMouseEnterNode({ key, x, y, color }, event) {
+    const { interactive, print } = this.props;
     if (!interactive || print) return;
     this.handleShowTooltip(event, [
-      { key, color: colors[key] },
+      { key, color },
       { key: 'x', value: x },
       { key: 'y', value: y },
     ]);
@@ -139,11 +159,10 @@ export default class PieChart extends Component {
       legendVisible,
     } = this.props;
 
-    if (!get(this.props.data, 'data')) return null;
-
     const { tooltipItems, tooltipVisible, tooltipPosition } = this.state;
-    const data = this.getData();
-    // const dataCount = data.length;
+    const series = this.getData();
+
+    if (!series) return null;
 
     return (
       <ChartLayout
@@ -158,21 +177,26 @@ export default class PieChart extends Component {
           <Legend
             horizontal={!horizontal}
             title={get(this.props, 'data.metadata.bucketColumnTitle')}
-            data={data.map(({ key }) => key)}
-            colors={colors}
+            data={series.data.map(({ key }) => key)}
+            colorMappings={
+              series.data.reduce((acc, { key }, i) => ({
+                ...acc,
+                [key]: this.getColor(key, i),
+              }), {})
+            }
             activeItem={get(this.state, 'hoveredNode')}
             onClick={({ datum }) => (event) => {
-              this.handleClickNode({ ...getDatum(data, datum) }, event);
+              this.handleClickNode({ ...getDatum(series.data, datum) }, event);
             }}
             onMouseEnter={({ datum }) => () => {
               if (this.state.isPickingColor) return;
-              this.handleMouseEnterLegendNode(getDatum(data, datum));
+              this.handleMouseEnterLegendNode(getDatum(series.data, datum));
             }}
           />
         )}
         chart={
           <ResponsiveWrapper>{(dimensions) => {
-            const xExtent = extent(data, ({ x }) => x);
+            const xExtent = extent(series.data, ({ x }) => x);
             if (xExtent[0] > 0) xExtent[0] = 0;
             const xScale = scaleLinear()
               .domain(xExtent)
@@ -181,7 +205,7 @@ export default class PieChart extends Component {
                 dimensions.width * (1 - marginRight),
               ]);
 
-            const yExtent = extent(data, ({ y }) => y);
+            const yExtent = extent(series.data, ({ y }) => y);
             if (yExtent[0] > 0) yExtent[0] = 0;
             const yScale = scaleLinear()
               .domain(yExtent)
@@ -206,9 +230,10 @@ export default class PieChart extends Component {
                   />
                 )}
                 <Svg width={dimensions.width} height={dimensions.height}>
-                  <Collection data={data}>{nodes => (
+                  <Collection data={series.data}>{nodes => (
                     <Group>
                       {nodes.map(({ key, x, y, r, category }, i) => {
+                        const color = this.getColor(key, i);
                         const normalizedX = xScale(x);
                         const normalizedY = yScale(y);
                         const colorpickerPlacementY = normalizedY < dimensions.height / 2 ? 'bottom' : 'top';
@@ -216,7 +241,7 @@ export default class PieChart extends Component {
                         const colorpickerPlacement = `${colorpickerPlacementY}-${colorpickerPlacementX}`;
 
                         return (
-                          <Group>
+                          <Group key={key}>
                             {(this.state.isPickingColor === key) && (
                               <Portal node={this.wrap}>
                                 <ColorPicker
@@ -228,7 +253,7 @@ export default class PieChart extends Component {
                                     }
                                   placement={colorpickerPlacement}
                                   title={`Pick color: ${key}`}
-                                  color={colors[this.state.isPickingColor]}
+                                  color={color}
                                   onChange={({ hex }) => {
                                     onChangeVisualisationSpec({
                                       colors: { ...colors, [this.state.isPickingColor]: hex },
@@ -243,18 +268,18 @@ export default class PieChart extends Component {
                               cx={normalizedX}
                               cy={normalizedY}
                               r={radius}
-                              fill={colors[key]}
-                              stroke={colors[key]}
+                              fill={color}
+                              stroke={color}
                               strokeWidth={2}
                               fillOpacity={opacity}
                               onClick={(event) => {
                                 this.handleClickNode({ key }, event);
                               }}
                               onMouseEnter={(event) => {
-                                this.handleMouseEnterNode({ key, x, y }, event);
+                                this.handleMouseEnterNode({ key, x, y, color }, event);
                               }}
                               onMouseMove={(event) => {
-                                this.handleMouseEnterNode({ key, x, y }, event);
+                                this.handleMouseEnterNode({ key, x, y, color }, event);
                               }}
                               onMouseLeave={() => {
                                 this.handleMouseLeaveNode();

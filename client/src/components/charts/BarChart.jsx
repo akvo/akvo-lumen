@@ -38,7 +38,7 @@ export default class PieChart extends Component {
   render() {
     const { data, grouped } = this.props;
 
-    if (!get(data, 'data')) return null;
+    if (!get(data, 'series')) return null;
     if (typeof get(this.props.data, 'data[0].values') === 'undefined') {
       return (
         <SimpleBarChart {...this.props} />

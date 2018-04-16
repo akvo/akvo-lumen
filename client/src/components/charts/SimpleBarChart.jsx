@@ -7,7 +7,9 @@ import { scaleLinear } from 'd3-scale';
 import { extent } from 'd3-array';
 import { AxisLeft } from '@vx/axis';
 import { Portal } from 'react-portal';
+import merge from 'lodash/merge';
 
+import { sortAlphabetically } from '../../utilities/utils';
 import Legend from './Legend';
 import ResponsiveWrapper from '../ResponsiveWrapper';
 import ColorPicker from '../ColorPicker';
@@ -17,7 +19,7 @@ import { labelFont } from '../../constants/chart';
 
 const getDatum = (data, datum) => data.filter(({ key }) => key === datum)[0];
 
-export default class PieChart extends Component {
+export default class BarChart extends Component {
 
   static propTypes = {
     data: PropTypes.shape({
@@ -39,7 +41,8 @@ export default class PieChart extends Component {
       ]),
       metadata: PropTypes.object,
     }),
-    colors: PropTypes.object.isRequired,
+    colors: PropTypes.array.isRequired,
+    colorMappings: PropTypes.object,
     onChangeVisualisationSpec: PropTypes.func.isRequired,
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
@@ -66,6 +69,7 @@ export default class PieChart extends Component {
     legendVisible: false,
     edit: false,
     padding: 0.1,
+    colorMappings: {},
   }
 
   state = {
@@ -73,7 +77,23 @@ export default class PieChart extends Component {
   }
 
   getData() {
-    return this.props.data.data;
+    const { data } = this.props;
+
+    if (!get(data, 'series[0]')) return false;
+
+    const series = merge({}, data.common, data.series[0]);
+
+    return {
+      ...series,
+      data: series.data
+        .sort((a, b) => sortAlphabetically(a, b, ({ key }) => key))
+        .map(datum => ({ ...datum, value: Math.abs(datum.value) })),
+    };
+  }
+
+  getColor(key, index) {
+    const { colorMappings, colors } = this.props;
+    return colorMappings[key] || colors[index];
   }
 
   handleShowTooltip(event, content) {
@@ -196,12 +216,13 @@ export default class PieChart extends Component {
       yAxisLabel,
     } = this.props;
 
-    if (!get(this.props.data, 'data')) return null;
-
     const { tooltipItems, tooltipVisible, tooltipPosition } = this.state;
 
-    const data = this.getData();
-    const dataCount = data.length;
+    const series = this.getData();
+
+    if (!series) return null;
+
+    const dataCount = series.data.length;
 
     return (
       <ChartLayout
@@ -216,15 +237,20 @@ export default class PieChart extends Component {
           <Legend
             horizontal={!horizontal}
             title={get(this.props, 'data.metadata.bucketColumnTitle')}
-            data={data.map(({ key }) => key)}
-            colors={colors}
+            data={series.data.map(({ key }) => key)}
+            colorMappings={
+              series.data.reduce((acc, { key }, i) => ({
+                ...acc,
+                [key]: this.getColor(key, i),
+              }), {})
+            }
             activeItem={get(this.state, 'hoveredNode')}
             onClick={({ datum }) => (event) => {
-              this.handleClickNode({ ...getDatum(data, datum) }, event);
+              this.handleClickNode({ ...getDatum(series.data, datum) }, event);
             }}
             onMouseEnter={({ datum }) => () => {
               if (this.state.isPickingColor) return;
-              this.handleMouseEnterLegendNode(getDatum(data, datum));
+              this.handleMouseEnterLegendNode(getDatum(series.data, datum));
             }}
           />
         )}
@@ -232,7 +258,7 @@ export default class PieChart extends Component {
           <ResponsiveWrapper>{(dimensions) => {
             const availableHeight = dimensions.height * (1 - marginBottom - marginTop);
 
-            const domain = extent(data, ({ value }) => value);
+            const domain = extent(series.data, ({ value }) => value);
             if (domain[0] > 0) domain[0] = 0;
 
             const heightScale = scaleLinear()
@@ -257,7 +283,7 @@ export default class PieChart extends Component {
                 <Svg width={dimensions.width} height={dimensions.height}>
 
                   <Grid
-                    data={data}
+                    data={series.data}
                     bands
                     size={[
                       dimensions.width * (1 - marginLeft - marginRight),
@@ -276,16 +302,17 @@ export default class PieChart extends Component {
                       }}
                     >
                       {nodes.map(({ nodeWidth, x, key, value }, i) => {
+                        const color = this.getColor(key, i);
                         const normalizedHeight = availableHeight - heightScale(Math.abs(value));
                         const colorpickerPlacement = i < dataCount / 2 ? 'right' : 'left';
                         const y = (value < 0) ? origin : origin - normalizedHeight;
                         return (
-                          <Group>
+                          <Group key={key}>
                             {(this.state.isPickingColor === key) && (
                               <Portal node={this.wrap}>
                                 <ColorPicker
                                   title={`Pick color: ${key}`}
-                                  color={colors[this.state.isPickingColor]}
+                                  color={color}
                                   left={
                                     colorpickerPlacement === 'right' ?
                                       (dimensions.width * marginLeft) + x + nodeWidth :
@@ -308,8 +335,8 @@ export default class PieChart extends Component {
                               y={y}
                               width={nodeWidth - (nodeWidth * padding * 2)}
                               height={normalizedHeight}
-                              fill={colors[key]}
-                              stroke={colors[key]}
+                              fill={color}
+                              stroke={color}
                               cursor={edit ? 'pointer' : 'default'}
                               onClick={(event) => {
                                 this.handleClickNode({ key }, event);

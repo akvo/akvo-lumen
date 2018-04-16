@@ -6,6 +6,7 @@ import { withKnobs, number, text, boolean, color } from '@storybook/addon-knobs/
 import { palette as generatePalette } from '@potion/color';
 import { interpolateSpectral } from 'd3-scale-chromatic';
 import { hsl } from 'd3-color';
+import moment from 'moment';
 
 import '../../styles/reset.global.scss';
 import '../../styles/style.global.scss';
@@ -52,9 +53,12 @@ const generateData = ({ seriesCount, nodeCount, minVal, maxVal, labelLength }) =
     }
   }
 
+  const startDate = moment().subtract(nodeCount, 'months');
+
   for (let i = 0; i < nodeCount; i++) {
     result.common.data.push({
       key: randomString(labelLength || 10),
+      timestamp: startDate.clone().add(i, 'months').toDate(),
     });
   }
   return result;
@@ -113,33 +117,12 @@ storiesOf('Charts', module)
     const minVal = number('min value', 1);
     const maxVal = number('max value', 100);
     const data = generateData({
-      seriesCount: 1,
+      seriesCount: 2,
       nodeCount,
       labelLength,
       minVal,
       maxVal,
     });
-    // const generateNodes = () => {
-    //   const nodes = [];
-    //   for (let i = 0; i < nodeCount; i++) {
-    //     nodes.push({
-    //       key: randomString(labelLength),
-    //       x: randomIntFromInterval(minVal, maxVal),
-    //       y: randomIntFromInterval(minVal, maxVal),
-    //       r: randomIntFromInterval(minVal, maxVal),
-    //     });
-    //   }
-    //   return nodes;
-    // };
-    // const data = generateNodes();
-    // const c = p(nodeCount);
-    // const colors = data.reduce((acc, datum, i) => {
-    //   const result = { ...acc };
-    //   if (!result[datum.key]) {
-    //     result[datum.key] = c[i];
-    //   }
-    //   return result;
-    // }, {});
 
     return (
       <div>
@@ -187,20 +170,6 @@ storiesOf('Charts', module)
       maxVal,
     });
 
-    // const generateNodes = () => {
-    //   const nodes = [];
-    //   for (let i = 0; i < nodeCount; i++) {
-    //     nodes.push({
-    //       key: i,
-    //       x: i,
-    //       y: randomIntFromInterval(minVal, maxVal),
-    //     });
-    //   }
-    //   return nodes;
-    // };
-
-    // const data = generateNodes();
-
     return (
       <div>
         <LineChart
@@ -218,7 +187,7 @@ storiesOf('Charts', module)
           height={number('props.height', 600)}
           marginTop={number('props.marginTop', 0.1)}
           marginRight={number('props.marginRight', 0.1)}
-          marginBottom={number('props.marginBottom', 0.1)}
+          marginBottom={number('props.marginBottom', 0.15)}
           marginLeft={number('props.marginLeft', 0.1)}
           print={boolean('props.print', false)}
           interactive={boolean('props.interactive', true)}
@@ -247,29 +216,6 @@ storiesOf('Charts', module)
       minVal,
       maxVal,
     });
-
-    // const generateNodes = () => {
-    //   const nodes = [];
-    //   for (let i = 0; i < nodeCount; i++) {
-    //     nodes.push({
-    //       key: randomString(labelLength),
-    //       value: randomIntFromInterval(minVal, maxVal),
-    //     });
-    //   }
-    //   return nodes.sort((a, b) =>
-    //     sortAlphabetically(a, b, ({ key }) => key)
-    //   );
-    // };
-
-    // const data = generateNodes();
-    // const c = p(nodeCount);
-    // const colors = data.reduce((acc, datum, i) => {
-    //   const result = { ...acc };
-    //   if (!result[datum.key]) {
-    //     result[datum.key] = c[i];
-    //   }
-    //   return result;
-    // }, {});
 
     return (
       <div>
@@ -317,31 +263,6 @@ storiesOf('Charts', module)
       minVal,
       maxVal,
     });
-
-    // const generateNodes = () => {
-    //   const nodes = [];
-    //   for (let i = 0; i < nodeCount; i++) {
-    //     nodes.push({
-    //       key: randomString(labelLength),
-    //       values: [
-    //         randomIntFromInterval(minVal, maxVal),
-    //         randomIntFromInterval(minVal, maxVal),
-    //         randomIntFromInterval(minVal, maxVal),
-    //       ],
-    //     });
-    //   }
-    //   return nodes;
-    // };
-
-    // const data = generateNodes();
-    // const c = p(nodeCount);
-    // const colors = data.reduce((acc, datum, i) => {
-    //   const result = { ...acc };
-    //   if (!result[datum.key]) {
-    //     result[datum.key] = c[i];
-    //   }
-    //   return result;
-    // }, {});
 
     return (
       <div>
