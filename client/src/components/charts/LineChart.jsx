@@ -102,10 +102,10 @@ export default class LineChart extends Component {
   }
 
   handleMouseEnterNode({ key, x, y }, event) {
-    const { interactive, print } = this.props;
+    const { interactive, print, xAxisLabel, yAxisLabel } = this.props;
     if (!interactive || print) return;
     if (this.state.isPickingColor) return;
-    this.handleShowTooltip(event, { x, y, xLabel: 'x', yLabel: 'y' });
+    this.handleShowTooltip(event, { x, y, xLabel: xAxisLabel || 'x', yLabel: yAxisLabel || 'y' });
     this.setState({ hoveredNode: key });
   }
 
@@ -215,8 +215,8 @@ export default class LineChart extends Component {
                       {area && (
                         <Area
                           points={series.data}
-                          x={d => xScale(d.x)}
-                          y1={d => yScale(d.y)}
+                          x={d => xScale(d.timestamp)}
+                          y1={d => yScale(d.value)}
                           y0={origin}
                           fill={color}
                           fillOpacity={0.6}

@@ -37,7 +37,6 @@ export default class ScatterChart extends Component {
     onChangeVisualisationSpec: PropTypes.func.isRequired,
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
-    // maxRadius: PropTypes.number,
     legendPosition: PropTypes.oneOf(['right']),
     print: PropTypes.bool,
     interactive: PropTypes.bool,
@@ -46,6 +45,8 @@ export default class ScatterChart extends Component {
     marginRight: PropTypes.number,
     marginTop: PropTypes.number,
     marginBottom: PropTypes.number,
+    xAxisLabel: PropTypes.string,
+    yAxisLabel: PropTypes.string,
     opacity: PropTypes.number,
     style: PropTypes.object,
     legendVisible: PropTypes.bool,
@@ -113,12 +114,12 @@ export default class ScatterChart extends Component {
   }
 
   handleMouseEnterNode({ key, x, y, color }, event) {
-    const { interactive, print } = this.props;
+    const { interactive, print, xAxisLabel, yAxisLabel } = this.props;
     if (!interactive || print) return;
     this.handleShowTooltip(event, [
       { key, color },
-      { key: 'x', value: x },
-      { key: 'y', value: y },
+      { key: xAxisLabel || 'x', value: x },
+      { key: yAxisLabel || 'y', value: y },
     ]);
     this.setState({ hoveredNode: key });
   }
@@ -149,7 +150,6 @@ export default class ScatterChart extends Component {
       height,
       colors,
       onChangeVisualisationSpec,
-      // maxRadius,
       marginLeft,
       marginRight,
       marginTop,
@@ -157,6 +157,8 @@ export default class ScatterChart extends Component {
       opacity,
       style,
       legendVisible,
+      xAxisLabel,
+      yAxisLabel,
     } = this.props;
 
     const { tooltipItems, tooltipVisible, tooltipPosition } = this.state;
@@ -294,7 +296,7 @@ export default class ScatterChart extends Component {
                   <AxisLeft
                     scale={yScale}
                     left={dimensions.width * marginLeft}
-                    label={'Y Axis'}
+                    label={yAxisLabel || ''}
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}
                   />
@@ -302,7 +304,7 @@ export default class ScatterChart extends Component {
                   <AxisBottom
                     scale={xScale}
                     top={dimensions.height * (1 - marginBottom)}
-                    label={'X Axis'}
+                    label={xAxisLabel || ''}
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}
                   />

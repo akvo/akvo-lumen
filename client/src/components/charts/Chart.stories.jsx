@@ -44,7 +44,7 @@ const generateData = ({ seriesCount, nodeCount, minVal, maxVal, labelLength }) =
   };
 
   for (let s = 0; s < seriesCount; s++) {
-    const series = { data: [] };
+    const series = { data: [], key: `ser_${randomString(10)}` };
     result.series.push(series);
     for (let i = 0; i < nodeCount; i++) {
       series.data.push({
@@ -57,7 +57,7 @@ const generateData = ({ seriesCount, nodeCount, minVal, maxVal, labelLength }) =
 
   for (let i = 0; i < nodeCount; i++) {
     result.common.data.push({
-      key: randomString(labelLength || 10),
+      key: `val_${randomString(labelLength || 10)}`,
       timestamp: startDate.clone().add(i, 'months').toDate(),
     });
   }
@@ -139,8 +139,6 @@ storiesOf('Charts', module)
           width={number('props.width', 600)}
           height={number('props.height', 600)}
           opacity={number('props.opacity', 0.9)}
-          // minRadius={number('props.minRadius')}
-          // maxRadius={number('props.maxRadius')}
           marginTop={number('props.marginTop', 0.1)}
           marginRight={number('props.marginRight', 0.1)}
           marginBottom={number('props.marginBottom', 0.1)}
@@ -149,6 +147,8 @@ storiesOf('Charts', module)
           interactive={boolean('props.interactive', true)}
           edit={boolean('props.edit', true)}
           legendVisible={boolean('props.legendVisible', false)}
+          xAxisLabel={text('props.xAxisLabel', 'Humidity')}
+          yAxisLabel={text('props.yAxisLabel', 'Temperature')}
         />
         <pre>
           <code>
@@ -192,8 +192,8 @@ storiesOf('Charts', module)
           print={boolean('props.print', false)}
           interactive={boolean('props.interactive', true)}
           edit={boolean('props.edit', true)}
-          xAxisLabel={text('props.xAxisLabel', 'X Axis')}
-          yAxisLabel={text('props.yAxisLabel', 'Y Axis')}
+          xAxisLabel={text('props.xAxisLabel', 'Date')}
+          yAxisLabel={text('props.yAxisLabel', 'Temperature')}
         />
         <pre>
           <code>
@@ -252,12 +252,13 @@ storiesOf('Charts', module)
   })
 
   .add('BarChart (Stacked)', () => {
+    const seriesCount = number('node count', 5);
     const nodeCount = number('node count', 20);
     const minVal = number('min value', 1);
     const maxVal = number('max value', 100);
     const labelLength = number('label length', 10);
     const data = generateData({
-      seriesCount: 1,
+      seriesCount,
       nodeCount,
       labelLength,
       minVal,
@@ -274,7 +275,7 @@ storiesOf('Charts', module)
               bucketColumnTitle: text('props.data.metatdata.bucketColumnTitle', 'Legend Title'),
             },
           }}
-          colors={palette(nodeCount)}
+          colors={palette(seriesCount)}
           onChangeVisualisationSpec={action('vis-spec-change')}
           width={number('props.width', 600)}
           height={number('props.height', 600)}
@@ -286,6 +287,7 @@ storiesOf('Charts', module)
           interactive={boolean('props.interactive', true)}
           edit={boolean('props.edit', true)}
           legendVisible={boolean('props.legendVisible', true)}
+          yAxisLabel={text('props.yAxisLabel', 'Temperature')}
         />
         <pre>
           <code>

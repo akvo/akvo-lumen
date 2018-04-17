@@ -6,7 +6,7 @@ import SimpleBarChart from './SimpleBarChart';
 import GroupedBarChart from './GroupedBarChart';
 import StackedBarChart from './StackedBarChart';
 
-export default class PieChart extends Component {
+export default class BarChart extends Component {
 
   static propTypes = {
     data: PropTypes.shape({
@@ -37,9 +37,9 @@ export default class PieChart extends Component {
 
   render() {
     const { data, grouped } = this.props;
-
-    if (!get(data, 'series')) return null;
-    if (typeof get(this.props.data, 'data[0].values') === 'undefined') {
+    const series = get(data, 'series');
+    if (!series) return null;
+    if (series.length === 1) {
       return (
         <SimpleBarChart {...this.props} />
       );

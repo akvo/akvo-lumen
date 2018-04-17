@@ -19,7 +19,7 @@ import { labelFont } from '../../constants/chart';
 
 const getDatum = (data, datum) => data.filter(({ key }) => key === datum)[0];
 
-export default class BarChart extends Component {
+export default class SimpleBarChart extends Component {
 
   static propTypes = {
     data: PropTypes.shape({

@@ -7,9 +7,10 @@ import { scaleLinear } from 'd3-scale';
 import { extent } from 'd3-array';
 import { AxisLeft } from '@vx/axis';
 import { Portal } from 'react-portal';
+import merge from 'lodash/merge';
+import { stack } from 'd3-shape';
 
 import { sortAlphabetically } from '../../utilities/utils';
-import { getFillDefs, getFill, getStroke } from '../../utilities/visualisationColors';
 import Legend from './Legend';
 import ResponsiveWrapper from '../ResponsiveWrapper';
 import ColorPicker from '../ColorPicker';
@@ -19,29 +20,16 @@ import { labelFont } from '../../constants/chart';
 
 const getDatum = (data, datum) => data.filter(({ key }) => key === datum)[0];
 
-export default class PieChart extends Component {
+export default class StackedBarChart extends Component {
 
   static propTypes = {
     data: PropTypes.shape({
-      data: PropTypes.oneOfType([
-        PropTypes.arrayOf(
-          PropTypes.shape({
-            key: PropTypes.string,
-            value: PropTypes.number,
-          })
-        ),
-        PropTypes.arrayOf(
-          PropTypes.shape({
-            key: PropTypes.string,
-            values: PropTypes.arrayOf(
-              PropTypes.number
-            ),
-          })
-        ),
-      ]),
+      series: PropTypes.array,
+      common: PropTypes.object,
       metadata: PropTypes.object,
     }),
-    colors: PropTypes.object.isRequired,
+    colors: PropTypes.array.isRequired,
+    colorMappings: PropTypes.object,
     onChangeVisualisationSpec: PropTypes.func.isRequired,
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
@@ -49,12 +37,14 @@ export default class PieChart extends Component {
     print: PropTypes.bool,
     interactive: PropTypes.bool,
     edit: PropTypes.bool,
+    padding: PropTypes.number,
     marginLeft: PropTypes.number,
     marginRight: PropTypes.number,
     marginTop: PropTypes.number,
     marginBottom: PropTypes.number,
     style: PropTypes.object,
     legendVisible: PropTypes.bool,
+    yAxisLabel: PropTypes.string,
   }
 
   static defaultProps = {
@@ -63,18 +53,58 @@ export default class PieChart extends Component {
     marginRight: 0.1,
     marginTop: 0.1,
     marginBottom: 0.2,
-    legendVisible: true,
+    legendVisible: false,
     edit: false,
+    padding: 0.1,
+    colorMappings: {},
   }
 
-  state = {
-    isPickingColor: false,
+  constructor(props) {
+    super(props);
+    this.state = {
+      isPickingColor: false,
+      data: this.getData(props),
+    };
   }
 
-  getData() {
-    return this.props.data.data.sort((a, b) =>
-      sortAlphabetically(a, b, ({ key }) => key)
-    );
+  componentWillReceiveProps(nextProps) {
+    this.setState({ data: this.getData(nextProps) });
+  }
+
+  getData(props) {
+    const { data } = props;
+
+    if (!get(data, 'series[0]')) return false;
+
+    const values = data.series[0].data
+      .reduce((acc, { value }, i) =>
+        [
+          ...acc,
+          data.series.reduce((acc2, series) => ({
+            ...acc2,
+            values: {
+              ...acc2.values,
+              [series.key]: series.data[i].value,
+            },
+          }), {}),
+        ]
+      , []);
+
+    const series = merge({}, data.common, { data: values });
+    const combinedData = series.data.sort((a, b) => sortAlphabetically(a, b, ({ key }) => key));
+
+    return {
+      ...series,
+      data: combinedData,
+      stack: stack()
+        .keys(Object.keys(combinedData[0].values))
+        .value((d, key) => Math.abs(d[key]))(combinedData.map(datum => datum.values)),
+    };
+  }
+
+  getColor(key, index) {
+    const { colorMappings, colors } = this.props;
+    return colorMappings[key] || colors[index];
   }
 
   handleShowTooltip(event, content) {
@@ -94,43 +124,52 @@ export default class PieChart extends Component {
 
     this.setState({
       tooltipVisible: true,
-      tooltipItems: [content],
+      tooltipItems: content,
       tooltipPosition,
     });
   }
 
-  handleMouseEnterNode({ key, value }, event) {
+  handleMouseEnterNode(node, { seriesKey, valueKey, seriesIndex }, event) {
     if (this.state.isPickingColor) return;
-    const { interactive, print, colors } = this.props;
+    const { interactive, print, yAxisLabel } = this.props;
     if (!interactive || print) return;
-    this.handleShowTooltip(event, { key, color: colors[key], value });
-    this.setState({ hoveredNode: key });
+    this.handleShowTooltip(event, [
+      { key: seriesKey, color: this.getColor(seriesKey, seriesIndex), value: valueKey },
+      { key: yAxisLabel || 'y', value: node.values[seriesKey] },
+    ]);
+    this.setState({ hoveredNode: { seriesKey, valueKey } });
   }
 
-  handleMouseEnterLegendNode({ key }) {
+  handleMouseEnterLegendNode(seriesKey) {
     if (this.state.isPickingColor) return;
     const { interactive, print } = this.props;
     if (!interactive || print) return;
-    this.setState({ hoveredNode: key });
+    this.setState({ hoveredSeries: seriesKey });
+  }
+
+  handleMouseLeaveLegendNode() {
+    this.setState({ hoveredSeries: null });
   }
 
   handleMouseLeaveNode() {
     this.setState({ tooltipVisible: false });
   }
 
-  handleClickNode({ key, event }) {
+  handleClickNode(node, event) {
     const { interactive, print, edit } = this.props;
     if (!interactive || print) return;
     event.stopPropagation();
+    const isPickingColor = edit ? node : null;
     this.setState({
-      isPickingColor: edit ? key : null,
-      hoveredNode: key,
+      isPickingColor,
+      tooltipVisible: !isPickingColor,
+      hoveredNode: node,
     });
   }
 
-  renderLabel({ key, nodeWidth, x, y, height }) {
+  renderLabel({ nodeWidth, x, y, node }) {
     const labelX = x + (nodeWidth / 2);
-    const labelY = y + height + 10;
+    const labelY = y + 10;
     return (
       <Text
         textAnchor="start"
@@ -139,9 +178,9 @@ export default class PieChart extends Component {
           { type: 'translate', value: [labelX, labelY] },
         ]}
         {...labelFont}
-        fontWeight={get(this.state, 'hoveredNode') === key ? 700 : 400}
+        fontWeight={get(this.state, 'hoveredNode.valueKey') === node.key ? 700 : 400}
       >
-        {key}
+        {node.key}
       </Text>
     );
   }
@@ -158,14 +197,19 @@ export default class PieChart extends Component {
       marginLeft,
       style,
       legendVisible,
+      edit,
+      padding,
+      yAxisLabel,
     } = this.props;
-
-    if (!get(this.props.data, 'data')) return null;
 
     const { tooltipItems, tooltipVisible, tooltipPosition } = this.state;
 
-    const data = this.getData();
-    const dataCount = data.length;
+    const series = this.state.data;
+
+    if (!series) return null;
+
+    const stackNodes = series.stack;
+    const dataCount = series.data.length;
 
     return (
       <ChartLayout
@@ -180,34 +224,40 @@ export default class PieChart extends Component {
           <Legend
             horizontal={!horizontal}
             title={get(this.props, 'data.metadata.bucketColumnTitle')}
-            data={data.map(({ key }) => key)}
-            colors={colors}
-            activeItem={get(this.state, 'hoveredNode')}
+            data={stackNodes.map(({ key }) => key)}
+            colorMappings={
+              stackNodes.reduce((acc, { key }, i) => ({
+                ...acc,
+                [key]: this.getColor(key, i),
+              }), {})
+            }
+            activeItem={get(this.state, 'hoveredNode.seriesKey')}
             onClick={({ datum }) => (event) => {
-              this.handleClickNode({ ...getDatum(data, datum), event });
+              this.handleClickNode(datum, event);
             }}
             onMouseEnter={({ datum }) => () => {
               if (this.state.isPickingColor) return;
-              this.handleMouseEnterLegendNode(getDatum(data, datum));
+              this.handleMouseEnterLegendNode(datum);
             }}
-            // onMouseLeave={({ datum }) => () => {
-            //   if (this.state.isPickingColor) return;
-            //   this.handleMouseLeaveNode(getDatum(data, datum));
-            // }}
+            onMouseLeave={() => () => {
+              this.handleMouseLeaveLegendNode();
+            }}
           />
         )}
         chart={
           <ResponsiveWrapper>{(dimensions) => {
             const availableHeight = dimensions.height * (1 - marginBottom - marginTop);
 
-            const domain = extent(data, ({ value }) => value);
+            const domain = extent(series.data, ({ values }) =>
+              Object.keys(values).reduce((acc, key) => acc + Math.abs(values[key]), 0)
+            );
             if (domain[0] > 0) domain[0] = 0;
+
             const heightScale = scaleLinear()
-              .domain(domain)
-              .range([
-                availableHeight,
-                0,
-              ]);
+              .domain([0, domain[1]])
+              .range([availableHeight, 0]);
+
+            const origin = heightScale(Math.abs(0));
 
             return (
               <div
@@ -224,75 +274,120 @@ export default class PieChart extends Component {
                 )}
                 <Svg width={dimensions.width} height={dimensions.height}>
 
-                  {getFillDefs(colors)}
-
                   <Grid
-                    data={data}
+                    data={series.data}
                     bands
                     size={[
                       dimensions.width * (1 - marginLeft - marginRight),
                       dimensions.height * (1 - marginTop - marginBottom),
                     ]}
                     rows={1}
-                    // nodeEnter={d => ({ ...d, value: 0 })}
-                    // animate
                   >{nodes => (
-                    <Group transform={{ translate: [dimensions.width * marginLeft, 0] }}>
-                      {nodes.map(({ nodeWidth, x, key, value }, i) => {
-                        const normalizedHeight = availableHeight - heightScale(value);
-                        const y = (dimensions.height * (1 - marginBottom)) - normalizedHeight;
-                        const colorpickerPlacement = i < dataCount / 2 ? 'right' : 'left';
+                    <Group
+                      transform={{
+                        translate: [
+                          dimensions.width * marginLeft,
+                          dimensions.height * marginTop,
+                        ],
+                      }}
+                    >
+                      {stackNodes.map((stackSeries, seriesIndex) => {
+                        const seriesKey = this.props.data.series[seriesIndex].key;
                         return (
-                          <Group>
-                            {(this.state.isPickingColor === key) && (
-                              <Portal node={this.wrap}>
-                                <ColorPicker
-                                  title={`Pick color: ${key}`}
-                                  color={colors[this.state.isPickingColor]}
-                                  left={
-                                    colorpickerPlacement === 'right' ?
-                                      (dimensions.width * marginLeft) + x + nodeWidth :
-                                      (dimensions.width * marginLeft) + x
-                                  }
-                                  top={y + (normalizedHeight / 2)}
-                                  placement={colorpickerPlacement}
-                                  onChange={({ hex }) => {
-                                    onChangeVisualisationSpec({
-                                      colors: { ...colors, [this.state.isPickingColor]: hex },
-                                    });
-                                    this.setState({ isPickingColor: null });
-                                  }}
-                                />
-                              </Portal>
-                            )}
-                            <Rect
-                              key={key}
-                              x={x}
-                              y={y}
-                              width={nodeWidth}
-                              height={normalizedHeight}
-                              fill={getFill(colors[key])}
-                              stroke={getStroke(colors[key])}
-                              onClick={(event) => {
-                                this.handleClickNode({ key, event });
-                              }}
-                              onMouseEnter={(event) => {
-                                this.handleMouseEnterNode({ key, value }, event);
-                              }}
-                              onMouseMove={(event) => {
-                                this.handleMouseEnterNode({ key, value }, event);
-                              }}
-                              onMouseLeave={() => {
-                                this.handleMouseLeaveNode({ key });
-                              }}
-                            />
+                          <Group key={seriesKey}>
+                            {stackSeries.map(([y0, y1], valueIndex) => {
+                              const { nodeWidth, x, key } = nodes[valueIndex];
+                              const color = this.getColor(key, seriesIndex);
+                              const normalizedY = heightScale(y0);
+                              const normalizedHeight = availableHeight - heightScale(y1 - y0);
+                              const colorpickerPlacement = valueIndex < dataCount / 2 ? 'right' : 'left';
+                              return (
+                                <Group key={key}>
+                                  {(
+                                    get(this.state, 'isPickingColor') &&
+                                    get(this.state, 'isPickingColor.valueKey') === key &&
+                                    get(this.state, 'isPickingColor.seriesKey') === seriesKey
+                                  ) && (
+                                    <Portal node={this.wrap}>
+                                      <ColorPicker
+                                        title={`Pick color: ${key}`}
+                                        color={color}
+                                        left={
+                                          colorpickerPlacement === 'right' ?
+                                            (dimensions.width * marginLeft) + x + nodeWidth :
+                                            (dimensions.width * marginLeft) + x
+                                        }
+                                        top={normalizedY}
+                                        placement={colorpickerPlacement}
+                                        onChange={({ hex }) => {
+                                          onChangeVisualisationSpec({
+                                            colors: { ...colors, [this.state.isPickingColor]: hex },
+                                          });
+                                          this.setState({ isPickingColor: null });
+                                        }}
+                                      />
+                                    </Portal>
+                                  )}
+                                  <Rect
+                                    key={key}
+                                    x={x + (nodeWidth * padding)}
+                                    y={normalizedY - normalizedHeight}
+                                    width={nodeWidth - (nodeWidth * padding * 2)}
+                                    height={normalizedHeight}
+                                    fill={color}
+                                    stroke={color}
+                                    opacity={
+                                      (
+                                        this.state.hoveredSeries &&
+                                        this.state.hoveredSeries !== seriesKey
+                                      ) ?
+                                      0.3 :
+                                      1
+                                    }
+                                    cursor={edit ? 'pointer' : 'default'}
+                                    onClick={(event) => {
+                                      this.handleClickNode({
+                                        seriesKey,
+                                        valueKey: key,
+                                        seriesIndex,
+                                      }, event);
+                                    }}
+                                    onMouseEnter={(event) => {
+                                      this.handleMouseEnterNode(
+                                        nodes[valueIndex],
+                                        { seriesKey, valueKey: key, seriesIndex },
+                                        event
+                                      );
+                                    }}
+                                    onMouseMove={(event) => {
+                                      this.handleMouseEnterNode(
+                                        nodes[valueIndex],
+                                        { seriesKey, valueKey: key, seriesIndex },
+                                        event
+                                      );
+                                    }}
+                                    onMouseLeave={() => {
+                                      this.handleMouseLeaveNode();
+                                    }}
+                                  />
+                                </Group>
+                              );
+                            })}
+                          </Group>
+                        );
+                      })}
+
+                      {nodes.map((node) => {
+                        const { nodeWidth, x, key } = node;
+                        return (
+                          <Group key={key}>
                             {this.renderLabel({
-                              key,
-                              value,
                               nodeWidth,
                               x,
-                              y,
-                              height: normalizedHeight,
+                              y: origin,
+                              domain,
+                              height: 100,
+                              node,
                             })}
                           </Group>
                         );
@@ -301,12 +396,17 @@ export default class PieChart extends Component {
                   )}</Grid>
 
                   <AxisLeft
-                    scale={heightScale}
+                    scale={
+                      scaleLinear()
+                        .domain([0, domain[1]])
+                        .range([0, availableHeight].reverse())
+                    }
                     left={dimensions.width * marginLeft}
                     top={dimensions.height * marginTop}
-                    label={'Y Axis'}
+                    label={yAxisLabel || ''}
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}
+                    numTicks={20}
                   />
 
                 </Svg>
