@@ -18,8 +18,6 @@ import ChartLayout from './ChartLayout';
 import Tooltip from './Tooltip';
 import { labelFont } from '../../constants/chart';
 
-const getDatum = (data, datum) => data.filter(({ key }) => key === datum)[0];
-
 export default class StackedBarChart extends Component {
 
   static propTypes = {
