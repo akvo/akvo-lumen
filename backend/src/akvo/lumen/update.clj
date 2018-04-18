@@ -64,6 +64,10 @@
         columns))))
 
 (defn compatible-columns? [imported-columns columns]
+  (prn "All column changes is seen as compatible!!!!!")
+  true)
+
+#_(defn compatible-columns? [imported-columns columns]
   (let [imported-columns (map (fn [column]
                                 (cond-> {:id (keyword (get column "columnName"))
                                          :type (keyword (get column "type"))
@@ -72,6 +76,8 @@
                               imported-columns)]
     (set/subset? (set imported-columns)
                  (set columns))))
+
+
 
 (defn do-update [conn config dataset-id data-source-id job-execution-id data-source-spec]
   (try

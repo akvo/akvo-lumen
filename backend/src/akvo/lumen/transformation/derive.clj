@@ -107,7 +107,7 @@
       first
       (get "title")))
 
-(defn build-js
+#_(defn build-js
   "Replace column references and fall back to use code pattern if there is no
   references."
   [columns transformation]
@@ -120,6 +120,19 @@
           (get-in transformation ["prepared" "references"])))
 
 
+(defn construct-code
+  "Replace column references and fall back to use code pattern if there is no
+  references."
+  [columns transformation]
+  (reduce (fn [code {:strs [column-name id pattern]}]
+            (let [column-title (column-title columns column-name)]
+              (if column-name
+                (str/replace code id (format "row['%s']" column-title))
+                (str/replace code id pattern))))
+          (get-in transformation ["computed" "template"])
+          (get-in transformation ["computed" "references"])))
+
+
 (defmethod engine/apply-operation :core/derive
   [tenant-conn table-name columns op-spec]
   (try
@@ -128,7 +141,8 @@
            column-type "newColumnType"} (engine/args op-spec)
           on-error (engine/error-strategy op-spec)
           column-name (engine/next-column-name columns)
-          transform (row-transform (build-js columns op-spec))
+          ;; transform (row-transform (build-js columns op-spec))
+          transform (row-transform (construct-code columns op-spec))
           key-translation (into {}
                                 (map (fn [{:strs [columnName title]}]
                                        [(keyword columnName) title])
@@ -161,7 +175,7 @@
       {:success? false
        :message (format "Failed to transform: %s" (.getMessage e))})))
 
-(defn row-references
+#_(defn row-references
   "Takes JavaScript and return a sequence of string tuples
   [<reference-pattern> <column-title>] e.g. \"row['a'];\" -> ([\"row['a']\"] \"a\")"
   [code]
@@ -173,46 +187,46 @@
       `([~code ~code])
       refs)))
 
-(comment
-  (row-references "row.a") ;; (["row.a" "a"])
-  (row-references "row['a'];") ;; (["row['a']" "a"])
-  (row-references "row[\"a\"].replace(\"a\", \"b\")") ;; (["row[\"a\"]" "a"])
-  (row-references " row.b + row['c'];") ;; (["row.b" "b"] ["row['c']" "c"])
-  (row-references "row['foo'].toUpperCase()") ;; (["row['foo']" "foo"])
-  (row-references "row['Derived 4'].toLowerCase()") ;; (["row['Derived" "Derived"])
-  (row-references "new Date()") ;; (["new Date()" "new Date()"])
+(defn parse-row-object-references
+  ""
+  [code]
+  (let [re #"(?U)row.([\w\d]+)|row\['([\w\d\.\s\p{S}%&]+)'\]|row\[\"([\w\d\.\s\p{S}%&]+)\"\]"
+        refs (map #(remove nil? %) (re-seq re code))]
+    (if (empty? refs)
+      `([~code ~code])
+      refs)))
 
-  ;; ????
-  (row-references "row['No.4']") ;; (["row['No" "No"])
-  (row-references "row[' ']") ;; (["row[' ']" " "])
-  (row-references "row['%&']") ;; (["row['%&']" "row['%&']"])
-  (row-references "row['ÅÄÖ']") ;; (["row['ÅÄÖ']" "row['ÅÄÖ']"])
-  (row-references "row['e`']") ;; (["row['e" "e"])
+(defn column-name
+  ""
+  [columns column-title]
+  (-> (filter (fn [{:strs [title]}]
+                (= title column-title))
+              columns)
+      first
+      (get "columnName")))
 
-  )
+(defn computed
+  ""
+  [transformation columns]
+  (let [code (get-in transformation ["args" "code"])]
+    (reduce (fn [m [pattern column-title]]
+              (let [id (str (util/squuid))]
+                (-> m
+                    (update-in ["template"] #(str/replace % pattern id))
+                    (update-in ["references"]
+                               #(conj % {"id" id
+                                         "pattern" pattern
+                                         "column-name" (column-name columns
+                                                                    column-title)})))))
+            {"template" code
+             "references" []}
+            (parse-row-object-references code))))
 
 
 (defmethod engine/pre-hook :core/derive
   [transformation columns]
-  (reduce (fn [t [reference-pattern column-title]]
-            (let [id (str (util/squuid))
-                  column-name (-> (filter (fn [{:strs [title]}]
-                                            (= title column-title))
-                                          columns)
-                                  first
-                                  (get "columnName"))]
-              (-> (if (nil? (get-in t ["prepared"]))
-                    (assoc-in t ["prepared"]
-                              {"code" (str/replace (get-in transformation ["args" "code"])
-                                                   reference-pattern id)
-                               "references" []})
-                    (update-in t ["prepared" "code"]
-                               #(str/replace % reference-pattern id)))
-                  (update-in ["prepared" "references"] #(conj % {"id" id
-                                                                 "pattern" reference-pattern
-                                                                 "column-name" column-name})))))
-          transformation
-          (row-references (get-in transformation ["args" "code"]))))
+  (assoc transformation "computed" (computed transformation columns)))
+
 
 (comment
 
@@ -231,9 +245,6 @@
     (build-js columns transformation)
     )
   )
-
-
-
 
 
 (comment

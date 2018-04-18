@@ -13,7 +13,7 @@ require('./TransformationLog.scss');
 
 function deriveTransformationDescription(transformation) {
   const newColumnTitle = transformation.getIn(['args', 'newColumnTitle']);
-  const code = transformation.getIn(['args', 'code']);
+  const code = transformation.getIn(['computed', 'code']);
   return (
     <FormattedMessage
       id="derived_transform_description"
