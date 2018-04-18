@@ -143,12 +143,15 @@ storiesOf('Charts', module)
           marginRight={number('props.marginRight', 0.1)}
           marginBottom={number('props.marginBottom', 0.1)}
           marginLeft={number('props.marginLeft', 0.1)}
+          grid={boolean('props.grid', true)}
           print={boolean('props.print', false)}
           interactive={boolean('props.interactive', true)}
           edit={boolean('props.edit', true)}
           legendVisible={boolean('props.legendVisible', false)}
           xAxisLabel={text('props.xAxisLabel', 'Humidity')}
           yAxisLabel={text('props.yAxisLabel', 'Temperature')}
+          xAxisTicks={number('props.xAxisTicks')}
+          yAxisTicks={number('props.yAxisTicks')}
         />
         <pre>
           <code>
@@ -189,11 +192,14 @@ storiesOf('Charts', module)
           marginRight={number('props.marginRight', 0.1)}
           marginBottom={number('props.marginBottom', 0.15)}
           marginLeft={number('props.marginLeft', 0.1)}
+          grid={boolean('props.grid', true)}
           print={boolean('props.print', false)}
           interactive={boolean('props.interactive', true)}
           edit={boolean('props.edit', true)}
           xAxisLabel={text('props.xAxisLabel', 'Date')}
           yAxisLabel={text('props.yAxisLabel', 'Temperature')}
+          xAxisTicks={number('props.xAxisTicks')}
+          yAxisTicks={number('props.yAxisTicks')}
         />
         <pre>
           <code>
@@ -236,6 +242,7 @@ storiesOf('Charts', module)
           marginRight={number('props.marginRight', 0.1)}
           marginBottom={number('props.marginBottom', 0.2)}
           marginLeft={number('props.marginLeft', 0.1)}
+          grid={boolean('props.grid', true)}
           print={boolean('props.print', false)}
           interactive={boolean('props.interactive', true)}
           edit={boolean('props.edit', true)}
@@ -252,7 +259,7 @@ storiesOf('Charts', module)
   })
 
   .add('BarChart (Stacked)', () => {
-    const seriesCount = number('node count', 5);
+    const seriesCount = number('series count', 5);
     const nodeCount = number('node count', 20);
     const minVal = number('min value', 1);
     const maxVal = number('max value', 100);
@@ -283,6 +290,8 @@ storiesOf('Charts', module)
           marginRight={number('props.marginRight', 0.1)}
           marginBottom={number('props.marginBottom', 0.2)}
           marginLeft={number('props.marginLeft', 0.1)}
+          grouped={boolean('props.grouped', false)}
+          grid={boolean('props.grid', true)}
           print={boolean('props.print', false)}
           interactive={boolean('props.interactive', true)}
           edit={boolean('props.edit', true)}

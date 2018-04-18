@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import get from 'lodash/get';
 
 import SimpleBarChart from './SimpleBarChart';
-import GroupedBarChart from './GroupedBarChart';
 import StackedBarChart from './StackedBarChart';
 
 export default class BarChart extends Component {
@@ -36,7 +35,7 @@ export default class BarChart extends Component {
   }
 
   render() {
-    const { data, grouped } = this.props;
+    const { data } = this.props;
     const series = get(data, 'series');
     if (!series) return null;
     if (series.length === 1) {
@@ -44,9 +43,7 @@ export default class BarChart extends Component {
         <SimpleBarChart {...this.props} />
       );
     }
-    return grouped ? (
-      <GroupedBarChart {...this.props} />
-    ) : (
+    return (
       <StackedBarChart {...this.props} />
     );
   }

@@ -9,6 +9,7 @@ import { AxisLeft } from '@vx/axis';
 import { Portal } from 'react-portal';
 import merge from 'lodash/merge';
 import { stack } from 'd3-shape';
+import { GridRows } from '@vx/grid';
 
 import { sortAlphabetically } from '../../utilities/utils';
 import Legend from './Legend';
@@ -43,6 +44,9 @@ export default class StackedBarChart extends Component {
     style: PropTypes.object,
     legendVisible: PropTypes.bool,
     yAxisLabel: PropTypes.string,
+    grouped: PropTypes.bool,
+    grid: PropTypes.bool,
+    yAxisTicks: PropTypes.number,
   }
 
   static defaultProps = {
@@ -55,6 +59,8 @@ export default class StackedBarChart extends Component {
     edit: false,
     padding: 0.1,
     colorMappings: {},
+    grouped: false,
+    grid: true,
   }
 
   constructor(props) {
@@ -198,6 +204,9 @@ export default class StackedBarChart extends Component {
       edit,
       padding,
       yAxisLabel,
+      yAxisTicks,
+      grouped,
+      grid,
     } = this.props;
 
     const { tooltipItems, tooltipVisible, tooltipPosition } = this.state;
@@ -208,6 +217,7 @@ export default class StackedBarChart extends Component {
 
     const stackNodes = series.stack;
     const dataCount = series.data.length;
+    const seriesCount = this.props.data.series.length;
 
     return (
       <ChartLayout
@@ -229,7 +239,7 @@ export default class StackedBarChart extends Component {
                 [key]: this.getColor(key, i),
               }), {})
             }
-            activeItem={get(this.state, 'hoveredNode.seriesKey')}
+            // activeItem={get(this.state, 'hoveredNode.seriesKey')}
             onClick={({ datum }) => (event) => {
               this.handleClickNode(datum, event);
             }}
@@ -245,10 +255,16 @@ export default class StackedBarChart extends Component {
         chart={
           <ResponsiveWrapper>{(dimensions) => {
             const availableHeight = dimensions.height * (1 - marginBottom - marginTop);
+            const availableWidth = dimensions.width * (1 - marginLeft - marginRight);
 
-            const domain = extent(series.data, ({ values }) =>
-              Object.keys(values).reduce((acc, key) => acc + Math.abs(values[key]), 0)
-            );
+            const domain = grouped ?
+              extent(series.data, ({ values }) =>
+                Object.keys(values).reduce((acc, key) => Math.max(acc, Math.abs(values[key])), 0)
+              ) :
+              extent(series.data, ({ values }) =>
+                Object.keys(values).reduce((acc, key) => acc + Math.abs(values[key]), 0)
+              );
+
             if (domain[0] > 0) domain[0] = 0;
 
             const heightScale = scaleLinear()
@@ -256,6 +272,10 @@ export default class StackedBarChart extends Component {
               .range([availableHeight, 0]);
 
             const origin = heightScale(Math.abs(0));
+
+            const axisScale = scaleLinear()
+              .domain([0, domain[1]])
+              .range([0, availableHeight].reverse());
 
             return (
               <div
@@ -271,6 +291,17 @@ export default class StackedBarChart extends Component {
                   />
                 )}
                 <Svg width={dimensions.width} height={dimensions.height}>
+
+                  {grid && (
+                    <GridRows
+                      scale={axisScale}
+                      width={availableWidth}
+                      height={availableHeight}
+                      left={dimensions.width * marginLeft}
+                      top={dimensions.height * marginTop}
+                      numTicks={yAxisTicks}
+                    />
+                  )}
 
                   <Grid
                     data={series.data}
@@ -291,6 +322,11 @@ export default class StackedBarChart extends Component {
                     >
                       {stackNodes.map((stackSeries, seriesIndex) => {
                         const seriesKey = this.props.data.series[seriesIndex].key;
+                        const seriesIsHovered = (
+                          this.state.hoveredSeries &&
+                          this.state.hoveredSeries !== seriesKey
+                        );
+
                         return (
                           <Group key={seriesKey}>
                             {stackSeries.map(([y0, y1], valueIndex) => {
@@ -299,6 +335,9 @@ export default class StackedBarChart extends Component {
                               const normalizedY = heightScale(y0);
                               const normalizedHeight = availableHeight - heightScale(y1 - y0);
                               const colorpickerPlacement = valueIndex < dataCount / 2 ? 'right' : 'left';
+                              const barWidth = (nodeWidth - (nodeWidth * padding * 2)) /
+                                (grouped ? seriesCount : 1);
+
                               return (
                                 <Group key={key}>
                                   {(
@@ -328,20 +367,17 @@ export default class StackedBarChart extends Component {
                                   )}
                                   <Rect
                                     key={key}
-                                    x={x + (nodeWidth * padding)}
-                                    y={normalizedY - normalizedHeight}
-                                    width={nodeWidth - (nodeWidth * padding * 2)}
+                                    x={
+                                      x +
+                                      (nodeWidth * padding) +
+                                      (grouped ? seriesIndex * barWidth : 0)
+                                    }
+                                    y={(grouped ? origin : normalizedY) - normalizedHeight}
+                                    width={barWidth}
                                     height={normalizedHeight}
                                     fill={color}
                                     stroke={color}
-                                    opacity={
-                                      (
-                                        this.state.hoveredSeries &&
-                                        this.state.hoveredSeries !== seriesKey
-                                      ) ?
-                                      0.3 :
-                                      1
-                                    }
+                                    opacity={seriesIsHovered ? 0.1 : 1}
                                     cursor={edit ? 'pointer' : 'default'}
                                     onClick={(event) => {
                                       this.handleClickNode({
@@ -377,6 +413,7 @@ export default class StackedBarChart extends Component {
 
                       {nodes.map((node) => {
                         const { nodeWidth, x, key } = node;
+
                         return (
                           <Group key={key}>
                             {this.renderLabel({
@@ -394,17 +431,13 @@ export default class StackedBarChart extends Component {
                   )}</Grid>
 
                   <AxisLeft
-                    scale={
-                      scaleLinear()
-                        .domain([0, domain[1]])
-                        .range([0, availableHeight].reverse())
-                    }
+                    scale={axisScale}
                     left={dimensions.width * marginLeft}
                     top={dimensions.height * marginTop}
                     label={yAxisLabel || ''}
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}
-                    numTicks={20}
+                    numTicks={yAxisTicks}
                   />
 
                 </Svg>

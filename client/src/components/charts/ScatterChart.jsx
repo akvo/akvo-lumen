@@ -8,6 +8,7 @@ import { scaleLinear } from 'd3-scale';
 import { extent } from 'd3-array';
 import { Portal } from 'react-portal';
 import merge from 'lodash/merge';
+import { GridRows, GridColumns } from '@vx/grid';
 
 import { sortAlphabetically } from '../../utilities/utils';
 import Legend from './Legend';
@@ -47,9 +48,12 @@ export default class ScatterChart extends Component {
     marginBottom: PropTypes.number,
     xAxisLabel: PropTypes.string,
     yAxisLabel: PropTypes.string,
+    yAxisTicks: PropTypes.number,
+    xAxisTicks: PropTypes.number,
     opacity: PropTypes.number,
     style: PropTypes.object,
     legendVisible: PropTypes.bool,
+    grid: PropTypes.bool,
   }
 
   static defaultProps = {
@@ -61,6 +65,7 @@ export default class ScatterChart extends Component {
     legendVisible: false,
     edit: false,
     colorMappings: {},
+    grid: true,
   }
 
   state = {
@@ -118,8 +123,8 @@ export default class ScatterChart extends Component {
     if (!interactive || print) return;
     this.handleShowTooltip(event, [
       { key, color },
-      { key: xAxisLabel || 'x', value: x },
       { key: yAxisLabel || 'y', value: y },
+      { key: xAxisLabel || 'x', value: x },
     ]);
     this.setState({ hoveredNode: key });
   }
@@ -159,6 +164,9 @@ export default class ScatterChart extends Component {
       legendVisible,
       xAxisLabel,
       yAxisLabel,
+      xAxisTicks,
+      yAxisTicks,
+      grid,
     } = this.props;
 
     const { tooltipItems, tooltipVisible, tooltipPosition } = this.state;
@@ -198,6 +206,9 @@ export default class ScatterChart extends Component {
         )}
         chart={
           <ResponsiveWrapper>{(dimensions) => {
+            const availableHeight = dimensions.height * (1 - marginBottom - marginTop);
+            const availableWidth = dimensions.width * (1 - marginLeft - marginRight);
+
             const xExtent = extent(series.data, ({ x }) => x);
             if (xExtent[0] > 0) xExtent[0] = 0;
             const xScale = scaleLinear()
@@ -232,6 +243,26 @@ export default class ScatterChart extends Component {
                   />
                 )}
                 <Svg width={dimensions.width} height={dimensions.height}>
+
+                  {grid && (
+                    <Group>
+                      <GridRows
+                        scale={yScale}
+                        width={availableWidth}
+                        height={availableHeight}
+                        left={dimensions.width * marginLeft}
+                        numTicks={yAxisTicks}
+                      />
+                      <GridColumns
+                        scale={xScale}
+                        width={availableWidth}
+                        height={availableHeight}
+                        top={dimensions.height * marginTop}
+                        numTicks={xAxisTicks}
+                      />
+                    </Group>
+                  )}
+
                   <Collection data={series.data}>{nodes => (
                     <Group>
                       {nodes.map(({ key, x, y, r, category }, i) => {
@@ -299,6 +330,7 @@ export default class ScatterChart extends Component {
                     label={yAxisLabel || ''}
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}
+                    numTicks={yAxisTicks}
                   />
 
                   <AxisBottom
@@ -307,6 +339,7 @@ export default class ScatterChart extends Component {
                     label={xAxisLabel || ''}
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}
+                    numTicks={xAxisTicks}
                   />
 
                 </Svg>

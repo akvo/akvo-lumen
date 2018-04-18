@@ -7,6 +7,7 @@ import get from 'lodash/get';
 import { scaleLinear, scaleTime } from 'd3-scale';
 import { extent } from 'd3-array';
 import merge from 'lodash/merge';
+import { GridRows, GridColumns } from '@vx/grid';
 
 import { sortChronologically } from '../../utilities/utils';
 import ResponsiveWrapper from '../ResponsiveWrapper';
@@ -47,6 +48,9 @@ export default class LineChart extends Component {
     area: PropTypes.bool,
     xAxisLabel: PropTypes.string,
     yAxisLabel: PropTypes.string,
+    yAxisTicks: PropTypes.number,
+    xAxisTicks: PropTypes.number,
+    grid: PropTypes.bool,
   }
 
   static defaultProps = {
@@ -57,6 +61,7 @@ export default class LineChart extends Component {
     opacity: 0.9,
     edit: false,
     area: false,
+    grid: true,
   }
 
   state = {
@@ -137,6 +142,9 @@ export default class LineChart extends Component {
       area,
       xAxisLabel,
       yAxisLabel,
+      xAxisTicks,
+      yAxisTicks,
+      grid,
     } = this.props;
     const { tooltipItems, tooltipVisible, tooltipPosition } = this.state;
 
@@ -155,6 +163,9 @@ export default class LineChart extends Component {
         }}
         chart={
           <ResponsiveWrapper>{(dimensions) => {
+            const availableHeight = dimensions.height * (1 - marginBottom - marginTop);
+            const availableWidth = dimensions.width * (1 - marginLeft - marginRight);
+
             const xScale = scaleTime()
               .domain([series.data[0].timestamp, series.data[series.data.length - 1].timestamp])
               .range([
@@ -209,6 +220,25 @@ export default class LineChart extends Component {
                     this.setState({ hoveredNode: null, tooltipVisible: false });
                   }}
                 >
+
+                  {grid && (
+                    <Group>
+                      <GridRows
+                        scale={yScale}
+                        width={availableWidth}
+                        height={availableHeight}
+                        left={xScale(series.data[0].timestamp)}
+                        numTicks={yAxisTicks}
+                      />
+                      <GridColumns
+                        scale={xScale}
+                        width={availableWidth}
+                        height={availableHeight}
+                        top={origin - availableHeight}
+                        numTicks={xAxisTicks}
+                      />
+                    </Group>
+                  )}
 
                   <Collection data={series.data}>{nodes => (
                     <Group>
@@ -270,6 +300,7 @@ export default class LineChart extends Component {
                     label={yAxisLabel || ''}
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}
+                    numTicks={yAxisTicks}
                   />
 
                   <AxisBottom
@@ -278,6 +309,7 @@ export default class LineChart extends Component {
                     label={xAxisLabel || ''}
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}
+                    numTicks={xAxisTicks}
                   />
                 </Svg>
               </div>

@@ -8,6 +8,7 @@ import { extent } from 'd3-array';
 import { AxisLeft } from '@vx/axis';
 import { Portal } from 'react-portal';
 import merge from 'lodash/merge';
+import { GridRows } from '@vx/grid';
 
 import { sortAlphabetically } from '../../utilities/utils';
 import Legend from './Legend';
@@ -58,6 +59,8 @@ export default class SimpleBarChart extends Component {
     style: PropTypes.object,
     legendVisible: PropTypes.bool,
     yAxisLabel: PropTypes.string,
+    yAxisTicks: PropTypes.number,
+    grid: PropTypes.bool,
   }
 
   static defaultProps = {
@@ -70,6 +73,7 @@ export default class SimpleBarChart extends Component {
     edit: false,
     padding: 0.1,
     colorMappings: {},
+    grid: true,
   }
 
   state = {
@@ -214,6 +218,8 @@ export default class SimpleBarChart extends Component {
       edit,
       padding,
       yAxisLabel,
+      yAxisTicks,
+      grid,
     } = this.props;
 
     const { tooltipItems, tooltipVisible, tooltipPosition } = this.state;
@@ -257,6 +263,7 @@ export default class SimpleBarChart extends Component {
         chart={
           <ResponsiveWrapper>{(dimensions) => {
             const availableHeight = dimensions.height * (1 - marginBottom - marginTop);
+            const availableWidth = dimensions.width * (1 - marginLeft - marginRight);
 
             const domain = extent(series.data, ({ value }) => value);
             if (domain[0] > 0) domain[0] = 0;
@@ -266,6 +273,8 @@ export default class SimpleBarChart extends Component {
               .range([availableHeight, 0]);
 
             const origin = heightScale(Math.abs(domain[0]));
+
+            const axisScale = scaleLinear().domain(domain).range([0, availableHeight].reverse());
 
             return (
               <div
@@ -281,6 +290,17 @@ export default class SimpleBarChart extends Component {
                   />
                 )}
                 <Svg width={dimensions.width} height={dimensions.height}>
+
+                  {grid && (
+                    <GridRows
+                      scale={axisScale}
+                      width={availableWidth}
+                      height={availableHeight}
+                      left={dimensions.width * marginLeft}
+                      top={dimensions.height * marginTop}
+                      numTicks={yAxisTicks}
+                    />
+                  )}
 
                   <Grid
                     data={series.data}
@@ -367,13 +387,13 @@ export default class SimpleBarChart extends Component {
                   )}</Grid>
 
                   <AxisLeft
-                    scale={scaleLinear().domain(domain).range([0, availableHeight].reverse())}
+                    scale={axisScale}
                     left={dimensions.width * marginLeft}
                     top={dimensions.height * marginTop}
                     label={yAxisLabel || ''}
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}
-                    numTicks={20}
+                    numTicks={yAxisTicks}
                   />
 
                 </Svg>
