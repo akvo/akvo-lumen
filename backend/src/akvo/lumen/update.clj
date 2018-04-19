@@ -63,20 +63,15 @@
           (recur (rest transformations) columns))
         columns))))
 
-(defn compatible-columns? [imported-columns columns]
-  (prn "All column changes is seen as compatible!!!!!")
-  true)
 
-#_(defn compatible-columns? [imported-columns columns]
+(defn compatible-columns? [imported-columns columns]
   (let [imported-columns (map (fn [column]
                                 (cond-> {:id (keyword (get column "columnName"))
-                                         :type (keyword (get column "type"))
-                                         :title (string/trim (get column "title"))}
+                                         :type (keyword (get column "type"))}
                                   (contains? column "key") (assoc :key (boolean (get column "key")))))
                               imported-columns)]
     (set/subset? (set imported-columns)
-                 (set columns))))
-
+                 (set (map #(dissoc % :title) columns)))))
 
 
 (defn do-update [conn config dataset-id data-source-id job-execution-id data-source-spec]
