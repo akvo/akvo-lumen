@@ -4,7 +4,7 @@ import SwatchesPicker from 'react-color/lib/components/swatches/Swatches';
 import Popover from './Popover';
 
 import './ColorPicker.scss';
-import LegendShape from './charts/LegendShape';
+import LegendShape from '../charts/LegendShape';
 
 const ColorPicker = ({ title, target, left = 0, top = 0, placement, style, ...rest }) => (
   <Popover

@@ -12,8 +12,8 @@ import { GridRows } from '@vx/grid';
 
 import { sortAlphabetically } from '../../utilities/utils';
 import Legend from './Legend';
-import ResponsiveWrapper from '../ResponsiveWrapper';
-import ColorPicker from '../ColorPicker';
+import ResponsiveWrapper from '../common/ResponsiveWrapper';
+import ColorPicker from '../common/ColorPicker';
 import ChartLayout from './ChartLayout';
 import Tooltip from './Tooltip';
 import { labelFont } from '../../constants/chart';
@@ -43,7 +43,7 @@ export default class SimpleBarChart extends Component {
       metadata: PropTypes.object,
     }),
     colors: PropTypes.array.isRequired,
-    colorMappings: PropTypes.object,
+    colorMapping: PropTypes.object,
     onChangeVisualisationSpec: PropTypes.func.isRequired,
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
@@ -72,7 +72,7 @@ export default class SimpleBarChart extends Component {
     legendVisible: false,
     edit: false,
     padding: 0.1,
-    colorMappings: {},
+    colorMapping: {},
     grid: true,
   }
 
@@ -96,8 +96,8 @@ export default class SimpleBarChart extends Component {
   }
 
   getColor(key, index) {
-    const { colorMappings, colors } = this.props;
-    return colorMappings[key] || colors[index];
+    const { colorMapping, colors } = this.props;
+    return colorMapping[key] || colors[index];
   }
 
   handleShowTooltip(event, content) {
@@ -244,7 +244,7 @@ export default class SimpleBarChart extends Component {
             horizontal={!horizontal}
             title={get(this.props, 'data.metadata.bucketColumnTitle')}
             data={series.data.map(({ key }) => key)}
-            colorMappings={
+            colorMapping={
               series.data.reduce((acc, { key }, i) => ({
                 ...acc,
                 [key]: this.getColor(key, i),

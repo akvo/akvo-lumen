@@ -10,8 +10,8 @@ import merge from 'lodash/merge';
 import { sortAlphabetically } from '../../utilities/utils';
 import { round } from '../../utilities/chart';
 import Legend from './Legend';
-import ResponsiveWrapper from '../ResponsiveWrapper';
-import ColorPicker from '../ColorPicker';
+import ResponsiveWrapper from '../common/ResponsiveWrapper';
+import ColorPicker from '../common/ColorPicker';
 import ChartLayout from './ChartLayout';
 import Tooltip from './Tooltip';
 import { keyFont } from '../../constants/chart';
@@ -26,7 +26,7 @@ export default class PieChart extends Component {
       metadata: PropTypes.object,
     }),
     colors: PropTypes.array.isRequired,
-    colorMappings: PropTypes.object,
+    colorMapping: PropTypes.object,
     onChangeVisualisationSpec: PropTypes.func.isRequired,
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
@@ -44,7 +44,7 @@ export default class PieChart extends Component {
     interactive: true,
     legendVisible: true,
     edit: false,
-    colorMappings: {},
+    colorMapping: {},
   }
 
   state = {
@@ -67,8 +67,8 @@ export default class PieChart extends Component {
   }
 
   getColor(key, index) {
-    const { colorMappings, colors } = this.props;
-    return colorMappings[key] || colors[index];
+    const { colorMapping, colors } = this.props;
+    return colorMapping[key] || colors[index];
   }
 
   handleShowTooltip(event, content) {
@@ -176,7 +176,7 @@ export default class PieChart extends Component {
             horizontal={!horizontal}
             title={get(this.props, 'data.metadata.bucketColumnTitle')}
             data={series.data.map(({ key }) => key)}
-            colorMappings={
+            colorMapping={
               series.data.reduce((acc, { key }, i) => ({
                 ...acc,
                 [key]: this.getColor(key, i),

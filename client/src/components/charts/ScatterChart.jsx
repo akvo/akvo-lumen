@@ -9,11 +9,12 @@ import { extent } from 'd3-array';
 import { Portal } from 'react-portal';
 import merge from 'lodash/merge';
 import { GridRows, GridColumns } from '@vx/grid';
+import itsSet from 'its-set';
 
 import { sortAlphabetically } from '../../utilities/utils';
 import Legend from './Legend';
-import ResponsiveWrapper from '../ResponsiveWrapper';
-import ColorPicker from '../ColorPicker';
+import ResponsiveWrapper from '../common/ResponsiveWrapper';
+import ColorPicker from '../common/ColorPicker';
 import Tooltip from './Tooltip';
 import ChartLayout from './ChartLayout';
 
@@ -34,7 +35,7 @@ export default class ScatterChart extends Component {
       metadata: PropTypes.object,
     }),
     colors: PropTypes.array.isRequired,
-    colorMappings: PropTypes.object,
+    colorMapping: PropTypes.object,
     onChangeVisualisationSpec: PropTypes.func.isRequired,
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
@@ -64,7 +65,7 @@ export default class ScatterChart extends Component {
     opacity: 0.9,
     legendVisible: false,
     edit: false,
-    colorMappings: {},
+    colorMapping: {},
     grid: true,
   }
 
@@ -78,22 +79,30 @@ export default class ScatterChart extends Component {
     if (!get(data, 'series[0]')) return false;
 
     const values = data.series[0].data
-      .map(({ value, ...rest }, i) => ({
-        ...rest,
-        x: Math.abs(value),
-        y: Math.abs(data.series[1].data[i].value),
-      }));
+      .map(({ value, ...rest }, i) => {
+        const x = value;
+        const y = data.series[1].data[i].value;
+        return {
+          ...rest,
+          x: x ? Math.abs(x) : x,
+          y: y ? Math.abs(y) : y,
+        };
+      });
     const series = merge({}, data.common, { ...data.series[0], data: values });
 
     return {
       ...series,
-      data: series.data.sort((a, b) => sortAlphabetically(a, b, ({ key }) => key)),
+      data: series.data
+        .sort((a, b) => sortAlphabetically(a, b, ({ key }) => key))
+        .reduce((acc, datum) => (
+          (itsSet(datum.x) && itsSet(datum.y)) ? acc.concat(datum) : acc
+        ), []),
     };
   }
 
   getColor(key, index) {
-    const { colorMappings, colors } = this.props;
-    return colorMappings[key] || colors[index];
+    const { colorMapping, colors } = this.props;
+    return colorMapping[key] || colors[index];
   }
 
   handleShowTooltip(event, tooltipItems) {
@@ -188,7 +197,7 @@ export default class ScatterChart extends Component {
             horizontal={!horizontal}
             title={get(this.props, 'data.metadata.bucketColumnTitle')}
             data={series.data.map(({ key }) => key)}
-            colorMappings={
+            colorMapping={
               series.data.reduce((acc, { key }, i) => ({
                 ...acc,
                 [key]: this.getColor(key, i),

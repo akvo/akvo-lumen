@@ -8,10 +8,11 @@ import { scaleLinear, scaleTime } from 'd3-scale';
 import { extent } from 'd3-array';
 import merge from 'lodash/merge';
 import { GridRows, GridColumns } from '@vx/grid';
+import itsSet from 'its-set';
 
 import { sortChronologically } from '../../utilities/utils';
-import ResponsiveWrapper from '../ResponsiveWrapper';
-import ColorPicker from '../ColorPicker';
+import ResponsiveWrapper from '../common/ResponsiveWrapper';
+import ColorPicker from '../common/ColorPicker';
 import ChartLayout from './ChartLayout';
 import Tooltip from './Tooltip';
 
@@ -77,7 +78,11 @@ export default class LineChart extends Component {
 
     return {
       ...series,
-      data: series.data.sort((a, b) => sortChronologically(a, b, ({ timestamp }) => timestamp)),
+      data: series.data
+        .sort((a, b) => sortChronologically(a, b, ({ timestamp }) => timestamp))
+        .reduce((acc, datum) => (
+          itsSet(datum.value) ? acc.concat(datum) : acc
+        ), []),
     };
   }
 

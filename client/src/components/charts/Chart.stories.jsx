@@ -92,7 +92,7 @@ storiesOf('Charts', module)
             },
           }}
           colors={palette(nodeCount)}
-          colorMappings={{ [data.common.data[0].key]: color('props.colorMappings[key]', 'rgb(158, 1, 66)') }}
+          colorMapping={{ [data.common.data[0].key]: color('props.colorMapping[key]', 'rgb(158, 1, 66)') }}
           innerRadius={number('props.innerRadius', 0)}
           onChangeVisualisationSpec={action('vis-spec-change')}
           width={number('props.width', 600)}

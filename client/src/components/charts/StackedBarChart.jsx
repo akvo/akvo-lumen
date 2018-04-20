@@ -13,8 +13,8 @@ import { GridRows } from '@vx/grid';
 
 import { sortAlphabetically } from '../../utilities/utils';
 import Legend from './Legend';
-import ResponsiveWrapper from '../ResponsiveWrapper';
-import ColorPicker from '../ColorPicker';
+import ResponsiveWrapper from '../common/ResponsiveWrapper';
+import ColorPicker from '../common/ColorPicker';
 import ChartLayout from './ChartLayout';
 import Tooltip from './Tooltip';
 import { labelFont } from '../../constants/chart';
@@ -28,7 +28,7 @@ export default class StackedBarChart extends Component {
       metadata: PropTypes.object,
     }),
     colors: PropTypes.array.isRequired,
-    colorMappings: PropTypes.object,
+    colorMapping: PropTypes.object,
     onChangeVisualisationSpec: PropTypes.func.isRequired,
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
@@ -58,7 +58,7 @@ export default class StackedBarChart extends Component {
     legendVisible: false,
     edit: false,
     padding: 0.1,
-    colorMappings: {},
+    colorMapping: {},
     grouped: false,
     grid: true,
   }
@@ -107,8 +107,8 @@ export default class StackedBarChart extends Component {
   }
 
   getColor(key, index) {
-    const { colorMappings, colors } = this.props;
-    return colorMappings[key] || colors[index];
+    const { colorMapping, colors } = this.props;
+    return colorMapping[key] || colors[index];
   }
 
   handleShowTooltip(event, content) {
@@ -233,7 +233,7 @@ export default class StackedBarChart extends Component {
             horizontal={!horizontal}
             title={get(this.props, 'data.metadata.bucketColumnTitle')}
             data={stackNodes.map(({ key }) => key)}
-            colorMappings={
+            colorMapping={
               stackNodes.reduce((acc, { key }, i) => ({
                 ...acc,
                 [key]: this.getColor(key, i),

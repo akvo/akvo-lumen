@@ -11,7 +11,7 @@ const Legend = ({
   title,
   horizontal = false,
   activeItem,
-  colorMappings = {},
+  colorMapping = {},
   ...rest
 }) => {
   const ordinalColor = scaleOrdinal({ domain: data, range: [] });
@@ -27,7 +27,7 @@ const Legend = ({
         shape={({ label: { datum }, ...shapeRest }) => (
           <LegendShape isActive={activeItem === datum} {...shapeRest} />
         )}
-        fill={({ datum }) => colorMappings[datum]}
+        fill={({ datum }) => colorMapping[datum]}
       />
     </div>
   );
@@ -35,7 +35,7 @@ const Legend = ({
 
 Legend.propTypes = {
   data: PropTypes.arrayOf(PropTypes.string),
-  colorMappings: PropTypes.object.isRequired,
+  colorMapping: PropTypes.object.isRequired,
   onClick: PropTypes.func,
   horizontal: PropTypes.bool,
   title: PropTypes.string,

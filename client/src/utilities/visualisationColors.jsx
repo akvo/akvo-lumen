@@ -1,59 +1,3 @@
-import React from 'react';
-import isObject from 'lodash/isObject';
-import { Pattern } from '@potion/extra';
-
-// export { schemePaired as palette } from 'd3-scale-chromatic';
-// [
-//   '#BF2932',
-//   '#19A99D',
-//   '#95734B',
-//   '#86AA90',
-//   '#66608F',
-//   '#FEDA77',
-//   '#C0652A',
-//   '#5286B4',
-//   '#C28A6F',
-//   '#61B66F',
-//   '#3D3455',
-//   '#D8BB7F',
-//   '#158EAE',
-//   '#5F6253',
-//   '#921FA1',
-//   '#F38341',
-//   '#487081',
-//   '#556123',
-//   '#C799AE',
-//   '#2F4E77',
-//   '#B8385E',
-//   '#9E4962',
-// ];
-// export const palette = [
-//   '#1118E2',
-//   '#7923EC',
-//   '#BD2ED6',
-//   '#E03056',
-//   '#EC4C27',
-//   '#F1B14A',
-//   '#4B89C2',
-//   '#2F6077',
-//   '#388285',
-//   '#7BAD83',
-//   '#F1B14A',
-//   '#EB6543',
-//   '#113152',
-//   '#1F506E',
-//   '#347A88',
-//   '#D5D6BF',
-//   '#EDE9C0',
-//   '#FBE07C',
-//   '#758396',
-//   '#6589AB',
-//   '#5EB8C3',
-//   '#BCD376',
-//   '#DCC777',
-//   '#D3716D',
-// ];
-
 export const patterns = [
   { type: 'Lines', strokeWidth: 10, size: 10, orientation: 'diagonal' },
   { type: 'Circles', strokeWidth: 3, size: 10 },
@@ -103,29 +47,61 @@ export const randomColor = () => {
   return color;
 };
 
-export const getFills = (keys, descriptors) => keys.reduce((acc, key, i) => {
-  const descriptor = descriptors[key] || paletteWithPatterns[i];
-  if (isObject(descriptor)) {
-    const { type, ...rest } = descriptor;
-    const the = { component: Pattern[type] };
-    const id = `p-${Math.random() * 100}`;
-    return { ...acc, [key]: { id, element: <the.component {...rest} id={id} />, descriptor } };
-  }
-  return { ...acc, [key]: descriptor };
-}, {});
+// keeping this here because it might come in useful if we want to do pattern fills etc
 
-export const getFillDefs = descriptors => Object.keys(descriptors).reduce((acc, key) => {
-  const descriptor = descriptors[key];
-  if (isObject(descriptor)) return acc.concat(descriptor.element);
-  return acc;
-}, []);
+// export const getFills = (keys, descriptors) => keys.reduce((acc, key, i) => {
+//   const descriptor = descriptors[key] || paletteWithPatterns[i];
+//   if (isObject(descriptor)) {
+//     const { type, ...rest } = descriptor;
+//     const the = { component: Pattern[type] };
+//     const id = `p-${Math.random() * 100}`;
+//     return { ...acc, [key]: { id, element: <the.component {...rest} id={id} />, descriptor } };
+//   }
+//   return { ...acc, [key]: descriptor };
+// }, {});
 
-export const getFill = (descriptor) => {
-  if (isObject(descriptor)) return `url(#${descriptor.id})`;
-  return descriptor;
-};
+// export const getFillDefs = descriptors => Object.keys(descriptors).reduce((acc, key) => {
+//   const descriptor = descriptors[key];
+//   if (isObject(descriptor)) return acc.concat(descriptor.element);
+//   return acc;
+// }, []);
 
-export const getStroke = (descriptor) => {
-  if (isObject(descriptor)) return descriptor.descriptor.stroke;
-  return descriptor;
-};
+// export const getFill = (descriptor) => {
+//   if (isObject(descriptor)) return `url(#${descriptor.id})`;
+//   return descriptor;
+// };
+
+// export const getStroke = (descriptor) => {
+//   if (isObject(descriptor)) return descriptor.descriptor.stroke;
+//   return descriptor;
+// };
+
+// keeping this in case we want to swithc back to old colours
+
+// export const palette = [
+//   '#BF2932',
+//   '#19A99D',
+//   '#95734B',
+//   '#86AA90',
+//   '#66608F',
+//   '#FEDA77',
+//   '#C0652A',
+//   '#5286B4',
+//   '#C28A6F',
+//   '#61B66F',
+//   '#3D3455',
+//   '#D8BB7F',
+//   '#158EAE',
+//   '#5F6253',
+//   '#921FA1',
+//   '#F38341',
+//   '#487081',
+//   '#556123',
+//   '#C799AE',
+//   '#2F4E77',
+//   '#B8385E',
+//   '#9E4962',
+// ];
+
+// export const defaultPrimaryColor = '#5286B4';
+// export const defaultHighlightColor = '#61B66F';
