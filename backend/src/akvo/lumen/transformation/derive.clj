@@ -9,12 +9,14 @@
   (:import [javax.script ScriptEngineManager ScriptEngine Invocable ScriptContext Bindings]
            [jdk.nashorn.api.scripting NashornScriptEngineFactory ClassFilter]))
 
+
 (hugsql/def-db-fns "akvo/lumen/transformation/derive.sql")
 (hugsql/def-db-fns "akvo/lumen/transformation/engine.sql")
 
-
-
-(defn derive-column-function [code]
+(defn derive-column-function
+  "A string that declares the provided JavaScript code as a var bound to
+  deriveColumn."
+  [code]
   (format "var deriveColumn = function(row) {  return %s; }" code))
 
 (def ^ClassFilter class-filter
@@ -26,7 +28,10 @@
   (doseq [function ["print" "load" "loadWithNewGlobal" "exit" "quit" "eval"]]
     (.remove bindings function)))
 
-(defn row-transform [code]
+(defn row-transform
+  "Provided JavaScript code returns a Clojure function to get used as row
+  transform."
+  [code]
   (let [factory (NashornScriptEngineFactory.)
         engine (.getScriptEngine factory class-filter)
         bindings (.getBindings engine ScriptContext/ENGINE_SCOPE)]
@@ -35,7 +40,10 @@
     (fn [row]
       (.invokeFunction ^Invocable engine "deriveColumn" (object-array [row])))))
 
-(defn valid? [code]
+;; This should be updated using Nashorns Parse functionallity,
+(defn valid?
+  "Checks the provided code and makes sure it's valid. "
+  [code]
   (boolean
    (and (not (str/includes? code "function"))
         (not (str/includes? code "=>"))
@@ -107,19 +115,6 @@
       first
       (get "title")))
 
-#_(defn build-js
-  "Replace column references and fall back to use code pattern if there is no
-  references."
-  [columns transformation]
-  (reduce (fn [code {:strs [column-name id pattern]}]
-            (let [column-title (column-title columns column-name)]
-              (if column-name
-                (str/replace code id (format "row['%s']" column-title))
-                (str/replace code id pattern))))
-          (get-in transformation ["prepared" "code"])
-          (get-in transformation ["prepared" "references"])))
-
-
 (defn construct-code
   "Replace column references and fall back to use code pattern if there is no
   references."
@@ -141,7 +136,6 @@
            column-type "newColumnType"} (engine/args op-spec)
           on-error (engine/error-strategy op-spec)
           column-name (engine/next-column-name columns)
-          ;; transform (row-transform (build-js columns op-spec))
           transform (row-transform (construct-code columns op-spec))
           key-translation (into {}
                                 (map (fn [{:strs [columnName title]}]
@@ -175,20 +169,10 @@
       {:success? false
        :message (format "Failed to transform: %s" (.getMessage e))})))
 
-#_(defn row-references
-  "Takes JavaScript and return a sequence of string tuples
-  [<reference-pattern> <column-title>] e.g. \"row['a'];\" -> ([\"row['a']\"] \"a\")"
-  [code]
-  (let [re #"row(\.|\['|\[\")([\w\s]+)('\]|\"\]|)" ;; Valid \w & \s ?
-        refs (map (fn [[reference-pattern _ column-title _]]
-                    [reference-pattern column-title])
-                  (re-seq re code))]
-    (if (empty? refs)
-      `([~code ~code])
-      refs)))
-
 (defn parse-row-object-references
-  ""
+  "Parse js code and return a sequence of row-references e.g. row.foo row['foo']
+  or row[\"foo\"]. For every reference return a tuple with matched pattern and
+  the row column as in [\"row.foo\" \"foo\"]."
   [code]
   (let [re #"(?U)row.([\w\d]+)|row\['([\w\d\.\s\p{S}%&]+)'\]|row\[\"([\w\d\.\s\p{S}%&]+)\"\]"
         refs (map #(remove nil? %) (re-seq re code))]
@@ -197,7 +181,7 @@
       refs)))
 
 (defn column-name
-  ""
+  "Based on column definitions and title get the column name"
   [columns column-title]
   (-> (filter (fn [{:strs [title]}]
                 (= title column-title))
@@ -226,43 +210,3 @@
 (defmethod engine/pre-hook :core/derive
   [transformation columns]
   (assoc transformation "computed" (computed transformation columns)))
-
-
-(comment
-
-  (let [columns [{"columnTitle" "A"
-                  "columnName" "c1"}
-                 {"columnTitle" "B"
-                  "columnName" "c2"}
-                 {"columnTitle" "C"
-                  "columnName" "d1"}]
-        transformation {"op" "core/derive"
-                        "args" {"code" "row.[' B'];"}
-                        "prepared" {"code" "abc123;"
-                                    "references" [{"id" "abc123"
-                                                   "pattern" "row[' B']"
-                                                   "column-name" "c2"}]}}]
-    (build-js columns transformation)
-    )
-  )
-
-
-(comment
-  (let [transform {"op" "core/derive"
-                   "args" {"code" "row['a'] + row.b;"}}
-        columns [{"title" "a"
-                  "columnName" "c1"}
-                 {"title" "b"
-                  "columnName" "c2"}]]
-    (reduce (fn [t ref]
-              (let [column-name (-> (filter #(= (get % "title") (second ref))
-                                            columns)
-                                    first (get "columnName"))
-                    id (str (util/squuid))]
-                (-> t
-                    (assoc-in ["tmap" id] {"pattern" (first ref)})
-                    (assoc-in ["tmap" id "column"] column-name)
-                    (update-in ["args" "code"] #(str/replace % (first ref) id)))))
-            transform
-            (parse-code (get-in transform ["args" "code"]))))
-  )

@@ -41,7 +41,7 @@ Setup your environment user and group id (only needs to be done once):
 To start:
 
 
-    docker-compose -f docker-compose.yml up -d ; docker-compose logs -f --tail=10
+    docker-compose up --build -d ; docker-compose logs -f --tail=10
 
 
 ## Keycloak

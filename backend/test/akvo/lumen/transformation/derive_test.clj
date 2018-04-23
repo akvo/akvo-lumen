@@ -6,6 +6,7 @@
 (deftest parse-row-object-references
   (is (= '(["row.a" "a"])
          (derive/parse-row-object-references "row.a")))
+
   (is (= '(["row['a']" "a"])
          (derive/parse-row-object-references "row['a'];")))
 
@@ -20,7 +21,6 @@
 
   (is (= '(["row['foo']" "foo"])
          (derive/parse-row-object-references "row['foo'].toUpperCase()")))
-
 
   (is (= '(["row['Derived 4']" "Derived 4"])
          (derive/parse-row-object-references "row['Derived 4'].toLowerCase()")))
