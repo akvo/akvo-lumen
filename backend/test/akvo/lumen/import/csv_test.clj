@@ -5,6 +5,7 @@
                                          *error-tracker*
                                          error-tracker-fixture]]
             [akvo.lumen.test-utils :refer [import-file]]
+            [clojure.tools.logging :as log]
             [clojure.string :as string]
             [clojure.test :refer :all]
             [hugsql.core :as hugsql]))
@@ -51,10 +52,12 @@
 
 (deftest ^:functional test-varying-column-count
   (testing "Should fail to import csv file with varying number of columns"
-    (is (thrown-with-msg? clojure.lang.ExceptionInfo
-                          #"Invalid csv file. Varying number of columns"
-                          (import-file *tenant-conn* *error-tracker* "mixed-column-counts.csv"
-                                       {:dataset-name "Mixed Column Counts"})))))
+    (with-redefs [log/log* (fn [_ _ _ _]
+                             (constantly nil))]
+      (is (thrown-with-msg? clojure.lang.ExceptionInfo
+                            #"Invalid csv file. Varying number of columns"
+                            (import-file *tenant-conn* *error-tracker* "mixed-column-counts.csv"
+                                         {:dataset-name "Mixed Column Counts"}))))))
 
 (deftest ^:functional test-trimmed-columns
   (testing "Testing if whitespace is removed from beginning & end of column titles"
