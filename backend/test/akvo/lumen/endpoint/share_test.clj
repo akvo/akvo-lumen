@@ -169,7 +169,4 @@
     (let [dashboard-id (-> (all-dashboards *tenant-conn*) first :id)
           dashboard-share (variant/value (share/fetch *tenant-conn*
                                                       {"dashboardId" dashboard-id}))]
-      (is (contains? dashboard-share :id))))
-
-  (testing "History"
-    (is (not (empty? (share-history *tenant-conn*))))))
+      (is (contains? dashboard-share :id)))))

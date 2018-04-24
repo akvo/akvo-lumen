@@ -54,6 +54,8 @@
 
 (defn put
   [tenant-conn id {:strs [password]}]
-  (let [password-hash (scrypt/encrypt (format "%s|%s" id password) 16384 8 1)]
-    (update-share-password tenant-conn {:id id
-                                        :password-hash password-hash})))
+  (if (> (count password) 7)
+    (let [password-hash (scrypt/encrypt (format "%s|%s" id password) 16384 8 1)]
+      (update-share-password tenant-conn {:id id
+                                          :password-hash password-hash}))
+    (lib/bad-request {:message "Password need to be 8 characters or more"})))
