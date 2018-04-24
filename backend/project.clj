@@ -4,7 +4,8 @@
   :license {:name "GNU Affero General Public License 3.0"
             :url  "https://www.gnu.org/licenses/agpl-3.0.html"}
   :min-lein-version "2.0.0"
-  :dependencies [[ch.qos.logback/logback-classic "1.2.3"]
+  :dependencies [[buddy/buddy-hashers "1.3.0"]
+                 [ch.qos.logback/logback-classic "1.2.3"]
                  [org.clojure/tools.logging "0.4.0"]
                  [org.slf4j/log4j-over-slf4j "1.7.25"]
                  [org.slf4j/jcl-over-slf4j "1.7.25"]

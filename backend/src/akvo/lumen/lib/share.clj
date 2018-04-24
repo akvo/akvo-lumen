@@ -16,3 +16,8 @@
   "Delete a share"
   [tenant-conn id]
   (impl/delete-share-by-id tenant-conn {:id id}))
+
+(defn put
+  "Update a share"
+  [tenant-conn id body]
+  (impl/put tenant-conn id body))

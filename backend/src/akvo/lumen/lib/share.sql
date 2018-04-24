@@ -31,3 +31,7 @@ WHERE visualisation_id = :visualisation-id;
 -- :name delete-share-by-id :! :n
 -- :doc Remove share.
 DELETE FROM share WHERE id=:id;
+
+-- :name update-share-password :! :n
+-- :doc update share password
+UPDATE share SET password = :password-hash WHERE id = :id;

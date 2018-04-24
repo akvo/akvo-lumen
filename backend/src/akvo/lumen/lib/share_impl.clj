@@ -50,3 +50,9 @@
 
     :else
     (lib/bad-request {:error "Required key not provided"})))
+
+(defn put
+  [tenant-conn id {:strs [password]}]
+  (let [password-hash (format "X-%s" password)]
+    (update-share-password tenant-conn {:id id
+                                        :password-hash password-hash})))
