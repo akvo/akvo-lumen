@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component } from 'react';
 import { render } from 'react-dom';
 import { Provider } from 'react-redux';
 import Immutable from 'immutable';
@@ -64,14 +64,41 @@ function renderNoSuchShare() {
 const pathMatch = window.location.pathname.match(/^\/s\/(.*)/);
 const shareId = pathMatch != null ? pathMatch[1] : null;
 
+const fetchData = (password = undefined) => {
+  fetch(`/share/${shareId}`, { headers: { 'X-Password': password } })
+    .then(response => response.json())
+    .then(data => renderSuccessfulShare(data))
+    .catch((error) => {
+      if (error.status === 403) {
+        renderPrivacyGate(); // eslint-disable-line
+      }
+      renderNoSuchShare();
+      throw error;
+    });
+};
+
+class PrivacyGate extends Component {
+  render() {
+    return (
+      <div>
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            fetchData(this.password.value);
+          }}
+        >
+          <input ref={(c) => { this.password = c; }} type="password" placeholder="Password" />
+          <input type="submit" value="Submit" />
+        </form>
+      </div>
+    );
+  }
+}
+
+function renderPrivacyGate() {
+  render(<PrivacyGate />, rootElement);
+}
+
 if (shareId != null) {
-  polyfill(() => {
-    fetch(`/share/${shareId}`)
-      .then(response => response.json())
-      .then(data => renderSuccessfulShare(data))
-      .catch((error) => {
-        renderNoSuchShare();
-        throw error;
-      });
-  });
+  polyfill(fetchData);
 }

@@ -17,6 +17,17 @@
         justify-content: space-between;
         margin-top: 2rem;
         align-items: center;
+
+        &.no-margin {
+            margin: 0;
+        }
+    }
+
+    .privacyContainer {
+        input {
+            padding: 4px;
+            margin-right: 4px;    
+        }
     }
 
     .copyButton {
@@ -25,6 +36,10 @@
 
     .showEmbedButton {
         @include btnOutline($black, $black);
+    }
+
+    .savePasswordButton {
+        @include button($anchorLink, $white);
     }
 
     textarea {

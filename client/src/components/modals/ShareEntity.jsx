@@ -4,6 +4,7 @@ import CopyToClipboard from 'react-copy-to-clipboard';
 import ModalWrapper from 'react-modal';
 import ModalHeader from './ModalHeader';
 import ModalFooter from './ModalFooter';
+import ToggleInput from '../common/ToggleInput';
 import * as api from '../../api';
 
 require('./ShareEntity.scss');
@@ -18,6 +19,8 @@ export default class ShareEntity extends Component {
       showEmbed: false,
     };
     this.fetchShareId = this.fetchShareId.bind(this);
+    this.handleSavePassword = this.handleSavePassword.bind(this);
+    this.handleChangePassword = this.handleChangePassword.bind(this);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -37,8 +40,16 @@ export default class ShareEntity extends Component {
     }
   }
 
+  handleChangePassword(event) {
+    this.setState({ password: event.target.value });
+  }
+
+  handleSavePassword() {
+    this.props.onSetPassword(this.state.password);
+  }
+
   render() {
-    const { type, title, onClose, isOpen } = this.props;
+    const { type, title, onClose, isOpen, canSetPrivacy } = this.props;
     const shareUrl = `${window.location.origin}/s/${this.state.id}`;
     const defaultHeight = type === 'visualisation' ? '500px' : '1000px';
     const embedCode = `<iframe width="100%" height="${defaultHeight}" src="${shareUrl}" frameborder="0" allow="encrypted-media"></iframe>`;
@@ -70,6 +81,40 @@ export default class ShareEntity extends Component {
             onCloseModal={onClose}
           />
           <div className="ModalContents">
+
+            {canSetPrivacy && (
+              <div className="row">
+                <div className="rowContainer">
+                  <ToggleInput
+                    checked={this.state.showPassword}
+                    label="Password protected"
+                    onChange={() => {
+                      this.setState({ showPassword: !this.state.showPassword });
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {(canSetPrivacy && this.state.showPassword) && (
+              <div className="row">
+                <div className="rowContainer privacyContainer">
+                  <input
+                    placeholder="Password"
+                    type="password"
+                    onChange={this.handleChangePassword}
+                  />
+                  <button
+                    onClick={this.handleSavePassword}
+                    className="savePasswordButton"
+                    data-test-id="next"
+                  >
+                    Save
+                  </button>
+                </div>
+              </div>
+            )}
+
             <div className="row">
               <div className="rowContainer">
                 <label htmlFor="shareUrlCopyButton">URL for {type}: {title}</label>
@@ -85,6 +130,7 @@ export default class ShareEntity extends Component {
                   </a>
                 </div>
               </div>
+
               <div className="rowContainer">
                 <CopyToClipboard
                   text={shareUrl}
@@ -98,6 +144,7 @@ export default class ShareEntity extends Component {
                 </CopyToClipboard>
               </div>
             </div>
+
             {this.state.showEmbed ?
               <div className="row">
                 <div className="rowContainer">
@@ -139,6 +186,7 @@ export default class ShareEntity extends Component {
                 </button>
               </div>
             }
+
           </div>
           <ModalFooter
             rightButton={{
@@ -158,4 +206,6 @@ ShareEntity.propTypes = {
   id: PropTypes.string,
   title: PropTypes.string,
   type: PropTypes.string,
+  canSetPrivacy: PropTypes.bool,
+  onSetPassword: PropTypes.func,
 };

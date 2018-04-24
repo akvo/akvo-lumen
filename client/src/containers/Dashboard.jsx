@@ -299,6 +299,10 @@ class Dashboard extends Component {
     }
   }
 
+  handleSetPassword(newPassword) {
+    console.log('PUT password', newPassword, this);
+  }
+
   toggleShareDashboard() {
     this.setState({
       isShareModalVisible: !this.state.isShareModalVisible,
@@ -426,6 +430,8 @@ class Dashboard extends Component {
           title={dashboard.title}
           id={dashboard.id}
           type={dashboard.type}
+          canSetPrivacy
+          onSetPassword={this.handleSetPassword}
         />
       </div>
     );
