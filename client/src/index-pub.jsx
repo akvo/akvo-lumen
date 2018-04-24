@@ -7,6 +7,7 @@ import IntlWrapper from './containers/IntlWrapper';
 import VisualisationViewerContainer from './components/visualisation/VisualisationViewerContainer';
 import DashboardViewer from './components/dashboard/DashboardViewer';
 import LumenBranding from './components/common/LumenBranding';
+import ErrorScreen from './components/common/ErrorScreen';
 import polyfill from './polyfill/polyfill';
 import configureStore from './store/configureStore';
 
@@ -80,17 +81,25 @@ const fetchData = (password = undefined) => {
 class PrivacyGate extends Component {
   render() {
     return (
-      <div>
-        <form
-          onSubmit={(event) => {
-            event.preventDefault();
-            fetchData(this.password.value);
-          }}
-        >
-          <input ref={(c) => { this.password = c; }} type="password" placeholder="Password" />
-          <input type="submit" value="Submit" />
+      <ErrorScreen code={403}>
+        <form onSubmit={(event) => { event.preventDefault(); }}>
+          <input
+            onChange={({ target: { value } }) => {
+              this.setState({ password: value });
+            }}
+            type="password"
+            placeholder="Password"
+          />
+          <a
+            className="submitButton"
+            onClick={() => {
+              fetchData(this.state.password);
+            }}
+          >
+            Submit
+          </a>
         </form>
-      </div>
+      </ErrorScreen>
     );
   }
 }
