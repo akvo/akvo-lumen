@@ -1,6 +1,7 @@
 (ns akvo.lumen.lib.share-impl
   (:require [akvo.lumen.lib :as lib]
             [clojure.string :as string]
+            [clojurewerkz.scrypt.core :as scrypt]
             [hugsql.core :as hugsql])
   (:import (java.security SecureRandom)
            (java.util Base64)))
@@ -53,6 +54,6 @@
 
 (defn put
   [tenant-conn id {:strs [password]}]
-  (let [password-hash (format "X-%s" password)]
+  (let [password-hash (scrypt/encrypt (format "%s|%s" id password) 16384 8 1)]
     (update-share-password tenant-conn {:id id
                                         :password-hash password-hash})))

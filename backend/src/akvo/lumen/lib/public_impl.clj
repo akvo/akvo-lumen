@@ -6,6 +6,7 @@
             [akvo.lumen.lib.visualisation :as visualisation]
             [akvo.lumen.lib.visualisation.maps :as maps]
             [cheshire.core :as json]
+            [clojurewerkz.scrypt.core :as scrypt]
             [clojure.set :as set]
             [hugsql.core :as hugsql]))
 
@@ -113,8 +114,7 @@
   (if-let [share (get-share tenant-conn id)]
     (if-some [password-from-db (:password share)]
       (let [share (dissoc share :password)]
-        (if (= password-from-db
-               (format "X-%s" password))
+        (if (scrypt/verify (format "%s|%s" id password) password-from-db)
           (lib/ok (response-data tenant-conn share config))
           (lib/not-authorized {"shareId" id})))
       (lib/ok (response-data tenant-conn share config)))
