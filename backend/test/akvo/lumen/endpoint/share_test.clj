@@ -136,7 +136,6 @@
 (use-fixtures :once tenant-conn-fixture)
 
 
-(hugsql/def-db-fns "akvo/lumen/endpoint/share_test.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/dashboard.sql")
 
 (deftest ^:functional share
