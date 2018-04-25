@@ -5,7 +5,6 @@ import ModalWrapper from 'react-modal';
 import ModalHeader from './ModalHeader';
 import ModalFooter from './ModalFooter';
 import ToggleInput from '../common/ToggleInput';
-import * as api from '../../api';
 
 require('./ShareEntity.scss');
 
@@ -14,11 +13,9 @@ export default class ShareEntity extends Component {
   constructor() {
     super();
     this.state = {
-      id: '',
       copiedToClipboard: null,
       showEmbed: false,
     };
-    this.fetchShareId = this.fetchShareId.bind(this);
     this.handleSavePassword = this.handleSavePassword.bind(this);
     this.handleChangePassword = this.handleChangePassword.bind(this);
   }
@@ -26,17 +23,6 @@ export default class ShareEntity extends Component {
   componentWillReceiveProps(nextProps) {
     if (!nextProps.isOpen) {
       this.setState({ copiedToClipboard: null, showEmbed: false });
-    }
-  }
-
-  fetchShareId() {
-    const { id } = this.props;
-    const entityType = this.props.type;
-
-    if (id != null) {
-      api.post('/api/shares', { [`${entityType}Id`]: id })
-        .then(response => response.json())
-        .then(response => this.setState({ id: response.id }));
     }
   }
 
@@ -49,20 +35,20 @@ export default class ShareEntity extends Component {
   }
 
   render() {
-    const { type, title, onClose, isOpen, canSetPrivacy } = this.props;
-    const shareUrl = `${window.location.origin}/s/${this.state.id}`;
+    const { type, title, onClose, isOpen, canSetPrivacy, onFetchShareId, shareId } = this.props;
+    const shareUrl = `${window.location.origin}/s/${shareId}`;
     const defaultHeight = type === 'visualisation' ? '500px' : '1000px';
     const embedCode = `<iframe width="100%" height="${defaultHeight}" src="${shareUrl}" frameborder="0" allow="encrypted-media"></iframe>`;
 
     return (
       <ModalWrapper
         isOpen={isOpen}
-        onAfterOpen={this.fetchShareId}
+        onAfterOpen={onFetchShareId}
         contentLabel="userInviteModal"
         style={{
           content: {
             width: 500,
-            height: 320,
+            minHeight: 320,
             marginLeft: 'auto',
             marginRight: 'auto',
             borderRadius: 0,
@@ -203,9 +189,10 @@ export default class ShareEntity extends Component {
 ShareEntity.propTypes = {
   onClose: PropTypes.func.isRequired,
   isOpen: PropTypes.bool.isRequired,
-  id: PropTypes.string,
   title: PropTypes.string,
   type: PropTypes.string,
+  shareId: PropTypes.string,
   canSetPrivacy: PropTypes.bool,
   onSetPassword: PropTypes.func,
+  onFetchShareId: PropTypes.func,
 };

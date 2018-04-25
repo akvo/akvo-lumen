@@ -79,3 +79,40 @@ export function deleteDashboard(id) {
 
 /* Remove visualisation from dashboard */
 export const removeVisualisation = createAction('REMOVE_VISUALISATION_FROM_DASHBOARD');
+
+/* Fetch dashboard share id */
+export const fetchShareIdRequest = createAction('FETCH_DASHBOARD_SHARE_ID_REQUEST');
+export const fetchShareIdFailure = createAction('FETCH_DASHBOARD_SHARE_ID_FAILURE');
+export const fetchShareIdSuccess = createAction('FETCH_DASHBOARD_SHARE_ID_SUCCESS');
+
+export function fetchShareId(dashboardId) {
+  return (dispatch) => {
+    if (dashboardId != null) {
+      api.post('/api/shares', { dashboardId })
+        .then(response => response.json())
+        .then((response) => {
+          dispatch(fetchShareIdSuccess({ id: dashboardId, shareId: response.id }));
+        });
+    }
+  };
+}
+
+/* Set dashboard share password */
+export const setSharePasswordRequest = createAction('SET_SHARE_PASSWORD_REQUEST');
+export const setSharePasswordFailure = createAction('SET_SHARE_PASSWORD_FAILURE');
+export const setSharePasswordSuccess = createAction('SET_SHARE_PASSWORD_SUCCESS');
+
+export function setSharePassword(shareId, password) {
+  return (dispatch) => {
+    if (shareId != null) {
+      api.put(`/api/shares/${shareId}`, { password })
+        .catch((error) => {
+          dispatch(setSharePasswordFailure(error));
+        });
+        // .then(response => response.json())
+        // .then((response) => {
+        //   dispatch(setSharePasswordSuccess({ shareId, shareId: response.id }));
+        // });
+    }
+  };
+}

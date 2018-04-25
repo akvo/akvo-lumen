@@ -52,6 +52,7 @@ class Dashboard extends Component {
         id: null,
         created: null,
         modified: null,
+        shareId: '',
       },
       isSavePending: null,
       isUnsavedChanges: null,
@@ -69,6 +70,8 @@ class Dashboard extends Component {
     this.toggleShareDashboard = this.toggleShareDashboard.bind(this);
     this.handleDashboardAction = this.handleDashboardAction.bind(this);
     this.addDataToVisualisations = this.addDataToVisualisations.bind(this);
+    this.handleFetchShareId = this.handleFetchShareId.bind(this);
+    this.handleSetSharePassword = this.handleSetSharePassword.bind(this);
   }
 
   componentWillMount() {
@@ -114,13 +117,17 @@ class Dashboard extends Component {
   componentWillReceiveProps(nextProps) {
     const isEditingExistingDashboard = getEditingStatus(this.props.location);
     const dashboardAlreadyLoaded = this.state.dashboard.layout.length !== 0;
+    const { dashboardId } = nextProps.params;
 
-    if (isEditingExistingDashboard && !dashboardAlreadyLoaded) {
+    if (
+      (isEditingExistingDashboard && !dashboardAlreadyLoaded) ||
+      get(this.state, 'dashboard.shareId') !== get(nextProps, `library.dashboards[${dashboardId}].shareId`)
+    ) {
       /* We need to load a dashboard, and we haven't loaded it yet. Check if nextProps has both i)
       /* the dashboard and ii) the visualisations the dashboard contains, then load the dashboard
       /* editor if both these conditions are true. */
 
-      const dash = nextProps.library.dashboards[nextProps.params.dashboardId];
+      const dash = nextProps.library.dashboards[dashboardId];
       const haveDashboardData = Boolean(dash && dash.layout);
 
       if (haveDashboardData) {
@@ -135,14 +142,11 @@ class Dashboard extends Component {
           /* componentWillReceiveProps will be called again. */
           return;
         }
-
         this.loadDashboardIntoState(dash, nextProps.library);
       }
     }
 
-    if (!this.props.params.dashboardId && nextProps.params.dashboardId) {
-      const dashboardId = nextProps.params.dashboardId;
-
+    if (!this.props.params.dashboardId && dashboardId) {
       this.setState({
         isSavePending: false,
         isUnsavedChanges: false,
@@ -299,8 +303,14 @@ class Dashboard extends Component {
     }
   }
 
-  handleSetPassword(newPassword) {
-    console.log('PUT password', newPassword, this);
+  handleFetchShareId() {
+    const dashboard = getDashboardFromState(this.state.dashboard, true);
+    this.props.dispatch(actions.fetchShareId(dashboard.id));
+  }
+
+  handleSetSharePassword(newPassword) {
+    const dashboard = getDashboardFromState(this.state.dashboard, true);
+    this.props.dispatch(actions.setSharePassword(dashboard.shareId, newPassword));
   }
 
   toggleShareDashboard() {
@@ -428,10 +438,11 @@ class Dashboard extends Component {
           isOpen={this.state.isShareModalVisible}
           onClose={this.toggleShareDashboard}
           title={dashboard.title}
-          id={dashboard.id}
+          shareId={get(this.state, 'dashboard.shareId')}
           type={dashboard.type}
           canSetPrivacy
-          onSetPassword={this.handleSetPassword}
+          onSetPassword={this.handleSetSharePassword}
+          onFetchShareId={this.handleFetchShareId}
         />
       </div>
     );

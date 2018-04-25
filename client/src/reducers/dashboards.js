@@ -37,6 +37,14 @@ function saveDashboard(state, { payload }) {
   });
 }
 
+function saveShareId(state, { payload }) {
+  const id = payload.id;
+  return {
+    ...state,
+    [id]: { ...state[id], ...payload },
+  };
+}
+
 function removeDashboard(state, { payload }) {
   const newState = Object.assign({}, state);
   delete newState[payload];
@@ -86,4 +94,5 @@ export default handleActions({
   [actions.editDashboardSuccess]: editDashboard,
   [actions.deleteDashboardSuccess]: removeDashboard,
   [actions.removeVisualisation]: removeVisualisation,
+  [actions.fetchShareIdSuccess]: saveShareId,
 }, initialState);
