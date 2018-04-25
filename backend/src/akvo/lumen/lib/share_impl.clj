@@ -34,8 +34,8 @@
   "Share a dashboard"
   [tenant-conn dashboard-id]
   (first (insert-dashboard-share tenant-conn
-                                 {:id (random-url-safe-string)
-                                  :dashboard-id dashboard-id})))
+                                   {:id (random-url-safe-string)
+                                    :dashboard-id dashboard-id})))
 
 (defn fetch [tenant-conn spec]
   (cond
@@ -52,10 +52,30 @@
     :else
     (lib/bad-request {:error "Required key not provided"})))
 
+
+(defn valid-password? [password]
+  (and (some? password)
+       (> (count password) 7)))
+
 (defn put
-  [tenant-conn id {:strs [password]}]
-  (if (> (count password) 7)
-    (let [password-hash (scrypt/encrypt (format "%s|%s" id password) 16384 8 1)]
-      (update-share-password tenant-conn {:id id
-                                          :password-hash password-hash}))
-    (lib/bad-request {:message "Password need to be 8 characters or more"})))
+  [tenant-conn id {:strs [password protected]}]
+  (try
+    (if (some? password)
+      (if (valid-password? password)
+        (let [hash (scrypt/encrypt (format "%s|%s" id password) 16384 8 1)]
+          (if (boolean? protected)
+            (db-set-protected-and-password tenant-conn {:id id
+                                                        :hash hash
+                                                        :protected protected})
+            (db-set-password tenant-conn {:id id
+                                          :hash hash
+                                          :protected protected}))
+          (lib/ok {}))
+        (lib/bad-request {:message "Invalid password (min 8 characters)"}))
+      (if (boolean? protected)
+        (db-set-protected-flag tenant-conn {:id id :protected protected})
+        (lib/bad-request {:message "Nothing to update"})))
+
+    (catch Exception e
+      (prn e)
+      (lib/bad-request {}))))
