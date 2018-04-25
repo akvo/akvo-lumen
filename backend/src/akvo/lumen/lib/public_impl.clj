@@ -108,14 +108,12 @@
       (assoc (visualisation-response-data tenant-conn visualisation-id config)
              "visualisationId" visualisation-id))))
 
-
 (defn share
   [tenant-conn config id password]
   (if-let [share (get-share tenant-conn id)]
-    (if-some [password-from-db (:password share)]
-      (let [share (dissoc share :password)]
-        (if (scrypt/verify (format "%s|%s" id password) password-from-db)
-          (lib/ok (response-data tenant-conn share config))
-          (lib/not-authorized {"shareId" id})))
+    (if (:protected share)
+      (if (scrypt/verify (format "%s|%s" id password) (:password share))
+        (lib/ok (response-data tenant-conn share config))
+        (lib/not-authorized {"shareId" id}))
       (lib/ok (response-data tenant-conn share config)))
     (lib/not-found {"shareId" id})))
