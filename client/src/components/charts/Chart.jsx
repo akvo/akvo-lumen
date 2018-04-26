@@ -150,6 +150,7 @@ export default class Chart extends Component {
     });
   }
 
+  /*
   renderNewChart() {
     const {
       visualisation,
@@ -185,6 +186,7 @@ export default class Chart extends Component {
     }
     return null;
   }
+  */
 
   render() {
     const { visualisation, width, height } = this.props;
@@ -219,7 +221,6 @@ export default class Chart extends Component {
             <FormattedMessage id="data_last_updated" />
           </span>: {moment(dataset.get('updated')).format('Do MMM YYYY - HH:mm')}
         </p>
-        {this.renderNewChart()}
         <div
           ref={(el) => { this.element = el; }}
         />
