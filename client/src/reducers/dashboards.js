@@ -45,6 +45,16 @@ function saveShareId(state, { payload }) {
   };
 }
 
+function saveShareProtection(state, { payload }) {
+  const { shareId, data } = payload;
+  const dashboardId = Object.keys(state).filter(id => state[id].shareId === shareId)[0];
+  if (!dashboardId) return state;
+  return {
+    ...state,
+    [dashboardId]: { ...state[dashboardId], ...data },
+  };
+}
+
 function removeDashboard(state, { payload }) {
   const newState = Object.assign({}, state);
   delete newState[payload];
@@ -95,4 +105,5 @@ export default handleActions({
   [actions.deleteDashboardSuccess]: removeDashboard,
   [actions.removeVisualisation]: removeVisualisation,
   [actions.fetchShareIdSuccess]: saveShareId,
+  [actions.setShareProtectionSuccess]: saveShareProtection,
 }, initialState);

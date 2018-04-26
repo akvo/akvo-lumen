@@ -67,12 +67,17 @@ const shareId = pathMatch != null ? pathMatch[1] : null;
 
 const fetchData = (password = undefined) => {
   fetch(`/share/${shareId}`, { headers: { 'X-Password': password } })
-    .then(response => response.json())
-    .then(data => renderSuccessfulShare(data))
-    .catch((error) => {
-      if (error.status === 403) {
+    .then((response) => {
+      if (response.status === 403) {
         renderPrivacyGate(); // eslint-disable-line
+        return null;
       }
+      return response.json();
+    })
+    .then((data) => {
+      if (data) renderSuccessfulShare(data);
+    })
+    .catch((error) => {
       renderNoSuchShare();
       throw error;
     });

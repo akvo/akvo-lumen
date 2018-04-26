@@ -30,6 +30,21 @@
         }
     }
 
+    .alert {
+        height: 0.8rem;
+        color: $darkLime;
+        display: inline-block;
+
+        @include border-radius(100%);
+
+        text-align: center;
+        margin-right: 0.15rem;
+
+        &.alert-danger {
+            color: $errorRed;
+        }
+    }
+
     .copyButton {
         @include btnOutline($black, $white);
     }
