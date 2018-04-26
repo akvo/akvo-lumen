@@ -73,7 +73,9 @@
           (lib/ok {}))
         (lib/bad-request {:message "Invalid password (min 8 characters)"}))
       (if (boolean? protected)
-        (db-set-protected-flag tenant-conn {:id id :protected protected})
+        (do
+          (db-set-protected-flag tenant-conn {:id id :protected protected})
+          (lib/ok {}))
         (lib/bad-request {:message "Nothing to update"})))
 
     (catch Exception e
