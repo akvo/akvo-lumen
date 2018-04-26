@@ -1,7 +1,7 @@
 FROM mhart/alpine-node:8
 MAINTAINER Akvo Foundation <devops@akvo.org>
 
-RUN apk add --no-cache build-base su-exec python cairo-dev pango-dev xz jpeg-dev
+RUN apk add --no-cache build-base su-exec python cairo-dev pango-dev xz jpeg-dev git
 
 WORKDIR "/lumen"
 

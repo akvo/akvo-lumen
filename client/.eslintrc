@@ -1,11 +1,13 @@
 {
   "extends": "airbnb",
+  "parser": "babel-eslint",
   "env": {
     "browser": true,
     "node": true
   },
   "plugins": [
-    "react"
+    "react",
+    "babel"
   ],
   "parserOptions": {
     "ecmaFeatures": {
@@ -27,7 +29,9 @@
       "imports": "always-multiline",
       "exports": "never",
       "functions": "never"
-    }]
+    }],
+    "class-methods-use-this": 1,
+    "no-plusplus": ["error", { "allowForLoopAfterthoughts": true }]
   },
   "globals": {
     "window": true,

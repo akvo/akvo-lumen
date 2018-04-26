@@ -1,0 +1,55 @@
+@import "../../styles/modules/importAll";
+
+.legend {
+  font-family: $bodyFont;
+  h4 {
+    margin-bottom: 5px;
+    font-size: 16px;
+  }
+  .vx-legend {
+    line-height: 0.9em;
+    font-size: 10px;
+  
+    .vx-legend-item {
+      margin-left: 0 !important;
+  
+      .vx-legend-label {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        display: block !important;
+      }
+    }
+  }
+
+  &.legend-horizontal {
+    .vx-legend {
+      display: block !important;
+    }
+
+    .vx-legend-item {
+      padding-left: 15px;
+      position: relative;
+      vertical-align: top;
+      height: 20px;;
+    }
+
+    .vx-legend-shape {
+      position: absolute;
+      left: 0;
+      top: 0;
+    }    
+
+    .vx-legend-label {
+      position: relative;
+      top: 3px;
+    }
+
+    .vx-legend-item,
+    .vx-legend-shape,
+    .vx-legend-label {
+      display: inline-block !important;
+      white-space: nowrap !important;
+    }
+  }
+}
