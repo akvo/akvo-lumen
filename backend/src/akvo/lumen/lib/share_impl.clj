@@ -8,7 +8,7 @@
 
 
 (hugsql/def-db-fns "akvo/lumen/lib/share.sql")
-
+(hugsql/def-db-fns "akvo/lumen/lib/public.sql")
 
 (defn all [tenant-conn]
   (lib/ok (all-shares tenant-conn)))
@@ -73,9 +73,13 @@
           (lib/ok {}))
         (lib/bad-request {:message "Invalid password (min 8 characters)"}))
       (if (boolean? protected)
-        (do
-          (db-set-protected-flag tenant-conn {:id id :protected protected})
-          (lib/ok {}))
+        (if (-> (public-by-id tenant-conn {:id id})
+                :password
+                (valid-password?))
+          (do
+            (db-set-protected-flag tenant-conn {:id id :protected protected})
+            (lib/ok {}))
+          (lib/bad-request {:message "Can't enable protection without valid password"}))
         (lib/bad-request {:message "Nothing to update"})))
 
     (catch Exception e
