@@ -43,20 +43,22 @@ const getMarginLeft = (placement) => {
 };
 
 const Popover = ({ title, children, placement = '', left, top, className = '', style = {} }) => (
-  <div
-    className={`popover fade show bs-popover-${placement.split('-')[0]} ${className} popover-${placement}`}
-    role="tooltip"
-    style={{
-      left,
-      top,
-      transform: `${getXTransform(placement)} ${getYTransform(placement)}`,
-      marginLeft: getMarginLeft(placement),
-      ...style,
-    }}
-  >
-    <div className="arrow" />
-    {title && <h3 className="popover-header">{title}</h3>}
-    <div className="popover-body">{children}</div>
+  <div className="Popover">
+    <div
+      className={`popover fade show bs-popover-${placement.split('-')[0]} ${className} popover-${placement}`}
+      role="tooltip"
+      style={{
+        left,
+        top,
+        transform: `${getXTransform(placement)} ${getYTransform(placement)}`,
+        marginLeft: getMarginLeft(placement),
+        ...style,
+      }}
+    >
+      <div className="arrow" />
+      {title && <h3 className="popover-header">{title}</h3>}
+      <div className="popover-body">{children}</div>
+    </div>
   </div>
 );
 
