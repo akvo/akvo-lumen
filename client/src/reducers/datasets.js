@@ -46,7 +46,7 @@ function saveDataset(state, dataset) {
   const id = dataset.get('id');
   return {
     ...state,
-    [id]: dataset.set('type', 'dataset'),
+    [id]: dataset.set('type', 'dataset').set('fetched', new Date()),
   };
 }
 
@@ -55,7 +55,7 @@ function saveDatasets(state, ds) {
     const id = dataset.get('id');
     if (state[id] == null) {
       return Object.assign({}, result, {
-        [id]: dataset.set('type', 'dataset'),
+        [id]: dataset.set('type', 'dataset').set('fetched', new Date()),
       });
     }
     return result;
@@ -65,7 +65,7 @@ function saveDatasets(state, ds) {
 function updateDatasetSuccess(state, datasetId, data) {
   const dataset = state[datasetId];
   return Object.assign({}, state, {
-    [datasetId]: dataset.merge(data),
+    [datasetId]: dataset.merge(data).set('fetched', new Date()),
   });
 }
 

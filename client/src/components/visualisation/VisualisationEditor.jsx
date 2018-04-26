@@ -334,6 +334,7 @@ export default class VisualisationEditor extends Component {
           visualisation={visualisationToRender}
           metadata={metadata}
           datasets={props.datasets}
+          onChangeVisualisationSpec={props.onChangeVisualisationSpec}
         />
       </div>
     );

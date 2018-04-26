@@ -108,7 +108,6 @@ class Dataset extends Component {
   }
 
   handleChangeDatasetTitle(name) {
-    console.log(this.props.dataset.toJS(), name, this);
     const { dispatch, params } = this.props;
     dispatch(updateDatasetMeta(params.datasetId, { name }));
     // this.handleChangeVisualisation({ name: title });
