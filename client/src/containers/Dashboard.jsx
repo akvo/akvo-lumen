@@ -72,6 +72,7 @@ class Dashboard extends Component {
     this.addDataToVisualisations = this.addDataToVisualisations.bind(this);
     this.handleFetchShareId = this.handleFetchShareId.bind(this);
     this.handleSetSharePassword = this.handleSetSharePassword.bind(this);
+    this.handleToggleShareProtected = this.handleToggleShareProtected.bind(this);
   }
 
   componentWillMount() {
@@ -121,7 +122,8 @@ class Dashboard extends Component {
 
     if (
       (isEditingExistingDashboard && !dashboardAlreadyLoaded) ||
-      get(this.state, 'dashboard.shareId') !== get(nextProps, `library.dashboards[${dashboardId}].shareId`)
+      get(this.state, 'dashboard.shareId') !== get(nextProps, `library.dashboards[${dashboardId}].shareId`) ||
+      get(this.state, 'dashboard.protected') !== get(nextProps, `library.dashboards[${dashboardId}].protected`)
     ) {
       /* We need to load a dashboard, and we haven't loaded it yet. Check if nextProps has both i)
       /* the dashboard and ii) the visualisations the dashboard contains, then load the dashboard
@@ -308,9 +310,25 @@ class Dashboard extends Component {
     this.props.dispatch(actions.fetchShareId(dashboard.id));
   }
 
-  handleSetSharePassword(newPassword) {
+  handleSetSharePassword(password) {
     const dashboard = getDashboardFromState(this.state.dashboard, true);
-    this.props.dispatch(actions.setSharePassword(dashboard.shareId, newPassword));
+    this.props.dispatch(actions.setShareProtection(
+      dashboard.shareId,
+      { password, protected: Boolean(password.length) },
+      (error) => {
+        const message = get(error, 'message');
+        if (message) {
+          this.setState({ passwordAlert: { message, type: 'danger' } });
+          return;
+        }
+        this.setState({ passwordAlert: { message: 'Saved successfully.' } });
+      }
+    ));
+  }
+
+  handleToggleShareProtected(isProtected) {
+    const dashboard = getDashboardFromState(this.state.dashboard, true);
+    this.props.dispatch(actions.setShareProtection(dashboard.shareId, { protected: isProtected }));
   }
 
   toggleShareDashboard() {
@@ -439,10 +457,13 @@ class Dashboard extends Component {
           onClose={this.toggleShareDashboard}
           title={dashboard.title}
           shareId={get(this.state, 'dashboard.shareId')}
+          protected={get(this.state, 'dashboard.protected')}
           type={dashboard.type}
           canSetPrivacy
           onSetPassword={this.handleSetSharePassword}
           onFetchShareId={this.handleFetchShareId}
+          onToggleProtected={this.handleToggleShareProtected}
+          alert={this.state.passwordAlert}
         />
       </div>
     );

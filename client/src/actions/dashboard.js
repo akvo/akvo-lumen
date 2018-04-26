@@ -91,28 +91,33 @@ export function fetchShareId(dashboardId) {
       api.post('/api/shares', { dashboardId })
         .then(response => response.json())
         .then((response) => {
-          dispatch(fetchShareIdSuccess({ id: dashboardId, shareId: response.id }));
+          dispatch(fetchShareIdSuccess({
+            id: dashboardId,
+            shareId: response.id,
+            protected: response.protected,
+          }));
         });
     }
   };
 }
 
 /* Set dashboard share password */
-export const setSharePasswordRequest = createAction('SET_SHARE_PASSWORD_REQUEST');
-export const setSharePasswordFailure = createAction('SET_SHARE_PASSWORD_FAILURE');
-export const setSharePasswordSuccess = createAction('SET_SHARE_PASSWORD_SUCCESS');
+export const setShareProtectionRequest = createAction('SET_SHARE_PROTECTION_REQUEST');
+export const setShareProtectionFailure = createAction('SET_SHARE_PROTECTION_FAILURE');
+export const setShareProtectionSuccess = createAction('SET_SHARE_PROTECTION_SUCCESS');
 
-export function setSharePassword(shareId, password) {
+export function setShareProtection(shareId, payload, callback = () => {}) {
   return (dispatch) => {
     if (shareId != null) {
-      api.put(`/api/shares/${shareId}`, { password })
-        .catch((error) => {
-          dispatch(setSharePasswordFailure(error));
+      api.put(`/api/shares/${shareId}`, payload)
+        .then(response => response.json())
+        .then((response) => {
+          dispatch(setShareProtectionSuccess({ shareId, data: payload }));
+          callback(null, response);
+        })
+        .catch((error, response) => {
+          callback(response);
         });
-        // .then(response => response.json())
-        // .then((response) => {
-        //   dispatch(setSharePasswordSuccess({ shareId, shareId: response.id }));
-        // });
     }
   };
 }

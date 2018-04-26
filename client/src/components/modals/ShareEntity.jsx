@@ -15,9 +15,12 @@ export default class ShareEntity extends Component {
     this.state = {
       copiedToClipboard: null,
       showEmbed: false,
+      protected: false,
     };
     this.handleSavePassword = this.handleSavePassword.bind(this);
     this.handleChangePassword = this.handleChangePassword.bind(this);
+    this.handleToggleProtected = this.handleToggleProtected.bind(this);
+    this.handleFocusPassword = this.handleFocusPassword.bind(this);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -32,6 +35,17 @@ export default class ShareEntity extends Component {
 
   handleSavePassword() {
     this.props.onSetPassword(this.state.password);
+  }
+
+  handleToggleProtected(isProtected) {
+    this.setState({ protected: isProtected });
+    this.props.onToggleProtected(isProtected);
+  }
+
+  handleFocusPassword() {
+    if (!this.state.password) {
+      this.passwordInput.value = '';
+    }
   }
 
   render() {
@@ -72,23 +86,24 @@ export default class ShareEntity extends Component {
               <div className="row">
                 <div className="rowContainer">
                   <ToggleInput
-                    checked={this.state.showPassword}
+                    checked={this.props.protected || this.state.protected}
                     label="Password protected"
-                    onChange={() => {
-                      this.setState({ showPassword: !this.state.showPassword });
-                    }}
+                    onChange={this.handleToggleProtected}
                   />
                 </div>
               </div>
             )}
 
-            {(canSetPrivacy && this.state.showPassword) && (
-              <div className="row">
-                <div className="rowContainer privacyContainer">
+            {(canSetPrivacy && (this.props.protected || this.state.protected)) && (
+              <div className="row privacyContainer">
+                <div className="rowContainer">
                   <input
                     placeholder="Password"
                     type="password"
                     onChange={this.handleChangePassword}
+                    value={this.state.password || (this.props.protected ? '.......' : undefined)}
+                    onFocus={this.handleFocusPassword}
+                    ref={(c) => { this.passwordInput = c; }}
                   />
                   <button
                     onClick={this.handleSavePassword}
@@ -97,6 +112,16 @@ export default class ShareEntity extends Component {
                   >
                     Save
                   </button>
+                </div>
+              </div>
+            )}
+
+            {this.props.alert && (
+              <div className="row">
+                <div className="rowContainer">
+                  <div className={`alert alert-${this.props.alert.type || 'success'}`}>
+                    {this.props.alert.message}
+                  </div>
                 </div>
               </div>
             )}
@@ -193,6 +218,12 @@ ShareEntity.propTypes = {
   type: PropTypes.string,
   shareId: PropTypes.string,
   canSetPrivacy: PropTypes.bool,
+  protected: PropTypes.bool,
+  onToggleProtected: PropTypes.func,
   onSetPassword: PropTypes.func,
   onFetchShareId: PropTypes.func,
+  alert: PropTypes.shape({
+    message: PropTypes.string,
+    type: PropTypes.string,
+  }),
 };
