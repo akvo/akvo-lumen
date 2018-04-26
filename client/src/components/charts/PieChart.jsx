@@ -25,7 +25,7 @@ export default class PieChart extends Component {
       data: PropTypes.array,
       metadata: PropTypes.object,
     }),
-    colors: PropTypes.array.isRequired,
+    colors: PropTypes.oneOfType([PropTypes.array, PropTypes.object]).isRequired,
     colorMapping: PropTypes.object,
     onChangeVisualisationSpec: PropTypes.func.isRequired,
     width: PropTypes.number.isRequired,
