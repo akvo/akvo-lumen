@@ -312,6 +312,7 @@ class Dashboard extends Component {
 
   handleSetSharePassword(password) {
     const dashboard = getDashboardFromState(this.state.dashboard, true);
+    this.setState({ passwordAlert: null });
     this.props.dispatch(actions.setShareProtection(
       dashboard.shareId,
       { password, protected: Boolean(password.length) },
@@ -327,6 +328,7 @@ class Dashboard extends Component {
   }
 
   handleToggleShareProtected(isProtected) {
+    this.setState({ passwordAlert: null });
     const dashboard = getDashboardFromState(this.state.dashboard, true);
     this.props.dispatch(actions.setShareProtection(dashboard.shareId, { protected: isProtected }));
   }
