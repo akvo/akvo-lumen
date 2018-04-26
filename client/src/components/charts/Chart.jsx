@@ -3,11 +3,14 @@ import PropTypes from 'prop-types';
 import vg from 'vega';
 import moment from 'moment';
 import isEqual from 'lodash/isEqual';
-import get from 'lodash/get';
 import { FormattedMessage } from 'react-intl';
 import * as chart from '../../utilities/chart';
+
+/*
+import get from 'lodash/get';
 import PieChart from './PieChart';
 import { palette } from '../../utilities/visualisationColors';
+*/
 
 require('./Chart.scss');
 
