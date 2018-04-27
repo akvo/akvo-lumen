@@ -9,8 +9,8 @@ const getTitle = (title, code) => title || ({
 })[code];
 
 const ErrorScreen = ({ title, children, code }) => (
-  <div className="error-screen">
-    <div className="error-screen__inner">
+  <div className="ErrorScreen">
+    <div className="ErrorScreen__inner">
       <h1>{code}</h1>
       <h2>{getTitle(title, code)}</h2>
       {children}
