@@ -1,0 +1,19 @@
+@import "../../styles/modules/importAll";
+
+.tooltip {
+  background: white;
+  padding: 5px 10px;
+  @include border-radius(4px);
+  @include box-shadow(2px, 2px, 0, rgba(0,0,0,0.17)); 
+
+  .key {
+    font-weight: 600;
+    margin-left: 2px;
+  }
+  
+  .legend-shape {
+    margin-right: 2px;
+    position: relative;
+    top: 3px;
+  }
+}

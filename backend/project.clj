@@ -9,8 +9,8 @@
                  [org.slf4j/log4j-over-slf4j "1.7.25"]
                  [org.slf4j/jcl-over-slf4j "1.7.25"]
                  [org.slf4j/jul-to-slf4j "1.7.25"]
-                 [cheshire "5.8.0"]
-                 [clj-http "3.7.0"]
+                 [cheshire "5.8.0" :exclusions [com.fasterxml.jackson.core/jackson-core]]
+                 [clj-http "3.7.0" :exclusions [org.apache.httpcomponents/httpcore org.apache.httpcomponents/httpclient org.apache.httpcomponents/httpmime]]
                  [clj-time "0.14.2"]
                  [com.layerware/hugsql "0.4.8"]
                  [com.stuartsierra/component "0.3.2"]
@@ -25,8 +25,14 @@
                  [org.akvo/commons "0.4.5" :exclusions [org.postgresql/postgresql org.clojure/java.jdbc]]
                  [org.akvo/resumed "1.17.be5e74d2518253bb87ce087c15f5e04bd4b8b824"]
                  [org.apache.tika/tika-core "1.17"]
-                 [org.apache.tika/tika-parsers "1.17" :exclusions [org.slf4j/slf4j-api]]
-                 [org.clojure/clojure "1.9.0-beta1"]
+                 [org.apache.tika/tika-parsers "1.17" :exclusions [org.slf4j/slf4j-api com.fasterxml.jackson.core/jackson-core org.apache.httpcomponents/httpcore org.apache.httpcomponents/httpclient org.apache.httpcomponents/httpmime]]
+                 ;; explicit versions of commons deps used by tika-parsers and clj-http
+                 [com.fasterxml.jackson.core/jackson-core "2.9.2"]
+                 [org.apache.httpcomponents/httpcore "4.4.7"]
+                 [org.apache.httpcomponents/httpclient "4.5.4"]
+                 [org.apache.httpcomponents/httpmime "4.5.4"]
+
+                 [org.clojure/clojure "1.9.0"]
                  [org.clojure/data.csv "0.1.4"]
                  [org.clojure/core.match "0.3.0-alpha5"]
                  [org.clojure/java.jdbc "0.7.5"]
@@ -34,14 +40,15 @@
                  [org.postgresql/postgresql "42.2.1"]
                  [ragtime/ragtime.jdbc "0.6.4"]
                  [raven-clj "1.5.1"]
-                 [ring "1.6.3"]
+                 [ring "1.6.3" :exclusions [ring/ring-core]]
+                 [ring/ring-core "1.6.3"]
                  [ring/ring-defaults "0.3.1"]
                  [ring/ring-json "0.4.0"]
                  [selmer "1.11.5"]
                  [net.postgis/postgis-jdbc "2.2.1" :exclusions [org.postgresql/postgresql]]]
   :uberjar-name "akvo-lumen.jar"
   :repl-options {:timeout 120000}
-  ;; :pedantic? :abort
+  :pedantic? :abort
   :plugins [[lein-ancient "0.6.15"]
             [lein-codox "0.9.6"]
             [lein-environ "1.0.3"]
