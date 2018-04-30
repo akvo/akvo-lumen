@@ -165,8 +165,9 @@ class Dashboard extends Component {
         isUnsavedChanges: false,
       });
     } else if (!this.state.isSavePending) {
-      this.setState({ isSavePending: true });
-      dispatch(actions.createDashboard(dashboard, get(location, 'state.collectionId')));
+      this.setState({ isSavePending: true, isUnsavedChanges: false }, () => {
+        dispatch(actions.createDashboard(dashboard, get(location, 'state.collectionId')));
+      });
     } else {
       // Ignore save request until the first "create dashboard" request succeeeds
     }
