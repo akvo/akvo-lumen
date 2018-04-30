@@ -10,6 +10,7 @@ import { fetchLibrary } from '../actions/library';
 import { fetchDataset } from '../actions/dataset';
 import aggregationOnlyVisualisationTypes from '../utilities/aggregationOnlyVisualisationTypes';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import NavigationPrompt from '../components/common/NavigationPrompt';
 
 const getEditingStatus = (location) => {
   const testString = 'create';
@@ -400,34 +401,36 @@ class Dashboard extends Component {
     const dashboard = getDashboardFromState(this.state.dashboard, true);
 
     return (
-      <div className="Dashboard">
-        <DashboardHeader
-          title={dashboard.title}
-          isUnsavedChanges={this.state.isUnsavedChanges}
-          onDashboardAction={this.handleDashboardAction}
-          onChangeTitle={this.onUpdateName}
-          onBeginEditTitle={() => this.setState({ isUnsavedChanges: true })}
-          onSaveDashboard={this.onSave}
-        />
-        <DashboardEditor
-          dashboard={dashboard}
-          datasets={this.props.library.datasets}
-          visualisations={this.addDataToVisualisations(this.props.library.visualisations)}
-          metadata={this.state.metadata}
-          onAddVisualisation={this.onAddVisualisation}
-          onSave={this.onSave}
-          onUpdateLayout={this.updateLayout}
-          onUpdateEntities={this.updateEntities}
-          onUpdateName={this.onUpdateName}
-        />
-        <ShareEntity
-          isOpen={this.state.isShareModalVisible}
-          onClose={this.toggleShareDashboard}
-          title={dashboard.title}
-          id={dashboard.id}
-          type={dashboard.type}
-        />
-      </div>
+      <NavigationPrompt shouldPrompt={this.state.isUnsavedChanges}>{() => (
+        <div className="Dashboard">
+          <DashboardHeader
+            title={dashboard.title}
+            isUnsavedChanges={this.state.isUnsavedChanges}
+            onDashboardAction={this.handleDashboardAction}
+            onChangeTitle={this.onUpdateName}
+            onBeginEditTitle={() => this.setState({ isUnsavedChanges: true })}
+            onSaveDashboard={this.onSave}
+          />
+          <DashboardEditor
+            dashboard={dashboard}
+            datasets={this.props.library.datasets}
+            visualisations={this.addDataToVisualisations(this.props.library.visualisations)}
+            metadata={this.state.metadata}
+            onAddVisualisation={this.onAddVisualisation}
+            onSave={this.onSave}
+            onUpdateLayout={this.updateLayout}
+            onUpdateEntities={this.updateEntities}
+            onUpdateName={this.onUpdateName}
+          />
+          <ShareEntity
+            isOpen={this.state.isShareModalVisible}
+            onClose={this.toggleShareDashboard}
+            title={dashboard.title}
+            id={dashboard.id}
+            type={dashboard.type}
+          />
+        </div>
+      )}</NavigationPrompt>
     );
   }
 }
