@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import { withRouter } from 'react-router';
 
 class NavigationPrompt extends React.Component {
@@ -14,7 +15,10 @@ class NavigationPrompt extends React.Component {
     const { message, shouldPrompt, router, route, routes } = this.props;
     router.setRouteLeaveHook(
       routes.length ? routes[routes.length - 1] : route,
-      () => shouldPrompt && confirm(message)
+      () => {
+        if (!shouldPrompt) return true;
+        return confirm(message);
+      }
     );
     window.onbeforeunload = shouldPrompt && (() => message);
   }
