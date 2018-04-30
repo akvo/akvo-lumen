@@ -64,6 +64,7 @@ function renderNoSuchShare() {
 
 const pathMatch = window.location.pathname.match(/^\/s\/(.*)/);
 const shareId = pathMatch != null ? pathMatch[1] : null;
+let hasSubmitted = false;
 
 const fetchData = (password = undefined) => {
   fetch(`/share/${shareId}`, { headers: { 'X-Password': password } })
@@ -84,11 +85,34 @@ const fetchData = (password = undefined) => {
 };
 
 class PrivacyGate extends Component {
+  constructor(props) {
+    super(props);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+  componentDidMount() {
+    this.passwordInput.focus();
+  }
+  handleSubmit() {
+    hasSubmitted = true;
+    fetchData(this.state.password);
+  }
   render() {
     return (
       <ErrorScreen code={403}>
-        <form onSubmit={(event) => { event.preventDefault(); }}>
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            this.handleSubmit();
+          }}
+        >
+          {hasSubmitted && (
+            <div className="alert alert-danger">
+              Password incorrect
+            </div>
+          )}
+          <div className="clearfix" />
           <input
+            ref={(c) => { this.passwordInput = c; }}
             onChange={({ target: { value } }) => {
               this.setState({ password: value });
             }}
@@ -97,9 +121,7 @@ class PrivacyGate extends Component {
           />
           <a
             className="submitButton"
-            onClick={() => {
-              fetchData(this.state.password);
-            }}
+            onClick={this.handleSubmit}
           >
             Submit
           </a>

@@ -24,6 +24,9 @@
 
   form {
     margin-top: 20px;
+    max-width: 240px;
+    margin: 0 auto;
+
     input {
       &[type="password"] {
         padding: 10px;
@@ -35,6 +38,28 @@
       margin-left: 5px;
       position: relative;
       top: -1px;
+    }
+
+    .alert {
+      padding: 10px;
+      border: 1px solid transparent;
+      display: inline-block;
+      display: flex;
+      margin-bottom: 10px;
+
+      @include border-radius(6px);
+
+      text-align: center;
+
+      &.alert-success {
+          color: $darkLime;
+          border-color: $darkLime;
+      }
+
+      &.alert-danger {
+          color: $errorRed;
+          border-color: $errorRed;
+      }
     }
   }
 }
