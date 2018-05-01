@@ -14,15 +14,10 @@
 
 (defmethod engine/apply-operation :core/delete-column
   [tenant-conn table-name columns op-spec]
-  (try
-    (let [column-name (col-name op-spec)
-          column-idx (engine/column-index columns column-name)]
-      (delete-column tenant-conn {:table-name table-name :column-name column-name})
-      {:success? true
-       :execution-log [(format "Deleted column %s" column-name)]
-       :columns (into (vec (take column-idx columns))
-                      (drop (inc column-idx) columns))})
-    (catch Exception e
-      (log/debug e)
-      {:success? false
-       :message (format "Failed to transform: %s" (.getMessage e))})))
+  (let [column-name (col-name op-spec)
+        column-idx (engine/column-index columns column-name)]
+    (delete-column tenant-conn {:table-name table-name :column-name column-name})
+    {:success? true
+     :execution-log [(format "Deleted column %s" column-name)]
+     :columns (into (vec (take column-idx columns))
+                    (drop (inc column-idx) columns))}))

@@ -18,30 +18,25 @@
 
 (defmethod engine/apply-operation :core/combine
   [tenant-conn table-name columns op-spec]
-  (try
-    (let [new-column-name (engine/next-column-name columns)
-          {[first-column-name second-column-name] "columnNames"
-           separator "separator"
-           column-title "newColumnTitle"} (engine/args op-spec)]
-      (add-column tenant-conn {:table-name table-name
-                               :column-type "text"
-                               :new-column-name new-column-name})
-      (combine-columns tenant-conn
-                       {:table-name table-name
-                        :new-column-name new-column-name
-                        :first-column first-column-name
-                        :second-column second-column-name
-                        :separator separator})
-      {:success? true
-       :execution-log [(format "Combined columns %s, %s into %s"
-                               first-column-name second-column-name new-column-name)]
-       :columns (conj columns {"title" column-title
-                               "type" "text"
-                               "sort" nil
-                               "hidden" false
-                               "direction" nil
-                               "columnName" new-column-name})})
-    (catch Exception e
-      (log/debug e)
-      {:success? false
-       :message (.getMessage e)})))
+  (let [new-column-name (engine/next-column-name columns)
+        {[first-column-name second-column-name] "columnNames"
+         separator "separator"
+         column-title "newColumnTitle"} (engine/args op-spec)]
+    (add-column tenant-conn {:table-name table-name
+                             :column-type "text"
+                             :new-column-name new-column-name})
+    (combine-columns tenant-conn
+                     {:table-name table-name
+                      :new-column-name new-column-name
+                      :first-column first-column-name
+                      :second-column second-column-name
+                      :separator separator})
+    {:success? true
+     :execution-log [(format "Combined columns %s, %s into %s"
+                             first-column-name second-column-name new-column-name)]
+     :columns (conj columns {"title" column-title
+                             "type" "text"
+                             "sort" nil
+                             "hidden" false
+                             "direction" nil
+                             "columnName" new-column-name})}))

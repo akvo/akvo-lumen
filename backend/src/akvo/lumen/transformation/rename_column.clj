@@ -14,13 +14,9 @@
 
 (defmethod engine/apply-operation :core/rename-column
   [tenant-conn table-name columns op-spec]
-  (try
-    (let [column-name (col-name op-spec)
-          column-idx (engine/column-index columns column-name)
-          new-column-title (new-col-title op-spec)]
-      {:success? true
-       :execution-log [(format "Renamed column %s to %s" column-name new-column-title)]
-       :columns (engine/update-column columns column-name assoc "title" new-column-title)})
-    (catch Exception e
-      {:success? false
-       :message (format "Failed to transform: %s" (.getMessage e))})))
+  (let [column-name (col-name op-spec)
+        column-idx (engine/column-index columns column-name)
+        new-column-title (new-col-title op-spec)]
+    {:success? true
+     :execution-log [(format "Renamed column %s to %s" column-name new-column-title)]
+     :columns (engine/update-column columns column-name assoc "title" new-column-title)}))
