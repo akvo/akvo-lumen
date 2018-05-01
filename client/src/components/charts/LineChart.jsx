@@ -30,8 +30,8 @@ export default class LineChart extends Component {
       ),
       metadata: PropTypes.object,
     }),
-    color: PropTypes.string.isRequired,
-    onChangeVisualisationSpec: PropTypes.func.isRequired,
+    color: PropTypes.string,
+    onChangeVisualisationSpec: PropTypes.func,
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
     minRadius: PropTypes.number,
@@ -147,15 +147,19 @@ export default class LineChart extends Component {
       area,
       xAxisLabel,
       yAxisLabel,
-      xAxisTicks,
       yAxisTicks,
       grid,
     } = this.props;
     const { tooltipItems, tooltipVisible, tooltipPosition } = this.state;
 
+    const xAxisTicks = 12;
+
     const series = this.getData();
 
+    series.data = series.data.filter(o => o.value !== null && o.timestamp !== null);
+
     if (!series) return null;
+
 
     return (
       <ChartLayout
@@ -177,6 +181,7 @@ export default class LineChart extends Component {
                 dimensions.width * marginLeft,
                 dimensions.width * (1 - marginRight),
               ]);
+
 
             const yExtent = extent(series.data, ({ value }) => value);
             if (yExtent[0] > 0) yExtent[0] = 0;
@@ -253,7 +258,7 @@ export default class LineChart extends Component {
                           x={d => xScale(d.timestamp)}
                           y1={d => yScale(d.value)}
                           y0={origin}
-                          fill={color}
+                          fill={this.props.color}
                           fillOpacity={0.6}
                           onClick={(event) => {
                             this.handleClickNode({ key: null }, event);
@@ -266,8 +271,8 @@ export default class LineChart extends Component {
                         x={d => xScale(d.timestamp)}
                         y={d => yScale(d.value)}
                         fill="none"
-                        stroke={color}
-                        strokeWidth={2}
+                        stroke={this.props.color}
+                        strokeWidth={1}
                         onClick={(event) => {
                           this.handleClickNode({ key: null }, event);
                         }}
@@ -284,7 +289,7 @@ export default class LineChart extends Component {
                               cy={normalizedY}
                               r={radius}
                               fill="white"
-                              stroke={color}
+                              stroke={this.props.color}
                               strokeWidth={2}
                               onClick={(event) => {
                                 this.handleClickNode({ key }, event);

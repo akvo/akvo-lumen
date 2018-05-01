@@ -19,9 +19,9 @@
         column-y (utils/find-column columns (get query "metricColumnY"))
         column-y-name (get column-y "columnName")
         column-y-title (get column-y "title")
-        aggregation-method (get query "metricAggregation")
+        aggregation-method (if (= (get query "metricAggregation") "mean") "avg" (get query "metricAggregation"))
         sql-text-with-aggregation "SELECT %1$s, %5$s(%2$s) FROM %3$s WHERE %4$s GROUP BY %1$s ORDER BY %1$s"
-        sql-text-without-aggreagtion "SELECT %1$s, %2$s FROM %3$s WHERE %4$s ORDER BY $%1$s"
+        sql-text-without-aggreagtion "SELECT %1$s, %2$s FROM %3$s WHERE %4$s ORDER BY %1$s"
         sql-text (if aggregation-method sql-text-with-aggregation sql-text-without-aggreagtion)
         sql-response (run-query tenant-conn table-name sql-text column-x-name column-y-name filter-sql aggregation-method)]
     (lib/ok

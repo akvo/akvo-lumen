@@ -5,11 +5,12 @@ import moment from 'moment';
 import isEqual from 'lodash/isEqual';
 import { FormattedMessage } from 'react-intl';
 import * as chart from '../../utilities/chart';
+import LineChart from './LineChart';
+import { defaultPrimaryColor } from '../../utilities/visualisationColors';
 
 /*
 import get from 'lodash/get';
 import PieChart from './PieChart';
-import { palette } from '../../utilities/visualisationColors';
 */
 
 require('./Chart.scss');
@@ -89,6 +90,8 @@ export default class Chart extends Component {
       titleHeight: null,
       titleLength: null,
     };
+
+    this.renderNewChart = this.renderNewChart.bind(this);
   }
 
   componentDidMount() {
@@ -111,8 +114,17 @@ export default class Chart extends Component {
   }
 
   renderChart(props) {
-    const dataset = this.getDataset(props);
     const { visualisation, width, height } = props;
+
+    /* Hard coding an exit for new chart types seems fine temporarily...*/
+    if (
+      visualisation.visualisationType === 'line' ||
+      visualisation.visualisationType === 'area'
+    ) {
+      return;
+    }
+
+    const dataset = this.getDataset(props);
     const titleHeight = getTitleStyle(visualisation.name, getSize(width)).height * (1 + META_SCALE);
     const containerHeight = (height - titleHeight) || 400;
     const containerWidth = width || 800;
@@ -121,15 +133,13 @@ export default class Chart extends Component {
     switch (visualisation.visualisationType) {
       case 'pie':
       case 'donut':
+      case 'area':
+      case 'line':
         chartData = visualisation.data;
         if (!chartData) {
           // Aggregated data hasn't loaded yet - do nothing
           return;
         }
-        break;
-      case 'area':
-      case 'line':
-        chartData = chart.getLineData(visualisation, dataset);
         break;
       case 'scatter':
         chartData = chart.getScatterData(visualisation, dataset);
@@ -153,15 +163,14 @@ export default class Chart extends Component {
     });
   }
 
-  /*
   renderNewChart() {
     const {
       visualisation,
       width,
       height,
-      onChangeVisualisationSpec,
     } = this.props;
 
+    /*
     const colors = get(visualisation, 'data.data') ?
       visualisation.data.data.reduce((acc, datum, i) => {
         const result = { ...acc };
@@ -171,8 +180,30 @@ export default class Chart extends Component {
         return result;
       }, get(visualisation, 'spec.colors') || {}) :
       {};
+    */
+
+    if (!visualisation.data) {
+      return null;
+    }
 
     switch (visualisation.visualisationType) {
+      case 'line':
+      case 'area':
+        return (
+          <LineChart
+            visualisation={visualisation}
+            data={visualisation.data}
+            width={width}
+            height={height}
+            color={defaultPrimaryColor}
+            xAxisLabel={visualisation.spec.axisLabelX}
+            yAxisLabel={visualisation.spec.axisLabelY}
+            area={Boolean(visualisation.visualisationType === 'area')}
+          />
+        );
+      default:
+        console.warn(`Unknown visualisation type ${visualisation.visualisationType}`);
+      /*
       case 'pie':
       case 'donut': {
         return (
@@ -185,11 +216,10 @@ export default class Chart extends Component {
           />
         );
       }
-      // no default
+      */
     }
     return null;
   }
-  */
 
   render() {
     const { visualisation, width, height } = this.props;
@@ -227,6 +257,7 @@ export default class Chart extends Component {
         <div
           ref={(el) => { this.element = el; }}
         />
+        {this.renderNewChart()}
       </div>
     );
   }

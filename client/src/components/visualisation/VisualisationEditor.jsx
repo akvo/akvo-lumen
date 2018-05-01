@@ -12,6 +12,12 @@ const specIsValidForApi = (spec, vType) => {
   let anyLayerInvalid;
 
   switch (vType) {
+    case 'line':
+    case 'area':
+      if (spec.metricColumnX === null || spec.metricColumnY === null) {
+        return false;
+      }
+      break;
     case 'pivot table':
       if (spec.aggregation !== 'count' && spec.valueColumn == null) {
         return false;
@@ -78,6 +84,16 @@ const getNeedNewAggregation = (newV = { spec: {} }, oldV = { spec: {} }, optiona
         newV.spec.bucketColumn !== oldV.spec.bucketColumn ||
         !isEqual(newV.spec.filters, oldV.spec.filters)
       );
+    case 'line':
+    case 'area':
+      return Boolean(
+        newV.datasetId !== oldV.datasetId ||
+        newV.spec.metricColumnX !== oldV.spec.metricColumnX ||
+        newV.spec.metricColumnY !== oldV.spec.metricColumnY ||
+        newV.spec.metricAggregation !== oldV.spec.metricAggregation ||
+        !isEqual(newV.spec.filters, oldV.spec.filters)
+      );
+
     case 'map':
       return Boolean(
         newV.datasetId !== oldV.datasetId ||
@@ -134,8 +150,6 @@ export default class VisualisationEditor extends Component {
     switch (vType) {
       case null:
       case 'bar':
-      case 'line':
-      case 'area':
       case 'scatter':
         // Data aggregated client-side
         this.setState({ visualisation });
@@ -187,6 +201,8 @@ export default class VisualisationEditor extends Component {
       case 'pivot table':
       case 'pie':
       case 'donut':
+      case 'line':
+      case 'area':
         // Data aggregated on the backend for these types
 
         specValid = specIsValidForApi(visualisation.spec, vType);
@@ -296,6 +312,19 @@ export default class VisualisationEditor extends Component {
       case 'pie':
       case 'donut':
         api.get(`/api/aggregation/${datasetId}/pie`, {
+          query: JSON.stringify(spec),
+        }).then(response => response.json())
+          .then((response) => {
+            if (requestId === this.latestRequestId) {
+              this.setState({
+                visualisation: Object.assign({}, visualisation, { data: response }),
+              });
+            }
+          });
+        break;
+      case 'line':
+      case 'area':
+        api.get(`/api/aggregation/${datasetId}/line`, {
           query: JSON.stringify(spec),
         }).then(response => response.json())
           .then((response) => {
