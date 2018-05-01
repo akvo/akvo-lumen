@@ -215,6 +215,10 @@ class Dashboard extends Component {
         case 'pivot table':
           aggType = 'pivot';
           break;
+        case 'line':
+        case 'area':
+          aggType = 'line';
+          break;
         default:
           break;
       }

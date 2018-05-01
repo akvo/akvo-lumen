@@ -1,5 +1,5 @@
 /* Visualisation types for which we don't load the whole dataset, but only request aggregated
 ** data from the backend */
-const aggregationOnlyVisualisationTypes = ['pivot table', 'pie', 'donut', 'map'];
+const aggregationOnlyVisualisationTypes = ['pivot table', 'pie', 'donut', 'map', 'line', 'area'];
 
 export default aggregationOnlyVisualisationTypes;

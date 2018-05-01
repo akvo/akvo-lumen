@@ -31,6 +31,8 @@ const getIsDatasetLoaded = (props) => {
     case 'pivot table':
     case 'pie':
     case 'donut':
+    case 'line':
+    case 'area':
       return true;
 
     case 'map':
