@@ -109,15 +109,21 @@ export const setShareProtectionSuccess = createAction('SET_SHARE_PROTECTION_SUCC
 export function setShareProtection(shareId, payload, callback = () => {}) {
   return (dispatch) => {
     if (shareId != null) {
+      let isError = false;
       api.put(`/api/shares/${shareId}`, payload)
         .then((response) => {
           if (response.status !== 400) {
             dispatch(setShareProtectionSuccess({ shareId, data: payload }));
           }
+          if (response.status !== 200) isError = true;
           return response.json();
         })
         .then((response) => {
-          callback(null, response);
+          if (isError) {
+            callback(response);
+          } else {
+            callback(null, response);
+          }
         })
         .catch((error, response) => {
           callback(response);

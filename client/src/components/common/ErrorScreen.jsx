@@ -8,10 +8,10 @@ const getTitle = (title, code) => title || ({
   403: 'Access Restricted',
 })[code];
 
-const ErrorScreen = ({ title, children, code }) => (
+const ErrorScreen = ({ title, children, code, codeVisible = true }) => (
   <div className="ErrorScreen">
     <div className="ErrorScreen__inner">
-      <h1>{code}</h1>
+      {codeVisible && <h1>{code}</h1>}
       <h2>{getTitle(title, code)}</h2>
       {children}
     </div>
@@ -22,6 +22,7 @@ ErrorScreen.propTypes = {
   title: PropTypes.string,
   code: PropTypes.number,
   children: PropTypes.node,
+  codeVisible: PropTypes.bool,
 };
 
 export default ErrorScreen;

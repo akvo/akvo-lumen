@@ -98,7 +98,11 @@ class PrivacyGate extends Component {
   }
   render() {
     return (
-      <ErrorScreen code={403}>
+      <ErrorScreen
+        code={403}
+        codeVisible={false}
+        title="A password is required to view this visualisation/dashboard"
+      >
         <form
           onSubmit={(event) => {
             event.preventDefault();

@@ -311,6 +311,10 @@ class Dashboard extends Component {
   }
 
   handleSetSharePassword(password) {
+    if (!password) {
+      this.setState({ passwordAlert: { message: 'Please enter a password.', type: 'danger' } });
+      return;
+    }
     const dashboard = getDashboardFromState(this.state.dashboard, true);
     this.setState({ passwordAlert: null });
     this.props.dispatch(actions.setShareProtection(

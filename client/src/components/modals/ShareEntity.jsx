@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import CopyToClipboard from 'react-copy-to-clipboard';
@@ -101,7 +102,11 @@ export default class ShareEntity extends Component {
                     placeholder="Password"
                     type="password"
                     onChange={this.handleChangePassword}
-                    value={this.state.password || (this.props.protected ? '.......' : undefined)}
+                    value={
+                      (typeof this.state.password !== 'undefined') ?
+                        this.state.password :
+                        (this.props.protected ? '.......' : '')
+                    }
                     onFocus={this.handleFocusPassword}
                     ref={(c) => { this.passwordInput = c; }}
                   />
