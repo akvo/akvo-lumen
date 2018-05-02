@@ -148,7 +148,7 @@ async function test(page, shouldLogin) {
   console.log('Typing visualisation name...');
   await page.type('input[data-test-id="entity-title"]', `Visualisation of ${datasetName}`);
   console.log('Saving visualisation...');
-  await page.click('button[data-test-id="save-changes"]');
+  await page.click('body');
   console.log(`Visualisation ${datasetName} was successfully created.\n`);
 
   console.log('Back to library');
@@ -166,7 +166,7 @@ async function test(page, shouldLogin) {
   await page.click('div[data-test-id="entity-title"]');
   await page.type('input[data-test-id="entity-title"]', `Dashboard of ${datasetName}`);
   console.log('Saving dashboard...');
-  await page.click('button[data-test-id="save-changes"]');
+  await page.click('body');
   await page.click('[data-test-id="back-button"]');
   console.log(`Dashboard ${datasetName} was successfully created.\n`);
 }
