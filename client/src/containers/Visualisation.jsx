@@ -135,18 +135,31 @@ class Visualisation extends Component {
 
   onSave() {
     const { dispatch, location } = this.props;
-    this.setState({
-      isUnsavedChanges: false,
-    });
     if (this.state.visualisation.id) {
-      dispatch(actions.saveVisualisationChanges(this.state.visualisation));
+      dispatch(actions.saveVisualisationChanges(this.state.visualisation, (error) => {
+        if (error) {
+          return;
+        }
+        this.setState({
+          isUnsavedChanges: false,
+        });
+      }));
     } else if (!this.state.isSavePending) {
       this.setState({ isSavePending: true });
       dispatch(
-        actions.createVisualisation(this.state.visualisation, get(location, 'state.collectionId'))
+        actions.createVisualisation(
+          this.state.visualisation,
+          get(location, 'state.collectionId'),
+          (error) => {
+            if (error) {
+              return;
+            }
+            this.setState({
+              isUnsavedChanges: false,
+            });
+          }
+        )
       );
-    } else {
-        // Ignore save request for now
     }
   }
 
@@ -157,6 +170,8 @@ class Visualisation extends Component {
     this.setState({
       visualisation,
       isUnsavedChanges: true,
+    }, () => {
+      this.onSave();
     });
   }
 
