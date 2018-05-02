@@ -10,6 +10,7 @@ import { fetchLibrary } from '../actions/library';
 import { fetchDataset } from '../actions/dataset';
 import aggregationOnlyVisualisationTypes from '../utilities/aggregationOnlyVisualisationTypes';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import NavigationPrompt from '../components/common/NavigationPrompt';
 
 const getEditingStatus = (location) => {
   const testString = 'create';
@@ -170,8 +171,9 @@ class Dashboard extends Component {
         isUnsavedChanges: false,
       });
     } else if (!this.state.isSavePending) {
-      this.setState({ isSavePending: true });
-      dispatch(actions.createDashboard(dashboard, get(location, 'state.collectionId')));
+      this.setState({ isSavePending: true, isUnsavedChanges: false }, () => {
+        dispatch(actions.createDashboard(dashboard, get(location, 'state.collectionId')));
+      });
     } else {
       // Ignore save request until the first "create dashboard" request succeeeds
     }
@@ -438,40 +440,42 @@ class Dashboard extends Component {
     const dashboard = getDashboardFromState(this.state.dashboard, true);
 
     return (
-      <div className="Dashboard">
-        <DashboardHeader
-          title={dashboard.title}
-          isUnsavedChanges={this.state.isUnsavedChanges}
-          onDashboardAction={this.handleDashboardAction}
-          onChangeTitle={this.onUpdateName}
-          onBeginEditTitle={() => this.setState({ isUnsavedChanges: true })}
-          onSaveDashboard={this.onSave}
-        />
-        <DashboardEditor
-          dashboard={dashboard}
-          datasets={this.props.library.datasets}
-          visualisations={this.addDataToVisualisations(this.props.library.visualisations)}
-          metadata={this.state.metadata}
-          onAddVisualisation={this.onAddVisualisation}
-          onSave={this.onSave}
-          onUpdateLayout={this.updateLayout}
-          onUpdateEntities={this.updateEntities}
-          onUpdateName={this.onUpdateName}
-        />
-        <ShareEntity
-          isOpen={this.state.isShareModalVisible}
-          onClose={this.toggleShareDashboard}
-          title={dashboard.title}
-          shareId={get(this.state, 'dashboard.shareId')}
-          protected={get(this.state, 'dashboard.protected')}
-          type={dashboard.type}
-          canSetPrivacy
-          onSetPassword={this.handleSetSharePassword}
-          onFetchShareId={this.handleFetchShareId}
-          onToggleProtected={this.handleToggleShareProtected}
-          alert={this.state.passwordAlert}
-        />
-      </div>
+      <NavigationPrompt shouldPrompt={this.state.isUnsavedChanges}>
+        <div className="Dashboard">
+          <DashboardHeader
+            title={dashboard.title}
+            isUnsavedChanges={this.state.isUnsavedChanges}
+            onDashboardAction={this.handleDashboardAction}
+            onChangeTitle={this.onUpdateName}
+            onBeginEditTitle={() => this.setState({ isUnsavedChanges: true })}
+            onSaveDashboard={this.onSave}
+          />
+          <DashboardEditor
+            dashboard={dashboard}
+            datasets={this.props.library.datasets}
+            visualisations={this.addDataToVisualisations(this.props.library.visualisations)}
+            metadata={this.state.metadata}
+            onAddVisualisation={this.onAddVisualisation}
+            onSave={this.onSave}
+            onUpdateLayout={this.updateLayout}
+            onUpdateEntities={this.updateEntities}
+            onUpdateName={this.onUpdateName}
+          />
+          <ShareEntity
+            isOpen={this.state.isShareModalVisible}
+            onClose={this.toggleShareDashboard}
+            title={dashboard.title}
+            shareId={get(this.state, 'dashboard.shareId')}
+            protected={get(this.state, 'dashboard.protected')}
+            type={dashboard.type}
+            canSetPrivacy
+            onSetPassword={this.handleSetSharePassword}
+            onFetchShareId={this.handleFetchShareId}
+            onToggleProtected={this.handleToggleShareProtected}
+            alert={this.state.passwordAlert}
+          />
+        </div>
+      </NavigationPrompt>
     );
   }
 }

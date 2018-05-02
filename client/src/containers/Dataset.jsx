@@ -10,6 +10,7 @@ import { getId, getTitle } from '../domain/entity';
 import { getTransformations, getRows, getColumns } from '../domain/dataset';
 import * as api from '../api';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import NavigationPrompt from '../components/common/NavigationPrompt';
 
 require('../components/dataset/Dataset.scss');
 
@@ -136,29 +137,31 @@ class Dataset extends Component {
     }
     const { DatasetHeader, DatasetTable } = this.state.asyncComponents;
     return (
-      <div className="Dataset">
-        <DatasetHeader
-          onShowDatasetSettings={this.handleShowDatasetSettings}
-          name={getTitle(dataset)}
-          id={getId(dataset)}
-          isUnsavedChanges={this.state.isUnsavedChanges}
-          onChangeTitle={this.handleChangeDatasetTitle}
-          onBeginEditTitle={() => this.setState({ isUnsavedChanges: true })}
-        />
-        {getRows(dataset) != null ? (
-          <DatasetTable
-            columns={getColumns(dataset)}
-            rows={getRows(dataset)}
-            transformations={getTransformations(dataset)}
-            pendingTransformations={pendingTransformations.valueSeq()}
-            onTransform={transformation => this.transform(transformation)}
-            onUndoTransformation={() => this.undo()}
-            onNavigateToVisualise={this.handleNavigateToVisualise}
+      <NavigationPrompt shouldPrompt={this.state.isUnsavedChanges}>
+        <div className="Dataset">
+          <DatasetHeader
+            onShowDatasetSettings={this.handleShowDatasetSettings}
+            name={getTitle(dataset)}
+            id={getId(dataset)}
+            isUnsavedChanges={this.state.isUnsavedChanges}
+            onChangeTitle={this.handleChangeDatasetTitle}
+            onBeginEditTitle={() => this.setState({ isUnsavedChanges: true })}
           />
-        ) : (
-          <LoadingSpinner />
-        )}
-      </div>
+          {getRows(dataset) != null ? (
+            <DatasetTable
+              columns={getColumns(dataset)}
+              rows={getRows(dataset)}
+              transformations={getTransformations(dataset)}
+              pendingTransformations={pendingTransformations.valueSeq()}
+              onTransform={transformation => this.transform(transformation)}
+              onUndoTransformation={() => this.undo()}
+              onNavigateToVisualise={this.handleNavigateToVisualise}
+            />
+          ) : (
+            <LoadingSpinner />
+          )}
+        </div>
+      </NavigationPrompt>
     );
   }
 }
