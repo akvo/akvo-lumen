@@ -312,12 +312,26 @@ export default class LineChart extends Component {
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}
                     numTicks={yAxisTicks}
+                    labelProps={{
+                      dy: marginTop * dimensions.height * 0.5,
+                      textAnchor: 'middle',
+                      fontFamily: 'Arial',
+                      fontSize: 10,
+                      fill: 'black',
+                    }}
                   />
 
                   <AxisBottom
-                    scale={xScale}
                     top={origin}
+                    scale={xScale}
                     label={xAxisLabel || ''}
+                    labelProps={{
+                      dx: marginLeft * dimensions.width * 0.5,
+                      textAnchor: 'middle',
+                      fontFamily: 'Arial',
+                      fontSize: 10,
+                      fill: 'black',
+                    }}
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}
                     numTicks={xAxisTicks}
