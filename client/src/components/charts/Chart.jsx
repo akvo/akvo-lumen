@@ -170,6 +170,9 @@ export default class Chart extends Component {
       height,
     } = this.props;
 
+    const titleHeight = getTitleStyle(visualisation.name, getSize(width)).height * (1 + META_SCALE);
+    const adjustedContainerHeight = ((height - titleHeight) - (titleHeight * META_SCALE)) || 400;
+
     /*
     const colors = get(visualisation, 'data.data') ?
       visualisation.data.data.reduce((acc, datum, i) => {
@@ -194,7 +197,7 @@ export default class Chart extends Component {
             visualisation={visualisation}
             data={visualisation.data}
             width={width}
-            height={height}
+            height={adjustedContainerHeight}
             color={defaultPrimaryColor}
             xAxisLabel={visualisation.spec.axisLabelX}
             yAxisLabel={visualisation.spec.axisLabelY}
