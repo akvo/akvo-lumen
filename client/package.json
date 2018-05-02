@@ -31,7 +31,7 @@
     "@potion/element": "^1.0.0-next.24",
     "@potion/extra": "^1.0.0-next.20",
     "@potion/layout": "^1.0.0-next.20",
-    "@vx/axis": "0.0.159",
+    "@vx/axis": "0.0.162",
     "@vx/grid": "0.0.160",
     "@vx/legend": "0.0.154",
     "@vx/scale": "0.0.153",
