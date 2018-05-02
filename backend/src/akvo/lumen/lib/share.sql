@@ -19,7 +19,7 @@ VALUES (:id, :dashboard-id)
 ON CONFLICT (dashboard_id)
 DO UPDATE SET dashboard_id=:dashboard-id
 WHERE share.dashboard_id=:dashboard-id
-RETURNING (id);
+RETURNING id, protected;
 
 -- :name share-by-item-id :? :1
 -- :doc Return share not by share id but item id.
@@ -31,3 +31,17 @@ WHERE visualisation_id = :visualisation-id;
 -- :name delete-share-by-id :! :n
 -- :doc Remove share.
 DELETE FROM share WHERE id=:id;
+
+-- :name db-set-password :! :n
+-- :doc Set share password
+UPDATE share SET password = :hash WHERE id = :id;
+
+-- :name db-set-protected-flag :! :n
+-- :doc Set protection flag
+UPDATE share SET protected = :protected WHERE id = :id;
+
+-- :name db-set-protected-and-password :! :n
+-- :doc Set protection flag
+UPDATE share
+SET protected = :protected, password = :hash
+WHERE id = :id;

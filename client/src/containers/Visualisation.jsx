@@ -46,6 +46,7 @@ class Visualisation extends Component {
     this.handleVisualisationAction = this.handleVisualisationAction.bind(this);
     this.toggleShareVisualisation = this.toggleShareVisualisation.bind(this);
     this.loadDataset = this.loadDataset.bind(this);
+    this.handleFetchShareId = this.handleFetchShareId.bind(this);
   }
 
   componentWillMount() {
@@ -120,7 +121,10 @@ class Visualisation extends Component {
     const loadedVisualisation = this.state.visualisation.id != null;
     const nextPropsHasVisualisation = Boolean(nextProps.library.visualisations[visualisationId]);
 
-    if (isEditingExistingVisualisation && !loadedVisualisation && nextPropsHasVisualisation) {
+    if (
+      (isEditingExistingVisualisation && !loadedVisualisation && nextPropsHasVisualisation) ||
+      get(this.state, 'visualisation.shareId') !== get(nextProps, `library.visualisations[${visualisationId}].shareId`)
+    ) {
       this.setState({
         visualisation: nextProps.library.visualisations[visualisationId],
       });
@@ -243,6 +247,11 @@ class Visualisation extends Component {
     }
   }
 
+  handleFetchShareId() {
+    const { visualisation } = this.state;
+    this.props.dispatch(actions.fetchShareId(visualisation.id));
+  }
+
   // Filter datasets to only include status OK datasets
   datasets() {
     const datasets = Object.assign({}, this.props.library.datasets);
@@ -259,7 +268,7 @@ class Visualisation extends Component {
       return <LoadingSpinner />;
     }
     const { VisualisationHeader, VisualisationEditor } = this.state.asyncComponents;
-    const visualisation = this.state.visualisation;
+    const { visualisation } = this.state;
 
     return (
       <div className="Visualisation">
@@ -286,8 +295,9 @@ class Visualisation extends Component {
           isOpen={this.state.isShareModalVisible}
           onClose={this.toggleShareVisualisation}
           title={visualisation.name}
-          id={visualisation.id}
+          shareId={visualisation.shareId}
           type={visualisation.type}
+          onFetchShareId={this.handleFetchShareId}
         />
       </div>
     );
