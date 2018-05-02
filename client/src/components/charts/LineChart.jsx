@@ -11,6 +11,7 @@ import { GridRows, GridColumns } from '@vx/grid';
 import itsSet from 'its-set';
 
 import { sortChronologically, filterNullData } from '../../utilities/utils';
+import { round } from '../../utilities/chart';
 import ResponsiveWrapper from '../common/ResponsiveWrapper';
 import ColorPicker from '../common/ColorPicker';
 import ChartLayout from './ChartLayout';
@@ -63,6 +64,7 @@ export default class LineChart extends Component {
     edit: false,
     area: false,
     grid: true,
+    interactive: true,
   }
 
   state = {
@@ -105,7 +107,7 @@ export default class LineChart extends Component {
       tooltipVisible: true,
       tooltipItems: [
         { key: xLabel, value: x },
-        { key: yLabel, value: y },
+        { key: yLabel, value: round(y, 4) },
       ],
       tooltipPosition,
     });
