@@ -1,13 +1,14 @@
 (ns akvo.lumen.lib.share-impl
   (:require [akvo.lumen.lib :as lib]
             [clojure.string :as string]
+            [clojurewerkz.scrypt.core :as scrypt]
             [hugsql.core :as hugsql])
   (:import (java.security SecureRandom)
            (java.util Base64)))
 
 
 (hugsql/def-db-fns "akvo/lumen/lib/share.sql")
-
+(hugsql/def-db-fns "akvo/lumen/lib/public.sql")
 
 (defn all [tenant-conn]
   (lib/ok (all-shares tenant-conn)))
@@ -33,8 +34,8 @@
   "Share a dashboard"
   [tenant-conn dashboard-id]
   (first (insert-dashboard-share tenant-conn
-                                 {:id (random-url-safe-string)
-                                  :dashboard-id dashboard-id})))
+                                   {:id (random-url-safe-string)
+                                    :dashboard-id dashboard-id})))
 
 (defn fetch [tenant-conn spec]
   (cond
@@ -50,3 +51,37 @@
 
     :else
     (lib/bad-request {:error "Required key not provided"})))
+
+
+(defn valid-password? [password]
+  (and (some? password)
+       (> (count password) 7)))
+
+(defn put
+  [tenant-conn id {:strs [password protected]}]
+  (try
+    (if (some? password)
+      (if (valid-password? password)
+        (let [hash (scrypt/encrypt (format "%s|%s" id password) 16384 8 1)]
+          (if (boolean? protected)
+            (db-set-protected-and-password tenant-conn {:id id
+                                                        :hash hash
+                                                        :protected protected})
+            (db-set-password tenant-conn {:id id
+                                          :hash hash
+                                          :protected protected}))
+          (lib/ok {}))
+        (lib/bad-request {:message "Invalid password (min 8 characters)"}))
+      (if (boolean? protected)
+        (if (-> (public-by-id tenant-conn {:id id})
+                :password
+                (valid-password?))
+          (do
+            (db-set-protected-flag tenant-conn {:id id :protected protected})
+            (lib/ok {}))
+          (lib/bad-request {:message "Can't enable protection without valid password"}))
+        (lib/bad-request {:message "Nothing to update"})))
+
+    (catch Exception e
+      (prn e)
+      (lib/bad-request {}))))

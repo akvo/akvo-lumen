@@ -1,0 +1,68 @@
+@import "../../styles/modules/importAll";
+
+.ErrorScreen {
+  display: flex;
+  
+  .ErrorScreen__inner {
+    display: flex;
+    flex: 1;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+  
+  h1 {
+    font-size: 10em;
+    font-weight: 300;
+    line-height: 1em;
+  }
+
+  h2 {
+    font-size: 2em;
+    font-weight: 300;
+    margin-bottom: 15px;
+  }
+
+  form {
+    margin-top: 20px;
+    max-width: 240px;
+    margin: 0 auto;
+
+    input {
+      &[type="password"] {
+        padding: 10px;
+      }
+    }
+    .submitButton {
+      @include button($anchorLink, $white);
+      padding: 11px;
+      margin-left: 5px;
+      position: relative;
+      top: -1px;
+    }
+
+    .alert {
+      padding: 10px;
+      border: 1px solid transparent;
+      display: inline-block;
+      display: flex;
+      margin-bottom: 10px;
+
+      @include border-radius(6px);
+
+      text-align: center;
+
+      &.alert-success {
+          color: $darkLime;
+          border-color: $darkLime;
+      }
+
+      &.alert-danger {
+          color: $errorRed;
+          border-color: $errorRed;
+      }
+    }
+  }
+}

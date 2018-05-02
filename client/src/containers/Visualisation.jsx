@@ -6,6 +6,7 @@ import isEmpty from 'lodash/isEmpty';
 import get from 'lodash/get';
 import ShareEntity from '../components/modals/ShareEntity';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import NavigationPrompt from '../components/common/NavigationPrompt';
 import * as actions from '../actions/visualisation';
 import * as entity from '../domain/entity';
 import { fetchDataset } from '../actions/dataset';
@@ -50,6 +51,7 @@ class Visualisation extends Component {
     this.handleVisualisationAction = this.handleVisualisationAction.bind(this);
     this.toggleShareVisualisation = this.toggleShareVisualisation.bind(this);
     this.loadDataset = this.loadDataset.bind(this);
+    this.handleFetchShareId = this.handleFetchShareId.bind(this);
   }
 
   componentWillMount() {
@@ -124,7 +126,10 @@ class Visualisation extends Component {
     const loadedVisualisation = this.state.visualisation.id != null;
     const nextPropsHasVisualisation = Boolean(nextProps.library.visualisations[visualisationId]);
 
-    if (isEditingExistingVisualisation && !loadedVisualisation && nextPropsHasVisualisation) {
+    if (
+      (isEditingExistingVisualisation && !loadedVisualisation && nextPropsHasVisualisation) ||
+      get(this.state, 'visualisation.shareId') !== get(nextProps, `library.visualisations[${visualisationId}].shareId`)
+    ) {
       this.setState({
         visualisation: nextProps.library.visualisations[visualisationId],
       });
@@ -282,6 +287,11 @@ class Visualisation extends Component {
     }
   }
 
+  handleFetchShareId() {
+    const { visualisation } = this.state;
+    this.props.dispatch(actions.fetchShareId(visualisation.id));
+  }
+
   // Filter datasets to only include status OK datasets
   datasets() {
     const datasets = Object.assign({}, this.props.library.datasets);
@@ -298,39 +308,42 @@ class Visualisation extends Component {
       return <LoadingSpinner />;
     }
     const { VisualisationHeader, VisualisationEditor } = this.state.asyncComponents;
-    const visualisation = this.state.visualisation;
+    const { visualisation } = this.state;
 
     return (
-      <div className="Visualisation">
-        <VisualisationHeader
-          isUnsavedChanges={this.state.isUnsavedChanges}
-          visualisation={visualisation}
-          onVisualisationAction={this.handleVisualisationAction}
-          onChangeTitle={this.handleChangeVisualisationTitle}
-          onBeginEditTitle={() => this.setState({ isUnsavedChanges: true })}
-          onSaveVisualisation={this.onSave}
-          savingFailed={this.state.savingFailed}
-          timeToNextSave={this.state.timeToNextSave - this.state.timeFromPreviousSave}
-        />
-        <VisualisationEditor
-          visualisation={visualisation}
-          datasets={this.datasets()}
-          rasters={this.props.library.rasters}
-          onChangeTitle={this.handleChangeVisualisationTitle}
-          onChangeVisualisationType={this.handleChangeVisualisationType}
-          onChangeSourceDataset={this.handleChangeSourceDataset}
-          onChangeVisualisationSpec={this.handleChangeVisualisationSpec}
-          onSaveVisualisation={this.onSave}
-          loadDataset={this.loadDataset}
-        />
-        <ShareEntity
-          isOpen={this.state.isShareModalVisible}
-          onClose={this.toggleShareVisualisation}
-          title={visualisation.name}
-          id={visualisation.id}
-          type={visualisation.type}
-        />
-      </div>
+      <NavigationPrompt shouldPrompt={this.state.isUnsavedChanges}>
+        <div className="Visualisation">
+          <VisualisationHeader
+            isUnsavedChanges={this.state.isUnsavedChanges}
+            visualisation={visualisation}
+            onVisualisationAction={this.handleVisualisationAction}
+            onChangeTitle={this.handleChangeVisualisationTitle}
+            onBeginEditTitle={() => this.setState({ isUnsavedChanges: true })}
+            onSaveVisualisation={this.onSave}
+            savingFailed={this.state.savingFailed}
+            timeToNextSave={this.state.timeToNextSave - this.state.timeFromPreviousSave}
+          />
+          <VisualisationEditor
+            visualisation={visualisation}
+            datasets={this.datasets()}
+            rasters={this.props.library.rasters}
+            onChangeTitle={this.handleChangeVisualisationTitle}
+            onChangeVisualisationType={this.handleChangeVisualisationType}
+            onChangeSourceDataset={this.handleChangeSourceDataset}
+            onChangeVisualisationSpec={this.handleChangeVisualisationSpec}
+            onSaveVisualisation={this.onSave}
+            loadDataset={this.loadDataset}
+          />
+          <ShareEntity
+            isOpen={this.state.isShareModalVisible}
+            onClose={this.toggleShareVisualisation}
+            title={visualisation.name}
+            shareId={visualisation.shareId}
+            type={visualisation.type}
+            onFetchShareId={this.handleFetchShareId}
+          />
+        </div>
+      </NavigationPrompt>
     );
   }
 }

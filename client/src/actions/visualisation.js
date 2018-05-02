@@ -125,3 +125,20 @@ export function deleteVisualisation(id) {
       .catch(error => dispatch(deleteVisualisationFailure(error)));
   };
 }
+
+/* Fetch visualisation share id */
+export const fetchShareIdRequest = createAction('FETCH_VISUALISATION_SHARE_ID_REQUEST');
+export const fetchShareIdFailure = createAction('FETCH_VISUALISATION_SHARE_ID_FAILURE');
+export const fetchShareIdSuccess = createAction('FETCH_VISUALISATION_SHARE_ID_SUCCESS');
+
+export function fetchShareId(visualisationId) {
+  return (dispatch) => {
+    if (visualisationId != null) {
+      api.post('/api/shares', { visualisationId })
+        .then(response => response.json())
+        .then((response) => {
+          dispatch(fetchShareIdSuccess({ id: visualisationId, shareId: response.id }));
+        });
+    }
+  };
+}
