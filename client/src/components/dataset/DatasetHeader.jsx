@@ -31,7 +31,13 @@ export default class DatasetHeader extends Component {
   }
 
   render() {
-    const { onChangeTitle, onBeginEditTitle, isUnsavedChanges, savingFailed, timeToNextSave } = this.props;
+    const {
+      onChangeTitle,
+      onBeginEditTitle,
+      isUnsavedChanges,
+      savingFailed,
+      timeToNextSave,
+    } = this.props;
 
     let saveStatusId = ({
       false: 'all_changes_saved',
