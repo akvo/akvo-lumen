@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage, FormattedRelative, injectIntl, intlShape } from 'react-intl';
-import moment from 'moment';
 
 import EntityTitleInput from './EntityTitleInput';
 import Header from '../common/Header';
