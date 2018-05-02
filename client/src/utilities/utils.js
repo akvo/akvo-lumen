@@ -47,3 +47,11 @@ export const sortAlphabetically = (a, b, accessor = val => val) => {
   if (nameA > nameB) return 1;
   return 0;
 };
+
+export const sortChronologically = (a, b, accessor = val => val) => {
+  const dateA = accessor(a);
+  const dateB = accessor(b);
+  if (dateA < dateB) return -1;
+  if (dateA > dateB) return 1;
+  return 0;
+};

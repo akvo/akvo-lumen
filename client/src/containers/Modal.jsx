@@ -24,6 +24,9 @@ const getHeight = (modal) => {
   }
 };
 
+// http://reactcommunity.org/react-modal/accessibility/
+ModalWrapper.setAppElement('#root');
+
 class Modal extends Component {
   constructor() {
     super();

@@ -37,6 +37,16 @@
     {:success? false
      :message msg}))
 
+(defn try-apply-operation
+  "invoke apply-operation inside a try-catch"
+  [tenant-conn table-name columns op-spec]
+  (try
+    (apply-operation tenant-conn table-name columns op-spec)
+    (catch Exception e
+      (log/debug e)
+      {:success? false
+       :message (format "Failed to transform: %s" (.getMessage e))})))
+
 (defn pg-escape-string [s]
   (when-not (nil? s)
     (when-not (string? s)
@@ -143,14 +153,25 @@
 
 (defn execute-transformation
   [tenant-conn dataset-id job-execution-id transformation]
+  (prn "@execute-transformation")
+  (let [dataset-version (latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})
+        previous-columns (vec (:columns dataset-version))
+        source-table (:table-name dataset-version)
+        computed-transformation (pre-hook transformation previous-columns)
+        ]
+    (let [{:keys [success? message columns execution-log]} (try-apply-operation tenant-conn
+                                                                                source-table
+                                                                                previous-columns
+                                                                                computed-transformation)])))
+
+(defn execute-transformation
+  [tenant-conn dataset-id job-execution-id transformation]
   (let [dataset-version (latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})
         previous-columns (vec (:columns dataset-version))
         source-table (:table-name dataset-version)
         computed-transformation (pre-hook transformation previous-columns)]
-    (let [{:keys [success? message columns execution-log]} (apply-operation tenant-conn
-                                                                            source-table
-                                                                            previous-columns
-                                                                            computed-transformation)]
+    (let [{:keys [success? message columns execution-log]}
+          (try-apply-operation tenant-conn source-table previous-columns computed-transformation)]
       (when-not success?
         (log/errorf "Failed to transform: %s, columns: %s, execution-log: %s" message columns execution-log)
         (throw (ex-info "Failed to transform" {})))
@@ -170,6 +191,7 @@
           (new-dataset-version tenant-conn next-dataset-version)
           (touch-dataset tenant-conn {:id dataset-id})
           (lib/created next-dataset-version))))))
+
 
 (defn- apply-undo [tenant-conn dataset-id job-execution-id current-dataset-version]
   (let [imported-table-name (:imported-table-name current-dataset-version)
@@ -205,7 +227,7 @@
             (drop-table tenant-conn {:table-name previous-table-name})
             (lib/created next-dataset-version)))
         (let [{:keys [success? message columns execution-log]}
-              (apply-operation tenant-conn table-name columns (first transformations))]
+              (try-apply-operation tenant-conn table-name columns (first transformations))]
           (if success?
             (recur (rest transformations) columns (into full-execution-log execution-log))
             (do

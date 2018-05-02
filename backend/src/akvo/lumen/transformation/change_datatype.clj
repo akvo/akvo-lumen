@@ -99,18 +99,13 @@
 
 (defmethod engine/apply-operation :core/change-datatype
   [tenant-conn table-name columns op-spec]
-  (try
-    (let [{column-name "columnName"
-           new-type "newType"} (engine/args op-spec)]
-      (condp = new-type
-        "text" (change-datatype-to-text tenant-conn table-name columns op-spec)
-        "number" (change-datatype-to-number tenant-conn table-name columns op-spec)
-        "date" (change-datatype-to-date tenant-conn table-name columns op-spec))
-      {:success? true
-       :execution-log [(format "Changed column %s datatype from %s to %s"
-                               column-name (engine/column-type columns column-name) new-type)]
-       :columns (engine/update-column columns column-name assoc "type" new-type)})
-    (catch Exception e
-      (log/debug e)
-      {:success? false
-       :message (.getMessage e)})))
+  (let [{column-name "columnName"
+         new-type "newType"} (engine/args op-spec)]
+    (condp = new-type
+      "text" (change-datatype-to-text tenant-conn table-name columns op-spec)
+      "number" (change-datatype-to-number tenant-conn table-name columns op-spec)
+      "date" (change-datatype-to-date tenant-conn table-name columns op-spec))
+    {:success? true
+     :execution-log [(format "Changed column %s datatype from %s to %s"
+                             column-name (engine/column-type columns column-name) new-type)]
+     :columns (engine/update-column columns column-name assoc "type" new-type)}))

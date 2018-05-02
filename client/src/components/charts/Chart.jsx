@@ -6,6 +6,12 @@ import isEqual from 'lodash/isEqual';
 import { FormattedMessage } from 'react-intl';
 import * as chart from '../../utilities/chart';
 
+/*
+import get from 'lodash/get';
+import PieChart from './PieChart';
+import { palette } from '../../utilities/visualisationColors';
+*/
+
 require('./Chart.scss');
 
 function getSize(computedWidth) {
@@ -68,6 +74,14 @@ const META_SCALE = 0.5;
 
 export default class Chart extends Component {
 
+  static propTypes = {
+    visualisation: PropTypes.object.isRequired,
+    datasets: PropTypes.object.isRequired,
+    width: PropTypes.number,
+    height: PropTypes.number,
+    onChangeVisualisationSpec: PropTypes.func,
+  }
+
   constructor() {
     super();
     this.state = {
@@ -123,9 +137,11 @@ export default class Chart extends Component {
       case 'bar':
         chartData = chart.getBarData(visualisation, dataset);
         break;
-      default:
-        throw new Error(`Unknown visualisation type ${visualisation.visualisationType}`);
+      // no default
     }
+
+    if (!chartData) return;
+
     /* TODO - once we support backend aggregations for more vTypes, it doesn't make sense to
     ** pass `chartData` separately, because we include it on the visualisation itself */
     const vegaSpec =
@@ -136,6 +152,44 @@ export default class Chart extends Component {
       this.vegaChart.update();
     });
   }
+
+  /*
+  renderNewChart() {
+    const {
+      visualisation,
+      width,
+      height,
+      onChangeVisualisationSpec,
+    } = this.props;
+
+    const colors = get(visualisation, 'data.data') ?
+      visualisation.data.data.reduce((acc, datum, i) => {
+        const result = { ...acc };
+        if (!result[datum.bucketValue]) {
+          result[datum.bucketValue] = palette[i];
+        }
+        return result;
+      }, get(visualisation, 'spec.colors') || {}) :
+      {};
+
+    switch (visualisation.visualisationType) {
+      case 'pie':
+      case 'donut': {
+        return (
+          <PieChart
+            colors={colors}
+            data={visualisation.data}
+            width={width}
+            height={height}
+            onChangeVisualisationSpec={onChangeVisualisationSpec}
+          />
+        );
+      }
+      // no default
+    }
+    return null;
+  }
+  */
 
   render() {
     const { visualisation, width, height } = this.props;
@@ -177,10 +231,3 @@ export default class Chart extends Component {
     );
   }
 }
-
-Chart.propTypes = {
-  visualisation: PropTypes.object.isRequired,
-  datasets: PropTypes.object.isRequired,
-  width: PropTypes.number,
-  height: PropTypes.number,
-};

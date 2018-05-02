@@ -1,0 +1,28 @@
+@import "../../styles/modules/importAll";
+
+.color-picker-popover {
+  max-width: 9999px !important;
+
+  .popover-header {
+    svg {
+      margin-right: 5px;
+      position: relative;
+      top: 2px;
+    }
+  }
+
+  .popover-body {
+    padding: 0;
+  }
+}
+
+.color-picker {
+  background-color: white;
+  box-shadow: rgba(0, 0, 0, 0.12) 0px 2px 10px, rgba(0, 0, 0, 0.16) 0px 2px 5px;
+  border-radius: 2px;
+
+  .swatches-picker > div > div {
+    box-shadow: none !important;
+  }
+
+}
