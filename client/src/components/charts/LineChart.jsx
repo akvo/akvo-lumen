@@ -10,7 +10,7 @@ import merge from 'lodash/merge';
 import { GridRows, GridColumns } from '@vx/grid';
 import itsSet from 'its-set';
 
-import { sortChronologically } from '../../utilities/utils';
+import { sortChronologically, filterNullData } from '../../utilities/utils';
 import ResponsiveWrapper from '../common/ResponsiveWrapper';
 import ColorPicker from '../common/ColorPicker';
 import ChartLayout from './ChartLayout';
@@ -156,10 +156,9 @@ export default class LineChart extends Component {
 
     const series = this.getData();
 
-    series.data = series.data.filter(o => o.value !== null && o.timestamp !== null);
-
     if (!series) return null;
 
+    series.data = filterNullData(series.data);
 
     return (
       <ChartLayout
