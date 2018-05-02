@@ -24,7 +24,7 @@ class NavigationPrompt extends React.Component {
   }
 
   render() {
-    return this.props.children();
+    return this.props.children;
   }
 }
 
@@ -34,7 +34,7 @@ NavigationPrompt.propTypes = {
   router: PropTypes.object,
   route: PropTypes.object,
   routes: PropTypes.array,
-  children: PropTypes.func.isRequired,
+  children: PropTypes.node.isRequired,
 };
 
 NavigationPrompt.defaultProps = {

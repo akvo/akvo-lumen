@@ -137,7 +137,7 @@ class Dataset extends Component {
     }
     const { DatasetHeader, DatasetTable } = this.state.asyncComponents;
     return (
-      <NavigationPrompt shouldPrompt={this.state.isUnsavedChanges}>{() => (
+      <NavigationPrompt shouldPrompt={this.state.isUnsavedChanges}>
         <div className="Dataset">
           <DatasetHeader
             onShowDatasetSettings={this.handleShowDatasetSettings}
@@ -161,7 +161,7 @@ class Dataset extends Component {
             <LoadingSpinner />
           )}
         </div>
-      )}</NavigationPrompt>
+      </NavigationPrompt>
     );
   }
 }
