@@ -60,4 +60,4 @@ export const sortChronologically = (a, b, accessor = val => val) => {
 Takes an array of objects and returns a new array of all objects that have no "null" properties
 */
 export const filterNullData = (dataArray = []) =>
-  dataArray.filter(datum => Object.keys(datum).every(key => datum[key] !== null))
+  dataArray.filter(datum => Object.keys(datum).every(key => datum[key] !== null));
