@@ -99,41 +99,36 @@
 
 (defmethod engine/apply-operation :core/derive
   [tenant-conn table-name columns op-spec]
-  (try
-    (let [{code "code"
-           column-title "newColumnTitle"
-           column-type "newColumnType"} (engine/args op-spec)
-          on-error (engine/error-strategy op-spec)
-          column-name (engine/next-column-name columns)
-          transform (row-transform code)
-          key-translation (into {}
-                                (map (fn [{:strs [columnName title]}]
-                                       [(keyword columnName) title])
-                                     columns))]
-      (let [data (->> (all-data tenant-conn {:table-name table-name})
-                      (map #(set/rename-keys % key-translation)))]
-        (jdbc/with-db-transaction [conn tenant-conn]
-          (add-column conn {:table-name table-name
-                            :column-type (lumen->pg-type column-type)
-                            :new-column-name column-name})
-          (doseq [row data]
-            (try
-              (set-cell-value conn {:table-name table-name
-                                    :column-name column-name
-                                    :rnum (:rnum row)
-                                    :value (ensure-valid-value-type (transform row)
-                                                                    column-type)})
-              (catch Exception e
-                (handle-transform-exception e conn on-error table-name column-name (:rnum row)))))))
-      {:success? true
-       :execution-log [(format "Derived columns using '%s'" code)]
-       :columns (conj columns {"title" column-title
-                               "type" column-type
-                               "sort" nil
-                               "hidden" false
-                               "direction" nil
-                               "columnName" column-name})})
-    (catch Exception e
-      (log/debug e)
-      {:success? false
-       :message (format "Failed to transform: %s" (.getMessage e))})))
+  (let [{code "code"
+         column-title "newColumnTitle"
+         column-type "newColumnType"} (engine/args op-spec)
+        on-error (engine/error-strategy op-spec)
+        column-name (engine/next-column-name columns)
+        transform (row-transform code)
+        key-translation (into {}
+                              (map (fn [{:strs [columnName title]}]
+                                     [(keyword columnName) title])
+                                   columns))]
+    (let [data (->> (all-data tenant-conn {:table-name table-name})
+                    (map #(set/rename-keys % key-translation)))]
+      (jdbc/with-db-transaction [conn tenant-conn]
+        (add-column conn {:table-name table-name
+                          :column-type (lumen->pg-type column-type)
+                          :new-column-name column-name})
+        (doseq [row data]
+          (try
+            (set-cell-value conn {:table-name table-name
+                                  :column-name column-name
+                                  :rnum (:rnum row)
+                                  :value (ensure-valid-value-type (transform row)
+                                                                  column-type)})
+            (catch Exception e
+              (handle-transform-exception e conn on-error table-name column-name (:rnum row)))))))
+    {:success? true
+     :execution-log [(format "Derived columns using '%s'" code)]
+     :columns (conj columns {"title" column-title
+                             "type" column-type
+                             "sort" nil
+                             "hidden" false
+                             "direction" nil
+                             "columnName" column-name})}))

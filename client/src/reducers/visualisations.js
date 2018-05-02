@@ -44,6 +44,14 @@ function saveVisualisation(state, { payload }) {
   });
 }
 
+function saveShareId(state, { payload }) {
+  const id = payload.id;
+  return {
+    ...state,
+    [id]: { ...state[id], ...payload },
+  };
+}
+
 function removeVisualisation(state, { payload }) {
   const newState = Object.assign({}, state);
   delete newState[payload];
@@ -56,4 +64,5 @@ export default handleActions({
   [actions.fetchVisualisationSuccess]: saveVisualisation,
   [actions.saveVisualisationChangesSuccess]: editVisualisation,
   [actions.deleteVisualisationSuccess]: removeVisualisation,
+  [actions.fetchShareIdSuccess]: saveShareId,
 }, initialState);

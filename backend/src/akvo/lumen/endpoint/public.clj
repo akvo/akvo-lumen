@@ -6,8 +6,9 @@
 
 
 (defn endpoint [{:keys [tenant-manager config]}]
-  (context "/share" {:keys [params tenant] :as request}
+  (context "/share" {:keys [params tenant headers] :as request}
     (let-routes [tenant-conn (connection tenant-manager tenant)]
 
       (GET "/:id" [id]
-        (public/share tenant-conn config id)))))
+        (let [password (get headers "x-password")]
+          (public/share tenant-conn config id password))))))

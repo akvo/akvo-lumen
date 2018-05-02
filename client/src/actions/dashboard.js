@@ -79,3 +79,55 @@ export function deleteDashboard(id) {
 
 /* Remove visualisation from dashboard */
 export const removeVisualisation = createAction('REMOVE_VISUALISATION_FROM_DASHBOARD');
+
+/* Fetch dashboard share id */
+export const fetchShareIdRequest = createAction('FETCH_DASHBOARD_SHARE_ID_REQUEST');
+export const fetchShareIdFailure = createAction('FETCH_DASHBOARD_SHARE_ID_FAILURE');
+export const fetchShareIdSuccess = createAction('FETCH_DASHBOARD_SHARE_ID_SUCCESS');
+
+export function fetchShareId(dashboardId) {
+  return (dispatch) => {
+    if (dashboardId != null) {
+      api.post('/api/shares', { dashboardId })
+        .then(response => response.json())
+        .then((response) => {
+          dispatch(fetchShareIdSuccess({
+            id: dashboardId,
+            shareId: response.id,
+            protected: response.protected,
+          }));
+        });
+    }
+  };
+}
+
+/* Set dashboard share password */
+export const setShareProtectionRequest = createAction('SET_SHARE_PROTECTION_REQUEST');
+export const setShareProtectionFailure = createAction('SET_SHARE_PROTECTION_FAILURE');
+export const setShareProtectionSuccess = createAction('SET_SHARE_PROTECTION_SUCCESS');
+
+export function setShareProtection(shareId, payload, callback = () => {}) {
+  return (dispatch) => {
+    if (shareId != null) {
+      let isError = false;
+      api.put(`/api/shares/${shareId}`, payload)
+        .then((response) => {
+          if (response.status !== 400) {
+            dispatch(setShareProtectionSuccess({ shareId, data: payload }));
+          }
+          if (response.status !== 200) isError = true;
+          return response.json();
+        })
+        .then((response) => {
+          if (isError) {
+            callback(response);
+          } else {
+            callback(null, response);
+          }
+        })
+        .catch((error, response) => {
+          callback(response);
+        });
+    }
+  };
+}

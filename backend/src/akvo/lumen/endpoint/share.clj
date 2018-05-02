@@ -9,4 +9,8 @@
     (let-routes [tenant-conn (connection tenant-manager tenant)]
 
       (POST "/" {:keys [body] :as request}
-        (share/fetch tenant-conn body)))))
+        (share/fetch tenant-conn body))
+
+      (context "/:id" [id]
+        (PUT "/" {:keys [body]}
+          (share/put tenant-conn id body))))))

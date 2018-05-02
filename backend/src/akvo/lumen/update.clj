@@ -3,7 +3,7 @@
             [akvo.lumen.import.csv]
             [akvo.lumen.import.flow]
             [akvo.lumen.lib :as lib]
-            [akvo.lumen.transformation.engine :as transformation]
+            [akvo.lumen.transformation.engine :as engine]
             [akvo.lumen.util :as util]
             [clojure.java.jdbc :as jdbc]
             [clojure.set :as set]
@@ -50,12 +50,7 @@
                       columns)]
     (loop [transformations transformations columns columns]
       (if-let [transformation (first transformations)]
-        (let [{:keys [success?
-                      message
-                      columns]} (transformation/apply-operation conn
-                                                                table-name
-                                                                columns
-                                                                transformation)]
+        (let [{:keys [success? message columns]} (engine/try-apply-operation conn table-name columns transformation)]
           (when-not success?
             (throw (ex-info (format "Failed to update due to transformation mismatch: %s"
                                     message)

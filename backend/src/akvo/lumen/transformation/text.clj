@@ -6,20 +6,15 @@
 
 (hugsql/def-db-fns "akvo/lumen/transformation/text.sql")
 
-(defn transform
+(defn- transform
   [tenant-conn table-name columns op-spec fn]
-  (try
-    (let [{column-name "columnName"} (engine/args op-spec)]
-      (text-transform tenant-conn {:table-name table-name
-                                   :column-name column-name
-                                   :fn fn})
-      {:success? true
-       :execution-log [(format "Text transform %s on %s" fn column-name)]
-       :columns columns})
-    (catch Exception e
-      (log/debug e)
-      {:success? false
-       :message (.getMessage e)})))
+  (let [{column-name "columnName"} (engine/args op-spec)]
+    (text-transform tenant-conn {:table-name table-name
+                                 :column-name column-name
+                                 :fn fn})
+    {:success? true
+     :execution-log [(format "Text transform %s on %s" fn column-name)]
+     :columns columns}))
 
 (defn valid? [op-spec]
   (engine/valid-column-name? (get (engine/args op-spec) "columnName")))
@@ -57,16 +52,11 @@
 
 (defmethod engine/apply-operation :core/trim-doublespace
   [tenant-conn table-name columns op-spec]
-  (try
-    (let [{column-name "columnName"} (engine/args op-spec)]
-      (trim-doublespace tenant-conn {:table-name table-name
-                                     :column-name column-name})
-      {:success? true
-       :execution-log [(format "Text transform trim-doublespace on %s" column-name)]
-       :columns columns})
-    (catch Exception e
-      (log/debug e)
-      {:success? false
-       :message (.getMessage e)}))
+  (let [{column-name "columnName"} (engine/args op-spec)]
+    (trim-doublespace tenant-conn {:table-name table-name
+                                   :column-name column-name})
+    {:success? true
+     :execution-log [(format "Text transform trim-doublespace on %s" column-name)]
+     :columns columns})
   {:success? true
    :columns columns})
