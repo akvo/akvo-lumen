@@ -12,6 +12,17 @@ export default class VisualisationHeader extends Component {
 
   getActionButtons(isUnsavedChanges) {
     const { onVisualisationAction } = this.props;
+    const save = {
+      buttonText: <FormattedMessage id="save" />,
+      primary: true,
+      onClick: () => {
+        this.props.onSaveVisualisation();
+      },
+      customClass: 'primaryButton',
+      props: {
+        'data-test-id': 'save-changes',
+      },
+    };
     const user = {
       buttonText: <FormattedMessage id="user" />,
       customClass: 'notImplemented',
@@ -39,11 +50,20 @@ export default class VisualisationHeader extends Component {
       overflow,
     ];
 
+    if (this.props.savingFailed) result.unshift(save);
+
     return result;
   }
 
   render() {
-    const { visualisation, onChangeTitle, onBeginEditTitle, isUnsavedChanges } = this.props;
+    const {
+      visualisation,
+      onChangeTitle,
+      onBeginEditTitle,
+      isUnsavedChanges,
+      savingFailed,
+      timeToNextSave,
+    } = this.props;
 
     const actionButtons = this.getActionButtons(isUnsavedChanges);
     let saveStatusId;
@@ -59,6 +79,10 @@ export default class VisualisationHeader extends Component {
         saveStatusId = null;
     }
 
+    if (savingFailed && timeToNextSave) {
+      saveStatusId = 'saving_failed_countdown';
+    }
+
     return (
       <EntityTypeHeader
         title={visualisation.name || 'Untitled visualisation'}
@@ -66,6 +90,8 @@ export default class VisualisationHeader extends Component {
         onBeginEditTitle={onBeginEditTitle}
         saveStatusId={saveStatusId}
         actionButtons={actionButtons}
+        savingFailed={savingFailed}
+        timeToNextSave={timeToNextSave}
       />
     );
   }
@@ -73,6 +99,8 @@ export default class VisualisationHeader extends Component {
 
 VisualisationHeader.propTypes = {
   isUnsavedChanges: PropTypes.bool,
+  savingFailed: PropTypes.bool,
+  timeToNextSave: PropTypes.number,
   visualisation: PropTypes.shape({
     name: PropTypes.string.isRequired,
   }).isRequired,

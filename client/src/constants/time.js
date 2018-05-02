@@ -1,0 +1,2 @@
+export const SAVE_INITIAL_TIMEOUT = 5000;
+export const SAVE_COUNTDOWN_INTERVAL = 500;

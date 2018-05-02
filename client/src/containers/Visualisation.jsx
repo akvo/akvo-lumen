@@ -16,6 +16,7 @@ import lineSpecTemplate from './Visualisation/lineSpecTemplate';
 import pivotTableSpecTemplate from './Visualisation/pivotTableSpecTemplate';
 import scatterSpecTemplate from './Visualisation/scatterSpecTemplate';
 import barSpecTemplate from './Visualisation/barSpecTemplate';
+import { SAVE_COUNTDOWN_INTERVAL, SAVE_INITIAL_TIMEOUT } from '../constants/time';
 
 require('../components/visualisation/Visualisation.scss');
 
@@ -35,9 +36,12 @@ class Visualisation extends Component {
         spec: {},
       },
       asyncComponents: null,
+      timeToNextSave: SAVE_INITIAL_TIMEOUT,
+      timeFromPreviousSave: 0,
     };
 
     this.onSave = this.onSave.bind(this);
+    this.onSaveFailure = this.onSaveFailure.bind(this);
     this.handleChangeVisualisationSpec = this.handleChangeVisualisationSpec.bind(this);
     this.handleChangeVisualisation = this.handleChangeVisualisation.bind(this);
     this.handleChangeSourceDataset = this.handleChangeSourceDataset.bind(this);
@@ -133,31 +137,51 @@ class Visualisation extends Component {
     }
   }
 
-  onSave() {
-    const { dispatch, location } = this.props;
-    if (this.state.visualisation.id) {
-      dispatch(actions.saveVisualisationChanges(this.state.visualisation, (error) => {
-        if (error) {
+  onSaveFailure() {
+    this.setState({
+      timeToNextSave: this.state.timeToNextSave * 2,
+      timeFromPreviousSave: 0,
+      savingFailed: true,
+    }, () => {
+      this.saveInterval = setInterval(() => {
+        const { timeFromPreviousSave, timeToNextSave } = this.state;
+        if (timeToNextSave - timeFromPreviousSave > SAVE_COUNTDOWN_INTERVAL) {
+          this.setState({ timeFromPreviousSave: timeFromPreviousSave + SAVE_COUNTDOWN_INTERVAL });
           return;
         }
-        this.setState({
-          isUnsavedChanges: false,
-        });
-      }));
+        clearInterval(this.saveInterval);
+      }, SAVE_COUNTDOWN_INTERVAL);
+      setTimeout(() => {
+        this.onSave();
+      }, this.state.timeToNextSave);
+    });
+  }
+
+  onSave() {
+    const { dispatch, location } = this.props;
+
+    const handleError = (error) => {
+      if (error) {
+        this.onSaveFailure();
+        return;
+      }
+      this.setState({
+        isUnsavedChanges: false,
+        timeToNextSave: SAVE_INITIAL_TIMEOUT,
+        timeFromPreviousSave: 0,
+        savingFailed: false,
+      });
+    };
+
+    if (this.state.visualisation.id) {
+      dispatch(actions.saveVisualisationChanges(this.state.visualisation, handleError));
     } else if (!this.state.isSavePending) {
       this.setState({ isSavePending: true });
       dispatch(
         actions.createVisualisation(
           this.state.visualisation,
           get(location, 'state.collectionId'),
-          (error) => {
-            if (error) {
-              return;
-            }
-            this.setState({
-              isUnsavedChanges: false,
-            });
-          }
+          handleError
         )
       );
     }
@@ -285,6 +309,8 @@ class Visualisation extends Component {
           onChangeTitle={this.handleChangeVisualisationTitle}
           onBeginEditTitle={() => this.setState({ isUnsavedChanges: true })}
           onSaveVisualisation={this.onSave}
+          savingFailed={this.state.savingFailed}
+          timeToNextSave={this.state.timeToNextSave - this.state.timeFromPreviousSave}
         />
         <VisualisationEditor
           visualisation={visualisation}

@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
+import { FormattedMessage, FormattedRelative, injectIntl, intlShape } from 'react-intl';
+import moment from 'moment';
+
 import EntityTitleInput from './EntityTitleInput';
 import Header from '../common/Header';
 
@@ -49,7 +51,10 @@ class EntityTypeHeader extends Component {
       title,
       saveStatusId,
       onChangeTitle,
-      onBeginEditTitle } = this.props;
+      onBeginEditTitle,
+      timeToNextSave,
+      savingFailed,
+    } = this.props;
 
     return (
       <Header
@@ -63,11 +68,16 @@ class EntityTypeHeader extends Component {
           onBeginEditTitle={onBeginEditTitle}
           onChangeTitle={onChangeTitle}
         />
-        {saveStatusId &&
-          <div className="saveStatus">
+        <div className="saveStatus">
+          {saveStatusId && (
             <FormattedMessage id={saveStatusId} />
-          </div>
-        }
+          )}
+          {timeToNextSave && savingFailed && (
+            <span>
+              <FormattedRelative value={new Date().getTime() + timeToNextSave} />...
+            </span>
+          )}
+        </div>
       </Header>
     );
   }
@@ -80,6 +90,8 @@ EntityTypeHeader.propTypes = {
   actionButtons: PropTypes.array,
   onBeginEditTitle: PropTypes.func,
   onChangeTitle: PropTypes.func,
+  timeToNextSave: PropTypes.number,
+  savingFailed: PropTypes.bool,
 };
 
 export default injectIntl(EntityTypeHeader);

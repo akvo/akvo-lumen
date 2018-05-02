@@ -10,7 +10,7 @@ export const createDashboardRequest = createAction('CREATE_DASHBOARD_REQUEST');
 export const createDashboardFailure = createAction('CREATE_DASHBOARD_FAILURE');
 export const createDashboardSuccess = createAction('CREATE_DASHBOARD_SUCCESS');
 
-export function createDashboard(dashboard, collectionId) {
+export function createDashboard(dashboard, collectionId, callback = () => {}) {
   return (dispatch) => {
     dispatch(createDashboardRequest(dashboard));
     api.post('/api/dashboards', dashboard)
@@ -21,8 +21,12 @@ export function createDashboard(dashboard, collectionId) {
           dispatch(addEntitiesToCollection(dash.id, collectionId));
         }
         dispatch(push(`/dashboard/${dash.id}`));
+        callback();
       })
-      .catch(err => dispatch(createDashboardFailure(err)));
+      .catch((err) => {
+        dispatch(createDashboardFailure(err));
+        callback(err);
+      });
   };
 }
 
@@ -31,7 +35,7 @@ export const editDashboardRequest = createAction('EDIT_DASHBOARD_REQUEST');
 export const editDashboardFailure = createAction('EDIT_DASHBOARD_FAILURE');
 export const editDashboardSuccess = createAction('EDIT_DASHBOARD_SUCCESS');
 
-export function saveDashboardChanges(dashboard) {
+export function saveDashboardChanges(dashboard, callback = () => {}) {
   const now = Date.now();
   const dash = Object.assign({}, dashboard, {
     modified: now,
@@ -42,8 +46,14 @@ export function saveDashboardChanges(dashboard) {
     dispatch(editDashboardRequest);
     api.put(`/api/dashboards/${id}`, dashboard)
       .then(response => response.json())
-      .then(responseDash => dispatch(editDashboardSuccess(responseDash)))
-      .catch(error => dispatch(editDashboardFailure(error)));
+      .then((responseDash) => {
+        dispatch(editDashboardSuccess(responseDash));
+        callback();
+      })
+      .catch((error) => {
+        dispatch(editDashboardFailure(error));
+        callback(error);
+      });
   };
 }
 
