@@ -1,12 +1,10 @@
 (ns akvo.lumen.transformation.derive.js-engine
-  (:require [akvo.lumen.transformation.engine :as engine]
-            [clojure.java.jdbc :as jdbc]
-            [clojure.set :as set]
-            [clojure.spec.alpha :as s]
+  (:require [clojure.set :as set]
             [clojure.string :as str]
             [clojure.tools.logging :as log])
-  (:import [javax.script ScriptEngineManager ScriptEngine Invocable ScriptContext Bindings]
-           [jdk.nashorn.api.scripting NashornScriptEngineFactory ClassFilter]))
+  (:import [java.util.concurrent Executors]
+           [delight.nashornsandbox NashornSandboxes NashornSandbox]
+           [javax.script ScriptEngine Invocable]))
 
 (defn- throw-invalid-return-type [value]
   (throw (ex-info "Invalid return type"
@@ -39,14 +37,19 @@
                :else
                (throw-invalid-return-type value)))))
 
-(def ^ClassFilter class-filter
-  (reify ClassFilter
-    (exposeToScripts [this s]
-      false)))
+(defn ^NashornSandbox js-engine []
+  (doto (NashornSandboxes/create)
+    (.allowReadFunctions false)
+    (.allowLoadFunctions false)
+    (.allowPrintFunctions false)
+    (.allowExitFunctions false)
+    (.allowGlobalsObjects false)
+    
+    (.setMaxMemory (* 200 1024))
+    (.setMaxCPUTime 100)
 
-(defn- remove-bindings [^Bindings bindings]
-  (doseq [function ["print" "load" "loadWithNewGlobal" "exit" "quit" "eval"]]
-    (.remove bindings function)))
+    ;; Specifies the executor service which is used to run scripts when a CPU time limit is specified.
+    (.setExecutor (Executors/newSingleThreadExecutor))))
 
 (defn- column-name->column-title
   "replace column-name by column-title"
@@ -55,24 +58,14 @@
                              (map (fn [{:strs [columnName title]}]
                                     [(keyword columnName) title]))
                              (into {}))]
-    #(clojure.set/rename-keys % key-translation)))
-
-(defn- js-factory [] (NashornScriptEngineFactory.))
-
-(defn- js-engine
-  ([]
-   (js-engine (js-factory)))
-  ([factory]
-   (let [engine (.getScriptEngine factory class-filter)]
-     (remove-bindings (.getBindings engine ScriptContext/ENGINE_SCOPE))
-     engine)))
+    #(set/rename-keys % key-translation)))
 
 (defn- eval*
-  ([^ScriptEngine engine ^String code]
-   (.eval ^ScriptEngine engine ^String code)))
+  ([^NashornSandbox engine ^String code]
+   (.eval ^NashornSandbox engine ^String code)))
 
 (defn- invoke* [^Invocable engine ^String fun & args]
-  (.invokeFunction engine fun (object-array args)))
+  (.invokeFunction (.getSandboxedInvocable engine) fun (object-array args)))
 
 (defn row-transform-fn
   [{:keys [columns code column-type]}]

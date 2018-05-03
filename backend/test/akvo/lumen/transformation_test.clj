@@ -299,13 +299,13 @@
                                             "onError" "fail"}))]
         (is (= tag ::lib/conflict))))
 
-    (testing "Sandboxing dangerous js functions"
+    (testing "Sandboxing dangerous js functions are just ignored"
       (let [[tag _] (apply-transformation (derive-column-transform
                                            {"args" {"code" "quit()"
                                                     "newColumnType" "number"
                                                     "newColumnTitle" "Derived 7"}
                                             "onError" "fail"}))]
-        (is (= tag ::lib/conflict))))
+        (is (= tag ::lib/ok))))
 
     (testing "Fail early on syntax error"
       (let [[tag _] (apply-transformation (derive-column-transform
@@ -315,13 +315,13 @@
                                             "onError" "fail"}))]
         (is (= tag ::lib/bad-request))))
 
-    (testing "Fail infinite loop"
+    (testing "Infinite loop is managed in js sandbox impl"
       (let [[tag _] (apply-transformation (derive-column-transform
                                            {"args" {"code" "while(true) {}"
                                                     "newColumnType" "text"
                                                     "newColumnTitle" "Derived 9"}
                                             "onError" "fail"}))]
-        (is (= tag ::lib/bad-request))))
+        (is (= tag ::lib/ok))))
 
 
     (testing "Disallow anonymous functions"
