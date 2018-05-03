@@ -14,6 +14,7 @@
   [tenant-conn {:keys [columns table-name]} query]
   (let [filter-sql (filter/sql-str columns (get query "filters"))
         column-x (utils/find-column columns (get query "metricColumnX"))
+        column-x-type (get column-x "type")
         column-x-name (get column-x "columnName")
         column-x-title (get column-x "title")
         column-y (utils/find-column columns (get query "metricColumnY"))
@@ -30,7 +31,8 @@
                  "data" (mapv (fn [[x-value y-value]]
                                 {"value" y-value})
                               sql-response)}]
-      "common" {"data" (mapv (fn [[x-value y-value]]
+      "common" {"metadata" {"type" column-x-type}
+                "data" (mapv (fn [[x-value y-value]]
                                {"timestamp" x-value})
                              sql-response)}})))
 
