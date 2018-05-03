@@ -1,134 +1,90 @@
 (ns akvo.lumen.transformation.derive
-  (:require [akvo.lumen.transformation.engine :as engine]
+  (:require [akvo.lumen.transformation.derive.js-engine :as js-engine]
+            [clj-time.coerce :as tc]
+            [akvo.lumen.transformation.engine :as engine]
             [clojure.java.jdbc :as jdbc]
-            [clojure.set :as set]
-            [clojure.string :as str]
             [clojure.tools.logging :as log]
-            [hugsql.core :as hugsql])
-  (:import [javax.script ScriptEngineManager ScriptEngine Invocable ScriptContext Bindings]
-           [jdk.nashorn.api.scripting NashornScriptEngineFactory ClassFilter]))
+            [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/transformation/derive.sql")
 (hugsql/def-db-fns "akvo/lumen/transformation/engine.sql")
 
-(defn derive-column-function [code]
-  (format "var deriveColumn = function(row) {  return %s; }" code))
-
-(def ^ClassFilter class-filter
-  (reify ClassFilter
-    (exposeToScripts [this s]
-      false)))
-
-(defn remove-bindings [^Bindings bindings]
-  (doseq [function ["print" "load" "loadWithNewGlobal" "exit" "quit" "eval"]]
-    (.remove bindings function)))
-
-(defn row-transform [code]
-  (let [factory (NashornScriptEngineFactory.)
-        engine (.getScriptEngine factory class-filter)
-        bindings (.getBindings engine ScriptContext/ENGINE_SCOPE)]
-    (remove-bindings bindings)
-    (.eval ^ScriptEngine engine ^String (derive-column-function code))
-    (fn [row]
-      (.invokeFunction ^Invocable engine "deriveColumn" (object-array [row])))))
-
-(defn valid? [code]
-  (boolean
-   (and (not (str/includes? code "function"))
-        (not (str/includes? code "=>"))
-        (try (row-transform code)
-             ;; Catches syntax errors
-             (catch Exception e
-               false)))))
-
-(defn throw-invalid-return-type [value]
-  (throw (ex-info "Invalid return type"
-                  {:value value
-                   :type (type value)})))
-
-(defn ensure-valid-value-type [value type]
-  (when-not (nil? value)
-    (condp = type
-      "number" (if (and (number? value)
-                        (if (float? value)
-                          (java.lang.Double/isFinite value)
-                          true))
-                 value
-                 (throw-invalid-return-type value))
-      "text" (if (string? value)
-               value
-               (throw-invalid-return-type value))
-      "date" (cond
-               (number? value)
-               (java.sql.Timestamp. (long value))
-
-               (and (instance? jdk.nashorn.api.scripting.ScriptObjectMirror value)
-                    (.containsKey value "getTime"))
-               (java.sql.Timestamp. (long (.callMember value "getTime" (object-array 0))))
-
-               :else
-               (throw-invalid-return-type value)))))
-
-(defn handle-transform-exception
-  [exn conn on-error table-name column-name rnum]
-  (condp = on-error
-    "leave-empty" (set-cell-value conn {:table-name table-name
-                                        :column-name column-name
-                                        :rnum rnum
-                                        :value nil})
-    "fail" (throw exn)
-    "delete-row" (delete-row conn {:table-name table-name
-                                   :rnum rnum})))
-
 (defn lumen->pg-type [type]
   (condp = type
-    "text" "text"
+    "text"   "text"
     "number" "double precision"
-    "date" "timestamptz"))
+    "date"   "timestamptz"))
+
+(defn args [op-spec]
+  (let [{code         "code"
+         column-title "newColumnTitle"
+         column-type  "newColumnType"} (engine/args op-spec)]
+    {::code code ::column-title column-title ::column-type column-type}))
 
 (defmethod engine/valid? :core/derive
   [op-spec]
-  (let [{code "code"
-         column-title "newColumnTitle"
-         column-type "newColumnType"} (engine/args op-spec)
-        on-error (engine/error-strategy op-spec)]
-    (and (string? column-title)
-         (engine/valid-type? column-type)
-         (#{"fail" "leave-empty" "delete-row"} on-error)
-         (valid? code))))
+  (let [{:keys [::code ::column-title ::column-type]} (args op-spec)
+        res (and (string? column-title) ;; TODO: ... should that be checked at other level .... endpoint???
+         (engine/valid-type? column-type) ;; same applies here ...
+         (#{"fail" "leave-empty" "delete-row"} (engine/error-strategy op-spec)) ;; too
+         (js-engine/evaluable? code))]
+    (log/debug :VALID? code res)
+    res
+    ))
+
+(defn js-execution>sql-params [js-seq result-kw]
+  (->> js-seq
+       (filter (fn [[j r i]]
+                     (= r result-kw)))
+       (map (fn [[i _ v]] [i v]))))
+
+(def max-items-to-process 8000)
+
+(defn set-cells-values! [conn opts data]
+  (->> data
+       (map (fn [[i v]] (set-cell-value conn (merge {:value v :rnum i} opts))))
+       doall))
+
+(defn delete-rows! [conn opts data]
+  (->> data
+       (map (fn [[i]] (delete-row conn (merge {:rnum i} opts))))
+       doall))
 
 (defmethod engine/apply-operation :core/derive
   [tenant-conn table-name columns op-spec]
-  (let [{code "code"
-         column-title "newColumnTitle"
-         column-type "newColumnType"} (engine/args op-spec)
-        on-error (engine/error-strategy op-spec)
-        column-name (engine/next-column-name columns)
-        transform (row-transform code)
-        key-translation (into {}
-                              (map (fn [{:strs [columnName title]}]
-                                     [(keyword columnName) title])
-                                   columns))]
-    (let [data (->> (all-data tenant-conn {:table-name table-name})
-                    (map #(set/rename-keys % key-translation)))]
-      (jdbc/with-db-transaction [conn tenant-conn]
-        (add-column conn {:table-name table-name
-                          :column-type (lumen->pg-type column-type)
-                          :new-column-name column-name})
-        (doseq [row data]
-          (try
-            (set-cell-value conn {:table-name table-name
-                                  :column-name column-name
-                                  :rnum (:rnum row)
-                                  :value (ensure-valid-value-type (transform row)
-                                                                  column-type)})
-            (catch Exception e
-              (handle-transform-exception e conn on-error table-name column-name (:rnum row)))))))
-    {:success? true
-     :execution-log [(format "Derived columns using '%s'" code)]
-     :columns (conj columns {"title" column-title
-                             "type" column-type
-                             "sort" nil
-                             "hidden" false
-                             "direction" nil
-                             "columnName" column-name})}))
+  (jdbc/with-db-transaction [conn tenant-conn]
+    (let [{:keys [::code
+                  ::column-title
+                  ::column-type]} (args op-spec)
+          new-column-name         (engine/next-column-name columns)
+          row-fn                  (js-engine/row-transform-fn {:columns     columns
+                                                               :code        code
+                                                               :column-type column-type})
+          ;; TODO: think how to execute-js depending of error-strategy
+          js-execution-seq        (->> (all-data conn {:table-name table-name})
+                                       (map (fn [i]
+                                              (try
+                                                [(:rnum i) :set-value! (row-fn i)]
+                                                (catch Exception e
+                                                  (condp = (engine/error-strategy op-spec)
+                                                    "leave-empty" [(:rnum i) :set-value! nil]
+                                                    "delete-row"  [(:rnum i) :delete-row!]
+                                                    "fail"        (throw e) ;; interrupt js execution
+                                                    ))))))
+          base-opts               {:table-name  table-name
+                                   :column-name new-column-name}]
+      (add-column conn {:table-name      table-name
+                        :column-type     (lumen->pg-type column-type)
+                        :new-column-name new-column-name})
+      (log/error :CODE code (map str js-execution-seq))
+      (set-cells-values! conn base-opts (js-execution>sql-params js-execution-seq :set-value!))
+      (delete-rows! conn base-opts (js-execution>sql-params js-execution-seq :delete-row!))
+      
+      {:success?      true
+       :execution-log [(format "Derived columns using '%s'" code)]
+       :columns       (conj columns {"title"      column-title
+                                     "type"       column-type
+                                     "sort"       nil
+                                     "hidden"     false
+                                     "direction"  nil
+                                     "columnName" new-column-name})})))
