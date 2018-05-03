@@ -474,7 +474,7 @@ class Dashboard extends Component {
     const dashboard = getDashboardFromState(this.state.dashboard, true);
 
     return (
-      <NavigationPrompt shouldPrompt={this.state.isUnsavedChanges}>
+      <NavigationPrompt shouldPrompt={this.state.savingFailed}>
         <div className="Dashboard">
           <DashboardHeader
             title={dashboard.title}

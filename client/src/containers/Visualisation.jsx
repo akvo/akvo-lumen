@@ -311,7 +311,7 @@ class Visualisation extends Component {
     const { visualisation } = this.state;
 
     return (
-      <NavigationPrompt shouldPrompt={this.state.isUnsavedChanges}>
+      <NavigationPrompt shouldPrompt={this.state.savingFailed}>
         <div className="Visualisation">
           <VisualisationHeader
             isUnsavedChanges={this.state.isUnsavedChanges}

@@ -178,7 +178,7 @@ class Dataset extends Component {
     }
     const { DatasetHeader, DatasetTable } = this.state.asyncComponents;
     return (
-      <NavigationPrompt shouldPrompt={this.state.isUnsavedChanges}>
+      <NavigationPrompt shouldPrompt={this.state.savingFailed}>
         <div className="Dataset">
           <DatasetHeader
             onShowDatasetSettings={this.handleShowDatasetSettings}
