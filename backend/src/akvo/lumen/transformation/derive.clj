@@ -1,7 +1,7 @@
 (ns akvo.lumen.transformation.derive
   (:require [akvo.lumen.transformation.derive.js-engine :as js-engine]
-            [clj-time.coerce :as tc]
             [akvo.lumen.transformation.engine :as engine]
+            [clj-time.coerce :as tc]
             [clojure.java.jdbc :as jdbc]
             [clojure.tools.logging :as log]
             [hugsql.core :as hugsql]))
@@ -23,22 +23,19 @@
 
 (defmethod engine/valid? :core/derive
   [op-spec]
-  (let [{:keys [::code ::column-title ::column-type]} (args op-spec)
-        res (and (string? column-title) ;; TODO: ... should that be checked at other level .... endpoint???
-         (engine/valid-type? column-type) ;; same applies here ...
-         (#{"fail" "leave-empty" "delete-row"} (engine/error-strategy op-spec)) ;; too
-         (js-engine/evaluable? code))]
-    (log/debug :VALID? code res)
-    res
-    ))
+  (let [{:keys [::code
+                ::column-title
+                ::column-type]} (args op-spec)]
+    (and (string? column-title) 
+         (engine/valid-type? column-type)
+         (#{"fail" "leave-empty" "delete-row"} (engine/error-strategy op-spec))
+         (js-engine/evaluable? code))))
 
 (defn js-execution>sql-params [js-seq result-kw]
   (->> js-seq
        (filter (fn [[j r i]]
-                     (= r result-kw)))
+                 (= r result-kw)))
        (map (fn [[i _ v]] [i v]))))
-
-(def max-items-to-process 8000)
 
 (defn set-cells-values! [conn opts data]
   (->> data
@@ -60,7 +57,6 @@
           row-fn                  (js-engine/row-transform-fn {:columns     columns
                                                                :code        code
                                                                :column-type column-type})
-          ;; TODO: think how to execute-js depending of error-strategy
           js-execution-seq        (->> (all-data conn {:table-name table-name})
                                        (map (fn [i]
                                               (try
@@ -76,10 +72,8 @@
       (add-column conn {:table-name      table-name
                         :column-type     (lumen->pg-type column-type)
                         :new-column-name new-column-name})
-      (log/error :CODE code (map str js-execution-seq))
       (set-cells-values! conn base-opts (js-execution>sql-params js-execution-seq :set-value!))
-      (delete-rows! conn base-opts (js-execution>sql-params js-execution-seq :delete-row!))
-      
+      (delete-rows! conn base-opts (js-execution>sql-params js-execution-seq :delete-row!))      
       {:success?      true
        :execution-log [(format "Derived columns using '%s'" code)]
        :columns       (conj columns {"title"      column-title
