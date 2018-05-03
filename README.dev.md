@@ -109,17 +109,18 @@ folder and run:
 
 #### Tests
 
-To run the tests, either do it from the REPL or run:
+To run the tests, either do it from the REPL or run one off:
 
 ```sh
-docker exec -i -t akvolumen_backend_1 lein test
+docker exec -i -t akvo-lumen_backend_1 lein test
+docker exec -i -t akvo-lumen_backend_1 lein test :all
 ```
 
 #### Postgres
 
 To connect to the postgres server connect using something like:
 ```sh
-psql --host=akvolumen_postgres_1 --port=5432 --dbname=lumen_tenant_1 --username=lumen --password
+psql --host=akvo-lumen_postgres_1 --port=5432 --dbname=lumen_tenant_1 --username=lumen --password
 ```
 
 ## Windshaft
