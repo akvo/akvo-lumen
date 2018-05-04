@@ -8,6 +8,7 @@
             [akvo.lumen.test-utils :refer [import-file]]
             [akvo.lumen.transformation :as tf]
             [akvo.lumen.transformation.engine :as engine]
+            [akvo.lumen.utils.logging-config :as logging-config :refer [with-no-logs]]
             [cheshire.core :as json]
             [clojure.java.io :as io]
             [clojure.test :refer :all]
@@ -221,8 +222,9 @@
 (deftest ^:functional derived-column-test
   (let [dataset-id (import-file *tenant-conn* *error-tracker* "derived-column.csv" {:has-column-headers? true})
         apply-transformation (partial tf/apply {:tenant-conn *tenant-conn*} dataset-id)]
-    (do (apply-transformation (change-datatype-transformation "c2"))
-        (apply-transformation (change-datatype-transformation "c3")))
+    (with-no-logs
+      (apply-transformation (change-datatype-transformation "c2"))
+      (apply-transformation (change-datatype-transformation "c3")))
 
     (testing "Import and initial transforms"
       (is (= (latest-data dataset-id)
@@ -249,11 +251,12 @@
       (apply-transformation {:type :undo}))
 
     (testing "Basic text transform with abort"
-      (apply-transformation (derive-column-transform
-                             {"args" {"code" "row['foo'].length"
-                                      "newColumnTitle" "Derived 2"
-                                      "newColumnType" "number"}
-                              "onError" "fail"}))
+      (with-no-logs
+        (apply-transformation (derive-column-transform
+                               {"args" {"code" "row['foo'].length"
+                                        "newColumnTitle" "Derived 2"
+                                        "newColumnType" "number"}
+                                "onError" "fail"})))
       (is (-> (latest-data dataset-id)
               first
               keys
@@ -284,19 +287,21 @@
         (is (every? number? (map :d4 (latest-data dataset-id))))))
 
     (testing "Valid type check"
-      (let [[tag _] (apply-transformation (derive-column-transform
-                                           {"args" {"code" "new Date()"
-                                                    "newColumnType" "number"
-                                                    "newColumnTitle" "Derived 6"}
-                                            "onError" "fail"}))]
+      (let [[tag _] (with-no-logs
+                      (apply-transformation (derive-column-transform
+                                             {"args" {"code" "new Date()"
+                                                      "newColumnType" "number"
+                                                      "newColumnTitle" "Derived 6"}
+                                              "onError" "fail"})))]
         (is (= tag ::lib/conflict))))
 
     (testing "Sandboxing java interop"
-      (let [[tag _] (apply-transformation (derive-column-transform
-                                           {"args" {"code" "new java.util.Date()"
-                                                    "newColumnType" "number"
-                                                    "newColumnTitle" "Derived 7"}
-                                            "onError" "fail"}))]
+      (let [[tag _] (with-no-logs
+                      (apply-transformation (derive-column-transform
+                                             {"args" {"code" "new java.util.Date()"
+                                                      "newColumnType" "number"
+                                                      "newColumnTitle" "Derived 7"}
+                                              "onError" "fail"})))]
         (is (= tag ::lib/conflict))))
 
     (testing "Sandboxing dangerous js functions are just ignored"
@@ -308,11 +313,12 @@
         (is (= tag ::lib/ok))))
 
     (testing "Fail early on syntax error"
-      (let [[tag _] (apply-transformation (derive-column-transform
-                                           {"args" {"code" ")"
-                                                    "newColumnType" "text"
-                                                    "newColumnTitle" "Derived 8"}
-                                            "onError" "fail"}))]
+      (let [[tag _] (with-no-logs
+                      (apply-transformation (derive-column-transform
+                                             {"args" {"code" ")"
+                                                      "newColumnType" "text"
+                                                      "newColumnTitle" "Derived 8"}
+                                              "onError" "fail"})))]
         (is (= tag ::lib/bad-request))))
 
     (testing "Infinite loop is managed in js sandbox impl"
