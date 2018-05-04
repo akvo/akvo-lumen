@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import vg from 'vega';
 import moment from 'moment';
 import isEqual from 'lodash/isEqual';
+import get from 'lodash/get';
 import { FormattedMessage } from 'react-intl';
 import * as chart from '../../utilities/chart';
 import LineChart from './LineChart';
@@ -256,6 +257,13 @@ export default class Chart extends Component {
           <span className="capitalize">
             <FormattedMessage id="data_last_updated" />
           </span>: {moment(dataset.get('updated')).format('Do MMM YYYY - HH:mm')}
+          {
+            // TODO: translate
+            get(visualisation, 'data.common.metadata.sampled') ?
+              <span> (Using Sampled Data)</span>
+              :
+              null
+          }
         </p>
         <div
           ref={(el) => { this.element = el; }}
