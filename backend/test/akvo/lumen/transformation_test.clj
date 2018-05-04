@@ -233,23 +233,24 @@
               {:rnum 3 :c1 nil :c2 4.0 :c3 5.0}])))
 
     (testing "Basic text transform"
-      (apply-transformation (derive-column-transform
-                             {"args" {"code" "row['foo'].toUpperCase()"
-                                      "newColumnTitle" "Derived 1"
-                                      "newColumnType" "text"}
-                              "onError" "leave-empty"}))
-
+      (with-no-logs
+        (apply-transformation (derive-column-transform
+                               {"args" {"code" "row['foo'].toUpperCase()"
+                                        "newColumnTitle" "Derived 1"
+                                        "newColumnType" "text"}
+                                "onError" "leave-empty"})))
       (is (= ["A" "B" nil] (map :d1 (latest-data dataset-id)))))
 
     (testing "Basic text transform with drop row on error"
-      (apply-transformation (derive-column-transform
-                             {"args" {"code" "row['foo'].replace('a', 'b')"
-                                      "newColumnTitle" "Derived 3"
-                                      "newColumnType" "text"}
-                              "onError" "delete-row"}))
+      (with-no-logs
+        (apply-transformation (derive-column-transform
+                               {"args" {"code" "row['foo'].replace('a', 'b')"
+                                        "newColumnTitle" "Derived 3"
+                                        "newColumnType" "text"}
+                                "onError" "delete-row"})))
       (is (= ["b" "b"] (map :d2 (latest-data dataset-id))))
       ;; Undo this so we have all the rows in the remaining tests
-      (apply-transformation {:type :undo}))
+      (with-no-logs (apply-transformation {:type :undo})))
 
     (testing "Basic text transform with abort"
       (with-no-logs
@@ -266,16 +267,18 @@
               not)))
 
     (testing "Nested string transform"
-      (apply-transformation (derive-column-transform
-                             {"args" {"code" "row['foo'].toUpperCase()"
-                                      "newColumnType" "text"
-                                      "newColumnTitle" "Derived 4"}}))
+      (with-no-logs
+        (apply-transformation (derive-column-transform
+                               {"args" {"code" "row['foo'].toUpperCase()"
+                                        "newColumnType" "text"
+                                        "newColumnTitle" "Derived 4"}})))
       (is (= ["A" "B" nil] (map :d2 (latest-data dataset-id))))
 
-      (apply-transformation (derive-column-transform
-                             {"args" {"code" "row['Derived 4'].toLowerCase()"
-                                      "newColumnType" "text"
-                                      "newColumnTitle" "Derived 5"}}))
+      (with-no-logs
+        (apply-transformation (derive-column-transform
+                               {"args" {"code" "row['Derived 4'].toLowerCase()"
+                                        "newColumnType" "text"
+                                        "newColumnTitle" "Derived 5"}})))
       (is (= ["a" "b" nil] (map :d3 (latest-data dataset-id)))))
 
     (testing "Date transform"
@@ -330,7 +333,6 @@
                                             "onError" "fail"}))]
         (is (= tag ::lib/ok))))
 
-
     (testing "Disallow anonymous functions"
       (let [[tag _] (apply-transformation (derive-column-transform
                                            {"args" {"code" "(function() {})()"
@@ -345,7 +347,6 @@
                                                     "newColumnTitle" "Derived 11"}
                                             "onError" "fail"}))]
         (is (= tag ::lib/bad-request))))))
-
 
 (deftest ^:functional delete-column-test
   (let [dataset-id (import-file *tenant-conn* *error-tracker* "dates.csv" {:has-column-headers? true})
