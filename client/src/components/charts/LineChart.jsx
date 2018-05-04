@@ -173,15 +173,24 @@ export default class LineChart extends Component {
         }}
         chart={
           <ResponsiveWrapper>{(dimensions) => {
+            if (!series.data.length) return null;
+
             const availableHeight = dimensions.height * (1 - marginBottom - marginTop);
             const availableWidth = dimensions.width * (1 - marginLeft - marginRight);
 
-            const xScale = scaleTime()
-              .domain([series.data[0].timestamp, series.data[series.data.length - 1].timestamp])
-              .range([
-                dimensions.width * marginLeft,
-                dimensions.width * (1 - marginRight),
-              ]);
+            const xScale = series.metadata.type === 'number' ?
+              scaleTime()
+                .domain([series.data[0].timestamp, series.data[series.data.length - 1].timestamp])
+                .range([
+                  dimensions.width * marginLeft,
+                  dimensions.width * (1 - marginRight),
+                ]) :
+              scaleLinear()
+                .domain([series.data[0].timestamp, series.data[series.data.length - 1].timestamp])
+                .range([
+                  dimensions.width * marginLeft,
+                  dimensions.width * (1 - marginRight),
+                ]);
 
 
             const yExtent = extent(series.data, ({ value }) => value);
@@ -283,9 +292,8 @@ export default class LineChart extends Component {
                         const normalizedX = xScale(timestamp);
                         const normalizedY = yScale(value);
                         return (
-                          <Group>
+                          <Group key={i}>
                             <Circle
-                              key={i}
                               cx={normalizedX}
                               cy={normalizedY}
                               r={radius}
