@@ -196,6 +196,10 @@ export default class LineChart extends Component {
             const origin = yScale(0);
             const radius = Math.min((5 / series.data.length) * 20, 5);
 
+            const numNodes = series.data.length;
+            const maxNodesForTooltip = 50;
+            const showTooltip = numNodes <= maxNodesForTooltip;
+
             return (
               <div
                 style={{ position: 'relative' }}
@@ -279,7 +283,7 @@ export default class LineChart extends Component {
                         }}
                       />
 
-                      {nodes.map(({ key, timestamp, value }, i) => {
+                      {showTooltip && nodes.map(({ key, timestamp, value }, i) => {
                         const normalizedX = xScale(timestamp);
                         const normalizedY = yScale(value);
                         return (
