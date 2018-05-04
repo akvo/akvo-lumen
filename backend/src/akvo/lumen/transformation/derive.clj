@@ -38,6 +38,7 @@
        (map (fn [[i _ v]] [i v]))))
 
 (defn set-cells-values! [conn opts data]
+  (log/error :set-cells-values! (doall (map str data)))
   (->> data
        (map (fn [[i v]] (set-cell-value conn (merge {:value v :rnum i} opts))))
        doall))
@@ -57,21 +58,25 @@
           row-fn                  (js-engine/row-transform-fn {:columns     columns
                                                                :code        code
                                                                :column-type column-type})
-          js-execution-seq        (->> (all-data conn {:table-name table-name})
+          data (all-data conn {:table-name table-name})
+          _ (log/error :data (doall (map str data)))
+          js-execution-seq        (->> data
                                        (map (fn [i]
                                               (try
                                                 [(:rnum i) :set-value! (row-fn i)]
                                                 (catch Exception e
-                                                  (condp = (engine/error-strategy op-spec)
-                                                    "leave-empty" [(:rnum i) :set-value! nil]
-                                                    "delete-row"  [(:rnum i) :delete-row!]
-                                                    "fail"        (throw e) ;; interrupt js execution
-                                                    ))))))
+                                                  (do (log/error e :js-execution-ex)
+                                                   (condp = (engine/error-strategy op-spec)
+                                                     "leave-empty" [(:rnum i) :set-value! nil]
+                                                     "delete-row"  [(:rnum i) :delete-row!]
+                                                     "fail"        (throw e) ;; interrupt js execution
+                                                     )))))))
           base-opts               {:table-name  table-name
                                    :column-name new-column-name}]
       (add-column conn {:table-name      table-name
                         :column-type     (lumen->pg-type column-type)
                         :new-column-name new-column-name})
+      (log/error :js-execution-seq (doall (map str js-execution-seq)))
       (set-cells-values! conn base-opts (js-execution>sql-params js-execution-seq :set-value!))
       (delete-rows! conn base-opts (js-execution>sql-params js-execution-seq :delete-row!))      
       {:success?      true
