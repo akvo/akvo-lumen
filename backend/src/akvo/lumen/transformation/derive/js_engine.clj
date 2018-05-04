@@ -45,8 +45,8 @@
     (.allowExitFunctions false)
     (.allowGlobalsObjects false)
     
-    (.setMaxMemory (* 200 1024))
-    (.setMaxCPUTime 100)
+    (.setMaxMemory (* 10000 1024))
+    (.setMaxCPUTime 2000)
 
     ;; Specifies the executor service which is used to run scripts when a CPU time limit is specified.
     (.setExecutor (Executors/newSingleThreadExecutor))))
