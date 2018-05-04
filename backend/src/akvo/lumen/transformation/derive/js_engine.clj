@@ -65,7 +65,6 @@
    (.eval ^NashornSandbox engine ^String code)))
 
 (defn- invoke* [^Invocable engine ^String fun & args]
-  (log/warn fun args)
   (.invokeFunction (.getSandboxedInvocable engine) fun (object-array args)))
 
 (defn row-transform-fn

@@ -233,7 +233,6 @@
               {:rnum 3 :c1 nil :c2 4.0 :c3 5.0}])))
 
     (testing "Basic text transform"
-      (log/error "Basic text transform" "posible problem")
       (apply-transformation (derive-column-transform
                              {"args" {"code" "row['foo'].toUpperCase()"
                                       "newColumnTitle" "Derived 1"
