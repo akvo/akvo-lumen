@@ -7,7 +7,7 @@ import get from 'lodash/get';
 import { Portal } from 'react-portal';
 import merge from 'lodash/merge';
 
-import { sortAlphabetically } from '../../utilities/utils';
+import { sortAlphabetically, sortChronologically } from '../../utilities/utils';
 import { round } from '../../utilities/chart';
 import Legend from './Legend';
 import ResponsiveWrapper from '../common/ResponsiveWrapper';
@@ -27,7 +27,7 @@ export default class PieChart extends Component {
     }),
     colors: PropTypes.oneOfType([PropTypes.array, PropTypes.object]).isRequired,
     colorMapping: PropTypes.object,
-    onChangeVisualisationSpec: PropTypes.func.isRequired,
+    onChangeVisualisationSpec: PropTypes.func,
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
     innerRadius: PropTypes.number,
@@ -57,11 +57,15 @@ export default class PieChart extends Component {
     if (!get(data, 'series[0]')) return false;
 
     const series = merge({}, data.common, data.series[0]);
-
+    const sortFunctionFactory = get(data, 'series.common.metadata.type') === 'text' ?
+      sortAlphabetically
+      :
+      sortChronologically
+    ;
     return {
       ...series,
       data: series.data
-        .sort((a, b) => sortAlphabetically(a, b, ({ key }) => key))
+        .sort((a, b) => sortFunctionFactory(a, b, ({ key }) => key))
         .map(datum => ({ ...datum, value: Math.abs(datum.value) })),
     };
   }
@@ -145,6 +149,7 @@ export default class PieChart extends Component {
 
   render() {
     const {
+      data,
       width,
       height,
       colors,
@@ -155,13 +160,16 @@ export default class PieChart extends Component {
       edit,
     } = this.props;
 
+    if (data.error) {
+      return "Cannot display pie chart"
+    }
+
     const series = this.getData();
 
     if (!series) return null;
 
     const totalCount = series.data.reduce((total, datum) => total + datum.value, 0);
     const { tooltipItems, tooltipVisible, tooltipPosition } = this.state;
-
     return (
       <ChartLayout
         style={style}
@@ -175,7 +183,7 @@ export default class PieChart extends Component {
           <Legend
             horizontal={!horizontal}
             title={get(this.props, 'data.metadata.bucketColumnTitle')}
-            data={series.data.map(({ key }) => key)}
+            data={series.data.map(({ key }) => `${key}`)}
             colorMapping={
               series.data.reduce((acc, { key }, i) => ({
                 ...acc,
@@ -218,9 +226,15 @@ export default class PieChart extends Component {
                       data={series.data}
                       value={datum => datum.value}
                       id={datum => datum.key}
-                      sort={(a, b) =>
-                        sortAlphabetically(a, b, ({ key }) => key)
-                      }
+                      sort={(a, b) => {
+                        const sortFunctionFactory = get(this.props.data, 'series.common.metadata.type') === 'text' ?
+                          sortAlphabetically
+                          :
+                          sortChronologically
+                        ;
+
+                        return sortFunctionFactory(a, b, ({ key }) => key);
+                      }}
                     >{nodes => (
                       <Group>
                         {nodes.map(({

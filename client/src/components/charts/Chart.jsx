@@ -7,12 +7,8 @@ import get from 'lodash/get';
 import { FormattedMessage } from 'react-intl';
 import * as chart from '../../utilities/chart';
 import LineChart from './LineChart';
-import { defaultPrimaryColor } from '../../utilities/visualisationColors';
-
-/*
-import get from 'lodash/get';
 import PieChart from './PieChart';
-*/
+import { defaultPrimaryColor, palette } from '../../utilities/visualisationColors';
 
 require('./Chart.scss');
 
@@ -120,7 +116,9 @@ export default class Chart extends Component {
     /* Hard coding an exit for new chart types seems fine temporarily...*/
     if (
       visualisation.visualisationType === 'line' ||
-      visualisation.visualisationType === 'area'
+      visualisation.visualisationType === 'area' ||
+      visualisation.visualisationType === 'donut' ||
+      visualisation.visualisationType === 'pie'
     ) {
       return;
     }
@@ -191,6 +189,19 @@ export default class Chart extends Component {
     }
 
     switch (visualisation.visualisationType) {
+      case 'pie':
+      case 'donut':
+        return (
+          <PieChart
+            visualisation={visualisation}
+            data={visualisation.data}
+            width={width}
+            height={adjustedContainerHeight}
+            colors={palette}
+            donut={Boolean(visualisation.visualisationType === 'donut')}
+            legendVisible={Boolean(visualisation.spec.showLegend)}
+          />
+        );
       case 'line':
       case 'area':
         return (
