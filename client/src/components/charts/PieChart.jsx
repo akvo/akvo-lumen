@@ -161,7 +161,7 @@ export default class PieChart extends Component {
     } = this.props;
 
     if (data.error) {
-      return "Cannot display pie chart"
+      return 'Cannot display pie chart';
     }
 
     const series = this.getData();
@@ -177,7 +177,7 @@ export default class PieChart extends Component {
         height={height}
         legendVisible={legendVisible}
         onClick={() => {
-          this.setState({ isPickingColor: null });
+          this.setState({ isPickingColor: undefined });
         }}
         legend={({ horizontal }) => (
           <Legend
@@ -251,7 +251,7 @@ export default class PieChart extends Component {
                             'left';
 
                           return (
-                            <Group>
+                            <Group key={key}>
                               {(this.state.isPickingColor === key) && (
                                 <Portal node={this.wrap}>
                                   <ColorPicker

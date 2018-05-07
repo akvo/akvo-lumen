@@ -167,6 +167,7 @@ export default class Chart extends Component {
       visualisation,
       width,
       height,
+      onChangeVisualisationSpec,
     } = this.props;
 
     const titleHeight = getTitleStyle(visualisation.name, getSize(width)).height * (1 + META_SCALE);
@@ -198,8 +199,11 @@ export default class Chart extends Component {
             width={width}
             height={adjustedContainerHeight}
             colors={palette}
+            colorMapping={visualisation.spec.colors}
             donut={Boolean(visualisation.visualisationType === 'donut')}
             legendVisible={Boolean(visualisation.spec.showLegend)}
+            onChangeVisualisationSpec={onChangeVisualisationSpec}
+            edit={Boolean(onChangeVisualisationSpec)}
           />
         );
       case 'line':
@@ -214,6 +218,8 @@ export default class Chart extends Component {
             xAxisLabel={visualisation.spec.axisLabelX}
             yAxisLabel={visualisation.spec.axisLabelY}
             area={Boolean(visualisation.visualisationType === 'area')}
+            onChangeVisualisationSpec={onChangeVisualisationSpec}
+            edit={Boolean(onChangeVisualisationSpec)}
           />
         );
       default:
