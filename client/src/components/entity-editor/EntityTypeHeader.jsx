@@ -67,7 +67,7 @@ class EntityTypeHeader extends Component {
           onBeginEditTitle={onBeginEditTitle}
           onChangeTitle={onChangeTitle}
         />
-        <div className="saveStatus">
+        <div className={`saveStatus ${saveStatusId === 'all_changes_saved' ? 'saved' : 'unsaved'}`}>
           {saveStatusId && (
             <FormattedMessage id={saveStatusId} />
           )}
