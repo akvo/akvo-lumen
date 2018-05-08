@@ -18,13 +18,10 @@
 
 (deftest ^:functional test-dos-file
   (testing "Import of DOS-formatted CSV file"
-    (try
-      (let [dataset-id (import-file *tenant-conn* *error-tracker* "dos.csv" {:dataset-name "DOS data"})
-            dataset (dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id
-                                                                  :version 1})]
-        (is (= 2 (count (:columns dataset)))))
-      (catch Exception e
-        (.printStackTrace (.getCause e))))))
+    (let [dataset-id (import-file *tenant-conn* *error-tracker* "dos.csv" {:dataset-name "DOS data"})
+          dataset (dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id
+                                                                :version 1})]
+      (is (= 2 (count (:columns dataset)))))))
 
 (deftest ^:functional test-mixed-columns
   (testing "Import of mixed-type data"
