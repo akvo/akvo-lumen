@@ -8,7 +8,7 @@ import { Portal } from 'react-portal';
 import merge from 'lodash/merge';
 
 import { sortAlphabetically, sortChronologically } from '../../utilities/utils';
-import { round } from '../../utilities/chart';
+import { round, replaceLabelIfValueEmpty } from '../../utilities/chart';
 import Legend from './Legend';
 import ResponsiveWrapper from '../common/ResponsiveWrapper';
 import ColorPicker from '../common/ColorPicker';
@@ -58,15 +58,18 @@ export default class PieChart extends Component {
 
     const series = merge({}, data.common, data.series[0]);
     const sortFunctionFactory = get(data, 'series.common.metadata.type') === 'text' ?
-      sortAlphabetically
-      :
-      sortChronologically
-    ;
+      sortAlphabetically :
+      sortChronologically;
     return {
       ...series,
       data: series.data
         .sort((a, b) => sortFunctionFactory(a, b, ({ key }) => key))
-        .map(datum => ({ ...datum, value: Math.abs(datum.value) })),
+        .map(datum => ({
+          ...datum,
+          value: Math.abs(datum.value),
+          key: replaceLabelIfValueEmpty(datum.key),
+          label: replaceLabelIfValueEmpty(datum.label),
+        })),
     };
   }
 
