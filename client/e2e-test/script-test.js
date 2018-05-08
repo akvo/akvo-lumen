@@ -149,6 +149,7 @@ async function test(page, shouldLogin) {
   await page.type('input[data-test-id="entity-title"]', `Visualisation of ${datasetName}`);
   console.log('Saving visualisation...');
   await page.click('body');
+  await page.waitForSelector('.saveStatus.saved');
   console.log(`Visualisation ${datasetName} was successfully created.\n`);
 
   console.log('Back to library');
@@ -167,6 +168,7 @@ async function test(page, shouldLogin) {
   await page.type('input[data-test-id="entity-title"]', `Dashboard of ${datasetName}`);
   console.log('Saving dashboard...');
   await page.click('body');
+  await page.waitForSelector('.saveStatus.saved');
   await page.click('[data-test-id="back-button"]');
   console.log(`Dashboard ${datasetName} was successfully created.\n`);
 }
