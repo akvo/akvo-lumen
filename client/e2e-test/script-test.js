@@ -50,13 +50,16 @@ async function login(page) {
 }
 
 async function addSourcemapScript(page) {
+  console.log('Adding sourcemap script...');
   try {
     await page.addScriptTag({
       content: sourcemapScript,
     });
   } catch (error) {
+    console.log('Failed to add sourcemap script...');
     console.log(error);
   }
+  console.log('Added sourcemap script successfully...');
   return Promise.resolve();
 }
 
