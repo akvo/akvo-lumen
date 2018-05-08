@@ -13,7 +13,7 @@ export const createVisualisationRequest = createAction('CREATE_VISUALISATION_REQ
 export const createVisualisationSuccess = createAction('CREATE_VISUALISATION_SUCCESS');
 export const createVisualisationFailure = createAction('CREATE_VISUALISATION_FAILURE');
 
-export function createVisualisation(visualisation, collectionId) {
+export function createVisualisation(visualisation, collectionId, callback = () => {}) {
   return (dispatch) => {
     dispatch(createVisualisationRequest(visualisation));
     api.post('/api/visualisations', visualisation)
@@ -24,8 +24,12 @@ export function createVisualisation(visualisation, collectionId) {
           dispatch(addEntitiesToCollection(vis.id, collectionId));
         }
         dispatch(push(`/visualisation/${vis.id}`));
+        callback();
       })
-      .catch(err => dispatch(createVisualisationFailure(err)));
+      .catch((err) => {
+        dispatch(createVisualisationFailure(err));
+        callback(err);
+      });
   };
 }
 
@@ -76,7 +80,7 @@ export const saveVisualisationChangesRequest = createAction('SAVE_VISUALISATION_
 export const saveVisualisationChangesFailure = createAction('SAVE_VISUALISATION_CHANGES_FAILURE');
 export const saveVisualisationChangesSuccess = createAction('SAVE_VISUALISATION_CHANGES_SUCCESS');
 
-export function saveVisualisationChanges(visualisation) {
+export function saveVisualisationChanges(visualisation, callback = () => {}) {
   return (dispatch, getState) => {
     const prevVisualisation = getState().library.visualisations[visualisation.id];
     dispatch(saveVisualisationChangesRequest(Object.assign({}, visualisation, {
@@ -85,11 +89,17 @@ export function saveVisualisationChanges(visualisation) {
     })));
     api.put(`/api/visualisations/${visualisation.id}`, visualisation)
       .then(response => response.json())
-      .then(() => dispatch(saveVisualisationChangesSuccess(Object.assign({}, visualisation, {
-        modified: Date.now(),
-        status: 'OK',
-      }))))
-      .catch(() => dispatch(saveVisualisationChangesFailure(prevVisualisation)));
+      .then(() => {
+        dispatch(saveVisualisationChangesSuccess(Object.assign({}, visualisation, {
+          modified: Date.now(),
+          status: 'OK',
+        })));
+        callback();
+      })
+      .catch((error) => {
+        dispatch(saveVisualisationChangesFailure(prevVisualisation));
+        callback(error);
+      });
   };
 }
 

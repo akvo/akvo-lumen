@@ -10,6 +10,7 @@ import { fetchLibrary } from '../actions/library';
 import { fetchDataset } from '../actions/dataset';
 import aggregationOnlyVisualisationTypes from '../utilities/aggregationOnlyVisualisationTypes';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import { SAVE_COUNTDOWN_INTERVAL, SAVE_INITIAL_TIMEOUT } from '../constants/time';
 import NavigationPrompt from '../components/common/NavigationPrompt';
 
 const getEditingStatus = (location) => {
@@ -61,6 +62,8 @@ class Dashboard extends Component {
       requestedDatasetIds: [],
       asyncComponents: null,
       aggregatedDatasets: {},
+      timeToNextSave: SAVE_INITIAL_TIMEOUT,
+      timeFromPreviousSave: 0,
     };
     this.loadDashboardIntoState = this.loadDashboardIntoState.bind(this);
     this.onAddVisualisation = this.onAddVisualisation.bind(this);
@@ -68,6 +71,7 @@ class Dashboard extends Component {
     this.updateEntities = this.updateEntities.bind(this);
     this.onUpdateName = this.onUpdateName.bind(this);
     this.onSave = this.onSave.bind(this);
+    this.onSaveFailure = this.onSaveFailure.bind(this);
     this.toggleShareDashboard = this.toggleShareDashboard.bind(this);
     this.handleDashboardAction = this.handleDashboardAction.bind(this);
     this.addDataToVisualisations = this.addDataToVisualisations.bind(this);
@@ -158,21 +162,49 @@ class Dashboard extends Component {
     }
   }
 
+  onSaveFailure() {
+    this.setState({
+      timeToNextSave: this.state.timeToNextSave * 2,
+      timeFromPreviousSave: 0,
+      savingFailed: true,
+    }, () => {
+      this.saveInterval = setInterval(() => {
+        const { timeFromPreviousSave, timeToNextSave } = this.state;
+        if (timeToNextSave - timeFromPreviousSave > SAVE_COUNTDOWN_INTERVAL) {
+          this.setState({ timeFromPreviousSave: timeFromPreviousSave + SAVE_COUNTDOWN_INTERVAL });
+          return;
+        }
+        clearInterval(this.saveInterval);
+      }, SAVE_COUNTDOWN_INTERVAL);
+      setTimeout(() => {
+        this.onSave();
+      }, this.state.timeToNextSave);
+    });
+  }
+
   onSave() {
     const { dispatch, location } = this.props;
     const dashboard = getDashboardFromState(this.state.dashboard, false);
     const isEditingExistingDashboard = getEditingStatus(this.props.location);
 
-    if (isEditingExistingDashboard) {
-      dispatch(actions.saveDashboardChanges(dashboard));
-
-      // We should really check the save was successful, but for now let's assume it was
+    const handleResponse = (error) => {
+      if (error) {
+        this.onSaveFailure();
+        return;
+      }
       this.setState({
         isUnsavedChanges: false,
+        timeToNextSave: SAVE_INITIAL_TIMEOUT,
+        timeFromPreviousSave: 0,
+        savingFailed: false,
       });
+    };
+
+    if (isEditingExistingDashboard) {
+      dispatch(actions.saveDashboardChanges(dashboard, handleResponse));
     } else if (!this.state.isSavePending) {
       this.setState({ isSavePending: true, isUnsavedChanges: false }, () => {
-        dispatch(actions.createDashboard(dashboard, get(location, 'state.collectionId')));
+        dispatch(actions.createDashboard(dashboard, get(location, 'state.collectionId'), handleResponse));
       });
     } else {
       // Ignore save request until the first "create dashboard" request succeeeds
@@ -253,10 +285,13 @@ class Dashboard extends Component {
   }
 
   onUpdateName(title) {
-    const dashboard = Object.assign({}, this.state.dashboard, { title });
+    const normalizedTitle = title || 'Untitled dashboard';
+    const dashboard = Object.assign({}, this.state.dashboard, { title: normalizedTitle });
     this.setState({
       dashboard,
       isUnsavedChanges: true,
+    }, () => {
+      this.onSave();
     });
   }
 
@@ -286,6 +321,10 @@ class Dashboard extends Component {
     this.setState({
       dashboard,
       isUnsavedChanges: layoutChanged ? true : this.state.isUnsavedChanges,
+    }, () => {
+      if (this.state.isUnsavedChanges) {
+        this.onSave();
+      }
     });
   }
 
@@ -440,7 +479,7 @@ class Dashboard extends Component {
     const dashboard = getDashboardFromState(this.state.dashboard, true);
 
     return (
-      <NavigationPrompt shouldPrompt={this.state.isUnsavedChanges}>
+      <NavigationPrompt shouldPrompt={this.state.savingFailed}>
         <div className="Dashboard">
           <DashboardHeader
             title={dashboard.title}
@@ -449,6 +488,8 @@ class Dashboard extends Component {
             onChangeTitle={this.onUpdateName}
             onBeginEditTitle={() => this.setState({ isUnsavedChanges: true })}
             onSaveDashboard={this.onSave}
+            savingFailed={this.state.savingFailed}
+            timeToNextSave={this.state.timeToNextSave - this.state.timeFromPreviousSave}
           />
           <DashboardEditor
             dashboard={dashboard}

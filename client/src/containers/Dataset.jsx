@@ -10,6 +10,7 @@ import { getId, getTitle } from '../domain/entity';
 import { getTransformations, getRows, getColumns } from '../domain/dataset';
 import * as api from '../api';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import { SAVE_COUNTDOWN_INTERVAL, SAVE_INITIAL_TIMEOUT } from '../constants/time';
 import NavigationPrompt from '../components/common/NavigationPrompt';
 
 require('../components/dataset/Dataset.scss');
@@ -24,10 +25,14 @@ class Dataset extends Component {
       // Pending transformations are represented as
       // an oredered map from timestamp to transformation
       pendingTransformations: Immutable.OrderedMap(),
+      timeToNextSave: SAVE_INITIAL_TIMEOUT,
+      timeFromPreviousSave: 0,
     };
     this.handleShowDatasetSettings = this.handleShowDatasetSettings.bind(this);
     this.handleNavigateToVisualise = this.handleNavigateToVisualise.bind(this);
     this.handleChangeDatasetTitle = this.handleChangeDatasetTitle.bind(this);
+    this.handleSave = this.handleSave.bind(this);
+    this.handleSaveFailure = this.handleSaveFailure.bind(this);
     this.transform = this.transform.bind(this);
     this.undo = this.undo.bind(this);
   }
@@ -109,9 +114,45 @@ class Dataset extends Component {
   }
 
   handleChangeDatasetTitle(name) {
+    this.setState({ title: name }, () => {
+      this.handleSave();
+    });
+  }
+
+  handleSaveFailure() {
+    this.setState({
+      timeToNextSave: this.state.timeToNextSave * 2,
+      timeFromPreviousSave: 0,
+      savingFailed: true,
+    }, () => {
+      this.saveInterval = setInterval(() => {
+        const { timeFromPreviousSave, timeToNextSave } = this.state;
+        if (timeToNextSave - timeFromPreviousSave > SAVE_COUNTDOWN_INTERVAL) {
+          this.setState({ timeFromPreviousSave: timeFromPreviousSave + SAVE_COUNTDOWN_INTERVAL });
+          return;
+        }
+        clearInterval(this.saveInterval);
+      }, SAVE_COUNTDOWN_INTERVAL);
+      setTimeout(() => {
+        this.handleSave();
+      }, this.state.timeToNextSave);
+    });
+  }
+
+  handleSave() {
     const { dispatch, params } = this.props;
-    dispatch(updateDatasetMeta(params.datasetId, { name }));
-    // this.handleChangeVisualisation({ name: title });
+    dispatch(updateDatasetMeta(params.datasetId, { name: this.state.title }, (error) => {
+      if (error) {
+        this.handleSaveFailure();
+        return;
+      }
+      this.setState({
+        isUnsavedChanges: false,
+        timeToNextSave: SAVE_INITIAL_TIMEOUT,
+        timeFromPreviousSave: 0,
+        savingFailed: false,
+      });
+    }));
   }
 
   handleShowDatasetSettings() {
@@ -137,7 +178,7 @@ class Dataset extends Component {
     }
     const { DatasetHeader, DatasetTable } = this.state.asyncComponents;
     return (
-      <NavigationPrompt shouldPrompt={this.state.isUnsavedChanges}>
+      <NavigationPrompt shouldPrompt={this.state.savingFailed}>
         <div className="Dataset">
           <DatasetHeader
             onShowDatasetSettings={this.handleShowDatasetSettings}
@@ -146,6 +187,9 @@ class Dataset extends Component {
             isUnsavedChanges={this.state.isUnsavedChanges}
             onChangeTitle={this.handleChangeDatasetTitle}
             onBeginEditTitle={() => this.setState({ isUnsavedChanges: true })}
+            savingFailed={this.state.savingFailed}
+            timeToNextSave={this.state.timeToNextSave - this.state.timeFromPreviousSave}
+            onSaveDataset={this.handleSave}
           />
           {getRows(dataset) != null ? (
             <DatasetTable
