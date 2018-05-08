@@ -187,7 +187,7 @@ class Dashboard extends Component {
     const dashboard = getDashboardFromState(this.state.dashboard, false);
     const isEditingExistingDashboard = getEditingStatus(this.props.location);
 
-    const handleError = (error) => {
+    const handleResponse = (error) => {
       if (error) {
         this.onSaveFailure();
         return;
@@ -201,10 +201,10 @@ class Dashboard extends Component {
     };
 
     if (isEditingExistingDashboard) {
-      dispatch(actions.saveDashboardChanges(dashboard, handleError));
+      dispatch(actions.saveDashboardChanges(dashboard, handleResponse));
     } else if (!this.state.isSavePending) {
       this.setState({ isSavePending: true, isUnsavedChanges: false }, () => {
-        dispatch(actions.createDashboard(dashboard, get(location, 'state.collectionId'), handleError));
+        dispatch(actions.createDashboard(dashboard, get(location, 'state.collectionId'), handleResponse));
       });
     } else {
       // Ignore save request until the first "create dashboard" request succeeeds
@@ -322,7 +322,9 @@ class Dashboard extends Component {
       dashboard,
       isUnsavedChanges: layoutChanged ? true : this.state.isUnsavedChanges,
     }, () => {
-      if (this.state.isUnsavedChanges) this.onSave();
+      if (this.state.isUnsavedChanges) {
+        this.onSave();
+      }
     });
   }
 
@@ -331,8 +333,6 @@ class Dashboard extends Component {
     this.setState({
       dashboard,
       isUnsavedChanges: true,
-    }, () => {
-      this.onSave();
     });
   }
 

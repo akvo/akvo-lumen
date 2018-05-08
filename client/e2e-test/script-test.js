@@ -187,7 +187,7 @@ const getSourcemapsScript = () => new Promise((resolve) => {
 
 const pagePromise =
   puppeteer.launch({
-//   headless: false,
+    // headless: false,
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
