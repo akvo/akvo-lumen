@@ -285,7 +285,8 @@ class Dashboard extends Component {
   }
 
   onUpdateName(title) {
-    const dashboard = Object.assign({}, this.state.dashboard, { title });
+    const normalizedTitle = title || 'Untitled dashboard';
+    const dashboard = Object.assign({}, this.state.dashboard, { title: normalizedTitle });
     this.setState({
       dashboard,
       isUnsavedChanges: true,
@@ -320,6 +321,8 @@ class Dashboard extends Component {
     this.setState({
       dashboard,
       isUnsavedChanges: layoutChanged ? true : this.state.isUnsavedChanges,
+    }, () => {
+      if (this.state.isUnsavedChanges) this.onSave();
     });
   }
 
@@ -328,6 +331,8 @@ class Dashboard extends Component {
     this.setState({
       dashboard,
       isUnsavedChanges: true,
+    }, () => {
+      this.onSave();
     });
   }
 
