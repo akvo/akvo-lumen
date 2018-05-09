@@ -1,5 +1,6 @@
 (ns akvo.lumen.util
-  (:require [clojure.string :as str]))
+  (:require [clojure.string :as str]
+            [clojure.tools.logging :as log]))
 
 (defn squuid
   "Sequential UUIDs.
@@ -36,3 +37,11 @@
        (map #(str/split % #"="))
        (map (fn [[k v]] [(keyword k) v]))
        (into {})))
+
+(defmacro time*
+  {:added "1.0"}
+  [kw expr]
+  `(let [start# (. System (nanoTime))
+         ret# ~expr]
+     (log/info (str ~kw ": " (/ (double (- (. System (nanoTime)) start#)) 1000000.0)))
+     ret#))

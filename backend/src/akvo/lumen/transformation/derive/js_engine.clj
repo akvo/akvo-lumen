@@ -1,6 +1,7 @@
 (ns akvo.lumen.transformation.derive.js-engine
   (:require [clojure.set :as set]
             [clojure.string :as str]
+            [akvo.lumen.util :refer (time*)]
             [clojure.tools.logging :as log])
   (:import [java.util.concurrent Executors]
            [delight.nashornsandbox NashornSandboxes NashornSandbox]
@@ -38,18 +39,25 @@
                (throw-invalid-return-type value)))))
 
 (defn ^NashornSandbox js-engine []
-  (doto (NashornSandboxes/create)
-    (.allowReadFunctions false)
-    (.allowLoadFunctions false)
-    (.allowPrintFunctions false)
-    (.allowExitFunctions false)
-    (.allowGlobalsObjects false)
-    
-    (.setMaxMemory (* 10000 1024))
-    (.setMaxCPUTime 2000)
+  (time* :js-engine
+         (let [maxmemory (* 1000000 1024)
+               maxtime 200000]
+           (doto (NashornSandboxes/create)
+             (.allowReadFunctions false)
+             (.allowLoadFunctions false)
+             (.allowPrintFunctions false)
+             (.allowExitFunctions false)
+             (.allowGlobalsObjects false)
 
-    ;; Specifies the executor service which is used to run scripts when a CPU time limit is specified.
-    (.setExecutor (Executors/newSingleThreadExecutor))))
+             
+             (.setMaxMemory maxmemory)
+             (.setMaxCPUTime maxtime)
+
+             ;; Specifies the executor service which is used to run scripts when a CPU time limit is specified.
+
+             (.setExecutor (Executors/newSingleThreadExecutor))
+             #_(.setExecutor (Executors/newFixedThreadPool 50))
+             ))))
 
 (defn- column-name->column-title
   "replace column-name by column-title"
@@ -64,19 +72,20 @@
   ([^NashornSandbox engine ^String code]
    (.eval ^NashornSandbox engine ^String code)))
 
-(defn- invoke* [^Invocable engine ^String fun & args]
-  (.invokeFunction (.getSandboxedInvocable engine) fun (object-array args)))
+(defn- invoke* [^Invocable invocable-engine ^String fun & args]
+  (.invokeFunction invocable-engine fun (object-array args)))
 
 (defn row-transform-fn
   [{:keys [columns code column-type]}]
   (let [adapter (column-name->column-title columns)
         engine (js-engine)
+        invocable-engine (.getSandboxedInvocable engine)
         fun-name "deriveColumn"]
     (eval* engine (column-function fun-name code))
     (fn [row]
       (let [res (->> row
                      (adapter)
-                     (invoke* engine fun-name))]
+                     (invoke* invocable-engine fun-name))]
         (if (some? column-type)
           (valid-type? res column-type)
           res)))))
@@ -90,5 +99,5 @@
            true
            ;; Catches syntax errors
            (catch Exception e
-             (log/warn :not-valid-js try-code)
+             (log/warn e :not-valid-js try-code)
              false)))))
