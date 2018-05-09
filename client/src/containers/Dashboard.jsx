@@ -103,6 +103,7 @@ class Dashboard extends Component {
   }
 
   componentDidMount() {
+    this.isMountedFlag = true;
     require.ensure(['../components/charts/VisualisationViewer'], () => {
       require.ensure([], () => {
         /* eslint-disable global-require */
@@ -162,6 +163,10 @@ class Dashboard extends Component {
     }
   }
 
+  componentWillUnmount() {
+    this.isMountedFlag = false;
+  }
+
   onSaveFailure() {
     this.setState({
       timeToNextSave: this.state.timeToNextSave * 2,
@@ -188,6 +193,9 @@ class Dashboard extends Component {
     const isEditingExistingDashboard = getEditingStatus(this.props.location);
 
     const handleResponse = (error) => {
+      if (!this.isMountedFlag) {
+        return;
+      }
       if (error) {
         this.onSaveFailure();
         return;

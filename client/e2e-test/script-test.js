@@ -31,6 +31,7 @@ const TIMEOUT = {
   datasetImport: 15 * 1000,
   datasetPending: 2 * 1000,
 };
+const LATENCY_ADJUST = 1000;
 const lumenUrl = process.env.LUMEN_URL;
 const username = process.env.LUMEN_USER;
 const password = process.env.LUMEN_PASSWORD;
@@ -127,7 +128,8 @@ async function test(page, shouldLogin) {
   console.log('Selecting pivot table option...');
   await page.waitForSelector('li[data-test-id="button-pivot-table"]', { timeout: TIMEOUT.waitFor });
   await page.click('li[data-test-id="button-pivot-table"]');
-  console.log('Witing to selecting dataset...');
+  await page.waitFor(LATENCY_ADJUST, () => true);
+  console.log('Waiting to select dataset...');
   await page.waitForSelector('[data-test-id="select-menu"]', { timeout: TIMEOUT.waitFor });
   console.log('Selecting dataset...');
   await page.click('[data-test-id="select-menu"]');
@@ -168,6 +170,7 @@ async function test(page, shouldLogin) {
   await page.waitForSelector('[data-test-id="dashboard"]', { timeout: TIMEOUT.waitFor });
   console.log('Accessing to dashboard creation...');
   await page.click('[data-test-id="dashboard"]');
+  await page.waitFor(LATENCY_ADJUST, () => true);
   console.log('Selecting visualisation...');
   await page.waitForSelector(`[data-test-name="Visualisation of ${datasetName}"]`, { timeout: TIMEOUT.waitFor });
   await page.click(`[data-test-name="Visualisation of ${datasetName}"]`);
