@@ -127,26 +127,33 @@ async function test(page, shouldLogin) {
   console.log('Selecting pivot table option...');
   await page.waitForSelector('li[data-test-id="button-pivot-table"]', { timeout: TIMEOUT.waitFor });
   await page.click('li[data-test-id="button-pivot-table"]');
-  console.log('Selecting dataset...');
+  console.log('Witing to selecting dataset...');
   await page.waitForSelector('[data-test-id="select-menu"]', { timeout: TIMEOUT.waitFor });
+  console.log('Selecting dataset...');
   await page.click('[data-test-id="select-menu"]');
+  console.log('Finding dataset option...');
   const optionId = await page.evaluate(() => {
     const elements = document.querySelectorAll('[role="option"]');
     const options = Array.from(elements);
     const found = options.find(e => e.textContent === __datasetName);
     return Promise.resolve(found.getAttribute('id'));
   });
+  console.log('Clicking dataset option...');
   await page.click(`#${optionId}`);
+  console.log('Waiting for column input...');
   await page.waitForSelector('label[data-test-id="categoryColumnInput"]+div', { timeout: TIMEOUT.waitFor });
+  console.log('Clicking column input...');
   await page.click('label[data-test-id="categoryColumnInput"]+div');
-  console.log('Selecting columns...');
+  console.log('Finding column to select...');
   const columnId = await page.evaluate(() => {
     const elements = document.querySelectorAll('[role="option"]');
     const options = Array.from(elements);
     const found = options.find(e => e.textContent === 'title (text)');
     return Promise.resolve(found.getAttribute('id'));
   });
+  console.log('Selecting columns...');
   await page.click(`#${columnId}`);
+  console.log('Focusing title...');
   await page.click('div[data-test-id="entity-title"]');
   console.log('Typing visualisation name...');
   await page.type('input[data-test-id="entity-title"]', `Visualisation of ${datasetName}`);
@@ -157,6 +164,7 @@ async function test(page, shouldLogin) {
   console.log('Back to library');
   await goto(page, lumenUrl);
   //   Dashboard
+  console.log('Waiting for dashboard create button...');
   await page.waitForSelector('[data-test-id="dashboard"]', { timeout: TIMEOUT.waitFor });
   console.log('Accessing to dashboard creation...');
   await page.click('[data-test-id="dashboard"]');
