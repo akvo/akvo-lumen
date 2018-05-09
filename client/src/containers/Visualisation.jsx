@@ -96,6 +96,7 @@ class Visualisation extends Component {
   }
 
   componentDidMount() {
+    this.isMountedFlag = true;
     this.handleChangeSourceDataset(get(this.props, 'location.state.preselectedDatasetId'));
 
     require.ensure(['../components/charts/VisualisationViewer'], () => {
@@ -142,6 +143,10 @@ class Visualisation extends Component {
     }
   }
 
+  componentWillUnmount() {
+    this.isMountedFlag = false;
+  }
+
   onSaveFailure() {
     this.setState({
       timeToNextSave: this.state.timeToNextSave * 2,
@@ -166,6 +171,9 @@ class Visualisation extends Component {
     const { dispatch, location } = this.props;
 
     const handleError = (error) => {
+      if (!this.isMountedFlag) {
+        return;
+      }
       if (error) {
         this.onSaveFailure();
         return;
