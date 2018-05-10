@@ -6,16 +6,14 @@ export const initialState = {};
 
 function createVisualisation(state, { payload }) {
   const id = payload.id;
-  return update(state, {
-    [id]: { $set: payload },
-  });
+  return update(state, { [id]: { $set: payload } });
 }
 
 function editVisualisation(state, { payload }) {
   const id = payload.id;
-  return Object.assign({}, state, {
-    [id]: payload,
-  });
+  return state[id].modified < payload.modified ?
+    Object.assign({}, state, { [id]: payload }) :
+    state;
 }
 
 function saveVisualisations(state, { payload }) {

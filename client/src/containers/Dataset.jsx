@@ -41,6 +41,8 @@ class Dataset extends Component {
     const { params, dataset, dispatch } = this.props;
     const { datasetId } = params;
 
+    this.isMountedFlag = true;
+
     if (dataset == null || dataset.get('rows') == null) {
       dispatch(fetchDataset(datasetId));
     }
@@ -59,6 +61,11 @@ class Dataset extends Component {
       });
     }, 'Dataset');
   }
+
+  componentWillUnmount() {
+    this.isMountedFlag = false;
+  }
+
   setPendingTransformation(timestamp, transformation) {
     const { pendingTransformations } = this.state;
     this.setState({
@@ -142,6 +149,7 @@ class Dataset extends Component {
   handleSave() {
     const { dispatch, params } = this.props;
     dispatch(updateDatasetMeta(params.datasetId, { name: this.state.title }, (error) => {
+      if (!this.isMountedFlag) return;
       if (error) {
         this.handleSaveFailure();
         return;
