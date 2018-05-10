@@ -96,6 +96,7 @@ class Visualisation extends Component {
   }
 
   componentDidMount() {
+    this.isMountedFlag = true;
     this.handleChangeSourceDataset(get(this.props, 'location.state.preselectedDatasetId'));
 
     require.ensure(['../components/charts/VisualisationViewer'], () => {
@@ -142,6 +143,10 @@ class Visualisation extends Component {
     }
   }
 
+  componentWillUnmount() {
+    this.isMountedFlag = false;
+  }
+
   onSaveFailure() {
     this.setState({
       timeToNextSave: this.state.timeToNextSave * 2,
@@ -165,7 +170,8 @@ class Visualisation extends Component {
   onSave() {
     const { dispatch, location } = this.props;
 
-    const handleError = (error) => {
+    const handleResponse = (error) => {
+      if (!this.isMountedFlag) return;
       if (error) {
         this.onSaveFailure();
         return;
@@ -175,18 +181,19 @@ class Visualisation extends Component {
         timeToNextSave: SAVE_INITIAL_TIMEOUT,
         timeFromPreviousSave: 0,
         savingFailed: false,
+        isSavePending: false,
       });
     };
 
     if (this.state.visualisation.id) {
-      dispatch(actions.saveVisualisationChanges(this.state.visualisation, handleError));
+      dispatch(actions.saveVisualisationChanges(this.state.visualisation, handleResponse));
     } else if (!this.state.isSavePending) {
       this.setState({ isSavePending: true });
       dispatch(
         actions.createVisualisation(
           this.state.visualisation,
           get(location, 'state.collectionId'),
-          handleError
+          handleResponse
         )
       );
     }
@@ -304,7 +311,11 @@ class Visualisation extends Component {
   }
 
   render() {
-    if (this.state.visualisation == null || !this.state.asyncComponents) {
+    if (
+      this.state.visualisation == null ||
+      !this.state.asyncComponents ||
+      this.state.isSavePending
+    ) {
       return <LoadingSpinner />;
     }
     const { VisualisationHeader, VisualisationEditor } = this.state.asyncComponents;
