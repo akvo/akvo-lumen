@@ -67,6 +67,10 @@ export default class LineChart extends Component {
     interactive: true,
   }
 
+  static contextTypes = {
+    abbrNumber: PropTypes.func,
+  }
+
   state = {
     isPickingColor: false,
   }
@@ -323,6 +327,7 @@ export default class LineChart extends Component {
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}
                     numTicks={yAxisTicks}
+                    tickFormat={value => this.context.abbrNumber(value)}
                     labelProps={{
                       dy: marginTop * dimensions.height * 0.5,
                       textAnchor: 'middle',
@@ -346,6 +351,7 @@ export default class LineChart extends Component {
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}
                     numTicks={xAxisTicks}
+                    tickFormat={value => this.context.abbrNumber(value)}
                   />
                 </Svg>
               </div>
