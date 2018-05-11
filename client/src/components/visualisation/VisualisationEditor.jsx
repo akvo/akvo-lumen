@@ -211,7 +211,9 @@ export default class VisualisationEditor extends Component {
         if (!this.state.visualisation || !this.state.visualisation.datasetId) {
           // Update immediately, without waiting for the api call
           this.setState({ visualisation });
-        } else if (!specValid || !needNewAggregation) {
+        } else if (!specValid) {
+          // Do nothing
+        } else if (!needNewAggregation) {
           this.setState({
             visualisation: Object.assign({},
               visualisation, { data: this.state.visualisation.data }),
