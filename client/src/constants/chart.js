@@ -6,6 +6,11 @@ export const labelFont = {
   dy: 3,
 };
 
+export const connectionStyle = {
+  stroke: '#aaa',
+  strokeWidth: 1,
+};
+
 export default {
   labelFont,
 };

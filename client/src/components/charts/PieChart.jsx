@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Pie } from '@potion/layout'; // TODO: see if can optimize this
 import { positionFromAngle } from '@nivo/core'; // TODO: move this to potion
-import { Arc, Svg, Group, Text } from '@potion/element';
+import { Arc, Svg, Group, Text, Line } from '@potion/element';
 import get from 'lodash/get';
 import { Portal } from 'react-portal';
 import merge from 'lodash/merge';
@@ -14,7 +14,7 @@ import ResponsiveWrapper from '../common/ResponsiveWrapper';
 import ColorPicker from '../common/ColorPicker';
 import ChartLayout from './ChartLayout';
 import Tooltip from './Tooltip';
-import { keyFont } from '../../constants/chart';
+import { labelFont, connectionStyle } from '../../constants/chart';
 
 const getDatum = (data, datum) => data.filter(({ key }) => key === datum)[0];
 
@@ -53,13 +53,13 @@ export default class PieChart extends Component {
 
   getData() {
     const { data } = this.props;
-
     if (!get(data, 'series[0]')) return false;
 
     const series = merge({}, data.common, data.series[0]);
     const sortFunctionFactory = get(data, 'series.common.metadata.type') === 'text' ?
       sortAlphabetically :
       sortChronologically;
+
     return {
       ...series,
       data: series.data
@@ -135,18 +135,28 @@ export default class PieChart extends Component {
     });
   }
 
-  renderkey({ key, value, labelPosition, midAngle, totalCount }) {
+  renderLabel({ key, value, labelPosition, edgePosition, midAngle, totalCount, angle }) {
     const { print, interactive, legendVisible } = this.props;
-    return (print || !interactive) ? (
-      <Text
-        textAnchor={midAngle > Math.PI / 2 ? 'end' : 'start'}
-        transform={{ translate: [labelPosition.x, labelPosition.y] }}
-        {...keyFont}
-      >
-        {(!print && interactive && !legendVisible) && `${key}: `}
-        {value}
-        &nbsp;({round((value / totalCount) * 100, 2)}%)
-      </Text>
+    return ((print || !interactive || !legendVisible) && angle > Math.PI / 12) ? (
+      <Group>
+        <Text
+          textAnchor={midAngle > Math.PI / 2 ? 'end' : 'start'}
+          transform={{ translate: [labelPosition.x, labelPosition.y] }}
+          {...labelFont}
+        >
+          {(!print && interactive && !legendVisible) && `${key}`}
+          {(print || !interactive) && ': '}
+          {(print || !interactive) && value}
+          {(print || !interactive) && (<span>&nbsp;({round((value / totalCount) * 100, 2)}%)</span>)}
+        </Text>
+        <Line
+          x1={labelPosition.x}
+          y1={labelPosition.y}
+          x2={edgePosition.x}
+          y2={edgePosition.y}
+          {...connectionStyle}
+        />
+      </Group>
     ) : null;
   }
 
@@ -248,7 +258,8 @@ export default class PieChart extends Component {
                           const color = this.getColor(key, i);
                           const midAngle = (((endAngle - startAngle) / 2) + startAngle) -
                             (Math.PI / 2);
-                          const labelPosition = positionFromAngle(midAngle, diameter * 0.35);
+                          const labelPosition = positionFromAngle(midAngle, diameter * 0.4);
+                          const edgePosition = positionFromAngle(midAngle, diameter * 0.3);
                           const colorpickerPlacement = labelPosition.x < 0 ?
                             'right' :
                             'left';
@@ -294,12 +305,14 @@ export default class PieChart extends Component {
                                   this.handleMouseLeaveNode({ key });
                                 }}
                               />
-                              {this.renderkey({
+                              {this.renderLabel({
                                 key,
                                 value,
                                 midAngle,
                                 labelPosition,
+                                edgePosition,
                                 totalCount,
+                                angle: endAngle - startAngle,
                               })}
                             </Group>
                           );
