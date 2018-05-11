@@ -179,13 +179,13 @@ export default class LineChart extends Component {
             const availableWidth = dimensions.width * (1 - marginLeft - marginRight);
 
             const xScale = series.metadata.type === 'number' ?
-              scaleTime()
+              scaleLinear()
                 .domain([series.data[0].timestamp, series.data[series.data.length - 1].timestamp])
                 .range([
                   dimensions.width * marginLeft,
                   dimensions.width * (1 - marginRight),
                 ]) :
-              scaleLinear()
+              scaleTime()
                 .domain([series.data[0].timestamp, series.data[series.data.length - 1].timestamp])
                 .range([
                   dimensions.width * marginLeft,
