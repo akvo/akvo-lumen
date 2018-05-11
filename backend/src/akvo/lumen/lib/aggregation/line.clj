@@ -23,7 +23,7 @@
         max-points 2500
         aggregation-method (if (= (get query "metricAggregation") "mean") "avg" (get query "metricAggregation"))
         sql-text-with-aggregation "SELECT * FROM (SELECT * FROM (SELECT %1$s, %5$s(%2$s) FROM %3$s WHERE %4$s GROUP BY %1$s)z ORDER BY random() LIMIT %6$s)zz ORDER BY zz.%1$s"
-        sql-text-without-aggreagtion "SELECT * FROM (SELECT * FROM (SELECT %1$s, %2$s FROM %3$s WHERE %4$s)z ORDER BY random() LIMIT %6$s)zz ORDER BY zz.%1$s"
+        sql-text-without-aggreagtion "SELECT * FROM (SELECT * FROM (SELECT %1$s AS x, %2$s AS y FROM %3$s WHERE %4$s)z ORDER BY random() LIMIT %6$s)zz ORDER BY zz.x"
         sql-text (if aggregation-method sql-text-with-aggregation sql-text-without-aggreagtion)
         sql-response (run-query tenant-conn table-name sql-text column-x-name column-y-name filter-sql aggregation-method max-points)]
     (lib/ok
