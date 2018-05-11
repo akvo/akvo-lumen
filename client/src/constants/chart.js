@@ -7,7 +7,7 @@ export const labelFont = {
 };
 
 export const connectionStyle = {
-  stroke: '#aaa',
+  stroke: '#ddd',
   strokeWidth: 1,
 };
 

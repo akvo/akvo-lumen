@@ -137,6 +137,9 @@ export default class PieChart extends Component {
 
   renderLabel({ key, value, labelPosition, edgePosition, midAngle, totalCount, angle }) {
     const { print, interactive, legendVisible } = this.props;
+    const offset = (input, mult) => Math.floor(input * mult);
+    const labelOffset = 0.95;
+    const edgeOffset = 1.01;
     return ((print || !interactive || !legendVisible) && angle > Math.PI / 12) ? (
       <Group>
         <Text
@@ -150,10 +153,10 @@ export default class PieChart extends Component {
           {(print || !interactive) && (<span>&nbsp;({round((value / totalCount) * 100, 2)}%)</span>)}
         </Text>
         <Line
-          x1={labelPosition.x}
-          y1={labelPosition.y}
-          x2={edgePosition.x}
-          y2={edgePosition.y}
+          x1={offset(labelPosition.x, labelOffset)}
+          y1={offset(labelPosition.y, labelOffset)}
+          x2={offset(edgePosition.x, edgeOffset)}
+          y2={offset(edgePosition.y, edgeOffset)}
           {...connectionStyle}
         />
       </Group>
