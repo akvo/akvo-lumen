@@ -161,7 +161,7 @@ export default class VisualisationEditor extends Component {
             checkUndefined(this.lastVisualisationRequested, 'spec', 'layers', 'length')
           );
 
-        if (!this.state.visualisation || !this.state.visualisation.datasetId) {
+        if (!this.state.visualisation) {
           // Update immediately, without waiting for the api call
           this.setState({ visualisation: { ...visualisation } });
         }
