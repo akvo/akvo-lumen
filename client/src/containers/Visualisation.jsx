@@ -168,6 +168,8 @@ class Visualisation extends Component {
   }
 
   onSave() {
+    if (!this.state.visualisation.visualisationType) return;
+
     const { dispatch, location } = this.props;
 
     const handleResponse = (error) => {
