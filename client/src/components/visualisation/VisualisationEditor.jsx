@@ -253,7 +253,7 @@ export default class VisualisationEditor extends Component {
 
     switch (vType) {
       case 'map':
-        this.setState({ visualisation: { ...this.state.visualisation, awaitingResponse: true } });
+        this.setState({ visualisation: { ...visualisation, awaitingResponse: true } });
         api.post('/api/visualisations/maps', visualisation)
           .then((response) => {
             updateMapIfSuccess(response);

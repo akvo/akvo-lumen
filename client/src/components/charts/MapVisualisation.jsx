@@ -435,7 +435,7 @@ export default class MapVisualisation extends Component {
         this.dataLayer.addTo(map);
       } else {
         const needToUpdate = Boolean(
-          !isEqual(newSpec.layers, oldSpec.layers)
+          layerGroupId !== this.storedLayerGroupId
         );
         if (needToUpdate) {
           this.storedSpec = cloneDeep(this.props.visualisation.spec);
