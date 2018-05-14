@@ -75,3 +75,11 @@ SELECT status
 DELETE
   FROM job_execution
  WHERE id = :id AND status = 'FAILED';
+
+-- :name delete-pending-job-execution-by-id :! :n
+-- :doc delete pending job execution by id
+DELETE
+  FROM data_source
+ WHERE id IN (SELECT data_source_id
+                FROM job_execution
+               WHERE id = :id AND status = 'PENDING');

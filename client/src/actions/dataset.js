@@ -279,6 +279,33 @@ export function deleteDataset(id) {
   };
 }
 
+function deletePendingDatasetSuccess(id) {
+  return (dispatch, getState) => {
+    dispatch(removeDataset(id))
+  }
+}
+
+function deletePendingDatasetFailure(id) {
+  return {
+    type: constants.DELETE_DATASET_FAILURE,
+    id,
+    error
+  }
+}
+
+export function deletePendingDataset(id) {
+  console.log("@deletePendingDataset")
+  console.log(id)
+  return dispatch => {
+    dispatch(deleteDatasetRequest(id))
+    api
+      .del(`/api/job_executions/${id}`)
+      .then(response => response.json())
+      .then(() => dispatch(deletePendingDatasetSuccess(id)))
+      .catch(error => dispatch(deletePendingDatasetFailure(id, error)))
+  }
+}
+
 export function updateDatasetMetaRequest(id) {
   return {
     type: constants.UPDATE_DATASET_META_REQUEST,

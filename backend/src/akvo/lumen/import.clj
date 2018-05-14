@@ -80,11 +80,12 @@
           (let [columns (import/columns importer)]
             (import/create-dataset-table conn table-name columns)
             (import/add-key-constraints conn table-name columns)
+            (throw (Exception. "Dummy"))
             (doseq [record (map import/coerce-to-sql (import/records importer))]
               (jdbc/insert! conn table-name record))
             (successful-import conn job-execution-id table-name columns spec))))
       (catch Throwable e
-        (failed-import conn job-execution-id (.getMessage e) table-name)
+        #_(failed-import conn job-execution-id (.getMessage e) table-name)
         (log/error e)
         (error-tracker/track error-tracker e)
         (throw e)))))

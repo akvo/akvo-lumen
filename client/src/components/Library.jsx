@@ -10,7 +10,7 @@ import DeleteConfirmationModal from './modals/DeleteConfirmationModal';
 import { showModal } from '../actions/activeModal';
 import { fetchLibrary } from '../actions/library';
 import { deleteVisualisation } from '../actions/visualisation';
-import { deleteDataset, updateDataset } from '../actions/dataset';
+import { deleteDataset, deletePendingDataset, updateDataset } from '../actions/dataset';
 import { deleteDashboard } from '../actions/dashboard';
 import { deleteRaster } from '../actions/raster';
 import { editCollection, addEntitiesToCollection } from '../actions/collection';
@@ -115,6 +115,8 @@ class Library extends Component {
       case 'dataset':
         if (!entity.isPending(datasets[id])) {
           dispatch(deleteDataset(id));
+        } else {
+          dispatch(deletePendingDataset(id))
         }
         break;
       case 'visualisation':
