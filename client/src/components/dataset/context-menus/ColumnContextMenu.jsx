@@ -123,11 +123,13 @@ export default function ColumnContextMenu({
   dimensions,
   onContextMenuItemSelected,
   onWindowClick,
+  left,
 }) {
   return (
     <ContextMenu
       options={commonOptions.concat(dataTypeOptions[column.get('type')])}
       selected={null}
+      subMenuSide={left && 'left'}
       style={{
         width: `${dimensions.width}px`,
         top: `${dimensions.top}px`,
@@ -152,4 +154,5 @@ ColumnContextMenu.propTypes = {
   }).isRequired,
   onContextMenuItemSelected: PropTypes.func.isRequired,
   onWindowClick: PropTypes.func.isRequired,
+  left: PropTypes.bool,
 };
