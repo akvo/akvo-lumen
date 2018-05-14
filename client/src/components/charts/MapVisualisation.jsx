@@ -417,13 +417,7 @@ export default class MapVisualisation extends Component {
       }
     }
 
-    if (!this.storedSpec) {
-      // Store a copy of the layer spec to compare to future changes so we know when to re-render
-      this.storedSpec = cloneDeep(visualisation.spec);
-    }
-
     const newSpec = nextProps.visualisation.spec || {};
-    const oldSpec = this.storedSpec || {};
 
     // Add or update the windshaft tile layer if necessary
     if (newSpec.layers.length === 0 && this.dataLayer) {
@@ -438,8 +432,6 @@ export default class MapVisualisation extends Component {
           layerGroupId !== this.storedLayerGroupId
         );
         if (needToUpdate) {
-          this.storedSpec = cloneDeep(this.props.visualisation.spec);
-
           map.removeLayer(this.dataLayer);
           this.dataLayer = L.tileLayer(`${baseURL}/${layerGroupId}/all/{z}/{x}/{y}.png`);
           this.dataLayer.addTo(map);
