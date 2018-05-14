@@ -97,12 +97,7 @@ class Visualisation extends Component {
 
   componentDidMount() {
     this.isMountedFlag = true;
-    const DONT_SAVE = false;
-    this.handleChangeSourceDataset(
-      get(this.props, 'location.state.preselectedDatasetId'),
-      {},
-      DONT_SAVE
-    );
+    this.handleChangeSourceDataset(get(this.props, 'location.state.preselectedDatasetId'));
 
     require.ensure(['../components/charts/VisualisationViewer'], () => {
       require.ensure([], () => {
@@ -173,6 +168,8 @@ class Visualisation extends Component {
   }
 
   onSave() {
+    if (!this.state.visualisation.visualisationType) return;
+
     const { dispatch, location } = this.props;
 
     const handleResponse = (error) => {
@@ -205,14 +202,14 @@ class Visualisation extends Component {
   }
 
   // Helper method for...
-  handleChangeVisualisation(map, shouldSave = true) {
+  handleChangeVisualisation(map) {
     const visualisation = Object.assign({}, this.state.visualisation, map);
 
     this.setState({
       visualisation,
       isUnsavedChanges: true,
     }, () => {
-      if (shouldSave) this.onSave();
+      this.onSave();
     });
   }
 
@@ -233,12 +230,12 @@ class Visualisation extends Component {
     }
   }
 
-  handleChangeSourceDataset(datasetId, optionalSpecChanges = {}, shouldSave = true) {
+  handleChangeSourceDataset(datasetId, optionalSpecChanges = {}) {
     if (!datasetId) return;
     this.loadDataset(datasetId);
     const spec = Object.assign({}, this.state.visualisation.spec, optionalSpecChanges);
     const visualisation = Object.assign({}, this.state.visualisation, { datasetId }, { spec });
-    this.handleChangeVisualisation(visualisation, shouldSave);
+    this.handleChangeVisualisation(visualisation);
   }
 
   handleChangeVisualisationType(visualisationType) {
