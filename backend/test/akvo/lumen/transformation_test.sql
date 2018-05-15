@@ -15,6 +15,9 @@ SELECT COUNT(*) AS total
 -- :name get-data :? :*
 SELECT * FROM :i:table-name
 
+-- :name get-data-rnums :? :*
+SELECT * FROM :i:table-name WHERE rnum IN (:v*:rnums)
+
 -- :name table-exists :? :1
 SELECT EXISTS (
   SELECT 1

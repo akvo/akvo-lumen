@@ -214,10 +214,18 @@
      :transformation (merge default-transform
                             (assoc transform "args" args))}))
 
-(defn latest-data [dataset-id]
-  (let [table-name (:table-name
-                    (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id}))]
-    (get-data *tenant-conn* {:table-name table-name})))
+(defn latest-data
+  ([dataset-id]
+   (latest-data dataset-id nil)
+   (let [table-name (:table-name
+                     (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id}))]
+     (get-data *tenant-conn* {:table-name table-name})))
+  ([dataset-id rnums]
+   (let [table-name (:table-name
+                     (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id}))]
+     (if rnums
+       (get-data-rnums *tenant-conn* {:table-name table-name :rnums rnums})
+       (get-data *tenant-conn* {:table-name table-name})))))
 
 (deftest ^:functional derived-column-test
   (let [dataset-id (import-file *tenant-conn* *error-tracker* "derived-column.csv" {:has-column-headers? true})
@@ -411,3 +419,58 @@
         (is (= 4 (count columns)))
         (is (= "geopoint" (get (last columns) "type")))
         (is (= "d1" (get (last columns) "columnName")))))))
+
+
+(deftest ^:functional big-dataset-3K-test
+  (let [dataset-id (import-file *tenant-conn* *error-tracker* "2014_us_cities.csv" {:has-column-headers? true})
+        apply-transformation (partial tf/apply *tenant-conn* dataset-id)]
+    (log/error :initial-rows (count (latest-data dataset-id )))
+    (testing "Import and initial transforms"
+      (is (= (take 6 (latest-data dataset-id [1 2 3 1001 1002 1003]))
+             [{:rnum 1,
+               :c1 "New York ",
+               :c2 8287238.0,
+               :c3 40.7305991,
+               :c4 -73.9865812}
+              {:rnum 2,
+               :c1 "Los Angeles ",
+               :c2 3826423.0,
+               :c3 34.053717,
+               :c4 -118.2427266}
+              {:rnum 3,
+               :c1 "Chicago ",
+               :c2 2705627.0,
+               :c3 41.8755546,
+               :c4 -87.6244212}
+              {:rnum 1001,
+               :c1 "Bangor ",
+               :c2 32962.0,
+               :c3 44.8011821,
+               :c4 -68.7778138}
+              {:rnum 1002,
+               :c1 "Danville ",
+               :c2 32903.0,
+               :c3 40.125222,
+               :c4 -87.6304614}
+              {:rnum 1003,
+               :c1 "Riviera Beach ",
+               :c2 32807.0,
+               :c3 26.7753405,
+               :c4 -80.0580969}]
+             )))
+
+    (testing "Basic text transform"
+      (apply-transformation (derive-column-transform
+                             {"args" {"code" "row.name + ' - ' + row.pop"
+                                      "newColumnTitle" "Derived 1"
+                                      "newColumnType" "text"}
+                              "onError" "leave-empty"}))
+      (is (= ["New York  - 8287238"	  
+              "Los Angeles  - 3826423"
+              "Chicago  - 2705627"
+              "Bangor  - 32962"
+              "Danville  - 32903"
+              "Riviera Beach  - 32807"] 
+             (vec (take 6 (map :d1 (latest-data dataset-id [1 2 3 1001 1002 1003])))))))
+
+))
