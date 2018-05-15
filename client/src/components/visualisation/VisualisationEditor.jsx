@@ -179,8 +179,9 @@ export default class VisualisationEditor extends Component {
         if (needNewAggregation && specValid) {
           this.fetchAggregatedData(visualisation);
           this.lastVisualisationRequested = cloneDeep(visualisation);
-        } else {
-          //
+        } else if (specValid) {
+          // setState to update non-aggregated properties e.g. baselayer
+          this.setState({ visualisation: { ...visualisation } });
         }
 
         break;
