@@ -349,11 +349,12 @@
                                             "onError" "fail"}))]
         (is (= tag ::lib/ok))))
     (testing "es6 disallowed in java8/nashorn"
-      (let [[tag _] (apply-transformation (derive-column-transform
-                                           {"args" {"code" "(() => 'foo')()"
-                                                    "newColumnType" "text"
-                                                    "newColumnTitle" "Derived 11"}
-                                            "onError" "fail"}))]
+      (let [[tag _] (with-no-logs
+                      (apply-transformation (derive-column-transform
+                                             {"args" {"code" "(() => 'foo')()"
+                                                      "newColumnType" "text"
+                                                      "newColumnTitle" "Derived 11"}
+                                              "onError" "fail"})))]
         ;; only due that we are running java 8
         ;; https://stackoverflow.com/a/47164970/1074389
         ;; if we run java9 we need to (NashornSandboxes/create (into-array String  ["--language=es6"]))
