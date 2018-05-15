@@ -1,10 +1,12 @@
 (ns akvo.lumen.transformation.derive.js-engine
-  (:require [clojure.set :as set]
+  (:require [akvo.lumen.util :refer (time*)]
+            [clojure.set :as set]
             [clojure.string :as str]
-            [akvo.lumen.util :refer (time*)]
-            [clojure.tools.logging :as log])
+            [clojure.tools.logging :as log]
+            [environ.core :refer [env]])
   (:import [java.util.concurrent Executors]
            [delight.nashornsandbox NashornSandboxes NashornSandbox]
+           [delight.nashornsandbox.exceptions ScriptAbuseException]
            [javax.script ScriptEngine Invocable]))
 
 (defn- throw-invalid-return-type [value]
@@ -39,25 +41,21 @@
                (throw-invalid-return-type value)))))
 
 (defn ^NashornSandbox js-engine []
-  (time* :js-engine
-         (let [maxmemory (* 2 1000000 1024)
-               maxtime 2000]
+  (time* :js-engine 
+         (let [maxmemory (Integer/parseInt (:js-engine-max-memory env))
+               maxtime   (Integer/parseInt (:js-engine-max-time env))]
            (doto (NashornSandboxes/create)
              (.allowReadFunctions false)
              (.allowLoadFunctions false)
              (.allowPrintFunctions false)
              (.allowExitFunctions false)
              (.allowGlobalsObjects false)
-
              
              (.setMaxMemory maxmemory)
              (.setMaxCPUTime maxtime)
 
              ;; Specifies the executor service which is used to run scripts when a CPU time limit is specified.
-
-             (.setExecutor (Executors/newSingleThreadExecutor))
-             #_(.setExecutor (Executors/newFixedThreadPool 50))
-             ))))
+             (.setExecutor (Executors/newSingleThreadExecutor))))))
 
 (defn- column-name->column-title
   "replace column-name by column-title"
@@ -92,7 +90,7 @@
       true
       ;; Catches syntax errors
       (catch Exception e
-        (log/warn :not-valid-js try-code)
+        (log/warn e :not-valid-js try-code)
         false))))
 
 (defn row-fn
@@ -109,7 +107,11 @@
                      (typed-invocation))]
           (log/debug :row-fn-success [(:rnum row) v])
           [:success (:rnum row) v])
+        (catch ScriptAbuseException e
+          (do
+            (log/warn e :row-fn-fail (:rnum row) e)
+            [:fail-cpu-limits (:rnum row) e]))
         (catch Exception e
           (do
-            (log/warn :row-fn-fail (:rnum row) e)
+            (log/warn e :row-fn-fail (:rnum row) e)
             [:fail (:rnum row) e]))))))

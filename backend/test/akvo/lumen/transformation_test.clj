@@ -341,19 +341,22 @@
                                             "onError" "fail"}))]
         (is (= tag ::lib/ok))))
 
-    (testing "Disallow anonymous functions"
+    (testing "Not Disallow anonymous functions"
       (let [[tag _] (apply-transformation (derive-column-transform
                                            {"args" {"code" "(function() {})()"
                                                     "newColumnType" "text"
                                                     "newColumnTitle" "Derived 10"}
                                             "onError" "fail"}))]
-        (is (= tag ::lib/bad-request)))
-
+        (is (= tag ::lib/ok))))
+    (testing "es6 disallowed in java8/nashorn"
       (let [[tag _] (apply-transformation (derive-column-transform
                                            {"args" {"code" "(() => 'foo')()"
                                                     "newColumnType" "text"
                                                     "newColumnTitle" "Derived 11"}
                                             "onError" "fail"}))]
+        ;; only due that we are running java 8
+        ;; https://stackoverflow.com/a/47164970/1074389
+        ;; if we run java9 we need to (NashornSandboxes/create (into-array String  ["--language=es6"]))
         (is (= tag ::lib/bad-request))))))
 
 (deftest ^:functional delete-column-test
@@ -419,7 +422,6 @@
         (is (= 4 (count columns)))
         (is (= "geopoint" (get (last columns) "type")))
         (is (= "d1" (get (last columns) "columnName")))))))
-
 
 (deftest ^:functional big-dataset-3K-test
   (let [dataset-id (import-file *tenant-conn* *error-tracker* "2014_us_cities.csv" {:has-column-headers? true})
