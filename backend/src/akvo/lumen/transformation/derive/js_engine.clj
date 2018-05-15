@@ -40,8 +40,8 @@
 
 (defn ^NashornSandbox js-engine []
   (time* :js-engine
-         (let [maxmemory (* 1000000 1024)
-               maxtime 200000]
+         (let [maxmemory (* 2 1000000 1024)
+               maxtime 2000]
            (doto (NashornSandboxes/create)
              (.allowReadFunctions false)
              (.allowLoadFunctions false)
@@ -75,29 +75,46 @@
 (defn- invoke* [^Invocable invocable-engine ^String fun & args]
   (.invokeFunction invocable-engine fun (object-array args)))
 
-(defn row-transform-fn
+(defn- invocation
+  ([engine fun]
+   (invocation engine fun nil))
+  ([engine fun type*]
+   (fn [& args]
+     (let [res (apply invoke* (.getSandboxedInvocable engine) fun args)]
+       (if (some? type*)
+         (valid-type? res type*)
+         res)))))
+
+(defn- row-transform-fn
   [{:keys [columns code column-type]}]
   (let [adapter (column-name->column-title columns)
         engine (js-engine)
-        invocable-engine (.getSandboxedInvocable engine)
-        fun-name "deriveColumn"]
+        fun-name "deriveColumn"
+        typed-invocation (invocation engine fun-name column-type)]
     (eval* engine (column-function fun-name code))
     (fn [row]
-      (let [res (->> row
+      (try
+        (let [v (->> row
                      (adapter)
-                     (invoke* invocable-engine fun-name))]
-        (if (some? column-type)
-          (valid-type? res column-type)
-          res)))))
+                     (typed-invocation))]
+          (log/debug :row-fn-success [(:rnum row) v])
+          [:success (:rnum row) v ])
+        (catch Exception e
+          (do
+            #_(log/error :row-fn-fail (:rnum row) e)
+            [:fail (:rnum row) e]))))))
 
 (defn evaluable? [code]
   (and (not (str/includes? code "function"))
        (not (str/includes? code "=>"))
        (let [try-code (column-function "try_js_sintax" code)]
          (try
-           (eval* (js-engine) try-code)
+           (eval* (js-engine) try-code) ;; invoke with sample row?
            true
            ;; Catches syntax errors
            (catch Exception e
-             (log/warn e :not-valid-js try-code)
+             (log/warn :not-valid-js try-code)
              false)))))
+
+(defn >fun [opts]
+  (row-transform-fn opts))

@@ -39,11 +39,13 @@
        (map (fn [[i _ v]] [i v]))))
 
 (defn set-cells-values! [conn opts data]
+  (log/debug :set-cells-values! data)
   (->> data
        (map (fn [[i v]] (set-cell-value conn (merge {:value v :rnum i} opts))))
        doall))
 
 (defn delete-rows! [conn opts data]
+  (log/debug :delete-rows data)
   (->> data
        (map (fn [[i]] (delete-row conn (merge {:rnum i} opts))))
        doall))
@@ -57,23 +59,22 @@
                         ::column-type]} (args op-spec)
                 new-column-name         (engine/next-column-name columns)
                 row-fn                  (time* :row-tx-fn
-                                               (js-engine/row-transform-fn {:columns     columns
-                                                                            :code        code
-                                                                            :column-type column-type}))
+                                               (js-engine/>fun {:columns     columns
+                                                                :code        code
+                                                                :column-type column-type}))
                 js-execution-seq        (time* :js-exec
                                                (->> (all-data conn {:table-name table-name})
                                                     (map (fn [i]
-;                                                           time* (str "column:" (:rnum i))
-                                                           (try
-                                                             [(:rnum i) :set-value! (row-fn i)]
-                                                             (catch Exception e
+                                                           (let [[res i v] (row-fn i)]
+                                                             (if (= :success res)
+                                                               [i :set-value! v]
                                                                (do
-                                                                 (log/warn e :js-execution-ex code i)
+                                                                 (log/warn v :js-execution-ex code i)
                                                                  (condp = (engine/error-strategy op-spec)
-                                                                   "leave-empty" [(:rnum i) :set-value! nil]
-                                                                   "delete-row"  [(:rnum i) :delete-row!]
+                                                                   "leave-empty" [i :set-value! nil]
+                                                                   "delete-row"  [i :delete-row!]
                                                                    ;; interrupt js execution
-                                                                   "fail"        (throw e)))))))
+                                                                   "fail"        (throw v)))))))
                                                     doall))
                 base-opts               {:table-name  table-name
                                          :column-name new-column-name}]

@@ -47,7 +47,7 @@
                  [ring/ring-json "0.4.0"]
                  [selmer "1.11.8"]
                  [net.postgis/postgis-jdbc "2.2.1" :exclusions [org.postgresql/postgresql]]
-                 [org.javadelight/delight-nashorn-sandbox "0.1.13"]]
+                 [org.javadelight/delight-nashorn-sandbox "0.1.14"]]
   :uberjar-name "akvo-lumen.jar"
   :repl-options {:timeout 120000}
   :pedantic? :abort
