@@ -407,6 +407,7 @@ class DatasetTable extends Component {
                 dimensions={activeColumnContextMenu.dimensions}
                 onContextMenuItemSelected={this.handleColumnContextMenuClicked}
                 onWindowClick={this.dismissColumnContextMenu}
+                left={columns.last().get('title') === activeColumnContextMenu.column.get('title')}
               />}
             <Table
               headerHeight={60}

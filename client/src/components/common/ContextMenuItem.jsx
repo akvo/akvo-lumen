@@ -22,8 +22,7 @@ export default class ContextMenuItem extends Component {
 
     return (
       <li
-        className={`contextMenuItem ${this.props.itemClass}
-          clickable ${this.props.selectedClassName} ${this.props.customClass ? this.props.customClass : ''}
+        className={`contextMenuItem ${this.props.itemClass || ''} clickable ${this.props.selectedClassName || ''} ${this.props.customClass || ''}
         `}
         onClick={onClick}
         data-test-id={item.value}
