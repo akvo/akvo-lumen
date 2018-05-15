@@ -85,25 +85,6 @@
          (valid-type? res type*)
          res)))))
 
-(defn- row-transform-fn
-  [{:keys [columns code column-type]}]
-  (let [adapter (column-name->column-title columns)
-        engine (js-engine)
-        fun-name "deriveColumn"
-        typed-invocation (invocation engine fun-name column-type)]
-    (eval* engine (column-function fun-name code))
-    (fn [row]
-      (try
-        (let [v (->> row
-                     (adapter)
-                     (typed-invocation))]
-          (log/debug :row-fn-success [(:rnum row) v])
-          [:success (:rnum row) v ])
-        (catch Exception e
-          (do
-            #_(log/error :row-fn-fail (:rnum row) e)
-            [:fail (:rnum row) e]))))))
-
 (defn evaluable? [code]
   (and (not (str/includes? code "function"))
        (not (str/includes? code "=>"))
@@ -116,5 +97,21 @@
              (log/warn :not-valid-js try-code)
              false)))))
 
-(defn >fun [opts]
-  (row-transform-fn opts))
+(defn row-fn
+  [{:keys [columns code column-type]}]
+  (let [adapter (column-name->column-title columns)
+        engine (js-engine)
+        fun-name "deriveColumn"
+        typed-invocation (invocation engine fun-name column-type)]
+    (eval* engine (column-function fun-name code))
+    (fn [row]
+      (try
+        (let [v (->> row
+                     (adapter)
+                     (typed-invocation))]
+          (log/debug :row-fn-success [(:rnum row) v])
+          [:success (:rnum row) v])
+        (catch Exception e
+          (do
+            (log/warn :row-fn-fail (:rnum row) e)
+            [:fail (:rnum row) e]))))))
