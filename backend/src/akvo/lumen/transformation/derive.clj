@@ -39,13 +39,13 @@
        (map (fn [[_ i v]] [i v]))))
 
 (defn set-cells-values! [conn opts data]
-  (log/info :set-cells-values! data)
+  (log/debug :set-cells-values! data)
   (->> data
        (map (fn [[i v]] (set-cell-value conn (merge {:value v :rnum i} opts))))
        doall))
 
 (defn delete-rows! [conn opts data]
-  (log/info :delete-rows data)
+  (log/debug :delete-rows data)
   (->> data
        (map (fn [[i]] (delete-row conn (merge {:rnum i} opts))))
        doall))
@@ -57,7 +57,6 @@
            (let [{:keys [::code
                          ::column-title
                          ::column-type]} (args op-spec)
-                 new-column-name         (engine/next-column-name columns)
                  js-row-fn               (time* :row-tx-fn
                                                 (js-engine/row-fn {:columns     columns
                                                                    :code        code
@@ -66,29 +65,31 @@
                                            "leave-empty" (fn [i _] [:set-value! i nil])
                                            "delete-row"  (fn [i _] [:delete-row! i])
                                            ;; interrupt js execution
-                                           "fail"        (fn [_ e] (throw e)))                 
+                                           "fail"        (fn [_ e] (throw e)))
+                 data-table              (all-data conn {:table-name table-name})
                  js-execution-seq        (time* :js-exec
-                                                (->> (all-data conn {:table-name table-name})
+                                                (->> data-table
                                                      (map (fn [i]
                                                             (let [[res i v] (js-row-fn i)]
                                                               (if (= :success res)
                                                                 [:set-value! i v]
                                                                 (on-error-cb i v)))))
                                                      doall))
+                 new-column-name         (engine/next-column-name columns)
                  base-opts               {:table-name  table-name
                                           :column-name new-column-name}]
              (add-column conn {:table-name      table-name
                                :column-type     (lumen->pg-type column-type)
                                :new-column-name new-column-name})
-            (time* :set-cells-values
-                   (set-cells-values! conn base-opts (js-execution>sql-params js-execution-seq :set-value!)))
-            (time* :delete-rows!
-                   (delete-rows! conn base-opts (js-execution>sql-params js-execution-seq :delete-row!)))      
-            {:success?      true
-             :execution-log [(format "Derived columns using '%s'" code)]
-             :columns       (conj columns {"title"      column-title
-                                           "type"       column-type
-                                           "sort"       nil
-                                           "hidden"     false
-                                           "direction"  nil
-                                           "columnName" new-column-name})}))))
+             (time* :set-cells-values
+                    (set-cells-values! conn base-opts (js-execution>sql-params js-execution-seq :set-value!)))
+             (time* :delete-rows!
+                    (delete-rows! conn base-opts (js-execution>sql-params js-execution-seq :delete-row!)))
+             {:success?      true
+              :execution-log [(format "Derived columns using '%s'" code)]
+              :columns       (conj columns {"title"      column-title
+                                            "type"       column-type
+                                            "sort"       nil
+                                            "hidden"     false
+                                            "direction"  nil
+                                            "columnName" new-column-name})}))))
