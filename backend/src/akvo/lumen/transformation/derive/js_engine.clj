@@ -86,7 +86,7 @@
 (defn evaluable? [code]
   (let [try-code (column-function "try_js_sintax" code)]
     (try
-      (eval* (js-engine) try-code) ;; invoke with sample row?
+      (eval* (js-engine) try-code)
       true
       ;; Catches syntax errors
       (catch Exception e
@@ -102,9 +102,7 @@
     (eval* engine (column-function fun-name code))
     (fn [row]
       (try
-        (let [v (->> row
-                     (adapter)
-                     (typed-invocation))]
+        (let [v (->> row (adapter) (typed-invocation))]
           (log/debug :row-fn-success [(:rnum row) v])
           [:success (:rnum row) v])
         (catch ScriptAbuseException e
