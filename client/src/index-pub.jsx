@@ -94,6 +94,7 @@ class PrivacyGate extends Component {
   }
   handleSubmit() {
     hasSubmitted = true;
+    this.forceUpdate();
     fetchData(this.state.password);
   }
   render() {
