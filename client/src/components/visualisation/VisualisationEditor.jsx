@@ -161,9 +161,9 @@ export default class VisualisationEditor extends Component {
             checkUndefined(this.lastVisualisationRequested, 'spec', 'layers', 'length')
           );
 
-        if (!this.state.visualisation || !this.state.visualisation.datasetId) {
+        if (!this.state.visualisation) {
           // Update immediately, without waiting for the api call
-          this.setState({ visualisation: Object.assign({}, visualisation) });
+          this.setState({ visualisation: { ...visualisation } });
         }
 
         if (checkUndefined(visualisation, 'spec', 'layers', 'length') === 0) {
@@ -171,7 +171,7 @@ export default class VisualisationEditor extends Component {
           // zero, there is no new metadata api respnonse. We need to manually set it to empty
           this.lastVisualisationRequested = null;
           this.setState({
-            visualisation: Object.assign({}, visualisation),
+            visualisation: { ...visualisation },
             metadata: {},
           });
         }
@@ -221,31 +221,22 @@ export default class VisualisationEditor extends Component {
     this.latestRequestId = requestId;
 
     const setMapVisualisationError = () => {
-      this.setState(
-        {
-          visualisation:
-            Object.assign(
-              {},
-              visualisation,
-              {
-                awaitingResponse: false,
-                failedToLoad: true,
-              }
-            ),
-        }
-      );
+      this.setState({
+        visualisation: {
+          ...visualisation,
+          awaitingResponse: false,
+          failedToLoad: true,
+        },
+      });
     };
 
     const updateMapVisualisation = (metadata) => {
       this.setState({
-        visualisation: Object.assign(
-          {},
-          visualisation,
-          {
-            awaitingResponse: false,
-            failedToLoad: false,
-          }
-        ),
+        visualisation: {
+          ...visualisation,
+          awaitingResponse: false,
+          failedToLoad: false,
+        },
         metadata,
       });
     };
@@ -262,18 +253,7 @@ export default class VisualisationEditor extends Component {
 
     switch (vType) {
       case 'map':
-        this.setState(
-          {
-            visualisation:
-              Object.assign(
-                {},
-                visualisation,
-                {
-                  awaitingResponse: true,
-                }
-              ),
-          }
-        );
+        this.setState({ visualisation: { ...visualisation, awaitingResponse: true } });
         api.post('/api/visualisations/maps', visualisation)
           .then((response) => {
             updateMapIfSuccess(response);
@@ -288,7 +268,7 @@ export default class VisualisationEditor extends Component {
           .then((response) => {
             if (requestId === this.latestRequestId) {
               this.setState({
-                visualisation: Object.assign({}, visualisation, { data: response }),
+                visualisation: { ...visualisation, data: response },
               });
             }
           });
@@ -301,7 +281,7 @@ export default class VisualisationEditor extends Component {
           .then((response) => {
             if (requestId === this.latestRequestId) {
               this.setState({
-                visualisation: Object.assign({}, visualisation, { data: response }),
+                visualisation: { ...visualisation, data: response },
               });
             }
           });
