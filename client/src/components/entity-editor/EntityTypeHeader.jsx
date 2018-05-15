@@ -58,7 +58,6 @@ class EntityTypeHeader extends Component {
     return (
       <Header
         className="EntityTypeHeader"
-        backButtonTarget="/library"
         actions={this.actionButtons()}
         primaryActions={this.actionButtons(IS_PRIMARY)}
       >
