@@ -94,7 +94,7 @@ class PrivacyGate extends Component {
   }
   handleSubmit() {
     hasSubmitted = true;
-    this.setState({ random: Math.random() }); // force rerender
+    this.forceUpdate();
     fetchData(this.state.password);
   }
   render() {
