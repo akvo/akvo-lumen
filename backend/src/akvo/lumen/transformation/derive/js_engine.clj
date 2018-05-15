@@ -86,16 +86,14 @@
          res)))))
 
 (defn evaluable? [code]
-  (and (not (str/includes? code "function"))
-       (not (str/includes? code "=>"))
-       (let [try-code (column-function "try_js_sintax" code)]
-         (try
-           (eval* (js-engine) try-code) ;; invoke with sample row?
-           true
-           ;; Catches syntax errors
-           (catch Exception e
-             (log/warn :not-valid-js try-code)
-             false)))))
+  (let [try-code (column-function "try_js_sintax" code)]
+    (try
+      (eval* (js-engine) try-code) ;; invoke with sample row?
+      true
+      ;; Catches syntax errors
+      (catch Exception e
+        (log/warn :not-valid-js try-code)
+        false))))
 
 (defn row-fn
   [{:keys [columns code column-type]}]
