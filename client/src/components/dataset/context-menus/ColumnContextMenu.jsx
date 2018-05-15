@@ -129,7 +129,7 @@ export default function ColumnContextMenu({
     <ContextMenu
       options={commonOptions.concat(dataTypeOptions[column.get('type')])}
       selected={null}
-      subMenuSide={left && 'left'}
+      subMenuSide={left ? 'left' : 'right'}
       style={{
         width: `${dimensions.width}px`,
         top: `${dimensions.top}px`,
