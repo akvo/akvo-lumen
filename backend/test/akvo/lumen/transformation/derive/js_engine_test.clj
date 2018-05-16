@@ -8,16 +8,14 @@
             [clojure.tools.logging :as log]))
 
 (deftest timing-test
-  (testing "trying to isolate js-engine"
+  (testing "simple js fn invocation "
     (let [js-engine (js-engine/js-engine)
           fun-name "test_fun"
+          
           row-fun (time* :row-fun (#'js-engine/column-function fun-name "row.prop"))]
-      (doseq [n (mapv first (next (take 2 (partition 1000 (range)))))]
+      (->> row-fun (#'js-engine/eval* js-engine))
+      (doseq [n (mapv first (next (take 20 (partition 1000 (range)))))]
        (time* (keyword (str "doseq-" n))
               (doseq [x (range n)]
-                (->> row-fun
-                     (#'js-engine/eval* js-engine))
-                (is (= x ((#'js-engine/invocation js-engine fun-name) {"prop" x})))))))
-    #_(is (js-engine/evaluable? "jor"))
-    ))
+                (assert (= x ((#'js-engine/invocation js-engine fun-name) {"prop" x})) x)))))))
 
