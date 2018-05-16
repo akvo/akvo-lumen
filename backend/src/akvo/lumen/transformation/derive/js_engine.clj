@@ -14,7 +14,7 @@
                    :type (type value)})))
 
 (defn- column-function [fun code]
-  (format "var %s = function(row) { %s;}" fun code))
+  (format "var %s = function(row) {  %s }" fun code))
 
 (defn- valid-type? [value type]
   (when-not (nil? value)
@@ -41,8 +41,8 @@
 
 (defn ^NashornSandbox js-engine []
   (time* :js-engine 
-         (let [maxmemory (Integer/parseInt (* 2 1000000 1024))
-               maxtime   (Integer/parseInt 2000)]
+         (let [maxmemory (* 2 1000000 1024)
+               maxtime   2000]
            (doto (NashornSandboxes/create)
              (.allowReadFunctions false)
              (.allowLoadFunctions false)
