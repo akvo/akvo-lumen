@@ -136,7 +136,6 @@
 (use-fixtures :once tenant-conn-fixture)
 
 
-(hugsql/def-db-fns "akvo/lumen/endpoint/share_test.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/dashboard.sql")
 
 (deftest ^:functional share
@@ -169,7 +168,4 @@
     (let [dashboard-id (-> (all-dashboards *tenant-conn*) first :id)
           dashboard-share (variant/value (share/fetch *tenant-conn*
                                                       {"dashboardId" dashboard-id}))]
-      (is (contains? dashboard-share :id))))
-
-  (testing "History"
-    (is (not (empty? (share-history *tenant-conn*))))))
+      (is (contains? dashboard-share :id)))))

@@ -178,17 +178,6 @@ export default class MapConfigMenu extends Component {
             />
           }
         </div>
-        <div
-          className="saveContainer noSelect"
-        >
-          <button
-            className="saveButton clickable"
-            data-test-id="save-button"
-            onClick={this.props.onSave}
-          >
-            <FormattedMessage id="save" />
-          </button>
-        </div>
       </div>
     );
   }

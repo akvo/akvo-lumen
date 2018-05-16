@@ -10,6 +10,8 @@ import { fetchLibrary } from '../actions/library';
 import { fetchDataset } from '../actions/dataset';
 import aggregationOnlyVisualisationTypes from '../utilities/aggregationOnlyVisualisationTypes';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import { SAVE_COUNTDOWN_INTERVAL, SAVE_INITIAL_TIMEOUT } from '../constants/time';
+import NavigationPrompt from '../components/common/NavigationPrompt';
 
 const getEditingStatus = (location) => {
   const testString = 'create';
@@ -52,6 +54,7 @@ class Dashboard extends Component {
         id: null,
         created: null,
         modified: null,
+        shareId: '',
       },
       isSavePending: null,
       isUnsavedChanges: null,
@@ -59,6 +62,8 @@ class Dashboard extends Component {
       requestedDatasetIds: [],
       asyncComponents: null,
       aggregatedDatasets: {},
+      timeToNextSave: SAVE_INITIAL_TIMEOUT,
+      timeFromPreviousSave: 0,
     };
     this.loadDashboardIntoState = this.loadDashboardIntoState.bind(this);
     this.onAddVisualisation = this.onAddVisualisation.bind(this);
@@ -66,9 +71,13 @@ class Dashboard extends Component {
     this.updateEntities = this.updateEntities.bind(this);
     this.onUpdateName = this.onUpdateName.bind(this);
     this.onSave = this.onSave.bind(this);
+    this.onSaveFailure = this.onSaveFailure.bind(this);
     this.toggleShareDashboard = this.toggleShareDashboard.bind(this);
     this.handleDashboardAction = this.handleDashboardAction.bind(this);
     this.addDataToVisualisations = this.addDataToVisualisations.bind(this);
+    this.handleFetchShareId = this.handleFetchShareId.bind(this);
+    this.handleSetSharePassword = this.handleSetSharePassword.bind(this);
+    this.handleToggleShareProtected = this.handleToggleShareProtected.bind(this);
   }
 
   componentWillMount() {
@@ -94,6 +103,7 @@ class Dashboard extends Component {
   }
 
   componentDidMount() {
+    this.isMountedFlag = true;
     require.ensure(['../components/charts/VisualisationViewer'], () => {
       require.ensure([], () => {
         /* eslint-disable global-require */
@@ -114,13 +124,18 @@ class Dashboard extends Component {
   componentWillReceiveProps(nextProps) {
     const isEditingExistingDashboard = getEditingStatus(this.props.location);
     const dashboardAlreadyLoaded = this.state.dashboard.layout.length !== 0;
+    const { dashboardId } = nextProps.params;
 
-    if (isEditingExistingDashboard && !dashboardAlreadyLoaded) {
+    if (
+      (isEditingExistingDashboard && !dashboardAlreadyLoaded) ||
+      get(this.state, 'dashboard.shareId') !== get(nextProps, `library.dashboards[${dashboardId}].shareId`) ||
+      get(this.state, 'dashboard.protected') !== get(nextProps, `library.dashboards[${dashboardId}].protected`)
+    ) {
       /* We need to load a dashboard, and we haven't loaded it yet. Check if nextProps has both i)
       /* the dashboard and ii) the visualisations the dashboard contains, then load the dashboard
       /* editor if both these conditions are true. */
 
-      const dash = nextProps.library.dashboards[nextProps.params.dashboardId];
+      const dash = nextProps.library.dashboards[dashboardId];
       const haveDashboardData = Boolean(dash && dash.layout);
 
       if (haveDashboardData) {
@@ -135,14 +150,11 @@ class Dashboard extends Component {
           /* componentWillReceiveProps will be called again. */
           return;
         }
-
         this.loadDashboardIntoState(dash, nextProps.library);
       }
     }
 
-    if (!this.props.params.dashboardId && nextProps.params.dashboardId) {
-      const dashboardId = nextProps.params.dashboardId;
-
+    if (!this.props.params.dashboardId && dashboardId) {
       this.setState({
         isSavePending: false,
         isUnsavedChanges: false,
@@ -151,23 +163,55 @@ class Dashboard extends Component {
     }
   }
 
+  componentWillUnmount() {
+    this.isMountedFlag = false;
+  }
+
+  onSaveFailure() {
+    this.setState({
+      timeToNextSave: this.state.timeToNextSave * 2,
+      timeFromPreviousSave: 0,
+      savingFailed: true,
+    }, () => {
+      this.saveInterval = setInterval(() => {
+        const { timeFromPreviousSave, timeToNextSave } = this.state;
+        if (timeToNextSave - timeFromPreviousSave > SAVE_COUNTDOWN_INTERVAL) {
+          this.setState({ timeFromPreviousSave: timeFromPreviousSave + SAVE_COUNTDOWN_INTERVAL });
+          return;
+        }
+        clearInterval(this.saveInterval);
+      }, SAVE_COUNTDOWN_INTERVAL);
+      setTimeout(() => {
+        this.onSave();
+      }, this.state.timeToNextSave);
+    });
+  }
+
   onSave() {
     const { dispatch, location } = this.props;
     const dashboard = getDashboardFromState(this.state.dashboard, false);
     const isEditingExistingDashboard = getEditingStatus(this.props.location);
 
-    if (isEditingExistingDashboard) {
-      dispatch(actions.saveDashboardChanges(dashboard));
-
-      // We should really check the save was successful, but for now let's assume it was
+    const handleResponse = (error) => {
+      if (!this.isMountedFlag) return;
+      if (error) {
+        this.onSaveFailure();
+        return;
+      }
       this.setState({
         isUnsavedChanges: false,
+        timeToNextSave: SAVE_INITIAL_TIMEOUT,
+        timeFromPreviousSave: 0,
+        savingFailed: false,
       });
+    };
+
+    if (isEditingExistingDashboard) {
+      dispatch(actions.saveDashboardChanges(dashboard, handleResponse));
     } else if (!this.state.isSavePending) {
-      this.setState({ isSavePending: true });
-      dispatch(actions.createDashboard(dashboard, get(location, 'state.collectionId')));
-    } else {
-      // Ignore save request until the first "create dashboard" request succeeeds
+      this.setState({ isSavePending: true, isUnsavedChanges: false }, () => {
+        dispatch(actions.createDashboard(dashboard, get(location, 'state.collectionId'), handleResponse));
+      });
     }
   }
 
@@ -249,10 +293,13 @@ class Dashboard extends Component {
   }
 
   onUpdateName(title) {
-    const dashboard = Object.assign({}, this.state.dashboard, { title });
+    const normalizedTitle = title || 'Untitled dashboard';
+    const dashboard = Object.assign({}, this.state.dashboard, { title: normalizedTitle });
     this.setState({
       dashboard,
       isUnsavedChanges: true,
+    }, () => {
+      this.onSave();
     });
   }
 
@@ -282,6 +329,10 @@ class Dashboard extends Component {
     this.setState({
       dashboard,
       isUnsavedChanges: layoutChanged ? true : this.state.isUnsavedChanges,
+    }, () => {
+      if (this.state.isUnsavedChanges) {
+        this.onSave();
+      }
     });
   }
 
@@ -301,6 +352,38 @@ class Dashboard extends Component {
       default:
         throw new Error(`Action ${action} not yet implemented`);
     }
+  }
+
+  handleFetchShareId() {
+    const dashboard = getDashboardFromState(this.state.dashboard, true);
+    this.props.dispatch(actions.fetchShareId(dashboard.id));
+  }
+
+  handleSetSharePassword(password) {
+    if (!password) {
+      this.setState({ passwordAlert: { message: 'Please enter a password.', type: 'danger' } });
+      return;
+    }
+    const dashboard = getDashboardFromState(this.state.dashboard, true);
+    this.setState({ passwordAlert: null });
+    this.props.dispatch(actions.setShareProtection(
+      dashboard.shareId,
+      { password, protected: Boolean(password.length) },
+      (error) => {
+        const message = get(error, 'message');
+        if (message) {
+          this.setState({ passwordAlert: { message, type: 'danger' } });
+          return;
+        }
+        this.setState({ passwordAlert: { message: 'Saved successfully.' } });
+      }
+    ));
+  }
+
+  handleToggleShareProtected(isProtected) {
+    this.setState({ passwordAlert: null });
+    const dashboard = getDashboardFromState(this.state.dashboard, true);
+    this.props.dispatch(actions.setShareProtection(dashboard.shareId, { protected: isProtected }));
   }
 
   toggleShareDashboard() {
@@ -397,41 +480,51 @@ class Dashboard extends Component {
   }
 
   render() {
-    if (!this.state.asyncComponents) {
+    if (!this.state.asyncComponents || this.state.isSavePending) {
       return <LoadingSpinner />;
     }
     const { DashboardHeader, DashboardEditor } = this.state.asyncComponents;
     const dashboard = getDashboardFromState(this.state.dashboard, true);
 
     return (
-      <div className="Dashboard">
-        <DashboardHeader
-          title={dashboard.title}
-          isUnsavedChanges={this.state.isUnsavedChanges}
-          onDashboardAction={this.handleDashboardAction}
-          onChangeTitle={this.onUpdateName}
-          onBeginEditTitle={() => this.setState({ isUnsavedChanges: true })}
-          onSaveDashboard={this.onSave}
-        />
-        <DashboardEditor
-          dashboard={dashboard}
-          datasets={this.props.library.datasets}
-          visualisations={this.addDataToVisualisations(this.props.library.visualisations)}
-          metadata={this.state.metadata}
-          onAddVisualisation={this.onAddVisualisation}
-          onSave={this.onSave}
-          onUpdateLayout={this.updateLayout}
-          onUpdateEntities={this.updateEntities}
-          onUpdateName={this.onUpdateName}
-        />
-        <ShareEntity
-          isOpen={this.state.isShareModalVisible}
-          onClose={this.toggleShareDashboard}
-          title={dashboard.title}
-          id={dashboard.id}
-          type={dashboard.type}
-        />
-      </div>
+      <NavigationPrompt shouldPrompt={this.state.savingFailed}>
+        <div className="Dashboard">
+          <DashboardHeader
+            title={dashboard.title}
+            isUnsavedChanges={this.state.isUnsavedChanges}
+            onDashboardAction={this.handleDashboardAction}
+            onChangeTitle={this.onUpdateName}
+            onBeginEditTitle={() => this.setState({ isUnsavedChanges: true })}
+            onSaveDashboard={this.onSave}
+            savingFailed={this.state.savingFailed}
+            timeToNextSave={this.state.timeToNextSave - this.state.timeFromPreviousSave}
+          />
+          <DashboardEditor
+            dashboard={dashboard}
+            datasets={this.props.library.datasets}
+            visualisations={this.addDataToVisualisations(this.props.library.visualisations)}
+            metadata={this.state.metadata}
+            onAddVisualisation={this.onAddVisualisation}
+            onSave={this.onSave}
+            onUpdateLayout={this.updateLayout}
+            onUpdateEntities={this.updateEntities}
+            onUpdateName={this.onUpdateName}
+          />
+          <ShareEntity
+            isOpen={this.state.isShareModalVisible}
+            onClose={this.toggleShareDashboard}
+            title={dashboard.title}
+            shareId={get(this.state, 'dashboard.shareId')}
+            protected={get(this.state, 'dashboard.protected')}
+            type={dashboard.type}
+            canSetPrivacy
+            onSetPassword={this.handleSetSharePassword}
+            onFetchShareId={this.handleFetchShareId}
+            onToggleProtected={this.handleToggleShareProtected}
+            alert={this.state.passwordAlert}
+          />
+        </div>
+      </NavigationPrompt>
     );
   }
 }

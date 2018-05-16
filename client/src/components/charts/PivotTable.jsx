@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import moment from 'moment';
+import get from 'lodash/get';
 import { replaceLabelIfValueEmpty, processPivotData } from '../../utilities/chart';
 
 require('./PivotTable.scss');
@@ -132,7 +133,7 @@ export default function PivotTable({ width, height, visualisation, context, data
       <table>
         <thead>
           <tr className="title">
-            <th colSpan={data.columns.length}>
+            <th colSpan={get(data, 'columns.length')}>
               <span>
                 {visualisation.name}
               </span>
@@ -148,7 +149,7 @@ export default function PivotTable({ width, height, visualisation, context, data
             <tr>
               <th className="spacer" />
               <th
-                colSpan={data.columns.length - 1}
+                colSpan={get(data, 'columns.length') - 1}
                 className="categoryColumnTitle"
               >
                 <span>

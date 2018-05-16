@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component } from 'react';
 import { render } from 'react-dom';
 import { Provider } from 'react-redux';
 import Immutable from 'immutable';
@@ -7,6 +7,7 @@ import IntlWrapper from './containers/IntlWrapper';
 import VisualisationViewerContainer from './components/visualisation/VisualisationViewerContainer';
 import DashboardViewer from './components/dashboard/DashboardViewer';
 import LumenBranding from './components/common/LumenBranding';
+import ErrorScreen from './components/common/ErrorScreen';
 import polyfill from './polyfill/polyfill';
 import configureStore from './store/configureStore';
 
@@ -63,15 +64,82 @@ function renderNoSuchShare() {
 
 const pathMatch = window.location.pathname.match(/^\/s\/(.*)/);
 const shareId = pathMatch != null ? pathMatch[1] : null;
+let hasSubmitted = false;
+
+const fetchData = (password = undefined) => {
+  fetch(`/share/${shareId}`, { headers: { 'X-Password': password } })
+    .then((response) => {
+      if (response.status === 403) {
+        renderPrivacyGate(); // eslint-disable-line
+        return null;
+      }
+      return response.json();
+    })
+    .then((data) => {
+      if (data) renderSuccessfulShare(data);
+    })
+    .catch((error) => {
+      renderNoSuchShare();
+      throw error;
+    });
+};
+
+class PrivacyGate extends Component {
+  constructor(props) {
+    super(props);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+  componentDidMount() {
+    this.passwordInput.focus();
+  }
+  handleSubmit() {
+    hasSubmitted = true;
+    this.forceUpdate();
+    fetchData(this.state.password);
+  }
+  render() {
+    return (
+      <ErrorScreen
+        code={403}
+        codeVisible={false}
+        title="A password is required to view this visualisation/dashboard"
+      >
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            this.handleSubmit();
+          }}
+        >
+          {hasSubmitted && (
+            <div className="alert alert-danger">
+              Password incorrect
+            </div>
+          )}
+          <div className="clearfix" />
+          <input
+            ref={(c) => { this.passwordInput = c; }}
+            onChange={({ target: { value } }) => {
+              this.setState({ password: value });
+            }}
+            type="password"
+            placeholder="Password"
+          />
+          <a
+            className="submitButton"
+            onClick={this.handleSubmit}
+          >
+            Submit
+          </a>
+        </form>
+      </ErrorScreen>
+    );
+  }
+}
+
+function renderPrivacyGate() {
+  render(<PrivacyGate />, rootElement);
+}
 
 if (shareId != null) {
-  polyfill(() => {
-    fetch(`/share/${shareId}`)
-      .then(response => response.json())
-      .then(data => renderSuccessfulShare(data))
-      .catch((error) => {
-        renderNoSuchShare();
-        throw error;
-      });
-  });
+  polyfill(fetchData);
 }

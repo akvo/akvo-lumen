@@ -46,17 +46,20 @@ export default class DashboardHeader extends Component {
       customClass: 'notImplemented',
     };
 
-    return ([
-      save,
+    const result = [
       user,
       download,
       share,
       overflow,
-    ]);
+    ];
+
+    if (this.props.savingFailed) result.unshift(save);
+
+    return result;
   }
 
   render() {
-    const { isUnsavedChanges } = this.props;
+    const { isUnsavedChanges, savingFailed, timeToNextSave } = this.props;
     const haveTitle = Boolean(this.props.title);
 
     const actionButtons = this.getActionButtons(isUnsavedChanges, haveTitle);
@@ -73,6 +76,10 @@ export default class DashboardHeader extends Component {
         saveStatusId = null;
     }
 
+    if (savingFailed && timeToNextSave) {
+      saveStatusId = 'saving_failed_countdown';
+    }
+
     return (
       <EntityTypeHeader
         title={this.props.title || 'Untitled dashboard'}
@@ -80,6 +87,8 @@ export default class DashboardHeader extends Component {
         onBeginEditTitle={this.props.onBeginEditTitle}
         saveStatusId={saveStatusId}
         actionButtons={actionButtons}
+        savingFailed={savingFailed}
+        timeToNextSave={timeToNextSave}
       />
     );
   }
@@ -87,6 +96,8 @@ export default class DashboardHeader extends Component {
 
 DashboardHeader.propTypes = {
   isUnsavedChanges: PropTypes.bool,
+  savingFailed: PropTypes.bool,
+  timeToNextSave: PropTypes.number,
   title: PropTypes.string.isRequired,
   onDashboardAction: PropTypes.func.isRequired,
   onChangeTitle: PropTypes.func.isRequired,

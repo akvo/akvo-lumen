@@ -302,16 +302,20 @@ export function updateDatasetMetaFailure(id, error) {
   };
 }
 
-export function updateDatasetMeta(id, meta) {
+export function updateDatasetMeta(id, meta, callback = () => {}) {
   return (dispatch, getState) => {
     dispatch(updateDatasetMetaRequest(id));
     api.put(`/api/datasets/${id}`, meta)
       .then(response => response.json())
-      .then(() => dispatch(updateDatasetMetaSuccess(id, meta)))
+      .then(() => {
+        dispatch(updateDatasetMetaSuccess(id, meta));
+        callback();
+      })
       .catch((error) => {
         const title = getState().library.datasets[id].get('name');
         dispatch(showNotification('error', `Failed to update "${title}": ${error.message}`));
         dispatch(updateDatasetMetaFailure(id, error));
+        callback(error);
       });
   };
 }
