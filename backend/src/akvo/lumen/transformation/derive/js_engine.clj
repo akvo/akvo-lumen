@@ -15,7 +15,7 @@
                    :type (type value)})))
 
 (defn- column-function [fun code]
-  (format "var %s = function(row) {  return %s; }" fun code))
+  (format "var %s = function(row) { %s;}" fun code))
 
 (defn- valid-type? [value type]
   (when-not (nil? value)
