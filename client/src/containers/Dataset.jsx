@@ -173,7 +173,10 @@ class Dataset extends Component {
     this.props.dispatch(
       push({
         pathname: '/visualisation/create',
-        state: { preselectedDatasetId: this.props.params.datasetId },
+        state: {
+          preselectedDatasetId: this.props.params.datasetId,
+          from: 'dataset',
+        },
       })
     );
   }
