@@ -90,11 +90,7 @@
                                             (migrate-and-seed))
                                     :host "0.0.0.0"
                                     :port 47480}
-                   :env            {:port "3000"
-                                    :js-engine-max-memory "2048000000"  #_(* 2 1000000 1024)
-                                    :js-engine-max-time "2000"}}
+                   :env            {:port "3000"}}
    :project/test  {:resource-paths ["test/resources"]
                    :env
-                   {:db {:uri "jdbc:postgresql://postgres/lumen?user=lumen&password=password"}
-                    :js-engine-max-memory "2048000000"  #_(* 2 1000000 1024)
-                    :js-engine-max-time "2000"}}})
+                   {:db {:uri "jdbc:postgresql://postgres/lumen?user=lumen&password=password"}}}})

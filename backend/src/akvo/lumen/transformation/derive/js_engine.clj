@@ -2,8 +2,7 @@
   (:require [akvo.lumen.util :refer (time*)]
             [clojure.set :as set]
             [clojure.string :as str]
-            [clojure.tools.logging :as log]
-            [environ.core :refer [env]])
+            [clojure.tools.logging :as log])
   (:import [java.util.concurrent Executors]
            [delight.nashornsandbox NashornSandboxes NashornSandbox]
            [delight.nashornsandbox.exceptions ScriptAbuseException]
@@ -42,8 +41,8 @@
 
 (defn ^NashornSandbox js-engine []
   (time* :js-engine 
-         (let [maxmemory (Integer/parseInt (:js-engine-max-memory env))
-               maxtime   (Integer/parseInt (:js-engine-max-time env))]
+         (let [maxmemory (Integer/parseInt (* 2 1000000 1024))
+               maxtime   (Integer/parseInt 2000)]
            (doto (NashornSandboxes/create)
              (.allowReadFunctions false)
              (.allowLoadFunctions false)
