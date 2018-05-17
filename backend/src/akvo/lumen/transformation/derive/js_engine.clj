@@ -106,9 +106,9 @@
           [:success (:rnum row) v])
         (catch ScriptAbuseException e
           (do
-            (log/warn e :row-fn-fail (:rnum row) e)
+            (log/debug e :row-fn-fail (:rnum row) e)
             [:fail-cpu-limits (:rnum row) e]))
         (catch Exception e
           (do
-            (log/warn e :row-fn-fail (:rnum row) e)
+            (log/debug e :row-fn-fail (:rnum row) e)
             [:fail (:rnum row) e]))))))
