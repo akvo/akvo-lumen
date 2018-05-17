@@ -16,19 +16,19 @@ pending_imports AS (
      AND j.status = 'PENDING'
      AND d.spec->'source'->>'kind' = 'GEOTIFF'
 )
-SELECT id, name, error_log as reason, status, modified, created, metadata
+SELECT id, name, error_log as reason, status, modified, created, metadata, '{}'::jsonb
   FROM failed_imports
  UNION
-SELECT id, name, NULL, status, modified, created, metadata
+SELECT id, name, NULL, status, modified, created, metadata, '{}'::jsonb
   FROM pending_imports
  UNION
-SELECT id, title, NULL, 'OK', modified, created, metadata
+SELECT id, title, NULL, 'OK', modified, created, metadata, author
   FROM raster_dataset;
 
 -- :name insert-raster :! :n
 -- :doc Insert new raster dataset
-INSERT INTO raster_dataset (id, title, description, job_execution_id, raster_table, metadata)
-VALUES (:id, :title, :description, :job-execution-id, :raster-table, :metadata);
+INSERT INTO raster_dataset (id, title, description, job_execution_id, raster_table, metadata, author)
+VALUES (:id, :title, :description, :job-execution-id, :raster-table, :metadata, :author);
 
 -- :name create-raster-table :!
 -- :doc Creates a raster table

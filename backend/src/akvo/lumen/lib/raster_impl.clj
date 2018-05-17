@@ -77,7 +77,7 @@
 (defn all [conn]
   (lib/ok (all-rasters conn)))
 
-(defn do-import [conn config data-source job-execution-id]
+(defn do-import [conn config claims data-source job-execution-id]
   (try
     (let [source (get data-source "source")
           file (import/get-path source (:file-upload-path config))
@@ -107,7 +107,8 @@
                              :metadata (doto (PGobject.)
                                          (.setType "jsonb")
                                          (.setValue (json/generate-string metadata)))
-                             :raster-table table-name})
+                             :raster-table table-name
+                             :author claims})
         (update-successful-job-execution conn {:id job-execution-id})))
     (catch Throwable e
       (log/errorf e "Error importing raster: %s" (.getMessage e))
@@ -124,7 +125,7 @@
                               :spec (json/generate-string data-source)})
     (insert-job-execution conn {:id job-execution-id
                                 :data-source-id data-source-id})
-    (future (do-import conn config data-source job-execution-id))
+    (future (do-import conn config claims data-source job-execution-id))
     (lib/ok {"importId" job-execution-id
              "kind" kind})))
 
