@@ -66,11 +66,12 @@ const pathMatch = window.location.pathname.match(/^\/s\/(.*)/);
 const shareId = pathMatch != null ? pathMatch[1] : null;
 let hasSubmitted = false;
 
-const fetchData = (password = undefined) => {
+const fetchData = (password = undefined, callback = () => {}) => {
   fetch(`/share/${shareId}`, { headers: { 'X-Password': password } })
     .then((response) => {
       if (response.status === 403) {
         renderPrivacyGate(); // eslint-disable-line
+        callback();
         return null;
       }
       return response.json();
@@ -94,8 +95,7 @@ class PrivacyGate extends Component {
   }
   handleSubmit() {
     hasSubmitted = true;
-    this.forceUpdate();
-    fetchData(this.state.password);
+    fetchData(this.state.password, () => this.forceUpdate());
   }
   render() {
     return (
