@@ -41,7 +41,7 @@
 
 (defn ^NashornSandbox js-engine []
   (time* :js-engine 
-         (let [maxmemory (* 2 1000000 1024)
+         (let [maxmemory (* 20 1024 1024) ;; 20Mb
                maxtime   2000]
            (doto (NashornSandboxes/create)
              (.allowReadFunctions false)
