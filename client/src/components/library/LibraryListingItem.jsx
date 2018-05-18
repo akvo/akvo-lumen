@@ -148,6 +148,10 @@ LibraryListingItemContextMenu.propTypes = {
 
 export default class LibraryListingItem extends Component {
 
+  static contextTypes = {
+    intl: intlShape,
+  };
+
   constructor() {
     super();
     this.state = {
@@ -155,10 +159,6 @@ export default class LibraryListingItem extends Component {
     };
     this.handleToggleContextMenu = this.handleToggleContextMenu.bind(this);
   }
-
-  static contextTypes = {
-    intl: intlShape,
-  };
 
   handleToggleContextMenu(event) {
     event.stopPropagation();
