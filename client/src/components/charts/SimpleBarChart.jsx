@@ -10,7 +10,7 @@ import { Portal } from 'react-portal';
 import merge from 'lodash/merge';
 import { GridRows } from '@vx/grid';
 
-import { sortAlphabetically } from '../../utilities/utils';
+import { replaceLabelIfValueEmpty } from '../../utilities/chart';
 import Legend from './Legend';
 import ResponsiveWrapper from '../common/ResponsiveWrapper';
 import ColorPicker from '../common/ColorPicker';
@@ -90,7 +90,6 @@ export default class SimpleBarChart extends Component {
     return {
       ...series,
       data: series.data
-        .sort((a, b) => sortAlphabetically(a, b, ({ key }) => key))
         .map(datum => ({ ...datum, value: Math.abs(datum.value) })),
     };
   }
@@ -174,7 +173,7 @@ export default class SimpleBarChart extends Component {
             this.handleMouseLeaveNode({ key });
           }}
         >
-          {key}
+          {replaceLabelIfValueEmpty(key)}
         </Text>
       );
     }
@@ -198,7 +197,7 @@ export default class SimpleBarChart extends Component {
           this.handleMouseLeaveNode({ key });
         }}
       >
-        {key}
+        {replaceLabelIfValueEmpty(key)}
       </Text>
     );
   }

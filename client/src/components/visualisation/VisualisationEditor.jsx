@@ -12,6 +12,11 @@ const specIsValidForApi = (spec, vType) => {
   let anyLayerInvalid;
 
   switch (vType) {
+    case 'bar': // DEBUG
+      if (spec.bucketColumn === null || spec.metricColumnY === null) {
+        return false;
+      }
+      break;
     case 'line':
     case 'area':
       if (spec.metricColumnX === null || spec.metricColumnY === null) {
@@ -68,6 +73,10 @@ const getNeedNewAggregation = (newV = { spec: {} }, oldV = { spec: {} }, optiona
   const vType = newV.visualisationType || optionalVizType;
 
   switch (vType) {
+    case 'bar':
+      return Boolean(
+        !isEqual(newV.spec, oldV.spec)
+      );
     case 'pivot table':
       return Boolean(
         newV.datasetId !== oldV.datasetId ||
@@ -149,7 +158,6 @@ export default class VisualisationEditor extends Component {
 
     switch (vType) {
       case null:
-      case 'bar':
       case 'scatter':
         // Data aggregated client-side
         this.setState({ visualisation });
@@ -204,6 +212,7 @@ export default class VisualisationEditor extends Component {
       case 'donut':
       case 'line':
       case 'area':
+      case 'bar':
         // Data aggregated on the backend for these types
 
         specValid = specIsValidForApi(visualisation.spec, vType);
@@ -308,6 +317,18 @@ export default class VisualisationEditor extends Component {
       case 'line':
       case 'area':
         api.get(`/api/aggregation/${datasetId}/line`, {
+          query: JSON.stringify(spec),
+        }).then(response => response.json())
+          .then((response) => {
+            if (requestId === this.latestRequestId) {
+              this.setState({
+                visualisation: Object.assign({}, visualisation, { data: response }),
+              });
+            }
+          });
+        break;
+      case 'bar':
+        api.get(`/api/aggregation/${datasetId}/bar`, {
           query: JSON.stringify(spec),
         }).then(response => response.json())
           .then((response) => {

@@ -7,7 +7,8 @@ import get from 'lodash/get';
 import { FormattedMessage } from 'react-intl';
 import * as chart from '../../utilities/chart';
 import LineChart from './LineChart';
-import { defaultPrimaryColor } from '../../utilities/visualisationColors';
+import BarChart from './BarChart';
+import { defaultPrimaryColor, palette } from '../../utilities/visualisationColors';
 
 /*
 import get from 'lodash/get';
@@ -120,7 +121,8 @@ export default class Chart extends Component {
     /* Hard coding an exit for new chart types seems fine temporarily...*/
     if (
       visualisation.visualisationType === 'line' ||
-      visualisation.visualisationType === 'area'
+      visualisation.visualisationType === 'area' ||
+      visualisation.visualisationType === 'bar'
     ) {
       return;
     }
@@ -136,6 +138,7 @@ export default class Chart extends Component {
       case 'donut':
       case 'area':
       case 'line':
+      case 'bar':
         chartData = visualisation.data;
         if (!chartData) {
           // Aggregated data hasn't loaded yet - do nothing
@@ -144,9 +147,6 @@ export default class Chart extends Component {
         break;
       case 'scatter':
         chartData = chart.getScatterData(visualisation, dataset);
-        break;
-      case 'bar':
-        chartData = chart.getBarData(visualisation, dataset);
         break;
       // no default
     }
@@ -169,26 +169,11 @@ export default class Chart extends Component {
       visualisation,
       width,
       height,
+      onChangeVisualisationSpec,
     } = this.props;
 
     const titleHeight = getTitleStyle(visualisation.name, getSize(width)).height * (1 + META_SCALE);
     const adjustedContainerHeight = ((height - titleHeight) - (titleHeight * META_SCALE)) || 400;
-
-    /*
-    const colors = get(visualisation, 'data.data') ?
-      visualisation.data.data.reduce((acc, datum, i) => {
-        const result = { ...acc };
-        if (!result[datum.bucketValue]) {
-          result[datum.bucketValue] = palette[i];
-        }
-        return result;
-      }, get(visualisation, 'spec.colors') || {}) :
-      {};
-    */
-
-    if (!visualisation.data) {
-      return null;
-    }
 
     switch (visualisation.visualisationType) {
       case 'line':
@@ -203,6 +188,23 @@ export default class Chart extends Component {
             xAxisLabel={visualisation.spec.axisLabelX}
             yAxisLabel={visualisation.spec.axisLabelY}
             area={Boolean(visualisation.visualisationType === 'area')}
+          />
+        );
+      case 'bar':
+        return (
+          <BarChart
+            edit
+            visualisation={visualisation}
+            data={visualisation.data}
+            width={width}
+            height={adjustedContainerHeight}
+            colors={palette}
+            colorMapping={visualisation.spec.colors}
+            xAxisLabel={visualisation.spec.axisLabelX}
+            yAxisLabel={visualisation.spec.axisLabelY}
+            area={Boolean(visualisation.visualisationType === 'area')}
+            grouped={Boolean(visualisation.spec.subBucketMethod === 'split')}
+            onChangeVisualisationSpec={onChangeVisualisationSpec}
           />
         );
       default:

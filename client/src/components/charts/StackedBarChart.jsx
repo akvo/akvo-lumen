@@ -11,7 +11,7 @@ import merge from 'lodash/merge';
 import { stack } from 'd3-shape';
 import { GridRows } from '@vx/grid';
 
-import { sortAlphabetically } from '../../utilities/utils';
+import { replaceLabelIfValueEmpty } from '../../utilities/chart';
 import Legend from './Legend';
 import ResponsiveWrapper from '../common/ResponsiveWrapper';
 import ColorPicker from '../common/ColorPicker';
@@ -55,7 +55,7 @@ export default class StackedBarChart extends Component {
     marginRight: 0.1,
     marginTop: 0.1,
     marginBottom: 0.2,
-    legendVisible: false,
+    legendVisible: true,
     edit: false,
     padding: 0.1,
     colorMapping: {},
@@ -79,7 +79,6 @@ export default class StackedBarChart extends Component {
     const { data } = props;
 
     if (!get(data, 'series[0]')) return false;
-
     const values = data.series[0].data
       .reduce((acc, { value }, i) =>
         [
@@ -95,7 +94,7 @@ export default class StackedBarChart extends Component {
       , []);
 
     const series = merge({}, data.common, { data: values });
-    const combinedData = series.data.sort((a, b) => sortAlphabetically(a, b, ({ key }) => key));
+    const combinedData = series.data.sort((a, b) => a.key - b.key);
 
     return {
       ...series,
@@ -184,7 +183,7 @@ export default class StackedBarChart extends Component {
         {...labelFont}
         fontWeight={get(this.state, 'hoveredNode.valueKey') === node.key ? 700 : 400}
       >
-        {node.key}
+        {replaceLabelIfValueEmpty(node.key)}
       </Text>
     );
   }
@@ -331,7 +330,7 @@ export default class StackedBarChart extends Component {
                           <Group key={seriesKey}>
                             {stackSeries.map(([y0, y1], valueIndex) => {
                               const { nodeWidth, x, key } = nodes[valueIndex];
-                              const color = this.getColor(key, seriesIndex);
+                              const color = this.getColor(seriesKey, seriesIndex);
                               const normalizedY = heightScale(y0);
                               const normalizedHeight = availableHeight - heightScale(y1 - y0);
                               const colorpickerPlacement = valueIndex < dataCount / 2 ? 'right' : 'left';
@@ -358,7 +357,10 @@ export default class StackedBarChart extends Component {
                                         placement={colorpickerPlacement}
                                         onChange={({ hex }) => {
                                           onChangeVisualisationSpec({
-                                            colors: { ...colors, [this.state.isPickingColor]: hex },
+                                            colors: {
+                                              ...colors,
+                                              [this.state.isPickingColor.seriesKey]: hex,
+                                            },
                                           });
                                           this.setState({ isPickingColor: null });
                                         }}
