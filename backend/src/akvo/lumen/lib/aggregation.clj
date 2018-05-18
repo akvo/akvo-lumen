@@ -2,6 +2,7 @@
   (:require [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.aggregation.pie :as pie]
             [akvo.lumen.lib.aggregation.line :as line]
+            [akvo.lumen.lib.aggregation.bar :as bar]
             [akvo.lumen.lib.aggregation.pivot :as pivot]
             [clojure.java.jdbc :as jdbc]
             [hugsql.core :as hugsql]))
@@ -39,6 +40,10 @@
 (defmethod query* "line"
   [tenant-conn dataset _ query]
   (line/query tenant-conn dataset query))
+
+(defmethod query* "bar"
+  [tenant-conn dataset _ query]
+  (bar/query tenant-conn dataset query))
 
 (defmethod query* "donut"
   [tenant-conn dataset _ query]
