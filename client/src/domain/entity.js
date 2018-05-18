@@ -39,6 +39,15 @@ export function getType(entity) {
   return type;
 }
 
+export function getSource(entity) {
+  return get(entity, 'source');
+}
+
+export function getAuthor(entity) {
+  const author = get(entity, 'author');
+  return author && `${author.given_name} ${author.family_name}`;
+}
+
 export function isDataset(entity) {
   return getType(entity) === 'dataset';
 }

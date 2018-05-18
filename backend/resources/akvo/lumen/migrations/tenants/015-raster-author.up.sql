@@ -1,2 +1,2 @@
-ALTER TABLE public.raster_dataset
-      ADD COLUMN IF NOT EXISTS author jsonb;
+ALTER TABLE raster_dataset
+      DROP COLUMN author;

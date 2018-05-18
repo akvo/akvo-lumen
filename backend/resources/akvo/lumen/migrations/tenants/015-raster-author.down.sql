@@ -1,2 +1,2 @@
-ALTER TABLE public.raster_dataset
+ALTER TABLE raster_dataset
       DROP COLUMN author;
