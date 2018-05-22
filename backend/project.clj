@@ -18,7 +18,7 @@
                  [commons-io/commons-io "2.6"]
                  [compojure "1.6.0" :exclusions [medley]]
                  [duct "0.8.2"]
-                 [duct/hikaricp-component "0.1.1" :exclusions [org.slf4j/slf4j-nop]]
+                 [duct/hikaricp-component "0.1.2" :exclusions [org.slf4j/slf4j-nop]]
                  [environ "1.1.0"]
                  [funcool/cuerdas "2.0.5"]
                  [honeysql "0.9.1"]
