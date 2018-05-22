@@ -1,0 +1,1 @@
+DROP FUNCTION IF EXISTS public.extract_cols_as_char(CHARACTER, CHARACTER);
