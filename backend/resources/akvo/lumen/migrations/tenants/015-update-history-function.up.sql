@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION extract_cols_as_char (tablename CHARACTER, my_prefix CHARACTER)
+CREATE OR REPLACE FUNCTION extract_cols_as_char (tablename CHARACTER, my_prefix CHARACTER DEFAULT '')
     RETURNS varchar
 AS $func$
 DECLARE
@@ -7,15 +7,13 @@ DECLARE
 BEGIN
     str := '';
     FOR i IN
-    SELECT
-        column_name
-    FROM
-        INFORMATION_SCHEMA.COLUMNS
+    SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS
     WHERE
         table_name = tablename
-        AND table_schema = 'public' LOOP
-            str := str || ',' || my_prefix || i;
-        END LOOP;
+        AND table_schema = 'public'
+    LOOP
+        str := str || ',' || my_prefix || i;
+    END LOOP;
     RETURN SUBSTRING(str FROM 2);
 END
 $func$
@@ -29,13 +27,9 @@ CREATE OR REPLACE FUNCTION history.log_change() RETURNS trigger AS $_$
       select_from_fields text;
 
     BEGIN
-        OPEN c FOR EXECUTE 'select extract_cols_as_char(''' || TG_TABLE_NAME || ''', '''')';
-          FETCH FROM c INTO insert_into_fields;
-        CLOSE c;
+        insert_into_fields := extract_cols_as_char(TG_TABLE_NAME::text);
 
-        OPEN c FOR EXECUTE 'select extract_cols_as_char(''' || TG_TABLE_NAME || ''', ''$1.'')';
-          FETCH FROM c INTO select_from_fields;
-        CLOSE c;
+        select_from_fields := extract_cols_as_char(TG_TABLE_NAME::text, '$1.');
 
         IF TG_OP = 'INSERT' THEN
             EXECUTE 'INSERT INTO history.' || TG_TABLE_NAME || ' (_validrange, ' || insert_into_fields || ' )'
