@@ -1,7 +1,7 @@
-CREATE OR REPLACE FUNCTION prefix_arr (arr varchar[], prefix_ varchar) RETURNS varchar[] AS $func$
+CREATE OR REPLACE FUNCTION prefix_arr (arr text[], prefix_ text) RETURNS text[] AS $_$
  DECLARE
- e varchar;
- new_arr varchar[] := '{}';
+ e text;
+ new_arr text[] := '{}';
  BEGIN
    FOREACH e IN ARRAY arr LOOP
       e := concat(prefix_, e);
@@ -9,43 +9,40 @@ CREATE OR REPLACE FUNCTION prefix_arr (arr varchar[], prefix_ varchar) RETURNS v
    END LOOP;
    RETURN new_arr;
  END;
-$func$ LANGUAGE plpgsql STABLE;
+$_$ LANGUAGE plpgsql IMMUTABLE;
 
-CREATE OR REPLACE FUNCTION extract_cols (tablename varchar) RETURNS varchar[] AS $func$
+CREATE OR REPLACE FUNCTION extract_cols (tablename text) RETURNS text[] AS $_$
  BEGIN
- RETURN ARRAY(SELECT column_name::varchar
+ RETURN ARRAY(SELECT column_name::text
               FROM information_schema.columns 
               WHERE table_name = tablename AND table_schema = 'public' 
               ORDER BY ordinal_position);
  END
-$func$ LANGUAGE PLPGSQL;
+$_$ LANGUAGE PLPGSQL STABLE;
 
-CREATE OR REPLACE FUNCTION get_insert_sql_history (tablename varchar) RETURNS text AS $func$
+CREATE OR REPLACE FUNCTION get_insert_sql_history (tablename text) RETURNS text AS $_$
    DECLARE
-   insert_into_fields varchar;
-   select_from_fields varchar;
+   insert_into_fields text;
+   select_from_fields text;
    BEGIN
 
      insert_into_fields := array_to_string(extract_cols(tablename), ',');
 
      select_from_fields := array_to_string(prefix_arr(extract_cols(tablename),'$1.'), ',');
 
-   RETURN 'INSERT INTO history.' || tablename || ' (_validrange, ' || insert_into_fields || ' ) '
-       	  'SELECT tstzrange(now(), $$infinity$$, $$[)$$), ' || select_from_fields || '';
+     RETURN 'INSERT INTO history.' || tablename || ' (_validrange, ' || insert_into_fields || ' ) '
+            'SELECT tstzrange(now(), $$infinity$$, $$[)$$), ' || select_from_fields || '';
    END
-   $func$ LANGUAGE PLPGSQL;
+   $_$ LANGUAGE PLPGSQL STABLE;
 
 CREATE OR REPLACE FUNCTION history.log_change() RETURNS trigger AS $_$
     DECLARE
       c refcursor;
       tt tstzrange;
-      insert_sql text;
 
     BEGIN
-        insert_sql := get_insert_sql_history(TG_TABLE_NAME::varchar);
-
         IF TG_OP = 'INSERT' THEN
-            EXECUTE insert_sql USING NEW;
+            EXECUTE get_insert_sql_history(TG_TABLE_NAME::text) USING NEW;
             RETURN NEW;
         ELSIF TG_OP = 'UPDATE' THEN
             OPEN c FOR EXECUTE 'SELECT _validrange FROM history.' || TG_TABLE_NAME ||
@@ -61,8 +58,7 @@ CREATE OR REPLACE FUNCTION history.log_change() RETURNS trigger AS $_$
                   ' WHERE CURRENT OF ' || quote_ident(c::text) USING lower(tt);
             END IF;
 
-            EXECUTE insert_sql USING NEW;
-            RETURN NEW;
+            EXECUTE get_insert_sql_history(TG_TABLE_NAME::text) USING NEW;
 
             RETURN NEW;
         ELSIF TG_OP = 'DELETE' THEN
