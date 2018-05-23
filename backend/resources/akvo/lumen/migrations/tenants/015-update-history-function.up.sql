@@ -83,4 +83,3 @@ CREATE OR REPLACE FUNCTION history.log_change() RETURNS trigger AS $_$
         RETURN NULL;
     END;
 $_$ LANGUAGE plpgsql;
--- ;;

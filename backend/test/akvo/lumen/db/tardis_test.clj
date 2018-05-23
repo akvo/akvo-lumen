@@ -3,7 +3,8 @@
   (:require [akvo.lumen.fixtures :refer [*tenant-conn* tenant-conn-fixture]]
             [clojure.string :as str]
             [clojure.test :refer :all]
-            [hugsql.core :as hugsql]))
+            [hugsql.core :as hugsql])
+  (:import [org.postgresql.util PSQLException]))
 
 (hugsql/def-db-fns "akvo/lumen/db/tardis_test.sql")
 
@@ -13,10 +14,9 @@
   (testing "with current data in public schema table, we alter table definition. Functionality keeps the same"
     (is (= '() (get-data *tenant-conn* {:table-name "data_source"})))
     (is (= 1 (insert-data-source *tenant-conn* {})))
-    (try
-      (insert-altered-data-source *tenant-conn* {:table-name "data_source" })
-      (assert false)
-      (catch Exception e (is (str/includes? (.getMessage e) "column \"test\" of relation \"data_source\" does not exist") )))
+    (is (thrown-with-msg? PSQLException
+                          #"column \"test\" of relation \"data_source\" does not exist"
+                          (insert-altered-data-source *tenant-conn* {:table-name "data_source" })))
     (is (= 0 (alter-table-add-test-bool *tenant-conn* {:table-name "public.data_source"})))
     (is (= 0 (alter-table-add-test-bool *tenant-conn* {:table-name "history.data_source"})))
     (is (= 1 (insert-altered-data-source *tenant-conn* {:table-name "public.data_source" })))
