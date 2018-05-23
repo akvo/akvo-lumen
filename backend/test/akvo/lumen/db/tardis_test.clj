@@ -1,4 +1,5 @@
 (ns akvo.lumen.db.tardis-test
+  {:functional true}
   (:require [akvo.lumen.fixtures :refer [*tenant-conn* tenant-conn-fixture]]
             [clojure.string :as str]
             [clojure.test :refer :all]
