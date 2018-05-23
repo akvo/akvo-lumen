@@ -17,6 +17,13 @@ import ColorPicker from '../common/ColorPicker';
 import ChartLayout from './ChartLayout';
 import Tooltip from './Tooltip';
 
+const formatValue = (value, type) => {
+  if (type === 'date') {
+    return new Date(value);
+  }
+  return value;
+};
+
 export default class LineChart extends Component {
 
   static propTypes = {
@@ -308,7 +315,11 @@ export default class LineChart extends Component {
                                 this.handleClickNode({ key }, event);
                               }}
                               onMouseEnter={(event) => {
-                                this.handleMouseEnterNode({ key, x: timestamp, y: value }, event);
+                                this.handleMouseEnterNode({
+                                  key,
+                                  x: formatValue(timestamp, series.metadata.type),
+                                  y: value,
+                                }, event);
                               }}
                             />
                           </Group>
