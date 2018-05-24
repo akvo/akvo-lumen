@@ -7,14 +7,9 @@ import get from 'lodash/get';
 import { FormattedMessage } from 'react-intl';
 import * as chart from '../../utilities/chart';
 import LineChart from './LineChart';
-<<<<<<< HEAD
 import BarChart from './BarChart';
 import { defaultPrimaryColor, palette } from '../../utilities/visualisationColors';
-
-/*
 import get from 'lodash/get';
-=======
->>>>>>> issue/1381-new-pie
 import PieChart from './PieChart';
 import { defaultPrimaryColor, palette } from '../../utilities/visualisationColors';
 
