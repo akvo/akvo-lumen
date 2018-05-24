@@ -8,7 +8,6 @@ import { FormattedMessage } from 'react-intl';
 import * as chart from '../../utilities/chart';
 import LineChart from './LineChart';
 import BarChart from './BarChart';
-import { defaultPrimaryColor, palette } from '../../utilities/visualisationColors';
 import PieChart from './PieChart';
 import { defaultPrimaryColor, palette } from '../../utilities/visualisationColors';
 
