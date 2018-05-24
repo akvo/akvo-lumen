@@ -10,7 +10,7 @@ export const createDashboardRequest = createAction('CREATE_DASHBOARD_REQUEST');
 export const createDashboardFailure = createAction('CREATE_DASHBOARD_FAILURE');
 export const createDashboardSuccess = createAction('CREATE_DASHBOARD_SUCCESS');
 
-export function createDashboard(dashboard, collectionId) {
+export function createDashboard(dashboard, collectionId, callback = () => {}) {
   return (dispatch) => {
     dispatch(createDashboardRequest(dashboard));
     api.post('/api/dashboards', dashboard)
@@ -21,8 +21,12 @@ export function createDashboard(dashboard, collectionId) {
           dispatch(addEntitiesToCollection(dash.id, collectionId));
         }
         dispatch(push(`/dashboard/${dash.id}`));
+        callback();
       })
-      .catch(err => dispatch(createDashboardFailure(err)));
+      .catch((err) => {
+        dispatch(createDashboardFailure(err));
+        callback(err);
+      });
   };
 }
 
@@ -31,7 +35,7 @@ export const editDashboardRequest = createAction('EDIT_DASHBOARD_REQUEST');
 export const editDashboardFailure = createAction('EDIT_DASHBOARD_FAILURE');
 export const editDashboardSuccess = createAction('EDIT_DASHBOARD_SUCCESS');
 
-export function saveDashboardChanges(dashboard) {
+export function saveDashboardChanges(dashboard, callback = () => {}) {
   const now = Date.now();
   const dash = Object.assign({}, dashboard, {
     modified: now,
@@ -42,8 +46,14 @@ export function saveDashboardChanges(dashboard) {
     dispatch(editDashboardRequest);
     api.put(`/api/dashboards/${id}`, dashboard)
       .then(response => response.json())
-      .then(responseDash => dispatch(editDashboardSuccess(responseDash)))
-      .catch(error => dispatch(editDashboardFailure(error)));
+      .then((responseDash) => {
+        dispatch(editDashboardSuccess(responseDash));
+        callback();
+      })
+      .catch((error) => {
+        dispatch(editDashboardFailure(error));
+        callback(error);
+      });
   };
 }
 
@@ -79,3 +89,55 @@ export function deleteDashboard(id) {
 
 /* Remove visualisation from dashboard */
 export const removeVisualisation = createAction('REMOVE_VISUALISATION_FROM_DASHBOARD');
+
+/* Fetch dashboard share id */
+export const fetchShareIdRequest = createAction('FETCH_DASHBOARD_SHARE_ID_REQUEST');
+export const fetchShareIdFailure = createAction('FETCH_DASHBOARD_SHARE_ID_FAILURE');
+export const fetchShareIdSuccess = createAction('FETCH_DASHBOARD_SHARE_ID_SUCCESS');
+
+export function fetchShareId(dashboardId) {
+  return (dispatch) => {
+    if (dashboardId != null) {
+      api.post('/api/shares', { dashboardId })
+        .then(response => response.json())
+        .then((response) => {
+          dispatch(fetchShareIdSuccess({
+            id: dashboardId,
+            shareId: response.id,
+            protected: response.protected,
+          }));
+        });
+    }
+  };
+}
+
+/* Set dashboard share password */
+export const setShareProtectionRequest = createAction('SET_SHARE_PROTECTION_REQUEST');
+export const setShareProtectionFailure = createAction('SET_SHARE_PROTECTION_FAILURE');
+export const setShareProtectionSuccess = createAction('SET_SHARE_PROTECTION_SUCCESS');
+
+export function setShareProtection(shareId, payload, callback = () => {}) {
+  return (dispatch) => {
+    if (shareId != null) {
+      let isError = false;
+      api.put(`/api/shares/${shareId}`, payload)
+        .then((response) => {
+          if (response.status !== 400) {
+            dispatch(setShareProtectionSuccess({ shareId, data: payload }));
+          }
+          if (response.status !== 200) isError = true;
+          return response.json();
+        })
+        .then((response) => {
+          if (isError) {
+            callback(response);
+          } else {
+            callback(null, response);
+          }
+        })
+        .catch((error, response) => {
+          callback(response);
+        });
+    }
+  };
+}

@@ -68,7 +68,7 @@
        (boolean (re-find #"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}" s))))
 
 (defn valid-type? [s]
-  (boolean (#{"text" "number" "date" "geopoint"} s)))
+  (#{"text" "number" "date" "geopoint"} s))
 
 (defn column-index
   "Returns the column index for a given column-name"

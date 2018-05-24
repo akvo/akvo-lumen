@@ -19,7 +19,9 @@ class CreateDataset extends Component {
   constructor() {
     super();
     this.handleNextOrImport = this.handleNextOrImport.bind(this);
+    this.handleDefineDataSource = this.handleDefineDataSource.bind(this);
     this.isValidImport = this.isValidImport.bind(this);
+    this.state = { sourceSet: false };
   }
 
   pageComponent(page) {
@@ -36,7 +38,7 @@ class CreateDataset extends Component {
         return (
           <DataSourceSettings
             dataSource={dataset.source}
-            onChange={this.props.defineDataSource}
+            onChange={this.handleDefineDataSource}
             onChangeSettings={this.props.defineDatasetSettings}
             updateUploadStatus={this.props.updateDatasetUploadStatus}
           />
@@ -50,6 +52,11 @@ class CreateDataset extends Component {
         );
       default: throw new Error(`Not yet implemented: ${page}`);
     }
+  }
+
+  handleDefineDataSource(...args) {
+    this.setState({ sourceSet: true });
+    this.props.defineDataSource(...args);
   }
 
   handleNextOrImport() {
@@ -75,6 +82,11 @@ class CreateDataset extends Component {
   render() {
     const { onCancel, datasetImport, clearImport } = this.props;
     const { currentPage, uploadRunning } = datasetImport;
+
+    let rightButtonDisabled = false;
+    if (currentPage === 'define-dataset') rightButtonDisabled = !this.isValidImport();
+    if (currentPage === 'define-data-source') rightButtonDisabled = !this.state.sourceSet;
+    rightButtonDisabled = rightButtonDisabled || uploadRunning;
 
     return (
       <div className="CreateDataset">
@@ -110,8 +122,7 @@ class CreateDataset extends Component {
           rightButton={{
             text: <FormattedMessage id={currentPage === 'define-dataset' ? 'import' : 'next'} />,
             className: 'btn next clickable positive',
-            disabled: currentPage === 'define-dataset' ? !this.isValidImport() : false
-                || uploadRunning,
+            disabled: rightButtonDisabled,
             onClick: this.handleNextOrImport,
           }}
         />

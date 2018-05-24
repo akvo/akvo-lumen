@@ -235,12 +235,6 @@ export default function ConfigMenu(props) {
                 {(visualisation.datasetId && visualisation.visualisationType) &&
                 getChartTypeEditor(visualisation.visualisationType)
               }
-                <button
-                  className="saveChanges clickable"
-                  onClick={props.onSaveVisualisation}
-                >
-                  <FormattedMessage id="save" />
-                </button>
               </div>
           }
           </div>

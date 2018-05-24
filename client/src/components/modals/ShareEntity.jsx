@@ -1,10 +1,11 @@
+/* eslint-disable no-nested-ternary */
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import ModalWrapper from 'react-modal';
 import ModalHeader from './ModalHeader';
 import ModalFooter from './ModalFooter';
-import * as api from '../../api';
+import ToggleInput from '../common/ToggleInput';
 
 require('./ShareEntity.scss');
 
@@ -13,11 +14,14 @@ export default class ShareEntity extends Component {
   constructor() {
     super();
     this.state = {
-      id: '',
       copiedToClipboard: null,
       showEmbed: false,
+      protected: false,
     };
-    this.fetchShareId = this.fetchShareId.bind(this);
+    this.handleSavePassword = this.handleSavePassword.bind(this);
+    this.handleChangePassword = this.handleChangePassword.bind(this);
+    this.handleToggleProtected = this.handleToggleProtected.bind(this);
+    this.handleFocusPassword = this.handleFocusPassword.bind(this);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -26,32 +30,40 @@ export default class ShareEntity extends Component {
     }
   }
 
-  fetchShareId() {
-    const { id } = this.props;
-    const entityType = this.props.type;
+  handleChangePassword(event) {
+    this.setState({ password: event.target.value });
+  }
 
-    if (id != null) {
-      api.post('/api/shares', { [`${entityType}Id`]: id })
-        .then(response => response.json())
-        .then(response => this.setState({ id: response.id }));
+  handleSavePassword() {
+    this.props.onSetPassword(this.state.password);
+  }
+
+  handleToggleProtected(isProtected) {
+    this.setState({ protected: isProtected });
+    this.props.onToggleProtected(isProtected);
+  }
+
+  handleFocusPassword() {
+    if (!this.state.password) {
+      this.passwordInput.value = '';
     }
   }
 
   render() {
-    const { type, title, onClose, isOpen } = this.props;
-    const shareUrl = `${window.location.origin}/s/${this.state.id}`;
+    const { type, title, onClose, isOpen, canSetPrivacy, onFetchShareId, shareId } = this.props;
+    const shareUrl = `${window.location.origin}/s/${shareId}`;
     const defaultHeight = type === 'visualisation' ? '500px' : '1000px';
     const embedCode = `<iframe width="100%" height="${defaultHeight}" src="${shareUrl}" frameborder="0" allow="encrypted-media"></iframe>`;
 
     return (
       <ModalWrapper
         isOpen={isOpen}
-        onAfterOpen={this.fetchShareId}
+        onAfterOpen={onFetchShareId}
         contentLabel="userInviteModal"
         style={{
           content: {
             width: 500,
-            height: 320,
+            minHeight: 320,
             marginLeft: 'auto',
             marginRight: 'auto',
             borderRadius: 0,
@@ -70,6 +82,55 @@ export default class ShareEntity extends Component {
             onCloseModal={onClose}
           />
           <div className="ModalContents">
+
+            {canSetPrivacy && (
+              <div className="row">
+                <div className="rowContainer">
+                  <ToggleInput
+                    checked={this.props.protected || this.state.protected}
+                    label="Password protected"
+                    onChange={this.handleToggleProtected}
+                  />
+                </div>
+              </div>
+            )}
+
+            {(canSetPrivacy && (this.props.protected || this.state.protected)) && (
+              <div className="row privacyContainer">
+                <div className="rowContainer">
+                  <input
+                    placeholder="Password"
+                    type="password"
+                    onChange={this.handleChangePassword}
+                    value={
+                      (typeof this.state.password !== 'undefined') ?
+                        this.state.password :
+                        (this.props.protected ? '.......' : '')
+                    }
+                    onFocus={this.handleFocusPassword}
+                    ref={(c) => { this.passwordInput = c; }}
+                  />
+                  <button
+                    onClick={this.handleSavePassword}
+                    className="savePasswordButton"
+                    data-test-id="next"
+                  >
+                    Save
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {this.props.alert && (
+              <div className="row">
+                <div className="rowContainer">
+                  <div className={`alert alert-${this.props.alert.type || 'success'}`}>
+                    {this.props.alert.message}
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="row">
               <div className="rowContainer">
                 <label htmlFor="shareUrlCopyButton">URL for {type}: {title}</label>
@@ -85,6 +146,7 @@ export default class ShareEntity extends Component {
                   </a>
                 </div>
               </div>
+
               <div className="rowContainer">
                 <CopyToClipboard
                   text={shareUrl}
@@ -98,6 +160,7 @@ export default class ShareEntity extends Component {
                 </CopyToClipboard>
               </div>
             </div>
+
             {this.state.showEmbed ?
               <div className="row">
                 <div className="rowContainer">
@@ -139,6 +202,7 @@ export default class ShareEntity extends Component {
                 </button>
               </div>
             }
+
           </div>
           <ModalFooter
             rightButton={{
@@ -155,7 +219,16 @@ export default class ShareEntity extends Component {
 ShareEntity.propTypes = {
   onClose: PropTypes.func.isRequired,
   isOpen: PropTypes.bool.isRequired,
-  id: PropTypes.string,
   title: PropTypes.string,
   type: PropTypes.string,
+  shareId: PropTypes.string,
+  canSetPrivacy: PropTypes.bool,
+  protected: PropTypes.bool,
+  onToggleProtected: PropTypes.func,
+  onSetPassword: PropTypes.func,
+  onFetchShareId: PropTypes.func,
+  alert: PropTypes.shape({
+    message: PropTypes.string,
+    type: PropTypes.string,
+  }),
 };

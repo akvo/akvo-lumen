@@ -21,9 +21,17 @@
         column-y-name (get column-y "columnName")
         column-y-title (get column-y "title")
         max-points 2500
-        aggregation-method (if (= (get query "metricAggregation") "mean") "avg" (get query "metricAggregation"))
-        sql-text-with-aggregation "SELECT * FROM (SELECT * FROM (SELECT %1$s, %5$s(%2$s) FROM %3$s WHERE %4$s GROUP BY %1$s)z ORDER BY random() LIMIT %6$s)zz ORDER BY zz.%1$s"
-        sql-text-without-aggreagtion "SELECT * FROM (SELECT * FROM (SELECT %1$s, %2$s FROM %3$s WHERE %4$s)z ORDER BY random() LIMIT %6$s)zz ORDER BY zz.%1$s"
+        aggregation-method (get query "metricAggregation")
+        sql-aggregation-subquery (case aggregation-method
+                                   nil ""
+                                   ("min" "max" "count" "sum") (str aggregation-method  "(%2$s)")
+                                   "mean" "avg(%2$s)"
+                                   "median" "percentile_cont(0.5) WITHIN GROUP (ORDER BY %2$s)"
+                                   "distinct" "COUNT(DISTINCT %2$s)"
+                                   "q1" "percentile_cont(0.25) WITHIN GROUP (ORDER BY %2$s)"
+                                   "q3" "percentile_cont(0.75) WITHIN GROUP (ORDER BY %2$s)")
+        sql-text-with-aggregation (str "SELECT * FROM (SELECT * FROM (SELECT %1$s, " sql-aggregation-subquery " FROM %3$s WHERE %4$s GROUP BY %1$s)z ORDER BY random() LIMIT %6$s)zz ORDER BY zz.%1$s")
+        sql-text-without-aggreagtion "SELECT * FROM (SELECT * FROM (SELECT %1$s AS x, %2$s AS y FROM %3$s WHERE %4$s)z ORDER BY random() LIMIT %6$s)zz ORDER BY zz.x"
         sql-text (if aggregation-method sql-text-with-aggregation sql-text-without-aggreagtion)
         sql-response (run-query tenant-conn table-name sql-text column-x-name column-y-name filter-sql aggregation-method max-points)]
     (lib/ok

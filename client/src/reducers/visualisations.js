@@ -6,16 +6,14 @@ export const initialState = {};
 
 function createVisualisation(state, { payload }) {
   const id = payload.id;
-  return update(state, {
-    [id]: { $set: payload },
-  });
+  return update(state, { [id]: { $set: payload } });
 }
 
 function editVisualisation(state, { payload }) {
   const id = payload.id;
-  return Object.assign({}, state, {
-    [id]: payload,
-  });
+  return state[id].modified < payload.modified ?
+    Object.assign({}, state, { [id]: payload }) :
+    state;
 }
 
 function saveVisualisations(state, { payload }) {
@@ -44,6 +42,14 @@ function saveVisualisation(state, { payload }) {
   });
 }
 
+function saveShareId(state, { payload }) {
+  const id = payload.id;
+  return {
+    ...state,
+    [id]: { ...state[id], ...payload },
+  };
+}
+
 function removeVisualisation(state, { payload }) {
   const newState = Object.assign({}, state);
   delete newState[payload];
@@ -56,4 +62,5 @@ export default handleActions({
   [actions.fetchVisualisationSuccess]: saveVisualisation,
   [actions.saveVisualisationChangesSuccess]: editVisualisation,
   [actions.deleteVisualisationSuccess]: removeVisualisation,
+  [actions.fetchShareIdSuccess]: saveShareId,
 }, initialState);

@@ -4,7 +4,8 @@
   :license {:name "GNU Affero General Public License 3.0"
             :url  "https://www.gnu.org/licenses/agpl-3.0.html"}
   :min-lein-version "2.0.0"
-  :dependencies [[ch.qos.logback/logback-classic "1.2.3"]
+  :dependencies [[clojurewerkz/scrypt "1.2.0"]
+                 [ch.qos.logback/logback-classic "1.2.3"]
                  [org.clojure/tools.logging "0.4.0"]
                  [org.slf4j/log4j-over-slf4j "1.7.25"]
                  [org.slf4j/jcl-over-slf4j "1.7.25"]
@@ -17,7 +18,7 @@
                  [commons-io/commons-io "2.6"]
                  [compojure "1.6.0" :exclusions [medley]]
                  [duct "0.8.2"]
-                 [duct/hikaricp-component "0.1.1" :exclusions [org.slf4j/slf4j-nop]]
+                 [duct/hikaricp-component "0.1.2" :exclusions [org.slf4j/slf4j-nop]]
                  [environ "1.1.0"]
                  [funcool/cuerdas "2.0.5"]
                  [honeysql "0.9.1"]
