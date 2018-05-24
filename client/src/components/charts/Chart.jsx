@@ -7,13 +7,16 @@ import get from 'lodash/get';
 import { FormattedMessage } from 'react-intl';
 import * as chart from '../../utilities/chart';
 import LineChart from './LineChart';
+<<<<<<< HEAD
 import BarChart from './BarChart';
 import { defaultPrimaryColor, palette } from '../../utilities/visualisationColors';
 
 /*
 import get from 'lodash/get';
+=======
+>>>>>>> issue/1381-new-pie
 import PieChart from './PieChart';
-*/
+import { defaultPrimaryColor, palette } from '../../utilities/visualisationColors';
 
 require('./Chart.scss');
 
@@ -122,7 +125,9 @@ export default class Chart extends Component {
     if (
       visualisation.visualisationType === 'line' ||
       visualisation.visualisationType === 'area' ||
-      visualisation.visualisationType === 'bar'
+      visualisation.visualisationType === 'bar' ||
+      visualisation.visualisationType === 'donut' ||
+      visualisation.visualisationType === 'pie'
     ) {
       return;
     }
@@ -176,6 +181,22 @@ export default class Chart extends Component {
     const adjustedContainerHeight = ((height - titleHeight) - (titleHeight * META_SCALE)) || 400;
 
     switch (visualisation.visualisationType) {
+      case 'pie':
+      case 'donut':
+        return (
+          <PieChart
+            visualisation={visualisation}
+            data={visualisation.data}
+            width={width}
+            height={adjustedContainerHeight}
+            colors={palette}
+            colorMapping={visualisation.spec.colors}
+            donut={Boolean(visualisation.visualisationType === 'donut')}
+            legendVisible={Boolean(visualisation.spec.showLegend)}
+            onChangeVisualisationSpec={onChangeVisualisationSpec}
+            edit={Boolean(onChangeVisualisationSpec)}
+          />
+        );
       case 'line':
       case 'area':
         return (
@@ -188,6 +209,8 @@ export default class Chart extends Component {
             xAxisLabel={visualisation.spec.axisLabelX}
             yAxisLabel={visualisation.spec.axisLabelY}
             area={Boolean(visualisation.visualisationType === 'area')}
+            onChangeVisualisationSpec={onChangeVisualisationSpec}
+            edit={Boolean(onChangeVisualisationSpec)}
           />
         );
       case 'bar':

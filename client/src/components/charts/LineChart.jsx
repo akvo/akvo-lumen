@@ -17,6 +17,13 @@ import ColorPicker from '../common/ColorPicker';
 import ChartLayout from './ChartLayout';
 import Tooltip from './Tooltip';
 
+const formatValue = (value, type) => {
+  if (type === 'date') {
+    return new Date(value);
+  }
+  return value;
+};
+
 export default class LineChart extends Component {
 
   static propTypes = {
@@ -65,6 +72,10 @@ export default class LineChart extends Component {
     area: false,
     grid: true,
     interactive: true,
+  }
+
+  static contextTypes = {
+    abbrNumber: PropTypes.func,
   }
 
   state = {
@@ -154,7 +165,7 @@ export default class LineChart extends Component {
     } = this.props;
     const { tooltipItems, tooltipVisible, tooltipPosition } = this.state;
 
-    const xAxisTicks = 12;
+    const xAxisTicks = 8;
 
     const series = this.getData();
 
@@ -191,7 +202,6 @@ export default class LineChart extends Component {
                   dimensions.width * marginLeft,
                   dimensions.width * (1 - marginRight),
                 ]);
-
 
             const yExtent = extent(series.data, ({ value }) => value);
             if (yExtent[0] > 0) yExtent[0] = 0;
@@ -308,7 +318,11 @@ export default class LineChart extends Component {
                                 this.handleClickNode({ key }, event);
                               }}
                               onMouseEnter={(event) => {
-                                this.handleMouseEnterNode({ key, x: timestamp, y: value }, event);
+                                this.handleMouseEnterNode({
+                                  key,
+                                  x: formatValue(timestamp, series.metadata.type),
+                                  y: value,
+                                }, event);
                               }}
                             />
                           </Group>
@@ -324,6 +338,7 @@ export default class LineChart extends Component {
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}
                     numTicks={yAxisTicks}
+                    tickFormat={value => this.context.abbrNumber(value)}
                     labelProps={{
                       dy: marginTop * dimensions.height * 0.5,
                       textAnchor: 'middle',
@@ -347,6 +362,7 @@ export default class LineChart extends Component {
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}
                     numTicks={xAxisTicks}
+                    tickFormat={value => this.context.abbrNumber(value)}
                   />
                 </Svg>
               </div>

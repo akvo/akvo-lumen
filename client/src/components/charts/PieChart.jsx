@@ -2,19 +2,19 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Pie } from '@potion/layout'; // TODO: see if can optimize this
 import { positionFromAngle } from '@nivo/core'; // TODO: move this to potion
-import { Arc, Svg, Group, Text } from '@potion/element';
+import { Arc, Svg, Group, Text, Line } from '@potion/element';
 import get from 'lodash/get';
 import { Portal } from 'react-portal';
 import merge from 'lodash/merge';
 
-import { sortAlphabetically } from '../../utilities/utils';
-import { round } from '../../utilities/chart';
+import { sortAlphabetically, sortChronologically } from '../../utilities/utils';
+import { round, replaceLabelIfValueEmpty } from '../../utilities/chart';
 import Legend from './Legend';
 import ResponsiveWrapper from '../common/ResponsiveWrapper';
 import ColorPicker from '../common/ColorPicker';
 import ChartLayout from './ChartLayout';
 import Tooltip from './Tooltip';
-import { keyFont } from '../../constants/chart';
+import { labelFont, connectionStyle } from '../../constants/chart';
 
 const getDatum = (data, datum) => data.filter(({ key }) => key === datum)[0];
 
@@ -27,7 +27,7 @@ export default class PieChart extends Component {
     }),
     colors: PropTypes.oneOfType([PropTypes.array, PropTypes.object]).isRequired,
     colorMapping: PropTypes.object,
-    onChangeVisualisationSpec: PropTypes.func.isRequired,
+    onChangeVisualisationSpec: PropTypes.func,
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
     innerRadius: PropTypes.number,
@@ -53,16 +53,23 @@ export default class PieChart extends Component {
 
   getData() {
     const { data } = this.props;
-
     if (!get(data, 'series[0]')) return false;
 
     const series = merge({}, data.common, data.series[0]);
+    const sortFunctionFactory = get(data, 'series.common.metadata.type') === 'text' ?
+      sortAlphabetically :
+      sortChronologically;
 
     return {
       ...series,
       data: series.data
-        .sort((a, b) => sortAlphabetically(a, b, ({ key }) => key))
-        .map(datum => ({ ...datum, value: Math.abs(datum.value) })),
+        .sort((a, b) => sortFunctionFactory(a, b, ({ key }) => key))
+        .map(datum => ({
+          ...datum,
+          value: Math.abs(datum.value),
+          key: replaceLabelIfValueEmpty(datum.key),
+          label: replaceLabelIfValueEmpty(datum.label),
+        })),
     };
   }
 
@@ -128,26 +135,40 @@ export default class PieChart extends Component {
     });
   }
 
-  renderkey({ key, value, labelPosition, midAngle, totalCount }) {
+  renderLabel({ key, value, labelPosition, edgePosition, midAngle, totalCount, angle }) {
     const { print, interactive, legendVisible } = this.props;
-    return (print || !interactive) ? (
-      <Text
-        textAnchor={midAngle > Math.PI / 2 ? 'end' : 'start'}
-        transform={{ translate: [labelPosition.x, labelPosition.y] }}
-        {...keyFont}
-      >
-        {(!print && interactive && !legendVisible) && `${key}: `}
-        {value}
-        &nbsp;({round((value / totalCount) * 100, 2)}%)
-      </Text>
+    const offset = (input, mult) => Math.floor(input * mult);
+    const labelOffset = 0.95;
+    const edgeOffset = 1.01;
+    return ((print || !interactive || !legendVisible) && angle > Math.PI / 12) ? (
+      <Group>
+        <Text
+          textAnchor={midAngle > Math.PI / 2 ? 'end' : 'start'}
+          transform={{ translate: [labelPosition.x, labelPosition.y] }}
+          {...labelFont}
+        >
+          {(!print && interactive && !legendVisible) && `${key}`}
+          {(print || !interactive) && ': '}
+          {(print || !interactive) && value}
+          {(print || !interactive) && (<span>&nbsp;({round((value / totalCount) * 100, 2)}%)</span>)}
+        </Text>
+        <Line
+          x1={offset(labelPosition.x, labelOffset)}
+          y1={offset(labelPosition.y, labelOffset)}
+          x2={offset(edgePosition.x, edgeOffset)}
+          y2={offset(edgePosition.y, edgeOffset)}
+          {...connectionStyle}
+        />
+      </Group>
     ) : null;
   }
 
   render() {
     const {
+      data,
       width,
       height,
-      colors,
+      colorMapping,
       onChangeVisualisationSpec,
       innerRadius,
       style,
@@ -155,13 +176,16 @@ export default class PieChart extends Component {
       edit,
     } = this.props;
 
+    if (data.error) {
+      return 'Cannot display pie chart';
+    }
+
     const series = this.getData();
 
     if (!series) return null;
 
     const totalCount = series.data.reduce((total, datum) => total + datum.value, 0);
     const { tooltipItems, tooltipVisible, tooltipPosition } = this.state;
-
     return (
       <ChartLayout
         style={style}
@@ -169,13 +193,13 @@ export default class PieChart extends Component {
         height={height}
         legendVisible={legendVisible}
         onClick={() => {
-          this.setState({ isPickingColor: null });
+          this.setState({ isPickingColor: undefined });
         }}
         legend={({ horizontal }) => (
           <Legend
             horizontal={!horizontal}
             title={get(this.props, 'data.metadata.bucketColumnTitle')}
-            data={series.data.map(({ key }) => key)}
+            data={series.data.map(({ key }) => `${key}`)}
             colorMapping={
               series.data.reduce((acc, { key }, i) => ({
                 ...acc,
@@ -218,9 +242,15 @@ export default class PieChart extends Component {
                       data={series.data}
                       value={datum => datum.value}
                       id={datum => datum.key}
-                      sort={(a, b) =>
-                        sortAlphabetically(a, b, ({ key }) => key)
-                      }
+                      sort={(a, b) => {
+                        const sortFunctionFactory = get(this.props.data, 'series.common.metadata.type') === 'text' ?
+                          sortAlphabetically
+                          :
+                          sortChronologically
+                        ;
+
+                        return sortFunctionFactory(a, b, ({ key }) => key);
+                      }}
                     >{nodes => (
                       <Group>
                         {nodes.map(({
@@ -231,13 +261,14 @@ export default class PieChart extends Component {
                           const color = this.getColor(key, i);
                           const midAngle = (((endAngle - startAngle) / 2) + startAngle) -
                             (Math.PI / 2);
-                          const labelPosition = positionFromAngle(midAngle, diameter * 0.35);
+                          const labelPosition = positionFromAngle(midAngle, diameter * 0.4);
+                          const edgePosition = positionFromAngle(midAngle, diameter * 0.3);
                           const colorpickerPlacement = labelPosition.x < 0 ?
                             'right' :
                             'left';
 
                           return (
-                            <Group>
+                            <Group key={key}>
                               {(this.state.isPickingColor === key) && (
                                 <Portal node={this.wrap}>
                                   <ColorPicker
@@ -248,7 +279,7 @@ export default class PieChart extends Component {
                                     color={color}
                                     onChange={({ hex }) => {
                                       onChangeVisualisationSpec({
-                                        colors: { ...colors, [this.state.isPickingColor]: hex },
+                                        colors: { ...colorMapping, [this.state.isPickingColor]: hex },
                                       });
                                       this.setState({ isPickingColor: null });
                                     }}
@@ -277,12 +308,14 @@ export default class PieChart extends Component {
                                   this.handleMouseLeaveNode({ key });
                                 }}
                               />
-                              {this.renderkey({
+                              {this.renderLabel({
                                 key,
                                 value,
                                 midAngle,
                                 labelPosition,
+                                edgePosition,
                                 totalCount,
+                                angle: endAngle - startAngle,
                               })}
                             </Group>
                           );
