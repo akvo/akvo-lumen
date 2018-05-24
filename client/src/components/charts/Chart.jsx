@@ -9,7 +9,6 @@ import * as chart from '../../utilities/chart';
 import LineChart from './LineChart';
 import BarChart from './BarChart';
 import { defaultPrimaryColor, palette } from '../../utilities/visualisationColors';
-import get from 'lodash/get';
 import PieChart from './PieChart';
 import { defaultPrimaryColor, palette } from '../../utilities/visualisationColors';
 
