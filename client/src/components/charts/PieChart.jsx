@@ -168,7 +168,7 @@ export default class PieChart extends Component {
       data,
       width,
       height,
-      colors,
+      colorMapping,
       onChangeVisualisationSpec,
       innerRadius,
       style,
@@ -279,7 +279,7 @@ export default class PieChart extends Component {
                                     color={color}
                                     onChange={({ hex }) => {
                                       onChangeVisualisationSpec({
-                                        colors: { ...colors, [this.state.isPickingColor]: hex },
+                                        colors: { ...colorMapping, [this.state.isPickingColor]: hex },
                                       });
                                       this.setState({ isPickingColor: null });
                                     }}
