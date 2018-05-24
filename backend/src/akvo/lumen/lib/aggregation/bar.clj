@@ -49,7 +49,7 @@
           WITH
             sort_table
           AS
-            (SELECT %1$s AS bucket, " sql-aggregation-subquery " AS sort_value, TRUE as include_value FROM %3$s WHERE %4$s GROUP BY %1$s " sql-sort-subbucket-subquery " LIMIT %6$s)
+            (SELECT %1$s AS x, " sql-aggregation-subquery " AS sort_value, TRUE as include_value FROM %3$s WHERE %4$s GROUP BY %1$s " sql-sort-subbucket-subquery " LIMIT %6$s)
           ,
             data_table
           AS
@@ -60,7 +60,7 @@
               GROUP BY %1$s, %7$s
             )
           SELECT
-            data_table.x,
+            data_table.x AS x,
             data_table.y,
             data_table.s,
             sort_table.sort_value,
@@ -70,7 +70,7 @@
           LEFT JOIN
             sort_table
           ON
-            COALESCE(sort_table.bucket, '@@@MISSINGDATA@@@') = COALESCE(data_table.x, '@@@MISSINGDATA@@@')
+            COALESCE(sort_table.x::text, '@@@MISSINGDATA@@@') = COALESCE(data_table.x::text, '@@@MISSINGDATA@@@')
           WHERE
             sort_table.include_value IS NOT NULL
           " sql-sort-subbucket-subquery)

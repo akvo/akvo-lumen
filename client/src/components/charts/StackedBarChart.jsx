@@ -151,7 +151,7 @@ export default class StackedBarChart extends Component {
   }
 
   handleMouseLeaveLegendNode() {
-    this.setState({ hoveredSeries: null });
+    this.setState({ hoveredSeries: undefined });
   }
 
   handleMouseLeaveNode() {
@@ -162,7 +162,7 @@ export default class StackedBarChart extends Component {
     const { interactive, print, edit } = this.props;
     if (!interactive || print) return;
     event.stopPropagation();
-    const isPickingColor = edit ? node : null;
+    const isPickingColor = edit ? node : undefined;
     this.setState({
       isPickingColor,
       tooltipVisible: !isPickingColor,
@@ -192,7 +192,7 @@ export default class StackedBarChart extends Component {
     const {
       width,
       height,
-      colors,
+      colorMapping,
       onChangeVisualisationSpec,
       marginTop,
       marginRight,
@@ -225,13 +225,13 @@ export default class StackedBarChart extends Component {
         height={height}
         legendVisible={legendVisible}
         onClick={() => {
-          this.setState({ isPickingColor: null });
+          this.setState({ isPickingColor: undefined });
         }}
         legend={({ horizontal }) => (
           <Legend
             horizontal={!horizontal}
             title={get(this.props, 'data.metadata.bucketColumnTitle')}
-            data={stackNodes.map(({ key }) => key)}
+            data={stackNodes.map(({ key }) => replaceLabelIfValueEmpty(key))}
             colorMapping={
               stackNodes.reduce((acc, { key }, i) => ({
                 ...acc,
@@ -358,11 +358,11 @@ export default class StackedBarChart extends Component {
                                         onChange={({ hex }) => {
                                           onChangeVisualisationSpec({
                                             colors: {
-                                              ...colors,
+                                              ...colorMapping,
                                               [this.state.isPickingColor.seriesKey]: hex,
                                             },
                                           });
-                                          this.setState({ isPickingColor: null });
+                                          this.setState({ isPickingColor: undefined });
                                         }}
                                       />
                                     </Portal>

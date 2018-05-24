@@ -75,7 +75,13 @@ const getNeedNewAggregation = (newV = { spec: {} }, oldV = { spec: {} }, optiona
   switch (vType) {
     case 'bar':
       return Boolean(
-        !isEqual(newV.spec, oldV.spec)
+        newV.datasetId !== oldV.datasetId ||
+        newV.spec.metricColumnX !== oldV.spec.metricColumnX ||
+        newV.spec.metricColumnY !== oldV.spec.metricColumnY ||
+        newV.spec.metricAggregation !== oldV.spec.metricAggregation ||
+        newV.spec.subBucketColumn !== oldV.spec.metricAggregation ||
+        newV.spec.subBucketMethod !== oldV.spec.subBucketMethod ||
+        !isEqual(newV.spec.filters, oldV.spec.filters)
       );
     case 'pivot table':
       return Boolean(

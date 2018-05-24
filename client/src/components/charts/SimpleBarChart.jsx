@@ -20,6 +20,20 @@ import { labelFont } from '../../constants/chart';
 
 const getDatum = (data, datum) => data.filter(({ key }) => key === datum)[0];
 
+const getPaddingBottom = ({ data }) => {
+  const labelCutoffLength = 16;
+  const longestLabelLength =
+    Math.min(
+      labelCutoffLength,
+      data
+        .map(({ label }) => String(replaceLabelIfValueEmpty(label)))
+        .sort((a, b) => b.length - a.length)[0].length
+    );
+  const pixelsPerChar = 3.5;
+
+  return Math.ceil(longestLabelLength * pixelsPerChar);
+};
+
 export default class SimpleBarChart extends Component {
 
   static propTypes = {
@@ -60,6 +74,7 @@ export default class SimpleBarChart extends Component {
     legendVisible: PropTypes.bool,
     yAxisLabel: PropTypes.string,
     yAxisTicks: PropTypes.number,
+    xAxisLabel: PropTypes.string,
     grid: PropTypes.bool,
   }
 
@@ -68,7 +83,7 @@ export default class SimpleBarChart extends Component {
     marginLeft: 0.1,
     marginRight: 0.1,
     marginTop: 0.1,
-    marginBottom: 0.2,
+    marginBottom: 0.1,
     legendVisible: false,
     edit: false,
     padding: 0.1,
@@ -113,7 +128,6 @@ export default class SimpleBarChart extends Component {
 
     if (y < bounds.height / 2) tooltipPosition.top = y - 12;
     else tooltipPosition.bottom = bounds.height - y - 12;
-
     this.setState({
       tooltipVisible: true,
       tooltipItems: [content],
@@ -145,7 +159,7 @@ export default class SimpleBarChart extends Component {
     if (!interactive || print) return;
     event.stopPropagation();
     this.setState({
-      isPickingColor: edit ? key : null,
+      isPickingColor: edit ? key : undefined,
       hoveredNode: key,
     });
   }
@@ -178,6 +192,9 @@ export default class SimpleBarChart extends Component {
       );
     }
     const labelY = y + 10;
+    let labelText = String(replaceLabelIfValueEmpty(key));
+    labelText = labelText.length <= 16 ?
+      labelText : `${labelText.substring(0, 13)}…`;
     return (
       <Text
         textAnchor="start"
@@ -197,7 +214,7 @@ export default class SimpleBarChart extends Component {
           this.handleMouseLeaveNode({ key });
         }}
       >
-        {replaceLabelIfValueEmpty(key)}
+        {labelText}
       </Text>
     );
   }
@@ -206,18 +223,19 @@ export default class SimpleBarChart extends Component {
     const {
       width,
       height,
-      colors,
+      colorMapping,
       onChangeVisualisationSpec,
       marginTop,
       marginRight,
-      marginBottom,
       marginLeft,
+      marginBottom,
       style,
       legendVisible,
       edit,
       padding,
       yAxisLabel,
       yAxisTicks,
+      xAxisLabel,
       grid,
     } = this.props;
 
@@ -226,6 +244,8 @@ export default class SimpleBarChart extends Component {
     const series = this.getData();
 
     if (!series) return null;
+
+    const paddingBottom = getPaddingBottom(series);
 
     const dataCount = series.data.length;
 
@@ -236,7 +256,7 @@ export default class SimpleBarChart extends Component {
         height={height}
         legendVisible={legendVisible}
         onClick={() => {
-          this.setState({ isPickingColor: null });
+          this.setState({ isPickingColor: undefined });
         }}
         legend={({ horizontal }) => (
           <Legend
@@ -261,7 +281,8 @@ export default class SimpleBarChart extends Component {
         )}
         chart={
           <ResponsiveWrapper>{(dimensions) => {
-            const availableHeight = dimensions.height * (1 - marginBottom - marginTop);
+            const availableHeight =
+              (dimensions.height * (1 - marginBottom - marginTop)) - paddingBottom;
             const availableWidth = dimensions.width * (1 - marginLeft - marginRight);
 
             const domain = extent(series.data, ({ value }) => value);
@@ -306,7 +327,7 @@ export default class SimpleBarChart extends Component {
                     bands
                     size={[
                       dimensions.width * (1 - marginLeft - marginRight),
-                      dimensions.height * (1 - marginTop - marginBottom),
+                      (dimensions.height * (1 - marginTop - marginBottom)) - paddingBottom,
                     ]}
                     rows={1}
                     // nodeEnter={d => ({ ...d, value: 0 })}
@@ -341,9 +362,9 @@ export default class SimpleBarChart extends Component {
                                   placement={colorpickerPlacement}
                                   onChange={({ hex }) => {
                                     onChangeVisualisationSpec({
-                                      colors: { ...colors, [this.state.isPickingColor]: hex },
+                                      colors: { ...colorMapping, [this.state.isPickingColor]: hex },
                                     });
-                                    this.setState({ isPickingColor: null });
+                                    this.setState({ isPickingColor: undefined });
                                   }}
                                 />
                               </Portal>
@@ -394,6 +415,16 @@ export default class SimpleBarChart extends Component {
                     tickTextFill={'#1b1a1e'}
                     numTicks={yAxisTicks}
                   />
+
+                  <Text
+                    transform={[
+                      { type: 'translate', value: [Math.floor(this.props.width / 2), this.props.height - 5] },
+                    ]}
+                    fontSize={10}
+                    fontFamily="Arial"
+                  >
+                    {xAxisLabel || ''}
+                  </Text>
 
                 </Svg>
               </div>
