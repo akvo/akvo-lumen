@@ -161,7 +161,7 @@ export default class LineChart extends Component {
     } = this.props;
     const { tooltipItems, tooltipVisible, tooltipPosition } = this.state;
 
-    const xAxisTicks = 12;
+    const xAxisTicks = 8;
 
     const series = this.getData();
 
