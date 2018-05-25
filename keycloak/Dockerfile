@@ -8,4 +8,4 @@ ENV KEYCLOAK_PASSWORD=admin
 CMD ["-b", "0.0.0.0", "-Dkeycloak.migration.action=import", \
      "-Dkeycloak.migration.provider=singleFile", \
      "-Dkeycloak.migration.file=/tmp/akvo.json", \
-     "-Dkeycloak.migration.strategy=OVERWRITE_EXISTING"]
+     "-Dkeycloak.migration.strategy=IGNORE_EXISTING"]
