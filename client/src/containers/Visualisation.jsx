@@ -10,6 +10,7 @@ import NavigationPrompt from '../components/common/NavigationPrompt';
 import * as actions from '../actions/visualisation';
 import * as entity from '../domain/entity';
 import { fetchDataset } from '../actions/dataset';
+import { trackPageView, trackEvent } from '../utilities/analytics';
 import { fetchLibrary } from '../actions/library';
 import mapSpecTemplate from './Visualisation/mapSpecTemplate';
 import pieSpecTemplate from './Visualisation/pieSpecTemplate';
@@ -90,6 +91,8 @@ class Visualisation extends Component {
         this.setState({
           visualisation,
           isUnsavedChanges: false,
+        }, () => {
+          this.handleTrackPageView(visualisation);
         });
       }
     }
@@ -131,8 +134,9 @@ class Visualisation extends Component {
       (isEditingExistingVisualisation && !loadedVisualisation && nextPropsHasVisualisation) ||
       get(this.state, 'visualisation.shareId') !== get(nextProps, `library.visualisations[${visualisationId}].shareId`)
     ) {
-      this.setState({
-        visualisation: nextProps.library.visualisations[visualisationId],
+      const visualisation = nextProps.library.visualisations[visualisationId];
+      this.setState({ visualisation }, () => {
+        this.handleTrackPageView(visualisation);
       });
     }
 
@@ -198,6 +202,14 @@ class Visualisation extends Component {
           handleResponse
         )
       );
+    }
+  }
+
+  handleTrackPageView(visualisation) {
+    if (!this.state.hasTrackedPageView) {
+      this.setState({ hasTrackedPageView: true }, () => {
+        trackPageView(`Visualisation: ${visualisation.name || 'Untitled visualisation'}`);
+      });
     }
   }
 
@@ -288,9 +300,14 @@ class Visualisation extends Component {
 
   handleVisualisationAction(action) {
     switch (action) {
-      case 'share':
+      case 'share': {
+        trackEvent(
+          'Share visualisation',
+          `${window.location.origin}/visualisation/${this.state.visualisation.id}`
+        );
         this.toggleShareVisualisation();
         break;
+      }
       default:
         throw new Error(`Action ${action} not yet implemented`);
     }

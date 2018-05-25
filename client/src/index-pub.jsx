@@ -10,13 +10,15 @@ import LumenBranding from './components/common/LumenBranding';
 import ErrorScreen from './components/common/ErrorScreen';
 import polyfill from './polyfill/polyfill';
 import configureStore from './store/configureStore';
+import { init as initAnalytics, trackPageView } from './utilities/analytics';
+import * as auth from './auth';
 
 require('./styles/reset.global.scss');
 require('./styles/style.global.scss');
 
 const rootElement = document.querySelector('#root');
 
-function renderSuccessfulShare(data) {
+function renderSuccessfulShare(data, initialState) {
   const datasets = data.datasets;
   const immutableDatasets = {};
 
@@ -27,6 +29,17 @@ function renderSuccessfulShare(data) {
       immutableDatasets[key] = dataset;
     });
   }
+
+  initAnalytics(initialState);
+
+  const entity = data.dashboards ?
+    data.dashboards[data.dashboardId] :
+    data.visualisations[data.visualisationId];
+
+  const entityType = data.dashboards ? 'dashboard' : 'visualisation';
+
+  trackPageView(`Share ${entityType}: ${entity.name || `Untitled ${entityType}`}`);
+
   render(
     <Provider store={configureStore()}>
       <IntlWrapper>
@@ -67,21 +80,24 @@ const shareId = pathMatch != null ? pathMatch[1] : null;
 let hasSubmitted = false;
 
 const fetchData = (password = undefined, callback = () => {}) => {
-  fetch(`/share/${shareId}`, { headers: { 'X-Password': password } })
-    .then((response) => {
-      if (response.status === 403) {
-        renderPrivacyGate(); // eslint-disable-line
-        callback();
-        return null;
-      }
-      return response.json();
-    })
-    .then((data) => {
-      if (data) renderSuccessfulShare(data);
-    })
-    .catch((error) => {
-      renderNoSuchShare();
-      throw error;
+  auth.initPublic()
+    .then(({ env }) => {
+      fetch(`/share/${shareId}`, { headers: { 'X-Password': password } })
+        .then((response) => {
+          if (response.status === 403) {
+            renderPrivacyGate(); // eslint-disable-line
+            callback();
+            return null;
+          }
+          return response.json();
+        })
+        .then((data) => {
+          if (data) renderSuccessfulShare(data, { env });
+        })
+        .catch((error) => {
+          renderNoSuchShare();
+          throw error;
+        });
     });
 };
 

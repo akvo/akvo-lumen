@@ -38,6 +38,7 @@ export function init() {
       tenant,
       sentryDSN,
       flowApiUrl,
+      piwikSiteId,
     }) => new Promise((resolve, reject) => {
       if (process.env.NODE_ENV === 'production') {
         Raven.config(sentryDSN).install();
@@ -56,7 +57,7 @@ export function init() {
             }
             resolve({
               profile: Object.assign({}, profile, { admin: keycloak.hasRealmRole(`akvo:lumen:${tenant}:admin`) }),
-              env: { flowApiUrl, keycloakURL },
+              env: { flowApiUrl, keycloakURL, piwikSiteId },
             });
           }).error(() => {
             reject(new Error('Could not load user profile'));
@@ -69,4 +70,10 @@ export function init() {
       });
     }
   ));
+}
+
+export function initPublic() {
+  return fetch('/env')
+    .then(response => response.json())
+    .then(({ piwikSiteId }) => ({ env: { piwikSiteId } }));
 }
