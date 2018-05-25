@@ -12,7 +12,12 @@ const specIsValidForApi = (spec, vType) => {
   let anyLayerInvalid;
 
   switch (vType) {
-    case 'bar': // DEBUG
+    case 'scatter':
+      if (spec.metricColumnX === null || spec.metricColumnY === null) {
+        return false;
+      }
+      break;
+    case 'bar':
       if (spec.bucketColumn === null || spec.metricColumnY === null) {
         return false;
       }
@@ -108,6 +113,16 @@ const getNeedNewAggregation = (newV = { spec: {} }, oldV = { spec: {} }, optiona
         newV.spec.metricAggregation !== oldV.spec.metricAggregation ||
         !isEqual(newV.spec.filters, oldV.spec.filters)
       );
+    case 'scatter':
+      return Boolean(
+        newV.datasetId !== oldV.datasetId ||
+        newV.spec.metricColumnX !== oldV.spec.metricColumnX ||
+        newV.spec.metricColumnY !== oldV.spec.metricColumnY ||
+        newV.spec.metricAggregation !== oldV.spec.metricAggregation ||
+        newV.spec.bucketColumn !== oldV.spec.bucketColumn ||
+        newV.spec.datapointLabelColumn !== oldV.spec.datapointLabelColumn ||
+        !isEqual(newV.spec.filters, oldV.spec.filters)
+      );
 
     case 'map':
       return Boolean(
@@ -164,7 +179,6 @@ export default class VisualisationEditor extends Component {
 
     switch (vType) {
       case null:
-      case 'scatter':
         // Data aggregated client-side
         this.setState({ visualisation });
         break;
@@ -219,6 +233,7 @@ export default class VisualisationEditor extends Component {
       case 'line':
       case 'area':
       case 'bar':
+      case 'scatter':
         // Data aggregated on the backend for these types
 
         specValid = specIsValidForApi(visualisation.spec, vType);
@@ -335,6 +350,18 @@ export default class VisualisationEditor extends Component {
         break;
       case 'bar':
         api.get(`/api/aggregation/${datasetId}/bar`, {
+          query: JSON.stringify(spec),
+        }).then(response => response.json())
+          .then((response) => {
+            if (requestId === this.latestRequestId) {
+              this.setState({
+                visualisation: Object.assign({}, visualisation, { data: response }),
+              });
+            }
+          });
+        break;
+      case 'scatter':
+        api.get(`/api/aggregation/${datasetId}/scatter`, {
           query: JSON.stringify(spec),
         }).then(response => response.json())
           .then((response) => {

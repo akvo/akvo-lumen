@@ -25,6 +25,7 @@ export default class PieChart extends Component {
       data: PropTypes.array,
       metadata: PropTypes.object,
     }),
+    donut: PropTypes.bool,
     colors: PropTypes.oneOfType([PropTypes.array, PropTypes.object]).isRequired,
     colorMapping: PropTypes.object,
     onChangeVisualisationSpec: PropTypes.func,
@@ -150,7 +151,9 @@ export default class PieChart extends Component {
           {(!print && interactive && !legendVisible) && `${key}`}
           {(print || !interactive) && ': '}
           {(print || !interactive) && value}
-          {(print || !interactive) && (<span>&nbsp;({round((value / totalCount) * 100, 2)}%)</span>)}
+          {(print || !interactive) && (
+            <span>&nbsp;({round((value / totalCount) * 100, 2)}%)</span>
+          )}
         </Text>
         <Line
           x1={offset(labelPosition.x, labelOffset)}
@@ -170,7 +173,7 @@ export default class PieChart extends Component {
       height,
       colorMapping,
       onChangeVisualisationSpec,
-      innerRadius,
+      donut,
       style,
       legendVisible,
       edit,
@@ -179,6 +182,8 @@ export default class PieChart extends Component {
     if (data.error) {
       return 'Cannot display pie chart';
     }
+
+    const innerRadius = donut ? Math.floor(Math.min(width, height) / 8) : 0;
 
     const series = this.getData();
 
@@ -243,11 +248,12 @@ export default class PieChart extends Component {
                       value={datum => datum.value}
                       id={datum => datum.key}
                       sort={(a, b) => {
-                        const sortFunctionFactory = get(this.props.data, 'series.common.metadata.type') === 'text' ?
-                          sortAlphabetically
-                          :
-                          sortChronologically
-                        ;
+                        const sortFunctionFactory =
+                          get(this.props.data, 'series.common.metadata.type') === 'text' ?
+                            sortAlphabetically
+                            :
+                            sortChronologically
+                          ;
 
                         return sortFunctionFactory(a, b, ({ key }) => key);
                       }}
@@ -279,7 +285,10 @@ export default class PieChart extends Component {
                                     color={color}
                                     onChange={({ hex }) => {
                                       onChangeVisualisationSpec({
-                                        colors: { ...colorMapping, [this.state.isPickingColor]: hex },
+                                        colors: {
+                                          ...colorMapping,
+                                          [this.state.isPickingColor]: hex,
+                                        },
                                       });
                                       this.setState({ isPickingColor: null });
                                     }}
@@ -289,7 +298,8 @@ export default class PieChart extends Component {
                               <Arc
                                 key={i}
                                 innerRadius={innerRadius}
-                                outerRadius={diameter * (get(this.state, 'hoveredNode') === key ? 0.31 : 0.3)}
+                                outerRadius={diameter *
+                                  (get(this.state, 'hoveredNode') === key ? 0.31 : 0.3)}
                                 startAngle={startAngle}
                                 endAngle={endAngle}
                                 fill={color}

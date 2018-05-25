@@ -9,6 +9,7 @@ import * as chart from '../../utilities/chart';
 import LineChart from './LineChart';
 import BarChart from './BarChart';
 import PieChart from './PieChart';
+import ScatterChart from './ScatterChart';
 import { defaultPrimaryColor, palette } from '../../utilities/visualisationColors';
 
 require('./Chart.scss');
@@ -120,7 +121,8 @@ export default class Chart extends Component {
       visualisation.visualisationType === 'area' ||
       visualisation.visualisationType === 'bar' ||
       visualisation.visualisationType === 'donut' ||
-      visualisation.visualisationType === 'pie'
+      visualisation.visualisationType === 'pie' ||
+      visualisation.visualisationType === 'scatter'
     ) {
       return;
     }
@@ -198,7 +200,7 @@ export default class Chart extends Component {
             data={visualisation.data}
             width={width}
             height={adjustedContainerHeight}
-            color={defaultPrimaryColor}
+            color={visualisation.spec.color || defaultPrimaryColor}
             xAxisLabel={visualisation.spec.axisLabelX}
             yAxisLabel={visualisation.spec.axisLabelY}
             area={Boolean(visualisation.visualisationType === 'area')}
@@ -206,10 +208,24 @@ export default class Chart extends Component {
             edit={Boolean(onChangeVisualisationSpec)}
           />
         );
+      case 'scatter':
+        return (
+          <ScatterChart
+            visualisation={visualisation}
+            data={visualisation.data}
+            width={width}
+            height={adjustedContainerHeight}
+            color={visualisation.spec.color || defaultPrimaryColor}
+            xAxisLabel={visualisation.spec.axisLabelX}
+            yAxisLabel={visualisation.spec.axisLabelY}
+            onChangeVisualisationSpec={onChangeVisualisationSpec}
+            edit={Boolean(onChangeVisualisationSpec)}
+          />
+        );
       case 'bar':
         return (
           <BarChart
-            edit
+            edit={Boolean(onChangeVisualisationSpec)}
             visualisation={visualisation}
             data={visualisation.data}
             width={width}
@@ -225,20 +241,6 @@ export default class Chart extends Component {
         );
       default:
         console.warn(`Unknown visualisation type ${visualisation.visualisationType}`);
-      /*
-      case 'pie':
-      case 'donut': {
-        return (
-          <PieChart
-            colors={colors}
-            data={visualisation.data}
-            width={width}
-            height={height}
-            onChangeVisualisationSpec={onChangeVisualisationSpec}
-          />
-        );
-      }
-      */
     }
     return null;
   }

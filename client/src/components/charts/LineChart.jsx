@@ -79,7 +79,7 @@ export default class LineChart extends Component {
   }
 
   state = {
-    isPickingColor: false,
+    isPickingColor: undefined,
   }
 
   getData() {
@@ -219,6 +219,12 @@ export default class LineChart extends Component {
             const maxNodesForTooltip = 50;
             const showTooltip = numNodes <= maxNodesForTooltip;
 
+            const tickFormat = series.metadata.type === 'number' ?
+              { tickFormat: value => this.context.abbrNumber(value) }
+              :
+              {}
+            ;
+
             return (
               <div
                 style={{ position: 'relative' }}
@@ -239,7 +245,7 @@ export default class LineChart extends Component {
                     color={color}
                     onChange={({ hex }) => {
                       onChangeVisualisationSpec({ color: hex });
-                      this.setState({ isPickingColor: null });
+                      this.setState({ isPickingColor: undefined });
                     }}
                     left={dimensions.width / 2}
                     top={dimensions.height / 2}
@@ -338,7 +344,7 @@ export default class LineChart extends Component {
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}
                     numTicks={yAxisTicks}
-                    tickFormat={value => this.context.abbrNumber(value)}
+                    {...tickFormat}
                     labelProps={{
                       dy: marginTop * dimensions.height * 0.5,
                       textAnchor: 'middle',
@@ -362,7 +368,7 @@ export default class LineChart extends Component {
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}
                     numTicks={xAxisTicks}
-                    tickFormat={value => this.context.abbrNumber(value)}
+                    {...tickFormat}
                   />
                 </Svg>
               </div>

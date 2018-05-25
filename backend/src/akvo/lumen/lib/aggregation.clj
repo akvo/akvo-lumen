@@ -4,6 +4,7 @@
             [akvo.lumen.lib.aggregation.line :as line]
             [akvo.lumen.lib.aggregation.bar :as bar]
             [akvo.lumen.lib.aggregation.pivot :as pivot]
+            [akvo.lumen.lib.aggregation.scatter :as scatter]
             [clojure.java.jdbc :as jdbc]
             [hugsql.core :as hugsql]))
 
@@ -48,3 +49,7 @@
 (defmethod query* "donut"
   [tenant-conn dataset _ query]
   (pie/query tenant-conn dataset query))
+
+(defmethod query* "scatter"
+  [tenant-conn dataset _ query]
+  (scatter/query tenant-conn dataset query))

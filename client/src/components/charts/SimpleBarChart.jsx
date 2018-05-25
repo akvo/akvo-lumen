@@ -20,13 +20,20 @@ import { labelFont } from '../../constants/chart';
 
 const getDatum = (data, datum) => data.filter(({ key }) => key === datum)[0];
 
-const getPaddingBottom = ({ data }) => {
+const getLabelText = (label, type) => {
+  const o = type === 'date' ?
+    `${new Date(label * 1000)}` : replaceLabelIfValueEmpty(label);
+
+  return o;
+};
+
+const getPaddingBottom = (data, type) => {
   const labelCutoffLength = 16;
   const longestLabelLength =
     Math.min(
       labelCutoffLength,
       data
-        .map(({ label }) => String(replaceLabelIfValueEmpty(label)))
+        .map(({ label }) => String(getLabelText(label, type)))
         .sort((a, b) => b.length - a.length)[0].length
     );
   const pixelsPerChar = 3.5;
@@ -164,7 +171,11 @@ export default class SimpleBarChart extends Component {
     });
   }
 
-  renderLabel({ key, nodeWidth, x, y, domain, value }) {
+  renderLabel({ key, nodeWidth, x, y, domain, value, type }) {
+    let labelText = String(getLabelText(value, type));
+    labelText = labelText.length <= 16 ?
+      labelText : `${labelText.substring(0, 13)}…`;
+
     const labelX = x + (nodeWidth / 2);
     if (domain[0] < 0) {
       const labelY = value < 0 ? y - 10 : y + 10;
@@ -187,14 +198,11 @@ export default class SimpleBarChart extends Component {
             this.handleMouseLeaveNode({ key });
           }}
         >
-          {replaceLabelIfValueEmpty(key)}
+          {labelText}
         </Text>
       );
     }
     const labelY = y + 10;
-    let labelText = String(replaceLabelIfValueEmpty(key));
-    labelText = labelText.length <= 16 ?
-      labelText : `${labelText.substring(0, 13)}…`;
     return (
       <Text
         textAnchor="start"
@@ -245,8 +253,8 @@ export default class SimpleBarChart extends Component {
 
     if (!series) return null;
 
-    const paddingBottom = getPaddingBottom(series);
-
+    const dataType = series.metadata.type;
+    const paddingBottom = getPaddingBottom(series.data, dataType);
     const dataCount = series.data.length;
 
     return (
@@ -399,6 +407,7 @@ export default class SimpleBarChart extends Component {
                               y: origin,
                               domain,
                               height: normalizedHeight,
+                              type: dataType,
                             })}
                           </Group>
                         );

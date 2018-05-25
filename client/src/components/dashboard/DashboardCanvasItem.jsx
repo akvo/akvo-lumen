@@ -33,6 +33,8 @@ const getIsDatasetLoaded = (props) => {
     case 'donut':
     case 'line':
     case 'area':
+    case 'bar':
+    case 'scatter':
       return true;
 
     case 'map':
