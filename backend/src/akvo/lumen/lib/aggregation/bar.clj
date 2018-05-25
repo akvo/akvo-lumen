@@ -36,7 +36,7 @@
                                       "asc" "ORDER BY sort_value ASC NULLS FIRST"
                                       "dsc" "ORDER BY sort_value DESC NULLS LAST")
         sql-aggregation-subquery (case aggregation-method
-                                   nil ""
+                                   nil "NULL"
                                    ("min" "max" "count" "sum") (str aggregation-method  "(%2$s)")
                                    "mean" "avg(%2$s)"
                                    "median" "percentile_cont(0.5) WITHIN GROUP (ORDER BY %2$s)"
@@ -75,7 +75,8 @@
             sort_table.include_value IS NOT NULL
           " sql-sort-subbucket-subquery)
 
-        sql-text (if column-subbucket sql-text-with-subbucket sql-text-without-subbucket)
+        valid-spec (boolean (and column-x column-y))
+        sql-text (if valid-spec (if column-subbucket sql-text-with-subbucket sql-text-without-subbucket) "SELECT NULL")
         sql-response (run-query tenant-conn table-name sql-text column-x-name column-y-name filter-sql aggregation-method max-buckets column-subbucket-name)
         bucket-values (distinct
                        (mapv
