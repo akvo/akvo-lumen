@@ -75,5 +75,5 @@ export function init() {
 export function initPublic() {
   return fetch('/env')
     .then(response => response.json())
-    .then(({ piwikSiteId }) => ({ env: { piwikSiteId } }));
+    .then(env => ({ env }));
 }

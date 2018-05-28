@@ -23,6 +23,7 @@ export const init = (state) => {
   window._paq = window._paq || [];
   window._paq.push(['setTrackerUrl', `${u}piwik.php`]);
   window._paq.push(['setSiteId', state.env.piwikSiteId]);
+  window._paq.push(['setCustomVariable', 1, 'Tenant', window.location.hostname, 'visit']);
   window._paq.push(['enableLinkTracking']);
 };
 
