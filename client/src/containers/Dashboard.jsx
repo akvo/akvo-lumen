@@ -8,6 +8,7 @@ import * as actions from '../actions/dashboard';
 import * as api from '../api';
 import { fetchLibrary } from '../actions/library';
 import { fetchDataset } from '../actions/dataset';
+import { trackPageView, trackEvent } from '../utilities/analytics';
 import aggregationOnlyVisualisationTypes from '../utilities/aggregationOnlyVisualisationTypes';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { SAVE_COUNTDOWN_INTERVAL, SAVE_INITIAL_TIMEOUT } from '../constants/time';
@@ -340,11 +341,24 @@ class Dashboard extends Component {
     });
   }
 
+  handleTrackPageView(dashboard) {
+    if (!this.state.hasTrackedPageView) {
+      this.setState({ hasTrackedPageView: true }, () => {
+        trackPageView(`Dashboard: ${dashboard.title || 'Untitled dashboard'}`);
+      });
+    }
+  }
+
   handleDashboardAction(action) {
     switch (action) {
-      case 'share':
+      case 'share': {
+        trackEvent(
+          'Share dashboard',
+          `${window.location.origin}/dashboard/${this.state.dashboard.id}`
+        );
         this.toggleShareDashboard();
         break;
+      }
       default:
         throw new Error(`Action ${action} not yet implemented`);
     }
@@ -394,6 +408,7 @@ class Dashboard extends Component {
       { layout: Object.keys(dash.layout).map(key => dash.layout[key]) }
     );
     this.setState({ dashboard });
+    this.handleTrackPageView(dashboard);
 
     /* Load each unique dataset referenced by visualisations in the dashboard. Note - Even though
     /* onAddVisualisation also checks to see if a datasetId has already been requested, setState is

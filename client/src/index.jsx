@@ -8,6 +8,7 @@ import Root from './containers/Root';
 import configureStore from './store/configureStore';
 import * as auth from './auth';
 import polyfill from './polyfill/polyfill';
+import { init as initAnalytics } from './utilities/analytics';
 
 function initAuthenticated(profile, env) {
   const initialState = { profile, env };
@@ -15,6 +16,10 @@ function initAuthenticated(profile, env) {
   const store = configureStore(initialState);
   const history = syncHistoryWithStore(browserHistory, store);
   const rootElement = document.querySelector('#root');
+
+  store.subscribe(() => {
+    initAnalytics(store.getState());
+  });
 
   // Refreshing the token on a fixed schedule (every 10 minutes)
   // will disable SSO Idle Timeout

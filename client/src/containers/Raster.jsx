@@ -6,6 +6,7 @@ import warning from 'warning';
 import { showModal } from '../actions/activeModal';
 import { fetchRaster } from '../actions/raster';
 import { getId, getTitle } from '../domain/entity';
+import { trackPageView } from '../utilities/analytics';
 import EntityTypeHeader from '../components/entity-editor/EntityTypeHeader';
 import * as api from '../api';
 import LoadingSpinner from '../components/common/LoadingSpinner';
@@ -31,6 +32,8 @@ class Raster extends Component {
     const { params, raster, dispatch } = this.props;
     const { rasterId } = params;
 
+    this.handleTrackPageView(this.props);
+
     if (raster == null) {
       dispatch(fetchRaster(rasterId));
     }
@@ -45,6 +48,19 @@ class Raster extends Component {
       .catch((error) => {
         warning(false, 'Failed to fetch layergroup: %s', error.message);
       });
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.handleTrackPageView(nextProps);
+  }
+
+  handleTrackPageView(props) {
+    const { raster } = props;
+    if (raster && !this.state.hasTrackedPageView) {
+      this.setState({ hasTrackedPageView: true }, () => {
+        trackPageView(`Raster: ${getTitle(raster)}`);
+      });
+    }
   }
 
   handleShowRasterSettings() {
