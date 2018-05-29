@@ -8,8 +8,8 @@ export const init = (state) => {
   hasInited = true;
 
   const u = ((document.location.protocol === 'https:') ?
-  'https://akvo.piwikpro.com/' :
-  'http://analytics.akvo.org/');
+    'https://akvo.piwikpro.com/' :
+    'http://analytics.akvo.org/');
 
   const d = document;
   const g = d.createElement('script');
