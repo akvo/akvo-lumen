@@ -274,7 +274,7 @@ class Library extends Component {
           }}
           onCreate={(type) => {
             const { params } = this.props;
-            const meta = { collectionId: params.collectionId };
+            const meta = { collectionId: params.collectionId, from: 'library' };
             if (type === 'dataset') {
               // Data set creation is handled in a modal
               dispatch(showModal('create-dataset', meta));
