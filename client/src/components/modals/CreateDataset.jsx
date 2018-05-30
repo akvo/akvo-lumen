@@ -11,6 +11,7 @@ import DataSourceSettings from './createDataset/DataSourceSettings';
 import Settings from '../dataset/Settings';
 import * as actionCreators from '../../actions/dataset';
 import { importRaster } from '../../actions/raster';
+import { trackEvent } from '../../utilities/analytics';
 
 require('./CreateDataset.scss');
 
@@ -63,6 +64,7 @@ class CreateDataset extends Component {
     const { datasetImport, collectionId } = this.props;
     const { currentPage, dataset } = datasetImport;
     if (currentPage === 'define-dataset') {
+      trackEvent('Import dataset. Source:', dataset.source.kind);
       if (dataset.source.kind === 'GEOTIFF') {
         this.props.importRaster(dataset, collectionId);
       } else {

@@ -10,10 +10,18 @@ function Header({
   router,
   className = '',
   backButtonTarget,
+  location,
 }) {
-  const target = backButtonTarget == null ?
-    { onClick: () => router.goBack() } :
-    { to: backButtonTarget };
+  const haveHistory = location.state && location.state.from;
+  let target;
+
+  if (backButtonTarget) {
+    target = { to: backButtonTarget };
+  } else if (haveHistory) {
+    target = { onClick: () => router.goBack() };
+  } else {
+    target = { to: '/library' };
+  }
 
   return (
     <nav className={`Header ${className}`}>
@@ -42,6 +50,7 @@ function Header({
 
 Header.propTypes = {
   router: PropTypes.object.isRequired,
+  location: PropTypes.object,
   backButtonTarget: PropTypes.string,
   children: PropTypes.node,
   actions: PropTypes.node,

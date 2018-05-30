@@ -160,7 +160,7 @@ export function clearImport() {
 
 export function importDataset(dataSource, collectionId) {
   return (dispatch) => {
-    dispatch(importDatasetRequest(dataSource, collectionId));
+    dispatch(importDatasetRequest(dataSource));
     api.post('/api/datasets', dataSource)
       .then(response => response.json())
       .then(({ importId }) => {

@@ -21,7 +21,8 @@
                              :scheme :http}
            :sentry-backend-dsn ""
            :sentry-client-dsn ""
-           :windshaft-url "http://windshaft:4000"}
+           :windshaft-url "http://windshaft:4000"
+           :piwik-site-id 165}
   :emailer {:from-email "devops@akvo.localhost"
             :from-name "Akvo Lumen"}
   :error-tracker {:dsn ""}
