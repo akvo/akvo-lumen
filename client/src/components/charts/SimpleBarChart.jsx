@@ -65,6 +65,7 @@ export default class SimpleBarChart extends Component {
     }),
     colors: PropTypes.array.isRequired,
     colorMapping: PropTypes.object,
+    defaultColor: PropTypes.string.isRequired,
     onChangeVisualisationSpec: PropTypes.func.isRequired,
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
@@ -116,9 +117,14 @@ export default class SimpleBarChart extends Component {
     };
   }
 
-  getColor(key, index) {
-    const { colorMapping, colors } = this.props;
-    return colorMapping[key] || colors[index];
+  getColor(key, index, numColors) {
+    const { colorMapping, colors, defaultColor } = this.props;
+
+    if (colorMapping[key]) {
+      return colorMapping[key];
+    }
+
+    return numColors > colors.length ? defaultColor : colors[index];
   }
 
   handleShowTooltip(event, content) {
@@ -274,7 +280,7 @@ export default class SimpleBarChart extends Component {
             colorMapping={
               series.data.reduce((acc, { key }, i) => ({
                 ...acc,
-                [key]: this.getColor(key, i),
+                [key]: this.getColor(key, i, series.data.length),
               }), {})
             }
             activeItem={get(this.state, 'hoveredNode')}
@@ -350,7 +356,7 @@ export default class SimpleBarChart extends Component {
                       }}
                     >
                       {nodes.map(({ nodeWidth, x, key, value }, i) => {
-                        const color = this.getColor(key, i);
+                        const color = this.getColor(key, i, nodes.length);
                         const normalizedHeight = availableHeight - heightScale(Math.abs(value));
                         const colorpickerPlacement = i < dataCount / 2 ? 'right' : 'left';
                         const y = (value < 0) ? origin : origin - normalizedHeight;
@@ -401,7 +407,7 @@ export default class SimpleBarChart extends Component {
                             />
                             {this.renderLabel({
                               key,
-                              value,
+                              value: key,
                               nodeWidth,
                               x,
                               y: origin,

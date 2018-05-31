@@ -232,6 +232,7 @@ export default class Chart extends Component {
             height={adjustedContainerHeight}
             colors={palette}
             colorMapping={visualisation.spec.colors}
+            defaultColor={defaultPrimaryColor}
             xAxisLabel={visualisation.spec.axisLabelX}
             yAxisLabel={visualisation.spec.axisLabelY}
             area={Boolean(visualisation.visualisationType === 'area')}
