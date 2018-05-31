@@ -18,10 +18,12 @@
         column-x-name (get column-x "columnName")
         column-x-title (get column-x "title")
         column-y (utils/find-column columns (get query "metricColumnY"))
+        column-y-type (get column-y "type")
         column-y-name (get column-y "columnName")
         column-y-title (get column-y "title")
         max-points 2500
         aggregation-method (get query "metricAggregation")
+        aggregation-method  (if (= column-y-type "text") "count" aggregation-method)
         sql-aggregation-subquery (case aggregation-method
                                    nil ""
                                    ("min" "max" "count" "sum") (str aggregation-method  "(%2$s)")
