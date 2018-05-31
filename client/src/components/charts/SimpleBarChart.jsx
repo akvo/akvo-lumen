@@ -235,6 +235,7 @@ export default class SimpleBarChart extends Component {
 
   render() {
     const {
+      data,
       width,
       height,
       colorMapping,
@@ -252,6 +253,8 @@ export default class SimpleBarChart extends Component {
       xAxisLabel,
       grid,
     } = this.props;
+
+    if (!data) return null;
 
     const { tooltipItems, tooltipVisible, tooltipPosition } = this.state;
 

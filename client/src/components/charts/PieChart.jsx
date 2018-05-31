@@ -179,6 +179,8 @@ export default class PieChart extends Component {
       edit,
     } = this.props;
 
+    if (!data) return null;
+
     if (data.error) {
       return 'Cannot display pie chart';
     }

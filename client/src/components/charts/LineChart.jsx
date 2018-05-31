@@ -148,6 +148,7 @@ export default class LineChart extends Component {
 
   render() {
     const {
+      data,
       width,
       height,
       color,
@@ -163,6 +164,9 @@ export default class LineChart extends Component {
       yAxisTicks,
       grid,
     } = this.props;
+
+    if (!data) return null;
+
     const { tooltipItems, tooltipVisible, tooltipPosition } = this.state;
 
     const xAxisTicks = 8;
