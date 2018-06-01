@@ -4,15 +4,16 @@
             [akvo.lumen.lib.aggregation.utils :as utils]
             [clojure.java.jdbc :as jdbc]))
 
-(defn- run-query [tenant-conn table-name sql-text column-x-name column-y-name filter-sql aggregation-method max-points column-subbucket-name]
+(defn- run-query [tenant-conn table-name sql-text column-x-name column-y-name filter-sql aggregation-method truncate-size column-subbucket-name]
   (rest (jdbc/query tenant-conn
                     [(format sql-text
-                             column-x-name column-y-name table-name filter-sql aggregation-method max-points column-subbucket-name)]
+                             column-x-name column-y-name table-name filter-sql aggregation-method truncate-size column-subbucket-name)]
                     {:as-arrays? true})))
 
 (defn query
   [tenant-conn {:keys [columns table-name]} query]
   (let [filter-sql (filter/sql-str columns (get query "filters"))
+        max-elements 200
         column-x (utils/find-column columns (get query "bucketColumn"))
         column-x-type (get column-x "type")
         column-x-name (get column-x "columnName")
@@ -26,7 +27,7 @@
         column-subbucket-title (get column-subbucket "title")
 
         aggregation-method (get query "metricAggregation")
-        max-buckets (or (get query "truncateSize") 200)
+        truncate-size (or (get query "truncateSize") "ALL")
         sql-sort-subquery (case (get query "sort")
                             nil "ORDER BY x ASC"
                             "asc" "ORDER BY z.y ASC NULLS FIRST"
@@ -77,7 +78,7 @@
 
         valid-spec (boolean (and column-x column-y))
         sql-text (if valid-spec (if column-subbucket sql-text-with-subbucket sql-text-without-subbucket) "SELECT NULL")
-        sql-response (run-query tenant-conn table-name sql-text column-x-name column-y-name filter-sql aggregation-method max-buckets column-subbucket-name)
+        sql-response (run-query tenant-conn table-name sql-text column-x-name column-y-name filter-sql aggregation-method truncate-size column-subbucket-name)
         bucket-values (distinct
                        (mapv
                         (fn [[x-value y-value s-value]] x-value)
@@ -86,40 +87,54 @@
                           (mapv
                            (fn [[x-value y-value s-value]] s-value)
                            sql-response))]
-    (lib/ok
-     (if (not column-subbucket)
-       {"series" [{"key" column-y-title
-                   "label" column-y-title
-                   "data" (mapv (fn [[x-value y-value]]
-                                  {"value" y-value})
-                                sql-response)}]
-        "common" {"metadata" {"type" column-x-type}
-                  "data" (mapv (fn [[x-value y-value]]
-                                 {"label" x-value "key" x-value})
-                               sql-response)}}
-       {"series"
-        (mapv
-         (fn [s-value]
-           {"key" s-value
-            "label" s-value
-            "data"
-            (map
-             (fn
-               [bucket-value]
-               {"value"
-                (or (nth
-                     (first
-                      (filter
-                       (fn [o] (and (= (nth o 0) bucket-value) (= (nth o 2) s-value)))
-                       sql-response))
-                     1
-                     0) 0)})
-             bucket-values)})
-         subbucket-values)
+    (if (> (count sql-response) max-elements)
+      (lib/ok
+       {"error" true
+        "reason" "too-many"
+        "max" max-elements
+        "count" (count sql-response)})
 
-        "common"
-        {"metadata"
-         {"type" column-x-type}
-         "data"  (mapv
-                  (fn [bucket] {"label" bucket "key" bucket})
-                  bucket-values)}}))))
+
+(lib/ok
+             (if (not column-subbucket)
+               {"series" [{"key" column-y-title
+                           "label" column-y-title
+                           "data" (mapv (fn [[x-value y-value]]
+                                          {"value" y-value})
+                                        sql-response)}]
+                "common" {"metadata" {"type" column-x-type}
+                          "data" (mapv (fn [[x-value y-value]]
+                                         {"label" x-value "key" x-value})
+                                       sql-response)}}
+               {"series"
+                (mapv
+                 (fn [s-value]
+                   {"key" s-value
+                    "label" s-value
+                    "data"
+                    (map
+                     (fn
+                       [bucket-value]
+                       {"value"
+                        (or (nth
+                             (first
+                              (filter
+                               (fn [o] (and (= (nth o 0) bucket-value) (= (nth o 2) s-value)))
+                               sql-response))
+                             1
+                             0) 0)})
+                     bucket-values)})
+                 subbucket-values)
+
+                "common"
+                {"metadata"
+                 {"type" column-x-type}
+                 "data"  (mapv
+                          (fn [bucket] {"label" bucket "key" bucket})
+                          bucket-values)}}))
+
+    )
+
+
+
+))

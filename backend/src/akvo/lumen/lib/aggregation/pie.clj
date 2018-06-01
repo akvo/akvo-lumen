@@ -23,6 +23,7 @@
       (lib/ok
        {"error" true
         "reason" "too-many"
+        "max" max-segments
         "count" (count counts)})
       (lib/ok
        {"series" [{"key" bucket-column-title

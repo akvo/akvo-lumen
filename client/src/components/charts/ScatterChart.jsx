@@ -166,8 +166,6 @@ export default class ScatterChart extends Component {
       grid,
     } = this.props;
 
-    if (!data) return null;
-
     const { tooltipItems, tooltipVisible, tooltipPosition } = this.state;
     const series = this.getData();
 

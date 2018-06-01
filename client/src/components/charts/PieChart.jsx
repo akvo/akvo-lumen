@@ -168,7 +168,6 @@ export default class PieChart extends Component {
 
   render() {
     const {
-      data,
       width,
       height,
       colorMapping,
@@ -178,12 +177,6 @@ export default class PieChart extends Component {
       legendVisible,
       edit,
     } = this.props;
-
-    if (!data) return null;
-
-    if (data.error) {
-      return 'Cannot display pie chart';
-    }
 
     const innerRadius = donut ? Math.floor(Math.min(width, height) / 8) : 0;
 

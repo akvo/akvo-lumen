@@ -6,6 +6,7 @@ import isEqual from 'lodash/isEqual';
 import get from 'lodash/get';
 import { FormattedMessage } from 'react-intl';
 import * as chart from '../../utilities/chart';
+import AggregationError from './AggregationError';
 import LineChart from './LineChart';
 import BarChart from './BarChart';
 import PieChart from './PieChart';
@@ -171,6 +172,20 @@ export default class Chart extends Component {
       height,
       onChangeVisualisationSpec,
     } = this.props;
+
+    if (!visualisation.data) {
+      return null;
+    }
+
+    if (visualisation.data.error) {
+      return (
+        <AggregationError
+          reason={visualisation.data.reason}
+          count={visualisation.data.count}
+          max={visualisation.data.max}
+        />
+      );
+    }
 
     const titleHeight = getTitleStyle(visualisation.name, getSize(width)).height * (1 + META_SCALE);
     const adjustedContainerHeight = ((height - titleHeight) - (titleHeight * META_SCALE)) || 400;
