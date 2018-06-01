@@ -14,6 +14,27 @@ import ResponsiveWrapper from '../common/ResponsiveWrapper';
 import Tooltip from './Tooltip';
 import ChartLayout from './ChartLayout';
 
+const startAxisFromZero = (axisExtent, type) => {
+  // Returns an educated guess on if axis should start from zero or not
+  const range = (axisExtent[1] - axisExtent[0]);
+  const lowest = axisExtent[0];
+
+  if (type !== 'number') {
+    return false;
+  }
+  if (lowest < 0) {
+    return false;
+  }
+
+  // Just a heurestic to do the "correct" thing
+  const subjectiveDivisor = 2;
+  if (range < (lowest / subjectiveDivisor)) {
+    return false;
+  }
+
+  return true;
+};
+
 export default class ScatterChart extends Component {
 
   static propTypes = {
@@ -186,7 +207,9 @@ export default class ScatterChart extends Component {
             const availableWidth = dimensions.width * (1 - marginLeft - marginRight);
 
             const xExtent = extent(series.data, ({ x }) => x);
-            if (get(data, 'series[0].metadata.type') === 'number' && xExtent[0] > 0) xExtent[0] = 0;
+            const fromZero = startAxisFromZero(xExtent, get(data, 'series[0].metadata.type'));
+            if (fromZero) xExtent[0] = 0;
+
             const xScaleFunction = get(data, 'series[0].metadata.type') === 'date' ? scaleTime : scaleLinear;
             const xScale = xScaleFunction()
               .domain(xExtent)
