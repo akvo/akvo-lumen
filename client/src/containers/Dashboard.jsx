@@ -253,18 +253,17 @@ class Dashboard extends Component {
             });
           /* Maps hit a different endpoint than other aggregations, so bail out now */
           return;
-        case 'pie':
         case 'donut':
           aggType = 'pie';
           break;
         case 'pivot table':
           aggType = 'pivot';
           break;
-        case 'line':
         case 'area':
           aggType = 'line';
           break;
         default:
+          aggType = vType;
           break;
       }
 
