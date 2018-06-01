@@ -14,8 +14,8 @@
   [tenant-conn {:keys [columns table-name]} query]
   (let [filter-sql (filter/sql-str columns (get query "filters"))
         column-x (utils/find-column columns (get query "metricColumnX"))
-        column-x-type (get column-x "type")
-        column-x-name (get column-x "columnName")
+        column-x-type (if column-x (get column-x "type") "number")
+        column-x-name (if column-x (get column-x "columnName") "row_number() OVER ()")
         column-x-title (get column-x "title")
         column-y (utils/find-column columns (get query "metricColumnY"))
         column-y-type (get column-y "type")
