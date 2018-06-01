@@ -33,6 +33,7 @@ export default class PieChart extends Component {
     height: PropTypes.number.isRequired,
     innerRadius: PropTypes.number,
     legendPosition: PropTypes.oneOf(['right']),
+    legendTitle: PropTypes.string,
     print: PropTypes.bool,
     interactive: PropTypes.bool,
     edit: PropTypes.bool,
@@ -175,6 +176,7 @@ export default class PieChart extends Component {
       donut,
       style,
       legendVisible,
+      legendTitle,
       edit,
     } = this.props;
 
@@ -198,7 +200,7 @@ export default class PieChart extends Component {
         legend={({ horizontal }) => (
           <Legend
             horizontal={!horizontal}
-            title={get(this.props, 'data.metadata.bucketColumnTitle')}
+            title={legendTitle}
             data={series.data.map(({ key }) => `${key}`)}
             colorMapping={
               series.data.reduce((acc, { key }, i) => ({

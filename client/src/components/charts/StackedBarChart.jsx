@@ -43,6 +43,7 @@ export default class StackedBarChart extends Component {
     marginBottom: PropTypes.number,
     style: PropTypes.object,
     legendVisible: PropTypes.bool,
+    legendTitle: PropTypes.string,
     yAxisLabel: PropTypes.string,
     grouped: PropTypes.bool,
     grid: PropTypes.bool,
@@ -200,6 +201,7 @@ export default class StackedBarChart extends Component {
       marginLeft,
       style,
       legendVisible,
+      legendTitle,
       edit,
       padding,
       yAxisLabel,
@@ -230,7 +232,7 @@ export default class StackedBarChart extends Component {
         legend={({ horizontal }) => (
           <Legend
             horizontal={!horizontal}
-            title={get(this.props, 'data.metadata.bucketColumnTitle')}
+            title={legendTitle}
             data={stackNodes.map(({ key }) => replaceLabelIfValueEmpty(key))}
             colorMapping={
               stackNodes.reduce((acc, { key }, i) => ({

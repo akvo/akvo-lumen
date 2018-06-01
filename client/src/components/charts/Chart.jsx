@@ -203,6 +203,7 @@ export default class Chart extends Component {
             colorMapping={visualisation.spec.colors}
             donut={Boolean(visualisation.visualisationType === 'donut')}
             legendVisible={Boolean(visualisation.spec.showLegend)}
+            legendTitle={visualisation.spec.legendTitle}
             onChangeVisualisationSpec={onChangeVisualisationSpec}
             edit={Boolean(onChangeVisualisationSpec)}
           />
@@ -253,6 +254,7 @@ export default class Chart extends Component {
             area={Boolean(visualisation.visualisationType === 'area')}
             grouped={Boolean(visualisation.spec.subBucketMethod === 'split')}
             onChangeVisualisationSpec={onChangeVisualisationSpec}
+            legendTitle={visualisation.spec.legendTitle}
           />
         );
       default:
