@@ -190,19 +190,20 @@ export default class LineChart extends Component {
             const availableHeight = dimensions.height * (1 - marginBottom - marginTop);
             const availableWidth = dimensions.width * (1 - marginLeft - marginRight);
 
-            const xScale = series.metadata.type === 'number' ?
-              scaleLinear()
-                .domain([series.data[0].timestamp, series.data[series.data.length - 1].timestamp])
-                .range([
-                  dimensions.width * marginLeft,
-                  dimensions.width * (1 - marginRight),
-                ]) :
+            const xScale = series.metadata.type === 'date' ?
               scaleTime()
                 .domain([series.data[0].timestamp, series.data[series.data.length - 1].timestamp])
                 .range([
                   dimensions.width * marginLeft,
                   dimensions.width * (1 - marginRight),
+                ]) :
+              scaleLinear()
+                .domain([series.data[0].timestamp, series.data[series.data.length - 1].timestamp])
+                .range([
+                  dimensions.width * marginLeft,
+                  dimensions.width * (1 - marginRight),
                 ]);
+
 
             const yExtent = extent(series.data, ({ value }) => value);
             if (yExtent[0] > 0) yExtent[0] = 0;

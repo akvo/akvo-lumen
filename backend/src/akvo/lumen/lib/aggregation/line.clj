@@ -5,6 +5,9 @@
             [clojure.java.jdbc :as jdbc]))
 
 (defn- run-query [tenant-conn table-name sql-text column-x-name column-y-name filter-sql aggregation-method max-points]
+  (prn
+   (format sql-text
+           column-x-name column-y-name table-name filter-sql aggregation-method max-points))
   (rest (jdbc/query tenant-conn
                     [(format sql-text
                              column-x-name column-y-name table-name filter-sql aggregation-method max-points)]
@@ -14,8 +17,8 @@
   [tenant-conn {:keys [columns table-name]} query]
   (let [filter-sql (filter/sql-str columns (get query "filters"))
         column-x (utils/find-column columns (get query "metricColumnX"))
-        column-x-type (if column-x (get column-x "type") "number")
-        column-x-name (if column-x (get column-x "columnName") "row_number() OVER ()")
+        column-x-type (get column-x "type")
+        column-x-name (get column-x "columnName")
         column-x-title (get column-x "title")
         column-y (utils/find-column columns (get query "metricColumnY"))
         column-y-type (get column-y "type")
@@ -33,8 +36,12 @@
                                    "q1" "percentile_cont(0.25) WITHIN GROUP (ORDER BY %2$s)"
                                    "q3" "percentile_cont(0.75) WITHIN GROUP (ORDER BY %2$s)")
         sql-text-with-aggregation (str "SELECT * FROM (SELECT * FROM (SELECT %1$s, " sql-aggregation-subquery " FROM %3$s WHERE %4$s GROUP BY %1$s)z ORDER BY random() LIMIT %6$s)zz ORDER BY zz.%1$s")
-        sql-text-without-aggreagtion "SELECT * FROM (SELECT * FROM (SELECT %1$s AS x, %2$s AS y FROM %3$s WHERE %4$s)z ORDER BY random() LIMIT %6$s)zz ORDER BY zz.x"
-        sql-text (if aggregation-method sql-text-with-aggregation sql-text-without-aggreagtion)
+        sql-text-without-aggregation "SELECT * FROM (SELECT * FROM (SELECT %1$s AS x, %2$s AS y FROM %3$s WHERE %4$s)z ORDER BY random() LIMIT %6$s)zz ORDER BY zz.x"
+        sql-text-no-x (str "SELECT row_number() over() AS x, " (if (= column-y-type "text") "COUNT(%2$s) AS y " "%2$s AS y ") "FROM %3$s WHERE %4$s GROUP BY %2$s")
+        sql-text (cond
+                   (not column-x) sql-text-no-x
+                   aggregation-method sql-text-with-aggregation
+                   :else sql-text-without-aggregation)
         sql-response (run-query tenant-conn table-name sql-text column-x-name column-y-name filter-sql aggregation-method max-points)]
     (lib/ok
      {"series" [{"key" column-y-title
