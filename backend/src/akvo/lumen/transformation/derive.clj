@@ -4,6 +4,7 @@
             [clj-time.coerce :as tc]
             [clojure.java.jdbc :as jdbc]
             [clojure.tools.logging :as log]
+            [clojure.walk :as w]
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/transformation/derive.sql")
@@ -54,7 +55,7 @@
                   ::column-title
                   ::column-type]} (args op-spec)
           new-column-name         (engine/next-column-name columns)
-          row-fn                  (js-engine/row-transform-fn {:columns     columns
+          row-fn                  (js-engine/row-transform-fn {:columns     (w/stringify-keys columns)
                                                                :code        code
                                                                :column-type column-type})
           js-execution-seq        (->> (all-data conn {:table-name table-name})
@@ -76,9 +77,9 @@
       (delete-rows! conn base-opts (js-execution>sql-params js-execution-seq :delete-row!))      
       {:success?      true
        :execution-log [(format "Derived columns using '%s'" code)]
-       :columns       (conj columns {"title"      column-title
-                                     "type"       column-type
-                                     "sort"       nil
-                                     "hidden"     false
-                                     "direction"  nil
-                                     "columnName" new-column-name})})))
+       :columns       (conj columns (w/keywordize-keys {"title"      column-title
+                                                        "type"       column-type
+                                                        "sort"       nil
+                                                        "hidden"     false
+                                                        "direction"  nil
+                                                        "columnName" new-column-name}))})))

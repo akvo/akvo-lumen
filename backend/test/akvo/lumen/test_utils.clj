@@ -4,6 +4,8 @@
             [akvo.lumen.util :refer [squuid]]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.tools.logging :as log]
+            [clojure.spec.test.alpha :as stest]
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/job-execution.sql")
@@ -44,3 +46,21 @@
     (insert-job-execution tenant-conn {:id job-id :data-source-id data-source-id})
     (do-import tenant-conn {:file-upload-path "/tmp/akvo/dash"} error-tracker job-id)
     (:dataset_id (dataset-id-by-job-execution-id tenant-conn {:id job-id}))))
+
+(defmacro try-specs
+  "run body code with spec instrument/validation"
+  [& body]
+  `(try
+     (stest/instrument)
+     ~@body
+     (finally (stest/unstrument))))
+
+(defmacro with-instrument-disabled [& body]
+  `(stest/with-instrument-disabled ~@body))
+
+(defn instrument-fixture [f]
+  (log/error "instrument-fixture")
+  (stest/instrument)
+  (f)
+  (log/error "unstrument-fixture")
+  (stest/unstrument))

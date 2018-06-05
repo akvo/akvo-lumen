@@ -1,5 +1,6 @@
 (ns akvo.lumen.transformation.combine
   (:require [akvo.lumen.transformation.engine :as engine]
+            [clojure.walk :as w]
             [clojure.tools.logging :as log]
             [hugsql.core :as hugsql]))
 
@@ -34,9 +35,9 @@
     {:success? true
      :execution-log [(format "Combined columns %s, %s into %s"
                              first-column-name second-column-name new-column-name)]
-     :columns (conj columns {"title" column-title
-                             "type" "text"
-                             "sort" nil
-                             "hidden" false
-                             "direction" nil
-                             "columnName" new-column-name})}))
+     :columns (conj columns (w/keywordize-keys {"title" column-title
+                                                "type" "text"
+                                                "sort" nil
+                                                "hidden" false
+                                                "direction" nil
+                                                "columnName" new-column-name}))}))

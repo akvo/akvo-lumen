@@ -6,6 +6,7 @@
             [cheshire.core :as json]
             [clojure.java.io :as io]
             [clojure.test :refer :all]
+            [clojure.walk :as w]
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/transformation/engine_test.sql")
@@ -74,7 +75,7 @@
   (testing "Valid data"
     (let [ops (:ops transformations)]
       (is (every? :success? (for [op ops]
-                              (try-apply-operation *tenant-conn* "ds_test_1" columns op))))))
+                              (try-apply-operation *tenant-conn* "ds_test_1" (w/keywordize-keys columns) op))))))
 
   (testing "Filter column (text)"
     (let [ops (:filter-column transformations)
@@ -116,7 +117,7 @@
       (db-delete-test-data *tenant-conn*)
       (db-insert-invalid-data *tenant-conn*)
 
-      (let [result (try-apply-operation *tenant-conn* "ds_test_1" columns op1)
+      (let [result (try-apply-operation *tenant-conn* "ds_test_1" (w/keywordize-keys columns) op1)
             data (db-select-test-data *tenant-conn*)]
         (is (:success? result))
         (is (= 1 (count data)))

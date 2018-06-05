@@ -4,6 +4,7 @@
             [clojure.set :as set]
             [clojure.string :as str]
             [clojure.tools.logging :as log]
+            [clojure.walk :as w]
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/transformation.sql")
@@ -74,7 +75,7 @@
   "Returns the column index for a given column-name"
   [columns column-name]
   (let [idx (first
-             (keep-indexed #(when (= column-name (get %2 "columnName")) %1) columns))]
+             (keep-indexed #(when (= column-name (get %2 :columnName)) %1) columns))]
     (if (nil? idx)
       (throw (ex-info "Column not found" {:column-name column-name
                                           :columns columns}))
@@ -84,7 +85,7 @@
   "Lookup the type of a column"
   [columns column-name]
   (let [idx (column-index columns column-name)]
-    (get-in columns [idx "type"])))
+    (get-in columns [idx :type])))
 
 (defn update-column [columns column-name f & args]
   (let [idx (column-index columns column-name)]
@@ -98,7 +99,7 @@
 
 (defn next-column-name [columns]
   (let [nums (->> columns
-                  (map #(get % "columnName"))
+                  (map #(get % :columnName))
                   (filter #(re-find #"^d\d+$" %))
                   (map #(subs % 1))
                   (map #(Long/parseLong %)))]
@@ -148,7 +149,7 @@
         previous-columns (vec (:columns dataset-version))
         source-table (:table-name dataset-version)]
     (let [{:keys [success? message columns execution-log]}
-          (try-apply-operation tenant-conn source-table previous-columns transformation)]
+          (try-apply-operation tenant-conn source-table (w/keywordize-keys previous-columns) transformation)]
       (when-not success?
         (log/errorf "Failed to transform: %s, columns: %s, execution-log: %s" message columns execution-log)
         (throw (ex-info "Failed to transform" {})))
@@ -163,7 +164,7 @@
                                     :transformations (conj (vec (:transformations dataset-version))
                                                            (assoc transformation
                                                                   "changedColumns" (diff-columns previous-columns
-                                                                                                 columns)))
+                                                                                                 (w/stringify-keys columns))))
                                     :columns columns}]
           (new-dataset-version tenant-conn next-dataset-version)
           (touch-dataset tenant-conn {:id dataset-id})
@@ -203,7 +204,7 @@
             (drop-table tenant-conn {:table-name previous-table-name})
             (lib/created next-dataset-version)))
         (let [{:keys [success? message columns execution-log]}
-              (try-apply-operation tenant-conn table-name columns (first transformations))]
+              (try-apply-operation tenant-conn table-name (w/keywordize-keys columns) (first transformations))]
           (if success?
             (recur (rest transformations) columns (into full-execution-log execution-log))
             (do

@@ -5,13 +5,20 @@
                                          *error-tracker*
                                          error-tracker-fixture]]
             [akvo.lumen.lib :as lib]
-            [akvo.lumen.test-utils :refer [import-file]]
+            [akvo.lumen.specs.config]
+            [akvo.lumen.specs.core :as lumen.s]
+            [akvo.lumen.specs.db :as db.s]
+            [akvo.lumen.specs.libs]
+            [akvo.lumen.specs.transformations]
+            [akvo.lumen.test-utils :refer [import-file instrument-fixture with-instrument-disabled]]
             [akvo.lumen.transformation :as tf]
             [akvo.lumen.transformation.engine :as engine]
             [cheshire.core :as json]
             [clojure.java.io :as io]
             [clojure.test :refer :all]
-            [hugsql.core :as hugsql]))
+            [clojure.tools.logging :as log]
+            [hugsql.core :as hugsql])
+  (:import [clojure.lang ExceptionInfo]))
 
 (def ops (vec (json/parse-string (slurp (io/resource "ops.json")))))
 
@@ -23,8 +30,7 @@
 (hugsql/def-db-fns "akvo/lumen/transformation_test.sql")
 (hugsql/def-db-fns "akvo/lumen/transformation.sql")
 
-(use-fixtures :once tenant-conn-fixture error-tracker-fixture)
-
+(use-fixtures :once tenant-conn-fixture error-tracker-fixture instrument-fixture)
 
 (deftest op-validation
   (testing "op validation"
@@ -33,10 +39,21 @@
       (is (= false (:valid? result)))
       (is (= (format "Invalid transformation %s" (second invalid-op)) (:message result))))))
 
+(deftest test-transformations-bis
+  (testing "Transformation application"
+    (log/error "starting Transformation application test")
+    (log/error "spec sample" (lumen.s/sample ::db.s/spec))
+    (log/error "transformation sample" (lumen.s/sample ::tf/transformation))
+    (is (thrown-with-msg?
+           ExceptionInfo
+           #"akvo.lumen.transformation/apply did not conform"
+           (tf/apply (lumen.s/sample ::db.s/spec) "Not-valid-id" [])))
+    (log/error "finishing Transformation application test")))
+
 (deftest ^:functional test-transformations
   (testing "Transformation application"
     (is (= [::lib/bad-request {"message" "Dataset not found"}]
-           (tf/apply *tenant-conn* "Not-valid-id" []))))
+           (with-instrument-disabled (tf/apply *tenant-conn* "Not-valid-id" [])))))
   (testing "Valid log"
     (let [dataset-id (import-file *tenant-conn* *error-tracker*
                                   "transformation_test.csv" {:name "Transformation Test"
@@ -288,37 +305,37 @@
                                             "onError" "fail"}))]
         (is (= tag ::lib/conflict))))
 
-    (testing "Fail early on syntax error"
-      (let [[tag _] (apply-transformation (derive-column-transform
-                                           {"args" {"code" ")"
-                                                    "newColumnType" "text"
-                                                    "newColumnTitle" "Derived 8"}
-                                            "onError" "fail"}))]
-        (is (= tag ::lib/bad-request))))
+    (with-instrument-disabled
+     (testing "Fail early on syntax error"
+       (let [[tag _] (apply-transformation (derive-column-transform
+                                            {"args" {"code" ")"
+                                                     "newColumnType" "text"
+                                                     "newColumnTitle" "Derived 8"}
+                                             "onError" "fail"}))]
+         (is (= tag ::lib/bad-request))))
 
-    (testing "Fail infinite loop"
-      (let [[tag _] (apply-transformation (derive-column-transform
-                                           {"args" {"code" "while(true) {}"
-                                                    "newColumnType" "text"
-                                                    "newColumnTitle" "Derived 9"}
-                                            "onError" "fail"}))]
-        (is (= tag ::lib/bad-request))))
+      (testing "Fail infinite loop"
+        (let [[tag _] (apply-transformation (derive-column-transform
+                                             {"args" {"code" "while(true) {}"
+                                                      "newColumnType" "text"
+                                                      "newColumnTitle" "Derived 9"}
+                                              "onError" "fail"}))]
+          (is (= tag ::lib/bad-request))))
 
+      (testing "Disallow anonymous functions"
+        (let [[tag _] (apply-transformation (derive-column-transform
+                                             {"args" {"code" "(function() {})()"
+                                                      "newColumnType" "text"
+                                                      "newColumnTitle" "Derived 10"}
+                                              "onError" "fail"}))]
+          (is (= tag ::lib/bad-request)))
 
-    (testing "Disallow anonymous functions"
-      (let [[tag _] (apply-transformation (derive-column-transform
-                                           {"args" {"code" "(function() {})()"
-                                                    "newColumnType" "text"
-                                                    "newColumnTitle" "Derived 10"}
-                                            "onError" "fail"}))]
-        (is (= tag ::lib/bad-request)))
-
-      (let [[tag _] (apply-transformation (derive-column-transform
-                                           {"args" {"code" "(() => 'foo')()"
-                                                    "newColumnType" "text"
-                                                    "newColumnTitle" "Derived 11"}
-                                            "onError" "fail"}))]
-        (is (= tag ::lib/bad-request))))))
+        (let [[tag _] (apply-transformation (derive-column-transform
+                                             {"args" {"code" "(() => 'foo')()"
+                                                      "newColumnType" "text"
+                                                      "newColumnTitle" "Derived 11"}
+                                              "onError" "fail"}))]
+          (is (= tag ::lib/bad-request)))))))
 
 
 (deftest ^:functional delete-column-test
@@ -362,12 +379,12 @@
   (is (engine/valid? {"op" "core/remove-sort"
                       "args" {"columnName" "c3"}
                       "onError" "fail"}))
-
-  (are [derived cols] (= derived (engine/next-column-name cols))
-    "d1" []
-    "d1" [{"columnName" "dx"}]
-    "d2" [{"columnName" "d1"}]
-    "d6" [{"columnName" "submitter"} {"columnName" "d5"} {"columnName" "dx"}]))
+  (let [column #(merge % {:type "text" :title "title" :hidden true :direction nil})]
+    (are [derived cols] (= derived (engine/next-column-name cols))
+      "d1" []
+      "d1" [(column {:columnName "dx"})]
+      "d2" [(column {:columnName "d1"})]
+      "d6" [(column {:columnName "submitter"}) (column {:columnName "d5"}) (column {:columnName "dx"})])))
 
 (deftest ^:functional generate-geopoints-test
   (let [dataset-id (import-file *tenant-conn* *error-tracker* "geopoints.csv" {:has-column-headers? true})

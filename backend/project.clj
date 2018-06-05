@@ -46,7 +46,8 @@
                  [ring/ring-defaults "0.3.1"]
                  [ring/ring-json "0.4.0"]
                  [selmer "1.11.5"]
-                 [net.postgis/postgis-jdbc "2.2.1" :exclusions [org.postgresql/postgresql]]]
+                 [net.postgis/postgis-jdbc "2.2.1" :exclusions [org.postgresql/postgresql]]
+                 [org.clojure/test.check "0.9.0" :scope "test"]]
   :uberjar-name "akvo-lumen.jar"
   :repl-options {:timeout 120000}
   :pedantic? :abort
