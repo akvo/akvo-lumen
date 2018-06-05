@@ -1,4 +1,4 @@
-(ns akvo.lumen.lib.aggregation.pivot-impl
+(ns akvo.lumen.lib.aggregation.pivot
   (:require [akvo.commons.psql-util]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.aggregation.filter :as filter]
