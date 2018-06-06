@@ -78,43 +78,48 @@
   (lib/ok (all-rasters conn)))
 
 (defn do-import [conn config data-source job-execution-id]
-  (try
-    (let [source (get data-source "source")
-          file (import/get-path source (:file-upload-path config))
-          path (.getAbsolutePath (.getParentFile file))
-          filename (.getName file)
-          table-name (util/gen-table-name "raster")
-          raster-info (get-raster-info path filename)
-          prj-file (project-and-compress path filename)]
-      (create-raster-table conn {:table-name table-name})
-      (create-raster-index conn {:table-name table-name})
-      (throw (Exception. "Dummy"))
-      (with-open [rdr (io/reader (get-raster-data-as-sql path prj-file table-name))]
-        (jdbc/with-db-transaction [tx conn]
-          (doseq [line (line-seq rdr)]
-            (jdbc/execute! tx [line] {:transaction? false}))))
-      (add-raster-constraints conn {:table-name table-name})
-      (vacuum-raster-table conn
-                           {:table-name table-name}
-                           {}
-                           {:transaction? false})
-      (let [stats (raster-stats conn {:table-name table-name})
-            metadata (merge {:bbox (bbox raster-info)}
-                            stats)]
-        (insert-raster conn {:id (util/squuid)
-                             :title (data-source "name")
-                             :description (get-in data-source ["source" "fileName"])
-                             :job-execution-id job-execution-id
-                             :metadata (doto (PGobject.)
-                                         (.setType "jsonb")
-                                         (.setValue (json/generate-string metadata)))
-                             :raster-table table-name})
-        (update-successful-job-execution conn {:id job-execution-id})))
-    (catch Throwable e
-      (log/errorf e "Error importing raster: %s" (.getMessage e))
-      #_(update-failed-job-execution conn {:id job-execution-id
+  (let [table-name (util/gen-table-name "raster")]
+    (try
+      (let [source (get data-source "source")
+            file (import/get-path source (:file-upload-path config))
+            path (.getAbsolutePath (.getParentFile file))
+            filename (.getName file)
+            ;; table-name (util/gen-table-name "raster")
+            raster-info (get-raster-info path filename)
+            prj-file (project-and-compress path filename)]
+        (create-raster-table conn {:table-name table-name})
+        (create-raster-index conn {:table-name table-name})
+        (throw (Exception. "Dummy"))
+        (with-open [rdr (io/reader (get-raster-data-as-sql path prj-file table-name))]
+          (jdbc/with-db-transaction [tx conn]
+            (doseq [line (line-seq rdr)]
+              (jdbc/execute! tx [line] {:transaction? false}))))
+        (add-raster-constraints conn {:table-name table-name})
+        (vacuum-raster-table conn
+                             {:table-name table-name}
+                             {}
+                             {:transaction? false})
+        (let [stats (raster-stats conn {:table-name table-name})
+              metadata (merge {:bbox (bbox raster-info)}
+                              stats)]
+          (insert-raster conn {:id (util/squuid)
+                               :title (data-source "name")
+                               :description (get-in data-source ["source" "fileName"])
+                               :job-execution-id job-execution-id
+                               :metadata (doto (PGobject.)
+                                           (.setType "jsonb")
+                                           (.setValue (json/generate-string metadata)))
+                               :raster-table table-name})
+          (update-successful-job-execution conn {:id job-execution-id})))
+      (catch Throwable e
+        ;; (prn "@do-import/catch")
+        ;; (prn table-name)
+        (log/errorf e "Error importing raster: %s" (.getMessage e))
+        (update-failed-job-execution conn {:id job-execution-id
                                            :reason (.getMessage e)})
-      (throw e))))
+        (drop-raster-table conn {:table-name table-name})
+        (delete-raster-columns conn {:table-name table-name})
+        (throw e)))))
 
 (defn create [conn config claims data-source]
   (let [data-source-id (str (util/squuid))
