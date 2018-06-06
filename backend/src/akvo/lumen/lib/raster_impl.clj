@@ -88,6 +88,7 @@
           prj-file (project-and-compress path filename)]
       (create-raster-table conn {:table-name table-name})
       (create-raster-index conn {:table-name table-name})
+      (throw (Exception. "Dummy"))
       (with-open [rdr (io/reader (get-raster-data-as-sql path prj-file table-name))]
         (jdbc/with-db-transaction [tx conn]
           (doseq [line (line-seq rdr)]
@@ -111,8 +112,8 @@
         (update-successful-job-execution conn {:id job-execution-id})))
     (catch Throwable e
       (log/errorf e "Error importing raster: %s" (.getMessage e))
-      (update-failed-job-execution conn {:id job-execution-id
-                                         :reason (.getMessage e)})
+      #_(update-failed-job-execution conn {:id job-execution-id
+                                           :reason (.getMessage e)})
       (throw e))))
 
 (defn create [conn config claims data-source]
