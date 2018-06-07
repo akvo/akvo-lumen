@@ -11,6 +11,7 @@ import DataSourceSettings from './createDataset/DataSourceSettings';
 import Settings from '../dataset/Settings';
 import * as actionCreators from '../../actions/dataset';
 import { importRaster } from '../../actions/raster';
+import { trackEvent } from '../../utilities/analytics';
 
 require('./CreateDataset.scss');
 
@@ -19,7 +20,9 @@ class CreateDataset extends Component {
   constructor() {
     super();
     this.handleNextOrImport = this.handleNextOrImport.bind(this);
+    this.handleDefineDataSource = this.handleDefineDataSource.bind(this);
     this.isValidImport = this.isValidImport.bind(this);
+    this.state = { sourceSet: false };
   }
 
   pageComponent(page) {
@@ -36,7 +39,7 @@ class CreateDataset extends Component {
         return (
           <DataSourceSettings
             dataSource={dataset.source}
-            onChange={this.props.defineDataSource}
+            onChange={this.handleDefineDataSource}
             onChangeSettings={this.props.defineDatasetSettings}
             updateUploadStatus={this.props.updateDatasetUploadStatus}
           />
@@ -52,10 +55,16 @@ class CreateDataset extends Component {
     }
   }
 
+  handleDefineDataSource(...args) {
+    this.setState({ sourceSet: true });
+    this.props.defineDataSource(...args);
+  }
+
   handleNextOrImport() {
     const { datasetImport, collectionId } = this.props;
     const { currentPage, dataset } = datasetImport;
     if (currentPage === 'define-dataset') {
+      trackEvent('Import dataset. Source:', dataset.source.kind);
       if (dataset.source.kind === 'GEOTIFF') {
         this.props.importRaster(dataset, collectionId);
       } else {
@@ -75,6 +84,11 @@ class CreateDataset extends Component {
   render() {
     const { onCancel, datasetImport, clearImport } = this.props;
     const { currentPage, uploadRunning } = datasetImport;
+
+    let rightButtonDisabled = false;
+    if (currentPage === 'define-dataset') rightButtonDisabled = !this.isValidImport();
+    if (currentPage === 'define-data-source') rightButtonDisabled = !this.state.sourceSet;
+    rightButtonDisabled = rightButtonDisabled || uploadRunning;
 
     return (
       <div className="CreateDataset">
@@ -110,8 +124,7 @@ class CreateDataset extends Component {
           rightButton={{
             text: <FormattedMessage id={currentPage === 'define-dataset' ? 'import' : 'next'} />,
             className: 'btn next clickable positive',
-            disabled: currentPage === 'define-dataset' ? !this.isValidImport() : false
-                || uploadRunning,
+            disabled: rightButtonDisabled,
             onClick: this.handleNextOrImport,
           }}
         />

@@ -35,6 +35,7 @@
         margin-bottom: 0.5rem;
 
         .imageContainer {
+            position: relative;
             width: 100%;
             min-height: 8rem;
             display: flex;
@@ -45,6 +46,15 @@
                 width: 100%;
                 image-orientation: from-image;
             }
+
+            .suppressImageContextMenu {
+                position: absolute;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                top: 0;
+            }
+
         }
     }
 

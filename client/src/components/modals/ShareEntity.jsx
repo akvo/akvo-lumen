@@ -6,6 +6,7 @@ import ModalWrapper from 'react-modal';
 import ModalHeader from './ModalHeader';
 import ModalFooter from './ModalFooter';
 import ToggleInput from '../common/ToggleInput';
+import { trackEvent } from '../../utilities/analytics';
 
 require('./ShareEntity.scss');
 
@@ -196,7 +197,10 @@ export default class ShareEntity extends Component {
               <div className="row">
                 <button
                   className="showEmbedButton"
-                  onClick={() => this.setState({ showEmbed: true })}
+                  onClick={() => {
+                    trackEvent('Get embed code', type, shareUrl);
+                    this.setState({ showEmbed: true });
+                  }}
                 >
                   Get embed code
                 </button>

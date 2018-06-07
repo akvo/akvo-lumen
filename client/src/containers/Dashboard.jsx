@@ -8,6 +8,7 @@ import * as actions from '../actions/dashboard';
 import * as api from '../api';
 import { fetchLibrary } from '../actions/library';
 import { fetchDataset } from '../actions/dataset';
+import { trackPageView, trackEvent } from '../utilities/analytics';
 import aggregationOnlyVisualisationTypes from '../utilities/aggregationOnlyVisualisationTypes';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { SAVE_COUNTDOWN_INTERVAL, SAVE_INITIAL_TIMEOUT } from '../constants/time';
@@ -103,6 +104,7 @@ class Dashboard extends Component {
   }
 
   componentDidMount() {
+    this.isMountedFlag = true;
     require.ensure(['../components/charts/VisualisationViewer'], () => {
       require.ensure([], () => {
         /* eslint-disable global-require */
@@ -162,6 +164,10 @@ class Dashboard extends Component {
     }
   }
 
+  componentWillUnmount() {
+    this.isMountedFlag = false;
+  }
+
   onSaveFailure() {
     this.setState({
       timeToNextSave: this.state.timeToNextSave * 2,
@@ -188,6 +194,7 @@ class Dashboard extends Component {
     const isEditingExistingDashboard = getEditingStatus(this.props.location);
 
     const handleResponse = (error) => {
+      if (!this.isMountedFlag) return;
       if (error) {
         this.onSaveFailure();
         return;
@@ -206,8 +213,6 @@ class Dashboard extends Component {
       this.setState({ isSavePending: true, isUnsavedChanges: false }, () => {
         dispatch(actions.createDashboard(dashboard, get(location, 'state.collectionId'), handleResponse));
       });
-    } else {
-      // Ignore save request until the first "create dashboard" request succeeeds
     }
   }
 
@@ -336,11 +341,24 @@ class Dashboard extends Component {
     });
   }
 
+  handleTrackPageView(dashboard) {
+    if (!this.state.hasTrackedPageView) {
+      this.setState({ hasTrackedPageView: true }, () => {
+        trackPageView(`Dashboard: ${dashboard.title || 'Untitled dashboard'}`);
+      });
+    }
+  }
+
   handleDashboardAction(action) {
     switch (action) {
-      case 'share':
+      case 'share': {
+        trackEvent(
+          'Share dashboard',
+          `${window.location.origin}/dashboard/${this.state.dashboard.id}`
+        );
         this.toggleShareDashboard();
         break;
+      }
       default:
         throw new Error(`Action ${action} not yet implemented`);
     }
@@ -390,6 +408,7 @@ class Dashboard extends Component {
       { layout: Object.keys(dash.layout).map(key => dash.layout[key]) }
     );
     this.setState({ dashboard });
+    this.handleTrackPageView(dashboard);
 
     /* Load each unique dataset referenced by visualisations in the dashboard. Note - Even though
     /* onAddVisualisation also checks to see if a datasetId has already been requested, setState is
@@ -472,7 +491,7 @@ class Dashboard extends Component {
   }
 
   render() {
-    if (!this.state.asyncComponents) {
+    if (!this.state.asyncComponents || this.state.isSavePending) {
       return <LoadingSpinner />;
     }
     const { DashboardHeader, DashboardEditor } = this.state.asyncComponents;
