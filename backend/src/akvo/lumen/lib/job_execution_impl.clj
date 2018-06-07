@@ -29,9 +29,5 @@
         (lib/not-found {:error "not-found"})))))
 
 (defn delete [conn id]
-  (prn "@job-execution:delete")
-  ;; Todo
-  ;; Dispatch on different types, query to pass from client?
-  ;; Clean up imported table
   (delete-pending-job-execution-by-id conn {:id id})
   (lib/ok {}))

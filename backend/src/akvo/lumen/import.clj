@@ -80,18 +80,16 @@
           (let [columns (import/columns importer)]
             (import/create-dataset-table conn table-name columns)
             (import/add-key-constraints conn table-name columns)
-            (throw (Exception. "Dummy"))
             (doseq [record (map import/coerce-to-sql (import/records importer))]
               (jdbc/insert! conn table-name record))
             (successful-import conn job-execution-id table-name columns spec))))
       (catch Throwable e
-        #_(failed-import conn job-execution-id (.getMessage e) table-name)
+        (failed-import conn job-execution-id (.getMessage e) table-name)
         (log/error e)
         (error-tracker/track error-tracker e)
         (throw e)))))
 
 (defn handle-import-request [tenant-conn config error-tracker claims data-source]
-  (prn "@handle-import-request")
   (let [data-source-id (str (util/squuid))
         job-execution-id (str (util/squuid))
         table-name (util/gen-table-name "ds")
@@ -100,7 +98,6 @@
                                      :spec (json/generate-string data-source)})
     (insert-job-execution tenant-conn {:id job-execution-id
                                        :data-source-id data-source-id})
-    #_(future (do-import tenant-conn config error-tracker job-execution-id))
-    (do-import tenant-conn config error-tracker job-execution-id)
+    (future (do-import tenant-conn config error-tracker job-execution-id))
     (lib/ok {"importId" job-execution-id
              "kind" kind})))
