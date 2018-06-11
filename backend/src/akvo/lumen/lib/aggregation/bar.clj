@@ -94,47 +94,40 @@
         "max" max-elements
         "count" (count sql-response)})
 
+      (lib/ok
+       (if (not column-subbucket)
+         {"series" [{"key" column-y-title
+                     "label" column-y-title
+                     "data" (mapv (fn [[x-value y-value]]
+                                    {"value" y-value})
+                                  sql-response)}]
+          "common" {"metadata" {"type" column-x-type}
+                    "data" (mapv (fn [[x-value y-value]]
+                                   {"label" x-value "key" x-value})
+                                 sql-response)}}
+         {"series"
+          (mapv
+           (fn [s-value]
+             {"key" s-value
+              "label" s-value
+              "data"
+              (map
+               (fn
+                 [bucket-value]
+                 {"value"
+                  (or (nth
+                       (first
+                        (filter
+                         (fn [o] (and (= (nth o 0) bucket-value) (= (nth o 2) s-value)))
+                         sql-response))
+                       1
+                       0) 0)})
+               bucket-values)})
+           subbucket-values)
 
-(lib/ok
-             (if (not column-subbucket)
-               {"series" [{"key" column-y-title
-                           "label" column-y-title
-                           "data" (mapv (fn [[x-value y-value]]
-                                          {"value" y-value})
-                                        sql-response)}]
-                "common" {"metadata" {"type" column-x-type}
-                          "data" (mapv (fn [[x-value y-value]]
-                                         {"label" x-value "key" x-value})
-                                       sql-response)}}
-               {"series"
-                (mapv
-                 (fn [s-value]
-                   {"key" s-value
-                    "label" s-value
-                    "data"
-                    (map
-                     (fn
-                       [bucket-value]
-                       {"value"
-                        (or (nth
-                             (first
-                              (filter
-                               (fn [o] (and (= (nth o 0) bucket-value) (= (nth o 2) s-value)))
-                               sql-response))
-                             1
-                             0) 0)})
-                     bucket-values)})
-                 subbucket-values)
-
-                "common"
-                {"metadata"
-                 {"type" column-x-type}
-                 "data"  (mapv
-                          (fn [bucket] {"label" bucket "key" bucket})
-                          bucket-values)}}))
-
-    )
-
-
-
-))
+          "common"
+          {"metadata"
+           {"type" column-x-type}
+           "data"  (mapv
+                    (fn [bucket] {"label" bucket "key" bucket})
+                    bucket-values)}})))))

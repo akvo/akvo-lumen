@@ -5,9 +5,6 @@
             [clojure.java.jdbc :as jdbc]))
 
 (defn- run-query [tenant-conn table-name sql-text column-x-name column-y-name filter-sql aggregation-method max-points]
-  (prn
-   (format sql-text
-           column-x-name column-y-name table-name filter-sql aggregation-method max-points))
   (rest (jdbc/query tenant-conn
                     [(format sql-text
                              column-x-name column-y-name table-name filter-sql aggregation-method max-points)]
