@@ -66,7 +66,7 @@ export default class SimpleBarChart extends Component {
     colors: PropTypes.array.isRequired,
     colorMapping: PropTypes.object,
     defaultColor: PropTypes.string.isRequired,
-    onChangeVisualisationSpec: PropTypes.func.isRequired,
+    onChangeVisualisationSpec: PropTypes.func,
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
     legendPosition: PropTypes.oneOf(['right']),

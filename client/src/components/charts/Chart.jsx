@@ -1,11 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import vg from 'vega';
 import moment from 'moment';
-import isEqual from 'lodash/isEqual';
 import get from 'lodash/get';
 import { FormattedMessage } from 'react-intl';
-import * as chart from '../../utilities/chart';
 import AggregationError from './AggregationError';
 import LineChart from './LineChart';
 import BarChart from './BarChart';
@@ -94,75 +91,9 @@ export default class Chart extends Component {
     this.renderNewChart = this.renderNewChart.bind(this);
   }
 
-  componentDidMount() {
-    this.renderChart(this.props);
-  }
-
-  componentWillReceiveProps(nextProps) {
-    const visualisationChanged = !isEqual(this.props.visualisation, nextProps.visualisation);
-    const sizeChanged = this.props.width !== nextProps.width ||
-      this.props.height !== nextProps.height;
-
-    if (visualisationChanged || sizeChanged) {
-      this.renderChart(nextProps);
-    }
-  }
-
   getDataset(nextProps) {
     const { datasets, visualisation } = nextProps || this.props;
     return datasets[visualisation.datasetId];
-  }
-
-  renderChart(props) {
-    const { visualisation, width, height } = props;
-
-    /* Hard coding an exit for new chart types seems fine temporarily...*/
-    if (
-      visualisation.visualisationType === 'line' ||
-      visualisation.visualisationType === 'area' ||
-      visualisation.visualisationType === 'bar' ||
-      visualisation.visualisationType === 'donut' ||
-      visualisation.visualisationType === 'pie' ||
-      visualisation.visualisationType === 'scatter'
-    ) {
-      return;
-    }
-
-    const dataset = this.getDataset(props);
-    const titleHeight = getTitleStyle(visualisation.name, getSize(width)).height * (1 + META_SCALE);
-    const containerHeight = (height - titleHeight) || 400;
-    const containerWidth = width || 800;
-    const chartSize = getSize(containerWidth);
-    let chartData;
-    switch (visualisation.visualisationType) {
-      case 'pie':
-      case 'donut':
-      case 'area':
-      case 'line':
-      case 'bar':
-        chartData = visualisation.data;
-        if (!chartData) {
-          // Aggregated data hasn't loaded yet - do nothing
-          return;
-        }
-        break;
-      case 'scatter':
-        chartData = chart.getScatterData(visualisation, dataset);
-        break;
-      // no default
-    }
-
-    if (!chartData) return;
-
-    /* TODO - once we support backend aggregations for more vTypes, it doesn't make sense to
-    ** pass `chartData` separately, because we include it on the visualisation itself */
-    const vegaSpec =
-      chart.getVegaSpec(visualisation, chartData, containerHeight, containerWidth, chartSize);
-
-    vg.parse.spec(vegaSpec, (error, vegaChart) => {
-      this.vegaChart = vegaChart({ el: this.element });
-      this.vegaChart.update();
-    });
   }
 
   renderNewChart() {
@@ -303,9 +234,6 @@ export default class Chart extends Component {
               null
           }
         </p>
-        <div
-          ref={(el) => { this.element = el; }}
-        />
         {this.renderNewChart()}
       </div>
     );

@@ -29,7 +29,7 @@ export default class StackedBarChart extends Component {
     }),
     colors: PropTypes.array.isRequired,
     colorMapping: PropTypes.object,
-    onChangeVisualisationSpec: PropTypes.func.isRequired,
+    onChangeVisualisationSpec: PropTypes.func,
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
     legendPosition: PropTypes.oneOf(['right']),
