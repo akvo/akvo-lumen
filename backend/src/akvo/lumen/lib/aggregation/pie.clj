@@ -20,7 +20,7 @@
         counts (run-query tenant-conn table-name bucket-column-name filter-sql)
         max-segments 50]
     (if (> (count counts) max-segments)
-      (lib/ok
+      (lib/bad-request
        {"error" true
         "reason" "too-many"
         "max" max-segments

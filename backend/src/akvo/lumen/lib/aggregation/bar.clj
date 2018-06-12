@@ -88,7 +88,7 @@
                            (fn [[x-value y-value s-value]] s-value)
                            sql-response))]
     (if (> (count sql-response) max-elements)
-      (lib/ok
+      (lib/bad-request
        {"error" true
         "reason" "too-many"
         "max" max-elements
