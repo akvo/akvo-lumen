@@ -63,7 +63,7 @@ const Popover = ({ title, children, placement = '', left, top, className = '', s
 );
 
 Popover.propTypes = {
-  title: PropTypes.string,
+  title: PropTypes.node,
   children: PropTypes.node,
   placement: PropTypes.string,
   className: PropTypes.string,

@@ -145,7 +145,7 @@ export default function PivotTable({ width, height, visualisation, context, data
               </p>
             </th>
           </tr>
-          {data.metadata.categoryColumnTitle &&
+          {get(data, 'metadata.categoryColumnTitle') &&
             <tr>
               <th className="spacer" />
               <th

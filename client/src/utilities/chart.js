@@ -1,8 +1,4 @@
 import dl from 'datalib';
-import getVegaScatterSpec from './vega-specs/Scatter';
-import getVegaPieSpec from './vega-specs/Pie';
-import getVegaAreaSpec from './vega-specs/Area';
-import getVegaBarSpec from './vega-specs/Bar';
 
 // Special value that will always come last alphabetically. Used for sorting.
 const lastValueAlphabetically = '';
@@ -445,40 +441,6 @@ export function getMapData(layer, datasets) {
         dataset.getIn(['columns', pointColorIndex, 'type']) : null,
     },
   });
-}
-
-export function getVegaSpec(visualisation, data, containerHeight, containerWidth, chartSize) {
-  const { visualisationType } = visualisation;
-  let vspec;
-  let displayData;
-
-  switch (visualisationType) {
-    case 'bar':
-      vspec = getVegaBarSpec(visualisation, data, containerHeight, containerWidth, chartSize);
-      break;
-
-    case 'area':
-    case 'line':
-      vspec = getVegaAreaSpec(visualisation, data, containerHeight, containerWidth, chartSize);
-      break;
-
-    case 'pie':
-    case 'donut':
-      displayData = formatPieData(data);
-
-      vspec =
-        getVegaPieSpec(visualisation, displayData, containerHeight, containerWidth, chartSize);
-      break;
-
-    case 'scatter':
-      vspec = getVegaScatterSpec(visualisation, data, containerHeight, containerWidth, chartSize);
-      break;
-
-    default:
-      throw new Error(`Unknown chart type ${visualisationType} supplied to getVegaSpec()`);
-  }
-
-  return vspec;
 }
 
 export const round = (num, places) =>

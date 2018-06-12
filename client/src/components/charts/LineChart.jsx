@@ -10,11 +10,19 @@ import merge from 'lodash/merge';
 import { GridRows, GridColumns } from '@vx/grid';
 import itsSet from 'its-set';
 
-import { sortChronologically } from '../../utilities/utils';
+import { sortChronologically, filterNullData } from '../../utilities/utils';
+import { round } from '../../utilities/chart';
 import ResponsiveWrapper from '../common/ResponsiveWrapper';
 import ColorPicker from '../common/ColorPicker';
 import ChartLayout from './ChartLayout';
 import Tooltip from './Tooltip';
+
+const formatValue = (value, type) => {
+  if (type === 'date') {
+    return new Date(value);
+  }
+  return value;
+};
 
 export default class LineChart extends Component {
 
@@ -30,8 +38,8 @@ export default class LineChart extends Component {
       ),
       metadata: PropTypes.object,
     }),
-    color: PropTypes.string.isRequired,
-    onChangeVisualisationSpec: PropTypes.func.isRequired,
+    color: PropTypes.string,
+    onChangeVisualisationSpec: PropTypes.func,
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
     minRadius: PropTypes.number,
@@ -63,10 +71,15 @@ export default class LineChart extends Component {
     edit: false,
     area: false,
     grid: true,
+    interactive: true,
+  }
+
+  static contextTypes = {
+    abbrNumber: PropTypes.func,
   }
 
   state = {
-    isPickingColor: false,
+    isPickingColor: undefined,
   }
 
   getData() {
@@ -105,7 +118,7 @@ export default class LineChart extends Component {
       tooltipVisible: true,
       tooltipItems: [
         { key: xLabel, value: x },
-        { key: yLabel, value: y },
+        { key: yLabel, value: round(y, 4) },
       ],
       tooltipPosition,
     });
@@ -147,15 +160,19 @@ export default class LineChart extends Component {
       area,
       xAxisLabel,
       yAxisLabel,
-      xAxisTicks,
       yAxisTicks,
       grid,
     } = this.props;
+
     const { tooltipItems, tooltipVisible, tooltipPosition } = this.state;
+
+    const xAxisTicks = 8;
 
     const series = this.getData();
 
     if (!series) return null;
+
+    series.data = filterNullData(series.data);
 
     return (
       <ChartLayout
@@ -168,15 +185,25 @@ export default class LineChart extends Component {
         }}
         chart={
           <ResponsiveWrapper>{(dimensions) => {
+            if (!series.data.length) return null;
+
             const availableHeight = dimensions.height * (1 - marginBottom - marginTop);
             const availableWidth = dimensions.width * (1 - marginLeft - marginRight);
 
-            const xScale = scaleTime()
-              .domain([series.data[0].timestamp, series.data[series.data.length - 1].timestamp])
-              .range([
-                dimensions.width * marginLeft,
-                dimensions.width * (1 - marginRight),
-              ]);
+            const xScale = series.metadata.type === 'date' ?
+              scaleTime()
+                .domain([series.data[0].timestamp, series.data[series.data.length - 1].timestamp])
+                .range([
+                  dimensions.width * marginLeft,
+                  dimensions.width * (1 - marginRight),
+                ]) :
+              scaleLinear()
+                .domain([series.data[0].timestamp, series.data[series.data.length - 1].timestamp])
+                .range([
+                  dimensions.width * marginLeft,
+                  dimensions.width * (1 - marginRight),
+                ]);
+
 
             const yExtent = extent(series.data, ({ value }) => value);
             if (yExtent[0] > 0) yExtent[0] = 0;
@@ -189,6 +216,16 @@ export default class LineChart extends Component {
 
             const origin = yScale(0);
             const radius = Math.min((5 / series.data.length) * 20, 5);
+
+            const numNodes = series.data.length;
+            const maxNodesForTooltip = 50;
+            const showTooltip = numNodes <= maxNodesForTooltip;
+
+            const tickFormat = series.metadata.type === 'number' ?
+              { tickFormat: value => this.context.abbrNumber(value) }
+              :
+              {}
+            ;
 
             return (
               <div
@@ -210,7 +247,7 @@ export default class LineChart extends Component {
                     color={color}
                     onChange={({ hex }) => {
                       onChangeVisualisationSpec({ color: hex });
-                      this.setState({ isPickingColor: null });
+                      this.setState({ isPickingColor: undefined });
                     }}
                     left={dimensions.width / 2}
                     top={dimensions.height / 2}
@@ -253,7 +290,7 @@ export default class LineChart extends Component {
                           x={d => xScale(d.timestamp)}
                           y1={d => yScale(d.value)}
                           y0={origin}
-                          fill={color}
+                          fill={this.props.color}
                           fillOpacity={0.6}
                           onClick={(event) => {
                             this.handleClickNode({ key: null }, event);
@@ -266,31 +303,34 @@ export default class LineChart extends Component {
                         x={d => xScale(d.timestamp)}
                         y={d => yScale(d.value)}
                         fill="none"
-                        stroke={color}
-                        strokeWidth={2}
+                        stroke={this.props.color}
+                        strokeWidth={1}
                         onClick={(event) => {
                           this.handleClickNode({ key: null }, event);
                         }}
                       />
 
-                      {nodes.map(({ key, timestamp, value }, i) => {
+                      {showTooltip && nodes.map(({ key, timestamp, value }, i) => {
                         const normalizedX = xScale(timestamp);
                         const normalizedY = yScale(value);
                         return (
-                          <Group>
+                          <Group key={i}>
                             <Circle
-                              key={i}
                               cx={normalizedX}
                               cy={normalizedY}
                               r={radius}
                               fill="white"
-                              stroke={color}
+                              stroke={this.props.color}
                               strokeWidth={2}
                               onClick={(event) => {
                                 this.handleClickNode({ key }, event);
                               }}
                               onMouseEnter={(event) => {
-                                this.handleMouseEnterNode({ key, x: timestamp, y: value }, event);
+                                this.handleMouseEnterNode({
+                                  key,
+                                  x: formatValue(timestamp, series.metadata.type),
+                                  y: value,
+                                }, event);
                               }}
                             />
                           </Group>
@@ -306,15 +346,31 @@ export default class LineChart extends Component {
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}
                     numTicks={yAxisTicks}
+                    {...tickFormat}
+                    labelProps={{
+                      dy: marginTop * dimensions.height * 0.5,
+                      textAnchor: 'middle',
+                      fontFamily: 'Arial',
+                      fontSize: 10,
+                      fill: 'black',
+                    }}
                   />
 
                   <AxisBottom
-                    scale={xScale}
                     top={origin}
+                    scale={xScale}
                     label={xAxisLabel || ''}
+                    labelProps={{
+                      dx: marginLeft * dimensions.width * 0.5,
+                      textAnchor: 'middle',
+                      fontFamily: 'Arial',
+                      fontSize: 10,
+                      fill: 'black',
+                    }}
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}
                     numTicks={xAxisTicks}
+                    {...tickFormat}
                   />
                 </Svg>
               </div>
