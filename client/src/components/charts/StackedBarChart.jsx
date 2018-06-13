@@ -11,7 +11,7 @@ import merge from 'lodash/merge';
 import { stack } from 'd3-shape';
 import { GridRows } from '@vx/grid';
 
-import { replaceLabelIfValueEmpty } from '../../utilities/chart';
+import { heuristicRound, replaceLabelIfValueEmpty } from '../../utilities/chart';
 import Legend from './Legend';
 import ResponsiveWrapper from '../common/ResponsiveWrapper';
 import ColorPicker from '../common/ColorPicker';
@@ -139,7 +139,7 @@ export default class StackedBarChart extends Component {
     if (!interactive || print) return;
     this.handleShowTooltip(event, [
       { key: seriesKey, color: this.getColor(seriesKey, seriesIndex), value: valueKey },
-      { key: yAxisLabel || 'y', value: node.values[seriesKey] },
+      { key: yAxisLabel || 'y', value: heuristicRound(node.values[seriesKey]) },
     ]);
     this.setState({ hoveredNode: { seriesKey, valueKey } });
   }

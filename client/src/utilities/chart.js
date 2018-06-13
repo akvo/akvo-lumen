@@ -443,9 +443,53 @@ export function getMapData(layer, datasets) {
   });
 }
 
-export const round = (num, places) =>
-    // eslint-disable-next-line no-restricted-properties
-    Math.round(num * Math.pow(10, places)) / Math.pow(10, places);
+export const round = (input, places) => {
+  let num;
+  if (typeof input === 'number') {
+    num = input;
+  } else {
+    num = Number(input);
+    if (isNaN(num)) {
+      return input;
+    }
+  }
+  // eslint-disable-next-line no-restricted-properties
+  return Math.round(num * Math.pow(10, places)) / Math.pow(10, places);
+}
+
+export const heuristicRound = (input) => {
+  let num;
+  if (typeof input === 'number') {
+    num = input;
+  } else {
+    num = Number(input);
+    if (isNaN(num)) {
+      return input;
+    }
+  }
+
+  let places;
+
+  if (num < 0.0000001) {
+    places = 10;
+  } else if (num < 0.000001) {
+    places = 9;
+  } else if (num < 0.00001) {
+    places = 8;
+  } else if (num < 0.00001) {
+    places = 7;
+  } else if (num < 0.0001) {
+    places = 6;
+  } else if (num < 0.001) {
+    places = 5;
+  } else if (num < 0.01) {
+    places = 4;
+  } else {
+    places = 2;
+  }
+
+  return round(num, places);
+}
 
 const percentageRow = (rows, spec) => {
   const totalsRowIndex = rows.length - 1;
