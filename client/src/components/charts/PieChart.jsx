@@ -18,6 +18,8 @@ import { labelFont, connectionStyle } from '../../constants/chart';
 
 const getDatum = (data, datum) => data.filter(({ key }) => key === datum)[0];
 
+const getLabelText = (count, totalCount) => `${count} (${round(100 * (count / totalCount), 2)}%)`;
+
 export default class PieChart extends Component {
 
   static propTypes = {
@@ -93,7 +95,7 @@ export default class PieChart extends Component {
 
     if (y < bounds.height / 2) tooltipPosition.top = y - 12;
     else tooltipPosition.bottom = bounds.height - y - 12;
-
+    console.log(content);
     this.setState({
       tooltipVisible: true,
       tooltipItems: [content],
@@ -101,13 +103,13 @@ export default class PieChart extends Component {
     });
   }
 
-  handleMouseEnterNode({ key, value }, event) {
+  handleMouseEnterNode({ key, value, totalCount }, event) {
     const { interactive, print, colors } = this.props;
     if (!interactive || print) return;
     this.handleShowTooltip(event, {
       key,
       color: colors[key],
-      value,
+      value: getLabelText(value, totalCount),
     });
     this.setState({ hoveredNode: key });
   }
@@ -142,6 +144,8 @@ export default class PieChart extends Component {
     const offset = (input, mult) => Math.floor(input * mult);
     const labelOffset = 0.95;
     const edgeOffset = 1.01;
+    const showKey = Boolean(!legendVisible);
+    const showLabel = Boolean(!interactive || print);
     return ((print || !interactive || !legendVisible) && angle > Math.PI / 12) ? (
       <Group>
         <Text
@@ -149,12 +153,9 @@ export default class PieChart extends Component {
           transform={{ translate: [labelPosition.x, labelPosition.y] }}
           {...labelFont}
         >
-          {(!print && interactive && !legendVisible) && `${key}`}
-          {(print || !interactive) && ': '}
-          {(print || !interactive) && value}
-          {(print || !interactive) && (
-            <span>&nbsp;({round((value / totalCount) * 100, 2)}%)</span>
-          )}
+          {showKey && `${key}`}
+          {(showKey && showLabel) && ': '}
+          {showLabel && getLabelText(value, totalCount)}
         </Text>
         <Line
           x1={offset(labelPosition.x, labelOffset)}
@@ -175,8 +176,8 @@ export default class PieChart extends Component {
       onChangeVisualisationSpec,
       donut,
       style,
-      legendVisible,
       legendTitle,
+      legendVisible,
       edit,
     } = this.props;
 
@@ -306,10 +307,10 @@ export default class PieChart extends Component {
                                   this.handleClickNode({ key }, event);
                                 }}
                                 onMouseEnter={(event) => {
-                                  this.handleMouseEnterNode({ key, value }, event);
+                                  this.handleMouseEnterNode({ key, value, totalCount }, event);
                                 }}
                                 onMouseMove={(event) => {
-                                  this.handleMouseEnterNode({ key, value }, event);
+                                  this.handleMouseEnterNode({ key, value, totalCount }, event);
                                 }}
                                 onMouseLeave={() => {
                                   this.handleMouseLeaveNode({ key });
