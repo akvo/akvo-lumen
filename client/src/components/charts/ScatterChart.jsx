@@ -13,6 +13,7 @@ import ColorPicker from '../common/ColorPicker';
 import ResponsiveWrapper from '../common/ResponsiveWrapper';
 import Tooltip from './Tooltip';
 import ChartLayout from './ChartLayout';
+import { heuristicRound } from '../../utilities/chart';
 
 const startAxisFromZero = (axisExtent, type) => {
   // Returns an educated guess on if axis should start from zero or not
@@ -140,8 +141,8 @@ export default class ScatterChart extends Component {
     if (!interactive || print) return;
     this.handleShowTooltip(event, [
       { key: label, color },
-      { key: yAxisLabel || 'y', value: y },
-      { key: xAxisLabel || 'x', value: x },
+      { key: yAxisLabel || 'y', value: heuristicRound(y) },
+      { key: xAxisLabel || 'x', value: heuristicRound(x) },
     ]);
     this.setState({ hoveredNode: key });
   }

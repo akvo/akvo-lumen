@@ -10,7 +10,7 @@ import { Portal } from 'react-portal';
 import merge from 'lodash/merge';
 import { GridRows } from '@vx/grid';
 
-import { replaceLabelIfValueEmpty } from '../../utilities/chart';
+import { heuristicRound, replaceLabelIfValueEmpty } from '../../utilities/chart';
 import Legend from './Legend';
 import ResponsiveWrapper from '../common/ResponsiveWrapper';
 import ColorPicker from '../common/ColorPicker';
@@ -152,7 +152,7 @@ export default class SimpleBarChart extends Component {
     if (this.state.isPickingColor) return;
     const { interactive, print, colors } = this.props;
     if (!interactive || print) return;
-    this.handleShowTooltip(event, { key, color: colors[key], value });
+    this.handleShowTooltip(event, { key, color: colors[key], value: heuristicRound(value) });
     this.setState({ hoveredNode: key });
   }
 
