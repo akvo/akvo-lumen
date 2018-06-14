@@ -70,6 +70,7 @@ export default class ScatterChart extends Component {
     style: PropTypes.object,
     legendVisible: PropTypes.bool,
     grid: PropTypes.bool,
+    visualisation: PropTypes.object.isRequired,
   }
 
   static defaultProps = {
