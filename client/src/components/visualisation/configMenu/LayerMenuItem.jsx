@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { injectIntl, intlShape } from 'react-intl';
 import ContextMenu from '../../common/ContextMenu';
 import ToggleInput from '../../common/ToggleInput';
 
 require('./LayerMenuItem.scss');
 
-export default class LayerMenuItem extends Component {
+class LayerMenuItem extends Component {
 
   constructor() {
     super();
@@ -31,6 +32,7 @@ export default class LayerMenuItem extends Component {
       onChangeTitle,
       onDeleteLayer,
       onSelectLayer,
+      intl,
     } = this.props;
 
     return (
@@ -98,8 +100,8 @@ export default class LayerMenuItem extends Component {
                   }}
                   arrowClass="topRight"
                   options={[
-                    { value: 'rename', label: 'Rename' },
-                    { value: 'delete', label: 'Delete' },
+                    { value: 'rename', label: intl.formatMessage({ id: 'rename' }) },
+                    { value: 'delete', label: intl.formatMessage({ id: 'delete' }) },
                   ]}
                   onOptionSelected={(option) => {
                     if (option === 'rename') {
@@ -120,6 +122,7 @@ export default class LayerMenuItem extends Component {
 }
 
 LayerMenuItem.propTypes = {
+  intl: intlShape,
   layer: PropTypes.object.isRequired,
   layerIndex: PropTypes.number.isRequired,
   titleEditMode: PropTypes.bool.isRequired,
@@ -131,3 +134,5 @@ LayerMenuItem.propTypes = {
   onSetLayerVisible: PropTypes.func.isRequired,
 
 };
+
+export default injectIntl(LayerMenuItem);

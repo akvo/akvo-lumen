@@ -163,7 +163,7 @@ export default class MapConfigMenu extends Component {
                     value: item,
                   }))}
                   selected={visualisation.spec.baseLayer}
-                  label="Base map"
+                  label={<FormattedMessage id="base_map" />}
                   onChange={baseLayer => onChangeSpec({ baseLayer })}
                 />
               </div>
