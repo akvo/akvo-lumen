@@ -28,6 +28,17 @@ const AggregationError = ({ reason, count, max }) => {
         </div>
       );
       break;
+    case 'invalid-filter':
+      contents = (
+        <div>
+          <p>
+            <FormattedMessage
+              id="invalid_filter"
+            />
+          </p>
+        </div>
+      );
+      break;
     default:
       console.warn(`Unknown reason ${reason}`);
   }

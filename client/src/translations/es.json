@@ -90,6 +90,7 @@
   "if_transformation_fails": "Si la transformación falla",
   "import": "Importar",
   "invalid_expression": "Expresión inválida",
+  "invalid_filter": "Esta visualización contiene un filtro inválido y no puede ser representada.",
   "javascript_code": "Código Javascript",
   "js_helptext": "Las columnas derivadas son fórmulas escritas utilizando un subconjunto de Javascript dónde se permite una sola expresión y las columnas son referenciadas como {columnSyntax} o alternativamente si el título es un identificador de Javascript válido: {title}.",
   "leave_cell_empty": "Dejar la celda vacía",
