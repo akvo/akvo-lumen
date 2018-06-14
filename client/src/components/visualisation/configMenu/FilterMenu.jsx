@@ -257,60 +257,66 @@ export default class FilterMenu extends Component {
                 <div className="noFilters">No filters</div> : <div className="filterListContainer">
                   <ol className="filterList">
                     {filters.map((filter, index) => {
-                      return isFilterValid(filter, columnOptions) ?
-                        <li
-                          key={index}
-                          className='filterListItem valid'
-                        >
-                          <span className="filterIndicator">
-                            {getFilterOperationLabel(filter.operation)}
-                          </span>
-                          {' '}
-                          <span>
-                          </span>
-                          {' '}
-                          <span className="filterIndicator">
-                            {getColumnTitle(columnOptions, filter)}
-                          </span>
-                          {' '}
-                          <span>
-                            {getFilterStrategyLabel(filter.strategy, filter.column, columnOptions)}
-                          </span>
-                          {' '}
-                          <span className="filterIndicator">
-                            {getFilterDisplayValue(filter.value, filter.column, columnOptions)}
-                          </span>
-                          <button
-                            className="deleteFilter clickable"
-                            onClick={() => this.deleteFilter(index)}
+                      const out = (
+                        isFilterValid(filter, columnOptions) ?
+                              <li
+                            key={index}
+                            className='filterListItem valid'
                           >
-                          ✕
-                          </button>
-                        </li>
-                        :
-                        <li
-                          key={index}
-                          className='filterListItem invalid'
-                        >
-                          <span className="filterIndicator">
-                            {
-                              getColumnTitle(columnOptions, filter) ?
-                                <span>
-                                  The type of column {getColumnTitle(columnOptions, filter)} has changed and this filter is no longer valid. Please delete it.
-                                </span>
-                                :
-                                <span>
-                                  A column this filter refers to no longer exists. Please delete this filter.
-                                </span>
-                            }
-                          </span>
-                          <button
-                            className="deleteFilter clickable"
-                            onClick={() => this.deleteFilter(index)}
+                            <span className="filterIndicator">
+                              {getFilterOperationLabel(filter.operation)}
+                            </span>
+                            {' '}
+                            <span>
+                            </span>
+                            {' '}
+                            <span className="filterIndicator">
+                              {getColumnTitle(columnOptions, filter)}
+                            </span>
+                            {' '}
+                            <span>
+                              {getFilterStrategyLabel(filter.strategy, filter.column, columnOptions)}
+                            </span>
+                            {' '}
+                            <span className="filterIndicator">
+                              {getFilterDisplayValue(filter.value, filter.column, columnOptions)}
+                            </span>
+                            <button
+                              className="deleteFilter clickable"
+                              onClick={() => this.deleteFilter(index)}
+                            >
+                            ✕
+                            </button>
+                          </li>
+                          :
+                          <li
+                            key={index}
+                            className='filterListItem invalid'
                           >
-                          ✕
-                          </button>
-                        </li>
+                            <span className="filterIndicator">
+                              {
+                                getColumnTitle(columnOptions, filter) ?
+                                  <span>
+                                    The type of column {getColumnTitle(columnOptions, filter)} has
+                                    changed and this filter is no longer valid. Please delete it.
+                                  </span>
+                                  :
+                                  <span>
+                                    A column this filter refers to no longer exists.
+                                    Please delete this filter.
+                                  </span>
+                              }
+                            </span>
+                            <button
+                              className="deleteFilter clickable"
+                              onClick={() => this.deleteFilter(index)}
+                            >
+                            ✕
+                            </button>
+                          </li>
+                        );
+
+                      return out;
                     }
                   )}
                   </ol>
