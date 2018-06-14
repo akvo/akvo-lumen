@@ -41,7 +41,22 @@ export default class AsyncVisualisationViewer extends Component {
         },
       });
     } else {
-      require.ensure(['vega'], () => {
+      require.ensure([
+        '@potion/color',
+        '@potion/element',
+        '@potion/extra',
+        '@potion/layout',
+        '@vx/axis',
+        '@vx/grid',
+        '@vx/legend',
+        '@vx/scale',
+        '@nivo/core',
+        'd3-array',
+        'd3-scale',
+        'd3-scale-chromatic',
+        'd3-shape',
+        'datalib',
+      ], () => {
         // eslint-disable-next-line global-require
         const Chart = require('./Chart').default;
 
@@ -64,7 +79,7 @@ export default class AsyncVisualisationViewer extends Component {
             output,
           },
         });
-      }, 'vega');
+      });
     }
   }
 

@@ -12,6 +12,22 @@ const specIsValidForApi = (spec, vType) => {
   let anyLayerInvalid;
 
   switch (vType) {
+    case 'scatter':
+      if (spec.metricColumnX === null || spec.metricColumnY === null) {
+        return false;
+      }
+      break;
+    case 'bar':
+      if (spec.bucketColumn === null || spec.metricColumnY === null) {
+        return false;
+      }
+      break;
+    case 'line':
+    case 'area':
+      if (spec.metricColumnX === null || spec.metricColumnY === null) {
+        return false;
+      }
+      break;
     case 'pivot table':
       if (spec.aggregation !== 'count' && spec.valueColumn == null) {
         return false;
@@ -62,6 +78,16 @@ const getNeedNewAggregation = (newV = { spec: {} }, oldV = { spec: {} }, optiona
   const vType = newV.visualisationType || optionalVizType;
 
   switch (vType) {
+    case 'bar':
+      return Boolean(
+        newV.datasetId !== oldV.datasetId ||
+        newV.spec.metricColumnX !== oldV.spec.metricColumnX ||
+        newV.spec.metricColumnY !== oldV.spec.metricColumnY ||
+        newV.spec.metricAggregation !== oldV.spec.metricAggregation ||
+        newV.spec.subBucketColumn !== oldV.spec.metricAggregation ||
+        newV.spec.subBucketMethod !== oldV.spec.subBucketMethod ||
+        !isEqual(newV.spec.filters, oldV.spec.filters)
+      );
     case 'pivot table':
       return Boolean(
         newV.datasetId !== oldV.datasetId ||
@@ -78,6 +104,26 @@ const getNeedNewAggregation = (newV = { spec: {} }, oldV = { spec: {} }, optiona
         newV.spec.bucketColumn !== oldV.spec.bucketColumn ||
         !isEqual(newV.spec.filters, oldV.spec.filters)
       );
+    case 'line':
+    case 'area':
+      return Boolean(
+        newV.datasetId !== oldV.datasetId ||
+        newV.spec.metricColumnX !== oldV.spec.metricColumnX ||
+        newV.spec.metricColumnY !== oldV.spec.metricColumnY ||
+        newV.spec.metricAggregation !== oldV.spec.metricAggregation ||
+        !isEqual(newV.spec.filters, oldV.spec.filters)
+      );
+    case 'scatter':
+      return Boolean(
+        newV.datasetId !== oldV.datasetId ||
+        newV.spec.metricColumnX !== oldV.spec.metricColumnX ||
+        newV.spec.metricColumnY !== oldV.spec.metricColumnY ||
+        newV.spec.metricAggregation !== oldV.spec.metricAggregation ||
+        newV.spec.bucketColumn !== oldV.spec.bucketColumn ||
+        newV.spec.datapointLabelColumn !== oldV.spec.datapointLabelColumn ||
+        !isEqual(newV.spec.filters, oldV.spec.filters)
+      );
+
     case 'map':
       return Boolean(
         newV.datasetId !== oldV.datasetId ||
@@ -133,10 +179,6 @@ export default class VisualisationEditor extends Component {
 
     switch (vType) {
       case null:
-      case 'bar':
-      case 'line':
-      case 'area':
-      case 'scatter':
         // Data aggregated client-side
         this.setState({ visualisation });
         break;
@@ -188,6 +230,10 @@ export default class VisualisationEditor extends Component {
       case 'pivot table':
       case 'pie':
       case 'donut':
+      case 'line':
+      case 'area':
+      case 'bar':
+      case 'scatter':
         // Data aggregated on the backend for these types
 
         specValid = specIsValidForApi(visualisation.spec, vType);
@@ -196,7 +242,9 @@ export default class VisualisationEditor extends Component {
         if (!this.state.visualisation || !this.state.visualisation.datasetId) {
           // Update immediately, without waiting for the api call
           this.setState({ visualisation });
-        } else if (!specValid || !needNewAggregation) {
+        } else if (!specValid) {
+          // Do nothing
+        } else if (!needNewAggregation) {
           this.setState({
             visualisation: Object.assign({},
               visualisation, { data: this.state.visualisation.data }),
@@ -283,6 +331,43 @@ export default class VisualisationEditor extends Component {
             if (requestId === this.latestRequestId) {
               this.setState({
                 visualisation: { ...visualisation, data: response },
+              });
+            }
+          });
+        break;
+      case 'line':
+      case 'area':
+        api.get(`/api/aggregation/${datasetId}/line`, {
+          query: JSON.stringify(spec),
+        }).then(response => response.json())
+          .then((response) => {
+            if (requestId === this.latestRequestId) {
+              this.setState({
+                visualisation: Object.assign({}, visualisation, { data: response }),
+              });
+            }
+          });
+        break;
+      case 'bar':
+        api.get(`/api/aggregation/${datasetId}/bar`, {
+          query: JSON.stringify(spec),
+        }).then(response => response.json())
+          .then((response) => {
+            if (requestId === this.latestRequestId) {
+              this.setState({
+                visualisation: Object.assign({}, visualisation, { data: response }),
+              });
+            }
+          });
+        break;
+      case 'scatter':
+        api.get(`/api/aggregation/${datasetId}/scatter`, {
+          query: JSON.stringify(spec),
+        }).then(response => response.json())
+          .then((response) => {
+            if (requestId === this.latestRequestId) {
+              this.setState({
+                visualisation: Object.assign({}, visualisation, { data: response }),
               });
             }
           });

@@ -1,8 +1,4 @@
 import dl from 'datalib';
-import getVegaScatterSpec from './vega-specs/Scatter';
-import getVegaPieSpec from './vega-specs/Pie';
-import getVegaAreaSpec from './vega-specs/Area';
-import getVegaBarSpec from './vega-specs/Bar';
 
 // Special value that will always come last alphabetically. Used for sorting.
 const lastValueAlphabetically = '';
@@ -447,43 +443,53 @@ export function getMapData(layer, datasets) {
   });
 }
 
-export function getVegaSpec(visualisation, data, containerHeight, containerWidth, chartSize) {
-  const { visualisationType } = visualisation;
-  let vspec;
-  let displayData;
-
-  switch (visualisationType) {
-    case 'bar':
-      vspec = getVegaBarSpec(visualisation, data, containerHeight, containerWidth, chartSize);
-      break;
-
-    case 'area':
-    case 'line':
-      vspec = getVegaAreaSpec(visualisation, data, containerHeight, containerWidth, chartSize);
-      break;
-
-    case 'pie':
-    case 'donut':
-      displayData = formatPieData(data);
-
-      vspec =
-        getVegaPieSpec(visualisation, displayData, containerHeight, containerWidth, chartSize);
-      break;
-
-    case 'scatter':
-      vspec = getVegaScatterSpec(visualisation, data, containerHeight, containerWidth, chartSize);
-      break;
-
-    default:
-      throw new Error(`Unknown chart type ${visualisationType} supplied to getVegaSpec()`);
+export const round = (input, places) => {
+  let num;
+  if (typeof input === 'number') {
+    num = input;
+  } else {
+    num = Number(input);
+    if (isNaN(num)) {
+      return input;
+    }
   }
-
-  return vspec;
+  // eslint-disable-next-line no-restricted-properties
+  return Math.round(num * Math.pow(10, places)) / Math.pow(10, places);
 }
 
-export const round = (num, places) =>
-    // eslint-disable-next-line no-restricted-properties
-    Math.round(num * Math.pow(10, places)) / Math.pow(10, places);
+export const heuristicRound = (input) => {
+  let num;
+  if (typeof input === 'number') {
+    num = input;
+  } else {
+    num = Number(input);
+    if (isNaN(num)) {
+      return input;
+    }
+  }
+
+  let places;
+
+  if (num < 0.0000001) {
+    places = 10;
+  } else if (num < 0.000001) {
+    places = 9;
+  } else if (num < 0.00001) {
+    places = 8;
+  } else if (num < 0.00001) {
+    places = 7;
+  } else if (num < 0.0001) {
+    places = 6;
+  } else if (num < 0.001) {
+    places = 5;
+  } else if (num < 0.01) {
+    places = 4;
+  } else {
+    places = 2;
+  }
+
+  return round(num, places);
+}
 
 const percentageRow = (rows, spec) => {
   const totalsRowIndex = rows.length - 1;

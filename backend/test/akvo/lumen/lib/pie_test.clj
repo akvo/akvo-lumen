@@ -17,14 +17,8 @@
     (testing "Simple queries"
       (let [[tag query-result] (query {"bucketColumn" "c1"})]
         (is (= tag ::lib/ok))
-        (is (= query-result {"metadata" {"bucketColumnTitle" "A"
-                                         "bucketColumnType" "text"},
-                             "data" [{"bucketValue" "a1", "bucketCount" 4}
-                                     {"bucketValue" "a2", "bucketCount" 4}]})))
+        (is (= query-result {"series" [{"key" "A" "label" "A" "data" [{"value" 4} {"value" 4}]}] "common" {"data" [{"key" "a1" "label" "a1"} {"key" "a2" "label" "a2"}] "metadata" {"type" "text"}}})))
 
       (let [[tag query-result] (query {"bucketColumn" "c2"})]
         (is (= tag ::lib/ok))
-        (is (= query-result {"metadata" {"bucketColumnTitle" "B"
-                                         "bucketColumnType" "text"},
-                             "data" [{"bucketValue" "b1", "bucketCount" 5}
-                                     {"bucketValue" "b2", "bucketCount" 3}]}))))))
+        (is (= query-result {"series" [{"key" "B" "label" "B" "data" [{"value" 5} {"value" 3}]}] "common" {"data" [{"key" "b1" "label" "b1"} {"key" "b2" "label" "b2"}] "metadata" {"type" "text"}}}))))))
