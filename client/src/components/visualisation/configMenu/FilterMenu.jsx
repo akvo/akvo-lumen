@@ -61,27 +61,13 @@ const strategies = {
   ],
 };
 
-const isFilterValid = (filter, columnOptions) => {
-  if (!getColumnTitle(columnOptions, filter)) {
-    return false;
-  }
-
-  const columnType = columnOptions.find(col => col.value === filter.column).type;
-  const filterStrategy = get(filter, 'strategy') || '';
-  const stratValid = Boolean(
-    strategies[columnType].find(item => item.value.toString() === filterStrategy.toString())
-  );
-
-  return stratValid;
-}
-
 const getColumnTitle = (columnOptions, filter) => {
   const columnInFilter = filter.column;
   const matchingColumn = columnOptions.find(col => col.value === columnInFilter);
   const columnTitle = get(matchingColumn, 'title') || null;
 
   return columnTitle;
-}
+};
 
 const getMenuFilters = filterArray =>
   filterArray.filter(item => item.origin !== 'pivot-row' && item.origin !== 'pivot-column');
@@ -116,6 +102,20 @@ const getFilterDisplayValue = (value, columnName, columnOptions) => {
   }
 
   return displayValue;
+};
+
+const isFilterValid = (filter, columnOptions) => {
+  if (!getColumnTitle(columnOptions, filter)) {
+    return false;
+  }
+
+  const columnType = columnOptions.find(col => col.value === filter.column).type;
+  const filterStrategy = get(filter, 'strategy') || '';
+  const stratValid = Boolean(
+    strategies[columnType].find(item => item.value.toString() === filterStrategy.toString())
+  );
+
+  return stratValid;
 };
 
 export default class FilterMenu extends Component {
@@ -258,63 +258,62 @@ export default class FilterMenu extends Component {
                   <ol className="filterList">
                     {filters.map((filter, index) => {
                       const out = (
-                        isFilterValid(filter, columnOptions) ?
-                              <li
-                            key={index}
-                            className='filterListItem valid'
+                      isFilterValid(filter, columnOptions) ?
+                        (<li
+                          key={index}
+                          className="filterListItem valid"
+                        >
+                          <span className="filterIndicator">
+                            {getFilterOperationLabel(filter.operation)}
+                          </span>
+                          {' '}
+                          <span />
+                          {' '}
+                          <span className="filterIndicator">
+                            {getColumnTitle(columnOptions, filter)}
+                          </span>
+                          {' '}
+                          <span>
+                            {getFilterStrategyLabel(filter.strategy, filter.column, columnOptions)}
+                          </span>
+                          {' '}
+                          <span className="filterIndicator">
+                            {getFilterDisplayValue(filter.value, filter.column, columnOptions)}
+                          </span>
+                          <button
+                            className="deleteFilter clickable"
+                            onClick={() => this.deleteFilter(index)}
                           >
-                            <span className="filterIndicator">
-                              {getFilterOperationLabel(filter.operation)}
-                            </span>
-                            {' '}
-                            <span>
-                            </span>
-                            {' '}
-                            <span className="filterIndicator">
-                              {getColumnTitle(columnOptions, filter)}
-                            </span>
-                            {' '}
-                            <span>
-                              {getFilterStrategyLabel(filter.strategy, filter.column, columnOptions)}
-                            </span>
-                            {' '}
-                            <span className="filterIndicator">
-                              {getFilterDisplayValue(filter.value, filter.column, columnOptions)}
-                            </span>
-                            <button
-                              className="deleteFilter clickable"
-                              onClick={() => this.deleteFilter(index)}
-                            >
-                            ✕
-                            </button>
-                          </li>
-                          :
-                          <li
-                            key={index}
-                            className='filterListItem invalid'
+                          ✕
+                          </button>
+                        </li>)
+                        :
+                        (<li
+                          key={index}
+                          className="filterListItem invalid"
+                        >
+                          <span className="filterIndicator">
+                            {
+                              getColumnTitle(columnOptions, filter) ?
+                                <span>
+                                  The type of column {getColumnTitle(columnOptions, filter)} has
+                                  changed and this filter is no longer valid. Please delete it.
+                                </span>
+                                :
+                                <span>
+                                  A column this filter refers to no longer exists.
+                                  Please delete this filter.
+                                </span>
+                            }
+                          </span>
+                          <button
+                            className="deleteFilter clickable"
+                            onClick={() => this.deleteFilter(index)}
                           >
-                            <span className="filterIndicator">
-                              {
-                                getColumnTitle(columnOptions, filter) ?
-                                  <span>
-                                    The type of column {getColumnTitle(columnOptions, filter)} has
-                                    changed and this filter is no longer valid. Please delete it.
-                                  </span>
-                                  :
-                                  <span>
-                                    A column this filter refers to no longer exists.
-                                    Please delete this filter.
-                                  </span>
-                              }
-                            </span>
-                            <button
-                              className="deleteFilter clickable"
-                              onClick={() => this.deleteFilter(index)}
-                            >
-                            ✕
-                            </button>
-                          </li>
-                        );
+                          ✕
+                          </button>
+                        </li>)
+                      );
 
                       return out;
                     }

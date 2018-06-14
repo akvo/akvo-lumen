@@ -116,7 +116,7 @@ export default class Chart extends Component {
           max={visualisation.data.max}
         />
       );
-    } else if (get(visualisation, 'data.message', '').indexOf('Invalid filter') > -1){
+    } else if (get(visualisation, 'data.message', '').indexOf('Invalid filter') > -1) {
       return (
         <AggregationError
           reason="invalid-filter"
