@@ -455,7 +455,7 @@ export const round = (input, places) => {
   }
   // eslint-disable-next-line no-restricted-properties
   return Math.round(num * Math.pow(10, places)) / Math.pow(10, places);
-}
+};
 
 export const heuristicRound = (input) => {
   let num;
@@ -489,7 +489,7 @@ export const heuristicRound = (input) => {
   }
 
   return round(num, places);
-}
+};
 
 const percentageRow = (rows, spec) => {
   const totalsRowIndex = rows.length - 1;

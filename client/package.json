@@ -11,7 +11,8 @@
   "scripts": {
     "preinstall": "node tools/nodeVersionCheck.js",
     "start": "babel-node tools/devServer.js",
-    "lint": "esw webpack.config.* src tools --color --fix --ext jsx --ext js",
+    "lint": "esw webpack.config.* src tools --color --ext jsx --ext js",
+    "lint:fix": "esw webpack.config.* src tools --color --fix --ext jsx --ext js",
     "lint:watch": "npm run lint -- --watch",
     "clean": "rimraf ./dist && mkdir dist",
     "prebuild": "npm run lint && npm run test && npm run clean",

@@ -138,7 +138,7 @@ export default class ScatterChart extends Component {
   }
 
   handleMouseEnterNode({ key, x, y, label, color }, event) {
-    const { interactive, print, xAxisLabel, yAxisLabel, visualisation, data} = this.props;
+    const { interactive, print, xAxisLabel, yAxisLabel, visualisation, data } = this.props;
     const xAxisType = get(data, 'series[0].metadata.type');
     const showColor =
       get(visualisation, 'spec.datapointLabelColumn') || get(visualisation, 'spec.bucketColumn');
