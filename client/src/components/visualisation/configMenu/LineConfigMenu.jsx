@@ -49,7 +49,7 @@ export default function LineConfigMenu(props) {
         labelTextId="metric_column"
         choice={spec.metricColumnY !== null ? spec.metricColumnY.toString() : null}
         name="metricColumnYInput"
-        options={filterColumns(columnOptions, ['number', 'date', 'text'])}
+        options={filterColumns(columnOptions, ['number', 'text'])}
         onChange={value => onChangeSpec({
           metricColumnY: value,
           axisLabelY: getAxisLabel('y', Object.assign({}, spec, { metricColumnY: value }), columnOptions),

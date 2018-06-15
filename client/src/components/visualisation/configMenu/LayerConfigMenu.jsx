@@ -274,13 +274,15 @@ const GeoshapeDataTab = injectIntl((props) => {
       {Boolean(layer.aggregationGeomColumn) &&
         <div className="inputGroup">
           <ButtonRowInput
-            options={[{
-              label: intl.formatMessage({ id: 'average' }),
-              value: 'avg',
-            }, {
-              label: intl.formatMessage({ id: 'sum' }),
-              value: 'sum',
-            },
+            options={[
+              {
+                label: intl.formatMessage({ id: 'average' }),
+                value: 'avg',
+              },
+              {
+                label: intl.formatMessage({ id: 'sum' }),
+                value: 'sum',
+              },
               {
                 label: intl.formatMessage({ id: 'min' }),
                 value: 'min',
@@ -292,7 +294,8 @@ const GeoshapeDataTab = injectIntl((props) => {
               {
                 label: intl.formatMessage({ id: 'count' }),
                 value: 'count',
-              }]}
+              },
+            ]}
             selected={layer.aggregationMethod || 'avg'}
             label={intl.formatMessage({ id: 'aggregation' })}
             onChange={value => onChangeMapLayer(layerIndex, {

@@ -1,16 +1,14 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import vg from 'vega';
 import moment from 'moment';
-import isEqual from 'lodash/isEqual';
-import { FormattedMessage } from 'react-intl';
-import * as chart from '../../utilities/chart';
-
-/*
 import get from 'lodash/get';
+import { FormattedMessage } from 'react-intl';
+import AggregationError from './AggregationError';
+import LineChart from './LineChart';
+import BarChart from './BarChart';
 import PieChart from './PieChart';
-import { palette } from '../../utilities/visualisationColors';
-*/
+import ScatterChart from './ScatterChart';
+import { defaultPrimaryColor, palette } from '../../utilities/visualisationColors';
 
 require('./Chart.scss');
 
@@ -89,20 +87,8 @@ export default class Chart extends Component {
       titleHeight: null,
       titleLength: null,
     };
-  }
 
-  componentDidMount() {
-    this.renderChart(this.props);
-  }
-
-  componentWillReceiveProps(nextProps) {
-    const visualisationChanged = !isEqual(this.props.visualisation, nextProps.visualisation);
-    const sizeChanged = this.props.width !== nextProps.width ||
-      this.props.height !== nextProps.height;
-
-    if (visualisationChanged || sizeChanged) {
-      this.renderChart(nextProps);
-    }
+    this.renderNewChart = this.renderNewChart.bind(this);
   }
 
   getDataset(nextProps) {
@@ -110,50 +96,6 @@ export default class Chart extends Component {
     return datasets[visualisation.datasetId];
   }
 
-  renderChart(props) {
-    const dataset = this.getDataset(props);
-    const { visualisation, width, height } = props;
-    const titleHeight = getTitleStyle(visualisation.name, getSize(width)).height * (1 + META_SCALE);
-    const containerHeight = (height - titleHeight) || 400;
-    const containerWidth = width || 800;
-    const chartSize = getSize(containerWidth);
-    let chartData;
-    switch (visualisation.visualisationType) {
-      case 'pie':
-      case 'donut':
-        chartData = visualisation.data;
-        if (!chartData) {
-          // Aggregated data hasn't loaded yet - do nothing
-          return;
-        }
-        break;
-      case 'area':
-      case 'line':
-        chartData = chart.getLineData(visualisation, dataset);
-        break;
-      case 'scatter':
-        chartData = chart.getScatterData(visualisation, dataset);
-        break;
-      case 'bar':
-        chartData = chart.getBarData(visualisation, dataset);
-        break;
-      // no default
-    }
-
-    if (!chartData) return;
-
-    /* TODO - once we support backend aggregations for more vTypes, it doesn't make sense to
-    ** pass `chartData` separately, because we include it on the visualisation itself */
-    const vegaSpec =
-      chart.getVegaSpec(visualisation, chartData, containerHeight, containerWidth, chartSize);
-
-    vg.parse.spec(vegaSpec, (error, vegaChart) => {
-      this.vegaChart = vegaChart({ el: this.element });
-      this.vegaChart.update();
-    });
-  }
-
-  /*
   renderNewChart() {
     const {
       visualisation,
@@ -162,34 +104,101 @@ export default class Chart extends Component {
       onChangeVisualisationSpec,
     } = this.props;
 
-    const colors = get(visualisation, 'data.data') ?
-      visualisation.data.data.reduce((acc, datum, i) => {
-        const result = { ...acc };
-        if (!result[datum.bucketValue]) {
-          result[datum.bucketValue] = palette[i];
-        }
-        return result;
-      }, get(visualisation, 'spec.colors') || {}) :
-      {};
+    if (!visualisation.data) {
+      return null;
+    }
+
+    if (visualisation.data.error) {
+      return (
+        <AggregationError
+          reason={visualisation.data.reason}
+          count={visualisation.data.count}
+          max={visualisation.data.max}
+        />
+      );
+    } else if (get(visualisation, 'data.message', '').indexOf('Invalid filter') > -1) {
+      return (
+        <AggregationError
+          reason="invalid-filter"
+        />
+      );
+    }
+
+    const titleHeight = getTitleStyle(visualisation.name, getSize(width)).height * (1 + META_SCALE);
+    const adjustedContainerHeight = ((height - titleHeight) - (titleHeight * META_SCALE)) || 400;
 
     switch (visualisation.visualisationType) {
       case 'pie':
-      case 'donut': {
+      case 'donut':
         return (
           <PieChart
-            colors={colors}
+            visualisation={visualisation}
             data={visualisation.data}
             width={width}
-            height={height}
+            height={adjustedContainerHeight}
+            colors={palette}
+            colorMapping={visualisation.spec.colors}
+            donut={Boolean(visualisation.visualisationType === 'donut')}
+            legendVisible={Boolean(visualisation.spec.showLegend)}
+            legendTitle={visualisation.spec.legendTitle}
             onChangeVisualisationSpec={onChangeVisualisationSpec}
+            edit={Boolean(onChangeVisualisationSpec)}
           />
         );
-      }
-      // no default
+      case 'line':
+      case 'area':
+        return (
+          <LineChart
+            visualisation={visualisation}
+            data={visualisation.data}
+            width={width}
+            height={adjustedContainerHeight}
+            color={visualisation.spec.color || defaultPrimaryColor}
+            xAxisLabel={visualisation.spec.axisLabelX}
+            yAxisLabel={visualisation.spec.axisLabelY}
+            area={Boolean(visualisation.visualisationType === 'area')}
+            onChangeVisualisationSpec={onChangeVisualisationSpec}
+            edit={Boolean(onChangeVisualisationSpec)}
+          />
+        );
+      case 'scatter':
+        return (
+          <ScatterChart
+            visualisation={visualisation}
+            data={visualisation.data}
+            width={width}
+            height={adjustedContainerHeight}
+            color={visualisation.spec.color || defaultPrimaryColor}
+            xAxisLabel={visualisation.spec.axisLabelX}
+            yAxisLabel={visualisation.spec.axisLabelY}
+            onChangeVisualisationSpec={onChangeVisualisationSpec}
+            edit={Boolean(onChangeVisualisationSpec)}
+          />
+        );
+      case 'bar':
+        return (
+          <BarChart
+            edit={Boolean(onChangeVisualisationSpec)}
+            visualisation={visualisation}
+            data={visualisation.data}
+            width={width}
+            height={adjustedContainerHeight}
+            colors={palette}
+            colorMapping={visualisation.spec.colors}
+            defaultColor={defaultPrimaryColor}
+            xAxisLabel={visualisation.spec.axisLabelX}
+            yAxisLabel={visualisation.spec.axisLabelY}
+            area={Boolean(visualisation.visualisationType === 'area')}
+            grouped={Boolean(visualisation.spec.subBucketMethod === 'split')}
+            onChangeVisualisationSpec={onChangeVisualisationSpec}
+            legendTitle={visualisation.spec.legendTitle}
+          />
+        );
+      default:
+        console.warn(`Unknown visualisation type ${visualisation.visualisationType}`);
     }
     return null;
   }
-  */
 
   render() {
     const { visualisation, width, height } = this.props;
@@ -223,10 +232,14 @@ export default class Chart extends Component {
           <span className="capitalize">
             <FormattedMessage id="data_last_updated" />
           </span>: {moment(dataset.get('updated')).format('Do MMM YYYY - HH:mm')}
+          {
+            get(visualisation, 'data.common.metadata.sampled') ?
+              <span> (<FormattedMessage id="using_sampled_data" />)</span>
+              :
+              null
+          }
         </p>
-        <div
-          ref={(el) => { this.element = el; }}
-        />
+        {this.renderNewChart()}
       </div>
     );
   }

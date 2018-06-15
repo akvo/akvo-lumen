@@ -11,7 +11,7 @@ import merge from 'lodash/merge';
 import { stack } from 'd3-shape';
 import { GridRows } from '@vx/grid';
 
-import { sortAlphabetically } from '../../utilities/utils';
+import { heuristicRound, replaceLabelIfValueEmpty } from '../../utilities/chart';
 import Legend from './Legend';
 import ResponsiveWrapper from '../common/ResponsiveWrapper';
 import ColorPicker from '../common/ColorPicker';
@@ -29,7 +29,7 @@ export default class StackedBarChart extends Component {
     }),
     colors: PropTypes.array.isRequired,
     colorMapping: PropTypes.object,
-    onChangeVisualisationSpec: PropTypes.func.isRequired,
+    onChangeVisualisationSpec: PropTypes.func,
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
     legendPosition: PropTypes.oneOf(['right']),
@@ -43,6 +43,7 @@ export default class StackedBarChart extends Component {
     marginBottom: PropTypes.number,
     style: PropTypes.object,
     legendVisible: PropTypes.bool,
+    legendTitle: PropTypes.string,
     yAxisLabel: PropTypes.string,
     grouped: PropTypes.bool,
     grid: PropTypes.bool,
@@ -55,7 +56,7 @@ export default class StackedBarChart extends Component {
     marginRight: 0.1,
     marginTop: 0.1,
     marginBottom: 0.2,
-    legendVisible: false,
+    legendVisible: true,
     edit: false,
     padding: 0.1,
     colorMapping: {},
@@ -79,7 +80,6 @@ export default class StackedBarChart extends Component {
     const { data } = props;
 
     if (!get(data, 'series[0]')) return false;
-
     const values = data.series[0].data
       .reduce((acc, { value }, i) =>
         [
@@ -95,7 +95,7 @@ export default class StackedBarChart extends Component {
       , []);
 
     const series = merge({}, data.common, { data: values });
-    const combinedData = series.data.sort((a, b) => sortAlphabetically(a, b, ({ key }) => key));
+    const combinedData = series.data.sort((a, b) => a.key - b.key);
 
     return {
       ...series,
@@ -139,7 +139,7 @@ export default class StackedBarChart extends Component {
     if (!interactive || print) return;
     this.handleShowTooltip(event, [
       { key: seriesKey, color: this.getColor(seriesKey, seriesIndex), value: valueKey },
-      { key: yAxisLabel || 'y', value: node.values[seriesKey] },
+      { key: yAxisLabel || 'y', value: heuristicRound(node.values[seriesKey]) },
     ]);
     this.setState({ hoveredNode: { seriesKey, valueKey } });
   }
@@ -152,7 +152,7 @@ export default class StackedBarChart extends Component {
   }
 
   handleMouseLeaveLegendNode() {
-    this.setState({ hoveredSeries: null });
+    this.setState({ hoveredSeries: undefined });
   }
 
   handleMouseLeaveNode() {
@@ -163,7 +163,7 @@ export default class StackedBarChart extends Component {
     const { interactive, print, edit } = this.props;
     if (!interactive || print) return;
     event.stopPropagation();
-    const isPickingColor = edit ? node : null;
+    const isPickingColor = edit ? node : undefined;
     this.setState({
       isPickingColor,
       tooltipVisible: !isPickingColor,
@@ -184,7 +184,7 @@ export default class StackedBarChart extends Component {
         {...labelFont}
         fontWeight={get(this.state, 'hoveredNode.valueKey') === node.key ? 700 : 400}
       >
-        {node.key}
+        {replaceLabelIfValueEmpty(node.key)}
       </Text>
     );
   }
@@ -193,7 +193,7 @@ export default class StackedBarChart extends Component {
     const {
       width,
       height,
-      colors,
+      colorMapping,
       onChangeVisualisationSpec,
       marginTop,
       marginRight,
@@ -201,6 +201,7 @@ export default class StackedBarChart extends Component {
       marginLeft,
       style,
       legendVisible,
+      legendTitle,
       edit,
       padding,
       yAxisLabel,
@@ -226,13 +227,13 @@ export default class StackedBarChart extends Component {
         height={height}
         legendVisible={legendVisible}
         onClick={() => {
-          this.setState({ isPickingColor: null });
+          this.setState({ isPickingColor: undefined });
         }}
         legend={({ horizontal }) => (
           <Legend
             horizontal={!horizontal}
-            title={get(this.props, 'data.metadata.bucketColumnTitle')}
-            data={stackNodes.map(({ key }) => key)}
+            title={legendTitle}
+            data={stackNodes.map(({ key }) => replaceLabelIfValueEmpty(key))}
             colorMapping={
               stackNodes.reduce((acc, { key }, i) => ({
                 ...acc,
@@ -331,7 +332,7 @@ export default class StackedBarChart extends Component {
                           <Group key={seriesKey}>
                             {stackSeries.map(([y0, y1], valueIndex) => {
                               const { nodeWidth, x, key } = nodes[valueIndex];
-                              const color = this.getColor(key, seriesIndex);
+                              const color = this.getColor(seriesKey, seriesIndex);
                               const normalizedY = heightScale(y0);
                               const normalizedHeight = availableHeight - heightScale(y1 - y0);
                               const colorpickerPlacement = valueIndex < dataCount / 2 ? 'right' : 'left';
@@ -358,9 +359,12 @@ export default class StackedBarChart extends Component {
                                         placement={colorpickerPlacement}
                                         onChange={({ hex }) => {
                                           onChangeVisualisationSpec({
-                                            colors: { ...colors, [this.state.isPickingColor]: hex },
+                                            colors: {
+                                              ...colorMapping,
+                                              [this.state.isPickingColor.seriesKey]: hex,
+                                            },
                                           });
-                                          this.setState({ isPickingColor: null });
+                                          this.setState({ isPickingColor: undefined });
                                         }}
                                       />
                                     </Portal>
