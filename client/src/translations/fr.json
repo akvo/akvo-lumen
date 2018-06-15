@@ -254,5 +254,6 @@
   "point_size": "***Point size",
   "color": "***Color",
   "colors_for_title": "***Colors ({title})",
-  "raster": "***Raster"
+  "raster": "***Raster",
+  "geopoint": "***Geopoint"
 }

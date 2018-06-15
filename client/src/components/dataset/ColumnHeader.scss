@@ -43,18 +43,15 @@
     .columnType {
         margin: 0 0.5rem;
         color: $black;
+        font-weight: 400;
     }
 
     .columnType, .columnTypeToggle {
         display: inline-block;
     }
 
-    .columnTypeToggle {
-        padding-top: 2px;
-    }
-
     .columnTitleText {
-        max-width: 7.75rem;
+        max-width: calc(100% - 30px);
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;

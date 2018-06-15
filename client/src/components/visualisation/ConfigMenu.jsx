@@ -34,12 +34,12 @@ const getDatasetOptions = datasetArray =>
     label: entity.getTitle(dataset),
   }));
 
-const getSelectMenuOptionsFromColumnList = (columns = Immutable.List(), formatMessage) =>
+const getSelectMenuOptionsFromColumnList = (columns = Immutable.List(), intl) =>
   columns.map((column, index) => ({
     value: `${column.get('columnName')}`,
     index: index.toString(),
     title: `${column.get('title')}`,
-    label: `${column.get('title')} (${formatMessage({ id: `column_type_${column.get('type')}` })})`,
+    label: `${column.get('title')} (${intl.formatMessage({ id: column.get('type') }).toLowerCase()})`,
     type: `${column.get('type')}`,
   })).toArray();
 
@@ -90,11 +90,10 @@ function ConfigMenu(props) {
   const visualisation = props.visualisation;
   const onChangeSpec = props.onChangeVisualisationSpec;
   const spec = visualisation.spec;
-  const { formatMessage } = props.intl;
 
   const columns = props.datasets[visualisation.datasetId] ?
     props.datasets[visualisation.datasetId].get('columns') : Immutable.List();
-  const columnOptions = getSelectMenuOptionsFromColumnList(columns, formatMessage);
+  const columnOptions = getSelectMenuOptionsFromColumnList(columns, props.intl);
 
   const getChartTypeEditor = (visualisationType) => {
     let chartTypeEditor;

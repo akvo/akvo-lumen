@@ -27,12 +27,12 @@ const getDatasetOrRasterId = (layer) => {
   return layer.datasetId ? layer.datasetId.toString() : null;
 };
 
-const getSelectMenuOptionsFromColumnList = columns => (columns == null ?
+const getSelectMenuOptionsFromColumnList = (columns, intl) => (columns == null ?
   [] : columns.map((column, index) => ({
     value: `${column.get('columnName')}`,
     index: index.toString(),
     title: `${column.get('title')}`,
-    label: `${column.get('title')} (${column.get('type')})`,
+    label: `${column.get('title')} (${intl.formatMessage({ id: column.get('type') }).toLowerCase()})`,
     type: `${column.get('type')}`,
   })).toArray());
 
@@ -154,7 +154,7 @@ GeopointDataTab.propTypes = {
   disabled: PropTypes.bool,
 };
 
-const getAggregationColumns = (layer, datasets) => {
+const getAggregationColumns = (layer, datasets, intl) => {
   const out = [];
 
   if (!layer.aggregationDataset) {
@@ -166,7 +166,7 @@ const getAggregationColumns = (layer, datasets) => {
   }
 
   const aggregationColumnOptions =
-    getSelectMenuOptionsFromColumnList(datasets[layer.aggregationDataset].get('columns'));
+    getSelectMenuOptionsFromColumnList(datasets[layer.aggregationDataset].get('columns'), intl);
 
   return aggregationColumnOptions;
 };
@@ -182,7 +182,7 @@ const GeoshapeDataTab = injectIntl((props) => {
     intl,
   } = props;
 
-  const aggregationColumns = getAggregationColumns(layer, datasets);
+  const aggregationColumns = getAggregationColumns(layer, datasets, intl);
 
   return (
     <div className="GeoshapeDataTab">
