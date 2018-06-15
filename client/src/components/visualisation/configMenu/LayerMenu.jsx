@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import LayerMenuItem from './LayerMenuItem';
 import { FormattedMessage } from 'react-intl';
+import LayerMenuItem from './LayerMenuItem';
 
 require('./LayerMenu.scss');
 

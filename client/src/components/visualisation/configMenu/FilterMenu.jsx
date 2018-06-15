@@ -58,10 +58,65 @@ class FilterMenu extends Component {
     );
   }
 
-  toggleInput() {
-    this.setState({
-      inputInProgress: !this.state.inputInProgress,
-    });
+  getDropdownOptions() {
+    const { formatMessage } = this.props.intl;
+    return {
+      operations: [
+        {
+          value: 'keep',
+          label: formatMessage({ id: 'keep_rows_in_which' }),
+        },
+        {
+          value: 'remove',
+          label: formatMessage({ id: 'remove_rows_in_which' }),
+        },
+      ],
+
+      strategies: {
+        text: [
+          {
+            label: formatMessage({ id: 'exactly_matches' }),
+            value: 'is',
+          },
+          {
+            label: formatMessage({ id: 'is_empty' }),
+            value: 'isEmpty',
+          },
+        ],
+        number: [
+          {
+            label: formatMessage({ id: 'is_higher_than' }),
+            value: 'isHigher',
+          },
+          {
+            label: formatMessage({ id: 'exactly_matches' }),
+            value: 'is',
+          },
+          {
+            label: formatMessage({ id: 'is_lower_than' }),
+            value: 'isLower',
+          },
+          {
+            label: formatMessage({ id: 'is_empty' }),
+            value: 'isEmpty',
+          },
+        ],
+        date: [
+          {
+            label: formatMessage({ id: 'is_after' }),
+            value: 'isHigher',
+          },
+          {
+            label: formatMessage({ id: 'is_before' }),
+            value: 'isLower',
+          },
+          {
+            label: formatMessage({ id: 'is_empty' }),
+            value: 'isEmpty',
+          },
+        ],
+      },
+    };
   }
 
   updateNewFilter(field, value, type) {
@@ -135,65 +190,10 @@ class FilterMenu extends Component {
     }
   }
 
-  getDropdownOptions() {
-    const { formatMessage } = this.props.intl;
-    return {
-      operations: [
-        {
-          value: 'keep',
-          label: formatMessage({ id: 'keep_rows_in_which' }),
-        },
-        {
-          value: 'remove',
-          label: formatMessage({ id: 'remove_rows_in_which' }),
-        },
-      ],
-
-      strategies: {
-        text: [
-          {
-            label: formatMessage({ id: 'exactly_matches' }),
-            value: 'is',
-          },
-          {
-            label: formatMessage({ id: 'is_empty' }),
-            value: 'isEmpty',
-          },
-        ],
-        number: [
-          {
-            label: formatMessage({ id: 'is_higher_than' }),
-            value: 'isHigher',
-          },
-          {
-            label: formatMessage({ id: 'exactly_matches' }),
-            value: 'is',
-          },
-          {
-            label: formatMessage({ id: 'is_lower_than' }),
-            value: 'isLower',
-          },
-          {
-            label: formatMessage({ id: 'is_empty' }),
-            value: 'isEmpty',
-          },
-        ],
-        date: [
-          {
-            label: formatMessage({ id: 'is_after' }),
-            value: 'isHigher',
-          },
-          {
-            label: formatMessage({ id: 'is_before' }),
-            value: 'isLower',
-          },
-          {
-            label: formatMessage({ id: 'is_empty' }),
-            value: 'isEmpty',
-          },
-        ],
-      },
-    };
+  toggleInput() {
+    this.setState({
+      inputInProgress: !this.state.inputInProgress,
+    });
   }
 
   render() {
@@ -252,7 +252,11 @@ class FilterMenu extends Component {
                         </span>
                         {' '}
                         <span>
-                          {getFilterStrategyLabel(strategies)(filter.strategy, filter.column, columnOptions)}
+                          {getFilterStrategyLabel(strategies)(
+                            filter.strategy,
+                            filter.column,
+                            columnOptions
+                          )}
                         </span>
                         {' '}
                         <span className="filterIndicator">
