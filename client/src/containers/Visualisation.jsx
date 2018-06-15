@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import update from 'react-addons-update';
 import isEmpty from 'lodash/isEmpty';
 import get from 'lodash/get';
+import { intlShape, injectIntl } from 'react-intl';
 import ShareEntity from '../components/modals/ShareEntity';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import NavigationPrompt from '../components/common/NavigationPrompt';
@@ -19,7 +20,6 @@ import pivotTableSpecTemplate from './Visualisation/pivotTableSpecTemplate';
 import scatterSpecTemplate from './Visualisation/scatterSpecTemplate';
 import barSpecTemplate from './Visualisation/barSpecTemplate';
 import { SAVE_COUNTDOWN_INTERVAL, SAVE_INITIAL_TIMEOUT } from '../constants/time';
-import { intlShape, injectIntl } from 'react-intl';
 
 require('../components/visualisation/Visualisation.scss');
 
