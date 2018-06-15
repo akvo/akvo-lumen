@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, intlShape } from 'react-intl';
 import VisualisationTypeMenu from '../VisualisationTypeMenu';
 import LayerMenu from './LayerMenu';
 import LayerConfigMenu from './LayerConfigMenu';
@@ -78,10 +78,14 @@ export default class MapConfigMenu extends Component {
   }
 
   handleAddMapLayer() {
-    const title = `Untitled Layer ${this.props.visualisation.spec.layers.length + 1}`;
-    const layers = this.props.visualisation.spec.layers.slice();
-    layers.push(Object.assign({}, mapLayerSpecTemplate, { title }));
-    this.props.onChangeSpec({ layers });
+    const { intl, visualisation, onChangeSpec } = this.props;
+    const title = intl.formatMessage({
+      id: 'untitled_layer',
+      values: { count: visualisation.spec.layers.length + 1 },
+    });
+    const layers = visualisation.spec.layers.slice();
+    layers.push({ ...mapLayerSpecTemplate, title });
+    onChangeSpec({ layers });
   }
 
   handleDeleteMapLayer(layerIndex) {
@@ -189,6 +193,7 @@ export default class MapConfigMenu extends Component {
 }
 
 MapConfigMenu.propTypes = {
+  intl: intlShape,
   visualisation: PropTypes.object.isRequired,
   metadata: PropTypes.object,
   datasets: PropTypes.object.isRequired,

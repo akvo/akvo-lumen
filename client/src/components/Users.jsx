@@ -5,6 +5,7 @@ import EntityTypeHeader from './entity-editor/EntityTypeHeader';
 import ConfirmUserAction from './users/ConfirmUserAction';
 import InviteUser from './users/InviteUser';
 import * as api from '../api';
+import { FormattedMessage } from 'react-intl';
 
 require('./entity-editor/EntityTypeHeader.scss');
 require('./Users.scss');
@@ -92,10 +93,20 @@ function UserList({ activeUserId, getUserActions, invitationMode, onChange, user
     <table>
       <tbody>
         <tr>
-          {!invitationMode && <th>Name</th>}
-          <th>Email</th>
-          {!invitationMode && <th>Role</th>}
-          <th>Actions</th>
+          {!invitationMode && (
+            <th>
+              <FormattedMessage id="name" />
+            </th>
+          )}
+          <th><FormattedMessage id="email" /></th>
+          {!invitationMode && (
+            <th>
+              <FormattedMessage id="role" />
+            </th>
+          )}
+          <th>
+            <FormattedMessage id="actions" />
+          </th>
         </tr>
         {users.map(({ admin, email, id, username }) => (
           <User

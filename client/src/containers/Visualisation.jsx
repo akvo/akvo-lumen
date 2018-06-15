@@ -19,20 +19,21 @@ import pivotTableSpecTemplate from './Visualisation/pivotTableSpecTemplate';
 import scatterSpecTemplate from './Visualisation/scatterSpecTemplate';
 import barSpecTemplate from './Visualisation/barSpecTemplate';
 import { SAVE_COUNTDOWN_INTERVAL, SAVE_INITIAL_TIMEOUT } from '../constants/time';
+import { intlShape, injectIntl } from 'react-intl';
 
 require('../components/visualisation/Visualisation.scss');
 
 class Visualisation extends Component {
 
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       isShareModalVisible: false,
       isUnsavedChanges: false,
       isSavePending: false,
       visualisation: {
         type: 'visualisation',
-        name: 'Untitled visualisation',
+        name: props.intl.formatMessage({ id: 'untitled_visualisation' }),
         visualisationType: null,
         datasetId: null,
         spec: {},
@@ -208,7 +209,9 @@ class Visualisation extends Component {
   handleTrackPageView(visualisation) {
     if (!this.state.hasTrackedPageView) {
       this.setState({ hasTrackedPageView: true }, () => {
-        trackPageView(`Visualisation: ${visualisation.name || 'Untitled visualisation'}`);
+        trackPageView(`Visualisation: ${
+          visualisation.name || this.props.intl.formatMessage({ id: 'untitled_visualisation' })
+        }`);
       });
     }
   }
@@ -379,10 +382,11 @@ class Visualisation extends Component {
 }
 
 Visualisation.propTypes = {
+  intl: intlShape,
   dispatch: PropTypes.func.isRequired,
   library: PropTypes.object.isRequired,
   location: PropTypes.object.isRequired,
   params: PropTypes.object,
 };
 
-export default connect(state => state)(Visualisation);
+export default connect(state => state)(injectIntl(Visualisation));

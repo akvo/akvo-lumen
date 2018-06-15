@@ -268,6 +268,14 @@
   "color": "Color",
   "colors_for_title": "Colors ({title})",
   "raster": "Raster",
-  "geopoint": "Geopoint"
+  "geopoint": "Geopoint",
+  "untitled_dashboard": "Untitled dashboard",
+  "untitled_visualisation": "Untitled visualisation",
+  "untitled_collection": "Untitled collection",
+  "untitled_layer": "Untitled layer {count}",
+  "name": "Name",
+  "role": "Role",
+  "email": "Email",
+  "actions": "Actions"
   
 }
