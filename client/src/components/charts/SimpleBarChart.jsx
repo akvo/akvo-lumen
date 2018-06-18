@@ -314,7 +314,13 @@ export default class SimpleBarChart extends Component {
 
             const axisScale = scaleLinear().domain(domain).range([0, availableHeight].reverse());
 
-            const tickFormat = value => value >= 10000 ? this.context.abbrNumber(value) : value;
+            const tickFormat = (value) => {
+              const cutoff = 10000;
+              if (cutoff >= 10000) {
+                return this.context.abbrNumber(value);
+              }
+              return value;
+            };
 
             return (
               <div
