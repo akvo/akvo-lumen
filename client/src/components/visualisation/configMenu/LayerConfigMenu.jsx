@@ -278,18 +278,18 @@ const GeoshapeDataTab = (props) => {
               label: 'Sum',
               value: 'sum',
             },
-            {
-              label: 'Min',
-              value: 'min',
-            },
-            {
-              label: 'Max',
-              value: 'max',
-            },
-            {
-              label: 'Count',
-              value: 'count',
-            }]}
+              {
+                label: 'Min',
+                value: 'min',
+              },
+              {
+                label: 'Max',
+                value: 'max',
+              },
+              {
+                label: 'Count',
+                value: 'count',
+              }]}
             selected={layer.aggregationMethod || 'avg'}
             label="Aggregation"
             onChange={value => onChangeMapLayer(layerIndex, {

@@ -189,9 +189,9 @@ export default function PivotTable({ width, height, visualisation, context, data
                   className={cellIndex === 0 ? 'uniqueRowValue' : 'cell'}
                   // Only set the title  attribute if the index is 0
                   {...cellIndex === 0 ?
-                  {
-                    title: replaceLabelIfValueEmpty(cell),
-                  } : {}
+                    {
+                      title: replaceLabelIfValueEmpty(cell),
+                    } : {}
                   }
                 >
                   <span>
