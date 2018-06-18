@@ -12,9 +12,7 @@ export default function ColorLabels({ pointColorMapping, onChangeColor, colorPal
       className="ColorLabels"
     >
       {pointColorMapping.map(({ color, value }, idx) =>
-        <li
-          key={idx}
-        >
+        <li key={idx}>
           <ColorLabelItem
             color={color}
             value={value}

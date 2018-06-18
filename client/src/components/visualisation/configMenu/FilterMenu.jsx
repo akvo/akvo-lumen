@@ -2,64 +2,15 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
 import { get } from 'lodash';
+import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
 import SelectMenu from '../../common/SelectMenu';
 import { filterColumns } from '../../../utilities/utils';
 
-const operations = [
-  {
-    value: 'keep',
-    label: 'Keep rows in which',
-  },
-  {
-    value: 'remove',
-    label: 'Remove rows in which',
-  },
-];
+const getMenuFilters = filterArray =>
+  filterArray.filter(item => item.origin !== 'pivot-row' && item.origin !== 'pivot-column');
 
-const strategies = {
-  text: [
-    {
-      label: 'exactly matches',
-      value: 'is',
-    },
-    {
-      label: 'is empty',
-      value: 'isEmpty',
-    },
-  ],
-  number: [
-    {
-      label: 'is higher than',
-      value: 'isHigher',
-    },
-    {
-      label: 'exactly matches',
-      value: 'is',
-    },
-    {
-      label: 'is lower than',
-      value: 'isLower',
-    },
-    {
-      label: 'is empty',
-      value: 'isEmpty',
-    },
-  ],
-  date: [
-    {
-      label: 'is after',
-      value: 'isHigher',
-    },
-    {
-      label: 'is before',
-      value: 'isLower',
-    },
-    {
-      label: 'is empty',
-      value: 'isEmpty',
-    },
-  ],
-};
+const getFilterOperationLabel = operations => operation =>
+  operations.find(item => item.value.toString() === operation.toString()).label;
 
 const getColumnTitle = (columnOptions, filter) => {
   const columnInFilter = filter.column;
@@ -69,13 +20,7 @@ const getColumnTitle = (columnOptions, filter) => {
   return columnTitle;
 };
 
-const getMenuFilters = filterArray =>
-  filterArray.filter(item => item.origin !== 'pivot-row' && item.origin !== 'pivot-column');
-
-const getFilterOperationLabel = operation =>
-  operations.find(item => item.value.toString() === operation.toString()).label;
-
-const getFilterStrategyLabel = (strategy, columnName, columnOptions) => {
+const getFilterStrategyLabel = (strategy, columnName, columnOptions, strategies) => {
   const columnType = get(columnOptions.find(col => col.value === columnName), 'type');
   if (!columnType) {
     return null;
@@ -104,7 +49,7 @@ const getFilterDisplayValue = (value, columnName, columnOptions) => {
   return displayValue;
 };
 
-const isFilterValid = (filter, columnOptions) => {
+const isFilterValid = (filter, columnOptions, strategies) => {
   if (!getColumnTitle(columnOptions, filter)) {
     return false;
   }
@@ -118,7 +63,8 @@ const isFilterValid = (filter, columnOptions) => {
   return stratValid;
 };
 
-export default class FilterMenu extends Component {
+class FilterMenu extends Component {
+
   constructor() {
     super();
     this.state = {
@@ -143,10 +89,65 @@ export default class FilterMenu extends Component {
     );
   }
 
-  toggleInput() {
-    this.setState({
-      inputInProgress: !this.state.inputInProgress,
-    });
+  getDropdownOptions() {
+    const { formatMessage } = this.props.intl;
+    return {
+      operations: [
+        {
+          value: 'keep',
+          label: formatMessage({ id: 'keep_rows_in_which' }),
+        },
+        {
+          value: 'remove',
+          label: formatMessage({ id: 'remove_rows_in_which' }),
+        },
+      ],
+
+      strategies: {
+        text: [
+          {
+            label: formatMessage({ id: 'exactly_matches' }),
+            value: 'is',
+          },
+          {
+            label: formatMessage({ id: 'is_empty' }),
+            value: 'isEmpty',
+          },
+        ],
+        number: [
+          {
+            label: formatMessage({ id: 'is_higher_than' }),
+            value: 'isHigher',
+          },
+          {
+            label: formatMessage({ id: 'exactly_matches' }),
+            value: 'is',
+          },
+          {
+            label: formatMessage({ id: 'is_lower_than' }),
+            value: 'isLower',
+          },
+          {
+            label: formatMessage({ id: 'is_empty' }),
+            value: 'isEmpty',
+          },
+        ],
+        date: [
+          {
+            label: formatMessage({ id: 'is_after' }),
+            value: 'isHigher',
+          },
+          {
+            label: formatMessage({ id: 'is_before' }),
+            value: 'isLower',
+          },
+          {
+            label: formatMessage({ id: 'is_empty' }),
+            value: 'isEmpty',
+          },
+        ],
+      },
+    };
   }
 
   updateNewFilter(field, value, type) {
@@ -220,8 +221,15 @@ export default class FilterMenu extends Component {
     }
   }
 
+  toggleInput() {
+    this.setState({
+      inputInProgress: !this.state.inputInProgress,
+    });
+  }
+
   render() {
-    const { hasDataset, columnOptions } = this.props;
+    const { hasDataset, columnOptions, intl } = this.props;
+    const { formatMessage } = intl;
     const filters = getMenuFilters(this.props.filters);
     const {
       newFilterColumn,
@@ -231,6 +239,7 @@ export default class FilterMenu extends Component {
       inputInProgress } = this.state;
     const activeColumnType = newFilterColumn ?
       columnOptions.find(col => col.value === newFilterColumn).type : null;
+    const { operations, strategies } = this.getDropdownOptions();
 
     const isFilterReady = this.getIsFilterReady();
 
@@ -239,7 +248,7 @@ export default class FilterMenu extends Component {
         className={`FilterMenu inputGroup ${hasDataset ? 'enabled' : 'disabled'}`}
       >
         <h4 className="title">
-          Dataset Filters
+          <FormattedMessage id="dataset_filters" />
           <button
             className="collapseToggle clickable"
             onClick={() => { this.setState({ collapsed: !collapsed }); }}
@@ -258,7 +267,7 @@ export default class FilterMenu extends Component {
                   <ol className="filterList">
                     {filters.map((filter, index) => {
                       const out = (
-                      isFilterValid(filter, columnOptions) ?
+                      isFilterValid(filter, columnOptions, strategies) ?
                         (<li
                           key={index}
                           className="filterListItem valid"
@@ -274,7 +283,12 @@ export default class FilterMenu extends Component {
                           </span>
                           {' '}
                           <span>
-                            {getFilterStrategyLabel(filter.strategy, filter.column, columnOptions)}
+                            {getFilterStrategyLabel(
+                              filter.strategy,
+                              filter.column,
+                              columnOptions,
+                              strategies
+                            )}
                           </span>
                           {' '}
                           <span className="filterIndicator">
@@ -323,46 +337,48 @@ export default class FilterMenu extends Component {
               }
               {inputInProgress ?
                 <div className="newFilterContainer">
-                  <h4>New Filter</h4>
+                  <h4>
+                    <FormattedMessage id="new_filter" />
+                  </h4>
                   <div className="inputGroup">
                     <div className="filterBodyContainer">
                       <label htmlFor="filterOperationInput">
-                        Filter operation
+                        <FormattedMessage id="filter_operation" />
                       </label>
                       <SelectMenu
                         className="filterOperationInput"
                         name="filterOperationInput"
-                        placeholder="Choose a filter operation..."
+                        placeholder={`${formatMessage({ id: 'choose_a_filter_operation' })}...`}
                         value={newFilterOperation || null}
                         options={operations}
                         onChange={choice => this.updateNewFilter('newFilterOperation', choice)}
                       />
                       <label htmlFor="filterColumnInput">
-                        Column to filter by:
+                        <FormattedMessage id="column_filter_by" />
                       </label>
                       <SelectMenu
                         className="filterColumnInput"
                         name="filterColumnInput"
-                        placeholder="Choose a column to filter by..."
+                        placeholder={`${formatMessage({ id: 'choose_a_column_to_filter_by' })}...`}
                         value={newFilterColumn || null}
                         options={filterColumns(columnOptions, ['text', 'number', 'date'])}
                         onChange={choice => this.updateNewFilter('newFilterColumn', choice)}
                       />
                       <label htmlFor="filterStrategyInput">
-                        Filter match method
+                        <FormattedMessage id="filter_match_method" />
                       </label>
                       <SelectMenu
                         className={`filterStrategyInput
                           ${newFilterColumn ? 'enabled' : 'disabled'}`}
                         disabled={newFilterColumn === null}
                         name="filterStrategyInput"
-                        placeholder="Choose a match method..."
+                        placeholder={`${formatMessage({ id: 'choose_a_match_method' })}...`}
                         value={newFilterStrategy || null}
                         options={newFilterColumn ? strategies[activeColumnType] : []}
                         onChange={choice => this.updateNewFilter('newFilterStrategy', choice)}
                       />
                       <label htmlFor="filterMatchValueInput">
-                        Filter match value
+                        <FormattedMessage id="filter_match_value" />
                       </label>
                       <input
                         className={`filterMatchValueInput textInput
@@ -381,13 +397,13 @@ export default class FilterMenu extends Component {
                       disabled={!isFilterReady}
                       onClick={() => this.saveFilter()}
                     >
-                      Save Filter
+                      <FormattedMessage id="save_filter" />
                     </button>
                     <button
                       className="cancelFilter clickable"
                       onClick={() => this.toggleInput()}
                     >
-                      Cancel
+                      <FormattedMessage id="cancel" />
                     </button>
                   </div>
                 </div> : <div className="addFilterContainer">
@@ -409,8 +425,11 @@ export default class FilterMenu extends Component {
 }
 
 FilterMenu.propTypes = {
+  intl: intlShape,
   filters: PropTypes.array.isRequired,
   hasDataset: PropTypes.bool.isRequired,
   columnOptions: PropTypes.array.isRequired,
   onChangeSpec: PropTypes.func.isRequired,
 };
+
+export default injectIntl(FilterMenu);

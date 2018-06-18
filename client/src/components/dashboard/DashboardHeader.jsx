@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
 import EntityTypeHeader from '../entity-editor/EntityTypeHeader';
 
-export default class DashboardHeader extends Component {
+class DashboardHeader extends Component {
 
   constructor() {
     super();
@@ -59,7 +59,7 @@ export default class DashboardHeader extends Component {
   }
 
   render() {
-    const { isUnsavedChanges, savingFailed, timeToNextSave } = this.props;
+    const { isUnsavedChanges, savingFailed, timeToNextSave, intl } = this.props;
     const haveTitle = Boolean(this.props.title);
 
     const actionButtons = this.getActionButtons(isUnsavedChanges, haveTitle);
@@ -82,7 +82,7 @@ export default class DashboardHeader extends Component {
 
     return (
       <EntityTypeHeader
-        title={this.props.title || 'Untitled dashboard'}
+        title={this.props.title || intl.formatMessage({ id: 'untitled_dashboard' })}
         onChangeTitle={this.props.onChangeTitle}
         onBeginEditTitle={this.props.onBeginEditTitle}
         saveStatusId={saveStatusId}
@@ -95,6 +95,7 @@ export default class DashboardHeader extends Component {
 }
 
 DashboardHeader.propTypes = {
+  intl: intlShape,
   isUnsavedChanges: PropTypes.bool,
   savingFailed: PropTypes.bool,
   timeToNextSave: PropTypes.number,
@@ -104,3 +105,5 @@ DashboardHeader.propTypes = {
   onSaveDashboard: PropTypes.func.isRequired,
   onBeginEditTitle: PropTypes.func.isRequired,
 };
+
+export default injectIntl(DashboardHeader);

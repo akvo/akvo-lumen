@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 import { createCollection } from '../../actions/collection';
 import ModalHeader from './ModalHeader';
 import ModalFooter from './ModalFooter';
@@ -20,7 +20,7 @@ const isTitleValid = (title, collections) => {
   return isValid;
 };
 
-export default class CreateCollection extends Component {
+class CreateCollection extends Component {
   constructor() {
     super();
     this.state = {
@@ -53,7 +53,7 @@ export default class CreateCollection extends Component {
   }
 
   render() {
-    const { onCancel } = this.props;
+    const { onCancel, intl } = this.props;
     return (
       <div className="CreateCollection">
         <ModalHeader
@@ -69,7 +69,7 @@ export default class CreateCollection extends Component {
             onInput={this.handleInputChange}
             value={this.state.title}
             type="text"
-            placeholder="Untitled collection"
+            placeholder={intl.formatMessage({ id: 'untitled_collection' })}
             autoFocus
             maxLength={127}
           />
@@ -96,9 +96,12 @@ export default class CreateCollection extends Component {
 }
 
 CreateCollection.propTypes = {
+  intl: intlShape,
   onSubmit: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
   containerClassName: PropTypes.string,
   collections: PropTypes.object.isRequired,
   entities: PropTypes.array,
 };
+
+export default injectIntl(CreateCollection);

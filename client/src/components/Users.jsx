@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import { FormattedMessage } from 'react-intl';
 import EntityTypeHeader from './entity-editor/EntityTypeHeader';
 import ConfirmUserAction from './users/ConfirmUserAction';
 import InviteUser from './users/InviteUser';
@@ -92,10 +93,20 @@ function UserList({ activeUserId, getUserActions, invitationMode, onChange, user
     <table>
       <tbody>
         <tr>
-          {!invitationMode && <th>Name</th>}
-          <th>Email</th>
-          {!invitationMode && <th>Role</th>}
-          <th>Actions</th>
+          {!invitationMode && (
+            <th>
+              <FormattedMessage id="name" />
+            </th>
+          )}
+          <th><FormattedMessage id="email" /></th>
+          {!invitationMode && (
+            <th>
+              <FormattedMessage id="role" />
+            </th>
+          )}
+          <th>
+            <FormattedMessage id="actions" />
+          </th>
         </tr>
         {users.map(({ admin, email, id, username }) => (
           <User

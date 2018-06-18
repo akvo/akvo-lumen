@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Immutable from 'immutable';
+import { FormattedMessage } from 'react-intl';
 
 require('./ColumnHeader.scss');
 
@@ -82,27 +83,27 @@ export default class ColumnHeader extends Component {
           </div>
           : null
         }
-        {column.get('key') ?
-          <span className="columnKey">
-            <i className="fa fa-key" aria-hidden />
-          </span> :
-          <span
-            className="columnType clickable"
-          >
-            <span
-              className="columnTypeToggle"
-              onClick={this.handleDataTypeMenuClick}
-              ref={(ref) => { this.columnTypeLabel = ref; }}
-            >
-              {column.get('type')}
-            </span>
-          </span>
-        }
         <span
           className="columnTitleText"
           title={column.get('title')}
           data-test-id={column.get('title')}
         >
+          {column.get('key') ?
+            <span className="columnKey">
+              <i className="fa fa-key" aria-hidden />
+            </span> :
+            <span
+              className="columnType clickable"
+            >
+              <span
+                className="columnTypeToggle"
+                onClick={this.handleDataTypeMenuClick}
+                ref={(ref) => { this.columnTypeLabel = ref; }}
+              >
+                <FormattedMessage id={column.get('type')} />
+              </span>
+            </span>
+          }
           {column.get('title')}
         </span>
       </div>

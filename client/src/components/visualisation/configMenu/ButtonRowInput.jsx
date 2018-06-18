@@ -36,7 +36,7 @@ ButtonRowInput.propTypes = {
   disabled: PropTypes.bool,
   options: PropTypes.array.isRequired,
   selected: PropTypes.node.isRequired,
-  label: PropTypes.string.isRequired,
+  label: PropTypes.node.isRequired,
   onChange: PropTypes.func.isRequired,
   buttonSpacing: PropTypes.string,
 };
