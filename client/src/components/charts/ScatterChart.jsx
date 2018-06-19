@@ -13,7 +13,7 @@ import ColorPicker from '../common/ColorPicker';
 import ResponsiveWrapper from '../common/ResponsiveWrapper';
 import Tooltip from './Tooltip';
 import ChartLayout from './ChartLayout';
-import { heuristicRound } from '../../utilities/chart';
+import { heuristicRound, calculateMargins } from '../../utilities/chart';
 
 const startAxisFromZero = (axisExtent, type) => {
   // Returns an educated guess on if axis should start from zero or not
@@ -217,8 +217,14 @@ export default class ScatterChart extends Component {
         }}
         chart={
           <ResponsiveWrapper>{(dimensions) => {
-            const availableHeight = dimensions.height * (1 - marginBottom - marginTop);
-            const availableWidth = dimensions.width * (1 - marginLeft - marginRight);
+            const margins = calculateMargins({
+              top: marginTop,
+              right: marginRight,
+              bottom: marginBottom,
+              left: marginLeft,
+            }, dimensions);
+            const availableHeight = dimensions.height - margins.bottom - margins.top;
+            const availableWidth = dimensions.width - margins.left - margins.right;
 
             const xExtent = extent(series.data, ({ x }) => x);
             const xAxisType = get(data, 'series[0].metadata.type');
@@ -232,8 +238,8 @@ export default class ScatterChart extends Component {
             let xScale = xScaleFunction()
               .domain(xExtent)
               .range([
-                dimensions.width * marginLeft,
-                dimensions.width * (1 - marginRight),
+                margins.left,
+                dimensions.width - margins.right,
               ]);
 
             if (!fromZero && xAxisType === 'number') {
@@ -246,8 +252,8 @@ export default class ScatterChart extends Component {
             const yScale = yScaleFunction()
               .domain(yExtent)
               .range([
-                dimensions.height * (1 - marginBottom),
-                dimensions.height * marginTop,
+                dimensions.height - margins.bottom,
+                margins.top,
               ]);
 
             const radius = 5;
@@ -286,14 +292,14 @@ export default class ScatterChart extends Component {
                         scale={yScale}
                         width={availableWidth}
                         height={availableHeight}
-                        left={dimensions.width * marginLeft}
+                        left={margins.left}
                         numTicks={yAxisTicks}
                       />
                       <GridColumns
                         scale={xScale}
                         width={availableWidth}
                         height={availableHeight}
-                        top={dimensions.height * marginTop}
+                        top={margins.top}
                         numTicks={xAxisTicks}
                       />
                     </Group>
@@ -337,7 +343,7 @@ export default class ScatterChart extends Component {
 
                   <AxisLeft
                     scale={yScale}
-                    left={dimensions.width * marginLeft}
+                    left={margins.left}
                     label={yAxisLabel || ''}
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}
@@ -346,7 +352,7 @@ export default class ScatterChart extends Component {
 
                   <AxisBottom
                     scale={xScale}
-                    top={dimensions.height * (1 - marginBottom)}
+                    top={dimensions.height - margins.bottom}
                     label={xAxisLabel || ''}
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}

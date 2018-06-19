@@ -1,5 +1,6 @@
 /* eslint-disable no-plusplus, import/no-extraneous-dependencies */
-import React from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { withKnobs, number, text, boolean, color } from '@storybook/addon-knobs/react';
@@ -64,8 +65,33 @@ const generateData = ({ seriesCount, nodeCount, minVal, maxVal, labelLength }) =
   return result;
 };
 
+class ContextProvider extends Component {
+  static childContextTypes = {
+    abbrNumber: PropTypes.func,
+  }
+
+  static propTypes = {
+    children: PropTypes.node,
+  }
+
+  getChildContext() {
+    return {
+      abbrNumber: val => val,
+    };
+  }
+
+  render() {
+    return this.props.children;
+  }
+}
+
 storiesOf('Charts', module)
   .addDecorator(withKnobs)
+  .addDecorator(story => (
+    <ContextProvider>
+      {story()}
+    </ContextProvider>
+  ))
 
   .add('PieChart', () => {
     const nodeCount = number('node count', 20);

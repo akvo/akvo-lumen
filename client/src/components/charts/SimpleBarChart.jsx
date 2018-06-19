@@ -10,7 +10,7 @@ import { Portal } from 'react-portal';
 import merge from 'lodash/merge';
 import { GridRows } from '@vx/grid';
 
-import { heuristicRound, replaceLabelIfValueEmpty } from '../../utilities/chart';
+import { heuristicRound, replaceLabelIfValueEmpty, calculateMargins } from '../../utilities/chart';
 import Legend from './Legend';
 import ResponsiveWrapper from '../common/ResponsiveWrapper';
 import ColorPicker from '../common/ColorPicker';
@@ -307,9 +307,14 @@ export default class SimpleBarChart extends Component {
         )}
         chart={
           <ResponsiveWrapper>{(dimensions) => {
-            const availableHeight =
-              (dimensions.height * (1 - marginBottom - marginTop)) - paddingBottom;
-            const availableWidth = dimensions.width * (1 - marginLeft - marginRight);
+            const margins = calculateMargins({
+              top: marginTop,
+              right: marginRight,
+              bottom: marginBottom,
+              left: marginLeft,
+            }, dimensions);
+            const availableHeight = dimensions.height - margins.bottom - margins.top - paddingBottom; // eslint-disable-line
+            const availableWidth = dimensions.width - margins.left - margins.right;
 
             const domain = extent(series.data, ({ value }) => value);
             if (domain[0] > 0) domain[0] = 0;
@@ -350,8 +355,8 @@ export default class SimpleBarChart extends Component {
                       scale={axisScale}
                       width={availableWidth}
                       height={availableHeight}
-                      left={dimensions.width * marginLeft}
-                      top={dimensions.height * marginTop}
+                      left={margins.left}
+                      top={margins.top}
                       numTicks={yAxisTicks}
                     />
                   )}
@@ -360,19 +365,14 @@ export default class SimpleBarChart extends Component {
                     data={series.data}
                     bands
                     size={[
-                      dimensions.width * (1 - marginLeft - marginRight),
-                      (dimensions.height * (1 - marginTop - marginBottom)) - paddingBottom,
+                      dimensions.width - margins.left - margins.right,
+                      dimensions.height - margins.top - margins.bottom - paddingBottom,
                     ]}
                     rows={1}
-                    // nodeEnter={d => ({ ...d, value: 0 })}
-                    // animate
                   >{nodes => (
                     <Group
                       transform={{
-                        translate: [
-                          dimensions.width * marginLeft,
-                          dimensions.height * marginTop,
-                        ],
+                        translate: [margins.left, margins.top],
                       }}
                     >
                       {nodes.map(({ nodeWidth, x, key, value }, i) => {
@@ -389,10 +389,10 @@ export default class SimpleBarChart extends Component {
                                   color={color}
                                   left={
                                     colorpickerPlacement === 'right' ?
-                                      (dimensions.width * marginLeft) + x + nodeWidth :
-                                      (dimensions.width * marginLeft) + x
+                                      margins.left + x + nodeWidth :
+                                      margins.left + x
                                   }
-                                  top={y + (normalizedHeight / 2) + (dimensions.height * marginTop)}
+                                  top={y + (normalizedHeight / 2) + margins.top}
                                   placement={colorpickerPlacement}
                                   onChange={({ hex }) => {
                                     onChangeVisualisationSpec({
@@ -443,8 +443,8 @@ export default class SimpleBarChart extends Component {
 
                   <AxisLeft
                     scale={axisScale}
-                    left={dimensions.width * marginLeft}
-                    top={dimensions.height * marginTop}
+                    left={margins.left}
+                    top={margins.top}
                     label={yAxisLabel || ''}
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}

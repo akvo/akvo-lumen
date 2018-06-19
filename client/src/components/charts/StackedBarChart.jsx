@@ -11,7 +11,7 @@ import merge from 'lodash/merge';
 import { stack } from 'd3-shape';
 import { GridRows } from '@vx/grid';
 
-import { heuristicRound, replaceLabelIfValueEmpty } from '../../utilities/chart';
+import { heuristicRound, replaceLabelIfValueEmpty, calculateMargins } from '../../utilities/chart';
 import Legend from './Legend';
 import ResponsiveWrapper from '../common/ResponsiveWrapper';
 import ColorPicker from '../common/ColorPicker';
@@ -263,8 +263,14 @@ export default class StackedBarChart extends Component {
         )}
         chart={
           <ResponsiveWrapper>{(dimensions) => {
-            const availableHeight = dimensions.height * (1 - marginBottom - marginTop);
-            const availableWidth = dimensions.width * (1 - marginLeft - marginRight);
+            const margins = calculateMargins({
+              top: marginTop,
+              right: marginRight,
+              bottom: marginBottom,
+              left: marginLeft,
+            }, dimensions);
+            const availableHeight = dimensions.height - margins.bottom - margins.top;
+            const availableWidth = dimensions.width - margins.left - margins.right;
 
             const domain = grouped ?
               extent(series.data, ({ values }) =>
@@ -314,8 +320,8 @@ export default class StackedBarChart extends Component {
                       scale={axisScale}
                       width={availableWidth}
                       height={availableHeight}
-                      left={dimensions.width * marginLeft}
-                      top={dimensions.height * marginTop}
+                      left={margins.left}
+                      top={margins.top}
                       numTicks={yAxisTicks}
                     />
                   )}
@@ -324,17 +330,14 @@ export default class StackedBarChart extends Component {
                     data={series.data}
                     bands
                     size={[
-                      dimensions.width * (1 - marginLeft - marginRight),
-                      dimensions.height * (1 - marginTop - marginBottom),
+                      dimensions.width - margins.left - margins.right,
+                      dimensions.height - margins.top - margins.bottom,
                     ]}
                     rows={1}
                   >{nodes => (
                     <Group
                       transform={{
-                        translate: [
-                          dimensions.width * marginLeft,
-                          dimensions.height * marginTop,
-                        ],
+                        translate: [margins.left, margins.top],
                       }}
                     >
                       {stackNodes.map((stackSeries, seriesIndex) => {
@@ -368,8 +371,8 @@ export default class StackedBarChart extends Component {
                                         color={color}
                                         left={
                                           colorpickerPlacement === 'right' ?
-                                            (dimensions.width * marginLeft) + x + nodeWidth :
-                                            (dimensions.width * marginLeft) + x
+                                            margins.left + x + nodeWidth :
+                                            margins.left + x
                                         }
                                         top={normalizedY}
                                         placement={colorpickerPlacement}
@@ -452,8 +455,8 @@ export default class StackedBarChart extends Component {
 
                   <AxisLeft
                     scale={axisScale}
-                    left={dimensions.width * marginLeft}
-                    top={dimensions.height * marginTop}
+                    left={margins.left}
+                    top={margins.top}
                     label={yAxisLabel || ''}
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}
