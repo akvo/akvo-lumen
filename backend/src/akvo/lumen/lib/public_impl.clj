@@ -76,7 +76,7 @@
         [dataset-tag dataset] (dataset/fetch tenant-conn dataset-id)
         [tag query-result] (aggregation/query tenant-conn
                                               dataset-id
-                                              "pie"
+                                              "donut"
                                               (:spec visualisation))]
     (when (and (= tag ::lib/ok)
                (= dataset-tag ::lib/ok))
