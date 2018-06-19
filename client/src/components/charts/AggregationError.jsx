@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 
 import './AggregationError.scss';
 
@@ -11,11 +12,29 @@ const AggregationError = ({ reason, count, max }) => {
       contents = (
         <div>
           <p>
-            This visualisation cannot be displayed because it has {count} elements.
-            The maximum number of elements is {max}.
+            <FormattedMessage
+              id="too_many_visualisation_elements"
+              values={{
+                count,
+                max,
+              }}
+            />
           </p>
           <p>
-            Please edit the visualisation or add a filter.
+            <FormattedMessage
+              id="please_edit_visualisation"
+            />
+          </p>
+        </div>
+      );
+      break;
+    case 'invalid-filter':
+      contents = (
+        <div>
+          <p>
+            <FormattedMessage
+              id="invalid_filter"
+            />
           </p>
         </div>
       );

@@ -77,6 +77,10 @@ const specIsValidForApi = (spec, vType) => {
 const getNeedNewAggregation = (newV = { spec: {} }, oldV = { spec: {} }, optionalVizType) => {
   const vType = newV.visualisationType || optionalVizType;
 
+  if (newV && !oldV) {
+    return true;
+  }
+
   switch (vType) {
     case 'bar':
       return Boolean(

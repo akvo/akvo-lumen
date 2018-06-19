@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Immutable from 'immutable';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
 import SelectMenu from '../common/SelectMenu';
 import FilterMenu from './configMenu/FilterMenu';
 import Subtitle from './configMenu/Subtitle';
@@ -34,12 +34,12 @@ const getDatasetOptions = datasetArray =>
     label: entity.getTitle(dataset),
   }));
 
-const getSelectMenuOptionsFromColumnList = (columns = Immutable.List()) =>
+const getSelectMenuOptionsFromColumnList = (columns = Immutable.List(), intl) =>
   columns.map((column, index) => ({
     value: `${column.get('columnName')}`,
     index: index.toString(),
     title: `${column.get('title')}`,
-    label: `${column.get('title')} (${column.get('type')})`,
+    label: `${column.get('title')} (${intl.formatMessage({ id: column.get('type') }).toLowerCase()})`,
     type: `${column.get('type')}`,
   })).toArray();
 
@@ -84,7 +84,7 @@ const aggregationOptions = [
 
 const selectProps = { 'data-test-id': 'select-menu' };
 
-export default function ConfigMenu(props) {
+function ConfigMenu(props) {
   const datasetArray = getDatasetArray(props.datasets);
   const datasetOptions = getDatasetOptions(datasetArray);
   const visualisation = props.visualisation;
@@ -93,7 +93,7 @@ export default function ConfigMenu(props) {
 
   const columns = props.datasets[visualisation.datasetId] ?
     props.datasets[visualisation.datasetId].get('columns') : Immutable.List();
-  const columnOptions = getSelectMenuOptionsFromColumnList(columns);
+  const columnOptions = getSelectMenuOptionsFromColumnList(columns, props.intl);
 
   const getChartTypeEditor = (visualisationType) => {
     let chartTypeEditor;
@@ -248,6 +248,7 @@ Subtitle.propTypes = {
 };
 
 ConfigMenu.propTypes = {
+  intl: intlShape,
   visualisation: PropTypes.object.isRequired,
   metadata: PropTypes.object,
   datasets: PropTypes.object.isRequired,
@@ -258,3 +259,5 @@ ConfigMenu.propTypes = {
   onSaveVisualisation: PropTypes.func.isRequired,
   loadDataset: PropTypes.func.isRequired,
 };
+
+export default injectIntl(ConfigMenu);

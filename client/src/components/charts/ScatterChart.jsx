@@ -70,6 +70,7 @@ export default class ScatterChart extends Component {
     style: PropTypes.object,
     legendVisible: PropTypes.bool,
     grid: PropTypes.bool,
+    visualisation: PropTypes.object.isRequired,
   }
 
   static defaultProps = {
@@ -137,13 +138,25 @@ export default class ScatterChart extends Component {
   }
 
   handleMouseEnterNode({ key, x, y, label, color }, event) {
-    const { interactive, print, xAxisLabel, yAxisLabel } = this.props;
+    const { interactive, print, xAxisLabel, yAxisLabel, visualisation, data } = this.props;
+    const xAxisType = get(data, 'series[0].metadata.type');
+    const showColor =
+      get(visualisation, 'spec.datapointLabelColumn') || get(visualisation, 'spec.bucketColumn');
     if (!interactive || print) return;
-    this.handleShowTooltip(event, [
-      { key: label, color },
+    let tooltipItems = [];
+
+    if (showColor) {
+      tooltipItems.push(
+        { key: label, color }
+      );
+    }
+
+    tooltipItems = tooltipItems.concat([
       { key: yAxisLabel || 'y', value: heuristicRound(y) },
-      { key: xAxisLabel || 'x', value: heuristicRound(x) },
+      { key: xAxisLabel || 'x', value: xAxisType === 'date' ? new Date(x) : heuristicRound(x) },
     ]);
+
+    this.handleShowTooltip(event, tooltipItems);
     this.setState({ hoveredNode: key });
   }
 
@@ -208,16 +221,24 @@ export default class ScatterChart extends Component {
             const availableWidth = dimensions.width * (1 - marginLeft - marginRight);
 
             const xExtent = extent(series.data, ({ x }) => x);
-            const fromZero = startAxisFromZero(xExtent, get(data, 'series[0].metadata.type'));
-            if (fromZero) xExtent[0] = 0;
+            const xAxisType = get(data, 'series[0].metadata.type');
+            const fromZero = startAxisFromZero(xExtent, xAxisType);
 
-            const xScaleFunction = get(data, 'series[0].metadata.type') === 'date' ? scaleTime : scaleLinear;
-            const xScale = xScaleFunction()
+            if (fromZero) {
+              xExtent[0] = 0;
+            }
+
+            const xScaleFunction = xAxisType === 'date' ? scaleTime : scaleLinear;
+            let xScale = xScaleFunction()
               .domain(xExtent)
               .range([
                 dimensions.width * marginLeft,
                 dimensions.width * (1 - marginRight),
               ]);
+
+            if (!fromZero && xAxisType === 'number') {
+              xScale = xScale.nice();
+            }
 
             const yExtent = extent(series.data, ({ y }) => y);
             if (yExtent[0] > 0) yExtent[0] = 0;

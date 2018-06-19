@@ -116,6 +116,12 @@ export default class Chart extends Component {
           max={visualisation.data.max}
         />
       );
+    } else if (get(visualisation, 'data.message', '').indexOf('Invalid filter') > -1) {
+      return (
+        <AggregationError
+          reason="invalid-filter"
+        />
+      );
     }
 
     const titleHeight = getTitleStyle(visualisation.name, getSize(width)).height * (1 + META_SCALE);
@@ -227,9 +233,8 @@ export default class Chart extends Component {
             <FormattedMessage id="data_last_updated" />
           </span>: {moment(dataset.get('updated')).format('Do MMM YYYY - HH:mm')}
           {
-            // TODO: translate
             get(visualisation, 'data.common.metadata.sampled') ?
-              <span> (Using Sampled Data)</span>
+              <span> (<FormattedMessage id="using_sampled_data" />)</span>
               :
               null
           }

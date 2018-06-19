@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { intlShape, injectIntl } from 'react-intl';
 
-export default class EntityTitleInput extends Component {
+class EntityTitleInput extends Component {
 
   constructor() {
     super();
@@ -12,8 +13,12 @@ export default class EntityTitleInput extends Component {
   }
 
   render() {
-    const { title, onChangeTitle } = this.props;
-    const titleIsDefault = title.toLowerCase().indexOf('untitled') > -1;
+    const { title, onChangeTitle, intl } = this.props;
+    const titleIsDefault = [
+      intl.formatMessage({ id: 'untitled_dashboard' }),
+      intl.formatMessage({ id: 'untitled_visualisation' }),
+      intl.formatMessage({ id: 'untitled_collection' }),
+    ].includes(title);
     const h3Class = `entityTitle
       ${onChangeTitle ? 'clickable' : ''}
       ${titleIsDefault ? 'default' : 'custom'}`;
@@ -73,7 +78,10 @@ export default class EntityTitleInput extends Component {
 }
 
 EntityTitleInput.propTypes = {
+  intl: intlShape,
   title: PropTypes.string.isRequired,
   onChangeTitle: PropTypes.func,
   onBeginEditTitle: PropTypes.func,
 };
+
+export default injectIntl(EntityTitleInput);

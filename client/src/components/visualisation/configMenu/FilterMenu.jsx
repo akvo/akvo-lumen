@@ -1,80 +1,41 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
+import { get } from 'lodash';
+import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
 import SelectMenu from '../../common/SelectMenu';
 import { filterColumns } from '../../../utilities/utils';
-
-const operations = [
-  {
-    value: 'keep',
-    label: 'Keep rows in which',
-  },
-  {
-    value: 'remove',
-    label: 'Remove rows in which',
-  },
-];
-
-const strategies = {
-  text: [
-    {
-      label: 'exactly matches',
-      value: 'is',
-    },
-    {
-      label: 'is empty',
-      value: 'isEmpty',
-    },
-  ],
-  number: [
-    {
-      label: 'is higher than',
-      value: 'isHigher',
-    },
-    {
-      label: 'exactly matches',
-      value: 'is',
-    },
-    {
-      label: 'is lower than',
-      value: 'isLower',
-    },
-    {
-      label: 'is empty',
-      value: 'isEmpty',
-    },
-  ],
-  date: [
-    {
-      label: 'is after',
-      value: 'isHigher',
-    },
-    {
-      label: 'is before',
-      value: 'isLower',
-    },
-    {
-      label: 'is empty',
-      value: 'isEmpty',
-    },
-  ],
-};
 
 const getMenuFilters = filterArray =>
   filterArray.filter(item => item.origin !== 'pivot-row' && item.origin !== 'pivot-column');
 
-const getFilterOperationLabel =
-  operation => operations.find(item => item.value.toString() === operation.toString()).label;
+const getFilterOperationLabel = operations => operation =>
+  operations.find(item => item.value.toString() === operation.toString()).label;
 
-const getFilterStrategyLabel = (strategy, columnName, columnOptions) => {
-  const columnType = columnOptions.find(col => col.value === columnName).type;
+const getColumnTitle = (columnOptions, filter) => {
+  const columnInFilter = filter.column;
+  const matchingColumn = columnOptions.find(col => col.value === columnInFilter);
+  const columnTitle = get(matchingColumn, 'title') || null;
+
+  return columnTitle;
+};
+
+const getFilterStrategyLabel = (strategy, columnName, columnOptions, strategies) => {
+  const columnType = get(columnOptions.find(col => col.value === columnName), 'type');
+  if (!columnType) {
+    return null;
+  }
   const strat = strategies[columnType].find(item => item.value.toString() === strategy.toString());
 
-  return strat.label;
+  return strat ? strat.label : null;
 };
 
 const getFilterDisplayValue = (value, columnName, columnOptions) => {
-  const columnType = columnOptions.find(col => col.value === columnName).type;
+  const column = columnOptions.find(col => col.value === columnName);
+  if (!column) {
+    return value;
+  }
+  const columnType = column.type;
   let displayValue;
 
   if (columnType === 'date') {
@@ -88,7 +49,22 @@ const getFilterDisplayValue = (value, columnName, columnOptions) => {
   return displayValue;
 };
 
-export default class FilterMenu extends Component {
+const isFilterValid = (filter, columnOptions, strategies) => {
+  if (!getColumnTitle(columnOptions, filter)) {
+    return false;
+  }
+
+  const columnType = columnOptions.find(col => col.value === filter.column).type;
+  const filterStrategy = get(filter, 'strategy') || '';
+  const stratValid = Boolean(
+    strategies[columnType].find(item => item.value.toString() === filterStrategy.toString())
+  );
+
+  return stratValid;
+};
+
+class FilterMenu extends Component {
+
   constructor() {
     super();
     this.state = {
@@ -113,10 +89,65 @@ export default class FilterMenu extends Component {
     );
   }
 
-  toggleInput() {
-    this.setState({
-      inputInProgress: !this.state.inputInProgress,
-    });
+  getDropdownOptions() {
+    const { formatMessage } = this.props.intl;
+    return {
+      operations: [
+        {
+          value: 'keep',
+          label: formatMessage({ id: 'keep_rows_in_which' }),
+        },
+        {
+          value: 'remove',
+          label: formatMessage({ id: 'remove_rows_in_which' }),
+        },
+      ],
+
+      strategies: {
+        text: [
+          {
+            label: formatMessage({ id: 'exactly_matches' }),
+            value: 'is',
+          },
+          {
+            label: formatMessage({ id: 'is_empty' }),
+            value: 'isEmpty',
+          },
+        ],
+        number: [
+          {
+            label: formatMessage({ id: 'is_higher_than' }),
+            value: 'isHigher',
+          },
+          {
+            label: formatMessage({ id: 'exactly_matches' }),
+            value: 'is',
+          },
+          {
+            label: formatMessage({ id: 'is_lower_than' }),
+            value: 'isLower',
+          },
+          {
+            label: formatMessage({ id: 'is_empty' }),
+            value: 'isEmpty',
+          },
+        ],
+        date: [
+          {
+            label: formatMessage({ id: 'is_after' }),
+            value: 'isHigher',
+          },
+          {
+            label: formatMessage({ id: 'is_before' }),
+            value: 'isLower',
+          },
+          {
+            label: formatMessage({ id: 'is_empty' }),
+            value: 'isEmpty',
+          },
+        ],
+      },
+    };
   }
 
   updateNewFilter(field, value, type) {
@@ -190,8 +221,15 @@ export default class FilterMenu extends Component {
     }
   }
 
+  toggleInput() {
+    this.setState({
+      inputInProgress: !this.state.inputInProgress,
+    });
+  }
+
   render() {
-    const { hasDataset, columnOptions } = this.props;
+    const { hasDataset, columnOptions, intl } = this.props;
+    const { formatMessage } = intl;
     const filters = getMenuFilters(this.props.filters);
     const {
       newFilterColumn,
@@ -201,6 +239,7 @@ export default class FilterMenu extends Component {
       inputInProgress } = this.state;
     const activeColumnType = newFilterColumn ?
       columnOptions.find(col => col.value === newFilterColumn).type : null;
+    const { operations, strategies } = this.getDropdownOptions();
 
     const isFilterReady = this.getIsFilterReady();
 
@@ -209,7 +248,7 @@ export default class FilterMenu extends Component {
         className={`FilterMenu inputGroup ${hasDataset ? 'enabled' : 'disabled'}`}
       >
         <h4 className="title">
-          Dataset Filters
+          <FormattedMessage id="dataset_filters" />
           <button
             className="collapseToggle clickable"
             onClick={() => { this.setState({ collapsed: !collapsed }); }}
@@ -226,83 +265,120 @@ export default class FilterMenu extends Component {
               {(!filters || filters.length === 0) ?
                 <div className="noFilters">No filters</div> : <div className="filterListContainer">
                   <ol className="filterList">
-                    {filters.map((filter, index) =>
-                      <li
-                        key={index}
-                        className="filterListItem"
-                      >
-                        <span className="filterIndicator">
-                          {getFilterOperationLabel(filter.operation)}
-                        </span>
-                        {' '}
-                        <span>
-                        rows where
-                        </span>
-                        {' '}
-                        <span className="filterIndicator">
-                          {columnOptions.find(col => col.value === filter.column).title}
-                        </span>
-                        {' '}
-                        <span>
-                          {getFilterStrategyLabel(filter.strategy, filter.column, columnOptions)}
-                        </span>
-                        {' '}
-                        <span className="filterIndicator">
-                          {getFilterDisplayValue(filter.value, filter.column, columnOptions)}
-                        </span>
-                        <button
-                          className="deleteFilter clickable"
-                          onClick={() => this.deleteFilter(index)}
+                    {filters.map((filter, index) => {
+                      const out = (
+                      isFilterValid(filter, columnOptions, strategies) ?
+                        (<li
+                          key={index}
+                          className="filterListItem valid"
                         >
-                        ✕
-                        </button>
-                      </li>
+                          <span className="filterIndicator">
+                            {getFilterOperationLabel(filter.operation)}
+                          </span>
+                          {' '}
+                          <span />
+                          {' '}
+                          <span className="filterIndicator">
+                            {getColumnTitle(columnOptions, filter)}
+                          </span>
+                          {' '}
+                          <span>
+                            {getFilterStrategyLabel(
+                              filter.strategy,
+                              filter.column,
+                              columnOptions,
+                              strategies
+                            )}
+                          </span>
+                          {' '}
+                          <span className="filterIndicator">
+                            {getFilterDisplayValue(filter.value, filter.column, columnOptions)}
+                          </span>
+                          <button
+                            className="deleteFilter clickable"
+                            onClick={() => this.deleteFilter(index)}
+                          >
+                          ✕
+                          </button>
+                        </li>)
+                        :
+                        (<li
+                          key={index}
+                          className="filterListItem invalid"
+                        >
+                          <span className="filterIndicator">
+                            {
+                              getColumnTitle(columnOptions, filter) ?
+                                <span>
+                                  The type of column {getColumnTitle(columnOptions, filter)} has
+                                  changed and this filter is no longer valid. Please delete it.
+                                </span>
+                                :
+                                <span>
+                                  A column this filter refers to no longer exists.
+                                  Please delete this filter.
+                                </span>
+                            }
+                          </span>
+                          <button
+                            className="deleteFilter clickable"
+                            onClick={() => this.deleteFilter(index)}
+                          >
+                          ✕
+                          </button>
+                        </li>)
+                      );
+
+                      return out;
+                    }
                   )}
                   </ol>
                 </div>
               }
               {inputInProgress ?
                 <div className="newFilterContainer">
-                  <h4>New Filter</h4>
+                  <h4>
+                    <FormattedMessage id="new_filter" />
+                  </h4>
                   <div className="inputGroup">
                     <div className="filterBodyContainer">
                       <label htmlFor="filterOperationInput">
-                        Filter operation
+                        <FormattedMessage id="filter_operation" />
                       </label>
                       <SelectMenu
                         className="filterOperationInput"
                         name="filterOperationInput"
-                        placeholder="Choose a filter operation..."
+                        placeholder={`${formatMessage({ id: 'choose_a_filter_operation' })}...`}
                         value={newFilterOperation || null}
                         options={operations}
                         onChange={choice => this.updateNewFilter('newFilterOperation', choice)}
                       />
                       <label htmlFor="filterColumnInput">
-                        Column to filter by:
+                        <FormattedMessage id="column_filter_by" />
                       </label>
                       <SelectMenu
                         className="filterColumnInput"
                         name="filterColumnInput"
-                        placeholder="Choose a column to filter by..."
+                        placeholder={`${formatMessage({ id: 'choose_a_column_to_filter_by' })}...`}
                         value={newFilterColumn || null}
                         options={filterColumns(columnOptions, ['text', 'number', 'date'])}
                         onChange={choice => this.updateNewFilter('newFilterColumn', choice)}
                       />
                       <label htmlFor="filterStrategyInput">
-                        Filter match method
+                        <FormattedMessage id="filter_match_method" />
                       </label>
                       <SelectMenu
                         className={`filterStrategyInput
                           ${newFilterColumn ? 'enabled' : 'disabled'}`}
                         disabled={newFilterColumn === null}
                         name="filterStrategyInput"
-                        placeholder="Choose a match method..."
+                        placeholder={`${formatMessage({ id: 'choose_a_match_method' })}...`}
                         value={newFilterStrategy || null}
                         options={newFilterColumn ? strategies[activeColumnType] : []}
                         onChange={choice => this.updateNewFilter('newFilterStrategy', choice)}
                       />
                       <label htmlFor="filterMatchValueInput">
-                        Filter match value
+                        <FormattedMessage id="filter_match_value" />
                       </label>
                       <input
                         className={`filterMatchValueInput textInput
@@ -321,13 +397,13 @@ export default class FilterMenu extends Component {
                       disabled={!isFilterReady}
                       onClick={() => this.saveFilter()}
                     >
-                      Save Filter
+                      <FormattedMessage id="save_filter" />
                     </button>
                     <button
                       className="cancelFilter clickable"
                       onClick={() => this.toggleInput()}
                     >
-                      Cancel
+                      <FormattedMessage id="cancel" />
                     </button>
                   </div>
                 </div> : <div className="addFilterContainer">
@@ -349,8 +425,11 @@ export default class FilterMenu extends Component {
 }
 
 FilterMenu.propTypes = {
+  intl: intlShape,
   filters: PropTypes.array.isRequired,
   hasDataset: PropTypes.bool.isRequired,
   columnOptions: PropTypes.array.isRequired,
   onChangeSpec: PropTypes.func.isRequired,
 };
+
+export default injectIntl(FilterMenu);
