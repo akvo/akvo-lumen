@@ -17,7 +17,7 @@ import ResponsiveWrapper from '../common/ResponsiveWrapper';
 import ColorPicker from '../common/ColorPicker';
 import ChartLayout from './ChartLayout';
 import Tooltip from './Tooltip';
-import { labelFont } from '../../constants/chart';
+import { labelFont, MAX_FONT_SIZE } from '../../constants/chart';
 
 export default class StackedBarChart extends Component {
 
@@ -219,6 +219,10 @@ export default class StackedBarChart extends Component {
     const stackNodes = series.stack;
     const dataCount = series.data.length;
     const seriesCount = this.props.data.series.length;
+    let yAxisLabelSize = 10;
+    if ((yAxisLabel || '').length > 60) yAxisLabelSize = 7;
+    if ((yAxisLabel || '').length > 100) yAxisLabelSize = 5;
+    const yAxisLabelSizeMultiplier = height / 600;
 
     return (
       <ChartLayout
@@ -442,6 +446,10 @@ export default class StackedBarChart extends Component {
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}
                     numTicks={yAxisTicks}
+                    labelProps={{
+                      fontSize: Math.min(yAxisLabelSize * yAxisLabelSizeMultiplier, MAX_FONT_SIZE),
+                      textAnchor: 'middle',
+                    }}
                   />
 
                 </Svg>

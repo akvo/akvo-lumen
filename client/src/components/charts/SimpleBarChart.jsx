@@ -16,7 +16,7 @@ import ResponsiveWrapper from '../common/ResponsiveWrapper';
 import ColorPicker from '../common/ColorPicker';
 import ChartLayout from './ChartLayout';
 import Tooltip from './Tooltip';
-import { labelFont } from '../../constants/chart';
+import { labelFont, MAX_FONT_SIZE } from '../../constants/chart';
 
 const getDatum = (data, datum) => data.filter(({ key }) => key === datum)[0];
 
@@ -262,6 +262,14 @@ export default class SimpleBarChart extends Component {
     const dataType = series.metadata.type;
     const paddingBottom = getPaddingBottom(series.data, dataType);
     const dataCount = series.data.length;
+    let yAxisLabelSize = 10;
+    if ((yAxisLabel || '').length > 60) yAxisLabelSize = 7;
+    if ((yAxisLabel || '').length > 100) yAxisLabelSize = 5;
+    let xAxisLabelSize = 10;
+    if ((xAxisLabel || '').length > 60) xAxisLabelSize = 7;
+    if ((xAxisLabel || '').length > 100) xAxisLabelSize = 5;
+    const yAxisLabelSizeMultiplier = height / 600;
+    const xAxisLabelSizeMultiplier = width / 600;
 
     return (
       <ChartLayout
@@ -429,13 +437,18 @@ export default class SimpleBarChart extends Component {
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}
                     numTicks={yAxisTicks}
+                    labelProps={{
+                      fontSize: Math.min(yAxisLabelSize * yAxisLabelSizeMultiplier, MAX_FONT_SIZE),
+                      textAnchor: 'middle',
+                    }}
                   />
 
                   <Text
                     transform={[
                       { type: 'translate', value: [Math.floor(this.props.width / 2), this.props.height - 5] },
                     ]}
-                    fontSize={10}
+                    fontSize={Math.min(xAxisLabelSize * xAxisLabelSizeMultiplier, MAX_FONT_SIZE)}
+                    textAnchor="middle"
                     fontFamily="Arial"
                   >
                     {xAxisLabel || ''}

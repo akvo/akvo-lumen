@@ -216,7 +216,6 @@ export default class LineChart extends Component {
 
             const origin = yScale(0);
             const radius = Math.min((5 / series.data.length) * 20, 5);
-
             const numNodes = series.data.length;
             const maxNodesForTooltip = 50;
             const showTooltip = numNodes <= maxNodesForTooltip;
@@ -370,6 +369,10 @@ export default class LineChart extends Component {
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}
                     numTicks={xAxisTicks}
+                    tickLabelProps={val => ({
+                      transform: `rotate(45, ${xScale(val)}, 18)`,
+                      fontSize: 10,
+                    })}
                     {...tickFormat}
                   />
                 </Svg>

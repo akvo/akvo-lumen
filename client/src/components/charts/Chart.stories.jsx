@@ -40,7 +40,7 @@ const palette = generatePalette({ colors: rainbowColors });
 const generateData = ({ seriesCount, nodeCount, minVal, maxVal, labelLength }) => {
   const result = {
     series: [],
-    common: { data: [] },
+    common: { data: [], metadata: {} },
   };
 
   for (let s = 0; s < seriesCount; s++) {
@@ -248,6 +248,7 @@ storiesOf('Charts', module)
           edit={boolean('props.edit', true)}
           legendVisible={boolean('props.legendVisible', false)}
           yAxisLabel={text('props.yAxisLabel', 'Y Axis')}
+          xAxisLabel={text('props.xAxisLabel', 'X Axis')}
         />
         <pre>
           <code>

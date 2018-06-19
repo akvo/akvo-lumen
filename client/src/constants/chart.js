@@ -13,4 +13,5 @@ export const connectionStyle = {
 
 export default {
   labelFont,
+  MAX_FONT_SIZE: 12,
 };
