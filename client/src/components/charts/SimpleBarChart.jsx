@@ -99,6 +99,10 @@ export default class SimpleBarChart extends Component {
     grid: true,
   }
 
+  static contextTypes = {
+    abbrNumber: PropTypes.func,
+  }
+
   state = {
     isPickingColor: false,
   }
@@ -318,6 +322,14 @@ export default class SimpleBarChart extends Component {
 
             const axisScale = scaleLinear().domain(domain).range([0, availableHeight].reverse());
 
+            const tickFormat = (value) => {
+              const cutoff = 10000;
+              if (cutoff >= 10000) {
+                return this.context.abbrNumber(value);
+              }
+              return value;
+            };
+
             return (
               <div
                 style={{ position: 'relative' }}
@@ -441,6 +453,7 @@ export default class SimpleBarChart extends Component {
                       fontSize: Math.min(yAxisLabelSize * yAxisLabelSizeMultiplier, MAX_FONT_SIZE),
                       textAnchor: 'middle',
                     }}
+                    tickFormat={tickFormat}
                   />
 
                   <Text

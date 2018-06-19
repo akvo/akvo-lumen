@@ -221,10 +221,8 @@ export default class LineChart extends Component {
             const showTooltip = numNodes <= maxNodesForTooltip;
 
             const tickFormat = series.metadata.type === 'number' ?
-              { tickFormat: value => this.context.abbrNumber(value) }
-              :
-              {}
-            ;
+              { tickFormat: value => this.context.abbrNumber(value) } :
+              {};
 
             return (
               <div
