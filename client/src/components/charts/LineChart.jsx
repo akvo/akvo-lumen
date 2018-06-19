@@ -359,6 +359,7 @@ export default class LineChart extends Component {
                     label={xAxisLabel || ''}
                     labelProps={{
                       dx: marginLeft * dimensions.width * 0.5,
+                      dy: 50,
                       textAnchor: 'middle',
                       fontFamily: 'Arial',
                       fontSize: 10,
