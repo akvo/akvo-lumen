@@ -8,6 +8,7 @@ import moment from 'moment';
 import leafletUtfGrid from '../../vendor/leaflet.utfgrid';
 import * as chart from '../../utilities/chart';
 import Spinner from '../common/LoadingSpinner';
+import { trackEvent } from '../../utilities/analytics';
 
 require('../../../node_modules/leaflet/dist/leaflet.css');
 require('./MapVisualisation.scss');
@@ -241,6 +242,9 @@ export default class MapVisualisation extends Component {
     super();
     this.renderLeafletLayer = this.renderLeafletLayer.bind(this);
     this.renderLeafletMap = this.renderLeafletMap.bind(this);
+    this.state = {
+      hasTrackedLayerTypes: false,
+    };
   }
   componentDidMount() {
     this.renderLeafletMap(this.props);
@@ -418,6 +422,16 @@ export default class MapVisualisation extends Component {
     }
 
     const newSpec = nextProps.visualisation.spec || {};
+
+    if (newSpec.layers.length && !this.state.hasTrackedLayerTypes) {
+      this.setState({
+        hasTrackedLayerTypes: true,
+      }, () => {
+        newSpec.layers.forEach(({ layerType }) => {
+          trackEvent('Render map layer type:', layerType || 'raster');
+        });
+      });
+    }
 
     // Add or update the windshaft tile layer if necessary
     if (newSpec.layers.length === 0 && this.dataLayer) {
