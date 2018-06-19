@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import numeral from 'numeral';
 import { addLocaleData, IntlProvider } from 'react-intl';
+import numeralLocaleFr from 'numeral/locales/fr';
+import numeralLocaleEs from 'numeral/locales/es';
 import fr from 'react-intl/locale-data/fr';
 import en from 'react-intl/locale-data/en';
 import es from 'react-intl/locale-data/es';
