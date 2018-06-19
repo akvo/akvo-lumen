@@ -46,10 +46,6 @@
   [tenant-conn dataset _ query]
   (bar/query tenant-conn dataset query))
 
-(defmethod query* "donut"
-  [tenant-conn dataset _ query]
-  (pie/query tenant-conn dataset query))
-
 (defmethod query* "scatter"
   [tenant-conn dataset _ query]
   (scatter/query tenant-conn dataset query))
