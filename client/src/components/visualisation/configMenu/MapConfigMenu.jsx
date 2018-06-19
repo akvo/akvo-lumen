@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage, intlShape } from 'react-intl';
+import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
 import VisualisationTypeMenu from '../VisualisationTypeMenu';
 import LayerMenu from './LayerMenu';
 import LayerConfigMenu from './LayerConfigMenu';
@@ -34,7 +34,7 @@ const applyAutomaticSpecChanges = (value) => {
   return newValue;
 };
 
-export default class MapConfigMenu extends Component {
+class MapConfigMenu extends Component {
 
   constructor() {
     super();
@@ -207,3 +207,5 @@ MapConfigMenu.propTypes = {
   datasetOptions: PropTypes.array.isRequired,
   loadDataset: PropTypes.func.isRequired,
 };
+
+export default injectIntl(MapConfigMenu);

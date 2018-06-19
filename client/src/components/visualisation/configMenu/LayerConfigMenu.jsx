@@ -760,10 +760,10 @@ class LayerConfigMenu extends Component {
 
 
   render() {
-    const { layer, datasets } = this.props;
+    const { layer, datasets, intl } = this.props;
     const columns = datasets[layer.datasetId] ?
     datasets[layer.datasetId].get('columns') : null;
-    const columnOptions = getSelectMenuOptionsFromColumnList(columns);
+    const columnOptions = getSelectMenuOptionsFromColumnList(columns, intl);
 
     return (
       <div
