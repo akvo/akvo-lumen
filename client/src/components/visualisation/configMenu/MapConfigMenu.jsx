@@ -79,10 +79,10 @@ class MapConfigMenu extends Component {
 
   handleAddMapLayer() {
     const { intl, visualisation, onChangeSpec } = this.props;
-    const title = intl.formatMessage({
-      id: 'untitled_layer',
-      values: { count: visualisation.spec.layers.length + 1 },
-    });
+    const title = intl.formatMessage(
+      { id: 'untitled_layer' },
+      { count: visualisation.spec.layers.length + 1 }
+    );
     const layers = visualisation.spec.layers.slice();
     layers.push({ ...mapLayerSpecTemplate, title });
     onChangeSpec({ layers });
