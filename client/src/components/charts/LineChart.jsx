@@ -66,7 +66,7 @@ export default class LineChart extends Component {
     marginLeft: 70,
     marginRight: 70,
     marginTop: 20,
-    marginBottom: 120,
+    marginBottom: 80,
     opacity: 0.9,
     edit: false,
     area: false,
