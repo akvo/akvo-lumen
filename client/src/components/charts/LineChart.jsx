@@ -368,6 +368,7 @@ export default class LineChart extends Component {
                       fontSize: axisLabelFontSize,
                       fill: 'black',
                     }}
+                    labelOffset={44}
                   />
 
                   <AxisBottom

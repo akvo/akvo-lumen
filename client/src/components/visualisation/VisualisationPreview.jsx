@@ -80,7 +80,7 @@ export default function CreateVisualisationPreview({
           metadata={metadata}
           datasets={datasets}
           context="editor"
-          height={visualisation.visualisationType === 'map' ? null : 400}
+          height={visualisation.visualisationType === 'map' ? null : 500}
           width={visualisation.visualisationType === 'map' ? null : 800}
           onChangeVisualisationSpec={onChangeVisualisationSpec}
         /> : null
