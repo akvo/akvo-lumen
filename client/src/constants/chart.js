@@ -11,6 +11,9 @@ export const connectionStyle = {
   strokeWidth: 1,
 };
 
+export const MAX_FONT_SIZE = 12;
+
 export default {
   labelFont,
+  MAX_FONT_SIZE,
 };

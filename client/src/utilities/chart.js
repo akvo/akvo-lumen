@@ -634,3 +634,13 @@ export function processPivotData(data, spec) {
 
   return out;
 }
+
+const isRatio = val => val > 0 && val < 1;
+export function calculateMargins({ top, right, bottom, left }, { width, height }) {
+  return {
+    top: isRatio(top) ? top * height : top,
+    right: isRatio(right) ? right * width : right,
+    bottom: isRatio(bottom) ? bottom * height : bottom,
+    left: isRatio(left) ? left * width : left,
+  };
+}
