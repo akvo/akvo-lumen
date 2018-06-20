@@ -63,10 +63,10 @@ export default class LineChart extends Component {
   }
 
   static defaultProps = {
-    marginLeft: 0.2,
-    marginRight: 0.1,
-    marginTop: 0.1,
-    marginBottom: 0.2,
+    marginLeft: 70,
+    marginRight: 70,
+    marginTop: 20,
+    marginBottom: 120,
     opacity: 0.9,
     edit: false,
     area: false,
