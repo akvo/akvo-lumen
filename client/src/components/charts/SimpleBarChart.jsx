@@ -88,10 +88,10 @@ export default class SimpleBarChart extends Component {
 
   static defaultProps = {
     interactive: true,
-    marginLeft: 0.1,
-    marginRight: 0.1,
-    marginTop: 0.1,
-    marginBottom: 0.1,
+    marginLeft: 70,
+    marginRight: 70,
+    marginTop: 70,
+    marginBottom: 100,
     legendVisible: false,
     edit: false,
     padding: 0.1,
@@ -458,7 +458,7 @@ export default class SimpleBarChart extends Component {
 
                   <Text
                     transform={[
-                      { type: 'translate', value: [Math.floor(this.props.width / 2), this.props.height - 5] },
+                      { type: 'translate', value: [Math.floor(this.props.width / 2), this.props.height - 10] },
                     ]}
                     fontSize={Math.min(xAxisLabelSize * xAxisLabelSizeMultiplier, MAX_FONT_SIZE)}
                     textAnchor="middle"

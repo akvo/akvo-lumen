@@ -52,10 +52,10 @@ export default class StackedBarChart extends Component {
 
   static defaultProps = {
     interactive: true,
-    marginLeft: 0.1,
-    marginRight: 0.1,
-    marginTop: 0.1,
-    marginBottom: 0.2,
+    marginLeft: 70,
+    marginRight: 70,
+    marginTop: 20,
+    marginBottom: 120,
     legendVisible: true,
     edit: false,
     padding: 0.1,
