@@ -55,7 +55,7 @@ export default class StackedBarChart extends Component {
     marginLeft: 70,
     marginRight: 70,
     marginTop: 20,
-    marginBottom: 120,
+    marginBottom: 20,
     legendVisible: true,
     edit: false,
     padding: 0.1,

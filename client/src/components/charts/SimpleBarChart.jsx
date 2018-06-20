@@ -91,7 +91,7 @@ export default class SimpleBarChart extends Component {
     marginLeft: 70,
     marginRight: 70,
     marginTop: 70,
-    marginBottom: 100,
+    marginBottom: 60,
     legendVisible: false,
     edit: false,
     padding: 0.1,
