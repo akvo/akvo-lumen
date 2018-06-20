@@ -225,10 +225,16 @@ export default class LineChart extends Component {
             const numNodes = series.data.length;
             const maxNodesForTooltip = 50;
             const showTooltip = numNodes <= maxNodesForTooltip;
+            const abbreviateNumber = value => this.context.abbrNumber(value);
 
-            const tickFormat = series.metadata.type === 'number' ?
-              { tickFormat: value => this.context.abbrNumber(value) } :
-              {};
+            const xTickFormatConditional = series.metadata.type === 'number' ?
+              { tickFormat: abbreviateNumber } : {};
+            const yTickFormat = (num) => {
+              if (num >= 10000) {
+                return abbreviateNumber(num);
+              }
+              return num;
+            };
 
             return (
               <div
@@ -349,7 +355,7 @@ export default class LineChart extends Component {
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}
                     numTicks={yAxisTicks}
-                    {...tickFormat}
+                    tickFormat={yTickFormat}
                     labelProps={{
                       dy: margins.top * 0.5,
                       textAnchor: 'middle',
@@ -378,7 +384,7 @@ export default class LineChart extends Component {
                       transform: `rotate(45, ${xScale(val)}, 18)`,
                       fontSize: 10,
                     })}
-                    {...tickFormat}
+                    {...xTickFormatConditional}
                   />
                 </Svg>
               </div>
