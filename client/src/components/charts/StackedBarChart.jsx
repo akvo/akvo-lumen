@@ -175,7 +175,11 @@ export default class StackedBarChart extends Component {
     });
   }
 
-  renderLabel({ nodeWidth, x, y, node }) {
+  renderLabel({ nodeWidth, x, y, node, index, nodeCount }) {
+    if (
+      (nodeCount >= 200 && index % 10 !== 0) ||
+      (nodeCount < 200 && nodeCount > 40 && index % 5 !== 0)
+    ) return null;
     const labelX = x + (nodeWidth / 2);
     const labelY = y + 10;
     return (
@@ -434,12 +438,14 @@ export default class StackedBarChart extends Component {
                         );
                       })}
 
-                      {nodes.map((node) => {
+                      {nodes.map((node, index) => {
                         const { nodeWidth, x, key } = node;
 
                         return (
                           <Group key={key}>
                             {this.renderLabel({
+                              nodeCount: series.data.length,
+                              index,
                               nodeWidth,
                               x,
                               y: origin,
