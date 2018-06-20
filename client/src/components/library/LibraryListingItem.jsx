@@ -95,36 +95,6 @@ function LibraryListingItemContextMenu({
   );
 }
 
-const VisualisationTypeLabel = ({ vType }) => {
-  let typeLabel = '';
-
-  switch (vType) {
-    case 'map':
-    case 'pivot table':
-      typeLabel = vType;
-      break;
-
-    default:
-      typeLabel = `${vType} chart`;
-  }
-
-  typeLabel = `${typeLabel.substring(0, 1).toUpperCase()}${typeLabel.substring(1, typeLabel.length)}`;
-
-  return (
-    <div
-      className="VisualisationTypeLabel"
-    >
-      <p>
-        {typeLabel}
-      </p>
-    </div>
-  );
-};
-
-VisualisationTypeLabel.propTypes = {
-  vType: PropTypes.string.isRequired,
-};
-
 LibraryListingItemContextMenu.propTypes = {
   entityType: PropTypes.string.isRequired,
   onClick: PropTypes.func.isRequired,
@@ -166,7 +136,10 @@ export default class LibraryListingItem extends Component {
           </div>
         }
         <Link
-          to={`/${getType(entity)}/${getId(entity)}`}
+          to={{
+            pathname: `/${getType(entity)}/${getId(entity)}`,
+            state: { from: 'library' },
+          }}
           className="entityBody clickable"
           onClick={(e) => {
             if (!isOk(entity)) {
@@ -186,11 +159,13 @@ export default class LibraryListingItem extends Component {
             </h3>
             {isFailed(entity) && <p>{getErrorMessage(entity)}</p>}
             {isPending(entity) && <p><FormattedMessage id="pending" />...</p>}
-            {getType(entity) === 'visualisation' &&
-              <VisualisationTypeLabel
-                vType={entity.visualisationType}
-              />
-            }
+            {getType(entity) === 'visualisation' && (
+              <div className="VisualisationTypeLabel">
+                <p>
+                  <FormattedMessage id={entity.visualisationType} />
+                </p>
+              </div>
+            )}
           </div>
         </Link>
         <div

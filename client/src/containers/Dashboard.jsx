@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { isEmpty, cloneDeep } from 'lodash';
 import get from 'lodash/get';
+import { intlShape, injectIntl } from 'react-intl';
 import ShareEntity from '../components/modals/ShareEntity';
 import * as actions from '../actions/dashboard';
 import * as api from '../api';
@@ -44,12 +45,12 @@ const getDashboardFromState = (stateDashboard, isForEditor) => {
 
 class Dashboard extends Component {
 
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       dashboard: {
         type: 'dashboard',
-        title: 'Untitled dashboard',
+        title: props.intl.formatMessage({ id: 'untitled_dashboard' }),
         entities: {},
         layout: [],
         id: null,
@@ -253,14 +254,17 @@ class Dashboard extends Component {
             });
           /* Maps hit a different endpoint than other aggregations, so bail out now */
           return;
-        case 'pie':
         case 'donut':
           aggType = 'pie';
           break;
         case 'pivot table':
           aggType = 'pivot';
           break;
+        case 'area':
+          aggType = 'line';
+          break;
         default:
+          aggType = vType;
           break;
       }
 
@@ -290,7 +294,7 @@ class Dashboard extends Component {
   }
 
   onUpdateName(title) {
-    const normalizedTitle = title || 'Untitled dashboard';
+    const normalizedTitle = title || this.props.intl.formatMessage({ id: 'untitled_dashboard' });
     const dashboard = Object.assign({}, this.state.dashboard, { title: normalizedTitle });
     this.setState({
       dashboard,
@@ -344,7 +348,9 @@ class Dashboard extends Component {
   handleTrackPageView(dashboard) {
     if (!this.state.hasTrackedPageView) {
       this.setState({ hasTrackedPageView: true }, () => {
-        trackPageView(`Dashboard: ${dashboard.title || 'Untitled dashboard'}`);
+        trackPageView(`Dashboard: ${
+          dashboard.title || this.props.intl.formatMessage({ id: 'untitled_dashboard' })
+        }`);
       });
     }
   }
@@ -541,10 +547,11 @@ class Dashboard extends Component {
 }
 
 Dashboard.propTypes = {
+  intl: intlShape,
   dispatch: PropTypes.func.isRequired,
   library: PropTypes.object.isRequired,
   location: PropTypes.object.isRequired,
   params: PropTypes.object,
 };
 
-export default connect(state => state)(Dashboard);
+export default connect(state => state)(injectIntl(Dashboard));

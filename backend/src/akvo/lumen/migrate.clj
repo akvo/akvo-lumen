@@ -85,9 +85,9 @@
                          amount-or-id))
 
 
-(defn rollback-tenants [db migrations amount-or-id]
+(defn rollback-tenants [db connection-uri-fn migrations amount-or-id]
   (doseq [tenant (all-tenants db)]
-    (do-rollback (ragtime-jdbc/sql-database {:connection-uri (:db_uri tenant)})
+    (do-rollback (ragtime-jdbc/sql-database {:connection-uri (connection-uri-fn tenant)})
                  migrations
                  amount-or-id)))
 
@@ -102,7 +102,9 @@
         tenant-migrations (:tenants migrations)
         tenant-manager-migrations (:tenant-manager migrations)
 
-        tenant-manager-db {:connection-uri (get-in system [:config :db :uri])}]
+        tenant-manager-db {:connection-uri (get-in system [:config :db :uri])}
+        tenant-connection-uri-fn #(aes/decrypt (get-in system [:config :config :encryption-key])
+                                       (:db_uri %))]
     (cond
       (= arg :tenant-manager)
       (do-rollback (ragtime-jdbc/sql-database tenant-manager-db)
@@ -110,11 +112,11 @@
                    (count tenant-manager-migrations))
 
       (number? arg)
-      (rollback-tenants tenant-manager-db
+      (rollback-tenants tenant-manager-db tenant-connection-uri-fn
                         (:tenants migrations)
                         arg)
 
       :else
-      (rollback-tenants tenant-manager-db
+      (rollback-tenants tenant-manager-db tenant-connection-uri-fn
                         (:tenants migrations)
                         (count (:tenants migrations))))))

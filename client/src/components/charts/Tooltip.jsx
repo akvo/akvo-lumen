@@ -1,19 +1,23 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+import { replaceLabelIfValueEmpty } from '../../utilities/chart';
 import LegendShape from './LegendShape';
 import './Tooltip.scss';
 
 const Tooltip = ({ items, ...rest }) => (items.length ? (
   <div className="tooltip" style={{ position: 'absolute', ...rest }}>
     <ul>
-      {items.map(({ color, key, value }, i) => (
-        <li key={key || i}>
-          {color && <LegendShape isActive={false} fill={color} />}
-          <span className="key">{key}</span>
-          {value && `: ${value}`}
-        </li>
-      ))}
+      {items.map(({ color, key, value }, i) => {
+        const label = replaceLabelIfValueEmpty(key);
+        return (
+          <li key={label || i}>
+            {color && <LegendShape isActive={false} fill={color} />}
+            <span className="key">{label}</span>
+            {value && `: ${value}`}
+          </li>
+        );
+      })}
     </ul>
   </div>
 ) : null);

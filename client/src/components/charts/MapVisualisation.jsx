@@ -205,19 +205,17 @@ const PopupContent = ({ data, singleMetadata, onImageLoad }) => {
           <h4>{getTitle(key)}</h4>
           <span>
             {isImage(data[key]) ?
-              <a
-                href={data[key]}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <div >
                 <div className="imageContainer">
                   <img
+                    className="noPointerEvents"
                     src={data[key]}
                     role="presentation"
                     onLoad={onImageLoad}
                   />
+                  <div className="suppressImageContextMenu" />
                 </div>
-              </a>
+              </div>
                   :
               <span>
                 {data[key] === null ? 'No data' : data[key]}

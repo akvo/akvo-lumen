@@ -101,7 +101,7 @@ function mergeDatasetsDescription(transformation, dependentDatasets) {
 
   if (sourceDataset == null) {
     // Show a simpler description if we haven't loaded the source dataset yet
-    return `Merged columns from dataset ${sourceDatasetId}`;
+    return <FormattedMessage id="merged_dataset" values={{ title: `dataset ${sourceDatasetId}` }} />;
   }
 
   const sourceColumns = sourceDataset.get('columns');
@@ -120,7 +120,7 @@ function mergeDatasetsDescription(transformation, dependentDatasets) {
 
   return (
     <div className="mergedColumnsInfo">
-      <p>Merged columns from <em>{sourceDatasetTitle}</em>:</p>
+      <FormattedMessage id="merged_dataset" values={{ title: sourceDatasetTitle }} />
       <ul className="mergedColumnTitles">
         {mergedColumnsTitles.map((title, idx) => <li key={idx}>{title}</li>)}
       </ul>
@@ -148,11 +148,30 @@ function transformationDescription(transformations, index, columns, dependentDat
     case 'core/change-datatype':
       return `${title} datatype to ${transformation.getIn(['args', 'newType'])}`;
     case 'core/sort-column':
-      return `${title} sorted ${transformation.getIn(['args', 'sortDirection'])}`;
+      return (
+        <FormattedMessage
+          id="sorted_column"
+          values={{ title, direction: transformation.getIn(['args', 'sortDirection']) }}
+        />
+      );
     case 'core/rename-column':
-      return `Renamed ${title} to ${transformation.getIn(['args', 'newColumnTitle'])}`;
+      return (
+        <FormattedMessage
+          id="renamed_column"
+          values={{ from: title, to: transformation.getIn(['args', 'newColumnTitle']) }}
+        />
+      );
+    case 'core/filter-column':
+      return (
+        <FormattedMessage
+          id="filter_column"
+          values={{ title: transformation.getIn(['args', 'columnTitle']) }}
+        />
+      );
     case 'core/delete-column':
-      return `Deleted ${title}`;
+      return <FormattedMessage id="deleted_column" values={{ title }} />;
+    case 'core/reverse-geocode':
+      return <FormattedMessage id="reverse_geocode" />;
     case 'core/combine':
       return combineTransformationDescription(transformations, index, columns);
     case 'core/derive':

@@ -1,5 +1,6 @@
 /* eslint-disable no-plusplus, import/no-extraneous-dependencies */
-import React from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { withKnobs, number, text, boolean, color } from '@storybook/addon-knobs/react';
@@ -40,7 +41,7 @@ const palette = generatePalette({ colors: rainbowColors });
 const generateData = ({ seriesCount, nodeCount, minVal, maxVal, labelLength }) => {
   const result = {
     series: [],
-    common: { data: [] },
+    common: { data: [], metadata: {} },
   };
 
   for (let s = 0; s < seriesCount; s++) {
@@ -64,8 +65,33 @@ const generateData = ({ seriesCount, nodeCount, minVal, maxVal, labelLength }) =
   return result;
 };
 
+class ContextProvider extends Component {
+  static childContextTypes = {
+    abbrNumber: PropTypes.func,
+  }
+
+  static propTypes = {
+    children: PropTypes.node,
+  }
+
+  getChildContext() {
+    return {
+      abbrNumber: val => val,
+    };
+  }
+
+  render() {
+    return this.props.children;
+  }
+}
+
 storiesOf('Charts', module)
   .addDecorator(withKnobs)
+  .addDecorator(story => (
+    <ContextProvider>
+      {story()}
+    </ContextProvider>
+  ))
 
   .add('PieChart', () => {
     const nodeCount = number('node count', 20);
@@ -139,10 +165,10 @@ storiesOf('Charts', module)
           width={number('props.width', 600)}
           height={number('props.height', 600)}
           opacity={number('props.opacity', 0.9)}
-          marginTop={number('props.marginTop', 0.1)}
-          marginRight={number('props.marginRight', 0.1)}
-          marginBottom={number('props.marginBottom', 0.1)}
-          marginLeft={number('props.marginLeft', 0.1)}
+          marginTop={number('props.marginTop', 70)}
+          marginRight={number('props.marginRight', 70)}
+          marginBottom={number('props.marginBottom', 70)}
+          marginLeft={number('props.marginLeft', 70)}
           grid={boolean('props.grid', true)}
           print={boolean('props.print', false)}
           interactive={boolean('props.interactive', true)}
@@ -188,10 +214,10 @@ storiesOf('Charts', module)
           onChangeVisualisationSpec={action('vis-spec-change')}
           width={number('props.width', 600)}
           height={number('props.height', 600)}
-          marginTop={number('props.marginTop', 0.1)}
-          marginRight={number('props.marginRight', 0.1)}
-          marginBottom={number('props.marginBottom', 0.15)}
-          marginLeft={number('props.marginLeft', 0.1)}
+          marginTop={number('props.marginTop', 20)}
+          marginRight={number('props.marginRight', 70)}
+          marginBottom={number('props.marginBottom', 120)}
+          marginLeft={number('props.marginLeft', 70)}
           grid={boolean('props.grid', true)}
           print={boolean('props.print', false)}
           interactive={boolean('props.interactive', true)}
@@ -238,16 +264,17 @@ storiesOf('Charts', module)
           width={number('props.width', 600)}
           height={number('props.height', 600)}
           padding={number('props.padding', 0.1)}
-          marginTop={number('props.marginTop', 0.1)}
-          marginRight={number('props.marginRight', 0.1)}
-          marginBottom={number('props.marginBottom', 0.2)}
-          marginLeft={number('props.marginLeft', 0.1)}
+          marginTop={number('props.marginTop', 20)}
+          marginRight={number('props.marginRight', 70)}
+          marginBottom={number('props.marginBottom', 120)}
+          marginLeft={number('props.marginLeft', 70)}
           grid={boolean('props.grid', true)}
           print={boolean('props.print', false)}
           interactive={boolean('props.interactive', true)}
           edit={boolean('props.edit', true)}
           legendVisible={boolean('props.legendVisible', false)}
           yAxisLabel={text('props.yAxisLabel', 'Y Axis')}
+          xAxisLabel={text('props.xAxisLabel', 'X Axis')}
         />
         <pre>
           <code>
@@ -286,10 +313,10 @@ storiesOf('Charts', module)
           onChangeVisualisationSpec={action('vis-spec-change')}
           width={number('props.width', 600)}
           height={number('props.height', 600)}
-          marginTop={number('props.marginTop', 0.1)}
-          marginRight={number('props.marginRight', 0.1)}
-          marginBottom={number('props.marginBottom', 0.2)}
-          marginLeft={number('props.marginLeft', 0.1)}
+          marginTop={number('props.marginTop', 20)}
+          marginRight={number('props.marginRight', 70)}
+          marginBottom={number('props.marginBottom', 120)}
+          marginLeft={number('props.marginLeft', 70)}
           grouped={boolean('props.grouped', false)}
           grid={boolean('props.grid', true)}
           print={boolean('props.print', false)}
