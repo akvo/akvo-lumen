@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 import leaflet from 'leaflet';
-import { isEqual, cloneDeep } from 'lodash';
+import { isEqual, cloneDeep, get } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import moment from 'moment';
 import leafletUtfGrid from '../../vendor/leaflet.utfgrid';
@@ -423,7 +423,7 @@ export default class MapVisualisation extends Component {
 
     const newSpec = nextProps.visualisation.spec || {};
 
-    if (newSpec.layers.length && !this.state.hasTrackedLayerTypes) {
+    if (get(newSpec, 'layers.length') && !this.state.hasTrackedLayerTypes) {
       this.setState({
         hasTrackedLayerTypes: true,
       }, () => {
@@ -434,7 +434,7 @@ export default class MapVisualisation extends Component {
     }
 
     // Add or update the windshaft tile layer if necessary
-    if (newSpec.layers.length === 0 && this.dataLayer) {
+    if (get(newSpec, 'layers.length') === 0 && this.dataLayer) {
       map.removeLayer(this.dataLayer);
       this.dataLayer = null;
     } else if (layerGroupId) {
