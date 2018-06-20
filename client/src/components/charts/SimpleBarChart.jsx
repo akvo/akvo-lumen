@@ -10,13 +10,13 @@ import { Portal } from 'react-portal';
 import merge from 'lodash/merge';
 import { GridRows } from '@vx/grid';
 
-import { heuristicRound, replaceLabelIfValueEmpty, calculateMargins } from '../../utilities/chart';
+import { heuristicRound, replaceLabelIfValueEmpty, calculateMargins, getLabelFontSize } from '../../utilities/chart';
 import Legend from './Legend';
 import ResponsiveWrapper from '../common/ResponsiveWrapper';
 import ColorPicker from '../common/ColorPicker';
 import ChartLayout from './ChartLayout';
 import Tooltip from './Tooltip';
-import { labelFont, MAX_FONT_SIZE } from '../../constants/chart';
+import { labelFont, MAX_FONT_SIZE, MIN_FONT_SIZE } from '../../constants/chart';
 
 const getDatum = (data, datum) => data.filter(({ key }) => key === datum)[0];
 
@@ -88,7 +88,7 @@ export default class SimpleBarChart extends Component {
 
   static defaultProps = {
     interactive: true,
-    marginLeft: 70,
+    marginLeft: 80,
     marginRight: 70,
     marginTop: 70,
     marginBottom: 60,
@@ -270,14 +270,8 @@ export default class SimpleBarChart extends Component {
     const dataType = series.metadata.type;
     const paddingBottom = getPaddingBottom(series.data, dataType);
     const dataCount = series.data.length;
-    let yAxisLabelSize = 10;
-    if ((yAxisLabel || '').length > 60) yAxisLabelSize = 7;
-    if ((yAxisLabel || '').length > 100) yAxisLabelSize = 5;
-    let xAxisLabelSize = 10;
-    if ((xAxisLabel || '').length > 60) xAxisLabelSize = 7;
-    if ((xAxisLabel || '').length > 100) xAxisLabelSize = 5;
-    const yAxisLabelSizeMultiplier = height / 600;
-    const xAxisLabelSizeMultiplier = width / 600;
+    const axisLabelFontSize =
+      getLabelFontSize(yAxisLabel, xAxisLabel, MAX_FONT_SIZE, MIN_FONT_SIZE, height, width);
 
     return (
       <ChartLayout
@@ -456,9 +450,10 @@ export default class SimpleBarChart extends Component {
                     tickTextFill={'#1b1a1e'}
                     numTicks={yAxisTicks}
                     labelProps={{
-                      fontSize: Math.min(yAxisLabelSize * yAxisLabelSizeMultiplier, MAX_FONT_SIZE),
+                      fontSize: axisLabelFontSize,
                       textAnchor: 'middle',
                     }}
+                    labelOffset={44}
                     tickFormat={tickFormat}
                   />
 
@@ -466,7 +461,7 @@ export default class SimpleBarChart extends Component {
                     transform={[
                       { type: 'translate', value: [Math.floor(this.props.width / 2), this.props.height - 10] },
                     ]}
-                    fontSize={Math.min(xAxisLabelSize * xAxisLabelSizeMultiplier, MAX_FONT_SIZE)}
+                    fontSize={axisLabelFontSize}
                     textAnchor="middle"
                     fontFamily="Arial"
                   >

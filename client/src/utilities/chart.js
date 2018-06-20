@@ -644,3 +644,13 @@ export function calculateMargins({ top, right, bottom, left }, { width, height }
     left: isRatio(left) ? left * width : left,
   };
 }
+
+export const getLabelFontSize = (xLabel = '', yLabel = '', maxFont, minFont, height, width) => {
+  const longest = Math.max(xLabel.length, yLabel.length);
+  const smallChartSize = Math.min(height, width) < 700;
+
+  if (longest > 60 && smallChartSize) {
+    return minFont;
+  }
+  return maxFont;
+};

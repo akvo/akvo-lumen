@@ -13,7 +13,8 @@ import ColorPicker from '../common/ColorPicker';
 import ResponsiveWrapper from '../common/ResponsiveWrapper';
 import Tooltip from './Tooltip';
 import ChartLayout from './ChartLayout';
-import { heuristicRound, calculateMargins } from '../../utilities/chart';
+import { heuristicRound, calculateMargins, getLabelFontSize } from '../../utilities/chart';
+import { MAX_FONT_SIZE, MIN_FONT_SIZE } from '../../constants/chart';
 
 const startAxisFromZero = (axisExtent, type) => {
   // Returns an educated guess on if axis should start from zero or not
@@ -83,6 +84,10 @@ export default class ScatterChart extends Component {
     edit: false,
     grid: true,
     interactive: true,
+  }
+
+  static contextTypes = {
+    abbrNumber: PropTypes.func,
   }
 
   state = {
@@ -205,6 +210,17 @@ export default class ScatterChart extends Component {
     const series = this.getData();
 
     if (!series) return null;
+
+    const axisLabelFontSize =
+      getLabelFontSize(yAxisLabel, xAxisLabel, MAX_FONT_SIZE, MIN_FONT_SIZE, height, width);
+
+    const tickFormat = (value) => {
+      const cutoff = 10000;
+      if (cutoff >= 10000) {
+        return this.context.abbrNumber(value);
+      }
+      return value;
+    };
 
     return (
       <ChartLayout
@@ -345,15 +361,32 @@ export default class ScatterChart extends Component {
                     scale={yScale}
                     left={margins.left}
                     label={yAxisLabel || ''}
+                    labelProps={{
+                      dy: margins.top * 0.5,
+                      textAnchor: 'middle',
+                      fontFamily: 'Arial',
+                      fontSize: axisLabelFontSize,
+                      fill: 'black',
+                    }}
+                    labelOffset={44}
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}
                     numTicks={yAxisTicks}
+                    tickFormat={tickFormat}
                   />
 
                   <AxisBottom
                     scale={xScale}
                     top={dimensions.height - margins.bottom}
                     label={xAxisLabel || ''}
+                    labelProps={{
+                      dx: margins.left * 0.5,
+                      dy: margins.bottom - 50,
+                      textAnchor: 'middle',
+                      fontFamily: 'Arial',
+                      fontSize: axisLabelFontSize,
+                      fill: 'black',
+                    }}
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}
                     numTicks={xAxisTicks}

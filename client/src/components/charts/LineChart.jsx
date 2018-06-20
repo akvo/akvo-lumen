@@ -11,7 +11,8 @@ import { GridRows, GridColumns } from '@vx/grid';
 import itsSet from 'its-set';
 
 import { sortChronologically, filterNullData } from '../../utilities/utils';
-import { heuristicRound, calculateMargins } from '../../utilities/chart';
+import { heuristicRound, calculateMargins, getLabelFontSize } from '../../utilities/chart';
+import { MAX_FONT_SIZE, MIN_FONT_SIZE } from '../../constants/chart';
 import ResponsiveWrapper from '../common/ResponsiveWrapper';
 import ColorPicker from '../common/ColorPicker';
 import ChartLayout from './ChartLayout';
@@ -173,6 +174,10 @@ export default class LineChart extends Component {
     if (!series) return null;
 
     series.data = filterNullData(series.data);
+
+    const axisLabelFontSize =
+      getLabelFontSize(yAxisLabel, xAxisLabel, MAX_FONT_SIZE, MIN_FONT_SIZE, height, width);
+
 
     return (
       <ChartLayout
@@ -354,7 +359,7 @@ export default class LineChart extends Component {
                       dy: margins.top * 0.5,
                       textAnchor: 'middle',
                       fontFamily: 'Arial',
-                      fontSize: 10,
+                      fontSize: axisLabelFontSize,
                       fill: 'black',
                     }}
                   />
@@ -368,7 +373,7 @@ export default class LineChart extends Component {
                       dy: margins.bottom - 50,
                       textAnchor: 'middle',
                       fontFamily: 'Arial',
-                      fontSize: 10,
+                      fontSize: axisLabelFontSize,
                       fill: 'black',
                     }}
                     stroke={'#1b1a1e'}
