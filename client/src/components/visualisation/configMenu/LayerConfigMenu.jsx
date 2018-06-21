@@ -789,7 +789,7 @@ class LayerConfigMenu extends Component {
         <TabMenu
           activeTab={this.state.activeTab}
           onChangeTab={tab => this.setState({ activeTab: tab })}
-          tabs={['data', 'legend', 'popup', 'theme']}
+          tabs={['data', 'legend', 'pop-up', 'theme']}
         />
         <div className="tabContent">
           {this.getTabContent(columnOptions)}
