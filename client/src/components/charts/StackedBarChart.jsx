@@ -55,7 +55,7 @@ export default class StackedBarChart extends Component {
     marginLeft: 70,
     marginRight: 70,
     marginTop: 20,
-    marginBottom: 20,
+    marginBottom: 80,
     legendVisible: true,
     edit: false,
     padding: 0.1,
@@ -180,6 +180,10 @@ export default class StackedBarChart extends Component {
       (nodeCount >= 200 && index % 10 !== 0) ||
       (nodeCount < 200 && nodeCount > 40 && index % 5 !== 0)
     ) return null;
+    let labelText = String(replaceLabelIfValueEmpty(node.key));
+    labelText = labelText.length <= 16 ?
+      labelText : `${labelText.substring(0, 13)}…`;
+
     const labelX = x + (nodeWidth / 2);
     const labelY = y + 10;
     return (
@@ -192,7 +196,7 @@ export default class StackedBarChart extends Component {
         {...labelFont}
         fontWeight={get(this.state, 'hoveredNode.valueKey') === node.key ? 700 : 400}
       >
-        {replaceLabelIfValueEmpty(node.key)}
+        {labelText}
       </Text>
     );
   }
@@ -469,6 +473,7 @@ export default class StackedBarChart extends Component {
                       fontSize: axisLabelFontSize,
                       textAnchor: 'middle',
                     }}
+                    labelOffset={44}
                     tickFormat={tickFormat}
                   />
 
