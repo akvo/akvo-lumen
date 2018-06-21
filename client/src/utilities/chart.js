@@ -644,3 +644,25 @@ export function calculateMargins({ top, right, bottom, left }, { width, height }
     left: isRatio(left) ? left * width : left,
   };
 }
+
+export const getLabelFontSize = (xLabel = '', yLabel = '', maxFont, minFont, height, width) => {
+  const longest = Math.max(xLabel.length, yLabel.length);
+  const smallestDimension = Math.min(height, width);
+  const smallChartSize = smallestDimension < 400;
+  const mediumChartSize = smallestDimension > 400 && smallestDimension < 700;
+  const mediumFont = Math.floor(0.5 * (minFont + maxFont));
+
+  if (longest > 45 && smallChartSize) {
+    return minFont;
+  }
+
+  if (longest > 60 && mediumChartSize) {
+    return minFont;
+  }
+
+  if (longest > 45 && mediumChartSize) {
+    return mediumFont;
+  }
+
+  return maxFont;
+};
