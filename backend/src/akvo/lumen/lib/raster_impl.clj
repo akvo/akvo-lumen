@@ -8,6 +8,7 @@
             [clojure.java.io :as io]
             [clojure.java.jdbc :as jdbc]
             [clojure.java.shell :as shell]
+            [clojure.set :refer (rename-keys)]
             [clojure.string :as str]
             [clojure.tools.logging :as log]
             [hugsql.core :as hugsql])
@@ -79,13 +80,13 @@
 
 (defn do-import [conn config claims data-source job-execution-id]
   (try
-    (let [source (get data-source "source")
-          file (import/get-path source (:file-upload-path config))
-          path (.getAbsolutePath (.getParentFile file))
-          filename (.getName file)
-          table-name (util/gen-table-name "raster")
+    (let [source      (get data-source "source")
+          file        (import/get-path source (:file-upload-path config))
+          path        (.getAbsolutePath (.getParentFile file))
+          filename    (.getName file)
+          table-name  (util/gen-table-name "raster")
           raster-info (get-raster-info path filename)
-          prj-file (project-and-compress path filename)]
+          prj-file    (project-and-compress path filename)]
       (create-raster-table conn {:table-name table-name})
       (create-raster-index conn {:table-name table-name})
       (with-open [rdr (io/reader (get-raster-data-as-sql path prj-file table-name))]
@@ -97,22 +98,23 @@
                            {:table-name table-name}
                            {}
                            {:transaction? false})
-      (let [stats (raster-stats conn {:table-name table-name})
+      (let [stats    (raster-stats conn {:table-name table-name})
             metadata (merge {:bbox (bbox raster-info)}
                             stats)]
-        (insert-raster conn {:id (util/squuid)
-                             :title (data-source "name")
-                             :description (get-in data-source ["source" "fileName"])
+        (insert-raster conn {:id               (util/squuid)
+                             :title            (data-source "name")
+                             :description      (get-in data-source ["source" "fileName"])
                              :job-execution-id job-execution-id
-                             :metadata (doto (PGobject.)
-                                         (.setType "jsonb")
-                                         (.setValue (json/generate-string metadata)))
-                             :raster-table table-name
-                             :author claims})
+                             :metadata         (doto (PGobject.)
+                                                 (.setType "jsonb")
+                                                 (.setValue (json/generate-string metadata)))
+                             :raster-table     table-name
+                             :author           claims
+                             :source           source})
         (update-successful-job-execution conn {:id job-execution-id})))
     (catch Throwable e
       (log/errorf e "Error importing raster: %s" (.getMessage e))
-      (update-failed-job-execution conn {:id job-execution-id
+      (update-failed-job-execution conn {:id     job-execution-id
                                          :reason (.getMessage e)})
       (throw e))))
 
@@ -132,12 +134,10 @@
 (defn fetch [conn id]
   (if-let [raster (raster-by-id conn {:id id})]
     (lib/ok
-     {:id id
-      :name (:title raster)
-      :modified (:modified raster)
-      :created (:created raster)
-      :status "OK"
-      :raster_table (:raster_table raster)})
+     (-> raster
+         (select-keys [:author :created :id :modified :raster_table :source :title])
+         (rename-keys {:title :name})
+         (assoc :status "OK")))
     (lib/not-found {:error "Not found"})))
 
 

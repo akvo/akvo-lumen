@@ -1,7 +1,7 @@
 -- :name all-rasters :? :*
 WITH
 failed_imports AS (
-  SELECT j.id, d.spec->>'name' AS name, j.error_log->>0 AS error_log, j.status, j.created, j.modified, '{}'::jsonb AS metadata
+  SELECT j.id, d.spec->>'name' AS name, j.error_log->>0 AS error_log, j.status, j.created, j.modified, '{}'::jsonb AS metadata, '{}'::jsonb AS author, '{}'::jsonb AS source 
     FROM data_source d, job_execution j
    WHERE j.data_source_id = d.id
      AND j.type = 'IMPORT'
@@ -9,26 +9,26 @@ failed_imports AS (
      AND d.spec->'source'->>'kind' = 'GEOTIFF'
 ),
 pending_imports AS (
-  SELECT j.id, d.spec->>'name' AS name, j.status, j.created, j.modified, '{}'::jsonb AS metadata
+  SELECT j.id, d.spec->>'name' AS name, j.status, j.created, j.modified, '{}'::jsonb AS metadata, '{}'::jsonb AS author, '{}'::jsonb AS source 
     FROM data_source d, job_execution j
    WHERE j.data_source_id = d.id
      AND j.type = 'IMPORT'
      AND j.status = 'PENDING'
      AND d.spec->'source'->>'kind' = 'GEOTIFF'
 )
-SELECT id, name, error_log as reason, status, modified, created, metadata, '{}'::jsonb
+SELECT id, name, error_log as reason, status, created, modified, metadata, '{}'::jsonb AS author, '{}'::jsonb AS source
   FROM failed_imports
  UNION
-SELECT id, name, NULL, status, modified, created, metadata, '{}'::jsonb
+SELECT id, name, NULL, status, created, modified, metadata, '{}'::jsonb AS author, '{}'::jsonb AS source
   FROM pending_imports
  UNION
-SELECT id, title, NULL, 'OK', modified, created, metadata, author
+SELECT id, title, NULL, 'OK', created, modified, metadata, author, source
   FROM raster_dataset;
 
 -- :name insert-raster :! :n
 -- :doc Insert new raster dataset
-INSERT INTO raster_dataset (id, title, description, job_execution_id, raster_table, metadata, author)
-VALUES (:id, :title, :description, :job-execution-id, :raster-table, :metadata, :author);
+INSERT INTO raster_dataset (id, title, description, job_execution_id, raster_table, metadata, author, source)
+VALUES (:id, :title, :description, :job-execution-id, :raster-table, :metadata, :author, :source);
 
 -- :name create-raster-table :!
 -- :doc Creates a raster table
