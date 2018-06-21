@@ -12,16 +12,16 @@
       (GET "/" _
         (dashboard/all tenant-conn))
 
-      (POST "/" {:keys [body]}
-        (dashboard/create tenant-conn body))
+      (POST "/" {:keys [body jwt-claims]}
+        (dashboard/create tenant-conn body jwt-claims))
 
       (context "/:id" [id]
 
         (GET "/" _
           (dashboard/fetch tenant-conn id))
 
-        (PUT "/" {:keys [body]}
-          (dashboard/upsert tenant-conn id body))
+        (PUT "/" {:keys [body jwt-claims]}
+          (dashboard/upsert tenant-conn id body jwt-claims))
 
         (DELETE "/" _
          (dashboard/delete tenant-conn id))))))

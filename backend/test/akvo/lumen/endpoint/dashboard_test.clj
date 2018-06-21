@@ -73,7 +73,7 @@
   (testing "Dashboard"
     (let [v-id               (-> (all-visualisations *tenant-conn*) first :id)
           d-spec             (dashboard-spec v-id)
-          {dashboard-id :id} (variant/value (dashboard/create *tenant-conn* d-spec))]
+          {dashboard-id :id} (variant/value (dashboard/create *tenant-conn* d-spec {}))]
       (is (not (nil? dashboard-id)))
 
       (testing "Get dashboard"
@@ -98,7 +98,7 @@
                                      "Updated text entity")
                            (assoc-in ["layout" "text-1" "h"] 1))]
 
-          (dashboard/upsert *tenant-conn* dashboard-id new-spec)
+          (dashboard/upsert *tenant-conn* dashboard-id new-spec {})
           (let [updated-d (variant/value (dashboard/fetch *tenant-conn* dashboard-id))]
             (is (= (:title updated-d)
                    "My updated dashboard"))

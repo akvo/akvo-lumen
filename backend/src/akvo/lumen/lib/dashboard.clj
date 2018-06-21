@@ -9,8 +9,8 @@
 
 (defn create
   "Creates a new dashboard."
-  [tenant-conn spec]
-  (impl/create tenant-conn spec))
+  [tenant-conn spec claims]
+  (impl/create tenant-conn spec claims))
 
 (defn fetch
   "Get a single dashboard."
@@ -19,8 +19,8 @@
 
 (defn upsert
   "Update or insert a dashboard."
-  [tenant-conn id spec]
-  (impl/upsert tenant-conn id spec))
+  [tenant-conn id spec claims]
+  (impl/upsert tenant-conn id spec claims))
 
 (defn delete
   "Delete dashboard."

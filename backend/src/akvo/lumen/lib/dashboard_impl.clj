@@ -52,7 +52,7 @@
 (defn build-dashboard-by-id
   ""
   [dashboard dvs]
-  (assoc (select-keys dashboard [:id :title :created :modified])
+  (assoc (select-keys dashboard [:author :created :id :modified :title])
          :entities (all-entities (get-in dashboard [:spec "entities"]) dvs)
          :layout (all-layouts (get-in dashboard [:spec "layout"]) dvs)
          :type "dashboard"
@@ -72,7 +72,7 @@
   Insert new dashboard and pass all text entites into the dashboard.spec. Then
   for each visualiation included in the dashboard insert an entry into
   dashboard_visualisation with it's layout data."
-  [tenant-conn spec]
+  [tenant-conn spec claims]
   (if (dashboard-keys-match? spec)
     (let [dashboard-id (str (squuid))
           parted-spec (part-by-entity-type spec)
@@ -80,7 +80,8 @@
       (jdbc/with-db-transaction [tx tenant-conn]
         (insert-dashboard tx {:id dashboard-id
                               :title (get spec "title")
-                              :spec (:texts parted-spec)})
+                              :spec (:texts parted-spec)
+                              :author claims})
         (doseq [visualisation (get-in parted-spec [:visualisations :entities])]
           (let [visualisation-id (get visualisation "id")
                 layout (first (filter #(= visualisation-id (get % "i"))
@@ -105,13 +106,14 @@
   3. Remove old dashboard_visualisations
   4. Add new dashboard_visualisations
   "
-  [tenant-conn id spec]
+  [tenant-conn id spec claims]
   (let [{:keys [texts visualisations]} (part-by-entity-type spec)
         visualisations-layouts (:layout visualisations)]
     (jdbc/with-db-transaction [tx tenant-conn]
       (update-dashboard tx {:id id
                             :title (get spec "title")
-                            :spec texts})
+                            :spec texts
+                            :author claims})
       (delete-dashboard_visualisation tenant-conn {:dashboard-id id})
       (doseq [visualisation-entity (:entities visualisations)]
         (let [visualisation-id (get visualisation-entity "id")

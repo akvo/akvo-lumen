@@ -109,7 +109,7 @@
                               :spec       {}
                               :author     {}})
   (dashboard/create conn (dashboard-spec (:visualisation-id spec)
-                                         (:visualisation2-id spec))))
+                                         (:visualisation2-id spec)) {}))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Test data
