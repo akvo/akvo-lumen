@@ -40,18 +40,6 @@ DELETE FROM dataset WHERE id=:id;
 -- :doc update dataset meta
 UPDATE dataset SET title = :title WHERE id = :id;
 
--- :name update-dataset-data :! :n
--- :doc Update dataset with data
-UPDATE datasets
-SET d = :d::jsonb, status = :status
-WHERE id = :id;
-
--- :name update-dataset-name :! :n
--- :doc Update dataset name
-UPDATE datasets
-SET "name" = :name
-WHERE id = :id;
-
 -- :name dataset-by-id :? :1
 SELECT dataset_version.table_name AS "table-name",
        dataset.title,
