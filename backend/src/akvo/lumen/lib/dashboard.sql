@@ -14,12 +14,12 @@ RETURNING *;
 INSERT INTO dashboard (id, title, spec, author)
 VALUES (:id, :title, :spec::jsonb, :author)
 ON CONFLICT (id)
-DO UPDATE SET id=:id, title=:title, spec=:spec::jsonb, author=:author
+DO UPDATE SET id=:id, title=:title, spec=:spec::jsonb
 RETURNING *;
 
 -- :name update-dashboard :<!
 UPDATE dashboard
-SET title = :title, spec = :spec::jsonb, author = :author
+SET title = :title, spec = :spec::jsonb
 WHERE id = :id
 RETURNING *;
 

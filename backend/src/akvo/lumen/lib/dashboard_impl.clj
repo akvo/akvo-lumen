@@ -106,14 +106,13 @@
   3. Remove old dashboard_visualisations
   4. Add new dashboard_visualisations
   "
-  [tenant-conn id spec claims]
+  [tenant-conn id spec]
   (let [{:keys [texts visualisations]} (part-by-entity-type spec)
         visualisations-layouts (:layout visualisations)]
     (jdbc/with-db-transaction [tx tenant-conn]
       (update-dashboard tx {:id id
                             :title (get spec "title")
-                            :spec texts
-                            :author claims})
+                            :spec texts})
       (delete-dashboard_visualisation tenant-conn {:dashboard-id id})
       (doseq [visualisation-entity (:entities visualisations)]
         (let [visualisation-id (get visualisation-entity "id")

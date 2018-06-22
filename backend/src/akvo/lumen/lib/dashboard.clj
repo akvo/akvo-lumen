@@ -19,8 +19,8 @@
 
 (defn upsert
   "Update or insert a dashboard."
-  [tenant-conn id spec claims]
-  (impl/upsert tenant-conn id spec claims))
+  [tenant-conn id spec]
+  (impl/upsert tenant-conn id spec))
 
 (defn delete
   "Delete dashboard."

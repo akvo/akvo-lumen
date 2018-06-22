@@ -20,8 +20,8 @@
         (GET "/" _
           (dashboard/fetch tenant-conn id))
 
-        (PUT "/" {:keys [body jwt-claims]}
-          (dashboard/upsert tenant-conn id body jwt-claims))
+        (PUT "/" {:keys [body]}
+          (dashboard/upsert tenant-conn id body))
 
         (DELETE "/" _
          (dashboard/delete tenant-conn id))))))
