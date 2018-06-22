@@ -18,12 +18,13 @@
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
 (hugsql/def-db-fns "akvo/lumen/transformation.sql")
 
-(defn successful-import [conn job-execution-id table-name columns spec]
+(defn successful-import [conn job-execution-id table-name columns spec claims]
   (let [dataset-id (util/squuid)
         imported-table-name (util/gen-table-name "imported")]
     (insert-dataset conn {:id dataset-id
                           :title (get spec "name") ;; TODO Consistent naming. Change on client side?
-                          :description (get spec "description" "")})
+                          :description (get spec "description" "")
+                          :author claims})
     (clone-data-table conn
                       {:from-table table-name
                        :to-table imported-table-name}
@@ -72,7 +73,7 @@
 (defn do-import
   "Import runs within a future and since this is not taking part of ring
   request / response cycle we need to make sure to capture errors."
-  [conn {:keys [sentry-backend-dsn] :as config} error-tracker job-execution-id]
+  [conn {:keys [sentry-backend-dsn] :as config} error-tracker job-execution-id claims]
   (let [table-name (util/gen-table-name "ds")]
     (try
       (let [spec (:spec (data-source-spec-by-job-execution-id conn {:job-execution-id job-execution-id}))]
@@ -82,7 +83,7 @@
             (import/add-key-constraints conn table-name columns)
             (doseq [record (map import/coerce-to-sql (import/records importer))]
               (jdbc/insert! conn table-name record))
-            (successful-import conn job-execution-id table-name columns spec))))
+            (successful-import conn job-execution-id table-name columns spec claims))))
       (catch Throwable e
         (failed-import conn job-execution-id (.getMessage e) table-name)
         (log/error e)
@@ -98,6 +99,6 @@
                                      :spec (json/generate-string data-source)})
     (insert-job-execution tenant-conn {:id job-execution-id
                                        :data-source-id data-source-id})
-    (future (do-import tenant-conn config error-tracker job-execution-id))
+    (future (do-import tenant-conn config error-tracker job-execution-id claims))
     (lib/ok {"importId" job-execution-id
              "kind" kind})))
