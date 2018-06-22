@@ -27,6 +27,11 @@ SELECT id, name, NULL, status, modified, created
 SELECT id, title, NULL, 'OK', modified, created
   FROM dataset;
 
+-- :name insert-dataset :! :n
+-- :doc Insert new dataset
+INSERT INTO dataset(id, title, description)
+VALUES (:id, :title, :description);
+
 -- :name delete-dataset-by-id :! :n
 -- :doc delete dataset
 DELETE FROM dataset WHERE id=:id;
