@@ -98,7 +98,7 @@
                                      "Updated text entity")
                            (assoc-in ["layout" "text-1" "h"] 1))]
 
-          (dashboard/upsert *tenant-conn* dashboard-id new-spec {})
+          (dashboard/upsert *tenant-conn* dashboard-id new-spec)
           (let [updated-d (variant/value (dashboard/fetch *tenant-conn* dashboard-id))]
             (is (= (:title updated-d)
                    "My updated dashboard"))

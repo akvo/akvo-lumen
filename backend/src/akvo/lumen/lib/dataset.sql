@@ -3,7 +3,7 @@
 WITH
 failed_imports AS (
   --TODO name->title
-  SELECT j.id, d.spec->>'name' AS name, j.error_log->>0 AS error_log, j.status, j.created, j.modified, '{}'::jsonb AS author
+  SELECT j.id, d.spec->>'name' AS name, j.error_log->>0 AS error_log, j.status, j.created, j.modified, '{}'::jsonb AS author, '{}'::jsonb AS source
     FROM data_source d, job_execution j
    WHERE j.data_source_id = d.id
      AND j.type = 'IMPORT'
@@ -11,26 +11,26 @@ failed_imports AS (
      AND d.spec->'source'->>'kind' != 'GEOTIFF'
 ),
 pending_imports AS (
-  SELECT j.id, d.spec->>'name' AS name, j.status, j.created, j.modified, '{}'::jsonb AS author
+  SELECT j.id, d.spec->>'name' AS name, j.status, j.created, j.modified, '{}'::jsonb AS author, '{}'::jsonb AS source
     FROM data_source d, job_execution j
    WHERE j.data_source_id = d.id
      AND j.type = 'IMPORT'
      AND j.status = 'PENDING'
      AND d.spec->'source'->>'kind' != 'GEOTIFF'
 )
-SELECT id, name, error_log as reason, status, modified, created, '{}'::jsonb AS author
+SELECT id, name, error_log as reason, status, modified, created, '{}'::jsonb AS author, '{}'::jsonb AS source
   FROM failed_imports
  UNION
-SELECT id, name, NULL, status, modified, created, '{}'::jsonb AS author
+SELECT id, name, NULL, status, modified, created, '{}'::jsonb AS author, '{}'::jsonb AS source
   FROM pending_imports
  UNION
-SELECT id, title, NULL, 'OK', modified, created, author
+SELECT id, title, NULL, 'OK', modified, created, author, source
   FROM dataset;
 
 -- :name insert-dataset :! :n
 -- :doc Insert new dataset
-INSERT INTO dataset(id, title, description, author)
-VALUES (:id, :title, :description, :author);
+INSERT INTO dataset(id, title, description, author, source)
+VALUES (:id, :title, :description, :author, :source);
 
 -- :name delete-dataset-by-id :! :n
 -- :doc delete dataset
@@ -47,6 +47,7 @@ SELECT dataset_version.table_name AS "table-name",
        dataset.modified,
        dataset.id,
        dataset.author,
+       dataset.source,
        dataset_version.created AS "updated",
        dataset_version.columns,
        dataset_version.transformations
