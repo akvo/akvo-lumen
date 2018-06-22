@@ -34,12 +34,10 @@ services:
    volumes:
       - ./postgres/provision:/pg-certs
  fe-e2e-tests:
-   image: akvo-lumen-backend-dev:develop
    build: client/e2e-test
    volumes:
       - ./client/e2e-test:/app
-      - ~/.cache:/home/akvo/.cache
-      - ~/.npm:/home/akvo/.npm
+      - /app/node_modules
    environment:
       - LUMEN_URL=http://t1.lumen.local:3030/
       - LUMEN_USER=jerome

@@ -1,5 +1,4 @@
 FROM cypress/base:8
-RUN npm install npm -g
 
 RUN set -ex; \
     apt-get update && apt-get install -y --no-install-recommends \
@@ -8,4 +7,7 @@ RUN set -ex; \
     useradd -d /home/akvo -m -s /bin/bash akvo
 
 WORKDIR /app
+
+RUN npm i cypress
+
 CMD ./run.sh
