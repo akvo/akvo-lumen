@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 import LayerMenuItem from './LayerMenuItem';
 
 require('./LayerMenu.scss');
@@ -30,7 +31,9 @@ export default class LayerMenu extends Component {
           <span
             className="titleContainer"
           >
-            <h3>Layers</h3>
+            <h3>
+              <FormattedMessage id="layers" />
+            </h3>
           </span>
           <span
             className="buttonContainer"

@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
 import EntityTypeHeader from '../entity-editor/EntityTypeHeader';
 
-export default class VisualisationHeader extends Component {
+class VisualisationHeader extends Component {
 
   constructor() {
     super();
@@ -63,6 +63,7 @@ export default class VisualisationHeader extends Component {
       isUnsavedChanges,
       savingFailed,
       timeToNextSave,
+      intl,
     } = this.props;
 
     const actionButtons = this.getActionButtons(isUnsavedChanges);
@@ -85,7 +86,7 @@ export default class VisualisationHeader extends Component {
 
     return (
       <EntityTypeHeader
-        title={visualisation.name || 'Untitled visualisation'}
+        title={visualisation.name || intl.formatMessage({ id: 'untitled_visualisation' })}
         onChangeTitle={onChangeTitle}
         onBeginEditTitle={onBeginEditTitle}
         saveStatusId={saveStatusId}
@@ -98,6 +99,7 @@ export default class VisualisationHeader extends Component {
 }
 
 VisualisationHeader.propTypes = {
+  intl: intlShape,
   isUnsavedChanges: PropTypes.bool,
   savingFailed: PropTypes.bool,
   timeToNextSave: PropTypes.number,
@@ -109,3 +111,5 @@ VisualisationHeader.propTypes = {
   onChangeTitle: PropTypes.func,
   onBeginEditTitle: PropTypes.func,
 };
+
+export default injectIntl(VisualisationHeader);

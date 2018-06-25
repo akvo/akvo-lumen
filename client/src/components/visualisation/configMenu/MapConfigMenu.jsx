@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
 import VisualisationTypeMenu from '../VisualisationTypeMenu';
 import LayerMenu from './LayerMenu';
 import LayerConfigMenu from './LayerConfigMenu';
 import ButtonRowInput from './ButtonRowInput';
 import mapLayerSpecTemplate from '../../../containers/Visualisation/mapLayerSpecTemplate';
+import { trackEvent } from '../../../utilities/analytics';
 
 require('./MapConfigMenu.scss');
 
@@ -33,7 +34,7 @@ const applyAutomaticSpecChanges = (value) => {
   return newValue;
 };
 
-export default class MapConfigMenu extends Component {
+class MapConfigMenu extends Component {
 
   constructor() {
     super();
@@ -77,10 +78,14 @@ export default class MapConfigMenu extends Component {
   }
 
   handleAddMapLayer() {
-    const title = `Untitled Layer ${this.props.visualisation.spec.layers.length + 1}`;
-    const layers = this.props.visualisation.spec.layers.slice();
-    layers.push(Object.assign({}, mapLayerSpecTemplate, { title }));
-    this.props.onChangeSpec({ layers });
+    const { intl, visualisation, onChangeSpec } = this.props;
+    const title = intl.formatMessage(
+      { id: 'untitled_layer' },
+      { count: visualisation.spec.layers.length + 1 }
+    );
+    const layers = visualisation.spec.layers.slice();
+    layers.push({ ...mapLayerSpecTemplate, title });
+    onChangeSpec({ layers });
   }
 
   handleDeleteMapLayer(layerIndex) {
@@ -96,6 +101,10 @@ export default class MapConfigMenu extends Component {
     const clonedLayer = Object.assign({}, this.props.visualisation.spec.layers[layerIndex], value);
     const layers = this.props.visualisation.spec.layers.map(item => item);
     layers[layerIndex] = clonedLayer;
+
+    if (userChange.layerType) {
+      trackEvent('Selected map layer type', userChange.layerType);
+    }
 
     if (Object.keys(value).indexOf('datasetId') > -1) {
       const { datasetId } = value;
@@ -158,7 +167,7 @@ export default class MapConfigMenu extends Component {
                     value: item,
                   }))}
                   selected={visualisation.spec.baseLayer}
-                  label="Base map"
+                  label={<FormattedMessage id="base_map" />}
                   onChange={baseLayer => onChangeSpec({ baseLayer })}
                 />
               </div>
@@ -184,6 +193,7 @@ export default class MapConfigMenu extends Component {
 }
 
 MapConfigMenu.propTypes = {
+  intl: intlShape,
   visualisation: PropTypes.object.isRequired,
   metadata: PropTypes.object,
   datasets: PropTypes.object.isRequired,
@@ -197,3 +207,5 @@ MapConfigMenu.propTypes = {
   datasetOptions: PropTypes.array.isRequired,
   loadDataset: PropTypes.func.isRequired,
 };
+
+export default injectIntl(MapConfigMenu);

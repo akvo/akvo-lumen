@@ -8,6 +8,7 @@ import { fetchDataset } from '../actions/dataset';
 import { showNotification } from '../actions/notification';
 import MergeTransformation from '../components/transformation/MergeTransformation';
 import ReverseGeocodeTransformation from '../components/transformation/ReverseGeocodeTransformation';
+import { trackEvent } from '../utilities/analytics';
 
 const transformationComponent = {
   merge: MergeTransformation,
@@ -30,6 +31,7 @@ class Transformation extends Component {
   }
 
   handleApplyTransformation(transformation) {
+    trackEvent('Transform dataset', transformation.op);
     const { dispatch, datasetId, router } = this.props;
     this.setState({ transforming: true });
     dispatch(showNotification('info', 'Applying transformation...'));

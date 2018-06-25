@@ -15,6 +15,7 @@ import { deleteDashboard } from '../actions/dashboard';
 import { deleteRaster } from '../actions/raster';
 import { editCollection, addEntitiesToCollection } from '../actions/collection';
 import * as entity from '../domain/entity';
+import { trackPageView } from '../utilities/analytics';
 
 require('./Library.scss');
 
@@ -70,6 +71,7 @@ class Library extends Component {
   }
 
   componentDidMount() {
+    trackPageView('Library');
     this.props.dispatch(fetchLibrary());
   }
 
@@ -272,7 +274,7 @@ class Library extends Component {
           }}
           onCreate={(type) => {
             const { params } = this.props;
-            const meta = { collectionId: params.collectionId };
+            const meta = { collectionId: params.collectionId, from: 'library' };
             if (type === 'dataset') {
               // Data set creation is handled in a modal
               dispatch(showModal('create-dataset', meta));

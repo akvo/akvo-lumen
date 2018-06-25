@@ -11,6 +11,7 @@ import { getTransformations, getRows, getColumns } from '../domain/dataset';
 import * as api from '../api';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { SAVE_COUNTDOWN_INTERVAL, SAVE_INITIAL_TIMEOUT } from '../constants/time';
+import { trackEvent, trackPageView } from '../utilities/analytics';
 import NavigationPrompt from '../components/common/NavigationPrompt';
 
 require('../components/dataset/Dataset.scss');
@@ -43,6 +44,8 @@ class Dataset extends Component {
 
     this.isMountedFlag = true;
 
+    this.handleTrackPageView(this.props);
+
     if (dataset == null || dataset.get('rows') == null) {
       dispatch(fetchDataset(datasetId));
     }
@@ -60,6 +63,10 @@ class Dataset extends Component {
         },
       });
     }, 'Dataset');
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.handleTrackPageView(nextProps);
   }
 
   componentWillUnmount() {
@@ -89,9 +96,11 @@ class Dataset extends Component {
     const { dataset, dispatch } = this.props;
     const id = dataset.get('id');
     const now = Date.now();
+    const transformationJs = transformation.toJS();
 
+    trackEvent('Transform dataset', transformationJs.op);
     this.setPendingTransformation(now, transformation);
-    return api.post(`/api/transformations/${id}/transform`, transformation.toJS())
+    return api.post(`/api/transformations/${id}/transform`, transformationJs)
       .then((response) => {
         if (!response.ok) {
           return response.json().then(({ message }) => {
@@ -118,6 +127,15 @@ class Dataset extends Component {
       .then(response => response.json())
       .then(() => dispatch(fetchDataset(id)))
       .then(() => this.removePending(now));
+  }
+
+  handleTrackPageView(props) {
+    const { dataset } = props;
+    if (dataset && !this.state.hasTrackedPageView) {
+      this.setState({ hasTrackedPageView: true }, () => {
+        trackPageView(`Dataset: ${getTitle(dataset)}`);
+      });
+    }
   }
 
   handleChangeDatasetTitle(name) {
@@ -173,7 +191,10 @@ class Dataset extends Component {
     this.props.dispatch(
       push({
         pathname: '/visualisation/create',
-        state: { preselectedDatasetId: this.props.params.datasetId },
+        state: {
+          preselectedDatasetId: this.props.params.datasetId,
+          from: 'dataset',
+        },
       })
     );
   }

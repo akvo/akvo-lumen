@@ -4,12 +4,14 @@ import { connect } from 'react-redux';
 import update from 'react-addons-update';
 import isEmpty from 'lodash/isEmpty';
 import get from 'lodash/get';
+import { intlShape, injectIntl } from 'react-intl';
 import ShareEntity from '../components/modals/ShareEntity';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import NavigationPrompt from '../components/common/NavigationPrompt';
 import * as actions from '../actions/visualisation';
 import * as entity from '../domain/entity';
 import { fetchDataset } from '../actions/dataset';
+import { trackPageView, trackEvent } from '../utilities/analytics';
 import { fetchLibrary } from '../actions/library';
 import mapSpecTemplate from './Visualisation/mapSpecTemplate';
 import pieSpecTemplate from './Visualisation/pieSpecTemplate';
@@ -23,15 +25,15 @@ require('../components/visualisation/Visualisation.scss');
 
 class Visualisation extends Component {
 
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       isShareModalVisible: false,
       isUnsavedChanges: false,
       isSavePending: false,
       visualisation: {
         type: 'visualisation',
-        name: 'Untitled visualisation',
+        name: props.intl.formatMessage({ id: 'untitled_visualisation' }),
         visualisationType: null,
         datasetId: null,
         spec: {},
@@ -90,6 +92,8 @@ class Visualisation extends Component {
         this.setState({
           visualisation,
           isUnsavedChanges: false,
+        }, () => {
+          this.handleTrackPageView(visualisation);
         });
       }
     }
@@ -131,8 +135,9 @@ class Visualisation extends Component {
       (isEditingExistingVisualisation && !loadedVisualisation && nextPropsHasVisualisation) ||
       get(this.state, 'visualisation.shareId') !== get(nextProps, `library.visualisations[${visualisationId}].shareId`)
     ) {
-      this.setState({
-        visualisation: nextProps.library.visualisations[visualisationId],
+      const visualisation = nextProps.library.visualisations[visualisationId];
+      this.setState({ visualisation }, () => {
+        this.handleTrackPageView(visualisation);
       });
     }
 
@@ -198,6 +203,16 @@ class Visualisation extends Component {
           handleResponse
         )
       );
+    }
+  }
+
+  handleTrackPageView(visualisation) {
+    if (!this.state.hasTrackedPageView) {
+      this.setState({ hasTrackedPageView: true }, () => {
+        trackPageView(`Visualisation: ${
+          visualisation.name || this.props.intl.formatMessage({ id: 'untitled_visualisation' })
+        }`);
+      });
     }
   }
 
@@ -288,9 +303,14 @@ class Visualisation extends Component {
 
   handleVisualisationAction(action) {
     switch (action) {
-      case 'share':
+      case 'share': {
+        trackEvent(
+          'Share visualisation',
+          `${window.location.origin}/visualisation/${this.state.visualisation.id}`
+        );
         this.toggleShareVisualisation();
         break;
+      }
       default:
         throw new Error(`Action ${action} not yet implemented`);
     }
@@ -362,10 +382,11 @@ class Visualisation extends Component {
 }
 
 Visualisation.propTypes = {
+  intl: intlShape,
   dispatch: PropTypes.func.isRequired,
   library: PropTypes.object.isRequired,
   location: PropTypes.object.isRequired,
   params: PropTypes.object,
 };
 
-export default connect(state => state)(Visualisation);
+export default connect(state => state)(injectIntl(Visualisation));

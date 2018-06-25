@@ -188,7 +188,10 @@ export default class LibraryListingItem extends Component {
           </div>
         }
         <Link
-          to={`/${entityType}/${getId(entity)}`}
+          to={{
+            pathname: `/${entityType}/${getId(entity)}`,
+            state: { from: 'library' },
+          }}
           className="entityBody clickable"
           onClick={(e) => {
             if (!isOk(entity)) {
