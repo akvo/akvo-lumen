@@ -18,6 +18,9 @@
         (GET "/" _
           (dataset/fetch tenant-conn id))
 
+        (GET "/meta" _
+          (dataset/fetch-metadata tenant-conn id))
+
         (DELETE "/" _
           (dataset/delete tenant-conn id))
 

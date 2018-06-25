@@ -288,7 +288,7 @@ class Dashboard extends Component {
         this.setState({
           requestedDatasetIds: newRequestedDatasetIds,
         });
-        this.props.dispatch(fetchDataset(datasetId));
+        this.props.dispatch(fetchDataset(datasetId, true));
       }
     }
   }
