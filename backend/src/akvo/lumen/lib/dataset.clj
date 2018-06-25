@@ -18,6 +18,11 @@
   [tenant-conn id]
   (impl/fetch tenant-conn id))
 
+(defn fetch-metadata
+  "Fetch dataset metadata (everything apart from rows) with id"
+  [tenant-conn id]
+  (impl/fetch-metadata tenant-conn id))
+
 (defn delete
   "Delete dataset with id"
   [tenant-conn id]
