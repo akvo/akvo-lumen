@@ -43,6 +43,20 @@
             table-name
             order-by-expr)))
 
+(defn fetch-metadata [conn id]
+  (if-let [dataset (dataset-by-id conn {:id id})]
+    (let [columns (remove #(get % "hidden") (:columns dataset))]
+      (lib/ok
+       {:id id
+        :name (:title dataset)
+        :modified (:modified dataset)
+        :created (:created dataset)
+        :updated (:updated dataset)
+        :status "OK"
+        :transformations (:transformations dataset)
+        :columns columns}))
+    (lib/not-found {:error "Not found"})))
+
 (defn fetch [conn id]
   (if-let [dataset (dataset-by-id conn {:id id})]
     (let [columns (remove #(get % "hidden") (:columns dataset))
