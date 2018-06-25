@@ -207,8 +207,14 @@ export default class LibraryListingItem extends Component {
               {isFailed(entity) && ' (Import failed)'}
             </h3>
             {isFailed(entity) && <p>{getErrorMessage(entity)}</p>}
-            {isPending(entity) && <p><FormattedMessage id="pending" />...</p>}
             <ul>
+              {isPending(entity) && (
+                <li>
+                  <VisualisationLabel className="VisualisationLabel__type">
+                    <FormattedMessage id="pending" />...
+                  </VisualisationLabel>
+                </li>
+              )}
               {entityType === 'visualisation' && (
                 <li>
                   <VisualisationTypeLabel

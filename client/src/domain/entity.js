@@ -41,14 +41,14 @@ export function getType(entity) {
 
 export function getSource(entity) {
   const source = get(entity, 'source');
-  if(!source) return;
+  if (!source) return null;
   return source.toJS();
 }
 
 export function getAuthor(entity) {
   let author = get(entity, 'author');
-  if(!author) return;
-  if(author.toJS) author = author.toJS();
+  if (!author) return null;
+  if (author.toJS) author = author.toJS();
   return author && `${author.given_name} ${author.family_name}`;
 }
 
