@@ -56,6 +56,7 @@ export default class LayerMenu extends Component {
                 key={index}
                 layer={layer}
                 layerIndex={index}
+                numLayers={layers.length - 1}
                 titleEditMode={this.state.activeLayerTitleEditor === index}
                 onBeginTitleEdit={() => this.setState({ activeLayerTitleEditor: index })}
                 onEndTitleEdit={() => this.setState({ activeLayerTitleEditor: null })}
@@ -63,6 +64,7 @@ export default class LayerMenu extends Component {
                 onDeleteLayer={() => onDeleteMapLayer(index)}
                 onSelectLayer={onSelectLayer}
                 onSetLayerVisible={isVisible => onChangeMapLayer(index, { visible: isVisible })}
+                onChangeLayerOrder={this.props.onChangeLayerOrder}
               />
             )}
           </ul>
@@ -79,4 +81,5 @@ LayerMenu.propTypes = {
   onSelectLayer: PropTypes.func.isRequired,
   onChangeMapLayer: PropTypes.func.isRequired,
   onDeleteMapLayer: PropTypes.func.isRequired,
+  onChangeLayerOrder: PropTypes.func.isRequired,
 };
