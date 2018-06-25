@@ -40,11 +40,15 @@ export function getType(entity) {
 }
 
 export function getSource(entity) {
-  return get(entity, 'source');
+  const source = get(entity, 'source');
+  if(!source) return;
+  return source.toJS();
 }
 
 export function getAuthor(entity) {
-  const author = get(entity, 'author');
+  let author = get(entity, 'author');
+  if(!author) return;
+  if(author.toJS) author = author.toJS();
   return author && `${author.given_name} ${author.family_name}`;
 }
 

@@ -220,7 +220,7 @@ export default class LibraryListingItem extends Component {
               {entityType === 'dataset' && entitySource && (
                 <li>
                   <VisualisationLabel className="VisualisationLabel__type">
-                    {entitySource}
+                    <FormattedMessage id={entitySource.kind.toLowerCase()} />
                   </VisualisationLabel>
                 </li>
               )}
