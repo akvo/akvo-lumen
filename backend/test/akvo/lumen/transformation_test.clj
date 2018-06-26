@@ -5,11 +5,7 @@
                                          *error-tracker*
                                          error-tracker-fixture]]
             [akvo.lumen.lib :as lib]
-            [akvo.lumen.specs.config]
-            [akvo.lumen.specs.core :as lumen.s]
-            [akvo.lumen.specs.db :as db.s]
-            [akvo.lumen.specs.libs]
-            [akvo.lumen.specs.transformations]
+            [akvo.lumen.utils.specs]
             [akvo.lumen.test-utils :refer [import-file instrument-fixture with-instrument-disabled]]
             [akvo.lumen.transformation :as tf]
             [akvo.lumen.transformation.engine :as engine]

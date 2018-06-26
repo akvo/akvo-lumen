@@ -28,49 +28,37 @@
 
 (defn query
   [tenant-conn {:keys [columns table-name]} query]
-  (let [filter-sql (filter/sql-str columns (get query "filters"))
-        column-x (utils/find-column columns (get query "metricColumnX"))
-        column-x-type (get column-x "type")
-        column-x-name (get column-x "columnName")
-        column-x-title (get column-x "title")
-        column-y (utils/find-column columns (get query "metricColumnY"))
-        column-y-type (get column-y "type")
-        column-y-name (get column-y "columnName")
-        column-y-title (get column-y "title")
-        column-label (utils/find-column columns (get query "datapointLabelColumn"))
-        column-label-type (get column-label "type")
-        column-label-name (get column-label "columnName")
-        column-label-title (get column-label "title")
-        column-bucket (utils/find-column columns (get query "bucketColumn"))
-        column-bucket-name (get column-bucket "columnName")
-        column-bucket-title (get column-bucket "title")
+  (let [filter-sql (filter/sql-str columns (:filters query))
+        column-x (utils/find-column columns (:metricColumnX query))
+        column-y (utils/find-column columns (:metricColumnY query))
+        column-label (utils/find-column columns (:datapointLabelColumn query))
+        column-bucket (utils/find-column columns (:bucketColumn query))
         max-points 2500
-        have-aggregation (boolean column-bucket)
-        aggregation-method (get query "metricAggregation")
+        aggregation-method (:metricAggregation query)
 
         sql-text-with-aggregation (str "SELECT "
-                                       (sql-aggregation-subquery aggregation-method "%1$s" column-x-type)
+                                       (sql-aggregation-subquery aggregation-method "%1$s" (:type column-x))
                                        " AS x, "
-                                       (sql-aggregation-subquery aggregation-method "%2$s" column-y-type)
+                                       (sql-aggregation-subquery aggregation-method "%2$s" (:type column-y))
                                        " AS y, %8$s AS label FROM (SELECT * FROM %3$s WHERE %4$s ORDER BY random() LIMIT %6$s)z GROUP BY %8$s")
         sql-text-without-aggregation "
           SELECT * FROM (SELECT * FROM (SELECT %1$s AS x, %2$s AS y, %7$s AS label FROM %3$s WHERE %4$s)z ORDER BY random() LIMIT %6$s)zz ORDER BY zz.x"
-        sql-text (if have-aggregation sql-text-with-aggregation sql-text-without-aggregation)
-        sql-response (run-query tenant-conn table-name sql-text column-x-name column-y-name filter-sql aggregation-method max-points column-label-name column-bucket-name)]
+        sql-text (if (boolean column-bucket) sql-text-with-aggregation sql-text-without-aggregation)
+        sql-response (run-query tenant-conn table-name sql-text (:columnName column-x) (:columnName column-y) filter-sql aggregation-method max-points (:columnName column-label) (:columnName column-bucket))]
     (lib/ok
-     {"series" [{"key" column-x-title
-                 "label" column-x-title
+     {"series" [{"key" (:title column-x)
+                 "label" (:title column-x)
                  "data" (mapv (fn [[x-value y-value label]]
                                 {"value" x-value})
                               sql-response)
-                 "metadata" {"type" column-x-type}}
-                {"key" column-y-title
-                 "label" column-y-title
+                 "metadata" {"type" (:type column-x)}}
+                {"key" (:title column-y)
+                 "label" (:title column-y)
                  "data" (mapv (fn [[x-value y-value label]]
                                 {"value" y-value})
                               sql-response)
-                 "metadata"  {"type" column-y-type}}]
-      "common" {"metadata" {"type" column-label-type "sampled" (= (count sql-response) max-points)}
+                 "metadata"  {"type" (:type column-y)}}]
+      "common" {"metadata" {"type" (:type column-label) "sampled" (= (count sql-response) max-points)}
                 "data" (mapv (fn [[x-value y-value label]]
                                {"label" label})
                              sql-response)}})))

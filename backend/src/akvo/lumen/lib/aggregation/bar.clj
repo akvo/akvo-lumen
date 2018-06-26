@@ -12,27 +12,18 @@
 
 (defn query
   [tenant-conn {:keys [columns table-name]} query]
-  (let [filter-sql (filter/sql-str columns (get query "filters"))
+  (let [filter-sql (filter/sql-str columns (:filters query))
         max-elements 200
-        column-x (utils/find-column columns (get query "bucketColumn"))
-        column-x-type (get column-x "type")
-        column-x-name (get column-x "columnName")
-        column-x-title (get column-x "title")
-        column-y (utils/find-column columns (get query "metricColumnY"))
-        column-y-name (get column-y "columnName")
-        column-y-title (get column-y "title")
-
-        column-subbucket (utils/find-column columns (get query "subBucketColumn"))
-        column-subbucket-name (get column-subbucket "columnName")
-        column-subbucket-title (get column-subbucket "title")
-
-        aggregation-method (get query "metricAggregation")
-        truncate-size (or (get query "truncateSize") "ALL")
-        sql-sort-subquery (case (get query "sort")
+        column-x (utils/find-column columns (:bucketColumn query))
+        column-y (utils/find-column columns (:metricColumnY query))
+        column-subbucket (utils/find-column columns (:subBucketColumn query))
+        aggregation-method (:metricAggregation query)
+        truncate-size (or (:truncateSize query) "ALL")
+        sql-sort-subquery (case (:sort query)
                             nil "ORDER BY x ASC"
                             "asc" "ORDER BY z.y ASC NULLS FIRST"
                             "dsc" "ORDER BY z.y DESC NULLS LAST")
-        sql-sort-subbucket-subquery (case (get query "sort")
+        sql-sort-subbucket-subquery (case (:sort query)
                                       nil "ORDER BY x ASC"
                                       "asc" "ORDER BY sort_value ASC NULLS FIRST"
                                       "dsc" "ORDER BY sort_value DESC NULLS LAST")
@@ -78,7 +69,7 @@
 
         valid-spec (boolean (and column-x column-y))
         sql-text (if valid-spec (if column-subbucket sql-text-with-subbucket sql-text-without-subbucket) "SELECT NULL")
-        sql-response (run-query tenant-conn table-name sql-text column-x-name column-y-name filter-sql aggregation-method truncate-size column-subbucket-name)
+        sql-response (run-query tenant-conn table-name sql-text (:columnName column-x) (:columnName column-y) filter-sql aggregation-method truncate-size (:columnName column-subbucket))
         bucket-values (distinct
                        (mapv
                         (fn [[x-value y-value s-value]] x-value)
@@ -96,12 +87,12 @@
 
       (lib/ok
        (if (not column-subbucket)
-         {"series" [{"key" column-y-title
-                     "label" column-y-title
+         {"series" [{"key" (:title column-y)
+                     "label" (:title column-y)
                      "data" (mapv (fn [[x-value y-value]]
                                     {"value" y-value})
                                   sql-response)}]
-          "common" {"metadata" {"type" column-x-type}
+          "common" {"metadata" {"type" (:type column-x)}
                     "data" (mapv (fn [[x-value y-value]]
                                    {"label" x-value "key" x-value})
                                  sql-response)}}
@@ -127,7 +118,7 @@
 
           "common"
           {"metadata"
-           {"type" column-x-type}
+           {"type" (:type column-x)}
            "data"  (mapv
                     (fn [bucket] {"label" bucket "key" bucket})
                     bucket-values)}})))))
