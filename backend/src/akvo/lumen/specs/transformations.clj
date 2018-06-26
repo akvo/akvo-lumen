@@ -1,9 +1,12 @@
 (ns akvo.lumen.specs.transformations
-  (:require [clojure.spec.alpha :as s]
+  (:require [akvo.lumen.lib :as lib]
+            [akvo.lumen.lib.dataset :as l.dataset]
             [akvo.lumen.specs.core :as lumen.s]
+            [akvo.lumen.specs.db :as db.s]
+            [akvo.lumen.specs.libs]
             [akvo.lumen.transformation :as transformation]
             [akvo.lumen.transformation.engine :as engine]
-            [akvo.lumen.specs.db :as db.s]))
+            [clojure.spec.alpha :as s]))
 
 (s/def ::transformation/transformation
   (s/with-gen
@@ -25,13 +28,8 @@
 (s/fdef transformation/apply
   :args ::transformation/apply-args)
 
-(require '[akvo.lumen.transformation.engine :as engine])
-
 (s/def ::engine/js-value-types #{"number" "text" "date"})
 
-(require '[akvo.lumen.specs.libs])
-(require '[akvo.lumen.lib.dataset :as l.dataset])
-(require '[akvo.lumen.lib :as lib])
 
 (s/def ::engine/error-strategy #{"leave-empty" "fail" "delete-row"})
 
