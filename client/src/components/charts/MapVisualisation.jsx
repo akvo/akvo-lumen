@@ -63,7 +63,7 @@ const wrapLabel = (str) => {
 
 const LegendEntry = ({ singleMetadata, layer }) => (
   <div className="LegendEntry">
-    {Boolean(singleMetadata.pointColorMapping) &&
+    {Boolean(get(singleMetadata, 'pointColorMapping')) &&
       <div className="container">
         <h4>{layer.title}</h4>
         <h5>{`${singleMetadata.pointColorMappingTitle}`}</h5>
@@ -88,7 +88,7 @@ const LegendEntry = ({ singleMetadata, layer }) => (
         </div>
       </div>
     }
-    {Boolean(singleMetadata.shapeColorMapping) &&
+    {Boolean(get(singleMetadata, 'shapeColorMapping')) &&
       <div className="container">
         <h4>{layer.title}</h4>
         <h5>{singleMetadata.shapeColorMappingTitle}</h5>
@@ -110,7 +110,7 @@ const LegendEntry = ({ singleMetadata, layer }) => (
         </div>
       </div>
     }
-    {Boolean(layer.layerType === 'raster') &&
+    {Boolean(singleMetadata && layer.layerType === 'raster') &&
       <div className="container">
         <h4>{layer.title}</h4>
         <h5>Raster layer</h5>
