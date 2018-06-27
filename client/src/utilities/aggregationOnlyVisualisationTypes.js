@@ -3,3 +3,4 @@
 const aggregationOnlyVisualisationTypes = ['pivot table', 'pie', 'donut', 'map'];
 
 export default aggregationOnlyVisualisationTypes;
+

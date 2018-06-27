@@ -82,8 +82,6 @@ const aggregationOptions = [
   },
 ];
 
-const selectProps = { 'data-test-id': 'select-menu' };
-
 export default function ConfigMenu(props) {
   const datasetArray = getDatasetArray(props.datasets);
   const datasetOptions = getDatasetOptions(datasetArray);
@@ -212,19 +210,19 @@ export default function ConfigMenu(props) {
                   className="inputGroup"
                   data-test-id="input-group"
                 >
-                  <label
-                    htmlFor="xDatasetMenu"
-                  >
-                    <FormattedMessage id="source_dataset" />:</label>
-                  <SelectMenu
-                    name="xDatasetMenu"
-                    placeholderId="choose_dataset"
-                    value={visualisation.datasetId !== null ?
-                    visualisation.datasetId.toString() : null}
-                    options={datasetOptions}
-                    onChange={props.onChangeSourceDataset}
-                    inputProps={selectProps}
-                  />
+                  <label htmlFor="xDatasetMenu">
+                    <FormattedMessage id="source_dataset" />:
+                  </label>
+                  <div data-test-id="dataset-menu">
+                    <SelectMenu
+                      name="xDatasetMenu"
+                      placeholderId="choose_dataset"
+                      value={visualisation.datasetId !== null ?
+                      visualisation.datasetId.toString() : null}
+                      options={datasetOptions}
+                      onChange={props.onChangeSourceDataset}
+                    />
+                  </div>
                 </div>
                 <FilterMenu
                   hasDataset={Boolean(visualisation.datasetId !== null)}
