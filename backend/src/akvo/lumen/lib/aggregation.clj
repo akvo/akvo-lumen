@@ -45,15 +45,15 @@
   (pie/query tenant-connection dataset query))
 
 (defmethod query* "line"
-  [{:keys [::db.s/tenant-connection ::db.s/dataset ::visualisation-type query]}]
+  [{:keys [::db.s/tenant-connection ::dataset.s/dataset ::visualisation-type query]}]
   (line/query tenant-connection dataset query))
 
 (defmethod query* "bar"
-  [{:keys [::db.s/tenant-connection ::db.s/dataset ::visualisation-type query]}]
+  [{:keys [::db.s/tenant-connection ::dataset.s/dataset ::visualisation-type query]}]
   (bar/query tenant-connection dataset query))
 
 (defmethod query* "scatter"
-  [{:keys [::db.s/tenant-connection ::db.s/dataset ::visualisation-type query]}]
+  [{:keys [::db.s/tenant-connection ::dataset.s/dataset ::visualisation-type query]}]
   (scatter/query tenant-connection dataset query))
 
 (defmethod query* "donut"
