@@ -153,14 +153,13 @@
 (s/def ::l.aggregation.pie/query (s/keys :req-un [::l.aggregation.pie/bucketColumn]
                                          :opt-un [::aggregation.query.s/filters]))
 
-(s/def ::lib.aggregation/metricAggregation #{nil
-                                             "mean"
-                                             "median"
-                                             "distinct"
-                                             "q1"
-                                             "q3"
-                                             '("min" "max" "count" "sum") ;; check this seq values
-                                             })
+(s/def ::lib.aggregation/metricAggregation (s/or :opts1 #{"mean"
+                                                          "median"
+                                                          "distinct"
+                                                          "q1"
+                                                          "q3"}
+                                                 :opts2 #{"min" "max" "count" "sum"}
+                                                 :nil nil?))
 
 (s/def ::l.aggregation.line/metricAggregation ::lib.aggregation/metricAggregation) 
 (s/def ::l.aggregation.line/metricColumnX ::aggregation.query.s/column)
