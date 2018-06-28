@@ -9,18 +9,25 @@
             [akvo.lumen.lib.dashboard :as dashboard]
             [akvo.lumen.lib.dataset :as dataset]
             [akvo.lumen.lib.visualisation :as visualisation]
-            [akvo.lumen.test-utils :refer [import-file]]
+            [akvo.lumen.test-utils :refer [import-file instrument-fixture]]
             [akvo.lumen.variant :as variant]
+            [akvo.lumen.util :refer [squuid]]
             [clojure.test :refer :all]))
 
-
-(use-fixtures :once tenant-conn-fixture error-tracker-fixture)
+(use-fixtures :once tenant-conn-fixture error-tracker-fixture instrument-fixture)
 
 (defn visualisation-body [dataset-id]
-  {"datasetId" dataset-id
-   "visualisationType" ""
-   "name" ""
-   "spec" {}})
+  {:datasetId dataset-id
+   :visualisationType "map"
+   :name ""
+   :type ""
+   :created 1111
+   :modified 1111
+   :status "OK"
+   :id (str (squuid))
+   :spec {:layers []
+          :version 1
+          :baseLayer "street"}})
 
 (defn create-visualisation [tenant-conn dataset-id]
   (-> (visualisation/create *tenant-conn* (visualisation-body dataset-id) {})

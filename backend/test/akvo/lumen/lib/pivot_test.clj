@@ -8,7 +8,8 @@
             [akvo.lumen.lib.aggregation :as aggregation]
             [akvo.lumen.test-utils :refer [import-file instrument-fixture with-instrument-disabled]]
             [akvo.lumen.transformation :as tf]
-            [clojure.test :refer :all]))
+            [clojure.test :refer :all]
+            [clojure.walk :refer (keywordize-keys)]))
 
 (use-fixtures :once tenant-conn-fixture error-tracker-fixture instrument-fixture)
 
@@ -18,12 +19,13 @@
         query (partial aggregation/query *tenant-conn* dataset-id "pivot")]
     (tf/apply *tenant-conn*
               dataset-id
-              {:type :transformation
-               :transformation {"op" "core/change-datatype"
-                                "args" {"columnName" "c3"
-                                        "newType" "number"
-                                        "defaultValue" 0}
-                                "onError" "default-value"}})
+              {::tf/type :transformation
+               :transformation (keywordize-keys
+                                {"akvo.lumen.transformation.engine/op" "core/change-datatype"
+                                 "args" {"columnName" "c3"
+                                         "newType" "number"
+                                         "defaultValue" 0}
+                                 "onError" "default-value"})})
     (testing "Empty query"
       (let [[tag query-result] (query {"aggregation" "count"})]
         (is (= tag ::lib/ok))

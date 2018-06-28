@@ -8,6 +8,7 @@
             [cheshire.core :as json]
             [clj-http.client :as client]
             [clojure.core.match :refer [match]]
+            [clojure.tools.logging :as log]
             [hugsql.core :as hugsql])
   (:import [com.zaxxer.hikari HikariDataSource]
            [java.net URI]))
@@ -116,5 +117,5 @@
     (let [[dataset-id] (conform-create-args layers)]
       (do-create tenant-conn windshaft-url dataset-id layers))
     (catch Exception e
-      (println e)
+      (log/error e)
       (lib/bad-request (ex-data e)))))

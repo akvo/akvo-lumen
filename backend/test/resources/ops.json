@@ -1,6 +1,6 @@
 [
   {
-    "op": "core/change-datatype",
+    "akvo.lumen.transformation.engine/op": "core/change-datatype",
     "args": {
       "columnName": "c2",
       "newType": "number",
@@ -9,7 +9,7 @@
     "onError": "default-value"
   },
   {
-    "op": "core/change-datatype",
+    "akvo.lumen.transformation.engine/op": "core/change-datatype",
     "args": {
       "columnName": "c3",
       "newType": "date",
@@ -19,7 +19,7 @@
     "onError": "fail"
   },
   {
-    "op": "core/rename-column",
+    "akvo.lumen.transformation.engine/op": "core/rename-column",
     "args": {
       "columnName": "c2",
       "newColumnTitle": "My number column"
@@ -27,7 +27,7 @@
     "onError": "fail"
   },
   {
-    "op": "core/sort-column",
+    "akvo.lumen.transformation.engine/op": "core/sort-column",
     "args": {
       "columnName": "c1",
       "sortDirection": "ASC"
@@ -35,14 +35,14 @@
     "onError": "fail"
   },
   {
-    "op": "core/remove-sort",
+    "akvo.lumen.transformation.engine/op": "core/remove-sort",
     "args": {
       "columnName": "c1"
     },
     "onError": "fail"
   },
   {
-    "op": "core/filter-column",
+    "akvo.lumen.transformation.engine/op": "core/filter-column",
     "args": {
       "columnName": "c1",
       "expression": {"<": 10}
@@ -50,35 +50,35 @@
     "onError": "fail"
   },
   {
-    "op": "core/to-titlecase",
+    "akvo.lumen.transformation.engine/op": "core/to-titlecase",
     "args": {
       "columnName": "c1"
     },
     "onError": "default-value"
   },
   {
-    "op": "core/to-lowercase",
+    "akvo.lumen.transformation.engine/op": "core/to-lowercase",
     "args": {
       "columnName": "c1"
     },
     "onError": "default-value"
   },
   {
-    "op": "core/to-uppercase",
+    "akvo.lumen.transformation.engine/op": "core/to-uppercase",
     "args": {
       "columnName": "c1"
     },
     "onError": "default-value"
   },
   {
-    "op": "core/trim",
+    "akvo.lumen.transformation.engine/op": "core/trim",
     "args": {
       "columnName": "c1"
     },
     "onError": "default-value"
   },
   {
-    "op": "core/trim-doublespace",
+    "akvo.lumen.transformation.engine/op": "core/trim-doublespace",
     "args": {
       "columnName": "c1"
     },

@@ -18,53 +18,29 @@
 	    [akvo.lumen.specs.libs]
 	    [clojure.spec.alpha :as s]))
 
+
 (s/def ::l.aggregation.filter/filter (s/keys :req-un [::aggregation.query.s/operation
                                                       ::aggregation.query.s/strategy
                                                       ::aggregation.query.s/value
                                                       ::dataset.s/column]))
 (s/def ::l.aggregation.filter/categoryColumn ::dataset.s/column)
+
 (s/def ::l.aggregation.filter/rowColumn ::dataset.s/column)
+
 (s/def ::l.aggregation.filter/valueColumn ::dataset.s/column)
+
 (s/def ::l.aggregation.filter/aggregation string?)
 
 (s/def ::l.aggregation.filter/filters (s/coll-of ::l.aggregation.filter/filter :gen-max 3))
 
-(s/fdef l.aggregation.filter/sql-str
-  :args (s/cat
-         :columns ::dataset.s/columns
-	 :filters ::aggregation.query.s/filters)
-  :ret string?)
-
-(s/fdef l.aggregation.filter/find-column
-  :args (s/cat
-         :columns ::dataset.s/columns
-	 :column-name string?)
-  :ret ::dataset.s/column)
-
-(s/fdef l.aggregation.filter/filter-sql
-  :args (s/cat
-         :filter ::l.aggregation.filter/filter)
-  :ret string?)
-
-
 (s/def ::l.aggregation.filter/comparison-op #{">" "<="})
 
-(s/fdef l.aggregation.filter/comparison
-  :args (s/cat
-         :op ::l.aggregation.filter/comparison-op
-         :column-type ::dataset.column.s/type
-         :column-name ::dataset.column.s/columnName
-         :value ::aggregation.query.s/value)
-  :ret string?)
-
-(s/fdef l.aggregation.utils/find-column
-  :args (s/cat :columns ::dataset.s/columns
-               :column-name ::lumen.s/string-nullable)
-  :ret ::dataset.s/column)
-
 (s/def ::l.aggregation.pivot/category-column ::dataset.s/column)
+
 (s/def ::l.aggregation.pivot/row-column ::dataset.s/column)
+
 (s/def ::l.aggregation.pivot/value-column ::dataset.s/column)
+
 (s/def ::l.aggregation.pivot/aggregation #{"avg" "sum" "min" "max" "count"})
 
 (s/def ::l.aggregation.pivot/categoryColumn ::aggregation.query.s/nullable-column)
@@ -85,73 +61,103 @@
                    ::l.aggregation.pivot/row-column
                    ::l.aggregation.pivot/value-column]))
 
+(s/def ::l.aggregation.pivot/row (s/keys :req-un [::a.pivot.row.s/type ::a.pivot.row.s/title]))
+
+(s/def ::l.aggregation.pivot/rows (s/coll-of ::l.aggregation.pivot/row :gen-max 3))
+
+(s/def ::l.aggregation.pivot/columns pos-int?)
+
+(s/def ::l.aggregation.pivot/apply-query-ret
+  (s/keys :req-un [::l.aggregation.pivot/rows
+                   ::l.aggregation.pivot/columns]))
+
+(s/def ::l.aggregation.pie/bucketColumn ::aggregation.query.s/column)
+
+(s/def ::l.aggregation.pie/query (s/keys :req-un [::l.aggregation.pie/bucketColumn]
+                                         :opt-un [::aggregation.query.s/filters]))
+
+(s/fdef l.aggregation.filter/sql-str
+  :args (s/cat
+	 :columns ::dataset.s/columns
+	 :filters ::aggregation.query.s/filters)
+  :ret string?)
+
+(s/fdef l.aggregation.filter/find-column
+  :args (s/cat
+	 :columns ::dataset.s/columns
+	 :column-name string?)
+  :ret ::dataset.s/column)
+
+(s/fdef l.aggregation.filter/filter-sql
+  :args (s/cat
+	 :filter ::l.aggregation.filter/filter)
+  :ret string?)
+
+(s/fdef l.aggregation.filter/comparison
+  :args (s/cat
+	 :op ::l.aggregation.filter/comparison-op
+	 :column-type ::dataset.column.s/type
+	 :column-name ::dataset.column.s/columnName
+	 :value ::aggregation.query.s/value)
+  :ret string?)
+
+(s/fdef l.aggregation.utils/find-column
+  :args (s/cat :columns ::dataset.s/columns
+	       :column-name ::lumen.s/string-nullable)
+  :ret ::dataset.s/column)
+
 (s/fdef l.aggregation.pivot/build-query
   :args (s/cat
 	 :columns ::dataset.s/columns
 	 :query ::l.aggregation.pivot/query)
   :ret ::l.aggregation.pivot/query-built)
 
-
-(s/def ::l.aggregation.pivot/row (s/keys :req-un [::a.pivot.row.s/type ::a.pivot.row.s/title]))
-
-(s/def ::l.aggregation.pivot/rows (s/coll-of ::l.aggregation.pivot/row :gen-max 3))
-
-(s/def ::l.aggregation.pivot/columns integer?)
-
-(s/def ::l.aggregation.pivot/apply-query-ret
-  (s/keys :req-un [::l.aggregation.pivot/rows
-                   ::l.aggregation.pivot/columns]))
-
 (s/fdef l.aggregation.pivot/apply-query
   :args (s/cat
-         :conn ::db.s/tenant-connection
-         :dataset ::dataset.s/dataset
-         :query ::l.aggregation.pivot/query-built
-         :filter-str string?)
+	 :conn ::db.s/tenant-connection
+	 :dataset ::dataset.s/dataset
+	 :query ::l.aggregation.pivot/query-built
+	 :filter-str string?)
   :ret ::l.aggregation.pivot/apply-query-ret)
 
 (s/fdef l.aggregation.pivot/apply-pivot
   :args (s/cat
-         :conn ::db.s/tenant-connection
-         :dataset ::dataset.s/dataset
-         :query ::l.aggregation.pivot/query-built
-         :filter-str string?)
+	 :conn ::db.s/tenant-connection
+	 :dataset ::dataset.s/dataset
+	 :query ::l.aggregation.pivot/query-built
+	 :filter-str string?)
   :ret ::l.aggregation.pivot/apply-query-ret)
 
 (s/fdef l.aggregation.pivot/apply-empty-query
   :args (s/cat
-         :conn ::db.s/tenant-connection
-         :dataset ::dataset.s/dataset
-         :filter-str string?)
+	 :conn ::db.s/tenant-connection
+	 :dataset ::dataset.s/dataset
+	 :filter-str string?)
   :ret ::l.aggregation.pivot/apply-query-ret)
 
 (s/fdef l.aggregation.pivot/apply-empty-category-query
   :args (s/cat
-         :conn ::db.s/tenant-connection
-         :dataset ::dataset.s/dataset
-         :query ::l.aggregation.pivot/query-built
-         :filter-str string?)
+	 :conn ::db.s/tenant-connection
+	 :dataset ::dataset.s/dataset
+	 :query ::l.aggregation.pivot/query-built
+	 :filter-str string?)
   :ret ::l.aggregation.pivot/apply-query-ret)
 
 (s/fdef l.aggregation.pivot/apply-empty-row-query
   :args (s/cat
-         :conn ::db.s/tenant-connection
-         :dataset ::dataset.s/dataset
-         :query ::l.aggregation.pivot/query-built
-         :filter-str string?)
+	 :conn ::db.s/tenant-connection
+	 :dataset ::dataset.s/dataset
+	 :query ::l.aggregation.pivot/query-built
+	 :filter-str string?)
   :ret ::l.aggregation.pivot/apply-query-ret)
 
 (s/fdef l.aggregation.pivot/apply-empty-value-query
   :args (s/cat
-         :conn ::db.s/tenant-connection
-         :dataset ::dataset.s/dataset
-         :query ::l.aggregation.pivot/query-built
-         :filter-str string?)
+	 :conn ::db.s/tenant-connection
+	 :dataset ::dataset.s/dataset
+	 :query ::l.aggregation.pivot/query-built
+	 :filter-str string?)
   :ret ::l.aggregation.pivot/apply-query-ret)
-
-(s/def ::l.aggregation.pie/bucketColumn ::aggregation.query.s/column)
-(s/def ::l.aggregation.pie/query (s/keys :req-un [::l.aggregation.pie/bucketColumn]
-                                         :opt-un [::aggregation.query.s/filters]))
 
 (s/def ::lib.aggregation/metricAggregation (s/or :opts1 #{"mean"
                                                           "median"
@@ -172,7 +178,7 @@
 (s/def ::l.aggregation.scatter/metricAggregation ::lib.aggregation/metricAggregation) 
 (s/def ::l.aggregation.scatter/metricColumnX ::aggregation.query.s/column)
 (s/def ::l.aggregation.scatter/metricColumnY ::aggregation.query.s/column)
-(s/def ::l.aggregation.scatter/datapointLabelColumn ::aggregation.query.s/column)
+(s/def ::l.aggregation.scatter/datapointLabelColumn ::aggregation.query.s/nullable-column)
 (s/def ::l.aggregation.scatter/bucketColumn ::aggregation.query.s/nullable-column)
 
 (s/def ::l.aggregation.scatter/query (s/keys :req-un [::l.aggregation.scatter/metricColumnX

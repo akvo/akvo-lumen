@@ -1,8 +1,10 @@
 (ns akvo.lumen.lib.visualisation.maps-test
   (:require [akvo.lumen.lib.visualisation.maps :as m]
             [akvo.lumen.transformation.engine :as engine]
+            [akvo.lumen.test-utils :refer [import-file instrument-fixture with-instrument-disabled]]
             [clojure.test :refer :all]))
 
+(use-fixtures :once instrument-fixture)
 (deftest invalid-location-spec?
 
   (let [p engine/valid-column-name?]

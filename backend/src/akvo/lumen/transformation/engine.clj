@@ -12,7 +12,7 @@
 (defmulti valid?
   "Validate transformation spec"
   (fn [op-spec]
-    (keyword (op-spec "op"))))
+    (keyword (op-spec ::op))))
 
 (defmethod valid? :default
   [op-spec]
@@ -29,11 +29,11 @@
    - \"args\" : map with arguments to the operation
    - \"onError\" : Error strategy"
   (fn [tenant-conn table-name columns op-spec]
-    (keyword (get op-spec "op"))))
+    (keyword (get op-spec ::op))))
 
 (defmethod apply-operation :default
   [tenant-conn table-name columns op-spec]
-  (let [msg (str "Unknown operation " (get op-spec "op"))]
+  (let [msg (str "Unknown operation " (get op-spec :op))]
     (log/debug msg)
     {:success? false
      :message msg}))
@@ -68,8 +68,10 @@
   (and (string? s)
        (boolean (re-find #"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}" s))))
 
+(def valid-column-types #{"text" "number" "date" "geopoint"})
+
 (defn valid-type? [s]
-  (#{"text" "number" "date" "geopoint"} s))
+  (valid-column-types s))
 
 (defn column-index
   "Returns the column index for a given column-name"
@@ -92,10 +94,10 @@
     (apply update columns idx f args)))
 
 (defn error-strategy [op-spec]
-  (get op-spec "onError"))
+  (get op-spec :onError))
 
 (defn args [op-spec]
-  (get op-spec "args"))
+  (get op-spec :args))
 
 (defn next-column-name [columns]
   (let [nums (->> columns
@@ -204,7 +206,7 @@
             (drop-table tenant-conn {:table-name previous-table-name})
             (lib/created next-dataset-version)))
         (let [{:keys [success? message columns execution-log]}
-              (try-apply-operation tenant-conn table-name (w/keywordize-keys columns) (first transformations))]
+              (try-apply-operation tenant-conn table-name (w/keywordize-keys columns) (w/keywordize-keys (first transformations)))]
           (if success?
             (recur (rest transformations) columns (into full-execution-log execution-log))
             (do

@@ -6,6 +6,7 @@
             [clojure.java.io :as io]
             [clojure.tools.logging :as log]
             [clojure.spec.test.alpha :as stest]
+            [clojure.spec.test.alpha :as st]
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/job-execution.sql")
@@ -59,8 +60,8 @@
   `(stest/with-instrument-disabled ~@body))
 
 (defn instrument-fixture [f]
-  (log/error "instrument-fixture")
-  (stest/instrument)
+  (log/warn "instrument-fixture")
+  (st/instrument)
   (f)
-  (log/error "unstrument-fixture")
-  (stest/unstrument))
+  (log/warn "unstrument-fixture")
+  (st/unstrument))

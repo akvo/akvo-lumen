@@ -2,6 +2,7 @@
   (:require [akvo.lumen.component.tenant-manager :refer [connection]]
             [akvo.lumen.lib.visualisation :as visualisation]
             [akvo.lumen.lib.visualisation.maps :as maps]
+            [clojure.walk :as w]
             [compojure.core :refer :all]))
 
 
@@ -13,7 +14,7 @@
         (visualisation/all tenant-conn))
 
       (POST "/" {:keys [jwt-claims body]}
-        (visualisation/create tenant-conn body jwt-claims))
+        (visualisation/create tenant-conn (w/keywordize-keys body) jwt-claims))
 
       (context "/maps" _
         (POST "/" {{:strs [spec]} :body}
@@ -30,7 +31,7 @@
           (visualisation/fetch tenant-conn id))
 
         (PUT "/" {:keys [jwt-claims body]}
-          (visualisation/upsert tenant-conn (assoc body "id" id) jwt-claims))
+          (visualisation/upsert tenant-conn (w/keywordize-keys (assoc body "id" id)) jwt-claims))
 
         (DELETE "/" _
           (visualisation/delete tenant-conn id))))))

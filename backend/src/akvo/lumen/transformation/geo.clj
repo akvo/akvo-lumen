@@ -11,7 +11,7 @@
 (defn- valid?
   "Predicate to determine if given op-spec is valid for geo transformation"
   [op-spec]
-  (let [{:strs [columnNameLat columnNameLong]} (engine/args op-spec)]
+  (let [{:keys [columnNameLat columnNameLong]} (engine/args op-spec)]
     (boolean
       (every? engine/valid-column-name? [columnNameLat columnNameLong]))))
 
@@ -24,7 +24,7 @@
 
 (defmethod engine/apply-operation :core/generate-geopoints
   [tenant-conn table-name columns op-spec]
-  (let [{:strs [columnNameLat columnNameLong columnTitleGeo]} (engine/args op-spec)
+  (let [{:keys [columnNameLat columnNameLong columnTitleGeo]} (engine/args op-spec)
         get-client-type (partial engine/column-type columns)
         column-types (map get-client-type [columnNameLat columnNameLong])]
     (if (every? #(= "number" %) column-types)

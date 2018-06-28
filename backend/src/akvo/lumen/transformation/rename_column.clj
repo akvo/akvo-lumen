@@ -2,10 +2,10 @@
   (:require [akvo.lumen.transformation.engine :as engine]))
 
 (defn col-name [op-spec]
-  (get (engine/args op-spec) "columnName"))
+  (get (engine/args op-spec) :columnName))
 
 (defn new-col-title [op-spec]
-  (get (engine/args op-spec) "newColumnTitle"))
+  (get (engine/args op-spec) :newColumnTitle))
 
 (defmethod engine/valid? :core/rename-column
   [op-spec]
@@ -19,4 +19,4 @@
         new-column-title (new-col-title op-spec)]
     {:success? true
      :execution-log [(format "Renamed column %s to %s" column-name new-column-title)]
-     :columns (engine/update-column columns column-name assoc "title" new-column-title)}))
+     :columns (engine/update-column columns column-name assoc :title new-column-title)}))
