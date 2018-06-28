@@ -66,9 +66,10 @@
 (s/def ::l.aggregation.pivot/row-column ::dataset.s/column)
 (s/def ::l.aggregation.pivot/value-column ::dataset.s/column)
 (s/def ::l.aggregation.pivot/aggregation #{"avg" "sum" "min" "max" "count"})
-(s/def ::l.aggregation.pivot/categoryColumn ::dataset.s/column)
-(s/def ::l.aggregation.pivot/rowColumn ::dataset.s/column)
-(s/def ::l.aggregation.pivot/valueColumn ::dataset.s/column)
+
+(s/def ::l.aggregation.pivot/categoryColumn ::aggregation.query.s/nullable-column)
+(s/def ::l.aggregation.pivot/rowColumn ::aggregation.query.s/nullable-column)
+(s/def ::l.aggregation.pivot/valueColumn ::aggregation.query.s/nullable-column)
 
 (s/def ::l.aggregation.pivot/query
   (s/keys :req-un [::aggregation.query.s/aggregation]
@@ -185,7 +186,7 @@
 
 (s/def ::l.aggregation.bar/bucketColumn ::aggregation.query.s/column)
 (s/def ::l.aggregation.bar/metricColumnY ::aggregation.query.s/column)
-(s/def ::l.aggregation.bar/subBucketColumn ::aggregation.query.s/column)
+(s/def ::l.aggregation.bar/subBucketColumn ::aggregation.query.s/nullable-column)
 (s/def ::l.aggregation.bar/sort (s/or :v ::db.s/sort :n nil?))
 (s/def ::l.aggregation.bar/metricAggregation ::lib.aggregation/metricAggregation)
 (s/def ::l.aggregation.bar/truncateSize (s/or :s string?
