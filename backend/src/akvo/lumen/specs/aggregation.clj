@@ -172,7 +172,7 @@
 (s/def ::l.aggregation.scatter/metricAggregation ::lib.aggregation/metricAggregation) 
 (s/def ::l.aggregation.scatter/metricColumnX ::aggregation.query.s/column)
 (s/def ::l.aggregation.scatter/metricColumnY ::aggregation.query.s/column)
-(s/def ::l.aggregation.scatter/datapointLabelColumn ::aggregation.query.s/column)
+(s/def ::l.aggregation.scatter/datapointLabelColumn ::aggregation.query.s/nullable-column)
 (s/def ::l.aggregation.scatter/bucketColumn ::aggregation.query.s/nullable-column)
 
 (s/def ::l.aggregation.scatter/query (s/keys :req-un [::l.aggregation.scatter/metricColumnX
