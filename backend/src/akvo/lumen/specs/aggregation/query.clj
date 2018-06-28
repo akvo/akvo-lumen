@@ -9,6 +9,8 @@
 (s/def ::value ::lumen.s/string-nullable)
 
 (s/def ::column string?)
+(s/def ::nullable-column (s/or :s string?
+                               :n nil?))
 
 (s/def ::filter (s/keys :req-un [::operation
                                  ::strategy
@@ -19,7 +21,3 @@
 		       :nil nil?))
 
 (s/def ::aggregation #{"mean" "sum" "min" "max" "count"})
-
-(s/def ::categoryColumn ::column)
-(s/def ::rowColumn ::column)
-(s/def ::valueColumn ::column)

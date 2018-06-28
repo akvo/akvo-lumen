@@ -22,8 +22,6 @@
                                                       ::aggregation.query.s/strategy
                                                       ::aggregation.query.s/value
                                                       ::dataset.s/column]))
-
-
 (s/def ::l.aggregation.filter/categoryColumn ::dataset.s/column)
 (s/def ::l.aggregation.filter/rowColumn ::dataset.s/column)
 (s/def ::l.aggregation.filter/valueColumn ::dataset.s/column)
@@ -68,13 +66,16 @@
 (s/def ::l.aggregation.pivot/row-column ::dataset.s/column)
 (s/def ::l.aggregation.pivot/value-column ::dataset.s/column)
 (s/def ::l.aggregation.pivot/aggregation #{"avg" "sum" "min" "max" "count"})
+(s/def ::l.aggregation.pivot/categoryColumn ::dataset.s/column)
+(s/def ::l.aggregation.pivot/rowColumn ::dataset.s/column)
+(s/def ::l.aggregation.pivot/valueColumn ::dataset.s/column)
 
 (s/def ::l.aggregation.pivot/query
   (s/keys :req-un [::aggregation.query.s/aggregation]
 	  :opt-un [::aggregation.query.s/filters
-		   ::aggregation.query.s/categoryColumn
-		   ::aggregation.query.s/rowColumn
-		   ::aggregation.query.s/valueColumn]))
+		   ::l.aggregation.pivot/categoryColumn
+		   ::l.aggregation.pivot/rowColumn
+		   ::l.aggregation.pivot/valueColumn]))
 
 (s/def ::l.aggregation.pivot/query-built
   (s/keys :req-un [::l.aggregation.pivot/aggregation]
@@ -172,14 +173,14 @@
 (s/def ::l.aggregation.scatter/metricColumnX ::aggregation.query.s/column)
 (s/def ::l.aggregation.scatter/metricColumnY ::aggregation.query.s/column)
 (s/def ::l.aggregation.scatter/datapointLabelColumn ::aggregation.query.s/column)
-(s/def ::l.aggregation.scatter/bucketColumn ::aggregation.query.s/column)
+(s/def ::l.aggregation.scatter/bucketColumn ::aggregation.query.s/nullable-column)
 
 (s/def ::l.aggregation.scatter/query (s/keys :req-un [::l.aggregation.scatter/metricColumnX
                                                       ::l.aggregation.scatter/metricColumnY
-                                                      ::l.aggregation.scatter/datapointLabelColumn
-                                                      ::l.aggregation.scatter/bucketColumn]
+                                                      ::l.aggregation.scatter/datapointLabelColumn]
                                              :opt-un [::aggregation.query.s/filters
-                                                      ::l.aggregation.scatter/metricAggregation]))
+                                                      ::l.aggregation.scatter/metricAggregation
+                                                      ::l.aggregation.scatter/bucketColumn]))
 
 
 (s/def ::l.aggregation.bar/bucketColumn ::aggregation.query.s/column)
@@ -187,14 +188,15 @@
 (s/def ::l.aggregation.bar/subBucketColumn ::aggregation.query.s/column)
 (s/def ::l.aggregation.bar/sort (s/or :v ::db.s/sort :n nil?))
 (s/def ::l.aggregation.bar/metricAggregation ::lib.aggregation/metricAggregation)
-(s/def ::l.aggregation.bar/truncateSize string?) 
+(s/def ::l.aggregation.bar/truncateSize (s/or :s string?
+                                              :n nil?)) 
 (s/def ::l.aggregation.bar/query
   (s/keys :req-un [::l.aggregation.bar/bucketColumn
                    ::l.aggregation.bar/metricColumnY
-                   ::l.aggregation.bar/metricAggregation
-                   ::l.aggregation.bar/sort
                    ::l.aggregation.bar/subBucketColumn] ;; check if it could be nil
           :opt-un [::aggregation.query.s/filters
+                   ::l.aggregation.bar/sort
+                   ::l.aggregation.bar/metricAggregation
                    ::l.aggregation.bar/truncateSize]))
 
 (s/def ::lib.aggregation/visualisation-type #{"pivot" "pie" "donut" "line" "bar" "scatter"})
@@ -231,6 +233,9 @@
 		::dataset.s/dataset]
 	  :req-un[::l.aggregation.scatter/query]))
 
+(s/fdef lib.aggregation/query*
+  :args (s/cat :args (s/multi-spec query-type ::lib.aggregation/visualisation-type))
+  :ret ::lib/response)
 
 (s/fdef lib.aggregation/query
   :args (s/cat
@@ -252,8 +257,4 @@
 	 :tenant-connection ::db.s/tenant-connection
 	 :dataset ::dataset.s/dataset
 	 :query ::l.aggregation.pivot/query)
-  :ret ::lib/response)
-
-(s/fdef lib.aggregation/query*
-  :args (s/cat :args (s/multi-spec query-type ::lib.aggregation/visualisation-type))
   :ret ::lib/response)
