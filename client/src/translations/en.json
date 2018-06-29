@@ -280,6 +280,6 @@
   "name": "Name",
   "role": "Role",
   "email": "Email",
-  "actions": "Actions"
-  
+  "actions": "Actions",
+  "show_labels": "Show labels"
 }

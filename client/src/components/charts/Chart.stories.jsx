@@ -120,9 +120,11 @@ storiesOf('Charts', module)
           colors={palette(nodeCount)}
           colorMapping={{ [data.common.data[0].key]: color('props.colorMapping[key]', 'rgb(158, 1, 66)') }}
           innerRadius={number('props.innerRadius', 0)}
+          outerRadius={number('props.outerRadius', 0.3)}
           onChangeVisualisationSpec={action('vis-spec-change')}
           width={number('props.width', 600)}
           height={number('props.height', 600)}
+          donut={boolean('props.donut', false)}
           print={boolean('props.print', false)}
           interactive={boolean('props.interactive', true)}
           edit={boolean('props.edit', true)}

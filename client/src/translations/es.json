@@ -277,5 +277,6 @@
   "x_axis": "Eje x",
   "x_axis_label": "Etiqueta del eje x",
   "y_axis": "Eje y",
-  "y_axis_label": "Etiqueta del eje y"
+  "y_axis_label": "Etiqueta del eje y",
+  "show_labels": "Mostrar etiquetas"
 }
