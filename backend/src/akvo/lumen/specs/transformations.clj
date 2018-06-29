@@ -9,11 +9,7 @@
 	    [akvo.lumen.specs.transformations.merge-dataset.source :as t.merge-dataset.source.s]
 	    [akvo.lumen.specs.transformations.merge-dataset.target :as t.merge-dataset.target.s]
 	    [akvo.lumen.specs.transformations.remove-sort :as transformations.remove-sort.s]
-	    [akvo.lumen.specs.transformations.to-lowercase :as transformations.to-lowercase.s]
-	    [akvo.lumen.specs.transformations.to-titlecase :as transformations.to-titlecase.s]
-	    [akvo.lumen.specs.transformations.to-uppercase :as transformations.to-uppercase.s]
-	    [akvo.lumen.specs.transformations.trim :as transformations.trim.s]
-	    [akvo.lumen.specs.transformations.trim-doublespace :as transformations.trim-doublespace.s]
+	    [akvo.lumen.specs.transformations.text :as transformations.text.s]
 	    [akvo.lumen.transformation :as transformation]
 	    [akvo.lumen.transformation.change-datatype :as transformation.change-datatype]
 	    [akvo.lumen.transformation.combine :as transformation.combine]
@@ -184,23 +180,23 @@
 ;; following op-spec specs defined appart in their namespace, thus 
 (defmethod op-spec "core/to-lowercase" [_]
   (s/keys
-   :req-un [::transformations.to-lowercase.s/args
+   :req-un [::transformations.text.s/args
 	    ::transformation.engine/onError]))
 (defmethod op-spec "core/to-uppercase" [_]
   (s/keys
-   :req-un [::transformations.to-uppercase.s/args
+   :req-un [::transformations.text.s/args
 	    ::transformation.engine/onError]))
 (defmethod op-spec "core/to-titlecase" [_]
   (s/keys
-   :req-un [::transformations.to-titlecase.s/args
+   :req-un [::transformations.text.s/args
 	    ::transformation.engine/onError]))
 (defmethod op-spec "core/trim" [_]
   (s/keys
-   :req-un [::transformations.trim.s/args
+   :req-un [::transformations.text.s/args
 	    ::transformation.engine/onError]))
 (defmethod op-spec "core/trim-doublespace" [_]
   (s/keys
-   :req-un [::transformations.trim.s/args
+   :req-un [::transformations.text.s/args
 	    ::transformation.engine/onError]))
 
 (s/def ::transformation.engine/op-spec

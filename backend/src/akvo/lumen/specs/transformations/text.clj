@@ -1,4 +1,4 @@
-(ns akvo.lumen.specs.transformations.to-lowercase
+(ns akvo.lumen.specs.transformations.text
     (:require [akvo.lumen.specs.dataset.column :as dataset.column.s]
 	      [clojure.spec.alpha :as s]))
 
