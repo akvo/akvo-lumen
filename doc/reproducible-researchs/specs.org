@@ -1,0 +1,121 @@
+#+OPTIONS: ^:nil
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+SETUPFILE: /Users/tangrammer/git/org-html-themes/setup/theme-readtheorg.setup
+#+TITLE: SPECs
+#+PROPERTY: header-args:clojure :exports both
+#+PROPERTY: header-args:clojure+ :results silent
+#+PROPERTY: header-args:clojure+ :session lumen
+#+PROPERTY: header-args:clojure+ :padline yes
+#+PROPERTY: header-args:clojure+ :mkdirp yes
+#+PROPERTY: header-args:clojure+ :tangle no
+#+FILETAGS: :FAQ:
+* WIP
+** TODO improve time related specs: updated, created, modified should be improved
+now we are using int?
+take care of int vs pos-int
+in lumen they map to ints [[/Users/tangrammer/git/akvo/akvo-lumen/backend/src/akvo/lumen/specs/core.clj::39][(WIP current spec]])
+
+* aggregation tests                                             :aggregation:
+** pivot 
+   https://github.com/akvo/akvo-lumen/blob/specs-lp-bis/backend/test/resources/pivot.csv#L1
+   #+BEGIN_SRC clojure :exports both :results value replace pp
+   (remove-ns 'test-pivot)
+   (ns test-pivot
+     (:require [clojure.spec.alpha :as s]
+
+	       [akvo.lumen.specs.dataset :as dataset.s]
+	       [akvo.lumen.lib.aggregation.pivot :as l.aggregation.pivot]))
+
+   (def query {:decimalPlaces 3,
+	       :hideColumnTotals false,
+	       :filters [],
+	       :rowTitle nil,
+	       :hideRowTotals false,
+	       :rowColumn "c1",
+	       :valueColumn nil,
+	       :categoryColumn "c2",
+	       :aggregation "count",
+	       :version 1,
+	       :valueDisplay "default",
+	       :categoryTitle nil})
+   (def dataset {:table-name "ds_25b10446_25b7_4074_bc45_c80b0d129ece",
+		 :title "popo",
+		 :created 1530180194838,
+		 :modified 1530180194838,
+		 :id "5b34b262-277d-4f4b-960a-9ee01f18356b",
+		 :updated 1530180194856,
+		 :columns
+		 {:sort nil,
+		  :type "number",
+		  :title "C",
+		  :hidden false,
+		  :direction nil,
+		  :columnName "c3"},
+		 :transformations ()})
+   {:akvo.lumen.specs.db/tenant-connection {}
+    :akvo.lumen.specs.dataset/dataset dataset
+    :akvo.lumen.lib.aggregation/visualisation-type "pivot"
+    :query query}
+
+   {:query? (s/valid? ::l.aggregation.pivot/query query)
+    :dataset? (s/valid? ::dataset.s/dataset dataset)}
+ #+END_SRC
+
+ #+RESULTS:
+ : {:query? true, :dataset? true}
+** bar
+#+BEGIN_SRC clojure :exports both :results value replace pp
+(remove-ns 'test-bar)
+(ns test-bar
+  (:require [clojure.spec.alpha :as s]
+
+            [akvo.lumen.specs.dataset :as dataset.s]
+            [akvo.lumen.lib.aggregation.bar :as l.aggregation.bar]))
+(def dataset {:columns
+              {:columnName "c3",
+               :direction nil,
+               :hidden false,
+               :sort nil,
+               :title "longitude",
+               :type "number"},
+              :created 1530185178537,
+              :id "5b34c5da-561e-4d01-814d-9988d5ac5f49",
+              :modified 1530185178537,
+              :table-name "ds_58343aa1_1136_4c49_94c7_188541721253",
+              :title "ooo",
+              :transformations [],
+              :updated 1530185178550})
+(def query   {:axisLabelX "city",
+              :axisLabelXFromUser false,
+              :axisLabelY "latitude - mean",
+              :axisLabelYFromUser false,
+              :bucketColumn "c1",
+              :filters [],
+              :legendTitle nil,
+              :metricAggregation "mean",
+              :metricColumnX nil,
+              :metricColumnY "c2",
+              :sort nil,
+              :subBucketColumn nil,
+              :subBucketMethod "split",
+              :truncateSize nil,
+              :version 1})
+(def data 
+ {:akvo.lumen.specs.db/tenant-connection {},
+  :akvo.lumen.specs.dataset/dataset dataset
+  :akvo.lumen.lib.aggregation/visualisation-type "bar"
+  :query query})
+
+{:dataset? (s/valid? ::dataset.s/dataset dataset)
+ :query? (s/valid? ::l.aggregation.bar/query query)}
+
+
+
+
+#+END_SRC
+** TODO complete all types and ways to test them
+* features
+** how find the function you need?                                :wip:ideas:
+browse-specs and search for args types specs???
+
+
