@@ -1,3 +1,4 @@
+/* eslint-disable global-require, import/no-dynamic-require */
 import moment from 'moment';
 import invariant from 'invariant';
 import Immutable from 'immutable';
@@ -124,6 +125,7 @@ export function getIconUrl(entity) {
     case 'visualisation': {
       return require(`../styles/img/icon-128-visualisation-${get(entity, 'visualisationType').replace(' ', '-')}.png`);
     }
+    // no default
   }
   return '';
 }

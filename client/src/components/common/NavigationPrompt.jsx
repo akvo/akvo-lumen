@@ -17,7 +17,7 @@ class NavigationPrompt extends React.Component {
       routes.length ? routes[routes.length - 1] : route,
       () => {
         if (!shouldPrompt) return true;
-        return confirm(message);
+        return confirm(message); // eslint-disable-line
       }
     );
     window.onbeforeunload = shouldPrompt && (() => message);

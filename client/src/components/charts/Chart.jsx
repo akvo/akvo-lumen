@@ -196,7 +196,7 @@ export default class Chart extends Component {
           />
         );
       default:
-        console.warn(`Unknown visualisation type ${visualisation.visualisationType}`);
+        console.warn(`Unknown visualisation type ${visualisation.visualisationType}`); // eslint-disable-line
     }
     return null;
   }

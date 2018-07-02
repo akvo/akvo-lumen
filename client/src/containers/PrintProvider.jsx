@@ -14,6 +14,13 @@ export const printShape = PropTypes.shape({
 });
 
 class PrintProvider extends Component {
+  static propTypes = {
+    windowWidth: PropTypes.number,
+    windowHeight: PropTypes.number,
+    children: PropTypes.node,
+    dispatch: PropTypes.func.isRequired,
+  }
+
   constructor(props) {
     super(props);
     this.handlePrintBegin = this.handlePrintBegin.bind(this);
@@ -23,35 +30,35 @@ class PrintProvider extends Component {
 
   componentDidMount() {
     if (window.matchMedia) {
-      var mediaQueryList = window.matchMedia('print');
+      const mediaQueryList = window.matchMedia('print');
       mediaQueryList.addListener((mql) => {
         if (mql.matches) {
           this.handlePrintBegin();
-        } 
+        }
       });
     }
     window.onbeforeprint = this.handlePrintBegin;
   }
-  
+
   componentWillUnmount() {
     this.cleanUp();
   }
-  
+
   handlePrintBegin() {
     const { windowWidth, windowHeight } = this.props;
     this.props.dispatch(printBegin({ width: windowWidth, height: windowHeight }));
     window.addEventListener('mouseover', this.handlePrintEnd);
   }
-  
+
   handlePrintEnd() {
     this.props.dispatch(printEnd());
-    this.cleanUp();                                
+    this.cleanUp();
   }
-  
-  cleanUp () {
+
+  cleanUp() {
     window.removeEventListener('mouseover', this.handlePrintEnd);
   }
-  
+
   render() {
     return this.props.children;
   }

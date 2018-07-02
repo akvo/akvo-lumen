@@ -10,7 +10,7 @@ const defaultState = {
 };
 
 export default (state = defaultState, action) => {
-  switch(action.type) {
+  switch (action.type) {
     case `${constants.PRINT_BEGIN}`: {
       return {
         isPrinting: true,

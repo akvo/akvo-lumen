@@ -40,7 +40,7 @@ const AggregationError = ({ reason, count, max }) => {
       );
       break;
     default:
-      console.warn(`Unknown reason ${reason}`);
+      console.warn(`Unknown reason ${reason}`); // eslint-disable-line
   }
   return (
     <div className="AggregationError">

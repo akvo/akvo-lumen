@@ -1,10 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import DashboardViewerItem from './DashboardViewerItem';
 import { connect } from 'react-redux';
 import windowSize from 'react-window-size';
-
-import { A4 } from '../../constants/print';
+import DashboardViewerItem from './DashboardViewerItem';
 
 require('./DashboardViewer.scss');
 
@@ -44,7 +42,6 @@ const getSortFunc = layout => (a, b) => {
 };
 
 const getViewportType = (width) => {
-  console.log(width);
   let viewport;
   for (let i = 0; i < viewportLimits.length; i += 1) {
     const entry = viewportLimits[i];
@@ -55,7 +52,7 @@ const getViewportType = (width) => {
     }
   }
   return viewport;
-}
+};
 
 class DashboardViewer extends Component {
   constructor() {
@@ -81,12 +78,12 @@ class DashboardViewer extends Component {
   }
 
   render() {
-    const { dashboard, datasets, metadata, print, windowWidth } = this.props;
+    const { dashboard, datasets, metadata, windowWidth } = this.props;
     const layout = dashboard.layout;
     const sortFunc = getSortFunc(layout);
     const sortedDashboard = getArrayFromObject(dashboard.entities).sort(sortFunc);
     const canvasWidth = windowWidth;
-    console.log(getViewportType(canvasWidth));
+
     return (
       <div
         className="DashboardViewer"
@@ -121,6 +118,7 @@ DashboardViewer.propTypes = {
   visualisations: PropTypes.object,
   datasets: PropTypes.object,
   metadata: PropTypes.object,
+  windowWidth: PropTypes.number,
   dashboard: PropTypes.shape({
     entities: PropTypes.object.isRequired,
     layout: PropTypes.object.isRequired,

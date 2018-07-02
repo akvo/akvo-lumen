@@ -148,8 +148,8 @@ export default class LibraryListingItem extends Component {
             }
           }}
         >
-          <div className='entityIcon'>
-            <img src={getIconUrl(entity)} />
+          <div className="entityIcon">
+            <img src={getIconUrl(entity)} role="presentation" />
           </div>
           <div className="textContents">
             <h3 className="entityName">
