@@ -1,7 +1,10 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import DashboardViewerItem from './DashboardViewerItem';
+import { connect } from 'react-redux';
+import windowSize from 'react-window-size';
 
+import { A4 } from '../../constants/print';
 
 require('./DashboardViewer.scss');
 
@@ -40,25 +43,24 @@ const getSortFunc = layout => (a, b) => {
   return 0;
 };
 
-export default class DashboardViewer extends Component {
+const getViewportType = (width) => {
+  console.log(width);
+  let viewport;
+  for (let i = 0; i < viewportLimits.length; i += 1) {
+    const entry = viewportLimits[i];
+
+    if (width < entry.limit) {
+      viewport = entry.name;
+      break;
+    }
+  }
+  return viewport;
+}
+
+class DashboardViewer extends Component {
   constructor() {
     super();
-    this.state = {
-      canvasWidth: 1080,
-      viewportType: 'large',
-    };
-
     this.getItemFromProps = this.getItemFromProps.bind(this);
-    this.handleResize = this.handleResize.bind(this);
-  }
-
-  componentDidMount() {
-    this.handleResize();
-    window.addEventListener('resize', this.handleResize);
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener('resize', this.handleResize);
   }
 
   getItemFromProps(item) {
@@ -78,38 +80,18 @@ export default class DashboardViewer extends Component {
     }
   }
 
-  handleResize() {
-    const width = this.DashboardViewer.clientWidth;
-    let viewport;
-
-    for (let i = 0; i < viewportLimits.length; i += 1) {
-      const entry = viewportLimits[i];
-
-      if (width < entry.limit) {
-        viewport = entry.name;
-        break;
-      }
-    }
-
-    this.setState({
-      canvasWidth: width,
-      viewportType: viewport,
-    });
-  }
-
   render() {
-    const { dashboard, datasets, metadata } = this.props;
+    const { dashboard, datasets, metadata, print, windowWidth } = this.props;
     const layout = dashboard.layout;
     const sortFunc = getSortFunc(layout);
     const sortedDashboard = getArrayFromObject(dashboard.entities).sort(sortFunc);
-
+    const canvasWidth = windowWidth;
+    console.log(getViewportType(canvasWidth));
     return (
       <div
         className="DashboardViewer"
         ref={(ref) => { this.DashboardViewer = ref; }}
-        style={{
-          width: '100%',
-        }}
+        style={{ width: '100%' }}
       >
         <h1>{dashboard.title}</h1>
         <div
@@ -123,8 +105,8 @@ export default class DashboardViewer extends Component {
               key={item.id}
               item={this.getItemFromProps(item)}
               layout={layout[item.id]}
-              canvasWidth={this.state.canvasWidth}
-              viewportType={this.state.viewportType}
+              canvasWidth={canvasWidth}
+              viewportType={getViewportType(canvasWidth)}
               datasets={datasets}
               metadata={metadata}
             />
@@ -145,3 +127,5 @@ DashboardViewer.propTypes = {
     title: PropTypes.string.isRequired,
   }),
 };
+
+export default connect(({ print }) => ({ print }))(windowSize(DashboardViewer));

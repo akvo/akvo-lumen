@@ -179,3 +179,11 @@
         display: none;
     }
 }
+
+@media print {
+    .WorkspaceNav,
+    .LibraryCreateButton,
+    .LibrarySearch {
+        display: none !important;
+    }
+}

@@ -4,6 +4,7 @@ import { Provider } from 'react-redux';
 import Immutable from 'immutable';
 import fetch from 'isomorphic-fetch';
 import IntlWrapper from './containers/IntlWrapper';
+import PrintProvider from './containers/PrintProvider';
 import VisualisationViewerContainer from './components/visualisation/VisualisationViewerContainer';
 import DashboardViewer from './components/dashboard/DashboardViewer';
 import LumenBranding from './components/common/LumenBranding';
@@ -42,27 +43,29 @@ function renderSuccessfulShare(data, initialState) {
 
   render(
     <Provider store={configureStore()}>
-      <IntlWrapper>
-        <div className="viewer">
-          {data.dashboards ?
-            <DashboardViewer
-              dashboard={data.dashboards[data.dashboardId]}
-              visualisations={data.visualisations}
-              datasets={immutableDatasets}
-              metadata={data.metadata ? data.metadata : null}
-            />
-              :
-              <VisualisationViewerContainer
-                visualisation={data.visualisations[data.visualisationId]}
-                metadata={data.metadata ? data.metadata[data.visualisationId] : null}
+      <PrintProvider>
+        <IntlWrapper>
+          <div className="viewer">
+            {data.dashboards ?
+              <DashboardViewer
+                dashboard={data.dashboards[data.dashboardId]}
+                visualisations={data.visualisations}
                 datasets={immutableDatasets}
+                metadata={data.metadata ? data.metadata : null}
               />
-          }
-          <LumenBranding
-            size={data.dashboards ? 'large' : 'small'}
-          />
-        </div>
-      </IntlWrapper>
+                :
+                <VisualisationViewerContainer
+                  visualisation={data.visualisations[data.visualisationId]}
+                  metadata={data.metadata ? data.metadata[data.visualisationId] : null}
+                  datasets={immutableDatasets}
+                />
+            }
+            <LumenBranding
+              size={data.dashboards ? 'large' : 'small'}
+            />
+          </div>
+        </IntlWrapper>
+      </PrintProvider>
     </Provider>,
     rootElement
   );

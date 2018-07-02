@@ -99,7 +99,6 @@ export default class PieChart extends Component {
 
     if (y < bounds.height / 2) tooltipPosition.top = y - 12;
     else tooltipPosition.bottom = bounds.height - y - 12;
-    console.log(content);
     this.setState({
       tooltipVisible: true,
       tooltipItems: [content],

@@ -7,7 +7,7 @@ import ContextMenu from '../common/ContextMenu';
 import {
   getTitle, getType, getId,
   getErrorMessage, isPending,
-  isFailed, isOk, getStatus,
+  isFailed, isOk, getStatus, getIconUrl,
 } from '../../domain/entity';
 
 function getCollectionContextMenuItem(collections, currentCollection) {
@@ -148,10 +148,9 @@ export default class LibraryListingItem extends Component {
             }
           }}
         >
-          <div
-            className={`entityIcon ${getType(entity) === 'visualisation' ?
-              entity.visualisationType.replace(' ', '-') : ''}`}
-          />
+          <div className='entityIcon'>
+            <img src={getIconUrl(entity)} />
+          </div>
           <div className="textContents">
             <h3 className="entityName">
               {getTitle(entity)}

@@ -104,6 +104,7 @@
     "react-router": "^3.0.5",
     "react-router-redux": "^4.0.8",
     "react-select": "^1.0.0-rc.2",
+    "react-window-size": "^1.2.0",
     "redux": "^3.6.0",
     "redux-actions": "^1.1.0",
     "redux-devtools": "^3.3.1",

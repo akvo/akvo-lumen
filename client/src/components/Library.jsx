@@ -214,7 +214,7 @@ class Library extends Component {
     const sortOrder = query.sort || 'last_modified';
     const isReverseSort = query.reverse === 'true';
     const filterBy = query.filter || 'all';
-    const searchString = query.search || '';
+    const searchString = query.search || ''; 
 
     return (
       <div
