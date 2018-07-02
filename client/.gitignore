@@ -40,3 +40,4 @@ dist
 .DS_Store
 
 e2e-test/cypress/videos
+e2e-test/cypress/screenshots
