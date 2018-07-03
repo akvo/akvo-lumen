@@ -1,6 +1,6 @@
-const baseUrl = process.env.LUMEN_URL || 'http://t1.lumen.local:3030/';
-const username = process.env.LUMEN_USER || 'jerome';
-const password = process.env.LUMEN_PASSWORD || 'password';
+const baseUrl = Cypress.env("LUMEN_URL") || 'http://t1.lumen.local:3030/';
+const username = Cypress.env("LUMEN_USER") || 'jerome';
+const password = Cypress.env("LUMEN_PASSWORD") || 'password';
 const DATASET_LINK = 'https://github.com/lawlesst/vivo-sample-data/raw/master/data/csv/people.csv';
 const datasetName = `Dataset ${Date.now().toString()}`;
 
