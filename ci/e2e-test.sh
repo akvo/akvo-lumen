@@ -11,7 +11,7 @@ else
     DOCKER_COMPOSE_ARGS="-p akvo-lumen-ci -f docker-compose.yml -f docker-compose.ci.yml"
 fi
 
-docker-compose run ${DOCKER_COMPOSE_ARGS} --no-deps \
+docker-compose ${DOCKER_COMPOSE_ARGS} run --no-deps \
     -e LUMEN_URL="${LUMEN_URL}" \
     -e LUMEN_USER="${LUMEN_USER}" \
     -e LUMEN_PASSWORD="${LUMEN_PASSWORD}" \
