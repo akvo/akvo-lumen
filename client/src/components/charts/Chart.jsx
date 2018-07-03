@@ -78,6 +78,11 @@ export default class Chart extends Component {
     width: PropTypes.number,
     height: PropTypes.number,
     onChangeVisualisationSpec: PropTypes.func,
+    showTitle: PropTypes.bool,
+  }
+
+  static defaultProps = {
+    showTitle: true,
   }
 
   constructor() {
@@ -102,6 +107,7 @@ export default class Chart extends Component {
       width,
       height,
       onChangeVisualisationSpec,
+      showTitle,
     } = this.props;
 
     if (!visualisation.data) {
@@ -124,7 +130,9 @@ export default class Chart extends Component {
       );
     }
 
-    const titleHeight = getTitleStyle(visualisation.name, getSize(width)).height * (1 + META_SCALE);
+    const titleHeight = showTitle ?
+      getTitleStyle(visualisation.name, getSize(width)).height * (1 + META_SCALE)
+      : 0;
     const adjustedContainerHeight = ((height - titleHeight) - (titleHeight * META_SCALE)) || 400;
 
     switch (visualisation.visualisationType) {
@@ -201,7 +209,7 @@ export default class Chart extends Component {
   }
 
   render() {
-    const { visualisation, width, height } = this.props;
+    const { visualisation, width, height, showTitle } = this.props;
     const { visualisationType } = visualisation;
     const containerHeight = height || 400;
     const containerWidth = width || 800;
@@ -223,22 +231,26 @@ export default class Chart extends Component {
           height: containerHeight,
         }}
       >
-        <h2 style={titleStyle}>
-          <span>
-            {visualisation.name}
-          </span>
-        </h2>
-        <p className="chartMeta" style={metaStyle}>
-          <span className="capitalize">
-            <FormattedMessage id="data_last_updated" />
-          </span>: {moment(dataset.get('updated')).format('Do MMM YYYY - HH:mm')}
-          {
-            get(visualisation, 'data.common.metadata.sampled') ?
-              <span> (<FormattedMessage id="using_sampled_data" />)</span>
-              :
-              null
-          }
-        </p>
+        {showTitle && (
+          <div className="title">
+            <h2 style={titleStyle}>
+              <span>
+                {visualisation.name}
+              </span>
+            </h2>
+            <p className="chartMeta" style={metaStyle}>
+              <span className="capitalize">
+                <FormattedMessage id="data_last_updated" />
+              </span>: {moment(dataset.get('updated')).format('Do MMM YYYY - HH:mm')}
+              {
+                get(visualisation, 'data.common.metadata.sampled') ?
+                  <span> (<FormattedMessage id="using_sampled_data" />)</span>
+                  :
+                  null
+              }
+            </p>
+          </div>
+        )}
         {this.renderNewChart()}
       </div>
     );

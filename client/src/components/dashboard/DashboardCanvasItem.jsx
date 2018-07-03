@@ -1,11 +1,16 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
+import moment from 'moment';
+
 import VisualisationViewer from '../charts/VisualisationViewer';
 import DashboardCanvasItemEditable from './DashboardCanvasItemEditable';
 import { checkUndefined } from '../../utilities/utils';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 require('./DashboardCanvasItem.scss');
+
+const TITLE_HEIGHT = 60;
 
 const getItemLayout = (props) => {
   let output = null;
@@ -101,12 +106,63 @@ export default class DashboardCanvasItem extends Component {
 
     if (layout !== null) {
       return ({
-        width: (layout.w * unit) - 40,
-        height: (layout.h * unit) - 40,
+        width: (layout.w * unit) - 60,
+        height: (layout.h * unit) - 60 - TITLE_HEIGHT,
       });
     }
 
     return null;
+  }
+
+  getDataset() {
+    const { datasets, item } = this.props;
+    return datasets[item.visualisation.datasetId];
+  }
+
+  getMostRecentlyUpdatedLayerDataset() {
+    const { item, datasets } = this.props;
+    return item.visualisation.spec.layers.map(({ datasetId }) => datasets[datasetId])
+      .sort((a, b) => {
+        if (a.get('updated') < b.get('updated')) return 1;
+        if (a.get('updated') > b.get('updated')) return -1;
+        return 0;
+      })[0];
+  }
+
+  getTitle() {
+    return this.props.item.visualisation.name;
+  }
+
+  getSubTitle() {
+    const dataset = this.getDataset();
+    switch (this.props.item.visualisation.visualisationType) {
+      case 'map': {
+        const mostRecentlyUpdatedLayerDataset = this.getMostRecentlyUpdatedLayerDataset();
+        return mostRecentlyUpdatedLayerDataset ? (
+          <span>
+            <FormattedMessage id="data_last_updated" />
+            : {moment(mostRecentlyUpdatedLayerDataset.get('updated')).format('Do MMM YYYY - HH:mm')}
+          </span>
+        ) : null;
+      }
+      case 'bar':
+      case 'pivot table':
+      case 'scatter':
+      case 'area':
+      case 'line':
+      case 'donut':
+      case 'pie': {
+        return (
+          <span>
+            <FormattedMessage id="data_last_updated" />
+            : {moment(dataset.get('updated')).format('Do MMM YYYY - HH:mm')}
+          </span>
+        );
+      }
+      default: {
+        return ' ';
+      }
+    }
   }
 
   render() {
@@ -123,21 +179,26 @@ export default class DashboardCanvasItem extends Component {
         className="DashboardCanvasItem"
         style={this.state.style}
       >
-        {this.props.item.type === 'visualisation' &&
-          <div
-            className="noPointerEvents itemContainer visualisation"
-          >
-            {getIsDatasetLoaded(this.props) ?
-              <VisualisationViewer
-                metadata={checkUndefined(this.props, 'metadata', this.props.item.visualisation.id)}
-                visualisation={this.props.item.visualisation}
-                datasets={this.props.datasets}
-                width={dimensions.width}
-                height={dimensions.height}
-              /> : <LoadingSpinner />
-            }
+        {this.props.item.type === 'visualisation' && (
+          <div className="itemContainerWrap">
+            <div className="itemTitle">
+              <h2>{this.getTitle()}</h2>
+              <span>{this.getSubTitle()}</span>
+            </div>
+            <div className="noPointerEvents itemContainer visualisation">
+              {getIsDatasetLoaded(this.props) ?
+                <VisualisationViewer
+                  metadata={checkUndefined(this.props, 'metadata', this.props.item.visualisation.id)}
+                  visualisation={this.props.item.visualisation}
+                  datasets={this.props.datasets}
+                  width={dimensions.width}
+                  height={dimensions.height}
+                  showTitle={false}
+                /> : <LoadingSpinner />
+              }
+            </div>
           </div>
-        }
+        )}
         {this.props.item.type === 'text' &&
           <div
             className="itemContainer text"
