@@ -1,13 +1,15 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, FormattedRelative, intlShape } from 'react-intl';
 import LoadingSpinner from '../common/LoadingSpinner';
 import ContextMenu from '../common/ContextMenu';
 import {
   getTitle, getType, getId,
   getErrorMessage, isPending,
   isFailed, isOk, getStatus,
+  getAuthor, getModifiedTimestamp,
+  getSource,
 } from '../../domain/entity';
 
 function getCollectionContextMenuItem(collections, currentCollection) {
@@ -95,6 +97,47 @@ function LibraryListingItemContextMenu({
   );
 }
 
+const VisualisationLabel = ({ children, title = '', className = '' }) => (
+  <div
+    title={title}
+    className={`VisualisationLabel ${className}`}
+  >
+    <p>
+      {children}
+    </p>
+  </div>
+);
+
+VisualisationLabel.propTypes = {
+  children: PropTypes.node.isRequired,
+  className: PropTypes.string,
+  title: PropTypes.string,
+};
+
+const VisualisationTypeLabel = ({ vType, ...rest }) => {
+  let typeLabel = '';
+
+  switch (vType) {
+    case 'map':
+    case 'pivot table':
+      typeLabel = vType;
+      break;
+
+    default:
+      typeLabel = `${vType} chart`;
+  }
+
+  typeLabel = `${typeLabel.substring(0, 1).toUpperCase()}${typeLabel.substring(1, typeLabel.length)}`;
+
+  return (
+    <VisualisationLabel {...rest}>{typeLabel}</VisualisationLabel>
+  );
+};
+
+VisualisationTypeLabel.propTypes = {
+  vType: PropTypes.string.isRequired,
+};
+
 LibraryListingItemContextMenu.propTypes = {
   entityType: PropTypes.string.isRequired,
   onClick: PropTypes.func.isRequired,
@@ -104,6 +147,10 @@ LibraryListingItemContextMenu.propTypes = {
 };
 
 export default class LibraryListingItem extends Component {
+
+  static contextTypes = {
+    intl: intlShape,
+  };
 
   constructor() {
     super();
@@ -121,12 +168,17 @@ export default class LibraryListingItem extends Component {
 
   render() {
     const { entity, onEntityAction } = this.props;
+    const author = getAuthor(entity);
+    const modified = getModifiedTimestamp(entity);
+    const { formatMessage, formatDate, formatTime } = this.context.intl;
+    const entityType = getType(entity);
+    const entitySource = getSource(entity);
 
     return (
       <li
         onMouseLeave={() => this.setState({ contextMenuVisible: false })}
         key={getId(entity)}
-        className={`LibraryListingItem ${getType(entity)} ${getStatus(entity)} ${getId(entity)}`}
+        className={`LibraryListingItem ${entityType} ${getStatus(entity)} ${getId(entity)}`}
         data-test-name={getTitle(entity)}
         data-test-id={getId(entity)}
       >
@@ -137,7 +189,7 @@ export default class LibraryListingItem extends Component {
         }
         <Link
           to={{
-            pathname: `/${getType(entity)}/${getId(entity)}`,
+            pathname: `/${entityType}/${getId(entity)}`,
             state: { from: 'library' },
           }}
           className="entityBody clickable"
@@ -149,7 +201,7 @@ export default class LibraryListingItem extends Component {
           }}
         >
           <div
-            className={`entityIcon ${getType(entity) === 'visualisation' ?
+            className={`entityIcon ${entityType === 'visualisation' ?
               entity.visualisationType.replace(' ', '-') : ''}`}
           />
           <div className="textContents">
@@ -158,14 +210,51 @@ export default class LibraryListingItem extends Component {
               {isFailed(entity) && ' (Import failed)'}
             </h3>
             {isFailed(entity) && <p>{getErrorMessage(entity)}</p>}
-            {isPending(entity) && <p><FormattedMessage id="pending" />...</p>}
-            {getType(entity) === 'visualisation' && (
-              <div className="VisualisationTypeLabel">
-                <p>
-                  <FormattedMessage id={entity.visualisationType} />
-                </p>
-              </div>
-            )}
+            <ul>
+              {isPending(entity) && (
+                <li>
+                  <VisualisationLabel className="VisualisationLabel__type">
+                    <FormattedMessage id="pending" />...
+                  </VisualisationLabel>
+                </li>
+              )}
+              {entityType === 'visualisation' && (
+                <li>
+                  <VisualisationTypeLabel
+                    className="VisualisationLabel__type"
+                    vType={entity.visualisationType}
+                  />
+                </li>
+              )}
+              {entityType === 'dataset' && entitySource && (
+                <li>
+                  <VisualisationLabel className="VisualisationLabel__type">
+                    <FormattedMessage id={entitySource.kind.toLowerCase()} />
+                  </VisualisationLabel>
+                </li>
+              )}
+              <li>
+                {(author || modified) && (
+                  <VisualisationLabel className="VisualisationLabel__meta">
+                    {author && (
+                      <span title={`${formatMessage({ id: 'created_by' })}: ${author}`}>
+                        {author}
+                      </span>
+                    )}
+                    {author && modified && (
+                      <span>&nbsp;|&nbsp;</span>
+                    )}
+                    {modified && (
+                      <span
+                        title={`${formatMessage({ id: 'last_modified' })}: ${formatDate(modified)}, ${formatTime(modified)}`}
+                      >
+                        <FormattedRelative value={modified} />
+                      </span>
+                    )}
+                  </VisualisationLabel>
+                )}
+              </li>
+            </ul>
           </div>
         </Link>
         <div
@@ -189,12 +278,12 @@ export default class LibraryListingItem extends Component {
           </button>
           {this.state.contextMenuVisible &&
             <LibraryListingItemContextMenu
-              entityType={getType(entity)}
+              entityType={entityType}
               collections={this.props.collections}
               currentCollection={this.props.currentCollection}
               onClick={(actionType) => {
                 this.setState({ contextMenuVisible: false });
-                onEntityAction(actionType, getType(entity), getId(entity));
+                onEntityAction(actionType, entityType, getId(entity));
               }}
               onWindowClick={() => this.setState({ contextMenuVisible: false })}
             />}

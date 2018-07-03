@@ -42,5 +42,5 @@
                                     "hasColumnHeaders" (boolean has-column-headers?)}}]
     (insert-data-source tenant-conn {:id data-source-id :spec data-source-spec})
     (insert-job-execution tenant-conn {:id job-id :data-source-id data-source-id})
-    (do-import tenant-conn {:file-upload-path "/tmp/akvo/dash"} error-tracker job-id)
+    (do-import tenant-conn {:file-upload-path "/tmp/akvo/dash"} error-tracker job-id {} (get data-source-spec "source"))
     (:dataset_id (dataset-id-by-job-execution-id tenant-conn {:id job-id}))))

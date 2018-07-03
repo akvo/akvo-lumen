@@ -9,8 +9,8 @@
 
 (defn create
   "Create new raster dataset"
-  [conn config data-source job-execution-id]
-  (impl/create conn config data-source job-execution-id))
+  [conn config claims data-source]
+  (impl/create conn config claims data-source))
 
 (defn fetch
   "Fetch dataset with id"
