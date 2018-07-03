@@ -17,4 +17,5 @@ exec chpst -u akvo:akvo -U akvo:akvo env \
         CYPRESS_LUMEN_URL=${LUMEN_URL} \
         CYPRESS_LUMEN_USER=${LUMEN_USER} \
         CYPRESS_LUMEN_PASSWORD=${LUMEN_PASSWORD} \
+        CYPRESS_RECORD_KEY=${CYPRESS_RECORD_KEY} \
         "/app/run.sh"
