@@ -6,8 +6,16 @@ RUN set -ex; \
     rm -rf /var/lib/apt/lists/* && \
     useradd -d /home/akvo -m -s /bin/bash akvo
 
+RUN mkdir /app
+
+COPY package* /app/
+
+RUN chown -R akvo:akvo /app
+
+USER akvo
+
 WORKDIR /app
-
 RUN npm i cypress
+RUN npm run cypress:verify
 
-CMD ./run.sh
+USER root
