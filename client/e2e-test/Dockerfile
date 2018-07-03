@@ -15,7 +15,6 @@ RUN chown -R akvo:akvo /app
 USER akvo
 
 WORKDIR /app
-RUN npm i cypress
-RUN npm run cypress:verify
+RUN npm i --silent cypress && npm run cypress:verify
 
 USER root
