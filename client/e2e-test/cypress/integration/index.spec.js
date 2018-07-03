@@ -54,8 +54,8 @@ context('Kitchen Sink', () => {
     cy.get('[data-test-id="dataset-menu"] .Select-control').click();
     // Finding dataset option
     cy.get('[role="option"]')
-      .contains(datasetName)
-      .should('have.attr', 'id')
+      .contains("aasdfasdfsadfsdfasdsadffdas")
+      .should('have.attr', 'idxadfasdfqw12312312323423421341')
       .then(optionId => {
         // Selecting dataset
         cy.get(`#${optionId}`).click();
