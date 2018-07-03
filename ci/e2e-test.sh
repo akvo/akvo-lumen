@@ -1,9 +1,18 @@
 #!/usr/bin/env bash
 
-SCRIPT=${1:-script-test}
-DOCKER_COMPOSE_PROJECT=${2:-akvolumen}
-LUMEN_URL=${3:-http://t1.lumen.local:3030/}
-LUMEN_USER=${4:-jerome}
-LUMEN_PASSWORD=${5:-password}
+DOCKER_COMPOSE_PROJECT=${1:-akvolumen}
+LUMEN_URL=${2:-http://t1.lumen.local:3030/}
+LUMEN_USER=${3:-jerome}
+LUMEN_PASSWORD=${4:-password}
 
-docker-compose run --no-deps fe-e2e-tests /app/run-as-user.sh
+if [ "${DOCKER_COMPOSE_PROJECT}" == "akvolumen" ]; then
+    DOCKER_COMPOSE_ARGS=""
+else
+    DOCKER_COMPOSE_ARGS="-p akvo-lumen-ci -f docker-compose.yml -f docker-compose.ci.yml"
+fi
+
+docker-compose run ${DOCKER_COMPOSE_ARGS} --no-deps \
+    -e LUMEN_URL="${LUMEN_URL}" \
+    -e LUMEN_USER="${LUMEN_USER}" \
+    -e LUMEN_PASSWORD="${LUMEN_PASSWORD}" \
+    fe-e2e-tests /app/run-as-user.sh
