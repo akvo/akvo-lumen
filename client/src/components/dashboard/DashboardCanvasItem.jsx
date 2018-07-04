@@ -107,7 +107,7 @@ export default class DashboardCanvasItem extends Component {
     if (layout !== null) {
       return ({
         width: (layout.w * unit) - 60,
-        height: (layout.h * unit) - 60 - TITLE_HEIGHT,
+        height: (layout.h * unit) - 60,
       });
     }
 
@@ -133,6 +133,10 @@ export default class DashboardCanvasItem extends Component {
       return null;
     }
 
+    const titleHeight = this.titleEl ?
+      this.titleEl.getBoundingClientRect().height :
+      TITLE_HEIGHT;
+
     return (
       <div
         data-test-id="dashboard-canvas-item"
@@ -141,7 +145,12 @@ export default class DashboardCanvasItem extends Component {
       >
         {this.props.item.type === 'visualisation' && (
           <div className="itemContainerWrap">
-            <div className="itemTitle">
+            <div
+              className="itemTitle"
+              ref={(c) => {
+                this.titleEl = c;
+              }}
+            >
               <h2>{getTitle(this.props.item.visualisation)}</h2>
               <span>{this.getSubTitle()}</span>
             </div>
@@ -152,7 +161,7 @@ export default class DashboardCanvasItem extends Component {
                   visualisation={this.props.item.visualisation}
                   datasets={this.props.datasets}
                   width={dimensions.width}
-                  height={dimensions.height}
+                  height={dimensions.height - titleHeight}
                   showTitle={false}
                 /> : <LoadingSpinner />
               }

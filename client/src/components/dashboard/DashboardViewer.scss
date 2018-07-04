@@ -9,7 +9,7 @@ html, body, #root {
     height: 100%;
     background-color: $dashboardBG;
     flex-direction: column;
-    overflow: auto;
+    overflow: hidden;
     h1 {
         line-height: 1.4em;
         padding: 0.5em;

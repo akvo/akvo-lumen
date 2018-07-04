@@ -76,6 +76,9 @@ export default class DashboardViewerItem extends Component {
     const isText = item.type === 'text';
     const isVisualisation = item.type === 'visualisation';
     const style = this.getItemStyle();
+    const titleHeight = this.titleEl ?
+      this.titleEl.getBoundingClientRect().height :
+      TITLE_HEIGHT;
 
     return (
       <div
@@ -86,7 +89,12 @@ export default class DashboardViewerItem extends Component {
           <div
             className="itemContainer visualisation"
           >
-            <div className="itemTitle">
+            <div
+              className="itemTitle"
+              ref={(c) => {
+                this.titleEl = c;
+              }}
+            >
               <h2>{getTitle(item.visualisation)}</h2>
               <span>{this.getSubTitle()}</span>
             </div>
@@ -96,7 +104,7 @@ export default class DashboardViewerItem extends Component {
                 this.props.metadata[item.visualisation.id] : null}
               datasets={this.props.datasets}
               width={style.width - (cPadding * 2)}
-              height={style.height - (cPadding * 2) - TITLE_HEIGHT}
+              height={style.height - (cPadding * 2) - titleHeight}
               showTitle={false}
             />
           </div>
