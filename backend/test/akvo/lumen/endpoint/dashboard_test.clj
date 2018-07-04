@@ -73,7 +73,7 @@
   (testing "Dashboard"
     (let [v-id               (-> (all-visualisations *tenant-conn*) first :id)
           d-spec             (dashboard-spec v-id)
-          {dashboard-id :id} (variant/value (dashboard/create *tenant-conn* d-spec))]
+          {dashboard-id :id} (variant/value (dashboard/create *tenant-conn* d-spec {}))]
       (is (not (nil? dashboard-id)))
 
       (testing "Get dashboard"

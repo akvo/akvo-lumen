@@ -28,7 +28,7 @@
       (get "id")))
 
 (defn create-dashboard [tenant-conn]
-  (-> (dashboard/create tenant-conn {"title" ""})
+  (-> (dashboard/create tenant-conn {"title" ""} {})
       variant/value
       (get :id)))
 
