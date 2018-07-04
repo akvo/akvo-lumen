@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router';
+import itsSet from 'its-set';
 import { FormattedMessage, FormattedRelative, intlShape } from 'react-intl';
 import LoadingSpinner from '../common/LoadingSpinner';
 import ContextMenu from '../common/ContextMenu';
@@ -226,13 +227,13 @@ export default class LibraryListingItem extends Component {
                   />
                 </li>
               )}
-              {entityType === 'dataset' && entitySource && (
+              {(entityType === 'dataset' && itsSet(entitySource, 'kind')) ? (
                 <li>
                   <VisualisationLabel className="VisualisationLabel__type">
                     <FormattedMessage id={entitySource.kind.toLowerCase()} />
                   </VisualisationLabel>
                 </li>
-              )}
+              ) : null}
               <li>
                 {(author || modified) && (
                   <VisualisationLabel className="VisualisationLabel__meta">
