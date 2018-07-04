@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import moment from 'moment';
 
 import AsyncVisualisationViewer from '../charts/AsyncVisualisationViewer';
+import { getTitle, getLastUpdated } from '../../utilities/chart';
 
 require('./DashboardViewerItem.scss');
 
@@ -60,65 +60,26 @@ export default class DashboardViewerItem extends Component {
     }
   }
 
-  getDataset() {
-    const { datasets, item } = this.props;
-    return datasets[item.visualisation.datasetId];
-  }
-
-  getMostRecentlyUpdatedLayerDataset() {
-    const { item, datasets } = this.props;
-    return item.visualisation.spec.layers.map(({ datasetId }) => datasets[datasetId])
-      .sort((a, b) => {
-        if (a.get('updated') < b.get('updated')) return 1;
-        if (a.get('updated') > b.get('updated')) return -1;
-        return 0;
-      })[0];
-  }
-
-  getTitle() {
-    return this.props.item.visualisation.name;
-  }
-
   getSubTitle() {
-    const dataset = this.getDataset();
-    switch (this.props.item.visualisation.visualisationType) {
-      case 'map': {
-        const mostRecentlyUpdatedLayerDataset = this.getMostRecentlyUpdatedLayerDataset();
-        return mostRecentlyUpdatedLayerDataset ? (
-          <span>
-            <FormattedMessage id="data_last_updated" />
-            : {moment(mostRecentlyUpdatedLayerDataset.get('updated')).format('Do MMM YYYY - HH:mm')}
-          </span>
-        ) : null;
-      }
-      case 'bar':
-      case 'pivot table':
-      case 'scatter':
-      case 'area':
-      case 'line':
-      case 'donut':
-      case 'pie': {
-        return (
-          <span>
-            <FormattedMessage id="data_last_updated" />
-            : {moment(dataset.get('updated')).format('Do MMM YYYY - HH:mm')}
-          </span>
-        );
-      }
-      default: {
-        return ' ';
-      }
-    }
+    const { item, datasets } = this.props;
+    const lastUpdated = getLastUpdated({ datasets, visualisation: item.visualisation });
+    return lastUpdated ? (
+      <span>
+        <FormattedMessage id="data_last_updated" />
+        : {lastUpdated}
+      </span>
+    ) : null;
   }
 
   render() {
-    const isText = this.props.item.type === 'text';
-    const isVisualisation = this.props.item.type === 'visualisation';
+    const { item } = this.props;
+    const isText = item.type === 'text';
+    const isVisualisation = item.type === 'visualisation';
     const style = this.getItemStyle();
 
     return (
       <div
-        className={`DashboardViewerItem DashboardCanvasItem ${this.props.item.type}`}
+        className={`DashboardViewerItem DashboardCanvasItem ${item.type}`}
         style={style}
       >
         {isVisualisation &&
@@ -126,13 +87,13 @@ export default class DashboardViewerItem extends Component {
             className="itemContainer visualisation"
           >
             <div className="itemTitle">
-              <h2>{this.getTitle()}</h2>
+              <h2>{getTitle(item.visualisation)}</h2>
               <span>{this.getSubTitle()}</span>
             </div>
             <AsyncVisualisationViewer
-              visualisation={this.props.item.visualisation}
+              visualisation={item.visualisation}
               metadata={this.props.metadata ?
-                this.props.metadata[this.props.item.visualisation.id] : null}
+                this.props.metadata[item.visualisation.id] : null}
               datasets={this.props.datasets}
               width={style.width - (cPadding * 2)}
               height={style.height - (cPadding * 2) - TITLE_HEIGHT}
@@ -148,7 +109,7 @@ export default class DashboardViewerItem extends Component {
               lineHeight: '1.4em',
             }}
           >
-            {this.props.item.content}
+            {item.content}
           </div>
         }
       </div>

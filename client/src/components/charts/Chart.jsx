@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import moment from 'moment';
 import get from 'lodash/get';
 import { FormattedMessage } from 'react-intl';
 import AggregationError from './AggregationError';
@@ -9,6 +8,7 @@ import BarChart from './BarChart';
 import PieChart from './PieChart';
 import ScatterChart from './ScatterChart';
 import { defaultPrimaryColor, palette } from '../../utilities/visualisationColors';
+import { getTitle, getLastUpdated } from '../../utilities/chart';
 
 require('./Chart.scss');
 
@@ -208,6 +208,18 @@ export default class Chart extends Component {
     return null;
   }
 
+  renderLastUpdated() {
+    const { visualisation, datasets } = this.props;
+    const lastUpdated = getLastUpdated({ datasets, visualisation });
+    return lastUpdated ? (
+      <span>
+        <span className="capitalize">
+          <FormattedMessage id="data_last_updated" />: {lastUpdated}
+        </span>
+      </span>
+    ) : null;
+  }
+
   render() {
     const { visualisation, width, height, showTitle } = this.props;
     const { visualisationType } = visualisation;
@@ -215,7 +227,6 @@ export default class Chart extends Component {
     const containerWidth = width || 800;
     const chartSize = getSize(containerWidth);
     const className = `Chart ${visualisationType} ${chartSize}`;
-    const dataset = this.getDataset();
     const titleStyle = getTitleStyle(visualisation.name, chartSize);
     const metaStyle = {
       height: titleStyle.height * META_SCALE,
@@ -235,18 +246,16 @@ export default class Chart extends Component {
           <div className="title">
             <h2 style={titleStyle}>
               <span>
-                {visualisation.name}
+                {getTitle(visualisation)}
               </span>
             </h2>
             <p className="chartMeta" style={metaStyle}>
-              <span className="capitalize">
-                <FormattedMessage id="data_last_updated" />
-              </span>: {moment(dataset.get('updated')).format('Do MMM YYYY - HH:mm')}
+              {this.renderLastUpdated()}
               {
-                get(visualisation, 'data.common.metadata.sampled') ?
+                get(visualisation, 'data.common.metadata.sampled') ? (
                   <span> (<FormattedMessage id="using_sampled_data" />)</span>
-                  :
-                  null
+                ) :
+                null
               }
             </p>
           </div>

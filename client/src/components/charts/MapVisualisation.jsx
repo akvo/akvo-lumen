@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 import leaflet from 'leaflet';
 import { isEqual, cloneDeep, get } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-import moment from 'moment';
 import leafletUtfGrid from '../../vendor/leaflet.utfgrid';
 import * as chart from '../../utilities/chart';
 import Spinner from '../common/LoadingSpinner';
@@ -251,16 +250,6 @@ export default class MapVisualisation extends Component {
     this.renderLeafletMap(nextProps);
   }
 
-  getMostRecentlyUpdatedLayerDataset() {
-    const { visualisation, datasets } = this.props;
-    return visualisation.spec.layers.map(({ datasetId }) => datasets[datasetId])
-      .sort((a, b) => {
-        if (a.get('updated') < b.get('updated')) return 1;
-        if (a.get('updated') > b.get('updated')) return -1;
-        return 0;
-      })[0];
-  }
-
   renderLeafletLayer(layer, id, layerGroupId, layerMetadata, baseURL, map) {
     if (!this[`storedSpec${id}`]) {
       // Store a copy of the layer spec to compare to future changes so we know when to re-render
@@ -462,7 +451,7 @@ export default class MapVisualisation extends Component {
   }
 
   render() {
-    const { visualisation, metadata, width, height, showTitle } = this.props;
+    const { visualisation, metadata, width, height, showTitle, datasets } = this.props;
     const title = visualisation.name || '';
     const titleLength = title.toString().length;
     const titleHeight = titleLength > 48 ? 56 : 36;
@@ -482,7 +471,7 @@ export default class MapVisualisation extends Component {
       metadata.layerMetadata &&
       metadata.layerMetadata.length
     );
-    const mostRecentlyUpdatedLayerDataset = this.getMostRecentlyUpdatedLayerDataset();
+    const lastUpdated = chart.getLastUpdated({ visualisation, datasets });
     return (
       <div
         className="MapVisualisation dashChart"
@@ -501,10 +490,10 @@ export default class MapVisualisation extends Component {
               }}
             >
               <span>
-                {visualisation.name}
+                {chart.getTitle(visualisation)}
               </span>
             </h2>
-            {mostRecentlyUpdatedLayerDataset && (
+            {lastUpdated && (
               <p
                 className="chartMeta"
                 style={{
@@ -515,7 +504,7 @@ export default class MapVisualisation extends Component {
               >
                 <span className="capitalize">
                   <FormattedMessage id="data_last_updated" />
-                </span>: {moment(mostRecentlyUpdatedLayerDataset.get('updated')).format('Do MMM YYYY - HH:mm')}
+                </span>: {lastUpdated}
               </p>
             )}
           </div>
@@ -560,6 +549,6 @@ MapVisualisation.propTypes = {
   showTitle: PropTypes.bool,
 };
 
-MapVisualisation.deafultProps = {
+MapVisualisation.defaultProps = {
   showTitle: true,
 };
