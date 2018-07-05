@@ -68,6 +68,7 @@
        (-> dataset
            (select-keys [:columns :created :id :modified :rows :status :title :transformations :updated])
            (rename-keys {:title :name})
+           (assoc :rows data)
            (assoc :status "OK"))))
     (lib/not-found {:error "Not found"})))
 
