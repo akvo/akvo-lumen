@@ -66,6 +66,4 @@ log Waiting for k8s to be healthy
 ./ci/helpers/wait-for-k8s-deployment-to-be-healthy.sh
 
 log Running end to end tests against the Kubernetes TEST environment
-./ci/e2e-test.sh script-test akvolumenci https://dark-lumencitest.akvotest.org/ "$USERNAME" "$PASSWORD"
-log Cleaning up environment
-./ci/e2e-test.sh clean-all akvolumenci https://dark-lumencitest.akvotest.org/ "$USERNAME" "$PASSWORD" || echo "Ignoring error during cleanup"
+./ci/e2e-test.sh akvolumenci https://dark-lumencitest.akvotest.org/ "$USERNAME" "$PASSWORD"

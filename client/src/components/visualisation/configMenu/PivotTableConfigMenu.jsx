@@ -192,27 +192,30 @@ export default class PivotTableConfigMenu extends Component {
         </div>
         <hr />
         <Subtitle><FormattedMessage id="columns" /></Subtitle>
-        <SelectInput
-          placeholderId="select_a_column"
-          labelTextId="columns"
-          choice={spec.categoryColumn !== null ? spec.categoryColumn.toString() : null}
-          name="categoryColumnInput"
-          options={filterColumns(columnOptions, ['number', 'date', 'text'])}
-          onChange={(value) => {
-            const change = { categoryColumn: value };
 
-            if (value == null && spec.aggregation !== 'count') {
-              change.aggregation = 'count';
-              change.valueColumn = null;
-            }
-            if (value !== spec.categoryColumn) {
-              change.categoryTitle = null;
-              change.filters = spec.filters.filter(filter => filter.origin !== 'pivot-column');
-            }
-            onChangeSpec(change);
-          }}
-          clearable
-        />
+        <div data-test-id="column-menu">
+          <SelectInput
+            placeholderId="select_a_column"
+            labelTextId="columns"
+            choice={spec.categoryColumn !== null ? spec.categoryColumn.toString() : null}
+            name="categoryColumnInput"
+            options={filterColumns(columnOptions, ['number', 'date', 'text'])}
+            onChange={(value) => {
+              const change = { categoryColumn: value };
+
+              if (value == null && spec.aggregation !== 'count') {
+                change.aggregation = 'count';
+                change.valueColumn = null;
+              }
+              if (value !== spec.categoryColumn) {
+                change.categoryTitle = null;
+                change.filters = spec.filters.filter(filter => filter.origin !== 'pivot-column');
+              }
+              onChangeSpec(change);
+            }}
+            clearable
+          />
+        </div>
         {spec.categoryColumn !== null &&
           <div>
             <UniqueValueMenu
