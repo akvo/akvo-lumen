@@ -10,6 +10,30 @@ import { filterColumns } from '../../../utilities/utils';
 const getColumnTitle = (columnName, columnOptions) =>
   columnOptions.find(obj => obj.value === columnName).title;
 
+const getAxisAutoLabels = (spec, columnOptions) => {
+  let autoAxisLabelY = spec.metricColumnY ? getColumnTitle(spec.metricColumnY, columnOptions) : '';
+  let autoAxisLabelX = spec.bucketColumn ? getColumnTitle(spec.bucketColumn, columnOptions) : '';
+
+  if (spec.bucketColumn !== null) {
+    autoAxisLabelY += ` - ${spec.metricAggregation}`;
+
+    if (spec.truncateSize !== null) {
+      let truncateOrderIndicator;
+
+      if (spec.sort === 'asc') {
+        truncateOrderIndicator = 'bottom';
+      } else if (spec.sort === 'dsc') {
+        truncateOrderIndicator = 'top';
+      } else {
+        truncateOrderIndicator = 'first';
+      }
+
+      autoAxisLabelX += ` - ${truncateOrderIndicator} ${spec.truncateSize}`;
+    }
+  }
+  return { x: autoAxisLabelX, y: autoAxisLabelY };
+};
+
 const handleChangeSpec = (change, oldSpec, onChangeSpec, columnOptions) => {
   const newSpec = Object.assign({}, oldSpec, change);
   const axisLabelUpdateTriggers = [
@@ -30,29 +54,15 @@ const handleChangeSpec = (change, oldSpec, onChangeSpec, columnOptions) => {
     onChangeSpec(change);
   }
 
-  let autoAxisLabelY = newSpec.metricColumnY ? getColumnTitle(newSpec.metricColumnY, columnOptions) : '';
-  let autoAxisLabelX = newSpec.bucketColumn ? getColumnTitle(newSpec.bucketColumn, columnOptions) : '';
+  const oldAutoLabels = getAxisAutoLabels(oldSpec, columnOptions);
+  const newAutoLabels = getAxisAutoLabels(newSpec, columnOptions);
 
-  if (newSpec.bucketColumn !== null) {
-    autoAxisLabelY += ` - ${newSpec.metricAggregation}`;
-
-    if (newSpec.truncateSize !== null) {
-      let truncateOrderIndicator;
-
-      if (newSpec.sort === 'asc') {
-        truncateOrderIndicator = 'bottom';
-      } else if (newSpec.sort === 'dsc') {
-        truncateOrderIndicator = 'top';
-      } else {
-        truncateOrderIndicator = 'first';
-      }
-
-      autoAxisLabelX += ` - ${truncateOrderIndicator} ${newSpec.truncateSize}`;
-    }
-  }
-
-  const axisLabelX = newSpec.axisLabelXFromUser ? newSpec.axisLabelX : autoAxisLabelX;
-  const axisLabelY = newSpec.axisLabelYFromUser ? newSpec.axisLabelY : autoAxisLabelY;
+  const axisLabelX = oldAutoLabels.x !== newAutoLabels.x ? // eslint-disable-line
+    newAutoLabels.x :
+    (newSpec.axisLabelXFromUser ? newSpec.axisLabelX : newAutoLabels.x);
+  const axisLabelY = oldAutoLabels.y !== newAutoLabels.y ? // eslint-disable-line
+    newAutoLabels.y :
+    (newSpec.axisLabelYFromUser ? newSpec.axisLabelY : newAutoLabels.y);
 
   const finalSpec = Object.assign({}, newSpec, { axisLabelY, axisLabelX });
 
