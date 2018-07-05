@@ -52,7 +52,7 @@ export function getAuthor(entity) {
   const result = author ?
     `${author.given_name ? `${author.given_name} ` : ''}${author.family_name ? author.family_name : ''}` :
     '';
-  return result.length ? result : null;
+  return result.length ? result : author.email;
 }
 
 export function isDataset(entity) {
