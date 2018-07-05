@@ -21,7 +21,7 @@
 (defmethod visualisation "pivot table"
   [tenant-conn visualisation config]
   (let [dataset-id (:datasetId visualisation)
-        [dataset-tag dataset] (dataset/fetch tenant-conn dataset-id)
+        [dataset-tag dataset] (dataset/fetch-metadata tenant-conn dataset-id)
         [tag query-result] (aggregation/query tenant-conn
                                               dataset-id
                                               "pivot"
@@ -29,12 +29,38 @@
     (when (and (= tag ::lib/ok)
                (= dataset-tag ::lib/ok))
       {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}
-        "datasets" { dataset-id (dissoc dataset :rows)}})))
+        "datasets" { dataset-id dataset}})))
+
+(defmethod visualisation "line"
+  [tenant-conn visualisation config]
+  (let [dataset-id (:datasetId visualisation)
+        [dataset-tag dataset] (dataset/fetch-metadata tenant-conn dataset-id)
+        [tag query-result] (aggregation/query tenant-conn
+                                              dataset-id
+                                              "line"
+                                              (:spec visualisation))]
+    (when (and (= tag ::lib/ok)
+               (= dataset-tag ::lib/ok))
+      {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}
+        "datasets" { dataset-id dataset}})))
+
+(defmethod visualisation "area"
+  [tenant-conn visualisation config]
+  (let [dataset-id (:datasetId visualisation)
+        [dataset-tag dataset] (dataset/fetch-metadata tenant-conn dataset-id)
+        [tag query-result] (aggregation/query tenant-conn
+                                              dataset-id
+                                              "line"
+                                              (:spec visualisation))]
+    (when (and (= tag ::lib/ok)
+               (= dataset-tag ::lib/ok))
+      {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}
+        "datasets" { dataset-id dataset}})))
 
 (defmethod visualisation "pie"
   [tenant-conn visualisation config]
   (let [dataset-id (:datasetId visualisation)
-        [dataset-tag dataset] (dataset/fetch tenant-conn dataset-id)
+        [dataset-tag dataset] (dataset/fetch-metadata tenant-conn dataset-id)
         [tag query-result] (aggregation/query tenant-conn
                                               dataset-id
                                               "pie"
@@ -42,12 +68,12 @@
     (when (and (= tag ::lib/ok)
                (= dataset-tag ::lib/ok))
       {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}
-        "datasets" { dataset-id (dissoc dataset :rows)}})))
+        "datasets" { dataset-id dataset}})))
 
 (defmethod visualisation "donut"
   [tenant-conn visualisation config]
   (let [dataset-id (:datasetId visualisation)
-        [dataset-tag dataset] (dataset/fetch tenant-conn dataset-id)
+        [dataset-tag dataset] (dataset/fetch-metadata tenant-conn dataset-id)
         [tag query-result] (aggregation/query tenant-conn
                                               dataset-id
                                               "pie"
@@ -55,7 +81,33 @@
     (when (and (= tag ::lib/ok)
                (= dataset-tag ::lib/ok))
       {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}
-        "datasets" { dataset-id (dissoc dataset :rows)}})))
+        "datasets" { dataset-id dataset}})))
+
+(defmethod visualisation "bar"
+  [tenant-conn visualisation config]
+  (let [dataset-id (:datasetId visualisation)
+        [dataset-tag dataset] (dataset/fetch-metadata tenant-conn dataset-id)
+        [tag query-result] (aggregation/query tenant-conn
+                                              dataset-id
+                                              "bar"
+                                              (:spec visualisation))]
+    (when (and (= tag ::lib/ok)
+               (= dataset-tag ::lib/ok))
+      {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}
+        "datasets" { dataset-id dataset }})))
+
+(defmethod visualisation "scatter"
+  [tenant-conn visualisation config]
+  (let [dataset-id (:datasetId visualisation)
+        [dataset-tag dataset] (dataset/fetch-metadata tenant-conn dataset-id)
+        [tag query-result] (aggregation/query tenant-conn
+                                              dataset-id
+                                              "scatter"
+                                              (:spec visualisation))]
+    (when (and (= tag ::lib/ok)
+               (= dataset-tag ::lib/ok))
+      {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}
+        "datasets" { dataset-id dataset}})))
 
 (defmethod visualisation "map"
   [tenant-conn visualisation {:keys [windshaft-url]}]
@@ -63,10 +115,10 @@
     (if (some #(get % "datasetId") layers)
       (let [dataset-id (some #(get % "datasetId") layers)
               [map-data-tag map-data] (maps/create tenant-conn windshaft-url layers)
-              [dataset-tag dataset] (dataset/fetch tenant-conn dataset-id)]
+              [dataset-tag dataset] (dataset/fetch-metadata tenant-conn dataset-id)]
           (when (and (= map-data-tag ::lib/ok)
                      (= dataset-tag ::lib/ok))
-            {"datasets" {dataset-id (dissoc dataset :rows)}
+            {"datasets" {dataset-id dataset}
              "visualisations" {(:id visualisation) (merge visualisation map-data)}
              "metadata" {(:id visualisation) map-data}}))
       (let [[map-data-tag map-data] (maps/create tenant-conn windshaft-url layers)]
@@ -77,7 +129,7 @@
 (defmethod visualisation :default
   [tenant-conn visualisation config]
   (let [dataset-id (:datasetId visualisation)
-        [tag dataset] (dataset/fetch tenant-conn dataset-id)]
+        [tag dataset] (dataset/fetch-metadata tenant-conn dataset-id)]
     (when (= tag ::lib/ok)
       {"datasets" {dataset-id dataset}
        "visualisations" {(:id visualisation) visualisation}})))

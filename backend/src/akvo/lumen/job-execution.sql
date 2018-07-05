@@ -10,11 +10,6 @@ INSERT INTO job_execution(id, data_source_id, type)
 INSERT INTO job_execution(id, data_source_id, type)
      VALUES (:id, :data-source-id, 'UPDATE');
 
--- :name insert-dataset :! :n
--- :doc Insert new dataset
-INSERT INTO dataset(id, title, description)
-VALUES (:id, :title, :description);
-
 -- :name insert-dataset-version :! :n
 -- :doc Insert new dataset version
 INSERT INTO dataset_version(id, dataset_id, job_execution_id, table_name, imported_table_name, version, columns, transformations)

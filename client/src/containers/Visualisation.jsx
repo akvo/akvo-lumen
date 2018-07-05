@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import update from 'react-addons-update';
 import isEmpty from 'lodash/isEmpty';
 import get from 'lodash/get';
+import { intlShape, injectIntl } from 'react-intl';
 import ShareEntity from '../components/modals/ShareEntity';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import NavigationPrompt from '../components/common/NavigationPrompt';
@@ -24,15 +25,15 @@ require('../components/visualisation/Visualisation.scss');
 
 class Visualisation extends Component {
 
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       isShareModalVisible: false,
       isUnsavedChanges: false,
       isSavePending: false,
       visualisation: {
         type: 'visualisation',
-        name: 'Untitled visualisation',
+        name: props.intl.formatMessage({ id: 'untitled_visualisation' }),
         visualisationType: null,
         datasetId: null,
         spec: {},
@@ -208,7 +209,9 @@ class Visualisation extends Component {
   handleTrackPageView(visualisation) {
     if (!this.state.hasTrackedPageView) {
       this.setState({ hasTrackedPageView: true }, () => {
-        trackPageView(`Visualisation: ${visualisation.name || 'Untitled visualisation'}`);
+        trackPageView(`Visualisation: ${
+          visualisation.name || this.props.intl.formatMessage({ id: 'untitled_visualisation' })
+        }`);
       });
     }
   }
@@ -238,7 +241,7 @@ class Visualisation extends Component {
     }
     if (!this.props.library.datasets[datasetId]
       || !this.props.library.datasets[datasetId].get('columns')) {
-      this.props.dispatch(fetchDataset(datasetId));
+      this.props.dispatch(fetchDataset(datasetId, true));
     }
   }
 
@@ -379,10 +382,11 @@ class Visualisation extends Component {
 }
 
 Visualisation.propTypes = {
+  intl: intlShape,
   dispatch: PropTypes.func.isRequired,
   library: PropTypes.object.isRequired,
   location: PropTypes.object.isRequired,
   params: PropTypes.object,
 };
 
-export default connect(state => state)(Visualisation);
+export default connect(state => state)(injectIntl(Visualisation));

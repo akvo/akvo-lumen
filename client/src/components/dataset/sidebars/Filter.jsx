@@ -24,6 +24,7 @@ export default class Filter extends Component {
         op: 'core/filter-column',
         args: {
           columnName: this.props.column.get('columnName'),
+          columnTitle: this.props.column.get('title'),
           expression: { is: '' },
         },
         onError: 'fail',

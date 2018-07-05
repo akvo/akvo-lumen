@@ -2,12 +2,13 @@ import React, { Component } from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 import leaflet from 'leaflet';
-import { isEqual, cloneDeep } from 'lodash';
+import { isEqual, cloneDeep, get } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import moment from 'moment';
 import leafletUtfGrid from '../../vendor/leaflet.utfgrid';
 import * as chart from '../../utilities/chart';
 import Spinner from '../common/LoadingSpinner';
+import { trackEvent } from '../../utilities/analytics';
 
 require('../../../node_modules/leaflet/dist/leaflet.css');
 require('./MapVisualisation.scss');
@@ -62,7 +63,7 @@ const wrapLabel = (str) => {
 
 const LegendEntry = ({ singleMetadata, layer }) => (
   <div className="LegendEntry">
-    {Boolean(singleMetadata.pointColorMapping) &&
+    {Boolean(get(singleMetadata, 'pointColorMapping')) &&
       <div className="container">
         <h4>{layer.title}</h4>
         <h5>{`${singleMetadata.pointColorMappingTitle}`}</h5>
@@ -87,7 +88,7 @@ const LegendEntry = ({ singleMetadata, layer }) => (
         </div>
       </div>
     }
-    {Boolean(singleMetadata.shapeColorMapping) &&
+    {Boolean(get(singleMetadata, 'shapeColorMapping')) &&
       <div className="container">
         <h4>{layer.title}</h4>
         <h5>{singleMetadata.shapeColorMappingTitle}</h5>
@@ -109,7 +110,7 @@ const LegendEntry = ({ singleMetadata, layer }) => (
         </div>
       </div>
     }
-    {Boolean(layer.layerType === 'raster') &&
+    {Boolean(singleMetadata && layer.layerType === 'raster') &&
       <div className="container">
         <h4>{layer.title}</h4>
         <h5>Raster layer</h5>
@@ -239,6 +240,9 @@ export default class MapVisualisation extends Component {
     super();
     this.renderLeafletLayer = this.renderLeafletLayer.bind(this);
     this.renderLeafletMap = this.renderLeafletMap.bind(this);
+    this.state = {
+      hasTrackedLayerTypes: false,
+    };
   }
   componentDidMount() {
     this.renderLeafletMap(this.props);
@@ -417,8 +421,18 @@ export default class MapVisualisation extends Component {
 
     const newSpec = nextProps.visualisation.spec || {};
 
+    if (get(newSpec, 'layers.length') && !this.state.hasTrackedLayerTypes) {
+      this.setState({
+        hasTrackedLayerTypes: true,
+      }, () => {
+        newSpec.layers.forEach(({ layerType }) => {
+          trackEvent('Render map layer type:', layerType || 'raster');
+        });
+      });
+    }
+
     // Add or update the windshaft tile layer if necessary
-    if (newSpec.layers.length === 0 && this.dataLayer) {
+    if (get(newSpec, 'layers.length') === 0 && this.dataLayer) {
       map.removeLayer(this.dataLayer);
       this.dataLayer = null;
     } else if (layerGroupId) {

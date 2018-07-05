@@ -106,6 +106,9 @@
                 right: 0.3rem;
                 top: 0.3rem;
             }
+            &.invalid {
+                background-color: $lightErrorRed;
+            }
         }
 
         .addFilterContainer {

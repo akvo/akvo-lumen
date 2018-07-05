@@ -6,6 +6,7 @@
             [akvo.lumen.update :as update]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
+            [clojure.set :refer (rename-keys)]
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
@@ -43,12 +44,9 @@
             table-name
             order-by-expr)))
 
-(defn fetch [conn id]
+(defn fetch-metadata [conn id]
   (if-let [dataset (dataset-by-id conn {:id id})]
-    (let [columns (remove #(get % "hidden") (:columns dataset))
-          data (rest (jdbc/query conn
-                                 [(select-data-sql (:table-name dataset) columns)]
-                                 {:as-arrays? true}))]
+    (let [columns (remove #(get % "hidden") (:columns dataset))]
       (lib/ok
        {:id id
         :name (:title dataset)
@@ -57,8 +55,20 @@
         :updated (:updated dataset)
         :status "OK"
         :transformations (:transformations dataset)
-        :columns columns
-        :rows data}))
+        :columns columns}))
+    (lib/not-found {:error "Not found"})))
+
+(defn fetch [conn id]
+  (if-let [dataset (dataset-by-id conn {:id id})]
+    (let [columns (remove #(get % "hidden") (:columns dataset))
+          data (rest (jdbc/query conn
+                                 [(select-data-sql (:table-name dataset) columns)]
+                                 {:as-arrays? true}))]
+      (lib/ok
+       (-> dataset
+           (select-keys [:columns :created :id :modified :rows :status :title :transformations :updated])
+           (rename-keys {:title :name})
+           (assoc :status "OK"))))
     (lib/not-found {:error "Not found"})))
 
 

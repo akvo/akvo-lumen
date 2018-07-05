@@ -76,7 +76,7 @@ export default function BarConfigMenu(props) {
         labelTextId="metric_column"
         choice={spec.metricColumnY !== null ? spec.metricColumnY.toString() : null}
         name="metricColumnYInput"
-        options={filterColumns(columnOptions, ['number', 'date', 'text'])}
+        options={filterColumns(columnOptions, ['number'])}
         onChange={value => handleChangeSpec({
           metricColumnY: value,
         }, spec, onChangeSpec, columnOptions)}
@@ -110,7 +110,7 @@ export default function BarConfigMenu(props) {
         choice={spec.bucketColumn !== null ?
           spec.bucketColumn.toString() : null}
         name="xGroupColumnMenu"
-        options={filterColumns(columnOptions, ['number', 'date', 'text'])}
+        options={filterColumns(columnOptions, ['number', 'text'])}
         clearable
         onChange={value => handleChangeSpec({
           bucketColumn: value,
@@ -161,7 +161,7 @@ export default function BarConfigMenu(props) {
             choice={spec.subBucketColumn !== null ?
               spec.subBucketColumn.toString() : null}
             name="subGroupColumnMenu"
-            options={filterColumns(columnOptions, ['number', 'date', 'text'])}
+            options={filterColumns(columnOptions, ['number', 'text'])}
             clearable
             disabled={spec.bucketColumn === null}
             onChange={value => handleChangeSpec({

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Immutable from 'immutable';
+import { FormattedMessage } from 'react-intl';
 import SidebarHeader from './SidebarHeader';
 import SidebarControls from './SidebarControls';
 
@@ -45,12 +46,12 @@ export default class RenameColumn extends Component {
         className="DataTableSidebar"
       >
         <SidebarHeader onClose={onClose}>
-          Rename Column
+          <FormattedMessage id="rename_column" />
         </SidebarHeader>
         <div className="inputs">
           <div className="inputGroup">
             <label htmlFor="titleTextInput">
-              New column title
+              <FormattedMessage id="new_column_title" />
             </label>
             <input
               value={args.get('newColumnTitle')}
@@ -61,7 +62,7 @@ export default class RenameColumn extends Component {
           </div>
         </div>
         <SidebarControls
-          positiveButtonText="Rename"
+          positiveButtonText={<FormattedMessage id="rename" />}
           onApply={this.isValidTransformation() ? () => onApply(trim(transformation)) : null}
           onClose={onClose}
         />
