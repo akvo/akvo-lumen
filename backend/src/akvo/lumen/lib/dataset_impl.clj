@@ -66,7 +66,7 @@
                                  {:as-arrays? true}))]
       (lib/ok
        (-> dataset
-           (select-keys [:columns :created :id :modified :rows :status :title :transformations :updated])
+           (select-keys [:columns :created :id :modified :status :title :transformations :updated])
            (rename-keys {:title :name})
            (assoc :rows data)
            (assoc :status "OK"))))
