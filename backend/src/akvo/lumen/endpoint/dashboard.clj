@@ -12,8 +12,8 @@
       (GET "/" _
         (dashboard/all tenant-conn))
 
-      (POST "/" {:keys [body]}
-        (dashboard/create tenant-conn body))
+      (POST "/" {:keys [body jwt-claims]}
+        (dashboard/create tenant-conn body jwt-claims))
 
       (context "/:id" [id]
 

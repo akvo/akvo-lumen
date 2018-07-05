@@ -6,6 +6,7 @@
             [akvo.lumen.update :as update]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
+            [clojure.set :refer (rename-keys)]
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
@@ -64,15 +65,10 @@
                                  [(select-data-sql (:table-name dataset) columns)]
                                  {:as-arrays? true}))]
       (lib/ok
-       {:id id
-        :name (:title dataset)
-        :modified (:modified dataset)
-        :created (:created dataset)
-        :updated (:updated dataset)
-        :status "OK"
-        :transformations (:transformations dataset)
-        :columns columns
-        :rows data}))
+       (-> dataset
+           (select-keys [:columns :created :id :modified :rows :status :title :transformations :updated])
+           (rename-keys {:title :name})
+           (assoc :status "OK"))))
     (lib/not-found {:error "Not found"})))
 
 
