@@ -2,7 +2,7 @@
   "The following env vars are assumed to be present:
   ENCRYPTION_KEY, KC_URL, KC_SECRET, PG_HOST, PG_DATABASE, PG_USER, PG_PASSWORD
   ENCRYPTION_KEY is a key specific for the Kubernetes environment used for
-  encrypting the db_uri.
+  encrypting the db_uri which can be found in the lumen secret in K8s.
   The PG_* env vars can be found in the ElephantSQL console for the appropriate
   instance. KC_URL is the url to keycloak (without trailing /auth).
   KC_SECRET is the client secret found in the Keycloak admin at
