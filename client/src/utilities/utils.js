@@ -61,3 +61,7 @@ Takes an array of objects and returns a new array of all objects that have no "n
 */
 export const filterNullData = (dataArray = []) =>
   dataArray.filter(datum => Object.keys(datum).every(key => datum[key] !== null));
+
+export const abbr = (text, maxLength) =>
+  (text.length > maxLength ? `${text.slice(0, maxLength - 3)}...` : text);
+

@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router';
 import itsSet from 'its-set';
-import { FormattedMessage, FormattedRelative, intlShape } from 'react-intl';
+import { FormattedMessage, intlShape } from 'react-intl';
+import moment from 'moment';
 import LoadingSpinner from '../common/LoadingSpinner';
 import ContextMenu from '../common/ContextMenu';
 import {
@@ -12,6 +13,7 @@ import {
   getAuthor, getModifiedTimestamp,
   getSource,
 } from '../../domain/entity';
+import { abbr } from '../../utilities/utils';
 
 function getCollectionContextMenuItem(collections, currentCollection) {
   if (currentCollection) {
@@ -171,7 +173,7 @@ export default class LibraryListingItem extends Component {
     const { entity, onEntityAction } = this.props;
     const author = getAuthor(entity);
     const modified = getModifiedTimestamp(entity);
-    const { formatMessage, formatDate, formatTime } = this.context.intl;
+    const { formatMessage } = this.context.intl;
     const entityType = getType(entity);
     const entitySource = getSource(entity);
 
@@ -205,8 +207,8 @@ export default class LibraryListingItem extends Component {
             <img src={getIconUrl(entity)} role="presentation" />
           </div>
           <div className="textContents">
-            <h3 className="entityName">
-              {getTitle(entity)}
+            <h3 className="entityName" title={getTitle(entity)}>
+              {abbr(getTitle(entity), 55)}
               {isFailed(entity) && ' (Import failed)'}
             </h3>
             {isFailed(entity) && <p>{getErrorMessage(entity)}</p>}
@@ -245,10 +247,8 @@ export default class LibraryListingItem extends Component {
                       <span>&nbsp;|&nbsp;</span>
                     )}
                     {modified && (
-                      <span
-                        title={`${formatMessage({ id: 'last_modified' })}: ${formatDate(modified)}, ${formatTime(modified)}`}
-                      >
-                        <FormattedRelative value={modified} />
+                      <span>
+                        {moment(modified).format('Do MMM YYYY - HH:mm')}
                       </span>
                     )}
                   </VisualisationLabel>
@@ -274,7 +274,7 @@ export default class LibraryListingItem extends Component {
             data-test-id="show-controls"
             onClick={this.handleToggleContextMenu}
           >
-            ...
+            <i className="fa fa-ellipsis-v" />
           </button>
           {this.state.contextMenuVisible &&
             <LibraryListingItemContextMenu

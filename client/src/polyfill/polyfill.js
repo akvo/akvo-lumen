@@ -1,8 +1,10 @@
 const polyfill = (callback) => {
   const browserSupported = Boolean(
+    'Map' in window &&
     'fetch' in window &&
     'assign' in Object &&
     'Intl' in window &&
+    'includes' in Array.prototype &&
     'filter' in Array.prototype
   );
 
@@ -23,7 +25,9 @@ const polyfill = (callback) => {
       require('core-js/es6/array');
       require('core-js/es6/object');
       require('core-js/es6/number');
+      require('core-js/es7/map');
       require('core-js/modules/es7.object.values');
+      require('core-js/modules/es7.array.includes');
       require('intl');
       require('intl/locale-data/jsonp/en.js');
       require('intl/locale-data/jsonp/fr.js');

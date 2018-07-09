@@ -21,6 +21,8 @@ const viewportLimits = [
   },
 ];
 
+const TITLE_HEIGHT = 70;
+
 const getArrayFromObject = object => Object.keys(object).map(key => object[key]);
 
 const getSortFunc = layout => (a, b) => {
@@ -77,9 +79,36 @@ class DashboardViewer extends Component {
     }
   }
 
+  getBottomMostPoint() {
+    return Object.keys(this.props.dashboard.layout).reduce((acc, key) => {
+      const item = this.props.dashboard.layout[key];
+      return ((item.y + item.h) > acc) ? item.y + item.h : acc;
+    }, 0);
+  }
+
+  handleResize() {
+    const width = this.DashboardViewer.clientWidth;
+    let viewport;
+
+    for (let i = 0; i < viewportLimits.length; i += 1) {
+      const entry = viewportLimits[i];
+
+      if (width < entry.limit) {
+        viewport = entry.name;
+        break;
+      }
+    }
+
+    this.setState({
+      canvasWidth: width,
+      viewportType: viewport,
+    });
+  }
+
   render() {
     const { dashboard, datasets, metadata, windowWidth } = this.props;
     const layout = dashboard.layout;
+    const minHeight = (this.getBottomMostPoint() * (this.state.canvasWidth / 12)) + TITLE_HEIGHT;
     const sortFunc = getSortFunc(layout);
     const sortedDashboard = getArrayFromObject(dashboard.entities).sort(sortFunc);
     const canvasWidth = windowWidth;
@@ -88,7 +117,7 @@ class DashboardViewer extends Component {
       <div
         className="DashboardViewer"
         ref={(ref) => { this.DashboardViewer = ref; }}
-        style={{ width: '100%' }}
+        style={{ width: '100%', minHeight }}
       >
         <h1>{dashboard.title}</h1>
         <div

@@ -33,3 +33,16 @@ services:
      - LUMEN_ENCRYPTION_KEY=supersecret
    volumes:
       - ./postgres/provision:/pg-certs
+ fe-e2e-tests:
+   build: client/e2e-test
+   volumes:
+      - ./client/e2e-test:/app
+      - /app/node_modules
+   environment:
+      - LUMEN_URL=http://t1.lumen.local:3030/
+      - LUMEN_USER=jerome
+      - LUMEN_PASSWORD=password
+   links:
+      - keycloak:auth.lumen.local
+      - client:t1.lumen.local
+   command: "true"
