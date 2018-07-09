@@ -275,7 +275,7 @@ export default class LibraryListingItem extends Component {
             data-test-id="show-controls"
             onClick={this.handleToggleContextMenu}
           >
-            ...
+            <i className="fa fa-ellipsis-v" />
           </button>
           {this.state.contextMenuVisible &&
             <LibraryListingItemContextMenu
