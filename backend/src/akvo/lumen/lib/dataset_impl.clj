@@ -66,10 +66,9 @@
                                  {:as-arrays? true}))]
       (lib/ok
        (-> dataset
-           (select-keys [:columns :created :id :modified :status :title :transformations :updated])
+           (select-keys [:created :id :modified :status :title :transformations :updated])
            (rename-keys {:title :name})
-           (assoc :rows data)
-           (assoc :status "OK"))))
+           (assoc :rows data :columns columns :status "OK"))))
     (lib/not-found {:error "Not found"})))
 
 
