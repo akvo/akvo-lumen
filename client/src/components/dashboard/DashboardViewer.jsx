@@ -62,6 +62,10 @@ class DashboardViewer extends Component {
     this.getItemFromProps = this.getItemFromProps.bind(this);
   }
 
+  state = {
+    canvasWidth: 1024,
+  }
+
   getItemFromProps(item) {
     switch (item.type) {
       case 'text':
