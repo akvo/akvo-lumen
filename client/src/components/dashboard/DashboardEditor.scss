@@ -69,3 +69,19 @@
         }
     }
 }
+
+@media print {
+    .DashboardVisualisationList,
+    .DashboardEditorCanvasControls,
+    .react-resizable-handle {
+        display: none !important;
+    }
+    .DashboardEditor{
+        .react-grid-layout {
+            background: none;
+        }
+        .DashboardEditorCanvas {
+            padding: 0 !important;
+        }
+    }
+}

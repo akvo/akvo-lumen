@@ -148,6 +148,7 @@ export default class Chart extends Component {
             colorMapping={visualisation.spec.colors}
             donut={Boolean(visualisation.visualisationType === 'donut')}
             legendVisible={Boolean(visualisation.spec.showLegend)}
+            labelsVisible={Boolean(visualisation.spec.showLabels)}
             legendTitle={visualisation.spec.legendTitle}
             onChangeVisualisationSpec={onChangeVisualisationSpec}
             edit={Boolean(onChangeVisualisationSpec)}
@@ -203,7 +204,7 @@ export default class Chart extends Component {
           />
         );
       default:
-        console.warn(`Unknown visualisation type ${visualisation.visualisationType}`);
+        console.warn(`Unknown visualisation type ${visualisation.visualisationType}`); // eslint-disable-line
     }
     return null;
   }

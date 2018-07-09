@@ -41,14 +41,26 @@ export default function PieConfigMenu(props) {
           showLegend: val,
         })}
       />
-      <LabelInput
-        value={spec.legendTitle != null ? spec.legendTitle.toString() : null}
-        placeholderId="legend_title"
-        name="legendLabel"
-        maxLength={32}
-        onChange={event => onChangeSpec({
-          legendTitle: event.target.value.toString(),
-        }, spec, onChangeSpec, columnOptions)}
+      {Boolean(spec.showLegend) && (
+        <LabelInput
+          value={spec.legendTitle != null ? spec.legendTitle.toString() : null}
+          placeholderId="legend_title"
+          name="legendLabel"
+          maxLength={32}
+          onChange={event => onChangeSpec({
+            legendTitle: event.target.value.toString(),
+          }, spec, onChangeSpec, columnOptions)}
+        />
+      )}
+      <ToggleInput
+        name="showLabels"
+        type="checkbox"
+        labelId="show_labels"
+        className="showLabels"
+        checked={Boolean(spec.showLabels)}
+        onChange={val => onChangeSpec({
+          showLabels: val,
+        })}
       />
     </div>
   );

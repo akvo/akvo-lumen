@@ -209,7 +209,7 @@ export default class DashboardEditor extends Component {
   }
 
   render() {
-    const dashboard = this.props.dashboard;
+    const { dashboard } = this.props;
     const canvasWidth = this.state.gridWidth;
     const rowHeight = canvasWidth / 12;
 

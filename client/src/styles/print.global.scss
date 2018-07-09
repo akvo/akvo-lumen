@@ -1,0 +1,20 @@
+@page {
+  size: A4;
+  margin: 0;
+}
+@media print { 
+  html, body {
+    width: 210mm;
+    height: 297mm;
+  }
+  /* hack for getting print styles to show in chrome when testing. more info here - 
+  https://www.lockedownseo.com/chrome-print-preview-differs-from-dev-tools/ */ 
+  * {
+    -webkit-transition: none !important;
+    transition: none !important;
+  }
+
+  #supporthero-button {
+    display: none !important;
+  }
+}
