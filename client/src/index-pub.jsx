@@ -44,20 +44,20 @@ function renderSuccessfulShare(data, initialState) {
     <Provider store={configureStore()}>
       <IntlWrapper>
         <div className="viewer">
-          {data.dashboards ?
+          {data.dashboards ? (
             <DashboardViewer
               dashboard={data.dashboards[data.dashboardId]}
               visualisations={data.visualisations}
               datasets={immutableDatasets}
               metadata={data.metadata ? data.metadata : null}
             />
-              :
-              <VisualisationViewerContainer
-                visualisation={data.visualisations[data.visualisationId]}
-                metadata={data.metadata ? data.metadata[data.visualisationId] : null}
-                datasets={immutableDatasets}
-              />
-          }
+          ) : (
+            <VisualisationViewerContainer
+              visualisation={data.visualisations[data.visualisationId]}
+              metadata={data.metadata ? data.metadata[data.visualisationId] : null}
+              datasets={immutableDatasets}
+            />
+          )}
           <LumenBranding
             size={data.dashboards ? 'large' : 'small'}
           />

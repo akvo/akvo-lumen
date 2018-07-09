@@ -1,4 +1,5 @@
 import dl from 'datalib';
+import moment from 'moment';
 
 // Special value that will always come last alphabetically. Used for sorting.
 const lastValueAlphabetically = '';
@@ -665,4 +666,39 @@ export const getLabelFontSize = (xLabel = '', yLabel = '', maxFont, minFont, hei
   }
 
   return maxFont;
+};
+
+export const getTitle = visualisation => visualisation.name;
+
+const DATE_FORMAT = 'Do MMM YYYY - HH:mm';
+
+export const getLastUpdated = ({ visualisation, datasets }) => {
+  if (!datasets) return null;
+  switch (visualisation.visualisationType) {
+    case 'map': {
+      const mostRecentlyUpdatedLayerDataset = visualisation.spec.layers
+        .map(({ datasetId }) => datasets[datasetId])
+        .sort((a, b) => {
+          if (a.get('updated') < b.get('updated')) return 1;
+          if (a.get('updated') > b.get('updated')) return -1;
+          return 0;
+        })[0];
+      return mostRecentlyUpdatedLayerDataset ?
+        moment(mostRecentlyUpdatedLayerDataset.get('updated')).format(DATE_FORMAT) :
+        null;
+    }
+    case 'bar':
+    case 'pivot table':
+    case 'scatter':
+    case 'area':
+    case 'line':
+    case 'donut':
+    case 'pie': {
+      const dataset = datasets[visualisation.datasetId];
+      return moment(dataset.get('updated')).format(DATE_FORMAT);
+    }
+    default: {
+      return null;
+    }
+  }
 };

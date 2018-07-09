@@ -3,10 +3,15 @@
 .DashboardCanvasItem {
     position: relative;
     overflow: hidden;
-    padding: 10px;
+    padding: 20px;
     margin: 10px;
     background-color: white;
-    border: 0.1rem solid $midGrey;
+    color: $dashboardFG;
+    @include border-radius(8px);
+
+    .title {
+        display: none;
+    }
 
     .itemContainer {
         &.text {
@@ -16,10 +21,15 @@
 
     .deleteButton {
         position: absolute;
-        top: 0;
-        right: 5px;
+        top: 5px;
+        right: 7px;
         display: block;
         z-index: 2;
+        color: #C6CAD4;
+
+        &:hover {
+            color: inherit;
+        }
     }
 
     .DashboardCanvasItemEditable {
@@ -28,6 +38,21 @@
         textarea {
             font-size: inherit;
             line-height: inherit;
+            color: $dashboardFG;
+        }
+    }
+
+    .itemTitle {
+        padding-bottom: 15px;
+
+        h2 {
+            color: $dashboardFG;
+            font-weight: 600;
+            font-size: 1.3em;
+        }
+        span {
+            color: $dashboardFGSecondary;
+            font-size: 0.9em;
         }
     }
 }
