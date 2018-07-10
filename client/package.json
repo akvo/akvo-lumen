@@ -146,7 +146,7 @@
     "mockdate": "2.0.1",
     "opn-cli": "3.1.0",
     "prompt": "1.0.0",
-    "raf": "3.3.2",
+    "raf": "^3.3.2",
     "react-addons-test-utils": "15.5.1",
     "react-test-renderer": "^15.5.4",
     "redux-immutable-state-invariant": "2.0.0",

@@ -1,3 +1,5 @@
+import 'raf/polyfill';
+
 const polyfill = (callback) => {
   const browserSupported = Boolean(
     'Map' in window &&
