@@ -26,8 +26,8 @@ const polyfill = (callback) => {
       require('core-js/es6/array');
       require('core-js/es6/object');
       require('core-js/es6/number');
-      require('core-js/es7/map');
-      require('core-js/es7/set');
+      require('core-js/es6/map');
+      require('core-js/es6/set');
       require('core-js/modules/es7.object.values');
       require('core-js/modules/es7.array.includes');
       require('intl');
