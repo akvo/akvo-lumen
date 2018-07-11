@@ -1,4 +1,4 @@
-/* eslint-disable import/default, global-require */
+/* eslint-disable import/default, global-require, import/first */
 import polyfill from './polyfill/polyfill';
 import React from 'react';
 import { render } from 'react-dom';
