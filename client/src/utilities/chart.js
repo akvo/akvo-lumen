@@ -695,6 +695,7 @@ export const getLastUpdated = ({ visualisation, datasets }) => {
     case 'donut':
     case 'pie': {
       const dataset = datasets[visualisation.datasetId];
+      if (!dataset) return null;
       return moment(dataset.get('updated')).format(DATE_FORMAT);
     }
     default: {

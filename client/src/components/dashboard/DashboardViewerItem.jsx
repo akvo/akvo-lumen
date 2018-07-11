@@ -21,14 +21,17 @@ export default class DashboardViewerItem extends Component {
     const { item, layout, canvasWidth, viewportType } = this.props;
     const numCols = 12;
     const unit = canvasWidth / numCols;
+    const MIN_HEIGHT = 300;
 
     switch (viewportType) {
       case 'small':
         return {
           display: 'inline-block',
           width: canvasWidth - (cMargin * 2),
-          height: item.type === 'visualisation' ?
-            (canvasWidth * (layout.h / layout.w)) - (cMargin * 2) : 'initial',
+          minHeight: MIN_HEIGHT,
+          height: item.type === 'visualisation' && item.visualisation.visualisationType === 'map' ?
+            MIN_HEIGHT :
+            null,
           margin: cMargin,
           padding: cPadding,
         };
@@ -37,8 +40,10 @@ export default class DashboardViewerItem extends Component {
         return {
           display: 'inline-block',
           width: (canvasWidth / 2) - (cMargin * 2),
-          height: item.type === 'visualisation' ?
-            ((canvasWidth * 0.5) * (layout.h / layout.w)) - (cMargin * 2) : 'initial',
+          minHeight: MIN_HEIGHT,
+          height: item.type === 'visualisation' && item.visualisation.visualisationType === 'map' ?
+            MIN_HEIGHT :
+            null,
           margin: cMargin,
           padding: cPadding,
         };
@@ -104,7 +109,7 @@ export default class DashboardViewerItem extends Component {
                 this.props.metadata[item.visualisation.id] : null}
               datasets={this.props.datasets}
               width={style.width - (cPadding * 2)}
-              height={style.height - (cPadding * 2) - titleHeight}
+              height={style.height ? style.height - (cPadding * 2) - titleHeight : 'auto'}
               showTitle={false}
             />
           </div>

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 import leaflet from 'leaflet';
-import { isEqual, cloneDeep, get } from 'lodash';
+import { isEqual, cloneDeep, get, compact } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import leafletUtfGrid from '../../vendor/leaflet.utfgrid';
 import * as chart from '../../utilities/chart';
@@ -140,7 +140,7 @@ LegendEntry.propTypes = {
 };
 
 const Legend = ({ layers, layerMetadata }) => {
-  const legendLayers = layers.map((layer, idx) => {
+  const legendLayers = compact(layers.map((layer, idx) => {
     const metadata = layerMetadata[idx];
     const showLayer =
       Boolean(
@@ -151,12 +151,10 @@ const Legend = ({ layers, layerMetadata }) => {
       layer.layerType === 'raster';
 
     return showLayer ? layer : null;
-  });
+  }));
 
-  return (
-    <div
-      className={'Legend'}
-    >
+  return legendLayers.length ? (
+    <div className="Legend">
       <div className="container">
         {
           legendLayers.map((layer, idx) => {
@@ -175,7 +173,7 @@ const Legend = ({ layers, layerMetadata }) => {
         }
       </div>
     </div>
-  );
+  ) : null;
 };
 
 Legend.propTypes = {
@@ -545,7 +543,7 @@ MapVisualisation.propTypes = {
   datasets: PropTypes.object.isRequired,
   metadata: PropTypes.object,
   width: PropTypes.number,
-  height: PropTypes.number,
+  height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   showTitle: PropTypes.bool,
 };
 

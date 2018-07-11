@@ -62,10 +62,6 @@ class DashboardViewer extends Component {
     this.getItemFromProps = this.getItemFromProps.bind(this);
   }
 
-  state = {
-    canvasWidth: 1024,
-  }
-
   getItemFromProps(item) {
     switch (item.type) {
       case 'text':
@@ -86,42 +82,26 @@ class DashboardViewer extends Component {
   getBottomMostPoint() {
     return Object.keys(this.props.dashboard.layout).reduce((acc, key) => {
       const item = this.props.dashboard.layout[key];
-      return ((item.y + item.h) > acc) ? item.y + item.h : acc;
+      const itemBottom = item.y + item.h;
+      return itemBottom > acc ? itemBottom : acc;
     }, 0);
-  }
-
-  handleResize() {
-    const width = this.DashboardViewer.clientWidth;
-    let viewport;
-
-    for (let i = 0; i < viewportLimits.length; i += 1) {
-      const entry = viewportLimits[i];
-
-      if (width < entry.limit) {
-        viewport = entry.name;
-        break;
-      }
-    }
-
-    this.setState({
-      canvasWidth: width,
-      viewportType: viewport,
-    });
   }
 
   render() {
     const { dashboard, datasets, metadata, windowWidth } = this.props;
     const layout = dashboard.layout;
-    const minHeight = (this.getBottomMostPoint() * (this.state.canvasWidth / 12)) + TITLE_HEIGHT;
+    const viewportType = getViewportType(windowWidth);
+    const minHeight = viewportType === 'large' ?
+      (this.getBottomMostPoint() * (windowWidth / 12)) + TITLE_HEIGHT + 100 :
+      0;
     const sortFunc = getSortFunc(layout);
     const sortedDashboard = getArrayFromObject(dashboard.entities).sort(sortFunc);
-    const canvasWidth = windowWidth;
 
     return (
       <div
         className="DashboardViewer"
         ref={(ref) => { this.DashboardViewer = ref; }}
-        style={{ width: '100%', minHeight }}
+        style={{ width: '100%', minHeight, height: 'auto' }}
       >
         <h1>{dashboard.title}</h1>
         <div
@@ -135,8 +115,8 @@ class DashboardViewer extends Component {
               key={item.id}
               item={this.getItemFromProps(item)}
               layout={layout[item.id]}
-              canvasWidth={canvasWidth}
-              viewportType={getViewportType(canvasWidth)}
+              canvasWidth={windowWidth}
+              viewportType={viewportType}
               datasets={datasets}
               metadata={metadata}
             />
