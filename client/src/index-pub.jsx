@@ -1,3 +1,5 @@
+/* eslint-disable import/first */
+import polyfill from './polyfill/polyfill';
 import React, { Component } from 'react';
 import { render } from 'react-dom';
 import { Provider } from 'react-redux';
@@ -9,7 +11,6 @@ import VisualisationViewerContainer from './components/visualisation/Visualisati
 import DashboardViewer from './components/dashboard/DashboardViewer';
 import LumenBranding from './components/common/LumenBranding';
 import ErrorScreen from './components/common/ErrorScreen';
-import polyfill from './polyfill/polyfill';
 import configureStore from './store/configureStore';
 import { init as initAnalytics, trackPageView } from './utilities/analytics';
 import * as auth from './auth';
