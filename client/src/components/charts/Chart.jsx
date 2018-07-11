@@ -76,7 +76,7 @@ export default class Chart extends Component {
     visualisation: PropTypes.object.isRequired,
     datasets: PropTypes.object.isRequired,
     width: PropTypes.number,
-    height: PropTypes.number,
+    height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     onChangeVisualisationSpec: PropTypes.func,
     showTitle: PropTypes.bool,
   }
