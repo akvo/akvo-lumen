@@ -1,12 +1,11 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { GithubPicker } from 'react-color';
-import { palette } from '../../../utilities/visualisationColors';
 import { replaceLabelIfValueEmpty } from '../../../utilities/chart';
+import ColorPicker from '../../common/ColorPicker';
 
 require('./ColorLabels.scss');
 
-export default function ColorLabels({ pointColorMapping, onChangeColor, colorPalette = palette }) {
+export default function ColorLabels({ pointColorMapping, onChangeColor }) {
   return (
     <ul
       className="ColorLabels"
@@ -17,7 +16,6 @@ export default function ColorLabels({ pointColorMapping, onChangeColor, colorPal
             color={color}
             value={value}
             onChangeColor={newColor => onChangeColor(value, newColor)}
-            colorPalette={colorPalette}
           />
         </li>
       )}
@@ -61,8 +59,9 @@ class ColorLabelItem extends Component {
   }
 
   render() {
-    const { color, value, colorPalette } = this.props;
+    const { color, value } = this.props;
     const { displayColorPicker } = this.state;
+    const title = replaceLabelIfValueEmpty(value);
     return (
       <div
         className="ColorLabelItem"
@@ -85,19 +84,20 @@ class ColorLabelItem extends Component {
           <div
             className="colorPickerContainer"
           >
-            <GithubPicker
-              disabled={this.props.disabled}
+            <ColorPicker
+              title={title}
+              left={14}
+              placement="bottom-right"
               color={color}
-              colors={colorPalette}
-              onChangeComplete={evt => this.handleOnChangeColor(evt.hex)}
+              onChange={({ hex }) => {
+                this.handleOnChangeColor(hex);
+              }}
             />
           </div>
         }
         {' '}
-        <span
-          className={`${replaceLabelIfValueEmpty(value, true)}`}
-        >
-          {replaceLabelIfValueEmpty(value)}
+        <span className={`${replaceLabelIfValueEmpty(value, true)}`}>
+          {title}
         </span>
       </div>
     );
