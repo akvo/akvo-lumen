@@ -1,7 +1,5 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import SwatchesPicker from 'react-color/lib/components/swatches/Swatches';
-import { paletteSwatches } from '../../../utilities/visualisationColors';
 import { replaceLabelIfValueEmpty } from '../../../utilities/chart';
 import ColorPicker from '../../common/ColorPicker';
 
@@ -90,7 +88,6 @@ class ColorLabelItem extends Component {
               title={title}
               left={14}
               placement="bottom-right"
-              colors={paletteSwatches.concat([...SwatchesPicker.defaultProps.colors])}
               color={color}
               onChange={({ hex }) => {
                 this.handleOnChangeColor(hex);
