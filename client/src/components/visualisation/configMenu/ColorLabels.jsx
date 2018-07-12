@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { GithubPicker } from 'react-color';
-import { palette } from '../../../utilities/visualisationColors';
+import SwatchesPicker from 'react-color/lib/components/swatches/Swatches';
+import { paletteSwatches } from '../../../utilities/visualisationColors';
 import { replaceLabelIfValueEmpty } from '../../../utilities/chart';
+import ColorPicker from '../../common/ColorPicker';
 
 require('./ColorLabels.scss');
 
@@ -61,8 +62,9 @@ class ColorLabelItem extends Component {
   }
 
   render() {
-    const { color, value, colorPalette } = this.props;
+    const { color, value } = this.props;
     const { displayColorPicker } = this.state;
+    const title = replaceLabelIfValueEmpty(value);
     return (
       <div
         className="ColorLabelItem"
@@ -85,19 +87,21 @@ class ColorLabelItem extends Component {
           <div
             className="colorPickerContainer"
           >
-            <GithubPicker
-              disabled={this.props.disabled}
+            <ColorPicker
+              title={title}
+              left={14}
+              placement="bottom-right"
+              colors={paletteSwatches.concat([...SwatchesPicker.defaultProps.colors])}
               color={color}
-              colors={colorPalette}
-              onChangeComplete={evt => this.handleOnChangeColor(evt.hex)}
+              onChange={({ hex }) => {
+                this.handleOnChangeColor(hex);
+              }}
             />
           </div>
         }
         {' '}
-        <span
-          className={`${replaceLabelIfValueEmpty(value, true)}`}
-        >
-          {replaceLabelIfValueEmpty(value)}
+        <span className={`${replaceLabelIfValueEmpty(value, true)}`}>
+          {title}
         </span>
       </div>
     );

@@ -1,3 +1,5 @@
+import { chunk } from 'lodash';
+
 export const patterns = [
   { type: 'Lines', strokeWidth: 10, size: 10, orientation: 'diagonal' },
   { type: 'Circles', strokeWidth: 3, size: 10 },
@@ -35,6 +37,8 @@ export const palette = [
   '#B8385E',
   '#9E4962',
 ];
+
+export const paletteSwatches = chunk(palette.concat(['#ffffff', '#404040']), 4);
 
 /*
 export const palette = [
