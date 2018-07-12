@@ -12,9 +12,12 @@ COPY package* /app/
 
 RUN chown -R akvo:akvo /app
 
-USER akvo
-
 WORKDIR /app
-RUN npm i --silent cypress && npm run cypress:verify
+
+USER root
+RUN npm i -g npm
+
+USER akvo
+RUN npm i cypress && npm run cypress:verify
 
 USER root
