@@ -7,7 +7,7 @@ import ColorPicker from '../../common/ColorPicker';
 
 require('./ColorLabels.scss');
 
-export default function ColorLabels({ pointColorMapping, onChangeColor, colorPalette = palette }) {
+export default function ColorLabels({ pointColorMapping, onChangeColor }) {
   return (
     <ul
       className="ColorLabels"
@@ -18,7 +18,6 @@ export default function ColorLabels({ pointColorMapping, onChangeColor, colorPal
             color={color}
             value={value}
             onChangeColor={newColor => onChangeColor(value, newColor)}
-            colorPalette={colorPalette}
           />
         </li>
       )}
