@@ -74,14 +74,14 @@ export default class DashboardVisualisationList extends Component {
                   key={item.id}
                   onClick={() => props.onEntityClick(item, 'visualisation')}
                 >
-                  <h4>
+                  <h3>
                     {item.name}
                     <span
                       className="isOnDashboardIndicator"
                     >
                       {isOnDashboard(item) ? '✔' : ''}
                     </span>
-                  </h4>
+                  </h3>
 
                   <div className="visualisationType">
                     {item.visualisationType === 'map' ?
@@ -91,8 +91,10 @@ export default class DashboardVisualisationList extends Component {
                         item.visualisationType.slice(1)} chart`
                   }
                   </div>
+                  <br />
                   <div className="lastModified">
-                    {getDataLastUpdated({ visualisation: item, datasets: props.datasets })}
+                    <FormattedMessage id="data_last_updated" />
+                    : {getDataLastUpdated({ visualisation: item, datasets: props.datasets })}
                   </div>
                 </li>
             )}
