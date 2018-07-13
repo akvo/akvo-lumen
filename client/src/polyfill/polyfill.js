@@ -1,43 +1,85 @@
+/* eslint-disable global-require */
+
 import 'raf/polyfill';
 
 const polyfill = (callback) => {
-  // const browserSupported = Boolean(
-  //   'Map' in window &&
-  //   'Set' in window &&
-  //   'fetch' in window &&
-  //   'assign' in Object &&
-  //   'Intl' in window &&
-  //   'includes' in Array.prototype &&
-  //   'filter' in Array.prototype
-  // );
-
-  // if (browserSupported) {
-  //   callback();
-  // } else {
-  //   /*
-  //     Load polyfills for older browsers.
-
-  //     We could load the whole of core-js/shim here (and perhaps we should if we find we
-  //     need to come back here and add stuff frequently) but it makes the polyfill bundle
-  //     about 40% larger. So let's try this and see if it's "enough".
-  //   */
-
-
-  /* eslint-disable global-require */
-  require.ensure([], () => {
-    require('core-js/es6/array');
-    require('core-js/es6/object');
-    require('core-js/es6/number');
-    require('core-js/es6/map');
-    require('core-js/es6/set');
-    require('core-js/modules/es7.object.values');
-    require('core-js/modules/es7.array.includes');
-    require('intl');
-    /* eslint-enable-global-require */
-
-    callback();
-  });
-  // }
+  new Promise((resolve) => {
+    if (!(window.Map && window.Set && window.WeakMap && window.WeakSet)) {
+      require.ensure([], () => {
+        require('core-js/es6/map');
+        require('core-js/es6/set');
+        resolve();
+      });
+      return;
+    }
+    resolve();
+  })
+  .then(() => {
+    if (!window.Intl) {
+      return new Promise((resolve) => {
+        require.ensure([], () => {
+          require('intl');
+          resolve();
+        });
+      });
+    }
+    return Promise.resolve();
+  })
+  .then(() => {
+    if (!(Object.assign && Object.is && Object.setPrototypeOf)) {
+      return new Promise((resolve) => {
+        require.ensure([], () => {
+          require('core-js/es6/object');
+          require('core-js/modules/es7.object.values');
+          resolve();
+        });
+      });
+    }
+    return null;
+  })
+  .then(() => {
+    if (!(Array.prototype &&
+      Array.prototype.copyWithin &&
+      Array.prototype.fill &&
+      Array.prototype.find &&
+      Array.prototype.findIndex &&
+      Array.prototype.keys &&
+      Array.prototype.entries &&
+      Array.prototype.values &&
+      Array.from &&
+      Array.of
+    )) {
+      return new Promise((resolve) => {
+        require.ensure([], () => {
+          require('core-js/es6/array');
+          require('core-js/modules/es7.array.includes');
+          resolve();
+        });
+      });
+    }
+    return Promise.resolve();
+  })
+  .then(() => {
+    if (!(Number.isFinite &&
+      Number.isInteger &&
+      Number.isSafeInteger &&
+      Number.isNaN &&
+      Number.parseInt &&
+      Number.parseFloat &&
+      Number.isInteger(Number.MAX_SAFE_INTEGER) &&
+      Number.isInteger(Number.MIN_SAFE_INTEGER) &&
+      Number.isFinite(Number.EPSILON)
+    )) {
+      return new Promise((resolve) => {
+        require.ensure([], () => {
+          require('core-js/es6/number');
+          resolve();
+        });
+      });
+    }
+    return null;
+  })
+  .then(callback);
 };
 
 export default polyfill;
