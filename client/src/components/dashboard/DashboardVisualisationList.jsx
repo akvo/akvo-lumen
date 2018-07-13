@@ -1,21 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
+import { getDataLastUpdated } from '../../utilities/chart';
 
 require('./DashboardVisualisationList.scss');
-
-const formatDate = (date) => {
-  let month = date.getMonth() + 1;
-  let day = date.getDate();
-  let hours = date.getHours();
-  let minutes = date.getMinutes();
-  if (month < 10) month = `0${month}`;
-  if (day < 10) day = `0${day}`;
-  if (hours < 10) hours = `0${hours}`;
-  if (minutes < 10) minutes = `0${minutes}`;
-
-  return `${date.getFullYear()}-${month}-${day}`;
-};
 
 const filterVisualisations = (visualisations, filterText) => {
   // NB - this naive approach is fine with a few hundred visualisations, but we should replace
@@ -104,7 +92,7 @@ export default class DashboardVisualisationList extends Component {
                   }
                   </div>
                   <div className="lastModified">
-                    {`${formatDate(new Date(item.modified))}`}
+                    {getDataLastUpdated({ visualisation: item, datasets: props.datasets })}
                   </div>
                 </li>
             )}
@@ -132,5 +120,6 @@ export default class DashboardVisualisationList extends Component {
 DashboardVisualisationList.propTypes = {
   dashboardItems: PropTypes.object.isRequired,
   visualisations: PropTypes.array.isRequired,
+  datasets: PropTypes.array.isRequired,
   onEntityClick: PropTypes.func.isRequired,
 };

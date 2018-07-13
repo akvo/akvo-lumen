@@ -55,7 +55,14 @@
     }
 
     h4 {
-        margin-bottom: 5px;
+        color: $dashboardFG;
+        font-weight: 600;
+        font-size: 1em;
+    }
+
+    .visualisationType,
+    .lastModified {
+        font-size: 0.8em;
     }
 
     .visualisationType {

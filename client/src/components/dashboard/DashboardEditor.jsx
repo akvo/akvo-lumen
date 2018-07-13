@@ -209,13 +209,14 @@ export default class DashboardEditor extends Component {
   }
 
   render() {
-    const { dashboard } = this.props;
+    const { dashboard, datasets } = this.props;
     const canvasWidth = this.state.gridWidth;
     const rowHeight = canvasWidth / 12;
 
     return (
       <div className="DashboardEditor">
         <DashboardVisualisationList
+          datasets={datasets}
           visualisations={getArrayFromObject(this.props.visualisations)}
           onEntityClick={this.handleEntityToggle}
           dashboardItems={dashboard.entities}
