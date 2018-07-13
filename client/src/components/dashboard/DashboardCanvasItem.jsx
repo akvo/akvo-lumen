@@ -6,7 +6,7 @@ import VisualisationViewer from '../charts/VisualisationViewer';
 import DashboardCanvasItemEditable from './DashboardCanvasItemEditable';
 import { checkUndefined } from '../../utilities/utils';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
-import { getTitle, getLastUpdated } from '../../utilities/chart';
+import { getTitle, getDataLastUpdated } from '../../utilities/chart';
 
 require('./DashboardCanvasItem.scss');
 
@@ -116,7 +116,7 @@ export default class DashboardCanvasItem extends Component {
 
   getSubTitle() {
     const { item, datasets } = this.props;
-    const lastUpdated = getLastUpdated({ datasets, visualisation: item.visualisation });
+    const lastUpdated = getDataLastUpdated({ datasets, visualisation: item.visualisation });
     return lastUpdated ? (
       <span>
         <FormattedMessage id="data_last_updated" />

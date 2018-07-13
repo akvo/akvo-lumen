@@ -6,7 +6,7 @@ import {
   replaceLabelIfValueEmpty,
   processPivotData,
   getTitle,
-  getLastUpdated,
+  getDataLastUpdated,
 } from '../../utilities/chart';
 
 require('./PivotTable.scss');
@@ -78,7 +78,7 @@ const formatCell = (index, cell, spec, columns) => {
 };
 
 const renderLastUpdated = ({ visualisation, datasets }) => { // eslint-disable-line
-  const lastUpdated = getLastUpdated({ datasets, visualisation });
+  const lastUpdated = getDataLastUpdated({ datasets, visualisation });
   return lastUpdated ? (
     <span>
       <span className="capitalize">

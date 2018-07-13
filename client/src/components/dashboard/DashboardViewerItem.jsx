@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 
 import AsyncVisualisationViewer from '../charts/AsyncVisualisationViewer';
-import { getTitle, getLastUpdated } from '../../utilities/chart';
+import { getTitle, getDataLastUpdated } from '../../utilities/chart';
 
 require('./DashboardViewerItem.scss');
 
@@ -67,7 +67,7 @@ export default class DashboardViewerItem extends Component {
 
   getSubTitle() {
     const { item, datasets } = this.props;
-    const lastUpdated = getLastUpdated({ datasets, visualisation: item.visualisation });
+    const lastUpdated = getDataLastUpdated({ datasets, visualisation: item.visualisation });
     return lastUpdated ? (
       <span>
         <FormattedMessage id="data_last_updated" />

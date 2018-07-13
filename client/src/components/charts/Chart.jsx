@@ -8,7 +8,7 @@ import BarChart from './BarChart';
 import PieChart from './PieChart';
 import ScatterChart from './ScatterChart';
 import { defaultPrimaryColor, palette } from '../../utilities/visualisationColors';
-import { getTitle, getLastUpdated } from '../../utilities/chart';
+import { getTitle, getDataLastUpdated } from '../../utilities/chart';
 
 require('./Chart.scss');
 
@@ -211,7 +211,7 @@ export default class Chart extends Component {
 
   renderLastUpdated() {
     const { visualisation, datasets } = this.props;
-    const lastUpdated = getLastUpdated({ datasets, visualisation });
+    const lastUpdated = getDataLastUpdated({ datasets, visualisation });
     return lastUpdated ? (
       <span>
         <span className="capitalize">
