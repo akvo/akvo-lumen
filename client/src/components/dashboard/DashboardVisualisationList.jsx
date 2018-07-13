@@ -1,21 +1,10 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
+import { getDataLastUpdated } from '../../utilities/chart';
+import { getIconUrl } from '../../domain/entity';
 
 require('./DashboardVisualisationList.scss');
-
-const formatDate = (date) => {
-  let month = date.getMonth() + 1;
-  let day = date.getDate();
-  let hours = date.getHours();
-  let minutes = date.getMinutes();
-  if (month < 10) month = `0${month}`;
-  if (day < 10) day = `0${day}`;
-  if (hours < 10) hours = `0${hours}`;
-  if (minutes < 10) minutes = `0${minutes}`;
-
-  return `${date.getFullYear()}-${month}-${day}`;
-};
 
 const filterVisualisations = (visualisations, filterText) => {
   // NB - this naive approach is fine with a few hundred visualisations, but we should replace
@@ -78,36 +67,51 @@ export default class DashboardVisualisationList extends Component {
               </div>
             }
             <ul className="list">
-              {visualisations.map(item =>
-                <li
-                  className={`listItem clickable ${item.visualisationType.replace(' ', '')}
-                  ${isOnDashboard(item) ? 'added' : ''}`}
-                  data-test-name={item.name}
-                  key={item.id}
-                  onClick={() => props.onEntityClick(item, 'visualisation')}
-                >
-                  <h4>
-                    {item.name}
-                    <span
-                      className="isOnDashboardIndicator"
-                    >
-                      {isOnDashboard(item) ? '✔' : ''}
-                    </span>
-                  </h4>
+              {visualisations.map((item) => {
+                const dataLastUpdated = getDataLastUpdated({
+                  visualisation: item,
+                  datasets: props.datasets,
+                });
+                return (
+                  <li
+                    className={`listItem clickable ${item.visualisationType.replace(' ', '')}
+                    ${isOnDashboard(item) ? 'added' : ''}`}
+                    data-test-name={item.name}
+                    key={item.id}
+                    onClick={() => props.onEntityClick(item, 'visualisation')}
+                  >
+                    <div className="entityIcon">
+                      <img src={getIconUrl(item)} role="presentation" />
+                    </div>
+                    <div className="textContent">
+                      <h3>
+                        {item.name}
+                        <span
+                          className="isOnDashboardIndicator"
+                        >
+                          {isOnDashboard(item) ? '✔' : ''}
+                        </span>
+                      </h3>
 
-                  <div className="visualisationType">
-                    {item.visualisationType === 'map' ?
-                    'Map'
-                    :
-                    `${item.visualisationType.charAt(0).toUpperCase() +
-                        item.visualisationType.slice(1)} chart`
-                  }
-                  </div>
-                  <div className="lastModified">
-                    {`${formatDate(new Date(item.modified))}`}
-                  </div>
-                </li>
-            )}
+                      <div className="visualisationType">
+                        {item.visualisationType === 'map' ?
+                        'Map'
+                        :
+                        `${item.visualisationType.charAt(0).toUpperCase() +
+                            item.visualisationType.slice(1)} chart`
+                      }
+                      </div>
+                      <br />
+                      {dataLastUpdated && (
+                        <div className="lastModified">
+                          <FormattedMessage id="data_last_updated" />
+                          : {dataLastUpdated}
+                        </div>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
             {(this.state.filterText && visualisations.length === 0) &&
               <div className="filterHelpText">
@@ -132,5 +136,6 @@ export default class DashboardVisualisationList extends Component {
 DashboardVisualisationList.propTypes = {
   dashboardItems: PropTypes.object.isRequired,
   visualisations: PropTypes.array.isRequired,
+  datasets: PropTypes.array.isRequired,
   onEntityClick: PropTypes.func.isRequired,
 };

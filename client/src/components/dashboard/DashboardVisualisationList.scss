@@ -45,30 +45,50 @@
         border: 1px solid rgba($black, 0.3);
         position: relative;
         overflow-y: auto;
-
-        &::after {}
+        display: flex;
 
         &.added {
             border: 1px solid rgba($black, 0.05);
             background-color: rgba($black, 0.05);
         }
+
+        .entityIcon {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+
+            &,
+            img {
+                width: 32px;
+            }
+        }
+
+        .textContent {
+            padding-left: 10px;
+        }
     }
 
-    h4 {
-        margin-bottom: 5px;
+    h3 {
+        font-weight: 300;
+        text-transform: capitalize;
+        color: black;
+    }
+
+    .visualisationType,
+    .lastModified {
+        font-size: 0.8em;
     }
 
     .visualisationType {
         display: inline;
+        font-weight: 600;
+        color: $midGrey;
     }
 
     .lastModified {
         display: inline;
-        margin-left: 10px;
-    }
-
-    .visualisationType, .lastModified {
-        color: $midGrey;
+        font-style: italic;
+        color: $midLightGrey;
     }
 
     .isOnDashboardIndicator {

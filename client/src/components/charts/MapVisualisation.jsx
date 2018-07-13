@@ -469,7 +469,7 @@ export default class MapVisualisation extends Component {
       metadata.layerMetadata &&
       metadata.layerMetadata.length
     );
-    const lastUpdated = chart.getLastUpdated({ visualisation, datasets });
+    const lastUpdated = chart.getDataLastUpdated({ visualisation, datasets });
     return (
       <div
         className="MapVisualisation dashChart"

@@ -672,7 +672,7 @@ export const getTitle = visualisation => visualisation.name;
 
 const DATE_FORMAT = 'Do MMM YYYY - HH:mm';
 
-export const getLastUpdated = ({ visualisation, datasets }) => {
+export const getDataLastUpdated = ({ visualisation, datasets }) => {
   if (!datasets) return null;
   switch (visualisation.visualisationType) {
     case 'map': {
@@ -696,7 +696,7 @@ export const getLastUpdated = ({ visualisation, datasets }) => {
     case 'pie': {
       const dataset = datasets[visualisation.datasetId];
       if (!dataset) return null;
-      return moment(dataset.get('updated')).format(DATE_FORMAT);
+      return moment(dataset.get('modified')).format(DATE_FORMAT);
     }
     default: {
       return null;
