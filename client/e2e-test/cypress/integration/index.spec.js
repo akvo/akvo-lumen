@@ -1,10 +1,12 @@
-const baseUrl = Cypress.env("LUMEN_URL") || 'http://t1.lumen.local:3030/';
-const username = Cypress.env("LUMEN_USER") || 'jerome';
-const password = Cypress.env("LUMEN_PASSWORD") || 'password';
-const DATASET_LINK = 'https://github.com/lawlesst/vivo-sample-data/raw/master/data/csv/people.csv';
+/* global cy, before, context, Cypress, after, it */
+const baseUrl = Cypress.env('LUMEN_URL') || 'http://t1.lumen.local:3030/';
+const username = Cypress.env('LUMEN_USER') || 'jerome';
+const password = Cypress.env('LUMEN_PASSWORD') || 'password';
+const DATASET_LINK = 'https://raw.githubusercontent.com/akvo/akvo-lumen/develop/client/e2e-test/sample-data-1.csv';
 const datasetName = `Dataset ${Date.now().toString()}`;
 
-context('Kitchen Sink', () => {
+context('Akvo Lumen', () => {
+  // login
   before(() => {
     cy.visit(baseUrl);
     cy.get('#username')
@@ -16,10 +18,11 @@ context('Kitchen Sink', () => {
     cy.get('#kc-login').click();
   });
 
+  // delete entities created during test
   after(() => {
     const tryDelete = () => {
       cy.get('.LibraryListingItem').filter(`:contains(${datasetName})`).each((el, i) => {
-        if(i > 0) return;
+        if (i > 0) return;
         cy.wrap(el)
           .find('[data-test-id="show-controls"]')
           .click({ force: true });
@@ -29,7 +32,7 @@ context('Kitchen Sink', () => {
         cy.get('.DeleteConfirmationModal button.delete')
           .click();
         setTimeout(5000, tryDelete);
-      })
+      });
     };
     tryDelete();
   });
@@ -46,9 +49,17 @@ context('Kitchen Sink', () => {
     // Import
     cy.get('button[data-test-id="next"]').click();
     cy.get(`[data-test-name="${datasetName}"]:not(.PENDING)`, { timeout: 20000 }).should('exist');
+    cy.get(`[data-test-name="${datasetName}"] > a`).click({ force: true });
+    // see if metadata is correct
+    cy.get('.columnCount').contains('9 Columns').should('exist');
+    cy.get('.rowCount').contains('40 Rows').should('exist');
+    // see if table cells exist
+    cy.get('.fixedDataTableCellLayout_main').should('have.length.of.at.least', 40);
+    // back to library
+    cy.get('[data-test-id="back-button"]').click();
   });
 
-  it('create visualisation', () => {
+  it('create visualisation (pivot table)', () => {
     cy.get('button[data-test-id="visualisation"]').click();
     cy.get('li[data-test-id="button-pivot-table"]', { timeout: 20000 }).click();
     cy.get('[data-test-id="dataset-menu"] .Select-control').click();
@@ -56,7 +67,7 @@ context('Kitchen Sink', () => {
     cy.get('[role="option"]')
       .contains(datasetName)
       .should('have.attr', 'id')
-      .then(optionId => {
+      .then((optionId) => {
         // Selecting dataset
         cy.get(`#${optionId}`).click();
         // open column menu
@@ -66,7 +77,7 @@ context('Kitchen Sink', () => {
           .contains('title (text)')
           .should('have.attr', 'id');
       })
-      .then(columnId => {
+      .then((columnId) => {
         const title = `Visualisation of ${datasetName}`;
         // Selecting column
         cy.get(`#${columnId}`).click();
@@ -78,6 +89,18 @@ context('Kitchen Sink', () => {
         cy.get('body').click();
         // wait for changes to be saved
         cy.get('.saveStatus').should('contain', 'All changes saved');
+
+        // pivot table elements exist
+        cy.get('.PivotTable .title').contains(title).should('exist');
+        cy.get('.PivotTable th').contains('Assistant Professor').should('exist');
+        cy.get('.PivotTable th').contains('Associate Curator ').should('exist');
+        cy.get('.PivotTable th').contains('Research Professor').should('exist');
+        cy.get('.PivotTable td').contains('Total').should('exist');
+        cy.get('.PivotTable td.cell').contains('11').should('exist');
+        cy.get('.PivotTable td.cell').contains('4').should('exist');
+        cy.get('.PivotTable td.cell').contains('10').should('exist');
+        cy.get('.PivotTable .categoryColumnTitle').contains('title').should('exist');
+
         // back to library
         cy.get('[data-test-id="back-button"]').click();
       });
@@ -92,6 +115,11 @@ context('Kitchen Sink', () => {
     cy.get('input[data-test-id="entity-title"]').type(`Dashboard of ${datasetName}`);
     // Saving dashboard
     cy.get('body').click();
+
+    // visualization has been added
+    cy.get('[data-test-id="dashboard-canvas-item"] h2').contains(`Visualisation of ${datasetName}`);
+    cy.get('[data-test-id="dashboard-canvas-item"] .PivotTable').should('exist');
+
     // back to library
     cy.get('[data-test-id="back-button"]').click();
   });
