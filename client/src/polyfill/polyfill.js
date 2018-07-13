@@ -1,43 +1,60 @@
+/* eslint-disable global-require */
+
 import 'raf/polyfill';
 
 const polyfill = (callback) => {
-  // const browserSupported = Boolean(
-  //   'Map' in window &&
-  //   'Set' in window &&
-  //   'fetch' in window &&
-  //   'assign' in Object &&
-  //   'Intl' in window &&
-  //   'includes' in Array.prototype &&
-  //   'filter' in Array.prototype
-  // );
+  const toBePolyfilled = [];
 
-  // if (browserSupported) {
-  //   callback();
-  // } else {
-  //   /*
-  //     Load polyfills for older browsers.
+  if (!(window.Map && window.Set && window.WeakMap && window.WeakSet)) {
+    toBePolyfilled.push('core-js/es6/map');
+    toBePolyfilled.push('core-js/es6/set');
+  }
 
-  //     We could load the whole of core-js/shim here (and perhaps we should if we find we
-  //     need to come back here and add stuff frequently) but it makes the polyfill bundle
-  //     about 40% larger. So let's try this and see if it's "enough".
-  //   */
+  if (!(window.Intl)) {
+    toBePolyfilled.push('intl');
+  }
 
+  if (!(Object.assign && Object.is && Object.setPrototypeOf)) {
+    toBePolyfilled.push('core-js/es6/object');
+    toBePolyfilled.push('core-js/modules/es7.object.values');
+  }
 
-  /* eslint-disable global-require */
-  require.ensure([], () => {
-    require('core-js/es6/array');
-    require('core-js/es6/object');
-    require('core-js/es6/number');
-    require('core-js/es6/map');
-    require('core-js/es6/set');
-    require('core-js/modules/es7.object.values');
-    require('core-js/modules/es7.array.includes');
-    require('intl');
-    /* eslint-enable-global-require */
+  if (!(Array.prototype &&
+    Array.prototype.copyWithin &&
+    Array.prototype.fill &&
+    Array.prototype.find &&
+    Array.prototype.findIndex &&
+    Array.prototype.keys &&
+    Array.prototype.entries &&
+    Array.prototype.values &&
+    Array.from &&
+    Array.of)
+  ) {
+    toBePolyfilled.push('core-js/es6/array');
+    toBePolyfilled.push('core-js/modules/es7.array.includes');
+  }
 
+  if (!(Number.isFinite &&
+    Number.isInteger &&
+    Number.isSafeInteger &&
+    Number.isNaN &&
+    Number.parseInt &&
+    Number.parseFloat &&
+    Number.isInteger(Number.MAX_SAFE_INTEGER) &&
+    Number.isInteger(Number.MIN_SAFE_INTEGER) &&
+    Number.isFinite(Number.EPSILON))
+  ) {
+    toBePolyfilled.push('core-js/es6/number');
+  }
+
+  if (!toBePolyfilled.length) {
     callback();
-  });
-  // }
+  } else {
+    require.ensure([], () => {
+      toBePolyfilled.forEach(require);
+      callback();
+    });
+  }
 };
 
 export default polyfill;
