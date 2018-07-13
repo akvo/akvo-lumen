@@ -68,7 +68,10 @@ export default class DashboardVisualisationList extends Component {
             }
             <ul className="list">
               {visualisations.map((item) => {
-                const dataLastUpdated = getDataLastUpdated({ visualisation: item, datasets: props.datasets });
+                const dataLastUpdated = getDataLastUpdated({
+                  visualisation: item,
+                  datasets: props.datasets,
+                });
                 return (
                   <li
                     className={`listItem clickable ${item.visualisationType.replace(' ', '')}
