@@ -45,12 +45,26 @@
         border: 1px solid rgba($black, 0.3);
         position: relative;
         overflow-y: auto;
-
-        &::after {}
+        display: flex;
 
         &.added {
             border: 1px solid rgba($black, 0.05);
             background-color: rgba($black, 0.05);
+        }
+
+        .entityIcon {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+
+            &,
+            img {
+                width: 32px;
+            }
+        }
+
+        .textContent {
+            padding-left: 10px;
         }
     }
 

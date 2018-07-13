@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { getDataLastUpdated } from '../../utilities/chart';
+import { getIconUrl } from '../../domain/entity';
 
 require('./DashboardVisualisationList.scss');
 
@@ -66,38 +67,48 @@ export default class DashboardVisualisationList extends Component {
               </div>
             }
             <ul className="list">
-              {visualisations.map(item =>
-                <li
-                  className={`listItem clickable ${item.visualisationType.replace(' ', '')}
-                  ${isOnDashboard(item) ? 'added' : ''}`}
-                  data-test-name={item.name}
-                  key={item.id}
-                  onClick={() => props.onEntityClick(item, 'visualisation')}
-                >
-                  <h3>
-                    {item.name}
-                    <span
-                      className="isOnDashboardIndicator"
-                    >
-                      {isOnDashboard(item) ? '✔' : ''}
-                    </span>
-                  </h3>
+              {visualisations.map((item) => {
+                const dataLastUpdated = getDataLastUpdated({ visualisation: item, datasets: props.datasets });
+                return (
+                  <li
+                    className={`listItem clickable ${item.visualisationType.replace(' ', '')}
+                    ${isOnDashboard(item) ? 'added' : ''}`}
+                    data-test-name={item.name}
+                    key={item.id}
+                    onClick={() => props.onEntityClick(item, 'visualisation')}
+                  >
+                    <div className="entityIcon">
+                      <img src={getIconUrl(item)} role="presentation" />
+                    </div>
+                    <div className="textContent">
+                      <h3>
+                        {item.name}
+                        <span
+                          className="isOnDashboardIndicator"
+                        >
+                          {isOnDashboard(item) ? '✔' : ''}
+                        </span>
+                      </h3>
 
-                  <div className="visualisationType">
-                    {item.visualisationType === 'map' ?
-                    'Map'
-                    :
-                    `${item.visualisationType.charAt(0).toUpperCase() +
-                        item.visualisationType.slice(1)} chart`
-                  }
-                  </div>
-                  <br />
-                  <div className="lastModified">
-                    <FormattedMessage id="data_last_updated" />
-                    : {getDataLastUpdated({ visualisation: item, datasets: props.datasets })}
-                  </div>
-                </li>
-            )}
+                      <div className="visualisationType">
+                        {item.visualisationType === 'map' ?
+                        'Map'
+                        :
+                        `${item.visualisationType.charAt(0).toUpperCase() +
+                            item.visualisationType.slice(1)} chart`
+                      }
+                      </div>
+                      <br />
+                      {dataLastUpdated && (
+                        <div className="lastModified">
+                          <FormattedMessage id="data_last_updated" />
+                          : {dataLastUpdated}
+                        </div>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
             {(this.state.filterText && visualisations.length === 0) &&
               <div className="filterHelpText">
