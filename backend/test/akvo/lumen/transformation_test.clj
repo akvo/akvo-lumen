@@ -13,6 +13,7 @@
             [clojure.java.io :as io]
             [clojure.test :refer :all]
             [clojure.tools.logging :as log]
+            [clojure.walk :refer (keywordize-keys)]
             [hugsql.core :as hugsql])
   (:import [clojure.lang ExceptionInfo]))
 
@@ -30,8 +31,8 @@
 
 (deftest op-validation
   (testing "op validation"
-    (is (= true (every? true? (map engine/valid? ops))))
-    (let [result (tf/validate {:type :transformation :transformation (second invalid-op)})]
+    (is (= true (every? true? (map engine/valid? (keywordize-keys ops)))))
+    (let [result (tf/validate {::tf/type :transformation :transformation (second invalid-op)})]
       (is (= false (:valid? result)))
       (is (= (format "Invalid transformation %s" (second invalid-op)) (:message result))))))
 
@@ -44,29 +45,30 @@
                                   "transformation_test.csv" {:name "Transformation Test"
                                                              :has-column-headers? true})
           [tag _] (last (for [transformation ops]
-                          (tf/apply *tenant-conn* dataset-id {:type :transformation
-                                                              :transformation transformation})))]
+                          (tf/apply *tenant-conn* dataset-id {::tf/type :transformation
+                                                              :transformation (keywordize-keys transformation)})))]
       (is (= ::lib/ok tag)))))
 
 (deftest ^:functional test-import-and-transform
   (testing "Import CSV and transform"
-    (let [t-log [{"op" "core/trim"
-                  "args" {"columnName" "c5"}
-                  "onError" "fail"}
-                 {"op" "core/change-datatype"
-                  "args" {"columnName" "c5"
-                          "newType" "number"
-                          "defaultValue" 0}
-                  "onError" "default-value"}
-                 {"op" "core/filter-column"
-                  "args" {"columnName" "c4"
-                          "expression" {"contains" "broken"}}
-                  "onError" "fail"}]
+    (let [t-log (map keywordize-keys
+                     [{"akvo.lumen.transformation.engine/op" "core/trim"
+                       "args" {"columnName" "c5"}
+                       "onError" "fail"}
+                      {"akvo.lumen.transformation.engine/op" "core/change-datatype"
+                       "args" {"columnName" "c5"
+                               "newType" "number"
+                               "defaultValue" 0}
+                       "onError" "default-value"}
+                      {"akvo.lumen.transformation.engine/op" "core/filter-column"
+                       "args" {"columnName" "c4"
+                               "expression" {"contains" "broken"}}
+                       "onError" "fail"}])
           dataset-id (import-file *tenant-conn* *error-tracker* "GDP.csv" {:name "GDP Test" :has-column-headers? false})]
       (let [[tag {:strs [datasetId]}] (last (for [transformation t-log]
                                               (tf/apply *tenant-conn*
                                                         dataset-id
-                                                        {:type :transformation
+                                                        {::tf/type :transformation
                                                          :transformation transformation})))]
 
         (is (= ::lib/ok tag))
@@ -82,24 +84,25 @@
                                                                     :table-name table-name}))))
           (is (= 1 (:total (get-row-count *tenant-conn* {:table-name table-name})))))))))
 
-
 (deftest ^:functional test-undo
   (let [dataset-id (import-file *tenant-conn* *error-tracker* "GDP.csv" {:dataset-name "GDP Undo Test"})
         {previous-table-name :table-name} (latest-dataset-version-by-dataset-id *tenant-conn*
                                                                                 {:dataset-id dataset-id})
         apply-transformation (partial tf/apply *tenant-conn* dataset-id)]
-    (is (= ::lib/ok (first (apply-transformation {:type :undo}))))
-    (let [[tag _] (do (apply-transformation {:type :transformation
-                                             :transformation {"op" "core/to-lowercase"
-                                                              "args" {"columnName" "c1"}
-                                                              "onError" "fail"}})
-                      (apply-transformation {:type :transformation
-                                             :transformation {"op" "core/change-datatype"
-                                                              "args" {"columnName" "c5"
-                                                                      "newType" "number"
-                                                                      "defaultValue" 0}
-                                                              "onError" "default-value"}})
-                      (apply-transformation {:type :undo}))]
+    (is (= ::lib/ok (first (apply-transformation {::tf/type :undo}))))
+    (let [[tag _] (do (apply-transformation {::tf/type :transformation
+                                             :transformation (keywordize-keys
+                                                              {"akvo.lumen.transformation.engine/op" "core/to-lowercase"
+                                                               "args" {"columnName" "c1"}
+                                                               "onError" "fail"})})
+                      (apply-transformation {::tf/type :transformation
+                                             :transformation (keywordize-keys
+                                                              {"akvo.lumen.transformation.engine/op" "core/change-datatype"
+                                                               "args" {"columnName" "c5"
+                                                                       "newType" "number"
+                                                                       "defaultValue" 0}
+                                                               "onError" "default-value"})})
+                      (apply-transformation {::tf/type :undo}))]
       (is (= ::lib/ok tag))
       (is (not (:exists (table-exists *tenant-conn* {:table-name previous-table-name}))))
       (is (= (:columns (dataset-version-by-dataset-id *tenant-conn*
@@ -114,7 +117,7 @@
                                         {:rnum 1
                                          :column-name "c1"
                                          :table-name table-name})))))
-      (apply-transformation {:type :undo})
+      (apply-transformation {::tf/type :undo})
       (let [table-name (:table-name
                         (latest-dataset-version-by-dataset-id *tenant-conn*
                                                               {:dataset-id dataset-id}))]
@@ -127,12 +130,13 @@
 (deftest ^:functional combine-transformation-test
   (let [dataset-id (import-file *tenant-conn* *error-tracker* "name.csv" {:has-column-headers? true})
         apply-transformation (partial tf/apply *tenant-conn* dataset-id)]
-    (let [[tag _] (apply-transformation {:type :transformation
-                                         :transformation {"op" "core/combine"
-                                                          "args" {"columnNames" ["c1" "c2"]
-                                                                  "newColumnTitle" "full name"
-                                                                  "separator" " "}
-                                                          "onError" "fail"}})]
+    (let [[tag _] (apply-transformation {::tf/type :transformation
+                                         :transformation (keywordize-keys
+                                                          {"akvo.lumen.transformation.engine/op" "core/combine"
+                                                           "args" {"columnNames" ["c1" "c2"]
+                                                                   "newColumnTitle" "full name"
+                                                                   "separator" " "}
+                                                           "onError" "fail"})})]
       (is (= ::lib/ok tag))
       (let [table-name (:table-name
                         (latest-dataset-version-by-dataset-id *tenant-conn*
@@ -144,13 +148,14 @@
                                          :table-name table-name}))))))))
 
 (defn date-transformation [column-name format]
-  {:type :transformation
-   :transformation {"op" "core/change-datatype"
-                    "args" {"columnName" column-name
-                            "newType" "date"
-                            "defaultValue" 0
-                            "parseFormat" format}
-                    "onError" "fail"}})
+  {::tf/type :transformation
+   :transformation (keywordize-keys
+                    {"akvo.lumen.transformation.engine/op" "core/change-datatype"
+                     "args" {"columnName" column-name
+                             "newType" "date"
+                             "defaultValue" 0
+                             "parseFormat" format}
+                     "onError" "fail"})})
 
 (deftest ^:functional date-parsing-test
   (let [dataset-id (import-file *tenant-conn* *error-tracker* "dates.csv" {:has-column-headers? true})
@@ -178,23 +183,25 @@
         (is (pos? third-date))))))
 
 (defn change-datatype-transformation [column-name]
-  {:type :transformation
-   :transformation {"op" "core/change-datatype"
-                    "args" {"columnName" column-name
-                            "newType" "number"
-                            "defaultValue" nil}
-                    "onError" "default-value"}})
+  {::tf/type :transformation
+   :transformation (keywordize-keys
+                    {"akvo.lumen.transformation.engine/op" "core/change-datatype"
+                     "args" {"columnName" column-name
+                             "newType" "number"
+                             "defaultValue" nil}
+                     "onError" "default-value"})})
 
 (defn derive-column-transform [transform]
   (let [default-args {"newColumnTitle" "Derived Column"
                       "newColumnType" "number"}
         args (merge default-args
                     (get transform "args"))
-        default-transform {"op" "core/derive"
+        default-transform {"akvo.lumen.transformation.engine/op" "core/derive"
                            "onError" "leave-empty"}]
-    {:type :transformation
-     :transformation (merge default-transform
-                            (assoc transform "args" args))}))
+    {::tf/type :transformation
+     :transformation (keywordize-keys
+                      (merge default-transform
+                             (assoc transform "args" args)))}))
 
 (defn latest-data [dataset-id]
   (let [table-name (:table-name
@@ -229,7 +236,7 @@
                               "onError" "delete-row"}))
       (is (= ["b" "b"] (map :d2 (latest-data dataset-id))))
       ;; Undo this so we have all the rows in the remaining tests
-      (apply-transformation {:type :undo}))
+      (apply-transformation {::tf/type :undo}))
 
     (testing "Basic text transform with abort"
       (apply-transformation (derive-column-transform
@@ -245,91 +252,101 @@
               not)))
 
     (testing "Nested string transform"
-      (apply-transformation (derive-column-transform
-                             {"args" {"code" "row['foo'].toUpperCase()"
-                                      "newColumnType" "text"
-                                      "newColumnTitle" "Derived 4"}}))
+      (apply-transformation (keywordize-keys
+                             (derive-column-transform
+                              {"args" {"code" "row['foo'].toUpperCase()"
+                                       "newColumnType" "text"
+                                       "newColumnTitle" "Derived 4"}})))
       (is (= ["A" "B" nil] (map :d2 (latest-data dataset-id))))
 
-      (apply-transformation (derive-column-transform
-                             {"args" {"code" "row['Derived 4'].toLowerCase()"
-                                      "newColumnType" "text"
-                                      "newColumnTitle" "Derived 5"}}))
+      (apply-transformation (keywordize-keys
+                             (derive-column-transform
+                              {"args" {"code" "row['Derived 4'].toLowerCase()"
+                                       "newColumnType" "text"
+                                       "newColumnTitle" "Derived 5"}})))
       (is (= ["a" "b" nil] (map :d3 (latest-data dataset-id)))))
 
     (testing "Date transform"
-      (let [[tag _] (apply-transformation (derive-column-transform
-                                           {"args" {"code" "new Date()"
-                                                    "newColumnType" "date"
-                                                    "newColumnTitle" "Derived 5"}
-                                            "onError" "fail"}))]
+      (let [[tag _] (apply-transformation (keywordize-keys
+                                           (derive-column-transform
+                                            {"args" {"code" "new Date()"
+                                                     "newColumnType" "date"
+                                                     "newColumnTitle" "Derived 5"}
+                                             "onError" "fail"})))]
         (is (= tag ::lib/ok))
         (is (every? number? (map :d4 (latest-data dataset-id))))))
 
     (testing "Valid type check"
-      (let [[tag _] (apply-transformation (derive-column-transform
-                                           {"args" {"code" "new Date()"
-                                                    "newColumnType" "number"
-                                                    "newColumnTitle" "Derived 6"}
-                                            "onError" "fail"}))]
+      (let [[tag _] (apply-transformation (keywordize-keys
+                                           (derive-column-transform
+                                            {"args" {"code" "new Date()"
+                                                     "newColumnType" "number"
+                                                     "newColumnTitle" "Derived 6"}
+                                             "onError" "fail"})))]
         (is (= tag ::lib/conflict))))
 
     (testing "Sandboxing java interop"
-      (let [[tag _] (apply-transformation (derive-column-transform
-                                           {"args" {"code" "new java.util.Date()"
-                                                    "newColumnType" "number"
-                                                    "newColumnTitle" "Derived 7"}
-                                            "onError" "fail"}))]
+      (let [[tag _] (apply-transformation (keywordize-keys
+                                           (derive-column-transform
+                                            {"args" {"code" "new java.util.Date()"
+                                                     "newColumnType" "number"
+                                                     "newColumnTitle" "Derived 7"}
+                                             "onError" "fail"})))]
         (is (= tag ::lib/conflict))))
 
     (testing "Sandboxing dangerous js functions"
-      (let [[tag _] (apply-transformation (derive-column-transform
-                                           {"args" {"code" "quit()"
-                                                    "newColumnType" "number"
-                                                    "newColumnTitle" "Derived 7"}
-                                            "onError" "fail"}))]
+      (let [[tag _] (apply-transformation (keywordize-keys
+                                           (derive-column-transform
+                                            {"args" {"code" "quit()"
+                                                     "newColumnType" "number"
+                                                     "newColumnTitle" "Derived 7"}
+                                             "onError" "fail"})))]
         (is (= tag ::lib/conflict))))
 
     (with-instrument-disabled
-     (testing "Fail early on syntax error"
-       (let [[tag _] (apply-transformation (derive-column-transform
-                                            {"args" {"code" ")"
-                                                     "newColumnType" "text"
-                                                     "newColumnTitle" "Derived 8"}
-                                             "onError" "fail"}))]
-         (is (= tag ::lib/bad-request))))
+      (testing "Fail early on syntax error"
+        (let [[tag _] (apply-transformation (keywordize-keys
+                                             (derive-column-transform
+                                              {"args" {"code" ")"
+                                                       "newColumnType" "text"
+                                                       "newColumnTitle" "Derived 8"}
+                                               "onError" "fail"})))]
+          (is (= tag ::lib/bad-request))))
 
       (testing "Fail infinite loop"
-        (let [[tag _] (apply-transformation (derive-column-transform
-                                             {"args" {"code" "while(true) {}"
-                                                      "newColumnType" "text"
-                                                      "newColumnTitle" "Derived 9"}
-                                              "onError" "fail"}))]
+        (let [[tag _] (apply-transformation (keywordize-keys
+                                             (derive-column-transform
+                                              {"args" {"code" "while(true) {}"
+                                                       "newColumnType" "text"
+                                                       "newColumnTitle" "Derived 9"}
+                                               "onError" "fail"})))]
           (is (= tag ::lib/bad-request))))
 
       (testing "Disallow anonymous functions"
-        (let [[tag _] (apply-transformation (derive-column-transform
-                                             {"args" {"code" "(function() {})()"
-                                                      "newColumnType" "text"
-                                                      "newColumnTitle" "Derived 10"}
-                                              "onError" "fail"}))]
+        (let [[tag _] (apply-transformation (keywordize-keys
+                                             (derive-column-transform
+                                              {"args" {"code" "(function() {})()"
+                                                       "newColumnType" "text"
+                                                       "newColumnTitle" "Derived 10"}
+                                               "onError" "fail"})))]
           (is (= tag ::lib/bad-request)))
 
-        (let [[tag _] (apply-transformation (derive-column-transform
-                                             {"args" {"code" "(() => 'foo')()"
-                                                      "newColumnType" "text"
-                                                      "newColumnTitle" "Derived 11"}
-                                              "onError" "fail"}))]
+        (let [[tag _] (apply-transformation (keywordize-keys
+                                             (derive-column-transform
+                                              {"args" {"code" "(() => 'foo')()"
+                                                       "newColumnType" "text"
+                                                       "newColumnTitle" "Derived 11"}
+                                               "onError" "fail"})))]
           (is (= tag ::lib/bad-request)))))))
-
 
 (deftest ^:functional delete-column-test
   (let [dataset-id (import-file *tenant-conn* *error-tracker* "dates.csv" {:has-column-headers? true})
         apply-transformation (partial tf/apply *tenant-conn* dataset-id)]
-    (let [[tag _] (apply-transformation {:type :transformation
-                                         :transformation {"op" "core/delete-column"
-                                                          "args" {"columnName" "c2"}
-                                                          "onError" "fail"}})]
+    (let [[tag _] (apply-transformation {::tf/type :transformation
+                                         :transformation (keywordize-keys
+                                                          {"akvo.lumen.transformation.engine/op" "core/delete-column"
+                                                           "args" {"columnName" "c2"}
+                                                           "onError" "fail"})})]
       (is (= ::lib/ok tag))
       (let [{:keys [columns transformations]} (latest-dataset-version-by-dataset-id *tenant-conn*
                                                                                     {:dataset-id dataset-id})]
@@ -341,11 +358,12 @@
 (deftest ^:functional rename-column-test
   (let [dataset-id (import-file *tenant-conn* *error-tracker* "dates.csv" {:has-column-headers? true})
         apply-transformation (partial tf/apply *tenant-conn* dataset-id)]
-    (let [[tag _] (apply-transformation {:type :transformation
-                                         :transformation {"op" "core/rename-column"
-                                                          "args" {"columnName" "c2"
-                                                                  "newColumnTitle" "New Title"}
-                                                          "onError" "fail"}})]
+    (let [[tag _] (apply-transformation {::tf/type :transformation
+                                         :transformation (keywordize-keys
+                                                          {"akvo.lumen.transformation.engine/op" "core/rename-column"
+                                                           "args" {"columnName" "c2"
+                                                                   "newColumnTitle" "New Title"}
+                                                           "onError" "fail"})})]
       (is (= ::lib/ok tag))
       (let [{:keys [columns transformations]} (latest-dataset-version-by-dataset-id *tenant-conn*
                                                                                     {:dataset-id dataset-id})]
@@ -356,14 +374,16 @@
 
 ;; Regression #808
 (deftest valid-column-names
-  (is (engine/valid? {"op" "core/sort-column"
-                      "args" {"columnName" "submitted_at"
-                              "sortDirection" "ASC"}
-                      "onError" "fail"}))
+  (is (engine/valid? (keywordize-keys
+                      {"akvo.lumen.transformation.engine/op" "core/sort-column"
+                       "args" {"columnName" "submitted_at"
+                               "sortDirection" "ASC"}
+                       "onError" "fail"})))
 
-  (is (engine/valid? {"op" "core/remove-sort"
-                      "args" {"columnName" "c3"}
-                      "onError" "fail"}))
+  (is (engine/valid? (keywordize-keys
+                      {"akvo.lumen.transformation.engine/op" "core/remove-sort"
+                       "args" {"columnName" "c3"}
+                       "onError" "fail"})))
   (let [column #(merge % {:type "text" :title "title" :hidden true :direction nil})]
     (are [derived cols] (= derived (engine/next-column-name cols))
       "d1" []
@@ -374,12 +394,13 @@
 (deftest ^:functional generate-geopoints-test
   (let [dataset-id (import-file *tenant-conn* *error-tracker* "geopoints.csv" {:has-column-headers? true})
         apply-transformation (partial tf/apply *tenant-conn* dataset-id)]
-    (let [[tag _] (apply-transformation {:type :transformation
-                                         :transformation {"op" "core/generate-geopoints"
-                                                          "args" {"columnNameLat" "c2"
-                                                                  "columnNameLong" "c3"
-                                                                  "columnTitleGeo" "Geopoints"}
-                                                          "onError" "fail"}})]
+    (let [[tag _] (apply-transformation {::tf/type :transformation
+                                         :transformation (keywordize-keys
+                                                          {"akvo.lumen.transformation.engine/op" "core/generate-geopoints"
+                                                           "args" {"columnNameLat" "c2"
+                                                                   "columnNameLong" "c3"
+                                                                   "columnTitleGeo" "Geopoints"}
+                                                           "onError" "fail"})})]
       (is (= ::lib/ok tag))
       (let [dataset (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id})
             {:keys [columns _]} dataset]

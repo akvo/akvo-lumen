@@ -8,16 +8,16 @@
 
 (defn- transform
   [tenant-conn table-name columns op-spec fn]
-  (let [{column-name "columnName"} (engine/args op-spec)]
+  (let [{:keys [columnName]} (engine/args op-spec)]
     (text-transform tenant-conn {:table-name table-name
-                                 :column-name column-name
+                                 :column-name columnName
                                  :fn fn})
     {:success? true
-     :execution-log [(format "Text transform %s on %s" fn column-name)]
+     :execution-log [(format "Text transform %s on %s" fn columnName)]
      :columns columns}))
 
 (defn valid? [op-spec]
-  (engine/valid-column-name? (get (engine/args op-spec) "columnName")))
+  (engine/valid-column-name? (get (engine/args op-spec) :columnName)))
 
 (defmethod engine/valid? :core/trim [op-spec]
   (valid? op-spec))
@@ -52,11 +52,11 @@
 
 (defmethod engine/apply-operation :core/trim-doublespace
   [tenant-conn table-name columns op-spec]
-  (let [{column-name "columnName"} (engine/args op-spec)]
+  (let [{:keys [columnName]} (engine/args op-spec)]
     (trim-doublespace tenant-conn {:table-name table-name
-                                   :column-name column-name})
+                                   :column-name columnName})
     {:success? true
-     :execution-log [(format "Text transform trim-doublespace on %s" column-name)]
+     :execution-log [(format "Text transform trim-doublespace on %s" columnName)]
      :columns columns})
   {:success? true
    :columns columns})

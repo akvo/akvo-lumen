@@ -9,20 +9,18 @@
 
 (defmethod engine/valid? :core/combine
   [op-spec]
-  (let [{[column-name-1 column-name-2] "columnNames"
-         column-title "newColumnTitle"
-         separator "separator"} (engine/args op-spec)]
+  (let [{:keys [columnNames newColumnTitle separator]} (engine/args op-spec)
+        [column-name-1 column-name-2] columnNames]
     (boolean (and (every? engine/valid-column-name? [column-name-1 column-name-2])
-                  (string? column-title)
+                  (string? newColumnTitle)
                   (string? separator)
                   (= (engine/error-strategy op-spec) "fail")))))
 
 (defmethod engine/apply-operation :core/combine
   [tenant-conn table-name columns op-spec]
   (let [new-column-name (engine/next-column-name columns)
-        {[first-column-name second-column-name] "columnNames"
-         separator "separator"
-         column-title "newColumnTitle"} (engine/args op-spec)]
+        {:keys [columnNames separator newColumnTitle]} (engine/args op-spec)
+        [first-column-name second-column-name] columnNames]
     (add-column tenant-conn {:table-name table-name
                              :column-type "text"
                              :new-column-name new-column-name})
@@ -35,7 +33,7 @@
     {:success? true
      :execution-log [(format "Combined columns %s, %s into %s"
                              first-column-name second-column-name new-column-name)]
-     :columns (conj columns (w/keywordize-keys {"title" column-title
+     :columns (conj columns (w/keywordize-keys {"title" newColumnTitle
                                                 "type" "text"
                                                 "sort" nil
                                                 "hidden" false

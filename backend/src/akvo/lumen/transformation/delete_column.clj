@@ -6,7 +6,7 @@
 (hugsql/def-db-fns "akvo/lumen/transformation/engine.sql")
 
 (defn col-name [op-spec]
-  (get (engine/args op-spec) "columnName"))
+  (get (engine/args op-spec) :columnName))
 
 (defmethod engine/valid? :core/delete-column
   [op-spec]
