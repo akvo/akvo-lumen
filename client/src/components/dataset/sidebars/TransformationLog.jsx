@@ -88,7 +88,7 @@ function textTransformationDescription(transformations, index, columns) {
     'core/to-titlecase': <FormattedMessage id="to_titlecase" values={{ title }} />,
     'core/trim': <FormattedMessage id="trimmed_whitespace" values={{ title }} />,
     'core/trim-doublespace': <FormattedMessage id="removed_double_space" values={{ title }} />,
-  })[transformation.get('op')];
+  })[transformation.get('akvo.lumen.transformation.engine/op')];
 }
 
 function mergeDatasetsDescription(transformation, dependentDatasets) {
@@ -135,7 +135,7 @@ function mergeDatasetsDescription(transformation, dependentDatasets) {
 
 function transformationDescription(transformations, index, columns, dependentDatasets) {
   const transformation = transformations.get(index);
-  const op = transformation.get('op');
+  const op = transformation.get('akvo.lumen.transformation.engine/op');
   const columnName = transformation.getIn(['args', 'columnName']);
   const title = transformation.getIn(['changedColumns', columnName, 'before', 'title']);
   switch (op) {
@@ -222,7 +222,7 @@ class TransformationList extends Component {
     const { transformations, dispatch } = this.props;
 
     const dependentDatasetIds = transformations
-      .filter(transformation => transformation.get('op') === 'core/merge-datasets')
+      .filter(transformation => transformation.get('akvo.lumen.transformation.engine/op') === 'core/merge-datasets')
       .map(transformation => transformation.getIn(['args', 'source', 'datasetId']))
       .toSet();
 
@@ -283,7 +283,7 @@ function markUndo(transformations, idx) {
 function transformationLog(persistedTransformations, pendingTransformations) {
   let allTransformations = persistedTransformations;
   pendingTransformations.forEach((pendingTransformation) => {
-    if (pendingTransformation.get('op') === 'undo') {
+    if (pendingTransformation.get('akvo.lumen.transformation.engine/op') === 'undo') {
       allTransformations = markUndo(allTransformations, allTransformations.size - 1);
     } else {
       allTransformations = allTransformations.push(pendingTransformation.set('pending', true));

@@ -18,17 +18,17 @@
    empty value. For dates, we use 1001-01-01 01:00:00"
   [column]
   (format "COALESCE(%s, %s)"
-          (get column "columnName")
-          (if (= "text" (get column "type"))
+          (get column :columnName)
+          (if (= "text" (get column :type))
             "''"
-            (if (= "date" (get column "type"))
+            (if (= "date" (get column :type))
               "'1001-01-01 01:00:00'::timestamptz"
               "'NaN'::double precision"))))
 
 (defn unique-values-sql [table-name category-column filter-str]
   (format "SELECT DISTINCT %s%s FROM %s WHERE %s ORDER BY 1"
           (coalesce category-column)
-          (if (= "timestamptz" (get category-column "type")) "::timestamptz::date" "")
+          (if (= "timestamptz" (get category-column :type)) "::timestamptz::date" "")
           table-name
           filter-str))
 
@@ -44,10 +44,10 @@
                           aggregation]}
                   filter-str]
   (format "SELECT %s, %s, %s(%s) FROM %s WHERE %s GROUP BY 1,2 ORDER BY 1,2"
-          (get row-column "columnName")
+          (get row-column :columnName)
           (coalesce category-column)
           aggregation
-          (get value-column "columnName")
+          (get value-column :columnName)
           table-name
           filter-str))
 
@@ -64,11 +64,11 @@
                                   (:category-column query)
                                   filter-str)
         category-columns (map (fn [title]
-                                {"title" title
-                                 "type" "number"})
+                                {:title title
+                                 :type "number"})
                               categories)
         columns (cons (select-keys (:row-column query)
-                                   ["title" "type"])
+                                   [:title :type])
                       category-columns)]
     {:rows (run-query conn (pivot-sql (:table-name dataset)
                                       query
@@ -80,8 +80,8 @@
   (let [count (run-query conn (format "SELECT count(rnum) FROM %s WHERE %s"
                                       (:table-name dataset)
                                       filter-str))]
-    {:columns [{"type" "number"
-                "title" "Total"}]
+    {:columns [{:type "number"
+                :title "Total"}]
      :rows count}))
 
 (defn apply-empty-category-query [conn dataset query filter-str]
@@ -90,10 +90,10 @@
                           (:table-name dataset)
                           filter-str)
                   (run-query conn))]
-    {:columns [{"type" "text"
-                "title" (get-in query [:row-column "title"])}
-               {"type" "number"
-                "title" "Total"}]
+    {:columns [{:type "text"
+                :title (get-in query [:row-column :title])}
+               {:type "number"
+                :title "Total"}]
      :rows rows}))
 
 (defn apply-empty-row-query [conn dataset query filter-str]
@@ -102,11 +102,11 @@
                             (:table-name dataset)
                             filter-str)
                     (run-query conn))]
-    {:columns (cons {"title" ""
-                     "type" "text"}
+    {:columns (cons {:title ""
+                     :type "text"}
                     (map (fn [[category]]
-                           {"title" category
-                            "type" "number"})
+                           {:title category
+                            :type "number"})
                          counts))
      :rows [(cons "Total" (map second counts))]}))
 
@@ -114,8 +114,8 @@
   (apply-pivot conn
                dataset
                (assoc query
-                      :value-column {"columnName" "rnum"}
-                      "aggregation" "count")
+                      :value-column {:columnName "rnum"}
+                      :aggregation "count")
                filter-str))
 
 (defn apply-query [conn dataset query filter-str]
@@ -134,23 +134,27 @@
 (defn build-query
   "Replace column names with proper column metadata from the dataset"
   [columns query]
-  {:category-column (utils/find-column columns (get query "categoryColumn"))
-   :row-column (utils/find-column columns (get query "rowColumn"))
-   :value-column (utils/find-column columns (get query "valueColumn"))
-   :aggregation (condp = (get query "aggregation")
-                  "mean" "avg"
-                  "sum" "sum"
-                  "min" "min"
-                  "max" "max"
-                  "count" "count"
-                  (throw (ex-info "Unsupported aggregation function"
-                                  {:aggregation (get query "aggregation")})))
-   :filters (get query "filters")})
+  (merge {:aggregation (condp = (:aggregation query)
+                         "mean" "avg"
+                         "sum" "sum"
+                         "min" "min"
+                         "max" "max"
+                         "count" "count"
+                         (throw (ex-info "Unsupported aggregation function"
+                                         {:aggregation (:aggregation query)})))}
+         (when-let [c (utils/find-column columns (:categoryColumn query)) ]
+           {:category-column c})
+         (when-let [c (utils/find-column columns (:rowColumn query)) ]
+           {:row-column c})
+         (when-let [c (utils/find-column columns (:valueColumn query)) ]
+           {:value-column c})
+         (when-let [f (:filters query) ]
+           {:filters f})))
 
 (defn query [tenant-conn dataset query]
-  (let [query (build-query (:columns dataset) query)
-        filter-str (filter/sql-str (:columns dataset) (:filters query))]
+  (let [columns (:columns dataset)
+        query (build-query columns query)
+        filter-str (filter/sql-str columns (:filters query))]
     (lib/ok (merge (apply-query tenant-conn dataset query filter-str)
                    {:metadata
-                    {"categoryColumnTitle" (get-in query
-                                                   [:category-column "title"])}}))))
+                    {:categoryColumnTitle (get-in query [:category-column :title])}}))))

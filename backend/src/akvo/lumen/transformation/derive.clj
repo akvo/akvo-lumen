@@ -17,10 +17,8 @@
     "date"   "timestamptz"))
 
 (defn args [op-spec]
-  (let [{code         "code"
-         column-title "newColumnTitle"
-         column-type  "newColumnType"} (engine/args op-spec)]
-    {::code code ::column-title column-title ::column-type column-type}))
+  (let [{:keys [code newColumnTitle newColumnType]} (engine/args op-spec)]
+    {::code code ::column-title newColumnTitle ::column-type newColumnType}))
 
 (defmethod engine/valid? :core/derive
   [op-spec]

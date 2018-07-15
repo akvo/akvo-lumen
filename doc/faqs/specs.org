@@ -1,0 +1,162 @@
+#+OPTIONS: ^:nil
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+SETUPFILE: /Users/tangrammer/git/org-html-themes/setup/theme-readtheorg.setup
+#+TITLE: SPECs
+#+PROPERTY: header-args:clojure :exports both
+#+PROPERTY: header-args:clojure+ :results silent
+#+PROPERTY: header-args:clojure+ :session lumen
+#+PROPERTY: header-args:clojure+ :padline yes
+#+PROPERTY: header-args:clojure+ :mkdirp yes
+#+PROPERTY: header-args:clojure+ :tangle no
+#+FILETAGS: :FAQ:
+* SPECs
+
+** where to put this stuff :) ?                      
+Normally clojure.specs aren't intended to be used in ~production~ environment, but in ~dev~ or ~test~ environment. 
+So, depending of the project we could place the specs in ~dev~ or ~test~ class path folder
+
+Sometimes we don't have the namespace that we need to internalise/identify our specs, in these cases we need the spec namespace in our src data to identify the keys as qualified keywords. Example [[https://github.com/akvo/akvo-lumen/blob/specs-lp-bis/backend/src/akvo/lumen/lib/aggregation.clj#L9][requiring a spec namespace in prod code]] and [[https://github.com/akvo/akvo-lumen/blob/specs-lp-bis/backend/src/akvo/lumen/lib/aggregation.clj#L17][using this ns spec to identify the prod data]]
+
+** Why is ~[org.clojure/test.check "0.9.0" :scope "test"]~ in ~prod~ dependencies?
+
+   the only reason to have this ~test~ dependency in ~prod~ side is to be able to [[https://clojure.org/guides/spec#_sampling_generators][generate samples]] inside custom generator. [[https://github.com/akvo/akvo-lumen/blob/specs-lp-bis/backend/src/akvo/lumen/specs/core.clj#L22][in lumen]]
+     
+** can ~clojure.spec~ check value returned by function spec(ed)?   
+clojure.spec only can check/instrument args in function call but *no* the value returned by the function. 
+
+Following this [[https://groups.google.com/forum/#!topic/clojure/JU6EmjtbRiQ][thread]] is not possible (using plain clojure.spec lib) but there is other option to test it https://github.com/jeaye/orchestra 
+
+** how to spec a piece of data?
+Specs usually live in same namespace as the data they are referring
+
+Below a sample data inside a sample namespace
+
+#+BEGIN_SRC clojure :exports code :results no
+(ns example.one)
+
+(def d {:id "12345abcde"})
+
+#+END_SRC
+
+And a sample spec namespace that defines specs for previous namespace
+
+#+BEGIN_SRC clojure :exports code :results no
+(ns example.specs
+  (:require [example.one :as one]
+            [clojure.spec.alpha :as s]))
+
+(s/def ::one/id string?)
+(s/def ::one/d (s/keys :req-un [::one/id]))
+
+#+END_SRC
+
+As you can see, specs live in its own namespace (~example.specs~ in the example provided) and they refers to the data to specify using the alias namespace (~::one/....~ again in the example provided)
+
+** how to solve qualified keywords spec ids?
+spec ids need to be [[https://clojuredocs.org/clojure.core/qualified-keyword_q][qualified keywords]] , sometimes this requirement we'll force us to create new namespaces to allocate the specs. 
+this is an [[https://github.com/akvo/akvo-lumen/blob/org-specs/backend/src/akvo/lumen/specs/aggregation/query.clj#L1][example of creating a ns to allocate spec]]: in this case [[https://github.com/akvo/akvo-lumen/blob/6567c0a907807d586d6744a855d0b26aa1638c84/backend/src/akvo/lumen/lib/aggregation.clj#L14][query]] as data doesn't have its own namespace but it is used from other nss as aggregation.clj 
+
+** how namespaces should be aliased?
+as you surely have realised, soon we could need a lot of typing to refere specs using qualified keywords ...
+
+#+BEGIN_SRC clojure :exports code :results no
+
+(s/def ::akvo.lumen.library.example.one/d (s/keys :req-un [::akvo.lumnen.library.one/id]))
+
+#+END_SRC
+
+so aliasing seems to be pretty important here
+
+#+BEGIN_SRC clojure :exports code :results no
+(require '[akvo.lumen.library.example.one :as one])
+
+(s/def ::one/d (s/keys :req-un [::one/id]))
+
+#+END_SRC
+
+But, a new problem appears thus if we have a medium size file, we'll soon loose the meaning of aliasing 
+
+
+#+BEGIN_SRC clojure :exports code :results no
+(require '[akvo.lumen.library.js.engine :as engine])
+(require '[akvo.lumen.library.example.one :as one])
+;; ... 100 LOC after
+;; .....
+
+(s/def ::one/d (s/keys :req-un [::one/id ::engine/type]))
+;; ups, I totally forgot the origin of ::engine at this point :(
+
+#+END_SRC
+
+
+and/or we could face conflict naming problems
+
+#+BEGIN_SRC clojure :exports code :results no
+(require '[akvo.lumen.library.js.one :as one])
+(require '[akvo.lumen.library.example.one :as one])
+
+;; ups two clj files in differents folders with same aliasing pattern
+
+#+END_SRC
+
+
+so ... following  the first approach/patter to aliasing specs 
+
+#+BEGIN_SRC clojure :exports code :results no
+(ns akvo.lumen.specs.aggregation
+  (:require [akvo.lumen.component.tenant-manager :as tenant-manager]
+	    [akvo.lumen.lib :as lib]
+	    [akvo.lumen.lib.aggregation :as lib.aggregation]
+	    [akvo.lumen.lib.aggregation.filter :as l.aggregation.filter]
+	    [akvo.lumen.lib.aggregation.pie :as l.aggregation.pie]
+	    [akvo.lumen.lib.aggregation.pivot :as l.aggregation.pivot]
+	    [akvo.lumen.lib.aggregation.utils :as l.aggregation.utils]
+	    [akvo.lumen.specs.aggregation.pivot.row :as a.pivot.row.s]
+	    [akvo.lumen.specs.aggregation.query :as aggregation.query.s]
+	    [akvo.lumen.specs.core :as lumen.s]
+	    [akvo.lumen.specs.dataset :as dataset.s]
+	    [akvo.lumen.specs.dataset.column :as dataset.column.s]
+	    [akvo.lumen.specs.db :as db.s]
+	    [akvo.lumen.specs.libs]
+	    [clojure.spec.alpha :as s]))
+
+#+END_SRC
+
++ all aliases ignore common project domain => ~akvo.lumen~ 
+is also ignored
+~[akvo.lumen.lib :as lib]~
+
+
++ if namespace contains only one or two nss then we use full nss
+~[akvo.lumen.lib :as lib]~
+~[akvo.lumen.lib.aggregation :as lib.aggregation]~
+
++ if namespace contains more than two nss then we contract parent ones 
+
++ if namespace is a ~spec~ namespace, we ignored  ~akvo.lumen.specs~ and aliasing ends in ~.s~
+=> ~[akvo.lumen.specs.aggregation.query :as aggregation.query.s]~
+=> ~[akvo.lumen.specs.aggregation.pivot.row :as a.pivot.row.s]~
+
+** how generate sample data having specs?
+
+   a.l.specs.core defined a ~sample~ function for sampling data based in spec
+   
+   #+BEGIN_SRC clojure :tangle no 
+   (require '[akvo.lumen.specs.core :as lumen.s])
+
+   [::int-nullable (lumen.s/sample ::int-nullable)]
+   #+END_SRC
+
+   #+RESULTS:
+   : [:akvo.lumen.specs.core/int-nullable -129802810]
+
+*** [[http://docs.cider.mx/en/latest/][CIDER]] can generate sample data from spec too
+ http://docs.cider.mx/en/latest/miscellaneous_features/#spec-browser
+ 
+** how to tests aggregation types?
+define steps to try out the different types in development
+
+** how to test using UI?
+
+*** pivot
+    import data file > choose test/resources/pivot.css .... make viz pivot table

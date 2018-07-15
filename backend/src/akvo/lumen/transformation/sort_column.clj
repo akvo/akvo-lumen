@@ -6,41 +6,40 @@
 
 (defmethod engine/valid? :core/sort-column
   [op-spec]
-  (and (engine/valid-column-name? (get (engine/args op-spec) "columnName"))
-       (boolean (#{"ASC" "DESC"} (get (engine/args op-spec) "sortDirection")))))
+  (and (engine/valid-column-name? (get (engine/args op-spec) :columnName))
+       (boolean (#{"ASC" "DESC"} (get (engine/args op-spec) :sortDirection)))))
 
 (defmethod engine/valid? :core/remove-sort
   [op-spec]
-  (engine/valid-column-name? (get (engine/args op-spec) "columnName")))
+  (engine/valid-column-name? (get (engine/args op-spec) :columnName)))
 
 (defn- get-sort-idx
   "Returns the next sort index for a given vector of columns"
   [columns]
-  (inc (count (filter #(get % "sort") columns))))
+  (inc (count (filter #(get % :sort) columns))))
 
 (defmethod engine/apply-operation :core/sort-column
   [tenant-conn table-name columns op-spec]
-  (let [{column-name "columnName"
-         sort-direction "sortDirection"} (engine/args op-spec)
-        idx-name (str table-name "_" column-name)
+  (let [{:keys [columnName sortDirection]} (engine/args op-spec)
+        idx-name (str table-name "_" columnName)
         sort-idx (get-sort-idx columns)
         new-cols (engine/update-column columns
-                                       column-name
+                                       columnName
                                        assoc
                                        "sort" sort-idx
-                                       "direction" sort-direction)]
+                                       "direction" sortDirection)]
     (db-create-index tenant-conn {:index-name idx-name
-                                  :column-name column-name
+                                  :column-name columnName
                                   :table-name table-name})
     {:success? true
      :columns new-cols}))
 
 (defmethod engine/apply-operation :core/remove-sort
   [tenant-conn table-name columns op-spec]
-  (let [{column-name "columnName"} (engine/args op-spec)
-        idx-name (str table-name "_" column-name)
+  (let [{:keys [columnName]} (engine/args op-spec)
+        idx-name (str table-name "_" columnName)
         new-cols (engine/update-column columns
-                                       column-name
+                                       columnName
                                        assoc
                                        "sort" nil
                                        "direction" nil)]
