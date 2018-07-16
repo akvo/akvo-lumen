@@ -1,11 +1,15 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
+
 import AsyncVisualisationViewer from '../charts/AsyncVisualisationViewer';
+import { getTitle, getDataLastUpdated } from '../../utilities/chart';
 
 require('./DashboardViewerItem.scss');
 
 const cMargin = 10; // margin between containers (in px)
-const cPadding = 10; // padding inside container (in px)
+const cPadding = 20; // padding inside container (in px)
+const TITLE_HEIGHT = 60;
 
 export default class DashboardViewerItem extends Component {
   constructor() {
@@ -17,14 +21,17 @@ export default class DashboardViewerItem extends Component {
     const { item, layout, canvasWidth, viewportType } = this.props;
     const numCols = 12;
     const unit = canvasWidth / numCols;
+    const MIN_HEIGHT = 300;
 
     switch (viewportType) {
       case 'small':
         return {
           display: 'inline-block',
           width: canvasWidth - (cMargin * 2),
-          height: item.type === 'visualisation' ?
-            (canvasWidth * (layout.h / layout.w)) - (cMargin * 2) : 'initial',
+          minHeight: MIN_HEIGHT,
+          height: item.type === 'visualisation' && item.visualisation.visualisationType === 'map' ?
+            MIN_HEIGHT :
+            null,
           margin: cMargin,
           padding: cPadding,
         };
@@ -33,8 +40,10 @@ export default class DashboardViewerItem extends Component {
         return {
           display: 'inline-block',
           width: (canvasWidth / 2) - (cMargin * 2),
-          height: item.type === 'visualisation' ?
-            ((canvasWidth * 0.5) * (layout.h / layout.w)) - (cMargin * 2) : 'initial',
+          minHeight: MIN_HEIGHT,
+          height: item.type === 'visualisation' && item.visualisation.visualisationType === 'map' ?
+            MIN_HEIGHT :
+            null,
           margin: cMargin,
           padding: cPadding,
         };
@@ -56,27 +65,52 @@ export default class DashboardViewerItem extends Component {
     }
   }
 
+  getSubTitle() {
+    const { item, datasets } = this.props;
+    const lastUpdated = getDataLastUpdated({ datasets, visualisation: item.visualisation });
+    return lastUpdated ? (
+      <span>
+        <FormattedMessage id="data_last_updated" />
+        : {lastUpdated}
+      </span>
+    ) : null;
+  }
+
   render() {
-    const isText = this.props.item.type === 'text';
-    const isVisualisation = this.props.item.type === 'visualisation';
+    const { item } = this.props;
+    const isText = item.type === 'text';
+    const isVisualisation = item.type === 'visualisation';
     const style = this.getItemStyle();
+    const titleHeight = this.titleEl ?
+      this.titleEl.getBoundingClientRect().height :
+      TITLE_HEIGHT;
 
     return (
       <div
-        className={`DashboardViewerItem DashboardCanvasItem ${this.props.item.type}`}
+        className={`DashboardViewerItem DashboardCanvasItem ${item.type}`}
         style={style}
       >
         {isVisualisation &&
           <div
             className="itemContainer visualisation"
           >
+            <div
+              className="itemTitle"
+              ref={(c) => {
+                this.titleEl = c;
+              }}
+            >
+              <h2>{getTitle(item.visualisation)}</h2>
+              <span>{this.getSubTitle()}</span>
+            </div>
             <AsyncVisualisationViewer
-              visualisation={this.props.item.visualisation}
+              visualisation={item.visualisation}
               metadata={this.props.metadata ?
-                this.props.metadata[this.props.item.visualisation.id] : null}
+                this.props.metadata[item.visualisation.id] : null}
               datasets={this.props.datasets}
               width={style.width - (cPadding * 2)}
-              height={style.height - (cPadding * 2)}
+              height={style.height ? style.height - (cPadding * 2) - titleHeight : 'auto'}
+              showTitle={false}
             />
           </div>
         }
@@ -88,7 +122,7 @@ export default class DashboardViewerItem extends Component {
               lineHeight: '1.4em',
             }}
           >
-            {this.props.item.content}
+            {item.content}
           </div>
         }
       </div>

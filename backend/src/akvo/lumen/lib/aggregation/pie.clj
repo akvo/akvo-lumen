@@ -1,6 +1,6 @@
 (ns akvo.lumen.lib.aggregation.pie
   (:require [akvo.lumen.lib :as lib]
-            [akvo.lumen.lib.aggregation.filter :as filter]
+            [akvo.lumen.postgres.filter :as filter]
             [akvo.lumen.lib.aggregation.utils :as utils]
             [clojure.java.jdbc :as jdbc]))
 

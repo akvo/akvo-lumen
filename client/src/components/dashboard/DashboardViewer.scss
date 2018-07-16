@@ -5,6 +5,11 @@ html, body, #root {
 }
 
 .DashboardViewer {
+    display: flex;
+    height: 100%;
+    background-color: $dashboardBG;
+    flex-direction: column;
+    overflow: hidden;
     h1 {
         line-height: 1.4em;
         padding: 0.5em;
@@ -13,6 +18,8 @@ html, body, #root {
         margin: 0.5em auto;
         display: block;
         text-align: center;
+        font-size: 2em;
+        font-weight: 600;
 
         @mixin responsive($medium-max-screens) {
             font-size: 1.6rem;
@@ -21,5 +28,11 @@ html, body, #root {
         @mixin responsive($small-max-screens) {
             font-size: 1.4rem;
         }
+    }
+    .dashboardEntities {
+        padding-bottom: 100px;
+    }
+    @mixin responsive($small-max-screens) {
+        overflow: visible;
     }
 }

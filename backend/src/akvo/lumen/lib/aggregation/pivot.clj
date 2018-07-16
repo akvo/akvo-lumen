@@ -1,7 +1,7 @@
 (ns akvo.lumen.lib.aggregation.pivot
   (:require [akvo.commons.psql-util]
             [akvo.lumen.lib :as lib]
-            [akvo.lumen.lib.aggregation.filter :as filter]
+            [akvo.lumen.postgres.filter :as filter]
             [akvo.lumen.lib.aggregation.utils :as utils]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]

@@ -1,3 +1,4 @@
+/* eslint-disable global-require, import/no-dynamic-require */
 import moment from 'moment';
 import invariant from 'invariant';
 import Immutable from 'immutable';
@@ -37,6 +38,22 @@ export function getType(entity) {
     getTitle(entity), getId(entity), type
   );
   return type;
+}
+
+export function getSource(entity) {
+  const source = get(entity, 'source');
+  if (!source) return null;
+  return source.toJS();
+}
+
+export function getAuthor(entity) {
+  let author = get(entity, 'author');
+  if (!author) return null;
+  if (author.toJS) author = author.toJS();
+  const result = author ?
+    `${author.given_name ? `${author.given_name} ` : ''}${author.family_name ? author.family_name : ''}` :
+    '';
+  return result.length ? result : author.email;
 }
 
 export function isDataset(entity) {
@@ -107,4 +124,24 @@ export function getModified(entity, format = 'MMMM Do YYYY') {
 
 export function getErrorMessage(entity) {
   return get(entity, 'reason') || '';
+}
+
+export function getIconUrl(entity) {
+  const type = getType(entity);
+  switch (type) {
+    case 'dashboard': {
+      return require('../styles/img/icon-256-library-listing-dashboard.png');
+    }
+    case 'dataset': {
+      return require('../styles/img/icon-256-library-listing-dataset.png');
+    }
+    case 'raster': {
+      return require('../styles/img/icon-256-library-listing-raster.png');
+    }
+    case 'visualisation': {
+      return require(`../styles/img/icon-128-visualisation-${get(entity, 'visualisationType').replace(' ', '-')}.png`);
+    }
+    // no default
+  }
+  return '';
 }

@@ -48,12 +48,6 @@
       {:success? false
        :message (format "Failed to transform: %s" (.getMessage e))})))
 
-(defn pg-escape-string [s]
-  (when-not (nil? s)
-    (when-not (string? s)
-      (throw (ex-info "Not a string" {:s s})))
-    (str/replace s "'" "''")))
-
 (defn ensure-number [n]
   (when-not (or (nil? n)
                 (number? n))

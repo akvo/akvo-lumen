@@ -1,5 +1,6 @@
 (ns akvo.lumen.transformation.change-datatype
   (:require [akvo.lumen.transformation.engine :as engine]
+            [akvo.lumen.postgres :as postgres]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
             [clojure.tools.logging :as log]
@@ -62,7 +63,7 @@
   (let [type-conversion (type-conversion-sql-function columns op-spec)
         on-error (engine/error-strategy op-spec)
         {:keys [columnName defaultValue]} (engine/args op-spec)
-        default-value (engine/pg-escape-string defaultValue)
+        default-value (postgres/escape-string defaultValue)
         alter-table (format-sql table-name columnName "text")
         alter-table-sql (condp = on-error
                           "fail" (alter-table "%s(%s)" type-conversion columnName)
@@ -77,7 +78,7 @@
         {:keys [columnName
                 defaultValue
                 parseFormat]} (engine/args op-spec)
-        parse-format (engine/pg-escape-string parseFormat)
+        parse-format (postgres/escape-string parseFormat)
         alter-table (format-sql table-name columnName "timestamptz")
         alter-table-sql (condp = (from-type columns op-spec)
                           "text" (condp = on-error

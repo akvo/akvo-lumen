@@ -19,12 +19,12 @@
         min-width: 370px;
         margin: 1rem 0.25rem;
         position: relative;
-        height: 6rem;
-        padding: 0.5rem 0;
+        min-height: 6rem;
         background-color: rgba($textSecondary, 0);
         transition: background-color 0.1s ease;
         h3 {
             color: rgba($black, 1);
+            font-weight: 300;
         }
         &:hover {
             background-color: rgba($black, 0.05);
@@ -66,11 +66,14 @@
                 height: 17px;
                 @include border-radius(3px);
                 border: 1px solid black;
-                margin-top: 33px;
-                margin-left: 8px;
+                margin-top: 38px;
+                margin-left: 7px;
             }
             input {
                 cursor: pointer;
+            }
+            &:hover {
+                background-color: lighten($black, 80%);
             }
         }
         .entityBody {
@@ -86,70 +89,38 @@
             background-repeat: no-repeat;
             opacity: 0.7;
             left: 30px;
-            top: 15px;
-        }
-        &.visualisation {
-            .entityIcon {
-                background-image: url("../../styles/img/icon-256-library-listing-visualisation.png");
-                &.area {
-                    background-image: url("../../styles/img/icon-128-visualisation-area.png");
-                }
-                &.bar {
-                    background-image: url("../../styles/img/icon-128-visualisation-bar.png");
-                }
-                &.donut {
-                    background-image: url("../../styles/img/icon-128-visualisation-donut.png");
-                }
-                &.line {
-                    background-image: url("../../styles/img/icon-128-visualisation-line.png");
-                }
-                &.map {
-                    background-image: url("../../styles/img/icon-128-visualisation-map.png");
-                }
-                &.pie {
-                    background-image: url("../../styles/img/icon-128-visualisation-pie.png");
-                }
-                &.pivot-table {
-                    background-image: url("../../styles/img/icon-128-visualisation-pivot-table.png");
-                }
-                &.scatter {
-                    background-image: url("../../styles/img/icon-128-visualisation-scatter.png");
-                }
-            }
-        }
-        &.dashboard {
-            .entityIcon {
-                // &:before {
-                //     content: "\f1ea";
-                // }
-                background-image: url("../../styles/img/icon-256-library-listing-dashboard.png");
-            }
-        }
-        &.dataset {
-            .entityIcon {
-                // &:before {
-                //     content: "\f1c0";
-                // }
-                background-image: url("../../styles/img/icon-256-library-listing-dataset.png");
-            }
-        }
-        &.raster {
-            .entityIcon {
-                background-image: url("../../styles/img/icon-256-library-listing-raster.png");
+            top: 17px;
+
+            img {
+                width: 100%;
+                height: auto;
             }
         }
         .textContents {
             vertical-align: top;
             overflow: hidden;
-            padding: 8px 20px 0 100px;
+            padding: 15px 20px 15px 100px;
             p {
                 /* Withouth this, long URLs in error messages willl break layout */
                 word-break: break-word;
             }
         }
-        .VisualisationTypeLabel {
+        .VisualisationLabel {
+            font-size: 0.9em;
+
             p {
-                color: $textPrimary;
+                color: $midGrey;
+            }
+
+            &.VisualisationLabel__type {
+                font-weight: 600;
+            }
+
+            &.VisualisationLabel__meta {
+                font-style: italic;
+                p {
+                    color: $midLightGrey;
+                }
             }
         }
         .entityName {
@@ -165,13 +136,16 @@
             height: 100%;
             right: 0;
             top: 0;
-            padding: 15px 6px;
             width: 20px;
             opacity: 0;
             .showControls {
-                transform: rotate(90deg);
-                font-size: 2.5rem;
-                font-weight: bold;
+                padding: 21px 6px;
+                font-size: 2rem;
+                height: 100%;
+                width: 20px;
+            }
+            &:hover {
+                background-color: lighten($black, 80%);
             }
         }
         &:hover .entityControls {

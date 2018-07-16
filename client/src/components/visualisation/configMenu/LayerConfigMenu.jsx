@@ -453,7 +453,7 @@ const RasterThemeTab = (props) => {
     >
       <ColorLabels
         pointColorMapping={[{ value: 'startColor', color: startColor || '#FFFFFF' }, { value: 'endColor', color: endColor || '#000000' }]}
-        colorPalette={palette}
+        colorPalette={[...palette, '#FFFFFF']}
         disabled={disabled}
         onChangeColor={(value, color) => {
           if (value === 'startColor') {
@@ -614,7 +614,7 @@ class LayerConfigMenu extends Component {
           </div>
         );
         break;
-      case 'pop-up':
+      case 'popup':
         tabContent = (
           <div
             className="popupTab"
@@ -789,7 +789,7 @@ class LayerConfigMenu extends Component {
         <TabMenu
           activeTab={this.state.activeTab}
           onChangeTab={tab => this.setState({ activeTab: tab })}
-          tabs={['data', 'legend', 'pop-up', 'theme']}
+          tabs={['data', 'legend', 'popup', 'theme']}
         />
         <div className="tabContent">
           {this.getTabContent(columnOptions)}

@@ -3,7 +3,7 @@
 	    [akvo.lumen.lib :as lib]
 	    [akvo.lumen.lib.aggregation :as lib.aggregation]
 	    [akvo.lumen.lib.aggregation.bar :as l.aggregation.bar]
-	    [akvo.lumen.lib.aggregation.filter :as l.aggregation.filter]
+	    [akvo.lumen.postgres.filter :as postgres.filter]
 	    [akvo.lumen.lib.aggregation.line :as l.aggregation.line]
 	    [akvo.lumen.lib.aggregation.pie :as l.aggregation.pie]
             [akvo.lumen.lib.aggregation.pivot :as l.aggregation.pivot]
@@ -19,21 +19,21 @@
 	    [clojure.spec.alpha :as s]))
 
 
-(s/def ::l.aggregation.filter/filter (s/keys :req-un [::aggregation.query.s/operation
-                                                      ::aggregation.query.s/strategy
-                                                      ::aggregation.query.s/value
-                                                      ::dataset.s/column]))
-(s/def ::l.aggregation.filter/categoryColumn ::dataset.s/column)
+(s/def ::postgres.filter/filter (s/keys :req-un [::aggregation.query.s/operation
+                                                 ::aggregation.query.s/strategy
+                                                 ::aggregation.query.s/value
+                                                 ::dataset.s/column]))
+(s/def ::postgres.filter/categoryColumn ::dataset.s/column)
 
-(s/def ::l.aggregation.filter/rowColumn ::dataset.s/column)
+(s/def ::postgres.filter/rowColumn ::dataset.s/column)
 
-(s/def ::l.aggregation.filter/valueColumn ::dataset.s/column)
+(s/def ::postgres.filter/valueColumn ::dataset.s/column)
 
-(s/def ::l.aggregation.filter/aggregation string?)
+(s/def ::postgres.filter/aggregation string?)
 
-(s/def ::l.aggregation.filter/filters (s/coll-of ::l.aggregation.filter/filter :gen-max 3))
+(s/def ::postgres.filter/filters (s/coll-of ::postgres.filter/filter :gen-max 3))
 
-(s/def ::l.aggregation.filter/comparison-op #{">" "<="})
+(s/def ::postgres.filter/comparison-op #{">" "<="})
 
 (s/def ::l.aggregation.pivot/category-column ::dataset.s/column)
 
@@ -90,12 +90,12 @@
 
 (s/fdef l.aggregation.filter/filter-sql
   :args (s/cat
-	 :filter ::l.aggregation.filter/filter)
+	 :filter ::postgres.filter/filter)
   :ret string?)
 
 (s/fdef l.aggregation.filter/comparison
   :args (s/cat
-	 :op ::l.aggregation.filter/comparison-op
+	 :op ::postgres.filter/comparison-op
 	 :column-type ::dataset.column.s/type
 	 :column-name ::dataset.column.s/columnName
 	 :value ::aggregation.query.s/value)

@@ -5,6 +5,7 @@ import library from './library';
 import collections from './collections';
 import activeModal from './activeModal';
 import notification from './notification';
+import print from './print';
 
 function profile(state = {}) {
   return state;
@@ -23,6 +24,7 @@ const rootReducer = combineReducers({
   profile,
   env,
   notification,
+  print,
 });
 
 export default rootReducer;

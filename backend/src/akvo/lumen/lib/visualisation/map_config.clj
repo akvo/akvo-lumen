@@ -1,5 +1,5 @@
 (ns akvo.lumen.lib.visualisation.map-config
-  (:require [akvo.lumen.lib.aggregation.filter :as filter]
+  (:require [akvo.lumen.postgres.filter :as filter]
             [clojure.string :as str]
             [hugsql.core :as hugsql]))
 

@@ -4,3 +4,9 @@
     flex: 1;
     overflow: auto;
 }
+
+@media print {
+    .Library {
+        padding-top: 0px;
+    }
+}

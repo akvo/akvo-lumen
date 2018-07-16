@@ -6,9 +6,8 @@ import Popover from './Popover';
 import './ColorPicker.scss';
 import LegendShape from '../charts/LegendShape';
 
-const ColorPicker = ({ title, target, left = 0, top = 0, placement, style, ...rest }) => (
+const ColorPicker = ({ title, left = 0, top = 0, placement, style, ...rest }) => (
   <Popover
-    target={target}
     left={left}
     top={top}
     placement={placement}

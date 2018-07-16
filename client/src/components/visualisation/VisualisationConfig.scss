@@ -184,3 +184,9 @@
         @include border-radius(3px);
     }
 }
+
+@media print { 
+    .VisualisationConfig {
+        display: none !important;
+    }
+}

@@ -1,9 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import moment from 'moment';
 import get from 'lodash/get';
-import { replaceLabelIfValueEmpty, processPivotData } from '../../utilities/chart';
+import {
+  replaceLabelIfValueEmpty,
+  processPivotData,
+  getTitle,
+  getDataLastUpdated,
+} from '../../utilities/chart';
 
 require('./PivotTable.scss');
 
@@ -73,6 +77,17 @@ const formatCell = (index, cell, spec, columns) => {
   return cell;
 };
 
+const renderLastUpdated = ({ visualisation, datasets }) => { // eslint-disable-line
+  const lastUpdated = getDataLastUpdated({ datasets, visualisation });
+  return lastUpdated ? (
+    <span>
+      <span className="capitalize">
+        <FormattedMessage id="data_last_updated" />: {lastUpdated}
+      </span>
+    </span>
+  ) : null;
+};
+
 export default function PivotTable({ width, height, visualisation, context, datasets }) {
   const { spec } = visualisation;
   const data = processPivotData(visualisation.data, spec);
@@ -135,13 +150,11 @@ export default function PivotTable({ width, height, visualisation, context, data
           <tr className="title">
             <th colSpan={get(data, 'columns.length')}>
               <span>
-                {visualisation.name}
+                {getTitle(visualisation)}
               </span>
               <br />
               <p className="chartMeta">
-                <span className="capitalize">
-                  <FormattedMessage id="data_last_updated" />
-                </span>: {moment(datasets[visualisation.datasetId].get('updated')).format('Do MMM YYYY - HH:mm')}
+                {renderLastUpdated({ visualisation, datasets })}
               </p>
             </th>
           </tr>
@@ -221,6 +234,6 @@ PivotTable.propTypes = {
   visualisation: PropTypes.object.isRequired,
   datasets: PropTypes.object.isRequired,
   width: PropTypes.number,
-  height: PropTypes.number,
+  height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   context: PropTypes.string,
 };

@@ -34,3 +34,9 @@
         max-width: 70%;
     }
 }
+
+@media print {
+    .VisualisationEditor .VisualisationPreview {
+        max-width: 100%;
+    }
+}

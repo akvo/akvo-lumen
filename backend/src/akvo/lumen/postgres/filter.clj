@@ -1,5 +1,5 @@
-(ns akvo.lumen.lib.aggregation.filter
-  (:require [akvo.lumen.transformation.engine :as engine]
+(ns akvo.lumen.postgres.filter
+  (:require [akvo.lumen.postgres :as core]
             [clojure.string :as str])
   (:import [java.sql.Timestamp]))
 
@@ -74,7 +74,7 @@
       "text" (format "coalesce(%1$s, '') %2$s '%3$s'"
                      columnName
                      op
-                     (engine/pg-escape-string value))
+                     (core/escape-string value))
       (invalid-filter "Type not supported" {:type type}))))
 
 (defmethod filter-sql "isEmpty"
