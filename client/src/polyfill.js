@@ -80,6 +80,9 @@ const polyfill = (callback) => {
     }
     return null;
   })
+  .then(() => {
+    console.log('done polyfilling');
+  })
   .then(callback);
 };
 
