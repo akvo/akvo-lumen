@@ -1,6 +1,6 @@
 /* eslint-disable global-require */
 import polyfill from './polyfill';
 
-polyfill(() => { 
+polyfill(() => {
   require('./app');
 });
