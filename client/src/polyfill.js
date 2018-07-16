@@ -3,7 +3,6 @@
 import 'raf/polyfill';
 
 const polyfill = (callback) => {
-  console.log('polyfilling');
   new Promise((resolve) => {
     if (!(window.Map && window.Set && window.WeakMap && window.WeakSet)) {
       require.ensure([], () => {
@@ -79,9 +78,6 @@ const polyfill = (callback) => {
       });
     }
     return null;
-  })
-  .then(() => {
-    console.log('done polyfilling');
   })
   .then(callback);
 };
