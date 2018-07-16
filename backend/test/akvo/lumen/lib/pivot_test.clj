@@ -21,7 +21,7 @@
               dataset-id
               {::tf/type :transformation
                :transformation (keywordize-keys
-                                {"akvo.lumen.transformation.engine/op" "core/change-datatype"
+                                {"akvo.lumen.transformation.engine/op" :core/change-datatype
                                  "args" {"columnName" "c3"
                                          "newType" "number"
                                          "defaultValue" 0}

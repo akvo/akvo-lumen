@@ -12,7 +12,7 @@
 (defmulti valid?
   "Validate transformation spec"
   (fn [op-spec]
-    (keyword (op-spec ::op))))
+    (op-spec ::op)))
 
 (defmethod valid? :default
   [op-spec]
@@ -29,11 +29,11 @@
    - \"args\" : map with arguments to the operation
    - \"onError\" : Error strategy"
   (fn [tenant-conn table-name columns op-spec]
-    (keyword (get op-spec ::op))))
+    (get op-spec ::op)))
 
 (defmethod apply-operation :default
   [tenant-conn table-name columns op-spec]
-  (let [msg (str "Unknown operation " (get op-spec :op))]
+  (let [msg (str "Unknown operation " (get op-spec ::op))]
     (log/debug msg)
     {:success? false
      :message msg}))
@@ -200,7 +200,11 @@
             (drop-table tenant-conn {:table-name previous-table-name})
             (lib/created next-dataset-version)))
         (let [{:keys [success? message columns execution-log]}
-              (try-apply-operation tenant-conn table-name (w/keywordize-keys columns) (w/keywordize-keys (first transformations)))]
+              (try-apply-operation tenant-conn table-name (w/keywordize-keys columns)
+                                   (-> transformations
+                                       first
+                                       w/keywordize-keys
+                                       (update ::op keyword)))]
           (if success?
             (recur (rest transformations) columns (into full-execution-log execution-log))
             (do

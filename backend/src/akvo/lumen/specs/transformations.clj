@@ -27,22 +27,22 @@
 
 (s/def ::transformation.engine/js-value-types #{"number" "text" "date"})
 (s/def ::transformation.engine/onError #{"leave-empty" "fail" "delete-row" "default-value"})
-(s/def ::transformation.engine/op #{"core/change-datatype"
-				    "core/combine"
-				    "core/delete-column"
-				    "core/derive"
-				    "core/filter-column"
-				    "core/generate-geopoints"
-				    "core/merge-datasets"
-				    "core/remove-sort"
-				    "core/rename-column"
-				    "core/reverse-geocode"
-				    "core/sort-column"
-				    "core/to-lowercase"
-				    "core/to-titlecase"
-				    "core/to-uppercase"
-				    "core/trim"
-				    "core/trim-doublespace"})
+(s/def ::transformation.engine/op #{:core/change-datatype
+				    :core/combine
+				    :core/delete-column
+				    :core/derive
+				    :core/filter-column
+				    :core/generate-geopoints
+				    :core/merge-datasets
+				    :core/remove-sort
+				    :core/rename-column
+				    :core/reverse-geocode
+				    :core/sort-column
+				    :core/to-lowercase
+				    :core/to-titlecase
+				    :core/to-uppercase
+				    :core/trim
+				    :core/trim-doublespace})
 
 (defmulti op-spec ::transformation.engine/op)
 
@@ -52,7 +52,7 @@
   (s/keys :req-un [::dataset.column.s/columnName
 		   ::transformation.change-datatype/newType]
 	  :opt-un [::transformation.change-datatype/parseFormat]))
-(defmethod op-spec "core/change-datatype"  [_]
+(defmethod op-spec :core/change-datatype  [_]
   (s/keys
    :req-un [::transformation.change-datatype/args
 	    ::transformation.engine/onError]))
@@ -65,14 +65,14 @@
   (s/keys :req-un [::transformation.combine/columnNames
 		   ::transformation.combine/newColumnTitle
 		   ::transformation.combine/separator]))
-(defmethod op-spec "core/combine"  [_]
+(defmethod op-spec :core/combine  [_]
   (s/keys
    :req-un [::transformation.combine/args
 	    ::transformation.engine/onError]))
 
 (s/def ::transformation.delete-column/args
   (s/keys :req-un [::dataset.column.s/columnName]))
-(defmethod op-spec "core/delete-column"  [_]
+(defmethod op-spec :core/delete-column  [_]
   (s/keys
    :req-un [::transformation.delete-column/args
 	    ::transformation.engine/onError]))
@@ -87,7 +87,7 @@
   (s/keys :req-un [::transformation.derive/code
 		   ::transformation.derive/newColumnTitle
 		   ::transformation.derive/newColumnType]))
-(defmethod op-spec "core/derive"  [_]
+(defmethod op-spec :core/derive  [_]
   (s/keys
    :req-un [::transformation.derive/args
 	    ::transformation.engine/onError]))
@@ -99,7 +99,7 @@
 (s/def ::transformation.filter-column/args
   (s/keys :req-un [::transformation.filter-column/expression
                    ::dataset.column.s/columnName]))
-(defmethod op-spec "core/filter-column"  [_]
+(defmethod op-spec :core/filter-column  [_]
   (s/keys
    :req-un [::transformation.filter-column/args
 	    ::transformation.engine/onError]))
@@ -115,7 +115,7 @@
 	  :opt-un [::transformation.geo/columnTitleGeo
 		   ::transformation.geo/ColumnTitleGeo]))
 
-(defmethod op-spec "core/generate-geopoints"  [_]
+(defmethod op-spec :core/generate-geopoints  [_]
   (s/keys
    :req-un [::transformation.geo/args
 	    ::transformation.engine/onError]))
@@ -132,7 +132,7 @@
 (s/def ::transformation.merge-datasets/args (s/keys :req-un [::transformation.merge-datasets/source
 							     ::transformation.merge-datasets/target]))
 
-(defmethod op-spec "core/merge-datasets"  [_]
+(defmethod op-spec :core/merge-datasets  [_]
   (s/keys
    :req-un [::transformation.merge-datasets/args]))
 
@@ -140,11 +140,11 @@
 (s/def ::transformation.sort-column/args
   (s/keys :req-un [::dataset.column.s/columnName
 		   ::transformation.sort-column/sortDirection]))
-(defmethod op-spec "core/sort-column"  [_]
+(defmethod op-spec :core/sort-column  [_]
   (s/keys
    :req-un [::transformation.sort-column/args
 	    ::transformation.engine/onError]))
-(defmethod op-spec "core/remove-sort"  [_]
+(defmethod op-spec :core/remove-sort  [_]
   (s/keys
    :req-un [::transformations.remove-sort.s/args
 	    ::transformation.engine/onError]))
@@ -153,7 +153,7 @@
 (s/def ::transformation.rename-column/args
   (s/keys :req-un [::dataset.column.s/columnName
 		   ::transformation.rename-column/newColumnTitle]))
-(defmethod op-spec "core/rename-column" [_]
+(defmethod op-spec :core/rename-column [_]
   (s/keys
    :req-un [::transformation.rename-column/args
 	    ::transformation.engine/onError]))
@@ -173,28 +173,27 @@
 (s/def ::transformation.reverse-geocode/args
   (s/keys :req-un [::transformation.reverse-geocode/target
 		   ::transformation.reverse-geocode/source]))
-(defmethod op-spec "core/reverse-geocode" [_]
+(defmethod op-spec :core/reverse-geocode [_]
   (s/keys
    :req-un [::transformation.reverse-geocode/args]))
 
-;; following op-spec specs defined appart in their namespace, thus 
-(defmethod op-spec "core/to-lowercase" [_]
+(defmethod op-spec :core/to-lowercase [_]
   (s/keys
    :req-un [::transformations.text.s/args
 	    ::transformation.engine/onError]))
-(defmethod op-spec "core/to-uppercase" [_]
+(defmethod op-spec :core/to-uppercase [_]
   (s/keys
    :req-un [::transformations.text.s/args
 	    ::transformation.engine/onError]))
-(defmethod op-spec "core/to-titlecase" [_]
+(defmethod op-spec :core/to-titlecase [_]
   (s/keys
    :req-un [::transformations.text.s/args
 	    ::transformation.engine/onError]))
-(defmethod op-spec "core/trim" [_]
+(defmethod op-spec :core/trim [_]
   (s/keys
    :req-un [::transformations.text.s/args
 	    ::transformation.engine/onError]))
-(defmethod op-spec "core/trim-doublespace" [_]
+(defmethod op-spec :core/trim-doublespace [_]
   (s/keys
    :req-un [::transformations.text.s/args
 	    ::transformation.engine/onError]))
@@ -205,8 +204,8 @@
 (s/def ::transformation/transformation
   (s/with-gen
     (s/and ::transformation.engine/op-spec transformation.engine/valid?) 
-    #(s/gen #{{:op "core/trim"
-	       :args {"columnName" "a"}
+    #(s/gen #{{::transformation.engine/op :core/trim
+	       :args {:columnName "c1"}
 	       :onError "leave-empty"}})))
 
 (s/def ::transformation/type #{:transformation :undo})

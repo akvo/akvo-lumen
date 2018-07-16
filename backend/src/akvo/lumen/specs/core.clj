@@ -8,9 +8,6 @@
 (defn exception? [e]
   (instance? java.lang.Exception e))
 
-(defn db-connection? [o]
-  (satisfies? javax.sql.DataSource o))
-
 (s/def ::any (s/with-gen
                (constantly true)
                #(s/gen #{{}})))
@@ -23,7 +20,6 @@
   (s/with-gen
     str-uuid?
     #(s/gen (reduce (fn [c _] (conj c (str (squuid)))) #{} (range 100)))))
-
 
 (defn str-int? [v]
   (when (some? v)

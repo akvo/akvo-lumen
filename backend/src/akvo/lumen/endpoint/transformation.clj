@@ -13,7 +13,9 @@
     (let-routes [tenant-conn (connection tenant-manager tenant)]
       (context "/:dataset-id" [dataset-id]
         (POST "/transform" {:keys [body] :as request}
-              (let [body (-> body keywordize-keys (rename-keys {:op ::engine/op}))
+              (let [body (-> body keywordize-keys
+                             (update :op keyword)
+                             (rename-keys {:op ::engine/op}))
                     command {::t/type :transformation
                              :transformation body}]
                 (t/apply tenant-conn dataset-id command)))

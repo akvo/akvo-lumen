@@ -22,8 +22,8 @@ in lumen they map to ints [[/Users/tangrammer/git/akvo/akvo-lumen/backend/src/ak
    (remove-ns 'test-pivot)
    (ns test-pivot
      (:require [clojure.spec.alpha :as s]
-
 	       [akvo.lumen.specs.dataset :as dataset.s]
+	       [akvo.lumen.specs.aggregation :as aggregation.s]
 	       [akvo.lumen.lib.aggregation.pivot :as l.aggregation.pivot]))
 
    (def query {:decimalPlaces 3,
@@ -57,12 +57,14 @@ in lumen they map to ints [[/Users/tangrammer/git/akvo/akvo-lumen/backend/src/ak
     :akvo.lumen.lib.aggregation/visualisation-type "pivot"
     :query query}
 
-   {:query? (s/valid? ::l.aggregation.pivot/query query)
+   {:query? (s/valid? :akvo.lumen.lib.aggregation.pivot/query query)
     :dataset? (s/valid? ::dataset.s/dataset dataset)}
+
  #+END_SRC
 
  #+RESULTS:
  : {:query? true, :dataset? true}
+
 ** bar
 #+BEGIN_SRC clojure :exports both :results value replace pp
 (remove-ns 'test-bar)
@@ -113,6 +115,11 @@ in lumen they map to ints [[/Users/tangrammer/git/akvo/akvo-lumen/backend/src/ak
 
 
 #+END_SRC
+
+#+RESULTS:
+: {:dataset? true, :query? true}
+
+ 
 ** TODO complete all types and ways to test them
 * features
 ** how find the function you need?                                :wip:ideas:

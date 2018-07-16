@@ -28,46 +28,46 @@
 
 (def transformations
   (w/keywordize-keys
-   {:ops [{"akvo.lumen.transformation.engine/op" "core/to-titlecase"
+   {:ops [{"akvo.lumen.transformation.engine/op" :core/to-titlecase
            "args" {"columnName" "c1"}
            "onError" "default-value"}
-          {"akvo.lumen.transformation.engine/op" "core/change-datatype"
+          {"akvo.lumen.transformation.engine/op" :core/change-datatype
            "args" {"columnName" "c2"
                    "newType" "number"
                    "defaultValue" 0}
            "onError" "default-value"}
-          {"akvo.lumen.transformation.engine/op" "core/change-datatype"
+          {"akvo.lumen.transformation.engine/op" :core/change-datatype
            "args" {"columnName" "c3"
                    "newType" "date"
                    "defaultValue" 0
                    "parseFormat" "YYYY-MM-DD"}
            "onError" "default-value"}]
-    :filter-column [{"akvo.lumen.transformation.engine/op" "core/filter-column"
+    :filter-column [{"akvo.lumen.transformation.engine/op" :core/filter-column
                      "args" {"columnName" "c1"
                              "expression" {"is" "akvo"}}
                      "onError" "fail"}
-                    {"akvo.lumen.transformation.engine/op" "core/filter-column"
+                    {"akvo.lumen.transformation.engine/op" :core/filter-column
                      "args" {"columnName" "c1"
                              "expression" {"contains" "FOUNDATION"}}}]
-    :to-number {"akvo.lumen.transformation.engine/op" "core/change-datatype"
+    :to-number {"akvo.lumen.transformation.engine/op" :core/change-datatype
                 "args" {"columnName" "c1"
                         "newType" "number"
                         "defaultValue" 0}
                 "onError" "fail"}
-    :to-date {"akvo.lumen.transformation.engine/op" "core/change-datatype"
+    :to-date {"akvo.lumen.transformation.engine/op" :core/change-datatype
               "args" {"columnName" "c1"
                       "newType" "date"
                       "defaultValue" 0
                       "parseFormat" "YYYY-MM-DD"}
               "onError" "fail"}
-    :sort-column {"akvo.lumen.transformation.engine/op" "core/sort-column"
+    :sort-column {"akvo.lumen.transformation.engine/op" :core/sort-column
                   "args" {"columnName" "c1"
                           "sortDirection" "ASC"}
                   "onError" "fail"}
-    :remove-sort {"akvo.lumen.transformation.engine/op" "core/remove-sort"
+    :remove-sort {"akvo.lumen.transformation.engine/op" :core/remove-sort
                   "args" {"columnName" "c1"}
                   "onError" "fail"}
-    :change-title {"akvo.lumen.transformation.engine/op" "core/change-column-title"
+    :change-title {"akvo.lumen.transformation.engine/op" :core/change-column-title
                    "args" {"columnName" "c2"
                            "columnTitle" "My column"}
                    "onError" "fail"}}))

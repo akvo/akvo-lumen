@@ -11,16 +11,22 @@
 				 ::dataset.column/hidden
 				 ::dataset.column/direction]))
 
-
 (s/def ::columns (s/coll-of ::column :gen-max 3))
 
 (s/def ::table-name string?)
+
 (s/def ::title string?)
+
 (s/def ::created int?)
+
 (s/def ::modified int?)
+
 (s/def ::updated int?)
+
 (s/def ::id string?)
+
 (s/def ::transformations any?)
+
 (s/def ::dataset (s/keys :req-un [::created
 				  ::id
 				  ::modified

@@ -17,7 +17,7 @@
             [hugsql.core :as hugsql])
   (:import [clojure.lang ExceptionInfo]))
 
-(def ops (vec (json/parse-string (slurp (io/resource "ops.json")))))
+(def ops (map #(update % "akvo.lumen.transformation.engine/op" keyword) (vec (json/parse-string (slurp (io/resource "ops.json"))))))
 
 (def invalid-op (-> (take 3 ops)
                     vec
@@ -52,15 +52,15 @@
 (deftest ^:functional test-import-and-transform
   (testing "Import CSV and transform"
     (let [t-log (map keywordize-keys
-                     [{"akvo.lumen.transformation.engine/op" "core/trim"
+                     [{"akvo.lumen.transformation.engine/op" :core/trim
                        "args" {"columnName" "c5"}
                        "onError" "fail"}
-                      {"akvo.lumen.transformation.engine/op" "core/change-datatype"
+                      {"akvo.lumen.transformation.engine/op" :core/change-datatype
                        "args" {"columnName" "c5"
                                "newType" "number"
                                "defaultValue" 0}
                        "onError" "default-value"}
-                      {"akvo.lumen.transformation.engine/op" "core/filter-column"
+                      {"akvo.lumen.transformation.engine/op" :core/filter-column
                        "args" {"columnName" "c4"
                                "expression" {"contains" "broken"}}
                        "onError" "fail"}])
@@ -92,12 +92,12 @@
     (is (= ::lib/ok (first (apply-transformation {::tf/type :undo}))))
     (let [[tag _] (do (apply-transformation {::tf/type :transformation
                                              :transformation (keywordize-keys
-                                                              {"akvo.lumen.transformation.engine/op" "core/to-lowercase"
+                                                              {"akvo.lumen.transformation.engine/op" :core/to-lowercase
                                                                "args" {"columnName" "c1"}
                                                                "onError" "fail"})})
                       (apply-transformation {::tf/type :transformation
                                              :transformation (keywordize-keys
-                                                              {"akvo.lumen.transformation.engine/op" "core/change-datatype"
+                                                              {"akvo.lumen.transformation.engine/op" :core/change-datatype
                                                                "args" {"columnName" "c5"
                                                                        "newType" "number"
                                                                        "defaultValue" 0}
@@ -132,7 +132,7 @@
         apply-transformation (partial tf/apply *tenant-conn* dataset-id)]
     (let [[tag _] (apply-transformation {::tf/type :transformation
                                          :transformation (keywordize-keys
-                                                          {"akvo.lumen.transformation.engine/op" "core/combine"
+                                                          {"akvo.lumen.transformation.engine/op" :core/combine
                                                            "args" {"columnNames" ["c1" "c2"]
                                                                    "newColumnTitle" "full name"
                                                                    "separator" " "}
@@ -150,7 +150,7 @@
 (defn date-transformation [column-name format]
   {::tf/type :transformation
    :transformation (keywordize-keys
-                    {"akvo.lumen.transformation.engine/op" "core/change-datatype"
+                    {"akvo.lumen.transformation.engine/op" :core/change-datatype
                      "args" {"columnName" column-name
                              "newType" "date"
                              "defaultValue" 0
@@ -185,7 +185,7 @@
 (defn change-datatype-transformation [column-name]
   {::tf/type :transformation
    :transformation (keywordize-keys
-                    {"akvo.lumen.transformation.engine/op" "core/change-datatype"
+                    {"akvo.lumen.transformation.engine/op" :core/change-datatype
                      "args" {"columnName" column-name
                              "newType" "number"
                              "defaultValue" nil}
@@ -196,7 +196,7 @@
                       "newColumnType" "number"}
         args (merge default-args
                     (get transform "args"))
-        default-transform {"akvo.lumen.transformation.engine/op" "core/derive"
+        default-transform {"akvo.lumen.transformation.engine/op" :core/derive
                            "onError" "leave-empty"}]
     {::tf/type :transformation
      :transformation (keywordize-keys
@@ -344,7 +344,7 @@
         apply-transformation (partial tf/apply *tenant-conn* dataset-id)]
     (let [[tag _] (apply-transformation {::tf/type :transformation
                                          :transformation (keywordize-keys
-                                                          {"akvo.lumen.transformation.engine/op" "core/delete-column"
+                                                          {"akvo.lumen.transformation.engine/op" :core/delete-column
                                                            "args" {"columnName" "c2"}
                                                            "onError" "fail"})})]
       (is (= ::lib/ok tag))
@@ -360,7 +360,7 @@
         apply-transformation (partial tf/apply *tenant-conn* dataset-id)]
     (let [[tag _] (apply-transformation {::tf/type :transformation
                                          :transformation (keywordize-keys
-                                                          {"akvo.lumen.transformation.engine/op" "core/rename-column"
+                                                          {"akvo.lumen.transformation.engine/op" :core/rename-column
                                                            "args" {"columnName" "c2"
                                                                    "newColumnTitle" "New Title"}
                                                            "onError" "fail"})})]
@@ -375,13 +375,13 @@
 ;; Regression #808
 (deftest valid-column-names
   (is (engine/valid? (keywordize-keys
-                      {"akvo.lumen.transformation.engine/op" "core/sort-column"
+                      {"akvo.lumen.transformation.engine/op" :core/sort-column
                        "args" {"columnName" "submitted_at"
                                "sortDirection" "ASC"}
                        "onError" "fail"})))
 
   (is (engine/valid? (keywordize-keys
-                      {"akvo.lumen.transformation.engine/op" "core/remove-sort"
+                      {"akvo.lumen.transformation.engine/op" :core/remove-sort
                        "args" {"columnName" "c3"}
                        "onError" "fail"})))
   (let [column #(merge % {:type "text" :title "title" :hidden true :direction nil})]
@@ -396,7 +396,7 @@
         apply-transformation (partial tf/apply *tenant-conn* dataset-id)]
     (let [[tag _] (apply-transformation {::tf/type :transformation
                                          :transformation (keywordize-keys
-                                                          {"akvo.lumen.transformation.engine/op" "core/generate-geopoints"
+                                                          {"akvo.lumen.transformation.engine/op" :core/generate-geopoints
                                                            "args" {"columnNameLat" "c2"
                                                                    "columnNameLong" "c3"
                                                                    "columnTitleGeo" "Geopoints"}
