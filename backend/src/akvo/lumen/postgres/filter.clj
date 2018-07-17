@@ -98,11 +98,4 @@
 (defn sql-str [columns filters]
   (if (empty? filters)
     "TRUE"
-    (let [filters (map #(assoc % :column (try
-                                           (dataset.utils/find-column columns (:column %))
-                                           (catch ExceptionInfo e
-                                             (invalid-filter "No such column"
-                                                             {:column (-> e ex-data :columnName)}))))
-                       filters)]
-      (str/join " AND " (map #(format "(%s)" (filter-sql %))
-                             filters)))))
+    (str/join " AND " (map #(format "(%s)" (filter-sql %)) filters))))

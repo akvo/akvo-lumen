@@ -1,5 +1,6 @@
 (ns akvo.lumen.lib.aggregation
   (:require [akvo.lumen.lib :as lib]
+            [akvo.lumen.dataset.utils :as dataset.utils]
             [akvo.lumen.lib.aggregation.pie :as pie]
             [akvo.lumen.lib.aggregation.line :as line]
             [akvo.lumen.lib.aggregation.bar :as bar]
@@ -26,12 +27,18 @@
 
 (defn query [tenant-conn dataset-id visualisation-type query]
   (jdbc/with-db-transaction [tenant-tx-conn tenant-conn {:read-only? true}]
-    (if-let [dataset (dataset-by-id tenant-tx-conn {:id dataset-id})]
+    (if-let [dataset (w/keywordize-keys
+                      (dataset-by-id tenant-tx-conn {:id dataset-id}))]
       (try
-        (query* {::db.s/tenant-connection tenant-tx-conn
-                 ::dataset/dataset (w/keywordize-keys dataset)
-                 ::visualisation-type visualisation-type
-                 :query (w/keywordize-keys query)})
+        (let [q (-> query
+                    w/keywordize-keys
+                    (update :filters
+                            (fn [f]
+                              (map #(assoc % :column (dataset.utils/find-column (:columns dataset) (:column %))) f))))]
+         (query* {::db.s/tenant-connection tenant-tx-conn
+                  ::dataset/dataset dataset
+                  ::visualisation-type visualisation-type
+                  :query q}))
         (catch clojure.lang.ExceptionInfo e
           (lib/bad-request (merge {:message (.getMessage e)}
                                   (ex-data e)))))

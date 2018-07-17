@@ -38,7 +38,6 @@
 
 
 (s/fdef dataset.utils/find-column
-  :args (s/cat
-	 :columns ::dataset/columns
-	 :column-name string?)
+  :args (s/cat :columns ::dataset/columns
+	       :column-name ::lumen.s/string-nullable)
   :ret ::dataset/column)

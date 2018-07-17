@@ -1,5 +1,7 @@
 (ns akvo.lumen.specs.aggregation
   (:require [akvo.lumen.dataset.utils :as dataset.utils]
+            [akvo.lumen.specs.postgres]
+	    [akvo.lumen.postgres.filter :as postgres.filter]
 	    [akvo.lumen.lib :as lib]
 	    [akvo.lumen.lib.aggregation :as lib.aggregation]
 	    [akvo.lumen.lib.aggregation.bar :as l.aggregation.bar]
@@ -31,7 +33,7 @@
 
 (s/def ::l.aggregation.pivot/query
   (s/keys :req-un [::aggregation.query.s/aggregation]
-	  :opt-un [::aggregation.query.s/filters
+	  :opt-un [::postgres.filter/filters
 		   ::l.aggregation.pivot/categoryColumn
 		   ::l.aggregation.pivot/rowColumn
 		   ::l.aggregation.pivot/valueColumn]))
@@ -39,7 +41,7 @@
 (s/def ::l.aggregation.pivot/query-built
   (s/keys :req-un [::l.aggregation.pivot/aggregation]
           :opt-un [::l.aggregation.pivot/category-column
-                   ::aggregation.query.s/filters
+                   ::postgres.filter/filters
                    ::l.aggregation.pivot/row-column
                    ::l.aggregation.pivot/value-column]))
 
@@ -56,12 +58,7 @@
 (s/def ::l.aggregation.pie/bucketColumn ::aggregation.query.s/column)
 
 (s/def ::l.aggregation.pie/query (s/keys :req-un [::l.aggregation.pie/bucketColumn]
-                                         :opt-un [::aggregation.query.s/filters]))
-
-(s/fdef dataset.utils/find-column
-  :args (s/cat :columns ::dataset/columns
-	       :column-name ::lumen.s/string-nullable)
-  :ret ::dataset/column)
+                                         :opt-un [::postgres.filter/filters]))
 
 (s/fdef l.aggregation.pivot/build-query
   :args (s/cat
@@ -129,7 +126,7 @@
 (s/def ::l.aggregation.line/metricColumnY ::aggregation.query.s/column)
 (s/def ::l.aggregation.line/query (s/keys :req-un [::l.aggregation.line/metricColumnX
                                                    ::l.aggregation.line/metricColumnY]
-                                          :opt-un [::aggregation.query.s/filters
+                                          :opt-un [::postgres.filter/filters
                                                    ::l.aggregation.line/metricAggregation]))
 
 (s/def ::l.aggregation.scatter/metricAggregation ::lib.aggregation/metricAggregation) 
@@ -141,7 +138,7 @@
 (s/def ::l.aggregation.scatter/query (s/keys :req-un [::l.aggregation.scatter/metricColumnX
                                                       ::l.aggregation.scatter/metricColumnY
                                                       ::l.aggregation.scatter/datapointLabelColumn]
-                                             :opt-un [::aggregation.query.s/filters
+                                             :opt-un [::postgres.filter/filters
                                                       ::l.aggregation.scatter/metricAggregation
                                                       ::l.aggregation.scatter/bucketColumn]))
 
@@ -221,3 +218,4 @@
 	 :dataset ::dataset/dataset
 	 :query ::l.aggregation.pivot/query)
   :ret ::lib/response)
+

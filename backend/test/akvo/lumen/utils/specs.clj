@@ -8,4 +8,5 @@
  [akvo.lumen.specs.libs]
  [akvo.lumen.specs.transformations]
  [akvo.lumen.specs.aggregation]
+ [akvo.lumen.specs.postgres]
  [akvo.lumen.specs.dataset])

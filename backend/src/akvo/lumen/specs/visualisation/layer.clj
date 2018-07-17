@@ -4,7 +4,7 @@
             [akvo.lumen.specs.visualisation.layer.legend :as layer.legend.s]
 	    [clojure.spec.alpha :as s]))
 
-;; TODO: check with akvo-lumen/backend/src/akvo/lumen/specs/aggregation/query.clj::21
+;; TODO: check with akvo-lumen/backend/src/akvo/lumen/specs/aggregation/query.clj::21 and|or akvo-lumen/backend/src/akvo/lumen/specs/postgres.clj::13
 (s/def ::aggregationMethod #{"avg"} ) 
 
 (s/def ::popup  coll?)
