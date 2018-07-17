@@ -1,7 +1,6 @@
 (ns akvo.lumen.specs.libs
   (:require [clojure.spec.alpha :as s]
 	    [akvo.lumen.lib :as lib]
-            [akvo.lumen.lib.dataset :as dataset]
 	    [akvo.lumen.specs.core :as lumen.s]))
 
 (s/def ::lib/val #{::lib/created ::lib/not-implemented

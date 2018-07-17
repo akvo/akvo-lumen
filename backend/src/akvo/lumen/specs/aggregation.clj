@@ -1,33 +1,33 @@
 (ns akvo.lumen.specs.aggregation
   (:require [akvo.lumen.component.tenant-manager :as tenant-manager]
+	    [akvo.lumen.dataset.utils :as dataset.utils]
 	    [akvo.lumen.lib :as lib]
 	    [akvo.lumen.lib.aggregation :as lib.aggregation]
 	    [akvo.lumen.lib.aggregation.bar :as l.aggregation.bar]
-	    [akvo.lumen.postgres.filter :as postgres.filter]
 	    [akvo.lumen.lib.aggregation.line :as l.aggregation.line]
 	    [akvo.lumen.lib.aggregation.pie :as l.aggregation.pie]
             [akvo.lumen.lib.aggregation.pivot :as l.aggregation.pivot]
 	    [akvo.lumen.lib.aggregation.scatter :as l.aggregation.scatter]
-	    [akvo.lumen.lib.aggregation.utils :as l.aggregation.utils]
+	    [akvo.lumen.postgres.filter :as postgres.filter]
 	    [akvo.lumen.specs.aggregation.pivot.row :as a.pivot.row.s]
 	    [akvo.lumen.specs.aggregation.query :as aggregation.query.s]
 	    [akvo.lumen.specs.core :as lumen.s]
+	    [akvo.lumen.dataset :as dataset]
 	    [akvo.lumen.specs.dataset :as dataset.s]
 	    [akvo.lumen.specs.dataset.column :as dataset.column.s]
 	    [akvo.lumen.specs.db :as db.s]
 	    [akvo.lumen.specs.libs]
 	    [clojure.spec.alpha :as s]))
 
-
 (s/def ::postgres.filter/filter (s/keys :req-un [::aggregation.query.s/operation
                                                  ::aggregation.query.s/strategy
                                                  ::aggregation.query.s/value
-                                                 ::dataset.s/column]))
-(s/def ::postgres.filter/categoryColumn ::dataset.s/column)
+                                                 ::dataset/column]))
+(s/def ::postgres.filter/categoryColumn ::dataset/column)
 
-(s/def ::postgres.filter/rowColumn ::dataset.s/column)
+(s/def ::postgres.filter/rowColumn ::dataset/column)
 
-(s/def ::postgres.filter/valueColumn ::dataset.s/column)
+(s/def ::postgres.filter/valueColumn ::dataset/column)
 
 (s/def ::postgres.filter/aggregation string?)
 
@@ -35,11 +35,11 @@
 
 (s/def ::postgres.filter/comparison-op #{">" "<="})
 
-(s/def ::l.aggregation.pivot/category-column ::dataset.s/column)
+(s/def ::l.aggregation.pivot/category-column ::dataset/column)
 
-(s/def ::l.aggregation.pivot/row-column ::dataset.s/column)
+(s/def ::l.aggregation.pivot/row-column ::dataset/column)
 
-(s/def ::l.aggregation.pivot/value-column ::dataset.s/column)
+(s/def ::l.aggregation.pivot/value-column ::dataset/column)
 
 (s/def ::l.aggregation.pivot/aggregation #{"avg" "sum" "min" "max" "count"})
 
@@ -76,24 +76,24 @@
 (s/def ::l.aggregation.pie/query (s/keys :req-un [::l.aggregation.pie/bucketColumn]
                                          :opt-un [::aggregation.query.s/filters]))
 
-(s/fdef l.aggregation.filter/sql-str
+(s/fdef postgres.filter/sql-str
   :args (s/cat
-	 :columns ::dataset.s/columns
+	 :columns ::dataset/columns
 	 :filters ::aggregation.query.s/filters)
   :ret string?)
 
-(s/fdef l.aggregation.filter/find-column
+(s/fdef postgres.filter/find-column
   :args (s/cat
-	 :columns ::dataset.s/columns
+	 :columns ::dataset/columns
 	 :column-name string?)
-  :ret ::dataset.s/column)
+  :ret ::dataset/column)
 
-(s/fdef l.aggregation.filter/filter-sql
+(s/fdef postgres.filter/filter-sql
   :args (s/cat
 	 :filter ::postgres.filter/filter)
   :ret string?)
 
-(s/fdef l.aggregation.filter/comparison
+(s/fdef postgres.filter/comparison
   :args (s/cat
 	 :op ::postgres.filter/comparison-op
 	 :column-type ::dataset.column.s/type
@@ -101,21 +101,21 @@
 	 :value ::aggregation.query.s/value)
   :ret string?)
 
-(s/fdef l.aggregation.utils/find-column
-  :args (s/cat :columns ::dataset.s/columns
+(s/fdef dataset.utils/find-column
+  :args (s/cat :columns ::dataset/columns
 	       :column-name ::lumen.s/string-nullable)
-  :ret ::dataset.s/column)
+  :ret ::dataset/column)
 
 (s/fdef l.aggregation.pivot/build-query
   :args (s/cat
-	 :columns ::dataset.s/columns
+	 :columns ::dataset/columns
 	 :query ::l.aggregation.pivot/query)
   :ret ::l.aggregation.pivot/query-built)
 
 (s/fdef l.aggregation.pivot/apply-query
   :args (s/cat
 	 :conn ::db.s/tenant-connection
-	 :dataset ::dataset.s/dataset
+	 :dataset ::dataset/dataset
 	 :query ::l.aggregation.pivot/query-built
 	 :filter-str string?)
   :ret ::l.aggregation.pivot/apply-query-ret)
@@ -123,7 +123,7 @@
 (s/fdef l.aggregation.pivot/apply-pivot
   :args (s/cat
 	 :conn ::db.s/tenant-connection
-	 :dataset ::dataset.s/dataset
+	 :dataset ::dataset/dataset
 	 :query ::l.aggregation.pivot/query-built
 	 :filter-str string?)
   :ret ::l.aggregation.pivot/apply-query-ret)
@@ -131,14 +131,14 @@
 (s/fdef l.aggregation.pivot/apply-empty-query
   :args (s/cat
 	 :conn ::db.s/tenant-connection
-	 :dataset ::dataset.s/dataset
+	 :dataset ::dataset/dataset
 	 :filter-str string?)
   :ret ::l.aggregation.pivot/apply-query-ret)
 
 (s/fdef l.aggregation.pivot/apply-empty-category-query
   :args (s/cat
 	 :conn ::db.s/tenant-connection
-	 :dataset ::dataset.s/dataset
+	 :dataset ::dataset/dataset
 	 :query ::l.aggregation.pivot/query-built
 	 :filter-str string?)
   :ret ::l.aggregation.pivot/apply-query-ret)
@@ -146,7 +146,7 @@
 (s/fdef l.aggregation.pivot/apply-empty-row-query
   :args (s/cat
 	 :conn ::db.s/tenant-connection
-	 :dataset ::dataset.s/dataset
+	 :dataset ::dataset/dataset
 	 :query ::l.aggregation.pivot/query-built
 	 :filter-str string?)
   :ret ::l.aggregation.pivot/apply-query-ret)
@@ -154,7 +154,7 @@
 (s/fdef l.aggregation.pivot/apply-empty-value-query
   :args (s/cat
 	 :conn ::db.s/tenant-connection
-	 :dataset ::dataset.s/dataset
+	 :dataset ::dataset/dataset
 	 :query ::l.aggregation.pivot/query-built
 	 :filter-str string?)
   :ret ::l.aggregation.pivot/apply-query-ret)
@@ -211,32 +211,32 @@
 
 (defmethod query-type "pivot" [_]
   (s/keys :req [::db.s/tenant-connection
-		::dataset.s/dataset]
+		::dataset/dataset]
 	  :req-un[::l.aggregation.pivot/query]))
 
 (defmethod query-type "pie" [_]
   (s/keys :req [::db.s/tenant-connection
-		::dataset.s/dataset]
+		::dataset/dataset]
 	  :req-un[::l.aggregation.pie/query]))
 
 (defmethod query-type "line" [_]
   (s/keys :req [::db.s/tenant-connection
-		::dataset.s/dataset]
+		::dataset/dataset]
 	  :req-un[::l.aggregation.line/query]))
 
 (defmethod query-type "bar" [_]
   (s/keys :req [::db.s/tenant-connection
-		::dataset.s/dataset]
+		::dataset/dataset]
 	  :req-un[::l.aggregation.bar/query]))
 
 (defmethod query-type "donut" [_]
   (s/keys :req [::db.s/tenant-connection
-		::dataset.s/dataset]
+		::dataset/dataset]
 	  :req-un[::l.aggregation.pie/query]))
 
 (defmethod query-type "scatter" [_]
   (s/keys :req [::db.s/tenant-connection
-		::dataset.s/dataset]
+		::dataset/dataset]
 	  :req-un[::l.aggregation.scatter/query]))
 
 (s/fdef lib.aggregation/query*
@@ -246,7 +246,7 @@
 (s/fdef lib.aggregation/query
   :args (s/cat
 	 :tenant-connection ::db.s/tenant-connection
-	 :dataset-id ::dataset.s/id
+	 :dataset-id ::dataset/id
 	 :visualisation-type ::lib.aggregation/visualisation-type
 	 :query ::lumen.s/any)
   :ret ::lib/response)
@@ -254,13 +254,13 @@
 (s/fdef l.aggregation.pie/query
   :args (s/cat
 	 :tenant-connection ::db.s/tenant-connection
-	 :dataset ::dataset.s/dataset
+	 :dataset ::dataset/dataset
 	 :query ::l.aggregation.pie/query)
   :ret ::lib/response)
 
 (s/fdef l.aggregation.pivot/query
   :args (s/cat
 	 :tenant-connection ::db.s/tenant-connection
-	 :dataset ::dataset.s/dataset
+	 :dataset ::dataset/dataset
 	 :query ::l.aggregation.pivot/query)
   :ret ::lib/response)

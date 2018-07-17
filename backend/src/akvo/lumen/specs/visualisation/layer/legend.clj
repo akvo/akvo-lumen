@@ -1,10 +1,9 @@
 (ns akvo.lumen.specs.visualisation.layer.legend
-  (:require
-	    [akvo.lumen.specs.core :as lumen.s]
-	    [akvo.lumen.specs.libs]
+  (:require [akvo.lumen.specs.core :as lumen.s]
 	    [clojure.spec.alpha :as s]))
 
-(s/def ::title (s/or :v string? :n nil?))
+(s/def ::title ::lumen.s/string-nullable)
+
 (s/def ::visible boolean?)
 
 (s/def ::legend (s/keys :req-un [::title ::visible]))

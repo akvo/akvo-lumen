@@ -1,6 +1,6 @@
 (ns akvo.lumen.specs.transformations
-  (:require [akvo.lumen.lib :as lib]
-	    [akvo.lumen.lib.dataset :as lib.dataset]
+  (:require [akvo.lumen.dataset :as dataset]
+            [akvo.lumen.lib :as lib]
 	    [akvo.lumen.specs.core :as lumen.s]
 	    [akvo.lumen.specs.dataset :as dataset.s]
 	    [akvo.lumen.specs.dataset.column :as dataset.column.s]
@@ -229,10 +229,10 @@
 (s/fdef transformation.engine/try-apply-operation
   :args (s/cat :tenant-conn ::db.s/spec
                :table-name string?
-               :columns ::dataset.s/columns
+               :columns ::dataset/columns
                :op-spec ::transformation.engine/op-spec)
-  :ret (s/keys :req-un [::transformation.engine/success? ::transformation.engine/message ]
-               :opt-un [::dataset.s/columns ::transformation.engine/execution-log ]))
+  :ret (s/keys :req-un [::transformation.engine/success? ::transformation.engine/message]
+               :opt-un [::dataset/columns ::transformation.engine/execution-log]))
 (s/fdef transformation.engine/execute-transformation
   :args (s/cat :tenant-conn ::db.s/spec
                :dataset-id string?
@@ -245,7 +245,7 @@
                :job-execution-id string?)
   :ret ::lib/response)
 (s/fdef transformation.engine/next-column-name
-  :args (s/cat :columns ::dataset.s/columns)
+  :args (s/cat :columns ::dataset/columns)
   :ret string?)
 (s/fdef transformation/apply
   :args (s/cat :tenant-conn ::db.s/spec
