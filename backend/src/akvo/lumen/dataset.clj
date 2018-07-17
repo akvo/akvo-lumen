@@ -1,4 +1,4 @@
-(ns akvo.lumen.lib.dataset-impl
+(ns akvo.lumen.dataset
   (:refer-clojure :exclude [update])
   (:require [akvo.lumen.endpoint.job-execution :as job-execution]
             [akvo.lumen.import :as import]
@@ -9,14 +9,16 @@
             [clojure.set :refer (rename-keys)]
             [hugsql.core :as hugsql]))
 
-(hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
+(hugsql/def-db-fns "akvo/lumen/dataset.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
 (hugsql/def-db-fns "akvo/lumen/job-execution.sql")
 
-(defn all [tenant-conn]
+(defn all
+  [tenant-conn]
   (lib/ok (all-datasets tenant-conn)))
 
-(defn create [tenant-conn config error-tracker claims data-source]
+(defn create
+  [tenant-conn config error-tracker claims data-source]
   (import/handle-import-request tenant-conn config error-tracker claims data-source))
 
 (defn column-sort-order
@@ -44,7 +46,9 @@
             table-name
             order-by-expr)))
 
-(defn fetch-metadata [conn id]
+(defn fetch-metadata
+  "Fetch dataset metadata (everything apart from rows)"
+  [conn id]
   (if-let [dataset (dataset-by-id conn {:id id})]
     (let [columns (remove #(get % "hidden") (:columns dataset))]
       (lib/ok
@@ -58,7 +62,8 @@
         :columns columns}))
     (lib/not-found {:error "Not found"})))
 
-(defn fetch [conn id]
+(defn fetch
+  [conn id]
   (if-let [dataset (dataset-by-id conn {:id id})]
     (let [columns (remove #(get % "hidden") (:columns dataset))
           data (rest (jdbc/query conn
@@ -72,7 +77,8 @@
     (lib/not-found {:error "Not found"})))
 
 
-(defn delete [tenant-conn id]
+(defn delete
+  [tenant-conn id]
   (let [c (delete-dataset-by-id tenant-conn {:id id})]
     (if (zero? c)
       (do
@@ -80,7 +86,8 @@
         (lib/not-found {:error "Not found"}))
       (let [v (delete-maps-by-dataset-id tenant-conn {:id id})](lib/ok {:id id})))))
 
-(defn update [tenant-conn config dataset-id {refresh-token "refreshToken"}]
+(defn update
+  [tenant-conn config dataset-id {refresh-token "refreshToken"}]
   (if-let [{data-source-spec :spec
             data-source-id :id} (data-source-by-dataset-id tenant-conn
                                                            {:dataset-id dataset-id})]
@@ -96,6 +103,7 @@
       (lib/bad-request {:error "Can't update uploaded dataset"}))
     (lib/not-found {:id dataset-id})))
 
-(defn update-meta [tenant-conn id {:strs [name]}]
+(defn update-meta
+  [tenant-conn id {:strs [name]}]
   (update-dataset-meta tenant-conn {:id id :title name})
   (lib/ok {}))

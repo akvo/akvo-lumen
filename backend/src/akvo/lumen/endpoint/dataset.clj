@@ -1,6 +1,6 @@
 (ns akvo.lumen.endpoint.dataset
   (:require [akvo.lumen.component.tenant-manager :refer [connection]]
-            [akvo.lumen.lib.dataset :as dataset]
+            [akvo.lumen.dataset :as dataset]
             [compojure.core :refer :all]))
 
 
