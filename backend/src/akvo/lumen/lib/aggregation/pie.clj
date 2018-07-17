@@ -1,7 +1,7 @@
 (ns akvo.lumen.lib.aggregation.pie
   (:require [akvo.lumen.lib :as lib]
             [akvo.lumen.postgres.filter :as filter]
-            [akvo.lumen.lib.aggregation.utils :as utils]
+            [akvo.lumen.dataset.utils :as utils]
             [clojure.java.jdbc :as jdbc]))
 
 (defn- run-query [tenant-conn table-name column-name filter-sql]
