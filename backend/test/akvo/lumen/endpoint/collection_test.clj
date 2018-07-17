@@ -7,7 +7,7 @@
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.collection :as collection]
             [akvo.lumen.lib.dashboard :as dashboard]
-            [akvo.lumen.lib.dataset :as dataset]
+            [akvo.lumen.dataset :as dataset]
             [akvo.lumen.lib.visualisation :as visualisation]
             [akvo.lumen.test-utils :refer [import-file instrument-fixture]]
             [akvo.lumen.variant :as variant]

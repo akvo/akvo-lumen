@@ -13,7 +13,7 @@
   (:import [com.zaxxer.hikari HikariDataSource]
            [java.net URI]))
 
-(hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
+(hugsql/def-db-fns "akvo/lumen/dataset.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/raster.sql")
 
 (defn- headers [tenant-conn]

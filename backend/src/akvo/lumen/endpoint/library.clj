@@ -1,9 +1,9 @@
 (ns akvo.lumen.endpoint.library
   (:require [akvo.lumen.component.tenant-manager :refer [connection]]
             [akvo.lumen.lib :as lib]
+            [akvo.lumen.dataset :as dataset]
             [akvo.lumen.lib
              [dashboard :as dashboard]
-             [dataset :as dataset]
              [visualisation :as visualisation]
              [collection :as collection]
              [raster :as raster]]

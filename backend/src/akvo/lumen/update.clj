@@ -12,7 +12,7 @@
 
 (hugsql/def-db-fns "akvo/lumen/job-execution.sql")
 (hugsql/def-db-fns "akvo/lumen/transformation.sql")
-(hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
+(hugsql/def-db-fns "akvo/lumen/dataset.sql")
 
 (defn successful-update
   "On a successful update we need to create a new dataset-version that

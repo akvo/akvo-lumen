@@ -11,7 +11,7 @@
             [clojure.walk :as w]
             [hugsql.core :as hugsql]))
 
-(hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
+(hugsql/def-db-fns "akvo/lumen/dataset.sql")
 
 (defmulti query*
   (fn [{:keys [::db.s/tenant-connection ::dataset.s/dataset ::visualisation-type query]}]
