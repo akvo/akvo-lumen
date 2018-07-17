@@ -1,7 +1,9 @@
 (ns akvo.lumen.postgres.filter
   (:require [akvo.lumen.postgres :as core]
+            [akvo.lumen.dataset.utils :as dataset.utils]
             [clojure.string :as str])
-  (:import [java.sql.Timestamp]))
+  (:import [java.sql.Timestamp]
+           [clojure.lang ExceptionInfo]))
 
 (defn invalid-filter [msg map]
   (throw (ex-info (format "Invalid filter: %s" msg) map)))
@@ -93,15 +95,14 @@
 (defmethod filter-sql :default [filter]
   (invalid-filter "No such filter strategy" {:strategy (:strategy filter)}))
 
-(defn find-column [columns column-name]
-  (if-let [column (first (filter #(= (:columnName %) column-name) columns))]
-    column
-    (invalid-filter "No such column" {:column column-name})))
-
 (defn sql-str [columns filters]
   (if (empty? filters)
     "TRUE"
-    (let [filters (map #(assoc % :column (find-column columns (:column %)))
+    (let [filters (map #(assoc % :column (try
+                                           (dataset.utils/find-column columns (:column %))
+                                           (catch ExceptionInfo e
+                                             (invalid-filter "No such column"
+                                                             {:column (-> e ex-data :columnName)}))))
                        filters)]
       (str/join " AND " (map #(format "(%s)" (filter-sql %))
                              filters)))))
