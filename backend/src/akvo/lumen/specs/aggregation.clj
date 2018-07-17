@@ -1,6 +1,5 @@
 (ns akvo.lumen.specs.aggregation
-  (:require [akvo.lumen.component.tenant-manager :as tenant-manager]
-	    [akvo.lumen.dataset.utils :as dataset.utils]
+  (:require [akvo.lumen.dataset.utils :as dataset.utils]
 	    [akvo.lumen.lib :as lib]
 	    [akvo.lumen.lib.aggregation :as lib.aggregation]
 	    [akvo.lumen.lib.aggregation.bar :as l.aggregation.bar]
@@ -8,7 +7,6 @@
 	    [akvo.lumen.lib.aggregation.pie :as l.aggregation.pie]
             [akvo.lumen.lib.aggregation.pivot :as l.aggregation.pivot]
 	    [akvo.lumen.lib.aggregation.scatter :as l.aggregation.scatter]
-	    [akvo.lumen.postgres.filter :as postgres.filter]
 	    [akvo.lumen.specs.aggregation.pivot.row :as a.pivot.row.s]
 	    [akvo.lumen.specs.aggregation.query :as aggregation.query.s]
 	    [akvo.lumen.specs.core :as lumen.s]
@@ -18,22 +16,6 @@
 	    [akvo.lumen.specs.db :as db.s]
 	    [akvo.lumen.specs.libs]
 	    [clojure.spec.alpha :as s]))
-
-(s/def ::postgres.filter/filter (s/keys :req-un [::aggregation.query.s/operation
-                                                 ::aggregation.query.s/strategy
-                                                 ::aggregation.query.s/value
-                                                 ::dataset/column]))
-(s/def ::postgres.filter/categoryColumn ::dataset/column)
-
-(s/def ::postgres.filter/rowColumn ::dataset/column)
-
-(s/def ::postgres.filter/valueColumn ::dataset/column)
-
-(s/def ::postgres.filter/aggregation string?)
-
-(s/def ::postgres.filter/filters (s/coll-of ::postgres.filter/filter :gen-max 3))
-
-(s/def ::postgres.filter/comparison-op #{">" "<="})
 
 (s/def ::l.aggregation.pivot/category-column ::dataset/column)
 
@@ -75,31 +57,6 @@
 
 (s/def ::l.aggregation.pie/query (s/keys :req-un [::l.aggregation.pie/bucketColumn]
                                          :opt-un [::aggregation.query.s/filters]))
-
-(s/fdef postgres.filter/sql-str
-  :args (s/cat
-	 :columns ::dataset/columns
-	 :filters ::aggregation.query.s/filters)
-  :ret string?)
-
-(s/fdef postgres.filter/find-column
-  :args (s/cat
-	 :columns ::dataset/columns
-	 :column-name string?)
-  :ret ::dataset/column)
-
-(s/fdef postgres.filter/filter-sql
-  :args (s/cat
-	 :filter ::postgres.filter/filter)
-  :ret string?)
-
-(s/fdef postgres.filter/comparison
-  :args (s/cat
-	 :op ::postgres.filter/comparison-op
-	 :column-type ::dataset.column.s/type
-	 :column-name ::dataset.column.s/columnName
-	 :value ::aggregation.query.s/value)
-  :ret string?)
 
 (s/fdef dataset.utils/find-column
   :args (s/cat :columns ::dataset/columns

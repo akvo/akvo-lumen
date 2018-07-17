@@ -1,5 +1,6 @@
 (ns akvo.lumen.specs.dataset
   (:require [akvo.lumen.dataset :as dataset]
+            [akvo.lumen.dataset.utils :as dataset.utils]
             [akvo.lumen.specs.core :as lumen.s]
             [akvo.lumen.specs.dataset.column :as dataset.column]
             [clojure.spec.alpha :as s]))
@@ -34,3 +35,10 @@
                                           ::dataset/title
                                           ::dataset/transformations
                                           ::dataset/updated]))
+
+
+(s/fdef dataset.utils/find-column
+  :args (s/cat
+	 :columns ::dataset/columns
+	 :column-name string?)
+  :ret ::dataset/column)
