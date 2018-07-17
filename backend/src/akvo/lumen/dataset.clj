@@ -14,12 +14,10 @@
 (hugsql/def-db-fns "akvo/lumen/job-execution.sql")
 
 (defn all
-  "Return all datasets."
   [tenant-conn]
   (lib/ok (all-datasets tenant-conn)))
 
 (defn create
-  "Create new dataset. Body should conform..."
   [tenant-conn config error-tracker claims data-source]
   (import/handle-import-request tenant-conn config error-tracker claims data-source))
 
@@ -49,7 +47,7 @@
             order-by-expr)))
 
 (defn fetch-metadata
-  "Fetch dataset metadata (everything apart from rows) with id"
+  "Fetch dataset metadata (everything apart from rows)"
   [conn id]
   (if-let [dataset (dataset-by-id conn {:id id})]
     (let [columns (remove #(get % "hidden") (:columns dataset))]
@@ -65,7 +63,6 @@
     (lib/not-found {:error "Not found"})))
 
 (defn fetch
-  "Fetch dataset with id"
   [conn id]
   (if-let [dataset (dataset-by-id conn {:id id})]
     (let [columns (remove #(get % "hidden") (:columns dataset))
@@ -81,7 +78,6 @@
 
 
 (defn delete
-  "Delete dataset with id"
   [tenant-conn id]
   (let [c (delete-dataset-by-id tenant-conn {:id id})]
     (if (zero? c)
@@ -91,7 +87,6 @@
       (let [v (delete-maps-by-dataset-id tenant-conn {:id id})](lib/ok {:id id})))))
 
 (defn update
-  "Update dataset with id"
   [tenant-conn config dataset-id {refresh-token "refreshToken"}]
   (if-let [{data-source-spec :spec
             data-source-id :id} (data-source-by-dataset-id tenant-conn
@@ -109,7 +104,6 @@
     (lib/not-found {:id dataset-id})))
 
 (defn update-meta
-  "Update dataset meta with id. Body should conform..."
   [tenant-conn id {:strs [name]}]
   (update-dataset-meta tenant-conn {:id id :title name})
   (lib/ok {}))
