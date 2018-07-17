@@ -25,6 +25,5 @@ ON CONFLICT (id)
 DO UPDATE SET dataset_id = :dataset-id,
               "name" = :name,
               "type" = :type,
-              spec = :spec,
-              author = :author
+              spec = :spec
 RETURNING *;
