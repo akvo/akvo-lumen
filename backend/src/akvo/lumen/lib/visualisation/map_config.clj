@@ -1,6 +1,9 @@
 (ns akvo.lumen.lib.visualisation.map-config
   (:require [akvo.lumen.postgres.filter :as filter]
             [clojure.string :as str]
+            [akvo.lumen.dataset.utils :as dataset.utils]
+            [clojure.walk :as w]
+            [clojure.tools.logging :as log]
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/dataset.sql")
@@ -336,7 +339,11 @@
                                  "sql" (format "SELECT * FROM %s" raster_table)
                                  "srid" "3857"}})
                    (let [geom-column (get-geom-column layer)
-                         {:keys [columns]} (dataset-by-id tenant-conn {:id datasetId})
+                         {:keys [columns]} (-> (dataset-by-id tenant-conn {:id datasetId})
+                                               w/keywordize-keys)
+                         filters (->> filters
+                                      w/keywordize-keys
+                                      (map #(assoc % :column (dataset.utils/find-column columns (:column %)))))
                          where-clause (filter/sql-str columns filters)
                          popup-columns (mapv #(get % "column") popup)
                          point-color-column pointColorColumn

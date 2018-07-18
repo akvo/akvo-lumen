@@ -7,7 +7,7 @@
 	    [akvo.lumen.specs.dataset :as dataset.s]
 	    [akvo.lumen.specs.visualisation.layer :as visualisation.layer.s]
 	    [akvo.lumen.specs.visualisation.layer.legend :as layer.legend.s]
-	    [akvo.lumen.specs.visualisation.layer.spec :as layer.spec.s]
+	    [akvo.lumen.specs.visualisation.layer.spec :as v.layer.spec.s]
 	    [akvo.lumen.specs.db :as db.s]
 	    [clojure.spec.alpha :as s]))
 
@@ -34,12 +34,12 @@
 (s/def ::lib.visualisation/body
   (s/keys :req-un [::lib.visualisation/datasetId
 		   ::lib.visualisation/name
-		   ::lib.visualisation/spec
+                   ::lib.visualisation/spec
 		   ::lib.visualisation/type
 		   ::lib.visualisation/visualisationType]
 	  :opt-un [::lib.visualisation/created
 		   ::lib.visualisation/modified
-		   ::layer.spec.s/spec
+;;		   ::v.layer.spec.s/spec
 		   ::lib.visualisation/status
 		   ::lib.visualisation/id]))
 

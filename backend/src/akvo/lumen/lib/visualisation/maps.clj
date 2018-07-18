@@ -1,14 +1,16 @@
 (ns akvo.lumen.lib.visualisation.maps
-  (:require [akvo.lumen.lib :as lib]
-            [akvo.lumen.postgres.filter :as filter]
+  (:require [akvo.lumen.dataset.utils :as dataset.utils]
+            [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.visualisation.map-config :as map-config]
             [akvo.lumen.lib.visualisation.map-metadata :as map-metadata]
+            [akvo.lumen.postgres.filter :as filter]
             [akvo.lumen.transformation.engine :as engine]
             [akvo.lumen.util :as util]
             [cheshire.core :as json]
             [clj-http.client :as client]
             [clojure.core.match :refer [match]]
             [clojure.tools.logging :as log]
+            [clojure.walk :as w]
             [hugsql.core :as hugsql])
   (:import [com.zaxxer.hikari HikariDataSource]
            [java.net URI]))
@@ -82,10 +84,16 @@
                                     current-dataset-id (if (= current-layer-type "raster")
                                                          (get current-layer "rasterId")
                                                          (get current-layer "datasetId"))
-                                    {:keys [table-name columns raster_table]} (if (= current-layer-type "raster")
-                                                                                (raster-by-id tenant-conn {:id current-dataset-id})
-                                                                                (dataset-by-id tenant-conn {:id current-dataset-id}))
-                                    current-where-clause (filter/sql-str columns (get current-layer "filters"))]
+                                    {:keys [table-name columns raster_table]} (-> (if (= current-layer-type "raster")
+                                                                                    (raster-by-id tenant-conn {:id current-dataset-id})
+                                                                                    (dataset-by-id tenant-conn {:id current-dataset-id}))
+                                                                                  w/keywordize-keys)
+
+                                    filters (->> (get current-layer "filters")
+                                                 w/keywordize-keys
+                                                 (map #(assoc % :column (dataset.utils/find-column columns (:column %)))))
+
+                                    current-where-clause (filter/sql-str columns filters)]
                                 (map-metadata/build tenant-conn (or raster_table table-name) current-layer current-where-clause)))
                             layers)
         headers (headers tenant-conn)

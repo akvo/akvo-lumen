@@ -23,6 +23,7 @@ in lumen they map to ints [[/Users/tangrammer/git/akvo/akvo-lumen/backend/src/ak
    (ns test-pivot
      (:require [clojure.spec.alpha :as s]
 	       [akvo.lumen.specs.dataset :as dataset.s]
+	       [akvo.lumen.dataset :as dataset]
 	       [akvo.lumen.specs.aggregation :as aggregation.s]
 	       [akvo.lumen.lib.aggregation.pivot :as l.aggregation.pivot]))
 
@@ -53,25 +54,26 @@ in lumen they map to ints [[/Users/tangrammer/git/akvo/akvo-lumen/backend/src/ak
 		  :columnName "c3"},
 		 :transformations ()})
    {:akvo.lumen.specs.db/tenant-connection {}
-    :akvo.lumen.specs.dataset/dataset dataset
+    :akvo.lumen.dataset/dataset dataset
     :akvo.lumen.lib.aggregation/visualisation-type "pivot"
     :query query}
 
    {:query? (s/valid? :akvo.lumen.lib.aggregation.pivot/query query)
-    :dataset? (s/valid? ::dataset.s/dataset dataset)}
+    :dataset? (s/valid? ::dataset/dataset dataset)}
 
  #+END_SRC
 
  #+RESULTS:
  : {:query? true, :dataset? true}
 
+ 
 ** bar
 #+BEGIN_SRC clojure :exports both :results value replace pp
 (remove-ns 'test-bar)
 (ns test-bar
   (:require [clojure.spec.alpha :as s]
-
             [akvo.lumen.specs.dataset :as dataset.s]
+            [akvo.lumen.dataset :as dataset]
             [akvo.lumen.lib.aggregation.bar :as l.aggregation.bar]))
 (def dataset {:columns
               {:columnName "c3",
@@ -108,7 +110,7 @@ in lumen they map to ints [[/Users/tangrammer/git/akvo/akvo-lumen/backend/src/ak
   :akvo.lumen.lib.aggregation/visualisation-type "bar"
   :query query})
 
-{:dataset? (s/valid? ::dataset.s/dataset dataset)
+{:dataset? (s/valid? ::dataset/dataset dataset)
  :query? (s/valid? ::l.aggregation.bar/query query)}
 
 
@@ -118,7 +120,6 @@ in lumen they map to ints [[/Users/tangrammer/git/akvo/akvo-lumen/backend/src/ak
 
 #+RESULTS:
 : {:dataset? true, :query? true}
-
  
 ** TODO complete all types and ways to test them
 * features

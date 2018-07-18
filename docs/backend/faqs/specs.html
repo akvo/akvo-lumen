@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2018-07-16 Mon 14:02 -->
+<!-- 2018-07-18 Wed 09:20 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>SPECs</title>
@@ -240,32 +240,32 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgb14d4c5">1. WIP</a>
+<li><a href="#orgfd589e0">1. WIP</a>
 <ul>
-<li><a href="#org9cf4eeb">1.1. <span class="todo TODO">TODO</span> improve time related specs: updated, created, modified should be improved</a></li>
+<li><a href="#orgb87b2ce">1.1. <span class="todo TODO">TODO</span> improve time related specs: updated, created, modified should be improved</a></li>
 </ul>
 </li>
-<li><a href="#orgc6a36e8">2. aggregation tests&#xa0;&#xa0;&#xa0;<span class="tag"><span class="aggregation">aggregation</span></span></a>
+<li><a href="#org5909f28">2. aggregation tests&#xa0;&#xa0;&#xa0;<span class="tag"><span class="aggregation">aggregation</span></span></a>
 <ul>
-<li><a href="#org021b791">2.1. pivot</a></li>
-<li><a href="#org4aa4170">2.2. bar</a></li>
-<li><a href="#org927fa69">2.3. <span class="todo TODO">TODO</span> complete all types and ways to test them</a></li>
+<li><a href="#org4ee5382">2.1. pivot</a></li>
+<li><a href="#orge2d15ac">2.2. bar</a></li>
+<li><a href="#org864a9d1">2.3. <span class="todo TODO">TODO</span> complete all types and ways to test them</a></li>
 </ul>
 </li>
-<li><a href="#org80fb7ce">3. features</a>
+<li><a href="#orgc9755b4">3. features</a>
 <ul>
-<li><a href="#orge1269b7">3.1. how find the function you need?&#xa0;&#xa0;&#xa0;<span class="tag"><span class="wip">wip</span>&#xa0;<span class="ideas">ideas</span></span></a></li>
+<li><a href="#orgf7b3ac9">3.1. how find the function you need?&#xa0;&#xa0;&#xa0;<span class="tag"><span class="wip">wip</span>&#xa0;<span class="ideas">ideas</span></span></a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orgb14d4c5" class="outline-2">
-<h2 id="orgb14d4c5"><span class="section-number-2">1</span> WIP</h2>
+<div id="outline-container-orgfd589e0" class="outline-2">
+<h2 id="orgfd589e0"><span class="section-number-2">1</span> WIP</h2>
 <div class="outline-text-2" id="text-1">
 </div>
-<div id="outline-container-org9cf4eeb" class="outline-3">
-<h3 id="org9cf4eeb"><span class="section-number-3">1.1</span> <span class="todo TODO">TODO</span> improve time related specs: updated, created, modified should be improved</h3>
+<div id="outline-container-orgb87b2ce" class="outline-3">
+<h3 id="orgb87b2ce"><span class="section-number-3">1.1</span> <span class="todo TODO">TODO</span> improve time related specs: updated, created, modified should be improved</h3>
 <div class="outline-text-3" id="text-1-1">
 <p>
 now we are using int?
@@ -276,12 +276,12 @@ in lumen they map to ints <a href="file:///Users/tangrammer/git/akvo/akvo-lumen/
 </div>
 </div>
 
-<div id="outline-container-orgc6a36e8" class="outline-2">
-<h2 id="orgc6a36e8"><span class="section-number-2">2</span> aggregation tests&#xa0;&#xa0;&#xa0;<span class="tag"><span class="aggregation">aggregation</span></span></h2>
+<div id="outline-container-org5909f28" class="outline-2">
+<h2 id="org5909f28"><span class="section-number-2">2</span> aggregation tests&#xa0;&#xa0;&#xa0;<span class="tag"><span class="aggregation">aggregation</span></span></h2>
 <div class="outline-text-2" id="text-2">
 </div>
-<div id="outline-container-org021b791" class="outline-3">
-<h3 id="org021b791"><span class="section-number-3">2.1</span> pivot</h3>
+<div id="outline-container-org4ee5382" class="outline-3">
+<h3 id="org4ee5382"><span class="section-number-3">2.1</span> pivot</h3>
 <div class="outline-text-3" id="text-2-1">
 <p>
 <a href="https://github.com/akvo/akvo-lumen/blob/specs-lp-bis/backend/test/resources/pivot.csv#L1">https://github.com/akvo/akvo-lumen/blob/specs-lp-bis/backend/test/resources/pivot.csv#L1</a>
@@ -291,6 +291,7 @@ in lumen they map to ints <a href="file:///Users/tangrammer/git/akvo/akvo-lumen/
 <span style="color: #707183;">(</span><span style="color: #0000FF;">ns</span> <span style="color: #6434A3;">test-pivot</span>
   <span style="color: #7388D6;">(</span><span style="color: #D0372D;">:require</span> <span style="color: #909183;">[</span>clojure.spec.alpha <span style="color: #D0372D;">:as</span> s<span style="color: #909183;">]</span>
             <span style="color: #909183;">[</span>akvo.lumen.specs.dataset <span style="color: #D0372D;">:as</span> dataset.s<span style="color: #909183;">]</span>
+            <span style="color: #909183;">[</span>akvo.lumen.dataset <span style="color: #D0372D;">:as</span> dataset<span style="color: #909183;">]</span>
             <span style="color: #909183;">[</span>akvo.lumen.specs.aggregation <span style="color: #D0372D;">:as</span> aggregation.s<span style="color: #909183;">]</span>
             <span style="color: #909183;">[</span>akvo.lumen.lib.aggregation.pivot <span style="color: #D0372D;">:as</span> l.aggregation.pivot<span style="color: #909183;">]</span><span style="color: #7388D6;">)</span><span style="color: #707183;">)</span>
 
@@ -321,12 +322,12 @@ in lumen they map to ints <a href="file:///Users/tangrammer/git/akvo/akvo-lumen/
                <span style="color: #D0372D;">:columnName</span> <span style="color: #008000;">"c3"</span><span style="color: #909183;">}</span>,
               <span style="color: #D0372D;">:transformations</span> <span style="color: #909183;">()</span><span style="color: #7388D6;">}</span><span style="color: #707183;">)</span>
 <span style="color: #707183;">{</span><span style="color: #D0372D;">:</span><span style="color: #6434A3;">akvo.lumen.specs.db</span><span style="color: #333333; background-color: #FFFFFF;">/</span><span style="color: #D0372D;">tenant-connection</span> <span style="color: #7388D6;">{}</span>
- <span style="color: #D0372D;">:</span><span style="color: #6434A3;">akvo.lumen.specs.dataset</span><span style="color: #333333; background-color: #FFFFFF;">/</span><span style="color: #D0372D;">dataset</span> dataset
+ <span style="color: #D0372D;">:</span><span style="color: #6434A3;">akvo.lumen.dataset</span><span style="color: #333333; background-color: #FFFFFF;">/</span><span style="color: #D0372D;">dataset</span> dataset
  <span style="color: #D0372D;">:</span><span style="color: #6434A3;">akvo.lumen.lib.aggregation</span><span style="color: #333333; background-color: #FFFFFF;">/</span><span style="color: #D0372D;">visualisation-type</span> <span style="color: #008000;">"pivot"</span>
  <span style="color: #D0372D;">:query</span> query<span style="color: #707183;">}</span>
 
 <span style="color: #707183;">{</span><span style="color: #D0372D;">:query?</span> <span style="color: #7388D6;">(</span><span style="color: #6434A3;">s</span>/valid? <span style="color: #D0372D;">:</span><span style="color: #6434A3;">akvo.lumen.lib.aggregation.pivot</span><span style="color: #333333; background-color: #FFFFFF;">/</span><span style="color: #D0372D;">query</span> query<span style="color: #7388D6;">)</span>
- <span style="color: #D0372D;">:dataset?</span> <span style="color: #7388D6;">(</span><span style="color: #6434A3;">s</span>/valid? <span style="color: #D0372D;">::</span><span style="color: #6434A3;">dataset.s</span><span style="color: #333333; background-color: #FFFFFF;">/</span><span style="color: #D0372D;">dataset</span> dataset<span style="color: #7388D6;">)</span><span style="color: #707183;">}</span>
+ <span style="color: #D0372D;">:dataset?</span> <span style="color: #7388D6;">(</span><span style="color: #6434A3;">s</span>/valid? <span style="color: #D0372D;">::</span><span style="color: #6434A3;">dataset</span><span style="color: #333333; background-color: #FFFFFF;">/</span><span style="color: #D0372D;">dataset</span> dataset<span style="color: #7388D6;">)</span><span style="color: #707183;">}</span>
 
 </pre>
 </div>
@@ -338,8 +339,9 @@ in lumen they map to ints <a href="file:///Users/tangrammer/git/akvo/akvo-lumen/
 </div>
 </div>
 
-<div id="outline-container-org4aa4170" class="outline-3">
-<h3 id="org4aa4170"><span class="section-number-3">2.2</span> bar</h3>
+
+<div id="outline-container-orge2d15ac" class="outline-3">
+<h3 id="orge2d15ac"><span class="section-number-3">2.2</span> bar</h3>
 <div class="outline-text-3" id="text-2-2">
 <div class="org-src-container">
 <pre class="src src-clojure"><span style="color: #707183;">(</span>remove-ns 'test-bar<span style="color: #707183;">)</span>
@@ -347,6 +349,7 @@ in lumen they map to ints <a href="file:///Users/tangrammer/git/akvo/akvo-lumen/
   <span style="color: #7388D6;">(</span><span style="color: #D0372D;">:require</span> <span style="color: #909183;">[</span>clojure.spec.alpha <span style="color: #D0372D;">:as</span> s<span style="color: #909183;">]</span>
 
             <span style="color: #909183;">[</span>akvo.lumen.specs.dataset <span style="color: #D0372D;">:as</span> dataset.s<span style="color: #909183;">]</span>
+            <span style="color: #909183;">[</span>akvo.lumen.dataset <span style="color: #D0372D;">:as</span> dataset<span style="color: #909183;">]</span>
             <span style="color: #909183;">[</span>akvo.lumen.lib.aggregation.bar <span style="color: #D0372D;">:as</span> l.aggregation.bar<span style="color: #909183;">]</span><span style="color: #7388D6;">)</span><span style="color: #707183;">)</span>
 <span style="color: #707183;">(</span><span style="color: #0000FF;">def</span> <span style="color: #BA36A5;">dataset</span> <span style="color: #7388D6;">{</span><span style="color: #D0372D;">:columns</span>
               <span style="color: #909183;">{</span><span style="color: #D0372D;">:columnName</span> <span style="color: #008000;">"c3"</span>,
@@ -383,7 +386,7 @@ in lumen they map to ints <a href="file:///Users/tangrammer/git/akvo/akvo-lumen/
   <span style="color: #D0372D;">:</span><span style="color: #6434A3;">akvo.lumen.lib.aggregation</span><span style="color: #333333; background-color: #FFFFFF;">/</span><span style="color: #D0372D;">visualisation-type</span> <span style="color: #008000;">"bar"</span>
   <span style="color: #D0372D;">:query</span> query<span style="color: #7388D6;">}</span><span style="color: #707183;">)</span>
 
-<span style="color: #707183;">{</span><span style="color: #D0372D;">:dataset?</span> <span style="color: #7388D6;">(</span><span style="color: #6434A3;">s</span>/valid? <span style="color: #D0372D;">::</span><span style="color: #6434A3;">dataset.s</span><span style="color: #333333; background-color: #FFFFFF;">/</span><span style="color: #D0372D;">dataset</span> dataset<span style="color: #7388D6;">)</span>
+<span style="color: #707183;">{</span><span style="color: #D0372D;">:dataset?</span> <span style="color: #7388D6;">(</span><span style="color: #6434A3;">s</span>/valid? <span style="color: #D0372D;">::</span><span style="color: #6434A3;">dataset</span><span style="color: #333333; background-color: #FFFFFF;">/</span><span style="color: #D0372D;">dataset</span> dataset<span style="color: #7388D6;">)</span>
  <span style="color: #D0372D;">:query?</span> <span style="color: #7388D6;">(</span><span style="color: #6434A3;">s</span>/valid? <span style="color: #D0372D;">::</span><span style="color: #6434A3;">l.aggregation.bar</span><span style="color: #333333; background-color: #FFFFFF;">/</span><span style="color: #D0372D;">query</span> query<span style="color: #7388D6;">)</span><span style="color: #707183;">}</span>
 
 
@@ -400,16 +403,16 @@ in lumen they map to ints <a href="file:///Users/tangrammer/git/akvo/akvo-lumen/
 </div>
 
 
-<div id="outline-container-org927fa69" class="outline-3">
-<h3 id="org927fa69"><span class="section-number-3">2.3</span> <span class="todo TODO">TODO</span> complete all types and ways to test them</h3>
+<div id="outline-container-org864a9d1" class="outline-3">
+<h3 id="org864a9d1"><span class="section-number-3">2.3</span> <span class="todo TODO">TODO</span> complete all types and ways to test them</h3>
 </div>
 </div>
-<div id="outline-container-org80fb7ce" class="outline-2">
-<h2 id="org80fb7ce"><span class="section-number-2">3</span> features</h2>
+<div id="outline-container-orgc9755b4" class="outline-2">
+<h2 id="orgc9755b4"><span class="section-number-2">3</span> features</h2>
 <div class="outline-text-2" id="text-3">
 </div>
-<div id="outline-container-orge1269b7" class="outline-3">
-<h3 id="orge1269b7"><span class="section-number-3">3.1</span> how find the function you need?&#xa0;&#xa0;&#xa0;<span class="tag"><span class="wip">wip</span>&#xa0;<span class="ideas">ideas</span></span></h3>
+<div id="outline-container-orgf7b3ac9" class="outline-3">
+<h3 id="orgf7b3ac9"><span class="section-number-3">3.1</span> how find the function you need?&#xa0;&#xa0;&#xa0;<span class="tag"><span class="wip">wip</span>&#xa0;<span class="ideas">ideas</span></span></h3>
 <div class="outline-text-3" id="text-3-1">
 <p>
 browse-specs and search for args types specs???
@@ -420,7 +423,7 @@ browse-specs and search for args types specs???
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: tangrammer</p>
-<p class="date">Created: 2018-07-16 Mon 14:02</p>
+<p class="date">Created: 2018-07-18 Wed 09:20</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

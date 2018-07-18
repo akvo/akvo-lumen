@@ -29,7 +29,7 @@
 
 (s/def ::postgres.filter/aggregation string?)
 
-(s/def ::postgres.filter/comparison-op #{">" "<="})
+(s/def ::postgres.filter/comparison-op #{">" "<=" "<" ">=" "=" "<>"})
 
 (s/fdef postgres.filter/sql-str
   :args (s/cat
