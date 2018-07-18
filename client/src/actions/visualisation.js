@@ -142,3 +142,16 @@ export function fetchShareId(visualisationId) {
     }
   };
 }
+
+/* Export visualisation */
+export const exportVisualisationRequest = createAction('EXPORT_VISUALISATION_REQUEST');
+
+export function exportVisualisation(visualisationId, format = 'png') {
+  if (visualisationId === null) throw new Error('visualisationUrl not set');
+  const target = encodeURIComponent(`${window.location.origin}/visualisation/${visualisationId}`);
+  api.get(`/api/export?format=${format}&target=${target}`)
+    .then(response => response.json())
+    .then((response) => {
+      window.open(response.file);
+    });
+}

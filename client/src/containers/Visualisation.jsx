@@ -302,13 +302,21 @@ class Visualisation extends Component {
   }
 
   handleVisualisationAction(action) {
+    const url = `${window.location.origin}/visualisation/${this.state.visualisation.id}`;
     switch (action) {
       case 'share': {
-        trackEvent(
-          'Share visualisation',
-          `${window.location.origin}/visualisation/${this.state.visualisation.id}`
-        );
+        trackEvent('Share visualisation', url);
         this.toggleShareVisualisation();
+        break;
+      }
+      case 'export_png': {
+        trackEvent('Export visualisation (png)', url);
+        this.props.dispatch(actions.exportVisualisation(this.state.visualisation.id));
+        break;
+      }
+      case 'export_pdf': {
+        trackEvent('Export visualisation (pdf)', url);
+        this.props.dispatch(actions.exportVisualisation(this.state.visualisation.id, 'pdf'));
         break;
       }
       default:

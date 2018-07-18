@@ -41,6 +41,22 @@ class DashboardHeader extends Component {
       disabled: disableShare,
       tooltipId: disableShare ? 'save_your_dashboard_before_sharing' : null,
     };
+    const exportButton = {
+      buttonText: <FormattedMessage id="export" />,
+      disabled: disableShare,
+      tooltipId: disableShare ? 'save_your_dashboard_before_exporting' : null,
+      onOptionSelected: format => onDashboardAction(`export_${format}`),
+      subActions: [
+        {
+          label: <FormattedMessage id="png" />,
+          value: 'png',
+        },
+        {
+          label: <FormattedMessage id="pdf" />,
+          value: 'pdf',
+        },
+      ],
+    };
     const overflow = {
       buttonText: <FormattedMessage id="overflow" />,
       customClass: 'notImplemented',
@@ -50,6 +66,7 @@ class DashboardHeader extends Component {
       user,
       download,
       share,
+      exportButton,
       overflow,
     ];
 

@@ -141,3 +141,16 @@ export function setShareProtection(shareId, payload, callback = () => {}) {
     }
   };
 }
+
+/* Export dashboard */
+export const exportDashboardRequest = createAction('EXPORT_DASHBOARD_REQUEST');
+
+export function exportDashboard(dashboardId, format = 'png') {
+  if (dashboardId === null) throw new Error('dashboardUrl not set');
+  const target = encodeURIComponent(`${window.location.origin}/dashboard/${dashboardId}`);
+  api.get(`/api/export?${format}=png&target=${target}`)
+    .then(response => response.json())
+    .then((response) => {
+      window.open(response.file);
+    });
+}
