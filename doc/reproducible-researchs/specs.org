@@ -9,13 +9,8 @@
 #+PROPERTY: header-args:clojure+ :mkdirp yes
 #+PROPERTY: header-args:clojure+ :tangle no
 #+FILETAGS: :FAQ:
-* WIP
-** TODO improve time related specs: updated, created, modified should be improved
-now we are using int?
-take care of int vs pos-int
-in lumen they map to ints [[/Users/tangrammer/git/akvo/akvo-lumen/backend/src/akvo/lumen/specs/core.clj::39][(WIP current spec]])
 
-* aggregation tests                                             :aggregation:
+* aggregation                                                   :aggregation:
 ** pivot 
    https://github.com/akvo/akvo-lumen/blob/specs-lp-bis/backend/test/resources/pivot.csv#L1
    #+BEGIN_SRC clojure :exports both :results value replace pp
@@ -65,7 +60,6 @@ in lumen they map to ints [[/Users/tangrammer/git/akvo/akvo-lumen/backend/src/ak
 
  #+RESULTS:
  : {:query? true, :dataset? true}
-
  
 ** bar
 #+BEGIN_SRC clojure :exports both :results value replace pp
@@ -120,10 +114,46 @@ in lumen they map to ints [[/Users/tangrammer/git/akvo/akvo-lumen/backend/src/ak
 
 #+RESULTS:
 : {:dataset? true, :query? true}
- 
-** TODO complete all types and ways to test them
-* features
+
+
+* interesting ideas
 ** how find the function you need?                                :wip:ideas:
-browse-specs and search for args types specs???
+browse-specs and search for args types you'll need in your logic
 
+* testing using UI
 
+In all cases we'll need to import dataset from ~akvo-lumen/backend/test/resources/~ folder
+*** data transformations
+**** combine: 
+any dataset will work, just define 2 columns and separator to combine with
+**** derive:
+javascript derivation, define expected result type and js formula, example ~row.prop.length~ or ~row['prop'].length~
+**** merge datasets:
+**** generate geopoints:
+     you need a dataset with latitude and longitude data, ~akvo-lumen/backend/test/resources/geopoints.csv~
+**** reverse geocode:
+Use ~akvo-lumen/backend/test/resources/liberia_adm2.csv~
+---- copied Gabe explanation ---
+First, you need a dataset with a geopoint column
+then, you need another dataset with a geoshape column
+and in that second dataset, there should also be a column that has some text values you're interested in - usually this will be the name of each geoshape (e.g. "USA" or "New York State" or "New York City" etc)
+then you open the first dataset with geopoint column, click "+Transform", then "Reverse geocode"
+on the left select your first dataset and the geopoint column, and then on the right select your second dataset and its shape column and text column
+the output of the transformation should be a text column which has the value from the text column of the second dataset based on the geo _shape_ from the second dataset that _contains_ the geo _point_ from the first dataset
+it's not the easiest thing to explain so let me know if that doesn't make sense
+---- end Gabe explanation ---
+*** vizs
+**** bar
+just any dataset that has a number type column
+**** line
+more or less the same as ~bar~
+**** area
+same as ~line~
+**** pie
+just try to :)
+**** donut
+same as ~pie~
+**** scatter
+     just try it
+**** pivot
+     import data file > choose test/resources/pivot.css .... make viz pivot table

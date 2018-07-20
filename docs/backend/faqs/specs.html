@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2018-07-18 Wed 09:20 -->
+<!-- 2018-07-20 Fri 09:49 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>SPECs</title>
@@ -240,190 +240,260 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgfd589e0">1. WIP</a>
+<li><a href="#org05ee1dd">1. SPECs</a>
 <ul>
-<li><a href="#orgb87b2ce">1.1. <span class="todo TODO">TODO</span> improve time related specs: updated, created, modified should be improved</a></li>
+<li><a href="#org09e27ef">1.1. where to put this stuff :) ?</a></li>
+<li><a href="#org5572c03">1.2. Why is <code>[org.clojure/test.check "0.9.0" :scope "test"]</code> in <code>prod</code> dependencies?</a></li>
+<li><a href="#org996ed49">1.3. can <code>clojure.spec</code> check value returned by function spec(ed)?</a></li>
+<li><a href="#orga173053">1.4. how to spec a piece of data?</a></li>
+<li><a href="#org07e1897">1.5. how to solve qualified keywords spec ids?</a></li>
+<li><a href="#org5d2cf65">1.6. how namespaces should be aliased?</a></li>
+<li><a href="#orgd3a99de">1.7. how generate sample data having specs?</a>
+<ul>
+<li><a href="#orge8c9e9b">1.7.1. CIDER can generate sample data from spec too</a></li>
 </ul>
 </li>
-<li><a href="#org5909f28">2. aggregation tests&#xa0;&#xa0;&#xa0;<span class="tag"><span class="aggregation">aggregation</span></span></a>
-<ul>
-<li><a href="#org4ee5382">2.1. pivot</a></li>
-<li><a href="#orge2d15ac">2.2. bar</a></li>
-<li><a href="#org864a9d1">2.3. <span class="todo TODO">TODO</span> complete all types and ways to test them</a></li>
-</ul>
-</li>
-<li><a href="#orgc9755b4">3. features</a>
-<ul>
-<li><a href="#orgf7b3ac9">3.1. how find the function you need?&#xa0;&#xa0;&#xa0;<span class="tag"><span class="wip">wip</span>&#xa0;<span class="ideas">ideas</span></span></a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orgfd589e0" class="outline-2">
-<h2 id="orgfd589e0"><span class="section-number-2">1</span> WIP</h2>
+<div id="outline-container-org05ee1dd" class="outline-2">
+<h2 id="org05ee1dd"><span class="section-number-2">1</span> SPECs</h2>
 <div class="outline-text-2" id="text-1">
 </div>
-<div id="outline-container-orgb87b2ce" class="outline-3">
-<h3 id="orgb87b2ce"><span class="section-number-3">1.1</span> <span class="todo TODO">TODO</span> improve time related specs: updated, created, modified should be improved</h3>
+<div id="outline-container-org09e27ef" class="outline-3">
+<h3 id="org09e27ef"><span class="section-number-3">1.1</span> where to put this stuff :) ?</h3>
 <div class="outline-text-3" id="text-1-1">
 <p>
-now we are using int?
-take care of int vs pos-int
-in lumen they map to ints <a href="file:///Users/tangrammer/git/akvo/akvo-lumen/backend/src/akvo/lumen/specs/core.clj#MissingReference">(WIP current spec</a>)
+Normally clojure.specs aren't intended to be used in <code>production</code> environment, but in <code>dev</code> or <code>test</code> environment. 
+So, depending of the project we could place the specs in <code>dev</code> or <code>test</code> class path folder
 </p>
-</div>
-</div>
-</div>
 
-<div id="outline-container-org5909f28" class="outline-2">
-<h2 id="org5909f28"><span class="section-number-2">2</span> aggregation tests&#xa0;&#xa0;&#xa0;<span class="tag"><span class="aggregation">aggregation</span></span></h2>
-<div class="outline-text-2" id="text-2">
-</div>
-<div id="outline-container-org4ee5382" class="outline-3">
-<h3 id="org4ee5382"><span class="section-number-3">2.1</span> pivot</h3>
-<div class="outline-text-3" id="text-2-1">
 <p>
-<a href="https://github.com/akvo/akvo-lumen/blob/specs-lp-bis/backend/test/resources/pivot.csv#L1">https://github.com/akvo/akvo-lumen/blob/specs-lp-bis/backend/test/resources/pivot.csv#L1</a>
+Sometimes we don't have the namespace that we need to internalise/identify our specs, in these cases we need the spec namespace in our src data to identify the keys as qualified keywords. Example <a href="https://github.com/akvo/akvo-lumen/blob/specs-lp-bis/backend/src/akvo/lumen/lib/aggregation.clj#L9">requiring a spec namespace in prod code</a> and <a href="https://github.com/akvo/akvo-lumen/blob/specs-lp-bis/backend/src/akvo/lumen/lib/aggregation.clj#L17">using this ns spec to identify the prod data</a>
 </p>
+</div>
+</div>
+
+<div id="outline-container-org5572c03" class="outline-3">
+<h3 id="org5572c03"><span class="section-number-3">1.2</span> Why is <code>[org.clojure/test.check "0.9.0" :scope "test"]</code> in <code>prod</code> dependencies?</h3>
+<div class="outline-text-3" id="text-1-2">
+<p>
+the only reason to have this <code>test</code> dependency in <code>prod</code> side is to be able to <a href="https://clojure.org/guides/spec#_sampling_generators">generate samples</a> inside custom generator. <a href="https://github.com/akvo/akvo-lumen/blob/specs-lp-bis/backend/src/akvo/lumen/specs/core.clj#L22">in lumen</a>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org996ed49" class="outline-3">
+<h3 id="org996ed49"><span class="section-number-3">1.3</span> can <code>clojure.spec</code> check value returned by function spec(ed)?</h3>
+<div class="outline-text-3" id="text-1-3">
+<p>
+clojure.spec only can check/instrument args in function call but <b>no</b> the value returned by the function. 
+</p>
+
+<p>
+Following this <a href="https://groups.google.com/forum/#!topic/clojure/JU6EmjtbRiQ">thread</a> is not possible (using plain clojure.spec lib) but there is other option to test it <a href="https://github.com/jeaye/orchestra">https://github.com/jeaye/orchestra</a> 
+</p>
+</div>
+</div>
+
+<div id="outline-container-orga173053" class="outline-3">
+<h3 id="orga173053"><span class="section-number-3">1.4</span> how to spec a piece of data?</h3>
+<div class="outline-text-3" id="text-1-4">
+<p>
+Specs usually live in same namespace as the data they are referring
+</p>
+
+<p>
+Below a sample data inside a sample namespace
+</p>
+
 <div class="org-src-container">
-<pre class="src src-clojure"><span style="color: #707183;">(</span>remove-ns 'test-pivot<span style="color: #707183;">)</span>
-<span style="color: #707183;">(</span><span style="color: #0000FF;">ns</span> <span style="color: #6434A3;">test-pivot</span>
-  <span style="color: #7388D6;">(</span><span style="color: #D0372D;">:require</span> <span style="color: #909183;">[</span>clojure.spec.alpha <span style="color: #D0372D;">:as</span> s<span style="color: #909183;">]</span>
+<pre class="src src-clojure"><span style="color: #707183;">(</span><span style="color: #0000FF;">ns</span> <span style="color: #6434A3;">example.one</span><span style="color: #707183;">)</span>
+
+<span style="color: #707183;">(</span><span style="color: #0000FF;">def</span> <span style="color: #BA36A5;">d</span> <span style="color: #7388D6;">{</span><span style="color: #D0372D;">:id</span> <span style="color: #008000;">"12345abcde"</span><span style="color: #7388D6;">}</span><span style="color: #707183;">)</span>
+
+</pre>
+</div>
+
+<p>
+And a sample spec namespace that defines specs for previous namespace
+</p>
+
+<div class="org-src-container">
+<pre class="src src-clojure"><span style="color: #707183;">(</span><span style="color: #0000FF;">ns</span> <span style="color: #6434A3;">example.specs</span>
+  <span style="color: #7388D6;">(</span><span style="color: #D0372D;">:require</span> <span style="color: #909183;">[</span>example.one <span style="color: #D0372D;">:as</span> one<span style="color: #909183;">]</span>
+            <span style="color: #909183;">[</span>clojure.spec.alpha <span style="color: #D0372D;">:as</span> s<span style="color: #909183;">]</span><span style="color: #7388D6;">)</span><span style="color: #707183;">)</span>
+
+<span style="color: #707183;">(</span><span style="color: #6434A3;">s</span>/<span style="color: #0000FF;">def</span> <span style="color: #006699;">::one/id</span> string?<span style="color: #707183;">)</span>
+<span style="color: #707183;">(</span><span style="color: #6434A3;">s</span>/<span style="color: #0000FF;">def</span> <span style="color: #006699;">::one/d</span> <span style="color: #7388D6;">(</span><span style="color: #6434A3;">s</span>/keys <span style="color: #D0372D;">:req-un</span> <span style="color: #909183;">[</span><span style="color: #D0372D;">::</span><span style="color: #6434A3;">one</span><span style="color: #333333; background-color: #FFFFFF;">/</span><span style="color: #D0372D;">id</span><span style="color: #909183;">]</span><span style="color: #7388D6;">)</span><span style="color: #707183;">)</span>
+
+</pre>
+</div>
+
+<p>
+As you can see, specs live in its own namespace (<code>example.specs</code> in the example provided) and they refers to the data to specify using the alias namespace (<code>::one/....</code> again in the example provided)
+</p>
+</div>
+</div>
+
+<div id="outline-container-org07e1897" class="outline-3">
+<h3 id="org07e1897"><span class="section-number-3">1.5</span> how to solve qualified keywords spec ids?</h3>
+<div class="outline-text-3" id="text-1-5">
+<p>
+spec ids need to be <a href="https://clojuredocs.org/clojure.core/qualified-keyword_q">qualified keywords</a> , sometimes this requirement we'll force us to create new namespaces to allocate the specs. 
+this is an <a href="https://github.com/akvo/akvo-lumen/blob/org-specs/backend/src/akvo/lumen/specs/aggregation/query.clj#L1">example of creating a ns to allocate spec</a>: in this case <a href="https://github.com/akvo/akvo-lumen/blob/6567c0a907807d586d6744a855d0b26aa1638c84/backend/src/akvo/lumen/lib/aggregation.clj#L14">query</a> as data doesn't have its own namespace but it is used from other nss as aggregation.clj 
+</p>
+</div>
+</div>
+
+<div id="outline-container-org5d2cf65" class="outline-3">
+<h3 id="org5d2cf65"><span class="section-number-3">1.6</span> how namespaces should be aliased?</h3>
+<div class="outline-text-3" id="text-1-6">
+<p>
+as you surely have realised, soon we could need a lot of typing to refere specs using qualified keywords &#x2026;
+</p>
+
+<div class="org-src-container">
+<pre class="src src-clojure">
+<span style="color: #707183;">(</span><span style="color: #6434A3;">s</span>/<span style="color: #0000FF;">def</span> <span style="color: #006699;">::akvo.lumen.library.example.one/d</span> <span style="color: #7388D6;">(</span><span style="color: #6434A3;">s</span>/keys <span style="color: #D0372D;">:req-un</span> <span style="color: #909183;">[</span><span style="color: #D0372D;">::</span><span style="color: #6434A3;">akvo.lumnen.library.one</span><span style="color: #333333; background-color: #FFFFFF;">/</span><span style="color: #D0372D;">id</span><span style="color: #909183;">]</span><span style="color: #7388D6;">)</span><span style="color: #707183;">)</span>
+
+</pre>
+</div>
+
+<p>
+so aliasing seems to be pretty important here
+</p>
+
+<div class="org-src-container">
+<pre class="src src-clojure"><span style="color: #707183;">(</span>require '<span style="color: #7388D6;">[</span>akvo.lumen.library.example.one <span style="color: #D0372D;">:as</span> one<span style="color: #7388D6;">]</span><span style="color: #707183;">)</span>
+
+<span style="color: #707183;">(</span><span style="color: #6434A3;">s</span>/<span style="color: #0000FF;">def</span> <span style="color: #006699;">::one/d</span> <span style="color: #7388D6;">(</span><span style="color: #6434A3;">s</span>/keys <span style="color: #D0372D;">:req-un</span> <span style="color: #909183;">[</span><span style="color: #D0372D;">::</span><span style="color: #6434A3;">one</span><span style="color: #333333; background-color: #FFFFFF;">/</span><span style="color: #D0372D;">id</span><span style="color: #909183;">]</span><span style="color: #7388D6;">)</span><span style="color: #707183;">)</span>
+
+</pre>
+</div>
+
+<p>
+But, a new problem appears thus if we have a medium size file, we'll soon loose the meaning of aliasing 
+</p>
+
+
+<div class="org-src-container">
+<pre class="src src-clojure"><span style="color: #707183;">(</span>require '<span style="color: #7388D6;">[</span>akvo.lumen.library.js.engine <span style="color: #D0372D;">:as</span> engine<span style="color: #7388D6;">]</span><span style="color: #707183;">)</span>
+<span style="color: #707183;">(</span>require '<span style="color: #7388D6;">[</span>akvo.lumen.library.example.one <span style="color: #D0372D;">:as</span> one<span style="color: #7388D6;">]</span><span style="color: #707183;">)</span>
+<span style="color: #8D8D84;">;; </span><span style="color: #8D8D84; font-style: italic;">... 100 LOC after</span>
+<span style="color: #8D8D84;">;; </span><span style="color: #8D8D84; font-style: italic;">.....</span>
+
+<span style="color: #707183;">(</span><span style="color: #6434A3;">s</span>/<span style="color: #0000FF;">def</span> <span style="color: #006699;">::one/d</span> <span style="color: #7388D6;">(</span><span style="color: #6434A3;">s</span>/keys <span style="color: #D0372D;">:req-un</span> <span style="color: #909183;">[</span><span style="color: #D0372D;">::</span><span style="color: #6434A3;">one</span><span style="color: #333333; background-color: #FFFFFF;">/</span><span style="color: #D0372D;">id</span> <span style="color: #D0372D;">::</span><span style="color: #6434A3;">engine</span><span style="color: #333333; background-color: #FFFFFF;">/</span><span style="color: #D0372D;">type</span><span style="color: #909183;">]</span><span style="color: #7388D6;">)</span><span style="color: #707183;">)</span>
+<span style="color: #8D8D84;">;; </span><span style="color: #8D8D84; font-style: italic;">ups, I totally forgot the origin of ::engine at this point :(</span>
+
+</pre>
+</div>
+
+
+<p>
+and/or we could face conflict naming problems
+</p>
+
+<div class="org-src-container">
+<pre class="src src-clojure"><span style="color: #707183;">(</span>require '<span style="color: #7388D6;">[</span>akvo.lumen.library.js.one <span style="color: #D0372D;">:as</span> one<span style="color: #7388D6;">]</span><span style="color: #707183;">)</span>
+<span style="color: #707183;">(</span>require '<span style="color: #7388D6;">[</span>akvo.lumen.library.example.one <span style="color: #D0372D;">:as</span> one<span style="color: #7388D6;">]</span><span style="color: #707183;">)</span>
+
+<span style="color: #8D8D84;">;; </span><span style="color: #8D8D84; font-style: italic;">ups two clj files in differents folders with same aliasing pattern</span>
+
+</pre>
+</div>
+
+
+<p>
+so &#x2026; following  the first approach/patter to aliasing specs 
+</p>
+
+<div class="org-src-container">
+<pre class="src src-clojure"><span style="color: #707183;">(</span><span style="color: #0000FF;">ns</span> <span style="color: #6434A3;">akvo.lumen.specs.aggregation</span>
+  <span style="color: #7388D6;">(</span><span style="color: #D0372D;">:require</span> <span style="color: #909183;">[</span>akvo.lumen.component.tenant-manager <span style="color: #D0372D;">:as</span> tenant-manager<span style="color: #909183;">]</span>
+            <span style="color: #909183;">[</span>akvo.lumen.lib <span style="color: #D0372D;">:as</span> lib<span style="color: #909183;">]</span>
+            <span style="color: #909183;">[</span>akvo.lumen.lib.aggregation <span style="color: #D0372D;">:as</span> lib.aggregation<span style="color: #909183;">]</span>
+            <span style="color: #909183;">[</span>akvo.lumen.lib.aggregation.filter <span style="color: #D0372D;">:as</span> l.aggregation.filter<span style="color: #909183;">]</span>
+            <span style="color: #909183;">[</span>akvo.lumen.lib.aggregation.pie <span style="color: #D0372D;">:as</span> l.aggregation.pie<span style="color: #909183;">]</span>
+            <span style="color: #909183;">[</span>akvo.lumen.lib.aggregation.pivot <span style="color: #D0372D;">:as</span> l.aggregation.pivot<span style="color: #909183;">]</span>
+            <span style="color: #909183;">[</span>akvo.lumen.lib.aggregation.utils <span style="color: #D0372D;">:as</span> l.aggregation.utils<span style="color: #909183;">]</span>
+            <span style="color: #909183;">[</span>akvo.lumen.specs.aggregation.pivot.row <span style="color: #D0372D;">:as</span> a.pivot.row.s<span style="color: #909183;">]</span>
+            <span style="color: #909183;">[</span>akvo.lumen.specs.aggregation.query <span style="color: #D0372D;">:as</span> aggregation.query.s<span style="color: #909183;">]</span>
+            <span style="color: #909183;">[</span>akvo.lumen.specs.core <span style="color: #D0372D;">:as</span> lumen.s<span style="color: #909183;">]</span>
             <span style="color: #909183;">[</span>akvo.lumen.specs.dataset <span style="color: #D0372D;">:as</span> dataset.s<span style="color: #909183;">]</span>
-            <span style="color: #909183;">[</span>akvo.lumen.dataset <span style="color: #D0372D;">:as</span> dataset<span style="color: #909183;">]</span>
-            <span style="color: #909183;">[</span>akvo.lumen.specs.aggregation <span style="color: #D0372D;">:as</span> aggregation.s<span style="color: #909183;">]</span>
-            <span style="color: #909183;">[</span>akvo.lumen.lib.aggregation.pivot <span style="color: #D0372D;">:as</span> l.aggregation.pivot<span style="color: #909183;">]</span><span style="color: #7388D6;">)</span><span style="color: #707183;">)</span>
+            <span style="color: #909183;">[</span>akvo.lumen.specs.dataset.column <span style="color: #D0372D;">:as</span> dataset.column.s<span style="color: #909183;">]</span>
+            <span style="color: #909183;">[</span>akvo.lumen.specs.db <span style="color: #D0372D;">:as</span> db.s<span style="color: #909183;">]</span>
+            <span style="color: #909183;">[</span>akvo.lumen.specs.libs<span style="color: #909183;">]</span>
+            <span style="color: #909183;">[</span>clojure.spec.alpha <span style="color: #D0372D;">:as</span> s<span style="color: #909183;">]</span><span style="color: #7388D6;">)</span><span style="color: #707183;">)</span>
 
-<span style="color: #707183;">(</span><span style="color: #0000FF;">def</span> <span style="color: #BA36A5;">query</span> <span style="color: #7388D6;">{</span><span style="color: #D0372D;">:decimalPlaces</span> 3,
-            <span style="color: #D0372D;">:hideColumnTotals</span> <span style="color: #D0372D;">false</span>,
-            <span style="color: #D0372D;">:filters</span> <span style="color: #909183;">[]</span>,
-            <span style="color: #D0372D;">:rowTitle</span> <span style="color: #D0372D;">nil</span>,
-            <span style="color: #D0372D;">:hideRowTotals</span> <span style="color: #D0372D;">false</span>,
-            <span style="color: #D0372D;">:rowColumn</span> <span style="color: #008000;">"c1"</span>,
-            <span style="color: #D0372D;">:valueColumn</span> <span style="color: #D0372D;">nil</span>,
-            <span style="color: #D0372D;">:categoryColumn</span> <span style="color: #008000;">"c2"</span>,
-            <span style="color: #D0372D;">:aggregation</span> <span style="color: #008000;">"count"</span>,
-            <span style="color: #D0372D;">:version</span> 1,
-            <span style="color: #D0372D;">:valueDisplay</span> <span style="color: #008000;">"default"</span>,
-            <span style="color: #D0372D;">:categoryTitle</span> <span style="color: #D0372D;">nil</span><span style="color: #7388D6;">}</span><span style="color: #707183;">)</span>
-<span style="color: #707183;">(</span><span style="color: #0000FF;">def</span> <span style="color: #BA36A5;">dataset</span> <span style="color: #7388D6;">{</span><span style="color: #D0372D;">:table-name</span> <span style="color: #008000;">"ds_25b10446_25b7_4074_bc45_c80b0d129ece"</span>,
-              <span style="color: #D0372D;">:title</span> <span style="color: #008000;">"popo"</span>,
-              <span style="color: #D0372D;">:created</span> 1530180194838,
-              <span style="color: #D0372D;">:modified</span> 1530180194838,
-              <span style="color: #D0372D;">:id</span> <span style="color: #008000;">"5b34b262-277d-4f4b-960a-9ee01f18356b"</span>,
-              <span style="color: #D0372D;">:updated</span> 1530180194856,
-              <span style="color: #D0372D;">:columns</span>
-              <span style="color: #909183;">{</span><span style="color: #D0372D;">:sort</span> <span style="color: #D0372D;">nil</span>,
-               <span style="color: #D0372D;">:type</span> <span style="color: #008000;">"number"</span>,
-               <span style="color: #D0372D;">:title</span> <span style="color: #008000;">"C"</span>,
-               <span style="color: #D0372D;">:hidden</span> <span style="color: #D0372D;">false</span>,
-               <span style="color: #D0372D;">:direction</span> <span style="color: #D0372D;">nil</span>,
-               <span style="color: #D0372D;">:columnName</span> <span style="color: #008000;">"c3"</span><span style="color: #909183;">}</span>,
-              <span style="color: #D0372D;">:transformations</span> <span style="color: #909183;">()</span><span style="color: #7388D6;">}</span><span style="color: #707183;">)</span>
-<span style="color: #707183;">{</span><span style="color: #D0372D;">:</span><span style="color: #6434A3;">akvo.lumen.specs.db</span><span style="color: #333333; background-color: #FFFFFF;">/</span><span style="color: #D0372D;">tenant-connection</span> <span style="color: #7388D6;">{}</span>
- <span style="color: #D0372D;">:</span><span style="color: #6434A3;">akvo.lumen.dataset</span><span style="color: #333333; background-color: #FFFFFF;">/</span><span style="color: #D0372D;">dataset</span> dataset
- <span style="color: #D0372D;">:</span><span style="color: #6434A3;">akvo.lumen.lib.aggregation</span><span style="color: #333333; background-color: #FFFFFF;">/</span><span style="color: #D0372D;">visualisation-type</span> <span style="color: #008000;">"pivot"</span>
- <span style="color: #D0372D;">:query</span> query<span style="color: #707183;">}</span>
+</pre>
+</div>
 
-<span style="color: #707183;">{</span><span style="color: #D0372D;">:query?</span> <span style="color: #7388D6;">(</span><span style="color: #6434A3;">s</span>/valid? <span style="color: #D0372D;">:</span><span style="color: #6434A3;">akvo.lumen.lib.aggregation.pivot</span><span style="color: #333333; background-color: #FFFFFF;">/</span><span style="color: #D0372D;">query</span> query<span style="color: #7388D6;">)</span>
- <span style="color: #D0372D;">:dataset?</span> <span style="color: #7388D6;">(</span><span style="color: #6434A3;">s</span>/valid? <span style="color: #D0372D;">::</span><span style="color: #6434A3;">dataset</span><span style="color: #333333; background-color: #FFFFFF;">/</span><span style="color: #D0372D;">dataset</span> dataset<span style="color: #7388D6;">)</span><span style="color: #707183;">}</span>
+<ul class="org-ul">
+<li>all aliases ignore common project domain =&gt; <code>akvo.lumen</code></li>
+</ul>
+<p>
+is also ignored
+<code>[akvo.lumen.lib :as lib]</code>
+</p>
 
+
+<ul class="org-ul">
+<li>if namespace contains only one or two nss then we use full nss</li>
+</ul>
+<p>
+<code>[akvo.lumen.lib :as lib]</code>
+<code>[akvo.lumen.lib.aggregation :as lib.aggregation]</code>
+</p>
+
+<ul class="org-ul">
+<li>if namespace contains more than two nss then we contract parent ones</li>
+
+<li>if namespace is a <code>spec</code> namespace, we ignored  <code>akvo.lumen.specs</code> and aliasing ends in <code>.s</code></li>
+</ul>
+<p>
+=&gt; <code>[akvo.lumen.specs.aggregation.query :as aggregation.query.s]</code>
+=&gt; <code>[akvo.lumen.specs.aggregation.pivot.row :as a.pivot.row.s]</code>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgd3a99de" class="outline-3">
+<h3 id="orgd3a99de"><span class="section-number-3">1.7</span> how generate sample data having specs?</h3>
+<div class="outline-text-3" id="text-1-7">
+<p>
+a.l.specs.core defined a <code>sample</code> function for sampling data based in spec
+</p>
+
+<div class="org-src-container">
+<pre class="src src-clojure"><span style="color: #707183;">(</span>require '<span style="color: #7388D6;">[</span>akvo.lumen.specs.core <span style="color: #D0372D;">:as</span> lumen.s<span style="color: #7388D6;">]</span><span style="color: #707183;">)</span>
+
+<span style="color: #707183;">[</span><span style="color: #D0372D;">::int-nullable</span> <span style="color: #7388D6;">(</span><span style="color: #6434A3;">lumen.s</span>/sample <span style="color: #D0372D;">::int-nullable</span><span style="color: #7388D6;">)</span><span style="color: #707183;">]</span>
 </pre>
 </div>
 
 <pre class="example">
-{:query? true, :dataset? true}
-
-</pre>
-</div>
-</div>
-
-
-<div id="outline-container-orge2d15ac" class="outline-3">
-<h3 id="orge2d15ac"><span class="section-number-3">2.2</span> bar</h3>
-<div class="outline-text-3" id="text-2-2">
-<div class="org-src-container">
-<pre class="src src-clojure"><span style="color: #707183;">(</span>remove-ns 'test-bar<span style="color: #707183;">)</span>
-<span style="color: #707183;">(</span><span style="color: #0000FF;">ns</span> <span style="color: #6434A3;">test-bar</span>
-  <span style="color: #7388D6;">(</span><span style="color: #D0372D;">:require</span> <span style="color: #909183;">[</span>clojure.spec.alpha <span style="color: #D0372D;">:as</span> s<span style="color: #909183;">]</span>
-
-            <span style="color: #909183;">[</span>akvo.lumen.specs.dataset <span style="color: #D0372D;">:as</span> dataset.s<span style="color: #909183;">]</span>
-            <span style="color: #909183;">[</span>akvo.lumen.dataset <span style="color: #D0372D;">:as</span> dataset<span style="color: #909183;">]</span>
-            <span style="color: #909183;">[</span>akvo.lumen.lib.aggregation.bar <span style="color: #D0372D;">:as</span> l.aggregation.bar<span style="color: #909183;">]</span><span style="color: #7388D6;">)</span><span style="color: #707183;">)</span>
-<span style="color: #707183;">(</span><span style="color: #0000FF;">def</span> <span style="color: #BA36A5;">dataset</span> <span style="color: #7388D6;">{</span><span style="color: #D0372D;">:columns</span>
-              <span style="color: #909183;">{</span><span style="color: #D0372D;">:columnName</span> <span style="color: #008000;">"c3"</span>,
-               <span style="color: #D0372D;">:direction</span> <span style="color: #D0372D;">nil</span>,
-               <span style="color: #D0372D;">:hidden</span> <span style="color: #D0372D;">false</span>,
-               <span style="color: #D0372D;">:sort</span> <span style="color: #D0372D;">nil</span>,
-               <span style="color: #D0372D;">:title</span> <span style="color: #008000;">"longitude"</span>,
-               <span style="color: #D0372D;">:type</span> <span style="color: #008000;">"number"</span><span style="color: #909183;">}</span>,
-              <span style="color: #D0372D;">:created</span> 1530185178537,
-              <span style="color: #D0372D;">:id</span> <span style="color: #008000;">"5b34c5da-561e-4d01-814d-9988d5ac5f49"</span>,
-              <span style="color: #D0372D;">:modified</span> 1530185178537,
-              <span style="color: #D0372D;">:table-name</span> <span style="color: #008000;">"ds_58343aa1_1136_4c49_94c7_188541721253"</span>,
-              <span style="color: #D0372D;">:title</span> <span style="color: #008000;">"ooo"</span>,
-              <span style="color: #D0372D;">:transformations</span> <span style="color: #909183;">[]</span>,
-              <span style="color: #D0372D;">:updated</span> 1530185178550<span style="color: #7388D6;">}</span><span style="color: #707183;">)</span>
-<span style="color: #707183;">(</span><span style="color: #0000FF;">def</span> <span style="color: #BA36A5;">query</span>   <span style="color: #7388D6;">{</span><span style="color: #D0372D;">:axisLabelX</span> <span style="color: #008000;">"city"</span>,
-              <span style="color: #D0372D;">:axisLabelXFromUser</span> <span style="color: #D0372D;">false</span>,
-              <span style="color: #D0372D;">:axisLabelY</span> <span style="color: #008000;">"latitude - mean"</span>,
-              <span style="color: #D0372D;">:axisLabelYFromUser</span> <span style="color: #D0372D;">false</span>,
-              <span style="color: #D0372D;">:bucketColumn</span> <span style="color: #008000;">"c1"</span>,
-              <span style="color: #D0372D;">:filters</span> <span style="color: #909183;">[]</span>,
-              <span style="color: #D0372D;">:legendTitle</span> <span style="color: #D0372D;">nil</span>,
-              <span style="color: #D0372D;">:metricAggregation</span> <span style="color: #008000;">"mean"</span>,
-              <span style="color: #D0372D;">:metricColumnX</span> <span style="color: #D0372D;">nil</span>,
-              <span style="color: #D0372D;">:metricColumnY</span> <span style="color: #008000;">"c2"</span>,
-              <span style="color: #D0372D;">:sort</span> <span style="color: #D0372D;">nil</span>,
-              <span style="color: #D0372D;">:subBucketColumn</span> <span style="color: #D0372D;">nil</span>,
-              <span style="color: #D0372D;">:subBucketMethod</span> <span style="color: #008000;">"split"</span>,
-              <span style="color: #D0372D;">:truncateSize</span> <span style="color: #D0372D;">nil</span>,
-              <span style="color: #D0372D;">:version</span> 1<span style="color: #7388D6;">}</span><span style="color: #707183;">)</span>
-<span style="color: #707183;">(</span><span style="color: #0000FF;">def</span> <span style="color: #BA36A5;">data</span> 
- <span style="color: #7388D6;">{</span><span style="color: #D0372D;">:</span><span style="color: #6434A3;">akvo.lumen.specs.db</span><span style="color: #333333; background-color: #FFFFFF;">/</span><span style="color: #D0372D;">tenant-connection</span> <span style="color: #909183;">{}</span>,
-  <span style="color: #D0372D;">:</span><span style="color: #6434A3;">akvo.lumen.specs.dataset</span><span style="color: #333333; background-color: #FFFFFF;">/</span><span style="color: #D0372D;">dataset</span> dataset
-  <span style="color: #D0372D;">:</span><span style="color: #6434A3;">akvo.lumen.lib.aggregation</span><span style="color: #333333; background-color: #FFFFFF;">/</span><span style="color: #D0372D;">visualisation-type</span> <span style="color: #008000;">"bar"</span>
-  <span style="color: #D0372D;">:query</span> query<span style="color: #7388D6;">}</span><span style="color: #707183;">)</span>
-
-<span style="color: #707183;">{</span><span style="color: #D0372D;">:dataset?</span> <span style="color: #7388D6;">(</span><span style="color: #6434A3;">s</span>/valid? <span style="color: #D0372D;">::</span><span style="color: #6434A3;">dataset</span><span style="color: #333333; background-color: #FFFFFF;">/</span><span style="color: #D0372D;">dataset</span> dataset<span style="color: #7388D6;">)</span>
- <span style="color: #D0372D;">:query?</span> <span style="color: #7388D6;">(</span><span style="color: #6434A3;">s</span>/valid? <span style="color: #D0372D;">::</span><span style="color: #6434A3;">l.aggregation.bar</span><span style="color: #333333; background-color: #FFFFFF;">/</span><span style="color: #D0372D;">query</span> query<span style="color: #7388D6;">)</span><span style="color: #707183;">}</span>
-
-
-
+[:akvo.lumen.specs.core/int-nullable -129802810]
 
 </pre>
 </div>
 
-<pre class="example">
-{:dataset? true, :query? true}
-
-</pre>
-</div>
-</div>
-
-
-<div id="outline-container-org864a9d1" class="outline-3">
-<h3 id="org864a9d1"><span class="section-number-3">2.3</span> <span class="todo TODO">TODO</span> complete all types and ways to test them</h3>
-</div>
-</div>
-<div id="outline-container-orgc9755b4" class="outline-2">
-<h2 id="orgc9755b4"><span class="section-number-2">3</span> features</h2>
-<div class="outline-text-2" id="text-3">
-</div>
-<div id="outline-container-orgf7b3ac9" class="outline-3">
-<h3 id="orgf7b3ac9"><span class="section-number-3">3.1</span> how find the function you need?&#xa0;&#xa0;&#xa0;<span class="tag"><span class="wip">wip</span>&#xa0;<span class="ideas">ideas</span></span></h3>
-<div class="outline-text-3" id="text-3-1">
+<div id="outline-container-orge8c9e9b" class="outline-4">
+<h4 id="orge8c9e9b"><span class="section-number-4">1.7.1</span> <a href="http://docs.cider.mx/en/latest/">CIDER</a> can generate sample data from spec too</h4>
+<div class="outline-text-4" id="text-1-7-1">
 <p>
-browse-specs and search for args types specs???
+<a href="http://docs.cider.mx/en/latest/miscellaneous_features/#spec-browser">http://docs.cider.mx/en/latest/miscellaneous_features/#spec-browser</a>
 </p>
+</div>
 </div>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: tangrammer</p>
-<p class="date">Created: 2018-07-18 Wed 09:20</p>
+<p class="date">Created: 2018-07-20 Fri 09:49</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

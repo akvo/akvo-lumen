@@ -151,12 +151,5 @@ is also ignored
    : [:akvo.lumen.specs.core/int-nullable -129802810]
 
 *** [[http://docs.cider.mx/en/latest/][CIDER]] can generate sample data from spec too
- http://docs.cider.mx/en/latest/miscellaneous_features/#spec-browser
+http://docs.cider.mx/en/latest/miscellaneous_features/#spec-browser
  
-** how to tests aggregation types?
-define steps to try out the different types in development
-
-** how to test using UI?
-
-*** pivot
-    import data file > choose test/resources/pivot.css .... make viz pivot table
