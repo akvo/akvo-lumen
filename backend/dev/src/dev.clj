@@ -8,6 +8,9 @@
             [clojure.java.jdbc :as jdbc]
             [clojure.pprint :refer [pprint]]
             [clojure.repl :refer :all]
+            [clojure.spec.alpha :as s]
+            [clojure.spec.test.alpha :as stest]
+            [clojure.tools.logging :as log]
             [clojure.tools.namespace.repl :refer [refresh]]
             [com.stuartsierra.component :as component]
             [duct.generate :as gen]
@@ -70,3 +73,11 @@
 (defn rollback
   ([] (lumen-migrate/rollback {}))
   ([args] (lumen-migrate/rollback args)))
+
+(defn check-specs! []
+  (log/warn "instrumenting specs!")
+  (stest/instrument))
+
+(defn uncheck-specs! []
+  (log/warn "unstrumenting specs!")
+  (stest/unstrument))
