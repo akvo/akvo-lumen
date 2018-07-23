@@ -19,7 +19,11 @@ Sometimes we don't have the namespace that we need to internalise/identify our s
 
 ** Why is ~[org.clojure/test.check "0.9.0" :scope "test"]~ in ~prod~ dependencies?
 
-   the only reason to have this ~test~ dependency in ~prod~ side is to be able to [[https://clojure.org/guides/spec#_sampling_generators][generate samples]] inside custom generator. [[https://github.com/akvo/akvo-lumen/blob/specs-lp-bis/backend/src/akvo/lumen/specs/core.clj#L22][in lumen]]
+   the only reason to have this ~test~ dependency in ~prod~ side is to be able to [[https://clojure.org/guides/spec#_sampling_generators][generate samples]] inside custom generator. [[https://github.com/akvo/akvo-lumen/pull/1448/files#diff-7ceec98c5205568b113e3ace601345a6R45][in lumen]]
+
+There is a lib to write generators aside our specs https://github.com/athos/genman
+
+Anyway, seems  that clojure.test.check is not too dangerous as it doesn't have deps associated https://github.com/clojure/test.check/blob/master/project.clj#L6 
      
 ** can ~clojure.spec~ check value returned by function spec(ed)?   
 clojure.spec only can check/instrument args in function call but *no* the value returned by the function. 
