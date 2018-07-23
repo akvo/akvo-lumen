@@ -1,0 +1,172 @@
+#+OPTIONS: ^:nil
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+SETUPFILE: /Users/tangrammer/git/org-html-themes/setup/theme-readtheorg.setup
+#+TITLE: akvo-lument blue/green deployment
+#+FILETAGS: :FAQ:
+
+** why blue/green and not red/black?
+ colors doesn't mean anything special, just identify 2 instances
+ So instead of blue/green this deployment patter could be called instance-1/instance-2   
+
+
+** what does ~blue/green~ ~B/G~ deployment mean?
+ (explained to a 5 years old kid) this ~B/G~ pattern consists in having 2 instances running at the same time in the same environment but listening to differents ~urls~. Both ~urls~ are reachable but only one is the URL known for the services or clients. Let's call these urls ~live~ and ~dark~ depending this property.
+
+ So we have 2 instances called ~blue~ and ~green~, and 2 urls ~live~ and ~dark~
+
+ Then at any time we'll have ~live~ url pointing to a ~blue~ or ~green~ instance and ~dark~ url pointing to the other
+
+ ~dark~ url and related instance is used to test new changes
+ ~live~ url and related instance is used for production real clients
+
+ As an example, let's say that ~live~ url is routed to ~blue~ instance, then the pattern to follow is pushing new changes to ~green~ instance that is reachable by ~dark~ url, and when we are sure that all changes are working fine then we change the routing to associate ~live~ url to ~green~ instance, being ~blue~ instance related to ~dark~ url 
+
+
+ [[https://www.martinfowler.com/bliki/BlueGreenDeployment.html][More info on B/G from Martin Fowler]]
+
+
+** how many ~B/G~ deployments do we have?
+ Currently akvo-lumen has 2 gcloud deployments ~test~ and ~prod~, that represents 4 instances
+
+
+** which are the ~live/dark~ urls?
+
+***  In ~test~ environment: 
+  dark => https://dark-lumen.akvotest.org/
+  live => https://lumen.akvotest.org/
+
+  
+*** In ~prod~ environment: 
+  dark => https://dark-demo.akvolumen.org/ 
+  live => https://demo.akvolumen.org/
+
+
+** how do we deploy new changes to ~dark~ instances?
+ akvo-lumen ci build is configured to automatically deploy to dark instances the changes pushed to develop and master branchs.
+ 
+Being ~develop~ branch associated to ~test~ environment and ~master~ branch to ~prod~ environment
+
+So we only need to push changes to develop or master branchs to do related dark deployments
+
+
+** how do we change gcloud environment to production or test?
+
+*To change to production ....*
+#+BEGIN_SRC shell :results silent :session :exports code
+gcloud container clusters get-credentials production --zone europe-west1-d --project akvo-lumen
+#+END_SRC
+
+*To change to test ....*
+#+BEGIN_SRC shell :results silent :session :exports code
+gcloud container clusters get-credentials test --zone europe-west1-d --project akvo-lumen
+#+END_SRC
+
+
+** which is the current instance/color listening to ~live~ url?
+
+*Firstly you need to read: how do we change gcloud environment to production or test?*
+
+And then, there is a script to know which is the live color, that's to say, which instance is waiting in ~live~ url
+
+ #+BEGIN_SRC shell :results silent :session :dir ~/git/akvo/akvo-lumen :exports both
+ cd ci
+ ./live-color.sh
+ #+END_SRC
+
+ #+RESULTS:
+ : blue
+
+
+** how we can flip colors? flipping instances, passing dark to live 
+
+Execute following script, during the execution you'll need to choose which gcloud environment you want to flip (test or production)
+
+  ~ci/flip-blue-green-deployment.sh~
+
+Below an example of how logs will look like 
+
+#+BEGIN_SRC shell :exports code :value silent
+
+$ ci/flip-blue-green-deployment.sh
+Probably is either test or production: production
+Are you sure you want to flip production? [yn] y
+12:28:53 - INFO - running: gcloud container clusters get-credentials production --zone europe-west1-d --project akvo-lumen
+Fetching cluster endpoint and auth data.
+kubeconfig entry generated for production.
+12:28:55 - INFO - Reading blue/green status of production
+12:29:00 - INFO - Current LIVE is green
+12:29:00 - INFO - Setting blue as LIVE
+service "lumen-live" configured
+service "lumen-dark" configured
+service "lumen-blue-green-gateway" unchanged
+12:29:02 - INFO - Switching k8s context back to gke_akvo-lumen_europe-west1-d_test
+Switched to context "gke_akvo-lumen_europe-west1-d_test".
+
+#+END_SRC
+
+
+** which akvo-lumen tenants are available in ~dark~ instances? 
+So far, ~dark-utz.akvolumen.org~, ~dark-fmwrnigeria.akvolumen.org~ and ~dark-demo.akvolumen.org~.
+Tenants available depends on KeyCloak Db
+
+
+** how do we tag the release?
+
+You'll need to *verify* the new tag so firstly add to github your GPG signature. Go to https://github.com/settings/keys and follow these steps https://help.github.com/articles/generating-a-gpg-key/
+
+The format of tags follows this pattern: ~vX.Y.Z~ 
+~X~ represents major version (relates to new api, breaking changes ...)
+~Y~ just increments in each release
+~Z~ means hot fix or patch
+
+*Tags had to be anotated and signed*
+
+~git tag -a -s v0.0.0~
+
+Then you'll be promted to insert a message.
+Insert following one, changing ~X.Y.Z~ with proper values
+~Title: Akvo Lumen vX.Y.Z~
+
+*Push new tag to origin/master*
+
+
+** how can we do github release?
+
+ Go to https://github.com/akvo/akvo-lumen/tags and verify that tag is signed then *create a new github release*, clicking in "Add Release Notes" link
+
+ Here a finished example: https://github.com/akvo/akvo-lumen/releases/tag/v0.29.0
+
+ As you can see, you'll need to manually add each issue to a one of the following sections 
+ + New and noteworthy
+ + Bugfixes
+ + Internal improvements
+
+ Below you have a script that queries commits between 2 tags v0.28.1 and v2.29.0.
+ #+BEGIN_SRC shell :exports both :results value replace
+ git log --no-merges  v0.28.1..v0.29.0 | grep -E -o '#[0-9]+' | sort -u | grep -E -o '[0-9]+' > /tmp/issues.txt && for i in $(cat /tmp/issues.txt); do echo "https://github.com/akvo/akvo-lumen/issues/$i"; done;
+ #+END_SRC
+
+ #+RESULTS:
+ | https://github.com/akvo/akvo-lumen/issues/1225 |
+ | https://github.com/akvo/akvo-lumen/issues/1401 |
+ | https://github.com/akvo/akvo-lumen/issues/1426 |
+ | https://github.com/akvo/akvo-lumen/issues/1435 |
+ | https://github.com/akvo/akvo-lumen/issues/1437 |
+ | https://github.com/akvo/akvo-lumen/issues/1442 |
+ | https://github.com/akvo/akvo-lumen/issues/1443 |
+ | https://github.com/akvo/akvo-lumen/issues/1494 |
+ | https://github.com/akvo/akvo-lumen/issues/1513 |
+ | https://github.com/akvo/akvo-lumen/issues/1514 |
+ | https://github.com/akvo/akvo-lumen/issues/1516 |
+ | https://github.com/akvo/akvo-lumen/issues/1519 |
+ | https://github.com/akvo/akvo-lumen/issues/1525 |
+ | https://github.com/akvo/akvo-lumen/issues/1534 |
+ | https://github.com/akvo/akvo-lumen/issues/1543 |
+ | https://github.com/akvo/akvo-lumen/issues/1549 |
+ | https://github.com/akvo/akvo-lumen/issues/1554 |
+ | https://github.com/akvo/akvo-lumen/issues/778  |
+
+
+
+
+ 

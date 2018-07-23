@@ -1,0 +1,609 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2018-07-24 Tue 18:31 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>akvo-lument blue/green deployment</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="tangrammer" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="https://www.pirilampo.org/styles/readtheorg/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="https://www.pirilampo.org/styles/readtheorg/css/readtheorg.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="https://www.pirilampo.org/styles/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="https://www.pirilampo.org/styles/readtheorg/js/readtheorg.js"></script>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2018 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">akvo-lument blue/green deployment</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org54f831c">1. why blue/green and not red/black?</a></li>
+<li><a href="#orgaddc253">2. what does <code>blue/green</code> <code>B/G</code> deployment mean?</a></li>
+<li><a href="#org1d4a899">3. how many <code>B/G</code> deployments do we have?</a></li>
+<li><a href="#org18b4a6a">4. which are the <code>live/dark</code> urls?</a>
+<ul>
+<li><a href="#org0d94d91">4.1. In <code>test</code> environment:</a></li>
+<li><a href="#orgb894b0a">4.2. In <code>prod</code> environment:</a></li>
+</ul>
+</li>
+<li><a href="#org2bfba68">5. how do we deploy new changes to <code>dark</code> instances?</a></li>
+<li><a href="#org2b80585">6. how do we change gcloud environment to production or test?</a></li>
+<li><a href="#org011aa99">7. which is the current instance/color listening to <code>live</code> url?</a></li>
+<li><a href="#org63154fe">8. how we can flip colors? flipping instances, passing dark to live</a></li>
+<li><a href="#org5fe5e49">9. which akvo-lumen tenants are available in <code>dark</code> instances?</a></li>
+<li><a href="#org080605e">10. how do we tag the release?</a></li>
+<li><a href="#orgf41ab5a">11. how can we do github release?</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org54f831c" class="outline-2">
+<h2 id="org54f831c"><span class="section-number-2">1</span> why blue/green and not red/black?</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+colors doesn't mean anything special, just identify 2 instances
+So instead of blue/green this deployment patter could be called instance-1/instance-2   
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-orgaddc253" class="outline-2">
+<h2 id="orgaddc253"><span class="section-number-2">2</span> what does <code>blue/green</code> <code>B/G</code> deployment mean?</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+(explained to a 5 years old kid) this <code>B/G</code> pattern consists in having 2 instances running at the same time in the same environment but listening to differents <code>urls</code>. Both <code>urls</code> are reachable but only one is the URL known for the services or clients. Let's call these urls <code>live</code> and <code>dark</code> depending this property.
+</p>
+
+<p>
+So we have 2 instances called <code>blue</code> and <code>green</code>, and 2 urls <code>live</code> and <code>dark</code>
+</p>
+
+<p>
+Then at any time we'll have <code>live</code> url pointing to a <code>blue</code> or <code>green</code> instance and <code>dark</code> url pointing to the other
+</p>
+
+<p>
+<code>dark</code> url and related instance is used to test new changes
+<code>live</code> url and related instance is used for production real clients
+</p>
+
+<p>
+As an example, let's say that <code>live</code> url is routed to <code>blue</code> instance, then the pattern to follow is pushing new changes to <code>green</code> instance that is reachable by <code>dark</code> url, and when we are sure that all changes are working fine then we change the routing to associate <code>live</code> url to <code>green</code> instance, being <code>blue</code> instance related to <code>dark</code> url 
+</p>
+
+
+<p>
+<a href="https://www.martinfowler.com/bliki/BlueGreenDeployment.html">More info on B/G from Martin Fowler</a>
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org1d4a899" class="outline-2">
+<h2 id="org1d4a899"><span class="section-number-2">3</span> how many <code>B/G</code> deployments do we have?</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+Currently akvo-lumen has 2 gcloud deployments <code>test</code> and <code>prod</code>, that represents 4 instances
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org18b4a6a" class="outline-2">
+<h2 id="org18b4a6a"><span class="section-number-2">4</span> which are the <code>live/dark</code> urls?</h2>
+<div class="outline-text-2" id="text-4">
+</div>
+<div id="outline-container-org0d94d91" class="outline-3">
+<h3 id="org0d94d91"><span class="section-number-3">4.1</span> In <code>test</code> environment:</h3>
+<div class="outline-text-3" id="text-4-1">
+<p>
+dark =&gt; <a href="https://dark-lumen.akvotest.org/">https://dark-lumen.akvotest.org/</a>
+live =&gt; <a href="https://lumen.akvotest.org/">https://lumen.akvotest.org/</a>
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-orgb894b0a" class="outline-3">
+<h3 id="orgb894b0a"><span class="section-number-3">4.2</span> In <code>prod</code> environment:</h3>
+<div class="outline-text-3" id="text-4-2">
+<p>
+dark =&gt; <a href="https://dark-demo.akvolumen.org/">https://dark-demo.akvolumen.org/</a> 
+live =&gt; <a href="https://demo.akvolumen.org/">https://demo.akvolumen.org/</a>
+</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org2bfba68" class="outline-2">
+<h2 id="org2bfba68"><span class="section-number-2">5</span> how do we deploy new changes to <code>dark</code> instances?</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+akvo-lumen ci build is configured to automatically deploy to dark instances the changes pushed to develop and master branchs.
+</p>
+
+<p>
+Being <code>develop</code> branch associated to <code>test</code> environment and <code>master</code> branch to <code>prod</code> environment
+</p>
+
+<p>
+So we only need to push changes to develop or master branchs to do related dark deployments
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org2b80585" class="outline-2">
+<h2 id="org2b80585"><span class="section-number-2">6</span> how do we change gcloud environment to production or test?</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+<b>To change to production &#x2026;.</b>
+</p>
+<div class="org-src-container">
+<pre class="src src-shell">gcloud container clusters get-credentials production --zone europe-west1-d --project akvo-lumen
+</pre>
+</div>
+
+<p>
+<b>To change to test &#x2026;.</b>
+</p>
+<div class="org-src-container">
+<pre class="src src-shell">gcloud container clusters get-credentials test --zone europe-west1-d --project akvo-lumen
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org011aa99" class="outline-2">
+<h2 id="org011aa99"><span class="section-number-2">7</span> which is the current instance/color listening to <code>live</code> url?</h2>
+<div class="outline-text-2" id="text-7">
+<p>
+<b>Firstly you need to read: how do we change gcloud environment to production or test?</b>
+</p>
+
+<p>
+And then, there is a script to know which is the live color, that's to say, which instance is waiting in <code>live</code> url
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell"><span style="color: #006FE0;">cd</span> ci
+./live-color.sh
+</pre>
+</div>
+
+<pre class="example">
+blue
+
+</pre>
+</div>
+</div>
+
+
+<div id="outline-container-org63154fe" class="outline-2">
+<h2 id="org63154fe"><span class="section-number-2">8</span> how we can flip colors? flipping instances, passing dark to live</h2>
+<div class="outline-text-2" id="text-8">
+<p>
+Execute following script, during the execution you'll need to choose which gcloud environment you want to flip (test or production)
+</p>
+
+<p>
+<code>ci/flip-blue-green-deployment.sh</code>
+</p>
+
+<p>
+Below an example of how logs will look like 
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">
+$ ci/flip-blue-green-deployment.sh
+Probably is either test or production: production
+Are you sure you want to flip production? <span style="color: #707183;">[</span>yn<span style="color: #707183;">]</span> y
+12:28:53 - INFO - running: gcloud container clusters get-credentials production --zone europe-west1-d --project akvo-lumen
+Fetching cluster endpoint and auth data.
+kubeconfig entry generated for production.
+12:28:55 - INFO - Reading blue/green status of production
+12:29:00 - INFO - Current LIVE is green
+12:29:00 - INFO - Setting blue as LIVE
+service <span style="color: #008000;">"lumen-live"</span> configured
+service <span style="color: #008000;">"lumen-dark"</span> configured
+service <span style="color: #008000;">"lumen-blue-green-gateway"</span> unchanged
+12:29:02 - INFO - Switching k8s context back to gke_akvo-lumen_europe-west1-d_test
+Switched to context <span style="color: #008000;">"gke_akvo-lumen_europe-west1-d_test"</span>.
+
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org5fe5e49" class="outline-2">
+<h2 id="org5fe5e49"><span class="section-number-2">9</span> which akvo-lumen tenants are available in <code>dark</code> instances?</h2>
+<div class="outline-text-2" id="text-9">
+<p>
+So far, <code>dark-utz.akvolumen.org</code>, <code>dark-fmwrnigeria.akvolumen.org</code> and <code>dark-demo.akvolumen.org</code>.
+Tenants available depends on KeyCloak Db
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org080605e" class="outline-2">
+<h2 id="org080605e"><span class="section-number-2">10</span> how do we tag the release?</h2>
+<div class="outline-text-2" id="text-10">
+<p>
+You'll need to <b>verify</b> the new tag so firstly add to github your GPG signature. Go to <a href="https://github.com/settings/keys">https://github.com/settings/keys</a> and follow these steps <a href="https://help.github.com/articles/generating-a-gpg-key/">https://help.github.com/articles/generating-a-gpg-key/</a>
+</p>
+
+<p>
+The format of tags follows this pattern: <code>vX.Y.Z</code> 
+<code>X</code> represents major version (relates to new api, breaking changes &#x2026;)
+<code>Y</code> just increments in each release
+<code>Z</code> means hot fix or patch
+</p>
+
+<p>
+<b>Tags had to be anotated and signed</b>
+</p>
+
+<p>
+<code>git tag -a -s v0.0.0</code>
+</p>
+
+<p>
+Then you'll be promted to insert a message.
+Insert following one, changing <code>X.Y.Z</code> with proper values
+<code>Title: Akvo Lumen vX.Y.Z</code>
+</p>
+
+<p>
+<b>Push new tag to origin/master</b>
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-orgf41ab5a" class="outline-2">
+<h2 id="orgf41ab5a"><span class="section-number-2">11</span> how can we do github release?</h2>
+<div class="outline-text-2" id="text-11">
+<p>
+Go to <a href="https://github.com/akvo/akvo-lumen/tags">https://github.com/akvo/akvo-lumen/tags</a> and verify that tag is signed then <b>create a new github release</b>, clicking in "Add Release Notes" link
+</p>
+
+<p>
+Here a finished example: <a href="https://github.com/akvo/akvo-lumen/releases/tag/v0.29.0">https://github.com/akvo/akvo-lumen/releases/tag/v0.29.0</a>
+</p>
+
+<p>
+As you can see, you'll need to manually add each issue to a one of the following sections 
+</p>
+<ul class="org-ul">
+<li>New and noteworthy</li>
+<li>Bugfixes</li>
+<li>Internal improvements</li>
+</ul>
+
+<p>
+Below you have a script that queries commits between 2 tags v0.28.1 and v2.29.0.
+</p>
+<div class="org-src-container">
+<pre class="src src-shell">git log --no-merges  v0.28.1..v0.29.0 | grep -E -o <span style="color: #008000;">'#[0-9]+'</span> | sort -u | grep -E -o <span style="color: #008000;">'[0-9]+'</span> &gt; /tmp/issues.txt &amp;&amp; <span style="color: #0000FF;">for</span> i<span style="color: #0000FF;"> in</span> $<span style="color: #707183;">(</span>cat /tmp/issues.txt<span style="color: #707183;">)</span>; <span style="color: #0000FF;">do </span><span style="color: #006FE0;">echo</span> <span style="color: #008000;">"https://github.com/akvo/akvo-lumen/issues/$i"</span>; <span style="color: #0000FF;">done</span>;
+</pre>
+</div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left"><a href="https://github.com/akvo/akvo-lumen/issues/1225">https://github.com/akvo/akvo-lumen/issues/1225</a></td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="https://github.com/akvo/akvo-lumen/issues/1401">https://github.com/akvo/akvo-lumen/issues/1401</a></td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="https://github.com/akvo/akvo-lumen/issues/1426">https://github.com/akvo/akvo-lumen/issues/1426</a></td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="https://github.com/akvo/akvo-lumen/issues/1435">https://github.com/akvo/akvo-lumen/issues/1435</a></td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="https://github.com/akvo/akvo-lumen/issues/1437">https://github.com/akvo/akvo-lumen/issues/1437</a></td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="https://github.com/akvo/akvo-lumen/issues/1442">https://github.com/akvo/akvo-lumen/issues/1442</a></td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="https://github.com/akvo/akvo-lumen/issues/1443">https://github.com/akvo/akvo-lumen/issues/1443</a></td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="https://github.com/akvo/akvo-lumen/issues/1494">https://github.com/akvo/akvo-lumen/issues/1494</a></td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="https://github.com/akvo/akvo-lumen/issues/1513">https://github.com/akvo/akvo-lumen/issues/1513</a></td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="https://github.com/akvo/akvo-lumen/issues/1514">https://github.com/akvo/akvo-lumen/issues/1514</a></td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="https://github.com/akvo/akvo-lumen/issues/1516">https://github.com/akvo/akvo-lumen/issues/1516</a></td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="https://github.com/akvo/akvo-lumen/issues/1519">https://github.com/akvo/akvo-lumen/issues/1519</a></td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="https://github.com/akvo/akvo-lumen/issues/1525">https://github.com/akvo/akvo-lumen/issues/1525</a></td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="https://github.com/akvo/akvo-lumen/issues/1534">https://github.com/akvo/akvo-lumen/issues/1534</a></td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="https://github.com/akvo/akvo-lumen/issues/1543">https://github.com/akvo/akvo-lumen/issues/1543</a></td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="https://github.com/akvo/akvo-lumen/issues/1549">https://github.com/akvo/akvo-lumen/issues/1549</a></td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="https://github.com/akvo/akvo-lumen/issues/1554">https://github.com/akvo/akvo-lumen/issues/1554</a></td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="https://github.com/akvo/akvo-lumen/issues/778">https://github.com/akvo/akvo-lumen/issues/778</a></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: tangrammer</p>
+<p class="date">Created: 2018-07-24 Tue 18:31</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>
