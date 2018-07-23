@@ -18,13 +18,13 @@
 
 (s/def ::dataset/title string?)
 
-(s/def ::dataset/created int?)
+(s/def ::dataset/created ::lumen.s/date-int)
 
-(s/def ::dataset/modified int?)
+(s/def ::dataset/modified ::lumen.s/date-int)
 
-(s/def ::dataset/updated int?)
+(s/def ::dataset/updated ::lumen.s/date-int)
 
-(s/def ::dataset/id string?)
+(s/def ::dataset/id ::lumen.s/str-uuid)
 
 (s/def ::dataset/transformations any?)
 
@@ -35,7 +35,6 @@
                                           ::dataset/title
                                           ::dataset/transformations
                                           ::dataset/updated]))
-
 
 (s/fdef dataset.utils/find-column
   :args (s/cat :columns ::dataset/columns

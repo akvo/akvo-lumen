@@ -1,17 +1,17 @@
 (ns akvo.lumen.specs.visualisation
-  (:require [akvo.lumen.lib.visualisation :as lib.visualisation]
+  (:require [akvo.lumen.dataset :as dataset]
+	    [akvo.lumen.lib.visualisation :as lib.visualisation]
 	    [akvo.lumen.lib.visualisation.map-config :as l.visualisation.map-config]
 	    [akvo.lumen.lib.visualisation.map-metadata :as l.visualisation.map-metadata]
 	    [akvo.lumen.specs.core :as lumen.s]
-	    [akvo.lumen.dataset :as dataset]
 	    [akvo.lumen.specs.dataset :as dataset.s]
+	    [akvo.lumen.specs.db :as db.s]
 	    [akvo.lumen.specs.visualisation.layer :as visualisation.layer.s]
 	    [akvo.lumen.specs.visualisation.layer.legend :as layer.legend.s]
 	    [akvo.lumen.specs.visualisation.layer.spec :as v.layer.spec.s]
-	    [akvo.lumen.specs.db :as db.s]
 	    [clojure.spec.alpha :as s]))
 
-(s/def ::lib.visualisation/type string?)
+(s/def ::lib.visualisation/type string?) ;; redundant field from FE? after debugging UI always receiving "visualisation" ... TODO : review it
 
 (s/def ::lib.visualisation/name string?)
 
@@ -29,7 +29,7 @@
 
 (s/def ::lib.visualisation/status #{"OK"})
 
-(s/def ::lib.visualisation/id string?)
+(s/def ::lib.visualisation/id ::lumen.s/str-uuid)
 
 (s/def ::lib.visualisation/body
   (s/keys :req-un [::lib.visualisation/datasetId
@@ -39,7 +39,6 @@
 		   ::lib.visualisation/visualisationType]
 	  :opt-un [::lib.visualisation/created
 		   ::lib.visualisation/modified
-;;		   ::v.layer.spec.s/spec
 		   ::lib.visualisation/status
 		   ::lib.visualisation/id]))
 

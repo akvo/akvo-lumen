@@ -15,12 +15,4 @@
 (s/def ::nullable-column (s/or :s string?
                                :n nil?))
 
-;; (s/def ::filter (s/keys :req-un [::operation
-;;                                  ::strategy
-;;                                  ::value
-;;                                  ::column]))
-
-;; (s/def ::filters (s/or :col (s/coll-of ::filter :gen-max 3)
-;; 		       :nil nil?))
-
 (s/def ::aggregation ::postgres.filter/aggregation)

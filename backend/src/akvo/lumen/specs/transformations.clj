@@ -5,9 +5,9 @@
 	    [akvo.lumen.specs.dataset :as dataset.s]
 	    [akvo.lumen.specs.dataset.column :as dataset.column.s]
 	    [akvo.lumen.specs.db :as db.s]
-	    [akvo.lumen.specs.libs]
+	    [akvo.lumen.specs.libs :as libs.s]
 	    [akvo.lumen.specs.transformations.merge-dataset.source :as t.merge-dataset.source.s]
-	    [akvo.lumen.specs.transformations.merge-dataset.target :as t.merge-dataset.target.s]
+            [akvo.lumen.specs.transformations.merge-dataset.target :as t.merge-dataset.target.s]
 	    [akvo.lumen.specs.transformations.remove-sort :as transformations.remove-sort.s]
 	    [akvo.lumen.specs.transformations.text :as transformations.text.s]
 	    [akvo.lumen.transformation :as transformation]
@@ -124,10 +124,11 @@
   (s/keys :req-un [::t.merge-dataset.source.s/mergeColumn 
 		   ::t.merge-dataset.source.s/mergeColumns
 		   ::t.merge-dataset.source.s/datasetId 
-		   ::t.merge-dataset.source.s/aggregationColumn]))
+		   ::t.merge-dataset.source.s/aggregationColumn
+                   ::t.merge-dataset.source.s/aggregationDirection]))
 
 (s/def ::transformation.merge-datasets/target
-  (s/keys :req-un [::t.merge-dataset.source.s/mergeColumn]))
+  (s/keys :req-un [::t.merge-dataset.target.s/mergeColumn]))
 
 (s/def ::transformation.merge-datasets/args (s/keys :req-un [::transformation.merge-datasets/source
 							     ::transformation.merge-datasets/target]))

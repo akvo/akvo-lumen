@@ -9,7 +9,7 @@
 
 (s/def ::hidden boolean?)
 
-(s/def ::direction ::lumen.s/string-nullable)
+(s/def ::direction ::lumen.s/string-nullable) ;; (review) TODO: should it be #{"ASC" "DESC"} ??
 
 (s/def ::title string?)
 

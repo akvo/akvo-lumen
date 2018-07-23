@@ -40,7 +40,7 @@
 
 (s/def ::string-nullable (s/or :s string? :n nil?))
 
-(s/def ::int-nullable (s/or :s int? :n nil?))
+(s/def ::int-nullable (s/or :s pos-int? :n nil?))
 
 (defn sample
   ([spec]

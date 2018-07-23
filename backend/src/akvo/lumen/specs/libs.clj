@@ -11,4 +11,4 @@
                    ::lib/not-authorized ::lib/conflict
                    ::lib/not-found})
 
-(s/def ::lib/response (s/tuple ::val ::lumen.s/any))
+(s/def ::lib/response (s/tuple ::lib/val ::lumen.s/any))

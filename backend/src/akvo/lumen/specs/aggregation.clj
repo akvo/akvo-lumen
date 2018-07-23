@@ -1,22 +1,22 @@
 (ns akvo.lumen.specs.aggregation
-  (:require [akvo.lumen.dataset.utils :as dataset.utils]
-            [akvo.lumen.specs.postgres]
-	    [akvo.lumen.postgres.filter :as postgres.filter]
+  (:require [akvo.lumen.dataset :as dataset]
+            [akvo.lumen.dataset.utils :as dataset.utils]
 	    [akvo.lumen.lib :as lib]
 	    [akvo.lumen.lib.aggregation :as lib.aggregation]
 	    [akvo.lumen.lib.aggregation.bar :as l.aggregation.bar]
 	    [akvo.lumen.lib.aggregation.line :as l.aggregation.line]
 	    [akvo.lumen.lib.aggregation.pie :as l.aggregation.pie]
-            [akvo.lumen.lib.aggregation.pivot :as l.aggregation.pivot]
-	    [akvo.lumen.lib.aggregation.scatter :as l.aggregation.scatter]
+	    [akvo.lumen.lib.aggregation.pivot :as l.aggregation.pivot]
+            [akvo.lumen.lib.aggregation.scatter :as l.aggregation.scatter]
+	    [akvo.lumen.postgres.filter :as postgres.filter]
 	    [akvo.lumen.specs.aggregation.pivot.row :as a.pivot.row.s]
 	    [akvo.lumen.specs.aggregation.query :as aggregation.query.s]
 	    [akvo.lumen.specs.core :as lumen.s]
-	    [akvo.lumen.dataset :as dataset]
 	    [akvo.lumen.specs.dataset :as dataset.s]
 	    [akvo.lumen.specs.dataset.column :as dataset.column.s]
 	    [akvo.lumen.specs.db :as db.s]
 	    [akvo.lumen.specs.libs]
+	    [akvo.lumen.specs.postgres]
 	    [clojure.spec.alpha :as s]))
 
 (s/def ::l.aggregation.pivot/category-column ::dataset/column)
@@ -28,7 +28,9 @@
 (s/def ::l.aggregation.pivot/aggregation #{"avg" "sum" "min" "max" "count"})
 
 (s/def ::l.aggregation.pivot/categoryColumn ::aggregation.query.s/nullable-column)
+
 (s/def ::l.aggregation.pivot/rowColumn ::aggregation.query.s/nullable-column)
+
 (s/def ::l.aggregation.pivot/valueColumn ::aggregation.query.s/nullable-column)
 
 (s/def ::l.aggregation.pivot/query
