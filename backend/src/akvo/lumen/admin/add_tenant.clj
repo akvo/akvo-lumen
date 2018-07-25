@@ -4,12 +4,6 @@
   
   ENCRYPTION_KEY is a key specific for the Kubernetes environment used for
   encrypting the db_uri which can be found in the lumen secret in K8s.
-  Obtain it by first switch to correct gcloud env. For example:
-  $ gcloud container clusters get-credentials production --zone europe-west1-d --project akvo-lumen
-  Then (on mac):
-  $ kubectl get secret lumen -o yaml | grep 'encryption_key' | awk -F': ' '{print $2}' | base64 -D
-  (linux):
-  $ kubectl get secret lumen -o yaml | grep 'encryption_key' | awk -F': ' '{print $2}' | base64 -d
 
   The PG_* env vars can be found in the ElephantSQL console for the appropriate
   instance.
