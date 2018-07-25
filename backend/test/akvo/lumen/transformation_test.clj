@@ -144,20 +144,20 @@
     ;;https://github.com/akvo/akvo-lumen/issues/1517
     (testing "Combining columns where one of the columns has empty values"
       (let [[tag _] (apply-transformation {:type :transformation
-                                          :transformation {"op" "core/combine"
-                                                           "args" {"columnNames" ["c2" "c3"]
-                                                                   "newColumnTitle" "issue1517"
-                                                                   "separator" " "}
-                                                           "onError" "fail"}})]
-       (is (= ::lib/ok tag))
-       (let [table-name (:table-name
-                         (latest-dataset-version-by-dataset-id *tenant-conn*
-                                                               {:dataset-id dataset-id}))]
-         (is (= "hope "
-                (:d2 (get-val-from-table *tenant-conn*
-                                         {:rnum 1
-                                          :column-name "d2"
-                                          :table-name table-name})))))))
+                                           :transformation {"op" "core/combine"
+                                                            "args" {"columnNames" ["c2" "c3"]
+                                                                    "newColumnTitle" "issue1517"
+                                                                    "separator" " "}
+                                                            "onError" "fail"}})]
+        (is (= ::lib/ok tag))
+        (let [table-name (:table-name
+                          (latest-dataset-version-by-dataset-id *tenant-conn*
+                                                                {:dataset-id dataset-id}))]
+          (is (= "hope "
+                 (:d2 (get-val-from-table *tenant-conn*
+                                          {:rnum 1
+                                           :column-name "d2"
+                                           :table-name table-name})))))))
     ))
 
 (defn date-transformation [column-name format]
