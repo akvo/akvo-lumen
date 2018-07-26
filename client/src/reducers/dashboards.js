@@ -97,6 +97,18 @@ function removeVisualisation(state, { payload }) {
   return dashboards;
 }
 
+function exportStarted(state) {
+  return { ...state, isExporting: true };
+}
+
+function exportSucceeded(state) {
+  return { ...state, isExporting: false };
+}
+
+function exportFailed(state) {
+  return { ...state, isExporting: false };
+}
+
 export default handleActions({
   [actions.createDashboardSuccess]: createDashboard,
   [actions.fetchDashboardsSuccess]: saveDashboards,
@@ -106,4 +118,7 @@ export default handleActions({
   [actions.removeVisualisation]: removeVisualisation,
   [actions.fetchShareIdSuccess]: saveShareId,
   [actions.setShareProtectionSuccess]: saveShareProtection,
+  [actions.exportVisualisationRequest]: exportStarted,
+  [actions.exportVisualisationSuccess]: exportSucceeded,
+  [actions.exportVisualisationFailure]: exportFailed,
 }, initialState);

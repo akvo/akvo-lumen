@@ -1,3 +1,14 @@
-FROM alekzonder/puppeteer:latest
+FROM zenato/puppeteer
 
-RUN index.js
+USER root
+
+RUN mkdir /usr/src/app
+
+COPY package* /usr/src/app/
+COPY index.js /usr/src/app/
+
+WORKDIR /usr/src/app
+
+RUN npm i
+
+CMD [ "npm", "start" ]

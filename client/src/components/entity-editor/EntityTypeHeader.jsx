@@ -44,6 +44,7 @@ class EntityTypeHeader extends Component {
                     disabled={button.disabled}
                     {...(button.props || {})}
                   >
+                    {button.icon || null}
                     {button.buttonText}
                   </button>
                   {this.state.menuActive === index && (
@@ -62,6 +63,7 @@ class EntityTypeHeader extends Component {
                   disabled={button.disabled}
                   {...(button.props || {})}
                 >
+                  {button.icon || null}
                   {button.buttonText}
                 </button>
               )}

@@ -15,6 +15,14 @@ html, body, #root {
     line-height: 1.42857;
 }
 
+body {
+    &.exporting {
+        .supporthero-button {
+            display: none !important;
+        }
+    } 
+}
+
 /* Very basic text styling */
 
 body, button, input {

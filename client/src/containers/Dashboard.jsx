@@ -516,6 +516,7 @@ class Dashboard extends Component {
             onSaveDashboard={this.onSave}
             savingFailed={this.state.savingFailed}
             timeToNextSave={this.state.timeToNextSave - this.state.timeFromPreviousSave}
+            isExporting={this.props.library.dashboards.isExporting}
           />
           <DashboardEditor
             dashboard={dashboard}

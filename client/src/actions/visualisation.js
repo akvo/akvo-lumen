@@ -1,9 +1,14 @@
 import { createAction } from 'redux-actions';
 import { push } from 'react-router-redux';
+import { saveAs } from 'file-saver/FileSaver';
+
 import { fetchDataset } from './dataset';
+import { showNotification } from './notification';
 import * as dashboardActions from './dashboard';
 import { addEntitiesToCollection } from './collection';
 import * as api from '../api';
+import { refreshToken, token as getToken } from '../auth';
+import { base64ToBlob, extToContentType } from '../utilities/export';
 
 /* Fetched all visualisations */
 export const fetchVisualisationsSuccess = createAction('FETCH_VISUALISATIONS_SUCCESS');
@@ -145,13 +150,34 @@ export function fetchShareId(visualisationId) {
 
 /* Export visualisation */
 export const exportVisualisationRequest = createAction('EXPORT_VISUALISATION_REQUEST');
+export const exportVisualisationSuccess = createAction('EXPORT_VISUALISATION_SUCCESS');
+export const exportVisualisationFailure = createAction('EXPORT_VISUALISATION_FAILURE');
 
-export function exportVisualisation(visualisationId, format = 'png') {
-  if (visualisationId === null) throw new Error('visualisationUrl not set');
-  const target = encodeURIComponent(`${window.location.origin}/visualisation/${visualisationId}`);
-  api.get(`/api/export?format=${format}&target=${target}`)
-    .then(response => response.json())
-    .then((response) => {
-      window.open(response.file);
+export function exportVisualisation(visualisationId, options) {
+  const { format, title } = { format: 'png', title: 'Untitled Export', ...options };
+  return (dispatch) => {
+    dispatch(exportVisualisationRequest());
+    if (visualisationId === null) throw new Error('visualisationId not set');
+    getToken().then((token) => {
+      const target = encodeURIComponent(`${window.location.origin}/visualisation/${visualisationId}/export`);
+
+      return api.get(`/api/export?format=${format}&title=${title}&token=${token}&refresh_token=${refreshToken()}&id=${visualisationId}&target=${target}`)
+        .then((response) => {
+          if (response.status !== 200) {
+            dispatch(showNotification('error', 'Failed to export visualisation.'));
+            dispatch(exportVisualisationFailure());
+            return;
+          }
+          response.text()
+            .then((imageStr) => {
+              const blob = base64ToBlob(imageStr, extToContentType(format));
+              saveAs(blob, `${title}.${format}`);
+              dispatch(exportVisualisationSuccess());
+            });
+        })
+        .catch((error) => {
+          dispatch(exportVisualisationFailure(error));
+        });
     });
+  };
 }

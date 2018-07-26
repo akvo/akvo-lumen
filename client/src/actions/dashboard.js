@@ -1,7 +1,12 @@
 import { createAction } from 'redux-actions';
 import { push } from 'react-router-redux';
+import { saveAs } from 'file-saver/FileSaver';
+
 import { addEntitiesToCollection } from './collection';
+import { showNotification } from './notification';
 import * as api from '../api';
+import { refreshToken, token as getToken } from '../auth';
+import { base64ToBlob, extToContentType } from '../utilities/export';
 
 export const fetchDashboardsSuccess = createAction('FETCH_DASHBOARDS_SUCCESS');
 
@@ -144,13 +149,34 @@ export function setShareProtection(shareId, payload, callback = () => {}) {
 
 /* Export dashboard */
 export const exportDashboardRequest = createAction('EXPORT_DASHBOARD_REQUEST');
+export const exportDashboardSuccess = createAction('EXPORT_DASHBOARD_SUCCESS');
+export const exportDashboardFailure = createAction('EXPORT_DASHBOARD_FAILURE');
 
-export function exportDashboard(dashboardId, format = 'png') {
-  if (dashboardId === null) throw new Error('dashboardUrl not set');
-  const target = encodeURIComponent(`${window.location.origin}/dashboard/${dashboardId}`);
-  api.get(`/api/export?${format}=png&target=${target}`)
-    .then(response => response.json())
-    .then((response) => {
-      window.open(response.file);
+export function exportDashboard(dashboardId, options) {
+  const { format, title } = { format: 'png', title: 'Untitled Export', ...options };
+  return (dispatch) => {
+    dispatch(exportDashboardRequest());
+    if (dashboardId === null) throw new Error('dashboardId not set');
+    getToken().then((token) => {
+      const target = encodeURIComponent(`${window.location.origin}/dashboard/${dashboardId}/export`);
+
+      return api.get(`/api/export?format=${format}&title=${title}&token=${token}&refresh_token=${refreshToken()}&target=${target}`)
+        .then((response) => {
+          if (response.status !== 200) {
+            dispatch(showNotification('error', 'Failed to export dashboard.'));
+            dispatch(exportDashboardFailure());
+            return;
+          }
+          response.text()
+            .then((imageStr) => {
+              const blob = base64ToBlob(imageStr, extToContentType(format));
+              saveAs(blob, `${title}.${format}`);
+              dispatch(exportDashboardSuccess());
+            });
+        })
+        .catch((error) => {
+          dispatch(exportDashboardFailure(error));
+        });
     });
+  };
 }

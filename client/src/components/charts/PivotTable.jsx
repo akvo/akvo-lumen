@@ -8,6 +8,7 @@ import {
   getTitle,
   getDataLastUpdated,
 } from '../../utilities/chart';
+import RenderComplete from './RenderComplete';
 
 require('./PivotTable.scss');
 
@@ -111,6 +112,7 @@ export default function PivotTable({ width, height, visualisation, context, data
           height,
         }}
       >
+        <RenderComplete id={visualisation.id} />
         Please choose a dataset.
       </div>
     );
@@ -125,6 +127,7 @@ export default function PivotTable({ width, height, visualisation, context, data
           height,
         }}
       >
+        <RenderComplete id={visualisation.id} />
         <p>
           There are {data.columns.length} columns in this table, which is too many to display.
           {context === 'editor' &&
@@ -145,6 +148,7 @@ export default function PivotTable({ width, height, visualisation, context, data
         height,
       }}
     >
+      <RenderComplete id={visualisation.id} />
       <table>
         <thead>
           <tr className="title">

@@ -1,6 +1,8 @@
+/* eslint-disable no-underscore-dangle */
 import fetch from 'isomorphic-fetch';
 import Keycloak from 'keycloak-js';
 import Raven from 'raven-js';
+import queryString from 'query-string';
 
 let keycloak = null;
 
@@ -49,7 +51,15 @@ export function init() {
         realm: 'akvo',
         clientId: keycloakClient,
       });
-      keycloak.init({ onLoad: 'login-required', checkLoginIframe: false }).success((authenticated) => {
+
+      const queryParams = queryString.parse(location.search);
+
+      keycloak.init({
+        onLoad: 'login-required',
+        checkLoginIframe: false,
+        token: queryParams.token,
+        refreshToken: queryParams.refresh_token,
+      }).success((authenticated) => {
         if (authenticated) {
           keycloak.loadUserProfile().success((profile) => {
             if (process.env.NODE_ENV === 'production') {

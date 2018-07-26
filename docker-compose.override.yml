@@ -31,3 +31,9 @@ services:
      - NODE_ENV=development
    volumes:
       - ./windshaft/config/dev:/config
+ exporter:
+   ports:
+      - "3001:3001"
+   links:
+      - keycloak:auth.lumen.local
+      - client:t1.lumen.local

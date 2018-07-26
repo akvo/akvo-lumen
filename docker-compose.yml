@@ -13,7 +13,7 @@ services:
       - ./postgres/provision:/pg-certs
    links:
       - keycloak:auth.lumen.local
-      # - exporter:exporter.lumen.local
+      - exporter:exporter.lumen.local
    expose:
       - 3000
    environment:
@@ -22,7 +22,7 @@ services:
    depends_on:
      - postgres
      - keycloak
-    #  - exporter
+     - exporter
  client:
    environment:
      - HOST_UID
@@ -48,7 +48,8 @@ services:
       - keycloak:auth.lumen.local
       - client:t1.lumen.local
    command: "true"
-#  exporter:
-#    expose:
-#       - 3001
+ exporter:
+   build: exporter
+   expose:
+      - 3001
    

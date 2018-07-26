@@ -71,17 +71,25 @@ export default function CreateVisualisationPreview({
   metadata,
   datasets,
   onChangeVisualisationSpec,
+  height,
+  width,
 }) {
   return (
-    <div className="VisualisationPreview">
+    <div
+      className="VisualisationPreview"
+      style={{
+        width,
+        height,
+      }}
+    >
       {shouldRender(visualisation, datasets) ?
         <VisualisationViewer
           visualisation={visualisation}
           metadata={metadata}
           datasets={datasets}
           context="editor"
-          height={visualisation.visualisationType === 'map' ? null : 500}
-          width={visualisation.visualisationType === 'map' ? null : 800}
+          height={visualisation.visualisationType === 'map' ? null : height}
+          width={visualisation.visualisationType === 'map' ? null : width}
           onChangeVisualisationSpec={onChangeVisualisationSpec}
         /> : null
       }
@@ -94,4 +102,11 @@ CreateVisualisationPreview.propTypes = {
   metadata: PropTypes.object,
   datasets: PropTypes.object.isRequired,
   onChangeVisualisationSpec: PropTypes.func,
+  width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+};
+
+CreateVisualisationPreview.defaultProps = {
+  width: 800,
+  height: 500,
 };

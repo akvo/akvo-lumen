@@ -1,4 +1,4 @@
-/* eslint-disable import/default, global-require, import/first */
+/* eslint-disable import/default, global-require, import/first, no-underscore-dangle */
 import React from 'react';
 import { render } from 'react-dom';
 import { browserHistory } from 'react-router';
