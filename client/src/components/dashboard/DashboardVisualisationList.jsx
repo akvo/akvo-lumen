@@ -136,6 +136,6 @@ export default class DashboardVisualisationList extends Component {
 DashboardVisualisationList.propTypes = {
   dashboardItems: PropTypes.object.isRequired,
   visualisations: PropTypes.array.isRequired,
-  datasets: PropTypes.array.isRequired,
+  datasets: PropTypes.object.isRequired,
   onEntityClick: PropTypes.func.isRequired,
 };
