@@ -44,7 +44,7 @@
           idx2 (rand-int props*)
           code (format "function countX (s){return (s.match(/x/g) || []).length; } 
                         return countX(%s)+countX(%s);" (row-prop idx) (row-prop idx2))
-          row-fun (#'js-engine/column-function fun-name code false)
+          row-fun (#'js-engine/column-function fun-name code 2)
           ]
       (#'js-engine/eval* js-engine row-fun) 
       (doseq [length* (mapv first (next (take 10 (partition 200 (range)))))]

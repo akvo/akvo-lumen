@@ -209,7 +209,8 @@
         args (merge default-args
                     (get transform "args"))
         default-transform {"op" "core/derive"
-                           "onError" "leave-empty"}]
+                           "onError" "leave-empty"
+                           "api-version" 1}]
     {:type :transformation
      :transformation (merge default-transform
                             (assoc transform "args" args))}))
@@ -332,13 +333,13 @@
                                                       "newColumnTitle" "Derived 8"}
                                               "onError" "fail"})))]
         (is (= tag ::lib/bad-request))))
-
     (testing "Infinite loop is managed in js sandbox impl with a ScriptCPUAbuseException"
       (let [[tag _] (apply-transformation (derive-column-transform
                                            {"args" {"code" "while(true) {}"
                                                     "newColumnType" "text"
                                                     "newColumnTitle" "Derived 9"}
-                                            "onError" "fail"}))]
+                                            "onError" "fail"
+                                            "api-version" 2}))]
         (is (= tag ::lib/conflict))))
 
     (testing "Not Disallow anonymous functions"

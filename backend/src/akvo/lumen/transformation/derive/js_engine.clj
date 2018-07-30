@@ -14,12 +14,14 @@
                    :type (type value)})))
 
 (defn- column-function
-  ([fun code explicit-return?]
-   (format "var %s = function(row) { %s }" fun (if explicit-return?
-                                                 (format "return  %s;" code)
-                                                 code)))
+  ([fun code api-version]
+   (log/error "API" api-version)
+   (format "var %s = function(row) { %s }" fun (condp = api-version
+                                                 2 code ;; full js code
+                                                 (format "return  %s;" code) ;; just js expressions
+                                                 )))
   ([fun code]
-   (column-function fun code true)))
+   (column-function fun code 1)))
 
 (defn- valid-type? [value type]
   (when-not (nil? value)
@@ -87,8 +89,8 @@
          (valid-type? res type*)
          res)))))
 
-(defn evaluable? [code]
-  (let [try-code (column-function "try_js_sintax" code)]
+(defn evaluable? [code api-version]
+  (let [try-code (column-function "try_js_sintax" code api-version)]
     (try
       (eval* (js-engine) try-code)
       true
@@ -98,12 +100,12 @@
         false))))
 
 (defn row-fn
-  [{:keys [columns code column-type]}]
+  [{:keys [columns code column-type api-version]}]
   (let [adapter (column-name->column-title columns)
         engine (js-engine)
         fun-name "deriveColumn"
         typed-invocation (invocation engine fun-name column-type)]
-    (eval* engine (column-function fun-name code))
+    (eval* engine (column-function fun-name code api-version))
     (fn [row]
       (try
         (let [v (->> row (adapter) (typed-invocation))]

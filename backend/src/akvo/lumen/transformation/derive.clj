@@ -19,8 +19,9 @@
 (defn args [op-spec]
   (let [{code         "code"
          column-title "newColumnTitle"
-         column-type  "newColumnType"} (engine/args op-spec)]
-    {::code code ::column-title column-title ::column-type column-type}))
+         column-type  "newColumnType"
+         api-version  "api-version"} (engine/args op-spec)]
+    {::code code ::column-title column-title ::column-type column-type ::api-version api-version}))
 
 (defmethod engine/valid? :core/derive
   [op-spec]
@@ -30,7 +31,7 @@
     (and (string? column-title) 
          (engine/valid-type? column-type)
          (#{"fail" "leave-empty" "delete-row"} (engine/error-strategy op-spec))
-         (js-engine/evaluable? code))))
+         (js-engine/evaluable? code (get op-spec "api-version")))))
 
 (defn js-execution>sql-params [js-seq result-kw]
   (->> js-seq
@@ -58,7 +59,8 @@
                          ::column-title
                          ::column-type]} (args op-spec)
                  js-row-fn               (time* :row-tx-fn
-                                                (js-engine/row-fn {:columns     columns
+                                                (js-engine/row-fn {:api-version (get op-spec "api-version")
+                                                                   :columns     columns
                                                                    :code        code
                                                                    :column-type column-type}))
                  on-error-cb             (condp = (engine/error-strategy op-spec)
