@@ -14,7 +14,7 @@
   (testing "simple js fn invocation "
     (let [js-engine (js-engine/js-engine)
           fun-name "test_fun"
-          row-fun (time* :row-fun (#'js-engine/column-function fun-name "return row.prop"))]
+          row-fun (time* :row-fun (#'js-engine/column-function fun-name "row.prop"))]
       (->> row-fun (#'js-engine/eval* js-engine))
       (doseq [n (mapv first (next (take 20 (partition 1000 (range)))))]
        (time* (keyword (str "doseq-" n))
@@ -28,7 +28,7 @@
           idx (rand-int 100)
           message (apply str (conj (repeat 2000 "x") "-"))
           row (reduce #(assoc % (str "prop-" %2) (str %2 message)) {} (range 100))
-          row-fun (time* :row-fun (#'js-engine/column-function fun-name (str "return row['prop-" idx "']")))]
+          row-fun (time* :row-fun (#'js-engine/column-function fun-name (str "row['prop-" idx "']")))]
       (->> row-fun (#'js-engine/eval* js-engine)) 
       (doseq [n (mapv first (next (take 20 (partition 1000 (range)))))]
         (time* (keyword (str "doseq-" n))
@@ -43,8 +43,8 @@
           idx (rand-int props*)
           idx2 (rand-int props*)
           code (format "function countX (s){return (s.match(/x/g) || []).length; } 
-                return countX(%s)+countX(%s);" (row-prop idx) (row-prop idx2))
-          row-fun (#'js-engine/column-function fun-name code)
+                        return countX(%s)+countX(%s);" (row-prop idx) (row-prop idx2))
+          row-fun (#'js-engine/column-function fun-name code false)
           ]
       (#'js-engine/eval* js-engine row-fun) 
       (doseq [length* (mapv first (next (take 10 (partition 200 (range)))))]

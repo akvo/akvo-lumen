@@ -13,8 +13,13 @@
                   {:value value
                    :type (type value)})))
 
-(defn- column-function [fun code]
-  (format "var %s = function(row) {  %s }" fun code))
+(defn- column-function
+  ([fun code explicit-return?]
+   (format "var %s = function(row) { %s }" fun (if explicit-return?
+                                                 (format "return  %s;" code)
+                                                 code)))
+  ([fun code]
+   (column-function fun code true)))
 
 (defn- valid-type? [value type]
   (when-not (nil? value)

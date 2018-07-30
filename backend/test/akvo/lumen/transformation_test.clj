@@ -243,7 +243,7 @@
     (testing "Basic text transform"
       (with-no-logs
         (apply-transformation (derive-column-transform
-                               {"args" {"code" "return row['foo'].toUpperCase()"
+                               {"args" {"code" "row['foo'].toUpperCase()"
                                         "newColumnTitle" "Derived 1"
                                         "newColumnType" "text"}
                                 "onError" "leave-empty"})))
@@ -252,7 +252,7 @@
     (testing "Basic text transform with drop row on error"
       (with-no-logs
         (apply-transformation (derive-column-transform
-                               {"args" {"code" "return row['foo'].replace('a', 'b')"
+                               {"args" {"code" "row['foo'].replace('a', 'b')"
                                         "newColumnTitle" "Derived 3"
                                         "newColumnType" "text"}
                                 "onError" "delete-row"})))
@@ -263,7 +263,7 @@
     (testing "Basic text transform with abort"
       (with-no-logs
         (apply-transformation (derive-column-transform
-                               {"args" {"code" "return row['foo'].length"
+                               {"args" {"code" "row['foo'].length"
                                         "newColumnTitle" "Derived 2"
                                         "newColumnType" "number"}
                                 "onError" "fail"})))
@@ -277,21 +277,21 @@
     (testing "Nested string transform"
       (with-no-logs
         (apply-transformation (derive-column-transform
-                               {"args" {"code" "return row['foo'].toUpperCase()"
+                               {"args" {"code" "row['foo'].toUpperCase()"
                                         "newColumnType" "text"
                                         "newColumnTitle" "Derived 4"}})))
       (is (= ["A" "B" nil] (map :d2 (latest-data dataset-id))))
 
       (with-no-logs
         (apply-transformation (derive-column-transform
-                               {"args" {"code" "return row['Derived 4'].toLowerCase()"
+                               {"args" {"code" "row['Derived 4'].toLowerCase()"
                                         "newColumnType" "text"
                                         "newColumnTitle" "Derived 5"}})))
       (is (= ["a" "b" nil] (map :d3 (latest-data dataset-id)))))
 
     (testing "Date transform"
       (let [[tag _] (apply-transformation (derive-column-transform
-                                           {"args" {"code" "return new Date()"
+                                           {"args" {"code" "new Date()"
                                                     "newColumnType" "date"
                                                     "newColumnTitle" "Derived 5"}
                                             "onError" "fail"}))]
@@ -301,7 +301,7 @@
     (testing "Valid type check"
       (let [[tag _] (with-no-logs
                       (apply-transformation (derive-column-transform
-                                             {"args" {"code" "return new Date()"
+                                             {"args" {"code" "new Date()"
                                                       "newColumnType" "number"
                                                       "newColumnTitle" "Derived 6"}
                                               "onError" "fail"})))]
@@ -310,7 +310,7 @@
     (testing "Sandboxing java interop"
       (let [[tag _] (with-no-logs
                       (apply-transformation (derive-column-transform
-                                             {"args" {"code" "return new java.util.Date()"
+                                             {"args" {"code" "new java.util.Date()"
                                                       "newColumnType" "number"
                                                       "newColumnTitle" "Derived 7"}
                                               "onError" "fail"})))]
@@ -343,7 +343,7 @@
 
     (testing "Not Disallow anonymous functions"
       (let [[tag _] (apply-transformation (derive-column-transform
-                                           {"args" {"code" "return (function() {})()"
+                                           {"args" {"code" "(function() {})()"
                                                     "newColumnType" "text"
                                                     "newColumnTitle" "Derived 10"}
                                             "onError" "fail"}))]
@@ -464,7 +464,7 @@
 
     (testing "Basic text transform"
       (apply-transformation (derive-column-transform
-                             {"args" {"code" "return row.name + ' - ' + row.pop"
+                             {"args" {"code" "row.name + ' - ' + row.pop"
                                       "newColumnTitle" "Derived 1"
                                       "newColumnType" "text"}
                               "onError" "leave-empty"}))
