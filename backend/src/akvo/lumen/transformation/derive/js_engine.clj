@@ -15,11 +15,11 @@
 
 (defn- column-function
   ([fun code api-version]
-   (log/error "API" api-version)
-   (format "var %s = function(row) { %s }" fun (condp = api-version
-                                                 2 code ;; full js code
-                                                 (format "return  %s;" code) ;; just js expressions
-                                                 )))
+   (format "var %s = function(row) { %s }" fun
+           (condp = api-version
+             2 code ;; full js code
+             (format "return  %s;" code) ;; just js expressions
+             )))
   ([fun code]
    (column-function fun code 1)))
 

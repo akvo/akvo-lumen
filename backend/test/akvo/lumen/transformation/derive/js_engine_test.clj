@@ -54,8 +54,6 @@
           (time* (keyword (str "message-length-" length* "-" ntimes))
                  (doseq [x (range ntimes)]
                    (assert (=  (double (* 2 length*)) ((#'js-engine/invocation js-engine fun-name) row)))))))
-      (is (int (rand-int 100)))))
-  
-  )
+      (is (int (rand-int 100))))))
 
  
