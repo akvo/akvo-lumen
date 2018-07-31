@@ -55,11 +55,9 @@
              (.allowLoadFunctions false)
              (.allowPrintFunctions false)
              (.allowExitFunctions false)
-             (.allowGlobalsObjects false)
-             
+             (.allowGlobalsObjects false)             
              (.setMaxMemory maxmemory)
              (.setMaxCPUTime maxtime)
-
              ;; Specifies the executor service which is used to run scripts when a CPU time limit is specified.
              (.setExecutor (Executors/newSingleThreadExecutor))))))
 
