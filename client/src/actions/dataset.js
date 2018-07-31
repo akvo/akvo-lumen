@@ -41,11 +41,11 @@ function fetchDatasetFailure(error, id) {
   };
 }
 
-export function fetchDataset(id) {
+export function fetchDataset(id, metaOnly) {
+  const suffix = metaOnly ? '/meta' : '';
   return (dispatch) => {
     dispatch(fetchDatasetRequest(id));
-    return api
-      .get(`/api/datasets/${id}`)
+    return api.get(`/api/datasets/${id}${suffix}`)
       .then(response => response.json())
       .then((dataset) => {
         const immutableDataset = Immutable.fromJS(dataset);

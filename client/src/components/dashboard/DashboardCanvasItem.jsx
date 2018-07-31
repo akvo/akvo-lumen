@@ -1,11 +1,16 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
+
 import VisualisationViewer from '../charts/VisualisationViewer';
 import DashboardCanvasItemEditable from './DashboardCanvasItemEditable';
 import { checkUndefined } from '../../utilities/utils';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import { getTitle, getDataLastUpdated } from '../../utilities/chart';
 
 require('./DashboardCanvasItem.scss');
+
+const TITLE_HEIGHT = 60;
 
 const getItemLayout = (props) => {
   let output = null;
@@ -101,12 +106,23 @@ export default class DashboardCanvasItem extends Component {
 
     if (layout !== null) {
       return ({
-        width: (layout.w * unit) - 40,
-        height: (layout.h * unit) - 40,
+        width: (layout.w * unit) - 60,
+        height: (layout.h * unit) - 60,
       });
     }
 
     return null;
+  }
+
+  getSubTitle() {
+    const { item, datasets } = this.props;
+    const lastUpdated = getDataLastUpdated({ datasets, visualisation: item.visualisation });
+    return lastUpdated ? (
+      <span>
+        <FormattedMessage id="data_last_updated" />
+        : {lastUpdated}
+      </span>
+    ) : null;
   }
 
   render() {
@@ -117,27 +133,41 @@ export default class DashboardCanvasItem extends Component {
       return null;
     }
 
+    const titleHeight = this.titleEl ?
+      this.titleEl.getBoundingClientRect().height :
+      TITLE_HEIGHT;
+
     return (
       <div
         data-test-id="dashboard-canvas-item"
         className="DashboardCanvasItem"
         style={this.state.style}
       >
-        {this.props.item.type === 'visualisation' &&
-          <div
-            className="noPointerEvents itemContainer visualisation"
-          >
-            {getIsDatasetLoaded(this.props) ?
-              <VisualisationViewer
-                metadata={checkUndefined(this.props, 'metadata', this.props.item.visualisation.id)}
-                visualisation={this.props.item.visualisation}
-                datasets={this.props.datasets}
-                width={dimensions.width}
-                height={dimensions.height}
-              /> : <LoadingSpinner />
-            }
+        {this.props.item.type === 'visualisation' && (
+          <div className="itemContainerWrap">
+            <div
+              className="itemTitle"
+              ref={(c) => {
+                this.titleEl = c;
+              }}
+            >
+              <h2>{getTitle(this.props.item.visualisation)}</h2>
+              <span>{this.getSubTitle()}</span>
+            </div>
+            <div className="noPointerEvents itemContainer visualisation">
+              {getIsDatasetLoaded(this.props) ?
+                <VisualisationViewer
+                  metadata={checkUndefined(this.props, 'metadata', this.props.item.visualisation.id)}
+                  visualisation={this.props.item.visualisation}
+                  datasets={this.props.datasets}
+                  width={dimensions.width}
+                  height={dimensions.height - titleHeight}
+                  showTitle={false}
+                /> : <LoadingSpinner />
+              }
+            </div>
           </div>
-        }
+        )}
         {this.props.item.type === 'text' &&
           <div
             className="itemContainer text"

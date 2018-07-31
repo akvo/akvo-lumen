@@ -1,6 +1,6 @@
 (ns akvo.lumen.endpoint.dataset
   (:require [akvo.lumen.component.tenant-manager :refer [connection]]
-            [akvo.lumen.lib.dataset :as dataset]
+            [akvo.lumen.dataset :as dataset]
             [compojure.core :refer :all]))
 
 
@@ -17,6 +17,9 @@
       (context "/:id" [id]
         (GET "/" _
           (dataset/fetch tenant-conn id))
+
+        (GET "/meta" _
+          (dataset/fetch-metadata tenant-conn id))
 
         (DELETE "/" _
           (dataset/delete tenant-conn id))

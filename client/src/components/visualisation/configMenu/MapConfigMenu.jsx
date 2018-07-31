@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage, intlShape } from 'react-intl';
+import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
 import VisualisationTypeMenu from '../VisualisationTypeMenu';
 import LayerMenu from './LayerMenu';
 import LayerConfigMenu from './LayerConfigMenu';
@@ -34,7 +34,7 @@ const applyAutomaticSpecChanges = (value) => {
   return newValue;
 };
 
-export default class MapConfigMenu extends Component {
+class MapConfigMenu extends Component {
 
   constructor() {
     super();
@@ -45,6 +45,7 @@ export default class MapConfigMenu extends Component {
     this.handleAddMapLayer = this.handleAddMapLayer.bind(this);
     this.handleDeleteMapLayer = this.handleDeleteMapLayer.bind(this);
     this.handleChangeMapLayer = this.handleChangeMapLayer.bind(this);
+    this.handleChangeLayerOrder = this.handleChangeLayerOrder.bind(this);
   }
 
   componentWillReceiveProps(next) {
@@ -79,10 +80,10 @@ export default class MapConfigMenu extends Component {
 
   handleAddMapLayer() {
     const { intl, visualisation, onChangeSpec } = this.props;
-    const title = intl.formatMessage({
-      id: 'untitled_layer',
-      values: { count: visualisation.spec.layers.length + 1 },
-    });
+    const title = intl.formatMessage(
+      { id: 'untitled_layer' },
+      { count: visualisation.spec.layers.length + 1 }
+    );
     const layers = visualisation.spec.layers.slice();
     layers.push({ ...mapLayerSpecTemplate, title });
     onChangeSpec({ layers });
@@ -94,6 +95,16 @@ export default class MapConfigMenu extends Component {
 
     newLayers.splice(layerIndex, 1);
     this.props.onChangeSpec({ layers: newLayers });
+  }
+
+  handleChangeLayerOrder(oldIndex, newIndex) {
+    // Swap the oldIndex layer with the newIndex layer
+    const layers = this.props.visualisation.spec.layers.slice(0);
+    const temp = layers[newIndex];
+    layers[newIndex] = layers[oldIndex];
+    layers[oldIndex] = temp;
+
+    this.props.onChangeSpec({ layers });
   }
 
   handleChangeMapLayer(layerIndex, userChange) {
@@ -156,6 +167,7 @@ export default class MapConfigMenu extends Component {
                 onAddLayer={() => this.handleAddMapLayer()}
                 onDeleteMapLayer={layerIndex => this.handleDeleteMapLayer(layerIndex)}
                 onSelectLayer={layerIndex => this.setState({ selectedLayer: layerIndex })}
+                onChangeLayerOrder={this.handleChangeLayerOrder}
                 onChangeMapLayer={this.handleChangeMapLayer}
               />
               <div
@@ -207,3 +219,5 @@ MapConfigMenu.propTypes = {
   datasetOptions: PropTypes.array.isRequired,
   loadDataset: PropTypes.func.isRequired,
 };
+
+export default injectIntl(MapConfigMenu);

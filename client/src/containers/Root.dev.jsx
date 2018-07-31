@@ -3,14 +3,17 @@ import PropTypes from 'prop-types';
 import { Provider } from 'react-redux';
 import App from './App';
 import DevTools from './DevTools';
+import PrintProvider from './PrintProvider';
 
 export default function Root({ store, history }) {
   return (
     <Provider store={store}>
-      <div>
-        <App history={history} />
-        <DevTools />
-      </div>
+      <PrintProvider>
+        <div>
+          <App history={history} />
+          <DevTools />
+        </div>
+      </PrintProvider>
     </Provider>
   );
 }

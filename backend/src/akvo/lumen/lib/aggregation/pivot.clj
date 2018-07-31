@@ -1,13 +1,13 @@
 (ns akvo.lumen.lib.aggregation.pivot
   (:require [akvo.commons.psql-util]
             [akvo.lumen.lib :as lib]
-            [akvo.lumen.lib.aggregation.filter :as filter]
-            [akvo.lumen.lib.aggregation.utils :as utils]
+            [akvo.lumen.postgres.filter :as filter]
+            [akvo.lumen.dataset.utils :as utils]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
             [hugsql.core :as hugsql]))
 
-(hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
+(hugsql/def-db-fns "akvo/lumen/dataset.sql")
 
 (defn run-query [conn query-str]
   (rest (jdbc/query conn [query-str] {:as-arrays? true})))

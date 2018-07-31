@@ -1,4 +1,4 @@
-(ns akvo.lumen.lib.aggregation.utils)
+(ns akvo.lumen.dataset.utils)
 
 (defn find-column [columns column-name]
   (when column-name

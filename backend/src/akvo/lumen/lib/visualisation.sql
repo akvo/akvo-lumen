@@ -1,6 +1,6 @@
 -- :name all-visualisations :? :*
 -- :doc All visualisations.
-SELECT id, dataset_id as "datasetId", "name", "type" as "visualisationType", spec, created, modified
+SELECT id, dataset_id as "datasetId", "name", "type" as "visualisationType", spec, created, modified, author
 FROM visualisation;
 
 -- :name visualisation-by-id :? :1
@@ -25,6 +25,5 @@ ON CONFLICT (id)
 DO UPDATE SET dataset_id = :dataset-id,
               "name" = :name,
               "type" = :type,
-              spec = :spec,
-              author = :author
+              spec = :spec
 RETURNING *;

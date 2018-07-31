@@ -1,4 +1,5 @@
 import dl from 'datalib';
+import moment from 'moment';
 
 // Special value that will always come last alphabetically. Used for sorting.
 const lastValueAlphabetically = '';
@@ -634,3 +635,71 @@ export function processPivotData(data, spec) {
 
   return out;
 }
+
+const isRatio = val => val > 0 && val < 1;
+export function calculateMargins({ top, right, bottom, left }, { width, height }) {
+  return {
+    top: isRatio(top) ? top * height : top,
+    right: isRatio(right) ? right * width : right,
+    bottom: isRatio(bottom) ? bottom * height : bottom,
+    left: isRatio(left) ? left * width : left,
+  };
+}
+
+export const getLabelFontSize = (xLabel = '', yLabel = '', maxFont, minFont, height, width) => {
+  const longest = Math.max(xLabel.length, yLabel.length);
+  const smallestDimension = Math.min(height, width);
+  const smallChartSize = smallestDimension < 400;
+  const mediumChartSize = smallestDimension > 400 && smallestDimension < 700;
+  const mediumFont = Math.floor(0.5 * (minFont + maxFont));
+
+  if (longest > 45 && smallChartSize) {
+    return minFont;
+  }
+
+  if (longest > 60 && mediumChartSize) {
+    return minFont;
+  }
+
+  if (longest > 45 && mediumChartSize) {
+    return mediumFont;
+  }
+
+  return maxFont;
+};
+
+export const getTitle = visualisation => visualisation.name;
+
+const DATE_FORMAT = 'Do MMM YYYY - HH:mm';
+
+export const getDataLastUpdated = ({ visualisation, datasets }) => {
+  if (!datasets) return null;
+  switch (visualisation.visualisationType) {
+    case 'map': {
+      const mostRecentlyUpdatedLayerDataset = visualisation.spec.layers
+        .map(({ datasetId }) => datasets[datasetId])
+        .sort((a, b) => {
+          if (a.get('updated') < b.get('updated')) return 1;
+          if (a.get('updated') > b.get('updated')) return -1;
+          return 0;
+        })[0];
+      return mostRecentlyUpdatedLayerDataset ?
+        moment(mostRecentlyUpdatedLayerDataset.get('updated')).format(DATE_FORMAT) :
+        null;
+    }
+    case 'bar':
+    case 'pivot table':
+    case 'scatter':
+    case 'area':
+    case 'line':
+    case 'donut':
+    case 'pie': {
+      const dataset = datasets[visualisation.datasetId];
+      if (!dataset) return null;
+      return moment(dataset.get('modified')).format(DATE_FORMAT);
+    }
+    default: {
+      return null;
+    }
+  }
+};

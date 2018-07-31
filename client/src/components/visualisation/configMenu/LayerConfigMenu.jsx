@@ -453,7 +453,7 @@ const RasterThemeTab = (props) => {
     >
       <ColorLabels
         pointColorMapping={[{ value: 'startColor', color: startColor || '#FFFFFF' }, { value: 'endColor', color: endColor || '#000000' }]}
-        colorPalette={palette}
+        colorPalette={[...palette, '#FFFFFF']}
         disabled={disabled}
         onChangeColor={(value, color) => {
           if (value === 'startColor') {
@@ -614,7 +614,7 @@ class LayerConfigMenu extends Component {
           </div>
         );
         break;
-      case 'pop-up':
+      case 'popup':
         tabContent = (
           <div
             className="popupTab"
@@ -760,10 +760,10 @@ class LayerConfigMenu extends Component {
 
 
   render() {
-    const { layer, datasets } = this.props;
+    const { layer, datasets, intl } = this.props;
     const columns = datasets[layer.datasetId] ?
     datasets[layer.datasetId].get('columns') : null;
-    const columnOptions = getSelectMenuOptionsFromColumnList(columns);
+    const columnOptions = getSelectMenuOptionsFromColumnList(columns, intl);
 
     return (
       <div

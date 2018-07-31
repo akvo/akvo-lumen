@@ -11,13 +11,27 @@ import merge from 'lodash/merge';
 import { stack } from 'd3-shape';
 import { GridRows } from '@vx/grid';
 
-import { heuristicRound, replaceLabelIfValueEmpty } from '../../utilities/chart';
+import { heuristicRound, replaceLabelIfValueEmpty, calculateMargins, getLabelFontSize } from '../../utilities/chart';
 import Legend from './Legend';
 import ResponsiveWrapper from '../common/ResponsiveWrapper';
 import ColorPicker from '../common/ColorPicker';
 import ChartLayout from './ChartLayout';
 import Tooltip from './Tooltip';
-import { labelFont } from '../../constants/chart';
+import { labelFont, MAX_FONT_SIZE, MIN_FONT_SIZE } from '../../constants/chart';
+
+const getPaddingBottom = (data) => {
+  const labelCutoffLength = 16;
+  const longestLabelLength =
+    Math.min(
+      labelCutoffLength,
+      data
+        .map(({ label }) => String(replaceLabelIfValueEmpty(label)))
+        .sort((a, b) => b.length - a.length)[0].length
+    );
+  const pixelsPerChar = 3.5;
+
+  return Math.ceil(longestLabelLength * pixelsPerChar);
+};
 
 export default class StackedBarChart extends Component {
 
@@ -45,6 +59,7 @@ export default class StackedBarChart extends Component {
     legendVisible: PropTypes.bool,
     legendTitle: PropTypes.string,
     yAxisLabel: PropTypes.string,
+    xAxisLabel: PropTypes.string,
     grouped: PropTypes.bool,
     grid: PropTypes.bool,
     yAxisTicks: PropTypes.number,
@@ -52,16 +67,20 @@ export default class StackedBarChart extends Component {
 
   static defaultProps = {
     interactive: true,
-    marginLeft: 0.1,
-    marginRight: 0.1,
-    marginTop: 0.1,
-    marginBottom: 0.2,
+    marginLeft: 70,
+    marginRight: 70,
+    marginTop: 20,
+    marginBottom: 60,
     legendVisible: true,
     edit: false,
     padding: 0.1,
     colorMapping: {},
     grouped: false,
     grid: true,
+  }
+
+  static contextTypes = {
+    abbrNumber: PropTypes.func,
   }
 
   constructor(props) {
@@ -76,7 +95,7 @@ export default class StackedBarChart extends Component {
     this.setState({ data: this.getData(nextProps) });
   }
 
-  getData(props) {
+  getData(props) { // eslint-disable-line
     const { data } = props;
 
     if (!get(data, 'series[0]')) return false;
@@ -171,7 +190,15 @@ export default class StackedBarChart extends Component {
     });
   }
 
-  renderLabel({ nodeWidth, x, y, node }) {
+  renderLabel({ nodeWidth, x, y, node, index, nodeCount }) {
+    if (
+      (nodeCount >= 200 && index % 10 !== 0) ||
+      (nodeCount < 200 && nodeCount > 40 && index % 5 !== 0)
+    ) return null;
+    let labelText = String(replaceLabelIfValueEmpty(node.key));
+    labelText = labelText.length <= 16 ?
+      labelText : `${labelText.substring(0, 13)}…`;
+
     const labelX = x + (nodeWidth / 2);
     const labelY = y + 10;
     return (
@@ -184,7 +211,7 @@ export default class StackedBarChart extends Component {
         {...labelFont}
         fontWeight={get(this.state, 'hoveredNode.valueKey') === node.key ? 700 : 400}
       >
-        {replaceLabelIfValueEmpty(node.key)}
+        {labelText}
       </Text>
     );
   }
@@ -206,6 +233,7 @@ export default class StackedBarChart extends Component {
       padding,
       yAxisLabel,
       yAxisTicks,
+      xAxisLabel,
       grouped,
       grid,
     } = this.props;
@@ -219,6 +247,9 @@ export default class StackedBarChart extends Component {
     const stackNodes = series.stack;
     const dataCount = series.data.length;
     const seriesCount = this.props.data.series.length;
+    const paddingBottom = getPaddingBottom(series.data);
+    const axisLabelFontSize =
+      getLabelFontSize(yAxisLabel, xAxisLabel, MAX_FONT_SIZE, MIN_FONT_SIZE, height, width);
 
     return (
       <ChartLayout
@@ -255,8 +286,15 @@ export default class StackedBarChart extends Component {
         )}
         chart={
           <ResponsiveWrapper>{(dimensions) => {
-            const availableHeight = dimensions.height * (1 - marginBottom - marginTop);
-            const availableWidth = dimensions.width * (1 - marginLeft - marginRight);
+            const margins = calculateMargins({
+              top: marginTop,
+              right: marginRight,
+              bottom: marginBottom,
+              left: marginLeft,
+            }, dimensions);
+            const availableHeight =
+              dimensions.height - margins.bottom - margins.top - paddingBottom;
+            const availableWidth = dimensions.width - margins.left - margins.right;
 
             const domain = grouped ?
               extent(series.data, ({ values }) =>
@@ -278,6 +316,14 @@ export default class StackedBarChart extends Component {
               .domain([0, domain[1]])
               .range([0, availableHeight].reverse());
 
+            const tickFormat = (value) => {
+              const cutoff = 10000;
+              if (cutoff >= 10000) {
+                return this.context.abbrNumber(value);
+              }
+              return value;
+            };
+
             return (
               <div
                 style={{ position: 'relative' }}
@@ -298,8 +344,8 @@ export default class StackedBarChart extends Component {
                       scale={axisScale}
                       width={availableWidth}
                       height={availableHeight}
-                      left={dimensions.width * marginLeft}
-                      top={dimensions.height * marginTop}
+                      left={margins.left}
+                      top={margins.top}
                       numTicks={yAxisTicks}
                     />
                   )}
@@ -308,17 +354,14 @@ export default class StackedBarChart extends Component {
                     data={series.data}
                     bands
                     size={[
-                      dimensions.width * (1 - marginLeft - marginRight),
-                      dimensions.height * (1 - marginTop - marginBottom),
+                      dimensions.width - margins.left - margins.right,
+                      dimensions.height - margins.top - margins.bottom - paddingBottom,
                     ]}
                     rows={1}
                   >{nodes => (
                     <Group
                       transform={{
-                        translate: [
-                          dimensions.width * marginLeft,
-                          dimensions.height * marginTop,
-                        ],
+                        translate: [margins.left, margins.top],
                       }}
                     >
                       {stackNodes.map((stackSeries, seriesIndex) => {
@@ -352,8 +395,8 @@ export default class StackedBarChart extends Component {
                                         color={color}
                                         left={
                                           colorpickerPlacement === 'right' ?
-                                            (dimensions.width * marginLeft) + x + nodeWidth :
-                                            (dimensions.width * marginLeft) + x
+                                            margins.left + x + nodeWidth :
+                                            margins.left + x
                                         }
                                         top={normalizedY}
                                         placement={colorpickerPlacement}
@@ -415,12 +458,14 @@ export default class StackedBarChart extends Component {
                         );
                       })}
 
-                      {nodes.map((node) => {
+                      {nodes.map((node, index) => {
                         const { nodeWidth, x, key } = node;
 
                         return (
                           <Group key={key}>
                             {this.renderLabel({
+                              nodeCount: series.data.length,
+                              index,
                               nodeWidth,
                               x,
                               y: origin,
@@ -436,13 +481,30 @@ export default class StackedBarChart extends Component {
 
                   <AxisLeft
                     scale={axisScale}
-                    left={dimensions.width * marginLeft}
-                    top={dimensions.height * marginTop}
+                    left={margins.left}
+                    top={margins.top}
                     label={yAxisLabel || ''}
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}
                     numTicks={yAxisTicks}
+                    labelProps={{
+                      fontSize: axisLabelFontSize,
+                      textAnchor: 'middle',
+                    }}
+                    labelOffset={44}
+                    tickFormat={tickFormat}
                   />
+
+                  <Text
+                    transform={[
+                      { type: 'translate', value: [Math.floor(this.props.width / 2) - 125, this.props.height - 10] },
+                    ]}
+                    fontSize={axisLabelFontSize}
+                    textAnchor="middle"
+                    fontFamily="Arial"
+                  >
+                    {xAxisLabel || ''}
+                  </Text>
 
                 </Svg>
               </div>

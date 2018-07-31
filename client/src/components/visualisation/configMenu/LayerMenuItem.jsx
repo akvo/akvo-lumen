@@ -32,7 +32,9 @@ class LayerMenuItem extends Component {
       onChangeTitle,
       onDeleteLayer,
       onSelectLayer,
+      onChangeLayerOrder,
       intl,
+      numLayers,
     } = this.props;
 
     return (
@@ -74,6 +76,32 @@ class LayerMenuItem extends Component {
               >
                 {layer.title}
               </span>
+            </span>
+            <span className="orderButtonSection">
+              {layerIndex > 0 ?
+                <span className="orderButtonContainer">
+                  <button
+                    className={'clickable orderButton noSelect'}
+                    onClick={() => onChangeLayerOrder(layerIndex, layerIndex - 1)}
+                  >
+                    <i className="fa fa-caret-up" />
+                  </button>
+                </span>
+                :
+                null
+              }
+              {layerIndex < numLayers ?
+                <span className="orderButtonContainer">
+                  <button
+                    className={'clickable orderButton noSelect'}
+                    onClick={() => onChangeLayerOrder(layerIndex, layerIndex + 1)}
+                  >
+                    <i className="fa fa-caret-down" />
+                  </button>
+                </span>
+                :
+                null
+              }
             </span>
             <span
               className="toggleContainer notImplemented"
@@ -132,7 +160,8 @@ LayerMenuItem.propTypes = {
   onDeleteLayer: PropTypes.func.isRequired,
   onSelectLayer: PropTypes.func.isRequired,
   onSetLayerVisible: PropTypes.func.isRequired,
-
+  numLayers: PropTypes.number.isRequired,
+  onChangeLayerOrder: PropTypes.func.isRequired,
 };
 
 export default injectIntl(LayerMenuItem);

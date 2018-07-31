@@ -11,7 +11,8 @@ import { GridRows, GridColumns } from '@vx/grid';
 import itsSet from 'its-set';
 
 import { sortChronologically, filterNullData } from '../../utilities/utils';
-import { heuristicRound } from '../../utilities/chart';
+import { heuristicRound, calculateMargins, getLabelFontSize } from '../../utilities/chart';
+import { MAX_FONT_SIZE, MIN_FONT_SIZE } from '../../constants/chart';
 import ResponsiveWrapper from '../common/ResponsiveWrapper';
 import ColorPicker from '../common/ColorPicker';
 import ChartLayout from './ChartLayout';
@@ -63,10 +64,10 @@ export default class LineChart extends Component {
   }
 
   static defaultProps = {
-    marginLeft: 0.2,
-    marginRight: 0.1,
-    marginTop: 0.1,
-    marginBottom: 0.2,
+    marginLeft: 70,
+    marginRight: 70,
+    marginTop: 20,
+    marginBottom: 80,
     opacity: 0.9,
     edit: false,
     area: false,
@@ -174,6 +175,10 @@ export default class LineChart extends Component {
 
     series.data = filterNullData(series.data);
 
+    const axisLabelFontSize =
+      getLabelFontSize(yAxisLabel, xAxisLabel, MAX_FONT_SIZE, MIN_FONT_SIZE, height, width);
+
+
     return (
       <ChartLayout
         style={style}
@@ -187,21 +192,27 @@ export default class LineChart extends Component {
           <ResponsiveWrapper>{(dimensions) => {
             if (!series.data.length) return null;
 
-            const availableHeight = dimensions.height * (1 - marginBottom - marginTop);
-            const availableWidth = dimensions.width * (1 - marginLeft - marginRight);
+            const margins = calculateMargins({
+              top: marginTop,
+              right: marginRight,
+              bottom: marginBottom,
+              left: marginLeft,
+            }, dimensions);
+            const availableHeight = dimensions.height - margins.bottom - margins.top;
+            const availableWidth = dimensions.width - margins.left - margins.right;
 
             const xScale = series.metadata.type === 'date' ?
               scaleTime()
                 .domain([series.data[0].timestamp, series.data[series.data.length - 1].timestamp])
                 .range([
-                  dimensions.width * marginLeft,
-                  dimensions.width * (1 - marginRight),
+                  margins.left,
+                  dimensions.width - margins.right,
                 ]) :
               scaleLinear()
                 .domain([series.data[0].timestamp, series.data[series.data.length - 1].timestamp])
                 .range([
-                  dimensions.width * marginLeft,
-                  dimensions.width * (1 - marginRight),
+                  margins.left,
+                  dimensions.width - margins.right,
                 ]);
 
 
@@ -210,22 +221,25 @@ export default class LineChart extends Component {
             const yScale = scaleLinear()
               .domain(yExtent)
               .range([
-                dimensions.height * (1 - marginBottom),
-                dimensions.height * marginTop,
+                dimensions.height - margins.bottom,
+                margins.top,
               ]);
 
             const origin = yScale(0);
             const radius = Math.min((5 / series.data.length) * 20, 5);
-
             const numNodes = series.data.length;
             const maxNodesForTooltip = 50;
             const showTooltip = numNodes <= maxNodesForTooltip;
+            const abbreviateNumber = value => this.context.abbrNumber(value);
 
-            const tickFormat = series.metadata.type === 'number' ?
-              { tickFormat: value => this.context.abbrNumber(value) }
-              :
-              {}
-            ;
+            const xTickFormatConditional = series.metadata.type === 'number' ?
+              { tickFormat: abbreviateNumber } : {};
+            const yTickFormat = (num) => {
+              if (num >= 10000) {
+                return abbreviateNumber(num);
+              }
+              return num;
+            };
 
             return (
               <div
@@ -346,14 +360,15 @@ export default class LineChart extends Component {
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}
                     numTicks={yAxisTicks}
-                    {...tickFormat}
+                    tickFormat={yTickFormat}
                     labelProps={{
-                      dy: marginTop * dimensions.height * 0.5,
+                      dy: margins.top * 0.5,
                       textAnchor: 'middle',
                       fontFamily: 'Arial',
-                      fontSize: 10,
+                      fontSize: axisLabelFontSize,
                       fill: 'black',
                     }}
+                    labelOffset={44}
                   />
 
                   <AxisBottom
@@ -361,16 +376,21 @@ export default class LineChart extends Component {
                     scale={xScale}
                     label={xAxisLabel || ''}
                     labelProps={{
-                      dx: marginLeft * dimensions.width * 0.5,
+                      dx: margins.left * 0.5,
+                      dy: margins.bottom - 50,
                       textAnchor: 'middle',
                       fontFamily: 'Arial',
-                      fontSize: 10,
+                      fontSize: axisLabelFontSize,
                       fill: 'black',
                     }}
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}
                     numTicks={xAxisTicks}
-                    {...tickFormat}
+                    tickLabelProps={val => ({
+                      transform: `rotate(45, ${xScale(val)}, 18)`,
+                      fontSize: 10,
+                    })}
+                    {...xTickFormatConditional}
                   />
                 </Svg>
               </div>

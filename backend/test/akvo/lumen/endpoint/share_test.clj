@@ -14,6 +14,7 @@
 ;;; Helpers
 ;;;
 
+(hugsql/def-db-fns "akvo/lumen/dataset.sql")
 (hugsql/def-db-fns "akvo/lumen/job-execution.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
 
@@ -76,10 +77,14 @@
                               :data-source-id (:data-source-id spec)})
   (insert-dataset conn {:id          (:dataset-id spec)
                         :title       "Title"
-                        :description "Description"})
+                        :description "Description"
+                        :author {}
+                        :source {}})
   (insert-dataset conn {:id          (:dataset-id-2 spec)
                         :title       "Title"
-                        :description "Description"})
+                        :description "Description"
+                        :author {}
+                        :source {}})
   (insert-dataset-version conn {:id (squuid)
                                 :dataset-id (:dataset-id spec)
                                 :job-execution-id (:job-execution-id spec)
@@ -109,7 +114,7 @@
                               :spec       {}
                               :author     {}})
   (dashboard/create conn (dashboard-spec (:visualisation-id spec)
-                                         (:visualisation2-id spec))))
+                                         (:visualisation2-id spec)) {}))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Test data

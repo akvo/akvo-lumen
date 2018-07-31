@@ -10,13 +10,13 @@ import { Portal } from 'react-portal';
 import merge from 'lodash/merge';
 import { GridRows } from '@vx/grid';
 
-import { heuristicRound, replaceLabelIfValueEmpty } from '../../utilities/chart';
+import { heuristicRound, replaceLabelIfValueEmpty, calculateMargins, getLabelFontSize } from '../../utilities/chart';
 import Legend from './Legend';
 import ResponsiveWrapper from '../common/ResponsiveWrapper';
 import ColorPicker from '../common/ColorPicker';
 import ChartLayout from './ChartLayout';
 import Tooltip from './Tooltip';
-import { labelFont } from '../../constants/chart';
+import { labelFont, MAX_FONT_SIZE, MIN_FONT_SIZE } from '../../constants/chart';
 
 const getDatum = (data, datum) => data.filter(({ key }) => key === datum)[0];
 
@@ -88,15 +88,19 @@ export default class SimpleBarChart extends Component {
 
   static defaultProps = {
     interactive: true,
-    marginLeft: 0.1,
-    marginRight: 0.1,
-    marginTop: 0.1,
-    marginBottom: 0.1,
+    marginLeft: 80,
+    marginRight: 70,
+    marginTop: 70,
+    marginBottom: 60,
     legendVisible: false,
     edit: false,
     padding: 0.1,
     colorMapping: {},
     grid: true,
+  }
+
+  static contextTypes = {
+    abbrNumber: PropTypes.func,
   }
 
   state = {
@@ -177,7 +181,11 @@ export default class SimpleBarChart extends Component {
     });
   }
 
-  renderLabel({ key, nodeWidth, x, y, domain, value, type }) {
+  renderLabel({ key, nodeWidth, x, y, domain, value, type, index, nodeCount }) {
+    if (
+      (nodeCount >= 200 && index % 10 !== 0) ||
+      (nodeCount < 200 && nodeCount > 40 && index % 5 !== 0)
+    ) return null;
     let labelText = String(getLabelText(value, type));
     labelText = labelText.length <= 16 ?
       labelText : `${labelText.substring(0, 13)}…`;
@@ -262,6 +270,8 @@ export default class SimpleBarChart extends Component {
     const dataType = series.metadata.type;
     const paddingBottom = getPaddingBottom(series.data, dataType);
     const dataCount = series.data.length;
+    const axisLabelFontSize =
+      getLabelFontSize(yAxisLabel, xAxisLabel, MAX_FONT_SIZE, MIN_FONT_SIZE, height, width);
 
     return (
       <ChartLayout
@@ -295,9 +305,14 @@ export default class SimpleBarChart extends Component {
         )}
         chart={
           <ResponsiveWrapper>{(dimensions) => {
-            const availableHeight =
-              (dimensions.height * (1 - marginBottom - marginTop)) - paddingBottom;
-            const availableWidth = dimensions.width * (1 - marginLeft - marginRight);
+            const margins = calculateMargins({
+              top: marginTop,
+              right: marginRight,
+              bottom: marginBottom,
+              left: marginLeft,
+            }, dimensions);
+            const availableHeight = dimensions.height - margins.bottom - margins.top - paddingBottom; // eslint-disable-line
+            const availableWidth = dimensions.width - margins.left - margins.right;
 
             const domain = extent(series.data, ({ value }) => value);
             if (domain[0] > 0) domain[0] = 0;
@@ -309,6 +324,14 @@ export default class SimpleBarChart extends Component {
             const origin = heightScale(Math.abs(domain[0]));
 
             const axisScale = scaleLinear().domain(domain).range([0, availableHeight].reverse());
+
+            const tickFormat = (value) => {
+              const cutoff = 10000;
+              if (cutoff >= 10000) {
+                return this.context.abbrNumber(value);
+              }
+              return value;
+            };
 
             return (
               <div
@@ -330,8 +353,8 @@ export default class SimpleBarChart extends Component {
                       scale={axisScale}
                       width={availableWidth}
                       height={availableHeight}
-                      left={dimensions.width * marginLeft}
-                      top={dimensions.height * marginTop}
+                      left={margins.left}
+                      top={margins.top}
                       numTicks={yAxisTicks}
                     />
                   )}
@@ -340,19 +363,14 @@ export default class SimpleBarChart extends Component {
                     data={series.data}
                     bands
                     size={[
-                      dimensions.width * (1 - marginLeft - marginRight),
-                      (dimensions.height * (1 - marginTop - marginBottom)) - paddingBottom,
+                      dimensions.width - margins.left - margins.right,
+                      dimensions.height - margins.top - margins.bottom - paddingBottom,
                     ]}
                     rows={1}
-                    // nodeEnter={d => ({ ...d, value: 0 })}
-                    // animate
                   >{nodes => (
                     <Group
                       transform={{
-                        translate: [
-                          dimensions.width * marginLeft,
-                          dimensions.height * marginTop,
-                        ],
+                        translate: [margins.left, margins.top],
                       }}
                     >
                       {nodes.map(({ nodeWidth, x, key, value }, i) => {
@@ -369,10 +387,10 @@ export default class SimpleBarChart extends Component {
                                   color={color}
                                   left={
                                     colorpickerPlacement === 'right' ?
-                                      (dimensions.width * marginLeft) + x + nodeWidth :
-                                      (dimensions.width * marginLeft) + x
+                                      margins.left + x + nodeWidth :
+                                      margins.left + x
                                   }
-                                  top={y + (normalizedHeight / 2) + (dimensions.height * marginTop)}
+                                  top={y + (normalizedHeight / 2) + margins.top}
                                   placement={colorpickerPlacement}
                                   onChange={({ hex }) => {
                                     onChangeVisualisationSpec({
@@ -406,6 +424,8 @@ export default class SimpleBarChart extends Component {
                               }}
                             />
                             {this.renderLabel({
+                              nodeCount: series.data.length,
+                              index: i,
                               key,
                               value: key,
                               nodeWidth,
@@ -423,19 +443,26 @@ export default class SimpleBarChart extends Component {
 
                   <AxisLeft
                     scale={axisScale}
-                    left={dimensions.width * marginLeft}
-                    top={dimensions.height * marginTop}
+                    left={margins.left}
+                    top={margins.top}
                     label={yAxisLabel || ''}
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}
                     numTicks={yAxisTicks}
+                    labelProps={{
+                      fontSize: axisLabelFontSize,
+                      textAnchor: 'middle',
+                    }}
+                    labelOffset={44}
+                    tickFormat={tickFormat}
                   />
 
                   <Text
                     transform={[
-                      { type: 'translate', value: [Math.floor(this.props.width / 2), this.props.height - 5] },
+                      { type: 'translate', value: [Math.floor(this.props.width / 2), this.props.height - 10] },
                     ]}
-                    fontSize={10}
+                    fontSize={axisLabelFontSize}
+                    textAnchor="middle"
                     fontFamily="Arial"
                   >
                     {xAxisLabel || ''}

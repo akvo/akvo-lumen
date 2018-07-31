@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import numeral from 'numeral';
 import { addLocaleData, IntlProvider } from 'react-intl';
+import 'numeral/locales/fr';
+import 'numeral/locales/es';
 import fr from 'react-intl/locale-data/fr';
 import en from 'react-intl/locale-data/en';
 import es from 'react-intl/locale-data/es';
@@ -20,13 +22,15 @@ const MESSAGES = {
   en: enTranslations,
 };
 
+const getMessages = (locale = 'en') => MESSAGES[locale];
+
 class IntlWrapper extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
       abbrNumber: value => numeral(value).format('0.0a'),
-      messages: this.getMessages(props.locale),
+      messages: getMessages(props.locale),
     };
   }
 
@@ -45,17 +49,13 @@ class IntlWrapper extends Component {
     }
   }
 
-  getMessages(locale = 'en') {
-    return MESSAGES[locale];
-  }
-
   handleChangeLocale(locale) {
     if (!locale) return;
 
     numeral.locale(locale);
 
     this.setState({
-      messages: this.getMessages(locale),
+      messages: getMessages(locale),
     });
   }
 

@@ -75,3 +75,24 @@
         border-left: 0.1rem solid $lightBlueGrey;
     }
 }
+
+
+@media print {
+    .Header {
+        width: 100%;
+
+        .backButton,
+        .primary-actions,
+        .actions,
+        .saveStatus {
+            display: none !important;
+        }
+
+        .content {
+            &,
+            * {
+                width: 100%;
+            }
+        }
+    }
+}

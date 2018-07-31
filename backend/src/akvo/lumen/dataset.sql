@@ -3,7 +3,7 @@
 WITH
 failed_imports AS (
   --TODO name->title
-  SELECT j.id, d.spec->>'name' AS name, j.error_log->>0 AS error_log, j.status, j.created, j.modified
+  SELECT j.id, d.spec->>'name' AS name, j.error_log->>0 AS error_log, j.status, j.created, j.modified, '{}'::jsonb AS author, '{}'::jsonb AS source
     FROM data_source d, job_execution j
    WHERE j.data_source_id = d.id
      AND j.type = 'IMPORT'
@@ -11,21 +11,26 @@ failed_imports AS (
      AND d.spec->'source'->>'kind' != 'GEOTIFF'
 ),
 pending_imports AS (
-  SELECT j.id, d.spec->>'name' AS name, j.status, j.created, j.modified
+  SELECT j.id, d.spec->>'name' AS name, j.status, j.created, j.modified, '{}'::jsonb AS author, '{}'::jsonb AS source
     FROM data_source d, job_execution j
    WHERE j.data_source_id = d.id
      AND j.type = 'IMPORT'
      AND j.status = 'PENDING'
      AND d.spec->'source'->>'kind' != 'GEOTIFF'
 )
-SELECT id, name, error_log as reason, status, modified, created
+SELECT id, name, error_log as reason, status, modified, created, '{}'::jsonb AS author, '{}'::jsonb AS source
   FROM failed_imports
  UNION
-SELECT id, name, NULL, status, modified, created
+SELECT id, name, NULL, status, modified, created, '{}'::jsonb AS author, '{}'::jsonb AS source
   FROM pending_imports
  UNION
-SELECT id, title, NULL, 'OK', modified, created
+SELECT id, title, NULL, 'OK', modified, created, author, source
   FROM dataset;
+
+-- :name insert-dataset :! :n
+-- :doc Insert new dataset
+INSERT INTO dataset(id, title, description, author, source)
+VALUES (:id, :title, :description, :author, :source);
 
 -- :name delete-dataset-by-id :! :n
 -- :doc delete dataset
@@ -35,24 +40,14 @@ DELETE FROM dataset WHERE id=:id;
 -- :doc update dataset meta
 UPDATE dataset SET title = :title WHERE id = :id;
 
--- :name update-dataset-data :! :n
--- :doc Update dataset with data
-UPDATE datasets
-SET d = :d::jsonb, status = :status
-WHERE id = :id;
-
--- :name update-dataset-name :! :n
--- :doc Update dataset name
-UPDATE datasets
-SET "name" = :name
-WHERE id = :id;
-
 -- :name dataset-by-id :? :1
 SELECT dataset_version.table_name AS "table-name",
        dataset.title,
        dataset.created,
        dataset.modified,
        dataset.id,
+       dataset.author,
+       dataset.source,
        dataset_version.created AS "updated",
        dataset_version.columns,
        dataset_version.transformations

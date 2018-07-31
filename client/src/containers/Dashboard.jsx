@@ -14,6 +14,7 @@ import aggregationOnlyVisualisationTypes from '../utilities/aggregationOnlyVisua
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { SAVE_COUNTDOWN_INTERVAL, SAVE_INITIAL_TIMEOUT } from '../constants/time';
 import NavigationPrompt from '../components/common/NavigationPrompt';
+import { printShape } from './PrintProvider';
 
 const getEditingStatus = (location) => {
   const testString = 'create';
@@ -288,7 +289,7 @@ class Dashboard extends Component {
         this.setState({
           requestedDatasetIds: newRequestedDatasetIds,
         });
-        this.props.dispatch(fetchDataset(datasetId));
+        this.props.dispatch(fetchDataset(datasetId, true));
       }
     }
   }
@@ -526,6 +527,7 @@ class Dashboard extends Component {
             onUpdateLayout={this.updateLayout}
             onUpdateEntities={this.updateEntities}
             onUpdateName={this.onUpdateName}
+            print={this.props.print}
           />
           <ShareEntity
             isOpen={this.state.isShareModalVisible}
@@ -552,6 +554,7 @@ Dashboard.propTypes = {
   library: PropTypes.object.isRequired,
   location: PropTypes.object.isRequired,
   params: PropTypes.object,
+  print: printShape,
 };
 
 export default connect(state => state)(injectIntl(Dashboard));

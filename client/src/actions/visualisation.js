@@ -47,7 +47,7 @@ export function fetchVisualisation(id) {
         // We also need to possibly fetch datasets.
         const datasetId = visualisation.datasetId;
         if (datasetId) {
-          dispatch(fetchDataset(datasetId));
+          dispatch(fetchDataset(datasetId, true));
         }
         // ...which might be stored on layers if it's a map
         if (visualisation.visualisationType === 'map') {
@@ -66,7 +66,7 @@ export function fetchVisualisation(id) {
               }
             });
 
-            datasetsToLoad.forEach(depId => dispatch(fetchDataset(depId)));
+            datasetsToLoad.forEach(depId => dispatch(fetchDataset(depId, true)));
           }
         }
         dispatch(fetchVisualisationSuccess(visualisation));

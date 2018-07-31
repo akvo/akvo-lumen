@@ -5,10 +5,16 @@
   overflow: hidden;
   vertical-align: top;
   background-color: white;
-  border: 0.1rem solid $midGrey;
+  color: $dashboardFG;
+  @include border-radius(8px);
+
+  .title {
+      display: none;
+  }
 
   &.text {
     overflow-y: auto;
+    color: $dashboardFG;
   }
 
   .itemContainer {
@@ -16,6 +22,21 @@
       line-height: 1.4rem;
       white-space: pre-wrap;
       word-break: break-word;
+      color: $dashboardFG;
     }
+  }
+
+  .itemTitle {
+      padding-bottom: 15px;
+
+      h2 {
+          color: $dashboardFG;
+          font-weight: 600;
+          font-size: 1.3em;
+      }
+      span {
+          color: $dashboardFGSecondary;
+          font-size: 0.9em;
+      }
   }
 }

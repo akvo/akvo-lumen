@@ -1,7 +1,8 @@
 @import "../../../styles/modules/importAll";
 
 .PieConfigMenu {
-    .showLegend {
+    .showLegend,
+    .showLabels {
         display: block;
         margin-bottom: 1rem;
 

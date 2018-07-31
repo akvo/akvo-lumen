@@ -1,6 +1,6 @@
 (ns akvo.lumen.lib.visualisation.maps
   (:require [akvo.lumen.lib :as lib]
-            [akvo.lumen.lib.aggregation.filter :as filter]
+            [akvo.lumen.postgres.filter :as filter]
             [akvo.lumen.lib.visualisation.map-config :as map-config]
             [akvo.lumen.lib.visualisation.map-metadata :as map-metadata]
             [akvo.lumen.transformation.engine :as engine]
@@ -12,7 +12,7 @@
   (:import [com.zaxxer.hikari HikariDataSource]
            [java.net URI]))
 
-(hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
+(hugsql/def-db-fns "akvo/lumen/dataset.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/raster.sql")
 
 (defn- headers [tenant-conn]

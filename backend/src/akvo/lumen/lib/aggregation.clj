@@ -8,7 +8,7 @@
             [clojure.java.jdbc :as jdbc]
             [hugsql.core :as hugsql]))
 
-(hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
+(hugsql/def-db-fns "akvo/lumen/dataset.sql")
 
 (defmulti query*
   (fn [tenant-conn dataset visualisation-type query]
@@ -45,10 +45,6 @@
 (defmethod query* "bar"
   [tenant-conn dataset _ query]
   (bar/query tenant-conn dataset query))
-
-(defmethod query* "donut"
-  [tenant-conn dataset _ query]
-  (pie/query tenant-conn dataset query))
 
 (defmethod query* "scatter"
   [tenant-conn dataset _ query]

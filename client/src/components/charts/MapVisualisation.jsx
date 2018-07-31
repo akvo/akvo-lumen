@@ -2,12 +2,12 @@ import React, { Component } from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 import leaflet from 'leaflet';
-import { isEqual, cloneDeep } from 'lodash';
+import { isEqual, cloneDeep, get, compact } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-import moment from 'moment';
 import leafletUtfGrid from '../../vendor/leaflet.utfgrid';
 import * as chart from '../../utilities/chart';
 import Spinner from '../common/LoadingSpinner';
+import { trackEvent } from '../../utilities/analytics';
 
 require('../../../node_modules/leaflet/dist/leaflet.css');
 require('./MapVisualisation.scss');
@@ -62,7 +62,7 @@ const wrapLabel = (str) => {
 
 const LegendEntry = ({ singleMetadata, layer }) => (
   <div className="LegendEntry">
-    {Boolean(singleMetadata.pointColorMapping) &&
+    {Boolean(get(singleMetadata, 'pointColorMapping')) &&
       <div className="container">
         <h4>{layer.title}</h4>
         <h5>{`${singleMetadata.pointColorMappingTitle}`}</h5>
@@ -87,7 +87,7 @@ const LegendEntry = ({ singleMetadata, layer }) => (
         </div>
       </div>
     }
-    {Boolean(singleMetadata.shapeColorMapping) &&
+    {Boolean(get(singleMetadata, 'shapeColorMapping')) &&
       <div className="container">
         <h4>{layer.title}</h4>
         <h5>{singleMetadata.shapeColorMappingTitle}</h5>
@@ -109,7 +109,7 @@ const LegendEntry = ({ singleMetadata, layer }) => (
         </div>
       </div>
     }
-    {Boolean(layer.layerType === 'raster') &&
+    {Boolean(singleMetadata && layer.layerType === 'raster') &&
       <div className="container">
         <h4>{layer.title}</h4>
         <h5>Raster layer</h5>
@@ -140,7 +140,7 @@ LegendEntry.propTypes = {
 };
 
 const Legend = ({ layers, layerMetadata }) => {
-  const legendLayers = layers.map((layer, idx) => {
+  const legendLayers = compact(layers.map((layer, idx) => {
     const metadata = layerMetadata[idx];
     const showLayer =
       Boolean(
@@ -151,12 +151,10 @@ const Legend = ({ layers, layerMetadata }) => {
       layer.layerType === 'raster';
 
     return showLayer ? layer : null;
-  });
+  }));
 
-  return (
-    <div
-      className={'Legend'}
-    >
+  return legendLayers.length ? (
+    <div className="Legend">
       <div className="container">
         {
           legendLayers.map((layer, idx) => {
@@ -175,7 +173,7 @@ const Legend = ({ layers, layerMetadata }) => {
         }
       </div>
     </div>
-  );
+  ) : null;
 };
 
 Legend.propTypes = {
@@ -239,22 +237,15 @@ export default class MapVisualisation extends Component {
     super();
     this.renderLeafletLayer = this.renderLeafletLayer.bind(this);
     this.renderLeafletMap = this.renderLeafletMap.bind(this);
+    this.state = {
+      hasTrackedLayerTypes: false,
+    };
   }
   componentDidMount() {
     this.renderLeafletMap(this.props);
   }
   componentWillReceiveProps(nextProps) {
     this.renderLeafletMap(nextProps);
-  }
-
-  getMostRecentlyUpdatedLayerDataset() {
-    const { visualisation, datasets } = this.props;
-    return visualisation.spec.layers.map(({ datasetId }) => datasets[datasetId])
-      .sort((a, b) => {
-        if (a.get('updated') < b.get('updated')) return 1;
-        if (a.get('updated') > b.get('updated')) return -1;
-        return 0;
-      })[0];
   }
 
   renderLeafletLayer(layer, id, layerGroupId, layerMetadata, baseURL, map) {
@@ -417,8 +408,18 @@ export default class MapVisualisation extends Component {
 
     const newSpec = nextProps.visualisation.spec || {};
 
+    if (get(newSpec, 'layers.length') && !this.state.hasTrackedLayerTypes) {
+      this.setState({
+        hasTrackedLayerTypes: true,
+      }, () => {
+        newSpec.layers.forEach(({ layerType }) => {
+          trackEvent('Render map layer type:', layerType || 'raster');
+        });
+      });
+    }
+
     // Add or update the windshaft tile layer if necessary
-    if (newSpec.layers.length === 0 && this.dataLayer) {
+    if (get(newSpec, 'layers.length') === 0 && this.dataLayer) {
       map.removeLayer(this.dataLayer);
       this.dataLayer = null;
     } else if (layerGroupId) {
@@ -448,14 +449,19 @@ export default class MapVisualisation extends Component {
   }
 
   render() {
-    const { visualisation, metadata, width, height } = this.props;
+    const { visualisation, metadata, width, height, showTitle, datasets } = this.props;
     const title = visualisation.name || '';
     const titleLength = title.toString().length;
     const titleHeight = titleLength > 48 ? 56 : 36;
     const mapWidth = width || '100%';
-    const mapHeight = height ?
-      height - (titleHeight * (1 + META_SCALE)) :
-      `calc(100% - ${(titleHeight * (1 + META_SCALE))}px)`;
+    let mapHeight;
+    if (showTitle) {
+      mapHeight = height ?
+        height - (titleHeight * (1 + META_SCALE)) :
+        `calc(100% - ${(titleHeight * (1 + META_SCALE))}px)`;
+    } else {
+      mapHeight = height || '100%';
+    }
     const needLegend = Boolean(
       visualisation.spec.layers &&
       visualisation.spec.layers.filter(l => l.legend.visible).length &&
@@ -463,7 +469,7 @@ export default class MapVisualisation extends Component {
       metadata.layerMetadata &&
       metadata.layerMetadata.length
     );
-    const mostRecentlyUpdatedLayerDataset = this.getMostRecentlyUpdatedLayerDataset();
+    const lastUpdated = chart.getDataLastUpdated({ visualisation, datasets });
     return (
       <div
         className="MapVisualisation dashChart"
@@ -472,30 +478,34 @@ export default class MapVisualisation extends Component {
           height,
         }}
       >
-        <h2
-          style={{
-            height: titleHeight,
-            lineHeight: titleLength > 96 ? '16px' : '20px',
-            fontSize: titleLength > 96 ? '14px' : '16px',
-          }}
-        >
-          <span>
-            {visualisation.name}
-          </span>
-        </h2>
-        {mostRecentlyUpdatedLayerDataset && (
-          <p
-            className="chartMeta"
-            style={{
-              height: titleHeight * META_SCALE,
-              lineHeight: titleLength > 96 ? '12px' : '16px',
-              fontSize: titleLength > 96 ? '10px' : '12px',
-            }}
-          >
-            <span className="capitalize">
-              <FormattedMessage id="data_last_updated" />
-            </span>: {moment(mostRecentlyUpdatedLayerDataset.get('updated')).format('Do MMM YYYY - HH:mm')}
-          </p>
+        {showTitle && (
+          <div>
+            <h2
+              style={{
+                height: titleHeight,
+                lineHeight: titleLength > 96 ? '16px' : '20px',
+                fontSize: titleLength > 96 ? '14px' : '16px',
+              }}
+            >
+              <span>
+                {chart.getTitle(visualisation)}
+              </span>
+            </h2>
+            {lastUpdated && (
+              <p
+                className="chartMeta"
+                style={{
+                  height: titleHeight * META_SCALE,
+                  lineHeight: titleLength > 96 ? '12px' : '16px',
+                  fontSize: titleLength > 96 ? '10px' : '12px',
+                }}
+              >
+                <span className="capitalize">
+                  <FormattedMessage id="data_last_updated" />
+                </span>: {lastUpdated}
+              </p>
+            )}
+          </div>
         )}
         <div
           className="mapContainer"
@@ -533,5 +543,10 @@ MapVisualisation.propTypes = {
   datasets: PropTypes.object.isRequired,
   metadata: PropTypes.object,
   width: PropTypes.number,
-  height: PropTypes.number,
+  height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  showTitle: PropTypes.bool,
+};
+
+MapVisualisation.defaultProps = {
+  showTitle: true,
 };

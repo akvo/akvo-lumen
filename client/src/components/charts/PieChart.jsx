@@ -34,6 +34,7 @@ export default class PieChart extends Component {
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
     innerRadius: PropTypes.number,
+    outerRadius: PropTypes.number,
     legendPosition: PropTypes.oneOf(['right']),
     legendTitle: PropTypes.string,
     print: PropTypes.bool,
@@ -41,14 +42,17 @@ export default class PieChart extends Component {
     edit: PropTypes.bool,
     legendVisible: PropTypes.bool,
     style: PropTypes.object,
+    labelsVisible: PropTypes.bool,
   }
 
   static defaultProps = {
     innerRadius: 0,
+    outerRadius: 0.3,
     interactive: true,
     legendVisible: true,
     edit: false,
     colorMapping: {},
+    labelsVisible: false,
   }
 
   state = {
@@ -95,7 +99,6 @@ export default class PieChart extends Component {
 
     if (y < bounds.height / 2) tooltipPosition.top = y - 12;
     else tooltipPosition.bottom = bounds.height - y - 12;
-    console.log(content);
     this.setState({
       tooltipVisible: true,
       tooltipItems: [content],
@@ -140,13 +143,13 @@ export default class PieChart extends Component {
   }
 
   renderLabel({ key, value, labelPosition, edgePosition, midAngle, totalCount, angle }) {
-    const { print, interactive, legendVisible } = this.props;
+    const { print, interactive, legendVisible, labelsVisible } = this.props;
     const offset = (input, mult) => Math.floor(input * mult);
     const labelOffset = 0.95;
     const edgeOffset = 1.01;
     const showKey = Boolean(!legendVisible);
-    const showLabel = Boolean(!interactive || print);
-    return ((print || !interactive || !legendVisible) && angle > Math.PI / 12) ? (
+    const showLabel = Boolean(!interactive || print || labelsVisible);
+    return ((print || !interactive || !legendVisible || labelsVisible) && angle > Math.PI / 12) ? (
       <Group>
         <Text
           textAnchor={midAngle > Math.PI / 2 ? 'end' : 'start'}
@@ -179,6 +182,7 @@ export default class PieChart extends Component {
       legendTitle,
       legendVisible,
       edit,
+      outerRadius,
     } = this.props;
 
     const innerRadius = donut ? Math.floor(Math.min(width, height) / 8) : 0;
@@ -266,7 +270,7 @@ export default class PieChart extends Component {
                           const midAngle = (((endAngle - startAngle) / 2) + startAngle) -
                             (Math.PI / 2);
                           const labelPosition = positionFromAngle(midAngle, diameter * 0.4);
-                          const edgePosition = positionFromAngle(midAngle, diameter * 0.3);
+                          const edgePosition = positionFromAngle(midAngle, diameter * outerRadius);
                           const colorpickerPlacement = labelPosition.x < 0 ?
                             'right' :
                             'left';
@@ -296,8 +300,13 @@ export default class PieChart extends Component {
                               <Arc
                                 key={i}
                                 innerRadius={innerRadius}
-                                outerRadius={diameter *
-                                  (get(this.state, 'hoveredNode') === key ? 0.31 : 0.3)}
+                                outerRadius={
+                                  diameter * (
+                                    get(this.state, 'hoveredNode') === key ?
+                                      outerRadius + 0.01 :
+                                      outerRadius
+                                  )
+                                }
                                 startAngle={startAngle}
                                 endAngle={endAngle}
                                 fill={color}

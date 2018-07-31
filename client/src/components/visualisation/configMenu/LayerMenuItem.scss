@@ -57,6 +57,18 @@
                 line-height: 1.4em;
             }
         }
+        .orderButtonSection {
+            width: 4rem;
+            display: flex;
+            justify-content: flex-end;
+        }
+        .orderButtonContainer {
+            width: 2rem;
+            text-align: center;
+        }
+        .orderButton i {
+            font-size: 2rem;
+        }
 
         .toggleContainer, .overflowButtonContainer {
             position: relative;

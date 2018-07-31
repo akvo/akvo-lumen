@@ -104,6 +104,11 @@ spec:
             secretKeyRef:
               name: lumen
               key: sentry.client_dsn
+        - name: LUMEN_PIWIK_SITE_ID
+          valueFrom:
+            secretKeyRef:
+              name: lumen
+              key: piwik.site_id
         - name: LUMEN_FLOW_REPORT_DATABASE_URL
           value: foo
         - name: POD_NAME
