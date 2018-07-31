@@ -66,3 +66,12 @@ SELECT stats.count, stats.sum, stats.mean, stats.stddev, stats.min, stats.max
 -- :name delete-raster-by-id :! :n
 -- :doc delete raster
 DELETE FROM raster_dataset WHERE id=:id;
+
+
+-- :name delete-raster-columns :! :n
+-- :doc delete from raster columns
+DELETE FROM raster_columns WHERE r_table_name=:table-name;
+
+-- :name drop-raster-table :!
+-- :doc delete raster table
+DROP TABLE IF EXISTS :i:table-name;

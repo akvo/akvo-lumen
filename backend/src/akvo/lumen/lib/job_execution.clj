@@ -6,3 +6,8 @@
   "Return status of a job execution."
   [tenant-conn id]
   (impl/job-status tenant-conn id))
+
+(defn delete
+  "Return status of a job execution."
+  [tenant-conn id]
+  (impl/delete tenant-conn id))

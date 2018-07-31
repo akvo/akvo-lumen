@@ -9,11 +9,16 @@ require('./DeleteConfirmationModal.scss');
 
 function getEntity(entityId, entityType, library) {
   switch (entityType) {
-    case 'dataset': return library.datasets[entityId];
-    case 'visualisation': return library.visualisations[entityId];
-    case 'dashboard': return library.dashboards[entityId];
-    case 'raster': return library.rasters[entityId];
-    default: throw new Error(`Unknown entity type ${entityType}`);
+    case 'dataset':
+      return library.datasets[entityId];
+    case 'visualisation':
+      return library.visualisations[entityId];
+    case 'dashboard':
+      return library.dashboards[entityId];
+    case 'raster':
+      return library.rasters[entityId];
+    default:
+      throw new Error(`Unknown entity type ${entityType}`);
   }
 }
 
@@ -24,32 +29,36 @@ function VisualisationsList({ datasetId, visualisations }) {
       if (vis.datasetId === datasetId) {
         return true;
       }
-      if (vis.visualisationType === 'map'
-        && vis.spec && vis.spec.layers
-        && vis.spec.layers.some(layer => layer.datasetId === datasetId)) {
+      if (
+        vis.visualisationType === 'map' &&
+        vis.spec &&
+        vis.spec.layers &&
+        vis.spec.layers.some(layer => layer.datasetId === datasetId)
+      ) {
         return true;
       }
       return false;
     })
-    .map((vis, idx) => (<li key={idx}>{vis.name}</li>));
+    .map((vis, idx) => <li key={idx}>{vis.name}</li>);
 
   if (dependentVisualisations.length > 0) {
     return (
       <div>
         <p>
           The following
-          {dependentVisualisations.length === 1 ?
-            ' visualisation ' : ` ${dependentVisualisations.length} visualisations `}
+          {dependentVisualisations.length === 1
+            ? ' visualisation '
+            : ` ${dependentVisualisations.length} visualisations `}
           will also be deleted:
         </p>
-        <ul>
-          {dependentVisualisations}
-        </ul>
+        <ul>{dependentVisualisations}</ul>
       </div>
     );
   }
   return (
-    <div><span>No visualisations depend on this datataset</span></div>
+    <div>
+      <span>No visualisations depend on this datataset</span>
+    </div>
   );
 }
 
@@ -90,17 +99,11 @@ export default function DeleteConfirmationModal({
       }}
     >
       <div className="DeleteConfirmationModal">
-        <ModalHeader
-          title={`Delete ${entityType} ${getTitle(entity)}?`}
-          onCloseModal={onCancel}
-        />
+        <ModalHeader title={`Delete ${entityType} ${getTitle(entity)}?`} onCloseModal={onCancel} />
         <div className="ModalContents">
-          {entityType === 'dataset' &&
-            <VisualisationsList
-              datasetId={getId(entity)}
-              visualisations={library.visualisations}
-            />
-          }
+          {entityType === 'dataset' && (
+            <VisualisationsList datasetId={getId(entity)} visualisations={library.visualisations} />
+          )}
         </div>
         <ModalFooter
           leftButton={{
@@ -129,5 +132,5 @@ DeleteConfirmationModal.propTypes = {
     dashboards: PropTypes.object.isRequired,
   }),
   entityId: PropTypes.string.isRequired,
-  entityType: PropTypes.oneOf(['dataset', 'visualisation', 'dashboard']).isRequired,
+  entityType: PropTypes.oneOf(['dataset', 'visualisation', 'dashboard', 'raster']).isRequired,
 };

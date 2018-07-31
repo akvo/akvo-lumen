@@ -10,9 +10,9 @@ import DeleteConfirmationModal from './modals/DeleteConfirmationModal';
 import { showModal } from '../actions/activeModal';
 import { fetchLibrary } from '../actions/library';
 import { deleteVisualisation } from '../actions/visualisation';
-import { deleteDataset, updateDataset } from '../actions/dataset';
+import { deleteDataset, deletePendingDataset, updateDataset } from '../actions/dataset';
 import { deleteDashboard } from '../actions/dashboard';
-import { deleteRaster } from '../actions/raster';
+import { deleteRaster, deletePendingRaster } from '../actions/raster';
 import { editCollection, addEntitiesToCollection } from '../actions/collection';
 import * as entity from '../domain/entity';
 import { trackPageView } from '../utilities/analytics';
@@ -53,7 +53,6 @@ const filterLibraryByCollection = (library, collection) => {
 };
 
 class Library extends Component {
-
   constructor() {
     super();
     this.state = {
@@ -117,6 +116,8 @@ class Library extends Component {
       case 'dataset':
         if (!entity.isPending(datasets[id])) {
           dispatch(deleteDataset(id));
+        } else {
+          dispatch(deletePendingDataset(id));
         }
         break;
       case 'visualisation':
@@ -128,6 +129,8 @@ class Library extends Component {
       case 'raster':
         if (!entity.isPending(rasters[id])) {
           dispatch(deleteRaster(id));
+        } else {
+          dispatch(deletePendingRaster(id));
         }
         break;
       default:
@@ -198,14 +201,7 @@ class Library extends Component {
   }
 
   render() {
-    const {
-      dispatch,
-      location,
-      datasets,
-      visualisations,
-      dashboards,
-      rasters,
-    } = this.props;
+    const { dispatch, location, datasets, visualisations, dashboards, rasters } = this.props;
 
     const collections = this.props.collections ? this.props.collections : {};
     const { pendingDeleteEntity, collection } = this.state;
@@ -217,11 +213,8 @@ class Library extends Component {
     const searchString = query.search || '';
 
     return (
-      <div
-        className="Library"
-        data-test-id="library"
-      >
-        {this.state.pendingDeleteEntity &&
+      <div className="Library" data-test-id="library">
+        {this.state.pendingDeleteEntity && (
           <DeleteConfirmationModal
             isOpen
             entityId={pendingDeleteEntity.entityId}
@@ -230,13 +223,10 @@ class Library extends Component {
             onCancel={() => this.setState({ pendingDeleteEntity: null })}
             onDelete={() => {
               this.setState({ pendingDeleteEntity: null });
-              this.handleDeleteEntity(
-                pendingDeleteEntity.entityType,
-                pendingDeleteEntity.entityId
-              );
+              this.handleDeleteEntity(pendingDeleteEntity.entityType, pendingDeleteEntity.entityId);
             }}
           />
-        }
+        )}
         <LibraryHeader
           location={collection ? collection.title : <FormattedMessage id="library" />}
           onCreateCollection={this.handleCreateCollection}
@@ -244,33 +234,43 @@ class Library extends Component {
           onRemoveEntitiesFromCollection={this.handleRemoveEntitiesFromCollection}
           displayMode={displayMode}
           onChangeDisplayMode={(newDisplayMode) => {
-            dispatch(updateQueryAction(location, {
-              display: newDisplayMode,
-            }));
+            dispatch(
+              updateQueryAction(location, {
+                display: newDisplayMode,
+              })
+            );
           }}
           sortOrder={sortOrder}
           onChangeSortOrder={(newSortOrder) => {
-            dispatch(updateQueryAction(location, {
-              sort: newSortOrder,
-            }));
+            dispatch(
+              updateQueryAction(location, {
+                sort: newSortOrder,
+              })
+            );
           }}
           isReverseSort={isReverseSort}
           onChangeReverseSort={(newReverseSort) => {
-            dispatch(updateQueryAction(location, {
-              reverse: newReverseSort,
-            }));
+            dispatch(
+              updateQueryAction(location, {
+                reverse: newReverseSort,
+              })
+            );
           }}
           filterBy={filterBy}
           onChangeFilterBy={(newFilterBy) => {
-            dispatch(updateQueryAction(location, {
-              filter: newFilterBy,
-            }));
+            dispatch(
+              updateQueryAction(location, {
+                filter: newFilterBy,
+              })
+            );
           }}
           searchString={searchString}
           onSetSearchString={(newSearchString) => {
-            dispatch(updateQueryAction(location, {
-              search: newSearchString,
-            }));
+            dispatch(
+              updateQueryAction(location, {
+                search: newSearchString,
+              })
+            );
           }}
           onCreate={(type) => {
             const { params } = this.props;
@@ -299,7 +299,7 @@ class Library extends Component {
           onEntityAction={this.handleEntityAction}
         />
         {this.props.children}
-        {this.state.checkboxEntities.length > 0 &&
+        {this.state.checkboxEntities.length > 0 && (
           <CheckboxEntityMenu
             collections={collections}
             collection={collection}
@@ -309,7 +309,7 @@ class Library extends Component {
             checkboxEntities={this.state.checkboxEntities}
             onDeselectEntities={() => this.setState({ checkboxEntities: [] })}
           />
-        }
+        )}
       </div>
     );
   }

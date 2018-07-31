@@ -59,10 +59,7 @@ export function fetchDataset(id, metaOnly) {
 export function ensureDatasetFullyLoaded(id) {
   return (dispatch, getState) => {
     const { datasets } = getState().library;
-    if (
-      datasets == null ||
-      datasets[id] == null ||
-      datasets[id].get('columns') == null) {
+    if (datasets == null || datasets[id] == null || datasets[id].get('columns') == null) {
       return dispatch(fetchDataset(id));
     }
     return Promise.resolve(datasets[id]);
@@ -130,12 +127,15 @@ function pollDatasetImportStatus(importId, name, collectionId) {
     if (collectionId) {
       dispatch(addTemporaryEntitiesToCollection(importId, collectionId));
     }
-    api.get(`/api/job_executions/${importId}`)
+    api
+      .get(`/api/job_executions/${importId}`)
       .then(response => response.json())
       .then(({ status, reason, datasetId }) => {
         if (status === 'PENDING') {
-          setTimeout(() => dispatch(pollDatasetImportStatus(importId, name, collectionId)),
-          constants.POLL_INTERVAL);
+          setTimeout(
+            () => dispatch(pollDatasetImportStatus(importId, name, collectionId)),
+            constants.POLL_INTERVAL
+          );
         } else if (status === 'FAILED') {
           dispatch(importDatasetFailure(importId, reason));
         } else if (status === 'OK') {
@@ -161,8 +161,9 @@ export function clearImport() {
 
 export function importDataset(dataSource, collectionId) {
   return (dispatch) => {
-    dispatch(importDatasetRequest(dataSource));
-    api.post('/api/datasets', dataSource)
+    dispatch(importDatasetRequest(dataSource, collectionId));
+    api
+      .post('/api/datasets', dataSource)
       .then(response => response.json())
       .then(({ importId }) => {
         dispatch(pollDatasetImportStatus(importId, dataSource.name, collectionId));
@@ -224,7 +225,6 @@ export function fetchDatasetsSuccess(datasets) {
   };
 }
 
-
 /* Delete dataset actions */
 
 function deleteDatasetRequest(id) {
@@ -273,10 +273,36 @@ function deleteDatasetFailure(id, error) {
 export function deleteDataset(id) {
   return (dispatch) => {
     dispatch(deleteDatasetRequest(id));
-    api.del(`/api/datasets/${id}`)
+    api
+      .del(`/api/datasets/${id}`)
       .then(response => response.json())
       .then(() => dispatch(deleteDatasetSuccess(id)))
       .catch(error => dispatch(deleteDatasetFailure(id, error)));
+  };
+}
+
+function deletePendingDatasetSuccess(id) {
+  return (dispatch) => {
+    dispatch(removeDataset(id));
+  };
+}
+
+function deletePendingDatasetFailure(id, error) {
+  return {
+    type: constants.DELETE_DATASET_FAILURE,
+    id,
+    error,
+  };
+}
+
+export function deletePendingDataset(id) {
+  return (dispatch) => {
+    dispatch(deleteDatasetRequest(id));
+    api
+      .del(`/api/job_executions/${id}`)
+      .then(response => response.json())
+      .then(() => dispatch(deletePendingDatasetSuccess(id)))
+      .catch(error => dispatch(deletePendingDatasetFailure(id, error)));
   };
 }
 
@@ -306,7 +332,8 @@ export function updateDatasetMetaFailure(id, error) {
 export function updateDatasetMeta(id, meta, callback = () => {}) {
   return (dispatch, getState) => {
     dispatch(updateDatasetMetaRequest(id));
-    api.put(`/api/datasets/${id}`, meta)
+    api
+      .put(`/api/datasets/${id}`, meta)
       .then(response => response.json())
       .then(() => {
         dispatch(updateDatasetMetaSuccess(id, meta));
@@ -334,7 +361,8 @@ function updateDatasetTogglePending(datasetId) {
 
 function pollDatasetUpdateStatus(updateId, datasetId, title) {
   return (dispatch) => {
-    api.get(`/api/job_executions/${updateId}`)
+    api
+      .get(`/api/job_executions/${updateId}`)
       .then(response => response.json())
       .then(({ status, reason }) => {
         if (status === 'PENDING') {
@@ -346,8 +374,9 @@ function pollDatasetUpdateStatus(updateId, datasetId, title) {
           dispatch(updateDatasetTogglePending(datasetId));
           dispatch(showNotification('error', `Failed to update "${title}": ${reason}`));
         } else if (status === 'OK') {
-          dispatch(fetchDataset(datasetId))
-            .then(() => dispatch(showNotification('info', `Successfully updated "${title}"`, true)));
+          dispatch(fetchDataset(datasetId)).then(() =>
+            dispatch(showNotification('info', `Successfully updated "${title}"`, true))
+          );
         }
       })
       .catch(error => dispatch(error));
@@ -358,12 +387,14 @@ export function updateDataset(id) {
   return (dispatch, getState) => {
     const title = getState().library.datasets[id].get('name');
     dispatch(showNotification('info', `Updating "${title}"`));
-    api.post(`/api/datasets/${id}/update`,
-      // Send the refreshToken as part of the update request as a workaround
-      // for not being able to get an offline token to the backend. It's TBD
-      // how we want to do that.
-      { refreshToken: auth.refreshToken() }
-    )
+    api
+      .post(
+        `/api/datasets/${id}/update`,
+        // Send the refreshToken as part of the update request as a workaround
+        // for not being able to get an offline token to the backend. It's TBD
+        // how we want to do that.
+        { refreshToken: auth.refreshToken() }
+      )
       .then(response => response.json())
       .then(({ updateId, error }) => {
         if (updateId != null) {
@@ -424,13 +455,15 @@ function transformationFailure(datasetId, reason) {
 
 function pollDatasetTransformationStatus(jobExecutionId, datasetId) {
   return (dispatch) => {
-    api.get(`/api/job_executions/${jobExecutionId}`)
+    api
+      .get(`/api/job_executions/${jobExecutionId}`)
       .then(response => response.json())
       .then(({ status, reason }) => {
         if (status === 'PENDING') {
-          setTimeout(() =>
-            dispatch(pollDatasetTransformationStatus(jobExecutionId, datasetId)),
-            constants.POLL_INTERVAL);
+          setTimeout(
+            () => dispatch(pollDatasetTransformationStatus(jobExecutionId, datasetId)),
+            constants.POLL_INTERVAL
+          );
         } else if (status === 'FAILED') {
           dispatch(transformationFailure(datasetId, reason));
         } else if (status === 'OK') {
@@ -444,13 +477,14 @@ function pollDatasetTransformationStatus(jobExecutionId, datasetId) {
 export function sendTransformationLog(datasetId, transformations) {
   return (dispatch) => {
     dispatch(transformationLogRequestSent(datasetId));
-    api.post(`/api/transformations/${datasetId}`, transformations.toJSON())
+    api
+      .post(`/api/transformations/${datasetId}`, transformations.toJSON())
       .then(response => response.json())
       .then(({ jobExecutionId }) =>
-        dispatch(pollDatasetTransformationStatus(jobExecutionId, datasetId)));
+        dispatch(pollDatasetTransformationStatus(jobExecutionId, datasetId))
+      );
   };
 }
-
 
 export function undoTransformation(id) {
   return {

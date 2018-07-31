@@ -27,3 +27,7 @@
           "kind" kind
           "reason" error-message})
         (lib/not-found {:error "not-found"})))))
+
+(defn delete [conn id]
+  (delete-pending-job-execution-by-id conn {:id id})
+  (lib/ok {}))
