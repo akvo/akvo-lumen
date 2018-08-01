@@ -376,7 +376,7 @@ class Visualisation extends Component {
                 onSaveVisualisation={this.onSave}
                 savingFailed={this.state.savingFailed}
                 timeToNextSave={this.state.timeToNextSave - this.state.timeFromPreviousSave}
-                isExporting={this.props.library.visualisations.isExporting}
+                isExporting={get(this.props, `library.visualisations[${visualisation.id}].isExporting`)}
               />
             )}
             <VisualisationEditor

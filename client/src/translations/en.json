@@ -194,6 +194,7 @@
   "satellite": "Satellite",
   "save": "Save",
   "save_filter": "Save filter",
+  "save_your_dashboard_before_exporting": "Save your dashboard before exporting",
   "save_your_dashboard_before_sharing": "Save your dashboard before sharing",
   "save_your_visualisation_before_sharing": "Save your visualisation before sharing",
   "saving_failed_countdown": "Saving failed. Retrying ",

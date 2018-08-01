@@ -56,16 +56,25 @@ function removeVisualisation(state, { payload }) {
   return newState;
 }
 
-function exportStarted(state) {
-  return { ...state, isExporting: true };
+function exportStarted(state, { payload: { id } }) {
+  return {
+    ...state,
+    [id]: { ...state[id], isExporting: true },
+  };
 }
 
-function exportSucceeded(state) {
-  return { ...state, isExporting: false };
+function exportSucceeded(state, { payload: { id } }) {
+  return {
+    ...state,
+    [id]: { ...state[id], isExporting: false },
+  };
 }
 
-function exportFailed(state) {
-  return { ...state, isExporting: false };
+function exportFailed(state, { payload: { id } }) {
+  return {
+    ...state,
+    [id]: { ...state[id], isExporting: false },
+  };
 }
 
 export default handleActions({

@@ -2,15 +2,17 @@ const express = require('express');
 const puppeteer = require('puppeteer');
 const validate = require('express-validation');
 const Joi = require('joi');
-var Raven = require('raven');
+const Raven = require('raven');
+const bodyParser = require('body-parser')
+const cors = require('cors')
 
 const validation = {
   screenshot: {
-    query: {
+    body: {
       format: Joi.string().valid(['png', 'pdf']),
       target: Joi.string().uri().required(),
       title: Joi.string(),
-      id: Joi.string().required(),
+      selector: Joi.string().required(),
     },
   },
 };
@@ -42,6 +44,9 @@ const app = express();
 let browser;
 let context;
 
+app.use(bodyParser.json());
+app.use(cors());
+
 (async() => {
   browser = await puppeteer.launch({
     args: [
@@ -55,8 +60,17 @@ let context;
   app.listen(process.env.PORT || 3001, '0.0.0.0');
 })();
 
-app.get('/screenshot', validate(validation.screenshot), async (req, res) => {
-  const { target, format, title, token, refresh_token, id } = req.query;
+app.post('/screenshot', validate(validation.screenshot), async (req, res) => {
+  const {
+    target,
+    format,
+    title,
+    token,
+    refreshToken,
+    selector,
+    clip,
+  } = req.body;
+
   setContext({ target, format, title }, async () => {
     try {
       const page = await context.newPage();
@@ -64,10 +78,18 @@ app.get('/screenshot', validate(validation.screenshot), async (req, res) => {
       page.on('pageerror', captureException);
       page.on('error', (e) => captureException(e));
 
-      const dest = `${target}?token=${token}&refresh_token=${refresh_token}`;
+      const dest = `${target}?token=${token}&refresh_token=${refreshToken}`;
 
       await page.goto(dest, { waitUntil: 'networkidle2', timeout: 0 });
-      await page.waitFor(`.render-completed-${id}`);
+
+      const selectors = (selector || '').split(',');
+      if (selectors.length) {
+        selectors.forEach(async (selector) => {
+          await page.waitFor(selector);
+        });
+      } else {
+        await page.waitFor(5000);
+      }
 
       let screenshot;
       switch (format) {
@@ -75,12 +97,7 @@ app.get('/screenshot', validate(validation.screenshot), async (req, res) => {
           screenshot = await page.screenshot({
             format: 'A4',
             omitBackground: false,
-            clip: {
-              x: 0,
-              y: 0,
-              width: 1000,
-              height: 600,
-            },
+            clip,
             encoding: 'base64',
           });
           const data = screenshot;

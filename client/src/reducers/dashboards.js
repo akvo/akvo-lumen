@@ -97,16 +97,25 @@ function removeVisualisation(state, { payload }) {
   return dashboards;
 }
 
-function exportStarted(state) {
-  return { ...state, isExporting: true };
+function exportStarted(state, { payload: { id } }) {
+  return {
+    ...state,
+    [id]: { ...state[id], isExporting: true },
+  };
 }
 
-function exportSucceeded(state) {
-  return { ...state, isExporting: false };
+function exportSucceeded(state, { payload: { id } }) {
+  return {
+    ...state,
+    [id]: { ...state[id], isExporting: false },
+  };
 }
 
-function exportFailed(state) {
-  return { ...state, isExporting: false };
+function exportFailed(state, { payload: { id } }) {
+  return {
+    ...state,
+    [id]: { ...state[id], isExporting: false },
+  };
 }
 
 export default handleActions({
@@ -118,7 +127,7 @@ export default handleActions({
   [actions.removeVisualisation]: removeVisualisation,
   [actions.fetchShareIdSuccess]: saveShareId,
   [actions.setShareProtectionSuccess]: saveShareProtection,
-  [actions.exportVisualisationRequest]: exportStarted,
-  [actions.exportVisualisationSuccess]: exportSucceeded,
-  [actions.exportVisualisationFailure]: exportFailed,
+  [actions.exportDashboardRequest]: exportStarted,
+  [actions.exportDashboardSuccess]: exportSucceeded,
+  [actions.exportDashboardFailure]: exportFailed,
 }, initialState);

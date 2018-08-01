@@ -209,31 +209,37 @@ export default class DashboardEditor extends Component {
   }
 
   render() {
-    const { dashboard, datasets } = this.props;
+    const { dashboard, datasets, exporting } = this.props;
     const canvasWidth = this.state.gridWidth;
     const rowHeight = canvasWidth / 12;
 
     return (
-      <div className="DashboardEditor">
-        <DashboardVisualisationList
-          datasets={datasets}
-          visualisations={getArrayFromObject(this.props.visualisations)}
-          onEntityClick={this.handleEntityToggle}
-          dashboardItems={dashboard.entities}
-        />
+      <div
+        className={`DashboardEditor ${exporting ? 'DashboardEditor--exporting' : ''}`}
+      >
+        {!exporting && (
+          <DashboardVisualisationList
+            datasets={datasets}
+            visualisations={getArrayFromObject(this.props.visualisations)}
+            onEntityClick={this.handleEntityToggle}
+            dashboardItems={dashboard.entities}
+          />
+        )}
         <div
           className="DashboardEditorCanvasContainer"
           ref={(ref) => { this.DashboardEditorCanvasContainer = ref; }}
         >
-          <div className="DashboardEditorCanvasControls">
-            <button
-              className="clickable addText"
-              onClick={() => this.handleEntityToggle({ content: '' }, 'text')}
-            >
-              <FormattedMessage id="add_new_text_element" />
-            </button>
-          </div>
-          {getArrayFromObject(dashboard.entities).length === 0 &&
+          {!exporting && (
+            <div className="DashboardEditorCanvasControls">
+              <button
+                className="clickable addText"
+                onClick={() => this.handleEntityToggle({ content: '' }, 'text')}
+              >
+                <FormattedMessage id="add_new_text_element" />
+              </button>
+            </div>
+          )}
+          {getArrayFromObject(dashboard.entities).length === 0 && !exporting &&
             <div className="blankDashboardHelpText">
               <FormattedMessage id="blank_dashboard_help_text" />
             </div>
@@ -297,4 +303,5 @@ DashboardEditor.propTypes = {
   onUpdateEntities: PropTypes.func.isRequired,
   onUpdateName: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
+  exporting: PropTypes.bool,
 };

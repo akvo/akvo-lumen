@@ -152,31 +152,41 @@ export const exportDashboardRequest = createAction('EXPORT_DASHBOARD_REQUEST');
 export const exportDashboardSuccess = createAction('EXPORT_DASHBOARD_SUCCESS');
 export const exportDashboardFailure = createAction('EXPORT_DASHBOARD_FAILURE');
 
-export function exportDashboard(dashboardId, options) {
-  const { format, title } = { format: 'png', title: 'Untitled Export', ...options };
-  return (dispatch) => {
-    dispatch(exportDashboardRequest());
-    if (dashboardId === null) throw new Error('dashboardId not set');
+export function exportDashboard(dashboard, options) {
+  const { format, title } = { format: 'png', title: 'Untitled Dashboard', ...options };
+  return (dispatch, getState) => {
+    dispatch(exportDashboardRequest({ id: dashboard.id }));
     getToken().then((token) => {
-      const target = encodeURIComponent(`${window.location.origin}/dashboard/${dashboardId}/export`);
+      const target = `${window.location.origin}/dashboard/${dashboard.id}/export`;
+      const { exporterUrl } = getState().env;
 
-      return api.get(`/api/export?format=${format}&title=${title}&token=${token}&refresh_token=${refreshToken()}&target=${target}`)
-        .then((response) => {
-          if (response.status !== 200) {
-            dispatch(showNotification('error', 'Failed to export dashboard.'));
-            dispatch(exportDashboardFailure());
-            return;
-          }
-          response.text()
-            .then((imageStr) => {
-              const blob = base64ToBlob(imageStr, extToContentType(format));
-              saveAs(blob, `${title}.${format}`);
-              dispatch(exportDashboardSuccess());
-            });
-        })
-        .catch((error) => {
-          dispatch(exportDashboardFailure(error));
-        });
+      return api.post(`${exporterUrl}/screenshot`, {
+        format,
+        title,
+        token,
+        refreshToken: refreshToken(),
+        selector: Object.keys(dashboard.entities)
+          .filter(key => dashboard.entities[key].type === 'visualisation')
+          .map(key => `.render-completed-${key}`)
+          .join(','),
+        target,
+      })
+      .then((response) => {
+        if (response.status !== 200) {
+          dispatch(showNotification('error', 'Failed to export dashboard.'));
+          dispatch(exportDashboardFailure({ id: dashboard.id }));
+          return;
+        }
+        response.text()
+          .then((imageStr) => {
+            const blob = base64ToBlob(imageStr, extToContentType(format));
+            saveAs(blob, `${title}.${format}`);
+            dispatch(exportDashboardSuccess({ id: dashboard.id }));
+          });
+      })
+      .catch((error) => {
+        dispatch(exportDashboardFailure(error));
+      });
     });
   };
 }

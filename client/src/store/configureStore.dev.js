@@ -1,20 +1,14 @@
+/* eslint-disable no-underscore-dangle */
 import { createStore, applyMiddleware, compose } from 'redux';
-import { persistState } from 'redux-devtools';
 import thunkMiddleware from 'redux-thunk';
 import { browserHistory } from 'react-router';
 import { routerMiddleware } from 'react-router-redux';
 import rootReducer from '../reducers/rootReducer';
-import DevTools from '../containers/DevTools';
 
-function getDebugSessionKey() {
-  const matches = window.location.href.match(/[?&]debug_session=([^&]+)\b/);
-  return (matches && matches.length > 0) ? matches[1] : null;
-}
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
-const finalCreateStore = compose(
-  applyMiddleware(thunkMiddleware, routerMiddleware(browserHistory)),
-  DevTools.instrument(),
-  persistState(getDebugSessionKey())
+const finalCreateStore = composeEnhancers(
+  applyMiddleware(thunkMiddleware, routerMiddleware(browserHistory))
 )(createStore);
 
 export default function configureStore(initialState) {
