@@ -107,7 +107,7 @@
    :sentry-backend-dsn sentry-backend-dsn
    :flow-api-url flow-api-url
    :windshaft-url "http://localhost:4000"
-   :exporter-api-url "http://localhost:3001"
+   :exporter-api-url exporter-api-url
    :piwik-site-id piwik-site-id}
   :keycloak
   {:url keycloak-url

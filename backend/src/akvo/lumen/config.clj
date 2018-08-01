@@ -10,6 +10,7 @@
   (assert (:lumen-keycloak-client-secret env)
           (error-msg "LUMEN_KEYCLOAK_CLIENT_SECRET"))
   (assert (:lumen-keycloak-url env) (error-msg "LUMEN_KEYCLOAK_URL"))
+  (assert (:exporter-api-url env) (error-msg "EXPORTER_API_URL"))
   (assert (:lumen-file-upload-path env) (error-msg "LUMEN_FILE_UPLOAD_PATH"))
   (when-not (= "yes" (:ci-build env))
     (assert (:lumen-email-password env) (error-msg "LUMEN_EMAIL_PASSWORD"))
@@ -24,7 +25,7 @@
    'email-password (:lumen-email-password env)
    'email-user (:lumen-email-user env)
    'encryption-key (:lumen-encryption-key env)
-   'exporter-api-url "http://localhost:3001"
+   'exporter-api-url (:exporter-api-url env "http://localhost:3001")
    'file-upload-path (:lumen-file-upload-path env "/tmp/akvo/lumen")
    'flow-api-url (:lumen-flow-api-url env)
    'http-port (Integer/parseInt (:port env "3000"))
