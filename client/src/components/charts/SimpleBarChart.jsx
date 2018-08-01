@@ -344,7 +344,7 @@ export default class SimpleBarChart extends Component {
                 }}
               >
                 <RenderComplete id={visualisation.id} />
-                
+
                 {tooltipVisible && (
                   <Tooltip
                     items={tooltipItems}

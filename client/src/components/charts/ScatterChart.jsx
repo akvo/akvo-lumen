@@ -285,7 +285,7 @@ export default class ScatterChart extends Component {
                 }}
               >
                 <RenderComplete id={visualisation.id} />
-                
+
                 {this.state.isPickingColor && (
                   <ColorPicker
                     title="Pick color"

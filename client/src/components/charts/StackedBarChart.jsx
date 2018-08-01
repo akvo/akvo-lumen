@@ -335,7 +335,7 @@ export default class StackedBarChart extends Component {
                 }}
               >
                 <RenderComplete id={visualisation.id} />
-                
+
                 {tooltipVisible && (
                   <Tooltip
                     items={tooltipItems}

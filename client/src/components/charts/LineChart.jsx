@@ -252,7 +252,7 @@ export default class LineChart extends Component {
                 }}
               >
                 <RenderComplete id={visualisation.id} />
-                
+
                 {tooltipVisible && (
                   <Tooltip
                     items={tooltipItems}
