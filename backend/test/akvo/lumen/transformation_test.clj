@@ -11,6 +11,7 @@
             [cheshire.core :as json]
             [clojure.java.io :as io]
             [clojure.test :refer :all]
+            [clojure.tools.logging :as log]
             [hugsql.core :as hugsql]))
 
 (def ops (vec (json/parse-string (slurp (io/resource "ops.json")))))
@@ -80,7 +81,6 @@
                                                                     :table-name table-name}))))
           (is (= 1 (:total (get-row-count *tenant-conn* {:table-name table-name})))))))))
 
-
 (deftest ^:functional test-undo
   (let [dataset-id (import-file *tenant-conn* *error-tracker* "GDP.csv" {:dataset-name "GDP Undo Test"})
         {previous-table-name :table-name} (latest-dataset-version-by-dataset-id *tenant-conn*
@@ -139,7 +139,26 @@
                (:d1 (get-val-from-table *tenant-conn*
                                         {:rnum 1
                                          :column-name "d1"
-                                         :table-name table-name}))))))))
+                                         :table-name table-name}))))))
+
+    ;;https://github.com/akvo/akvo-lumen/issues/1517
+    (testing "Combining columns where one of the columns has empty values"
+      (let [[tag _] (apply-transformation {:type :transformation
+                                           :transformation {"op" "core/combine"
+                                                            "args" {"columnNames" ["c2" "c3"]
+                                                                    "newColumnTitle" "issue1517"
+                                                                    "separator" " "}
+                                                            "onError" "fail"}})]
+        (is (= ::lib/ok tag))
+        (let [table-name (:table-name
+                          (latest-dataset-version-by-dataset-id *tenant-conn*
+                                                                {:dataset-id dataset-id}))]
+          (is (= "hope "
+                 (:d2 (get-val-from-table *tenant-conn*
+                                          {:rnum 1
+                                           :column-name "d2"
+                                           :table-name table-name})))))))
+    ))
 
 (defn date-transformation [column-name format]
   {:type :transformation
