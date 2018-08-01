@@ -343,6 +343,8 @@ class Dashboard extends Component {
     this.setState({
       dashboard,
       isUnsavedChanges: true,
+    }, () => {
+      this.onSave();
     });
   }
 
