@@ -483,7 +483,7 @@ export default class MapVisualisation extends Component {
           height,
         }}
       >
-        {this.state.hasRendered && <RenderComplete id={visualisation.id} />}
+        {this.state.hasRendered && visualisation.id && <RenderComplete id={visualisation.id} />}
         {showTitle && (
           <div>
             <h2
