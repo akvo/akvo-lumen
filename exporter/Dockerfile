@@ -1,4 +1,4 @@
-FROM zenato/puppeteer
+FROM buildkite/puppeteer:v1.6.2
 
 USER root
 
