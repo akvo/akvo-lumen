@@ -37,13 +37,16 @@
                                   :table-name table-name
                                   :imported-table-name imported-table-name
                                   :version 1
-                                  :columns (mapv (fn [{:keys [title id type key] :as columns}]
-                                                   (cond-> {:type (name type)
-                                                            :title (string/trim title)
-                                                            :columnName (name id)
-                                                            :sort nil
-                                                            :direction nil
-                                                            :hidden false}
+                                  :columns (mapv (fn [{:keys [title id type key caddisflyResourceUuid] :as columns}]
+                                                   (cond-> (merge
+                                                            {:type (name type)
+                                                             :title (string/trim title)
+                                                             :columnName (name id)
+                                                             :sort nil
+                                                             :direction nil
+                                                             :hidden false}
+                                                            (when caddisflyResourceUuid
+                                                              {:caddisflyResourceUuid caddisflyResourceUuid}))
                                                      (contains? columns :key) (assoc :key (boolean key))))
                                                  columns)
                                   :transformations []})
@@ -53,7 +56,6 @@
   (update-failed-job-execution conn {:id job-execution-id
                                      :reason [reason]})
   (drop-table conn {:table-name table-name}))
-
 
 (defn val->geometry-pgobj
   [v]
