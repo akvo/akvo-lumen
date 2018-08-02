@@ -1,7 +1,11 @@
 (ns akvo.lumen.import.flow-v3
   (:require [akvo.lumen.import.common :as import]
             [akvo.lumen.import.flow-common :as flow-common]
-            [akvo.lumen.import.flow-v2 :as v2])
+            [akvo.lumen.import.flow-v2 :as v2]
+            [cheshire.core :as json]
+            [clojure.walk :refer (keywordize-keys)]
+            [clojure.tools.logging :as log]
+            [clojure.java.io :as io])
   (:import [java.time Instant]))
 
 (defn question-type->lumen-type
@@ -11,6 +15,19 @@
     "DATE" :date
     "GEO" :geopoint
     :text))
+
+(def parse-json #(json/parse-string (slurp (io/resource %)) keyword))
+
+(def schemas (->> (:tests (parse-json "./caddisfly/tests-schema.json"))
+                  (reduce #(assoc % (:uuid %2) %2) {})))
+
+(defn add-new-columns [col* q]
+  (reduce #(conj % (assoc q
+                          :title (str (:title q) "|" (:name %2) "|" (:unit %2))
+                          :id  (keyword (str (name (:id q)) (:id %2))))) col*
+          (:results (get schemas (:caddisflyResourceUuid q)))))
+
+(add-new-columns [] {:title "Fluoride", :type :text, :id :c110249115, :caddisflyResourceUuid "f0f3c1dd-89af-49f1-83e7-bcc31c3006cf"})
 
 (defn dataset-columns
   [form version]
@@ -24,12 +41,16 @@
            {:title "Submitter" :type :text :id :submitter}
            {:title "Submitted at" :type :date :id :submitted_at}
            {:title "Surveyal time" :type :number :id :surveyal_time}]
-          (map (fn [question]
-                 {:title (:name question)
-                  :type (question-type->lumen-type question)
-                  :id (keyword (format "c%s" (:id question)))
-                  :caddisflyResourceUuid (:caddisflyResourceUuid question)})
-               questions))))
+          (->> questions
+               (map (fn [q]
+                      {:title (:name q)
+                       :type (question-type->lumen-type q)
+                       :id (keyword (format "c%s" (:id q)))
+                       :caddisflyResourceUuid (:caddisflyResourceUuid q)}))
+               (reduce (fn [c q]
+                         (if-not (:caddisflyResourceUuid q)
+                           (conj c q)
+                           (add-new-columns c q))) [])))))
 
 (defn render-response
   [type response]
@@ -43,11 +64,17 @@
 (defn response-data
   [form responses]
   (let [responses (flow-common/question-responses responses)]
-    (reduce (fn [response-data {:keys [type id]}]
-              (if-let [response (get responses id)]
-                (assoc response-data
-                       (keyword (format "c%s" id))
-                       (render-response type response))
+    (reduce (fn [response-data {:keys [type id caddisflyResourceUuid] :as q}]
+               (if-let [response (get responses id)]
+                (if-not caddisflyResourceUuid
+                  (assoc response-data (keyword (format "c%s" id))
+                         (render-response type response))
+                  (reduce
+                   (fn [map* r]
+                     (assoc map* (keyword (format "c%s%s" id (:id r)))
+                            (:value r)))
+                   response-data
+                   (:result (keywordize-keys response))))
                 response-data))
             {}
             (flow-common/questions form))))
