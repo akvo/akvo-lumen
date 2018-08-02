@@ -1,0 +1,31 @@
+{
+    "device": {
+        "model": "ASUS_Z00LD",
+        "product": "WW_Z00L",
+        "manufacturer": "asus",
+        "os": "Android - 6.0.1 (23)",
+        "country": "ID",
+        "language": "in"
+    },
+    "image": "6a8aa913-7579-4276-a159-9ac3f2ff5c84.png",
+    "user": {
+        "backDropDetection": true,
+        "language": "in"
+    },
+    "name": "Soil - Available Phosphorous",
+    "uuid": "7cb666ea-7913-4511-9ae4-18f78e67aa09",
+    "testDate": "2017-02-14 14:16",
+    "type": "caddisfly",
+    "app": {
+        "appVersion": "Version 1.0.0 Alpha 8.6 (Build 167)",
+        "language": "en"
+    },
+    "result": [
+        {
+            "name": "Available Phosphorous",
+            "unit": "kg/ha",
+            "id": 1,
+            "value": "200.9"
+        }
+    ]
+}

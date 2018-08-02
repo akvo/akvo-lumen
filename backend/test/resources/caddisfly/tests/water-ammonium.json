@@ -1,0 +1,31 @@
+{
+    "device": {
+        "model": "SM-J500F",
+        "product": "j5ltexx",
+        "manufacturer": "samsung",
+        "os": "Android - 6.0.1 (23)",
+        "country": "US",
+        "language": "en"
+    },
+    "image": "64571e28-2017-4dfd-b0a6-c5ecab2edbfb.png",
+    "user": {
+        "backDropDetection": false,
+        "language": "en"
+    },
+    "name": "Water - Ammonium",
+    "uuid": "99abf0cd-4697-4880-bde0-933d32d3972c",
+    "testDate": "2017-02-24 06:28",
+    "type": "caddisfly",
+    "app": {
+        "appVersion": "Version 1.0.0 Beta 8.6",
+        "language": "en"
+    },
+    "result": [
+        {
+            "name": "Ammonium",
+            "unit": "ppm",
+            "id": 1,
+            "value": "4.0"
+        }
+    ]
+}

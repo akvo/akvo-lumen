@@ -1,0 +1,31 @@
+{
+    "device": {
+        "model": "SM-J500F",
+        "product": "j5ltexx",
+        "manufacturer": "samsung",
+        "os": "Android - 6.0.1 (23)",
+        "country": "US",
+        "language": "en"
+    },
+    "image": "d90b91a2-2af1-4cbd-9149-076c677da9ed.png",
+    "user": {
+        "backDropDetection": true,
+        "language": "en"
+    },
+    "name": "Soil - pH",
+    "uuid": "895845dd-9990-49f3-b611-420551851acd",
+    "testDate": "2017-03-22 09:11",
+    "type": "caddisfly",
+    "app": {
+        "appVersion": "Version 1.0.0 Beta 8.7",
+        "language": "en"
+    },
+    "result": [
+        {
+            "name": "pH",
+            "unit": "",
+            "id": 1,
+            "value": ""
+        }
+    ]
+}
