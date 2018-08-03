@@ -60,9 +60,12 @@
 
 (defn compatible-columns? [imported-columns columns]
   (let [imported-columns (map (fn [column]
-                                (cond-> {:id (keyword (get column "columnName"))
-                                         :type (keyword (get column "type"))
-                                         :title (string/trim (get column "title"))}
+                                (cond-> (let [caddisflyResourceUuid (get column "caddisflyResourceUuid")]
+                                          (merge {:id (keyword (get column "columnName"))
+                                                  :type (keyword (get column "type"))
+                                                  :title (string/trim (get column "title"))}
+                                                 (when caddisflyResourceUuid
+                                                     {:caddisflyResourceUuid caddisflyResourceUuid})))
                                   (contains? column "key") (assoc :key (boolean (get column "key")))))
                               imported-columns)]
     (set/subset? (set imported-columns)

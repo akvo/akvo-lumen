@@ -43,10 +43,11 @@
            {:title "Surveyal time" :type :number :id :surveyal_time}]
           (->> questions
                (map (fn [q]
-                      {:title (:name q)
-                       :type (question-type->lumen-type q)
-                       :id (keyword (format "c%s" (:id q)))
-                       :caddisflyResourceUuid (:caddisflyResourceUuid q)}))
+                      (merge {:title (:name q)
+                              :type (question-type->lumen-type q)
+                              :id (keyword (format "c%s" (:id q)))}
+                             (when (:caddisflyResourceUuid q)
+                               {:caddisflyResourceUuid (:caddisflyResourceUuid q)}))))
                (reduce (fn [c q]
                          (if-not (:caddisflyResourceUuid q)
                            (conj c q)
