@@ -18,7 +18,3 @@ docker-compose ${DOCKER_COMPOSE_ARGS} run --no-deps \
     -e LUMEN_PASSWORD="${LUMEN_PASSWORD}" \
     -e CYPRESS_RECORD_KEY="${CYPRESS_RECORD_KEY}" \
     fe-e2e-tests /app/run-as-user.sh
-
-echo "Peek at docker-compose"
-docker-compose ps
-docker-compose logs backend
