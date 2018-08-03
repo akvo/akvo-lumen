@@ -37,17 +37,16 @@
                                   :table-name table-name
                                   :imported-table-name imported-table-name
                                   :version 1
-                                  :columns (mapv (fn [{:keys [title id type key caddisflyResourceUuid] :as columns}]
-                                                   (cond-> (merge
-                                                            {:type (name type)
-                                                             :title (string/trim title)
-                                                             :columnName (name id)
-                                                             :sort nil
-                                                             :direction nil
-                                                             :hidden false}
-                                                            (when caddisflyResourceUuid
-                                                              {:caddisflyResourceUuid caddisflyResourceUuid}))
-                                                     (contains? columns :key) (assoc :key (boolean key))))
+                                  :columns (mapv (fn [{:keys [title id type key caddisflyResourceUuid]}]
+                                                   (cond->
+                                                       {:type (name type)
+                                                        :title (string/trim title)
+                                                        :columnName (name id)
+                                                        :sort nil
+                                                        :direction nil
+                                                        :hidden false}
+                                                     caddisflyResourceUuid (assoc :caddisflyResourceUuid caddisflyResourceUuid)
+                                                     key (assoc :key (boolean key))))
                                                  columns)
                                   :transformations []})
     (update-successful-job-execution conn {:id job-execution-id})))

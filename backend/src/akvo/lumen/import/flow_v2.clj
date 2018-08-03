@@ -35,8 +35,7 @@
      (map (fn [question]
             {:title (:name question)
              :type (question-type->lumen-type question)
-             :id (keyword (format "c%s" (:id question)))
-             :caddisflyResourceUuid (:caddisflyResourceUuid question)})
+             :id (keyword (format "c%s" (:id question)))})
           questions))))
 
 (defmulti render-response
