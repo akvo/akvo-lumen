@@ -15,19 +15,17 @@
     "GEO" :geopoint
     :text))
 
-;; move here the id generation
-
 (defn question->columns
-  "a question could reflect several columns/values. Example: caddisfly values"
+  "a question could reflect several columns/values. Example: caddisfly values.
+  Column ids are generated based in question ids and childs option"
   [{:keys [name id caddisflyResourceUuid] :as q}]
   (let [column {:title name
                 :type  (question-type->lumen-type q)
-                :id    (keyword (format "c%s" id))
-                ;; removed caddisflyresourceuuid!!
-                }]
+                :id    id}]
     (if caddisflyResourceUuid
-      (caddisfly/child-questions column caddisflyResourceUuid)
-      [column])))
+      (->> (caddisfly/child-questions column caddisflyResourceUuid)
+           (map (fn [c] (update c :id #(keyword (format "c%s%s" id %))))))
+      [(update column :id #(keyword (format "c%s" id)))])))
 
 (defn dataset-columns
   [form version]
