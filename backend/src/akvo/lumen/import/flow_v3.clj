@@ -24,8 +24,8 @@
                 :id    id}]
     (if caddisflyResourceUuid
       (->> (caddisfly/child-questions column caddisflyResourceUuid)
-           (map (fn [c] (update c :id #(keyword (format "c%s%s" id %))))))
-      [(update column :id #(keyword (format "c%s" id)))])))
+           (map #(update % :id (fn [id*] (keyword (format "c%s%s" id id*))))))
+      [(update column :id (fn [id*] (keyword (format "c%s" id*))))])))
 
 (defn dataset-columns
   [form version]
