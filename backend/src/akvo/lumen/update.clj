@@ -5,10 +5,8 @@
             [akvo.lumen.lib :as lib]
             [akvo.lumen.transformation.engine :as engine]
             [akvo.lumen.util :as util]
-            [clojure.tools.logging :as log]
             [clojure.java.jdbc :as jdbc]
             [clojure.set :as set]
-            [clojure.walk :refer [keywordize-keys]]
             [clojure.string :as string]
             [hugsql.core :as hugsql]))
 
@@ -61,16 +59,14 @@
         columns))))
 
 (defn compatible-columns? [imported-columns columns]
-  (let [imported-columns (map (comp
-                               (fn [{:keys [columnName type title caddisflyResourceUuid key]}]
-                                 (cond-> {:id (keyword columnName)
-                                          :type (keyword type)
-                                          :title (string/trim title)}
-                                   caddisflyResourceUuid (assoc :caddisflyResourceUuid caddisflyResourceUuid)
-                                   key (assoc :key (boolean key))))
-                               keywordize-keys)
+  (let [imported-columns (map (fn [column]
+                                (cond-> {:id (keyword (get column "columnName"))
+                                         :type (keyword (get column "type"))
+                                         :title (string/trim (get column "title"))}
+                                  (contains? column "key") (assoc :key (boolean (get column "key")))))
                               imported-columns)]
-    (set/subset? (set imported-columns) (set columns))))
+    (set/subset? (set imported-columns)
+                 (set columns))))
 
 (defn do-update [conn config dataset-id data-source-id job-execution-id data-source-spec]
   (try

@@ -15,6 +15,20 @@
     "GEO" :geopoint
     :text))
 
+;; move here the id generation
+
+(defn question->columns
+  "a question could reflect several columns/values. Example: caddisfly values"
+  [{:keys [name id caddisflyResourceUuid] :as q}]
+  (let [column {:title name
+                :type  (question-type->lumen-type q)
+                :id    (keyword (format "c%s" id))
+                ;; removed caddisflyresourceuuid!!
+                }]
+    (if caddisflyResourceUuid
+      (caddisfly/child-questions column caddisflyResourceUuid)
+      [column])))
+
 (defn dataset-columns
   [form version]
   (let [questions (flow-common/questions form)]
@@ -27,18 +41,7 @@
            {:title "Submitter" :type :text :id :submitter}
            {:title "Submitted at" :type :date :id :submitted_at}
            {:title "Surveyal time" :type :number :id :surveyal_time}]
-          (->> questions
-               (map (fn [{:keys [name id caddisflyResourceUuid] :as q}]
-                      (cond-> {:title name
-                               :type (question-type->lumen-type q)
-                               :id (keyword (format "c%s" id))}
-                        caddisflyResourceUuid
-                        (assoc :caddisflyResourceUuid caddisflyResourceUuid))))
-               (reduce (fn [c {:keys [caddisflyResourceUuid]:as q}]
-                         (if-not caddisflyResourceUuid
-                           (conj c q)
-                           (apply conj c (caddisfly/question-to-columns q))))
-                       [])))))
+          (reduce #(apply conj % (question->columns %2)) [] questions))))
 
 (defn render-response
   [type response]

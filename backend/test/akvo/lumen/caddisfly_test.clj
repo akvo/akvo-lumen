@@ -49,5 +49,4 @@
 	                  [{:id 1, :name "Water Electrical Conductivity", :unit "μS/cm"}
 	                   {:id 2, :name "Temperature", :unit "°Celsius"}]}))))))
 
-
-(caddisfly/question-to-columns {:title "Fluoride", :type :text, :id :c110249115, :caddisflyResourceUuid "f0f3c1dd-89af-49f1-83e7-bcc31c3006cf"})
+(caddisfly/child-questions {:title "Fluoride", :type :text, :id :c110249115 } "f0f3c1dd-89af-49f1-83e7-bcc31c3006cf")
