@@ -15,6 +15,12 @@
     "GEO" :geopoint
     :text))
 
+(defn kw-child-id-fun [parent-id]
+  (fn [id*]
+    (keyword (format "c%s%s" parent-id id*))))
+
+(defn kw-id [id*] (keyword (format "c%s" id*)))
+
 (defn question->columns
   "a question could reflect several columns/values. Example: caddisfly values.
   Column ids are generated based in question ids and childs option"
@@ -24,8 +30,8 @@
                 :id    id}]
     (if caddisflyResourceUuid
       (->> (caddisfly/child-questions column caddisflyResourceUuid)
-           (map #(update % :id (fn [id*] (keyword (format "c%s%s" id id*))))))
-      [(update column :id (fn [id*] (keyword (format "c%s" id*))))])))
+           (map #(update % :id (kw-child-id-fun id))))
+      [(update column :id kw-id)])))
 
 (defn dataset-columns
   [form version]
@@ -50,23 +56,21 @@
          (format "POINT (%s %s)" long lat))))
     (v2/render-response type response)))
 
+(defn response->columns
+  "returns a vector of tuples of columns reponses [id1 r1 id2 r2 ...]"
+  [{:keys [type id caddisflyResourceUuid] :as q} response]
+  (if caddisflyResourceUuid
+    (caddisfly/child-responses (kw-child-id-fun id) response)
+    [(kw-id id) (render-response type response)]))
+
 (defn response-data
   [form responses]
-  (let [responses (flow-common/question-responses responses)]
-    (reduce (fn [response-data {:keys [type id caddisflyResourceUuid] :as q}]
-               (if-let [response (get responses id)]
-                (if-not caddisflyResourceUuid
-                  (assoc response-data
-                         (keyword (format "c%s" id))
-                         (render-response type response))
-                  (reduce
-                   (fn [map* r] ;; TODO move to caddisfly namespace all possible logic
-                     (assoc map* (keyword (format "c%s%s" id (:id r))) (:value r)))
-                   response-data
-                   (:result (keywordize-keys response))))
-                response-data))
-            {}
-            (flow-common/questions form))))
+  (let [question-responses (flow-common/question-responses responses)]
+    (reduce
+     (fn [map* {:keys [type id caddisflyResourceUuid] :as q}]
+       (apply assoc map* (response->columns q (get question-responses (:id q)))))
+     {}
+     (filter #(get question-responses (:id %)) (flow-common/questions form)))))
 
 (defn form-data
   "First pulls all data-points belonging to the survey. Then map over all form
