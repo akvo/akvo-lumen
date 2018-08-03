@@ -37,14 +37,16 @@
                                   :table-name table-name
                                   :imported-table-name imported-table-name
                                   :version 1
-                                  :columns (mapv (fn [{:keys [title id type key] :as columns}]
-                                                   (cond-> {:type (name type)
-                                                            :title (string/trim title)
-                                                            :columnName (name id)
-                                                            :sort nil
-                                                            :direction nil
-                                                            :hidden false}
-                                                     (contains? columns :key) (assoc :key (boolean key))))
+                                  :columns (mapv (fn [{:keys [title id type key caddisflyResourceUuid]}]
+                                                   (cond->
+                                                       {:type (name type)
+                                                        :title (string/trim title)
+                                                        :columnName (name id)
+                                                        :sort nil
+                                                        :direction nil
+                                                        :hidden false}
+                                                     caddisflyResourceUuid (assoc :caddisflyResourceUuid caddisflyResourceUuid)
+                                                     key (assoc :key (boolean key))))
                                                  columns)
                                   :transformations []})
     (update-successful-job-execution conn {:id job-execution-id})))
@@ -53,7 +55,6 @@
   (update-failed-job-execution conn {:id job-execution-id
                                      :reason [reason]})
   (drop-table conn {:table-name table-name}))
-
 
 (defn val->geometry-pgobj
   [v]

@@ -1,0 +1,31 @@
+{
+    "device": {
+        "model": "ASUS_Z00LD",
+        "product": "WW_Z00L",
+        "manufacturer": "asus",
+        "os": "Android - 6.0.1 (23)",
+        "country": "US",
+        "language": "en"
+    },
+    "image": "b1961e99-bc1c-477c-9309-ae5e8d2374e8.png",
+    "user": {
+        "backDropDetection": false,
+        "language": "en"
+    },
+    "name": "Water - Fluoride",
+    "uuid": "f0f3c1dd-89af-49f1-83e7-bcc31c3006cf",
+    "testDate": "2017-02-06 00:50",
+    "type": "caddisfly",
+    "app": {
+        "appVersion": "Version 1.0.0 Beta 9.0",
+        "language": "en"
+    },
+    "result": [
+        {
+            "name": "Fluoride",
+            "unit": "ppm",
+            "id": 1,
+            "value": "1.51"
+        }
+    ]
+}
