@@ -59,68 +59,68 @@ context('Akvo Lumen', () => {
     cy.get('[data-test-id="back-button"]').click();
   });
 
-  it('create visualisation (pivot table)', () => {
-    cy.get('button[data-test-id="visualisation"]').click();
-    cy.get('li[data-test-id="button-pivot-table"]', { timeout: 20000 }).click();
-    cy.get('[data-test-id="dataset-menu"] .Select-control').click();
-    // Finding dataset option
-    cy.get('[role="option"]')
-      .contains(datasetName)
-      .should('have.attr', 'id')
-      .then((optionId) => {
-        // Selecting dataset
-        cy.get(`#${optionId}`).click();
-        // open column menu
-        cy.get('[data-test-id="column-menu"] .Select-control').click();
-        // Finding column to select
-        return cy.get('[role="option"]')
-          .contains('title (text)')
-          .should('have.attr', 'id');
-      })
-      .then((columnId) => {
-        const title = `Visualisation of ${datasetName}`;
-        // Selecting column
-        cy.get(`#${columnId}`).click();
-        // Focusing title
-        cy.get('div[data-test-id="entity-title"]').click();
-        // Typing visualisation name
-        cy.get('input[data-test-id="entity-title"]').type(title);
-        // Saving visualisation
-        cy.get('body').click();
-        // wait for changes to be saved
-        cy.get('.saveStatus').should('contain', 'All changes saved');
+  // it('create visualisation (pivot table)', () => {
+  //   cy.get('button[data-test-id="visualisation"]').click();
+  //   cy.get('li[data-test-id="button-pivot-table"]', { timeout: 20000 }).click();
+  //   cy.get('[data-test-id="dataset-menu"] .Select-control').click();
+  //   // Finding dataset option
+  //   cy.get('[role="option"]')
+  //     .contains(datasetName)
+  //     .should('have.attr', 'id')
+  //     .then((optionId) => {
+  //       // Selecting dataset
+  //       cy.get(`#${optionId}`).click();
+  //       // open column menu
+  //       cy.get('[data-test-id="column-menu"] .Select-control').click();
+  //       // Finding column to select
+  //       return cy.get('[role="option"]')
+  //         .contains('title (text)')
+  //         .should('have.attr', 'id');
+  //     })
+  //     .then((columnId) => {
+  //       const title = `Visualisation of ${datasetName}`;
+  //       // Selecting column
+  //       cy.get(`#${columnId}`).click();
+  //       // Focusing title
+  //       cy.get('div[data-test-id="entity-title"]').click();
+  //       // Typing visualisation name
+  //       cy.get('input[data-test-id="entity-title"]').type(title);
+  //       // Saving visualisation
+  //       cy.get('body').click();
+  //       // wait for changes to be saved
+  //       cy.get('.saveStatus').should('contain', 'All changes saved');
 
-        // pivot table elements exist
-        cy.get('.PivotTable .title').contains(title).should('exist');
-        cy.get('.PivotTable th').contains('Assistant Professor').should('exist');
-        cy.get('.PivotTable th').contains('Associate Curator ').should('exist');
-        cy.get('.PivotTable th').contains('Research Professor').should('exist');
-        cy.get('.PivotTable td').contains('Total').should('exist');
-        cy.get('.PivotTable td.cell').contains('11').should('exist');
-        cy.get('.PivotTable td.cell').contains('4').should('exist');
-        cy.get('.PivotTable td.cell').contains('10').should('exist');
-        cy.get('.PivotTable .categoryColumnTitle').contains('title').should('exist');
+  //       // pivot table elements exist
+  //       cy.get('.PivotTable .title').contains(title).should('exist');
+  //       cy.get('.PivotTable th').contains('Assistant Professor').should('exist');
+  //       cy.get('.PivotTable th').contains('Associate Curator ').should('exist');
+  //       cy.get('.PivotTable th').contains('Research Professor').should('exist');
+  //       cy.get('.PivotTable td').contains('Total').should('exist');
+  //       cy.get('.PivotTable td.cell').contains('11').should('exist');
+  //       cy.get('.PivotTable td.cell').contains('4').should('exist');
+  //       cy.get('.PivotTable td.cell').contains('10').should('exist');
+  //       cy.get('.PivotTable .categoryColumnTitle').contains('title').should('exist');
 
-        // back to library
-        cy.get('[data-test-id="back-button"]').click();
-      });
-  });
+  //       // back to library
+  //       cy.get('[data-test-id="back-button"]').click();
+  //     });
+  // });
 
-  it('create dashboard', () => {
-    cy.get('button[data-test-id="dashboard"]', { timeout: 20000 }).click();
-    // Selecting visualisation
-    cy.get(`[data-test-name="Visualisation of ${datasetName}"]`).click();
-    // Typing dashboard name
-    cy.get('div[data-test-id="entity-title"]').click();
-    cy.get('input[data-test-id="entity-title"]').type(`Dashboard of ${datasetName}`);
-    // Saving dashboard
-    cy.get('body').click();
+  // it('create dashboard', () => {
+  //   cy.get('button[data-test-id="dashboard"]', { timeout: 20000 }).click();
+  //   // Selecting visualisation
+  //   cy.get(`[data-test-name="Visualisation of ${datasetName}"]`).click();
+  //   // Typing dashboard name
+  //   cy.get('div[data-test-id="entity-title"]').click();
+  //   cy.get('input[data-test-id="entity-title"]').type(`Dashboard of ${datasetName}`);
+  //   // Saving dashboard
+  //   cy.get('body').click();
 
-    // visualization has been added
-    cy.get('[data-test-id="dashboard-canvas-item"] h2').contains(`Visualisation of ${datasetName}`);
-    cy.get('[data-test-id="dashboard-canvas-item"] .PivotTable').should('exist');
+  //   // visualization has been added
+  //   cy.get('[data-test-id="dashboard-canvas-item"] h2').contains(`Visualisation of ${datasetName}`);
+  //   cy.get('[data-test-id="dashboard-canvas-item"] .PivotTable').should('exist');
 
-    // back to library
-    cy.get('[data-test-id="back-button"]').click();
-  });
+  //   // back to library
+  //   cy.get('[data-test-id="back-button"]').click();
+  // });
 });
