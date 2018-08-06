@@ -10,7 +10,7 @@
   (assert (:lumen-keycloak-client-secret env)
           (error-msg "LUMEN_KEYCLOAK_CLIENT_SECRET"))
   (assert (:lumen-keycloak-url env) (error-msg "LUMEN_KEYCLOAK_URL"))
-  (assert (:exporter-api-url env) (error-msg "EXPORTER_API_URL"))
+  #_(assert (:exporter-api-url env) (error-msg "EXPORTER_API_URL"))
   (assert (:lumen-file-upload-path env) (error-msg "LUMEN_FILE_UPLOAD_PATH"))
   (when-not (= "yes" (:ci-build env))
     (assert (:lumen-email-password env) (error-msg "LUMEN_EMAIL_PASSWORD"))
