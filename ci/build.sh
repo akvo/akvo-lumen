@@ -49,7 +49,7 @@ docker-compose -p akvo-lumen-ci -f docker-compose.yml -f docker-compose.ci.yml r
 docker-compose -p akvo-lumen-ci -f docker-compose.yml -f docker-compose.ci.yml ps
 docker-compose -p akvo-lumen-ci -f docker-compose.yml -f docker-compose.ci.yml logs backend
 docker ps
-docker logs akvo-lumen_backend_1
+docker logs akvolumenci_backend_1
 
 log Running the end to end tests against local Docker Compose Environment
 ./ci/e2e-test.sh akvolumenci http://t1.lumen.local/
