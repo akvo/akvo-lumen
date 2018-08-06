@@ -56,6 +56,7 @@
                                      :reason [reason]})
   (drop-table conn {:table-name table-name}))
 
+
 (defn val->geometry-pgobj
   [v]
   (doto (PGobject.)

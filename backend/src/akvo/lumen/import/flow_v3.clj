@@ -1,10 +1,7 @@
 (ns akvo.lumen.import.flow-v3
   (:require [akvo.lumen.import.common :as import]
             [akvo.lumen.import.flow-common :as flow-common]
-            [akvo.lumen.import.flow-v2 :as v2]
-            [akvo.lumen.caddisfly :as caddisfly]
-            [clojure.walk :refer (keywordize-keys)]
-            [clojure.tools.logging :as log])
+            [akvo.lumen.import.flow-v2 :as v2])
   (:import [java.time Instant]))
 
 (defn question-type->lumen-type
@@ -14,24 +11,6 @@
     "DATE" :date
     "GEO" :geopoint
     :text))
-
-(defn kw-child-id-fun [parent-id]
-  (fn [id*]
-    (keyword (format "c%s%s" parent-id id*))))
-
-(defn kw-id [id*] (keyword (format "c%s" id*)))
-
-(defn question->columns
-  "a question could reflect several columns/values. Example: caddisfly values.
-  Column ids are generated based in question ids and childs option"
-  [{:keys [name id caddisflyResourceUuid] :as q}]
-  (let [column {:title name
-                :type  (question-type->lumen-type q)
-                :id    id}]
-    (if caddisflyResourceUuid
-      (->> (caddisfly/child-questions column caddisflyResourceUuid)
-           (map #(update % :id (kw-child-id-fun id))))
-      [(update column :id kw-id)])))
 
 (defn dataset-columns
   [form version]
@@ -45,7 +24,11 @@
            {:title "Submitter" :type :text :id :submitter}
            {:title "Submitted at" :type :date :id :submitted_at}
            {:title "Surveyal time" :type :number :id :surveyal_time}]
-          (reduce #(apply conj % (question->columns %2)) [] questions))))
+          (map (fn [question]
+                 {:title (:name question)
+                  :type (question-type->lumen-type question)
+                  :id (keyword (format "c%s" (:id question)))})
+               questions))))
 
 (defn render-response
   [type response]
@@ -56,21 +39,17 @@
          (format "POINT (%s %s)" long lat))))
     (v2/render-response type response)))
 
-(defn response->columns
-  "returns a vector of tuples of columns reponses [id1 r1 id2 r2 ...]"
-  [{:keys [type id caddisflyResourceUuid] :as q} response]
-  (if caddisflyResourceUuid
-    (caddisfly/child-responses (kw-child-id-fun id) response)
-    [(kw-id id) (render-response type response)]))
-
 (defn response-data
   [form responses]
-  (let [question-responses (flow-common/question-responses responses)]
-    (reduce
-     (fn [map* {:keys [type id caddisflyResourceUuid] :as q}]
-       (apply assoc map* (response->columns q (get question-responses (:id q)))))
-     {}
-     (filter #(get question-responses (:id %)) (flow-common/questions form)))))
+  (let [responses (flow-common/question-responses responses)]
+    (reduce (fn [response-data {:keys [type id]}]
+              (if-let [response (get responses id)]
+                (assoc response-data
+                       (keyword (format "c%s" id))
+                       (render-response type response))
+                response-data))
+            {}
+            (flow-common/questions form))))
 
 (defn form-data
   "First pulls all data-points belonging to the survey. Then map over all form
