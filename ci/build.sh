@@ -12,20 +12,20 @@ if [ -z "$TRAVIS_COMMIT" ]; then
 fi
 
 log Bulding container to run the backend tests
-docker build --rm=false -t akvo-lumen-backend-dev:develop backend -f backend/Dockerfile-dev
+docker build --quiet --rm=false -t akvo-lumen-backend-dev:develop backend -f backend/Dockerfile-dev
 log Running Backend unit tests and building uberjar
 docker run --env-file=.env -v "$HOME/.m2:/home/akvo/.m2" -v "$(pwd)/backend:/app" akvo-lumen-backend-dev:develop /app/run-as-user.sh lein "do" test, eastwood, uberjar
 
 cp backend/target/uberjar/akvo-lumen.jar backend
 
 log Creating Production Backend image
-docker build --rm=false -t eu.gcr.io/${PROJECT_NAME}/lumen-backend:${TRAVIS_COMMIT} ./backend
+docker build --quiet --rm=false -t eu.gcr.io/${PROJECT_NAME}/lumen-backend:${TRAVIS_COMMIT} ./backend
 docker tag eu.gcr.io/${PROJECT_NAME}/lumen-backend:${TRAVIS_COMMIT} eu.gcr.io/${PROJECT_NAME}/lumen-backend:develop
 
 #rm backend/akvo-lumen.jar
 
 log Building container to run the client unit tests
-docker build --rm=false -t akvo-lumen-client-dev:develop client -f client/Dockerfile-dev
+docker build --quiet --rm=false -t akvo-lumen-client-dev:develop client -f client/Dockerfile-dev
 
 log Running Client linting, unit tests and creating production assets
 docker run --env-file=.env -v "$(pwd)/client:/lumen" --rm=false -t akvo-lumen-client-dev:develop /lumen/run-as-user.sh /lumen/ci-build.sh
@@ -35,7 +35,7 @@ docker build --rm=false -t eu.gcr.io/${PROJECT_NAME}/lumen-client:${TRAVIS_COMMI
 docker tag eu.gcr.io/${PROJECT_NAME}/lumen-client:${TRAVIS_COMMIT} eu.gcr.io/${PROJECT_NAME}/lumen-client:develop
 
 log Creating Production Windshaft image
-docker build --rm=false -t eu.gcr.io/${PROJECT_NAME}/lumen-maps:${TRAVIS_COMMIT} ./windshaft
+docker build --quiet --rm=false -t eu.gcr.io/${PROJECT_NAME}/lumen-maps:${TRAVIS_COMMIT} ./windshaft
 docker tag eu.gcr.io/${PROJECT_NAME}/lumen-maps:${TRAVIS_COMMIT} eu.gcr.io/${PROJECT_NAME}/lumen-maps:develop
 
 log Starting Docker Compose environment
