@@ -72,6 +72,7 @@
   "default": "Default",
   "delete": "Delete",
   "delete_column": "Delete column",
+  "extract_caddisfly": "Extract Caddisfly values",
   "delete_row": "Delete row",
   "deleted_column": "Deleted column: {title}",
   "derive": "Derive",

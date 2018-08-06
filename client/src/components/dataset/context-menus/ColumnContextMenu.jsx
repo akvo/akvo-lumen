@@ -65,6 +65,11 @@ const actions = Immutable.fromJS({
     args: {},
     onError: 'fail',
   },
+  'extract-caddisfly': {
+    op: 'core/extract-caddisfly',
+    args: {},
+    onError: 'fail',
+  },
 });
 
 const commonOptions = [{
@@ -83,6 +88,9 @@ const commonOptions = [{
 }, {
   label: <FormattedMessage id="delete_column" />,
   value: 'delete-column',
+}, {
+  label: <FormattedMessage id="extract_caddisfly" />,
+  value: 'extract-caddisfly',
 }];
 
 const dataTypeOptions = {
