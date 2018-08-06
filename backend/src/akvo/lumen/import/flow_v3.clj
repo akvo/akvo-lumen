@@ -25,9 +25,11 @@
            {:title "Submitted at" :type :date :id :submitted_at}
            {:title "Surveyal time" :type :number :id :surveyal_time}]
           (map (fn [question]
-                 {:title (:name question)
-                  :type (question-type->lumen-type question)
-                  :id (keyword (format "c%s" (:id question)))})
+                 (merge {:title (:name question)
+                         :type (question-type->lumen-type question)
+                         :id (keyword (format "c%s" (:id question)))}
+                        (when (:caddisflyResourceUuid question)
+                          {:caddisflyResourceUuid (:caddisflyResourceUuid question)})))
                questions))))
 
 (defn render-response
