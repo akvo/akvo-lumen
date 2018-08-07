@@ -14,22 +14,26 @@
 (def schemas (->> (:tests (parse-json "./caddisfly/tests-schema.json"))
                   (reduce #(assoc % (:uuid %2) %2) {})))
 
-(defn caddisfly-test-results [cad-val]
-  (:result cad-val))
+(defn caddisfly-test-results [cad-val cad-schema]
+  (log/error :image? (:hasImage cad-schema) (:image cad-val) cad-val cad-schema)
+  (let [result (:result cad-val)]
+    (if (:hasImage cad-schema)
+      (vec (cons {:value (:image cad-val)} result))
+      result)))
 ;;=> [{:id 1, :name "Fluoride", :unit "ppm", :value "> 1.80"}]
-
 
 (defn extract-caddisfly-column
   [column next-column-int]
   (if (:caddisflyResourceUuid column)
-    (->> (reduce #(conj %
-                        (assoc column
-                               :title (str (:title column) "|" (:name %2) "|" (:unit %2))))
-                 []
-                 (:results (get schemas (:caddisflyResourceUuid column))))
-         (map #(let [id (engine/int->derivation-column-name %)]
-                 (assoc %2 :columnName id :id id))
-              (filter #(>= % next-column-int) (range))))
+    (let [caddisfly-schema (get schemas (:caddisflyResourceUuid column))]
+      (->> (reduce #(conj % (assoc column :title (str (:title column) "|" (:name %2) "|" (:unit %2))))
+                   (if (:hasImage caddisfly-schema)
+                     [(assoc column :title (str (:title column) "| Image" ))]
+                     [])
+                   (:results caddisfly-schema))
+          (map #(let [id (engine/int->derivation-column-name %)]
+                  (assoc %2 :columnName id :id id))
+               (filter #(>= % next-column-int) (range)))))
     (throw (ex-info "this column doesn't have a caddisflyResourceUuid currently associated!" {:message {:possible-reason "maybe you don't update the dataset!?"}}))))
 
 (hugsql/def-db-fns "akvo/lumen/transformation/derive.sql")
@@ -64,7 +68,8 @@
           column (keywordize-keys (u/find-column columns column-name))
           next-column-int (engine/next-column-int columns)
           column-idx (engine/column-index columns column-name)
-          new-columns (extract-caddisfly-column column next-column-int)]
+          new-columns (extract-caddisfly-column column next-column-int)
+          cad-schema (get schemas (:caddisflyResourceUuid column))]
       (log/debug :new-columns new-columns)
       (doseq [c new-columns]
         (log/debug "persist new-column " c)
@@ -75,7 +80,7 @@
       (->> (caddisfly-data conn {:table-name table-name :column-name column-name})
 
            (map (fn [m]
-                  (let [cad-results (or (caddisfly-test-results (json/parse-string ((keyword column-name) m) keyword))
+                  (let [cad-results (or (caddisfly-test-results (json/parse-string ((keyword column-name) m) keyword) cad-schema)
                                         (repeat nil))
                         update-vals (->> (map
                                           (fn [new-column-name new-column-val]
