@@ -52,6 +52,9 @@ class DatasetControls extends Component {
                     label: <FormattedMessage id="combine_columns" />,
                     value: 'combineColumns',
                   }, {
+                    label: <FormattedMessage id="extract_caddisfly" />,
+                    value: 'extractCaddisfly',
+                  }, {
                     label: <FormattedMessage id="derive_column" />,
                     value: 'deriveColumn',
                   }, {

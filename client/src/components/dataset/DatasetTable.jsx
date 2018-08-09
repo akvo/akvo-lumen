@@ -50,6 +50,7 @@ class DatasetTable extends Component {
 
     this.handleToggleTransformationLog = this.handleToggleTransformationLog.bind(this);
     this.handleToggleCombineColumnSidebar = this.handleToggleCombineColumnSidebar.bind(this);
+    this.handleToggleExtractCaddisflyColumnSidebar = this.handleToggleExtractCaddisflyColumnSidebar.bind(this);
     this.handleToggleDeriveColumnSidebar = this.handleToggleDeriveColumnSidebar.bind(this);
     this.handleToggleGeoColumnSidebar = this.handleToggleGeoColumnSidebar.bind(this);
   }
@@ -148,6 +149,29 @@ class DatasetTable extends Component {
     }
   }
 
+  handleToggleExtractCaddisflyColumnSidebar() {
+    if (this.state.sidebarProps &&
+      this.state.sidebarProps.type === 'extractCaddisfly') {
+      this.hideSidebar();
+    } else {
+      this.setState({
+        activeDataTypeContextMenu: null,
+        activeColumnContextMenu: null,
+      });
+      this.showSidebar({
+        type: 'extractCaddisfly',
+        displayRight: false,
+        onClose: this.hideSidebar,
+        onApply: (transformation) => {
+          this.props.onTransform(transformation).then(() => {
+            this.hideSidebar();
+          });
+        },
+        columns: this.props.columns,
+      });
+    }
+  }    
+    
   handleToggleGeoColumnSidebar() {
     if (this.state.sidebarProps &&
       this.state.sidebarProps.type === 'generateGeopoints') {
@@ -362,6 +386,8 @@ class DatasetTable extends Component {
           onClickMenuItem={(menuItem) => {
             if (menuItem === 'combineColumns') {
               this.handleToggleCombineColumnSidebar();
+            } else if (menuItem === 'extractCaddisfly') {
+              this.handleToggleExtractCaddisflyColumnSidebar();
             } else if (menuItem === 'deriveColumn') {
               this.handleToggleDeriveColumnSidebar();
             } else if (menuItem === 'generateGeopoints') {
