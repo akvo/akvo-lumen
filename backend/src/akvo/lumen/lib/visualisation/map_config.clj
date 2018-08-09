@@ -1,7 +1,9 @@
 (ns akvo.lumen.lib.visualisation.map-config
   (:require [akvo.lumen.postgres.filter :as filter]
             [clojure.string :as str]
-            [hugsql.core :as hugsql]))
+            [hugsql.core :as hugsql])
+  (:import [java.awt Color]))
+
 
 (hugsql/def-db-fns "akvo/lumen/dataset.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/raster.sql")
@@ -111,12 +113,16 @@
       (str/replace #"\n" " ")
       (str/replace #" +" " ")))
 
-;; Should convert hex string to hue for hsl color. Use string matching as proof of concept for now
-(defn color-to-hue [s]
-  (case s
-    "#FF0000" "0"
-    "#00FF00" "120"
-    "#0000FF" "240"))
+(defn color-to-hue
+  "Should convert hex string to hue for hsl color."
+  [hex-string]
+  (try
+    (let [c (Color/decode hex-string)
+          hue (->> (Color/RGBtoHSB (.getRed c) (.getGreen c) (.getBlue c) (float-array 3))
+                   (into [])
+                   first)]
+      (str (int (* 360 hue))))
+    (catch Exception e "0")))
 
 (defn shape-aggregagation-extra-cols-sql [popup table-name prefix postfix]
   (if (= (count popup) 0)
