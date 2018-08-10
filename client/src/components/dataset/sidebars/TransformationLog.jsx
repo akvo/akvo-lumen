@@ -171,7 +171,7 @@ function transformationDescription(transformations, index, columns, dependentDat
     case 'core/delete-column':
       return <FormattedMessage id="deleted_column" values={{ title }} />;
     case 'core/extract-caddisfly':
-      return <FormattedMessage id="extract_caddisfly" values={{ title }} />;
+      return <FormattedMessage id="extract_caddisfly_log" values={{ title }} />;
     case 'core/reverse-geocode':
       return <FormattedMessage id="reverse_geocode" />;
     case 'core/combine':
