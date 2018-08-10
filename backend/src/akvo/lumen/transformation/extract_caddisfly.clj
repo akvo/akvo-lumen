@@ -24,8 +24,9 @@
 
 (defn extract-caddisfly-column
   [column next-column-int]
-  (if (:caddisflyResourceUuid column)
-    (let [caddisfly-schema (get schemas (:caddisflyResourceUuid column))]
+  (if-let [caddisflyResourceUuid (:caddisflyResourceUuid column)]
+    (let [column (dissoc column :caddisflyResourceUuid)
+          caddisfly-schema (get schemas caddisflyResourceUuid)]
       (->> (reduce #(conj % (assoc column :title (str (:title column) "|" (:name %2) "|" (:unit %2))))
                    (if (:hasImage caddisfly-schema)
                      [(assoc column :title (str (:title column) "| Image" ))]
