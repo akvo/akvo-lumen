@@ -10,6 +10,7 @@
     "NUMBER" :number
     "DATE" :date
     "GEO" :geopoint
+    "CADDISFLY" :json
     :text))
 
 (defn dataset-columns
