@@ -130,9 +130,15 @@ app.post('/screenshot', validate(validation.screenshot), async (req, res) => {
 });
 
 function exitHandler(options, err) {
-  if (browser) browser.close();
-  if (err) captureException(err);
-  if (options.exit) process.exit(err ? err.code : 0);
+  if (browser) {
+    browser.close();
+  }
+  if (err) {
+    captureException(err);
+  }
+  if (options.exit) {
+    process.exit(err ? err.code : 0);
+  }
 }
 
 process.on('exit', exitHandler); //do something when app is closing
