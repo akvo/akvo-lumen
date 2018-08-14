@@ -1,7 +1,14 @@
 (ns akvo.lumen.lib.visualisation.maps-test
   (:require [akvo.lumen.lib.visualisation.maps :as m]
             [akvo.lumen.transformation.engine :as engine]
+            [akvo.lumen.lib.visualisation.map-config :as map-config]
             [clojure.test :refer :all]))
+
+(deftest hue-color
+  (is (= "0" (map-config/color-to-hue "#FF0000" )))
+  (is (= "120" (map-config/color-to-hue "#00FF00")))
+  (is (= "240" (map-config/color-to-hue "#0000FF")))
+  (is (= "282" (map-config/color-to-hue "#7b1fa2"))))
 
 (deftest invalid-location-spec?
 
