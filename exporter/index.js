@@ -121,6 +121,7 @@ app.post('/screenshot', validate(validation.screenshot), async (req, res) => {
       }
       
       await page.close();
+      await context.close();
     } catch (err) {
       captureException(err);
       res.sendStatus(500);
