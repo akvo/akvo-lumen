@@ -42,7 +42,6 @@ const setContext = (contextData, callback) => {
 
 const app = express();
 let browser;
-let context;
 
 app.use(bodyParser.json());
 app.use(cors());
@@ -54,8 +53,6 @@ app.use(cors());
       '--disable-setuid-sandbox',
     ],
   });
-  // Create a new incognito browser context.
-  context = await browser.createIncognitoBrowserContext();
   console.log('Exporter started...');
   app.listen(process.env.PORT || 3001, '0.0.0.0');
 })();
@@ -73,6 +70,8 @@ app.post('/screenshot', validate(validation.screenshot), async (req, res) => {
 
   setContext({ target, format, title }, async () => {
     try {
+      // Create a new incognito browser context.
+      const context = await browser.createIncognitoBrowserContext();
       const page = await context.newPage();
 
       page.on('pageerror', captureException);
