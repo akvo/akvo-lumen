@@ -65,8 +65,8 @@ const actions = Immutable.fromJS({
     args: {},
     onError: 'fail',
   },
-  'extract-caddisfly': {
-    op: 'core/extract-caddisfly',
+  'extract-multiple': {
+    op: 'core/extract-multiple',
     args: {},
     onError: 'fail',
   },
@@ -88,9 +88,6 @@ const commonOptions = [{
 }, {
   label: <FormattedMessage id="delete_column" />,
   value: 'delete-column',
-}, {
-  label: <FormattedMessage id="extract_caddisfly" />,
-  value: 'extract-caddisfly',
 }];
 
 const dataTypeOptions = {
@@ -124,6 +121,9 @@ const dataTypeOptions = {
   number: [],
   date: [],
   geopoint: [],
+    multiple:[{
+  label: <FormattedMessage id="extract_multiple" />,
+  value: 'extract-multiple',}],
 };
 
 export default function ColumnContextMenu({

@@ -4,7 +4,7 @@ import ChangeDataType from './sidebars/ChangeDataType';
 import Filter from './sidebars/Filter';
 import TransformationLog from './sidebars/TransformationLog';
 import CombineColumns from './sidebars/CombineColumns';
-import ExtractCaddisfly from './sidebars/ExtractCaddisfly';
+import ExtractMultiple from './sidebars/ExtractMultiple';
 import DeriveColumn from './sidebars/DeriveColumn';
 import RenameColumn from './sidebars/RenameColumn';
 import GenerateGeopoints from './sidebars/GenerateGeopoints';
@@ -21,8 +21,8 @@ export default function DataTableSidebar(props) {
       return <TransformationLog {...props} />;
     case 'combineColumns':
       return <CombineColumns {...props} />;
-    case 'extractCaddisfly':
-      return <ExtractCaddisfly {...props} />;
+    case 'extractMultiple':
+      return <ExtractMultiple {...props} />;
     case 'deriveColumn':
       return <DeriveColumn {...props} />;
     case 'renameColumn':
@@ -41,7 +41,7 @@ DataTableSidebar.propTypes = {
       'filter',
       'transformationLog',
       'combineColumns',
-      'extractCaddisfly',
+      'extractMultiple',
       'deriveColumn',
       'renameColumn',
       'generateGeopoints',

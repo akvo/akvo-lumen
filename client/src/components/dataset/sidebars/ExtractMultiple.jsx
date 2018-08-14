@@ -5,15 +5,22 @@ import { FormattedMessage } from 'react-intl';
 import SelectMenu from '../../common/SelectMenu';
 import SidebarHeader from './SidebarHeader';
 import SidebarControls from './SidebarControls';
-
+import * as api from '../../../api';
 function textColumnOptions(columns) {
   return columns.filter(column =>
-    (column.get('type') === 'text' && column.get('caddisflyResourceUuid'))
+    (column.get('type') === 'multiple')
   ).map(column => ({
     label: column.get('title'),
     value: column.get('columnName'),
   })).toJS();
 }
+
+function getMultipleColumn(columns, value) {
+  return columns.filter(column =>
+	((column.get('type') === 'multiple') && (column.get('columnName') === value))
+  ).toJS()[0];
+}
+
 
 function SelectColumn({ columns, idx, onChange, value }) {
   return (
@@ -43,12 +50,12 @@ SelectColumn.propTypes = {
   value: PropTypes.string,
 };
 
-export default class ExtractCaddisfly extends Component {
+export default class ExtractMultiple extends Component {
   constructor() {
     super();
     this.state = {
       transformation: Immutable.fromJS({
-        op: 'core/extract-caddisfly',
+        op: 'core/extract-multiple',
         args: {
           columnName: ''
         },
@@ -62,11 +69,21 @@ export default class ExtractCaddisfly extends Component {
       return transformation.getIn(['args', 'columnName']) !== '';
   }
 
-  handleSelectColumn(value) {
-    const { transformation } = this.state;
+    getPossibleColumns(column) {
+	console.log("column:",column);
+	api.get('/api/multiple-column', {
+            query: JSON.stringify({subtype: column.subtype, subtypeId: column.subtypeId}),
+        })
+       .then(response => response.json())
+	    .then(multipleColumns => this.setState(multipleColumns));
+  }
+
+
+    handleSelectColumn(columns, value) {
+	const { transformation } = this.state;
+      this.getPossibleColumns(getMultipleColumn(columns, value));
     this.setState({
-      transformation: transformation.setIn(['args', 'columnName'], value),
-    });
+      transformation: transformation.setIn(['args', 'columnName'], value),});
   }
 
   render() {
@@ -75,13 +92,13 @@ export default class ExtractCaddisfly extends Component {
     return (
       <div className="DataTableSidebar">
         <SidebarHeader onClose={onClose}>
-          <FormattedMessage id="extract_caddisfly" />
+          <FormattedMessage id="extract_multiple" />
         </SidebarHeader>
         <div className="inputs">
           <SelectColumn
             columns={columns}
             idx={1}
-            onChange={value => this.handleSelectColumn(value)}
+            onChange={value => this.handleSelectColumn(columns, value)}
             value={args.get('columnName')}
           />
         </div>
@@ -95,7 +112,7 @@ export default class ExtractCaddisfly extends Component {
   }
 }
 
-ExtractCaddisfly.propTypes = {
+ExtractMultiple.propTypes = {
   onClose: PropTypes.func.isRequired,
   onApply: PropTypes.func.isRequired,
   columns: PropTypes.object.isRequired,

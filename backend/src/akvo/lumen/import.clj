@@ -37,7 +37,7 @@
                                   :table-name table-name
                                   :imported-table-name imported-table-name
                                   :version 1
-                                  :columns (mapv (fn [{:keys [title id type key caddisflyResourceUuid]}]
+                                  :columns (mapv (fn [{:keys [title id type key subtype subtype-id]}]
                                                    (cond->
                                                        {:type (name type)
                                                         :title (string/trim title)
@@ -45,7 +45,8 @@
                                                         :sort nil
                                                         :direction nil
                                                         :hidden false}
-                                                     caddisflyResourceUuid (assoc :caddisflyResourceUuid caddisflyResourceUuid)
+                                                     subtype (assoc :subtype subtype)
+                                                     subtype-id (assoc :subtypeId subtype-id)
                                                      key (assoc :key (boolean key))))
                                                  columns)
                                   :transformations []})
