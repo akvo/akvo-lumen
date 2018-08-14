@@ -117,10 +117,8 @@
   "Should convert hex string to hue for hsl color."
   [hex-string]
   (try
-    (let [c (Color/decode hex-string)
-          hue (->> (Color/RGBtoHSB (.getRed c) (.getGreen c) (.getBlue c) (float-array 3))
-                   (into [])
-                   first)]
+    (let [c   (Color/decode hex-string)
+          hue (first (Color/RGBtoHSB (.getRed c) (.getGreen c) (.getBlue c) (float-array 3)))]
       (str (int (* 360 hue))))
     (catch Exception e "0")))
 
