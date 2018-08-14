@@ -28,6 +28,5 @@
 (defn all [subtype subtype-id]
   (log/error ::all :subtype subtype :subtype-id subtype-id)
   (if (= subtype "caddisfly")
-    (response {:subtype subtype :subtype-id subtype-id
-               :multiple-column  (extract-caddisfly subtype-id) })
+    (response (extract-caddisfly subtype-id))
     (not-found {:subtype subtype})))
