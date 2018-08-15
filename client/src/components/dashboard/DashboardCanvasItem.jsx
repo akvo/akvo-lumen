@@ -100,6 +100,10 @@ export default class DashboardCanvasItem extends Component {
     return shouldUpdate;
   }
 
+  getElement() {
+    return this.el;
+  }
+
   getRenderDimensions() {
     const unit = this.props.canvasWidth / 12;
     const layout = getItemLayout(this.props);
@@ -142,6 +146,7 @@ export default class DashboardCanvasItem extends Component {
         data-test-id="dashboard-canvas-item"
         className="DashboardCanvasItem"
         style={this.state.style}
+        ref={(c) => { this.el = c; }}
       >
         {this.props.item.type === 'visualisation' && (
           <div className="itemContainerWrap">

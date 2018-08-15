@@ -1,32 +1,28 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { intlShape, injectIntl } from 'react-intl';
 
-export default class DashboardCanvasItemEditable extends Component {
-  constructor() {
-    super();
-    this.state = {
-      textContents: 'Enter text here',
-    };
+class DashboardCanvasItemEditable extends Component {
+  constructor(props) {
+    super(props);
+    this.placeholder = props.intl.formatMessage({ id: 'enter_text_here' });
+    this.state = {};
     this.handleChange = this.handleChange.bind(this);
     this.handleBlur = this.handleBlur.bind(this);
-    this.handleFocus = this.handleFocus.bind(this);
   }
   componentWillMount() {
-    this.setState({ textContents: this.props.item.content || 'Enter text here' });
+    this.setState({
+      textContents: this.placeholder !== this.props.item.content ?
+        this.props.item.content :
+        this.placeholder,
+    });
   }
   handleChange(evt) {
     this.setState({ textContents: evt.target.value });
   }
   handleBlur() {
-    const newItem = this.props.item;
-
-    newItem.content = this.state.textContents;
+    const newItem = { ...this.props.item, content: this.state.textContents };
     this.props.onEntityUpdate(newItem);
-  }
-  handleFocus() {
-    if (this.state.textContents === 'Enter text here') {
-      this.setState({ textContents: '' });
-    }
   }
   render() {
     return (
@@ -39,6 +35,7 @@ export default class DashboardCanvasItemEditable extends Component {
           onBlur={this.handleBlur}
           onFocus={this.handleFocus}
           value={this.state.textContents}
+          placeholder={this.placeholder}
           style={{
             width: '95%',
             height: '100%',
@@ -53,6 +50,9 @@ export default class DashboardCanvasItemEditable extends Component {
 }
 
 DashboardCanvasItemEditable.propTypes = {
+  intl: intlShape,
   item: PropTypes.object.isRequired,
   onEntityUpdate: PropTypes.func.isRequired,
 };
+
+export default injectIntl(DashboardCanvasItemEditable);

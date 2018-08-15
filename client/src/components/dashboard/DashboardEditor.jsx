@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import ReactGridLayout from 'react-grid-layout';
+import { Element, scroller } from 'react-scroll';
+
 import DashboardVisualisationList from './DashboardVisualisationList';
 import DashboardCanvasItem from './DashboardCanvasItem';
 
@@ -69,6 +71,15 @@ const getFirstBlankRowGroup = (layout, height) => {
   return lastRow + 1;
 };
 
+const handleScrollToItem = (id) => {
+  scroller.scrollTo(`DashboardCanvasItem__${id}`, {
+    duration: 500,
+    smooth: true,
+    containerId: 'DashboardEditorCanvasContainer',
+    offset: -60,
+  });
+};
+
 export default class DashboardEditor extends Component {
 
   constructor() {
@@ -78,6 +89,7 @@ export default class DashboardEditor extends Component {
       propLayout: [],
       saveError: false,
     };
+    this.canvasEls = {};
     this.handleLayoutChange = this.handleLayoutChange.bind(this);
     this.handleEntityToggle = this.handleEntityToggle.bind(this);
     this.handleResize = this.handleResize.bind(this);
@@ -132,10 +144,13 @@ export default class DashboardEditor extends Component {
   handleEntityToggle(item, itemType) {
     const newEntities = Object.assign({}, this.props.dashboard.entities);
     const newLayout = this.props.dashboard.layout.slice(0);
+    const itemExists = this.props.dashboard.entities[item.id];
+    let newEntityId;
 
-    if (this.props.dashboard.entities[item.id]) {
+    if (itemExists) {
       delete newEntities[item.id];
     } else if (itemType === 'visualisation') {
+      newEntityId = item.id;
       this.props.onAddVisualisation(this.props.visualisations[item.id]);
 
       const visualisationType = this.props.visualisations[item.id].visualisationType;
@@ -155,7 +170,7 @@ export default class DashboardEditor extends Component {
         i: item.id,
       });
     } else if (itemType === 'text') {
-      const newEntityId = getNewEntityId(this.props.dashboard.entities, itemType);
+      newEntityId = getNewEntityId(this.props.dashboard.entities, itemType);
 
       newEntities[newEntityId] = {
         type: itemType,
@@ -174,8 +189,27 @@ export default class DashboardEditor extends Component {
 
     /* Note that we update the propLayout, not the parent layout, to prevent race conditions. The
     /* parent layout will be updated automatically by handleLayoutChange */
-    this.setState({ propLayout: newLayout });
+    this.setState({ propLayout: newLayout }, () => {
+      if (!itemExists) {
+        handleScrollToItem(newEntityId);
+        if (itemType === 'text') {
+          this.handleFocusTextItem(newEntityId);
+        }
+      }
+    });
     this.props.onUpdateEntities(newEntities);
+  }
+
+  handleFocusTextItem(id) {
+    setTimeout(() => {
+      const canvasItem = this.canvasEls[id];
+      if (!canvasItem) return;
+      const el = canvasItem.getElement();
+      if (!el) return;
+      const textarea = el.querySelector('textarea');
+      if (!textarea) return;
+      textarea.focus();
+    }, 1000);
   }
 
   handleResize() {
@@ -223,6 +257,7 @@ export default class DashboardEditor extends Component {
         />
         <div
           className="DashboardEditorCanvasContainer"
+          id="DashboardEditorCanvasContainer"
           ref={(ref) => { this.DashboardEditorCanvasContainer = ref; }}
         >
           <div className="DashboardEditorCanvasControls">
@@ -261,9 +296,7 @@ export default class DashboardEditor extends Component {
               margin={[0, 0]}
             >
               {getArrayFromObject(dashboard.entities).map(item =>
-                <div
-                  key={item.id}
-                >
+                <Element key={item.id} name={`DashboardCanvasItem__${item.id}`}>
                   <DashboardCanvasItem
                     item={this.getItemFromLibrary(item)}
                     datasets={this.props.datasets}
@@ -272,8 +305,9 @@ export default class DashboardEditor extends Component {
                     canvasWidth={canvasWidth}
                     onDeleteClick={this.handleEntityToggle}
                     onEntityUpdate={this.handleEntityUpdate}
+                    ref={(c) => { this.canvasEls[item.id] = c; }}
                   />
-                </div>
+                </Element>
               )}
             </ReactGridLayout>
           </div>
