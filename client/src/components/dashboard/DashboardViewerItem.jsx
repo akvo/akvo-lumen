@@ -29,7 +29,11 @@ export default class DashboardViewerItem extends Component {
           display: 'inline-block',
           width: canvasWidth - (cMargin * 2),
           minHeight: MIN_HEIGHT,
-          height: item.type === 'visualisation' && item.visualisation.visualisationType === 'map' ?
+          height: (
+            item.type === 'visualisation' &&
+            item.visualisation &&
+            item.visualisation.visualisationType === 'map'
+          ) ?
             MIN_HEIGHT :
             null,
           margin: cMargin,
@@ -41,7 +45,11 @@ export default class DashboardViewerItem extends Component {
           display: 'inline-block',
           width: (canvasWidth / 2) - (cMargin * 2),
           minHeight: MIN_HEIGHT,
-          height: item.type === 'visualisation' && item.visualisation.visualisationType === 'map' ?
+          height: (
+            item.type === 'visualisation' &&
+            item.visualisation &&
+            item.visualisation.visualisationType === 'map'
+          ) ?
             MIN_HEIGHT :
             null,
           margin: cMargin,
