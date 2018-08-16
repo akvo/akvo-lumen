@@ -71,11 +71,14 @@ const getFirstBlankRowGroup = (layout, height) => {
   return lastRow + 1;
 };
 
+const editorCanvasId = 'DashboardEditorCanvasContainer';
+const getItemScrollName = id => `DashboardCanvasItem__${id}`;
+
 const handleScrollToItem = (id) => {
-  scroller.scrollTo(`DashboardCanvasItem__${id}`, {
+  scroller.scrollTo(getItemScrollName(id), {
     duration: 500,
     smooth: true,
-    containerId: 'DashboardEditorCanvasContainer',
+    containerId: editorCanvasId,
     offset: -60,
   });
 };
@@ -89,7 +92,7 @@ export default class DashboardEditor extends Component {
       propLayout: [],
       saveError: false,
     };
-    this.canvasEls = {};
+    this.canvasElements = {};
     this.handleLayoutChange = this.handleLayoutChange.bind(this);
     this.handleEntityToggle = this.handleEntityToggle.bind(this);
     this.handleResize = this.handleResize.bind(this);
@@ -144,10 +147,10 @@ export default class DashboardEditor extends Component {
   handleEntityToggle(item, itemType) {
     const newEntities = Object.assign({}, this.props.dashboard.entities);
     const newLayout = this.props.dashboard.layout.slice(0);
-    const itemExists = this.props.dashboard.entities[item.id];
+    const dashboardEntity = this.props.dashboard.entities[item.id];
     let newEntityId;
 
-    if (itemExists) {
+    if (dashboardEntity) {
       delete newEntities[item.id];
     } else if (itemType === 'visualisation') {
       newEntityId = item.id;
@@ -190,7 +193,7 @@ export default class DashboardEditor extends Component {
     /* Note that we update the propLayout, not the parent layout, to prevent race conditions. The
     /* parent layout will be updated automatically by handleLayoutChange */
     this.setState({ propLayout: newLayout }, () => {
-      if (!itemExists) {
+      if (!dashboardEntity) {
         handleScrollToItem(newEntityId);
         if (itemType === 'text') {
           this.handleFocusTextItem(newEntityId);
@@ -202,7 +205,7 @@ export default class DashboardEditor extends Component {
 
   handleFocusTextItem(id) {
     setTimeout(() => {
-      const canvasItem = this.canvasEls[id];
+      const canvasItem = this.canvasElements[id];
       if (!canvasItem) return;
       const el = canvasItem.getElement();
       if (!el) return;
@@ -256,8 +259,8 @@ export default class DashboardEditor extends Component {
           dashboardItems={dashboard.entities}
         />
         <div
-          className="DashboardEditorCanvasContainer"
-          id="DashboardEditorCanvasContainer"
+          className={editorCanvasId}
+          id={editorCanvasId}
           ref={(ref) => { this.DashboardEditorCanvasContainer = ref; }}
         >
           <div className="DashboardEditorCanvasControls">
@@ -296,7 +299,7 @@ export default class DashboardEditor extends Component {
               margin={[0, 0]}
             >
               {getArrayFromObject(dashboard.entities).map(item =>
-                <Element key={item.id} name={`DashboardCanvasItem__${item.id}`}>
+                <Element key={item.id} name={getItemScrollName(item.id)}>
                   <DashboardCanvasItem
                     item={this.getItemFromLibrary(item)}
                     datasets={this.props.datasets}
@@ -305,7 +308,7 @@ export default class DashboardEditor extends Component {
                     canvasWidth={canvasWidth}
                     onDeleteClick={this.handleEntityToggle}
                     onEntityUpdate={this.handleEntityUpdate}
-                    ref={(c) => { this.canvasEls[item.id] = c; }}
+                    ref={(c) => { this.canvasElements[item.id] = c; }}
                   />
                 </Element>
               )}
