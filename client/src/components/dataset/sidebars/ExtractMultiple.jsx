@@ -8,75 +8,30 @@ import SidebarHeader from './SidebarHeader';
 import SidebarControls from './SidebarControls';
 import * as api from '../../../api';
 
-
-function MultipleColumnImage(props) {
-    const hasImage = props.multipleColumn ? props.multipleColumn.hasImage : null;
-    console.log("hasImage",  hasImage);
-  if (hasImage) {
-      return <div><h1>extract image? {hasImage.toString()} </h1>
-	   <ToggleInput
-        name="image"
-        type="checkbox"
-        labelId="show_legend"
-        className="showLegend"
-      checked={false}
-      onChange={null}
-      /></div>
-      ;
-  }else{
-      return <h1>NO IMAGE {hasImage.toString()}</h1>;
-  }
-}
-function Column(props) {
-    const value = props.value;
-    const key = props.key;
-    const type = props.type;
-  return (
-    // Wrong! There is no need to specify the key here:
-    <li key={key}>
-      {value} - {type}
-    </li>
-  );
-}
-
-
-function MultipleColumnList(props) {
-    const columns = props.multipleColumn ? props.multipleColumn.columns : [];
-    console.log("columns", columns);
-    const columList = columns.map(column => <Column key={column.id} value={column.name} type={column.type} />);
-    return (
-	<ul>
-	  {columList}
-	</ul>
-    );}
-
-
 function textColumnOptions(columns) {
-  return columns.filter(column =>
-    (column.get('type') === 'multiple')
-  ).map(column => ({
-    label: column.get('title'),
-    value: column.get('columnName'),
-  })).toJS();
+  return columns
+    .filter(column => column.get('type') === 'multiple')
+    .map(column => ({
+      label: column.get('title'),
+      value: column.get('columnName'),
+    }))
+    .toJS();
 }
 
 function getMultipleColumn(columns, value) {
-  return columns.filter(column =>
-	((column.get('type') === 'multiple') && (column.get('columnName') === value))
-  ).toJS()[0];
+  return columns
+    .filter(
+      column =>
+        column.get('type') === 'multiple' && column.get('columnName') === value,
+    )
+    .toJS()[0];
 }
-
 
 function SelectColumn({ columns, idx, onChange, value }) {
   return (
     <div className="inputGroup">
-      <label
-        htmlFor="columnName"
-      >
-        <FormattedMessage
-          id="select_n_column"
-          values={{ idx }}
-        />
+      <label htmlFor="columnName">
+        <FormattedMessage id="select_n_column" values={{ idx }} />
       </label>
       <SelectMenu
         name="columnName"
@@ -95,6 +50,95 @@ SelectColumn.propTypes = {
   value: PropTypes.string,
 };
 
+class MultipleColumnImage extends Component {
+  constructor(props) {
+    super(props);
+    this.onChange = this.onChange.bind(this);
+    this.state = { transformation: this.props.transformation };
+  }
+  onChange(value) {
+    this.setState({
+      transformation: this.state.transformation.setIn(['args', 'image'], value),
+    });
+  }
+  render() {
+    const hasImage = this.props.multipleColumn.hasImage;
+    const extractImage = this.state.transformation.getIn(['args', 'image']);
+    if (hasImage) {
+      return (
+        <div>
+          <FormattedMessage id="extract_image" />
+          <ToggleInput
+            name="image"
+            type="checkbox"
+            labelId="extract_image"
+            className="showLegend"
+            checked={extractImage}
+            onChange={this.onChange}
+          />
+        </div>
+      );
+    }
+    return null;
+  }
+}
+
+class Column extends Component {
+  constructor(props) {
+    super(props);
+  }
+  render() {
+    const value = this.props.value;
+    const type = this.props.type;
+    const id = this.props.id;
+    return (
+      <div key={id}>
+        {/* <ToggleInput
+            name="extractColumn"
+            type="checkbox"
+            labelId="extract_column"
+            className="showLegend"
+            checked={extractColumn}
+            onChange={this.onChange}
+            /> */}
+        {value} - {type}
+      </div>
+    );
+  }
+}
+
+class MultipleColumnList extends Component {
+  constructor(props) {
+    super(props);
+  }
+  render() {
+    const columns = this.props.multipleColumn.columns || [];
+    const columList = columns.map(column => (
+      <Column key={column.id} value={column.name} type={column.type} />
+    ));
+    return <div>{columList}</div>;
+  }
+}
+
+class MultipleColumn extends Component {
+  constructor(props) {
+    super(props);
+  }
+  render() {
+    const multipleColumn = this.props.multipleColumn;
+    const transformation = this.props.transformation;
+    return multipleColumn ? (
+      <div>
+        <MultipleColumnImage
+          multipleColumn={multipleColumn}
+          transformation={transformation}
+        />
+        <MultipleColumnList multipleColumn={multipleColumn} />
+      </div>
+    ) : null;
+  }
+}
+
 export default class ExtractMultiple extends Component {
   constructor() {
     super();
@@ -102,7 +146,8 @@ export default class ExtractMultiple extends Component {
       transformation: Immutable.fromJS({
         op: 'core/extract-multiple',
         args: {
-          columnName: ''
+          image: false,
+          columnName: '',
         },
         onError: 'fail',
       }),
@@ -111,31 +156,36 @@ export default class ExtractMultiple extends Component {
 
   isValidTransformation() {
     const { transformation } = this.state;
-      return transformation.getIn(['args', 'columnName']) !== '';
+    return transformation.getIn(['args', 'columnName']) !== '';
   }
 
-    getPossibleColumns(column) {
-	console.log("column:",column);
-	api.get('/api/multiple-column', {
-            query: JSON.stringify({subtype: column.subtype, subtypeId: column.subtypeId}),
-        })
-       .then(response => response.json())
-	    .then(multipleColumns => this.setState({multipleColumn:multipleColumns}));
+  getPossibleColumns(column) {
+    console.log('column:', column);
+    api
+      .get('/api/multiple-column', {
+        query: JSON.stringify({
+          subtype: column.subtype,
+          subtypeId: column.subtypeId,
+        }),
+      })
+      .then(response => response.json())
+      .then(multipleColumns =>
+        this.setState({ multipleColumn: multipleColumns }),
+      );
   }
 
+  handleSelectColumn(columns, value) {
+    const { transformation } = this.state;
+    this.getPossibleColumns(getMultipleColumn(columns, value));
+    this.setState({
+      transformation: transformation.setIn(['args', 'columnName'], value),
+    });
+  }
 
-    handleSelectColumn(columns, value) {
-	const { transformation } = this.state;
-	this.getPossibleColumns(getMultipleColumn(columns, value));
-	this.setState({transformation: transformation.setIn(['args', 'columnName'], value),});
-    }
-
-
-    
   render() {
     const { onClose, onApply, columns } = this.props;
-      const args = this.state.transformation.get('args');
-      console.log(this.state);
+    const args = this.state.transformation.get('args');
+    console.log(this.state);
     return (
       <div className="DataTableSidebar">
         <SidebarHeader onClose={onClose}>
@@ -148,13 +198,19 @@ export default class ExtractMultiple extends Component {
             onChange={value => this.handleSelectColumn(columns, value)}
             value={args.get('columnName')}
           />
-	    <MultipleColumnImage multipleColumn={this.state.multipleColumn}/>
-	    <MultipleColumnList multipleColumn={this.state.multipleColumn}/>
+          <MultipleColumn
+            multipleColumn={this.state.multipleColumn}
+            transformation={this.state.transformation}
+          />
         </div>
 
         <SidebarControls
           positiveButtonText={<FormattedMessage id="extract" />}
-          onApply={this.isValidTransformation() ? () => onApply(this.state.transformation) : null}
+          onApply={
+            this.isValidTransformation()
+              ? () => onApply(this.state.transformation)
+              : null
+          }
           onClose={onClose}
         />
       </div>
