@@ -16,7 +16,7 @@
   [subtype-id ]
   (when subtype-id
     (let [schema (get schemas subtype-id)
-          res (select-keys schema [:name :hasImage])]
+          res (select-keys schema [:hasImage])]
       (assoc res :columns (map (fn [r]
                                  {:id (:id r)
                                   :name (:name r)
