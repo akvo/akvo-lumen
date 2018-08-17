@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { LegendOrdinal } from '@vx/legend';
 import { scaleOrdinal } from '@vx/scale';
 
-import { replaceLabelIfValueEmpty } from '../../utilities/chart';
 import './Legend.scss';
 import LegendShape from './LegendShape';
 
@@ -28,7 +27,7 @@ const Legend = ({
         shape={({ label: { datum }, ...shapeRest }) => (
           <LegendShape isActive={activeItem === datum} {...shapeRest} />
         )}
-        fill={({ datum }) => colorMapping[replaceLabelIfValueEmpty(datum)]}
+        fill={({ datum }) => colorMapping[datum]}
       />
     </div>
   );

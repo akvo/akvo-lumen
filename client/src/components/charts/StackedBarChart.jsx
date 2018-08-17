@@ -268,7 +268,7 @@ export default class StackedBarChart extends Component {
             colorMapping={
               stackNodes.reduce((acc, { key }, i) => ({
                 ...acc,
-                [key]: this.getColor(key, i),
+                [replaceLabelIfValueEmpty(key)]: this.getColor(key, i),
               }), {})
             }
             // activeItem={get(this.state, 'hoveredNode.seriesKey')}
