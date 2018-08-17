@@ -17,25 +17,35 @@
     "number" "double precision"
     "date"   "timestamptz"))
 
-(defn args [op-spec]
-  (let [{code         "code"
-         column-title "newColumnTitle"
-         column-type  "newColumnType"} (engine/args op-spec)]
-    {::code code ::column-title column-title ::column-type column-type}))
+  {:args
+   {:columns
+    [{:extract true, :id 1, :name "Soil Moisture", :type "string"}],
+    :extractImage false,
+    :selectedColumn
+    {:columnName "c108799115",
+     :direction nil,
+     :hidden false,
+     :sort nil,
+     :subtype "caddisfly",
+     :subtypeId "0b4a0aaa-f556-4c11-a539-c4626582cca6",
+     :title "Soil Moisture",
+     :type "multiple"}},
+   :onError "fail",
+   :op "core/extract-multiple"}
 
 (defmethod engine/valid? :core/extract-multiple
   [op-spec]
-  (log/error ::engine/valid? (keywordize-keys op-spec))
+  (let [{:keys [onError op args]}                      (keywordize-keys op-spec)
+        {:keys [columns extractImage selectedColumn] } args
+        columns-to-extract                             (filter :extract columns)
+        res                                                    (and
+                                                                (or extractImage (not-empty columns-to-extract))
+                                                                (every? (comp  engine/valid-type? :type) columns-to-extract)
+                                                                (#{"fail" "leave-empty" "delete-row"} onError))]
+    
+    (log/debug ::engine/valid? [ columns-to-extract extractImage selectedColumn onError op res])
 
-  (comment (let [{:keys [::code
-                 ::column-title
-                 ::column-type]} (args op-spec)]
-     (and (string? column-title) 
-          (engine/valid-type? column-type)
-          (#{"fail" "leave-empty" "delete-row"} (engine/error-strategy op-spec)))))
-
-    false
-  )
+    res))
 
 (defn js-execution>sql-params [js-seq result-kw]
   (->> js-seq
@@ -55,7 +65,7 @@
 
 (defmethod engine/apply-operation :core/extract-multiple
   [tenant-conn table-name columns op-spec]
-  (jdbc/with-db-transaction [conn tenant-conn]
+  #_(jdbc/with-db-transaction [conn tenant-conn]
     (let [{:keys [::code
                   ::column-title
                   ::column-type]} (args op-spec)

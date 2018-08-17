@@ -20,7 +20,7 @@
       (assoc res :columns (map (fn [r]
                                  {:id (:id r)
                                   :name (:name r)
-                                  :type "string" ;; TODO improve it
+                                  :type "text" ;; TODO improve it
                                   }
                                  ) (:results schema))))))
 
