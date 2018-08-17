@@ -18,7 +18,6 @@
     akvo.lumen.transformation.derive
     akvo.lumen.transformation.rename-column
     akvo.lumen.transformation.delete-column
-    akvo.lumen.transformation.extract-caddisfly
     akvo.lumen.transformation.geo
     akvo.lumen.transformation.merge-datasets
     akvo.lumen.transformation.multiple-column
