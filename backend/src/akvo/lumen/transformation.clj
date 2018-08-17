@@ -21,6 +21,7 @@
     akvo.lumen.transformation.extract-caddisfly
     akvo.lumen.transformation.geo
     akvo.lumen.transformation.merge-datasets
+    akvo.lumen.transformation.multiple-column
     akvo.lumen.transformation.reverse-geocode])
 
 ;; Load transformation namespaces
