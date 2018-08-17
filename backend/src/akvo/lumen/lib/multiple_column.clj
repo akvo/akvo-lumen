@@ -19,10 +19,9 @@
           res (select-keys schema [:hasImage])]
       (assoc res :columns (map (fn [r]
                                  {:id (:id r)
-                                  :name (:name r)
+                                  :name (str (:name r) " :: " (:unit r))
                                   :type "text" ;; TODO improve it
-                                  }
-                                 ) (:results schema))))))
+                                  }) (:results schema))))))
 
 (extract-caddisfly "f88237b7-be3d-4fac-bbee-ab328eefcd14")
 (defn all [subtype subtype-id]
