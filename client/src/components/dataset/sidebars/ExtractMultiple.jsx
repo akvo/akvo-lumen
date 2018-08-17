@@ -55,24 +55,18 @@ SelectColumn.propTypes = {
 class MultipleColumnImage extends Component {
   constructor(props) {
     super(props);
-    this.onChange = this.onChange.bind(this);
-    this.state = {
-      extractImage: this.props.extractImage,
-    };
-  }
-  onChange(value) {
-    this.setState({ extractImage: value });
   }
   render() {
-    if (this.props.hasImage) {
+    const { hasImage, extractImage, onExtractImage } = this.props;
+    if (hasImage) {
       return (
         <ToggleInput
           name="image"
           type="checkbox"
           labelId="extract_image_question"
           className="showLegend"
-          checked={this.state.extractImage}
-          onChange={this.onChange}
+          checked={extractImage}
+          onChange={onExtractImage}
         />
       );
     }
@@ -105,7 +99,6 @@ class Column extends Component {
   render() {
     const api = this.props.api; // .name; type id
     const ui = this.state.ui;
-    console.log(api, ui);
     return (
       <div className="inputs">
         <div className="inputGroup">
@@ -159,14 +152,14 @@ class MultipleColumnList extends Component {
 }
 
 function MultipleColumn(props) {
-  const api = props.api;
-  const ui = props.ui;
-  const selectedColumn = props.selectedColumn;
+  const { api, ui, onExtractImage, extractImage } = props;
   return api ? (
     <div>
       <MultipleColumnImage
         hasImage={api.hasImage}
         extractImage={ui.extractImage}
+        onExtractImage={onExtractImage}
+        extractImage={extractImage}
       />
       <MultipleColumnList api={props.api} ui={props.ui} />
     </div>
@@ -188,6 +181,7 @@ export default class ExtractMultiple extends Component {
       selectedColumn: { name: null },
       extractMultiple: { api: null, ui: null },
     };
+    this.onExtractImage = this.onExtractImage.bind(this);
   }
   isValidTransformation() {
     const { transformation } = this.state;
@@ -209,7 +203,6 @@ export default class ExtractMultiple extends Component {
   handleSelectColumn(columns, columnName) {
     const column = filterByMultipleAndColumnName(columns, columnName);
     this.apiMultipleColumn(column, apiRes => {
-      console.log(apiRes);
       const ui = _.cloneDeep(apiRes); // cloning object
       delete ui.hasImage;
       ui.extractImage = false;
@@ -220,6 +213,13 @@ export default class ExtractMultiple extends Component {
         },
         selectedColumn: column,
       });
+    });
+  }
+  onExtractImage(value) {
+    this.setState({
+      extractMultiple: _.merge(this.state.extractMultiple, {
+        ui: { extractImage: value },
+      }),
     });
   }
 
@@ -245,6 +245,8 @@ export default class ExtractMultiple extends Component {
             api={this.state.extractMultiple.api}
             ui={this.state.extractMultiple.ui}
             selectedColumn={this.state.selectedColumn}
+            onExtractImage={this.onExtractImage}
+            extractImage={this.state.extractMultiple.ui.extractImage}
           />
         </div>
 
