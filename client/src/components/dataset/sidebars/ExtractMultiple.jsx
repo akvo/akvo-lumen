@@ -77,26 +77,17 @@ class MultipleColumnImage extends Component {
 class Column extends Component {
   constructor(props) {
     super(props);
-    const ui = props.ui;
-    ui.extract = false;
-    this.props.onChangeColumnName('');
-    this.state = { ui: ui };
-    this.onChangeExtract = this.onChangeExtract.bind(this);
-    this.onChangeColumnName = this.onChangeColumnName.bind(this);
+    this.props.onExtractColumn(false);
+    this.props.onColumnName('');
+    this.onColumnName = this.onColumnName.bind(this);
   }
 
-  onChangeExtract(v) {
-    console.log('onChangeExtract', v);
-    this.setState({
-      ui: _.merge(this.state.ui, { extract: v, name: this.props.api.name }),
-    });
-  }
-  onChangeColumnName(evt) {
-    this.props.onChangeColumnName(evt.target.value);
+  onColumnName(evt) {
+    this.props.onColumnName(evt.target.value);
   }
   render() {
     const api = this.props.api; // .name; type id
-    const ui = this.state.ui;
+    const ui = this.props.ui;
     return (
       <div className="inputs">
         <div className="inputGroup">
@@ -115,7 +106,7 @@ class Column extends Component {
               type="checkbox"
               className="showLegend"
               checked={ui.extract}
-              onChange={this.onChangeExtract}
+              onChange={this.props.onExtractColumn}
             />
           </div>
           {ui.extract ? (
@@ -124,7 +115,7 @@ class Column extends Component {
               placeholder={api.name} // TODO: how to i18n this value?
               type="text"
               className="titleTextInput"
-              onChange={this.onChangeColumnName}
+              onChange={this.onColumnName}
               data-test-id={'column-title-' + api.id}
             />
           ) : (
@@ -137,6 +128,7 @@ class Column extends Component {
 }
 
 function MultipleColumnList(props) {
+  const { onColumnName, onExtractColumn } = props;
   const columns = props.api.columns || [];
   const columList = columns.map((column, index) => (
     <Column
@@ -144,14 +136,22 @@ function MultipleColumnList(props) {
       api={column}
       ui={props.ui.columns[index]}
       idx={index}
-      onChangeColumnName={props.onChangeColumnName(index)}
+      onColumnName={onColumnName(index)}
+      onExtractColumn={onExtractColumn(index)}
     />
   ));
   return <div>{columList}</div>;
 }
 
 function MultipleColumn(props) {
-  const { api, ui, onExtractImage, extractImage, onChangeColumnName } = props;
+  const {
+    api,
+    ui,
+    onExtractImage,
+    extractImage,
+    onColumnName,
+    onExtractColumn,
+  } = props;
   return api ? (
     <div>
       <MultipleColumnImage
@@ -163,7 +163,8 @@ function MultipleColumn(props) {
       <MultipleColumnList
         api={api}
         ui={ui}
-        onChangeColumnName={onChangeColumnName}
+        onColumnName={onColumnName}
+        onExtractColumn={onExtractColumn}
       />
     </div>
   ) : null;
@@ -185,7 +186,8 @@ export default class ExtractMultiple extends Component {
       extractMultiple: { api: null, ui: { extractImage: null } },
     };
     this.onExtractImage = this.onExtractImage.bind(this);
-    this.onChangeColumnName = this.onChangeColumnName.bind(this);
+    this.onColumnName = this.onColumnName.bind(this);
+    this.onExtractColumn = this.onExtractColumn.bind(this);
   }
   isValidTransformation() {
     const { transformation } = this.state;
@@ -227,7 +229,7 @@ export default class ExtractMultiple extends Component {
     });
   }
 
-  onChangeColumnName(idx) {
+  onColumnName(idx) {
     return columnName => {
       this.setState({
         extractMultiple: _.merge(this.state.extractMultiple, {
@@ -243,7 +245,29 @@ export default class ExtractMultiple extends Component {
           },
         }),
       });
-      console.log(this.state.extractMultiple.ui.columns[idx].name);
+      //      console.log(this.state.extractMultiple.ui.columns[idx].name);
+    };
+  }
+  onExtractColumn(idx) {
+    return extractColumn => {
+      if (!extractColumn) {
+        this.onColumnName(idx)('');
+      }
+      this.setState({
+        extractMultiple: _.merge(this.state.extractMultiple, {
+          ui: {
+            columns: this.state.extractMultiple.ui.columns.map(
+              (column, index) => {
+                if (idx === index) {
+                  column.extract = extractColumn;
+                }
+                return column;
+              },
+            ),
+          },
+        }),
+      });
+      //      console.log(this.state.extractMultiple.ui.columns[idx].extract);
     };
   }
 
@@ -271,7 +295,8 @@ export default class ExtractMultiple extends Component {
             selectedColumn={this.state.selectedColumn}
             onExtractImage={this.onExtractImage}
             extractImage={this.state.extractMultiple.ui.extractImage}
-            onChangeColumnName={this.onChangeColumnName}
+            onColumnName={this.onColumnName}
+            onExtractColumn={this.onExtractColumn}
           />
         </div>
 
