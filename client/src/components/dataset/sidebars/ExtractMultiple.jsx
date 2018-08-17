@@ -78,7 +78,6 @@ class Column extends Component {
   constructor(props) {
     super(props);
     this.props.onExtractColumn(false);
-    this.props.onColumnName('');
     this.onColumnName = this.onColumnName.bind(this);
   }
 
@@ -176,14 +175,14 @@ export default class ExtractMultiple extends Component {
     this.state = {
       transformation: Immutable.fromJS({
         op: 'core/extract-multiple',
-        args: {
-          image: false,
-          columnName: '',
-        },
+        args: {},
         onError: 'fail',
       }),
-      selectedColumn: { name: null },
-      extractMultiple: { api: null, ui: { extractImage: null, columns: [] } },
+
+      extractMultiple: {
+        api: null,
+        ui: { extractImage: null, columns: [], selectedColumn: { name: null } },
+      },
     };
     this.onExtractImage = this.onExtractImage.bind(this);
     this.onColumnName = this.onColumnName.bind(this);
@@ -193,9 +192,9 @@ export default class ExtractMultiple extends Component {
   isValidTransformation() {
     const {
       transformation,
-      selectedColumn,
+
       extractMultiple: {
-        ui: { extractImage, columns },
+        ui: { extractImage, columns, selectedColumn },
       },
     } = this.state;
     const extractColumns =
@@ -207,7 +206,7 @@ export default class ExtractMultiple extends Component {
     console.log('extractColumns', extractColumns);
 
     //    return transformation.getIn(['args', 'columnName']) !== '';
-
+    console.log('transformation', transformation);
     return selectedColumn && (extractImage || extractColumns);
   }
 
@@ -223,77 +222,96 @@ export default class ExtractMultiple extends Component {
       .then(callback);
   }
 
-  selectColumn(columns, columnName) {
+  onExtractColumn(idx) {
+    return extractColumn => {
+      if (!extractColumn) {
+        this.onColumnName(idx)(
+          this.state.extractMultiple.api.columns[idx].name,
+        );
+      }
+      const extractMultiple = _.merge(this.state.extractMultiple, {
+        ui: {
+          columns: this.state.extractMultiple.ui.columns.map(
+            (column, index) => {
+              if (idx === index) {
+                column.extract = extractColumn;
+              }
+              return column;
+            },
+          ),
+        },
+      });
+      this.setState({
+        extractMultiple: extractMultiple,
+        transformation: this.state.transformation.setIn(
+          ['args'],
+          extractMultiple.ui,
+        ),
+      });
+      //      console.log(this.state.extractMultiple.ui.columns[idx].extract);
+    };
+  }
+
+  onSelectColumn(columns, columnName) {
     const column = filterByMultipleAndColumnName(columns, columnName);
     this.apiMultipleColumn(column, apiRes => {
       const ui = _.cloneDeep(apiRes); // cloning object
       delete ui.hasImage;
       ui.extractImage = false;
+      ui.selectedColumn = column;
+
       this.setState({
         extractMultiple: {
           api: apiRes,
           ui: ui,
         },
-        selectedColumn: column,
+        transformation: this.state.transformation.setIn(['args'], ui),
       });
     });
   }
 
   onExtractImage(value) {
+    const extractMultiple = _.merge(this.state.extractMultiple, {
+      ui: { extractImage: value },
+    });
     this.setState({
-      extractMultiple: _.merge(this.state.extractMultiple, {
-        ui: { extractImage: value },
-      }),
+      extractMultiple: extractMultiple,
+      transformation: this.state.transformation.setIn(
+        ['args'],
+        extractMultiple.ui,
+      ),
     });
   }
 
   onColumnName(idx) {
     return columnName => {
+      const extractMultiple = _.merge(this.state.extractMultiple, {
+        ui: {
+          columns: this.state.extractMultiple.ui.columns.map(
+            (column, index) => {
+              if (idx === index) {
+                column.name = columnName;
+              }
+              return column;
+            },
+          ),
+        },
+      });
       this.setState({
-        extractMultiple: _.merge(this.state.extractMultiple, {
-          ui: {
-            columns: this.state.extractMultiple.ui.columns.map(
-              (column, index) => {
-                if (idx === index) {
-                  column.name = columnName;
-                }
-                return column;
-              },
-            ),
-          },
-        }),
+        extractMultiple: extractMultiple,
+        transformation: this.state.transformation.setIn(
+          ['args'],
+          extractMultiple.ui,
+        ),
       });
       //      console.log(this.state.extractMultiple.ui.columns[idx].name);
-    };
-  }
-
-  onExtractColumn(idx) {
-    return extractColumn => {
-      if (!extractColumn) {
-        this.onColumnName(idx)('');
-      }
-      this.setState({
-        extractMultiple: _.merge(this.state.extractMultiple, {
-          ui: {
-            columns: this.state.extractMultiple.ui.columns.map(
-              (column, index) => {
-                if (idx === index) {
-                  column.extract = extractColumn;
-                }
-                return column;
-              },
-            ),
-          },
-        }),
-      });
-      //      console.log(this.state.extractMultiple.ui.columns[idx].extract);
     };
   }
 
   render() {
     const { onClose, onApply, columns } = this.props;
     const args = this.state.transformation.get('args');
-    const selectedColumn = this.state.selectedColumn;
+    const selectedColumn = this.state.extractMultiple.ui.selectedColumn;
     return (
       <div className="DataTableSidebar">
         <SidebarHeader onClose={onClose}>
@@ -303,7 +321,7 @@ export default class ExtractMultiple extends Component {
           <SelectColumn
             columns={columns}
             idx={1}
-            onChange={columnName => this.selectColumn(columns, columnName)}
+            onChange={columnName => this.onSelectColumn(columns, columnName)}
             value={selectedColumn.columnName}
           />
           <MultipleColumn
@@ -337,4 +355,4 @@ ExtractMultiple.propTypes = {
   columns: PropTypes.object.isRequired,
 };
 //    const { transformation } = this.state;
-//{transformation: transformation.setIn(['args', 'columnName'], value),}
+//
