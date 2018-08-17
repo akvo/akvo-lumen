@@ -183,15 +183,32 @@ export default class ExtractMultiple extends Component {
         onError: 'fail',
       }),
       selectedColumn: { name: null },
-      extractMultiple: { api: null, ui: { extractImage: null } },
+      extractMultiple: { api: null, ui: { extractImage: null, columns: [] } },
     };
     this.onExtractImage = this.onExtractImage.bind(this);
     this.onColumnName = this.onColumnName.bind(this);
     this.onExtractColumn = this.onExtractColumn.bind(this);
   }
+
   isValidTransformation() {
-    const { transformation } = this.state;
-    return transformation.getIn(['args', 'columnName']) !== '';
+    const {
+      transformation,
+      selectedColumn,
+      extractMultiple: {
+        ui: { extractImage, columns },
+      },
+    } = this.state;
+    const extractColumns =
+      columns.map(c => c.extract).filter(e => e).length != 0;
+    console.log(this.state);
+    console.log('selectedColumn', selectedColumn);
+    console.log('extractImage', extractImage);
+    console.log('columns', columns);
+    console.log('extractColumns', extractColumns);
+
+    //    return transformation.getIn(['args', 'columnName']) !== '';
+
+    return selectedColumn && (extractImage || extractColumns);
   }
 
   apiMultipleColumn(column, callback) {
@@ -206,7 +223,7 @@ export default class ExtractMultiple extends Component {
       .then(callback);
   }
 
-  handleSelectColumn(columns, columnName) {
+  selectColumn(columns, columnName) {
     const column = filterByMultipleAndColumnName(columns, columnName);
     this.apiMultipleColumn(column, apiRes => {
       const ui = _.cloneDeep(apiRes); // cloning object
@@ -221,6 +238,7 @@ export default class ExtractMultiple extends Component {
       });
     });
   }
+
   onExtractImage(value) {
     this.setState({
       extractMultiple: _.merge(this.state.extractMultiple, {
@@ -248,6 +266,7 @@ export default class ExtractMultiple extends Component {
       //      console.log(this.state.extractMultiple.ui.columns[idx].name);
     };
   }
+
   onExtractColumn(idx) {
     return extractColumn => {
       if (!extractColumn) {
@@ -284,9 +303,7 @@ export default class ExtractMultiple extends Component {
           <SelectColumn
             columns={columns}
             idx={1}
-            onChange={columnName =>
-              this.handleSelectColumn(columns, columnName)
-            }
+            onChange={columnName => this.selectColumn(columns, columnName)}
             value={selectedColumn.columnName}
           />
           <MultipleColumn
