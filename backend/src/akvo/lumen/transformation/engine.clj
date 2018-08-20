@@ -96,7 +96,7 @@
 (defn derivation-column-name->int [s]
   (Integer/parseInt (apply str (rest (seq s)))))
 
-(defn next-column-int [columns]
+(defn next-column-index [columns]
   (let [nums (->> columns
                   (map #(get % "columnName"))
                   (filter #(re-find #"^d\d+$" %))
@@ -107,7 +107,7 @@
       (inc (apply max nums)))))
 
 (defn next-column-name [columns]
-  (int->derivation-column-name (next-column-int columns)))
+  (int->derivation-column-name (next-column-index columns)))
 
 (defn- deliver-promise-success [promise dataset-id dataset-version-id job-execution-id]
   (deliver promise {:status "OK"

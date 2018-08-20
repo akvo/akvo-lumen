@@ -33,7 +33,7 @@
 ;;=> [{:id 1, :name "Fluoride", :unit "ppm", :value "> 1.80"}]
 
 (defn extract-caddisfly-column
-  [column next-column-int]
+  [column next-column-index]
   (if-let [caddisflyResourceUuid (:subtypeId column)]
     (let [column (dissoc column :subtypeId)
           caddisfly-schema (get schemas caddisflyResourceUuid)]
@@ -44,7 +44,7 @@
                    (:results caddisfly-schema))
            (map #(let [id (engine/int->derivation-column-name %)]
                    (assoc %2 :columnName id :id id))
-                (filter #(>= % next-column-int) (range)))))
+                (filter #(>= % next-column-index) (range)))))
     (throw (ex-info "this column doesn't have a caddisflyResourceUuid currently associated!" {:message {:possible-reason "maybe you don't update the dataset!?"}}))))
 
 
@@ -67,10 +67,11 @@
   (jdbc/with-db-transaction [conn tenant-conn]
     (let [;;column-name     (col-name op-spec)
           ;;column          (keywordize-keys (u/find-column columns column-name))
-          next-column-int (engine/next-column-int columns)
+          next-column-index (engine/next-column-index columns)
           column-idx      (engine/column-index columns (:columnName selectedColumn))
-          new-columns     (extract-caddisfly-column column next-column-int)
-          cad-schema      (get schemas (:caddisflyResourceUuid column))]
+          new-columns     (extract-caddisfly-column selectedColumn next-column-index)
+          cad-schema      (get schemas (:subtypeId selectedColumn))
+          ]
       #_(log/debug :new-columns new-columns)
       #_(doseq [c new-columns]
         (log/debug "persist new-column " c)
