@@ -66,13 +66,9 @@
   [tenant-conn table-name columns columns-to-extract {:keys [selectedColumn extractImage] :as args} onError]
   (jdbc/with-db-transaction [conn tenant-conn]
     (let [column-name       (:columnName selectedColumn)
-
           next-column-index (engine/next-column-index columns)
-
           column-idx        (engine/column-index columns column-name)
-
           new-columns       (construct-new-columns selectedColumn columns-to-extract extractImage next-column-index)
-
           cad-schema        (get schemas (:subtypeId selectedColumn))
           add-db-columns (doseq [c new-columns]
                            (add-column conn {:table-name      table-name
@@ -84,6 +80,7 @@
                                         (let [multiple-value (json/parse-string ((keyword column-name) m) keyword)
                                               cad-results (or (caddisfly-test-results multiple-value cad-schema columns-to-extract)
                                                               (repeat nil))
+                                              _ (log/debug :cad-results cad-results)
                                               update-vals (->> (map
                                                                 (fn [new-column-name new-column-val]
                                                                   [(keyword new-column-name) new-column-val])
@@ -93,7 +90,7 @@
                                           (update-row conn table-name (:rnum m) update-vals))))
                                  doall)
           delete-db-column (delete-column conn {:table-name table-name :column-name column-name})]
-      (log/debug :db-ops add-db-columns update-db-columns delete-db-column)      
+      (log/info :db-ops add-db-columns update-db-columns delete-db-column)
       {:success?      true
        :execution-log [(format "Extract caddisfly column %s" column-name)]
        :columns
