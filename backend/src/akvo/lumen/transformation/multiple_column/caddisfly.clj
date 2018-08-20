@@ -39,13 +39,12 @@
   (if-let [caddisflyResourceUuid (:subtypeId column)]
     (let [base-column      (dissoc column :subtypeId :type :subtype :columnName :title)
           caddisfly-schema (get schemas caddisflyResourceUuid)]
-      (cond->>  (map #(assoc base-column :title (:name %) :type (:type %)) columns-to-extract )
-        (and (:hasImage caddisfly-schema) extractImage)
-        (cons (assoc base-column :type "text" :title (str (:title column) "| Image" )))
-        true (map #(assoc %2 :columnName % :id %) (map engine/int->derivation-column-name (iterate inc next-column-index))))
-      )
-;; TODO:  maybe we need to double check that columsn in columns-extract exists in schema, looking by id
-    
+      (map #(assoc %2 :columnName % :id %)
+           (map engine/int->derivation-column-name (iterate inc next-column-index))
+           (cond->>  (map #(assoc base-column :title (:name %) :type (:type %)) columns-to-extract )
+             (and (:hasImage caddisfly-schema) extractImage)
+             (cons (assoc base-column :type "text" :title (str (:title column) "| Image" ))))))
+    ;; TODO:  maybe we need to double check that columsn in columns-extract exists in schema, looking by id
     (throw (ex-info "this column doesn't have a caddisflyResourceUuid currently associated!" {:message {:possible-reason "maybe you don't update the dataset!?"}}))))
 
 (defn update-row [conn table-name row-id vals-map]
@@ -74,30 +73,27 @@
 
           new-columns       (construct-new-columns selectedColumn columns-to-extract extractImage next-column-index)
 
-          cad-schema        (get schemas (:subtypeId selectedColumn))]
+          cad-schema        (get schemas (:subtypeId selectedColumn))
+          add-db-columns (doseq [c new-columns]
+                           (add-column conn {:table-name      table-name
+                                             :column-type     (:type c)
+                                             :new-column-name (:id c)}))
+          update-db-columns (->> (caddisfly-data conn {:table-name table-name :column-name column-name})
 
-      (doseq [c new-columns]
-  
-        (add-column conn {:table-name      table-name
-                          :column-type     (:type c)
-                          :new-column-name (:id c)}))
-
-      (->> (caddisfly-data conn {:table-name table-name :column-name column-name})
-
-           (map (fn [m]
-                  (let [multiple-value (json/parse-string ((keyword column-name) m) keyword)
-                        cad-results (or (caddisfly-test-results multiple-value cad-schema columns-to-extract)
-                                        (repeat nil))
-                        update-vals (->> (map
-                                          (fn [new-column-name new-column-val]
-                                            [(keyword new-column-name) new-column-val])
-                                          (map :id new-columns)
-                                          (map :value cad-results))
-                                         (reduce #(apply assoc % %2) {}))]
-                    (update-row conn table-name (:rnum m) update-vals))))
-           doall)
-      (delete-column conn {:table-name table-name :column-name column-name})
- 
+                                 (map (fn [m]
+                                        (let [multiple-value (json/parse-string ((keyword column-name) m) keyword)
+                                              cad-results (or (caddisfly-test-results multiple-value cad-schema columns-to-extract)
+                                                              (repeat nil))
+                                              update-vals (->> (map
+                                                                (fn [new-column-name new-column-val]
+                                                                  [(keyword new-column-name) new-column-val])
+                                                                (map :id new-columns)
+                                                                (map :value cad-results))
+                                                               (reduce #(apply assoc % %2) {}))]
+                                          (update-row conn table-name (:rnum m) update-vals))))
+                                 doall)
+          delete-db-column (delete-column conn {:table-name table-name :column-name column-name})]
+      (log/debug :db-ops add-db-columns update-db-columns delete-db-column)      
       {:success?      true
        :execution-log [(format "Extract caddisfly column %s" column-name)]
        :columns
