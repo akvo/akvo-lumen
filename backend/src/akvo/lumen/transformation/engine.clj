@@ -19,7 +19,7 @@
 
 (defmulti apply-operation
   "Applies a particular operation based on `op` key from spec
-   * tenant-conn: Open connection to the database
+   * {:keys [tenant-conn] :as deps}: includes open connection to the database
    * table-name: table on which to operate (ds_<uuid>)
    * columns: in-memory representation of a columns spec
    * op-spec: JSON payload with the operation settings
@@ -27,11 +27,11 @@
    - \"op\" : operation to perform
    - \"args\" : map with arguments to the operation
    - \"onError\" : Error strategy"
-  (fn [tenant-conn table-name columns op-spec]
+  (fn [{:keys [tenant-conn]} table-name columns op-spec]
     (keyword (get op-spec "op"))))
 
 (defmethod apply-operation :default
-  [tenant-conn table-name columns op-spec]
+  [{:keys [tenant-conn]} table-name columns op-spec]
   (let [msg (str "Unknown operation " (get op-spec "op"))]
     (log/debug msg)
     {:success? false
@@ -41,7 +41,7 @@
   "invoke apply-operation inside a try-catch"
   [tenant-conn table-name columns op-spec]
   (try
-    (apply-operation tenant-conn table-name columns op-spec)
+    (apply-operation {:tenant-conn tenant-conn} table-name columns op-spec)
     (catch Exception e
       (log/debug e)
       {:success? false

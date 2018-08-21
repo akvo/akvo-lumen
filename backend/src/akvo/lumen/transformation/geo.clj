@@ -23,7 +23,7 @@
   (jdbc/execute! conn (import/geo-index table-name column-name)))
 
 (defmethod engine/apply-operation :core/generate-geopoints
-  [tenant-conn table-name columns op-spec]
+  [{:keys [tenant-conn]} table-name columns op-spec]
   (let [{:strs [columnNameLat columnNameLong columnTitleGeo]} (engine/args op-spec)
         get-client-type (partial engine/column-type columns)
         column-types (map get-client-type [columnNameLat columnNameLong])]

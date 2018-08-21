@@ -10,7 +10,7 @@
   (boolean (not-empty (get (engine/args op-spec) "expression"))))
 
 (defmethod engine/apply-operation :core/filter-column
-  [tenant-conn table-name columns op-spec]
+  [{:keys [tenant-conn]} table-name columns op-spec]
   (let [{expr "expression"
          column-name "columnName"} (engine/args op-spec)
         expr-fn (first (keys expr))

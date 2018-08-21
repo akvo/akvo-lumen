@@ -24,16 +24,16 @@
       :table-name))
 
 (defmethod engine/apply-operation :core/reverse-geocode
-  [conn table-name columns {:strs [args] :as op-spec}]
+  [{:keys [tenant-conn]} table-name columns {:strs [args] :as op-spec}]
   (let [column-name (engine/next-column-name columns)
         {:strs [target source]} args
         geopointColumn (get target "geopointColumn")
         {:strs [mergeColumn geoshapeColumn]} source
-        source-table-name (source-table-name conn source)]
-    (add-column conn {:column-type "text"
+        source-table-name (source-table-name tenant-conn source)]
+    (add-column tenant-conn {:column-type "text"
                       :new-column-name column-name
                       :table-name table-name})
-    (reverse-geocode conn {:point-column (table-qualify table-name geopointColumn)
+    (reverse-geocode tenant-conn {:point-column (table-qualify table-name geopointColumn)
                            :shape-column (table-qualify source-table-name geoshapeColumn)
                            :source-column-name (table-qualify source-table-name mergeColumn)
                            :source-table-name source-table-name
