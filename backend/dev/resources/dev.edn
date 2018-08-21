@@ -1,6 +1,7 @@
 {:components
  {:emailer #var akvo.lumen.component.emailer/dev-emailer
-  :error-tracker #var akvo.lumen.component.error-tracker/local-error-tracker}
+  :error-tracker #var akvo.lumen.component.error-tracker/local-error-tracker
+  :caddisfly #var akvo.lumen.component.caddisfly/dev-caddisfly}
  :config
  {:app
   {:middleware
@@ -10,6 +11,7 @@
     :arguments {:wrap-jwt {:keycloak-url "http://auth.lumen.local:8080/auth"
                            :keycloak-realm "akvo"}}}}
   :db {:uri "jdbc:postgresql://postgres/lumen?user=lumen&password=password&ssl=true"}
+  :caddisfly {:local-schema-uri "./caddisfly/tests-schema.json"}
   :http {:port 3000}
   :config {:encryption-key "secret"
            :file-upload-path "/tmp/akvo/lumen"

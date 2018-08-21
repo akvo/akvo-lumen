@@ -4,6 +4,7 @@
   :emailer #var akvo.lumen.component.emailer/mailjet-emailer
   :error-tracker #var akvo.lumen.component.error-tracker/sentry-error-tracker
   :http #var akvo.lumen.component.http/http
+  :caddisfly #var akvo.lumen.component.caddisfly/caddisfly
   :keycloak #var akvo.lumen.component.keycloak/keycloak
   :tenant-manager #var akvo.lumen.component.tenant-manager/tenant-manager}
  :endpoints
@@ -88,6 +89,8 @@
   {:port http-port}
   :db
   {:uri db-uri}
+  :caddisfly
+  {:schema-uri caddisfly-schema-uri}
   :emailer
   {:email-host email-host
    :email-password email-password
