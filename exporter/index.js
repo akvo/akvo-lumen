@@ -1,63 +1,61 @@
-const express = require('express');
-const puppeteer = require('puppeteer');
-const validate = require('express-validation');
-const Joi = require('joi');
-const Raven = require('raven');
-const bodyParser = require('body-parser')
-const cors = require('cors')
+const express = require("express")
+const puppeteer = require("puppeteer")
+const validate = require("express-validation")
+const Joi = require("joi")
+const Raven = require("raven")
+const bodyParser = require("body-parser")
+const cors = require("cors")
 
 const validation = {
   screenshot: {
     body: {
-      format: Joi.string().valid(['png', 'pdf']),
-      target: Joi.string().uri().required(),
+      format: Joi.string().valid(["png", "pdf"]),
+      target: Joi.string()
+        .uri()
+        .required(),
       title: Joi.string(),
-      selector: Joi.string().required(),
-    },
-  },
-};
+      selector: Joi.string().required()
+    }
+  }
+}
 
 if (process.env.SENTRY_DSN) {
-  Raven.config(process.env.SENTRY_DSN).install();
+  Raven.config(process.env.SENTRY_DSN).install()
 }
 
 const captureException = error => {
   if (process.env.SENTRY_DSN) {
-    Raven.captureException(error);
+    Raven.captureException(error)
   } else {
-    console.error(error);
+    console.error(error)
   }
-};
+}
 
 const setContext = (contextData, callback) => {
   if (process.env.SENTRY_DSN) {
-    Raven.context(function () {
-      Raven.setContext(contextData);
-      callback();
-    });
+    Raven.context(function() {
+      Raven.setContext(contextData)
+      callback()
+    })
   } else {
-    callback();
+    callback()
   }
-};
+}
 
-const app = express();
-let browser;
+const app = express()
+let browser
 
-app.use(bodyParser.json());
-app.use(cors());
-
-(async() => {
+app.use(bodyParser.json())
+app.use(cors())
+;(async () => {
   browser = await puppeteer.launch({
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-    ],
-  });
-  console.log('Exporter started...');
-  app.listen(process.env.PORT || 3001, '0.0.0.0');
-})();
+    args: ["--no-sandbox", "--disable-setuid-sandbox"]
+  })
+  console.log("Exporter started...")
+  app.listen(process.env.PORT || 3001, "0.0.0.0")
+})()
 
-app.post('/screenshot', validate(validation.screenshot), async (req, res) => {
+app.post("/screenshot", validate(validation.screenshot), async (req, res) => {
   const {
     target,
     format,
@@ -65,84 +63,93 @@ app.post('/screenshot', validate(validation.screenshot), async (req, res) => {
     token,
     refreshToken,
     selector,
-    clip,
-  } = req.body;
+    clip
+  } = req.body
+
+  const bearerToken = req.header("Authorization")
+  console.log(bearerToken)
 
   setContext({ target, format, title }, async () => {
     try {
       // Create a new incognito browser context.
-      const context = await browser.createIncognitoBrowserContext();
-      const page = await context.newPage();
+      const context = await browser.createIncognitoBrowserContext()
+      const page = await context.newPage()
 
-      page.on('pageerror', captureException);
-      page.on('error', (e) => captureException(e));
+      page.on("pageerror", captureException)
+      page.on("error", e => captureException(e))
 
-      const dest = `${target}?token=${token}&refresh_token=${refreshToken}`;
+      const dest = `${target}?token=${token}&refresh_token=${refreshToken}`
+      await page.setExtraHTTPHeaders({ Authorization: bearerToken })
+      await page.goto(dest, { waitUntil: "networkidle2", timeout: 0 })
 
-      await page.goto(dest, { waitUntil: 'networkidle2', timeout: 0 });
-
-      const selectors = (selector || '').split(',');
+      const selectors = (selector || "").split(",")
       if (selectors.length) {
-        selectors.forEach(async (selector) => {
-          await page.waitFor(selector);
-        });
+        selectors.forEach(async selector => {
+          await page.waitFor(selector)
+        })
       } else {
-        await page.waitFor(5000);
+        await page.waitFor(5000)
       }
 
-      let screenshot;
+      let screenshot
       switch (format) {
-        case 'png': {
+        case "png": {
           screenshot = await page.screenshot({
-            format: 'A4',
+            format: "A4",
             omitBackground: false,
             clip,
-            encoding: 'base64',
-          });
-          const data = screenshot;
-          res.setHeader('Content-Length', data.length);
-          res.setHeader('Content-Type', 'image/png');
-          res.setHeader('Content-Disposition', `attachment; filename=${title}.png`);
-          res.send(data);
-          break;
+            encoding: "base64"
+          })
+          const data = screenshot
+          res.setHeader("Content-Length", data.length)
+          res.setHeader("Content-Type", "image/png")
+          res.setHeader(
+            "Content-Disposition",
+            `attachment; filename=${title}.png`
+          )
+          res.send(data)
+          break
         }
-        case 'pdf': {
+        case "pdf": {
           screenshot = await page.pdf({
-            format: 'A4',
-            printBackground: true,
-          });
-          const data = screenshot.toString('base64');
-          res.setHeader('Content-Length', data.length);
-          res.setHeader('Content-Type', 'application/pdf');
-          res.setHeader('Content-Disposition', `attachment; filename=${title}.pdf`);
-          res.send(data);
-          break;
-        } 
+            format: "A4",
+            printBackground: true
+          })
+          const data = screenshot.toString("base64")
+          res.setHeader("Content-Length", data.length)
+          res.setHeader("Content-Type", "application/pdf")
+          res.setHeader(
+            "Content-Disposition",
+            `attachment; filename=${title}.pdf`
+          )
+          res.send(data)
+          break
+        }
       }
-      
-      await page.close();
-      await context.close();
+
+      await page.close()
+      await context.close()
     } catch (err) {
-      captureException(err);
-      res.sendStatus(500);
+      captureException(err)
+      res.sendStatus(500)
     }
-  });
-});
+  })
+})
 
 function exitHandler(options, err) {
   if (browser) {
-    browser.close();
+    browser.close()
   }
   if (err) {
-    captureException(err);
+    captureException(err)
   }
   if (options.exit) {
-    process.exit(err ? err.code : 0);
+    process.exit(err ? err.code : 0)
   }
 }
 
-process.on('exit', exitHandler); //do something when app is closing
-process.on('SIGINT', exitHandler); //catches ctrl+c event
-process.on('SIGUSR1', exitHandler); // catches "kill pid" (for example: nodemon restart)
-process.on('SIGUSR2', exitHandler);
-process.on('uncaughtException', exitHandler); //catches uncaught exceptions
+process.on("exit", exitHandler) //do something when app is closing
+process.on("SIGINT", exitHandler) //catches ctrl+c event
+process.on("SIGUSR1", exitHandler) // catches "kill pid" (for example: nodemon restart)
+process.on("SIGUSR2", exitHandler)
+process.on("uncaughtException", exitHandler) //catches uncaught exceptions

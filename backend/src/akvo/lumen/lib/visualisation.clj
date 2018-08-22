@@ -26,3 +26,7 @@
   "Delete"
   [tenant-conn id]
   (impl/delete tenant-conn id))
+
+(defn export
+  [id bearer-token spec]
+  (impl/export id bearer-token spec))

@@ -21,7 +21,8 @@ export const createVisualisationFailure = createAction('CREATE_VISUALISATION_FAI
 export function createVisualisation(visualisation, collectionId, callback = () => {}) {
   return (dispatch) => {
     dispatch(createVisualisationRequest(visualisation));
-    api.post('/api/visualisations', visualisation)
+    api
+      .post('/api/visualisations', visualisation)
       .then(response => response.json())
       .then((vis) => {
         dispatch(createVisualisationSuccess(vis));
@@ -46,7 +47,8 @@ export const fetchVisualisationFailure = createAction('FETCH_VISUALISATION_FAILU
 export function fetchVisualisation(id) {
   return (dispatch) => {
     dispatch(fetchVisualisationRequest(id));
-    api.get(`/api/visualisations/${id}`)
+    api
+      .get(`/api/visualisations/${id}`)
       .then(response => response.json())
       .then((visualisation) => {
         // We also need to possibly fetch datasets.
@@ -88,17 +90,26 @@ export const saveVisualisationChangesSuccess = createAction('SAVE_VISUALISATION_
 export function saveVisualisationChanges(visualisation, callback = () => {}) {
   return (dispatch, getState) => {
     const prevVisualisation = getState().library.visualisations[visualisation.id];
-    dispatch(saveVisualisationChangesRequest(Object.assign({}, visualisation, {
-      modified: Date.now(),
-      status: 'PENDING',
-    })));
-    api.put(`/api/visualisations/${visualisation.id}`, visualisation)
+    dispatch(
+      saveVisualisationChangesRequest(
+        Object.assign({}, visualisation, {
+          modified: Date.now(),
+          status: 'PENDING',
+        })
+      )
+    );
+    api
+      .put(`/api/visualisations/${visualisation.id}`, visualisation)
       .then(response => response.json())
       .then(() => {
-        dispatch(saveVisualisationChangesSuccess(Object.assign({}, visualisation, {
-          modified: Date.now(),
-          status: 'OK',
-        })));
+        dispatch(
+          saveVisualisationChangesSuccess(
+            Object.assign({}, visualisation, {
+              modified: Date.now(),
+              status: 'OK',
+            })
+          )
+        );
         callback();
       })
       .catch((error) => {
@@ -124,7 +135,8 @@ export function removeVisualisation(id) {
 export function deleteVisualisation(id) {
   return (dispatch) => {
     dispatch(deleteVisualisationRequest(id));
-    api.del(`/api/visualisations/${id}`)
+    api
+      .del(`/api/visualisations/${id}`)
       .then(response => response.json())
       .then(() => dispatch(removeVisualisation(id)))
       .catch(error => dispatch(deleteVisualisationFailure(error)));
@@ -139,7 +151,8 @@ export const fetchShareIdSuccess = createAction('FETCH_VISUALISATION_SHARE_ID_SU
 export function fetchShareId(visualisationId) {
   return (dispatch) => {
     if (visualisationId != null) {
-      api.post('/api/shares', { visualisationId })
+      api
+        .post('/api/shares', { visualisationId })
         .then(response => response.json())
         .then((response) => {
           dispatch(fetchShareIdSuccess({ id: visualisationId, shareId: response.id }));
@@ -160,15 +173,11 @@ export function exportVisualisation(visualisationId, options) {
 
     if (visualisationId === null) throw new Error('visualisationId not set');
 
-    getToken().then((token) => {
-      const target = `${window.location.origin}/visualisation/${visualisationId}/export`;
-      const { exporterUrl } = getState().env;
-
-      return api.post(`${exporterUrl}/screenshot`, {
+    const target = `${window.location.origin}/visualisation/${visualisationId}/export`;
+    return api
+      .post(`/api/visualisations/${visualisationId}/export`, {
         format,
         title,
-        token,
-        refreshToken: refreshToken(),
         selector: `.render-completed-${visualisationId}`,
         target,
         clip: {
@@ -179,21 +188,53 @@ export function exportVisualisation(visualisationId, options) {
         },
       })
       .then((response) => {
-        if (response.status !== 200) {
-          dispatch(showNotification('error', 'Failed to export visualisation.'));
-          dispatch(exportVisualisationFailure({ id: visualisationId }));
-          return;
-        }
-        response.text()
-          .then((imageStr) => {
-            const blob = base64ToBlob(imageStr, extToContentType(format));
-            saveAs(blob, `${title}.${format}`);
-            dispatch(exportVisualisationSuccess({ id: visualisationId }));
-          });
-      })
-      .catch((error) => {
-        dispatch(exportVisualisationFailure(error));
+        console.log(response);
+        dispatch(exportVisualisationSuccess({ id: visualisationId }));
+        //       response.text().then((imageStr) => {
+        //         const blob = base64ToBlob(imageStr, extToContentType(format));
+        //         saveAs(blob, `${title}.${format}`);
+        //         dispatch(exportVisualisationSuccess({ id: visualisationId }));
+        //       });
       });
-    });
+
+    // getToken().then((token) => {
+    //   const target = `${window.location.origin}/visualisation/${visualisationId}/export`;
+    //   console.log('@exportVisualisation');
+    //   console.log(target);
+    //   const { exporterUrl } = getState().env;
+    //
+    //
+    //
+    //   return api
+    //     .post(`${exporterUrl}/screenshot`, {
+    //       format,
+    //       title,
+    //       token,
+    //       refreshToken: refreshToken(),
+    //       selector: `.render-completed-${visualisationId}`,
+    //       target,
+    //       clip: {
+    //         x: 0,
+    //         y: 0,
+    //         width: 1000,
+    //         height: 600,
+    //       },
+    //     })
+    //     .then((response) => {
+    //       if (response.status !== 200) {
+    //         dispatch(showNotification('error', 'Failed to export visualisation.'));
+    //         dispatch(exportVisualisationFailure({ id: visualisationId }));
+    //         return;
+    //       }
+    //       response.text().then((imageStr) => {
+    //         const blob = base64ToBlob(imageStr, extToContentType(format));
+    //         saveAs(blob, `${title}.${format}`);
+    //         dispatch(exportVisualisationSuccess({ id: visualisationId }));
+    //       });
+    //     })
+    //     .catch((error) => {
+    //       dispatch(exportVisualisationFailure(error));
+    //     });
+    // });
   };
 }

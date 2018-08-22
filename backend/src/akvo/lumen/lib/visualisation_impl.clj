@@ -1,6 +1,7 @@
 (ns akvo.lumen.lib.visualisation-impl
   (:require [akvo.lumen.lib :as lib]
             [akvo.lumen.util :refer [squuid]]
+            [clj-http.client :as client]
             [hugsql.core :as hugsql])
   (:import [java.sql SQLException]))
 
@@ -52,3 +53,16 @@
   (if (zero? (delete-visualisation-by-id tenant-conn {:id id}))
     (lib/not-found {:error "Not found"})
     (lib/ok {:id id})))
+
+(defn export [id bearer-token spec]
+  (prn "@export")
+  (let [{:keys [body headers status]} (client/post "http://exporter:3001/screenshot"
+                                            {:form-params spec
+                                             :headers {"authorization" bearer-token}
+                                             :content-type :json})]
+    #_(into {} (filter #(some #{"Content-Type" "Content-Disposition"} %)
+                       headers))
+    {:body body
+     :headers {"Content-Type" (get headers "Content-Type")
+               "Content-Disposition" (get headers "Content-Disposition")}
+     :status status}))
