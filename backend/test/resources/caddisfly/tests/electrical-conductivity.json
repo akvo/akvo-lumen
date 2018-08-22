@@ -1,0 +1,36 @@
+{
+    "type": "caddisfly",
+    "name": "Water - Electrical Conductivity",
+    "uuid": "f88237b7-be3d-4fac-bbee-ab328eefcd14",
+    "result": [
+        {
+            "name": "Electrical Conductivity",
+            "unit": "μS/cm",
+            "id": 1,
+            "value": "0.0"
+        },
+        {
+            "name": "Temperature",
+            "unit": "°Celsius",
+            "id": 2,
+            "value": "27.8"
+        }
+    ],
+    "testDate": "2017-02-24 06:30",
+    "user": {
+        "backDropDetection": false,
+        "language": "en"
+    },
+    "app": {
+        "appVersion": "Version 1.0.0 Beta 8.6",
+        "language": "en"
+    },
+    "device": {
+        "model": "SM-J500F",
+        "product": "j5ltexx",
+        "manufacturer": "samsung",
+        "os": "Android - 6.0.1 (23)",
+        "country": "US",
+        "language": "en"
+    }
+}

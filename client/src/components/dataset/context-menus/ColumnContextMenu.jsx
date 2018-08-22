@@ -65,6 +65,11 @@ const actions = Immutable.fromJS({
     args: {},
     onError: 'fail',
   },
+  'extract-multiple': {
+    op: 'core/extract-multiple',
+    args: {},
+    onError: 'fail',
+  },
 });
 
 const commonOptions = [{
@@ -116,6 +121,9 @@ const dataTypeOptions = {
   number: [],
   date: [],
   geopoint: [],
+    multiple:[{
+  label: <FormattedMessage id="extract_multiple" />,
+  value: 'extract-multiple',}],
 };
 
 export default function ColumnContextMenu({

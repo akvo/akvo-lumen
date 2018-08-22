@@ -90,16 +90,24 @@
 (defn args [op-spec]
   (get op-spec "args"))
 
-(defn next-column-name [columns]
+(defn int->derivation-column-name [i]
+  (format "d%s" i))
+
+(defn derivation-column-name->int [s]
+  (Integer/parseInt (apply str (rest (seq s)))))
+
+(defn next-column-index [columns]
   (let [nums (->> columns
                   (map #(get % "columnName"))
                   (filter #(re-find #"^d\d+$" %))
                   (map #(subs % 1))
                   (map #(Long/parseLong %)))]
-    (str "d"
-         (if (empty? nums)
-           1
-           (inc (apply max nums))))))
+    (if (empty? nums)
+      1
+      (inc (apply max nums)))))
+
+(defn next-column-name [columns]
+  (int->derivation-column-name (next-column-index columns)))
 
 (defn- deliver-promise-success [promise dataset-id dataset-version-id job-execution-id]
   (deliver promise {:status "OK"

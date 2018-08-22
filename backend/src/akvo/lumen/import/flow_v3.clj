@@ -10,6 +10,7 @@
     "NUMBER" :number
     "DATE" :date
     "GEO" :geopoint
+    "CADDISFLY" :multiple
     :text))
 
 (defn dataset-columns
@@ -25,9 +26,16 @@
            {:title "Submitted at" :type :date :id :submitted_at}
            {:title "Surveyal time" :type :number :id :surveyal_time}]
           (map (fn [question]
-                 {:title (:name question)
-                  :type (question-type->lumen-type question)
-                  :id (keyword (format "c%s" (:id question)))})
+                 (let[column-type (question-type->lumen-type question)]
+                   (merge {:title (:name question)
+                           :type column-type
+                           :id (keyword (format "c%s" (:id question)))}
+                          (when (= column-type :multiple)
+                            (if (:caddisflyResourceUuid question)
+                              {:subtype :caddisfly
+                               :subtype-id (:caddisflyResourceUuid question)}
+                              {:subtype :unknown
+                               :subtype-id nil})))))
                questions))))
 
 (defn render-response

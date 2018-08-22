@@ -20,6 +20,7 @@
     akvo.lumen.transformation.delete-column
     akvo.lumen.transformation.geo
     akvo.lumen.transformation.merge-datasets
+    akvo.lumen.transformation.multiple-column
     akvo.lumen.transformation.reverse-geocode])
 
 ;; Load transformation namespaces

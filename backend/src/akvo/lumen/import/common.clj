@@ -78,6 +78,7 @@
                                           ;; Note not `POLYGON` so we can support `MULTIPOLYGON` as well
                                           :geoshape "geometry(GEOMETRY, 4326)"
                                           :geopoint "geometry(POINT, 4326)"
+                                          :multiple "text"
                                           :text "text")))
                               columns))))
 
