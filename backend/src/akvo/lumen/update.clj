@@ -50,7 +50,7 @@
                       columns)]
     (loop [transformations transformations columns columns]
       (if-let [transformation (first transformations)]
-        (let [{:keys [success? message columns]} (engine/try-apply-operation conn table-name columns transformation)]
+        (let [{:keys [success? message columns]} (engine/try-apply-operation {:tenant-conn conn} table-name columns transformation)]
           (when-not success?
             (throw (ex-info (format "Failed to update due to transformation mismatch: %s"
                                     message)

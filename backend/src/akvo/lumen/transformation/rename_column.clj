@@ -13,7 +13,7 @@
        (string? (new-col-title op-spec))))
 
 (defmethod engine/apply-operation :core/rename-column
-  [tenant-conn table-name columns op-spec]
+  [{:keys [tenant-conn]} table-name columns op-spec]
   (let [column-name (col-name op-spec)
         column-idx (engine/column-index columns column-name)
         new-column-title (new-col-title op-spec)]
