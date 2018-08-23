@@ -1,0 +1,32 @@
+.DashboardCanvasItemEditable {
+  display: flex;
+  z-index: 10;
+  position: relative;
+
+  .ql-container {
+    height: calc(100% - 51px);
+
+    .ql-editor {
+      strong {
+        font-weight: 700;
+      }
+      em {
+        font-style: italic;
+      }
+    }
+
+    .ql-toolbar {
+      height: 51px;
+      overflow: auto;
+    }
+  }
+
+  .DashboardCanvasItemEditableOverlay {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    cursor: pointer;
+  }
+}

@@ -122,17 +122,12 @@ export default class DashboardViewerItem extends Component {
             />
           </div>
         }
-        {isText &&
+        {isText && (
           <div
             className="itemContainer text"
-            style={{
-              fontSize: Math.floor(20 * (this.props.canvasWidth / 1280)),
-              lineHeight: '1.4em',
-            }}
-          >
-            {item.content}
-          </div>
-        }
+            dangerouslySetInnerHTML={{ __html: item.content }}
+          />
+        )}
       </div>
     );
   }

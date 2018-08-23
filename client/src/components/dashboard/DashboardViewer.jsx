@@ -103,7 +103,7 @@ class DashboardViewer extends Component {
         ref={(ref) => { this.DashboardViewer = ref; }}
         style={{ width: '100%', minHeight, height: 'auto' }}
       >
-        <h1>{dashboard.title}</h1>
+        <h1 className="DashboaredViewerTitle">{dashboard.title}</h1>
         <div
           className="dashboardEntities"
           style={{

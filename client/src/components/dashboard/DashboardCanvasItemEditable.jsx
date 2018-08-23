@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { intlShape, injectIntl } from 'react-intl';
+import ReactQuill from 'react-quill';
+
+import './DashboardCanvasItemEditable.scss';
 
 class DashboardCanvasItemEditable extends Component {
   constructor(props) {
@@ -9,6 +12,8 @@ class DashboardCanvasItemEditable extends Component {
     this.state = {};
     this.handleChange = this.handleChange.bind(this);
     this.handleBlur = this.handleBlur.bind(this);
+    this.handleFocus = this.handleFocus.bind(this);
+    this.inputElement = React.createRef();
   }
   componentWillMount() {
     this.setState({
@@ -17,33 +22,44 @@ class DashboardCanvasItemEditable extends Component {
         this.placeholder,
     });
   }
-  handleChange(evt) {
-    this.setState({ textContents: evt.target.value });
+  componentDidMount() {
+    if (this.props.focused) {
+      this.focusInput();
+    }
+  }
+  handleChange(textContents) {
+    this.setState({ textContents });
   }
   handleBlur() {
     const newItem = { ...this.props.item, content: this.state.textContents };
     this.props.onEntityUpdate(newItem);
   }
+  handleFocus() {
+    this.props.onFocus();
+    this.focusInput();
+  }
+  focusInput() {
+    if (!this.inputElement.current) return;
+    this.inputElement.current.focus();
+    this.inputElement.current.getEditor().setSelection(10000, 10000);
+  }
   render() {
     return (
-      <div
-        className="DashboardCanvasItemEditable"
-      >
-        <textarea
-          type="text"
+      <div className="DashboardCanvasItemEditable">
+        <ReactQuill
           onChange={this.handleChange}
           onBlur={this.handleBlur}
-          onFocus={this.handleFocus}
           value={this.state.textContents}
           placeholder={this.placeholder}
-          style={{
-            width: '95%',
-            height: '100%',
-            resize: 'none',
-            border: 'none',
-            marginRight: '5%',
-          }}
+          style={{ flex: 1 }}
+          ref={this.inputElement}
         />
+        {!this.props.focused && (
+          <div
+            onClick={this.handleFocus}
+            className="DashboardCanvasItemEditableOverlay"
+          />
+        )}
       </div>
     );
   }
@@ -53,6 +69,8 @@ DashboardCanvasItemEditable.propTypes = {
   intl: intlShape,
   item: PropTypes.object.isRequired,
   onEntityUpdate: PropTypes.func.isRequired,
+  onFocus: PropTypes.func.isRequired,
+  focused: PropTypes.bool,
 };
 
 export default injectIntl(DashboardCanvasItemEditable);
