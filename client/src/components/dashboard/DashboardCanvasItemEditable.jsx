@@ -53,6 +53,7 @@ class DashboardCanvasItemEditable extends Component {
           placeholder={this.placeholder}
           style={{ flex: 1 }}
           ref={this.inputElement}
+          className="DashboardCanvasItemEditableInput"
         />
         {!this.props.focused && (
           <div
