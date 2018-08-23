@@ -37,14 +37,16 @@
                                   :table-name table-name
                                   :imported-table-name imported-table-name
                                   :version 1
-                                  :columns (mapv (fn [{:keys [title id type key] :as columns}]
-                                                   (cond-> {:type (name type)
-                                                            :title (string/trim title)
-                                                            :columnName (name id)
-                                                            :sort nil
-                                                            :direction nil
-                                                            :hidden false}
-                                                     (contains? columns :key) (assoc :key (boolean key))))
+                                  :columns (mapv (fn [{:keys [title id type key multiple-type multiple-id]}]
+                                                   {:columnName (name id)
+                                                    :direction nil
+                                                    :hidden false
+                                                    :key (boolean key)
+                                                    :multipleId multiple-id
+                                                    :multipleType multiple-type
+                                                    :sort nil
+                                                    :title (string/trim title)
+                                                    :type (name type)})
                                                  columns)
                                   :transformations []})
     (update-successful-job-execution conn {:id job-execution-id})))
