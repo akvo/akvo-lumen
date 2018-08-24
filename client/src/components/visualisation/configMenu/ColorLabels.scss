@@ -1,6 +1,9 @@
 @import "../../../styles/modules/importAll";
 
 .ColorLabels {
+
+    list-style: none;
+
     li {
         margin: 1rem 0;
         height: 2rem;

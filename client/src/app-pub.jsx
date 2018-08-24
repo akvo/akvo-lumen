@@ -45,7 +45,7 @@ function renderSuccessfulShare(data, initialState) {
     <Provider store={configureStore()}>
       <PrintProvider>
         <IntlWrapper>
-          <div className="viewer">
+          <div className="viewer" style={{ display: 'flex' }}>
             {data.dashboards ? (
               <DashboardViewer
                 dashboard={data.dashboards[data.dashboardId]}

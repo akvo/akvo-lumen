@@ -1,6 +1,12 @@
 @import "../../styles/modules/importAll";
 
 .ConfigMenu {
+
+    ul,
+    ol {
+        list-style: none;
+    }
+    
     .visualisationTypePicker {
         .typeButton {
             padding: 2rem 1rem;

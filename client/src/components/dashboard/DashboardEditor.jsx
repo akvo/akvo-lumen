@@ -185,7 +185,7 @@ export default class DashboardEditor extends Component {
       };
       newLayout.push({
         w: 4,
-        minW: 2,
+        minW: 4,
         h: 2,
         x: 0,
         y: getFirstBlankRowGroup(this.props.dashboard.layout, 1),
@@ -255,25 +255,27 @@ export default class DashboardEditor extends Component {
 
     return (
       <div className="DashboardEditor">
-        <DashboardVisualisationList
-          datasets={datasets}
-          visualisations={getArrayFromObject(this.props.visualisations)}
-          onEntityClick={this.handleEntityToggle}
-          dashboardItems={dashboard.entities}
-        />
-        <div
-          className={editorCanvasId}
-          id={editorCanvasId}
-          ref={(ref) => { this.DashboardEditorCanvasContainer = ref; }}
-        >
+        <div className="DashboardEditorSidebar">
           <div className="DashboardEditorCanvasControls">
             <button
               className="clickable addText"
               onClick={() => this.handleEntityToggle({ content: '' }, 'text')}
             >
-              <FormattedMessage id="add_new_text_element" />
+              <i className="fa fa-plus" /><FormattedMessage id="add_new_text_element" />
             </button>
           </div>
+          <DashboardVisualisationList
+            datasets={datasets}
+            visualisations={getArrayFromObject(this.props.visualisations)}
+            onEntityClick={this.handleEntityToggle}
+            dashboardItems={dashboard.entities}
+          />
+        </div>
+        <div
+          className={editorCanvasId}
+          id={editorCanvasId}
+          ref={(ref) => { this.DashboardEditorCanvasContainer = ref; }}
+        >
           {getArrayFromObject(dashboard.entities).length === 0 &&
             <div className="blankDashboardHelpText">
               <FormattedMessage id="blank_dashboard_help_text" />
@@ -319,6 +321,7 @@ export default class DashboardEditor extends Component {
                     canvasLayout={dashboard.layout}
                     canvasWidth={canvasWidth}
                     onDeleteClick={this.handleEntityToggle}
+                    onSave={this.props.onSave}
                     onEntityUpdate={this.handleEntityUpdate}
                     ref={(c) => { this.canvasElements[item.id] = c; }}
                   />

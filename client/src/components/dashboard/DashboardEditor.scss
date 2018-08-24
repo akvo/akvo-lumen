@@ -5,6 +5,10 @@
     display: flex;
     margin-top: 4rem;
     width: 100%;
+
+    .DashboardEditorSidebar {
+        border-right: 0.1rem solid $lightGrey;
+    }
     
     .DashboardEditorCanvas {
         padding: 16px;
@@ -28,7 +32,7 @@
     }
 
     .DashboardVisualisationList, .DashboardEditorCanvasContainer {
-        height: calc(100vh - 4rem);
+        height: calc(100vh - 4rem - 64px);
         overflow: auto;
     }
 
@@ -53,6 +57,8 @@
 
     .DashboardEditorCanvasControls {
         padding: 1rem;
+        border-bottom: 0.1rem solid $lightGrey;
+        text-align: center;
         
         button {
             padding: 0.5rem 1rem;
@@ -64,6 +70,10 @@
             @include border-radius(3px);
 
             margin-right: 1rem;
+
+            i {
+                margin-right: 1em;
+            }
         }
     }
 

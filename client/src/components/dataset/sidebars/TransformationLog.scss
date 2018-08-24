@@ -1,4 +1,10 @@
 .TransformationLog {
+
+  ul,
+  ol {
+      list-style: none;
+  }
+  
   .mergedColumnsInfo {
     em {
       font-style: italic;

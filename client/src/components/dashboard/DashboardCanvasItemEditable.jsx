@@ -33,6 +33,7 @@ class DashboardCanvasItemEditable extends Component {
   handleBlur() {
     const newItem = { ...this.props.item, content: this.state.textContents };
     this.props.onEntityUpdate(newItem);
+    this.props.onSave();
   }
   handleFocus() {
     this.props.onFocus();
@@ -72,6 +73,7 @@ DashboardCanvasItemEditable.propTypes = {
   onEntityUpdate: PropTypes.func.isRequired,
   onFocus: PropTypes.func.isRequired,
   focused: PropTypes.bool,
+  onSave: PropTypes.func,
 };
 
 export default injectIntl(DashboardCanvasItemEditable);
