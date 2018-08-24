@@ -8,6 +8,7 @@ import Root from './containers/Root';
 import configureStore from './store/configureStore';
 import * as auth from './auth';
 import { init as initAnalytics } from './utilities/analytics';
+import queryString from 'query-string';
 
 function initAuthenticated(profile, env) {
   const initialState = { profile, env };
@@ -44,10 +45,36 @@ function initAuthenticated(profile, env) {
   }
 }
 
+function initWithAuthToken() {
+  const initialState = {};
+  const rootElement = document.querySelector('#root');
+  const store = configureStore(initialState);
+  const history = syncHistoryWithStore(browserHistory, store);
+
+  render(
+    <AppContainer>
+      <Root store={store} history={history} />
+    </AppContainer>,
+    rootElement
+  );
+}
+
 function initNotAuthenticated(msg) {
   document.querySelector('#root').innerHTML = msg;
 }
 
-auth.init()
-  .then(({ profile, env }) => initAuthenticated(profile, env))
-  .catch(err => initNotAuthenticated(err.message));
+function dispatchOnMode() {
+  const queryParams = queryString.parse(location.search);
+  const accessToken = queryParams.access_token;
+  if (accessToken == null) {
+    auth
+      .init()
+      .then(({ profile, env }) => initAuthenticated(profile, env))
+      .catch(err => initNotAuthenticated(err.message));
+  } else {
+    window.accessToken = accessToken;
+    initWithAuthToken();
+  }
+}
+
+dispatchOnMode();

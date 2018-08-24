@@ -168,7 +168,7 @@ export const exportVisualisationFailure = createAction('EXPORT_VISUALISATION_FAI
 
 export function exportVisualisation(visualisationId, options) {
   const { format, title } = { format: 'png', title: 'Untitled Export', ...options };
-  return (dispatch, getState) => {
+  return (dispatch) => {
     dispatch(exportVisualisationRequest({ id: visualisationId }));
 
     if (visualisationId === null) throw new Error('visualisationId not set');
@@ -188,53 +188,19 @@ export function exportVisualisation(visualisationId, options) {
         },
       })
       .then((response) => {
-        console.log(response);
-        dispatch(exportVisualisationSuccess({ id: visualisationId }));
-        //       response.text().then((imageStr) => {
-        //         const blob = base64ToBlob(imageStr, extToContentType(format));
-        //         saveAs(blob, `${title}.${format}`);
-        //         dispatch(exportVisualisationSuccess({ id: visualisationId }));
-        //       });
+        if (response.status !== 200) {
+          dispatch(showNotification('error', 'Failed to export visualisation.'));
+          dispatch(exportVisualisationFailure({ id: visualisationId }));
+          return;
+        }
+        response.text().then((imageStr) => {
+          const blob = base64ToBlob(imageStr, extToContentType(format));
+          saveAs(blob, `${title}.${format}`);
+          dispatch(exportVisualisationSuccess({ id: visualisationId }));
+        });
+      })
+      .catch((error) => {
+        dispatch(exportVisualisationFailure(error));
       });
-
-    // getToken().then((token) => {
-    //   const target = `${window.location.origin}/visualisation/${visualisationId}/export`;
-    //   console.log('@exportVisualisation');
-    //   console.log(target);
-    //   const { exporterUrl } = getState().env;
-    //
-    //
-    //
-    //   return api
-    //     .post(`${exporterUrl}/screenshot`, {
-    //       format,
-    //       title,
-    //       token,
-    //       refreshToken: refreshToken(),
-    //       selector: `.render-completed-${visualisationId}`,
-    //       target,
-    //       clip: {
-    //         x: 0,
-    //         y: 0,
-    //         width: 1000,
-    //         height: 600,
-    //       },
-    //     })
-    //     .then((response) => {
-    //       if (response.status !== 200) {
-    //         dispatch(showNotification('error', 'Failed to export visualisation.'));
-    //         dispatch(exportVisualisationFailure({ id: visualisationId }));
-    //         return;
-    //       }
-    //       response.text().then((imageStr) => {
-    //         const blob = base64ToBlob(imageStr, extToContentType(format));
-    //         saveAs(blob, `${title}.${format}`);
-    //         dispatch(exportVisualisationSuccess({ id: visualisationId }));
-    //       });
-    //     })
-    //     .catch((error) => {
-    //       dispatch(exportVisualisationFailure(error));
-    //     });
-    // });
   };
 }

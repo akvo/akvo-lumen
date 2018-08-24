@@ -56,18 +56,7 @@ app.use(cors())
 })()
 
 app.post("/screenshot", validate(validation.screenshot), async (req, res) => {
-  const {
-    target,
-    format,
-    title,
-    token,
-    refreshToken,
-    selector,
-    clip
-  } = req.body
-
-  const bearerToken = req.header("Authorization")
-  console.log(bearerToken)
+  const { target, format, title, selector, clip } = req.body
 
   setContext({ target, format, title }, async () => {
     try {
@@ -78,8 +67,8 @@ app.post("/screenshot", validate(validation.screenshot), async (req, res) => {
       page.on("pageerror", captureException)
       page.on("error", e => captureException(e))
 
-      const dest = `${target}?token=${token}&refresh_token=${refreshToken}`
-      await page.setExtraHTTPHeaders({ Authorization: bearerToken })
+      const token = req.header("access_token")
+      const dest = `${target}?access_token=${token}`
       await page.goto(dest, { waitUntil: "networkidle2", timeout: 0 })
 
       const selectors = (selector || "").split(",")

@@ -35,8 +35,5 @@
         (DELETE "/" _
                 (visualisation/delete tenant-conn id))
 
-        (POST "/export" {spec :query-params
-                         export-spec :body
-                         {:strs [authorization]} :headers :as req}
-              (clojure.pprint/pprint req)
-             (visualisation/export id authorization export-spec))))))
+        (POST "/export" {:keys [body headers]}
+              (visualisation/export id (get headers "authorization") body))))))

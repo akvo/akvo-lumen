@@ -2,6 +2,7 @@
   (:require [akvo.lumen.lib :as lib]
             [akvo.lumen.util :refer [squuid]]
             [clj-http.client :as client]
+            [clojure.string :as str]
             [hugsql.core :as hugsql])
   (:import [java.sql SQLException]))
 
@@ -54,14 +55,16 @@
     (lib/not-found {:error "Not found"})
     (lib/ok {:id id})))
 
-(defn export [id bearer-token spec]
-  (prn "@export")
-  (let [{:keys [body headers status]} (client/post "http://exporter:3001/screenshot"
-                                            {:form-params spec
-                                             :headers {"authorization" bearer-token}
-                                             :content-type :json})]
-    #_(into {} (filter #(some #{"Content-Type" "Content-Disposition"} %)
-                       headers))
+(defn export [id access-token spec]
+  "Proxy function that accepts visualisation id, map with auth tokens and an
+   exporter service spec."
+  (let [{:keys [body headers status]}
+        (client/post "http://exporter:3001/screenshot"
+                     {:headers {"access_token" (str/replace-first access-token
+                                                                  #"Bearer "
+                                                                  "")}
+                      :form-params spec
+                      :content-type :json})]
     {:body body
      :headers {"Content-Type" (get headers "Content-Type")
                "Content-Disposition" (get headers "Content-Disposition")}
