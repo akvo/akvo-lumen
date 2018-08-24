@@ -36,4 +36,5 @@
                 (visualisation/delete tenant-conn id))
 
         (POST "/export" {:keys [body headers]}
-              (visualisation/export id (get headers "authorization") body))))))
+              (let [exporter-url "http://exporter:3001/screenshot"]
+                (visualisation/export exporter-url (get headers "authorization") body)))))))

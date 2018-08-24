@@ -55,11 +55,11 @@
     (lib/not-found {:error "Not found"})
     (lib/ok {:id id})))
 
-(defn export [id access-token spec]
-  "Proxy function that accepts visualisation id, map with auth tokens and an
-   exporter service spec."
+(defn export
+  "Proxy fn, exporter-url token exporter spec -> ring response map"
+  [exporter-url access-token spec]
   (let [{:keys [body headers status]}
-        (client/post "http://exporter:3001/screenshot"
+        (client/post exporter-url
                      {:headers {"access_token" (str/replace-first access-token
                                                                   #"Bearer "
                                                                   "")}
