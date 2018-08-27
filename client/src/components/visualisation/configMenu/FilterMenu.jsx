@@ -5,6 +5,7 @@ import { get } from 'lodash';
 import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
 import SelectMenu from '../../common/SelectMenu';
 import { filterColumns } from '../../../utilities/utils';
+import './FilterMenu.scss';
 
 const getMenuFilters = filterArray =>
   filterArray.filter(item => item.origin !== 'pivot-row' && item.origin !== 'pivot-column');

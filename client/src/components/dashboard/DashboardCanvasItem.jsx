@@ -188,6 +188,7 @@ export default class DashboardCanvasItem extends Component {
               focused={this.props.focused}
               onEntityUpdate={this.props.onEntityUpdate}
               item={this.props.item}
+              onSave={this.props.onSave}
             />
           </div>
         )}
@@ -212,4 +213,5 @@ DashboardCanvasItem.propTypes = {
   onDeleteClick: PropTypes.func.isRequired,
   onFocus: PropTypes.func.isRequired,
   focused: PropTypes.bool,
+  onSave: PropTypes.func,
 };

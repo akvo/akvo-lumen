@@ -1,6 +1,11 @@
 @import "../../styles/modules/importAll";
 
 .LibraryListing {
+    ul,
+    ol {
+        list-style: none;
+    }
+    
     .LibraryListingGroup {
         margin: 1em auto;
         padding: 0.5rem 1.5rem;

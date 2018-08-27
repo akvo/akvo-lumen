@@ -3,6 +3,11 @@
 .LayerConfigMenu {
     position: 'relative';
 
+    ul,
+    ol {
+        list-style: none;
+    }
+
     .header {
         display: flex;
         justify-content: space-around;

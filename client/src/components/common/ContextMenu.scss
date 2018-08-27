@@ -9,6 +9,12 @@
   /* Default positioning... */
   width: 10rem;
   right: 0;
+
+  ul,
+  ol {
+      list-style: none;
+  }
+  
   &.hasArrow {
     margin-top: 10px;
   }

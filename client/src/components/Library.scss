@@ -3,6 +3,11 @@
 .Library {
     flex: 1;
     overflow: auto;
+
+    ul,
+    ol {
+        list-style: none;
+    }
 }
 
 @media print {

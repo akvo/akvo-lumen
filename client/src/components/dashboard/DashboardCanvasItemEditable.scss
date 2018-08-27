@@ -17,7 +17,13 @@
 
     .ql-toolbar {
       height: 51px;
-      overflow: auto;
+      overflow: visible;
+    }
+
+    .ql-picker-label {
+      &:before {
+        vertical-align: top;
+      }
     }
   }
 

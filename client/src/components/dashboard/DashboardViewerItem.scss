@@ -15,6 +15,20 @@
   &.text {
     overflow-y: auto;
     color: $dashboardFG;
+    height: auto !important;
+
+    ol,
+    ul {
+      margin-left: 20px;
+    }
+
+    a {
+      color: $lumenGreen;
+    }
+
+    strong {
+      font-weight: 700;
+    }
   }
 
   .itemContainer {

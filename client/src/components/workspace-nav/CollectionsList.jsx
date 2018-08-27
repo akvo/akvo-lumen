@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import CollectionListItem from './CollectionListItem';
+import './CollectionsList.scss';
 
 export default function CollectionsList({
   collections,
