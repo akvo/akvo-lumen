@@ -1,4 +1,4 @@
-import * as _ from 'lodash';
+import { merge, cloneDeep } from 'lodash';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Immutable from 'immutable';
@@ -89,7 +89,7 @@ class Column extends Component {
           <div>
             <FormattedMessage id="extract_column_question" />
             {ui.extract ? (
-               undefined
+               null
             ) : (
               <div>
                 {' '}
@@ -114,7 +114,7 @@ class Column extends Component {
               data-test-id={`column-title-${api.id}`}
             />
           ) : (
-             undefined
+             null
           )}
         </div>
       </div>
@@ -220,7 +220,7 @@ export default class ExtractMultiple extends Component {
       if (!extractColumn) {
         this.onColumnName(idx)(this.state.extractMultiple.api.columns[idx].name);
       }
-      const extractMultiple = _.merge(this.state.extractMultiple, {
+      const extractMultiple = merge(this.state.extractMultiple, {
         ui: {
           columns: this.state.extractMultiple.ui.columns.map(
             (column, index) => {
@@ -248,7 +248,7 @@ export default class ExtractMultiple extends Component {
     apiMultipleColumn(column, (apiRes) => {
       const apiResBis = apiRes;
       apiResBis.columnName = columnName;
-      const ui = _.cloneDeep(apiResBis); // cloning object
+      const ui = cloneDeep(apiResBis); // cloning object
       delete ui.hasImage;
       ui.extractImage = false;
       ui.selectedColumn = column;
@@ -264,7 +264,7 @@ export default class ExtractMultiple extends Component {
   }
 
   onExtractImage(value) {
-    const extractMultiple = _.merge(this.state.extractMultiple, {
+    const extractMultiple = merge(this.state.extractMultiple, {
       ui: { extractImage: value },
     });
     this.setState({
@@ -278,7 +278,7 @@ export default class ExtractMultiple extends Component {
 
   onColumnName(idx) {
     return (columnName) => {
-      const extractMultiple = _.merge(this.state.extractMultiple, {
+      const extractMultiple = merge(this.state.extractMultiple, {
         ui: {
           columns: this.state.extractMultiple.ui.columns.map(
 	    (column, index) => {
@@ -344,7 +344,7 @@ export default class ExtractMultiple extends Component {
           onApply={
             this.isValidTransformation()
               ? () => onApply(this.state.transformation)
-              : null
+              : () => {}
           }
           onClose={onClose}
         />
@@ -358,5 +358,3 @@ ExtractMultiple.propTypes = {
   onApply: PropTypes.func.isRequired,
   columns: PropTypes.object.isRequired,
 };
-//    const { transformation } = this.state;
-//
