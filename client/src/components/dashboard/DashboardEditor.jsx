@@ -285,7 +285,7 @@ export default class DashboardEditor extends Component {
               cols={12}
               rowHeight={rowHeight}
               width={canvasWidth}
-              verticalCompact={false}
+              verticalCompact
               layout={this.state.propLayout}
               onLayoutChange={this.handleLayoutChange}
               isDraggable={!this.state.focusedItem}
