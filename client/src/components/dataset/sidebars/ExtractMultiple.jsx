@@ -49,26 +49,45 @@ SelectColumn.propTypes = {
 };
 
 function MultipleColumnImage(props) {
-  const { hasImage, extractImage, onExtractImage } = props;
+  const { hasImage, extractImage, onExtractImage, ui, api, onChangeImageTitle } = props;
   if (hasImage) {
     return (
-      <ToggleInput
-        name="image"
-        type="checkbox"
-        labelId="extract_image_question"
-        className="showLegend"
-        checked={extractImage}
-        onChange={onExtractImage}
-      />
-    );
+      <div className="inputs">
+        <div className="inputGroup">
+          <div>
+            <FormattedMessage id="extract_image_question" />
+            <ToggleInput
+              name="image"
+              type="checkbox"
+              className="showLegend"
+              checked={extractImage}
+              onChange={onExtractImage}
+            />
+          </div>
+          {extractImage ? (
+            <input
+              value={ui.image.title}
+              placeholder={api.image.title}
+              type="text"
+              className="titleTextInput"
+              onChange={onChangeImageTitle}
+            />
+          ) : (
+             null
+          )}
+        </div>
+      </div>);
   }
   return null;
 }
 
 MultipleColumnImage.propTypes = {
   hasImage: PropTypes.bool.isRequired,
-  extractImage: PropTypes.func.isRequired,
+  extractImage: PropTypes.bool.isRequired,
   onExtractImage: PropTypes.object.isRequired,
+  api: PropTypes.object.isRequired,
+  ui: PropTypes.object.isRequired,
+  onChangeImageTitle: PropTypes.func.isRequired,
 };
 
 class Column extends Component {
@@ -81,46 +100,42 @@ class Column extends Component {
   onColumnName(evt) {
     this.props.onColumnName(evt.target.value);
   }
+
   render() {
     const { api, ui } = this.props;
-    return (
-      <div className="inputs">
-        <div className="inputGroup">
-          <div>
-            <FormattedMessage id="extract_column_question" />
-            {ui.extract ? (
-               null
-            ) : (
-              <div>
-                {' '}
-                {api.name} :: {api.type}
-              </div>
-            )}
-            <ToggleInput
-              name="extractColumn"
-              type="checkbox"
-              className="showLegend"
-              checked={ui.extract}
-              onChange={this.props.onExtractColumn}
-            />
-          </div>
+    return (<div className="inputs">
+      <div className="inputGroup">
+	<div>
+          <FormattedMessage id="extract_column_question" />
           {ui.extract ? (
-            <input
-              value={ui.name}
-              placeholder={api.name} // TODO: how to i18n this value?
-              type="text"
-              className="titleTextInput"
-              onChange={this.onColumnName}
-              data-test-id={`column-title-${api.id}`}
-            />
-          ) : (
-             null
-          )}
-        </div>
+	     null) : (
+	       <div>
+		 {' '}
+		 {api.name} :: {api.type}
+	       </div>
+	     )}
+          <ToggleInput
+            name="extractColumn"
+            type="checkbox"
+            className="showLegend"
+            checked={ui.extract}
+            onChange={this.props.onExtractColumn}
+          />
+	</div>
+	{ui.extract ? (<input
+			 value={ui.name}
+			 placeholder={api.name}
+			 type="text"
+			 className="titleTextInput"
+			 onChange={this.onColumnName}
+			 data-test-id={`column-title-${api.id}`} />)
+	: (null)}
       </div>
+    </div>
     );
   }
-}
+      }
+
 Column.propTypes = {
   onExtractColumn: PropTypes.func.isRequired,
   onColumnName: PropTypes.func.isRequired,
@@ -139,8 +154,7 @@ function MultipleColumnList(props) {
       idx={index}
       onColumnName={onColumnName(index)}
       onExtractColumn={onExtractColumn(index)}
-    />
-  ));
+    />));
   return <div>{columList}</div>;
 }
 
@@ -152,19 +166,17 @@ MultipleColumnList.propTypes = {
 };
 
 function MultipleColumn(props) {
-  const {
-    api,
-    ui,
-    onExtractImage,
-    onColumnName,
-    onExtractColumn,
-  } = props;
+  const { api, ui, onExtractImage, onColumnName, onExtractColumn, onChangeImageTitle } =
+    props;
   return api ? (
     <div>
       <MultipleColumnImage
         hasImage={api.hasImage}
         extractImage={ui.extractImage}
         onExtractImage={onExtractImage}
+        onChangeImageTitle={onChangeImageTitle}
+        api={api}
+        ui={ui}
       />
       <MultipleColumnList
         api={api}
@@ -172,14 +184,14 @@ function MultipleColumn(props) {
         onColumnName={onColumnName}
         onExtractColumn={onExtractColumn}
       />
-    </div>
-  ) : null;
+    </div>) : null;
 }
 
 MultipleColumn.propTypes = {
-  api: PropTypes.object.isRequired,
+  api: PropTypes.object,
   ui: PropTypes.object.isRequired,
   onExtractImage: PropTypes.func.isRequired,
+  onChangeImageTitle: PropTypes.func.isRequired,
   onColumnName: PropTypes.func.isRequired,
   onExtractColumn: PropTypes.func.isRequired,
 };
@@ -207,12 +219,16 @@ export default class ExtractMultiple extends Component {
 
       extractMultiple: {
         api: null,
-        ui: { extractImage: null, columns: [], selectedColumn: { name: null } },
+        ui: { extractImage: null,
+	      columns: [],
+	      selectedColumn: { name: null },
+	      image: { title: null } },
       },
     };
     this.onExtractImage = this.onExtractImage.bind(this);
     this.onColumnName = this.onColumnName.bind(this);
     this.onExtractColumn = this.onExtractColumn.bind(this);
+    this.onChangeImageTitle = this.onChangeImageTitle.bind(this);
   }
 
   onExtractColumn(idx) {
@@ -248,7 +264,8 @@ export default class ExtractMultiple extends Component {
     apiMultipleColumn(column, (apiRes) => {
       const apiResBis = apiRes;
       apiResBis.columnName = columnName;
-      const ui = cloneDeep(apiResBis); // cloning object
+      apiResBis.image = { title: `Image of "${column.title}"` };
+      const ui = cloneDeep(apiResBis);
       delete ui.hasImage;
       ui.extractImage = false;
       ui.selectedColumn = column;
@@ -267,6 +284,21 @@ export default class ExtractMultiple extends Component {
     const extractMultiple = merge(this.state.extractMultiple, {
       ui: { extractImage: value },
     });
+
+    this.setState({
+      extractMultiple,
+      transformation: this.state.transformation.setIn(
+        ['args'],
+        extractMultiple.ui
+      ),
+    });
+  }
+
+  onChangeImageTitle(evt) {
+    const extractMultiple = merge(this.state.extractMultiple, {
+      ui: { image: { title: evt.target.value } },
+    });
+
     this.setState({
       extractMultiple,
       transformation: this.state.transformation.setIn(
@@ -330,6 +362,7 @@ export default class ExtractMultiple extends Component {
             ui={this.state.extractMultiple.ui}
             selectedColumn={this.state.selectedColumn}
             onExtractImage={this.onExtractImage}
+            onChangeImageTitle={this.onChangeImageTitle}
             extractImage={this.state.extractMultiple.ui.extractImage}
             onColumnName={this.onColumnName}
             onExtractColumn={this.onExtractColumn}
@@ -340,8 +373,7 @@ export default class ExtractMultiple extends Component {
           positiveButtonText={<FormattedMessage id="extract" />}
           onApply={
             this.isValidTransformation()
-              ? () => onApply(this.state.transformation)
-              : () => {}
+            ? () => onApply(this.state.transformation) : () => {}
           }
           onClose={onClose}
         />
