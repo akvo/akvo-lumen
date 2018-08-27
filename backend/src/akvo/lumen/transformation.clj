@@ -41,7 +41,7 @@
        :message (.getMessage e)})))
 
 (defn apply
-  [tenant-conn dataset-id command]
+  [{:keys [tenant-conn] :as deps} dataset-id command]
   (if-let [dataset (dataset-by-id tenant-conn {:id dataset-id})]
     (let [v (validate command)
           job-execution-id (str (squuid))]
@@ -49,9 +49,10 @@
         (try
           (new-transformation-job-execution tenant-conn {:id job-execution-id :dataset-id dataset-id})
           (jdbc/with-db-transaction [tx-conn tenant-conn]
-            (condp = (:type command)
-              :transformation (engine/execute-transformation tx-conn dataset-id job-execution-id (:transformation command))
-              :undo (engine/execute-undo tx-conn dataset-id job-execution-id)))
+            (let [tx-deps (assoc deps :tenant-conn tx-conn)]
+              (condp = (:type command)
+                :transformation (engine/execute-transformation tx-deps dataset-id job-execution-id (:transformation command))
+                :undo (engine/execute-undo tx-deps dataset-id job-execution-id))))
           (update-successful-job-execution tenant-conn {:id job-execution-id})
           (lib/ok {"jobExecutionId" job-execution-id "datasetId" dataset-id})
           (catch Exception e

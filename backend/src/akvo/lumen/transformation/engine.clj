@@ -27,11 +27,11 @@
    - \"op\" : operation to perform
    - \"args\" : map with arguments to the operation
    - \"onError\" : Error strategy"
-  (fn [{:keys [tenant-conn]} table-name columns op-spec]
+  (fn [deps table-name columns op-spec]
     (keyword (get op-spec "op"))))
 
 (defmethod apply-operation :default
-  [{:keys [tenant-conn]} table-name columns op-spec]
+  [deps table-name columns op-spec]
   (let [msg (str "Unknown operation " (get op-spec "op"))]
     (log/debug msg)
     {:success? false
@@ -39,9 +39,9 @@
 
 (defn try-apply-operation
   "invoke apply-operation inside a try-catch"
-  [tenant-conn table-name columns op-spec]
+  [deps table-name columns op-spec]
   (try
-    (apply-operation {:tenant-conn tenant-conn} table-name columns op-spec)
+    (apply-operation deps table-name columns op-spec)
     (catch Exception e
       (log/debug e)
       {:success? false
@@ -144,12 +144,12 @@
             changed-columns)))
 
 (defn execute-transformation
-  [tenant-conn dataset-id job-execution-id transformation]
+  [{:keys [tenant-conn] :as deps} dataset-id job-execution-id transformation]
   (let [dataset-version (latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})
         previous-columns (vec (:columns dataset-version))
         source-table (:table-name dataset-version)]
     (let [{:keys [success? message columns execution-log]}
-          (try-apply-operation tenant-conn source-table previous-columns transformation)]
+          (try-apply-operation deps source-table previous-columns transformation)]
       (when-not success?
         (log/errorf "Failed to transform: %s, columns: %s, execution-log: %s" message columns execution-log)
         (throw (ex-info "Failed to transform" {})))
@@ -170,7 +170,7 @@
           (touch-dataset tenant-conn {:id dataset-id})
           (lib/created next-dataset-version))))))
 
-(defn- apply-undo [tenant-conn dataset-id job-execution-id current-dataset-version]
+(defn- apply-undo [{:keys [tenant-conn] :as deps} dataset-id job-execution-id current-dataset-version]
   (let [imported-table-name (:imported-table-name current-dataset-version)
         previous-table-name (:table-name current-dataset-version)
         initial-columns (vec (:columns (dataset-version-by-dataset-id tenant-conn
@@ -204,7 +204,7 @@
             (drop-table tenant-conn {:table-name previous-table-name})
             (lib/created next-dataset-version)))
         (let [{:keys [success? message columns execution-log]}
-              (try-apply-operation tenant-conn table-name columns (first transformations))]
+              (try-apply-operation deps table-name columns (first transformations))]
           (if success?
             (recur (rest transformations) columns (into full-execution-log execution-log))
             (do
@@ -213,13 +213,13 @@
               (log/debug "Job executionid: " job-execution-id)
               (throw (ex-info "Failed to undo" {})))))))))
 
-(defn execute-undo [tenant-conn dataset-id job-execution-id]
+(defn execute-undo [{:keys [tenant-conn] :as deps} dataset-id job-execution-id]
   (let [current-dataset-version (latest-dataset-version-by-dataset-id tenant-conn
                                                                       {:dataset-id dataset-id})
         current-version (:version current-dataset-version)]
     (if (= current-version 1)
       (lib/created (assoc current-dataset-version :dataset-id dataset-id))
-      (apply-undo tenant-conn
+      (apply-undo deps
                   dataset-id
                   job-execution-id
                   current-dataset-version))))
