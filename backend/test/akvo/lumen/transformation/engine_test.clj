@@ -68,7 +68,22 @@
    :change-title {"op" "core/change-column-title"
                   "args" {"columnName" "c2"
                           "columnTitle" "My column"}
-                  "onError" "fail"}})
+                  "onError" "fail"}
+   :extract-multiple-column {"args"
+                              {"columnName" "c11",
+                               "columns"
+                               [{"extract" true, "id" 1, "name" "title 1", "type" "text"}
+                                {"extract" false, "id" 2, "name" "title 2", "type" "text"}],
+                               "extractImage" false,
+                               "selectedColumn"
+                               {"columnName" "c11",
+                                "direction" nil,
+                                "hidden" false,
+                                "sort" nil,
+                                "title" "Column 11",
+                                "type" "multiple"}},
+                              "onError" "fail",
+                              "op" "core/extract-multiple"}})
 
 (deftest ^:functional test-transformations
   (testing "Valid data"
