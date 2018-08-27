@@ -8,9 +8,6 @@ let keycloak = null;
 
 export function token() {
   if (!keycloak) {
-    //  throw new Error('Keycloak not initialized');
-    console.log('@No Keycloak');
-    console.log(window.accessToken);
     return Promise.resolve(window.accessToken);
   }
 
