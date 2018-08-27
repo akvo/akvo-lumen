@@ -3,7 +3,7 @@
             [akvo.lumen.transformation.engine :as t.engine]
             [akvo.lumen.transformation.multiple-column.caddisfly :as t.m-c.caddisfly]
             [clojure.tools.logging :as log]
-            [clojure.walk :refer (keywordize-keys)]))
+            [clojure.walk :refer (keywordize-keys stringify-keys)]))
 
 (defmethod t.engine/valid? :core/extract-multiple
   [op-spec]
@@ -18,5 +18,7 @@
   [deps table-name columns op-spec]
   (let [{:keys [onError op args] :as op-spec} (keywordize-keys op-spec)]
     ;; so far we only implement `caddisfly` in other case we throw exception based on core/condp impl
-    (condp = (-> args :selectedColumn :multipleType)
-      "caddisfly" (t.m-c.caddisfly/apply-operation deps table-name columns op-spec))))
+    (update
+     (condp = (-> args :selectedColumn :multipleType)
+       "caddisfly" (t.m-c.caddisfly/apply-operation deps table-name columns op-spec))
+     :columns stringify-keys)))
