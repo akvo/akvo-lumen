@@ -224,7 +224,7 @@ export default class ExtractMultiple extends Component {
         ui: {
           columns: this.state.extractMultiple.ui.columns.map(
             (column, index) => {
-	      const columnBis = column;
+              const columnBis = column;
               if (idx === index) {
                 columnBis.extract = extractColumn;
               }
@@ -280,15 +280,13 @@ export default class ExtractMultiple extends Component {
     return (columnName) => {
       const extractMultiple = merge(this.state.extractMultiple, {
         ui: {
-          columns: this.state.extractMultiple.ui.columns.map(
-	    (column, index) => {
-	      const columnBis = column;
-	      if (idx === index) {
-		columnBis.name = columnName;
-              }
-              return columnBis;
+          columns: this.state.extractMultiple.ui.columns.map((column, index) => {
+            const columnBis = column;
+            if (idx === index) {
+              columnBis.name = columnName;
             }
-          ),
+            return columnBis;
+          }),
         },
       });
       this.setState({
@@ -314,8 +312,7 @@ export default class ExtractMultiple extends Component {
 
   render() {
     const { onClose, onApply, columns } = this.props;
-    const { extractMultiple: { ui: { selectedColumn } } } =
-      this.state.extractMultiple.ui.selectedColumn;
+    const { extractMultiple: { ui: { selectedColumn } } } = this.state;
     return (
       <div className="DataTableSidebar">
         <SidebarHeader onClose={onClose}>
