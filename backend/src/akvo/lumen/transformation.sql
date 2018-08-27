@@ -52,3 +52,7 @@ INSERT INTO :i:dest-table SELECT * FROM :i:source-table;
 -- :name drop-table :!
 -- :doc Drop table
 DROP TABLE IF EXISTS :i:table-name CASCADE;
+
+-- :name select-rnum-and-column :?
+-- :doc Get only the column and the rnum
+SELECT rnum, :i:column-name FROM :i:table-name

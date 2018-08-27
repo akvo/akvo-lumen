@@ -68,4 +68,11 @@
     "hidden": false,
     "direction": null,
     "columnName": "c10"
+}, {
+    "sort": null,
+    "type": "multiple",
+    "title": "Column 11",
+    "hidden": false,
+    "direction": null,
+    "columnName": "c11"
 }]

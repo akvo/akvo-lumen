@@ -37,13 +37,13 @@
 (deftest ^:functional test-transformations
   (testing "Transformation application"
     (is (= [::lib/bad-request {"message" "Dataset not found"}]
-           (tf/apply *tenant-conn* "Not-valid-id" []))))
+           (tf/apply {:tenant-conn *tenant-conn*} "Not-valid-id" []))))
   (testing "Valid log"
     (let [dataset-id (import-file *tenant-conn* *error-tracker*
                                   "transformation_test.csv" {:name "Transformation Test"
                                                              :has-column-headers? true})
           [tag _] (last (for [transformation ops]
-                          (tf/apply *tenant-conn* dataset-id {:type :transformation
+                          (tf/apply {:tenant-conn *tenant-conn*} dataset-id {:type :transformation
                                                               :transformation transformation})))]
       (is (= ::lib/ok tag)))))
 
@@ -63,7 +63,7 @@
                   "onError" "fail"}]
           dataset-id (import-file *tenant-conn* *error-tracker* "GDP.csv" {:name "GDP Test" :has-column-headers? false})]
       (let [[tag {:strs [datasetId]}] (last (for [transformation t-log]
-                                              (tf/apply *tenant-conn*
+                                              (tf/apply {:tenant-conn *tenant-conn*}
                                                         dataset-id
                                                         {:type :transformation
                                                          :transformation transformation})))]
@@ -85,7 +85,7 @@
   (let [dataset-id (import-file *tenant-conn* *error-tracker* "GDP.csv" {:dataset-name "GDP Undo Test"})
         {previous-table-name :table-name} (latest-dataset-version-by-dataset-id *tenant-conn*
                                                                                 {:dataset-id dataset-id})
-        apply-transformation (partial tf/apply *tenant-conn* dataset-id)]
+        apply-transformation (partial tf/apply {:tenant-conn *tenant-conn*} dataset-id)]
     (is (= ::lib/ok (first (apply-transformation {:type :undo}))))
     (let [[tag _] (do (apply-transformation {:type :transformation
                                              :transformation {"op" "core/to-lowercase"
@@ -124,7 +124,7 @@
 
 (deftest ^:functional combine-transformation-test
   (let [dataset-id (import-file *tenant-conn* *error-tracker* "name.csv" {:has-column-headers? true})
-        apply-transformation (partial tf/apply *tenant-conn* dataset-id)]
+        apply-transformation (partial tf/apply {:tenant-conn *tenant-conn*} dataset-id)]
     (let [[tag _] (apply-transformation {:type :transformation
                                          :transformation {"op" "core/combine"
                                                           "args" {"columnNames" ["c1" "c2"]
@@ -171,7 +171,7 @@
 
 (deftest ^:functional date-parsing-test
   (let [dataset-id (import-file *tenant-conn* *error-tracker* "dates.csv" {:has-column-headers? true})
-        apply-transformation (partial tf/apply *tenant-conn* dataset-id)]
+        apply-transformation (partial tf/apply {:tenant-conn *tenant-conn*} dataset-id)]
     (let [[tag {:strs [datasetId]}] (do (apply-transformation (date-transformation "c1" "YYYY"))
                                         (apply-transformation (date-transformation "c2" "DD/MM/YYYY"))
                                         (apply-transformation (date-transformation "c3" "YYYY-MM-DD")))]
@@ -220,7 +220,7 @@
 
 (deftest ^:functional derived-column-test
   (let [dataset-id (import-file *tenant-conn* *error-tracker* "derived-column.csv" {:has-column-headers? true})
-        apply-transformation (partial tf/apply *tenant-conn* dataset-id)]
+        apply-transformation (partial tf/apply {:tenant-conn *tenant-conn*} dataset-id)]
     (do (apply-transformation (change-datatype-transformation "c2"))
         (apply-transformation (change-datatype-transformation "c3")))
 
@@ -342,7 +342,7 @@
 
 (deftest ^:functional delete-column-test
   (let [dataset-id (import-file *tenant-conn* *error-tracker* "dates.csv" {:has-column-headers? true})
-        apply-transformation (partial tf/apply *tenant-conn* dataset-id)]
+        apply-transformation (partial tf/apply {:tenant-conn *tenant-conn*} dataset-id)]
     (let [[tag _] (apply-transformation {:type :transformation
                                          :transformation {"op" "core/delete-column"
                                                           "args" {"columnName" "c2"}
@@ -357,7 +357,7 @@
 
 (deftest ^:functional rename-column-test
   (let [dataset-id (import-file *tenant-conn* *error-tracker* "dates.csv" {:has-column-headers? true})
-        apply-transformation (partial tf/apply *tenant-conn* dataset-id)]
+        apply-transformation (partial tf/apply {:tenant-conn *tenant-conn*} dataset-id)]
     (let [[tag _] (apply-transformation {:type :transformation
                                          :transformation {"op" "core/rename-column"
                                                           "args" {"columnName" "c2"
@@ -390,7 +390,7 @@
 
 (deftest ^:functional generate-geopoints-test
   (let [dataset-id (import-file *tenant-conn* *error-tracker* "geopoints.csv" {:has-column-headers? true})
-        apply-transformation (partial tf/apply *tenant-conn* dataset-id)]
+        apply-transformation (partial tf/apply {:tenant-conn *tenant-conn*} dataset-id)]
     (let [[tag _] (apply-transformation {:type :transformation
                                          :transformation {"op" "core/generate-geopoints"
                                                           "args" {"columnNameLat" "c2"
