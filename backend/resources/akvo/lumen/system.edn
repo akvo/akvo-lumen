@@ -50,7 +50,7 @@
   :root [:tenant-manager]
   :share [:tenant-manager :config]
   :tier [:tenant-manager]
-  :transformation [:tenant-manager]
+  :transformation [:tenant-manager :caddisfly]
   :user [:keycloak]
   :visualisation [:config :tenant-manager]}
  :config
