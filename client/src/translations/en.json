@@ -74,7 +74,7 @@
   "delete_column": "Delete column",
   "extract": "Extract",
   "extract_multiple": "Extract Multiple values",
-  "extract_multiple_log": "Extract multiple values: {title}",
+  "extract_multiple_log": "Extract multiple values from: {extractedColumnTitle} to {newColumnsTitle}",
   "delete_row": "Delete row",
   "deleted_column": "Deleted column: {title}",
   "derive": "Derive",
