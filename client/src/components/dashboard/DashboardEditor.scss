@@ -31,8 +31,16 @@
         z-index: 9;
     }
 
-    .DashboardVisualisationList, .DashboardEditorCanvasContainer {
-        height: calc(100vh - 4rem - 64px);
+    .DashboardVisualisationList {
+        height: calc(100vh - 4rem - 64px); 
+    }
+    
+    .DashboardEditorCanvasContainer {
+        height: calc(100vh - 4rem);
+    }
+
+    .DashboardVisualisationList,
+    .DashboardEditorCanvasContainer {
         overflow: auto;
     }
 
