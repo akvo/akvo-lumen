@@ -45,8 +45,8 @@ function initAuthenticated(profile, env) {
   }
 }
 
-function initWithAuthToken() {
-  const initialState = {};
+function initWithAuthToken(locale) {
+  const initialState = { profile: { attributes: { locale: [locale] } } };
   const rootElement = document.querySelector('#root');
   const store = configureStore(initialState);
   const history = syncHistoryWithStore(browserHistory, store);
@@ -73,7 +73,7 @@ function dispatchOnMode() {
       .catch(err => initNotAuthenticated(err.message));
   } else {
     window.accessToken = accessToken;
-    initWithAuthToken();
+    initWithAuthToken(queryParams.locale);
   }
 }
 

@@ -28,5 +28,5 @@
   (impl/delete tenant-conn id))
 
 (defn export
-  [exporter-url access-token spec]
-  (impl/export exporter-url access-token spec))
+  [exporter-url access-token locale spec]
+  (impl/export exporter-url access-token locale spec))
