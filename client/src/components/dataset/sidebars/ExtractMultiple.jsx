@@ -9,6 +9,8 @@ import SidebarHeader from './SidebarHeader';
 import SidebarControls from './SidebarControls';
 import * as API from '../../../api';
 
+require('./ExtractMultiple.scss');
+
 function textColumnOptions(columns) {
   return columns
     .filter(column => column.get('type') === 'multiple')
@@ -25,12 +27,12 @@ function filterByMultipleAndColumnName(columns, columnName) {
     .toJS()[0];
 }
 
-function SelectColumn({ columns, idx, onChange, value }) {
+function SelectColumn({ columns, onChange, value }) {
   return (
     <div className="inputGroup">
-      <label htmlFor="columnName">
-        <FormattedMessage id="select_n_column" values={{ idx }} />
-      </label>
+      <h4 htmlFor="columnName">
+        <FormattedMessage id="select_multiple_column" />
+      </h4>
       <SelectMenu
         name="columnName"
         value={value}
@@ -49,45 +51,28 @@ SelectColumn.propTypes = {
 };
 
 function MultipleColumnImage(props) {
-  const { hasImage, extractImage, onExtractImage, ui, api, onChangeImageTitle } = props;
+  const { hasImage, extractImage, onExtractImage } = props;
   if (hasImage) {
     return (
-      <div className="inputs">
-        <div className="inputGroup">
-          <div>
-            <FormattedMessage id="extract_image_question" />
-            <ToggleInput
-              name="image"
-              type="checkbox"
-              className="showLegend"
-              checked={extractImage}
-              onChange={onExtractImage}
-            />
-          </div>
-          {extractImage ? (
-            <input
-              value={ui.image.title}
-              placeholder={api.image.title}
-              type="text"
-              className="titleTextInput"
-              onChange={onChangeImageTitle}
-            />
-          ) : (
-             null
-          )}
-        </div>
-      </div>);
+      <div>
+        <hr />
+        <ToggleInput
+          name="image"
+          type="checkbox"
+          labelId="image"
+          className={`valueToExtract ${extractImage ? 'checked' : ''}`}
+          checked={extractImage}
+          onChange={onExtractImage}
+        /></div>
+    );
   }
   return null;
 }
 
 MultipleColumnImage.propTypes = {
   hasImage: PropTypes.bool.isRequired,
-  extractImage: PropTypes.bool.isRequired,
+  extractImage: PropTypes.func.isRequired,
   onExtractImage: PropTypes.object.isRequired,
-  api: PropTypes.object.isRequired,
-  ui: PropTypes.object.isRequired,
-  onChangeImageTitle: PropTypes.func.isRequired,
 };
 
 class Column extends Component {
@@ -100,42 +85,41 @@ class Column extends Component {
   onColumnName(evt) {
     this.props.onColumnName(evt.target.value);
   }
-
   render() {
     const { api, ui } = this.props;
-    return (<div className="inputs">
+    return (
       <div className="inputGroup">
-	<div>
-          <FormattedMessage id="extract_column_question" />
-          {ui.extract ? (
-	     null) : (
-	       <div>
-		 {' '}
-		 {api.name} :: {api.type}
-	       </div>
-	     )}
+        <hr />
+        <div className="inputGroup">
           <ToggleInput
             name="extractColumn"
             type="checkbox"
-            className="showLegend"
+            className={`valueToExtract ${ui.extract ? 'checked' : ''}`}
             checked={ui.extract}
+            label={api.name}
             onChange={this.props.onExtractColumn}
           />
-	</div>
-	{ui.extract ? (<input
-			 value={ui.name}
-			 placeholder={api.name}
-			 type="text"
-			 className="titleTextInput"
-			 onChange={this.onColumnName}
-			 data-test-id={`column-title-${api.id}`} />)
-	: (null)}
+        </div>
+        {ui.extract ? (
+          <div>
+            <label htmlFor="titleTextInput" >
+              <FormattedMessage id="new_column_title" />
+            </label>
+            <input
+              value={ui.name}
+              type="text"
+              className="titleTextInput"
+              onChange={this.onColumnName}
+              data-test-id={`column-title-${api.id}`}
+            />
+          </div>
+        ) : (
+           null
+        )}
       </div>
-    </div>
     );
   }
-      }
-
+}
 Column.propTypes = {
   onExtractColumn: PropTypes.func.isRequired,
   onColumnName: PropTypes.func.isRequired,
@@ -154,8 +138,9 @@ function MultipleColumnList(props) {
       idx={index}
       onColumnName={onColumnName(index)}
       onExtractColumn={onExtractColumn(index)}
-    />));
-  return <div>{columList}</div>;
+    />
+  ));
+  return <div className="inputGroup">{columList}</div>;
 }
 
 MultipleColumnList.propTypes = {
@@ -166,17 +151,21 @@ MultipleColumnList.propTypes = {
 };
 
 function MultipleColumn(props) {
-  const { api, ui, onExtractImage, onColumnName, onExtractColumn, onChangeImageTitle } =
-    props;
+  const {
+    api,
+    ui,
+    onExtractImage,
+    onColumnName,
+    onExtractColumn,
+  } = props;
+
   return api ? (
-    <div>
+    <div className="inputGroup">
+      <h4><FormattedMessage id="check_values_to_extract" /></h4>
       <MultipleColumnImage
         hasImage={api.hasImage}
         extractImage={ui.extractImage}
         onExtractImage={onExtractImage}
-        onChangeImageTitle={onChangeImageTitle}
-        api={api}
-        ui={ui}
       />
       <MultipleColumnList
         api={api}
@@ -184,14 +173,14 @@ function MultipleColumn(props) {
         onColumnName={onColumnName}
         onExtractColumn={onExtractColumn}
       />
-    </div>) : null;
+    </div>
+  ) : null;
 }
 
 MultipleColumn.propTypes = {
   api: PropTypes.object,
   ui: PropTypes.object.isRequired,
   onExtractImage: PropTypes.func.isRequired,
-  onChangeImageTitle: PropTypes.func.isRequired,
   onColumnName: PropTypes.func.isRequired,
   onExtractColumn: PropTypes.func.isRequired,
 };
@@ -204,7 +193,12 @@ function apiMultipleColumn(column, callback) {
         multipleId: column.multipleId,
       }),
     })
-    .then(response => response.json())
+    .then((response) => {
+      if (response.status !== 200) {
+        return { error: response.status };
+      }
+      return response.json();
+    })
     .then(callback);
 }
 export default class ExtractMultiple extends Component {
@@ -219,16 +213,12 @@ export default class ExtractMultiple extends Component {
 
       extractMultiple: {
         api: null,
-        ui: { extractImage: null,
-	      columns: [],
-	      selectedColumn: { name: null },
-	      image: { title: null } },
+        ui: { extractImage: null, columns: [], selectedColumn: { name: null } },
       },
     };
     this.onExtractImage = this.onExtractImage.bind(this);
     this.onColumnName = this.onColumnName.bind(this);
     this.onExtractColumn = this.onExtractColumn.bind(this);
-    this.onChangeImageTitle = this.onChangeImageTitle.bind(this);
   }
 
   onExtractColumn(idx) {
@@ -262,21 +252,28 @@ export default class ExtractMultiple extends Component {
   onSelectColumn(columns, columnName) {
     const column = filterByMultipleAndColumnName(columns, columnName);
     apiMultipleColumn(column, (apiRes) => {
-      const apiResBis = apiRes;
-      apiResBis.columnName = columnName;
-      apiResBis.image = { title: `Image of "${column.title}"` };
-      const ui = cloneDeep(apiResBis);
-      delete ui.hasImage;
-      ui.extractImage = false;
-      ui.selectedColumn = column;
+      if (apiRes.error) {
+        if (apiRes.error === 404) {
+          this.setState({ error: 'extract_multiple_not_found_error' });
+        } else {
+          this.setState({ error: 'extract_multiple_global_error' });
+        }
+      } else {
+        const apiResBis = apiRes;
+        apiResBis.columnName = columnName;
+        const ui = cloneDeep(apiResBis);
+        delete ui.hasImage;
+        ui.extractImage = false;
+        ui.selectedColumn = column;
 
-      this.setState({
-        extractMultiple: {
-          api: apiRes,
-          ui,
-        },
-        transformation: this.state.transformation.setIn(['args'], ui),
-      });
+        this.setState({
+          extractMultiple: {
+            api: apiRes,
+            ui,
+          },
+          transformation: this.state.transformation.setIn(['args'], ui),
+        });
+      }
     });
   }
 
@@ -284,21 +281,6 @@ export default class ExtractMultiple extends Component {
     const extractMultiple = merge(this.state.extractMultiple, {
       ui: { extractImage: value },
     });
-
-    this.setState({
-      extractMultiple,
-      transformation: this.state.transformation.setIn(
-        ['args'],
-        extractMultiple.ui
-      ),
-    });
-  }
-
-  onChangeImageTitle(evt) {
-    const extractMultiple = merge(this.state.extractMultiple, {
-      ui: { image: { title: evt.target.value } },
-    });
-
     this.setState({
       extractMultiple,
       transformation: this.state.transformation.setIn(
@@ -345,6 +327,7 @@ export default class ExtractMultiple extends Component {
   render() {
     const { onClose, onApply, columns } = this.props;
     const { extractMultiple: { ui: { selectedColumn } } } = this.state;
+    const error = this.state.error;
     return (
       <div className="DataTableSidebar">
         <SidebarHeader onClose={onClose}>
@@ -357,23 +340,24 @@ export default class ExtractMultiple extends Component {
             onChange={columnName => this.onSelectColumn(columns, columnName)}
             value={selectedColumn.columnName}
           />
-          <MultipleColumn
-            api={this.state.extractMultiple.api}
-            ui={this.state.extractMultiple.ui}
-            selectedColumn={this.state.selectedColumn}
-            onExtractImage={this.onExtractImage}
-            onChangeImageTitle={this.onChangeImageTitle}
-            extractImage={this.state.extractMultiple.ui.extractImage}
-            onColumnName={this.onColumnName}
-            onExtractColumn={this.onExtractColumn}
-          />
+          { error ? <div className="feedbackMessage"><FormattedMessage id={error} /></div> : (
+            <MultipleColumn
+              api={this.state.extractMultiple.api}
+              ui={this.state.extractMultiple.ui}
+              selectedColumn={this.state.selectedColumn}
+              onExtractImage={this.onExtractImage}
+              extractImage={this.state.extractMultiple.ui.extractImage}
+              onColumnName={this.onColumnName}
+              onExtractColumn={this.onExtractColumn}
+            />)}
         </div>
 
         <SidebarControls
           positiveButtonText={<FormattedMessage id="extract" />}
           onApply={
             this.isValidTransformation()
-            ? () => onApply(this.state.transformation) : () => {}
+            ? () => onApply(this.state.transformation)
+ : () => {}
           }
           onClose={onClose}
         />
