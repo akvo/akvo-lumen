@@ -40,6 +40,24 @@ function findTitle(columnName, transformations, index, columns) {
   return columnTitle(columnName, columns);
 }
 
+function extractMultipleTransformationDescription(transformations, index) {
+  const transformation = transformations.get(index);
+
+  const extractedColumnTitle = transformation.getIn(['args', 'selectedColumn', 'title']);
+
+  const changedColumns = transformation.getIn(['changedColumns']).toJS();
+  const newColumnsTitle = Object.values(changedColumns).map(o => o.after.title).join(', ');
+  return (
+    <FormattedMessage
+      id="extract_multiple_log"
+      values={{
+        extractedColumnTitle,
+        newColumnsTitle,
+      }}
+    />
+  );
+}
+
 function combineTransformationDescription(transformations, index, columns) {
   const transformation = transformations.get(index);
   const firstColumnName = transformation.getIn(['args', 'columnNames', 0]);
@@ -170,6 +188,8 @@ function transformationDescription(transformations, index, columns, dependentDat
       );
     case 'core/delete-column':
       return <FormattedMessage id="deleted_column" values={{ title }} />;
+    case 'core/extract-multiple':
+      return extractMultipleTransformationDescription(transformations, index);
     case 'core/reverse-geocode':
       return <FormattedMessage id="reverse_geocode" />;
     case 'core/combine':

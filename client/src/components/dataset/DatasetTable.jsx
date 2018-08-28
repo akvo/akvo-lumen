@@ -50,6 +50,8 @@ class DatasetTable extends Component {
 
     this.handleToggleTransformationLog = this.handleToggleTransformationLog.bind(this);
     this.handleToggleCombineColumnSidebar = this.handleToggleCombineColumnSidebar.bind(this);
+    this.handleToggleExtractMultipleColumnSidebar =
+      this.handleToggleExtractMultipleColumnSidebar.bind(this);
     this.handleToggleDeriveColumnSidebar = this.handleToggleDeriveColumnSidebar.bind(this);
     this.handleToggleGeoColumnSidebar = this.handleToggleGeoColumnSidebar.bind(this);
   }
@@ -136,6 +138,29 @@ class DatasetTable extends Component {
       });
       this.showSidebar({
         type: 'combineColumns',
+        displayRight: false,
+        onClose: this.hideSidebar,
+        onApply: (transformation) => {
+          this.props.onTransform(transformation).then(() => {
+            this.hideSidebar();
+          });
+        },
+        columns: this.props.columns,
+      });
+    }
+  }
+
+  handleToggleExtractMultipleColumnSidebar() {
+    if (this.state.sidebarProps &&
+      this.state.sidebarProps.type === 'extractMultiple') {
+      this.hideSidebar();
+    } else {
+      this.setState({
+        activeDataTypeContextMenu: null,
+        activeColumnContextMenu: null,
+      });
+      this.showSidebar({
+        type: 'extractMultiple',
         displayRight: false,
         onClose: this.hideSidebar,
         onApply: (transformation) => {
@@ -362,6 +387,8 @@ class DatasetTable extends Component {
           onClickMenuItem={(menuItem) => {
             if (menuItem === 'combineColumns') {
               this.handleToggleCombineColumnSidebar();
+            } else if (menuItem === 'extractMultiple') {
+              this.handleToggleExtractMultipleColumnSidebar();
             } else if (menuItem === 'deriveColumn') {
               this.handleToggleDeriveColumnSidebar();
             } else if (menuItem === 'generateGeopoints') {
