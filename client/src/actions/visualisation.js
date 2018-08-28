@@ -173,8 +173,9 @@ export function exportVisualisation(visualisationId, options) {
     if (visualisationId === null) throw new Error('visualisationId not set');
 
     const target = `${window.location.origin}/visualisation/${visualisationId}/export`;
+
     return api
-      .post(`/api/visualisations/${visualisationId}/export`, {
+      .post('/api/exports', {
         format,
         title,
         selector: `.render-completed-${visualisationId}`,

@@ -33,11 +33,4 @@
           (visualisation/upsert tenant-conn (assoc body "id" id) jwt-claims))
 
         (DELETE "/" _
-                (visualisation/delete tenant-conn id))
-
-        (POST "/export" {:keys [body jwt-claims headers]}
-              (let [exporter-url (str (:exporter-api-url config) "/screenshot")]
-                (visualisation/export exporter-url
-                                      (get headers "authorization")
-                                      (get jwt-claims "locale")
-                                      body)))))))
+                (visualisation/delete tenant-conn id))))))

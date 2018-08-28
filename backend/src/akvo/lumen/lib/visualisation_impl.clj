@@ -1,21 +1,17 @@
 (ns akvo.lumen.lib.visualisation-impl
   (:require [akvo.lumen.lib :as lib]
             [akvo.lumen.util :refer [squuid]]
-            [clj-http.client :as client]
-            [clojure.string :as str]
             [hugsql.core :as hugsql])
   (:import [java.sql SQLException]))
 
 
 (hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
 
-
 (defn all [tenant-conn]
   (lib/ok (all-visualisations tenant-conn
                               {}
                               {}
                               {:identifiers identity})))
-
 
 (defn create [tenant-conn body jwt-claims]
   (let [id (squuid)
@@ -54,19 +50,3 @@
   (if (zero? (delete-visualisation-by-id tenant-conn {:id id}))
     (lib/not-found {:error "Not found"})
     (lib/ok {:id id})))
-
-(defn export
-  "Proxy fn, exporter-url token exporter spec -> ring response map"
-  [exporter-url access-token locale spec]
-  (let [{:keys [body headers status]}
-        (client/post exporter-url
-                     {:headers {"access_token" (str/replace-first access-token
-                                                                  #"Bearer "
-                                                                  "")
-                                "locale" locale}
-                      :form-params spec
-                      :content-type :json})]
-    {:body body
-     :headers {"Content-Type" (get headers "Content-Type")
-               "Content-Disposition" (get headers "Content-Disposition")}
-     :status status}))
