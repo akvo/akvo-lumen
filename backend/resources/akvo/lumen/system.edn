@@ -20,6 +20,7 @@
   :invite-verify #var akvo.lumen.endpoint.invite/verify-endpoint
   :job-execution #var akvo.lumen.endpoint.job-execution/endpoint
   :library #var akvo.lumen.endpoint.library/endpoint
+  :multiple-column #var akvo.lumen.endpoint.multiple-column/endpoint
   :public #var akvo.lumen.endpoint.public/endpoint
   :resource #var akvo.lumen.endpoint.resource/endpoint
   :root #var akvo.lumen.endpoint.root/endpoint
@@ -32,7 +33,7 @@
  {:http [:app]
   :app [:aggregation :collection :dashboard :dataset :raster :env :emailer :files :healthz
         :invite :invite-verify :job-execution :library :public :resource :root :share
-        :tier :transformation :user :visualisation]
+        :tier :transformation :user :visualisation :multiple-column]
   :tenant-manager [:config :db]
   :aggregation [:tenant-manager]
   :collection [:tenant-manager]
@@ -45,6 +46,7 @@
   :invite-verify [:keycloak :tenant-manager :config]
   :job-execution [:tenant-manager]
   :library [:tenant-manager]
+  :multiple-column [:caddisfly]
   :public [:tenant-manager :config]
   :resource [:tenant-manager]
   :root [:tenant-manager]
