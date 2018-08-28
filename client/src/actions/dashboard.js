@@ -18,7 +18,8 @@ export const createDashboardSuccess = createAction('CREATE_DASHBOARD_SUCCESS');
 export function createDashboard(dashboard, collectionId, callback = () => {}) {
   return (dispatch) => {
     dispatch(createDashboardRequest(dashboard));
-    api.post('/api/dashboards', dashboard)
+    api
+      .post('/api/dashboards', dashboard)
       .then(response => response.json())
       .then((dash) => {
         dispatch(createDashboardSuccess(dash));
@@ -49,7 +50,8 @@ export function saveDashboardChanges(dashboard, callback = () => {}) {
 
   return (dispatch) => {
     dispatch(editDashboardRequest);
-    api.put(`/api/dashboards/${id}`, dashboard)
+    api
+      .put(`/api/dashboards/${id}`, dashboard)
       .then(response => response.json())
       .then((responseDash) => {
         dispatch(editDashboardSuccess(responseDash));
@@ -70,7 +72,8 @@ export const fetchDashboardSuccess = createAction('FETCH_DASHBOARD_SUCCESS');
 export function fetchDashboard(id) {
   return (dispatch) => {
     dispatch(fetchDashboardRequest(id));
-    api.get(`/api/dashboards/${id}`)
+    api
+      .get(`/api/dashboards/${id}`)
       .then(response => response.json())
       .then(dashboard => dispatch(fetchDashboardSuccess(dashboard)))
       .catch(err => dispatch(fetchDashboardFailure(err)));
@@ -85,7 +88,8 @@ export const deleteDashboardSuccess = createAction('DELETE_DASHBOARD_SUCCESS');
 export function deleteDashboard(id) {
   return (dispatch) => {
     dispatch(deleteDashboardRequest(id));
-    api.del(`/api/dashboards/${id}`)
+    api
+      .del(`/api/dashboards/${id}`)
       .then(response => response.json())
       .then(() => dispatch(deleteDashboardSuccess(id)))
       .catch(error => dispatch(deleteDashboardFailure(error)));
@@ -103,14 +107,17 @@ export const fetchShareIdSuccess = createAction('FETCH_DASHBOARD_SHARE_ID_SUCCES
 export function fetchShareId(dashboardId) {
   return (dispatch) => {
     if (dashboardId != null) {
-      api.post('/api/shares', { dashboardId })
+      api
+        .post('/api/shares', { dashboardId })
         .then(response => response.json())
         .then((response) => {
-          dispatch(fetchShareIdSuccess({
-            id: dashboardId,
-            shareId: response.id,
-            protected: response.protected,
-          }));
+          dispatch(
+            fetchShareIdSuccess({
+              id: dashboardId,
+              shareId: response.id,
+              protected: response.protected,
+            })
+          );
         });
     }
   };
@@ -125,7 +132,8 @@ export function setShareProtection(shareId, payload, callback = () => {}) {
   return (dispatch) => {
     if (shareId != null) {
       let isError = false;
-      api.put(`/api/shares/${shareId}`, payload)
+      api
+        .put(`/api/shares/${shareId}`, payload)
         .then((response) => {
           if (response.status !== 400) {
             dispatch(setShareProtectionSuccess({ shareId, data: payload }));
@@ -154,17 +162,17 @@ export const exportDashboardFailure = createAction('EXPORT_DASHBOARD_FAILURE');
 
 export function exportDashboard(dashboard, options) {
   const { format, title } = { format: 'png', title: 'Untitled Dashboard', ...options };
-  return (dispatch, getState) => {
+  return (dispatch) => {
     dispatch(exportDashboardRequest({ id: dashboard.id }));
-    getToken().then((token) => {
-      const target = `${window.location.origin}/dashboard/${dashboard.id}/export`;
-      const { exporterUrl } = getState().env;
 
-      return api.post(`${exporterUrl}/screenshot`, {
+    if (dashboard.id === null) throw new Error('dashboard.id not set');
+
+    const target = `${window.location.origin}/dashboard/${dashboard.id}/export`;
+
+    return api
+      .post('/api/exports', {
         format,
         title,
-        token,
-        refreshToken: refreshToken(),
         selector: Object.keys(dashboard.entities)
           .filter(key => dashboard.entities[key].type === 'visualisation')
           .map(key => `.render-completed-${key}`)
@@ -177,16 +185,14 @@ export function exportDashboard(dashboard, options) {
           dispatch(exportDashboardFailure({ id: dashboard.id }));
           return;
         }
-        response.text()
-          .then((imageStr) => {
-            const blob = base64ToBlob(imageStr, extToContentType(format));
-            saveAs(blob, `${title}.${format}`);
-            dispatch(exportDashboardSuccess({ id: dashboard.id }));
-          });
+        response.text().then((imageStr) => {
+          const blob = base64ToBlob(imageStr, extToContentType(format));
+          saveAs(blob, `${title}.${format}`);
+          dispatch(exportDashboardSuccess({ id: dashboard.id }));
+        });
       })
       .catch((error) => {
         dispatch(exportDashboardFailure(error));
       });
-    });
   };
 }
