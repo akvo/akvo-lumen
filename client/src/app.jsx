@@ -72,8 +72,7 @@ function dispatchOnMode() {
       .then(({ profile, env }) => initAuthenticated(profile, env))
       .catch(err => initNotAuthenticated(err.message));
   } else {
-    window.accessToken = accessToken;
-    initWithAuthToken(queryParams.locale);
+    auth.initExport(accessToken).then(initWithAuthToken(queryParams.locale));
   }
 }
 

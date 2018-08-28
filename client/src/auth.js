@@ -5,10 +5,11 @@ import Raven from 'raven-js';
 import queryString from 'query-string';
 
 let keycloak = null;
+let accessToken = null;
 
 export function token() {
   if (!keycloak) {
-    return Promise.resolve(window.accessToken);
+    return Promise.resolve(accessToken);
   }
 
   return new Promise(resolve =>
@@ -90,4 +91,8 @@ export function initPublic() {
   return fetch('/env')
     .then(response => response.json())
     .then(env => ({ env }));
+}
+
+export function initExport(providedAccessToken) {
+  return Promise.resolve((accessToken = providedAccessToken));
 }
