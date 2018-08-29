@@ -15,7 +15,7 @@ import {
 } from '../../domain/entity';
 import { abbr } from '../../utilities/utils';
 
-function getCollectionContextMenuItem(collections, currentCollection) {
+function getCollectionContextMenuItem(entity, collections, currentCollection) {
   if (currentCollection) {
     return ({
       label: (
@@ -28,7 +28,7 @@ function getCollectionContextMenuItem(collections, currentCollection) {
     });
   }
 
-  return ({
+  return (isFailed(entity) ? null : {
     label: <FormattedMessage id="add_to_collection" />,
     value: 'add-to-collection:new',
     subMenu: [
@@ -60,7 +60,7 @@ function contextMenuOptions(entity, collections, currentCollection) {
       value: 'add-to-dashboard',
       customClass: 'notImplemented',
     },
-    getCollectionContextMenuItem(collections, currentCollection),
+    getCollectionContextMenuItem(entity, collections, currentCollection),
     {
       label: <FormattedMessage id="view_details" />,
       value: 'view-details',
@@ -69,7 +69,7 @@ function contextMenuOptions(entity, collections, currentCollection) {
       label: <FormattedMessage id="delete" />,
       value: 'delete',
     },
-  ];
+  ].filter(opt => (opt !== null));
 
   if (isUpdatable(entity)) {
     options.push({
