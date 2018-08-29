@@ -11,7 +11,7 @@ import {
   getErrorMessage, isPending,
   isFailed, isOk, getStatus, getIconUrl,
   getAuthor, getCreatedTimestamp,
-  getSource,
+  getSource, isUpdatable,
 } from '../../domain/entity';
 import { abbr } from '../../utilities/utils';
 
@@ -45,7 +45,7 @@ function getCollectionContextMenuItem(collections, currentCollection) {
   });
 }
 
-function contextMenuOptions(entityType, collections, currentCollection) {
+function contextMenuOptions(entity, collections, currentCollection) {
   const options = [
     {
       label: <FormattedMessage id="duplicate" />,
@@ -71,7 +71,7 @@ function contextMenuOptions(entityType, collections, currentCollection) {
     },
   ];
 
-  if (entityType === 'dataset') {
+  if (isUpdatable(entity)) {
     options.push({
       label: <FormattedMessage id="update" />,
       value: 'update-dataset',
@@ -82,13 +82,13 @@ function contextMenuOptions(entityType, collections, currentCollection) {
 }
 
 function LibraryListingItemContextMenu({
-  entityType,
+  entity,
   onClick,
   collections = {},
   currentCollection,
   onWindowClick,
 }) {
-  const options = contextMenuOptions(entityType, collections, currentCollection);
+  const options = contextMenuOptions(entity, collections, currentCollection);
   return (
     <ContextMenu
       style={{ width: 200 }}
@@ -142,7 +142,7 @@ VisualisationTypeLabel.propTypes = {
 };
 
 LibraryListingItemContextMenu.propTypes = {
-  entityType: PropTypes.string.isRequired,
+  entity: PropTypes.object.isRequired,
   onClick: PropTypes.func.isRequired,
   collections: PropTypes.object.isRequired,
   currentCollection: PropTypes.object,
@@ -176,7 +176,6 @@ export default class LibraryListingItem extends Component {
     const { formatMessage } = this.context.intl;
     const entityType = getType(entity);
     const entitySource = getSource(entity);
-
     return (
       <li
         onMouseLeave={() => this.setState({ contextMenuVisible: false })}
@@ -186,9 +185,9 @@ export default class LibraryListingItem extends Component {
         data-test-id={getId(entity)}
       >
         {isPending(entity) &&
-          <div className="pendingOverlay" data-test-id="pending">
-            <LoadingSpinner />
-          </div>
+        <div className="pendingOverlay" data-test-id="pending">
+          <LoadingSpinner />
+        </div>
         }
         <Link
           to={{
@@ -198,7 +197,7 @@ export default class LibraryListingItem extends Component {
           className="entityBody clickable"
           onClick={(e) => {
             if (!isOk(entity)) {
-              // prevent navigation - unfortunately this is the only way to "disable" a <Link />
+// prevent navigation - unfortunately this is the only way to "disable" a <Link />
               e.preventDefault();
             }
           }}
@@ -214,11 +213,11 @@ export default class LibraryListingItem extends Component {
             {isFailed(entity) && <p>{getErrorMessage(entity)}</p>}
             <ul>
               {isPending(entity) && (
-                <li>
-                  <VisualisationLabel className="VisualisationLabel__type">
-                    <FormattedMessage id="pending" />...
-                  </VisualisationLabel>
-                </li>
+              <li>
+                <VisualisationLabel className="VisualisationLabel__type">
+                  <FormattedMessage id="pending" />...
+                </VisualisationLabel>
+              </li>
               )}
               {entityType === 'visualisation' && (
                 <li>
@@ -241,19 +240,9 @@ export default class LibraryListingItem extends Component {
                     className="VisualisationLabel__meta"
                     title={formatMessage({ id: 'created_by' })}
                   >
-                    {author && (
-                      <span>
-                        {author}
-                      </span>
-                    )}
-                    {author && created && (
-                      <span>&nbsp;|&nbsp;</span>
-                    )}
-                    {created && (
-                      <span>
-                        {moment(created).format('Do MMM YYYY - HH:mm')}
-                      </span>
-                    )}
+                    {author && (<span>{author}</span>)}
+                      {author && created && (<span>&nbsp;|&nbsp;</span>)}
+                    {created && (<span>{moment(created).format('Do MMM YYYY - HH:mm')}</span>)}
                   </VisualisationLabel>
                 )}
               </li>
@@ -280,16 +269,17 @@ export default class LibraryListingItem extends Component {
             <i className="fa fa-ellipsis-v" />
           </button>
           {this.state.contextMenuVisible &&
-            <LibraryListingItemContextMenu
-              entityType={entityType}
-              collections={this.props.collections}
-              currentCollection={this.props.currentCollection}
-              onClick={(actionType) => {
-                this.setState({ contextMenuVisible: false });
-                onEntityAction(actionType, entityType, getId(entity));
-              }}
-              onWindowClick={() => this.setState({ contextMenuVisible: false })}
-            />}
+          <LibraryListingItemContextMenu
+            entityType={entityType}
+            entity={entity}
+            collections={this.props.collections}
+            currentCollection={this.props.currentCollection}
+            onClick={(actionType) => {
+              this.setState({ contextMenuVisible: false });
+              onEntityAction(actionType, entityType, getId(entity));
+            }}
+            onWindowClick={() => this.setState({ contextMenuVisible: false })}
+          />}
         </div>
       </li>
     );
