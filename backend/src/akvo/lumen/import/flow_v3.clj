@@ -21,6 +21,7 @@
              (if (:registration-form? form)
                (assoc identifier :key true)
                identifier))
+           {:title "Device Id" :type :text :id :device_id}
            {:title "Display name" :type :text :id :display_name}
            {:title "Submitter" :type :text :id :submitter}
            {:title "Submitted at" :type :date :id :submitted_at}
@@ -72,6 +73,7 @@
                (assoc (response-data form (get form-instance "responses"))
                       :instance_id (get form-instance "id")
                       :display_name (get data-point "displayName")
+                      :device_id (get form-instance "deviceIdentifier")
                       :identifier (get data-point "identifier")
                       :submitter (get form-instance "submitter")
                       :submitted_at (some-> (get form-instance "submissionDate")
