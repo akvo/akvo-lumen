@@ -38,6 +38,10 @@ log Creating Production Windshaft image
 docker build --quiet --rm=false -t eu.gcr.io/${PROJECT_NAME}/lumen-maps:${TRAVIS_COMMIT} ./windshaft
 docker tag eu.gcr.io/${PROJECT_NAME}/lumen-maps:${TRAVIS_COMMIT} eu.gcr.io/${PROJECT_NAME}/lumen-maps:develop
 
+log Creating Production Exporter image
+docker build --quiet --rm=false -t eu.gcr.io/${PROJECT_NAME}/lumen-exporter:${TRAVIS_COMMIT} ./exporter
+docker tag eu.gcr.io/${PROJECT_NAME}/lumen-exporter:${TRAVIS_COMMIT} eu.gcr.io/${PROJECT_NAME}/lumen-exporter:develop
+
 log Starting Docker Compose environment
 docker-compose -p akvo-lumen-ci -f docker-compose.yml -f docker-compose.ci.yml up --no-color -d --build
 
