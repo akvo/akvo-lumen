@@ -52,7 +52,7 @@
   [cell-value columns-to-extract]
   (map (fn [c]
          (if (:image (meta c))
-           (:image cell-value)
+           (format "https://akvoflow-uat1.s3.amazonaws.com/images/%s" (:image cell-value)) 
            (:value (some #(when (= (:caddisfly-test-id c) (:id %)) %) (:result cell-value)))))
    columns-to-extract))
 
