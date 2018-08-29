@@ -9,7 +9,7 @@
       (let [res (select-keys schema [:hasImage])]
         (assoc res :columns (map (fn [r]
                                    {:id   (:id r)
-                                    :name (str (:name r) " :: " (:unit r))
+                                    :name (:name r)
                                     :type "text" ;; TODO will be improved after design discussions 
                                     }) (:results schema)))))))
 
