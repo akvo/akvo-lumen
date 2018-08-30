@@ -46,6 +46,12 @@ export function getSource(entity) {
   return source.toJS();
 }
 
+export function isUpdatable(entity) {
+  const s = getSource(entity);
+  const k = s ? s.kind : '';
+  return (getType(entity) === 'dataset' && (k === 'LINK' || k === 'AKVO_FLOW'));
+}
+
 export function getAuthor(entity) {
   let author = get(entity, 'author');
   if (!author) return null;
