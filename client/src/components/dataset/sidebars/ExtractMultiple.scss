@@ -1,0 +1,11 @@
+@import "../../../styles/modules/importAll";
+
+.feedbackMessage {
+  color: $errorRed;
+}
+.valueToExtract {
+  font-size: 1em;
+}
+.checked {
+  font-weight: 500;
+}
