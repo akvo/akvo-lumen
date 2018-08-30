@@ -29,6 +29,41 @@
     strong {
       font-weight: 700;
     }
+
+    ul {
+      li {
+        &.ql-indent-1 {
+          margin-left: 20px;
+        }    
+        &.ql-indent-2 {
+          margin-left: 40px;
+        }    
+        &.ql-indent-3 {
+          margin-left: 60px;
+        }    
+        &.ql-indent-4 {
+          margin-left: 80px;
+        }    
+        &.ql-indent-5 {
+          margin-left: 100px;
+        }    
+        &.ql-indent-6 {
+          margin-left: 120px;
+        }    
+        &.ql-indent-7 {
+          margin-left: 140px;
+        }    
+        &.ql-indent-8 {
+          margin-left: 160px;
+        }    
+        &.ql-indent-9 {
+          margin-left: 180px;
+        }    
+        &.ql-indent-10 {
+          margin-left: 200px;
+        }    
+      }
+    }
   }
 
   .itemContainer {
