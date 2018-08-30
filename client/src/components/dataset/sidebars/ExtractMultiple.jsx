@@ -30,7 +30,7 @@ function filterByMultipleAndColumnName(columns, columnName) {
 function SelectColumn({ columns, onChange, value }) {
   return (
     <div className="inputGroup">
-      <h4 htmlFor="columnName">
+      <h4 htmlFor="columnName" className="bolder">
         <FormattedMessage id="select_multiple_column" />
       </h4>
       <SelectMenu
@@ -59,7 +59,7 @@ function MultipleColumnImage(props) {
         <ToggleInput
           name="image"
           type="checkbox"
-          labelId="image"
+          labelId="Image"
           className={`valueToExtract ${extractImage ? 'checked' : ''}`}
           checked={extractImage}
           onChange={onExtractImage}
@@ -161,7 +161,7 @@ function MultipleColumn(props) {
 
   return api ? (
     <div className="inputGroup">
-      <h4><FormattedMessage id="check_values_to_extract" /></h4>
+      <h4 className="bolder"><FormattedMessage id="select_values_to_extract" /></h4>
       <MultipleColumnImage
         hasImage={api.hasImage}
         extractImage={ui.extractImage}
@@ -267,6 +267,7 @@ export default class ExtractMultiple extends Component {
         ui.selectedColumn = column;
 
         this.setState({
+          error: null,
           extractMultiple: {
             api: apiRes,
             ui,
