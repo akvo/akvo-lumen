@@ -267,6 +267,7 @@ export default class ExtractMultiple extends Component {
         ui.selectedColumn = column;
 
         this.setState({
+          error: null,
           extractMultiple: {
             api: apiRes,
             ui,
