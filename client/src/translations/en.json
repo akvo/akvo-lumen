@@ -118,6 +118,7 @@
   "gradient": "Gradient",
   "if_cell_format_is_invalid": "If cell format is invalid",
   "if_transformation_fails": "If transformation fails",
+  "Image": "Image",
   "import": "Import",
   "invalid_expression": "Invalid expression",
   "invalid_filter": "This visualisation contains an invalid filter and cannot be displayed.",
