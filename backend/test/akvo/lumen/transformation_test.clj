@@ -427,7 +427,7 @@
 
 (deftest ^:functional big-dataset-3K-test
   (let [dataset-id (import-file *tenant-conn* *error-tracker* "2014_us_cities.csv" {:has-column-headers? true})
-        apply-transformation (partial tf/apply *tenant-conn* dataset-id)]
+        apply-transformation (partial tf/apply {:tenant-conn *tenant-conn*} dataset-id)]
     (log/error :initial-rows (count (latest-data dataset-id )))
     (testing "Import and initial transforms"
       (is (= (take 6 (latest-data dataset-id [1 2 3 1001 1002 1003]))
