@@ -59,11 +59,15 @@ export default class DashboardViewerItem extends Component {
 
       case 'large':
         return {
-          position: 'absolute',
+          display: 'inline-block',
           width: (layout.w * unit) - (cMargin * 2),
-          height: (layout.h * unit) - (cMargin * 2),
-          left: layout.x * unit,
-          top: layout.y * unit,
+          height: (
+            item.type === 'visualisation' &&
+            item.visualisation &&
+            item.visualisation.visualisationType === 'map'
+          ) ?
+            MIN_HEIGHT :
+            (layout.h * unit) - (cMargin * 2),
           margin: cMargin,
           padding: cPadding,
         };

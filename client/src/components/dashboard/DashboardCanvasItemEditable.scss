@@ -7,17 +7,13 @@
     height: calc(100% - 51px);
 
     .ql-editor {
-      strong {
-        font-weight: 700;
-      }
-      em {
-        font-style: italic;
-      }
+      background: white;
+      min-height: 40px;
     }
 
     .ql-toolbar {
-      height: 51px;
-      overflow: visible;
+      height: auto;
+      background: white;
     }
 
     .ql-picker-label {
@@ -34,5 +30,50 @@
     bottom: 0;
     left: 0;
     cursor: pointer;
+  }
+
+  ul {
+    padding-left: 20px;
+    li {
+      &.ql-indent-1 {
+        margin-left: 20px;
+      }    
+      &.ql-indent-2 {
+        margin-left: 40px;
+      }    
+      &.ql-indent-3 {
+        margin-left: 60px;
+      }    
+      &.ql-indent-4 {
+        margin-left: 80px;
+      }    
+      &.ql-indent-5 {
+        margin-left: 100px;
+      }    
+      &.ql-indent-6 {
+        margin-left: 120px;
+      }    
+      &.ql-indent-7 {
+        margin-left: 140px;
+      }    
+      &.ql-indent-8 {
+        margin-left: 160px;
+      }    
+      &.ql-indent-9 {
+        margin-left: 180px;
+      }    
+      &.ql-indent-10 {
+        margin-left: 200px;
+      }    
+    }
+  }
+
+  .text {
+    strong {
+      font-weight: 700;
+    }
+    em {
+      font-style: italic;
+    }
   }
 }

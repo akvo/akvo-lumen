@@ -184,7 +184,7 @@ export default class DashboardEditor extends Component {
         content: '',
       };
       newLayout.push({
-        w: 4,
+        w: 12,
         minW: 4,
         h: 2,
         x: 0,
@@ -298,7 +298,7 @@ export default class DashboardEditor extends Component {
               /* a margin on the grid item themselves for now. */
               margin={[0, 0]}
             >
-              {getArrayFromObject(dashboard.entities).map(item => (
+              {getArrayFromObject(dashboard.entities).reverse().map(item => (
                 <div
                   key={item.id}
                   className={

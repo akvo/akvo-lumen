@@ -47,15 +47,23 @@ class DashboardCanvasItemEditable extends Component {
   render() {
     return (
       <div className="DashboardCanvasItemEditable">
-        <ReactQuill
-          onChange={this.handleChange}
-          onBlur={this.handleBlur}
-          value={this.state.textContents}
-          placeholder={this.placeholder}
-          style={{ flex: 1 }}
-          ref={this.inputElement}
-          className="DashboardCanvasItemEditableInput"
-        />
+        {this.props.focused && (
+          <ReactQuill
+            onChange={this.handleChange}
+            onBlur={this.handleBlur}
+            value={this.state.textContents}
+            placeholder={this.placeholder}
+            style={{ flex: 1 }}
+            ref={this.inputElement}
+            className="DashboardCanvasItemEditableInput"
+          />
+        )}
+        {!this.props.focused && (
+          <div
+            className="itemContainer text"
+            dangerouslySetInnerHTML={{ __html: this.state.textContents || this.placeholder }}
+          />
+        )}
         {!this.props.focused && (
           <div
             onClick={this.handleFocus}
