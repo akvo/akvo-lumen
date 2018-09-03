@@ -24,6 +24,10 @@
           (get-in transformation ["computed" "template"])
           (get-in transformation ["computed" "references"])))
 
+(defmethod engine/parse-tx :core/derive
+  [op-spec columns]
+  (assoc-in op-spec ["computed" "code"] (construct-code columns op-spec)))
+
 (defn lumen->pg-type [type]
   (condp = type
     "text"   "text"
@@ -109,33 +113,18 @@
       `([~code ~code])
       refs)))
 
-(defn column-name
-  "Based on column definitions and title get the column name"
-  [columns column-title]
-  (-> (filter (fn [{:strs [title]}]
-                (= title column-title))
-              columns)
-      first
-      (get "columnName")))
-
-
-(defn computed
-  ""
-  [transformation columns]
-  (let [code (get-in transformation ["args" "code"])]
-    (reduce (fn [m [pattern column-title]]
-              (let [id (str (util/squuid))]
-                (-> m
-                    (update-in ["template"] #(str/replace % pattern id))
-                    (update-in ["references"]
-                               #(conj % {"id" id
-                                         "pattern" pattern
-                                         "column-name" (column-name columns
-                                                                    column-title)})))))
-            {"template" code
-             "references" []}
-            (parse-row-object-references code))))
-
 (defmethod engine/pre-hook :core/derive
   [transformation columns]
-  (assoc transformation "computed" (computed transformation columns)))
+  (let [code (get-in transformation ["args" "code"]) 
+        computed (reduce (fn [m [pattern column-title]]
+            (let [id (str (util/squuid))]
+              (-> m
+                  (update-in ["template"] #(str/replace % pattern id))
+                  (update-in ["references"]
+                             #(conj % {"id" id
+                                       "pattern" pattern
+                                       "column-name" (get (dataset.utils/find-column columns column-title "title") "columnName")})))))
+          {"template" code
+           "references" []}
+          (parse-row-object-references code))]
+    (assoc transformation "computed" computed)))

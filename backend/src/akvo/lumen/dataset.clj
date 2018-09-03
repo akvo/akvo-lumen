@@ -3,7 +3,7 @@
   (:require [akvo.lumen.endpoint.job-execution :as job-execution]
             [akvo.lumen.import :as import]
             [akvo.lumen.lib :as lib]
-            [akvo.lumen.transformation.derive :as derive]
+            [akvo.lumen.transformation.engine :as engine]
             [akvo.lumen.update :as update]
             [clojure.java.jdbc :as jdbc]
             [clojure.set :refer (rename-keys)]
@@ -71,15 +71,7 @@
                                  [(select-data-sql (:table-name dataset) columns)]
                                  {:as-arrays? true}))
 
-          transformations (reduce (fn [transformations operation]
-                                    (if (= "core/derive" (get operation "op"))
-                                      (conj transformations
-                                            (assoc-in operation
-                                                      ["computed" "code"]
-                                                      (derive/construct-code (:columns dataset) operation)))
-                                      (conj transformations operation)))
-                                  '()
-                                  (:transformations dataset))]
+          transformations (engine/transformations* (:columns dataset) (:transformations dataset))]
       (lib/ok
        (-> dataset
            (select-keys [:created :id :modified :status :title :updated :author :source])

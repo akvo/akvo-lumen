@@ -8,6 +8,17 @@
 
 (hugsql/def-db-fns "akvo/lumen/transformation.sql")
 
+(defmulti parse-tx
+  (fn [op-spec columns]
+    (keyword (get op-spec "op"))))
+
+(defmethod parse-tx :default
+  [op-spec columns]
+  op-spec)
+
+(defn transformations* [columns transformations]
+  (map #(parse-tx % columns) transformations))
+
 (defmulti valid?
   "Validate transformation spec"
   (fn [op-spec]
