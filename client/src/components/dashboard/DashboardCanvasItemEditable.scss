@@ -9,12 +9,6 @@
     .ql-editor {
       background: white;
       min-height: 40px;
-      strong {
-        font-weight: 700;
-      }
-      em {
-        font-style: italic;
-      }
     }
 
     .ql-toolbar {
@@ -71,6 +65,15 @@
       &.ql-indent-10 {
         margin-left: 200px;
       }    
+    }
+  }
+
+  .text {
+    strong {
+      font-weight: 700;
+    }
+    em {
+      font-style: italic;
     }
   }
 }
