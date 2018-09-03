@@ -3,10 +3,11 @@
   (:require [akvo.lumen.endpoint.job-execution :as job-execution]
             [akvo.lumen.import :as import]
             [akvo.lumen.lib :as lib]
+            [akvo.lumen.transformation.derive :as derive]
             [akvo.lumen.update :as update]
             [clojure.java.jdbc :as jdbc]
-            [clojure.string :as str]
             [clojure.set :refer (rename-keys)]
+            [clojure.string :as str]
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/dataset.sql")
@@ -68,14 +69,23 @@
     (let [columns (remove #(get % "hidden") (:columns dataset))
           data (rest (jdbc/query conn
                                  [(select-data-sql (:table-name dataset) columns)]
-                                 {:as-arrays? true}))]
+                                 {:as-arrays? true}))
+
+          transformations (reduce (fn [transformations operation]
+                                    (if (= "core/derive" (get operation "op"))
+                                      (conj transformations
+                                            (assoc-in operation
+                                                      ["computed" "code"]
+                                                      (derive/construct-code (:columns dataset) operation)))
+                                      (conj transformations operation)))
+                                  '()
+                                  (:transformations dataset))]
       (lib/ok
        (-> dataset
-           (select-keys [:created :id :modified :status :title :transformations :updated :author :source])
+           (select-keys [:created :id :modified :status :title :updated :author :source])
            (rename-keys {:title :name})
-           (assoc :rows data :columns columns :status "OK"))))
+           (assoc :rows data :columns columns :status "OK" :transformations transformations))))
     (lib/not-found {:error "Not found"})))
-
 
 (defn delete
   [tenant-conn id]

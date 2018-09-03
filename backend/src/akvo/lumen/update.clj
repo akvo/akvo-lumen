@@ -62,12 +62,11 @@
 (defn compatible-columns? [imported-columns columns]
   (let [imported-columns (map (fn [column]
                                 (cond-> {:id (keyword (get column "columnName"))
-                                         :type (keyword (get column "type"))
-                                         :title (string/trim (get column "title"))}
+                                         :type (keyword (get column "type"))}
                                   (contains? column "key") (assoc :key (boolean (get column "key")))))
                               imported-columns)]
-    (set/subset? (set (map #(select-keys % [:id :type :title]) imported-columns))
-                 (set (map #(select-keys % [:id :type :title]) columns)))))
+    (set/subset? (set (map #(select-keys % [:id :type]) imported-columns))
+                 (set (map #(select-keys % [:id :type]) columns)))))
 
 (defn do-update [conn config dataset-id data-source-id job-execution-id data-source-spec]
   (try
