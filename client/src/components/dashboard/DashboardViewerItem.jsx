@@ -66,7 +66,7 @@ export default class DashboardViewerItem extends Component {
             item.visualisation &&
             item.visualisation.visualisationType === 'map'
           ) ?
-            MIN_HEIGHT :
+            Math.max(MIN_HEIGHT, (layout.h * unit) - (cMargin * 2)) :
             (layout.h * unit) - (cMargin * 2),
           margin: cMargin,
           padding: cPadding,
