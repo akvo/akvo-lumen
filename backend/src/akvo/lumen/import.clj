@@ -24,8 +24,7 @@
     (insert-dataset conn {:id dataset-id
                           :title (get spec "name") ;; TODO Consistent naming. Change on client side?
                           :description (get spec "description" "")
-                          :author claims
-                          :source (get data-source "source")})
+                          :author claims})
     (clone-data-table conn
                       {:from-table table-name
                        :to-table imported-table-name}

@@ -37,8 +37,8 @@ SELECT id, title, NULL, 'OK', modified, created, author, source_data.source::jso
 
 -- :name insert-dataset :! :n
 -- :doc Insert new dataset
-INSERT INTO dataset(id, title, description, author, source)
-VALUES (:id, :title, :description, :author, :source);
+INSERT INTO dataset(id, title, description, author)
+VALUES (:id, :title, :description, :author);
 
 -- :name delete-dataset-by-id :! :n
 -- :doc delete dataset
