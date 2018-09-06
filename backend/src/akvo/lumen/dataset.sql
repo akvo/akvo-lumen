@@ -2,7 +2,7 @@
 -- :doc All datasets. Including pending datasets and datasets that failed to import
 WITH
 source_data AS (
- SELECT spec::json->'source' as source
+ SELECT dataset.id as dataset_id, spec::json->'source' as source
    FROM data_source, dataset_version, job_execution, dataset
   WHERE dataset_version.dataset_id = dataset.id
     AND dataset_version.version = 1
@@ -33,7 +33,9 @@ SELECT id, name, NULL, status, modified, created, '{}'::jsonb AS author, '{}'::j
   FROM pending_imports
  UNION
 SELECT id, title, NULL, 'OK', modified, created, author, source_data.source::jsonb
-  FROM dataset, source_data;
+  FROM dataset, source_data
+  WHERE source_data.dataset_id = dataset.id;
+
 
 -- :name insert-dataset :! :n
 -- :doc Insert new dataset
