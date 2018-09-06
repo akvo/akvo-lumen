@@ -57,7 +57,7 @@ export default class DashboardViewerItem extends Component {
         };
       }
 
-      case 'large':
+      case 'large': {
         const maxHeight = (layout.h * unit) - (cMargin * 2);
         return {
           position: 'absolute',
@@ -76,6 +76,7 @@ export default class DashboardViewerItem extends Component {
           margin: cMargin,
           padding: cPadding,
         };
+      }
 
       default:
         throw new Error(`Unknown viewportType ${viewportType} supplied to getItemStyle()`);
