@@ -58,16 +58,21 @@ export default class DashboardViewerItem extends Component {
       }
 
       case 'large':
+        const maxHeight = (layout.h * unit) - (cMargin * 2);
         return {
-          display: 'inline-block',
+          position: 'absolute',
+          display: 'block',
+          left: (layout.x * unit) + cMargin,
+          top: (layout.y * unit) + cMargin,
           width: (layout.w * unit) - (cMargin * 2),
           height: (
             item.type === 'visualisation' &&
             item.visualisation &&
             item.visualisation.visualisationType === 'map'
           ) ?
-            Math.max(MIN_HEIGHT, (layout.h * unit) - (cMargin * 2)) :
+            Math.max(MIN_HEIGHT, maxHeight) :
             (layout.h * unit) - (cMargin * 2),
+          maxHeight,
           margin: cMargin,
           padding: cPadding,
         };

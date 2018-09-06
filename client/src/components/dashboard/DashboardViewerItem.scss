@@ -7,6 +7,7 @@
   background-color: white;
   color: $dashboardFG;
   @include border-radius(8px);
+  float: left;
 
   .title {
       display: none;
@@ -15,7 +16,6 @@
   &.text {
     overflow-y: auto;
     color: $dashboardFG;
-    height: auto !important;
 
     ol,
     ul {
