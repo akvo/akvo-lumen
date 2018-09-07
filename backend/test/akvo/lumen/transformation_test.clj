@@ -171,7 +171,7 @@
 
 (deftest ^:functional date-parsing-test
   (let [dataset-id (import-file *tenant-conn* *error-tracker* "dates.csv" {:has-column-headers? true})
-        apply-transformation (partial tf/apply {:tenant-conn *tenant-conn*} dataset-id)]
+        apply-transformation #(tf/apply {:tenant-conn *tenant-conn*} dataset-id %)]
     (let [[tag {:strs [datasetId]}] (do (apply-transformation (date-transformation "c1" "YYYY"))
                                         (apply-transformation (date-transformation "c2" "DD/MM/YYYY"))
                                         (apply-transformation (date-transformation "c3" "YYYY-MM-DD")))]
@@ -220,7 +220,10 @@
 
 (deftest ^:functional derived-column-test
   (let [dataset-id (import-file *tenant-conn* *error-tracker* "derived-column.csv" {:has-column-headers? true})
-        apply-transformation (partial tf/apply {:tenant-conn *tenant-conn*} dataset-id)]
+        apply-transformation #(let [r (tf/apply {:tenant-conn *tenant-conn*} dataset-id %)]
+                                (log/error :t % :r r)
+                                r)]
+    (log/error (latest-data dataset-id))
     (do (apply-transformation (change-datatype-transformation "c2"))
         (apply-transformation (change-datatype-transformation "c3")))
 

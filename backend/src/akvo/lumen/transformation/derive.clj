@@ -16,13 +16,18 @@
   "Replace column references and fall back to use code pattern if there is no
   references."
   [columns transformation]
-  (reduce (fn [code {:strs [column-name id pattern]}]
-            (let [column-title (get (dataset.utils/find-column columns column-name) "title")]
-              (if column-name
-                (str/replace code id (format "row['%s']" column-title))
-                (str/replace code id pattern))))
-          (get-in transformation ["computed" "template"])
-          (get-in transformation ["computed" "references"])))
+  (let [code (reduce (fn [code {:strs [column-name id pattern]}]
+                       (let [column-title (try
+                                            (get (dataset.utils/find-column columns column-name) "title")
+                                            (catch Exception e (do
+                                                                 (log/error "jor" column-name)
+                                                                 nil)))]
+                         (if column-name
+                           (str/replace code id (format "row['%s']" column-title))
+                           (str/replace code id pattern))))
+                     (get-in transformation ["computed" "template"])
+                     (get-in transformation ["computed" "references"]))]
+    code))
 
 (defmethod engine/parse-tx :core/derive
   [op-spec columns]
@@ -123,7 +128,9 @@
                   (update-in ["references"]
                              #(conj % {"id" id
                                        "pattern" pattern
-                                       "column-name" (get (dataset.utils/find-column columns column-title "title") "columnName")})))))
+                                       "column-name" (try
+                                                       (get (dataset.utils/find-column columns column-title "title") "columnName")
+                                                       (catch Exception e nil))})))))
           {"template" code
            "references" []}
           (parse-row-object-references code))]

@@ -224,8 +224,9 @@
             (touch-dataset tenant-conn {:id dataset-id})                                 
             (drop-table tenant-conn {:table-name previous-table-name})
             (lib/created next-dataset-version)))
-        (let [{:keys [success? message columns execution-log]}
-              (try-apply-operation deps table-name columns (first transformations))]
+        (let [computed-tx (pre-hook (first transformations) columns)
+              {:keys [success? message columns execution-log]}
+              (try-apply-operation deps table-name columns computed-tx)]
           (if success?
             (recur (rest transformations) columns (into full-execution-log execution-log))
             (do
