@@ -1,6 +1,14 @@
 -- :name all-datasets :? :*
 -- :doc All datasets. Including pending datasets and datasets that failed to import
 WITH
+source_data AS (
+ SELECT dataset.id as dataset_id, spec::json->'source' as source
+   FROM data_source, dataset_version, job_execution, dataset
+  WHERE dataset_version.dataset_id = dataset.id
+    AND dataset_version.version = 1
+    AND dataset_version.job_execution_id = job_execution.id
+    AND job_execution.data_source_id = data_source.id
+),
 failed_imports AS (
   --TODO name->title
   SELECT j.id, d.spec->>'name' AS name, j.error_log->>0 AS error_log, j.status, j.created, j.modified, '{}'::jsonb AS author, '{}'::jsonb AS source
@@ -24,8 +32,10 @@ SELECT id, name, error_log as reason, status, modified, created, '{}'::jsonb AS 
 SELECT id, name, NULL, status, modified, created, '{}'::jsonb AS author, '{}'::jsonb AS source
   FROM pending_imports
  UNION
-SELECT id, title, NULL, 'OK', modified, created, author, source
-  FROM dataset;
+SELECT id, title, NULL, 'OK', modified, created, author, source_data.source::jsonb
+  FROM dataset, source_data
+  WHERE source_data.dataset_id = dataset.id;
+
 
 -- :name insert-dataset :! :n
 -- :doc Insert new dataset
@@ -41,17 +51,27 @@ DELETE FROM dataset WHERE id=:id;
 UPDATE dataset SET title = :title WHERE id = :id;
 
 -- :name dataset-by-id :? :1
+WITH
+source_data AS (
+SELECT spec::json->'source' as source
+  FROM data_source, dataset_version, job_execution, dataset
+ WHERE dataset_version.dataset_id = dataset.id
+   AND dataset_version.version = 1
+   AND dataset_version.job_execution_id = job_execution.id
+   AND job_execution.data_source_id = data_source.id
+   AND dataset_version.dataset_id=:id
+)
 SELECT dataset_version.table_name AS "table-name",
        dataset.title,
        dataset.created,
        dataset.modified,
        dataset.id,
        dataset.author,
-       dataset.source,
+       source_data.source,
        dataset_version.created AS "updated",
        dataset_version.columns,
        dataset_version.transformations
-  FROM dataset_version, dataset
+  FROM dataset_version, dataset, source_data
  WHERE dataset_version.dataset_id=:id
    AND dataset.id=dataset_version.dataset_id
    AND version=(SELECT max(version)
