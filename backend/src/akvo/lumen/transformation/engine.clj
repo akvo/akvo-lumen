@@ -8,17 +8,6 @@
 
 (hugsql/def-db-fns "akvo/lumen/transformation.sql")
 
-(defmulti parse-tx
-  (fn [op-spec columns]
-    (keyword (get op-spec "op"))))
-
-(defmethod parse-tx :default
-  [op-spec columns]
-  op-spec)
-
-(defn transformations* [columns transformations]
-  (map #(parse-tx % columns) transformations))
-
 (defmulti valid?
   "Validate transformation spec"
   (fn [op-spec]
@@ -154,23 +143,13 @@
             {}
             changed-columns)))
 
-(defmulti pre-hook
-  ""
-  (fn [{:strs [op]} columns]
-    (keyword op)))
-
-(defmethod pre-hook :default
-  [transformation columns]
-  transformation)
-
 (defn execute-transformation
   [{:keys [tenant-conn] :as deps} dataset-id job-execution-id transformation]
   (let [dataset-version (latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})
         previous-columns (vec (:columns dataset-version))
         source-table (:table-name dataset-version)]
-    (let [computed-transformation (pre-hook transformation previous-columns)
-          {:keys [success? message columns execution-log]}
-          (try-apply-operation deps source-table previous-columns computed-transformation)]
+    (let [{:keys [success? message columns execution-log]}
+          (try-apply-operation deps source-table previous-columns transformation)]
       (when-not success?
         (log/errorf "Failed to transform: %s, columns: %s, execution-log: %s" message columns execution-log)
         (throw (ex-info "Failed to transform" {})))
@@ -183,7 +162,7 @@
                                     :imported-table-name (:imported-table-name dataset-version)
                                     :version (inc (:version dataset-version))
                                     :transformations (conj (vec (:transformations dataset-version))
-                                                           (assoc computed-transformation
+                                                           (assoc transformation
                                                                   "changedColumns" (diff-columns previous-columns
                                                                                                  columns)))
                                     :columns columns}]
@@ -224,9 +203,8 @@
             (touch-dataset tenant-conn {:id dataset-id})                                 
             (drop-table tenant-conn {:table-name previous-table-name})
             (lib/created next-dataset-version)))
-        (let [computed-tx (pre-hook (first transformations) columns)
-              {:keys [success? message columns execution-log]}
-              (try-apply-operation deps table-name columns computed-tx)]
+        (let [{:keys [success? message columns execution-log]}
+              (try-apply-operation deps table-name columns (first transformations))]
           (if success?
             (recur (rest transformations) columns (into full-execution-log execution-log))
             (do

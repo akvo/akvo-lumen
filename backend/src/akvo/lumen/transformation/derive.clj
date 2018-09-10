@@ -1,37 +1,64 @@
 (ns akvo.lumen.transformation.derive
-  (:require [akvo.lumen.transformation.derive.js-engine :as js-engine]
+  (:require [akvo.lumen.dataset.utils :as dataset.utils]
+            [akvo.lumen.transformation.derive.js-engine :as js-engine]
             [akvo.lumen.transformation.engine :as engine]
-            [clj-time.coerce :as tc]
-            [akvo.lumen.dataset.utils :as dataset.utils]
+            [akvo.lumen.update :as update]
             [akvo.lumen.util :as util]
+            [clj-time.coerce :as tc]
             [clojure.java.jdbc :as jdbc]
-            [clojure.tools.logging :as log]
             [clojure.string :as str]
+            [clojure.tools.logging :as log]
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/transformation/derive.sql")
 (hugsql/def-db-fns "akvo/lumen/transformation/engine.sql")
 
-(defn construct-code
-  "Replace column references and fall back to use code pattern if there is no
+(defn columnName>columnTitle
+  "Replace code column references and fall back to use code pattern if there is no
   references."
-  [columns transformation]
-  (let [code (reduce (fn [code {:strs [column-name id pattern]}]
-                       (let [column-title (try
-                                            (get (dataset.utils/find-column columns column-name) "title")
-                                            (catch Exception e (do
-                                                                 (log/error "jor" column-name)
-                                                                 nil)))]
-                         (if column-name
-                           (str/replace code id (format "row['%s']" column-title))
-                           (str/replace code id pattern))))
-                     (get-in transformation ["computed" "template"])
-                     (get-in transformation ["computed" "references"]))]
-    code))
+  [computed columns]
+  (reduce (fn [code {:strs [column-name id pattern]}]
+                    (if column-name
+                      (str/replace code id (format "row['%s']"
+                                                   (-> (try (dataset.utils/find-column columns column-name)
+                                                            (catch Exception e nil))
+                                                       (get "title"))))
+                      (str/replace code id pattern)))
+                  (get computed "template")
+                  (get computed "references")))
 
-(defmethod engine/parse-tx :core/derive
-  [op-spec columns]
-  (assoc-in op-spec ["computed" "code"] (construct-code columns op-spec)))
+(defn parse-row-object-references
+  "Parse js code and return a sequence of row-references e.g. row.foo row['foo']
+  or row[\"foo\"]. For every reference return a tuple with matched pattern and
+  the row column as in [\"row.foo\" \"foo\"]."
+  [code]
+  (let [re #"(?U)row.([\w\d]+)|row\['([\w\d\.\s\p{S}%&]+)'\]|row\[\"([\w\d\.\s\p{S}%&]+)\"\]"
+        refs (map #(remove nil? %) (re-seq re code))]
+    (if (empty? refs)
+      `([~code ~code])
+      refs)))
+
+(defn compute-transformation-code
+  "analyses code to find columns relations between column-title and column-name when using js code"
+  [code columns]
+  (reduce (fn [m [pattern column-title]]
+            (let [id (str (util/squuid))]
+              (-> m
+                  (update-in ["template"] #(str/replace % pattern id))
+                  (update-in ["references"]
+                             #(conj % {"id" id
+                                       "pattern" pattern
+                                       "column-name" (try
+                                                       (get (dataset.utils/find-column columns column-title "title") "columnName")
+                                                       (catch Exception e nil))})))))
+          {"template" code
+           "references" []}
+          (parse-row-object-references code)))
+
+(defmethod update/adapt-transformation :core/derive
+  [op-spec older-columns new-columns]
+  (update-in op-spec ["args" "code"]
+             #(columnName>columnTitle (compute-transformation-code % older-columns) new-columns)))
 
 (defn lumen->pg-type [type]
   (condp = type
@@ -79,7 +106,7 @@
                   ::column-type]} (args op-spec)
           new-column-name         (engine/next-column-name columns)
           row-fn                  (js-engine/row-transform-fn {:columns     columns
-                                                               :code        (construct-code columns op-spec)
+                                                               :code        code
                                                                :column-type column-type})
           js-execution-seq        (->> (all-data conn {:table-name table-name})
                                        (map (fn [i]
@@ -106,32 +133,3 @@
                                      "hidden"     false
                                      "direction"  nil
                                      "columnName" new-column-name})})))
-
-(defn parse-row-object-references
-  "Parse js code and return a sequence of row-references e.g. row.foo row['foo']
-  or row[\"foo\"]. For every reference return a tuple with matched pattern and
-  the row column as in [\"row.foo\" \"foo\"]."
-  [code]
-  (let [re #"(?U)row.([\w\d]+)|row\['([\w\d\.\s\p{S}%&]+)'\]|row\[\"([\w\d\.\s\p{S}%&]+)\"\]"
-        refs (map #(remove nil? %) (re-seq re code))]
-    (if (empty? refs)
-      `([~code ~code])
-      refs)))
-
-(defmethod engine/pre-hook :core/derive
-  [transformation columns]
-  (let [code (get-in transformation ["args" "code"]) 
-        computed (reduce (fn [m [pattern column-title]]
-            (let [id (str (util/squuid))]
-              (-> m
-                  (update-in ["template"] #(str/replace % pattern id))
-                  (update-in ["references"]
-                             #(conj % {"id" id
-                                       "pattern" pattern
-                                       "column-name" (try
-                                                       (get (dataset.utils/find-column columns column-title "title") "columnName")
-                                                       (catch Exception e nil))})))))
-          {"template" code
-           "references" []}
-          (parse-row-object-references code))]
-    (assoc transformation "computed" computed)))

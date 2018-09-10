@@ -3,7 +3,6 @@
             [clojure.test :refer :all]
             [clojure.string :as str]))
 
-
 (deftest compatible-columns
   (let [imported-columns [{"sort" nil,
                            "type" "text",
@@ -47,8 +46,4 @@
         (is (update/compatible-columns? imported-columns columns))))
 
     (testing "Removed column"
-      (is (not (update/compatible-columns? imported-columns (pop columns)))))
-
-
-
-    ))
+      (is (not (update/compatible-columns? imported-columns (pop columns)))))))

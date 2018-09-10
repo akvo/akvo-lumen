@@ -1,8 +1,6 @@
 (ns akvo.lumen.transformation.derive-test
   (:require [akvo.lumen.transformation.derive :as derive]
-            [akvo.lumen.transformation.engine :as t.engine]
             [clojure.test :refer :all]))
-
 
 (deftest parse-row-object-references
   (is (= '(["row.a" "a"])
@@ -66,10 +64,7 @@
              "hidden" false
              "direction" nil
              "columnName" "c2"}]
-        computed (get (t.engine/pre-hook t1 c1) "computed")
-        _ (prn "@computed/test")
-        _ (prn computed)
-        ]
+        computed (derive/compute-transformation-code (get-in t1 ["args" "code"]) c1)]
 
     (is (every? #(contains? computed %) ["template" "references"]))
     (is (= "c2"
