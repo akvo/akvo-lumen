@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import moment from 'moment';
 import { get } from 'lodash';
 import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
+
+import Button from '../../common/Button';
 import SelectMenu from '../../common/SelectMenu';
 import { filterColumns } from '../../../utilities/utils';
 import './FilterMenu.scss';
@@ -74,7 +76,6 @@ class FilterMenu extends Component {
       newFilterValue: null,
       newFilterOperation: null,
       newFilterStrategy: null,
-      collapsed: true,
     };
 
     this.toggleInput = this.toggleInput.bind(this);
@@ -236,8 +237,8 @@ class FilterMenu extends Component {
       newFilterColumn,
       newFilterStrategy,
       newFilterOperation,
-      collapsed,
-      inputInProgress } = this.state;
+      inputInProgress,
+    } = this.state;
     const activeColumnType = newFilterColumn ?
       columnOptions.find(col => col.value === newFilterColumn).type : null;
     const { operations, strategies } = this.getDropdownOptions();
@@ -245,181 +246,163 @@ class FilterMenu extends Component {
     const isFilterReady = this.getIsFilterReady();
 
     return (
-      <div
-        className={`FilterMenu inputGroup ${hasDataset ? 'enabled' : 'disabled'}`}
-      >
-        <h4 className="title">
-          <FormattedMessage id="dataset_filters" />
-          <button
-            className="collapseToggle clickable"
-            onClick={() => { this.setState({ collapsed: !collapsed }); }}
-          >
-            {collapsed ? <i className="fa fa-angle-down" aria-hidden="true" />
-            : <i className="fa fa-angle-up" aria-hidden="true" />}
-          </button>
-        </h4>
-        { collapsed ?
-          <div />
-          :
-          <div>
-            <div className="container">
-              {(!filters || filters.length === 0) ?
-                <div className="noFilters">No filters</div> : <div className="filterListContainer">
-                  <ol className="filterList">
-                    {filters.map((filter, index) => {
-                      const out = (
-                      isFilterValid(filter, columnOptions, strategies) ?
-                        (<li
-                          key={index}
-                          className="filterListItem valid"
+      <div className={`FilterMenu inputGroup ${hasDataset ? 'enabled' : 'disabled'}`}>
+        <div>
+          <div className="container">
+            {(!filters || filters.length === 0) ? (
+              <div className="noFilters">No filters</div>
+            ) : (
+              <div className="filterListContainer">
+                <ol className="filterList">
+                  {filters.map((filter, index) => (
+                    isFilterValid(filter, columnOptions, strategies) ? (
+                      <li
+                        key={index}
+                        className="filterListItem valid"
+                      >
+                        <span className="filterIndicator">
+                          {getFilterOperationLabel(filter.operation)}
+                        </span>
+                        {' '}
+                        <span />
+                        {' '}
+                        <span className="filterIndicator">
+                          {getColumnTitle(columnOptions, filter)}
+                        </span>
+                        {' '}
+                        <span>
+                          {getFilterStrategyLabel(
+                            filter.strategy,
+                            filter.column,
+                            columnOptions,
+                            strategies
+                          )}
+                        </span>
+                        {' '}
+                        <span className="filterIndicator">
+                          {getFilterDisplayValue(filter.value, filter.column, columnOptions)}
+                        </span>
+                        <button
+                          className="deleteFilter clickable"
+                          onClick={() => this.deleteFilter(index)}
                         >
-                          <span className="filterIndicator">
-                            {getFilterOperationLabel(filter.operation)}
-                          </span>
-                          {' '}
-                          <span />
-                          {' '}
-                          <span className="filterIndicator">
-                            {getColumnTitle(columnOptions, filter)}
-                          </span>
-                          {' '}
-                          <span>
-                            {getFilterStrategyLabel(
-                              filter.strategy,
-                              filter.column,
-                              columnOptions,
-                              strategies
-                            )}
-                          </span>
-                          {' '}
-                          <span className="filterIndicator">
-                            {getFilterDisplayValue(filter.value, filter.column, columnOptions)}
-                          </span>
-                          <button
-                            className="deleteFilter clickable"
-                            onClick={() => this.deleteFilter(index)}
-                          >
-                          ✕
-                          </button>
-                        </li>)
-                        :
-                        (<li
-                          key={index}
-                          className="filterListItem invalid"
+                        ✕
+                        </button>
+                      </li>
+                    ) : (
+                      <li
+                        key={index}
+                        className="filterListItem invalid"
+                      >
+                        <span className="filterIndicator">
+                          {
+                            getColumnTitle(columnOptions, filter) ?
+                              <span>
+                                The type of column {getColumnTitle(columnOptions, filter)} has
+                                changed and this filter is no longer valid. Please delete it.
+                              </span>
+                              :
+                              <span>
+                                A column this filter refers to no longer exists.
+                                Please delete this filter.
+                              </span>
+                          }
+                        </span>
+                        <button
+                          className="deleteFilter clickable"
+                          onClick={() => this.deleteFilter(index)}
                         >
-                          <span className="filterIndicator">
-                            {
-                              getColumnTitle(columnOptions, filter) ?
-                                <span>
-                                  The type of column {getColumnTitle(columnOptions, filter)} has
-                                  changed and this filter is no longer valid. Please delete it.
-                                </span>
-                                :
-                                <span>
-                                  A column this filter refers to no longer exists.
-                                  Please delete this filter.
-                                </span>
-                            }
-                          </span>
-                          <button
-                            className="deleteFilter clickable"
-                            onClick={() => this.deleteFilter(index)}
-                          >
-                          ✕
-                          </button>
-                        </li>)
-                      );
-
-                      return out;
-                    }
-                  )}
-                  </ol>
+                        ✕
+                        </button>
+                      </li>
+                    )
+                  ))}
+                </ol>
+              </div>
+            )}
+            {inputInProgress && (
+              <div className="newFilterContainer">
+                <h4>
+                  <FormattedMessage id="new_filter" />
+                </h4>
+                <div className="inputGroup">
+                  <div className="filterBodyContainer">
+                    <label htmlFor="filterOperationInput">
+                      <FormattedMessage id="filter_operation" />
+                    </label>
+                    <SelectMenu
+                      className="filterOperationInput"
+                      name="filterOperationInput"
+                      placeholder={`${formatMessage({ id: 'choose_a_filter_operation' })}...`}
+                      value={newFilterOperation || null}
+                      options={operations}
+                      onChange={choice => this.updateNewFilter('newFilterOperation', choice)}
+                    />
+                    <label htmlFor="filterColumnInput">
+                      <FormattedMessage id="column_filter_by" />
+                    </label>
+                    <SelectMenu
+                      className="filterColumnInput"
+                      name="filterColumnInput"
+                      placeholder={`${formatMessage({ id: 'choose_a_column_to_filter_by' })}...`}
+                      value={newFilterColumn || null}
+                      options={filterColumns(columnOptions, ['text', 'number', 'date'])}
+                      onChange={choice => this.updateNewFilter('newFilterColumn', choice)}
+                    />
+                    <label htmlFor="filterStrategyInput">
+                      <FormattedMessage id="filter_match_method" />
+                    </label>
+                    <SelectMenu
+                      className={`filterStrategyInput
+                        ${newFilterColumn ? 'enabled' : 'disabled'}`}
+                      disabled={newFilterColumn === null}
+                      name="filterStrategyInput"
+                      placeholder={`${formatMessage({ id: 'choose_a_match_method' })}...`}
+                      value={newFilterStrategy || null}
+                      options={newFilterColumn ? strategies[activeColumnType] : []}
+                      onChange={choice => this.updateNewFilter('newFilterStrategy', choice)}
+                    />
+                    <label htmlFor="filterMatchValueInput">
+                      <FormattedMessage id="filter_match_value" />
+                    </label>
+                    <input
+                      className={`filterMatchValueInput textInput
+                        ${newFilterColumn ? 'enabled' : 'disabled'}`}
+                      disabled={newFilterColumn === null || newFilterStrategy === 'isEmpty'}
+                      type={newFilterColumn ? activeColumnType : 'text'}
+                      onChange={evt =>
+                        this.updateNewFilter('newFilterValue', evt.target.value, activeColumnType)}
+                    />
+                  </div>
                 </div>
-              }
-              {inputInProgress ?
-                <div className="newFilterContainer">
-                  <h4>
-                    <FormattedMessage id="new_filter" />
-                  </h4>
-                  <div className="inputGroup">
-                    <div className="filterBodyContainer">
-                      <label htmlFor="filterOperationInput">
-                        <FormattedMessage id="filter_operation" />
-                      </label>
-                      <SelectMenu
-                        className="filterOperationInput"
-                        name="filterOperationInput"
-                        placeholder={`${formatMessage({ id: 'choose_a_filter_operation' })}...`}
-                        value={newFilterOperation || null}
-                        options={operations}
-                        onChange={choice => this.updateNewFilter('newFilterOperation', choice)}
-                      />
-                      <label htmlFor="filterColumnInput">
-                        <FormattedMessage id="column_filter_by" />
-                      </label>
-                      <SelectMenu
-                        className="filterColumnInput"
-                        name="filterColumnInput"
-                        placeholder={`${formatMessage({ id: 'choose_a_column_to_filter_by' })}...`}
-                        value={newFilterColumn || null}
-                        options={filterColumns(columnOptions, ['text', 'number', 'date'])}
-                        onChange={choice => this.updateNewFilter('newFilterColumn', choice)}
-                      />
-                      <label htmlFor="filterStrategyInput">
-                        <FormattedMessage id="filter_match_method" />
-                      </label>
-                      <SelectMenu
-                        className={`filterStrategyInput
-                          ${newFilterColumn ? 'enabled' : 'disabled'}`}
-                        disabled={newFilterColumn === null}
-                        name="filterStrategyInput"
-                        placeholder={`${formatMessage({ id: 'choose_a_match_method' })}...`}
-                        value={newFilterStrategy || null}
-                        options={newFilterColumn ? strategies[activeColumnType] : []}
-                        onChange={choice => this.updateNewFilter('newFilterStrategy', choice)}
-                      />
-                      <label htmlFor="filterMatchValueInput">
-                        <FormattedMessage id="filter_match_value" />
-                      </label>
-                      <input
-                        className={`filterMatchValueInput textInput
-                          ${newFilterColumn ? 'enabled' : 'disabled'}`}
-                        disabled={newFilterColumn === null || newFilterStrategy === 'isEmpty'}
-                        type={newFilterColumn ? activeColumnType : 'text'}
-                        onChange={evt =>
-                          this.updateNewFilter('newFilterValue', evt.target.value, activeColumnType)}
-                      />
-                    </div>
-                  </div>
-                  <div className="buttonContainer">
-                    <button
-                      className={`saveFilter clickable
-                        ${isFilterReady ? 'enabled' : 'disabled'}`}
-                      disabled={!isFilterReady}
-                      onClick={() => this.saveFilter()}
-                    >
-                      <FormattedMessage id="save_filter" />
-                    </button>
-                    <button
-                      className="cancelFilter clickable"
-                      onClick={() => this.toggleInput()}
-                    >
-                      <FormattedMessage id="cancel" />
-                    </button>
-                  </div>
-                </div> : <div className="addFilterContainer">
-                  <button
-                    className={`addFilter clickable
-                    ${hasDataset ? 'enabled' : 'disabled noPointerEvents'}`}
-                    onClick={() => this.toggleInput()}
+                <div className="buttonContainer">
+                  <Button
+                    className={'saveFilter clickable'}
+                    disabled={!isFilterReady}
+                    onClick={() => this.saveFilter()}
+                    success
                   >
-                    <i className="fa fa-plus" aria-hidden="true" />
-                  </button>
+                    <FormattedMessage id="save_filter" />
+                  </Button>
+                  <Button
+                    className="cancelFilter clickable"
+                    onClick={() => this.toggleInput()}
+                    danger
+                  >
+                    <FormattedMessage id="cancel" />
+                  </Button>
                 </div>
-              }
-            </div>
+              </div>
+            )}
+            {!inputInProgress && (
+              <Button onClick={this.toggleInput} primary>
+                <i className="fa fa-plus" aria-hidden="true" />
+                &nbsp;
+                <FormattedMessage id="new_filter" />
+              </Button>
+            )}
           </div>
-        }
+        </div>
       </div>
     );
   }

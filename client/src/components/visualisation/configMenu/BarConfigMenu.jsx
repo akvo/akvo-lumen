@@ -1,11 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
-import SelectInput from './SelectInput';
-import LabelInput from './LabelInput';
-import Subtitle from './Subtitle';
+
+import ConfigMenuSectionOptionSelect from '../../common/ConfigMenu/ConfigMenuSectionOptionSelect';
+import ConfigMenuSectionOptionText from '../../common/ConfigMenu/ConfigMenuSectionOptionText';
 import SortInput from './SortInput';
 import { filterColumns } from '../../../utilities/utils';
+import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
 
 const getColumnTitle = (columnName, columnOptions) =>
   columnOptions.find(obj => obj.value === columnName).title;
@@ -80,144 +80,162 @@ export default function BarConfigMenu(props) {
 
   return (
     <div>
-      <Subtitle><FormattedMessage id="y_axis" /></Subtitle>
-      <SelectInput
-        placeholderId="select_a_metric_column"
-        labelTextId="metric_column"
-        choice={spec.metricColumnY !== null ? spec.metricColumnY.toString() : null}
-        name="metricColumnYInput"
-        options={filterColumns(columnOptions, ['number'])}
-        onChange={value => handleChangeSpec({
-          metricColumnY: value,
-        }, spec, onChangeSpec, columnOptions)}
-      />
-      <SelectInput
-        placeholderId={spec.bucketColumn !== null ?
-          'choose_aggregation_type' : 'must_choose_bucket_column_first'}
-        labelTextId="aggregation_type"
-        choice={spec.bucketColumn !== null ?
-          spec.metricAggregation.toString() : null}
-        name="yAggregationMenu"
-        options={aggregationOptions}
-        disabled={spec.bucketColumn === null}
-        onChange={value => handleChangeSpec({
-          metricAggregation: value,
-        }, spec, onChangeSpec, columnOptions)}
-      />
-      <LabelInput
-        value={spec.axisLabelY !== null ? spec.axisLabelY.toString() : null}
-        placeholderId="y_axis_label"
-        name="yLabel"
-        onChange={event => handleChangeSpec({
-          axisLabelY: event.target.value.toString(),
-          axisLabelYFromUser: true,
-        }, spec, onChangeSpec, columnOptions)}
-      />
-      <Subtitle><FormattedMessage id="x_axis" /></Subtitle>
-      <SelectInput
-        placeholderId="select_a_data_column_to_group_by"
-        labelTextId="bucket_column"
-        choice={spec.bucketColumn !== null ?
-          spec.bucketColumn.toString() : null}
-        name="xGroupColumnMenu"
-        options={filterColumns(columnOptions, ['number', 'text'])}
-        clearable
-        onChange={value => handleChangeSpec({
-          bucketColumn: value,
-        }, spec, onChangeSpec, columnOptions)}
-      />
-      {spec.bucketColumn !== null &&
-        <div>
-          <SelectInput
-            labelTextId="number_of_buckets_to_show"
-            choice={spec.truncateSize !== null ? spec.truncateSize.toString() : null}
-            name="truncateSizeInput"
-            disabled={spec.bucketColumn === null}
-            clearable
-            options={[
-              {
-                value: '10',
-                label: '10',
-              },
-              {
-                value: '25',
-                label: '25',
-              },
-              {
-                value: '50',
-                label: '50',
-              },
-              {
-                value: '100',
-                label: '100',
-              },
-              {
-                value: '200',
-                label: '200',
-              },
-            ]}
+      <ConfigMenuSection
+        title="y_axis"
+        options={(
+          <ConfigMenuSectionOptionSelect
+            id="metric_column"
+            placeholderId="select_a_metric_column"
+            labelTextId="metric_column"
+            value={spec.metricColumnY !== null ? spec.metricColumnY.toString() : null}
+            name="metricColumnYInput"
+            options={filterColumns(columnOptions, ['number'])}
             onChange={value => handleChangeSpec({
-              truncateSize: value,
+              metricColumnY: value,
             }, spec, onChangeSpec, columnOptions)}
           />
-          <SortInput
-            spec={spec}
-            columnOptions={filterColumns(columnOptions, ['number', 'date', 'text'])}
-            onChangeSpec={value => handleChangeSpec(value, spec, onChangeSpec, columnOptions)}
-          />
-          <SelectInput
-            placeholderId="select_a_sub_bucket_column"
-            labelTextId="sub_bucket_column"
-            choice={spec.subBucketColumn !== null ?
-              spec.subBucketColumn.toString() : null}
-            name="subGroupColumnMenu"
+        )}
+        advancedOptions={(
+          <div>
+            <ConfigMenuSectionOptionText
+              value={spec.axisLabelY !== null ? spec.axisLabelY.toString() : null}
+              placeholderId="y_axis_label"
+              name="yLabel"
+              onChange={event => handleChangeSpec({
+                axisLabelY: event.target.value.toString(),
+                axisLabelYFromUser: true,
+              }, spec, onChangeSpec, columnOptions)}
+            />
+            <ConfigMenuSectionOptionSelect
+              placeholderId={spec.bucketColumn !== null ?
+                'choose_aggregation_type' : 'must_choose_bucket_column_first'}
+              labelTextId="aggregation_type"
+              value={spec.bucketColumn !== null ?
+                spec.metricAggregation.toString() : null}
+              name="yAggregationMenu"
+              options={aggregationOptions}
+              disabled={spec.bucketColumn === null}
+              onChange={value => handleChangeSpec({
+                metricAggregation: value,
+              }, spec, onChangeSpec, columnOptions)}
+            />
+          </div>
+        )}
+      />
+
+      <ConfigMenuSection
+        title="x_axis"
+        options={(
+          <ConfigMenuSectionOptionSelect
+            placeholderId="select_a_data_column_to_group_by"
+            labelTextId="bucket_column"
+            value={spec.bucketColumn !== null ?
+              spec.bucketColumn.toString() : null}
+            name="xGroupColumnMenu"
             options={filterColumns(columnOptions, ['number', 'text'])}
             clearable
-            disabled={spec.bucketColumn === null}
             onChange={value => handleChangeSpec({
-              subBucketColumn: value,
-              legendTitle: columnOptions.find(item => item.value === value) ?
-                columnOptions.find(item => item.value === value).title : null,
+              bucketColumn: value,
             }, spec, onChangeSpec, columnOptions)}
           />
-          <SelectInput
-            labelTextId="sub_bucket_method"
-            choice={spec.subBucketMethod !== null ? spec.subBucketMethod.toString() : null}
-            name="subBucketMethodInput"
-            disabled={spec.bucketColumn === null || spec.subBucketColumn === null}
-            options={[
-              {
-                value: 'split',
-                labelId: 'split_bars',
-              },
-              {
-                value: 'stack',
-                labelId: 'stack_bars',
-              },
-            ]}
-            onChange={value => handleChangeSpec({
-              subBucketMethod: value,
-            }, spec, onChangeSpec, columnOptions)}
-          />
-          <LabelInput
-            value={spec.legendTitle != null ? spec.legendTitle.toString() : null}
-            placeholderId="legend_title"
-            name="legendLabel"
-            maxLength={32}
-            onChange={event => handleChangeSpec({
-              legendTitle: event.target.value.toString(),
-            }, spec, onChangeSpec, columnOptions)}
-          />
-        </div>
-      }
-      <LabelInput
-        value={spec.axisLabelX !== null ? spec.axisLabelX.toString() : null}
-        placeholderId="x_axis_label"
-        name="xLabel"
-        onChange={event => handleChangeSpec({
-          axisLabelX: event.target.value.toString(),
-          axisLabelXFromUser: true,
-        }, spec, onChangeSpec, columnOptions)}
+        )}
+        advancedOptions={(
+          <div>
+            {spec.bucketColumn !== null &&
+              <div>
+                <ConfigMenuSectionOptionSelect
+                  labelTextId="number_of_buckets_to_show"
+                  value={spec.truncateSize !== null ? spec.truncateSize.toString() : null}
+                  name="truncateSizeInput"
+                  disabled={spec.bucketColumn === null}
+                  clearable
+                  options={[
+                    {
+                      value: '10',
+                      label: '10',
+                    },
+                    {
+                      value: '25',
+                      label: '25',
+                    },
+                    {
+                      value: '50',
+                      label: '50',
+                    },
+                    {
+                      value: '100',
+                      label: '100',
+                    },
+                    {
+                      value: '200',
+                      label: '200',
+                    },
+                  ]}
+                  onChange={value => handleChangeSpec({
+                    truncateSize: value,
+                  }, spec, onChangeSpec, columnOptions)}
+                />
+                <SortInput
+                  spec={spec}
+                  columnOptions={filterColumns(columnOptions, ['number', 'date', 'text'])}
+                  onChangeSpec={value => handleChangeSpec(value, spec, onChangeSpec, columnOptions)}
+                />
+                <ConfigMenuSectionOptionSelect
+                  placeholderId="select_a_sub_bucket_column"
+                  labelTextId="sub_bucket_column"
+                  value={spec.subBucketColumn !== null ?
+                    spec.subBucketColumn.toString() : null}
+                  name="subGroupColumnMenu"
+                  options={filterColumns(columnOptions, ['number', 'text'])}
+                  clearable
+                  disabled={spec.bucketColumn === null}
+                  onChange={value => handleChangeSpec({
+                    subBucketColumn: value,
+                    legendTitle: columnOptions.find(item => item.value === value) ?
+                      columnOptions.find(item => item.value === value).title : null,
+                  }, spec, onChangeSpec, columnOptions)}
+                />
+                <ConfigMenuSectionOptionSelect
+                  labelTextId="sub_bucket_method"
+                  value={spec.subBucketMethod !== null ? spec.subBucketMethod.toString() : null}
+                  name="subBucketMethodInput"
+                  disabled={spec.bucketColumn === null || spec.subBucketColumn === null}
+                  options={[
+                    {
+                      value: 'split',
+                      labelId: 'split_bars',
+                    },
+                    {
+                      value: 'stack',
+                      labelId: 'stack_bars',
+                    },
+                  ]}
+                  onChange={value => handleChangeSpec({
+                    subBucketMethod: value,
+                  }, spec, onChangeSpec, columnOptions)}
+                />
+                <ConfigMenuSectionOptionText
+                  value={spec.legendTitle != null ? spec.legendTitle.toString() : null}
+                  placeholderId="legend_title"
+                  name="legendLabel"
+                  maxLength={32}
+                  onChange={event => handleChangeSpec({
+                    legendTitle: event.target.value.toString(),
+                  }, spec, onChangeSpec, columnOptions)}
+                />
+              </div>
+            }
+            <ConfigMenuSectionOptionText
+              value={spec.axisLabelX !== null ? spec.axisLabelX.toString() : null}
+              placeholderId="x_axis_label"
+              name="xLabel"
+              onChange={event => handleChangeSpec({
+                axisLabelX: event.target.value.toString(),
+                axisLabelXFromUser: true,
+              }, spec, onChangeSpec, columnOptions)}
+            />
+          </div>
+        )}
       />
     </div>
   );

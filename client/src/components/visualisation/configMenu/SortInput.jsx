@@ -8,7 +8,7 @@ export default function SortInput({ spec, onChangeSpec }) {
       <SelectInput
         placeholder="Choose a sort direction..."
         labelText="Sort"
-        choice={spec.sort !== null ? spec.sort.toString() : null}
+        value={spec.sort !== null ? spec.sort.toString() : null}
         name="sortInput"
         options={[
           {

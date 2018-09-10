@@ -3,9 +3,13 @@
 .LayerMenuItem {
     display: flex;
     flex: 1;
-    height: 6rem;
-    border-bottom: 0.1rem solid rgba($black, 0.2);
+    height: 4rem;
+    border-bottom: 1px solid $lightGrey;
     position: relative;
+
+    &:last-child {
+        margin-bottom: 1rem;
+    }
 
     .titleInputContainer {
         display: flex;
@@ -31,11 +35,13 @@
     .container {
         display: flex;
         flex: 1;
-        padding: 0.5rem 1rem;
+        padding: 0.5rem 0;
         align-items: center;
         justify-content: space-between;
 
-        .titleContainer, .toggleContainer, .overflowButtonContainer {
+        .titleContainer,
+        .toggleContainer,
+        .overflowButtonContainer {
             display: flex;
             justify-content: center;
             align-items: center;
@@ -67,7 +73,7 @@
             text-align: center;
         }
         .orderButton i {
-            font-size: 2rem;
+            font-size: 1.5rem;
         }
 
         .toggleContainer, .overflowButtonContainer {
@@ -85,8 +91,13 @@
         .overflowButtonContainer {
             justify-content: flex-end;
 
-            button.active {
-                color: $midGrey;
+            button{
+                font-size: 1.5em;
+                padding: 0 0.5rem;
+
+                &.active {
+                    color: $midGrey;
+                }
             }
         }
     }

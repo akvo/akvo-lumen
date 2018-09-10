@@ -1,7 +1,10 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
+
 import LayerMenuItem from './LayerMenuItem';
+import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
+import Button from '../../common/Button';
 
 require('./LayerMenu.scss');
 
@@ -25,50 +28,40 @@ export default class LayerMenu extends Component {
 
     return (
       <div className="LayerMenu">
-        <div
-          className="controlRow"
-        >
-          <span
-            className="titleContainer"
-          >
-            <h3>
-              <FormattedMessage id="layers" />
-            </h3>
-          </span>
-          <span
-            className="buttonContainer"
-          >
-            <button
-              className="addLayer clickable noSelect"
-              data-test-id="add-layer"
-              onClick={onAddLayer}
-            >
-              <i className="fa fa-plus" aria-hidden="true" />
-            </button>
-          </span>
-        </div>
-        {layers.length === 0 ?
-          null
-          :
-          <ul>
-            {layers.map((layer, index) =>
-              <LayerMenuItem
-                key={index}
-                layer={layer}
-                layerIndex={index}
-                numLayers={layers.length - 1}
-                titleEditMode={this.state.activeLayerTitleEditor === index}
-                onBeginTitleEdit={() => this.setState({ activeLayerTitleEditor: index })}
-                onEndTitleEdit={() => this.setState({ activeLayerTitleEditor: null })}
-                onChangeTitle={title => onChangeMapLayer(index, { title })}
-                onDeleteLayer={() => onDeleteMapLayer(index)}
-                onSelectLayer={onSelectLayer}
-                onSetLayerVisible={isVisible => onChangeMapLayer(index, { visible: isVisible })}
-                onChangeLayerOrder={this.props.onChangeLayerOrder}
-              />
-            )}
-          </ul>
-        }
+        <ConfigMenuSection
+          title="layers"
+          options={(
+            <div>
+              {layers.length ? (
+                <ul>
+                  {layers.map((layer, index) =>
+                    <LayerMenuItem
+                      key={index}
+                      layer={layer}
+                      layerIndex={index}
+                      numLayers={layers.length - 1}
+                      titleEditMode={this.state.activeLayerTitleEditor === index}
+                      onBeginTitleEdit={() => this.setState({ activeLayerTitleEditor: index })}
+                      onEndTitleEdit={() => this.setState({ activeLayerTitleEditor: null })}
+                      onChangeTitle={title => onChangeMapLayer(index, { title })}
+                      onDeleteLayer={() => onDeleteMapLayer(index)}
+                      onSelectLayer={onSelectLayer}
+                      onSetLayerVisible={isVisible =>
+                        onChangeMapLayer(index, { visible: isVisible })
+                      }
+                      onChangeLayerOrder={this.props.onChangeLayerOrder}
+                    />
+                  )}
+                </ul>
+              ) : null}
+              <Button onClick={onAddLayer} primary>
+                <i className="fa fa-plus" aria-hidden="true" />
+                &nbsp;
+                <FormattedMessage id="add_layer" />
+              </Button>
+            </div>
+          )}
+        />
       </div>
     );
   }

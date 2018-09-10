@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { isEqual, cloneDeep } from 'lodash';
-import VisualisationConfig from './VisualisationConfig';
+import { isEqual, cloneDeep, get } from 'lodash';
+
+import VisualisationConfig from './configMenu/VisualisationConfig';
 import VisualisationPreview from './VisualisationPreview';
 import { checkUndefined } from '../../utilities/utils';
 import * as api from '../../api';
@@ -180,6 +181,7 @@ export default class VisualisationEditor extends Component {
     const vType = visualisation.visualisationType;
     let specValid;
     let needNewAggregation;
+    const visTypeHasChanged = vType !== get(this.state, 'visualisation.visualisationType');
 
     switch (vType) {
       case null:
@@ -207,7 +209,7 @@ export default class VisualisationEditor extends Component {
             checkUndefined(this.lastVisualisationRequested, 'spec', 'layers', 'length')
           );
 
-        if (!this.state.visualisation) {
+        if (!this.state.visualisation || visTypeHasChanged) {
           // Update immediately, without waiting for the api call
           this.setState({ visualisation: { ...visualisation } });
         }
@@ -243,7 +245,7 @@ export default class VisualisationEditor extends Component {
         specValid = specIsValidForApi(visualisation.spec, vType);
         needNewAggregation = getNeedNewAggregation(visualisation, this.lastVisualisationRequested);
 
-        if (!this.state.visualisation || !this.state.visualisation.datasetId) {
+        if (!this.state.visualisation || !this.state.visualisation.datasetId || visTypeHasChanged) {
           // Update immediately, without waiting for the api call
           this.setState({ visualisation });
         } else if (!specValid) {
