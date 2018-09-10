@@ -7,4 +7,4 @@
    (when v
      (if-let [column (first (filter #(= v (get % filter-by)) columns))]
        column
-       (throw (ex-info "No such column" {filter-by v}))))))
+       (throw (ex-info (str "No such column: " v) {filter-by v}))))))
