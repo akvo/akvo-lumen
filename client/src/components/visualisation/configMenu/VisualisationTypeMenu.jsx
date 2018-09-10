@@ -17,12 +17,16 @@ export default function VisualisationTypeMenu({ visualisation, onChangeVisualisa
       options={(
         <ConfigMenuSectionOptionThumbs
           id="visualisation_type"
-          items={visualisationTypes.map(type => ({
-            label: type,
-            imageSrc: require(`../../../styles/img/icon-128-visualisation-${kebabCase(type)}.png`),
-            onClick: () => onChangeVisualisationType(type),
-            selected: visualisation.visualisationType === type,
-          }))}
+          items={visualisationTypes.map((type) => {
+            const kebabType = kebabCase(type);
+            return {
+              label: type,
+              imageSrc: require(`../../../styles/img/icon-128-visualisation-${kebabType}.png`),
+              onClick: () => onChangeVisualisationType(type),
+              selected: visualisation.visualisationType === type,
+              testId: `visualisation-type-${kebabType}`,
+            };
+          })}
         />
       )}
     />
