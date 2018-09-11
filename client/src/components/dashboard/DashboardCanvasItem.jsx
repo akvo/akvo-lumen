@@ -100,6 +100,10 @@ export default class DashboardCanvasItem extends Component {
     return shouldUpdate;
   }
 
+  getElement() {
+    return this.el;
+  }
+
   getRenderDimensions() {
     const unit = this.props.canvasWidth / 12;
     const layout = getItemLayout(this.props);
@@ -142,6 +146,7 @@ export default class DashboardCanvasItem extends Component {
         data-test-id="dashboard-canvas-item"
         className="DashboardCanvasItem"
         style={this.state.style}
+        ref={(c) => { this.el = c; }}
       >
         {this.props.item.type === 'visualisation' && (
           <div className="itemContainerWrap">
@@ -168,7 +173,7 @@ export default class DashboardCanvasItem extends Component {
             </div>
           </div>
         )}
-        {this.props.item.type === 'text' &&
+        {this.props.item.type === 'text' && (
           <div
             className="itemContainer text"
             style={{
@@ -179,11 +184,14 @@ export default class DashboardCanvasItem extends Component {
             }}
           >
             <DashboardCanvasItemEditable
+              onFocus={this.props.onFocus}
+              focused={this.props.focused}
               onEntityUpdate={this.props.onEntityUpdate}
               item={this.props.item}
+              onSave={this.props.onSave}
             />
           </div>
-        }
+        )}
         <button
           className="clickable deleteButton noSelect"
           onClick={() => this.props.onDeleteClick(this.props.item)}
@@ -203,4 +211,7 @@ DashboardCanvasItem.propTypes = {
   metadata: PropTypes.object,
   onEntityUpdate: PropTypes.func.isRequired,
   onDeleteClick: PropTypes.func.isRequired,
+  onFocus: PropTypes.func.isRequired,
+  focused: PropTypes.bool,
+  onSave: PropTypes.func,
 };

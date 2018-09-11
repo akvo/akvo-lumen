@@ -6,6 +6,11 @@
 
     @include border-radius(3px);
 
+    ul,
+    ol {
+        list-style: none;
+    }
+
     .header {
         position: relative;
 

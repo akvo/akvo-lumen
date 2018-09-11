@@ -2,7 +2,6 @@
 
 .DashboardCanvasItem {
     position: relative;
-    overflow: hidden;
     padding: 20px;
     margin: 10px;
     background-color: white;
@@ -54,5 +53,9 @@
             color: $dashboardFGSecondary;
             font-size: 0.9em;
         }
+    }
+
+    &--focused {
+        z-index: 10;
     }
 }

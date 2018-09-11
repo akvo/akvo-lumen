@@ -10,6 +10,7 @@
     "NUMBER" :number
     "DATE" :date
     "GEO" :geopoint
+    "CADDISFLY" :multiple
     :text))
 
 (defn dataset-columns
@@ -20,14 +21,22 @@
              (if (:registration-form? form)
                (assoc identifier :key true)
                identifier))
+           {:title "Device Id" :type :text :id :device_id}
            {:title "Display name" :type :text :id :display_name}
            {:title "Submitter" :type :text :id :submitter}
            {:title "Submitted at" :type :date :id :submitted_at}
            {:title "Surveyal time" :type :number :id :surveyal_time}]
           (map (fn [question]
-                 {:title (:name question)
-                  :type (question-type->lumen-type question)
-                  :id (keyword (format "c%s" (:id question)))})
+                 (let[column-type (question-type->lumen-type question)]
+                   (merge {:title (:name question)
+                           :type column-type
+                           :id (keyword (format "c%s" (:id question)))}
+                          (when (= column-type :multiple)
+                            (if (:caddisflyResourceUuid question)
+                              {:multiple-type :caddisfly
+                               :multiple-id (:caddisflyResourceUuid question)}
+                              {:multiple :unknown
+                               :multiple-id nil})))))
                questions))))
 
 (defn render-response
@@ -64,6 +73,7 @@
                (assoc (response-data form (get form-instance "responses"))
                       :instance_id (get form-instance "id")
                       :display_name (get data-point "displayName")
+                      :device_id (get form-instance "deviceIdentifier")
                       :identifier (get data-point "identifier")
                       :submitter (get form-instance "submitter")
                       :submitted_at (some-> (get form-instance "submissionDate")

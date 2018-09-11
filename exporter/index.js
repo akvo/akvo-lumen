@@ -88,7 +88,8 @@ app.post("/screenshot", validate(validation.screenshot), async (req, res) => {
             format: "A4",
             omitBackground: false,
             clip,
-            encoding: "base64"
+            encoding: "base64",
+            fullPage: true,
           })
           const data = screenshot
           res.setHeader("Content-Length", data.length)

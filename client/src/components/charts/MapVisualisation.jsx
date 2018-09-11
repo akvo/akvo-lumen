@@ -151,15 +151,13 @@ const Legend = ({ layers, layerMetadata }) => {
         (metadata.pointColorMapping || metadata.shapeColorMapping)
       ) ||
       layer.layerType === 'raster';
-
-    return showLayer ? layer : null;
+    return showLayer ? { metadata, layer } : null;
   }));
-
   return legendLayers.length ? (
     <div className="Legend">
       <div className="container">
         {
-          legendLayers.map((layer, idx) => {
+          legendLayers.map(({ metadata, layer }, idx) => {
             const haveLayer = Boolean(layer);
             if (!haveLayer) {
               return null;
@@ -168,7 +166,7 @@ const Legend = ({ layers, layerMetadata }) => {
               <LegendEntry
                 key={idx}
                 layer={layer}
-                singleMetadata={layerMetadata[idx]}
+                singleMetadata={metadata}
               />
             );
           })

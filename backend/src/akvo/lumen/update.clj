@@ -39,18 +39,19 @@
 
 (defn apply-transformation-log [conn table-name columns transformations]
   (let [;; Translate columns vector into a form that the transformation engine understands
-        columns (mapv (fn [{:keys [title id type key] :as column}]
+        columns (mapv (fn [{:keys [title id type key caddisflyResourceUuid] :as column}]
                         (cond-> {"type" (name type)
                                  "title" title
                                  "columnName" (name id)
                                  "sort" nil
                                  "direction" nil
                                  "hidden" false}
-                          (contains? column :key) (assoc "key" (boolean key))) )
+                          key (assoc "key" (boolean key))
+                          caddisflyResourceUuid (assoc "caddisflyResourceUuid" caddisflyResourceUuid)))
                       columns)]
     (loop [transformations transformations columns columns]
       (if-let [transformation (first transformations)]
-        (let [{:keys [success? message columns]} (engine/try-apply-operation conn table-name columns transformation)]
+        (let [{:keys [success? message columns]} (engine/try-apply-operation {:tenant-conn conn} table-name columns transformation)]
           (when-not success?
             (throw (ex-info (format "Failed to update due to transformation mismatch: %s"
                                     message)
@@ -65,8 +66,8 @@
                                          :title (string/trim (get column "title"))}
                                   (contains? column "key") (assoc :key (boolean (get column "key")))))
                               imported-columns)]
-    (set/subset? (set imported-columns)
-                 (set columns))))
+    (set/subset? (set (map #(select-keys % [:id :type :title]) imported-columns))
+                 (set (map #(select-keys % [:id :type :title]) columns)))))
 
 (defn do-update [conn config dataset-id data-source-id job-execution-id data-source-spec]
   (try

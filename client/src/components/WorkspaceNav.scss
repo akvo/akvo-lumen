@@ -10,6 +10,11 @@
     box-shadow: 2px 0 3px rgba($black, 0.05);
     overflow: auto;
 
+    ul,
+    ol {
+        list-style: none;
+    }
+
     .header {
         height: 9rem;
 

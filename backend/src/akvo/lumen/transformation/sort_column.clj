@@ -19,7 +19,7 @@
   (inc (count (filter #(get % "sort") columns))))
 
 (defmethod engine/apply-operation :core/sort-column
-  [tenant-conn table-name columns op-spec]
+  [{:keys [tenant-conn]} table-name columns op-spec]
   (let [{column-name "columnName"
          sort-direction "sortDirection"} (engine/args op-spec)
         idx-name (str table-name "_" column-name)
@@ -36,7 +36,7 @@
      :columns new-cols}))
 
 (defmethod engine/apply-operation :core/remove-sort
-  [tenant-conn table-name columns op-spec]
+  [{:keys [tenant-conn]} table-name columns op-spec]
   (let [{column-name "columnName"} (engine/args op-spec)
         idx-name (str table-name "_" column-name)
         new-cols (engine/update-column columns

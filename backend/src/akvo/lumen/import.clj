@@ -24,8 +24,7 @@
     (insert-dataset conn {:id dataset-id
                           :title (get spec "name") ;; TODO Consistent naming. Change on client side?
                           :description (get spec "description" "")
-                          :author claims
-                          :source (get data-source "source")})
+                          :author claims})
     (clone-data-table conn
                       {:from-table table-name
                        :to-table imported-table-name}
@@ -37,14 +36,16 @@
                                   :table-name table-name
                                   :imported-table-name imported-table-name
                                   :version 1
-                                  :columns (mapv (fn [{:keys [title id type key] :as columns}]
-                                                   (cond-> {:type (name type)
-                                                            :title (string/trim title)
-                                                            :columnName (name id)
-                                                            :sort nil
-                                                            :direction nil
-                                                            :hidden false}
-                                                     (contains? columns :key) (assoc :key (boolean key))))
+                                  :columns (mapv (fn [{:keys [title id type key multiple-type multiple-id]}]
+                                                   {:columnName (name id)
+                                                    :direction nil
+                                                    :hidden false
+                                                    :key (boolean key)
+                                                    :multipleId multiple-id
+                                                    :multipleType multiple-type
+                                                    :sort nil
+                                                    :title (string/trim title)
+                                                    :type (name type)})
                                                  columns)
                                   :transformations []})
     (update-successful-job-execution conn {:id job-execution-id})))

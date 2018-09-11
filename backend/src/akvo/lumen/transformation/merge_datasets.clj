@@ -159,5 +159,5 @@
      :columns (into columns target-merge-columns)}))
 
 (defmethod engine/apply-operation :core/merge-datasets
-  [conn table-name columns op-spec]
-  (apply-merge-operation conn table-name columns op-spec))
+  [{:keys [tenant-conn]} table-name columns op-spec]
+  (apply-merge-operation tenant-conn table-name columns op-spec))

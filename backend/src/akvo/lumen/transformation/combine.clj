@@ -17,7 +17,7 @@
                   (= (engine/error-strategy op-spec) "fail")))))
 
 (defmethod engine/apply-operation :core/combine
-  [tenant-conn table-name columns op-spec]
+  [{:keys [tenant-conn]} table-name columns op-spec]
   (let [new-column-name (engine/next-column-name columns)
         {[first-column-name second-column-name] "columnNames"
          separator "separator"

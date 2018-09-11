@@ -2,6 +2,11 @@
 
 .EntityTypeHeader {
 
+    ul,
+    ol {
+        list-style: none;
+    }
+
     .entityInfo {
         width: 60%;
         background-color: white;
