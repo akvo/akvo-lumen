@@ -4,6 +4,7 @@
   :emailer #var akvo.lumen.component.emailer/mailjet-emailer
   :error-tracker #var akvo.lumen.component.error-tracker/sentry-error-tracker
   :http #var akvo.lumen.component.http/http
+  :caddisfly #var akvo.lumen.component.caddisfly/caddisfly
   :keycloak #var akvo.lumen.component.keycloak/keycloak
   :tenant-manager #var akvo.lumen.component.tenant-manager/tenant-manager}
  :endpoints
@@ -20,6 +21,7 @@
   :invite-verify #var akvo.lumen.endpoint.invite/verify-endpoint
   :job-execution #var akvo.lumen.endpoint.job-execution/endpoint
   :library #var akvo.lumen.endpoint.library/endpoint
+  :multiple-column #var akvo.lumen.endpoint.multiple-column/endpoint
   :public #var akvo.lumen.endpoint.public/endpoint
   :resource #var akvo.lumen.endpoint.resource/endpoint
   :root #var akvo.lumen.endpoint.root/endpoint
@@ -30,9 +32,10 @@
   :visualisation #var akvo.lumen.endpoint.visualisation/endpoint}
  :dependencies
  {:http [:app]
-  :app [:aggregation :collection :dashboard :dataset :raster :env :emailer :files :healthz
-        :invite :invite-verify :job-execution :library :public :resource :root :share
-        :tier :transformation :user :visualisation :export]
+  :app [:aggregation :collection :dashboard :dataset :emailer :env :export
+        :files :healthz :invite :invite-verify :job-execution :library
+        :multiple-column :public :raster :resource :root :share :tier
+        :transformation :user :visualisation]
   :tenant-manager [:config :db]
   :aggregation [:tenant-manager]
   :export [:config]
@@ -46,12 +49,13 @@
   :invite-verify [:keycloak :tenant-manager :config]
   :job-execution [:tenant-manager]
   :library [:tenant-manager]
+  :multiple-column [:caddisfly]
   :public [:tenant-manager :config]
   :resource [:tenant-manager]
   :root [:tenant-manager]
   :share [:tenant-manager :config]
   :tier [:tenant-manager]
-  :transformation [:tenant-manager]
+  :transformation [:tenant-manager :caddisfly]
   :user [:keycloak]
   :visualisation [:config :tenant-manager]}
  :config
@@ -90,6 +94,8 @@
   {:port http-port}
   :db
   {:uri db-uri}
+  :caddisfly
+  {:schema-uri caddisfly-schema-uri}
   :emailer
   {:email-host email-host
    :email-password email-password

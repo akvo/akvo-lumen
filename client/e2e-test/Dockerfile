@@ -18,6 +18,7 @@ USER root
 RUN npm i -g npm
 
 USER akvo
+
 RUN npm i cypress --silent && npm run cypress:verify
 
 USER root

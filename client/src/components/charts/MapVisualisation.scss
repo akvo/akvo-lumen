@@ -56,6 +56,11 @@
             }
 
         }
+
+        ul,
+        ol {
+            list-style: none;
+        }
     }
 
     .Legend {
@@ -116,6 +121,7 @@
                 flex: 1;
                 position: relative;
                 max-width: 100%;
+                list-style: none;
             }
 
             li {

@@ -1,5 +1,6 @@
 @import "modules/importAll";
 @import "print.global"; 
+@import "~react-quill/dist/quill.snow";
 
 html, body, #root, #root > div {
     height: 100%;

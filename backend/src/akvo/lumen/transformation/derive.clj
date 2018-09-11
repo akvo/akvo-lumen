@@ -48,7 +48,7 @@
        doall))
 
 (defmethod engine/apply-operation :core/derive
-  [tenant-conn table-name columns op-spec]
+  [{:keys [tenant-conn]} table-name columns op-spec]
   (jdbc/with-db-transaction [conn tenant-conn]
     (let [{:keys [::code
                   ::column-title

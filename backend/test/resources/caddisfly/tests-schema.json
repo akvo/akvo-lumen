@@ -1,0 +1,1233 @@
+{
+    "tests": [
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 30 Alkalinity-m, Tablet (5 - 200 mg/l CaCO3)",
+            "uuid": "85e9bea2-8538-4759-a46a-46459783c2d3",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Alkalinity-m",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 31 Alkalinity-m HR, Tablet (5 - 500 mg/l CaCO3)",
+            "uuid": "403af73f-377f-42ea-bba3-f9c88cfe97d2",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Alkalinity-m",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 40 Aluminium, Tablet (0.01 - 0.3 mg/l Al)",
+            "uuid": "76defb64-592f-405c-b491-77ffa76fbad8",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Aluminium",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 60 Ammonia, Tablet (0.02 - 1 mg/l N)",
+            "uuid": "f0d60451-a220-4113-821d-3a658167cc9f",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Ammonia",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 62 Ammonia, Powder (0.01 - 0.8 mg/l N)",
+            "uuid": "538ab4d3-706b-4c5e-93a9-adb5c13b1be9",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Ammonia",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 65 Ammonia LR, Tube (0.02 - 2.5 mg/l N)",
+            "uuid": "3221bdba-8898-4ae2-958f-5f6a1f949c8f",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Ammonia",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 66 Ammonia HR, Tube (1 - 50 mg/l N)",
+            "uuid": "17ca9214-23d4-49bf-99cc-c0463db03a90",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Ammonia",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 90 Chloride, Tablet (0.5 - 25 mg/l Cl)",
+            "uuid": "4f8fcb4b-35f6-40df-aa1c-c3f4a96352d4",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Chloride",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 92 Chloride, Liquid (0.5 - 20 mg/l Cl)",
+            "uuid": "e2849dba-6486-4ceb-b5fd-58472d61fe5e",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Chloride",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 100 Total, Free and Combined Chlorine, Tablet (0.01 - 6 mg/l Cl2)",
+            "uuid": "69f3e1f9-0d74-4ab5-aa32-6431b8d3b088",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Free Chlorine",
+                    "unit": "mg/l"
+                },
+                {
+                    "id": 2,
+                    "name": "Combined Chlorine",
+                    "unit": "mg/l"
+                },
+                {
+                    "id": 3,
+                    "name": "Total Chlorine",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 100 Free Chlorine, Tablet (0.01 - 6 mg/l Cl2)",
+            "uuid": "6450764c-4a97-4d45-adeb-ffd15786c8c3",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Free Chlorine",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 101 Total, Free and Combined Chlorine, Liquid (0.02 - 4 mg/l Cl2)",
+            "uuid": "6ae5a50f-06cd-4869-89b3-313b26ca8b54",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Free Chlorine",
+                    "unit": "mg/l"
+                },
+                {
+                    "id": 2,
+                    "name": "Combined Chlorine",
+                    "unit": "mg/l"
+                },
+                {
+                    "id": 3,
+                    "name": "Total Chlorine",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 101 Free Chlorine, Liquid (0.02 - 4 mg/l Cl2)",
+            "uuid": "e4996792-33e7-46d3-a348-6f37f6f56af1",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Free Chlorine",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 103 Total, Free and Combined Chlorine HR, Tablet (0.1 - 10 mg/l Cl2)",
+            "uuid": "280b6b7b-1781-4923-b0da-60c2a8f2f711",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Free Chlorine",
+                    "unit": "mg/l"
+                },
+                {
+                    "id": 2,
+                    "name": "Combined Chlorine",
+                    "unit": "mg/l"
+                },
+                {
+                    "id": 3,
+                    "name": "Total Chlorine",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 103 Free Chlorine HR, Tablet (0.1 - 10 mg/l Cl2)",
+            "uuid": "7c6efb6a-bc98-4c00-a9f9-1fee29ebb460",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Free Chlorine",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 110 Total, Free and Combined Chlorine, Powder (0.02 - 2 mg/l Cl2)",
+            "uuid": "925a8f1e-3d0c-4cd7-b9c2-0bfe7f37779d",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Free Chlorine",
+                    "unit": "mg/l"
+                },
+                {
+                    "id": 2,
+                    "name": "Combined Chlorine",
+                    "unit": "mg/l"
+                },
+                {
+                    "id": 3,
+                    "name": "Total Chlorine",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 110 Free Chlorine, Powder (0.02 - 2 mg/l Cl2)",
+            "uuid": "c1159ae9-dd68-4e25-ba86-5167d31c2f9e",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Free Chlorine",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 111 Total, Free and Combined Chlorine HR, Powder (0.1 - 8 mg/l Cl2)",
+            "uuid": "3934797e-8d83-4d2c-96e8-ad0e52a77be2",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Free Chlorine",
+                    "unit": "mg/l"
+                },
+                {
+                    "id": 2,
+                    "name": "Combined Chlorine",
+                    "unit": "mg/l"
+                },
+                {
+                    "id": 3,
+                    "name": "Total Chlorine",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 111 Free Chlorine HR, Powder (0.1 - 8 mg/l Cl2)",
+            "uuid": "cf4822db-15cc-4aaa-91f5-cfb2ea45aabc",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Free Chlorine",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 125 Chromium (VI, III, Total), Powder (0.02 - 2 mg/l Cr)",
+            "uuid": "b6b46404-3392-4718-ac35-d2379c0f7d6d",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Chromium (VI)",
+                    "unit": "mg/l"
+                },
+                {
+                    "id": 2,
+                    "name": "Chromium (III)",
+                    "unit": "mg/l"
+                },
+                {
+                    "id": 3,
+                    "name": "Total Chromium",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 125 Chromium (VI), Powder (0.02 - 2 mg/l Cr)",
+            "uuid": "b6b12955-46ae-4be7-8c57-e2ccb417bd7b",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Chromium (VI)",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 125 Total Chromium (III+VI), Powder (0.02 - 2 mg/l Cr)",
+            "uuid": "cdbbd63a-2740-4e42-9b4b-5a3d490d9df3",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Total Chromium",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 130 COD LR, Tube (0 - 150 mg/l O2)",
+            "uuid": "f15575d4-141e-4696-9c99-59cc2d3153b9",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "COD",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 131 COD MR, Tube (0 - 1500 mg/l O2)",
+            "uuid": "c99c85fa-ab1a-4065-b959-9991fb84dd90",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "COD",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 132 COD HR, Tube (0 - 15 g/l O2)",
+            "uuid": "cf6a1ce4-0e5d-42a9-827d-606b771e0ffe",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "COD",
+                    "unit": "g/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 157 Cyanide, Liquid and Powder (0.01 - 0.5 mg/l CN)",
+            "uuid": "6ecb41e7-b962-4a50-8408-b5c608bf86e4",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Cyanide",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 170 Fluoride, Liquid (0.05 - 2 mg/l F)",
+            "uuid": "d839537b-8106-44e8-953a-6060e4dbe59d",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Fluoride",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 190 Calcium Hardness, Tablet (50 - 900 mg/l CaCO3)",
+            "uuid": "3e7c94de-1963-4b59-b196-de40aa126a24",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Calcium Hardness",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 200 Total Hardness, Tablet (2 - 50 mg/l CaCO3)",
+            "uuid": "d4d57975-5e87-4ba9-b9d1-09ec2eb8f500",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Total Hardness",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 201 Total Hardness HR, Tablet (20 - 500 mg/l CaCO3)",
+            "uuid": "5d82d3a3-cfb3-40fb-a739-49e308b0f9b4",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Total Hardness",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 220 Iron, Tablet (0.02 - 1 mg/l Fe 2+/3+)",
+            "uuid": "ac65e12d-632a-439d-b841-383b1b9b7026",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Iron",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 222 Iron, Powder (0.02 - 1 mg/l Fe 2+/3+)",
+            "uuid": "7a9457b0-96c2-487d-b3d3-c52c50fb2279",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Iron",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 223 Total Iron, Powder (0.02 - 1.8 mg/l Fe)",
+            "uuid": "928f2cf7-7c98-4707-af3b-2e12e0d2d46b",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Iron",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 225 Iron LR, Liquid (0.03 - 2 mg/l Fe 2+/3+)",
+            "uuid": "1f704c37-9dbe-4ca7-a3da-00adc1e5fa0b",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Iron",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 227 Iron HR, Liquid (0.1 - 10 mg/l Fe 2+/3+)",
+            "uuid": "bdcf8941-f7df-4c04-9242-fc8a5b3af672",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Iron",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 240 Manganese, Tablet (0.2 - 4 mg/l Mn)",
+            "uuid": "21c1bc13-51c2-4770-8fae-7d0685b49370",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Manganese",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 265 Nitrate, Tube (1 - 30 mg/l NO3)",
+            "uuid": "a213cf40-7cb8-4828-872e-25bf2b8b12aa",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Nitrate",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 260 Nitrate, Tablet and Powder (0.08 - 1 mg/l NO3)",
+            "uuid": "252298b1-5c2b-4b7d-9385-cc25d617725d",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Nitrate",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 270 Nitrite, Tablet (0.01 - 0.5 mg/l NO2)",
+            "uuid": "22963cac-e81d-43db-a84b-e71c27a3dd60",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Nitrite",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 272 Nitrite LR, Powder (0.01 - 0.3 mg/l NO2)",
+            "uuid": "1ad51f5d-bfea-4a49-8797-efd899d7f484",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Nitrite",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 320 Phosphate (ortho) LR, Tablet (0.05 - 4 mg/l PO4)",
+            "uuid": "8e096f48-19bf-4446-8fc7-a824d0b00f7c",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Phosphate (ortho)",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 321 Phosphate (ortho) HR, Tablet (1 - 80 mg/l PO4)",
+            "uuid": "853d210d-647d-4482-b57e-f24ff0422bd3",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Phosphate (ortho)",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 323 Phosphate (ortho) , Powder (0.06 - 2.5 mg/l PO4)",
+            "uuid": "ef94c4fc-be81-4a25-b879-7c0ab18efe43",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Phosphate (ortho)",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 335 Phosphate HR, Liquid and Powder (5 - 80 mg/l PO4)",
+            "uuid": "eb1f2bd6-a505-43b2-ba67-73f866e8d1ac",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Phosphate",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 329 pH , Tablet (5.2 - 6.8)",
+            "uuid": "58bd3f92-7092-4bfa-ac4a-1f3f24b85b6c",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "pH",
+                    "unit": ""
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 330 pH, Tablet (6.5 - 8.4)",
+            "uuid": "6b6e9183-215f-4dc2-94a9-68444b1ec0df",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "pH",
+                    "unit": ""
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 331 pH, Liquid (6.5 - 8.4)",
+            "uuid": "976a33ff-a5cd-4a21-98ed-f07cd94f018e",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "pH",
+                    "unit": ""
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 332 pH, Tablet (8 - 9.6)",
+            "uuid": "635fe6af-b66b-48b4-aa62-0b6a8db0a493",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "pH",
+                    "unit": ""
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 340 Potassium, Tablet (0.7 - 12 mg/l K)",
+            "uuid": "6b485134-e6e5-4db1-88b3-d96ff081e629",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Potassium",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 355 Sulfate, Tablet (5 - 100 mg/l SO4)",
+            "uuid": "4275391e-1498-4623-a068-e3f40dea8c29",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Sulfate",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 360 Sulfate, Powder (5 - 100 mg/l SO4)",
+            "uuid": "64248882-405c-4ec2-b433-5977bf505ffb",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Sulfate",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 384 Suspended Solids,  (0 - 750 mg/l TSS)",
+            "uuid": "51c6bbf7-f027-478d-8a60-37404537d819",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Suspended Solids",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Lovibond MD610 - 386 Turbidity,  (0 - 1000 FAU)",
+            "uuid": "90d6c006-2646-4c79-aa17-bb0ec47e2007",
+            "brand": "Lovibond",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Turbidity",
+                    "unit": "FAU"
+                }
+            ]
+        },
+        {
+            "name": "Water - Microbiology - Aquagenx CBT - E.coli (MPN)",
+            "uuid": "e40d4764-e73f-46dd-a598-ed4db0fd3386",
+            "brand": "Aquagenx",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Health Risk Category (Based on MPN and Confidence Interval)",
+                    "unit": ""
+                },
+                {
+                    "id": 2,
+                    "name": "MPN",
+                    "unit": "MPN/100ml"
+                },
+                {
+                    "id": 3,
+                    "name": "Upper 95% Confidence Interval",
+                    "unit": ""
+                }
+            ]
+        },
+        {
+            "name": "Water - Test Strips - Quantofix - Ammonium (0 - 400 mg/l NH4+)",
+            "uuid": "99abf0cd-4697-4880-bde0-933d32d3972c",
+            "brand": "Quantofix 91315",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Ammonium",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Test Strips - Hach - Arsenic (0 - 500 ug/l As)",
+            "uuid": "32b6d11b-c7f3-475f-adf9-32d9b8f4aecf",
+            "brand": "HACH 2822800-500",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Arsenic",
+                    "unit": "ug/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Test Strips - Hach - Arsenic (0 - 4000 ug/l As)",
+            "uuid": "beca9731-63f4-434f-a3c2-ac33b44f9992",
+            "brand": "HACH 2822800-4000",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Arsenic",
+                    "unit": "ug/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Test Strips - Quantofix - Chloride (0 - 3000 mg/l Cl)",
+            "uuid": "4c3a4192-c484-4329-8240-71e4c7cd2280",
+            "brand": "Quantofix 91321",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Chloride",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Caddisfly - Fluoride (0 - 2 mg/l F)",
+            "uuid": "f0f3c1dd-89af-49f1-83e7-bcc31c3006cf",
+            "brand": "Caddisfly",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Fluoride",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Caddisfly - Free Chlorine (0 - 1 mg/l Cl2)",
+            "uuid": "c3535e72-ff77-4225-9f4a-41d3288780c6",
+            "brand": "Caddisfly",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Free Chlorine",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Caddisfly - Free Chlorine (0 - 3 mg/l Cl2)",
+            "uuid": "a2413119-38eb-4959-92ee-cc169fdbb0fc",
+            "brand": "Caddisfly",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Free Chlorine",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Test Strips - Hach - Chlorine (0 - 10 mg/l Cl2), Hardness (0 - 425 mg/l CaCO3), Alkalinity (0 - 240 mg/l CaCO3), pH (6.2-8.4)",
+            "uuid": "2456d482-dbec-466c-8387-411a4093f6b6",
+            "brand": "HACH 2755250",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Total Chlorine",
+                    "unit": "mg/l"
+                },
+                {
+                    "id": 2,
+                    "name": "Free Chlorine",
+                    "unit": "mg/l"
+                },
+                {
+                    "id": 3,
+                    "name": "Total Hardness",
+                    "unit": "gpg"
+                },
+                {
+                    "id": 4,
+                    "name": "Total Alkalinity",
+                    "unit": "mg/l"
+                },
+                {
+                    "id": 5,
+                    "name": "pH",
+                    "unit": ""
+                }
+            ]
+        },
+        {
+            "name": "TRIAL: Water - Test Strips - SenSafe - Mercury (0 - 0.08 mg/l Hg)",
+            "uuid": "af98ac35-dc55-4d86-bbdc-aa4a4e3100c9",
+            "brand": "SenSafe 480048",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Mercury",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Test Strips - Hach - Nitrate (0 - 50 mg/l NO3-N ), Nitrite (0-3 mg/l NO2-N)",
+            "uuid": "c801b70c-39e4-493a-b20e-6843158b47b4",
+            "brand": "HACH 27454",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Nitrate Nitrogen",
+                    "unit": "mg/l"
+                },
+                {
+                    "id": 2,
+                    "name": "Nitrite Nitrogen",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Test Strips - Quantofix - Nitrate (0 - 100 mg/l NO3), Nitrite (0 - 50 mg/l NO2)",
+            "uuid": "77957656-3b72-4f0f-9507-d555f04db952",
+            "brand": "Quantofix 91351",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Nitrate",
+                    "unit": "mg/l"
+                },
+                {
+                    "id": 2,
+                    "name": "Nitrite",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Test Strips - Hach - pH (4 - 9)",
+            "uuid": "debbbf5e-fe0c-4b9c-be1f-6ed8142b6b07",
+            "brand": "HACH 27456",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "pH",
+                    "unit": ""
+                }
+            ]
+        },
+        {
+            "name": "Water - Test Strips - Merck - pH (0 - 14)",
+            "uuid": "c2669bb7-ad63-4a69-a16a-798b81d2b019",
+            "brand": "MERCK 1095350001",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "pH",
+                    "unit": ""
+                }
+            ]
+        },
+        {
+            "name": "Water - Test Strips - Quantofix - Phosphate (0 -100 mg/l PO4)",
+            "uuid": "39e7ea7e-9884-407d-a99a-ac3b4d9c9599",
+            "brand": "Quantofix 91320",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Phosphate",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Test Strips - Hach - Phosphate (0 - 50 mg/ PO4)",
+            "uuid": "f4c57d34-dd17-4750-9fcd-fe26af2621a7",
+            "brand": "HACH 27571",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Phosphate",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Test Strips - Merck - Potassium (0 - 1500 mg/l K)",
+            "uuid": "a18118e7-6382-4d16-b5fb-55f97cd99083",
+            "brand": "MERCK 117985",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Potassium",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Soil - Sensors - Caddisfly - Electrical Conductivity, (us/cm)",
+            "uuid": "80697cd1-acc9-4a15-8358-f32b4257dfaf",
+            "brand": "Caddisfly",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Soil Electrical Conductivity",
+                    "unit": "μS/cm"
+                },
+                {
+                    "id": 2,
+                    "name": "Temperature",
+                    "unit": "°Celsius"
+                }
+            ]
+        },
+        {
+            "name": "Soil - Sensors - Caddisfly - Moisture (VWC)",
+            "uuid": "0b4a0aaa-f556-4c11-a539-c4626582cca6",
+            "brand": "Caddisfly",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Soil Moisture",
+                    "unit": "% VWC"
+                }
+            ]
+        },
+        {
+            "name": "Water - Test Strips - Hach - Total & Free Chlorine (0 - 10 mg/l Cl2)",
+            "uuid": "bf1c19c0-9788-4e26-999e-1b5c6ca28111",
+            "brand": "HACH 27450",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Total Chlorine",
+                    "unit": "mg/l"
+                },
+                {
+                    "id": 2,
+                    "name": "Free Chlorine",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Test Strips - Hach - Total Iron (0 - 5 mg/l Fe)",
+            "uuid": "459a42d9-0834-4656-9e5a-e3bde46bdcff",
+            "brand": "HACH 2745348",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Total Iron",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Test Strips - Quantofix - Total Iron (0 - 100 mg/l Fe 2+/3+)",
+            "uuid": "5c90472e-9c06-4c7c-9f62-4c5cbcf6b1c1",
+            "brand": "Quantofix 91344",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Total Iron",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Water - Sensors - Caddisfly - Electrical Conductivity, (0 - 12500)",
+            "uuid": "f88237b7-be3d-4fac-bbee-ab328eefcd14",
+            "brand": "Caddisfly",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Water Electrical Conductivity",
+                    "unit": "μS/cm"
+                },
+                {
+                    "id": 2,
+                    "name": "Temperature",
+                    "unit": "°Celsius"
+                }
+            ]
+        },
+        {
+            "name": "Water - Colorimetry - Caddisfly - Chromium",
+            "uuid": "d488672f-9a4c-4aa4-82eb-8a95c40d0296",
+            "brand": "Caddisfly",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Chromium",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Soil - Test Strips  - Hach - Nitrogen (mg/l)",
+            "uuid": "53a1649a-be67-4a13-8cba-1b7db640037c",
+            "brand": "HACH 27454",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Nitrogen",
+                    "unit": "mg/l"
+                },
+                {
+                    "id": 2,
+                    "name": "Nitrate Nitrogen",
+                    "unit": "mg/l"
+                },
+                {
+                    "id": 3,
+                    "name": "Nitrite Nitrogen",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Soil - Test Strips  - Merck - pH (0 - 14)",
+            "uuid": "e4d8a391-6ee4-4bd5-8e90-321bbbd9876b",
+            "brand": "MERCK 1095350001",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "pH",
+                    "unit": ""
+                }
+            ]
+        },
+        {
+            "name": "Soil - Test Strips  - Quantofix - Phosphorous (mg/l)",
+            "uuid": "7cb666ea-7913-4511-9ae4-18f78e67aa09",
+            "brand": "Quantofix 91320",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Phosphorous",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Soil - Test Strips  - Merck - Potassium (mg/l)",
+            "uuid": "ac533acc-8ffc-48e1-a66e-2394f9a54050",
+            "brand": "MERCK 117985",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Potassium",
+                    "unit": "mg/l"
+                }
+            ]
+        },
+        {
+            "name": "Soil - Test Strips  - Hach - pH (4 - 9)",
+            "uuid": "895845dd-9990-49f3-b611-420551851acd",
+            "brand": "HACH 27456",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "pH",
+                    "unit": ""
+                }
+            ]
+        },
+        {
+            "name": "Water - Lovibond SD 50 pH (0 - 14)",
+            "uuid": "dbd058b6-29ed-4c7f-8b11-fcdae725a518",
+            "brand": "Lovibond",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "pH"
+                }
+            ]
+        },
+        {
+            "name": "Water - Lovibond SD 70 Electrical Conductivity, (0 - 20000 μS/cm)",
+            "uuid": "578c5768-273d-455f-ba12-57a6ced96c17",
+            "brand": "Lovibond",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Electrical Conductivity",
+                    "unit": "μS/cm"
+                }
+            ]
+        },
+        {
+            "name": "Water - DelAgua Turbidity Tube, (0 - 2000 NTU)",
+            "uuid": "7af4cbcc-f1f5-4fa5-9416-3752f1af4519",
+            "brand": "DelAgua",
+            "hasImage": false,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Turbidity",
+                    "unit": "NTU"
+                }
+            ]
+        }
+    ]
+}

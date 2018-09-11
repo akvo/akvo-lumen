@@ -6,8 +6,41 @@
     margin-top: 4rem;
     width: 100%;
 
-    .DashboardVisualisationList, .DashboardEditorCanvasContainer {
+    .DashboardEditorSidebar {
+        border-right: 0.1rem solid $lightGrey;
+    }
+    
+    .DashboardEditorCanvas {
+        padding: 16px;
+        position: relative;
+        box-sizing: initial;
+        background-color: $dashboardBG;
+    }
+
+    .DashboardEditorOverlay {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background: rgba(0,0,0,0.2);
+        cursor: pointer;
+    }
+    
+    .DashboardCanvasItemWrap--focused {
+        z-index: 9;
+    }
+
+    .DashboardVisualisationList {
+        height: calc(100vh - 4rem - 64px); 
+    }
+    
+    .DashboardEditorCanvasContainer {
         height: calc(100vh - 4rem);
+    }
+
+    .DashboardVisualisationList,
+    .DashboardEditorCanvasContainer {
         overflow: auto;
     }
 
@@ -26,17 +59,15 @@
         color: $midGrey;
     }
 
-    .react-grid-layout {
-        background-color: $dashboardBG;
-    }
-
     .react-resizable-handle {
         z-index: 99;
     }
 
     .DashboardEditorCanvasControls {
-        padding: 1rem 1rem 0 1rem;
-
+        padding: 1rem;
+        border-bottom: 0.1rem solid $lightGrey;
+        text-align: center;
+        
         button {
             padding: 0.5rem 1rem;
             color: $lumenGreen;
@@ -47,6 +78,10 @@
             @include border-radius(3px);
 
             margin-right: 1rem;
+
+            i {
+                margin-right: 1em;
+            }
         }
     }
 

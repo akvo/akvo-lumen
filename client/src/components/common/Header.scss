@@ -85,6 +85,15 @@
     .actions {
         border-left: 0.1rem solid $lightBlueGrey;
     }
+
+    ul,
+    ol {
+        list-style: none;
+
+        li {
+            display: inline-block;
+        }
+    }
 }
 
 

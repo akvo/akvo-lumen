@@ -13,7 +13,7 @@
   (engine/valid-column-name? (col-name op-spec)))
 
 (defmethod engine/apply-operation :core/delete-column
-  [tenant-conn table-name columns op-spec]
+  [{:keys [tenant-conn]} table-name columns op-spec]
   (let [column-name (col-name op-spec)
         column-idx (engine/column-index columns column-name)]
     (delete-column tenant-conn {:table-name table-name :column-name column-name})

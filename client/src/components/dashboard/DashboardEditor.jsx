@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import ReactGridLayout from 'react-grid-layout';
+import { Element, scroller } from 'react-scroll';
+
 import DashboardVisualisationList from './DashboardVisualisationList';
 import DashboardCanvasItem from './DashboardCanvasItem';
 
@@ -40,7 +42,7 @@ const getFirstBlankRowGroup = (layout, height) => {
   /* Build an object of all occupied rows, and record the last currently
   /* occupied row. */
   layout.forEach((item) => {
-    for (let row = item.y; row < (item.y + item.h); row += 1) {
+    for (let row = item.y; row < item.y + item.h; row += 1) {
       occupiedRows[row] = true;
       if (row > lastRow) lastRow = row;
     }
@@ -53,7 +55,7 @@ const getFirstBlankRowGroup = (layout, height) => {
     if (!occupiedRows[i]) {
       let haveSpace = true;
 
-      for (let y = i + 1; y < (i + height); y += 1) {
+      for (let y = i + 1; y < i + height; y += 1) {
         if (occupiedRows[y]) {
           haveSpace = false;
         }
@@ -69,15 +71,29 @@ const getFirstBlankRowGroup = (layout, height) => {
   return lastRow + 1;
 };
 
-export default class DashboardEditor extends Component {
+const editorCanvasId = 'DashboardEditorCanvasContainer';
+const getItemScrollName = id => `DashboardCanvasItem__${id}`;
 
+const scrollToItem = (id) => {
+  scroller.scrollTo(getItemScrollName(id), {
+    duration: 500,
+    smooth: true,
+    containerId: editorCanvasId,
+    offset: -60,
+  });
+};
+
+export default class DashboardEditor extends Component {
   constructor() {
     super();
     this.state = {
       gridWidth: 1024,
       propLayout: [],
       saveError: false,
+      focusedItem: null,
+      isDragging: false,
     };
+    this.canvasElements = {};
     this.handleLayoutChange = this.handleLayoutChange.bind(this);
     this.handleEntityToggle = this.handleEntityToggle.bind(this);
     this.handleResize = this.handleResize.bind(this);
@@ -132,10 +148,14 @@ export default class DashboardEditor extends Component {
   handleEntityToggle(item, itemType) {
     const newEntities = Object.assign({}, this.props.dashboard.entities);
     const newLayout = this.props.dashboard.layout.slice(0);
+    const dashboardEntity = this.props.dashboard.entities[item.id];
+    let newEntityId;
 
-    if (this.props.dashboard.entities[item.id]) {
+    if (dashboardEntity) {
       delete newEntities[item.id];
+      this.setState({ focusedItem: null });
     } else if (itemType === 'visualisation') {
+      newEntityId = item.id;
       this.props.onAddVisualisation(this.props.visualisations[item.id]);
 
       const visualisationType = this.props.visualisations[item.id].visualisationType;
@@ -155,7 +175,7 @@ export default class DashboardEditor extends Component {
         i: item.id,
       });
     } else if (itemType === 'text') {
-      const newEntityId = getNewEntityId(this.props.dashboard.entities, itemType);
+      newEntityId = getNewEntityId(this.props.dashboard.entities, itemType);
 
       newEntities[newEntityId] = {
         type: itemType,
@@ -163,9 +183,9 @@ export default class DashboardEditor extends Component {
         content: '',
       };
       newLayout.push({
-        w: 4,
-        minW: 2,
-        h: 1,
+        w: 12,
+        minW: 4,
+        h: 2,
         x: 0,
         y: getFirstBlankRowGroup(this.props.dashboard.layout, 1),
         i: newEntityId,
@@ -174,8 +194,27 @@ export default class DashboardEditor extends Component {
 
     /* Note that we update the propLayout, not the parent layout, to prevent race conditions. The
     /* parent layout will be updated automatically by handleLayoutChange */
-    this.setState({ propLayout: newLayout });
+    this.setState({ propLayout: newLayout }, () => {
+      if (!dashboardEntity) {
+        scrollToItem(newEntityId);
+        if (itemType === 'text') {
+          this.focusTextItem(newEntityId);
+        }
+      }
+    });
     this.props.onUpdateEntities(newEntities);
+  }
+
+  focusTextItem(id) {
+    setTimeout(() => {
+      const canvasItem = this.canvasElements[id];
+      if (!canvasItem) return;
+      const el = canvasItem.getElement();
+      if (!el) return;
+      const textarea = el.querySelector('textarea');
+      if (!textarea) return;
+      textarea.focus();
+    }, 1000);
   }
 
   handleResize() {
@@ -214,76 +253,98 @@ export default class DashboardEditor extends Component {
     const rowHeight = canvasWidth / 12;
 
     return (
-      <div
-        className={`DashboardEditor ${exporting ? 'DashboardEditor--exporting' : ''}`}
-      >
+      <div className={`DashboardEditor ${exporting ? 'DashboardEditor--exporting' : ''}`}>
         {!exporting && (
-          <DashboardVisualisationList
-            datasets={datasets}
-            visualisations={getArrayFromObject(this.props.visualisations)}
-            onEntityClick={this.handleEntityToggle}
-            dashboardItems={dashboard.entities}
-          />
-        )}
-        <div
-          className="DashboardEditorCanvasContainer"
-          ref={(ref) => { this.DashboardEditorCanvasContainer = ref; }}
-        >
-          {!exporting && (
+          <div className="DashboardEditorSidebar">
             <div className="DashboardEditorCanvasControls">
               <button
                 className="clickable addText"
                 onClick={() => this.handleEntityToggle({ content: '' }, 'text')}
               >
+                <i className="fa fa-plus" />
                 <FormattedMessage id="add_new_text_element" />
               </button>
             </div>
-          )}
-          {getArrayFromObject(dashboard.entities).length === 0 && !exporting &&
-            <div className="blankDashboardHelpText">
-              <FormattedMessage id="blank_dashboard_help_text" />
-            </div>
-          }
-          <div
-            className="DashboardEditorCanvas"
-            style={{
-              position: 'relative',
-              boxSizing: 'initial',
-              padding: '16px',
-            }}
-          >
-            <ReactGridLayout
-              className="layout"
-              cols={12}
-              rowHeight={rowHeight}
-              width={canvasWidth}
-              verticalCompact={false}
-              layout={this.state.propLayout}
-              onLayoutChange={this.handleLayoutChange}
-
-              /* Setting any margin results in grid units being different
-              /* vertically and horizontally due to implementation details. Use
-              /* a margin on the grid item themselves for now. */
-              margin={[0, 0]}
+            <DashboardVisualisationList
+              datasets={datasets}
+              visualisations={getArrayFromObject(this.props.visualisations)}
+              onEntityClick={this.handleEntityToggle}
+              dashboardItems={dashboard.entities}
+            />
+            <div
+              className={editorCanvasId}
+              id={editorCanvasId}
+              ref={(ref) => {
+                this.DashboardEditorCanvasContainer = ref;
+              }}
             >
-              {getArrayFromObject(dashboard.entities).map(item =>
-                <div
-                  key={item.id}
-                >
-                  <DashboardCanvasItem
-                    item={this.getItemFromLibrary(item)}
-                    datasets={this.props.datasets}
-                    metadata={this.props.metadata}
-                    canvasLayout={dashboard.layout}
-                    canvasWidth={canvasWidth}
-                    onDeleteClick={this.handleEntityToggle}
-                    onEntityUpdate={this.handleEntityUpdate}
-                  />
+              {getArrayFromObject(dashboard.entities).length === 0 && (
+                <div className="blankDashboardHelpText">
+                  <FormattedMessage id="blank_dashboard_help_text" />
                 </div>
               )}
-            </ReactGridLayout>
+              <div className="DashboardEditorCanvas">
+                <ReactGridLayout
+                  className="layout"
+                  cols={12}
+                  rowHeight={rowHeight}
+                  width={canvasWidth}
+                  verticalCompact
+                  layout={this.state.propLayout}
+                  onLayoutChange={this.handleLayoutChange}
+                  isDraggable={!this.state.focusedItem}
+                  isResizable={!this.state.focusedItem}
+                  /* Setting any margin results in grid units being different
+              /* vertically and horizontally due to implementation details. Use
+              /* a margin on the grid item themselves for now. */
+                  margin={[0, 0]}
+                >
+                  {getArrayFromObject(dashboard.entities)
+                    .reverse()
+                    .map(item => (
+                      <div
+                        key={item.id}
+                        className={
+                          this.state.focusedItem === item.id
+                            ? 'DashboardCanvasItemWrap--focused'
+                            : ''
+                        }
+                      >
+                        <Element name={getItemScrollName(item.id)}>
+                          <div />
+                        </Element>
+                        <DashboardCanvasItem
+                          onFocus={() => {
+                            this.setState({ focusedItem: item.id });
+                          }}
+                          focused={this.state.focusedItem === item.id}
+                          item={this.getItemFromLibrary(item)}
+                          datasets={this.props.datasets}
+                          metadata={this.props.metadata}
+                          canvasLayout={dashboard.layout}
+                          canvasWidth={canvasWidth}
+                          onDeleteClick={this.handleEntityToggle}
+                          onSave={this.props.onSave}
+                          onEntityUpdate={this.handleEntityUpdate}
+                          ref={(c) => {
+                            this.canvasElements[item.id] = c;
+                          }}
+                        />
+                      </div>
+                    ))}
+                </ReactGridLayout>
+                {this.state.focusedItem && (
+                  <div
+                    className="DashboardEditorOverlay"
+                    onClick={() => {
+                      this.setState({ focusedItem: null });
+                    }}
+                  />
+                )}
+              </div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     );
   }

@@ -1,6 +1,12 @@
 @import "../../../styles/modules/importAll";
 
 .LayerMenu {
+
+    ul,
+    ol {
+        list-style: none;
+    }
+    
     .controlRow {
         display: flex;
         flex-direction: row;

@@ -29,7 +29,11 @@ export default class DashboardViewerItem extends Component {
           display: 'inline-block',
           width: canvasWidth - (cMargin * 2),
           minHeight: MIN_HEIGHT,
-          height: item.type === 'visualisation' && item.visualisation.visualisationType === 'map' ?
+          height: (
+            item.type === 'visualisation' &&
+            item.visualisation &&
+            item.visualisation.visualisationType === 'map'
+          ) ?
             MIN_HEIGHT :
             null,
           margin: cMargin,
@@ -41,7 +45,11 @@ export default class DashboardViewerItem extends Component {
           display: 'inline-block',
           width: (canvasWidth / 2) - (cMargin * 2),
           minHeight: MIN_HEIGHT,
-          height: item.type === 'visualisation' && item.visualisation.visualisationType === 'map' ?
+          height: (
+            item.type === 'visualisation' &&
+            item.visualisation &&
+            item.visualisation.visualisationType === 'map'
+          ) ?
             MIN_HEIGHT :
             null,
           margin: cMargin,
@@ -51,11 +59,15 @@ export default class DashboardViewerItem extends Component {
 
       case 'large':
         return {
-          position: 'absolute',
+          display: 'inline-block',
           width: (layout.w * unit) - (cMargin * 2),
-          height: (layout.h * unit) - (cMargin * 2),
-          left: layout.x * unit,
-          top: layout.y * unit,
+          height: (
+            item.type === 'visualisation' &&
+            item.visualisation &&
+            item.visualisation.visualisationType === 'map'
+          ) ?
+            Math.max(MIN_HEIGHT, (layout.h * unit) - (cMargin * 2)) :
+            (layout.h * unit) - (cMargin * 2),
           margin: cMargin,
           padding: cPadding,
         };
@@ -114,17 +126,12 @@ export default class DashboardViewerItem extends Component {
             />
           </div>
         }
-        {isText &&
+        {isText && (
           <div
             className="itemContainer text"
-            style={{
-              fontSize: Math.floor(20 * (this.props.canvasWidth / 1280)),
-              lineHeight: '1.4em',
-            }}
-          >
-            {item.content}
-          </div>
-        }
+            dangerouslySetInnerHTML={{ __html: item.content }}
+          />
+        )}
       </div>
     );
   }
