@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
-import VisualisationTypeMenu from '../VisualisationTypeMenu';
 import LayerMenu from './LayerMenu';
 import LayerConfigMenu from './LayerConfigMenu';
 import ButtonRowInput from './ButtonRowInput';
 import mapLayerSpecTemplate from '../../../containers/Visualisation/mapLayerSpecTemplate';
 import { trackEvent } from '../../../utilities/analytics';
+import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
 
 require('./MapConfigMenu.scss');
 
@@ -145,21 +145,10 @@ class MapConfigMenu extends Component {
     const { spec } = visualisation;
 
     return (
-      <div
-        className="MapConfigMenu"
-      >
+      <div className="MapConfigMenu">
         <div className="contents">
           {this.state.selectedLayer === null ?
             <div>
-              <div
-                className="drawer"
-              >
-                <VisualisationTypeMenu
-                  onChangeVisualisationType={this.props.onChangeVisualisationType}
-                  visualisation={visualisation}
-                  disabled={false}
-                />
-              </div>
               <LayerMenu
                 layers={this.props.visualisation.spec.layers}
                 metadata={this.props.metadata}
@@ -170,19 +159,20 @@ class MapConfigMenu extends Component {
                 onChangeLayerOrder={this.handleChangeLayerOrder}
                 onChangeMapLayer={this.handleChangeMapLayer}
               />
-              <div
-                className="drawer"
-              >
-                <ButtonRowInput
-                  options={['street', 'satellite', 'terrain'].map(item => ({
-                    label: <FormattedMessage id={item} />,
-                    value: item,
-                  }))}
-                  selected={visualisation.spec.baseLayer}
-                  label={<FormattedMessage id="base_map" />}
-                  onChange={baseLayer => onChangeSpec({ baseLayer })}
-                />
-              </div>
+
+              <ConfigMenuSection
+                title="base_map"
+                options={(
+                  <ButtonRowInput
+                    options={['street', 'satellite', 'terrain'].map(item => ({
+                      label: <FormattedMessage id={item} />,
+                      value: item,
+                    }))}
+                    selected={visualisation.spec.baseLayer}
+                    onChange={baseLayer => onChangeSpec({ baseLayer })}
+                  />
+                )}
+              />
             </div>
           :
             <LayerConfigMenu

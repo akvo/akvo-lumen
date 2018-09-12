@@ -1,0 +1,27 @@
+@import "../../../styles/modules/importAll";
+
+.ConfigMenuSectionOptionThumb {
+  display: inline-block;
+  width: 72px;
+  height: 72px;
+  text-align: center;
+  padding: 10px 0; 
+  @include border-radius(8px);
+  margin-right: 10px; 
+  text-decoration: none;
+  
+  img {
+    width: 32px;
+    height: 32px;
+  }
+
+  h4 {
+    font-size: 0.9em;
+    line-height: 1em;
+    text-transform: capitalize;
+  }
+
+  &--selected {
+    border: 1px solid $anchorLinkLight;
+  }
+}

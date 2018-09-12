@@ -61,7 +61,7 @@ context('Akvo Lumen', () => {
 
   it('create visualisation (pivot table)', () => {
     cy.get('button[data-test-id="visualisation"]').click();
-    cy.get('li[data-test-id="button-pivot-table"]', { timeout: 20000 }).click();
+    cy.get('[data-test-id="visualisation-type-pivot-table"]', { timeout: 20000 }).click();
     cy.get('[data-test-id="dataset-menu"] .Select-control').click();
     // Finding dataset option
     cy.get('[role="option"]')

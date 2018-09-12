@@ -1,0 +1,46 @@
+@import "../../styles/modules/importAll";
+
+.Button {
+  @include border-radius(3px);
+  text-align: center;
+  background: white;
+  display: inline-block;
+
+  &--xs {
+    padding: 0.1rem;
+  }
+  &--sm {
+    padding: 0.2rem;
+    
+  }
+  &--md {
+    padding: 0.5rem;
+  }
+  &--lg {
+    padding: 1rem;    
+  }
+  &--default {
+    border: 1px solid $lightBlueGrey;
+    color: $black;
+  }
+  &--primary {
+    color: $anchorLinkLight;
+    border: 1px solid $anchorLinkLight;    
+  }
+  &--success {
+    color: $anchorLink;
+    border: 1px solid $anchorLink;    
+  }
+  &--danger {
+    color: $errorRed;
+    border: 1px solid $errorRed;     
+  }
+  &--warning {
+    color: $warnYellow;
+    border: 1px solid $warnYellow;    
+  }
+  &--disabled {
+    color: $midGrey;
+    border: 1px solid $midGrey;    
+  }
+}

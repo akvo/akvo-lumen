@@ -4,7 +4,7 @@ $textPrimary: lighten($black, 30%);
 $textSecondary: lighten($black, 60%);
 
 $lumenGreen: rgb(108, 164, 41);
-$complementary: complement($lumenGreen);
+$complmentary: complement($lumenGreen);
 $invert: invert($lumenGreen);
 
 $darkLime: rgb(66, 100, 25);

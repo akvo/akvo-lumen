@@ -6,16 +6,6 @@
     ol {
         list-style: none;
     }
-    
-    .controlRow {
-        display: flex;
-        flex-direction: row;
-        align-items: space-between;
-        justify-content: center;
-        height: 6rem;
-        background-color: $lightGrey;
-        padding: 0 1rem;
-    }
 
     .titleContainer {
         display: flex;
