@@ -15,6 +15,19 @@ INSERT INTO job_execution(id, data_source_id, type)
 INSERT INTO dataset_version(id, dataset_id, job_execution_id, table_name, imported_table_name, version, columns, transformations)
 VALUES (:id, :dataset-id, :job-execution-id, :table-name, :imported-table-name, :version, :columns, :transformations);
 
+-- :name update-dataset-version :! :n
+-- :doc Update dataset version
+UPDATE dataset_version SET columns= :columns,  transformations= :transformations
+where dataset_id= :dataset-id and version= :version;
+
+-- :name initial-dataset-version-to-update-by-dataset-id :? :1
+SELECT id, table_name AS "table-name", imported_table_name AS "imported-table-name", columns, version, transformations
+  FROM  dataset_version
+  WHERE dataset_id= :dataset-id AND transformations='[]'
+  ORDER BY version DESC LIMIT 1;
+
+
+
 -- :name clone-data-table :! :n
 -- :doc Clone a data table
 CREATE TABLE :i:to-table (LIKE :i:from-table INCLUDING ALL);

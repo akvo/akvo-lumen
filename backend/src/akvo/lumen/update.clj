@@ -48,7 +48,8 @@
   (update-failed-job-execution conn {:id job-execution-id
                                      :reason [reason]}))
 
-(defn apply-transformation-log [conn table-name importer-columns imported-dataset-columns transformations]
+(defn- apply-transformation-log [conn table-name importer-columns original-dataset-columns last-transformations dataset-id version]
+  (log/error :VERSION version)
   (let [importer-columns (mapv (fn [{:keys [title id type key caddisflyResourceUuid] :as column}]
                         (cond-> {"type" (name type)
                                  "title" title
@@ -58,20 +59,30 @@
                                  "hidden" false}
                           key (assoc "key" (boolean key))
                           caddisflyResourceUuid (assoc "caddisflyResourceUuid" caddisflyResourceUuid)))
-                      importer-columns)]
-    (loop [transformations transformations
+                               importer-columns)]
+    (update-dataset-version conn {:dataset-id dataset-id
+                                  :version version
+                                  :columns importer-columns
+                                  :transformations []})
+    (loop [transformations last-transformations
            importer-columns importer-columns
+           version (inc version)
            applied-txs []]
       (if-let [transformation (first transformations)]
-        (let [transformation (adapt-transformation transformation imported-dataset-columns importer-columns)
+        (let [transformation (adapt-transformation transformation original-dataset-columns importer-columns)
               {:keys [success? message columns]} (engine/try-apply-operation {:tenant-conn conn} table-name importer-columns transformation)]
-          (when-not success?
-            (throw (ex-info (format "Failed to update due to transformation mismatch: %s"
-                                    message)
-                            {})))
-          (recur (rest transformations)
-                 columns
-                 (conj applied-txs transformation)))
+          (when-not success? (throw
+                              (ex-info (format "Failed to update due to transformation mismatch: %s" message) {})))
+          (let [txs (conj applied-txs transformation)]
+            (log/error :apply-tx :version version :columns columns :txs txs :dataset-id dataset-id)
+            (update-dataset-version conn {:dataset-id dataset-id
+                                          :version version
+                                          :columns columns
+                                          :transformations (conj applied-txs
+                                                                 (assoc transformation
+                                                                        "changedColumns"
+                                                                        (engine/diff-columns importer-columns columns)))})
+            (recur (rest transformations) columns (inc version) txs)))
         [importer-columns  applied-txs ]))))
 
 (defn compatible-columns? [imported-columns columns]
@@ -81,7 +92,8 @@
                                   (contains? column "key") (assoc :key (boolean (get column "key")))))
                               imported-columns)
         ;; we filter here all the not derived columns
-        imported-columns (filter #(not= \d (first (name (:id %)))) imported-columns)]
+ ;;       imported-columns (filter #(not= \d (first (name (:id %)))) imported-columns)
+        ]
     (set/subset? (set (map #(select-keys % [:id :type]) imported-columns))
                  (set (map #(select-keys % [:id :type]) columns)))))
 
@@ -90,15 +102,12 @@
     (let [table-name (util/gen-table-name "ds")
           imported-table-name (util/gen-table-name "imported")
           dataset-version (latest-dataset-version-by-dataset-id conn {:dataset-id dataset-id})
-          imported-dataset-columns (vec (:columns dataset-version))]
+          initial-dataset-version (initial-dataset-version-to-update-by-dataset-id conn {:dataset-id dataset-id})
+          imported-dataset-columns (vec (:columns initial-dataset-version))]
       (with-open [importer (import/dataset-importer (get data-source-spec "source") config)]
         (let [importer-columns (import/columns importer)]
           (if-not (compatible-columns? imported-dataset-columns importer-columns)
-            (do
-              (log/warn :compatible-columns-mismatch!
-                        :imported-dataset-columns imported-dataset-columns
-                        :importer-columns importer-columns)
-              (failed-update conn job-execution-id "Column mismatch"))
+            (failed-update conn job-execution-id "Column mismatch")
             (do (import/create-dataset-table conn table-name importer-columns)
                 (import/add-key-constraints conn table-name importer-columns)
                 (doseq [record (map import/coerce-to-sql (import/records importer))]
@@ -108,11 +117,12 @@
                                    :to-table imported-table-name}
                                   {}
                                   {:transaction? false})
-                (let [[columns transformations] (apply-transformation-log conn
-                                                                          table-name
-                                                                          importer-columns
-                                                                          imported-dataset-columns
-                                                                          (:transformations dataset-version))]
+                (let [[columns transformations]
+                      (apply-transformation-log conn table-name importer-columns imported-dataset-columns
+                                                                          (:transformations dataset-version)
+                                                                          dataset-id
+                                                                          (:version initial-dataset-version)
+                                                                          )]
                   (successful-update conn
                                      job-execution-id
                                      dataset-id
