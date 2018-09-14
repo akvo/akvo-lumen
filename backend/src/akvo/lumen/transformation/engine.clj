@@ -7,7 +7,6 @@
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/transformation.sql")
-(hugsql/def-db-fns "akvo/lumen/job-execution.sql")
 
 (defmulti valid?
   "Validate transformation spec"
