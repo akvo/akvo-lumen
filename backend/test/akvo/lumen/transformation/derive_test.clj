@@ -1,5 +1,6 @@
 (ns akvo.lumen.transformation.derive-test
   (:require [akvo.lumen.transformation.derive :as derive]
+            [akvo.lumen.update :as update]
             [clojure.test :refer :all]))
 
 (deftest parse-row-object-references
@@ -45,7 +46,6 @@
   (is (= '(["row['e`']" "e`"])
          (derive/parse-row-object-references "row['e`']"))))
 
-
 (deftest computed
   (let [t1 {"op" "core/derive"
             "args" {"newColumnTitle" "C"
@@ -73,3 +73,45 @@
                        (get computed "references"))
                first
                (get "column-name"))))))
+
+(deftest adapt-code-test
+  (let [code_v1 "row.a_1+row.b_1"
+        code_v2 "row['a_2']+row['b_2']"
+        t1 {"op" "core/derive"
+            "args" {"newColumnTitle" "C"
+                    "newColumnType" "text"
+                    "code" code_v1}
+            "onError" "leave-empty"}
+
+        older-columns [{"sort" nil
+                        "type" "text"
+                        "title" "a_1"
+                        "hidden" false
+                        "direction" nil
+                        "columnName" "c1"}
+                       {"sort" nil
+                        "type" "text"
+                        "title" "b_1"
+                        "hidden" false
+                        "direction" nil
+                        "columnName" "c2"}]
+
+        new-columns [{"sort" nil
+                      "type" "text"
+                      "title" "a_2"
+                      "hidden" false
+                      "direction" nil
+                      "columnName" "c1"}
+                     {"sort" nil
+                      "type" "text"
+                      "title" "b_2"
+                      "hidden" false
+                      "direction" nil
+                      "columnName" "c2"}]
+        computed (derive/compute-transformation-code (get-in t1 ["args" "code"]) older-columns)]
+    (is (= code_v2 (derive/columnName>columnTitle computed new-columns)))
+    (is (= (update-in t1 ["args" "code"] (constantly code_v2))
+           (update/adapt-transformation t1 older-columns new-columns)))
+    ))
+
+
