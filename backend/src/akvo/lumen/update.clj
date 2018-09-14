@@ -71,7 +71,10 @@
               {:keys [success? message columns]} (engine/try-apply-operation {:tenant-conn conn} table-name importer-columns transformation)]
           (when-not success? (throw
                               (ex-info (format "Failed to update due to transformation mismatch: %s" message) {})))
-          (let [txs (conj applied-txs transformation)]
+          (let [txs (conj applied-txs
+                          (assoc transformation
+                                 "changedColumns"
+                                 (engine/diff-columns importer-columns columns)))]
             (log/debug :apply-tx :version version :columns columns :txs txs :dataset-id dataset-id)
             (update-dataset-version conn {:dataset-id dataset-id
                                           :version version
