@@ -23,7 +23,6 @@
   [op-spec older-columns new-columns]
   op-spec)
 
-
 (defn successful-update
   "On a successful update we need to create a new dataset-version that
   is similar to the previous one, except with an updated :version and
@@ -49,7 +48,6 @@
                                      :reason [reason]}))
 
 (defn- apply-transformation-log [conn table-name importer-columns original-dataset-columns last-transformations dataset-id version]
-  (log/error :VERSION version)
   (let [importer-columns (mapv (fn [{:keys [title id type key caddisflyResourceUuid] :as column}]
                         (cond-> {"type" (name type)
                                  "title" title
@@ -74,7 +72,7 @@
           (when-not success? (throw
                               (ex-info (format "Failed to update due to transformation mismatch: %s" message) {})))
           (let [txs (conj applied-txs transformation)]
-            (log/error :apply-tx :version version :columns columns :txs txs :dataset-id dataset-id)
+            (log/debug :apply-tx :version version :columns columns :txs txs :dataset-id dataset-id)
             (update-dataset-version conn {:dataset-id dataset-id
                                           :version version
                                           :columns columns
@@ -90,10 +88,7 @@
                                 (cond-> {:id (keyword (get column "columnName"))
                                          :type (keyword (get column "type"))}
                                   (contains? column "key") (assoc :key (boolean (get column "key")))))
-                              imported-columns)
-        ;; we filter here all the not derived columns
- ;;       imported-columns (filter #(not= \d (first (name (:id %)))) imported-columns)
-        ]
+                              imported-columns)]
     (set/subset? (set (map #(select-keys % [:id :type]) imported-columns))
                  (set (map #(select-keys % [:id :type]) columns)))))
 

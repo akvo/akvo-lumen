@@ -26,8 +26,6 @@ SELECT id, table_name AS "table-name", imported_table_name AS "imported-table-na
   WHERE dataset_id= :dataset-id AND transformations='[]'
   ORDER BY version DESC LIMIT 1;
 
-
-
 -- :name clone-data-table :! :n
 -- :doc Clone a data table
 CREATE TABLE :i:to-table (LIKE :i:from-table INCLUDING ALL);
@@ -64,7 +62,6 @@ SELECT j.status, j.error_log->>0 as "error-message", d.spec->'source'->>'kind' a
 SELECT dataset_id
   FROM dataset_version
   WHERE dataset_version.job_execution_id = :id;
-
 
 -- :name raster-id-by-job-execution-id :? :1
 -- :doc Find a raster id corresponding to the job execution id
