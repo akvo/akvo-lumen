@@ -39,7 +39,6 @@
     }
 
     .aggregationHelpText {
-        height: 0;
         border: 0.1rem solid transparent;
         transition: border-color 0.5s ease, height 0.5s ease;
         transition-delay: 0.75s;
@@ -50,15 +49,14 @@
         cursor: pointer;
     }
 
-    .aggregationInputContainer:hover .aggregationHelpText {
-        height: 2.5rem;
+    .aggregationInputContainer .aggregationHelpText {
         opacity: 1;
         border: 0.1rem solid $warnYellow;
     }
 
     .alert {
-        height: 0.8rem;
-        width: 0.8rem;
+        height: 1rem;
+        width: 1rem;
         background-color: $warnYellow;
         color: white;
         display: inline-block;
@@ -66,6 +64,6 @@
         @include border-radius(100%);
 
         text-align: center;
-        margin-right: 0.15rem;
+        margin-right: 0.5rem;
     }
 }

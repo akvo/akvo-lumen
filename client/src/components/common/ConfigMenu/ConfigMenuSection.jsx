@@ -19,7 +19,11 @@ class ConfigMenuSection extends Component {
             <FormattedMessage id={title} />
           </h3>
         ) : title}
-        <div className="ConfigMenuSection-inner">
+        <div
+          className={`ConfigMenuSection-inner ${
+            !title ? 'ConfigMenuSection-inner--without-title' : ''}`
+          }
+        >
           {options}
           {(advancedOptions || children) && (
             <a
