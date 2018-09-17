@@ -59,7 +59,7 @@ class LayerMenuItem extends Component {
                 onEndTitleEdit();
               }}
             >
-              ✓
+              <i className="fa fa-check-circle" />
             </button>
           </div>
           :
@@ -119,7 +119,7 @@ class LayerMenuItem extends Component {
                   ${this.state.showOverflow ? 'active' : 'inactive'}`}
                 onClick={() => this.setState({ showOverflow: true })}
               >
-                ● ● ●
+                <i className="fa fa-ellipsis-h" />
               </button>
               {this.state.showOverflow &&
                 <ContextMenu

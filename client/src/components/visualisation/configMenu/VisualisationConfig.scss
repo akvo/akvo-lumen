@@ -1,10 +1,6 @@
-@import "../../styles/modules/importAll";
+@import "../../../styles/modules/importAll";
 
 .VisualisationConfig {
-    h3 {}
-
-    h4 {}
-
     .textInput, .numberInput {
         height: 2.5rem;
         border: 0.1rem solid $lightBlueGrey;
@@ -43,9 +39,6 @@
     }
 
     .ColumnGroupingInput, .FilterMenu {
-        padding: 0.5rem;
-        background-color: $lightGrey;
-
         @include border-radius(3px);
     }
 
@@ -141,20 +134,10 @@
 
         .saveFilter {
             right: 0;
-            background-color: $lumenGreen;
-            color: $white;
-            transition: background-color 0.4s ease;
-
-            &.disabled {
-                background-color: $midGrey;
-            }
         }
 
         .cancelFilter {
             left: 0;
-            border: 0.1rem solid;
-            border-color: $black;
-            color: $black;
         }
 
         .newFilterContainer {

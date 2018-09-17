@@ -7,10 +7,9 @@ require('./VisualisationConfig.scss');
 export default function VisualisationConfig(props) {
   const vType = props.visualisation.visualisationType ?
     props.visualisation.visualisationType : 'noVisualisationType';
+
   return (
-    <div
-      className={`VisualisationConfig ${vType}`}
-    >
+    <div className={`VisualisationConfig ${vType}`}>
       <ConfigMenu
         visualisation={props.visualisation}
         metadata={props.metadata}

@@ -32,7 +32,7 @@
             }
 
             &.selected {
-                @include button(rgba($black, 0.7), white);
+                @include button($anchorLinkLight, white);
             }
         }
     }
