@@ -1,11 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 
 import ConfigMenuSectionOptionSelect from '../../common/ConfigMenu/ConfigMenuSectionOptionSelect';
 import ConfigMenuSectionOptionText from '../../common/ConfigMenu/ConfigMenuSectionOptionText';
 import SortInput from './SortInput';
+import ButtonRowInput from './ButtonRowInput';
 import { filterColumns } from '../../../utilities/utils';
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
+import ConfigMenuSectionOption from '../../common/ConfigMenu/ConfigMenuSectionOption';
 
 const getColumnTitle = (columnName, columnOptions) =>
   columnOptions.find(obj => obj.value === columnName).title;
@@ -157,25 +160,28 @@ export default function BarConfigMenu(props) {
                       columnOptions.find(item => item.value === value).title : null,
                   }, spec, onChangeSpec, columnOptions)}
                 />
-                <ConfigMenuSectionOptionSelect
-                  labelTextId="sub_bucket_method"
-                  value={spec.subBucketMethod !== null ? spec.subBucketMethod.toString() : null}
-                  name="subBucketMethodInput"
-                  disabled={spec.bucketColumn === null || spec.subBucketColumn === null}
-                  options={[
-                    {
-                      value: 'split',
-                      labelId: 'split_bars',
-                    },
-                    {
-                      value: 'stack',
-                      labelId: 'stack_bars',
-                    },
-                  ]}
-                  onChange={value => handleChangeSpec({
-                    subBucketMethod: value,
-                  }, spec, onChangeSpec, columnOptions)}
-                />
+                {spec.bucketColumn && spec.subBucketColumn && (
+                  <ConfigMenuSectionOption
+                    labelTextId="sub_bucket_method"
+                  >
+                    <ButtonRowInput
+                      options={[
+                        {
+                          value: 'split',
+                          label: <FormattedMessage id="split_bars" />,
+                        },
+                        {
+                          value: 'stack',
+                          label: <FormattedMessage id="stack_bars" />,
+                        },
+                      ]}
+                      selected={spec.subBucketMethod || 'split'}
+                      onChange={subBucketMethod => handleChangeSpec({
+                        subBucketMethod,
+                      }, spec, onChangeSpec, columnOptions)}
+                    />
+                  </ConfigMenuSectionOption>
+                )}
                 <ConfigMenuSectionOptionText
                   value={spec.legendTitle != null ? spec.legendTitle.toString() : null}
                   placeholderId="legend_title"

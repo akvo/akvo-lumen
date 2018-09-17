@@ -100,15 +100,16 @@ export default function LineConfigMenu(props) {
               })}
             />
             <ConfigMenuSectionOptionSelect
-              placeholderId={spec.metricColumnX !== null ?
+              placeholderId={(spec.metricColumnX !== null && spec.metricColumnY !== null) ?
                 'choose_aggregation_type' : 'must_choose_x_axis_column_first'}
               labelTextId="aggregation_type"
-              value={(spec.metricColumnX !== null && spec.metricAggregation != null) ?
+              value={((spec.metricColumnX !== null && spec.metricColumnY !== null) &&
+                spec.metricAggregation != null) ?
                 spec.metricAggregation.toString() : null}
               name="metricAggregationInput"
               options={aggregationOptions}
               clearable
-              disabled={spec.metricColumnY === null || spec.metricColumnX === null}
+              disabled={!spec.metricColumnY || !spec.metricColumnX}
               onChange={value => onChangeSpec({
                 metricAggregation: value,
                 axisLabelY: getAxisLabel('y', Object.assign({}, spec, { metricAggregation: value }), columnOptions),
