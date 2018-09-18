@@ -22,6 +22,17 @@ SELECT id, table_name AS "table-name", imported_table_name AS "imported-table-na
                     FROM dataset_version v
                    WHERE v.dataset_id = :dataset-id);
 
+-- :name update-dataset-version :! :n
+-- :doc Update dataset version
+UPDATE dataset_version SET columns= :columns,  transformations= :transformations
+where dataset_id= :dataset-id and version= :version;
+
+-- :name initial-dataset-version-to-update-by-dataset-id :? :1
+SELECT id, table_name AS "table-name", imported_table_name AS "imported-table-name", columns, version, transformations
+  FROM  dataset_version
+  WHERE dataset_id= :dataset-id AND transformations='[]'
+  ORDER BY version DESC LIMIT 1;
+
 -- :name dataset-version-by-dataset-id :? :1
 -- :doc Returns the most recent dataset version for a given dataset id
 SELECT id, table_name AS "table-name", imported_table_name AS "imported-table-name", columns, version, transformations
