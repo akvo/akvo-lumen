@@ -82,15 +82,20 @@ app.post("/screenshot", validate(validation.screenshot), async (req, res) => {
       }
 
       let screenshot
+      let screenshotOptions = {
+        encoding: "base64",
+        format: "A4",
+        omitBackground: false
+      }
+
       switch (format) {
         case "png": {
-          screenshot = await page.screenshot({
-            format: "A4",
-            omitBackground: false,
-            clip,
-            encoding: "base64",
-            fullPage: true,
-          })
+          if (clip === undefined) {
+            screenshotOptions.fullPage = true
+          } else {
+            screenshotOptions.clip = clip
+          }
+          screenshot = await page.screenshot(screenshotOptions)
           const data = screenshot
           res.setHeader("Content-Length", data.length)
           res.setHeader("Content-Type", "image/png")
