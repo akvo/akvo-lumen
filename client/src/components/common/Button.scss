@@ -31,6 +31,10 @@
     color: $anchorLink;
     border: 1px solid $anchorLink;    
   }
+  &--link {
+    color: $anchorLinkLight;
+    border: none;    
+  }
   &--danger {
     color: $errorRed;
     border: 1px solid $errorRed;     

@@ -7,8 +7,6 @@ import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
 import ConfigMenuSectionOptionText from '../../common/ConfigMenu/ConfigMenuSectionOptionText';
 import ConfigMenuSectionOptionSelect from '../../common/ConfigMenu/ConfigMenuSectionOptionSelect';
 
-require('./PieConfigMenu.scss');
-
 export default function PieConfigMenu(props) {
   const {
     visualisation,
@@ -20,11 +18,10 @@ export default function PieConfigMenu(props) {
   return (
     <div className="PieConfigMenu">
       <ConfigMenuSection
-        title="y_axis"
+        title="bucket_column"
         options={(
           <ConfigMenuSectionOptionSelect
             placeholderId="select_a_data_column_to_group_by"
-            labelTextId="bucket_column"
             value={spec.bucketColumn !== null ?
               spec.bucketColumn.toString() : null}
             name="xGroupColumnMenu"
@@ -50,15 +47,17 @@ export default function PieConfigMenu(props) {
               })}
             />
             {Boolean(spec.showLegend) && (
-              <ConfigMenuSectionOptionText
-                value={spec.legendTitle != null ? spec.legendTitle.toString() : null}
-                placeholderId="legend_title"
-                name="legendLabel"
-                maxLength={32}
-                onChange={event => onChangeSpec({
-                  legendTitle: event.target.value.toString(),
-                }, spec, onChangeSpec, columnOptions)}
-              />
+              <div>
+                <ConfigMenuSectionOptionText
+                  value={spec.legendTitle != null ? spec.legendTitle.toString() : null}
+                  placeholderId="legend_title"
+                  name="legendLabel"
+                  maxLength={32}
+                  onChange={event => onChangeSpec({
+                    legendTitle: event.target.value.toString(),
+                  }, spec, onChangeSpec, columnOptions)}
+                />
+              </div>
             )}
             <ToggleInput
               name="showLabels"

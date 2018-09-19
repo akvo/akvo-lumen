@@ -1,31 +1,34 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import SelectInput from './SelectInput';
+import { FormattedMessage } from 'react-intl';
+
+import ButtonRowInput from './ButtonRowInput';
+import ConfigMenuSectionOption from '../../common/ConfigMenu/ConfigMenuSectionOption';
 
 export default function SortInput({ spec, onChangeSpec }) {
   return (
-    <div>
-      <SelectInput
-        placeholder="Choose a sort direction..."
-        labelText="Sort"
-        value={spec.sort !== null ? spec.sort.toString() : null}
-        name="sortInput"
+    <ConfigMenuSectionOption
+      labelTextId="sort"
+    >
+      <ButtonRowInput
         options={[
           {
+            value: undefined,
+            label: <FormattedMessage id="none" />,
+          },
+          {
             value: 'asc',
-            label: 'Ascending',
+            label: <FormattedMessage id="ascending" />,
           },
           {
             value: 'dsc',
-            label: 'Descending',
+            label: <FormattedMessage id="descending" />,
           },
         ]}
-        clearable
-        onChange={value => onChangeSpec({
-          sort: value,
-        })}
+        selected={spec.sort ? spec.sort.toString() : undefined}
+        onChange={sort => onChangeSpec({ sort })}
       />
-    </div>
+    </ConfigMenuSectionOption>
   );
 }
 

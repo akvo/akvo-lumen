@@ -328,7 +328,7 @@ export default class ScatterChart extends Component {
                         const normalizedY = yScale(y);
 
                         return (
-                          <Group key={key}>
+                          <Group key={key || i}>
                             <Circle
                               key={i}
                               cx={normalizedX}

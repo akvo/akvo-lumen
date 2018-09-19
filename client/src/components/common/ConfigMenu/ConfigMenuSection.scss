@@ -14,6 +14,10 @@
  
   .ConfigMenuSection-inner {
     padding: 15px 0;
+
+    &--without-title {
+      padding: 0;
+    }
   }
 
   .ConfigMenuSection-advanced-seperator {

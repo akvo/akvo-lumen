@@ -189,124 +189,110 @@ const GeoshapeDataTab = injectIntl((props) => {
 
   return (
     <div className="GeoshapeDataTab">
-      <div className="inputGroup">
+      <ConfigMenuSectionOptionSelect
+        disabled={layer.datasetId === null || disabled}
+        placeholderId="select_a_geoshape_column"
+        labelTextId="geoshape_column"
+        value={layer.geom != null ? layer.geom.toString() : null}
+        name="geomInput"
+        options={filterColumns(columnOptions, 'geoshape')}
+        onChange={value => onChangeMapLayer(layerIndex, {
+          geom: value,
+          latitude: null,
+          longitude: null,
+        })}
+      />
+      <ToggleInput
+        label={intl.formatMessage({ id: 'geoshape_labels' })}
+        disabled={disabled}
+        checked={Boolean(layer.showShapeLabelInput)}
+        onChange={(val) => {
+          onChangeMapLayer(layerIndex, { showShapeLabelInput: val });
+        }}
+      />
+      {layer.showShapeLabelInput &&
         <ConfigMenuSectionOptionSelect
+          clearable
           disabled={layer.datasetId === null || disabled}
-          placeholder={intl.formatMessage({ id: 'select_a_geoshape_column' })}
-          labelText={intl.formatMessage({ id: 'geoshape_column' })}
-          value={layer.geom != null ? layer.geom.toString() : null}
-          name="geomInput"
-          options={filterColumns(columnOptions, 'geoshape')}
+          placeholderId="select_a_geoshape_label_column"
+          value={layer.shapeLabelColumn != null ? layer.shapeLabelColumn.toString() : null}
+          name="shapeLabelInput"
+          options={filterColumns(columnOptions, 'text')}
           onChange={value => onChangeMapLayer(layerIndex, {
-            geom: value,
-            latitude: null,
-            longitude: null,
+            shapeLabelColumn: value,
           })}
         />
-      </div>
-      <div className="shapeLabel">
-        <ToggleInput
-          className="shapeLabelToggle"
-          size="small"
-          label={intl.formatMessage({ id: 'geoshape_labels' })}
-          disabled={disabled}
-          checked={Boolean(layer.showShapeLabelInput)}
-          onChange={(val) => {
-            onChangeMapLayer(layerIndex, { showShapeLabelInput: val });
-          }}
-        />
-        {layer.showShapeLabelInput &&
-          <ConfigMenuSectionOptionSelect
-            clearable
-            disabled={layer.datasetId === null || disabled}
-            placeholder={intl.formatMessage({ id: 'select_a_geoshape_label_column' })}
-            value={layer.shapeLabelColumn != null ? layer.shapeLabelColumn.toString() : null}
-            name="shapeLabelInput"
-            options={filterColumns(columnOptions, 'text')}
-            onChange={value => onChangeMapLayer(layerIndex, {
-              shapeLabelColumn: value,
-            })}
-          />
-        }
-      </div>
-      <div className="inputGroup">
-        <ConfigMenuSectionOptionSelect
-          disabled={(layer.datasetId == null) || disabled}
-          placeholder={intl.formatMessage({ id: 'select_a_styling_dataset' })}
-          labelText={intl.formatMessage({ id: 'styling_dataset' })}
-          value={layer.aggregationDataset != null ?
-            layer.aggregationDataset.toString() : null}
-          name="aggregationDataset"
-          options={datasetOptions}
-          clearable
-          onChange={value => onChangeMapLayer(layerIndex, {
-            aggregationDataset: value,
-          })}
-        />
-      </div>
-      <div className="inputGroup">
-        <ConfigMenuSectionOptionSelect
-          disabled={(layer.aggregationDataset == null) || disabled}
-          placeholder={intl.formatMessage({ id: 'select_a_styling_indicator_geopoint_column' })}
-          labelText={intl.formatMessage({ id: 'styling_indicator_geopoint_column' })}
-          value={layer.aggregationGeomColumn != null ?
-            layer.aggregationGeomColumn.toString() : null}
-          name="aggregationGeomColumn"
-          options={filterColumns(aggregationColumns, ['geopoint'])}
-          clearable
-          onChange={value => onChangeMapLayer(layerIndex, {
-            aggregationGeomColumn: value,
-          })}
-        />
-      </div>
-      <div className="inputGroup">
-        <ConfigMenuSectionOptionSelect
-          disabled={(layer.aggregationDataset == null) || disabled}
-          placeholder={intl.formatMessage({ id: 'select_a_styling_indicator' })}
-          labelText={intl.formatMessage({ id: 'styling_indicator' })}
-          value={layer.aggregationColumn != null ?
-            layer.aggregationColumn.toString() : null}
-          name="aggregationColumn"
-          options={filterColumns(aggregationColumns, ['number'])}
-          clearable
-          onChange={value => onChangeMapLayer(layerIndex, {
-            aggregationColumn: value,
-          })}
-        />
-      </div>
+      }
+      <ConfigMenuSectionOptionSelect
+        disabled={(layer.datasetId == null) || disabled}
+        placeholderId="select_a_styling_dataset"
+        labelTextId="styling_dataset"
+        value={layer.aggregationDataset != null ?
+          layer.aggregationDataset.toString() : null}
+        name="aggregationDataset"
+        options={datasetOptions}
+        clearable
+        onChange={value => onChangeMapLayer(layerIndex, {
+          aggregationDataset: value,
+        })}
+      />
+      <ConfigMenuSectionOptionSelect
+        disabled={(layer.aggregationDataset == null) || disabled}
+        placeholderId="select_a_styling_indicator_geopoint_column"
+        labelTextId="styling_indicator_geopoint_column"
+        value={layer.aggregationGeomColumn != null ?
+          layer.aggregationGeomColumn.toString() : null}
+        name="aggregationGeomColumn"
+        options={filterColumns(aggregationColumns, ['geopoint'])}
+        clearable
+        onChange={value => onChangeMapLayer(layerIndex, {
+          aggregationGeomColumn: value,
+        })}
+      />
+      <ConfigMenuSectionOptionSelect
+        disabled={(layer.aggregationDataset == null) || disabled}
+        placeholderId="select_a_styling_indicator"
+        labelTextId="styling_indicator"
+        value={layer.aggregationColumn != null ?
+          layer.aggregationColumn.toString() : null}
+        name="aggregationColumn"
+        options={filterColumns(aggregationColumns, ['number'])}
+        clearable
+        onChange={value => onChangeMapLayer(layerIndex, {
+          aggregationColumn: value,
+        })}
+      />
       {Boolean(layer.aggregationGeomColumn) &&
-        <div className="inputGroup">
-          <ButtonRowInput
-            options={[
-              {
-                label: intl.formatMessage({ id: 'average' }),
-                value: 'avg',
-              },
-              {
-                label: intl.formatMessage({ id: 'sum' }),
-                value: 'sum',
-              },
-              {
-                label: intl.formatMessage({ id: 'min' }),
-                value: 'min',
-              },
-              {
-                label: intl.formatMessage({ id: 'max' }),
-                value: 'max',
-              },
-              {
-                label: intl.formatMessage({ id: 'count' }),
-                value: 'count',
-              },
-            ]}
-            selected={layer.aggregationMethod || 'avg'}
-            label={intl.formatMessage({ id: 'aggregation' })}
-            onChange={value => onChangeMapLayer(layerIndex, {
-              aggregationMethod: value,
-            })}
-            buttonSpacing="0"
-          />
-        </div>
+        <ButtonRowInput
+          options={[
+            {
+              label: intl.formatMessage({ id: 'average' }),
+              value: 'avg',
+            },
+            {
+              label: intl.formatMessage({ id: 'sum' }),
+              value: 'sum',
+            },
+            {
+              label: intl.formatMessage({ id: 'min' }),
+              value: 'min',
+            },
+            {
+              label: intl.formatMessage({ id: 'max' }),
+              value: 'max',
+            },
+            {
+              label: intl.formatMessage({ id: 'count' }),
+              value: 'count',
+            },
+          ]}
+          selected={layer.aggregationMethod || 'avg'}
+          label={intl.formatMessage({ id: 'aggregation' })}
+          onChange={value => onChangeMapLayer(layerIndex, {
+            aggregationMethod: value,
+          })}
+          buttonSpacing="0"
+        />
       }
     </div>
   );
@@ -629,7 +615,6 @@ class LayerConfigMenu extends Component {
               label={intl.formatMessage({ id: 'popup' })}
               onChange={() => null}
             />
-            <hr />
             <div
               className="inputGroup"
             >
@@ -770,18 +755,6 @@ class LayerConfigMenu extends Component {
 
     return (
       <ConfigMenuSection
-        title={(
-          <div>
-            <Button
-              primary
-              onClick={this.props.onDeselectLayer}
-            >
-              <i className="fa fa-chevron-left" />
-              &nbsp;
-              <FormattedMessage id="back_to_layers" />
-            </Button>
-          </div>
-        )}
         options={(
           <div className="LayerConfigMenu">
             <div
@@ -791,6 +764,9 @@ class LayerConfigMenu extends Component {
                 className="layerTitleContainer"
               >
                 <h2>
+                  <Button link lg onClick={this.props.onDeselectLayer}>
+                    <i className="fa fa-chevron-left" />
+                  </Button>
                   {layer.title}
                 </h2>
               </span>
