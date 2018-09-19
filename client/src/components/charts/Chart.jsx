@@ -147,8 +147,8 @@ export default class Chart extends Component {
             colors={palette}
             colorMapping={visualisation.spec.colors}
             donut={Boolean(visualisation.visualisationType === 'donut')}
-            legendVisible={Boolean(visualisation.spec.showLegend)}
-            labelsVisible={Boolean(visualisation.spec.showLabels)}
+            legendVisible={visualisation.spec.showLegend}
+            labelsVisible={visualisation.spec.showLabels}
             legendTitle={visualisation.spec.legendTitle}
             onChangeVisualisationSpec={onChangeVisualisationSpec}
             edit={Boolean(onChangeVisualisationSpec)}
@@ -201,8 +201,8 @@ export default class Chart extends Component {
             grouped={Boolean(visualisation.spec.subBucketMethod === 'split')}
             onChangeVisualisationSpec={onChangeVisualisationSpec}
             legendTitle={visualisation.spec.legendTitle}
-            legendVisible={Boolean(visualisation.spec.showLegend)}
-            labelsVisible={Boolean(visualisation.spec.showLabels)}
+            legendVisible={visualisation.spec.showLegend}
+            labelsVisible={visualisation.spec.showLabels}
           />
         );
       default:
