@@ -39,8 +39,8 @@
                                 :version (inc (:version dataset-version))
                                 :columns new-columns
                                 :transformations (vec transformations)})
-  (drop-table (:imported-table-name dataset-version))
-  (drop-table (:table-name dataset-version))
+  (drop-table conn {:table-name (:imported-table-name dataset-version)})
+  (drop-table conn {:table-name (:table-name dataset-version)})
   (update-successful-job-execution conn {:id job-execution-id}))
 
 (defn failed-update [conn job-execution-id reason]
@@ -135,10 +135,12 @@
   (let [job-execution-id (str (util/squuid))]
     (insert-dataset-update-job-execution tenant-conn {:id job-execution-id
                                                       :data-source-id data-source-id})
-    (future (do-update tenant-conn
-                       config
-                       dataset-id
-                       data-source-id
-                       job-execution-id
-                       data-source-spec))
+    (future
+      (jdbc/with-db-transaction [tx-conn tenant-conn]
+        (do-update tx-conn
+                   config
+                   dataset-id
+                   data-source-id
+                   job-execution-id
+                   data-source-spec)))
     (lib/ok {"updateId" job-execution-id})))
