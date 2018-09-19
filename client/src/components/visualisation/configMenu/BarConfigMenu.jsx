@@ -5,6 +5,7 @@ import { FormattedMessage } from 'react-intl';
 import ConfigMenuSectionOptionSelect from '../../common/ConfigMenu/ConfigMenuSectionOptionSelect';
 import ConfigMenuSectionOptionText from '../../common/ConfigMenu/ConfigMenuSectionOptionText';
 import SortInput from './SortInput';
+import ToggleInput from '../../common/ToggleInput';
 import ButtonRowInput from './ButtonRowInput';
 import { filterColumns } from '../../../utilities/utils';
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
@@ -201,6 +202,16 @@ export default function BarConfigMenu(props) {
                 axisLabelX: event.target.value.toString(),
                 axisLabelXFromUser: true,
               }, spec, onChangeSpec, columnOptions)}
+            />
+            <ToggleInput
+              name="showLabels"
+              type="checkbox"
+              labelId="show_labels"
+              className="InputGroup"
+              checked={Boolean(spec.showLabels)}
+              onChange={val => onChangeSpec({
+                showLabels: val,
+              })}
             />
           </div>
         )}

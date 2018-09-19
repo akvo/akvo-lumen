@@ -57,6 +57,7 @@ export default class StackedBarChart extends Component {
     marginBottom: PropTypes.number,
     style: PropTypes.object,
     legendVisible: PropTypes.bool,
+    labelsVisible: PropTypes.bool,
     legendTitle: PropTypes.string,
     yAxisLabel: PropTypes.string,
     xAxisLabel: PropTypes.string,
@@ -72,6 +73,7 @@ export default class StackedBarChart extends Component {
     marginTop: 20,
     marginBottom: 60,
     legendVisible: true,
+    labelsVisible: true,
     edit: false,
     padding: 0.1,
     colorMapping: {},
@@ -190,10 +192,11 @@ export default class StackedBarChart extends Component {
     });
   }
 
-  renderLabel({ nodeWidth, x, y, node, index, nodeCount }) {
+  renderLabel({ nodeWidth, x, y, node, index, nodeCount, labelsVisible }) {
     if (
       (nodeCount >= 200 && index % 10 !== 0) ||
-      (nodeCount < 200 && nodeCount > 40 && index % 5 !== 0)
+      (nodeCount < 200 && nodeCount > 40 && index % 5 !== 0) ||
+      !labelsVisible
     ) return null;
     let labelText = String(replaceLabelIfValueEmpty(node.key));
     labelText = labelText.length <= 16 ?
@@ -228,6 +231,7 @@ export default class StackedBarChart extends Component {
       marginLeft,
       style,
       legendVisible,
+      labelsVisible,
       legendTitle,
       edit,
       padding,
@@ -472,6 +476,7 @@ export default class StackedBarChart extends Component {
                               domain,
                               height: 100,
                               node,
+                              labelsVisible,
                             })}
                           </Group>
                         );
