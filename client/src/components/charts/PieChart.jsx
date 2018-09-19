@@ -142,14 +142,27 @@ export default class PieChart extends Component {
     });
   }
 
-  renderLabel({ key, value, labelPosition, edgePosition, midAngle, totalCount, angle }) {
+  renderLabel({
+    key,
+    value,
+    labelPosition,
+    edgePosition,
+    midAngle,
+    totalCount,
+    angle,
+    nextNode,
+  }) {
     const { print, interactive, legendVisible, labelsVisible } = this.props;
     const offset = (input, mult) => Math.floor(input * mult);
     const labelOffset = 0.95;
     const edgeOffset = 1.01;
     const showKey = Boolean(!legendVisible);
     const showLabel = Boolean(!interactive || print || labelsVisible);
-    return ((print || !interactive || !legendVisible || labelsVisible) && angle > Math.PI / 12) ? (
+    const nextNodeAngle = nextNode.endAngle - nextNode.startAngle;
+    return (
+      (print || !interactive || !legendVisible || labelsVisible) &&
+      (angle > Math.PI / 12 || nextNodeAngle > Math.PI / 12)
+    ) ? (
       <Group>
         <Text
           textAnchor={midAngle > Math.PI / 2 ? 'end' : 'start'}
@@ -333,6 +346,7 @@ export default class PieChart extends Component {
                                 edgePosition,
                                 totalCount,
                                 angle: endAngle - startAngle,
+                                nextNode: nodes[i + 1] || nodes[0],
                               })}
                             </Group>
                           );
