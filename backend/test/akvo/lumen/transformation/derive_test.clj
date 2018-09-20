@@ -19,6 +19,9 @@
   (is (= '(["row['a b']" "a b"] ["row['c']" "c"])
          (derive/parse-row-object-references " row['a b'] + row['c'];")))
 
+  (is (= '(["row['a-b']" "a-b"] ["row['c d']" "c d"])
+         (derive/parse-row-object-references " row['a-b'] + row['c d'];")))
+
   (is (= '(["row['foo']" "foo"])
          (derive/parse-row-object-references "row['foo'].toUpperCase()")))
 
