@@ -1,7 +1,33 @@
 (ns akvo.lumen.transformation.derive-test
   (:require [akvo.lumen.transformation.derive :as derive]
             [akvo.lumen.update :as update]
+            [clojure.test.check.generators :as gen]
+            [clojure.string :as str]
+            [clojure.tools.logging :as log]
+            [clojure.test.check.properties :as prop]
+            [clojure.test.check.clojure-test :refer (defspec)]
             [clojure.test :refer :all]))
+
+(defspec parse-row-object-references-double-quote-gen-test
+  10000
+  (prop/for-all [v  (gen/not-empty (gen/such-that #(not (str/includes? % "\"")) gen/string 100))]
+                (let [expression (format "row[\"%s\"]" v)
+                      r1 (derive/parse-row-object-references expression)
+                      res (= (list (list expression v))
+                             (derive/parse-row-object-references expression))]
+                  (when-not res (log/error v expression res))
+                  res)))
+
+(defspec parse-row-object-references-simple-quote-gen-test
+  10000
+  (prop/for-all [v  (gen/not-empty (gen/such-that #(not (str/includes? % "'")) gen/string 100))]
+                (let [expression (format "row['%s']" v)
+                      r1 (derive/parse-row-object-references expression)
+                      res (= (list (list expression v))
+                             (derive/parse-row-object-references expression))]
+                  (when-not res (log/error v expression res))
+                  res)))
+
 
 (deftest parse-row-object-references
   (is (= '(["row.a" "a"])
