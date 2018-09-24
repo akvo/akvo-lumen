@@ -13,7 +13,11 @@
         justify-content: space-around;
         align-items: center;
         height: 4rem;
-        border-bottom: 0.1rem solid $midGrey;
+
+        h2 {
+            font-size: 1.1em;
+            font-weight: 600;
+        }
     }
 
     .deselectLayer {
@@ -22,14 +26,13 @@
 
     .layerTitleContainer {
         flex: 5;
-        padding: 0 0.5rem;
     }
 
     .TabMenu {
         display: flex;
         justify-content: space-around;
         align-items: center;
-        border-bottom: 0.1rem solid $midGrey;
+        border-bottom: 1px solid $lightGrey;
 
         .tab {
             flex: 1;
@@ -41,18 +44,28 @@
             margin: 0 15%;
             text-align: center;
             height: 3rem;
-            color: $akvoPurple;
-            border-bottom: 0.2rem solid transparent;
+            color: $textPrimary;
+            border-bottom: 0.1rem solid transparent;
+
+            &:first-child {
+                margin-left: 0;
+                width: 85%;
+            }
+
+            &:last-child {
+                margin-right: 0;
+                width: 85%;
+            }
         }
 
         .tab.active .tabButton {
-            color: $midGrey;
-            border-bottom: 0.2rem solid $midGrey;
+            color: $anchorLinkLight;
+            border-bottom: 0.1rem solid $anchorLinkLight;
         }
     }
 
     .tabContent {
-        margin: 1rem;
+        margin: 1rem 0;
 
         .ButtonRowInput, .ToggleInput {
             margin: 1.5rem 0;
@@ -61,6 +74,7 @@
         h4 {
             font-weight: initial;
             color: $black;
+            font-size: 1em;
         }
 
         hr {

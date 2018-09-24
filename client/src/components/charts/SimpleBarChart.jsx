@@ -80,6 +80,7 @@ export default class SimpleBarChart extends Component {
     marginBottom: PropTypes.number,
     style: PropTypes.object,
     legendVisible: PropTypes.bool,
+    labelsVisible: PropTypes.bool,
     yAxisLabel: PropTypes.string,
     yAxisTicks: PropTypes.number,
     xAxisLabel: PropTypes.string,
@@ -93,6 +94,7 @@ export default class SimpleBarChart extends Component {
     marginTop: 70,
     marginBottom: 60,
     legendVisible: false,
+    labelsVisible: true,
     edit: false,
     padding: 0.1,
     colorMapping: {},
@@ -181,10 +183,11 @@ export default class SimpleBarChart extends Component {
     });
   }
 
-  renderLabel({ key, nodeWidth, x, y, domain, value, type, index, nodeCount }) {
+  renderLabel({ key, nodeWidth, x, y, domain, value, type, index, nodeCount, labelsVisible }) {
     if (
       (nodeCount >= 200 && index % 10 !== 0) ||
-      (nodeCount < 200 && nodeCount > 40 && index % 5 !== 0)
+      (nodeCount < 200 && nodeCount > 40 && index % 5 !== 0) ||
+      !labelsVisible
     ) return null;
     let labelText = String(getLabelText(value, type));
     labelText = labelText.length <= 16 ?
@@ -259,6 +262,7 @@ export default class SimpleBarChart extends Component {
       yAxisTicks,
       xAxisLabel,
       grid,
+      labelsVisible,
     } = this.props;
 
     const { tooltipItems, tooltipVisible, tooltipPosition } = this.state;
@@ -434,6 +438,7 @@ export default class SimpleBarChart extends Component {
                               domain,
                               height: normalizedHeight,
                               type: dataType,
+                              labelsVisible,
                             })}
                           </Group>
                         );

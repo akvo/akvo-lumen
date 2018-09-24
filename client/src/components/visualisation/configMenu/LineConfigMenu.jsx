@@ -1,9 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
-import SelectInput from './SelectInput';
-import LabelInput from './LabelInput';
-import Subtitle from './Subtitle';
+
+import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
+import ConfigMenuSectionOptionText from '../../common/ConfigMenu/ConfigMenuSectionOptionText';
+import ConfigMenuSectionOptionSelect from '../../common/ConfigMenu/ConfigMenuSectionOptionSelect';
 import { filterColumns } from '../../../utilities/utils';
 
 const getColumnTitle = (columnName, columnOptions) =>
@@ -43,64 +43,80 @@ export default function LineConfigMenu(props) {
 
   return (
     <div>
-      <Subtitle><FormattedMessage id="y_axis" /></Subtitle>
-      <SelectInput
-        placeholderId="select_a_metric_column"
-        labelTextId="metric_column"
-        choice={spec.metricColumnY !== null ? spec.metricColumnY.toString() : null}
-        name="metricColumnYInput"
-        options={filterColumns(columnOptions, ['number', 'text'])}
-        onChange={value => onChangeSpec({
-          metricColumnY: value,
-          axisLabelY: getAxisLabel('y', Object.assign({}, spec, { metricColumnY: value }), columnOptions),
-          axisLabelX: getAxisLabel('x', Object.assign({}, spec, { metricColumnY: value }), columnOptions),
-        })}
+      <ConfigMenuSection
+        title="y_axis"
+        options={(
+          <ConfigMenuSectionOptionSelect
+            placeholderId="select_a_metric_column"
+            labelTextId="metric_column"
+            value={spec.metricColumnY !== null ? spec.metricColumnY.toString() : null}
+            name="metricColumnYInput"
+            options={filterColumns(columnOptions, ['number', 'text'])}
+            onChange={value => onChangeSpec({
+              metricColumnY: value,
+              axisLabelY: getAxisLabel('y', Object.assign({}, spec, { metricColumnY: value }), columnOptions),
+              axisLabelX: getAxisLabel('x', Object.assign({}, spec, { metricColumnY: value }), columnOptions),
+            })}
+          />
+        )}
+        advancedOptions={(
+          <ConfigMenuSectionOptionText
+            value={spec.axisLabelY !== null ? spec.axisLabelY.toString() : null}
+            placeholderId="y_axis_label"
+            name="yLabel"
+            onChange={event => onChangeSpec({
+              axisLabelY: event.target.value.toString(),
+              axisLabelYFromUser: true,
+            })}
+          />
+        )}
       />
-      <LabelInput
-        value={spec.axisLabelY !== null ? spec.axisLabelY.toString() : null}
-        placeholderId="y_axis_label"
-        name="yLabel"
-        onChange={event => onChangeSpec({
-          axisLabelY: event.target.value.toString(),
-          axisLabelYFromUser: true,
-        })}
-      />
-      <Subtitle><FormattedMessage id="x_axis" /></Subtitle>
-      <SelectInput
-        placeholderId="select_a_metric_column"
-        labelTextId="metric_column"
-        choice={spec.metricColumnX !== null ? spec.metricColumnX.toString() : null}
-        name="metricColumnXInput"
-        options={filterColumns(columnOptions, ['number', 'date'])}
-        onChange={value => onChangeSpec({
-          metricColumnX: value,
-          axisLabelX: getAxisLabel('x', Object.assign({}, spec, { metricColumnX: value }), columnOptions),
-        })}
-        clearable
-      />
-      <SelectInput
-        placeholderId={spec.metricColumnX !== null ?
-          'choose_aggregation_type' : 'must_choose_x_axis_column_first'}
-        labelTextId="aggregation_type"
-        choice={(spec.metricColumnX !== null && spec.metricAggregation != null) ?
-          spec.metricAggregation.toString() : null}
-        name="metricAggregationInput"
-        options={aggregationOptions}
-        clearable
-        disabled={spec.metricColumnY === null || spec.metricColumnX === null}
-        onChange={value => onChangeSpec({
-          metricAggregation: value,
-          axisLabelY: getAxisLabel('y', Object.assign({}, spec, { metricAggregation: value }), columnOptions),
-        })}
-      />
-      <LabelInput
-        value={spec.axisLabelX !== null ? spec.axisLabelX.toString() : null}
-        placeholderId="x_axis_label"
-        name="xLabel"
-        onChange={event => onChangeSpec({
-          axisLabelX: event.target.value.toString(),
-          axisLabelXFromUser: true,
-        })}
+
+      <ConfigMenuSection
+        title="x_axis"
+        options={(
+          <ConfigMenuSectionOptionSelect
+            placeholderId="select_a_metric_column"
+            labelTextId="metric_column"
+            value={spec.metricColumnX !== null ? spec.metricColumnX.toString() : null}
+            name="metricColumnXInput"
+            options={filterColumns(columnOptions, ['number', 'date'])}
+            onChange={value => onChangeSpec({
+              metricColumnX: value,
+              axisLabelX: getAxisLabel('x', Object.assign({}, spec, { metricColumnX: value }), columnOptions),
+            })}
+            clearable
+          />
+        )}
+        advancedOptions={(
+          <div>
+            <ConfigMenuSectionOptionText
+              value={spec.axisLabelX !== null ? spec.axisLabelX.toString() : null}
+              placeholderId="x_axis_label"
+              name="xLabel"
+              onChange={event => onChangeSpec({
+                axisLabelX: event.target.value.toString(),
+                axisLabelXFromUser: true,
+              })}
+            />
+            <ConfigMenuSectionOptionSelect
+              placeholderId={(spec.metricColumnX !== null && spec.metricColumnY !== null) ?
+                'choose_aggregation_type' : 'must_choose_x_axis_column_first'}
+              labelTextId="aggregation_type"
+              value={((spec.metricColumnX !== null && spec.metricColumnY !== null) &&
+                spec.metricAggregation != null) ?
+                spec.metricAggregation.toString() : null}
+              name="metricAggregationInput"
+              options={aggregationOptions}
+              clearable
+              disabled={!spec.metricColumnY || !spec.metricColumnX}
+              onChange={value => onChangeSpec({
+                metricAggregation: value,
+                axisLabelY: getAxisLabel('y', Object.assign({}, spec, { metricAggregation: value }), columnOptions),
+              })}
+            />
+          </div>
+        )}
       />
     </div>
   );

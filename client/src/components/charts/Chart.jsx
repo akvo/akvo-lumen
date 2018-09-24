@@ -201,6 +201,8 @@ export default class Chart extends Component {
             grouped={Boolean(visualisation.spec.subBucketMethod === 'split')}
             onChangeVisualisationSpec={onChangeVisualisationSpec}
             legendTitle={visualisation.spec.legendTitle}
+            legendVisible={Boolean(visualisation.spec.showLegend)}
+            labelsVisible={Boolean(visualisation.spec.showLabels)}
           />
         );
       default:

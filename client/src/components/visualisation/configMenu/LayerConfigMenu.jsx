@@ -1,15 +1,18 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
+
 import SelectMenu from '../../common/SelectMenu';
-import SelectInput from './SelectInput';
 import ButtonRowInput from './ButtonRowInput';
 import ToggleInput from '../../common/ToggleInput';
+import Button from '../../common/Button';
 import ColorLabels from './ColorLabels';
 import FilterMenu from './FilterMenu';
 import { filterColumns, checkUndefined, sortAlphabetically } from '../../../utilities/utils';
 import * as entity from '../../../domain/entity';
 import { palette } from '../../../utilities/visualisationColors';
+import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
+import ConfigMenuSectionOptionSelect from '../../common/ConfigMenu/ConfigMenuSectionOptionSelect';
 
 require('./LayerConfigMenu.scss');
 
@@ -77,11 +80,11 @@ const GeopointDataTab = injectIntl((props) => {
       {(layer.latitude != null || layer.longitude != null) &&
         <div>
           <div className="inputGroup">
-            <SelectInput
+            <ConfigMenuSectionOptionSelect
               disabled={layer.datasetId === null || disabled}
               placeholder={intl.formatMessage({ id: 'select_a_latitude_column' })}
               labelText={intl.formatMessage({ id: 'select_a_latitude_column' })}
-              choice={layer.latitude != null ? layer.latitude.toString() : null}
+              value={layer.latitude != null ? layer.latitude.toString() : null}
               name="latitudeInput"
               options={filterColumns(columnOptions, 'number')}
               onChange={value => onChangeMapLayer(layerIndex, {
@@ -90,11 +93,11 @@ const GeopointDataTab = injectIntl((props) => {
             />
           </div>
           <div className="inputGroup">
-            <SelectInput
+            <ConfigMenuSectionOptionSelect
               disabled={layer.datasetId === null || disabled}
               placeholder={intl.formatMessage({ id: 'select_a_longitude_column' })}
               labelText={intl.formatMessage({ id: 'select_a_longitude_column' })}
-              choice={layer.longitude != null ? layer.longitude.toString() : null}
+              value={layer.longitude != null ? layer.longitude.toString() : null}
               name="longitudeInput"
               options={filterColumns(columnOptions, 'number')}
               onChange={value => onChangeMapLayer(layerIndex, {
@@ -106,11 +109,11 @@ const GeopointDataTab = injectIntl((props) => {
         </div>
       }
       <div className="inputGroup">
-        <SelectInput
+        <ConfigMenuSectionOptionSelect
           disabled={layer.datasetId === null || disabled}
           placeholder={intl.formatMessage({ id: 'select_a_geopoint_column' })}
-          labelText={intl.formatMessage({ id: 'geopoint_column' })}
-          choice={layer.geom != null ? layer.geom.toString() : null}
+          labelTextId="geopoint_column"
+          value={layer.geom != null ? layer.geom.toString() : null}
           name="geomInput"
           options={filterColumns(columnOptions, 'geopoint')}
           onChange={value => onChangeMapLayer(layerIndex, {
@@ -122,14 +125,14 @@ const GeopointDataTab = injectIntl((props) => {
         />
       </div>
       <div className="inputGroup">
-        <SelectInput
+        <ConfigMenuSectionOptionSelect
           disabled={
             ((layer.latitude == null || layer.longitude == null) && layer.geom == null) ||
             disabled
           }
           placeholder={intl.formatMessage({ id: 'select_a_color_coding_column' })}
-          labelText={intl.formatMessage({ id: 'color_coding_column' })}
-          choice={layer.pointColorColumn != null ?
+          labelTextId="color_coding_column"
+          value={layer.pointColorColumn != null ?
             layer.pointColorColumn.toString() : null}
           name="xGroupColumnMenu"
           options={filterColumns(columnOptions, ['text', 'number'])}
@@ -186,124 +189,110 @@ const GeoshapeDataTab = injectIntl((props) => {
 
   return (
     <div className="GeoshapeDataTab">
-      <div className="inputGroup">
-        <SelectInput
+      <ConfigMenuSectionOptionSelect
+        disabled={layer.datasetId === null || disabled}
+        placeholderId="select_a_geoshape_column"
+        labelTextId="geoshape_column"
+        value={layer.geom != null ? layer.geom.toString() : null}
+        name="geomInput"
+        options={filterColumns(columnOptions, 'geoshape')}
+        onChange={value => onChangeMapLayer(layerIndex, {
+          geom: value,
+          latitude: null,
+          longitude: null,
+        })}
+      />
+      <ToggleInput
+        label={intl.formatMessage({ id: 'geoshape_labels' })}
+        disabled={disabled}
+        checked={Boolean(layer.showShapeLabelInput)}
+        onChange={(val) => {
+          onChangeMapLayer(layerIndex, { showShapeLabelInput: val });
+        }}
+      />
+      {layer.showShapeLabelInput &&
+        <ConfigMenuSectionOptionSelect
+          clearable
           disabled={layer.datasetId === null || disabled}
-          placeholder={intl.formatMessage({ id: 'select_a_geoshape_column' })}
-          labelText={intl.formatMessage({ id: 'geoshape_column' })}
-          choice={layer.geom != null ? layer.geom.toString() : null}
-          name="geomInput"
-          options={filterColumns(columnOptions, 'geoshape')}
+          placeholderId="select_a_geoshape_label_column"
+          value={layer.shapeLabelColumn != null ? layer.shapeLabelColumn.toString() : null}
+          name="shapeLabelInput"
+          options={filterColumns(columnOptions, 'text')}
           onChange={value => onChangeMapLayer(layerIndex, {
-            geom: value,
-            latitude: null,
-            longitude: null,
+            shapeLabelColumn: value,
           })}
         />
-      </div>
-      <div className="shapeLabel">
-        <ToggleInput
-          className="shapeLabelToggle"
-          size="small"
-          label={intl.formatMessage({ id: 'geoshape_labels' })}
-          disabled={disabled}
-          checked={Boolean(layer.showShapeLabelInput)}
-          onChange={(val) => {
-            onChangeMapLayer(layerIndex, { showShapeLabelInput: val });
-          }}
-        />
-        {layer.showShapeLabelInput &&
-          <SelectInput
-            clearable
-            disabled={layer.datasetId === null || disabled}
-            placeholder={intl.formatMessage({ id: 'select_a_geoshape_label_column' })}
-            choice={layer.shapeLabelColumn != null ? layer.shapeLabelColumn.toString() : null}
-            name="shapeLabelInput"
-            options={filterColumns(columnOptions, 'text')}
-            onChange={value => onChangeMapLayer(layerIndex, {
-              shapeLabelColumn: value,
-            })}
-          />
-        }
-      </div>
-      <div className="inputGroup">
-        <SelectInput
-          disabled={(layer.datasetId == null) || disabled}
-          placeholder={intl.formatMessage({ id: 'select_a_styling_dataset' })}
-          labelText={intl.formatMessage({ id: 'styling_dataset' })}
-          choice={layer.aggregationDataset != null ?
-            layer.aggregationDataset.toString() : null}
-          name="aggregationDataset"
-          options={datasetOptions}
-          clearable
-          onChange={value => onChangeMapLayer(layerIndex, {
-            aggregationDataset: value,
-          })}
-        />
-      </div>
-      <div className="inputGroup">
-        <SelectInput
-          disabled={(layer.aggregationDataset == null) || disabled}
-          placeholder={intl.formatMessage({ id: 'select_a_styling_indicator_geopoint_column' })}
-          labelText={intl.formatMessage({ id: 'styling_indicator_geopoint_column' })}
-          choice={layer.aggregationGeomColumn != null ?
-            layer.aggregationGeomColumn.toString() : null}
-          name="aggregationGeomColumn"
-          options={filterColumns(aggregationColumns, ['geopoint'])}
-          clearable
-          onChange={value => onChangeMapLayer(layerIndex, {
-            aggregationGeomColumn: value,
-          })}
-        />
-      </div>
-      <div className="inputGroup">
-        <SelectInput
-          disabled={(layer.aggregationDataset == null) || disabled}
-          placeholder={intl.formatMessage({ id: 'select_a_styling_indicator' })}
-          labelText={intl.formatMessage({ id: 'styling_indicator' })}
-          choice={layer.aggregationColumn != null ?
-            layer.aggregationColumn.toString() : null}
-          name="aggregationColumn"
-          options={filterColumns(aggregationColumns, ['number'])}
-          clearable
-          onChange={value => onChangeMapLayer(layerIndex, {
-            aggregationColumn: value,
-          })}
-        />
-      </div>
+      }
+      <ConfigMenuSectionOptionSelect
+        disabled={(layer.datasetId == null) || disabled}
+        placeholderId="select_a_styling_dataset"
+        labelTextId="styling_dataset"
+        value={layer.aggregationDataset != null ?
+          layer.aggregationDataset.toString() : null}
+        name="aggregationDataset"
+        options={datasetOptions}
+        clearable
+        onChange={value => onChangeMapLayer(layerIndex, {
+          aggregationDataset: value,
+        })}
+      />
+      <ConfigMenuSectionOptionSelect
+        disabled={(layer.aggregationDataset == null) || disabled}
+        placeholderId="select_a_styling_indicator_geopoint_column"
+        labelTextId="styling_indicator_geopoint_column"
+        value={layer.aggregationGeomColumn != null ?
+          layer.aggregationGeomColumn.toString() : null}
+        name="aggregationGeomColumn"
+        options={filterColumns(aggregationColumns, ['geopoint'])}
+        clearable
+        onChange={value => onChangeMapLayer(layerIndex, {
+          aggregationGeomColumn: value,
+        })}
+      />
+      <ConfigMenuSectionOptionSelect
+        disabled={(layer.aggregationDataset == null) || disabled}
+        placeholderId="select_a_styling_indicator"
+        labelTextId="styling_indicator"
+        value={layer.aggregationColumn != null ?
+          layer.aggregationColumn.toString() : null}
+        name="aggregationColumn"
+        options={filterColumns(aggregationColumns, ['number'])}
+        clearable
+        onChange={value => onChangeMapLayer(layerIndex, {
+          aggregationColumn: value,
+        })}
+      />
       {Boolean(layer.aggregationGeomColumn) &&
-        <div className="inputGroup">
-          <ButtonRowInput
-            options={[
-              {
-                label: intl.formatMessage({ id: 'average' }),
-                value: 'avg',
-              },
-              {
-                label: intl.formatMessage({ id: 'sum' }),
-                value: 'sum',
-              },
-              {
-                label: intl.formatMessage({ id: 'min' }),
-                value: 'min',
-              },
-              {
-                label: intl.formatMessage({ id: 'max' }),
-                value: 'max',
-              },
-              {
-                label: intl.formatMessage({ id: 'count' }),
-                value: 'count',
-              },
-            ]}
-            selected={layer.aggregationMethod || 'avg'}
-            label={intl.formatMessage({ id: 'aggregation' })}
-            onChange={value => onChangeMapLayer(layerIndex, {
-              aggregationMethod: value,
-            })}
-            buttonSpacing="0"
-          />
-        </div>
+        <ButtonRowInput
+          options={[
+            {
+              label: intl.formatMessage({ id: 'average' }),
+              value: 'avg',
+            },
+            {
+              label: intl.formatMessage({ id: 'sum' }),
+              value: 'sum',
+            },
+            {
+              label: intl.formatMessage({ id: 'min' }),
+              value: 'min',
+            },
+            {
+              label: intl.formatMessage({ id: 'max' }),
+              value: 'max',
+            },
+            {
+              label: intl.formatMessage({ id: 'count' }),
+              value: 'count',
+            },
+          ]}
+          selected={layer.aggregationMethod || 'avg'}
+          label={intl.formatMessage({ id: 'aggregation' })}
+          onChange={value => onChangeMapLayer(layerIndex, {
+            aggregationMethod: value,
+          })}
+          buttonSpacing="0"
+        />
       }
     </div>
   );
@@ -626,7 +615,6 @@ class LayerConfigMenu extends Component {
               label={intl.formatMessage({ id: 'popup' })}
               onChange={() => null}
             />
-            <hr />
             <div
               className="inputGroup"
             >
@@ -766,35 +754,34 @@ class LayerConfigMenu extends Component {
     const columnOptions = getSelectMenuOptionsFromColumnList(columns, intl);
 
     return (
-      <div
-        className="LayerConfigMenu"
-      >
-        <div
-          className="header"
-        >
-          <button
-            className="clickable deselectLayer"
-            onClick={this.props.onDeselectLayer}
-          >
-            ←
-          </button>
-          <span
-            className="layerTitleContainer"
-          >
-            <h2>
-              {layer.title}
-            </h2>
-          </span>
-        </div>
-        <TabMenu
-          activeTab={this.state.activeTab}
-          onChangeTab={tab => this.setState({ activeTab: tab })}
-          tabs={['data', 'legend', 'popup', 'theme']}
-        />
-        <div className="tabContent">
-          {this.getTabContent(columnOptions)}
-        </div>
-      </div>
+      <ConfigMenuSection
+        options={(
+          <div className="LayerConfigMenu">
+            <div
+              className="header"
+            >
+              <span
+                className="layerTitleContainer"
+              >
+                <h2>
+                  <Button link lg onClick={this.props.onDeselectLayer}>
+                    <i className="fa fa-chevron-left" />
+                  </Button>
+                  {layer.title}
+                </h2>
+              </span>
+            </div>
+            <TabMenu
+              activeTab={this.state.activeTab}
+              onChangeTab={tab => this.setState({ activeTab: tab })}
+              tabs={['data', 'legend', 'popup', 'theme']}
+            />
+            <div className="tabContent">
+              {this.getTabContent(columnOptions)}
+            </div>
+          </div>
+        )}
+      />
     );
   }
 }

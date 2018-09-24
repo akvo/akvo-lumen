@@ -8,6 +8,10 @@
 
     $small-height: 14px;
 
+    h4 {
+        font-size: 1em;
+    }
+
     .label {
         flex: 1;
     }
@@ -27,7 +31,7 @@
         border-radius: 3px;
         transition: background-color 0.25s ease-out;
         &.active {
-            background-color: $lime2;
+            background-color: $anchorLinkLight;
         }
     }
     &.default .toggle {

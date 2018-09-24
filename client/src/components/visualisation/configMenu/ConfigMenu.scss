@@ -1,4 +1,4 @@
-@import "../../styles/modules/importAll";
+@import "../../../styles/modules/importAll";
 
 .ConfigMenu {
 
@@ -12,8 +12,6 @@
             padding: 2rem 1rem;
             background-color: rgba(white, 1);
             color: rgba($black, 0.6);
-
-            /*overflow: hidden;*/
             transition: all 0.1s ease;
             margin: 0.25rem;
             background-repeat: no-repeat;
@@ -26,38 +24,6 @@
                 background-color: rgba($black, 0.05);
                 opacity: 1;
                 color: $black;
-            }
-
-            &.bar {
-                background-image: url("../../styles/img/icon-128-visualisation-bar.png");
-            }
-
-            &.map {
-                background-image: url("../../styles/img/icon-128-visualisation-map.png");
-            }
-
-            &.pivottable {
-                background-image: url("../../styles/img/icon-128-visualisation-pivot-table.png");
-            }
-
-            &.line {
-                background-image: url("../../styles/img/icon-128-visualisation-line.png");
-            }
-
-            &.area {
-                background-image: url("../../styles/img/icon-128-visualisation-area.png");
-            }
-
-            &.pie {
-                background-image: url("../../styles/img/icon-128-visualisation-pie.png");
-            }
-
-            &.donut {
-                background-image: url("../../styles/img/icon-128-visualisation-donut.png");
-            }
-
-            &.scatter {
-                background-image: url("../../styles/img/icon-128-visualisation-scatter.png");
             }
         }
     }
@@ -73,7 +39,6 @@
     }
 
     .aggregationHelpText {
-        height: 0;
         border: 0.1rem solid transparent;
         transition: border-color 0.5s ease, height 0.5s ease;
         transition-delay: 0.75s;
@@ -84,15 +49,14 @@
         cursor: pointer;
     }
 
-    .aggregationInputContainer:hover .aggregationHelpText {
-        height: 2.5rem;
+    .aggregationInputContainer .aggregationHelpText {
         opacity: 1;
         border: 0.1rem solid $warnYellow;
     }
 
     .alert {
-        height: 0.8rem;
-        width: 0.8rem;
+        height: 1rem;
+        width: 1rem;
         background-color: $warnYellow;
         color: white;
         display: inline-block;
@@ -100,6 +64,6 @@
         @include border-radius(100%);
 
         text-align: center;
-        margin-right: 0.15rem;
+        margin-right: 0.5rem;
     }
 }

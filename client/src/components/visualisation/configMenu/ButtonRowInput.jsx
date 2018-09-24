@@ -7,9 +7,11 @@ export default function ButtonRowInput(props) {
   const { label, options, selected, disabled } = props;
   return (
     <div className={`ButtonRowInput inputGroup${props.disabled ? ' disabled' : ''}`}>
-      <h4>
-        {label}
-      </h4>
+      {label && (
+        <h4>
+          {label}
+        </h4>
+      )}
       <div
         className={`row ${props.buttonSpacing ? 'manualSpacing' : ''}`}
       >
@@ -35,8 +37,8 @@ export default function ButtonRowInput(props) {
 ButtonRowInput.propTypes = {
   disabled: PropTypes.bool,
   options: PropTypes.array.isRequired,
-  selected: PropTypes.node.isRequired,
-  label: PropTypes.node.isRequired,
+  selected: PropTypes.node,
+  label: PropTypes.node,
   onChange: PropTypes.func.isRequired,
   buttonSpacing: PropTypes.string,
 };
