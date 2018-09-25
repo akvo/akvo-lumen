@@ -3,6 +3,7 @@
   (:require [cheshire.core :as json]
             [clj-http.client :as client]
             [clojure.java.io :as io]
+            [integrant.core :as ig]
             [clojure.tools.logging :as log]
             [com.stuartsierra.component :as component]))
 
@@ -39,3 +40,12 @@
 (defn caddisfly [options]
   {:pre [(boolean (:schema-uri options))]}
   (map->Caddisfly options))
+
+(defmethod ig/init-key :akvo.lumen.component.caddisfly/local  [_ opts]
+  (println "init-key"  :opts (:caddisfly opts))
+  (dev-caddisfly (:caddisfly opts))
+  )
+
+(defmethod ig/halt-key! :akvo.lumen.component.caddisfly/local  [_ opts]
+  (println "halt-key"  opts)
+  )

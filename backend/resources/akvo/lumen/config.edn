@@ -1,0 +1,8 @@
+{:duct.core/project-ns  akvo-lumen
+ :duct.core/environment :production
+ :duct.module/logging {}
+ :akvo.lumen.component.hikaricp #ig/ref :akvo.lumen.config
+;; :duct.module/web {}
+ 
+;; :duct.router/cascading[]
+ }

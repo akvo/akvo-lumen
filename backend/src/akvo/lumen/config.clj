@@ -1,5 +1,6 @@
 (ns akvo.lumen.config
-  (:require [environ.core :refer [env]]))
+  (:require [environ.core :refer [env]]
+            [integrant.core :as ig]))
 
 (defn error-msg [env-var]
   (format "Failed to setup binding: %s environment variable missing" env-var))
@@ -38,3 +39,7 @@
    'piwik-site-id (:lumen-piwik-site-id env)
    'sentry-backend-dsn (:lumen-sentry-backend-dsn env)
    'sentry-client-dsn (:lumen-sentry-client-dsn env)})
+
+(defmethod ig/init-key :akvo.lumen.config  [a opts]
+  (println "init-config" :a a :opts opts)
+  opts)

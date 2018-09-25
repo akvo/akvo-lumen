@@ -17,8 +17,9 @@
                  [com.stuartsierra/component "0.3.2"]
                  [commons-io/commons-io "2.6"]
                  [compojure "1.6.1" :exclusions [medley]]
-                 [duct "0.8.2"]
-                 [duct/hikaricp-component "0.1.2" :exclusions [org.slf4j/slf4j-nop]]
+                 [duct/core "0.6.2"]
+                 [duct/module.logging "0.3.1"]
+                 [duct/database.sql.hikaricp "0.3.3" :exclusions [org.slf4j/slf4j-nop integrant]]
                  [environ "1.1.0"]
                  [funcool/cuerdas "2.0.5"]
                  [honeysql "0.9.3"]
@@ -74,6 +75,7 @@
    :profiles/test {:dependencies   [[org.clojure/test.check "0.10.0-alpha3"]]}
    :project/dev   {:dependencies   [[org.clojure/test.check "0.10.0-alpha3"]
                                     [duct/generate "0.8.2"]
+                                    [integrant/repl "0.2.0"]
                                     [reloaded.repl "0.2.4"]
                                     [org.clojure/tools.namespace "0.2.11"]
                                     [org.clojure/tools.nrepl "0.2.13"]
@@ -85,8 +87,8 @@
                    :repl-options   {:init-ns dev
                                     :init (do
                                             (println "Starting BackEnd ...")
-                                            (go)
-                                            (migrate-and-seed))
+                                            #_(go)
+                                            #_(migrate-and-seed))
                                     :host "0.0.0.0"
                                     :port 47480}
                    :env            {:port "3000"}}

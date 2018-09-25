@@ -3,7 +3,7 @@
    [akvo.lumen.config :refer [bindings]]
    [akvo.lumen.lib.aes :as aes]
    [clojure.java.io :as io]
-   [duct.util.system :refer [read-config]]
+   #_[duct.util.system :refer [read-config]]
    [environ.core :refer [env]]
    [hugsql.core :as hugsql]
    [meta-merge.core :refer [meta-merge]]
@@ -40,7 +40,7 @@
   ([sources bindings]
    (->> (map io/resource sources)
         (remove nil?)
-        (map #(read-config % bindings))
+        #_(map #(read-config % bindings))
         (apply meta-merge))))
 
 

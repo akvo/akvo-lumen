@@ -2,7 +2,8 @@
   (:require [cheshire.core :as json]
             [clj-http.client :as client]
             [clojure.tools.logging :as log]
-            [com.stuartsierra.component :as component]))
+            [com.stuartsierra.component :as component]
+            [integrant.core :as ig]))
 
 (defprotocol SendEmail
   (send-email [this recipients email] "Send email"))
@@ -60,3 +61,10 @@
              :from-email from-email
              :from-name from-name
              :api-url "https://api.mailjet.com/v3"}}))
+
+(defmethod ig/init-key :akvo.lumen.component.emailer/dev-emailer  [a opts]
+  (println "init-dev-emailer" :a a :opts opts)
+  (dev-emailer {}))
+
+(defmethod ig/halt-key! :akvo.lumen.component.emailer/dev-emailer  [a opts]
+  (println "halt-dev-emailer" a opts))

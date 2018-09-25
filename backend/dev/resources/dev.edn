@@ -1,11 +1,13 @@
-{:components
- {:emailer #var akvo.lumen.component.emailer/dev-emailer
-  :error-tracker #var akvo.lumen.component.error-tracker/local-error-tracker
-  :caddisfly #var akvo.lumen.component.caddisfly/dev-caddisfly}
- :config
+{:duct.core/environment :development
+ :duct.core/include ["akvo/lumen/config.edn" ]
+
+ :akvo.lumen.component.emailer/dev-emailer {}
+ :akvo.lumen.component.error-tracker/local {}
+ :akvo.lumen.component.caddisfly/local #ig/ref :akvo.lumen.config
+ :akvo.lumen.config
  {:app
   {:middleware
-   {:functions {:stacktrace #var ring.middleware.stacktrace/wrap-stacktrace}
+   {;:functions {:stacktrace #var ring.middleware.stacktrace/wrap-stacktrace}
     :applied   ^:replace [:not-found :json-response :ring-defaults :json-body
                           :wrap-auth :wrap-jwt :wrap-label-tenant :stacktrace]
     :arguments {:wrap-jwt {:keycloak-url "http://auth.lumen.local:8080/auth"
@@ -33,4 +35,6 @@
              :realm "akvo"
              :credentials
              {"client_id" "akvo-lumen-confidential"
-              "client_secret" "caed3964-09dd-4752-b0bb-22c8e8ffd631"}}}}
+              "client_secret" "caed3964-09dd-4752-b0bb-22c8e8ffd631"}}}
+
+ }

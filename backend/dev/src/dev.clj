@@ -11,14 +11,36 @@
             [clojure.tools.namespace.repl :refer [refresh]]
             [com.stuartsierra.component :as component]
             [duct.generate :as gen]
-            [duct.util.repl :refer [setup test cljs-repl] :as duct-repl]
-            [duct.util.system :refer [load-system]]
+            [duct.core :as duct]
+            #_[duct.util.system :refer [load-system]]
+            [integrant.repl.state :as state]
+            [integrant.core :as ig]
+            [integrant.repl :as ir]
             [reloaded.repl :refer [system init start stop go reset]])
   (:import [org.postgresql.util PSQLException PGobject]))
 
+(duct/load-hierarchy)
+(defn read-config []
+  (duct/read-config (io/resource "dev.edn")))
+
+(def config ((ir/set-prep! (comp duct/prep read-config))))
+
+
+(ir/go)
+#_(println "JOR:>"(:akvo.lumen.component.emailer/dev-emailer state/system))
+#_(println "JOR:>"(:akvo.lumen.config state/system))
+(ir/halt)
+state/system
+
+
+
 (defn new-system []
-  (load-system (keep io/resource
+
+  #_(load-system
+     (keep io/resource
                      ["akvo/lumen/system.edn" "dev.edn" "local.edn"])))
+
+
 
 (when (io/resource "local.clj")
   (load "local"))

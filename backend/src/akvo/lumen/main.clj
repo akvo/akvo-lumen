@@ -6,14 +6,15 @@
             [akvo.lumen.migrate :as migrate]
             [clojure.java.io :as io]
             [com.stuartsierra.component :as component]
-            [duct.util.runtime :refer [add-shutdown-hook]]
-            [duct.util.system :refer [load-system]]
+;;            [duct.util.runtime :refer [add-shutdown-hook]]
+  ;;          [duct.util.system :refer [load-system]]
+            [integrant.core :as ig]
             [environ.core :refer [env]]))
 
 
 (defn -main [& args]
   (config/assert-bindings)
-  (let [system (load-system [(io/resource "akvo/lumen/system.edn")]
+  #_(let [system (load-system [(io/resource "akvo/lumen/system.edn")]
                             (config/bindings))]
     (println "Starting HTTP server on port" (-> system :http :port))
     (migrate/migrate)
