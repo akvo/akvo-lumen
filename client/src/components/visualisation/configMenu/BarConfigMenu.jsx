@@ -208,7 +208,7 @@ export default function BarConfigMenu(props) {
               type="checkbox"
               labelId="show_labels"
               className="InputGroup"
-              checked={Boolean(spec.showLabels)}
+              checked={typeof spec.showLabels !== 'undefined' ? spec.showLabels : true}
               onChange={val => onChangeSpec({
                 showLabels: val,
               })}
