@@ -186,10 +186,9 @@ export default class SimpleBarChart extends Component {
   renderLabel({ key, nodeWidth, x, y, domain, value, type, index, nodeCount, labelsVisible }) {
     if (
       (nodeCount >= 200 && index % 10 !== 0) ||
-      (nodeCount < 200 && nodeCount > 40 && index % 5 !== 0) ||
-      !labelsVisible
+      (nodeCount < 200 && nodeCount > 40 && index % 5 !== 0)
     ) return null;
-    let labelText = String(getLabelText(value, type));
+    let labelText = `${String(getLabelText(value, type))}${labelsVisible ? `: ${heuristicRound(value)}` : ''}`;
     labelText = labelText.length <= 16 ?
       labelText : `${labelText.substring(0, 13)}…`;
 
