@@ -47,7 +47,6 @@
   :collection [:tenant-manager]
   :dashboard [:tenant-manager]
   :dataset [:config :error-tracker :tenant-manager]
-  :raster [:config :tenant-manager]
   :env [:config :tenant-manager]
   :files [:config]
   :invite [:tenant-manager :keycloak :emailer :config]
@@ -56,13 +55,15 @@
   :library [:tenant-manager]
   :multiple-column [:caddisfly]
   :public [:tenant-manager :config]
+  :raster [:config :tenant-manager]
   :resource [:tenant-manager]
   :root [:tenant-manager]
   :share [:tenant-manager :config]
   :tier [:tenant-manager]
   :transformation [:tenant-manager :caddisfly]
   :user [:keycloak]
-  :visualisation [:config :tenant-manager]}
+  :visualisation [:config :tenant-manager]
+  }
 
  :config
  {:app

@@ -28,7 +28,7 @@
 
 (defmethod ig/init-key :akvo.lumen.endpoint.library  [_ opts]
   (log/debug "init-key" :akvo.lumen.endpoint.library :opts opts)
-  endpoint)
+  (endpoint opts))
 
 (defmethod ig/halt-key! :akvo.lumen.endpoint.library  [_ opts]
   (log/debug "halt-key" :akvo.lumen.endpoint.library opts))

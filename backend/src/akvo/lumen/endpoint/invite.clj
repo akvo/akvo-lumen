@@ -38,14 +38,14 @@
 
 (defmethod ig/init-key :akvo.lumen.endpoint.invite  [_ opts]
   (log/debug "init-key" :akvo.lumen.endpoint.invite :opts opts)
-  endpoint)
+  (endpoint opts))
 
 (defmethod ig/halt-key! :akvo.lumen.endpoint.invite  [_ opts]
   (log/debug "halt-key" :akvo.lumen.endpoint.invite opts))
 
 (defmethod ig/init-key :akvo.lumen.endpoint.invite/verify  [_ opts]
   (log/debug "init-key" :akvo.lumen.endpoint.invite/verify :opts opts)
-  verify-endpoint)
+  (verify-endpoint opts))
 
 (defmethod ig/halt-key! :akvo.lumen.endpoint.invite/verify  [_ opts]
   (log/debug "halt-key" :akvo.lumen.endpoint.invite/verify opts))

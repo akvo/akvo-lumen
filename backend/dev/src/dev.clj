@@ -24,7 +24,8 @@
 (defn read-config []
   (duct/read-config (io/resource "dev.edn")))
 
-(derive :akvo.lumen.component.emailer/dev-emailer   :akvo.lumen.component.emailer/emailer)
+(derive :akvo.lumen.component.emailer/dev-emailer :akvo.lumen.component.emailer/emailer)
+(derive :akvo.lumen.component.caddisfly/local :akvo.lumen.component.caddisfly/caddisfly)
 #_(underive :akvo.lumen.component.emailer/dev-emailer   :akvo.lumen.component.emailer/emailer )
 #_(derive :akvo.lumen.component.emailer/mailjet-emailer   :akvo.lumen.component.emailer/emailer)
 #_(underive :akvo.lumen.component.emailer/mailjet-emailer   :akvo.lumen.component.emailer/emailer)
