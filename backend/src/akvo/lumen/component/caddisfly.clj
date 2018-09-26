@@ -42,10 +42,10 @@
   (map->Caddisfly options))
 
 (defmethod ig/init-key :akvo.lumen.component.caddisfly/local  [_ opts]
-  (println "init-key"  :opts (:caddisfly opts))
+  (log/debug "init-key"  :opts (:caddisfly opts))
   (dev-caddisfly (:caddisfly opts))
   )
 
 (defmethod ig/halt-key! :akvo.lumen.component.caddisfly/local  [_ opts]
-  (println "halt-key"  opts)
+  (log/debug "halt-key"  opts)
   )

@@ -2,12 +2,23 @@
   "add integrant support"
   (:require [integrant.core :as ig]
             [ring.middleware.json]
+            [ring.middleware.stacktrace]
             [ring.middleware.defaults]
             [raven-clj.ring]
             [akvo.lumen.component.tenant-manager]
             [akvo.lumen.auth]
             [duct.middleware.errors]
+            [duct.middleware.not-found]
             [clojure.tools.logging :as log]))
+
+:akvo.lumen.middleware.ring.stacktrace/wrap-stacktrace
+
+(defmethod ig/init-key :akvo.lumen.middleware.ring.stacktrace/wrap-stacktrace  [_ opts]  
+  ring.middleware.stacktrace/wrap-stacktrace)
+
+(defmethod ig/halt-key! :akvo.lumen.middleware.ring.stacktrace/wrap-stacktrace  [_ opts]  
+  {})
+
 
 (defmethod ig/init-key :akvo.lumen.middleware.ring.json/wrap-json-body  [_ opts]  
   ring.middleware.json/wrap-json-body)
@@ -45,19 +56,20 @@
 (defmethod ig/halt-key! :akvo.lumen.middleware.tenant-manager/wrap-label-tenant  [_ opts]  
   {})
 
-(defmethod ig/init-key :akvo.lumen.sentry/wrap-sentry  [_ opts]  
+(defmethod ig/init-key :akvo.lumen.middleware.sentry/wrap-sentry  [_ opts]  
   raven-clj.ring/wrap-sentry)
 
-(defmethod ig/halt-key! :akvo.lumen.sentry/wrap-sentry  [_ opts]  
+(defmethod ig/halt-key! :akvo.lumen.middleware.sentry/wrap-sentry  [_ opts]  
   {})
-
-
-
-
-
 
 (defmethod ig/init-key :akvo.lumen.middleware.duct.erros/wrap-hide-errors  [_ opts]  
   duct.middleware.errors/wrap-hide-errors)
 
 (defmethod ig/halt-key! :akvo.lumen.middleware.duct.erros/wrap-hide-errors  [_ opts]  
+  {})
+
+(defmethod ig/init-key :akvo.lumen.middleware.duct.not-found/wrap-not-found  [_ opts]  
+  duct.middleware.not-found/wrap-not-found)
+
+(defmethod ig/halt-key! :akvo.lumen.middleware.duct.not-found/wrap-not-found  [_ opts]  
   {})

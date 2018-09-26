@@ -20,8 +20,14 @@
   (->LocalErrorTracker))
 
 (defmethod ig/init-key :akvo.lumen.component.error-tracker/local  [_ opts]
-  (println "init-key" _  :opts opts)
+  (log/debug "init-key" _  :opts opts)
   (local-error-tracker nil))
 
 (defmethod ig/halt-key! :akvo.lumen.component.error-tracker/local  [_ opts]
-  (println "halt-key" _ opts))
+  (log/debug "halt-key" _ opts))
+
+(defmethod ig/init-key :akvo.lumen.component.error-tracker/prod  [_ {:keys [config] :as opts}]
+  (sentry-error-tracker (-> config :error-tracker)))
+
+(defmethod ig/halt-key! :akvo.lumen.component.error-tracker/prod  [_ opts]
+  (log/debug "halt-key" _ opts))

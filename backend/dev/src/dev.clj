@@ -15,6 +15,7 @@
             #_[duct.util.system :refer [load-system]]
             [integrant.repl.state :as state]
             [integrant.core :as ig]
+            [akvo.lumen.middleware]
             [integrant.repl :as ir]
             [reloaded.repl :refer [system init start stop go reset]])
   (:import [org.postgresql.util PSQLException PGobject]))
@@ -26,7 +27,8 @@
 (derive :akvo.lumen.component.emailer/dev-emailer   :akvo.lumen.component.emailer/emailer)
 #_(underive :akvo.lumen.component.emailer/dev-emailer   :akvo.lumen.component.emailer/emailer )
 #_(derive :akvo.lumen.component.emailer/mailjet-emailer   :akvo.lumen.component.emailer/emailer)
-#_(underive :akvo.lumen.component.emailer/mailjet-emailer   :akvo.lumen.component.emailer/emailer) 
+#_(underive :akvo.lumen.component.emailer/mailjet-emailer   :akvo.lumen.component.emailer/emailer)
+
 (def config ((ir/set-prep! (comp duct/prep read-config))))
 
 #_(duct/load-hierarchy)
@@ -37,7 +39,7 @@
 #_(ir/halt)
 
 (ir/go)
-(:akvo.lumen.component.other state/system)
+(:akvo.lumen.component.error-tracker/prod state/system)
 
 
 
