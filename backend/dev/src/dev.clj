@@ -25,9 +25,8 @@
 
 (derive :akvo.lumen.component.emailer/dev-emailer   :akvo.lumen.component.emailer/emailer)
 #_(underive :akvo.lumen.component.emailer/dev-emailer   :akvo.lumen.component.emailer/emailer )
-#_(derive :akvo.lumen.component.emailer/emailer  :akvo.lumen.component.emailer/dev-emailer)
-#_(underive :akvo.lumen.component.emailer/emailer  :akvo.lumen.component.emailer/dev-emailer)
-(derive :akvo.lumen.component.emailer/mailjet-emailer   :akvo.lumen.component.emailer/emailer) 
+#_(derive :akvo.lumen.component.emailer/mailjet-emailer   :akvo.lumen.component.emailer/emailer)
+#_(underive :akvo.lumen.component.emailer/mailjet-emailer   :akvo.lumen.component.emailer/emailer) 
 (def config ((ir/set-prep! (comp duct/prep read-config))))
 
 #_(duct/load-hierarchy)
@@ -37,8 +36,9 @@
 #_(println "JOR:>"(:akvo.lumen.config state/system))
 #_(ir/halt)
 
-#_(ir/go)
-#_(:akvo.lumen.component.other state/system)
+(ir/go)
+(:akvo.lumen.component.other state/system)
+
 
 
 

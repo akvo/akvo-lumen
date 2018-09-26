@@ -24,3 +24,4 @@
 (defmethod ig/halt-key! :akvo.lumen.component.other  [_ opts]
   (println "halt-key other"  :opts opts)
   {})
+

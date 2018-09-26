@@ -41,5 +41,4 @@
    'sentry-client-dsn (:lumen-sentry-client-dsn env)})
 
 (defmethod ig/init-key :akvo.lumen.config  [a opts]
-  (println "init-config" :a a :opts opts)
   opts)

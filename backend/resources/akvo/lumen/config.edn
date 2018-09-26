@@ -1,9 +1,31 @@
 {:duct.core/project-ns  akvo-lumen
  :duct.core/environment :production
  :duct.module/logging {}
+
  :akvo.lumen.component.hikaricp/hikaricp {:config #ig/ref :akvo.lumen.config}
- :akvo.lumen.component.other {:emailer #ig/ref :akvo.lumen.component.emailer/emailer}
- ;; :akvo.lumen.component.emailer/mailjet-emailer {}
+ :akvo.lumen.middleware.duct.erros/wrap-hide-errors {}
+
+ :akvo.lumen.middleware.ring.json/wrap-json-body {}
+ :akvo.lumen.middleware.ring.json/wrap-json-response {}
+ ;;TODO      :not-found #var duct.middleware.not-found/wrap-not-found
+ :akvo.lumen.middleware.ring.defaults/wrap-defaults {}
+ :akvo.lumen.middleware.auth/wrap-auth {}
+ :akvo.lumen.middleware.auth/wrap-jwt {}
+ :akvo.lumen.middleware.tenant-manager/wrap-label-tenant {}
+ :akvo.lumen.sentry/wrap-sentry {}
+ :akvo.lumen.component.other {:emailer #ig/ref :akvo.lumen.component.emailer/emailer
+                              :functions
+                              {:hide-errors #ig/ref :akvo.lumen.middleware.duct.erros/wrap-hide-errors
+                               :json-body #ig/ref :akvo.lumen.middleware.ring.json/wrap-json-body
+                               :json-response #ig/ref :akvo.lumen.middleware.ring.json/wrap-json-response
+                               ;; not-found TODO
+                               :ring-defaults #ig/ref :akvo.lumen.middleware.ring.defaults/wrap-defaults
+                               :wrap-auth #ig/ref :akvo.lumen.middleware.auth/wrap-auth
+                               :wrap-jwt #ig/ref :akvo.lumen.middleware.auth/wrap-jwt
+                               :wrap-label-tenant #ig/ref :akvo.lumen.middleware.tenant-manager/wrap-label-tenant
+                               :wrap-sentry #ig/ref :akvo.lumen.sentry/wrap-sentry}}
+
+ :akvo.lumen.component.emailer/mailjet-emailer {}
 ;; :duct.module/web {}
  
 ;; :duct.router/cascading[]
