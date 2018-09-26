@@ -2,6 +2,8 @@
   (:require [akvo.lumen.component.tenant-manager :refer [connection]]
             [akvo.lumen.http :as http]
             [akvo.lumen.lib.aggregation :as aggregation]
+            [integrant.core :as ig]
+            [clojure.tools.logging :as log]
             [cheshire.core :as json]
             [compojure.core :refer :all])
   (:import [com.fasterxml.jackson.core JsonParseException]))
@@ -19,3 +21,9 @@
             (catch JsonParseException e
               (http/bad-request {:message (.getMessage e)})))
           (http/bad-request {:message "No query supplied"}))))))
+(defmethod ig/init-key :akvo.lumen.endpoint.aggregation  [_ opts]
+  (log/debug "init-key"  :akvo.lumen.endpoint.aggregation :opts opts)
+  endpoint)
+
+(defmethod ig/halt-key! :akvo.lumen.endpoint.aggregation  [_ opts]
+  (log/debug "halt-key" :akvo.lumen.endpoint.aggregation opts))

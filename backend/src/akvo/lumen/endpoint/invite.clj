@@ -2,6 +2,8 @@
   (:require [akvo.lumen.component.tenant-manager :refer [connection]]
             [akvo.lumen.http :as http]
             [akvo.lumen.lib.user :as user]
+            [integrant.core :as ig]
+            [clojure.tools.logging :as log]
             [compojure.core :refer :all]))
 
 
@@ -33,3 +35,17 @@
       (GET "/:id" [id]
         (user/verify-invite keycloak tenant-conn tenant id
                             (location (:invite-redirect config) request))))))
+
+(defmethod ig/init-key :akvo.lumen.endpoint.invite  [_ opts]
+  (log/debug "init-key" :akvo.lumen.endpoint.invite :opts opts)
+  endpoint)
+
+(defmethod ig/halt-key! :akvo.lumen.endpoint.invite  [_ opts]
+  (log/debug "halt-key" :akvo.lumen.endpoint.invite opts))
+
+(defmethod ig/init-key :akvo.lumen.endpoint.invite/verify  [_ opts]
+  (log/debug "init-key" :akvo.lumen.endpoint.invite/verify :opts opts)
+  verify-endpoint)
+
+(defmethod ig/halt-key! :akvo.lumen.endpoint.invite/verify  [_ opts]
+  (log/debug "halt-key" :akvo.lumen.endpoint.invite/verify opts))

@@ -12,34 +12,35 @@
 ;  :tenant-manager #var akvo.lumen.component.tenant-manager/tenant-manager
   }
  :endpoints
- {:aggregation #var akvo.lumen.endpoint.aggregation/endpoint
-  :collection #var akvo.lumen.endpoint.collection/endpoint
-  :dashboard #var akvo.lumen.endpoint.dashboard/endpoint
-  :dataset #var akvo.lumen.endpoint.dataset/endpoint
-  :export #var akvo.lumen.endpoint.export/endpoint
-  :raster #var akvo.lumen.endpoint.raster/endpoint
-  :env #var akvo.lumen.endpoint.env/endpoint
-  :files #var akvo.lumen.endpoint.files/endpoint
-  :healthz #var akvo.lumen.endpoint.healthz/endpoint
-  :invite #var akvo.lumen.endpoint.invite/endpoint
-  :invite-verify #var akvo.lumen.endpoint.invite/verify-endpoint
-  :job-execution #var akvo.lumen.endpoint.job-execution/endpoint
-  :library #var akvo.lumen.endpoint.library/endpoint
-  :multiple-column #var akvo.lumen.endpoint.multiple-column/endpoint
-  :public #var akvo.lumen.endpoint.public/endpoint
-  :resource #var akvo.lumen.endpoint.resource/endpoint
-  :root #var akvo.lumen.endpoint.root/endpoint
-  :share #var akvo.lumen.endpoint.share/endpoint
-  :tier #var akvo.lumen.endpoint.tier/endpoint
-  :transformation #var akvo.lumen.endpoint.transformation/endpoint
-  :user #var akvo.lumen.endpoint.user/endpoint
-  :visualisation #var akvo.lumen.endpoint.visualisation/endpoint}
+ {
+;;  :aggregation #var akvo.lumen.endpoint.aggregation/endpoint
+;;  :collection #var akvo.lumen.endpoint.collection/endpoint
+;;  :dashboard #var akvo.lumen.endpoint.dashboard/endpoint
+;;  :dataset #var akvo.lumen.endpoint.dataset/endpoint
+  ;;:env #var akvo.lumen.endpoint.env/endpoint
+;;  :files #var akvo.lumen.endpoint.files/endpoint
+;;  :healthz #var akvo.lumen.endpoint.healthz/endpoint
+;;  :invite #var akvo.lumen.endpoint.invite/endpoint
+;;  :invite-verify #var akvo.lumen.endpoint.invite/verify-endpoint
+;;  :job-execution #var akvo.lumen.endpoint.job-execution/endpoint
+;;  :library #var akvo.lumen.endpoint.library/endpoint
+;;  :multiple-column #var akvo.lumen.endpoint.multiple-column/endpoint
+;;  :public #var akvo.lumen.endpoint.public/endpoint
+;;  :raster #var akvo.lumen.endpoint.raster/endpoint
+;;  :resource #var akvo.lumen.endpoint.resource/endpoint
+;;  :root #var akvo.lumen.endpoint.root/endpoint
+;;  :share #var akvo.lumen.endpoint.share/endpoint
+;;  :tier #var akvo.lumen.endpoint.tier/endpoint
+;;  :transformation #var akvo.lumen.endpoint.transformation/endpoint
+;;  :user #var akvo.lumen.endpoint.user/endpoint
+;;  :visualisation #var akvo.lumen.endpoint.visualisation/endpoint
+  }
  :dependencies
  {:http [:app]
   :app [:aggregation :collection :dashboard :dataset :raster :env :emailer :files :healthz
         :invite :invite-verify :job-execution :library :public :resource :root :share
-        :tier :transformation :user :visualisation :export :multiple-column]
-  :tenant-manager [:config :db]
+        :tier :transformation :user :visualisation :multiple-column]
+;; DONE  :tenant-manager [:config :db]
   :aggregation [:tenant-manager]
   :export [:config]
   :collection [:tenant-manager]

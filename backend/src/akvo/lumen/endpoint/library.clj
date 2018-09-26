@@ -8,6 +8,8 @@
              [collection :as collection]
              [raster :as raster]]
             [akvo.lumen.variant :as variant]
+            [integrant.core :as ig]
+            [clojure.tools.logging :as log]
             [compojure.core :refer :all]))
 
 
@@ -22,3 +24,11 @@
           :rasters (variant/value (raster/all tenant-conn))
           :visualisations (variant/value (visualisation/all tenant-conn))
           :collections (variant/value (collection/all tenant-conn))})))))
+
+
+(defmethod ig/init-key :akvo.lumen.endpoint.library  [_ opts]
+  (log/debug "init-key" :akvo.lumen.endpoint.library :opts opts)
+  endpoint)
+
+(defmethod ig/halt-key! :akvo.lumen.endpoint.library  [_ opts]
+  (log/debug "halt-key" :akvo.lumen.endpoint.library opts))

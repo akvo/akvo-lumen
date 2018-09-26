@@ -1,6 +1,8 @@
 (ns akvo.lumen.endpoint.dataset
   (:require [akvo.lumen.component.tenant-manager :refer [connection]]
             [akvo.lumen.dataset :as dataset]
+            [integrant.core :as ig]
+            [clojure.tools.logging :as log]
             [compojure.core :refer :all]))
 
 
@@ -29,3 +31,10 @@
 
         (POST "/update" {:keys [body] :as request}
           (dataset/update tenant-conn config id body))))))
+
+(defmethod ig/init-key :akvo.lumen.endpoint.dataset  [_ opts]
+  (log/debug "init-key" :akvo.lumen.endpoint.dataset :opts opts)
+  endpoint)
+(defmethod ig/halt-key! :akvo.lumen.endpoint.dataset  [_ opts]
+  (log/debug "halt-key" :akvo.lumen.endpoint.dataset opts)
+  )

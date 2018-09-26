@@ -15,6 +15,28 @@
  :akvo.lumen.middleware.tenant-manager/wrap-label-tenant {}
  :akvo.lumen.middleware.sentry/wrap-sentry               {}
 
+ :akvo.lumen.endpoint.aggregation {}
+ :akvo.lumen.endpoint.collection  {}
+ :akvo.lumen.endpoint.dashboard   {}
+ :akvo.lumen.endpoint.dataset     {}
+ :akvo.lumen.endpoint.env         {}
+ :akvo.lumen.endpoint.files       {}
+ :akvo.lumen.endpoint.healthz       {}
+ :akvo.lumen.endpoint.invite       {}
+ :akvo.lumen.endpoint.invite/verify       {}
+ :akvo.lumen.endpoint.job-execution       {}
+ :akvo.lumen.endpoint.library       {}
+ :akvo.lumen.endpoint.multiple-column       {}
+ :akvo.lumen.endpoint.public       {}
+ :akvo.lumen.endpoint.raster       {}
+ :akvo.lumen.endpoint.resource       {}
+ :akvo.lumen.endpoint.root       {}
+ :akvo.lumen.endpoint.share       {}
+ :akvo.lumen.endpoint.tier       {}
+ :akvo.lumen.endpoint.transformation       {}
+ :akvo.lumen.endpoint.user       {}
+ :akvo.lumen.endpoint.visualisation       {}
+ 
  :akvo.lumen.component.http/http      {:config #ig/ref :akvo.lumen.config}
  :akvo.lumen.component.caddisfly/prod {:config #ig/ref :akvo.lumen.config}
  :akvo.lumen.component.keycloak       {:config #ig/ref :akvo.lumen.config}
@@ -22,7 +44,7 @@
                                        :db     #ig/ref :akvo.lumen.component.hikaricp/hikaricp}
  
  ;; example injecting dep
- :akvo.lumen.component.other          {:emailer #ig/ref :akvo.lumen.component.emailer/emailer}
+ :akvo.lumen.component.other {:emailer #ig/ref :akvo.lumen.component.emailer/emailer}
 
  :akvo.lumen.component.emailer/mailjet-emailer {:config #ig/ref :akvo.lumen.config}
 

@@ -11,14 +11,11 @@
             [duct.middleware.not-found]
             [clojure.tools.logging :as log]))
 
-:akvo.lumen.middleware.ring.stacktrace/wrap-stacktrace
-
 (defmethod ig/init-key :akvo.lumen.middleware.ring.stacktrace/wrap-stacktrace  [_ opts]  
   ring.middleware.stacktrace/wrap-stacktrace)
 
 (defmethod ig/halt-key! :akvo.lumen.middleware.ring.stacktrace/wrap-stacktrace  [_ opts]  
   {})
-
 
 (defmethod ig/init-key :akvo.lumen.middleware.ring.json/wrap-json-body  [_ opts]  
   ring.middleware.json/wrap-json-body)

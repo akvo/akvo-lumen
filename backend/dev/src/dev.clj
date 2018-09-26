@@ -39,7 +39,7 @@
 #_(ir/halt)
 
 (ir/go)
-(:akvo.lumen.component.tenant-manager state/system)
+(:akvo.lumen.endpoint.visualisation state/system)
 
 
 

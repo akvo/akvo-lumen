@@ -1,5 +1,7 @@
 (ns akvo.lumen.endpoint.visualisation
   (:require [akvo.lumen.component.tenant-manager :refer [connection]]
+            [integrant.core :as ig]
+            [clojure.tools.logging :as log]
             [akvo.lumen.lib.visualisation :as visualisation]
             [akvo.lumen.lib.visualisation.maps :as maps]
             [compojure.core :refer :all]))
@@ -33,4 +35,12 @@
           (visualisation/upsert tenant-conn (assoc body "id" id) jwt-claims))
 
         (DELETE "/" _
-                (visualisation/delete tenant-conn id))))))
+          (visualisation/delete tenant-conn id))))))
+
+
+(defmethod ig/init-key :akvo.lumen.endpoint.visualisation  [_ opts]
+  (log/debug "init-key" :akvo.lumen.endpoint.visualisation :opts opts)
+  endpoint)
+
+(defmethod ig/halt-key! :akvo.lumen.endpoint.visualisation  [_ opts]
+  (log/debug "halt-key" :akvo.lumen.endpoint.visualisation opts))

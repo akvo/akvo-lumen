@@ -1,6 +1,8 @@
 (ns akvo.lumen.endpoint.dashboard
   (:require [compojure.core :refer :all]
             [akvo.lumen.component.tenant-manager :refer [connection]]
+            [integrant.core :as ig]
+            [clojure.tools.logging :as log]
             [akvo.lumen.lib.dashboard :as dashboard]))
 
 
@@ -25,3 +27,10 @@
 
         (DELETE "/" _
          (dashboard/delete tenant-conn id))))))
+
+(defmethod ig/init-key :akvo.lumen.endpoint.dashboard  [_ opts]
+  (log/debug "init-key" :akvo.lumen.endpoint.dashboard :opts opts)
+  endpoint)
+(defmethod ig/halt-key! :akvo.lumen.endpoint.dashboard  [_ opts]
+  (log/debug "halt-key" :akvo.lumen.endpoint.dashboard opts)
+  )

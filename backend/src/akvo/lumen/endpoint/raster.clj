@@ -1,6 +1,8 @@
 (ns akvo.lumen.endpoint.raster
   (:require [akvo.lumen.component.tenant-manager :refer [connection]]
             [akvo.lumen.import :as import]
+            [integrant.core :as ig]
+            [clojure.tools.logging :as log]
             [akvo.lumen.lib.raster :as raster]
             [compojure.core :refer :all]))
 
@@ -21,3 +23,10 @@
 
         (DELETE "/" _
           (raster/delete tenant-conn id))))))
+
+(defmethod ig/init-key :akvo.lumen.endpoint.raster  [_ opts]
+  (log/debug "init-key" :akvo.lumen.endpoint.raster :opts opts)
+  endpoint)
+
+(defmethod ig/halt-key! :akvo.lumen.endpoint.raster  [_ opts]
+  (log/debug "halt-key" :akvo.lumen.endpoint.raster opts))
