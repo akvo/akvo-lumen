@@ -15,7 +15,14 @@
  :akvo.lumen.middleware.tenant-manager/wrap-label-tenant {}
  :akvo.lumen.middleware.sentry/wrap-sentry               {}
 
- :akvo.lumen.component.other {:emailer #ig/ref :akvo.lumen.component.emailer/emailer}
+ :akvo.lumen.component.http/http      {:config #ig/ref :akvo.lumen.config}
+ :akvo.lumen.component.caddisfly/prod {:config #ig/ref :akvo.lumen.config}
+ :akvo.lumen.component.keycloak       {:config #ig/ref :akvo.lumen.config}
+ :akvo.lumen.component.tenant-manager {:config #ig/ref :akvo.lumen.config
+                                       :db     #ig/ref :akvo.lumen.component.hikaricp/hikaricp}
+ 
+ ;; example injecting dep
+ :akvo.lumen.component.other          {:emailer #ig/ref :akvo.lumen.component.emailer/emailer}
 
  :akvo.lumen.component.emailer/mailjet-emailer {:config #ig/ref :akvo.lumen.config}
 

@@ -3,6 +3,8 @@
   We use the first domain label e.g. t1 in t1.lumen.akvo.org to dispatch."
   (:require [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.aes :as aes]
+            [clojure.tools.logging :as log]
+            [integrant.core :as ig]
             [clojure.string :as str]
             [com.stuartsierra.component :as component]
             [hugsql.core :as hugsql])
@@ -109,3 +111,11 @@
 
 (defn tenant-manager [options]
   (map->TenantManager options))
+
+
+(defmethod ig/init-key :akvo.lumen.component.tenant-manager  [_ {:keys [config] :as opts}]
+  (log/debug "init-key"  :opts  opts)
+  (tenant-manager opts))
+
+(defmethod ig/halt-key! tenant-manager  [_ opts]
+  (log/debug "halt-key"  opts))

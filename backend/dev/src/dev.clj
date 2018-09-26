@@ -39,7 +39,7 @@
 #_(ir/halt)
 
 (ir/go)
-(:akvo.lumen.component.error-tracker/prod state/system)
+(:akvo.lumen.component.tenant-manager state/system)
 
 
 

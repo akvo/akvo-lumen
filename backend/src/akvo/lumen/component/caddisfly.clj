@@ -41,11 +41,16 @@
   {:pre [(boolean (:schema-uri options))]}
   (map->Caddisfly options))
 
-(defmethod ig/init-key :akvo.lumen.component.caddisfly/local  [_ opts]
+(defmethod ig/init-key :akvo.lumen.component.caddisfly/local  [_ {:keys [config] :as opts}]
   (log/debug "init-key"  :opts (:caddisfly opts))
-  (dev-caddisfly (:caddisfly opts))
-  )
+  (dev-caddisfly (:caddisfly config)))
 
 (defmethod ig/halt-key! :akvo.lumen.component.caddisfly/local  [_ opts]
-  (log/debug "halt-key"  opts)
-  )
+  (log/debug "halt-key"  opts))
+
+(defmethod ig/init-key :akvo.lumen.component.caddisfly/prod  [_ {:keys [config] :as opts}]
+  (log/debug "init-key"  :opts (:caddisfly opts))
+  (caddisfly (:caddisfly config)))
+
+(defmethod ig/halt-key! :akvo.lumen.component.caddisfly/prod  [_ opts]
+  (log/debug "halt-key"  opts))

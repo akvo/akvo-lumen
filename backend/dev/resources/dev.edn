@@ -3,7 +3,7 @@
  :akvo.lumen.component.error-tracker/local              {}
  :akvo.lumen.component.emailer/dev-emailer              {}
  :akvo.lumen.middleware.ring.stacktrace/wrap-stacktrace {}
- :akvo.lumen.component.caddisfly/local                  #ig/ref :akvo.lumen.config
+ :akvo.lumen.component.caddisfly/local                  {:config #ig/ref :akvo.lumen.config}
  :akvo.lumen.config
  {:app
   {:middleware

@@ -4,6 +4,7 @@
   (:require [akvo.lumen.lib :as lib]
             [cheshire.core :as json]
             [clj-http.client :as client]
+            [integrant.core :as ig]
             [clojure.set :as set]
             [clojure.tools.logging :as log]
             [com.stuartsierra.component :as component]
@@ -319,3 +320,10 @@
   (map->KeycloakAgent {:issuer (format "%s/realms/%s" url realm)
                        :api-root (format "%s/admin/realms/%s" url realm)
                        :credentials credentials}))
+
+(defmethod ig/init-key :akvo.lumen.component.keycloak  [_ {:keys [config] :as opts}]
+  (log/debug "init-key"  :opts (:keycloak opts))
+  (keycloak (:keycloak config)))
+
+(defmethod ig/halt-key! :akvo.lumen.component.keycloak  [_ opts]
+  (log/debug "halt-key"  opts))

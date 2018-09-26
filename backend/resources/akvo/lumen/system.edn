@@ -1,12 +1,16 @@
 {:components
- {:app #var duct.component.handler/handler-component
-  :db #var duct.component.hikaricp/hikaricp
-  :emailer #var akvo.lumen.component.emailer/mailjet-emailer
-  :error-tracker #var akvo.lumen.component.error-tracker/sentry-error-tracker
-  :http #var akvo.lumen.component.http/http
-  :caddisfly #var akvo.lumen.component.caddisfly/caddisfly
-  :keycloak #var akvo.lumen.component.keycloak/keycloak
-  :tenant-manager #var akvo.lumen.component.tenant-manager/tenant-manager}
+ {
+  ;; todo
+  :app #var duct.component.handler/handler-component
+  
+  ;; :db #var duct.component.hikaricp/hikaricp
+ ;;  :emailer #var akvo.lumen.component.emailer/mailjet-emailer
+;;  :error-tracker #var akvo.lumen.component.error-tracker/sentry-error-tracker
+;;  :http #var akvo.lumen.component.http/http
+;;  :caddisfly #var akvo.lumen.component.caddisfly/caddisfly
+;;  :keycloak #var akvo.lumen.component.keycloak/keycloak
+;  :tenant-manager #var akvo.lumen.component.tenant-manager/tenant-manager
+  }
  :endpoints
  {:aggregation #var akvo.lumen.endpoint.aggregation/endpoint
   :collection #var akvo.lumen.endpoint.collection/endpoint
