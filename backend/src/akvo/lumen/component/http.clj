@@ -24,8 +24,11 @@
 (defn http [options]
   (map->Http options))
 
-(defmethod ig/init-key :akvo.lumen.component.http/http  [_ {:keys [config] :as opts}]
-  (http (-> config :http)))
+(defmethod ig/init-key :akvo.lumen.component.http  [_ {:keys [config app] :as opts}]
+  (log/debug "init-key"  opts)
+  (component/start (http (assoc (-> config :http) :app app))))
 
-(defmethod ig/halt-key! :akvo.lumen.component.http/http  [_ opts]
-  (log/debug "halt-key" _ opts))
+(defmethod ig/halt-key! :akvo.lumen.component.http  [_ opts]
+  (log/debug "halt-key"  opts)
+  (component/stop opts)
+)

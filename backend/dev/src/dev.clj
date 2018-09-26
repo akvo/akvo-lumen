@@ -39,7 +39,7 @@
 #_(ir/halt)
 
 (ir/go)
-(:akvo.lumen.endpoint.visualisation state/system)
+(:akvo.lumen.component.http state/system)
 
 
 

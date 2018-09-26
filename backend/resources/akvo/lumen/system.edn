@@ -1,7 +1,7 @@
 {:components
  {
   ;; todo
-  :app #var duct.component.handler/handler-component
+;;  :app #var duct.component.handler/handler-component
   
   ;; :db #var duct.component.hikaricp/hikaricp
  ;;  :emailer #var akvo.lumen.component.emailer/mailjet-emailer
@@ -36,11 +36,12 @@
 ;;  :visualisation #var akvo.lumen.endpoint.visualisation/endpoint
   }
  :dependencies
- {:http [:app]
-  :app [:aggregation :collection :dashboard :dataset :raster :env :emailer :files :healthz
+ {;;:http [:app]
+  #_:app #_[:aggregation :collection :dashboard :dataset :raster :env :emailer :files :healthz
         :invite :invite-verify :job-execution :library :public :resource :root :share
         :tier :transformation :user :visualisation :multiple-column]
 ;; DONE  :tenant-manager [:config :db]
+
   :aggregation [:tenant-manager]
   :export [:config]
   :collection [:tenant-manager]
@@ -62,6 +63,7 @@
   :transformation [:tenant-manager :caddisfly]
   :user [:keycloak]
   :visualisation [:config :tenant-manager]}
+
  :config
  {:app
   {:migrations {:tenant-manager "akvo/lumen/migrations/tenant_manager"
