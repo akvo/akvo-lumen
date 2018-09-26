@@ -23,18 +23,26 @@
 (defn read-config []
   (duct/read-config (io/resource "dev.edn")))
 
+(derive :akvo.lumen.component.emailer/dev-emailer   :akvo.lumen.component.emailer/emailer)
+#_(underive :akvo.lumen.component.emailer/dev-emailer   :akvo.lumen.component.emailer/emailer )
+#_(derive :akvo.lumen.component.emailer/emailer  :akvo.lumen.component.emailer/dev-emailer)
+#_(underive :akvo.lumen.component.emailer/emailer  :akvo.lumen.component.emailer/dev-emailer)
+(derive :akvo.lumen.component.emailer/mailjet-emailer   :akvo.lumen.component.emailer/emailer) 
 (def config ((ir/set-prep! (comp duct/prep read-config))))
 
-
-(ir/go)
+#_(duct/load-hierarchy)
+#_(ig/init config [:akvo.lumen.component.emailer/emailer])
+#_config
 #_(println "JOR:>"(:akvo.lumen.component.emailer/dev-emailer state/system))
 #_(println "JOR:>"(:akvo.lumen.config state/system))
-(ir/halt)
-state/system
+#_(ir/halt)
+
+#_(ir/go)
+#_(:akvo.lumen.component.other state/system)
 
 
 
-(defn new-system []
+#_(defn new-system []
 
   #_(load-system
      (keep io/resource
@@ -42,19 +50,19 @@ state/system
 
 
 
-(when (io/resource "local.clj")
+#_(when (io/resource "local.clj")
   (load "local"))
 
-(gen/set-ns-prefix 'akvo.lumen)
+#_(gen/set-ns-prefix 'akvo.lumen)
 
-(reloaded.repl/set-init! new-system)
+#_(reloaded.repl/set-init! new-system)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Seed
 ;;;
 
-(defn- seed-tenant
+#_(defn- seed-tenant
   "Helper function that will seed tenant to the tenants table."
   [db tenant]
   (try
@@ -67,7 +75,7 @@ state/system
     (catch PSQLException e
       (println "Seed data already loaded."))))
 
-(defn seed
+#_(defn seed
   "At the moment only support seed of tenants table."
   []
   (let [db-uri (-> (lumen-migrate/construct-system)
@@ -81,14 +89,14 @@ state/system
 ;;; Migrate
 ;;;
 
-(defn migrate []
+#_(defn migrate []
   (lumen-migrate/migrate))
 
-(defn migrate-and-seed []
+#_(defn migrate-and-seed []
   (migrate)
   (seed)
   (migrate))
 
-(defn rollback
+#_(defn rollback
   ([] (lumen-migrate/rollback {}))
   ([args] (lumen-migrate/rollback args)))

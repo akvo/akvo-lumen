@@ -62,9 +62,23 @@
              :from-name from-name
              :api-url "https://api.mailjet.com/v3"}}))
 
-(defmethod ig/init-key :akvo.lumen.component.emailer/dev-emailer  [a opts]
-  (println "init-dev-emailer" :a a :opts opts)
+
+(defmethod ig/init-key :akvo.lumen.component.emailer/mailjet-emailer  [_ opts]
+  (println "init-prod-emailer" :opts opts)
+  (mailjet-emailer {})
+  )
+
+(defmethod ig/halt-key! :akvo.lumen.component.emailer/mailjet-emailer  [_ opts]
+  (println "halt-dev-emailer" :opts opts)
+  {})
+
+
+(defmethod ig/init-key :akvo.lumen.component.emailer/dev-emailer  [_ opts]
+  (println "init-dev-emailer" :opts opts)
   (dev-emailer {}))
 
-(defmethod ig/halt-key! :akvo.lumen.component.emailer/dev-emailer  [a opts]
-  (println "halt-dev-emailer" a opts))
+(defmethod ig/halt-key! :akvo.lumen.component.emailer/dev-emailer  [_ opts]
+  (println "halt-dev-emailer" :opts opts)
+  {})
+
+
