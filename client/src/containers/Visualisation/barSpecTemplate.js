@@ -14,7 +14,7 @@ const barSpec = {
   filters: [],
   sort: null, // can be "asc", "dsc" or "null"
   truncateSize: null,
-  showLabels: true,
+  showLabels: false,
 };
 
 export default barSpec;
