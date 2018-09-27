@@ -39,12 +39,8 @@
 #_(println "JOR:>"(:akvo.lumen.config state/system))
 #_(ir/halt)
 
-(ir/go)
-(:akvo.lumen.component.http state/system)
-
-
-
-
+#_(ir/go)
+(:akvo.lumen.config state/system)
 #_(defn new-system []
 
   #_(load-system

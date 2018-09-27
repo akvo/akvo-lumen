@@ -9,8 +9,7 @@
   (sort (map key (filter (comp :routes val) component))))
 
 (defn- find-routes [component]
-  (map #(:routes (get component %))
-       (:endpoints component (find-endpoint-keys component))))
+  (:endpoints component (find-endpoint-keys component)))
 
 (defn- middleware-fn [f args]
   (let [f    (ns/resolve-var f)
@@ -32,7 +31,6 @@
       (let [routes  (find-routes component)
             wrap-mw (compose-middleware (:middleware component))
             handler (wrap-mw (apply compojure/routes routes))]
-        (log/error :HERE handler)
         (assoc component :handler handler))
       component))
   (stop [component]
@@ -47,4 +45,5 @@
   (component/start (handler-component {:endpoints endpoints :middleware (-> config :app :middleware)})))
 
 (defmethod ig/halt-key! :akvo.lumen.component.handler  [_ opts]
-  (log/debug "halt-key" :akvo.lumen.component.handler opts))
+  (log/debug "halt-key" :akvo.lumen.component.handler opts)
+  (component/stop opts))

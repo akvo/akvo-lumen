@@ -5,15 +5,16 @@
             [ring.util.response :refer [response]]))
 
 (defn endpoint [{:keys [config]}]
-  (GET "/env" request
-    (response
-      (cond-> {"keycloakClient" (:keycloak-public-client-id config)
-               "keycloakURL" (:keycloak-url config)
-               "flowApiUrl" (:flow-api-url config)
-               "piwikSiteId" (:piwik-site-id config)
-               "tenant" (:tenant request)}
-        (string? (:sentry-client-dsn config))
-        (assoc "sentryDSN" (:sentry-client-dsn config))))))
+  (let [config (:config config)]
+    (GET "/env" request
+         (response
+          (cond-> {"keycloakClient" (:keycloak-public-client-id config)
+                   "keycloakURL" (:keycloak-url config)
+                   "flowApiUrl" (:flow-api-url config)
+                   "piwikSiteId" (:piwik-site-id config)
+                   "tenant" (:tenant request)}
+            (string? (:sentry-client-dsn config))
+            (assoc "sentryDSN" (:sentry-client-dsn config)))))))
 
 (defmethod ig/init-key :akvo.lumen.endpoint.env  [_ opts]
   (log/debug "init-key" :akvo.lumen.endpoint.env :opts opts)
