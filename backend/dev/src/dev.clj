@@ -16,18 +16,20 @@
             [integrant.core :as ig]
             [akvo.lumen.middleware]
             [integrant.repl :as ir]
-            [reloaded.repl :refer [system init start stop go reset]])
+            [reloaded.repl :refer [system init start stop #_go reset]])
   (:import [org.postgresql.util PSQLException PGobject]))
+
+
+
 
 #_(duct/load-hierarchy)
 (defn read-config []
   (duct/read-config (io/resource "dev.edn")))
 
+
 (derive :akvo.lumen.component.emailer/dev-emailer :akvo.lumen.component.emailer/emailer)
 (derive :akvo.lumen.component.caddisfly/local :akvo.lumen.component.caddisfly/caddisfly)
-
-#_(underive :akvo.lumen.component.emailer/dev-emailer :akvo.lumen.component.emailer/emailer)
-#_(underive :akvo.lumen.component.caddisfly/local :akvo.lumen.component.caddisfly/caddisfly)
+(derive :akvo.lumen.component.error-tracker/local :akvo.lumen.component.error-tracker/error-tracker)
 
 (defn clean [c]
   (dissoc c :akvo.lumen.component.emailer/mailjet-emailer
@@ -35,11 +37,15 @@
           :akvo.lumen.component.error-tracker/prod))
 
 (def config ((ir/set-prep!  (comp clean duct/prep read-config))))
-
+(ig/load-namespaces config)
 #_(keys config)
 
-(ir/go)
-(keys state/system)
+(defn go []
+  (ir/go))
+#_(go)
+(defn halt! []
+  (ir/halt))
+
 #_(defn new-system []
 
   #_(load-system
@@ -60,7 +66,7 @@
 ;;; Seed
 ;;;
 
-#_(defn- seed-tenant
+(defn- seed-tenant
   "Helper function that will seed tenant to the tenants table."
   [db tenant]
   (try
@@ -73,11 +79,11 @@
     (catch PSQLException e
       (println "Seed data already loaded."))))
 
-#_(defn seed
+(defn seed
   "At the moment only support seed of tenants table."
   []
   (let [db-uri (-> (lumen-migrate/construct-system)
-                   :config :db :uri)]
+                   :akvo.lumen.config :db :uri)]
     (doseq [tenant (->> "seed.edn" io/resource slurp edn/read-string
                         :tenant-manager :tenants)]
       (seed-tenant {:connection-uri db-uri} tenant))))
@@ -87,14 +93,15 @@
 ;;; Migrate
 ;;;
 
-#_(defn migrate []
-  (lumen-migrate/migrate))
+(defn migrate []
+  (lumen-migrate/migrate "dev.edn"))
 
-#_(defn migrate-and-seed []
+(defn migrate-and-seed []
   (migrate)
   (seed)
   (migrate))
 
-#_(defn rollback
-  ([] (lumen-migrate/rollback {}))
-  ([args] (lumen-migrate/rollback args)))
+(defn rollback
+  ([] (lumen-migrate/rollback "dev.edn" {}))
+  ([args] (lumen-migrate/rollback "dev.edn" args)))
+

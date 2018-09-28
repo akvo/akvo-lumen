@@ -26,9 +26,10 @@
 
         (DELETE "/" _
           (collection/delete tenant-conn id))))))
-(defmethod ig/init-key :akvo.lumen.endpoint.collection  [_ opts]
+
+(defmethod ig/init-key :akvo.lumen.endpoint.collection/collection  [_ opts]
   (log/debug "init-key" :akvo.lumen.endpoint.collection :opts opts)
   (endpoint opts))
-(defmethod ig/halt-key! :akvo.lumen.endpoint.collection  [_ opts]
-  (log/debug "halt-key" :akvo.lumen.endpoint.collection opts)
-  )
+
+(defmethod ig/halt-key! :akvo.lumen.endpoint.collection/collection  [_ opts]
+  (log/debug "halt-key" :akvo.lumen.endpoint.collection opts))

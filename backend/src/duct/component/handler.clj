@@ -40,10 +40,10 @@
   (map->Handler options))
 
 
-(defmethod ig/init-key :akvo.lumen.component.handler  [_ {:keys [endpoints config] :as opts}]
+(defmethod ig/init-key :akvo.lumen.component.handler/handler  [_ {:keys [endpoints config] :as opts}]
   (log/debug "init-key" :akvo.lumen.component.handler :opts opts)
   (component/start (handler-component {:endpoints endpoints :middleware (-> config :app :middleware)})))
 
-(defmethod ig/halt-key! :akvo.lumen.component.handler  [_ opts]
+(defmethod ig/halt-key! :akvo.lumen.component.handler/handler  [_ opts]
   (log/debug "halt-key" :akvo.lumen.component.handler opts)
   (component/stop opts))

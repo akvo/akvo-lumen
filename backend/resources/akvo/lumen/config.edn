@@ -15,67 +15,67 @@
  :akvo.lumen.middleware.tenant-manager/wrap-label-tenant {}
  :akvo.lumen.middleware.sentry/wrap-sentry               {}
 
- :akvo.lumen.endpoint.aggregation     {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
- :akvo.lumen.endpoint.collection      {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
- :akvo.lumen.endpoint.dashboard       {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
- :akvo.lumen.endpoint.dataset         {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
-                                       :error-tracker  "" ;;TODO
-                                       :config         #ig/ref :akvo.lumen.config}
- :akvo.lumen.endpoint.env             {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
-                                       :config         #ig/ref :akvo.lumen.config}
- :akvo.lumen.endpoint.files           {:config #ig/ref :akvo.lumen.config}
- :akvo.lumen.endpoint.healthz         {}
- :akvo.lumen.endpoint.invite          {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
-                                       :keycloak       :akvo.lumen.component.keycloak
-                                       :emailer        #ig/ref :akvo.lumen.component.emailer/emailer
-                                       :config         #ig/ref :akvo.lumen.config}
- :akvo.lumen.endpoint.invite/verify   {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
-                                       :keycloak       :akvo.lumen.component.keycloak
-                                       :config         #ig/ref :akvo.lumen.config}
- :akvo.lumen.endpoint.job-execution   {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
- :akvo.lumen.endpoint.library         {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
- :akvo.lumen.endpoint.multiple-column {:caddisfly #ig/ref :akvo.lumen.component.caddisfly/caddisfly}
- :akvo.lumen.endpoint.public          {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
-                                       :config         #ig/ref :akvo.lumen.config}
- :akvo.lumen.endpoint.raster          {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
-                                       :config         #ig/ref :akvo.lumen.config}
- :akvo.lumen.endpoint.resource        {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
- :akvo.lumen.endpoint.root            {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
- :akvo.lumen.endpoint.share           {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
-                                       :config         #ig/ref :akvo.lumen.config}
- :akvo.lumen.endpoint.tier            {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
- :akvo.lumen.endpoint.transformation  {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
-                                       :caddisfly      #ig/ref :akvo.lumen.component.caddisfly/caddisfly}
- :akvo.lumen.endpoint.user            {:keycloak :akvo.lumen.component.keycloak}
- :akvo.lumen.endpoint.visualisation   {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
-                                       :config         #ig/ref :akvo.lumen.config}
+ :akvo.lumen.endpoint.aggregation/aggregation         {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
+ :akvo.lumen.endpoint.collection/collection           {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
+ :akvo.lumen.endpoint.dashboard/dashboard             {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
+ :akvo.lumen.endpoint.dataset/dataset                 {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
+                                                       :error-tracker  #ig/ref :akvo.lumen.component.error-tracker/error-tracker
+                                                       :config         #ig/ref :akvo.lumen.config}
+ :akvo.lumen.endpoint.env/env                         {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
+                                                       :config         #ig/ref :akvo.lumen.config}
+ :akvo.lumen.endpoint.files/files                     {:config #ig/ref :akvo.lumen.config}
+ :akvo.lumen.endpoint.healthz/healthz                 {}
+ :akvo.lumen.endpoint.invite/invite                   {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
+                                                       :keycloak       :akvo.lumen.component.keycloak
+                                                       :emailer        #ig/ref :akvo.lumen.component.emailer/emailer
+                                                       :config         #ig/ref :akvo.lumen.config}
+ :akvo.lumen.endpoint.invite/verify                   {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
+                                                       :keycloak       :akvo.lumen.component.keycloak
+                                                       :config         #ig/ref :akvo.lumen.config}
+ :akvo.lumen.endpoint.job-execution/job-execution     {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
+ :akvo.lumen.endpoint.library/library                 {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
+ :akvo.lumen.endpoint.multiple-column/multiple-column {:caddisfly #ig/ref :akvo.lumen.component.caddisfly/caddisfly}
+ :akvo.lumen.endpoint.public/public                   {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
+                                                       :config         #ig/ref :akvo.lumen.config}
+ :akvo.lumen.endpoint.raster/raster                   {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
+                                                       :config         #ig/ref :akvo.lumen.config}
+ :akvo.lumen.endpoint.resource/resource               {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
+ :akvo.lumen.endpoint.root/root                       {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
+ :akvo.lumen.endpoint.share/share                     {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
+                                                       :config         #ig/ref :akvo.lumen.config}
+ :akvo.lumen.endpoint.tier/tier                       {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
+ :akvo.lumen.endpoint.transformation/transformation   {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
+                                                       :caddisfly      #ig/ref :akvo.lumen.component.caddisfly/caddisfly}
+ :akvo.lumen.endpoint.user/user                       {:keycloak :akvo.lumen.component.keycloak}
+ :akvo.lumen.endpoint.visualisation/visualisation     {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
+                                                       :config         #ig/ref :akvo.lumen.config}
 
- :akvo.lumen.component.handler
- {:endpoints [#ig/ref :akvo.lumen.endpoint.aggregation
-              #ig/ref :akvo.lumen.endpoint.collection
-              #ig/ref :akvo.lumen.endpoint.dashboard
-              #ig/ref :akvo.lumen.endpoint.dataset
-              #ig/ref :akvo.lumen.endpoint.env
-              #ig/ref :akvo.lumen.endpoint.files
-              #ig/ref :akvo.lumen.endpoint.healthz
-              #ig/ref :akvo.lumen.endpoint.invite
+ :akvo.lumen.component.handler/handler
+ {:endpoints [#ig/ref :akvo.lumen.endpoint.aggregation/aggregation
+              #ig/ref :akvo.lumen.endpoint.collection/collection
+              #ig/ref :akvo.lumen.endpoint.dashboard/dashboard
+              #ig/ref :akvo.lumen.endpoint.dataset/dataset
+              #ig/ref :akvo.lumen.endpoint.env/env
+              #ig/ref :akvo.lumen.endpoint.files/files
+              #ig/ref :akvo.lumen.endpoint.healthz/healthz
+              #ig/ref :akvo.lumen.endpoint.invite/invite
               #ig/ref :akvo.lumen.endpoint.invite/verify
-              #ig/ref :akvo.lumen.endpoint.job-execution
-              #ig/ref :akvo.lumen.endpoint.library
-              #ig/ref :akvo.lumen.endpoint.multiple-column
-              #ig/ref :akvo.lumen.endpoint.public
-              #ig/ref :akvo.lumen.endpoint.raster
-              #ig/ref :akvo.lumen.endpoint.resource
-              #ig/ref :akvo.lumen.endpoint.root
-              #ig/ref :akvo.lumen.endpoint.share
-              #ig/ref :akvo.lumen.endpoint.tier
-              #ig/ref :akvo.lumen.endpoint.transformation
-              #ig/ref :akvo.lumen.endpoint.user
-              #ig/ref :akvo.lumen.endpoint.visualisation]
+              #ig/ref :akvo.lumen.endpoint.job-execution/job-execution
+              #ig/ref :akvo.lumen.endpoint.library/library
+              #ig/ref :akvo.lumen.endpoint.multiple-column/multiple-column
+              #ig/ref :akvo.lumen.endpoint.public/public
+              #ig/ref :akvo.lumen.endpoint.raster/raster
+              #ig/ref :akvo.lumen.endpoint.resource/resource
+              #ig/ref :akvo.lumen.endpoint.root/root
+              #ig/ref :akvo.lumen.endpoint.share/share
+              #ig/ref :akvo.lumen.endpoint.tier/tier
+              #ig/ref :akvo.lumen.endpoint.transformation/transformation
+              #ig/ref :akvo.lumen.endpoint.user/user
+              #ig/ref :akvo.lumen.endpoint.visualisation/visualisation]
   :config    #ig/ref :akvo.lumen.config}
  
- :akvo.lumen.component.http           {:config #ig/ref :akvo.lumen.config
-                                       :app    #ig/ref :akvo.lumen.component.handler}
+ :akvo.lumen.component.http/http      {:config #ig/ref :akvo.lumen.config
+                                       :app    #ig/ref :akvo.lumen.component.handler/handler}
  :akvo.lumen.component.caddisfly/prod {:config #ig/ref :akvo.lumen.config}
  :akvo.lumen.component.keycloak       {:config #ig/ref :akvo.lumen.config}
  :akvo.lumen.component.tenant-manager {:config #ig/ref :akvo.lumen.config

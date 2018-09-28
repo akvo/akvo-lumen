@@ -36,9 +36,9 @@
         (user/remove-user keycloak tenant jwt-claims id)))))
 
 
-(defmethod ig/init-key :akvo.lumen.endpoint.user  [_ opts]
+(defmethod ig/init-key :akvo.lumen.endpoint.user/user  [_ opts]
   (log/debug "init-key" :akvo.lumen.endpoint.user :opts opts)
   (endpoint opts))
 
-(defmethod ig/halt-key! :akvo.lumen.endpoint.user  [_ opts]
+(defmethod ig/halt-key! :akvo.lumen.endpoint.user/user  [_ opts]
   (log/debug "halt-key" :akvo.lumen.endpoint.user opts))

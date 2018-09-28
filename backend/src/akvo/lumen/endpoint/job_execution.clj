@@ -18,9 +18,9 @@
           (job-execution/delete tenant-conn id))))))
 
 
-(defmethod ig/init-key :akvo.lumen.endpoint.job-execution  [_ opts]
+(defmethod ig/init-key :akvo.lumen.endpoint.job-execution/job-execution  [_ opts]
   (log/debug "init-key" :akvo.lumen.endpoint.job-execution :opts opts)
   (endpoint opts))
 
-(defmethod ig/halt-key! :akvo.lumen.endpoint.job-execution  [_ opts]
+(defmethod ig/halt-key! :akvo.lumen.endpoint.job-execution/job-execution  [_ opts]
   (log/debug "halt-key" :akvo.lumen.endpoint.job-execution opts))

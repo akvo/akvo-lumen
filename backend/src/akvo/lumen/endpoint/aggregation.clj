@@ -21,9 +21,9 @@
             (catch JsonParseException e
               (http/bad-request {:message (.getMessage e)})))
           (http/bad-request {:message "No query supplied"}))))))
-(defmethod ig/init-key :akvo.lumen.endpoint.aggregation  [_ opts]
+(defmethod ig/init-key :akvo.lumen.endpoint.aggregation/aggregation  [_ opts]
   (log/debug "init-key"  :akvo.lumen.endpoint.aggregation :opts opts)
   (endpoint opts))
 
-(defmethod ig/halt-key! :akvo.lumen.endpoint.aggregation  [_ opts]
+(defmethod ig/halt-key! :akvo.lumen.endpoint.aggregation/aggregation  [_ opts]
   (log/debug "halt-key" :akvo.lumen.endpoint.aggregation opts))

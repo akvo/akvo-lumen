@@ -87,8 +87,8 @@
                    :repl-options   {:init-ns dev
                                     :init (do
                                             (println "Starting BackEnd ...")
-                                            #_(go)
-                                            #_(migrate-and-seed))
+                                            (go)
+                                            (migrate-and-seed))
                                     :host "0.0.0.0"
                                     :port 47480}
                    :env            {:port "3000"}}

@@ -36,11 +36,11 @@
         (user/verify-invite keycloak tenant-conn tenant id
                             (location (:invite-redirect config) request))))))
 
-(defmethod ig/init-key :akvo.lumen.endpoint.invite  [_ opts]
+(defmethod ig/init-key :akvo.lumen.endpoint.invite/invite  [_ opts]
   (log/debug "init-key" :akvo.lumen.endpoint.invite :opts opts)
   (endpoint opts))
 
-(defmethod ig/halt-key! :akvo.lumen.endpoint.invite  [_ opts]
+(defmethod ig/halt-key! :akvo.lumen.endpoint.invite/invite  [_ opts]
   (log/debug "halt-key" :akvo.lumen.endpoint.invite opts))
 
 (defmethod ig/init-key :akvo.lumen.endpoint.invite/verify  [_ opts]

@@ -22,7 +22,7 @@
     (assert (:lumen-flow-api-url env) (error-msg "LUMEN_FLOW_API_URL"))))
 
 (defn bindings []
-  {'db-uri (:lumen-db-url env)
+  {'db-uri (:lumen-db-url env "jdbc:postgresql://postgres/lumen?user=lumen&password=password&ssl=true")
    'caddisfly-schema-uri (:lumen-caddisfly-schema-uri env "https://akvoflow-public.s3.amazonaws.com/caddisfly-tests.json")
    'email-host (:lumen-email-host env)
    'email-password (:lumen-email-password env)

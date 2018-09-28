@@ -38,9 +38,9 @@
           (visualisation/delete tenant-conn id))))))
 
 
-(defmethod ig/init-key :akvo.lumen.endpoint.visualisation  [_ opts]
+(defmethod ig/init-key :akvo.lumen.endpoint.visualisation/visualisation  [_ opts]
   (log/debug "init-key" :akvo.lumen.endpoint.visualisation :opts opts)
   endpoint)
 
-(defmethod ig/halt-key! :akvo.lumen.endpoint.visualisation  [_ opts]
+(defmethod ig/halt-key! :akvo.lumen.endpoint.visualisation/visualisation  [_ opts]
   (log/debug "halt-key" :akvo.lumen.endpoint.visualisation opts))

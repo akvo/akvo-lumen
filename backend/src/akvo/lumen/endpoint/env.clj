@@ -16,10 +16,9 @@
             (string? (:sentry-client-dsn config))
             (assoc "sentryDSN" (:sentry-client-dsn config)))))))
 
-(defmethod ig/init-key :akvo.lumen.endpoint.env  [_ opts]
+(defmethod ig/init-key :akvo.lumen.endpoint.env/env  [_ opts]
   (log/debug "init-key" :akvo.lumen.endpoint.env :opts opts)
   (endpoint opts))
 
-(defmethod ig/halt-key! :akvo.lumen.endpoint.env  [_ opts]
-  (log/debug "halt-key" :akvo.lumen.endpoint.env opts)
-  )
+(defmethod ig/halt-key! :akvo.lumen.endpoint.env/env  [_ opts]
+  (log/debug "halt-key" :akvo.lumen.endpoint.env opts))

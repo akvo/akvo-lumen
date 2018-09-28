@@ -113,10 +113,10 @@
   (map->TenantManager options))
 
 
-(defmethod ig/init-key :akvo.lumen.component.tenant-manager  [_ {:keys [config] :as opts}]
-  (log/debug "init-key"  :opts  opts)
-  (component/start (tenant-manager opts)))
+(defmethod ig/init-key :akvo.lumen.component.tenant-manager  [_ {:keys [db config] :as opts}]
+  (log/debug ":akvo.lumen.component.tenant-manager"  :db  db)
+  (component/start (tenant-manager (assoc config :db db))))
 
-(defmethod ig/halt-key! tenant-manager  [_ opts]
+(defmethod ig/halt-key! :akvo.lumen.component.tenant-manager  [_ opts]
   (log/debug "halt-key"  opts)
   (component/stop opts))

@@ -32,9 +32,9 @@
         (POST "/update" {:keys [body] :as request}
           (dataset/update tenant-conn config id body))))))
 
-(defmethod ig/init-key :akvo.lumen.endpoint.dataset  [_ opts]
+(defmethod ig/init-key :akvo.lumen.endpoint.dataset/dataset  [_ opts]
   (log/debug "init-key" :akvo.lumen.endpoint.dataset :opts opts)
   (endpoint opts))
-(defmethod ig/halt-key! :akvo.lumen.endpoint.dataset  [_ opts]
+(defmethod ig/halt-key! :akvo.lumen.endpoint.dataset/dataset  [_ opts]
   (log/debug "halt-key" :akvo.lumen.endpoint.dataset opts)
   )

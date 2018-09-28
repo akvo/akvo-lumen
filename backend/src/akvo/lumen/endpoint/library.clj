@@ -16,7 +16,6 @@
 (defn endpoint [{:keys [tenant-manager]}]
   (context "/api/library" {:keys [tenant] :as request}
     (let-routes [tenant-conn (connection tenant-manager tenant)]
-
       (GET "/" _
         (lib/ok
          {:dashboards (variant/value (dashboard/all tenant-conn))
@@ -26,9 +25,9 @@
           :collections (variant/value (collection/all tenant-conn))})))))
 
 
-(defmethod ig/init-key :akvo.lumen.endpoint.library  [_ opts]
+(defmethod ig/init-key :akvo.lumen.endpoint.library/library  [_ opts]
   (log/debug "init-key" :akvo.lumen.endpoint.library :opts opts)
   (endpoint opts))
 
-(defmethod ig/halt-key! :akvo.lumen.endpoint.library  [_ opts]
+(defmethod ig/halt-key! :akvo.lumen.endpoint.library/library  [_ opts]
   (log/debug "halt-key" :akvo.lumen.endpoint.library opts))

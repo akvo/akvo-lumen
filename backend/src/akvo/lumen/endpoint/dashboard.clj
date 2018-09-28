@@ -28,9 +28,9 @@
         (DELETE "/" _
          (dashboard/delete tenant-conn id))))))
 
-(defmethod ig/init-key :akvo.lumen.endpoint.dashboard  [_ opts]
+(defmethod ig/init-key :akvo.lumen.endpoint.dashboard/dashboard  [_ opts]
   (log/debug "init-key" :akvo.lumen.endpoint.dashboard :opts opts)
   (endpoint opts))
-(defmethod ig/halt-key! :akvo.lumen.endpoint.dashboard  [_ opts]
+(defmethod ig/halt-key! :akvo.lumen.endpoint.dashboard/dashboard  [_ opts]
   (log/debug "halt-key" :akvo.lumen.endpoint.dashboard opts)
   )

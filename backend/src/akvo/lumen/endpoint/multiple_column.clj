@@ -11,9 +11,9 @@
                 (let [query (json/parse-string (get query-params "query") keyword)]
                   (multiple-column/details {:caddisfly caddisfly} (:multipleType query) (:multipleId query))))))
 
-(defmethod ig/init-key :akvo.lumen.endpoint.multiple-column  [_ opts]
+(defmethod ig/init-key :akvo.lumen.endpoint.multiple-column/multiple-column  [_ opts]
   (log/debug "init-key" :akvo.lumen.endpoint.multiple-column :opts opts)
   (endpoint opts))
 
-(defmethod ig/halt-key! :akvo.lumen.endpoint.multiple-column  [_ opts]
+(defmethod ig/halt-key! :akvo.lumen.endpoint.multiple-column/multiple-column  [_ opts]
   (log/debug "halt-key" :akvo.lumen.endpoint.multiple-column opts))

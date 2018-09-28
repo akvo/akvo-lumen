@@ -11,9 +11,9 @@
               :pod (env/env :pod-name)
               :blue-green-status (get-in req [:headers "x-blue-green-state"])})))
 
-(defmethod ig/init-key :akvo.lumen.endpoint.healthz  [_ opts]
+(defmethod ig/init-key :akvo.lumen.endpoint.healthz/healthz  [_ opts]
   (log/debug "init-key" :akvo.lumen.endpoint.healthz :opts opts)
   (endpoint opts))
 
-(defmethod ig/halt-key! :akvo.lumen.endpoint.healthz  [_ opts]
+(defmethod ig/halt-key! :akvo.lumen.endpoint.healthz/healthz  [_ opts]
   (log/debug "halt-key" :akvo.lumen.endpoint.healthz opts))

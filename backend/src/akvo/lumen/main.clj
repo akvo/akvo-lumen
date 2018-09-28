@@ -15,13 +15,15 @@
 
 (defn -main [& args]
   (config/assert-bindings)
-  (def config ((comp duct/prep read-config)))
-  #_(derive :akvo.lumen.component.emailer/mailjet-emailer :akvo.lumen.component.emailer/emailer)
-  #_(derive :akvo.lumen.component.caddisfly/prod :akvo.lumen.component.caddisfly/caddisfly)
-  (underive :akvo.lumen.component.emailer/mailjet-emailer :akvo.lumen.component.emailer/emailer)
-  (underive :akvo.lumen.component.caddisfly/prod :akvo.lumen.component.caddisfly/caddisfly)
+  (derive :akvo.lumen.component.emailer/mailjet-emailer :akvo.lumen.component.emailer/emailer)
+  (derive :akvo.lumen.component.caddisfly/prod :akvo.lumen.component.caddisfly/caddisfly)
+  (derive :akvo.lumen.component.error-tracker/prod :akvo.lumen.component.error-tracker/error-tracker)
+  #_(underive :akvo.lumen.component.emailer/mailjet-emailer :akvo.lumen.component.emailer/emailer)
+  #_(underive :akvo.lumen.component.caddisfly/prod :akvo.lumen.component.caddisfly/caddisfly)
+  #_(underive :akvo.lumen.component.error-tracker/prod :akvo.lumen.component.error-tracker/error-tracker)
   (migrate/migrate)
-  (let [system (ig/init config)]
+  (let [config ((comp duct/prep read-config))
+        system (ig/init config)]
     system
     )
 

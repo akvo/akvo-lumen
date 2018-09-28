@@ -16,9 +16,9 @@
           (public/share tenant-conn config id password))))))
 
 
-(defmethod ig/init-key :akvo.lumen.endpoint.public  [_ opts]
+(defmethod ig/init-key :akvo.lumen.endpoint.public/public  [_ opts]
   (log/debug "init-key" :akvo.lumen.endpoint.public :opts opts)
   (endpoint opts))
 
-(defmethod ig/halt-key! :akvo.lumen.endpoint.public  [_ opts]
+(defmethod ig/halt-key! :akvo.lumen.endpoint.public/public  [_ opts]
   (log/debug "halt-key" :akvo.lumen.endpoint.public opts))

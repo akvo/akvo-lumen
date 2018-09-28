@@ -12,9 +12,9 @@
     (ANY "/api/files*" req
       (file-upload-handler req))))
 
-(defmethod ig/init-key :akvo.lumen.endpoint.files  [_ opts]
+(defmethod ig/init-key :akvo.lumen.endpoint.files/files  [_ opts]
   (log/debug "init-key" :akvo.lumen.endpoint.files :opts opts)
   (endpoint opts))
 
-(defmethod ig/halt-key! :akvo.lumen.endpoint.files  [_ opts]
+(defmethod ig/halt-key! :akvo.lumen.endpoint.files/files  [_ opts]
   (log/debug "halt-key" :akvo.lumen.endpoint.files opts))
