@@ -275,6 +275,7 @@ storiesOf('Charts', module)
           interactive={boolean('props.interactive', true)}
           edit={boolean('props.edit', true)}
           legendVisible={boolean('props.legendVisible', false)}
+          labelsVisible={boolean('props.labelsVisible', false)}
           yAxisLabel={text('props.yAxisLabel', 'Y Axis')}
           xAxisLabel={text('props.xAxisLabel', 'X Axis')}
         />
