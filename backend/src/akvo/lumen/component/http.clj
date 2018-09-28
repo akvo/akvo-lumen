@@ -30,5 +30,4 @@
 
 (defmethod ig/halt-key! :akvo.lumen.component.http  [_ opts]
   (log/debug "halt-key"  opts)
-  (component/stop opts)
-)
+  (component/stop opts))

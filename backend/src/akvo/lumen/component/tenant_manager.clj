@@ -115,7 +115,8 @@
 
 (defmethod ig/init-key :akvo.lumen.component.tenant-manager  [_ {:keys [config] :as opts}]
   (log/debug "init-key"  :opts  opts)
-  (tenant-manager opts))
+  (component/start (tenant-manager opts)))
 
 (defmethod ig/halt-key! tenant-manager  [_ opts]
-  (log/debug "halt-key"  opts))
+  (log/debug "halt-key"  opts)
+  (component/stop opts))

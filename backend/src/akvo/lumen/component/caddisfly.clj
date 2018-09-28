@@ -49,8 +49,9 @@
   (log/debug "halt-key"  opts))
 
 (defmethod ig/init-key :akvo.lumen.component.caddisfly/prod  [_ {:keys [config] :as opts}]
-  (log/debug "init-key"  :opts (:caddisfly opts))
-  (caddisfly (:caddisfly config)))
+  (log/warn "init-key :PROD"  :opts (:caddisfly opts))
+  (component/start (caddisfly (:caddisfly config))))
 
 (defmethod ig/halt-key! :akvo.lumen.component.caddisfly/prod  [_ opts]
-  (log/debug "halt-key"  opts))
+  (log/debug "halt-key"  opts)
+  (component/stop opts))

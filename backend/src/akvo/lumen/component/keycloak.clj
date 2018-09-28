@@ -323,7 +323,8 @@
 
 (defmethod ig/init-key :akvo.lumen.component.keycloak  [_ {:keys [config] :as opts}]
   (log/debug "init-key"  :opts (:keycloak opts))
-  (keycloak (:keycloak config)))
+  (component/start (keycloak (:keycloak config))))
 
 (defmethod ig/halt-key! :akvo.lumen.component.keycloak  [_ opts]
-  (log/debug "halt-key"  opts))
+  (log/debug "halt-key"  opts)
+  (component/stop opts))

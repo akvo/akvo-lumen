@@ -12,7 +12,6 @@
             [com.stuartsierra.component :as component]
             [duct.generate :as gen]
             [duct.core :as duct]
-            #_[duct.util.system :refer [load-system]]
             [integrant.repl.state :as state]
             [integrant.core :as ig]
             [akvo.lumen.middleware]
@@ -20,27 +19,27 @@
             [reloaded.repl :refer [system init start stop go reset]])
   (:import [org.postgresql.util PSQLException PGobject]))
 
-(duct/load-hierarchy)
+#_(duct/load-hierarchy)
 (defn read-config []
   (duct/read-config (io/resource "dev.edn")))
 
 (derive :akvo.lumen.component.emailer/dev-emailer :akvo.lumen.component.emailer/emailer)
 (derive :akvo.lumen.component.caddisfly/local :akvo.lumen.component.caddisfly/caddisfly)
-#_(underive :akvo.lumen.component.emailer/dev-emailer   :akvo.lumen.component.emailer/emailer )
-#_(derive :akvo.lumen.component.emailer/mailjet-emailer   :akvo.lumen.component.emailer/emailer)
-#_(underive :akvo.lumen.component.emailer/mailjet-emailer   :akvo.lumen.component.emailer/emailer)
 
-(def config ((ir/set-prep! (comp duct/prep read-config))))
+#_(underive :akvo.lumen.component.emailer/dev-emailer :akvo.lumen.component.emailer/emailer)
+#_(underive :akvo.lumen.component.caddisfly/local :akvo.lumen.component.caddisfly/caddisfly)
 
-#_(duct/load-hierarchy)
-#_(ig/init config [:akvo.lumen.component.emailer/emailer])
-#_config
-#_(println "JOR:>"(:akvo.lumen.component.emailer/dev-emailer state/system))
-#_(println "JOR:>"(:akvo.lumen.config state/system))
-#_(ir/halt)
+(defn clean [c]
+  (dissoc c :akvo.lumen.component.emailer/mailjet-emailer
+          :akvo.lumen.component.caddisfly/prod
+          :akvo.lumen.component.error-tracker/prod))
 
-#_(ir/go)
-(:akvo.lumen.config state/system)
+(def config ((ir/set-prep!  (comp clean duct/prep read-config))))
+
+#_(keys config)
+
+(ir/go)
+(keys state/system)
 #_(defn new-system []
 
   #_(load-system

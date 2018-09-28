@@ -73,10 +73,10 @@
 
 (defmethod ig/init-key :akvo.lumen.component.emailer/dev-emailer  [_ opts]
   (log/debug "init-dev-emailer" :opts opts)
-  (dev-emailer {}))
+  (component/start (dev-emailer {})))
 
 (defmethod ig/halt-key! :akvo.lumen.component.emailer/dev-emailer  [_ opts]
   (log/debug "halt-dev-emailer" :opts opts)
-  {})
+  (component/stop opts))
 
 
