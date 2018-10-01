@@ -239,37 +239,28 @@ export default class VisualisationEditor extends Component {
       case 'line':
       case 'area':
       case 'bar':
-      case 'scatter':
+      case 'scatter': {
         // Data aggregated on the backend for these types
 
         specValid = specIsValidForApi(visualisation.spec, vType);
         needNewAggregation = getNeedNewAggregation(visualisation, this.lastVisualisationRequested);
 
-        if (
-          !this.state.visualisation ||
-          !this.state.visualisation.datasetId ||
-          visTypeHasChanged ||
-          !specValid
-        ) {
-          // Update immediately, without waiting for the api call
-          this.setState({ visualisation });
-        } else if (!needNewAggregation) {
-          this.setState({
-            visualisation: {
-              ...visualisation,
-              data: this.state.visualisation.data,
-            },
-          });
+        const newVisualisation = { ...visualisation };
+        const data = get(this, 'state.visualisation.data');
+        if (data && !['pivot table'].includes(vType)) {
+          newVisualisation.data = data;
         }
+        this.setState({ visualisation: newVisualisation });
 
         if (visualisation.datasetId && specValid && needNewAggregation) {
           this.fetchAggregatedData(visualisation);
-
           // Store a copy of this visualisation to compare against on next update
           this.lastVisualisationRequested = cloneDeep(visualisation);
         }
-        break;
 
+        this.forceUpdate();
+        break;
+      }
       default: throw new Error(`Unknown visualisation type ${visualisation.visualisationType}`);
     }
   }

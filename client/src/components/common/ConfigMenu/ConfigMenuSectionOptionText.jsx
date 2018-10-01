@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { injectIntl, intlShape } from 'react-intl';
 
-function LabelInput(props) {
+function ConfigMenuSectionOptionText(props) {
   const placeholder = props.placeholderId ?
     props.intl.formatMessage({ id: props.placeholderId }) : props.placeholder;
   return (
@@ -24,7 +24,7 @@ function LabelInput(props) {
   );
 }
 
-LabelInput.propTypes = {
+ConfigMenuSectionOptionText.propTypes = {
   intl: intlShape.isRequired,
   name: PropTypes.string.isRequired,
   placeholder: PropTypes.string,
@@ -34,4 +34,4 @@ LabelInput.propTypes = {
   maxLength: PropTypes.number,
 };
 
-export default injectIntl(LabelInput);
+export default injectIntl(ConfigMenuSectionOptionText);

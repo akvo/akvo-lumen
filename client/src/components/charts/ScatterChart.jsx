@@ -98,6 +98,7 @@ export default class ScatterChart extends Component {
     const { data } = this.props;
 
     if (!get(data, 'series[0]')) return false;
+    if (!get(data, 'series[1]')) return false;
 
     const values = data.series[0].data
       .map(({ value, ...rest }, i) => {
