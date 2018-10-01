@@ -25,7 +25,7 @@ function shouldRender(visualisation, datasets) {
       if (!datasetLoaded) {
         return false;
       }
-      if (spec.metricColumnY == null || spec.bucketColumn == null) {
+      if (spec.bucketColumn == null) {
         return false;
       }
       break;

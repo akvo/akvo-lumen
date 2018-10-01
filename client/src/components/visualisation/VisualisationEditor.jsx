@@ -19,7 +19,7 @@ const specIsValidForApi = (spec, vType) => {
       }
       break;
     case 'bar':
-      if (spec.bucketColumn === null || spec.metricColumnY === null) {
+      if (spec.bucketColumn === null) {
         return false;
       }
       break;

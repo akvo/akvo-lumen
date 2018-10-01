@@ -5,7 +5,7 @@ const barSpec = {
   bucketColumn: null,
   subBucketColumn: null,
   subBucketMethod: 'split', // can be "split" or "stack"
-  metricAggregation: 'mean', // default to mean,
+  metricAggregation: 'count', // default to count,
   axisLabelX: null,
   axisLabelXFromUser: false, // Has the label been manually entered by the user?
   axisLabelY: null,
