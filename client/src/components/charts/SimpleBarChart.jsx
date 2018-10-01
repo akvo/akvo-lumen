@@ -10,6 +10,7 @@ import { Portal } from 'react-portal';
 import merge from 'lodash/merge';
 import { GridRows } from '@vx/grid';
 
+import { isLight } from '../../utilities/color';
 import { heuristicRound, replaceLabelIfValueEmpty, calculateMargins, getLabelFontSize } from '../../utilities/chart';
 import Legend from './Legend';
 import ResponsiveWrapper from '../common/ResponsiveWrapper';
@@ -94,7 +95,7 @@ export default class SimpleBarChart extends Component {
     marginTop: 70,
     marginBottom: 60,
     legendVisible: false,
-    labelsVisible: true,
+    labelsVisible: false,
     edit: false,
     padding: 0.1,
     colorMapping: {},
@@ -114,13 +115,7 @@ export default class SimpleBarChart extends Component {
 
     if (!get(data, 'series[0]')) return false;
 
-    const series = merge({}, data.common, data.series[0]);
-
-    return {
-      ...series,
-      data: series.data
-        .map(datum => ({ ...datum, value: Math.abs(datum.value) })),
-    };
+    return merge({}, data.common, data.series[0]);
   }
 
   getColor(key, index, numColors) {
@@ -183,13 +178,12 @@ export default class SimpleBarChart extends Component {
     });
   }
 
-  renderLabel({ key, nodeWidth, x, y, domain, value, type, index, nodeCount, labelsVisible }) {
+  renderLabel({ key, nodeWidth, x, y, domain, value, type, index, nodeCount }) {
     if (
       (nodeCount >= 200 && index % 10 !== 0) ||
-      (nodeCount < 200 && nodeCount > 40 && index % 5 !== 0) ||
-      !labelsVisible
+      (nodeCount < 200 && nodeCount > 40 && index % 5 !== 0)
     ) return null;
-    let labelText = String(getLabelText(value, type));
+    let labelText = String(getLabelText(key, type));
     labelText = labelText.length <= 16 ?
       labelText : `${labelText.substring(0, 13)}…`;
 
@@ -228,6 +222,39 @@ export default class SimpleBarChart extends Component {
           { type: 'translate', value: [labelX, labelY] },
         ]}
         {...labelFont}
+        fontWeight={get(this.state, 'hoveredNode') === key ? 700 : 400}
+        onMouseEnter={(event) => {
+          this.handleMouseEnterNode({ key, value }, event);
+        }}
+        onMouseMove={(event) => {
+          this.handleMouseEnterNode({ key, value }, event);
+        }}
+        onMouseLeave={() => {
+          this.handleMouseLeaveNode({ key });
+        }}
+      >
+        {labelText}
+      </Text>
+    );
+  }
+
+  renderValueLabel({ key, nodeWidth, x, y, value, labelsVisible, color }) {
+    if (!labelsVisible) return null;
+    const labelText = heuristicRound(value);
+    const labelX = x + (nodeWidth / 2);
+    const OFFSET = 5;
+    const labelY = value < 0 ? y - OFFSET : y + OFFSET;
+
+    return (
+      <Text
+        textAnchor={value < 0 ? 'end' : 'start'}
+        alignmentBaseline="center"
+        transform={[
+          { type: 'rotate', value: [90, labelX, labelY] },
+          { type: 'translate', value: [labelX, labelY] },
+        ]}
+        {...labelFont}
+        fill={isLight(color) ? labelFont.fill : 'white'}
         fontWeight={get(this.state, 'hoveredNode') === key ? 700 : 400}
         onMouseEnter={(event) => {
           this.handleMouseEnterNode({ key, value }, event);
@@ -431,14 +458,20 @@ export default class SimpleBarChart extends Component {
                               nodeCount: series.data.length,
                               index: i,
                               key,
-                              value: key,
+                              value,
                               nodeWidth,
                               x,
                               y: origin,
                               domain,
-                              height: normalizedHeight,
-                              type: dataType,
+                            })}
+                            {this.renderValueLabel({
+                              key,
+                              value,
+                              nodeWidth,
+                              x,
+                              y: origin + ((value < 0 ? 1 : -1) * normalizedHeight),
                               labelsVisible,
+                              color,
                             })}
                           </Group>
                         );

@@ -192,11 +192,10 @@ export default class StackedBarChart extends Component {
     });
   }
 
-  renderLabel({ nodeWidth, x, y, node, index, nodeCount, labelsVisible }) {
+  renderLabel({ nodeWidth, x, y, node, index, nodeCount }) {
     if (
       (nodeCount >= 200 && index % 10 !== 0) ||
-      (nodeCount < 200 && nodeCount > 40 && index % 5 !== 0) ||
-      !labelsVisible
+      (nodeCount < 200 && nodeCount > 40 && index % 5 !== 0)
     ) return null;
     let labelText = String(replaceLabelIfValueEmpty(node.key));
     labelText = labelText.length <= 16 ?

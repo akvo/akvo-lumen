@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
+import { get } from 'lodash';
 
 import ConfigMenuSectionOptionSelect from '../../common/ConfigMenu/ConfigMenuSectionOptionSelect';
 import ConfigMenuSectionOptionText from '../../common/ConfigMenu/ConfigMenuSectionOptionText';
@@ -12,7 +13,7 @@ import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
 import ConfigMenuSectionOption from '../../common/ConfigMenu/ConfigMenuSectionOption';
 
 const getColumnTitle = (columnName, columnOptions) =>
-  columnOptions.find(obj => obj.value === columnName).title;
+  get(columnOptions.find(obj => obj.value === columnName), 'title');
 
 const getAxisAutoLabels = (spec, columnOptions) => {
   let autoAxisLabelY = spec.metricColumnY ? getColumnTitle(spec.metricColumnY, columnOptions) : '';
@@ -208,7 +209,7 @@ export default function BarConfigMenu(props) {
               type="checkbox"
               labelId="show_labels"
               className="InputGroup"
-              checked={Boolean(spec.showLabels)}
+              checked={typeof spec.showLabels !== 'undefined' ? spec.showLabels : true}
               onChange={val => onChangeSpec({
                 showLabels: val,
               })}
