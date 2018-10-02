@@ -202,7 +202,7 @@ export default class Chart extends Component {
             onChangeVisualisationSpec={onChangeVisualisationSpec}
             legendTitle={visualisation.spec.legendTitle}
             legendVisible={visualisation.spec.showLegend}
-            labelsVisible={visualisation.spec.showLabels}
+            valueLabelsVisible={visualisation.spec.showValueLabels}
           />
         );
       default:
