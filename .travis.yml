@@ -14,6 +14,7 @@ before_install:
 - echo "HOST_GID=$(id -g)" >> .env
 - if [[ ! -f "${HOME}/google-cloud-sdk/bin/gcloud" ]]; then rm -rf "${HOME}/google-cloud-sdk";
   curl https://sdk.cloud.google.com | bash > /dev/null; fi
+- python -c "import fcntl; fcntl.fcntl(1, fcntl.F_SETFL, 0)"
 script:
 - "./ci/build.sh && ./ci/deploy.sh"
 after_failure:

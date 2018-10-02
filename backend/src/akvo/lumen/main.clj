@@ -2,6 +2,7 @@
   (:gen-class)
   (:require [akvo.commons.psql-util]
             [akvo.lumen.config :as config]
+            [akvo.lumen.middleware]
             [akvo.lumen.endpoint]
             [akvo.lumen.migrate :as migrate]
             [clojure.java.io :as io]
@@ -21,8 +22,9 @@
   #_(underive :akvo.lumen.component.emailer/mailjet-emailer :akvo.lumen.component.emailer/emailer)
   #_(underive :akvo.lumen.component.caddisfly/prod :akvo.lumen.component.caddisfly/caddisfly)
   #_(underive :akvo.lumen.component.error-tracker/prod :akvo.lumen.component.error-tracker/error-tracker)
-  (migrate/migrate)
+  (migrate/migrate "akvo/lumen/config.edn")
   (let [config ((comp duct/prep read-config))
+        _ (ig/load-namespaces config)
         system (ig/init config)]
     system
     )
