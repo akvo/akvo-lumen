@@ -2,7 +2,6 @@
   (:require [akvo.commons.jwt :as jwt]
             [cheshire.core :as json]
             [clj-http.client :as client]
-            [clojure.tools.logging :as log]
             [clojure.set :as set]
             [clojure.string :as s]
             [ring.util.response :as response]))
@@ -64,7 +63,6 @@
   "Go get cert from Keycloak and feed it to wrap-jwt-claims. Keycloak url can
   be configured via the KEYCLOAK_URL env var."
   [handler {:keys [keycloak-url keycloak-realm]}]
-  (log/error :keycloak-url  keycloak-url :keycloak-realm keycloak-realm)
   (try
     (let [issuer (str keycloak-url "/realms/" keycloak-realm)
           certs (-> (str issuer "/protocol/openid-connect/certs")
