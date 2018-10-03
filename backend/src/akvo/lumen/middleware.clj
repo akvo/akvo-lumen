@@ -1,15 +1,32 @@
 (ns akvo.lumen.middleware
   "add integrant support"
-  (:require [integrant.core :as ig]
+  (:require [akvo.lumen.auth]
+            [akvo.lumen.component.tenant-manager]
+            [clojure.tools.logging :as log]
+            [compojure.response :as compojure]
+            [integrant.core :as ig]
+            [raven-clj.ring]
+            [ring.middleware.defaults]
             [ring.middleware.json]
             [ring.middleware.stacktrace]
-            [ring.middleware.defaults]
-            [raven-clj.ring]
-            [akvo.lumen.component.tenant-manager]
-            [akvo.lumen.auth]
-            [duct.middleware.errors]
-            [duct.middleware.not-found]
-            [clojure.tools.logging :as log]))
+            [ring.util.response :as response]))
+
+(defn wrap-not-found
+  [handler error-response]
+  (fn [request]
+    (or (handler request)
+        (-> (compojure/render error-response request)
+            (response/content-type "text/html")
+            (response/status 404)))))
+
+(defn wrap-hide-errors [handler error-response]
+  (fn [request]
+    (try
+      (handler request)
+      (catch Throwable _
+        (-> (compojure/render error-response request)
+            (response/content-type "text/html")
+            (response/status 500))))))
 
 (defmethod ig/init-key :akvo.lumen.middleware.ring.stacktrace/wrap-stacktrace  [_ opts]  
   ring.middleware.stacktrace/wrap-stacktrace)
@@ -60,13 +77,13 @@
   {})
 
 (defmethod ig/init-key :akvo.lumen.middleware.duct.erros/wrap-hide-errors  [_ opts]  
-  duct.middleware.errors/wrap-hide-errors)
+  wrap-hide-errors)
 
 (defmethod ig/halt-key! :akvo.lumen.middleware.duct.erros/wrap-hide-errors  [_ opts]  
   {})
 
 (defmethod ig/init-key :akvo.lumen.middleware.duct.not-found/wrap-not-found  [_ opts]  
-  duct.middleware.not-found/wrap-not-found)
+  wrap-not-found)
 
 (defmethod ig/halt-key! :akvo.lumen.middleware.duct.not-found/wrap-not-found  [_ opts]  
   {})
