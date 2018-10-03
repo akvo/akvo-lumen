@@ -205,13 +205,13 @@ export default function BarConfigMenu(props) {
               }, spec, onChangeSpec, columnOptions)}
             />
             <ToggleInput
-              name="showLabels"
+              name="showValueLabels"
               type="checkbox"
               labelId="show_labels"
               className="InputGroup"
-              checked={typeof spec.showLabels !== 'undefined' ? spec.showLabels : true}
+              checked={typeof spec.showValueLabels !== 'undefined' ? spec.showValueLabels : false}
               onChange={val => onChangeSpec({
-                showLabels: val,
+                showValueLabels: val,
               })}
             />
           </div>
