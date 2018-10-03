@@ -1,19 +1,17 @@
 (ns akvo.lumen.component.caddisfly-test
   (:require [akvo.lumen.component.caddisfly :as c]
-            [clojure.test :refer :all]
-            [com.stuartsierra.component :as component]))
+            [integrant.core :as ig]
+            [clojure.test :refer :all]))
 
 (defn caddisfly
   ([]
    (caddisfly :dev))
   ([type]
    (if (= type :prod)
-     (-> {:schema-uri "https://akvoflow-public.s3.amazonaws.com/caddisfly-tests.json"}
-         c/caddisfly
-         component/start)
-     (-> {:local-schema-uri "./caddisfly/tests-schema.json"}
-         c/dev-caddisfly
-         component/start))))
+     (->> {:config {:caddisfly {:schema-uri "https://akvoflow-public.s3.amazonaws.com/caddisfly-tests.json"}}}
+          (ig/init-key :akvo.lumen.component.caddisfly/prod))
+     (->> {:config {:caddisfly {:local-schema-uri "./caddisfly/tests-schema.json"}}}
+          (ig/init-key :akvo.lumen.component.caddisfly/local)))))
 
 
 

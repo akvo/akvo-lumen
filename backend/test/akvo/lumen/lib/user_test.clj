@@ -9,7 +9,8 @@
             [akvo.lumen.variant :as variant]
             [clojure.set :as set]
             [clojure.test :refer :all]
-            [com.stuartsierra.component :as component]))
+            [com.stuartsierra.component :as component]
+            [integrant.core :as ig]))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -20,7 +21,7 @@
 
 (def test-system
   (component/system-map
-   :emailer (emailer/dev-emailer {})
+   :emailer (ig/init-key :akvo.lumen.component.emailer/dev-emailer {})
    :keycloak (keycloak/keycloak keycloak-config)))
 
 (def ^:dynamic *emailer*)

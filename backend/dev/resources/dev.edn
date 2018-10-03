@@ -1,7 +1,7 @@
 {:duct.core/environment                                 :development
- :duct.core/include                                     ["akvo/lumen/config.edn" ]
+ :duct.core/include                                     ["akvo/lumen/config.edn"]
  :akvo.lumen.component.error-tracker/local              {}
- :akvo.lumen.component.emailer/dev-emailer              {}
+ :akvo.lumen.component.emailer/dev-emailer              {:config #ig/ref :akvo.lumen.config}
  :akvo.lumen.middleware.ring.stacktrace/wrap-stacktrace {}
  :akvo.lumen.component.caddisfly/local                  {:config #ig/ref :akvo.lumen.config}
  :akvo.lumen.config
