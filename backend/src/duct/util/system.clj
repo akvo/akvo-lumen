@@ -5,27 +5,18 @@
             [clojure.tools.logging :as log]
             [com.stuartsierra.component :as component]
             [duct.component.endpoint :refer [endpoint-component]]
-            [duct.util.namespace :as ns]
             [meta-merge.core :refer [meta-merge]]))
 
-(defmulti reader
-  (fn [tag value] tag))
-
-(defmethod reader 'resource [_ value]
-  (io/resource value))
-
-(defmethod reader 'var [_ value]
-  (ns/load-var value))
 
 (defn read-config [source bindings]
   (->> source
        (walk/postwalk #(bindings % %))))
 
 (defn- add-components [system components config]
-  (reduce-kv (fn [m k v] (assoc m k ((ns/resolve-var v) (config k)))) system components))
+  (reduce-kv (fn [m k v] (assoc m k (v (config k)))) system components))
 
 (defn- add-endpoints [system endpoints]
-  (reduce-kv (fn [m k v] (assoc m k (endpoint-component (ns/resolve-var v))))
+  (reduce-kv (fn [m k v] (assoc m k (endpoint-component v)))
              system
              endpoints))
 
