@@ -12,11 +12,11 @@
             [com.stuartsierra.component :as component]
             [duct.generate :as gen]
             [duct.core :as duct]
-            [integrant.repl.state :as state]
+            [integrant.repl.state :as state :refer (system)]
             [integrant.core :as ig]
             [akvo.lumen.middleware]
             [integrant.repl :as ir]
-            [reloaded.repl :refer [system init start stop #_go reset]])
+            [reloaded.repl :refer [init start stop #_go reset]])
   (:import [org.postgresql.util PSQLException PGobject]))
 
 
