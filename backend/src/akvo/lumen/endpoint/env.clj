@@ -1,7 +1,6 @@
 (ns akvo.lumen.endpoint.env
   (:require [compojure.core :refer :all]
             [integrant.core :as ig]
-            [clojure.tools.logging :as log]
             [ring.util.response :refer [response]]))
 
 (defn endpoint [{:keys [config]}]
@@ -17,8 +16,6 @@
             (assoc "sentryDSN" (:sentry-client-dsn config)))))))
 
 (defmethod ig/init-key :akvo.lumen.endpoint.env/env  [_ opts]
-  (log/debug "init-key" :akvo.lumen.endpoint.env :opts opts)
   (endpoint opts))
 
-(defmethod ig/halt-key! :akvo.lumen.endpoint.env/env  [_ opts]
-  (log/debug "halt-key" :akvo.lumen.endpoint.env opts))
+(defmethod ig/halt-key! :akvo.lumen.endpoint.env/env  [_ opts])
