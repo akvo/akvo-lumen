@@ -22,7 +22,7 @@
 (def test-system
   (component/system-map
    :emailer (ig/init-key :akvo.lumen.component.emailer/dev-emailer {})
-   :keycloak (keycloak/keycloak keycloak-config)))
+   :keycloak (ig/init-key :akvo.lumen.component.keycloak {:config {:keycloak keycloak-config}}) ))
 
 (def ^:dynamic *emailer*)
 (def ^:dynamic *keycloak*)
