@@ -2,6 +2,7 @@
   (:refer-clojure :exclude [test])
   (:require [akvo.lumen.endpoint]
             [akvo.lumen.lib.aes :as aes]
+            [akvo.lumen.middleware]
             [akvo.lumen.migrate :as lumen-migrate]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
@@ -9,58 +10,44 @@
             [clojure.pprint :refer [pprint]]
             [clojure.repl :refer :all]
             [clojure.tools.namespace.repl :refer [refresh]]
-            [com.stuartsierra.component :as component]
-            [duct.generate :as gen]
             [duct.core :as duct]
-            [integrant.repl.state :as state :refer (system)]
+            [duct.generate :as gen]
             [integrant.core :as ig]
-            [akvo.lumen.middleware]
             [integrant.repl :as ir]
-            [reloaded.repl :refer [init start stop #_go reset]])
+            [integrant.repl.state :as state :refer (system)])
   (:import [org.postgresql.util PSQLException PGobject]))
 
-
-
-
-#_(duct/load-hierarchy)
 (defn read-config []
   (duct/read-config (io/resource "dev.edn")))
-
 
 (derive :akvo.lumen.component.emailer/dev-emailer :akvo.lumen.component.emailer/emailer)
 (derive :akvo.lumen.component.caddisfly/local :akvo.lumen.component.caddisfly/caddisfly)
 (derive :akvo.lumen.component.error-tracker/local :akvo.lumen.component.error-tracker/error-tracker)
 
-(defn clean [c]
-  (dissoc c :akvo.lumen.component.emailer/mailjet-emailer
+(defn dissoc-prod-components [c]
+  (dissoc c
+          :akvo.lumen.component.emailer/mailjet-emailer
           :akvo.lumen.component.caddisfly/prod
           :akvo.lumen.component.error-tracker/prod))
 
-(def config ((ir/set-prep!  (comp clean duct/prep read-config))))
-(ig/load-namespaces config)
-#_(keys config)
+(def config (let [c ((ir/set-prep!  (comp dissoc-prod-components duct/prep read-config)))]
+              (ig/load-namespaces c)
+              c))
 
 (defn go []
   (ir/go))
-#_(go)
+
 (defn halt! []
   (ir/halt))
 
-#_(defn new-system []
+(def stop halt!)
 
-  #_(load-system
-     (keep io/resource
-                     ["akvo/lumen/system.edn" "dev.edn" "local.edn"])))
+(def reset go)
 
-
-
-#_(when (io/resource "local.clj")
+(when (io/resource "local.clj")
   (load "local"))
 
-#_(gen/set-ns-prefix 'akvo.lumen)
-
-#_(reloaded.repl/set-init! new-system)
-
+(gen/set-ns-prefix 'akvo.lumen)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Seed
@@ -88,7 +75,6 @@
                         :tenant-manager :tenants)]
       (seed-tenant {:connection-uri db-uri} tenant))))
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Migrate
 ;;;
@@ -104,4 +90,3 @@
 (defn rollback
   ([] (lumen-migrate/rollback "dev.edn" {}))
   ([args] (lumen-migrate/rollback "dev.edn" args)))
-
