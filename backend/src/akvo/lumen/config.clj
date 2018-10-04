@@ -43,5 +43,4 @@
    'sentry-client-dsn (:lumen-sentry-client-dsn env)})
 
 (defmethod ig/init-key :akvo.lumen.config  [a opts]
-  (log/debug :jconfig (duct.system/load-system [opts] (bindings)))
   (duct.system/load-system [opts] (bindings)))
