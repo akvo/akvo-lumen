@@ -6,7 +6,6 @@
             [clojure.tools.logging :as log]
             [integrant.core :as ig]
             [clojure.string :as str]
-            [com.stuartsierra.component :as component]
             [hugsql.core :as hugsql])
   (:import [com.zaxxer.hikari HikariConfig HikariDataSource]))
 
@@ -75,21 +74,6 @@
 
 
 (defrecord TenantManager [db config]
-
-  component/Lifecycle
-  (start [this]
-    (if (:tenants this)
-      this
-      (assoc this :tenants (atom {}))))
-
-  (stop [this]
-    (if-let [tenants (:tenants this)]
-      (do
-        (doseq [[_ {{^HikariDataSource conn :datasource} :spec}] @tenants]
-          (.close conn))
-        (dissoc this :tenants))
-      this))
-
   TenantConnection
   (connection [{:keys [tenants]} label]
     (if-let [tenant (get @tenants label)]
@@ -109,14 +93,20 @@
   (current-plan [{:keys [db]} label]
     (:tier (select-current-plan (:spec db) {:label label}))))
 
-(defn tenant-manager [options]
+(defn- tenant-manager [options]
   (map->TenantManager options))
 
 
 (defmethod ig/init-key :akvo.lumen.component.tenant-manager  [_ {:keys [db config] :as opts}]
-  (log/debug ":akvo.lumen.component.tenant-manager"  :db  db)
-  (component/start (tenant-manager (assoc config :db db))))
+  (let [this (tenant-manager (assoc config :db db))]
+    (if (:tenants this)
+      this
+      (assoc this :tenants (atom {})))))
 
-(defmethod ig/halt-key! :akvo.lumen.component.tenant-manager  [_ opts]
-  (log/debug "halt-key"  opts)
-  (component/stop opts))
+(defmethod ig/halt-key! :akvo.lumen.component.tenant-manager  [_ this]
+  (if-let [tenants (:tenants this)]
+      (do
+        (doseq [[_ {{^HikariDataSource conn :datasource} :spec}] @tenants]
+          (.close conn))
+        (dissoc this :tenants))
+      this))
