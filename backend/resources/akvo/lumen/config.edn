@@ -26,11 +26,11 @@
  :akvo.lumen.endpoint.files/files                     {:config #ig/ref :akvo.lumen.config}
  :akvo.lumen.endpoint.healthz/healthz                 {}
  :akvo.lumen.endpoint.invite/invite                   {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
-                                                       :keycloak       :akvo.lumen.component.keycloak
+                                                       :keycloak       #ig/ref :akvo.lumen.component.keycloak
                                                        :emailer        #ig/ref :akvo.lumen.component.emailer/emailer
                                                        :config         #ig/ref :akvo.lumen.config}
  :akvo.lumen.endpoint.invite/verify                   {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
-                                                       :keycloak       :akvo.lumen.component.keycloak
+                                                       :keycloak       #ig/ref :akvo.lumen.component.keycloak
                                                        :config         #ig/ref :akvo.lumen.config}
  :akvo.lumen.endpoint.job-execution/job-execution     {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
  :akvo.lumen.endpoint.library/library                 {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
@@ -46,7 +46,7 @@
  :akvo.lumen.endpoint.tier/tier                       {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
  :akvo.lumen.endpoint.transformation/transformation   {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
                                                        :caddisfly      #ig/ref :akvo.lumen.component.caddisfly/caddisfly}
- :akvo.lumen.endpoint.user/user                       {:keycloak :akvo.lumen.component.keycloak}
+ :akvo.lumen.endpoint.user/user                       {:keycloak #ig/ref :akvo.lumen.component.keycloak}
  :akvo.lumen.endpoint.visualisation/visualisation     {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
                                                        :config         #ig/ref :akvo.lumen.config}
 
