@@ -27,7 +27,7 @@
           wrap-mw (compose-middleware (:middleware component))
           handler (wrap-mw (apply compojure/routes routes))]
       (assoc component :handler handler))
-    component))
+    opts))
 
 (defmethod ig/halt-key! :akvo.lumen.component.handler/handler  [_ opts]
   (dissoc opts :handler))
