@@ -1,9 +1,7 @@
 (ns akvo.lumen.endpoint.root
   (:require [compojure.core :refer :all]
             [integrant.core :as ig]
-            [clojure.tools.logging :as log]
             [ring.util.response :refer [response]]))
-
 
 (defn endpoint [config]
 
@@ -21,10 +19,7 @@
                       :shares         (str base-url "shares")
                       :visualisations (str base-url "visualisations")}})))))
 
-
 (defmethod ig/init-key :akvo.lumen.endpoint.root/root  [_ opts]
-  (log/debug "init-key" :akvo.lumen.endpoint.root :opts opts)
   (endpoint opts))
 
-(defmethod ig/halt-key! :akvo.lumen.endpoint.root/root  [_ opts]
-  (log/debug "halt-key" :akvo.lumen.endpoint.root opts))
+(defmethod ig/halt-key! :akvo.lumen.endpoint.root/root  [_ opts])
