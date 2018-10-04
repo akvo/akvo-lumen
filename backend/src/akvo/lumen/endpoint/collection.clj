@@ -1,10 +1,8 @@
 (ns akvo.lumen.endpoint.collection
   (:require [akvo.lumen.component.tenant-manager :refer [connection]]
-            [akvo.lumen.lib.collection :as collection]
-            [integrant.core :as ig]
-            [clojure.tools.logging :as log]
-            [clojure.set :as set]
-            [compojure.core :refer :all]))
+            [akvo.lumen.lib.collection :as collection]            
+            [compojure.core :refer :all]
+            [integrant.core :as ig]))
 
 (defn endpoint [{:keys [tenant-manager]}]
   (context "/api/collections" {:keys [params tenant] :as request}
@@ -28,8 +26,6 @@
           (collection/delete tenant-conn id))))))
 
 (defmethod ig/init-key :akvo.lumen.endpoint.collection/collection  [_ opts]
-  (log/debug "init-key" :akvo.lumen.endpoint.collection :opts opts)
   (endpoint opts))
 
-(defmethod ig/halt-key! :akvo.lumen.endpoint.collection/collection  [_ opts]
-  (log/debug "halt-key" :akvo.lumen.endpoint.collection opts))
+(defmethod ig/halt-key! :akvo.lumen.endpoint.collection/collection  [_ opts])
