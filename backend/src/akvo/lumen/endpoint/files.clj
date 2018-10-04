@@ -1,20 +1,16 @@
 (ns akvo.lumen.endpoint.files
   (:require [compojure.core :refer [ANY]]
             [integrant.core :as ig]
-            [clojure.tools.logging :as log]
             [org.akvo.resumed :refer [make-handler]]))
-
 
 (defn endpoint
   [{{:keys [file-upload-path max-upload-size]} :config}]
-  (let [file-upload-handler (make-handler {:save-dir file-upload-path
+  (let [file-upload-handler (make-handler {:save-dir        file-upload-path
                                            :max-upload-size max-upload-size})]
     (ANY "/api/files*" req
-      (file-upload-handler req))))
+         (file-upload-handler req))))
 
 (defmethod ig/init-key :akvo.lumen.endpoint.files/files  [_ opts]
-  (log/debug "init-key" :akvo.lumen.endpoint.files :opts opts)
   (endpoint opts))
 
-(defmethod ig/halt-key! :akvo.lumen.endpoint.files/files  [_ opts]
-  (log/debug "halt-key" :akvo.lumen.endpoint.files opts))
+(defmethod ig/halt-key! :akvo.lumen.endpoint.files/files  [_ opts])
