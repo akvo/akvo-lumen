@@ -14,7 +14,6 @@
                  [clj-http "3.9.0" :exclusions [org.apache.httpcomponents/httpcore org.apache.httpcomponents/httpclient org.apache.httpcomponents/httpmime]]
                  [clj-time "0.14.4"]
                  [com.layerware/hugsql "0.4.9"]
-                 [com.stuartsierra/component "0.3.2"]
                  [commons-io/commons-io "2.6"]
                  [compojure "1.6.1" :exclusions [medley]]
                  [duct/core "0.6.2"]

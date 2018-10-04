@@ -9,7 +9,6 @@
             [akvo.lumen.variant :as variant]
             [clojure.set :as set]
             [clojure.test :refer :all]
-            [com.stuartsierra.component :as component]
             [integrant.core :as ig]))
 
 
