@@ -7,7 +7,7 @@
    [clojure.tools.logging :as log]
    [environ.core :refer [env]]
    [hugsql.core :as hugsql]
-   [duct.util.system :as duct.system]
+   [akvo.lumen.util.system :as akvo.system]
    [meta-merge.core :refer [meta-merge]]
    [ragtime
     strategy
@@ -43,7 +43,7 @@
   "Create a system definition."
   ([] (construct-system "akvo/lumen/config.edn" (bindings)))
   ([config-path bindings]
-   (duct.system/load-system [(duct/prep (read-config config-path))] bindings)))
+   (akvo.system/load-system [(duct/prep (read-config config-path))] bindings)))
 
 
 

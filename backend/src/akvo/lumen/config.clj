@@ -1,7 +1,7 @@
 (ns akvo.lumen.config
   (:require [environ.core :refer [env]]
             [clojure.tools.logging :as log]
-            [duct.util.system :as duct.system]
+            [akvo.lumen.util.system :as akvo.system]
             [integrant.core :as ig]))
 
 (defn error-msg [env-var]
@@ -43,4 +43,4 @@
    'sentry-client-dsn (:lumen-sentry-client-dsn env)})
 
 (defmethod ig/init-key :akvo.lumen.config  [a opts]
-  (duct.system/load-system [opts] (bindings)))
+  (akvo.system/load-system [opts] (bindings)))

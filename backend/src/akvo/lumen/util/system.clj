@@ -1,7 +1,7 @@
-(ns duct.util.system
+(ns akvo.lumen.util.system
   (:require [clojure.walk :as walk]
             [meta-merge.core :refer [meta-merge]]))
-
+;; legacy code from duct.util.system (older version)
 (defn read-config [source bindings]
   (->> source
        (walk/postwalk #(bindings % %))))
