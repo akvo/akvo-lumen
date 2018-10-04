@@ -1,35 +1,24 @@
 (ns akvo.lumen.component.error-tracker
-  (:require [com.stuartsierra.component :as component]
-            [clojure.tools.logging :as log]
-            [integrant.core :as ig]))
+  (:require [integrant.core :as ig]))
 
-(defrecord SentryErrorTracker [dsn]
-  component/Lifecycle
-  (start [this] this)
-  (stop [this] this))
+(defrecord SentryErrorTracker [dsn])
 
 (defn sentry-error-tracker [options]
   (map->SentryErrorTracker options))
 
-(defrecord LocalErrorTracker []
-  component/Lifecycle
-  (start [this] this)
-  (stop [this] this))
+(defrecord LocalErrorTracker [])
 
 (defn local-error-tracker [_]
   (->LocalErrorTracker))
 
 (defmethod ig/init-key :akvo.lumen.component.error-tracker/local  [_ opts]
-  (log/debug "init-key" _  :opts opts)
-  (component/start (local-error-tracker nil)))
+  (local-error-tracker nil))
 
 (defmethod ig/halt-key! :akvo.lumen.component.error-tracker/local  [_ opts]
-  (log/debug "halt-key" _ opts)
-  (component/stop opts))
+  opts)
 
 (defmethod ig/init-key :akvo.lumen.component.error-tracker/prod  [_ {:keys [config] :as opts}]
-  (component/start (sentry-error-tracker (-> config :error-tracker))))
+  (sentry-error-tracker (-> config :error-tracker)))
 
 (defmethod ig/halt-key! :akvo.lumen.component.error-tracker/prod  [_ opts]
-  (log/debug "halt-key" _ opts)
-  (component/stop opts))
+  opts)
