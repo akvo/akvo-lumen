@@ -1,9 +1,5 @@
 (ns duct.util.system
-  (:require [clojure.java.io :as io]
-            [clojure.walk :as walk]
-            [clojure.tools.logging :as log]
-            [com.stuartsierra.component :as component]
-            [duct.component.endpoint :refer [endpoint-component]]
+  (:require [clojure.walk :as walk]
             [meta-merge.core :refer [meta-merge]]))
 
 (defn read-config [source bindings]
