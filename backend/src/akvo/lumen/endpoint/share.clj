@@ -1,10 +1,8 @@
 (ns akvo.lumen.endpoint.share
-  (:require [compojure.core :refer :all]
-            [akvo.lumen.component.tenant-manager :refer [connection]]
-            [integrant.core :as ig]
-            [clojure.tools.logging :as log]
-            [akvo.lumen.lib.share :as share]))
-
+  (:require [akvo.lumen.component.tenant-manager :refer [connection]]
+            [akvo.lumen.lib.share :as share]
+            [compojure.core :refer :all]
+            [integrant.core :as ig]))
 
 (defn endpoint [{:keys [tenant-manager]}]
   (context "/api/shares" {:keys [params tenant] :as request}
@@ -17,10 +15,7 @@
         (PUT "/" {:keys [body]}
           (share/put tenant-conn id body))))))
 
-
 (defmethod ig/init-key :akvo.lumen.endpoint.share/share  [_ opts]
-  (log/debug "init-key" :akvo.lumen.endpoint.share :opts opts)
   (endpoint opts))
 
-(defmethod ig/halt-key! :akvo.lumen.endpoint.share/share  [_ opts]
-  (log/debug "halt-key" :akvo.lumen.endpoint.share opts))
+(defmethod ig/halt-key! :akvo.lumen.endpoint.share/share  [_ opts])
