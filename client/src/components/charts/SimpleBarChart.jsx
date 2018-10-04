@@ -42,6 +42,9 @@ const getPaddingBottom = (data, type) => {
   return Math.ceil(longestLabelLength * pixelsPerChar);
 };
 
+const LABEL_CHAR_WIDTH = 10;
+const labelFitsBar = (text, height) => `${text}`.length * LABEL_CHAR_WIDTH < height;
+
 export default class SimpleBarChart extends Component {
 
   static propTypes = {
@@ -81,7 +84,7 @@ export default class SimpleBarChart extends Component {
     marginBottom: PropTypes.number,
     style: PropTypes.object,
     legendVisible: PropTypes.bool,
-    labelsVisible: PropTypes.bool,
+    valueLabelsVisible: PropTypes.bool,
     yAxisLabel: PropTypes.string,
     yAxisTicks: PropTypes.number,
     xAxisLabel: PropTypes.string,
@@ -95,7 +98,7 @@ export default class SimpleBarChart extends Component {
     marginTop: 70,
     marginBottom: 60,
     legendVisible: false,
-    labelsVisible: false,
+    valueLabelsVisible: false,
     edit: false,
     padding: 0.1,
     colorMapping: {},
@@ -238,12 +241,13 @@ export default class SimpleBarChart extends Component {
     );
   }
 
-  renderValueLabel({ key, nodeWidth, x, y, value, labelsVisible, color }) {
-    if (!labelsVisible) return null;
+  renderValueLabel({ key, nodeWidth, x, y, value, valueLabelsVisible, color, height }) {
+    if (!valueLabelsVisible) return null;
     const labelText = heuristicRound(value);
     const labelX = x + (nodeWidth / 2);
     const OFFSET = 5;
     const labelY = value < 0 ? y - OFFSET : y + OFFSET;
+    if (!labelFitsBar(labelText, height)) return null;
 
     return (
       <Text
@@ -289,7 +293,7 @@ export default class SimpleBarChart extends Component {
       yAxisTicks,
       xAxisLabel,
       grid,
-      labelsVisible,
+      valueLabelsVisible,
     } = this.props;
 
     const { tooltipItems, tooltipVisible, tooltipPosition } = this.state;
@@ -470,8 +474,9 @@ export default class SimpleBarChart extends Component {
                               nodeWidth,
                               x,
                               y: origin + ((value < 0 ? 1 : -1) * normalizedHeight),
-                              labelsVisible,
+                              valueLabelsVisible,
                               color,
+                              height: normalizedHeight,
                             })}
                           </Group>
                         );

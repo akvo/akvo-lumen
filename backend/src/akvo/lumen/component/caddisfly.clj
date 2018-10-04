@@ -13,7 +13,7 @@
 (defrecord DevCaddisfly [local-schema-uri]
   component/Lifecycle
   (start [this]
-    (let [tests (-> "./caddisfly/tests-schema.json" io/resource slurp (json/parse-string keyword) extract-tests)]
+    (let [tests (-> local-schema-uri io/resource slurp (json/parse-string keyword) extract-tests)]
       (log/warn ::start "Using caddisfly LOCAL schema-uri:" local-schema-uri)
       (assoc this :schema tests)))
   (stop [this]
