@@ -247,7 +247,8 @@ export default class VisualisationEditor extends Component {
 
         const newVisualisation = { ...visualisation };
         const data = get(this, 'state.visualisation.data');
-        if (data && !['pivot table'].includes(vType)) {
+        const currentVType = get(this.props, 'visualisation.visualisationType');
+        if (data && (vType !== 'pivot table' || (currentVType && currentVType === vType))) {
           newVisualisation.data = data;
         }
         this.setState({ visualisation: newVisualisation });
