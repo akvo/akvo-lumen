@@ -81,9 +81,6 @@
  :akvo.lumen.component.tenant-manager {:config #ig/ref :akvo.lumen.config
                                        :db     #ig/ref :akvo.lumen.component.hikaricp/hikaricp}
  
- ;; example injecting dep
- :akvo.lumen.component.other {:emailer #ig/ref :akvo.lumen.component.emailer/emailer}
-
  :akvo.lumen.component.emailer/mailjet-emailer {:config #ig/ref :akvo.lumen.config}
 
  :akvo.lumen.component.error-tracker/prod {:config #ig/ref :akvo.lumen.config}
