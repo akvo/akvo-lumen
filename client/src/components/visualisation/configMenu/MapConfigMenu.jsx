@@ -4,7 +4,7 @@ import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
 import LayerMenu from './LayerMenu';
 import LayerConfigMenu from './LayerConfigMenu';
 import ButtonRowInput from './ButtonRowInput';
-import mapLayerSpecTemplate from '../../../containers/Visualisation/mapLayerSpecTemplate';
+import mapLayerSpecTemplate from '../../../constants/Visualisation/mapLayerSpecTemplate';
 import { trackEvent } from '../../../utilities/analytics';
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
 

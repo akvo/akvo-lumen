@@ -3,7 +3,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { kebabCase } from 'lodash';
 
-import visualisationTypes from '../../../containers/Visualisation/visualisationTypes';
+import visualisationTypes from '../../../constants/Visualisation/visualisationTypes';
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
 import ConfigMenuSectionOptionThumbs from '../../common/ConfigMenu/ConfigMenuSectionOptionThumbs';
 

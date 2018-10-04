@@ -5,6 +5,7 @@ import update from 'react-addons-update';
 import isEmpty from 'lodash/isEmpty';
 import get from 'lodash/get';
 import { intlShape, injectIntl } from 'react-intl';
+
 import ShareEntity from '../components/modals/ShareEntity';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import NavigationPrompt from '../components/common/NavigationPrompt';
@@ -12,13 +13,14 @@ import * as actions from '../actions/visualisation';
 import * as entity from '../domain/entity';
 import { fetchDataset } from '../actions/dataset';
 import { trackPageView, trackEvent } from '../utilities/analytics';
+import { remapVisualisationDataColumnMappings } from '../utilities/visualisation';
 import { fetchLibrary } from '../actions/library';
-import mapSpecTemplate from './Visualisation/mapSpecTemplate';
-import pieSpecTemplate from './Visualisation/pieSpecTemplate';
-import lineSpecTemplate from './Visualisation/lineSpecTemplate';
-import pivotTableSpecTemplate from './Visualisation/pivotTableSpecTemplate';
-import scatterSpecTemplate from './Visualisation/scatterSpecTemplate';
-import barSpecTemplate from './Visualisation/barSpecTemplate';
+import mapSpecTemplate from '../constants/Visualisation/mapSpecTemplate';
+import pieSpecTemplate from '../constants/Visualisation/pieSpecTemplate';
+import lineSpecTemplate from '../constants/Visualisation/lineSpecTemplate';
+import pivotTableSpecTemplate from '../constants/Visualisation/pivotTableSpecTemplate';
+import scatterSpecTemplate from '../constants/Visualisation/scatterSpecTemplate';
+import barSpecTemplate from '../constants/Visualisation/barSpecTemplate';
 import { SAVE_COUNTDOWN_INTERVAL, SAVE_INITIAL_TIMEOUT } from '../constants/time';
 
 require('../components/visualisation/Visualisation.scss');
@@ -281,7 +283,11 @@ class Visualisation extends Component {
   handleChangeVisualisationType(visualisationType) {
     this.handleChangeVisualisation({
       visualisationType,
-      spec: getSpecFromVisualisationType(visualisationType),
+      spec: {
+        ...this.state.visualisation.spec,
+        ...getSpecFromVisualisationType(visualisationType),
+        ...remapVisualisationDataColumnMappings(this.state.visualisation, visualisationType),
+      },
     });
   }
 

@@ -1,8 +1,13 @@
-import React from 'react';
+/* eslint-disable react/prefer-stateless-function */
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import windowSize from 'react-window-size';
+
 import VisualisationViewer from '../charts/VisualisationViewer';
 
 require('./VisualisationPreview.scss');
+
+const HEADER_HEIGHT = 70;
 
 function shouldRender(visualisation, datasets) {
   const datasetId = visualisation.datasetId;
@@ -35,7 +40,7 @@ function shouldRender(visualisation, datasets) {
       if (!datasetLoaded) {
         return false;
       }
-      if (spec.metricColumnY == null) {
+      if (spec.metricColumnY == null || spec.metricColumnX == null) {
         return false;
       }
       break;
@@ -66,32 +71,43 @@ function shouldRender(visualisation, datasets) {
   return true;
 }
 
-export default function CreateVisualisationPreview({
-  visualisation,
-  metadata,
-  datasets,
-  onChangeVisualisationSpec,
-}) {
-  return (
-    <div className="VisualisationPreview">
-      {shouldRender(visualisation, datasets) ?
-        <VisualisationViewer
-          visualisation={visualisation}
-          metadata={metadata}
-          datasets={datasets}
-          context="editor"
-          height={visualisation.visualisationType === 'map' ? null : 500}
-          width={visualisation.visualisationType === 'map' ? null : 800}
-          onChangeVisualisationSpec={onChangeVisualisationSpec}
-        /> : null
-      }
-    </div>
-  );
+class VisualisationPreview extends Component {
+  render() {
+    const { visualisation,
+      metadata,
+      datasets,
+      onChangeVisualisationSpec,
+      windowHeight,
+    } = this.props;
+
+    return (
+      <div className="VisualisationPreview">
+        {shouldRender(visualisation, datasets) ?
+          <VisualisationViewer
+            visualisation={visualisation}
+            metadata={metadata}
+            datasets={datasets}
+            context="editor"
+            height={
+              visualisation.visualisationType === 'map' ?
+                null :
+                Math.min(500, windowHeight - HEADER_HEIGHT)
+            }
+            width={visualisation.visualisationType === 'map' ? null : 800}
+            onChangeVisualisationSpec={onChangeVisualisationSpec}
+          /> : null
+        }
+      </div>
+    );
+  }
 }
 
-CreateVisualisationPreview.propTypes = {
+VisualisationPreview.propTypes = {
   visualisation: PropTypes.object.isRequired,
   metadata: PropTypes.object,
   datasets: PropTypes.object.isRequired,
   onChangeVisualisationSpec: PropTypes.func,
+  windowHeight: PropTypes.number,
 };
+
+export default windowSize(VisualisationPreview);
