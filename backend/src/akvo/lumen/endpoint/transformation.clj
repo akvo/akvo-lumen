@@ -1,9 +1,8 @@
 (ns akvo.lumen.endpoint.transformation
   (:require [akvo.lumen.component.tenant-manager :refer [connection]]
             [akvo.lumen.transformation :as t]
-            [integrant.core :as ig]
-            [clojure.tools.logging :as log]
-            [compojure.core :refer :all]))
+            [compojure.core :refer :all]
+            [integrant.core :as ig]))
 
 (defn endpoint [{:keys [tenant-manager caddisfly]}]
   (context "/api/transformations" {:keys [tenant] :as request}
@@ -20,10 +19,7 @@
                    dataset-id
                    {:type :undo}))))))
 
-
 (defmethod ig/init-key :akvo.lumen.endpoint.transformation/transformation  [_ opts]
-  (log/debug "init-key" :akvo.lumen.endpoint.transformation :opts opts)
   (endpoint opts))
 
-(defmethod ig/halt-key! :akvo.lumen.endpoint.transformation/transformation  [_ opts]
-  (log/debug "halt-key" :akvo.lumen.endpoint.transformation opts))
+(defmethod ig/halt-key! :akvo.lumen.endpoint.transformation/transformation  [_ opts])
