@@ -11,7 +11,13 @@ import merge from 'lodash/merge';
 import { GridRows } from '@vx/grid';
 
 import { isLight } from '../../utilities/color';
-import { heuristicRound, replaceLabelIfValueEmpty, calculateMargins, getLabelFontSize } from '../../utilities/chart';
+import {
+  heuristicRound,
+  replaceLabelIfValueEmpty,
+  calculateMargins,
+  getLabelFontSize,
+  labelFitsWidth,
+} from '../../utilities/chart';
 import Legend from './Legend';
 import ResponsiveWrapper from '../common/ResponsiveWrapper';
 import ColorPicker from '../common/ColorPicker';
@@ -41,9 +47,6 @@ const getPaddingBottom = (data, type) => {
 
   return Math.ceil(longestLabelLength * pixelsPerChar);
 };
-
-const LABEL_CHAR_WIDTH = 10;
-const labelFitsBar = (text, height) => `${text}`.length * LABEL_CHAR_WIDTH < height;
 
 export default class SimpleBarChart extends Component {
 
@@ -241,13 +244,14 @@ export default class SimpleBarChart extends Component {
     );
   }
 
-  renderValueLabel({ key, nodeWidth, x, y, value, valueLabelsVisible, color, height }) {
+  renderValueLabel({ key, nodeWidth, x, y, value, color, height }) {
+    const { valueLabelsVisible } = this.props;
     if (!valueLabelsVisible) return null;
     const labelText = heuristicRound(value);
     const labelX = x + (nodeWidth / 2);
     const OFFSET = 5;
     const labelY = value < 0 ? y - OFFSET : y + OFFSET;
-    if (!labelFitsBar(labelText, height)) return null;
+    if (!labelFitsWidth(labelText, height)) return null;
 
     return (
       <Text
@@ -293,7 +297,6 @@ export default class SimpleBarChart extends Component {
       yAxisTicks,
       xAxisLabel,
       grid,
-      valueLabelsVisible,
     } = this.props;
 
     const { tooltipItems, tooltipVisible, tooltipPosition } = this.state;
@@ -474,7 +477,6 @@ export default class SimpleBarChart extends Component {
                               nodeWidth,
                               x,
                               y: origin + ((value < 0 ? 1 : -1) * normalizedHeight),
-                              valueLabelsVisible,
                               color,
                               height: normalizedHeight,
                             })}

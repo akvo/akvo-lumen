@@ -11,13 +11,21 @@ import merge from 'lodash/merge';
 import { stack } from 'd3-shape';
 import { GridRows } from '@vx/grid';
 
-import { heuristicRound, replaceLabelIfValueEmpty, calculateMargins, getLabelFontSize } from '../../utilities/chart';
+import {
+  heuristicRound,
+  replaceLabelIfValueEmpty,
+  calculateMargins,
+  getLabelFontSize,
+  labelFitsWidth,
+  labelFitsHeight,
+} from '../../utilities/chart';
 import Legend from './Legend';
 import ResponsiveWrapper from '../common/ResponsiveWrapper';
 import ColorPicker from '../common/ColorPicker';
 import ChartLayout from './ChartLayout';
 import Tooltip from './Tooltip';
 import { labelFont, MAX_FONT_SIZE, MIN_FONT_SIZE } from '../../constants/chart';
+import { isLight } from '../../utilities/color';
 
 const getPaddingBottom = (data) => {
   const labelCutoffLength = 16;
@@ -58,6 +66,7 @@ export default class StackedBarChart extends Component {
     style: PropTypes.object,
     legendVisible: PropTypes.bool,
     labelsVisible: PropTypes.bool,
+    valueLabelsVisible: PropTypes.bool,
     legendTitle: PropTypes.string,
     yAxisLabel: PropTypes.string,
     xAxisLabel: PropTypes.string,
@@ -91,6 +100,7 @@ export default class StackedBarChart extends Component {
       isPickingColor: false,
       data: this.getData(props),
     };
+    this.handleMouseLeaveNode = this.handleMouseLeaveNode.bind(this);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -212,6 +222,56 @@ export default class StackedBarChart extends Component {
         ]}
         {...labelFont}
         fontWeight={get(this.state, 'hoveredNode.valueKey') === node.key ? 700 : 400}
+      >
+        {labelText}
+      </Text>
+    );
+  }
+
+  renderValueLabel({
+    key,
+    x,
+    y,
+    color,
+    barHeight,
+    barWidth,
+    node,
+    seriesKey,
+    seriesIndex,
+  }) {
+    const { valueLabelsVisible } = this.props;
+    if (!valueLabelsVisible) return null;
+    const labelText = heuristicRound(node.values[seriesKey]);
+    const labelX = x + (barWidth / 2);
+    const labelY = y;
+    if (!labelFitsWidth(labelText, barHeight) || !labelFitsHeight(barWidth)) return null;
+
+    return (
+      <Text
+        textAnchor="middle"
+        alignmentBaseline="center"
+        transform={[
+          { type: 'rotate', value: [90, labelX, labelY] },
+          { type: 'translate', value: [labelX, labelY] },
+        ]}
+        {...labelFont}
+        fill={isLight(color) ? labelFont.fill : 'white'}
+        fontWeight={get(this.state, 'hoveredNode') === key ? 700 : 400}
+        onMouseEnter={(event) => {
+          this.handleMouseEnterNode(
+            node,
+            { seriesKey, valueKey: key, seriesIndex },
+            event
+          );
+        }}
+        onMouseMove={(event) => {
+          this.handleMouseEnterNode(
+            node,
+            { seriesKey, valueKey: key, seriesIndex },
+            event
+          );
+        }}
+        onMouseLeave={this.handleMouseLeaveNode}
       >
         {labelText}
       </Text>
@@ -377,13 +437,17 @@ export default class StackedBarChart extends Component {
                         return (
                           <Group key={seriesKey}>
                             {stackSeries.map(([y0, y1], valueIndex) => {
-                              const { nodeWidth, x, key } = nodes[valueIndex];
+                              const node = nodes[valueIndex];
+                              const { nodeWidth, x, key } = node;
                               const color = this.getColor(seriesKey, seriesIndex);
                               const normalizedY = heightScale(y0);
                               const normalizedHeight = availableHeight - heightScale(y1 - y0);
                               const colorpickerPlacement = valueIndex < dataCount / 2 ? 'right' : 'left';
                               const barWidth = (nodeWidth - (nodeWidth * padding * 2)) /
                                 (grouped ? seriesCount : 1);
+                              const normalizedX = x +
+                                (nodeWidth * padding) +
+                                (grouped ? seriesIndex * barWidth : 0);
 
                               return (
                                 <Group key={key}>
@@ -417,11 +481,7 @@ export default class StackedBarChart extends Component {
                                   )}
                                   <Rect
                                     key={key}
-                                    x={
-                                      x +
-                                      (nodeWidth * padding) +
-                                      (grouped ? seriesIndex * barWidth : 0)
-                                    }
+                                    x={normalizedX}
                                     y={(grouped ? origin : normalizedY) - normalizedHeight}
                                     width={barWidth}
                                     height={normalizedHeight}
@@ -450,10 +510,20 @@ export default class StackedBarChart extends Component {
                                         event
                                       );
                                     }}
-                                    onMouseLeave={() => {
-                                      this.handleMouseLeaveNode();
-                                    }}
+                                    onMouseLeave={this.handleMouseLeaveNode}
                                   />
+                                  {this.renderValueLabel({
+                                    key,
+                                    barWidth,
+                                    x: normalizedX,
+                                    y: ((grouped ? origin : normalizedY) - normalizedHeight) + normalizedHeight / 2,
+                                    value: nodes[valueIndex],
+                                    color,
+                                    barHeight: normalizedHeight,
+                                    node,
+                                    seriesKey,
+                                    seriesIndex,
+                                  })}
                                 </Group>
                               );
                             })}

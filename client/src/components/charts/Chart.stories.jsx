@@ -327,6 +327,7 @@ storiesOf('Charts', module)
           edit={boolean('props.edit', true)}
           legendVisible={boolean('props.legendVisible', true)}
           yAxisLabel={text('props.yAxisLabel', 'Temperature')}
+          valueLabelsVisible={boolean('props.valueLabelsVisible', false)}
         />
         <pre>
           <code>
