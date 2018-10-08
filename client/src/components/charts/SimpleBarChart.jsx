@@ -154,9 +154,9 @@ export default class SimpleBarChart extends Component {
 
   handleMouseEnterNode({ key, value }, event) {
     if (this.state.isPickingColor) return;
-    const { interactive, print, colors } = this.props;
+    const { interactive, print, colorMapping } = this.props;
     if (!interactive || print) return;
-    this.handleShowTooltip(event, { key, color: colors[key], value: heuristicRound(value) });
+    this.handleShowTooltip(event, { key, color: colorMapping[key], value: heuristicRound(value) });
     this.setState({ hoveredNode: key });
   }
 
