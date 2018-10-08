@@ -107,11 +107,11 @@ export default class PieChart extends Component {
   }
 
   handleMouseEnterNode({ key, value, totalCount }, event) {
-    const { interactive, print, colors } = this.props;
+    const { interactive, print, colorMapping } = this.props;
     if (!interactive || print) return;
     this.handleShowTooltip(event, {
       key,
-      color: colors[key],
+      color: colorMapping[key],
       value: getLabelText(value, totalCount),
     });
     this.setState({ hoveredNode: key });
