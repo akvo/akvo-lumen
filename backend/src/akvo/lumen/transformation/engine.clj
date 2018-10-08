@@ -173,9 +173,9 @@
 (defn- apply-undo [{:keys [tenant-conn] :as deps} dataset-id job-execution-id current-dataset-version]
   (let [imported-table-name (:imported-table-name current-dataset-version)
         previous-table-name (:table-name current-dataset-version)
-        initial-columns (vec (:columns (dataset-version-by-dataset-id tenant-conn
-                                                                      {:dataset-id dataset-id
-                                                                       :version 1})))
+        initial-columns (vec (:columns (initial-dataset-version-to-update-by-dataset-id
+                                        tenant-conn
+                                        {:dataset-id dataset-id})))
         table-name (util/gen-table-name "ds")]
     (copy-table tenant-conn
                 {:source-table imported-table-name

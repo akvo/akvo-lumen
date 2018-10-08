@@ -37,7 +37,7 @@ export default function ButtonRowInput(props) {
 ButtonRowInput.propTypes = {
   disabled: PropTypes.bool,
   options: PropTypes.array.isRequired,
-  selected: PropTypes.node.isRequired,
+  selected: PropTypes.node,
   label: PropTypes.node,
   onChange: PropTypes.func.isRequired,
   buttonSpacing: PropTypes.string,

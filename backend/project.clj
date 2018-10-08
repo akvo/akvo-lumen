@@ -71,8 +71,9 @@
    :test          [:project/test :profiles/test]
    :uberjar       {:aot :all}
    :profiles/dev  {}
-   :profiles/test {}
-   :project/dev   {:dependencies   [[duct/generate "0.8.2"]
+   :profiles/test {:dependencies   [[org.clojure/test.check "0.10.0-alpha3"]]}
+   :project/dev   {:dependencies   [[org.clojure/test.check "0.10.0-alpha3"]
+                                    [duct/generate "0.8.2"]
                                     [reloaded.repl "0.2.4"]
                                     [org.clojure/tools.namespace "0.2.11"]
                                     [org.clojure/tools.nrepl "0.2.13"]

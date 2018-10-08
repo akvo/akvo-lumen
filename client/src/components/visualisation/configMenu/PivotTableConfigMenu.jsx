@@ -111,37 +111,32 @@ export default class PivotTableConfigMenu extends Component {
                   </div>
                 }
               </span>
-              {spec.aggregation !== 'count' &&
-                <div>
-                  <ConfigMenuSectionOptionSelect
-                    placeholderId="select_a_value_column"
-                    labelText="value_column"
-                    value={spec.valueColumn !== null ? spec.valueColumn.toString() : null}
-                    name="valueColumnInput"
-                    options={filterColumns(columnOptions, ['number', 'date'])}
-                    onChange={value => onChangeSpec({
-                      valueColumn: value,
-                    })}
-                    clearable
-                  />
-                  <div className="inputGroup">
-                    <label htmlFor="decimalPlacesInput">
-                      <FormattedMessage id="number_of_decimal_places" />
-                    </label>
-                    <input
-                      className="numberInput"
-                      id="decimalPlacesInput"
-                      type="number"
-                      value={spec.decimalPlaces}
-                      min={0}
-                      max={16}
-                      onChange={evt => onChangeSpec({
-                        decimalPlaces: evt.target.value,
-                      })}
-                    />
-                  </div>
-                </div>
-              }
+              {spec.aggregation !== 'count' && (
+                <ConfigMenuSectionOptionSelect
+                  placeholderId="select_a_value_column"
+                  labelTextId="value_column"
+                  value={spec.valueColumn !== null ? spec.valueColumn.toString() : null}
+                  name="valueColumnInput"
+                  options={filterColumns(columnOptions, ['number', 'date'])}
+                  onChange={value => onChangeSpec({
+                    valueColumn: value,
+                  })}
+                  clearable
+                />
+              )}
+              {spec.aggregation !== 'count' && (
+                <ConfigMenuSectionOptionText
+                  id="decimalPlacesInput"
+                  type="number"
+                  value={`${spec.decimalPlaces}`}
+                  min={0}
+                  max={16}
+                  onChange={evt => onChangeSpec({
+                    decimalPlaces: parseInt(evt.target.value),
+                  })}
+                  placeholderId="number_of_decimal_places"
+                />
+              )}
               {showValueDisplayInput(spec) &&
                 <ConfigMenuSectionOptionSelect
                   placeholderId="choose_how_cells_are_displayed"

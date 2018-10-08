@@ -14,16 +14,38 @@ import * as actions from '../actions/visualisation';
 import * as entity from '../domain/entity';
 import { fetchDataset } from '../actions/dataset';
 import { trackPageView, trackEvent } from '../utilities/analytics';
+import { remapVisualisationDataColumnMappings } from '../utilities/visualisation';
 import { fetchLibrary } from '../actions/library';
-import mapSpecTemplate from './Visualisation/mapSpecTemplate';
-import pieSpecTemplate from './Visualisation/pieSpecTemplate';
-import lineSpecTemplate from './Visualisation/lineSpecTemplate';
-import pivotTableSpecTemplate from './Visualisation/pivotTableSpecTemplate';
-import scatterSpecTemplate from './Visualisation/scatterSpecTemplate';
-import barSpecTemplate from './Visualisation/barSpecTemplate';
+import mapSpecTemplate from '../constants/Visualisation/mapSpecTemplate';
+import pieSpecTemplate from '../constants/Visualisation/pieSpecTemplate';
+import lineSpecTemplate from '../constants/Visualisation/lineSpecTemplate';
+import pivotTableSpecTemplate from '../constants/Visualisation/pivotTableSpecTemplate';
+import scatterSpecTemplate from '../constants/Visualisation/scatterSpecTemplate';
+import barSpecTemplate from '../constants/Visualisation/barSpecTemplate';
 import { SAVE_COUNTDOWN_INTERVAL, SAVE_INITIAL_TIMEOUT } from '../constants/time';
 
 require('../components/visualisation/Visualisation.scss');
+
+const getSpecFromVisualisationType = (visualisationType) => {
+  switch (visualisationType) {
+    case 'map':
+      return { ...mapSpecTemplate };
+    case 'pie':
+    case 'donut':
+      return { ...pieSpecTemplate };
+    case 'line':
+    case 'area':
+      return { ...lineSpecTemplate };
+    case 'scatter':
+      return { ...scatterSpecTemplate };
+    case 'bar':
+      return { ...barSpecTemplate };
+    case 'pivot table':
+      return { ...pivotTableSpecTemplate };
+    default:
+      throw new Error(`Unknown visualisation type ${visualisationType}`);
+  }
+};
 
 class Visualisation extends Component {
 
@@ -128,7 +150,7 @@ class Visualisation extends Component {
   componentWillReceiveProps(nextProps) {
     /* If there is a visualisation to load from the library, and we haven't loaded it yet, load it
     /* from nextProps if it exists there */
-    const visualisationId = this.props.params.visualisationId;
+    const { visualisationId } = this.props.params;
     const isEditingExistingVisualisation = visualisationId != null;
     const loadedVisualisation = this.state.visualisation.id != null;
     const nextPropsHasVisualisation = Boolean(nextProps.library.visualisations[visualisationId]);
@@ -218,15 +240,13 @@ class Visualisation extends Component {
     }
   }
 
-  // Helper method for...
-  handleChangeVisualisation(map) {
-    const visualisation = Object.assign({}, this.state.visualisation, map);
-
+  handleChangeVisualisation(map, callback = () => {}) {
     this.setState({
-      visualisation,
+      visualisation: { ...this.state.visualisation, ...map },
       isUnsavedChanges: true,
     }, () => {
       this.onSave();
+      callback();
     });
   }
 
@@ -249,47 +269,26 @@ class Visualisation extends Component {
 
   handleChangeSourceDataset(datasetId, optionalSpecChanges = {}) {
     if (!datasetId) return;
-    this.loadDataset(datasetId);
-    const spec = Object.assign({}, this.state.visualisation.spec, optionalSpecChanges);
-    const visualisation = Object.assign({}, this.state.visualisation, { datasetId }, { spec });
-    this.handleChangeVisualisation(visualisation);
+    this.handleChangeVisualisation({
+      ...this.state.visualisation,
+      datasetId,
+      spec: {
+        ...getSpecFromVisualisationType(this.state.visualisation.visualisationType),
+        ...optionalSpecChanges,
+      },
+    }, () => {
+      this.loadDataset(datasetId);
+    });
   }
 
   handleChangeVisualisationType(visualisationType) {
-    let specTemplate;
-    switch (visualisationType) {
-      case 'map':
-        specTemplate = Object.assign({}, mapSpecTemplate);
-        break;
-
-      case 'pie':
-      case 'donut':
-        specTemplate = Object.assign({}, pieSpecTemplate);
-        break;
-
-      case 'line':
-      case 'area':
-        specTemplate = Object.assign({}, lineSpecTemplate);
-        break;
-
-      case 'scatter':
-        specTemplate = Object.assign({}, scatterSpecTemplate);
-        break;
-
-      case 'bar':
-        specTemplate = Object.assign({}, barSpecTemplate);
-        break;
-
-      case 'pivot table':
-        specTemplate = Object.assign({}, pivotTableSpecTemplate);
-        break;
-
-      default:
-        throw new Error(`Unknown visualisation type ${visualisationType}`);
-    }
     this.handleChangeVisualisation({
       visualisationType,
-      spec: specTemplate,
+      spec: {
+        ...this.state.visualisation.spec,
+        ...getSpecFromVisualisationType(visualisationType),
+        ...remapVisualisationDataColumnMappings(this.state.visualisation, visualisationType),
+      },
     });
   }
 

@@ -1,3 +1,4 @@
+// TODO: intl
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
@@ -114,6 +115,7 @@ export default function PivotTable({ width, height, visualisation, context, data
       >
         <RenderComplete id={visualisation.id} />
         Please choose a dataset.
+        Please choose a dataset and link up its columns.
       </div>
     );
   }

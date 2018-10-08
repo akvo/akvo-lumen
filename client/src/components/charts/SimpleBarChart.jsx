@@ -10,6 +10,7 @@ import { Portal } from 'react-portal';
 import merge from 'lodash/merge';
 import { GridRows } from '@vx/grid';
 
+import { isLight } from '../../utilities/color';
 import { heuristicRound, replaceLabelIfValueEmpty, calculateMargins, getLabelFontSize } from '../../utilities/chart';
 import Legend from './Legend';
 import ResponsiveWrapper from '../common/ResponsiveWrapper';
@@ -41,6 +42,9 @@ const getPaddingBottom = (data, type) => {
 
   return Math.ceil(longestLabelLength * pixelsPerChar);
 };
+
+const LABEL_CHAR_WIDTH = 10;
+const labelFitsBar = (text, height) => `${text}`.length * LABEL_CHAR_WIDTH < height;
 
 export default class SimpleBarChart extends Component {
 
@@ -81,6 +85,7 @@ export default class SimpleBarChart extends Component {
     marginBottom: PropTypes.number,
     style: PropTypes.object,
     legendVisible: PropTypes.bool,
+    valueLabelsVisible: PropTypes.bool,
     yAxisLabel: PropTypes.string,
     yAxisTicks: PropTypes.number,
     xAxisLabel: PropTypes.string,
@@ -95,6 +100,7 @@ export default class SimpleBarChart extends Component {
     marginTop: 70,
     marginBottom: 60,
     legendVisible: false,
+    valueLabelsVisible: false,
     edit: false,
     padding: 0.1,
     colorMapping: {},
@@ -114,13 +120,7 @@ export default class SimpleBarChart extends Component {
 
     if (!get(data, 'series[0]')) return false;
 
-    const series = merge({}, data.common, data.series[0]);
-
-    return {
-      ...series,
-      data: series.data
-        .map(datum => ({ ...datum, value: Math.abs(datum.value) })),
-    };
+    return merge({}, data.common, data.series[0]);
   }
 
   getColor(key, index, numColors) {
@@ -156,9 +156,9 @@ export default class SimpleBarChart extends Component {
 
   handleMouseEnterNode({ key, value }, event) {
     if (this.state.isPickingColor) return;
-    const { interactive, print, colors } = this.props;
+    const { interactive, print, colorMapping } = this.props;
     if (!interactive || print) return;
-    this.handleShowTooltip(event, { key, color: colors[key], value: heuristicRound(value) });
+    this.handleShowTooltip(event, { key, color: colorMapping[key], value: heuristicRound(value) });
     this.setState({ hoveredNode: key });
   }
 
@@ -188,7 +188,7 @@ export default class SimpleBarChart extends Component {
       (nodeCount >= 200 && index % 10 !== 0) ||
       (nodeCount < 200 && nodeCount > 40 && index % 5 !== 0)
     ) return null;
-    let labelText = String(getLabelText(value, type));
+    let labelText = String(getLabelText(key, type));
     labelText = labelText.length <= 16 ?
       labelText : `${labelText.substring(0, 13)}…`;
 
@@ -243,6 +243,40 @@ export default class SimpleBarChart extends Component {
     );
   }
 
+  renderValueLabel({ key, nodeWidth, x, y, value, valueLabelsVisible, color, height }) {
+    if (!valueLabelsVisible) return null;
+    const labelText = heuristicRound(value);
+    const labelX = x + (nodeWidth / 2);
+    const OFFSET = 5;
+    const labelY = value < 0 ? y - OFFSET : y + OFFSET;
+    if (!labelFitsBar(labelText, height)) return null;
+
+    return (
+      <Text
+        textAnchor={value < 0 ? 'end' : 'start'}
+        alignmentBaseline="center"
+        transform={[
+          { type: 'rotate', value: [90, labelX, labelY] },
+          { type: 'translate', value: [labelX, labelY] },
+        ]}
+        {...labelFont}
+        fill={isLight(color) ? labelFont.fill : 'white'}
+        fontWeight={get(this.state, 'hoveredNode') === key ? 700 : 400}
+        onMouseEnter={(event) => {
+          this.handleMouseEnterNode({ key, value }, event);
+        }}
+        onMouseMove={(event) => {
+          this.handleMouseEnterNode({ key, value }, event);
+        }}
+        onMouseLeave={() => {
+          this.handleMouseLeaveNode({ key });
+        }}
+      >
+        {labelText}
+      </Text>
+    );
+  }
+
   render() {
     const {
       width,
@@ -262,6 +296,7 @@ export default class SimpleBarChart extends Component {
       xAxisLabel,
       grid,
       visualisation,
+      valueLabelsVisible,
     } = this.props;
 
     const { tooltipItems, tooltipVisible, tooltipPosition } = this.state;
@@ -432,13 +467,21 @@ export default class SimpleBarChart extends Component {
                               nodeCount: series.data.length,
                               index: i,
                               key,
-                              value: key,
+                              value,
                               nodeWidth,
                               x,
                               y: origin,
                               domain,
+                            })}
+                            {this.renderValueLabel({
+                              key,
+                              value,
+                              nodeWidth,
+                              x,
+                              y: origin + ((value < 0 ? 1 : -1) * normalizedHeight),
+                              valueLabelsVisible,
+                              color,
                               height: normalizedHeight,
-                              type: dataType,
                             })}
                           </Group>
                         );

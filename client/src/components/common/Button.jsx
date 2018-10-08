@@ -12,6 +12,7 @@ const Button = ({
   warning,
   danger,
   success,
+  link,
   children,
   disabled,
   ...rest
@@ -26,9 +27,10 @@ const Button = ({
     if (xs) size = 'xs';
   }
   let type;
-  if (!primary && !warning && !danger && !success) {
+  if (!primary && !warning && !danger && !success && !link) {
     type = 'default';
   } else {
+    if (link) type = 'link';
     if (primary) type = 'primary';
     if (warning) type = 'warning';
     if (danger) type = 'danger';
@@ -56,6 +58,7 @@ Button.propTypes = {
   success: PropTypes.bool,
   danger: PropTypes.bool,
   warning: PropTypes.bool,
+  link: PropTypes.bool,
   disabled: PropTypes.bool,
   children: PropTypes.oneOfType([PropTypes.node, PropTypes.string]),
 };

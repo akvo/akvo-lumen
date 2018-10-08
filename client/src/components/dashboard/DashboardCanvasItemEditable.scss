@@ -6,9 +6,18 @@
   .DashboardCanvasItemEditableInput {
     height: calc(100% - 51px);
 
+    .ql-container {
+      border-bottom: none;
+    }
+
     .ql-editor {
       background: white;
       min-height: 40px;
+      border-bottom: 1px solid #ccc;
+      border-right: 1px solid #ccc;
+      border-left: 1px solid #ccc;
+      margin-left: -1px;
+      margin-right: -1px;
     }
 
     .ql-toolbar {
@@ -68,7 +77,8 @@
     }
   }
 
-  .text {
+  .text,
+  .ql-editor {
     strong {
       font-weight: 700;
     }
