@@ -15,5 +15,3 @@
 
 (defmethod ig/init-key :akvo.lumen.endpoint.public/public  [_ opts]
   (endpoint opts))
-
-(defmethod ig/halt-key! :akvo.lumen.endpoint.public/public  [_ opts])

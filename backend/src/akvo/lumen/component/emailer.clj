@@ -41,12 +41,6 @@
               :from-name   from-name
               :api-url     mailjet-url}})))
 
-(defmethod ig/halt-key! :akvo.lumen.component.emailer/mailjet-emailer  [_ opts]
-  {})
-
 (defmethod ig/init-key :akvo.lumen.component.emailer/dev-emailer  [_ {:keys [config] :as opts}]
   (log/info  "Using std out emailer")
   (map->DevEmailer (select-keys (:emailer config) [:from-email :from-name])))
-
-(defmethod ig/halt-key! :akvo.lumen.component.emailer/dev-emailer  [_ opts]
-  {})

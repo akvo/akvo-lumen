@@ -315,6 +315,3 @@
         openid-config (fetch-openid-configuration issuer)]
       (log/info "Successfully got openid-config from provider.")
       (assoc this :openid-config openid-config)))
-
-(defmethod ig/halt-key! :akvo.lumen.component.keycloak  [_ opts]
-  (assoc opts :openid-config nil))

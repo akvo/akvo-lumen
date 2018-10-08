@@ -12,5 +12,3 @@
 
 (defmethod ig/init-key :akvo.lumen.endpoint.multiple-column/multiple-column  [_ opts]
   (endpoint opts))
-
-(defmethod ig/halt-key! :akvo.lumen.endpoint.multiple-column/multiple-column  [_ opts])

@@ -28,5 +28,3 @@
 
 (defmethod ig/init-key :akvo.lumen.endpoint.dashboard/dashboard  [_ opts]
   (endpoint opts))
-
-(defmethod ig/halt-key! :akvo.lumen.endpoint.dashboard/dashboard  [_ opts])

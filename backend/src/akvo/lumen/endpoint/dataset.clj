@@ -32,5 +32,3 @@
 
 (defmethod ig/init-key :akvo.lumen.endpoint.dataset/dataset  [_ opts]
   (endpoint opts))
-
-(defmethod ig/halt-key! :akvo.lumen.endpoint.dataset/dataset  [_ opts])

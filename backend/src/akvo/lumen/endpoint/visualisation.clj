@@ -37,5 +37,3 @@
 
 (defmethod ig/init-key :akvo.lumen.endpoint.visualisation/visualisation  [_ opts]
   (endpoint opts))
-
-(defmethod ig/halt-key! :akvo.lumen.endpoint.visualisation/visualisation  [_ opts])

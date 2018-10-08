@@ -26,14 +26,8 @@
     (log/warn ::start "Using caddisfly LOCAL schema-uri:" local-schema-uri)
     (assoc this :schema tests)))
 
-(defmethod ig/halt-key! :akvo.lumen.component.caddisfly/local  [_ opts]
-  (log/debug "halt-key"  opts))
-
 (defmethod ig/init-key :akvo.lumen.component.caddisfly/prod  [_ {:keys [config] :as opts}]
   (let [{:keys [schema-uri] :as this} (caddisfly (:caddisfly config))
         tests (-> schema-uri client/get :body (json/decode keyword) extract-tests)]
     (log/info ::start "Using caddisfly ONLINE schema-uri" schema-uri)
     (assoc this :schema tests)))
-
-(defmethod ig/halt-key! :akvo.lumen.component.caddisfly/prod  [_ opts]
-  (dissoc opts :schema))

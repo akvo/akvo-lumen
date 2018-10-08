@@ -14,5 +14,3 @@
 
 (defmethod ig/init-key :akvo.lumen.endpoint.resource/resource  [_ opts]
   (endpoint opts))
-
-(defmethod ig/halt-key! :akvo.lumen.endpoint.resource/resource  [_ opts])

@@ -17,5 +17,3 @@
 
 (defmethod ig/init-key :akvo.lumen.endpoint.share/share  [_ opts]
   (endpoint opts))
-
-(defmethod ig/halt-key! :akvo.lumen.endpoint.share/share  [_ opts])

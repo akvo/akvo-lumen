@@ -23,5 +23,3 @@
 
 (defmethod ig/init-key :akvo.lumen.endpoint.aggregation/aggregation  [_ opts]
   (endpoint opts))
-
-(defmethod ig/halt-key! :akvo.lumen.endpoint.aggregation/aggregation  [_ opts])
