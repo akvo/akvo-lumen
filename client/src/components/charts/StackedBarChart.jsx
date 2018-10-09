@@ -516,7 +516,8 @@ export default class StackedBarChart extends Component {
                                     key,
                                     barWidth,
                                     x: normalizedX,
-                                    y: ((grouped ? origin : normalizedY) - normalizedHeight) + normalizedHeight / 2,
+                                    y: ((grouped ? origin : normalizedY) - normalizedHeight) +
+                                      (normalizedHeight / 2),
                                     value: nodes[valueIndex],
                                     color,
                                     barHeight: normalizedHeight,
