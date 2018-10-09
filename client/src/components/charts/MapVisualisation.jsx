@@ -4,10 +4,12 @@ import PropTypes from 'prop-types';
 import leaflet from 'leaflet';
 import { isEqual, cloneDeep, get, compact } from 'lodash';
 import { FormattedMessage } from 'react-intl';
+
 import leafletUtfGrid from '../../vendor/leaflet.utfgrid';
 import * as chart from '../../utilities/chart';
 import Spinner from '../common/LoadingSpinner';
 import { trackEvent } from '../../utilities/analytics';
+import RenderComplete from './RenderComplete';
 
 require('../../../node_modules/leaflet/dist/leaflet.css');
 require('./MapVisualisation.scss');
@@ -327,6 +329,8 @@ export default class MapVisualisation extends Component {
     const { visualisation, metadata, width, height } = nextProps;
     const { tileUrl, tileAttribution } = getBaseLayerAttributes(visualisation.spec.baseLayer);
 
+    this.setState({ hasRendered: false });
+
     // Windshaft map
     // const tenantDB = visualisation.tenantDB;
     const baseURL = '/maps/layergroup';
@@ -444,6 +448,7 @@ export default class MapVisualisation extends Component {
       });
     }
     this.storedLayerGroupId = layerGroupId;
+    this.setState({ hasRendered: true });
   }
 
   render() {
@@ -476,6 +481,7 @@ export default class MapVisualisation extends Component {
           height,
         }}
       >
+        {this.state.hasRendered && visualisation.id && <RenderComplete id={visualisation.id} />}
         {showTitle && (
           <div>
             <h2

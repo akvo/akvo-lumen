@@ -18,6 +18,7 @@ import ColorPicker from '../common/ColorPicker';
 import ChartLayout from './ChartLayout';
 import Tooltip from './Tooltip';
 import { labelFont, MAX_FONT_SIZE, MIN_FONT_SIZE } from '../../constants/chart';
+import RenderComplete from './RenderComplete';
 
 const getDatum = (data, datum) => data.filter(({ key }) => key === datum)[0];
 
@@ -89,6 +90,7 @@ export default class SimpleBarChart extends Component {
     yAxisTicks: PropTypes.number,
     xAxisLabel: PropTypes.string,
     grid: PropTypes.bool,
+    visualisation: PropTypes.object,
   }
 
   static defaultProps = {
@@ -293,6 +295,7 @@ export default class SimpleBarChart extends Component {
       yAxisTicks,
       xAxisLabel,
       grid,
+      visualisation,
       valueLabelsVisible,
     } = this.props;
 
@@ -375,6 +378,8 @@ export default class SimpleBarChart extends Component {
                   this.wrap = c;
                 }}
               >
+                <RenderComplete id={visualisation.id} />
+
                 {tooltipVisible && (
                   <Tooltip
                     items={tooltipItems}

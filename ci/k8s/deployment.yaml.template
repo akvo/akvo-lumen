@@ -42,6 +42,15 @@ spec:
             secretKeyRef:
               name: lumen
               key: encryption_key
+      - name: lumen-exporter
+        image: eu.gcr.io/akvo-lumen/lumen-exporter:${BUILD_HASH}
+        ports:
+        - containerPort: 3001
+        resources:
+          requests:
+            cpu: "50m"
+          limits:
+            cpu: "1000m"
       - name: lumen-backend
         image: eu.gcr.io/akvo-lumen/lumen-backend:${BUILD_HASH}
         ports:

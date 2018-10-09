@@ -13,6 +13,7 @@ import Resources from '../components/Resources';
 import Main from './Main';
 import WorkspaceNav from '../components/WorkspaceNav';
 import AdminNav from '../components/AdminNav';
+import withExport from '../utilities/withExport';
 
 export default function App({ history, location }) {
   return (
@@ -51,6 +52,11 @@ export default function App({ history, location }) {
             location={location}
           />
           <Route
+            path="visualisation/:visualisationId/export"
+            components={{ sidebar: WorkspaceNav, content: withExport(Visualisation) }}
+            location={location}
+          />
+          <Route
             path="visualisation/:visualisationId"
             components={{ sidebar: WorkspaceNav, content: Visualisation }}
             location={location}
@@ -58,6 +64,11 @@ export default function App({ history, location }) {
           <Route
             path="dashboard/create"
             components={{ sidebar: WorkspaceNav, content: Dashboard }}
+            location={location}
+          />
+          <Route
+            path="dashboard/:dashboardId/export"
+            components={{ sidebar: WorkspaceNav, content: withExport(Dashboard) }}
             location={location}
           />
           <Route
