@@ -46,6 +46,11 @@ VALUES (:id, :title, :description, :author);
 -- :doc delete dataset
 DELETE FROM dataset WHERE id=:id;
 
+-- :name select-datasets-by-id :? :*
+-- :doc select datasets by id
+SELECT * from dataset WHERE id IN (:v*:ids);
+
+
 -- :name update-dataset-meta :! :n
 -- :doc update dataset meta
 UPDATE dataset SET title = :title WHERE id = :id;
