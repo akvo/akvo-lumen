@@ -25,6 +25,7 @@
    'email-password (:lumen-email-password env)
    'email-user (:lumen-email-user env)
    'encryption-key (:lumen-encryption-key env)
+   'exporter-api-url (:exporter-api-url env "http://localhost:3001")
    'file-upload-path (:lumen-file-upload-path env "/tmp/akvo/lumen")
    'flow-api-url (:lumen-flow-api-url env)
    'http-port (Integer/parseInt (:port env "3000"))

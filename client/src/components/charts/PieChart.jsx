@@ -14,6 +14,7 @@ import ResponsiveWrapper from '../common/ResponsiveWrapper';
 import ColorPicker from '../common/ColorPicker';
 import ChartLayout from './ChartLayout';
 import Tooltip from './Tooltip';
+import RenderComplete from './RenderComplete';
 import { labelFont, connectionStyle } from '../../constants/chart';
 
 const getDatum = (data, datum) => data.filter(({ key }) => key === datum)[0];
@@ -43,6 +44,7 @@ export default class PieChart extends Component {
     legendVisible: PropTypes.bool,
     style: PropTypes.object,
     labelsVisible: PropTypes.bool,
+    visualisation: PropTypes.object,
   }
 
   static defaultProps = {
@@ -107,11 +109,11 @@ export default class PieChart extends Component {
   }
 
   handleMouseEnterNode({ key, value, totalCount }, event) {
-    const { interactive, print, colors } = this.props;
+    const { interactive, print, colorMapping } = this.props;
     if (!interactive || print) return;
     this.handleShowTooltip(event, {
       key,
-      color: colors[key],
+      color: colorMapping[key],
       value: getLabelText(value, totalCount),
     });
     this.setState({ hoveredNode: key });
@@ -196,6 +198,7 @@ export default class PieChart extends Component {
       legendVisible,
       edit,
       outerRadius,
+      visualisation,
     } = this.props;
 
     const innerRadius = donut ? Math.floor(Math.min(width, height) / 8) : 0;
@@ -250,6 +253,8 @@ export default class PieChart extends Component {
                   this.wrap = c;
                 }}
               >
+                <RenderComplete id={visualisation.id} />
+
                 {tooltipVisible && (
                   <Tooltip
                     items={tooltipItems}

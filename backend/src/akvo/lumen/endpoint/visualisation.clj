@@ -33,4 +33,4 @@
           (visualisation/upsert tenant-conn (assoc body "id" id) jwt-claims))
 
         (DELETE "/" _
-          (visualisation/delete tenant-conn id))))))
+                (visualisation/delete tenant-conn id))))))

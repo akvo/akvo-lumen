@@ -1,4 +1,4 @@
-/* eslint-disable import/default, global-require, import/first */
+/* eslint-disable import/default, global-require, import/first, no-underscore-dangle */
 import React from 'react';
 import { render } from 'react-dom';
 import { browserHistory } from 'react-router';
@@ -8,6 +8,7 @@ import Root from './containers/Root';
 import configureStore from './store/configureStore';
 import * as auth from './auth';
 import { init as initAnalytics } from './utilities/analytics';
+import queryString from 'query-string';
 
 function initAuthenticated(profile, env) {
   const initialState = { profile, env };
@@ -44,10 +45,35 @@ function initAuthenticated(profile, env) {
   }
 }
 
+function initWithAuthToken(locale) {
+  const initialState = { profile: { attributes: { locale: [locale] } } };
+  const rootElement = document.querySelector('#root');
+  const store = configureStore(initialState);
+  const history = syncHistoryWithStore(browserHistory, store);
+
+  render(
+    <AppContainer>
+      <Root store={store} history={history} />
+    </AppContainer>,
+    rootElement
+  );
+}
+
 function initNotAuthenticated(msg) {
   document.querySelector('#root').innerHTML = msg;
 }
 
-auth.init()
-  .then(({ profile, env }) => initAuthenticated(profile, env))
-  .catch(err => initNotAuthenticated(err.message));
+function dispatchOnMode() {
+  const queryParams = queryString.parse(location.search);
+  const accessToken = queryParams.access_token;
+  if (accessToken == null) {
+    auth
+      .init()
+      .then(({ profile, env }) => initAuthenticated(profile, env))
+      .catch(err => initNotAuthenticated(err.message));
+  } else {
+    auth.initExport(accessToken).then(initWithAuthToken(queryParams.locale));
+  }
+}
+
+dispatchOnMode();

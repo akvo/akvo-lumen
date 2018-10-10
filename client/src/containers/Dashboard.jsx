@@ -357,13 +357,29 @@ class Dashboard extends Component {
   }
 
   handleDashboardAction(action) {
+    const { dashboard } = this.state;
+    const url = `${window.location.origin}/dashboard/${dashboard.id}`;
     switch (action) {
       case 'share': {
-        trackEvent(
-          'Share dashboard',
-          `${window.location.origin}/dashboard/${this.state.dashboard.id}`
-        );
+        trackEvent('Share dashboard', url);
         this.toggleShareDashboard();
+        break;
+      }
+      case 'export_png': {
+        trackEvent('Export dashboard (png)', url);
+        this.props.dispatch(
+          actions.exportDashboard(dashboard, { title: dashboard.title })
+        );
+        break;
+      }
+      case 'export_pdf': {
+        trackEvent('Export dashboard (pdf)', url);
+        this.props.dispatch(
+          actions.exportDashboard(dashboard, {
+            format: 'pdf',
+            title: dashboard.title,
+          })
+        );
         break;
       }
       default:
@@ -503,20 +519,24 @@ class Dashboard extends Component {
     }
     const { DashboardHeader, DashboardEditor } = this.state.asyncComponents;
     const dashboard = getDashboardFromState(this.state.dashboard, true);
+    const { exporting } = this.props;
 
     return (
       <NavigationPrompt shouldPrompt={this.state.savingFailed}>
         <div className="Dashboard">
-          <DashboardHeader
-            title={dashboard.title}
-            isUnsavedChanges={this.state.isUnsavedChanges}
-            onDashboardAction={this.handleDashboardAction}
-            onChangeTitle={this.onUpdateName}
-            onBeginEditTitle={() => this.setState({ isUnsavedChanges: true })}
-            onSaveDashboard={this.onSave}
-            savingFailed={this.state.savingFailed}
-            timeToNextSave={this.state.timeToNextSave - this.state.timeFromPreviousSave}
-          />
+          {!exporting && (
+            <DashboardHeader
+              title={dashboard.title}
+              isUnsavedChanges={this.state.isUnsavedChanges}
+              onDashboardAction={this.handleDashboardAction}
+              onChangeTitle={this.onUpdateName}
+              onBeginEditTitle={() => this.setState({ isUnsavedChanges: true })}
+              onSaveDashboard={this.onSave}
+              savingFailed={this.state.savingFailed}
+              timeToNextSave={this.state.timeToNextSave - this.state.timeFromPreviousSave}
+              isExporting={get(this.props, `library.dashboards[${dashboard.id}].isExporting`)}
+            />
+          )}
           <DashboardEditor
             dashboard={dashboard}
             datasets={this.props.library.datasets}
@@ -528,20 +548,23 @@ class Dashboard extends Component {
             onUpdateEntities={this.updateEntities}
             onUpdateName={this.onUpdateName}
             print={this.props.print}
+            exporting={exporting}
           />
-          <ShareEntity
-            isOpen={this.state.isShareModalVisible}
-            onClose={this.toggleShareDashboard}
-            title={dashboard.title}
-            shareId={get(this.state, 'dashboard.shareId')}
-            protected={get(this.state, 'dashboard.protected')}
-            type={dashboard.type}
-            canSetPrivacy
-            onSetPassword={this.handleSetSharePassword}
-            onFetchShareId={this.handleFetchShareId}
-            onToggleProtected={this.handleToggleShareProtected}
-            alert={this.state.passwordAlert}
-          />
+          {!exporting && (
+            <ShareEntity
+              isOpen={this.state.isShareModalVisible}
+              onClose={this.toggleShareDashboard}
+              title={dashboard.title}
+              shareId={get(this.state, 'dashboard.shareId')}
+              protected={get(this.state, 'dashboard.protected')}
+              type={dashboard.type}
+              canSetPrivacy
+              onSetPassword={this.handleSetSharePassword}
+              onFetchShareId={this.handleFetchShareId}
+              onToggleProtected={this.handleToggleShareProtected}
+              alert={this.state.passwordAlert}
+            />
+          )}
         </div>
       </NavigationPrompt>
     );
@@ -554,6 +577,7 @@ Dashboard.propTypes = {
   library: PropTypes.object.isRequired,
   location: PropTypes.object.isRequired,
   params: PropTypes.object,
+  exporting: PropTypes.bool,
   print: printShape,
 };
 

@@ -12,6 +12,7 @@
   :collection #var akvo.lumen.endpoint.collection/endpoint
   :dashboard #var akvo.lumen.endpoint.dashboard/endpoint
   :dataset #var akvo.lumen.endpoint.dataset/endpoint
+  :export #var akvo.lumen.endpoint.export/endpoint
   :raster #var akvo.lumen.endpoint.raster/endpoint
   :env #var akvo.lumen.endpoint.env/endpoint
   :files #var akvo.lumen.endpoint.files/endpoint
@@ -33,9 +34,10 @@
  {:http [:app]
   :app [:aggregation :collection :dashboard :dataset :raster :env :emailer :files :healthz
         :invite :invite-verify :job-execution :library :public :resource :root :share
-        :tier :transformation :user :visualisation :multiple-column]
+        :tier :transformation :user :visualisation :export :multiple-column]
   :tenant-manager [:config :db]
   :aggregation [:tenant-manager]
+  :export [:config]
   :collection [:tenant-manager]
   :dashboard [:tenant-manager]
   :dataset [:config :error-tracker :tenant-manager]
@@ -112,6 +114,7 @@
    :sentry-backend-dsn sentry-backend-dsn
    :flow-api-url flow-api-url
    :windshaft-url "http://localhost:4000"
+   :exporter-api-url exporter-api-url
    :piwik-site-id piwik-site-id}
   :keycloak
   {:url keycloak-url

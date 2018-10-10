@@ -58,19 +58,30 @@
             &.disabled {
                 color: $midGrey;
                 border-color: $midGrey;
-
+                
                 &:hover, &:active {
                     color: $midGrey;
                     background: inherit;
                 }
             }
         }
-    }
 
+        ul {
+            li {
+                display: inline-block;
+                position: relative;
+
+                .LoadingIndicator {
+                    margin-right: 10px;
+                }
+            }
+        }
+    }
+    
     .primary-actions {
         margin-left: 20px;
     }
-
+    
     .actions {
         border-left: 0.1rem solid $lightBlueGrey;
     }

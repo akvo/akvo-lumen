@@ -29,6 +29,10 @@
         flex: 1;
         max-width: 70%;
     }
+
+    &--exporting {
+        margin-top: 0;
+    }
 }
 
 @media print {
