@@ -50,29 +50,6 @@ const getIsDatasetLoaded = (props) => {
 };
 
 export default class DashboardCanvasItem extends Component {
-
-  constructor() {
-    super();
-    this.state = { style: null };
-  }
-
-  componentWillMount() {
-    this.setState({
-      style: {
-        boxShadow: '0 0 30px 20px rgb(223, 244, 234)',
-      },
-    });
-
-    setTimeout(() => {
-      this.setState({
-        style: {
-          boxShadow: 'none',
-          transition: 'box-shadow 1s ease-in-out',
-        },
-      });
-    }, 0);
-  }
-
   shouldComponentUpdate(nextProps) {
     const oldLayout = getItemLayout(this.props);
     const newLayout = getItemLayout(nextProps);
@@ -82,7 +59,6 @@ export default class DashboardCanvasItem extends Component {
     const canvasWidthChanged = this.props.canvasWidth !== nextProps.canvasWidth;
     const needDataset = this.props.item.type === 'visualisation';
     const datasetDependencyMet = needDataset ? getIsDatasetLoaded(this.props) : true;
-    const styleTransitionFinished = this.state.style.boxShadow === 'none';
 
     if (this.props.item.type === 'visualisation' &&
         !this.props.item.visualisation.data
@@ -93,8 +69,7 @@ export default class DashboardCanvasItem extends Component {
     const shouldUpdate = Boolean(
         dimensionsChanged ||
         canvasWidthChanged ||
-        !datasetDependencyMet ||
-        !styleTransitionFinished
+        !datasetDependencyMet
       );
 
     return shouldUpdate;
@@ -145,7 +120,6 @@ export default class DashboardCanvasItem extends Component {
       <div
         data-test-id="dashboard-canvas-item"
         className="DashboardCanvasItem"
-        style={this.state.style}
         ref={(c) => { this.el = c; }}
       >
         {this.props.item.type === 'visualisation' && (

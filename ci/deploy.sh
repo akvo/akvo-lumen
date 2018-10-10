@@ -43,6 +43,7 @@ log Pushing images
 gcloud docker -- push eu.gcr.io/${PROJECT_NAME}/lumen-backend
 gcloud docker -- push eu.gcr.io/${PROJECT_NAME}/lumen-client
 gcloud docker -- push eu.gcr.io/${PROJECT_NAME}/lumen-maps
+gcloud docker -- push eu.gcr.io/${PROJECT_NAME}/lumen-exporter
 
 log Finding blue/green state
 LIVE_COLOR=$(./ci/live-color.sh)

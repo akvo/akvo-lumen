@@ -1,7 +1,11 @@
 import { createAction } from 'redux-actions';
 import { push } from 'react-router-redux';
+import { saveAs } from 'file-saver/FileSaver';
+
 import { addEntitiesToCollection } from './collection';
+import { showNotification } from './notification';
 import * as api from '../api';
+import { base64ToBlob, extToContentType } from '../utilities/export';
 
 export const fetchDashboardsSuccess = createAction('FETCH_DASHBOARDS_SUCCESS');
 
@@ -13,7 +17,8 @@ export const createDashboardSuccess = createAction('CREATE_DASHBOARD_SUCCESS');
 export function createDashboard(dashboard, collectionId, callback = () => {}) {
   return (dispatch) => {
     dispatch(createDashboardRequest(dashboard));
-    api.post('/api/dashboards', dashboard)
+    api
+      .post('/api/dashboards', dashboard)
       .then(response => response.json())
       .then((dash) => {
         dispatch(createDashboardSuccess(dash));
@@ -44,7 +49,8 @@ export function saveDashboardChanges(dashboard, callback = () => {}) {
 
   return (dispatch) => {
     dispatch(editDashboardRequest);
-    api.put(`/api/dashboards/${id}`, dashboard)
+    api
+      .put(`/api/dashboards/${id}`, dashboard)
       .then(response => response.json())
       .then((responseDash) => {
         dispatch(editDashboardSuccess(responseDash));
@@ -65,7 +71,8 @@ export const fetchDashboardSuccess = createAction('FETCH_DASHBOARD_SUCCESS');
 export function fetchDashboard(id) {
   return (dispatch) => {
     dispatch(fetchDashboardRequest(id));
-    api.get(`/api/dashboards/${id}`)
+    api
+      .get(`/api/dashboards/${id}`)
       .then(response => response.json())
       .then(dashboard => dispatch(fetchDashboardSuccess(dashboard)))
       .catch(err => dispatch(fetchDashboardFailure(err)));
@@ -80,7 +87,8 @@ export const deleteDashboardSuccess = createAction('DELETE_DASHBOARD_SUCCESS');
 export function deleteDashboard(id) {
   return (dispatch) => {
     dispatch(deleteDashboardRequest(id));
-    api.del(`/api/dashboards/${id}`)
+    api
+      .del(`/api/dashboards/${id}`)
       .then(response => response.json())
       .then(() => dispatch(deleteDashboardSuccess(id)))
       .catch(error => dispatch(deleteDashboardFailure(error)));
@@ -98,14 +106,17 @@ export const fetchShareIdSuccess = createAction('FETCH_DASHBOARD_SHARE_ID_SUCCES
 export function fetchShareId(dashboardId) {
   return (dispatch) => {
     if (dashboardId != null) {
-      api.post('/api/shares', { dashboardId })
+      api
+        .post('/api/shares', { dashboardId })
         .then(response => response.json())
         .then((response) => {
-          dispatch(fetchShareIdSuccess({
-            id: dashboardId,
-            shareId: response.id,
-            protected: response.protected,
-          }));
+          dispatch(
+            fetchShareIdSuccess({
+              id: dashboardId,
+              shareId: response.id,
+              protected: response.protected,
+            })
+          );
         });
     }
   };
@@ -120,7 +131,8 @@ export function setShareProtection(shareId, payload, callback = () => {}) {
   return (dispatch) => {
     if (shareId != null) {
       let isError = false;
-      api.put(`/api/shares/${shareId}`, payload)
+      api
+        .put(`/api/shares/${shareId}`, payload)
         .then((response) => {
           if (response.status !== 400) {
             dispatch(setShareProtectionSuccess({ shareId, data: payload }));
@@ -139,5 +151,47 @@ export function setShareProtection(shareId, payload, callback = () => {}) {
           callback(response);
         });
     }
+  };
+}
+
+/* Export dashboard */
+export const exportDashboardRequest = createAction('EXPORT_DASHBOARD_REQUEST');
+export const exportDashboardSuccess = createAction('EXPORT_DASHBOARD_SUCCESS');
+export const exportDashboardFailure = createAction('EXPORT_DASHBOARD_FAILURE');
+
+export function exportDashboard(dashboard, options) {
+  const { format, title } = { format: 'png', title: 'Untitled Dashboard', ...options };
+  return (dispatch) => {
+    dispatch(exportDashboardRequest({ id: dashboard.id }));
+
+    if (dashboard.id === null) throw new Error('dashboard.id not set');
+
+    const target = `${window.location.origin}/dashboard/${dashboard.id}/export`;
+
+    return api
+      .post('/api/exports', {
+        format,
+        title,
+        selector: Object.keys(dashboard.entities)
+          .filter(key => dashboard.entities[key].type === 'visualisation')
+          .map(key => `.render-completed-${key}`)
+          .join(','),
+        target,
+      })
+      .then((response) => {
+        if (response.status !== 200) {
+          dispatch(showNotification('error', 'Failed to export dashboard.'));
+          dispatch(exportDashboardFailure({ id: dashboard.id }));
+          return;
+        }
+        response.text().then((imageStr) => {
+          const blob = base64ToBlob(imageStr, extToContentType(format));
+          saveAs(blob, `${title}.${format}`);
+          dispatch(exportDashboardSuccess({ id: dashboard.id }));
+        });
+      })
+      .catch((error) => {
+        dispatch(exportDashboardFailure(error));
+      });
   };
 }

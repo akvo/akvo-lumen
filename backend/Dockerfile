@@ -2,7 +2,7 @@ FROM openjdk:8-jre-stretch
 MAINTAINER Akvo Foundation <devops@akvo.org>
 
 RUN set -ex; apt-get update && \
-    apt-get install -y --no-install-recommends --no-install-suggests \
+    apt-get -qq install -y --no-install-recommends --no-install-suggests \
     postgis gdal-bin postgresql-client-9.6 && \
     rm -rf /var/lib/apt/lists/*
 
