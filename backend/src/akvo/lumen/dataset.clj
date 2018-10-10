@@ -3,12 +3,12 @@
   (:require [akvo.lumen.endpoint.job-execution :as job-execution]
             [akvo.lumen.import :as import]
             [akvo.lumen.lib :as lib]
+            [akvo.lumen.transformation.merge-datasets :as md]
             [akvo.lumen.update :as update]
             [clojure.tools.logging :as log]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
             [clojure.set :refer (rename-keys) :as set]
-            [clojure.walk :refer (keywordize-keys)]
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/dataset.sql")
@@ -78,31 +78,6 @@
            (assoc :rows data :columns columns :status "OK"))))
     (lib/not-found {:error "Not found"})))
 
-(defn- dataset-merged-sources [tenant-conn dataset-id]
-  (->> {:dataset-id dataset-id}
-       (update/latest-dataset-version-by-dataset-id tenant-conn)
-       :transformations
-       keywordize-keys
-       (filter #(= "core/merge-datasets" (:op %)))
-       (map #(-> % :args :source))))
-
-(defn- problematic-merged-datasets? [tenant-conn dataset-merged-sources]
-  (let [datasets-merged (mapv :datasetId dataset-merged-sources)]
-    (if (empty? datasets-merged)
-      nil
-      (let [diff (set/difference (set datasets-merged)
-                                 (set (map :id (select-datasets-by-id tenant-conn {:ids datasets-merged}))))]
-        (when (not-empty diff)
-          {:diff diff})))))
-
-(defn problematic-merged-columns? [dss  merge-source-op]
- (let [ds      (some #(when (= (:dataset-id %) (:datasetId merge-source-op)) %) dss)
-       columns (set (conj (:mergeColumns merge-source-op)
-                          (:mergeColumn merge-source-op)
-                          (:aggregationColumn merge-source-op)))]
-   (= (set (map #(get % "columnName") (:columns ds)))
-      columns)))
-
 (defn delete
   [tenant-conn id]
   (let [c (delete-dataset-by-id tenant-conn {:id id})]
@@ -114,31 +89,21 @@
 
 (defn update
   [tenant-conn config dataset-id {refresh-token "refreshToken"}]
-  (let [merged-sources (dataset-merged-sources tenant-conn dataset-id)]
-    (if-let [merged-problems (problematic-merged-datasets? tenant-conn merged-sources)]
-      (lib/bad-request  {:error "This dataset can't be updated thus it has dependent datasets that were removed"
-                         :merged-problems merged-problems})
-      (if-let [column-problem (when (not-empty merged-sources)
-                                (let [dss (->> {:dataset-ids (mapv :datasetId merged-sources)}
-                                               (update/latest-dataset-versions-by-dataset-ids tenant-conn )
-                                               (map #(rename-keys % {:dataset_id :dataset-id})))]
-                                  (some #(when-not (problematic-merged-columns? dss %) %) merged-sources)))]
-        (lib/bad-request  {:error "This dataset can't be updated thus it has dependent columns that were removed"
-                           :merged-problems column-problem})
-
-        (if-let [{data-source-spec :spec
-                  data-source-id   :id} (data-source-by-dataset-id tenant-conn {:dataset-id dataset-id})]
-          (if-not (= (get-in data-source-spec ["source" "kind"])
-                     "DATA_FILE")
-            (update/update-dataset tenant-conn
-                                   config
-                                   dataset-id
-                                   data-source-id
-                                   (assoc-in data-source-spec
-                                             ["source" "refreshToken"]
-                                             refresh-token))
-            (lib/bad-request {:error "Can't update uploaded dataset"}))
-          (lib/not-found {:id dataset-id}))))))
+  (if-let [error (md/consistency-error? tenant-conn dataset-id)]
+    (lib/bad-request error)
+    (if-let [{data-source-spec :spec
+              data-source-id   :id} (data-source-by-dataset-id tenant-conn {:dataset-id dataset-id})]
+      (if-not (= (get-in data-source-spec ["source" "kind"])
+                 "DATA_FILE")
+        (update/update-dataset tenant-conn
+                               config
+                               dataset-id
+                               data-source-id
+                               (assoc-in data-source-spec
+                                         ["source" "refreshToken"]
+                                         refresh-token))
+        (lib/bad-request {:error "Can't update uploaded dataset"}))
+      (lib/not-found {:id dataset-id}))))
 
 (defn update-meta
   [tenant-conn id {:strs [name]}]
