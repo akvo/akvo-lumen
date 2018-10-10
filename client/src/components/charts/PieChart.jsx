@@ -59,6 +59,11 @@ export default class PieChart extends Component {
 
   state = {
     isPickingColor: false,
+    hasRendered: false,
+  }
+
+  componentDidMount() {
+    this.setState({ hasRendered: true }); // eslint-disable-line
   }
 
   getData() {
@@ -208,7 +213,9 @@ export default class PieChart extends Component {
     if (!series) return null;
 
     const totalCount = series.data.reduce((total, datum) => total + datum.value, 0);
-    const { tooltipItems, tooltipVisible, tooltipPosition } = this.state;
+
+    const { tooltipItems, tooltipVisible, tooltipPosition, hasRendered } = this.state;
+
     return (
       <ChartLayout
         style={style}
@@ -253,7 +260,7 @@ export default class PieChart extends Component {
                   this.wrap = c;
                 }}
               >
-                <RenderComplete id={visualisation.id} />
+                {hasRendered && <RenderComplete id={visualisation.id} />}
 
                 {tooltipVisible && (
                   <Tooltip

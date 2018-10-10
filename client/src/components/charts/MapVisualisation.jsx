@@ -448,7 +448,9 @@ export default class MapVisualisation extends Component {
       });
     }
     this.storedLayerGroupId = layerGroupId;
-    this.setState({ hasRendered: true });
+    setTimeout(() => {
+      this.setState({ hasRendered: true });
+    }, 5000);
   }
 
   render() {
