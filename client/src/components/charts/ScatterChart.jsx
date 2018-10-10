@@ -94,6 +94,11 @@ export default class ScatterChart extends Component {
 
   state = {
     isPickingColor: false,
+    hasRendered: false,
+  }
+
+  componentDidMount() {
+    this.setState({ hasRendered: true }); // eslint-disable-line
   }
 
   getData() {
@@ -210,7 +215,7 @@ export default class ScatterChart extends Component {
       visualisation,
     } = this.props;
 
-    const { tooltipItems, tooltipVisible, tooltipPosition } = this.state;
+    const { tooltipItems, tooltipVisible, tooltipPosition, hasRendered } = this.state;
     const series = this.getData();
 
     if (!series) return null;
@@ -285,7 +290,7 @@ export default class ScatterChart extends Component {
                   this.wrap = c;
                 }}
               >
-                <RenderComplete id={visualisation.id} />
+                {hasRendered && <RenderComplete id={visualisation.id} />}
 
                 {this.state.isPickingColor && (
                   <ColorPicker

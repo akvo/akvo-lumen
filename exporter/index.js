@@ -24,11 +24,8 @@ if (process.env.SENTRY_DSN) {
 }
 
 const captureException = error => {
-  if (process.env.SENTRY_DSN) {
-    Raven.captureException(error)
-  } else {
-    console.error(error)
-  }
+  console.error(error)
+  if (process.env.SENTRY_DSN) Raven.captureException(error)
 }
 
 const setContext = (contextData, callback) => {
@@ -46,11 +43,16 @@ const app = express()
 let browser
 
 app.use(bodyParser.json())
-app.use(cors())
-;(async () => {
-  browser = await puppeteer.launch({
-    args: ["--no-sandbox", "--disable-setuid-sandbox"]
-  })
+app.use(cors());
+
+(async () => {
+  try {
+    browser = await puppeteer.launch({
+      args: ["--no-sandbox", "--disable-setuid-sandbox"]
+    })
+  } catch (err) {
+    captureException(err);
+  }
   console.log("Exporter started...")
   app.listen(process.env.PORT || 3001, "0.0.0.0")
 })()
@@ -126,21 +128,21 @@ app.post("/screenshot", validate(validation.screenshot), async (req, res) => {
       await page.close()
       await context.close()
     } catch (err) {
-      captureException(err)
-      res.sendStatus(500)
+      captureException(err);
+      res.sendStatus(500);
     }
   })
 })
 
 function exitHandler(options, err) {
   if (browser) {
-    browser.close()
+    browser.close();
   }
   if (err) {
-    captureException(err)
+    captureException(err);
   }
   if (options.exit) {
-    process.exit(err ? err.code : 0)
+    process.exit(err ? err.code : 0);
   }
 }
 
