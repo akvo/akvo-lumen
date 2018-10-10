@@ -22,7 +22,7 @@
 (defn dev-caddisfly
   "caddisfly development version, so we can develop without internet connection"
   [options]
-  {:pre [(:local-schema-uri options)]}
+  {:pre [(boolean (:local-schema-uri options))]}
   (map->DevCaddisfly options))
 
 (defrecord Caddisfly [schema-uri]
@@ -37,5 +37,5 @@
     (dissoc this :schema)))
 
 (defn caddisfly [options]
-  {:pre [(:schema-uri options)]}
+  {:pre [(boolean (:schema-uri options))]}
   (map->Caddisfly options))
