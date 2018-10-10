@@ -274,6 +274,7 @@ storiesOf('Charts', module)
           print={boolean('props.print', false)}
           interactive={boolean('props.interactive', true)}
           edit={boolean('props.edit', true)}
+          horizontal={boolean('props.horizontal', false)}
           legendVisible={boolean('props.legendVisible', false)}
           valueLabelsVisible={boolean('props.valueLabelsVisible', false)}
           yAxisLabel={text('props.yAxisLabel', 'Y Axis')}
@@ -321,11 +322,13 @@ storiesOf('Charts', module)
           marginBottom={number('props.marginBottom', 120)}
           marginLeft={number('props.marginLeft', 70)}
           grouped={boolean('props.grouped', false)}
+          horizontal={boolean('props.horizontal', false)}
           grid={boolean('props.grid', true)}
           print={boolean('props.print', false)}
           interactive={boolean('props.interactive', true)}
           edit={boolean('props.edit', true)}
           legendVisible={boolean('props.legendVisible', true)}
+          valueLabelsVisible={boolean('props.valueLabelsVisible', false)}
           yAxisLabel={text('props.yAxisLabel', 'Temperature')}
         />
         <pre>
