@@ -50,11 +50,11 @@ app.use(cors());
     browser = await puppeteer.launch({
       args: ["--no-sandbox", "--disable-setuid-sandbox"]
     })
+    console.log("Exporter started...")
+    app.listen(process.env.PORT || 3001, "0.0.0.0")
   } catch (err) {
     captureException(err);
   }
-  console.log("Exporter started...")
-  app.listen(process.env.PORT || 3001, "0.0.0.0")
 })()
 
 app.post("/screenshot", validate(validation.screenshot), async (req, res) => {
@@ -73,12 +73,16 @@ app.post("/screenshot", validate(validation.screenshot), async (req, res) => {
       const token = req.header("access_token")
       const locale = req.header("locale")
       const dest = `${target}?access_token=${token}&locale=${locale}`
-      await page.goto(dest, { waitUntil: "networkidle2", timeout: 100000 })
+      await page.goto(dest, { waitUntil: "networkidle2", timeout: 0 })
 
       const selectors = (selector || "").split(",")
       if (selectors.length) {
         selectors.forEach(async selector => {
-          await page.waitFor(selector)
+          try {
+            await page.waitFor(selector);
+          } catch(error) {
+            captureException(error);
+          }
         })
       } else {
         await page.waitFor(5000)
