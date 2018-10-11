@@ -73,7 +73,7 @@ app.post("/screenshot", validate(validation.screenshot), async (req, res) => {
       const token = req.header("access_token")
       const locale = req.header("locale")
       const dest = `${target}?access_token=${token}&locale=${locale}`
-      await page.goto(dest, { waitUntil: "networkidle2", timeout: 0 })
+      await page.goto(dest, { waitUntil: "networkidle2", timeout: 100000 })
 
       const selectors = (selector || "").split(",")
       if (selectors.length) {
