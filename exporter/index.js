@@ -65,6 +65,7 @@ app.post("/screenshot", validate(validation.screenshot), async (req, res) => {
       // Create a new incognito browser context.
       const context = await browser.createIncognitoBrowserContext()
       const page = await context.newPage()
+      page.setDefaultNavigationTimeout(100000);
 
       page.on("pageerror", captureException)
       page.on("error", e => captureException(e))
