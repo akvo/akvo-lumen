@@ -43,7 +43,7 @@ const getSpecFromVisualisationType = (visualisationType) => {
     case 'pivot table':
       return { ...pivotTableSpecTemplate };
     default:
-      throw new Error(`Unknown visualisation type ${visualisationType}`);
+      return {};
   }
 };
 
