@@ -56,7 +56,7 @@ const ChartLayout = ({
 }) => {
   const dimensions = calculateDimensions({ width, height, legendVisible, legendPosition });
   return dimensions.horizontal ? (
-    <div style={{ display: 'flex', height, width, ...style }} {...rest}>
+    <div style={{ display: 'flex', height, width, flexGrow: 1, ...style }} {...rest}>
       {children}
       {dimensions.chartBeforeLegend && (
         <div style={{ height, width: dimensions.chart }}>
@@ -75,7 +75,7 @@ const ChartLayout = ({
       )}
     </div>
   ) : (
-    <div style={{ height, width, ...style }} {...rest}>
+    <div style={{ height, width, flexGrow: 1, ...style }} {...rest}>
       {children}
       {dimensions.chartBeforeLegend && (
         <div style={{ height: dimensions.chart, width }}>
