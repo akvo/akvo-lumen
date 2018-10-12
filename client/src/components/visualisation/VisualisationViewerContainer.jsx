@@ -25,8 +25,8 @@ export default class VisualisationViewerContainer extends Component {
   }
 
   handleResize() {
-    const height = this.sizeNode.clientHeight;
-    const width = this.sizeNode.clientWidth;
+    const height = Math.max(window.innerHeight, this.sizeNode.clientHeight);
+    const width = Math.max(window.innerWidth, this.sizeNode.clientWidth);
 
     this.setState({
       clientHeight: height,
