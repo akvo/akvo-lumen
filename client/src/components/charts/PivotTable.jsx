@@ -124,7 +124,7 @@ export default class PivotTable extends Component {
             height,
           }}
         >
-          {hasRendered && <RenderComplete id={visualisation.id} />}
+          {hasRendered && visualisation.id && <RenderComplete id={visualisation.id} />}
           Please choose a dataset.
           Please choose a dataset and link up its columns.
         </div>
@@ -140,7 +140,7 @@ export default class PivotTable extends Component {
             height,
           }}
         >
-          {hasRendered && <RenderComplete id={visualisation.id} />}
+          {hasRendered && visualisation.id && <RenderComplete id={visualisation.id} />}
           <p>
             There are {data.columns.length} columns in this table, which is too many to display.
             {context === 'editor' &&
@@ -161,7 +161,7 @@ export default class PivotTable extends Component {
           height,
         }}
       >
-        {hasRendered && <RenderComplete id={visualisation.id} />}
+        {hasRendered && visualisation.id && <RenderComplete id={visualisation.id} />}
         <table>
           <thead>
             <tr className="title">

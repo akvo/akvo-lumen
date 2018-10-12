@@ -57,13 +57,14 @@ class DatasetTable extends Component {
   }
 
   componentDidMount() {
-    setTimeout(() => {
+    this.resizeTimeout = setTimeout(() => {
       this.handleResize();
     }, 500);
     window.addEventListener('resize', this.handleResize);
   }
 
   componentWillUnmount() {
+    clearTimeout(this.resizeTimeout);
     window.removeEventListener('resize', this.handleResize);
   }
 
