@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
+import { addUrlProps, UrlQueryParamTypes } from 'react-url-query';
+
 import EntityTypeHeader from '../entity-editor/EntityTypeHeader';
 import LoadingSpinner from '../common/LoadingSpinner';
 
@@ -12,7 +14,7 @@ class VisualisationHeader extends Component {
   }
 
   getActionButtons(isUnsavedChanges) {
-    const { onVisualisationAction, isExporting } = this.props;
+    const { onVisualisationAction, isExporting, showExport } = this.props;
     const save = {
       buttonText: <FormattedMessage id="save" />,
       primary: true,
@@ -45,6 +47,7 @@ class VisualisationHeader extends Component {
       tooltipId: disableShare ? 'save_your_visualisation_before_exporting' : null,
       icon: isExporting ? <LoadingSpinner /> : null,
       onOptionSelected: format => onVisualisationAction(`export_${format}`),
+      customClass: showExport === 1 ? undefined : 'notImplemented',
       subActions: [
         {
           label: <FormattedMessage id="png" />,
@@ -130,6 +133,11 @@ VisualisationHeader.propTypes = {
   onChangeTitle: PropTypes.func,
   onBeginEditTitle: PropTypes.func,
   isExporting: PropTypes.bool,
+  showExport: PropTypes.number,
 };
 
-export default injectIntl(VisualisationHeader);
+export default addUrlProps({
+  urlPropsQueryConfig: {
+    showExport: { type: UrlQueryParamTypes.number, queryParam: 'show-export' },
+  },
+})(injectIntl(VisualisationHeader));

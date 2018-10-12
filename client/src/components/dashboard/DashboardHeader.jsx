@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
+import { addUrlProps, UrlQueryParamTypes } from 'react-url-query';
 
 import EntityTypeHeader from '../entity-editor/EntityTypeHeader';
 import LoadingSpinner from '../common/LoadingSpinner';
@@ -13,7 +14,7 @@ class DashboardHeader extends Component {
   }
 
   getActionButtons(isUnsavedChanges, haveTitle) {
-    const { onDashboardAction, isExporting } = this.props;
+    const { onDashboardAction, isExporting, showExport } = this.props;
 
     const save = {
       buttonText: <FormattedMessage id="save" />,
@@ -43,12 +44,14 @@ class DashboardHeader extends Component {
       disabled: disableShare,
       tooltipId: disableShare ? 'save_your_dashboard_before_sharing' : null,
     };
+
     const exportButton = {
       buttonText: <FormattedMessage id="export" />,
       disabled: disableShare || isExporting,
       tooltipId: disableShare ? 'save_your_dashboard_before_exporting' : null,
       onOptionSelected: format => onDashboardAction(`export_${format}`),
       icon: isExporting ? <LoadingSpinner /> : null,
+      customClass: showExport === 1 ? undefined : 'notImplemented',
       subActions: [
         {
           label: <FormattedMessage id="png" />,
@@ -60,6 +63,7 @@ class DashboardHeader extends Component {
         },
       ],
     };
+
     const overflow = {
       buttonText: <FormattedMessage id="overflow" />,
       customClass: 'notImplemented',
@@ -125,6 +129,11 @@ DashboardHeader.propTypes = {
   onSaveDashboard: PropTypes.func.isRequired,
   onBeginEditTitle: PropTypes.func.isRequired,
   isExporting: PropTypes.bool,
+  showExport: PropTypes.number,
 };
 
-export default injectIntl(DashboardHeader);
+export default addUrlProps({
+  urlPropsQueryConfig: {
+    showExport: { type: UrlQueryParamTypes.number, queryParam: 'show-export' },
+  },
+})(injectIntl(DashboardHeader));
