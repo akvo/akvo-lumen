@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
+import queryString from 'query-string';
+
 import EntityTypeHeader from '../entity-editor/EntityTypeHeader';
 import LoadingSpinner from '../common/LoadingSpinner';
 
@@ -39,12 +41,16 @@ class VisualisationHeader extends Component {
       disabled: disableShare,
       tooltipId: disableShare ? 'save_your_visualisation_before_sharing' : null,
     };
+
+    const queryParams = queryString.parse(location.search);
+
     const exportButton = {
       buttonText: <FormattedMessage id="export" />,
       disabled: disableShare || isExporting,
       tooltipId: disableShare ? 'save_your_visualisation_before_exporting' : null,
       icon: isExporting ? <LoadingSpinner /> : null,
       onOptionSelected: format => onVisualisationAction(`export_${format}`),
+      customClass: queryParams['show-export'] === '1' ? undefined : 'notImplemented',
       subActions: [
         {
           label: <FormattedMessage id="png" />,
