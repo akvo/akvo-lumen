@@ -13,9 +13,7 @@ const ConfigMenuOptionSelect = ({
     labelTextId={labelTextId}
     testId={testId}
   >
-    <div data-test-id="dataset-menu">
-      <SelectMenu {...rest} />
-    </div>
+    <SelectMenu {...rest} />
   </ConfigMenuSectionOption>
 );
 

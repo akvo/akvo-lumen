@@ -113,6 +113,11 @@ export default class SimpleBarChart extends Component {
 
   state = {
     isPickingColor: false,
+    hasRendered: false,
+  }
+
+  componentDidMount() {
+    this.setState({ hasRendered: true }); // eslint-disable-line
   }
 
   getData() {
@@ -299,7 +304,7 @@ export default class SimpleBarChart extends Component {
       valueLabelsVisible,
     } = this.props;
 
-    const { tooltipItems, tooltipVisible, tooltipPosition } = this.state;
+    const { tooltipItems, tooltipVisible, tooltipPosition, hasRendered } = this.state;
 
     const series = this.getData();
 
@@ -378,7 +383,7 @@ export default class SimpleBarChart extends Component {
                   this.wrap = c;
                 }}
               >
-                <RenderComplete id={visualisation.id} />
+                {hasRendered && <RenderComplete id={visualisation.id} />}
 
                 {tooltipVisible && (
                   <Tooltip

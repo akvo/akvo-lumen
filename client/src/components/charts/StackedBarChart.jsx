@@ -92,7 +92,12 @@ export default class StackedBarChart extends Component {
     this.state = {
       isPickingColor: false,
       data: this.getData(props),
+      hasRendered: false,
     };
+  }
+
+  componentDidMount() {
+    this.setState({ hasRendered: true }); // eslint-disable-line
   }
 
   componentWillReceiveProps(nextProps) {
@@ -244,7 +249,7 @@ export default class StackedBarChart extends Component {
       visualisation,
     } = this.props;
 
-    const { tooltipItems, tooltipVisible, tooltipPosition } = this.state;
+    const { tooltipItems, tooltipVisible, tooltipPosition, hasRendered } = this.state;
 
     const series = this.state.data;
 
@@ -337,7 +342,7 @@ export default class StackedBarChart extends Component {
                   this.wrap = c;
                 }}
               >
-                <RenderComplete id={visualisation.id} />
+                {hasRendered && <RenderComplete id={visualisation.id} />}
 
                 {tooltipVisible && (
                   <Tooltip

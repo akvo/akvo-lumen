@@ -24,11 +24,8 @@ if (process.env.SENTRY_DSN) {
 }
 
 const captureException = error => {
-  if (process.env.SENTRY_DSN) {
-    Raven.captureException(error)
-  } else {
-    console.error(error)
-  }
+  console.error(error)
+  if (process.env.SENTRY_DSN) Raven.captureException(error)
 }
 
 const setContext = (contextData, callback) => {
@@ -46,13 +43,18 @@ const app = express()
 let browser
 
 app.use(bodyParser.json())
-app.use(cors())
-;(async () => {
-  browser = await puppeteer.launch({
-    args: ["--no-sandbox", "--disable-setuid-sandbox"]
-  })
-  console.log("Exporter started...")
-  app.listen(process.env.PORT || 3001, "0.0.0.0")
+app.use(cors());
+
+(async () => {
+  try {
+    browser = await puppeteer.launch({
+      args: ["--no-sandbox", "--disable-setuid-sandbox"]
+    })
+    console.log("Exporter started...")
+    app.listen(process.env.PORT || 3001, "0.0.0.0")
+  } catch (err) {
+    captureException(err);
+  }
 })()
 
 app.post("/screenshot", validate(validation.screenshot), async (req, res) => {
@@ -63,6 +65,7 @@ app.post("/screenshot", validate(validation.screenshot), async (req, res) => {
       // Create a new incognito browser context.
       const context = await browser.createIncognitoBrowserContext()
       const page = await context.newPage()
+      page.setDefaultNavigationTimeout(100000);
 
       page.on("pageerror", captureException)
       page.on("error", e => captureException(e))
@@ -75,7 +78,11 @@ app.post("/screenshot", validate(validation.screenshot), async (req, res) => {
       const selectors = (selector || "").split(",")
       if (selectors.length) {
         selectors.forEach(async selector => {
-          await page.waitFor(selector)
+          try {
+            await page.waitFor(selector);
+          } catch(error) {
+            captureException(error);
+          }
         })
       } else {
         await page.waitFor(5000)
@@ -126,21 +133,21 @@ app.post("/screenshot", validate(validation.screenshot), async (req, res) => {
       await page.close()
       await context.close()
     } catch (err) {
-      captureException(err)
-      res.sendStatus(500)
+      captureException(err);
+      res.sendStatus(500);
     }
   })
 })
 
 function exitHandler(options, err) {
   if (browser) {
-    browser.close()
+    browser.close();
   }
   if (err) {
-    captureException(err)
+    captureException(err);
   }
   if (options.exit) {
-    process.exit(err ? err.code : 0)
+    process.exit(err ? err.code : 0);
   }
 }
 

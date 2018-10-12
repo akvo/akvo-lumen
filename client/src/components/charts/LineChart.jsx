@@ -83,6 +83,11 @@ export default class LineChart extends Component {
 
   state = {
     isPickingColor: undefined,
+    hasRendered: false,
+  }
+
+  componentDidMount() {
+    this.setState({ hasRendered: true }); // eslint-disable-line
   }
 
   getData() {
@@ -168,7 +173,7 @@ export default class LineChart extends Component {
       visualisation,
     } = this.props;
 
-    const { tooltipItems, tooltipVisible, tooltipPosition } = this.state;
+    const { tooltipItems, tooltipVisible, tooltipPosition, hasRendered } = this.state;
 
     const xAxisTicks = 8;
 
@@ -251,7 +256,7 @@ export default class LineChart extends Component {
                   this.wrap = c;
                 }}
               >
-                <RenderComplete id={visualisation.id} />
+                {hasRendered && <RenderComplete id={visualisation.id} />}
 
                 {tooltipVisible && (
                   <Tooltip
