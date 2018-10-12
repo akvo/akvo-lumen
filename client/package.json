@@ -110,7 +110,6 @@
     "react-router-redux": "^4.0.8",
     "react-scroll": "^1.7.10",
     "react-select": "^1.0.0-rc.2",
-    "react-url-query": "^1.4.0",
     "react-window-size": "^1.2.2",
     "redux": "^3.6.0",
     "redux-actions": "^1.1.0",
