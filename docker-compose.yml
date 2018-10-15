@@ -5,7 +5,7 @@ services:
    expose:
     - 5432
  keycloak:
-   build: keycloak
+   image: akvo/akvo-keycloak-dev:20181015.be5740a
    expose:
     - 8080
  backend:
@@ -36,7 +36,7 @@ services:
    volumes:
       - ./postgres/provision:/pg-certs
  fe-e2e-tests:
-   build: client/e2e-test
+   image: akvo/akvo-lumen-e2e-test:20181015.d875262
    volumes:
       - ./client/e2e-test:/app
       - /app/node_modules
@@ -52,4 +52,3 @@ services:
    build: exporter
    expose:
       - 3001
-   
