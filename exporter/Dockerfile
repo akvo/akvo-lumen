@@ -1,4 +1,4 @@
-FROM buildkite/puppeteer:v1.6.2
+FROM buildkite/puppeteer:v1.9.0
 
 USER root
 
