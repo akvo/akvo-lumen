@@ -16,6 +16,8 @@ spec:
         lumen-version: ${BUILD_HASH}
         app: lumen
         color: ${COLOR}
+      annotations:
+        prometheus.io/scrape: 'true'
     spec:
       containers:
       - name: lumen-client
