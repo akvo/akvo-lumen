@@ -194,7 +194,7 @@
                             (map #(-> % :args :source)))]
     (if-let [ds-diff (and (not-empty merged-sources)
                           (merged-datasets-diff tenant-conn merged-sources))]
-      {:error        (format "This dataset can't be updated thus it has merged dataset transformations that were removed: %s" (reduce str ds-diff))
+      {:error        (format "This version of the dataset isn't consistent thus it has merge transformations with datasets which were already removed. Dataset diff: %s" (reduce str ds-diff))
        :dataset-diff ds-diff}
       (when-let [column-diff (when (not-empty merged-sources)
                                (let [dss              (->> {:dataset-ids (mapv :datasetId merged-sources)}
@@ -205,5 +205,5 @@
                                                            (filter some?))]
                                  (when (not-empty column-diff-coll)
                                    column-diff-coll)))]
-        {:error       (format "This dataset can't be updated thus it has merged columns transformations that were removed from their datasets: %s" (reduce str column-diff))
+        {:error       (format "This version of the dataset isn't consistent thus it has merge transformations with datasets columns wich were already removed from their datasets: %s" (reduce str column-diff))
          :column-diff column-diff}))))

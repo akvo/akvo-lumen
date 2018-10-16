@@ -3,7 +3,7 @@
   (:require [akvo.lumen.endpoint.job-execution :as job-execution]
             [akvo.lumen.import :as import]
             [akvo.lumen.lib :as lib]
-            [akvo.lumen.transformation.merge-datasets :as md]
+            [akvo.lumen.transformation.merge-datasets :as transformation.merge-datasets]
             [akvo.lumen.update :as update]
             [clojure.tools.logging :as log]
             [clojure.java.jdbc :as jdbc]
@@ -89,21 +89,15 @@
 
 (defn update
   [tenant-conn config dataset-id {refresh-token "refreshToken"}]
-  (if-let [error (md/consistency-error? tenant-conn dataset-id)]
-    (lib/bad-request error)
-    (if-let [{data-source-spec :spec
-              data-source-id   :id} (data-source-by-dataset-id tenant-conn {:dataset-id dataset-id})]
-      (if-not (= (get-in data-source-spec ["source" "kind"])
-                 "DATA_FILE")
-        (update/update-dataset tenant-conn
-                               config
-                               dataset-id
-                               data-source-id
-                               (assoc-in data-source-spec
-                                         ["source" "refreshToken"]
-                                         refresh-token))
-        (lib/bad-request {:error "Can't update uploaded dataset"}))
-      (lib/not-found {:id dataset-id}))))
+  (if-let [{data-source-spec :spec
+            data-source-id   :id} (data-source-by-dataset-id tenant-conn {:dataset-id dataset-id})]
+    (if-let [error (transformation.merge-datasets/consistency-error? tenant-conn dataset-id)]
+      (lib/bad-request error)
+      (if-not (= (get-in data-source-spec ["source" "kind"]) "DATA_FILE")
+        (update/update-dataset tenant-conn config dataset-id data-source-id
+                               (assoc-in data-source-spec ["source" "refreshToken"] refresh-token))
+        (lib/bad-request {:error "Can't update uploaded dataset"})))    
+    (lib/not-found {:id dataset-id})))
 
 (defn update-meta
   [tenant-conn id {:strs [name]}]
