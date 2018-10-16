@@ -37,7 +37,7 @@ spec:
           requests:
             cpu: "50m"
           limits:
-            cpu: "1000m"
+            cpu: "2000m"
         env:
         - name: LUMEN_ENCRYPTION_KEY
           valueFrom:
