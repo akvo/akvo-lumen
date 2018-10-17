@@ -48,7 +48,7 @@ app.use(cors());
 (async () => {
   try {
     browser = await puppeteer.launch({
-      args: ["--no-sandbox", "--disable-setuid-sandbox"]
+	args: ["--no-sandbox", "--disable-setuid-sandbox","--disable-dev-shm-usage"]
     })
     console.log("Exporter started...")
     app.listen(process.env.PORT || 3001, "0.0.0.0")
