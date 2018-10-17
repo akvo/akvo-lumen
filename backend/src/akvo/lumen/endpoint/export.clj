@@ -1,6 +1,7 @@
 (ns akvo.lumen.endpoint.export
   "Exposes the exporter proxy"
   (:require [akvo.lumen.lib.export :as export]
+            [integrant.core :as ig]
             [compojure.core :refer :all]))
 
 
@@ -12,3 +13,6 @@
                                   (get headers "authorization")
                                   (get jwt-claims "locale")
                                   body)))))
+
+(defmethod ig/init-key :akvo.lumen.endpoint.export/export  [_ opts]
+  (endpoint opts))

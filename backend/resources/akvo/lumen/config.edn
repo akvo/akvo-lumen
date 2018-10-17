@@ -23,6 +23,7 @@
                                                        :config         #ig/ref :akvo.lumen.config}
  :akvo.lumen.endpoint.env/env                         {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
                                                        :config         #ig/ref :akvo.lumen.config}
+ :akvo.lumen.endpoint.export/export                   {:config         #ig/ref :akvo.lumen.config}
  :akvo.lumen.endpoint.files/files                     {:config #ig/ref :akvo.lumen.config}
  :akvo.lumen.endpoint.healthz/healthz                 {}
  :akvo.lumen.endpoint.invite/invite                   {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
@@ -56,6 +57,7 @@
               #ig/ref :akvo.lumen.endpoint.dashboard/dashboard
               #ig/ref :akvo.lumen.endpoint.dataset/dataset
               #ig/ref :akvo.lumen.endpoint.env/env
+              #ig/ref :akvo.lumen.endpoint.export/export
               #ig/ref :akvo.lumen.endpoint.files/files
               #ig/ref :akvo.lumen.endpoint.healthz/healthz
               #ig/ref :akvo.lumen.endpoint.invite/invite
