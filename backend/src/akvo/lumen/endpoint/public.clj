@@ -14,4 +14,4 @@
           (public/share tenant-conn config id password))))))
 
 (defmethod ig/init-key :akvo.lumen.endpoint.public/public  [_ opts]
-  (endpoint opts))
+  (endpoint (assoc opts :config (:config (:config opts)))))

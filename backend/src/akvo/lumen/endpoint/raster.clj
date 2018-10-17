@@ -22,4 +22,4 @@
           (raster/delete tenant-conn id))))))
 
 (defmethod ig/init-key :akvo.lumen.endpoint.raster/raster  [_ opts]
-  (endpoint opts))
+  (endpoint (assoc opts :config (:config (:config opts)))))

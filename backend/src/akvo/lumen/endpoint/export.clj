@@ -15,4 +15,4 @@
                                   body)))))
 
 (defmethod ig/init-key :akvo.lumen.endpoint.export/export  [_ opts]
-  (endpoint opts))
+  (endpoint (assoc opts :config (:config (:config opts)))))

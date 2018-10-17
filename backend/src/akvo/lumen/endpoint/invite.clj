@@ -35,7 +35,7 @@
                             (location (:invite-redirect config) request))))))
 
 (defmethod ig/init-key :akvo.lumen.endpoint.invite/invite  [_ opts]
-  (endpoint opts))
+  (endpoint (assoc opts :config (:config (:config opts)))))
 
 (defmethod ig/init-key :akvo.lumen.endpoint.invite/verify  [_ opts]
-  (verify-endpoint opts))
+  (verify-endpoint (assoc opts :config (:config (:config opts)))))

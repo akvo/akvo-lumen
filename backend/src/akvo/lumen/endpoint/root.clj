@@ -20,4 +20,4 @@
                       :visualisations (str base-url "visualisations")}})))))
 
 (defmethod ig/init-key :akvo.lumen.endpoint.root/root  [_ opts]
-  (endpoint opts))
+  (endpoint (assoc opts :config (:config (:config opts)))))

@@ -31,4 +31,4 @@
           (dataset/update tenant-conn config id body))))))
 
 (defmethod ig/init-key :akvo.lumen.endpoint.dataset/dataset  [_ opts]
-  (endpoint opts))
+  (endpoint (assoc opts :config (:config (:config opts)))))
