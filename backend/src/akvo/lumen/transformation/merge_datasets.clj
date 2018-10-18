@@ -98,6 +98,7 @@
                                      "geopoint" "geometry(POINT, 4326)"
                                      "geoshape" "geometry(GEOMETRY, 4326)"
                                      "number" "double precision"
+                                     "multiple" "text"
                                      "text" "text")})))
 
 (defn insert-merged-data
