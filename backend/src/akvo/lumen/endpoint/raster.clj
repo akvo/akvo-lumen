@@ -1,9 +1,8 @@
 (ns akvo.lumen.endpoint.raster
   (:require [akvo.lumen.component.tenant-manager :refer [connection]]
-            [akvo.lumen.import :as import]
+            [integrant.core :as ig]
             [akvo.lumen.lib.raster :as raster]
             [compojure.core :refer :all]))
-
 
 (defn endpoint [{:keys [tenant-manager config]}]
   (context "/api/rasters" {:keys [params tenant] :as request}
@@ -21,3 +20,6 @@
 
         (DELETE "/" _
           (raster/delete tenant-conn id))))))
+
+(defmethod ig/init-key :akvo.lumen.endpoint.raster/raster  [_ opts]
+  (endpoint (assoc opts :config (:config (:config opts)))))

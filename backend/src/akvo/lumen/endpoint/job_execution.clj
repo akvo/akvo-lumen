@@ -1,8 +1,8 @@
 (ns akvo.lumen.endpoint.job-execution
   (:require [akvo.lumen.component.tenant-manager :refer [connection]]
             [akvo.lumen.lib.job-execution :as job-execution]
-            [compojure.core :refer :all]))
-
+            [compojure.core :refer :all]
+            [integrant.core :as ig]))
 
 (defn endpoint [{:keys [tenant-manager]}]
   (context "/api/job_executions" {:keys [tenant]}
@@ -14,3 +14,6 @@
 
         (DELETE "/" _
           (job-execution/delete tenant-conn id))))))
+
+(defmethod ig/init-key :akvo.lumen.endpoint.job-execution/job-execution  [_ opts]
+  (endpoint opts))

@@ -1,0 +1,141 @@
+{:duct.core/project-ns  akvo-lumen
+ :duct.core/environment :production
+
+ :duct.module/logging {}
+
+ :akvo.lumen.component.hikaricp/hikaricp {:config #ig/ref :akvo.lumen.config}
+
+ :akvo.lumen.middleware.duct.erros/wrap-hide-errors      {}
+ :akvo.lumen.middleware.duct.not-found/wrap-not-found    {}
+ :akvo.lumen.middleware.ring.json/wrap-json-body         {}
+ :akvo.lumen.middleware.ring.json/wrap-json-response     {}
+ :akvo.lumen.middleware.ring.defaults/wrap-defaults      {}
+ :akvo.lumen.middleware.auth/wrap-auth                   {}
+ :akvo.lumen.middleware.auth/wrap-jwt                    {}
+ :akvo.lumen.middleware.tenant-manager/wrap-label-tenant {}
+ :akvo.lumen.middleware.sentry/wrap-sentry               {}
+
+ :akvo.lumen.endpoint.aggregation/aggregation         {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
+ :akvo.lumen.endpoint.collection/collection           {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
+ :akvo.lumen.endpoint.dashboard/dashboard             {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
+ :akvo.lumen.endpoint.dataset/dataset                 {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
+                                                       :error-tracker  #ig/ref :akvo.lumen.component.error-tracker/error-tracker
+                                                       :config         #ig/ref :akvo.lumen.config}
+ :akvo.lumen.endpoint.env/env                         {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
+                                                       :config         #ig/ref :akvo.lumen.config}
+ :akvo.lumen.endpoint.export/export                   {:config         #ig/ref :akvo.lumen.config}
+ :akvo.lumen.endpoint.files/files                     {:config #ig/ref :akvo.lumen.config}
+ :akvo.lumen.endpoint.healthz/healthz                 {}
+ :akvo.lumen.endpoint.invite/invite                   {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
+                                                       :keycloak       #ig/ref :akvo.lumen.component.keycloak
+                                                       :emailer        #ig/ref :akvo.lumen.component.emailer/emailer
+                                                       :config         #ig/ref :akvo.lumen.config}
+ :akvo.lumen.endpoint.invite/verify                   {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
+                                                       :keycloak       #ig/ref :akvo.lumen.component.keycloak
+                                                       :config         #ig/ref :akvo.lumen.config}
+ :akvo.lumen.endpoint.job-execution/job-execution     {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
+ :akvo.lumen.endpoint.library/library                 {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
+ :akvo.lumen.endpoint.multiple-column/multiple-column {:caddisfly #ig/ref :akvo.lumen.component.caddisfly/caddisfly}
+ :akvo.lumen.endpoint.public/public                   {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
+                                                       :config         #ig/ref :akvo.lumen.config}
+ :akvo.lumen.endpoint.raster/raster                   {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
+                                                       :config         #ig/ref :akvo.lumen.config}
+ :akvo.lumen.endpoint.resource/resource               {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
+ :akvo.lumen.endpoint.root/root                       {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
+ :akvo.lumen.endpoint.share/share                     {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
+                                                       :config         #ig/ref :akvo.lumen.config}
+ :akvo.lumen.endpoint.tier/tier                       {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
+ :akvo.lumen.endpoint.transformation/transformation   {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
+                                                       :caddisfly      #ig/ref :akvo.lumen.component.caddisfly/caddisfly}
+ :akvo.lumen.endpoint.user/user                       {:keycloak #ig/ref :akvo.lumen.component.keycloak}
+ :akvo.lumen.endpoint.visualisation/visualisation     {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
+                                                       :config         #ig/ref :akvo.lumen.config}
+
+ :akvo.lumen.component.handler/handler
+ {:endpoints [#ig/ref :akvo.lumen.endpoint.aggregation/aggregation
+              #ig/ref :akvo.lumen.endpoint.collection/collection
+              #ig/ref :akvo.lumen.endpoint.dashboard/dashboard
+              #ig/ref :akvo.lumen.endpoint.dataset/dataset
+              #ig/ref :akvo.lumen.endpoint.env/env
+              #ig/ref :akvo.lumen.endpoint.export/export
+              #ig/ref :akvo.lumen.endpoint.files/files
+              #ig/ref :akvo.lumen.endpoint.healthz/healthz
+              #ig/ref :akvo.lumen.endpoint.invite/invite
+              #ig/ref :akvo.lumen.endpoint.invite/verify
+              #ig/ref :akvo.lumen.endpoint.job-execution/job-execution
+              #ig/ref :akvo.lumen.endpoint.library/library
+              #ig/ref :akvo.lumen.endpoint.multiple-column/multiple-column
+              #ig/ref :akvo.lumen.endpoint.public/public
+              #ig/ref :akvo.lumen.endpoint.raster/raster
+              #ig/ref :akvo.lumen.endpoint.resource/resource
+              #ig/ref :akvo.lumen.endpoint.root/root
+              #ig/ref :akvo.lumen.endpoint.share/share
+              #ig/ref :akvo.lumen.endpoint.tier/tier
+              #ig/ref :akvo.lumen.endpoint.transformation/transformation
+              #ig/ref :akvo.lumen.endpoint.user/user
+              #ig/ref :akvo.lumen.endpoint.visualisation/visualisation]
+  :config    #ig/ref :akvo.lumen.config}
+ 
+ :akvo.lumen.component.http/http      {:config #ig/ref :akvo.lumen.config
+                                       :app    #ig/ref :akvo.lumen.component.handler/handler}
+ :akvo.lumen.component.caddisfly/prod {:config #ig/ref :akvo.lumen.config}
+ :akvo.lumen.component.keycloak       {:config #ig/ref :akvo.lumen.config}
+ :akvo.lumen.component.tenant-manager {:config #ig/ref :akvo.lumen.config
+                                       :db     #ig/ref :akvo.lumen.component.hikaricp/hikaricp}
+ 
+ :akvo.lumen.component.emailer/mailjet-emailer {:config #ig/ref :akvo.lumen.config}
+
+ :akvo.lumen.component.error-tracker/prod {:config #ig/ref :akvo.lumen.config}
+ :akvo.lumen.config
+ {:app
+  {:migrations {:tenant-manager "akvo/lumen/migrations/tenant_manager"
+                :tenants        "akvo/lumen/migrations/tenants"}
+   :middleware {:functions {:hide-errors       #ig/ref :akvo.lumen.middleware.duct.erros/wrap-hide-errors
+                            :json-body         #ig/ref :akvo.lumen.middleware.ring.json/wrap-json-body
+                            :json-response     #ig/ref :akvo.lumen.middleware.ring.json/wrap-json-response 
+                            :not-found         #ig/ref :akvo.lumen.middleware.duct.not-found/wrap-not-found 
+                            :ring-defaults     #ig/ref :akvo.lumen.middleware.ring.defaults/wrap-defaults
+                            :wrap-auth         #ig/ref :akvo.lumen.middleware.auth/wrap-auth
+                            :wrap-jwt          #ig/ref :akvo.lumen.middleware.auth/wrap-jwt
+                            :wrap-label-tenant #ig/ref :akvo.lumen.middleware.tenant-manager/wrap-label-tenant
+                            :wrap-sentry       #ig/ref :akvo.lumen.middleware.sentry/wrap-sentry}
+                :applied   [:not-found :json-response :ring-defaults :json-body
+                            :wrap-auth :wrap-jwt :wrap-label-tenant :wrap-sentry
+                            :hide-errors]
+                :arguments {:not-found     "Resource Not Found"
+                            :hide-errors   "Internal Server Error"
+                            :wrap-jwt      {:keycloak-url   keycloak-url
+                                            :keycloak-realm keycloak-realm}
+                            :ring-defaults {:params    {:urlencoded true
+                                                        :keywordize true}
+                                            :responses {:not-modified-responses true
+                                                        :absolute-redirects     true
+                                                        :content-types          true
+                                                        :default-charset        "utf-8"}}
+                            :wrap-sentry   [sentry-backend-dsn {:namespaces ["org.akvo" "akvo"]}]}}}
+  :http          {:port http-port}
+  :db            {:uri db-uri}
+  :caddisfly     {:schema-uri caddisfly-schema-uri}
+  :emailer       {:email-host     email-host
+                  :email-password email-password
+                  :email-user     email-user
+                  :mailjet-url    mailjet-url
+                  :from-email     "noreply@akvo.org"
+                  :from-name      "Akvo Lumen"}
+  :error-tracker {:dsn sentry-backend-dsn}
+  :config        {:encryption-key            encryption-key
+                  :file-upload-path          file-upload-path
+                  :max-upload-size           100
+                  :keycloak-url              keycloak-url
+                  :keycloak-realm            keycloak-realm
+                  :keycloak-public-client-id keycloak-public-client-id
+                  :sentry-client-dsn         sentry-client-dsn
+                  :sentry-backend-dsn        sentry-backend-dsn
+                  :flow-api-url              flow-api-url
+                  :windshaft-url             "http://localhost:4000"
+                  :piwik-site-id             piwik-site-id}
+  :keycloak      {:url         keycloak-url
+                  :realm       keycloak-realm
+                  :credentials {"client_id"     keycloak-client-id
+                                "client_secret" keycloak-client-secret}}}
+ }

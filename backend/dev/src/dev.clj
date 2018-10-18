@@ -2,6 +2,7 @@
   (:refer-clojure :exclude [test])
   (:require [akvo.lumen.endpoint]
             [akvo.lumen.lib.aes :as aes]
+            [akvo.lumen.middleware]
             [akvo.lumen.migrate :as lumen-migrate]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
@@ -9,24 +10,44 @@
             [clojure.pprint :refer [pprint]]
             [clojure.repl :refer :all]
             [clojure.tools.namespace.repl :refer [refresh]]
-            [com.stuartsierra.component :as component]
+            [duct.core :as duct]
             [duct.generate :as gen]
-            [duct.util.repl :refer [setup test cljs-repl] :as duct-repl]
-            [duct.util.system :refer [load-system]]
-            [reloaded.repl :refer [system init start stop go reset]])
+            [integrant.core :as ig]
+            [integrant.repl :as ir]
+            [integrant.repl.state :as state :refer (system)])
   (:import [org.postgresql.util PSQLException PGobject]))
 
-(defn new-system []
-  (load-system (keep io/resource
-                     ["akvo/lumen/system.edn" "dev.edn" "local.edn"])))
+(defn read-config []
+  (duct/read-config (io/resource "dev.edn")))
+
+(derive :akvo.lumen.component.emailer/dev-emailer :akvo.lumen.component.emailer/emailer)
+(derive :akvo.lumen.component.caddisfly/local :akvo.lumen.component.caddisfly/caddisfly)
+(derive :akvo.lumen.component.error-tracker/local :akvo.lumen.component.error-tracker/error-tracker)
+
+(defn dissoc-prod-components [c]
+  (dissoc c
+          :akvo.lumen.component.emailer/mailjet-emailer
+          :akvo.lumen.component.caddisfly/prod
+          :akvo.lumen.component.error-tracker/prod))
+
+(def config (let [c ((ir/set-prep!  (comp dissoc-prod-components duct/prep read-config)))]
+              (ig/load-namespaces c)
+              c))
+
+(defn go []
+  (ir/go))
+
+(defn halt! []
+  (ir/halt))
+
+(def stop halt!)
+
+(def reset go)
 
 (when (io/resource "local.clj")
   (load "local"))
 
 (gen/set-ns-prefix 'akvo.lumen)
-
-(reloaded.repl/set-init! new-system)
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Seed
@@ -49,18 +70,17 @@
   "At the moment only support seed of tenants table."
   []
   (let [db-uri (-> (lumen-migrate/construct-system)
-                   :config :db :uri)]
+                   :akvo.lumen.config :db :uri)]
     (doseq [tenant (->> "seed.edn" io/resource slurp edn/read-string
                         :tenant-manager :tenants)]
       (seed-tenant {:connection-uri db-uri} tenant))))
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Migrate
 ;;;
 
 (defn migrate []
-  (lumen-migrate/migrate))
+  (lumen-migrate/migrate "dev.edn"))
 
 (defn migrate-and-seed []
   (migrate)
@@ -68,5 +88,5 @@
   (migrate))
 
 (defn rollback
-  ([] (lumen-migrate/rollback {}))
-  ([args] (lumen-migrate/rollback args)))
+  ([] (lumen-migrate/rollback "dev.edn" {}))
+  ([args] (lumen-migrate/rollback "dev.edn" args)))

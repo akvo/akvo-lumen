@@ -3,7 +3,8 @@
             [akvo.lumen.http :as http]
             [akvo.lumen.lib.aggregation :as aggregation]
             [cheshire.core :as json]
-            [compojure.core :refer :all])
+            [compojure.core :refer :all]
+            [integrant.core :as ig])
   (:import [com.fasterxml.jackson.core JsonParseException]))
 
 (defn endpoint [{:keys [tenant-manager]}]
@@ -19,3 +20,6 @@
             (catch JsonParseException e
               (http/bad-request {:message (.getMessage e)})))
           (http/bad-request {:message "No query supplied"}))))))
+
+(defmethod ig/init-key :akvo.lumen.endpoint.aggregation/aggregation  [_ opts]
+  (endpoint opts))
