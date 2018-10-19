@@ -59,7 +59,7 @@ app.use(cors());
 
 app.post("/screenshot", validate(validation.screenshot), async (req, res) => {
   const { target, format, title, selector, clip } = req.body
-
+  console.log("/screenshot", target);
   setContext({ target, format, title }, async () => {
     try {
       // Create a new incognito browser context.

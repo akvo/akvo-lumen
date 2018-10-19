@@ -125,6 +125,7 @@
   :error-tracker {:dsn sentry-backend-dsn}
   :config        {:encryption-key            encryption-key
                   :file-upload-path          file-upload-path
+                  :exporter-api-url          exporter-api-url
                   :max-upload-size           100
                   :keycloak-url              keycloak-url
                   :keycloak-realm            keycloak-realm

@@ -2,10 +2,11 @@
   "Exposes the exporter proxy"
   (:require [akvo.lumen.lib.export :as export]
             [integrant.core :as ig]
+            [clojure.tools.logging :as log]
             [compojure.core :refer :all]))
 
-
-(defn endpoint [{{exporter-api-url :exporter-api-url} :config}]
+(defn endpoint [{:keys [exporter-api-url] :as config} ]
+  (log/error :exporter-api-url exporter-api-url)
   (context "/api/exports" _
            (POST "/" {:keys [body jwt-claims headers]}
                  (let [exporter-url (str exporter-api-url "/screenshot")]
@@ -15,4 +16,4 @@
                                   body)))))
 
 (defmethod ig/init-key :akvo.lumen.endpoint.export/export  [_ opts]
-  (endpoint (assoc opts :config (:config (:config opts)))))
+  (endpoint (:config (:config opts))))
