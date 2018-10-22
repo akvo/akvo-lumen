@@ -207,3 +207,21 @@
                                    column-diff-coll)))]
         {:error       (format "This version of the dataset isn't consistent thus it has merge transformations with datasets columns wich were already removed from their datasets: %s" (reduce str column-diff))
          :column-diff column-diff}))))
+
+(defn datasets-merged-with
+  "return the list of datasets that use dataset-id in merge transformations"
+  [tenant-conn dataset-id]
+  (let [dsvs (latest-dataset-versions tenant-conn)
+        dsvs (filter #(not= dataset-id (:dataset_id %)) dsvs)
+        ;; _ (log/error :dsvs dsvs)
+        datasets-in-merge-ops (->> dsvs
+                                   (map (fn [i] (let [txs     (keywordize-keys (:transformations i))
+                                                      mds     (filter #(= "core/merge-datasets" (:op %)) txs)
+                                                      sources (map #(-> % :args :source) mds)]
+                                                  (map #(assoc % :origin (:dataset_id i)) sources))))
+                                   (reduce into [])
+                                   (filter #(= (:datasetId %) dataset-id)))
+        dataset-ids-in-merge-ops (map :origin datasets-in-merge-ops)]
+    (when-not (empty? dataset-ids-in-merge-ops)
+      (select-datasets-by-id tenant-conn {:ids dataset-ids-in-merge-ops}))))
+

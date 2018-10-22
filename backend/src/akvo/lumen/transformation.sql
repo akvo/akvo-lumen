@@ -29,6 +29,13 @@ FROM dataset_version
 WHERE dataset_id IN (:v*:dataset-ids)
 order by dataset_id, version desc;
 
+-- :name latest-dataset-versions :? :*
+-- :doc Returns the most recent dataset version for a given dataset id
+select DISTINCT ON (dataset_id) dataset_id, id, version, transformations
+FROM dataset_version
+order by dataset_id, version desc;
+
+
 -- :name update-dataset-version :! :n
 -- :doc Update dataset version
 UPDATE dataset_version SET columns= :columns,  transformations= :transformations
