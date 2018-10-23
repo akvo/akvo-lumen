@@ -8,7 +8,7 @@
             [clojure.tools.logging :as log]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
-            [clojure.set :refer (rename-keys)]
+            [clojure.set :refer (rename-keys) :as set]
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/dataset.sql")
