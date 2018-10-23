@@ -279,7 +279,7 @@ export function deleteDataset(id) {
         if (response.status >= 400) {
           response.json().then((error) => {
             dispatch(deleteDatasetFailure(id, error));
-            dispatch(showNotification('error', `deletion failed: ${error.error}. Ids: ${error.datasets}`));
+            dispatch(showNotification('error', `deletion failed: ${error.error}.`));
           });
         } else {
           response.json().then(() => dispatch(deleteDatasetSuccess(id)));

@@ -174,14 +174,19 @@
     (when (not-empty diff)
       {:diff diff})))
 
+(defn distinct-columns
+  "returns a distinct collection with the columns that participate in a merge operation"
+  [merge-op]
+  (distinct
+   (conj (:mergeColumns merge-op)
+         (:mergeColumn merge-op)
+         (:aggregationColumn merge-op))))
+
 (defn- merged-columns-diff [dss merge-source-op]
   (let [merged-dataset (some #(when (= (:dataset-id %) (:datasetId merge-source-op)) %) dss)
-
-        columns        (set (conj (:mergeColumns merge-source-op)
-                                  (:mergeColumn merge-source-op)
-                                  (:aggregationColumn merge-source-op)))
+        columns        (distinct-columns merge-source-op)
         expected-columns (set (map #(get % "columnName") (:columns merged-dataset)))
-        diff (set/difference columns expected-columns)]
+        diff (set/difference (set columns) expected-columns)]
     (when (not-empty diff)
       {:diff diff
        :dataset-id (:datasetId merge-source-op)})))
@@ -226,6 +231,6 @@
   "return the list of datasets that use dataset-id in merge transformations"
   [tenant-conn dataset-id]
   (let [datasets-in-merge-ops (datasets-merged-with* tenant-conn dataset-id)
-        dataset-ids-in-merge-ops (map (comp :id :origin) datasets-in-merge-ops)]
+        dataset-ids-in-merge-ops (map :origin datasets-in-merge-ops)]
     (when-not (empty? dataset-ids-in-merge-ops)
       dataset-ids-in-merge-ops)))
