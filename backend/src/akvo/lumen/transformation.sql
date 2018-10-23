@@ -31,8 +31,9 @@ order by dataset_id, version desc;
 
 -- :name latest-dataset-versions :? :*
 -- :doc Returns the most recent dataset version for a given dataset id
-select DISTINCT ON (dataset_id) dataset_id, id, version, transformations
-FROM dataset_version
+select DISTINCT ON (dataset_id) dataset_id, dataset_version.id as id, version, title, transformations
+FROM dataset_version, dataset
+where dataset.id=dataset_id
 order by dataset_id, version desc;
 
 
