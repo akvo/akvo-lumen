@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC1010
 
-set -eux
+set -eu
 
 function log {
    echo "$(date +"%T") - INFO - $*"
