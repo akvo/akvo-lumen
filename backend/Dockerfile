@@ -1,5 +1,4 @@
 FROM openjdk:8-jre-stretch
-MAINTAINER Akvo Foundation <devops@akvo.org>
 
 RUN set -ex; apt-get update && \
     apt-get -qq install -y --no-install-recommends --no-install-suggests \

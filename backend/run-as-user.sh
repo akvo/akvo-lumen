@@ -1,26 +1,12 @@
 #!/usr/bin/env bash
 
-set -eu
+set -o nounset
+set -o errexit
 
-USER_EXISTS=$(awk -F ':' '$3 ~ /^'${HOST_UID}'$/' /etc/passwd)
-GROUP_EXISTS=$(awk -F ':' '$3 ~ /^'${HOST_GID}'$/' /etc/group)
+host_uid=$(stat -c '%u' /app)
+host_gid=$(stat -c '%g' /app)
 
-if [ -z "${GROUP_EXISTS}" ]; then
-    addgroup --gid "${HOST_GID}" akvo
-else
-    sed -i -e "s/\(.*\):\(.*\):${HOST_GID}:\(.*\)/akvo:\2:${HOST_GID}:\3/" /etc/group
-fi
+groupmod -g "${host_uid}" -o akvo > /dev/null 2>&1
+usermod -u "${host_gid}" -o akvo > /dev/null 2>&1
 
-if [ -z "${USER_EXISTS}" ]; then
-    useradd --home /home/akvo \
-	    --no-create-home \
-	    --password akvo \
-	    --shell /bin/bash \
-	    --gid "${HOST_GID}" \
-	    --uid "${HOST_UID}" \
-	    akvo
-else
-    sed -i -e "s|^\(.*\):\(.*\):${HOST_UID}:\(.*\)$|akvo:x:${HOST_UID}:${HOST_UID}:akvo:/home/akvo:/bin/bash|" /etc/passwd
-fi
-
-gosu akvo "$@"
+exec chpst -u akvo:akvo -U akvo:akvo env HOME="/home/akvo" "$@"

@@ -1,24 +1,26 @@
 version: "3"
 services:
  postgres:
-   build: postgres
-   expose:
-    - 5432
+   image: akvo/akvo-lumen-db:20181023.8084497
+   environment:
+     - POSTGRES_PASSWORD=akvo
+   volumes:
+     - pg-data:/var/lib/postgresql/data
  keycloak:
    image: akvo/akvo-keycloak-dev:20181015.be5740a
-   expose:
-    - 8080
  backend:
    volumes:
-      - ./postgres/provision:/pg-certs
+      - pg-data:/pg-certs:ro
    links:
       - keycloak:auth.lumen.local
       - exporter:exporter.lumen.local
    expose:
       - 3000
    environment:
-     - HOST_UID
-     - HOST_GID
+     - PGSSLMODE=require
+     - PGSSLKEY=/pg-data/server.key
+     - PGSSLCERT=/pg-data/server.crt
+     - PGPASSWORD=password # password of lumen role
    depends_on:
      - postgres
      - keycloak
@@ -34,12 +36,11 @@ services:
      - PGSSLROOTCERT=/pg-certs/server.crt
      - LUMEN_ENCRYPTION_KEY=supersecret
    volumes:
-      - ./postgres/provision:/pg-certs
+      - pg-data:/pg-certs:ro
  fe-e2e-tests:
-   image: akvo/akvo-lumen-e2e-test:20181016.efedbc7
+   image: akvo/akvo-lumen-e2e-test:latest
    volumes:
-      - ./client/e2e-test:/app
-      - /app/node_modules
+     - ./client/e2e-test:/app
    environment:
       - LUMEN_URL=http://t1.lumen.local:3030/
       - LUMEN_USER=jerome
@@ -52,3 +53,5 @@ services:
    build: exporter
    expose:
       - 3001
+volumes:
+  pg-data:

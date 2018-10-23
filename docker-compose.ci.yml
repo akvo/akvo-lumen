@@ -1,7 +1,5 @@
 version: "3"
 services:
- postgres:
- keycloak:
  backend:
    image: "eu.gcr.io/${PROJECT_NAME}/lumen-backend:${TRAVIS_COMMIT}"
    environment:
@@ -28,14 +26,16 @@ services:
 
  backend-functional-tests:
    image: akvo-lumen-backend-dev:develop
+   environment:
+     - PGSSLMODE=require
+     - PGSSLKEY=/pg-data/server.key
+     - PGSSLCERT=/pg-data/server.crt
+     - PGPASSWORD=password # password of lumen role
    volumes:
-      - ./postgres/provision:/pg-certs
+      - pg-data:/pg-certs:ro
       - ./backend:/app
       - ~/.m2:/home/akvo/.m2
       - ~/.lein:/home/akvo/.lein
-   environment:
-     - HOST_UID
-     - HOST_GID
    links:
       - keycloak:auth.lumen.local
    command: "true"

@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-set -eu
+# shellcheck disable=SC1010
+
+set -eux
 
 function log {
    echo "$(date +"%T") - INFO - $*"
@@ -14,7 +16,7 @@ fi
 log Bulding container to run the backend tests
 docker build --quiet --rm=false -t akvo-lumen-backend-dev:develop backend -f backend/Dockerfile-dev
 log Running Backend unit tests and building uberjar
-docker run --env-file=.env -v "$HOME/.m2:/home/akvo/.m2" -v "$(pwd)/backend:/app" akvo-lumen-backend-dev:develop /app/run-as-user.sh lein "do" test, eastwood, uberjar
+docker run --env-file=.env -v "$HOME/.m2:/home/akvo/.m2" -v "$(pwd)/backend:/app" akvo-lumen-backend-dev:develop /app/run-as-user.sh lein do test, eastwood, uberjar
 
 cp backend/target/uberjar/akvo-lumen.jar backend
 
@@ -45,13 +47,13 @@ docker tag eu.gcr.io/${PROJECT_NAME}/lumen-exporter:${TRAVIS_COMMIT} eu.gcr.io/$
 log Starting Docker Compose environment
 docker-compose -p akvo-lumen-ci -f docker-compose.yml -f docker-compose.ci.yml up --no-color -d --build
 
-bash ci/helpers/wait-for-docker-compose-to-start.sh
+./ci/helpers/wait-for-docker-compose-to-start.sh
 
 log Running Backend functional tests
 docker-compose -p akvo-lumen-ci -f docker-compose.yml -f docker-compose.ci.yml run --no-deps backend-functional-tests /app/import-and-run.sh functional-and-seed
 
-log Running the end to end tests against local Docker Compose Environment
-./ci/e2e-test.sh akvolumenci http://t1.lumen.local/
+#log Running the end to end tests against local Docker Compose Environment
+#./ci/e2e-test.sh akvolumenci http://t1.lumen.local/
 
 log Done
 #docker-compose -p akvo-lumen-ci -f docker-compose.yml -f docker-compose.ci.yml down
