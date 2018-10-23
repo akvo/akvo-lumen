@@ -1,12 +1,16 @@
 language: bash
 sudo: required
+
 services:
 - docker
+
 cache:
   directories:
   - "$HOME/.m2"
   - "$HOME/.lein"
   - "${HOME}/google-cloud-sdk"
+  - "./client/node_modules"
+
 before_install:
 - if [[ ! -d "$HOME/.m2" ]]; then mkdir "$HOME/.m2"; fi;
 - if [[ ! -d "$HOME/.lein" ]]; then mkdir "$HOME/.lein"; fi;
