@@ -2,7 +2,6 @@
   (:refer-clojure :exclude [apply])
   (:require [akvo.lumen.lib :as lib]
             [akvo.lumen.transformation.engine :as engine]
-            [clojure.tools.logging :as log]
             [akvo.lumen.util :refer (squuid)]
             [clojure.java.jdbc :as jdbc]
             [hugsql.core :as hugsql]))
@@ -30,7 +29,6 @@
 (defn validate
   [command]
   (try
-    (log/error ::comand command)
     (condp = (:type command)
       :transformation (if (engine/valid? (:transformation command))
                         {:valid? true}

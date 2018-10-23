@@ -36,7 +36,6 @@ FROM dataset_version, dataset
 where dataset.id=dataset_id
 order by dataset_id, version desc;
 
-
 -- :name update-dataset-version :! :n
 -- :doc Update dataset version
 UPDATE dataset_version SET columns= :columns,  transformations= :transformations

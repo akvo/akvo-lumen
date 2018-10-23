@@ -80,7 +80,6 @@
 
 (defn delete
   [tenant-conn id]
-  (log/error :delete-id id)
   (if-let [datasets-merged-with (transformation.merge-datasets/datasets-merged-with tenant-conn id)]
     (lib/bad-request {:error    (format "This dataset is used in merge tranformations with other datasets: %s"
                                         (str/join ", " datasets-merged-with))})
