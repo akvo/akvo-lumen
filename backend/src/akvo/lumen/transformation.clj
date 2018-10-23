@@ -2,6 +2,7 @@
   (:refer-clojure :exclude [apply])
   (:require [akvo.lumen.lib :as lib]
             [akvo.lumen.transformation.engine :as engine]
+            [clojure.tools.logging :as log]
             [akvo.lumen.util :refer (squuid)]
             [clojure.java.jdbc :as jdbc]
             [hugsql.core :as hugsql]))
@@ -29,6 +30,7 @@
 (defn validate
   [command]
   (try
+    (log/error ::comand command)
     (condp = (:type command)
       :transformation (if (engine/valid? (:transformation command))
                         {:valid? true}
@@ -50,9 +52,10 @@
         (try
           (new-transformation-job-execution tenant-conn {:id job-execution-id :dataset-id dataset-id})
           (jdbc/with-db-transaction [tx-conn tenant-conn]
-            (let [tx-deps (assoc deps :tenant-conn tx-conn)]
+            (let [tx-deps (assoc deps :tenant-conn tx-conn)
+                  command-extended (engine/extend-data-command deps dataset-id command)]
               (condp = (:type command)
-                :transformation (engine/execute-transformation tx-deps dataset-id job-execution-id (:transformation command))
+                :transformation (engine/execute-transformation tx-deps dataset-id job-execution-id command-extended)
                 :undo (engine/execute-undo tx-deps dataset-id job-execution-id))))
           (update-successful-job-execution tenant-conn {:id job-execution-id})
           (lib/ok {"jobExecutionId" job-execution-id "datasetId" dataset-id})

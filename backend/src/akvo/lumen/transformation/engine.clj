@@ -17,6 +17,16 @@
   [op-spec]
   false)
 
+(defmulti extend-data-command
+  "Validate transformation spec"
+  (fn [{:keys [tenant-conn] :as deps} dataset-id command]
+    (log/error :JOR command (keyword (get (:transformation command) "op")))
+    (keyword (get (:transformation command) "op"))))
+
+(defmethod extend-data-command :default
+  [{:keys [tenant-conn] :as deps} dataset-id command]
+  (:transformation command))
+
 (defmulti apply-operation
   "Applies a particular operation based on `op` key from spec
    * {:keys [tenant-conn] :as deps}: includes open connection to the database
