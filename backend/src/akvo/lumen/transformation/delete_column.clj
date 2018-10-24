@@ -15,21 +15,17 @@
   [op-spec]
   (engine/valid-column-name? (col-name op-spec)))
 
-(defmethod engine/extend-data-command :core/delete-column
-  [{:keys [tenant-conn] :as deps} dataset-id command]
-  (assoc (:transformation command) :datasets-merged-with (merge-datasets/sources-related tenant-conn dataset-id)))
-
 (defmethod engine/apply-operation :core/delete-column
   [{:keys [tenant-conn]} table-name columns op-spec]
   (let [res         (mapv (juxt merge-datasets/distinct-columns :origin)
-                          (:datasets-merged-with op-spec))
-        columnskw   (keywordize-keys columns)
+                          (merge-datasets/sources-related tenant-conn (:dataset-id op-spec)))
+        kw-columns   (keywordize-keys columns)
         columnName  (-> (keywordize-keys op-spec) :args :columnName)
-        full-column (first (filter #(= columnName (:columnName %)) columnskw))        
-        resres (map second (filter (fn [[cns datasource]]
-                                     (log/error :cns cns columnName)
-                                     (not-empty (filter #(= % columnName) cns)))
-                                   res))]
+        full-column (first (filter #(= columnName (:columnName %)) kw-columns))
+        resres      (map second (filter (fn [[cns datasource]]
+                                          (log/error :cns cns columnName)
+                                          (not-empty (filter #(= % columnName) cns)))
+                                        res))]
     (log/error :CK (empty? resres) (str/join "," (map :title resres)))
     (if (empty? resres)
       (let [column-name (col-name op-spec)

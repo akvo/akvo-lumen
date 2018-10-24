@@ -17,16 +17,6 @@
   [op-spec]
   false)
 
-(defmulti extend-data-command
-  "Validate transformation spec"
-  (fn [{:keys [tenant-conn] :as deps} dataset-id command]
-    (log/error :JOR command (keyword (get (:transformation command) "op")))
-    (keyword (get (:transformation command) "op"))))
-
-(defmethod extend-data-command :default
-  [{:keys [tenant-conn] :as deps} dataset-id command]
-  (:transformation command))
-
 (defmulti apply-operation
   "Applies a particular operation based on `op` key from spec
    * {:keys [tenant-conn] :as deps}: includes open connection to the database
@@ -159,7 +149,7 @@
         previous-columns (vec (:columns dataset-version))
         source-table (:table-name dataset-version)]
     (let [{:keys [success? message columns execution-log]}
-          (try-apply-operation deps source-table previous-columns transformation)]
+          (try-apply-operation deps source-table previous-columns (assoc transformation :dataset-id dataset-id))]
       (when-not success?
         (log/errorf "Failed to transform: %s, columns: %s, execution-log: %s" message columns execution-log)
         (throw (ex-info (format "Failed to transform. %s" (or message "")) {})))

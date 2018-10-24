@@ -50,10 +50,9 @@
         (try
           (new-transformation-job-execution tenant-conn {:id job-execution-id :dataset-id dataset-id})
           (jdbc/with-db-transaction [tx-conn tenant-conn]
-            (let [tx-deps (assoc deps :tenant-conn tx-conn)
-                  command-extended (engine/extend-data-command deps dataset-id command)]
+            (let [tx-deps (assoc deps :tenant-conn tx-conn)]
               (condp = (:type command)
-                :transformation (engine/execute-transformation tx-deps dataset-id job-execution-id command-extended)
+                :transformation (engine/execute-transformation tx-deps dataset-id job-execution-id (:transformation command))
                 :undo (engine/execute-undo tx-deps dataset-id job-execution-id))))
           (update-successful-job-execution tenant-conn {:id job-execution-id})
           (lib/ok {"jobExecutionId" job-execution-id "datasetId" dataset-id})
