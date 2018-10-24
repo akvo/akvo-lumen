@@ -28,8 +28,7 @@ services:
    image: akvo-lumen-backend-dev:develop
    environment:
      - PGSSLMODE=require
-     - PGSSLKEY=/pg-data/server.key
-     - PGSSLCERT=/pg-data/server.crt
+     - PGSSLROOTCERT=/pg-certs/server.crt
      - PGPASSWORD=password # password of lumen role
    volumes:
       - pg-data:/pg-certs:ro
@@ -39,3 +38,6 @@ services:
    links:
       - keycloak:auth.lumen.local
    command: "true"
+ fe-e2e-tests:
+   environment:
+      - LUMEN_URL=http://t1.lumen.local/

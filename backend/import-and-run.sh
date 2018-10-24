@@ -1,14 +1,8 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC1010
 
 set -o nounset
 set -o errexit
-
-CERT_INSTALLED=$( (keytool -list -trustcacerts -keystore "${JAVA_HOME}/jre/lib/security/cacerts" -storepass changeit | grep postgrescert) || echo "not found")
-
-if [[ "${CERT_INSTALLED}" = "not found" ]]; then
-    echo "Importing postgres cert"
-    keytool -import -trustcacerts -keystore "${JAVA_HOME}/jre/lib/security/cacerts" -storepass changeit -noprompt -alias postgrescert -file /pg-certs/server.crt
-fi
 
 ./wait-for-dependencies.sh
 

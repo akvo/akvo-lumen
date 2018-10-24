@@ -18,8 +18,7 @@ services:
       - 3000
    environment:
      - PGSSLMODE=require
-     - PGSSLKEY=/pg-data/server.key
-     - PGSSLCERT=/pg-data/server.crt
+     - PGSSLROOTCERT=/pg-certs/server.crt
      - PGPASSWORD=password # password of lumen role
    depends_on:
      - postgres
@@ -38,13 +37,14 @@ services:
    volumes:
       - pg-data:/pg-certs:ro
  fe-e2e-tests:
-   image: akvo/akvo-lumen-e2e-test:20181016.efedbc7
+   image: akvo/akvo-lumen-e2e-test:20181024.271ce79
    volumes:
-     - ./client/e2e-test:/app
+     - ./client/e2e-test:/app/e2e-test
    environment:
       - LUMEN_URL=http://t1.lumen.local:3030/
       - LUMEN_USER=jerome
       - LUMEN_PASSWORD=password
+      - APP_DIR=/app/e2e-test
    links:
       - keycloak:auth.lumen.local
       - client:t1.lumen.local

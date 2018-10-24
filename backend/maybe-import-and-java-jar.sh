@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 
-if [ -f "/pg-certs/server.crt" ]; then
-    keytool -import -trustcacerts -keystore /etc/ssl/certs/java/cacerts -storepass changeit -noprompt -alias postgrescert -file /pg-certs/server.crt
-fi
+set -o errexit
+set -o nounset
 
-if [ "${WAIT_FOR_DB}" = "true" ]; then
+if [[ "${WAIT_FOR_DB}" = "true" ]]; then
   /app/wait-for-dependencies.sh
 fi
 
