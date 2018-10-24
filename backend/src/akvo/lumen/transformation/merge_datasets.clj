@@ -216,16 +216,19 @@
 (defn datasets-merged-with*
   "return the list of datasets that use dataset-id in merge transformations"
   [tenant-conn dataset-id]
-  (let [dsvs (latest-dataset-versions tenant-conn)
-        dsvs (filter #(not= dataset-id (:dataset_id %)) dsvs)]
-    (->> dsvs
-         (map (fn [i] (let [txs     (keywordize-keys (:transformations i))
-                            mds     (filter #(= "core/merge-datasets" (:op %)) txs)
-                            sources (map #(-> % :args :source) mds)]
-                        (map #(assoc % :origin {:id (:dataset_id i)
-                                                :title (:title i)}) sources))))
-                                   (reduce into [])
-                                   (filter #(= (:datasetId %) dataset-id)))))
+  (->> (latest-dataset-versions tenant-conn) ;; all dataset_versions
+       (filter #(not= dataset-id (:dataset_id %))) ;; exclude dataset-id
+       (map (fn [dataset-version]
+              ;; get source datasets of merge transformations with appended dataset-version as origin
+              (->> (keywordize-keys (:transformations dataset-version))
+                   (filter #(= "core/merge-datasets" (:op %)))
+                   (map #(-> % :args :source))
+                   (map #(assoc % :origin {:id    (:dataset_id dataset-version)
+                                           :title (:title dataset-version)})))))
+       (reduce into []) ;; adapt from (({:a :b})({:c :d})) to [{:a :b}{:c :d}]
+       (filter #(= (:datasetId %) dataset-id)) ;; we are only interested in those that dataset-id is related
+       ))
+
 
 (defn datasets-merged-with
   "return the list of datasets that use dataset-id in merge transformations"
