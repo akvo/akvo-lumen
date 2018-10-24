@@ -29,19 +29,21 @@
   pointing to the new table-name, imported-table-name and columns. We
   also delete the previous table-name and imported-table-name so we
   don't accumulate unused datasets on each update."
-  [conn job-execution-id dataset-id table-name imported-table-name dataset-version
+  [conn* job-execution-id dataset-id table-name imported-table-name dataset-version
    transformations new-columns]
-  (insert-dataset-version conn {:id (str (util/squuid))
-                                :dataset-id dataset-id
-                                :job-execution-id job-execution-id
-                                :table-name table-name
-                                :imported-table-name imported-table-name
-                                :version (inc (:version dataset-version))
-                                :columns new-columns
-                                :transformations (vec transformations)})
-  (drop-table conn {:table-name (:imported-table-name dataset-version)})
-  (drop-table conn {:table-name (:table-name dataset-version)})
-  (update-successful-job-execution conn {:id job-execution-id}))
+  (jdbc/with-db-transaction [conn conn*]
+    (insert-dataset-version conn {:id (str (util/squuid))
+                                  :dataset-id dataset-id
+                                  :job-execution-id job-execution-id
+                                  :table-name table-name
+                                  :imported-table-name imported-table-name
+                                  :version (inc (:version dataset-version))
+                                  :columns new-columns
+                                  :transformations (vec transformations)})
+    (touch-dataset conn {:id dataset-id})
+    (drop-table conn {:table-name (:imported-table-name dataset-version)})
+    (drop-table conn {:table-name (:table-name dataset-version)})
+    (update-successful-job-execution conn {:id job-execution-id})))
 
 (defn failed-update [conn job-execution-id reason]
   (update-failed-job-execution conn {:id job-execution-id
