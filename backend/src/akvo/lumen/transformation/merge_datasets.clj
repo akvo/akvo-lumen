@@ -213,28 +213,36 @@
         {:error       (format "This version of the dataset isn't consistent thus it has merge transformations with datasets columns wich were already removed from their datasets: %s" (reduce str column-diff))
          :column-diff column-diff}))))
 
-(defn datasets-related*
-  "return the list of sources datasets that use dataset-id in merge transformations,
-  `:origin` keeps a reference to the dataset included in the merge"
-  [tenant-conn dataset-id type]
+(defn sources-related
+  "return the list of transformations sources that use target-dataset-id,
+  add `:origin` to each item in collection to keep a reference to the dataset-version
+  that contains the transformation
+  Example schema returned:
+  {:datasetId 'uuid-str,
+   :mergeColumn 'str
+   :mergeColumns ['str]
+   :aggregationColumn 'str
+   :aggregationDirection 'str
+   :origin {:id 'uuid-str
+            :title 'str}}"
+  [tenant-conn target-dataset-id]
   (->> (latest-dataset-versions tenant-conn) ;; all dataset_versions
-       (filter #(not= dataset-id (:dataset_id %))) ;; exclude dataset-id
+       (filter #(not= target-dataset-id (:dataset_id %))) ;; exclude (target-)dataset(-id)
        (map (fn [dataset-version]
               ;; get source datasets of merge transformations with appended dataset-version as origin
               (->> (keywordize-keys (:transformations dataset-version))
                    (filter #(= "core/merge-datasets" (:op %)))
-                   (map #(-> % :args type))
+                   (map #(-> % :args :source))
                    (map #(assoc % :origin {:id    (:dataset_id dataset-version)
                                            :title (:title dataset-version)})))))
        (reduce into []) ;; adapt from (({:a :b})({:c :d})) to [{:a :b}{:c :d}]
-       (filter #(= (:datasetId %) dataset-id)) ;; we are only interested in those that dataset-id is related
-       ))
-
+       (filter #(= (:datasetId %) target-dataset-id))))
 
 (defn datasets-related
-  "return the list of datasets that use dataset-id in merge transformations"
-  [tenant-conn dataset-id]
-  (let [datasets-in-merge-ops (datasets-related* tenant-conn dataset-id :source)
-        dataset-ids-in-merge-ops (map :origin datasets-in-merge-ops)]
-    (when-not (empty? dataset-ids-in-merge-ops)
-      dataset-ids-in-merge-ops)))
+  "return the list of dataset-versions that use target-dataset-id in their merge transformations
+  Example schema returned
+  [{:id 'uuid-str
+    :title 'str}]"
+  [tenant-conn target-dataset-id]
+  (let [origins (map :origin (sources-related tenant-conn target-dataset-id))]
+    (when-not (empty? origins) origins)))

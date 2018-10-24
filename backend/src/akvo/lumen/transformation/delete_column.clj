@@ -17,7 +17,7 @@
 
 (defmethod engine/extend-data-command :core/delete-column
   [{:keys [tenant-conn] :as deps} dataset-id command]
-  (assoc (:transformation command) :datasets-merged-with (merge-datasets/datasets-related tenant-conn dataset-id :source)))
+  (assoc (:transformation command) :datasets-merged-with (merge-datasets/sources-related tenant-conn dataset-id)))
 
 (defmethod engine/apply-operation :core/delete-column
   [{:keys [tenant-conn]} table-name columns op-spec]
