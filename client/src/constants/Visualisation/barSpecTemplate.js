@@ -16,6 +16,7 @@ const barSpec = {
   truncateSize: null,
   showLabels: false,
   showValueLabels: false,
+  horizontal: false,
 };
 
 export default barSpec;

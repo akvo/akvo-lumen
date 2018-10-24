@@ -459,7 +459,7 @@ export default class SimpleBarChart extends Component {
                     scale={axisScale}
                     left={margins.left}
                     top={availableHeight + margins.top}
-                    label={xAxisLabel || ''}
+                    label={yAxisLabel || ''}
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}
                     numTicks={yAxisTicks}
@@ -485,7 +485,7 @@ export default class SimpleBarChart extends Component {
                     fontSize={axisLabelFontSize}
                     fontWeight={400}
                   >
-                    {yAxisLabel || ''}
+                    {xAxisLabel || ''}
                   </Text>
 
                 </Svg>

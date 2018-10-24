@@ -259,6 +259,21 @@ export default function BarConfigMenu(props) {
           />
         )}
       />
+      <ConfigMenuSection
+        title="misc"
+        options={(
+          <ToggleInput
+            name="horizontal"
+            type="checkbox"
+            labelId="horizontal"
+            className="InputGroup"
+            checked={typeof spec.horizontal !== 'undefined' ? spec.horizontal : false}
+            onChange={val => onChangeSpec({
+              horizontal: val,
+            })}
+          />
+        )}
+      />
     </div>
   );
 }

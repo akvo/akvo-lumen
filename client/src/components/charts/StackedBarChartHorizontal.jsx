@@ -501,11 +501,18 @@ export default class StackedBarChart extends Component {
 
                   <Text
                     transform={[
-                      { type: 'translate', value: [Math.floor(this.props.width / 2) - 125, this.props.height - 10] },
+                      {
+                        type: 'translate',
+                        value: [
+                          margins.left - 10,
+                          margins.top - 10,
+                        ],
+                      },
                     ]}
+                    textAnchor="end"
+                    {...labelFont}
                     fontSize={axisLabelFontSize}
-                    textAnchor="middle"
-                    fontFamily="Arial"
+                    fontWeight={400}
                   >
                     {xAxisLabel || ''}
                   </Text>

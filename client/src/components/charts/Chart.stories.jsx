@@ -330,6 +330,7 @@ storiesOf('Charts', module)
           legendVisible={boolean('props.legendVisible', true)}
           valueLabelsVisible={boolean('props.valueLabelsVisible', false)}
           yAxisLabel={text('props.yAxisLabel', 'Temperature')}
+          xAxisLabel={text('props.xAxisLabel', 'X Axis')}
         />
         <pre>
           <code>
