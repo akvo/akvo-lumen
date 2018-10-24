@@ -81,7 +81,7 @@
 (defn delete
   [tenant-conn id]
   (if-let [datasets-merged-with (transformation.merge-datasets/datasets-merged-with tenant-conn id)]
-    (lib/bad-request {:error    (format "This dataset is used in merge tranformations with other datasets: %s"
+    (lib/conflict {:error    (format "This dataset is used in merge tranformations with other datasets: %s"
                                         (str/join ", " datasets-merged-with))})
     (let [c (delete-dataset-by-id tenant-conn {:id id})]
       (if (zero? c)
@@ -95,7 +95,7 @@
   (if-let [{data-source-spec :spec
             data-source-id   :id} (data-source-by-dataset-id tenant-conn {:dataset-id dataset-id})]
     (if-let [error (transformation.merge-datasets/consistency-error? tenant-conn dataset-id)]
-      (lib/bad-request error)
+      (lib/conflict error)
       (if-not (= (get-in data-source-spec ["source" "kind"]) "DATA_FILE")
         (update/update-dataset tenant-conn config dataset-id data-source-id
                                (assoc-in data-source-spec ["source" "refreshToken"] refresh-token))
