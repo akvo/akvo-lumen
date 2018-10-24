@@ -149,10 +149,10 @@
         previous-columns (vec (:columns dataset-version))
         source-table (:table-name dataset-version)]
     (let [{:keys [success? message columns execution-log]}
-          (try-apply-operation deps source-table previous-columns transformation)]
+          (try-apply-operation deps source-table previous-columns (assoc transformation :dataset-id dataset-id))]
       (when-not success?
         (log/errorf "Failed to transform: %s, columns: %s, execution-log: %s" message columns execution-log)
-        (throw (ex-info "Failed to transform" {})))
+        (throw (ex-info (format "Failed to transform. %s" (or message "")) {})))
       (let [new-dataset-version-id (str (util/squuid))]
         (clear-dataset-version-data-table tenant-conn {:id (:id dataset-version)})
         (let [next-dataset-version {:id new-dataset-version-id

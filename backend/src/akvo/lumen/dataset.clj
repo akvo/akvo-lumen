@@ -80,19 +80,22 @@
 
 (defn delete
   [tenant-conn id]
-  (let [c (delete-dataset-by-id tenant-conn {:id id})]
-    (if (zero? c)
-      (do
-        (delete-failed-job-execution-by-id tenant-conn {:id id})
-        (lib/not-found {:error "Not found"}))
-      (let [v (delete-maps-by-dataset-id tenant-conn {:id id})](lib/ok {:id id})))))
+  (if-let [datasets-merged-with (transformation.merge-datasets/datasets-related tenant-conn id)]
+    (lib/conflict {:error (format "This dataset is used in merge tranformations with other datasets: %s"
+                                  (str/join ", " datasets-merged-with))})
+    (let [c (delete-dataset-by-id tenant-conn {:id id})]
+      (if (zero? c)
+        (do
+          (delete-failed-job-execution-by-id tenant-conn {:id id})
+          (lib/not-found {:error "Not found"}))
+        (let [v (delete-maps-by-dataset-id tenant-conn {:id id})](lib/ok {:id id}))))))
 
 (defn update
   [tenant-conn config dataset-id {refresh-token "refreshToken"}]
   (if-let [{data-source-spec :spec
             data-source-id   :id} (data-source-by-dataset-id tenant-conn {:dataset-id dataset-id})]
     (if-let [error (transformation.merge-datasets/consistency-error? tenant-conn dataset-id)]
-      (lib/bad-request error)
+      (lib/conflict error)
       (if-not (= (get-in data-source-spec ["source" "kind"]) "DATA_FILE")
         (update/update-dataset tenant-conn config dataset-id data-source-id
                                (assoc-in data-source-spec ["source" "refreshToken"] refresh-token))

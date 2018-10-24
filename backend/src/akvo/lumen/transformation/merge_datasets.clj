@@ -174,14 +174,19 @@
     (when (not-empty diff)
       {:diff diff})))
 
+(defn distinct-columns
+  "returns a distinct collection with the columns that participate in a merge operation"
+  [merge-op]
+  (distinct
+   (conj (:mergeColumns merge-op)
+         (:mergeColumn merge-op)
+         (:aggregationColumn merge-op))))
+
 (defn- merged-columns-diff [dss merge-source-op]
   (let [merged-dataset (some #(when (= (:dataset-id %) (:datasetId merge-source-op)) %) dss)
-
-        columns        (set (conj (:mergeColumns merge-source-op)
-                                  (:mergeColumn merge-source-op)
-                                  (:aggregationColumn merge-source-op)))
+        columns        (distinct-columns merge-source-op)
         expected-columns (set (map #(get % "columnName") (:columns merged-dataset)))
-        diff (set/difference columns expected-columns)]
+        diff (set/difference (set columns) expected-columns)]
     (when (not-empty diff)
       {:diff diff
        :dataset-id (:datasetId merge-source-op)})))
@@ -207,3 +212,37 @@
                                    column-diff-coll)))]
         {:error       (format "This version of the dataset isn't consistent thus it has merge transformations with datasets columns wich were already removed from their datasets: %s" (reduce str column-diff))
          :column-diff column-diff}))))
+
+(defn sources-related
+  "return the list of transformations sources that use target-dataset-id,
+  add `:origin` to each item in collection to keep a reference to the dataset-version
+  that contains the transformation
+  Example schema returned:
+  {:datasetId 'uuid-str,
+   :mergeColumn 'str
+   :mergeColumns ['str]
+   :aggregationColumn 'str
+   :aggregationDirection 'str
+   :origin {:id 'uuid-str
+            :title 'str}}"
+  [tenant-conn target-dataset-id]
+  (->> (latest-dataset-versions tenant-conn) ;; all dataset_versions
+       (filter #(not= target-dataset-id (:dataset_id %))) ;; exclude (target-)dataset(-id)
+       (map (fn [dataset-version]
+              ;; get source datasets of merge transformations with appended dataset-version as origin
+              (->> (keywordize-keys (:transformations dataset-version))
+                   (filter #(= "core/merge-datasets" (:op %)))
+                   (map #(-> % :args :source))
+                   (map #(assoc % :origin {:id    (:dataset_id dataset-version)
+                                           :title (:title dataset-version)})))))
+       (reduce into []) ;; adapt from (({:a :b})({:c :d})) to [{:a :b}{:c :d}]
+       (filter #(= (:datasetId %) target-dataset-id))))
+
+(defn datasets-related
+  "return the list of dataset-versions that use target-dataset-id in their merge transformations
+  Example schema returned
+  [{:id 'uuid-str
+    :title 'str}]"
+  [tenant-conn target-dataset-id]
+  (let [origins (map :origin (sources-related tenant-conn target-dataset-id))]
+    (when-not (empty? origins) origins)))
