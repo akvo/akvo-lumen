@@ -2,7 +2,7 @@
   (:require [akvo.lumen.transformation.engine :as engine]
             [clojure.tools.logging :as log]
             [clojure.string :as str]
-            [akvo.lumen.transformation.merge-datasets :refer (datasets-merged-with* ) :as merge-datasets]
+            [akvo.lumen.transformation.merge-datasets :as merge-datasets]
             [clojure.walk :refer (keywordize-keys)]
             [hugsql.core :as hugsql]))
 
@@ -17,7 +17,7 @@
 
 (defmethod engine/extend-data-command :core/delete-column
   [{:keys [tenant-conn] :as deps} dataset-id command]
-  (assoc (:transformation command) :datasets-merged-with (datasets-merged-with* tenant-conn dataset-id)))
+  (assoc (:transformation command) :datasets-merged-with (merge-datasets/datasets-related tenant-conn dataset-id :source)))
 
 (defmethod engine/apply-operation :core/delete-column
   [{:keys [tenant-conn]} table-name columns op-spec]
