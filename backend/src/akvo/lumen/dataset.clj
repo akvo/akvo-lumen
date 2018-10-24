@@ -81,8 +81,8 @@
 (defn delete
   [tenant-conn id]
   (if-let [datasets-merged-with (transformation.merge-datasets/datasets-related tenant-conn id)]
-    (lib/conflict {:error    (format "This dataset is used in merge tranformations with other datasets: %s"
-                                     (str/join ", " datasets-merged-with))})
+    (lib/conflict {:error (format "This dataset is used in merge tranformations with other datasets: %s"
+                                  (str/join ", " datasets-merged-with))})
     (let [c (delete-dataset-by-id tenant-conn {:id id})]
       (if (zero? c)
         (do

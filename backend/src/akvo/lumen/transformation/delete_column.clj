@@ -3,7 +3,6 @@
             [clojure.tools.logging :as log]
             [clojure.string :as str]
             [akvo.lumen.transformation.merge-datasets :as merge-datasets]
-            [clojure.walk :refer (keywordize-keys)]
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/transformation/engine.sql")
