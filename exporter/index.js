@@ -5,6 +5,7 @@ const Joi = require("joi")
 const Raven = require("raven")
 const bodyParser = require("body-parser")
 const cors = require("cors")
+const httpCommon = require('_http_common');
 
 const validation = {
   screenshot: {
@@ -57,6 +58,13 @@ app.use(cors());
   }
 })()
 
+
+function adaptTitle(title){
+    var r = "";
+    [...title].forEach(c => r += (httpCommon._checkInvalidHeaderChar(c) ? "" : c));
+    return r;
+}
+
 app.post("/screenshot", validate(validation.screenshot), async (req, res) => {
   const { target, format, title, selector, clip } = req.body
   console.log("/screenshot", target);
@@ -108,7 +116,7 @@ app.post("/screenshot", validate(validation.screenshot), async (req, res) => {
           res.setHeader("Content-Type", "image/png")
           res.setHeader(
             "Content-Disposition",
-            `attachment; filename=${title}.png`
+            `attachment; filename=${adaptTitle(title)}.png`
           )
           res.send(data)
           break
@@ -123,7 +131,7 @@ app.post("/screenshot", validate(validation.screenshot), async (req, res) => {
           res.setHeader("Content-Type", "application/pdf")
           res.setHeader(
             "Content-Disposition",
-            `attachment; filename=${title}.pdf`
+            `attachment; filename=${adaptTitle(title)}.pdf`
           )
           res.send(data)
           break
