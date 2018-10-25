@@ -1,13 +1,17 @@
 (ns akvo.lumen.transformation.merge-datasets
-  (:require [akvo.lumen.transformation.engine :as engine]
-            [akvo.lumen.import.common :as import]
+  (:require [akvo.lumen.import.common :as import]
+            [akvo.lumen.transformation.engine :as engine]
             [clojure.java.jdbc :as jdbc]
+            [clojure.tools.logging :as log]
             [clojure.set :as set]
+            [clojure.set :refer (rename-keys) :as set]
             [clojure.string :as s]
+            [clojure.walk :refer (keywordize-keys)]
             [hugsql.core :as hugsql])
   (:import [java.sql Timestamp]
            [org.postgis PGgeometry]))
 
+(hugsql/def-db-fns "akvo/lumen/dataset.sql")
 (hugsql/def-db-fns "akvo/lumen/transformation.sql")
 (hugsql/def-db-fns "akvo/lumen/transformation/engine.sql")
 
@@ -98,6 +102,7 @@
                                      "geopoint" "geometry(POINT, 4326)"
                                      "geoshape" "geometry(GEOMETRY, 4326)"
                                      "number" "double precision"
+                                     "multiple" "text"
                                      "text" "text")})))
 
 (defn insert-merged-data
@@ -161,3 +166,83 @@
 (defmethod engine/apply-operation :core/merge-datasets
   [{:keys [tenant-conn]} table-name columns op-spec]
   (apply-merge-operation tenant-conn table-name columns op-spec))
+
+(defn- merged-datasets-diff [tenant-conn merged-dataset-sources]
+  (let [dataset-ids (mapv :datasetId merged-dataset-sources)
+        diff        (set/difference (set dataset-ids)
+                                    (set (map :id (select-datasets-by-id tenant-conn {:ids dataset-ids}))))]
+    (when (not-empty diff)
+      {:diff diff})))
+
+(defn distinct-columns
+  "returns a distinct collection with the columns that participate in a merge operation"
+  [merge-op]
+  (distinct
+   (conj (:mergeColumns merge-op)
+         (:mergeColumn merge-op)
+         (:aggregationColumn merge-op))))
+
+(defn- merged-columns-diff [dss merge-source-op]
+  (let [merged-dataset (some #(when (= (:dataset-id %) (:datasetId merge-source-op)) %) dss)
+        columns        (distinct-columns merge-source-op)
+        expected-columns (set (map #(get % "columnName") (:columns merged-dataset)))
+        diff (set/difference (set columns) expected-columns)]
+    (when (not-empty diff)
+      {:diff diff
+       :dataset-id (:datasetId merge-source-op)})))
+
+(defn consistency-error? [tenant-conn dataset-id]
+  (let [merged-sources (->> (latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})
+                            :transformations
+                            keywordize-keys
+                            (filter #(= "core/merge-datasets" (:op %)))
+                            (map #(-> % :args :source)))]
+    (if-let [ds-diff (and (not-empty merged-sources)
+                          (merged-datasets-diff tenant-conn merged-sources))]
+      {:error        (format "This version of the dataset isn't consistent thus it has merge transformations with datasets which were already removed. Dataset diff: %s" (reduce str ds-diff))
+       :dataset-diff ds-diff}
+      (when-let [column-diff (when (not-empty merged-sources)
+                               (let [dss              (->> {:dataset-ids (mapv :datasetId merged-sources)}
+                                                           (latest-dataset-versions-by-dataset-ids tenant-conn)
+                                                           (map #(rename-keys % {:dataset_id :dataset-id})))
+                                     column-diff-coll (->> merged-sources
+                                                           (map (partial merged-columns-diff dss))
+                                                           (filter some?))]
+                                 (when (not-empty column-diff-coll)
+                                   column-diff-coll)))]
+        {:error       (format "This version of the dataset isn't consistent thus it has merge transformations with datasets columns wich were already removed from their datasets: %s" (reduce str column-diff))
+         :column-diff column-diff}))))
+
+(defn sources-related
+  "return the list of transformations sources that use target-dataset-id,
+  add `:origin` to each item in collection to keep a reference to the dataset-version
+  that contains the transformation
+  Example schema returned:
+  {:datasetId 'uuid-str,
+   :mergeColumn 'str
+   :mergeColumns ['str]
+   :aggregationColumn 'str
+   :aggregationDirection 'str
+   :origin {:id 'uuid-str
+            :title 'str}}"
+  [tenant-conn target-dataset-id]
+  (->> (latest-dataset-versions tenant-conn) ;; all dataset_versions
+       (filter #(not= target-dataset-id (:dataset_id %))) ;; exclude (target-)dataset(-id)
+       (map (fn [dataset-version]
+              ;; get source datasets of merge transformations with appended dataset-version as origin
+              (->> (keywordize-keys (:transformations dataset-version))
+                   (filter #(= "core/merge-datasets" (:op %)))
+                   (map #(-> % :args :source))
+                   (map #(assoc % :origin {:id    (:dataset_id dataset-version)
+                                           :title (:title dataset-version)})))))
+       (reduce into []) ;; adapt from (({:a :b})({:c :d})) to [{:a :b}{:c :d}]
+       (filter #(= (:datasetId %) target-dataset-id))))
+
+(defn datasets-related
+  "return the list of dataset-versions that use target-dataset-id in their merge transformations
+  Example schema returned
+  [{:id 'uuid-str
+    :title 'str}]"
+  [tenant-conn target-dataset-id]
+  (let [origins (map :origin (sources-related tenant-conn target-dataset-id))]
+    (when-not (empty? origins) origins)))

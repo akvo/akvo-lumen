@@ -4,9 +4,9 @@
   (:require [akvo.lumen.lib :as lib]
             [cheshire.core :as json]
             [clj-http.client :as client]
+            [integrant.core :as ig]
             [clojure.set :as set]
             [clojure.tools.logging :as log]
-            [com.stuartsierra.component :as component]
             [ring.util.response :refer [response]]))
 
 
@@ -258,16 +258,6 @@
 ;;;
 
 (defrecord KeycloakAgent [issuer openid-config api-root]
-
-  component/Lifecycle
-  (start [this]
-    (let [openid-config (fetch-openid-configuration issuer)]
-      (log/info "Successfully got openid-config from provider.")
-      (assoc this :openid-config openid-config)))
-
-  (stop [this]
-    (assoc this :openid-config nil))
-
   KeycloakUserManagement
   (add-user-with-email [{:keys [api-root] :as keycloak} tenant-label email]
     (let [request-headers (request-headers keycloak)
@@ -315,7 +305,13 @@
   (users [this tenant-label]
     (tenant-members this tenant-label)))
 
-(defn keycloak [{:keys [credentials url realm]}]
+(defn- keycloak [{:keys [credentials url realm]}]
   (map->KeycloakAgent {:issuer (format "%s/realms/%s" url realm)
                        :api-root (format "%s/admin/realms/%s" url realm)
                        :credentials credentials}))
+
+(defmethod ig/init-key :akvo.lumen.component.keycloak  [_ {:keys [config] :as opts}]
+  (let [{:keys [issuer openid-config api-root] :as this} (keycloak (:keycloak config))
+        openid-config (fetch-openid-configuration issuer)]
+      (log/info "Successfully got openid-config from provider.")
+      (assoc this :openid-config openid-config)))
