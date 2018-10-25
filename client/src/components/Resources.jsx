@@ -8,10 +8,13 @@ function resourceRuleDescription(resourceKey) {
   let description = null;
   switch (resourceKey) {
     case 'numberOfVisualisations':
-      description = 'Number of visualisations';
+      description = 'Visualisations';
       break;
     case 'numberOfExternalDatasets':
-      description = 'Number of external datasets';
+      description = 'External datasets';
+      break;
+    case 'numberOfDashboards':
+      description = 'Dashboards';
       break;
     default:
       description = resourceKey;
@@ -19,31 +22,18 @@ function resourceRuleDescription(resourceKey) {
   return description;
 }
 
-function resourceDescription(limit) {
-  let l = null;
-  if (limit == null) {
-    l = 'unlimited';
-  } else {
-    l = limit;
-  }
-  return l;
-}
-
-function ResourceList({ resources, tier }) {
+function ResourceList({ resources }) {
   return (
     <table>
       <thead>
         <tr>
-          <th>Policy</th>
-          <th>Limit</th>
-          <th>Current</th>
+          <th />
         </tr>
       </thead>
       <tbody>
         {Object.keys(resources).map(key =>
           <tr key={key}>
             <td>{resourceRuleDescription(key)}</td>
-            <td>{resourceDescription(tier[key])}</td>
             <td>{resources && resources[key]}</td>
           </tr>
         )}
@@ -53,24 +43,19 @@ function ResourceList({ resources, tier }) {
 }
 ResourceList.propTypes = {
   resources: PropTypes.object,
-  tier: PropTypes.object,
 };
 
 class Resources extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      plan: {},
       resources: {},
-      tiers: {},
     };
     this.getResources = this.getResources.bind(this);
-    this.getTiers = this.getTiers.bind(this);
   }
 
   componentWillMount() {
     this.getResources();
-    this.getTiers();
   }
 
   getResources() {
@@ -79,21 +64,12 @@ class Resources extends Component {
       .then(resources => this.setState(resources));
   }
 
-  getTiers() {
-    api.get('/api/tiers')
-      .then(response => response.json())
-      .then(tiers => this.setState(tiers));
-  }
-
   render() {
-    const currentPlan = this.state.plan.tier;
-    const tiers = this.state.tiers;
     const resources = this.state.resources;
 
     return (
       <div className="resourceContainer">
-        Plan: {currentPlan}
-        <ResourceList resources={resources} tier={tiers[currentPlan]} />
+        <ResourceList resources={resources} />
       </div>
     );
   }
