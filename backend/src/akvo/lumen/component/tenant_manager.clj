@@ -54,13 +54,13 @@
 (defn pool
   "Created a Hikari connection pool."
   [{:keys [db_uri label dropwizard-registry]}]
-  (let [minutes_5 (* 5 60 1000)
+  (let [minute (* 60 1000)
         cfg (doto
               (HikariConfig.)
               (.setJdbcUrl db_uri)
               (.setPoolName label)
               (.setMinimumIdle 0)
-              (.setIdleTimeout minutes_5)
+              (.setIdleTimeout (* 10 minute))
               (.setConnectionTimeout (* 10 1000))
               (.setMaximumPoolSize 10)
               (.setMetricRegistry dropwizard-registry))]
