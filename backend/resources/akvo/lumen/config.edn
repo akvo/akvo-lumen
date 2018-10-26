@@ -75,14 +75,14 @@
               #ig/ref :akvo.lumen.endpoint.user/user
               #ig/ref :akvo.lumen.endpoint.visualisation/visualisation]
   :config    #ig/ref :akvo.lumen.config}
- 
+
  :akvo.lumen.component.http/http      {:config #ig/ref :akvo.lumen.config
                                        :app    #ig/ref :akvo.lumen.component.handler/handler}
  :akvo.lumen.component.caddisfly/prod {:config #ig/ref :akvo.lumen.config}
  :akvo.lumen.component.keycloak       {:config #ig/ref :akvo.lumen.config}
  :akvo.lumen.component.tenant-manager {:config #ig/ref :akvo.lumen.config
                                        :db     #ig/ref :akvo.lumen.component.hikaricp/hikaricp}
- 
+
  :akvo.lumen.component.emailer/mailjet-emailer {:config #ig/ref :akvo.lumen.config}
 
  :akvo.lumen.component.error-tracker/prod {:config #ig/ref :akvo.lumen.config}
@@ -92,15 +92,16 @@
                 :tenants        "akvo/lumen/migrations/tenants"}
    :middleware {:functions {:hide-errors       #ig/ref :akvo.lumen.middleware.duct.erros/wrap-hide-errors
                             :json-body         #ig/ref :akvo.lumen.middleware.ring.json/wrap-json-body
-                            :json-response     #ig/ref :akvo.lumen.middleware.ring.json/wrap-json-response 
-                            :not-found         #ig/ref :akvo.lumen.middleware.duct.not-found/wrap-not-found 
+                            :json-response     #ig/ref :akvo.lumen.middleware.ring.json/wrap-json-response
+                            :not-found         #ig/ref :akvo.lumen.middleware.duct.not-found/wrap-not-found
                             :ring-defaults     #ig/ref :akvo.lumen.middleware.ring.defaults/wrap-defaults
                             :wrap-auth         #ig/ref :akvo.lumen.middleware.auth/wrap-auth
                             :wrap-jwt          #ig/ref :akvo.lumen.middleware.auth/wrap-jwt
                             :wrap-label-tenant #ig/ref :akvo.lumen.middleware.tenant-manager/wrap-label-tenant
-                            :wrap-sentry       #ig/ref :akvo.lumen.middleware.sentry/wrap-sentry}
+                            :wrap-sentry       #ig/ref :akvo.lumen.middleware.sentry/wrap-sentry
+                            :lumen-monitoring  #ig/ref :akvo.lumen.lumen-monitoring/middleware}
                 :applied   [:not-found :json-response :ring-defaults :json-body
-                            :wrap-auth :wrap-jwt :wrap-label-tenant :wrap-sentry
+                            :wrap-auth :wrap-jwt :wrap-label-tenant :wrap-sentry :lumen-monitoring
                             :hide-errors]
                 :arguments {:not-found     "Resource Not Found"
                             :hide-errors   "Internal Server Error"
@@ -143,4 +144,8 @@
                   :realm       keycloak-realm
                   :credentials {"client_id"     keycloak-client-id
                                 "client_secret" keycloak-client-secret}}}
+
+ :akvo.lumen.lumen-monitoring/collector {}
+ :akvo.lumen.lumen-monitoring/middleware {:collector #ig/ref :akvo.lumen.lumen-monitoring/collector}
+
  }
