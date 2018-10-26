@@ -1,6 +1,7 @@
 (ns akvo.lumen.auth
   (:require [akvo.commons.jwt :as jwt]
             [cheshire.core :as json]
+            [clojure.tools.logging :as log]
             [clj-http.client :as client]
             [clojure.set :as set]
             [clojure.string :as s]
@@ -48,6 +49,7 @@
   Otherwiese grant access. This implies that access is on tenant level."
   [handler]
   (fn [{:keys [jwt-claims] :as request}]
+    (log/warn (select-keys jwt-claims ["email" "realm_access"]))
     (cond
       (public-path? request) (handler request)
       (nil? jwt-claims) not-authenticated
