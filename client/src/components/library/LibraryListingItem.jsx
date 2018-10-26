@@ -10,7 +10,7 @@ import {
   getTitle, getType, getId,
   getErrorMessage, isPending,
   isFailed, isOk, getStatus, getIconUrl,
-  getAuthor, getCreatedTimestamp,
+  getAuthor, getModifiedTimestamp,
   getSource, isUpdatable,
 } from '../../domain/entity';
 import { abbr } from '../../utilities/utils';
@@ -172,7 +172,7 @@ export default class LibraryListingItem extends Component {
   render() {
     const { entity, onEntityAction } = this.props;
     const author = getAuthor(entity);
-    const created = getCreatedTimestamp(entity);
+    const modified = getModifiedTimestamp(entity);
     const { formatMessage } = this.context.intl;
     const entityType = getType(entity);
     const entitySource = getSource(entity);
@@ -235,14 +235,14 @@ export default class LibraryListingItem extends Component {
                 </li>
               ) : null}
               <li>
-                {(author || created) && (
+                {(author || modified) && (
                   <VisualisationLabel
                     className="VisualisationLabel__meta"
                     title={formatMessage({ id: 'created_by' })}
                   >
                     {author && (<span>{author}</span>)}
-                      {author && created && (<span>&nbsp;|&nbsp;</span>)}
-                    {created && (<span>{moment(created).format('Do MMM YYYY - HH:mm')}</span>)}
+                      {author && modified && (<span>&nbsp;|&nbsp;</span>)}
+                    {modified && (<span>{moment(modified).format('Do MMM YYYY - HH:mm')}</span>)}
                   </VisualisationLabel>
                 )}
               </li>
