@@ -16,7 +16,7 @@
 
 (defmethod ig/init-key ::middleware [_ {:keys [collector]}]
   #(-> %
-       (ring/wrap-metrics collector)))
+       (ring/wrap-metrics collector {:path-fn (constantly "unknown")})))
 
 (comment
   (slurp "http://localhost:3000/metrics")
