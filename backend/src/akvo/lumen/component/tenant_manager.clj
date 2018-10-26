@@ -52,48 +52,52 @@
 
 (defn pool
   "Created a Hikari connection pool."
-  [tenant]
+  [{:keys [db_uri label dropwizard-registry]}]
   (let [minutes_5 (* 5 60 1000)
         cfg (doto
               (HikariConfig.)
-              (.setJdbcUrl (:db_uri tenant))
-              (.setPoolName (:label tenant))
+              (.setJdbcUrl db_uri)
+              (.setPoolName label)
               (.setMinimumIdle 0)
               (.setIdleTimeout minutes_5)
               (.setConnectionTimeout (* 10 1000))
-              (.setMaximumPoolSize 10))
-        ]
+              (.setMaximumPoolSize 10)
+              (.setMetricRegistry dropwizard-registry))]
     {:datasource (HikariDataSource. cfg)}))
 
+(defn assoc-if-key-does-not-exist [m k v]
+  (if (contains? m k)
+    m
+    (assoc m k v)))
 
-(defn load-tenant [db encryption-key tenants label]
+(defn load-tenant [db config tenants label]
   (if-let [{:keys [db_uri label]} (tenant-by-id (:spec db)
                                                 {:label label})]
-    (let [decrypted-db-uri (aes/decrypt encryption-key db_uri)]
+    (let [decrypted-db-uri (aes/decrypt (:encryption-key config) db_uri)]
       (swap! tenants
-             assoc
+             assoc-if-key-does-not-exist
              label
-             {:uri decrypted-db-uri
-              :spec (pool {:db_uri decrypted-db-uri
-                           :label label})}))
+             {::uri   decrypted-db-uri
+              ::spec (delay (pool {:db_uri              decrypted-db-uri
+                                   :dropwizard-registry (:dropwizard-registry config)
+                                   :label               label}))}))
     (throw (Exception. "Could not match dns label with tenant from tenats."))))
-
 
 (defrecord TenantManager [db config]
   TenantConnection
   (connection [{:keys [tenants]} label]
     (if-let [tenant (get @tenants label)]
-      (:spec tenant)
+      @(::spec tenant)
       (do
-        (load-tenant db (:encryption-key config) tenants label)
-        (:spec (get @tenants label)))))
+        (load-tenant db config tenants label)
+        @(::spec (get @tenants label)))))
 
   (uri [{:keys [tenants]} label]
     (if-let [tenant (get @tenants label)]
-      (:uri tenant)
+      (::uri tenant)
       (do
-        (load-tenant db (:encryption-key config) tenants label)
-        (:uri (get @tenants label)))))
+        (load-tenant db config tenants label)
+        (::uri (get @tenants label)))))
 
   TenantAdmin
   (current-plan [{:keys [db]} label]
@@ -102,17 +106,17 @@
 (defn- tenant-manager [options]
   (map->TenantManager options))
 
-
-(defmethod ig/init-key :akvo.lumen.component.tenant-manager  [_ {:keys [db config] :as opts}]
+(defmethod ig/init-key :akvo.lumen.component.tenant-manager [_ {:keys [db config] :as opts}]
   (let [this (tenant-manager (assoc config :db db))]
     (if (:tenants this)
       this
       (assoc this :tenants (atom {})))))
 
-(defmethod ig/halt-key! :akvo.lumen.component.tenant-manager  [_ this]
+(defmethod ig/halt-key! :akvo.lumen.component.tenant-manager [_ this]
   (if-let [tenants (:tenants this)]
-      (do
-        (doseq [[_ {{^HikariDataSource conn :datasource} :spec}] @tenants]
-          (.close conn))
-        (dissoc this :tenants))
-      this))
+    (do
+      (doseq [[_ {spec ::spec}] @tenants]
+        (when (realized? spec)
+          (.close (:datasource @spec))))
+      (dissoc this :tenants))
+    this))

@@ -2,16 +2,17 @@
   (:require [iapetos.core :as prometheus]
             [iapetos.collector.jvm :as jvm]
             [iapetos.collector.ring :as ring]
-            [integrant.core :as ig]
-            [iapetos.collector.exceptions :as ex])
+            [integrant.core :as ig])
   (:import (io.prometheus.client.dropwizard DropwizardExports)
            (com.codahale.metrics MetricRegistry)))
 
+(defmethod ig/init-key ::dropwizard-registry [_ _]
+  (MetricRegistry.))
 
-(defmethod ig/init-key ::collector [_ config]
+(defmethod ig/init-key ::collector [_ {:keys [dropwizard-registry]}]
   (-> (prometheus/collector-registry)
       (jvm/initialize)
-      (prometheus/register (DropwizardExports. (MetricRegistry.)))
+      (prometheus/register (DropwizardExports. dropwizard-registry))
       (ring/initialize)))
 
 (defmethod ig/init-key ::middleware [_ {:keys [collector]}]
