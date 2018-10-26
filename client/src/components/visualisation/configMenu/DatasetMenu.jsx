@@ -11,6 +11,7 @@ const DatasetMenu = ({ visualisation, options, onChange, children }) => (
       <ConfigMenuSectionOptionSelect
         id="source_dataset"
         name="xDatasetMenu"
+        testId="dataset-menu"
         placeholderId="choose_dataset"
         value={visualisation.datasetId !== null ? visualisation.datasetId.toString() : null}
         options={options}

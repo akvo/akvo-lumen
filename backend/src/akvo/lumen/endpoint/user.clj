@@ -1,8 +1,8 @@
 (ns akvo.lumen.endpoint.user
   (:require [akvo.lumen.http :as http]
             [akvo.lumen.lib.user :as user]
-            [compojure.core :refer :all]))
-
+            [compojure.core :refer :all]
+            [integrant.core :as ig]))
 
 (defn- promote-user? [body]
   (and (contains? body "admin")
@@ -32,3 +32,6 @@
 
       (DELETE "/" _
         (user/remove-user keycloak tenant jwt-claims id)))))
+
+(defmethod ig/init-key :akvo.lumen.endpoint.user/user  [_ opts]
+  (endpoint opts))

@@ -1,5 +1,8 @@
 (ns akvo.lumen.config
-  (:require [environ.core :refer [env]]))
+  (:require [environ.core :refer [env]]
+            [clojure.tools.logging :as log]
+            [akvo.lumen.util.system :as akvo.system]
+            [integrant.core :as ig]))
 
 (defn error-msg [env-var]
   (format "Failed to setup binding: %s environment variable missing" env-var))
@@ -19,12 +22,13 @@
     (assert (:lumen-flow-api-url env) (error-msg "LUMEN_FLOW_API_URL"))))
 
 (defn bindings []
-  {'db-uri (:lumen-db-url env)
+  {'db-uri (:lumen-db-url env "jdbc:postgresql://postgres/lumen?user=lumen&password=password&ssl=true")
    'caddisfly-schema-uri (:lumen-caddisfly-schema-uri env "https://akvoflow-public.s3.amazonaws.com/caddisfly-tests.json")
    'email-host (:lumen-email-host env)
    'email-password (:lumen-email-password env)
    'email-user (:lumen-email-user env)
    'encryption-key (:lumen-encryption-key env)
+   'exporter-api-url (:exporter-api-url env "http://localhost:3001")
    'file-upload-path (:lumen-file-upload-path env "/tmp/akvo/lumen")
    'flow-api-url (:lumen-flow-api-url env)
    'http-port (Integer/parseInt (:port env "3000"))
@@ -37,3 +41,6 @@
    'piwik-site-id (:lumen-piwik-site-id env)
    'sentry-backend-dsn (:lumen-sentry-backend-dsn env)
    'sentry-client-dsn (:lumen-sentry-client-dsn env)})
+
+(defmethod ig/init-key :akvo.lumen.config  [a opts]
+  (akvo.system/load-system [opts] (bindings)))

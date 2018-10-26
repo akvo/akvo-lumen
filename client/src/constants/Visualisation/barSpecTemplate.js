@@ -15,6 +15,7 @@ const barSpec = {
   sort: null, // can be "asc", "dsc" or "null"
   truncateSize: null,
   showLabels: false,
+  showValueLabels: false,
 };
 
 export default barSpec;

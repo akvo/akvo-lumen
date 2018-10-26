@@ -18,6 +18,7 @@ import ColorPicker from '../common/ColorPicker';
 import ChartLayout from './ChartLayout';
 import Tooltip from './Tooltip';
 import { labelFont, MAX_FONT_SIZE, MIN_FONT_SIZE } from '../../constants/chart';
+import RenderComplete from './RenderComplete';
 
 const getDatum = (data, datum) => data.filter(({ key }) => key === datum)[0];
 
@@ -41,6 +42,9 @@ const getPaddingBottom = (data, type) => {
 
   return Math.ceil(longestLabelLength * pixelsPerChar);
 };
+
+const LABEL_CHAR_WIDTH = 10;
+const labelFitsBar = (text, height) => `${text}`.length * LABEL_CHAR_WIDTH < height;
 
 export default class SimpleBarChart extends Component {
 
@@ -81,11 +85,12 @@ export default class SimpleBarChart extends Component {
     marginBottom: PropTypes.number,
     style: PropTypes.object,
     legendVisible: PropTypes.bool,
-    labelsVisible: PropTypes.bool,
+    valueLabelsVisible: PropTypes.bool,
     yAxisLabel: PropTypes.string,
     yAxisTicks: PropTypes.number,
     xAxisLabel: PropTypes.string,
     grid: PropTypes.bool,
+    visualisation: PropTypes.object,
   }
 
   static defaultProps = {
@@ -95,7 +100,7 @@ export default class SimpleBarChart extends Component {
     marginTop: 70,
     marginBottom: 60,
     legendVisible: false,
-    labelsVisible: false,
+    valueLabelsVisible: false,
     edit: false,
     padding: 0.1,
     colorMapping: {},
@@ -108,6 +113,11 @@ export default class SimpleBarChart extends Component {
 
   state = {
     isPickingColor: false,
+    hasRendered: false,
+  }
+
+  componentDidMount() {
+    this.setState({ hasRendered: true }); // eslint-disable-line
   }
 
   getData() {
@@ -151,9 +161,9 @@ export default class SimpleBarChart extends Component {
 
   handleMouseEnterNode({ key, value }, event) {
     if (this.state.isPickingColor) return;
-    const { interactive, print, colors } = this.props;
+    const { interactive, print, colorMapping } = this.props;
     if (!interactive || print) return;
-    this.handleShowTooltip(event, { key, color: colors[key], value: heuristicRound(value) });
+    this.handleShowTooltip(event, { key, color: colorMapping[key], value: heuristicRound(value) });
     this.setState({ hoveredNode: key });
   }
 
@@ -238,12 +248,13 @@ export default class SimpleBarChart extends Component {
     );
   }
 
-  renderValueLabel({ key, nodeWidth, x, y, value, labelsVisible, color }) {
-    if (!labelsVisible) return null;
+  renderValueLabel({ key, nodeWidth, x, y, value, valueLabelsVisible, color, height }) {
+    if (!valueLabelsVisible) return null;
     const labelText = heuristicRound(value);
     const labelX = x + (nodeWidth / 2);
     const OFFSET = 5;
     const labelY = value < 0 ? y - OFFSET : y + OFFSET;
+    if (!labelFitsBar(labelText, height)) return null;
 
     return (
       <Text
@@ -289,10 +300,11 @@ export default class SimpleBarChart extends Component {
       yAxisTicks,
       xAxisLabel,
       grid,
-      labelsVisible,
+      visualisation,
+      valueLabelsVisible,
     } = this.props;
 
-    const { tooltipItems, tooltipVisible, tooltipPosition } = this.state;
+    const { tooltipItems, tooltipVisible, tooltipPosition, hasRendered } = this.state;
 
     const series = this.getData();
 
@@ -371,6 +383,8 @@ export default class SimpleBarChart extends Component {
                   this.wrap = c;
                 }}
               >
+                {hasRendered && <RenderComplete id={visualisation.id} />}
+
                 {tooltipVisible && (
                   <Tooltip
                     items={tooltipItems}
@@ -470,8 +484,9 @@ export default class SimpleBarChart extends Component {
                               nodeWidth,
                               x,
                               y: origin + ((value < 0 ? 1 : -1) * normalizedHeight),
-                              labelsVisible,
+                              valueLabelsVisible,
                               color,
+                              height: normalizedHeight,
                             })}
                           </Group>
                         );

@@ -1,7 +1,7 @@
 (ns akvo.lumen.endpoint.root
   (:require [compojure.core :refer :all]
+            [integrant.core :as ig]
             [ring.util.response :refer [response]]))
-
 
 (defn endpoint [config]
 
@@ -18,3 +18,6 @@
           :resources {:datasets       (str base-url "datasets")
                       :shares         (str base-url "shares")
                       :visualisations (str base-url "visualisations")}})))))
+
+(defmethod ig/init-key :akvo.lumen.endpoint.root/root  [_ opts]
+  (endpoint (assoc opts :config (:config (:config opts)))))

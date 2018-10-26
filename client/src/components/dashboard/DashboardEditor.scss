@@ -103,6 +103,13 @@
             box-shadow: 0 0 0.1rem 0.25rem $errorRed;
         }
     }
+
+    &--exporting {
+        margin-top: 0;
+        .DashboardEditorCanvasContainer {
+            height: auto;
+        }
+    }
 }
 
 @media print {

@@ -647,7 +647,7 @@ export function calculateMargins({ top, right, bottom, left }, { width, height }
 }
 
 export const getLabelFontSize = (xLabel = '', yLabel = '', maxFont, minFont, height, width) => {
-  const longest = Math.max(xLabel.length, yLabel.length);
+  const longest = Math.max(xLabel ? xLabel.length : 0, yLabel ? yLabel.length : 0);
   const smallestDimension = Math.min(height, width);
   const smallChartSize = smallestDimension < 400;
   const mediumChartSize = smallestDimension > 400 && smallestDimension < 700;

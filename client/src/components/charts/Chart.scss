@@ -1,6 +1,9 @@
 @import "../../styles/modules/importAll";
 
 .Chart {
+    display: flex;
+    flex-direction: column;
+    
     h2 {
         display: flex;
         flex-direction: column;

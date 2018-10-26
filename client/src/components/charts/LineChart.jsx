@@ -16,6 +16,7 @@ import { MAX_FONT_SIZE, MIN_FONT_SIZE } from '../../constants/chart';
 import ResponsiveWrapper from '../common/ResponsiveWrapper';
 import ColorPicker from '../common/ColorPicker';
 import ChartLayout from './ChartLayout';
+import RenderComplete from './RenderComplete';
 import Tooltip from './Tooltip';
 
 const formatValue = (value, type) => {
@@ -61,6 +62,7 @@ export default class LineChart extends Component {
     yAxisTicks: PropTypes.number,
     xAxisTicks: PropTypes.number,
     grid: PropTypes.bool,
+    visualisation: PropTypes.object,
   }
 
   static defaultProps = {
@@ -81,6 +83,11 @@ export default class LineChart extends Component {
 
   state = {
     isPickingColor: undefined,
+    hasRendered: false,
+  }
+
+  componentDidMount() {
+    this.setState({ hasRendered: true }); // eslint-disable-line
   }
 
   getData() {
@@ -163,9 +170,10 @@ export default class LineChart extends Component {
       yAxisLabel,
       yAxisTicks,
       grid,
+      visualisation,
     } = this.props;
 
-    const { tooltipItems, tooltipVisible, tooltipPosition } = this.state;
+    const { tooltipItems, tooltipVisible, tooltipPosition, hasRendered } = this.state;
 
     const xAxisTicks = 8;
 
@@ -248,6 +256,8 @@ export default class LineChart extends Component {
                   this.wrap = c;
                 }}
               >
+                {hasRendered && <RenderComplete id={visualisation.id} />}
+
                 {tooltipVisible && (
                   <Tooltip
                     items={tooltipItems}

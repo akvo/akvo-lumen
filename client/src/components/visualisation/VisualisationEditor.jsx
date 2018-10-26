@@ -239,37 +239,29 @@ export default class VisualisationEditor extends Component {
       case 'line':
       case 'area':
       case 'bar':
-      case 'scatter':
+      case 'scatter': {
         // Data aggregated on the backend for these types
 
         specValid = specIsValidForApi(visualisation.spec, vType);
         needNewAggregation = getNeedNewAggregation(visualisation, this.lastVisualisationRequested);
 
-        if (
-          !this.state.visualisation ||
-          !this.state.visualisation.datasetId ||
-          visTypeHasChanged ||
-          !specValid
-        ) {
-          // Update immediately, without waiting for the api call
-          this.setState({ visualisation });
-        } else if (!needNewAggregation) {
-          this.setState({
-            visualisation: {
-              ...visualisation,
-              data: this.state.visualisation.data,
-            },
-          });
+        const newVisualisation = { ...visualisation };
+        const data = get(this, 'state.visualisation.data');
+        const currentVType = get(this.props, 'visualisation.visualisationType');
+        if (data && (vType !== 'pivot table' || (currentVType && currentVType === vType))) {
+          newVisualisation.data = data;
         }
+        this.setState({ visualisation: newVisualisation });
 
         if (visualisation.datasetId && specValid && needNewAggregation) {
           this.fetchAggregatedData(visualisation);
-
           // Store a copy of this visualisation to compare against on next update
           this.lastVisualisationRequested = cloneDeep(visualisation);
         }
-        break;
 
+        this.forceUpdate();
+        break;
+      }
       default: throw new Error(`Unknown visualisation type ${visualisation.visualisationType}`);
     }
   }
@@ -395,23 +387,29 @@ export default class VisualisationEditor extends Component {
     const visualisation = props.visualisation; // up-to-date visualisation (may be unrenderable)
 
     return (
-      <div className="VisualisationEditor">
-        <VisualisationConfig
-          visualisation={visualisation}
-          metadata={metadata}
-          datasets={props.datasets}
-          rasters={props.rasters}
-          onChangeVisualisationType={props.onChangeVisualisationType}
-          onChangeSourceDataset={props.onChangeSourceDataset}
-          onChangeVisualisationSpec={props.onChangeVisualisationSpec}
-          onSaveVisualisation={props.onSaveVisualisation}
-          loadDataset={props.loadDataset}
-        />
+      <div
+        className={`VisualisationEditor ${props.exporting ? 'VisualisationEditor--exporting' : ''}`}
+      >
+        {!props.exporting && (
+          <VisualisationConfig
+            visualisation={visualisation}
+            metadata={metadata}
+            datasets={props.datasets}
+            rasters={props.rasters}
+            onChangeVisualisationType={props.onChangeVisualisationType}
+            onChangeSourceDataset={props.onChangeSourceDataset}
+            onChangeVisualisationSpec={props.onChangeVisualisationSpec}
+            onSaveVisualisation={props.onSaveVisualisation}
+            loadDataset={props.loadDataset}
+          />
+        )}
         <VisualisationPreview
           visualisation={visualisationToRender}
           metadata={metadata}
           datasets={props.datasets}
           onChangeVisualisationSpec={props.onChangeVisualisationSpec}
+          width={props.exporting ? 1000 : undefined}
+          height={props.exporting ? 600 : undefined}
         />
       </div>
     );
@@ -426,4 +424,5 @@ VisualisationEditor.propTypes = {
   onChangeVisualisationSpec: PropTypes.func.isRequired,
   onSaveVisualisation: PropTypes.func.isRequired,
   loadDataset: PropTypes.func.isRequired,
+  exporting: PropTypes.bool,
 };

@@ -9,7 +9,7 @@
             [akvo.lumen.variant :as variant]
             [clojure.set :as set]
             [clojure.test :refer :all]
-            [com.stuartsierra.component :as component]))
+            [integrant.core :as ig]))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -19,9 +19,8 @@
 (def keycloak-config (:keycloak seed-data))
 
 (def test-system
-  (component/system-map
-   :emailer (emailer/dev-emailer {})
-   :keycloak (keycloak/keycloak keycloak-config)))
+  {:emailer {}
+   :keycloak {}})
 
 (def ^:dynamic *emailer*)
 (def ^:dynamic *keycloak*)
@@ -29,12 +28,10 @@
 
 (defn fixture [f]
   (migrate-tenant test-tenant)
-  (alter-var-root #'test-system component/start)
-  (binding [*emailer* (:emailer test-system)
-            *keycloak* (:keycloak test-system)
+  (binding [*emailer* (ig/init-key :akvo.lumen.component.emailer/dev-emailer {})
+            *keycloak* (ig/init-key :akvo.lumen.component.keycloak {:config {:keycloak keycloak-config}})
             *tenant-conn* (test-tenant-conn test-tenant)]
-    (f)
-    (alter-var-root #'test-system component/stop)))
+    (f)))
 
 (use-fixtures :once fixture)
 

@@ -9,12 +9,14 @@ import { extent } from 'd3-array';
 import merge from 'lodash/merge';
 import { GridRows, GridColumns } from '@vx/grid';
 import itsSet from 'its-set';
+
 import ColorPicker from '../common/ColorPicker';
 import ResponsiveWrapper from '../common/ResponsiveWrapper';
 import Tooltip from './Tooltip';
 import ChartLayout from './ChartLayout';
 import { heuristicRound, calculateMargins, getLabelFontSize } from '../../utilities/chart';
 import { MAX_FONT_SIZE, MIN_FONT_SIZE } from '../../constants/chart';
+import RenderComplete from './RenderComplete';
 
 const startAxisFromZero = (axisExtent, type) => {
   // Returns an educated guess on if axis should start from zero or not
@@ -92,12 +94,18 @@ export default class ScatterChart extends Component {
 
   state = {
     isPickingColor: false,
+    hasRendered: false,
+  }
+
+  componentDidMount() {
+    this.setState({ hasRendered: true }); // eslint-disable-line
   }
 
   getData() {
     const { data } = this.props;
 
     if (!get(data, 'series[0]')) return false;
+    if (!get(data, 'series[1]')) return false;
 
     const values = data.series[0].data
       .map(({ value, ...rest }, i) => {
@@ -204,9 +212,10 @@ export default class ScatterChart extends Component {
       xAxisTicks,
       yAxisTicks,
       grid,
+      visualisation,
     } = this.props;
 
-    const { tooltipItems, tooltipVisible, tooltipPosition } = this.state;
+    const { tooltipItems, tooltipVisible, tooltipPosition, hasRendered } = this.state;
     const series = this.getData();
 
     if (!series) return null;
@@ -281,6 +290,8 @@ export default class ScatterChart extends Component {
                   this.wrap = c;
                 }}
               >
+                {hasRendered && <RenderComplete id={visualisation.id} />}
+
                 {this.state.isPickingColor && (
                   <ColorPicker
                     title="Pick color"

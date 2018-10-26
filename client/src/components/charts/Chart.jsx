@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import get from 'lodash/get';
 import { FormattedMessage } from 'react-intl';
+
 import AggregationError from './AggregationError';
 import LineChart from './LineChart';
 import BarChart from './BarChart';
@@ -202,7 +203,7 @@ export default class Chart extends Component {
             onChangeVisualisationSpec={onChangeVisualisationSpec}
             legendTitle={visualisation.spec.legendTitle}
             legendVisible={visualisation.spec.showLegend}
-            labelsVisible={visualisation.spec.showLabels}
+            valueLabelsVisible={visualisation.spec.showValueLabels}
           />
         );
       default:

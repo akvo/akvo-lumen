@@ -18,6 +18,7 @@ import ColorPicker from '../common/ColorPicker';
 import ChartLayout from './ChartLayout';
 import Tooltip from './Tooltip';
 import { labelFont, MAX_FONT_SIZE, MIN_FONT_SIZE } from '../../constants/chart';
+import RenderComplete from './RenderComplete';
 
 const getPaddingBottom = (data) => {
   const labelCutoffLength = 16;
@@ -64,6 +65,7 @@ export default class StackedBarChart extends Component {
     grouped: PropTypes.bool,
     grid: PropTypes.bool,
     yAxisTicks: PropTypes.number,
+    visualisation: PropTypes.object,
   }
 
   static defaultProps = {
@@ -90,7 +92,12 @@ export default class StackedBarChart extends Component {
     this.state = {
       isPickingColor: false,
       data: this.getData(props),
+      hasRendered: false,
     };
+  }
+
+  componentDidMount() {
+    this.setState({ hasRendered: true }); // eslint-disable-line
   }
 
   componentWillReceiveProps(nextProps) {
@@ -239,9 +246,10 @@ export default class StackedBarChart extends Component {
       xAxisLabel,
       grouped,
       grid,
+      visualisation,
     } = this.props;
 
-    const { tooltipItems, tooltipVisible, tooltipPosition } = this.state;
+    const { tooltipItems, tooltipVisible, tooltipPosition, hasRendered } = this.state;
 
     const series = this.state.data;
 
@@ -334,6 +342,8 @@ export default class StackedBarChart extends Component {
                   this.wrap = c;
                 }}
               >
+                {hasRendered && <RenderComplete id={visualisation.id} />}
+
                 {tooltipVisible && (
                   <Tooltip
                     items={tooltipItems}
