@@ -78,27 +78,26 @@
       (swap! tenants
              assoc-if-key-does-not-exist
              label
-             {::uri   decrypted-db-uri
+             {::uri  decrypted-db-uri
               ::spec (delay (pool {:db_uri              decrypted-db-uri
                                    :dropwizard-registry (:dropwizard-registry config)
                                    :label               label}))}))
     (throw (Exception. "Could not match dns label with tenant from tenats."))))
 
+(defn get-or-create-tenant [db config tenants label]
+  (if-let [tenant (get @tenants label)]
+    tenant
+    (->
+      (load-tenant db config tenants label)
+      (get label))))
+
 (defrecord TenantManager [db config]
   TenantConnection
   (connection [{:keys [tenants]} label]
-    (if-let [tenant (get @tenants label)]
-      @(::spec tenant)
-      (do
-        (load-tenant db config tenants label)
-        @(::spec (get @tenants label)))))
+    @(::spec (get-or-create-tenant db config tenants label)))
 
   (uri [{:keys [tenants]} label]
-    (if-let [tenant (get @tenants label)]
-      (::uri tenant)
-      (do
-        (load-tenant db config tenants label)
-        (::uri (get @tenants label)))))
+    (::uri (get-or-create-tenant db config tenants label)))
 
   TenantAdmin
   (current-plan [{:keys [db]} label]
