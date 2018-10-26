@@ -101,7 +101,7 @@
                             :wrap-sentry       #ig/ref :akvo.lumen.middleware.sentry/wrap-sentry
                             :lumen-monitoring  #ig/ref :akvo.lumen.lumen-monitoring/middleware}
                 :applied   [:not-found :json-response :ring-defaults :json-body
-                            :wrap-auth :wrap-jwt :wrap-label-tenant :wrap-sentry :lumen-monitoring
+                            :wrap-auth :wrap-jwt :lumen-monitoring :wrap-label-tenant :wrap-sentry
                             :hide-errors]
                 :arguments {:not-found     "Resource Not Found"
                             :hide-errors   "Internal Server Error"

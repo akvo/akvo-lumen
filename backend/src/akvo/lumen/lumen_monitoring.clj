@@ -13,11 +13,13 @@
   (-> (prometheus/collector-registry)
       (jvm/initialize)
       (prometheus/register (DropwizardExports. dropwizard-registry))
-      (ring/initialize)))
+      (ring/initialize {:labels [:tenant]})))
 
 (defmethod ig/init-key ::middleware [_ {:keys [collector]}]
   #(-> %
-       (ring/wrap-metrics collector {:path-fn (constantly "unknown")})))
+       (ring/wrap-metrics collector {:path-fn (constantly "unknown")
+                                     :label-fn (fn [request _]
+                                                 {:tenant (:tenant request)})})))
 
 (comment
   (slurp "http://localhost:3000/metrics")

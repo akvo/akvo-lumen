@@ -18,9 +18,9 @@
 (defn subdomain? [host]
   (>= (get (frequencies host) \.) 2))
 
-(defn healthz? [{:keys [request-method path-info]}]
+(defn path-info? [expected-path-info {:keys [request-method path-info]}]
   (and (= request-method :get)
-       (= path-info "/healthz")))
+       (= path-info expected-path-info)))
 
 (defn tenant-host [host]
   (-> host
@@ -35,7 +35,8 @@
   (fn [req]
     (let [host (get-in req [:headers "host"])]
       (cond
-        (healthz? req) (handler req)
+        (path-info? "/healthz" req) (handler req)
+        (path-info? "/metrics" req) (handler req)
         (subdomain? host) (handler (assoc req :tenant (tenant-host host)))
         :else (lib/bad-request "Not a tenant")))))
 
