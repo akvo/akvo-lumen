@@ -114,7 +114,11 @@
                                                         :default-charset        "utf-8"}}
                             :wrap-sentry   [sentry-backend-dsn {:namespaces ["org.akvo" "akvo"]}]}}}
   :http          {:port http-port}
-  :db            {:uri db-uri}
+  :db            {:uri db-uri
+                  :pool-name "tenant-manager"
+                  :maximum-pool-size 5
+                  :minimum-idle 2}
+
   :caddisfly     {:schema-uri caddisfly-schema-uri}
   :emailer       {:email-host     email-host
                   :email-password email-password
