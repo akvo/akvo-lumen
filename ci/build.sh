@@ -22,11 +22,9 @@ log Creating Production Backend image
 docker build --quiet --rm=false -t eu.gcr.io/${PROJECT_NAME}/lumen-backend:${TRAVIS_COMMIT} ./backend
 docker tag eu.gcr.io/${PROJECT_NAME}/lumen-backend:${TRAVIS_COMMIT} eu.gcr.io/${PROJECT_NAME}/lumen-backend:develop
 
-log Building container to run the client unit tests
-docker build --quiet --rm=false -t akvo-lumen-client-dev:develop client -f client/Dockerfile-dev
-
 log Running Client linting, unit tests and creating production assets
-docker run --env-file=.env -v "$(pwd)/client:/lumen" --rm=false -t akvo-lumen-client-dev:develop /lumen/run-as-user.sh /lumen/ci-build.sh
+client_image_version=$(awk -F':' '/client-dev/ {print $3}' docker-compose.yml)
+docker run -v "$(pwd)/client:/lumen" --rm=false -t "akvo/akvo-lumen-client-dev:${client_image_version}" ./ci-build.sh
 
 log Creating Production Client image
 docker build --quiet --rm=false -t eu.gcr.io/${PROJECT_NAME}/lumen-client:${TRAVIS_COMMIT} ./client
