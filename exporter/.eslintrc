@@ -31,7 +31,8 @@
       "functions": "never"
     }],
     "class-methods-use-this": 1,
-    "no-plusplus": ["error", { "allowForLoopAfterthoughts": true }]
+    "no-plusplus": ["error", { "allowForLoopAfterthoughts": true }],
+    "semi": 2
   },
   "globals": {
     "window": true,
