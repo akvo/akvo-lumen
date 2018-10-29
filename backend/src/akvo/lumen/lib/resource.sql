@@ -3,6 +3,11 @@
 SELECT COUNT (*) AS "numberOfVisualisations"
 FROM visualisation;
 
+-- :name count-dashboards :? :1
+-- :doc Returns the count of dashboards
+SELECT COUNT (*) AS "numberOfDashboards"
+FROM dashboard;
+
 -- :name count-external-datasets :? :1
 -- :doc Return..
 SELECT COUNT(dataset.id) AS "numberOfExternalDatasets"

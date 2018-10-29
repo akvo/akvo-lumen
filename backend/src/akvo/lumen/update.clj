@@ -39,6 +39,7 @@
                                 :version (inc (:version dataset-version))
                                 :columns new-columns
                                 :transformations (vec transformations)})
+  (touch-dataset conn {:id dataset-id})
   (drop-table conn {:table-name (:imported-table-name dataset-version)})
   (drop-table conn {:table-name (:table-name dataset-version)})
   (update-successful-job-execution conn {:id job-execution-id}))

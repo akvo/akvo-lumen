@@ -53,10 +53,16 @@
 (defn pool
   "Created a Hikari connection pool."
   [tenant]
-  (let [cfg (HikariConfig.)]
-    (.setJdbcUrl cfg (:db_uri tenant))
-    (.setPoolName cfg (:label tenant))
-    (.setMinimumIdle cfg 2)
+  (let [minutes_5 (* 5 60 1000)
+        cfg (doto
+              (HikariConfig.)
+              (.setJdbcUrl (:db_uri tenant))
+              (.setPoolName (:label tenant))
+              (.setMinimumIdle 0)
+              (.setIdleTimeout minutes_5)
+              (.setConnectionTimeout (* 10 1000))
+              (.setMaximumPoolSize 10))
+        ]
     {:datasource (HikariDataSource. cfg)}))
 
 
