@@ -703,3 +703,9 @@ export const getDataLastUpdated = ({ visualisation, datasets }) => {
     }
   }
 };
+
+const LABEL_CHAR_WIDTH = 10;
+const LABEL_CHAR_HEIGHT = 12;
+export const labelFitsWidth = (text, width) => `${text}`.length * LABEL_CHAR_WIDTH < width;
+export const labelFitsHeight = height => height > LABEL_CHAR_HEIGHT;
+
