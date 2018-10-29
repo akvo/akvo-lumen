@@ -11,10 +11,10 @@ echo "Starting REPL ..."
 cmd="${1:-repl}"
 
 if [[ "${cmd}" == "repl" ]]; then
-    ./run-as-user.sh lein repl :headless
+    run-as-user.sh lein repl :headless
 elif [[ "${cmd}" == "functional-and-seed" ]]; then
     # Two thing in one so that we avoid starting yet another JVM
-    ./run-as-user.sh lein do test :functional, run -m dev/migrate-and-seed
+    run-as-user.sh lein do test :functional, run -m dev/migrate-and-seed
 else
     true
 fi

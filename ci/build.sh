@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC1010
+
 set -eu
 
 function log {
@@ -11,10 +13,9 @@ if [ -z "$TRAVIS_COMMIT" ]; then
     export TRAVIS_COMMIT=local
 fi
 
-log Bulding container to run the backend tests
-docker build --quiet --rm=false -t akvo-lumen-backend-dev:develop backend -f backend/Dockerfile-dev
 log Running Backend unit tests and building uberjar
-docker run --env-file=.env -v "$HOME/.m2:/home/akvo/.m2" -v "$(pwd)/backend:/app" akvo-lumen-backend-dev:develop /app/run-as-user.sh lein "do" test, eastwood, uberjar
+backend_image_version=$(awk -F':' '/backend-dev/ {print $3}' docker-compose.override.yml)
+docker run -v "$HOME/.m2:/home/akvo/.m2" -v "$(pwd)/backend:/app" "akvo/akvo-lumen-backend-dev:${backend_image_version}" run-as-user.sh lein do test, eastwood, uberjar
 
 cp backend/target/uberjar/akvo-lumen.jar backend
 
