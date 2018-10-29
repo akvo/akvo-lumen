@@ -18,9 +18,9 @@
 (defn subdomain? [host]
   (>= (get (frequencies host) \.) 2))
 
-(defn healthz? [{:keys [request-method path-info]}]
+(defn path-info? [expected-path-info {:keys [request-method path-info]}]
   (and (= request-method :get)
-       (= path-info "/healthz")))
+       (= path-info expected-path-info)))
 
 (defn tenant-host [host]
   (-> host
@@ -35,7 +35,8 @@
   (fn [req]
     (let [host (get-in req [:headers "host"])]
       (cond
-        (healthz? req) (handler req)
+        (path-info? "/healthz" req) (handler req)
+        (path-info? "/metrics" req) (handler req)
         (subdomain? host) (handler (assoc req :tenant (tenant-host host)))
         :else (lib/bad-request "Not a tenant")))))
 
@@ -52,48 +53,51 @@
 
 (defn pool
   "Created a Hikari connection pool."
-  [tenant]
-  (let [minutes_5 (* 5 60 1000)
+  [{:keys [db_uri label dropwizard-registry]}]
+  (let [minute (* 60 1000)
         cfg (doto
               (HikariConfig.)
-              (.setJdbcUrl (:db_uri tenant))
-              (.setPoolName (:label tenant))
+              (.setJdbcUrl db_uri)
+              (.setPoolName label)
               (.setMinimumIdle 0)
-              (.setIdleTimeout minutes_5)
+              (.setIdleTimeout (* 10 minute))
               (.setConnectionTimeout (* 10 1000))
-              (.setMaximumPoolSize 10))
-        ]
+              (.setMaximumPoolSize 10)
+              (.setMetricRegistry dropwizard-registry))]
     {:datasource (HikariDataSource. cfg)}))
 
+(defn assoc-if-key-does-not-exist [m k v]
+  (if (contains? m k)
+    m
+    (assoc m k v)))
 
-(defn load-tenant [db encryption-key tenants label]
+(defn load-tenant [db config tenants label]
   (if-let [{:keys [db_uri label]} (tenant-by-id (:spec db)
                                                 {:label label})]
-    (let [decrypted-db-uri (aes/decrypt encryption-key db_uri)]
+    (let [decrypted-db-uri (aes/decrypt (:encryption-key config) db_uri)]
       (swap! tenants
-             assoc
+             assoc-if-key-does-not-exist
              label
-             {:uri decrypted-db-uri
-              :spec (pool {:db_uri decrypted-db-uri
-                           :label label})}))
+             {::uri  decrypted-db-uri
+              ::spec (delay (pool {:db_uri              decrypted-db-uri
+                                   :dropwizard-registry (:dropwizard-registry config)
+                                   :label               label}))}))
     (throw (Exception. "Could not match dns label with tenant from tenats."))))
 
+(defn get-or-create-tenant [db config tenants label]
+  (if-let [tenant (get @tenants label)]
+    tenant
+    (->
+      (load-tenant db config tenants label)
+      (get label))))
 
 (defrecord TenantManager [db config]
   TenantConnection
   (connection [{:keys [tenants]} label]
-    (if-let [tenant (get @tenants label)]
-      (:spec tenant)
-      (do
-        (load-tenant db (:encryption-key config) tenants label)
-        (:spec (get @tenants label)))))
+    @(::spec (get-or-create-tenant db config tenants label)))
 
   (uri [{:keys [tenants]} label]
-    (if-let [tenant (get @tenants label)]
-      (:uri tenant)
-      (do
-        (load-tenant db (:encryption-key config) tenants label)
-        (:uri (get @tenants label)))))
+    (::uri (get-or-create-tenant db config tenants label)))
 
   TenantAdmin
   (current-plan [{:keys [db]} label]
@@ -102,17 +106,17 @@
 (defn- tenant-manager [options]
   (map->TenantManager options))
 
-
-(defmethod ig/init-key :akvo.lumen.component.tenant-manager  [_ {:keys [db config] :as opts}]
+(defmethod ig/init-key :akvo.lumen.component.tenant-manager [_ {:keys [db config] :as opts}]
   (let [this (tenant-manager (assoc config :db db))]
     (if (:tenants this)
       this
       (assoc this :tenants (atom {})))))
 
-(defmethod ig/halt-key! :akvo.lumen.component.tenant-manager  [_ this]
+(defmethod ig/halt-key! :akvo.lumen.component.tenant-manager [_ this]
   (if-let [tenants (:tenants this)]
-      (do
-        (doseq [[_ {{^HikariDataSource conn :datasource} :spec}] @tenants]
-          (.close conn))
-        (dissoc this :tenants))
-      this))
+    (do
+      (doseq [[_ {spec ::spec}] @tenants]
+        (when (realized? spec)
+          (.close (:datasource @spec))))
+      (dissoc this :tenants))
+    this))
