@@ -1,0 +1,1 @@
+DROP INDEX dataset_version_version_idx;

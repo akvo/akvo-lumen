@@ -18,15 +18,17 @@
         column-x-type (get column-x "type")
         column-x-name (get column-x "columnName")
         column-x-title (get column-x "title")
-        column-y (utils/find-column columns (get query "metricColumnY"))
-        column-y-name (get column-y "columnName")
-        column-y-title (get column-y "title")
 
         column-subbucket (utils/find-column columns (get query "subBucketColumn"))
         column-subbucket-name (get column-subbucket "columnName")
         column-subbucket-title (get column-subbucket "title")
 
-        aggregation-method (get query "metricAggregation")
+        column-y (or (utils/find-column columns (get query "metricColumnY"))
+                     column-subbucket)
+        column-y-name (get column-y "columnName")
+        column-y-title (get column-y "title")
+
+        aggregation-method (if (and (not column-y) column-x) "count" (get query "metricAggregation"))
         truncate-size (or (get query "truncateSize") "ALL")
         sql-sort-subquery (case (get query "sort")
                             nil "ORDER BY x ASC"
@@ -76,9 +78,9 @@
             sort_table.include_value IS NOT NULL
           " sql-sort-subbucket-subquery)
 
-        valid-spec (boolean (and column-x column-y))
+        valid-spec (boolean column-x)
         sql-text (if valid-spec (if column-subbucket sql-text-with-subbucket sql-text-without-subbucket) "SELECT NULL")
-        sql-response (run-query tenant-conn table-name sql-text column-x-name column-y-name filter-sql aggregation-method truncate-size column-subbucket-name)
+        sql-response (run-query tenant-conn table-name sql-text column-x-name (or column-y-name column-x-name) filter-sql aggregation-method truncate-size column-subbucket-name)
         bucket-values (distinct
                        (mapv
                         (fn [[x-value y-value s-value]] x-value)

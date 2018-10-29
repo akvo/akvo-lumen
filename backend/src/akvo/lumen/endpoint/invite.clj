@@ -2,8 +2,8 @@
   (:require [akvo.lumen.component.tenant-manager :refer [connection]]
             [akvo.lumen.http :as http]
             [akvo.lumen.lib.user :as user]
-            [compojure.core :refer :all]))
-
+            [compojure.core :refer :all]
+            [integrant.core :as ig]))
 
 (defn location
   ""
@@ -33,3 +33,9 @@
       (GET "/:id" [id]
         (user/verify-invite keycloak tenant-conn tenant id
                             (location (:invite-redirect config) request))))))
+
+(defmethod ig/init-key :akvo.lumen.endpoint.invite/invite  [_ opts]
+  (endpoint (assoc opts :config (:config (:config opts)))))
+
+(defmethod ig/init-key :akvo.lumen.endpoint.invite/verify  [_ opts]
+  (verify-endpoint (assoc opts :config (:config (:config opts)))))

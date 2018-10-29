@@ -1,8 +1,8 @@
 (ns akvo.lumen.endpoint.dataset
   (:require [akvo.lumen.component.tenant-manager :refer [connection]]
             [akvo.lumen.dataset :as dataset]
-            [compojure.core :refer :all]))
-
+            [compojure.core :refer :all]
+            [integrant.core :as ig]))
 
 (defn endpoint [{:keys [config error-tracker tenant-manager]}]
   (context "/api/datasets" {:keys [params tenant] :as request}
@@ -29,3 +29,6 @@
 
         (POST "/update" {:keys [body] :as request}
           (dataset/update tenant-conn config id body))))))
+
+(defmethod ig/init-key :akvo.lumen.endpoint.dataset/dataset  [_ opts]
+  (endpoint (assoc opts :config (:config (:config opts)))))

@@ -275,9 +275,17 @@ export function deleteDataset(id) {
     dispatch(deleteDatasetRequest(id));
     api
       .del(`/api/datasets/${id}`)
-      .then(response => response.json())
-      .then(() => dispatch(deleteDatasetSuccess(id)))
-      .catch(error => dispatch(deleteDatasetFailure(id, error)));
+      .then((response) => {
+        if (response.status >= 400) {
+          response.json().then((error) => {
+            dispatch(deleteDatasetFailure(id, error));
+            dispatch(showNotification('error', `deletion failed: ${error.error}.`));
+          });
+        } else {
+          response.json().then(() => dispatch(deleteDatasetSuccess(id)));
+        }
+      })
+    ;
   };
 }
 
