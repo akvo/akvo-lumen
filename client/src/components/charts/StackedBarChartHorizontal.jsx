@@ -462,7 +462,7 @@ export default class StackedBarChart extends Component {
                       })}
 
                       {nodes.map((node, index) => {
-                        const { nodeHeight, x, key } = node;
+                        const { nodeHeight, key } = node;
 
                         return (
                           <Group key={key}>

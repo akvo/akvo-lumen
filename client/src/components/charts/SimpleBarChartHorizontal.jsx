@@ -277,7 +277,6 @@ export default class SimpleBarChart extends Component {
 
     const dataType = series.metadata.type;
     const paddingBottom = getPaddingBottom(series.data, dataType);
-    const dataCount = series.data.length;
     const axisLabelFontSize =
       getLabelFontSize(yAxisLabel, xAxisLabel, MAX_FONT_SIZE, MIN_FONT_SIZE, height, width);
 
