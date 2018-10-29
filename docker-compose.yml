@@ -25,9 +25,7 @@ services:
      - keycloak
      - exporter
  client:
-   environment:
-     - HOST_UID
-     - HOST_GID
+   image: akvo/akvo-lumen-client-dev:20181029.3d46626
  redis:
    image: redis:3.2.9
  windshaft:

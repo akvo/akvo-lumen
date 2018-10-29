@@ -18,9 +18,6 @@ services:
       - "47480:47480"
       - "3000:3000"
  client:
-   build:
-     context: ./client
-     dockerfile: Dockerfile-dev
    volumes:
       - ./client:/lumen
    ports:
