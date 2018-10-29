@@ -49,7 +49,6 @@
   Otherwiese grant access. This implies that access is on tenant level."
   [handler]
   (fn [{:keys [jwt-claims] :as request}]
-    (when (map? jwt-claims) (log/warn (:path-info request) (select-keys jwt-claims ["email" "realm_access"])))
     (cond
       (public-path? request) (handler request)
       (nil? jwt-claims) not-authenticated
