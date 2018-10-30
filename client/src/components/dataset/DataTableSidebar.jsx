@@ -5,6 +5,7 @@ import Filter from './sidebars/Filter';
 import TransformationLog from './sidebars/TransformationLog';
 import CombineColumns from './sidebars/CombineColumns';
 import ExtractMultiple from './sidebars/ExtractMultiple';
+import SplitColumn from './sidebars/SplitColumn';
 import DeriveColumn from './sidebars/DeriveColumn';
 import RenameColumn from './sidebars/RenameColumn';
 import GenerateGeopoints from './sidebars/GenerateGeopoints';
@@ -23,6 +24,8 @@ export default function DataTableSidebar(props) {
       return <CombineColumns {...props} />;
     case 'extractMultiple':
       return <ExtractMultiple {...props} />;
+    case 'splitColumn':
+      return <SplitColumn {...props} />;
     case 'deriveColumn':
       return <DeriveColumn {...props} />;
     case 'renameColumn':
@@ -42,6 +45,7 @@ DataTableSidebar.propTypes = {
       'transformationLog',
       'combineColumns',
       'extractMultiple',
+      'splitColumn',
       'deriveColumn',
       'renameColumn',
       'generateGeopoints',

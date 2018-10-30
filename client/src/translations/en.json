@@ -254,6 +254,7 @@
   "sorted_column": "{title} sorted {direction, select, ASC {ascending} DESC {descending}}",
   "source": "Source",
   "source_dataset": "Source dataset",
+  "split_column": "Split column values",
   "split_bars": "Split bars",
   "square": "Square",
   "stack_bars": "Stack bars",
