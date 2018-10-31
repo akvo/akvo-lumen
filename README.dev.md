@@ -31,18 +31,17 @@ Or just
 
 Before starting the following ports that must be free: 8080, 3000, 3030, 47480, 5432
 
-Setup your environment user and group id (only needs to be done once):
-
-
-    echo "HOST_UID=$(id -u)" >> .env
-    echo "HOST_GID=$(id -g)" >> .env
-
-
 To start:
 
+```sh
+docker-compose up --build -d && docker-compose logs -f --tail=10
+```
 
-    docker-compose up --build -d && docker-compose logs -f --tail=10
+To stop:
 
+```sh
+docker-compose down -v
+```
 
 ## Keycloak
 
@@ -86,7 +85,7 @@ be picked up automatically by the Webpack server.
 Run:
 
 ```sh
-docker exec -i -t akvolumen_client_1  npm test
+docker-compose exec client npm test
 ```
 
 ## Backend
@@ -103,6 +102,7 @@ A Clojure REPL should be available on port 47480.
 
 To run the test of the puppeteer user simulator, just go to lumen main
 folder and run:
+
 ```sh
 ./ci/e2e-test.sh
 ```
@@ -112,7 +112,7 @@ folder and run:
 To run the tests, either do it from the REPL or run:
 
 ```sh
-docker exec -i -t akvolumen_backend_1 lein test
+docker-compose exec backend lein test
 ```
 
 #### Postgres
