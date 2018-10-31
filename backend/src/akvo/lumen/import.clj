@@ -71,6 +71,56 @@
   (sql-value [v] (val->geometry-pgobj v)))
 
 
+(defn l [t o]
+  (log/error t o)
+  o)
+
+
+(frequencies (re-seq (re-pattern "[^a-zA-Z0-9\\s]") "lkjasd f&8(/&"))
+
+
+(def regex "[^a-zA-Z0-9\\s]")
+
+(let [data ["uss/" "a·bc1&&&&???????23de?f" "lk&&&&&&&jasdf& 8"]
+      res (->>
+           data
+           (reduce
+            (fn [c v]
+              (let [f (frequencies (re-seq (re-pattern regex) v))]
+                (reduce (fn [c2 [k v2]]
+                          (assoc c2 k {:max-by-row (max v2 (get-in c2 [k :by-row] 0))
+                                       :row-coincidences (inc (get-in c2 [k :row-coincidences] 0))
+                                       :total (+ v2 (get-in c2 [k :total] 0))}))
+                        c f)))
+            {}))]
+  {:total-count (count data)
+   :max-by-row  (seq (into (sorted-map-by >) (group-by (fn [c] (:max-by-row (val c))) res)))
+   :row-coincidences  (seq (into (sorted-map-by >) (group-by (fn [c] (:row-coincidences (val c))) res)))
+   :total-rows (seq (into (sorted-map-by >) (group-by (fn [c] (:total (val c))) res)))})
+
+
+{:max-by-row
+ [[8
+   [["&" {:max-by-row 8, :row-coincidences 2, :total 12}]
+    ["?" {:max-by-row 8, :row-coincidences 1, :total 8}]]]
+  [1
+   [["/" {:max-by-row 1, :row-coincidences 1, :total 1}]
+    ["·" {:max-by-row 1, :row-coincidences 1, :total 1}]]]],
+ :row-coincidences
+ [[2 [["&" {:max-by-row 8, :row-coincidences 2, :total 12}]]]
+  [1
+   [["/" {:max-by-row 1, :row-coincidences 1, :total 1}]
+    ["·" {:max-by-row 1, :row-coincidences 1, :total 1}]
+    ["?" {:max-by-row 8, :row-coincidences 1, :total 8}]]]],
+ :total-count 3,
+ :total-rows
+ [[12 [["&" {:max-by-row 8, :row-coincidences 2, :total 12}]]]
+  [8 [["?" {:max-by-row 8, :row-coincidences 1, :total 8}]]]
+  [1
+   [["/" {:max-by-row 1, :row-coincidences 1, :total 1}]
+    ["·" {:max-by-row 1, :row-coincidences 1, :total 1}]]]]}
+
+
 
 (defn do-import
   "Import runs within a future and since this is not taking part of ring
@@ -80,10 +130,12 @@
     (try
       (let [spec (:spec (data-source-spec-by-job-execution-id conn {:job-execution-id job-execution-id}))]
         (with-open [importer (import/dataset-importer (get spec "source") config)]
-          (let [columns (import/columns importer)]
+          (let [columns (import/columns importer)
+                records (import/records importer)]
             (import/create-dataset-table conn table-name columns)
             (import/add-key-constraints conn table-name columns)
-            (doseq [record (map import/coerce-to-sql (import/records importer))]
+            (doseq [record (map (comp import/coerce-to-sql (partial l :raw-row)) records)]
+              (l :coerced record)
               (jdbc/insert! conn table-name record))
             (successful-import conn job-execution-id table-name columns spec claims data-source))))
       (catch Throwable e
