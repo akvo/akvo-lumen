@@ -1,7 +1,10 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
+import queryString from 'query-string';
+
 import EntityTypeHeader from '../entity-editor/EntityTypeHeader';
+import LoadingSpinner from '../common/LoadingSpinner';
 
 class DashboardHeader extends Component {
 
@@ -11,7 +14,7 @@ class DashboardHeader extends Component {
   }
 
   getActionButtons(isUnsavedChanges, haveTitle) {
-    const { onDashboardAction } = this.props;
+    const { onDashboardAction, isExporting } = this.props;
 
     const save = {
       buttonText: <FormattedMessage id="save" />,
@@ -41,6 +44,28 @@ class DashboardHeader extends Component {
       disabled: disableShare,
       tooltipId: disableShare ? 'save_your_dashboard_before_sharing' : null,
     };
+
+    const queryParams = queryString.parse(location.search);
+
+    const exportButton = {
+      buttonText: <FormattedMessage id="export" />,
+      disabled: disableShare || isExporting,
+      tooltipId: disableShare ? 'save_your_dashboard_before_exporting' : null,
+      onOptionSelected: format => onDashboardAction(`export_${format}`),
+      icon: isExporting ? <LoadingSpinner /> : null,
+      customClass: queryParams['show-export'] === '1' ? undefined : 'notImplemented',
+      subActions: [
+        {
+          label: <FormattedMessage id="png" />,
+          value: 'png',
+        },
+        {
+          label: <FormattedMessage id="pdf" />,
+          value: 'pdf',
+        },
+      ],
+    };
+
     const overflow = {
       buttonText: <FormattedMessage id="overflow" />,
       customClass: 'notImplemented',
@@ -50,6 +75,7 @@ class DashboardHeader extends Component {
       user,
       download,
       share,
+      exportButton,
       overflow,
     ];
 
@@ -104,6 +130,7 @@ DashboardHeader.propTypes = {
   onChangeTitle: PropTypes.func.isRequired,
   onSaveDashboard: PropTypes.func.isRequired,
   onBeginEditTitle: PropTypes.func.isRequired,
+  isExporting: PropTypes.bool,
 };
 
 export default injectIntl(DashboardHeader);

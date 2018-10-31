@@ -5,6 +5,7 @@ import update from 'react-addons-update';
 import isEmpty from 'lodash/isEmpty';
 import get from 'lodash/get';
 import { intlShape, injectIntl } from 'react-intl';
+import BodyClassName from 'react-body-classname';
 
 import ShareEntity from '../components/modals/ShareEntity';
 import LoadingSpinner from '../components/common/LoadingSpinner';
@@ -42,7 +43,7 @@ const getSpecFromVisualisationType = (visualisationType) => {
     case 'pivot table':
       return { ...pivotTableSpecTemplate };
     default:
-      throw new Error(`Unknown visualisation type ${visualisationType}`);
+      return {};
   }
 };
 
@@ -302,13 +303,29 @@ class Visualisation extends Component {
   }
 
   handleVisualisationAction(action) {
+    const url = `${window.location.origin}/visualisation/${this.state.visualisation.id}`;
+    const { visualisation } = this.state;
     switch (action) {
       case 'share': {
-        trackEvent(
-          'Share visualisation',
-          `${window.location.origin}/visualisation/${this.state.visualisation.id}`
-        );
+        trackEvent('Share visualisation', url);
         this.toggleShareVisualisation();
+        break;
+      }
+      case 'export_png': {
+        trackEvent('Export visualisation (png)', url);
+        this.props.dispatch(
+          actions.exportVisualisation(this.state.visualisation.id, { title: visualisation.name })
+        );
+        break;
+      }
+      case 'export_pdf': {
+        trackEvent('Export visualisation (pdf)', url);
+        this.props.dispatch(
+          actions.exportVisualisation(this.state.visualisation.id, {
+            format: 'pdf',
+            title: visualisation.name,
+          })
+        );
         break;
       }
       default:
@@ -342,40 +359,49 @@ class Visualisation extends Component {
     }
     const { VisualisationHeader, VisualisationEditor } = this.state.asyncComponents;
     const { visualisation } = this.state;
+    const { exporting } = this.props;
 
     return (
       <NavigationPrompt shouldPrompt={this.state.savingFailed}>
-        <div className="Visualisation">
-          <VisualisationHeader
-            isUnsavedChanges={this.state.isUnsavedChanges}
-            visualisation={visualisation}
-            onVisualisationAction={this.handleVisualisationAction}
-            onChangeTitle={this.handleChangeVisualisationTitle}
-            onBeginEditTitle={() => this.setState({ isUnsavedChanges: true })}
-            onSaveVisualisation={this.onSave}
-            savingFailed={this.state.savingFailed}
-            timeToNextSave={this.state.timeToNextSave - this.state.timeFromPreviousSave}
-          />
-          <VisualisationEditor
-            visualisation={visualisation}
-            datasets={this.datasets()}
-            rasters={this.props.library.rasters}
-            onChangeTitle={this.handleChangeVisualisationTitle}
-            onChangeVisualisationType={this.handleChangeVisualisationType}
-            onChangeSourceDataset={this.handleChangeSourceDataset}
-            onChangeVisualisationSpec={this.handleChangeVisualisationSpec}
-            onSaveVisualisation={this.onSave}
-            loadDataset={this.loadDataset}
-          />
-          <ShareEntity
-            isOpen={this.state.isShareModalVisible}
-            onClose={this.toggleShareVisualisation}
-            title={visualisation.name}
-            shareId={visualisation.shareId}
-            type={visualisation.type}
-            onFetchShareId={this.handleFetchShareId}
-          />
-        </div>
+        <BodyClassName className={exporting ? 'exporting' : ''}>
+          <div className="Visualisation">
+            {!exporting && (
+              <VisualisationHeader
+                isUnsavedChanges={this.state.isUnsavedChanges}
+                visualisation={visualisation}
+                onVisualisationAction={this.handleVisualisationAction}
+                onChangeTitle={this.handleChangeVisualisationTitle}
+                onBeginEditTitle={() => this.setState({ isUnsavedChanges: true })}
+                onSaveVisualisation={this.onSave}
+                savingFailed={this.state.savingFailed}
+                timeToNextSave={this.state.timeToNextSave - this.state.timeFromPreviousSave}
+                isExporting={get(this.props, `library.visualisations[${visualisation.id}].isExporting`)}
+              />
+            )}
+            <VisualisationEditor
+              visualisation={visualisation}
+              datasets={this.datasets()}
+              rasters={this.props.library.rasters}
+              onChangeTitle={this.handleChangeVisualisationTitle}
+              onChangeVisualisationType={this.handleChangeVisualisationType}
+              onChangeSourceDataset={this.handleChangeSourceDataset}
+              onChangeVisualisationSpec={this.handleChangeVisualisationSpec}
+              onSaveVisualisation={this.onSave}
+              loadDataset={this.loadDataset}
+              exporting={exporting}
+            />
+            {!exporting && (
+              <ShareEntity
+                isOpen={this.state.isShareModalVisible}
+                onClose={this.toggleShareVisualisation}
+                title={visualisation.name}
+                shareId={visualisation.shareId}
+                type={visualisation.type}
+                onFetchShareId={this.handleFetchShareId}
+              />
+            )}
+          </div>
+        </BodyClassName>
       </NavigationPrompt>
     );
   }
@@ -387,6 +413,7 @@ Visualisation.propTypes = {
   library: PropTypes.object.isRequired,
   location: PropTypes.object.isRequired,
   params: PropTypes.object,
+  exporting: PropTypes.bool,
 };
 
 export default connect(state => state)(injectIntl(Visualisation));

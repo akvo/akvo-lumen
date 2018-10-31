@@ -1,0 +1,33 @@
+{
+  "name": "akvo-lumen-exporter",
+  "version": "1.0.0",
+  "description": "PDF and image exporter for Akvo Lumen",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "author": "",
+  "license": "AGPL-3.0",
+  "dependencies": {
+    "@google-cloud/storage": "^1.7.0",
+    "body-parser": "^1.18.3",
+    "cors": "^2.8.4",
+    "express": "^4.16.3",
+    "express-validation": "^1.0.2",
+    "joi": "^13.4.0",
+    "lodash": "^4.17.11",
+    "raven": "^2.6.3",
+    "uuid": "^3.3.2"
+  },
+  "devDependencies": {
+    "babel-eslint": "^10.0.1",
+    "eslint": "^5.8.0",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-plugin-babel": "^5.2.1",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-jsx-a11y": "^6.1.2",
+    "eslint-plugin-react": "^7.11.1",
+    "eslint-watch": "^4.0.2"
+  }
+}

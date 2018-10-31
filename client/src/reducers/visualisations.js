@@ -56,6 +56,27 @@ function removeVisualisation(state, { payload }) {
   return newState;
 }
 
+function exportStarted(state, { payload: { id } }) {
+  return {
+    ...state,
+    [id]: { ...state[id], isExporting: true },
+  };
+}
+
+function exportSucceeded(state, { payload: { id } }) {
+  return {
+    ...state,
+    [id]: { ...state[id], isExporting: false },
+  };
+}
+
+function exportFailed(state, { payload: { id } }) {
+  return {
+    ...state,
+    [id]: { ...state[id], isExporting: false },
+  };
+}
+
 export default handleActions({
   [actions.createVisualisationSuccess]: createVisualisation,
   [actions.fetchVisualisationsSuccess]: saveVisualisations,
@@ -63,4 +84,7 @@ export default handleActions({
   [actions.saveVisualisationChangesSuccess]: editVisualisation,
   [actions.deleteVisualisationSuccess]: removeVisualisation,
   [actions.fetchShareIdSuccess]: saveShareId,
+  [actions.exportVisualisationRequest]: exportStarted,
+  [actions.exportVisualisationSuccess]: exportSucceeded,
+  [actions.exportVisualisationFailure]: exportFailed,
 }, initialState);

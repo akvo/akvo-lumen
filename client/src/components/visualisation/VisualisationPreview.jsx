@@ -1,13 +1,12 @@
 /* eslint-disable react/prefer-stateless-function */
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import windowSize from 'react-window-size';
 
 import VisualisationViewer from '../charts/VisualisationViewer';
 
 require('./VisualisationPreview.scss');
 
-const HEADER_HEIGHT = 70;
+const HEADER_HEIGHT = 160;
 
 function shouldRender(visualisation, datasets) {
   const datasetId = visualisation.datasetId;
@@ -30,7 +29,7 @@ function shouldRender(visualisation, datasets) {
       if (!datasetLoaded) {
         return false;
       }
-      if (spec.metricColumnY == null || spec.bucketColumn == null) {
+      if (spec.bucketColumn == null) {
         return false;
       }
       break;
@@ -77,7 +76,8 @@ class VisualisationPreview extends Component {
       metadata,
       datasets,
       onChangeVisualisationSpec,
-      windowHeight,
+      width,
+      height,
     } = this.props;
 
     return (
@@ -89,11 +89,14 @@ class VisualisationPreview extends Component {
             datasets={datasets}
             context="editor"
             height={
-              visualisation.visualisationType === 'map' ?
-                null :
-                Math.min(500, windowHeight - HEADER_HEIGHT)
+              height ||
+              (
+                visualisation.visualisationType === 'map' ?
+                  null :
+                  Math.max(500, window.outerHeight - HEADER_HEIGHT)
+              )
             }
-            width={visualisation.visualisationType === 'map' ? null : 800}
+            width={width || (visualisation.visualisationType === 'map' ? null : 800)}
             onChangeVisualisationSpec={onChangeVisualisationSpec}
           /> : null
         }
@@ -107,7 +110,8 @@ VisualisationPreview.propTypes = {
   metadata: PropTypes.object,
   datasets: PropTypes.object.isRequired,
   onChangeVisualisationSpec: PropTypes.func,
-  windowHeight: PropTypes.number,
+  width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
 };
 
-export default windowSize(VisualisationPreview);
+export default VisualisationPreview;

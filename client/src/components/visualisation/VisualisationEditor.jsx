@@ -19,7 +19,7 @@ const specIsValidForApi = (spec, vType) => {
       }
       break;
     case 'bar':
-      if (spec.bucketColumn === null || spec.metricColumnY === null) {
+      if (spec.bucketColumn === null) {
         return false;
       }
       break;
@@ -387,23 +387,29 @@ export default class VisualisationEditor extends Component {
     const visualisation = props.visualisation; // up-to-date visualisation (may be unrenderable)
 
     return (
-      <div className="VisualisationEditor">
-        <VisualisationConfig
-          visualisation={visualisation}
-          metadata={metadata}
-          datasets={props.datasets}
-          rasters={props.rasters}
-          onChangeVisualisationType={props.onChangeVisualisationType}
-          onChangeSourceDataset={props.onChangeSourceDataset}
-          onChangeVisualisationSpec={props.onChangeVisualisationSpec}
-          onSaveVisualisation={props.onSaveVisualisation}
-          loadDataset={props.loadDataset}
-        />
+      <div
+        className={`VisualisationEditor ${props.exporting ? 'VisualisationEditor--exporting' : ''}`}
+      >
+        {!props.exporting && (
+          <VisualisationConfig
+            visualisation={visualisation}
+            metadata={metadata}
+            datasets={props.datasets}
+            rasters={props.rasters}
+            onChangeVisualisationType={props.onChangeVisualisationType}
+            onChangeSourceDataset={props.onChangeSourceDataset}
+            onChangeVisualisationSpec={props.onChangeVisualisationSpec}
+            onSaveVisualisation={props.onSaveVisualisation}
+            loadDataset={props.loadDataset}
+          />
+        )}
         <VisualisationPreview
           visualisation={visualisationToRender}
           metadata={metadata}
           datasets={props.datasets}
           onChangeVisualisationSpec={props.onChangeVisualisationSpec}
+          width={props.exporting ? 1000 : undefined}
+          height={props.exporting ? 600 : undefined}
         />
       </div>
     );
@@ -418,4 +424,5 @@ VisualisationEditor.propTypes = {
   onChangeVisualisationSpec: PropTypes.func.isRequired,
   onSaveVisualisation: PropTypes.func.isRequired,
   loadDataset: PropTypes.func.isRequired,
+  exporting: PropTypes.bool,
 };

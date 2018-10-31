@@ -14,11 +14,11 @@
                  [clj-http "3.9.0" :exclusions [org.apache.httpcomponents/httpcore org.apache.httpcomponents/httpclient org.apache.httpcomponents/httpmime]]
                  [clj-time "0.14.4"]
                  [com.layerware/hugsql "0.4.9"]
-                 [com.stuartsierra/component "0.3.2"]
                  [commons-io/commons-io "2.6"]
                  [compojure "1.6.1" :exclusions [medley]]
-                 [duct "0.8.2"]
-                 [duct/hikaricp-component "0.1.2" :exclusions [org.slf4j/slf4j-nop]]
+                 [duct/core "0.6.2"]
+                 [duct/module.logging "0.3.1"]
+                 [duct/database.sql.hikaricp "0.3.3" :exclusions [org.slf4j/slf4j-nop integrant]]
                  [environ "1.1.0"]
                  [funcool/cuerdas "2.0.5"]
                  [honeysql "0.9.3"]
@@ -32,7 +32,6 @@
                  [org.apache.httpcomponents/httpcore "4.4.10"]
                  [org.apache.httpcomponents/httpclient "4.5.5"]
                  [org.apache.httpcomponents/httpmime "4.5.5"]
-
                  [org.clojure/clojure "1.9.0"]
                  [org.clojure/data.csv "0.1.4"]
                  [org.clojure/core.match "0.3.0-alpha5"]
@@ -46,7 +45,11 @@
                  [ring/ring-defaults "0.3.2"]
                  [ring/ring-json "0.4.0"]
                  [selmer "1.11.8"]
-                 [net.postgis/postgis-jdbc "2.2.1" :exclusions [org.postgresql/postgresql]]]
+                 [net.postgis/postgis-jdbc "2.2.1" :exclusions [org.postgresql/postgresql]]
+
+                 [iapetos "0.1.8" :exclusions [io.prometheus/simpleclient]]
+                 [io.prometheus/simpleclient_hotspot "0.5.0"]
+                 [io.prometheus/simpleclient_dropwizard "0.5.0"]]
   :uberjar-name "akvo-lumen.jar"
   :repl-options {:timeout 120000}
   :pedantic? :abort
@@ -75,6 +78,7 @@
    :profiles/test {:dependencies   [[org.clojure/test.check "0.10.0-alpha3"]]}
    :project/dev   {:dependencies   [[org.clojure/test.check "0.10.0-alpha3"]
                                     [duct/generate "0.8.2"]
+                                    [integrant/repl "0.2.0"]
                                     [reloaded.repl "0.2.4"]
                                     [org.clojure/tools.namespace "0.2.11"]
                                     [org.clojure/tools.nrepl "0.2.13"]

@@ -1,7 +1,8 @@
 (ns akvo.lumen.endpoint.transformation
   (:require [akvo.lumen.component.tenant-manager :refer [connection]]
             [akvo.lumen.transformation :as t]
-            [compojure.core :refer :all]))
+            [compojure.core :refer :all]
+            [integrant.core :as ig]))
 
 (defn endpoint [{:keys [tenant-manager caddisfly]}]
   (context "/api/transformations" {:keys [tenant] :as request}
@@ -17,3 +18,6 @@
               (t/apply {:tenant-conn tenant-conn :caddisfly caddisfly}
                    dataset-id
                    {:type :undo}))))))
+
+(defmethod ig/init-key :akvo.lumen.endpoint.transformation/transformation  [_ opts]
+  (endpoint opts))

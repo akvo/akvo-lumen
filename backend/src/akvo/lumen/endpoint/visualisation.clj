@@ -2,8 +2,8 @@
   (:require [akvo.lumen.component.tenant-manager :refer [connection]]
             [akvo.lumen.lib.visualisation :as visualisation]
             [akvo.lumen.lib.visualisation.maps :as maps]
-            [compojure.core :refer :all]))
-
+            [compojure.core :refer :all]
+            [integrant.core :as ig]))
 
 (defn endpoint [{:keys [config tenant-manager]}]
 
@@ -34,3 +34,6 @@
 
         (DELETE "/" _
           (visualisation/delete tenant-conn id))))))
+
+(defmethod ig/init-key :akvo.lumen.endpoint.visualisation/visualisation  [_ opts]
+  (endpoint (assoc opts :config (:config (:config opts)))))

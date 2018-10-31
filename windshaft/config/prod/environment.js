@@ -15,3 +15,8 @@ module.exports.grainstore = {
 	use_overviews: true
     }
 };
+module.exports.statsd = {
+    host: '127.0.0.1',
+    port: 9125,
+    cacheDns: true
+};

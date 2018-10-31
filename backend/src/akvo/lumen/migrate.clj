@@ -3,9 +3,11 @@
    [akvo.lumen.config :refer [bindings]]
    [akvo.lumen.lib.aes :as aes]
    [clojure.java.io :as io]
-   [duct.util.system :refer [read-config]]
+   [duct.core :as duct]
+   [clojure.tools.logging :as log]
    [environ.core :refer [env]]
    [hugsql.core :as hugsql]
+   [akvo.lumen.util.system :as akvo.system]
    [meta-merge.core :refer [meta-merge]]
    [ragtime
     strategy
@@ -34,42 +36,43 @@
                          :migrations migrations
                          :strategy ignore-future-migrations}))
 
+(defn read-config [config-path]
+  (duct/read-config (io/resource config-path)))
+
 (defn construct-system
   "Create a system definition."
-  ([] (construct-system source-files {}))
-  ([sources bindings]
-   (->> (map io/resource sources)
-        (remove nil?)
-        (map #(read-config % bindings))
-        (apply meta-merge))))
+  ([] (construct-system "akvo/lumen/config.edn" (bindings)))
+  ([config-path bindings]
+   (akvo.system/load-system [(duct/prep (read-config config-path))] bindings)))
+
+
 
 
 (defn load-migrations
   "From a system definition get migrations for tenant manager and tenants."
   [system]
   {:tenant-manager (ragtime-jdbc/load-resources
-                    (get-in system [:config :app :migrations :tenant-manager]))
+                    (get-in system [:akvo.lumen.config :app :migrations :tenant-manager]))
    :tenants        (ragtime-jdbc/load-resources
-                    (get-in system [:config :app :migrations :tenants]))})
+                    (get-in system [:akvo.lumen.config :app :migrations :tenants]))})
 
 
 (defn migrate
   "Migrate tenant manager and tenants."
   ([] (migrate source-files))
-  ([system-definitions]
-   (let [system (construct-system system-definitions (bindings))
+  ([config-path]
+   (let [system (construct-system config-path (bindings))
          migrations (load-migrations system)
-         tenant-manager-db {:connection-uri (get-in system [:config :db :uri])}]
+         tenant-manager-db {:connection-uri (get-in system [:akvo.lumen.config :db :uri])}]
      (do-migrate (ragtime-jdbc/sql-database tenant-manager-db)
                  (:tenant-manager migrations))
      (doseq [tenant (all-tenants tenant-manager-db)]
        (try
          (do-migrate (ragtime-jdbc/sql-database
-                          {:connection-uri (aes/decrypt (get-in system [:config :config :encryption-key])
+                          {:connection-uri (aes/decrypt (get-in system [:akvo.lumen.config :config :encryption-key])
                                                         (:db_uri tenant))})
                         (:tenants migrations))
          (catch Exception e (throw (ex-info "Migration failed" {:tenant (:label tenant)} e))))))))
-
 
 (defn migrate-tenant
   [tenant-conn]
@@ -96,14 +99,14 @@
   "(rollback) ;; will rollback tenants
   (rollback 1 ;; will rollback 1 migration on all tenants)
   (rollback :tenant-manager) ;; will rollback tenant manager migrations"
-  [arg]
-  (let [system (construct-system source-files (bindings))
+  [config-path arg]
+  (let [system (construct-system config-path (bindings))
         migrations (load-migrations system)
         tenant-migrations (:tenants migrations)
         tenant-manager-migrations (:tenant-manager migrations)
 
-        tenant-manager-db {:connection-uri (get-in system [:config :db :uri])}
-        tenant-connection-uri-fn #(aes/decrypt (get-in system [:config :config :encryption-key])
+        tenant-manager-db {:connection-uri (get-in system [:akvo.lumen.config :db :uri])}
+        tenant-connection-uri-fn #(aes/decrypt (get-in system [:akvo.lumen.config :config :encryption-key])
                                        (:db_uri %))]
     (cond
       (= arg :tenant-manager)

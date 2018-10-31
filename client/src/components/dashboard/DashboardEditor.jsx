@@ -249,34 +249,38 @@ export default class DashboardEditor extends Component {
   }
 
   render() {
-    const { dashboard, datasets } = this.props;
+    const { dashboard, datasets, exporting } = this.props;
     const canvasWidth = this.state.gridWidth;
     const rowHeight = canvasWidth / 12;
 
     return (
-      <div className="DashboardEditor">
-        <div className="DashboardEditorSidebar">
-          <div className="DashboardEditorCanvasControls">
-            <button
-              className="clickable addText"
-              onClick={() => this.handleEntityToggle({ content: '' }, 'text')}
-            >
-              <i className="fa fa-plus" /><FormattedMessage id="add_new_text_element" />
-            </button>
+      <div
+        className={`DashboardEditor ${exporting ? 'DashboardEditor--exporting' : ''}`}
+      >
+        {!exporting && (
+          <div className="DashboardEditorSidebar">
+            <div className="DashboardEditorCanvasControls">
+              <button
+                className="clickable addText"
+                onClick={() => this.handleEntityToggle({ content: '' }, 'text')}
+              >
+                <i className="fa fa-plus" /><FormattedMessage id="add_new_text_element" />
+              </button>
+            </div>
+            <DashboardVisualisationList
+              datasets={datasets}
+              visualisations={getArrayFromObject(this.props.visualisations)}
+              onEntityClick={this.handleEntityToggle}
+              dashboardItems={dashboard.entities}
+            />
           </div>
-          <DashboardVisualisationList
-            datasets={datasets}
-            visualisations={getArrayFromObject(this.props.visualisations)}
-            onEntityClick={this.handleEntityToggle}
-            dashboardItems={dashboard.entities}
-          />
-        </div>
+        )}
         <div
           className={editorCanvasId}
           id={editorCanvasId}
           ref={(ref) => { this.DashboardEditorCanvasContainer = ref; }}
         >
-          {getArrayFromObject(dashboard.entities).length === 0 &&
+          {getArrayFromObject(dashboard.entities).length === 0 && !exporting &&
             <div className="blankDashboardHelpText">
               <FormattedMessage id="blank_dashboard_help_text" />
             </div>
@@ -328,7 +332,7 @@ export default class DashboardEditor extends Component {
                 </div>
               ))}
             </ReactGridLayout>
-            {this.state.focusedItem && (
+            {this.state.focusedItem && !exporting && (
               <div
                 className="DashboardEditorOverlay"
                 onClick={() => {
@@ -357,4 +361,5 @@ DashboardEditor.propTypes = {
   onUpdateEntities: PropTypes.func.isRequired,
   onUpdateName: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
+  exporting: PropTypes.bool,
 };

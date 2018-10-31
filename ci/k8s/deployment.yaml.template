@@ -16,6 +16,8 @@ spec:
         lumen-version: ${BUILD_HASH}
         app: lumen
         color: ${COLOR}
+      annotations:
+        prometheus.io/scrape: 'true'
     spec:
       containers:
       - name: lumen-client
@@ -35,13 +37,22 @@ spec:
           requests:
             cpu: "50m"
           limits:
-            cpu: "1000m"
+            cpu: "2000m"
         env:
         - name: LUMEN_ENCRYPTION_KEY
           valueFrom:
             secretKeyRef:
               name: lumen
               key: encryption_key
+      - name: lumen-exporter
+        image: eu.gcr.io/akvo-lumen/lumen-exporter:${BUILD_HASH}
+        ports:
+        - containerPort: 3001
+        resources:
+          requests:
+            cpu: "50m"
+          limits:
+            cpu: "1000m"
       - name: lumen-backend
         image: eu.gcr.io/akvo-lumen/lumen-backend:${BUILD_HASH}
         ports:
@@ -115,3 +126,22 @@ spec:
           valueFrom:
              fieldRef:
                fieldPath: metadata.name
+      - name: flow-maps-statsd-to-prometheus
+      # If you change this version, probably you want to change the /windsahft/Dockerfile version
+        image: akvo/akvo-maps-statsd-to-prometheus:da60926a
+        ports:
+        - containerPort: 9125
+        - containerPort: 9102
+        livenessProbe:
+          tcpSocket:
+             port: 9125
+          initialDelaySeconds: 5
+        readinessProbe:
+          tcpSocket:
+             port: 9125
+          initialDelaySeconds: 5
+        resources:
+          requests:
+            cpu: "10m"
+          limits:
+            cpu: "1000m"

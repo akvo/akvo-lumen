@@ -4,6 +4,7 @@ import { FormattedMessage, FormattedRelative, injectIntl, intlShape } from 'reac
 
 import EntityTitleInput from './EntityTitleInput';
 import Header from '../common/Header';
+import ContextMenu from '../common/ContextMenu';
 
 require('./EntityTypeHeader.scss');
 
@@ -16,6 +17,11 @@ class EntityTypeHeader extends Component {
     this.state = {
       titleEditModeActive: false,
     };
+    this.handleToggleContextMenu = this.handleToggleContextMenu.bind(this);
+  }
+
+  handleToggleContextMenu(menuActive) {
+    this.setState({ menuActive });
   }
 
   actionButtons(isPrimary = false) {
@@ -29,15 +35,38 @@ class EntityTypeHeader extends Component {
           .filter(({ primary = false }) => (isPrimary && primary) || (!isPrimary && !primary))
           .map((button, index) =>
             <li key={index}>
-              <button
-                className={`overflow clickable ${button.customClass ? button.customClass : ''}`}
-                onClick={button.onClick}
-                title={button.tooltipId && intl.formatMessage({ id: button.tooltipId })}
-                disabled={button.disabled}
-                {...(button.props || {})}
-              >
-                {button.buttonText}
-              </button>
+              {button.subActions ? (
+                <span>
+                  <button
+                    className={`overflow clickable ${button.customClass ? button.customClass : ''}`}
+                    onClick={() => this.handleToggleContextMenu(index)}
+                    title={button.tooltipId && intl.formatMessage({ id: button.tooltipId })}
+                    disabled={button.disabled}
+                    {...(button.props || {})}
+                  >
+                    {button.icon || null}
+                    {button.buttonText}
+                  </button>
+                  {this.state.menuActive === index && (
+                    <ContextMenu
+                      options={button.subActions}
+                      onOptionSelected={button.onOptionSelected}
+                      onWindowClick={this.handleToggleContextMenu}
+                    />
+                  )}
+                </span>
+              ) : (
+                <button
+                  className={`overflow clickable ${button.customClass ? button.customClass : ''}`}
+                  onClick={button.onClick}
+                  title={button.tooltipId && intl.formatMessage({ id: button.tooltipId })}
+                  disabled={button.disabled}
+                  {...(button.props || {})}
+                >
+                  {button.icon || null}
+                  {button.buttonText}
+                </button>
+              )}
             </li>
           )
         }

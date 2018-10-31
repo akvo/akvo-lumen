@@ -14,6 +14,7 @@ import ResponsiveWrapper from '../common/ResponsiveWrapper';
 import ColorPicker from '../common/ColorPicker';
 import ChartLayout from './ChartLayout';
 import Tooltip from './Tooltip';
+import RenderComplete from './RenderComplete';
 import { labelFont, connectionStyle } from '../../constants/chart';
 
 const getDatum = (data, datum) => data.filter(({ key }) => key === datum)[0];
@@ -43,6 +44,7 @@ export default class PieChart extends Component {
     legendVisible: PropTypes.bool,
     style: PropTypes.object,
     labelsVisible: PropTypes.bool,
+    visualisation: PropTypes.object,
   }
 
   static defaultProps = {
@@ -57,6 +59,11 @@ export default class PieChart extends Component {
 
   state = {
     isPickingColor: false,
+    hasRendered: false,
+  }
+
+  componentDidMount() {
+    this.setState({ hasRendered: true }); // eslint-disable-line
   }
 
   getData() {
@@ -196,6 +203,7 @@ export default class PieChart extends Component {
       legendVisible,
       edit,
       outerRadius,
+      visualisation,
     } = this.props;
 
     const innerRadius = donut ? Math.floor(Math.min(width, height) / 8) : 0;
@@ -205,7 +213,9 @@ export default class PieChart extends Component {
     if (!series) return null;
 
     const totalCount = series.data.reduce((total, datum) => total + datum.value, 0);
-    const { tooltipItems, tooltipVisible, tooltipPosition } = this.state;
+
+    const { tooltipItems, tooltipVisible, tooltipPosition, hasRendered } = this.state;
+
     return (
       <ChartLayout
         style={style}
@@ -250,6 +260,8 @@ export default class PieChart extends Component {
                   this.wrap = c;
                 }}
               >
+                {hasRendered && <RenderComplete id={visualisation.id} />}
+
                 {tooltipVisible && (
                   <Tooltip
                     items={tooltipItems}

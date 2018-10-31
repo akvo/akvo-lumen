@@ -11,13 +11,20 @@ import merge from 'lodash/merge';
 import { GridRows } from '@vx/grid';
 
 import { isLight } from '../../utilities/color';
-import { heuristicRound, replaceLabelIfValueEmpty, calculateMargins, getLabelFontSize } from '../../utilities/chart';
+import {
+  heuristicRound,
+  replaceLabelIfValueEmpty,
+  calculateMargins,
+  getLabelFontSize,
+  labelFitsWidth,
+} from '../../utilities/chart';
 import Legend from './Legend';
 import ResponsiveWrapper from '../common/ResponsiveWrapper';
 import ColorPicker from '../common/ColorPicker';
 import ChartLayout from './ChartLayout';
 import Tooltip from './Tooltip';
 import { labelFont, MAX_FONT_SIZE, MIN_FONT_SIZE } from '../../constants/chart';
+import RenderComplete from './RenderComplete';
 
 const getDatum = (data, datum) => data.filter(({ key }) => key === datum)[0];
 
@@ -41,9 +48,6 @@ const getPaddingBottom = (data, type) => {
 
   return Math.ceil(longestLabelLength * pixelsPerChar);
 };
-
-const LABEL_CHAR_WIDTH = 10;
-const labelFitsBar = (text, height) => `${text}`.length * LABEL_CHAR_WIDTH < height;
 
 export default class SimpleBarChart extends Component {
 
@@ -89,6 +93,7 @@ export default class SimpleBarChart extends Component {
     yAxisTicks: PropTypes.number,
     xAxisLabel: PropTypes.string,
     grid: PropTypes.bool,
+    visualisation: PropTypes.object,
   }
 
   static defaultProps = {
@@ -111,6 +116,11 @@ export default class SimpleBarChart extends Component {
 
   state = {
     isPickingColor: false,
+    hasRendered: false,
+  }
+
+  componentDidMount() {
+    this.setState({ hasRendered: true }); // eslint-disable-line
   }
 
   getData() {
@@ -241,13 +251,14 @@ export default class SimpleBarChart extends Component {
     );
   }
 
-  renderValueLabel({ key, nodeWidth, x, y, value, valueLabelsVisible, color, height }) {
+  renderValueLabel({ key, nodeWidth, x, y, value, color, height }) {
+    const { valueLabelsVisible } = this.props;
     if (!valueLabelsVisible) return null;
     const labelText = heuristicRound(value);
     const labelX = x + (nodeWidth / 2);
     const OFFSET = 5;
     const labelY = value < 0 ? y - OFFSET : y + OFFSET;
-    if (!labelFitsBar(labelText, height)) return null;
+    if (!labelFitsWidth(labelText, height)) return null;
 
     return (
       <Text
@@ -293,10 +304,10 @@ export default class SimpleBarChart extends Component {
       yAxisTicks,
       xAxisLabel,
       grid,
-      valueLabelsVisible,
+      visualisation,
     } = this.props;
 
-    const { tooltipItems, tooltipVisible, tooltipPosition } = this.state;
+    const { tooltipItems, tooltipVisible, tooltipPosition, hasRendered } = this.state;
 
     const series = this.getData();
 
@@ -375,6 +386,8 @@ export default class SimpleBarChart extends Component {
                   this.wrap = c;
                 }}
               >
+                {hasRendered && <RenderComplete id={visualisation.id} />}
+
                 {tooltipVisible && (
                   <Tooltip
                     items={tooltipItems}
@@ -474,7 +487,6 @@ export default class SimpleBarChart extends Component {
                               nodeWidth,
                               x,
                               y: origin + ((value < 0 ? 1 : -1) * normalizedHeight),
-                              valueLabelsVisible,
                               color,
                               height: normalizedHeight,
                             })}
