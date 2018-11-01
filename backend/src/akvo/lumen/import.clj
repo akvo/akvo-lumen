@@ -116,7 +116,7 @@
               (jdbc/insert! conn table-name record))
             (successful-import conn job-execution-id table-name
                                (map #(assoc % :splitable
-                                            (map (fn [[k v]] [k (assoc v :rows @rows-count)]) @(last %2)))
+                                            (reduce (fn [c [k v]] (assoc c k (assoc v :total-rows @rows-count))) {} @(last %2)))
                                     columns stores)
                                spec claims data-source))))
       (catch Throwable e

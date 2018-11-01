@@ -1,19 +1,18 @@
-import { merge, cloneDeep } from 'lodash';
+import { merge } from 'lodash';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Immutable from 'immutable';
 import { FormattedMessage } from 'react-intl';
+import isEmpty from 'lodash/isEmpty';
 import SelectMenu from '../../common/SelectMenu';
-import ToggleInput from '../../common/ToggleInput';
 import SidebarHeader from './SidebarHeader';
 import SidebarControls from './SidebarControls';
-import * as API from '../../../api';
 
 require('./SplitColumn.scss');
 
 function textColumnOptions(columns) {
   return columns
-    .filter(column => column.get('type') === 'text')
+    .filter(column => (column.get('type') === 'text' && !isEmpty(column.get('splitable'))))
     .map(column => ({
       label: column.get('title'),
       value: column.get('columnName'),
@@ -21,9 +20,9 @@ function textColumnOptions(columns) {
     .toJS();
 }
 
-function filterByMultipleAndColumnName(columns, columnName) {
+function filterByColumnName(columns, columnName) {
   return columns
-    .filter(column => column.get('type') === 'text' && column.get('columnName') === columnName)
+    .filter(column => column.get('columnName') === columnName)
     .toJS()[0];
 }
 
@@ -50,157 +49,43 @@ SelectColumn.propTypes = {
   value: PropTypes.string,
 };
 
-function MultipleColumnImage(props) {
-  const { hasImage, extractImage, onExtractImage } = props;
-  if (hasImage) {
-    return (
-      <div>
-        <hr />
-        <ToggleInput
-          name="image"
-          type="checkbox"
-          labelId="Image"
-          className={`valueToExtract ${extractImage ? 'checked' : ''}`}
-          checked={extractImage}
-          onChange={onExtractImage}
-        /></div>
-    );
-  }
-  return null;
-}
+class SplitColumni extends Component {
 
-MultipleColumnImage.propTypes = {
-  hasImage: PropTypes.bool.isRequired,
-  extractImage: PropTypes.func.isRequired,
-  onExtractImage: PropTypes.object.isRequired,
-};
-
-class Column extends Component {
   constructor(props) {
     super(props);
-    this.props.onExtractColumn(false);
-    this.onColumnName = this.onColumnName.bind(this);
+    this.onPattern = this.onPattern.bind(this);
   }
-
-  onColumnName(evt) {
-    this.props.onColumnName(evt.target.value);
+  onPattern(evt) {
+    this.props.onPattern(evt.target.value);
   }
   render() {
-    const { api, ui } = this.props;
-    return (
+    const { ui } = this.props;
+
+    return ui ? (
       <div className="inputGroup">
+        <h4 className="bolder">
+        these are the values we found for spliting this column
+        </h4>
+        {(ui.selectedColumn && ui.selectedColumn.splitable) ? Object.keys(ui.selectedColumn.splitable).join(', ') : '' }
         <hr />
-        <div className="inputGroup">
-          <ToggleInput
-            name="extractColumn"
-            type="checkbox"
-            className={`valueToExtract ${ui.extract ? 'checked' : ''}`}
-            checked={ui.extract}
-            label={api.name}
-            onChange={this.props.onExtractColumn}
-          />
-        </div>
-        {ui.extract ? (
-          <div>
-            <label htmlFor="titleTextInput" >
-              <FormattedMessage id="new_column_title" />
-            </label>
-            <input
-              value={ui.name}
-              type="text"
-              className="titleTextInput"
-              onChange={this.onColumnName}
-              data-test-id={`column-title-${api.id}`}
-            />
-          </div>
-        ) : (
-           null
-        )}
+        <input
+          value={ui.pattern}
+          type="text"
+          className="titleTextInput"
+          onChange={this.onPattern}
+
+        />
+
       </div>
-    );
+    ) : null;
   }
 }
-Column.propTypes = {
-  onExtractColumn: PropTypes.func.isRequired,
-  onColumnName: PropTypes.func.isRequired,
-  api: PropTypes.object.isRequired,
+
+SplitColumni.propTypes = {
+  onPattern: PropTypes.func.isRequired,
   ui: PropTypes.object.isRequired,
 };
 
-function MultipleColumnList(props) {
-  const { onColumnName, onExtractColumn } = props;
-  const columns = props.api.columns || [];
-  const columList = columns.map((column, index) => (
-    <Column
-      key={column.id}
-      api={column}
-      ui={props.ui.columns[index]}
-      idx={index}
-      onColumnName={onColumnName(index)}
-      onExtractColumn={onExtractColumn(index)}
-    />
-  ));
-  return <div className="inputGroup">{columList}</div>;
-}
-
-MultipleColumnList.propTypes = {
-  onExtractColumn: PropTypes.func.isRequired,
-  onColumnName: PropTypes.func.isRequired,
-  api: PropTypes.object.isRequired,
-  ui: PropTypes.object.isRequired,
-};
-
-function MultipleColumn(props) {
-  const {
-    api,
-    ui,
-    onExtractImage,
-    onColumnName,
-    onExtractColumn,
-  } = props;
-
-  return api ? (
-    <div className="inputGroup">
-      <h4 className="bolder"><FormattedMessage id="select_values_to_extract" /></h4>
-      <MultipleColumnImage
-        hasImage={api.hasImage}
-        extractImage={ui.extractImage}
-        onExtractImage={onExtractImage}
-      />
-      <MultipleColumnList
-        api={api}
-        ui={ui}
-        onColumnName={onColumnName}
-        onExtractColumn={onExtractColumn}
-      />
-    </div>
-  ) : null;
-}
-
-MultipleColumn.propTypes = {
-  api: PropTypes.object,
-  ui: PropTypes.object.isRequired,
-  onExtractImage: PropTypes.func.isRequired,
-  onColumnName: PropTypes.func.isRequired,
-  onExtractColumn: PropTypes.func.isRequired,
-};
-
-function apiMultipleColumn(column, callback) {
-  API
-    .get('/api/multiple-column', {
-      query: JSON.stringify({
-        multipleType: column.multipleType,
-        multipleId: column.multipleId,
-      }),
-    })
-    .then((response) => {
-      if (response.status !== 200) {
-        return { error: response.status };
-      }
-      return response.json();
-    })
-    .then(callback);
-}
 export default class SplitColumn extends Component {
   constructor() {
     super();
@@ -211,123 +96,51 @@ export default class SplitColumn extends Component {
         onError: 'fail',
       }),
 
-      extractMultiple: {
-        api: null,
-        ui: { extractImage: null, columns: [], selectedColumn: { name: null } },
+      splitColumn: {
+        ui: { columns: [], selectedColumn: { name: null }, pattern: null },
       },
     };
-    this.onExtractImage = this.onExtractImage.bind(this);
-    this.onColumnName = this.onColumnName.bind(this);
-    this.onExtractColumn = this.onExtractColumn.bind(this);
-  }
-
-  onExtractColumn(idx) {
-    return (extractColumn) => {
-      if (!extractColumn) {
-        this.onColumnName(idx)(this.state.extractMultiple.api.columns[idx].name);
-      }
-      const extractMultiple = merge(this.state.extractMultiple, {
-        ui: {
-          columns: this.state.extractMultiple.ui.columns.map(
-            (column, index) => {
-              const columnBis = column;
-              if (idx === index) {
-                columnBis.extract = extractColumn;
-              }
-              return columnBis;
-            }
-          ),
-        },
-      });
-      this.setState({
-        extractMultiple,
-        transformation: this.state.transformation.setIn(
-          ['args'],
-          extractMultiple.ui
-        ),
-      });
-    };
+    this.onPattern = this.onPattern.bind(this);
   }
 
   onSelectColumn(columns, columnName) {
-    const column = filterByMultipleAndColumnName(columns, columnName);
-    apiMultipleColumn(column, (apiRes) => {
-      if (apiRes.error) {
-        if (apiRes.error === 404) {
-          this.setState({ error: 'extract_multiple_not_found_error' });
-        } else {
-          this.setState({ error: 'extract_multiple_global_error' });
-        }
-      } else {
-        const apiResBis = apiRes;
-        apiResBis.columnName = columnName;
-        const ui = cloneDeep(apiResBis);
-        delete ui.hasImage;
-        ui.extractImage = false;
-        ui.selectedColumn = column;
-
-        this.setState({
-          error: null,
-          extractMultiple: {
-            api: apiRes,
-            ui,
-          },
-          transformation: this.state.transformation.setIn(['args'], ui),
-        });
-      }
+    const column = filterByColumnName(columns, columnName);
+    const ui = {};
+    ui.selectedColumn = column;
+    ui.pattern = '';
+    this.setState({
+      error: null,
+      splitColumn: {
+        ui,
+      },
+      transformation: this.state.transformation.setIn(['args'], ui),
     });
   }
 
-  onExtractImage(value) {
-    const extractMultiple = merge(this.state.extractMultiple, {
-      ui: { extractImage: value },
+  onPattern(value) {
+    const ui = merge(this.state.splitColumn, {
+      ui: {
+        pattern: value,
+      },
     });
     this.setState({
-      extractMultiple,
-      transformation: this.state.transformation.setIn(
-        ['args'],
-        extractMultiple.ui
-      ),
+      error: null,
+      ui,
     });
-  }
-
-  onColumnName(idx) {
-    return (columnName) => {
-      const extractMultiple = merge(this.state.extractMultiple, {
-        ui: {
-          columns: this.state.extractMultiple.ui.columns.map((column, index) => {
-            const columnBis = column;
-            if (idx === index) {
-              columnBis.name = columnName;
-            }
-            return columnBis;
-          }),
-        },
-      });
-      this.setState({
-        extractMultiple,
-        transformation: this.state.transformation.setIn(
-          ['args'],
-          extractMultiple.ui
-        ),
-      });
-    };
   }
 
   isValidTransformation() {
     const {
-      extractMultiple: {
-        ui: { extractImage, columns, selectedColumn },
+      splitColumn: {
+        ui: { selectedColumn, pattern },
       },
     } = this.state;
-    const extractColumns =
-      columns.map(c => c.extract).filter(e => e).length !== 0;
-    return selectedColumn && (extractImage || extractColumns);
+    return selectedColumn && pattern && pattern.length > 0;
   }
 
   render() {
     const { onClose, onApply, columns } = this.props;
-    const { extractMultiple: { ui: { selectedColumn } } } = this.state;
+    const { splitColumn: { ui: { selectedColumn } } } = this.state;
     const error = this.state.error;
     return (
       <div className="DataTableSidebar">
@@ -341,16 +154,12 @@ export default class SplitColumn extends Component {
             onChange={columnName => this.onSelectColumn(columns, columnName)}
             value={selectedColumn.columnName}
           />
-          { error ? <div className="feedbackMessage"><FormattedMessage id={error} /></div> : (
-            <MultipleColumn
-              api={this.state.extractMultiple.api}
-              ui={this.state.extractMultiple.ui}
-              selectedColumn={this.state.selectedColumn}
-              onExtractImage={this.onExtractImage}
-              extractImage={this.state.extractMultiple.ui.extractImage}
-              onColumnName={this.onColumnName}
-              onExtractColumn={this.onExtractColumn}
-            />)}
+          { error ? <div className="feedbackMessage"><FormattedMessage id={error} /></div> :
+            (<SplitColumni
+              ui={this.state.splitColumn.ui}
+              onPattern={this.onPattern}
+            />)
+          }
         </div>
 
         <SidebarControls
