@@ -204,6 +204,7 @@ export default class Chart extends Component {
             legendTitle={visualisation.spec.legendTitle}
             legendVisible={visualisation.spec.showLegend}
             valueLabelsVisible={visualisation.spec.showValueLabels}
+            horizontal={visualisation.spec.horizontal}
           />
         );
       default:

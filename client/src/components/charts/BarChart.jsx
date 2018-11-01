@@ -4,6 +4,8 @@ import get from 'lodash/get';
 
 import SimpleBarChart from './SimpleBarChart';
 import StackedBarChart from './StackedBarChart';
+import SimpleBarChartHorizontal from './SimpleBarChartHorizontal';
+import StackedBarChartHorizontal from './StackedBarChartHorizontal';
 
 export default class BarChart extends Component {
 
@@ -28,6 +30,7 @@ export default class BarChart extends Component {
       metadata: PropTypes.object,
     }),
     grouped: PropTypes.bool,
+    horizontal: PropTypes.bool,
   }
 
   static defaultProps = {
@@ -35,15 +38,19 @@ export default class BarChart extends Component {
   }
 
   render() {
-    const { data } = this.props;
+    const { data, horizontal } = this.props;
     const series = get(data, 'series');
     if (!series) return null;
     if (series.length === 1) {
-      return (
+      return horizontal ? (
+        <SimpleBarChartHorizontal {...this.props} />
+      ) : (
         <SimpleBarChart {...this.props} />
       );
     }
-    return (
+    return horizontal ? (
+      <StackedBarChartHorizontal {...this.props} />
+    ) : (
       <StackedBarChart {...this.props} />
     );
   }

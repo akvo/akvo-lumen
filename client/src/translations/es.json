@@ -156,6 +156,7 @@
   "merged_dataset": "Unir columnas desde {title}",
   "metric_column": "Columna métrica",
   "min": "Mínimo",
+  "misc": "Diverso",
   "multiple": "Múltiple",
   "must_choose_bucket_column_first": "Debe elegir primero la columna cubo",
   "must_choose_x_axis_column_first": "Debe elegir primero la columna del eje x",

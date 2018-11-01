@@ -156,6 +156,7 @@
   "merged_dataset": "Fusionner les colonnes depuis {title}",
   "metric_column": "Colonne numérique",
   "min": "Min",
+  "misc": "Divers",
   "multiple": "Multiple",
   "must_choose_bucket_column_first": "Doit choisir la colonne contenant d'abord",
   "must_choose_x_axis_column_first": "Doit choisir l'axe-x d'abord",
