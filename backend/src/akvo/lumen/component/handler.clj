@@ -9,7 +9,7 @@
   (:endpoints component (find-endpoint-keys component)))
 
 (defn- middleware-fn [f args]
-  (let [args (if (or (nil? args) (seq? args)) args (list args))]
+  (let [args (if (or (nil? args) (sequential? args)) args (list args))]
     #(apply f % args)))
 
 (defn- middleware-map [{:keys [functions arguments]}]
