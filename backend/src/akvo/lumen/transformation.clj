@@ -13,6 +13,7 @@
   '[akvo.lumen.transformation.change-datatype
     akvo.lumen.transformation.text
     akvo.lumen.transformation.sort-column
+    akvo.lumen.transformation.split-column
     akvo.lumen.transformation.filter-column
     akvo.lumen.transformation.combine
     akvo.lumen.transformation.derive
