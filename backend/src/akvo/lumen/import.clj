@@ -36,7 +36,7 @@
                                   :table-name table-name
                                   :imported-table-name imported-table-name
                                   :version 1
-                                  :columns (mapv (fn [{:keys [title id type key multiple-type multiple-id splitable]}]
+                                  :columns (mapv (fn [{:keys [title id type key multiple-type multiple-id]}]
                                                    {:columnName (name id)
                                                     :direction nil
                                                     :hidden false
@@ -44,7 +44,6 @@
                                                     :multipleId multiple-id
                                                     :multipleType multiple-type
                                                     :sort nil
-                                                    :splitable splitable
                                                     :title (string/trim title)
                                                     :type (name type)})
                                                  columns)
@@ -70,33 +69,6 @@
   org.postgis.Point
   (sql-value [v] (val->geometry-pgobj v)))
 
-(defn l [t o]
-  (log/error t o)
-  o)
-
-(defn fun*fun [c v]
-  (let [regex "[^a-zA-Z0-9\\s]"
-        freqs (frequencies (re-seq (re-pattern regex) v))]    
-    (reset! c
-            (reduce (fn [c2 [k v2]]
-                      (assoc c2 k
-                             {:max-coincidences-in-one-row (max v2 (get-in c2 [k :max-coincidences-in-one-row] 0))
-                              :total-row-coincidences (inc (get-in c2 [k :total-row-coincidences] 0))
-                              :total-coincidences (+ v2 (get-in c2 [k :total-coincidences] 0))}))
-                    @c freqs))))
-
-(defn splitable [stores columns record]
-  (log/debug :splitable stores columns)
-  (reduce-kv
-   (fn [result k v]
-     (let [column (first (filter #(= k (:id %)) columns))]
-       (when (= :text (:type column))
-         (let [store (get stores column)]
-           (fun*fun store v)))))
-   {}
-   record)
-  record)
-
 (defn do-import
   "Import runs within a future and since this is not taking part of ring
   request / response cycle we need to make sure to capture errors."
@@ -106,19 +78,12 @@
       (let [spec (:spec (data-source-spec-by-job-execution-id conn {:job-execution-id job-execution-id}))]
         (with-open [importer (import/dataset-importer (get spec "source") config)]
           (let [columns (import/columns importer)
-                records (import/records importer)
-                stores (apply assoc {} (interleave columns (repeatedly #(atom {}))))
-                rows-count (atom 0)]
+                records (import/records importer)]
             (import/create-dataset-table conn table-name columns)
             (import/add-key-constraints conn table-name columns)
-            (doseq [record (map (comp import/coerce-to-sql (partial splitable stores columns)) records)]
-              (swap! rows-count inc)
+            (doseq [record (map import/coerce-to-sql  records)]
               (jdbc/insert! conn table-name record))
-            (successful-import conn job-execution-id table-name
-                               (map #(assoc % :splitable
-                                            (reduce (fn [c [k v]] (assoc c k (assoc v :total-rows @rows-count))) {} @(last %2)))
-                                    columns stores)
-                               spec claims data-source))))
+            (successful-import conn job-execution-id table-name spec claims data-source))))
       (catch Throwable e
         (failed-import conn job-execution-id (.getMessage e) table-name)
         (log/error e)

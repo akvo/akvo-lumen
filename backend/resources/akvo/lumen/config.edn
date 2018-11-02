@@ -44,6 +44,8 @@
  :akvo.lumen.endpoint.root/root                       {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
  :akvo.lumen.endpoint.share/share                     {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
                                                        :config         #ig/ref :akvo.lumen.config}
+ :akvo.lumen.endpoint.split-column/endpoint           {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
+                                                       :config         #ig/ref :akvo.lumen.config}
  :akvo.lumen.endpoint.tier/tier                       {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
  :akvo.lumen.endpoint.transformation/transformation   {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
                                                        :caddisfly      #ig/ref :akvo.lumen.component.caddisfly/caddisfly}
@@ -70,6 +72,7 @@
               #ig/ref :akvo.lumen.endpoint.resource/resource
               #ig/ref :akvo.lumen.endpoint.root/root
               #ig/ref :akvo.lumen.endpoint.share/share
+              #ig/ref :akvo.lumen.endpoint.split-column/endpoint
               #ig/ref :akvo.lumen.endpoint.tier/tier
               #ig/ref :akvo.lumen.endpoint.transformation/transformation
               #ig/ref :akvo.lumen.endpoint.user/user
