@@ -24,7 +24,6 @@
 (defn bindings []
   {'db-uri (:lumen-db-url env "jdbc:postgresql://postgres/lumen?user=lumen&password=password&ssl=true")
    'caddisfly-schema-uri (:lumen-caddisfly-schema-uri env "https://akvoflow-public.s3.amazonaws.com/caddisfly-tests.json")
-   'email-host (:lumen-email-host env)
    'email-password (:lumen-email-password env)
    'email-user (:lumen-email-user env)
    'encryption-key (:lumen-encryption-key env)
@@ -37,7 +36,6 @@
    'keycloak-public-client-id (:lumen-keycloak-public-client-id env "akvo-lumen")
    'keycloak-realm "akvo"
    'keycloak-url (:lumen-keycloak-url env)
-   'mailjet-url (:lumen-mailjet-url env)
    'piwik-site-id (:lumen-piwik-site-id env)
    'sentry-backend-dsn (:lumen-sentry-backend-dsn env)
    'sentry-client-dsn (:lumen-sentry-client-dsn env)})
