@@ -3,16 +3,16 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Immutable from 'immutable';
 import { FormattedMessage } from 'react-intl';
-import isEmpty from 'lodash/isEmpty';
 import SelectMenu from '../../common/SelectMenu';
 import SidebarHeader from './SidebarHeader';
 import SidebarControls from './SidebarControls';
+import * as API from '../../../api';
 
 require('./SplitColumn.scss');
 
 function textColumnOptions(columns) {
   return columns
-    .filter(column => (column.get('type') === 'text' && !isEmpty(column.get('splitable'))))
+    .filter(column => (column.get('type') === 'text'))
     .map(column => ({
       label: column.get('title'),
       value: column.get('columnName'),
@@ -85,6 +85,22 @@ SplitColumni.propTypes = {
   onPattern: PropTypes.func.isRequired,
   ui: PropTypes.object.isRequired,
 };
+function apiSplitColumn(datasetId, columnName, limit, callback) {
+  API
+    .get(`/api/split-column/${datasetId}/analysis`, {
+      query: JSON.stringify({
+        columnName,
+        limit,
+      }),
+    })
+    .then((response) => {
+      if (response.status !== 200) {
+        return { error: response.status };
+      }
+      return response.json();
+    })
+    .then(callback);
+}
 
 export default class SplitColumn extends Component {
   constructor() {
@@ -101,19 +117,31 @@ export default class SplitColumn extends Component {
       },
     };
     this.onPattern = this.onPattern.bind(this);
+    this.onSelectColumn = this.onSelectColumn.bind(this);
   }
 
-  onSelectColumn(columns, columnName) {
+  onSelectColumn(columns, columnName, datasetId) {
     const column = filterByColumnName(columns, columnName);
-    const ui = {};
-    ui.selectedColumn = column;
-    ui.pattern = '';
-    this.setState({
-      error: null,
-      splitColumn: {
-        ui,
-      },
-      transformation: this.state.transformation.setIn(['args'], ui),
+    apiSplitColumn(datasetId, columnName, 200, (apiRes) => {
+      if (apiRes.error) {
+        if (apiRes.error === 404) {
+          this.setState({ error: 'not_found_error' });
+        } else {
+          this.setState({ error: 'global_error' });
+        }
+      } else {
+        const ui = {};
+        column.splitable = apiRes['split-column-analysis'];
+        ui.selectedColumn = column;
+        ui.pattern = '';
+        this.setState({
+          error: null,
+          splitColumn: {
+            ui,
+          },
+          transformation: this.state.transformation.setIn(['args'], ui),
+        });
+      }
     });
   }
 
@@ -139,7 +167,7 @@ export default class SplitColumn extends Component {
   }
 
   render() {
-    const { onClose, onApply, columns } = this.props;
+    const { onClose, onApply, columns, datasetId } = this.props;
     const { splitColumn: { ui: { selectedColumn } } } = this.state;
     const error = this.state.error;
     return (
@@ -151,7 +179,7 @@ export default class SplitColumn extends Component {
           <SelectColumn
             columns={columns}
             idx={1}
-            onChange={columnName => this.onSelectColumn(columns, columnName)}
+            onChange={columnName => this.onSelectColumn(columns, columnName, datasetId)}
             value={selectedColumn.columnName}
           />
           { error ? <div className="feedbackMessage"><FormattedMessage id={error} /></div> :
@@ -177,6 +205,7 @@ export default class SplitColumn extends Component {
 }
 
 SplitColumn.propTypes = {
+  datasetId: PropTypes.string.isRequired,
   onClose: PropTypes.func.isRequired,
   onApply: PropTypes.func.isRequired,
   columns: PropTypes.object.isRequired,

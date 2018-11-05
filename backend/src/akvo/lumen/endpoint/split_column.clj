@@ -1,8 +1,11 @@
 (ns akvo.lumen.endpoint.split-column
-  (:require [cheshire.core :as json]
+  (:require [akvo.lumen.component.tenant-manager :refer [connection]]
+            [cheshire.core :as json]
+            [akvo.lumen.lib :as lib]
             [compojure.core :refer :all]
-            [integrant.core :as ig]
-            [hugsql.core :as hugsql]))
+            [clojure.tools.logging :as log]
+            [hugsql.core :as hugsql]
+            [integrant.core :as ig]))
 
 (hugsql/def-db-fns "akvo/lumen/transformation.sql")
 
@@ -27,15 +30,17 @@
    {:rows 0}
    column-values))
 
-(splitable ["ab$c" "ac$g" "12%34"])
-
 (defn endpoint [{:keys [tenant-manager]}]
-  (context "/api/split-column" {:keys [query-params] :as request}
-           (GET "/analysis" _
-                (let [query (json/parse-string (get query-params "query") keyword)]
-                  (select-random-column-data tenant-manager {:table-name (:tableName query)
-                                                             :column-name (:columnName query)
-                                                             :limit 200})))))
+  (context "/api/split-column" {:keys [query-params tenant] :as request}
+           (context "/:dataset-id" [dataset-id]
+                    (GET "/analysis" _
+                         (let [query           (json/parse-string (get query-params "query") keyword)
+                               tenant-conn     (connection tenant-manager tenant)
+                               dataset-version (latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})
+                               sql-query       {:table-name  (:table-name dataset-version)
+                                                :column-name (:columnName query)
+                                                :limit       (str (:limit query "200"))}]
+                           (lib/ok (splitable (map (comp str (keyword (:columnName query))) (select-random-column-data tenant-conn sql-query)))))))))
 
 (defmethod ig/init-key :akvo.lumen.endpoint.split-column/endpoint  [_ opts]
   (endpoint opts))
