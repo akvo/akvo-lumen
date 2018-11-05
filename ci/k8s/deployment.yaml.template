@@ -68,11 +68,6 @@ spec:
             secretKeyRef:
               name: lumen
               key: lumen_db_url
-        - name: LUMEN_EMAIL_HOST
-          valueFrom:
-            configMapKeyRef:
-              name: akvo
-              key: email.host
         - name: LUMEN_EMAIL_PASSWORD
           valueFrom:
             secretKeyRef:

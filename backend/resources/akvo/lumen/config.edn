@@ -83,7 +83,7 @@
  :akvo.lumen.component.tenant-manager {:config #ig/ref :akvo.lumen.config
                                        :db     #ig/ref :akvo.lumen.component.hikaricp/hikaricp}
 
- :akvo.lumen.component.emailer/mailjet-emailer {:config #ig/ref :akvo.lumen.config}
+ :akvo.lumen.component.emailer/mailjet-v3-emailer {:config #ig/ref :akvo.lumen.config}
 
  :akvo.lumen.component.error-tracker/prod {:config #ig/ref :akvo.lumen.config}
  :akvo.lumen.config
@@ -122,12 +122,10 @@
                   :metric-registry #ig/ref :akvo.lumen.lumen-monitoring/dropwizard-registry}
 
   :caddisfly     {:schema-uri caddisfly-schema-uri}
-  :emailer       {:email-host     email-host
-                  :email-password email-password
-                  :email-user     email-user
-                  :mailjet-url    mailjet-url
-                  :from-email     "noreply@akvo.org"
-                  :from-name      "Akvo Lumen"}
+  :emailer {:email-password email-password
+            :email-user     email-user
+            :from-email     "noreply@akvo.org"
+            :from-name      "Akvo Lumen"}
   :error-tracker {:dsn sentry-backend-dsn}
   :config        {:encryption-key            encryption-key
                   :file-upload-path          file-upload-path
