@@ -359,6 +359,7 @@ class DatasetTable extends Component {
       pendingTransformations,
       transformations,
       onNavigateToVisualise,
+      datasetId,
     } = this.props;
     const {
       activeDataTypeContextMenu,
@@ -443,6 +444,7 @@ class DatasetTable extends Component {
               <DataTableSidebar
                 {...sidebarProps}
                 transformations={transformations}
+                datasetId={datasetId}
                 pendingTransformations={pendingTransformations}
               />
             }
@@ -484,6 +486,7 @@ class DatasetTable extends Component {
 }
 
 DatasetTable.propTypes = {
+  datasetId: PropTypes.string.isRequired,
   columns: PropTypes.object.isRequired,
   rows: PropTypes.object.isRequired,
   transformations: PropTypes.object,
