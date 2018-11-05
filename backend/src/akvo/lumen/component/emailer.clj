@@ -13,10 +13,9 @@
     (log/info recipients)
     (log/info email)))
 
-(defrecord MailJetEmailer [config]
+(defrecord MailJetV3Emailer [config]
   SendEmail
   (send-email [{{credentials :credentials
-                 api-root    :api-url
                  from-email  :from-email
                  from-name   :from-name} :config}
                recipients
@@ -27,20 +26,18 @@
                        "Recipients" (into []
                                           (map (fn [email] {"Email" email})
                                                recipients))})]
-      (client/post (format "%s/send" api-root)
+      (client/post "https://api.mailjet.com/v3/send"
                    {:basic-auth credentials
                     :headers    {"Content-Type" "application/json"}
                     :body       (json/encode body)}))))
 
-(defmethod ig/init-key :akvo.lumen.component.emailer/mailjet-emailer  [_ {:keys [config] :as opts}]
-  (let [{:keys [email-user email-password from-email from-name mailjet-url]
-         :or   {mailjet-url "https://api.mailjet.com/v3"}} (-> config :emailer)]
-   (map->MailJetEmailer
-    {:config {:credentials [email-user email-password]
-              :from-email  from-email
-              :from-name   from-name
-              :api-url     mailjet-url}})))
-
 (defmethod ig/init-key :akvo.lumen.component.emailer/dev-emailer  [_ {:keys [config] :as opts}]
   (log/info  "Using std out emailer")
   (map->DevEmailer (select-keys (:emailer config) [:from-email :from-name])))
+
+(defmethod ig/init-key :akvo.lumen.component.emailer/mailjet-v3-emailer  [_ {:keys [config]}]
+  (let [{:keys [email-password email-user from-email from-name]} (-> config :emailer)]
+    (map->MailJetV3Emailer
+     {:config {:credentials [email-user email-password]
+               :from-email  from-email
+               :from-name   from-name}})))

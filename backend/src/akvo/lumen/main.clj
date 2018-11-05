@@ -15,7 +15,7 @@
 
 (defn -main [& args]
   (config/assert-bindings)
-  (derive :akvo.lumen.component.emailer/mailjet-emailer :akvo.lumen.component.emailer/emailer)
+  (derive :akvo.lumen.component.emailer/mailjet-v3-emailer :akvo.lumen.component.emailer/emailer)
   (derive :akvo.lumen.component.caddisfly/prod :akvo.lumen.component.caddisfly/caddisfly)
   (derive :akvo.lumen.component.error-tracker/prod :akvo.lumen.component.error-tracker/error-tracker)
   (migrate/migrate config-file)

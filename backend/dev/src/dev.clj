@@ -26,7 +26,7 @@
 
 (defn dissoc-prod-components [c]
   (dissoc c
-          :akvo.lumen.component.emailer/mailjet-emailer
+          :akvo.lumen.component.emailer/mailjet-v3-emailer
           :akvo.lumen.component.caddisfly/prod
           :akvo.lumen.component.error-tracker/prod))
 
