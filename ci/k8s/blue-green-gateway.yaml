@@ -48,7 +48,6 @@ spec:
 ---
 apiVersion: v1
 data:
-  current-live: green
   default.conf: |-
         client_max_body_size 50M;
         large_client_header_buffers 16 32k;
