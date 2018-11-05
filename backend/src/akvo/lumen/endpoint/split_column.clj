@@ -1,9 +1,9 @@
 (ns akvo.lumen.endpoint.split-column
   (:require [akvo.lumen.component.tenant-manager :refer [connection]]
-            [cheshire.core :as json]
             [akvo.lumen.lib :as lib]
-            [compojure.core :refer :all]
+            [cheshire.core :as json]
             [clojure.tools.logging :as log]
+            [compojure.core :refer :all]
             [hugsql.core :as hugsql]
             [integrant.core :as ig]))
 
@@ -21,8 +21,6 @@
                   (update :rows inc)))
             store freqs)))
 
-;;column (first (filter #(= k (:id %)) columns))
-;;when (= :text (:type column))
 (defn splitable [column-values]
   (reduce
    (fn [store row-value]

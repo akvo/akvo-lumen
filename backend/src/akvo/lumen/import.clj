@@ -83,7 +83,7 @@
             (import/add-key-constraints conn table-name columns)
             (doseq [record (map import/coerce-to-sql  records)]
               (jdbc/insert! conn table-name record))
-            (successful-import conn job-execution-id table-name spec claims data-source))))
+            (successful-import conn job-execution-id table-name columns spec claims data-source))))
       (catch Throwable e
         (failed-import conn job-execution-id (.getMessage e) table-name)
         (log/error e)
