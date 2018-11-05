@@ -64,24 +64,25 @@ class SplitColumni extends Component {
   }
   render() {
     const { ui, splitable } = this.props;
-
+    const recommendations = (ui.selectedColumn && splitable) ? Object.keys(splitable).map(e => `\`${e}\``).join(', ') : null;
+    const columnTitle = ui.selectedColumn.title;
     return ui && ui.selectedColumn.columnName ? (
       <div className="inputGroup">
         <h4 className="bolder">
-        these are the values we found for spliting this column
+          <FormattedMessage id="pattern" />
         </h4>
-        {(ui.selectedColumn && splitable) ? Object.keys(splitable).join(', ') : '' }
-        <hr />
+        {recommendations ? (<FormattedMessage id="pattern_recommendation" values={{ columnTitle, recommendations }} />) : null}
         <input
           value={ui.pattern}
           type="text"
           className="titleTextInput"
           onChange={this.onPattern}
         />
-        <hr />
         <h4 className="bolder">
-        New column name prefix
+          <FormattedMessage id="prefix" />
         </h4>
+        <FormattedMessage id="new_column_name_prefix" />
+
         <input
           value={ui.newColumnName}
           type="text"
