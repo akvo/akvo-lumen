@@ -54,14 +54,18 @@ class SplitColumni extends Component {
   constructor(props) {
     super(props);
     this.onPattern = this.onPattern.bind(this);
+    this.onNewColumnName = this.onNewColumnName.bind(this);
   }
   onPattern(evt) {
     this.props.onPattern(evt.target.value);
   }
+  onNewColumnName(evt) {
+    this.props.onNewColumnName(evt.target.value);
+  }
   render() {
     const { ui, splitable } = this.props;
 
-    return ui ? (
+    return ui && ui.selectedColumn.columnName ? (
       <div className="inputGroup">
         <h4 className="bolder">
         these are the values we found for spliting this column
@@ -73,6 +77,16 @@ class SplitColumni extends Component {
           type="text"
           className="titleTextInput"
           onChange={this.onPattern}
+        />
+        <hr />
+        <h4 className="bolder">
+        New column name prefix
+        </h4>
+        <input
+          value={ui.newColumnName}
+          type="text"
+          className="titleTextInput"
+          onChange={this.onNewColumnName}
 
         />
 
@@ -83,6 +97,7 @@ class SplitColumni extends Component {
 
 SplitColumni.propTypes = {
   onPattern: PropTypes.func.isRequired,
+  onNewColumnName: PropTypes.func.isRequired,
   ui: PropTypes.object.isRequired,
   splitable: PropTypes.object.isRequired,
 };
@@ -113,12 +128,13 @@ export default class SplitColumn extends Component {
         args: {},
         onError: 'fail',
       }),
-
+      splitable: {},
       splitColumn: {
-        ui: { columns: [], selectedColumn: { name: null }, pattern: null },
+        ui: { columns: [], selectedColumn: { name: null }, pattern: null, newColumnName: null },
       },
     };
     this.onPattern = this.onPattern.bind(this);
+    this.onNewColumnName = this.onNewColumnName.bind(this);
     this.onSelectColumn = this.onSelectColumn.bind(this);
   }
 
@@ -135,6 +151,7 @@ export default class SplitColumn extends Component {
         const ui = {};
         ui.selectedColumn = column;
         ui.pattern = '';
+        ui.newColumnName = '';
         this.setState({
           error: null,
           splitable: apiRes['split-column-analysis'],
@@ -158,14 +175,25 @@ export default class SplitColumn extends Component {
       ui,
     });
   }
+  onNewColumnName(value) {
+    const ui = merge(this.state.splitColumn, {
+      ui: {
+        newColumnName: value,
+      },
+    });
+    this.setState({
+      error: null,
+      ui,
+    });
+  }
 
   isValidTransformation() {
     const {
       splitColumn: {
-        ui: { selectedColumn, pattern },
+        ui: { selectedColumn, pattern, newColumnName },
       },
     } = this.state;
-    return selectedColumn && pattern && pattern.length > 0;
+    return selectedColumn && newColumnName && pattern && pattern.length > 0;
   }
 
   render() {
@@ -188,6 +216,7 @@ export default class SplitColumn extends Component {
             (<SplitColumni
               ui={this.state.splitColumn.ui}
               onPattern={this.onPattern}
+              onNewColumnName={this.onNewColumnName}
               splitable={this.state.splitable}
             />)
           }

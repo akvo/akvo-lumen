@@ -38,8 +38,8 @@
 (defn pattern [args]
   (-> args :pattern))
 
-(defn prefix [args]
-  (or (-> args :prefix) "EX-"))
+(defn new-column-name [args]
+  (-> args :newColumnName))
 
 (defmethod engine/valid? :core/split-column
   [op-spec]
@@ -55,7 +55,7 @@
 
 (defn columns-to-extract [prefix number-new-rows selected-column columns]
   (let [base-column (dissoc selected-column :type :columnName)
-        new-columns (map #(assoc base-column :title (str prefix % ": "(:title base-column)) :type "text" :splitable nil)
+        new-columns (map #(assoc base-column :title (str prefix "-" %) :type "text")
                          (range 1 (inc number-new-rows)))]
     (add-name-to-new-columns columns new-columns)))
 
@@ -82,7 +82,7 @@
           analysis                                                       (get-in splitable [:split-column-analysis pattern])
           _ (log/error :analysis analysis)
           number-new-rows                                                (inc (:max-coincidences-in-one-row analysis))
-          new-columns                                                    (columns-to-extract (prefix args) number-new-rows (selected-column args) columns)
+          new-columns                                                    (columns-to-extract (new-column-name args) number-new-rows (selected-column args) columns)
           add-db-columns                                                 (doseq [c new-columns]
                                                                            (add-column tenant-conn {:table-name      table-name
                                                                                                     :column-type     (:type c)
