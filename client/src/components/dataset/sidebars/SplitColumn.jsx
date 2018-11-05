@@ -59,14 +59,14 @@ class SplitColumni extends Component {
     this.props.onPattern(evt.target.value);
   }
   render() {
-    const { ui } = this.props;
+    const { ui, splitable } = this.props;
 
     return ui ? (
       <div className="inputGroup">
         <h4 className="bolder">
         these are the values we found for spliting this column
         </h4>
-        {(ui.selectedColumn && ui.selectedColumn.splitable) ? Object.keys(ui.selectedColumn.splitable).join(', ') : '' }
+        {(ui.selectedColumn && splitable) ? Object.keys(splitable).join(', ') : '' }
         <hr />
         <input
           value={ui.pattern}
@@ -84,7 +84,9 @@ class SplitColumni extends Component {
 SplitColumni.propTypes = {
   onPattern: PropTypes.func.isRequired,
   ui: PropTypes.object.isRequired,
+  splitable: PropTypes.object.isRequired,
 };
+
 function apiSplitColumn(datasetId, columnName, limit, callback) {
   API
     .get(`/api/split-column/${datasetId}/analysis`, {
@@ -131,11 +133,11 @@ export default class SplitColumn extends Component {
         }
       } else {
         const ui = {};
-        column.splitable = apiRes['split-column-analysis'];
         ui.selectedColumn = column;
         ui.pattern = '';
         this.setState({
           error: null,
+          splitable: apiRes['split-column-analysis'],
           splitColumn: {
             ui,
           },
@@ -186,6 +188,7 @@ export default class SplitColumn extends Component {
             (<SplitColumni
               ui={this.state.splitColumn.ui}
               onPattern={this.onPattern}
+              splitable={this.state.splitable}
             />)
           }
         </div>
