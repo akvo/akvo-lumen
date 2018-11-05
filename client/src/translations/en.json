@@ -255,6 +255,7 @@
   "source": "Source",
   "source_dataset": "Source dataset",
   "split_column": "Split column values",
+  "split_column_log": "Split column '{extractedColumnTitle}', with new column name '{newColumnNamePrefix}', using pattern '{pattern}'",
   "split_bars": "Split bars",
   "square": "Square",
   "stack_bars": "Stack bars",
