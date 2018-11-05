@@ -7,6 +7,25 @@
             [clojure.walk :refer (keywordize-keys stringify-keys)])
   (:import [java.util.regex Pattern]))
 
+
+(defn split-column-analysis [store patterns-fn value]
+  (let [freqs (patterns-fn value)]
+    (reduce (fn [c [k v]]
+              (-> c
+                  (assoc-in [:split-column-analysis k]
+                            {:max-coincidences-in-one-row (max v (get-in c [k :max-coincidences-in-one-row] 0))
+                             :total-row-coincidences      (inc (get-in c [k :total-row-coincidences] 0))
+                             :total-coincidences          (+ v (get-in c [k :total-coincidences] 0))})
+                  (update :rows inc)))
+            store freqs)))
+
+(defn splitable [pattern-fn column-values]
+  (reduce
+   (fn [store row-value]
+     (split-column-analysis store pattern-fn row-value))
+   {:rows 0}
+   column-values))
+
 (hugsql/def-db-fns "akvo/lumen/transformation.sql")
 (hugsql/def-db-fns "akvo/lumen/transformation/engine.sql")
 
@@ -21,6 +40,7 @@
 
 (defn prefix [args]
   (or (-> args :prefix) "EX-"))
+
 (defmethod engine/valid? :core/split-column
   [op-spec]
   (let [{:keys [onError op args] :as op-spec} (keywordize-keys op-spec)]
@@ -32,7 +52,6 @@
   (let [next-column-index (engine/next-column-index columns)
         indexes (map engine/derivation-column-name (iterate inc next-column-index))]
     (map #(assoc % :columnName %2 :id %2) new-columns indexes)))
-
 
 (defn columns-to-extract [prefix number-new-rows selected-column columns]
   (let [base-column (dissoc selected-column :type :columnName)
@@ -47,31 +66,35 @@
     (log/debug :sql sql)
     (jdbc/execute! conn sql)))
 
-
 (defmethod engine/apply-operation :core/split-column
   [{:keys [tenant-conn]} table-name columns op-spec]
   (log/debug :engine/apply-operation :core/split-column table-name)
   (jdbc/with-db-transaction [tenant-conn tenant-conn]
-    (let [{:keys [onError op args] :as op-spec} (keywordize-keys op-spec)
-          column-name                           (col-name args)
-          pattern                               (pattern args)
-          re-pattern                            (re-pattern (Pattern/quote pattern))
-          splitable                             (-> args :selectedColumn :splitable)
-          analysis                              ((keyword pattern) splitable)
-          number-new-rows                       (inc (:max-coincidences-in-one-row analysis))
-          new-columns                           (columns-to-extract (prefix args) number-new-rows (selected-column args) columns)
-          add-db-columns                        (doseq [c new-columns]
-                                                  (add-column tenant-conn {:table-name      table-name
-                                                                           :column-type     (:type c)
-                                                                           :new-column-name (:id c)}))
-          update-db-columns                     (->> (select-rnum-and-column tenant-conn {:table-name table-name :column-name column-name})
-                                                     (map
-                                                      #(let [value       ((keyword column-name) %)
-                                                             values      (string/split value  re-pattern)
-                                                             update-vals (map (fn [a b]
-                                                                                [(keyword (:id a)) b]) new-columns values)]
-                                                         (update-row tenant-conn table-name (:rnum %) update-vals)))
-                                                     doall)]      
+    (let [{:keys [onError op args] :as op-spec}                          (keywordize-keys op-spec)
+          column-name                                                    (col-name args)
+          pattern                                                        (pattern args)
+          re-pattern                                                     (re-pattern (Pattern/quote pattern))
+          values                                                         (map (comp str (keyword column-name)) (select-column-data tenant-conn {:table-name table-name :column-name column-name}))
+          _ (log/error :values values)
+          splitable                                                      (splitable #(frequencies (re-seq re-pattern %))
+                                                                                    values)
+          _ (log/error :Splitable splitable)
+          analysis                                                       (get-in splitable [:split-column-analysis pattern])
+          _ (log/error :analysis analysis)
+          number-new-rows                                                (inc (:max-coincidences-in-one-row analysis))
+          new-columns                                                    (columns-to-extract (prefix args) number-new-rows (selected-column args) columns)
+          add-db-columns                                                 (doseq [c new-columns]
+                                                                           (add-column tenant-conn {:table-name      table-name
+                                                                                                    :column-type     (:type c)
+                                                                                                    :new-column-name (:id c)}))
+          update-db-columns                                              (->> (select-rnum-and-column tenant-conn {:table-name table-name :column-name column-name})
+                                                                              (map
+                                                                               #(let [value       ((keyword column-name) %)
+                                                                                      values      (string/split value  re-pattern)
+                                                                                      update-vals (map (fn [a b]
+                                                                                                         [(keyword (:id a)) b]) new-columns values)]
+                                                                                  (update-row tenant-conn table-name (:rnum %) update-vals)))
+                                                                              doall)]      
       {:success?      true
        :execution-log [(format "Splitted column %s with pattern %s" column-name pattern)]
        :columns       (into columns (vec new-columns))})))

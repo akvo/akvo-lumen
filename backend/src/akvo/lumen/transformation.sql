@@ -88,3 +88,6 @@ SELECT :i:column-name FROM :i:table-name
 order by random()
 limit :i:limit
 
+-- :name select-column-data :?
+-- :doc Get only the column and the rnum
+SELECT :i:column-name FROM :i:table-name

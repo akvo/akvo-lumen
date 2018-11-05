@@ -1,5 +1,6 @@
 (ns akvo.lumen.endpoint.split-column
   (:require [akvo.lumen.component.tenant-manager :refer [connection]]
+            [akvo.lumen.transformation.split-column :as transformation]
             [akvo.lumen.lib :as lib]
             [cheshire.core :as json]
             [clojure.tools.logging :as log]
@@ -8,25 +9,6 @@
             [integrant.core :as ig]))
 
 (hugsql/def-db-fns "akvo/lumen/transformation.sql")
-
-(defn split-column-analysis [store value]
-  (let [regex "[^a-zA-Z0-9\\s]"
-        freqs (frequencies (re-seq (re-pattern regex) value))]    
-    (reduce (fn [c [k v]]
-              (-> c
-                  (assoc-in [:split-column-analysis k]
-                            {:max-coincidences-in-one-row (max v (get-in c [k :max-coincidences-in-one-row] 0))
-                             :total-row-coincidences      (inc (get-in c [k :total-row-coincidences] 0))
-                             :total-coincidences          (+ v (get-in c [k :total-coincidences] 0))})
-                  (update :rows inc)))
-            store freqs)))
-
-(defn splitable [column-values]
-  (reduce
-   (fn [store row-value]
-     (split-column-analysis store row-value))
-   {:rows 0}
-   column-values))
 
 (defn endpoint [{:keys [tenant-manager]}]
   (context "/api/split-column" {:keys [query-params tenant] :as request}
@@ -37,8 +19,11 @@
                                dataset-version (latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})
                                sql-query       {:table-name  (:table-name dataset-version)
                                                 :column-name (:columnName query)
-                                                :limit       (str (:limit query "200"))}]
-                           (lib/ok (splitable (map (comp str (keyword (:columnName query))) (select-random-column-data tenant-conn sql-query)))))))))
+                                                :limit       (str (:limit query "200"))}
+                               pattern-fn      #(frequencies (re-seq (re-pattern "[^a-zA-Z0-9\\s]") %))
+                               values (map (comp str (keyword (:columnName query)))
+                                           (select-random-column-data tenant-conn sql-query))]
+                           (lib/ok (transformation/splitable pattern-fn values)))))))
 
 (defmethod ig/init-key :akvo.lumen.endpoint.split-column/endpoint  [_ opts]
   (endpoint opts))
