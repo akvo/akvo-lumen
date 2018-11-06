@@ -42,7 +42,8 @@
   [op-spec]
   (let [{:keys [onError op args] :as op-spec} (keywordize-keys op-spec)]
     (and (engine/valid-column-name? (col-name args))
-         (pattern* args))))
+         (pattern* args)
+         (new-column-name args))))
 
 (defn- add-name-to-new-columns
   [columns new-columns]
@@ -70,11 +71,11 @@
           column-name               (col-name args)
           pattern                   (pattern* args)
           re-pattern*               (re-pattern (Pattern/quote pattern))]
-      (if-let [pattern-analysis (get-in
+      (if-let [pattern-analysis (get
                                  (->> (select-column-data tenant-conn {:table-name table-name :column-name column-name})
                                       (map (comp str (keyword column-name)))
                                       (pattern-analysis re-pattern*)
-                                      :analysys)
+                                      :analysis)
                                  pattern)]
         (let [new-rows-count    (inc (:max-coincidences-in-one-row pattern-analysis))
               new-columns       (columns-to-extract (new-column-name args) new-rows-count (selected-column args) columns)
