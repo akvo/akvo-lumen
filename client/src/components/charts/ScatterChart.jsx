@@ -7,6 +7,7 @@ import get from 'lodash/get';
 import { scaleLinear, scaleTime } from 'd3-scale';
 import { extent } from 'd3-array';
 import merge from 'lodash/merge';
+import sortBy from 'lodash/sortBy';
 import { GridRows, GridColumns } from '@vx/grid';
 import itsSet from 'its-set';
 
@@ -126,12 +127,13 @@ export default class ScatterChart extends Component {
       });
     const series = merge({}, data.common, { ...data.series[0], data: values });
 
+    // TODO: reduce complexity below
     return {
       ...series,
-      data: series.data
+      data: sortBy(series.data
         .reduce((acc, datum) => (
           (itsSet(datum.x) && itsSet(datum.y)) ? acc.concat(datum) : acc
-        ), []),
+        ), []), 'size').reverse(),
     };
   }
 
@@ -158,7 +160,15 @@ export default class ScatterChart extends Component {
   }
 
   handleMouseEnterNode({ key, x, y, size, label, color }, event) {
-    const { interactive, print, xAxisLabel, yAxisLabel, sizeLabel, visualisation, data } = this.props;
+    const {
+      interactive,
+      print,
+      xAxisLabel,
+      yAxisLabel,
+      sizeLabel,
+      visualisation,
+      data,
+    } = this.props;
     const xAxisType = get(data, 'series[0].metadata.type');
     const showColor =
       get(visualisation, 'spec.datapointLabelColumn') || get(visualisation, 'spec.bucketColumn');
