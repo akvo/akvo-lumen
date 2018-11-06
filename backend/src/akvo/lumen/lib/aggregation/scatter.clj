@@ -66,19 +66,19 @@
     (lib/ok
      {"series" (cond-> [{"key" column-x-title
                           "label" column-x-title
-                          "data" (mapv (fn [[x-value y-value label]]
+                          "data" (mapv (fn [[x-value y-value size-value label]]
                                           {"value" x-value})
                                         sql-response)
                           "metadata" {"type" column-x-type}}
                         {"key" column-y-title
                           "label" column-y-title
-                          "data" (mapv (fn [[x-value y-value label]]
+                          "data" (mapv (fn [[x-value y-value size-value label]]
                                         {"value" y-value})
                                       sql-response)
                           "metadata"  {"type" column-y-type}}]
                         (some? column-size-title) (conj {"key" column-size-title
                           "label" column-size-title
-                          "data" (mapv (fn [[x-value size-value label]]
+                          "data" (mapv (fn [[x-value y-value size-value label]]
                                           {"value" size-value})
                                         sql-response)
                           "metadata"  {"type" column-size-type}}))
