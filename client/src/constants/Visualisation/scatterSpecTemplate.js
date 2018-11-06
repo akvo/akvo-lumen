@@ -2,6 +2,7 @@ const scatterSpec = {
   version: 1,
   metricColumnY: null,
   metricColumnX: null,
+  metricColumnSize: null,
   datapointLabelColumn: null,
   bucketColumn: null,
   metricAggregation: 'mean', // default to mean,
@@ -9,6 +10,8 @@ const scatterSpec = {
   axisLabelXFromUser: false, // Has the label been manually entered by the user?
   axisLabelY: null,
   axisLabelYFromUser: false,
+  sizeLabel: null,
+  sizeLabelFromUser: false,
   filters: [],
 };
 

@@ -67,6 +67,7 @@ export default class ScatterChart extends Component {
     onChangeVisualisationSpec: PropTypes.func,
     xAxisLabel: PropTypes.string,
     yAxisLabel: PropTypes.string,
+    sizeLabel: PropTypes.string,
     yAxisTicks: PropTypes.number,
     xAxisTicks: PropTypes.number,
     opacity: PropTypes.number,
@@ -81,7 +82,7 @@ export default class ScatterChart extends Component {
     marginRight: 70,
     marginTop: 70,
     marginBottom: 70,
-    opacity: 0.9,
+    opacity: 0.7,
     legendVisible: false,
     edit: false,
     grid: true,
@@ -106,15 +107,21 @@ export default class ScatterChart extends Component {
 
     if (!get(data, 'series[0]')) return false;
     if (!get(data, 'series[1]')) return false;
+    const sizeExists = get(data, 'series[2]');
 
     const values = data.series[0].data
       .map(({ value, ...rest }, i) => {
         const x = value;
         const y = data.series[1].data[i].value;
+        let size;
+        if (sizeExists) {
+          size = data.series[2].data[i].value;
+        }
         return {
           ...rest,
           x: x ? Math.abs(x) : x,
           y: y ? Math.abs(y) : y,
+          size: size ? Math.abs(size) : size,
         };
       });
     const series = merge({}, data.common, { ...data.series[0], data: values });
@@ -150,8 +157,8 @@ export default class ScatterChart extends Component {
     });
   }
 
-  handleMouseEnterNode({ key, x, y, label, color }, event) {
-    const { interactive, print, xAxisLabel, yAxisLabel, visualisation, data } = this.props;
+  handleMouseEnterNode({ key, x, y, size, label, color }, event) {
+    const { interactive, print, xAxisLabel, yAxisLabel, sizeLabel, visualisation, data } = this.props;
     const xAxisType = get(data, 'series[0].metadata.type');
     const showColor =
       get(visualisation, 'spec.datapointLabelColumn') || get(visualisation, 'spec.bucketColumn');
@@ -168,6 +175,10 @@ export default class ScatterChart extends Component {
       { key: yAxisLabel || 'y', value: heuristicRound(y) },
       { key: xAxisLabel || 'x', value: xAxisType === 'date' ? new Date(x) : heuristicRound(x) },
     ]);
+
+    if (get(data, 'series[2]')) { // size exists
+      tooltipItems.push({ key: sizeLabel || 'size', value: heuristicRound(size) });
+    }
 
     this.handleShowTooltip(event, tooltipItems);
     this.setState({ hoveredNode: key });
@@ -281,7 +292,19 @@ export default class ScatterChart extends Component {
                 margins.top,
               ]);
 
-            const radius = 5;
+            let sizeScale = () => 25;
+
+            if (get(data, 'series[2]')) { // size exists
+              const sizeExtent = extent(series.data, ({ size }) => size);
+              if (sizeExtent[0] > 0) sizeExtent[0] = 0;
+              const sizeScaleFunction = get(data, 'series[2].metadata.type') === 'date' ? scaleTime : scaleLinear;
+              sizeScale = sizeScaleFunction()
+                .domain(sizeExtent)
+                .range([
+                  2,
+                  ((availableWidth * availableHeight) / sizeExtent[1]) * 10,
+                ]);
+            }
 
             return (
               <div
@@ -334,9 +357,10 @@ export default class ScatterChart extends Component {
 
                   <Collection data={series.data}>{nodes => (
                     <Group>
-                      {nodes.map(({ key, x, y, label, r, category }, i) => {
+                      {nodes.map(({ key, x, y, size, label, r, category }, i) => {
                         const normalizedX = xScale(x);
                         const normalizedY = yScale(y);
+                        const normalizedSize = Math.sqrt(sizeScale(size));
 
                         return (
                           <Group key={key || i}>
@@ -344,19 +368,19 @@ export default class ScatterChart extends Component {
                               key={i}
                               cx={normalizedX}
                               cy={normalizedY}
-                              r={radius}
+                              r={normalizedSize}
                               fill={color}
                               stroke={color}
-                              strokeWidth={2}
+                              strokeWidth={1}
                               fillOpacity={opacity}
                               onClick={(event) => {
                                 this.handleClickNode({ key }, event);
                               }}
                               onMouseEnter={(event) => {
-                                this.handleMouseEnterNode({ key, x, y, label, color }, event);
+                                this.handleMouseEnterNode({ key, x, y, size, label, color }, event);
                               }}
                               onMouseMove={(event) => {
-                                this.handleMouseEnterNode({ key, x, y, label, color }, event);
+                                this.handleMouseEnterNode({ key, x, y, size, label, color }, event);
                               }}
                               onMouseLeave={() => {
                                 this.handleMouseLeaveNode();

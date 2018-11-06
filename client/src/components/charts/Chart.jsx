@@ -181,6 +181,7 @@ export default class Chart extends Component {
             color={visualisation.spec.color || defaultPrimaryColor}
             xAxisLabel={visualisation.spec.axisLabelX}
             yAxisLabel={visualisation.spec.axisLabelY}
+            sizeLabel={visualisation.spec.sizeLabel}
             onChangeVisualisationSpec={onChangeVisualisationSpec}
             edit={Boolean(onChangeVisualisationSpec)}
           />

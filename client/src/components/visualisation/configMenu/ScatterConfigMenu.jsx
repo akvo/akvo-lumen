@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { injectIntl, intlShape } from 'react-intl';
 
 import { filterColumns } from '../../../utilities/utils';
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
@@ -21,12 +22,14 @@ const getAxisLabel = (axis, spec, columnOptions) => {
     if (spec.bucketColumn != null) {
       newAxisLabel += ` - ${spec.metricAggregation}`;
     }
-  } else {
+  } else if (axis === 'y') {
     newAxisLabel = getColumnTitle(spec.metricColumnY, columnOptions);
 
     if (spec.bucketColumn != null) {
       newAxisLabel += ` - ${spec.metricAggregation}`;
     }
+  } else if (axis === 'size') {
+    newAxisLabel = getColumnTitle(spec.metricColumnSize, columnOptions);
   }
 
   return newAxisLabel;
@@ -42,7 +45,7 @@ const getPopupLabelChoice = (spec) => {
   return null;
 };
 
-export default function ScatterConfigMenu(props) {
+function ScatterConfigMenu(props) {
   const {
     visualisation,
     onChangeSpec,
@@ -120,6 +123,47 @@ export default function ScatterConfigMenu(props) {
       />
 
       <ConfigMenuSection
+        title="size"
+        options={(
+          <ConfigMenuSectionOptionSelect
+            placeholderId="select_a_metric_column"
+            labelTextId="metric_column"
+            value={
+              spec.metricColumnSize !== null && typeof spec.metricColumnSize !== 'undefined' ?
+                spec.metricColumnSize.toString() :
+                null
+            }
+            name="sizeColumnInput"
+            options={
+              [{
+                label: props.intl.formatMessage({ id: 'select_a_metric_column' }),
+                value: null,
+              }].concat(filterColumns(columnOptions, ['number', 'date']))
+            }
+            onChange={(value) => {
+              const change = { metricColumnSize: value };
+              change.sizeLabel = getAxisLabel('size', Object.assign({}, spec, change), columnOptions);
+              onChangeSpec(change);
+            }}
+          />
+        )}
+        advancedOptions={(
+          <ConfigMenuSectionOptionText
+            value={spec.sizeLabel !== null && typeof spec.sizeLabel !== 'undefined' ?
+              spec.sizeLabel.toString() :
+              null
+            }
+            placeholderId="size_label"
+            name="sizeLabel"
+            onChange={event => onChangeSpec({
+              sizeLabel: event.target.value.toString(),
+              sizeLabelFromUser: true,
+            })}
+          />
+        )}
+      />
+
+      <ConfigMenuSection
         title="aggregation"
         options={(
           <div>
@@ -185,7 +229,10 @@ export default function ScatterConfigMenu(props) {
   );
 }
 
+export default injectIntl(ScatterConfigMenu);
+
 ScatterConfigMenu.propTypes = {
+  intl: intlShape.isRequired,
   visualisation: PropTypes.object.isRequired,
   datasets: PropTypes.object.isRequired,
   onChangeSpec: PropTypes.func.isRequired,
