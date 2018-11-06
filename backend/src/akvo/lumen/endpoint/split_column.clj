@@ -1,7 +1,7 @@
 (ns akvo.lumen.endpoint.split-column
   (:require [akvo.lumen.component.tenant-manager :refer [connection]]
-            [akvo.lumen.transformation.split-column :as transformation]
             [akvo.lumen.lib :as lib]
+            [akvo.lumen.transformation.split-column :as transformation]
             [cheshire.core :as json]
             [clojure.tools.logging :as log]
             [compojure.core :refer :all]
@@ -13,7 +13,7 @@
 (defn endpoint [{:keys [tenant-manager]}]
   (context "/api/split-column" {:keys [query-params tenant] :as request}
            (context "/:dataset-id" [dataset-id]
-                    (GET "/analysis" _
+                    (GET "/pattern-analysis" _
                          (let [query           (json/parse-string (get query-params "query") keyword)
                                tenant-conn     (connection tenant-manager tenant)
                                dataset-version (latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})
@@ -23,7 +23,7 @@
                                pattern-fn      #(frequencies (re-seq (re-pattern "[^a-zA-Z0-9\\s]") %))
                                values (map (comp str (keyword (:columnName query)))
                                            (select-random-column-data tenant-conn sql-query))]
-                           (lib/ok (transformation/splitable pattern-fn values)))))))
+                           (lib/ok (transformation/pattern-analysis pattern-fn values)))))))
 
 (defmethod ig/init-key :akvo.lumen.endpoint.split-column/endpoint  [_ opts]
   (endpoint opts))

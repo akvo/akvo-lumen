@@ -1,33 +1,30 @@
 (ns akvo.lumen.transformation.split-column
   (:require [akvo.lumen.transformation.engine :as engine]
             [clojure.java.jdbc :as jdbc]
-            [clojure.tools.logging :as log]
             [clojure.string :as string]
-            [hugsql.core :as hugsql]
-            [clojure.walk :refer (keywordize-keys stringify-keys)])
+            [clojure.tools.logging :as log]
+            [clojure.walk :refer (keywordize-keys stringify-keys)]
+            [hugsql.core :as hugsql])
   (:import [java.util.regex Pattern]))
 
+(hugsql/def-db-fns "akvo/lumen/transformation.sql")
 
-(defn split-column-analysis [store patterns-fn value]
-  (let [freqs (patterns-fn value)]
-    (reduce (fn [c [k v]]
-              (-> c
-                  (assoc-in [:split-column-analysis k]
-                            {:max-coincidences-in-one-row (max v (get-in c [k :max-coincidences-in-one-row] 0))
-                             :total-row-coincidences      (inc (get-in c [k :total-row-coincidences] 0))
-                             :total-coincidences          (+ v (get-in c [k :total-coincidences] 0))})
-                  (update :rows inc)))
-            store freqs)))
+(hugsql/def-db-fns "akvo/lumen/transformation/engine.sql")
 
-(defn splitable [pattern-fn column-values]
+(defn pattern-analysis [pattern-fn column-values]
   (reduce
-   (fn [store row-value]
-     (split-column-analysis store pattern-fn row-value))
+   (fn [store value]
+     (let [freqs (pattern-fn value)]
+       (reduce (fn [c [k v]]
+                 (-> c
+                     (assoc-in [:analysis k]
+                               {:max-coincidences-in-one-row (max v (get-in c [k :max-coincidences-in-one-row] 0))
+                                :total-row-coincidences      (inc (get-in c [k :total-row-coincidences] 0))
+                                :total-coincidences          (+ v (get-in c [k :total-coincidences] 0))})
+                     (update :rows inc)))
+               store freqs)))
    {:rows 0}
    column-values))
-
-(hugsql/def-db-fns "akvo/lumen/transformation.sql")
-(hugsql/def-db-fns "akvo/lumen/transformation/engine.sql")
 
 (defn selected-column [args]
   (-> args :selectedColumn))
@@ -75,12 +72,10 @@
           pattern                   (pattern* args)
           re-pattern                (re-pattern (Pattern/quote pattern))
           values                    (map (comp str (keyword column-name))
-                                         (select-column-data tenant-conn {:table-name table-name :column-name column-name}))
-          splitable                 (splitable #(frequencies (re-seq re-pattern %))
-                                               values)]
-      (if-let [analysis (get-in splitable [:split-column-analysis pattern])]
-        (let [_ (log/error :analysis analysis)
-              number-new-rows   (inc (:max-coincidences-in-one-row analysis))
+                                         (select-column-data tenant-conn {:table-name table-name :column-name column-name}))]
+      (if-let [pattern-analysis (get-in (pattern-analysis #(frequencies (re-seq re-pattern %)) values) [:analysis pattern])]
+        (let [_ (log/error :pattern-analysis pattern-analysis)
+              number-new-rows   (inc (:max-coincidences-in-one-row pattern-analysis))
               new-columns       (columns-to-extract (new-column-name args) number-new-rows (selected-column args) columns)
               add-db-columns    (doseq [c new-columns]
                                   (add-column tenant-conn {:table-name      table-name
@@ -99,4 +94,3 @@
            :columns       (into columns (vec new-columns))})
         {:success? false
          :message (format "No results trying to split column '%s' with pattern '%s'" (:title (selected-column args)) (pattern* args))}))))
-

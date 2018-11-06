@@ -105,7 +105,7 @@ SplitColumni.propTypes = {
 
 function apiSplitColumn(datasetId, columnName, limit, callback) {
   API
-    .get(`/api/split-column/${datasetId}/analysis`, {
+    .get(`/api/split-column/${datasetId}/pattern-analysis`, {
       query: JSON.stringify({
         columnName,
         limit,
@@ -155,7 +155,7 @@ export default class SplitColumn extends Component {
         ui.newColumnName = '';
         this.setState({
           error: null,
-          splitable: apiRes['split-column-analysis'],
+          splitable: apiRes.analysis,
           splitColumn: {
             ui,
           },
