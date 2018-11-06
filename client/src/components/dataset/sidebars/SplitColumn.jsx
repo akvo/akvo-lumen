@@ -38,8 +38,7 @@ function SelectColumn({ columns, onChange, value }) {
         onChange={onChange}
         options={textColumnOptions(columns)}
       />
-    </div>
-  );
+    </div>);
 }
 
 SelectColumn.propTypes = {
@@ -49,7 +48,7 @@ SelectColumn.propTypes = {
   value: PropTypes.string,
 };
 
-class SplitColumni extends Component {
+class SplitColumnOptions extends Component {
 
   constructor(props) {
     super(props);
@@ -82,28 +81,25 @@ class SplitColumni extends Component {
           <FormattedMessage id="prefix" />
         </h4>
         <FormattedMessage id="new_column_name_prefix" />
-
         <input
           value={ui.newColumnName}
           type="text"
           className="titleTextInput"
           onChange={this.onNewColumnName}
-
         />
-
       </div>
     ) : null;
   }
 }
 
-SplitColumni.propTypes = {
+SplitColumnOptions.propTypes = {
   onPattern: PropTypes.func.isRequired,
   onNewColumnName: PropTypes.func.isRequired,
   ui: PropTypes.object.isRequired,
   splitable: PropTypes.object.isRequired,
 };
 
-function apiSplitColumn(datasetId, columnName, limit, callback) {
+function apiColumnPatternAnalysis(datasetId, columnName, limit, callback) {
   API
     .get(`/api/split-column/${datasetId}/pattern-analysis`, {
       query: JSON.stringify({
@@ -141,7 +137,7 @@ export default class SplitColumn extends Component {
 
   onSelectColumn(columns, columnName, datasetId) {
     const column = filterByColumnName(columns, columnName);
-    apiSplitColumn(datasetId, columnName, 200, (apiRes) => {
+    apiColumnPatternAnalysis(datasetId, columnName, 200, (apiRes) => {
       if (apiRes.error) {
         if (apiRes.error === 404) {
           this.setState({ error: 'not_found_error' });
@@ -149,10 +145,7 @@ export default class SplitColumn extends Component {
           this.setState({ error: 'global_error' });
         }
       } else {
-        const ui = {};
-        ui.selectedColumn = column;
-        ui.pattern = '';
-        ui.newColumnName = '';
+        const ui = { selectedColumn: column, pattern: '', newColumnName: '' };
         this.setState({
           error: null,
           splitable: apiRes.analysis,
@@ -214,7 +207,7 @@ export default class SplitColumn extends Component {
             value={selectedColumn.columnName}
           />
           { error ? <div className="feedbackMessage"><FormattedMessage id={error} /></div> :
-            (<SplitColumni
+            (<SplitColumnOptions
               ui={this.state.splitColumn.ui}
               onPattern={this.onPattern}
               onNewColumnName={this.onNewColumnName}
@@ -226,9 +219,7 @@ export default class SplitColumn extends Component {
         <SidebarControls
           positiveButtonText={<FormattedMessage id="extract" />}
           onApply={
-            this.isValidTransformation()
-            ? () => onApply(this.state.transformation)
- : () => {}
+            this.isValidTransformation() ? () => onApply(this.state.transformation) : () => {}
           }
           onClose={onClose}
         />
