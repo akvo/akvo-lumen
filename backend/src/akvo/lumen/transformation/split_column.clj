@@ -11,10 +11,10 @@
 
 (hugsql/def-db-fns "akvo/lumen/transformation/engine.sql")
 
-(defn pattern-analysis [pattern-fn column-values]
+(defn pattern-analysis [re-pattern* column-values]
   (reduce
    (fn [store value]
-     (let [freqs (pattern-fn value)]
+     (let [freqs (frequencies (re-seq re-pattern* value))]
        (reduce (fn [c [k v]]
                  (-> c
                      (assoc-in [:analysis k]
@@ -65,18 +65,19 @@
 
 (defmethod engine/apply-operation :core/split-column
   [{:keys [tenant-conn]} table-name columns op-spec]
-  (log/debug :engine/apply-operation :core/split-column table-name)
   (jdbc/with-db-transaction [tenant-conn tenant-conn]
     (let [{:keys [onError op args]} (keywordize-keys op-spec)
           column-name               (col-name args)
           pattern                   (pattern* args)
-          re-pattern                (re-pattern (Pattern/quote pattern))
-          values                    (map (comp str (keyword column-name))
-                                         (select-column-data tenant-conn {:table-name table-name :column-name column-name}))]
-      (if-let [pattern-analysis (get-in (pattern-analysis #(frequencies (re-seq re-pattern %)) values) [:analysis pattern])]
-        (let [_ (log/error :pattern-analysis pattern-analysis)
-              number-new-rows   (inc (:max-coincidences-in-one-row pattern-analysis))
-              new-columns       (columns-to-extract (new-column-name args) number-new-rows (selected-column args) columns)
+          re-pattern*               (re-pattern (Pattern/quote pattern))]
+      (if-let [pattern-analysis (get-in
+                                 (->> (select-column-data tenant-conn {:table-name table-name :column-name column-name})
+                                      (map (comp str (keyword column-name)))
+                                      (pattern-analysis re-pattern*)
+                                      :analysys)
+                                 pattern)]
+        (let [new-rows-count    (inc (:max-coincidences-in-one-row pattern-analysis))
+              new-columns       (columns-to-extract (new-column-name args) new-rows-count (selected-column args) columns)
               add-db-columns    (doseq [c new-columns]
                                   (add-column tenant-conn {:table-name      table-name
                                                            :column-type     (:type c)
@@ -84,7 +85,7 @@
               update-db-columns (->> (select-rnum-and-column tenant-conn {:table-name table-name :column-name column-name})
                                      (map
                                       #(let [value       ((keyword column-name) %)
-                                             values      (string/split value  re-pattern)
+                                             values      (string/split value re-pattern*)
                                              update-vals (map (fn [a b]
                                                                 [(keyword (:id a)) b]) new-columns values)]
                                          (update-row tenant-conn table-name (:rnum %) update-vals)))
@@ -93,4 +94,5 @@
            :execution-log [(format "Splitted column %s with pattern %s" column-name pattern)]
            :columns       (into columns (vec new-columns))})
         {:success? false
-         :message (format "No results trying to split column '%s' with pattern '%s'" (:title (selected-column args)) (pattern* args))}))))
+         :message  (format "No results trying to split column '%s' with pattern '%s'"
+                           (:title (selected-column args)) (pattern* args))}))))
