@@ -20,7 +20,7 @@
                      (assoc-in [:analysis k]
                                {:max-coincidences-in-one-row (max v (get-in c [k :max-coincidences-in-one-row] 0))
                                 :total-row-coincidences      (inc (get-in c [k :total-row-coincidences] 0))
-                                :total-coincidences          (+ v (get-in c [k :total-coincidences] 0))})
+                                :total-column-coincidences   (+ v (get-in c [k :total-column-coincidences] 0))})
                      (update :rows inc)))
                store freqs)))
    {:rows 0}
