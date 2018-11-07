@@ -20,9 +20,12 @@
                                sql-query       {:table-name  (:table-name dataset-version)
                                                 :column-name (:columnName query)
                                                 :limit       (str (:limit query "200"))}
-                               values (map (comp str (keyword (:columnName query)))
-                                           (select-random-column-data tenant-conn sql-query))]
-                           (lib/ok (transformation/pattern-analysis (re-pattern "[^a-zA-Z0-9\\s]") values)))))))
+                               values          (map (comp str (keyword (:columnName query)))
+                                                    (select-random-column-data tenant-conn sql-query))
+                               patter-analysis (transformation/pattern-analysis (re-pattern "[^a-zA-Z0-9\\s]") values)]
+                           (lib/ok {:analysis (->> (seq (:analysis patter-analysis))
+                                                   (sort-by :total-row-coincidences )
+                                                   (mapv first))}))))))
 
 (defmethod ig/init-key :akvo.lumen.endpoint.split-column/endpoint  [_ opts]
   (endpoint opts))

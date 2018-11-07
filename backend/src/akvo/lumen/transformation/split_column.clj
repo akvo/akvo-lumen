@@ -15,14 +15,15 @@
   (reduce
    (fn [store value]
      (let [freqs (frequencies (re-seq re-pattern* value))]
-       (reduce (fn [c [k v]]
-                 (-> c
-                     (assoc-in [:analysis k]
-                               {:max-coincidences-in-one-row (max v (get-in c [k :max-coincidences-in-one-row] 0))
-                                :total-row-coincidences      (inc (get-in c [k :total-row-coincidences] 0))
-                                :total-column-coincidences   (+ v (get-in c [k :total-column-coincidences] 0))})
-                     (update :rows inc)))
-               store freqs)))
+       (-> (reduce (fn [c [k v]]
+                     (let [path [:analysis k]]
+                       (-> c
+                           (assoc-in path
+                                     {:max-coincidences-in-one-row (max v (get-in c (conj path :max-coincidences-in-one-row) 0))
+                                      :total-row-coincidences      (inc (get-in c (conj path :total-row-coincidences) 0))
+                                      :total-column-coincidences   (+ v (get-in c (conj path :total-column-coincidences) 0))}))))
+                   store freqs)
+           (update :rows inc))))
    {:rows 0}
    column-values))
 

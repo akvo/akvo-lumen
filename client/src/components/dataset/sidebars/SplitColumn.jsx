@@ -63,7 +63,7 @@ class SplitColumnOptions extends Component {
   }
   render() {
     const { ui, splitable } = this.props;
-    const recommendations = (ui.selectedColumn && splitable) ? Object.keys(splitable).map(e => `\`${e}\``).join(', ') : null;
+    const recommendations = (ui.selectedColumn && splitable) ? splitable.map(e => `\`${e}\``).join(', ') : null;
     const columnTitle = ui.selectedColumn.title;
     return ui && ui.selectedColumn.columnName ? (
       <div className="inputGroup">
@@ -96,7 +96,7 @@ SplitColumnOptions.propTypes = {
   onPattern: PropTypes.func.isRequired,
   onNewColumnName: PropTypes.func.isRequired,
   ui: PropTypes.object.isRequired,
-  splitable: PropTypes.object.isRequired,
+  splitable: PropTypes.array,
 };
 
 function apiColumnPatternAnalysis(datasetId, columnName, limit, callback) {
@@ -125,7 +125,7 @@ export default class SplitColumn extends Component {
         args: {},
         onError: 'fail',
       }),
-      splitable: {},
+      splitable: null,
       splitColumn: {
         ui: { columns: [], selectedColumn: { name: null }, pattern: null, newColumnName: null },
       },
