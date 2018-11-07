@@ -3,7 +3,7 @@
 set -o errexit
 set -o nounset
 
-if [[ "${WAIT_FOR_DB}" = "true" ]]; then
+if [[ "${WAIT_FOR_DB:=false}" = "true" ]]; then
   /app/wait-for-dependencies.sh
 fi
 
