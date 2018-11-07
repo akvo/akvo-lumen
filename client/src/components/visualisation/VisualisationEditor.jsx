@@ -124,6 +124,7 @@ const getNeedNewAggregation = (newV = { spec: {} }, oldV = { spec: {} }, optiona
         newV.spec.metricColumnX !== oldV.spec.metricColumnX ||
         newV.spec.metricColumnY !== oldV.spec.metricColumnY ||
         newV.spec.metricColumnSize !== oldV.spec.metricColumnSize ||
+        newV.spec.bucketColumnCategory !== oldV.spec.bucketColumnCategory ||
         newV.spec.metricAggregation !== oldV.spec.metricAggregation ||
         newV.spec.bucketColumn !== oldV.spec.bucketColumn ||
         newV.spec.datapointLabelColumn !== oldV.spec.datapointLabelColumn ||

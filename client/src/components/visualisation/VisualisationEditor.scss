@@ -10,11 +10,10 @@
 
     .VisualisationConfig,
     .VisualisationPreview {
-        min-height: 40rem;
-        min-height: calc(100vh - 4rem);
+        height: calc(100vh - 4em);
         padding: 1rem;
     }
-
+    
     .VisualisationConfig {
         display: block;
         overflow: auto;
@@ -24,10 +23,11 @@
         background-color: $white;
         box-shadow: 0rem 0rem 0.25rem rgba(0, 0, 0, 0.15);
     }
-
+    
     .VisualisationPreview {
         flex: 1;
         max-width: 70%;
+        min-height: 40rem;
     }
 
     &--exporting {

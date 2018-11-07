@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { injectIntl, intlShape } from 'react-intl';
+import itsSet from 'its-set';
 
 import { filterColumns } from '../../../utilities/utils';
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
@@ -29,7 +30,9 @@ const getAxisLabel = (axis, spec, columnOptions) => {
       newAxisLabel += ` - ${spec.metricAggregation}`;
     }
   } else if (axis === 'size') {
-    newAxisLabel = getColumnTitle(spec.metricColumnSize, columnOptions);
+    newAxisLabel = spec.metricColumnSize ?
+      getColumnTitle(spec.metricColumnSize, columnOptions) :
+      null;
   }
 
   return newAxisLabel;
@@ -123,13 +126,53 @@ function ScatterConfigMenu(props) {
       />
 
       <ConfigMenuSection
+        title="category"
+        options={(
+          <ConfigMenuSectionOptionSelect
+            placeholderId="select_a_data_column_to_group_by"
+            labelTextId="bucket_column"
+            value={
+              itsSet(spec.bucketColumnCategory) ?
+                spec.bucketColumnCategory.toString() :
+                null
+            }
+            name="sizeColumnInput"
+            options={
+              [{
+                label: props.intl.formatMessage({ id: 'select_a_data_column_to_group_by' }),
+                value: null,
+              }].concat(filterColumns(columnOptions, ['number', 'text']))
+            }
+            onChange={(value) => {
+              onChangeSpec({ bucketColumnCategory: value });
+            }}
+          />
+        )}
+        advancedOptions={(
+          <ConfigMenuSectionOptionText
+            value={
+              itsSet(spec.categoryLabel) ?
+                spec.categoryLabel.toString() :
+                null
+            }
+            placeholderId="category_label"
+            name="categoryLabel"
+            onChange={event => onChangeSpec({
+              categoryLabel: event.target.value.toString(),
+              categoryLabelFromUser: true,
+            })}
+          />
+        )}
+      />
+
+      <ConfigMenuSection
         title="size"
         options={(
           <ConfigMenuSectionOptionSelect
             placeholderId="select_a_metric_column"
             labelTextId="metric_column"
             value={
-              spec.metricColumnSize !== null && typeof spec.metricColumnSize !== 'undefined' ?
+              itsSet(spec.metricColumnSize) ?
                 spec.metricColumnSize.toString() :
                 null
             }
@@ -149,7 +192,7 @@ function ScatterConfigMenu(props) {
         )}
         advancedOptions={(
           <ConfigMenuSectionOptionText
-            value={spec.sizeLabel !== null && typeof spec.sizeLabel !== 'undefined' ?
+            value={itsSet(spec.sizeLabel) ?
               spec.sizeLabel.toString() :
               null
             }

@@ -28,6 +28,7 @@
   "bulk_column_editor": "Editor de columnas en masa",
   "bulk_row_editor": "Editor de filas en masa",
   "cancel": "Cancelar",
+  "category": "Categoría",
   "cell_as_percentage_of_column": "Celda como porcentaje de columna",
   "cell_as_percentage_of_row": "Celda como porcentaje de fila",
   "cell_as_percentage_of_table_total": "Celda como porcentaje del total de la tabla",

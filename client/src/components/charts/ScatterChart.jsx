@@ -55,6 +55,8 @@ export default class ScatterChart extends Component {
       metadata: PropTypes.object,
     }),
     color: PropTypes.string.isRequired,
+    colors: PropTypes.array.isRequired,
+    colorMapping: PropTypes.object,
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
     legendPosition: PropTypes.oneOf(['right']),
@@ -69,6 +71,7 @@ export default class ScatterChart extends Component {
     xAxisLabel: PropTypes.string,
     yAxisLabel: PropTypes.string,
     sizeLabel: PropTypes.string,
+    categoryLabel: PropTypes.string,
     yAxisTicks: PropTypes.number,
     xAxisTicks: PropTypes.number,
     opacity: PropTypes.number,
@@ -88,10 +91,17 @@ export default class ScatterChart extends Component {
     edit: false,
     grid: true,
     interactive: true,
+    colorMapping: {},
   }
 
   static contextTypes = {
     abbrNumber: PropTypes.func,
+  }
+
+  constructor(props) {
+    super(props);
+    this.colors = {};
+    this.colorsCount = 0;
   }
 
   state = {
@@ -109,6 +119,7 @@ export default class ScatterChart extends Component {
     if (!get(data, 'series[0]')) return false;
     if (!get(data, 'series[1]')) return false;
     const sizeExists = get(data, 'series[2]');
+    const categoryExists = get(data, 'series[3]');
 
     const values = data.series[0].data
       .map(({ value, ...rest }, i) => {
@@ -123,6 +134,7 @@ export default class ScatterChart extends Component {
           x: x ? Math.abs(x) : x,
           y: y ? Math.abs(y) : y,
           size: size ? Math.abs(size) : size,
+          category: categoryExists ? data.series[3].data[i].value : undefined,
         };
       });
     const series = merge({}, data.common, { ...data.series[0], data: values });
@@ -130,11 +142,29 @@ export default class ScatterChart extends Component {
     // TODO: reduce complexity below
     return {
       ...series,
-      data: sortBy(series.data
-        .reduce((acc, datum) => (
+      data: sortBy(
+        series.data.reduce((acc, datum) => (
           (itsSet(datum.x) && itsSet(datum.y)) ? acc.concat(datum) : acc
-        ), []), 'size').reverse(),
+        ), []),
+        'size'
+      ).reverse(),
     };
+  }
+
+  getColor(category) {
+    const { colorMapping, colors, color } = this.props;
+    if (!category) {
+      return color;
+    }
+    if (colorMapping[category]) {
+      return colorMapping[category];
+    }
+    if (this.colors[category]) {
+      return this.colors[category];
+    }
+    this.colors[category] = colors[this.colorsCount];
+    this.colorsCount += 1;
+    return this.colors[category];
   }
 
   handleShowTooltip(event, tooltipItems) {
@@ -159,13 +189,14 @@ export default class ScatterChart extends Component {
     });
   }
 
-  handleMouseEnterNode({ key, x, y, size, label, color }, event) {
+  handleMouseEnterNode({ key, x, y, size, label, color, category }, event) {
     const {
       interactive,
       print,
       xAxisLabel,
       yAxisLabel,
       sizeLabel,
+      categoryLabel,
       visualisation,
       data,
     } = this.props;
@@ -187,7 +218,11 @@ export default class ScatterChart extends Component {
     ]);
 
     if (get(data, 'series[2]')) { // size exists
-      tooltipItems.push({ key: sizeLabel || 'size', value: heuristicRound(size) });
+      tooltipItems.push({ key: sizeLabel || 'Size', value: heuristicRound(size) });
+    }
+
+    if (get(data, 'series[3]')) { // category exists
+      tooltipItems.push({ key: categoryLabel || 'Category', value: category });
     }
 
     this.handleShowTooltip(event, tooltipItems);
@@ -219,7 +254,6 @@ export default class ScatterChart extends Component {
       data,
       width,
       height,
-      color,
       marginLeft,
       marginRight,
       marginTop,
@@ -312,7 +346,7 @@ export default class ScatterChart extends Component {
                 .domain(sizeExtent)
                 .range([
                   2,
-                  ((availableWidth * availableHeight) / sizeExtent[1]) * 10,
+                  2000,
                 ]);
             }
 
@@ -325,19 +359,6 @@ export default class ScatterChart extends Component {
               >
                 {hasRendered && <RenderComplete id={visualisation.id} />}
 
-                {this.state.isPickingColor && (
-                  <ColorPicker
-                    title="Pick color"
-                    color={color}
-                    onChange={({ hex }) => {
-                      onChangeVisualisationSpec({ color: hex });
-                      this.setState({ isPickingColor: undefined });
-                    }}
-                    left={dimensions.width / 2}
-                    top={dimensions.height / 2}
-                    style={{ transform: 'translateX(-50%) translateY(-50%)' }}
-                  />
-                )}
                 {tooltipVisible && (
                   <Tooltip
                     items={tooltipItems}
@@ -367,13 +388,27 @@ export default class ScatterChart extends Component {
 
                   <Collection data={series.data}>{nodes => (
                     <Group>
-                      {nodes.map(({ key, x, y, size, label, r, category }, i) => {
+                      {nodes.map(({ key, x, y, size, category, label }, i) => {
                         const normalizedX = xScale(x);
                         const normalizedY = yScale(y);
                         const normalizedSize = Math.sqrt(sizeScale(size));
+                        const color = this.getColor(category);
 
                         return (
                           <Group key={key || i}>
+                            {this.state.isPickingColor && (
+                              <ColorPicker
+                                title="Pick color"
+                                color={color}
+                                onChange={({ hex }) => {
+                                  onChangeVisualisationSpec({ color: hex });
+                                  this.setState({ isPickingColor: undefined });
+                                }}
+                                left={dimensions.width / 2}
+                                top={dimensions.height / 2}
+                                style={{ transform: 'translateX(-50%) translateY(-50%)' }}
+                              />
+                            )}
                             <Circle
                               key={i}
                               cx={normalizedX}
@@ -387,10 +422,26 @@ export default class ScatterChart extends Component {
                                 this.handleClickNode({ key }, event);
                               }}
                               onMouseEnter={(event) => {
-                                this.handleMouseEnterNode({ key, x, y, size, label, color }, event);
+                                this.handleMouseEnterNode({
+                                  key,
+                                  x,
+                                  y,
+                                  size,
+                                  label,
+                                  color,
+                                  category,
+                                }, event);
                               }}
                               onMouseMove={(event) => {
-                                this.handleMouseEnterNode({ key, x, y, size, label, color }, event);
+                                this.handleMouseEnterNode({
+                                  key,
+                                  x,
+                                  y,
+                                  size,
+                                  label,
+                                  color,
+                                  category,
+                                }, event);
                               }}
                               onMouseLeave={() => {
                                 this.handleMouseLeaveNode();
