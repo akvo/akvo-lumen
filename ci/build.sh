@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC1010
+
 set -eu
 
 function log {
@@ -11,10 +13,9 @@ if [ -z "$TRAVIS_COMMIT" ]; then
     export TRAVIS_COMMIT=local
 fi
 
-log Bulding container to run the backend tests
-docker build --quiet --rm=false -t akvo-lumen-backend-dev:develop backend -f backend/Dockerfile-dev
 log Running Backend unit tests and building uberjar
-docker run --env-file=.env -v "$HOME/.m2:/home/akvo/.m2" -v "$(pwd)/backend:/app" akvo-lumen-backend-dev:develop /app/run-as-user.sh lein "do" test, eastwood, uberjar
+backend_image_version=$(awk -F':' '/backend-dev/ {print $3}' docker-compose.override.yml)
+docker run -v "$HOME/.m2:/home/akvo/.m2" -v "$(pwd)/backend:/app" "akvo/akvo-lumen-backend-dev:${backend_image_version}" run-as-user.sh lein do test, eastwood, uberjar
 
 cp backend/target/uberjar/akvo-lumen.jar backend
 
@@ -22,16 +23,12 @@ log Creating Production Backend image
 docker build --quiet --rm=false -t eu.gcr.io/${PROJECT_NAME}/lumen-backend:${TRAVIS_COMMIT} ./backend
 docker tag eu.gcr.io/${PROJECT_NAME}/lumen-backend:${TRAVIS_COMMIT} eu.gcr.io/${PROJECT_NAME}/lumen-backend:develop
 
-#rm backend/akvo-lumen.jar
-
-log Building container to run the client unit tests
-docker build --quiet --rm=false -t akvo-lumen-client-dev:develop client -f client/Dockerfile-dev
-
 log Running Client linting, unit tests and creating production assets
-docker run --env-file=.env -v "$(pwd)/client:/lumen" --rm=false -t akvo-lumen-client-dev:develop /lumen/run-as-user.sh /lumen/ci-build.sh
+client_image_version=$(awk -F':' '/client-dev/ {print $3}' docker-compose.yml)
+docker run -v "$(pwd)/client:/lumen" --rm=false -t "akvo/akvo-lumen-client-dev:${client_image_version}" ./ci-build.sh
 
 log Creating Production Client image
-docker build --rm=false -t eu.gcr.io/${PROJECT_NAME}/lumen-client:${TRAVIS_COMMIT} ./client
+docker build --quiet --rm=false -t eu.gcr.io/${PROJECT_NAME}/lumen-client:${TRAVIS_COMMIT} ./client
 docker tag eu.gcr.io/${PROJECT_NAME}/lumen-client:${TRAVIS_COMMIT} eu.gcr.io/${PROJECT_NAME}/lumen-client:develop
 
 log Creating Production Windshaft image
