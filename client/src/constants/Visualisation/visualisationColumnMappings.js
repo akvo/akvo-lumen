@@ -121,12 +121,8 @@ const visualizationColumnMappings = {
       { from: 'metricColumnY', to: 'metricColumnY' },
       { from: 'metricColumnX', to: 'metricColumnX' },
     ],
-    pie: [
-      { from: 'bucketColumn', to: 'bucketColumn' },
-    ],
-    donut: [
-      { from: 'bucketColumn', to: 'bucketColumn' },
-    ],
+    pie: [],
+    donut: [],
   },
 };
 

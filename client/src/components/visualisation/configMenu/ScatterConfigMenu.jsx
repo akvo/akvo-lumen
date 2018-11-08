@@ -1,5 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { injectIntl, intlShape } from 'react-intl';
+import itsSet from 'its-set';
 
 import { filterColumns } from '../../../utilities/utils';
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
@@ -21,12 +23,16 @@ const getAxisLabel = (axis, spec, columnOptions) => {
     if (spec.bucketColumn != null) {
       newAxisLabel += ` - ${spec.metricAggregation}`;
     }
-  } else {
+  } else if (axis === 'y') {
     newAxisLabel = getColumnTitle(spec.metricColumnY, columnOptions);
 
     if (spec.bucketColumn != null) {
       newAxisLabel += ` - ${spec.metricAggregation}`;
     }
+  } else if (axis === 'size') {
+    newAxisLabel = spec.metricColumnSize ?
+      getColumnTitle(spec.metricColumnSize, columnOptions) :
+      null;
   }
 
   return newAxisLabel;
@@ -42,7 +48,7 @@ const getPopupLabelChoice = (spec) => {
   return null;
 };
 
-export default function ScatterConfigMenu(props) {
+function ScatterConfigMenu(props) {
   const {
     visualisation,
     onChangeSpec,
@@ -120,6 +126,87 @@ export default function ScatterConfigMenu(props) {
       />
 
       <ConfigMenuSection
+        title="category"
+        options={(
+          <ConfigMenuSectionOptionSelect
+            placeholderId="select_a_data_column_to_group_by"
+            labelTextId="bucket_column"
+            value={
+              itsSet(spec.bucketColumnCategory) ?
+                spec.bucketColumnCategory.toString() :
+                null
+            }
+            name="sizeColumnInput"
+            options={
+              [{
+                label: props.intl.formatMessage({ id: 'select_a_data_column_to_group_by' }),
+                value: null,
+              }].concat(filterColumns(columnOptions, ['number', 'text']))
+            }
+            onChange={(value) => {
+              onChangeSpec({ bucketColumnCategory: value });
+            }}
+          />
+        )}
+        advancedOptions={(
+          <ConfigMenuSectionOptionText
+            value={
+              itsSet(spec.categoryLabel) ?
+                spec.categoryLabel.toString() :
+                null
+            }
+            placeholderId="category_label"
+            name="categoryLabel"
+            onChange={event => onChangeSpec({
+              categoryLabel: event.target.value.toString(),
+              categoryLabelFromUser: true,
+            })}
+          />
+        )}
+      />
+
+      <ConfigMenuSection
+        title="size"
+        options={(
+          <ConfigMenuSectionOptionSelect
+            placeholderId="select_a_metric_column"
+            labelTextId="metric_column"
+            value={
+              itsSet(spec.metricColumnSize) ?
+                spec.metricColumnSize.toString() :
+                null
+            }
+            name="sizeColumnInput"
+            options={
+              [{
+                label: props.intl.formatMessage({ id: 'select_a_metric_column' }),
+                value: null,
+              }].concat(filterColumns(columnOptions, ['number', 'date']))
+            }
+            onChange={(value) => {
+              const change = { metricColumnSize: value };
+              change.sizeLabel = getAxisLabel('size', Object.assign({}, spec, change), columnOptions);
+              onChangeSpec(change);
+            }}
+          />
+        )}
+        advancedOptions={(
+          <ConfigMenuSectionOptionText
+            value={itsSet(spec.sizeLabel) ?
+              spec.sizeLabel.toString() :
+              null
+            }
+            placeholderId="size_label"
+            name="sizeLabel"
+            onChange={event => onChangeSpec({
+              sizeLabel: event.target.value.toString(),
+              sizeLabelFromUser: true,
+            })}
+          />
+        )}
+      />
+
+      <ConfigMenuSection
         title="aggregation"
         options={(
           <div>
@@ -185,7 +272,10 @@ export default function ScatterConfigMenu(props) {
   );
 }
 
+export default injectIntl(ScatterConfigMenu);
+
 ScatterConfigMenu.propTypes = {
+  intl: intlShape.isRequired,
   visualisation: PropTypes.object.isRequired,
   datasets: PropTypes.object.isRequired,
   onChangeSpec: PropTypes.func.isRequired,
