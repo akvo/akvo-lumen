@@ -55,6 +55,7 @@
                                      :reason [reason]})
   (drop-table conn {:table-name table-name}))
 
+
 (defn val->geometry-pgobj
   [v]
   (doto (PGobject.)
@@ -69,6 +70,8 @@
   org.postgis.Point
   (sql-value [v] (val->geometry-pgobj v)))
 
+
+
 (defn do-import
   "Import runs within a future and since this is not taking part of ring
   request / response cycle we need to make sure to capture errors."
@@ -77,11 +80,10 @@
     (try
       (let [spec (:spec (data-source-spec-by-job-execution-id conn {:job-execution-id job-execution-id}))]
         (with-open [importer (import/dataset-importer (get spec "source") config)]
-          (let [columns (import/columns importer)
-                records (import/records importer)]
+          (let [columns (import/columns importer)]
             (import/create-dataset-table conn table-name columns)
             (import/add-key-constraints conn table-name columns)
-            (doseq [record (map import/coerce-to-sql  records)]
+            (doseq [record (map import/coerce-to-sql (import/records importer))]
               (jdbc/insert! conn table-name record))
             (successful-import conn job-execution-id table-name columns spec claims data-source))))
       (catch Throwable e
