@@ -83,5 +83,14 @@
       "columnName": "c1"
     },
     "onError": "default-value"
+  },
+  {
+    "op": "core/split-column",
+    "args": {
+        "selectedColumn" : {"columnName": "c1"},
+        "newColumnName": "Example",
+        "pattern": "A"
+    },
+      "onError": "default-value"
   }
 ]

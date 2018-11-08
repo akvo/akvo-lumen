@@ -87,7 +87,10 @@
               update-db-columns (->> (select-rnum-and-column tenant-conn {:table-name table-name :column-name column-name})
                                      (map
                                       #(let [value       ((keyword column-name) %)
-                                             values      (string/split value re-pattern*)
+                                             values      (as-> (string/split value re-pattern*) values
+                                                           (if (empty? values)
+                                                             (cons value (repeat nil))
+                                                             values))
                                              update-vals (map (fn [a b]
                                                                 [(keyword (:id a)) b]) new-columns values)]
                                          (update-row tenant-conn table-name (:rnum %) update-vals)))

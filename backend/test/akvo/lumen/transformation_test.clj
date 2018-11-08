@@ -29,7 +29,8 @@
 
 (deftest op-validation
   (testing "op validation"
-    (is (= true (every? true? (map engine/valid? ops))))
+    (doseq [op ops]
+      (is (engine/valid? op) (str op)))
     (let [result (tf/validate {:type :transformation :transformation (second invalid-op)})]
       (is (= false (:valid? result)))
       (is (= (format "Invalid transformation %s" (second invalid-op)) (:message result))))))
@@ -339,6 +340,23 @@
                                             "onError" "fail"}))]
         (is (= tag ::lib/bad-request))))))
 
+(deftest ^:functional split-column-test
+  (let [dataset-id (import-file *tenant-conn* *error-tracker* "split_column.csv" {:has-column-headers? true})
+        apply-transformation (partial tf/apply {:tenant-conn *tenant-conn*} dataset-id)]
+    (let [[tag _] (apply-transformation {:type :transformation
+                                         :transformation {"op" "core/split-column"
+                                                          "args" {"pattern" "%"
+                                                                  "newColumnName" "splitted"
+                                                                  "selectedColumn" {"columnName" "c1"}}
+                                                          "onError" "fail"}})]
+      (is (= ::lib/ok tag))
+      (let [{:keys [columns transformations]} (latest-dataset-version-by-dataset-id *tenant-conn*
+                                                                                    {:dataset-id dataset-id})]
+        (is (= ["c1" "c2" "d1" "d2" "d3"] (map #(get % "columnName") columns)))
+        (let [data (latest-data dataset-id)]
+          (is (= ["exam" "se"] (map :d1 data)))
+          (is (= ["ple" "co"] (map :d2 data)))
+          (is (= [nil "nd"] (map :d3 data))))))))
 
 (deftest ^:functional delete-column-test
   (let [dataset-id (import-file *tenant-conn* *error-tracker* "dates.csv" {:has-column-headers? true})

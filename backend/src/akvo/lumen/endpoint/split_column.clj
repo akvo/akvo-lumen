@@ -10,6 +10,11 @@
 
 (hugsql/def-db-fns "akvo/lumen/transformation.sql")
 
+(defn sort-pattern-analysis-by [pattern-analysis sort-by*]
+  (->> (seq (:analysis pattern-analysis))
+       (sort-by sort-by*)
+       (mapv first)))
+
 (defn endpoint [{:keys [tenant-manager]}]
   (context "/api/split-column" {:keys [query-params tenant] :as request}
            (context "/:dataset-id" [dataset-id]
@@ -22,10 +27,8 @@
                                                 :limit       (str (:limit query "200"))}
                                values          (map (comp str (keyword (:columnName query)))
                                                     (select-random-column-data tenant-conn sql-query))
-                               patter-analysis (transformation/pattern-analysis (re-pattern "[^a-zA-Z0-9\\s]") values)]
-                           (lib/ok {:analysis (->> (seq (:analysis patter-analysis))
-                                                   (sort-by :total-row-coincidences )
-                                                   (mapv first))}))))))
+                               pattern-analysis (transformation/pattern-analysis (re-pattern "[^a-zA-Z0-9\\s]") values)]
+                           (lib/ok {:analysis (sort-pattern-analysis-by pattern-analysis :total-row-coincidences)}))))))
 
 (defmethod ig/init-key :akvo.lumen.endpoint.split-column/endpoint  [_ opts]
   (endpoint opts))
