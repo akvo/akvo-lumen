@@ -84,17 +84,16 @@
                                   (add-column tenant-conn {:table-name      table-name
                                                            :column-type     (:type c)
                                                            :new-column-name (:id c)}))
-              update-db-columns (->> (select-rnum-and-column tenant-conn {:table-name table-name :column-name column-name})
-                                     (map
-                                      #(let [value       ((keyword column-name) %)
-                                             values      (as-> (string/split value re-pattern*) values
-                                                           (if (empty? values)
-                                                             (cons value (repeat nil))
-                                                             values))
-                                             update-vals (map (fn [a b]
-                                                                [(keyword (:id a)) b]) new-columns values)]
-                                         (update-row tenant-conn table-name (:rnum %) update-vals)))
-                                     doall)]
+              update-db-columns (doseq [row (select-rnum-and-column tenant-conn {:table-name table-name :column-name column-name})]
+                                  (let [value       ((keyword column-name) row)
+                                        values      (as-> (string/split value re-pattern*) values
+                                                      (if (empty? values)
+                                                        (cons value (repeat nil))
+                                                        values))
+                                        update-vals (map (fn [column v]
+                                                           [(keyword (:id column)) v])
+                                                         new-columns values)]
+                                    (update-row tenant-conn table-name (:rnum row) update-vals)))]
           {:success?      true
            :execution-log [(format "Splitted column %s with pattern %s" column-name pattern)]
            :columns       (into columns (vec new-columns))})
