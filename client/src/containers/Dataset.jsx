@@ -104,6 +104,7 @@ class Dataset extends Component {
       .then((response) => {
         if (!response.ok) {
           return response.json().then(({ message }) => {
+            this.removePending(now);
             throw new Error(message);
           });
         }
