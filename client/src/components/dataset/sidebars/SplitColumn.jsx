@@ -1,14 +1,13 @@
-import { merge } from 'lodash';
+import { merge, get } from 'lodash';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Immutable from 'immutable';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 import SelectMenu from '../../common/SelectMenu';
+import Alert from '../../common/Alert';
 import SidebarHeader from './SidebarHeader';
 import SidebarControls from './SidebarControls';
 import * as API from '../../../api';
-
-require('./SplitColumn.scss');
 
 function textColumnOptions(columns) {
   return columns
@@ -29,16 +28,17 @@ function filterByColumnName(columns, columnName) {
 function SelectColumn({ columns, onChange, value }) {
   return (
     <div className="inputGroup">
-      <h4 htmlFor="columnName" className="bolder">
+      <label htmlFor="columnName">
         <FormattedMessage id="select_a_column" />
-      </h4>
+      </label>
       <SelectMenu
         name="columnName"
         value={value}
         onChange={onChange}
         options={textColumnOptions(columns)}
       />
-    </div>);
+    </div>
+  );
 }
 
 SelectColumn.propTypes = {
@@ -48,59 +48,82 @@ SelectColumn.propTypes = {
   value: PropTypes.string,
 };
 
-class SplitColumnOptions extends Component {
-
-  constructor(props) {
-    super(props);
-    this.onPattern = this.onPattern.bind(this);
-    this.onNewColumnName = this.onNewColumnName.bind(this);
-  }
-  onPattern(evt) {
-    this.props.onPattern(evt.target.value);
-  }
-  onNewColumnName(evt) {
-    this.props.onNewColumnName(evt.target.value);
-  }
-  render() {
-    const { ui, splitable } = this.props;
-    const recommendations = (ui.selectedColumn && splitable) ? splitable.map(e => `\`${e}\``).join(', ') : null;
-    const columnTitle = ui.selectedColumn.title;
-    return ui && ui.selectedColumn.columnName ? (
+const SplitColumnOptions = ({
+  ui,
+  splitable,
+  onPatternChange,
+  onPrefixChange,
+  patternErrorMessage,
+  prefixErrorMessage,
+}) => {
+  const recommendations = (ui.selectedColumn && splitable) ?
+    splitable.map(e => `\`${e}\``).join(', ') :
+    null;
+  const columnTitle = ui.selectedColumn.title;
+  return ui && ui.selectedColumn.columnName ? (
+    <div>
       <div className="inputGroup">
-        <h4 className="bolder">
+        <label htmlFor="patternInput">
           <FormattedMessage id="pattern" />
-        </h4>
-        {recommendations ? (<FormattedMessage id="pattern_recommendation" values={{ columnTitle, recommendations }} />) : null}
+        </label>
+        {recommendations && (
+          <Alert>
+            <FormattedMessage
+              id="pattern_recommendation"
+              values={{ columnTitle, recommendations }}
+            />
+          </Alert>
+        )}
+        {patternErrorMessage && (
+          <Alert danger>
+            {patternErrorMessage}
+          </Alert>
+        )}
         <input
           value={ui.pattern}
           type="text"
           className="titleTextInput"
-          onChange={this.onPattern}
+          onChange={(evt) => {
+            onPatternChange(evt.target.value);
+          }}
+          name="patternInput"
         />
-        <h4 className="bolder">
+      </div>
+      <div className="inputGroup">
+        <label htmlFor="newColumnNameInput">
           <FormattedMessage id="prefix" />
-        </h4>
+        </label>
         <FormattedMessage id="new_column_name_prefix" />
+        {prefixErrorMessage && (
+          <Alert danger>
+            {prefixErrorMessage}
+          </Alert>
+        )}
         <input
           value={ui.newColumnName}
           type="text"
           className="titleTextInput"
-          onChange={this.onNewColumnName}
+          onChange={(evt) => {
+            onPrefixChange(evt.target.value);
+          }}
+          name="newColumnNameInput"
         />
       </div>
-    ) : null;
-  }
-}
-
-SplitColumnOptions.propTypes = {
-  onPattern: PropTypes.func.isRequired,
-  onNewColumnName: PropTypes.func.isRequired,
-  ui: PropTypes.object.isRequired,
-  splitable: PropTypes.array,
+    </div>
+  ) : null;
 };
 
-function apiColumnPatternAnalysis(datasetId, columnName, limit, callback) {
-  API
+SplitColumnOptions.propTypes = {
+  onPatternChange: PropTypes.func.isRequired,
+  onPrefixChange: PropTypes.func.isRequired,
+  ui: PropTypes.object.isRequired,
+  splitable: PropTypes.array,
+  patternErrorMessage: PropTypes.string,
+  prefixErrorMessage: PropTypes.string,
+};
+
+function apiColumnPatternAnalysis(datasetId, columnName, limit) {
+  return API
     .get(`/api/split-column/${datasetId}/pattern-analysis`, {
       query: JSON.stringify({
         columnName,
@@ -112,11 +135,10 @@ function apiColumnPatternAnalysis(datasetId, columnName, limit, callback) {
         return { error: response.status };
       }
       return response.json();
-    })
-    .then(callback);
+    });
 }
 
-export default class SplitColumn extends Component {
+class SplitColumn extends Component {
   constructor() {
     super();
     this.state = {
@@ -129,15 +151,18 @@ export default class SplitColumn extends Component {
       splitColumn: {
         ui: { columns: [], selectedColumn: { name: null }, pattern: null, newColumnName: null },
       },
+      patternErrorMessage: null,
+      prefixErrorMessage: null,
     };
-    this.onPattern = this.onPattern.bind(this);
-    this.onNewColumnName = this.onNewColumnName.bind(this);
-    this.onSelectColumn = this.onSelectColumn.bind(this);
+    this.handlePatternChange = this.handlePatternChange.bind(this);
+    this.handlePrefixChange = this.handlePrefixChange.bind(this);
+    this.handleSelectColumn = this.handleSelectColumn.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  onSelectColumn(columns, columnName, datasetId) {
+  handleSelectColumn(columns, columnName, datasetId) {
     const column = filterByColumnName(columns, columnName);
-    apiColumnPatternAnalysis(datasetId, columnName, 200, (apiRes) => {
+    apiColumnPatternAnalysis(datasetId, columnName, 200).then((apiRes) => {
       if (apiRes.error) {
         if (apiRes.error === 404) {
           this.setState({ error: 'not_found_error' });
@@ -158,7 +183,7 @@ export default class SplitColumn extends Component {
     });
   }
 
-  onPattern(value) {
+  handlePatternChange(value) {
     const ui = merge(this.state.splitColumn, {
       ui: {
         pattern: value,
@@ -166,10 +191,12 @@ export default class SplitColumn extends Component {
     });
     this.setState({
       error: null,
+      patternErrorMessage: null,
       ui,
     });
   }
-  onNewColumnName(value) {
+
+  handlePrefixChange(value) {
     const ui = merge(this.state.splitColumn, {
       ui: {
         newColumnName: value,
@@ -177,8 +204,28 @@ export default class SplitColumn extends Component {
     });
     this.setState({
       error: null,
+      prefixErrorMessage: null,
       ui,
     });
+  }
+
+  handleSubmit() {
+    const prefixEmpty = !get(this.state, 'splitColumn.ui.newColumnName.length');
+    const patternEmpty = !get(this.state, 'splitColumn.ui.pattern.length');
+    if (prefixEmpty || patternEmpty) {
+      this.setState({
+        prefixErrorMessage: prefixEmpty ?
+          this.props.intl.formatMessage({ id: 'field_required' }) :
+          null,
+        patternErrorMessage: patternEmpty ?
+          this.props.intl.formatMessage({ id: 'field_required' }) :
+          null,
+      });
+      return;
+    }
+    if (this.isValidTransformation()) {
+      this.props.onApply(this.state.transformation);
+    }
   }
 
   isValidTransformation() {
@@ -191,46 +238,56 @@ export default class SplitColumn extends Component {
   }
 
   render() {
-    const { onClose, onApply, columns, datasetId } = this.props;
+    const { onClose, columns, datasetId } = this.props;
     const { splitColumn: { ui: { selectedColumn } } } = this.state;
     const error = this.state.error;
     return (
       <div className="DataTableSidebar">
-        <SidebarHeader onClose={onClose}>
-          <FormattedMessage id="split_column" />
-        </SidebarHeader>
-        <div className="inputs">
-          <SelectColumn
-            columns={columns}
-            idx={1}
-            onChange={columnName => this.onSelectColumn(columns, columnName, datasetId)}
-            value={selectedColumn.columnName}
-          />
-          { error ? <div className="feedbackMessage"><FormattedMessage id={error} /></div> :
-            (<SplitColumnOptions
-              ui={this.state.splitColumn.ui}
-              onPattern={this.onPattern}
-              onNewColumnName={this.onNewColumnName}
-              splitable={this.state.splitable}
-            />)
-          }
-        </div>
+        <div className="SplitColumnOptions">
+          <SidebarHeader onClose={onClose}>
+            <FormattedMessage id="split_column" />
+          </SidebarHeader>
 
-        <SidebarControls
-          positiveButtonText={<FormattedMessage id="extract" />}
-          onApply={
-            this.isValidTransformation() ? () => onApply(this.state.transformation) : () => {}
-          }
-          onClose={onClose}
-        />
+          <div className="inputs">
+            <SelectColumn
+              columns={columns}
+              idx={1}
+              onChange={columnName => this.handleSelectColumn(columns, columnName, datasetId)}
+              value={selectedColumn.columnName}
+            />
+            {error ? (
+              <div className="alert alert-danger">
+                <FormattedMessage id={error} />
+              </div>
+            ) : (
+              <SplitColumnOptions
+                ui={this.state.splitColumn.ui}
+                onPatternChange={this.handlePatternChange}
+                onPrefixChange={this.handlePrefixChange}
+                splitable={this.state.splitable}
+                prefixErrorMessage={this.state.prefixErrorMessage}
+                patternErrorMessage={this.state.patternErrorMessage}
+              />
+            )}
+          </div>
+
+          <SidebarControls
+            positiveButtonText={<FormattedMessage id="extract" />}
+            onApply={this.handleSubmit}
+            onClose={onClose}
+          />
+        </div>
       </div>
     );
   }
 }
 
 SplitColumn.propTypes = {
+  intl: intlShape,
   datasetId: PropTypes.string.isRequired,
   onClose: PropTypes.func.isRequired,
   onApply: PropTypes.func.isRequired,
   columns: PropTypes.object.isRequired,
 };
+
+export default injectIntl(SplitColumn);
