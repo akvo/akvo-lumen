@@ -307,7 +307,7 @@ export function deletePendingDataset(id) {
   return (dispatch) => {
     dispatch(deleteDatasetRequest(id));
     api
-      .del(`/api/job_executions/${id}`)
+      .del(`/api/data-source/job-execution/${id}/status/pending`)
       .then(response => response.json())
       .then(() => dispatch(deletePendingDatasetSuccess(id)))
       .catch(error => dispatch(deletePendingDatasetFailure(id, error)));
