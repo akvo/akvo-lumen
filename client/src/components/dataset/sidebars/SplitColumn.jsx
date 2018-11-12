@@ -93,12 +93,13 @@ const SplitColumnOptions = ({
         <label htmlFor="newColumnNameInput">
           <FormattedMessage id="prefix" />
         </label>
-        <FormattedMessage id="new_column_name_prefix" />
-        {prefixErrorMessage && (
+        {prefixErrorMessage ? (
           <Alert danger>
             {prefixErrorMessage}
-          </Alert>
-        )}
+          </Alert>) : (
+            <Alert>
+              <FormattedMessage id="new_column_name_prefix" />
+            </Alert>)}
         <input
           value={ui.newColumnName}
           type="text"
