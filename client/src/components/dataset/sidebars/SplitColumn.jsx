@@ -3,11 +3,13 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Immutable from 'immutable';
 import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
+
 import SelectMenu from '../../common/SelectMenu';
 import Alert from '../../common/Alert';
 import SidebarHeader from './SidebarHeader';
 import SidebarControls from './SidebarControls';
 import * as API from '../../../api';
+import './SplitColumn.scss';
 
 function textColumnOptions(columns) {
   return columns
