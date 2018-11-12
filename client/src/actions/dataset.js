@@ -302,6 +302,19 @@ function deletePendingDatasetFailure(id, error) {
     error,
   };
 }
+function deleteFailedDatasetSuccess(id) {
+  return (dispatch) => {
+    dispatch(removeDataset(id));
+  };
+}
+
+function deleteFailedDatasetFailure(id, error) {
+  return {
+    type: constants.DELETE_DATASET_FAILURE,
+    id,
+    error,
+  };
+}
 
 export function deletePendingDataset(id) {
   return (dispatch) => {
@@ -313,6 +326,18 @@ export function deletePendingDataset(id) {
       .catch(error => dispatch(deletePendingDatasetFailure(id, error)));
   };
 }
+
+export function deleteFailedDataset(id) {
+  return (dispatch) => {
+    dispatch(deleteDatasetRequest(id));
+    api
+      .del(`/api/data-source/job-execution/${id}/status/failed`)
+      .then(response => response.json())
+      .then(() => dispatch(deleteFailedDatasetSuccess(id)))
+      .catch(error => dispatch(deleteFailedDatasetFailure(id, error)));
+  };
+}
+
 
 export function updateDatasetMetaRequest(id) {
   return {
