@@ -4,6 +4,8 @@
     position: relative;
     height: calc(100vh - 8rem);
     width: 300px;
+    display: flex;
+    flex-direction: column;
 
     .SidebarHeader {
         padding: 1rem;
@@ -76,8 +78,6 @@
     h3 {
         display: inline-block;
     }
-
-    .columnTitle {}
 
     .close {
         float: right;

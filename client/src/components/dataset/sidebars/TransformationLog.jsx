@@ -58,6 +58,26 @@ function extractMultipleTransformationDescription(transformations, index) {
   );
 }
 
+function splitColumnTransformationDescription(transformations, index) {
+  const transformation = transformations.get(index);
+
+  const extractedColumnTitle = transformation.getIn(['args', 'selectedColumn', 'title']);
+  const pattern = transformation.getIn(['args', 'pattern']);
+  const newColumnNamePrefix = transformation.getIn(['args', 'newColumnName']);
+
+  return (
+    <FormattedMessage
+      id="split_column_log"
+      values={{
+        extractedColumnTitle,
+        pattern,
+        newColumnNamePrefix,
+      }}
+    />
+  );
+}
+
+
 function combineTransformationDescription(transformations, index, columns) {
   const transformation = transformations.get(index);
   const firstColumnName = transformation.getIn(['args', 'columnNames', 0]);
@@ -190,6 +210,8 @@ function transformationDescription(transformations, index, columns, dependentDat
       return <FormattedMessage id="deleted_column" values={{ title }} />;
     case 'core/extract-multiple':
       return extractMultipleTransformationDescription(transformations, index);
+    case 'core/split-column':
+      return splitColumnTransformationDescription(transformations, index);
     case 'core/reverse-geocode':
       return <FormattedMessage id="reverse_geocode" />;
     case 'core/combine':

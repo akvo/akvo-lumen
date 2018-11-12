@@ -202,7 +202,8 @@ class Dataset extends Component {
 
   render() {
     const { pendingTransformations } = this.state;
-    const { dataset } = this.props;
+    const { dataset, params } = this.props;
+    const { datasetId } = params;
     if (dataset == null || !this.state.asyncComponents) {
       return <LoadingSpinner />;
     }
@@ -223,6 +224,7 @@ class Dataset extends Component {
           />
           {getRows(dataset) != null ? (
             <DatasetTable
+              datasetId={datasetId}
               columns={getColumns(dataset)}
               rows={getRows(dataset)}
               transformations={getTransformations(dataset)}

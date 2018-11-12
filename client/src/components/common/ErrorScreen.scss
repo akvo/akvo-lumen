@@ -44,25 +44,7 @@
     }
 
     .alert {
-      padding: 10px;
-      border: 1px solid transparent;
-      display: inline-block;
-      display: flex;
-      margin-bottom: 10px;
-
-      @include border-radius(6px);
-
       text-align: center;
-
-      &.alert-success {
-          color: $darkLime;
-          border-color: $darkLime;
-      }
-
-      &.alert-danger {
-          color: $errorRed;
-          border-color: $errorRed;
-      }
     }
   }
 }
