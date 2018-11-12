@@ -3,7 +3,7 @@ services:
  backend:
    image: "eu.gcr.io/${PROJECT_NAME}/lumen-backend:${TRAVIS_COMMIT}"
    environment:
-     - WAIT_FOR_DB=true
+     - WAIT_FOR_DEPS=true
      - LUMEN_DB_URL=jdbc:postgresql://postgres/lumen?user=lumen&password=password&ssl=true
      - CI_BUILD=yes
      - LUMEN_FILE_UPLOAD_PATH=/tmp/akvo/lumen
