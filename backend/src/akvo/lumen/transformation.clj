@@ -2,6 +2,7 @@
   (:refer-clojure :exclude [apply])
   (:require [akvo.lumen.lib :as lib]
             [akvo.lumen.transformation.engine :as engine]
+            [clojure.tools.logging :as log]
             [akvo.lumen.util :refer (squuid)]
             [clojure.java.jdbc :as jdbc]
             [hugsql.core :as hugsql]))
@@ -59,6 +60,7 @@
           (lib/ok {"jobExecutionId" job-execution-id "datasetId" dataset-id})
           (catch Exception e
             (let [msg (.getMessage e)]
+              (log/info e)
               (update-failed-job-execution tenant-conn {:id job-execution-id :reason [msg]})
               (lib/conflict {"jobExecutionId" job-execution-id "datasetId" dataset-id "message" msg}))))
         (lib/bad-request {"message" (:message v)})))
