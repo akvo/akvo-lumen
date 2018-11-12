@@ -9,8 +9,8 @@ WORKDIR /app
 
 COPY akvo-lumen.jar /app/akvo-lumen.jar
 
-COPY maybe-import-and-java-jar.sh /app/maybe-import-and-java-jar.sh
+COPY run-server.sh /app/run-server.sh
 COPY wait-for-dependencies.sh /app/wait-for-dependencies.sh
 RUN chmod +x /app/*.sh
 
-CMD ["./maybe-import-and-java-jar.sh"]
+CMD ["./run-server.sh"]
