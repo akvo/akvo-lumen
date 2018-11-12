@@ -43,7 +43,7 @@
   (try
     (apply-operation deps table-name columns op-spec)
     (catch Exception e
-      (log/debug e)
+      (log/info e)
       {:success? false
        :message (format "Failed to transform: %s" (.getMessage e))})))
 
