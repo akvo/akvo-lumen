@@ -57,7 +57,7 @@
             [lein-codox "0.9.6"]
             [lein-environ "1.0.3"]
             [lein-cljfmt "0.5.7"]
-            [jonase/eastwood "0.2.5"]]
+            [jonase/eastwood "0.3.3"]]
   :codox {:doc-paths   ["resources/akvo/lumen/doc"]
           :output-path "../docs"}
   :main ^:skip-aot akvo.lumen.main
