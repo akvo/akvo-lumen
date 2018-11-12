@@ -1,5 +1,6 @@
 (ns akvo.lumen.component.hikaricp
-  (:require [integrant.core :as ig]
+  (:require [clojure.set]
+            [integrant.core :as ig]
             [duct.database.sql.hikaricp]))
 
 (defmethod ig/init-key :akvo.lumen.component.hikaricp/hikaricp  [_ {:keys [ config] :as opts}]
