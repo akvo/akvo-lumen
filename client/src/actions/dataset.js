@@ -302,11 +302,6 @@ function deletePendingDatasetFailure(id, error) {
     error,
   };
 }
-function deleteFailedDatasetSuccess(id) {
-  return (dispatch) => {
-    dispatch(removeDataset(id));
-  };
-}
 
 function deleteFailedDatasetFailure(id, error) {
   return {
@@ -333,7 +328,7 @@ export function deleteFailedDataset(id) {
     api
       .del(`/api/data-source/job-execution/${id}/status/failed`)
       .then(response => response.json())
-      .then(() => dispatch(deleteFailedDatasetSuccess(id)))
+      .then(() => dispatch(removeDataset(id)))
       .catch(error => dispatch(deleteFailedDatasetFailure(id, error)));
   };
 }
