@@ -1,13 +1,29 @@
 (ns akvo.lumen.lib.job-execution
-  (:require [akvo.lumen.lib.job-execution-impl :as impl]))
+  (:require [akvo.lumen.lib :as lib]
+            [hugsql.core :as hugsql]))
 
+(hugsql/def-db-fns "akvo/lumen/job-execution.sql")
 
 (defn status
-  "Return status of a job execution."
-  [tenant-conn id]
-  (impl/job-status tenant-conn id))
-
-(defn delete
-  "Return status of a job execution."
-  [tenant-conn id]
-  (impl/delete tenant-conn id))
+  "Get the status of a job execution. There are three different states:
+  * { \"status\": \"PENDING\", \"jobExecytionId\": <id> }
+  * { \"status\": \"FAILED\", \"jobExecutionId\": <id>, \"reason\": <reason> }
+  * { \"status\": \"OK\", \"jobExecutionId\": <id>, \"datasetId\": <dataset-id> }"
+  [conn id]
+  (if-let [{:keys [dataset_id]} (dataset-id-by-job-execution-id conn {:id id})]
+    (lib/ok
+     {"jobExecutionId" id
+      "status" "OK"
+      "datasetId" dataset_id})
+    (if-let [{:keys [raster_id]} (raster-id-by-job-execution-id conn {:id id})]
+      (lib/ok
+       {"jobExecutionId" id
+        "status" "OK"
+        "rasterId" raster_id})
+      (if-let [{:keys [status error-message kind]} (job-execution-by-id conn {:id id})]
+        (lib/ok
+         {"jobExecutionId" id
+          "status" status
+          "kind" kind
+          "reason" error-message})
+        (lib/not-found {:error "not-found"})))))
