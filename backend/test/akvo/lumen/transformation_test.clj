@@ -354,9 +354,10 @@
                                                                                     {:dataset-id dataset-id})]
         (is (= ["c1" "c2" "d1" "d2" "d3"] (map #(get % "columnName") columns)))
         (let [data (latest-data dataset-id)]
-          (is (= ["exam" "se"] (map :d1 data)))
-          (is (= ["ple" "co"] (map :d2 data)))
-          (is (= [nil "nd"] (map :d3 data))))))))
+          (log/error :data data)
+          (is (= ["" "exam" "se"] (map :d1 data)))
+          (is (= ["" "ple" "co"] (map :d2 data)))
+          (is (= ["" "" "nd"] (map :d3 data))))))))
 
 (deftest ^:functional delete-column-test
   (let [dataset-id (import-file *tenant-conn* *error-tracker* "dates.csv" {:has-column-headers? true})
