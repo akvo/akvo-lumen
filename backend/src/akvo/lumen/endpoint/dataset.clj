@@ -28,7 +28,7 @@
           (dataset/update-meta tenant-conn id body))
 
         (POST "/update" {:keys [body] :as request}
-          (dataset/update tenant-conn config id body))))))
+          (dataset/update tenant-conn config error-tracker id body))))))
 
 (defmethod ig/init-key :akvo.lumen.endpoint.dataset/dataset  [_ opts]
   (endpoint (assoc opts :config (:config (:config opts)))))
