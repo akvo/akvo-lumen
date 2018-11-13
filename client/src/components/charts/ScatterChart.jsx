@@ -404,8 +404,8 @@ export default class ScatterChart extends Component {
                     color={this.getColor(isPickingColor)}
                     onChange={({ hex }) => {
                       onChangeVisualisationSpec({
-                        colorMapping: {
-                          ...(this.visualisation.spec.colorMapping || {}),
+                        colors: {
+                          ...(visualisation.spec.colorMapping || {}),
                           [isPickingColor]: hex,
                         },
                       });
