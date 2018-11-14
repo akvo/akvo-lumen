@@ -184,7 +184,8 @@
                 {:transaction? false})
     (loop [transformations (butlast (:transformations current-dataset-version))
            columns initial-columns
-           full-execution-log []]
+           full-execution-log []
+           tx-index 0]
       (if (empty? transformations)
         (let [new-dataset-version-id (str (util/squuid))]
           (clear-dataset-version-data-table tenant-conn {:id (:id current-dataset-version)})
@@ -203,15 +204,17 @@
             (touch-dataset tenant-conn {:id dataset-id})                                 
             (drop-table tenant-conn {:table-name previous-table-name})
             (lib/created next-dataset-version)))
-        (let [{:keys [success? message columns execution-log]}
-              (try-apply-operation deps table-name columns (first transformations))]
+        (let [transformation (first transformations)
+              {:keys [success? message columns execution-log] :as transformation-result}
+              (try-apply-operation deps table-name columns transformation)]
           (if success?
-            (recur (rest transformations) columns (into full-execution-log execution-log))
+            (recur (rest transformations) columns (into full-execution-log execution-log) (inc tx-index))
             (do
               (log/info (str "Unsuccessful undo of dataset: " dataset-id))
               (log/debug message)
               (log/debug "Job executionid: " job-execution-id)
-              (throw (ex-info "Failed to undo" {})))))))))
+              (throw (ex-info (str "Failed to undo transformation index:" tx-index) {:transformation-result transformation-result
+                                                                                     :transformation transformation})))))))))
 
 (defn execute-undo [{:keys [tenant-conn] :as deps} dataset-id job-execution-id]
   (let [current-dataset-version (latest-dataset-version-by-dataset-id tenant-conn
