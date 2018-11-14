@@ -4,6 +4,7 @@ import { Collection } from '@potion/layout'; // TODO: see if can optimize this
 import { Circle, Svg, Group } from '@potion/element';
 import { AxisBottom, AxisLeft } from '@vx/axis';
 import get from 'lodash/get';
+import uniq from 'lodash/uniq';
 import { scaleLinear, scaleTime } from 'd3-scale';
 import { extent } from 'd3-array';
 import merge from 'lodash/merge';
@@ -18,6 +19,7 @@ import ChartLayout from './ChartLayout';
 import { heuristicRound, calculateMargins, getLabelFontSize } from '../../utilities/chart';
 import { MAX_FONT_SIZE, MIN_FONT_SIZE } from '../../constants/chart';
 import RenderComplete from './RenderComplete';
+import Legend from './Legend';
 
 const startAxisFromZero = (axisExtent, type) => {
   // Returns an educated guess on if axis should start from zero or not
@@ -153,7 +155,7 @@ export default class ScatterChart extends Component {
 
   getColor(category) {
     const { colorMapping, colors, color } = this.props;
-    if (!category) {
+    if (!itsSet(category)) {
       return color;
     }
     if (colorMapping[category]) {
@@ -229,24 +231,20 @@ export default class ScatterChart extends Component {
     this.setState({ hoveredNode: key });
   }
 
-  handleMouseEnterLegendNode({ key }) {
+  handleMouseEnterLegendNode(hoveredCategory) {
     const { interactive, print } = this.props;
     if (!interactive || print) return;
-    this.setState({ hoveredNode: key });
+    this.setState({ hoveredCategory });
+  }
+
+  handleClickLegendNode(isPickingColor) {
+    const { interactive, print } = this.props;
+    if (!interactive || print) return;
+    this.setState({ isPickingColor });
   }
 
   handleMouseLeaveNode() {
     this.setState({ tooltipVisible: false });
-  }
-
-  handleClickNode({ key }, event) {
-    const { interactive, print, edit } = this.props;
-    if (!interactive || print) return;
-    event.stopPropagation();
-    this.setState({
-      isPickingColor: edit,
-      hoveredNode: key,
-    });
   }
 
   render() {
@@ -261,7 +259,6 @@ export default class ScatterChart extends Component {
       onChangeVisualisationSpec,
       opacity,
       style,
-      legendVisible,
       xAxisLabel,
       yAxisLabel,
       xAxisTicks,
@@ -270,8 +267,17 @@ export default class ScatterChart extends Component {
       visualisation,
     } = this.props;
 
-    const { tooltipItems, tooltipVisible, tooltipPosition, hasRendered } = this.state;
+    const {
+      tooltipItems,
+      tooltipVisible,
+      tooltipPosition,
+      hasRendered,
+      hoveredCategory,
+      isPickingColor,
+    } = this.state;
+
     const series = this.getData();
+    const categoryExists = Boolean(get(data, 'series[3]'));
 
     if (!series) return null;
 
@@ -291,9 +297,35 @@ export default class ScatterChart extends Component {
         style={style}
         width={width}
         height={height}
-        legendVisible={legendVisible}
+        legendVisible={categoryExists}
         onClick={() => {
           this.setState({ isPickingColor: undefined });
+        }}
+        legend={({ horizontal }) => {
+          const categories = uniq(series.data.map(({ category }) => category));
+          return (
+            <Legend
+              horizontal={!horizontal}
+              title={get(this.props, 'data.metadata.bucketColumnCategory')}
+              data={categories.map(cat => `${cat}`)}
+              colorMapping={categories.reduce((acc, category) => ({
+                ...acc,
+                [category]: this.getColor(category),
+              }), {})}
+              activeItem={get(this.state, 'hoveredNode')}
+              onMouseEnter={({ datum }) => () => {
+                if (this.state.isPickingColor) return;
+                this.handleMouseEnterLegendNode(datum);
+              }}
+              onMouseLeave={() => () => {
+                this.setState({ hoveredCategory: null });
+              }}
+              onClick={({ datum }) => (event) => {
+                event.stopPropagation();
+                this.handleClickLegendNode(datum);
+              }}
+            />
+          );
         }}
         chart={
           <ResponsiveWrapper>{(dimensions) => {
@@ -365,6 +397,26 @@ export default class ScatterChart extends Component {
                     {...tooltipPosition}
                   />
                 )}
+
+                {isPickingColor && (
+                  <ColorPicker
+                    title="Pick color"
+                    color={this.getColor(isPickingColor)}
+                    onChange={({ hex }) => {
+                      onChangeVisualisationSpec({
+                        colors: {
+                          ...(visualisation.spec.colorMapping || {}),
+                          [isPickingColor]: hex,
+                        },
+                      });
+                      this.setState({ isPickingColor: undefined });
+                    }}
+                    left={dimensions.width / 2}
+                    top={dimensions.height / 2}
+                    style={{ transform: 'translateX(-50%) translateY(-50%)' }}
+                  />
+                )}
+
                 <Svg width={dimensions.width} height={dimensions.height}>
 
                   {grid && (
@@ -396,19 +448,6 @@ export default class ScatterChart extends Component {
 
                         return (
                           <Group key={key || i}>
-                            {this.state.isPickingColor && (
-                              <ColorPicker
-                                title="Pick color"
-                                color={color}
-                                onChange={({ hex }) => {
-                                  onChangeVisualisationSpec({ color: hex });
-                                  this.setState({ isPickingColor: undefined });
-                                }}
-                                left={dimensions.width / 2}
-                                top={dimensions.height / 2}
-                                style={{ transform: 'translateX(-50%) translateY(-50%)' }}
-                              />
-                            )}
                             <Circle
                               key={i}
                               cx={normalizedX}
@@ -418,9 +457,10 @@ export default class ScatterChart extends Component {
                               stroke={color}
                               strokeWidth={1}
                               fillOpacity={opacity}
-                              onClick={(event) => {
-                                this.handleClickNode({ key }, event);
-                              }}
+                              opacity={hoveredCategory && hoveredCategory !== `${category}` ?
+                                0.2 :
+                                1
+                              }
                               onMouseEnter={(event) => {
                                 this.handleMouseEnterNode({
                                   key,
