@@ -97,7 +97,7 @@
 
 (defn next-column-index [columns]
   (let [nums (->> columns
-                  (map #(or (get % "columnName") (:columnName %)))
+                  (map #(get % "columnName"))
                   (filter #(re-find #"^d\d+$" %))
                   (map #(subs % 1))
                   (map #(Long/parseLong %)))]
