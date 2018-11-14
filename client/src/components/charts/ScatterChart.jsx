@@ -107,7 +107,7 @@ export default class ScatterChart extends Component {
   }
 
   state = {
-    isPickingColor: false,
+    isPickingColor: null,
     hasRendered: false,
   }
 
@@ -237,7 +237,7 @@ export default class ScatterChart extends Component {
     this.setState({ hoveredCategory });
   }
 
-  handleClickLegendNode(isPickingColor) {
+  handleShowColorPicker(isPickingColor) {
     const { interactive, print } = this.props;
     if (!interactive || print) return;
     this.setState({ isPickingColor });
@@ -307,7 +307,7 @@ export default class ScatterChart extends Component {
             <Legend
               horizontal={!horizontal}
               title={get(this.props, 'data.metadata.bucketColumnCategory')}
-              data={categories.map(cat => `${cat}`)}
+              data={categories}
               colorMapping={categories.reduce((acc, category) => ({
                 ...acc,
                 [category]: this.getColor(category),
@@ -322,7 +322,7 @@ export default class ScatterChart extends Component {
               }}
               onClick={({ datum }) => (event) => {
                 event.stopPropagation();
-                this.handleClickLegendNode(datum);
+                this.handleShowColorPicker(datum);
               }}
             />
           );
@@ -398,13 +398,13 @@ export default class ScatterChart extends Component {
                   />
                 )}
 
-                {isPickingColor && (
+                {itsSet(isPickingColor) && (
                   <ColorPicker
                     title="Pick color"
                     color={this.getColor(isPickingColor)}
                     onChange={({ hex }) => {
                       onChangeVisualisationSpec({
-                        colors: {
+                        colorMapping: {
                           ...(visualisation.spec.colorMapping || {}),
                           [isPickingColor]: hex,
                         },
@@ -485,6 +485,10 @@ export default class ScatterChart extends Component {
                               }}
                               onMouseLeave={() => {
                                 this.handleMouseLeaveNode();
+                              }}
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                this.handleShowColorPicker(category);
                               }}
                             />
                           </Group>
