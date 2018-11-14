@@ -65,6 +65,17 @@
     (log/debug :sql sql)
     (jdbc/execute! conn sql)))
 
+(defn split [cell-value re-pattern* new-rows-count]
+  (let [default-values (take new-rows-count (repeat ""))]
+    (if cell-value
+      (as-> (string/split cell-value re-pattern*) values
+        (cond
+          (nil? values)         default-values
+          (empty? values)       default-values
+          (== 1 (count values)) default-values
+          :else                 (apply conj default-values (reverse values))))
+      default-values)))
+
 (defmethod engine/apply-operation :core/split-column
   [{:keys [tenant-conn]} table-name columns op-spec]
   (jdbc/with-db-transaction [tenant-conn tenant-conn]
@@ -84,21 +95,13 @@
                                   (add-column tenant-conn {:table-name      table-name
                                                            :column-type     (:type c)
                                                            :new-column-name (:id c)}))
-              update-db-columns (doseq [row (select-rnum-and-column tenant-conn {:table-name table-name :column-name column-name})]
-                                  (let [value          ((keyword column-name) row)
-                                        default-values (take new-rows-count (repeat ""))
-                                        values         (if value
-                                                         (as-> (string/split value re-pattern*) values
-                                                           (cond
-                                                             (nil? values)         default-values
-                                                             (empty? values)       default-values
-                                                             (== 1 (count values)) default-values
-                                                             :else                 (apply conj default-values (reverse values))))
-                                                         default-values)
-                                        update-vals    (map (fn [column v]
-                                                              [(keyword (:id column)) v])
-                                                            new-columns values)]
-                                    (update-row tenant-conn table-name (:rnum row) update-vals)))]
+              update-db-columns (doseq [row (select-rnum-and-column tenant-conn {:table-name table-name
+                                                                                 :column-name column-name})]
+                                  (->>
+                                   (split ((keyword column-name) row) re-pattern* new-rows-count)
+                                   (map (fn [column v]
+                                          [(keyword (:id column)) v]) new-columns)
+                                   (update-row tenant-conn table-name (:rnum row))))]
           {:success?      true
            :execution-log [(format "Splitted column %s with pattern %s" column-name pattern)]
            :columns       (into columns (vec new-columns))})
