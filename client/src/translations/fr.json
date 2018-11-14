@@ -178,6 +178,7 @@
   "outline": "Contour",
   "overflow": "Débordement",
   "paste_url_here": "Coller l'url ici",
+  "pattern": "Séparateur",
   "pattern_subtitle": "Spécifiez n’importe quel caractère (ou chaîne de caractères) pour fractionner la colonne.",
   "pattern_suggestion": "Suggestions pour '{columnTitle}': {recommendations}",
   "pdf": "PDF",
