@@ -21,3 +21,10 @@
 	      :total-row-coincidences 2,
 	      :total-column-coincidences 5}} (:analysis res)))
     (is (= '["a" "b"] (e.split-column/sort-pattern-analysis-by res :total-row-coincidences)))))
+
+
+(deftest split-test
+  (is (= '("" "" "") (split-column/split nil (re-pattern "a") 3)))
+  (is (= '("" "" "") (split-column/split "" (re-pattern "a") 3)))
+  (is (= '("" "" "") (split-column/split "a" (re-pattern "a") 3)))
+  (is (= '("1" "2" "" "" "") (split-column/split "1a2" (re-pattern "a") 3))))

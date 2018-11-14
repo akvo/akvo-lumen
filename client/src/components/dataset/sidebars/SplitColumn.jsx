@@ -68,14 +68,19 @@ const SplitColumnOptions = ({
         <label htmlFor="patternInput">
           <FormattedMessage id="pattern" />
         </label>
-        {recommendations && (
-          <Alert>
-            <FormattedMessage
-              id="pattern_recommendation"
-              values={{ columnTitle, recommendations }}
-            />
-          </Alert>
-        )}
+        <Alert>
+          <div>
+            <FormattedMessage id="pattern_subtitle" />
+            {recommendations && (
+              <div><br />
+                <FormattedMessage
+                  id="pattern_suggestion"
+                  values={{ columnTitle, recommendations }}
+                />
+              </div>
+          )}
+          </div>
+        </Alert>
         {patternErrorMessage && (
           <Alert danger>
             {patternErrorMessage}
@@ -95,13 +100,10 @@ const SplitColumnOptions = ({
         <label htmlFor="newColumnNameInput">
           <FormattedMessage id="prefix" />
         </label>
-        {prefixErrorMessage ? (
+        {prefixErrorMessage && (
           <Alert danger>
             {prefixErrorMessage}
-          </Alert>) : (
-            <Alert>
-              <FormattedMessage id="new_column_name_prefix" />
-            </Alert>)}
+          </Alert>)}
         <input
           value={ui.newColumnName}
           type="text"
