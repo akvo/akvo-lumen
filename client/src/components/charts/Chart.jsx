@@ -180,7 +180,7 @@ export default class Chart extends Component {
             height={adjustedContainerHeight}
             color={visualisation.spec.color || defaultPrimaryColor}
             colors={palette}
-            colorMapping={visualisation.spec.colors}
+            colorMapping={visualisation.spec.colorMapping}
             xAxisLabel={visualisation.spec.axisLabelX}
             yAxisLabel={visualisation.spec.axisLabelY}
             sizeLabel={visualisation.spec.sizeLabel}

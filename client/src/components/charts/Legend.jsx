@@ -34,7 +34,7 @@ const Legend = ({
 };
 
 Legend.propTypes = {
-  data: PropTypes.arrayOf(PropTypes.string),
+  data: PropTypes.array.isRequired,
   colorMapping: PropTypes.object.isRequired,
   onClick: PropTypes.func,
   horizontal: PropTypes.bool,
