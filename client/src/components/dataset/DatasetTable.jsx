@@ -52,6 +52,8 @@ class DatasetTable extends Component {
     this.handleToggleCombineColumnSidebar = this.handleToggleCombineColumnSidebar.bind(this);
     this.handleToggleExtractMultipleColumnSidebar =
       this.handleToggleExtractMultipleColumnSidebar.bind(this);
+    this.handleToggleSplitColumnSidebar =
+      this.handleToggleSplitColumnSidebar.bind(this);
     this.handleToggleDeriveColumnSidebar = this.handleToggleDeriveColumnSidebar.bind(this);
     this.handleToggleGeoColumnSidebar = this.handleToggleGeoColumnSidebar.bind(this);
   }
@@ -164,6 +166,29 @@ class DatasetTable extends Component {
       });
       this.showSidebar({
         type: 'extractMultiple',
+        displayRight: false,
+        onClose: this.hideSidebar,
+        onApply: (transformation) => {
+          this.props.onTransform(transformation).then(() => {
+            this.hideSidebar();
+          });
+        },
+        columns: this.props.columns,
+      });
+    }
+  }
+
+  handleToggleSplitColumnSidebar() {
+    if (this.state.sidebarProps &&
+      this.state.sidebarProps.type === 'splitColumn') {
+      this.hideSidebar();
+    } else {
+      this.setState({
+        activeDataTypeContextMenu: null,
+        activeColumnContextMenu: null,
+      });
+      this.showSidebar({
+        type: 'splitColumn',
         displayRight: false,
         onClose: this.hideSidebar,
         onApply: (transformation) => {
@@ -334,6 +359,7 @@ class DatasetTable extends Component {
       pendingTransformations,
       transformations,
       onNavigateToVisualise,
+      datasetId,
     } = this.props;
     const {
       activeDataTypeContextMenu,
@@ -392,6 +418,8 @@ class DatasetTable extends Component {
               this.handleToggleCombineColumnSidebar();
             } else if (menuItem === 'extractMultiple') {
               this.handleToggleExtractMultipleColumnSidebar();
+            } else if (menuItem === 'splitColumn') {
+              this.handleToggleSplitColumnSidebar();
             } else if (menuItem === 'deriveColumn') {
               this.handleToggleDeriveColumnSidebar();
             } else if (menuItem === 'generateGeopoints') {
@@ -416,6 +444,7 @@ class DatasetTable extends Component {
               <DataTableSidebar
                 {...sidebarProps}
                 transformations={transformations}
+                datasetId={datasetId}
                 pendingTransformations={pendingTransformations}
               />
             }
@@ -457,6 +486,7 @@ class DatasetTable extends Component {
 }
 
 DatasetTable.propTypes = {
+  datasetId: PropTypes.string.isRequired,
   columns: PropTypes.object.isRequired,
   rows: PropTypes.object.isRequired,
   transformations: PropTypes.object,

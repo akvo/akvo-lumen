@@ -3,7 +3,7 @@
 @import "~react-quill/dist/quill.snow";
 
 html, body, #root, #root > div {
-    min-height: 100%;
+    min-height: calc(100vh);
 }
 
 * {
@@ -124,4 +124,24 @@ code {
 .clearfix {
     width: 100%;
     clear: both;
+}
+
+.alert {
+    padding: 10px;
+    border: 1px solid $lightBlueGrey;
+    display: inline-block;
+    display: flex;
+    margin-bottom: 10px;
+
+    @include border-radius(6px);
+
+    &.alert-success {
+        color: $darkLime;
+        border-color: $darkLime;
+    }
+
+    &.alert-danger {
+        color: $errorRed;
+        border-color: $errorRed;
+    }
 }

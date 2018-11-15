@@ -1,32 +1,31 @@
 version: "3"
 services:
  postgres:
-   build: postgres
-   expose:
-    - 5432
+   image: akvo/akvo-lumen-db:20181023.8084497
+   environment:
+     - POSTGRES_PASSWORD=akvo
+   volumes:
+     - pg-data:/var/lib/postgresql/data
  keycloak:
-   build: keycloak
-   expose:
-    - 8080
+   image: akvo/akvo-keycloak-dev:20181015.be5740a
  backend:
    volumes:
-      - ./postgres/provision:/pg-certs
+      - pg-data:/pg-certs:ro
    links:
       - keycloak:auth.lumen.local
       - exporter:exporter.lumen.local
    expose:
       - 3000
    environment:
-     - HOST_UID
-     - HOST_GID
+     - PGSSLMODE=require
+     - PGSSLROOTCERT=/pg-certs/server.crt
+     - PGPASSWORD=password # password of lumen role
    depends_on:
      - postgres
      - keycloak
      - exporter
  client:
-   environment:
-     - HOST_UID
-     - HOST_GID
+   image: akvo/akvo-lumen-client-dev:20181029.3d46626
  redis:
    image: redis:3.2.9
  windshaft:
@@ -34,16 +33,16 @@ services:
      - PGSSLROOTCERT=/pg-certs/server.crt
      - LUMEN_ENCRYPTION_KEY=supersecret
    volumes:
-      - ./postgres/provision:/pg-certs
+      - pg-data:/pg-certs:ro
  fe-e2e-tests:
-   build: client/e2e-test
+   image: akvo/akvo-lumen-e2e-test:20181024.271ce79
    volumes:
-      - ./client/e2e-test:/app
-      - /app/node_modules
+     - ./client/e2e-test:/app/e2e-test
    environment:
       - LUMEN_URL=http://t1.lumen.local:3030/
       - LUMEN_USER=jerome
       - LUMEN_PASSWORD=password
+      - APP_DIR=/app/e2e-test
    links:
       - keycloak:auth.lumen.local
       - client:t1.lumen.local
@@ -52,4 +51,5 @@ services:
    build: exporter
    expose:
       - 3001
-   
+volumes:
+  pg-data:

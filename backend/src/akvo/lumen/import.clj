@@ -1,16 +1,16 @@
 (ns akvo.lumen.import
-  (:require  [akvo.lumen.boundary.error-tracker :as error-tracker]
-             [akvo.lumen.import.common :as import]
-             [akvo.lumen.import.csv]
-             [akvo.lumen.import.flow]
-             [akvo.lumen.lib :as lib]
-             [akvo.lumen.lib.raster :as raster]
-             [akvo.lumen.util :as util]
-             [cheshire.core :as json]
-             [clojure.java.jdbc :as jdbc]
-             [clojure.string :as string]
-             [clojure.tools.logging :as log]
-             [hugsql.core :as hugsql])
+  (:require [akvo.lumen.boundary.error-tracker :as error-tracker]
+            [akvo.lumen.import.common :as import]
+            [akvo.lumen.import.csv]
+            [akvo.lumen.import.flow]
+            [akvo.lumen.lib :as lib]
+            [akvo.lumen.lib.raster :as raster]
+            [akvo.lumen.util :as util]
+            [cheshire.core :as json]
+            [clojure.java.jdbc :as jdbc]
+            [clojure.string :as string]
+            [clojure.tools.logging :as log]
+            [hugsql.core :as hugsql])
   (:import [org.postgis Polygon MultiPolygon]
            [org.postgresql.util PGobject]))
 

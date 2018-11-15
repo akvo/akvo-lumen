@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 
 KEYCLOAK_USERNAME=${KEYCLOAK_USERNAME:-lumen}
 KEYCLOAK_PASSWORD=${KEYCLOAK_PASSWORD:-lumen}

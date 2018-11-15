@@ -55,6 +55,9 @@ class DatasetControls extends Component {
                     label: <FormattedMessage id="extract_multiple" />,
                     value: 'extractMultiple',
                   }, {
+                    label: <FormattedMessage id="split_column" />,
+                    value: 'splitColumn',
+                  }, {
                     label: <FormattedMessage id="derive_column" />,
                     value: 'deriveColumn',
                   }, {

@@ -179,8 +179,12 @@ export default class Chart extends Component {
             width={width}
             height={adjustedContainerHeight}
             color={visualisation.spec.color || defaultPrimaryColor}
+            colors={palette}
+            colorMapping={visualisation.spec.colorMapping}
             xAxisLabel={visualisation.spec.axisLabelX}
             yAxisLabel={visualisation.spec.axisLabelY}
+            sizeLabel={visualisation.spec.sizeLabel}
+            categoryLabel={visualisation.spec.categoryLabel}
             onChangeVisualisationSpec={onChangeVisualisationSpec}
             edit={Boolean(onChangeVisualisationSpec)}
           />

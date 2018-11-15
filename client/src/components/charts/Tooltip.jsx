@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import itsSet from 'its-set';
 
 import { replaceLabelIfValueEmpty } from '../../utilities/chart';
 import LegendShape from './LegendShape';
@@ -14,7 +15,7 @@ const Tooltip = ({ items, ...rest }) => (items.length ? (
           <li key={label || i}>
             {color && <LegendShape isActive={false} fill={color} />}
             <span className="key">{label}</span>
-            {value && `: ${value}`}
+            {itsSet(value) && `: ${value}`}
           </li>
         );
       })}

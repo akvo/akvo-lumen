@@ -1,11 +1,9 @@
 version: "3"
 services:
- postgres:
- keycloak:
  backend:
    image: "eu.gcr.io/${PROJECT_NAME}/lumen-backend:${TRAVIS_COMMIT}"
    environment:
-     - WAIT_FOR_DB=true
+     - WAIT_FOR_DEPS=true
      - LUMEN_DB_URL=jdbc:postgresql://postgres/lumen?user=lumen&password=password&ssl=true
      - CI_BUILD=yes
      - LUMEN_FILE_UPLOAD_PATH=/tmp/akvo/lumen
@@ -27,15 +25,19 @@ services:
    image: "eu.gcr.io/${PROJECT_NAME}/lumen-maps:${TRAVIS_COMMIT}"
 
  backend-functional-tests:
-   image: akvo-lumen-backend-dev:develop
+   image: akvo/akvo-lumen-backend-dev:20181029.3606771
+   environment:
+     - PGSSLMODE=require
+     - PGSSLROOTCERT=/pg-certs/server.crt
+     - PGPASSWORD=password # password of lumen role
    volumes:
-      - ./postgres/provision:/pg-certs
+      - pg-data:/pg-certs:ro
       - ./backend:/app
       - ~/.m2:/home/akvo/.m2
       - ~/.lein:/home/akvo/.lein
-   environment:
-     - HOST_UID
-     - HOST_GID
    links:
       - keycloak:auth.lumen.local
    command: "true"
+ fe-e2e-tests:
+   environment:
+      - LUMEN_URL=http://t1.lumen.local/

@@ -10,7 +10,7 @@ import DeleteConfirmationModal from './modals/DeleteConfirmationModal';
 import { showModal } from '../actions/activeModal';
 import { fetchLibrary } from '../actions/library';
 import { deleteVisualisation } from '../actions/visualisation';
-import { deleteDataset, deletePendingDataset, updateDataset } from '../actions/dataset';
+import { deleteDataset, deleteFailedDataset, deletePendingDataset, updateDataset } from '../actions/dataset';
 import { deleteDashboard } from '../actions/dashboard';
 import { deleteRaster, deletePendingRaster } from '../actions/raster';
 import { editCollection, addEntitiesToCollection } from '../actions/collection';
@@ -114,10 +114,12 @@ class Library extends Component {
     const { dispatch, datasets, rasters } = this.props;
     switch (entityType) {
       case 'dataset':
-        if (!entity.isPending(datasets[id])) {
-          dispatch(deleteDataset(id));
-        } else {
+        if (entity.isPending(datasets[id])) {
           dispatch(deletePendingDataset(id));
+        } else if (entity.isFailed(datasets[id])) {
+          dispatch(deleteFailedDataset(id));
+        } else {
+          dispatch(deleteDataset(id));
         }
         break;
       case 'visualisation':
