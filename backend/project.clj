@@ -91,7 +91,8 @@
                                     :init (do
                                             (println "Starting BackEnd ...")
                                             (go)
-                                            (migrate-and-seed))
+                                            (migrate-and-seed)
+                                            (check-specs!))
                                     :host "0.0.0.0"
                                     :port 47480}
                    :env            {:port "3000"}}

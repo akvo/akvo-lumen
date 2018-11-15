@@ -10,12 +10,24 @@
             [clojure.pprint :refer [pprint]]
             [clojure.repl :refer :all]
             [clojure.tools.namespace.repl :refer [refresh]]
+            [clojure.spec.alpha :as s]
+            [clojure.spec.test.alpha :as stest]
+            [clojure.tools.logging :as log]
             [duct.core :as duct]
             [duct.generate :as gen]
             [integrant.core :as ig]
             [integrant.repl :as ir]
             [integrant.repl.state :as state :refer (system)])
   (:import [org.postgresql.util PSQLException PGobject]))
+
+(defn check-specs! []
+  (log/warn "instrumenting specs!")
+  (stest/instrument))
+
+(defn uncheck-specs! []
+  (log/warn "unstrumenting specs!")
+  (stest/unstrument))
+
 
 (defn read-config []
   (duct/read-config (io/resource "dev.edn")))
