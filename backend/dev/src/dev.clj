@@ -9,7 +9,7 @@
             [clojure.java.jdbc :as jdbc]
             [clojure.pprint :refer [pprint]]
             [clojure.repl :refer :all]
-            [clojure.tools.namespace.repl :refer [refresh]]
+            [clojure.tools.namespace.repl :as repl]
             [clojure.spec.alpha :as s]
             [clojure.spec.test.alpha :as stest]
             [clojure.tools.logging :as log]
@@ -27,6 +27,11 @@
 (defn uncheck-specs! []
   (log/warn "unstrumenting specs!")
   (stest/unstrument))
+
+(defn refresh []
+  (uncheck-specs!)
+  (repl/refresh)
+  (check-specs!))
 
 
 (defn read-config []
