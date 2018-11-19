@@ -4,14 +4,18 @@
             [akvo.lumen.test-utils
              :refer
              [import-file test-tenant test-tenant-conn]]
-            [ragtime.jdbc :as jdbc]
-            [ragtime.repl :as repl]))
+            [ragtime.jdbc :as rjdbc]
+            [ragtime.repl :as repl]
+            [hugsql.core :as hugsql]
+            [clojure.java.jdbc :as jdbc]
+            [clojure.string :as string]))
 
+(hugsql/def-db-fns "public_tables.sql")
 
 (defn- ragtime-spec
   [tenant]
-  {:datastore  (jdbc/sql-database {:connection-uri (:db_uri tenant)})
-   :migrations (jdbc/load-resources "akvo/lumen/migrations/tenants")})
+  {:datastore  (rjdbc/sql-database {:connection-uri (:db_uri tenant)})
+   :migrations (rjdbc/load-resources "akvo/lumen/migrations/tenants")})
 
 (defn migrate-tenant
   [tenant]
@@ -24,12 +28,21 @@
 
 (defn- user-manager-ragtime-spec []
   {:datastore
-   (jdbc/sql-database {:connection-uri (:db_uri (test-utils/test-tenant-manager))})
+   (rjdbc/sql-database {:connection-uri (:db_uri (test-utils/test-tenant-manager))})
    :migrations
-   (jdbc/load-resources "akvo/lumen/migrations/tenant_manager")})
+   (rjdbc/load-resources "akvo/lumen/migrations/tenant_manager")})
 
 (defn migrate-user-manager []
   (repl/migrate (user-manager-ragtime-spec)))
+
+(defn drop-all-data [tenant]
+  (let [db {:connection-uri (:db_uri tenant)}
+        public-tables (db-public-tables db)
+        truncate-call (format "TRUNCATE %s CASCADE;"
+                              (string/join ","
+                                           (for [table public-tables]
+                                             (:table_name table))))]
+    (jdbc/execute! db [truncate-call])))
 
 (def ^:dynamic *tenant-conn*)
 
@@ -39,7 +52,7 @@
   (migrate-tenant test-tenant)
   (binding [*tenant-conn* (test-tenant-conn test-tenant)]
     (f)
-    (rollback-tenant test-tenant)))
+    (drop-all-data test-tenant)))
 
 (def ^:dynamic *error-tracker*)
 
