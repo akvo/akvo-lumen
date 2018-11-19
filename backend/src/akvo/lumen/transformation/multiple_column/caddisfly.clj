@@ -1,6 +1,7 @@
 (ns akvo.lumen.transformation.multiple-column.caddisfly
   (:require [akvo.lumen.postgres :as postgres]
             [akvo.lumen.transformation.engine :as engine]
+            [akvo.lumen.component.caddisfly :refer (get-caddisfly-schema)]
             [cheshire.core :as json]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as string]
@@ -11,14 +12,7 @@
 
 (hugsql/def-db-fns "akvo/lumen/transformation/engine.sql")
 
-(defn- get-caddisfly-schema
-  [caddisfly column]
-  (if-let [caddisflyResourceUuid (:multipleId column)]
-    (get (:schema caddisfly) caddisflyResourceUuid)
-    (throw
-     (ex-info "this column doesn't have a caddisflyResourceUuid currently associated!"
-              {:message
-               {:possible-reason "maybe you don't update the flow dataset!? (via client dashboard ...)"}}))))
+
 
 (defn- add-name-to-new-columns
   [current-columns columns-to-extract]
@@ -64,7 +58,12 @@
 
           selected-column (-> args :selectedColumn)
 
-          caddisfly-schema (get-caddisfly-schema caddisfly selected-column)
+          caddisfly-schema (if-let [multiple-id (:multipleId selected-column)]
+                             (get-caddisfly-schema caddisfly multiple-id)
+                             (throw
+                              (ex-info "this column doesn't have a caddisflyResourceUuid currently associated!"
+                                       {:message
+                                        {:possible-reason "maybe you don't update the flow dataset!? (via client dashboard ...)"}})))
 
           new-columns (->> (columns-to-extract (:columns args) selected-column caddisfly-schema (:extractImage args))
                            (add-name-to-new-columns current-columns))

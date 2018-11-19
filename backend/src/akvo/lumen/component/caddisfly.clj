@@ -31,3 +31,7 @@
         tests (-> schema-uri client/get :body (json/decode keyword) extract-tests)]
     (log/info ::start "Using caddisfly ONLINE schema-uri" schema-uri)
     (assoc this :schema tests)))
+
+(defn get-caddisfly-schema
+  [caddisfly caddisflyResourceUuid]
+  (get (:schema caddisfly) caddisflyResourceUuid))
