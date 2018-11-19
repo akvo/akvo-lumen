@@ -74,6 +74,8 @@ export default {
 
     // Minify JS
     new webpack.optimize.UglifyJsPlugin({ sourceMap: true }),
+
+    new webpack.optimize.ModuleConcatenationPlugin(),
   ],
   module: {
     rules: [
