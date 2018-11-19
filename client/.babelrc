@@ -1,7 +1,9 @@
   {
     "plugins": [
-      "transform-class-properties"
+      "transform-class-properties",
+      "transform-es2015-for-of"
     ],
+    "ignore": "/node_modules/(?!query-string)",
     "env": {
       "development": {
         "presets": [
