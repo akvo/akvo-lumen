@@ -8,7 +8,7 @@ import './ConfigMenuSectionOptionThumbs.scss';
 const scrollTo = (container, to) => {
   const toElement = document.getElementsByName(to)[0];
   if (!toElement) {
-    console.warn('scroll target not found', to);
+    console.warn('scroll target not found', to); // eslint-disable-line
     return null;
   }
   container.scrollLeft = toElement.offsetLeft; // eslint-disable-line
