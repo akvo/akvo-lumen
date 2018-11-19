@@ -54,6 +54,10 @@
   [_ response]
   response)
 
+(defmethod render-response "SCAN"
+  [_ response]
+  response)
+
 (defmethod render-response "OPTION"
   [_ response]
   (str/join "|" (map (fn [{:strs [text code]}]
