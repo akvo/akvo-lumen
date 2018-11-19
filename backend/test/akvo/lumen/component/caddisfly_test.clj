@@ -13,8 +13,6 @@
      (->> {:config {:caddisfly {:local-schema-uri "./caddisfly/tests-schema.json"}}}
           (ig/init-key :akvo.lumen.component.caddisfly/local)))))
 
-
-
 (deftest component-versions-test
   (testing "prod component version"
     (is (= (-> (caddisfly :prod) :schema first val keys)

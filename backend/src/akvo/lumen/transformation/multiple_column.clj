@@ -14,11 +14,13 @@
      (every? (comp t.engine/valid-type? :type) columns-to-extract)
      (#{"fail" "leave-empty" "delete-row"} onError))))
 
-(defmethod t.engine/apply-operation :core/extract-multiple
-  [deps table-name columns op-spec]
+(defn- apply-operation [deps table-name columns op-spec]
   (let [{:keys [onError op args] :as op-spec} (keywordize-keys op-spec)]
     ;; so far we only implement `caddisfly` in other case we throw exception based on core/condp impl
-    (update
-     (condp = (-> args :selectedColumn :multipleType)
-       "caddisfly" (t.m-c.caddisfly/apply-operation deps table-name columns op-spec))
-     :columns stringify-keys)))
+    (condp = (-> args :selectedColumn :multipleType)
+      "caddisfly" (t.m-c.caddisfly/apply-operation deps table-name columns op-spec))))
+
+(defmethod t.engine/apply-operation :core/extract-multiple
+  [deps table-name columns op-spec]
+  (-> (apply-operation deps table-name columns op-spec)
+      (update :columns stringify-keys)))

@@ -1,7 +1,7 @@
 (ns akvo.lumen.transformation.multiple-column.caddisfly
   (:require [akvo.lumen.postgres :as postgres]
             [akvo.lumen.transformation.engine :as engine]
-            [akvo.lumen.component.caddisfly :refer (get-caddisfly-schema)]
+            [akvo.lumen.component.caddisfly :refer (get-schema)]
             [cheshire.core :as json]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as string]
@@ -11,8 +11,6 @@
 (hugsql/def-db-fns "akvo/lumen/transformation.sql")
 
 (hugsql/def-db-fns "akvo/lumen/transformation/engine.sql")
-
-
 
 (defn- add-name-to-new-columns
   [current-columns columns-to-extract]
@@ -27,7 +25,7 @@
     (log/debug :sql sql)
     (jdbc/execute! conn sql)))
 
-(defn columns-to-extract [columns selected-column caddisfly-schema extractImage]
+(defn- columns-to-extract [columns selected-column caddisfly-schema extractImage]
   (let [columns   (filter :extract columns)
         base-column (dissoc selected-column :multipleId :type :multipleType :columnName :title)]
     (cond->>
@@ -36,7 +34,7 @@
       (cons (with-meta (assoc base-column :type "text" :title (str (:title selected-column) "| Image"))
               {:image true})))))
 
-(defn multiple-cell-value
+(defn- multiple-cell-value
   "get json parsed value from cell row"
   [row column-name]
   (json/parse-string ((keyword column-name) row) keyword))
@@ -59,7 +57,7 @@
           selected-column (-> args :selectedColumn)
 
           caddisfly-schema (if-let [multiple-id (:multipleId selected-column)]
-                             (get-caddisfly-schema caddisfly multiple-id)
+                             (get-schema caddisfly multiple-id)
                              (throw
                               (ex-info "this column doesn't have a caddisflyResourceUuid currently associated!"
                                        {:message
