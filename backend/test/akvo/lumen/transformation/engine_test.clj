@@ -1,7 +1,6 @@
 (ns akvo.lumen.transformation.engine-test
   {:functional true}
-  (:require [akvo.lumen.fixtures :refer [migrate-tenant rollback-tenant]]
-            [akvo.lumen.test-utils :refer [test-tenant test-tenant-conn]]
+  (:require [akvo.lumen.test-utils :refer [test-tenant test-tenant-conn]]
             [akvo.lumen.transformation.engine :refer :all]
             [cheshire.core :as json]
             [clojure.java.io :as io]
@@ -15,13 +14,11 @@
 (def ^:dynamic *tenant-conn*)
 
 (defn fixture [f]
-  (migrate-tenant test-tenant)
   (binding [*tenant-conn* (test-tenant-conn test-tenant)]
     (db-drop-test-table *tenant-conn*)
     (db-test-table *tenant-conn*)
     (db-test-data *tenant-conn*)
-    (f)
-    (rollback-tenant test-tenant)))
+    (f)))
 
 (use-fixtures :once fixture)
 
