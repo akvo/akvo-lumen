@@ -8,11 +8,30 @@
 
   &-content {
     width: 100%;
-    padding-bottom: 4px;
+    padding-bottom: 15px;
     margin-bottom: 4px;
     
     &-inner {
       overflow: auto;
+      padding-bottom: 15px;
+      &::-webkit-scrollbar {
+          -webkit-appearance: none;
+      }
+
+      &::-webkit-scrollbar:vertical {
+          width: 11px;
+          display: none;
+      }
+
+      &::-webkit-scrollbar:horizontal {
+          height: 11px;
+      }
+
+      &::-webkit-scrollbar-thumb {
+          border-radius: 8px;
+          border: 2px solid white; /* should match background, can't be transparent */
+          background-color: rgba(0, 0, 0, .5);
+      }
     }
   }
 
@@ -23,6 +42,7 @@
     position: absolute;
     left: 0;
     bottom: 0;
+    display: none;
   }
 
   &-handle {
@@ -31,3 +51,6 @@
     background: $anchorLinkLight;
   }
 }
+
+
+
