@@ -1,6 +1,7 @@
 (ns akvo.lumen.transformation.split-column
   (:require [akvo.lumen.transformation.engine :as engine]
             [clojure.java.jdbc :as jdbc]
+            [akvo.lumen.postgres :as postgres]
             [clojure.string :as string]
             [clojure.tools.logging :as log]
             [clojure.walk :refer (keywordize-keys stringify-keys)]
@@ -60,7 +61,7 @@
 
 (defn- update-row [conn table-name row-id vals-map]
   (let [r (string/join "," (doall (map (fn [[k v]]
-                                         (str (name k) "=$anylumenthing$" v "$anylumenthing$::TEXT")) vals-map)))
+                                         (str (name k) "=" (postgres/adapt-string-value v))) vals-map)))
         sql (str  "update " table-name " SET "  r " where rnum=" row-id)]
     (log/debug :sql sql)
     (jdbc/execute! conn sql)))

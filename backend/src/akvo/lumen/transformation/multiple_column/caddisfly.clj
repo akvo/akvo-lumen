@@ -1,5 +1,6 @@
 (ns akvo.lumen.transformation.multiple-column.caddisfly
-  (:require [akvo.lumen.transformation.engine :as engine]
+  (:require [akvo.lumen.postgres :as postgres]
+            [akvo.lumen.transformation.engine :as engine]
             [cheshire.core :as json]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as string]
@@ -27,7 +28,7 @@
 
 (defn- update-row [conn table-name row-id vals-map]
   (let [r (string/join "," (doall (map (fn [[k v]]
-                                         (str (name k) "==$anylumenthing$" v "=$anylumenthing$::TEXT")) vals-map)))
+                                         (str (name k) "=" (postgres/adapt-string-value v))) vals-map)))
         sql (str  "update " table-name " SET "  r " where rnum=" row-id)]
     (log/debug :sql sql)
     (jdbc/execute! conn sql)))

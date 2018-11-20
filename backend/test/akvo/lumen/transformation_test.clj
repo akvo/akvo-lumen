@@ -6,6 +6,7 @@
                                          error-tracker-fixture]]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.test-utils :refer [import-file]]
+            [akvo.lumen.postgres :as postgres]
             [akvo.lumen.transformation :as tf]
             [akvo.lumen.transformation.engine :as engine]
             [cheshire.core :as json]
@@ -375,6 +376,15 @@
           (is (= ["v1" "v2$"] (map :d1 data)))
           (is (= ["$1" "1"] (map :d2 data))))))
     (apply-transformation {:type :undo})
+    (with-redefs [postgres/adapt-string-value (fn [v] (str "'" v "'::TEXT"))]
+
+      (let [[tag _] (apply-transformation {:type :transformation
+                                           :transformation {"op" "core/split-column"
+                                                            "args" {"pattern" "-"
+                                                                    "newColumnName" "splitted"
+                                                                    "selectedColumn" {"columnName" "c2"}}
+                                                            "onError" "fail"}})]
+        (is (= ::lib/conflict tag))))
     (let [[tag _] (apply-transformation {:type :transformation
                                          :transformation {"op" "core/split-column"
                                                           "args" {"pattern" "-"

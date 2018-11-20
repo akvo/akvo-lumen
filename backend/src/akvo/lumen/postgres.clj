@@ -6,3 +6,6 @@
     (when-not (string? s)
       (throw (ex-info "Not a string" {:s s})))
     (str/replace s "'" "''")))
+
+(defn adapt-string-value [v]
+  (str "$anylumenthing$" v "$anylumenthing$::TEXT"))
