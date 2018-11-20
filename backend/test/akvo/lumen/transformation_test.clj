@@ -6,6 +6,7 @@
                                          error-tracker-fixture]]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.test-utils :refer [import-file]]
+            [akvo.lumen.postgres :as postgres]
             [akvo.lumen.transformation :as tf]
             [akvo.lumen.transformation.engine :as engine]
             [cheshire.core :as json]
@@ -354,10 +355,49 @@
                                                                                     {:dataset-id dataset-id})]
         (is (= ["c1" "c2" "d1" "d2" "d3"] (map #(get % "columnName") columns)))
         (let [data (latest-data dataset-id)]
-          (log/error :data data)
           (is (= ["" "exam" "se"] (map :d1 data)))
           (is (= ["" "ple" "co"] (map :d2 data)))
           (is (= ["" "" "nd"] (map :d3 data))))))))
+
+(deftest ^:functional split-column-test-quote-issue-1785
+  (let [dataset-id (import-file *tenant-conn* *error-tracker* "split_column_1785.csv" {:has-column-headers? true})
+        apply-transformation (partial tf/apply {:tenant-conn *tenant-conn*} dataset-id)]
+    (let [[tag _] (apply-transformation {:type :transformation
+                                         :transformation {"op" "core/split-column"
+                                                          "args" {"pattern" "-"
+                                                                  "newColumnName" "splitted"
+                                                                  "selectedColumn" {"columnName" "c1"}}
+                                                          "onError" "fail"}})]
+      (is (= ::lib/ok tag))
+      (let [{:keys [columns transformations]} (latest-dataset-version-by-dataset-id *tenant-conn*
+                                                                                    {:dataset-id dataset-id})]
+        (is (= ["c1" "c2" "d1" "d2"] (map #(get % "columnName") columns)))
+        (let [data (latest-data dataset-id)]
+          (is (= ["v1" "v2$"] (map :d1 data)))
+          (is (= ["$1" "1"] (map :d2 data))))))
+    (apply-transformation {:type :undo})
+    (with-redefs [postgres/adapt-string-value (fn [v] (str "'" v "'::TEXT"))]
+
+      (let [[tag _] (apply-transformation {:type :transformation
+                                           :transformation {"op" "core/split-column"
+                                                            "args" {"pattern" "-"
+                                                                    "newColumnName" "splitted"
+                                                                    "selectedColumn" {"columnName" "c2"}}
+                                                            "onError" "fail"}})]
+        (is (= ::lib/conflict tag))))
+    (let [[tag _] (apply-transformation {:type :transformation
+                                         :transformation {"op" "core/split-column"
+                                                          "args" {"pattern" "-"
+                                                                  "newColumnName" "splitted"
+                                                                  "selectedColumn" {"columnName" "c2"}}
+                                                          "onError" "fail"}})]
+      (is (= ::lib/ok tag))
+      (let [{:keys [columns transformations]} (latest-dataset-version-by-dataset-id *tenant-conn*
+                                                                                    {:dataset-id dataset-id})]
+        (is (= ["c1" "c2" "d1" "d2"] (map #(get % "columnName") columns)))
+        (let [data (latest-data dataset-id)]
+          (is (= ["v1" "v2'"] (map :d1 data)))
+          (is (= ["'2" "2"] (map :d2 data))))))))
 
 (deftest ^:functional delete-column-test
   (let [dataset-id (import-file *tenant-conn* *error-tracker* "dates.csv" {:has-column-headers? true})
