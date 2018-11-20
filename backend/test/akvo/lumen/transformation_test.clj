@@ -381,7 +381,13 @@
                                                                   "newColumnName" "splitted"
                                                                   "selectedColumn" {"columnName" "c2"}}
                                                           "onError" "fail"}})]
-      (is (= ::lib/conflict tag)))))
+      (is (= ::lib/ok tag))
+      (let [{:keys [columns transformations]} (latest-dataset-version-by-dataset-id *tenant-conn*
+                                                                                    {:dataset-id dataset-id})]
+        (is (= ["c1" "c2" "d1" "d2"] (map #(get % "columnName") columns)))
+        (let [data (latest-data dataset-id)]
+          (is (= ["v1" "v2'"] (map :d1 data)))
+          (is (= ["'2" "2"] (map :d2 data))))))))
 
 (deftest ^:functional delete-column-test
   (let [dataset-id (import-file *tenant-conn* *error-tracker* "dates.csv" {:has-column-headers? true})
