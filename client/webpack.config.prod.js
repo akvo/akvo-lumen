@@ -74,12 +74,14 @@ export default {
 
     // Minify JS
     new webpack.optimize.UglifyJsPlugin({ sourceMap: true }),
+
+    new webpack.optimize.ModuleConcatenationPlugin(),
   ],
   module: {
     rules: [
       {
         test: /\.jsx?$/,
-        exclude: /node_modules/,
+        exclude: /node_modules\/(?!(query-string)\/).*/,
         use: ['babel-loader'],
       },
       {

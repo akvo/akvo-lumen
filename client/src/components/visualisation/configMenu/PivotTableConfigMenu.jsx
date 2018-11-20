@@ -132,7 +132,7 @@ export default class PivotTableConfigMenu extends Component {
                   min={0}
                   max={16}
                   onChange={evt => onChangeSpec({
-                    decimalPlaces: parseInt(evt.target.value),
+                    decimalPlaces: parseInt(evt.target.value, 10),
                   })}
                   placeholderId="number_of_decimal_places"
                 />
