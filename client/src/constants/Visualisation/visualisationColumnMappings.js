@@ -7,6 +7,7 @@ const visualizationColumnMappings = {
     pie: [],
     donut: [],
     scatter: [],
+    bubble: [],
   },
   'pivot table': {
     map: [],
@@ -28,6 +29,10 @@ const visualizationColumnMappings = {
     ],
     scatter: [
       { from: 'valueColumn', to: 'metricColumnY' },
+      { from: 'categoryColumn', to: 'bucketColumn' },
+    ],
+    bubble: [
+      { from: 'valueColumn', to: 'metricColumn' },
       { from: 'categoryColumn', to: 'bucketColumn' },
     ],
   },
@@ -53,6 +58,10 @@ const visualizationColumnMappings = {
       { from: 'metricColumnY', to: 'metricColumnY' },
       { from: 'bucketColumn', to: 'bucketColumn' },
     ],
+    bubble: [
+      { from: 'metricColumnY', to: 'metricColumn' },
+      { from: 'bucketColumn', to: 'bucketColumn' },
+    ],
   },
   line: {
     map: [],
@@ -76,6 +85,9 @@ const visualizationColumnMappings = {
       { from: 'metricColumnY', to: 'metricColumnY' },
       { from: 'metricColumnX', to: 'metricColumnX' },
     ],
+    bubble: [
+      { from: 'metricColumnY', to: 'metricColumn' },
+    ],
   },
   get area() {
     return this.line;
@@ -97,6 +109,9 @@ const visualizationColumnMappings = {
       return this.donut;
     },
     scatter: [
+      { from: 'bucketColumn', to: 'bucketColumn' },
+    ],
+    bubble: [
       { from: 'bucketColumn', to: 'bucketColumn' },
     ],
   },
@@ -123,6 +138,32 @@ const visualizationColumnMappings = {
     ],
     pie: [],
     donut: [],
+    bubble: [
+      { from: 'metricColumnY', to: 'metricColumn' },
+    ],
+  },
+  bubble: {
+    map: [],
+    'pivot table': [
+      { from: 'metricColumn', to: 'valueColumn' },
+      { from: 'bucketColumn', to: 'categoryColumn' },
+    ],
+    bar: [
+      { from: 'metricColumn', to: 'metricColumnY' },
+      { from: 'bucketColumn', to: 'bucketColumn' },
+    ],
+    line: [
+      { from: 'metricColumn', to: 'metricColumnY' },
+    ],
+    area: [
+      { from: 'metricColumn', to: 'metricColumnY' },
+    ],
+    pie: [
+      { from: 'bucketColumn', to: 'bucketColumn' },
+    ],
+    donut: [
+      { from: 'bucketColumn', to: 'bucketColumn' },
+    ],
   },
 };
 

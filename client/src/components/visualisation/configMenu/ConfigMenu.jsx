@@ -12,6 +12,7 @@ import PieConfigMenu from './PieConfigMenu';
 import ScatterConfigMenu from './ScatterConfigMenu';
 import MapConfigMenu from './MapConfigMenu';
 import PivotTableConfigMenu from './PivotTableConfigMenu';
+import BubbleConfigMenu from './BubbleConfigMenu';
 import DatasetMenu from './DatasetMenu';
 
 require('./ConfigMenu.scss');
@@ -90,6 +91,7 @@ const visualisationTypeComponents = {
   pie: PieConfigMenu,
   donut: PieConfigMenu,
   'pivot table': PivotTableConfigMenu,
+  bubble: BubbleConfigMenu,
 };
 
 function ConfigMenu(props) {

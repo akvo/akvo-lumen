@@ -402,7 +402,7 @@ export default class StackedBarChart extends Component {
                   this.wrap = c;
                 }}
               >
-                {hasRendered && <RenderComplete id={visualisation.id} />}
+                {hasRendered && visualisation && <RenderComplete id={visualisation.id} />}
 
                 {tooltipVisible && (
                   <Tooltip

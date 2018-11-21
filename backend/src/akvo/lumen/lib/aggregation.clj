@@ -5,6 +5,7 @@
             [akvo.lumen.lib.aggregation.bar :as bar]
             [akvo.lumen.lib.aggregation.pivot :as pivot]
             [akvo.lumen.lib.aggregation.scatter :as scatter]
+            [akvo.lumen.lib.aggregation.bubble :as bubble]
             [clojure.java.jdbc :as jdbc]
             [hugsql.core :as hugsql]))
 
@@ -49,3 +50,7 @@
 (defmethod query* "scatter"
   [tenant-conn dataset _ query]
   (scatter/query tenant-conn dataset query))
+
+(defmethod query* "bubble"
+  [tenant-conn dataset _ query]
+  (bubble/query tenant-conn dataset query))

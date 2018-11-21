@@ -67,6 +67,7 @@ export default class AsyncVisualisationViewer extends Component {
           case 'donut':
           case 'pie':
           case 'scatter':
+          case 'bubble':
             output = Chart;
             break;
 

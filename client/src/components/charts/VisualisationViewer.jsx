@@ -11,6 +11,7 @@ export default function VisualisationViewer(props) {
     case 'area':
     case 'donut':
     case 'pie':
+    case 'bubble':
     case 'scatter':
       return (
         <Chart

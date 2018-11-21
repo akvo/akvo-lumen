@@ -6,6 +6,7 @@ import { FormattedMessage } from 'react-intl';
 import AggregationError from './AggregationError';
 import LineChart from './LineChart';
 import BarChart from './BarChart';
+import BubbleChart from './BubbleChart';
 import PieChart from './PieChart';
 import ScatterChart from './ScatterChart';
 import { defaultPrimaryColor, palette } from '../../utilities/visualisationColors';
@@ -209,6 +210,23 @@ export default class Chart extends Component {
             legendVisible={visualisation.spec.showLegend}
             valueLabelsVisible={visualisation.spec.showValueLabels}
             horizontal={visualisation.spec.horizontal}
+          />
+        );
+      case 'bubble':
+        return (
+          <BubbleChart
+            edit={Boolean(onChangeVisualisationSpec)}
+            visualisation={visualisation}
+            data={visualisation.data}
+            width={width}
+            height={adjustedContainerHeight}
+            colors={palette}
+            colorMapping={visualisation.spec.colors}
+            metricLabel={visualisation.spec.metricLabel}
+            onChangeVisualisationSpec={onChangeVisualisationSpec}
+            legendTitle={visualisation.spec.legendTitle}
+            legendVisible={visualisation.spec.showLegend}
+            labelsVisible={visualisation.spec.showLabels}
           />
         );
       default:

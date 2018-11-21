@@ -15,6 +15,7 @@ import PieChart from './PieChart';
 import ScatterChart from './ScatterChart';
 import LineChart from './LineChart';
 import BarChart from './BarChart';
+import BubbleChart from './BubbleChart';
 
 const letters = 'abcdef ghijklmn opqrstuvwxyz 123456789'.split('');
 const letterCount = letters.length;
@@ -331,6 +332,54 @@ storiesOf('Charts', module)
           valueLabelsVisible={boolean('props.valueLabelsVisible', false)}
           yAxisLabel={text('props.yAxisLabel', 'Temperature')}
           xAxisLabel={text('props.xAxisLabel', 'X Axis')}
+        />
+        <pre>
+          <code>
+            {JSON.stringify(data, null, 2)}
+          </code>
+        </pre>
+      </div>
+    );
+  })
+
+  .add('BubbleChart', () => {
+    const seriesCount = number('series count', 5);
+    const nodeCount = number('node count', 20);
+    const minVal = number('min value', 1);
+    const maxVal = number('max value', 100);
+    const labelLength = number('label length', 10);
+    const data = generateData({
+      seriesCount,
+      nodeCount,
+      labelLength,
+      minVal,
+      maxVal,
+    });
+
+    return (
+      <div>
+        <BubbleChart
+          style={{ border: '1px solid black' }}
+          data={{
+            ...data,
+            metadata: {
+              bucketColumnTitle: text('props.data.metatdata.bucketColumnTitle', 'Legend Title'),
+            },
+          }}
+          colors={palette(seriesCount)}
+          onChangeVisualisationSpec={action('vis-spec-change')}
+          width={number('props.width', 600)}
+          height={number('props.height', 600)}
+          marginTop={number('props.marginTop', 70)}
+          marginRight={number('props.marginRight', 70)}
+          marginBottom={number('props.marginBottom', 70)}
+          marginLeft={number('props.marginLeft', 70)}
+          print={boolean('props.print', false)}
+          interactive={boolean('props.interactive', true)}
+          edit={boolean('props.edit', true)}
+          legendVisible={boolean('props.legendVisible', true)}
+          labelsVisible={boolean('props.labelsVisible', false)}
+          metricLabel={text('props.metricLabel', 'Temperature')}
         />
         <pre>
           <code>

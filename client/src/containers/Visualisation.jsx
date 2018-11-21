@@ -22,6 +22,7 @@ import lineSpecTemplate from '../constants/Visualisation/lineSpecTemplate';
 import pivotTableSpecTemplate from '../constants/Visualisation/pivotTableSpecTemplate';
 import scatterSpecTemplate from '../constants/Visualisation/scatterSpecTemplate';
 import barSpecTemplate from '../constants/Visualisation/barSpecTemplate';
+import bubbleSpecTemplate from '../constants/Visualisation/bubbleSpecTemplate';
 import { SAVE_COUNTDOWN_INTERVAL, SAVE_INITIAL_TIMEOUT } from '../constants/time';
 
 require('../components/visualisation/Visualisation.scss');
@@ -42,6 +43,8 @@ const getSpecFromVisualisationType = (visualisationType) => {
       return { ...barSpecTemplate };
     case 'pivot table':
       return { ...pivotTableSpecTemplate };
+    case 'bubble':
+      return { ...bubbleSpecTemplate };
     default:
       return {};
   }
