@@ -7,7 +7,7 @@
             [clojure.string :as str]
             [hugsql.core :as hugsql]))
 
-(hugsql/def-db-fns "akvo/lumen/dataset.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
 
 (defn run-query [conn query-str]
   (rest (jdbc/query conn [query-str] {:as-arrays? true})))

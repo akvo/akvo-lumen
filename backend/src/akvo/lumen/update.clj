@@ -12,7 +12,7 @@
 
 (hugsql/def-db-fns "akvo/lumen/job-execution.sql")
 (hugsql/def-db-fns "akvo/lumen/transformation.sql")
-(hugsql/def-db-fns "akvo/lumen/dataset.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
 
 (defmulti adapt-transformation
   (fn [op-spec older-columns new-columns]

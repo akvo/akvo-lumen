@@ -11,7 +11,7 @@
             [clojure.set :refer (rename-keys)]
             [hugsql.core :as hugsql]))
 
-(hugsql/def-db-fns "akvo/lumen/dataset.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
 (hugsql/def-db-fns "akvo/lumen/job-execution.sql")
 
