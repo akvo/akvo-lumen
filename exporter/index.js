@@ -136,7 +136,7 @@ const takeScreenshot = (req, runId) => new Promise((resolve, reject) => {
       await context.close();
     } catch (err) {
       captureException(err, runId);
-      throw err;
+      reject(err);
     }
   });
 });
