@@ -28,6 +28,7 @@ if (process.env.SENTRY_DSN) {
 const captureException = (error, runId = '') => {
   console.error(`Run ID: ${runId} -`, error);
   if (process.env.SENTRY_DSN) Raven.captureException(error);
+  throw error;
 };
 
 const setContext = (contextData, callback) => {
@@ -135,7 +136,7 @@ const takeScreenshot = (req, runId) => new Promise((resolve, reject) => {
       await context.close();
     } catch (err) {
       captureException(err, runId);
-      reject(err);
+      throw err;
     }
   });
 });
