@@ -1,5 +1,5 @@
 (ns akvo.lumen.endpoint.healthz
-  (:require [akvo.lumen.http :as http]
+  (:require [akvo.lumen.endpoint.commons.http :as http]
             [compojure.core :refer :all]
             [environ.core :as env]
             [integrant.core :as ig]))

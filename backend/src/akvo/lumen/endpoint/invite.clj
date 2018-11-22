@@ -1,6 +1,5 @@
 (ns akvo.lumen.endpoint.invite
   (:require [akvo.lumen.component.tenant-manager :refer [connection]]
-            [akvo.lumen.http :as http]
             [akvo.lumen.lib.user :as user]
             [compojure.core :refer :all]
             [integrant.core :as ig]))
