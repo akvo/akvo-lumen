@@ -105,9 +105,9 @@
                             :wrap-jwt          #ig/ref :akvo.lumen.middleware.auth/wrap-jwt
                             :wrap-label-tenant #ig/ref :akvo.lumen.middleware.tenant-manager/wrap-label-tenant
                             :wrap-sentry       #ig/ref :akvo.lumen.middleware.sentry/wrap-sentry
-                            :lumen-monitoring  #ig/ref :akvo.lumen.lumen-monitoring/middleware}
+                            :monitoring  #ig/ref :akvo.lumen.monitoring/middleware}
                 :applied   [:not-found :json-response :ring-defaults :json-body
-                            :wrap-auth :wrap-jwt :lumen-monitoring :wrap-label-tenant :wrap-sentry
+                            :wrap-auth :wrap-jwt :monitoring :wrap-label-tenant :wrap-sentry
                             :hide-errors]
                 :arguments {:not-found     "Resource Not Found"
                             :hide-errors   "Internal Server Error"
@@ -125,7 +125,7 @@
                   :pool-name "tenant-manager"
                   :maximum-pool-size 5
                   :minimum-idle 2
-                  :metric-registry #ig/ref :akvo.lumen.lumen-monitoring/dropwizard-registry}
+                  :metric-registry #ig/ref :akvo.lumen.monitoring/dropwizard-registry}
 
   :caddisfly     {:schema-uri caddisfly-schema-uri}
   :emailer {:email-password email-password
@@ -144,15 +144,15 @@
                   :sentry-backend-dsn        sentry-backend-dsn
                   :flow-api-url              flow-api-url
                   :windshaft-url             "http://localhost:4000"
-                  :dropwizard-registry       #ig/ref :akvo.lumen.lumen-monitoring/dropwizard-registry
+                  :dropwizard-registry       #ig/ref :akvo.lumen.monitoring/dropwizard-registry
                   :piwik-site-id             piwik-site-id}
   :keycloak      {:url         keycloak-url
                   :realm       keycloak-realm
                   :credentials {"client_id"     keycloak-client-id
                                 "client_secret" keycloak-client-secret}}}
 
- :akvo.lumen.lumen-monitoring/dropwizard-registry {}
- :akvo.lumen.lumen-monitoring/collector {:dropwizard-registry #ig/ref :akvo.lumen.lumen-monitoring/dropwizard-registry}
- :akvo.lumen.lumen-monitoring/middleware {:collector #ig/ref :akvo.lumen.lumen-monitoring/collector}
+ :akvo.lumen.monitoring/dropwizard-registry {}
+ :akvo.lumen.monitoring/collector {:dropwizard-registry #ig/ref :akvo.lumen.monitoring/dropwizard-registry}
+ :akvo.lumen.monitoring/middleware {:collector #ig/ref :akvo.lumen.monitoring/collector}
 
  }
