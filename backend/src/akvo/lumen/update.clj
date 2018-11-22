@@ -1,8 +1,6 @@
 (ns akvo.lumen.update
   (:require [akvo.lumen.boundary.error-tracker :as error-tracker]
             [akvo.lumen.import.common :as import]
-            [akvo.lumen.import.csv]
-            [akvo.lumen.import.flow]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.transformation.engine :as engine]
             [akvo.lumen.util :as util]
@@ -104,7 +102,6 @@
         (if-not (compatible-columns? imported-dataset-columns importer-columns)
           (failed-update conn job-execution-id "Column mismatch")
           (do (import/create-dataset-table conn table-name importer-columns)
-              (import/add-key-constraints conn table-name importer-columns)
               (doseq [record (map import/coerce-to-sql (import/records importer))]
                 (jdbc/insert! conn table-name record))
               (clone-data-table conn

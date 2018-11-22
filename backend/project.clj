@@ -90,6 +90,7 @@
                    :repl-options   {:init-ns dev
                                     :init (do
                                             (println "Starting BackEnd ...")
+                                            (check-specs!)
                                             (go)
                                             (migrate-and-seed))
                                     :host "0.0.0.0"

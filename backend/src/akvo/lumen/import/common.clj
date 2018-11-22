@@ -102,11 +102,7 @@
       ;; else
       nil)))
 
-(defn create-dataset-table [conn table-name columns]
-  (jdbc/execute! conn [(dataset-table-sql table-name columns)])
-  (create-indexes conn table-name columns))
-
-(defn add-key-constraints [conn table-name columns]
+(defn- add-key-constraints [conn table-name columns]
   (doseq [column columns
           :when (:key column)]
     (jdbc/execute! conn
@@ -117,6 +113,11 @@
                    (format "ALTER TABLE \"%s\" ALTER COLUMN %s SET NOT NULL"
                            table-name
                            (name (:id column))))))
+
+(defn create-dataset-table [conn table-name columns]
+  (jdbc/execute! conn [(dataset-table-sql table-name columns)])
+  (create-indexes conn table-name columns)
+  (add-key-constraints conn table-name columns))
 
 (defrecord Geoshape [wkt-string])
 

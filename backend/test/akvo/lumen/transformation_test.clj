@@ -9,6 +9,7 @@
             [akvo.lumen.postgres :as postgres]
             [akvo.lumen.transformation :as tf]
             [akvo.lumen.transformation.engine :as engine]
+            [akvo.lumen.test-utils :as tu]
             [cheshire.core :as json]
             [clojure.java.io :as io]
             [clojure.test :refer :all]
@@ -25,8 +26,7 @@
 (hugsql/def-db-fns "akvo/lumen/transformation_test.sql")
 (hugsql/def-db-fns "akvo/lumen/transformation.sql")
 
-(use-fixtures :once tenant-conn-fixture error-tracker-fixture)
-
+(use-fixtures :once tu/spec-instrument tenant-conn-fixture error-tracker-fixture)
 
 (deftest op-validation
   (testing "op validation"

@@ -1,6 +1,7 @@
 (ns akvo.lumen.transformation.multiple-column.caddisfly
   (:require [akvo.lumen.postgres :as postgres]
             [akvo.lumen.transformation.engine :as engine]
+            [akvo.lumen.component.caddisfly :refer (get-schema)]
             [cheshire.core :as json]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as string]
@@ -10,15 +11,6 @@
 (hugsql/def-db-fns "akvo/lumen/transformation.sql")
 
 (hugsql/def-db-fns "akvo/lumen/transformation/engine.sql")
-
-(defn- get-caddisfly-schema
-  [caddisfly column]
-  (if-let [caddisflyResourceUuid (:multipleId column)]
-    (get (:schema caddisfly) caddisflyResourceUuid)
-    (throw
-     (ex-info "this column doesn't have a caddisflyResourceUuid currently associated!"
-              {:message
-               {:possible-reason "maybe you don't update the flow dataset!? (via client dashboard ...)"}}))))
 
 (defn- add-name-to-new-columns
   [current-columns columns-to-extract]
@@ -33,7 +25,7 @@
     (log/debug :sql sql)
     (jdbc/execute! conn sql)))
 
-(defn columns-to-extract [columns selected-column caddisfly-schema extractImage]
+(defn- columns-to-extract [columns selected-column caddisfly-schema extractImage]
   (let [columns   (filter :extract columns)
         base-column (dissoc selected-column :multipleId :type :multipleType :columnName :title)]
     (cond->>
@@ -42,7 +34,7 @@
       (cons (with-meta (assoc base-column :type "text" :title (str (:title selected-column) "| Image"))
               {:image true})))))
 
-(defn multiple-cell-value
+(defn- multiple-cell-value
   "get json parsed value from cell row"
   [row column-name]
   (json/parse-string ((keyword column-name) row) keyword))
@@ -64,7 +56,12 @@
 
           selected-column (-> args :selectedColumn)
 
-          caddisfly-schema (get-caddisfly-schema caddisfly selected-column)
+          caddisfly-schema (if-let [multiple-id (:multipleId selected-column)]
+                             (get-schema caddisfly multiple-id)
+                             (throw
+                              (ex-info "this column doesn't have a caddisflyResourceUuid currently associated!"
+                                       {:message
+                                        {:possible-reason "maybe you don't update the flow dataset!? (via client dashboard ...)"}})))
 
           new-columns (->> (columns-to-extract (:columns args) selected-column caddisfly-schema (:extractImage args))
                            (add-name-to-new-columns current-columns))

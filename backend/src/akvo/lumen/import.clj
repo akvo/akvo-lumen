@@ -82,7 +82,6 @@
         (with-open [importer (import/dataset-importer (get spec "source") config)]
           (let [columns (import/columns importer)]
             (import/create-dataset-table conn table-name columns)
-            (import/add-key-constraints conn table-name columns)
             (doseq [record (map import/coerce-to-sql (import/records importer))]
               (jdbc/insert! conn table-name record))
             (successful-import conn job-execution-id table-name columns spec claims data-source))))

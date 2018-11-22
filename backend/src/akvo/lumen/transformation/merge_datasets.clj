@@ -1,6 +1,5 @@
 (ns akvo.lumen.transformation.merge-datasets
-  (:require [akvo.lumen.import.common :as import]
-            [akvo.lumen.transformation.engine :as engine]
+  (:require [akvo.lumen.transformation.engine :as engine]
             [clojure.java.jdbc :as jdbc]
             [clojure.tools.logging :as log]
             [clojure.set :as set]
