@@ -3,7 +3,7 @@
             [clojure.tools.logging :as log]
             [clj-http.client :as client]))
 
-(defmacro time
+(defmacro time*
   "Evaluates expr and prints the time it took.  Returns the value of
  expr."
   {:added "1.0"}
@@ -18,14 +18,14 @@
   [exporter-url access-token locale spec]
   (let [
         {:keys [body headers status] :as response}
-        (time (client/post exporter-url
+        (time* (client/post exporter-url
                       {:headers {"access_token" (str/replace-first access-token
                                                                    #"Bearer "
                                                                    "")
                                  "locale" locale}
                        :form-params spec
                        :content-type :json}))]
-    (log/info :response response)
+    (log/info :response-without-body (dissoc response :body))
     {:body body
      :headers {"Content-Type" (get headers "Content-Type")
                "Content-Disposition" (get headers "Content-Disposition")}
