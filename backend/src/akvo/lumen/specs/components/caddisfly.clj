@@ -13,9 +13,3 @@
 
 (defmethod integrant-key ::caddisfly/local [_]
   (s/cat :kw keyword? :config (s/keys :req-un [::caddisfly/config])))
-
-(s/explain :integrant/component-args [::caddisfly/local
-                                      {:config {:caddisfly {:local-schema-uri "./caddisfly/tests-schema.json"}}}])
-
-
-#_(ig/init-key ::caddisfly/local {:config {:caddisfly {:local-schema-uri "./caddisfly/tests-schema.json"}}})
