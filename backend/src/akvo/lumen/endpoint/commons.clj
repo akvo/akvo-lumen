@@ -1,4 +1,4 @@
-(ns akvo.lumen.endpoint
+(ns akvo.lumen.endpoint.commons
   (:require [akvo.lumen.endpoint.commons.http :as http]
             [akvo.lumen.lib :as lib]
             [compojure.response]))
