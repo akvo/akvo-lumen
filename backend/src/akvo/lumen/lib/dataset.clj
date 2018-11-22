@@ -1,4 +1,4 @@
-(ns akvo.lumen.dataset
+(ns akvo.lumen.lib.dataset
   (:refer-clojure :exclude [update])
   (:require [akvo.lumen.endpoint.job-execution :as job-execution]
             [akvo.lumen.import :as import]

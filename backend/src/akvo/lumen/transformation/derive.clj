@@ -1,5 +1,5 @@
 (ns akvo.lumen.transformation.derive
-  (:require [akvo.lumen.dataset.utils :as dataset.utils]
+  (:require [akvo.lumen.lib.dataset.utils :as dataset.utils]
             [akvo.lumen.transformation.derive.js-engine :as js-engine]
             [akvo.lumen.transformation.engine :as engine]
             [akvo.lumen.update :as update]

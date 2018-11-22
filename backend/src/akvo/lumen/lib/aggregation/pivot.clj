@@ -2,7 +2,7 @@
   (:require [akvo.commons.psql-util]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.postgres.filter :as filter]
-            [akvo.lumen.dataset.utils :as utils]
+            [akvo.lumen.lib.dataset.utils :as utils]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
             [hugsql.core :as hugsql]))
