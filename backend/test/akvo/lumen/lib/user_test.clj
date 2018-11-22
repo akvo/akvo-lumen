@@ -6,7 +6,7 @@
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.user :as user]
             [akvo.lumen.test-utils :refer [seed-data test-tenant test-tenant-conn]]
-            [akvo.lumen.variant :as variant]
+            [akvo.lumen.endpoint.commons.variant :as variant]
             [clojure.set :as set]
             [clojure.test :refer :all]
             [integrant.core :as ig]))

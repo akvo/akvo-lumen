@@ -5,7 +5,7 @@
                                          tenant-conn-fixture]]
             [akvo.lumen.lib.public-impl :as public-impl]
             [akvo.lumen.lib.share :as share]
-            [akvo.lumen.variant :as variant]
+            [akvo.lumen.endpoint.commons.variant :as variant]
             [clojure.test :refer :all]
             [hugsql.core :as hugsql]))
 

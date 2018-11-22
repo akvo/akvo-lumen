@@ -7,7 +7,7 @@
              [visualisation :as visualisation]
              [collection :as collection]
              [raster :as raster]]
-            [akvo.lumen.variant :as variant]
+            [akvo.lumen.endpoint.commons.variant :as variant]
             [compojure.core :refer :all]
             [integrant.core :as ig]))
 

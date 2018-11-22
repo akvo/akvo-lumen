@@ -5,7 +5,7 @@
                                          tenant-conn-fixture]]
             [akvo.lumen.lib.dashboard :as dashboard]
             [akvo.lumen.lib.dashboard-impl :as dashboard-impl]
-            [akvo.lumen.variant :as variant]
+            [akvo.lumen.endpoint.commons.variant :as variant]
             [clojure.test :refer :all]
             [hugsql.core :as hugsql]))
 
