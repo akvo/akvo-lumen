@@ -1,7 +1,7 @@
-(ns akvo.lumen.transformation
+(ns akvo.lumen.lib.transformation
   (:refer-clojure :exclude [apply])
   (:require [akvo.lumen.lib :as lib]
-            [akvo.lumen.transformation.engine :as engine]
+            [akvo.lumen.lib.transformation.engine :as engine]
             [clojure.tools.logging :as log]
             [akvo.lumen.util :refer (squuid)]
             [clojure.java.jdbc :as jdbc]
@@ -11,19 +11,19 @@
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 
 (def transformation-namespaces
-  '[akvo.lumen.transformation.change-datatype
-    akvo.lumen.transformation.text
-    akvo.lumen.transformation.sort-column
-    akvo.lumen.transformation.split-column
-    akvo.lumen.transformation.filter-column
-    akvo.lumen.transformation.combine
-    akvo.lumen.transformation.derive
-    akvo.lumen.transformation.rename-column
-    akvo.lumen.transformation.delete-column
-    akvo.lumen.transformation.geo
-    akvo.lumen.transformation.merge-datasets
-    akvo.lumen.transformation.multiple-column
-    akvo.lumen.transformation.reverse-geocode])
+  '[akvo.lumen.lib.transformation.change-datatype
+    akvo.lumen.lib.transformation.text
+    akvo.lumen.lib.transformation.sort-column
+    akvo.lumen.lib.transformation.split-column
+    akvo.lumen.lib.transformation.filter-column
+    akvo.lumen.lib.transformation.combine
+    akvo.lumen.lib.transformation.derive
+    akvo.lumen.lib.transformation.rename-column
+    akvo.lumen.lib.transformation.delete-column
+    akvo.lumen.lib.transformation.geo
+    akvo.lumen.lib.transformation.merge-datasets
+    akvo.lumen.lib.transformation.multiple-column
+    akvo.lumen.lib.transformation.reverse-geocode])
 
 ;; Load transformation namespaces
 (clojure.core/apply require transformation-namespaces)

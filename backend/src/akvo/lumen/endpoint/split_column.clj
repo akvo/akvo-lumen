@@ -1,7 +1,7 @@
 (ns akvo.lumen.endpoint.split-column
   (:require [akvo.lumen.component.tenant-manager :refer [connection]]
             [akvo.lumen.lib :as lib]
-            [akvo.lumen.transformation.split-column :as transformation]
+            [akvo.lumen.lib.transformation.split-column :as transformation]
             [cheshire.core :as json]
             [clojure.tools.logging :as log]
             [compojure.core :refer :all]

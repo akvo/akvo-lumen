@@ -1,5 +1,5 @@
-(ns akvo.lumen.transformation.split-column
-  (:require [akvo.lumen.transformation.engine :as engine]
+(ns akvo.lumen.lib.transformation.split-column
+  (:require [akvo.lumen.lib.transformation.engine :as engine]
             [clojure.java.jdbc :as jdbc]
             [akvo.lumen.postgres :as postgres]
             [clojure.string :as string]
@@ -10,7 +10,7 @@
 
 (hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
 
-(hugsql/def-db-fns "akvo/lumen/transformation/engine.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/transformation/engine.sql")
 
 (defn pattern-analysis [re-pattern* column-values]
   (reduce

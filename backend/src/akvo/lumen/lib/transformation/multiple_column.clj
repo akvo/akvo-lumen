@@ -1,7 +1,7 @@
-(ns akvo.lumen.transformation.multiple-column
+(ns akvo.lumen.lib.transformation.multiple-column
   (:require [akvo.lumen.lib.dataset.utils :as u]
-            [akvo.lumen.transformation.engine :as t.engine]
-            [akvo.lumen.transformation.multiple-column.caddisfly :as t.m-c.caddisfly]
+            [akvo.lumen.lib.transformation.engine :as t.engine]
+            [akvo.lumen.lib.transformation.multiple-column.caddisfly :as t.m-c.caddisfly]
             [clojure.tools.logging :as log]
             [clojure.walk :refer (keywordize-keys stringify-keys)]))
 

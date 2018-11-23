@@ -1,9 +1,9 @@
-(ns akvo.lumen.transformation.filter-column
-  (:require [akvo.lumen.transformation.engine :as engine]
+(ns akvo.lumen.lib.transformation.filter-column
+  (:require [akvo.lumen.lib.transformation.engine :as engine]
             [clojure.tools.logging :as log]
             [hugsql.core :as hugsql]))
 
-(hugsql/def-db-fns "akvo/lumen/transformation/filter_column.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/transformation/filter_column.sql")
 
 (defmethod engine/valid? :core/filter-column
   [op-spec]

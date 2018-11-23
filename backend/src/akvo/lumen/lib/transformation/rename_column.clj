@@ -1,5 +1,5 @@
-(ns akvo.lumen.transformation.rename-column
-  (:require [akvo.lumen.transformation.engine :as engine]))
+(ns akvo.lumen.lib.transformation.rename-column
+  (:require [akvo.lumen.lib.transformation.engine :as engine]))
 
 (defn col-name [op-spec]
   (get (engine/args op-spec) "columnName"))

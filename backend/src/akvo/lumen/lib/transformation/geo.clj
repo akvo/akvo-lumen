@@ -1,12 +1,12 @@
-(ns akvo.lumen.transformation.geo
+(ns akvo.lumen.lib.transformation.geo
   "Geometry data transformations"
   (:require [akvo.lumen.lib.import.common :as import]
-            [akvo.lumen.transformation.engine :as engine]
+            [akvo.lumen.lib.transformation.engine :as engine]
             [clojure.java.jdbc :as jdbc]
             [clojure.tools.logging :as log]
             [hugsql.core :as hugsql]))
 
-(hugsql/def-db-fns "akvo/lumen/transformation/geo.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/transformation/geo.sql")
 
 (defn- valid?
   "Predicate to determine if given op-spec is valid for geo transformation"

@@ -2,7 +2,7 @@
   (:require [akvo.lumen.component.error-tracker :as error-tracker]
             [akvo.lumen.lib.import.common :as import]
             [akvo.lumen.lib :as lib]
-            [akvo.lumen.transformation.engine :as engine]
+            [akvo.lumen.lib.transformation.engine :as engine]
             [akvo.lumen.util :as util]
             [clojure.java.jdbc :as jdbc]
             [clojure.set :as set]

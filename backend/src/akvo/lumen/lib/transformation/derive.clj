@@ -1,7 +1,7 @@
-(ns akvo.lumen.transformation.derive
+(ns akvo.lumen.lib.transformation.derive
   (:require [akvo.lumen.lib.dataset.utils :as dataset.utils]
-            [akvo.lumen.transformation.derive.js-engine :as js-engine]
-            [akvo.lumen.transformation.engine :as engine]
+            [akvo.lumen.lib.transformation.derive.js-engine :as js-engine]
+            [akvo.lumen.lib.transformation.engine :as engine]
             [akvo.lumen.lib.update :as update]
             [akvo.lumen.util :as util]
             [clj-time.coerce :as tc]
@@ -10,8 +10,8 @@
             [clojure.tools.logging :as log]
             [hugsql.core :as hugsql]))
 
-(hugsql/def-db-fns "akvo/lumen/transformation/derive.sql")
-(hugsql/def-db-fns "akvo/lumen/transformation/engine.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/transformation/derive.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/transformation/engine.sql")
 
 (defn columnName>columnTitle
   "Replace code column references and fall back to use code pattern if there is no

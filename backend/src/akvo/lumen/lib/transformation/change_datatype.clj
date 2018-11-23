@@ -1,12 +1,12 @@
-(ns akvo.lumen.transformation.change-datatype
-  (:require [akvo.lumen.transformation.engine :as engine]
+(ns akvo.lumen.lib.transformation.change-datatype
+  (:require [akvo.lumen.lib.transformation.engine :as engine]
             [akvo.lumen.postgres :as postgres]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
             [clojure.tools.logging :as log]
             [hugsql.core :as hugsql]))
 
-(hugsql/def-db-fns "akvo/lumen/transformation/change_datatype.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/transformation/change_datatype.sql")
 
 (defmethod engine/valid? :core/change-datatype
   [op-spec]

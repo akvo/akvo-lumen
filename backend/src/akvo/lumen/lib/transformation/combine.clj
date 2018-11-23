@@ -1,10 +1,10 @@
-(ns akvo.lumen.transformation.combine
-  (:require [akvo.lumen.transformation.engine :as engine]
+(ns akvo.lumen.lib.transformation.combine
+  (:require [akvo.lumen.lib.transformation.engine :as engine]
             [clojure.tools.logging :as log]
             [hugsql.core :as hugsql]))
 
-(hugsql/def-db-fns "akvo/lumen/transformation/combine.sql")
-(hugsql/def-db-fns "akvo/lumen/transformation/engine.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/transformation/combine.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/transformation/engine.sql")
 
 (defmethod engine/valid? :core/combine
   [op-spec]

@@ -1,5 +1,5 @@
-(ns akvo.lumen.transformation.derive.js-engine
-  (:require [akvo.lumen.transformation.engine :as engine]
+(ns akvo.lumen.lib.transformation.derive.js-engine
+  (:require [akvo.lumen.lib.transformation.engine :as engine]
             [clojure.java.jdbc :as jdbc]
             [clojure.set :as set]
             [clojure.spec.alpha :as s]
