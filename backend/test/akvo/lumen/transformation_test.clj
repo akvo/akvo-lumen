@@ -22,9 +22,9 @@
                     vec
                     (update-in [1 "args"] dissoc "parseFormat")))
 
-(hugsql/def-db-fns "akvo/lumen/job-execution.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 (hugsql/def-db-fns "akvo/lumen/transformation_test.sql")
-(hugsql/def-db-fns "akvo/lumen/transformation.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
 
 (use-fixtures :once tu/spec-instrument tenant-conn-fixture error-tracker-fixture)
 

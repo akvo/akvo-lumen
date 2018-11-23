@@ -7,8 +7,8 @@
             [clojure.java.jdbc :as jdbc]
             [hugsql.core :as hugsql]))
 
-(hugsql/def-db-fns "akvo/lumen/transformation.sql")
-(hugsql/def-db-fns "akvo/lumen/job-execution.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 
 (def transformation-namespaces
   '[akvo.lumen.transformation.change-datatype

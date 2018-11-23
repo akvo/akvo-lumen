@@ -16,7 +16,7 @@
            [org.postgresql.util PGobject]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/raster.sql")
-(hugsql/def-db-fns "akvo/lumen/job-execution.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 
 (defn get-raster-info
   "Returns a JSON representation of gdalinfo output or nil if

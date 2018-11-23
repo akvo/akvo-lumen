@@ -8,7 +8,7 @@
             [hugsql.core :as hugsql]
             [integrant.core :as ig]))
 
-(hugsql/def-db-fns "akvo/lumen/transformation.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
 
 (defn sort-pattern-analysis-by [pattern-analysis sort-by*]
   (->> (seq (:analysis pattern-analysis))

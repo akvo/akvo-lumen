@@ -6,7 +6,7 @@
             [clojure.tools.logging :as log]
             [hugsql.core :as hugsql]))
 
-(hugsql/def-db-fns "akvo/lumen/transformation.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
 
 (defmulti valid?
   "Validate transformation spec"
