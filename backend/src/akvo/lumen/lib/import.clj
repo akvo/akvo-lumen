@@ -1,8 +1,8 @@
-(ns akvo.lumen.import
+(ns akvo.lumen.lib.import
   (:require [akvo.lumen.boundary.error-tracker :as error-tracker]
-            [akvo.lumen.import.common :as import]
-            [akvo.lumen.import.csv]
-            [akvo.lumen.import.flow]
+            [akvo.lumen.lib.import.common :as import]
+            [akvo.lumen.lib.import.csv]
+            [akvo.lumen.lib.import.flow]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.raster :as raster]
             [akvo.lumen.util :as util]

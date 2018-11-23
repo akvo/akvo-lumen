@@ -1,6 +1,6 @@
 (ns akvo.lumen.update
   (:require [akvo.lumen.boundary.error-tracker :as error-tracker]
-            [akvo.lumen.import.common :as import]
+            [akvo.lumen.lib.import.common :as import]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.transformation.engine :as engine]
             [akvo.lumen.util :as util]

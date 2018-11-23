@@ -1,7 +1,7 @@
 (ns akvo.lumen.lib.dataset
   (:refer-clojure :exclude [update])
   (:require [akvo.lumen.endpoint.job-execution :as job-execution]
-            [akvo.lumen.import :as import]
+            [akvo.lumen.lib.import :as import]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.transformation.merge-datasets :as transformation.merge-datasets]
             [akvo.lumen.update :as update]

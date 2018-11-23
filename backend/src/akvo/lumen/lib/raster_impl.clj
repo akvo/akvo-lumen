@@ -1,6 +1,6 @@
 (ns akvo.lumen.lib.raster-impl
   (:require [akvo.lumen.endpoint.job-execution :as job-execution]
-            [akvo.lumen.import.common :as import]
+            [akvo.lumen.lib.import.common :as import]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.update :as update]
             [akvo.lumen.util :as util]

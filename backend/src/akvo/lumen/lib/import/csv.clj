@@ -1,5 +1,5 @@
-(ns akvo.lumen.import.csv
-  (:require [akvo.lumen.import.common :as import]
+(ns akvo.lumen.lib.import.csv
+  (:require [akvo.lumen.lib.import.common :as import]
             [clojure.data.csv :as csv]
             [clojure.java.io :as io]
             [clojure.java.jdbc :as jdbc]

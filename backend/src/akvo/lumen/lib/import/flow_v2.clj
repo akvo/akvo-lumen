@@ -1,7 +1,7 @@
-(ns akvo.lumen.import.flow-v2
+(ns akvo.lumen.lib.import.flow-v2
   (:require [akvo.commons.psql-util :as pg]
-            [akvo.lumen.import.common :as import]
-            [akvo.lumen.import.flow-common :as flow-common]
+            [akvo.lumen.lib.import.common :as import]
+            [akvo.lumen.lib.import.flow-common :as flow-common]
             [cheshire.core :as json]
             [clj-http.client :as http]
             [clojure.java.jdbc :as jdbc]

@@ -1,8 +1,7 @@
-(ns akvo.lumen.import.raster-test
+(ns akvo.lumen.lib.import.raster-test
   (:require [clojure.test :refer :all]
             [akvo.lumen.fixtures :refer [*tenant-conn*
                                          tenant-conn-fixture]]
-            #_[akvo.lumen.import.raster :refer :all]
             [clojure.java.io :as io]
             [clojure.java.jdbc :as jdbc]))
 
