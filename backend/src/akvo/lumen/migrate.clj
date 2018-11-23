@@ -1,13 +1,12 @@
 (ns akvo.lumen.migrate
   (:require
-   [akvo.lumen.config :refer [bindings]]
+   [akvo.lumen.config :as config]
    [akvo.lumen.lib.aes :as aes]
    [clojure.java.io :as io]
    [duct.core :as duct]
    [clojure.tools.logging :as log]
    [environ.core :refer [env]]
    [hugsql.core :as hugsql]
-   [akvo.lumen.util.system :as akvo.system]
    [meta-merge.core :refer [meta-merge]]
    [ragtime
     strategy
@@ -39,11 +38,11 @@
 (defn read-config [config-path]
   (duct/read-config (io/resource config-path)))
 
-(defn construct-system
+(defn construct-system-config
   "Create a system definition."
-  ([] (construct-system "akvo/lumen/config.edn" (bindings)))
+  ([] (construct-system-config "akvo/lumen/config.edn" (config/bindings)))
   ([config-path bindings]
-   (akvo.system/load-system [(duct/prep (read-config config-path))] bindings)))
+   (config/load-config [(duct/prep (read-config config-path))] bindings)))
 
 
 
@@ -61,7 +60,7 @@
   "Migrate tenant manager and tenants."
   ([] (migrate source-files))
   ([config-path]
-   (let [system (construct-system config-path (bindings))
+   (let [system (construct-system-config config-path (config/bindings))
          migrations (load-migrations system)
          tenant-manager-db {:connection-uri (get-in system [:akvo.lumen.config :db :uri])}]
      (do-migrate (ragtime-jdbc/sql-database tenant-manager-db)
@@ -76,7 +75,7 @@
 
 (defn migrate-tenant
   [tenant-conn]
-  (let [system (construct-system)
+  (let [system (construct-system-config)
         migrations (load-migrations system)]
     (do-migrate (ragtime-jdbc/sql-database tenant-conn)
                 (:tenants migrations))))
@@ -100,7 +99,7 @@
   (rollback 1 ;; will rollback 1 migration on all tenants)
   (rollback :tenant-manager) ;; will rollback tenant manager migrations"
   [config-path arg]
-  (let [system (construct-system config-path (bindings))
+  (let [system (construct-system-config config-path (config/bindings))
         migrations (load-migrations system)
         tenant-migrations (:tenants migrations)
         tenant-manager-migrations (:tenant-manager migrations)

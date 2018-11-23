@@ -86,7 +86,7 @@
 (defn seed
   "At the moment only support seed of tenants table."
   []
-  (let [db-uri (-> (lumen-migrate/construct-system)
+  (let [db-uri (-> (lumen-migrate/construct-system-config)
                    :akvo.lumen.config :db :uri)]
     (doseq [tenant (->> "seed.edn" io/resource slurp edn/read-string
                         :tenant-manager :tenants)]
