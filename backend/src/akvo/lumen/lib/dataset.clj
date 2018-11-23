@@ -4,7 +4,7 @@
             [akvo.lumen.lib.import :as import]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.transformation.merge-datasets :as transformation.merge-datasets]
-            [akvo.lumen.update :as update]
+            [akvo.lumen.lib.update :as update]
             [clojure.tools.logging :as log]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]

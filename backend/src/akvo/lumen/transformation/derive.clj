@@ -2,7 +2,7 @@
   (:require [akvo.lumen.lib.dataset.utils :as dataset.utils]
             [akvo.lumen.transformation.derive.js-engine :as js-engine]
             [akvo.lumen.transformation.engine :as engine]
-            [akvo.lumen.update :as update]
+            [akvo.lumen.lib.update :as update]
             [akvo.lumen.util :as util]
             [clj-time.coerce :as tc]
             [clojure.java.jdbc :as jdbc]

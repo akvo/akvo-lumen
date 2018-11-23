@@ -1,6 +1,6 @@
 (ns akvo.lumen.transformation.derive-test
   (:require [akvo.lumen.transformation.derive :as derive]
-            [akvo.lumen.update :as update]
+            [akvo.lumen.lib.update :as update]
             [clojure.test.check.generators :as gen]
             [clojure.string :as str]
             [clojure.tools.logging :as log]
