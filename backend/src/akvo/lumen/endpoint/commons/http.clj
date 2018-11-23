@@ -1,4 +1,4 @@
-(ns akvo.lumen.http)
+(ns akvo.lumen.endpoint.commons.http)
 
 (defn- response [response-code]
   {:pre [(pos? response-code)]}

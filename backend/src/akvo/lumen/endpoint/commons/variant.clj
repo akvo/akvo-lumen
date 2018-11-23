@@ -1,4 +1,4 @@
-(ns akvo.lumen.variant)
+(ns akvo.lumen.endpoint.commons.variant)
 
 (defn variant? [v]
   (and (vector? v)

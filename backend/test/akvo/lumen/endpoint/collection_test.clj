@@ -10,7 +10,7 @@
             [akvo.lumen.dataset :as dataset]
             [akvo.lumen.lib.visualisation :as visualisation]
             [akvo.lumen.test-utils :refer [import-file]]
-            [akvo.lumen.variant :as variant]
+            [akvo.lumen.endpoint.commons.variant :as variant]
             [clojure.test :refer :all]))
 
 
