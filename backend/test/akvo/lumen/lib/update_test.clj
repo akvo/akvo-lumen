@@ -1,5 +1,5 @@
-(ns akvo.lumen.update-test
-  (:require [akvo.lumen.update :as update]
+(ns akvo.lumen.lib.update-test
+  (:require [akvo.lumen.lib.update :as update]
             [clojure.test :refer :all]
             [clojure.string :as str]))
 

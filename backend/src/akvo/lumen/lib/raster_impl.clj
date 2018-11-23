@@ -2,7 +2,7 @@
   (:require [akvo.lumen.endpoint.job-execution :as job-execution]
             [akvo.lumen.lib.import.common :as import]
             [akvo.lumen.lib :as lib]
-            [akvo.lumen.update :as update]
+            [akvo.lumen.lib.update :as update]
             [akvo.lumen.util :as util]
             [cheshire.core :as json]
             [clojure.java.io :as io]
