@@ -1,5 +1,5 @@
 (ns akvo.lumen.transformation.multiple-column
-  (:require [akvo.lumen.dataset.utils :as u]
+  (:require [akvo.lumen.lib.dataset.utils :as u]
             [akvo.lumen.transformation.engine :as t.engine]
             [akvo.lumen.transformation.multiple-column.caddisfly :as t.m-c.caddisfly]
             [clojure.tools.logging :as log]

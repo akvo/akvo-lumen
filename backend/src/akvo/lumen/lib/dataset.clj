@@ -1,4 +1,4 @@
-(ns akvo.lumen.dataset
+(ns akvo.lumen.lib.dataset
   (:refer-clojure :exclude [update])
   (:require [akvo.lumen.endpoint.job-execution :as job-execution]
             [akvo.lumen.import :as import]
@@ -11,7 +11,7 @@
             [clojure.set :refer (rename-keys)]
             [hugsql.core :as hugsql]))
 
-(hugsql/def-db-fns "akvo/lumen/dataset.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
 (hugsql/def-db-fns "akvo/lumen/job-execution.sql")
 

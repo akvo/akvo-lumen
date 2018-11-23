@@ -1,4 +1,4 @@
-(ns akvo.lumen.dataset.utils)
+(ns akvo.lumen.lib.dataset.utils)
 
 (defn find-column
   ([columns v]

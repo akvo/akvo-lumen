@@ -2,7 +2,7 @@
   (:require [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.aggregation :as aggregation]
             [akvo.lumen.lib.dashboard :as dashboard]
-            [akvo.lumen.dataset :as dataset]
+            [akvo.lumen.lib.dataset :as dataset]
             [akvo.lumen.lib.visualisation :as visualisation]
             [akvo.lumen.lib.visualisation.maps :as maps]
             [cheshire.core :as json]
