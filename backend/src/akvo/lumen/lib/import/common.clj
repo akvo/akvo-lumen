@@ -1,4 +1,4 @@
-(ns akvo.lumen.import.common
+(ns akvo.lumen.lib.import.common
   (:require [clojure.java.io :as io]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]

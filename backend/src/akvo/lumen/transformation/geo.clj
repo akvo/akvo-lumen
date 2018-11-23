@@ -1,6 +1,6 @@
 (ns akvo.lumen.transformation.geo
   "Geometry data transformations"
-  (:require [akvo.lumen.import.common :as import]
+  (:require [akvo.lumen.lib.import.common :as import]
             [akvo.lumen.transformation.engine :as engine]
             [clojure.java.jdbc :as jdbc]
             [clojure.tools.logging :as log]

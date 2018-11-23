@@ -1,6 +1,6 @@
 (ns akvo.lumen.test-utils
   (:require [akvo.lumen.component.tenant-manager :refer [pool]]
-            [akvo.lumen.import :refer [do-import]]
+            [akvo.lumen.lib.import :refer [do-import]]
             [akvo.lumen.util :refer [squuid]]
             [clojure.edn :as edn]
             [clojure.spec.test.alpha :as stest]

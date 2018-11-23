@@ -1,7 +1,7 @@
-(ns akvo.lumen.import.flow-v3
-  (:require [akvo.lumen.import.common :as import]
-            [akvo.lumen.import.flow-common :as flow-common]
-            [akvo.lumen.import.flow-v2 :as v2])
+(ns akvo.lumen.lib.import.flow-v3
+  (:require [akvo.lumen.lib.import.common :as import]
+            [akvo.lumen.lib.import.flow-common :as flow-common]
+            [akvo.lumen.lib.import.flow-v2 :as v2])
   (:import [java.time Instant]))
 
 (defn question-type->lumen-type
