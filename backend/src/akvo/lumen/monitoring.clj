@@ -1,4 +1,4 @@
-(ns akvo.lumen.lumen-monitoring
+(ns akvo.lumen.monitoring
   (:require [iapetos.core :as prometheus]
             [iapetos.collector.jvm :as jvm]
             [iapetos.collector.ring :as ring]
