@@ -7,7 +7,7 @@
             [clojure.java.io :as io]
             [hugsql.core :as hugsql]))
 
-(hugsql/def-db-fns "akvo/lumen/job-execution.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 
 (defn spec-instrument
   "Fixture to instrument all functions"

@@ -14,9 +14,9 @@
   (:import [org.postgis Polygon MultiPolygon]
            [org.postgresql.util PGobject]))
 
-(hugsql/def-db-fns "akvo/lumen/job-execution.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
-(hugsql/def-db-fns "akvo/lumen/transformation.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
 
 (defn successful-import [conn job-execution-id table-name columns spec claims data-source]
   (let [dataset-id (util/squuid)

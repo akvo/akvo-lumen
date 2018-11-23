@@ -11,7 +11,7 @@
            [org.postgis PGgeometry]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
-(hugsql/def-db-fns "akvo/lumen/transformation.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
 (hugsql/def-db-fns "akvo/lumen/transformation/engine.sql")
 
 (defmethod engine/valid? :core/merge-datasets

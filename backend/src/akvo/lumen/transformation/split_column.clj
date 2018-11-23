@@ -8,7 +8,7 @@
             [hugsql.core :as hugsql])
   (:import [java.util.regex Pattern]))
 
-(hugsql/def-db-fns "akvo/lumen/transformation.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
 
 (hugsql/def-db-fns "akvo/lumen/transformation/engine.sql")
 

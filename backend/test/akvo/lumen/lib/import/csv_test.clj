@@ -10,8 +10,8 @@
             [clojure.test :refer :all]
             [hugsql.core :as hugsql]))
 
-(hugsql/def-db-fns "akvo/lumen/job-execution.sql")
-(hugsql/def-db-fns "akvo/lumen/transformation.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
 
 
 (use-fixtures :once tenant-conn-fixture error-tracker-fixture)
