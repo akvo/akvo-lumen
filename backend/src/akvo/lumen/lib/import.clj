@@ -1,5 +1,5 @@
 (ns akvo.lumen.lib.import
-  (:require [akvo.lumen.boundary.error-tracker :as error-tracker]
+  (:require [akvo.lumen.component.error-tracker :as error-tracker]
             [akvo.lumen.lib.import.common :as import]
             [akvo.lumen.lib.import.csv]
             [akvo.lumen.lib.import.flow]
