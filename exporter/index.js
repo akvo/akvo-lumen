@@ -43,6 +43,8 @@ const setContext = (contextData, callback) => {
 
 const app = express();
 let browser;
+let currentJobCount = 0;
+const MAX_CONCURRENT_JOBS = 5;
 
 app.use(bodyParser.json());
 app.use(cors());
@@ -169,7 +171,12 @@ const sendScreenshotResponse = ({
 };
 
 app.post('/screenshot', validate(validation.screenshot), async (req, res) => {
+  if (currentJobCount > MAX_CONCURRENT_JOBS) {
+    res.sendStatus(503);
+    return;
+  }
   const runId = _.uniqueId();
+  currentJobCount += 1;
   const { format, title } = req.body;
   let retryCount = 0;
 
@@ -186,8 +193,10 @@ app.post('/screenshot', validate(validation.screenshot), async (req, res) => {
       }
       console.log('Run failed: ', runId);
       res.status(500).send(error);
+      currentJobCount -= 1;
       return;
     }
+    currentJobCount -= 1;
     sendScreenshotResponse({
       res, data, format, title,
     });
