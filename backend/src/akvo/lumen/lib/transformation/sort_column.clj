@@ -1,8 +1,8 @@
-(ns akvo.lumen.transformation.sort-column
-  (:require [akvo.lumen.transformation.engine :as engine]
+(ns akvo.lumen.lib.transformation.sort-column
+  (:require [akvo.lumen.lib.transformation.engine :as engine]
             [hugsql.core :as hugsql]))
 
-(hugsql/def-db-fns "akvo/lumen/transformation/sort_column.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/transformation/sort_column.sql")
 
 (defmethod engine/valid? :core/sort-column
   [op-spec]

@@ -3,7 +3,7 @@
             [akvo.lumen.postgres.filter :as filter]
             [akvo.lumen.lib.visualisation.map-config :as map-config]
             [akvo.lumen.lib.visualisation.map-metadata :as map-metadata]
-            [akvo.lumen.transformation.engine :as engine]
+            [akvo.lumen.lib.transformation.engine :as engine]
             [akvo.lumen.util :as util]
             [cheshire.core :as json]
             [clj-http.client :as client]

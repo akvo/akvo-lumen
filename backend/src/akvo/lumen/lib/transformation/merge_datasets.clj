@@ -1,5 +1,5 @@
-(ns akvo.lumen.transformation.merge-datasets
-  (:require [akvo.lumen.transformation.engine :as engine]
+(ns akvo.lumen.lib.transformation.merge-datasets
+  (:require [akvo.lumen.lib.transformation.engine :as engine]
             [clojure.java.jdbc :as jdbc]
             [clojure.tools.logging :as log]
             [clojure.set :as set]
@@ -12,7 +12,7 @@
 
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
-(hugsql/def-db-fns "akvo/lumen/transformation/engine.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/transformation/engine.sql")
 
 (defmethod engine/valid? :core/merge-datasets
   [op-spec]

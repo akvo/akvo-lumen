@@ -1,10 +1,10 @@
-(ns akvo.lumen.transformation.text
+(ns akvo.lumen.lib.transformation.text
   "Simple text transforms"
-  (:require [akvo.lumen.transformation.engine :as engine]
+  (:require [akvo.lumen.lib.transformation.engine :as engine]
             [clojure.tools.logging :as log]
             [hugsql.core :as hugsql]))
 
-(hugsql/def-db-fns "akvo/lumen/transformation/text.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/transformation/text.sql")
 
 (defn- transform
   [tenant-conn table-name columns op-spec fn]

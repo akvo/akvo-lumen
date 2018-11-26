@@ -1,6 +1,6 @@
-(ns akvo.lumen.transformation.multiple-column.caddisfly
+(ns akvo.lumen.lib.transformation.multiple-column.caddisfly
   (:require [akvo.lumen.postgres :as postgres]
-            [akvo.lumen.transformation.engine :as engine]
+            [akvo.lumen.lib.transformation.engine :as engine]
             [akvo.lumen.component.caddisfly :refer (get-schema)]
             [cheshire.core :as json]
             [clojure.java.jdbc :as jdbc]
@@ -10,7 +10,7 @@
 
 (hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
 
-(hugsql/def-db-fns "akvo/lumen/transformation/engine.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/transformation/engine.sql")
 
 (defn- add-name-to-new-columns
   [current-columns columns-to-extract]

@@ -1,6 +1,6 @@
-(ns akvo.lumen.transformation.split-column-test
+(ns akvo.lumen.lib.transformation.split-column-test
   (:require [akvo.lumen.endpoint.split-column :as e.split-column]
-            [akvo.lumen.transformation.split-column :as split-column]
+            [akvo.lumen.lib.transformation.split-column :as split-column]
             [clojure.test :refer :all]))
 
 (deftest pattern-test  

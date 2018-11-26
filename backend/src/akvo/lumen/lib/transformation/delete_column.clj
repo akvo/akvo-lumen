@@ -1,11 +1,11 @@
-(ns akvo.lumen.transformation.delete-column
-  (:require [akvo.lumen.transformation.engine :as engine]
+(ns akvo.lumen.lib.transformation.delete-column
+  (:require [akvo.lumen.lib.transformation.engine :as engine]
             [clojure.tools.logging :as log]
             [clojure.string :as str]
-            [akvo.lumen.transformation.merge-datasets :as merge-datasets]
+            [akvo.lumen.lib.transformation.merge-datasets :as merge-datasets]
             [hugsql.core :as hugsql]))
 
-(hugsql/def-db-fns "akvo/lumen/transformation/engine.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/transformation/engine.sql")
 
 (defn col-name [op-spec]
   (get (engine/args op-spec) "columnName"))

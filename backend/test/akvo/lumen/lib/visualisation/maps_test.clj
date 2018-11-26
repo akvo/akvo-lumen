@@ -1,6 +1,6 @@
 (ns akvo.lumen.lib.visualisation.maps-test
   (:require [akvo.lumen.lib.visualisation.maps :as m]
-            [akvo.lumen.transformation.engine :as engine]
+            [akvo.lumen.lib.transformation.engine :as engine]
             [akvo.lumen.lib.visualisation.map-config :as map-config]
             [clojure.test :refer :all]))
 

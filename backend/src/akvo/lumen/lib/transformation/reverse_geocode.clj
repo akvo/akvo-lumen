@@ -1,11 +1,11 @@
-(ns akvo.lumen.transformation.reverse-geocode
-  (:require [akvo.lumen.transformation.engine :as engine]
+(ns akvo.lumen.lib.transformation.reverse-geocode
+  (:require [akvo.lumen.lib.transformation.engine :as engine]
             [clojure.java.jdbc :as jdbc]
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
-(hugsql/def-db-fns "akvo/lumen/transformation/engine.sql")
-(hugsql/def-db-fns "akvo/lumen/transformation/reverse_geocode.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/transformation/engine.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/transformation/reverse_geocode.sql")
 
 (defmethod engine/valid? :core/reverse-geocode
   [op-spec]

@@ -1,14 +1,14 @@
-(ns akvo.lumen.transformation.engine-test
+(ns akvo.lumen.lib.transformation.engine-test
   {:functional true}
   (:require [akvo.lumen.fixtures :refer [migrate-tenant rollback-tenant]]
             [akvo.lumen.test-utils :refer [test-tenant test-tenant-conn]]
-            [akvo.lumen.transformation.engine :refer :all]
+            [akvo.lumen.lib.transformation.engine :refer :all]
             [cheshire.core :as json]
             [clojure.java.io :as io]
             [clojure.test :refer :all]
             [hugsql.core :as hugsql]))
 
-(hugsql/def-db-fns "akvo/lumen/transformation/engine_test.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/transformation/engine_test.sql")
 
 (def columns (vec (take 3 (json/parse-string (slurp (io/resource "columns_test.json"))))))
 
