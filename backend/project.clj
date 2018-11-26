@@ -24,7 +24,7 @@
                  [honeysql "0.9.3"]
                  [meta-merge "1.0.0"]
                  [org.akvo/commons "0.4.5" :exclusions [org.postgresql/postgresql org.clojure/java.jdbc]]
-                 [org.akvo/resumed "1.17.be5e74d2518253bb87ce087c15f5e04bd4b8b824"]
+                 [org.akvo/resumed "1.43.1e66390dedd92322a9bf6aecdcdc3c2d0c7a2083"]
                  [org.apache.tika/tika-core "1.18"]
                  [org.apache.tika/tika-parsers "1.18" :exclusions [org.slf4j/slf4j-api com.fasterxml.jackson.core/jackson-core org.apache.httpcomponents/httpcore org.apache.httpcomponents/httpclient org.apache.httpcomponents/httpmime]]
                  ;; explicit versions of commons deps used by tika-parsers and clj-http
