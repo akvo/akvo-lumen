@@ -27,7 +27,7 @@
             [akvo.lumen.component.keycloak :as keycloak]
             [akvo.lumen.config :refer [error-msg]]
             [akvo.lumen.lib.aes :as aes]
-            [akvo.lumen.lib.share-impl :refer [random-url-safe-string]]
+            [akvo.lumen.lib.share :refer [random-url-safe-string]]
             [akvo.lumen.util :refer [conform-email squuid]]
             [cheshire.core :as json]
             [clj-http.client :as client]

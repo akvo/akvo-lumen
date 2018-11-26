@@ -3,7 +3,7 @@
   (:require [akvo.lumen.endpoint.share-test :as share-test]
             [akvo.lumen.fixtures :refer [*tenant-conn*
                                          tenant-conn-fixture]]
-            [akvo.lumen.lib.public-impl :as public-impl]
+            [akvo.lumen.lib.public :as public]
             [akvo.lumen.lib.share :as share]
             [akvo.lumen.endpoint.commons.variant :as variant]
             [clojure.test :refer :all]
@@ -21,7 +21,7 @@
 (deftest ^:functional public-data
 
   (testing "Non existing public share id."
-    (let [r (public-impl/get-share *tenant-conn* "abc123")]
+    (let [r (public/get-share *tenant-conn* "abc123")]
       (is (= nil (get r "error")))))
 
   (testing "Public visualiation share."
@@ -29,7 +29,7 @@
     (let [new-share (variant/value (share/fetch *tenant-conn*
                                                 {"visualisationId"
                                                  (:visualisation-id share-test/test-spec)}))
-          p         (public-impl/get-share *tenant-conn* (:id new-share))]
+          p         (public/get-share *tenant-conn* (:id new-share))]
       (is (= (:visualisation-id p)
              (:visualisation-id share-test/test-spec)))
       (is (= (:id new-share)
@@ -39,8 +39,8 @@
     (let [dashboard-id    (-> (all-dashboards *tenant-conn*) first :id)
           dashboard-share (variant/value (share/fetch *tenant-conn*
                                                       {"dashboardId" dashboard-id}))
-          share           (public-impl/get-share *tenant-conn* (:id dashboard-share))
-          share-data      (public-impl/response-data *tenant-conn* share {})]
+          share           (public/get-share *tenant-conn* (:id dashboard-share))
+          share-data      (public/response-data *tenant-conn* share {})]
       (is (every? #(contains? share-data %)
                   ["dashboardId" "dashboards" "visualisations" "datasets"]))
       (is (= 1
