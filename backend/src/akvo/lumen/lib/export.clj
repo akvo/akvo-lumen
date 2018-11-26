@@ -16,15 +16,15 @@
 (defn export
   "Proxy fn, exporter-url token exporter spec -> ring response map"
   [exporter-url access-token locale spec]
-  (let [
-        {:keys [body headers status] :as response}
+  (let [{:keys [body headers status] :as response}
         (time* (client/post exporter-url
-                      {:headers {"access_token" (str/replace-first access-token
-                                                                   #"Bearer "
-                                                                   "")
-                                 "locale" locale}
-                       :form-params spec
-                       :content-type :json}))]
+                            {:headers {"access_token" (str/replace-first access-token
+                                                                         #"Bearer "
+                                                                         "")
+                                       "locale" locale}
+                             :form-params spec
+                             :content-type :json
+                             :throw-exceptions false}))]
     (log/info :response-without-body (dissoc response :body))
     {:body body
      :headers {"Content-Type" (get headers "Content-Type")
