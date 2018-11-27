@@ -9,3 +9,6 @@
 
 (defprotocol TenantAdmin
   (current-plan [this label] "Get the current plan."))
+
+(defprotocol SendEmail
+  (send-email [this recipients email] "Send email"))

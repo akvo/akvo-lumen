@@ -1,8 +1,8 @@
 (ns akvo.lumen.lib.user
-  (:require [akvo.lumen.component.emailer :as emailer]
-            [akvo.lumen.component.keycloak :as keycloak]
+  (:require [akvo.lumen.component.keycloak :as keycloak]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.share :refer [random-url-safe-string]]
+            [akvo.lumen.protocols :as p]
             [clj-time.coerce :as c]
             [clj-time.core :as t]
             [clojure.string :as str]
@@ -24,7 +24,7 @@
                     {:author-email (get author-claims "email")
                      :invite-id invite-id
                      :location location})]
-    (emailer/send-email emailer [email] {"Subject" "Akvo Lumen invite"
+    (p/send-email emailer [email] {"Subject" "Akvo Lumen invite"
                                          "Text-part" text-part})))
 
 (defn create-new-account-and-invite-to-tenant
@@ -53,7 +53,7 @@
                      :location location
                      :tmp-password tmp-password})]
     (keycloak/reset-password keycloak request-headers user-id tmp-password)
-    (emailer/send-email emailer [email] {"Subject" "Akvo Lumen invite"
+    (p/send-email emailer [email] {"Subject" "Akvo Lumen invite"
                                          "Text-part" text-part})))
 
 (defn create-invite

@@ -1,20 +1,18 @@
 (ns akvo.lumen.component.emailer
   (:require [cheshire.core :as json]
             [clj-http.client :as client]
+            [akvo.lumen.protocols :as p]
             [clojure.tools.logging :as log]
             [integrant.core :as ig]))
 
-(defprotocol SendEmail
-  (send-email [this recipients email] "Send email"))
-
 (defrecord DevEmailer []
-  SendEmail
+  p/SendEmail
   (send-email [this recipients email]
     (log/info recipients)
     (log/info email)))
 
 (defrecord MailJetV3Emailer [config]
-  SendEmail
+  p/SendEmail
   (send-email [{{credentials :credentials
                  from-email  :from-email
                  from-name   :from-name} :config}
