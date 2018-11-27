@@ -1,6 +1,6 @@
 (ns akvo.lumen.lib.import
   (:require [akvo.lumen.protocols :as p]
-            [akvo.lumen.lib.import.common :as import]
+            [akvo.lumen.lib.import.common :as common]
             [akvo.lumen.protocols :as p]
             [akvo.lumen.lib.import.csv]
             [akvo.lumen.lib.import.flow]
@@ -10,9 +10,7 @@
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as string]
             [clojure.tools.logging :as log]
-            [hugsql.core :as hugsql])
-  (:import [org.postgis Polygon MultiPolygon]
-           [org.postgresql.util PGobject]))
+            [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
@@ -55,23 +53,6 @@
                                      :reason [reason]})
   (drop-table conn {:table-name table-name}))
 
-
-(defn val->geometry-pgobj
-  [v]
-  (doto (PGobject.)
-    (.setType "geometry")
-    (.setValue (.toString v))))
-
-(extend-protocol jdbc/ISQLValue
-  org.postgis.Polygon
-  (sql-value [v] (val->geometry-pgobj v))
-  org.postgis.MultiPolygon
-  (sql-value [v] (val->geometry-pgobj v))
-  org.postgis.Point
-  (sql-value [v] (val->geometry-pgobj v)))
-
-
-
 (defn do-import
   "Import runs within a future and since this is not taking part of ring
   request / response cycle we need to make sure to capture errors."
@@ -79,10 +60,10 @@
   (let [table-name (util/gen-table-name "ds")]
     (try
       (let [spec (:spec (data-source-spec-by-job-execution-id conn {:job-execution-id job-execution-id}))]
-        (with-open [importer (import/dataset-importer (get spec "source") config)]
+        (with-open [importer (common/dataset-importer (get spec "source") config)]
           (let [columns (p/columns importer)]
-            (import/create-dataset-table conn table-name columns)
-            (doseq [record (map import/coerce-to-sql (p/records importer))]
+            (common/create-dataset-table conn table-name columns)
+            (doseq [record (map common/coerce-to-sql (p/records importer))]
               (jdbc/insert! conn table-name record))
             (successful-import conn job-execution-id table-name columns spec claims data-source))))
       (catch Throwable e
