@@ -1,5 +1,5 @@
 (ns akvo.lumen.lib.update
-  (:require [akvo.lumen.component.error-tracker :as error-tracker]
+  (:require [akvo.lumen.protocols :as p]
             [akvo.lumen.lib.import.common :as import]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.transformation.engine :as engine]
@@ -141,6 +141,6 @@
                      data-source-spec))
         (catch Exception e
           (failed-update tenant-conn job-execution-id (.getMessage e))
-          (error-tracker/track error-tracker e)
+          (p/track error-tracker e)
           (log/error e))))
     (lib/ok {"updateId" job-execution-id})))

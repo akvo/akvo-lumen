@@ -1,5 +1,5 @@
 (ns akvo.lumen.lib.import
-  (:require [akvo.lumen.component.error-tracker :as error-tracker]
+  (:require [akvo.lumen.protocols :as p]
             [akvo.lumen.lib.import.common :as import]
             [akvo.lumen.lib.import.csv]
             [akvo.lumen.lib.import.flow]
@@ -88,7 +88,7 @@
       (catch Throwable e
         (failed-import conn job-execution-id (.getMessage e) table-name)
         (log/error e)
-        (error-tracker/track error-tracker e)
+        (p/track error-tracker e)
         (throw e)))))
 
 (defn handle-import-request [tenant-conn config error-tracker claims data-source]
