@@ -75,13 +75,11 @@
 
 (defn handle-import-request [tenant-conn config error-tracker claims data-source]
   (let [data-source-id (str (util/squuid))
-        job-execution-id (str (util/squuid))
-        table-name (util/gen-table-name "ds")
-        kind (get-in data-source ["source" "kind"])]
+        job-execution-id (str (util/squuid))]
     (insert-data-source tenant-conn {:id data-source-id
                                      :spec (json/generate-string data-source)})
     (insert-job-execution tenant-conn {:id job-execution-id
                                        :data-source-id data-source-id})
     (do-import tenant-conn config error-tracker job-execution-id claims)
     (lib/ok {"importId" job-execution-id
-             "kind" kind})))
+             "kind" (get-in data-source ["source" "kind"])})))
