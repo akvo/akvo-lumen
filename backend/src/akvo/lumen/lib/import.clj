@@ -4,7 +4,6 @@
             [akvo.lumen.lib.import.csv]
             [akvo.lumen.lib.import.flow]
             [akvo.lumen.lib :as lib]
-            [akvo.lumen.lib.raster :as raster]
             [akvo.lumen.util :as util]
             [cheshire.core :as json]
             [clojure.java.jdbc :as jdbc]

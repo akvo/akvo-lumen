@@ -75,7 +75,7 @@
       (throw e))))
 
 (defmethod ig/init-key :akvo.lumen.auth/wrap-auth  [_ opts]
-  akvo.lumen.auth/wrap-auth)
+  wrap-auth)
 
 (defmethod ig/init-key :akvo.lumen.auth/wrap-jwt  [_ opts]
-  akvo.lumen.auth/wrap-jwt)
+  wrap-jwt)
