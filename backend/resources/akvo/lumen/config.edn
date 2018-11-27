@@ -5,11 +5,11 @@
 
  :akvo.lumen.component.hikaricp/hikaricp {:config #ig/ref :akvo.lumen.config}
 
- :akvo.lumen.middleware.duct.erros/wrap-hide-errors      {}
- :akvo.lumen.middleware.duct.not-found/wrap-not-found    {}
- :akvo.lumen.middleware.ring.json/wrap-json-body         {}
- :akvo.lumen.middleware.ring.json/wrap-json-response     {}
- :akvo.lumen.middleware.ring.defaults/wrap-defaults      {}
+ :akvo.lumen.component.handler/wrap-hide-errors          {}
+ :akvo.lumen.component.handler/wrap-not-found            {}
+ :akvo.lumen.component.handler/wrap-json-body            {}
+ :akvo.lumen.component.handler/wrap-json-response        {}
+ :akvo.lumen.component.handler/wrap-defaults             {}
  :akvo.lumen.auth/wrap-auth                              {}
  :akvo.lumen.auth/wrap-jwt                               {}
  :akvo.lumen.component.tenant-manager/wrap-label-tenant  {}
@@ -96,11 +96,11 @@
  {:app
   {:migrations {:tenant-manager "akvo/lumen/migrations/tenant_manager"
                 :tenants        "akvo/lumen/migrations/tenants"}
-   :middleware {:functions {:hide-errors       #ig/ref :akvo.lumen.middleware.duct.erros/wrap-hide-errors
-                            :json-body         #ig/ref :akvo.lumen.middleware.ring.json/wrap-json-body
-                            :json-response     #ig/ref :akvo.lumen.middleware.ring.json/wrap-json-response
-                            :not-found         #ig/ref :akvo.lumen.middleware.duct.not-found/wrap-not-found
-                            :ring-defaults     #ig/ref :akvo.lumen.middleware.ring.defaults/wrap-defaults
+   :middleware {:functions {:hide-errors       #ig/ref :akvo.lumen.component.handler/wrap-hide-errors
+                            :json-body         #ig/ref :akvo.lumen.component.handler/wrap-json-body
+                            :json-response     #ig/ref :akvo.lumen.component.handler/wrap-json-response
+                            :not-found         #ig/ref :akvo.lumen.component.handler/wrap-not-found
+                            :ring-defaults     #ig/ref :akvo.lumen.component.handler/wrap-defaults
                             :wrap-auth         #ig/ref :akvo.lumen.auth/wrap-auth
                             :wrap-jwt          #ig/ref :akvo.lumen.auth/wrap-jwt
                             :wrap-label-tenant #ig/ref :akvo.lumen.component.tenant-manager/wrap-label-tenant

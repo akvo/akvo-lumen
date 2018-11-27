@@ -4,12 +4,12 @@
  :akvo.lumen.component.error-tracker/local              {}
  :akvo.lumen.component.emailer/dev-emailer              {:config #ig/ref :akvo.lumen.config}
 
- :akvo.lumen.middleware.ring.stacktrace/wrap-stacktrace {}
+ :akvo.lumen.component.handler/wrap-stacktrace {}
 
  :akvo.lumen.config
  {:app
   {:middleware
-   {:functions {:stacktrace #ig/ref :akvo.lumen.middleware.ring.stacktrace/wrap-stacktrace}
+   {:functions {:stacktrace #ig/ref :akvo.lumen.component.handler/wrap-stacktrace}
     :applied   ^:replace [:not-found :json-response :ring-defaults :json-body
                           :wrap-auth :wrap-jwt :monitoring :wrap-label-tenant :stacktrace]
     :arguments {:wrap-jwt {:keycloak-url   "http://auth.lumen.local:8080/auth"

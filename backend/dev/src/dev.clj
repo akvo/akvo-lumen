@@ -2,7 +2,6 @@
   (:refer-clojure :exclude [test])
   (:require [akvo.lumen.endpoint.commons]
             [akvo.lumen.lib.aes :as aes]
-            [akvo.lumen.middleware]
             [akvo.lumen.migrate :as lumen-migrate]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
