@@ -10,8 +10,8 @@
  :akvo.lumen.middleware.ring.json/wrap-json-body         {}
  :akvo.lumen.middleware.ring.json/wrap-json-response     {}
  :akvo.lumen.middleware.ring.defaults/wrap-defaults      {}
- :akvo.lumen.middleware.auth/wrap-auth                   {}
- :akvo.lumen.middleware.auth/wrap-jwt                    {}
+ :akvo.lumen.auth/wrap-auth                              {}
+ :akvo.lumen.auth/wrap-jwt                               {}
  :akvo.lumen.middleware.tenant-manager/wrap-label-tenant {}
  :akvo.lumen.middleware.sentry/wrap-sentry               {}
 
@@ -101,8 +101,8 @@
                             :json-response     #ig/ref :akvo.lumen.middleware.ring.json/wrap-json-response
                             :not-found         #ig/ref :akvo.lumen.middleware.duct.not-found/wrap-not-found
                             :ring-defaults     #ig/ref :akvo.lumen.middleware.ring.defaults/wrap-defaults
-                            :wrap-auth         #ig/ref :akvo.lumen.middleware.auth/wrap-auth
-                            :wrap-jwt          #ig/ref :akvo.lumen.middleware.auth/wrap-jwt
+                            :wrap-auth         #ig/ref :akvo.lumen.auth/wrap-auth
+                            :wrap-jwt          #ig/ref :akvo.lumen.auth/wrap-jwt
                             :wrap-label-tenant #ig/ref :akvo.lumen.middleware.tenant-manager/wrap-label-tenant
                             :wrap-sentry       #ig/ref :akvo.lumen.middleware.sentry/wrap-sentry
                             :monitoring  #ig/ref :akvo.lumen.monitoring/middleware}

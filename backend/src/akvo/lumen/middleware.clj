@@ -1,7 +1,6 @@
 (ns akvo.lumen.middleware
   "add integrant support"
-  (:require [akvo.lumen.auth]
-            [akvo.lumen.component.tenant-manager]
+  (:require [akvo.lumen.component.tenant-manager]
             [clojure.tools.logging :as log]
             [compojure.response :as compojure]
             [integrant.core :as ig]
@@ -39,12 +38,6 @@
 
 (defmethod ig/init-key :akvo.lumen.middleware.ring.defaults/wrap-defaults  [_ opts]  
   ring.middleware.defaults/wrap-defaults)
-
-(defmethod ig/init-key :akvo.lumen.middleware.auth/wrap-auth  [_ opts]  
-  akvo.lumen.auth/wrap-auth)
-
-(defmethod ig/init-key :akvo.lumen.middleware.auth/wrap-jwt  [_ opts]  
-  akvo.lumen.auth/wrap-jwt)
 
 (defmethod ig/init-key :akvo.lumen.middleware.tenant-manager/wrap-label-tenant  [_ opts]  
   akvo.lumen.component.tenant-manager/wrap-label-tenant)
