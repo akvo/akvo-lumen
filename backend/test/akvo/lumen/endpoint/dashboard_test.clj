@@ -4,7 +4,6 @@
             [akvo.lumen.fixtures :refer [*tenant-conn*
                                          tenant-conn-fixture]]
             [akvo.lumen.lib.dashboard :as dashboard]
-            [akvo.lumen.lib.dashboard-impl :as dashboard-impl]
             [akvo.lumen.endpoint.commons.variant :as variant]
             [clojure.test :refer :all]
             [hugsql.core :as hugsql]))
@@ -56,7 +55,7 @@
 
 (deftest dashboard-unit
   (testing "filter-type"
-    (is (= (dashboard-impl/filter-type (dashboard-spec "abc123") "text")
+    (is (= (dashboard/filter-type (dashboard-spec "abc123") "text")
            {:entities
             '({"id" "text-1", "type" "text", "content" "I am a text entity."}
              {"id" "text-2",

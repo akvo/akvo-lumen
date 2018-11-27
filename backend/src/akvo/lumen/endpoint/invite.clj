@@ -15,12 +15,12 @@
   (context "/api/admin/invites" {:keys [jwt-claims params tenant] :as request}
     (let-routes [tenant-conn (connection tenant-manager tenant)]
       (GET "/" _
-        (user/invites tenant-conn))
+        (user/active-invites tenant-conn))
 
       (POST "/" {{:strs [email]} :body}
-        (user/invite emailer keycloak tenant-conn tenant
-                     (location (:invite-redirect config) request)
-                     email jwt-claims))
+        (user/create-invite emailer keycloak tenant-conn tenant
+                            (location (:invite-redirect config) request)
+                            email jwt-claims))
 
       (context "/:id" [id]
         (DELETE "/" _
