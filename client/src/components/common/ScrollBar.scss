@@ -30,25 +30,28 @@
       &::-webkit-scrollbar-thumb {
           border-radius: 8px;
           border: 2px solid white; /* should match background, can't be transparent */
-          background-color: rgba(0, 0, 0, .5);
+          background-color: #7C7C7C;
+          z-index:9999;
       }
     }
   }
 
   &-track {
-    width: 100%;
+    width: 100% !important;
     height: 2px;
-    background: $lightGrey;
+    background: transparent;
     position: absolute;
     left: 0;
-    bottom: 0;
-    display: none;
+    bottom: 6px;         
   }
 
   &-handle {
     position: absolute;
     height: 2px;
-    background: $anchorLinkLight;
+    background: #7C7C7C;
+    z-index:9998;    
+    width: 70% !important;
+    margin-left: 5px;
   }
 }
 
