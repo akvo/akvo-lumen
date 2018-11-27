@@ -1,13 +1,13 @@
 (ns akvo.lumen.endpoint.library
   (:require [akvo.lumen.component.tenant-manager :refer [connection]]
-            [akvo.lumen.dataset :as dataset]
+            [akvo.lumen.lib.dataset :as dataset]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib
              [dashboard :as dashboard]
              [visualisation :as visualisation]
              [collection :as collection]
              [raster :as raster]]
-            [akvo.lumen.variant :as variant]
+            [akvo.lumen.endpoint.commons.variant :as variant]
             [compojure.core :refer :all]
             [integrant.core :as ig]))
 

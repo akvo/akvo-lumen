@@ -6,7 +6,7 @@
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.user :as user]
             [akvo.lumen.test-utils :refer [seed-data test-tenant test-tenant-conn]]
-            [akvo.lumen.variant :as variant]
+            [akvo.lumen.endpoint.commons.variant :as variant]
             [clojure.set :as set]
             [clojure.test :refer :all]
             [integrant.core :as ig]))
@@ -64,24 +64,24 @@
 
 (deftest ^:functional create-delete-invite
   (testing "Create invite"
-    (let [number-of-initial-invites (-> (user/invites  *tenant-conn*)
+    (let [number-of-initial-invites (-> (user/active-invites  *tenant-conn*)
                                         variant/value :invites count)
-          resp (user/invite *emailer* *keycloak* *tenant-conn* "t1"
-                            server-name ruth-email author-claims)]
+          resp (user/create-invite *emailer* *keycloak* *tenant-conn* "t1"
+                                   server-name ruth-email author-claims)]
       (is (= ::lib/ok (variant/tag resp)))
       (is (= (inc number-of-initial-invites)
-             (-> (user/invites *tenant-conn*)
+             (-> (user/active-invites *tenant-conn*)
                  variant/value :invites count)))))
 
   (testing "Delete invite"
-    (let [number-of-initial-invites (-> (user/invites *tenant-conn*)
+    (let [number-of-initial-invites (-> (user/active-invites *tenant-conn*)
                                         variant/value :invites count)
-          invite-id (-> (user/invites *tenant-conn*)
+          invite-id (-> (user/active-invites *tenant-conn*)
                         variant/value :invites first :id)
           resp (user/delete-invite *tenant-conn* invite-id)]
       (is (= ::lib/ok (variant/tag resp)))
       (is (= (dec number-of-initial-invites)
-             (-> (user/invites *tenant-conn*)
+             (-> (user/active-invites *tenant-conn*)
                  variant/value :invites count))))))
 
 
@@ -89,11 +89,11 @@
 
   (testing "Invite user"
 
-    (let [invite-resp (user/invite *emailer* *keycloak* *tenant-conn* "t1"
+    (let [invite-resp (user/create-invite *emailer* *keycloak* *tenant-conn* "t1"
                                    server-name ruth-email author-claims)
           number-of-original-users (-> (user/users *keycloak* "t1")
                                        variant/value :users count)
-          invite-id (-> (user/invites *tenant-conn*)
+          invite-id (-> (user/active-invites *tenant-conn*)
                         variant/value :invites first :id)
           resp (user/verify-invite *keycloak* *tenant-conn* "t1" invite-id
                                    "http://t1.lumen.localhost:3030")]

@@ -3,7 +3,7 @@
             [clojure.string :as str]
             [hugsql.core :as hugsql]))
 
-(hugsql/def-db-fns "akvo/lumen/data-source.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/data-source.sql")
 
 (defn delete [conn id status]
   {:pre [(#{:pending :failed :ok} (keyword status))]}

@@ -5,7 +5,7 @@
             [akvo.lumen.lib.dashboard :as dashboard]
             [akvo.lumen.lib.share :as share]
             [akvo.lumen.util :refer [gen-table-name squuid]]
-            [akvo.lumen.variant :as variant]
+            [akvo.lumen.endpoint.commons.variant :as variant]
             [clojure.java.jdbc :as jdbc]
             [clojure.test :refer :all]
             [hugsql.core :as hugsql]))
@@ -14,8 +14,8 @@
 ;;; Helpers
 ;;;
 
-(hugsql/def-db-fns "akvo/lumen/dataset.sql")
-(hugsql/def-db-fns "akvo/lumen/job-execution.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
 
 

@@ -1,7 +1,7 @@
 (ns akvo.lumen.main
   (:gen-class)
   (:require [akvo.lumen.config :as config]
-            [akvo.lumen.endpoint]
+            [akvo.lumen.endpoint.commons]
             [akvo.lumen.middleware]
             [akvo.lumen.migrate :as migrate]
             [clojure.java.io :as io]

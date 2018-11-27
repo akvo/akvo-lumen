@@ -1,6 +1,6 @@
 (ns akvo.lumen.endpoint.aggregation
   (:require [akvo.lumen.component.tenant-manager :refer [connection]]
-            [akvo.lumen.http :as http]
+            [akvo.lumen.endpoint.commons.http :as http]
             [akvo.lumen.lib.aggregation :as aggregation]
             [cheshire.core :as json]
             [compojure.core :refer :all]

@@ -1,17 +1,18 @@
 (ns akvo.lumen.lib.multiple-column
   (:require [clojure.tools.logging :as log]
+            [akvo.lumen.component.caddisfly :as c.caddisfly]
             [ring.util.response :refer [response not-found]]))
 
 (defn- extract
   [caddisfly id]
   (when id
-    (if-let [schema (get (:schema caddisfly) id)]
-      (let [res (select-keys schema [:hasImage])]
-        (assoc res :columns (map (fn [r]
-                                   {:id   (:id r)
-                                    :name (format "%s (%s)" (:name r) (:unit r))
-                                    :type "text" ;; TODO will be improved after design discussions 
-                                    }) (:results schema)))))))
+    (if-let [schema (c.caddisfly/get-schema caddisfly id)]
+      (-> (select-keys schema [:hasImage])
+          (assoc :columns (map (fn [r]
+                                 {:id   (:id r)
+                                  :name (format "%s (%s)" (:name r) (:unit r))
+                                  :type "text" ;; TODO will be improved after design discussions
+                                  }) (:results schema)))))))
 
 (defn details
   "depending of type of multiple columns we dispatch to different logic impls"

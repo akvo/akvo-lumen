@@ -1,5 +1,5 @@
 (ns akvo.lumen.endpoint.user
-  (:require [akvo.lumen.http :as http]
+  (:require [akvo.lumen.endpoint.commons.http :as http]
             [akvo.lumen.lib.user :as user]
             [compojure.core :refer :all]
             [integrant.core :as ig]))
