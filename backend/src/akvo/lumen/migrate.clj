@@ -35,18 +35,6 @@
                          :migrations migrations
                          :strategy ignore-future-migrations}))
 
-(defn read-config [config-path]
-  (duct/read-config (io/resource config-path)))
-
-(defn construct-system-config
-  "Create a system definition."
-  ([] (construct-system-config "akvo/lumen/config.edn" (config/bindings)))
-  ([config-path bindings]
-   (config/load-config [(duct/prep (read-config config-path))] bindings)))
-
-
-
-
 (defn load-migrations
   "From a system definition get migrations for tenant manager and tenants."
   [system]
@@ -55,12 +43,11 @@
    :tenants        (ragtime-jdbc/load-resources
                     (get-in system [:akvo.lumen.config :app :migrations :tenants]))})
 
-
 (defn migrate
   "Migrate tenant manager and tenants."
   ([] (migrate source-files))
   ([config-path]
-   (let [system (construct-system-config config-path (config/bindings))
+   (let [system (config/construct config-path (config/bindings))
          migrations (load-migrations system)
          tenant-manager-db {:connection-uri (get-in system [:akvo.lumen.config :db :uri])}]
      (do-migrate (ragtime-jdbc/sql-database tenant-manager-db)
@@ -75,17 +62,15 @@
 
 (defn migrate-tenant
   [tenant-conn]
-  (let [system (construct-system-config)
+  (let [system (config/construct)
         migrations (load-migrations system)]
     (do-migrate (ragtime-jdbc/sql-database tenant-conn)
                 (:tenants migrations))))
-
 
 (defn do-rollback [datastore migrations amount-or-id]
   (ragtime-repl/rollback {:datastore  datastore
                           :migrations migrations}
                          amount-or-id))
-
 
 (defn rollback-tenants [db connection-uri-fn migrations amount-or-id]
   (doseq [tenant (all-tenants db)]
@@ -93,13 +78,12 @@
                  migrations
                  amount-or-id)))
 
-
 (defn rollback
   "(rollback) ;; will rollback tenants
   (rollback 1 ;; will rollback 1 migration on all tenants)
   (rollback :tenant-manager) ;; will rollback tenant manager migrations"
   [config-path arg]
-  (let [system (construct-system-config config-path (config/bindings))
+  (let [system (config/construct config-path (config/bindings))
         migrations (load-migrations system)
         tenant-migrations (:tenants migrations)
         tenant-manager-migrations (:tenant-manager migrations)

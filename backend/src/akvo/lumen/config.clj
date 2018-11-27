@@ -1,6 +1,8 @@
 (ns akvo.lumen.config
-  (:require [clojure.tools.logging :as log]
+  (:require [clojure.java.io :as io]
+            [clojure.tools.logging :as log]
             [clojure.walk :as walk]
+            [duct.core :as duct]
             [environ.core :refer [env]]
             [integrant.core :as ig]
             [meta-merge.core :refer [meta-merge]]))
@@ -55,5 +57,12 @@
    'sentry-backend-dsn (:lumen-sentry-backend-dsn env)
    'sentry-client-dsn (:lumen-sentry-client-dsn env)})
 
-(defmethod ig/init-key :akvo.lumen.config  [a opts]
+(defn construct
+  "Create a system definition."
+  ([] (construct "akvo/lumen/config.edn" (bindings)))
+  ([config-path bindings]
+   (load-config [(duct/prep (duct/read-config (io/resource config-path)))] bindings)))
+
+(defmethod ig/init-key :akvo.lumen.config [a opts]
   (load-config [opts] (bindings)))
+
