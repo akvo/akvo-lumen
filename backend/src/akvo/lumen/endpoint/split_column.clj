@@ -1,14 +1,14 @@
 (ns akvo.lumen.endpoint.split-column
   (:require [akvo.lumen.component.tenant-manager :refer [connection]]
             [akvo.lumen.lib :as lib]
-            [akvo.lumen.transformation.split-column :as transformation]
+            [akvo.lumen.lib.transformation.split-column :as transformation]
             [cheshire.core :as json]
             [clojure.tools.logging :as log]
             [compojure.core :refer :all]
             [hugsql.core :as hugsql]
             [integrant.core :as ig]))
 
-(hugsql/def-db-fns "akvo/lumen/transformation.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
 
 (defn sort-pattern-analysis-by [pattern-analysis sort-by*]
   (->> (seq (:analysis pattern-analysis))

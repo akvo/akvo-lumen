@@ -1,6 +1,6 @@
 (ns akvo.lumen.endpoint.transformation
   (:require [akvo.lumen.component.tenant-manager :refer [connection]]
-            [akvo.lumen.transformation :as t]
+            [akvo.lumen.lib.transformation :as t]
             [compojure.core :refer :all]
             [integrant.core :as ig]))
 

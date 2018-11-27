@@ -5,7 +5,7 @@
   (:import [java.awt Color]))
 
 
-(hugsql/def-db-fns "akvo/lumen/dataset.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/raster.sql")
 
 (defn layer-point-color [layer-index]

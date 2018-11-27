@@ -1,7 +1,11 @@
 (ns akvo.lumen.lib.tier
-  (:require [akvo.lumen.lib.tier-impl :as impl]))
+  (:require
+   [ring.util.response :refer [response]]))
 
-(defn all
-  "Returns all tiers."
-  [tenant-conn]
-  (impl/all tenant-conn))
+(defn all [tenant-conn]
+  (response {"tiers" {"unlimited" {"numberOfExternalDatasets" nil
+                                   "numberOfVisualisations" nil}
+                      "standard" {"numberOfExternalDatasets" 5
+                                  "numberOfVisualisations" 50}
+                      "pro" {"numberOfExternalDatasets" 20
+                             "numberOfVisualisations" 200}}}))

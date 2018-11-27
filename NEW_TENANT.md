@@ -16,7 +16,7 @@ used) we run the scripts our docker container.
 
 ## To create a new tenant
 ```
-$ docker-compose exec backend /app/run-as-user.sh env ENCRYPTION_KEY=... KC_URL=... KC_SECRET=... PG_HOST=... PG_DATABASE=... PG_USER=... PG_PASSWORD=... lein run -m akvo.lumen.admin.add-tenant "<FULL TENANT URL>" "<TENANT TITLE>" "<ADMIN EMAIL>"
+$ docker-compose exec backend run-as-user.sh env ENCRYPTION_KEY=... KC_URL=... KC_SECRET=... PG_HOST=... PG_DATABASE=... PG_USER=... PG_PASSWORD=... lein run -m akvo.lumen.admin.add-tenant "<FULL TENANT URL>" "<TENANT TITLE>" "<ADMIN EMAIL>"
 ```
 
 - ENCRYPTION_KEY is a key specific for the Kubernetes environment used for encrypting the db_uri which can be found in the lumen secret in K8s.
@@ -45,7 +45,7 @@ For `PG_HOST`,  `PG_DATABASE`, `PG_USER` and `PG_PASSWORD` go to [elephantsql](h
 ## To add a plan
 
 ```
-docker-compose exec backend /app/run-as-user.sh env ENCRYPTION_KEY=... KC_URL=... KC_SECRET=... PG_HOST=... PG_DATABASE=... PG_USER=... PG_PASSWORD=... lein run -m akvo.lumen.admin.new-plan <TENANT LABEL> <TIER>
+docker-compose exec backend run-as-user.sh env ENCRYPTION_KEY=... KC_URL=... KC_SECRET=... PG_HOST=... PG_DATABASE=... PG_USER=... PG_PASSWORD=... lein run -m akvo.lumen.admin.new-plan <TENANT LABEL> <TIER>
 ```
 
 - TENANT LABEL: the subdomain of the existing tenant. Example: if you previously created the new tenant `https://example.akvo.org` your TENANT LABEL will be `example`

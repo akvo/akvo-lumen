@@ -26,7 +26,7 @@ if (process.env.SENTRY_DSN) {
 }
 
 const captureException = (error, runId = '') => {
-  console.error(`Run ID: ${runId} -`, error);
+  console.error(`Exception captured for run ID: ${runId} -`, error);
   if (process.env.SENTRY_DSN) Raven.captureException(error);
 };
 
@@ -43,6 +43,8 @@ const setContext = (contextData, callback) => {
 
 const app = express();
 let browser;
+let currentJobCount = 0;
+const MAX_CONCURRENT_JOBS = 5;
 
 app.use(bodyParser.json());
 app.use(cors());
@@ -72,71 +74,69 @@ const takeScreenshot = (req, runId) => new Promise((resolve, reject) => {
   const {
     target, format, title, selector, clip,
   } = req.body;
+
   console.log('Starting run: ', runId, ' - ', target);
+
   setContext({ target, format, title }, async () => {
-    try {
-      // Create a new incognito browser context.
-      const context = await browser.createIncognitoBrowserContext();
-      const page = await context.newPage();
-      page.setDefaultNavigationTimeout(100000);
+    // Create a new incognito browser context.
+    const context = await browser.createIncognitoBrowserContext();
+    const page = await context.newPage();
+    page.setDefaultNavigationTimeout(100000);
 
-      page.on('pageerror', e => captureException(e, runId));
-      page.on('error', e => captureException(e, runId));
+    page.on('pageerror', reject);
+    page.on('error', reject);
 
-      const token = req.header('access_token');
-      const locale = req.header('locale');
-      const dest = `${target}?access_token=${token}&locale=${locale}`;
-      await page.goto(dest, { waitUntil: 'networkidle2', timeout: 0 });
+    const token = req.header('access_token');
+    const locale = req.header('locale');
+    const dest = `${target}?access_token=${token}&locale=${locale}`;
+    await page.goto(dest, { waitUntil: 'networkidle2', timeout: 0 });
 
-      const selectors = (selector || '').split(',');
-      if (selectors.length) {
-        await Promise.all(selectors.map(async (s) => {
-          try {
-            await page.waitFor(s);
-          } catch (error) {
-            captureException(error, runId);
-          }
-        }));
-      } else {
-        await page.waitFor(5000);
-      }
-
-      let screenshot;
-      const screenshotOptions = {
-        encoding: 'base64',
-        format: 'A4',
-        omitBackground: false,
-      };
-
-      switch (format) {
-        case 'png': {
-          if (clip === undefined) {
-            screenshotOptions.fullPage = true;
-          } else {
-            screenshotOptions.clip = clip;
-          }
-          screenshot = await page.screenshot(screenshotOptions);
-          resolve(screenshot);
-          break;
+    const selectors = (selector || '').split(',');
+    if (selectors.length) {
+      await Promise.all(selectors.map(async (s) => {
+        try {
+          await page.waitFor(s);
+        } catch (error) {
+          console.log('Visualisation didnt render with ID: ', s.replace('.render-completed-', ''));
+          reject(error);
         }
-        case 'pdf': {
-          screenshot = await page.pdf({
-            format: 'A4',
-            printBackground: true,
-          });
-          const data = screenshot.toString('base64');
-          resolve(data);
-          break;
-        }
-        // no default
-      }
-
-      await page.close();
-      await context.close();
-    } catch (err) {
-      captureException(err, runId);
-      reject(err);
+      }));
+    } else {
+      await page.waitFor(5000);
     }
+
+    let screenshot;
+    const screenshotOptions = {
+      encoding: 'base64',
+      format: 'A4',
+      omitBackground: false,
+    };
+
+    switch (format) {
+      case 'png': {
+        if (clip === undefined) {
+          screenshotOptions.fullPage = true;
+        } else {
+          screenshotOptions.clip = clip;
+        }
+        screenshot = await page.screenshot(screenshotOptions);
+        resolve(screenshot);
+        break;
+      }
+      case 'pdf': {
+        screenshot = await page.pdf({
+          format: 'A4',
+          printBackground: true,
+        });
+        const data = screenshot.toString('base64');
+        resolve(data);
+        break;
+      }
+      // no default
+    }
+
+    await page.close();
+    await context.close();
   });
 });
 
@@ -171,27 +171,38 @@ const sendScreenshotResponse = ({
 };
 
 app.post('/screenshot', validate(validation.screenshot), async (req, res) => {
+  if (currentJobCount > MAX_CONCURRENT_JOBS) {
+    res.sendStatus(503);
+    return;
+  }
   const runId = _.uniqueId();
+  currentJobCount += 1;
   const { format, title } = req.body;
   let retryCount = 0;
+
   const tryTakeScreenshot = async () => {
-    const data = await takeScreenshot(req, runId);
+    let data;
+    try {
+      data = await takeScreenshot(req, runId);
+    } catch (error) {
+      if (retryCount < MAX_RETRIES) {
+        console.log('Duplicating/retrying run: ', runId);
+        retryCount += 1;
+        tryTakeScreenshot();
+        return;
+      }
+      console.log('Run failed: ', runId);
+      res.status(500).send(error);
+      currentJobCount -= 1;
+      return;
+    }
+    currentJobCount -= 1;
     sendScreenshotResponse({
       res, data, format, title,
     });
     console.log('Done run: ', runId);
   };
-  try {
-    tryTakeScreenshot();
-  } catch (error) {
-    if (retryCount < MAX_RETRIES) {
-      console.log('Duplicating/retrying run: ', runId);
-      retryCount += 1;
-      tryTakeScreenshot();
-      return;
-    }
-    res.status(500).send(error);
-  }
+  tryTakeScreenshot();
 });
 
 function exitHandler(options, err) {
