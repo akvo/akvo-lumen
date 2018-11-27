@@ -3,7 +3,7 @@
   (:require [clojure.tools.logging :as log]
             [compojure.response :as compojure]
             [integrant.core :as ig]
-            [raven-clj.ring]
+
             [ring.middleware.defaults]
             [ring.middleware.json]
             [ring.middleware.stacktrace]
@@ -37,9 +37,6 @@
 
 (defmethod ig/init-key :akvo.lumen.middleware.ring.defaults/wrap-defaults  [_ opts]  
   ring.middleware.defaults/wrap-defaults)
-
-(defmethod ig/init-key :akvo.lumen.middleware.sentry/wrap-sentry  [_ opts]  
-  raven-clj.ring/wrap-sentry)
 
 (defmethod ig/init-key :akvo.lumen.middleware.duct.erros/wrap-hide-errors  [_ opts]  
   wrap-hide-errors)

@@ -1,6 +1,8 @@
 (ns akvo.lumen.component.error-tracker
   (:require [integrant.core :as ig]
             [raven-clj.core :as raven]
+            [integrant.core :as ig]
+            [raven-clj.ring]
             [raven-clj.interfaces :as raven-interface]))
 
 (defrecord SentryErrorTracker [dsn])
@@ -39,3 +41,6 @@
   LocalErrorTracker
   (track [this error]
     (println "LocalErrorTracker:" (.getMessage error))))
+
+(defmethod ig/init-key :akvo.lumen.component.error-tracker/wrap-sentry  [_ opts]
+  raven-clj.ring/wrap-sentry)
