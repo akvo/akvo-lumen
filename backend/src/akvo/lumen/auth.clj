@@ -4,6 +4,7 @@
             [clj-http.client :as client]
             [clojure.set :as set]
             [clojure.string :as s]
+            [integrant.core :as ig]
             [ring.util.response :as response]))
 
 (defn claimed-roles [jwt-claims]
@@ -72,3 +73,9 @@
     (catch Exception e
       (println "Could not get cert from Keycloak")
       (throw e))))
+
+(defmethod ig/init-key :akvo.lumen.auth/wrap-auth  [_ opts]
+  wrap-auth)
+
+(defmethod ig/init-key :akvo.lumen.auth/wrap-jwt  [_ opts]
+  wrap-jwt)

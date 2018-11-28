@@ -114,3 +114,6 @@
           (.close (:datasource @spec))))
       (dissoc this :tenants))
     this))
+
+(defmethod ig/init-key :akvo.lumen.component.tenant-manager/wrap-label-tenant  [_ opts]
+  wrap-label-tenant)
