@@ -256,6 +256,7 @@ class Dashboard extends Component {
           /* Maps hit a different endpoint than other aggregations, so bail out now */
           return;
         case 'donut':
+        case 'polararea':
           aggType = 'pie';
           break;
         case 'pivot table':

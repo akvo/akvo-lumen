@@ -6,10 +6,11 @@ import { kebabCase } from 'lodash';
 import visualisationTypes from '../../../constants/Visualisation/visualisationTypes';
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
 import ConfigMenuSectionOptionThumbs from '../../common/ConfigMenu/ConfigMenuSectionOptionThumbs';
+import { injectIntl, intlShape } from 'react-intl';
 
 require('./VisualisationTypeMenu.scss');
 
-export default function VisualisationTypeMenu({ visualisation, onChangeVisualisationType }) {
+function VisualisationTypeMenu({ visualisation, onChangeVisualisationType, intl }) {
   return (
     <ConfigMenuSection
       className="VisualisationTypeMenu"
@@ -20,7 +21,7 @@ export default function VisualisationTypeMenu({ visualisation, onChangeVisualisa
           items={visualisationTypes.map((type) => {
             const kebabType = kebabCase(type);
             return {
-              label: type,
+              label: intl.formatMessage({ id: type }),
               imageSrc: require(`../../../styles/img/icon-128-visualisation-${kebabType}.png`),
               onClick: () => onChangeVisualisationType(type),
               selected: visualisation.visualisationType === type,
@@ -34,6 +35,9 @@ export default function VisualisationTypeMenu({ visualisation, onChangeVisualisa
 }
 
 VisualisationTypeMenu.propTypes = {
+  intl: intlShape,
   visualisation: PropTypes.object.isRequired,
   onChangeVisualisationType: PropTypes.func.isRequired,
 };
+
+export default injectIntl(VisualisationTypeMenu);

@@ -5,7 +5,12 @@ const visualizationColumnMappings = {
     line: [],
     area: [],
     pie: [],
-    donut: [],
+    get donut() {
+      return this.pie;
+    },
+    get polararea() {
+      return this.pie;
+    },
     scatter: [],
   },
   'pivot table': {
@@ -23,9 +28,12 @@ const visualizationColumnMappings = {
     pie: [
       { from: 'categoryColumn', to: 'bucketColumn' },
     ],
-    donut: [
-      { from: 'categoryColumn', to: 'bucketColumn' },
-    ],
+    get donut() {
+      return this.pie;
+    },
+    get polararea() {
+      return this.pie;
+    },
     scatter: [
       { from: 'valueColumn', to: 'metricColumnY' },
       { from: 'categoryColumn', to: 'bucketColumn' },
@@ -46,9 +54,12 @@ const visualizationColumnMappings = {
     pie: [
       { from: 'bucketColumn', to: 'bucketColumn' },
     ],
-    donut: [
-      { from: 'bucketColumn', to: 'bucketColumn' },
-    ],
+    get donut() {
+      return this.pie;
+    },
+    get polararea() {
+      return this.pie;
+    },
     scatter: [
       { from: 'metricColumnY', to: 'metricColumnY' },
       { from: 'bucketColumn', to: 'bucketColumn' },
@@ -71,7 +82,12 @@ const visualizationColumnMappings = {
       return this.area;
     },
     pie: [],
-    donut: [],
+    get donut() {
+      return this.pie;
+    },
+    get polararea() {
+      return this.pie;
+    },
     scatter: [
       { from: 'metricColumnY', to: 'metricColumnY' },
       { from: 'metricColumnX', to: 'metricColumnX' },
@@ -90,17 +106,23 @@ const visualizationColumnMappings = {
     ],
     line: [],
     area: [],
-    donut: [
+    pie: [
       { from: 'bucketColumn', to: 'bucketColumn' },
     ],
-    get pie() {
-      return this.donut;
+    get donut() {
+      return this.pie;
+    },
+    get polararea() {
+      return this.pie;
     },
     scatter: [
       { from: 'bucketColumn', to: 'bucketColumn' },
     ],
   },
   get donut() {
+    return this.pie;
+  },
+  get polararea() {
     return this.pie;
   },
   scatter: {
@@ -122,7 +144,12 @@ const visualizationColumnMappings = {
       { from: 'metricColumnX', to: 'metricColumnX' },
     ],
     pie: [],
-    donut: [],
+    get donut() {
+      return this.pie;
+    },
+    get polararea() {
+      return this.pie;
+    },
   },
 };
 

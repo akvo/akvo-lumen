@@ -89,6 +89,7 @@ const visualisationTypeComponents = {
   map: MapConfigMenu,
   pie: PieConfigMenu,
   donut: PieConfigMenu,
+  polararea: PieConfigMenu,
   'pivot table': PivotTableConfigMenu,
 };
 

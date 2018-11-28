@@ -12,6 +12,7 @@ import moment from 'moment';
 import '../../styles/reset.global.scss';
 import '../../styles/style.global.scss';
 import PieChart from './PieChart';
+import PolarAreaChart from './PolarAreaChart';
 import ScatterChart from './ScatterChart';
 import LineChart from './LineChart';
 import BarChart from './BarChart';
@@ -110,6 +111,52 @@ storiesOf('Charts', module)
     return (
       <div>
         <PieChart
+          style={{ border: '1px solid black' }}
+          data={{
+            ...data,
+            metadata: {
+              bucketColumnTitle: text('props.data.metadata.bucketColumnTitle', 'Legend Title'),
+            },
+          }}
+          colors={palette(nodeCount)}
+          colorMapping={{ [data.common.data[0].key]: color('props.colorMapping[key]', 'rgb(158, 1, 66)') }}
+          innerRadius={number('props.innerRadius', 0)}
+          outerRadius={number('props.outerRadius', 0.3)}
+          onChangeVisualisationSpec={action('vis-spec-change')}
+          width={number('props.width', 600)}
+          height={number('props.height', 600)}
+          donut={boolean('props.donut', false)}
+          print={boolean('props.print', false)}
+          interactive={boolean('props.interactive', true)}
+          edit={boolean('props.edit', true)}
+          legendVisible={boolean('props.legendVisible', true)}
+        />
+        <pre>
+          <code>
+            {JSON.stringify(data, null, 2)}
+          </code>
+        </pre>
+      </div>
+    );
+  })
+
+  .add('PolarAreaChart', () => {
+    const nodeCount = number('node count', 20);
+    const labelLength = number('label length', 10);
+    const minVal = number('min value', 1);
+    const maxVal = number('max value', 100);
+
+    const data = generateData({
+      seriesCount: 1,
+      nodeCount,
+      labelLength,
+      minVal,
+      maxVal,
+    });
+
+    return (
+      <div>
+        <PolarAreaChart
           style={{ border: '1px solid black' }}
           data={{
             ...data,

@@ -5,6 +5,7 @@ const visualisationTypes = [
   'line',
   'area',
   'pie',
+  'polararea',
   'donut',
   'scatter',
 ];

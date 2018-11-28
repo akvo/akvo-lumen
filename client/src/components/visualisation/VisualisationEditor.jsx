@@ -36,6 +36,7 @@ const specIsValidForApi = (spec, vType) => {
       break;
     case 'pie':
     case 'donut':
+    case 'polararea':
       if (spec.bucketColumn === null) {
         return false;
       }
@@ -104,6 +105,7 @@ const getNeedNewAggregation = (newV = { spec: {} }, oldV = { spec: {} }, optiona
       );
     case 'pie':
     case 'donut':
+    case 'polararea':
       return Boolean(
         newV.datasetId !== oldV.datasetId ||
         newV.spec.bucketColumn !== oldV.spec.bucketColumn ||
@@ -237,6 +239,7 @@ export default class VisualisationEditor extends Component {
         break;
       case 'pivot table':
       case 'pie':
+      case 'polararea':
       case 'donut':
       case 'line':
       case 'area':
@@ -329,6 +332,7 @@ export default class VisualisationEditor extends Component {
         break;
       case 'pie':
       case 'donut':
+      case 'polararea':
         api.get(`/api/aggregation/${datasetId}/pie`, {
           query: JSON.stringify(spec),
         }).then(response => response.json())
