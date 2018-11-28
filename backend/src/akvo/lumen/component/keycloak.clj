@@ -2,47 +2,13 @@
   "We leverage Keycloak groups for tenant partition and admin roles.
    More info can be found in the Keycloak integration doc spec."
   (:require [akvo.lumen.lib :as lib]
+            [akvo.lumen.protocols :as p]
             [cheshire.core :as json]
             [clj-http.client :as client]
             [integrant.core :as ig]
             [clojure.set :as set]
             [clojure.tools.logging :as log]
             [ring.util.response :refer [response]]))
-
-
-(defprotocol KeycloakUserManagement
-  (add-user-with-email
-    [this tenant-label email]
-    "Add user to tenant")
-
-  (create-user
-    [this request-headers email]
-    "Create user")
-
-  (demote-user-from-admin
-    [this tenant author-claims user-id]
-    "Demote tenant admin to member")
-
-  (promote-user-to-admin
-    [this tenant author-claims user-id]
-    "Promote existing tenant member to admin")
-
-  (reset-password
-    [this request-headers user-id tmp-password]
-    "Set temporary user password")
-
-  (remove-user
-    [this tenant author-claims user-id]
-    "Remove user from tenant")
-
-  (user?
-    [this email]
-    "Predicate to see if the email has a user in KC")
-
-  (users
-    [this tenant-label]
-    "List tenants users"))
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Helper fns
@@ -258,7 +224,7 @@
 ;;;
 
 (defrecord KeycloakAgent [issuer openid-config api-root]
-  KeycloakUserManagement
+  p/KeycloakUserManagement
   (add-user-with-email [{:keys [api-root] :as keycloak} tenant-label email]
     (let [request-headers (request-headers keycloak)
           user-id (get (fetch-user-by-email request-headers api-root email)

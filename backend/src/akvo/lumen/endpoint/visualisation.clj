@@ -1,5 +1,5 @@
 (ns akvo.lumen.endpoint.visualisation
-  (:require [akvo.lumen.component.tenant-manager :refer [connection]]
+  (:require [akvo.lumen.protocols :as p]
             [akvo.lumen.lib.visualisation :as visualisation]
             [akvo.lumen.lib.visualisation.maps :as maps]
             [compojure.core :refer :all]
@@ -8,7 +8,7 @@
 (defn endpoint [{:keys [config tenant-manager]}]
 
   (context "/api/visualisations" {:keys [params tenant] :as request}
-    (let-routes [tenant-conn (connection tenant-manager tenant)]
+    (let-routes [tenant-conn (p/connection tenant-manager tenant)]
       (GET "/" _
         (visualisation/all tenant-conn))
 

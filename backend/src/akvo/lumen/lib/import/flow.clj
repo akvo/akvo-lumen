@@ -1,6 +1,7 @@
 (ns akvo.lumen.lib.import.flow
   (:require [akvo.commons.psql-util :as pg]
             [akvo.lumen.lib.import.common :as import]
+            [akvo.lumen.protocols :as p]
             [akvo.lumen.lib.import.flow-common :as flow-common]
             [akvo.lumen.lib.import.flow-v2 :as v2]
             [akvo.lumen.lib.import.flow-v3 :as v3]))
@@ -21,7 +22,7 @@
     (reify
       java.io.Closeable
       (close [this])
-      import/DatasetImporter
+      p/DatasetImporter
       (columns [this]
         (cond
           (<= version 2) (v2/dataset-columns (flow-common/form @survey formId) version)

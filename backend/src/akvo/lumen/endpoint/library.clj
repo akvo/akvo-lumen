@@ -1,5 +1,5 @@
 (ns akvo.lumen.endpoint.library
-  (:require [akvo.lumen.component.tenant-manager :refer [connection]]
+  (:require [akvo.lumen.protocols :as p]
             [akvo.lumen.lib.dataset :as dataset]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib
@@ -13,7 +13,7 @@
 
 (defn endpoint [{:keys [tenant-manager]}]
   (context "/api/library" {:keys [tenant] :as request}
-    (let-routes [tenant-conn (connection tenant-manager tenant)]
+    (let-routes [tenant-conn (p/connection tenant-manager tenant)]
       (GET "/" _
         (lib/ok
          {:dashboards (variant/value (dashboard/all tenant-conn))

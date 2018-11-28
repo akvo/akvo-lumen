@@ -1,5 +1,5 @@
 (ns akvo.lumen.endpoint.invite
-  (:require [akvo.lumen.component.tenant-manager :refer [connection]]
+  (:require [akvo.lumen.protocols :as p]
             [akvo.lumen.lib.user :as user]
             [compojure.core :refer :all]
             [integrant.core :as ig]))
@@ -13,7 +13,7 @@
 
 (defn endpoint [{:keys [config emailer keycloak tenant-manager]}]
   (context "/api/admin/invites" {:keys [jwt-claims params tenant] :as request}
-    (let-routes [tenant-conn (connection tenant-manager tenant)]
+    (let-routes [tenant-conn (p/connection tenant-manager tenant)]
       (GET "/" _
         (user/active-invites tenant-conn))
 
@@ -28,7 +28,7 @@
 
 (defn verify-endpoint [{:keys [config keycloak tenant-manager]}]
   (context "/verify" {:keys [tenant] :as request}
-    (let-routes [tenant-conn (connection tenant-manager tenant)]
+    (let-routes [tenant-conn (p/connection tenant-manager tenant)]
       (GET "/:id" [id]
         (user/verify-invite keycloak tenant-conn tenant id
                             (location (:invite-redirect config) request))))))

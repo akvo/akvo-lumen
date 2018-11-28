@@ -1,5 +1,6 @@
 (ns akvo.lumen.lib.import.csv
   (:require [akvo.lumen.lib.import.common :as import]
+            [akvo.lumen.protocols :as p]
             [clojure.data.csv :as csv]
             [clojure.java.io :as io]
             [clojure.java.jdbc :as jdbc]
@@ -84,7 +85,7 @@
                        (repeat column-count :text))
         column-spec (get-column-tuples column-titles column-types)]
     (reify
-      import/DatasetImporter
+      p/DatasetImporter
       (columns [this] column-spec)
       (records [this]
         (data-records column-spec rows))

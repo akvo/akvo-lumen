@@ -1,12 +1,12 @@
 (ns akvo.lumen.endpoint.raster
-  (:require [akvo.lumen.component.tenant-manager :refer [connection]]
+  (:require [akvo.lumen.protocols :as p]
             [integrant.core :as ig]
             [akvo.lumen.lib.raster :as raster]
             [compojure.core :refer :all]))
 
 (defn endpoint [{:keys [tenant-manager config]}]
   (context "/api/rasters" {:keys [params tenant] :as request}
-    (let-routes [tenant-conn (connection tenant-manager tenant)]
+    (let-routes [tenant-conn (p/connection tenant-manager tenant)]
 
       (GET "/" _
         (raster/all tenant-conn))

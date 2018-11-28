@@ -1,6 +1,7 @@
 (ns akvo.lumen.lib.import
-  (:require [akvo.lumen.component.error-tracker :as error-tracker]
+  (:require [akvo.lumen.protocols :as p]
             [akvo.lumen.lib.import.common :as import]
+            [akvo.lumen.protocols :as p]
             [akvo.lumen.lib.import.csv]
             [akvo.lumen.lib.import.flow]
             [akvo.lumen.lib :as lib]
@@ -80,15 +81,15 @@
     (try
       (let [spec (:spec (data-source-spec-by-job-execution-id conn {:job-execution-id job-execution-id}))]
         (with-open [importer (import/dataset-importer (get spec "source") config)]
-          (let [columns (import/columns importer)]
+          (let [columns (p/columns importer)]
             (import/create-dataset-table conn table-name columns)
-            (doseq [record (map import/coerce-to-sql (import/records importer))]
+            (doseq [record (map import/coerce-to-sql (p/records importer))]
               (jdbc/insert! conn table-name record))
             (successful-import conn job-execution-id table-name columns spec claims data-source))))
       (catch Throwable e
         (failed-import conn job-execution-id (.getMessage e) table-name)
         (log/error e)
-        (error-tracker/track error-tracker e)
+        (p/track error-tracker e)
         (throw e)))))
 
 (defn handle-import-request [tenant-conn config error-tracker claims data-source]

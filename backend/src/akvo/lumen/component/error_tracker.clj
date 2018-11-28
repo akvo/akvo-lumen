@@ -1,5 +1,6 @@
 (ns akvo.lumen.component.error-tracker
-  (:require [integrant.core :as ig]
+  (:require [akvo.lumen.protocols :as p]
+            [integrant.core :as ig]
             [raven-clj.core :as raven]
             [raven-clj.interfaces :as raven-interface]))
 
@@ -19,15 +20,12 @@
 (defmethod ig/init-key :akvo.lumen.component.error-tracker/prod  [_ {:keys [config] :as opts}]
   (sentry-error-tracker (-> config :error-tracker)))
 
-(defprotocol IErrorTracker
-  (track [this error]))
-
 (defn event-map [error]
   (let [text (str (ex-data error))]
     {:extra {:ex-data (subs text 0 (min (count text) 4096))}
      :message (.getMessage error)}))
 
-(extend-protocol IErrorTracker
+(extend-protocol p/IErrorTracker
 
   SentryErrorTracker
   (track [{:keys [dsn]} error]

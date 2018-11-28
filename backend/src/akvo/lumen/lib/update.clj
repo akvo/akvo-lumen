@@ -1,5 +1,5 @@
 (ns akvo.lumen.lib.update
-  (:require [akvo.lumen.component.error-tracker :as error-tracker]
+  (:require [akvo.lumen.protocols :as p]
             [akvo.lumen.lib.import.common :as import]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.transformation.engine :as engine]
@@ -101,11 +101,11 @@
         initial-dataset-version (initial-dataset-version-to-update-by-dataset-id conn {:dataset-id dataset-id})
         imported-dataset-columns (vec (:columns initial-dataset-version))]
     (with-open [importer (import/dataset-importer (get data-source-spec "source") config)]
-      (let [importer-columns (import/columns importer)]
+      (let [importer-columns (p/columns importer)]
         (if-not (compatible-columns? imported-dataset-columns importer-columns)
           (failed-update conn job-execution-id "Column mismatch")
           (do (import/create-dataset-table conn table-name importer-columns)
-              (doseq [record (map import/coerce-to-sql (import/records importer))]
+              (doseq [record (map import/coerce-to-sql (p/records importer))]
                 (jdbc/insert! conn table-name record))
               (clone-data-table conn
                                 {:from-table table-name
@@ -141,6 +141,6 @@
                      data-source-spec))
         (catch Exception e
           (failed-update tenant-conn job-execution-id (.getMessage e))
-          (error-tracker/track error-tracker e)
+          (p/track error-tracker e)
           (log/error e))))
     (lib/ok {"updateId" job-execution-id})))
