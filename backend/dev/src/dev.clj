@@ -1,6 +1,7 @@
 (ns dev
   (:refer-clojure :exclude [test])
-  (:require [akvo.lumen.endpoint.commons]
+  (:require [akvo.lumen.config :as config]
+            [akvo.lumen.endpoint.commons]
             [akvo.lumen.lib.aes :as aes]
             [akvo.lumen.middleware]
             [akvo.lumen.migrate :as lumen-migrate]
@@ -86,7 +87,7 @@
 (defn seed
   "At the moment only support seed of tenants table."
   []
-  (let [db-uri (-> (lumen-migrate/construct-system)
+  (let [db-uri (-> (config/construct)
                    :akvo.lumen.config :db :uri)]
     (doseq [tenant (->> "seed.edn" io/resource slurp edn/read-string
                         :tenant-manager :tenants)]

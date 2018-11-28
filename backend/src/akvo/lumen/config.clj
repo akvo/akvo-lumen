@@ -1,8 +1,25 @@
 (ns akvo.lumen.config
-  (:require [environ.core :refer [env]]
+  (:require [clojure.java.io :as io]
             [clojure.tools.logging :as log]
-            [akvo.lumen.util.system :as akvo.system]
-            [integrant.core :as ig]))
+            [clojure.walk :as walk]
+            [duct.core :as duct]
+            [environ.core :refer [env]]
+            [integrant.core :as ig]
+            [meta-merge.core :refer [meta-merge]]))
+
+;; init --/legacy code from duct.util.system (older version)
+(defn- read-config [source bindings-fun]
+  (->> source
+       (walk/postwalk #(bindings-fun % %))))
+
+(defn load-config
+  ([sources]
+   (load-config sources {}))
+  ([sources bindings]
+   (->> sources
+        (map #(read-config % bindings))
+        (apply meta-merge))))
+;; end --/legacy code from duct.util.system (older version)
 
 (defn error-msg [env-var]
   (format "Failed to setup binding: %s environment variable missing" env-var))
@@ -40,5 +57,12 @@
    'sentry-backend-dsn (:lumen-sentry-backend-dsn env)
    'sentry-client-dsn (:lumen-sentry-client-dsn env)})
 
-(defmethod ig/init-key :akvo.lumen.config  [a opts]
-  (akvo.system/load-system [opts] (bindings)))
+(defn construct
+  "Create a system definition."
+  ([] (construct "akvo/lumen/config.edn" (bindings)))
+  ([config-path bindings]
+   (load-config [(duct/prep (duct/read-config (io/resource config-path)))] bindings)))
+
+(defmethod ig/init-key :akvo.lumen.config [a opts]
+  (load-config [opts] (bindings)))
+
