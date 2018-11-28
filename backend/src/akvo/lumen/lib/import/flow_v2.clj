@@ -1,5 +1,6 @@
 (ns akvo.lumen.lib.import.flow-v2
   (:require [akvo.commons.psql-util :as pg]
+            [akvo.lumen.lib.import.common :as common]
             [akvo.lumen.lib.import.flow-common :as flow-common]
             [cheshire.core :as json]
             [clj-http.client :as http]
@@ -16,26 +17,13 @@
     :text))
 
 (defn dataset-columns
-  [form version]
+  [form]
   (let [questions (flow-common/questions form)]
-    (into
-     [(cond-> {:title "Instance id" :type :text :id :instance_id}
-        (<= 2 version) (assoc :key true))
-      (let [identifier {:title "Identifier" :type :text :id :identifier}]
-        (if (and (:registration-form? form) (<= 2 version))
-          (assoc identifier :key true)
-          identifier))
-      {:title "Display name" :type :text :id :display_name}
-      {:title "Latitude" :type :number :id :latitude}
-      {:title "Longitude" :type :number :id :longitude}
-      {:title "Submitter" :type :text :id :submitter}
-      {:title "Submitted at" :type :date :id :submitted_at}
-      {:title "Surveyal time" :type :number :id :surveyal_time}]
-     (map (fn [question]
-            {:title (:name question)
-             :type (question-type->lumen-type question)
-             :id (keyword (format "c%s" (:id question)))})
-          questions))))
+    (into (flow-common/commons-columns form)
+          (into
+           [{:title "Latitude" :type :number :id :latitude}
+            {:title "Longitude" :type :number :id :longitude}]
+           (common/coerce question-type->lumen-type (flow-common/questions form))))))
 
 (defmulti render-response
   (fn [type response]
