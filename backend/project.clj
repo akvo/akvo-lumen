@@ -7,6 +7,7 @@
   :dependencies [[clojurewerkz/scrypt "1.2.0"]
                  [ch.qos.logback/logback-classic "1.2.3"]
                  [org.clojure/tools.logging "0.4.1"]
+                 [diehard "0.7.2"]
                  [org.slf4j/log4j-over-slf4j "1.7.25"]
                  [org.slf4j/jcl-over-slf4j "1.7.25"]
                  [org.slf4j/jul-to-slf4j "1.7.25"]

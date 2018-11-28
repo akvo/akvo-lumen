@@ -47,14 +47,12 @@
       (is (= "text" (get (last columns) "type")))
       (is (= (count columns) 15)))))
 
-
 (deftest ^:functional test-varying-column-count
   (testing "Should fail to import csv file with varying number of columns"
-    (is (thrown-with-msg? ExecutionException
-                          #"Invalid csv file. Varying number of columns"
-                          (with-no-logs
-                            (import-file *tenant-conn* *error-tracker* "mixed-column-counts.csv"
-                                         {:dataset-name "Mixed Column Counts"}))))))
+    (let [job-execution-id (import-file *tenant-conn* *error-tracker* "mixed-column-counts.csv"
+                                        {:dataset-name "Mixed Column Counts"})]
+      (is (= "Invalid csv file. Varying number of columns"
+             (:error-message (job-execution-by-id *tenant-conn* {:id job-execution-id})))))))
 
 (deftest ^:functional test-trimmed-columns
   (testing "Testing if whitespace is removed from beginning & end of column titles"
