@@ -7,6 +7,7 @@ class ScrollBar extends Component {
   constructor(props) {
     super(props);
     this.handleScroll = this.handleScroll.bind(this);
+    this.setProportions = this.setProportions.bind(this);
   }
 
   state = {
@@ -19,20 +20,28 @@ class ScrollBar extends Component {
   }
 
   componentDidMount() {
-    setTimeout(() => {
-      const outerWidth = this.wrapperElement.parentElement.offsetWidth;
-      const innerWidth = this.contentElement.scrollWidth;
-      const innerHeight = this.contentElement.scrollHeight;
-      const outerToInner = outerWidth / innerWidth;
-      const buttonWidth = outerToInner * outerWidth;
-      this.setState({
-        innerWidth,
-        innerHeight,
-        outerWidth,
-        outerToInner,
-        buttonWidth,
-      });
-    }, 100);
+    const WITH_HEIGHT = true;
+    setTimeout(() => this.setProportions(WITH_HEIGHT), 100);
+    this.interval = setInterval(this.setProportions, 2000);
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.interval);
+  }
+
+  setProportions(withHeight) {
+    const outerWidth = this.wrapperElement.parentElement.offsetWidth;
+    const innerWidth = this.contentElement.scrollWidth;
+    const innerHeight = withHeight ? this.contentElement.scrollHeight : this.state.innerHeight;
+    const outerToInner = outerWidth / innerWidth;
+    const buttonWidth = (outerToInner * outerWidth);
+    this.setState({
+      innerWidth,
+      innerHeight,
+      outerWidth,
+      outerToInner,
+      buttonWidth,
+    });
   }
 
   getElement() {

@@ -4,7 +4,7 @@
   width: 100%;
   position: relative;
   overflow: hidden;
-  padding-bottom: 10px;
+  padding-bottom: 6px;
 
   &-content {
     width: 100%;
@@ -28,6 +28,6 @@
   &-handle {
     position: absolute;
     height: 2px;
-    background: $anchorLinkLight;
+    background: $scrollbarHandle;
   }
 }

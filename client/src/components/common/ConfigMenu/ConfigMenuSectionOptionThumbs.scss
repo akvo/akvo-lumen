@@ -9,6 +9,7 @@
   @include border-radius(8px);
   margin-right: 10px; 
   text-decoration: none;
+  background-color: rgba($lightBlueGrey, 0.3);
   
   img {
     width: 32px;
@@ -22,6 +23,11 @@
   }
 
   &--selected {
-    border: 1px solid $anchorLinkLight;
+    background-color: rgba($anchorLinkLight, 0.1);
+  }    
+
+
+  &:first-child {
+    margin-left: 10px; 
   }
 }
