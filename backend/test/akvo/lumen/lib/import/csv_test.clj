@@ -8,7 +8,8 @@
             [akvo.lumen.utils.logging-config :refer [with-no-logs]]
             [clojure.string :as string]
             [clojure.test :refer :all]
-            [hugsql.core :as hugsql]))
+            [hugsql.core :as hugsql])
+  (:import [java.util.concurrent ExecutionException]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
@@ -49,7 +50,7 @@
 
 (deftest ^:functional test-varying-column-count
   (testing "Should fail to import csv file with varying number of columns"
-    (is (thrown-with-msg? clojure.lang.ExceptionInfo
+    (is (thrown-with-msg? ExecutionException
                           #"Invalid csv file. Varying number of columns"
                           (with-no-logs
                             (import-file *tenant-conn* *error-tracker* "mixed-column-counts.csv"

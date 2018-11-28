@@ -4,6 +4,8 @@
             [akvo.lumen.protocols :as p]
             [akvo.lumen.lib.import.csv]
             [akvo.lumen.lib.import.flow]
+            [akvo.lumen.lib.import.csv]
+            [akvo.lumen.lib.raster]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.util :as util]
             [cheshire.core :as json]
@@ -16,7 +18,7 @@
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
 
-(defn- successful-import [conn job-execution-id table-name columns spec claims]
+(defn- successful-execution [conn job-execution-id table-name columns spec claims]
   (let [dataset-id (util/squuid)
         imported-table-name (util/gen-table-name "imported")]
     (insert-dataset conn {:id dataset-id
@@ -48,12 +50,12 @@
                                   :transformations []})
     (update-successful-job-execution conn {:id job-execution-id})))
 
-(defn- failed-import [conn job-execution-id reason table-name]
+(defn- failed-execution [conn job-execution-id reason table-name]
   (update-failed-job-execution conn {:id job-execution-id
                                      :reason [reason]})
   (drop-table conn {:table-name table-name}))
 
-(defn do-import
+(defn execute
   "Import runs within a future and since this is not taking part of ring
   request / response cycle we need to make sure to capture errors."
   [conn {:keys [sentry-backend-dsn] :as config} error-tracker job-execution-id claims]
@@ -66,20 +68,20 @@
               (common/create-dataset-table conn table-name columns)
               (doseq [record (map common/coerce-to-sql (p/records importer))]
                 (jdbc/insert! conn table-name record))
-              (successful-import conn job-execution-id table-name columns spec claims))))
+              (successful-execution conn job-execution-id table-name columns spec claims))))
         (catch Throwable e
-          (failed-import conn job-execution-id (.getMessage e) table-name)
+          (failed-execution conn job-execution-id (.getMessage e) table-name)
           (log/error e)
           (p/track error-tracker e)
           (throw e))))))
 
-(defn handle-import-request [tenant-conn config error-tracker claims data-source]
+(defn handle [tenant-conn config error-tracker claims data-source]
   (let [data-source-id (str (util/squuid))
         job-execution-id (str (util/squuid))]
     (insert-data-source tenant-conn {:id data-source-id
                                      :spec (json/generate-string data-source)})
     (insert-job-execution tenant-conn {:id job-execution-id
                                        :data-source-id data-source-id})
-    (do-import tenant-conn config error-tracker job-execution-id claims)
+    (execute tenant-conn config error-tracker job-execution-id claims)
     (lib/ok {"importId" job-execution-id
              "kind" (get-in data-source ["source" "kind"])})))
