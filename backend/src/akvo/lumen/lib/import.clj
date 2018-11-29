@@ -55,20 +55,19 @@
                                      :reason [reason]})
   (drop-table conn {:table-name table-name}))
 
-(defn execute
+(defn- execute
   "Import runs within a future and since this is not taking part of ring
   request / response cycle we need to make sure to capture errors."
-  [conn {:keys [sentry-backend-dsn] :as config} error-tracker job-execution-id claims]
+  [conn {:keys [sentry-backend-dsn] :as config} error-tracker job-execution-id claims spec]
   (future
     (let [table-name (util/gen-table-name "ds")]
       (try
-        (let [spec (:spec (data-source-spec-by-job-execution-id conn {:job-execution-id job-execution-id}))]
-          (with-open [importer (common/dataset-importer (get spec "source") config)]
-            (let [columns (p/columns importer)]
-              (common/create-dataset-table conn table-name columns)
-              (doseq [record (map common/coerce-to-sql (p/records importer))]
-                (jdbc/insert! conn table-name record))
-              (successful-execution conn job-execution-id table-name columns spec claims))))
+        (with-open [importer (common/dataset-importer (get spec "source") config)]
+          (let [columns (p/columns importer)]
+            (common/create-dataset-table conn table-name columns)
+            (doseq [record (map common/coerce-to-sql (p/records importer))]
+              (jdbc/insert! conn table-name record))
+            (successful-execution conn job-execution-id table-name columns spec claims)))
         (catch Throwable e
           (failed-execution conn job-execution-id (.getMessage e) table-name)
           (log/error e)
@@ -82,6 +81,6 @@
                                      :spec (json/generate-string data-source)})
     (insert-job-execution tenant-conn {:id job-execution-id
                                        :data-source-id data-source-id})
-    (execute tenant-conn config error-tracker job-execution-id claims)
+    (execute tenant-conn config error-tracker job-execution-id claims data-source)
     (lib/ok {"importId" job-execution-id
              "kind" (get-in data-source ["source" "kind"])})))
