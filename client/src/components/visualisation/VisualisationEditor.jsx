@@ -24,7 +24,7 @@ const specIsValidForApi = (spec, vType) => {
       }
       break;
     case 'bubble':
-      if (spec.bucketColumn === null || spec.metricColumn === null) {
+      if (spec.bucketColumn === null) {
         return false;
       }
       break;

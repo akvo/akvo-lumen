@@ -72,6 +72,7 @@ export default function BarConfigMenu(props) {
     visualisation,
     onChangeSpec,
     columnOptions,
+    aggregationOptions,
   } = props;
   const spec = visualisation.spec;
 
@@ -182,6 +183,20 @@ export default function BarConfigMenu(props) {
               options={filterColumns(columnOptions, ['number'])}
               onChange={value => handleChangeSpec({
                 metricColumn: value,
+                metricAggregation: spec.metricColumn ? spec.metricAggregation : 'mean',
+              }, spec, onChangeSpec, columnOptions)}
+            />
+            <ConfigMenuSectionOptionSelect
+              placeholderId={spec.bucketColumn !== null ?
+                'choose_aggregation_type' : 'must_choose_bucket_column_first'}
+              labelTextId="aggregation_type"
+              value={spec.bucketColumn !== null ?
+                spec.metricAggregation.toString() : null}
+              name="aggregationMenu"
+              options={aggregationOptions}
+              disabled={spec.bucketColumn === null}
+              onChange={value => handleChangeSpec({
+                metricAggregation: value,
               }, spec, onChangeSpec, columnOptions)}
             />
           </div>
