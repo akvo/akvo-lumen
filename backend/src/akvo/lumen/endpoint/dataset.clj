@@ -1,12 +1,12 @@
 (ns akvo.lumen.endpoint.dataset
-  (:require [akvo.lumen.component.tenant-manager :refer [connection]]
-            [akvo.lumen.dataset :as dataset]
+  (:require [akvo.lumen.protocols :as p]
+            [akvo.lumen.lib.dataset :as dataset]
             [compojure.core :refer :all]
             [integrant.core :as ig]))
 
 (defn endpoint [{:keys [config error-tracker tenant-manager]}]
   (context "/api/datasets" {:keys [params tenant] :as request}
-    (let-routes [tenant-conn (connection tenant-manager tenant)]
+    (let-routes [tenant-conn (p/connection tenant-manager tenant)]
 
       (GET "/" _
         (dataset/all tenant-conn))

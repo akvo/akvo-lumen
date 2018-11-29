@@ -189,7 +189,11 @@ export function exportVisualisation(visualisationId, options) {
       })
       .then((response) => {
         if (response.status !== 200) {
-          dispatch(showNotification('error', 'Failed to export visualisation.'));
+          if (response.status === 503) {
+            dispatch(showNotification('error', 'Our servers are busy, please try again shortly.'));
+          } else {
+            dispatch(showNotification('error', 'Failed to export visualisation.'));
+          }
           dispatch(exportVisualisationFailure({ id: visualisationId }));
           return;
         }

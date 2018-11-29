@@ -1,7 +1,7 @@
 (ns akvo.lumen.lib.aggregation.scatter
   (:require [akvo.lumen.lib :as lib]
             [akvo.lumen.postgres.filter :as filter]
-            [akvo.lumen.dataset.utils :as utils]
+            [akvo.lumen.lib.dataset.utils :as utils]
             [clojure.java.jdbc :as jdbc]))
 
 (defn- run-query [tenant-conn table-name sql-text column-x-name column-y-name column-size-name column-category-name filter-sql aggregation-method max-points column-label-name column-bucket-name]

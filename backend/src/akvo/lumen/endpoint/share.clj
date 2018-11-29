@@ -1,12 +1,12 @@
 (ns akvo.lumen.endpoint.share
-  (:require [akvo.lumen.component.tenant-manager :refer [connection]]
+  (:require [akvo.lumen.protocols :as p]
             [akvo.lumen.lib.share :as share]
             [compojure.core :refer :all]
             [integrant.core :as ig]))
 
 (defn endpoint [{:keys [tenant-manager]}]
   (context "/api/shares" {:keys [params tenant] :as request}
-    (let-routes [tenant-conn (connection tenant-manager tenant)]
+    (let-routes [tenant-conn (p/connection tenant-manager tenant)]
 
       (POST "/" {:keys [body] :as request}
         (share/fetch tenant-conn body))

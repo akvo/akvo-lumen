@@ -1,12 +1,12 @@
 (ns akvo.lumen.endpoint.transformation
-  (:require [akvo.lumen.component.tenant-manager :refer [connection]]
-            [akvo.lumen.transformation :as t]
+  (:require [akvo.lumen.protocols :as p]
+            [akvo.lumen.lib.transformation :as t]
             [compojure.core :refer :all]
             [integrant.core :as ig]))
 
 (defn endpoint [{:keys [tenant-manager caddisfly]}]
   (context "/api/transformations" {:keys [tenant] :as request}
-    (let-routes [tenant-conn (connection tenant-manager tenant)]
+    (let-routes [tenant-conn (p/connection tenant-manager tenant)]
       (context "/:dataset-id" [dataset-id]
         (POST "/transform" {:keys [body] :as request}
               (t/apply {:tenant-conn tenant-conn :caddisfly caddisfly}

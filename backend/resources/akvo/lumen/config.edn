@@ -5,15 +5,15 @@
 
  :akvo.lumen.component.hikaricp/hikaricp {:config #ig/ref :akvo.lumen.config}
 
- :akvo.lumen.middleware.duct.erros/wrap-hide-errors      {}
- :akvo.lumen.middleware.duct.not-found/wrap-not-found    {}
- :akvo.lumen.middleware.ring.json/wrap-json-body         {}
- :akvo.lumen.middleware.ring.json/wrap-json-response     {}
- :akvo.lumen.middleware.ring.defaults/wrap-defaults      {}
- :akvo.lumen.middleware.auth/wrap-auth                   {}
- :akvo.lumen.middleware.auth/wrap-jwt                    {}
- :akvo.lumen.middleware.tenant-manager/wrap-label-tenant {}
- :akvo.lumen.middleware.sentry/wrap-sentry               {}
+ :akvo.lumen.component.handler/wrap-hide-errors          {}
+ :akvo.lumen.component.handler/wrap-not-found            {}
+ :akvo.lumen.component.handler/wrap-json-body            {}
+ :akvo.lumen.component.handler/wrap-json-response        {}
+ :akvo.lumen.component.handler/wrap-defaults             {}
+ :akvo.lumen.auth/wrap-auth                              {}
+ :akvo.lumen.auth/wrap-jwt                               {}
+ :akvo.lumen.component.tenant-manager/wrap-label-tenant  {}
+ :akvo.lumen.component.error-tracker/wrap-sentry         {}
 
  :akvo.lumen.endpoint.aggregation/aggregation         {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
  :akvo.lumen.endpoint.collection/collection           {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
@@ -96,18 +96,18 @@
  {:app
   {:migrations {:tenant-manager "akvo/lumen/migrations/tenant_manager"
                 :tenants        "akvo/lumen/migrations/tenants"}
-   :middleware {:functions {:hide-errors       #ig/ref :akvo.lumen.middleware.duct.erros/wrap-hide-errors
-                            :json-body         #ig/ref :akvo.lumen.middleware.ring.json/wrap-json-body
-                            :json-response     #ig/ref :akvo.lumen.middleware.ring.json/wrap-json-response
-                            :not-found         #ig/ref :akvo.lumen.middleware.duct.not-found/wrap-not-found
-                            :ring-defaults     #ig/ref :akvo.lumen.middleware.ring.defaults/wrap-defaults
-                            :wrap-auth         #ig/ref :akvo.lumen.middleware.auth/wrap-auth
-                            :wrap-jwt          #ig/ref :akvo.lumen.middleware.auth/wrap-jwt
-                            :wrap-label-tenant #ig/ref :akvo.lumen.middleware.tenant-manager/wrap-label-tenant
-                            :wrap-sentry       #ig/ref :akvo.lumen.middleware.sentry/wrap-sentry
-                            :lumen-monitoring  #ig/ref :akvo.lumen.lumen-monitoring/middleware}
+   :middleware {:functions {:hide-errors       #ig/ref :akvo.lumen.component.handler/wrap-hide-errors
+                            :json-body         #ig/ref :akvo.lumen.component.handler/wrap-json-body
+                            :json-response     #ig/ref :akvo.lumen.component.handler/wrap-json-response
+                            :not-found         #ig/ref :akvo.lumen.component.handler/wrap-not-found
+                            :ring-defaults     #ig/ref :akvo.lumen.component.handler/wrap-defaults
+                            :wrap-auth         #ig/ref :akvo.lumen.auth/wrap-auth
+                            :wrap-jwt          #ig/ref :akvo.lumen.auth/wrap-jwt
+                            :wrap-label-tenant #ig/ref :akvo.lumen.component.tenant-manager/wrap-label-tenant
+                            :wrap-sentry       #ig/ref :akvo.lumen.component.error-tracker/wrap-sentry
+                            :monitoring  #ig/ref :akvo.lumen.monitoring/middleware}
                 :applied   [:not-found :json-response :ring-defaults :json-body
-                            :wrap-auth :wrap-jwt :lumen-monitoring :wrap-label-tenant :wrap-sentry
+                            :wrap-auth :wrap-jwt :monitoring :wrap-label-tenant :wrap-sentry
                             :hide-errors]
                 :arguments {:not-found     "Resource Not Found"
                             :hide-errors   "Internal Server Error"
@@ -125,7 +125,7 @@
                   :pool-name "tenant-manager"
                   :maximum-pool-size 5
                   :minimum-idle 2
-                  :metric-registry #ig/ref :akvo.lumen.lumen-monitoring/dropwizard-registry}
+                  :metric-registry #ig/ref :akvo.lumen.monitoring/dropwizard-registry}
 
   :caddisfly     {:schema-uri caddisfly-schema-uri}
   :emailer {:email-password email-password
@@ -144,15 +144,15 @@
                   :sentry-backend-dsn        sentry-backend-dsn
                   :flow-api-url              flow-api-url
                   :windshaft-url             "http://localhost:4000"
-                  :dropwizard-registry       #ig/ref :akvo.lumen.lumen-monitoring/dropwizard-registry
+                  :dropwizard-registry       #ig/ref :akvo.lumen.monitoring/dropwizard-registry
                   :piwik-site-id             piwik-site-id}
   :keycloak      {:url         keycloak-url
                   :realm       keycloak-realm
                   :credentials {"client_id"     keycloak-client-id
                                 "client_secret" keycloak-client-secret}}}
 
- :akvo.lumen.lumen-monitoring/dropwizard-registry {}
- :akvo.lumen.lumen-monitoring/collector {:dropwizard-registry #ig/ref :akvo.lumen.lumen-monitoring/dropwizard-registry}
- :akvo.lumen.lumen-monitoring/middleware {:collector #ig/ref :akvo.lumen.lumen-monitoring/collector}
+ :akvo.lumen.monitoring/dropwizard-registry {}
+ :akvo.lumen.monitoring/collector {:dropwizard-registry #ig/ref :akvo.lumen.monitoring/dropwizard-registry}
+ :akvo.lumen.monitoring/middleware {:collector #ig/ref :akvo.lumen.monitoring/collector}
 
  }

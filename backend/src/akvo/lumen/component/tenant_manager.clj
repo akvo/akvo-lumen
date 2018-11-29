@@ -3,6 +3,7 @@
   We use the first domain label e.g. t1 in t1.lumen.akvo.org to dispatch."
   (:require [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.aes :as aes]
+            [akvo.lumen.protocols :as p]
             [clojure.tools.logging :as log]
             [integrant.core :as ig]
             [clojure.string :as str]
@@ -43,13 +44,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Component
 ;;;
-
-(defprotocol TenantConnection
-  (connection [this label] "Connection based on a tenant dns label.")
-  (uri [this label] "Database URI based on a tenant dns label."))
-
-(defprotocol TenantAdmin
-  (current-plan [this label] "Get the current plan."))
 
 (defn pool
   "Created a Hikari connection pool."
@@ -92,14 +86,14 @@
       (get label))))
 
 (defrecord TenantManager [db config]
-  TenantConnection
+  p/TenantConnection
   (connection [{:keys [tenants]} label]
     @(::spec (get-or-create-tenant db config tenants label)))
 
   (uri [{:keys [tenants]} label]
     (::uri (get-or-create-tenant db config tenants label)))
 
-  TenantAdmin
+  p/TenantAdmin
   (current-plan [{:keys [db]} label]
     (:tier (select-current-plan (:spec db) {:label label}))))
 
@@ -120,3 +114,6 @@
           (.close (:datasource @spec))))
       (dissoc this :tenants))
     this))
+
+(defmethod ig/init-key :akvo.lumen.component.tenant-manager/wrap-label-tenant  [_ opts]
+  wrap-label-tenant)

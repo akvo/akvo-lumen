@@ -1,6 +1,6 @@
 (ns akvo.lumen.endpoint.aggregation
-  (:require [akvo.lumen.component.tenant-manager :refer [connection]]
-            [akvo.lumen.http :as http]
+  (:require [akvo.lumen.protocols :as p]
+            [akvo.lumen.endpoint.commons.http :as http]
             [akvo.lumen.lib.aggregation :as aggregation]
             [cheshire.core :as json]
             [compojure.core :refer :all]
@@ -9,7 +9,7 @@
 
 (defn endpoint [{:keys [tenant-manager]}]
   (context "/api/aggregation" {:keys [tenant query-params] :as request}
-    (let-routes [tenant-conn (connection tenant-manager tenant)]
+    (let-routes [tenant-conn (p/connection tenant-manager tenant)]
       (GET "/:dataset-id/:visualisation-type" [dataset-id visualisation-type]
         (if-let [query (get query-params "query")]
           (try

@@ -6,7 +6,7 @@
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.aggregation :as aggregation]
             [akvo.lumen.test-utils :refer [import-file]]
-            [akvo.lumen.transformation :as tf]
+            [akvo.lumen.lib.transformation :as tf]
             [clojure.test :refer :all]))
 
 

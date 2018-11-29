@@ -1,14 +1,14 @@
 (ns akvo.lumen.endpoint.split-column
-  (:require [akvo.lumen.component.tenant-manager :refer [connection]]
+  (:require [akvo.lumen.protocols :as p]
             [akvo.lumen.lib :as lib]
-            [akvo.lumen.transformation.split-column :as transformation]
+            [akvo.lumen.lib.transformation.split-column :as transformation]
             [cheshire.core :as json]
             [clojure.tools.logging :as log]
             [compojure.core :refer :all]
             [hugsql.core :as hugsql]
             [integrant.core :as ig]))
 
-(hugsql/def-db-fns "akvo/lumen/transformation.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
 
 (defn sort-pattern-analysis-by [pattern-analysis sort-by*]
   (->> (seq (:analysis pattern-analysis))
@@ -20,7 +20,7 @@
            (context "/:dataset-id" [dataset-id]
                     (GET "/pattern-analysis" _
                          (let [query           (json/parse-string (get query-params "query") keyword)
-                               tenant-conn     (connection tenant-manager tenant)
+                               tenant-conn     (p/connection tenant-manager tenant)
                                dataset-version (latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})
                                sql-query       {:table-name  (:table-name dataset-version)
                                                 :column-name (:columnName query)

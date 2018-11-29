@@ -1,21 +1,38 @@
 (ns dev
   (:refer-clojure :exclude [test])
-  (:require [akvo.lumen.endpoint]
+  (:require [akvo.lumen.config :as config]
+            [akvo.lumen.endpoint.commons]
             [akvo.lumen.lib.aes :as aes]
-            [akvo.lumen.middleware]
             [akvo.lumen.migrate :as lumen-migrate]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.java.jdbc :as jdbc]
             [clojure.pprint :refer [pprint]]
             [clojure.repl :refer :all]
-            [clojure.tools.namespace.repl :refer [refresh]]
+            [clojure.tools.namespace.repl :as repl]
+            [clojure.spec.alpha :as s]
+            [clojure.spec.test.alpha :as stest]
+            [clojure.tools.logging :as log]
             [duct.core :as duct]
             [duct.generate :as gen]
             [integrant.core :as ig]
             [integrant.repl :as ir]
             [integrant.repl.state :as state :refer (system)])
   (:import [org.postgresql.util PSQLException PGobject]))
+
+(defn check-specs! []
+  (log/warn "instrumenting specs!")
+  (stest/instrument))
+
+(defn uncheck-specs! []
+  (log/warn "unstrumenting specs!")
+  (stest/unstrument))
+
+(defn refresh []
+  (uncheck-specs!)
+  (repl/refresh)
+  (check-specs!))
+
 
 (defn read-config []
   (duct/read-config (io/resource "dev.edn")))
@@ -69,7 +86,7 @@
 (defn seed
   "At the moment only support seed of tenants table."
   []
-  (let [db-uri (-> (lumen-migrate/construct-system)
+  (let [db-uri (-> (config/construct)
                    :akvo.lumen.config :db :uri)]
     (doseq [tenant (->> "seed.edn" io/resource slurp edn/read-string
                         :tenant-manager :tenants)]

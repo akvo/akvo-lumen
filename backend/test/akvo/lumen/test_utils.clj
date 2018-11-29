@@ -1,13 +1,21 @@
 (ns akvo.lumen.test-utils
   (:require [akvo.lumen.component.tenant-manager :refer [pool]]
-            [akvo.lumen.import :refer [do-import]]
+            [akvo.lumen.lib.import :refer [do-import]]
             [akvo.lumen.util :refer [squuid]]
             [clojure.edn :as edn]
+            [clojure.spec.test.alpha :as stest]
             [clojure.java.io :as io]
             [hugsql.core :as hugsql]))
 
-(hugsql/def-db-fns "akvo/lumen/job-execution.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 
+(defn spec-instrument
+  "Fixture to instrument all functions"
+  [f]
+  (stest/instrument)
+  (let [r (f)]
+    (stest/unstrument)
+    r))
 
 (def seed-data
   (->> "test-seed.edn"
