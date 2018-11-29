@@ -23,6 +23,11 @@ const specIsValidForApi = (spec, vType) => {
         return false;
       }
       break;
+    case 'bubble':
+      if (spec.bucketColumn === null || spec.metricColumn === null) {
+        return false;
+      }
+      break;
     case 'line':
     case 'area':
       if (spec.metricColumnX === null || spec.metricColumnY === null) {
@@ -78,7 +83,7 @@ const specIsValidForApi = (spec, vType) => {
 const getNeedNewAggregation = (newV = { spec: {} }, oldV = { spec: {} }, optionalVizType) => {
   const vType = newV.visualisationType || optionalVizType;
 
-  if (newV && !oldV) {
+  if ((newV && !oldV) || (vType !== oldV.visualisationType)) {
     return true;
   }
 
@@ -89,8 +94,15 @@ const getNeedNewAggregation = (newV = { spec: {} }, oldV = { spec: {} }, optiona
         newV.spec.metricColumnX !== oldV.spec.metricColumnX ||
         newV.spec.metricColumnY !== oldV.spec.metricColumnY ||
         newV.spec.metricAggregation !== oldV.spec.metricAggregation ||
-        newV.spec.subBucketColumn !== oldV.spec.metricAggregation ||
         newV.spec.subBucketMethod !== oldV.spec.subBucketMethod ||
+        !isEqual(newV.spec.filters, oldV.spec.filters)
+      );
+    case 'bubble':
+      return Boolean(
+        newV.datasetId !== oldV.datasetId ||
+        newV.spec.metricColumn !== oldV.spec.metricColumn ||
+        newV.spec.bucketColumn !== oldV.spec.bucketColumn ||
+        newV.spec.metricAggregation !== oldV.spec.metricAggregation ||
         !isEqual(newV.spec.filters, oldV.spec.filters)
       );
     case 'pivot table':
@@ -240,6 +252,7 @@ export default class VisualisationEditor extends Component {
       case 'donut':
       case 'line':
       case 'area':
+      case 'bubble':
       case 'bar':
       case 'scatter': {
         // Data aggregated on the backend for these types
@@ -305,80 +318,39 @@ export default class VisualisationEditor extends Component {
       }
     };
 
-    switch (vType) {
-      case 'map':
-        this.setState({ visualisation: { ...visualisation, awaitingResponse: true } });
-        api.post('/api/visualisations/maps', visualisation)
-          .then((response) => {
-            updateMapIfSuccess(response);
-          }).catch(() => {
-            setMapVisualisationError();
-          });
-        break;
-      case 'pivot table':
-        api.get(`/api/aggregation/${datasetId}/pivot`, {
+    if (vType === 'map') {
+      this.setState({ visualisation: { ...visualisation, awaitingResponse: true } });
+      api
+        .post('/api/visualisations/maps', visualisation)
+        .then((response) => {
+          updateMapIfSuccess(response);
+        })
+        .catch(() => {
+          setMapVisualisationError();
+        });
+    } else {
+      const VIS_TYPE_TO_AGGR_ENDPOINT_NAME = {
+        'pivot table': 'pivot',
+        pie: 'pie',
+        donut: 'pie',
+        line: 'line',
+        area: 'line',
+        bar: 'bar',
+        scatter: 'scatter',
+        bubble: 'bubble',
+      };
+      api
+        .get(`/api/aggregation/${datasetId}/${VIS_TYPE_TO_AGGR_ENDPOINT_NAME[vType]}`, {
           query: JSON.stringify(spec),
-        }).then(response => response.json())
-          .then((response) => {
-            if (requestId === this.latestRequestId) {
-              this.setState({
-                visualisation: { ...visualisation, data: response },
-              });
-            }
-          });
-        break;
-      case 'pie':
-      case 'donut':
-        api.get(`/api/aggregation/${datasetId}/pie`, {
-          query: JSON.stringify(spec),
-        }).then(response => response.json())
-          .then((response) => {
-            if (requestId === this.latestRequestId) {
-              this.setState({
-                visualisation: { ...visualisation, data: response },
-              });
-            }
-          });
-        break;
-      case 'line':
-      case 'area':
-        api.get(`/api/aggregation/${datasetId}/line`, {
-          query: JSON.stringify(spec),
-        }).then(response => response.json())
-          .then((response) => {
-            if (requestId === this.latestRequestId) {
-              this.setState({
-                visualisation: Object.assign({}, visualisation, { data: response }),
-              });
-            }
-          });
-        break;
-      case 'bar':
-        api.get(`/api/aggregation/${datasetId}/bar`, {
-          query: JSON.stringify(spec),
-        }).then(response => response.json())
-          .then((response) => {
-            if (requestId === this.latestRequestId) {
-              this.setState({
-                visualisation: Object.assign({}, visualisation, { data: response }),
-              });
-            }
-          });
-        break;
-      case 'scatter':
-        api.get(`/api/aggregation/${datasetId}/scatter`, {
-          query: JSON.stringify(spec),
-        }).then(response => response.json())
-          .then((response) => {
-            if (requestId === this.latestRequestId) {
-              this.setState({
-                visualisation: Object.assign({}, visualisation, { data: response }),
-              });
-            }
-          });
-        break;
-      default:
-        throw new Error(`Unknown visualisation type ${vType} supplied to fetchAggregatedData`);
+        })
+        .then(response => response.json())
+        .then((response) => {
+          if (requestId === this.latestRequestId) {
+            this.setState({
+              visualisation: Object.assign({}, visualisation, { data: response }),
+            });
+          }
+        });
     }
   }
 

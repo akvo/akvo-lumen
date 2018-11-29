@@ -6,11 +6,12 @@ import Popover from './Popover';
 import './ColorPicker.scss';
 import LegendShape from '../charts/LegendShape';
 
-const ColorPicker = ({ title, left = 0, top = 0, placement, style, ...rest }) => (
+const ColorPicker = ({ title, left = 0, top = 0, placement, style, hideArrow, ...rest }) => (
   <Popover
     left={left}
     top={top}
     placement={placement}
+    hideArrow={hideArrow}
     className="color-picker-popover"
     style={style}
     title={(
@@ -29,6 +30,7 @@ const ColorPicker = ({ title, left = 0, top = 0, placement, style, ...rest }) =>
 ColorPicker.propTypes = {
   target: PropTypes.node,
   isOpen: PropTypes.bool,
+  hideArrow: PropTypes.bool,
   title: PropTypes.string,
   placement: PropTypes.string,
   left: PropTypes.number,

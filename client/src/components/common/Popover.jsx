@@ -42,7 +42,16 @@ const getMarginLeft = (placement) => {
   }
 };
 
-const Popover = ({ title, children, placement = '', left, top, className = '', style = {} }) => (
+const Popover = ({
+  title,
+  children,
+  placement = '',
+  left,
+  top,
+  className = '',
+  style = {},
+  hideArrow = false,
+}) => (
   <div className="Popover">
     <div
       className={`popover fade show bs-popover-${placement.split('-')[0]} ${className} popover-${placement}`}
@@ -55,7 +64,7 @@ const Popover = ({ title, children, placement = '', left, top, className = '', s
         ...style,
       }}
     >
-      <div className="arrow" />
+      {!hideArrow && <div className="arrow" />}
       {title && <h3 className="popover-header">{title}</h3>}
       <div className="popover-body">{children}</div>
     </div>
@@ -70,6 +79,7 @@ Popover.propTypes = {
   left: PropTypes.number,
   top: PropTypes.number,
   style: PropTypes.object,
+  hideArrow: PropTypes.bool,
 };
 
 export default Popover;
