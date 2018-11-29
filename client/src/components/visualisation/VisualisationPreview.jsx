@@ -50,7 +50,7 @@ function shouldRender(visualisation, datasets) {
       if (!datasetLoaded) {
         return false;
       }
-      if (spec.bucketColumn == null || spec.metricColumn == null) {
+      if (spec.bucketColumn == null) {
         return false;
       }
       break;
