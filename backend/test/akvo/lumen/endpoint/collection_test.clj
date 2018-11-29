@@ -34,8 +34,8 @@
 
 (deftest ^:functional collection-test
   (let [;; Import a few datasets
-        ds1 (import-file *tenant-conn* *error-tracker* "GDP.csv" {})
-        ds2 (import-file *tenant-conn* *error-tracker* "dates.csv" {})
+        ds1 (import-file *tenant-conn* *error-tracker* {:file "GDP.csv"})
+        ds2 (import-file *tenant-conn* *error-tracker* {:file "dates.csv"})
         vs1 (create-visualisation *tenant-conn* ds1)
         vs2 (create-visualisation *tenant-conn* ds2)
         db1 (create-dashboard *tenant-conn*)

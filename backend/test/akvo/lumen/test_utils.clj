@@ -43,7 +43,7 @@
 
 (defn import-file
   "Import a file and return the dataset-id, or the job-execution-id in case of FAIL status"
-  [tenant-conn error-tracker file {:keys [dataset-name has-column-headers?]}]
+  [tenant-conn error-tracker {:keys [file dataset-name has-column-headers?]}]
   (let [spec {"name" (or dataset-name file)
               "source" {"path" (.getAbsolutePath (io/file (io/resource file)))
                         "kind" "DATA_FILE"
