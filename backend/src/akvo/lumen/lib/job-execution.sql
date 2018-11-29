@@ -40,6 +40,15 @@ UPDATE job_execution
    SET status = 'OK'
  WHERE id = :id;
 
+-- :name update-job-execution :! :n
+-- :doc Update successful job execution
+UPDATE job_execution
+   SET status = :status,
+       dataset_id = :dataset-id,
+       data_source_id = :data-source-id
+ WHERE id = :id;
+
+
 -- :name job-execution-by-id :? :1
 SELECT j.status, j.error_log->>0 as "error-message", d.spec->'source'->>'kind' as kind
   FROM data_source d, job_execution j

@@ -18,7 +18,7 @@
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
 
-(defn- successful-execution [conn job-execution-id table-name columns spec claims]
+(defn- successful-execution [conn job-execution-id data-source-id table-name columns spec claims]
   (let [dataset-id (util/squuid)
         imported-table-name (util/gen-table-name "imported")]
     (insert-dataset conn {:id dataset-id
@@ -48,7 +48,10 @@
                                                     :type (name type)})
                                                  columns)
                                   :transformations []})
-    (update-successful-job-execution conn {:id job-execution-id})))
+    (update-job-execution conn {:id             job-execution-id
+                                :status         "OK"
+                                :dataset-id     dataset-id
+                                :data-source-id data-source-id})))
 
 (defn- failed-execution [conn job-execution-id reason table-name]
   (update-failed-job-execution conn {:id job-execution-id
@@ -58,7 +61,7 @@
 (defn- execute
   "Import runs within a future and since this is not taking part of ring
   request / response cycle we need to make sure to capture errors."
-  [conn {:keys [sentry-backend-dsn] :as config} error-tracker job-execution-id claims spec]
+  [conn {:keys [sentry-backend-dsn] :as config} error-tracker job-execution-id data-source-id claims spec]
   (future
     (let [table-name (util/gen-table-name "ds")]
       (try
@@ -67,7 +70,7 @@
             (common/create-dataset-table conn table-name columns)
             (doseq [record (map common/coerce-to-sql (p/records importer))]
               (jdbc/insert! conn table-name record))
-            (successful-execution conn job-execution-id table-name columns spec claims)))
+            (successful-execution conn job-execution-id  data-source-id table-name columns spec claims)))
         (catch Throwable e
           (failed-execution conn job-execution-id (.getMessage e) table-name)
           (log/error e)
@@ -81,6 +84,6 @@
                                      :spec (json/generate-string data-source)})
     (insert-job-execution tenant-conn {:id job-execution-id
                                        :data-source-id data-source-id})
-    (execute tenant-conn config error-tracker job-execution-id claims data-source)
+    (execute tenant-conn config error-tracker job-execution-id data-source-id claims data-source)
     (lib/ok {"importId" job-execution-id
              "kind" (get-in data-source ["source" "kind"])})))
