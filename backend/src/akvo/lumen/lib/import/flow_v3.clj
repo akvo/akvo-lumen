@@ -1,5 +1,6 @@
 (ns akvo.lumen.lib.import.flow-v3
-  (:require [akvo.lumen.lib.import.common :as common]
+  (:require [akvo.lumen.postgres :as postgres]
+            [akvo.lumen.lib.import.common :as common]
             [akvo.lumen.lib.import.flow-common :as flow-common]
             [akvo.lumen.lib.import.flow-v2 :as v2])
   (:import [java.time Instant]))
@@ -36,7 +37,7 @@
   (if (= type "GEO")
     (let [{:strs [long lat]} response]
       (when (and long lat)
-        (common/->Geopoint
+        (postgres/->Geopoint
          (format "POINT (%s %s)" long lat))))
     (v2/render-response type response)))
 

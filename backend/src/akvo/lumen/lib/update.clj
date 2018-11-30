@@ -1,6 +1,7 @@
 (ns akvo.lumen.lib.update
   (:require [akvo.lumen.protocols :as p]
             [akvo.lumen.lib.import.common :as import]
+            [akvo.lumen.postgres :as postgres]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.transformation.engine :as engine]
             [akvo.lumen.util :as util]
@@ -104,8 +105,8 @@
       (let [importer-columns (p/columns importer)]
         (if-not (compatible-columns? imported-dataset-columns importer-columns)
           (failed-update conn job-execution-id "Column mismatch")
-          (do (import/create-dataset-table conn table-name importer-columns)
-              (doseq [record (map import/coerce-to-sql (p/records importer))]
+          (do (postgres/create-dataset-table conn table-name importer-columns)
+              (doseq [record (map postgres/coerce-to-sql (p/records importer))]
                 (jdbc/insert! conn table-name record))
               (clone-data-table conn
                                 {:from-table table-name

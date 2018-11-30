@@ -1,6 +1,7 @@
 (ns akvo.lumen.lib.import
   (:require [akvo.lumen.protocols :as p]
             [akvo.lumen.lib.import.common :as common]
+            [akvo.lumen.postgres :as postgres]
             [akvo.lumen.protocols :as p]
             [akvo.lumen.lib.import.csv]
             [akvo.lumen.lib.import.flow]
@@ -67,8 +68,8 @@
       (try
         (with-open [importer (common/dataset-importer (get spec "source") config)]
           (let [columns (p/columns importer)]
-            (common/create-dataset-table conn table-name columns)
-            (doseq [record (map common/coerce-to-sql (p/records importer))]
+            (postgres/create-dataset-table conn table-name columns)
+            (doseq [record (map postgres/coerce-to-sql (p/records importer))]
               (jdbc/insert! conn table-name record))
             (successful-execution conn job-execution-id  data-source-id table-name columns spec claims)))
         (catch Throwable e
