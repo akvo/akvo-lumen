@@ -112,3 +112,10 @@
             (when-not (#{"http" "https"} (.getProtocol url))
               (throw (ex-info (str "Invalid url: " url) {:url url})))
             url)))))
+
+(defn coerce [type-fun questions]
+  (map (fn [q]
+         {:title (:name q)
+          :type (type-fun q)
+          :id (keyword (format "c%s" (:id q)))})
+       questions))

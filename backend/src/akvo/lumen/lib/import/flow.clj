@@ -25,8 +25,8 @@
       p/DatasetImporter
       (columns [this]
         (cond
-          (<= version 2) (v2/dataset-columns (flow-common/form @survey formId) version)
-          (<= version 3) (v3/dataset-columns (flow-common/form @survey formId) version)))
+          (<= version 2) (v2/dataset-columns (flow-common/form @survey formId))
+          (<= version 3) (v3/dataset-columns (flow-common/form @survey formId))))
       (records [this]
         (cond
           (<= version 2) (v2/form-data headers-fn @survey formId)

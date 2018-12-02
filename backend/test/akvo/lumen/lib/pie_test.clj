@@ -11,8 +11,9 @@
 (use-fixtures :once tenant-conn-fixture error-tracker-fixture)
 
 (deftest ^:functional test-pie
-  (let [dataset-id (import-file *tenant-conn* *error-tracker* "pie.csv" {:dataset-name "pie"
-                                                                         :has-column-headers? true})
+  (let [dataset-id (import-file *tenant-conn* *error-tracker*  {:file "pie.csv"
+                                                                :dataset-name "pie"
+                                                                :has-column-headers? true})
         query (partial aggregation/query *tenant-conn* dataset-id "pie")]
     (testing "Simple queries"
       (let [[tag query-result] (query {"bucketColumn" "c1"})]
