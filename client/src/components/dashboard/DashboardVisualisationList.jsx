@@ -3,17 +3,25 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { getDataLastUpdated } from '../../utilities/chart';
 import { getIconUrl } from '../../domain/entity';
+import { specIsValidForApi } from '../../utilities/aggregation';
 
 require('./DashboardVisualisationList.scss');
 
 const filterVisualisations = (visualisations, filterText) => {
   // NB - this naive approach is fine with a few hundred visualisations, but we should replace
   // with something more serious before users start to have thousands of visualisations
+
   if (!filterText) {
-    return visualisations;
+    return visualisations.filter(({ spec, visualisationType }) =>
+      specIsValidForApi(spec, visualisationType)
+    );
   }
 
   return visualisations.filter((visualisation) => {
+    if (!specIsValidForApi(visualisation.spec, visualisation.visualisationType)) {
+      return false;
+    }
+
     let name = visualisation.name || '';
     name = name.toString().toLowerCase();
 
@@ -56,7 +64,7 @@ export default class DashboardVisualisationList extends Component {
                   htmlFor="filterText"
                 >
                   <FormattedMessage id="filter_list_by_title" />
-                </label>
+                </label> 
                 <input
                   type="text"
                   name="filterText"
