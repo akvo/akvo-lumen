@@ -2,6 +2,7 @@
   "Geometry data transformations"
   (:require [akvo.lumen.lib.import.common :as import]
             [akvo.lumen.lib.transformation.engine :as engine]
+            [akvo.lumen.postgres :as postgres]
             [clojure.java.jdbc :as jdbc]
             [clojure.tools.logging :as log]
             [hugsql.core :as hugsql]))
@@ -20,7 +21,7 @@
   (valid? op-spec))
 
 (defn add-index [conn table-name column-name]
-  (jdbc/execute! conn (import/geo-index table-name column-name)))
+  (jdbc/execute! conn (postgres/geo-index table-name column-name)))
 
 (defmethod engine/apply-operation :core/generate-geopoints
   [{:keys [tenant-conn]} table-name columns op-spec]

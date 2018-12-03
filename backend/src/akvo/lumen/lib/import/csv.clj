@@ -1,5 +1,6 @@
 (ns akvo.lumen.lib.import.csv
   (:require [akvo.lumen.lib.import.common :as import]
+            [akvo.lumen.postgres :as postgres]
             [akvo.lumen.protocols :as p]
             [clojure.data.csv :as csv]
             [clojure.java.io :as io]
@@ -14,7 +15,7 @@
   (cond
     (string/blank? value) nil
     (= type :number) (Double/parseDouble value)
-    (= type :geoshape) (import/->Geoshape value)
+    (= type :geoshape) (postgres/->Geoshape value)
     :else value))
 
 (defn gen-column-titles
