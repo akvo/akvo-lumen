@@ -49,8 +49,7 @@
                                      :reason [reason]}))
 
 (defn- apply-transformation-log [conn table-name importer-columns original-dataset-columns last-transformations dataset-id version]
-  (let [importer-columns (mapv (fn [{:keys [title id type key caddisflyResourceUuid
-                                            multiple-id multiple-type] :as column}]
+  (let [importer-columns (mapv (fn [{:keys [title id type key multiple-id multiple-type] :as column}]
                                  (cond-> {"type" (name type)
                                           "title" title
                                           "columnName" (name id)
