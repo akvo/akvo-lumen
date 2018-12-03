@@ -120,15 +120,9 @@
                     :jobExecutionId job-id
                     :message message}))
 
-(defn index-by [key coll]
-  (reduce (fn [index item]
-            (assoc index (get item key) item))
-          {}
-          coll))
-
 (defn diff-columns [previous-columns next-columns]
-  (let [previous-columns (index-by "columnName" previous-columns)
-        next-columns (index-by "columnName" next-columns)
+  (let [previous-columns (util/index-by "columnName" previous-columns)
+        next-columns (util/index-by "columnName" next-columns)
         all-column-names (set/union (set (keys previous-columns))
                                     (set (keys next-columns)))
         changed-columns (for [column-name all-column-names

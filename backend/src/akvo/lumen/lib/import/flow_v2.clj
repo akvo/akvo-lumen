@@ -1,6 +1,7 @@
 (ns akvo.lumen.lib.import.flow-v2
   (:require [akvo.commons.psql-util :as pg]
             [akvo.lumen.lib.import.common :as common]
+            [akvo.lumen.util :as util]
             [akvo.lumen.lib.import.flow-common :as flow-common]
             [cheshire.core :as json]
             [clj-http.client :as http]
@@ -98,7 +99,7 @@
   "Returns a lazy sequence of form data, ready to be inserted as a lumen dataset"
   [headers-fn survey form-id]
   (let [form (flow-common/form survey form-id)
-        data-points (flow-common/index-by "id" (flow-common/data-points headers-fn survey))]
+        data-points (util/index-by "id" (flow-common/data-points headers-fn survey))]
     (map (fn [form-instance]
            (let [data-point-id (get form-instance "dataPointId")]
              (assoc (response-data form (get form-instance "responses"))

@@ -50,3 +50,9 @@
             (when-not (#{"http" "https"} (.getProtocol url))
               (throw (ex-info (str "Invalid url: " url) {:url url})))
             url)))))
+
+(defn index-by [key coll]
+  (reduce (fn [index item]
+            (assoc index (get item key) item))
+          {}
+          coll))
