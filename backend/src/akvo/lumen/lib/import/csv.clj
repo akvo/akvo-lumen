@@ -2,6 +2,7 @@
   (:require [akvo.lumen.lib.import.common :as import]
             [akvo.lumen.postgres :as postgres]
             [akvo.lumen.protocols :as p]
+            [akvo.lumen.util :as util]
             [clojure.data.csv :as csv]
             [clojure.java.io :as io]
             [clojure.java.jdbc :as jdbc]
@@ -96,7 +97,7 @@
 
 (defmethod import/dataset-importer "CSV"
   [spec {:keys [file-upload-path]}]
-  (let [path (import/get-path spec file-upload-path)
+  (let [path (util/get-path spec file-upload-path)
         headers? (boolean (get spec "hasColumnHeaders"))
         guess-types? (-> (get spec "guessColumnTypes") false? not)]
     (csv-importer path headers? guess-types?)))

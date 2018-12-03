@@ -1,6 +1,5 @@
 (ns akvo.lumen.lib.raster
   (:require [akvo.lumen.endpoint.job-execution :as job-execution]
-            [akvo.lumen.lib.import.common :as import]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.update :as update]
             [akvo.lumen.util :as util]
@@ -82,7 +81,7 @@
   (let [table-name (util/gen-table-name "raster")]
     (try
       (let [source      (get data-source "source")
-            file        (import/get-path source (:file-upload-path config))
+            file        (util/get-path source (:file-upload-path config))
             path        (.getAbsolutePath (.getParentFile file))
             filename    (.getName file)
             raster-info (get-raster-info path filename)
