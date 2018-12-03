@@ -64,7 +64,7 @@ export default class DashboardVisualisationList extends Component {
                   htmlFor="filterText"
                 >
                   <FormattedMessage id="filter_list_by_title" />
-                </label> 
+                </label>
                 <input
                   type="text"
                   name="filterText"
