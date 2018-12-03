@@ -108,18 +108,6 @@
 (defn next-column-name [columns]
   (derivation-column-name (next-column-index columns)))
 
-(defn- deliver-promise-success [promise dataset-id dataset-version-id job-execution-id]
-  (deliver promise {:status "OK"
-                    :jobExecutionId job-execution-id
-                    :datasetVersionId dataset-version-id
-                    :datasetId dataset-id}))
-
-(defn- deliver-promise-failure [promise dataset-id job-id message]
-  (deliver promise {:status "FAILED"
-                    :datasetId dataset-id
-                    :jobExecutionId job-id
-                    :message message}))
-
 (defn index-by [key coll]
   (reduce (fn [index item]
             (assoc index (get item key) item))
