@@ -58,7 +58,6 @@
                                           "direction" nil
                                           "hidden" false}
                                    key                   (assoc "key" (boolean key))
-                                   caddisflyResourceUuid (assoc "caddisflyResourceUuid" caddisflyResourceUuid)
                                    multiple-type (assoc "multipleType" multiple-type)
                                    multiple-id (assoc "multipleId" multiple-id)))
                                importer-columns)]
