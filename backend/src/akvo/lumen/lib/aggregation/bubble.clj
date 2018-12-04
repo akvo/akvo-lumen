@@ -20,7 +20,8 @@
 (defn sql-aggregation-subquery [aggregation-method column-string column-type]
   (case aggregation-method
     nil ""
-    ("min" "max" "count" "sum") (str aggregation-method "(" (cast-to-decimal column-string column-type) "::decimal)")
+    ("min" "max" "sum") (str aggregation-method "(" (cast-to-decimal column-string column-type) "::decimal)")
+    "count" (str aggregation-method "(" column-string (if (#{"number" "data"} column-type) "::decimal" "::text") ")")
     "mean" (str "avg(" (cast-to-decimal column-string column-type) "::decimal)")
     "median" (str "percentile_cont(0.5) WITHIN GROUP (ORDER BY " (cast-to-decimal column-string column-type) ")")
     "distinct" (str "COUNT(DISTINCT " (cast-to-decimal column-string column-type) ")")
