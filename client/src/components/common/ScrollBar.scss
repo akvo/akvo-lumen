@@ -12,48 +12,23 @@
     margin-bottom: 4px;
     
     &-inner {
-      overflow: auto;
-      padding-bottom: 15px;
-      &::-webkit-scrollbar {
-          -webkit-appearance: none;
-      }
-
-      &::-webkit-scrollbar:vertical {
-          width: 11px;
-          display: none;
-      }
-
-      &::-webkit-scrollbar:horizontal {
-          height: 11px;
-      }
-
-      &::-webkit-scrollbar-thumb {
-          border-radius: 8px;
-          border: 2px solid white; /* should match background, can't be transparent */
-          background-color: #7C7C7C;
-          z-index:9999;
-      }
+      overflow-x: auto;
+      overflow-y: hidden;
     }
   }
 
   &-track {
-    width: 100% !important;
+    width: 100%;
     height: 2px;
-    background: transparent;
+    background: $lightGrey;
     position: absolute;
     left: 0;
-    bottom: 6px;         
+    bottom: 0;
   }
 
   &-handle {
     position: absolute;
     height: 2px;
-    background: #7C7C7C;
-    z-index:9998;    
-    width: 70% !important;
-    margin-left: 5px;
+    background: $anchorLinkLight;
   }
 }
-
-
-
