@@ -44,6 +44,19 @@
       {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}
         "datasets" { dataset-id dataset}})))
 
+(defmethod visualisation "bubble"
+  [tenant-conn visualisation config]
+  (let [dataset-id (:datasetId visualisation)
+        [dataset-tag dataset] (dataset/fetch-metadata tenant-conn dataset-id)
+        [tag query-result] (aggregation/query tenant-conn
+                                              dataset-id
+                                              "bubble"
+                                              (:spec visualisation))]
+    (when (and (= tag ::lib/ok)
+                (= dataset-tag ::lib/ok))
+      {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}
+        "datasets" { dataset-id dataset}})))
+
 (defmethod visualisation "area"
   [tenant-conn visualisation config]
   (let [dataset-id (:datasetId visualisation)

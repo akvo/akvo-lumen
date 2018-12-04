@@ -12,6 +12,7 @@ export default function VisualisationViewer(props) {
     case 'donut':
     case 'pie':
     case 'polararea':
+    case 'bubble':
     case 'scatter':
       return (
         <Chart

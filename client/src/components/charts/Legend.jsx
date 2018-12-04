@@ -39,7 +39,10 @@ Legend.propTypes = {
   onClick: PropTypes.func,
   horizontal: PropTypes.bool,
   title: PropTypes.string,
-  activeItem: PropTypes.string,
+  activeItem: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.number,
+  ]),
 };
 
 export default Legend;

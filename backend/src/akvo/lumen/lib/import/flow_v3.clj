@@ -1,5 +1,6 @@
 (ns akvo.lumen.lib.import.flow-v3
-  (:require [akvo.lumen.lib.import.common :as import]
+  (:require [akvo.lumen.postgres :as postgres]
+            [akvo.lumen.lib.import.common :as common]
             [akvo.lumen.lib.import.flow-common :as flow-common]
             [akvo.lumen.lib.import.flow-v2 :as v2])
   (:import [java.time Instant]))
@@ -14,37 +15,29 @@
     :text))
 
 (defn dataset-columns
-  [form version]
+  "returns a vector of [{:title :type :id :key}]
+  `key` is optional"
+  [form]
   (let [questions (flow-common/questions form)]
-    (into [{:title "Instance id" :type :text :id :instance_id :key true}
-           (let [identifier {:title "Identifier" :type :text :id :identifier}]
-             (if (:registration-form? form)
-               (assoc identifier :key true)
-               identifier))
-           {:title "Device Id" :type :text :id :device_id}
-           {:title "Display name" :type :text :id :display_name}
-           {:title "Submitter" :type :text :id :submitter}
-           {:title "Submitted at" :type :date :id :submitted_at}
-           {:title "Surveyal time" :type :number :id :surveyal_time}]
-          (map (fn [question]
-                 (let[column-type (question-type->lumen-type question)]
-                   (merge {:title (:name question)
-                           :type column-type
-                           :id (keyword (format "c%s" (:id question)))}
-                          (when (= column-type :multiple)
-                            (if (:caddisflyResourceUuid question)
-                              {:multiple-type :caddisfly
-                               :multiple-id (:caddisflyResourceUuid question)}
-                              {:multiple :unknown
-                               :multiple-id nil})))))
-               questions))))
+    (into (flow-common/commons-columns form)
+          (into [{:title "Device Id" :type :text :id :device_id}]
+                (->> (flow-common/questions form)
+                     (common/coerce question-type->lumen-type)
+                     (map (fn [question]
+                            (merge question
+                                   (when (= (:type question) :multiple)
+                                     (if (:caddisflyResourceUuid question)
+                                       {:multiple-type :caddisfly
+                                        :multiple-id (:caddisflyResourceUuid question)}
+                                       {:multiple-type :unknown
+                                        :multiple-id nil}))))))))))
 
 (defn render-response
   [type response]
   (if (= type "GEO")
     (let [{:strs [long lat]} response]
       (when (and long lat)
-        (import/->Geopoint
+        (postgres/->Geopoint
          (format "POINT (%s %s)" long lat))))
     (v2/render-response type response)))
 

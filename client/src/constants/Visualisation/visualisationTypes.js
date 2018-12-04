@@ -1,12 +1,13 @@
 const visualisationTypes = [
-  'map',
-  'pivot table',
-  'bar',
-  'line',
   'area',
+  'bar',
+  'bubble',
+  'line',
+  'map',
   'pie',
   'polararea',
   'donut',
+  'pivot table',
   'scatter',
 ];
 

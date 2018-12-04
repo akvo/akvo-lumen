@@ -1,6 +1,7 @@
 (ns akvo.lumen.lib.update
   (:require [akvo.lumen.protocols :as p]
             [akvo.lumen.lib.import.common :as import]
+            [akvo.lumen.postgres :as postgres]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.transformation.engine :as engine]
             [akvo.lumen.util :as util]
@@ -48,8 +49,7 @@
                                      :reason [reason]}))
 
 (defn- apply-transformation-log [conn table-name importer-columns original-dataset-columns last-transformations dataset-id version]
-  (let [importer-columns (mapv (fn [{:keys [title id type key caddisflyResourceUuid
-                                            multiple-id multiple-type] :as column}]
+  (let [importer-columns (mapv (fn [{:keys [title id type key multiple-id multiple-type] :as column}]
                                  (cond-> {"type" (name type)
                                           "title" title
                                           "columnName" (name id)
@@ -57,7 +57,6 @@
                                           "direction" nil
                                           "hidden" false}
                                    key                   (assoc "key" (boolean key))
-                                   caddisflyResourceUuid (assoc "caddisflyResourceUuid" caddisflyResourceUuid)
                                    multiple-type (assoc "multipleType" multiple-type)
                                    multiple-id (assoc "multipleId" multiple-id)))
                                importer-columns)]
@@ -104,8 +103,8 @@
       (let [importer-columns (p/columns importer)]
         (if-not (compatible-columns? imported-dataset-columns importer-columns)
           (failed-update conn job-execution-id "Column mismatch")
-          (do (import/create-dataset-table conn table-name importer-columns)
-              (doseq [record (map import/coerce-to-sql (p/records importer))]
+          (do (postgres/create-dataset-table conn table-name importer-columns)
+              (doseq [record (map postgres/coerce-to-sql (p/records importer))]
                 (jdbc/insert! conn table-name record))
               (clone-data-table conn
                                 {:from-table table-name

@@ -15,6 +15,7 @@ import LoadingSpinner from '../components/common/LoadingSpinner';
 import { SAVE_COUNTDOWN_INTERVAL, SAVE_INITIAL_TIMEOUT } from '../constants/time';
 import NavigationPrompt from '../components/common/NavigationPrompt';
 import { printShape } from './PrintProvider';
+import { specIsValidForApi } from '../utilities/aggregation';
 
 const getEditingStatus = (location) => {
   const testString = 'create';
@@ -269,6 +270,8 @@ class Dashboard extends Component {
           aggType = vType;
           break;
       }
+
+      if (!specIsValidForApi(visualisation.spec, vType)) return;
 
       api.get(`/api/aggregation/${datasetId}/${aggType}`, {
         query: JSON.stringify(spec),

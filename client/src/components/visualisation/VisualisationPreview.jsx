@@ -25,15 +25,6 @@ function shouldRender(visualisation, datasets) {
       }
       break;
 
-    case 'bar':
-      if (!datasetLoaded) {
-        return false;
-      }
-      if (spec.bucketColumn == null) {
-        return false;
-      }
-      break;
-
     case 'line':
     case 'area':
       if (!datasetLoaded) {
@@ -44,9 +35,10 @@ function shouldRender(visualisation, datasets) {
       }
       break;
 
+    case 'bar':
     case 'pie':
     case 'donut':
-    case 'polararea':
+    case 'bubble':
       if (!datasetLoaded) {
         return false;
       }
