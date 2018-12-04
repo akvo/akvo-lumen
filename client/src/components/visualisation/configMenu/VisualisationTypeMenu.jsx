@@ -2,11 +2,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { kebabCase } from 'lodash';
+import { injectIntl, intlShape } from 'react-intl';
 
 import visualisationTypes from '../../../constants/Visualisation/visualisationTypes';
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
 import ConfigMenuSectionOptionThumbs from '../../common/ConfigMenu/ConfigMenuSectionOptionThumbs';
-import { injectIntl, intlShape } from 'react-intl';
 
 require('./VisualisationTypeMenu.scss');
 
