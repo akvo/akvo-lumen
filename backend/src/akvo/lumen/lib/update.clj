@@ -15,30 +15,13 @@
 (hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
 
-(defmulti adapt-transformation
-  (fn [op-spec older-columns new-columns]
-    (keyword (get op-spec "op"))))
-
-(defmethod adapt-transformation :default
-  [op-spec older-columns new-columns]
-  op-spec)
-
 (defn successful-update
   "On a successful update we need to create a new dataset-version that
   is similar to the previous one, except with an updated :version and
   pointing to the new table-name, imported-table-name and columns. We
   also delete the previous table-name and imported-table-name so we
   don't accumulate unused datasets on each update."
-  [conn job-execution-id dataset-id table-name imported-table-name dataset-version
-   transformations new-columns]
-  (insert-dataset-version conn {:id (str (util/squuid))
-                                :dataset-id dataset-id
-                                :job-execution-id job-execution-id
-                                :table-name table-name
-                                :imported-table-name imported-table-name
-                                :version (inc (:version dataset-version))
-                                :columns new-columns
-                                :transformations (vec transformations)})
+  [conn job-execution-id dataset-id table-name imported-table-name dataset-version]
   (touch-dataset conn {:id dataset-id})
   (drop-table conn {:table-name (:imported-table-name dataset-version)})
   (drop-table conn {:table-name (:table-name dataset-version)})
@@ -47,42 +30,6 @@
 (defn failed-update [conn job-execution-id reason]
   (update-failed-job-execution conn {:id job-execution-id
                                      :reason [reason]}))
-
-(defn- apply-transformation-log [conn table-name importer-columns original-dataset-columns last-transformations dataset-id version]
-  (let [importer-columns (mapv (fn [{:keys [title id type key multiple-id multiple-type] :as column}]
-                                 (cond-> {"type" (name type)
-                                          "title" title
-                                          "columnName" (name id)
-                                          "sort" nil
-                                          "direction" nil
-                                          "hidden" false}
-                                   key                   (assoc "key" (boolean key))
-                                   multiple-type (assoc "multipleType" multiple-type)
-                                   multiple-id (assoc "multipleId" multiple-id)))
-                               importer-columns)]
-    (update-dataset-version conn {:dataset-id      dataset-id
-                                  :version         version
-                                  :columns         importer-columns
-                                  :transformations []})
-    (loop [transformations  last-transformations
-           importer-columns importer-columns
-           version          (inc version)
-           applied-txs      []]
-      (if-let [transformation (first transformations)]
-        (let [transformation                     (adapt-transformation transformation original-dataset-columns importer-columns)
-              {:keys [success? message columns]} (engine/try-apply-operation
-                                                  {:tenant-conn conn} table-name importer-columns transformation)]
-          (when-not success? (throw
-                              (ex-info (format "Failed to update due to transformation mismatch: %s" message) {})))
-          (let [applied-txs (conj applied-txs
-                                  (assoc transformation "changedColumns"
-                                         (engine/diff-columns importer-columns columns)))]
-            (update-dataset-version conn {:dataset-id      dataset-id
-                                          :version         version
-                                          :columns         columns
-                                          :transformations applied-txs})
-            (recur (rest transformations) columns (inc version) applied-txs)))
-        [importer-columns applied-txs]))))
 
 (defn compatible-columns? [imported-columns columns]
   (let [imported-columns (map (fn [column]
@@ -111,19 +58,32 @@
                                  :to-table imported-table-name}
                                 {}
                                 {:transaction? false})
-              (let [[columns transformations]
-                    (apply-transformation-log conn table-name importer-columns imported-dataset-columns
-                                              (:transformations dataset-version)
-                                              dataset-id
-                                              (:version initial-dataset-version))]
+              (let [coerce-column-fn (fn [{:keys [title id type key multiple-id multiple-type] :as column}]
+                                       (cond-> {"type" (name type)
+                                                "title" title
+                                                "columnName" (name id)
+                                                "sort" nil
+                                                "direction" nil
+                                                "hidden" false}
+                                         key           (assoc "key" (boolean key))
+                                         multiple-type (assoc "multipleType" multiple-type)
+                                         multiple-id   (assoc "multipleId" multiple-id)))
+                    importer-columns (mapv coerce-column-fn importer-columns)]
+                (engine/apply-transformation-log conn
+                                                 table-name
+                                                 imported-table-name
+                                                 importer-columns
+                                                 imported-dataset-columns
+                                                 dataset-id
+                                                 job-execution-id
+
+                                                 dataset-version)
                 (successful-update conn
                                    job-execution-id
                                    dataset-id
                                    table-name
                                    imported-table-name
-                                   dataset-version
-                                   transformations
-                                   columns))))))))
+                                   dataset-version))))))))
 
 (defn update-dataset [tenant-conn config error-tracker dataset-id data-source-id data-source-spec]
   (let [job-execution-id (str (util/squuid))]

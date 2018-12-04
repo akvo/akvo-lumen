@@ -1,5 +1,6 @@
 (ns akvo.lumen.lib.transformation.derive-test
   (:require [akvo.lumen.lib.transformation.derive :as derive]
+            [akvo.lumen.lib.transformation.engine :as engine]
             [akvo.lumen.lib.update :as update]
             [clojure.test.check.generators :as gen]
             [clojure.string :as str]
@@ -140,7 +141,7 @@
         computed (derive/compute-transformation-code (get-in t1 ["args" "code"]) older-columns)]
     (is (= code_v2 (derive/columnName>columnTitle computed new-columns)))
     (is (= (update-in t1 ["args" "code"] (constantly code_v2))
-           (update/adapt-transformation t1 older-columns new-columns)))
+           (engine/adapt-transformation t1 older-columns new-columns)))
     ))
 
 
