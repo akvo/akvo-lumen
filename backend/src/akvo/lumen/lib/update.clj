@@ -41,49 +41,47 @@
                  (set (map #(select-keys % [:id :type]) columns)))))
 
 (defn do-update [conn config dataset-id data-source-id job-execution-id data-source-spec]
-  (let [table-name (util/gen-table-name "ds")
-        imported-table-name (util/gen-table-name "imported")
-        dataset-version (latest-dataset-version-by-dataset-id conn {:dataset-id dataset-id})
-        initial-dataset-version (initial-dataset-version-to-update-by-dataset-id conn {:dataset-id dataset-id})
-        imported-dataset-columns (vec (:columns initial-dataset-version))]
-    (with-open [importer (import/dataset-importer (get data-source-spec "source") config)]
-      (let [importer-columns (p/columns importer)]
-        (if-not (compatible-columns? imported-dataset-columns importer-columns)
-          (failed-update conn job-execution-id "Column mismatch")
-          (do (postgres/create-dataset-table conn table-name importer-columns)
-              (doseq [record (map postgres/coerce-to-sql (p/records importer))]
-                (jdbc/insert! conn table-name record))
-              (clone-data-table conn
-                                {:from-table table-name
-                                 :to-table imported-table-name}
-                                {}
-                                {:transaction? false})
-              (let [coerce-column-fn (fn [{:keys [title id type key multiple-id multiple-type] :as column}]
-                                       (cond-> {"type" (name type)
-                                                "title" title
-                                                "columnName" (name id)
-                                                "sort" nil
-                                                "direction" nil
-                                                "hidden" false}
-                                         key           (assoc "key" (boolean key))
-                                         multiple-type (assoc "multipleType" multiple-type)
-                                         multiple-id   (assoc "multipleId" multiple-id)))
-                    importer-columns (mapv coerce-column-fn importer-columns)]
-                (engine/apply-transformation-log conn
-                                                 table-name
-                                                 imported-table-name
-                                                 importer-columns
-                                                 imported-dataset-columns
-                                                 dataset-id
-                                                 job-execution-id
-
-                                                 dataset-version)
-                (successful-update conn
-                                   job-execution-id
-                                   dataset-id
-                                   table-name
-                                   imported-table-name
-                                   dataset-version))))))))
+  (with-open [importer (import/dataset-importer (get data-source-spec "source") config)]
+    (let [initial-dataset-version (initial-dataset-version-to-update-by-dataset-id conn {:dataset-id dataset-id})
+          imported-dataset-columns (vec (:columns initial-dataset-version))
+          importer-columns (p/columns importer)]
+      (if-not (compatible-columns? imported-dataset-columns importer-columns)
+        (failed-update conn job-execution-id "Column mismatch")
+        (let [table-name (util/gen-table-name "ds")
+              imported-table-name (util/gen-table-name "imported")]
+          (postgres/create-dataset-table conn table-name importer-columns)
+          (doseq [record (map postgres/coerce-to-sql (p/records importer))]
+            (jdbc/insert! conn table-name record))
+          (clone-data-table conn {:from-table table-name
+                                  :to-table imported-table-name}
+                            {}
+                            {:transaction? false})
+          (let [dataset-version (latest-dataset-version-by-dataset-id conn {:dataset-id dataset-id})
+                coerce-column-fn (fn [{:keys [title id type key multiple-id multiple-type] :as column}]
+                                   (cond-> {"type" (name type)
+                                            "title" title
+                                            "columnName" (name id)
+                                            "sort" nil
+                                            "direction" nil
+                                            "hidden" false}
+                                     key           (assoc "key" (boolean key))
+                                     multiple-type (assoc "multipleType" multiple-type)
+                                     multiple-id   (assoc "multipleId" multiple-id)))
+                importer-columns (mapv coerce-column-fn importer-columns)]
+            (engine/apply-transformation-log conn
+                                             table-name
+                                             imported-table-name
+                                             importer-columns
+                                             imported-dataset-columns
+                                             dataset-id
+                                             job-execution-id
+                                             dataset-version)
+            (successful-update conn
+                               job-execution-id
+                               dataset-id
+                               table-name
+                               imported-table-name
+                               dataset-version)))))))
 
 (defn update-dataset [tenant-conn config error-tracker dataset-id data-source-id data-source-spec]
   (let [job-execution-id (str (util/squuid))]
