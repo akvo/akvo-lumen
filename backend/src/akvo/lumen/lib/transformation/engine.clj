@@ -6,6 +6,7 @@
             [clojure.tools.logging :as log]
             [hugsql.core :as hugsql]))
 
+(hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
 
 (defmulti valid?
@@ -37,7 +38,7 @@
     {:success? false
      :message msg}))
 
-(defn try-apply-operation
+(defn- try-apply-operation
   "invoke apply-operation inside a try-catch"
   [deps table-name columns op-spec]
   (try
@@ -208,3 +209,46 @@
                   dataset-id
                   job-execution-id
                   current-dataset-version))))
+
+(defmulti adapt-transformation
+  (fn [op-spec older-columns new-columns]
+    (keyword (get op-spec "op"))))
+
+(defmethod adapt-transformation :default
+  [op-spec older-columns new-columns]
+  op-spec)
+
+
+(defn apply-transformation-log [conn table-name imported-table-name
+                                new-columns old-columns dataset-id job-execution-id
+                                {:keys [transformations version] :as dataset-version}]
+  (update-dataset-version conn {:dataset-id      dataset-id
+                                :version         version
+                                :columns         new-columns
+                                :transformations []})
+  (loop [transformations transformations
+         columns         new-columns
+         version         (inc version)
+         applied-txs     []]
+    (if-let [transformation (first transformations)]
+      (let [transformation (adapt-transformation transformation old-columns columns)
+            op             (try-apply-operation {:tenant-conn conn} table-name columns transformation)]
+        (when-not (:success? op)
+          (throw
+           (ex-info (format "Failed to update due to transformation mismatch: %s" (:message op)) {})))
+        (let [applied-txs (conj applied-txs
+                                (assoc transformation "changedColumns"
+                                       (diff-columns columns (:columns op))))]
+          (update-dataset-version conn {:dataset-id      dataset-id
+                                        :version         version
+                                        :columns         (:columns op)
+                                        :transformations applied-txs})
+          (recur (rest transformations) (:columns op) (inc version) applied-txs)))
+      (insert-dataset-version conn {:id                  (str (util/squuid))
+                                    :dataset-id          dataset-id
+                                    :job-execution-id    job-execution-id
+                                    :table-name          table-name
+                                    :imported-table-name imported-table-name
+                                    :version             (inc (:version dataset-version))
+                                    :columns             columns
+                                    :transformations     (vec applied-txs)}))))
