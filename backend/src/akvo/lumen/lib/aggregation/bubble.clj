@@ -51,6 +51,5 @@
                  "label" (:title column-size)
                  "data" (mapv (fn [[size-value label]] {"value" size-value}) sql-response)
                  "metadata"  {"type" (:type column-size)}}]
-      "common" {"metadata" {"type" nil
-                            "sampled" (= (count sql-response) max-points)}
+      "common" {"metadata" {"sampled" (= (count sql-response) max-points)}
                 "data" (mapv (fn [[size-value label]] {"label" label}) sql-response)}})))
