@@ -56,3 +56,15 @@
             (assoc index (get item key) item))
           {}
           coll))
+
+(defn valid-column-name? [s]
+  (and (string? s)
+       (boolean (re-find #"^[a-z][a-z0-9_]*$" s))))
+
+(defn valid-dataset-id? [s]
+  (and (string? s)
+       (boolean (re-find #"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}" s))))
+
+(defn valid-type? [s]
+  (#{"text" "number" "date" "geopoint"} s))
+

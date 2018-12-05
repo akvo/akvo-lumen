@@ -77,7 +77,7 @@
                 ::column-title
                 ::column-type]} (args op-spec)]
     (and (string? column-title) 
-         (engine/valid-type? column-type)
+         (util/valid-type? column-type)
          (#{"fail" "leave-empty" "delete-row"} (engine/error-strategy op-spec))
          (js-engine/evaluable? code))))
 

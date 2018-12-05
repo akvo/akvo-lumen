@@ -1,5 +1,6 @@
 (ns akvo.lumen.lib.transformation.reverse-geocode
   (:require [akvo.lumen.lib.transformation.engine :as engine]
+            [akvo.lumen.util :as util]
             [clojure.java.jdbc :as jdbc]
             [hugsql.core :as hugsql]))
 
@@ -11,10 +12,10 @@
   [op-spec]
   (let [{:strs [target source]} (get op-spec "args")]
     (and (string? (get target "title"))
-         (engine/valid-column-name? (get target "geopointColumn"))
-         (engine/valid-dataset-id? (get source "datasetId"))
-         (engine/valid-column-name? (get source "geoshapeColumn"))
-         (engine/valid-column-name? (get source "mergeColumn")))))
+         (util/valid-column-name? (get target "geopointColumn"))
+         (util/valid-dataset-id? (get source "datasetId"))
+         (util/valid-column-name? (get source "geoshapeColumn"))
+         (util/valid-column-name? (get source "mergeColumn")))))
 
 (defn table-qualify [table-name column-name]
   (str table-name "." column-name))

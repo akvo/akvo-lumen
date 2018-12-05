@@ -1,6 +1,7 @@
 (ns akvo.lumen.lib.transformation.geo
   "Geometry data transformations"
   (:require [akvo.lumen.lib.import.common :as import]
+            [akvo.lumen.util :as util]
             [akvo.lumen.lib.transformation.engine :as engine]
             [akvo.lumen.postgres :as postgres]
             [clojure.java.jdbc :as jdbc]
@@ -14,7 +15,7 @@
   [op-spec]
   (let [{:strs [columnNameLat columnNameLong]} (engine/args op-spec)]
     (boolean
-      (every? engine/valid-column-name? [columnNameLat columnNameLong]))))
+      (every? util/valid-column-name? [columnNameLat columnNameLong]))))
 
 (defmethod engine/valid? :core/generate-geopoints
   [op-spec]

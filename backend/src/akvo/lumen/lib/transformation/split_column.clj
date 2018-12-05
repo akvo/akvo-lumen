@@ -1,6 +1,8 @@
 (ns akvo.lumen.lib.transformation.split-column
   (:require [akvo.lumen.lib.transformation.engine :as engine]
+            [akvo.lumen.util :as util]
             [clojure.java.jdbc :as jdbc]
+            
             [akvo.lumen.postgres :as postgres]
             [clojure.string :as string]
             [clojure.tools.logging :as log]
@@ -43,7 +45,7 @@
 (defmethod engine/valid? :core/split-column
   [op-spec]
   (let [{:keys [onError op args] :as op-spec} (keywordize-keys op-spec)]
-    (and (engine/valid-column-name? (col-name args))
+    (and (util/valid-column-name? (col-name args))
          (pattern* args)
          (new-column-name args))))
 
