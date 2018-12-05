@@ -7,6 +7,7 @@ import ModalHeader from './ModalHeader';
 import ModalFooter from './ModalFooter';
 import ToggleInput from '../common/ToggleInput';
 import { trackEvent } from '../../utilities/analytics';
+import { GET_EMBED_CODE } from '../../constants/analytics';
 
 require('./ShareEntity.scss');
 
@@ -198,7 +199,7 @@ export default class ShareEntity extends Component {
                 <button
                   className="showEmbedButton"
                   onClick={() => {
-                    trackEvent('Get embed code', type, shareUrl);
+                    trackEvent(GET_EMBED_CODE, type, shareUrl);
                     this.setState({ showEmbed: true });
                   }}
                 >
