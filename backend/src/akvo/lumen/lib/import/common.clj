@@ -28,7 +28,15 @@
 
 (defn coerce [type-fun questions]
   (map (fn [q]
-         {:title (:name q)
-          :type (type-fun q)
-          :id (keyword (format "c%s" (:id q)))})
+         (let [t (type-fun q)]
+           (merge
+            {:title (:name q)
+             :type t
+             :id (keyword (format "c%s" (:id q)))}
+            (when (= t :multiple)
+              (if (:caddisflyResourceUuid q)
+                {:multiple-type :caddisfly
+                 :multiple-id (:caddisflyResourceUuid q)}
+                {:multiple-type :unknown
+                 :multiple-id nil})))))
        questions))
