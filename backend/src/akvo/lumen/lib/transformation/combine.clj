@@ -1,5 +1,6 @@
 (ns akvo.lumen.lib.transformation.combine
   (:require [akvo.lumen.lib.transformation.engine :as engine]
+            [akvo.lumen.util :as util]
             [clojure.tools.logging :as log]
             [hugsql.core :as hugsql]))
 
@@ -11,7 +12,7 @@
   (let [{[column-name-1 column-name-2] "columnNames"
          column-title "newColumnTitle"
          separator "separator"} (engine/args op-spec)]
-    (boolean (and (every? engine/valid-column-name? [column-name-1 column-name-2])
+    (boolean (and (every? util/valid-column-name? [column-name-1 column-name-2])
                   (string? column-title)
                   (string? separator)
                   (= (engine/error-strategy op-spec) "fail")))))

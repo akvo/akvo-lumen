@@ -1,6 +1,7 @@
 (ns akvo.lumen.lib.transformation.change-datatype
   (:require [akvo.lumen.lib.transformation.engine :as engine]
             [akvo.lumen.postgres :as postgres]
+            [akvo.lumen.util :as util]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
             [clojure.tools.logging :as log]
@@ -13,8 +14,8 @@
   (let [{column-name "columnName"
          new-type "newType"
          parse-format "parseFormat"} (engine/args op-spec)]
-    (boolean (and (engine/valid-type? new-type)
-                  (engine/valid-column-name? column-name)
+    (boolean (and (util/valid-type? new-type)
+                  (util/valid-column-name? column-name)
                   (if (= new-type "date")
                     (string? parse-format)
                     true)))))

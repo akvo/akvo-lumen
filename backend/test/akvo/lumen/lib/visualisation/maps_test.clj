@@ -1,6 +1,7 @@
 (ns akvo.lumen.lib.visualisation.maps-test
   (:require [akvo.lumen.lib.visualisation.maps :as m]
             [akvo.lumen.lib.transformation.engine :as engine]
+            [akvo.lumen.util :as util]
             [akvo.lumen.lib.visualisation.map-config :as map-config]
             [clojure.test :refer :all]))
 
@@ -12,7 +13,7 @@
 
 (deftest invalid-location-spec?
 
-  (let [p engine/valid-column-name?]
+  (let [p util/valid-column-name?]
 
     (testing "Sanity check for invalid location specs"
       (is (not (m/valid-location? nil p)))

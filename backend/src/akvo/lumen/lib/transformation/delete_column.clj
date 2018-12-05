@@ -1,5 +1,6 @@
 (ns akvo.lumen.lib.transformation.delete-column
   (:require [akvo.lumen.lib.transformation.engine :as engine]
+            [akvo.lumen.util :as util]
             [clojure.tools.logging :as log]
             [clojure.string :as str]
             [akvo.lumen.lib.transformation.merge-datasets :as merge-datasets]
@@ -12,7 +13,7 @@
 
 (defmethod engine/valid? :core/delete-column
   [op-spec]
-  (engine/valid-column-name? (col-name op-spec)))
+  (util/valid-column-name? (col-name op-spec)))
 
 (defn- merged-sources-with-column
   "search for merged-datasets with this column related"
