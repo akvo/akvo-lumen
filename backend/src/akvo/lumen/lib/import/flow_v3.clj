@@ -1,6 +1,7 @@
 (ns akvo.lumen.lib.import.flow-v3
   (:require [akvo.lumen.postgres :as postgres]
             [akvo.lumen.lib.import.common :as common]
+            [akvo.lumen.util :as util]
             [akvo.lumen.lib.import.flow-common :as flow-common]
             [akvo.lumen.lib.import.flow-v2 :as v2])
   (:import [java.time Instant]))
@@ -58,7 +59,7 @@
   instances and pulls additional data-point data using the forms data-point-id."
   [headers-fn survey form-id]
   (let [form (flow-common/form survey form-id)
-        data-points (flow-common/index-by
+        data-points (util/index-by
                      "id" (flow-common/data-points headers-fn survey))]
     (map (fn [form-instance]
            (let [data-point-id (get form-instance "dataPointId")]

@@ -108,15 +108,9 @@
 (defn next-column-name [columns]
   (derivation-column-name (next-column-index columns)))
 
-(defn index-by [key coll]
-  (reduce (fn [index item]
-            (assoc index (get item key) item))
-          {}
-          coll))
-
 (defn diff-columns [previous-columns next-columns]
-  (let [previous-columns (index-by "columnName" previous-columns)
-        next-columns (index-by "columnName" next-columns)
+  (let [previous-columns (util/index-by "columnName" previous-columns)
+        next-columns (util/index-by "columnName" next-columns)
         all-column-names (set/union (set (keys previous-columns))
                                     (set (keys next-columns)))
         changed-columns (for [column-name all-column-names
@@ -189,7 +183,7 @@
                                       :columns columns}]
             (new-dataset-version tenant-conn
                                  next-dataset-version)
-            (touch-dataset tenant-conn {:id dataset-id})                                 
+            (touch-dataset tenant-conn {:id dataset-id})
             (drop-table tenant-conn {:table-name previous-table-name})
             (lib/created next-dataset-version)))
         (let [transformation (first transformations)
