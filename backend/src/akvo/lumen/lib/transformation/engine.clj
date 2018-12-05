@@ -108,18 +108,6 @@
 (defn next-column-name [columns]
   (derivation-column-name (next-column-index columns)))
 
-(defn- deliver-promise-success [promise dataset-id dataset-version-id job-execution-id]
-  (deliver promise {:status "OK"
-                    :jobExecutionId job-execution-id
-                    :datasetVersionId dataset-version-id
-                    :datasetId dataset-id}))
-
-(defn- deliver-promise-failure [promise dataset-id job-id message]
-  (deliver promise {:status "FAILED"
-                    :datasetId dataset-id
-                    :jobExecutionId job-id
-                    :message message}))
-
 (defn diff-columns [previous-columns next-columns]
   (let [previous-columns (util/index-by "columnName" previous-columns)
         next-columns (util/index-by "columnName" next-columns)
@@ -195,7 +183,7 @@
                                       :columns columns}]
             (new-dataset-version tenant-conn
                                  next-dataset-version)
-            (touch-dataset tenant-conn {:id dataset-id})                                 
+            (touch-dataset tenant-conn {:id dataset-id})
             (drop-table tenant-conn {:table-name previous-table-name})
             (lib/created next-dataset-version)))
         (let [transformation (first transformations)
