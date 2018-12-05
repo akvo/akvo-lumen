@@ -6,13 +6,6 @@
             [clojure.string :as str])
   (:import [java.time Instant]))
 
-(defn index-by
-  [key coll]
-  (reduce (fn [index item]
-            (assoc index (get item key) item))
-          {}
-          coll))
-
 (defn access-token
   "Fetch a new access token using a refresh token"
   [token-endpoint refresh-token]
