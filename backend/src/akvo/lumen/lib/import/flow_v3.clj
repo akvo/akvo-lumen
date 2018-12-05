@@ -23,15 +23,7 @@
     (into (flow-common/commons-columns form)
           (into [{:title "Device Id" :type :text :id :device_id}]
                 (->> (flow-common/questions form)
-                     (common/coerce question-type->lumen-type)
-                     (map (fn [question]
-                            (merge question
-                                   (when (= (:type question) :multiple)
-                                     (if (:caddisflyResourceUuid question)
-                                       {:multiple-type :caddisfly
-                                        :multiple-id (:caddisflyResourceUuid question)}
-                                       {:multiple-type :unknown
-                                        :multiple-id nil}))))))))))
+                     (common/coerce question-type->lumen-type))))))
 
 (defn render-response
   [type response]
