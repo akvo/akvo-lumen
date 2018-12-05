@@ -9,6 +9,7 @@ import leafletUtfGrid from '../../vendor/leaflet.utfgrid';
 import * as chart from '../../utilities/chart';
 import Spinner from '../common/LoadingSpinner';
 import { trackEvent } from '../../utilities/analytics';
+import { RENDER_MAP_LAYER_TYPE } from '../../constants/analytics';
 import RenderComplete from './RenderComplete';
 
 require('../../../node_modules/leaflet/dist/leaflet.css');
@@ -415,7 +416,7 @@ export default class MapVisualisation extends Component {
         hasTrackedLayerTypes: true,
       }, () => {
         newSpec.layers.forEach(({ layerType }) => {
-          trackEvent('Render map layer type:', layerType || 'raster');
+          trackEvent(RENDER_MAP_LAYER_TYPE, layerType || 'raster');
         });
       });
     }

@@ -6,6 +6,8 @@ import { kebabCase } from 'lodash';
 import visualisationTypes from '../../../constants/Visualisation/visualisationTypes';
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
 import ConfigMenuSectionOptionThumbs from '../../common/ConfigMenu/ConfigMenuSectionOptionThumbs';
+import { SELECT_VISUALISATION_TYPE } from '../../../constants/analytics';
+import { trackEvent } from '../../../utilities/analytics';
 
 require('./VisualisationTypeMenu.scss');
 
@@ -22,7 +24,10 @@ export default function VisualisationTypeMenu({ visualisation, onChangeVisualisa
             return {
               label: type,
               imageSrc: require(`../../../styles/img/icon-128-visualisation-${kebabType}.png`),
-              onClick: () => onChangeVisualisationType(type),
+              onClick: () => {
+                trackEvent(SELECT_VISUALISATION_TYPE, type);
+                return onChangeVisualisationType(type);
+              },
               selected: visualisation.visualisationType === type,
               testId: `visualisation-type-${kebabType}`,
             };

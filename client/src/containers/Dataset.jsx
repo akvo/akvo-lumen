@@ -11,6 +11,7 @@ import { getTransformations, getRows, getColumns } from '../domain/dataset';
 import * as api from '../api';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { SAVE_COUNTDOWN_INTERVAL, SAVE_INITIAL_TIMEOUT } from '../constants/time';
+import { TRANSFORM_DATASET } from '../constants/analytics';
 import { trackEvent, trackPageView } from '../utilities/analytics';
 import NavigationPrompt from '../components/common/NavigationPrompt';
 
@@ -98,7 +99,7 @@ class Dataset extends Component {
     const now = Date.now();
     const transformationJs = transformation.toJS();
 
-    trackEvent('Transform dataset', transformationJs.op);
+    trackEvent(TRANSFORM_DATASET, transformationJs.op);
     this.setPendingTransformation(now, transformation);
     return api.post(`/api/transformations/${id}/transform`, transformationJs)
       .then((response) => {
