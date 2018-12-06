@@ -24,6 +24,7 @@
   "base_map": "Base map",
   "blank_dashboard_help_text": "Click a visualisation in the visualisation list to add it to the dashboard",
   "bottom": "Bottom",
+  "bubble_size_represents": "Bubble size represents: {value}",
   "bucket_column": "Bucket column",
   "bulk_column_editor": "Bulk column editor",
   "bulk_row_editor": "Bulk row editor",

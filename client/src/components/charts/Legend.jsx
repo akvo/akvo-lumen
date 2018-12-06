@@ -9,6 +9,7 @@ import LegendShape from './LegendShape';
 const Legend = ({
   data,
   title,
+  description,
   horizontal = false,
   activeItem,
   colorMapping = {},
@@ -18,6 +19,7 @@ const Legend = ({
   return (
     <div className={`legend ${horizontal ? 'legend-horizontal' : ''}`}>
       {title && <h4>{title}</h4>}
+      {description && <p className="legend-description">{description}</p>}
       <LegendOrdinal
         {...rest}
         shapeMargin="0"
@@ -39,6 +41,7 @@ Legend.propTypes = {
   onClick: PropTypes.func,
   horizontal: PropTypes.bool,
   title: PropTypes.string,
+  description: PropTypes.string,
   activeItem: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.number,

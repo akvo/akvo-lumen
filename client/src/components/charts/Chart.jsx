@@ -222,9 +222,9 @@ export default class Chart extends Component {
             height={adjustedContainerHeight}
             colors={palette}
             colorMapping={visualisation.spec.colors}
-            metricLabel={visualisation.spec.metricLabel}
             onChangeVisualisationSpec={onChangeVisualisationSpec}
             legendTitle={visualisation.spec.legendTitle}
+            legendDescription={visualisation.spec.metricLabel}
             legendVisible={visualisation.spec.showLegend}
             labelsVisible={visualisation.spec.showLabels}
           />

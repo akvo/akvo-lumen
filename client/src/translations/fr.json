@@ -24,6 +24,7 @@
   "base_map": "Carte de base",
   "blank_dashboard_help_text": "Cliquez une visualisation dans la liste pour l'ajouter au tableau de bord",
   "bottom": "Bas",
+  "bubble_size_represents": "Bubble size represents: {value}",
   "bucket_column": "Colonne contenant",
   "bulk_column_editor": "Editeur multi-colonne",
   "bulk_row_editor": "Editeur multi-rangée",

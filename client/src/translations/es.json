@@ -24,6 +24,7 @@
   "base_map": "Mapa base",
   "blank_dashboard_help_text": "Haga clic en una visualización de la lista de visualizaciones para añadirla al tablero",
   "bottom": "Parte inferior",
+  "bubble_size_represents": "Bubble size represents: {value}",
   "bucket_column": "Columna cubo",
   "bulk_column_editor": "Editor de columnas en masa",
   "bulk_row_editor": "Editor de filas en masa",

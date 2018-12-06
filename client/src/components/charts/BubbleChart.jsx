@@ -7,6 +7,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Portal } from 'react-portal';
 import { randomColor } from '@potion/color';
+import { injectIntl, intlShape } from 'react-intl';
 
 import { labelFont } from '../../constants/chart';
 import { calculateMargins, replaceLabelIfValueEmpty, round } from '../../utilities/chart';
@@ -21,9 +22,10 @@ const getDatum = (data, datum) => data.filter(({ key }) => key === datum)[0];
 
 const getLabelText = (count, totalCount) => `${count} (${round(100 * (count / totalCount), 2)}%)`;
 
-export default class BubbleChart extends Component {
+class BubbleChart extends Component {
 
   static propTypes = {
+    intl: intlShape,
     data: PropTypes.shape({
       data: PropTypes.array,
       metadata: PropTypes.object,
@@ -35,6 +37,7 @@ export default class BubbleChart extends Component {
     height: PropTypes.number.isRequired,
     legendPosition: PropTypes.oneOf(['right']),
     legendTitle: PropTypes.string,
+    legendDescription: PropTypes.string,
     print: PropTypes.bool,
     interactive: PropTypes.bool,
     edit: PropTypes.bool,
@@ -111,19 +114,24 @@ export default class BubbleChart extends Component {
     else tooltipPosition.bottom = bounds.height - y - 12;
     this.setState({
       tooltipVisible: true,
-      tooltipItems: [content],
+      tooltipItems: content,
       tooltipPosition,
     });
   }
 
-  handleMouseEnterNode({ key, value, totalCount }, event) {
-    const { interactive, print, colorMapping } = this.props;
+  handleMouseEnterNode({ key, value, totalCount, index }, event) {
+    const { interactive, print, legendDescription } = this.props;
     if (!interactive || print) return;
-    this.handleShowTooltip(event, {
-      key,
-      color: colorMapping[key],
-      value: getLabelText(value, totalCount),
-    });
+    this.handleShowTooltip(event, [
+      {
+        key,
+        color: this.getColor(key, index),
+      },
+      {
+        key: legendDescription,
+        value: getLabelText(value, totalCount),
+      },
+    ]);
   }
 
   handleMouseEnterLegendNode({ key }) {
@@ -190,12 +198,14 @@ export default class BubbleChart extends Component {
 
   render() {
     const {
+      intl,
       width,
       height,
       colorMapping,
       onChangeVisualisationSpec,
       style,
       legendTitle,
+      legendDescription,
       legendVisible,
       edit,
       visualisation,
@@ -226,6 +236,11 @@ export default class BubbleChart extends Component {
           <Legend
             horizontal={!horizontal}
             title={legendTitle}
+            description={intl.formatMessage({
+              id: 'bubble_size_represents',
+            }, {
+              value: legendDescription,
+            })}
             data={series.data.map(({ key }) => key)}
             colorMapping={
               series.data.reduce((acc, { key }, i) => ({
@@ -331,10 +346,20 @@ export default class BubbleChart extends Component {
                                     this.handleClickNode({ key }, event);
                                   }}
                                   onMouseEnter={(event) => {
-                                    this.handleMouseEnterNode({ key, value, totalCount }, event);
+                                    this.handleMouseEnterNode({
+                                      key,
+                                      value,
+                                      totalCount,
+                                      index: i,
+                                    }, event);
                                   }}
                                   onMouseMove={(event) => {
-                                    this.handleMouseEnterNode({ key, value, totalCount }, event);
+                                    this.handleMouseEnterNode({
+                                      key,
+                                      value,
+                                      totalCount,
+                                      index: i,
+                                    }, event);
                                   }}
                                   onMouseLeave={() => {
                                     this.handleMouseLeaveNode({ key });
@@ -376,3 +401,5 @@ export default class BubbleChart extends Component {
   }
 
 }
+
+export default injectIntl(BubbleChart);
