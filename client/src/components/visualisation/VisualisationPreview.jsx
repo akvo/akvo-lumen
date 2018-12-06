@@ -39,6 +39,7 @@ function shouldRender(visualisation, datasets) {
     case 'pie':
     case 'donut':
     case 'bubble':
+    case 'polararea':
       if (!datasetLoaded) {
         return false;
       }
