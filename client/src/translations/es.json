@@ -136,6 +136,7 @@
   "javascript_code": "Código Javascript",
   "js_helptext": "Las columnas derivadas son fórmulas escritas utilizando un subset de Javascript dónde se permite una sola expresión y las columnas son referenciadas como {columnSyntax} o alternativamente si el título es un identificador de Javascript válido: {title}.",
   "keep_rows_in_which": "mantener las filas en las cuales",
+  "label": "Etiqueta",
   "last_modified": "Ultima modificación",
   "latitude_column": "Columna de latitud",
   "layer_type": "Capa tipo",
