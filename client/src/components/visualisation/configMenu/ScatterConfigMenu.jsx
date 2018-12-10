@@ -27,6 +27,7 @@ const getAxisLabel = (axis, spec, columnOptions) => {
   } else if (axis === 'size') {
     return formatLabel(spec, 'metricColumnSize', columnOptions);
   }
+  return '';
 };
 
 const getPopupLabelChoice = (spec) => {
