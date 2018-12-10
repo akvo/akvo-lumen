@@ -41,6 +41,7 @@ const getIsDatasetLoaded = (props) => {
     case 'area':
     case 'bar':
     case 'scatter':
+    case 'bubble':
       return true;
 
     case 'map':
