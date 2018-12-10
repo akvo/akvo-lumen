@@ -38,15 +38,8 @@ function shouldRender(visualisation, datasets) {
     case 'bar':
     case 'pie':
     case 'donut':
-      if (!datasetLoaded) {
-        return false;
-      }
-      if (spec.bucketColumn == null) {
-        return false;
-      }
-      break;
-
     case 'bubble':
+    case 'polararea':
       if (!datasetLoaded) {
         return false;
       }

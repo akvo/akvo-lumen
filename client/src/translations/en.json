@@ -186,6 +186,7 @@
   "pdf": "PDF",
   "pending": "Pending",
   "pie": "Pie",
+  "polararea": "Polar Area",
   "pivot table": "Pivot table",
   "pivot_help_text": "Choose a column and a row to pivot on to use aggregations other than count.",
   "please_edit_visualisation": "Please edit the visualisation or add a filter.",

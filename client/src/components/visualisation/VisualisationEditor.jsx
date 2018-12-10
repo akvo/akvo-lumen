@@ -90,6 +90,7 @@ export default class VisualisationEditor extends Component {
         break;
       case 'pivot table':
       case 'pie':
+      case 'polararea':
       case 'donut':
       case 'line':
       case 'area':
@@ -174,6 +175,7 @@ export default class VisualisationEditor extends Component {
         'pivot table': 'pivot',
         pie: 'pie',
         donut: 'pie',
+        polararea: 'pie',
         line: 'line',
         area: 'line',
         bar: 'bar',

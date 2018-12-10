@@ -8,6 +8,7 @@ import LineChart from './LineChart';
 import BarChart from './BarChart';
 import BubbleChart from './BubbleChart';
 import PieChart from './PieChart';
+import PolarAreaChart from './PolarAreaChart';
 import ScatterChart from './ScatterChart';
 import { defaultPrimaryColor, palette } from '../../utilities/visualisationColors';
 import { getTitle, getDataLastUpdated } from '../../utilities/chart';
@@ -142,6 +143,23 @@ export default class Chart extends Component {
       case 'donut':
         return (
           <PieChart
+            visualisation={visualisation}
+            data={visualisation.data}
+            width={width}
+            height={adjustedContainerHeight}
+            colors={palette}
+            colorMapping={visualisation.spec.colors}
+            donut={Boolean(visualisation.visualisationType === 'donut')}
+            legendVisible={visualisation.spec.showLegend}
+            labelsVisible={visualisation.spec.showLabels}
+            legendTitle={visualisation.spec.legendTitle}
+            onChangeVisualisationSpec={onChangeVisualisationSpec}
+            edit={Boolean(onChangeVisualisationSpec)}
+          />
+        );
+      case 'polararea':
+        return (
+          <PolarAreaChart
             visualisation={visualisation}
             data={visualisation.data}
             width={width}
