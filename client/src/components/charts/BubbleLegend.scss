@@ -1,8 +1,8 @@
 @import '../../styles/modules/importAll.scss';
 
 .BubbleLegend {
-  width: 100%;
-  height: 160px;
+  width: 120px;
+  height: 120px;
   position: relative;
   margin-bottom: 30px;
 
@@ -10,32 +10,32 @@
     border: 1px dashed black;
     @include border-radius(50%);
     position: absolute;
-    left: 50%;
     bottom: 0;
 
     &--lg {
-      width: 160px;
-      height: 160px;
-      margin-left: -80px;
+      width: 120px;
+      height: 120px;
+      margin-left: 0px;
     }
 
     &--md {
-      width: 80px;
-      height: 80px;
-      margin-left: -40px;
+      width: 60px;
+      height: 60px;
+      margin-left: 30px;
     }
 
     &--sm {
-      width: 40px;
-      height: 40px;
-      margin-left: -20px;
+      width: 30px;
+      height: 30px;
+      margin-left: 45px;
     }
   }
 
   .BubbleLegend__title {
     text-align: center;
     position: absolute;
-    top: 50px;
-    width: 100%;
+    top: 20px;
+    width: 80%;
+    left: 10%;
   }
 }
