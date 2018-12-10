@@ -17,6 +17,7 @@ import ChartLayout from './ChartLayout';
 import Legend from './Legend';
 import RenderComplete from './RenderComplete';
 import Tooltip from './Tooltip';
+import BubbleLegend from './BubbleLegend';
 
 const getDatum = (data, datum) => data.filter(({ key }) => key === datum)[0];
 
@@ -236,11 +237,9 @@ class BubbleChart extends Component {
           <Legend
             horizontal={!horizontal}
             title={legendTitle}
-            description={intl.formatMessage({
-              id: 'bubble_size_represents',
-            }, {
-              value: legendDescription,
-            })}
+            description={
+              <BubbleLegend title={legendDescription} />
+            }
             data={series.data.map(({ key }) => key)}
             colorMapping={
               series.data.reduce((acc, { key }, i) => ({

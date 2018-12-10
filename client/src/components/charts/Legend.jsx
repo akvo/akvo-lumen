@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { isString } from 'lodash';
 import { LegendOrdinal } from '@vx/legend';
 import { scaleOrdinal } from '@vx/scale';
 
@@ -18,8 +19,11 @@ const Legend = ({
   const ordinalColor = scaleOrdinal({ domain: data, range: [] });
   return (
     <div className={`legend ${horizontal ? 'legend-horizontal' : ''}`}>
+      {description && (isString(description) ? (
+        <p className="legend-description">{description}</p>
+      ) : description)}
+      {description && isString(description) && <p className="legend-description">{description}</p>}
       {title && <h4>{title}</h4>}
-      {description && <p className="legend-description">{description}</p>}
       <LegendOrdinal
         {...rest}
         shapeMargin="0"
