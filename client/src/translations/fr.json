@@ -136,6 +136,7 @@
   "javascript_code": "Code javascript",
   "js_helptext": "Les colonnes dérivées sont des formules écrites en utilisant un sous-ensemble de Javascript où une seule expression est autorisée et les colonnes sont référencées comme {columnSyntax} ou, en variante, si le titre est un identifiant de javascript valide: {title}.",
   "keep_rows_in_which": "Garder les lignes dans lesquelles",
+  "label": "Étiquette",
   "last_modified": "Modifié",
   "latitude_column": "Colonne de latitude",
   "layer_type": "Type de calque",

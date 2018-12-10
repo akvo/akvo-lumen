@@ -206,6 +206,8 @@ export default class Chart extends Component {
             categoryLabel={visualisation.spec.categoryLabel}
             onChangeVisualisationSpec={onChangeVisualisationSpec}
             edit={Boolean(onChangeVisualisationSpec)}
+            legendTitle={visualisation.spec.categoryLabel}
+            legendDescription={visualisation.spec.sizeLabel}
           />
         );
       case 'bar':

@@ -3,14 +3,18 @@ import PropTypes from 'prop-types';
 import { Collection } from '@potion/layout'; // TODO: see if can optimize this
 import { Circle, Svg, Group } from '@potion/element';
 import { AxisBottom, AxisLeft } from '@vx/axis';
-import get from 'lodash/get';
-import uniq from 'lodash/uniq';
+import {
+  get,
+  uniq,
+  uniqBy,
+  merge,
+  sortBy,
+} from 'lodash';
 import { scaleLinear, scaleTime } from 'd3-scale';
 import { extent } from 'd3-array';
-import merge from 'lodash/merge';
-import sortBy from 'lodash/sortBy';
 import { GridRows, GridColumns } from '@vx/grid';
 import itsSet from 'its-set';
+import { injectIntl, intlShape } from 'react-intl';
 
 import ColorPicker from '../common/ColorPicker';
 import ResponsiveWrapper from '../common/ResponsiveWrapper';
@@ -42,9 +46,10 @@ const startAxisFromZero = (axisExtent, type) => {
   return true;
 };
 
-export default class ScatterChart extends Component {
+class ScatterChart extends Component {
 
   static propTypes = {
+    intl: intlShape,
     data: PropTypes.shape({
       data: PropTypes.arrayOf(
         PropTypes.shape({
@@ -81,6 +86,8 @@ export default class ScatterChart extends Component {
     legendVisible: PropTypes.bool,
     grid: PropTypes.bool,
     visualisation: PropTypes.object.isRequired,
+    legendTitle: PropTypes.string,
+    legendDescription: PropTypes.string,
   }
 
   static defaultProps = {
@@ -227,7 +234,7 @@ export default class ScatterChart extends Component {
       tooltipItems.push({ key: categoryLabel || 'Category', value: category });
     }
 
-    this.handleShowTooltip(event, tooltipItems);
+    this.handleShowTooltip(event, uniqBy(tooltipItems, 'key'));
     this.setState({ hoveredNode: key });
   }
 
@@ -249,6 +256,7 @@ export default class ScatterChart extends Component {
 
   render() {
     const {
+      intl,
       data,
       width,
       height,
@@ -265,6 +273,8 @@ export default class ScatterChart extends Component {
       yAxisTicks,
       grid,
       visualisation,
+      legendTitle,
+      legendDescription,
     } = this.props;
 
     const {
@@ -306,7 +316,12 @@ export default class ScatterChart extends Component {
           return (
             <Legend
               horizontal={!horizontal}
-              title={get(this.props, 'data.metadata.bucketColumnCategory')}
+              title={legendTitle}
+              description={legendDescription && intl.formatMessage({
+                id: 'bubble_size_represents',
+              }, {
+                value: legendDescription,
+              })}
               data={categories}
               colorMapping={categories.reduce((acc, category) => ({
                 ...acc,
@@ -542,3 +557,5 @@ export default class ScatterChart extends Component {
   }
 
 }
+
+export default injectIntl(ScatterChart);
