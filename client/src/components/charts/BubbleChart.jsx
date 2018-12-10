@@ -7,7 +7,6 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Portal } from 'react-portal';
 import { randomColor } from '@potion/color';
-import { injectIntl, intlShape } from 'react-intl';
 
 import { labelFont } from '../../constants/chart';
 import { calculateMargins, replaceLabelIfValueEmpty, round } from '../../utilities/chart';
@@ -26,7 +25,6 @@ const getLabelText = (count, totalCount) => `${count} (${round(100 * (count / to
 class BubbleChart extends Component {
 
   static propTypes = {
-    intl: intlShape,
     data: PropTypes.shape({
       data: PropTypes.array,
       metadata: PropTypes.object,
@@ -199,7 +197,6 @@ class BubbleChart extends Component {
 
   render() {
     const {
-      intl,
       width,
       height,
       colorMapping,
@@ -401,4 +398,4 @@ class BubbleChart extends Component {
 
 }
 
-export default injectIntl(BubbleChart);
+export default BubbleChart;
