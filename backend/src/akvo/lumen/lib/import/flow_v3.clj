@@ -1,9 +1,10 @@
 (ns akvo.lumen.lib.import.flow-v3
-  (:require [akvo.lumen.postgres :as postgres]
-            [akvo.lumen.lib.import.common :as common]
-            [akvo.lumen.util :as util]
-            [akvo.lumen.lib.import.flow-common :as flow-common]
-            [akvo.lumen.lib.import.flow-v2 :as v2])
+  (:require
+   [akvo.lumen.lib.import.common :as common]
+   [akvo.lumen.lib.import.flow-common :as flow-common]
+   [akvo.lumen.lib.import.flow-v2 :as v2]
+   [akvo.lumen.postgres :as postgres]
+   [akvo.lumen.util :as util])
   (:import [java.time Instant]))
 
 (defn question-type->lumen-type
@@ -49,7 +50,7 @@
 (defn form-data
   "First pulls all data-points belonging to the survey. Then map over all form
   instances and pulls additional data-point data using the forms data-point-id."
-  [headers-fn survey form-id]
+  [headers-fn instance survey form-id]
   (let [form (flow-common/form survey form-id)
         data-points (util/index-by
                      "id" (flow-common/data-points headers-fn survey))]
@@ -66,7 +67,8 @@
                                             Instant/parse)
                       :surveyal_time (get form-instance "surveyalTime"))
                (throw (ex-info "Flow form (dataPointId) referenced data point not in survey"
-                               {:form-instance-id (get form-instance "id")
-                                :data-point-id data-point-id
+                               {:data-point-id data-point-id
+                                :form-instance-id (get form-instance "id")
+                                :flow-instance instance
                                 :survey-id (:id survey)})))))
          (flow-common/form-instances headers-fn form))))

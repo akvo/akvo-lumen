@@ -1,10 +1,10 @@
 (ns akvo.lumen.lib.import.flow
   (:require [akvo.commons.psql-util :as pg]
             [akvo.lumen.lib.import.common :as import]
-            [akvo.lumen.protocols :as p]
             [akvo.lumen.lib.import.flow-common :as flow-common]
             [akvo.lumen.lib.import.flow-v2 :as v2]
-            [akvo.lumen.lib.import.flow-v3 :as v3]))
+            [akvo.lumen.lib.import.flow-v3 :as v3]
+            [akvo.lumen.protocols :as p]))
 
 
 (defmethod import/dataset-importer "AKVO_FLOW"
@@ -30,4 +30,4 @@
       (records [this]
         (cond
           (<= version 2) (v2/form-data headers-fn @survey formId)
-          (<= version 3) (v3/form-data headers-fn @survey formId))))))
+          (<= version 3) (v3/form-data headers-fn instance @survey formId))))))
