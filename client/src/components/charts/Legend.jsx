@@ -45,7 +45,7 @@ Legend.propTypes = {
   onClick: PropTypes.func,
   horizontal: PropTypes.bool,
   title: PropTypes.string,
-  description: PropTypes.string,
+  description: PropTypes.node,
   activeItem: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.number,
