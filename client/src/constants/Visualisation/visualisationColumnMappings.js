@@ -37,7 +37,7 @@ const visualizationColumnMappings = {
     },
     scatter: [
       { from: 'valueColumn', to: 'metricColumnY' },
-      { from: 'categoryColumn', to: 'bucketColumn' },
+      { from: 'categoryColumn', to: 'bucketColumnCategory' },
     ],
     bubble: [
       { from: 'valueColumn', to: 'metricColumn' },
@@ -67,7 +67,7 @@ const visualizationColumnMappings = {
     },
     scatter: [
       { from: 'metricColumnY', to: 'metricColumnY' },
-      { from: 'bucketColumn', to: 'bucketColumn' },
+      { from: 'bucketColumn', to: 'bucketColumnCategory' },
     ],
     bubble: [
       { from: 'metricColumnY', to: 'metricColumn' },
@@ -128,7 +128,7 @@ const visualizationColumnMappings = {
       return this.pie;
     },
     scatter: [
-      { from: 'bucketColumn', to: 'bucketColumn' },
+      { from: 'bucketColumn', to: 'bucketColumnCategory' },
     ],
     bubble: [
       { from: 'bucketColumn', to: 'bucketColumn' },
@@ -144,11 +144,11 @@ const visualizationColumnMappings = {
     map: [],
     'pivot table': [
       { from: 'metricColumnY', to: 'valueColumn' },
-      { from: 'bucketColumn', to: 'categoryColumn' },
+      { from: 'bucketColumnCategory', to: 'categoryColumn' },
     ],
     bar: [
       { from: 'metricColumnY', to: 'metricColumnY' },
-      { from: 'bucketColumn', to: 'bucketColumn' },
+      { from: 'bucketColumnCategory', to: 'bucketColumn' },
     ],
     line: [
       { from: 'metricColumnY', to: 'metricColumnY' },
@@ -166,7 +166,11 @@ const visualizationColumnMappings = {
       return this.pie;
     },
     bubble: [
-      { from: 'metricColumnY', to: 'metricColumn' },
+      { from: 'bucketColumnCategory', to: 'bucketColumn' },
+      { from: 'metricColumnSize', to: 'metricColumn' },
+      { from: 'metricLabel', to: 'categoryLabel' },
+      { from: 'metricLabelFromUser', to: 'categoryLabelFromuser' },
+      { from: 'legendTitle', to: 'legendTitle' },
     ],
   },
   bubble: {
@@ -194,6 +198,13 @@ const visualizationColumnMappings = {
     get polararea() {
       return this.pie;
     },
+    scatter: [
+      { from: 'bucketColumn', to: 'bucketColumnCategory' },
+      { from: 'metricColumn', to: 'metricColumnSize' },
+      { from: 'categoryLabel', to: 'metricLabel' },
+      { from: 'categoryLabelFromuser', to: 'metricLabelFromUser' },
+      { from: 'legendTitle', to: 'legendTitle' },
+    ],
   },
 };
 
