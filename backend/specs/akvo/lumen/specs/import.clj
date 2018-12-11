@@ -1,9 +1,10 @@
 (ns akvo.lumen.specs.import
   (:require [akvo.lumen.specs.import.values :as v]
-            [clojure.tools.logging :as log]
             [akvo.lumen.util :refer (squuid)]
             [clojure.spec.alpha :as s]
-            [clojure.spec.gen.alpha :as gen])
+            [clojure.spec.gen.alpha :as gen]
+            [clojure.string :as string]
+            [clojure.tools.logging :as log])
   (:import [akvo.lumen.postgres Geoshape Geopoint]
            [java.time Instant]))
 
@@ -100,3 +101,43 @@
   (s/keys :req-un [::c.geopoint/header ::c.geopoint/body]))
 
 (s/def :import/column (s/multi-spec column (fn [a b] a)))
+
+(defn- keyname [key] (str (namespace key) "/" (name key)))
+
+(defn sample-with-gen [s map-gen amount]
+  (map first (s/exercise s amount map-gen)))
+
+(defn sample [s amount]
+  (map first (s/exercise s amount)))
+
+(defn sample-imported-dataset [types-gens-tuple rows-count]
+  (let [adapt-spec (fn [k] (-> k keyname (string/replace "/body" "/value" ) keyword))
+        kw->spec (fn [s h] (->> (name h) (format s) keyword))
+        kw->column-spec (fn [h] (kw->spec "akvo.lumen.specs.import.column.%s/header" h))
+        kw->body-spec (fn [h] (kw->spec "akvo.lumen.specs.import.column.%s/body" h))
+        header-types (map (fn [t] (if (sequential? t) (first t) t)) types-gens-tuple)
+        headers   (map kw->column-spec header-types)
+        columns   (->> (map (fn [t]
+                              (if (sequential? t)
+                                (sample (kw->column-spec (first t)) 1)
+                                (sample (kw->column-spec t) 1))) types-gens-tuple)
+                       (mapv #(assoc (first %2)
+                                     :id (str "c" %)
+                                     :title (str "Column" (inc %)))
+                             (range (count headers))))
+        _         (do
+                    "ensure columns headers are valid specs"
+                    (reduce #(assert (s/valid? ::c/header %2) %) [] columns))
+        row-types (map (fn [t]
+                         (let [t (if (sequential? t) (first t) t)]
+                           (kw->body-spec t))) types-gens-tuple)
+        rows0     (reduce (fn [c _] (conj c (mapv (fn [t tg]
+                                                    (last (if (sequential? tg)
+                                                            (sample-with-gen t {(adapt-spec t) (last tg)}  10)
+                                                            (sample t 10)))) row-types types-gens-tuple)))
+                          [] (range rows-count))
+        _         (do
+                    "ensure column bodies (cells) are valid specs"
+                    (reduce #(assert (s/valid? ::c/body %2) %) [] (flatten rows0)))
+        rows      (mapv #(mapv (fn [c] (dissoc c :type)) %) rows0)]
+    {:columns columns :rows rows}))
