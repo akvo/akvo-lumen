@@ -17,13 +17,11 @@
 
 (defn dataset-columns
   "returns a vector of [{:title :type :id :key}]
-  `key` is optional"
+  `:key` is optional"
   [form]
-  (let [questions (flow-common/questions form)]
-    (into (flow-common/commons-columns form)
-          (into [{:title "Device Id" :type :text :id :device_id}]
-                (->> (flow-common/questions form)
-                     (common/coerce question-type->lumen-type))))))
+  (into (flow-common/commons-columns form)
+        (into [{:title "Device Id" :type :text :id :device_id}]
+              (common/coerce question-type->lumen-type (flow-common/questions form)))))
 
 (defn render-response
   [type response]
@@ -56,15 +54,9 @@
     (map (fn [form-instance]
            (let [data-point-id (get form-instance "dataPointId")]
              (if-let [data-point (get data-points data-point-id)]
-               (assoc (response-data form (get form-instance "responses"))
-                      :instance_id (get form-instance "id")
-                      :display_name (get data-point "displayName")
-                      :device_id (get form-instance "deviceIdentifier")
-                      :identifier (get data-point "identifier")
-                      :submitter (get form-instance "submitter")
-                      :submitted_at (some-> (get form-instance "submissionDate")
-                                            Instant/parse)
-                      :surveyal_time (get form-instance "surveyalTime"))
+               (merge (response-data form (get form-instance "responses"))
+                      (flow-common/common-records form-instance data-point)
+                      {:device_id (get form-instance "deviceIdentifier")})
                (throw (ex-info "Flow form (dataPointId) referenced data point not in survey"
                                {:form-instance-id (get form-instance "id")
                                 :data-point-id data-point-id

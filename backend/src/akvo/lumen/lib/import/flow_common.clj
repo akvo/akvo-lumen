@@ -100,3 +100,11 @@
    {:title "Submitter" :type :text :id :submitter}
    {:title "Submitted at" :type :date :id :submitted_at}
    {:title "Surveyal time" :type :number :id :surveyal_time}])
+
+(defn common-records [form-instance data-point]
+  {:instance_id   (get form-instance "id")
+   :display_name  (get data-point "displayName")
+   :identifier    (get data-point "identifier")
+   :submitter     (get form-instance "submitter")
+   :submitted_at  (some-> (get form-instance "submissionDate") Instant/parse)
+   :surveyal_time (get form-instance "surveyalTime")})
