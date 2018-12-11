@@ -83,6 +83,14 @@
 
 (defrecord Geopoint [wkt-string])
 
+(defmethod clojure.core/print-method Geopoint
+     [system ^java.io.Writer writer]
+  (.write writer "#<Geopoint>"))
+
+(defmethod clojure.core/print-method Geoshape
+     [system ^java.io.Writer writer]
+     (.write writer "#<Geoshape>"))
+
 (extend-protocol p/CoerceToSql
   java.lang.String
   (coerce [value] value)
