@@ -19,12 +19,11 @@
 
 (defn dataset-columns
   [form]
-  (let [questions (flow-common/questions form)]
-    (into (flow-common/commons-columns form)
-          (into
-           [{:title "Latitude" :type :number :id :latitude}
-            {:title "Longitude" :type :number :id :longitude}]
-           (common/coerce question-type->lumen-type (flow-common/questions form))))))
+  (into (flow-common/commons-columns form)
+        (into
+         [{:title "Latitude" :type :number :id :latitude}
+          {:title "Longitude" :type :number :id :longitude}]
+         (common/coerce question-type->lumen-type (flow-common/questions form)))))
 
 (defmulti render-response
   (fn [type response]
@@ -101,15 +100,10 @@
   (let [form (flow-common/form survey form-id)
         data-points (util/index-by "id" (flow-common/data-points headers-fn survey))]
     (map (fn [form-instance]
-           (let [data-point-id (get form-instance "dataPointId")]
-             (assoc (response-data form (get form-instance "responses"))
-                    :instance_id (get form-instance "id")
-                    :display_name (get-in data-points [data-point-id "displayName"])
-                    :identifier (get-in data-points [data-point-id "identifier"])
-                    :latitude (get-in data-points [data-point-id "latitude"])
-                    :longitude (get-in data-points [data-point-id "longitude"])
-                    :submitter (get form-instance "submitter")
-                    :submitted_at (some-> (get form-instance "submissionDate")
-                                          Instant/parse)
-                    :surveyal_time (get form-instance "surveyalTime"))))
+           (let [data-point-id (get form-instance "dataPointId")
+                 data-point (get data-points data-point-id)]
+             (merge (response-data form (get form-instance "responses"))
+                    (flow-common/common-records form-instance data-point)
+                    {:latitude (get-in data-points [data-point-id "latitude"])
+                     :longitude (get-in data-points [data-point-id "longitude"])})))
          (flow-common/form-instances headers-fn form))))
