@@ -1,13 +1,13 @@
 /* eslint-disable import/prefer-default-export */
 
-import visualisationColumnMappings from '../constants/Visualisation/visualisationColumnMappings';
+import specMappings from '../constants/Visualisation/visualisationSpecMappings';
 
-export const remapVisualisationDataColumnMappings = (visualisation, newVisualisationType) => (
-  !visualisation.visualisationType ?
-    {} :
-    visualisationColumnMappings[visualisation.visualisationType][newVisualisationType]
-      .reduce((acc, { from, to }) => ({
+export const remapVisualisationDataColumnMappings = (visualisation, newVisualisationType) => {
+  if (!visualisation.visualisationType) return {};
+  const mappings = specMappings[visualisation.visualisationType][newVisualisationType];
+  return Object.keys(mappings)
+      .reduce((acc, key) => ({
         ...acc,
-        [to]: visualisation.spec[from],
-      }), {})
-);
+        [mappings[key]]: visualisation.spec[key],
+      }), {});
+};
