@@ -32,6 +32,7 @@ export const specIsValidForApi = (spec, vType) => {
       break;
     case 'pie':
     case 'donut':
+    case 'polararea':
       if (spec.bucketColumn === null) {
         return false;
       }
@@ -111,6 +112,7 @@ export const getNeedNewAggregation = (
       );
     case 'pie':
     case 'donut':
+    case 'polararea':
       return Boolean(
         newV.datasetId !== oldV.datasetId ||
         newV.spec.bucketColumn !== oldV.spec.bucketColumn ||

@@ -38,6 +38,7 @@ const getSpecFromVisualisationType = (visualisationType) => {
       return { ...mapSpecTemplate };
     case 'pie':
     case 'donut':
+    case 'polararea':
       return { ...pieSpecTemplate };
     case 'line':
     case 'area':

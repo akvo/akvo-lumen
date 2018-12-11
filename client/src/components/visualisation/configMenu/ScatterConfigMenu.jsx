@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { injectIntl, intlShape } from 'react-intl';
 import itsSet from 'its-set';
+import { get } from 'lodash';
 
 import { filterColumns } from '../../../utilities/utils';
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
@@ -11,31 +12,22 @@ import ConfigMenuSectionOptionSelect from '../../common/ConfigMenu/ConfigMenuSec
 const getColumnTitle = (columnName, columnOptions) =>
   columnOptions.find(obj => obj.value === columnName).title;
 
+const formatLabel = (spec, columnName, columnOptions) =>
+  `${getColumnTitle(spec[columnName], columnOptions)}${spec.bucketColumn != null ? ` - ${spec.metricAggregation}` : ''}`;
+
 const getAxisLabel = (axis, spec, columnOptions) => {
   if (spec[`axisLabel${axis}FromUser`]) {
     return spec[`axisLabel${axis}`];
   }
 
-  let newAxisLabel = '';
   if (axis === 'x') {
-    newAxisLabel = getColumnTitle(spec.metricColumnX, columnOptions);
-
-    if (spec.bucketColumn != null) {
-      newAxisLabel += ` - ${spec.metricAggregation}`;
-    }
+    return formatLabel(spec, 'metricColumnX', columnOptions);
   } else if (axis === 'y') {
-    newAxisLabel = getColumnTitle(spec.metricColumnY, columnOptions);
-
-    if (spec.bucketColumn != null) {
-      newAxisLabel += ` - ${spec.metricAggregation}`;
-    }
+    return formatLabel(spec, 'metricColumnY', columnOptions);
   } else if (axis === 'size') {
-    newAxisLabel = spec.metricColumnSize ?
-      getColumnTitle(spec.metricColumnSize, columnOptions) :
-      null;
+    return formatLabel(spec, 'metricColumnSize', columnOptions);
   }
-
-  return newAxisLabel;
+  return '';
 };
 
 const getPopupLabelChoice = (spec) => {
@@ -144,7 +136,10 @@ function ScatterConfigMenu(props) {
               }].concat(filterColumns(columnOptions, ['number', 'text']))
             }
             onChange={(value) => {
-              onChangeSpec({ bucketColumnCategory: value });
+              onChangeSpec({
+                bucketColumnCategory: value,
+                categoryLabel: get(columnOptions.find(item => item.value === value), 'title'),
+              });
             }}
           />
         )}
@@ -155,7 +150,8 @@ function ScatterConfigMenu(props) {
                 spec.categoryLabel.toString() :
                 null
             }
-            placeholderId="category_label"
+            placeholderId="label"
+            labelTextId="label"
             name="categoryLabel"
             onChange={event => onChangeSpec({
               categoryLabel: event.target.value.toString(),

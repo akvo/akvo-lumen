@@ -35,11 +35,13 @@ const getIsDatasetLoaded = (props) => {
   switch (props.item.visualisation.visualisationType) {
     case 'pivot table':
     case 'pie':
+    case 'polararea':
     case 'donut':
     case 'line':
     case 'area':
     case 'bar':
     case 'scatter':
+    case 'bubble':
       return true;
 
     case 'map':

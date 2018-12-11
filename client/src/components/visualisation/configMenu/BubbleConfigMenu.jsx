@@ -16,6 +16,9 @@ const getAxisAutoLabels = (spec, columnOptions) => {
   let autoBucketLabel = spec.bucketColumn ? getColumnTitle(spec.bucketColumn, columnOptions) : '';
 
   if (spec.bucketColumn !== null) {
+    if (!spec.metricColumn) {
+      autoMetricLabel = autoBucketLabel;
+    }
     autoMetricLabel += ` - ${spec.metricAggregation}`;
 
     if (spec.truncateSize !== null) {
@@ -86,13 +89,13 @@ export default function BarConfigMenu(props) {
             <ConfigMenuSectionOptionSelect
               placeholderId="select_a_data_column_to_group_by"
               labelTextId="bucket_column"
-              value={spec.bucketColumn !== null ?
-              spec.bucketColumn.toString() : null}
+              value={spec.bucketColumn !== null ? spec.bucketColumn.toString() : null}
               name="bucketColumnMenu"
               options={filterColumns(columnOptions, ['number', 'text'])}
               clearable
               onChange={value => handleChangeSpec({
                 bucketColumn: value,
+                legendTitle: get(columnOptions.find(item => item.value === value), 'title'),
               }, spec, onChangeSpec, columnOptions)}
             />
             {spec.bucketColumn !== null && (
@@ -180,11 +183,25 @@ export default function BarConfigMenu(props) {
               labelTextId="metric_column"
               value={spec.metricColumn !== null ? spec.metricColumn.toString() : null}
               name="metricColumnInput"
+              clearable
               options={filterColumns(columnOptions, ['number'])}
-              onChange={value => handleChangeSpec({
-                metricColumn: value,
-                metricAggregation: spec.metricColumn ? spec.metricAggregation : 'mean',
-              }, spec, onChangeSpec, columnOptions)}
+              onChange={(value) => {
+                let metricAggregation = 'count';
+                const previousMetricColumn = spec.metricColumn;
+                const nextMetricColumn = value;
+                if (nextMetricColumn) {
+                  metricAggregation = spec.metricAggregation;
+                  if (!previousMetricColumn) {
+                    metricAggregation = 'mean';
+                  }
+                } else {
+                  metricAggregation = 'count';
+                }
+                return handleChangeSpec({
+                  metricColumn: value,
+                  metricAggregation,
+                }, spec, onChangeSpec, columnOptions);
+              }}
             />
             <ConfigMenuSectionOptionSelect
               placeholderId={spec.bucketColumn !== null ?
