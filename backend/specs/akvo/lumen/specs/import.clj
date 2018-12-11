@@ -126,7 +126,7 @@
                                      :title (str "Column" (inc %)))
                              (range (count headers))))
         _         (do
-                    "ensure columns headers are valid specs"
+                    ;; "ensure columns headers are valid specs"
                     (reduce #(assert (s/valid? ::c/header %2) %) [] columns))
         row-types (map (fn [t]
                          (let [t (if (sequential? t) (first t) t)]
@@ -137,7 +137,7 @@
                                                             (sample t 10)))) row-types types-gens-tuple)))
                           [] (range rows-count))
         _         (do
-                    "ensure column bodies (cells) are valid specs"
+                   ;;  "ensure column bodies (cells) are valid specs"
                     (reduce #(assert (s/valid? ::c/body %2) %) [] (flatten rows0)))
         rows      (mapv #(mapv (fn [c] (dissoc c :type)) %) rows0)]
     {:columns columns :rows rows}))
