@@ -14,7 +14,6 @@ import { scaleLinear, scaleTime } from 'd3-scale';
 import { extent } from 'd3-array';
 import { GridRows, GridColumns } from '@vx/grid';
 import itsSet from 'its-set';
-import { injectIntl, intlShape } from 'react-intl';
 
 import ColorPicker from '../common/ColorPicker';
 import ResponsiveWrapper from '../common/ResponsiveWrapper';
@@ -24,6 +23,7 @@ import { heuristicRound, calculateMargins, getLabelFontSize } from '../../utilit
 import { MAX_FONT_SIZE, MIN_FONT_SIZE } from '../../constants/chart';
 import RenderComplete from './RenderComplete';
 import Legend from './Legend';
+import BubbleLegend from './BubbleLegend';
 
 const startAxisFromZero = (axisExtent, type) => {
   // Returns an educated guess on if axis should start from zero or not
@@ -49,7 +49,6 @@ const startAxisFromZero = (axisExtent, type) => {
 class ScatterChart extends Component {
 
   static propTypes = {
-    intl: intlShape,
     data: PropTypes.shape({
       data: PropTypes.arrayOf(
         PropTypes.shape({
@@ -256,7 +255,6 @@ class ScatterChart extends Component {
 
   render() {
     const {
-      intl,
       data,
       width,
       height,
@@ -317,11 +315,9 @@ class ScatterChart extends Component {
             <Legend
               horizontal={!horizontal}
               title={legendTitle}
-              description={legendDescription && intl.formatMessage({
-                id: 'bubble_size_represents',
-              }, {
-                value: legendDescription,
-              })}
+              description={
+                <BubbleLegend title={legendDescription} />
+              }
               data={categories}
               colorMapping={categories.reduce((acc, category) => ({
                 ...acc,
@@ -558,4 +554,4 @@ class ScatterChart extends Component {
 
 }
 
-export default injectIntl(ScatterChart);
+export default ScatterChart;
