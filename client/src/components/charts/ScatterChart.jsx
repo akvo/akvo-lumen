@@ -468,7 +468,7 @@ class ScatterChart extends Component {
                               stroke={color}
                               strokeWidth={1}
                               fillOpacity={opacity}
-                              opacity={hoveredCategory && hoveredCategory !== `${category}` ?
+                              opacity={itsSet(hoveredCategory) && hoveredCategory !== category ?
                                 0.2 :
                                 1
                               }
