@@ -89,12 +89,14 @@
 (s/def ::c.text/body (s/keys :req-un [::c.text/type ::c.text/value]))
 (s/def ::c.number/body (s/keys :req-un [::c.number/type ::c.number/value]))
 (s/def ::c.date/body (s/keys :req-un [::c.date/type ::c.date/value]))
+(s/def ::c.multiple/body (s/keys :req-un [::c.multiple/type ::c.multiple/value]))
 (s/def ::c.geoshape/body (s/keys :req-un [::c.geoshape/type ::c.geoshape/value]))
 (s/def ::c.geopoint/body (s/keys :req-un [::c.geopoint/type ::c.geopoint/value]))
 
 (defmethod column-body :text [_] ::c.text/body)
 (defmethod column-body :number [_] ::c.number/body)
 (defmethod column-body :date [_] ::c.date/body)
+(defmethod column-body :multiple [_] ::c.multiple/body)
 (defmethod column-body :geoshape [_] ::c.geoshape/body)
 (defmethod column-body :geopoint [_] ::c.geopoint/body)
 
@@ -108,6 +110,8 @@
   (s/keys :req-un [::c.number/header ::c.number/body]))
 (defmethod column :date [_]
   (s/keys :req-un [::c.date/header ::c.date/body]))
+(defmethod column :multiple [_]
+  (s/keys :req-un [::c.multiple/header ::c.multiple/body]))
 (defmethod column :geoshape [_]
   (s/keys :req-un [::c.geoshape/header ::c.geoshape/body]))
 (defmethod column :geopoint [_]
