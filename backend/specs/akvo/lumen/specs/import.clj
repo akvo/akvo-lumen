@@ -15,7 +15,9 @@
         headers   (map kw->column-spec header-types)
         columns   (->> (map (fn [t]
                               (if (sequential? t)
-                                (lumen.s/sample (kw->column-spec (first t)) 1)
+                                (lumen.s/sample-with-gen (kw->column-spec (first t)) (if (map? (last t))
+                                                                                         (last t)
+                                                                                         {(adapt-spec (last t)) (last t)})  1)
                                 (lumen.s/sample (kw->column-spec t) 1))) types-gens-tuple)
                        (mapv #(assoc (first %2)
                                      :id (str "c" %)
@@ -29,7 +31,10 @@
                            (kw->body-spec t))) types-gens-tuple)
         rows0     (reduce (fn [c _] (conj c (mapv (fn [t tg]
                                                     (last (if (sequential? tg)
-                                                            (lumen.s/sample-with-gen t {(adapt-spec t) (last tg)}  10)
+                                                            (lumen.s/sample-with-gen t
+                                                                                     (if (map? (last tg))
+                                                                                         (last tg)
+                                                                                         {(adapt-spec t) (last tg)})  10)
                                                             (lumen.s/sample t 10)))) row-types types-gens-tuple)))
                           [] (range rows-count))
         _         (do
