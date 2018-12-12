@@ -17,7 +17,7 @@
                               (if (sequential? t)
                                 (lumen.s/sample-with-gen (kw->column-spec (first t)) (if (map? (last t))
                                                                                          (last t)
-                                                                                         {(adapt-spec (last t)) (last t)})  1)
+                                                                                         {(adapt-spec (first t)) (last t)})  1)
                                 (lumen.s/sample (kw->column-spec t) 1))) types-gens-tuple)
                        (mapv #(assoc (first %2)
                                      :id (str "c" %)
