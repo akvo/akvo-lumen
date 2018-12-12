@@ -5,13 +5,16 @@
                                          *error-tracker*
                                          error-tracker-fixture]]
             [akvo.lumen.lib :as lib]
-            [akvo.lumen.test-utils :refer [import-file]]
-            [akvo.lumen.postgres :as postgres]
             [akvo.lumen.lib.transformation :as tf]
             [akvo.lumen.lib.transformation.engine :as engine]
+            [akvo.lumen.postgres :as postgres]
+            [akvo.lumen.specs.import :as i-c]
+            [akvo.lumen.specs.import.values :as i-v]
+            [akvo.lumen.test-utils :refer [import-file]]
             [akvo.lumen.test-utils :as tu]
             [cheshire.core :as json]
             [clojure.java.io :as io]
+            [clojure.spec.alpha :as s]
             [clojure.test :refer :all]
             [clojure.tools.logging :as log]
             [hugsql.core :as hugsql]))
@@ -422,6 +425,37 @@
         (let [{:strs [before after]} (get-in (last transformations) ["changedColumns" "c2"])]
           (is (= "c2" (get before "columnName")))
           (is (nil? after)))))))
+
+(alias 'c.multiple 'akvo.lumen.specs.import.column.multiple)
+
+(deftest ^:functional multiple-column-test
+  (let [data (i-c/sample-imported-dataset [[:multiple {::i-v/multiple-id #(s/gen #{i-v/cad1-id})
+                                                       ::c.multiple/value #(s/gen #{i-v/cad1})}]] 2)
+        dataset-id (import-file *tenant-conn* *error-tracker*
+                                {:dataset-name "multiple caddisfly"
+                                 :kind "clj"
+                                 :data data})
+        apply-transformation (partial tf/apply {:tenant-conn *tenant-conn*} dataset-id)]
+    (let [[tag _ :as res] (apply-transformation {:type :transformation
+                                                 :transformation {"op" "core/extract-multiple"
+                                                                  "args" {"columns" [{"extract" true
+                                                                                      "type" "text"
+                                                                                      "name" "ole"
+                                                                                      "id" 1}]
+                                                                          "selectedColumn" {"multipleType" "caddisfly"
+                                                                                            "multipleId" i-v/cad1-id
+                                                                                            "columnName" "c0"}
+                                                                          "columnName" "c0"
+                                                                          "extractImage" false}
+                                                                  "onError" "fail"}})]
+      (is (= ::lib/ok tag))
+      (let [{:keys [columns transformations]} (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id})]
+        (is (= ["c0" "d1"] (map #(get % "columnName") columns)))
+        (let [{:strs [before after]} (get-in (last transformations) ["changedColumns" "d1"])]          
+          (is (= 1 (get after "caddisfly-test-id")))
+          (is (= "ole" (get after "title")))
+          (is (= "d1" (get after "columnName")))
+          (is (nil? before)))))))
 
 (deftest ^:functional rename-column-test
   (let [dataset-id (import-file *tenant-conn* *error-tracker* {:has-column-headers? true
