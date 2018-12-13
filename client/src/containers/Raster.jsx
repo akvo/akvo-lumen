@@ -8,7 +8,7 @@ import { fetchRaster } from '../actions/raster';
 import { getId, getTitle } from '../domain/entity';
 import { trackPageView } from '../utilities/analytics';
 import EntityTypeHeader from '../components/entity-editor/EntityTypeHeader';
-import * as api from '../api';
+import * as api from '../utilities/api';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 
 require('../../node_modules/leaflet/dist/leaflet.css');

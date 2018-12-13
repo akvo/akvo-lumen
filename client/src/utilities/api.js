@@ -1,5 +1,6 @@
-import fetch from 'isomorphic-fetch';
+// import fetch from 'whatwg-fetch';
 import { omit } from 'lodash';
+
 import * as auth from './auth';
 
 function wrapUpdateToken(fetchRequestThunk) {

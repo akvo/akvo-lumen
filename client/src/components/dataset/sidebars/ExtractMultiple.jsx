@@ -7,7 +7,7 @@ import SelectMenu from '../../common/SelectMenu';
 import ToggleInput from '../../common/ToggleInput';
 import SidebarHeader from './SidebarHeader';
 import SidebarControls from './SidebarControls';
-import * as API from '../../../api';
+import * as API from '../../../utilities/api';
 
 require('./ExtractMultiple.scss');
 

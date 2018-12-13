@@ -1,7 +1,7 @@
 import { createAction } from 'redux-actions';
 import { hideModal } from './activeModal';
 import { showNotification } from './notification';
-import * as api from '../api';
+import * as api from '../utilities/api';
 
 /* Fetched all collections */
 export const fetchCollectionsSuccess = createAction('FETCH_COLLECTIONS_SUCCESS');

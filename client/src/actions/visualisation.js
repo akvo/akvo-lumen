@@ -6,7 +6,7 @@ import { fetchDataset } from './dataset';
 import { showNotification } from './notification';
 import * as dashboardActions from './dashboard';
 import { addEntitiesToCollection } from './collection';
-import * as api from '../api';
+import * as api from '../utilities/api';
 import { base64ToBlob, extToContentType } from '../utilities/export';
 
 /* Fetched all visualisations */

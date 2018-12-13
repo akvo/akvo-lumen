@@ -8,7 +8,7 @@ import SelectMenu from '../../common/SelectMenu';
 import Alert from '../../common/Alert';
 import SidebarHeader from './SidebarHeader';
 import SidebarControls from './SidebarControls';
-import * as API from '../../../api';
+import * as API from '../../../utilities/api';
 import './SplitColumn.scss';
 
 function textColumnOptions(columns) {

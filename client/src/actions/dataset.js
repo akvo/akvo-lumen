@@ -9,8 +9,8 @@ import {
   addTemporaryEntitiesToCollection,
   removeTemporaryEntitiesFromCollection,
 } from './collection';
-import * as api from '../api';
-import * as auth from '../auth';
+import * as api from '../utilities/api';
+import * as auth from '../utilities/auth';
 
 /*
  * Fetch a dataset by id

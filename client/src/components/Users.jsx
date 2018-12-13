@@ -5,7 +5,7 @@ import { FormattedMessage } from 'react-intl';
 import EntityTypeHeader from './entity-editor/EntityTypeHeader';
 import ConfirmUserAction from './users/ConfirmUserAction';
 import InviteUser from './users/InviteUser';
-import * as api from '../api';
+import * as api from '../utilities/api';
 
 require('./entity-editor/EntityTypeHeader.scss');
 require('./Users.scss');

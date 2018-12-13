@@ -6,7 +6,7 @@ import get from 'lodash/get';
 import { intlShape, injectIntl } from 'react-intl';
 import ShareEntity from '../components/modals/ShareEntity';
 import * as actions from '../actions/dashboard';
-import * as api from '../api';
+import * as api from '../utilities/api';
 import { fetchLibrary } from '../actions/library';
 import { fetchDataset } from '../actions/dataset';
 import { trackPageView, trackEvent } from '../utilities/analytics';

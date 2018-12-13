@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
-import * as api from '../api';
+import * as api from '../utilities/api';
 import { ensureLibraryLoaded } from '../actions/library';
 import { fetchDataset } from '../actions/dataset';
 import { showNotification } from '../actions/notification';

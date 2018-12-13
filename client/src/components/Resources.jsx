@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import * as api from '../api';
+import * as api from '../utilities/api';
 
 require('./Resources.scss');
 

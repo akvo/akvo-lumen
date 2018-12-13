@@ -6,7 +6,7 @@ import VisualisationConfig from './configMenu/VisualisationConfig';
 import VisualisationPreview from './VisualisationPreview';
 import { checkUndefined } from '../../utilities/utils';
 import { specIsValidForApi, getNeedNewAggregation } from '../../utilities/aggregation';
-import * as api from '../../api';
+import * as api from '../../utilities/api';
 
 require('./VisualisationEditor.scss');
 

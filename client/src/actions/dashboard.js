@@ -4,7 +4,7 @@ import { saveAs } from 'file-saver/FileSaver';
 
 import { addEntitiesToCollection } from './collection';
 import { showNotification } from './notification';
-import * as api from '../api';
+import * as api from '../utilities/api';
 import { base64ToBlob, extToContentType } from '../utilities/export';
 
 export const fetchDashboardsSuccess = createAction('FETCH_DASHBOARDS_SUCCESS');

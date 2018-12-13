@@ -2,7 +2,7 @@ import Immutable from 'immutable';
 import * as constants from '../constants/raster';
 import * as visualisationActions from './visualisation';
 import { hideModal } from './activeModal';
-import * as api from '../api';
+import * as api from '../utilities/api';
 import {
   addEntitiesToCollection,
   addTemporaryEntitiesToCollection,

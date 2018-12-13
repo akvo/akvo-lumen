@@ -1,15 +1,14 @@
 import Immutable from 'immutable';
 import warning from 'warning';
 import isEmpty from 'lodash/isEmpty';
+
 import * as constants from '../constants/library';
 import { fetchDatasetsSuccess } from './dataset';
 import { fetchVisualisationsSuccess } from './visualisation';
 import { fetchDashboardsSuccess } from './dashboard';
 import { fetchCollectionsSuccess } from './collection';
 import { fetchRastersSuccess } from './raster';
-
-
-import * as api from '../api';
+import * as api from '../utilities/api';
 
 function fetchLibraryRequest() {
   return {

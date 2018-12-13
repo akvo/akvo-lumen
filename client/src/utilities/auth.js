@@ -1,5 +1,5 @@
 /* eslint-disable no-underscore-dangle */
-import fetch from 'isomorphic-fetch';
+import fetch from 'whatwg-fetch';
 import Keycloak from 'keycloak-js';
 import Raven from 'raven-js';
 import queryString from 'query-string';

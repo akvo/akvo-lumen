@@ -12,7 +12,7 @@ import LumenBranding from './components/common/LumenBranding';
 import ErrorScreen from './components/common/ErrorScreen';
 import configureStore from './store/configureStore';
 import { init as initAnalytics, trackPageView } from './utilities/analytics';
-import * as auth from './auth';
+import * as auth from './utilities/auth';
 
 require('./styles/reset.global.scss');
 require('./styles/style.global.scss');

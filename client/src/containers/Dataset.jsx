@@ -8,7 +8,7 @@ import { fetchDataset, updateDatasetMeta } from '../actions/dataset';
 import { showNotification } from '../actions/notification';
 import { getId, getTitle } from '../domain/entity';
 import { getTransformations, getRows, getColumns } from '../domain/dataset';
-import * as api from '../api';
+import * as api from '../utilities/api';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { SAVE_COUNTDOWN_INTERVAL, SAVE_INITIAL_TIMEOUT } from '../constants/time';
 import { TRANSFORM_DATASET } from '../constants/analytics';

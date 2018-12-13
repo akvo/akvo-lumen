@@ -3,8 +3,8 @@ import PropTypes from 'prop-types';
 import Select from 'react-select';
 import { connect } from 'react-redux';
 import { injectIntl, intlShape } from 'react-intl';
-import * as api from '../../../api';
-import * as keycloak from '../../../auth';
+import * as api from '../../../utilities/api';
+import * as keycloak from '../../../utilities/auth';
 
 require('../../../../node_modules/react-select/dist/react-select.css');
 // TODO: we should use the "SelectMenu" wrapper component in the "common" folder in this component
