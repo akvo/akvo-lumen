@@ -200,6 +200,7 @@ export default class PieChart extends Component {
       edit,
       outerRadius,
       visualisation,
+      labelsVisible,
     } = this.props;
 
     const series = this.getData();
@@ -253,7 +254,8 @@ export default class PieChart extends Component {
         )}
         chart={
           <ResponsiveWrapper>{(dimensions) => {
-            const diameter = Math.min(dimensions.width, dimensions.height);
+            const diameter = Math.min(dimensions.width, dimensions.height) *
+              (labelsVisible ? 0.8 : 1);
 
             return (
               <div
@@ -284,8 +286,8 @@ export default class PieChart extends Component {
                             (Math.PI / 2);
                           const radius = sectorRadiusFromAreaAndAngle(value, nodeAngle) *
                             radiusMultiplier;
-                          const labelPosition = positionFromAngle(midAngle, diameter * 0.4 * 0.8);
-                          const edgePosition = positionFromAngle(midAngle, diameter * radius * 0.8);
+                          const labelPosition = positionFromAngle(midAngle, diameter * 0.4);
+                          const edgePosition = positionFromAngle(midAngle, diameter * radius);
                           const colorpickerPlacement = labelPosition.x < 0 ?
                             'right' :
                             'left';
@@ -315,7 +317,7 @@ export default class PieChart extends Component {
                               <Arc
                                 key={i}
                                 innerRadius={0}
-                                outerRadius={radius * diameter * 0.8}
+                                outerRadius={radius * diameter}
                                 startAngle={startAngle}
                                 endAngle={endAngle}
                                 fill={color}
