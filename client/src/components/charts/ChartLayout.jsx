@@ -64,7 +64,7 @@ const ChartLayout = ({
         </div>
       )}
       {legendVisible && (
-        <div style={{ height, width: dimensions.legend }}>
+        <div style={{ height, width: dimensions.legend, overflow: 'auto' }}>
           {legend(dimensions)}
         </div>
       )}
@@ -83,7 +83,7 @@ const ChartLayout = ({
         </div>
       )}
       {legendVisible && (
-        <div style={{ width, height: dimensions.legend }}>
+        <div style={{ width, height: dimensions.legend, overflow: 'auto' }}>
           {legend(dimensions)}
         </div>
       )}
