@@ -284,8 +284,8 @@ export default class PieChart extends Component {
                             (Math.PI / 2);
                           const radius = sectorRadiusFromAreaAndAngle(value, nodeAngle) *
                             radiusMultiplier;
-                          const labelPosition = positionFromAngle(midAngle, diameter * 0.4);
-                          const edgePosition = positionFromAngle(midAngle, diameter * radius);
+                          const labelPosition = positionFromAngle(midAngle, diameter * 0.4 * 0.8);
+                          const edgePosition = positionFromAngle(midAngle, diameter * radius * 0.8);
                           const colorpickerPlacement = labelPosition.x < 0 ?
                             'right' :
                             'left';
@@ -315,7 +315,7 @@ export default class PieChart extends Component {
                               <Arc
                                 key={i}
                                 innerRadius={0}
-                                outerRadius={radius * diameter}
+                                outerRadius={radius * diameter * 0.8}
                                 startAngle={startAngle}
                                 endAngle={endAngle}
                                 fill={color}
