@@ -1,12 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage, injectIntl } from 'react-intl';
 
 import './BubbleLegend.scss';
-import { FormattedMessage, injectIntl } from 'react-intl';
 
 const MAX_LENGTH = 30;
 
-const BubbleLegend = ({ title }) => title.length > MAX_LENGTH ? (
+const BubbleLegend = ({ title }) => (title.length > MAX_LENGTH ? (
   <div className="BubbleLegend">
     <h4>
       <FormattedMessage id="size" />
@@ -24,7 +24,7 @@ const BubbleLegend = ({ title }) => title.length > MAX_LENGTH ? (
       {title}
     </div>
   </div>
-);
+));
 
 BubbleLegend.propTypes = {
   title: PropTypes.string.isRequired,
