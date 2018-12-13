@@ -225,13 +225,13 @@ export default class PieChart extends Component {
         height={height}
         legendVisible={legendVisible}
         onClick={() => {
-          this.setState({ isPickingColor: undefined });
+          this.setState({ isPickingColor: undefined, hoveredNode: null });
         }}
         legend={({ horizontal }) => (
           <Legend
             horizontal={!horizontal}
             title={legendTitle}
-            data={series.data.map(({ key }) => `${key}`)}
+            data={series.data.map(({ key }) => key)}
             colorMapping={
               series.data.reduce((acc, { key }, i) => ({
                 ...acc,
