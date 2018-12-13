@@ -1,10 +1,18 @@
 @import '../../styles/modules/importAll.scss';
 
 .BubbleLegend {
-  width: 120px;
-  height: 120px;
   position: relative;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
+  
+  p {
+    line-height: 0.9em;
+    font-size: 10px;
+  }
+  
+  .BubbleLegend__bubbles {
+    height: 120px;
+    width: 120px;
+  }
 
   .BubbleLegend__bubble {
     border: 1px dashed black;
@@ -35,7 +43,7 @@
     text-align: center;
     position: absolute;
     top: 20px;
-    width: 80%;
-    left: 10%;
+    width: 100px;
+    left: 10px;
   }
 }

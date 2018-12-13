@@ -316,7 +316,7 @@ class ScatterChart extends Component {
               horizontal={!horizontal}
               title={legendTitle}
               description={
-                <BubbleLegend title={legendDescription} />
+                legendDescription && <BubbleLegend title={legendDescription} />
               }
               data={categories}
               colorMapping={categories.reduce((acc, category) => ({

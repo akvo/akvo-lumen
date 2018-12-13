@@ -200,6 +200,7 @@ export default class PieChart extends Component {
       edit,
       outerRadius,
       visualisation,
+      labelsVisible,
     } = this.props;
 
     const series = this.getData();
@@ -225,13 +226,13 @@ export default class PieChart extends Component {
         height={height}
         legendVisible={legendVisible}
         onClick={() => {
-          this.setState({ isPickingColor: undefined });
+          this.setState({ isPickingColor: undefined, hoveredNode: null });
         }}
         legend={({ horizontal }) => (
           <Legend
             horizontal={!horizontal}
             title={legendTitle}
-            data={series.data.map(({ key }) => `${key}`)}
+            data={series.data.map(({ key }) => key)}
             colorMapping={
               series.data.reduce((acc, { key }, i) => ({
                 ...acc,
@@ -253,7 +254,8 @@ export default class PieChart extends Component {
         )}
         chart={
           <ResponsiveWrapper>{(dimensions) => {
-            const diameter = Math.min(dimensions.width, dimensions.height);
+            const diameter = Math.min(dimensions.width, dimensions.height) *
+              (labelsVisible ? 0.8 : 1);
 
             return (
               <div
