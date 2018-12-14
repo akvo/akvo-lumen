@@ -1,6 +1,7 @@
 (ns akvo.lumen.util
   (:require [clojure.string :as str]
             [clojure.java.io :as io]
+            [clojure.spec.alpha :as s]
             [org.akvo.resumed :as resumed]))
 
 (defn squuid
@@ -68,3 +69,12 @@
 (defn valid-type? [s]
   (#{"text" "number" "date" "geopoint"} s))
 
+
+(defn conform
+  ([s d adapter]
+   (conform s (adapter d))
+   d)
+  ([s d]
+   (when-not (s/valid? s d) (throw (ex-info (str s " spec problem!") {:message (s/explain-str s d)
+                                                                      :data d})))
+   d))
