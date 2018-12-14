@@ -5,7 +5,12 @@ const visualizationColumnMappings = {
     line: {},
     area: {},
     pie: {},
-    donut: {},
+    get donut() {
+      return this.pie;
+    },
+    get polararea() {
+      return this.pie;
+    },
     scatter: {},
     bubble: {},
   },
@@ -24,8 +29,11 @@ const visualizationColumnMappings = {
     pie: {
       categoryColumn: 'bucketColumn',
     },
-    donut: {
-      categoryColumn: 'bucketColumn',
+    get donut() {
+      return this.pie;
+    },
+    get polararea() {
+      return this.pie;
     },
     scatter: {
       valueColumn: 'metricColumnY',
@@ -51,8 +59,11 @@ const visualizationColumnMappings = {
     pie: {
       bucketColumn: 'bucketColumn',
     },
-    donut: {
-      bucketColumn: 'bucketColumn',
+    get donut() {
+      return this.pie;
+    },
+    get polararea() {
+      return this.pie;
     },
     scatter: {
       metricColumnY: 'metricColumnY',
@@ -80,7 +91,12 @@ const visualizationColumnMappings = {
       return this.area;
     },
     pie: {},
-    donut: {},
+    get donut() {
+      return this.pie;
+    },
+    get polararea() {
+      return this.pie;
+    },
     scatter: {
       metricColumnY: 'metricColumnY',
       metricColumnX: 'metricColumnX',
@@ -102,11 +118,14 @@ const visualizationColumnMappings = {
     },
     line: {},
     area: {},
-    donut: {
+    pie: {
       bucketColumn: 'bucketColumn',
     },
-    get pie() {
-      return this.donut;
+    get donut() {
+      return this.pie;
+    },
+    get polararea() {
+      return this.pie;
     },
     scatter: {
       bucketColumn: 'bucketColumnCategory',
@@ -117,6 +136,9 @@ const visualizationColumnMappings = {
     },
   },
   get donut() {
+    return this.pie;
+  },
+  get polararea() {
     return this.pie;
   },
   scatter: {
@@ -140,8 +162,11 @@ const visualizationColumnMappings = {
     pie: {
       bucketColumnCategory: 'bucketColumn',
     },
-    donut: {
-      bucketColumnCategory: 'bucketColumn',
+    get donut() {
+      return this.pie;
+    },
+    get polararea() {
+      return this.pie;
     },
     bubble: {
       bucketColumnCategory: 'bucketColumn',
@@ -170,8 +195,11 @@ const visualizationColumnMappings = {
     pie: {
       bucketColumn: 'bucketColumn',
     },
-    donut: {
-      bucketColumn: 'bucketColumn',
+    get donut() {
+      return this.pie;
+    },
+    get polararea() {
+      return this.pie;
     },
     scatter: {
       bucketColumn: 'bucketColumnCategory',
