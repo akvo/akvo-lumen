@@ -29,8 +29,8 @@
     #(s/gen #{polygon multipolygon})))
 
 (s/def ::id (s/with-gen
-                     string?
-                     #(s/gen #{"c1" "c2" "c3"})))
+                     keyword?
+                     #(s/gen #{:c1 :c2 :c3})))
 
 (s/def ::title (s/with-gen
                         string?
