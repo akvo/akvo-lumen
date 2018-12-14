@@ -9,8 +9,12 @@
 (defn sample-with-gen [s map-gen amount]
   (map first (s/exercise s amount map-gen)))
 
-(defn sample [s amount]
-  (map first (s/exercise s amount)))
+(defn sample
+  ([s]
+   (map first (s/exercise s 1)))
+  ([s amount]
+   (map first (s/exercise s amount))))
+
 (defn str-uuid? [v]
   (when (some? v)
     (uuid? (read-string (format "#uuid \"%s\"" v)))))
