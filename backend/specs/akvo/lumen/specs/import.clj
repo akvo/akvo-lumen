@@ -1,5 +1,6 @@
 (ns akvo.lumen.specs.import
   (:require [akvo.lumen.specs :as lumen.s]
+            [akvo.lumen.util :as u]
             [akvo.lumen.specs.import.column :as c]
             [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
@@ -25,7 +26,7 @@
                              (range (count headers))))
         _         (do
                     ;; "ensure columns headers are valid specs"
-                    (reduce #(assert (s/valid? ::c/header %2) %) [] columns))
+                    (reduce (fn [_ i] (u/conform ::c/header i)) [] columns))
         row-types (map (fn [t]
                          (let [t (if (sequential? t) (first t) t)]
                            (kw->body-spec t))) types-gens-tuple)
@@ -39,6 +40,6 @@
                           [] (range rows-count))
         _         (do
                    ;;  "ensure column bodies (cells) are valid specs"
-                    (reduce #(assert (s/valid? ::c/body %2) %) [] (flatten rows0)))
+                    (reduce (fn [_ i] (u/conform ::c/body i)) [] (flatten rows0)))
         rows      (mapv #(mapv (fn [c] (dissoc c :type)) %) rows0)]
     {:columns columns :rows rows}))
