@@ -38,19 +38,10 @@
 
 (s/def ::key boolean?)
 
-(defn str-uuid? [v]
-  (when (some? v)
-    (uuid? (read-string (format "#uuid \"%s\"" v)))))
-
-(s/def ::str-uuid
-  (s/with-gen
-    str-uuid?
-    #(s/gen (reduce (fn [c _] (conj c (str (squuid)))) #{} (range 100)))))
-
 ;; alias and custom generator doesn't work so far
 ;; https://dev.clojure.org/jira/browse/CLJ-2079
 (s/def ::multiple-id (s/with-gen
-                       str-uuid?
+                       lumen.s/str-uuid?
                        #(s/gen (reduce (fn [c _] (conj c (str (squuid)))) #{} (range 100)))))
 
 (s/def ::multiple-type #{:caddisfly})
