@@ -20,8 +20,10 @@
 
 (defn gen-table-name
   "Generates a table name using a UUID suffix"
-  [prefix]
-  (str prefix "_" (str/replace (java.util.UUID/randomUUID) "-" "_")))
+  ([]
+   (gen-table-name nil))
+  ([prefix]
+   (str (when prefix (str prefix "_")) (str/replace (java.util.UUID/randomUUID) "-" "_"))))
 
 (defn conform-email
   "Returns valid email or throws."

@@ -4,14 +4,46 @@
             [akvo.lumen.lib.import.clj-data-importer]
             [akvo.lumen.lib.update :as update]
             [akvo.lumen.postgres]
-            [akvo.lumen.util :refer [squuid]]
+            [akvo.lumen.lib.transformation.engine :refer (new-dataset-version)]
+            [akvo.lumen.specs.transformation]
+            [robert.hooke :refer (add-hook) :as r]
+            [akvo.lumen.util :refer [squuid] :as util ]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.set :as set]
+            [clojure.spec.alpha :as s]
             [clojure.spec.test.alpha :as stest]
             [clojure.test :as t]
             [clojure.tools.logging :as log]
+            [clojure.walk :refer (keywordize-keys)]
             [diehard.core :as dh]
             [hugsql.core :as hugsql]))
+
+(defn dataset-version-spec-adapter
+  "provisional spec adapter function to be removed when specs work was finished"
+  [dsv]
+  (letfn [(>mult [i]
+            (-> i
+                (update :multipleType keyword)
+                (set/rename-keys {:multipleType :multiple-type
+                                  :multipleId :multiple-id})))]
+    (-> (keywordize-keys dsv)
+        (update :columns #(mapv (fn [e]
+                                  (cond-> e
+                                    true keywordize-keys
+                                    true (update :type keyword)
+                                    true (update :id (fn [o] (if o (keyword o) (keyword (:columnName e)))))
+                                    (:multipleType e) >mult)) %)))))
+
+(defn new-dataset-version-conform
+  [f t d]
+  (log/info :conforming :akvo.lumen.specs.transformation/next-dataset-version)
+  (util/conform :akvo.lumen.specs.transformation/next-dataset-version d dataset-version-spec-adapter)
+  (f t d))
+
+(doseq [v [#'new-dataset-version #'import/new-dataset-version]]
+  (r/clear-hooks v)
+  (r/add-hook v #'new-dataset-version-conform))
 
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 

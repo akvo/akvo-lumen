@@ -1,6 +1,7 @@
 (ns akvo.lumen.specs.import.values
   (:require [clojure.spec.alpha :as s]
             [akvo.lumen.util :refer (squuid)]
+            [akvo.lumen.specs :as lumen.s :refer (sample)]
             [akvo.lumen.lib.import.csv :as csv]))
 
 (def polygon

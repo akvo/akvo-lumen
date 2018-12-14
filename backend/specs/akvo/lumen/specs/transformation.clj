@@ -23,11 +23,19 @@
 
 (defn- ds-table-name? [s]
   (let [[_ uuid] (string/split  s #"ds_")]
-       (lumen.s/str-uuid? uuid)))
+       (lumen.s/str-uuid? (string/replace uuid "_" "-"))))
 
 (s/def ::db.dsv/table-name (s/with-gen
                              (s/and string? ds-table-name?)
-                             #(s/gen (into #{} (take 5 (repeatedly (fn [] (str "ds_" (u/squuid)))))))))
+                             #(s/gen (into #{} (take 5 (repeatedly (partial u/gen-table-name "ds")))))))
+
+(defn- imported-table-name? [s]
+  (let [[_ uuid] (string/split  s #"imported_")]
+       (lumen.s/str-uuid? (string/replace uuid "_" "-"))))
+
+(s/def ::db.dsv/imported-table-name (s/with-gen
+                                      (s/and string? imported-table-name?)
+                                      #(s/gen (into #{} (take 5 (repeatedly (fn [] (str "imported_" (u/squuid)))))))))
 
 (s/def ::db.dsv/version int?)
 (s/def ::db.dsv/transformations any?) ;; TODO complete ... 
