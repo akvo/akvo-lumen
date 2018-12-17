@@ -6,7 +6,7 @@ import './BubbleLegend.scss';
 
 const MAX_LENGTH = 30;
 
-const BubbleLegend = ({ title }) => (title.length > MAX_LENGTH ? (
+const BubbleLegend = ({ title = '' }) => (title.length > MAX_LENGTH ? (
   <div className="BubbleLegend">
     <h4>
       <FormattedMessage id="size" />
