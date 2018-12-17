@@ -119,3 +119,20 @@
           (if (= "OK" status)
             (:dataset_id (dataset-id-by-job-execution-id tenant-conn {:id updateId}))
             updateId))))))
+
+(defn rand-bol []
+  (if (= 0 (rand-int 2)) false true))
+
+(defn- replace-item
+  "Returns a list with the n-th item of l replaced by v."
+  [l n v]
+  (concat (take n l) (list v) (drop (inc n) l)))
+
+(defn at-least-one-true
+  "returns a seq of boolean with a minimum one true"
+  [c]
+  (let [res (for [r (range c)]
+              (rand-bol))]
+    (if (some true? res)
+      res
+      (replace-item res (rand-int c) true))))
