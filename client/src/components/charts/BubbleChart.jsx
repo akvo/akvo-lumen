@@ -235,7 +235,7 @@ class BubbleChart extends Component {
             horizontal={!horizontal}
             title={legendTitle}
             description={
-              <BubbleLegend title={legendDescription} />
+              legendDescription && <BubbleLegend title={legendDescription} />
             }
             data={series.data.map(({ key }) => key)}
             colorMapping={
