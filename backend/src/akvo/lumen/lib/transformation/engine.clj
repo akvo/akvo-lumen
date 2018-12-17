@@ -8,6 +8,7 @@
 
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/dataset_version.sql")
 
 (defmulti valid?
   "Validate transformation spec"

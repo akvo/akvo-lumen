@@ -16,6 +16,7 @@
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/dataset_version.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
 
