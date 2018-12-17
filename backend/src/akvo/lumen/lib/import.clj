@@ -16,6 +16,7 @@
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/dataset_version.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
 
@@ -31,7 +32,7 @@
                        :to-table imported-table-name}
                       {}
                       {:transaction? false})
-    (insert-dataset-version conn {:id (util/squuid)
+    (new-dataset-version conn {:id (util/squuid)
                                   :dataset-id dataset-id
                                   :job-execution-id job-execution-id
                                   :table-name table-name

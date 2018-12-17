@@ -8,6 +8,7 @@
 
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/dataset_version.sql")
 
 (defmulti valid?
   "Validate transformation spec"
@@ -233,7 +234,7 @@
                                         :columns         (:columns op)
                                         :transformations applied-txs})
           (recur (rest transformations) (:columns op) (inc version) applied-txs)))
-      (insert-dataset-version conn {:id                  (str (util/squuid))
+      (new-dataset-version conn {:id                  (str (util/squuid))
                                     :dataset-id          dataset-id
                                     :job-execution-id    job-execution-id
                                     :table-name          table-name
