@@ -1,5 +1,6 @@
 (ns akvo.lumen.fixtures
   (:require [akvo.lumen.component.error-tracker :refer [local-error-tracker]]
+            [akvo.lumen.component.caddisfly-test :refer (caddisfly)]
             [akvo.lumen.test-utils :as test-utils]
             [akvo.lumen.test-utils
              :refer
@@ -47,4 +48,12 @@
   "Returns a fixture that binds a local error tracker to *error-tracker*"
   [f]
   (binding [*error-tracker* (local-error-tracker {})]
+    (f)))
+
+(def ^:dynamic *caddisfly*)
+
+(defn caddisfly-fixture
+  "Returns a fixture that binds a local error tracker to *error-tracker*"
+  [f]
+  (binding [*caddisfly* (caddisfly)]
     (f)))
