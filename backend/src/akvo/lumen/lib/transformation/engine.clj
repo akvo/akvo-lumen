@@ -234,7 +234,7 @@
                                         :columns         (:columns op)
                                         :transformations applied-txs})
           (recur (rest transformations) (:columns op) (inc version) applied-txs)))
-      (insert-dataset-version conn {:id                  (str (util/squuid))
+      (new-dataset-version conn {:id                  (str (util/squuid))
                                     :dataset-id          dataset-id
                                     :job-execution-id    job-execution-id
                                     :table-name          table-name

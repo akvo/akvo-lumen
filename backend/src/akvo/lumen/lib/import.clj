@@ -32,7 +32,7 @@
                        :to-table imported-table-name}
                       {}
                       {:transaction? false})
-    (insert-dataset-version conn {:id (util/squuid)
+    (new-dataset-version conn {:id (util/squuid)
                                   :dataset-id dataset-id
                                   :job-execution-id job-execution-id
                                   :table-name table-name
