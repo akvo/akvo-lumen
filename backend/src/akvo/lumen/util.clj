@@ -71,12 +71,13 @@
 (defn valid-type? [s]
   (#{"text" "number" "date" "geopoint"} s))
 
-
-(defn conform
+(defn conform  
+  ([s d]
+   (when-not (s/valid? s d)
+     (throw (ex-info (str s " spec problem!")
+                     {:message (s/explain-str s d)
+                      :data d})))
+   d)
   ([s d adapter]
    (conform s (adapter d))
-   d)
-  ([s d]
-   (when-not (s/valid? s d) (throw (ex-info (str s " spec problem!") {:message (s/explain-str s d)
-                                                                      :data d})))
    d))
