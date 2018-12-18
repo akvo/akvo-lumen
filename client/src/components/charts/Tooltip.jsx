@@ -9,13 +9,14 @@ import './Tooltip.scss';
 const Tooltip = ({ items, ...rest }) => (items.length ? (
   <div className="tooltip" style={{ position: 'absolute', ...rest }}>
     <ul>
-      {items.map(({ color, key, value }, i) => {
-        const label = replaceLabelIfValueEmpty(key);
+      {items.map(({ color, key, value }) => {
+        const hasKey = Boolean(itsSet(key) && key.length);
         return (
-          <li key={label || i}>
+          <li key={replaceLabelIfValueEmpty(key)}>
             {color && <LegendShape isActive={false} fill={color} />}
-            <span className="key">{label}</span>
-            {itsSet(value) && `: ${value}`}
+            {hasKey && <span className="key">{key}</span>}
+            {(itsSet(value) && hasKey) && ': '}
+            {itsSet(value) && `${value}`}
           </li>
         );
       })}
