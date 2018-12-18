@@ -12,16 +12,25 @@
             [akvo.lumen.lib.transformation.engine :as engine]
             [akvo.lumen.postgres :as postgres]
             [akvo.lumen.specs.import :as i-c]
+            [akvo.lumen.specs.import.column :as import.column.s]
             [akvo.lumen.specs.import.values :as i-v]
             [akvo.lumen.test-utils :refer [import-file at-least-one-true]]
             [akvo.lumen.test-utils :as tu]
             [cheshire.core :as json]
+            [clj-time.coerce :as tcc]
+            [clj-time.core :as tc]
+            [clj-time.format :as timef]
             [clojure.java.io :as io]
             [clojure.spec.alpha :as s]
+            [clojure.string :as string]
             [clojure.test :refer :all]
             [clojure.tools.logging :as log]
             [clojure.walk :refer (stringify-keys)]
             [hugsql.core :as hugsql]))
+
+(alias 'c.multiple 'akvo.lumen.specs.import.column.multiple)
+(alias 'c.text 'akvo.lumen.specs.import.column.text)
+(alias 'i.values 'akvo.lumen.specs.import.values)
 
 (def ops (vec (json/parse-string (slurp (io/resource "ops.json")))))
 
@@ -173,18 +182,37 @@
                                            :table-name table-name})))))))
     ))
 
-(defn date-transformation [column-name format]
-  {:type :transformation
-   :transformation {"op" "core/change-datatype"
-                    "args" {"columnName" column-name
-                            "newType" "date"
-                            "defaultValue" 0
-                            "parseFormat" format}
-                    "onError" "fail"}})
-
 (deftest ^:functional date-parsing-test
-  (let [dataset-id (import-file *tenant-conn* *error-tracker* {:has-column-headers? true
-                                                               :file "dates.csv"})
+  (let [date-transformation (fn[column-name format*]
+                              {:type           :transformation
+                               :transformation {"op"      "core/change-datatype"
+                                                "args"    {"columnName"   column-name
+                                                           "newType"      "date"
+                                                           "defaultValue" 0
+                                                           "parseFormat"  format*}
+                                                "onError" "fail"}})
+        data                (i-c/sample-imported-dataset [:text
+                                                          [:text {::c.text/value (fn [] (import.column.s/date-format-gen
+                                                                                         (fn [[y _ _ :as date]]
+                                                                                           (str y))))
+                                                                  ::i.values/key (fn [] import.column.s/false-gen)}]
+                                                          [:text {::c.text/value (fn [] (import.column.s/date-format-gen
+                                                                                         (fn [[y m d :as date]]
+                                                                                           (str d "/" m "/" y))))
+                                                                  ::i.values/key (fn [] import.column.s/false-gen)}]
+                                                          [:text {::c.text/value (fn [] (import.column.s/date-format-gen
+                                                                                         (fn [date]
+                                                                                           (string/join "-" date))))
+                                                                  ::i.values/key (fn [] import.column.s/false-gen)}]]
+                                                         10)
+        years               (map (comp :value second) (:rows data))
+        years-slash         (map (comp (partial timef/parse (timef/formatter "dd/MM/yyyy")) :value first next next) (:rows data))
+        years-hiphen        (map (comp (partial timef/parse (timef/formatter "yyyy-MM-dd")) :value first next next next) (:rows data))
+        dataset-id          (import-file *tenant-conn* *error-tracker* 
+                                         {:dataset-name "date-parsing-test-bis"
+                                          :kind         "clj"
+                                          :data         data})
+
         apply-transformation (partial tf/apply {:tenant-conn *tenant-conn*} dataset-id)]
     (let [[tag {:strs [datasetId]}] (do (apply-transformation (date-transformation "c1" "YYYY"))
                                         (apply-transformation (date-transformation "c2" "DD/MM/YYYY"))
@@ -192,21 +220,10 @@
       (is (= ::lib/ok tag))
       (let [table-name (:table-name (latest-dataset-version-by-dataset-id *tenant-conn*
                                                                           {:dataset-id datasetId}))
-            first-date (:c1 (get-val-from-table *tenant-conn*
-                                                {:rnum 1
-                                                 :column-name "c1"
-                                                 :table-name table-name}))
-            second-date (:c2 (get-val-from-table *tenant-conn*
-                                                 {:rnum 1
-                                                  :column-name "c2"
-                                                  :table-name table-name}))
-            third-date (:c3 (get-val-from-table *tenant-conn*
-                                                {:rnum 1
-                                                 :column-name "c3"
-                                                 :table-name table-name}))]
-        (is (pos? first-date))
-        (is (pos? second-date))
-        (is (pos? third-date))))))
+            table-data (get-data *tenant-conn* {:table-name table-name})]
+        (is (= years (map (comp str tc/year tcc/from-long :c1) table-data)))
+        (is (= years-slash (map (comp tcc/from-long :c2) table-data)))
+        (is (= years-hiphen (map (comp tcc/from-long :c3) table-data)))))))
 
 (defn change-datatype-transformation [column-name]
   {:type :transformation
@@ -429,8 +446,6 @@
         (let [{:strs [before after]} (get-in (last transformations) ["changedColumns" "c2"])]
           (is (= "c2" (get before "columnName")))
           (is (nil? after)))))))
-
-(alias 'c.multiple 'akvo.lumen.specs.import.column.multiple)
 
 (deftest ^:functional multiple-column-test
   (let [multiple-column-type "caddisfly"

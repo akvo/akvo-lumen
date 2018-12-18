@@ -1,9 +1,13 @@
 (ns akvo.lumen.specs.import.column
-  (:require [akvo.lumen.specs.import.values :as v]
+  (:require [akvo.lumen.specs :as lumen.s]
+            [akvo.lumen.specs.import.values :as v]
             [akvo.lumen.util :refer (squuid)]
+            [clj-time.coerce :as tcc]
+            [clj-time.core :as tc]
             [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
             [clojure.string :as string]
+            [clojure.test.check.generators :as tgen]
             [clojure.tools.logging :as log])
   (:import [akvo.lumen.postgres Geoshape Geopoint]
            [java.time Instant]))
@@ -67,9 +71,35 @@
 
 (s/def ::c.number/value double?)
 
-(s/def ::c.date/value (s/with-gen
-                        #(instance? Instant %)
-                        #(s/gen #{(Instant/parse "2017-12-03T10:15:30.00Z") (Instant/parse "2018-12-03T10:15:30.00Z")})))
+(def year-gen (tgen/choose 1976 2018))
+
+(def month-gen (tgen/choose 1 12))
+
+(def day-gen (tgen/choose 1 31))
+
+(def date-gen (tgen/such-that (fn [t]
+                                (try
+                                  (apply tc/date-time t)
+                                  (catch Exception e false)))
+                              (tgen/tuple year-gen month-gen day-gen)))
+
+(def instant-gen (tgen/fmap (fn [e] (Instant/ofEpochMilli (tcc/to-long (apply tc/date-time e)))) date-gen))
+
+(gen/sample date-gen 10)
+
+(gen/sample instant-gen 10)
+
+(def false-gen (gen/return false))
+
+(def text-year-gen (tgen/fmap str year-gen))
+
+(defn date-format-gen [fun] (tgen/fmap fun date-gen))
+
+(gen/sample (date-format-gen (fn [[y _ _]] (str y))) 10)
+
+(s/def ::c.date/value (s/with-gen #(instance? Instant %) (fn [] instant-gen)))
+
+(lumen.s/sample ::c.date/value)
 
 (s/def ::c.multiple/value (s/with-gen
                             string?
