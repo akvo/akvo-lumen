@@ -9,7 +9,7 @@ import './Tooltip.scss';
 const Tooltip = ({ items, ...rest }) => (items.length ? (
   <div className="tooltip" style={{ position: 'absolute', ...rest }}>
     <ul>
-      {items.map(({ color, key, value }, i) => {
+      {items.map(({ color, key, value }) => {
         const hasKey = Boolean(itsSet(key) && key.length);
         return (
           <li key={replaceLabelIfValueEmpty(key)}>
