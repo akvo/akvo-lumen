@@ -1,5 +1,7 @@
 (ns akvo.lumen.util
-  (:require [clojure.string :as str]))
+  (:require [clojure.string :as str]
+            [clojure.java.io :as io]
+            [org.akvo.resumed :as resumed]))
 
 (defn squuid
   "Sequential UUIDs.
@@ -36,3 +38,33 @@
        (map #(str/split % #"="))
        (map (fn [[k v]] [(keyword k) v]))
        (into {})))
+
+(defn get-path
+  [spec file-upload-path]
+  (or (get spec "path")
+      (let [file-on-disk? (contains? spec "fileName")
+            url (get spec "url")]
+        (if file-on-disk?
+          (resumed/file-for-upload file-upload-path url)
+          (let [url (io/as-url url)]
+            (when-not (#{"http" "https"} (.getProtocol url))
+              (throw (ex-info (str "Invalid url: " url) {:url url})))
+            url)))))
+
+(defn index-by [key coll]
+  (reduce (fn [index item]
+            (assoc index (get item key) item))
+          {}
+          coll))
+
+(defn valid-column-name? [s]
+  (and (string? s)
+       (boolean (re-find #"^[a-z][a-z0-9_]*$" s))))
+
+(defn valid-dataset-id? [s]
+  (and (string? s)
+       (boolean (re-find #"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}" s))))
+
+(defn valid-type? [s]
+  (#{"text" "number" "date" "geopoint"} s))
+

@@ -126,6 +126,10 @@ const VisualisationTypeLabel = ({ vType, ...rest }) => {
       typeLabel = vType;
       break;
 
+    case 'polararea':
+      typeLabel = 'polar Area chart';
+      break;
+
     default:
       typeLabel = `${vType} chart`;
   }

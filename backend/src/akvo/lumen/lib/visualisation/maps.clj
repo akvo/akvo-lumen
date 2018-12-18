@@ -62,14 +62,14 @@
            :else false)))
 
 (defn conform-create-args [layers]
-  (let [dataset-id (get (first (filter (fn[layer] (engine/valid-dataset-id? (get layer "datasetId"))) layers)) "datasetId")
-        raster-id (get (first (filter (fn[layer] (engine/valid-dataset-id? (get layer "rasterId"))) layers)) "rasterId")]
+  (let [dataset-id (get (first (filter (fn[layer] (util/valid-dataset-id? (get layer "datasetId"))) layers)) "datasetId")
+        raster-id (get (first (filter (fn[layer] (util/valid-dataset-id? (get layer "rasterId"))) layers)) "rasterId")]
     (cond
       (and (not dataset-id) (not raster-id))
       (throw (ex-info "No valid datasetID"
                       {"reason" "No valid datasetID"}))
 
-      (some (fn [layer] (not (valid-location? layer engine/valid-column-name?))) (filter (fn [layer] (not (= (get layer "layerType") "raster"))) layers))
+      (some (fn [layer] (not (valid-location? layer util/valid-column-name?))) (filter (fn [layer] (not (= (get layer "layerType") "raster"))) layers))
       (throw (ex-info "Location spec not valid"
                       {"reason" "Location spec not valid"}))
 

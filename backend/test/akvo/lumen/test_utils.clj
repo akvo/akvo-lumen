@@ -1,10 +1,16 @@
 (ns akvo.lumen.test-utils
   (:require [akvo.lumen.component.tenant-manager :refer [pool]]
-            [akvo.lumen.lib.import :refer [do-import]]
+            [akvo.lumen.lib.import :as import]
+            [akvo.lumen.lib.import.clj-data-importer]
+            [akvo.lumen.lib.update :as update]
+            [akvo.lumen.postgres]
             [akvo.lumen.util :refer [squuid]]
             [clojure.edn :as edn]
-            [clojure.spec.test.alpha :as stest]
             [clojure.java.io :as io]
+            [clojure.spec.test.alpha :as stest]
+            [clojure.test :as t]
+            [clojure.tools.logging :as log]
+            [diehard.core :as dh]
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
@@ -39,16 +45,45 @@
       (get (swap! conn-cache assoc label (pool tenant)) label))))
 
 (defn import-file
-  "Import a file and return the dataset-id"
-  [tenant-conn error-tracker file {:keys [dataset-name has-column-headers?]}]
-  (let [data-source-id (str (squuid))
-        job-id (str (squuid))
-        data-source-spec {"name" (or dataset-name file)
-                          "source" {"path" (.getAbsolutePath (io/file (io/resource file)))
-                                    "kind" "DATA_FILE"
-                                    "fileName" (or dataset-name file)
-                                    "hasColumnHeaders" (boolean has-column-headers?)}}]
-    (insert-data-source tenant-conn {:id data-source-id :spec data-source-spec})
-    (insert-job-execution tenant-conn {:id job-id :data-source-id data-source-id})
-    (do-import tenant-conn {:file-upload-path "/tmp/akvo/dash"} error-tracker job-id {} (get data-source-spec "source"))
-    (:dataset_id (dataset-id-by-job-execution-id tenant-conn {:id job-id}))))
+  "Import a file and return the dataset-id, or the job-execution-id in case of FAIL status"
+  [tenant-conn error-tracker {:keys [file dataset-name has-column-headers? kind data with-job?]}]
+  (let [spec {"name" (or dataset-name file)
+              "source" {"path" (when file (.getAbsolutePath (io/file (io/resource file))))
+                        "kind" (or kind "DATA_FILE")
+                        "fileName" (or dataset-name file)
+                        "data" data
+                        "hasColumnHeaders" (boolean has-column-headers?)}}
+        [tag {:strs [importId]}] (import/handle tenant-conn {} error-tracker {} spec)]
+    (t/is (= tag :akvo.lumen.lib/ok))
+    (dh/with-retry {:retry-if (fn [v e] (not v))
+                    :max-retries 20
+                    :delay-ms 100}
+      (let [job (job-execution-by-id tenant-conn {:id importId})
+            status (:status job)
+            dataset (dataset-id-by-job-execution-id tenant-conn {:id importId})
+            res (when (not= "PENDING" status)
+                  (if (= "OK" status)
+                    (:dataset_id dataset)
+                    importId))]
+        (when res
+          (if  with-job?
+            [job dataset]
+            res))))))
+
+(defn update-file
+  "Update a file and return the dataset-id, or the job-execution-id in case of FAIL status"
+  [tenant-conn error-tracker dataset-id data-source-id {:keys [data has-column-headers? kind]}]
+  (let [spec {"source" {"kind" kind
+                        "hasColumnHeaders" (boolean has-column-headers?)
+                        "data" data}}
+        [tag {:strs [updateId] :as res}] (update/update-dataset tenant-conn {} error-tracker dataset-id data-source-id spec)]
+    (t/is (= tag :akvo.lumen.lib/ok))
+    (dh/with-retry {:retry-if (fn [v e] (not v))
+                    :max-retries 20
+                    :delay-ms 100}
+      (let [job (job-execution-by-id tenant-conn {:id updateId})
+            status (:status job)]
+        (when (not= "PENDING" status)
+          (if (= "OK" status)
+            (:dataset_id (dataset-id-by-job-execution-id tenant-conn {:id updateId}))
+            updateId))))))

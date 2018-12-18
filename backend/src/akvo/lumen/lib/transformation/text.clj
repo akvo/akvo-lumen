@@ -1,6 +1,7 @@
 (ns akvo.lumen.lib.transformation.text
   "Simple text transforms"
   (:require [akvo.lumen.lib.transformation.engine :as engine]
+            [akvo.lumen.util :as util]
             [clojure.tools.logging :as log]
             [hugsql.core :as hugsql]))
 
@@ -17,7 +18,7 @@
      :columns columns}))
 
 (defn valid? [op-spec]
-  (engine/valid-column-name? (get (engine/args op-spec) "columnName")))
+  (util/valid-column-name? (get (engine/args op-spec) "columnName")))
 
 (defmethod engine/valid? :core/trim [op-spec]
   (valid? op-spec))

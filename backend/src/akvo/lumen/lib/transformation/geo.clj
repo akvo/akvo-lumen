@@ -1,7 +1,9 @@
 (ns akvo.lumen.lib.transformation.geo
   "Geometry data transformations"
   (:require [akvo.lumen.lib.import.common :as import]
+            [akvo.lumen.util :as util]
             [akvo.lumen.lib.transformation.engine :as engine]
+            [akvo.lumen.postgres :as postgres]
             [clojure.java.jdbc :as jdbc]
             [clojure.tools.logging :as log]
             [hugsql.core :as hugsql]))
@@ -13,14 +15,14 @@
   [op-spec]
   (let [{:strs [columnNameLat columnNameLong]} (engine/args op-spec)]
     (boolean
-      (every? engine/valid-column-name? [columnNameLat columnNameLong]))))
+      (every? util/valid-column-name? [columnNameLat columnNameLong]))))
 
 (defmethod engine/valid? :core/generate-geopoints
   [op-spec]
   (valid? op-spec))
 
 (defn add-index [conn table-name column-name]
-  (jdbc/execute! conn (import/geo-index table-name column-name)))
+  (jdbc/execute! conn (postgres/geo-index table-name column-name)))
 
 (defmethod engine/apply-operation :core/generate-geopoints
   [{:keys [tenant-conn]} table-name columns op-spec]

@@ -3,12 +3,15 @@ import PropTypes from 'prop-types';
 import { Collection } from '@potion/layout'; // TODO: see if can optimize this
 import { Circle, Svg, Group } from '@potion/element';
 import { AxisBottom, AxisLeft } from '@vx/axis';
-import get from 'lodash/get';
-import uniq from 'lodash/uniq';
+import {
+  get,
+  uniq,
+  uniqBy,
+  merge,
+  sortBy,
+} from 'lodash';
 import { scaleLinear, scaleTime } from 'd3-scale';
 import { extent } from 'd3-array';
-import merge from 'lodash/merge';
-import sortBy from 'lodash/sortBy';
 import { GridRows, GridColumns } from '@vx/grid';
 import itsSet from 'its-set';
 
@@ -20,6 +23,7 @@ import { heuristicRound, calculateMargins, getLabelFontSize } from '../../utilit
 import { MAX_FONT_SIZE, MIN_FONT_SIZE } from '../../constants/chart';
 import RenderComplete from './RenderComplete';
 import Legend from './Legend';
+import BubbleLegend from './BubbleLegend';
 
 const startAxisFromZero = (axisExtent, type) => {
   // Returns an educated guess on if axis should start from zero or not
@@ -42,7 +46,7 @@ const startAxisFromZero = (axisExtent, type) => {
   return true;
 };
 
-export default class ScatterChart extends Component {
+class ScatterChart extends Component {
 
   static propTypes = {
     data: PropTypes.shape({
@@ -81,6 +85,8 @@ export default class ScatterChart extends Component {
     legendVisible: PropTypes.bool,
     grid: PropTypes.bool,
     visualisation: PropTypes.object.isRequired,
+    legendTitle: PropTypes.string,
+    legendDescription: PropTypes.string,
   }
 
   static defaultProps = {
@@ -227,7 +233,7 @@ export default class ScatterChart extends Component {
       tooltipItems.push({ key: categoryLabel || 'Category', value: category });
     }
 
-    this.handleShowTooltip(event, tooltipItems);
+    this.handleShowTooltip(event, uniqBy(tooltipItems, 'key'));
     this.setState({ hoveredNode: key });
   }
 
@@ -265,6 +271,8 @@ export default class ScatterChart extends Component {
       yAxisTicks,
       grid,
       visualisation,
+      legendTitle,
+      legendDescription,
     } = this.props;
 
     const {
@@ -306,7 +314,10 @@ export default class ScatterChart extends Component {
           return (
             <Legend
               horizontal={!horizontal}
-              title={get(this.props, 'data.metadata.bucketColumnCategory')}
+              title={legendTitle}
+              description={
+                legendDescription && <BubbleLegend title={legendDescription} />
+              }
               data={categories}
               colorMapping={categories.reduce((acc, category) => ({
                 ...acc,
@@ -389,7 +400,7 @@ export default class ScatterChart extends Component {
                   this.wrap = c;
                 }}
               >
-                {hasRendered && <RenderComplete id={visualisation.id} />}
+                {hasRendered && visualisation && <RenderComplete id={visualisation.id} />}
 
                 {tooltipVisible && (
                   <Tooltip
@@ -457,7 +468,7 @@ export default class ScatterChart extends Component {
                               stroke={color}
                               strokeWidth={1}
                               fillOpacity={opacity}
-                              opacity={hoveredCategory && hoveredCategory !== `${category}` ?
+                              opacity={itsSet(hoveredCategory) && hoveredCategory !== category ?
                                 0.2 :
                                 1
                               }
@@ -542,3 +553,5 @@ export default class ScatterChart extends Component {
   }
 
 }
+
+export default ScatterChart;

@@ -6,6 +6,7 @@ import LayerConfigMenu from './LayerConfigMenu';
 import ButtonRowInput from './ButtonRowInput';
 import mapLayerSpecTemplate from '../../../constants/Visualisation/mapLayerSpecTemplate';
 import { trackEvent } from '../../../utilities/analytics';
+import { SELECT_MAP_LAYER_TYPE } from '../../../constants/analytics';
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
 
 require('./MapConfigMenu.scss');
@@ -114,7 +115,7 @@ class MapConfigMenu extends Component {
     layers[layerIndex] = clonedLayer;
 
     if (userChange.layerType) {
-      trackEvent('Selected map layer type', userChange.layerType);
+      trackEvent(SELECT_MAP_LAYER_TYPE, userChange.layerType);
     }
 
     if (Object.keys(value).indexOf('datasetId') > -1) {

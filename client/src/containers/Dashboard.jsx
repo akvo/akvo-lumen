@@ -15,6 +15,12 @@ import LoadingSpinner from '../components/common/LoadingSpinner';
 import { SAVE_COUNTDOWN_INTERVAL, SAVE_INITIAL_TIMEOUT } from '../constants/time';
 import NavigationPrompt from '../components/common/NavigationPrompt';
 import { printShape } from './PrintProvider';
+import { specIsValidForApi } from '../utilities/aggregation';
+import {
+  SHARE_DASHBOARD,
+  EXPORT_DASHBOARD_PNG,
+  EXPORT_DASHBOARD_PDF,
+} from '../constants/analytics';
 
 const getEditingStatus = (location) => {
   const testString = 'create';
@@ -256,6 +262,7 @@ class Dashboard extends Component {
           /* Maps hit a different endpoint than other aggregations, so bail out now */
           return;
         case 'donut':
+        case 'polararea':
           aggType = 'pie';
           break;
         case 'pivot table':
@@ -268,6 +275,8 @@ class Dashboard extends Component {
           aggType = vType;
           break;
       }
+
+      if (!specIsValidForApi(visualisation.spec, vType)) return;
 
       api.get(`/api/aggregation/${datasetId}/${aggType}`, {
         query: JSON.stringify(spec),
@@ -361,19 +370,19 @@ class Dashboard extends Component {
     const url = `${window.location.origin}/dashboard/${dashboard.id}`;
     switch (action) {
       case 'share': {
-        trackEvent('Share dashboard', url);
+        trackEvent(SHARE_DASHBOARD, url);
         this.toggleShareDashboard();
         break;
       }
       case 'export_png': {
-        trackEvent('Export dashboard (png)', url);
+        trackEvent(EXPORT_DASHBOARD_PNG, url);
         this.props.dispatch(
           actions.exportDashboard(dashboard, { title: dashboard.title })
         );
         break;
       }
       case 'export_pdf': {
-        trackEvent('Export dashboard (pdf)', url);
+        trackEvent(EXPORT_DASHBOARD_PDF, url);
         this.props.dispatch(
           actions.exportDashboard(dashboard, {
             format: 'pdf',

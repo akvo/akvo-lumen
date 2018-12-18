@@ -8,6 +8,8 @@
             [clojure.test :refer :all]
             [hugsql.core :as hugsql]))
 
+(def try-apply-operation #'akvo.lumen.lib.transformation.engine/try-apply-operation)
+
 (hugsql/def-db-fns "akvo/lumen/lib/transformation/engine_test.sql")
 
 (def columns (vec (take 3 (json/parse-string (slurp (io/resource "columns_test.json"))))))

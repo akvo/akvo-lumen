@@ -22,7 +22,13 @@ import lineSpecTemplate from '../constants/Visualisation/lineSpecTemplate';
 import pivotTableSpecTemplate from '../constants/Visualisation/pivotTableSpecTemplate';
 import scatterSpecTemplate from '../constants/Visualisation/scatterSpecTemplate';
 import barSpecTemplate from '../constants/Visualisation/barSpecTemplate';
+import bubbleSpecTemplate from '../constants/Visualisation/bubbleSpecTemplate';
 import { SAVE_COUNTDOWN_INTERVAL, SAVE_INITIAL_TIMEOUT } from '../constants/time';
+import {
+  SHARE_VISUALISATION,
+  EXPORT_VISUALISATION_PNG,
+  EXPORT_VISUALISATION_PDF,
+} from '../constants/analytics';
 
 require('../components/visualisation/Visualisation.scss');
 
@@ -32,6 +38,7 @@ const getSpecFromVisualisationType = (visualisationType) => {
       return { ...mapSpecTemplate };
     case 'pie':
     case 'donut':
+    case 'polararea':
       return { ...pieSpecTemplate };
     case 'line':
     case 'area':
@@ -42,6 +49,8 @@ const getSpecFromVisualisationType = (visualisationType) => {
       return { ...barSpecTemplate };
     case 'pivot table':
       return { ...pivotTableSpecTemplate };
+    case 'bubble':
+      return { ...bubbleSpecTemplate };
     default:
       return {};
   }
@@ -307,19 +316,19 @@ class Visualisation extends Component {
     const { visualisation } = this.state;
     switch (action) {
       case 'share': {
-        trackEvent('Share visualisation', url);
+        trackEvent(SHARE_VISUALISATION, url);
         this.toggleShareVisualisation();
         break;
       }
       case 'export_png': {
-        trackEvent('Export visualisation (png)', url);
+        trackEvent(EXPORT_VISUALISATION_PNG, url);
         this.props.dispatch(
           actions.exportVisualisation(this.state.visualisation.id, { title: visualisation.name })
         );
         break;
       }
       case 'export_pdf': {
-        trackEvent('Export visualisation (pdf)', url);
+        trackEvent(EXPORT_VISUALISATION_PDF, url);
         this.props.dispatch(
           actions.exportVisualisation(this.state.visualisation.id, {
             format: 'pdf',

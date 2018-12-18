@@ -10,11 +10,6 @@ INSERT INTO job_execution(id, data_source_id, type)
 INSERT INTO job_execution(id, data_source_id, type)
      VALUES (:id, :data-source-id, 'UPDATE');
 
--- :name insert-dataset-version :! :n
--- :doc Insert new dataset version
-INSERT INTO dataset_version(id, dataset_id, job_execution_id, table_name, imported_table_name, version, columns, transformations)
-VALUES (:id, :dataset-id, :job-execution-id, :table-name, :imported-table-name, :version, :columns, :transformations);
-
 -- :name clone-data-table :! :n
 -- :doc Clone a data table
 CREATE TABLE :i:to-table (LIKE :i:from-table INCLUDING ALL);
@@ -40,8 +35,17 @@ UPDATE job_execution
    SET status = 'OK'
  WHERE id = :id;
 
+-- :name update-job-execution :! :n
+-- :doc Update successful job execution
+UPDATE job_execution
+   SET status = :status,
+       dataset_id = :dataset-id,
+       data_source_id = :data-source-id
+ WHERE id = :id;
+
+
 -- :name job-execution-by-id :? :1
-SELECT j.status, j.error_log->>0 as "error-message", d.spec->'source'->>'kind' as kind
+SELECT j.dataset_id, j.data_source_id, j.status, j.error_log->>0 as "error-message", d.spec->'source'->>'kind' as kind
   FROM data_source d, job_execution j
  WHERE d.id = j.data_source_id
    AND j.id = :id;

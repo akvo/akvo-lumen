@@ -6,7 +6,9 @@ import { FormattedMessage } from 'react-intl';
 import AggregationError from './AggregationError';
 import LineChart from './LineChart';
 import BarChart from './BarChart';
+import BubbleChart from './BubbleChart';
 import PieChart from './PieChart';
+import PolarAreaChart from './PolarAreaChart';
 import ScatterChart from './ScatterChart';
 import { defaultPrimaryColor, palette } from '../../utilities/visualisationColors';
 import { getTitle, getDataLastUpdated } from '../../utilities/chart';
@@ -155,6 +157,23 @@ export default class Chart extends Component {
             edit={Boolean(onChangeVisualisationSpec)}
           />
         );
+      case 'polararea':
+        return (
+          <PolarAreaChart
+            visualisation={visualisation}
+            data={visualisation.data}
+            width={width}
+            height={adjustedContainerHeight}
+            colors={palette}
+            colorMapping={visualisation.spec.colors}
+            donut={Boolean(visualisation.visualisationType === 'donut')}
+            legendVisible={visualisation.spec.showLegend}
+            labelsVisible={visualisation.spec.showLabels}
+            legendTitle={visualisation.spec.legendTitle}
+            onChangeVisualisationSpec={onChangeVisualisationSpec}
+            edit={Boolean(onChangeVisualisationSpec)}
+          />
+        );
       case 'line':
       case 'area':
         return (
@@ -187,6 +206,8 @@ export default class Chart extends Component {
             categoryLabel={visualisation.spec.categoryLabel}
             onChangeVisualisationSpec={onChangeVisualisationSpec}
             edit={Boolean(onChangeVisualisationSpec)}
+            legendTitle={visualisation.spec.categoryLabel}
+            legendDescription={visualisation.spec.sizeLabel}
           />
         );
       case 'bar':
@@ -209,6 +230,23 @@ export default class Chart extends Component {
             legendVisible={visualisation.spec.showLegend}
             valueLabelsVisible={visualisation.spec.showValueLabels}
             horizontal={visualisation.spec.horizontal}
+          />
+        );
+      case 'bubble':
+        return (
+          <BubbleChart
+            edit={Boolean(onChangeVisualisationSpec)}
+            visualisation={visualisation}
+            data={visualisation.data}
+            width={width}
+            height={adjustedContainerHeight}
+            colors={palette}
+            colorMapping={visualisation.spec.colors}
+            onChangeVisualisationSpec={onChangeVisualisationSpec}
+            legendTitle={visualisation.spec.legendTitle}
+            legendDescription={visualisation.spec.metricLabel}
+            legendVisible={visualisation.spec.showLegend}
+            labelsVisible={visualisation.spec.showLabels}
           />
         );
       default:

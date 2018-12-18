@@ -1,17 +1,18 @@
 (ns akvo.lumen.lib.transformation.sort-column
   (:require [akvo.lumen.lib.transformation.engine :as engine]
+            [akvo.lumen.util :as util]
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/transformation/sort_column.sql")
 
 (defmethod engine/valid? :core/sort-column
   [op-spec]
-  (and (engine/valid-column-name? (get (engine/args op-spec) "columnName"))
+  (and (util/valid-column-name? (get (engine/args op-spec) "columnName"))
        (boolean (#{"ASC" "DESC"} (get (engine/args op-spec) "sortDirection")))))
 
 (defmethod engine/valid? :core/remove-sort
   [op-spec]
-  (engine/valid-column-name? (get (engine/args op-spec) "columnName")))
+  (util/valid-column-name? (get (engine/args op-spec) "columnName")))
 
 (defn- get-sort-idx
   "Returns the next sort index for a given vector of columns"

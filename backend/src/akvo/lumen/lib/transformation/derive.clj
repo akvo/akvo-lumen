@@ -2,7 +2,6 @@
   (:require [akvo.lumen.lib.dataset.utils :as dataset.utils]
             [akvo.lumen.lib.transformation.derive.js-engine :as js-engine]
             [akvo.lumen.lib.transformation.engine :as engine]
-            [akvo.lumen.lib.update :as update]
             [akvo.lumen.util :as util]
             [clj-time.coerce :as tc]
             [clojure.java.jdbc :as jdbc]
@@ -55,7 +54,7 @@
            "references" []}
           (parse-row-object-references code)))
 
-(defmethod update/adapt-transformation :core/derive
+(defmethod engine/adapt-transformation :core/derive
   [op-spec older-columns new-columns]
   (update-in op-spec ["args" "code"]
              #(columnName>columnTitle (compute-transformation-code % older-columns) new-columns)))
@@ -78,7 +77,7 @@
                 ::column-title
                 ::column-type]} (args op-spec)]
     (and (string? column-title) 
-         (engine/valid-type? column-type)
+         (util/valid-type? column-type)
          (#{"fail" "leave-empty" "delete-row"} (engine/error-strategy op-spec))
          (js-engine/evaluable? code))))
 

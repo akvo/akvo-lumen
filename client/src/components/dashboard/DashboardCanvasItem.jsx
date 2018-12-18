@@ -35,11 +35,13 @@ const getIsDatasetLoaded = (props) => {
   switch (props.item.visualisation.visualisationType) {
     case 'pivot table':
     case 'pie':
+    case 'polararea':
     case 'donut':
     case 'line':
     case 'area':
     case 'bar':
     case 'scatter':
+    case 'bubble':
       return true;
 
     case 'map':
@@ -67,10 +69,10 @@ export default class DashboardCanvasItem extends Component {
     }
 
     const shouldUpdate = Boolean(
-        dimensionsChanged ||
-        canvasWidthChanged ||
-        !datasetDependencyMet
-      );
+      dimensionsChanged ||
+      canvasWidthChanged ||
+      !datasetDependencyMet
+    );
 
     return shouldUpdate;
   }
@@ -116,13 +118,15 @@ export default class DashboardCanvasItem extends Component {
       this.titleEl.getBoundingClientRect().height :
       TITLE_HEIGHT;
 
+    const { item } = this.props;
+
     return (
       <div
         data-test-id="dashboard-canvas-item"
         className="DashboardCanvasItem"
         ref={(c) => { this.el = c; }}
       >
-        {this.props.item.type === 'visualisation' && (
+        {item.type === 'visualisation' && (
           <div className="itemContainerWrap">
             <div
               className="itemTitle"
@@ -130,14 +134,14 @@ export default class DashboardCanvasItem extends Component {
                 this.titleEl = c;
               }}
             >
-              <h2>{getTitle(this.props.item.visualisation)}</h2>
+              <h2>{getTitle(item.visualisation)}</h2>
               <span>{this.getSubTitle()}</span>
             </div>
             <div className="noPointerEvents itemContainer visualisation">
               {getIsDatasetLoaded(this.props) ?
                 <VisualisationViewer
-                  metadata={checkUndefined(this.props, 'metadata', this.props.item.visualisation.id)}
-                  visualisation={this.props.item.visualisation}
+                  metadata={checkUndefined(this.props, 'metadata', item.visualisation.id)}
+                  visualisation={item.visualisation}
                   datasets={this.props.datasets}
                   width={dimensions.width}
                   height={dimensions.height - titleHeight}
@@ -147,7 +151,7 @@ export default class DashboardCanvasItem extends Component {
             </div>
           </div>
         )}
-        {this.props.item.type === 'text' && (
+        {item.type === 'text' && (
           <div
             className="itemContainer text"
             style={{
@@ -161,14 +165,14 @@ export default class DashboardCanvasItem extends Component {
               onFocus={this.props.onFocus}
               focused={this.props.focused}
               onEntityUpdate={this.props.onEntityUpdate}
-              item={this.props.item}
+              item={item}
               onSave={this.props.onSave}
             />
           </div>
         )}
         <button
           className="clickable deleteButton noSelect"
-          onClick={() => this.props.onDeleteClick(this.props.item)}
+          onClick={() => this.props.onDeleteClick(item)}
         >
           ✕
         </button>

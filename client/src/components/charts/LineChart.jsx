@@ -223,7 +223,6 @@ export default class LineChart extends Component {
                   dimensions.width - margins.right,
                 ]);
 
-
             const yExtent = extent(series.data, ({ value }) => value);
             if (yExtent[0] > 0) yExtent[0] = 0;
             const yScale = scaleLinear()
@@ -256,7 +255,7 @@ export default class LineChart extends Component {
                   this.wrap = c;
                 }}
               >
-                {hasRendered && <RenderComplete id={visualisation.id} />}
+                {hasRendered && visualisation && <RenderComplete id={visualisation.id} />}
 
                 {tooltipVisible && (
                   <Tooltip
@@ -365,7 +364,7 @@ export default class LineChart extends Component {
 
                   <AxisLeft
                     scale={yScale}
-                    left={xScale(series.data[0].timestamp)}
+                    left={xScale(0)}
                     label={yAxisLabel || ''}
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}

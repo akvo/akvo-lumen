@@ -1,5 +1,7 @@
 (ns akvo.lumen.lib.import.flow-v2
   (:require [akvo.commons.psql-util :as pg]
+            [akvo.lumen.lib.import.common :as common]
+            [akvo.lumen.util :as util]
             [akvo.lumen.lib.import.flow-common :as flow-common]
             [cheshire.core :as json]
             [clj-http.client :as http]
@@ -16,26 +18,12 @@
     :text))
 
 (defn dataset-columns
-  [form version]
-  (let [questions (flow-common/questions form)]
-    (into
-     [(cond-> {:title "Instance id" :type :text :id :instance_id}
-        (<= 2 version) (assoc :key true))
-      (let [identifier {:title "Identifier" :type :text :id :identifier}]
-        (if (and (:registration-form? form) (<= 2 version))
-          (assoc identifier :key true)
-          identifier))
-      {:title "Display name" :type :text :id :display_name}
-      {:title "Latitude" :type :number :id :latitude}
-      {:title "Longitude" :type :number :id :longitude}
-      {:title "Submitter" :type :text :id :submitter}
-      {:title "Submitted at" :type :date :id :submitted_at}
-      {:title "Surveyal time" :type :number :id :surveyal_time}]
-     (map (fn [question]
-            {:title (:name question)
-             :type (question-type->lumen-type question)
-             :id (keyword (format "c%s" (:id question)))})
-          questions))))
+  [form]
+  (into (flow-common/commons-columns form)
+        (into
+         [{:title "Latitude" :type :number :id :latitude}
+          {:title "Longitude" :type :number :id :longitude}]
+         (common/coerce question-type->lumen-type (flow-common/questions form)))))
 
 (defmulti render-response
   (fn [type response]
@@ -110,17 +98,12 @@
   "Returns a lazy sequence of form data, ready to be inserted as a lumen dataset"
   [headers-fn survey form-id]
   (let [form (flow-common/form survey form-id)
-        data-points (flow-common/index-by "id" (flow-common/data-points headers-fn survey))]
+        data-points (util/index-by "id" (flow-common/data-points headers-fn survey))]
     (map (fn [form-instance]
-           (let [data-point-id (get form-instance "dataPointId")]
-             (assoc (response-data form (get form-instance "responses"))
-                    :instance_id (get form-instance "id")
-                    :display_name (get-in data-points [data-point-id "displayName"])
-                    :identifier (get-in data-points [data-point-id "identifier"])
-                    :latitude (get-in data-points [data-point-id "latitude"])
-                    :longitude (get-in data-points [data-point-id "longitude"])
-                    :submitter (get form-instance "submitter")
-                    :submitted_at (some-> (get form-instance "submissionDate")
-                                          Instant/parse)
-                    :surveyal_time (get form-instance "surveyalTime"))))
+           (let [data-point-id (get form-instance "dataPointId")
+                 data-point (get data-points data-point-id)]
+             (merge (response-data form (get form-instance "responses"))
+                    (flow-common/common-records form-instance data-point)
+                    {:latitude (get-in data-points [data-point-id "latitude"])
+                     :longitude (get-in data-points [data-point-id "longitude"])})))
          (flow-common/form-instances headers-fn form))))
