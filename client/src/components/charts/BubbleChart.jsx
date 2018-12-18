@@ -111,6 +111,7 @@ class BubbleChart extends Component {
 
     if (y < bounds.height / 2) tooltipPosition.top = y - 12;
     else tooltipPosition.bottom = bounds.height - y - 12;
+
     this.setState({
       tooltipVisible: true,
       tooltipItems: content,

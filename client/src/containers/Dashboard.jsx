@@ -477,7 +477,7 @@ class Dashboard extends Component {
   addDataToVisualisations(visualisations) {
     const out = {};
 
-    Object.keys(visualisations).forEach((key) => {
+    Object.keys(visualisations).filter(key => Boolean(visualisations[key])).forEach((key) => {
       if (this.state.aggregatedDatasets[key]) {
         if (visualisations[key].visualisationType === 'map') {
           const { tenantDB, layerGroupId, metadata } = this.state.aggregatedDatasets[key];
