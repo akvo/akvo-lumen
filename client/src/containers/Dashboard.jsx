@@ -447,7 +447,7 @@ class Dashboard extends Component {
     /* not synchronous and is too slow here, hence the extra check */
     const requestedDatasetIds = this.state.requestedDatasetIds.slice(0);
 
-    Object.keys(dash.entities).forEach((key) => {
+    Object.keys(dash.entities).filter(key => Boolean(dash.entities[key])).forEach((key) => {
       const entity = dash.entities[key];
       const isVisualisation = entity.type === 'visualisation';
 
