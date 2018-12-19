@@ -32,17 +32,17 @@
 (alias 'c.text 'akvo.lumen.specs.import.column.text)
 (alias 'i.values 'akvo.lumen.specs.import.values)
 
-(def ops (vec (json/parse-string (slurp (io/resource "ops.json")))))
-
-(def invalid-op (-> (take 3 ops)
-                    vec
-                    (update-in [1 "args"] dissoc "parseFormat")))
+(use-fixtures :once tu/spec-instrument caddisfly-fixture tenant-conn-fixture error-tracker-fixture)
 
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/transformation_test.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
 
-(use-fixtures :once tu/spec-instrument caddisfly-fixture tenant-conn-fixture error-tracker-fixture)
+(def ops (vec (json/parse-string (slurp (io/resource "ops.json")))))
+
+(def invalid-op (-> (take 3 ops)
+                    vec
+                    (update-in [1 "args"] dissoc "parseFormat")))
 
 (deftest op-validation
   (testing "op validation"
@@ -62,7 +62,7 @@
                                                                  :file "transformation_test.csv"})
           [tag _] (last (for [transformation ops]
                           (tf/apply {:tenant-conn *tenant-conn*} dataset-id {:type :transformation
-                                                              :transformation transformation})))]
+                                                                             :transformation transformation})))]
       (is (= ::lib/ok tag)))))
 
 (deftest ^:functional test-import-and-transform
