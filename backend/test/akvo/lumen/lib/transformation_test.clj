@@ -45,6 +45,7 @@
                     vec
                     (update-in [1 "args"] dissoc "parseFormat")))
 
+
 (deftest op-validation
   (testing "op validation"
     (doseq [op ops]
