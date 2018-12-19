@@ -214,16 +214,16 @@
                                           :data         data})
 
         apply-transformation (partial tf/apply {:tenant-conn *tenant-conn*} dataset-id)]
-    (let [[tag {:strs [datasetId]}] (do (apply-transformation (date-transformation "c1" "YYYY"))
-                                        (apply-transformation (date-transformation "c2" "DD/MM/YYYY"))
-                                        (apply-transformation (date-transformation "c3" "YYYY-MM-DD")))]
+    (let [[tag {:strs [datasetId]}] (do (apply-transformation (date-transformation "c2" "YYYY"))
+                                        (apply-transformation (date-transformation "c3" "DD/MM/YYYY"))
+                                        (apply-transformation (date-transformation "c4" "YYYY-MM-DD")))]
       (is (= ::lib/ok tag))
       (let [table-name (:table-name (latest-dataset-version-by-dataset-id *tenant-conn*
                                                                           {:dataset-id datasetId}))
             table-data (get-data *tenant-conn* {:table-name table-name})]
-        (is (= years (map (comp str tc/year tcc/from-long :c1) table-data)))
-        (is (= years-slash (map (comp tcc/from-long :c2) table-data)))
-        (is (= years-hiphen (map (comp tcc/from-long :c3) table-data)))))))
+        (is (= years (map (comp str tc/year tcc/from-long :c2) table-data)))
+        (is (= years-slash (map (comp tcc/from-long :c3) table-data)))
+        (is (= years-hiphen (map (comp tcc/from-long :c4) table-data)))))))
 
 (defn change-datatype-transformation [column-name]
   {:type :transformation
@@ -432,8 +432,10 @@
           (is (= ["'2" "2"] (map :d2 data))))))))
 
 (deftest ^:functional delete-column-test
-  (let [dataset-id (import-file *tenant-conn* *error-tracker* {:has-column-headers? true
-                                                               :file "dates.csv"})
+  (let [dataset-id (import-file *tenant-conn* *error-tracker*
+                                       {:dataset-name "origin-dataset"
+                                        :kind "clj"
+                                        :data (i-c/sample-imported-dataset [:text :number :number :text] 2)})
         apply-transformation (partial tf/apply {:tenant-conn *tenant-conn*} dataset-id)]
     (let [[tag _] (apply-transformation {:type :transformation
                                          :transformation {"op" "core/delete-column"
@@ -468,14 +470,14 @@
                                                                   "args" {"columns" (stringify-keys columns-payload)
                                                                           "selectedColumn" {"multipleType" multiple-column-type
                                                                                             "multipleId" i-v/cad1-id
-                                                                                            "columnName" "c0"}
-                                                                          "columnName" "c0"
+                                                                                            "columnName" "c1"}
+                                                                          "columnName" "c1"
                                                                           "extractImage" false}
                                                                   "onError" "fail"}})]
       (is (= ::lib/ok tag))
       (let [{:keys [columns transformations]} (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id})]
         
-        (is (= (apply conj ["c0"] (mapv (fn [idx] (str "d" idx)) (range 1 (inc (count new-columns)))))
+        (is (= (apply conj ["c1"] (mapv (fn [idx] (str "d" idx)) (range 1 (inc (count new-columns)))))
                (map #(get % "columnName") columns)))
         (let [{:strs [before after]} (get-in (last transformations) ["changedColumns" "d1"])]
           (is (nil? before))
@@ -507,11 +509,11 @@
                                                                   "args"
                                                                   {"source"
                                                                    {"datasetId" target-dataset-id,
-                                                                    "mergeColumn" "c0",
+                                                                    "mergeColumn" "c1",
                                                                     "aggregationColumn" nil,
                                                                     "aggregationDirection" "DESC",
-                                                                    "mergeColumns" ["c3" "c2" "c1"]},
-                                                                   "target" {"mergeColumn" "c0"}}}})]
+                                                                    "mergeColumns" ["c4" "c3" "c2"]},
+                                                                   "target" {"mergeColumn" "c1"}}}})]
       (is (= ::lib/ok tag))
       (let [{:keys [columns transformations table-name]} (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id origin-dataset-id})
             data-db (get-data *tenant-conn* {:table-name table-name})]
@@ -519,9 +521,9 @@
                                               (:columns origin-data)
                                               (next (:columns target-data))))
                 (map #(get % "type") columns)))
-        (is (= '(:c0 :c1 :d1 :d2 :d3) (map #(keyword (get % "columnName")) columns)))
+        (is (= '(:c1 :c2 :d1 :d2 :d3) (map #(keyword (get % "columnName")) columns)))
         (is (= 2 (count data-db)))
-        (is (= (map (comp :value first) (:rows origin-data)) (map :c0 data-db)))
+        (is (= (map (comp :value first) (:rows origin-data)) (map :c1 data-db)))
         (is (= (map (comp :value last) (:rows target-data)) (map :d3 data-db)))))))
 
 (deftest ^:functional rename-column-test

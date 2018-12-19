@@ -51,10 +51,10 @@
 	                                      "columnName"))))
 
       (is (= (map #(select-keys % ["type" "columnName"]) (:columns dataset))
-             '({"type" "text", "columnName" "c0"}
-	       {"type" "number", "columnName" "c1"})))
+             '({"type" "text", "columnName" "c1"}
+	       {"type" "number", "columnName" "c2"})))
 
-      (is (= (map keys stored-data) '((:rnum :c0 :c1) (:rnum :c0 :c1)))))))
+      (is (= (map keys stored-data) '((:rnum :c1 :c2) (:rnum :c1 :c2)))))))
 
 (deftest ^:functional test-update
   (testing "Testing update"
