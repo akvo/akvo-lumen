@@ -435,7 +435,7 @@
   (let [dataset-id (import-file *tenant-conn* *error-tracker*
                                        {:dataset-name "origin-dataset"
                                         :kind "clj"
-                                        :data (i-c/sample-imported-dataset [:text :number :number :text] 2)})
+                                        :data (i-c/sample-imported-dataset [:text :number :number :date :multiple] 2)})
         apply-transformation (partial tf/apply {:tenant-conn *tenant-conn*} dataset-id)]
     (let [[tag _] (apply-transformation {:type :transformation
                                          :transformation {"op" "core/delete-column"
@@ -444,7 +444,7 @@
       (is (= ::lib/ok tag))
       (let [{:keys [columns transformations]} (latest-dataset-version-by-dataset-id *tenant-conn*
                                                                                     {:dataset-id dataset-id})]
-        (is (= ["c1" "c3" "c4"] (map #(get % "columnName") columns)))
+        (is (= ["c1" "c3" "c4" "c5"] (map #(get % "columnName") columns)))
         (let [{:strs [before after]} (get-in (last transformations) ["changedColumns" "c2"])]
           (is (= "c2" (get before "columnName")))
           (is (nil? after)))))))
@@ -493,7 +493,7 @@
       (assoc :rows (map #(assoc-in % [column-idx] (nth %2 column-idx)) (:rows target-data) (:rows origin-data)))))
 
 (deftest ^:functional merge-datasets-test
-  (let [origin-data (i-c/sample-imported-dataset [:text :number] 2)
+  (let [origin-data (i-c/sample-imported-dataset [:text :date] 2)
         target-data (replace-column origin-data (i-c/sample-imported-dataset [:text :number :number :text] 2) 0) 
         origin-dataset-id (import-file *tenant-conn* *error-tracker*
                                        {:dataset-name "origin-dataset"
