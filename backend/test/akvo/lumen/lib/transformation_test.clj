@@ -483,6 +483,47 @@
           (is (= (:name (nth new-columns 0)) (get after "title")))
           (is (= "d1" (get after "columnName"))))))))
 
+(defn- replace-column
+  "utility to have same column in other generated dataset"
+  [origin-data target-data column-idx]
+  (-> target-data
+      (assoc-in [:columns column-idx]  (nth (:columns origin-data) column-idx))
+      (assoc :rows (map #(assoc-in % [column-idx] (nth %2 column-idx)) (:rows target-data) (:rows origin-data)))))
+
+(deftest ^:functional merge-datasets-test
+  (let [origin-data (i-c/sample-imported-dataset [:text :number] 2)
+        target-data (replace-column origin-data (i-c/sample-imported-dataset [:text :number :number :text] 2) 0) 
+        origin-dataset-id (import-file *tenant-conn* *error-tracker*
+                                       {:dataset-name "origin-dataset"
+                                        :kind "clj"
+                                        :data origin-data})
+        target-dataset-id (import-file *tenant-conn* *error-tracker*
+                                       {:dataset-name "origin-dataset"
+                                        :kind "clj"
+                                        :data target-data})
+        apply-transformation (partial tf/apply {:tenant-conn *tenant-conn*} origin-dataset-id)]
+    (let [[tag _ :as res] (apply-transformation {:type :transformation
+                                                 :transformation {"op" "core/merge-datasets",
+                                                                  "args"
+                                                                  {"source"
+                                                                   {"datasetId" target-dataset-id,
+                                                                    "mergeColumn" "c0",
+                                                                    "aggregationColumn" nil,
+                                                                    "aggregationDirection" "DESC",
+                                                                    "mergeColumns" ["c3" "c2" "c1"]},
+                                                                   "target" {"mergeColumn" "c0"}}}})]
+      (is (= ::lib/ok tag))
+      (let [{:keys [columns transformations table-name]} (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id origin-dataset-id})
+            data-db (get-data *tenant-conn* {:table-name table-name})]
+        (is (=  (map (comp name :type) (apply conj
+                                              (:columns origin-data)
+                                              (next (:columns target-data))))
+                (map #(get % "type") columns)))
+        (is (= '(:c0 :c1 :d1 :d2 :d3) (map #(keyword (get % "columnName")) columns)))
+        (is (= 2 (count data-db)))
+        (is (= (map (comp :value first) (:rows origin-data)) (map :c0 data-db)))
+        (is (= (map (comp :value last) (:rows target-data)) (map :d3 data-db)))))))
+
 (deftest ^:functional rename-column-test
   (let [dataset-id (import-file *tenant-conn* *error-tracker* {:has-column-headers? true
                                                                :file "dates.csv"})
