@@ -2,6 +2,7 @@
 import moment from 'moment';
 import invariant from 'invariant';
 import Immutable from 'immutable';
+import IMAGES from '../constants/images';
 
 function get(entity, key) {
   if (Immutable.Map.isMap(entity)) {
@@ -136,16 +137,16 @@ export function getIconUrl(entity) {
   const type = getType(entity);
   switch (type) {
     case 'dashboard': {
-      return require('../styles/img/icon-256-library-listing-dashboard.png');
+      return IMAGES.LIBRARY_LISTING.dashboard;
     }
     case 'dataset': {
-      return require('../styles/img/icon-256-library-listing-dataset.png');
+      return IMAGES.LIBRARY_LISTING.dataset;
     }
     case 'raster': {
-      return require('../styles/img/icon-256-library-listing-raster.png');
+      return IMAGES.LIBRARY_LISTING.raster;
     }
     case 'visualisation': {
-      return require(`../styles/img/icon-128-visualisation-${get(entity, 'visualisationType').replace(' ', '-')}.png`);
+      return IMAGES.VISUALISATION[get(entity, 'visualisationType')] || '';
     }
     // no default
   }
