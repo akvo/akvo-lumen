@@ -84,7 +84,8 @@
                                     [org.clojure/tools.nrepl "0.2.13"]
                                     [eftest "0.5.1"]
                                     [com.gearswithingears/shrubbery "0.4.1"]
-                                    [kerodon "0.9.0"]]
+                                    [kerodon "0.9.0"]
+                                    [robert/hooke "1.3.0"]]
                    :source-paths   ["dev/src" "specs"]
                    :resource-paths ["dev/resources" "test/resources"]
                    :repl-options   {:init-ns dev
@@ -99,6 +100,7 @@
    :project/test  {:source-paths   ["specs"]
                    :resource-paths ["test/resources"]
                    :dependencies [[org.clojure/test.check "0.10.0-alpha3"]
-                                  [diehard "0.7.2" :exclusions [org.clojure/spec.alpha]]]
+                                  [diehard "0.7.2" :exclusions [org.clojure/spec.alpha]]
+                                  [robert/hooke "1.3.0"]]
                    :env
                    {:db {:uri "jdbc:postgresql://postgres/lumen?user=lumen&password=password"}}}})

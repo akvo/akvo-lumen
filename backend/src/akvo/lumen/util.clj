@@ -1,6 +1,7 @@
 (ns akvo.lumen.util
   (:require [clojure.string :as str]
             [clojure.java.io :as io]
+            [clojure.spec.alpha :as s]
             [org.akvo.resumed :as resumed]))
 
 (defn squuid
@@ -19,8 +20,10 @@
 
 (defn gen-table-name
   "Generates a table name using a UUID suffix"
-  [prefix]
-  (str prefix "_" (str/replace (java.util.UUID/randomUUID) "-" "_")))
+  ([]
+   (gen-table-name nil))
+  ([prefix]
+   (str (when prefix (str prefix "_")) (str/replace (java.util.UUID/randomUUID) "-" "_"))))
 
 (defn conform-email
   "Returns valid email or throws."
@@ -68,3 +71,13 @@
 (defn valid-type? [s]
   (#{"text" "number" "date" "geopoint"} s))
 
+(defn conform  
+  ([s d]
+   (when-not (s/valid? s d)
+     (throw (ex-info (str s " spec problem!")
+                     {:message (s/explain-str s d)
+                      :data d})))
+   d)
+  ([s d adapter]
+   (conform s (adapter d))
+   d))

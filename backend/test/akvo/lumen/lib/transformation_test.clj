@@ -3,20 +3,24 @@
   (:require [akvo.lumen.fixtures :refer [*tenant-conn*
                                          tenant-conn-fixture
                                          *error-tracker*
-                                         error-tracker-fixture]]
+                                         error-tracker-fixture
+                                         *caddisfly*
+                                         caddisfly-fixture]]
             [akvo.lumen.lib :as lib]
+            [akvo.lumen.lib.multiple-column :as multiple-column]
             [akvo.lumen.lib.transformation :as tf]
             [akvo.lumen.lib.transformation.engine :as engine]
             [akvo.lumen.postgres :as postgres]
             [akvo.lumen.specs.import :as i-c]
             [akvo.lumen.specs.import.values :as i-v]
-            [akvo.lumen.test-utils :refer [import-file]]
+            [akvo.lumen.test-utils :refer [import-file at-least-one-true]]
             [akvo.lumen.test-utils :as tu]
             [cheshire.core :as json]
             [clojure.java.io :as io]
             [clojure.spec.alpha :as s]
             [clojure.test :refer :all]
             [clojure.tools.logging :as log]
+            [clojure.walk :refer (stringify-keys)]
             [hugsql.core :as hugsql]))
 
 (def ops (vec (json/parse-string (slurp (io/resource "ops.json")))))
@@ -29,7 +33,7 @@
 (hugsql/def-db-fns "akvo/lumen/lib/transformation_test.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
 
-(use-fixtures :once tu/spec-instrument tenant-conn-fixture error-tracker-fixture)
+(use-fixtures :once tu/spec-instrument caddisfly-fixture tenant-conn-fixture error-tracker-fixture)
 
 (deftest op-validation
   (testing "op validation"
@@ -429,7 +433,15 @@
 (alias 'c.multiple 'akvo.lumen.specs.import.column.multiple)
 
 (deftest ^:functional multiple-column-test
-  (let [data (i-c/sample-imported-dataset [[:multiple {::i-v/multiple-id #(s/gen #{i-v/cad1-id})
+  (let [multiple-column-type "caddisfly"
+        {:keys [hasImage columns]} (:body (multiple-column/details {:caddisfly *caddisfly*} multiple-column-type i-v/cad1-id))
+        bols (at-least-one-true (count columns))
+        columns-payload (mapv #(-> %
+                                   (update :name (partial str "new-name-" %2 "-"))
+                                   (assoc :extract %3))
+                              columns (range) bols)
+        new-columns (filter :extract columns-payload)
+        data (i-c/sample-imported-dataset [[:multiple {::i-v/multiple-id #(s/gen #{i-v/cad1-id})
                                                        ::c.multiple/value #(s/gen #{i-v/cad1})}]] 2)
         dataset-id (import-file *tenant-conn* *error-tracker*
                                 {:dataset-name "multiple caddisfly"
@@ -438,11 +450,8 @@
         apply-transformation (partial tf/apply {:tenant-conn *tenant-conn*} dataset-id)]
     (let [[tag _ :as res] (apply-transformation {:type :transformation
                                                  :transformation {"op" "core/extract-multiple"
-                                                                  "args" {"columns" [{"extract" true
-                                                                                      "type" "text"
-                                                                                      "name" "ole"
-                                                                                      "id" 1}]
-                                                                          "selectedColumn" {"multipleType" "caddisfly"
+                                                                  "args" {"columns" (stringify-keys columns-payload)
+                                                                          "selectedColumn" {"multipleType" multiple-column-type
                                                                                             "multipleId" i-v/cad1-id
                                                                                             "columnName" "c0"}
                                                                           "columnName" "c0"
@@ -450,12 +459,14 @@
                                                                   "onError" "fail"}})]
       (is (= ::lib/ok tag))
       (let [{:keys [columns transformations]} (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id})]
-        (is (= ["c0" "d1"] (map #(get % "columnName") columns)))
-        (let [{:strs [before after]} (get-in (last transformations) ["changedColumns" "d1"])]          
+        
+        (is (= (apply conj ["c0"] (mapv (fn [idx] (str "d" idx)) (range 1 (inc (count new-columns)))))
+               (map #(get % "columnName") columns)))
+        (let [{:strs [before after]} (get-in (last transformations) ["changedColumns" "d1"])]
+          (is (nil? before))
           (is (= 1 (get after "caddisfly-test-id")))
-          (is (= "ole" (get after "title")))
-          (is (= "d1" (get after "columnName")))
-          (is (nil? before)))))))
+          (is (= (:name (nth new-columns 0)) (get after "title")))
+          (is (= "d1" (get after "columnName"))))))))
 
 (deftest ^:functional rename-column-test
   (let [dataset-id (import-file *tenant-conn* *error-tracker* {:has-column-headers? true
