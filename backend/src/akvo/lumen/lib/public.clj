@@ -6,6 +6,7 @@
             [akvo.lumen.lib.visualisation :as visualisation]
             [akvo.lumen.lib.visualisation.maps :as maps]
             [cheshire.core :as json]
+            [clojure.tools.logging :as log]
             [clojurewerkz.scrypt.core :as scrypt]
             [clojure.set :as set]
             [hugsql.core :as hugsql]))
@@ -161,9 +162,13 @@
        "visualisations" {(:id visualisation) visualisation}})))
 
 (defn visualisation-response-data [tenant-conn id config]
-  (let [[tag vis] (visualisation/fetch tenant-conn id)]
-    (when (= tag ::lib/ok)
-      (visualisation tenant-conn vis config))))
+  (try
+    (let [[tag vis] (visualisation/fetch tenant-conn id)]
+     (when (= tag ::lib/ok)
+       (visualisation tenant-conn vis config)))
+    (catch Exception e (do
+                         (log/warn e ::visualisation-response-data (str "problems fetching this vis-id: " id))
+                         nil))))
 
 (defn dashboard-response-data [tenant-conn id config]
   (let [[tag dashboard] (dashboard/fetch tenant-conn id)]
