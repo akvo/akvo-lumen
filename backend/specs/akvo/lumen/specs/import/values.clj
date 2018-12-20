@@ -1,6 +1,7 @@
 (ns akvo.lumen.specs.import.values
   (:require [clojure.spec.alpha :as s]
             [akvo.lumen.util :refer (squuid)]
+            [akvo.lumen.specs :as lumen.s :refer (sample)]
             [akvo.lumen.lib.import.csv :as csv]))
 
 (def polygon
@@ -29,8 +30,8 @@
     #(s/gen #{polygon multipolygon})))
 
 (s/def ::id (s/with-gen
-                     string?
-                     #(s/gen #{"c1" "c2" "c3"})))
+                     keyword?
+                     #(s/gen #{:c1 :c2 :c3})))
 
 (s/def ::title (s/with-gen
                         string?
@@ -38,19 +39,10 @@
 
 (s/def ::key boolean?)
 
-(defn str-uuid? [v]
-  (when (some? v)
-    (uuid? (read-string (format "#uuid \"%s\"" v)))))
-
-(s/def ::str-uuid
-  (s/with-gen
-    str-uuid?
-    #(s/gen (reduce (fn [c _] (conj c (str (squuid)))) #{} (range 100)))))
-
 ;; alias and custom generator doesn't work so far
 ;; https://dev.clojure.org/jira/browse/CLJ-2079
 (s/def ::multiple-id (s/with-gen
-                       str-uuid?
+                       lumen.s/str-uuid?
                        #(s/gen (reduce (fn [c _] (conj c (str (squuid)))) #{} (range 100)))))
 
 (s/def ::multiple-type #{:caddisfly})

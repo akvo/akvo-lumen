@@ -1,8 +1,8 @@
 (ns akvo.lumen.lib.transformation.split-column
   (:require [akvo.lumen.lib.transformation.engine :as engine]
+            [akvo.lumen.lib.dataset.utils :refer (find-column)]
             [akvo.lumen.util :as util]
             [clojure.java.jdbc :as jdbc]
-            
             [akvo.lumen.postgres :as postgres]
             [clojure.string :as string]
             [clojure.tools.logging :as log]
@@ -56,7 +56,8 @@
     (map #(assoc % :columnName %2 :id %2) new-columns indexes)))
 
 (defn columns-to-extract [prefix number-new-rows selected-column columns]
-  (let [base-column (dissoc selected-column :type :columnName)
+  (let [selected-column (keywordize-keys (find-column columns (:columnName selected-column)))
+        base-column (dissoc selected-column :type :columnName)
         new-columns (map #(assoc base-column :title (str prefix "-" %) :type "text")
                          (range 1 (inc number-new-rows)))]
     (add-name-to-new-columns columns new-columns)))
