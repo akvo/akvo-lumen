@@ -161,9 +161,11 @@
        "visualisations" {(:id visualisation) visualisation}})))
 
 (defn visualisation-response-data [tenant-conn id config]
-  (let [[tag vis] (visualisation/fetch tenant-conn id)]
-    (when (= tag ::lib/ok)
-      (visualisation tenant-conn vis config))))
+  (try
+    (let [[tag vis] (visualisation/fetch tenant-conn id)]
+     (when (= tag ::lib/ok)
+       (visualisation tenant-conn vis config)))
+    (catch Exception e nil)))
 
 (defn dashboard-response-data [tenant-conn id config]
   (let [[tag dashboard] (dashboard/fetch tenant-conn id)]
