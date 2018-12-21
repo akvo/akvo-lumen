@@ -126,6 +126,27 @@
 	    ::transformation.engine/onError
             ::transformation.engine/op]))
 
+
+
+(create-ns  'akvo.lumen.specs.transformation.combine)
+(alias 'transformation.combine 'akvo.lumen.specs.transformation.combine)
+
+(s/def ::transformation.combine/newColumnTitle string?)
+
+(s/def ::transformation.combine/separator string?)
+
+(s/def ::transformation.combine/columnNames (s/coll-of ::db.dsv.column/columnName :kind vector? :distinct true)) 
+(s/def ::transformation.combine/args
+  (s/keys :req-un [::transformation.combine/columnNames
+                   ::transformation.combine/newColumnTitle
+                   ::transformation.combine/separator]))
+
+(defmethod op-spec :core/combine  [_]
+  (s/keys
+   :req-un [::transformation.combine/args
+	    ::transformation.engine/onError
+            ::transformation.engine/op]))
+
 (lumen.s/sample ::transformation.engine/op-spec 10)
 
 (create-ns  'akvo.lumen.specs.dataset-version.transformation)
