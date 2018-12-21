@@ -201,8 +201,7 @@
 (s/def ::transformation.generate-geopoints/args
   (s/keys :req-un [::transformation.generate-geopoints/columnNameLat
                    ::transformation.generate-geopoints/columnNameLong
-                   ::transformation.generate-geopoints/columnTitleGeo
-                   ::transformation.filter-column/expression]))
+                   ::transformation.generate-geopoints/columnTitleGeo]))
 
 (defmethod op-spec :core/generate-geopoints  [_]
   (s/keys
@@ -210,6 +209,43 @@
 	    ::transformation.engine/onError
             ::transformation.engine/op]))
 
+(create-ns  'akvo.lumen.specs.transformation.merge-datasets)
+(alias 'transformation.merge-datasets 'akvo.lumen.specs.transformation.merge-datasets)
+
+(create-ns  'akvo.lumen.specs.transformation.merge-datasets.source)
+(alias 'transformation.merge-datasets.source 'akvo.lumen.specs.transformation.merge-datasets.source)
+
+(create-ns  'akvo.lumen.specs.transformation.merge-datasets.target)
+(alias 'transformation.merge-datasets.target 'akvo.lumen.specs.transformation.merge-datasets.target)
+
+
+
+(s/def ::transformation.merge-datasets.source/datasetId ::db.dsv/dataset-id)
+(s/def ::transformation.merge-datasets.source/aggregationColumn (s/nilable ::db.dsv.column/columnName))
+(s/def ::transformation.merge-datasets.source/aggregationDirection #{"ASC" "DESC"})
+(s/def ::transformation.merge-datasets.source/mergeColumn ::db.dsv.column/columnName)
+(s/def ::transformation.merge-datasets.source/mergeColumns (s/coll-of ::db.dsv.column/columnName :kind vector? :distinct true))
+
+(s/def ::transformation.merge-datasets/source (s/keys
+                                               :req-un [::transformation.merge-datasets.source/datasetId
+                                                        ::transformation.merge-datasets.source/aggregationColumn
+                                                        ::transformation.merge-datasets.source/aggregationDirection
+                                                        ::transformation.merge-datasets.source/mergeColumn
+                                                        ::transformation.merge-datasets.source/mergeColumns]))
+
+(s/def ::transformation.merge-datasets.target/mergeColumn ::db.dsv.column/columnName)
+
+(s/def ::transformation.merge-datasets/target (s/keys :req-un [::transformation.merge-datasets.target/mergeColumn]))
+
+(s/def ::transformation.merge-datasets/args
+  (s/keys :req-un [::transformation.merge-datasets/source
+                   ::transformation.merge-datasets/target]))
+
+(defmethod op-spec :core/merge-datasets  [_]
+  (s/keys
+   :req-un [::transformation.merge-datasets/args
+	    ::transformation.engine/onError
+            ::transformation.engine/op]))
 
 (lumen.s/sample ::transformation.engine/op-spec 10)
 
