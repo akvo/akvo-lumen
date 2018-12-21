@@ -63,16 +63,15 @@
 
 (s/def ::type #{:transformation :undo})
 
-
-(defmulti command-spec ::type)
+(defmulti command-spec :type)
 
 (defmethod command-spec :undo [_]
-  (s/keys :req [::type]))
+  (s/keys :req-un [::type]))
 
 (defmethod command-spec :transformation [_]
-  (s/keys :req [::type]))
+  (s/keys :req-un [::type]))
 
-(s/def ::command (s/multi-spec command-spec ::type))
+(s/def ::command (s/multi-spec command-spec :type))
 
 (lumen.s/sample ::command)
 
@@ -98,10 +97,10 @@
 				    :core/trim
 				    :core/trim-doublespace})
 
-(defmulti op-spec ::transformation.engine/op)
+(defmulti op-spec :op)
 
 (s/def ::transformation.engine/op-spec
-  (s/multi-spec op-spec ::transformation.engine/op))
+  (s/multi-spec op-spec :op))
 
 (create-ns  'akvo.lumen.specs.transformation.delete-column)
 (alias 'transformation.delete-column 'akvo.lumen.specs.transformation.delete-column)
@@ -112,6 +111,7 @@
 (defmethod op-spec :core/delete-column  [_]
   (s/keys
    :req-un [::transformation.delete-column/args
-	    ::transformation.engine/onError]))
+	    ::transformation.engine/onError
+            ::transformation.engine/op]))
 
-(lumen.s/sample ::transformation.engine/op-spec 10)
+(lumen.s/sample ::transformation.engine/op-spec)
