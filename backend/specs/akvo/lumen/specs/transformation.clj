@@ -170,6 +170,26 @@
             ::transformation.engine/op]))
 
 
+(create-ns  'akvo.lumen.specs.transformation.filter-column)
+(alias 'transformation.filter-column 'akvo.lumen.specs.transformation.filter-column)
+
+(s/def ::transformation.filter-column/is string?)
+(s/def ::transformation.filter-column/contains string?)
+(s/def ::transformation.filter-column/expression (s/keys
+                                                  :opt-un [::transformation.filter-column/is
+                                                           ::transformation.filter-column/contains]))
+
+(s/def ::transformation.filter-column/args
+  (s/keys :req-un [::db.dsv.column/columnName
+                   ::transformation.filter-column/expression]))
+
+(defmethod op-spec :core/filter-column  [_]
+  (s/keys
+   :req-un [::transformation.filter-column/args
+	    ::transformation.engine/onError
+            ::transformation.engine/op]))
+
+
 (lumen.s/sample ::transformation.engine/op-spec 10)
 
 (create-ns  'akvo.lumen.specs.dataset-version.transformation)
