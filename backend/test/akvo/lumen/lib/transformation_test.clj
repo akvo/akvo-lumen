@@ -441,7 +441,9 @@
         apply-transformation (partial tf/apply {:tenant-conn *tenant-conn*} dataset-id)]
     (let [[tag _] (apply-transformation {:type :transformation
                                          :transformation {"op" "core/delete-column"
-                                                          "args" {"columnName" "c2"}
+                                                          "args" {"columnName" "c2"
+                                                                  "type" "text"
+                                                                  "title" "c2"}
                                                           "onError" "fail"}})]
       (is (= ::lib/ok tag))
       (let [{:keys [columns transformations]} (latest-dataset-version-by-dataset-id *tenant-conn*
@@ -472,7 +474,9 @@
                                                                   "args" {"columns" (stringify-keys columns-payload)
                                                                           "selectedColumn" {"multipleType" multiple-column-type
                                                                                             "multipleId" i-v/cad1-id
-                                                                                            "columnName" "c1"}
+                                                                                            "columnName" "c1"
+                                                                                            "title" "title"
+                                                                                            "type" "multiple"}
                                                                           "columnName" "c1"
                                                                           "extractImage" false}
                                                                   "onError" "fail"}})]
@@ -527,6 +531,10 @@
         (is (= 2 (count data-db)))
         (is (= (map (comp :value first) (:rows origin-data)) (map :c1 data-db)))
         (is (= (map (comp :value last) (:rows target-data)) (map :d3 data-db)))))))
+
+(deftest ^:functional reverse-geocode-test
+  ;; todo
+  )
 
 (deftest ^:functional rename-column-test
   (let [dataset-id (import-file *tenant-conn* *error-tracker* {:has-column-headers? true

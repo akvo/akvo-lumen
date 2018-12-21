@@ -26,13 +26,27 @@
             (-> i
                 (update :multipleType keyword)
                 (set/rename-keys {:multipleType :multiple-type
-                                  :multipleId :multiple-id})))]
-    (-> (keywordize-keys dsv)
-        (update :columns #(mapv (fn [e]
-                                  (cond-> e
-                                    true (update :type keyword)
-                                    true (update :id (fn [o] (if o (keyword o) (keyword (:columnName e)))))
-                                    (:multipleType e) >mult)) %)))))
+                                  :multipleId :multiple-id})))
+          (>column [e]
+            (when e
+              (cond-> e
+               true (update :type keyword)
+               true (update :id (fn [o] (if o (keyword o) (keyword (:columnName e)))))
+               (:multipleType e) >mult)))
+          (>changedColumns [cc]
+            (reduce-kv (fn [c k {:keys [before after] :as v}]
+                         ;; (log/info :v v  (>column v))
+                         (assoc c (name k) {:before (>column before) :after (>column after)})
+                         ) {} cc))]
+    (let [res  (-> (keywordize-keys dsv)
+                   (update :columns #(mapv >column %))
+                   (update :transformations #(mapv (fn [t]
+                                                     (let [t (if (or (= :core/split-column (:op t))
+                                                                     (= :core/extract-multiple (:op t)))
+                                                               (update-in t [:args :selectedColumn] >column)
+                                                               t)]
+                                                       (update t :changedColumns >changedColumns))) %)))]
+      res)))
 
 (defn new-dataset-version-conform
   [f t d]

@@ -11,9 +11,12 @@
 
 (defn sample
   ([s]
-   (map first (s/exercise s 1)))
+   (sample s 1))
   ([s amount]
-   (map first (s/exercise s amount))))
+   (let [res (map first (s/exercise s amount))]
+     (if (== 1 amount)
+       (first res)
+       res))))
 
 (defn str-uuid? [v]
   (when (some? v)
@@ -23,3 +26,5 @@
   (s/with-gen
     str-uuid?
     #(s/gen (reduce (fn [c _] (conj c (str (squuid)))) #{} (range 100)))))
+
+(s/def ::sort #{"ASC" "DESC"})

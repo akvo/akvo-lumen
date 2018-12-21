@@ -42,11 +42,11 @@
 
 (s/def ::db.dsv.column/key boolean?)
 (s/def ::db.dsv.column/hidden boolean?)
-(s/def ::sort #{"asc" "dsc"})
+(s/def ::sort #{"asc" "dsc"}) ;; TODO double check this values
 
 (s/def ::db.dsv.column/sort (s/nilable ::sort))
 (s/def ::db.dsv.column/direction (s/nilable string?))
-(s/def ::db.dsv.column/columnName string?)
+(s/def ::db.dsv.column/columnName string?) ;; TODO improve with gen tuple
 
 (s/def ::db.dsv.column/id (s/nilable keyword?))
 (s/def ::db.dsv/column* (s/keys :req-un [::db.dsv.column/hidden ::db.dsv.column/direction
@@ -79,6 +79,7 @@
 				    :core/combine
 				    :core/delete-column
 				    :core/derive
+                                    :core/extract-multiple
 				    :core/filter-column
 				    :core/generate-geopoints
 				    :core/merge-datasets
@@ -86,6 +87,7 @@
 				    :core/rename-column
 				    :core/reverse-geocode
 				    :core/sort-column
+                                    :core/split-column
 				    :core/to-lowercase
 				    :core/to-titlecase
 				    :core/to-uppercase
@@ -222,7 +224,8 @@
 
 (s/def ::transformation.merge-datasets.source/datasetId ::db.dsv/dataset-id)
 (s/def ::transformation.merge-datasets.source/aggregationColumn (s/nilable ::db.dsv.column/columnName))
-(s/def ::transformation.merge-datasets.source/aggregationDirection #{"ASC" "DESC"})
+
+(s/def ::transformation.merge-datasets.source/aggregationDirection ::lumen.s/sort)
 (s/def ::transformation.merge-datasets.source/mergeColumn ::db.dsv.column/columnName)
 (s/def ::transformation.merge-datasets.source/mergeColumns (s/coll-of ::db.dsv.column/columnName :kind vector? :distinct true))
 
@@ -244,7 +247,6 @@
 (defmethod op-spec :core/merge-datasets  [_]
   (s/keys
    :req-un [::transformation.merge-datasets/args
-	    ::transformation.engine/onError
             ::transformation.engine/op]))
 
 
@@ -299,18 +301,183 @@
 
 
 
+(create-ns  'akvo.lumen.specs.transformation.reverse-geocode)
+(alias 'transformation.reverse-geocode 'akvo.lumen.specs.transformation.reverse-geocode)
+
+(create-ns  'akvo.lumen.specs.transformation.reverse-geocode.source)
+(alias 'transformation.reverse-geocode.source 'akvo.lumen.specs.transformation.reverse-geocode.source)
+
+(create-ns  'akvo.lumen.specs.transformation.reverse-geocode.target)
+(alias 'transformation.reverse-geocode.target 'akvo.lumen.specs.transformation.reverse-geocode.target)
+
+(s/def ::transformation.reverse-geocode/mergeColumn ::db.dsv.column/columnName)
+(s/def ::transformation.reverse-geocode/geoshapeColumn ::db.dsv.column/columnName)
+ 
+(s/def ::transformation.reverse-geocode/source
+  (s/keys
+   :req-un [::transformation.reverse-geocode/mergeColumn
+            ::transformation.reverse-geocode/geoshapeColumn]))
+
+(s/def ::transformation.reverse-geocode.target/geopointColumn ::db.dsv.column/columnName)
+(s/def ::transformation.reverse-geocode.target/title string?)
+
+(s/def ::transformation.reverse-geocode/target
+  (s/keys :req-un [::transformation.reverse-geocode.target/geopointColumn
+                   ::transformation.reverse-geocode.target/title]))
+
+(s/def ::transformation.reverse-geocode/args
+  (s/keys :req-un [::transformation.reverse-geocode/source
+                   ::transformation.reverse-geocode/target]))
+
+(defmethod op-spec :core/reverse-geocode  [_]
+  (s/keys
+   :req-un [::transformation.reverse-geocode/args
+	    ::transformation.engine/onError
+            ::transformation.engine/op]))
+
+
+
+
+(create-ns  'akvo.lumen.specs.transformation.sort-column)
+(alias 'transformation.sort-column 'akvo.lumen.specs.transformation.sort-column)
+
+(s/def ::transformation.sort-column/sortDirection ::lumen.s/sort)
+
+(s/def ::transformation.sort-column/args
+  (s/keys :req-un [::transformation.sort-column/sortDirection
+                   ::db.dsv.column/columnName]))
+
+(defmethod op-spec :core/sort-column  [_]
+  (s/keys
+   :req-un [::transformation.sort-column/args
+	    ::transformation.engine/onError
+            ::transformation.engine/op]))
+
+(create-ns  'akvo.lumen.specs.transformation.remove-sort)
+(alias 'transformation.remove-sort 'akvo.lumen.specs.transformation.remove-sort)
+
+
+(s/def ::transformation.remove-sort/args
+  (s/keys :req-un [::db.dsv.column/columnName]))
+
+(defmethod op-spec :core/remove-sort  [_]
+  (s/keys
+   :req-un [::transformation.remove-sort/args
+	    ::transformation.engine/onError
+            ::transformation.engine/op]))
+
+(create-ns  'akvo.lumen.specs.transformation.split-column)
+(alias 'transformation.split-column 'akvo.lumen.specs.transformation.split-column)
+
+(s/def ::transformation.split-column/newColumnName string?)
+(s/def ::transformation.split-column/pattern string?)
+(s/def ::transformation.split-column/selectedColumn
+  (s/keys :req-un [::db.dsv.column/columnName])
+  ;;:akvo.lumen.specs.import.column.text/header
+  )
+
+(s/def ::transformation.split-column/args
+  (s/keys :req-un [::transformation.split-column/newColumnName
+                   ::transformation.split-column/selectedColumn
+                   ::transformation.split-column/pattern]))
+
+(defmethod op-spec :core/split-column  [_]
+  (s/keys
+   :req-un [::transformation.split-column/args
+	    ::transformation.engine/onError
+            ::transformation.engine/op]))
+
+(create-ns  'akvo.lumen.specs.transformation.trim)
+(alias 'transformation.trim 'akvo.lumen.specs.transformation.trim)
+
+(s/def ::transformation.trim/args
+  (s/keys :req-un [::db.dsv.column/columnName]))
+
+(defmethod op-spec :core/trim  [_]
+  (s/keys
+   :req-un [::transformation.trim/args
+	    ::transformation.engine/onError
+            ::transformation.engine/op]))
+
+(create-ns  'akvo.lumen.specs.transformation.to-lowercase)
+(alias 'transformation.to-lowercase 'akvo.lumen.specs.transformation.to-lowercase)
+
+(s/def ::transformation.to-lowercase/args
+  (s/keys :req-un [::db.dsv.column/columnName]))
+
+(defmethod op-spec :core/to-lowercase  [_]
+  (s/keys
+   :req-un [::transformation.to-lowercase/args
+	    ::transformation.engine/onError
+            ::transformation.engine/op]))
+
+(create-ns  'akvo.lumen.specs.transformation.to-uppercase)
+(alias 'transformation.to-uppercase 'akvo.lumen.specs.transformation.to-uppercase)
+
+(s/def ::transformation.to-uppercase/args
+  (s/keys :req-un [::db.dsv.column/columnName]))
+
+(defmethod op-spec :core/to-uppercase  [_]
+  (s/keys
+   :req-un [::transformation.to-uppercase/args
+	    ::transformation.engine/onError
+            ::transformation.engine/op]))
+
+(create-ns  'akvo.lumen.specs.transformation.to-titlecase)
+(alias 'transformation.to-titlecase 'akvo.lumen.specs.transformation.to-titlecase)
+
+(s/def ::transformation.to-titlecase/args
+  (s/keys :req-un [::db.dsv.column/columnName]))
+
+(defmethod op-spec :core/to-titlecase  [_]
+  (s/keys
+   :req-un [::transformation.to-titlecase/args
+	    ::transformation.engine/onError
+            ::transformation.engine/op]))
+
+
+(create-ns  'akvo.lumen.specs.transformation.trim-doublespace)
+(alias 'transformation.trim-doublespace 'akvo.lumen.specs.transformation.trim-doublespace)
+
+(s/def ::transformation.trim-doublespace/args
+  (s/keys :req-un [::db.dsv.column/columnName]))
+
+(defmethod op-spec :core/trim-doublespace  [_]
+  (s/keys
+   :req-un [::transformation.trim-doublespace/args
+	    ::transformation.engine/onError
+            ::transformation.engine/op]))
+
+
+
+
+
+
+
+
+
+
 (lumen.s/sample ::transformation.engine/op-spec 10)
 
 (create-ns  'akvo.lumen.specs.dataset-version.transformation)
 (alias 'db.dsv.transformation 'akvo.lumen.specs.dataset-version.transformation)
 
-(s/def ::db.dsv.transformation/changedColumns map?)
+(create-ns  'akvo.lumen.specs.dataset-version.transformation.changed-columns)
+(alias 'db.dsv.transformation.changed-columns 'akvo.lumen.specs.dataset-version.transformation.changed-columns)
+
+(s/def ::db.dsv.transformation.changed-columns/after (s/nilable ::import.column.s/header))
+
+(s/def ::db.dsv.transformation.changed-columns/before (s/nilable ::import.column.s/header))
+
+(s/def ::db.dsv.transformation/changedColumns
+  (s/map-of ::db.dsv.column/columnName (s/keys :req-un [::db.dsv.transformation.changed-columns/after
+                                                        ::db.dsv.transformation.changed-columns/before])))
 
 (s/def ::db.dsv.transformation/changedColumns* (s/keys :req-un [::db.dsv.transformation/changedColumns]))
 
 (s/def ::db.dsv/transformation (s/merge ::transformation.engine/op-spec ::db.dsv.transformation/changedColumns*))
 
-(s/def ::db.dsv/transformations (s/coll-of ::transformation.engine/op-spec :kind vector? :distinct true))
+(s/def ::db.dsv/transformations (s/coll-of ::db.dsv/transformation :kind vector? :distinct true))
 
 (s/def ::next-dataset-version (s/keys :req-un [::db.dsv/id ::db.dsv/dataset-id
                                                ::db.dsv/job-execution-id ::db.dsv/table-name
@@ -325,14 +492,12 @@
  "changedColumns"
  {"c2"
   {"after" nil,
-   "before"
-   {"key" false,
-    "sort" nil,
-    "direction" nil,
-    "title" "Column2",
-    "type" "number",
-    "multipleType" nil,
-    "hidden" false,
-    "multipleId" nil,
-    "columnName" "c2"}}}}
-
+   "before" {"key" false,
+             "sort" nil,
+             "direction" nil,
+             "title" "Column2",
+             "type" "number",
+             "multipleType" nil,
+             "hidden" false,
+             "multipleId" nil,
+             "columnName" "c2"}}}}
