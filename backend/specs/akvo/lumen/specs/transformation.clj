@@ -190,6 +190,27 @@
             ::transformation.engine/op]))
 
 
+(create-ns  'akvo.lumen.specs.transformation.generate-geopoints)
+(alias 'transformation.generate-geopoints 'akvo.lumen.specs.transformation.generate-geopoints)
+
+(s/def ::transformation.generate-geopoints/columnNameLat ::db.dsv.column/columnName)
+(s/def ::transformation.generate-geopoints/columnNameLong ::db.dsv.column/columnName)
+(s/def ::transformation.generate-geopoints/columnTitleGeo string?)
+
+
+(s/def ::transformation.generate-geopoints/args
+  (s/keys :req-un [::transformation.generate-geopoints/columnNameLat
+                   ::transformation.generate-geopoints/columnNameLong
+                   ::transformation.generate-geopoints/columnTitleGeo
+                   ::transformation.filter-column/expression]))
+
+(defmethod op-spec :core/generate-geopoints  [_]
+  (s/keys
+   :req-un [::transformation.generate-geopoints/args
+	    ::transformation.engine/onError
+            ::transformation.engine/op]))
+
+
 (lumen.s/sample ::transformation.engine/op-spec 10)
 
 (create-ns  'akvo.lumen.specs.dataset-version.transformation)
