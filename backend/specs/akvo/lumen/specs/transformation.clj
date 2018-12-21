@@ -38,7 +38,7 @@
                                       #(s/gen (into #{} (take 5 (repeatedly (fn [] (str "imported_" (u/squuid)))))))))
 
 (s/def ::db.dsv/version int?)
-(s/def ::db.dsv/transformations any?) ;; TODO complete ... 
+
 
 (s/def ::db.dsv.column/key boolean?)
 (s/def ::db.dsv.column/hidden boolean?)
@@ -55,11 +55,6 @@
 (s/def ::db.dsv/column (s/merge ::import.column.s/header ::db.dsv/column*))
 
 (s/def ::db.dsv/columns (s/coll-of ::db.dsv/column :kind vector? :distinct true))
-
-(s/def ::next-dataset-version (s/keys :req-un [::db.dsv/id ::db.dsv/dataset-id
-                                               ::db.dsv/job-execution-id ::db.dsv/table-name
-                                               ::db.dsv/imported-table-name ::db.dsv/version
-                                               ::db.dsv/transformations ::db.dsv/columns]))
 
 (s/def ::type #{:transformation :undo})
 
@@ -114,4 +109,57 @@
 	    ::transformation.engine/onError
             ::transformation.engine/op]))
 
-(lumen.s/sample ::transformation.engine/op-spec)
+
+(create-ns  'akvo.lumen.specs.transformation.change-datatype)
+(alias 'transformation.change-datatype 'akvo.lumen.specs.transformation.change-datatype)
+
+(s/def ::transformation.change-datatype/newType #{"number" "text" "date"})
+(s/def ::transformation.change-datatype/defaultValue (s/nilable string?))
+
+(s/def ::transformation.change-datatype/args
+  (s/keys :req-un [::db.dsv.column/columnName
+                   ::transformation.change-datatype/newType]))
+
+(defmethod op-spec :core/change-datatype  [_]
+  (s/keys
+   :req-un [::transformation.change-datatype/args
+	    ::transformation.engine/onError
+            ::transformation.engine/op]))
+
+(lumen.s/sample ::transformation.engine/op-spec 10)
+
+(create-ns  'akvo.lumen.specs.dataset-version.transformation)
+(alias 'db.dsv.transformation 'akvo.lumen.specs.dataset-version.transformation)
+
+(s/def ::db.dsv.transformation/changedColumns map?)
+
+(s/def ::db.dsv.transformation/changedColumns* (s/keys :req-un [::db.dsv.transformation/changedColumns]))
+
+(s/def ::db.dsv/transformation (s/merge ::transformation.engine/op-spec ::db.dsv.transformation/changedColumns*))
+
+(s/def ::db.dsv/transformations (s/coll-of ::transformation.engine/op-spec :kind vector? :distinct true))
+
+(s/def ::next-dataset-version (s/keys :req-un [::db.dsv/id ::db.dsv/dataset-id
+                                               ::db.dsv/job-execution-id ::db.dsv/table-name
+                                               ::db.dsv/imported-table-name ::db.dsv/version
+                                               ::db.dsv/transformations ::db.dsv/columns]))
+
+(lumen.s/sample ::next-dataset-version)
+
+#_{"op" "core/delete-column",
+ "args" {"columnName" "c\n2"},
+ "onError" "fail",
+ "changedColumns"
+ {"c2"
+  {"after" nil,
+   "before"
+   {"key" false,
+    "sort" nil,
+    "direction" nil,
+    "title" "Column2",
+    "type" "number",
+    "multipleType" nil,
+    "hidden" false,
+    "multipleId" nil,
+    "columnName" "c2"}}}}
+
