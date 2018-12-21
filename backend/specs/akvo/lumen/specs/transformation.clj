@@ -147,6 +147,29 @@
 	    ::transformation.engine/onError
             ::transformation.engine/op]))
 
+
+(create-ns  'akvo.lumen.specs.transformation.derive)
+(alias 'transformation.derive 'akvo.lumen.specs.transformation.derive)
+
+(s/def ::transformation.derive/newColumnTitle string?) ;; reuse s/def also used in combine
+
+(s/def ::transformation.derive/code string?) ;; improve js validation
+
+(s/def ::transformation.derive/newColumnType #{"number" "text" "date"})
+
+
+(s/def ::transformation.derive/args
+  (s/keys :req-un [::transformation.derive/newColumnTitle
+                   ::transformation.derive/code
+                   ::transformation.derive/newColumnType]))
+
+(defmethod op-spec :core/derive  [_]
+  (s/keys
+   :req-un [::transformation.derive/args
+	    ::transformation.engine/onError
+            ::transformation.engine/op]))
+
+
 (lumen.s/sample ::transformation.engine/op-spec 10)
 
 (create-ns  'akvo.lumen.specs.dataset-version.transformation)
