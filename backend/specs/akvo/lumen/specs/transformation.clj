@@ -247,6 +247,40 @@
 	    ::transformation.engine/onError
             ::transformation.engine/op]))
 
+
+(create-ns 'akvo.lumen.specs.transformation.extract-multiple)
+(alias 'transformation.extract-multiple 'akvo.lumen.specs.transformation.extract-multiple)
+
+(create-ns 'akvo.lumen.specs.transformation.extract-multiple.column)
+(alias 'transformation.extract-multiple.column 'akvo.lumen.specs.transformation.extract-multiple.column)
+
+(s/def ::transformation.extract-multiple/selectedColumn :akvo.lumen.specs.import.column.multiple/header)
+(s/def ::transformation.extract-multiple/extractImage boolean?)
+(s/def ::transformation.extract-multiple.column/id int?)
+(s/def ::transformation.extract-multiple.column/name string?)
+(s/def ::transformation.extract-multiple.column/type #{"text"})
+(s/def ::transformation.extract-multiple.column/extract boolean?)
+(s/def ::transformation.extract-multiple.column/column
+  (s/keys :req-un [::transformation.extract-multiple.column/id
+                   ::transformation.extract-multiple.column/name
+                   ::transformation.extract-multiple.column/type
+                   ::transformation.extract-multiple.column/extract]))
+
+(s/def ::transformation.extract-multiple/columns (s/coll-of ::transformation.extract-multiple.column/column
+                                                            :kind vector? :distinct true))
+
+(s/def ::transformation.extract-multiple/args
+  (s/keys :req-un [::db.dsv.column/columnName
+                   ::transformation.extract-multiple/selectedColumn
+                   ::transformation.extract-multiple/extractImage]))
+
+(defmethod op-spec :core/extract-multiple  [_]
+  (s/keys
+   :req-un [::transformation.extract-multiple/args
+	    ::transformation.engine/onError
+            ::transformation.engine/op]))
+
+
 (lumen.s/sample ::transformation.engine/op-spec 10)
 
 (create-ns  'akvo.lumen.specs.dataset-version.transformation)
