@@ -281,6 +281,24 @@
             ::transformation.engine/op]))
 
 
+(create-ns  'akvo.lumen.specs.transformation.rename-column)
+(alias 'transformation.rename-column 'akvo.lumen.specs.transformation.rename-column)
+
+(s/def ::transformation.rename-column/newColumnTitle string?) ;; reuse s/def also used in combine
+
+(s/def ::transformation.rename-column/args
+  (s/keys :req-un [::transformation.derive/newColumnTitle
+                   ::db.dsv.column/columnName]))
+
+(defmethod op-spec :core/rename-column  [_]
+  (s/keys
+   :req-un [::transformation.rename-column/args
+	    ::transformation.engine/onError
+            ::transformation.engine/op]))
+
+
+
+
 (lumen.s/sample ::transformation.engine/op-spec 10)
 
 (create-ns  'akvo.lumen.specs.dataset-version.transformation)
