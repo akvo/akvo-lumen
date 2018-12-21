@@ -30,7 +30,6 @@
     (-> (keywordize-keys dsv)
         (update :columns #(mapv (fn [e]
                                   (cond-> e
-                                    true keywordize-keys
                                     true (update :type keyword)
                                     true (update :id (fn [o] (if o (keyword o) (keyword (:columnName e)))))
                                     (:multipleType e) >mult)) %)))))
