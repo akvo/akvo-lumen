@@ -60,7 +60,7 @@
           (lib/ok {"jobExecutionId" job-execution-id "datasetId" dataset-id})
           (catch Exception e
             (let [msg (.getMessage e)]
-              (log/info e)
+              (engine/log-ex e)
               (update-failed-job-execution tenant-conn {:id job-execution-id :reason [msg]})
               (lib/conflict {"jobExecutionId" job-execution-id "datasetId" dataset-id "message" msg}))))
         (lib/bad-request {"message" (:message v)})))
