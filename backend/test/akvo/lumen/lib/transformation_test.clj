@@ -381,7 +381,12 @@
                                          :transformation {"op" "core/split-column"
                                                           "args" {"pattern" "%"
                                                                   "newColumnName" "splitted"
-                                                                  "selectedColumn" {"columnName" "c1"}}
+                                                                  "selectedColumn" {"columnName" "c1"
+                                                                                    "title" "title"
+                                                                                    "sort" nil
+                                                                                    "direction" nil
+                                                                                    "hidden" false
+                                                                                    "type" "text"}}
                                                           "onError" "fail"}})]
       (is (= ::lib/ok tag))
       (let [{:keys [columns transformations]} (latest-dataset-version-by-dataset-id *tenant-conn*
@@ -400,7 +405,12 @@
                                          :transformation {"op" "core/split-column"
                                                           "args" {"pattern" "-"
                                                                   "newColumnName" "splitted"
-                                                                  "selectedColumn" {"columnName" "c1"}}
+                                                                  "selectedColumn" {"columnName" "c1"
+                                                                                    "title" "title"
+                                                                                    "sort" nil
+                                                                                    "direction" nil
+                                                                                    "hidden" false
+                                                                                    "type" "text"}}
                                                           "onError" "fail"}})]
       (is (= ::lib/ok tag))
       (let [{:keys [columns transformations]} (latest-dataset-version-by-dataset-id *tenant-conn*
@@ -416,14 +426,24 @@
                                            :transformation {"op" "core/split-column"
                                                             "args" {"pattern" "-"
                                                                     "newColumnName" "splitted"
-                                                                    "selectedColumn" {"columnName" "c2"}}
+                                                                    "selectedColumn" {"columnName" "c2"
+                                                                                      "title" "title"
+                                                                                      "sort" nil
+                                                                                      "direction" nil
+                                                                                      "hidden" false
+                                                                                      "type" "text"}}
                                                             "onError" "fail"}})]
         (is (= ::lib/conflict tag))))
     (let [[tag _] (apply-transformation {:type :transformation
                                          :transformation {"op" "core/split-column"
                                                           "args" {"pattern" "-"
                                                                   "newColumnName" "splitted"
-                                                                  "selectedColumn" {"columnName" "c2"}}
+                                                                  "selectedColumn" {"columnName" "c2"
+                                                                                    "title" "title"
+                                                                                    "sort" nil
+                                                                                    "direction" nil
+                                                                                    "hidden" false
+                                                                                    "type" "text"}}
                                                           "onError" "fail"}})]
       (is (= ::lib/ok tag))
       (let [{:keys [columns transformations]} (latest-dataset-version-by-dataset-id *tenant-conn*
@@ -475,6 +495,9 @@
                                                                           "selectedColumn" {"multipleType" multiple-column-type
                                                                                             "multipleId" i-v/cad1-id
                                                                                             "columnName" "c1"
+                                                                                            "sort" nil
+                                                                                            "direction" nil
+                                                                                            "hidden" false
                                                                                             "title" "title"
                                                                                             "type" "multiple"}
                                                                           "columnName" "c1"

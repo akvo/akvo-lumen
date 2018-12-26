@@ -44,7 +44,7 @@
 (s/def ::db.dsv.column/hidden boolean?)
 (s/def ::sort #{"asc" "dsc"}) ;; TODO double check this values
 
-(s/def ::db.dsv.column/sort (s/nilable ::sort))
+(s/def ::db.dsv.column/sort (s/nilable int?))
 (s/def ::db.dsv.column/direction (s/nilable string?))
 (s/def ::db.dsv.column/columnName string?) ;; TODO improve with gen tuple
 
@@ -256,7 +256,7 @@
 (create-ns 'akvo.lumen.specs.transformation.extract-multiple.column)
 (alias 'transformation.extract-multiple.column 'akvo.lumen.specs.transformation.extract-multiple.column)
 
-(s/def ::transformation.extract-multiple/selectedColumn :akvo.lumen.specs.import.column.multiple/header)
+(s/def ::transformation.extract-multiple/selectedColumn (s/merge ::db.dsv/column* :akvo.lumen.specs.import.column.multiple/header))
 (s/def ::transformation.extract-multiple/extractImage boolean?)
 (s/def ::transformation.extract-multiple.column/id int?)
 (s/def ::transformation.extract-multiple.column/name string?)
@@ -371,10 +371,7 @@
 
 (s/def ::transformation.split-column/newColumnName string?)
 (s/def ::transformation.split-column/pattern string?)
-(s/def ::transformation.split-column/selectedColumn
-  (s/keys :req-un [::db.dsv.column/columnName])
-  ;;:akvo.lumen.specs.import.column.text/header
-  )
+(s/def ::transformation.split-column/selectedColumn ::db.dsv/column)
 
 (s/def ::transformation.split-column/args
   (s/keys :req-un [::transformation.split-column/newColumnName
@@ -465,9 +462,9 @@
 (create-ns  'akvo.lumen.specs.dataset-version.transformation.changed-columns)
 (alias 'db.dsv.transformation.changed-columns 'akvo.lumen.specs.dataset-version.transformation.changed-columns)
 
-(s/def ::db.dsv.transformation.changed-columns/after (s/nilable ::import.column.s/header))
+(s/def ::db.dsv.transformation.changed-columns/after (s/nilable ::db.dsv/column))
 
-(s/def ::db.dsv.transformation.changed-columns/before (s/nilable ::import.column.s/header))
+(s/def ::db.dsv.transformation.changed-columns/before (s/nilable ::db.dsv/column))
 
 (s/def ::db.dsv.transformation/changedColumns
   (s/map-of ::db.dsv.column/columnName (s/keys :req-un [::db.dsv.transformation.changed-columns/after
