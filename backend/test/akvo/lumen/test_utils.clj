@@ -8,6 +8,7 @@
             [akvo.lumen.specs.transformation]
             [robert.hooke :refer (add-hook) :as r]
             [akvo.lumen.util :refer [squuid] :as util ]
+            [cheshire.core :as json]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.set :as set]
@@ -149,3 +150,6 @@
     (if (some true? res)
       res
       (replace-item res (rand-int c) true))))
+
+(defn clj>json>clj [d]
+  (json/decode (json/generate-string d)))

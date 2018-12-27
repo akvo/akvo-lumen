@@ -18,7 +18,9 @@
 
 
 (s/def ::db.dsv/id ::lumen.s/str-uuid)
-(s/def ::db.dsv/dataset-id ::lumen.s/str-uuid)
+(s/def ::db.dsv/dataset-id (s/with-gen
+                             lumen.s/str-uuid?
+                             lumen.s/str-uuid-gen))
 (s/def ::db.dsv/job-execution-id (s/nilable ::lumen.s/str-uuid))
 
 (defn- ds-table-name? [s]
@@ -44,15 +46,18 @@
 (s/def ::db.dsv.column/hidden boolean?)
 (s/def ::sort #{"asc" "dsc"}) ;; TODO double check this values
 
-(s/def ::db.dsv.column/sort (s/nilable int?))
+(s/def ::db.dsv.column/sort (s/nilable pos-int?))
 (s/def ::db.dsv.column/direction (s/nilable string?))
-(s/def ::db.dsv.column/columnName string?) ;; TODO improve with gen tuple
+(def columnName? string?)
+(s/def ::db.dsv.column/columnName columnName?) ;; TODO improve with gen tuple
+
 
 (s/def ::db.dsv.column/id (s/nilable keyword?))
 (s/def ::db.dsv/column* (s/keys :req-un [::db.dsv.column/hidden ::db.dsv.column/direction
                                          ::db.dsv.column/sort ::db.dsv.column/columnName]))
 
 (s/def ::db.dsv/column (s/merge ::import.column.s/header ::db.dsv/column*))
+
 
 (s/def ::db.dsv/columns (s/coll-of ::db.dsv/column :kind vector? :distinct true))
 
@@ -67,8 +72,6 @@
   (s/keys :req-un [::type]))
 
 (s/def ::command (s/multi-spec command-spec :type))
-
-(lumen.s/sample ::command)
 
 (create-ns  'akvo.lumen.specs.transformation.engine)
 (alias 'transformation.engine 'akvo.lumen.specs.transformation.engine)
@@ -116,10 +119,13 @@
 (alias 'transformation.change-datatype 'akvo.lumen.specs.transformation.change-datatype)
 
 (s/def ::transformation.change-datatype/newType #{"number" "text" "date"})
-(s/def ::transformation.change-datatype/defaultValue (s/nilable string?))
+(s/def ::transformation.change-datatype/defaultValue (s/or :n nil? :s string? :i int?))
+(s/def ::transformation.change-datatype/parseFormat (s/nilable string?))
 
 (s/def ::transformation.change-datatype/args
   (s/keys :req-un [::db.dsv.column/columnName
+                   ::transformation.change-datatype/defaultValue
+                   ::transformation.change-datatype/parseFormat
                    ::transformation.change-datatype/newType]))
 
 (defmethod op-spec :core/change-datatype  [_]
@@ -127,8 +133,6 @@
    :req-un [::transformation.change-datatype/args
 	    ::transformation.engine/onError
             ::transformation.engine/op]))
-
-
 
 (create-ns  'akvo.lumen.specs.transformation.combine)
 (alias 'transformation.combine 'akvo.lumen.specs.transformation.combine)
@@ -158,7 +162,6 @@
 (s/def ::transformation.derive/code string?) ;; improve js validation
 
 (s/def ::transformation.derive/newColumnType #{"number" "text" "date"})
-
 
 (s/def ::transformation.derive/args
   (s/keys :req-un [::transformation.derive/newColumnTitle
@@ -195,8 +198,8 @@
 (create-ns  'akvo.lumen.specs.transformation.generate-geopoints)
 (alias 'transformation.generate-geopoints 'akvo.lumen.specs.transformation.generate-geopoints)
 
-(s/def ::transformation.generate-geopoints/columnNameLat ::db.dsv.column/columnName)
-(s/def ::transformation.generate-geopoints/columnNameLong ::db.dsv.column/columnName)
+(s/def ::transformation.generate-geopoints/columnNameLat columnName?)
+(s/def ::transformation.generate-geopoints/columnNameLong columnName?)
 (s/def ::transformation.generate-geopoints/columnTitleGeo string?)
 
 
@@ -222,11 +225,13 @@
 
 
 
-(s/def ::transformation.merge-datasets.source/datasetId ::db.dsv/dataset-id)
-(s/def ::transformation.merge-datasets.source/aggregationColumn (s/nilable ::db.dsv.column/columnName))
+(s/def ::transformation.merge-datasets.source/datasetId (s/with-gen
+                                                          lumen.s/str-uuid?
+                                                          lumen.s/str-uuid-gen))
+(s/def ::transformation.merge-datasets.source/aggregationColumn (s/nilable columnName?))
 
-(s/def ::transformation.merge-datasets.source/aggregationDirection ::lumen.s/sort)
-(s/def ::transformation.merge-datasets.source/mergeColumn ::db.dsv.column/columnName)
+(s/def ::transformation.merge-datasets.source/aggregationDirection lumen.s/sort?)
+(s/def ::transformation.merge-datasets.source/mergeColumn columnName?)
 (s/def ::transformation.merge-datasets.source/mergeColumns (s/coll-of ::db.dsv.column/columnName :kind vector? :distinct true))
 
 (s/def ::transformation.merge-datasets/source (s/keys
@@ -236,7 +241,8 @@
                                                         ::transformation.merge-datasets.source/mergeColumn
                                                         ::transformation.merge-datasets.source/mergeColumns]))
 
-(s/def ::transformation.merge-datasets.target/mergeColumn ::db.dsv.column/columnName)
+(s/def ::transformation.merge-datasets.target/mergeColumn columnName?)
+
 
 (s/def ::transformation.merge-datasets/target (s/keys :req-un [::transformation.merge-datasets.target/mergeColumn]))
 
@@ -287,10 +293,11 @@
 (alias 'transformation.rename-column 'akvo.lumen.specs.transformation.rename-column)
 
 (s/def ::transformation.rename-column/newColumnTitle string?) ;; reuse s/def also used in combine
+(s/def ::transformation.rename-column/columnName columnName?)
 
 (s/def ::transformation.rename-column/args
   (s/keys :req-un [::transformation.derive/newColumnTitle
-                   ::db.dsv.column/columnName]))
+                   ::transformation.rename-column/columnName]))
 
 (defmethod op-spec :core/rename-column  [_]
   (s/keys
@@ -335,17 +342,15 @@
 	    ::transformation.engine/onError
             ::transformation.engine/op]))
 
-
-
-
 (create-ns  'akvo.lumen.specs.transformation.sort-column)
 (alias 'transformation.sort-column 'akvo.lumen.specs.transformation.sort-column)
 
-(s/def ::transformation.sort-column/sortDirection ::lumen.s/sort)
+(s/def ::transformation.sort-column/sortDirection lumen.s/sort?)
+(s/def ::transformation.sort-column/columnName columnName?)
 
 (s/def ::transformation.sort-column/args
   (s/keys :req-un [::transformation.sort-column/sortDirection
-                   ::db.dsv.column/columnName]))
+                   ::transformation.sort-column/columnName]))
 
 (defmethod op-spec :core/sort-column  [_]
   (s/keys
@@ -356,9 +361,10 @@
 (create-ns  'akvo.lumen.specs.transformation.remove-sort)
 (alias 'transformation.remove-sort 'akvo.lumen.specs.transformation.remove-sort)
 
+(s/def ::transformation.remove-sort/columnName columnName?)
 
 (s/def ::transformation.remove-sort/args
-  (s/keys :req-un [::db.dsv.column/columnName]))
+  (s/keys :req-un [::transformation.remove-sort/columnName]))
 
 (defmethod op-spec :core/remove-sort  [_]
   (s/keys
@@ -373,6 +379,9 @@
 (s/def ::transformation.split-column/pattern string?)
 (s/def ::transformation.split-column/selectedColumn ::db.dsv/column)
 
+
+
+ 
 (s/def ::transformation.split-column/args
   (s/keys :req-un [::transformation.split-column/newColumnName
                    ::transformation.split-column/selectedColumn
@@ -432,7 +441,6 @@
 	    ::transformation.engine/onError
             ::transformation.engine/op]))
 
-
 (create-ns  'akvo.lumen.specs.transformation.trim-doublespace)
 (alias 'transformation.trim-doublespace 'akvo.lumen.specs.transformation.trim-doublespace)
 
@@ -444,17 +452,6 @@
    :req-un [::transformation.trim-doublespace/args
 	    ::transformation.engine/onError
             ::transformation.engine/op]))
-
-
-
-
-
-
-
-
-
-
-(lumen.s/sample ::transformation.engine/op-spec 10)
 
 (create-ns  'akvo.lumen.specs.dataset-version.transformation)
 (alias 'db.dsv.transformation 'akvo.lumen.specs.dataset-version.transformation)
@@ -480,8 +477,6 @@
                                                ::db.dsv/job-execution-id ::db.dsv/table-name
                                                ::db.dsv/imported-table-name ::db.dsv/version
                                                ::db.dsv/transformations ::db.dsv/columns]))
-
-(lumen.s/sample ::next-dataset-version)
 
 #_{"op" "core/delete-column",
  "args" {"columnName" "c\n2"},

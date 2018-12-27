@@ -53,6 +53,7 @@
 (s/def ::c.geopoint/header (s/merge ::column-header ::c.geopoint/header*))
 
 (s/def ::c.multiple/header* (s/keys :req-un [::c.multiple/type ::v/multiple-type ::v/multiple-id]))
+
 (s/def ::c.multiple/header (s/merge ::column-header ::c.multiple/header*))
 
 
@@ -65,7 +66,6 @@
 (defmethod column-header :multiple [_] ::c.multiple/header)
 
 (s/def ::header (s/multi-spec column-header :type))
-
 
 (s/def ::c.text/value string?)
 
