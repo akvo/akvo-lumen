@@ -28,3 +28,14 @@
     #(s/gen (reduce (fn [c _] (conj c (str (squuid)))) #{} (range 100)))))
 
 (s/def ::sort #{"ASC" "DESC"})
+
+(defn sample-with-filter
+  "generates a sample satisfying a filter condition."
+  ([spec filter-fun]
+   (sample-with-filter spec filter-fun 10))
+  ([spec filter-fun attempts]
+   (loop [attempt 0]
+     (let [res (filter filter-fun (sample spec attempts))]
+       (if (and (empty? res) (< attempt attempts))
+         (recur (inc attempt))
+         (first res))))))
