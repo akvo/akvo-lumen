@@ -35,10 +35,12 @@
 
 (alias 'import.column.text.s                   'akvo.lumen.specs.import.column.text)
 (alias 'import.column.multiple.s               'akvo.lumen.specs.import.column.multiple)
-
 (alias 'transformation.engine.s                'akvo.lumen.specs.transformation.engine)
+(alias 'transformation.combine.s               'akvo.lumen.specs.transformation.combine)
+(alias 'transformation.filter-column.s         'akvo.lumen.specs.transformation.filter-column)
 (alias 'transformation.split-column.s          'akvo.lumen.specs.transformation.split-column)
 (alias 'transformation.derive.s                'akvo.lumen.specs.transformation.derive)
+(alias 'transformation.change-datatype.s       'akvo.lumen.specs.transformation.change-datatype)
 (alias 'transformation.sort-column.s           'akvo.lumen.specs.transformation.sort-column)
 (alias 'transformation.remove-sort.s           'akvo.lumen.specs.transformation.remove-sort)
 (alias 'transformation.generate-geopoints.s    'akvo.lumen.specs.transformation.generate-geopoints)
@@ -53,6 +55,11 @@
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/transformation_test.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
+
+(defn latest-data [dataset-id]
+  (let [table-name (:table-name
+                    (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id}))]
+    (get-data *tenant-conn* {:table-name table-name})))
 
 (def ops (vec (json/parse-string (slurp (io/resource "ops.json")))))
 
@@ -85,7 +92,7 @@
                args)
         
         op-name (str (namespace t-type) "/" (name t-type))]
-    (conform :akvo.lumen.specs.transformation.engine/op-spec (assoc s :op (keyword op-name) :args args))
+    (conform ::transformation.engine.s/op-spec (assoc s :op (keyword op-name) :args args))
 
     (tu/clj>json>clj (assoc s :op op-name :args args))))
 
@@ -104,35 +111,35 @@
 
 (deftest ^:functional test-import-and-transform
   (testing "Import CSV and transform"
-    (let [t-log [(gen-transformation :core/trim {:akvo.lumen.specs.db.dataset-version.column/columnName "c5"
-                                                 :akvo.lumen.specs.transformation.engine/onError "fail"})
-                 (gen-transformation :core/change-datatype {:akvo.lumen.specs.db.dataset-version.column/columnName "c5"
-                                                        :akvo.lumen.specs.transformation.change-datatype/defaultValue 0
-                                                        :akvo.lumen.specs.transformation.change-datatype/newType "number"
-                                                        :akvo.lumen.specs.transformation.engine/onError "default-value"})
-                 (gen-transformation :core/filter-column {:akvo.lumen.specs.db.dataset-version.column/columnName "c4"
-                                                      :akvo.lumen.specs.transformation.filter-column/expression {"contains" "broken"}
-                                                      :akvo.lumen.specs.transformation.engine/onError "fail"})]
-          dataset-id (import-file *tenant-conn* *error-tracker* {:name "GDP Test"
+    (let [t-log      [(gen-transformation :core/trim {::db.dataset-version.column.s/columnName "c5"
+                                                      ::transformation.engine.s/onError        "fail"})
+                      (gen-transformation :core/change-datatype {::db.dataset-version.column.s/columnName        "c5"
+                                                                 ::transformation.change-datatype.s/defaultValue 0
+                                                                 ::transformation.change-datatype.s/newType      "number"
+                                                                 ::transformation.engine.s/onError               "default-value"})
+                      (gen-transformation :core/filter-column {::db.dataset-version.column.s/columnName    "c4"
+                                                               ::transformation.filter-column.s/expression {"contains" "broken"}
+                                                               ::transformation.engine.s/onError           "fail"})]
+          dataset-id (import-file *tenant-conn* *error-tracker* {:name                "GDP Test"
                                                                  :has-column-headers? false
-                                                                 :file "GDP.csv"})]
+                                                                 :file                "GDP.csv"})]
       (let [[tag {:strs [datasetId]}] (last (for [transformation t-log]
                                               (transformation/apply {:tenant-conn *tenant-conn*}
-                                                        dataset-id
-                                                        {:type :transformation
-                                                         :transformation transformation})))]
+                                                                    dataset-id
+                                                                    {:type           :transformation
+                                                                     :transformation transformation})))]
 
         (is (= ::lib/ok tag))
 
         (let [table-name (:table-name (latest-dataset-version-by-dataset-id *tenant-conn*
                                                                             {:dataset-id datasetId}))]
           (is (zero? (:c5 (get-val-from-table *tenant-conn*
-                                              {:rnum 196
+                                              {:rnum        196
                                                :column-name "c5"
-                                               :table-name table-name}))))
-          (is (= "[Broken]" (:c4 (get-val-from-table *tenant-conn* {:rnum 196
+                                               :table-name  table-name}))))
+          (is (= "[Broken]" (:c4 (get-val-from-table *tenant-conn* {:rnum        196
                                                                     :column-name "c4"
-                                                                    :table-name table-name}))))
+                                                                    :table-name  table-name}))))
           (is (= 1 (:total (get-row-count *tenant-conn* {:table-name table-name})))))))))
 
 (deftest ^:functional test-undo
@@ -143,17 +150,15 @@
         apply-transformation (partial transformation/apply {:tenant-conn *tenant-conn*} dataset-id)]
     (is (= ::lib/ok (first (apply-transformation {:type :undo}))))
     (let [[tag _] (do (apply-transformation {:type :transformation
-                                             :transformation
-                                             (gen-transformation :core/to-lowercase
-                                                                 {:akvo.lumen.specs.db.dataset-version.column/columnName "c1"
-                                                                  :akvo.lumen.specs.transformation.engine/onError "fail"})})
+                                             :transformation (gen-transformation :core/to-lowercase
+                                                                                 {::db.dataset-version.column.s/columnName "c1"
+                                                                                  ::transformation.engine.s/onError "fail"})})
                       (apply-transformation {:type :transformation
-                                             :transformation
-                                             (gen-transformation :core/change-datatype
-                                                                 {:akvo.lumen.specs.db.dataset-version.column/columnName "c5"
-                                                                  :akvo.lumen.specs.transformation.engine/onError "default-value"
-                                                                  :akvo.lumen.specs.transformation.change-datatype/newType "number"
-                                                                  :akvo.lumen.specs.transformation.change-datatype/defaultValue 0})})
+                                             :transformation (gen-transformation :core/change-datatype
+                                                                                 {::db.dataset-version.column.s/columnName "c5"
+                                                                                  ::transformation.engine.s/onError "default-value"
+                                                                                  ::transformation.change-datatype.s/newType "number"
+                                                                                  ::transformation.change-datatype.s/defaultValue 0})})
                       (apply-transformation {:type :undo}))]
       (is (= ::lib/ok tag))
       (is (not (:exists (table-exists *tenant-conn* {:table-name previous-table-name}))))
@@ -182,29 +187,29 @@
 (deftest ^:functional combine-transformation-test
   (let [dataset-id (import-file *tenant-conn* *error-tracker* {:has-column-headers? true
                                                                :file "name.csv"})
-        apply-transformation (partial transformation/apply {:tenant-conn *tenant-conn*} dataset-id)]
-    (let [[tag _] (apply-transformation {:type :transformation
-                                         :transformation
-                                         (gen-transformation :core/combine
-                                                             {:akvo.lumen.specs.transformation.combine/columnNames ["c1" "c2"]                                                                          :akvo.lumen.specs.transformation.engine/onError "fail"
-                                                              :akvo.lumen.specs.transformation.combine/newColumnTitle "full name"
-                                                              :akvo.lumen.specs.transformation.combine/separator " "})})]
-      (is (= ::lib/ok tag))
-      (let [table-name (:table-name
-                        (latest-dataset-version-by-dataset-id *tenant-conn*
-                                                              {:dataset-id dataset-id}))]
-        (is (= "bob hope"
-               (:d1 (get-val-from-table *tenant-conn*
-                                        {:rnum 1
-                                         :column-name "d1"
-                                         :table-name table-name}))))))
+        apply-transformation (partial transformation/apply {:tenant-conn *tenant-conn*} dataset-id)
+        [tag _] (apply-transformation {:type :transformation
+                                       :transformation (gen-transformation :core/combine
+                                                                           {::transformation.combine.s/columnNames ["c1" "c2"]
+                                                                            ::transformation.engine.s/onError "fail"
+                                                                            ::transformation.combine.s/newColumnTitle "full name"
+                                                                            ::transformation.combine.s/separator " "})})]
+    (is (= ::lib/ok tag))
+    (let [table-name (:table-name
+                      (latest-dataset-version-by-dataset-id *tenant-conn*
+                                                            {:dataset-id dataset-id}))]
+      (is (= "bob hope"
+             (:d1 (get-val-from-table *tenant-conn*
+                                      {:rnum 1
+                                       :column-name "d1"
+                                       :table-name table-name})))))
 
     ;;https://github.com/akvo/akvo-lumen/issues/1517
     (testing "Combining columns where one of the columns has empty values"
       (let [[tag _] (apply-transformation {:type :transformation
                                            :transformation
                                          (gen-transformation :core/combine
-                                                             {:akvo.lumen.specs.transformation.combine/columnNames ["c2" "c3"]                                                                          :akvo.lumen.specs.transformation.engine/onError "fail"
+                                                             {:akvo.lumen.specs.transformation.combine/columnNames ["c2" "c3"]                                                                          ::transformation.engine.s/onError "fail"
                                                               :akvo.lumen.specs.transformation.combine/newColumnTitle "issue1517"
                                                               :akvo.lumen.specs.transformation.combine/separator " "})})]
         (is (= ::lib/ok tag))
@@ -226,7 +231,7 @@
                                                        :akvo.lumen.specs.transformation.change-datatype/defaultValue 0
                                                        :akvo.lumen.specs.transformation.change-datatype/newType "date"
                                                        :akvo.lumen.specs.transformation.change-datatype/parseFormat format*
-                                                       :akvo.lumen.specs.transformation.engine/onError "fail"})})
+                                                       ::transformation.engine.s/onError "fail"})})
         data                (import.s/sample-imported-dataset [:text
                                                           [:text {::import.column.text.s/value (fn [] (import.column.s/date-format-gen
                                                                                          (fn [[y _ _ :as date]]
@@ -261,24 +266,16 @@
         (is (= years-slash (map (comp tcc/from-long :c3) table-data)))
         (is (= years-hiphen (map (comp tcc/from-long :c4) table-data)))))))
 
-
-(defn change-datatype-transformation [column-name]
-  {:type :transformation
-   :transformation
-   (-> (gen-transformation
-        :core/change-datatype {:akvo.lumen.specs.db.dataset-version.column/columnName "column-name"
-                               :akvo.lumen.specs.transformation.change-datatype/newType "number"
-                               :akvo.lumen.specs.transformation.engine/onError "default-value"})
-       (assoc-in ["args" "defaultValue"] nil) ;; we can generate nil values ... spec related
-       )})
-
-(defn latest-data [dataset-id]
-  (let [table-name (:table-name
-                    (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id}))]
-    (get-data *tenant-conn* {:table-name table-name})))
-
 (deftest ^:functional derived-column-test
-  (let [dataset-id (import-file *tenant-conn* *error-tracker* {:has-column-headers? true
+  (let [change-datatype-transformation (fn [column-name]
+                                         {:type :transformation
+                                          :transformation
+                                          (-> (gen-transformation
+                                               :core/change-datatype {::db.dataset-version.column.s/columnName "column-name"
+                                                                      ::transformation.change-datatype.s/newType "number"
+                                                                      ::transformation.engine.s/onError "default-value"})
+                                              (assoc-in ["args" "defaultValue"] nil))})
+        dataset-id (import-file *tenant-conn* *error-tracker* {:has-column-headers? true
                                                                :file "derived-column.csv"})
         apply-transformation (partial transformation/apply {:tenant-conn *tenant-conn*} dataset-id)]
     (do (apply-transformation (change-datatype-transformation "c2"))
@@ -294,20 +291,20 @@
       (apply-transformation {:type :transformation
                              :transformation
                              (gen-transformation :core/derive
-                                                 {:akvo.lumen.specs.transformation.derive/newColumnTitle "Derived 1"
-                                                  :akvo.lumen.specs.transformation.derive/code "row['foo'].toUpperCase()"
-                                                  :akvo.lumen.specs.transformation.derive/newColumnType "text"
-                                                  :akvo.lumen.specs.transformation.engine/onError "leave-empty"})})
+                                                 {::transformation.derive.s/newColumnTitle "Derived 1"
+                                                  ::transformation.derive.s/code "row['foo'].toUpperCase()"
+                                                  ::transformation.derive.s/newColumnType "text"
+                                                  ::transformation.engine.s/onError "leave-empty"})})
       (is (= ["A" "B" nil] (map :d1 (latest-data dataset-id)))))
 
     (testing "Basic text transform with drop row on error"
       (apply-transformation {:type :transformation
                              :transformation
                              (gen-transformation :core/derive
-                                                 {:akvo.lumen.specs.transformation.derive/newColumnTitle "Derived 3"
-                                                  :akvo.lumen.specs.transformation.derive/code "row['foo'].replace('a', 'b')"
-                                                  :akvo.lumen.specs.transformation.derive/newColumnType "text"
-                                                  :akvo.lumen.specs.transformation.engine/onError "delete-row"})})
+                                                 {::transformation.derive.s/newColumnTitle "Derived 3"
+                                                  ::transformation.derive.s/code "row['foo'].replace('a', 'b')"
+                                                  ::transformation.derive.s/newColumnType "text"
+                                                  ::transformation.engine.s/onError "delete-row"})})
       (is (= ["b" "b"] (map :d2 (latest-data dataset-id))))
       ;; Undo this so we have all the rows in the remaining tests
       (apply-transformation {:type :undo}))
@@ -316,10 +313,10 @@
       (apply-transformation {:type :transformation
                              :transformation
                              (gen-transformation :core/derive
-                                                 {:akvo.lumen.specs.transformation.derive/newColumnTitle "Derived 2"
-                                                  :akvo.lumen.specs.transformation.derive/code "row['foo'].length"
-                                                  :akvo.lumen.specs.transformation.derive/newColumnType "number"
-                                                  :akvo.lumen.specs.transformation.engine/onError "fail"})})
+                                                 {::transformation.derive.s/newColumnTitle "Derived 2"
+                                                  ::transformation.derive.s/code "row['foo'].length"
+                                                  ::transformation.derive.s/newColumnType "number"
+                                                  ::transformation.engine.s/onError "fail"})})
       (is (-> (latest-data dataset-id)
               first
               keys
@@ -331,29 +328,29 @@
       (apply-transformation {:type :transformation
                              :transformation
                              (gen-transformation :core/derive
-                                                 {:akvo.lumen.specs.transformation.derive/newColumnTitle "Derived 4"
-                                                  :akvo.lumen.specs.transformation.derive/code "row['foo'].toUpperCase()"
-                                                  :akvo.lumen.specs.transformation.derive/newColumnType "text"
-                                                  :akvo.lumen.specs.transformation.engine/onError "leave-empty"})})
+                                                 {::transformation.derive.s/newColumnTitle "Derived 4"
+                                                  ::transformation.derive.s/code "row['foo'].toUpperCase()"
+                                                  ::transformation.derive.s/newColumnType "text"
+                                                  ::transformation.engine.s/onError "leave-empty"})})
       (is (= ["A" "B" nil] (map :d2 (latest-data dataset-id))))
 
       (apply-transformation {:type :transformation
                              :transformation
                              (gen-transformation :core/derive
-                                                 {:akvo.lumen.specs.transformation.derive/newColumnTitle "Derived 5"
-                                                  :akvo.lumen.specs.transformation.derive/code "row['Derived 4'].toLowerCase()"
-                                                  :akvo.lumen.specs.transformation.derive/newColumnType "text"
-                                                  :akvo.lumen.specs.transformation.engine/onError "leave-empty"})})
+                                                 {::transformation.derive.s/newColumnTitle "Derived 5"
+                                                  ::transformation.derive.s/code "row['Derived 4'].toLowerCase()"
+                                                  ::transformation.derive.s/newColumnType "text"
+                                                  ::transformation.engine.s/onError "leave-empty"})})
       (is (= ["a" "b" nil] (map :d3 (latest-data dataset-id)))))
 
     (testing "Date transform"
       (let [[tag _] (apply-transformation {:type :transformation
                                            :transformation
                                            (gen-transformation :core/derive
-                                                               {:akvo.lumen.specs.transformation.derive/newColumnTitle "Derived 5"
-                                                                :akvo.lumen.specs.transformation.derive/code "new Date()"
-                                                                :akvo.lumen.specs.transformation.derive/newColumnType "date"
-                                                                :akvo.lumen.specs.transformation.engine/onError "fail"})})]
+                                                               {::transformation.derive.s/newColumnTitle "Derived 5"
+                                                                ::transformation.derive.s/code "new Date()"
+                                                                ::transformation.derive.s/newColumnType "date"
+                                                                ::transformation.engine.s/onError "fail"})})]
         (is (= tag ::lib/ok))
         (is (every? number? (map :d4 (latest-data dataset-id))))))
 
@@ -361,50 +358,50 @@
       (let [[tag _] (apply-transformation {:type :transformation
                                            :transformation
                                            (gen-transformation :core/derive
-                                                               {:akvo.lumen.specs.transformation.derive/newColumnTitle "Derived 6"
-                                                                :akvo.lumen.specs.transformation.derive/code "new Date()"
-                                                                :akvo.lumen.specs.transformation.derive/newColumnType "number"
-                                                                :akvo.lumen.specs.transformation.engine/onError "fail"})})]
+                                                               {::transformation.derive.s/newColumnTitle "Derived 6"
+                                                                ::transformation.derive.s/code "new Date()"
+                                                                ::transformation.derive.s/newColumnType "number"
+                                                                ::transformation.engine.s/onError "fail"})})]
         (is (= tag ::lib/conflict))))
 
     (testing "Sandboxing java interop"
       (let [[tag _] (apply-transformation {:type :transformation
                                            :transformation
                                            (gen-transformation :core/derive
-                                                               {:akvo.lumen.specs.transformation.derive/newColumnTitle "Derived 7"
-                                                                :akvo.lumen.specs.transformation.derive/code "new java.util.Date()"
-                                                                :akvo.lumen.specs.transformation.derive/newColumnType "number"
-                                                                :akvo.lumen.specs.transformation.engine/onError "fail"})})]
+                                                               {::transformation.derive.s/newColumnTitle "Derived 7"
+                                                                ::transformation.derive.s/code "new java.util.Date()"
+                                                                ::transformation.derive.s/newColumnType "number"
+                                                                ::transformation.engine.s/onError "fail"})})]
         (is (= tag ::lib/conflict))))
 
     (testing "Sandboxing dangerous js functions"
       (let [[tag _] (apply-transformation {:type :transformation
                                            :transformation
                                            (gen-transformation :core/derive
-                                                               {:akvo.lumen.specs.transformation.derive/newColumnTitle "Derived 7"
-                                                                :akvo.lumen.specs.transformation.derive/code "quit()"
-                                                                :akvo.lumen.specs.transformation.derive/newColumnType "number"
-                                                                :akvo.lumen.specs.transformation.engine/onError "fail"})})]
+                                                               {::transformation.derive.s/newColumnTitle "Derived 7"
+                                                                ::transformation.derive.s/code "quit()"
+                                                                ::transformation.derive.s/newColumnType "number"
+                                                                ::transformation.engine.s/onError "fail"})})]
         (is (= tag ::lib/conflict))))
 
     (testing "Fail early on syntax error"
       (let [[tag _] (apply-transformation {:type :transformation
                                            :transformation
                                            (gen-transformation :core/derive
-                                                               {:akvo.lumen.specs.transformation.derive/newColumnTitle "Derived 8"
-                                                                :akvo.lumen.specs.transformation.derive/code ")"
-                                                                :akvo.lumen.specs.transformation.derive/newColumnType "text"
-                                                                :akvo.lumen.specs.transformation.engine/onError "fail"})})]
+                                                               {::transformation.derive.s/newColumnTitle "Derived 8"
+                                                                ::transformation.derive.s/code ")"
+                                                                ::transformation.derive.s/newColumnType "text"
+                                                                ::transformation.engine.s/onError "fail"})})]
         (is (= tag ::lib/bad-request))))
 
     (testing "Fail infinite loop"
       (let [[tag _] (apply-transformation {:type :transformation
                                            :transformation
                                            (gen-transformation :core/derive
-                                                               {:akvo.lumen.specs.transformation.derive/newColumnTitle "Derived 9"
-                                                                :akvo.lumen.specs.transformation.derive/code "while(true) {}"
-                                                                :akvo.lumen.specs.transformation.derive/newColumnType "text"
-                                                                :akvo.lumen.specs.transformation.engine/onError "fail"})})]
+                                                               {::transformation.derive.s/newColumnTitle "Derived 9"
+                                                                ::transformation.derive.s/code "while(true) {}"
+                                                                ::transformation.derive.s/newColumnType "text"
+                                                                ::transformation.engine.s/onError "fail"})})]
         (is (= tag ::lib/bad-request))))
 
 
@@ -412,19 +409,19 @@
       (let [[tag _] (apply-transformation {:type :transformation
                                            :transformation
                                            (gen-transformation :core/derive
-                                                               {:akvo.lumen.specs.transformation.derive/newColumnTitle "Derived 10"
-                                                                :akvo.lumen.specs.transformation.derive/code "(function() {})()"
-                                                                :akvo.lumen.specs.transformation.derive/newColumnType "text"
-                                                                :akvo.lumen.specs.transformation.engine/onError "fail"})})]
+                                                               {::transformation.derive.s/newColumnTitle "Derived 10"
+                                                                ::transformation.derive.s/code "(function() {})()"
+                                                                ::transformation.derive.s/newColumnType "text"
+                                                                ::transformation.engine.s/onError "fail"})})]
         (is (= tag ::lib/bad-request)))
 
       (let [[tag _] (apply-transformation {:type :transformation
                                            :transformation
                                            (gen-transformation :core/derive
-                                                               {:akvo.lumen.specs.transformation.derive/newColumnTitle "Derived 11"
-                                                                :akvo.lumen.specs.transformation.derive/code "(() => 'foo')()"
-                                                                :akvo.lumen.specs.transformation.derive/newColumnType "text"
-                                                                :akvo.lumen.specs.transformation.engine/onError "fail"})})]
+                                                               {::transformation.derive.s/newColumnTitle "Derived 11"
+                                                                ::transformation.derive.s/code "(() => 'foo')()"
+                                                                ::transformation.derive.s/newColumnType "text"
+                                                                ::transformation.engine.s/onError "fail"})})]
         (is (= tag ::lib/bad-request))))))
 
 (deftest ^:functional split-column-test
