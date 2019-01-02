@@ -339,7 +339,6 @@
 (defmethod op-spec :core/reverse-geocode  [_]
   (s/keys
    :req-un [::transformation.reverse-geocode/args
-	    ::transformation.engine/onError
             ::transformation.engine/op]))
 
 (create-ns  'akvo.lumen.specs.transformation.sort-column)
