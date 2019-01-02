@@ -4,6 +4,7 @@
                                          tenant-conn-fixture
                                          *error-tracker*
                                          error-tracker-fixture
+                                         summarise-transformation-logs-fixture
                                          *caddisfly*
                                          caddisfly-fixture]]
             [akvo.lumen.lib :as lib]
@@ -32,7 +33,7 @@
 (alias 'c.text 'akvo.lumen.specs.import.column.text)
 (alias 'i.values 'akvo.lumen.specs.import.values)
 
-(use-fixtures :once tu/spec-instrument caddisfly-fixture tenant-conn-fixture error-tracker-fixture)
+(use-fixtures :once tu/spec-instrument caddisfly-fixture tenant-conn-fixture error-tracker-fixture summarise-transformation-logs-fixture)
 
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/transformation_test.sql")
