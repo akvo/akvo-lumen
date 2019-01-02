@@ -13,28 +13,37 @@
             [akvo.lumen.lib.transformation.engine :as engine]
             [akvo.lumen.postgres :as postgres]
             [akvo.lumen.specs.import :as i-c]
+            [akvo.lumen.specs.import.column :as import.column.s]
             [akvo.lumen.specs.import.values :as i-v]
             [akvo.lumen.test-utils :refer [import-file at-least-one-true]]
             [akvo.lumen.test-utils :as tu]
             [cheshire.core :as json]
+            [clj-time.coerce :as tcc]
+            [clj-time.core :as tc]
+            [clj-time.format :as timef]
             [clojure.java.io :as io]
             [clojure.spec.alpha :as s]
+            [clojure.string :as string]
             [clojure.test :refer :all]
             [clojure.tools.logging :as log]
             [clojure.walk :refer (stringify-keys)]
             [hugsql.core :as hugsql]))
+
+(alias 'c.multiple 'akvo.lumen.specs.import.column.multiple)
+(alias 'c.text 'akvo.lumen.specs.import.column.text)
+(alias 'i.values 'akvo.lumen.specs.import.values)
+
+(use-fixtures :once tu/spec-instrument caddisfly-fixture tenant-conn-fixture error-tracker-fixture summarise-transformation-logs-fixture)
+
+(hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/transformation_test.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
 
 (def ops (vec (json/parse-string (slurp (io/resource "ops.json")))))
 
 (def invalid-op (-> (take 3 ops)
                     vec
                     (update-in [1 "args"] dissoc "parseFormat")))
-
-(hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
-(hugsql/def-db-fns "akvo/lumen/lib/transformation_test.sql")
-(hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
-
-(use-fixtures :once tu/spec-instrument caddisfly-fixture tenant-conn-fixture error-tracker-fixture summarise-transformation-logs-fixture)
 
 (deftest op-validation
   (testing "op validation"
@@ -54,7 +63,7 @@
                                                                  :file "transformation_test.csv"})
           [tag _] (last (for [transformation ops]
                           (tf/apply {:tenant-conn *tenant-conn*} dataset-id {:type :transformation
-                                                              :transformation transformation})))]
+                                                                             :transformation transformation})))]
       (is (= ::lib/ok tag)))))
 
 (deftest ^:functional test-import-and-transform
@@ -174,40 +183,48 @@
                                            :table-name table-name})))))))
     ))
 
-(defn date-transformation [column-name format]
-  {:type :transformation
-   :transformation {"op" "core/change-datatype"
-                    "args" {"columnName" column-name
-                            "newType" "date"
-                            "defaultValue" 0
-                            "parseFormat" format}
-                    "onError" "fail"}})
-
 (deftest ^:functional date-parsing-test
-  (let [dataset-id (import-file *tenant-conn* *error-tracker* {:has-column-headers? true
-                                                               :file "dates.csv"})
+  (let [date-transformation (fn[column-name format*]
+                              {:type           :transformation
+                               :transformation {"op"      "core/change-datatype"
+                                                "args"    {"columnName"   column-name
+                                                           "newType"      "date"
+                                                           "defaultValue" 0
+                                                           "parseFormat"  format*}
+                                                "onError" "fail"}})
+        data                (i-c/sample-imported-dataset [:text
+                                                          [:text {::c.text/value (fn [] (import.column.s/date-format-gen
+                                                                                         (fn [[y _ _ :as date]]
+                                                                                           (str y))))
+                                                                  ::i.values/key (fn [] import.column.s/false-gen)}]
+                                                          [:text {::c.text/value (fn [] (import.column.s/date-format-gen
+                                                                                         (fn [[y m d :as date]]
+                                                                                           (str d "/" m "/" y))))
+                                                                  ::i.values/key (fn [] import.column.s/false-gen)}]
+                                                          [:text {::c.text/value (fn [] (import.column.s/date-format-gen
+                                                                                         (fn [date]
+                                                                                           (string/join "-" date))))
+                                                                  ::i.values/key (fn [] import.column.s/false-gen)}]]
+                                                         10)
+        years               (map (comp :value second) (:rows data))
+        years-slash         (map (comp (partial timef/parse (timef/formatter "dd/MM/yyyy")) :value first next next) (:rows data))
+        years-hiphen        (map (comp (partial timef/parse (timef/formatter "yyyy-MM-dd")) :value first next next next) (:rows data))
+        dataset-id          (import-file *tenant-conn* *error-tracker* 
+                                         {:dataset-name "date-parsing-test-bis"
+                                          :kind         "clj"
+                                          :data         data})
+
         apply-transformation (partial tf/apply {:tenant-conn *tenant-conn*} dataset-id)]
-    (let [[tag {:strs [datasetId]}] (do (apply-transformation (date-transformation "c1" "YYYY"))
-                                        (apply-transformation (date-transformation "c2" "DD/MM/YYYY"))
-                                        (apply-transformation (date-transformation "c3" "YYYY-MM-DD")))]
+    (let [[tag {:strs [datasetId]}] (do (apply-transformation (date-transformation "c2" "YYYY"))
+                                        (apply-transformation (date-transformation "c3" "DD/MM/YYYY"))
+                                        (apply-transformation (date-transformation "c4" "YYYY-MM-DD")))]
       (is (= ::lib/ok tag))
       (let [table-name (:table-name (latest-dataset-version-by-dataset-id *tenant-conn*
                                                                           {:dataset-id datasetId}))
-            first-date (:c1 (get-val-from-table *tenant-conn*
-                                                {:rnum 1
-                                                 :column-name "c1"
-                                                 :table-name table-name}))
-            second-date (:c2 (get-val-from-table *tenant-conn*
-                                                 {:rnum 1
-                                                  :column-name "c2"
-                                                  :table-name table-name}))
-            third-date (:c3 (get-val-from-table *tenant-conn*
-                                                {:rnum 1
-                                                 :column-name "c3"
-                                                 :table-name table-name}))]
-        (is (pos? first-date))
-        (is (pos? second-date))
-        (is (pos? third-date))))))
+            table-data (get-data *tenant-conn* {:table-name table-name})]
+        (is (= years (map (comp str tc/year tcc/from-long :c2) table-data)))
+        (is (= years-slash (map (comp tcc/from-long :c3) table-data)))
+        (is (= years-hiphen (map (comp tcc/from-long :c4) table-data)))))))
 
 (defn change-datatype-transformation [column-name]
   {:type :transformation
@@ -416,8 +433,10 @@
           (is (= ["'2" "2"] (map :d2 data))))))))
 
 (deftest ^:functional delete-column-test
-  (let [dataset-id (import-file *tenant-conn* *error-tracker* {:has-column-headers? true
-                                                               :file "dates.csv"})
+  (let [dataset-id (import-file *tenant-conn* *error-tracker*
+                                       {:dataset-name "origin-dataset"
+                                        :kind "clj"
+                                        :data (i-c/sample-imported-dataset [:text :number :number :date :multiple] 2)})
         apply-transformation (partial tf/apply {:tenant-conn *tenant-conn*} dataset-id)]
     (let [[tag _] (apply-transformation {:type :transformation
                                          :transformation {"op" "core/delete-column"
@@ -426,12 +445,10 @@
       (is (= ::lib/ok tag))
       (let [{:keys [columns transformations]} (latest-dataset-version-by-dataset-id *tenant-conn*
                                                                                     {:dataset-id dataset-id})]
-        (is (= ["c1" "c3" "c4"] (map #(get % "columnName") columns)))
+        (is (= ["c1" "c3" "c4" "c5"] (map #(get % "columnName") columns)))
         (let [{:strs [before after]} (get-in (last transformations) ["changedColumns" "c2"])]
           (is (= "c2" (get before "columnName")))
           (is (nil? after)))))))
-
-(alias 'c.multiple 'akvo.lumen.specs.import.column.multiple)
 
 (deftest ^:functional multiple-column-test
   (let [multiple-column-type "caddisfly"
@@ -454,20 +471,61 @@
                                                                   "args" {"columns" (stringify-keys columns-payload)
                                                                           "selectedColumn" {"multipleType" multiple-column-type
                                                                                             "multipleId" i-v/cad1-id
-                                                                                            "columnName" "c0"}
-                                                                          "columnName" "c0"
+                                                                                            "columnName" "c1"}
+                                                                          "columnName" "c1"
                                                                           "extractImage" false}
                                                                   "onError" "fail"}})]
       (is (= ::lib/ok tag))
       (let [{:keys [columns transformations]} (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id})]
         
-        (is (= (apply conj ["c0"] (mapv (fn [idx] (str "d" idx)) (range 1 (inc (count new-columns)))))
+        (is (= (apply conj ["c1"] (mapv (fn [idx] (str "d" idx)) (range 1 (inc (count new-columns)))))
                (map #(get % "columnName") columns)))
         (let [{:strs [before after]} (get-in (last transformations) ["changedColumns" "d1"])]
           (is (nil? before))
           (is (= 1 (get after "caddisfly-test-id")))
           (is (= (:name (nth new-columns 0)) (get after "title")))
           (is (= "d1" (get after "columnName"))))))))
+
+(defn- replace-column
+  "utility to have same column in other generated dataset"
+  [origin-data target-data column-idx]
+  (-> target-data
+      (assoc-in [:columns column-idx]  (nth (:columns origin-data) column-idx))
+      (assoc :rows (map #(assoc-in % [column-idx] (nth %2 column-idx)) (:rows target-data) (:rows origin-data)))))
+
+(deftest ^:functional merge-datasets-test
+  (let [origin-data (i-c/sample-imported-dataset [:text :date] 2)
+        target-data (replace-column origin-data (i-c/sample-imported-dataset [:text :number :number :text] 2) 0) 
+        origin-dataset-id (import-file *tenant-conn* *error-tracker*
+                                       {:dataset-name "origin-dataset"
+                                        :kind "clj"
+                                        :data origin-data})
+        target-dataset-id (import-file *tenant-conn* *error-tracker*
+                                       {:dataset-name "origin-dataset"
+                                        :kind "clj"
+                                        :data target-data})
+        apply-transformation (partial tf/apply {:tenant-conn *tenant-conn*} origin-dataset-id)]
+    (let [[tag _ :as res] (apply-transformation {:type :transformation
+                                                 :transformation {"op" "core/merge-datasets",
+                                                                  "args"
+                                                                  {"source"
+                                                                   {"datasetId" target-dataset-id,
+                                                                    "mergeColumn" "c1",
+                                                                    "aggregationColumn" nil,
+                                                                    "aggregationDirection" "DESC",
+                                                                    "mergeColumns" ["c4" "c3" "c2"]},
+                                                                   "target" {"mergeColumn" "c1"}}}})]
+      (is (= ::lib/ok tag))
+      (let [{:keys [columns transformations table-name]} (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id origin-dataset-id})
+            data-db (get-data *tenant-conn* {:table-name table-name})]
+        (is (=  (map (comp name :type) (apply conj
+                                              (:columns origin-data)
+                                              (next (:columns target-data))))
+                (map #(get % "type") columns)))
+        (is (= '(:c1 :c2 :d1 :d2 :d3) (map #(keyword (get % "columnName")) columns)))
+        (is (= 2 (count data-db)))
+        (is (= (map (comp :value first) (:rows origin-data)) (map :c1 data-db)))
+        (is (= (map (comp :value last) (:rows target-data)) (map :d3 data-db)))))))
 
 (deftest ^:functional rename-column-test
   (let [dataset-id (import-file *tenant-conn* *error-tracker* {:has-column-headers? true

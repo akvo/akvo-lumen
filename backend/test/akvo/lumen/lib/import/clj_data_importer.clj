@@ -1,7 +1,18 @@
 (ns akvo.lumen.lib.import.clj-data-importer
   (:require [akvo.lumen.lib.import.common :as common]
             [akvo.lumen.protocols :as p]
+            [robert.hooke :refer (add-hook) :as r]
+            [clojure.tools.logging :as log]
+            [akvo.lumen.lib.import :as l.import]
             [clojure.tools.logging :as log]))
+
+(defn new-insert-data-source
+  [f tenant-conn data-source-id data-source]
+  (log/info "hooking l.import/insert-data-source-db")
+  (f tenant-conn data-source-id (-> data-source (update-in ["source"] dissoc "data"))))
+
+(r/clear-hooks #'l.import/insert-data-source-db)
+(r/add-hook #'l.import/insert-data-source-db #'new-insert-data-source)
 
 (defn data-records [{:keys [columns rows]}]
   (for [row rows]
