@@ -58,9 +58,9 @@
           (str/join "," (map #(format "c%s double precision" (+ % 2))
                              (range categories-count)))))
 
-(defn apply-pivot [conn dataset query filter-str]
+(defn apply-pivot [conn table-name query filter-str]
   (let [categories (unique-values conn
-                                  (:table-name dataset)
+                                  table-name
                                   (:category-column query)
                                   filter-str)
         category-columns (map (fn [title]
@@ -70,24 +70,24 @@
         columns (cons (select-keys (:row-column query)
                                    ["title" "type"])
                       category-columns)]
-    {:rows (run-query conn (pivot-sql (:table-name dataset)
+    {:rows (run-query conn (pivot-sql table-name
                                       query
                                       filter-str
                                       (count categories)))
      :columns columns}))
 
-(defn apply-empty-query [conn dataset filter-str]
+(defn apply-empty-query [conn table-name filter-str]
   (let [count (run-query conn (format "SELECT count(rnum) FROM %s WHERE %s"
-                                      (:table-name dataset)
+                                      table-name
                                       filter-str))]
     {:columns [{"type" "number"
                 "title" "Total"}]
      :rows count}))
 
-(defn apply-empty-category-query [conn dataset query filter-str]
+(defn apply-empty-category-query [conn table-name query filter-str]
   (let [rows (->> (format "SELECT %s, count(rnum) FROM %s WHERE %s GROUP BY 1 ORDER BY 1"
                           (coalesce (get query :row-column))
-                          (:table-name dataset)
+                          table-name
                           filter-str)
                   (run-query conn))]
     {:columns [{"type" "text"
@@ -96,10 +96,10 @@
                 "title" "Total"}]
      :rows rows}))
 
-(defn apply-empty-row-query [conn dataset query filter-str]
+(defn apply-empty-row-query [conn table-name query filter-str]
   (let [counts (->> (format "SELECT %s, count(rnum) FROM %s WHERE %s GROUP BY 1 ORDER BY 1"
                             (coalesce (get query :category-column))
-                            (:table-name dataset)
+                            table-name
                             filter-str)
                     (run-query conn))]
     {:columns (cons {"title" ""
@@ -110,26 +110,26 @@
                          counts))
      :rows [(cons "Total" (map second counts))]}))
 
-(defn apply-empty-value-query [conn dataset query filter-str]
+(defn apply-empty-value-query [conn table-name query filter-str]
   (apply-pivot conn
-               dataset
+               table-name
                (assoc query
                       :value-column {"columnName" "rnum"}
                       "aggregation" "count")
                filter-str))
 
-(defn apply-query [conn dataset query filter-str]
+(defn apply-query [conn table-name query filter-str]
   (cond
     (and (nil? (:row-column query))
          (nil? (:category-column query)))
-    (apply-empty-query conn dataset filter-str)
+    (apply-empty-query conn table-name filter-str)
     (nil? (:category-column query))
-    (apply-empty-category-query conn dataset query filter-str)
+    (apply-empty-category-query conn table-name query filter-str)
     (nil? (:row-column query))
-    (apply-empty-row-query conn dataset query filter-str)
+    (apply-empty-row-query conn table-name query filter-str)
     (nil? (:value-column query))
-    (apply-empty-value-query conn dataset query filter-str)
-    :else (apply-pivot conn dataset query filter-str)))
+    (apply-empty-value-query conn table-name query filter-str)
+    :else (apply-pivot conn table-name query filter-str)))
 
 (defn build-query
   "Replace column names with proper column metadata from the dataset"
@@ -147,10 +147,10 @@
                                   {:aggregation (get query "aggregation")})))
    :filters (get query "filters")})
 
-(defn query [tenant-conn dataset query]
-  (let [query (build-query (:columns dataset) query)
-        filter-str (filter/sql-str (:columns dataset) (:filters query))]
-    (lib/ok (merge (apply-query tenant-conn dataset query filter-str)
+(defn query [tenant-conn {:keys [columns table-name]} query]
+  (let [query (build-query columns query)
+        filter-str (filter/sql-str columns (:filters query))]
+    (lib/ok (merge (apply-query tenant-conn table-name query filter-str)
                    {:metadata
                     {"categoryColumnTitle" (get-in query
                                                    [:category-column "title"])}}))))
