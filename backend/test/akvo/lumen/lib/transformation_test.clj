@@ -31,24 +31,30 @@
             [clojure.test :refer :all]
             [clojure.tools.logging :as log]
             [clojure.walk :refer (stringify-keys)]
-            [hugsql.core :as hugsql]))
+            [hugsql.core :as hugsql])
+  (:import [akvo.lumen.postgres Geoshape Geopoint]))
 
-(alias 'import.column.text.s                   'akvo.lumen.specs.import.column.text)
-(alias 'import.column.multiple.s               'akvo.lumen.specs.import.column.multiple)
-(alias 'transformation.engine.s                'akvo.lumen.specs.transformation.engine)
-(alias 'transformation.combine.s               'akvo.lumen.specs.transformation.combine)
-(alias 'transformation.filter-column.s         'akvo.lumen.specs.transformation.filter-column)
-(alias 'transformation.split-column.s          'akvo.lumen.specs.transformation.split-column)
-(alias 'transformation.derive.s                'akvo.lumen.specs.transformation.derive)
-(alias 'transformation.change-datatype.s       'akvo.lumen.specs.transformation.change-datatype)
-(alias 'transformation.sort-column.s           'akvo.lumen.specs.transformation.sort-column)
-(alias 'transformation.remove-sort.s           'akvo.lumen.specs.transformation.remove-sort)
-(alias 'transformation.generate-geopoints.s    'akvo.lumen.specs.transformation.generate-geopoints)
-(alias 'transformation.rename-column.s         'akvo.lumen.specs.transformation.rename-column)
-(alias 'transformation.merge-datasets.source.s 'akvo.lumen.specs.transformation.merge-datasets.source)
-(alias 'transformation.merge-datasets.target.s 'akvo.lumen.specs.transformation.merge-datasets.target)
-(alias 'transformation.merge-datasets.s        'akvo.lumen.specs.transformation.merge-datasets)
-(alias 'db.dataset-version.column.s            'akvo.lumen.specs.db.dataset-version.column)
+(alias 'import.column.text.s                    'akvo.lumen.specs.import.column.text)
+(alias 'import.column.geoshape.s                'akvo.lumen.specs.import.column.geoshape)
+(alias 'import.column.multiple.s                'akvo.lumen.specs.import.column.multiple)
+(alias 'transformation.engine.s                 'akvo.lumen.specs.transformation.engine)
+(alias 'transformation.combine.s                'akvo.lumen.specs.transformation.combine)
+(alias 'transformation.filter-column.s          'akvo.lumen.specs.transformation.filter-column)
+(alias 'transformation.split-column.s           'akvo.lumen.specs.transformation.split-column)
+(alias 'transformation.derive.s                 'akvo.lumen.specs.transformation.derive)
+(alias 'transformation.change-datatype.s        'akvo.lumen.specs.transformation.change-datatype)
+(alias 'transformation.sort-column.s            'akvo.lumen.specs.transformation.sort-column)
+(alias 'transformation.remove-sort.s            'akvo.lumen.specs.transformation.remove-sort)
+(alias 'transformation.generate-geopoints.s     'akvo.lumen.specs.transformation.generate-geopoints)
+(alias 'transformation.rename-column.s          'akvo.lumen.specs.transformation.rename-column)
+(alias 'transformation.merge-datasets.source.s  'akvo.lumen.specs.transformation.merge-datasets.source)
+(alias 'transformation.merge-datasets.target.s  'akvo.lumen.specs.transformation.merge-datasets.target)
+(alias 'transformation.merge-datasets.s         'akvo.lumen.specs.transformation.merge-datasets)
+(alias 'transformation.reverse-geocode.source.s 'akvo.lumen.specs.transformation.reverse-geocode.source)
+(alias 'transformation.reverse-geocode.target.s 'akvo.lumen.specs.transformation.reverse-geocode.target)
+(alias 'transformation.reverse-geocode.s        'akvo.lumen.specs.transformation.reverse-geocode)
+(alias 'db.dataset-version.s                    'akvo.lumen.specs.db.dataset-version)
+(alias 'db.dataset-version.column.s             'akvo.lumen.specs.db.dataset-version.column)
 
 (use-fixtures :once tu/spec-instrument caddisfly-fixture tenant-conn-fixture error-tracker-fixture summarise-transformation-logs-fixture)
 
@@ -594,9 +600,34 @@
       (is (= (map (comp :value last) (:rows target-data)) (map :d3 data-db))))))
 
 (deftest ^:functional reverse-geocode-test
-  ;; todo
-  (log/error :follow-here :TODO "reverse-geocode-test" "and replace all csv file references ") 
-  )
+  (let [geoshape-data (import.s/sample-imported-dataset
+              [:text
+               [:geoshape {:import.column.geoshape.s/value #(s/gen #{(Geoshape. import.values.s/polygon)})}]]
+              2)
+        geopoint-data (import.s/sample-imported-dataset
+                       [:text
+                        :geopoint]
+                       2)
+        geoshape-dataset-id (import-file *tenant-conn* *error-tracker*
+                                         {:dataset-name "dataset-with-geoshape"
+                                          :kind         "clj"
+                                          :data         geoshape-data})
+        geopoint-dataset-id (import-file *tenant-conn* *error-tracker*
+                                         {:dataset-name "dataset-with-geopoint"
+                                          :kind         "clj"
+                                          :data         geopoint-data})
+        apply-transformation (partial transformation/apply {:tenant-conn *tenant-conn*} geopoint-dataset-id)
+        [tag _] (apply-transformation {:type :transformation
+                                       :transformation
+                                       (gen-transformation :core/reverse-geocode
+                                                           {::db.dataset-version.s/dataset-id geoshape-dataset-id}
+                                                           [:source :geoshapeColumn] "c2"
+                                                           [:source :mergeColumn] "c1"
+                                                           [:target :geopointColumn] "c2"
+                                                           [:target :title] "reverse-geocode-new-column"
+                                                           )})]
+    (is (= ::lib/ok tag))))
+
 
 (deftest ^:functional rename-column-test
   (let [dataset-id           (import-file *tenant-conn* *error-tracker* {:has-column-headers? true
