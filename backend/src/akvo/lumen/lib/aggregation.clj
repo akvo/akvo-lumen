@@ -23,7 +23,7 @@
 
 (defn query [tenant-conn dataset-id visualisation-type query]
   (jdbc/with-db-transaction [tenant-tx-conn tenant-conn {:read-only? true}]
-    (if-let [dataset (dataset-by-id tenant-tx-conn {:id dataset-id})]
+    (if-let [dataset (table-name-and-columns-by-dataset-id tenant-tx-conn {:id dataset-id})]
       (try
         (query* tenant-tx-conn dataset visualisation-type query)
         (catch clojure.lang.ExceptionInfo e
