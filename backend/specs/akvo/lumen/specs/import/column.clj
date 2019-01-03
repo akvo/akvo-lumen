@@ -111,7 +111,7 @@
 
 (s/def ::c.geopoint/value (s/with-gen
                             #(instance? Geopoint %)
-                            #(s/gen #{(Geopoint. "auto-generated")})))
+                            #(s/gen #{(Geopoint. v/point)})))
 
 
 (defmulti column-body (fn[{:keys [type] :as o}] type))
