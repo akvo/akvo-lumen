@@ -40,6 +40,7 @@
                          (assoc c (name k) {:before (>column before) :after (>column after)})
                          ) {} cc))]
     (let [res  (-> (keywordize-keys dsv)
+                   (update :transformations #(mapv (fn [t] (update t :op keyword)) %))
                    (update :columns #(mapv >column %))
                    (update :transformations #(mapv (fn [t]
                                                      (let [t (if (or (= :core/split-column (:op t))

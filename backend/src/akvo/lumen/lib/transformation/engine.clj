@@ -3,7 +3,6 @@
             [akvo.lumen.util :as util]
             [clojure.set :as set]
             [clojure.string :as str]
-            [clojure.walk :refer (keywordize-keys)]
             [clojure.tools.logging :as log]
             [hugsql.core :as hugsql]))
 
@@ -17,9 +16,7 @@
 (defmulti valid?
   "Validate transformation spec"
   (fn [op-spec]
-    (keyword
-     (or (op-spec "op")
-         (op-spec :op)))))
+    (keyword (op-spec "op"))))
 
 (defmethod valid? :default
   [op-spec]
@@ -36,9 +33,7 @@
    - \"args\" : map with arguments to the operation
    - \"onError\" : Error strategy"
   (fn [deps table-name columns op-spec]
-    (keyword
-     (or (op-spec "op")
-         (op-spec :op)))))
+    (keyword (get op-spec "op"))))
 
 (defmethod apply-operation :default
   [deps table-name columns op-spec]
@@ -136,19 +131,17 @@
         (throw (ex-info (format "Failed to transform. %s" (or message "")) {})))
       (let [new-dataset-version-id (str (util/squuid))]
         (clear-dataset-version-data-table tenant-conn {:id (:id dataset-version)})
-        (let [transformations      (conj (mapv #(update (keywordize-keys %) :op keyword) (vec (:transformations dataset-version)))
-                                         (assoc (update (keywordize-keys transformation) :op keyword)
-                                                "changedColumns" (diff-columns previous-columns
-                                                                               columns)))
-
-              next-dataset-version {:id                  new-dataset-version-id
-                                    :dataset-id          dataset-id
-                                    :job-execution-id    job-execution-id
-                                    :table-name          source-table
+        (let [next-dataset-version {:id new-dataset-version-id
+                                    :dataset-id dataset-id
+                                    :job-execution-id job-execution-id
+                                    :table-name source-table
                                     :imported-table-name (:imported-table-name dataset-version)
-                                    :version             (inc (:version dataset-version))
-                                    :transformations     transformations
-                                    :columns             columns}]
+                                    :version (inc (:version dataset-version))
+                                    :transformations (conj (vec (:transformations dataset-version))
+                                                           (assoc transformation
+                                                                  "changedColumns" (diff-columns previous-columns
+                                                                                                 columns)))
+                                    :columns columns}]
           (new-dataset-version tenant-conn next-dataset-version)
           (touch-dataset tenant-conn {:id dataset-id})
           (lib/created next-dataset-version))))))
@@ -172,19 +165,18 @@
       (if (empty? transformations)
         (let [new-dataset-version-id (str (util/squuid))]
           (clear-dataset-version-data-table tenant-conn {:id (:id current-dataset-version)})
-          (let [transformations (mapv #(update (keywordize-keys %) :op keyword)
-                                      (vec
-                                       (butlast
-                                        (:transformations current-dataset-version))))
-                next-dataset-version {:id new-dataset-version-id
+          (let [next-dataset-version {:id new-dataset-version-id
                                       :dataset-id dataset-id
                                       :job-execution-id job-execution-id
                                       :table-name table-name
                                       :imported-table-name (:imported-table-name current-dataset-version)
                                       :version (inc (:version current-dataset-version))
-                                      :transformations transformations
+                                      :transformations (vec
+                                                        (butlast
+                                                         (:transformations current-dataset-version)))
                                       :columns columns}]
-            (new-dataset-version tenant-conn next-dataset-version)
+            (new-dataset-version tenant-conn
+                                 next-dataset-version)
             (touch-dataset tenant-conn {:id dataset-id})
             (drop-table tenant-conn {:table-name previous-table-name})
             (lib/created next-dataset-version)))
@@ -213,7 +205,7 @@
 
 (defmulti adapt-transformation
   (fn [op-spec older-columns new-columns]
-    (or (keyword (get op-spec "op")) (keyword (:op op-spec)))))
+    (keyword (get op-spec "op"))))
 
 (defmethod adapt-transformation :default
   [op-spec older-columns new-columns]
