@@ -317,13 +317,15 @@
 (create-ns  'akvo.lumen.specs.transformation.reverse-geocode.target)
 (alias 'transformation.reverse-geocode.target 'akvo.lumen.specs.transformation.reverse-geocode.target)
 
-(s/def ::transformation.reverse-geocode/mergeColumn ::db.dsv.column/columnName)
-(s/def ::transformation.reverse-geocode/geoshapeColumn ::db.dsv.column/columnName)
- 
+(s/def ::transformation.reverse-geocode.source/datasetId ::db.dsv/dataset-id)
+(s/def ::transformation.reverse-geocode.source/mergeColumn ::db.dsv.column/columnName)
+(s/def ::transformation.reverse-geocode.source/geoshapeColumn ::db.dsv.column/columnName)
+
 (s/def ::transformation.reverse-geocode/source
   (s/keys
-   :req-un [::transformation.reverse-geocode/mergeColumn
-            ::transformation.reverse-geocode/geoshapeColumn]))
+   :req-un [::transformation.reverse-geocode.source/datasetId
+            ::transformation.reverse-geocode.source/mergeColumn
+            ::transformation.reverse-geocode.source/geoshapeColumn]))
 
 (s/def ::transformation.reverse-geocode.target/geopointColumn ::db.dsv.column/columnName)
 (s/def ::transformation.reverse-geocode.target/title string?)
