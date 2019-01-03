@@ -8,6 +8,7 @@
             [akvo.lumen.specs.transformation]
             [robert.hooke :refer (add-hook) :as r]
             [akvo.lumen.util :refer [squuid] :as util ]
+            [cheshire.core :as json]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.set :as set]
@@ -26,14 +27,28 @@
             (-> i
                 (update :multipleType keyword)
                 (set/rename-keys {:multipleType :multiple-type
-                                  :multipleId :multiple-id})))]
-    (-> (keywordize-keys dsv)
-        (update :columns #(mapv (fn [e]
-                                  (cond-> e
-                                    true keywordize-keys
-                                    true (update :type keyword)
-                                    true (update :id (fn [o] (if o (keyword o) (keyword (:columnName e)))))
-                                    (:multipleType e) >mult)) %)))))
+                                  :multipleId :multiple-id})))
+          (>column [e]
+            (when e
+              (cond-> e
+               true (update :type keyword)
+               true (update :id (fn [o] (if o (keyword o) (keyword (:columnName e)))))
+               (:multipleType e) >mult)))
+          (>changedColumns [cc]
+            (reduce-kv (fn [c k {:keys [before after] :as v}]
+                         ;; (log/info :v v  (>column v))
+                         (assoc c (name k) {:before (>column before) :after (>column after)})
+                         ) {} cc))]
+    (let [res  (-> (keywordize-keys dsv)
+                   (update :transformations #(mapv (fn [t] (update t :op keyword)) %))
+                   (update :columns #(mapv >column %))
+                   (update :transformations #(mapv (fn [t]
+                                                     (let [t (if (or (= :core/split-column (:op t))
+                                                                     (= :core/extract-multiple (:op t)))
+                                                               (update-in t [:args :selectedColumn] >column)
+                                                               t)]
+                                                       (update t :changedColumns >changedColumns))) %)))]
+      res)))
 
 (defn new-dataset-version-conform
   [f t d]
@@ -136,3 +151,6 @@
     (if (some true? res)
       res
       (replace-item res (rand-int c) true))))
+
+(defn clj>json>clj [d]
+  (json/decode (json/generate-string d)))
