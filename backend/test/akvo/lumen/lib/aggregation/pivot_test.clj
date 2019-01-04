@@ -1,4 +1,4 @@
-(ns akvo.lumen.lib.pivot-test
+(ns akvo.lumen.lib.aggregation.pivot-test
   (:require [akvo.lumen.fixtures :refer [*tenant-conn*
                                          tenant-conn-fixture
                                          *error-tracker*
