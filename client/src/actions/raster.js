@@ -43,9 +43,8 @@ export function fetchRaster(id) {
     dispatch(fetchRasterRequest(id));
     return api
       .get(`/api/rasters/${id}`)
-      .then(response => response.json())
-      .then((raster) => {
-        const immutableRaster = Immutable.fromJS(raster);
+      .then(({ body }) => {
+        const immutableRaster = Immutable.fromJS(body);
         dispatch(fetchRasterSuccess(immutableRaster));
         return immutableRaster;
       })
@@ -126,8 +125,7 @@ function pollRasterImportStatus(importId, name, collectionId) {
     }
     api
       .get(`/api/job_executions/${importId}`)
-      .then(response => response.json())
-      .then(({ status, reason, rasterId }) => {
+      .then(({ body: { status, reason, rasterId } }) => {
         if (status === 'PENDING') {
           setTimeout(
             () => dispatch(pollRasterImportStatus(importId, name, collectionId)),
@@ -162,8 +160,7 @@ export function importRaster(dataSource, collectionId) {
     dispatch(importRasterRequest(dataSource, collectionId));
     api
       .post('/api/rasters', dataSource)
-      .then(response => response.json())
-      .then(({ importId }) => {
+      .then(({ body: { importId } }) => {
         dispatch(pollRasterImportStatus(importId, dataSource.name, collectionId));
         dispatch(hideModal());
         dispatch(clearImport());
@@ -266,7 +263,6 @@ export function deleteRaster(id) {
     dispatch(deleteRasterRequest(id));
     api
       .del(`/api/rasters/${id}`)
-      .then(response => response.json())
       .then(() => dispatch(deleteRasterSuccess(id)))
       .catch(error => dispatch(deleteRasterFailure(id, error)));
   };
@@ -291,7 +287,6 @@ export function deletePendingRaster(id) {
     dispatch(deleteRasterRequest(id));
     api
       .del(`/api/job_executions/${id}`)
-      .then(response => response.json())
       .then(() => dispatch(deletePendingRasterSuccess(id)))
       .catch(error => dispatch(deletePendingRasterFailure(id, error)));
   };

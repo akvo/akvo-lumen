@@ -168,20 +168,17 @@ class Users extends Component {
   onInviteUser(email) {
     this.setState({ isInviteModalVisible: false });
     api.post('/api/admin/invites', { email })
-      .then(response => response.json())
       .then(() => this.getInvitations());
   }
 
   getUsers() {
     api.get('/api/admin/users')
-      .then(response => response.json())
-      .then(({ users }) => this.setState({ users }));
+      .then(({ body }) => this.setState({ users: body }));
   }
 
   getInvitations() {
     api.get('/api/admin/invites')
-      .then(response => response.json())
-      .then(({ invites }) => this.setState({ invitations: invites }));
+      .then(({ body: { invites } }) => this.setState({ invitations: invites }));
   }
 
   getUserActionButtons() {
@@ -233,19 +230,15 @@ class Users extends Component {
     const invitesUrl = `/api/admin/invites/${id}`;
     if (action === 'delete') {
       api.del(usersUrl)
-        .then(response => response.json())
         .then(() => this.getUsers());
     } else if (action === 'demote') {
       api.patch(usersUrl, { admin: false })
-        .then(response => response.json())
         .then(() => this.getUsers());
     } else if (action === 'promote') {
       api.patch(usersUrl, { admin: true })
-        .then(response => response.json())
         .then(() => this.getUsers());
     } else if (action === 'revoke') {
       api.del(invitesUrl)
-        .then(response => response.json())
         .then(() => this.getInvitations());
     }
   }

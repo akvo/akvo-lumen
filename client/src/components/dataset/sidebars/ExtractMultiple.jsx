@@ -197,7 +197,7 @@ function apiMultipleColumn(column, callback) {
       if (response.status !== 200) {
         return { error: response.status };
       }
-      return response.json();
+      return response.body;
     })
     .then(callback);
 }

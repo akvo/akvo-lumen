@@ -46,9 +46,8 @@ export function fetchDataset(id, metaOnly) {
   return (dispatch) => {
     dispatch(fetchDatasetRequest(id));
     return api.get(`/api/datasets/${id}${suffix}`)
-      .then(response => response.json())
-      .then((dataset) => {
-        const immutableDataset = Immutable.fromJS(dataset);
+      .then(({ body }) => {
+        const immutableDataset = Immutable.fromJS(body);
         dispatch(fetchDatasetSuccess(immutableDataset));
         return immutableDataset;
       })
@@ -129,8 +128,7 @@ function pollDatasetImportStatus(importId, name, collectionId) {
     }
     api
       .get(`/api/job_executions/${importId}`)
-      .then(response => response.json())
-      .then(({ status, reason, datasetId }) => {
+      .then(({ body: { status, reason, datasetId } }) => {
         if (status === 'PENDING') {
           setTimeout(
             () => dispatch(pollDatasetImportStatus(importId, name, collectionId)),
@@ -164,8 +162,7 @@ export function importDataset(dataSource, collectionId) {
     dispatch(importDatasetRequest(dataSource, collectionId));
     api
       .post('/api/datasets', dataSource)
-      .then(response => response.json())
-      .then(({ importId }) => {
+      .then(({ body: { importId } }) => {
         dispatch(pollDatasetImportStatus(importId, dataSource.name, collectionId));
         dispatch(hideModal());
         dispatch(clearImport());
@@ -282,7 +279,7 @@ export function deleteDataset(id) {
             dispatch(showNotification('error', `deletion failed: ${error.error}.`));
           });
         } else {
-          response.json().then(() => dispatch(deleteDatasetSuccess(id)));
+          dispatch(deleteDatasetSuccess(id));
         }
       })
     ;
@@ -316,7 +313,6 @@ export function deletePendingDataset(id) {
     dispatch(deleteDatasetRequest(id));
     api
       .del(`/api/data-source/job-execution/${id}/status/pending`)
-      .then(response => response.json())
       .then(() => dispatch(deletePendingDatasetSuccess(id)))
       .catch(error => dispatch(deletePendingDatasetFailure(id, error)));
   };
@@ -327,7 +323,6 @@ export function deleteFailedDataset(id) {
     dispatch(deleteDatasetRequest(id));
     api
       .del(`/api/data-source/job-execution/${id}/status/failed`)
-      .then(response => response.json())
       .then(() => dispatch(removeDataset(id)))
       .catch(error => dispatch(deleteFailedDatasetFailure(id, error)));
   };
@@ -362,7 +357,6 @@ export function updateDatasetMeta(id, meta, callback = () => {}) {
     dispatch(updateDatasetMetaRequest(id));
     api
       .put(`/api/datasets/${id}`, meta)
-      .then(response => response.json())
       .then(() => {
         dispatch(updateDatasetMetaSuccess(id, meta));
         callback();
@@ -391,8 +385,7 @@ function pollDatasetUpdateStatus(updateId, datasetId, title) {
   return (dispatch) => {
     api
       .get(`/api/job_executions/${updateId}`)
-      .then(response => response.json())
-      .then(({ status, reason }) => {
+      .then(({ body: { status, reason } }) => {
         if (status === 'PENDING') {
           setTimeout(
             () => dispatch(pollDatasetUpdateStatus(updateId, datasetId, title)),
@@ -423,8 +416,7 @@ export function updateDataset(id) {
         // how we want to do that.
         { refreshToken: auth.refreshToken() }
       )
-      .then(response => response.json())
-      .then(({ updateId, error }) => {
+      .then(({ body: { updateId, error } }) => {
         if (updateId != null) {
           dispatch(updateDatasetTogglePending(id));
           dispatch(pollDatasetUpdateStatus(updateId, id, title));
@@ -485,8 +477,7 @@ function pollDatasetTransformationStatus(jobExecutionId, datasetId) {
   return (dispatch) => {
     api
       .get(`/api/job_executions/${jobExecutionId}`)
-      .then(response => response.json())
-      .then(({ status, reason }) => {
+      .then(({ body: { status, reason } }) => {
         if (status === 'PENDING') {
           setTimeout(
             () => dispatch(pollDatasetTransformationStatus(jobExecutionId, datasetId)),
@@ -507,8 +498,7 @@ export function sendTransformationLog(datasetId, transformations) {
     dispatch(transformationLogRequestSent(datasetId));
     api
       .post(`/api/transformations/${datasetId}`, transformations.toJSON())
-      .then(response => response.json())
-      .then(({ jobExecutionId }) =>
+      .then(({ body: { jobExecutionId } }) =>
         dispatch(pollDatasetTransformationStatus(jobExecutionId, datasetId))
       );
   };

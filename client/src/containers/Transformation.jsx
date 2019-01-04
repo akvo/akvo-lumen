@@ -39,7 +39,7 @@ class Transformation extends Component {
     api.post(`/api/transformations/${datasetId}/transform`, transformation)
       .then((response) => {
         if (response.ok) {
-          return response.json();
+          return response.body;
         }
         throw new Error('Failed to merge dataset');
       })

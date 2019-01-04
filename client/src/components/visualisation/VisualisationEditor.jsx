@@ -152,9 +152,7 @@ export default class VisualisationEditor extends Component {
 
     const updateMapIfSuccess = (response) => {
       if (response.status >= 200 && response.status < 300) {
-        response
-          .json()
-          .then(json => updateMapVisualisation(json));
+        updateMapVisualisation(response.body);
       } else {
         setMapVisualisationError();
       }
@@ -186,11 +184,10 @@ export default class VisualisationEditor extends Component {
         .get(`/api/aggregation/${datasetId}/${VIS_TYPE_TO_AGGR_ENDPOINT_NAME[vType]}`, {
           query: JSON.stringify(spec),
         })
-        .then(response => response.json())
-        .then((response) => {
+        .then(({ body }) => {
           if (requestId === this.latestRequestId) {
             this.setState({
-              visualisation: Object.assign({}, visualisation, { data: response }),
+              visualisation: Object.assign({}, visualisation, { data: body }),
             });
           }
         });

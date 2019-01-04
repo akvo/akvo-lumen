@@ -22,8 +22,8 @@ export function createVisualisation(visualisation, collectionId, callback = () =
     dispatch(createVisualisationRequest(visualisation));
     api
       .post('/api/visualisations', visualisation)
-      .then(response => response.json())
-      .then((vis) => {
+      .then(({ body }) => {
+        const vis = body;
         dispatch(createVisualisationSuccess(vis));
         if (collectionId) {
           dispatch(addEntitiesToCollection(vis.id, collectionId));
@@ -48,8 +48,8 @@ export function fetchVisualisation(id) {
     dispatch(fetchVisualisationRequest(id));
     api
       .get(`/api/visualisations/${id}`)
-      .then(response => response.json())
-      .then((visualisation) => {
+      .then(({ body }) => {
+        const visualisation = body;
         // We also need to possibly fetch datasets.
         const datasetId = visualisation.datasetId;
         if (datasetId) {
@@ -99,7 +99,6 @@ export function saveVisualisationChanges(visualisation, callback = () => {}) {
     );
     api
       .put(`/api/visualisations/${visualisation.id}`, visualisation)
-      .then(response => response.json())
       .then(() => {
         dispatch(
           saveVisualisationChangesSuccess(
@@ -136,7 +135,6 @@ export function deleteVisualisation(id) {
     dispatch(deleteVisualisationRequest(id));
     api
       .del(`/api/visualisations/${id}`)
-      .then(response => response.json())
       .then(() => dispatch(removeVisualisation(id)))
       .catch(error => dispatch(deleteVisualisationFailure(error)));
   };
@@ -152,9 +150,8 @@ export function fetchShareId(visualisationId) {
     if (visualisationId != null) {
       api
         .post('/api/shares', { visualisationId })
-        .then(response => response.json())
-        .then((response) => {
-          dispatch(fetchShareIdSuccess({ id: visualisationId, shareId: response.id }));
+        .then(({ body }) => {
+          dispatch(fetchShareIdSuccess({ id: visualisationId, shareId: body.id }));
         });
     }
   };

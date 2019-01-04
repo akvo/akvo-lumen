@@ -60,8 +60,7 @@ class Resources extends Component {
 
   getResources() {
     api.get('/api/resources')
-      .then(response => response.json())
-      .then(resources => this.setState(resources));
+      .then(({ body }) => this.setState({ resources: body }));
   }
 
   render() {

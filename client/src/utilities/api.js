@@ -2,7 +2,61 @@ import { omit } from 'lodash';
 
 import * as auth from './auth';
 
+const CONTENT_TYPE = {
+  JSON: 'json',
+};
+
 const wrapUpdateToken = callback => auth.token().then(token => callback(token));
+
+const iteratorToObject = (iterator) => {
+  const result = {};
+  iterator.forEach((value, key) => {
+    result[key] = value;
+  });
+  return result;
+};
+
+const getContentType = (contentType) => {
+  if (contentType.indexOf('application/json') > -1) {
+    return CONTENT_TYPE.JSON;
+  }
+  return null;
+};
+
+const handleResponse = (response) => {
+  const {
+    ok,
+    redirected,
+    status,
+    statusText,
+    type,
+    url,
+    useFinalURL,
+    bodyUsed,
+  } = response;
+  const headers = iteratorToObject(response.headers);
+  const contentType = getContentType(headers['content-type']);
+
+  switch (contentType) {
+    case CONTENT_TYPE.JSON: {
+      return response.json().then(body => ({
+        headers,
+        ok,
+        redirected,
+        status,
+        statusText,
+        type,
+        url,
+        useFinalURL,
+        bodyUsed,
+        body,
+      }));
+    }
+    default: {
+      return response;
+    }
+  }
+};
 
 const requestHeaders = (token, additionalHeaders = {}) => ({
   ...additionalHeaders,
@@ -22,7 +76,8 @@ export const get = (url, queryParams, headers) => {
       method: 'GET',
       headers: omit(requestHeaders(token, headers), 'Content-Type'),
     })
-  );
+  )
+  .then(handleResponse);
 };
 
 export const post = (url, body, headers) =>
@@ -32,7 +87,8 @@ export const post = (url, body, headers) =>
       headers: requestHeaders(token, headers),
       body: JSON.stringify(body),
     })
-  );
+  )
+  .then(handleResponse);
 
 export const put = (url, body, headers) =>
   wrapUpdateToken(token =>
@@ -41,7 +97,8 @@ export const put = (url, body, headers) =>
       headers: requestHeaders(token, headers),
       body: JSON.stringify(body),
     })
-  );
+  )
+  .then(handleResponse);
 
 export const del = (url, headers) =>
   wrapUpdateToken(token =>
@@ -49,7 +106,8 @@ export const del = (url, headers) =>
       method: 'DELETE',
       headers: requestHeaders(token, headers),
     })
-  );
+  )
+  .then(handleResponse);
 
 export const patch = (url, body, headers) =>
   wrapUpdateToken(token =>
@@ -58,5 +116,5 @@ export const patch = (url, body, headers) =>
       headers: requestHeaders(token, headers),
       body: JSON.stringify(body),
     })
-  );
-
+  )
+  .then(handleResponse);

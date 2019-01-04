@@ -104,12 +104,10 @@ class Dataset extends Component {
     return api.post(`/api/transformations/${id}/transform`, transformationJs)
       .then((response) => {
         if (!response.ok) {
-          return response.json().then(({ message }) => {
-            this.removePending(now);
-            throw new Error(message);
-          });
+          this.removePending(now);
+          throw new Error(response.body.message);
         }
-        return response.json();
+        return response.body;
       })
       .then(() => dispatch(fetchDataset(id)))
       .then(() => this.removePending(now))
@@ -126,7 +124,6 @@ class Dataset extends Component {
 
     this.setPendingUndo(now);
     api.post(`/api/transformations/${id}/undo`)
-      .then(response => response.json())
       .then(() => dispatch(fetchDataset(id)))
       .then(() => this.removePending(now));
   }

@@ -28,8 +28,8 @@ export function fetchLibrary() {
   return (dispatch, getState) => {
     dispatch(fetchLibraryRequest());
     return api.get('/api/library')
-      .then(response => response.json())
-      .then((library) => {
+      .then(({ body }) => {
+        const library = body;
         dispatch(fetchDatasetsSuccess(Immutable.fromJS(library.datasets)));
         dispatch(fetchRastersSuccess(Immutable.fromJS(library.rasters)));
         dispatch(fetchVisualisationsSuccess(library.visualisations));

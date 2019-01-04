@@ -237,26 +237,22 @@ class Dashboard extends Component {
           api.post('/api/visualisations/maps', visualisation)
             .then((response) => {
               if (response.status >= 200 && response.status < 300) {
-                response
-                  .json()
-                  .then((json) => {
-                    const change = {};
-                    change[id] = json;
-                    const aggregatedDatasets =
-                      Object.assign({}, this.state.aggregatedDatasets, change);
+                const change = {};
+                change[id] = response.body;
+                const aggregatedDatasets =
+                  Object.assign({}, this.state.aggregatedDatasets, change);
 
-                    const metadataChange = {};
-                    metadataChange[id] = json;
+                const metadataChange = {};
+                metadataChange[id] = response.body;
 
-                    const metadata =
-                      Object.assign(
-                        {},
-                        this.state.metadata,
-                        metadataChange
-                      );
+                const metadata =
+                  Object.assign(
+                    {},
+                    this.state.metadata,
+                    metadataChange
+                  );
 
-                    this.setState({ aggregatedDatasets, metadata });
-                  });
+                this.setState({ aggregatedDatasets, metadata });
               }
             });
           /* Maps hit a different endpoint than other aggregations, so bail out now */
@@ -280,9 +276,10 @@ class Dashboard extends Component {
 
       api.get(`/api/aggregation/${datasetId}/${aggType}`, {
         query: JSON.stringify(spec),
-      }).then(response => response.json()).then((response) => {
+      })
+      .then(({ body }) => {
         const change = {};
-        change[id] = response;
+        change[id] = body;
         const aggregatedDatasets = Object.assign({}, this.state.aggregatedDatasets, change);
         this.setState({ aggregatedDatasets });
       });

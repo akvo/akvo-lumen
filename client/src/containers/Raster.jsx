@@ -39,8 +39,8 @@ class Raster extends Component {
     }
 
     api.post('/api/visualisations/rasters', { rasterId })
-      .then(response => response.json())
-      .then((layergroup) => {
+      .then(({ body }) => {
+        const layergroup = body;
         this.setState({ layerGroupId: layergroup.layerGroupId,
           layerMetadata: layergroup.layerMetadata });
         this.renderLeafletMap();

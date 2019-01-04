@@ -87,7 +87,7 @@ class AkvoFlowDataSourceSettings extends Component {
           .then((response) => {
             this.setState({ isLoadingNext: false });
             if (response.ok) {
-              return response.json();
+              return response.body;
             } else if (response.status === 404) {
               throw new Error(`No such flow instance: ${instance}`);
             } else if (response.status === 403) {
@@ -148,9 +148,9 @@ class AkvoFlowDataSourceSettings extends Component {
       selectedFolders: selectedFolders.concat([selectedFolderId]),
     });
     Promise.all([
-      api.get(selectedFolder.foldersUrl, null, acceptHeader).then(response => response.json()),
-      api.get(selectedFolder.surveysUrl, null, acceptHeader).then(response => response.json()),
-    ]).then(([{ folders }, { surveys }]) => this.setState({
+      api.get(selectedFolder.foldersUrl, null, acceptHeader),
+      api.get(selectedFolder.surveysUrl, null, acceptHeader),
+    ]).then(({ body: [{ folders }, { surveys }] }) => this.setState({
       isLoadingNext: false,
       surveys: merge(this.state.surveys, indexById(surveys)),
       folders: merge(this.state.folders, indexById(folders)),
@@ -162,11 +162,10 @@ class AkvoFlowDataSourceSettings extends Component {
     this.setState({ selectedSurveyId, isLoadingForms: true });
     const surveyUrl = surveys[selectedSurveyId].surveyUrl;
     api.get(surveyUrl, null, acceptHeader)
-      .then(response => response.json())
-      .then(surveyDefinition => this.setState({
+      .then(({ body }) => this.setState({
         isLoadingForms: false,
         surveyDefinitions: merge(surveyDefinitions, {
-          [surveyDefinition.id]: surveyDefinition,
+          [body.id]: body,
         }),
       }));
   }

@@ -22,8 +22,7 @@ export function editCollection(collection) {
   return (dispatch) => {
     dispatch(editCollectionRequest);
     api.put(`/api/collections/${id}`, collection)
-      .then(response => response.json())
-      .then(responseCollection => dispatch(editCollectionSuccess(responseCollection)))
+      .then(({ body }) => dispatch(editCollectionSuccess(body)))
       .catch(error => dispatch(editCollectionFailure(error)));
   };
 }
@@ -33,8 +32,8 @@ export function createCollection(title, optionalEntities) {
   return (dispatch) => {
     // dispatch(createCollectionRequest(title));
     api.post('/api/collections', { title })
-      .then(response => response.json())
-      .then((collection) => {
+      .then(({ body }) => {
+        const collection = body;
         dispatch(createCollectionSuccess(collection));
         if (optionalEntities) {
           const collectionWithEntities =
@@ -56,7 +55,6 @@ export function deleteCollection(id) {
   return (dispatch) => {
     dispatch(deleteCollectionRequest);
     api.del(`/api/collections/${id}`)
-      // No response expected
       .then(() => dispatch(deleteCollectionSuccess(id)))
       .catch(error => dispatch(deleteCollectionFailure(error)));
   };

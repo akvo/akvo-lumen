@@ -139,7 +139,7 @@ function apiColumnPatternAnalysis(datasetId, columnName, limit) {
       if (response.status !== 200) {
         return { error: response.status };
       }
-      return response.json();
+      return response.body;
     });
 }
 
