@@ -18,16 +18,14 @@
     (testing "Simple queries"
       (let [[tag query-result] (query {"bucketColumn" "c1"})]
         (is (= tag ::lib/ok))
-        (is (= query-result {"series"
-                             [{"key" "A", "label" "A", "data" [{"value" 4} {"value" 4}]}],
-                             "common"
-                             {"data" [{"key" "a1", "label" "a1"} {"key" "a2", "label" "a2"}],
-                              "metadata" {"type" "text"}}})))
+        (is (= query-result {:series [{:key "A", :label "A", :data [{:value 4} {:value 4}]}],
+                             :common
+                             {:data [{:key "a1", :label "a1"} {:key "a2", :label "a2"}],
+                              :metadata {:type "text"}}})))
 
       (let [[tag query-result] (query {"bucketColumn" "c2"})]
         (is (= tag ::lib/ok))
-        (is (= query-result {"series"
-                             [{"key" "B", "label" "B", "data" [{"value" 5} {"value" 3}]}],
-                             "common"
-                             {"data" [{"key" "b1", "label" "b1"} {"key" "b2", "label" "b2"}],
-                              "metadata" {"type" "text"}}}))))))
+        (is (= query-result {:series [{:key "B", :label "B", :data [{:value 5} {:value 3}]}],
+                             :common
+                             {:data [{:key "b1", :label "b1"} {:key "b2", :label "b2"}],
+                              :metadata {:type "text"}}}))))))
