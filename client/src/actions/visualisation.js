@@ -32,6 +32,7 @@ export function createVisualisation(visualisation, collectionId, callback = () =
         callback();
       })
       .catch((err) => {
+        dispatch(showNotification('error', 'Failed to create visualisation.'));
         dispatch(createVisualisationFailure(err));
         callback(err);
       });
@@ -77,7 +78,10 @@ export function fetchVisualisation(id) {
         }
         dispatch(fetchVisualisationSuccess(visualisation));
       })
-      .catch(err => dispatch(fetchVisualisationFailure(err)));
+      .catch((err) => {
+        dispatch(showNotification('error', 'Failed to fetch visualisation.'));
+        dispatch(fetchVisualisationFailure(err));
+      });
   };
 }
 
@@ -111,6 +115,7 @@ export function saveVisualisationChanges(visualisation, callback = () => {}) {
         callback();
       })
       .catch((error) => {
+        dispatch(showNotification('error', 'Failed to save visualisation.'));
         dispatch(saveVisualisationChangesFailure(prevVisualisation));
         callback(error);
       });
@@ -136,7 +141,10 @@ export function deleteVisualisation(id) {
     api
       .del(`/api/visualisations/${id}`)
       .then(() => dispatch(removeVisualisation(id)))
-      .catch(error => dispatch(deleteVisualisationFailure(error)));
+      .catch((error) => {
+        dispatch(showNotification('error', 'Failed to delete visualisation.'));
+        dispatch(deleteVisualisationFailure(error));
+      });
   };
 }
 
@@ -152,6 +160,9 @@ export function fetchShareId(visualisationId) {
         .post('/api/shares', { visualisationId })
         .then(({ body }) => {
           dispatch(fetchShareIdSuccess({ id: visualisationId, shareId: body.id }));
+        })
+        .catch(() => {
+          dispatch(showNotification('error', 'Failed to fetch share ID for visualisation.'));
         });
     }
   };
@@ -201,6 +212,7 @@ export function exportVisualisation(visualisationId, options) {
         });
       })
       .catch((error) => {
+        dispatch(showNotification('error', 'Failed to export visualisation.'));
         dispatch(exportVisualisationFailure(error));
       });
   };

@@ -23,7 +23,10 @@ export function editCollection(collection) {
     dispatch(editCollectionRequest);
     api.put(`/api/collections/${id}`, collection)
       .then(({ body }) => dispatch(editCollectionSuccess(body)))
-      .catch(error => dispatch(editCollectionFailure(error)));
+      .catch((error) => {
+        dispatch(showNotification('error', 'Failed to edit collection.'));
+        dispatch(editCollectionFailure(error));
+      });
   };
 }
 
@@ -42,7 +45,10 @@ export function createCollection(title, optionalEntities) {
         }
         dispatch(hideModal());
       })
-      .catch(err => dispatch(createCollectionFailure(err)));
+      .catch((error) => {
+        dispatch(showNotification('error', 'Failed to create collection.'));
+        dispatch(createCollectionFailure(error));
+      });
   };
 }
 
@@ -56,7 +62,10 @@ export function deleteCollection(id) {
     dispatch(deleteCollectionRequest);
     api.del(`/api/collections/${id}`)
       .then(() => dispatch(deleteCollectionSuccess(id)))
-      .catch(error => dispatch(deleteCollectionFailure(error)));
+      .catch((error) => {
+        dispatch(showNotification('error', 'Failed to delete collection.'));
+        dispatch(deleteCollectionFailure(error));
+      });
   };
 }
 

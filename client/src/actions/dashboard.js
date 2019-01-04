@@ -29,6 +29,7 @@ export function createDashboard(dashboard, collectionId, callback = () => {}) {
         callback();
       })
       .catch((err) => {
+        dispatch(showNotification('error', 'Failed to create dashboard.'));
         dispatch(createDashboardFailure(err));
         callback(err);
       });
@@ -56,6 +57,7 @@ export function saveDashboardChanges(dashboard, callback = () => {}) {
         callback();
       })
       .catch((error) => {
+        dispatch(showNotification('error', 'Failed to save dashboard.'));
         dispatch(editDashboardFailure(error));
         callback(error);
       });
@@ -73,7 +75,10 @@ export function fetchDashboard(id) {
     api
       .get(`/api/dashboards/${id}`)
       .then(({ body }) => dispatch(fetchDashboardSuccess(body)))
-      .catch(err => dispatch(fetchDashboardFailure(err)));
+      .catch((error) => {
+        dispatch(showNotification('error', 'Failed to fetch dashboard.'));
+        dispatch(fetchDashboardFailure(error));
+      });
   };
 }
 
@@ -88,7 +93,10 @@ export function deleteDashboard(id) {
     api
       .del(`/api/dashboards/${id}`)
       .then(() => dispatch(deleteDashboardSuccess(id)))
-      .catch(error => dispatch(deleteDashboardFailure(error)));
+      .catch((error) => {
+        dispatch(showNotification('error', 'Failed to delete dashboard.'));
+        dispatch(deleteDashboardFailure(error));
+      });
   };
 }
 
@@ -113,6 +121,9 @@ export function fetchShareId(dashboardId) {
               protected: body.protected,
             })
           );
+        })
+        .catch(() => {
+          dispatch(showNotification('error', 'Failed to fetch share ID for dashboard.'));
         });
     }
   };
@@ -144,6 +155,7 @@ export function setShareProtection(shareId, payload, callback = () => {}) {
           }
         })
         .catch((error, response) => {
+          dispatch(showNotification('error', 'Failed to set share protection for dashboard.'));
           callback(response);
         });
     }
@@ -187,6 +199,7 @@ export function exportDashboard(dashboard, options) {
         });
       })
       .catch((error) => {
+        dispatch(showNotification('error', 'Failed to export dashboard.'));
         dispatch(exportDashboardFailure(error));
       });
   };

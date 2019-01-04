@@ -8,6 +8,7 @@ import {
   addTemporaryEntitiesToCollection,
   removeTemporaryEntitiesFromCollection,
 } from './collection';
+import { showNotification } from './notification';
 
 /*
  * Fetch a raster by id
@@ -48,7 +49,10 @@ export function fetchRaster(id) {
         dispatch(fetchRasterSuccess(immutableRaster));
         return immutableRaster;
       })
-      .catch(error => dispatch(fetchRasterFailure(error, id)));
+      .catch((error) => {
+        dispatch(showNotification('error', 'Failed to fetch raster.'));
+        dispatch(fetchRasterFailure(error, id));
+      });
   };
 }
 
@@ -132,12 +136,15 @@ function pollRasterImportStatus(importId, name, collectionId) {
             constants.POLL_INTERVAL
           );
         } else if (status === 'FAILED') {
+          dispatch(showNotification('error', 'Failed to poll raster import status.'));
           dispatch(importRasterFailure(importId, reason, collectionId));
         } else if (status === 'OK') {
           dispatch(importRasterSuccess(rasterId, importId, collectionId));
         }
       })
-      .catch(error => dispatch(error));
+      .catch(() => {
+        dispatch(showNotification('error', 'Failed to poll raster import status.'));
+      });
   };
 }
 
@@ -164,6 +171,9 @@ export function importRaster(dataSource, collectionId) {
         dispatch(pollRasterImportStatus(importId, dataSource.name, collectionId));
         dispatch(hideModal());
         dispatch(clearImport());
+      })
+      .catch(() => {
+        dispatch(showNotification('error', 'Failed to import raster.'));
       });
   };
 }
@@ -264,7 +274,10 @@ export function deleteRaster(id) {
     api
       .del(`/api/rasters/${id}`)
       .then(() => dispatch(deleteRasterSuccess(id)))
-      .catch(error => dispatch(deleteRasterFailure(id, error)));
+      .catch((error) => {
+        dispatch(showNotification('error', 'Failed to delete raster.'));
+        dispatch(deleteRasterFailure(id, error));
+      });
   };
 }
 
@@ -288,6 +301,9 @@ export function deletePendingRaster(id) {
     api
       .del(`/api/job_executions/${id}`)
       .then(() => dispatch(deletePendingRasterSuccess(id)))
-      .catch(error => dispatch(deletePendingRasterFailure(id, error)));
+      .catch((error) => {
+        dispatch(showNotification('error', 'Failed to delete pending raster.'));
+        dispatch(deletePendingRasterFailure(id, error));
+      });
   };
 }

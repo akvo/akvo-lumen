@@ -34,8 +34,26 @@ const handleResponse = (response) => {
     useFinalURL,
     bodyUsed,
   } = response;
+
   const headers = iteratorToObject(response.headers);
   const contentType = getContentType(headers['content-type']);
+
+  if (!ok) {
+    switch (status) {
+      case 400: {
+        return response.json().then((body) => {
+          throw new Error(`Bad request${body.message ? `: ${body.message}` : ''}`);
+        });
+      }
+      case 404:
+      case 500: {
+        throw new Error(statusText);
+      }
+      default : {
+        throw new Error('There was an error communicating with the server.');
+      }
+    }
+  }
 
   switch (contentType) {
     case CONTENT_TYPE.JSON: {

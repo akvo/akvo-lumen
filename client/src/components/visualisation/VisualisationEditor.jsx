@@ -1,16 +1,18 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { cloneDeep, get } from 'lodash';
+import { connect } from 'react-redux';
 
 import VisualisationConfig from './configMenu/VisualisationConfig';
 import VisualisationPreview from './VisualisationPreview';
 import { checkUndefined } from '../../utilities/utils';
 import { specIsValidForApi, getNeedNewAggregation } from '../../utilities/aggregation';
 import * as api from '../../utilities/api';
+import { showNotification } from '../../actions/notification';
 
 require('./VisualisationEditor.scss');
 
-export default class VisualisationEditor extends Component {
+class VisualisationEditor extends Component {
 
   constructor() {
     super();
@@ -190,6 +192,9 @@ export default class VisualisationEditor extends Component {
               visualisation: Object.assign({}, visualisation, { data: body }),
             });
           }
+        })
+        .catch((error) => {
+          this.props.dispatch(showNotification('error', error.message));
         });
     }
   }
@@ -240,3 +245,5 @@ VisualisationEditor.propTypes = {
   loadDataset: PropTypes.func.isRequired,
   exporting: PropTypes.bool,
 };
+
+export default connect()(VisualisationEditor);
