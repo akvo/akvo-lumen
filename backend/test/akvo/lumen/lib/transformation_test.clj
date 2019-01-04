@@ -236,9 +236,9 @@
                                :transformation
                                (gen-transformation
                                 "core/change-datatype" {:akvo.lumen.specs.db.dataset-version.column/columnName column-name
-                                                        :akvo.lumen.specs.transformation.change-datatype/defaultValue 0
-                                                        :akvo.lumen.specs.transformation.change-datatype/newType "date"
-                                                        ::transformation.engine.s/onError "fail"}
+                                                       :akvo.lumen.specs.transformation.change-datatype/defaultValue 0
+                                                       :akvo.lumen.specs.transformation.change-datatype/newType "date"
+                                                       ::transformation.engine.s/onError "fail"}
                                 :parseFormat format*)})
         data                (import.s/sample-imported-dataset [:text
                                                           [:text {::import.column.text.s/value (fn [] (import.column.s/date-format-gen
@@ -267,8 +267,8 @@
                                         (apply-transformation (date-transformation "c3" "DD/MM/YYYY"))
                                         (apply-transformation (date-transformation "c4" "YYYY-MM-DD")))]
       (is (= ::lib/ok tag))
-      (let [table-name (:table-name (latest-dataset-version-by-dataset-id *tenant-conn*
-                                                                          {:dataset-id datasetId}))
+      (let [dsv (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id datasetId})
+            table-name (:table-name dsv)
             table-data (get-data *tenant-conn* {:table-name table-name})]
         (is (= years (map (comp str tc/year tcc/from-long :c2) table-data)))
         (is (= years-slash (map (comp tcc/from-long :c3) table-data)))
