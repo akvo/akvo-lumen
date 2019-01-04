@@ -1,7 +1,7 @@
 (ns akvo.lumen.lib.aggregation.bubble
   (:require [akvo.lumen.lib :as lib]
-            [akvo.lumen.lib.dataset.utils :as utils]
-            [akvo.lumen.postgres.filter :as filter]
+            [akvo.lumen.lib.dataset.utils-kw :refer (find-column)]
+            [akvo.lumen.postgres.filter-kw :refer (sql-str)]
             [clojure.java.jdbc :as jdbc]
             [clojure.tools.logging :as log]
             [clojure.walk :refer (keywordize-keys)]))
@@ -30,11 +30,13 @@
 
 (defn query
   [tenant-conn {:keys [columns table-name]} query]
-  (let [filter-sql (filter/sql-str columns (get query "filters"))
-        column-size (keywordize-keys (utils/find-column columns (get query "metricColumn")))
-        column-bucket (keywordize-keys (utils/find-column columns (get query "bucketColumn")))
+  (let [columns (keywordize-keys columns)
+        query (keywordize-keys query)
+        filter-sql (sql-str columns (:filters query))
+        column-size  (find-column columns (:metricColumn query))
+        column-bucket (find-column columns (:bucketColumn query))
         max-points 2500
-        aggregation-method (if column-size (get query "metricAggregation") "count")
+        aggregation-method (if column-size (:metricAggregation query) "count")
         sql-text (str "SELECT "
                       (sql-aggregation-subquery aggregation-method "%1$s" (or (:type column-size) (:type column-bucket)))
                       " AS size, "
@@ -47,9 +49,9 @@
                                 max-points
                                 (:columnName column-bucket))]
     (lib/ok
-     {"series" [{"key" (:title column-size)
-                 "label" (:title column-size)
-                 "data" (mapv (fn [[size-value label]] {"value" size-value}) sql-response)
-                 "metadata"  {"type" (:type column-size)}}]
-      "common" {"metadata" {"sampled" (= (count sql-response) max-points)}
-                "data" (mapv (fn [[size-value label]] {"label" label}) sql-response)}})))
+     {:series [{:key      (:title column-size)
+                :label    (:title column-size)
+                :data     (mapv (fn [[size-value label]] {:value size-value}) sql-response)
+                :metadata {:type (:type column-size)}}]
+      :common {:metadata {:sampled (= (count sql-response) max-points)}
+               :data     (mapv (fn [[size-value label]] {:label label}) sql-response)}})))
