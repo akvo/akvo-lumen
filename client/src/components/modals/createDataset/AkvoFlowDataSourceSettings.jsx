@@ -3,8 +3,10 @@ import PropTypes from 'prop-types';
 import Select from 'react-select';
 import { connect } from 'react-redux';
 import { injectIntl, intlShape } from 'react-intl';
+
 import * as api from '../../../utilities/api';
 import * as keycloak from '../../../utilities/auth';
+import { showNotification } from '../../../actions/notification';
 
 require('../../../../node_modules/react-select/dist/react-select.css');
 // TODO: we should use the "SelectMenu" wrapper component in the "common" folder in this component
@@ -154,7 +156,10 @@ class AkvoFlowDataSourceSettings extends Component {
       isLoadingNext: false,
       surveys: merge(this.state.surveys, indexById(surveys)),
       folders: merge(this.state.folders, indexById(folders)),
-    }));
+    }))
+    .catch(() => {
+      this.props.dispatch(showNotification('error', 'Failed to select folder.'));
+    });
   }
 
   handleSurveySelection(selectedSurveyId) {
@@ -167,7 +172,10 @@ class AkvoFlowDataSourceSettings extends Component {
         surveyDefinitions: merge(surveyDefinitions, {
           [body.id]: body,
         }),
-      }));
+      }))
+      .catch(() => {
+        this.props.dispatch(showNotification('error', 'Failed to select survey.'));
+      });
   }
 
   handleFormSelection(selectedFormId) {
@@ -309,5 +317,6 @@ AkvoFlowDataSourceSettings.propTypes = {
     formId: PropTypes.string,
   }).isRequired,
   onChange: PropTypes.func.isRequired,
+  dispatch: PropTypes.func.isRequired,
   onChangeSettings: PropTypes.func.isRequired,
 };

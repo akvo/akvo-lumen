@@ -125,7 +125,10 @@ class Dataset extends Component {
     this.setPendingUndo(now);
     api.post(`/api/transformations/${id}/undo`)
       .then(() => dispatch(fetchDataset(id)))
-      .then(() => this.removePending(now));
+      .then(() => this.removePending(now))
+      .catch(() => {
+        this.props.dispatch(showNotification('error', 'Failed to undo.'));
+      });
   }
 
   handleTrackPageView(props) {

@@ -416,7 +416,10 @@ function pollDatasetUpdateStatus(updateId, datasetId, title) {
           );
         }
       })
-      .catch(error => dispatch(error));
+      .catch((error) => {
+        dispatch(showNotification('error', 'Failed to update dataset'));
+        dispatch(error);
+      });
   };
 }
 
@@ -439,6 +442,9 @@ export function updateDataset(id) {
         } else {
           dispatch(showNotification('error', `Update failed: ${error}`));
         }
+      })
+      .catch(() => {
+        dispatch(showNotification('error', 'Failed to update dataset.'));
       });
   };
 }

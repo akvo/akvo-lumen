@@ -243,6 +243,7 @@ VisualisationEditor.propTypes = {
   onChangeVisualisationSpec: PropTypes.func.isRequired,
   onSaveVisualisation: PropTypes.func.isRequired,
   loadDataset: PropTypes.func.isRequired,
+  dispatch: PropTypes.func.isRequired,
   exporting: PropTypes.bool,
 };
 

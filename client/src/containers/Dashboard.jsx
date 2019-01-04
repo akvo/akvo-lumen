@@ -21,6 +21,7 @@ import {
   EXPORT_DASHBOARD_PNG,
   EXPORT_DASHBOARD_PDF,
 } from '../constants/analytics';
+import { showNotification } from '../actions/notification';
 
 const getEditingStatus = (location) => {
   const testString = 'create';
@@ -254,6 +255,9 @@ class Dashboard extends Component {
 
                 this.setState({ aggregatedDatasets, metadata });
               }
+            })
+            .catch(() => {
+              this.props.dispatch(showNotification('error', 'Failed to add visualisation.'));
             });
           /* Maps hit a different endpoint than other aggregations, so bail out now */
           return;
@@ -282,6 +286,9 @@ class Dashboard extends Component {
         change[id] = body;
         const aggregatedDatasets = Object.assign({}, this.state.aggregatedDatasets, change);
         this.setState({ aggregatedDatasets });
+      })
+      .catch(() => {
+        this.props.dispatch(showNotification('error', 'Failed to fetch aggregations.'));
       });
     } else {
       /* Fetch the whole dataset */

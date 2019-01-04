@@ -3,11 +3,14 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Immutable from 'immutable';
 import { FormattedMessage } from 'react-intl';
+import { connect } from 'react-redux';
+
 import SelectMenu from '../../common/SelectMenu';
 import ToggleInput from '../../common/ToggleInput';
 import SidebarHeader from './SidebarHeader';
 import SidebarControls from './SidebarControls';
 import * as API from '../../../utilities/api';
+import { showNotification } from '../../../actions/notification';
 
 require('./ExtractMultiple.scss');
 
@@ -186,7 +189,7 @@ MultipleColumn.propTypes = {
 };
 
 function apiMultipleColumn(column, callback) {
-  API
+  return API
     .get('/api/multiple-column', {
       query: JSON.stringify({
         multipleType: column.multipleType,
@@ -201,7 +204,8 @@ function apiMultipleColumn(column, callback) {
     })
     .then(callback);
 }
-export default class ExtractMultiple extends Component {
+
+class ExtractMultiple extends Component {
   constructor() {
     super();
     this.state = {
@@ -275,6 +279,9 @@ export default class ExtractMultiple extends Component {
           transformation: this.state.transformation.setIn(['args'], ui),
         });
       }
+    })
+    .catch(() => {
+      this.props.dispatch(showNotification('error', 'Failed to extract multiple.'));
     });
   }
 
@@ -371,4 +378,7 @@ ExtractMultiple.propTypes = {
   onClose: PropTypes.func.isRequired,
   onApply: PropTypes.func.isRequired,
   columns: PropTypes.object.isRequired,
+  dispatch: PropTypes.func.isRequired,
 };
+
+export default connect()(ExtractMultiple);

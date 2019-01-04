@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Immutable from 'immutable';
 import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
+import { connect } from 'react-redux';
 
 import SelectMenu from '../../common/SelectMenu';
 import Alert from '../../common/Alert';
@@ -10,6 +11,7 @@ import SidebarHeader from './SidebarHeader';
 import SidebarControls from './SidebarControls';
 import * as API from '../../../utilities/api';
 import './SplitColumn.scss';
+import { showNotification } from '../../../actions/notification';
 
 function textColumnOptions(columns) {
   return columns
@@ -167,25 +169,29 @@ class SplitColumn extends Component {
 
   handleSelectColumn(columns, columnName, datasetId) {
     const column = filterByColumnName(columns, columnName);
-    apiColumnPatternAnalysis(datasetId, columnName, 200).then((apiRes) => {
-      if (apiRes.error) {
-        if (apiRes.error === 404) {
-          this.setState({ error: 'not_found_error' });
+    apiColumnPatternAnalysis(datasetId, columnName, 200)
+      .then((apiRes) => {
+        if (apiRes.error) {
+          if (apiRes.error === 404) {
+            this.setState({ error: 'not_found_error' });
+          } else {
+            this.setState({ error: 'global_error' });
+          }
         } else {
-          this.setState({ error: 'global_error' });
+          const ui = { selectedColumn: column, pattern: '', newColumnName: '' };
+          this.setState({
+            error: null,
+            splitable: apiRes.analysis,
+            splitColumn: {
+              ui,
+            },
+            transformation: this.state.transformation.setIn(['args'], ui),
+          });
         }
-      } else {
-        const ui = { selectedColumn: column, pattern: '', newColumnName: '' };
-        this.setState({
-          error: null,
-          splitable: apiRes.analysis,
-          splitColumn: {
-            ui,
-          },
-          transformation: this.state.transformation.setIn(['args'], ui),
-        });
-      }
-    });
+      })
+      .catch(() => {
+        this.props.dispatch(showNotification('error', 'Failed to select column.'));
+      });
   }
 
   handlePatternChange(value) {
@@ -293,6 +299,7 @@ SplitColumn.propTypes = {
   onClose: PropTypes.func.isRequired,
   onApply: PropTypes.func.isRequired,
   columns: PropTypes.object.isRequired,
+  dispatch: PropTypes.func.isRequired,
 };
 
-export default injectIntl(SplitColumn);
+export default connect()(injectIntl(SplitColumn));
