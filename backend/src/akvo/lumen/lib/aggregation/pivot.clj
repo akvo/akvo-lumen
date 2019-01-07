@@ -1,7 +1,7 @@
 (ns akvo.lumen.lib.aggregation.pivot
   (:require [akvo.commons.psql-util]
             [akvo.lumen.lib :as lib]
-            [akvo.lumen.lib.dataset.utils-kw :refer (find-column)]
+            [akvo.lumen.lib.dataset.utils :refer (find-column)]
             [akvo.lumen.postgres.filter-kw :refer (sql-str)]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]

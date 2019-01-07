@@ -1,6 +1,6 @@
 (ns akvo.lumen.lib.aggregation.pie
   (:require [akvo.lumen.lib :as lib]
-            [akvo.lumen.lib.dataset.utils-kw :refer (find-column)]
+            [akvo.lumen.lib.dataset.utils :refer (find-column)]
             [akvo.lumen.postgres.filter-kw :refer (sql-str)]
             [clojure.walk :refer (keywordize-keys stringify-keys)]
             [clojure.java.jdbc :as jdbc]))
