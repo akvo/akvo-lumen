@@ -1,10 +1,12 @@
 (ns akvo.lumen.fixtures
-  (:require [akvo.lumen.component.error-tracker :refer [local-error-tracker]]
-            [akvo.lumen.component.caddisfly-test :refer (caddisfly)]
+  (:require [akvo.lumen.component.caddisfly-test :refer (caddisfly)]
+            [akvo.lumen.component.error-tracker :refer [local-error-tracker]]
+            [akvo.lumen.lib.transformation.engine :refer (log-ex)]
             [akvo.lumen.test-utils :as test-utils]
             [akvo.lumen.test-utils
              :refer
              [import-file test-tenant test-tenant-conn]]
+            [clojure.tools.logging :as log]
             [ragtime.jdbc :as jdbc]
             [ragtime.repl :as repl]))
 
@@ -56,4 +58,10 @@
   "Returns a fixture that binds a local error tracker to *error-tracker*"
   [f]
   (binding [*caddisfly* (caddisfly)]
+    (f)))
+
+(defn summarise-transformation-logs-fixture
+  "Returns a fixture that binds a connection pool to *tenant-conn*"
+  [f]
+  (with-redefs [log-ex (fn [ex] (log/info (.getMessage ex)))]
     (f)))

@@ -10,6 +10,9 @@
 (hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/dataset_version.sql")
 
+(defn log-ex [e]
+  (log/info e))
+
 (defmulti valid?
   "Validate transformation spec"
   (fn [op-spec]
@@ -45,7 +48,7 @@
   (try
     (apply-operation deps table-name columns op-spec)
     (catch Exception e
-      (log/info e)
+      (log-ex e)
       {:success? false
        :message (format "Failed to transform: %s" (.getMessage e))})))
 

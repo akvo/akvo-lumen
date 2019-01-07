@@ -19,9 +19,9 @@
                                 (lumen.s/sample-with-gen (kw->column-spec (first t)) (if (map? (last t))
                                                                                          (last t)
                                                                                          {(adapt-spec (first t)) (last t)})  1)
-                                (lumen.s/sample (kw->column-spec t) 1))) types-gens-tuple)
+                                (list (lumen.s/sample (kw->column-spec t) 1)))) types-gens-tuple)
                        (mapv #(assoc (first %2)
-                                     :id (keyword (str "c" %))
+                                     :id (keyword (str "c" (inc %)))
                                      :title (str "Column" (inc %)))
                              (range (count headers))))
         _         (do

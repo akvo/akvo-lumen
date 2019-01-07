@@ -1,6 +1,7 @@
 (ns akvo.lumen.util
   (:require [clojure.string :as str]
             [clojure.java.io :as io]
+            [clojure.tools.logging :as log]
             [clojure.spec.alpha :as s]
             [org.akvo.resumed :as resumed]))
 
@@ -74,6 +75,9 @@
 (defn conform  
   ([s d]
    (when-not (s/valid? s d)
+     (log/info (str s " spec problem!")
+               {:message (s/explain-str s d)
+                :data d})
      (throw (ex-info (str s " spec problem!")
                      {:message (s/explain-str s d)
                       :data d})))

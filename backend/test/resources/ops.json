@@ -87,7 +87,13 @@
   {
     "op": "core/split-column",
     "args": {
-        "selectedColumn" : {"columnName": "c1"},
+        "selectedColumn" : {"columnName": "c1",
+			    "title":"title",
+			    "sort": null,
+			    "direction":null,
+			    "hidden":false,
+			    "type":"text"
+			   },
         "newColumnName": "Example",
         "pattern": "A"
     },
