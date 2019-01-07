@@ -13,16 +13,16 @@
 (defn question-type->lumen-type
   [question]
   (condp = (:type question)
-    "NUMBER" :number
-    "DATE" :date
-    :text))
+    "NUMBER" "number"
+    "DATE" "date"
+    "text"))
 
 (defn dataset-columns
   [form]
   (into (flow-common/commons-columns form)
         (into
-         [{:title "Latitude" :type :number :id :latitude}
-          {:title "Longitude" :type :number :id :longitude}]
+         [{:title "Latitude" :type "number" :id :latitude}
+          {:title "Longitude" :type "number" :id :longitude}]
          (common/coerce question-type->lumen-type (flow-common/questions form)))))
 
 (defmulti render-response

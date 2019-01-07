@@ -40,9 +40,9 @@
 (defn- create-indexes [conn table-name columns]
   (doseq [column columns]
     (condp = (:type column)
-      :geoshape
+      "geoshape"
       (jdbc/execute! conn (geo-index table-name (name (:id column))))
-      :geopoint
+      "geopoint"
       (jdbc/execute! conn (geo-index table-name (name (:id column))))
 
       ;; else
@@ -64,13 +64,13 @@
   (format "%s %s"
           (name id)
           (condp = type
-            :date "timestamptz"
-            :number "double precision"
+            "date" "timestamptz"
+            "number" "double precision"
             ;; Note not `POLYGON` so we can support `MULTIPOLYGON` as well
-            :geoshape "geometry(GEOMETRY, 4326)"
-            :geopoint "geometry(POINT, 4326)"
-            :multiple "text"
-            :text "text")))
+            "geoshape" "geometry(GEOMETRY, 4326)"
+            "geopoint" "geometry(POINT, 4326)"
+            "multiple" "text"
+            "text" "text")))
 
 (defn create-dataset-table [conn table-name columns]
   (jdbc/execute! conn [(format "create table %s (rnum serial primary key, %s);"

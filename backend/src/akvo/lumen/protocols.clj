@@ -59,9 +59,9 @@
 
     DatasetImporter
     (columns [this]
-      [{:id :a :type :text :title \"A\"}
-       {:id :b :type :number :title \"B\"}
-       {:id :c :type :date :title \"C\"}])
+      [{:id :a :type \"text\" :title \"A\"}
+       {:id :b :type \"number\" :title \"B\"}
+       {:id :c :type \"date\" :title \"C\"}])
     (records [this]
       [{:a \"foo\"
         :b 42
@@ -76,7 +76,7 @@
      A column specification is a map with keys
 
      Required:
-       :type - The lumen type of the column. Currently :text, :number, :date, :geoshape or :geopoint
+       :type - The lumen type of the column. Currently text, number, date, geoshape or geopoint
        :title - The title of the column
        :id - The internal id of the column (as a keyword). The id must be
              lowercase alphanumeric ([a-z][a-z0-9]*)
@@ -87,12 +87,12 @@
     "Returns a sequence of record data. A record is a map of column ids to values.
      The type of the value depends on the type of the column where
 
-       :text - java.lang.String
-       :number - java.lang.Number
-       :date - java.time.Instant
-       :geoshape - Geoshape
+       text - java.lang.String
+       number - java.lang.Number
+       date - java.time.Instant
+       geoshape - Geoshape
                    Well-known text (WKT) shape (POLYGON or MULTIPOLYGON)
-       :geopoint - Geopoint
+       geopoint - Geopoint
                    Well-known text (WKT) shape (POINT)"))
 
 (defprotocol CoerceToSql
