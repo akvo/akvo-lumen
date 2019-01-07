@@ -53,7 +53,7 @@
   "
   [column-titles column-types]
   (mapv (fn [idx title type]
-          {:id (keyword (str "c" (inc idx)))
+          {:id (str "c" (inc idx))
            :title title
            :type type})
         (range)

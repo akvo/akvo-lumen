@@ -16,10 +16,10 @@
                            "hidden" false,
                            "direction" nil,
                            "columnName" "c2"}]
-        columns '({:id :c1,
+        columns '({:id "c1",
                    :title "A",
                    :type "text"}
-                  {:id :c2,
+                  {:id "c2",
                    :title "B",
                    :type "text"})]
     (testing "No changes to columns"

@@ -32,7 +32,7 @@
            (merge
             {:title (:name q)
              :type t
-             :id (keyword (format "c%s" (:id q)))}
+             :id (format "c%s" (:id q))}
             (when (= t :multiple)
               (if (:caddisflyResourceUuid q)
                 {:multiple-type :caddisfly

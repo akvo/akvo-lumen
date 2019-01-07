@@ -38,7 +38,7 @@
     (reduce (fn [response-data {:keys [type id]}]
               (if-let [response (get responses id)]
                 (assoc response-data
-                       (keyword (format "c%s" id))
+                       (format "c%s" id)
                        (render-response type response))
                 response-data))
             {}

@@ -33,7 +33,7 @@
 
 (defn compatible-columns? [imported-columns columns]
   (let [imported-columns (map (fn [column]
-                                (cond-> {:id (keyword (get column "columnName"))
+                                (cond-> {:id (get column "columnName")
                                          :type (get column "type")}
                                   (contains? column "key") (assoc :key (boolean (get column "key")))))
                               imported-columns)]

@@ -29,7 +29,6 @@
           (>column [e]
             (when e
               (cond-> e
-               true (update :id (fn [o] (if o (keyword o) (keyword (:columnName e)))))
                (:multipleType e) >mult)))
           (>changedColumns [cc]
             (reduce-kv (fn [c k {:keys [before after] :as v}]

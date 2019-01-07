@@ -104,7 +104,7 @@
                                   (->>
                                    (split ((keyword column-name) row) re-pattern* new-rows-count)
                                    (map (fn [column v]
-                                          [(keyword (:id column)) v]) new-columns)
+                                          [(:id column) v]) new-columns)
                                    (update-row tenant-conn table-name (:rnum row))))]
           {:success?      true
            :execution-log [(format "Splitted column %s with pattern %s" column-name pattern)]
