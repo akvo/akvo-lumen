@@ -24,9 +24,14 @@
       (close [this])
       p/DatasetImporter
       (columns [this]
-        (cond
-          (<= version 2) (v2/dataset-columns (flow-common/form @survey formId))
-          (<= version 3) (v3/dataset-columns (flow-common/form @survey formId))))
+        (try
+          (cond
+            (<= version 2) (v2/dataset-columns (flow-common/form @survey formId))
+            (<= version 3) (v3/dataset-columns (flow-common/form @survey formId)))
+          (catch Throwable e
+            (if-let [ex-d (ex-data e)]
+              (throw (ex-info (:cause e) (assoc ex-d :instance instance)))
+              (throw e)))))
       (records [this]
         (try
           (cond
