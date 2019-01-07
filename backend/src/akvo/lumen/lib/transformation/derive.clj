@@ -54,7 +54,7 @@
            "references" []}
           (parse-row-object-references code)))
 
-(defmethod engine/adapt-transformation :core/derive
+(defmethod engine/adapt-transformation "core/derive"
   [op-spec older-columns new-columns]
   (update-in op-spec ["args" "code"]
              #(columnName>columnTitle (compute-transformation-code % older-columns) new-columns)))
@@ -71,7 +71,7 @@
          column-type  "newColumnType"} (engine/args op-spec)]
     {::code code ::column-title column-title ::column-type column-type}))
 
-(defmethod engine/valid? :core/derive
+(defmethod engine/valid? "core/derive"
   [op-spec]
   (let [{:keys [::code
                 ::column-title
@@ -97,7 +97,7 @@
        (map (fn [[i]] (delete-row conn (merge {:rnum i} opts))))
        doall))
 
-(defmethod engine/apply-operation :core/derive
+(defmethod engine/apply-operation "core/derive"
   [{:keys [tenant-conn]} table-name columns op-spec]
   (jdbc/with-db-transaction [conn tenant-conn]
     (let [{:keys [::code

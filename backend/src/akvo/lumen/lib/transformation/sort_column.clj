@@ -5,12 +5,12 @@
 
 (hugsql/def-db-fns "akvo/lumen/lib/transformation/sort_column.sql")
 
-(defmethod engine/valid? :core/sort-column
+(defmethod engine/valid? "core/sort-column"
   [op-spec]
   (and (util/valid-column-name? (get (engine/args op-spec) "columnName"))
        (boolean (#{"ASC" "DESC"} (get (engine/args op-spec) "sortDirection")))))
 
-(defmethod engine/valid? :core/remove-sort
+(defmethod engine/valid? "core/remove-sort"
   [op-spec]
   (util/valid-column-name? (get (engine/args op-spec) "columnName")))
 
@@ -19,7 +19,7 @@
   [columns]
   (inc (count (filter #(get % "sort") columns))))
 
-(defmethod engine/apply-operation :core/sort-column
+(defmethod engine/apply-operation "core/sort-column"
   [{:keys [tenant-conn]} table-name columns op-spec]
   (let [{column-name "columnName"
          sort-direction "sortDirection"} (engine/args op-spec)
@@ -36,7 +36,7 @@
     {:success? true
      :columns new-cols}))
 
-(defmethod engine/apply-operation :core/remove-sort
+(defmethod engine/apply-operation "core/remove-sort"
   [{:keys [tenant-conn]} table-name columns op-spec]
   (let [{column-name "columnName"} (engine/args op-spec)
         idx-name (str table-name "_" column-name)

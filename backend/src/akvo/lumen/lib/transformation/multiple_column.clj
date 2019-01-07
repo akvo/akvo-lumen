@@ -6,7 +6,7 @@
             [clojure.tools.logging :as log]
             [clojure.walk :refer (keywordize-keys stringify-keys)]))
 
-(defmethod t.engine/valid? :core/extract-multiple
+(defmethod t.engine/valid? "core/extract-multiple"
   [op-spec]
   (let [{:keys [onError op args]} (keywordize-keys op-spec)
         columns-to-extract        (filter :extract (:columns args))]
@@ -21,7 +21,7 @@
     (condp = (-> args :selectedColumn :multipleType)
       "caddisfly" (t.m-c.caddisfly/apply-operation deps table-name columns op-spec))))
 
-(defmethod t.engine/apply-operation :core/extract-multiple
+(defmethod t.engine/apply-operation "core/extract-multiple"
   [deps table-name columns op-spec]
   (-> (apply-operation deps table-name columns op-spec)
       (update :columns stringify-keys)))

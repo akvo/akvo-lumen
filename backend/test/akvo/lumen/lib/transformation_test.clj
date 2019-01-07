@@ -85,20 +85,22 @@
   "due some specs issues we need to generate merge specs step by step
   issues related to s/merge or generating false/nil values"
   [t-type  gens & kvs]
-  (let [gens (when gens
+  (let [t-type (keyword t-type)
+        op-name (str (namespace t-type) "/" (name t-type))
+        gens (when gens
                (reduce-kv (fn [c k v]
                             (if (fn? v)
                               (assoc c k v)
                               (assoc c k #(s/gen #{v})))
                             ) {} gens))
-        s (first (lumen.s/sample-with-gen (transformation.s/op-spec {:op t-type}) gens 1))
+        s (first (lumen.s/sample-with-gen (transformation.s/op-spec {:op op-name}) gens 1))
         args (first (lumen.s/sample-with-gen (keyword (str "akvo.lumen.specs.transformation." (name t-type) "/args")) gens 1))
         args (if (and kvs (not-empty kvs) (even? (count kvs)))
                (reduce #((if (vector? (first %2))  assoc-in assoc) % (first %2) (last %2)) args (partition 2 kvs))
                args)
         
-        op-name (str (namespace t-type) "/" (name t-type))]
-    (conform ::transformation.engine.s/op-spec (assoc s :op (keyword op-name) :args args))
+]
+    (conform ::transformation.engine.s/op-spec (assoc s :op op-name :args args))
 
     (tu/clj>json>clj (assoc s :op op-name :args args))))
 
@@ -117,13 +119,13 @@
 
 (deftest ^:functional test-import-and-transform
   (testing "Import CSV and transform"
-    (let [t-log      [(gen-transformation :core/trim {::db.dataset-version.column.s/columnName "c5"
+    (let [t-log      [(gen-transformation "core/trim" {::db.dataset-version.column.s/columnName "c5"
                                                       ::transformation.engine.s/onError        "fail"})
-                      (gen-transformation :core/change-datatype {::db.dataset-version.column.s/columnName        "c5"
+                      (gen-transformation "core/change-datatype" {::db.dataset-version.column.s/columnName        "c5"
                                                                  ::transformation.change-datatype.s/defaultValue 0
                                                                  ::transformation.change-datatype.s/newType      "number"
                                                                  ::transformation.engine.s/onError               "default-value"})
-                      (gen-transformation :core/filter-column {::db.dataset-version.column.s/columnName    "c4"
+                      (gen-transformation "core/filter-column" {::db.dataset-version.column.s/columnName    "c4"
                                                                ::transformation.filter-column.s/expression {"contains" "broken"}
                                                                ::transformation.engine.s/onError           "fail"})]
           dataset-id (import-file *tenant-conn* *error-tracker* {:name                "GDP Test"
@@ -156,11 +158,11 @@
         apply-transformation (partial transformation/apply {:tenant-conn *tenant-conn*} dataset-id)]
     (is (= ::lib/ok (first (apply-transformation {:type :undo}))))
     (let [[tag _] (do (apply-transformation {:type :transformation
-                                             :transformation (gen-transformation :core/to-lowercase
+                                             :transformation (gen-transformation "core/to-lowercase"
                                                                                  {::db.dataset-version.column.s/columnName "c1"
                                                                                   ::transformation.engine.s/onError "fail"})})
                       (apply-transformation {:type :transformation
-                                             :transformation (gen-transformation :core/change-datatype
+                                             :transformation (gen-transformation "core/change-datatype"
                                                                                  {::db.dataset-version.column.s/columnName "c5"
                                                                                   ::transformation.engine.s/onError "default-value"
                                                                                   ::transformation.change-datatype.s/newType "number"
@@ -195,7 +197,7 @@
                                                                :file "name.csv"})
         apply-transformation (partial transformation/apply {:tenant-conn *tenant-conn*} dataset-id)
         [tag _] (apply-transformation {:type :transformation
-                                       :transformation (gen-transformation :core/combine
+                                       :transformation (gen-transformation "core/combine"
                                                                            {::transformation.combine.s/columnNames ["c1" "c2"]
                                                                             ::transformation.engine.s/onError "fail"
                                                                             ::transformation.combine.s/newColumnTitle "full name"
@@ -214,7 +216,7 @@
     (testing "Combining columns where one of the columns has empty values"
       (let [[tag _] (apply-transformation {:type :transformation
                                            :transformation
-                                         (gen-transformation :core/combine
+                                         (gen-transformation "core/combine"
                                                              {:akvo.lumen.specs.transformation.combine/columnNames ["c2" "c3"]                                                                          ::transformation.engine.s/onError "fail"
                                                               :akvo.lumen.specs.transformation.combine/newColumnTitle "issue1517"
                                                               :akvo.lumen.specs.transformation.combine/separator " "})})]
@@ -233,7 +235,7 @@
                               {:type           :transformation
                                :transformation
                                (gen-transformation
-                                :core/change-datatype {:akvo.lumen.specs.db.dataset-version.column/columnName column-name
+                                "core/change-datatype" {:akvo.lumen.specs.db.dataset-version.column/columnName column-name
                                                        :akvo.lumen.specs.transformation.change-datatype/defaultValue 0
                                                        :akvo.lumen.specs.transformation.change-datatype/newType "date"
                                                        :akvo.lumen.specs.transformation.change-datatype/parseFormat format*
@@ -277,7 +279,7 @@
                                          {:type :transformation
                                           :transformation
                                           (-> (gen-transformation
-                                               :core/change-datatype {::db.dataset-version.column.s/columnName "column-name"
+                                               "core/change-datatype" {::db.dataset-version.column.s/columnName "column-name"
                                                                       ::transformation.change-datatype.s/newType "number"
                                                                       ::transformation.engine.s/onError "default-value"})
                                               (assoc-in ["args" "defaultValue"] nil))})
@@ -296,7 +298,7 @@
     (testing "Basic text transform"
       (apply-transformation {:type :transformation
                              :transformation
-                             (gen-transformation :core/derive
+                             (gen-transformation "core/derive"
                                                  {::transformation.derive.s/newColumnTitle "Derived 1"
                                                   ::transformation.derive.s/code "row['foo'].toUpperCase()"
                                                   ::transformation.derive.s/newColumnType "text"
@@ -306,7 +308,7 @@
     (testing "Basic text transform with drop row on error"
       (apply-transformation {:type :transformation
                              :transformation
-                             (gen-transformation :core/derive
+                             (gen-transformation "core/derive"
                                                  {::transformation.derive.s/newColumnTitle "Derived 3"
                                                   ::transformation.derive.s/code "row['foo'].replace('a', 'b')"
                                                   ::transformation.derive.s/newColumnType "text"
@@ -318,7 +320,7 @@
     (testing "Basic text transform with abort"
       (apply-transformation {:type :transformation
                              :transformation
-                             (gen-transformation :core/derive
+                             (gen-transformation "core/derive"
                                                  {::transformation.derive.s/newColumnTitle "Derived 2"
                                                   ::transformation.derive.s/code "row['foo'].length"
                                                   ::transformation.derive.s/newColumnType "number"
@@ -333,7 +335,7 @@
     (testing "Nested string transform"
       (apply-transformation {:type :transformation
                              :transformation
-                             (gen-transformation :core/derive
+                             (gen-transformation "core/derive"
                                                  {::transformation.derive.s/newColumnTitle "Derived 4"
                                                   ::transformation.derive.s/code "row['foo'].toUpperCase()"
                                                   ::transformation.derive.s/newColumnType "text"
@@ -342,7 +344,7 @@
 
       (apply-transformation {:type :transformation
                              :transformation
-                             (gen-transformation :core/derive
+                             (gen-transformation "core/derive"
                                                  {::transformation.derive.s/newColumnTitle "Derived 5"
                                                   ::transformation.derive.s/code "row['Derived 4'].toLowerCase()"
                                                   ::transformation.derive.s/newColumnType "text"
@@ -352,7 +354,7 @@
     (testing "Date transform"
       (let [[tag _] (apply-transformation {:type :transformation
                                            :transformation
-                                           (gen-transformation :core/derive
+                                           (gen-transformation "core/derive"
                                                                {::transformation.derive.s/newColumnTitle "Derived 5"
                                                                 ::transformation.derive.s/code "new Date()"
                                                                 ::transformation.derive.s/newColumnType "date"
@@ -363,7 +365,7 @@
     (testing "Valid type check"
       (let [[tag _] (apply-transformation {:type :transformation
                                            :transformation
-                                           (gen-transformation :core/derive
+                                           (gen-transformation "core/derive"
                                                                {::transformation.derive.s/newColumnTitle "Derived 6"
                                                                 ::transformation.derive.s/code "new Date()"
                                                                 ::transformation.derive.s/newColumnType "number"
@@ -373,7 +375,7 @@
     (testing "Sandboxing java interop"
       (let [[tag _] (apply-transformation {:type :transformation
                                            :transformation
-                                           (gen-transformation :core/derive
+                                           (gen-transformation "core/derive"
                                                                {::transformation.derive.s/newColumnTitle "Derived 7"
                                                                 ::transformation.derive.s/code "new java.util.Date()"
                                                                 ::transformation.derive.s/newColumnType "number"
@@ -383,7 +385,7 @@
     (testing "Sandboxing dangerous js functions"
       (let [[tag _] (apply-transformation {:type :transformation
                                            :transformation
-                                           (gen-transformation :core/derive
+                                           (gen-transformation "core/derive"
                                                                {::transformation.derive.s/newColumnTitle "Derived 7"
                                                                 ::transformation.derive.s/code "quit()"
                                                                 ::transformation.derive.s/newColumnType "number"
@@ -393,7 +395,7 @@
     (testing "Fail early on syntax error"
       (let [[tag _] (apply-transformation {:type :transformation
                                            :transformation
-                                           (gen-transformation :core/derive
+                                           (gen-transformation "core/derive"
                                                                {::transformation.derive.s/newColumnTitle "Derived 8"
                                                                 ::transformation.derive.s/code ")"
                                                                 ::transformation.derive.s/newColumnType "text"
@@ -403,7 +405,7 @@
     (testing "Fail infinite loop"
       (let [[tag _] (apply-transformation {:type :transformation
                                            :transformation
-                                           (gen-transformation :core/derive
+                                           (gen-transformation "core/derive"
                                                                {::transformation.derive.s/newColumnTitle "Derived 9"
                                                                 ::transformation.derive.s/code "while(true) {}"
                                                                 ::transformation.derive.s/newColumnType "text"
@@ -414,7 +416,7 @@
     (testing "Disallow anonymous functions"
       (let [[tag _] (apply-transformation {:type :transformation
                                            :transformation
-                                           (gen-transformation :core/derive
+                                           (gen-transformation "core/derive"
                                                                {::transformation.derive.s/newColumnTitle "Derived 10"
                                                                 ::transformation.derive.s/code "(function() {})()"
                                                                 ::transformation.derive.s/newColumnType "text"
@@ -423,7 +425,7 @@
 
       (let [[tag _] (apply-transformation {:type :transformation
                                            :transformation
-                                           (gen-transformation :core/derive
+                                           (gen-transformation "core/derive"
                                                                {::transformation.derive.s/newColumnTitle "Derived 11"
                                                                 ::transformation.derive.s/code "(() => 'foo')()"
                                                                 ::transformation.derive.s/newColumnType "text"
@@ -502,7 +504,7 @@
         apply-transformation (partial transformation/apply {:tenant-conn *tenant-conn*} dataset-id)
         [tag _]              (apply-transformation {:type :transformation
                                                     :transformation
-                                                    (gen-transformation :core/delete-column
+                                                    (gen-transformation "core/delete-column"
                                                                         {::db.dataset-version.column.s/columnName "c2"
                                                                          :transformation.engine.s/onError         "fail"})})]
     (is (= ::lib/ok tag))
@@ -576,17 +578,15 @@
                                            :kind         "clj"
                                            :data         target-data})
         apply-transformation (partial transformation/apply {:tenant-conn *tenant-conn*} origin-dataset-id)
-        tx                   (gen-transformation :core/merge-datasets
+        tx                   (gen-transformation "core/merge-datasets"
                                                  {::transformation.merge-datasets.source.s/datasetId            target-dataset-id
                                                   ::transformation.merge-datasets.source.s/mergeColumn          "c1"
                                                   ::transformation.merge-datasets.source.s/aggregationDirection "DESC"
-                                                  ::transformation.merge-datasets.source.s/aggregationColumn    ""
                                                   ::transformation.merge-datasets.source.s/mergeColumns         ["c4" "c3" "c2"]
                                                   ::transformation.merge-datasets.target.s/mergeColumn          "c1"}
                                                  [:source :aggregationColumn] nil)
         [tag _ :as res] (apply-transformation {:type           :transformation
                                                :transformation tx})]
-         
     (is (= ::lib/ok tag))
     (let [{:keys [columns transformations table-name]} (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id origin-dataset-id})
           data-db                                      (get-data *tenant-conn* {:table-name table-name})]
@@ -635,7 +635,7 @@
         apply-transformation (partial transformation/apply {:tenant-conn *tenant-conn*} dataset-id)
         [tag _]              (apply-transformation {:type :transformation
                                                     :transformation
-                                                    (gen-transformation :core/rename-column
+                                                    (gen-transformation "core/rename-column"
                                                                         {::transformation.derive.s/newColumnTitle    "New Title"
                                                                          ::transformation.rename-column.s/columnName "c2"
                                                                          ::transformation.engine.s/onError           "fail"})})]
@@ -650,7 +650,7 @@
 ;; Regression #808
 (deftest valid-column-names
   (is (engine/valid?
-       (gen-transformation :core/sort-column
+       (gen-transformation "core/sort-column"
                            {::transformation.sort-column.s/sortDirection "ASC"
                             ::transformation.sort-column.s/columnName    "submitted_at"
                             ::transformation.engine.s/onError            "fail"})))
@@ -672,7 +672,7 @@
         apply-transformation (partial transformation/apply {:tenant-conn *tenant-conn*} dataset-id)
         [tag _]              (apply-transformation {:type :transformation
                                                     :transformation
-                                                    (gen-transformation :core/generate-geopoints
+                                                    (gen-transformation "core/generate-geopoints"
                                                                         {::transformation.generate-geopoints.s/columnTitleGeo "Geopoints"
                                                                          ::transformation.generate-geopoints.s/columnNameLong "c3"
                                                                          ::transformation.generate-geopoints.s/columnNameLat  "c2"

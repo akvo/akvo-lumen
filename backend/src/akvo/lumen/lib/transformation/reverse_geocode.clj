@@ -8,7 +8,7 @@
 (hugsql/def-db-fns "akvo/lumen/lib/transformation/engine.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/transformation/reverse_geocode.sql")
 
-(defmethod engine/valid? :core/reverse-geocode
+(defmethod engine/valid? "core/reverse-geocode"
   [op-spec]
   (let [{:strs [target source]} (get op-spec "args")]
     (and (string? (get target "title"))
@@ -24,7 +24,7 @@
   (-> (latest-dataset-version-by-dataset-id conn {:dataset-id datasetId})
       :table-name))
 
-(defmethod engine/apply-operation :core/reverse-geocode
+(defmethod engine/apply-operation "core/reverse-geocode"
   [{:keys [tenant-conn]} table-name columns {:strs [args] :as op-spec}]
   (let [column-name (engine/next-column-name columns)
         {:strs [target source]} args
