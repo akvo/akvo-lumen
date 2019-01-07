@@ -24,10 +24,8 @@
   "provisional spec adapter function to be removed when specs work was finished"
   [dsv]
   (letfn [(>mult [i]
-            (-> i
-                (update :multipleType keyword)
-                (set/rename-keys {:multipleType :multiple-type
-                                  :multipleId :multiple-id})))
+            (set/rename-keys i {:multipleType :multiple-type
+                                :multipleId :multiple-id}))
           (>column [e]
             (when e
               (cond-> e

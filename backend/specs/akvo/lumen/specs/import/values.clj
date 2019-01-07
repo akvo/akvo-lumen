@@ -46,4 +46,4 @@
                        lumen.s/str-uuid?
                        #(s/gen (reduce (fn [c _] (conj c (str (squuid)))) #{} (range 100)))))
 
-(s/def ::multiple-type #{:caddisfly})
+(s/def ::multiple-type #{"caddisfly"})
