@@ -2,7 +2,7 @@
   (:require [akvo.commons.psql-util]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.dataset.utils :refer (find-column)]
-            [akvo.lumen.postgres.filter-kw :refer (sql-str)]
+            [akvo.lumen.postgres.filter :refer (sql-str)]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
             [clojure.tools.logging :as log]

@@ -2,7 +2,7 @@
   (:require [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.dataset.utils :refer (find-column)]
             [clojure.walk :refer (keywordize-keys stringify-keys)]
-            [akvo.lumen.postgres.filter-kw :refer (sql-str)]
+            [akvo.lumen.postgres.filter :refer (sql-str)]
             [clojure.java.jdbc :as jdbc]))
 
 (defn- run-query [tenant-conn table-name sql-text column-x-name column-y-name filter-sql aggregation-method truncate-size column-subbucket-name]
