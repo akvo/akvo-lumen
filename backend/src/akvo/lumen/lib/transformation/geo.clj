@@ -17,14 +17,14 @@
     (boolean
       (every? util/valid-column-name? [columnNameLat columnNameLong]))))
 
-(defmethod engine/valid? :core/generate-geopoints
+(defmethod engine/valid? "core/generate-geopoints"
   [op-spec]
   (valid? op-spec))
 
 (defn add-index [conn table-name column-name]
   (jdbc/execute! conn (postgres/geo-index table-name column-name)))
 
-(defmethod engine/apply-operation :core/generate-geopoints
+(defmethod engine/apply-operation "core/generate-geopoints"
   [{:keys [tenant-conn]} table-name columns op-spec]
   (let [{:strs [columnNameLat columnNameLong columnTitleGeo]} (engine/args op-spec)
         get-client-type (partial engine/column-type columns)

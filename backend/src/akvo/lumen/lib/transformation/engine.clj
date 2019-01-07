@@ -16,7 +16,7 @@
 (defmulti valid?
   "Validate transformation spec"
   (fn [op-spec]
-    (keyword (op-spec "op"))))
+    (op-spec "op")))
 
 (defmethod valid? :default
   [op-spec]
@@ -33,7 +33,7 @@
    - \"args\" : map with arguments to the operation
    - \"onError\" : Error strategy"
   (fn [deps table-name columns op-spec]
-    (keyword (get op-spec "op"))))
+    (get op-spec "op")))
 
 (defmethod apply-operation :default
   [deps table-name columns op-spec]
@@ -205,7 +205,7 @@
 
 (defmulti adapt-transformation
   (fn [op-spec older-columns new-columns]
-    (keyword (get op-spec "op"))))
+    (get op-spec "op")))
 
 (defmethod adapt-transformation :default
   [op-spec older-columns new-columns]

@@ -42,7 +42,7 @@
 (defn new-column-name [args]
   (-> args :newColumnName))
 
-(defmethod engine/valid? :core/split-column
+(defmethod engine/valid? "core/split-column"
   [op-spec]
   (let [{:keys [onError op args] :as op-spec} (keywordize-keys op-spec)]
     (and (util/valid-column-name? (col-name args))
@@ -80,7 +80,7 @@
           :else                 (apply conj default-values (reverse values))))
       default-values)))
 
-(defmethod engine/apply-operation :core/split-column
+(defmethod engine/apply-operation "core/split-column"
   [{:keys [tenant-conn]} table-name columns op-spec]
   (jdbc/with-db-transaction [tenant-conn tenant-conn]
     (let [{:keys [onError op args]} (keywordize-keys op-spec)

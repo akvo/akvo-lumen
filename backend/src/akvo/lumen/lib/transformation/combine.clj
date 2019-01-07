@@ -7,7 +7,7 @@
 (hugsql/def-db-fns "akvo/lumen/lib/transformation/combine.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/transformation/engine.sql")
 
-(defmethod engine/valid? :core/combine
+(defmethod engine/valid? "core/combine"
   [op-spec]
   (let [{[column-name-1 column-name-2] "columnNames"
          column-title "newColumnTitle"
@@ -17,7 +17,7 @@
                   (string? separator)
                   (= (engine/error-strategy op-spec) "fail")))))
 
-(defmethod engine/apply-operation :core/combine
+(defmethod engine/apply-operation "core/combine"
   [{:keys [tenant-conn]} table-name columns op-spec]
   (let [new-column-name (engine/next-column-name columns)
         {[first-column-name second-column-name] "columnNames"
