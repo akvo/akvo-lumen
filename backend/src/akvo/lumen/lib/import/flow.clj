@@ -30,7 +30,8 @@
             (<= version 3) (v3/dataset-columns (flow-common/form @survey formId)))
           (catch Throwable e
             (if-let [ex-d (ex-data e)]
-              (throw (ex-info (:cause e) (assoc ex-d :instance instance)))
+              (throw (ex-info (or (:cause e) (str "Null cause from instance: " instance))
+                              (assoc ex-d :instance instance)))
               (throw e)))))
       (records [this]
         (try
@@ -39,5 +40,6 @@
             (<= version 3) (v3/form-data headers-fn @survey formId))
           (catch Throwable e
             (if-let [ex-d (ex-data e)]
-              (throw (ex-info (:cause e) (assoc ex-d :instance instance)))
+              (throw (ex-info (or (:cause e) (str "Null cause from instance: " instance))
+                              (assoc ex-d :instance instance)))
               (throw e))))))))
