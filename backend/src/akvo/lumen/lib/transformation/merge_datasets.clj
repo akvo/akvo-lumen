@@ -179,9 +179,9 @@
   [merge-op]
   (distinct
    (filter some?
-           (conj (conj (:mergeColumns merge-op)
-                       (:mergeColumn merge-op))
-                 (:aggregationColumn merge-op)))))
+           (-> (:mergeColumns merge-op)
+               (conj (:mergeColumn merge-op))
+               (conj (:aggregationColumn merge-op))))))
 
 (defn- merged-columns-diff [dss merge-source-op]
   (let [merged-dataset (some #(when (= (:dataset-id %) (:datasetId merge-source-op)) %) dss)
