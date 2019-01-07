@@ -178,9 +178,10 @@
   "returns a distinct collection with the columns that participate in a merge operation"
   [merge-op]
   (distinct
-   (conj (:mergeColumns merge-op)
-         (:mergeColumn merge-op)
-         (:aggregationColumn merge-op))))
+   (filter some?
+           (conj (conj (:mergeColumns merge-op)
+                       (:mergeColumn merge-op))
+                 (:aggregationColumn merge-op)))))
 
 (defn- merged-columns-diff [dss merge-source-op]
   (let [merged-dataset (some #(when (= (:dataset-id %) (:datasetId merge-source-op)) %) dss)
