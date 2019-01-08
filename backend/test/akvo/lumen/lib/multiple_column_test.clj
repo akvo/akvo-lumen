@@ -5,8 +5,8 @@
 
 (deftest details-test
   (testing "get multiple column details"
-    (let [multiple-type "caddisfly"
-          multiple-id "0b4a0aaa-f556-4c11-a539-c4626582cca6"]
-      (is (= 200 (:status (multiple-column/details {:caddisfly (caddisfly)} multiple-type multiple-id))))
-      (is (= 404 (:status (multiple-column/details {} "other" multiple-id))))
-      (is (= 404 (:status (multiple-column/details {:caddisfly (caddisfly)} multiple-type "not-found")))))))
+    (let [multipleType "caddisfly"
+          multipleId "0b4a0aaa-f556-4c11-a539-c4626582cca6"]
+      (is (= 200 (:status (multiple-column/details {:caddisfly (caddisfly)} multipleType multipleId))))
+      (is (= 404 (:status (multiple-column/details {} "other" multipleId))))
+      (is (= 404 (:status (multiple-column/details {:caddisfly (caddisfly)} multipleType "not-found")))))))

@@ -16,11 +16,11 @@
 
 (defn details
   "depending of type of multiple columns we dispatch to different logic impls"
-  [{:keys [caddisfly] :as deps} multiple-type multiple-id]
-  (log/debug ::all :multiple-type multiple-type :multiple-id multiple-id)
-  (condp = multiple-type
-    "caddisfly" (if-let [res (extract caddisfly multiple-id)]
+  [{:keys [caddisfly] :as deps} multipleType multipleId]
+  (log/debug ::all :multipleType multipleType :multipleId multipleId)
+  (condp = multipleType
+    "caddisfly" (if-let [res (extract caddisfly multipleId)]
                   (response res)
                   (not-found {:message "caddisfly id not found"
-                              :multiple-id multiple-id}))
-    (not-found {:type multiple-type})))
+                              :multipleId multipleId}))
+    (not-found {:type multipleType})))

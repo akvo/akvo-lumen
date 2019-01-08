@@ -23,27 +23,13 @@
 (defn dataset-version-spec-adapter
   "provisional spec adapter function to be removed when specs work was finished"
   [dsv]
-  (letfn [(>mult [i]
-            (set/rename-keys i {:multipleType :multiple-type
-                                :multipleId :multiple-id}))
-          (>column [e]
-            (when e
-              (cond-> e
-               (:multipleType e) >mult)))
-          (>changedColumns [cc]
-            (reduce-kv (fn [c k {:keys [before after] :as v}]
-                         ;; (log/info :v v  (>column v))
-                         (assoc c (name k) {:before (>column before) :after (>column after)})
-                         ) {} cc))]
-    (let [res  (-> (keywordize-keys dsv)
-                   (update :columns #(mapv >column %))
-                   (update :transformations #(mapv (fn [t]
-                                                     (let [t (if (or (= "core/split-column" (:op t))
-                                                                     (= "core/extract-multiple" (:op t)))
-                                                               (update-in t [:args :selectedColumn] >column)
-                                                               t)]
-                                                       (update t :changedColumns >changedColumns))) %)))]
-      res)))
+  (-> (keywordize-keys dsv)
+      (update :transformations
+              (fn [txs]
+                (mapv (fn [t]
+                        (update t :changedColumns
+                                (fn [cc]
+                                  (reduce (fn [c [k v]] (assoc c (name k) v)) {} cc)))) txs)))))
 
 (defn new-dataset-version-conform
   [f t d]
