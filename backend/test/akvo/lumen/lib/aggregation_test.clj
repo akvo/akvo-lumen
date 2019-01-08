@@ -41,7 +41,6 @@
                                 "onError" "default-value"}})
     (testing "Empty query"
       (let [[tag query-result :as res] (query {:aggregation "count"})]
-        (log/error :res res)
         (is (= tag ::lib/ok))
         (is (= query-result {:columns [{:type "number" :title "Total"}]
                              :rows [[8]]
