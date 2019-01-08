@@ -17,28 +17,21 @@
   (let [data {:columns
               [{:id :c1, :title "A", :type "text"}
                {:id :c2, :title "B", :type "text"}
-               {:id :c3, :title "C", :type "text"}],
+               {:id :c3, :title "C", :type "number"}],
               :rows
-              [[{:value "a1"} {:value "b1"} {:value "10"}]
-               [{:value "a1"} {:value "b1"} {:value "11"}]
-               [{:value "a1"} {:value "b2"} {:value "9"}]
-               [{:value "a1"} {:value "b2"} {:value "10"}]
-               [{:value "a2"} {:value "b1"} {:value "12"}]
-               [{:value "a2"} {:value "b1"} {:value "10"}]
-               [{:value "a2"} {:value "b2"} {:value "11"}]
-               [{:value "a2"} {:value "b2"} {:value "10"}]]}
+              [[{:value "a1"} {:value "b1"} {:value 10}]
+               [{:value "a1"} {:value "b1"} {:value 11}]
+               [{:value "a1"} {:value "b2"} {:value 9}]
+               [{:value "a1"} {:value "b2"} {:value 10}]
+               [{:value "a2"} {:value "b1"} {:value 12}]
+               [{:value "a2"} {:value "b1"} {:value 10}]
+               [{:value "a2"} {:value "b2"} {:value 11}]
+               [{:value "a2"} {:value "b2"} {:value 10}]]}
         dataset-id (import-file *tenant-conn* *error-tracker* {:dataset-name "pivot"
                                                                :kind "clj"
                                                                :data data})
         query (partial aggregation/query *tenant-conn* dataset-id "pivot") ]
-    (tf/apply {:tenant-conn *tenant-conn*}
-              dataset-id
-              {:type :transformation
-               :transformation {"op" "core/change-datatype"
-                                "args" {"columnName" "c3"
-                                        "newType" "number"
-                                        "defaultValue" 0}
-                                "onError" "default-value"}})
+
     (testing "Empty query"
       (let [[tag query-result :as res] (query {:aggregation "count"})]
         (is (= tag ::lib/ok))
