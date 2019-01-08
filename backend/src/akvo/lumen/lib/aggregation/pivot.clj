@@ -57,8 +57,7 @@
 (defn apply-query [conn table-name {:keys [row-column category-column value-column] :as query} filter-str]
   (cond
 
-    (and (nil? row-column)
-         (nil? category-column))
+    (and (nil? row-column) (nil? category-column))
     {:columns [{:type "number" :title "Total"}]
      :rows    (run-query conn (format "SELECT count(rnum) FROM %s WHERE %s"
                                       table-name
