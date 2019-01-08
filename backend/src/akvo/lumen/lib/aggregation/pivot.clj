@@ -6,7 +6,6 @@
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
             [clojure.tools.logging :as log]
-            [clojure.walk :refer (keywordize-keys stringify-keys)]
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
@@ -150,8 +149,7 @@
    :filters (:filters query)})
 
 (defn query [tenant-conn {:keys [columns table-name]} query]
-  (let [columns (keywordize-keys columns)
-        query (build-query columns (keywordize-keys query))
+  (let [query (build-query columns query)
         filter-str (sql-str columns (:filters query))]
     (lib/ok (merge (apply-query tenant-conn table-name query filter-str)
                    {:metadata

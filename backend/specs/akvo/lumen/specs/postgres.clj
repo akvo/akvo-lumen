@@ -19,10 +19,13 @@
 
 (s/def ::postgres.filter/value (s/nilable string?))
 
-(s/def ::postgres.filter/filter (s/keys :req-un [::postgres.filter/operation
-                                                 ::postgres.filter/strategy
-                                                 ::postgres.filter/value
-                                                 ::db.dsv/column]))
+(alias 'db.dsv.column 'akvo.lumen.specs.db.dataset-version.column)
+
+(s/def ::postgres.filter/column ::db.dsv.column/columnName)
+(s/def ::postgres.filter/filter (s/nilable (s/keys :req-un [::postgres.filter/operation
+                                                            ::postgres.filter/strategy
+                                                            ::postgres.filter/value
+                                                            ::postgres.filter/column])))
 
 (s/def ::postgres.filter/filters (s/coll-of ::postgres.filter/filter :gen-max 3))
 
@@ -39,7 +42,7 @@
 (s/fdef postgres.filter/sql-str
   :args (s/cat
 	 :columns ::db.dsv/columns
-	 :filters ::postgres.filter/filters)
+	 :filters (s/nilable ::postgres.filter/filters))
   :ret string?)
 
 

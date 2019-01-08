@@ -2,7 +2,6 @@
   (:require [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.dataset.utils :refer (find-column)]
             [akvo.lumen.postgres.filter :refer (sql-str)]
-            [clojure.walk :refer (keywordize-keys stringify-keys)]
             [clojure.java.jdbc :as jdbc]))
 
 (defn- run-query [tenant-conn table-name column-name filter-sql]
@@ -13,9 +12,7 @@
 
 (defn query
   [tenant-conn {:keys [columns table-name]} query]
-  (let [columns (keywordize-keys columns)
-        query (keywordize-keys query)
-        filter-sql (sql-str columns (:filters query))
+  (let [filter-sql (sql-str columns (:filters query))
         bucket-column (find-column columns (:bucketColumn query))
         counts (run-query tenant-conn table-name (:columnName bucket-column) filter-sql)
         max-segments 50]

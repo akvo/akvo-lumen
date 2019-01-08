@@ -3,8 +3,7 @@
             [akvo.lumen.lib.dataset.utils :refer (find-column)]
             [akvo.lumen.postgres.filter :refer (sql-str)]
             [clojure.java.jdbc :as jdbc]
-            [clojure.tools.logging :as log]
-            [clojure.walk :refer (keywordize-keys)]))
+            [clojure.tools.logging :as log]))
 
 (defn- run-query [tenant-conn table-name sql-text column-size-name filter-sql aggregation-method max-points column-bucket-name]
   (let [sql-query (format sql-text column-size-name table-name filter-sql aggregation-method max-points column-bucket-name)]
@@ -30,9 +29,7 @@
 
 (defn query
   [tenant-conn {:keys [columns table-name]} query]
-  (let [columns (keywordize-keys columns)
-        query (keywordize-keys query)
-        filter-sql (sql-str columns (:filters query))
+  (let [filter-sql (sql-str columns (:filters query))
         column-size  (find-column columns (:metricColumn query))
         column-bucket (find-column columns (:bucketColumn query))
         max-points 2500

@@ -1,7 +1,6 @@
 (ns akvo.lumen.lib.aggregation.bar
   (:require [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.dataset.utils :refer (find-column)]
-            [clojure.walk :refer (keywordize-keys stringify-keys)]
             [akvo.lumen.postgres.filter :refer (sql-str)]
             [clojure.java.jdbc :as jdbc]))
 
@@ -13,10 +12,7 @@
 
 (defn query
   [tenant-conn {:keys [columns table-name]} query]
-  (let [columns (keywordize-keys columns)
-        query   (keywordize-keys query)
-
-        filter-sql                  (sql-str columns (:filters query))
+  (let [filter-sql                  (sql-str columns (:filters query))
         max-elements                200
         column-x                    (find-column columns (:bucketColumn query))
         column-subbucket            (find-column columns (:subBucketColumn query))

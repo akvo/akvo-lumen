@@ -7,6 +7,7 @@
             [akvo.lumen.lib.aggregation.scatter :as scatter]
             [akvo.lumen.lib.aggregation.bubble :as bubble]
             [clojure.java.jdbc :as jdbc]
+            [clojure.walk :refer (keywordize-keys)]
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
@@ -25,7 +26,7 @@
   (jdbc/with-db-transaction [tenant-tx-conn tenant-conn {:read-only? true}]
     (if-let [dataset (table-name-and-columns-by-dataset-id tenant-tx-conn {:id dataset-id})]
       (try
-        (query* tenant-tx-conn dataset visualisation-type query)
+        (query* tenant-tx-conn (update dataset :columns (comp keywordize-keys vec)) visualisation-type query)
         (catch clojure.lang.ExceptionInfo e
           (lib/bad-request (merge {:message (.getMessage e)}
                                   (ex-data e)))))
