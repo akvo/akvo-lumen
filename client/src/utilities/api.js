@@ -1,4 +1,5 @@
 import { omit } from 'lodash';
+import Raven from 'raven-js';
 
 import * as auth from './auth';
 
@@ -42,15 +43,37 @@ const handleResponse = (response) => {
     switch (status) {
       case 400: {
         return response.json().then((body) => {
-          throw new Error(`Bad request${body.message ? `: ${body.message}` : ''}`);
+          const error = new Error(`Bad request${body.message ? `: ${body.message}` : ''}`);
+          Raven.captureException(error, {
+            extra: {
+              url,
+              body,
+              status,
+            },
+          });
+          throw error;
         });
       }
       case 404:
       case 500: {
-        throw new Error(statusText);
+        const error = new Error(statusText);
+        Raven.captureException(error, {
+          extra: {
+            url,
+            status,
+          },
+        });
+        throw error;
       }
       default : {
-        throw new Error('There was an error communicating with the server.');
+        const error = new Error('There was an error communicating with the server.');
+        Raven.captureException(error, {
+          extra: {
+            url,
+            status,
+          },
+        });
+        throw error;
       }
     }
   }
