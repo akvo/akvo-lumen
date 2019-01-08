@@ -32,11 +32,11 @@
            (merge
             {:title (:name q)
              :type t
-             :id (keyword (format "c%s" (:id q)))}
+             :id (format "c%s" (:id q))}
             (when (= t :multiple)
               (if (:caddisflyResourceUuid q)
-                {:multiple-type :caddisfly
-                 :multiple-id (:caddisflyResourceUuid q)}
-                {:multiple-type :unknown
-                 :multiple-id nil})))))
+                {:multipleType :caddisfly
+                 :multipleId (:caddisflyResourceUuid q)}
+                {:multipleType :unknown
+                 :multipleId nil})))))
        questions))

@@ -57,8 +57,8 @@
     (let [{:keys [onError op args]} op-spec
           selected-column (keywordize-keys (find-column current-columns (:columnName (-> args :selectedColumn))))
 
-          caddisfly-schema (if-let [multiple-id (:multipleId selected-column)]
-                             (get-schema caddisfly multiple-id)
+          caddisfly-schema (if-let [multipleId (:multipleId selected-column)]
+                             (get-schema caddisfly multipleId)
                              (throw
                               (ex-info "this column doesn't have a caddisflyResourceUuid currently associated!"
                                        {:message

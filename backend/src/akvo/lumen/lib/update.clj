@@ -33,8 +33,8 @@
 
 (defn compatible-columns? [imported-columns columns]
   (let [imported-columns (map (fn [column]
-                                (cond-> {:id (keyword (get column "columnName"))
-                                         :type (keyword (get column "type"))}
+                                (cond-> {:id (get column "columnName")
+                                         :type (get column "type")}
                                   (contains? column "key") (assoc :key (boolean (get column "key")))))
                               imported-columns)]
     (set/subset? (set (map #(select-keys % [:id :type]) imported-columns))
@@ -58,7 +58,7 @@
                               {}
                               {:transaction? false})
             (let [dataset-version  (latest-dataset-version-by-dataset-id conn {:dataset-id dataset-id})
-                  coerce-column-fn (fn [{:keys [title id type key multiple-id multiple-type] :as column}]
+                  coerce-column-fn (fn [{:keys [title id type key multipleId multipleType] :as column}]
                                      (cond-> {"type" (name type)
                                               "title" title
                                               "columnName" (name id)
@@ -66,8 +66,8 @@
                                               "direction" nil
                                               "hidden" false}
                                        key           (assoc "key" (boolean key))
-                                       multiple-type (assoc "multipleType" multiple-type)
-                                       multiple-id   (assoc "multipleId" multiple-id)))
+                                       multipleType (assoc "multipleType" multipleType)
+                                       multipleId   (assoc "multipleId" multipleId)))
                   importer-columns (mapv coerce-column-fn importer-columns)]
               (engine/apply-transformation-log conn
                                                table-name

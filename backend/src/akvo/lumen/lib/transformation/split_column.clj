@@ -64,7 +64,7 @@
 
 (defn- update-row [conn table-name row-id vals-map]
   (let [r (string/join "," (doall (map (fn [[k v]]
-                                         (str (name k) "=" (postgres/adapt-string-value v))) vals-map)))
+                                         (str k "=" (postgres/adapt-string-value v))) vals-map)))
         sql (str  "update " table-name " SET "  r " where rnum=" row-id)]
     (log/debug :sql sql)
     (jdbc/execute! conn sql)))
@@ -104,7 +104,7 @@
                                   (->>
                                    (split ((keyword column-name) row) re-pattern* new-rows-count)
                                    (map (fn [column v]
-                                          [(keyword (:id column)) v]) new-columns)
+                                          [(:id column) v]) new-columns)
                                    (update-row tenant-conn table-name (:rnum row))))]
           {:success?      true
            :execution-log [(format "Splitted column %s with pattern %s" column-name pattern)]

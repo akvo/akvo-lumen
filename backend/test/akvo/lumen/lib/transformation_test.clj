@@ -524,7 +524,7 @@
                                               (assoc :extract %3))
                                          columns (range) bols)
         new-columns                (filter :extract columns-payload)
-        data                       (import.s/sample-imported-dataset [[:multiple {::import.values.s/multiple-id    #(s/gen #{import.values.s/cad1-id})
+        data                       (import.s/sample-imported-dataset [[:multiple {::import.values.s/multipleId    #(s/gen #{import.values.s/cad1-id})
                                                                                   ::import.column.multiple.s/value #(s/gen #{import.values.s/cad1})}]] 2)
         dataset-id                 (import-file *tenant-conn* *error-tracker*
                                                 {:dataset-name "multiple caddisfly"
@@ -532,8 +532,8 @@
                                                  :data         data})
         apply-transformation       (partial transformation/apply {:tenant-conn *tenant-conn*} dataset-id)
         selected-column            (lumen.s/sample-with-gen* ::transformation.split-column.s/selectedColumn
-                                                             {::import.values.s/multiple-type          "caddisfly"
-                                                              ::import.values.s/multiple-id            import.values.s/cad1-id
+                                                             {::import.values.s/multipleType          "caddisfly"
+                                                              ::import.values.s/multipleId            import.values.s/cad1-id
                                                               ::db.dataset-version.column.s/columnName "c1"
                                                               ::import.values.s/id                     :c1
                                                               ::import.column.s/header                 #(s/gen ::import.column.multiple.s/header)})
@@ -545,7 +545,6 @@
                                                               ::transformation.split-column.s/pattern  "-"
                                                               ::transformation.engine.s/onError        "fail"}
                                                              :selectedColumn selected-column)
-                                         (update-in ["args" "selectedColumn"] #(set/rename-keys % {"multiple-type" "multipleType" "multiple-id" "multipleId"}))
                                          (update-in ["args" "extractImage"] (constantly false))
                                          (assoc-in ["args" "columns"] (stringify-keys columns-payload)))})]
     (is (= ::lib/ok tag))
