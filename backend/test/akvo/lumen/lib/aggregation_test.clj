@@ -15,9 +15,9 @@
 
 (deftest ^:functional pivot-tests
   (let [data {:columns
-              [{:id :c1, :title "A", :type "text"}
-               {:id :c2, :title "B", :type "text"}
-               {:id :c3, :title "C", :type "number"}],
+              [{:id "c1", :title "A", :type "text"}
+               {:id "c2", :title "B", :type "text"}
+               {:id "c3", :title "C", :type "number"}],
               :rows
               [[{:value "a1"} {:value "b1"} {:value 10}]
                [{:value "a1"} {:value "b1"} {:value 11}]
@@ -113,8 +113,8 @@
 
 (deftest ^:functional pie-tests
   (let [data {:columns
-              [{:id :c1, :title "A", :type "text"}
-               {:id :c2, :title "B", :type "text"}],
+              [{:id "c1", :title "A", :type "text"}
+               {:id "c2", :title "B", :type "text"}],
               :rows
               [[{:value "a1"} {:value "b1"}]
                [{:value "a1"} {:value "b1"}]

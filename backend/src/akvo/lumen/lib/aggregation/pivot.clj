@@ -10,9 +10,6 @@
 
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
 
-(defn- run-query [conn query-str]
-  (rest (jdbc/query conn [query-str] {:as-arrays? true})))
-
 (defn- coalesce
   "For pivot tables, `NULL` categories will always be empty because `crosstab` uses `=` and
    `NULL = NULL` is `NULL`. To work around this, we must use another value to represent the
@@ -26,33 +23,43 @@
               "'1001-01-01 01:00:00'::timestamptz"
               "'NaN'::double precision"))))
 
-(defn- apply-pivot [conn table-name {:keys [category-column row-column] :as query} filter-str]
-  (let [source-sql        (fn [table-name {:keys [category-column row-column value-column aggregation]} filter-str]
-                            (format "SELECT %s, %s, %s(%s) FROM %s WHERE %s GROUP BY 1,2 ORDER BY 1,2"
-                                    (:columnName row-column) (coalesce category-column) aggregation
-                                    (:columnName value-column) table-name filter-str))
-        unique-values-sql (fn [table-name category-column filter-str]
-                            (format "SELECT DISTINCT %s%s FROM %s WHERE %s ORDER BY 1"
-                                    (coalesce category-column)
-                                    (if (= "timestamptz" (:type category-column)) "::timestamptz::date" "")
-                                    table-name
-                                    filter-str))
-        pivot-sql         (fn [table-name {:keys [category-column] :as query}
-                               filter-str categories-count]
-                            (format "SELECT * FROM crosstab ($$ %s $$, $$ %s $$) AS ct (c1 text, %s);"
-                                    (source-sql table-name query filter-str)
-                                    (unique-values-sql table-name category-column filter-str)
-                                    (str/join "," (map #(format "c%s double precision" (+ % 2))
-                                                       (range categories-count)))))
-        unique-values     (fn [conn table-name category-column filter-str]
-                            (->> (unique-values-sql table-name category-column filter-str)
-                                 (run-query conn)
-                                 (map first)))
-        categories        (unique-values conn table-name category-column filter-str)
-        category-columns  (map (fn [title] {:title title :type "number"}) categories)
-        columns           (cons (select-keys row-column [:title :type]) category-columns)]
-    {:rows    (run-query conn (pivot-sql table-name query filter-str (count categories)))
-     :columns columns}))
+(defn- run-query [conn query-str]
+  (rest (jdbc/query conn [query-str] {:as-arrays? true})))
+
+(defn- apply-pivot [conn table-name {:keys [category-column row-column aggregation value-column]} filter-str]
+  (let [source-sql        (let [select (format "SELECT %s, %s, %s(%s)"
+                                               (:columnName row-column)
+                                               (coalesce category-column)
+                                               aggregation
+                                               (:columnName value-column))
+                                from   (format "FROM %s" table-name)
+                                where  (format "WHERE %s GROUP BY 1,2 ORDER BY 1,2" filter-str)]
+                            (format "%s %s %s" select from where))
+
+        unique-values-sql (let [select (format "SELECT DISTINCT %s%s"
+                                               (coalesce category-column) (if (= "timestamptz"
+                                                                                 (:type category-column))
+                                                                            "::timestamptz::date"
+                                                                            ""))
+                                from   (format "FROM %s" table-name)
+                                where  (format "WHERE %s ORDER BY 1" filter-str)]
+                            (format "%s %s %s" select from where))
+
+        categories        (->> (run-query conn unique-values-sql)
+                               (map first))
+
+        pivot-sql         (let [select "SELECT *"
+                                from   (format "FROM crosstab ($$ %s $$, $$ %s $$) AS ct (c1 text, %s)"
+                                               source-sql
+                                               unique-values-sql
+                                               (str/join "," (map #(format "c%s double precision" (+ % 2))
+                                                                  (range (count categories)))))
+                                where  ""]
+                            (format "%s %s %s" select from where))]
+    {:rows    (run-query conn pivot-sql)
+     :columns (->> categories
+                   (map (fn [title] {:title title :type "number"}))
+                   (cons (select-keys row-column [:title :type])))}))
 
 (defn apply-query [conn table-name {:keys [row-column category-column value-column] :as query} filter-str]
   (cond
@@ -64,30 +71,30 @@
                                       filter-str))}
 
     (nil? category-column)
-    (let [rows (->> (format "SELECT %s, count(rnum) FROM %s WHERE %s GROUP BY 1 ORDER BY 1"
-                            (coalesce (:row-column query))
-                            table-name
-                            filter-str)
-                    (run-query conn))]
-      {:columns [{:type  "text"
-                  :title (get-in query [:row-column :title])}
-                 {:type  "number"
-                  :title "Total"}]
-       :rows    rows})
+    {:columns [{:type  "text"
+                :title (get-in query [:row-column :title])}
+               {:type  "number"
+                :title "Total"}]
+     :rows    (run-query conn (format "SELECT %s, count(rnum) FROM %s WHERE %s GROUP BY 1 ORDER BY 1"
+                                      (coalesce (:row-column query))
+                                      table-name
+                                      filter-str))}
 
     (nil? row-column)
-    (let [counts (->> (format "SELECT %s, count(rnum) FROM %s WHERE %s GROUP BY 1 ORDER BY 1"
+    (let [data (->> (format "SELECT %s, count(rnum) FROM %s WHERE %s GROUP BY 1 ORDER BY 1"
                               (coalesce (:category-column query))
                               table-name
                               filter-str)
                       (run-query conn))]
-      {:columns (cons {:title ""
-                       :type  "text"}
-                      (map (fn [[category]]
-                             {:title category
-                              :type  "number"})
-                           counts))
-       :rows    [(cons "Total" (map second counts))]})
+      {:columns (->> data
+                     (map (fn [[category]]
+                            {:title category
+                             :type  "number"}))
+                     (cons {:title ""
+                            :type  "text"}))
+       :rows    [(->> data
+                      (map second)
+                      (cons "Total"))]})
 
     (nil? value-column)
     (apply-pivot conn table-name (assoc query

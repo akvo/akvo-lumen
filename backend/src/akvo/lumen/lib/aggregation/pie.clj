@@ -12,26 +12,26 @@
 
 (defn query
   [tenant-conn {:keys [columns table-name]} query]
-  (let [filter-sql (sql-str columns (:filters query))
+  (let [filter-sql    (sql-str columns (:filters query))
         bucket-column (find-column columns (:bucketColumn query))
-        counts (run-query tenant-conn table-name (:columnName bucket-column) filter-sql)
-        max-segments 50]
+        counts        (run-query tenant-conn table-name (:columnName bucket-column) filter-sql)
+        max-segments  50]
     (if (> (count counts) max-segments)
       (lib/bad-request
-       {:error true
+       {:error  true
         :reason "too-many"
-        :max max-segments
-        :count (count counts)})
+        :max    max-segments
+        :count  (count counts)})
       (lib/ok
-       {:series [{:key (:title bucket-column)
+       {:series [{:key   (:title bucket-column)
                   :label (:title bucket-column)
-                  :data (mapv
-                           (fn [[bucket-value bucket-count]]
-                             {:value bucket-count})
-                           counts)}]
-        :common {:data (mapv
+                  :data  (mapv
                           (fn [[bucket-value bucket-count]]
-                            {:key bucket-value
-                             :label bucket-value})
-                          counts)
-                  :metadata {:type (:type bucket-column)}}}))))
+                            {:value bucket-count})
+                          counts)}]
+        :common {:data     (mapv
+                            (fn [[bucket-value bucket-count]]
+                              {:key   bucket-value
+                               :label bucket-value})
+                            counts)
+                 :metadata {:type (:type bucket-column)}}}))))
