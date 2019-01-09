@@ -4,6 +4,7 @@
             [akvo.lumen.lib.aggregation :as aggregation]
             [akvo.lumen.lib.aggregation.pie :as aggregation.pie]
             [akvo.lumen.lib.aggregation.pivot :as aggregation.pivot]
+            [akvo.lumen.lib.aggregation.bar :as aggregation.bar]
             [akvo.lumen.postgres.filter :as postgres.filter]
             [akvo.lumen.specs.db :as db.s]
             [akvo.lumen.util :as u]
@@ -33,18 +34,17 @@
 (s/def ::aggregation.pivot/categoryColumn ::db.dsv.column/columnName)
 (s/def ::aggregation.pivot/rowColumn ::db.dsv.column/columnName)
 (s/def ::aggregation.pivot/valueColumn ::db.dsv.column/columnName)
-(s/def ::aggregation/aggregation #{"mean"  
-                                   "sum"   
-                                   "min"   
-                                   "max"   
-                                   "count"}) 
+(s/def ::aggregation.pivot/aggregation #{"mean"
+                                         "sum"
+                                         "min"
+                                         "max"
+                                         "count"})
 
 (s/def ::aggregation.pivot/query (s/keys :req-un [(s/nilable ::postgres.filter/filters)
-                                                  ::aggregation/aggregation]
+                                                  ::aggregation.pivot/aggregation]
                                          :opt-un [::aggregation.pivot/rowColumn
                                                   ::aggregation.pivot/valueColumn
                                                   ::aggregation.pivot/categoryColumn]))
-
 
 (s/fdef aggregation.pivot/query
   :args (s/cat
@@ -53,4 +53,32 @@
 	 :query ::aggregation.pivot/query)
   :ret any?)
 
+(s/def ::aggregation.bar/bucketColumn ::db.dsv.column/columnName)
+(s/def ::aggregation.bar/subBucketColumn (s/nilable ::db.dsv.column/columnName))
+(s/def ::aggregation.bar/metricColumnY (s/nilable ::db.dsv.column/columnName))
+(s/def ::aggregation.bar/metricAggregation #{"mean"
+                                             "sum"
+                                             "min"
+                                             "max"
+                                             "count"
+                                             "median"
+                                             "distinct"
+                                             "q1"
+                                             "q3"})
+(s/def ::aggregation.bar/sort (s/nilable #{"asc" "dsc"}))
+(s/def ::aggregation.bar/truncateSize (s/nilable string?))
+
+(s/def ::aggregation.bar/query (s/keys :req-un [(s/nilable ::postgres.filter/filters)
+                                                ::aggregation.bar/bucketColumn]
+                                       :opt-un [::aggregation.bar/subBucketColumn
+                                                ::aggregation.bar/metricColumnY
+                                                ::aggregation.bar/sort
+                                                ::aggregation.bar/truncateSize]))
+
+(s/fdef aggregation.bar/query
+  :args (s/cat
+         :db-conn ::db.s/tenant-connection
+	 :dataset ::aggregation/dataset
+	 :query ::aggregation.bar/query)
+  :ret any?)
 
