@@ -4,6 +4,7 @@
             [akvo.lumen.lib.aggregation.bubble :as aggregation.bubble]
             [akvo.lumen.lib.aggregation.line :as aggregation.line]
             [akvo.lumen.lib.aggregation.pie :as aggregation.pie]
+            [akvo.lumen.lib.aggregation.scatter :as aggregation.scatter]
             [akvo.lumen.lib.aggregation.pivot :as aggregation.pivot]
             [akvo.lumen.postgres.filter :as postgres.filter]
             [akvo.lumen.specs :as lumen.s :refer (sample)]
@@ -93,15 +94,12 @@
                                           :opt-un [::aggregation.bubble/metricAggregation
                                                    ::aggregation.bubble/metricColumn]))
 
-
 (s/fdef aggregation.bubble/query
   :args (s/cat
          :db-conn ::db.s/tenant-connection
 	 :dataset ::aggregation/dataset
 	 :query ::aggregation.bubble/query)
   :ret any?)
-
-
 
 (s/def ::aggregation.line/metricColumnX (s/nilable ::db.dsv.column/columnName))
 (s/def ::aggregation.line/metricColumnY (s/nilable ::db.dsv.column/columnName))
@@ -112,7 +110,6 @@
                                                  ::aggregation.line/metricColumnY]
                                           :opt-un [::aggregation.line/metricAggregation]))
 
-
 (s/fdef aggregation.line/query
   :args (s/cat
          :db-conn ::db.s/tenant-connection
@@ -120,3 +117,25 @@
 	 :query ::aggregation.line/query)
   :ret any?)
 
+(s/def ::aggregation.scatter/metricColumnX (s/nilable ::db.dsv.column/columnName))
+(s/def ::aggregation.scatter/metricColumnY (s/nilable ::db.dsv.column/columnName))
+(s/def ::aggregation.scatter/metricColumnSize (s/nilable ::db.dsv.column/columnName))
+(s/def ::aggregation.scatter/bucketColumnCategory (s/nilable ::db.dsv.column/columnName))
+(s/def ::aggregation.scatter/datapointLabelColumn (s/nilable ::db.dsv.column/columnName))
+(s/def ::aggregation.scatter/bucketColumn (s/nilable ::db.dsv.column/columnName))
+(s/def ::aggregation.scatter/metricAggregation (s/nilable ::aggregation.bar/metricAggregation))
+
+(s/def ::aggregation.scatter/query (s/keys :req-un [::postgres.filter/filters
+                                                    ::aggregation.scatter/metricColumnX
+                                                    ::aggregation.scatter/metricColumnY
+                                                    ::aggregation.scatter/metricColumnSize
+                                                    ::aggregation.scatter/bucketColumnCategory
+                                                    ::aggregation.scatter/datapointLabelColumn]
+                                           :opt-un [::aggregation.scatter/bucketColumn]))
+
+(s/fdef aggregation.scatter/query
+  :args (s/cat
+         :db-conn ::db.s/tenant-connection
+	 :dataset ::aggregation/dataset
+	 :query ::aggregation.scatter/query)
+  :ret any?)

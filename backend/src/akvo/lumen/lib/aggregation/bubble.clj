@@ -29,8 +29,7 @@
 
 (defn query
   [tenant-conn {:keys [columns table-name]} query]
-  (let [filter-sql (sql-str columns (:filters query))
-        column-size  (find-column columns (:metricColumn query))
+  (let [column-size  (find-column columns (:metricColumn query))
         column-bucket (find-column columns (:bucketColumn query))
         max-points 2500
         aggregation-method (if column-size (:metricAggregation query) "count")
@@ -41,7 +40,7 @@
         sql-response (run-query tenant-conn table-name
                                 sql-text
                                 (or (:columnName column-size) (:columnName column-bucket))
-                                filter-sql
+                                (sql-str columns (:filters query))
                                 aggregation-method
                                 max-points
                                 (:columnName column-bucket))]
