@@ -5,6 +5,7 @@
             [akvo.lumen.lib.aggregation.pie :as aggregation.pie]
             [akvo.lumen.lib.aggregation.pivot :as aggregation.pivot]
             [akvo.lumen.lib.aggregation.bar :as aggregation.bar]
+            [akvo.lumen.lib.aggregation.bubble :as aggregation.bubble]
             [akvo.lumen.postgres.filter :as postgres.filter]
             [akvo.lumen.specs.db :as db.s]
             [akvo.lumen.util :as u]
@@ -68,7 +69,7 @@
 (s/def ::aggregation.bar/sort (s/nilable #{"asc" "dsc"}))
 (s/def ::aggregation.bar/truncateSize (s/nilable string?))
 
-(s/def ::aggregation.bar/query (s/keys :req-un [(s/nilable ::postgres.filter/filters)
+(s/def ::aggregation.bar/query (s/keys :req-un [::postgres.filter/filters
                                                 ::aggregation.bar/bucketColumn]
                                        :opt-un [::aggregation.bar/subBucketColumn
                                                 ::aggregation.bar/metricColumnY
@@ -80,5 +81,22 @@
          :db-conn ::db.s/tenant-connection
 	 :dataset ::aggregation/dataset
 	 :query ::aggregation.bar/query)
+  :ret any?)
+
+(s/def ::aggregation.bubble/bucketColumn (s/nilable ::db.dsv.column/columnName))
+(s/def ::aggregation.bubble/metricColumn (s/nilable ::db.dsv.column/columnName))
+(s/def ::aggregation.bubble/metricAggregation ::aggregation.bar/metricAggregation)
+
+(s/def ::aggregation.bubble/query (s/keys :req-un [::postgres.filter/filters
+                                                   ::aggregation.bubble/bucketColumn]
+                                          :opt-un [::aggregation.bubble/metricAggregation
+                                                   ::aggregation.bubble/metricColumn]))
+
+
+(s/fdef aggregation.bubble/query
+  :args (s/cat
+         :db-conn ::db.s/tenant-connection
+	 :dataset ::aggregation/dataset
+	 :query ::aggregation.bubble/query)
   :ret any?)
 
