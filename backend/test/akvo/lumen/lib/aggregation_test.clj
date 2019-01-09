@@ -1,4 +1,5 @@
 (ns akvo.lumen.lib.aggregation-test
+  {:functional true}
   (:require [akvo.lumen.fixtures :refer [*tenant-conn*
                                          tenant-conn-fixture
                                          *error-tracker*
@@ -6,12 +7,13 @@
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.transformation :as tf]
             [akvo.lumen.lib.aggregation :as aggregation]
+            [akvo.lumen.test-utils :as tu]
             [akvo.lumen.test-utils :refer [import-file]]
             [clojure.tools.logging :as log]
             [clojure.walk :refer (keywordize-keys stringify-keys)]
             [clojure.test :refer :all]))
 
-(use-fixtures :once tenant-conn-fixture error-tracker-fixture)
+(use-fixtures :once tu/spec-instrument tenant-conn-fixture error-tracker-fixture)
 
 (defn query*  [conn t dataset-id]
   (fn [q]
@@ -20,7 +22,7 @@
               (assoc q :filters []))]
       (aggregation/query conn dataset-id t q))))
 
-(deftest ^:functional pivot-tests
+(deftest pivot-tests
   (let [data {:columns
               [{:id "c1", :title "A", :type "text"}
                {:id "c2", :title "B", :type "text"}
@@ -118,7 +120,7 @@
                        ["b2" 9.5 10.5]]
                 :metadata {:categoryColumnTitle "A"}}))))))
 
-(deftest ^:functional pie-tests
+(deftest pie-tests
   (let [data {:columns
               [{:id "c1", :title "A", :type "text"}
                {:id "c2", :title "B", :type "text"}],
