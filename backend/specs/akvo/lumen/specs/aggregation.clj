@@ -1,12 +1,13 @@
 (ns akvo.lumen.specs.aggregation
-  (:require [akvo.lumen.specs :as lumen.s :refer (sample)]
-            [akvo.lumen.specs.db :as db.s]
-            [akvo.lumen.lib.aggregation :as aggregation]
-            [akvo.lumen.lib.aggregation.pie :as aggregation.pie]
-            [akvo.lumen.lib.aggregation.pivot :as aggregation.pivot]
+  (:require [akvo.lumen.lib.aggregation :as aggregation]
             [akvo.lumen.lib.aggregation.bar :as aggregation.bar]
             [akvo.lumen.lib.aggregation.bubble :as aggregation.bubble]
+            [akvo.lumen.lib.aggregation.line :as aggregation.line]
+            [akvo.lumen.lib.aggregation.pie :as aggregation.pie]
+            [akvo.lumen.lib.aggregation.pivot :as aggregation.pivot]
             [akvo.lumen.postgres.filter :as postgres.filter]
+            [akvo.lumen.specs :as lumen.s :refer (sample)]
+            [akvo.lumen.specs.db :as db.s]
             [akvo.lumen.specs.db :as db.s]
             [akvo.lumen.util :as u]
             [clojure.spec.alpha :as s]
@@ -98,5 +99,24 @@
          :db-conn ::db.s/tenant-connection
 	 :dataset ::aggregation/dataset
 	 :query ::aggregation.bubble/query)
+  :ret any?)
+
+
+
+(s/def ::aggregation.line/metricColumnX (s/nilable ::db.dsv.column/columnName))
+(s/def ::aggregation.line/metricColumnY (s/nilable ::db.dsv.column/columnName))
+(s/def ::aggregation.line/metricAggregation (s/nilable ::aggregation.bar/metricAggregation))
+
+(s/def ::aggregation.line/query (s/keys :req-un [::postgres.filter/filters
+                                                 ::aggregation.line/metricColumnX
+                                                 ::aggregation.line/metricColumnY]
+                                          :opt-un [::aggregation.line/metricAggregation]))
+
+
+(s/fdef aggregation.line/query
+  :args (s/cat
+         :db-conn ::db.s/tenant-connection
+	 :dataset ::aggregation/dataset
+	 :query ::aggregation.line/query)
   :ret any?)
 

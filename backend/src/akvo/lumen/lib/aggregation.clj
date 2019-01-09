@@ -6,6 +6,7 @@
             [akvo.lumen.lib.aggregation.pivot :as pivot]
             [akvo.lumen.lib.aggregation.scatter :as scatter]
             [akvo.lumen.lib.aggregation.bubble :as bubble]
+            [clojure.tools.logging :as log]
             [clojure.java.jdbc :as jdbc]
             [clojure.walk :refer (keywordize-keys)]
             [hugsql.core :as hugsql]))
@@ -28,6 +29,7 @@
       (try
         (query* tenant-tx-conn (update dataset :columns (comp keywordize-keys vec)) visualisation-type query)
         (catch clojure.lang.ExceptionInfo e
+          (log/warn e :query query :visualisation-type visualisation-type)
           (lib/bad-request (merge {:message (.getMessage e)}
                                   (ex-data e)))))
       (lib/not-found {"datasetId" dataset-id}))))
