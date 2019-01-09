@@ -13,6 +13,13 @@
 
 (use-fixtures :once tenant-conn-fixture error-tracker-fixture)
 
+(defn query*  [t dataset-id]
+  (fn [q]
+    (let [q (if (:filters q)
+              q
+              (assoc q :filters []))]
+      (aggregation/query *tenant-conn* dataset-id t q))))
+
 (deftest ^:functional pivot-tests
   (let [data {:columns
               [{:id "c1", :title "A", :type "text"}
@@ -30,7 +37,7 @@
         dataset-id (import-file *tenant-conn* *error-tracker* {:dataset-name "pivot"
                                                                :kind "clj"
                                                                :data data})
-        query (partial aggregation/query *tenant-conn* dataset-id "pivot") ]
+        query (query* "pivot" dataset-id)]
 
     (testing "Empty query"
       (let [[tag query-result :as res] (query {:aggregation "count"})]
@@ -127,7 +134,7 @@
         dataset-id (import-file *tenant-conn* *error-tracker* {:dataset-name "pie"
                                                                :kind "clj"
                                                                :data data})
-        query (partial aggregation/query *tenant-conn* dataset-id "pie")]
+        query (query* "pie" dataset-id)]
     (testing "Simple queries"
       (let [[tag query-result] (query {:bucketColumn "c1"})]
         (is (= tag ::lib/ok))

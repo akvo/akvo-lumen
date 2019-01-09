@@ -21,7 +21,7 @@
 
 (s/def ::aggregation/dataset (s/keys :req-un [::db.dsv/columns ::db.dsv/table-name]))
 (s/def ::aggregation.pie/bucketColumn ::db.dsv.column/columnName)
-(s/def ::aggregation.pie/query (s/keys :req-un [(s/nilable ::postgres.filter/filters)
+(s/def ::aggregation.pie/query (s/keys :req-un [::postgres.filter/filters
                                                 ::aggregation.pie/bucketColumn]))
 
 (s/fdef aggregation.pie/query
@@ -40,7 +40,7 @@
                                          "max"
                                          "count"})
 
-(s/def ::aggregation.pivot/query (s/keys :req-un [(s/nilable ::postgres.filter/filters)
+(s/def ::aggregation.pivot/query (s/keys :req-un [::postgres.filter/filters
                                                   ::aggregation.pivot/aggregation]
                                          :opt-un [::aggregation.pivot/rowColumn
                                                   ::aggregation.pivot/valueColumn
