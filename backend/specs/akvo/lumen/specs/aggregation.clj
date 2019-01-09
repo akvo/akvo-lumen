@@ -126,12 +126,13 @@
 (s/def ::aggregation.scatter/metricAggregation (s/nilable ::aggregation.bar/metricAggregation))
 
 (s/def ::aggregation.scatter/query (s/keys :req-un [::postgres.filter/filters
+                                                    ::aggregation.scatter/metricAggregation
                                                     ::aggregation.scatter/metricColumnX
-                                                    ::aggregation.scatter/metricColumnY
+                                                    ::aggregation.scatter/metricColumnY]
+                                           :opt-un [::aggregation.scatter/bucketColumn
                                                     ::aggregation.scatter/metricColumnSize
-                                                    ::aggregation.scatter/bucketColumnCategory
-                                                    ::aggregation.scatter/datapointLabelColumn]
-                                           :opt-un [::aggregation.scatter/bucketColumn]))
+                                                    ::aggregation.scatter/datapointLabelColumn
+                                                    ::aggregation.scatter/bucketColumnCategory]))
 
 (s/fdef aggregation.scatter/query
   :args (s/cat
