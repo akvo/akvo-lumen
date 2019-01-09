@@ -46,18 +46,20 @@ export default function LineConfigMenu(props) {
       <ConfigMenuSection
         title="y_axis"
         options={(
-          <ConfigMenuSectionOptionSelect
-            placeholderId="select_a_metric_column"
-            labelTextId="metric_column"
-            value={spec.metricColumnY !== null ? spec.metricColumnY.toString() : null}
-            name="metricColumnYInput"
-            options={filterColumns(columnOptions, ['number', 'text'])}
-            onChange={value => onChangeSpec({
-              metricColumnY: value,
-              axisLabelY: getAxisLabel('y', Object.assign({}, spec, { metricColumnY: value }), columnOptions),
-              axisLabelX: getAxisLabel('x', Object.assign({}, spec, { metricColumnY: value }), columnOptions),
-            })}
-          />
+          <div data-test-id="y-axis-select">
+            <ConfigMenuSectionOptionSelect
+              placeholderId="select_a_metric_column"
+              labelTextId="metric_column"
+              value={spec.metricColumnY !== null ? spec.metricColumnY.toString() : null}
+              name="metricColumnYInput"
+              options={filterColumns(columnOptions, ['number', 'text'])}
+              onChange={value => onChangeSpec({
+                metricColumnY: value,
+                axisLabelY: getAxisLabel('y', Object.assign({}, spec, { metricColumnY: value }), columnOptions),
+                axisLabelX: getAxisLabel('x', Object.assign({}, spec, { metricColumnY: value }), columnOptions),
+              })}
+            />
+          </div>
         )}
         advancedOptions={(
           <ConfigMenuSectionOptionText
@@ -75,18 +77,20 @@ export default function LineConfigMenu(props) {
       <ConfigMenuSection
         title="x_axis"
         options={(
-          <ConfigMenuSectionOptionSelect
-            placeholderId="select_a_metric_column"
-            labelTextId="metric_column"
-            value={spec.metricColumnX !== null ? spec.metricColumnX.toString() : null}
-            name="metricColumnXInput"
-            options={filterColumns(columnOptions, ['number', 'date'])}
-            onChange={value => onChangeSpec({
-              metricColumnX: value,
-              axisLabelX: getAxisLabel('x', Object.assign({}, spec, { metricColumnX: value }), columnOptions),
-            })}
-            clearable
-          />
+          <div data-test-id="x-axis-select">
+            <ConfigMenuSectionOptionSelect
+              placeholderId="select_a_metric_column"
+              labelTextId="metric_column"
+              value={spec.metricColumnX !== null ? spec.metricColumnX.toString() : null}
+              name="metricColumnXInput"
+              options={filterColumns(columnOptions, ['number', 'date'])}
+              onChange={value => onChangeSpec({
+                metricColumnX: value,
+                axisLabelX: getAxisLabel('x', Object.assign({}, spec, { metricColumnX: value }), columnOptions),
+              })}
+              clearable
+            />
+          </div>
         )}
         advancedOptions={(
           <div>

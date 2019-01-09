@@ -2,8 +2,17 @@
 const baseUrl = Cypress.env('LUMEN_URL') || 'http://t1.lumen.local:3030/';
 const username = Cypress.env('LUMEN_USER') || 'jerome';
 const password = Cypress.env('LUMEN_PASSWORD') || 'password';
-const DATASET_LINK = 'https://raw.githubusercontent.com/akvo/akvo-lumen/develop/client/e2e-test/sample-data-1.csv';
+// TODO change this link back to develop branch once merged
+const DATASET_LINK = 'https://raw.githubusercontent.com/akvo/akvo-lumen/cypress-tests-for-changing-visualisation-types-%231866/client/e2e-test/sample-data-1.csv';
 const datasetName = `Dataset ${Date.now().toString()}`;
+const COLUMNS = {
+  TEXT_1: 'Name',
+  CAT_1: 'Cat',
+  NUMBER_1: 'Age',
+  NUMBER_2: 'Humidity',
+  NUMBER_3: 'Score',
+  NUMBER_4: 'Temperature',
+};
 
 context('Akvo Lumen', () => {
   // login
@@ -51,10 +60,10 @@ context('Akvo Lumen', () => {
     cy.get(`[data-test-name="${datasetName}"]:not(.PENDING)`, { timeout: 20000 }).should('exist');
     cy.get(`[data-test-name="${datasetName}"] > a`).click({ force: true });
     // see if metadata is correct
-    cy.get('.columnCount').contains('9 Columns').should('exist');
-    cy.get('.rowCount').contains('40 Rows').should('exist');
+    cy.get('.columnCount').contains('6 Columns').should('exist');
+    cy.get('.rowCount').contains('4 Rows').should('exist');
     // see if table cells exist
-    cy.get('.fixedDataTableCellLayout_main').should('have.length.of.at.least', 40);
+    cy.get('.fixedDataTableCellLayout_main').should('have.length.of.at.least', 4);
     // back to library
     cy.get('[data-test-id="back-button"]').click();
   });
@@ -71,10 +80,10 @@ context('Akvo Lumen', () => {
         // Selecting dataset
         cy.get(`#${optionId}`).click();
         // open column menu
-        cy.get('[data-test-id="column-menu"] .Select-control').click();
+        cy.get('[data-test-id="column-select"] .Select-control').click();
         // Finding column to select
         return cy.get('[role="option"]')
-          .contains('title (text)')
+          .contains(COLUMNS.TEXT_1)
           .should('have.attr', 'id');
       })
       .then((columnId) => {
@@ -92,14 +101,13 @@ context('Akvo Lumen', () => {
 
         // pivot table elements exist
         cy.get('.PivotTable .title').contains(title).should('exist');
-        cy.get('.PivotTable th').contains('Assistant Professor').should('exist');
-        cy.get('.PivotTable th').contains('Associate Curator ').should('exist');
-        cy.get('.PivotTable th').contains('Research Professor').should('exist');
+        cy.get('.PivotTable th').contains('Bob').should('exist');
+        cy.get('.PivotTable th').contains('Jane').should('exist');
+        cy.get('.PivotTable th').contains('Frank').should('exist');
+        cy.get('.PivotTable th').contains('Lisa').should('exist');
         cy.get('.PivotTable td').contains('Total').should('exist');
-        cy.get('.PivotTable td.cell').contains('11').should('exist');
-        cy.get('.PivotTable td.cell').contains('4').should('exist');
-        cy.get('.PivotTable td.cell').contains('10').should('exist');
-        cy.get('.PivotTable .categoryColumnTitle').contains('title').should('exist');
+        cy.get('.PivotTable td.cell').contains('1').should('exist');
+        cy.get('.PivotTable .categoryColumnTitle').contains(COLUMNS.TEXT_1).should('exist');
 
         // back to library
         cy.get('[data-test-id="back-button"]').click();
@@ -119,10 +127,10 @@ context('Akvo Lumen', () => {
         // Selecting dataset
         cy.get(`#${optionId}`).click();
         // open column menu
-        cy.get('[data-test-id="column-menu"] .Select-control').click();
+        cy.get('[data-test-id="column-select"] .Select-control').click();
         // Finding column to select
         return cy.get('[role="option"]')
-          .contains('title (text)')
+          .contains(COLUMNS.TEXT_1)
           .should('have.attr', 'id');
       })
       .then((columnId) => {
@@ -140,14 +148,13 @@ context('Akvo Lumen', () => {
 
         // pivot table elements exist
         cy.get('.PivotTable .title').contains(title).should('exist');
-        cy.get('.PivotTable th').contains('Assistant Professor').should('exist');
-        cy.get('.PivotTable th').contains('Associate Curator ').should('exist');
-        cy.get('.PivotTable th').contains('Research Professor').should('exist');
+        cy.get('.PivotTable th').contains('Bob').should('exist');
+        cy.get('.PivotTable th').contains('Jane').should('exist');
+        cy.get('.PivotTable th').contains('Frank').should('exist');
+        cy.get('.PivotTable th').contains('Lisa').should('exist');
         cy.get('.PivotTable td').contains('Total').should('exist');
-        cy.get('.PivotTable td.cell').contains('11').should('exist');
-        cy.get('.PivotTable td.cell').contains('4').should('exist');
-        cy.get('.PivotTable td.cell').contains('10').should('exist');
-        cy.get('.PivotTable .categoryColumnTitle').contains('title').should('exist');
+        cy.get('.PivotTable td.cell').contains('1').should('exist');
+        cy.get('.PivotTable .categoryColumnTitle').contains(COLUMNS.TEXT_1).should('exist');
 
         // back to library
         cy.get('[data-test-id="back-button"]').click();
@@ -170,5 +177,140 @@ context('Akvo Lumen', () => {
 
     // back to library
     cy.get('[data-test-id="back-button"]').click();
+  });
+
+  it('change visualization types', () => {
+    cy.get('button[data-test-id="visualisation"]').click();
+
+    // Area
+    cy.get('[data-test-id="visualisation-type-area"]', { timeout: 20000 }).click();
+    cy.get('[data-test-id="dataset-menu"] .Select-control').click();
+
+    // Finding dataset option
+    cy.get('[role="option"]')
+      .contains(datasetName)
+      .should('have.attr', 'id')
+      .then((optionId) => {
+        // Selecting dataset
+        cy.get(`#${optionId}`).click();
+      })
+
+      .then(() => {
+        // open x axis menu
+        cy.get('[data-test-id="x-axis-select"] .Select-control').click();
+        // Finding column to select
+        cy.get('[role="option"]')
+          .contains(COLUMNS.NUMBER_1)
+          .click();
+
+          // open y axis menu
+        cy.get('[data-test-id="y-axis-select"] .Select-control').click();
+        // Finding column to select
+        cy.get('[role="option"]')
+          .contains(COLUMNS.NUMBER_2)
+          .click();
+
+        // wait for changes to be saved
+        cy.get('.saveStatus').should('contain', 'All changes saved');
+        // chart elements exist
+        cy.get('.Chart .vx-line').should('exist');
+      })
+
+      .then(() => {
+        // Line
+        cy.get('[data-test-id="visualisation-type-line"]', { timeout: 20000 }).click();
+
+        // wait for changes to be saved
+        cy.get('.saveStatus').should('contain', 'All changes saved');
+        // chart elements exist
+        cy.get('.Chart .vx-line').should('exist');
+      })
+
+      .then(() => {
+        // Scatter
+        cy.get('[data-test-id="visualisation-type-scatter"]', { timeout: 20000 }).click();
+
+        cy.get('.Chart circle').should('exist');
+
+        // open bucket menu
+        cy.get('[data-test-id="category-select"] .Select-control').click();
+        // Finding column to select
+        cy.get('[role="option"]')
+          .contains(COLUMNS.TEXT_1)
+          .click();
+
+        // open size menu
+        cy.get('[data-test-id="size-select"] .Select-control').click();
+        // Finding column to select
+        cy.get('[role="option"]')
+          .contains(COLUMNS.NUMBER_3)
+          .click();
+
+        // wait for changes to be saved
+        cy.get('.saveStatus').should('contain', 'All changes saved');
+        // chart elements exist
+        cy.get('.Chart circle').should('exist');
+      })
+
+      .then(() => {
+        // Bar
+        cy.get('[data-test-id="visualisation-type-bar"]', { timeout: 20000 }).click();
+
+        // wait for changes to be saved
+        cy.get('.saveStatus').should('contain', 'All changes saved');
+        // chart elements exist
+        cy.get('.Chart rect').should('exist');
+      })
+
+      .then(() => {
+        // Bubble
+        cy.get('[data-test-id="visualisation-type-bubble"]', { timeout: 20000 }).click();
+
+        // wait for changes to be saved
+        cy.get('.saveStatus').should('contain', 'All changes saved');
+        // chart elements exist
+        cy.get('.Chart circle').should('exist');
+      })
+
+      .then(() => {
+        // Pie
+        cy.get('[data-test-id="visualisation-type-pie"]', { timeout: 20000 }).click();
+
+        // wait for changes to be saved
+        cy.get('.saveStatus').should('contain', 'All changes saved');
+        // chart elements exist
+        cy.get('.Chart path').should('exist');
+      })
+
+      .then(() => {
+        // Donut
+        cy.get('[data-test-id="visualisation-type-donut"]', { timeout: 20000 }).click();
+
+        // wait for changes to be saved
+        cy.get('.saveStatus').should('contain', 'All changes saved');
+        // chart elements exist
+        cy.get('.Chart path').should('exist');
+      })
+
+      .then(() => {
+        // Pivot
+        cy.get('[data-test-id="visualisation-type-pivot-table"]', { timeout: 20000 }).click();
+
+        // wait for changes to be saved
+        cy.get('.saveStatus').should('contain', 'All changes saved');
+        // chart elements exist
+        cy.get('.PivotTable th').contains('Bob').should('exist');
+        cy.get('.PivotTable th').contains('Jane').should('exist');
+        cy.get('.PivotTable th').contains('Frank').should('exist');
+        cy.get('.PivotTable th').contains('Lisa').should('exist');
+        cy.get('.PivotTable td').contains('Total').should('exist');
+        cy.get('.PivotTable td.cell').contains('1').should('exist');
+        cy.get('.PivotTable .categoryColumnTitle').contains(COLUMNS.TEXT_1).should('exist');
+      })
+
+      .then(() => {
+        // back to library
+        cy.get('[data-test-id="back-button"]').click();
+      });
   });
 });
