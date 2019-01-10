@@ -9,10 +9,11 @@
             [clojure.java.jdbc :as jdbc]
             [clojure.pprint :refer [pprint]]
             [clojure.repl :refer :all]
-            [clojure.tools.namespace.repl :as repl]
             [clojure.spec.alpha :as s]
             [clojure.spec.test.alpha :as stest]
             [clojure.tools.logging :as log]
+            [clojure.tools.namespace.repl :as repl]
+            [commons :as commons]
             [duct.core :as duct]
             [duct.generate :as gen]
             [integrant.core :as ig]
@@ -83,13 +84,13 @@
     (catch PSQLException e
       (println "Seed data already loaded."))))
 
+
 (defn seed
   "At the moment only support seed of tenants table."
   []
   (let [db-uri (-> (config/construct)
                    :akvo.lumen.config :db :uri)]
-    (doseq [tenant (->> "seed.edn" io/resource slurp edn/read-string
-                        :tenant-manager :tenants)]
+    (doseq [tenant commons/tenants]
       (seed-tenant {:connection-uri db-uri} tenant))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -107,3 +108,7 @@
 (defn rollback
   ([] (lumen-migrate/rollback "dev.edn" {}))
   ([args] (lumen-migrate/rollback "dev.edn" args)))
+
+(defn reset-db []
+  (rollback)
+  (migrate))
