@@ -120,28 +120,30 @@ function ScatterConfigMenu(props) {
       <ConfigMenuSection
         title="category"
         options={(
-          <ConfigMenuSectionOptionSelect
-            placeholderId="select_a_data_column_to_group_by"
-            labelTextId="bucket_column"
-            value={
-              itsSet(spec.bucketColumnCategory) ?
-                spec.bucketColumnCategory.toString() :
-                null
-            }
-            name="sizeColumnInput"
-            options={
-              [{
-                label: props.intl.formatMessage({ id: 'select_a_data_column_to_group_by' }),
-                value: null,
-              }].concat(filterColumns(columnOptions, ['number', 'text']))
-            }
-            onChange={(value) => {
-              onChangeSpec({
-                bucketColumnCategory: value,
-                categoryLabel: get(columnOptions.find(item => item.value === value), 'title'),
-              });
-            }}
-          />
+          <div data-test-id="category-select">
+            <ConfigMenuSectionOptionSelect
+              placeholderId="select_a_data_column_to_group_by"
+              labelTextId="bucket_column"
+              value={
+                itsSet(spec.bucketColumnCategory) ?
+                  spec.bucketColumnCategory.toString() :
+                  null
+              }
+              name="sizeColumnInput"
+              options={
+                [{
+                  label: props.intl.formatMessage({ id: 'select_a_data_column_to_group_by' }),
+                  value: null,
+                }].concat(filterColumns(columnOptions, ['number', 'text']))
+              }
+              onChange={(value) => {
+                onChangeSpec({
+                  bucketColumnCategory: value,
+                  categoryLabel: get(columnOptions.find(item => item.value === value), 'title'),
+                });
+              }}
+            />
+          </div>
         )}
         advancedOptions={(
           <ConfigMenuSectionOptionText
@@ -164,27 +166,29 @@ function ScatterConfigMenu(props) {
       <ConfigMenuSection
         title="size"
         options={(
-          <ConfigMenuSectionOptionSelect
-            placeholderId="select_a_metric_column"
-            labelTextId="metric_column"
-            value={
-              itsSet(spec.metricColumnSize) ?
-                spec.metricColumnSize.toString() :
-                null
-            }
-            name="sizeColumnInput"
-            options={
-              [{
-                label: props.intl.formatMessage({ id: 'select_a_metric_column' }),
-                value: null,
-              }].concat(filterColumns(columnOptions, ['number', 'date']))
-            }
-            onChange={(value) => {
-              const change = { metricColumnSize: value };
-              change.sizeLabel = getAxisLabel('size', Object.assign({}, spec, change), columnOptions);
-              onChangeSpec(change);
-            }}
-          />
+          <div data-test-id="size-select">
+            <ConfigMenuSectionOptionSelect
+              placeholderId="select_a_metric_column"
+              labelTextId="metric_column"
+              value={
+                itsSet(spec.metricColumnSize) ?
+                  spec.metricColumnSize.toString() :
+                  null
+              }
+              name="sizeColumnInput"
+              options={
+                [{
+                  label: props.intl.formatMessage({ id: 'select_a_metric_column' }),
+                  value: null,
+                }].concat(filterColumns(columnOptions, ['number', 'date']))
+              }
+              onChange={(value) => {
+                const change = { metricColumnSize: value };
+                change.sizeLabel = getAxisLabel('size', Object.assign({}, spec, change), columnOptions);
+                onChangeSpec(change);
+              }}
+            />
+          </div>
         )}
         advancedOptions={(
           <ConfigMenuSectionOptionText
