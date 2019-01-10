@@ -2,8 +2,7 @@
 const baseUrl = Cypress.env('LUMEN_URL') || 'http://t1.lumen.local:3030/';
 const username = Cypress.env('LUMEN_USER') || 'jerome';
 const password = Cypress.env('LUMEN_PASSWORD') || 'password';
-// TODO change this link back to develop branch once merged
-const DATASET_LINK = 'https://raw.githubusercontent.com/akvo/akvo-lumen/cypress-tests-for-changing-visualisation-types-%231866/client/e2e-test/sample-data-1.csv';
+const DATASET_LINK = 'https://raw.githubusercontent.com/akvo/akvo-lumen/develop/client/e2e-test/sample-data-1.csv';
 const datasetName = `Dataset ${Date.now().toString()}`;
 const COLUMNS = {
   TEXT_1: 'Name',
