@@ -1,55 +1,70 @@
 (ns akvo.lumen.lib.aggregation.bar
   (:require [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.dataset.utils :refer (find-column)]
+            [clojure.pprint :refer (pprint)]
             [akvo.lumen.postgres.filter :refer (sql-str)]
             [clojure.java.jdbc :as jdbc]))
 
-(defn- run-query [tenant-conn table-name sql-text bucket-column-name metric-y-column-name filter-sql aggregation-method truncate-size subbucket-column-name]
-  (let [q (format sql-text bucket-column-name metric-y-column-name table-name filter-sql aggregation-method truncate-size subbucket-column-name)]
-    (rest (jdbc/query tenant-conn
-                     [q]
-                     {:as-arrays? true}))))
+(defn- run-query [tenant-conn table-name q]
+  (pprint q)
+  (rest (jdbc/query tenant-conn [q] {:as-arrays? true})))
+
+
+(defn aggregation* [aggregation-method metric-column bucket-column]
+  (let [aggregation-method (if-not metric-column "count" aggregation-method)]
+    (format
+     (case aggregation-method
+       nil                         "NULL"
+       ("min" "max" "count" "sum") (str aggregation-method  "(%s)")
+       "mean"                      "avg(%s)"
+       "median"                    "percentile_cont(0.5) WITHIN GROUP (ORDER BY %s)"
+       "distinct"                  "COUNT(DISTINCT %s)"
+       "q1"                        "percentile_cont(0.25) WITHIN GROUP (ORDER BY %s)"
+       "q3"                        "percentile_cont(0.75) WITHIN GROUP (ORDER BY %s)")
+     (or (:columnName metric-column)
+         (:columnName bucket-column)))))
 
 (defn query
   [tenant-conn {:keys [columns table-name]} query]
-  (let [filter-sql                  (sql-str columns (:filters query))
-        max-elements                200
-        bucket-column               (find-column columns (:bucketColumn query))
-        subbucket-column            (find-column columns (:subBucketColumn query))
-        metric-y-column             (or (find-column columns (:metricColumnY query)) subbucket-column)
-        aggregation-method          (if-not metric-y-column "count" (:metricAggregation query))
-        truncate-size               (or (:truncateSize query) "ALL")
-        sql-sort-subbucket-subquery (case (:sort query)
-                                      nil   "ORDER BY x ASC"
-                                      "asc" "ORDER BY sort_value ASC NULLS FIRST"
-                                      "dsc" "ORDER BY sort_value DESC NULLS LAST")
-        sql-aggregation-subquery    (case aggregation-method
-                                      nil                         "NULL"
-                                      ("min" "max" "count" "sum") (str aggregation-method  "(%2$s)")
-                                      "mean"                      "avg(%2$s)"
-                                      "median"                    "percentile_cont(0.5) WITHIN GROUP (ORDER BY %2$s)"
-                                      "distinct"                  "COUNT(DISTINCT %2$s)"
-                                      "q1"                        "percentile_cont(0.25) WITHIN GROUP (ORDER BY %2$s)"
-                                      "q3"                        "percentile_cont(0.75) WITHIN GROUP (ORDER BY %2$s)")
-        sql-text-without-subbucket  (str "SELECT * FROM (SELECT %1$s as x, " sql-aggregation-subquery " as y FROM %3$s WHERE %4$s GROUP BY %1$s)z " (case (:sort query)
-                                      nil   "ORDER BY x ASC"
-                                      "asc" "ORDER BY z.y ASC NULLS FIRST"
-                                      "dsc" "ORDER BY z.y DESC NULLS LAST") " LIMIT %6$s")
+  (let [filter-sql       (sql-str columns (:filters query))
+        max-elements     200
+        bucket-column    (find-column columns (:bucketColumn query))
+        truncate-size    (or (:truncateSize query) "ALL")
+        subbucket-column (find-column columns (:subBucketColumn query))
+        metric-y-column  (or (find-column columns (:metricColumnY query)) subbucket-column)
 
-        sql-text-with-subbucket (str "
+        aggregation                 (aggregation* (:metricAggregation query) metric-y-column bucket-column)        
+        sql-text-without-subbucket  (format "SELECT * FROM (SELECT %1$s as x, %2$s as y 
+                                            FROM %3$s WHERE %4$s GROUP BY %1$s)z 
+                                            ORDER BY %5$s 
+                                            LIMIT %6$s"
+                                            (:columnName bucket-column)
+                                            aggregation
+                                            table-name
+                                            filter-sql
+                                            (case (:sort query)
+                                              nil   "x ASC"
+                                              "asc" "z.y ASC NULLS FIRST"
+                                              "dsc" "z.y DESC NULLS LAST")
+                                            truncate-size)
+
+        sql-text-with-subbucket (format "
           WITH
             sort_table
           AS
-            (SELECT %1$s AS x, " sql-aggregation-subquery " AS sort_value, TRUE as include_value FROM %3$s WHERE %4$s GROUP BY %1$s " sql-sort-subbucket-subquery " LIMIT %6$s)
-          ,
+            (SELECT %1$s AS x, %2$s AS sort_value, TRUE as include_value 
+             FROM %3$s 
+             WHERE %4$s 
+             GROUP BY %1$s 
+             ORDER BY %5$s 
+             LIMIT %6$s) , 
             data_table
           AS
-            ( SELECT %1$s as x, " sql-aggregation-subquery " as y,
+            ( SELECT %1$s as x, %2$s as y,
               %7$s as s
               FROM %3$s
               WHERE %4$s
-              GROUP BY %1$s, %7$s
-            )
+              GROUP BY %1$s, %7$s ) 
           SELECT
             data_table.x AS x,
             data_table.y,
@@ -63,17 +78,23 @@
           ON
             COALESCE(sort_table.x::text, '@@@MISSINGDATA@@@') = COALESCE(data_table.x::text, '@@@MISSINGDATA@@@')
           WHERE
-            sort_table.include_value IS NOT NULL
-          " sql-sort-subbucket-subquery)
-        sql-text                (if subbucket-column
-                                  sql-text-with-subbucket
-                                  sql-text-without-subbucket)
+            sort_table.include_value IS NOT NULL 
+          ORDER BY %5$s"
 
-        sql-response     (run-query tenant-conn table-name sql-text
-                                    (:columnName bucket-column)
-                                    (or (:columnName metric-y-column)
-                                        (:columnName bucket-column))
-                                    filter-sql aggregation-method truncate-size (:columnName subbucket-column))
+                                        (:columnName bucket-column) 
+                                        aggregation 
+                                        table-name
+                                        filter-sql
+                                        (case (:sort query)
+                                          nil   "x ASC"
+                                          "asc" "sort_value ASC NULLS FIRST"
+                                          "dsc" "sort_value DESC NULLS LAST")
+                                        truncate-size
+                                        (:columnName subbucket-column))
+
+        sql-response            (if subbucket-column
+                                  (run-query tenant-conn table-name sql-text-with-subbucket)
+                                  (run-query tenant-conn table-name sql-text-without-subbucket))
         bucket-values    (distinct
                           (mapv
                            (fn [[x-value y-value s-value]] x-value)
@@ -83,14 +104,12 @@
                            (fn [[x-value y-value s-value]] s-value)
                            sql-response))]
     (if (> (count sql-response) max-elements)
-      (lib/bad-request
-       {"error"  true
-        "reason" "too-many"
-        "max"    max-elements
-        "count"  (count sql-response)})
-
+      (lib/bad-request {"error"  true
+                        "reason" "too-many"
+                        "max"    max-elements
+                        "count"  (count sql-response)})
       (lib/ok
-       (if (not subbucket-column)
+       (if-not subbucket-column
          {:series [{:key   (:title metric-y-column)
                     :label (:title metric-y-column)
                     :data  (mapv (fn [[x-value y-value]]
