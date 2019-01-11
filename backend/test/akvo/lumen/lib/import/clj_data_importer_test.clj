@@ -20,7 +20,7 @@
 
 (use-fixtures :once tenant-conn-fixture error-tracker-fixture)
 
-(deftest ^:functional test-import
+(deftest test-import
   (testing "Testing import"
     (let [dataset-id (import-file *tenant-conn* *error-tracker* 
                                   {:dataset-name "Padded titles"
