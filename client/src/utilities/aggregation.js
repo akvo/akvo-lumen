@@ -91,6 +91,11 @@ export const getNeedNewAggregation = (
         newV.spec.metricColumnY !== oldV.spec.metricColumnY ||
         newV.spec.metricAggregation !== oldV.spec.metricAggregation ||
         newV.spec.subBucketMethod !== oldV.spec.subBucketMethod ||
+        newV.spec.bucketColumn !== oldV.spec.bucketColumn ||
+        newV.spec.subBucketColumn !== oldV.spec.subBucketColumn ||
+        newV.spec.metricAggregation !== oldV.spec.metricAggregation ||
+        newV.spec.sort !== oldV.spec.sort ||
+        newV.spec.truncateSize !== oldV.spec.truncateSize ||
         !isEqual(newV.spec.filters, oldV.spec.filters)
       );
     case 'bubble':
@@ -116,6 +121,7 @@ export const getNeedNewAggregation = (
       return Boolean(
         newV.datasetId !== oldV.datasetId ||
         newV.spec.bucketColumn !== oldV.spec.bucketColumn ||
+        newV.spec.sort !== oldV.spec.sort ||
         !isEqual(newV.spec.filters, oldV.spec.filters)
       );
     case 'line':
