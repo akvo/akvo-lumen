@@ -7,7 +7,7 @@
             [clojure.java.jdbc :as jdbc]))
 
 (defn- run-query [tenant-conn q]
-  (log/error :q q)
+  (log/debug :q q)
   (rest (jdbc/query tenant-conn [q] {:as-arrays? true})))
 
 (defn- sql [table-name bucket-column subbucket-column aggregation filter-sql sort-query truncate-size]
@@ -44,7 +44,6 @@
           WHERE
             sort_table.include_value IS NOT NULL 
           ORDER BY %5$s"
-
             (:columnName bucket-column) 
             aggregation 
             table-name
@@ -80,6 +79,53 @@
      (or (:columnName metric-column)
          (:columnName bucket-column)))))
 
+(defn- subbucket-column-response [sql-response bucket-column]
+  (let [bucket-values    (distinct
+                          (mapv
+                           (fn [[x-value y-value s-value]] x-value)
+                           sql-response))
+        subbucket-values (distinct
+                          (mapv
+                           (fn [[x-value y-value s-value]] s-value)
+                           sql-response))]
+    {:series
+     (mapv
+      (fn [s-value]
+        {:key   s-value
+         :label s-value
+         :data
+         (map
+          (fn
+            [bucket-value]
+            {:value (or (nth
+                         (first
+                          (filter
+                           (fn [o] (and (= (nth o 0) bucket-value) (= (nth o 2) s-value)))
+                           sql-response))
+                         1
+                         0) 0)})
+          bucket-values)})
+      subbucket-values)
+     :common
+     {:metadata
+      {:type (:type bucket-column)}
+      :data (mapv
+             (fn [bucket] {:label bucket
+                           :key   bucket})
+             bucket-values)}}))
+
+(defn- bucket-column-response [sql-response bucket-column metric-y-column]
+  {:series [{:key   (:title metric-y-column)
+             :label (:title metric-y-column)
+             :data  (mapv (fn [[x-value y-value]]
+                            {:value y-value})
+                          sql-response)}]
+   :common {:metadata {:type (:type bucket-column)}
+            :data     (mapv (fn [[x-value y-value]]
+                              {:label x-value
+                               :key   x-value})
+                            sql-response)}})
+
 (defn query
   [tenant-conn {:keys [columns table-name]} query]
   (let [max-elements     200
@@ -92,7 +138,6 @@
                                (sql-str columns (:filters query))
                                (:sort query) (or (:truncateSize query) "ALL"))
                           (run-query tenant-conn))]
-    
     (if (> (count sql-response) max-elements)
       (lib/bad-request {"error"  true
                         "reason" "too-many"
@@ -100,46 +145,5 @@
                         "count"  (count sql-response)})
       (lib/ok
        (if subbucket-column
-         (let [bucket-values    (distinct
-                                 (mapv
-                                  (fn [[x-value y-value s-value]] x-value)
-                                  sql-response))
-               subbucket-values (distinct
-                                 (mapv
-                                  (fn [[x-value y-value s-value]] s-value)
-                                  sql-response))]
-           {:series
-            (mapv
-             (fn [s-value]
-               {:key   s-value
-                :label s-value
-                :data
-                (map
-                 (fn
-                   [bucket-value]
-                   {:value (or (nth
-                                (first
-                                 (filter
-                                  (fn [o] (and (= (nth o 0) bucket-value) (= (nth o 2) s-value)))
-                                  sql-response))
-                                1
-                                0) 0)})
-                 bucket-values)})
-             subbucket-values)
-            :common
-            {:metadata
-             {:type (:type bucket-column)}
-             :data (mapv
-                    (fn [bucket] {:label bucket
-                                  :key   bucket})
-                    bucket-values)}})
-         {:series [{:key   (:title metric-y-column)
-                    :label (:title metric-y-column)
-                    :data  (mapv (fn [[x-value y-value]]
-                                   {:value y-value})
-                                 sql-response)}]
-          :common {:metadata {:type (:type bucket-column)}
-                   :data     (mapv (fn [[x-value y-value]]
-                                     {:label x-value
-                                      :key   x-value})
-                                   sql-response)}})))))
+         (subbucket-column-response sql-response bucket-column)
+         (bucket-column-response sql-response bucket-column metric-y-column))))))
