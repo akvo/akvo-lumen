@@ -13,6 +13,10 @@ const COLUMNS = {
   NUMBER_4: 'Temperature',
 };
 
+Cypress.on('uncaught:exception', (err) => {
+  console.log(err);
+});
+
 context('Akvo Lumen', () => {
   // login
   before(() => {
