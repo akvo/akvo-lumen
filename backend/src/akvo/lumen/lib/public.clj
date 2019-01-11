@@ -8,6 +8,7 @@
             [cheshire.core :as json]
             [clojure.tools.logging :as log]
             [clojurewerkz.scrypt.core :as scrypt]
+            [clojure.walk :refer (keywordize-keys)]
             [clojure.set :as set]
             [hugsql.core :as hugsql]))
 
@@ -26,7 +27,7 @@
         [tag query-result] (aggregation/query tenant-conn
                                               dataset-id
                                               "pivot"
-                                              (:spec visualisation))]
+                                              (keywordize-keys (:spec visualisation)))]
     (when (and (= tag ::lib/ok)
                (= dataset-tag ::lib/ok))
       {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}
@@ -39,7 +40,7 @@
         [tag query-result] (aggregation/query tenant-conn
                                               dataset-id
                                               "line"
-                                              (:spec visualisation))]
+                                              (keywordize-keys (:spec visualisation)))]
     (when (and (= tag ::lib/ok)
                (= dataset-tag ::lib/ok))
       {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}
@@ -52,7 +53,7 @@
         [tag query-result] (aggregation/query tenant-conn
                                               dataset-id
                                               "bubble"
-                                              (:spec visualisation))]
+                                              (keywordize-keys (:spec visualisation)))]
     (when (and (= tag ::lib/ok)
                 (= dataset-tag ::lib/ok))
       {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}
@@ -65,7 +66,7 @@
         [tag query-result] (aggregation/query tenant-conn
                                               dataset-id
                                               "line"
-                                              (:spec visualisation))]
+                                              (keywordize-keys (:spec visualisation)))]
     (when (and (= tag ::lib/ok)
                (= dataset-tag ::lib/ok))
       {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}
@@ -78,7 +79,7 @@
         [tag query-result] (aggregation/query tenant-conn
                                               dataset-id
                                               "pie"
-                                              (:spec visualisation))]
+                                              (keywordize-keys (:spec visualisation)))]
     (when (and (= tag ::lib/ok)
                (= dataset-tag ::lib/ok))
       {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}
@@ -91,7 +92,7 @@
         [tag query-result] (aggregation/query tenant-conn
                                               dataset-id
                                               "pie"
-                                              (:spec visualisation))]
+                                              (keywordize-keys (:spec visualisation)))]
     (when (and (= tag ::lib/ok)
                (= dataset-tag ::lib/ok))
       {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}
@@ -104,7 +105,7 @@
         [tag query-result] (aggregation/query tenant-conn
                                               dataset-id
                                               "pie"
-                                              (:spec visualisation))]
+                                              (keywordize-keys (:spec visualisation)))]
     (when (and (= tag ::lib/ok)
                 (= dataset-tag ::lib/ok))
       {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}
@@ -117,7 +118,7 @@
         [tag query-result] (aggregation/query tenant-conn
                                               dataset-id
                                               "bar"
-                                              (:spec visualisation))]
+                                              (keywordize-keys (:spec visualisation)))]
     (when (and (= tag ::lib/ok)
                (= dataset-tag ::lib/ok))
       {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}
@@ -130,7 +131,7 @@
         [tag query-result] (aggregation/query tenant-conn
                                               dataset-id
                                               "scatter"
-                                              (:spec visualisation))]
+                                              (keywordize-keys (:spec visualisation)))]
     (when (and (= tag ::lib/ok)
                (= dataset-tag ::lib/ok))
       {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}

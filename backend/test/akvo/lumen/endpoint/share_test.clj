@@ -5,6 +5,7 @@
             [akvo.lumen.lib.dashboard :as dashboard]
             [akvo.lumen.lib.share :as share]
             [akvo.lumen.util :refer [gen-table-name squuid]]
+            [akvo.lumen.postgres :as postgres]
             [akvo.lumen.endpoint.commons.variant :as variant]
             [clojure.java.jdbc :as jdbc]
             [clojure.test :refer :all]
@@ -57,19 +58,11 @@
 
 (defn seed
   [conn spec]
-  (jdbc/execute! conn [(str "CREATE TABLE IF NOT EXISTS " (:table-name spec) " ("
-                            "rnum serial PRIMARY KEY"
-                            ");")])
-  (jdbc/execute! conn [(str "CREATE TABLE IF NOT EXISTS " (:table-name-2 spec) " ("
-                            "rnum serial PRIMARY KEY"
-                            ");")])
-  (jdbc/execute! conn [(str "CREATE TABLE IF NOT EXISTS " (:imported-table-name spec) " ("
-                            "rnum serial PRIMARY KEY"
-                            ");")])
-  (jdbc/execute! conn [(str "CREATE TABLE IF NOT EXISTS " (:imported-table-name-2 spec) " ("
-                            "rnum serial PRIMARY KEY"
-                            ");")])
-
+  (postgres/create-dataset-table conn (:table-name spec) (:columns-ds-1 spec))
+  (postgres/create-dataset-table conn (:table-name-2 spec) (:columns-ds-2 spec))
+  (postgres/create-dataset-table conn (:imported-table-name spec) (:columns-ds-1 spec))
+  (postgres/create-dataset-table conn (:imported-table-name-2 spec) (:columns-ds-2 spec))
+  
   (insert-data-source conn {:id (:data-source-id spec)
                             :spec "{}"})
   (insert-job-execution conn {:id (:job-execution-id spec)
@@ -92,7 +85,7 @@
                              :table-name (:table-name spec)
                              :imported-table-name (:imported-table-name spec)
                              :version 1
-                             :columns {}
+                             :columns (:columns-ds-1 spec)
                              :transformations []})
   (new-dataset-version conn {:id (squuid)
                              :dataset-id (:dataset-id-2 spec)
@@ -100,19 +93,19 @@
                              :table-name (:table-name-2 spec)
                              :imported-table-name (:imported-table-name-2 spec)
                              :version 1
-                             :columns [{:title "Column 1", :type "text", :key false, :hidden false, :direction "", :sort nil, :columnName "c1"}]
+                             :columns (:columns-ds-2 spec)
                              :transformations []})
   (upsert-visualisation conn {:id         (:visualisation-id spec)
                               :dataset-id (:dataset-id spec)
                               :name       "Visualisation"
                               :type       "pie"
-                              :spec       {"bucketColumn" "c1"}
+                              :spec       {:bucketColumn "c1" :filters []}
                               :author     {}})
   (upsert-visualisation conn {:id         (:visualisation2-id spec)
                               :dataset-id (:dataset-id-2 spec)
                               :name       "Visualisation"
                               :type       "bar"
-                              :spec       {"bucketColumn" "c1"}
+                              :spec       {:bucketColumn "c1" :filters []}
                               :author     {}})
   (dashboard/create conn (dashboard-spec (:visualisation-id spec)
                                          (:visualisation2-id spec)) {}))
@@ -126,7 +119,9 @@
    :job-execution-id      (str (squuid))
    :job-execution-id-2    (str (squuid))
    :dataset-id            (str (squuid))
+   :columns-ds-1          [{:title "Column 1", :type "text", :key false, :hidden false, :direction "", :sort nil, :columnName "c1" :id "c1"}]
    :dataset-id-2          (str (squuid))
+   :columns-ds-2          [{:title "Column 1", :type "text", :key false, :hidden false, :direction "", :sort nil, :columnName "c1" :id "c1"}]
    :visualisation-id      (str (squuid))
    :visualisation2-id     (str (squuid))
    :table-name            (gen-table-name "ds")
