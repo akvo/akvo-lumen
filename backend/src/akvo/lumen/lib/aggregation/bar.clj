@@ -65,11 +65,10 @@
           WHERE
             sort_table.include_value IS NOT NULL
           " sql-sort-subbucket-subquery)
-        sql-text         (if bucket-column
-                           (if subbucket-column
-                             sql-text-with-subbucket
-                             sql-text-without-subbucket)
-                           "SELECT NULL")
+        sql-text                (if subbucket-column
+                                  sql-text-with-subbucket
+                                  sql-text-without-subbucket)
+
         sql-response     (run-query tenant-conn table-name sql-text
                                     (:columnName bucket-column)
                                     (or (:columnName metric-y-column)
