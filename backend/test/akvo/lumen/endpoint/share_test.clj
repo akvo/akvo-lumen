@@ -100,7 +100,7 @@
                              :table-name (:table-name-2 spec)
                              :imported-table-name (:imported-table-name-2 spec)
                              :version 1
-                             :columns {}
+                             :columns [{:title "Column 1", :type "text", :key false, :hidden false, :direction "", :sort nil, :columnName "c1"}]
                              :transformations []})
   (upsert-visualisation conn {:id         (:visualisation-id spec)
                               :dataset-id (:dataset-id spec)
@@ -112,7 +112,7 @@
                               :dataset-id (:dataset-id-2 spec)
                               :name       "Visualisation"
                               :type       "bar"
-                              :spec       {}
+                              :spec       {"bucketColumn" "c1"}
                               :author     {}})
   (dashboard/create conn (dashboard-spec (:visualisation-id spec)
                                          (:visualisation2-id spec)) {}))
