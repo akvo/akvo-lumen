@@ -56,7 +56,7 @@
 	 :query ::aggregation.pivot/query)
   :ret any?)
 
-(s/def ::aggregation.bar/bucketColumn ::db.dsv.column/columnName)
+(s/def ::aggregation.bar/bucketColumn (s/nilable ::db.dsv.column/columnName))
 (s/def ::aggregation.bar/subBucketColumn (s/nilable ::db.dsv.column/columnName))
 (s/def ::aggregation.bar/metricColumnY (s/nilable ::db.dsv.column/columnName))
 (s/def ::aggregation.bar/metricAggregation #{"mean"

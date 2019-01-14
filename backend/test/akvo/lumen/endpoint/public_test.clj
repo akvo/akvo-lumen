@@ -43,9 +43,9 @@
           share-data      (public/response-data *tenant-conn* share {})]
       (is (every? #(contains? share-data %)
                   ["dashboardId" "dashboards" "visualisations" "datasets"]))
-      (is (= 2
+      (is (= 1
              (count (get share-data "datasets"))))
-      (is (= 2
+      (is (= 1
              (count (get share-data "visualisations"))))
       (is (every? #(not (nil? %))
                   (vals share-data))))))
