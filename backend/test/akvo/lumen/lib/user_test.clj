@@ -5,7 +5,7 @@
             [akvo.lumen.fixtures :refer [migrate-tenant]]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.user :as user]
-            [akvo.lumen.test-utils :refer [seed-data test-tenant test-tenant-conn]]
+            [akvo.lumen.test-utils :refer [seed-data test-tenant test-tenant-conn] :as tu]
             [akvo.lumen.endpoint.commons.variant :as variant]
             [clojure.set :as set]
             [clojure.test :refer :all]
@@ -33,7 +33,7 @@
             *tenant-conn* (test-tenant-conn test-tenant)]
     (f)))
 
-(use-fixtures :once fixture)
+(use-fixtures :once fixture tu/spec-instrument)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
