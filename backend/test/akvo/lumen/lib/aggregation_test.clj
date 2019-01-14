@@ -320,5 +320,44 @@
                               nil],
                              :common
                              {:metadata {:type nil, :sampled false},
-                              :data [{:label nil} {:label nil} {:label nil} {:label nil}]}})))
-)))
+                              :data [{:label nil} {:label nil} {:label nil} {:label nil}]}}))))))
+
+(deftest bubble-tests
+  (let [data {:columns [{:id "c1", :title "A", :type "text"}
+                        {:id "c2", :title "B", :type "number"}
+                        {:id "c3", :title "C", :type "number"}]
+              :rows    [[{:value "a"} {:value 1} {:value 1}]
+                        [{:value "b"} {:value 2} {:value 2}]
+                        [{:value "c"} {:value 3} {:value 2}]
+                        [{:value "c"} {:value 4} {:value 3}]]}
+
+        dataset-id (import-file *tenant-conn* *error-tracker* {:dataset-name "bubble"
+                                                               :kind "clj"
+                                                               :data data})
+        query (query* "bubble" dataset-id)]
+    (testing "Simple queries"
+      (let [[tag query-result] (query {:bucketColumn "c1"
+                                       :metricColumn nil
+                                       :metricAggregation nil})]
+        (is (= tag ::lib/ok))
+        (is (= query-result {:series
+                             [{:key nil,
+                               :label nil,
+                               :data [{:value 2} {:value 1} {:value 1}],
+                               :metadata {:type nil}}],
+                             :common
+                             {:metadata {:sampled false},
+                              :data [{:label "c"} {:label "b"} {:label "a"}]}}))))
+    (testing "Metric queries"
+      (let [[tag query-result] (query {:bucketColumn "c1"
+                                       :metricColumn "c2"
+                                       :metricAggregation "max"})]
+        (is (= tag ::lib/ok))
+        (is (= query-result {:series
+                             [{:key "B",
+                               :label "B",
+                               :data [{:value 4M} {:value 2M} {:value 1M}],
+                               :metadata {:type "number"}}],
+                             :common
+                             {:metadata {:sampled false},
+                              :data [{:label "c"} {:label "b"} {:label "a"}]}}))))))

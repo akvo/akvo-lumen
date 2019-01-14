@@ -59,15 +59,15 @@
 (s/def ::aggregation.bar/bucketColumn (s/nilable ::db.dsv.column/columnName))
 (s/def ::aggregation.bar/subBucketColumn (s/nilable ::db.dsv.column/columnName))
 (s/def ::aggregation.bar/metricColumnY (s/nilable ::db.dsv.column/columnName))
-(s/def ::aggregation.bar/metricAggregation #{"mean"
-                                             "sum"
-                                             "min"
-                                             "max"
-                                             "count"
-                                             "median"
-                                             "distinct"
-                                             "q1"
-                                             "q3"})
+(s/def ::aggregation.bar/metricAggregation (s/nilable #{"mean"
+                                                        "sum"
+                                                        "min"
+                                                        "max"
+                                                        "count"
+                                                        "median"
+                                                        "distinct"
+                                                        "q1"
+                                                        "q3"}))
 (s/def ::aggregation.bar/sort (s/nilable #{"asc" "dsc"}))
 (s/def ::aggregation.bar/truncateSize (s/nilable string?))
 
@@ -85,14 +85,14 @@
 	 :query ::aggregation.bar/query)
   :ret any?)
 
-(s/def ::aggregation.bubble/bucketColumn (s/nilable ::db.dsv.column/columnName))
+(s/def ::aggregation.bubble/bucketColumn ::db.dsv.column/columnName)
 (s/def ::aggregation.bubble/metricColumn (s/nilable ::db.dsv.column/columnName))
 (s/def ::aggregation.bubble/metricAggregation ::aggregation.bar/metricAggregation)
 
 (s/def ::aggregation.bubble/query (s/keys :req-un [::postgres.filter/filters
-                                                   ::aggregation.bubble/bucketColumn]
-                                          :opt-un [::aggregation.bubble/metricAggregation
-                                                   ::aggregation.bubble/metricColumn]))
+                                                   ::aggregation.bubble/bucketColumn
+                                                   ::aggregation.bubble/metricColumn
+                                                   ::aggregation.bubble/metricAggregation]))
 
 (s/fdef aggregation.bubble/query
   :args (s/cat
