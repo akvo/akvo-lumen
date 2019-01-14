@@ -2,29 +2,29 @@
   (:require [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.dataset.utils :refer (find-column)]
             [akvo.lumen.postgres.filter :refer (sql-str)]
+            [clojure.tools.logging :as log]
             [clojure.java.jdbc :as jdbc]))
 
-(defn- run-query [tenant-conn table-name sql-text column-x-name column-y-name column-size-name column-category-name filter-sql aggregation-method max-points column-label-name column-bucket-name]
-  (rest (jdbc/query tenant-conn
-                    [(format sql-text
-                             column-x-name column-y-name column-size-name column-category-name table-name filter-sql aggregation-method max-points column-label-name column-bucket-name)]
-                    {:as-arrays? true})))
+(defn- run-query [tenant-conn sql]
+  (log/info :scatter-sql sql)
+  (rest (jdbc/query tenant-conn [sql] {:as-arrays? true})))
 
-(defn cast-to-decimal [column-string column-type]
-  (case column-type
-    "number" column-string
-    "date" (str "(1000 * cast(extract(epoch from " column-string ") as decimal))")
-    column-string))
+(defn cast-to-decimal [column]
+  (case (:type column)
+    "number" (:columnName column)
+    "date" (format "(1000 * cast(extract(epoch from %s) as decimal))" (:columnName column))
+    (:columnName column)))
 
-(defn sql-aggregation-subquery [aggregation-method column-string column-type]
-  (case aggregation-method
-    nil ""
-    ("min" "max" "count" "sum") (str aggregation-method "(" (cast-to-decimal column-string column-type) "::decimal)")
-    "mean" (str "avg(" (cast-to-decimal column-string column-type) "::decimal)")
-    "median" (str "percentile_cont(0.5) WITHIN GROUP (ORDER BY " (cast-to-decimal column-string column-type) ")")
-    "distinct" (str "COUNT(DISTINCT " (cast-to-decimal column-string column-type) ")")
-    "q1" (str "percentile_cont(0.25) WITHIN GROUP (ORDER BY " (cast-to-decimal column-string column-type) ")")
-    "q3" (str "percentile_cont(0.75) WITHIN GROUP (ORDER BY " (cast-to-decimal column-string column-type) ")")))
+(defn sql-aggregation-subquery [aggregation-method column]
+  (let [v (cast-to-decimal column)]
+    (case aggregation-method
+      nil ""
+      ("min" "max" "count" "sum") (str aggregation-method "(" v "::decimal)")
+      "mean" (str "avg(" v "::decimal)")
+      "median" (str "percentile_cont(0.5) WITHIN GROUP (ORDER BY " v ")")
+      "distinct" (str "COUNT(DISTINCT " v ")")
+      "q1" (str "percentile_cont(0.25) WITHIN GROUP (ORDER BY " v ")")
+      "q3" (str "percentile_cont(0.75) WITHIN GROUP (ORDER BY " v ")"))))
 
 (defn query
   [tenant-conn {:keys [columns table-name]} query]
@@ -36,22 +36,41 @@
         column-label (find-column columns (:datapointLabelColumn query))
         column-bucket (find-column columns (:bucketColumn query))
         max-points 2500
-        have-aggregation (boolean column-bucket)
-        aggregation-method (:metricAggregation query)
 
-        sql-text-with-aggregation (str "SELECT "
-                                       (sql-aggregation-subquery aggregation-method "%1$s" (:type column-x))
-                                       " AS x, "
-                                       (sql-aggregation-subquery aggregation-method "%2$s" (:type column-y))
-                                       " AS y, "
-                                       (sql-aggregation-subquery aggregation-method "%3$s" (:type column-size))
-                                       " AS size, "
-                                       (sql-aggregation-subquery aggregation-method "%4$s" (:type column-category))
-                                       " AS category, %10$s AS label FROM (SELECT * FROM %5$s WHERE %6$s ORDER BY random() LIMIT %8$s)z GROUP BY %10$s")
-        sql-text-without-aggregation "
-          SELECT * FROM (SELECT * FROM (SELECT %1$s AS x, %2$s AS y, %3$s AS size, %4$s AS category, %9$s AS label FROM %5$s WHERE %6$s)z ORDER BY random() LIMIT %8$s)zz ORDER BY zz.x"
-        sql-text (if have-aggregation sql-text-with-aggregation sql-text-without-aggregation)
-        sql-response (run-query tenant-conn table-name sql-text (:columnName column-x) (:columnName column-y) (:columnName column-size)  (:columnName column-category) filter-sql aggregation-method max-points (:columnName column-label) (:columnName column-bucket))]
+        aggregation (partial sql-aggregation-subquery (:metricAggregation query))
+
+        subquery (format "(SELECT * FROM %1$s WHERE %2$s ORDER BY random() LIMIT %3$s)z"
+                         table-name filter-sql max-points)
+
+        sql-text-with-aggregation
+        (format "SELECT %1$s AS x, %2$s AS y, %3$s AS size, %4$s AS category, %5$s AS label 
+                 FROM %6$s
+                 GROUP BY %5$s"
+                (aggregation column-x)
+                (aggregation column-y)
+                (aggregation column-size)
+                (aggregation column-category)
+                (:columnName column-bucket)
+                subquery)
+        sql-text-without-aggregation (format "SELECT * FROM
+                                               (SELECT * FROM 
+                                                 (SELECT %1$s AS x, %2$s AS y, %3$s AS size, %4$s AS category, %5$s AS label 
+                                                  FROM %6$s 
+                                                  WHERE %7$s)z
+                                                ORDER BY random() 
+                                                LIMIT %8$s)zz
+                                              ORDER BY zz.x"
+                         (:columnName column-x)
+                         (:columnName column-y)
+                         (:columnName column-size)
+                         (:columnName column-category)
+                         (:columnName column-label)
+                         table-name
+                         filter-sql
+                         max-points)
+
+        sql-text (if column-bucket sql-text-with-aggregation sql-text-without-aggregation)
+        sql-response (run-query tenant-conn sql-text)]
     (lib/ok
      {:series (conj [{:key (:title column-x)
                         :label (:title column-x)
