@@ -18,9 +18,6 @@
           [
             "env",
             {
-              "es2015": {
-                "modules": false
-              },
               "targets": {
                 "ie": 9,
                 "uglify": true
