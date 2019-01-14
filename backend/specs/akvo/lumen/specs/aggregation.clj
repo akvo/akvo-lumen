@@ -117,8 +117,8 @@
 	 :query ::aggregation.line/query)
   :ret any?)
 
-(s/def ::aggregation.scatter/metricColumnX (s/nilable ::db.dsv.column/columnName))
-(s/def ::aggregation.scatter/metricColumnY (s/nilable ::db.dsv.column/columnName))
+(s/def ::aggregation.scatter/metricColumnX ::db.dsv.column/columnName)
+(s/def ::aggregation.scatter/metricColumnY ::db.dsv.column/columnName)
 (s/def ::aggregation.scatter/metricColumnSize (s/nilable ::db.dsv.column/columnName))
 (s/def ::aggregation.scatter/bucketColumnCategory (s/nilable ::db.dsv.column/columnName))
 (s/def ::aggregation.scatter/datapointLabelColumn (s/nilable ::db.dsv.column/columnName))

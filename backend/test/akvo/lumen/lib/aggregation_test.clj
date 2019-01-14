@@ -284,3 +284,41 @@
                                  {:timestamp 1549065600000}
                                  {:timestamp 1549152000000}
                                  {:timestamp 1549238400000}]}})))))))
+
+(deftest scatter-tests
+  (let [data {:columns [{:id "c1", :title "A", :type "text"}
+                        {:id "c2", :title "B", :type "number"}
+                        {:id "c3", :title "C", :type "date"}]
+              :rows    [[{:value "a"} {:value 1} {:value (tu/instant-date "01/02/2019")}]
+                        [{:value "b"} {:value 2} {:value (tu/instant-date "02/02/2019")}]
+                        [{:value "c"} {:value 3} {:value (tu/instant-date "03/02/2019")}]
+                        [{:value "c"} {:value 4} {:value (tu/instant-date "04/02/2019")}]]}
+
+        dataset-id (import-file *tenant-conn* *error-tracker* {:dataset-name "scatter"
+                                                               :kind "clj"
+                                                               :data data})
+        query (query* "scatter" dataset-id)]
+    (testing "Simple queries"
+      (let [[tag query-result] (query {:metricColumnX "c3"
+                                       :metricColumnY "c2"
+                                       :metricAggregation "mean"})]
+        (is (= tag ::lib/ok))
+        (is (= query-result {:series
+                             [{:key "C",
+                               :label "C",
+                               :data
+                               [{:value 1548979200000}
+                                {:value 1549065600000}
+                                {:value 1549152000000}
+                                {:value 1549238400000}],
+                               :metadata {:type "date"}}
+                              {:key "B",
+                               :label "B",
+                               :data [{:value 1.0} {:value 2.0} {:value 3.0} {:value 4.0}],
+                               :metadata {:type "number"}}
+                              nil
+                              nil],
+                             :common
+                             {:metadata {:type nil, :sampled false},
+                              :data [{:label nil} {:label nil} {:label nil} {:label nil}]}})))
+)))
