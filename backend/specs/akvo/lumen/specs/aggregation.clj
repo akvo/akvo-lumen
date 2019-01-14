@@ -101,14 +101,14 @@
 	 :query ::aggregation.bubble/query)
   :ret any?)
 
-(s/def ::aggregation.line/metricColumnX (s/nilable ::db.dsv.column/columnName))
-(s/def ::aggregation.line/metricColumnY (s/nilable ::db.dsv.column/columnName))
+(s/def ::aggregation.line/metricColumnX ::db.dsv.column/columnName)
+(s/def ::aggregation.line/metricColumnY ::db.dsv.column/columnName)
 (s/def ::aggregation.line/metricAggregation (s/nilable ::aggregation.bar/metricAggregation))
 
 (s/def ::aggregation.line/query (s/keys :req-un [::postgres.filter/filters
                                                  ::aggregation.line/metricColumnX
                                                  ::aggregation.line/metricColumnY]
-                                          :opt-un [::aggregation.line/metricAggregation]))
+                                        :opt-un [::aggregation.line/metricAggregation]))
 
 (s/fdef aggregation.line/query
   :args (s/cat

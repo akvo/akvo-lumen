@@ -7,8 +7,7 @@
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.transformation :as tf]
             [akvo.lumen.lib.aggregation :as aggregation]
-            [akvo.lumen.test-utils :as tu]
-            [akvo.lumen.test-utils :refer [import-file update-file]]
+            [akvo.lumen.test-utils :refer [import-file update-file] :as tu]
             [clojure.tools.logging :as log]
             [clojure.walk :refer (keywordize-keys stringify-keys)]
             [clojure.test :refer :all]))
@@ -241,3 +240,47 @@
                               [{:label "a", :key "a"}
                                {:label "b", :key "b"}
                                {:label "c", :key "c"}]}}))))))
+
+(deftest line-tests
+  (let [data {:columns [{:id "c1", :title "A", :type "text"}
+                        {:id "c2", :title "B", :type "number"}
+                        {:id "c3", :title "C", :type "date"}]
+              :rows    [[{:value "a"} {:value 1} {:value (tu/instant-date "01/02/2019")}]
+                        [{:value "b"} {:value 2} {:value (tu/instant-date "02/02/2019")}]
+                        [{:value "c"} {:value 3} {:value (tu/instant-date "03/02/2019")}]
+                        [{:value "c"} {:value 4} {:value (tu/instant-date "04/02/2019")}]]}
+
+        dataset-id (import-file *tenant-conn* *error-tracker* {:dataset-name "line"
+                                                               :kind "clj"
+                                                               :data data})
+        query (query* "line" dataset-id)]
+    (testing "Simple queries"
+      (let [[tag query-result] (query {:metricColumnX "c3"
+                                       :metricColumnY "c2"})]
+        (is (= tag ::lib/ok))
+        (is (= query-result {:series
+                             [{:key "B",
+                               :label "B",
+                               :data [{:value 1.0} {:value 2.0} {:value 3.0} {:value 4.0}]}],
+                             :common
+                             {:metadata {:type "date", :sampled false},
+                              :data
+                              [{:timestamp 1548979200000}
+                               {:timestamp 1549065600000}
+                               {:timestamp 1549152000000}
+                               {:timestamp 1549238400000}]}})))
+      (testing "metricColumY text type aggregation based on count"
+        (let [[tag query-result] (query {:metricColumnX "c3"
+                                         :metricColumnY "c1"})]
+          (is (= tag ::lib/ok))
+          (is (= query-result {:series
+                               [{:key "A",
+                                 :label "A",
+                                 :data [{:value 1} {:value 1} {:value 1} {:value 1}]}],
+                               :common
+                               {:metadata {:type "date", :sampled false},
+                                :data
+                                [{:timestamp 1548979200000}
+                                 {:timestamp 1549065600000}
+                                 {:timestamp 1549152000000}
+                                 {:timestamp 1549238400000}]}})))))))

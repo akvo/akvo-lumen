@@ -148,7 +148,4 @@
          (if subbucket-column
            (subbucket-column-response sql-response bucket-column)
            (bucket-column-response sql-response bucket-column metric-y-column)))))
-    (lib/ok (bucket-column-response nil nil nil))
-    )
-  
-  )
+    (lib/ok (bucket-column-response nil nil nil))))

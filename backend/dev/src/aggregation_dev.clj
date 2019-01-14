@@ -2,6 +2,7 @@
   (:require [akvo.lumen.lib.aggregation :as aggregation]
             [clojure.pprint :refer [pprint]]
             [clojure.spec.alpha :as s]
+            [akvo.lumen.test-utils :as tu]
             [clojure.spec.test.alpha :as stest]
             [clojure.tools.logging :as log]
             [import-dev :as import-dev]))
