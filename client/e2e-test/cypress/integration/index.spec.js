@@ -181,7 +181,7 @@ context('Akvo Lumen', () => {
     // back to library
     cy.get('[data-test-id="back-button"]').click();
   });
-
+/*
   it('change visualization types', () => {
     cy.get('button[data-test-id="visualisation"]').click();
 
@@ -316,4 +316,5 @@ context('Akvo Lumen', () => {
         cy.get('[data-test-id="back-button"]').click();
       });
   });
+*/
 });
