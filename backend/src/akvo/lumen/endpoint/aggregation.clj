@@ -3,6 +3,7 @@
             [akvo.lumen.endpoint.commons.http :as http]
             [akvo.lumen.lib.aggregation :as aggregation]
             [cheshire.core :as json]
+            [clojure.walk :refer (keywordize-keys)]
             [compojure.core :refer :all]
             [integrant.core :as ig])
   (:import [com.fasterxml.jackson.core JsonParseException]))
