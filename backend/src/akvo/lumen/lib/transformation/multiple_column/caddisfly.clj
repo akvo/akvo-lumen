@@ -55,7 +55,7 @@
   [{:keys [tenant-conn caddisfly] :as deps} table-name current-columns op-spec]
   (jdbc/with-db-transaction [conn tenant-conn]
     (let [{:keys [onError op args]} op-spec
-          selected-column (keywordize-keys (find-column current-columns (:columnName (-> args :selectedColumn))))
+          selected-column (find-column (keywordize-keys current-columns) (:columnName (-> args :selectedColumn)))
 
           caddisfly-schema (if-let [multipleId (:multipleId selected-column)]
                              (get-schema caddisfly multipleId)

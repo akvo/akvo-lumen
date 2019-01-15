@@ -8,6 +8,7 @@
             [cheshire.core :as json]
             [clj-http.client :as client]
             [clojure.core.match :refer [match]]
+            [clojure.walk :refer (keywordize-keys)]
             [hugsql.core :as hugsql])
   (:import [com.zaxxer.hikari HikariDataSource]
            [java.net URI]))
@@ -84,7 +85,7 @@
                                     {:keys [table-name columns raster_table]} (if (= current-layer-type "raster")
                                                                                 (raster-by-id tenant-conn {:id current-dataset-id})
                                                                                 (dataset-by-id tenant-conn {:id current-dataset-id}))
-                                    current-where-clause (filter/sql-str columns (get current-layer "filters"))]
+                                    current-where-clause (filter/sql-str (keywordize-keys columns) (get current-layer "filters"))]
                                 (map-metadata/build tenant-conn (or raster_table table-name) current-layer current-where-clause)))
                             layers)
         headers (headers tenant-conn)

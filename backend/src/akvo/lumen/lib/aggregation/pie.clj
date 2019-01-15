@@ -1,7 +1,7 @@
 (ns akvo.lumen.lib.aggregation.pie
   (:require [akvo.lumen.lib :as lib]
-            [akvo.lumen.postgres.filter :as filter]
-            [akvo.lumen.lib.dataset.utils :as utils]
+            [akvo.lumen.lib.dataset.utils :refer (find-column)]
+            [akvo.lumen.postgres.filter :refer (sql-str)]
             [clojure.java.jdbc :as jdbc]))
 
 (defn- run-query [tenant-conn table-name column-name filter-sql]
@@ -12,29 +12,26 @@
 
 (defn query
   [tenant-conn {:keys [columns table-name]} query]
-  (let [filter-sql (filter/sql-str columns (get query "filters"))
-        bucket-column (utils/find-column columns (get query "bucketColumn"))
-        bucket-column-name (get bucket-column "columnName")
-        bucket-column-title (get bucket-column "title")
-        bucket-column-type (get bucket-column "type")
-        counts (run-query tenant-conn table-name bucket-column-name filter-sql)
-        max-segments 50]
+  (let [filter-sql    (sql-str columns (:filters query))
+        bucket-column (find-column columns (:bucketColumn query))
+        counts        (run-query tenant-conn table-name (:columnName bucket-column) filter-sql)
+        max-segments  50]
     (if (> (count counts) max-segments)
       (lib/bad-request
-       {"error" true
-        "reason" "too-many"
-        "max" max-segments
-        "count" (count counts)})
+       {:error  true
+        :reason "too-many"
+        :max    max-segments
+        :count  (count counts)})
       (lib/ok
-       {"series" [{"key" bucket-column-title
-                   "label" bucket-column-title
-                   "data" (mapv
-                           (fn [[bucket-value bucket-count]]
-                             {"value" bucket-count})
-                           counts)}]
-        "common" {"data" (mapv
+       {:series [{:key   (:title bucket-column)
+                  :label (:title bucket-column)
+                  :data  (mapv
                           (fn [[bucket-value bucket-count]]
-                            {"key" bucket-value
-                             "label" bucket-value})
-                          counts)
-                  "metadata" {"type" bucket-column-type}}}))))
+                            {:value bucket-count})
+                          counts)}]
+        :common {:data     (mapv
+                            (fn [[bucket-value bucket-count]]
+                              {:key   bucket-value
+                               :label bucket-value})
+                            counts)
+                 :metadata {:type (:type bucket-column)}}}))))

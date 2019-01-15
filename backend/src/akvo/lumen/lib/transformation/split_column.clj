@@ -56,7 +56,7 @@
     (map #(assoc % :columnName %2 :id %2) new-columns indexes)))
 
 (defn columns-to-extract [prefix number-new-rows selected-column columns]
-  (let [selected-column (keywordize-keys (find-column columns (:columnName selected-column)))
+  (let [selected-column (find-column (keywordize-keys columns) (:columnName selected-column))
         base-column (dissoc selected-column :type :columnName)
         new-columns (map #(assoc base-column :title (str prefix "-" %) :type "text")
                          (range 1 (inc number-new-rows)))]
