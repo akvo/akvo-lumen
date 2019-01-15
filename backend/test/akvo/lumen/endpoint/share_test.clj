@@ -7,6 +7,7 @@
             [akvo.lumen.util :refer [gen-table-name squuid]]
             [akvo.lumen.endpoint.commons.variant :as variant]
             [clojure.java.jdbc :as jdbc]
+            [akvo.lumen.test-utils :as tu]
             [clojure.test :refer :all]
             [hugsql.core :as hugsql]))
 
@@ -139,7 +140,7 @@
 ;;; Tests
 ;;;
 
-(use-fixtures :once tenant-conn-fixture)
+(use-fixtures :once tenant-conn-fixture tu/spec-instrument)
 
 
 (hugsql/def-db-fns "akvo/lumen/lib/dashboard.sql")
