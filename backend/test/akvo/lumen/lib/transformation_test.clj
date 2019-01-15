@@ -17,8 +17,7 @@
             [akvo.lumen.specs.import.column :as import.column.s]
             [akvo.lumen.specs.import.values :as import.values.s]
             [akvo.lumen.specs.transformation :as transformation.s]
-            [akvo.lumen.test-utils :refer [import-file at-least-one-true]]
-            [akvo.lumen.test-utils :as tu]
+            [akvo.lumen.test-utils :refer [import-file at-least-one-true] :as tu]
             [akvo.lumen.util :refer [conform squuid]]
             [cheshire.core :as json]
             [clj-time.coerce :as tcc]
@@ -236,9 +235,9 @@
                                :transformation
                                (gen-transformation
                                 "core/change-datatype" {:akvo.lumen.specs.db.dataset-version.column/columnName column-name
-                                                        :akvo.lumen.specs.transformation.change-datatype/defaultValue 0
-                                                        :akvo.lumen.specs.transformation.change-datatype/newType "date"
-                                                        ::transformation.engine.s/onError "fail"}
+                                                       :akvo.lumen.specs.transformation.change-datatype/defaultValue 0
+                                                       :akvo.lumen.specs.transformation.change-datatype/newType "date"
+                                                       ::transformation.engine.s/onError "fail"}
                                 :parseFormat format*)})
         data                (import.s/sample-imported-dataset [:text
                                                           [:text {::import.column.text.s/value (fn [] (import.column.s/date-format-gen
