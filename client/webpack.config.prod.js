@@ -81,7 +81,6 @@ export default {
     rules: [
       {
         test: /\.jsx?$/,
-        exclude: /node_modules\/(?!(query-string)\/).*/,
         use: ['babel-loader'],
       },
       {
