@@ -9,6 +9,20 @@ LUMEN_USER="${3:-jerome}"
 LUMEN_PASSWORD="${4:-password}"
 CYPRESS_RECORD_KEY="${CYPRESS_RECORD_KEY:-}"
 
+starttime=$(date +%s)
+
+while [ $(( $(date +%s) - 120 )) -lt "${starttime}" ]; do
+
+    if wget "${LUMEN_URL}" -O - -nv; then
+        exit 0
+    else
+        echo "Waiting for the client to start..."
+        sleep 5
+    fi
+done
+
+exit 1  
+
 if [[ "${DOCKER_COMPOSE_PROJECT}" == "akvolumen" ]]; then
     docker-compose \
 	run --no-deps \
