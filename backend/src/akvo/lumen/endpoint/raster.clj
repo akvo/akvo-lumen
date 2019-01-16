@@ -14,12 +14,11 @@
       (POST "/" {:keys [tenant body jwt-claims] :as request}
         (raster/create tenant-conn config jwt-claims body))
 
-      (context "/:id" [id]
-        (GET "/" _
-          (raster/fetch tenant-conn id))
+      (GET "/:id" [id]
+           (raster/fetch tenant-conn id))
 
-        (DELETE "/" _
-          (raster/delete tenant-conn id))))))
+      (DELETE "/:id" [id]
+              (raster/delete tenant-conn id)))))
 
 (defmethod ig/init-key :akvo.lumen.endpoint.raster/raster  [_ opts]
   (endpoint (assoc opts :config (:config (:config opts)))))

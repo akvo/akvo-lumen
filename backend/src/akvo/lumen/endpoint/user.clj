@@ -18,20 +18,18 @@
     (GET "/" _
       (user/users keycloak tenant))
 
-    (context "/:id" [id]
+    (PATCH "/:id/" {:keys [body params]}
+           (cond
+             (demote-user? body)
+             (user/demote-user-from-admin keycloak tenant jwt-claims (:id params))
 
-      (PATCH "/" {:keys [body]}
-        (cond
-          (demote-user? body)
-          (user/demote-user-from-admin keycloak tenant jwt-claims id)
+             (promote-user? body)
+             (user/promote-user-to-admin keycloak tenant jwt-claims (:id params))
 
-          (promote-user? body)
-          (user/promote-user-to-admin keycloak tenant jwt-claims id)
+             :else (http/not-implemented)))
 
-          :else (http/not-implemented)))
-
-      (DELETE "/" _
-        (user/remove-user keycloak tenant jwt-claims id)))))
+    (DELETE "/:id/" [id]
+            (user/remove-user keycloak tenant jwt-claims id))))
 
 (defmethod ig/init-key :akvo.lumen.endpoint.user/user  [_ opts]
   (endpoint opts))

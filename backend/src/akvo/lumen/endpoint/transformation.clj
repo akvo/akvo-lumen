@@ -8,15 +8,15 @@
   (context "/api/transformations" {:keys [tenant] :as request}
     (let-routes [tenant-conn (p/connection tenant-manager tenant)]
       (context "/:dataset-id" [dataset-id]
-        (POST "/transform" {:keys [body] :as request}
+        (POST "/:dataset-id/transform" {:keys [body params] :as request}
               (t/apply {:tenant-conn tenant-conn :caddisfly caddisfly}
-                   dataset-id
+                   (:dataset-id params)
                    {:type :transformation
                     :transformation body}))
 
-        (POST "/undo" _
+        (POST "/:dataset-id/undo" [dataset-id]
               (t/apply {:tenant-conn tenant-conn :caddisfly caddisfly}
-                   dataset-id
+                   dataset-id 
                    {:type :undo}))))))
 
 (defmethod ig/init-key :akvo.lumen.endpoint.transformation/transformation  [_ opts]

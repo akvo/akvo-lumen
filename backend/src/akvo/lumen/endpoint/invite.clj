@@ -21,10 +21,8 @@
         (user/create-invite emailer keycloak tenant-conn tenant
                             (location (:invite-redirect config) request)
                             email jwt-claims))
-
-      (context "/:id" [id]
-        (DELETE "/" _
-          (user/delete-invite tenant-conn id))))))
+      (DELETE "/:id" [id]
+              (user/delete-invite tenant-conn id)))))
 
 (defn verify-endpoint [{:keys [config keycloak tenant-manager]}]
   (context "/verify" {:keys [tenant] :as request}

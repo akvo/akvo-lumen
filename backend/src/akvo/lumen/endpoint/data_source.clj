@@ -7,9 +7,8 @@
 (defn endpoint [{:keys [tenant-manager]}]
   (context "/api/data-source/job-execution" {:keys [tenant]}
     (let-routes [tenant-conn (p/connection tenant-manager tenant)]
-      (context "/:id/status/:status" [id status]
-               (DELETE "/" _
-                       (data-source/delete tenant-conn id status))))))
+      (DELETE "/:id/status/:status" [id status]
+              (data-source/delete tenant-conn id status)))))
 
 (defmethod ig/init-key :akvo.lumen.endpoint.data-source/data-source  [_ opts]
   (endpoint opts))

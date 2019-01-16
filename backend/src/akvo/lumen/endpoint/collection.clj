@@ -14,16 +14,14 @@
       (POST "/" {:keys [body]}
         (collection/create tenant-conn body))
 
-      (context "/:id" [id]
+      (GET "/:id" [id]
+           (collection/fetch tenant-conn id))
 
-        (GET "/" _
-          (collection/fetch tenant-conn id))
+      (PUT "/:id" {:keys [body params]}
+           (collection/update tenant-conn (:id params) body))
 
-        (PUT "/" {:keys [body]}
-          (collection/update tenant-conn id body))
-
-        (DELETE "/" _
-          (collection/delete tenant-conn id))))))
+      (DELETE "/:id" [id]
+              (collection/delete tenant-conn id)))))
 
 (defmethod ig/init-key :akvo.lumen.endpoint.collection/collection  [_ opts]
   (endpoint opts))

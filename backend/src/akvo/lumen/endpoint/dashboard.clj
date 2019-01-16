@@ -15,16 +15,14 @@
       (POST "/" {:keys [body jwt-claims]}
         (dashboard/create tenant-conn body jwt-claims))
 
-      (context "/:id" [id]
+      (GET "/:id" [id]
+           (dashboard/fetch tenant-conn id))
 
-        (GET "/" _
-          (dashboard/fetch tenant-conn id))
+      (PUT "/:id" {:keys [body params]}
+           (dashboard/upsert tenant-conn (:id params) body))
 
-        (PUT "/" {:keys [body]}
-          (dashboard/upsert tenant-conn id body))
-
-        (DELETE "/" _
-         (dashboard/delete tenant-conn id))))))
+      (DELETE "/:id" [id]
+              (dashboard/delete tenant-conn id)))))
 
 (defmethod ig/init-key :akvo.lumen.endpoint.dashboard/dashboard  [_ opts]
   (endpoint opts))

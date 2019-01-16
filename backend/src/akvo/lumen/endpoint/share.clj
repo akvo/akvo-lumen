@@ -9,11 +9,10 @@
     (let-routes [tenant-conn (p/connection tenant-manager tenant)]
 
       (POST "/" {:keys [body] :as request}
-        (share/fetch tenant-conn body))
-
-      (context "/:id" [id]
-        (PUT "/" {:keys [body]}
-          (share/put tenant-conn id body))))))
+            (share/fetch tenant-conn body))
+      
+      (PUT "/:id" {:keys [body params]}
+           (share/put tenant-conn (:id params) body)))))
 
 (defmethod ig/init-key :akvo.lumen.endpoint.share/share  [_ opts]
   (endpoint opts))

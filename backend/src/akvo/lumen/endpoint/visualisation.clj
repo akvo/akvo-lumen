@@ -15,25 +15,21 @@
       (POST "/" {:keys [jwt-claims body]}
         (visualisation/create tenant-conn body jwt-claims))
 
-      (context "/maps" _
-        (POST "/" {{:strs [spec]} :body}
-          (let [layers (get-in spec ["layers"])]
-            (maps/create tenant-conn (:windshaft-url config) layers))))
+      (POST "/maps/" {{:strs [spec]} :body}
+            (let [layers (get-in spec ["layers"])]
+              (maps/create tenant-conn (:windshaft-url config) layers)))
+     
+      (POST "/rasters/" {{:strs [rasterId spec]} :body}
+            (maps/create-raster tenant-conn (:windshaft-url config) rasterId))
 
-      (context "/rasters" _
-        (POST "/" {{:strs [rasterId spec]} :body}
-          (maps/create-raster tenant-conn (:windshaft-url config) rasterId)))
+      (GET "/:id" [id]
+           (visualisation/fetch tenant-conn id))
 
-      (context "/:id" [id]
+      (PUT "/:id" {:keys [jwt-claims body params]}
+           (visualisation/upsert tenant-conn (assoc body "id" (:id params)) jwt-claims))
 
-        (GET "/" _
-          (visualisation/fetch tenant-conn id))
-
-        (PUT "/" {:keys [jwt-claims body]}
-          (visualisation/upsert tenant-conn (assoc body "id" id) jwt-claims))
-
-        (DELETE "/" _
-          (visualisation/delete tenant-conn id))))))
+      (DELETE "/:id" [id]
+              (visualisation/delete tenant-conn id)))))
 
 (defmethod ig/init-key :akvo.lumen.endpoint.visualisation/visualisation  [_ opts]
   (endpoint (assoc opts :config (:config (:config opts)))))
