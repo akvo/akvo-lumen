@@ -3,7 +3,7 @@
       "transform-class-properties",
       "transform-es2015-for-of"
     ],
-    "ignore": "/node_modules/(?!query-string)",
+    "ignore": "/node_modules/",
     "env": {
       "development": {
         "presets": [
