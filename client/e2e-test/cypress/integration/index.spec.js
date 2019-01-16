@@ -13,22 +13,22 @@ const COLUMNS = {
   NUMBER_4: 'Temperature',
 };
 
-Cypress.on('uncaught:exception', (err) => {
-  console.log(err);
-  return false;
-});
+// Cypress.on('uncaught:exception', (err) => {
+//   console.log(err);
+//   return false;
+// });
 
 context('Akvo Lumen', () => {
   // login
   before(() => {
     cy.visit(baseUrl);
-    cy.get('#username', { timeout: 30000 })
+    cy.get('#username', { timeout: 60000 })
       .type(username)
       .should('have.value', username);
-    cy.get('#password', { timeout: 30000 })
+    cy.get('#password', { timeout: 60000 })
       .type(password)
       .should('have.value', password);
-    cy.get('#kc-login', { timeout: 30000 }).click();
+    cy.get('#kc-login', { timeout: 60000 }).click();
   });
 
   // delete entities created during test
