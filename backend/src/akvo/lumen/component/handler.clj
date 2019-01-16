@@ -1,11 +1,22 @@
 (ns akvo.lumen.component.handler
   (:require [compojure.core :as compojure.core]
             [compojure.response :as compojure.res]
+            [clojure.tools.logging :as log]
             [integrant.core :as ig]
             [ring.middleware.defaults]
             [ring.middleware.json]
             [ring.middleware.stacktrace]
             [ring.util.response :as ring.response]))
+
+(defn metric-path-middleware [handler]
+  (fn [request]
+    (log/debug :uri (:uri request)
+               :route-params (:route-params request)
+               :context (:context request)
+               :compojure/route (:compojure/route request))
+    (assoc (handler request)
+           :metric-path (let [[_ path] (:compojure/route request)]
+                          (str (:context request) path)))))
 
 ;; code from older versions of duct.component.handler
 (defn- find-endpoint-keys [component]
@@ -31,7 +42,7 @@
     (let [component {:endpoints endpoints :middleware (-> config :app :middleware)}
           routes  (find-routes component)
           wrap-mw (compose-middleware (:middleware component))
-          handler (wrap-mw (apply compojure.core/routes routes))]
+          handler (wrap-mw (apply compojure.core/routes (map #(compojure.core/wrap-routes % metric-path-middleware) routes)))]
       (assoc component :handler handler))
     opts))
 

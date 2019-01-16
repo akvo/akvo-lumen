@@ -16,10 +16,11 @@
       (ring/initialize {:labels [:tenant]})))
 
 (defmethod ig/init-key ::middleware [_ {:keys [collector]}]
-  #(-> %
-       (ring/wrap-metrics collector {:path-fn (constantly "unknown")
-                                     :label-fn (fn [request _]
-                                                 {:tenant (:tenant request)})})))
+  (fn [handler]
+    (ring/wrap-metrics handler collector {:path-fn (constantly "unknown")
+                                          :label-fn (fn [request response]
+                                                      {:tenant (:tenant request)
+                                                       :path (:metric-path response)})})))
 
 (comment
   (slurp "http://localhost:3000/metrics")
