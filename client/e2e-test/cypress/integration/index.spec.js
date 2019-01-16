@@ -22,13 +22,13 @@ context('Akvo Lumen', () => {
   // login
   before(() => {
     cy.visit(baseUrl);
-    cy.get('#username')
+    cy.get('#username', { timeout: 30000 })
       .type(username)
       .should('have.value', username);
-    cy.get('#password')
+    cy.get('#password', { timeout: 30000 })
       .type(password)
       .should('have.value', password);
-    cy.get('#kc-login').click();
+    cy.get('#kc-login', { timeout: 30000 }).click();
   });
 
   // delete entities created during test
