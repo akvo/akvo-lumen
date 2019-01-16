@@ -21,8 +21,6 @@ while [ $(( $(date +%s) - 120 )) -lt "${starttime}" ]; do
     fi
 done
 
-exit 1  
-
 if [[ "${DOCKER_COMPOSE_PROJECT}" == "akvolumen" ]]; then
     docker-compose \
 	run --no-deps \
