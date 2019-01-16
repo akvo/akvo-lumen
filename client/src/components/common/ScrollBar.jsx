@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import itsSet from 'its-set';
 
 import './ScrollBar.scss';
 
@@ -20,7 +21,10 @@ class ScrollBar extends Component {
 
   componentDidMount() {
     setTimeout(() => {
-      // if (!this.wrapperElement || !this.contentElement) return;
+      if (
+        !itsSet(this, 'wrapperElement.parentElement.offsetWidth') ||
+        !itsSet(this, 'contentElement.scrollWidth')
+      ) return;
       const outerWidth = this.wrapperElement.parentElement.offsetWidth;
       const innerWidth = this.contentElement.scrollWidth;
       const innerHeight = this.contentElement.scrollHeight;
