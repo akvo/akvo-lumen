@@ -4,37 +4,43 @@
             [integrant.core :as ig]
             [clojure.tools.logging :as log]
             [akvo.lumen.specs.components :refer [integrant-key]]
+            [akvo.lumen.endpoint.commons :as commons]
+            [reitit.ring :as ring]
+            [reitit.coercion.spec]
+            [clojure.tools.logging :as log]
+            [muuntaja.core :as m]
+            [reitit.ring.coercion :as rrc]
             [clojure.spec.alpha :as s]
             [ring.middleware.defaults]
             [ring.middleware.json]
             [ring.middleware.stacktrace]
             [ring.util.response :as ring.response]))
 
-;; code from older versions of duct.component.handler
-(defn- find-endpoint-keys [component]
-  (sort (map key (filter (comp :routes val) component))))
-
-(defn- find-routes [component]
-  (:endpoints component (find-endpoint-keys component)))
-
-(defn- middleware-map [{:keys [functions]}]
-  (reduce-kv (fn [m k v] (assoc m k v)) {} functions))
-
-(defn- compose-middleware [{:keys [applied] :as middleware}]
-  (->> (reverse applied)
-       (map (middleware-map middleware))
-       (apply comp identity)))
-
 (defmethod ig/init-key :akvo.lumen.component.handler/handler  [_ {:keys [endpoints middleware handler] :as opts}]
   (if-not handler
-    (let [component {:endpoints endpoints :middleware middleware}
-          routes  (find-routes component)
-          wrap-mw (compose-middleware (:middleware component))
-          handler (wrap-mw (apply compojure.core/routes routes))]
-      (assoc component :handler handler))
+    (let [
+          routes  (->> endpoints
+                       (reduce-kv (fn [c k v]
+                                    (conj c [k v])
+                                    ) [] ))
+
+;;          _ (log/warn routes)
+
+          handler (ring/ring-handler
+                   (ring/router routes
+                                {:data {;; :coercion reitit.coercion.spec/coercion
+                                        ;;:muuntaja m/instance
+                                        :middleware middleware}
+                                 :conflicts (constantly nil)}))
+;;          _ (log/error :handler handler)
+]
+      (assoc opts :handler handler))
     opts))
 
-(s/def ::endpoints (s/coll-of fn? :count 24 :distinct true))
+
+(s/def ::endpoints (s/coll-of fn?
+                              ;;:count 24
+                              :distinct true))
 
 (s/def ::functions (s/map-of keyword? fn?))
 (s/def ::applied (s/coll-of keyword?  :distinct true))
@@ -42,9 +48,10 @@
 
 (s/def ::config (s/keys :req-un [::endpoints ::middleware]))
 (s/def ::handler fn?)
-(defmethod integrant-key :akvo.lumen.component.handler/handler [_]
-  (s/cat :kw keyword?
-         :config ::config))
+
+;; (defmethod integrant-key :akvo.lumen.component.handler/handler [_]
+;;   (s/cat :kw keyword?
+;;          :config ::config))
 
 (defmethod ig/halt-key! :akvo.lumen.component.handler/handler  [_ opts]
   (dissoc opts :handler))
@@ -122,3 +129,12 @@
 (defmethod integrant-key :akvo.lumen.component.handler/wrap-not-found [_]
   (s/cat :kw keyword?
          :config (s/keys :req-un [::error-response])))
+
+(defmethod ig/init-key :akvo.lumen.component.handler/variant  [_ _]
+  (fn [handler]
+    (fn [request]
+      (let [res (handler request)]
+        (if (vector? res)
+          (commons/variant->response res request)
+          res)))))
+

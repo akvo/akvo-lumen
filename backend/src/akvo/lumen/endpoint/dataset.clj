@@ -2,42 +2,57 @@
   (:require [akvo.lumen.protocols :as p]
             [akvo.lumen.lib.dataset :as dataset]
             [akvo.lumen.specs.components :refer [integrant-key]]
+            [clojure.tools.logging :as log]
             [clojure.spec.alpha :as s]
             [akvo.lumen.component.tenant-manager :as tenant-manager]
             [akvo.lumen.component.keycloak :as keycloak]
+            [clojure.walk :as w]
             [akvo.lumen.component.error-tracker :as error-tracker]
             [akvo.lumen.upload :as upload]
-            [compojure.core :refer :all]
             [integrant.core :as ig]))
 
-(defn endpoint [{:keys [upload-config import-config error-tracker tenant-manager]}]
-  (context "/api/datasets" {:keys [params tenant] :as request}
-    (let-routes [tenant-conn (p/connection tenant-manager tenant)]
+(defn routes [{:keys [upload-config import-config error-tracker tenant-manager] :as opts}]
+  ["/datasets"
+   ["" {:get {:handler (fn [{tenant :tenant}]
+                         (dataset/all (p/connection tenant-manager tenant)))}
+        :post {:responses {200 {}}
+               :parameters {:body map?}
+               :handler (fn [{tenant :tenant
+                              jwt-claims :jwt-claims
+                              body :body}]
+                          (dataset/create (p/connection tenant-manager tenant) (merge import-config upload-config) error-tracker jwt-claims (w/stringify-keys body)))}}]
+   ["/:id" [["" {:get {:responses {200 {}}
+                       :parameters {:path-params {:id string?}}
+                       :handler (fn [{tenant :tenant
+                                      {:keys [id]} :path-params}]
+                                  (dataset/fetch (p/connection tenant-manager tenant) id))}
+                 :put {:responses {200 {}}
+                       :parameters {:body map?
+                                    :path-params {:id string?}}
+                       :handler (fn [{tenant :tenant
+                                      body :body
+                                      {:keys [id]} :path-params}]
+                                  (dataset/update-meta (p/connection tenant-manager tenant) id body))}
+                 :delete {:responses {200 {}}
+                          :parameters {:path-params {:id string?}}
+                          :handler (fn [{tenant :tenant
+                                         {:keys [id]} :path-params}]
+                                     (dataset/delete (p/connection tenant-manager tenant) id))}}]
+            ["/meta" {:get {:responses {200 {}}
+                            :parameters {:path-params {:id string?}}
+                            :handler (fn [{tenant :tenant
+                                           {:keys [id]} :path-params}]
+                                       (dataset/fetch-metadata (p/connection tenant-manager tenant) id))}}]
+            ["/update" {:post {:parameters {:path-params {:id string?}}
+                               :handler (fn [{tenant :tenant
+                                              jwt-claims :jwt-claims
+                                              body :body
+                                              {:keys [id]} :path-params}]
+                                          (dataset/update (p/connection tenant-manager tenant) (merge import-config upload-config) error-tracker id (w/stringify-keys body)))}}]]]])
 
-      (GET "/" _
-        (dataset/all tenant-conn))
-
-      (POST "/" {:keys [tenant body jwt-claims] :as request}
-        (dataset/create tenant-conn (merge import-config upload-config) error-tracker jwt-claims body))
-
-      (context "/:id" [id]
-        (GET "/" _
-          (dataset/fetch tenant-conn id))
-
-        (GET "/meta" _
-          (dataset/fetch-metadata tenant-conn id))
-
-        (DELETE "/" _
-          (dataset/delete tenant-conn id))
-
-        (PUT "/" {:keys [body]}
-          (dataset/update-meta tenant-conn id body))
-
-        (POST "/update" {:keys [body] :as request}
-          (dataset/update tenant-conn (merge import-config upload-config) error-tracker id body))))))
 
 (defmethod ig/init-key :akvo.lumen.endpoint.dataset/dataset  [_ opts]
-  (endpoint opts))
+  (routes opts))
 
 (s/def ::upload-config ::upload/config)
 (s/def ::flow-api-url string?)

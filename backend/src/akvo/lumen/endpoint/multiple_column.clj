@@ -4,18 +4,20 @@
             [clojure.spec.alpha :as s]
             [akvo.lumen.component.caddisfly :as caddisfly]
             [cheshire.core :as json]
-            [compojure.core :refer :all]
             [integrant.core :as ig]))
 
-(defn endpoint [{:keys [caddisfly]}]
-  (context "/api/multiple-column" {:keys [query-params] :as request}
-           (GET "/" _
-                (let [query (json/parse-string (get query-params "query") keyword)]
-                  (multiple-column/details {:caddisfly caddisfly} (:multipleType query) (:multipleId query))))))
+(defn handler [{:keys [caddisfly] :as opts}]
+  (fn [{query-params :query-params
+        :as request}]
+    (let [query (json/parse-string (get query-params "query") keyword)]
+      (multiple-column/details opts (:multipleType query) (:multipleId query)))))
+
+(defn routes [{:keys [tenant-manager] :as opts}]
+  ["/multiple-column"
+   {:get {:handler (handler opts)}}])
 
 (defmethod ig/init-key :akvo.lumen.endpoint.multiple-column/multiple-column  [_ opts]
-  (endpoint opts))
-
+  (routes opts))
 
 (defmethod integrant-key :akvo.lumen.endpoint.multiple-column/multiple-column [_]
   (s/cat :kw keyword?

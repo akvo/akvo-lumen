@@ -2,4 +2,4 @@
   (:require [akvo.lumen.endpoint.visualisation :as visualisation]))
 
 (def handler
-  (visualisation/endpoint {}))
+  #_(visualisation/endpoint {}))

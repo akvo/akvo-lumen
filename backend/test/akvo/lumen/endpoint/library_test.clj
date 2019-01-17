@@ -2,7 +2,7 @@
   (:require [akvo.lumen.endpoint.library :as library]))
 
 (def handler
-  (library/endpoint {}))
+  (library/handler {}))
 
 #_(deftest a-test
   (testing "FIXME, I fail."

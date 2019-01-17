@@ -10,10 +10,8 @@
                                                          :from-name "Akvo Lumen"}
 
  :akvo.lumen.component.error-tracker/wrap-sentry         {:dsn "dev-dsn"}
- :akvo.lumen.component.handler/handler {:middleware
-                                        {:functions {:stacktrace #ig/ref :akvo.lumen.component.handler/wrap-stacktrace}
-                                         :applied   ^:replace [:not-found :json-response :ring-defaults :json-body
-                                                               :wrap-auth :wrap-jwt :monitoring :wrap-label-tenant :stacktrace]}}
+
+ :akvo.lumen.component.handler/handler {:middleware [#ig/ref :akvo.lumen.component.handler/wrap-stacktrace]}
 
  :akvo.lumen.component.keycloak/data  {:url         "http://auth.lumen.local:8080/auth"
                                        :realm       "akvo"}

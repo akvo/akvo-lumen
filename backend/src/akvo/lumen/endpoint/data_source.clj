@@ -4,18 +4,21 @@
             [akvo.lumen.specs.components :refer [integrant-key]]
             [clojure.spec.alpha :as s]
             [akvo.lumen.component.tenant-manager :as tenant-manager]
-            [compojure.core :refer :all]
             [integrant.core :as ig]))
 
-(defn endpoint [{:keys [tenant-manager]}]
-  (context "/api/data-source/job-execution" {:keys [tenant]}
-    (let-routes [tenant-conn (p/connection tenant-manager tenant)]
-      (context "/:id/status/:status" [id status]
-               (DELETE "/" _
-                       (data-source/delete tenant-conn id status))))))
+(defn routes [{:keys [tenant-manager] :as opts}]
+  ["/data-source/job-execution/:id/status/:status"
+   {:delete {:responses {200 {}}
+             :parameters {:path-params {:id string?
+                                        :status string?}}
+             :handler (fn [{tenant :tenant
+                            {:keys [id status]} :path-params}]
+                        (data-source/delete (p/connection tenant-manager tenant) id status))}}])
+
+
 
 (defmethod ig/init-key :akvo.lumen.endpoint.data-source/data-source  [_ opts]
-  (endpoint opts))
+  (routes opts))
 
 (defmethod integrant-key :akvo.lumen.endpoint.data-source/data-source [_]
   (s/cat :kw keyword?

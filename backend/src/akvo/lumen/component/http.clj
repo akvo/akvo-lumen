@@ -24,6 +24,6 @@
 
 (s/def ::handler (s/merge ::handler/config (s/keys :req-un [::handler/handler])))
 
-(defmethod integrant-key :akvo.lumen.component.http/http [_]
+#_(defmethod integrant-key :akvo.lumen.component.http/http [_]
   (s/cat :kw keyword?
          :config (s/keys :req-un [::port ::handler])))

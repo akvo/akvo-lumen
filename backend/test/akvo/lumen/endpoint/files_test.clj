@@ -2,4 +2,4 @@
   (:require [akvo.lumen.endpoint.files :as files]))
 
 (def handler
-  (files/endpoint {}))
+  #_(files/endpoint {}))

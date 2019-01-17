@@ -3,7 +3,7 @@
             [clojure.test :refer :all]))
 
 (def handler
-  (root/endpoint {}))
+  (root/routes {}))
 
 (deftest a-test
   (testing "FIXME, I fail."
