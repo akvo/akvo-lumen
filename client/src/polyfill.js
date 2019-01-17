@@ -79,17 +79,6 @@ const polyfill = (callback) => {
     }
     return null;
   })
-  .then(() => {
-    if (!(String.endsWith)) {
-      return new Promise((resolve) => {
-        require.ensure([], () => {
-          require('core-js/es6/string');
-          resolve();
-        });
-      });
-    }
-    return null;
-  })
   .then(callback);
 };
 
