@@ -6,6 +6,15 @@
             [clojure.java.jdbc :as jdbc]
             [clojure.tools.logging :as log]))
 
+(defn- serie-data [sql-data index]
+  (vec (map-indexed  #(hash-map :value (nth %2 index)) sql-data)))
+
+(defn serie [sql-data column index]
+  {:key      (:title column)
+   :label    (:title column)
+   :data (serie-data sql-data index)
+   :metadata {:type (:type column)}})
+
 (defn query
   [tenant-conn {:keys [columns table-name]} query]
   (let [filter-sql (sql-str columns (:filters query))
@@ -52,24 +61,12 @@
         sql-text (if column-bucket sql-text-with-aggregation sql-text-without-aggregation)
         sql-response (run-query tenant-conn sql-text)]
     (lib/ok
-     {:series (conj [{:key      (:title column-x)
-                      :label    (:title column-x)
-                      :data     (mapv (fn [[x-value]] {:value x-value}) sql-response)
-                      :metadata {:type (:type column-x)}}
-                     {:key      (:title column-y)
-                      :label    (:title column-y)
-                      :data     (mapv (fn [[_ y-value]] {:value y-value}) sql-response)
-                      :metadata {:type (:type column-y)}}]
-                    (when (:title column-size) 
-                      {:key      (:title column-size)
-                       :label    (:title column-size)
-                       :data     (mapv (fn [[_ _ size-value]] {:value size-value}) sql-response)
-                       :metadata {:type (:type column-size)}})
+     {:series (conj [(serie sql-response column-x 0)
+                     (serie sql-response column-y 1)]
+                    (when (:title column-size)
+                      (serie sql-response column-size 2))
                     (when (:title column-category)
-                      {:key      (:title column-category)
-                       :label    (:title column-category)
-                       :data     (mapv (fn [[_ _ _ category-value]] {:value category-value}) sql-response)
-                       :metadata {:type (:type column-category)}}))
+                      (serie sql-response column-size 3)))
       :common {:metadata {:type    (:type column-label)
                           :sampled (= (count sql-response) max-points)}
-               :data     (mapv (fn [[_ _ _ _ label]] {:label label}) sql-response)}})))
+               :data     (serie-data sql-response 4)}})))
