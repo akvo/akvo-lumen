@@ -6,14 +6,15 @@
             [clojure.java.jdbc :as jdbc]
             [clojure.tools.logging :as log]))
 
-(defn- serie-data [sql-data index]
-  (vec (map-indexed  #(hash-map :value (nth %2 index)) sql-data)))
+(defn- serie-data [tag sql-data index]
+  (mapv #(array-map tag (nth % index)) sql-data))
 
 (defn serie [sql-data column index]
-  {:key      (:title column)
-   :label    (:title column)
-   :data (serie-data sql-data index)
-   :metadata {:type (:type column)}})
+  (when (:title column)
+    {:key (:title column)
+     :label (:title column)
+     :data (serie-data :value sql-data index)
+     :metadata {:type (:type column)}}))
 
 (defn query
   [tenant-conn {:keys [columns table-name]} query]
@@ -61,12 +62,10 @@
         sql-text (if column-bucket sql-text-with-aggregation sql-text-without-aggregation)
         sql-response (run-query tenant-conn sql-text)]
     (lib/ok
-     {:series (conj [(serie sql-response column-x 0)
-                     (serie sql-response column-y 1)]
-                    (when (:title column-size)
-                      (serie sql-response column-size 2))
-                    (when (:title column-category)
-                      (serie sql-response column-size 3)))
-      :common {:metadata {:type    (:type column-label)
-                          :sampled (= (count sql-response) max-points)}
-               :data     (serie-data sql-response 4)}})))
+      {:series (map-indexed
+                 (fn [idx column]
+                   (serie sql-response column idx))
+                 [column-x column-y column-size column-category])
+       :common {:metadata {:type (:type column-label)
+                           :sampled (= (count sql-response) max-points)}
+                :data (serie-data :label sql-response 4)}})))
