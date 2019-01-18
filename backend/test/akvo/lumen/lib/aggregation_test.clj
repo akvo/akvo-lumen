@@ -16,8 +16,7 @@
 
 (defn query* [t dataset-id]
   (fn [q]
-    (let [q (if (:filters q) q (assoc q :filters []))]
-      (aggregation/query *tenant-conn* dataset-id t q))))
+    (aggregation/query *tenant-conn* dataset-id t q)))
 
 (deftest pivot-tests
   (let [columns [{:id "c1", :title "A", :type "text"}

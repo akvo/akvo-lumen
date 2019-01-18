@@ -1,20 +1,17 @@
 (ns akvo.lumen.lib.aggregation.pie
   (:require [akvo.lumen.lib :as lib]
+            [akvo.lumen.lib.aggregation.commons :refer (run-query)]
             [akvo.lumen.lib.dataset.utils :refer (find-column)]
             [akvo.lumen.postgres.filter :refer (sql-str)]
             [clojure.java.jdbc :as jdbc]))
-
-(defn- run-query [tenant-conn table-name column-name filter-sql]
-  (rest (jdbc/query tenant-conn
-                    [(format "SELECT %1$s, count(*) FROM %2$s WHERE %3$s GROUP BY %1$s"
-                             column-name table-name filter-sql)]
-                    {:as-arrays? true})))
 
 (defn query
   [tenant-conn {:keys [columns table-name]} query]
   (let [filter-sql    (sql-str columns (:filters query))
         bucket-column (find-column columns (:bucketColumn query))
-        counts        (run-query tenant-conn table-name (:columnName bucket-column) filter-sql)
+        query         (format "SELECT %1$s, count(*) FROM %2$s WHERE %3$s GROUP BY %1$s"
+                              (:columnName bucket-column) table-name filter-sql)
+        counts        (run-query tenant-conn query)
         max-segments  50]
     (if (> (count counts) max-segments)
       (lib/bad-request

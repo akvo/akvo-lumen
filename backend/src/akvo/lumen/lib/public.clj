@@ -27,7 +27,7 @@
         [tag query-result] (aggregation/query tenant-conn
                                               dataset-id
                                               "pivot"
-                                              (keywordize-keys (:spec visualisation)))]
+                                              (:spec visualisation))]
     (when (and (= tag ::lib/ok)
                (= dataset-tag ::lib/ok))
       {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}
@@ -40,7 +40,7 @@
         [tag query-result] (aggregation/query tenant-conn
                                               dataset-id
                                               "line"
-                                              (keywordize-keys (:spec visualisation)))]
+                                              (:spec visualisation))]
     (when (and (= tag ::lib/ok)
                (= dataset-tag ::lib/ok))
       {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}
@@ -53,7 +53,7 @@
         [tag query-result] (aggregation/query tenant-conn
                                               dataset-id
                                               "bubble"
-                                              (keywordize-keys (:spec visualisation)))]
+                                              (:spec visualisation))]
     (when (and (= tag ::lib/ok)
                 (= dataset-tag ::lib/ok))
       {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}
@@ -66,7 +66,7 @@
         [tag query-result] (aggregation/query tenant-conn
                                               dataset-id
                                               "line"
-                                              (keywordize-keys (:spec visualisation)))]
+                                              (:spec visualisation))]
     (when (and (= tag ::lib/ok)
                (= dataset-tag ::lib/ok))
       {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}
@@ -79,7 +79,7 @@
         [tag query-result] (aggregation/query tenant-conn
                                               dataset-id
                                               "pie"
-                                              (keywordize-keys (:spec visualisation)))]
+                                              (:spec visualisation))]
     (when (and (= tag ::lib/ok)
                (= dataset-tag ::lib/ok))
       {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}
@@ -92,7 +92,7 @@
         [tag query-result] (aggregation/query tenant-conn
                                               dataset-id
                                               "pie"
-                                              (keywordize-keys (:spec visualisation)))]
+                                              (:spec visualisation))]
     (when (and (= tag ::lib/ok)
                (= dataset-tag ::lib/ok))
       {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}
@@ -105,7 +105,7 @@
         [tag query-result] (aggregation/query tenant-conn
                                               dataset-id
                                               "pie"
-                                              (keywordize-keys (:spec visualisation)))]
+                                              (:spec visualisation))]
     (when (and (= tag ::lib/ok)
                 (= dataset-tag ::lib/ok))
       {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}
@@ -118,7 +118,7 @@
         [tag query-result] (aggregation/query tenant-conn
                                               dataset-id
                                               "bar"
-                                              (keywordize-keys (:spec visualisation)))]
+                                              (:spec visualisation))]
     (when (and (= tag ::lib/ok)
                (= dataset-tag ::lib/ok))
       {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}
@@ -131,7 +131,7 @@
         [tag query-result] (aggregation/query tenant-conn
                                               dataset-id
                                               "scatter"
-                                              (keywordize-keys (:spec visualisation)))]
+                                              (:spec visualisation))]
     (when (and (= tag ::lib/ok)
                (= dataset-tag ::lib/ok))
       {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}
@@ -164,7 +164,11 @@
 
 (defn visualisation-response-data [tenant-conn id config]
   (try
-    (let [[tag vis] (visualisation/fetch tenant-conn id)]
+    (let [[tag vis] (visualisation/fetch tenant-conn id)
+          ;; provisional condition until akvo.lumen.lib.visualisation.maps is keywordized, tested and speced too
+          vis (if (= "map" (:visualisationType vis))
+                vis
+                (update vis :spec keywordize-keys))]
      (when (= tag ::lib/ok)
        (visualisation tenant-conn vis config)))
     (catch Exception e (do

@@ -1,6 +1,7 @@
 (ns akvo.lumen.lib.aggregation.pivot
   (:require [akvo.commons.psql-util]
             [akvo.lumen.lib :as lib]
+            [akvo.lumen.lib.aggregation.commons :refer (run-query)]
             [akvo.lumen.lib.dataset.utils :refer (find-column)]
             [akvo.lumen.postgres.filter :refer (sql-str)]
             [clojure.java.jdbc :as jdbc]
@@ -22,9 +23,6 @@
             (if (= "date" (:type column))
               "'1001-01-01 01:00:00'::timestamptz"
               "'NaN'::double precision"))))
-
-(defn- run-query [conn query-str]
-  (rest (jdbc/query conn [query-str] {:as-arrays? true})))
 
 (defn- apply-pivot [conn table-name {:keys [category-column row-column aggregation value-column]} filter-str]
   (let [source-sql        (let [select (format "SELECT %s, %s, %s(%s)"

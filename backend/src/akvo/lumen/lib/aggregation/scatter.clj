@@ -1,30 +1,10 @@
 (ns akvo.lumen.lib.aggregation.scatter
   (:require [akvo.lumen.lib :as lib]
+            [akvo.lumen.lib.aggregation.commons :refer (run-query sql-aggregation-subquery)]
             [akvo.lumen.lib.dataset.utils :refer (find-column)]
             [akvo.lumen.postgres.filter :refer (sql-str)]
-            [clojure.tools.logging :as log]
-            [clojure.java.jdbc :as jdbc]))
-
-(defn- run-query [tenant-conn sql]
-  (log/info :scatter-sql sql)
-  (rest (jdbc/query tenant-conn [sql] {:as-arrays? true})))
-
-(defn cast-to-decimal [column]
-  (case (:type column)
-    "number" (:columnName column)
-    "date" (format "(1000 * cast(extract(epoch from %s) as decimal))" (:columnName column))
-    (:columnName column)))
-
-(defn sql-aggregation-subquery [aggregation-method column]
-  (let [v (cast-to-decimal column)]
-    (case aggregation-method
-      nil ""
-      ("min" "max" "count" "sum") (str aggregation-method "(" v "::decimal)")
-      "mean" (str "avg(" v "::decimal)")
-      "median" (str "percentile_cont(0.5) WITHIN GROUP (ORDER BY " v ")")
-      "distinct" (str "COUNT(DISTINCT " v ")")
-      "q1" (str "percentile_cont(0.25) WITHIN GROUP (ORDER BY " v ")")
-      "q3" (str "percentile_cont(0.75) WITHIN GROUP (ORDER BY " v ")"))))
+            [clojure.java.jdbc :as jdbc]
+            [clojure.tools.logging :as log]))
 
 (defn query
   [tenant-conn {:keys [columns table-name]} query]
@@ -72,34 +52,24 @@
         sql-text (if column-bucket sql-text-with-aggregation sql-text-without-aggregation)
         sql-response (run-query tenant-conn sql-text)]
     (lib/ok
-     {:series (conj [{:key (:title column-x)
-                        :label (:title column-x)
-                        :data (mapv (fn [[x-value y-value size-value category-value label]]
-                                        {:value x-value})
-                                      sql-response)
-                        :metadata {:type (:type column-x)}}
-                      {:key (:title column-y)
-                        :label (:title column-y)
-                        :data (mapv (fn [[x-value y-value size-value category-value label]]
-                                      {:value y-value})
-                                    sql-response)
-                        :metadata  {:type (:type column-y)}}]
-                      (when (:title column-size) 
-                        {:key (:title column-size)
-                        :label (:title column-size)
-                        :data (mapv (fn [[x-value y-value size-value category-value label]]
-                                        {:value size-value})
-                                      sql-response)
-                        :metadata  {:type (:type column-size)}})
-                      (when (:title column-category)
-                        {:key (:title column-category)
-                        :label (:title column-category)
-                        :data (mapv (fn [[x-value y-value size-value category-value label]]
-                                        {:value category-value})
-                                      sql-response)
-                         :metadata  {:type (:type column-category)}}))
-      :common {:metadata {:type (:type column-label)
-                            :sampled (= (count sql-response) max-points)}
-                :data (mapv (fn [[x-value y-value size-value category-value label]]
-                               {:label label})
-                             sql-response)}})))
+     {:series (conj [{:key      (:title column-x)
+                      :label    (:title column-x)
+                      :data     (mapv (fn [[x-value]] {:value x-value}) sql-response)
+                      :metadata {:type (:type column-x)}}
+                     {:key      (:title column-y)
+                      :label    (:title column-y)
+                      :data     (mapv (fn [[_ y-value]] {:value y-value}) sql-response)
+                      :metadata {:type (:type column-y)}}]
+                    (when (:title column-size) 
+                      {:key      (:title column-size)
+                       :label    (:title column-size)
+                       :data     (mapv (fn [[_ _ size-value]] {:value size-value}) sql-response)
+                       :metadata {:type (:type column-size)}})
+                    (when (:title column-category)
+                      {:key      (:title column-category)
+                       :label    (:title column-category)
+                       :data     (mapv (fn [[_ _ _ category-value]] {:value category-value}) sql-response)
+                       :metadata {:type (:type column-category)}}))
+      :common {:metadata {:type    (:type column-label)
+                          :sampled (= (count sql-response) max-points)}
+               :data     (mapv (fn [[_ _ _ _ label]] {:label label}) sql-response)}})))

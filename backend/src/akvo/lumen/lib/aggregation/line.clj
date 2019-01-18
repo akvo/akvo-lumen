@@ -1,13 +1,10 @@
 (ns akvo.lumen.lib.aggregation.line
   (:require [akvo.lumen.lib :as lib]
+            [akvo.lumen.lib.aggregation.commons :refer (run-query)]
             [akvo.lumen.lib.dataset.utils :refer (find-column)]
             [akvo.lumen.postgres.filter :refer (sql-str)]
-            [clojure.tools.logging :as log]
-            [clojure.java.jdbc :as jdbc]))
-
-(defn- run-query [tenant-conn sql]
-  (log/debug :line-sql sql)
-  (rest (jdbc/query tenant-conn [sql] {:as-arrays? true})))
+            [clojure.java.jdbc :as jdbc]
+            [clojure.tools.logging :as log]))
 
 (defn aggregation* [metricAggregation column-y]
   (when-let [aggregation-method (if (= (:type column-y) "text") "count" metricAggregation)]

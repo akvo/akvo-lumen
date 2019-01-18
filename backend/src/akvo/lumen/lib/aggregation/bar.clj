@@ -1,14 +1,11 @@
 (ns akvo.lumen.lib.aggregation.bar
   (:require [akvo.lumen.lib :as lib]
+            [akvo.lumen.lib.aggregation.commons :refer (run-query)]
             [akvo.lumen.lib.dataset.utils :refer (find-column)]
-            [clojure.pprint :refer (pprint)]
-            [clojure.tools.logging :as log]
             [akvo.lumen.postgres.filter :refer (sql-str)]
-            [clojure.java.jdbc :as jdbc]))
-
-(defn- run-query [tenant-conn q]
-  (log/debug :q q)
-  (rest (jdbc/query tenant-conn [q] {:as-arrays? true})))
+            [clojure.java.jdbc :as jdbc]
+            [clojure.pprint :refer (pprint)]
+            [clojure.tools.logging :as log]))
 
 (defn- sql [table-name bucket-column subbucket-column aggregation filter-sql sort-query truncate-size]
   (if subbucket-column

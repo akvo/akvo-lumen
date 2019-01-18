@@ -1,21 +1,17 @@
 (ns akvo.lumen.lib.aggregation.bubble
   (:require [akvo.lumen.lib :as lib]
+            [akvo.lumen.lib.aggregation.commons :refer (run-query) :as commons]
+            [akvo.lumen.lib.aggregation.scatter :as scatter]
             [akvo.lumen.lib.dataset.utils :refer (find-column)]
             [akvo.lumen.postgres.filter :refer (sql-str)]
-            [akvo.lumen.lib.aggregation.scatter :as scatter]
             [clojure.java.jdbc :as jdbc]
             [clojure.tools.logging :as log]))
 
-(defn- run-query [tenant-conn query]
-  (log/debug :sql-bubble query)
-  (rest (jdbc/query tenant-conn [query] {:as-arrays? true})))
-
 (defn sql-aggregation-subquery [aggregation-method column]
-  (let [v (scatter/cast-to-decimal column)]
-    (if (= aggregation-method "count")
-      (let [sql-type (if (#{"number" "data"} (:type column)) "::decimal" "::text")]
-        (format "count(%1$s%2$s)" (:columnName column) sql-type))
-      (scatter/sql-aggregation-subquery aggregation-method column))))
+  (if (= aggregation-method "count")
+    (let [sql-type (if (#{"number" "data"} (:type column)) "::decimal" "::text")]
+      (format "count(%1$s%2$s)" (:columnName column) sql-type))
+    (commons/sql-aggregation-subquery aggregation-method column)))
 
 (defn query
   [tenant-conn {:keys [columns table-name]} query]
