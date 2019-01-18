@@ -2,7 +2,7 @@
 
 (defn find-column
   ([columns v]
-   (when v (find-column columns v :columnName)))
+   (find-column columns v :columnName))
   ([columns v filter-by]
    (when v
      (if-let [column (first (filter #(= v (filter-by %)) columns))]
