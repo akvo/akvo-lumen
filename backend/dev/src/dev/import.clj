@@ -1,4 +1,4 @@
-(ns dev.import-dev
+(ns dev.import
   (:require [akvo.lumen.component.error-tracker :as et]
             [akvo.lumen.test-utils :as tu]
             [clj-time.core :as tc]
