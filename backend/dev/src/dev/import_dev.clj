@@ -1,4 +1,4 @@
-(ns import-dev
+(ns dev.import-dev
   (:require [akvo.lumen.component.error-tracker :as et]
             [akvo.lumen.test-utils :as tu]
             [clj-time.core :as tc]
@@ -6,7 +6,7 @@
             [clojure.spec.alpha :as s]
             [clojure.spec.test.alpha :as stest]
             [clojure.tools.logging :as log]
-            [commons :as commons]
+            [dev.commons :as commons]
             [integrant.repl.state :as state :refer (system)]))
 
 (def error-tracker (et/local-error-tracker nil))

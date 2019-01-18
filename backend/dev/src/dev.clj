@@ -13,7 +13,7 @@
             [clojure.spec.test.alpha :as stest]
             [clojure.tools.logging :as log]
             [clojure.tools.namespace.repl :as repl]
-            [commons :as commons]
+            [dev.commons :as commons]
             [duct.core :as duct]
             [duct.generate :as gen]
             [integrant.core :as ig]
