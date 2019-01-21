@@ -61,7 +61,7 @@ context('Akvo Lumen', () => {
     cy.get('input[data-test-id="dataset-name"]').type(datasetName);
     // Import
     cy.get('button[data-test-id="next"]').click();
-    cy.get(`[data-test-name="${datasetName}"]:not(.PENDING)`, { timeout: 20000 }).should('exist');
+    cy.get(`[data-test-name="${datasetName}"]:not(.PENDING)`).should('exist');
     cy.get(`[data-test-name="${datasetName}"] > a`).click({ force: true });
     // see if metadata is correct
     cy.get('.columnCount').contains('6 Columns').should('exist');
@@ -74,7 +74,8 @@ context('Akvo Lumen', () => {
 
   it('create visualisation (pivot table)', () => {
     cy.get('button[data-test-id="visualisation"]').click();
-    cy.get('[data-test-id="visualisation-type-pivot-table"]', { timeout: 20000 }).click();
+    cy.get('[data-test-id="visualisation-type-pivot-table"]')
+      .click({ force: true });
     cy.get('[data-test-id="dataset-menu"] .Select-control').click();
     // Finding dataset option
     cy.get('[role="option"]')
@@ -121,7 +122,8 @@ context('Akvo Lumen', () => {
   it('create visualisation from dataset page', () => {
     cy.get('.dataset').contains(datasetName).click({ force: true });
     cy.get('button[data-test-id="visualise"]').click({ force: true });
-    cy.get('[data-test-id="visualisation-type-pivot-table"]', { timeout: 20000 }).click();
+    cy.get('[data-test-id="visualisation-type-pivot-table"]')
+      .click({ force: true });
     cy.get('[data-test-id="dataset-menu"] .Select-control').click();
     // Finding dataset option
     cy.get('[role="option"]')
@@ -166,7 +168,8 @@ context('Akvo Lumen', () => {
   });
 
   it('create dashboard', () => {
-    cy.get('button[data-test-id="dashboard"]', { timeout: 20000 }).click();
+    cy.get('button[data-test-id="dashboard"]')
+      .click({ force: true });
     // Selecting visualisation
     cy.get(`[data-test-name="Visualisation of ${datasetName}"]`).click();
     // Typing dashboard name
@@ -187,7 +190,8 @@ context('Akvo Lumen', () => {
     cy.get('button[data-test-id="visualisation"]').click();
 
     // Area
-    cy.get('[data-test-id="visualisation-type-area"]', { timeout: 20000 }).click();
+    cy.get('[data-test-id="visualisation-type-area"]')
+      .click({ force: true });
     cy.get('[data-test-id="dataset-menu"] .Select-control').click();
 
     // Finding dataset option
@@ -222,7 +226,8 @@ context('Akvo Lumen', () => {
 
       .then(() => {
         // Line
-        cy.get('[data-test-id="visualisation-type-line"]', { timeout: 20000 }).click();
+        cy.get('[data-test-id="visualisation-type-line"]')
+          .click({ force: true });
 
         // wait for changes to be saved
         cy.get('.saveStatus').should('contain', 'All changes saved');
@@ -232,7 +237,8 @@ context('Akvo Lumen', () => {
 
       .then(() => {
         // Scatter
-        cy.get('[data-test-id="visualisation-type-scatter"]', { timeout: 20000 }).click();
+        cy.get('[data-test-id="visualisation-type-scatter"]')
+          .click({ force: true });
 
         cy.get('.Chart circle').should('exist');
 
@@ -258,7 +264,8 @@ context('Akvo Lumen', () => {
 
       .then(() => {
         // Bar
-        cy.get('[data-test-id="visualisation-type-bar"]', { timeout: 20000 }).click();
+        cy.get('[data-test-id="visualisation-type-bar"]')
+          .click({ force: true });
 
         // wait for changes to be saved
         cy.get('.saveStatus').should('contain', 'All changes saved');
@@ -268,7 +275,8 @@ context('Akvo Lumen', () => {
 
       .then(() => {
         // Bubble
-        cy.get('[data-test-id="visualisation-type-bubble"]', { timeout: 20000 }).click();
+        cy.get('[data-test-id="visualisation-type-bubble"]')
+          .click({ force: true });
 
         // wait for changes to be saved
         cy.get('.saveStatus').should('contain', 'All changes saved');
@@ -278,7 +286,8 @@ context('Akvo Lumen', () => {
 
       .then(() => {
         // Pie
-        cy.get('[data-test-id="visualisation-type-pie"]', { timeout: 20000 }).click();
+        cy.get('[data-test-id="visualisation-type-pie"]')
+          .click({ force: true });
 
         // wait for changes to be saved
         cy.get('.saveStatus').should('contain', 'All changes saved');
@@ -288,7 +297,8 @@ context('Akvo Lumen', () => {
 
       .then(() => {
         // Donut
-        cy.get('[data-test-id="visualisation-type-donut"]', { timeout: 20000 }).click();
+        cy.get('[data-test-id="visualisation-type-donut"]')
+          .click({ force: true });
 
         // wait for changes to be saved
         cy.get('.saveStatus').should('contain', 'All changes saved');
@@ -298,7 +308,8 @@ context('Akvo Lumen', () => {
 
       .then(() => {
         // Pivot
-        cy.get('[data-test-id="visualisation-type-pivot-table"]', { timeout: 20000 }).click();
+        cy.get('[data-test-id="visualisation-type-pivot-table"]')
+          .click({ force: true });
 
         // wait for changes to be saved
         cy.get('.saveStatus').should('contain', 'All changes saved');
