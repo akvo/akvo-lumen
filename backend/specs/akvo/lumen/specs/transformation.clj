@@ -125,8 +125,8 @@
 (s/def ::transformation.change-datatype/args
   (s/keys :req-un [::db.dsv.column/columnName
                    ::transformation.change-datatype/defaultValue
-                   ::transformation.change-datatype/parseFormat
-                   ::transformation.change-datatype/newType]))
+                   ::transformation.change-datatype/newType]
+          :opt-un [::transformation.change-datatype/parseFormat]))
 
 (defmethod op-spec "core/change-datatype"  [_]
   (s/keys
