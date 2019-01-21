@@ -38,13 +38,13 @@
                                   :table-name table-name
                                   :imported-table-name imported-table-name
                                   :version 1
-                                  :columns (mapv (fn [{:keys [title id type key multiple-type multiple-id]}]
+                                  :columns (mapv (fn [{:keys [title id type key multipleType multipleId]}]
                                                    {:columnName (name id)
                                                     :direction nil
                                                     :hidden false
                                                     :key (boolean key)
-                                                    :multipleId multiple-id
-                                                    :multipleType multiple-type
+                                                    :multipleId multipleId
+                                                    :multipleType multipleType
                                                     :sort nil
                                                     :title (string/trim title)
                                                     :type (name type)})

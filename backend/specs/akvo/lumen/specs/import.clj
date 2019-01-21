@@ -21,7 +21,7 @@
                                                                                          {(adapt-spec (first t)) (last t)})  1)
                                 (list (lumen.s/sample (kw->column-spec t) 1)))) types-gens-tuple)
                        (mapv #(assoc (first %2)
-                                     :id (keyword (str "c" (inc %)))
+                                     :id (str "c" (inc %))
                                      :title (str "Column" (inc %)))
                              (range (count headers))))
         _         (do

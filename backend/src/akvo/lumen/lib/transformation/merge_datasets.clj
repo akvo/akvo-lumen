@@ -15,7 +15,7 @@
 (hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/transformation/engine.sql")
 
-(defmethod engine/valid? :core/merge-datasets
+(defmethod engine/valid? "core/merge-datasets"
   [op-spec]
   (let [source (get-in op-spec ["args" "source"])
         target (get-in op-spec ["args" "target"])]
@@ -163,7 +163,7 @@
                              table-name)]
      :columns (into columns target-merge-columns)}))
 
-(defmethod engine/apply-operation :core/merge-datasets
+(defmethod engine/apply-operation "core/merge-datasets"
   [{:keys [tenant-conn]} table-name columns op-spec]
   (apply-merge-operation tenant-conn table-name columns op-spec))
 
@@ -211,7 +211,7 @@
                                                            (filter some?))]
                                  (when (not-empty column-diff-coll)
                                    column-diff-coll)))]
-        {:error       (format "This version of the dataset isn't consistent thus it has merge transformations with datasets columns wich were already removed from their datasets: %s" (reduce str column-diff))
+        {:error(format "This version of the dataset isn't consistent thus it has merge transformations with datasets columns which were already removed from their datasets: %s" (reduce str column-diff))
          :column-diff column-diff}))))
 
 (defn sources-related

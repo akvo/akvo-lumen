@@ -86,7 +86,7 @@
     "object-assign": "4.1.0",
     "postcss-loader": "2.0.6",
     "prop-types": "^15.5.10",
-    "query-string": "^6.1.0",
+    "querystringify": "^2.1.0",
     "raf": "^3.3.2",
     "raven-js": "^3.14.0",
     "react": "^16.3.2",

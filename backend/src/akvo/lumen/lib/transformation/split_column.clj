@@ -42,7 +42,7 @@
 (defn new-column-name [args]
   (-> args :newColumnName))
 
-(defmethod engine/valid? :core/split-column
+(defmethod engine/valid? "core/split-column"
   [op-spec]
   (let [{:keys [onError op args] :as op-spec} (keywordize-keys op-spec)]
     (and (util/valid-column-name? (col-name args))
@@ -64,7 +64,7 @@
 
 (defn- update-row [conn table-name row-id vals-map]
   (let [r (string/join "," (doall (map (fn [[k v]]
-                                         (str (name k) "=" (postgres/adapt-string-value v))) vals-map)))
+                                         (str k "=" (postgres/adapt-string-value v))) vals-map)))
         sql (str  "update " table-name " SET "  r " where rnum=" row-id)]
     (log/debug :sql sql)
     (jdbc/execute! conn sql)))
@@ -80,7 +80,7 @@
           :else                 (apply conj default-values (reverse values))))
       default-values)))
 
-(defmethod engine/apply-operation :core/split-column
+(defmethod engine/apply-operation "core/split-column"
   [{:keys [tenant-conn]} table-name columns op-spec]
   (jdbc/with-db-transaction [tenant-conn tenant-conn]
     (let [{:keys [onError op args]} (keywordize-keys op-spec)
@@ -104,7 +104,7 @@
                                   (->>
                                    (split ((keyword column-name) row) re-pattern* new-rows-count)
                                    (map (fn [column v]
-                                          [(keyword (:id column)) v]) new-columns)
+                                          [(:id column) v]) new-columns)
                                    (update-row tenant-conn table-name (:rnum row))))]
           {:success?      true
            :execution-log [(format "Splitted column %s with pattern %s" column-name pattern)]

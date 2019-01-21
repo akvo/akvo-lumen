@@ -27,7 +27,7 @@ CSV data is imported using `New->Dataset` in the Lumen user interface. Functiona
 
 #### Flowing data from CSV
 
-Lumen does not yet support automatic updates of data with transformation and visualizations maintained for the data flow. This functionality is in the roadmap and will be available.
+Lumen only supports updates of datasets whose origins are flow or CSV imported via http or https (link option in lumen import UI).
 
 #### My data is in XML/JSON/etc. What do I do?
 

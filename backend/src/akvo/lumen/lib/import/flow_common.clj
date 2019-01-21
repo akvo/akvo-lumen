@@ -93,13 +93,13 @@
        (apply merge)))
 
 (defn commons-columns [form]
-  [(cond-> {:title "Identifier" :type :text :id :identifier}
+  [(cond-> {:title "Identifier" :type "text" :id :identifier}
      (:registration-form? form) (assoc :key true))
-   {:title "Instance id" :type :text :id :instance_id :key true}
-   {:title "Display name" :type :text :id :display_name}
-   {:title "Submitter" :type :text :id :submitter}
-   {:title "Submitted at" :type :date :id :submitted_at}
-   {:title "Surveyal time" :type :number :id :surveyal_time}])
+   {:title "Instance id" :type "text" :id :instance_id :key true}
+   {:title "Display name" :type "text" :id :display_name}
+   {:title "Submitter" :type "text" :id :submitter}
+   {:title "Submitted at" :type "date" :id :submitted_at}
+   {:title "Surveyal time" :type "number" :id :surveyal_time}])
 
 (defn common-records [form-instance data-point]
   {:instance_id   (get form-instance "id")
