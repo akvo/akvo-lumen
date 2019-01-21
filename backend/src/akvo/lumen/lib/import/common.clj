@@ -33,7 +33,7 @@
             {:title (:name q)
              :type t
              :id (format "c%s" (:id q))}
-            (when (= t :multiple)
+            (when (= t "multiple")
               (if (:caddisflyResourceUuid q)
                 {:multipleType :caddisfly
                  :multipleId (:caddisflyResourceUuid q)}
