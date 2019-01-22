@@ -3,7 +3,11 @@
 
  :duct.module/logging {}
 
- :akvo.lumen.component.hikaricp/hikaricp {:config #ig/ref :akvo.lumen.config}
+ :akvo.lumen.component.hikaricp/hikaricp {:uri db-uri
+                                          :pool-name "tenant-manager"
+                                          :maximum-pool-size 5
+                                          :minimum-idle 2
+                                          :metric-registry #ig/ref :akvo.lumen.monitoring/dropwizard-registry}
 
  :akvo.lumen.component.handler/wrap-hide-errors          {:error-response "Internal Server Error"}
  :akvo.lumen.component.handler/wrap-not-found            {:error-response "Resource Not Found"}
@@ -116,11 +120,6 @@
                             :wrap-auth :wrap-jwt :monitoring :wrap-label-tenant :wrap-sentry
                             :hide-errors]
   :http          {:port http-port}
-  :db            {:uri db-uri
-                  :pool-name "tenant-manager"
-                  :maximum-pool-size 5
-                  :minimum-idle 2
-                  :metric-registry #ig/ref :akvo.lumen.monitoring/dropwizard-registry}
 
   :caddisfly     {:schema-uri caddisfly-schema-uri}
   :emailer {:email-password email-password
