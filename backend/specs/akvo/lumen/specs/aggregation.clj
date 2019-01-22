@@ -8,13 +8,9 @@
             [akvo.lumen.lib.aggregation.scatter :as aggregation.scatter]
             [akvo.lumen.postgres.filter :as postgres.filter]
             [akvo.lumen.specs.db :as db.s]
+            [akvo.lumen.specs.db.dataset-version :as db.dsv.s]
+            [akvo.lumen.specs.db.dataset-version.column :as db.dsv.column.s]
             [clojure.spec.alpha :as s]))
-
-(create-ns  'akvo.lumen.specs.aggregation.query)
-(alias 'aggregation.query.s 'akvo.lumen.specs.aggregation.query)
-
-(alias 'db.dsv.column.s 'akvo.lumen.specs.db.dataset-version.column)
-(alias 'db.dsv.s 'akvo.lumen.specs.db.dataset-version)
 
 (s/def ::aggregation/dataset (s/keys :req-un [::db.dsv.s/columns ::db.dsv.s/table-name]))
 (s/def ::aggregation.pie/bucketColumn ::db.dsv.column.s/columnName)
