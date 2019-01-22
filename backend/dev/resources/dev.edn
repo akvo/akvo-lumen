@@ -7,7 +7,8 @@
 
  :akvo.lumen.component.caddisfly/local                  {:local-schema-uri "./caddisfly/tests-schema.json"}
  :akvo.lumen.component.error-tracker/local              {}
- :akvo.lumen.component.emailer/dev-emailer              {:config #ig/ref :akvo.lumen.config}
+ :akvo.lumen.component.emailer/dev-emailer              {:from-email "devops@akvo.localhost"
+                                                         :from-name "Akvo Lumen"}
 
  :akvo.lumen.auth/wrap-jwt                              {:keycloak-url   "http://auth.lumen.local:8080/auth"
                                                          :keycloak-realm "akvo"}
@@ -33,8 +34,6 @@
            :windshaft-url "http://windshaft:4000"
            :exporter-api-url "http://exporter:3001"
            :piwik-site-id "165"}
-  :emailer {:from-email "devops@akvo.localhost"
-            :from-name "Akvo Lumen"}
   :error-tracker {:dsn ""}
   :keycloak      {:url   "http://auth.lumen.local:8080/auth"
                   :realm "akvo"

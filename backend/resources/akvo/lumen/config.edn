@@ -99,7 +99,10 @@
  :akvo.lumen.component.tenant-manager {:config #ig/ref :akvo.lumen.config
                                        :db     #ig/ref :akvo.lumen.component.hikaricp/hikaricp}
 
- :akvo.lumen.component.emailer/mailjet-v3-emailer {:config #ig/ref :akvo.lumen.config}
+ :akvo.lumen.component.emailer/mailjet-v3-emailer {:email-password email-password
+                                                   :email-user     email-user
+                                                   :from-email     "noreply@akvo.org"
+                                                   :from-name      "Akvo Lumen"}
 
  :akvo.lumen.component.error-tracker/prod {:dsn sentry-backend-dsn}
  :akvo.lumen.config
@@ -119,10 +122,6 @@
                 :applied   [:not-found :json-response :ring-defaults :json-body
                             :wrap-auth :wrap-jwt :monitoring :wrap-label-tenant :wrap-sentry
                             :hide-errors]}}
-  :emailer {:email-password email-password
-            :email-user     email-user
-            :from-email     "noreply@akvo.org"
-            :from-name      "Akvo Lumen"}
   :config        {:encryption-key            encryption-key
                   :file-upload-path          file-upload-path
                   :exporter-api-url          exporter-api-url
