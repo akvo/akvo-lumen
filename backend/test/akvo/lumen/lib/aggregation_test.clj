@@ -25,9 +25,14 @@
                  {:id "c2", :title "B", :type "text"}
                  {:id "c3", :title "C", :type "number"}]
         rows [[{:value "a1"} {:value "b1"} {:value 10}]
-               [{:value "a1"} {:value "b1"} {:value 11}]
-               [{:value "a1"} {:value "b2"} {:value 9}]
-               [{:value "a1"} {:value "b2"} {:value 10}]]
+              [{:value "a1"} {:value "b1"} {:value 11}]
+              [{:value "a1"} {:value "b2"} {:value 9}]
+              [{:value "a1"} {:value "b2"} {:value 10}]
+              [{:value "a2"} {:value "b1"} {:value 12}]
+              [{:value "a2"} {:value "b1"} {:value 10}]
+              [{:value "a2"} {:value "b2"} {:value 11}]
+              [{:value "a2"} {:value "b2"} {:value 10}]
+              [{:value "a2"} {:value "b2"} {:value 10}]]
         data {:columns columns :rows rows}
         [job dataset] (import-file *tenant-conn* *error-tracker* {:dataset-name "pivot"
                                                                   :kind "clj"
@@ -41,27 +46,9 @@
       (let [[tag query-result] (query {:aggregation "count"})]
         (is (= query-result
                {:columns [{:type "number" :title "Total"}]
-                :rows [[4]]
-                :metadata {:categoryColumnTitle nil}})))
-
-
-      (update-file *tenant-conn* *error-tracker* dataset-id data-source-id
-                   {:kind "clj"
-                    :data {:columns columns
-                           :rows (conj rows
-                                       [{:value "a2"} {:value "b1"} {:value 12}]
-                                       [{:value "a2"} {:value "b1"} {:value 10}]
-                                       [{:value "a2"} {:value "b2"} {:value 11}]
-                                       [{:value "a2"} {:value "b2"} {:value 10}])}})
-
-      (let [[tag query-result] (query {:aggregation "count"})]
-        (is (= query-result
-               {:columns [{:type "number" :title "Total"}]
-                :rows [[8]]
+                :rows [[9]]
                 :metadata {:categoryColumnTitle nil}}))))
 
-    
-    
     (testing "Empty query with filter"
       (let [[tag query-result] (query {:aggregation "count",
                                        :filters
@@ -77,7 +64,7 @@
                {:columns [{:title "" :type "text"}
                           {:title "a1" :type "number"}
                           {:title "a2" :type "number"}]
-                :rows [["Total" 4 4]]
+                :rows [["Total" 4 5]]
                 :metadata {:categoryColumnTitle "A"}}))))
 
     (testing "Row Column Only"
@@ -86,7 +73,7 @@
                {:columns [{:title "B" :type "text"}
                           {:title "Total" :type "number"}]
                 :rows [["b1" 4]
-                       ["b2" 4]]
+                       ["b2" 5]]
                 :metadata {:categoryColumnTitle nil}}))))
 
     (testing "Row & Category Column with count aggregation"
@@ -96,7 +83,7 @@
                           {:title "a1", :type "number"}
                           {:title "a2", :type "number"}]
                 :rows [["b1" 2.0 2.0]
-                       ["b2" 2.0 2.0]]
+                       ["b2" 2.0 3.0]]
                 :metadata {:categoryColumnTitle "A"}}))))
 
     (testing "Row & Category Column with mean aggregation"
@@ -109,7 +96,7 @@
                           {:title "a1", :type "number"}
                           {:title "a2", :type "number"}]
                 :rows [["b1" 10.5 11.0]
-                       ["b2" 9.5 10.5]]
+                       ["b2" 9.5 10.333333333333334]]
                 :metadata {:categoryColumnTitle "A"}}))))
 
     (testing "Row & Category Column with mean aggregation and filter"
@@ -127,7 +114,7 @@
                           {:title "a1" :type "number"}
                           {:title "a2" :type "number"}]
                 :rows [["b1" 10.5 10.0]
-                       ["b2" 9.5 10.5]]
+                       ["b2" 9.5 10.333333333333334]]
                 :metadata {:categoryColumnTitle "A"}}))))))
 
 (deftest pie-tests
