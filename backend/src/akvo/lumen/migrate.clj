@@ -55,7 +55,7 @@
      (doseq [tenant (all-tenants tenant-manager-db)]
        (try
          (do-migrate (ragtime-jdbc/sql-database
-                          {:connection-uri (aes/decrypt (get-in system [:akvo.lumen.config :config :encryption-key])
+                          {:connection-uri (aes/decrypt (get-in system [:akvo.lumen.component.tenant-manager :encryption-key])
                                                         (:db_uri tenant))})
                         (:tenants migrations))
          (catch Exception e (throw (ex-info "Migration failed" {:tenant (:label tenant)} e))))))))
@@ -89,7 +89,7 @@
         tenant-manager-migrations (:tenant-manager migrations)
 
         tenant-manager-db {:connection-uri (get-in system [:akvo.lumen.component.hikaricp/hikaricp :uri])}
-        tenant-connection-uri-fn #(aes/decrypt (get-in system [:akvo.lumen.config :config :encryption-key])
+        tenant-connection-uri-fn #(aes/decrypt (get-in system [:akvo.lumen.component.tenant-manager :encryption-key])
                                        (:db_uri %))]
     (cond
       (= arg :tenant-manager)

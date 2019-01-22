@@ -9,6 +9,10 @@
                                           :minimum-idle 2
                                           :metric-registry #ig/ref :akvo.lumen.monitoring/dropwizard-registry}
 
+ :akvo.lumen.component.tenant-manager {:dropwizard-registry #ig/ref :akvo.lumen.monitoring/dropwizard-registry
+                                       :encryption-key      encryption-key
+                                       :db                  #ig/ref :akvo.lumen.component.hikaricp/hikaricp}
+
  :akvo.lumen.component.handler/wrap-hide-errors          {:error-response "Internal Server Error"}
  :akvo.lumen.component.handler/wrap-not-found            {:error-response "Resource Not Found"}
  :akvo.lumen.component.handler/wrap-json-body            {}
@@ -99,8 +103,6 @@
                                        :realm       keycloak-realm
                                        :credentials {"client_id"     keycloak-client-id
                                                      "client_secret" keycloak-client-secret}}
- :akvo.lumen.component.tenant-manager {:config #ig/ref :akvo.lumen.config
-                                       :db     #ig/ref :akvo.lumen.component.hikaricp/hikaricp}
 
  :akvo.lumen.component.emailer/mailjet-v3-emailer {:email-password email-password
                                                    :email-user     email-user
@@ -125,8 +127,7 @@
                 :applied   [:not-found :json-response :ring-defaults :json-body
                             :wrap-auth :wrap-jwt :monitoring :wrap-label-tenant :wrap-sentry
                             :hide-errors]}}
-  :config        {:encryption-key            encryption-key
-                  :file-upload-path          file-upload-path
+  :config        {:file-upload-path          file-upload-path
                   :exporter-api-url          exporter-api-url
                   :max-upload-size           100
                   :keycloak-url              keycloak-url
@@ -136,7 +137,6 @@
                   :sentry-backend-dsn        sentry-backend-dsn
                   :flow-api-url              flow-api-url
                   :windshaft-url             "http://localhost:4000"
-                  :dropwizard-registry       #ig/ref :akvo.lumen.monitoring/dropwizard-registry
                   :piwik-site-id             piwik-site-id}}
 
  :akvo.lumen.monitoring/dropwizard-registry {}
