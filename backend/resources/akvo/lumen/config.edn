@@ -92,8 +92,8 @@
               #ig/ref :akvo.lumen.endpoint.visualisation/visualisation]
   :config    #ig/ref :akvo.lumen.config}
 
- :akvo.lumen.component.http/http      {:config #ig/ref :akvo.lumen.config
-                                       :app    #ig/ref :akvo.lumen.component.handler/handler}
+ :akvo.lumen.component.http/http      {:port http-port
+                                       :handler    #ig/ref :akvo.lumen.component.handler/handler}
  :akvo.lumen.component.caddisfly/prod {:config #ig/ref :akvo.lumen.config}
  :akvo.lumen.component.keycloak       {:config #ig/ref :akvo.lumen.config}
  :akvo.lumen.component.tenant-manager {:config #ig/ref :akvo.lumen.config
@@ -118,9 +118,7 @@
                             :monitoring  #ig/ref :akvo.lumen.monitoring/middleware}
                 :applied   [:not-found :json-response :ring-defaults :json-body
                             :wrap-auth :wrap-jwt :monitoring :wrap-label-tenant :wrap-sentry
-                            :hide-errors]
-  :http          {:port http-port}
-
+                            :hide-errors]}}
   :caddisfly     {:schema-uri caddisfly-schema-uri}
   :emailer {:email-password email-password
             :email-user     email-user
