@@ -8,7 +8,7 @@
             [cheshire.core :as json]
             [clojure.tools.logging :as log]
             [clojurewerkz.scrypt.core :as scrypt]
-            [clojure.walk :refer (keywordize-keys)]
+            [clojure.walk :as walk]
             [clojure.set :as set]
             [hugsql.core :as hugsql]))
 
@@ -29,7 +29,7 @@
 
 (defn run-visualisation 
   [tenant-conn visualisation]
-  (let [visualisation (keywordize-keys visualisation)
+  (let [visualisation (walk/keywordize-keys visualisation)
         [dataset-tag dataset] (dataset/fetch-metadata tenant-conn (:datasetId visualisation))
         aggregation-type (get vis-aggregation-mapper (:visualisationType visualisation))
         [tag query-result] (aggregation/query tenant-conn

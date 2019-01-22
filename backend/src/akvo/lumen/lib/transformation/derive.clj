@@ -7,7 +7,7 @@
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
             [clojure.tools.logging :as log]
-            [clojure.walk :refer (keywordize-keys)]
+            [clojure.walk :as walk]
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/transformation/derive.sql")
@@ -17,7 +17,7 @@
   "Replace code column references and fall back to use code pattern if there is no
   references."
   [computed columns]
-  (let [columns (keywordize-keys columns)]
+  (let [columns (walk/keywordize-keys columns)]
     (reduce (fn [code {:strs [column-name id pattern]}]
               (if column-name
                 (str/replace code id (format "row['%s']"
@@ -42,7 +42,7 @@
 (defn compute-transformation-code
   "analyses code to find columns relations between column-title and column-name when using js code"
   [code columns]
-  (let [columns (keywordize-keys columns)]
+  (let [columns (walk/keywordize-keys columns)]
     (reduce (fn [m [pattern column-title]]
               (let [id (str (util/squuid))]
                 (-> m

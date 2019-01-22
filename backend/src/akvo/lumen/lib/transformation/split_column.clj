@@ -6,7 +6,7 @@
             [akvo.lumen.postgres :as postgres]
             [clojure.string :as string]
             [clojure.tools.logging :as log]
-            [clojure.walk :refer (keywordize-keys stringify-keys)]
+            [clojure.walk :as walk]
             [hugsql.core :as hugsql])
   (:import [java.util.regex Pattern]))
 
@@ -44,7 +44,7 @@
 
 (defmethod engine/valid? "core/split-column"
   [op-spec]
-  (let [{:keys [onError op args] :as op-spec} (keywordize-keys op-spec)]
+  (let [{:keys [onError op args] :as op-spec} (walk/keywordize-keys op-spec)]
     (and (util/valid-column-name? (col-name args))
          (pattern* args)
          (new-column-name args))))
@@ -56,7 +56,7 @@
     (map #(assoc % :columnName %2 :id %2) new-columns indexes)))
 
 (defn columns-to-extract [prefix number-new-rows selected-column columns]
-  (let [selected-column (find-column (keywordize-keys columns) (:columnName selected-column))
+  (let [selected-column (find-column (walk/keywordize-keys columns) (:columnName selected-column))
         base-column (dissoc selected-column :type :columnName)
         new-columns (map #(assoc base-column :title (str prefix "-" %) :type "text")
                          (range 1 (inc number-new-rows)))]
@@ -83,7 +83,7 @@
 (defmethod engine/apply-operation "core/split-column"
   [{:keys [tenant-conn]} table-name columns op-spec]
   (jdbc/with-db-transaction [tenant-conn tenant-conn]
-    (let [{:keys [onError op args]} (keywordize-keys op-spec)
+    (let [{:keys [onError op args]} (walk/keywordize-keys op-spec)
           column-name               (col-name args)
           pattern                   (pattern* args)
           re-pattern*               (re-pattern (Pattern/quote pattern))]
@@ -108,7 +108,7 @@
                                    (update-row tenant-conn table-name (:rnum row))))]
           {:success?      true
            :execution-log [(format "Splitted column %s with pattern %s" column-name pattern)]
-           :columns       (into columns (stringify-keys (vec new-columns)))})
+           :columns       (into columns (walk/stringify-keys (vec new-columns)))})
         {:success? false
          :message  (format "No results trying to split column '%s' with pattern '%s'"
                            (:title (selected-column args)) (pattern* args))}))))
