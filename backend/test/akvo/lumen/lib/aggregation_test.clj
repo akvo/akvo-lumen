@@ -83,8 +83,8 @@
     (testing "Row Column Only"
       (let [[tag query-result] (query {:aggregation "count", :rowColumn "c2"})]
         (is (= query-result
-               {:columns [{:type "text", :title "B"}
-                          {:type "number", :title "Total"}],
+               {:columns [{:title "B" :type "text"}
+                          {:title "Total" :type "number"}]
                 :rows [["b1" 4]
                        ["b2" 4]]
                 :metadata {:categoryColumnTitle nil}}))))
