@@ -14,9 +14,11 @@
 
 (use-fixtures :once tu/spec-instrument tenant-conn-fixture error-tracker-fixture)
 
-(defn query* [t dataset-id]
+(defn query* [t dataset-id & [expected-tag]]
   (fn [q]
-    (aggregation/query *tenant-conn* dataset-id t q)))
+    (let [[tag _ :as res] (aggregation/query *tenant-conn* dataset-id t q)]
+      (is (= tag (or expected-tag ::lib/ok)))
+      res)))
 
 (deftest pivot-tests
   (let [columns [{:id "c1", :title "A", :type "text"}
@@ -37,7 +39,6 @@
 
     (testing "Empty query"
       (let [[tag query-result] (query {:aggregation "count"})]
-        (is (= tag ::lib/ok))
         (is (= query-result
                {:columns [{:type "number" :title "Total"}]
                 :rows [[4]]
@@ -54,7 +55,6 @@
                                        [{:value "a2"} {:value "b2"} {:value 10}])}})
 
       (let [[tag query-result] (query {:aggregation "count"})]
-        (is (= tag ::lib/ok))
         (is (= query-result
                {:columns [{:type "number" :title "Total"}]
                 :rows [[8]]
@@ -66,7 +66,6 @@
       (let [[tag query-result] (query {:aggregation "count",
                                        :filters
                                        [{:column "c1", :value "a1", :operation "keep", :strategy "is"}]})]
-        (is (= tag ::lib/ok))
         (is (= query-result
                {:columns [{:type "number" :title "Total"}]
                 :rows [[4]]
@@ -74,7 +73,6 @@
 
     (testing "Category column only"
       (let [[tag query-result] (query {:aggregation "count", :categoryColumn "c1"})]
-        (is (= tag ::lib/ok))
         (is (= query-result
                {:columns [{:title "" :type "text"}
                           {:title "a1" :type "number"}
@@ -84,7 +82,6 @@
 
     (testing "Row Column Only"
       (let [[tag query-result] (query {:aggregation "count", :rowColumn "c2"})]
-        (is (= tag ::lib/ok))
         (is (= query-result
                {:columns [{:type "text", :title "B"}
                           {:type "number", :title "Total"}],
@@ -94,7 +91,6 @@
 
     (testing "Row & Category Column with count aggregation"
       (let [[tag query-result] (query {:aggregation "count", :categoryColumn "c1", :rowColumn "c2"})]
-        (is (= tag ::lib/ok))
         (is (= query-result
                {:columns [{:title "B", :type "text"}
                           {:title "a1", :type "number"}
@@ -108,7 +104,6 @@
                                        :categoryColumn "c1",
                                        :rowColumn "c2",
                                        :valueColumn "c3"})]
-        (is (= tag ::lib/ok))
         (is (= query-result
                {:columns [{:title "B", :type "text"}
                           {:title "a1", :type "number"}
@@ -127,7 +122,6 @@
                                          :value "11",
                                          :operation "remove",
                                          :strategy "isHigher"}]})]
-        (is (= tag ::lib/ok))
         (is (= query-result
                {:columns [{:title "B" :type "text"}
                           {:title "a1" :type "number"}
@@ -155,7 +149,6 @@
         query (query* "pie" dataset-id)]
     (testing "Simple queries"
       (let [[tag query-result] (query {:bucketColumn "c1"})]
-        (is (= tag ::lib/ok))
         (is (= query-result
                {:series [{:key "A", :label "A", :data [{:value 4} {:value 4}]}],
                 :common
@@ -163,7 +156,6 @@
                  :metadata {:type "text"}}})))
 
       (let [[tag query-result] (query {:bucketColumn "c2"})]
-        (is (= tag ::lib/ok))
         (is (= query-result
                {:series [{:key "B", :label "B", :data [{:value 5} {:value 3}]}],
                 :common
@@ -184,7 +176,6 @@
         query (query* "bar" dataset-id)]
     (testing "Simple queries"
       (let [[tag query-result] (query {:bucketColumn "c1"})]
-        (is (= tag ::lib/ok))
         (is (= query-result
                {:series
                 [{:key nil, :label nil, :data [{:value 1} {:value 1} {:value 2}]}],
@@ -196,7 +187,6 @@
                   {:label "c", :key "c"}]}})))
 
       (let [[tag query-result] (query {:bucketColumn "c2"})]
-        (is (= tag ::lib/ok))
         (is (= query-result
                {:series [{:key nil, :label nil, :data [{:value 4}]}],
                 :common
@@ -205,7 +195,6 @@
       (let [[tag query-result] (query {:bucketColumn "c1"
                                        :metricAggregation "min"
                                        :metricColumnY "c3"})]
-        (is (= tag ::lib/ok))
         (is (= query-result
                {:series
                 [{:key "C",
@@ -220,7 +209,6 @@
       (let [[tag query-result] (query {:bucketColumn "c1"
                                        :metricAggregation "max"
                                        :metricColumnY "c3"})]
-        (is (= tag ::lib/ok))
         (is (= query-result
                {:series
                 [{:key "C",
@@ -237,7 +225,6 @@
                                        :metricAggregation "max"
                                        :metricColumnY "c3"
                                        :subBucketColumn "c3"})]
-        (is (= tag ::lib/ok))
         (is (= query-result
                {:series
                 [{:key 1.0, :label 1.0, :data '({:value 1.0} {:value 0} {:value 0})}
@@ -267,7 +254,6 @@
     (testing "Simple queries"
       (let [[tag query-result] (query {:metricColumnX "c3"
                                        :metricColumnY "c2"})]
-        (is (= tag ::lib/ok))
         (is (= query-result
                {:series
                 [{:key "B",
@@ -283,7 +269,6 @@
       (testing "metricColumY text type aggregation based on count"
         (let [[tag query-result] (query {:metricColumnX "c3"
                                          :metricColumnY "c1"})]
-          (is (= tag ::lib/ok))
           (is (= query-result
                  {:series
                   [{:key "A",
@@ -314,7 +299,6 @@
       (let [[tag query-result] (query {:metricColumnX "c3"
                                        :metricColumnY "c2"
                                        :metricAggregation "mean"})]
-        (is (= tag ::lib/ok))
         (is (= query-result
                {:series
                 [{:key "C",
@@ -352,7 +336,6 @@
       (let [[tag query-result] (query {:bucketColumn "c1"
                                        :metricColumn nil
                                        :metricAggregation nil})]
-        (is (= tag ::lib/ok))
         (is (= query-result
                {:series
                 [{:key nil,
@@ -366,7 +349,6 @@
       (let [[tag query-result] (query {:bucketColumn "c1"
                                        :metricColumn "c2"
                                        :metricAggregation "max"})]
-        (is (= tag ::lib/ok))
         (is (= query-result
                {:series
                 [{:key "B",
