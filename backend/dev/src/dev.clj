@@ -89,7 +89,7 @@
   "At the moment only support seed of tenants table."
   []
   (let [db-uri (-> (config/construct)
-                   :akvo.lumen.config :db :uri)]
+                   :akvo.lumen.component.hikaricp/hikaricp :uri)]
     (doseq [tenant commons/tenants]
       (seed-tenant {:connection-uri db-uri} tenant))))
 

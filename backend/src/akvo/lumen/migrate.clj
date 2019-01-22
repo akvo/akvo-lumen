@@ -49,7 +49,7 @@
   ([config-path]
    (let [system (config/construct config-path (config/bindings))
          migrations (load-migrations system)
-         tenant-manager-db {:connection-uri (get-in system [:akvo.lumen.config :db :uri])}]
+         tenant-manager-db {:connection-uri (get-in system [:akvo.lumen.component.hikaricp/hikaricp :uri])}]
      (do-migrate (ragtime-jdbc/sql-database tenant-manager-db)
                  (:tenant-manager migrations))
      (doseq [tenant (all-tenants tenant-manager-db)]
@@ -88,7 +88,7 @@
         tenant-migrations (:tenants migrations)
         tenant-manager-migrations (:tenant-manager migrations)
 
-        tenant-manager-db {:connection-uri (get-in system [:akvo.lumen.config :db :uri])}
+        tenant-manager-db {:connection-uri (get-in system [:akvo.lumen.component.hikaricp/hikaricp :uri])}
         tenant-connection-uri-fn #(aes/decrypt (get-in system [:akvo.lumen.config :config :encryption-key])
                                        (:db_uri %))]
     (cond
