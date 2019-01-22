@@ -8,8 +8,8 @@
 
 (defrecord SentryErrorTracker [dsn])
 
-(defn sentry-error-tracker [options]
-  (map->SentryErrorTracker options))
+(defn sentry-error-tracker [dsn]
+  (SentryErrorTracker. dsn))
 
 (defrecord LocalErrorTracker [])
 
@@ -19,8 +19,8 @@
 (defmethod ig/init-key :akvo.lumen.component.error-tracker/local  [_ opts]
   (local-error-tracker nil))
 
-(defmethod ig/init-key :akvo.lumen.component.error-tracker/prod  [_ {:keys [config] :as opts}]
-  (sentry-error-tracker (-> config :error-tracker)))
+(defmethod ig/init-key :akvo.lumen.component.error-tracker/prod  [_ {:keys [dsn] :as opts}]
+  (sentry-error-tracker dsn))
 
 (defn event-map [error]
   (let [text (str (ex-data error))]

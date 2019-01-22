@@ -101,7 +101,7 @@
 
  :akvo.lumen.component.emailer/mailjet-v3-emailer {:config #ig/ref :akvo.lumen.config}
 
- :akvo.lumen.component.error-tracker/prod {:config #ig/ref :akvo.lumen.config}
+ :akvo.lumen.component.error-tracker/prod {:dsn sentry-backend-dsn}
  :akvo.lumen.config
  {:app
   {:migrations {:tenant-manager "akvo/lumen/migrations/tenant_manager"
@@ -124,7 +124,6 @@
             :email-user     email-user
             :from-email     "noreply@akvo.org"
             :from-name      "Akvo Lumen"}
-  :error-tracker {:dsn sentry-backend-dsn}
   :config        {:encryption-key            encryption-key
                   :file-upload-path          file-upload-path
                   :exporter-api-url          exporter-api-url
