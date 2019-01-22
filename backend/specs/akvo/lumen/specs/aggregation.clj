@@ -4,26 +4,20 @@
             [akvo.lumen.lib.aggregation.bubble :as aggregation.bubble]
             [akvo.lumen.lib.aggregation.line :as aggregation.line]
             [akvo.lumen.lib.aggregation.pie :as aggregation.pie]
-            [akvo.lumen.lib.aggregation.scatter :as aggregation.scatter]
             [akvo.lumen.lib.aggregation.pivot :as aggregation.pivot]
+            [akvo.lumen.lib.aggregation.scatter :as aggregation.scatter]
             [akvo.lumen.postgres.filter :as postgres.filter]
-            [akvo.lumen.specs :as lumen.s :refer (sample)]
             [akvo.lumen.specs.db :as db.s]
-            [akvo.lumen.specs.db :as db.s]
-            [akvo.lumen.util :as u]
-            [clojure.spec.alpha :as s]
-            [clojure.spec.gen.alpha :as gen]
-            [clojure.string :as string]
-            [clojure.tools.logging :as log]))
+            [clojure.spec.alpha :as s]))
 
 (create-ns  'akvo.lumen.specs.aggregation.query)
 (alias 'aggregation.query.s 'akvo.lumen.specs.aggregation.query)
 
-(alias 'db.dsv.column 'akvo.lumen.specs.db.dataset-version.column)
-(alias 'db.dsv 'akvo.lumen.specs.db.dataset-version)
+(alias 'db.dsv.column.s 'akvo.lumen.specs.db.dataset-version.column)
+(alias 'db.dsv.s 'akvo.lumen.specs.db.dataset-version)
 
-(s/def ::aggregation/dataset (s/keys :req-un [::db.dsv/columns ::db.dsv/table-name]))
-(s/def ::aggregation.pie/bucketColumn ::db.dsv.column/columnName)
+(s/def ::aggregation/dataset (s/keys :req-un [::db.dsv.s/columns ::db.dsv.s/table-name]))
+(s/def ::aggregation.pie/bucketColumn ::db.dsv.column.s/columnName)
 (s/def ::aggregation.pie/query (s/keys :req-un [::postgres.filter/filters
                                                 ::aggregation.pie/bucketColumn]))
 
@@ -34,9 +28,9 @@
 	 :query ::aggregation.pie/query)
   :ret any?)
 
-(s/def ::aggregation.pivot/categoryColumn ::db.dsv.column/columnName)
-(s/def ::aggregation.pivot/rowColumn ::db.dsv.column/columnName)
-(s/def ::aggregation.pivot/valueColumn ::db.dsv.column/columnName)
+(s/def ::aggregation.pivot/categoryColumn ::db.dsv.column.s/columnName)
+(s/def ::aggregation.pivot/rowColumn ::db.dsv.column.s/columnName)
+(s/def ::aggregation.pivot/valueColumn ::db.dsv.column.s/columnName)
 (s/def ::aggregation.pivot/aggregation #{"mean"
                                          "sum"
                                          "min"
@@ -56,9 +50,9 @@
 	 :query ::aggregation.pivot/query)
   :ret any?)
 
-(s/def ::aggregation.bar/bucketColumn (s/nilable ::db.dsv.column/columnName))
-(s/def ::aggregation.bar/subBucketColumn (s/nilable ::db.dsv.column/columnName))
-(s/def ::aggregation.bar/metricColumnY (s/nilable ::db.dsv.column/columnName))
+(s/def ::aggregation.bar/bucketColumn (s/nilable ::db.dsv.column.s/columnName))
+(s/def ::aggregation.bar/subBucketColumn (s/nilable ::db.dsv.column.s/columnName))
+(s/def ::aggregation.bar/metricColumnY (s/nilable ::db.dsv.column.s/columnName))
 (s/def ::aggregation.bar/metricAggregation (s/nilable #{"mean"
                                                         "sum"
                                                         "min"
@@ -85,8 +79,8 @@
 	 :query ::aggregation.bar/query)
   :ret any?)
 
-(s/def ::aggregation.bubble/bucketColumn ::db.dsv.column/columnName)
-(s/def ::aggregation.bubble/metricColumn (s/nilable ::db.dsv.column/columnName))
+(s/def ::aggregation.bubble/bucketColumn ::db.dsv.column.s/columnName)
+(s/def ::aggregation.bubble/metricColumn (s/nilable ::db.dsv.column.s/columnName))
 (s/def ::aggregation.bubble/metricAggregation ::aggregation.bar/metricAggregation)
 
 (s/def ::aggregation.bubble/query (s/keys :req-un [::postgres.filter/filters
@@ -101,8 +95,8 @@
 	 :query ::aggregation.bubble/query)
   :ret any?)
 
-(s/def ::aggregation.line/metricColumnX ::db.dsv.column/columnName)
-(s/def ::aggregation.line/metricColumnY ::db.dsv.column/columnName)
+(s/def ::aggregation.line/metricColumnX ::db.dsv.column.s/columnName)
+(s/def ::aggregation.line/metricColumnY ::db.dsv.column.s/columnName)
 (s/def ::aggregation.line/metricAggregation (s/nilable ::aggregation.bar/metricAggregation))
 
 (s/def ::aggregation.line/query (s/keys :req-un [::postgres.filter/filters
@@ -117,12 +111,12 @@
 	 :query ::aggregation.line/query)
   :ret any?)
 
-(s/def ::aggregation.scatter/metricColumnX ::db.dsv.column/columnName)
-(s/def ::aggregation.scatter/metricColumnY ::db.dsv.column/columnName)
-(s/def ::aggregation.scatter/metricColumnSize (s/nilable ::db.dsv.column/columnName))
-(s/def ::aggregation.scatter/bucketColumnCategory (s/nilable ::db.dsv.column/columnName))
-(s/def ::aggregation.scatter/datapointLabelColumn (s/nilable ::db.dsv.column/columnName))
-(s/def ::aggregation.scatter/bucketColumn (s/nilable ::db.dsv.column/columnName))
+(s/def ::aggregation.scatter/metricColumnX ::db.dsv.column.s/columnName)
+(s/def ::aggregation.scatter/metricColumnY ::db.dsv.column.s/columnName)
+(s/def ::aggregation.scatter/metricColumnSize (s/nilable ::db.dsv.column.s/columnName))
+(s/def ::aggregation.scatter/bucketColumnCategory (s/nilable ::db.dsv.column.s/columnName))
+(s/def ::aggregation.scatter/datapointLabelColumn (s/nilable ::db.dsv.column.s/columnName))
+(s/def ::aggregation.scatter/bucketColumn (s/nilable ::db.dsv.column.s/columnName))
 (s/def ::aggregation.scatter/metricAggregation (s/nilable ::aggregation.bar/metricAggregation))
 
 (s/def ::aggregation.scatter/query (s/keys :req-un [::postgres.filter/filters
