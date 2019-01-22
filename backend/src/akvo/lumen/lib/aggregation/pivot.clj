@@ -20,6 +20,7 @@
                                                     "text" "''"
                                                     "date" "'1001-01-01 01:00:00'::timestamptz"
                                                     "'NaN'::double precision")))
+
 (defn unique-values-sql [table-name filter-str category-column]
   (let [select (format "SELECT DISTINCT %s%s"
                        (coalesce category-column) (if (= "timestamptz"
@@ -35,27 +36,30 @@
        (run-query conn)
        (map first)))
 
-(defn- apply-pivot [conn table-name {:keys [category-column row-column aggregation value-column]} filter-str]
+(defn- run-pivot-query [conn table-name {:keys [category-column row-column aggregation value-column]} filter-str categories]
   (let [source-sql        (let [select (format "SELECT %s, %s, %s(%s)"
-                                               (:columnName row-column)
-                                               (coalesce category-column)
-                                               aggregation
-                                               (:columnName value-column))
+                                         (:columnName row-column)
+                                         (coalesce category-column)
+                                         aggregation
+                                         (:columnName value-column))
                                 from   (format "FROM %s" table-name)
                                 where  (format "WHERE %s GROUP BY 1,2 ORDER BY 1,2" filter-str)]
                             (format "%s %s %s" select from where))
 
-        categories        (run-query-categories conn table-name filter-str category-column)
-
         pivot-sql         (let [select "SELECT *"
                                 from   (format "FROM crosstab ($$ %s $$, $$ %s $$) AS ct (c1 text, %s)"
-                                               source-sql
-                                               (unique-values-sql table-name filter-str category-column)
-                                               (str/join "," (map #(format "c%s double precision" (+ % 2))
-                                                                  (range (count categories)))))
+                                         source-sql
+                                         (unique-values-sql table-name filter-str category-column)
+                                         (str/join "," (map #(format "c%s double precision" (+ % 2))
+                                                         (range (count categories)))))
                                 where  ""]
                             (format "%s %s %s" select from where))]
-    {:rows    (run-query conn pivot-sql)
+    (run-query conn pivot-sql)))
+
+(defn- apply-pivot [conn table-name {:keys [category-column row-column] :as query} filter-str]
+  (let [categories (run-query-categories conn table-name filter-str category-column)
+        rows (run-pivot-query conn table-name query filter-str categories)]
+    {:rows    rows
      :columns (->> categories
                    (map (fn [title] {:title title :type "number"}))
                    (cons (select-keys row-column [:title :type])))}))
