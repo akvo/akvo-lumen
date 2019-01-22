@@ -95,7 +95,10 @@
  :akvo.lumen.component.http/http      {:port http-port
                                        :handler    #ig/ref :akvo.lumen.component.handler/handler}
  :akvo.lumen.component.caddisfly/prod {:schema-uri caddisfly-schema-uri}
- :akvo.lumen.component.keycloak       {:config #ig/ref :akvo.lumen.config}
+ :akvo.lumen.component.keycloak       {:url         keycloak-url
+                                       :realm       keycloak-realm
+                                       :credentials {"client_id"     keycloak-client-id
+                                                     "client_secret" keycloak-client-secret}}
  :akvo.lumen.component.tenant-manager {:config #ig/ref :akvo.lumen.config
                                        :db     #ig/ref :akvo.lumen.component.hikaricp/hikaricp}
 
@@ -134,11 +137,7 @@
                   :flow-api-url              flow-api-url
                   :windshaft-url             "http://localhost:4000"
                   :dropwizard-registry       #ig/ref :akvo.lumen.monitoring/dropwizard-registry
-                  :piwik-site-id             piwik-site-id}
-  :keycloak      {:url         keycloak-url
-                  :realm       keycloak-realm
-                  :credentials {"client_id"     keycloak-client-id
-                                "client_secret" keycloak-client-secret}}}
+                  :piwik-site-id             piwik-site-id}}
 
  :akvo.lumen.monitoring/dropwizard-registry {}
  :akvo.lumen.monitoring/collector {:dropwizard-registry #ig/ref :akvo.lumen.monitoring/dropwizard-registry}

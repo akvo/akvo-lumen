@@ -10,6 +10,12 @@
  :akvo.lumen.component.emailer/dev-emailer              {:from-email "devops@akvo.localhost"
                                                          :from-name "Akvo Lumen"}
 
+ :akvo.lumen.component.keycloak      {:url   "http://auth.lumen.local:8080/auth"
+                                      :realm "akvo"
+                                      :credentials
+                                      {"client_id"     "akvo-lumen-confidential"
+                                       "client_secret" "caed3964-09dd-4752-b0bb-22c8e8ffd631"}}
+
  :akvo.lumen.auth/wrap-jwt                              {:keycloak-url   "http://auth.lumen.local:8080/auth"
                                                          :keycloak-realm "akvo"}
 
@@ -33,11 +39,5 @@
            :sentry-client-dsn ""
            :windshaft-url "http://windshaft:4000"
            :exporter-api-url "http://exporter:3001"
-           :piwik-site-id "165"}
-  :error-tracker {:dsn ""}
-  :keycloak      {:url   "http://auth.lumen.local:8080/auth"
-                  :realm "akvo"
-                  :credentials
-                  {"client_id"     "akvo-lumen-confidential"
-                   "client_secret" "caed3964-09dd-4752-b0bb-22c8e8ffd631"}}}
+           :piwik-site-id "165"}}
  }
