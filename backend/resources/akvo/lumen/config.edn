@@ -5,15 +5,21 @@
 
  :akvo.lumen.component.hikaricp/hikaricp {:config #ig/ref :akvo.lumen.config}
 
- :akvo.lumen.component.handler/wrap-hide-errors          {}
- :akvo.lumen.component.handler/wrap-not-found            {}
+ :akvo.lumen.component.handler/wrap-hide-errors          {:error-response "Internal Server Error"}
+ :akvo.lumen.component.handler/wrap-not-found            {:error-response "Resource Not Found"}
  :akvo.lumen.component.handler/wrap-json-body            {}
  :akvo.lumen.component.handler/wrap-json-response        {}
- :akvo.lumen.component.handler/wrap-defaults             {}
+ :akvo.lumen.component.handler/wrap-defaults             {:params    {:urlencoded true
+                                                                      :keywordize true}
+                                                          :responses {:not-modified-responses true
+                                                                      :absolute-redirects     true
+                                                                      :content-types          true
+                                                                      :default-charset        "utf-8"}}
  :akvo.lumen.auth/wrap-auth                              {}
- :akvo.lumen.auth/wrap-jwt                               {}
+ :akvo.lumen.auth/wrap-jwt                               {:keycloak-url   keycloak-url
+                                                          :keycloak-realm keycloak-realm}
  :akvo.lumen.component.tenant-manager/wrap-label-tenant  {}
- :akvo.lumen.component.error-tracker/wrap-sentry         {}
+ :akvo.lumen.component.error-tracker/wrap-sentry         {:dsn sentry-backend-dsn :opts {:namespaces ["org.akvo" "akvo"]}}
 
  :akvo.lumen.endpoint.aggregation/aggregation         {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
  :akvo.lumen.endpoint.collection/collection           {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
@@ -109,17 +115,6 @@
                 :applied   [:not-found :json-response :ring-defaults :json-body
                             :wrap-auth :wrap-jwt :monitoring :wrap-label-tenant :wrap-sentry
                             :hide-errors]
-                :arguments {:not-found     "Resource Not Found"
-                            :hide-errors   "Internal Server Error"
-                            :wrap-jwt      {:keycloak-url   keycloak-url
-                                            :keycloak-realm keycloak-realm}
-                            :ring-defaults {:params    {:urlencoded true
-                                                        :keywordize true}
-                                            :responses {:not-modified-responses true
-                                                        :absolute-redirects     true
-                                                        :content-types          true
-                                                        :default-charset        "utf-8"}}
-                            :wrap-sentry   [sentry-backend-dsn {:namespaces ["org.akvo" "akvo"]}]}}}
   :http          {:port http-port}
   :db            {:uri db-uri
                   :pool-name "tenant-manager"

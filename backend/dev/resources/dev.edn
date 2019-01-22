@@ -4,6 +4,9 @@
  :akvo.lumen.component.error-tracker/local              {}
  :akvo.lumen.component.emailer/dev-emailer              {:config #ig/ref :akvo.lumen.config}
 
+ :akvo.lumen.auth/wrap-jwt                              {:keycloak-url   "http://auth.lumen.local:8080/auth"
+                                                         :keycloak-realm "akvo"}
+
  :akvo.lumen.component.handler/wrap-stacktrace {}
 
  :akvo.lumen.config
@@ -11,9 +14,7 @@
   {:middleware
    {:functions {:stacktrace #ig/ref :akvo.lumen.component.handler/wrap-stacktrace}
     :applied   ^:replace [:not-found :json-response :ring-defaults :json-body
-                          :wrap-auth :wrap-jwt :monitoring :wrap-label-tenant :stacktrace]
-    :arguments {:wrap-jwt {:keycloak-url   "http://auth.lumen.local:8080/auth"
-                           :keycloak-realm "akvo"}}}}
+                          :wrap-auth :wrap-jwt :monitoring :wrap-label-tenant :stacktrace]}}
   :db {:uri "jdbc:postgresql://postgres/lumen?user=lumen&password=password&ssl=true"}
   :caddisfly {:local-schema-uri "./caddisfly/tests-schema.json"}
   :http {:port 3000}

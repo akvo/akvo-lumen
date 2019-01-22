@@ -63,19 +63,21 @@
 (defn wrap-jwt
   "Go get cert from Keycloak and feed it to wrap-jwt-claims. Keycloak url can
   be configured via the KEYCLOAK_URL env var."
-  [handler {:keys [keycloak-url keycloak-realm]}]
-  (try
-    (let [issuer (str keycloak-url "/realms/" keycloak-realm)
-          certs (-> (str issuer "/protocol/openid-connect/certs")
-                    client/get
-                    :body)]
-      (jwt/wrap-jwt-claims handler (jwt/rsa-key certs 0) issuer))
-    (catch Exception e
-      (println "Could not get cert from Keycloak")
-      (throw e))))
+  [{:keys [keycloak-url keycloak-realm]}]
+  (fn [handler]
+   (try
+     (let [issuer (str keycloak-url "/realms/" keycloak-realm)
+           certs  (-> (str issuer "/protocol/openid-connect/certs")
+                      client/get
+                      :body)]
+       (jwt/wrap-jwt-claims handler (jwt/rsa-key certs 0) issuer))
+     (catch Exception e
+       (println "Could not get cert from Keycloak")
+       (throw e)))))
 
 (defmethod ig/init-key :akvo.lumen.auth/wrap-auth  [_ opts]
   wrap-auth)
 
 (defmethod ig/init-key :akvo.lumen.auth/wrap-jwt  [_ opts]
-  wrap-jwt)
+  (wrap-jwt opts))
+

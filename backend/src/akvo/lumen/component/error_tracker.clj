@@ -40,5 +40,5 @@
   (track [this error]
     (println "LocalErrorTracker:" (.getMessage error))))
 
-(defmethod ig/init-key :akvo.lumen.component.error-tracker/wrap-sentry  [_ opts]
-  raven-clj.ring/wrap-sentry)
+(defmethod ig/init-key :akvo.lumen.component.error-tracker/wrap-sentry  [_ {:keys [dsn opts]}]
+  #(raven-clj.ring/wrap-sentry % dsn opts))

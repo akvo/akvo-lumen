@@ -14,12 +14,8 @@
 (defn- find-routes [component]
   (:endpoints component (find-endpoint-keys component)))
 
-(defn- middleware-fn [f args]
-  (let [args (if (or (nil? args) (sequential? args)) args (list args))]
-    #(apply f % args)))
-
-(defn- middleware-map [{:keys [functions arguments]}]
-  (reduce-kv (fn [m k v] (assoc m k (middleware-fn v (arguments k)))) {} functions))
+(defn- middleware-map [{:keys [functions]}]
+  (reduce-kv (fn [m k v] (assoc m k v)) {} functions))
 
 (defn- compose-middleware [{:keys [applied] :as middleware}]
   (->> (reverse applied)
@@ -48,10 +44,10 @@
   ring.middleware.json/wrap-json-response)
 
 (defmethod ig/init-key :akvo.lumen.component.handler/wrap-defaults  [_ opts]
-  ring.middleware.defaults/wrap-defaults)
+  #(ring.middleware.defaults/wrap-defaults % opts))
 
-(defmethod ig/init-key :akvo.lumen.component.handler/wrap-hide-errors  [_ opts]
-  (fn [handler error-response]
+(defmethod ig/init-key :akvo.lumen.component.handler/wrap-hide-errors  [_ {:keys [error-response]}]
+  (fn [handler]
     (fn [request]
       (try
         (handler request)
@@ -60,8 +56,8 @@
               (ring.response/content-type "text/html")
               (ring.response/status 500)))))))
 
-(defmethod ig/init-key :akvo.lumen.component.handler/wrap-not-found  [_ opts]
-  (fn [handler error-response]
+(defmethod ig/init-key :akvo.lumen.component.handler/wrap-not-found  [_ {:keys [error-response]}]
+  (fn [handler]
     (fn [request]
       (or (handler request)
           (-> (compojure.res/render error-response request)
