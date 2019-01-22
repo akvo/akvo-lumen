@@ -17,19 +17,20 @@
 (defn get-share [tenant-conn id]
   (public-by-id tenant-conn {:id id}))
 
+(def vis-aggregation-mapper {"pivot table" "pivot"
+                             "line"      "line"
+                             "bubble"    "bubble"
+                             "area"      "line"
+                             "pie"       "pie"
+                             "donut"     "donut"
+                             "polararea" "pie"
+                             "bar"       "bar"
+                             "scatter"   "scatter"})
+
 (defn run-visualisation 
   [tenant-conn visualisation]
   (let [visualisation (keywordize-keys visualisation)
         [dataset-tag dataset] (dataset/fetch-metadata tenant-conn (:datasetId visualisation))
-        vis-aggregation-mapper {"pivot table" "pivot"
-                                "line"      "line"
-                                "bubble"    "bubble"
-                                "area"      "line"
-                                "pie"       "pie"
-                                "donut"     "donut"
-                                "polararea" "pie"
-                                "bar"       "bar"
-                                "scatter"   "scatter"}
         aggregation-type (get vis-aggregation-mapper (:visualisationType visualisation))
         [tag query-result] (aggregation/query tenant-conn
                                               (:datasetId visualisation)
@@ -67,12 +68,11 @@
 
 (defn visualisation-response-data [tenant-conn id config]
   (try
-    (let [vis-types #{"pivot table" "line" "bubble" "area" "pie" "donut" "polararea" "bar" "scatter" "map"}
-          [tag vis] (visualisation/fetch tenant-conn id)]
+    (let [[tag vis] (visualisation/fetch tenant-conn id)]
       (when (= tag ::lib/ok)
         (condp contains? (:visualisationType vis)
           #{"map"} (run-map-visualisation tenant-conn vis config)
-          vis-types (run-visualisation tenant-conn vis)
+          (set (keys vis-aggregation-mapper)) (run-visualisation tenant-conn vis)
           (run-unknown-type-visualisation tenant-conn vis))))
     (catch Exception e
       (log/warn e ::visualisation-response-data (str "problems fetching this vis-id: " id)))))
