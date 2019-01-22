@@ -16,13 +16,10 @@
    `NULL = NULL` is `NULL`. To work around this, we must use another value to represent the
    empty value. For dates, we use 1001-01-01 01:00:00"
   [column]
-  (format "COALESCE(%s, %s)"
-          (:columnName column)
-          (if (= "text" (:type column))
-            "''"
-            (if (= "date" (:type column))
-              "'1001-01-01 01:00:00'::timestamptz"
-              "'NaN'::double precision"))))
+  (format "COALESCE(%s, %s)" (:columnName column) (case (:type column)
+                                                    "text" "''"
+                                                    "date" "'1001-01-01 01:00:00'::timestamptz"
+                                                    "'NaN'::double precision")))
 
 (defn- apply-pivot [conn table-name {:keys [category-column row-column aggregation value-column]} filter-str]
   (let [source-sql        (let [select (format "SELECT %s, %s, %s(%s)"
