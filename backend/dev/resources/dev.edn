@@ -23,6 +23,7 @@
 
  :akvo.lumen.component.handler/wrap-stacktrace {}
 
+ :akvo.lumen.endpoint.export/export                   {:exporter-api-url "http://exporter:3001"}
  :akvo.lumen.config
  {:app
   {:middleware
@@ -39,6 +40,5 @@
            :sentry-backend-dsn ""
            :sentry-client-dsn ""
            :windshaft-url "http://windshaft:4000"
-           :exporter-api-url "http://exporter:3001"
            :piwik-site-id "165"}}
  }

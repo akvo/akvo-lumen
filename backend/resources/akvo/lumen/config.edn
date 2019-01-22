@@ -38,7 +38,7 @@
  :akvo.lumen.endpoint.data-source/data-source         {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
  :akvo.lumen.endpoint.env/env                         {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
                                                        :config         #ig/ref :akvo.lumen.config}
- :akvo.lumen.endpoint.export/export                   {:config         #ig/ref :akvo.lumen.config}
+ :akvo.lumen.endpoint.export/export                   {:exporter-api-url          exporter-api-url}
  :akvo.lumen.endpoint.files/files                     {:config #ig/ref :akvo.lumen.config}
  :akvo.lumen.endpoint.healthz/healthz                 {}
  :akvo.lumen.endpoint.invite/invite                   {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
@@ -128,7 +128,6 @@
                             :wrap-auth :wrap-jwt :monitoring :wrap-label-tenant :wrap-sentry
                             :hide-errors]}}
   :config        {:file-upload-path          file-upload-path
-                  :exporter-api-url          exporter-api-url
                   :max-upload-size           100
                   :keycloak-url              keycloak-url
                   :keycloak-realm            keycloak-realm
