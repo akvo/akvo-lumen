@@ -36,7 +36,7 @@
         query  (query* "pivot" dataset-id)]
 
     (testing "Empty query"
-      (let [[tag query-result :as res] (query {:aggregation "count"})]
+      (let [[tag query-result] (query {:aggregation "count"})]
         (is (= tag ::lib/ok))
         (is (= query-result
                {:columns [{:type "number" :title "Total"}]
@@ -53,7 +53,7 @@
                                        [{:value "a2"} {:value "b2"} {:value 11}]
                                        [{:value "a2"} {:value "b2"} {:value 10}])}})
 
-      (let [[tag query-result :as res] (query {:aggregation "count"})]
+      (let [[tag query-result] (query {:aggregation "count"})]
         (is (= tag ::lib/ok))
         (is (= query-result
                {:columns [{:type "number" :title "Total"}]
