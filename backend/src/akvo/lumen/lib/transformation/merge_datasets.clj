@@ -6,7 +6,7 @@
             [clojure.set :as set]
             [clojure.set :refer (rename-keys) :as set]
             [clojure.string :as s]
-            [clojure.walk :refer (keywordize-keys)]
+            [clojure.walk :as walk]
             [hugsql.core :as hugsql])
   (:import [java.sql Timestamp]
            [org.postgis PGgeometry]))
@@ -195,7 +195,7 @@
 (defn consistency-error? [tenant-conn dataset-id]
   (let [merged-sources (->> (latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})
                             :transformations
-                            keywordize-keys
+                            walk/keywordize-keys
                             (filter #(= "core/merge-datasets" (:op %)))
                             (map #(-> % :args :source)))]
     (if-let [ds-diff (and (not-empty merged-sources)
@@ -231,7 +231,7 @@
        (filter #(not= target-dataset-id (:dataset_id %))) ;; exclude (target-)dataset(-id)
        (map (fn [dataset-version]
               ;; get source datasets of merge transformations with appended dataset-version as origin
-              (->> (keywordize-keys (:transformations dataset-version))
+              (->> (walk/keywordize-keys (:transformations dataset-version))
                    (filter #(= "core/merge-datasets" (:op %)))
                    (map #(-> % :args :source))
                    (map #(assoc % :origin {:id    (:dataset_id dataset-version)
