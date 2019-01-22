@@ -1,13 +1,7 @@
 (ns akvo.lumen.specs.postgres
-  (:require [akvo.lumen.specs :as lumen.s :refer (sample)]
-            [akvo.lumen.specs.db :as db.s]
-            [akvo.lumen.postgres :as postgres]
+  (:require [akvo.lumen.postgres :as postgres]
             [akvo.lumen.postgres.filter :as postgres.filter]
-            [akvo.lumen.util :as u]
-            [clojure.spec.alpha :as s]
-            [clojure.spec.gen.alpha :as gen]
-            [clojure.string :as string]
-            [clojure.tools.logging :as log]))
+            [clojure.spec.alpha :as s]))
 
 (alias 'db.dsv 'akvo.lumen.specs.db.dataset-version)
 
