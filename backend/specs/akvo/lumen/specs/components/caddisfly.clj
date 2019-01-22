@@ -7,9 +7,5 @@
 
 (s/def ::caddisfly/local-schema-uri string?)
 
-(s/def ::caddisfly/caddisfly (s/keys :req-un [::caddisfly/local-schema-uri]))
-
-(s/def ::caddisfly/config (s/keys :req-un [::caddisfly/caddisfly] ))
-
 (defmethod integrant-key ::caddisfly/local [_]
-  (s/cat :kw keyword? :config (s/keys :req-un [::caddisfly/config])))
+  (s/cat :kw keyword? :config (s/keys :req-un [::caddisfly/local-schema-uri])))

@@ -94,7 +94,7 @@
 
  :akvo.lumen.component.http/http      {:port http-port
                                        :handler    #ig/ref :akvo.lumen.component.handler/handler}
- :akvo.lumen.component.caddisfly/prod {:config #ig/ref :akvo.lumen.config}
+ :akvo.lumen.component.caddisfly/prod {:schema-uri caddisfly-schema-uri}
  :akvo.lumen.component.keycloak       {:config #ig/ref :akvo.lumen.config}
  :akvo.lumen.component.tenant-manager {:config #ig/ref :akvo.lumen.config
                                        :db     #ig/ref :akvo.lumen.component.hikaricp/hikaricp}
@@ -119,7 +119,6 @@
                 :applied   [:not-found :json-response :ring-defaults :json-body
                             :wrap-auth :wrap-jwt :monitoring :wrap-label-tenant :wrap-sentry
                             :hide-errors]}}
-  :caddisfly     {:schema-uri caddisfly-schema-uri}
   :emailer {:email-password email-password
             :email-user     email-user
             :from-email     "noreply@akvo.org"

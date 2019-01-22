@@ -5,7 +5,7 @@
 
  :akvo.lumen.component.http/http               {:port 3000}
 
- :akvo.lumen.component.caddisfly/local                  {:config #ig/ref :akvo.lumen.config}
+ :akvo.lumen.component.caddisfly/local                  {:local-schema-uri "./caddisfly/tests-schema.json"}
  :akvo.lumen.component.error-tracker/local              {}
  :akvo.lumen.component.emailer/dev-emailer              {:config #ig/ref :akvo.lumen.config}
 
@@ -20,8 +20,6 @@
    {:functions {:stacktrace #ig/ref :akvo.lumen.component.handler/wrap-stacktrace}
     :applied   ^:replace [:not-found :json-response :ring-defaults :json-body
                           :wrap-auth :wrap-jwt :monitoring :wrap-label-tenant :stacktrace]}}
-  :caddisfly {:local-schema-uri "./caddisfly/tests-schema.json"}
-  
   :config {:encryption-key "secret"
            :file-upload-path "/tmp/akvo/lumen"
            :keycloak-realm "akvo"
