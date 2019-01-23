@@ -6,6 +6,7 @@ import { Arc, Svg, Group, Text, Line } from '@potion/element';
 import get from 'lodash/get';
 import { Portal } from 'react-portal';
 import merge from 'lodash/merge';
+import itsSet from 'its-set';
 
 import { sortAlphabetically, sortChronologically } from '../../utilities/utils';
 import { round, replaceLabelIfValueEmpty } from '../../utilities/chart';
@@ -78,6 +79,7 @@ export default class PieChart extends Component {
     return {
       ...series,
       data: series.data
+        .filter(itsSet)
         .sort((a, b) => sortFunctionFactory(a, b, ({ key }) => key))
         .map(datum => ({
           ...datum,

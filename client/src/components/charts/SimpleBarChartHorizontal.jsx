@@ -9,6 +9,7 @@ import { AxisBottom } from '@vx/axis';
 import { Portal } from 'react-portal';
 import merge from 'lodash/merge';
 import { GridColumns } from '@vx/grid';
+import itsSet from 'its-set';
 
 import { isLight } from '../../utilities/color';
 import { heuristicRound, replaceLabelIfValueEmpty, calculateMargins, getLabelFontSize } from '../../utilities/chart';
@@ -116,9 +117,13 @@ export default class SimpleBarChart extends Component {
   getData() {
     const { data } = this.props;
 
-    if (!get(data, 'series[0]')) return false;
+    if (!itsSet(data, 'series[0]')) return false;
 
-    return merge({}, data.common, data.series[0]);
+    const result = merge({}, data.common, data.series[0]);
+
+    result.data = result.data.filter(itsSet);
+
+    return result;
   }
 
   getColor(key, index, numColors) {

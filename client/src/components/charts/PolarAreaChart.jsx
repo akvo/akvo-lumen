@@ -76,6 +76,7 @@ export default class PieChart extends Component {
     return {
       ...series,
       data: series.data
+        .filter(itsSet)
         .map(datum => ({
           ...datum,
           value: Math.abs(datum.value),
