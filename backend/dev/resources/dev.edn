@@ -12,6 +12,11 @@
  :akvo.lumen.component.emailer/dev-emailer              {:from-email "devops@akvo.localhost"
                                                          :from-name "Akvo Lumen"}
 
+ :akvo.lumen.component.handler/handler {:middleware
+                                        {:functions {:stacktrace #ig/ref :akvo.lumen.component.handler/wrap-stacktrace}
+                                         :applied   ^:replace [:not-found :json-response :ring-defaults :json-body
+                                                               :wrap-auth :wrap-jwt :monitoring :wrap-label-tenant :stacktrace]}}
+
  :akvo.lumen.component.keycloak      {:url   "http://auth.lumen.local:8080/auth"
                                       :realm "akvo"
                                       :credentials
@@ -25,12 +30,7 @@
 
  :akvo.lumen.endpoint.export/export                   {:exporter-api-url "http://exporter:3001"}
  :akvo.lumen.config
- {:app
-  {:middleware
-   {:functions {:stacktrace #ig/ref :akvo.lumen.component.handler/wrap-stacktrace}
-    :applied   ^:replace [:not-found :json-response :ring-defaults :json-body
-                          :wrap-auth :wrap-jwt :monitoring :wrap-label-tenant :stacktrace]}}
-  :config {:file-upload-path "/tmp/akvo/lumen"
+ {:config {:file-upload-path "/tmp/akvo/lumen"
            :keycloak-realm "akvo"
            :keycloak-url "http://auth.lumen.local:8080/auth"
            :keycloak-public-client-id "akvo-lumen"

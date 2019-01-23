@@ -22,9 +22,9 @@
        (map (middleware-map middleware))
        (apply comp identity)))
 
-(defmethod ig/init-key :akvo.lumen.component.handler/handler  [_ {:keys [endpoints config handler] :as opts}]
+(defmethod ig/init-key :akvo.lumen.component.handler/handler  [_ {:keys [endpoints middleware handler] :as opts}]
   (if-not handler
-    (let [component {:endpoints endpoints :middleware (-> config :app :middleware)}
+    (let [component {:endpoints endpoints :middleware middleware}
           routes  (find-routes component)
           wrap-mw (compose-middleware (:middleware component))
           handler (wrap-mw (apply compojure.core/routes routes))]
