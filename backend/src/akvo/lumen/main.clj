@@ -9,16 +9,13 @@
 
 (def config-file "akvo/lumen/config.edn")
 
-(defn read-config []
-  (duct/read-config (io/resource config-file)))
-
 (defn -main [& args]
   (config/assert-bindings)
   (derive :akvo.lumen.component.emailer/mailjet-v3-emailer :akvo.lumen.component.emailer/emailer)
   (derive :akvo.lumen.component.caddisfly/prod :akvo.lumen.component.caddisfly/caddisfly)
   (derive :akvo.lumen.component.error-tracker/prod :akvo.lumen.component.error-tracker/error-tracker)
   (migrate/migrate config-file)
-  (let [config ((comp duct/prep read-config))
+  (let [config (config/construct config-file (config/bindings))
         _ (ig/load-namespaces config)
         system (ig/init config)]
     system))
