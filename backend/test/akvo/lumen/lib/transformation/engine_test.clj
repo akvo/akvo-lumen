@@ -3,6 +3,7 @@
   (:require [akvo.lumen.fixtures :refer [migrate-tenant rollback-tenant summarise-transformation-logs-fixture]]
             [akvo.lumen.test-utils :refer [test-tenant test-tenant-conn]]
             [akvo.lumen.lib.transformation.engine :refer :all]
+            [akvo.lumen.test-utils :as tu]
             [cheshire.core :as json]
             [clojure.java.io :as io]
             [clojure.test :refer :all]
@@ -25,7 +26,7 @@
     (f)
     (rollback-tenant test-tenant)))
 
-(use-fixtures :once fixture summarise-transformation-logs-fixture)
+(use-fixtures :once fixture summarise-transformation-logs-fixture tu/spec-instrument)
 
 (def transformations
   {:ops [{"op" "core/to-titlecase"
