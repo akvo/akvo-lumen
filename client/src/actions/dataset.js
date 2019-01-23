@@ -9,8 +9,8 @@ import {
   addTemporaryEntitiesToCollection,
   removeTemporaryEntitiesFromCollection,
 } from './collection';
-import * as api from '../api';
-import * as auth from '../auth';
+import * as api from '../utilities/api';
+import * as auth from '../utilities/auth';
 
 /*
  * Fetch a dataset by id
@@ -46,13 +46,15 @@ export function fetchDataset(id, metaOnly) {
   return (dispatch) => {
     dispatch(fetchDatasetRequest(id));
     return api.get(`/api/datasets/${id}${suffix}`)
-      .then(response => response.json())
-      .then((dataset) => {
-        const immutableDataset = Immutable.fromJS(dataset);
+      .then(({ body }) => {
+        const immutableDataset = Immutable.fromJS(body);
         dispatch(fetchDatasetSuccess(immutableDataset));
         return immutableDataset;
       })
-      .catch(error => dispatch(fetchDatasetFailure(error, id)));
+      .catch((error) => {
+        dispatch(showNotification('error', 'Failed to fetch dataset.'));
+        dispatch(fetchDatasetFailure(error, id));
+      });
   };
 }
 
@@ -129,20 +131,23 @@ function pollDatasetImportStatus(importId, name, collectionId) {
     }
     api
       .get(`/api/job_executions/${importId}`)
-      .then(response => response.json())
-      .then(({ status, reason, datasetId }) => {
+      .then(({ body: { status, reason, datasetId } }) => {
         if (status === 'PENDING') {
           setTimeout(
             () => dispatch(pollDatasetImportStatus(importId, name, collectionId)),
             constants.POLL_INTERVAL
           );
         } else if (status === 'FAILED') {
+          dispatch(showNotification('error', 'Failed to import dataset.'));
           dispatch(importDatasetFailure(importId, reason));
         } else if (status === 'OK') {
           dispatch(importDatasetSuccess(datasetId, importId, collectionId));
         }
       })
-      .catch(error => dispatch(importDatasetFailure(importId, error.message)));
+      .catch((error) => {
+        dispatch(showNotification('error', 'Failed to import dataset.'));
+        dispatch(importDatasetFailure(importId, error.message));
+      });
   };
 }
 
@@ -164,11 +169,13 @@ export function importDataset(dataSource, collectionId) {
     dispatch(importDatasetRequest(dataSource, collectionId));
     api
       .post('/api/datasets', dataSource)
-      .then(response => response.json())
-      .then(({ importId }) => {
+      .then(({ body: { importId } }) => {
         dispatch(pollDatasetImportStatus(importId, dataSource.name, collectionId));
         dispatch(hideModal());
         dispatch(clearImport());
+      })
+      .catch(() => {
+        dispatch(showNotification('error', 'Failed to import dataset.'));
       });
   };
 }
@@ -275,17 +282,17 @@ export function deleteDataset(id) {
     dispatch(deleteDatasetRequest(id));
     api
       .del(`/api/datasets/${id}`)
-      .then((response) => {
-        if (response.status >= 400) {
-          response.json().then((error) => {
-            dispatch(deleteDatasetFailure(id, error));
-            dispatch(showNotification('error', `deletion failed: ${error.error}.`));
-          });
+      .then(({ body, status }) => {
+        if (status >= 400) {
+          dispatch(deleteDatasetFailure(id, body));
+          dispatch(showNotification('error', 'Failed to delete dataset.'));
         } else {
-          response.json().then(() => dispatch(deleteDatasetSuccess(id)));
+          dispatch(deleteDatasetSuccess(id));
         }
       })
-    ;
+      .catch(() => {
+        dispatch(showNotification('error', 'Failed to delete dataset.'));
+      });
   };
 }
 
@@ -316,9 +323,11 @@ export function deletePendingDataset(id) {
     dispatch(deleteDatasetRequest(id));
     api
       .del(`/api/data-source/job-execution/${id}/status/pending`)
-      .then(response => response.json())
       .then(() => dispatch(deletePendingDatasetSuccess(id)))
-      .catch(error => dispatch(deletePendingDatasetFailure(id, error)));
+      .catch((error) => {
+        dispatch(showNotification('error', 'Failed to delete pending dataset.'));
+        dispatch(deletePendingDatasetFailure(id, error));
+      });
   };
 }
 
@@ -327,9 +336,11 @@ export function deleteFailedDataset(id) {
     dispatch(deleteDatasetRequest(id));
     api
       .del(`/api/data-source/job-execution/${id}/status/failed`)
-      .then(response => response.json())
       .then(() => dispatch(removeDataset(id)))
-      .catch(error => dispatch(deleteFailedDatasetFailure(id, error)));
+      .catch((error) => {
+        dispatch(showNotification('error', 'Failed to delete dataset.'));
+        dispatch(deleteFailedDatasetFailure(id, error));
+      });
   };
 }
 
@@ -362,14 +373,13 @@ export function updateDatasetMeta(id, meta, callback = () => {}) {
     dispatch(updateDatasetMetaRequest(id));
     api
       .put(`/api/datasets/${id}`, meta)
-      .then(response => response.json())
       .then(() => {
         dispatch(updateDatasetMetaSuccess(id, meta));
         callback();
       })
       .catch((error) => {
         const title = getState().library.datasets[id].get('name');
-        dispatch(showNotification('error', `Failed to update "${title}": ${error.message}`));
+        dispatch(showNotification('error', `Failed to update dataset: "${title}".`));
         dispatch(updateDatasetMetaFailure(id, error));
         callback(error);
       });
@@ -391,8 +401,7 @@ function pollDatasetUpdateStatus(updateId, datasetId, title) {
   return (dispatch) => {
     api
       .get(`/api/job_executions/${updateId}`)
-      .then(response => response.json())
-      .then(({ status, reason }) => {
+      .then(({ body: { status, reason } }) => {
         if (status === 'PENDING') {
           setTimeout(
             () => dispatch(pollDatasetUpdateStatus(updateId, datasetId, title)),
@@ -400,14 +409,17 @@ function pollDatasetUpdateStatus(updateId, datasetId, title) {
           );
         } else if (status === 'FAILED') {
           dispatch(updateDatasetTogglePending(datasetId));
-          dispatch(showNotification('error', `Failed to update "${title}": ${reason}`));
+          dispatch(showNotification('error', `Failed to update dataset "${title}": ${reason}`));
         } else if (status === 'OK') {
           dispatch(fetchDataset(datasetId)).then(() =>
-            dispatch(showNotification('info', `Successfully updated "${title}"`, true))
+            dispatch(showNotification('info', `Successfully updated dataset "${title}"`, true))
           );
         }
       })
-      .catch(error => dispatch(error));
+      .catch((error) => {
+        dispatch(showNotification('error', 'Failed to update dataset'));
+        dispatch(error);
+      });
   };
 }
 
@@ -423,14 +435,16 @@ export function updateDataset(id) {
         // how we want to do that.
         { refreshToken: auth.refreshToken() }
       )
-      .then(response => response.json())
-      .then(({ updateId, error }) => {
+      .then(({ body: { updateId, error } }) => {
         if (updateId != null) {
           dispatch(updateDatasetTogglePending(id));
           dispatch(pollDatasetUpdateStatus(updateId, id, title));
         } else {
           dispatch(showNotification('error', `Update failed: ${error}`));
         }
+      })
+      .catch(() => {
+        dispatch(showNotification('error', 'Failed to update dataset.'));
       });
   };
 }
@@ -485,20 +499,22 @@ function pollDatasetTransformationStatus(jobExecutionId, datasetId) {
   return (dispatch) => {
     api
       .get(`/api/job_executions/${jobExecutionId}`)
-      .then(response => response.json())
-      .then(({ status, reason }) => {
+      .then(({ body: { status, reason } }) => {
         if (status === 'PENDING') {
           setTimeout(
             () => dispatch(pollDatasetTransformationStatus(jobExecutionId, datasetId)),
             constants.POLL_INTERVAL
           );
         } else if (status === 'FAILED') {
+          dispatch(showNotification('error', 'Failed to transform dataset.'));
           dispatch(transformationFailure(datasetId, reason));
         } else if (status === 'OK') {
           dispatch(transformationSuccess(datasetId));
         }
       })
-      .catch(error => dispatch(error));
+      .catch(() => {
+        dispatch(showNotification('error', 'Failed to transform dataset.'));
+      });
   };
 }
 
@@ -507,10 +523,12 @@ export function sendTransformationLog(datasetId, transformations) {
     dispatch(transformationLogRequestSent(datasetId));
     api
       .post(`/api/transformations/${datasetId}`, transformations.toJSON())
-      .then(response => response.json())
-      .then(({ jobExecutionId }) =>
+      .then(({ body: { jobExecutionId } }) =>
         dispatch(pollDatasetTransformationStatus(jobExecutionId, datasetId))
-      );
+      )
+      .catch(() => {
+        dispatch(showNotification('error', 'Failed to send transformation log.'));
+      });
   };
 }
 

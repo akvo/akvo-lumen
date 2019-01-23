@@ -2,12 +2,13 @@ import Immutable from 'immutable';
 import * as constants from '../constants/raster';
 import * as visualisationActions from './visualisation';
 import { hideModal } from './activeModal';
-import * as api from '../api';
+import * as api from '../utilities/api';
 import {
   addEntitiesToCollection,
   addTemporaryEntitiesToCollection,
   removeTemporaryEntitiesFromCollection,
 } from './collection';
+import { showNotification } from './notification';
 
 /*
  * Fetch a raster by id
@@ -43,13 +44,15 @@ export function fetchRaster(id) {
     dispatch(fetchRasterRequest(id));
     return api
       .get(`/api/rasters/${id}`)
-      .then(response => response.json())
-      .then((raster) => {
-        const immutableRaster = Immutable.fromJS(raster);
+      .then(({ body }) => {
+        const immutableRaster = Immutable.fromJS(body);
         dispatch(fetchRasterSuccess(immutableRaster));
         return immutableRaster;
       })
-      .catch(error => dispatch(fetchRasterFailure(error, id)));
+      .catch((error) => {
+        dispatch(showNotification('error', 'Failed to fetch raster.'));
+        dispatch(fetchRasterFailure(error, id));
+      });
   };
 }
 
@@ -126,20 +129,22 @@ function pollRasterImportStatus(importId, name, collectionId) {
     }
     api
       .get(`/api/job_executions/${importId}`)
-      .then(response => response.json())
-      .then(({ status, reason, rasterId }) => {
+      .then(({ body: { status, reason, rasterId } }) => {
         if (status === 'PENDING') {
           setTimeout(
             () => dispatch(pollRasterImportStatus(importId, name, collectionId)),
             constants.POLL_INTERVAL
           );
         } else if (status === 'FAILED') {
+          dispatch(showNotification('error', 'Failed to poll raster import status.'));
           dispatch(importRasterFailure(importId, reason, collectionId));
         } else if (status === 'OK') {
           dispatch(importRasterSuccess(rasterId, importId, collectionId));
         }
       })
-      .catch(error => dispatch(error));
+      .catch(() => {
+        dispatch(showNotification('error', 'Failed to poll raster import status.'));
+      });
   };
 }
 
@@ -162,11 +167,13 @@ export function importRaster(dataSource, collectionId) {
     dispatch(importRasterRequest(dataSource, collectionId));
     api
       .post('/api/rasters', dataSource)
-      .then(response => response.json())
-      .then(({ importId }) => {
+      .then(({ body: { importId } }) => {
         dispatch(pollRasterImportStatus(importId, dataSource.name, collectionId));
         dispatch(hideModal());
         dispatch(clearImport());
+      })
+      .catch(() => {
+        dispatch(showNotification('error', 'Failed to import raster.'));
       });
   };
 }
@@ -266,9 +273,11 @@ export function deleteRaster(id) {
     dispatch(deleteRasterRequest(id));
     api
       .del(`/api/rasters/${id}`)
-      .then(response => response.json())
       .then(() => dispatch(deleteRasterSuccess(id)))
-      .catch(error => dispatch(deleteRasterFailure(id, error)));
+      .catch((error) => {
+        dispatch(showNotification('error', 'Failed to delete raster.'));
+        dispatch(deleteRasterFailure(id, error));
+      });
   };
 }
 
@@ -291,8 +300,10 @@ export function deletePendingRaster(id) {
     dispatch(deleteRasterRequest(id));
     api
       .del(`/api/job_executions/${id}`)
-      .then(response => response.json())
       .then(() => dispatch(deletePendingRasterSuccess(id)))
-      .catch(error => dispatch(deletePendingRasterFailure(id, error)));
+      .catch((error) => {
+        dispatch(showNotification('error', 'Failed to delete pending raster.'));
+        dispatch(deletePendingRasterFailure(id, error));
+      });
   };
 }

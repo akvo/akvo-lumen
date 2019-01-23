@@ -6,7 +6,7 @@ import get from 'lodash/get';
 import { intlShape, injectIntl } from 'react-intl';
 import ShareEntity from '../components/modals/ShareEntity';
 import * as actions from '../actions/dashboard';
-import * as api from '../api';
+import * as api from '../utilities/api';
 import { fetchLibrary } from '../actions/library';
 import { fetchDataset } from '../actions/dataset';
 import { trackPageView, trackEvent } from '../utilities/analytics';
@@ -21,6 +21,7 @@ import {
   EXPORT_DASHBOARD_PNG,
   EXPORT_DASHBOARD_PDF,
 } from '../constants/analytics';
+import { showNotification } from '../actions/notification';
 
 const getEditingStatus = (location) => {
   const testString = 'create';
@@ -237,27 +238,26 @@ class Dashboard extends Component {
           api.post('/api/visualisations/maps', visualisation)
             .then((response) => {
               if (response.status >= 200 && response.status < 300) {
-                response
-                  .json()
-                  .then((json) => {
-                    const change = {};
-                    change[id] = json;
-                    const aggregatedDatasets =
-                      Object.assign({}, this.state.aggregatedDatasets, change);
+                const change = {};
+                change[id] = response.body;
+                const aggregatedDatasets =
+                  Object.assign({}, this.state.aggregatedDatasets, change);
 
-                    const metadataChange = {};
-                    metadataChange[id] = json;
+                const metadataChange = {};
+                metadataChange[id] = response.body;
 
-                    const metadata =
-                      Object.assign(
-                        {},
-                        this.state.metadata,
-                        metadataChange
-                      );
+                const metadata =
+                  Object.assign(
+                    {},
+                    this.state.metadata,
+                    metadataChange
+                  );
 
-                    this.setState({ aggregatedDatasets, metadata });
-                  });
+                this.setState({ aggregatedDatasets, metadata });
               }
+            })
+            .catch(() => {
+              this.props.dispatch(showNotification('error', 'Failed to add visualisation.'));
             });
           /* Maps hit a different endpoint than other aggregations, so bail out now */
           return;
@@ -280,11 +280,15 @@ class Dashboard extends Component {
 
       api.get(`/api/aggregation/${datasetId}/${aggType}`, {
         query: JSON.stringify(spec),
-      }).then(response => response.json()).then((response) => {
+      })
+      .then(({ body }) => {
         const change = {};
-        change[id] = response;
+        change[id] = body;
         const aggregatedDatasets = Object.assign({}, this.state.aggregatedDatasets, change);
         this.setState({ aggregatedDatasets });
+      })
+      .catch(() => {
+        this.props.dispatch(showNotification('error', 'Failed to fetch aggregations.'));
       });
     } else {
       /* Fetch the whole dataset */

@@ -1,8 +1,9 @@
 /* eslint-disable no-underscore-dangle */
-import fetch from 'isomorphic-fetch';
 import Keycloak from 'keycloak-js';
 import Raven from 'raven-js';
 import queryString from 'querystringify';
+
+import { get } from './api';
 
 let keycloak = null;
 let accessToken = null;
@@ -34,10 +35,19 @@ export function init() {
   if (keycloak != null) {
     throw new Error('Keycloak already initialized');
   }
-  return fetch('/env')
-    .then(response => response.json())
+  return get('/env')
     .then(
-      ({ keycloakClient, keycloakURL, tenant, sentryDSN, flowApiUrl, piwikSiteId, exporterUrl }) =>
+      ({
+        body: {
+          keycloakClient,
+          keycloakURL,
+          tenant,
+          sentryDSN,
+          flowApiUrl,
+          piwikSiteId,
+          exporterUrl,
+        },
+      }) =>
         new Promise((resolve, reject) => {
           if (process.env.NODE_ENV === 'production') {
             Raven.config(sentryDSN).install();
@@ -88,9 +98,8 @@ export function init() {
 }
 
 export function initPublic() {
-  return fetch('/env')
-    .then(response => response.json())
-    .then(env => ({ env }));
+  return get('/env')
+    .then(({ body }) => ({ env: body }));
 }
 
 export function initExport(providedAccessToken) {

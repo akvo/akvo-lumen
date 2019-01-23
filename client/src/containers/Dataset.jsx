@@ -8,7 +8,7 @@ import { fetchDataset, updateDatasetMeta } from '../actions/dataset';
 import { showNotification } from '../actions/notification';
 import { getId, getTitle } from '../domain/entity';
 import { getTransformations, getRows, getColumns } from '../domain/dataset';
-import * as api from '../api';
+import * as api from '../utilities/api';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { SAVE_COUNTDOWN_INTERVAL, SAVE_INITIAL_TIMEOUT } from '../constants/time';
 import { TRANSFORM_DATASET } from '../constants/analytics';
@@ -104,12 +104,10 @@ class Dataset extends Component {
     return api.post(`/api/transformations/${id}/transform`, transformationJs)
       .then((response) => {
         if (!response.ok) {
-          return response.json().then(({ message }) => {
-            this.removePending(now);
-            throw new Error(message);
-          });
+          this.removePending(now);
+          throw new Error(response.body.message);
         }
-        return response.json();
+        return response.body;
       })
       .then(() => dispatch(fetchDataset(id)))
       .then(() => this.removePending(now))
@@ -126,9 +124,11 @@ class Dataset extends Component {
 
     this.setPendingUndo(now);
     api.post(`/api/transformations/${id}/undo`)
-      .then(response => response.json())
       .then(() => dispatch(fetchDataset(id)))
-      .then(() => this.removePending(now));
+      .then(() => this.removePending(now))
+      .catch(() => {
+        this.props.dispatch(showNotification('error', 'Failed to undo.'));
+      });
   }
 
   handleTrackPageView(props) {

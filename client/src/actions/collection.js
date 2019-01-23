@@ -1,7 +1,7 @@
 import { createAction } from 'redux-actions';
 import { hideModal } from './activeModal';
 import { showNotification } from './notification';
-import * as api from '../api';
+import * as api from '../utilities/api';
 
 /* Fetched all collections */
 export const fetchCollectionsSuccess = createAction('FETCH_COLLECTIONS_SUCCESS');
@@ -22,9 +22,11 @@ export function editCollection(collection) {
   return (dispatch) => {
     dispatch(editCollectionRequest);
     api.put(`/api/collections/${id}`, collection)
-      .then(response => response.json())
-      .then(responseCollection => dispatch(editCollectionSuccess(responseCollection)))
-      .catch(error => dispatch(editCollectionFailure(error)));
+      .then(({ body }) => dispatch(editCollectionSuccess(body)))
+      .catch((error) => {
+        dispatch(showNotification('error', 'Failed to edit collection.'));
+        dispatch(editCollectionFailure(error));
+      });
   };
 }
 
@@ -33,8 +35,8 @@ export function createCollection(title, optionalEntities) {
   return (dispatch) => {
     // dispatch(createCollectionRequest(title));
     api.post('/api/collections', { title })
-      .then(response => response.json())
-      .then((collection) => {
+      .then(({ body }) => {
+        const collection = body;
         dispatch(createCollectionSuccess(collection));
         if (optionalEntities) {
           const collectionWithEntities =
@@ -43,7 +45,10 @@ export function createCollection(title, optionalEntities) {
         }
         dispatch(hideModal());
       })
-      .catch(err => dispatch(createCollectionFailure(err)));
+      .catch((error) => {
+        dispatch(showNotification('error', 'Failed to create collection.'));
+        dispatch(createCollectionFailure(error));
+      });
   };
 }
 
@@ -56,9 +61,11 @@ export function deleteCollection(id) {
   return (dispatch) => {
     dispatch(deleteCollectionRequest);
     api.del(`/api/collections/${id}`)
-      // No response expected
       .then(() => dispatch(deleteCollectionSuccess(id)))
-      .catch(error => dispatch(deleteCollectionFailure(error)));
+      .catch((error) => {
+        dispatch(showNotification('error', 'Failed to delete collection.'));
+        dispatch(deleteCollectionFailure(error));
+      });
   };
 }
 

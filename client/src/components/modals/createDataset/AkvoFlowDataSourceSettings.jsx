@@ -3,8 +3,10 @@ import PropTypes from 'prop-types';
 import Select from 'react-select';
 import { connect } from 'react-redux';
 import { injectIntl, intlShape } from 'react-intl';
-import * as api from '../../../api';
-import * as keycloak from '../../../auth';
+
+import * as api from '../../../utilities/api';
+import * as keycloak from '../../../utilities/auth';
+import { showNotification } from '../../../actions/notification';
 
 require('../../../../node_modules/react-select/dist/react-select.css');
 // TODO: we should use the "SelectMenu" wrapper component in the "common" folder in this component
@@ -87,7 +89,7 @@ class AkvoFlowDataSourceSettings extends Component {
           .then((response) => {
             this.setState({ isLoadingNext: false });
             if (response.ok) {
-              return response.json();
+              return response.body;
             } else if (response.status === 404) {
               throw new Error(`No such flow instance: ${instance}`);
             } else if (response.status === 403) {
@@ -148,13 +150,16 @@ class AkvoFlowDataSourceSettings extends Component {
       selectedFolders: selectedFolders.concat([selectedFolderId]),
     });
     Promise.all([
-      api.get(selectedFolder.foldersUrl, null, acceptHeader).then(response => response.json()),
-      api.get(selectedFolder.surveysUrl, null, acceptHeader).then(response => response.json()),
-    ]).then(([{ folders }, { surveys }]) => this.setState({
+      api.get(selectedFolder.foldersUrl, null, acceptHeader),
+      api.get(selectedFolder.surveysUrl, null, acceptHeader),
+    ]).then(({ body: [{ folders }, { surveys }] }) => this.setState({
       isLoadingNext: false,
       surveys: merge(this.state.surveys, indexById(surveys)),
       folders: merge(this.state.folders, indexById(folders)),
-    }));
+    }))
+    .catch(() => {
+      this.props.dispatch(showNotification('error', 'Failed to select folder.'));
+    });
   }
 
   handleSurveySelection(selectedSurveyId) {
@@ -162,13 +167,15 @@ class AkvoFlowDataSourceSettings extends Component {
     this.setState({ selectedSurveyId, isLoadingForms: true });
     const surveyUrl = surveys[selectedSurveyId].surveyUrl;
     api.get(surveyUrl, null, acceptHeader)
-      .then(response => response.json())
-      .then(surveyDefinition => this.setState({
+      .then(({ body }) => this.setState({
         isLoadingForms: false,
         surveyDefinitions: merge(surveyDefinitions, {
-          [surveyDefinition.id]: surveyDefinition,
+          [body.id]: body,
         }),
-      }));
+      }))
+      .catch(() => {
+        this.props.dispatch(showNotification('error', 'Failed to select survey.'));
+      });
   }
 
   handleFormSelection(selectedFormId) {
@@ -310,5 +317,6 @@ AkvoFlowDataSourceSettings.propTypes = {
     formId: PropTypes.string,
   }).isRequired,
   onChange: PropTypes.func.isRequired,
+  dispatch: PropTypes.func.isRequired,
   onChangeSettings: PropTypes.func.isRequired,
 };

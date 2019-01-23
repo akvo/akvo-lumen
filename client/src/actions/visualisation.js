@@ -6,7 +6,7 @@ import { fetchDataset } from './dataset';
 import { showNotification } from './notification';
 import * as dashboardActions from './dashboard';
 import { addEntitiesToCollection } from './collection';
-import * as api from '../api';
+import * as api from '../utilities/api';
 import { base64ToBlob, extToContentType } from '../utilities/export';
 
 /* Fetched all visualisations */
@@ -22,8 +22,8 @@ export function createVisualisation(visualisation, collectionId, callback = () =
     dispatch(createVisualisationRequest(visualisation));
     api
       .post('/api/visualisations', visualisation)
-      .then(response => response.json())
-      .then((vis) => {
+      .then(({ body }) => {
+        const vis = body;
         dispatch(createVisualisationSuccess(vis));
         if (collectionId) {
           dispatch(addEntitiesToCollection(vis.id, collectionId));
@@ -32,6 +32,7 @@ export function createVisualisation(visualisation, collectionId, callback = () =
         callback();
       })
       .catch((err) => {
+        dispatch(showNotification('error', 'Failed to create visualisation.'));
         dispatch(createVisualisationFailure(err));
         callback(err);
       });
@@ -48,8 +49,8 @@ export function fetchVisualisation(id) {
     dispatch(fetchVisualisationRequest(id));
     api
       .get(`/api/visualisations/${id}`)
-      .then(response => response.json())
-      .then((visualisation) => {
+      .then(({ body }) => {
+        const visualisation = body;
         // We also need to possibly fetch datasets.
         const datasetId = visualisation.datasetId;
         if (datasetId) {
@@ -77,7 +78,10 @@ export function fetchVisualisation(id) {
         }
         dispatch(fetchVisualisationSuccess(visualisation));
       })
-      .catch(err => dispatch(fetchVisualisationFailure(err)));
+      .catch((err) => {
+        dispatch(showNotification('error', 'Failed to fetch visualisation.'));
+        dispatch(fetchVisualisationFailure(err));
+      });
   };
 }
 
@@ -99,7 +103,6 @@ export function saveVisualisationChanges(visualisation, callback = () => {}) {
     );
     api
       .put(`/api/visualisations/${visualisation.id}`, visualisation)
-      .then(response => response.json())
       .then(() => {
         dispatch(
           saveVisualisationChangesSuccess(
@@ -112,6 +115,7 @@ export function saveVisualisationChanges(visualisation, callback = () => {}) {
         callback();
       })
       .catch((error) => {
+        dispatch(showNotification('error', 'Failed to save visualisation.'));
         dispatch(saveVisualisationChangesFailure(prevVisualisation));
         callback(error);
       });
@@ -136,9 +140,11 @@ export function deleteVisualisation(id) {
     dispatch(deleteVisualisationRequest(id));
     api
       .del(`/api/visualisations/${id}`)
-      .then(response => response.json())
       .then(() => dispatch(removeVisualisation(id)))
-      .catch(error => dispatch(deleteVisualisationFailure(error)));
+      .catch((error) => {
+        dispatch(showNotification('error', 'Failed to delete visualisation.'));
+        dispatch(deleteVisualisationFailure(error));
+      });
   };
 }
 
@@ -152,9 +158,11 @@ export function fetchShareId(visualisationId) {
     if (visualisationId != null) {
       api
         .post('/api/shares', { visualisationId })
-        .then(response => response.json())
-        .then((response) => {
-          dispatch(fetchShareIdSuccess({ id: visualisationId, shareId: response.id }));
+        .then(({ body }) => {
+          dispatch(fetchShareIdSuccess({ id: visualisationId, shareId: body.id }));
+        })
+        .catch(() => {
+          dispatch(showNotification('error', 'Failed to fetch share ID for visualisation.'));
         });
     }
   };
@@ -204,6 +212,7 @@ export function exportVisualisation(visualisationId, options) {
         });
       })
       .catch((error) => {
+        dispatch(showNotification('error', 'Failed to export visualisation.'));
         dispatch(exportVisualisationFailure(error));
       });
   };

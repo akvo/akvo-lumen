@@ -2,10 +2,12 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { FormattedMessage } from 'react-intl';
+
 import EntityTypeHeader from './entity-editor/EntityTypeHeader';
 import ConfirmUserAction from './users/ConfirmUserAction';
 import InviteUser from './users/InviteUser';
-import * as api from '../api';
+import * as api from '../utilities/api';
+import { showNotification } from '../actions/notification';
 
 require('./entity-editor/EntityTypeHeader.scss');
 require('./Users.scss');
@@ -168,20 +170,26 @@ class Users extends Component {
   onInviteUser(email) {
     this.setState({ isInviteModalVisible: false });
     api.post('/api/admin/invites', { email })
-      .then(response => response.json())
-      .then(() => this.getInvitations());
+      .then(() => this.getInvitations())
+      .catch(() => {
+        this.props.dispatch(showNotification('error', 'Failed to invite user.'));
+      });
   }
 
   getUsers() {
     api.get('/api/admin/users')
-      .then(response => response.json())
-      .then(({ users }) => this.setState({ users }));
+      .then(({ body }) => this.setState({ users: body }))
+      .catch(() => {
+        this.props.dispatch(showNotification('error', 'Failed to fetch users.'));
+      });
   }
 
   getInvitations() {
     api.get('/api/admin/invites')
-      .then(response => response.json())
-      .then(({ invites }) => this.setState({ invitations: invites }));
+      .then(({ body: { invites } }) => this.setState({ invitations: invites }))
+      .catch(() => {
+        this.props.dispatch(showNotification('error', 'Failed to fetch invitations.'));
+      });
   }
 
   getUserActionButtons() {
@@ -233,20 +241,28 @@ class Users extends Component {
     const invitesUrl = `/api/admin/invites/${id}`;
     if (action === 'delete') {
       api.del(usersUrl)
-        .then(response => response.json())
-        .then(() => this.getUsers());
+        .then(() => this.getUsers())
+        .catch(() => {
+          this.props.dispatch(showNotification('error', `Failed to ${action} user.`));
+        });
     } else if (action === 'demote') {
       api.patch(usersUrl, { admin: false })
-        .then(response => response.json())
-        .then(() => this.getUsers());
+        .then(() => this.getUsers())
+        .catch(() => {
+          this.props.dispatch(showNotification('error', `Failed to ${action} user.`));
+        });
     } else if (action === 'promote') {
       api.patch(usersUrl, { admin: true })
-        .then(response => response.json())
-        .then(() => this.getUsers());
+        .then(() => this.getUsers())
+        .catch(() => {
+          this.props.dispatch(showNotification('error', `Failed to ${action} user.`));
+        });
     } else if (action === 'revoke') {
       api.del(invitesUrl)
-        .then(response => response.json())
-        .then(() => this.getInvitations());
+        .then(() => this.getInvitations())
+        .catch(() => {
+          this.props.dispatch(showNotification('error', `Failed to ${action} user.`));
+        });
     }
   }
 
@@ -308,6 +324,7 @@ Users.propTypes = {
     id: PropTypes.string.isRequired,
     username: PropTypes.string.isRequired,
   }).isRequired,
+  dispatch: PropTypes.func.isRequired,
 };
 
 Users.defaultProps = {
