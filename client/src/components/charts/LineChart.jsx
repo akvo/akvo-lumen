@@ -100,6 +100,7 @@ export default class LineChart extends Component {
     return {
       ...series,
       data: series.data
+        .filter(itsSet)
         .sort((a, b) => sortChronologically(a, b, ({ timestamp }) => timestamp))
         .reduce((acc, datum) => (
           itsSet(datum.value) ? acc.concat(datum) : acc
