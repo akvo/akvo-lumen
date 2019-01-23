@@ -1,7 +1,6 @@
 (ns akvo.lumen.lib.raster
   (:require [akvo.lumen.endpoint.job-execution :as job-execution]
             [akvo.lumen.lib :as lib]
-            [akvo.lumen.lib.update :as update]
             [akvo.lumen.util :as util]
             [cheshire.core :as json]
             [clojure.java.io :as io]

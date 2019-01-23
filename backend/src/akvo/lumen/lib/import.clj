@@ -63,7 +63,7 @@
 (defn- execute
   "Import runs within a future and since this is not taking part of ring
   request / response cycle we need to make sure to capture errors."
-  [conn {:keys [sentry-backend-dsn] :as config} error-tracker job-execution-id data-source-id claims spec]
+  [conn config error-tracker job-execution-id data-source-id claims spec]
   (future
     (let [table-name (util/gen-table-name "ds")]
       (try
