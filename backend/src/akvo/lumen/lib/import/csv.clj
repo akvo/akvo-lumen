@@ -15,8 +15,8 @@
   [value type]
   (cond
     (string/blank? value) nil
-    (= type :number) (Double/parseDouble value)
-    (= type :geoshape) (postgres/->Geoshape value)
+    (= type "number") (Double/parseDouble value)
+    (= type "geoshape") (postgres/->Geoshape value)
     :else value))
 
 (defn gen-column-titles
@@ -40,20 +40,20 @@
   [rows]
   (for [column-data (apply map vector rows)]
     (condp every? column-data
-      numeric? :number
-      wkt-shape? :geoshape
-      :text)))
+      numeric? "number"
+      wkt-shape? "geoshape"
+      "text")))
 
 (defn get-column-tuples
   "Returns a seq of maps containing column id, titles & types.
 
   Example output:
 
-  [{:id :c1 :title \"Column 1\" :type :text} ...]
+  [{:id :c1 :title \"Column 1\" :type \"text\"} ...]
   "
   [column-titles column-types]
   (mapv (fn [idx title type]
-          {:id (keyword (str "c" (inc idx)))
+          {:id (str "c" (inc idx))
            :title title
            :type type})
         (range)
@@ -84,7 +84,7 @@
         rows (if headers? (rest data) data)
         column-types (if guess-types?
                        (get-column-types rows)
-                       (repeat column-count :text))
+                       (repeat column-count "text"))
         column-spec (get-column-tuples column-titles column-types)]
     (reify
       p/DatasetImporter

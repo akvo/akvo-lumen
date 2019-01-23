@@ -6,7 +6,7 @@
             [clojure.set :as set]
             [clojure.set :refer (rename-keys) :as set]
             [clojure.string :as s]
-            [clojure.walk :refer (keywordize-keys)]
+            [clojure.walk :as walk]
             [hugsql.core :as hugsql])
   (:import [java.sql Timestamp]
            [org.postgis PGgeometry]))
@@ -15,7 +15,7 @@
 (hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/transformation/engine.sql")
 
-(defmethod engine/valid? :core/merge-datasets
+(defmethod engine/valid? "core/merge-datasets"
   [op-spec]
   (let [source (get-in op-spec ["args" "source"])
         target (get-in op-spec ["args" "target"])]
@@ -163,7 +163,7 @@
                              table-name)]
      :columns (into columns target-merge-columns)}))
 
-(defmethod engine/apply-operation :core/merge-datasets
+(defmethod engine/apply-operation "core/merge-datasets"
   [{:keys [tenant-conn]} table-name columns op-spec]
   (apply-merge-operation tenant-conn table-name columns op-spec))
 
@@ -178,9 +178,10 @@
   "returns a distinct collection with the columns that participate in a merge operation"
   [merge-op]
   (distinct
-   (conj (:mergeColumns merge-op)
-         (:mergeColumn merge-op)
-         (:aggregationColumn merge-op))))
+   (filter some?
+           (-> (:mergeColumns merge-op)
+               (conj (:mergeColumn merge-op))
+               (conj (:aggregationColumn merge-op))))))
 
 (defn- merged-columns-diff [dss merge-source-op]
   (let [merged-dataset (some #(when (= (:dataset-id %) (:datasetId merge-source-op)) %) dss)
@@ -194,7 +195,7 @@
 (defn consistency-error? [tenant-conn dataset-id]
   (let [merged-sources (->> (latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})
                             :transformations
-                            keywordize-keys
+                            walk/keywordize-keys
                             (filter #(= "core/merge-datasets" (:op %)))
                             (map #(-> % :args :source)))]
     (if-let [ds-diff (and (not-empty merged-sources)
@@ -210,7 +211,7 @@
                                                            (filter some?))]
                                  (when (not-empty column-diff-coll)
                                    column-diff-coll)))]
-        {:error       (format "This version of the dataset isn't consistent thus it has merge transformations with datasets columns wich were already removed from their datasets: %s" (reduce str column-diff))
+        {:error(format "This version of the dataset isn't consistent thus it has merge transformations with datasets columns which were already removed from their datasets: %s" (reduce str column-diff))
          :column-diff column-diff}))))
 
 (defn sources-related
@@ -230,7 +231,7 @@
        (filter #(not= target-dataset-id (:dataset_id %))) ;; exclude (target-)dataset(-id)
        (map (fn [dataset-version]
               ;; get source datasets of merge transformations with appended dataset-version as origin
-              (->> (keywordize-keys (:transformations dataset-version))
+              (->> (walk/keywordize-keys (:transformations dataset-version))
                    (filter #(= "core/merge-datasets" (:op %)))
                    (map #(-> % :args :source))
                    (map #(assoc % :origin {:id    (:dataset_id dataset-version)

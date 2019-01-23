@@ -98,7 +98,7 @@ export default class DashboardViewerItem extends Component {
   render() {
     const { item } = this.props;
     const isText = item.type === 'text';
-    const isVisualisation = item.type === 'visualisation';
+    const isVisualisation = (item.type === 'visualisation' && item.visualisation);
     const style = this.getItemStyle();
     const titleHeight = this.titleEl ?
       this.titleEl.getBoundingClientRect().height :

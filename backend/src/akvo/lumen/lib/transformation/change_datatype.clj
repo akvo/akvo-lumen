@@ -9,7 +9,7 @@
 
 (hugsql/def-db-fns "akvo/lumen/lib/transformation/change_datatype.sql")
 
-(defmethod engine/valid? :core/change-datatype
+(defmethod engine/valid? "core/change-datatype"
   [op-spec]
   (let [{column-name "columnName"
          new-type "newType"
@@ -99,7 +99,7 @@
     (engine/ensure-number default-value)
     (change-datatype tenant-conn table-name column-name on-error alter-table-sql)))
 
-(defmethod engine/apply-operation :core/change-datatype
+(defmethod engine/apply-operation "core/change-datatype"
   [{:keys [tenant-conn]} table-name columns op-spec]
   (let [{column-name "columnName"
          new-type "newType"} (engine/args op-spec)]

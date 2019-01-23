@@ -8,7 +8,7 @@ import Root from './containers/Root';
 import configureStore from './store/configureStore';
 import * as auth from './utilities/auth';
 import { init as initAnalytics } from './utilities/analytics';
-import queryString from 'query-string';
+import queryString from 'querystringify';
 
 function initAuthenticated(profile, env) {
   const initialState = { profile, env };

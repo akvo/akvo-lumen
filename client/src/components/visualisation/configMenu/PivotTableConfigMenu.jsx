@@ -194,7 +194,7 @@ export default class PivotTableConfigMenu extends Component {
           title="columns"
           options={(
             <div>
-              <div data-test-id="column-menu">
+              <div data-test-id="column-select">
                 <ConfigMenuSectionOptionSelect
                   placeholderId="select_a_column"
                   labelTextId="columns"

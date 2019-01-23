@@ -1,14 +1,49 @@
 (ns akvo.lumen.test-utils
   (:require [akvo.lumen.component.tenant-manager :refer [pool]]
-            [akvo.lumen.util :refer [squuid]]
-            [clojure.edn :as edn]
             [akvo.lumen.lib.import :as import]
-            [diehard.core :as dh]
-            [clojure.tools.logging :as log]
-            [clojure.test :as t]
-            [clojure.spec.test.alpha :as stest]
+            [akvo.lumen.lib.import.clj-data-importer]
+            [akvo.lumen.lib.transformation.engine :refer (new-dataset-version)]
+            [akvo.lumen.lib.update :as update]
+            [akvo.lumen.postgres]
+            [akvo.lumen.specs.transformation]
+            [akvo.lumen.util :refer [squuid] :as util ]
+            [cheshire.core :as json]
+            [clj-time.coerce :as tcc]
+            [clj-time.core :as tc]
+            [clj-time.format :as timef]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [hugsql.core :as hugsql]))
+            [clojure.set :as set]
+            [clojure.spec.alpha :as s]
+            [clojure.spec.test.alpha :as stest]
+            [clojure.test :as t]
+            [clojure.tools.logging :as log]
+            [clojure.walk :refer (keywordize-keys)]
+            [diehard.core :as dh]
+            [hugsql.core :as hugsql]
+            [robert.hooke :refer (add-hook) :as r])
+  (:import [java.time Instant]))
+
+(defn dataset-version-spec-adapter
+  "provisional spec adapter function to be removed when specs work was finished"
+  [dsv]
+  (-> (keywordize-keys dsv)
+      (update :transformations
+              (fn [txs]
+                (mapv (fn [t]
+                        (update t :changedColumns
+                                (fn [cc]
+                                  (reduce (fn [c [k v]] (assoc c (name k) v)) {} cc)))) txs)))))
+
+(defn new-dataset-version-conform
+  [f t d]
+  (log/info :conforming :akvo.lumen.specs.transformation/next-dataset-version)
+  (util/conform :akvo.lumen.specs.transformation/next-dataset-version d dataset-version-spec-adapter)
+  (f t d))
+
+(doseq [v [#'new-dataset-version #'import/new-dataset-version]]
+  (r/clear-hooks v)
+  (r/add-hook v #'new-dataset-version-conform))
 
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 
@@ -43,11 +78,12 @@
 
 (defn import-file
   "Import a file and return the dataset-id, or the job-execution-id in case of FAIL status"
-  [tenant-conn error-tracker {:keys [file dataset-name has-column-headers?]}]
+  [tenant-conn error-tracker {:keys [file dataset-name has-column-headers? kind data with-job?]}]
   (let [spec {"name" (or dataset-name file)
-              "source" {"path" (.getAbsolutePath (io/file (io/resource file)))
-                        "kind" "DATA_FILE"
+              "source" {"path" (when file (.getAbsolutePath (io/file (io/resource file))))
+                        "kind" (or kind "DATA_FILE")
                         "fileName" (or dataset-name file)
+                        "data" data
                         "hasColumnHeaders" (boolean has-column-headers?)}}
         [tag {:strs [importId]}] (import/handle tenant-conn {} error-tracker {} spec)]
     (t/is (= tag :akvo.lumen.lib/ok))
@@ -55,8 +91,60 @@
                     :max-retries 20
                     :delay-ms 100}
       (let [job (job-execution-by-id tenant-conn {:id importId})
+            status (:status job)
+            dataset (dataset-id-by-job-execution-id tenant-conn {:id importId})
+            res (when (not= "PENDING" status)
+                  (if (= "OK" status)
+                    (:dataset_id dataset)
+                    importId))]
+        (when res
+          (if  with-job?
+            [job dataset]
+            res))))))
+
+(defn update-file
+  "Update a file and return the dataset-id, or the job-execution-id in case of FAIL status"
+  [tenant-conn error-tracker dataset-id data-source-id {:keys [data has-column-headers? kind]}]
+  (let [spec {"source" {"kind" kind
+                        "hasColumnHeaders" (boolean has-column-headers?)
+                        "data" data}}
+        [tag {:strs [updateId] :as res}] (update/update-dataset tenant-conn {} error-tracker dataset-id data-source-id spec)]
+    (t/is (= tag :akvo.lumen.lib/ok))
+    (dh/with-retry {:retry-if (fn [v e] (not v))
+                    :max-retries 20
+                    :delay-ms 100}
+      (let [job (job-execution-by-id tenant-conn {:id updateId})
             status (:status job)]
-                 (when (not= "PENDING" status)
-                   (if (= "OK" status)
-                     (:dataset_id (dataset-id-by-job-execution-id tenant-conn {:id importId}))
-                     importId))))))
+        (when (not= "PENDING" status)
+          (if (= "OK" status)
+            (:dataset_id (dataset-id-by-job-execution-id tenant-conn {:id updateId}))
+            updateId))))))
+
+(defn rand-bol []
+  (if (= 0 (rand-int 2)) false true))
+
+(defn- replace-item
+  "Returns a list with the n-th item of l replaced by v."
+  [l n v]
+  (concat (take n l) (list v) (drop (inc n) l)))
+
+(defn at-least-one-true
+  "returns a seq of boolean with a minimum one true"
+  [c]
+  (let [res (for [r (range c)]
+              (rand-bol))]
+    (if (some true? res)
+      res
+      (replace-item res (rand-int c) true))))
+
+(defn clj>json>clj [d]
+  (json/decode (json/generate-string d)))
+
+(defn instant-date
+  "receives a string that represents a date dd/MM/yyyy
+   returns an java.time.Instant object "
+  [d]
+  (->> d
+       (timef/parse (timef/formatter "dd/MM/yyyy"))
+       tcc/to-long
+       Instant/ofEpochMilli))

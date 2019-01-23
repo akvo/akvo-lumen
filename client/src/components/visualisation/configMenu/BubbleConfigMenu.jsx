@@ -98,7 +98,7 @@ export default function BarConfigMenu(props) {
                 legendTitle: get(columnOptions.find(item => item.value === value), 'title'),
               }, spec, onChangeSpec, columnOptions)}
             />
-            {spec.bucketColumn !== null && (
+            {/* {spec.bucketColumn !== null && (
               <ConfigMenuSectionOptionSelect
                 labelTextId="number_of_buckets_to_show"
                 value={spec.truncateSize !== null ? spec.truncateSize.toString() : null}
@@ -131,7 +131,7 @@ export default function BarConfigMenu(props) {
                   truncateSize: value,
                 }, spec, onChangeSpec, columnOptions)}
               />
-            )}
+            )} */}
           </div>
         )}
         advancedOptions={(

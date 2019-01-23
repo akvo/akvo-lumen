@@ -1,6 +1,7 @@
 (ns akvo.lumen.lib.visualisation.map-config
   (:require [akvo.lumen.postgres.filter :as filter]
             [clojure.string :as str]
+            [clojure.walk :as walk]
             [hugsql.core :as hugsql])
   (:import [java.awt Color]))
 
@@ -341,7 +342,7 @@
                                  "srid" "3857"}})
                    (let [geom-column (get-geom-column layer)
                          {:keys [columns]} (dataset-by-id tenant-conn {:id datasetId})
-                         where-clause (filter/sql-str columns filters)
+                         where-clause (filter/sql-str (walk/keywordize-keys columns) filters)
                          popup-columns (mapv #(get % "column") popup)
                          point-color-column pointColorColumn
                          sql (get-sql tenant-conn columns table-name geom-column

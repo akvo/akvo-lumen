@@ -8,11 +8,15 @@
 
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/dataset_version.sql")
+
+(defn log-ex [e]
+  (log/info e))
 
 (defmulti valid?
   "Validate transformation spec"
   (fn [op-spec]
-    (keyword (op-spec "op"))))
+    (op-spec "op")))
 
 (defmethod valid? :default
   [op-spec]
@@ -29,7 +33,7 @@
    - \"args\" : map with arguments to the operation
    - \"onError\" : Error strategy"
   (fn [deps table-name columns op-spec]
-    (keyword (get op-spec "op"))))
+    (get op-spec "op")))
 
 (defmethod apply-operation :default
   [deps table-name columns op-spec]
@@ -44,7 +48,7 @@
   (try
     (apply-operation deps table-name columns op-spec)
     (catch Exception e
-      (log/info e)
+      (log-ex e)
       {:success? false
        :message (format "Failed to transform: %s" (.getMessage e))})))
 
@@ -201,7 +205,7 @@
 
 (defmulti adapt-transformation
   (fn [op-spec older-columns new-columns]
-    (keyword (get op-spec "op"))))
+    (get op-spec "op")))
 
 (defmethod adapt-transformation :default
   [op-spec older-columns new-columns]
@@ -233,7 +237,7 @@
                                         :columns         (:columns op)
                                         :transformations applied-txs})
           (recur (rest transformations) (:columns op) (inc version) applied-txs)))
-      (insert-dataset-version conn {:id                  (str (util/squuid))
+      (new-dataset-version conn {:id                  (str (util/squuid))
                                     :dataset-id          dataset-id
                                     :job-execution-id    job-execution-id
                                     :table-name          table-name

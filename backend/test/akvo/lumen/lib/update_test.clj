@@ -16,12 +16,12 @@
                            "hidden" false,
                            "direction" nil,
                            "columnName" "c2"}]
-        columns '({:id :c1,
+        columns '({:id "c1",
                    :title "A",
-                   :type :text}
-                  {:id :c2,
+                   :type "text"}
+                  {:id "c2",
                    :title "B",
-                   :type :text})]
+                   :type "text"})]
     (testing "No changes to columns"
       (is (update/compatible-columns? imported-columns columns)))
 
@@ -42,7 +42,7 @@
         (is (not (update/compatible-columns? imported-columns columns)))))
 
     (testing "New column"
-      (let [columns (conj columns {:id :c3 :title "C" :type :text})]
+      (let [columns (conj columns {:id :c3 :title "C" :type "text"})]
         (is (update/compatible-columns? imported-columns columns))))
 
     (testing "Removed column"

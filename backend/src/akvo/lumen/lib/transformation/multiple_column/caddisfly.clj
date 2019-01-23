@@ -1,8 +1,10 @@
 (ns akvo.lumen.lib.transformation.multiple-column.caddisfly
   (:require [akvo.lumen.postgres :as postgres]
             [akvo.lumen.lib.transformation.engine :as engine]
+            [akvo.lumen.lib.dataset.utils :refer (find-column)]
             [akvo.lumen.component.caddisfly :refer (get-schema)]
             [cheshire.core :as json]
+            [clojure.walk :as walk]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as string]
             [clojure.tools.logging :as log]
@@ -53,11 +55,10 @@
   [{:keys [tenant-conn caddisfly] :as deps} table-name current-columns op-spec]
   (jdbc/with-db-transaction [conn tenant-conn]
     (let [{:keys [onError op args]} op-spec
+          selected-column (find-column (walk/keywordize-keys current-columns) (-> args :selectedColumn :columnName))
 
-          selected-column (-> args :selectedColumn)
-
-          caddisfly-schema (if-let [multiple-id (:multipleId selected-column)]
-                             (get-schema caddisfly multiple-id)
+          caddisfly-schema (if-let [multipleId (:multipleId selected-column)]
+                             (get-schema caddisfly multipleId)
                              (throw
                               (ex-info "this column doesn't have a caddisflyResourceUuid currently associated!"
                                        {:message

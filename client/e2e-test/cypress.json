@@ -1,4 +1,5 @@
 {
   "chromeWebSecurity": false,
-  "projectId": "wazc6q"
+  "projectId": "wazc6q",
+  "defaultCommandTimeout": 20000
 }

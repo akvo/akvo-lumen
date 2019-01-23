@@ -7,6 +7,7 @@
             [akvo.lumen.util :refer [gen-table-name squuid]]
             [akvo.lumen.endpoint.commons.variant :as variant]
             [clojure.java.jdbc :as jdbc]
+            [akvo.lumen.test-utils :as tu]
             [clojure.test :refer :all]
             [hugsql.core :as hugsql]))
 
@@ -15,6 +16,7 @@
 ;;;
 
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/dataset_version.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
 
@@ -85,33 +87,33 @@
                         :description "Description"
                         :author {}
                         :source {}})
-  (insert-dataset-version conn {:id (squuid)
-                                :dataset-id (:dataset-id spec)
-                                :job-execution-id (:job-execution-id spec)
-                                :table-name (:table-name spec)
-                                :imported-table-name (:imported-table-name spec)
-                                :version 1
-                                :columns {}
-                                :transformations []})
-  (insert-dataset-version conn {:id (squuid)
-                                :dataset-id (:dataset-id-2 spec)
-                                :job-execution-id (:job-execution-id-2 spec)
-                                :table-name (:table-name-2 spec)
-                                :imported-table-name (:imported-table-name-2 spec)
-                                :version 1
-                                :columns {}
-                                :transformations []})
+  (new-dataset-version conn {:id (squuid)
+                             :dataset-id (:dataset-id spec)
+                             :job-execution-id (:job-execution-id spec)
+                             :table-name (:table-name spec)
+                             :imported-table-name (:imported-table-name spec)
+                             :version 1
+                             :columns {}
+                             :transformations []})
+  (new-dataset-version conn {:id (squuid)
+                             :dataset-id (:dataset-id-2 spec)
+                             :job-execution-id (:job-execution-id-2 spec)
+                             :table-name (:table-name-2 spec)
+                             :imported-table-name (:imported-table-name-2 spec)
+                             :version 1
+                             :columns {}
+                             :transformations []})
   (upsert-visualisation conn {:id         (:visualisation-id spec)
                               :dataset-id (:dataset-id spec)
                               :name       "Visualisation"
                               :type       "pie"
-                              :spec       {"bucketColumn" "c1"}
+                              :spec       {"bucketColumn" "c1" :filters []}
                               :author     {}})
   (upsert-visualisation conn {:id         (:visualisation2-id spec)
                               :dataset-id (:dataset-id-2 spec)
                               :name       "Visualisation"
                               :type       "bar"
-                              :spec       {}
+                              :spec       {:filters []}
                               :author     {}})
   (dashboard/create conn (dashboard-spec (:visualisation-id spec)
                                          (:visualisation2-id spec)) {}))
@@ -138,7 +140,7 @@
 ;;; Tests
 ;;;
 
-(use-fixtures :once tenant-conn-fixture)
+(use-fixtures :once tenant-conn-fixture tu/spec-instrument)
 
 
 (hugsql/def-db-fns "akvo/lumen/lib/dashboard.sql")

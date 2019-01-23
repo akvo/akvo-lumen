@@ -1,7 +1,7 @@
 /* eslint-disable no-underscore-dangle */
 import Keycloak from 'keycloak-js';
 import Raven from 'raven-js';
-import queryString from 'query-string';
+import queryString from 'querystringify';
 
 import { get } from './api';
 

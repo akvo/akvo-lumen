@@ -5,6 +5,7 @@
                                          tenant-conn-fixture]]
             [akvo.lumen.lib.dashboard :as dashboard]
             [akvo.lumen.endpoint.commons.variant :as variant]
+            [akvo.lumen.test-utils :as tu]
             [clojure.test :refer :all]
             [hugsql.core :as hugsql]))
 
@@ -47,7 +48,7 @@
 ;;; Tests
 ;;;
 
-(use-fixtures :once tenant-conn-fixture)
+(use-fixtures :once tenant-conn-fixture tu/spec-instrument)
 
 
 (hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")

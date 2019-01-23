@@ -16,7 +16,7 @@
             (aggregation/query tenant-conn
                                dataset-id
                                visualisation-type
-                               (json/parse-string query))
+                               (json/parse-string query true))
             (catch JsonParseException e
               (http/bad-request {:message (.getMessage e)})))
           (http/bad-request {:message "No query supplied"}))))))

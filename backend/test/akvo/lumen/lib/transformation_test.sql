@@ -13,7 +13,7 @@ SELECT COUNT(*) AS total
   FROM :i:table-name
 
 -- :name get-data :? :*
-SELECT * FROM :i:table-name
+SELECT * FROM :i:table-name order by rnum
 
 -- :name table-exists :? :1
 SELECT EXISTS (

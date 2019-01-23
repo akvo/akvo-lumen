@@ -10,6 +10,7 @@ const aggregationOnlyVisualisationTypes = [
   'bar',
   'scatter',
   'bubble',
+  'polararea',
 ];
 
 export default aggregationOnlyVisualisationTypes;

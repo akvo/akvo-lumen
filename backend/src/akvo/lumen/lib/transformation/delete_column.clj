@@ -11,7 +11,7 @@
 (defn col-name [op-spec]
   (get (engine/args op-spec) "columnName"))
 
-(defmethod engine/valid? :core/delete-column
+(defmethod engine/valid? "core/delete-column"
   [op-spec]
   (util/valid-column-name? (col-name op-spec)))
 
@@ -23,7 +23,7 @@
        (filter (fn [[distinct-columns _]]
                  (not-empty (filter #(= % column-name) distinct-columns))))))
 
-(defmethod engine/apply-operation :core/delete-column
+(defmethod engine/apply-operation "core/delete-column"
   [{:keys [tenant-conn]} table-name columns op-spec]
   (let [column-name (col-name op-spec)
         merged-sources (merged-sources-with-column tenant-conn column-name (:dataset-id op-spec))]

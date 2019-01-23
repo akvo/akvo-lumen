@@ -9,12 +9,12 @@
 (defn new-col-title [op-spec]
   (get (engine/args op-spec) "newColumnTitle"))
 
-(defmethod engine/valid? :core/rename-column
+(defmethod engine/valid? "core/rename-column"
   [op-spec]
   (and (util/valid-column-name? (col-name op-spec))
        (string? (new-col-title op-spec))))
 
-(defmethod engine/apply-operation :core/rename-column
+(defmethod engine/apply-operation "core/rename-column"
   [{:keys [tenant-conn]} table-name columns op-spec]
   (let [column-name (col-name op-spec)
         column-idx (engine/column-index columns column-name)

@@ -9,18 +9,18 @@
 (defn question-type->lumen-type
   [question]
   (condp = (:type question)
-    "NUMBER" :number
-    "DATE" :date
-    "GEO" :geopoint
-    "CADDISFLY" :multiple
-    :text))
+    "NUMBER" "number"
+    "DATE" "date"
+    "GEO" "geopoint"
+    "CADDISFLY" "multiple"
+    "text"))
 
 (defn dataset-columns
   "returns a vector of [{:title :type :id :key}]
   `:key` is optional"
   [form]
   (into (flow-common/commons-columns form)
-        (into [{:title "Device Id" :type :text :id :device_id}]
+        (into [{:title "Device Id" :type "text" :id :device_id}]
               (common/coerce question-type->lumen-type (flow-common/questions form)))))
 
 (defn render-response
@@ -38,7 +38,7 @@
     (reduce (fn [response-data {:keys [type id]}]
               (if-let [response (get responses id)]
                 (assoc response-data
-                       (keyword (format "c%s" id))
+                       (format "c%s" id)
                        (render-response type response))
                 response-data))
             {}

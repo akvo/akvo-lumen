@@ -6,7 +6,9 @@
             [akvo.lumen.lib.aggregation.pivot :as pivot]
             [akvo.lumen.lib.aggregation.scatter :as scatter]
             [akvo.lumen.lib.aggregation.bubble :as bubble]
+            [clojure.tools.logging :as log]
             [clojure.java.jdbc :as jdbc]
+            [clojure.walk :as walk]
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
@@ -23,10 +25,11 @@
 
 (defn query [tenant-conn dataset-id visualisation-type query]
   (jdbc/with-db-transaction [tenant-tx-conn tenant-conn {:read-only? true}]
-    (if-let [dataset (dataset-by-id tenant-tx-conn {:id dataset-id})]
+    (if-let [dataset (table-name-and-columns-by-dataset-id tenant-tx-conn {:id dataset-id})]
       (try
-        (query* tenant-tx-conn dataset visualisation-type query)
+        (query* tenant-tx-conn (update dataset :columns (comp walk/keywordize-keys vec)) visualisation-type query)
         (catch clojure.lang.ExceptionInfo e
+          (log/warn e :query query :visualisation-type visualisation-type)
           (lib/bad-request (merge {:message (.getMessage e)}
                                   (ex-data e)))))
       (lib/not-found {"datasetId" dataset-id}))))

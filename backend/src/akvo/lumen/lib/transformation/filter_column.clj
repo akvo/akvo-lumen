@@ -5,11 +5,11 @@
 
 (hugsql/def-db-fns "akvo/lumen/lib/transformation/filter_column.sql")
 
-(defmethod engine/valid? :core/filter-column
+(defmethod engine/valid? "core/filter-column"
   [op-spec]
   (boolean (not-empty (get (engine/args op-spec) "expression"))))
 
-(defmethod engine/apply-operation :core/filter-column
+(defmethod engine/apply-operation "core/filter-column"
   [{:keys [tenant-conn]} table-name columns op-spec]
   (let [{expr "expression"
          column-name "columnName"} (engine/args op-spec)

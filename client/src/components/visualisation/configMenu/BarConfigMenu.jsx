@@ -90,18 +90,20 @@ export default function BarConfigMenu(props) {
         title="x_axis"
         options={(
           <div>
-            <ConfigMenuSectionOptionSelect
-              placeholderId="select_a_data_column_to_group_by"
-              labelTextId="bucket_column"
-              value={spec.bucketColumn !== null ?
-              spec.bucketColumn.toString() : null}
-              name="xGroupColumnMenu"
-              options={filterColumns(columnOptions, ['number', 'text'])}
-              clearable
-              onChange={value => handleChangeSpec({
-                bucketColumn: value,
-              }, spec, onChangeSpec, columnOptions)}
-            />
+            <div data-test-id="bucket-select">
+              <ConfigMenuSectionOptionSelect
+                placeholderId="select_a_data_column_to_group_by"
+                labelTextId="bucket_column"
+                value={spec.bucketColumn !== null ?
+                spec.bucketColumn.toString() : null}
+                name="xGroupColumnMenu"
+                options={filterColumns(columnOptions, ['number', 'text'])}
+                clearable
+                onChange={value => handleChangeSpec({
+                  bucketColumn: value,
+                }, spec, onChangeSpec, columnOptions)}
+              />
+            </div>
             {spec.bucketColumn !== null && (
               <ConfigMenuSectionOptionSelect
                 labelTextId="number_of_buckets_to_show"

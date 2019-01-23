@@ -7,6 +7,7 @@
             [akvo.lumen.test-utils :refer [import-file]]
             [akvo.lumen.utils.logging-config :refer [with-no-logs]]
             [clojure.string :as string]
+            [akvo.lumen.test-utils :as tu]
             [clojure.test :refer :all]
             [hugsql.core :as hugsql])
   (:import [java.util.concurrent ExecutionException]))
@@ -15,7 +16,7 @@
 (hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
 
 
-(use-fixtures :once tenant-conn-fixture error-tracker-fixture)
+(use-fixtures :once tenant-conn-fixture error-tracker-fixture tu/spec-instrument)
 
 
 (deftest ^:functional test-dos-file

@@ -451,7 +451,7 @@ class Dashboard extends Component {
     /* not synchronous and is too slow here, hence the extra check */
     const requestedDatasetIds = this.state.requestedDatasetIds.slice(0);
 
-    Object.keys(dash.entities).forEach((key) => {
+    Object.keys(dash.entities).filter(key => Boolean(dash.entities[key])).forEach((key) => {
       const entity = dash.entities[key];
       const isVisualisation = entity.type === 'visualisation';
 
@@ -481,7 +481,7 @@ class Dashboard extends Component {
   addDataToVisualisations(visualisations) {
     const out = {};
 
-    Object.keys(visualisations).forEach((key) => {
+    Object.keys(visualisations).filter(key => Boolean(visualisations[key])).forEach((key) => {
       if (this.state.aggregatedDatasets[key]) {
         if (visualisations[key].visualisationType === 'map') {
           const { tenantDB, layerGroupId, metadata } = this.state.aggregatedDatasets[key];

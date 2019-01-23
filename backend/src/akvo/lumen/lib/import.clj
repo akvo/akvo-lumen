@@ -16,6 +16,7 @@
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/dataset_version.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
 
@@ -31,19 +32,19 @@
                        :to-table imported-table-name}
                       {}
                       {:transaction? false})
-    (insert-dataset-version conn {:id (util/squuid)
+    (new-dataset-version conn {:id (util/squuid)
                                   :dataset-id dataset-id
                                   :job-execution-id job-execution-id
                                   :table-name table-name
                                   :imported-table-name imported-table-name
                                   :version 1
-                                  :columns (mapv (fn [{:keys [title id type key multiple-type multiple-id]}]
+                                  :columns (mapv (fn [{:keys [title id type key multipleType multipleId]}]
                                                    {:columnName (name id)
                                                     :direction nil
                                                     :hidden false
                                                     :key (boolean key)
-                                                    :multipleId multiple-id
-                                                    :multipleType multiple-type
+                                                    :multipleId multipleId
+                                                    :multipleType multipleType
                                                     :sort nil
                                                     :title (string/trim title)
                                                     :type (name type)})
@@ -78,11 +79,17 @@
           (p/track error-tracker e)
           (throw e))))))
 
+(defn insert-data-source-db
+  "not all kind of things in data-source could be jsonify properly,
+  extracting here this functionality to be hookable in `dev` and `test`"
+  [tenant-conn data-source-id data-source]
+  (insert-data-source tenant-conn {:id data-source-id
+                                   :spec (json/generate-string data-source)}))
+
 (defn handle [tenant-conn config error-tracker claims data-source]
   (let [data-source-id (str (util/squuid))
         job-execution-id (str (util/squuid))]
-    (insert-data-source tenant-conn {:id data-source-id
-                                     :spec (json/generate-string data-source)})
+    (insert-data-source-db tenant-conn data-source-id data-source)
     (insert-job-execution tenant-conn {:id job-execution-id
                                        :data-source-id data-source-id})
     (execute tenant-conn config error-tracker job-execution-id data-source-id claims data-source)

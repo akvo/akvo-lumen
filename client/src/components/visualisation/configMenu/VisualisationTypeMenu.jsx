@@ -8,6 +8,7 @@ import visualisationTypes from '../../../constants/Visualisation/visualisationTy
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
 import ConfigMenuSectionOptionThumbs from '../../common/ConfigMenu/ConfigMenuSectionOptionThumbs';
 import { SELECT_VISUALISATION_TYPE } from '../../../constants/analytics';
+import IMAGES from '../../../constants/images';
 import { trackEvent } from '../../../utilities/analytics';
 
 require('./VisualisationTypeMenu.scss');
@@ -20,19 +21,16 @@ function VisualisationTypeMenu({ visualisation, onChangeVisualisationType, intl 
       options={(
         <ConfigMenuSectionOptionThumbs
           id="visualisation_type"
-          items={visualisationTypes.map((type) => {
-            const kebabType = kebabCase(type);
-            return {
-              label: intl.formatMessage({ id: type }),
-              imageSrc: require(`../../../styles/img/icon-128-visualisation-${kebabType}.png`),
-              onClick: () => {
-                trackEvent(SELECT_VISUALISATION_TYPE, type);
-                return onChangeVisualisationType(type);
-              },
-              selected: visualisation.visualisationType === type,
-              testId: `visualisation-type-${kebabType}`,
-            };
-          })}
+          items={visualisationTypes.map(type => ({
+            label: intl.formatMessage({ id: type }),
+            imageSrc: IMAGES.VISUALISATION[type] || '',
+            onClick: () => {
+              trackEvent(SELECT_VISUALISATION_TYPE, type);
+              return onChangeVisualisationType(type);
+            },
+            selected: visualisation.visualisationType === type,
+            testId: `visualisation-type-${kebabCase(type)}`,
+          }))}
         />
       )}
     />

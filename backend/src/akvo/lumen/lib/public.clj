@@ -6,7 +6,9 @@
             [akvo.lumen.lib.visualisation :as visualisation]
             [akvo.lumen.lib.visualisation.maps :as maps]
             [cheshire.core :as json]
+            [clojure.tools.logging :as log]
             [clojurewerkz.scrypt.core :as scrypt]
+            [clojure.walk :as walk]
             [clojure.set :as set]
             [hugsql.core :as hugsql]))
 
@@ -15,127 +17,31 @@
 (defn get-share [tenant-conn id]
   (public-by-id tenant-conn {:id id}))
 
-(defmulti visualisation (fn [_ visualisation config]
-                          (:visualisationType visualisation)))
+(def vis-aggregation-mapper {"pivot table" "pivot"
+                             "line"      "line"
+                             "bubble"    "bubble"
+                             "area"      "line"
+                             "pie"       "pie"
+                             "donut"     "donut"
+                             "polararea" "pie"
+                             "bar"       "bar"
+                             "scatter"   "scatter"})
 
-(defmethod visualisation "pivot table"
-  [tenant-conn visualisation config]
-  (let [dataset-id (:datasetId visualisation)
-        [dataset-tag dataset] (dataset/fetch-metadata tenant-conn dataset-id)
+(defn run-visualisation 
+  [tenant-conn visualisation]
+  (let [visualisation (walk/keywordize-keys visualisation)
+        [dataset-tag dataset] (dataset/fetch-metadata tenant-conn (:datasetId visualisation))
+        aggregation-type (get vis-aggregation-mapper (:visualisationType visualisation))
         [tag query-result] (aggregation/query tenant-conn
-                                              dataset-id
-                                              "pivot"
+                                              (:datasetId visualisation)
+                                              aggregation-type
                                               (:spec visualisation))]
     (when (and (= tag ::lib/ok)
                (= dataset-tag ::lib/ok))
       {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}
-        "datasets" { dataset-id dataset}})))
+       "datasets" { (:id dataset) dataset}})))
 
-(defmethod visualisation "line"
-  [tenant-conn visualisation config]
-  (let [dataset-id (:datasetId visualisation)
-        [dataset-tag dataset] (dataset/fetch-metadata tenant-conn dataset-id)
-        [tag query-result] (aggregation/query tenant-conn
-                                              dataset-id
-                                              "line"
-                                              (:spec visualisation))]
-    (when (and (= tag ::lib/ok)
-               (= dataset-tag ::lib/ok))
-      {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}
-        "datasets" { dataset-id dataset}})))
-
-(defmethod visualisation "bubble"
-  [tenant-conn visualisation config]
-  (let [dataset-id (:datasetId visualisation)
-        [dataset-tag dataset] (dataset/fetch-metadata tenant-conn dataset-id)
-        [tag query-result] (aggregation/query tenant-conn
-                                              dataset-id
-                                              "bubble"
-                                              (:spec visualisation))]
-    (when (and (= tag ::lib/ok)
-                (= dataset-tag ::lib/ok))
-      {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}
-        "datasets" { dataset-id dataset}})))
-
-(defmethod visualisation "area"
-  [tenant-conn visualisation config]
-  (let [dataset-id (:datasetId visualisation)
-        [dataset-tag dataset] (dataset/fetch-metadata tenant-conn dataset-id)
-        [tag query-result] (aggregation/query tenant-conn
-                                              dataset-id
-                                              "line"
-                                              (:spec visualisation))]
-    (when (and (= tag ::lib/ok)
-               (= dataset-tag ::lib/ok))
-      {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}
-        "datasets" { dataset-id dataset}})))
-
-(defmethod visualisation "pie"
-  [tenant-conn visualisation config]
-  (let [dataset-id (:datasetId visualisation)
-        [dataset-tag dataset] (dataset/fetch-metadata tenant-conn dataset-id)
-        [tag query-result] (aggregation/query tenant-conn
-                                              dataset-id
-                                              "pie"
-                                              (:spec visualisation))]
-    (when (and (= tag ::lib/ok)
-               (= dataset-tag ::lib/ok))
-      {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}
-        "datasets" { dataset-id dataset}})))
-
-(defmethod visualisation "donut"
-  [tenant-conn visualisation config]
-  (let [dataset-id (:datasetId visualisation)
-        [dataset-tag dataset] (dataset/fetch-metadata tenant-conn dataset-id)
-        [tag query-result] (aggregation/query tenant-conn
-                                              dataset-id
-                                              "pie"
-                                              (:spec visualisation))]
-    (when (and (= tag ::lib/ok)
-               (= dataset-tag ::lib/ok))
-      {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}
-        "datasets" { dataset-id dataset}})))
-
-(defmethod visualisation "polararea"
-  [tenant-conn visualisation config]
-  (let [dataset-id (:datasetId visualisation)
-        [dataset-tag dataset] (dataset/fetch-metadata tenant-conn dataset-id)
-        [tag query-result] (aggregation/query tenant-conn
-                                              dataset-id
-                                              "pie"
-                                              (:spec visualisation))]
-    (when (and (= tag ::lib/ok)
-                (= dataset-tag ::lib/ok))
-      {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}
-        "datasets" { dataset-id dataset}})))
-
-(defmethod visualisation "bar"
-  [tenant-conn visualisation config]
-  (let [dataset-id (:datasetId visualisation)
-        [dataset-tag dataset] (dataset/fetch-metadata tenant-conn dataset-id)
-        [tag query-result] (aggregation/query tenant-conn
-                                              dataset-id
-                                              "bar"
-                                              (:spec visualisation))]
-    (when (and (= tag ::lib/ok)
-               (= dataset-tag ::lib/ok))
-      {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}
-        "datasets" { dataset-id dataset }})))
-
-(defmethod visualisation "scatter"
-  [tenant-conn visualisation config]
-  (let [dataset-id (:datasetId visualisation)
-        [dataset-tag dataset] (dataset/fetch-metadata tenant-conn dataset-id)
-        [tag query-result] (aggregation/query tenant-conn
-                                              dataset-id
-                                              "scatter"
-                                              (:spec visualisation))]
-    (when (and (= tag ::lib/ok)
-               (= dataset-tag ::lib/ok))
-      {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}
-        "datasets" { dataset-id dataset}})))
-
-(defmethod visualisation "map"
+(defn run-map-visualisation
   [tenant-conn visualisation {:keys [windshaft-url]}]
   (let [layers (get-in visualisation [:spec "layers"])]
     (if (some #(get % "datasetId") layers)
@@ -152,8 +58,8 @@
             {"visualisations" {(:id visualisation) (merge visualisation map-data)}
              "metadata" {(:id visualisation) map-data}})))))
 
-(defmethod visualisation :default
-  [tenant-conn visualisation config]
+(defn run-unknown-type-visualisation 
+  [tenant-conn visualisation]
   (let [dataset-id (:datasetId visualisation)
         [tag dataset] (dataset/fetch-metadata tenant-conn dataset-id)]
     (when (= tag ::lib/ok)
@@ -161,9 +67,15 @@
        "visualisations" {(:id visualisation) visualisation}})))
 
 (defn visualisation-response-data [tenant-conn id config]
-  (let [[tag vis] (visualisation/fetch tenant-conn id)]
-    (when (= tag ::lib/ok)
-      (visualisation tenant-conn vis config))))
+  (try
+    (let [[tag vis] (visualisation/fetch tenant-conn id)]
+      (when (= tag ::lib/ok)
+        (condp contains? (:visualisationType vis)
+          #{"map"} (run-map-visualisation tenant-conn vis config)
+          (set (keys vis-aggregation-mapper)) (run-visualisation tenant-conn vis)
+          (run-unknown-type-visualisation tenant-conn vis))))
+    (catch Exception e
+      (log/warn e ::visualisation-response-data (str "problems fetching this vis-id: " id)))))
 
 (defn dashboard-response-data [tenant-conn id config]
   (let [[tag dashboard] (dashboard/fetch tenant-conn id)]

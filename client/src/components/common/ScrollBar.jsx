@@ -20,6 +20,7 @@ class ScrollBar extends Component {
 
   componentDidMount() {
     setTimeout(() => {
+      if (!this.wrapperElement || !this.contentElement) return;
       const outerWidth = this.wrapperElement.parentElement.offsetWidth;
       const innerWidth = this.contentElement.scrollWidth;
       const innerHeight = this.contentElement.scrollHeight;
