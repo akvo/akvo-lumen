@@ -24,8 +24,7 @@
                                                                       :content-types          true
                                                                       :default-charset        "utf-8"}}
  :akvo.lumen.auth/wrap-auth                              {}
- :akvo.lumen.auth/wrap-jwt                               {:keycloak-url   keycloak-url
-                                                          :keycloak-realm keycloak-realm}
+ :akvo.lumen.auth/wrap-jwt                               {:keycloak #ig/ref :akvo.lumen.component.keycloak/data}
  :akvo.lumen.component.tenant-manager/wrap-label-tenant  {}
  :akvo.lumen.component.error-tracker/wrap-sentry         {:dsn sentry-backend-dsn :opts {:namespaces ["org.akvo" "akvo"]}}
 
@@ -34,7 +33,9 @@
  :akvo.lumen.endpoint.dashboard/dashboard             {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
  :akvo.lumen.endpoint.dataset/dataset                 {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
                                                        :error-tracker  #ig/ref :akvo.lumen.component.error-tracker/error-tracker
-                                                       :config         #ig/ref :akvo.lumen.config}
+                                                       :import-config {:file-upload-path file-upload-path
+                                                                       :flow-api-url flow-api-url
+                                                                       :keycloak #ig/ref :akvo.lumen.component.keycloak/data}}
  :akvo.lumen.endpoint.data-source/data-source         {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
  :akvo.lumen.endpoint.env/env                         {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
                                                        :config         #ig/ref :akvo.lumen.config}
@@ -111,8 +112,11 @@
  :akvo.lumen.component.http/http      {:port http-port
                                        :handler    #ig/ref :akvo.lumen.component.handler/handler}
  :akvo.lumen.component.caddisfly/prod {:schema-uri caddisfly-schema-uri}
- :akvo.lumen.component.keycloak       {:url         keycloak-url
-                                       :realm       keycloak-realm
+
+ :akvo.lumen.component.keycloak/data  {:url         keycloak-url
+                                       :realm       keycloak-realm}
+
+ :akvo.lumen.component.keycloak       {:data #ig/ref :akvo.lumen.component.keycloak/data
                                        :credentials {"client_id"     keycloak-client-id
                                                      "client_secret" keycloak-client-secret}}
 
@@ -126,14 +130,17 @@
  {:app
   {:migrations {:tenant-manager "akvo/lumen/migrations/tenant_manager"
                 :tenants        "akvo/lumen/migrations/tenants"}}
-  :config        {:file-upload-path          file-upload-path
+  :config        {
+                  :file-upload-path          file-upload-path
+                  :flow-api-url              flow-api-url
+
                   :max-upload-size           100
                   :keycloak-url              keycloak-url
                   :keycloak-realm            keycloak-realm
                   :keycloak-public-client-id keycloak-public-client-id
                   :sentry-client-dsn         sentry-client-dsn
                   :sentry-backend-dsn        sentry-backend-dsn
-                  :flow-api-url              flow-api-url
+
                   :windshaft-url             "http://localhost:4000"
                   :piwik-site-id             piwik-site-id}}
 

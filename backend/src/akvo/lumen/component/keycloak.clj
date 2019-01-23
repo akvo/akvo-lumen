@@ -276,8 +276,12 @@
                        :api-root (format "%s/admin/realms/%s" url realm)
                        :credentials credentials}))
 
-(defmethod ig/init-key :akvo.lumen.component.keycloak  [_ {:keys [credentials url realm] :as opts}]
-  (let [{:keys [issuer openid-config api-root] :as this} (keycloak opts)
+(defmethod ig/init-key :akvo.lumen.component.keycloak/data  [_ {:keys [url realm] :as opts}]
+  opts)
+
+
+(defmethod ig/init-key :akvo.lumen.component.keycloak  [_ {:keys [credentials data] :as opts}]
+  (let [{:keys [issuer openid-config api-root] :as this} (keycloak (assoc data :credentials credentials))
         openid-config (fetch-openid-configuration issuer)]
       (log/info "Successfully got openid-config from provider.")
       (assoc this :openid-config openid-config)))

@@ -44,9 +44,9 @@
                            ;; remove this map conversion logic once #1926 is finished
                            (map #(update % :id name) columns))))))
 
-(defn- do-update [tenant-conn config dataset-id data-source-id job-execution-id data-source-spec]
+(defn- do-update [tenant-conn import-config dataset-id data-source-id job-execution-id data-source-spec]
   (jdbc/with-db-transaction [conn tenant-conn]
-    (with-open [importer (import/dataset-importer (get data-source-spec "source") config)]
+    (with-open [importer (import/dataset-importer (get data-source-spec "source") import-config)]
       (let [initial-dataset-version  (initial-dataset-version-to-update-by-dataset-id conn {:dataset-id dataset-id})
             imported-dataset-columns (vec (:columns initial-dataset-version))
             importer-columns         (p/columns importer)]
@@ -88,14 +88,14 @@
                                  imported-table-name
                                  dataset-version))))))))
 
-(defn update-dataset [tenant-conn config error-tracker dataset-id data-source-id data-source-spec]
+(defn update-dataset [tenant-conn import-config error-tracker dataset-id data-source-id data-source-spec]
   (let [job-execution-id (str (util/squuid))]
     (insert-dataset-update-job-execution tenant-conn {:id job-execution-id
                                                       :data-source-id data-source-id})
     (future
       (try
         (do-update tenant-conn
-                   config
+                   import-config
                    dataset-id
                    data-source-id
                    job-execution-id

@@ -20,8 +20,8 @@
   (lib/ok (all-datasets tenant-conn)))
 
 (defn create
-  [tenant-conn config error-tracker claims data-source]
-  (import/handle tenant-conn config error-tracker claims data-source))
+  [tenant-conn import-config error-tracker claims data-source]
+  (import/handle tenant-conn import-config error-tracker claims data-source))
 
 (defn column-sort-order
   "Return this columns sort order (an integer) or nil if the dataset
@@ -91,13 +91,13 @@
         (let [v (delete-maps-by-dataset-id tenant-conn {:id id})](lib/ok {:id id}))))))
 
 (defn update
-  [tenant-conn config error-tracker dataset-id {refresh-token "refreshToken"}]
+  [tenant-conn import-config error-tracker dataset-id {refresh-token "refreshToken"}]
   (if-let [{data-source-spec :spec
             data-source-id   :id} (data-source-by-dataset-id tenant-conn {:dataset-id dataset-id})]
     (if-let [error (transformation.merge-datasets/consistency-error? tenant-conn dataset-id)]
       (lib/conflict error)
       (if-not (= (get-in data-source-spec ["source" "kind"]) "DATA_FILE")
-        (update/update-dataset tenant-conn config error-tracker dataset-id data-source-id
+        (update/update-dataset tenant-conn import-config error-tracker dataset-id data-source-id
                                (assoc-in data-source-spec ["source" "refreshToken"] refresh-token))
         (lib/bad-request {:error "Can't update uploaded dataset"})))
     (lib/not-found {:id dataset-id})))
