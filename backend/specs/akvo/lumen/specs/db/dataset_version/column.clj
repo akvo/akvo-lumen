@@ -1,7 +1,5 @@
 (ns akvo.lumen.specs.db.dataset-version.column
-  (:require [akvo.lumen.specs :as lumen.s]
-            [akvo.lumen.util :as u]
-            [clojure.spec.alpha :as s]))
+  (:require [clojure.spec.alpha :as s]))
 
 (s/def ::key boolean?)
 
