@@ -118,7 +118,7 @@ export default class DashboardCanvasItem extends Component {
       this.titleEl.getBoundingClientRect().height :
       TITLE_HEIGHT;
 
-    const { item } = this.props;
+    const { item, exporting } = this.props;
 
     return (
       <div
@@ -146,6 +146,7 @@ export default class DashboardCanvasItem extends Component {
                   width={dimensions.width}
                   height={dimensions.height - titleHeight}
                   showTitle={false}
+                  exporting={exporting}
                 /> : <LoadingSpinner />
               }
             </div>
@@ -192,4 +193,5 @@ DashboardCanvasItem.propTypes = {
   onFocus: PropTypes.func.isRequired,
   focused: PropTypes.bool,
   onSave: PropTypes.func,
+  exporting: PropTypes.bool,
 };
