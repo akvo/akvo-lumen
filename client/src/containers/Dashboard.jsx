@@ -4,6 +4,8 @@ import { connect } from 'react-redux';
 import { isEmpty, cloneDeep } from 'lodash';
 import get from 'lodash/get';
 import { intlShape, injectIntl } from 'react-intl';
+import BodyClassName from 'react-body-classname';
+
 import ShareEntity from '../components/modals/ShareEntity';
 import * as actions from '../actions/dashboard';
 import * as api from '../utilities/api';
@@ -536,49 +538,51 @@ class Dashboard extends Component {
 
     return (
       <NavigationPrompt shouldPrompt={this.state.savingFailed}>
-        <div className="Dashboard">
-          {!exporting && (
-            <DashboardHeader
-              title={dashboard.title}
-              isUnsavedChanges={this.state.isUnsavedChanges}
-              onDashboardAction={this.handleDashboardAction}
-              onChangeTitle={this.onUpdateName}
-              onBeginEditTitle={() => this.setState({ isUnsavedChanges: true })}
-              onSaveDashboard={this.onSave}
-              savingFailed={this.state.savingFailed}
-              timeToNextSave={this.state.timeToNextSave - this.state.timeFromPreviousSave}
-              isExporting={get(this.props, `library.dashboards[${dashboard.id}].isExporting`)}
+        <BodyClassName className={exporting ? 'exporting' : ''}>
+          <div className="Dashboard">
+            {!exporting && (
+              <DashboardHeader
+                title={dashboard.title}
+                isUnsavedChanges={this.state.isUnsavedChanges}
+                onDashboardAction={this.handleDashboardAction}
+                onChangeTitle={this.onUpdateName}
+                onBeginEditTitle={() => this.setState({ isUnsavedChanges: true })}
+                onSaveDashboard={this.onSave}
+                savingFailed={this.state.savingFailed}
+                timeToNextSave={this.state.timeToNextSave - this.state.timeFromPreviousSave}
+                isExporting={get(this.props, `library.dashboards[${dashboard.id}].isExporting`)}
+              />
+            )}
+            <DashboardEditor
+              dashboard={dashboard}
+              datasets={this.props.library.datasets}
+              visualisations={this.addDataToVisualisations(this.props.library.visualisations)}
+              metadata={this.state.metadata}
+              onAddVisualisation={this.onAddVisualisation}
+              onSave={this.onSave}
+              onUpdateLayout={this.updateLayout}
+              onUpdateEntities={this.updateEntities}
+              onUpdateName={this.onUpdateName}
+              print={this.props.print}
+              exporting={exporting}
             />
-          )}
-          <DashboardEditor
-            dashboard={dashboard}
-            datasets={this.props.library.datasets}
-            visualisations={this.addDataToVisualisations(this.props.library.visualisations)}
-            metadata={this.state.metadata}
-            onAddVisualisation={this.onAddVisualisation}
-            onSave={this.onSave}
-            onUpdateLayout={this.updateLayout}
-            onUpdateEntities={this.updateEntities}
-            onUpdateName={this.onUpdateName}
-            print={this.props.print}
-            exporting={exporting}
-          />
-          {!exporting && (
-            <ShareEntity
-              isOpen={this.state.isShareModalVisible}
-              onClose={this.toggleShareDashboard}
-              title={dashboard.title}
-              shareId={get(this.state, 'dashboard.shareId')}
-              protected={get(this.state, 'dashboard.protected')}
-              type={dashboard.type}
-              canSetPrivacy
-              onSetPassword={this.handleSetSharePassword}
-              onFetchShareId={this.handleFetchShareId}
-              onToggleProtected={this.handleToggleShareProtected}
-              alert={this.state.passwordAlert}
-            />
-          )}
-        </div>
+            {!exporting && (
+              <ShareEntity
+                isOpen={this.state.isShareModalVisible}
+                onClose={this.toggleShareDashboard}
+                title={dashboard.title}
+                shareId={get(this.state, 'dashboard.shareId')}
+                protected={get(this.state, 'dashboard.protected')}
+                type={dashboard.type}
+                canSetPrivacy
+                onSetPassword={this.handleSetSharePassword}
+                onFetchShareId={this.handleFetchShareId}
+                onToggleProtected={this.handleToggleShareProtected}
+                alert={this.state.passwordAlert}
+              />
+            )}
+          </div>
+        </BodyClassName>
       </NavigationPrompt>
     );
   }
