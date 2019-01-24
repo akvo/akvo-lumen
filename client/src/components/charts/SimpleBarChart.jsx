@@ -37,12 +37,13 @@ const getLabelText = (label, type) => {
 
 const getPaddingBottom = (data, type) => {
   const labelCutoffLength = 16;
+  const longestLabel = data
+    .map(({ label }) => String(getLabelText(label, type)))
+    .sort((a, b) => b.length - a.length)[0];
   const longestLabelLength =
     Math.min(
       labelCutoffLength,
-      data
-        .map(({ label }) => String(getLabelText(label, type)))
-        .sort((a, b) => b.length - a.length)[0].length
+      longestLabel ? longestLabel.length : 0
     );
   const pixelsPerChar = 3.5;
 
