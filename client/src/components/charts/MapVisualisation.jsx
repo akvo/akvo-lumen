@@ -327,7 +327,7 @@ export default class MapVisualisation extends Component {
     }
   }
   renderLeafletMap(nextProps) {
-    const { visualisation, metadata, width, height } = nextProps;
+    const { visualisation, metadata, width, height, exporting } = nextProps;
     const { tileUrl, tileAttribution } = getBaseLayerAttributes(visualisation.spec.baseLayer);
 
     this.setState({ hasRendered: false });
@@ -350,7 +350,7 @@ export default class MapVisualisation extends Component {
     }
 
     if (!this.map) {
-      map = L.map(node).setView(xCenter, xZoom);
+      map = L.map(node, { zoomControl: !exporting }).setView(xCenter, xZoom);
       map.scrollWheelZoom.disable();
       this.map = map;
     } else {

@@ -229,6 +229,7 @@ class VisualisationEditor extends Component {
           onChangeVisualisationSpec={props.onChangeVisualisationSpec}
           width={props.exporting ? 1000 : undefined}
           height={props.exporting ? 600 : undefined}
+          exporting={props.exporting}
         />
       </div>
     );
