@@ -328,6 +328,7 @@ export default class DashboardEditor extends Component {
                     onSave={this.props.onSave}
                     onEntityUpdate={this.handleEntityUpdate}
                     ref={(c) => { this.canvasElements[item.id] = c; }}
+                    exporting={exporting}
                   />
                 </div>
               ))}
