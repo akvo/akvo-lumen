@@ -130,6 +130,7 @@ class ScatterChart extends Component {
     const categoryExists = get(data, 'series[3]');
 
     const values = data.series[0].data
+      .filter(itsSet)
       .map(({ value, ...rest }, i) => {
         const x = value;
         const y = data.series[1].data[i].value;

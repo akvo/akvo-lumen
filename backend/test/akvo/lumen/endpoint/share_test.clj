@@ -7,6 +7,7 @@
             [akvo.lumen.util :refer [gen-table-name squuid]]
             [akvo.lumen.endpoint.commons.variant :as variant]
             [clojure.java.jdbc :as jdbc]
+            [akvo.lumen.test-utils :as tu]
             [clojure.test :refer :all]
             [hugsql.core :as hugsql]))
 
@@ -106,13 +107,13 @@
                               :dataset-id (:dataset-id spec)
                               :name       "Visualisation"
                               :type       "pie"
-                              :spec       {"bucketColumn" "c1"}
+                              :spec       {"bucketColumn" "c1" :filters []}
                               :author     {}})
   (upsert-visualisation conn {:id         (:visualisation2-id spec)
                               :dataset-id (:dataset-id-2 spec)
                               :name       "Visualisation"
                               :type       "bar"
-                              :spec       {}
+                              :spec       {:filters []}
                               :author     {}})
   (dashboard/create conn (dashboard-spec (:visualisation-id spec)
                                          (:visualisation2-id spec)) {}))
@@ -139,7 +140,7 @@
 ;;; Tests
 ;;;
 
-(use-fixtures :once tenant-conn-fixture)
+(use-fixtures :once tenant-conn-fixture tu/spec-instrument)
 
 
 (hugsql/def-db-fns "akvo/lumen/lib/dashboard.sql")

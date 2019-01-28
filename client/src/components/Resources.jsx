@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import * as api from '../api';
+
+import * as api from '../utilities/api';
+import { showNotification } from '../actions/notification';
 
 require('./Resources.scss');
 
@@ -60,8 +62,10 @@ class Resources extends Component {
 
   getResources() {
     api.get('/api/resources')
-      .then(response => response.json())
-      .then(resources => this.setState(resources));
+      .then(({ body }) => this.setState({ resources: body }))
+      .catch(() => {
+        this.props.dispatch(showNotification('error', 'Failed to fetch resources.'));
+      });
   }
 
   render() {

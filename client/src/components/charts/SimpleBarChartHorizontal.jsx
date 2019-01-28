@@ -9,6 +9,7 @@ import { AxisBottom } from '@vx/axis';
 import { Portal } from 'react-portal';
 import merge from 'lodash/merge';
 import { GridColumns } from '@vx/grid';
+import itsSet from 'its-set';
 
 import { isLight } from '../../utilities/color';
 import { heuristicRound, replaceLabelIfValueEmpty, calculateMargins, getLabelFontSize } from '../../utilities/chart';
@@ -30,12 +31,13 @@ const getLabelText = (label, type) => {
 
 const getPaddingBottom = (data, type) => {
   const labelCutoffLength = 16;
+  const longestLabel = data
+    .map(({ label }) => String(getLabelText(label, type)))
+    .sort((a, b) => b.length - a.length)[0];
   const longestLabelLength =
     Math.min(
       labelCutoffLength,
-      data
-        .map(({ label }) => String(getLabelText(label, type)))
-        .sort((a, b) => b.length - a.length)[0].length
+      longestLabel ? longestLabel.length : 0
     );
   const pixelsPerChar = 3.5;
 
@@ -116,9 +118,13 @@ export default class SimpleBarChart extends Component {
   getData() {
     const { data } = this.props;
 
-    if (!get(data, 'series[0]')) return false;
+    if (!itsSet(data, 'series[0]')) return false;
 
-    return merge({}, data.common, data.series[0]);
+    const result = merge({}, data.common, data.series[0]);
+
+    result.data = result.data.filter(itsSet);
+
+    return result;
   }
 
   getColor(key, index, numColors) {

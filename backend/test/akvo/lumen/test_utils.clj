@@ -2,13 +2,15 @@
   (:require [akvo.lumen.component.tenant-manager :refer [pool]]
             [akvo.lumen.lib.import :as import]
             [akvo.lumen.lib.import.clj-data-importer]
+            [akvo.lumen.lib.transformation.engine :refer (new-dataset-version)]
             [akvo.lumen.lib.update :as update]
             [akvo.lumen.postgres]
-            [akvo.lumen.lib.transformation.engine :refer (new-dataset-version)]
             [akvo.lumen.specs.transformation]
-            [robert.hooke :refer (add-hook) :as r]
             [akvo.lumen.util :refer [squuid] :as util ]
             [cheshire.core :as json]
+            [clj-time.coerce :as tcc]
+            [clj-time.core :as tc]
+            [clj-time.format :as timef]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.set :as set]
@@ -18,7 +20,9 @@
             [clojure.tools.logging :as log]
             [clojure.walk :refer (keywordize-keys)]
             [diehard.core :as dh]
-            [hugsql.core :as hugsql]))
+            [hugsql.core :as hugsql]
+            [robert.hooke :refer (add-hook) :as r])
+  (:import [java.time Instant]))
 
 (defn dataset-version-spec-adapter
   "provisional spec adapter function to be removed when specs work was finished"
@@ -135,3 +139,12 @@
 
 (defn clj>json>clj [d]
   (json/decode (json/generate-string d)))
+
+(defn instant-date
+  "receives a string that represents a date dd/MM/yyyy
+   returns an java.time.Instant object "
+  [d]
+  (->> d
+       (timef/parse (timef/formatter "dd/MM/yyyy"))
+       tcc/to-long
+       Instant/ofEpochMilli))

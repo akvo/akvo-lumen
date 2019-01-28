@@ -4,7 +4,7 @@ import { saveAs } from 'file-saver/FileSaver';
 
 import { addEntitiesToCollection } from './collection';
 import { showNotification } from './notification';
-import * as api from '../api';
+import * as api from '../utilities/api';
 import { base64ToBlob, extToContentType } from '../utilities/export';
 
 export const fetchDashboardsSuccess = createAction('FETCH_DASHBOARDS_SUCCESS');
@@ -19,8 +19,8 @@ export function createDashboard(dashboard, collectionId, callback = () => {}) {
     dispatch(createDashboardRequest(dashboard));
     api
       .post('/api/dashboards', dashboard)
-      .then(response => response.json())
-      .then((dash) => {
+      .then(({ body }) => {
+        const dash = body;
         dispatch(createDashboardSuccess(dash));
         if (collectionId) {
           dispatch(addEntitiesToCollection(dash.id, collectionId));
@@ -29,6 +29,7 @@ export function createDashboard(dashboard, collectionId, callback = () => {}) {
         callback();
       })
       .catch((err) => {
+        dispatch(showNotification('error', 'Failed to create dashboard.'));
         dispatch(createDashboardFailure(err));
         callback(err);
       });
@@ -51,12 +52,12 @@ export function saveDashboardChanges(dashboard, callback = () => {}) {
     dispatch(editDashboardRequest);
     api
       .put(`/api/dashboards/${id}`, dashboard)
-      .then(response => response.json())
-      .then((responseDash) => {
-        dispatch(editDashboardSuccess(responseDash));
+      .then(({ body }) => {
+        dispatch(editDashboardSuccess(body));
         callback();
       })
       .catch((error) => {
+        dispatch(showNotification('error', 'Failed to save dashboard.'));
         dispatch(editDashboardFailure(error));
         callback(error);
       });
@@ -73,9 +74,11 @@ export function fetchDashboard(id) {
     dispatch(fetchDashboardRequest(id));
     api
       .get(`/api/dashboards/${id}`)
-      .then(response => response.json())
-      .then(dashboard => dispatch(fetchDashboardSuccess(dashboard)))
-      .catch(err => dispatch(fetchDashboardFailure(err)));
+      .then(({ body }) => dispatch(fetchDashboardSuccess(body)))
+      .catch((error) => {
+        dispatch(showNotification('error', 'Failed to fetch dashboard.'));
+        dispatch(fetchDashboardFailure(error));
+      });
   };
 }
 
@@ -89,9 +92,11 @@ export function deleteDashboard(id) {
     dispatch(deleteDashboardRequest(id));
     api
       .del(`/api/dashboards/${id}`)
-      .then(response => response.json())
       .then(() => dispatch(deleteDashboardSuccess(id)))
-      .catch(error => dispatch(deleteDashboardFailure(error)));
+      .catch((error) => {
+        dispatch(showNotification('error', 'Failed to delete dashboard.'));
+        dispatch(deleteDashboardFailure(error));
+      });
   };
 }
 
@@ -108,15 +113,17 @@ export function fetchShareId(dashboardId) {
     if (dashboardId != null) {
       api
         .post('/api/shares', { dashboardId })
-        .then(response => response.json())
-        .then((response) => {
+        .then(({ body }) => {
           dispatch(
             fetchShareIdSuccess({
               id: dashboardId,
-              shareId: response.id,
-              protected: response.protected,
+              shareId: body.id,
+              protected: body.protected,
             })
           );
+        })
+        .catch(() => {
+          dispatch(showNotification('error', 'Failed to fetch share ID for dashboard.'));
         });
     }
   };
@@ -138,16 +145,17 @@ export function setShareProtection(shareId, payload, callback = () => {}) {
             dispatch(setShareProtectionSuccess({ shareId, data: payload }));
           }
           if (response.status !== 200) isError = true;
-          return response.json();
+          return response.body;
         })
-        .then((response) => {
+        .then((body) => {
           if (isError) {
-            callback(response);
+            callback(body);
           } else {
-            callback(null, response);
+            callback(null, body);
           }
         })
         .catch((error, response) => {
+          dispatch(showNotification('error', 'Failed to set share protection for dashboard.'));
           callback(response);
         });
     }
@@ -191,6 +199,7 @@ export function exportDashboard(dashboard, options) {
         });
       })
       .catch((error) => {
+        dispatch(showNotification('error', 'Failed to export dashboard.'));
         dispatch(exportDashboardFailure(error));
       });
   };

@@ -6,7 +6,7 @@ import { AppContainer } from 'react-hot-loader';
 import { syncHistoryWithStore } from 'react-router-redux';
 import Root from './containers/Root';
 import configureStore from './store/configureStore';
-import * as auth from './auth';
+import * as auth from './utilities/auth';
 import { init as initAnalytics } from './utilities/analytics';
 import queryString from 'querystringify';
 

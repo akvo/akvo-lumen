@@ -1,16 +1,18 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { cloneDeep, get } from 'lodash';
+import { connect } from 'react-redux';
 
 import VisualisationConfig from './configMenu/VisualisationConfig';
 import VisualisationPreview from './VisualisationPreview';
 import { checkUndefined } from '../../utilities/utils';
 import { specIsValidForApi, getNeedNewAggregation } from '../../utilities/aggregation';
-import * as api from '../../api';
+import * as api from '../../utilities/api';
+import { showNotification } from '../../actions/notification';
 
 require('./VisualisationEditor.scss');
 
-export default class VisualisationEditor extends Component {
+class VisualisationEditor extends Component {
 
   constructor() {
     super();
@@ -152,9 +154,7 @@ export default class VisualisationEditor extends Component {
 
     const updateMapIfSuccess = (response) => {
       if (response.status >= 200 && response.status < 300) {
-        response
-          .json()
-          .then(json => updateMapVisualisation(json));
+        updateMapVisualisation(response.body);
       } else {
         setMapVisualisationError();
       }
@@ -186,13 +186,15 @@ export default class VisualisationEditor extends Component {
         .get(`/api/aggregation/${datasetId}/${VIS_TYPE_TO_AGGR_ENDPOINT_NAME[vType]}`, {
           query: JSON.stringify(spec),
         })
-        .then(response => response.json())
-        .then((response) => {
+        .then(({ body }) => {
           if (requestId === this.latestRequestId) {
             this.setState({
-              visualisation: Object.assign({}, visualisation, { data: response }),
+              visualisation: Object.assign({}, visualisation, { data: body }),
             });
           }
+        })
+        .catch((error) => {
+          this.props.dispatch(showNotification('error', error.message));
         });
     }
   }
@@ -227,6 +229,7 @@ export default class VisualisationEditor extends Component {
           onChangeVisualisationSpec={props.onChangeVisualisationSpec}
           width={props.exporting ? 1000 : undefined}
           height={props.exporting ? 600 : undefined}
+          exporting={props.exporting}
         />
       </div>
     );
@@ -241,5 +244,8 @@ VisualisationEditor.propTypes = {
   onChangeVisualisationSpec: PropTypes.func.isRequired,
   onSaveVisualisation: PropTypes.func.isRequired,
   loadDataset: PropTypes.func.isRequired,
+  dispatch: PropTypes.func.isRequired,
   exporting: PropTypes.bool,
 };
+
+export default connect()(VisualisationEditor);

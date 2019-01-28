@@ -9,12 +9,13 @@
             [akvo.lumen.lib.dashboard :as dashboard]
             [akvo.lumen.lib.dataset :as dataset]
             [akvo.lumen.lib.visualisation :as visualisation]
+            [akvo.lumen.test-utils :as tu]
             [akvo.lumen.test-utils :refer [import-file]]
             [akvo.lumen.endpoint.commons.variant :as variant]
             [clojure.test :refer :all]))
 
 
-(use-fixtures :once tenant-conn-fixture error-tracker-fixture)
+(use-fixtures :once tenant-conn-fixture error-tracker-fixture tu/spec-instrument)
 
 (defn visualisation-body [dataset-id]
   {"datasetId" dataset-id

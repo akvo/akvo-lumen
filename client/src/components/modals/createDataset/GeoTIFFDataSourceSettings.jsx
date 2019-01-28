@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import * as tus from 'tus-js-client';
-import * as auth from '../../../auth';
+import * as auth from '../../../utilities/auth';
 import ProgressBar from '../../common/ProgressBar';
 
 const handleDragEnter = (evt) => {
