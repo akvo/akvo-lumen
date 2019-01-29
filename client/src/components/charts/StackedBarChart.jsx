@@ -10,6 +10,7 @@ import { Portal } from 'react-portal';
 import merge from 'lodash/merge';
 import { stack } from 'd3-shape';
 import { GridRows } from '@vx/grid';
+import itsSet from 'its-set';
 
 import {
   heuristicRound,
@@ -119,7 +120,8 @@ export default class StackedBarChart extends Component {
 
     if (!get(data, 'series[0]')) return false;
     const values = data.series[0].data
-      .reduce((acc, { value }, i) =>
+      .filter(itsSet)
+      .reduce((acc, datum, i) =>
         [
           ...acc,
           data.series.reduce((acc2, series) => ({

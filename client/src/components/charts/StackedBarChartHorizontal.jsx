@@ -10,6 +10,7 @@ import { Portal } from 'react-portal';
 import merge from 'lodash/merge';
 import { stack } from 'd3-shape';
 import { GridColumns } from '@vx/grid';
+import itsSet from 'its-set';
 
 import { heuristicRound, replaceLabelIfValueEmpty, calculateMargins, getLabelFontSize } from '../../utilities/chart';
 import Legend from './Legend';
@@ -102,6 +103,7 @@ export default class StackedBarChart extends Component {
 
     if (!get(data, 'series[0]')) return false;
     const values = data.series[0].data
+      .filter(itsSet)
       .reduce((acc, { value }, i) =>
         [
           ...acc,

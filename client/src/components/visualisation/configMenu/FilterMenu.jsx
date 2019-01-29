@@ -261,7 +261,7 @@ class FilterMenu extends Component {
                         className="filterListItem valid"
                       >
                         <span className="filterIndicator">
-                          {getFilterOperationLabel(filter.operation)}
+                          {getFilterOperationLabel(operations)(filter.operation)}
                         </span>
                         {' '}
                         <span />
@@ -296,16 +296,17 @@ class FilterMenu extends Component {
                       >
                         <span className="filterIndicator">
                           {
-                            getColumnTitle(columnOptions, filter) ?
+                            getColumnTitle(columnOptions, filter) ? (
                               <span>
                                 The type of column {getColumnTitle(columnOptions, filter)} has
                                 changed and this filter is no longer valid. Please delete it.
                               </span>
-                              :
+                            ) : (
                               <span>
                                 A column this filter refers to no longer exists.
                                 Please delete this filter.
                               </span>
+                            )
                           }
                         </span>
                         <button

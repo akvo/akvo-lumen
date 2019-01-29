@@ -2,7 +2,7 @@
   :description "Akvo Lumen backend"
   :url "https://github.com/akvo/akvo-lumen"
   :license {:name "GNU Affero General Public License 3.0"
-            :url  "https://www.gnu.org/licenses/agpl-3.0.html"}
+            :url "https://www.gnu.org/licenses/agpl-3.0.html"}
   :min-lein-version "2.0.0"
   :dependencies [[clojurewerkz/scrypt "1.2.0"]
                  [ch.qos.logback/logback-classic "1.2.3"]
@@ -46,7 +46,6 @@
                  [ring/ring-json "0.4.0"]
                  [selmer "1.11.8"]
                  [net.postgis/postgis-jdbc "2.2.1" :exclusions [org.postgresql/postgresql]]
-
                  [iapetos "0.1.8" :exclusions [io.prometheus/simpleclient]]
                  [io.prometheus/simpleclient_hotspot "0.5.0"]
                  [io.prometheus/simpleclient_dropwizard "0.5.0"]]
@@ -58,17 +57,17 @@
             [lein-environ "1.0.3"]
             [lein-cljfmt "0.5.7"]
             [jonase/eastwood "0.3.3"]]
-  :codox {:doc-paths   ["resources/akvo/lumen/doc"]
+  :codox {:doc-paths ["resources/akvo/lumen/doc"]
           :output-path "../docs"}
   :main ^:skip-aot akvo.lumen.main
   :target-path "target/%s/"
-  :aliases {"setup"   ["run" "-m" "duct.util.repl/setup"]
+  :aliases {"setup" ["run" "-m" "duct.util.repl/setup"]
             "migrate" ["run" "-m" "dev/migrate"]
-            "seed"    ["run" "-m" "dev/seed"]}
+            "seed" ["run" "-m" "dev/seed"]}
   :test-selectors {:default (and (constantly true)
                                  (complement :functional))
                    :functional :functional
-                   :all     (constantly true)}
+                   :all (constantly true)}
   :eastwood {:config-files ["eastwood_cfg.clj"]}
   :profiles
   {:dev           [:project/dev :profiles/dev]
