@@ -153,13 +153,11 @@ class AkvoFlowDataSourceSettings extends Component {
       api.get(selectedFolder.foldersUrl, null, acceptHeader),
       api.get(selectedFolder.surveysUrl, null, acceptHeader),
     ])
-    .then(([{ body: { folders } }, { body: { surveys } }]) => {
-      this.setState({
-        isLoadingNext: false,
-        folders: merge(this.state.folders, indexById(folders)),
-        surveys: merge(this.state.surveys, indexById(surveys)),
-      });
-    })
+    .then(([{ body: { folders } }, { body: { surveys } }]) => this.setState({
+      isLoadingNext: false,
+      folders: merge(this.state.folders, indexById(folders)),
+      surveys: merge(this.state.surveys, indexById(surveys)),
+    }))
     .catch(() => {
       this.props.dispatch(showNotification('error', 'Failed to select folder.'));
     });
