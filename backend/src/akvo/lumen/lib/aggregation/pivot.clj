@@ -32,28 +32,42 @@
     (format "%s %s %s" select from where)))
 
 (defn run-query-categories [conn table-name filter-str category-column]
-  (->> (unique-values-sql table-name filter-str category-column)
-       (run-query conn)
-       (map first)))
+  (prn "@run-query-categories")
+  (let [uvs (->> (unique-values-sql table-name filter-str category-column)
+                 (run-query conn)
+                 (map first))]
+    #_(clojure.pprint/pprint uvs)
+    #_(if (empty uvs)
+        '("a1")
+        uvs)
+    uvs
+    ))
 
-(defn- run-pivot-query [conn table-name {:keys [category-column row-column aggregation value-column]} filter-str categories]
-  (let [source-sql        (let [select (format "SELECT %s, %s, %s(%s)"
-                                         (:columnName row-column)
-                                         (coalesce category-column)
-                                         aggregation
-                                         (:columnName value-column))
-                                from   (format "FROM %s" table-name)
-                                where  (format "WHERE %s GROUP BY 1,2 ORDER BY 1,2" filter-str)]
-                            (format "%s %s %s" select from where))
-
-        pivot-sql         (let [select "SELECT *"
-                                from   (format "FROM crosstab ($$ %s $$, $$ %s $$) AS ct (c1 text, %s)"
-                                         source-sql
-                                         (unique-values-sql table-name filter-str category-column)
-                                         (str/join "," (map #(format "c%s double precision" (+ % 2))
-                                                         (range (count categories)))))
-                                where  ""]
-                            (format "%s %s %s" select from where))]
+(defn- run-pivot-query
+  [conn table-name {:keys [category-column row-column aggregation value-column]} filter-str categories]
+  (let [source-sql (let [select (format "SELECT %s, %s, %s(%s)"
+                                        (:columnName row-column)
+                                        (coalesce category-column)
+                                        aggregation
+                                        (:columnName value-column))
+                         from   (format "FROM %s" table-name)
+                         where  (format "WHERE %s GROUP BY 1,2 ORDER BY 1,2" filter-str)]
+                     (format "%s %s %s" select from where))
+        pivot-sql (let [select (format "SELECT COALESCE(cc1, '') AS c1, %s"
+                                       (->> categories
+                                            count
+                                            range
+                                            (map #(format "COALESCE(cc%1$s, 0) AS c%1$s" (+ % 2)))
+                                            (str/join ", ")))
+                        _ (prn select)
+                        from   (format "FROM crosstab ($$ %s $$, $$ %s $$) AS ct (cc1 text, %s)"
+                                       source-sql
+                                       (unique-values-sql table-name filter-str category-column)
+                                       (str/join "," (map #(format "cc%s double precision" (+ % 2))
+                                                          (range (count categories)))))
+                        where  ""]
+                    (format "%s %s %s" select from where))]
+    (clojure.pprint/pprint pivot-sql)
     (run-query conn pivot-sql)))
 
 (defn- apply-pivot [conn table-name {:keys [category-column row-column] :as query} filter-str]
