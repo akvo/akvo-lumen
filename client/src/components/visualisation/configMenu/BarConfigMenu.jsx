@@ -178,6 +178,10 @@ export default function BarConfigMenu(props) {
                           value: 'stack',
                           label: <FormattedMessage id="stack_bars" />,
                         },
+                        {
+                          value: 'stack_percentage',
+                          label: <FormattedMessage id="percentage_stack_bars" />,
+                        },
                       ]}
                       selected={spec.subBucketMethod || 'split'}
                       onChange={subBucketMethod => handleChangeSpec({
