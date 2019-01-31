@@ -10,7 +10,7 @@
                                           :metric-registry #ig/ref :akvo.lumen.monitoring/dropwizard-registry}
 
  :akvo.lumen.component.tenant-manager {:dropwizard-registry #ig/ref :akvo.lumen.monitoring/dropwizard-registry
-                                       :encryption-key      encryption-key
+                                       :encryption-key      #duct/env "LUMEN_ENCRYPTION_KEY"
                                        :db                  #ig/ref :akvo.lumen.component.hikaricp/hikaricp}
 
  :akvo.lumen.component.handler/wrap-hide-errors          {:error-response "Internal Server Error"}
@@ -26,7 +26,7 @@
  :akvo.lumen.auth/wrap-auth                              {}
  :akvo.lumen.auth/wrap-jwt                               {:keycloak #ig/ref :akvo.lumen.component.keycloak/data}
  :akvo.lumen.component.tenant-manager/wrap-label-tenant  {}
- :akvo.lumen.component.error-tracker/wrap-sentry         {:dsn sentry-backend-dsn :opts {:namespaces ["org.akvo" "akvo"]}}
+ :akvo.lumen.component.error-tracker/wrap-sentry         {:dsn #duct/env "LUMEN_SENTRY_BACKEND_DSN" :opts {:namespaces ["org.akvo" "akvo"]}}
 
  :akvo.lumen.endpoint.aggregation/aggregation         {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
  :akvo.lumen.endpoint.collection/collection           {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
@@ -126,7 +126,7 @@
                                                    :from-email     "noreply@akvo.org"
                                                    :from-name      "Akvo Lumen"}
 
- :akvo.lumen.component.error-tracker/prod {:dsn sentry-backend-dsn}
+ :akvo.lumen.component.error-tracker/prod {:dsn #duct/env "LUMEN_SENTRY_BACKEND_DSN"}
  :akvo.lumen.migrate   {:migrations {:tenant-manager "akvo/lumen/migrations/tenant_manager"
                                      :tenants        "akvo/lumen/migrations/tenants"}}
  :akvo.lumen.monitoring/dropwizard-registry {}
