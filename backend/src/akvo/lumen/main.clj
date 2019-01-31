@@ -15,7 +15,7 @@
   (derive :akvo.lumen.component.caddisfly/prod :akvo.lumen.component.caddisfly/caddisfly)
   (derive :akvo.lumen.component.error-tracker/prod :akvo.lumen.component.error-tracker/error-tracker)
   (migrate/migrate config-file)
-  (let [config (config/construct config-file (config/bindings))
+  (let [config (config/construct config-file)
         _ (ig/load-namespaces config)
         system (ig/init config)]
     system))

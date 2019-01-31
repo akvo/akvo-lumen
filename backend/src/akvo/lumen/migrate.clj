@@ -48,7 +48,7 @@
   "Migrate tenant manager and tenants."
   ([] (migrate source-files))
   ([config-path]
-   (let [system (config/construct config-path (config/bindings))
+   (let [system (config/construct config-path)
          migrations (load-migrations system)
          tenant-manager-db {:connection-uri (get-in system [:akvo.lumen.component.hikaricp/hikaricp :uri])}]
      (do-migrate (ragtime-jdbc/sql-database tenant-manager-db)
@@ -84,7 +84,7 @@
   (rollback 1 ;; will rollback 1 migration on all tenants)
   (rollback :tenant-manager) ;; will rollback tenant manager migrations"
   [config-path arg]
-  (let [system (config/construct config-path (config/bindings))
+  (let [system (config/construct config-path)
         migrations (load-migrations system)
         tenant-migrations (:tenants migrations)
         tenant-manager-migrations (:tenant-manager migrations)
