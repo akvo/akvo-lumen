@@ -11,7 +11,7 @@
     (format "https://%s" server-name)
     (format "%s://%s:%s" (name scheme) server-name client-port)))
 
-(defn endpoint [{:keys [config emailer keycloak tenant-manager]}]
+(defn endpoint [{:keys [invite-redirect emailer keycloak tenant-manager]}]
   (context "/api/admin/invites" {:keys [jwt-claims params tenant] :as request}
     (let-routes [tenant-conn (p/connection tenant-manager tenant)]
       (GET "/" _
@@ -19,19 +19,19 @@
 
       (POST "/" {{:strs [email]} :body}
         (user/create-invite emailer keycloak tenant-conn tenant
-                            (location (:invite-redirect config) request)
+                            (location invite-redirect request)
                             email jwt-claims))
 
       (context "/:id" [id]
         (DELETE "/" _
           (user/delete-invite tenant-conn id))))))
 
-(defn verify-endpoint [{:keys [config keycloak tenant-manager]}]
+(defn verify-endpoint [{:keys [invite-redirect keycloak tenant-manager]}]
   (context "/verify" {:keys [tenant] :as request}
     (let-routes [tenant-conn (p/connection tenant-manager tenant)]
       (GET "/:id" [id]
         (user/verify-invite keycloak tenant-conn tenant id
-                            (location (:invite-redirect config) request))))))
+                            (location invite-redirect request))))))
 
 (defmethod ig/init-key :akvo.lumen.endpoint.invite/invite  [_ opts]
   (endpoint opts))

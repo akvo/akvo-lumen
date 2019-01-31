@@ -29,7 +29,12 @@
 
  :akvo.lumen.endpoint.export/export                   {:exporter-api-url "http://exporter:3001"}
 
+ :akvo.lumen.endpoint.invite/invite                   {:invite-redirect {:client-port 3030
+                                                                         :scheme :http}}
 
+ :akvo.lumen.endpoint.invite/verify                   {:invite-redirect {:client-port 3030
+                                                                         :scheme :http}}
+ 
  :akvo.lumen.endpoint.dataset/dataset                 {:import-config {:file-upload-path "/tmp/akvo/lumen"}}
  
  :akvo.lumen.config
@@ -38,8 +43,7 @@
            :keycloak-url "http://auth.lumen.local:8080/auth"
            :keycloak-public-client-id "akvo-lumen"
            :flow-api-url "https://api.akvotest.org/flow"
-           :invite-redirect {:client-port 3030
-                             :scheme :http}
+
            :sentry-backend-dsn ""
            :sentry-client-dsn ""
            :windshaft-url "http://windshaft:4000"

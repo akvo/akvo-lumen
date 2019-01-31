@@ -42,7 +42,7 @@
        "datasets" { (:id dataset) dataset}})))
 
 (defn run-map-visualisation
-  [tenant-conn visualisation {:keys [windshaft-url]}]
+  [tenant-conn visualisation windshaft-url]
   (let [layers (get-in visualisation [:spec "layers"])]
     (if (some #(get % "datasetId") layers)
       (let [dataset-id (some #(get % "datasetId") layers)
@@ -66,18 +66,18 @@
       {"datasets" {dataset-id dataset}
        "visualisations" {(:id visualisation) visualisation}})))
 
-(defn visualisation-response-data [tenant-conn id config]
+(defn visualisation-response-data [tenant-conn id windshaft-url]
   (try
     (let [[tag vis] (visualisation/fetch tenant-conn id)]
       (when (= tag ::lib/ok)
         (condp contains? (:visualisationType vis)
-          #{"map"} (run-map-visualisation tenant-conn vis config)
+          #{"map"} (run-map-visualisation tenant-conn vis windshaft-url)
           (set (keys vis-aggregation-mapper)) (run-visualisation tenant-conn vis)
           (run-unknown-type-visualisation tenant-conn vis))))
     (catch Exception e
       (log/warn e ::visualisation-response-data (str "problems fetching this vis-id: " id)))))
 
-(defn dashboard-response-data [tenant-conn id config]
+(defn dashboard-response-data [tenant-conn id windshaft-url]
   (let [[tag dashboard] (dashboard/fetch tenant-conn id)]
     (when (= tag ::lib/ok)
       (let [deps (->> dashboard
@@ -85,25 +85,25 @@
                       vals
                       (filter #(= "visualisation" (get % "type")))
                       (map #(get % "id"))
-                      (map #(visualisation-response-data tenant-conn % config))
+                      (map #(visualisation-response-data tenant-conn % windshaft-url))
                       (sort-by #(-> % (get "datasets") vals first (get :rows) boolean))
                       (apply merge-with merge))]
         (assoc deps "dashboards" {id dashboard})))))
 
-(defn response-data [tenant-conn share config]
+(defn response-data [tenant-conn share windshaft-url]
   (if-let [dashboard-id (:dashboard-id share)]
-    (assoc (dashboard-response-data tenant-conn dashboard-id config)
+    (assoc (dashboard-response-data tenant-conn dashboard-id windshaft-url)
            "dashboardId" dashboard-id)
     (let [visualisation-id (:visualisation-id share)]
-      (assoc (visualisation-response-data tenant-conn visualisation-id config)
+      (assoc (visualisation-response-data tenant-conn visualisation-id windshaft-url)
              "visualisationId" visualisation-id))))
 
 (defn share
-  [tenant-conn config id password]
+  [tenant-conn windshaft-url id password]
   (if-let [share (get-share tenant-conn id)]
     (if (:protected share)
       (if (scrypt/verify (format "%s|%s" id password) (:password share))
-        (lib/ok (response-data tenant-conn share config))
+        (lib/ok (response-data tenant-conn share windshaft-url))
         (lib/not-authorized {"shareId" id}))
-      (lib/ok (response-data tenant-conn share config)))
+      (lib/ok (response-data tenant-conn share windshaft-url)))
     (lib/not-found {"shareId" id})))
