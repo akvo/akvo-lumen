@@ -34,16 +34,16 @@
  :akvo.lumen.endpoint.dataset/dataset                 {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
                                                        :error-tracker  #ig/ref :akvo.lumen.component.error-tracker/error-tracker
                                                        :upload-config #ig/ref :akvo.lumen.upload
-                                                       :import-config {:flow-api-url flow-api-url
+                                                       :import-config {:flow-api-url #duct/env "LUMEN_FLOW_API_URL"
                                                                        :keycloak #ig/ref :akvo.lumen.component.keycloak/data}}
  :akvo.lumen.endpoint.data-source/data-source         {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
- :akvo.lumen.endpoint.env/env                         {:keycloak-public-client-id keycloak-public-client-id
-                                                       :keycloak-url              keycloak-url                                                       
-                                                       :flow-api-url              flow-api-url
-                                                       :sentry-client-dsn         sentry-client-dsn
-                                                       :piwik-site-id             piwik-site-id}
+ :akvo.lumen.endpoint.env/env                         {:keycloak-public-client-id #duct/env [ "LUMEN_KEYCLOAK_PUBLIC_CLIENT_ID" :or "akvo-lumen" ]
+                                                       :keycloak-url              #duct/env "LUMEN_KEYCLOAK_URL"
+                                                       :flow-api-url              #duct/env "LUMEN_FLOW_API_URL"
+                                                       :sentry-client-dsn         #duct/env "LUMEN_SENTRY_CLIENT_DSN"
+                                                       :piwik-site-id             #duct/env "LUMEN_PIWIK_SITE_ID"}
 
- :akvo.lumen.endpoint.export/export                   {:exporter-api-url          exporter-api-url}
+ :akvo.lumen.endpoint.export/export                   {:exporter-api-url          #duct/env [ "EXPORTER_API_URL" :or "http://localhost:3001" ]}
 
  :akvo.lumen.upload                     {:file-upload-path          #duct/env [ "LUMEN_FILE_UPLOAD_PATH" :or "/tmp/akvo/lumen" ]
                                          :max-upload-size           100}
@@ -117,12 +117,12 @@
                                        :handler    #ig/ref :akvo.lumen.component.handler/handler}
  :akvo.lumen.component.caddisfly/prod {:schema-uri #duct/env [ "LUMEN_CADDISFLY_SCHEMA_URI" :or "https://akvoflow-public.s3.amazonaws.com/caddisfly-tests.json" ]}
 
- :akvo.lumen.component.keycloak/data  {:url         keycloak-url
-                                       :realm       keycloak-realm}
+ :akvo.lumen.component.keycloak/data  {:url         #duct/env "LUMEN_KEYCLOAK_URL"
+                                       :realm       "akvo"}
 
  :akvo.lumen.component.keycloak       {:data #ig/ref :akvo.lumen.component.keycloak/data
-                                       :credentials {"client_id"     keycloak-client-id
-                                                     "client_secret" keycloak-client-secret}}
+                                       :credentials {"client_id"     #duct/env [ "LUMEN_KEYCLOAK_CLIENT_ID" :or "akvo-lumen-confidential" ]
+                                                     "client_secret" #duct/env "LUMEN_KEYCLOAK_CLIENT_SECRET"}}
 
  :akvo.lumen.component.emailer/mailjet-v3-emailer {:email-password #duct/env "LUMEN_EMAIL_PASSWORD"
                                                    :email-user     #duct/env "LUMEN_EMAIL_USER"
