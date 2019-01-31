@@ -3,7 +3,7 @@
 
  :duct.module/logging {}
 
- :akvo.lumen.component.hikaricp/hikaricp {:uri db-uri
+ :akvo.lumen.component.hikaricp/hikaricp {:uri #duct/env [ "LUMEN_DB_URL" :or "jdbc:postgresql://postgres/lumen?user=lumen&password=password&ssl=true" ]
                                           :pool-name "tenant-manager"
                                           :maximum-pool-size 5
                                           :minimum-idle 2
