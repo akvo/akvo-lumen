@@ -4,7 +4,7 @@
             [compojure.core :refer :all]
             [integrant.core :as ig]))
 
-(defn endpoint [{:keys [import-config error-tracker tenant-manager]}]
+(defn endpoint [{:keys [upload-config import-config error-tracker tenant-manager]}]
   (context "/api/datasets" {:keys [params tenant] :as request}
     (let-routes [tenant-conn (p/connection tenant-manager tenant)]
 
@@ -12,7 +12,7 @@
         (dataset/all tenant-conn))
 
       (POST "/" {:keys [tenant body jwt-claims] :as request}
-        (dataset/create tenant-conn import-config error-tracker jwt-claims body))
+        (dataset/create tenant-conn (merge import-config upload-config) error-tracker jwt-claims body))
 
       (context "/:id" [id]
         (GET "/" _
@@ -28,7 +28,7 @@
           (dataset/update-meta tenant-conn id body))
 
         (POST "/update" {:keys [body] :as request}
-          (dataset/update tenant-conn import-config error-tracker id body))))))
+          (dataset/update tenant-conn (merge import-config upload-config) error-tracker id body))))))
 
 (defmethod ig/init-key :akvo.lumen.endpoint.dataset/dataset  [_ opts]
   (endpoint opts))

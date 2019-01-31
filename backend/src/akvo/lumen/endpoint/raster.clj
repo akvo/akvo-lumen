@@ -4,7 +4,7 @@
             [akvo.lumen.lib.raster :as raster]
             [compojure.core :refer :all]))
 
-(defn endpoint [{:keys [tenant-manager file-upload-path]}]
+(defn endpoint [tenant-manager file-upload-path]
   (context "/api/rasters" {:keys [params tenant] :as request}
     (let-routes [tenant-conn (p/connection tenant-manager tenant)]
 
@@ -22,4 +22,4 @@
           (raster/delete tenant-conn id))))))
 
 (defmethod ig/init-key :akvo.lumen.endpoint.raster/raster  [_ opts]
-  (endpoint opts))
+  (endpoint (-> opts :tenant-manager) (-> opts :upload-config :file-upload-path)))

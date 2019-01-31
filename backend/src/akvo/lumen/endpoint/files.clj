@@ -11,4 +11,7 @@
          (file-upload-handler req))))
 
 (defmethod ig/init-key :akvo.lumen.endpoint.files/files  [_ opts]
-  (endpoint opts))
+  (endpoint (:upload-config opts)))
+
+(defmethod ig/init-key :akvo.lumen.upload  [_ opts]
+  opts)
