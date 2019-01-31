@@ -37,8 +37,12 @@
                                                                        :flow-api-url flow-api-url
                                                                        :keycloak #ig/ref :akvo.lumen.component.keycloak/data}}
  :akvo.lumen.endpoint.data-source/data-source         {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
- :akvo.lumen.endpoint.env/env                         {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
-                                                       :config         #ig/ref :akvo.lumen.config}
+ :akvo.lumen.endpoint.env/env                         {:keycloak-public-client-id keycloak-public-client-id
+                                                       :keycloak-url              keycloak-url                                                       
+                                                       :flow-api-url              flow-api-url
+                                                       :sentry-client-dsn         sentry-client-dsn
+                                                       :piwik-site-id             piwik-site-id}
+
  :akvo.lumen.endpoint.export/export                   {:exporter-api-url          exporter-api-url}
  :akvo.lumen.endpoint.files/files                     {:file-upload-path          file-upload-path
                                                        :max-upload-size           100}
@@ -55,7 +59,7 @@
  :akvo.lumen.endpoint.public/public                   {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
                                                        :windshaft-url  "http://localhost:4000"}
  :akvo.lumen.endpoint.raster/raster                   {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
-                                                       :config         #ig/ref :akvo.lumen.config}
+                                                       :file-upload-path          file-upload-path}
  :akvo.lumen.endpoint.resource/resource               {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
  :akvo.lumen.endpoint.root/root                       {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
  :akvo.lumen.endpoint.share/share                     {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
@@ -65,7 +69,7 @@
                                                        :caddisfly      #ig/ref :akvo.lumen.component.caddisfly/caddisfly}
  :akvo.lumen.endpoint.user/user                       {:keycloak #ig/ref :akvo.lumen.component.keycloak}
  :akvo.lumen.endpoint.visualisation/visualisation     {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
-                                                       :config         #ig/ref :akvo.lumen.config}
+                                                       :windshaft-url             "http://localhost:4000"}
 
  :akvo.lumen.component.handler/handler
  {:endpoints [#ig/ref :akvo.lumen.endpoint.aggregation/aggregation
@@ -125,22 +129,6 @@
  :akvo.lumen.component.error-tracker/prod {:dsn sentry-backend-dsn}
  :akvo.lumen.migrate   {:migrations {:tenant-manager "akvo/lumen/migrations/tenant_manager"
                                      :tenants        "akvo/lumen/migrations/tenants"}}
- :akvo.lumen.config {
-                     :file-upload-path          file-upload-path
-                     :flow-api-url              flow-api-url
-
-                     :max-upload-size           100
-                     :keycloak-url              keycloak-url
-                     :keycloak-realm            keycloak-realm
-                     :keycloak-public-client-id keycloak-public-client-id
-                     :sentry-client-dsn         sentry-client-dsn
-                     :sentry-backend-dsn        sentry-backend-dsn
-
-                     :windshaft-url             "http://localhost:4000"
-                     :piwik-site-id             piwik-site-id}
-
  :akvo.lumen.monitoring/dropwizard-registry {}
  :akvo.lumen.monitoring/collector {:dropwizard-registry #ig/ref :akvo.lumen.monitoring/dropwizard-registry}
- :akvo.lumen.monitoring/middleware {:collector #ig/ref :akvo.lumen.monitoring/collector}
-
- }
+ :akvo.lumen.monitoring/middleware {:collector #ig/ref :akvo.lumen.monitoring/collector}}

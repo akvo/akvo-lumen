@@ -76,11 +76,11 @@
 (defn all [conn]
   (lib/ok (all-rasters conn)))
 
-(defn do-import [conn config claims data-source job-execution-id]
+(defn do-import [conn file-upload-path claims data-source job-execution-id]
   (let [table-name (util/gen-table-name "raster")]
     (try
       (let [source      (get data-source "source")
-            file        (util/get-path source (:file-upload-path config))
+            file        (util/get-path source file-upload-path)
             path        (.getAbsolutePath (.getParentFile file))
             filename    (.getName file)
             raster-info (get-raster-info path filename)
@@ -117,7 +117,7 @@
         (drop-raster-table conn {:table-name table-name})
         (throw e)))))
 
-(defn create [conn config claims data-source]
+(defn create [conn file-upload-path claims data-source]
   (let [data-source-id (str (util/squuid))
         job-execution-id (str (util/squuid))
         table-name (util/gen-table-name "ds")
@@ -126,7 +126,7 @@
                               :spec (json/generate-string data-source)})
     (insert-job-execution conn {:id job-execution-id
                                 :data-source-id data-source-id})
-    (future (do-import conn config claims data-source job-execution-id))
+    (future (do-import conn file-upload-path claims data-source job-execution-id))
     (lib/ok {"importId" job-execution-id
              "kind" kind})))
 

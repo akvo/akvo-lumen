@@ -4,7 +4,7 @@
             [akvo.lumen.lib.raster :as raster]
             [compojure.core :refer :all]))
 
-(defn endpoint [{:keys [tenant-manager config]}]
+(defn endpoint [{:keys [tenant-manager file-upload-path]}]
   (context "/api/rasters" {:keys [params tenant] :as request}
     (let-routes [tenant-conn (p/connection tenant-manager tenant)]
 
@@ -12,7 +12,7 @@
         (raster/all tenant-conn))
 
       (POST "/" {:keys [tenant body jwt-claims] :as request}
-        (raster/create tenant-conn config jwt-claims body))
+        (raster/create tenant-conn file-upload-path jwt-claims body))
 
       (context "/:id" [id]
         (GET "/" _

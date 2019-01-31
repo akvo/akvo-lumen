@@ -5,7 +5,7 @@
             [compojure.core :refer :all]
             [integrant.core :as ig]))
 
-(defn endpoint [{:keys [config tenant-manager]}]
+(defn endpoint [{:keys [windshaft-url tenant-manager]}]
 
   (context "/api/visualisations" {:keys [params tenant] :as request}
     (let-routes [tenant-conn (p/connection tenant-manager tenant)]
@@ -18,11 +18,11 @@
       (context "/maps" _
         (POST "/" {{:strs [spec]} :body}
           (let [layers (get-in spec ["layers"])]
-            (maps/create tenant-conn (:windshaft-url config) layers))))
+            (maps/create tenant-conn windshaft-url layers))))
 
       (context "/rasters" _
         (POST "/" {{:strs [rasterId spec]} :body}
-          (maps/create-raster tenant-conn (:windshaft-url config) rasterId)))
+          (maps/create-raster tenant-conn windshaft-url rasterId)))
 
       (context "/:id" [id]
 

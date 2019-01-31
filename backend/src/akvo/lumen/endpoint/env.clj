@@ -3,16 +3,17 @@
             [integrant.core :as ig]
             [ring.util.response :refer [response]]))
 
-(defn endpoint [{:keys [config]}]
+(defn endpoint [{:keys [keycloak-public-client-id keycloak-url flow-api-url
+                        piwik-site-id sentry-client-dsn]}]
   (GET "/env" request
        (response
-        (cond-> {"keycloakClient" (:keycloak-public-client-id config)
-                 "keycloakURL" (:keycloak-url config)
-                 "flowApiUrl" (:flow-api-url config)
-                 "piwikSiteId" (:piwik-site-id config)
+        (cond-> {"keycloakClient" keycloak-public-client-id
+                 "keycloakURL" keycloak-url
+                 "flowApiUrl" flow-api-url
+                 "piwikSiteId" piwik-site-id
                  "tenant" (:tenant request)}
-          (string? (:sentry-client-dsn config))
-          (assoc "sentryDSN" (:sentry-client-dsn config))))))
+          (string? sentry-client-dsn)
+          (assoc "sentryDSN" sentry-client-dsn)))))
 
 (defmethod ig/init-key :akvo.lumen.endpoint.env/env  [_ opts]
   (endpoint opts))

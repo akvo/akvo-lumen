@@ -36,16 +36,11 @@
                                                                          :scheme :http}}
  
  :akvo.lumen.endpoint.dataset/dataset                 {:import-config {:file-upload-path "/tmp/akvo/lumen"}}
- 
- :akvo.lumen.config
- {:config {:file-upload-path "/tmp/akvo/lumen"
-           :keycloak-realm "akvo"
-           :keycloak-url "http://auth.lumen.local:8080/auth"
-           :keycloak-public-client-id "akvo-lumen"
-           :flow-api-url "https://api.akvotest.org/flow"
 
-           :sentry-backend-dsn ""
-           :sentry-client-dsn ""
-           :windshaft-url "http://windshaft:4000"
-           :piwik-site-id "165"}}
- }
+ :akvo.lumen.endpoint.env/env                         {:keycloak-public-client-id "akvo-lumen"
+                                                       :keycloak-url "http://auth.lumen.local:8080/auth"
+                                                       :flow-api-url "https://api.akvotest.org/flow"
+                                                       :sentry-client-dsn ""
+                                                       :piwik-site-id "165"}
+ 
+}
