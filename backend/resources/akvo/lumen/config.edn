@@ -110,7 +110,7 @@
                            :wrap-auth :wrap-jwt :monitoring :wrap-label-tenant :wrap-sentry
                            :hide-errors]}}
 
- :akvo.lumen.component.http/http      {:port http-port
+ :akvo.lumen.component.http/http      {:port #duct/env [ "PORT" Int :or 3000 ]
                                        :handler    #ig/ref :akvo.lumen.component.handler/handler}
  :akvo.lumen.component.caddisfly/prod {:schema-uri caddisfly-schema-uri}
 
