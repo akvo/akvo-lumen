@@ -436,8 +436,8 @@ export default class StackedBarChart extends Component {
                       }}
                     >
                       {stackNodes.map((stackSeries, seriesIndex) => {
-                        const seriesKey = this.props.data.series[seriesIndex].key;
-                        const seriesIsHovered = (
+                        const seriesKey = stackSeries.key;
+                        const seriesIsNotHovered = (
                           this.state.hoveredSeries &&
                           this.state.hoveredSeries !== seriesKey
                         );
@@ -494,7 +494,7 @@ export default class StackedBarChart extends Component {
                                     height={normalizedHeight}
                                     fill={color}
                                     stroke={color}
-                                    opacity={seriesIsHovered ? 0.1 : 1}
+                                    opacity={seriesIsNotHovered ? 0.1 : 1}
                                     cursor={edit ? 'pointer' : 'default'}
                                     onClick={(event) => {
                                       this.handleClickNode({
@@ -742,8 +742,8 @@ export default class StackedBarChart extends Component {
                       }}
                     >
                       {stackNodes.map((stackSeries, seriesIndex) => {
-                        const seriesKey = this.props.data.series[seriesIndex].key;
-                        const seriesIsHovered = (
+                        const seriesKey = stackSeries.key;
+                        const seriesIsNotHovered = (
                           this.state.hoveredSeries &&
                           this.state.hoveredSeries !== seriesKey
                         );
@@ -798,7 +798,7 @@ export default class StackedBarChart extends Component {
                                     height={normalizedHeight}
                                     fill={color}
                                     stroke={color}
-                                    opacity={seriesIsHovered ? 0.1 : 1}
+                                    opacity={seriesIsNotHovered ? 0.1 : 1}
                                     cursor={edit ? 'pointer' : 'default'}
                                     onClick={(event) => {
                                       this.handleClickNode({
@@ -948,11 +948,11 @@ export default class StackedBarChart extends Component {
           <Legend
             horizontal={!horizontal}
             title={legendTitle}
-            data={stackNodes.map(({ key }) => replaceLabelIfValueEmpty(key))}
+            data={stackNodes.map(({ key }) => key)}
             colorMapping={
               stackNodes.reduce((acc, { key }, i) => ({
                 ...acc,
-                [replaceLabelIfValueEmpty(key)]: this.getColor(key, i),
+                [key]: this.getColor(key, i),
               }), {})
             }
             onClick={({ datum }) => (event) => {
@@ -991,16 +991,10 @@ export default class StackedBarChart extends Component {
             const origin = heightScale(Math.abs(0));
 
             const axisScale = scaleLinear()
-              .domain([0, domain[1]])
+              .domain([0, 100])
               .range([0, availableHeight].reverse());
 
-            const tickFormat = (value) => {
-              const cutoff = 10000;
-              if (cutoff >= 10000) {
-                return this.context.abbrNumber(value);
-              }
-              return value;
-            };
+            const tickFormat = value => `${value}%`;
 
             return (
               <div
@@ -1045,8 +1039,8 @@ export default class StackedBarChart extends Component {
                       }}
                     >
                       {stackNodes.map((stackSeries, seriesIndex) => {
-                        const seriesKey = this.props.data.series[seriesIndex].key;
-                        const seriesIsHovered = (
+                        const seriesKey = stackSeries.key;
+                        const seriesIsNotHovered = (
                           this.state.hoveredSeries &&
                           this.state.hoveredSeries !== seriesKey
                         );
@@ -1111,7 +1105,7 @@ export default class StackedBarChart extends Component {
                                     height={normalizedHeight}
                                     fill={color}
                                     stroke={color}
-                                    opacity={seriesIsHovered ? 0.1 : 1}
+                                    opacity={seriesIsNotHovered ? 0.1 : 1}
                                     cursor={edit ? 'pointer' : 'default'}
                                     onClick={(event) => {
                                       this.handleClickNode({
@@ -1182,7 +1176,7 @@ export default class StackedBarChart extends Component {
                     scale={axisScale}
                     left={margins.left}
                     top={margins.top}
-                    label={`${yAxisLabel || ''} (%)`}
+                    label={yAxisLabel || ''}
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}
                     numTicks={yAxisTicks}
