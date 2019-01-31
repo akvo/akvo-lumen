@@ -121,8 +121,8 @@
                                        :credentials {"client_id"     keycloak-client-id
                                                      "client_secret" keycloak-client-secret}}
 
- :akvo.lumen.component.emailer/mailjet-v3-emailer {:email-password email-password
-                                                   :email-user     email-user
+ :akvo.lumen.component.emailer/mailjet-v3-emailer {:email-password #duct/env "LUMEN_EMAIL_PASSWORD"
+                                                   :email-user     #duct/env "LUMEN_EMAIL_USER"
                                                    :from-email     "noreply@akvo.org"
                                                    :from-name      "Akvo Lumen"}
 
