@@ -126,11 +126,10 @@
                                                    :from-name      "Akvo Lumen"}
 
  :akvo.lumen.component.error-tracker/prod {:dsn sentry-backend-dsn}
+ :akvo.lumen.migrate   {:migrations {:tenant-manager "akvo/lumen/migrations/tenant_manager"
+                                     :tenants        "akvo/lumen/migrations/tenants"}}
  :akvo.lumen.config
- {:app
-  {:migrations {:tenant-manager "akvo/lumen/migrations/tenant_manager"
-                :tenants        "akvo/lumen/migrations/tenants"}}
-  :config        {
+ {:config        {
                   :file-upload-path          file-upload-path
                   :flow-api-url              flow-api-url
 

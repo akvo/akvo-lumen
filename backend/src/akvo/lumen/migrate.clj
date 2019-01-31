@@ -3,10 +3,11 @@
    [akvo.lumen.config :as config]
    [akvo.lumen.lib.aes :as aes]
    [clojure.java.io :as io]
-   [duct.core :as duct]
    [clojure.tools.logging :as log]
+   [duct.core :as duct]
    [environ.core :refer [env]]
    [hugsql.core :as hugsql]
+   [integrant.core :as ig]
    [meta-merge.core :refer [meta-merge]]
    [ragtime
     strategy
@@ -39,9 +40,9 @@
   "From a system definition get migrations for tenant manager and tenants."
   [system]
   {:tenant-manager (ragtime-jdbc/load-resources
-                    (get-in system [:akvo.lumen.config :app :migrations :tenant-manager]))
+                    (get-in system [:akvo.lumen.migrate :migrations :tenant-manager]))
    :tenants        (ragtime-jdbc/load-resources
-                    (get-in system [:akvo.lumen.config :app :migrations :tenants]))})
+                    (get-in system [:akvo.lumen.migrate :migrations :tenants]))})
 
 (defn migrate
   "Migrate tenant manager and tenants."
@@ -106,3 +107,6 @@
       (rollback-tenants tenant-manager-db tenant-connection-uri-fn
                         (:tenants migrations)
                         (count (:tenants migrations))))))
+
+(defmethod ig/init-key :akvo.lumen.migrate [_ opts]
+  opts)
