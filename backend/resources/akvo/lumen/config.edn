@@ -59,10 +59,8 @@
                                                        :config         #ig/ref :akvo.lumen.config}
  :akvo.lumen.endpoint.resource/resource               {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
  :akvo.lumen.endpoint.root/root                       {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
- :akvo.lumen.endpoint.share/share                     {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
-                                                       :config         #ig/ref :akvo.lumen.config}
- :akvo.lumen.endpoint.split-column/endpoint           {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
-                                                       :config         #ig/ref :akvo.lumen.config}
+ :akvo.lumen.endpoint.share/share                     {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
+ :akvo.lumen.endpoint.split-column/endpoint           {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
  :akvo.lumen.endpoint.tier/tier                       {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
  :akvo.lumen.endpoint.transformation/transformation   {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
                                                        :caddisfly      #ig/ref :akvo.lumen.component.caddisfly/caddisfly}
@@ -128,20 +126,19 @@
  :akvo.lumen.component.error-tracker/prod {:dsn sentry-backend-dsn}
  :akvo.lumen.migrate   {:migrations {:tenant-manager "akvo/lumen/migrations/tenant_manager"
                                      :tenants        "akvo/lumen/migrations/tenants"}}
- :akvo.lumen.config
- {:config        {
-                  :file-upload-path          file-upload-path
-                  :flow-api-url              flow-api-url
+ :akvo.lumen.config {
+                     :file-upload-path          file-upload-path
+                     :flow-api-url              flow-api-url
 
-                  :max-upload-size           100
-                  :keycloak-url              keycloak-url
-                  :keycloak-realm            keycloak-realm
-                  :keycloak-public-client-id keycloak-public-client-id
-                  :sentry-client-dsn         sentry-client-dsn
-                  :sentry-backend-dsn        sentry-backend-dsn
+                     :max-upload-size           100
+                     :keycloak-url              keycloak-url
+                     :keycloak-realm            keycloak-realm
+                     :keycloak-public-client-id keycloak-public-client-id
+                     :sentry-client-dsn         sentry-client-dsn
+                     :sentry-backend-dsn        sentry-backend-dsn
 
-                  :windshaft-url             "http://localhost:4000"
-                  :piwik-site-id             piwik-site-id}}
+                     :windshaft-url             "http://localhost:4000"
+                     :piwik-site-id             piwik-site-id}
 
  :akvo.lumen.monitoring/dropwizard-registry {}
  :akvo.lumen.monitoring/collector {:dropwizard-registry #ig/ref :akvo.lumen.monitoring/dropwizard-registry}

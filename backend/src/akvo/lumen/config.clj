@@ -63,6 +63,6 @@
   ([config-path bindings]
    (load-config [(duct/prep (duct/read-config (io/resource config-path)))] bindings)))
 
-(defmethod ig/init-key :akvo.lumen.config [a opts]
+(defmethod ig/init-key :akvo.lumen.config [_ opts]
   (load-config [opts] (bindings)))
 

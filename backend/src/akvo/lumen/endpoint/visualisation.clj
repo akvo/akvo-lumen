@@ -36,4 +36,4 @@
           (visualisation/delete tenant-conn id))))))
 
 (defmethod ig/init-key :akvo.lumen.endpoint.visualisation/visualisation  [_ opts]
-  (endpoint (assoc opts :config (:config (:config opts)))))
+  (endpoint opts))
