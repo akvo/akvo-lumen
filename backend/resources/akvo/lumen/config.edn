@@ -112,7 +112,7 @@
 
  :akvo.lumen.component.http/http      {:port #duct/env [ "PORT" Int :or 3000 ]
                                        :handler    #ig/ref :akvo.lumen.component.handler/handler}
- :akvo.lumen.component.caddisfly/prod {:schema-uri caddisfly-schema-uri}
+ :akvo.lumen.component.caddisfly/prod {:schema-uri #duct/env [ "LUMEN_CADDISFLY_SCHEMA_URI" :or "https://akvoflow-public.s3.amazonaws.com/caddisfly-tests.json" ]}
 
  :akvo.lumen.component.keycloak/data  {:url         keycloak-url
                                        :realm       keycloak-realm}
