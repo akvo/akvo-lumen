@@ -39,23 +39,26 @@
     (assert (:lumen-flow-api-url env) (error-msg "LUMEN_FLOW_API_URL"))))
 
 (defn bindings []
-  {'db-uri (:lumen-db-url env "jdbc:postgresql://postgres/lumen?user=lumen&password=password&ssl=true")
-   'caddisfly-schema-uri (:lumen-caddisfly-schema-uri env "https://akvoflow-public.s3.amazonaws.com/caddisfly-tests.json")
-   'email-password (:lumen-email-password env)
-   'email-user (:lumen-email-user env)
-   'encryption-key (:lumen-encryption-key env)
-   'exporter-api-url (:exporter-api-url env "http://localhost:3001")
-   'file-upload-path (:lumen-file-upload-path env "/tmp/akvo/lumen")
-   'flow-api-url (:lumen-flow-api-url env)
-   'http-port (Integer/parseInt (:port env "3000"))
-   'keycloak-client-id (:lumen-keycloak-client-id env "akvo-lumen-confidential")
-   'keycloak-client-secret (:lumen-keycloak-client-secret env)
-   'keycloak-public-client-id (:lumen-keycloak-public-client-id env "akvo-lumen")
-   'keycloak-realm "akvo"
-   'keycloak-url (:lumen-keycloak-url env)
-   'piwik-site-id (:lumen-piwik-site-id env)
-   'sentry-backend-dsn (:lumen-sentry-backend-dsn env)
-   'sentry-client-dsn (:lumen-sentry-client-dsn env)})
+  {
+   ;;'db-uri (:lumen-db-url env "jdbc:postgresql://postgres/lumen?user=lumen&password=password&ssl=true")
+;;   'caddisfly-schema-uri (:lumen-caddisfly-schema-uri env "https://akvoflow-public.s3.amazonaws.com/caddisfly-tests.json")
+;;   'email-password (:lumen-email-password env)
+;;   'email-user (:lumen-email-user env)
+;;   'encryption-key (:lumen-encryption-key env)
+;;   'exporter-api-url (:exporter-api-url env "http://localhost:3001")
+   ;;   'file-upload-path (:lumen-file-upload-path env "/tmp/akvo/lumen")
+   
+;;   'flow-api-url (:lumen-flow-api-url env)
+;;   'http-port (Integer/parseInt (:port env "3000"))
+;;   'keycloak-client-id (:lumen-keycloak-client-id env "akvo-lumen-confidential")
+;;   'keycloak-client-secret (:lumen-keycloak-client-secret env)
+;;   'keycloak-public-client-id (:lumen-keycloak-public-client-id env "akvo-lumen")
+;;   'keycloak-realm "akvo"
+;;   'keycloak-url (:lumen-keycloak-url env)
+;;   'piwik-site-id (:lumen-piwik-site-id env)
+;;   'sentry-backend-dsn (:lumen-sentry-backend-dsn env)
+;;   'sentry-client-dsn (:lumen-sentry-client-dsn env)
+   })
 
 (defn construct
   "Create a system definition."
