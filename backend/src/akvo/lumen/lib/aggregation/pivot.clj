@@ -36,33 +36,37 @@
        (run-query conn)
        (map first)))
 
-(defn- run-pivot-query [conn table-name {:keys [category-column row-column aggregation value-column]} filter-str categories]
+(defn- run-pivot-query
+  [conn table-name {:keys [category-column row-column aggregation value-column]} filter-str categories]
   (let [source-sql        (let [select (format "SELECT %s, %s, %s(%s)"
-                                         (:columnName row-column)
-                                         (coalesce category-column)
-                                         aggregation
-                                         (:columnName value-column))
+                                               (:columnName row-column)
+                                               (coalesce category-column)
+                                               aggregation
+                                               (:columnName value-column))
                                 from   (format "FROM %s" table-name)
                                 where  (format "WHERE %s GROUP BY 1,2 ORDER BY 1,2" filter-str)]
                             (format "%s %s %s" select from where))
-
-        pivot-sql         (let [select "SELECT *"
-                                from   (format "FROM crosstab ($$ %s $$, $$ %s $$) AS ct (c1 text, %s)"
-                                         source-sql
-                                         (unique-values-sql table-name filter-str category-column)
-                                         (str/join "," (map #(format "c%s double precision" (+ % 2))
-                                                         (range (count categories)))))
-                                where  ""]
-                            (format "%s %s %s" select from where))]
+        pivot-sql (let [select "SELECT *"
+                        from   (format "FROM crosstab ($$ %s $$, $$ %s $$) AS ct (c1 text, %s)"
+                                       source-sql
+                                       (unique-values-sql table-name filter-str category-column)
+                                       (str/join "," (map #(format "c%s double precision" (+ % 2))
+                                                          (range (count categories)))))
+                        where  ""]
+                    (format "%s %s %s" select from where))]
     (run-query conn pivot-sql)))
 
-(defn- apply-pivot [conn table-name {:keys [category-column row-column] :as query} filter-str]
-  (let [categories (run-query-categories conn table-name filter-str category-column)
-        rows (run-pivot-query conn table-name query filter-str categories)]
-    {:rows    rows
-     :columns (->> categories
+
+(defn- apply-pivot
+  [conn table-name {:keys [category-column row-column] :as query} filter-str]
+  (if-let [categories (not-empty (run-query-categories conn table-name
+                                                       filter-str category-column))]
+    {:columns (->> categories
                    (map (fn [title] {:title title :type "number"}))
-                   (cons (select-keys row-column [:title :type])))}))
+                   (cons (select-keys row-column [:title :type])))
+     :rows    (run-pivot-query conn table-name query filter-str categories)}
+    {:columns []
+     :rows [[]]}))
 
 (defn apply-query [conn table-name {:keys [row-column category-column value-column] :as query} filter-str]
   (cond
@@ -85,10 +89,10 @@
 
     (nil? row-column)
     (let [data (->> (format "SELECT %s, count(rnum) FROM %s WHERE %s GROUP BY 1 ORDER BY 1"
-                              (coalesce (:category-column query))
-                              table-name
-                              filter-str)
-                      (run-query conn))]
+                            (coalesce (:category-column query))
+                            table-name
+                            filter-str)
+                    (run-query conn))]
       {:columns (->> data
                      (map (fn [[category]]
                             {:title category
