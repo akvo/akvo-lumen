@@ -3,7 +3,7 @@
             [clojure.tools.logging :as log]))
 
 (defn run-query [tenant-conn sql]
-  (log/debug :run-query sql)
+  (log/info :run-query sql)
   (rest (jdbc/query tenant-conn [sql] {:as-arrays? true})))
 
 (defn cast-to-decimal [column]

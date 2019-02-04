@@ -22,9 +22,9 @@
         column-x (find-column columns (:metricColumnX query))
         column-y (find-column columns (:metricColumnY query))
         column-size (find-column columns (:metricColumnSize query))
-        column-category (find-column columns (:bucketColumnCategory query))
         column-label (find-column columns (:datapointLabelColumn query))
         column-bucket (find-column columns (:bucketColumn query))
+        column-category (or (find-column columns (:bucketColumnCategory query)) column-bucket)
         max-points 2500
 
         aggregation (partial sql-aggregation-subquery (:metricAggregation query))
