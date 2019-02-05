@@ -342,7 +342,8 @@
                                  "srid" "3857"}})
                    (let [geom-column (get-geom-column layer)
                          {:keys [columns]} (dataset-by-id tenant-conn {:id datasetId})
-                         where-clause (filter/sql-str (walk/keywordize-keys columns) filters)
+                         where-clause (filter/sql-str (walk/keywordize-keys columns)
+                                                      (walk/keywordize-keys filters))
                          popup-columns (mapv #(get % "column") popup)
                          point-color-column pointColorColumn
                          sql (get-sql tenant-conn columns table-name geom-column
