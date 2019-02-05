@@ -13,12 +13,13 @@
     (:columnName column)))
 
 (defn sql-aggregation-subquery [aggregation-method column]
-  (let [v (cast-to-decimal column)]
-    (case aggregation-method
-      nil ""
-      ("min" "max" "count" "sum") (str aggregation-method "(" v "::decimal)")
-      "mean" (str "avg(" v "::decimal)")
-      "median" (str "percentile_cont(0.5) WITHIN GROUP (ORDER BY " v ")")
-      "distinct" (str "COUNT(DISTINCT " v ")")
-      "q1" (str "percentile_cont(0.25) WITHIN GROUP (ORDER BY " v ")")
-      "q3" (str "percentile_cont(0.75) WITHIN GROUP (ORDER BY " v ")"))))
+  (when column
+    (let [v (cast-to-decimal column)]
+      (case aggregation-method
+        nil ""
+        ("min" "max" "count" "sum") (str aggregation-method "(" v "::decimal)")
+        "mean" (str "avg(" v "::decimal)")
+        "median" (str "percentile_cont(0.5) WITHIN GROUP (ORDER BY " v ")")
+        "distinct" (str "COUNT(DISTINCT " v ")")
+        "q1" (str "percentile_cont(0.25) WITHIN GROUP (ORDER BY " v ")")
+        "q3" (str "percentile_cont(0.75) WITHIN GROUP (ORDER BY " v ")")))))
