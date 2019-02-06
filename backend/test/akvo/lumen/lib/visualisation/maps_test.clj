@@ -20,46 +20,42 @@
       (is (not (m/valid-location? {} p))))
 
     (testing "Only geom column"
-      (is (m/valid-location? {"geom" "c1"} p))
-      (is (not (m/valid-location? {"geom" nil} p)))
-      (is (not (m/valid-location? {"geom" 1} p))))
+      (is (m/valid-location? {:geom "c1"} p))
+      (is (not (m/valid-location? {:geom nil} p)))
+      (is (not (m/valid-location? {:geom 1} p))))
 
     (testing "Only latitude & longitude columns"
-      (is (m/valid-location? {"latitude" "c1"
-                              "longitude" "c2"} p))
-      (is (not (m/valid-location? {"latitude" "c1"} p)))
-      (is (not (m/valid-location? {"latitude" "c1"
-                                   "longitude" "c1"} p)))
-      (is (not (m/valid-location? {"latitude" nil
-                                   "longitude" "c1"} p)))
-      (is (not (m/valid-location? {"latitude" "c1"
-                                   "longitude" 2} p))))
+      (is (m/valid-location? {:latitude "c1"
+                              :longitude "c2"} p))
+      (is (not (m/valid-location? {:latitude "c1"} p)))
+      (is (not (m/valid-location? {:latitude "c1"
+                                   :longitude "c1"} p)))
+      (is (not (m/valid-location? {:latitude nil
+                                   :longitude "c1"} p)))
+      (is (not (m/valid-location? {:latitude "c1"
+                                   :longitude 2} p))))
 
     (testing "Both geom & lat/long"
-      (is (not (m/valid-location? {"geom" nil
-                                   "latitude" nil
-                                   "longitude" nil} p)))
-      (is (m/valid-location? {"geom" "c1"
-                              "latitude" nil
-                              "longitude" nil} p))
-      (is (m/valid-location? {"geom" nil
-                              "latitude" "c2"
-                              "longitude" "c3"} p))
+      (is (not (m/valid-location? {:geom nil
+                                   :latitude nil
+                                   :longitude nil} p)))
+      (is (m/valid-location? {:geom "c1"
+                              :latitude nil
+                              :longitude nil} p))
+      (is (m/valid-location? {:geom nil
+                              :latitude "c2"
+                              :longitude "c3"} p))
 
-      (is (not (m/valid-location? {"geom" "c1"
-                                   "latitude" "c1"
-                                   "longitude" "c2"} p)))
+      (is (not (m/valid-location? {:geom "c1"
+                                   :latitude "c1"
+                                   :longitude "c2"} p)))
 
-      (is (m/valid-location? {"geom" "c1"
-                              "latitude" "c2"
-                              "longitude" nil} p))
+      (is (m/valid-location? {:geom "c1"
+                              :latitude "c2"
+                              :longitude nil} p))
 
-      (is (m/valid-location? {"geom" "c1"
-                              "longitude" "c2"} p))
-
-
-
-      )
+      (is (m/valid-location? {:geom "c1"
+                              :longitude "c2"} p)))
 
 
 
