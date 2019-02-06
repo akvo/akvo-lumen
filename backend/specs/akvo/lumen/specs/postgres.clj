@@ -35,7 +35,7 @@
 
 (s/fdef postgres.filter/sql-str
   :args (s/cat
-	 :columns ::db.dsv/columns
+	 :columns (s/coll-of ::db.dsv/column :distinct true)
 	 :filters (s/nilable ::postgres.filter/filters))
   :ret string?)
 
