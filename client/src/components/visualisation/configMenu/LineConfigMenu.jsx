@@ -7,7 +7,7 @@ import ConfigMenuSectionOptionSelect from '../../common/ConfigMenu/ConfigMenuSec
 import { filterColumns } from '../../../utilities/utils';
 
 const getColumnTitle = (columnName, columnOptions) =>
-  columnOptions.find(obj => obj.value === columnName).title;
+  get(columnOptions.find(obj => obj.value === columnName), 'title');
 
 const getAxisLabel = (axis, spec, columnOptions) => {
   if (spec[`axisLabel${axis}FromUser`]) {

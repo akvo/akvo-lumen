@@ -10,6 +10,7 @@ const bubbleSpec = {
   truncateSize: null,
   showLegend: true,
   showLabels: false,
+  legendPosition: 'right',
 };
 
 export default bubbleSpec;

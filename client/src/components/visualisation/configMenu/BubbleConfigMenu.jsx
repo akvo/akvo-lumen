@@ -7,6 +7,7 @@ import ConfigMenuSectionOptionText from '../../common/ConfigMenu/ConfigMenuSecti
 import ToggleInput from '../../common/ToggleInput';
 import { filterColumns } from '../../../utilities/utils';
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
+import { intlShape, injectIntl } from 'react-intl';
 
 const getColumnTitle = (columnName, columnOptions) =>
   get(columnOptions.find(obj => obj.value === columnName), 'title');
@@ -70,12 +71,13 @@ const handleChangeSpec = (change, oldSpec, onChangeSpec, columnOptions) => {
   onChangeSpec(finalSpec);
 };
 
-export default function BarConfigMenu(props) {
+function BarConfigMenu(props) {
   const {
     visualisation,
     onChangeSpec,
     columnOptions,
     aggregationOptions,
+    intl,
   } = props;
   const spec = visualisation.spec;
 
@@ -98,7 +100,7 @@ export default function BarConfigMenu(props) {
                 legendTitle: get(columnOptions.find(item => item.value === value), 'title'),
               }, spec, onChangeSpec, columnOptions)}
             />
-            {/* {spec.bucketColumn !== null && (
+              {/* {spec.bucketColumn !== null && (
               <ConfigMenuSectionOptionSelect
                 labelTextId="number_of_buckets_to_show"
                 value={spec.truncateSize !== null ? spec.truncateSize.toString() : null}
@@ -136,19 +138,6 @@ export default function BarConfigMenu(props) {
         )}
         advancedOptions={(
           <div>
-            {spec.bucketColumn !== null && (
-              <div>
-                <ConfigMenuSectionOptionText
-                  value={spec.legendTitle != null ? spec.legendTitle.toString() : null}
-                  placeholderId="legend_title"
-                  name="legendLabel"
-                  maxLength={32}
-                  onChange={event => handleChangeSpec({
-                    legendTitle: event.target.value.toString(),
-                  }, spec, onChangeSpec, columnOptions)}
-                />
-              </div>
-            )}
             <ToggleInput
               name="showLegend"
               type="checkbox"
@@ -159,6 +148,36 @@ export default function BarConfigMenu(props) {
                 showLegend: val,
               })}
             />
+            {Boolean(spec.showLegend) && (
+              <div>
+                <ConfigMenuSectionOptionText
+                  value={spec.legendTitle != null ? spec.legendTitle.toString() : null}
+                  placeholderId="legend_title"
+                  name="legendLabel"
+                  maxLength={32}
+                  onChange={event => onChangeSpec({
+                    legendTitle: event.target.value.toString(),
+                  }, spec, onChangeSpec, columnOptions)}
+                />
+                <ConfigMenuSectionOptionSelect
+                  placeholderId="legend_position"
+                  value={spec.legendPosition}
+                  name="legendPosition"
+                  options={[
+                    {
+                      label: intl.formatMessage({ id: 'right' }),
+                      value: 'right',
+                    },
+                    {
+                      label: intl.formatMessage({ id: 'left' }),
+                      value: 'left',
+                    },
+                  ]}
+                  clearable
+                  onChange={value => onChangeSpec({ legendPosition: value })}
+                />
+              </div>
+            )}
             <ToggleInput
               name="showLabels"
               type="checkbox"
@@ -235,9 +254,12 @@ export default function BarConfigMenu(props) {
 }
 
 BarConfigMenu.propTypes = {
+  intl: intlShape,
   visualisation: PropTypes.object.isRequired,
   datasets: PropTypes.object.isRequired,
   onChangeSpec: PropTypes.func.isRequired,
   columnOptions: PropTypes.array.isRequired,
   aggregationOptions: PropTypes.array.isRequired,
 };
+
+export default injectIntl(BarConfigMenu);

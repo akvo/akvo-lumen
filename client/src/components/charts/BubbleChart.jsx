@@ -34,7 +34,7 @@ class BubbleChart extends Component {
     onChangeVisualisationSpec: PropTypes.func,
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
-    legendPosition: PropTypes.oneOf(['right']),
+    legendPosition: PropTypes.oneOf(['top', 'right', 'bottom', 'left', undefined]),
     legendTitle: PropTypes.string,
     legendDescription: PropTypes.string,
     print: PropTypes.bool,
@@ -53,6 +53,7 @@ class BubbleChart extends Component {
   static defaultProps = {
     interactive: true,
     legendVisible: true,
+    legendPosition: 'right',
     marginLeft: 70,
     marginRight: 70,
     marginTop: 70,
@@ -207,6 +208,7 @@ class BubbleChart extends Component {
       legendTitle,
       legendDescription,
       legendVisible,
+      legendPosition,
       edit,
       visualisation,
       marginTop,
@@ -229,6 +231,7 @@ class BubbleChart extends Component {
         width={width}
         height={height}
         legendVisible={legendVisible}
+        legendPosition={legendPosition}
         onClick={() => {
           this.setState({ isPickingColor: undefined, tooltipVisible: false });
         }}

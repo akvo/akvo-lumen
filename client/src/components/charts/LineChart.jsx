@@ -46,7 +46,7 @@ export default class LineChart extends Component {
     height: PropTypes.number.isRequired,
     minRadius: PropTypes.number,
     maxRadius: PropTypes.number,
-    legendPosition: PropTypes.oneOf(['right']),
+    legendPosition: PropTypes.oneOf(['top', 'right', 'bottom', 'left', undefined]),
     print: PropTypes.bool,
     interactive: PropTypes.bool,
     edit: PropTypes.bool,
