@@ -93,7 +93,7 @@
                                                                                 (raster-by-id tenant-conn {:id current-dataset-id})
                                                                                 (dataset-by-id tenant-conn {:id current-dataset-id}))
                                     current-where-clause (filter/sql-str (walk/keywordize-keys columns) (:filters current-layer))]
-                                (map-metadata/build tenant-conn (or raster_table table-name) (walk/stringify-keys current-layer) current-where-clause)))
+                                (map-metadata/build tenant-conn (or raster_table table-name) current-layer current-where-clause)))
                             layers)
         headers (headers tenant-conn)
         url (format "%s/layergroup" windshaft-url)

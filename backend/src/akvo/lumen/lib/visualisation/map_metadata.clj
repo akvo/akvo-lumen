@@ -42,20 +42,20 @@
 
 (defn sort-point-color-mapping
   [point-color-mapping]
-  (let [sorted (sort-by #(get % "value") point-color-mapping)]
-    (if (nil? (-> sorted first (get "value")))
+  (let [sorted (sort-by :value point-color-mapping)]
+    (if (nil? (-> sorted first :value))
       (move-last sorted)
       sorted)))
 
 (defn point-color-mapping
-  [tenant-conn table-name {:strs [pointColorMapping pointColorColumn]} where-clause]
+  [tenant-conn table-name {:keys [pointColorMapping pointColorColumn]} where-clause]
   (when pointColorColumn
     (let [sql-str (format "SELECT distinct %s AS value FROM %s WHERE %s LIMIT 22"
                           pointColorColumn table-name where-clause)
           distinct-values (map :value
                                (jdbc/query tenant-conn sql-str))
-          used-colors (set (map #(get % "color") pointColorMapping))
-          color-map (reduce (fn [m {:strs [value color]}]
+          used-colors (set (map :color pointColorMapping))
+          color-map (reduce (fn [m {:keys [value color]}]
                               (assoc m value color))
                             {}
                             pointColorMapping)
@@ -66,23 +66,23 @@
                             result
                             (let [value (first values)]
                               (if-some [color (get color-map value)]
-                                (recur (conj result {"op" "equals" "value" value "color" color})
+                                (recur (conj result {:op "equals" :value value :color color})
                                        (rest values)
                                        used-colors)
                                 (let [color (next-point-color used-colors)]
-                                  (recur (conj result {"op" "equals" "value" value "color" color})
+                                  (recur (conj result {:op "equals" :value value :color color})
                                          (rest values)
                                          (conj used-colors color)))))))]
       (sort-point-color-mapping color-mapping))))
 
 (defn shape-color-mapping [layer]
-  [{"op" "heatmap"
-    "stop" 0
-    "color" "#FFFFFF"}
-   {"op" "heatmap"
-    "stop" 100
-    "color" (if (get layer "gradientColor")
-              (get layer "gradientColor")
+  [{:op "heatmap"
+    :stop 0
+    :color "#FFFFFF"}
+   {:op "heatmap"
+    :stop 100
+    :color (if (:gradientColor layer)
+              (:gradientColor layer)
               (get gradient-palette 0))}])
 
 ;; "BOX(-0.127758 51.507351,24.938379 63.095089)"
@@ -96,10 +96,10 @@
      [(Double/parseDouble north) (Double/parseDouble east)]]))
 
 (defn bounds [tenant-conn table-name layer where-clause]
-  (let [geom (or (get layer "geom")
+  (let [geom (or (:geom layer)
                  (format "ST_SetSRID(ST_MakePoint(%s, %s), 4326)"
-                         (get layer "longitude")
-                         (get layer "latitude")))
+                         (:longitude layer)
+                         (:latitude layer)))
         sql-str (format "SELECT ST_Extent(%s) FROM %s WHERE %s"
                         geom table-name where-clause)]
     (when-some [st-extent (-> (jdbc/query tenant-conn sql-str)
@@ -109,57 +109,57 @@
 (defn get-column-titles [tenant-conn selector-name selector-value]
   (let [sql-str "SELECT columns, modified FROM dataset_version WHERE %s='%s' ORDER BY version DESC LIMIT 1"]
     (map (fn [{:strs [columnName title]}]
-           {"columnName" columnName
-            "title" title})
+           {:columnName columnName
+            :title title})
          (-> (jdbc/query tenant-conn (format sql-str selector-name selector-value))
              first
              :columns))))
 
 (defn get-column-title-for-name [collection column-name]
-  (-> (filter (fn [{:strs [columnName]}]
+  (-> (filter (fn [{:keys [columnName]}]
                 (boolean (= columnName column-name)))
               collection)
       first
-      (get "title")))
+      :title))
 
 (defn point-metadata [tenant-conn table-name layer where-clause]
   (let [column-titles (get-column-titles tenant-conn "table_name" table-name)]
-    {"boundingBox" (bounds tenant-conn table-name layer where-clause)
-     "pointColorMapping" (point-color-mapping tenant-conn table-name layer where-clause)
-     "availableColors" palette
-     "pointColorMappingTitle" (get-column-title-for-name column-titles (get layer "pointColorColumn"))
-     "columnTitles" column-titles}))
+    {:boundingBox (bounds tenant-conn table-name layer where-clause)
+     :pointColorMapping (point-color-mapping tenant-conn table-name layer where-clause)
+     :availableColors palette
+     :pointColorMappingTitle (get-column-title-for-name column-titles (:pointColorColumn layer))
+     :columnTitles column-titles}))
 
 (defn shape-aggregation-metadata [tenant-conn table-name layer where-clause]
   (let [column-titles (get-column-titles tenant-conn "table_name" table-name)
         column-title-for-name (get-column-title-for-name
                                (get-column-titles tenant-conn "dataset_id"
-                                                  (get layer "aggregationDataset"))
-                               (get layer "aggregationColumn"))
+                                                  (:aggregationDataset layer))
+                               (:aggregationColumn layer))
         shape-color-mapping-title (format "%s (%s)" column-title-for-name
-                                          (get layer "aggregationMethod"))]
-    {"boundingBox" (bounds tenant-conn table-name layer where-clause)
-     "shapeColorMapping" (shape-color-mapping layer)
-     "availableColors" gradient-palette
-     "columnTitles" column-titles
-     "shapeColorMappingTitle" shape-color-mapping-title}))
+                                          (:aggregationMethod layer))]
+    {:boundingBox (bounds tenant-conn table-name layer where-clause)
+     :shapeColorMapping (shape-color-mapping layer)
+     :availableColors gradient-palette
+     :columnTitles column-titles
+     :shapeColorMappingTitle shape-color-mapping-title}))
 
 (defn shape-metadata [tenant-conn table-name layer where-clause]
   (let [column-titles (get-column-titles tenant-conn "table_name" table-name)]
-    {"columnTitles" column-titles
-     "boundingBox" (bounds tenant-conn table-name layer where-clause)}))
+    {:columnTitles column-titles
+     :boundingBox (bounds tenant-conn table-name layer where-clause)}))
 
 (defn raster-metadata [tenant-conn table-name layer where-clause]
   (let [raster-meta (jdbc/query tenant-conn ["SELECT metadata FROM raster_dataset WHERE raster_table = ?" table-name])
         {{:strs [bbox]} :metadata} (first raster-meta)]
     (merge
-      {"max" (get (:metadata (first raster-meta)) "max")
-       "min" (get (:metadata (first raster-meta)) "min")}
+      {:max (get (:metadata (first raster-meta)) "max")
+       :min (get (:metadata (first raster-meta)) "min")}
       (if bbox
-        {"boundingBox" [(reverse (first bbox)) (reverse (second bbox))]}
+        {:boundingBox [(reverse (first bbox)) (reverse (second bbox))]}
         {}))))
 
-(defn get-metadata [{:strs [aggregationDataset aggregationColumn aggregationGeomColumn layerType]
+(defn get-metadata [{:keys [aggregationDataset aggregationColumn aggregationGeomColumn layerType]
                      :as layer}]
   (cond
     (= layerType "raster")
