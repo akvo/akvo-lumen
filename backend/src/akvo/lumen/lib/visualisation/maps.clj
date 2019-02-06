@@ -97,7 +97,7 @@
                             layers)
         headers (headers tenant-conn)
         url (format "%s/layergroup" windshaft-url)
-        map-config (map-config/build tenant-conn "todo: remove this" (walk/stringify-keys layers) (walk/stringify-keys metadata-array))
+        map-config (map-config/build tenant-conn "todo: remove this" layers metadata-array)
         layer-group-id (-> (client/post url {:body (json/encode map-config)
                                              :headers headers
                                              :content-type :json})
