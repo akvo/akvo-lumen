@@ -4,7 +4,6 @@
                                          tenant-conn-fixture]]
             [akvo.lumen.lib.dashboard :as dashboard]
             [akvo.lumen.lib.share :as share]
-            [clojure.tools.logging :as log]
             [akvo.lumen.util :refer [gen-table-name squuid]]
             [akvo.lumen.endpoint.commons.variant :as variant]
             [clojure.java.jdbc :as jdbc]
@@ -79,8 +78,8 @@
 
 (defn seed
   [conn spec]
-  (log/error :seed* (seed* conn (:vis-1 spec) ))
-  (log/error :seed* (seed* conn (:vis-2 spec) ))  
+  (seed* conn (:vis-1 spec))
+  (seed* conn (:vis-2 spec))
   (dashboard/create conn (dashboard-spec (:id (:vis-1 spec))
                                          (:id (:vis-2 spec))) {}))
 
@@ -112,7 +111,6 @@
 (hugsql/def-db-fns "akvo/lumen/lib/dashboard.sql")
 
 (deftest ^:functional share
-
   (testing "Empty collection"
     (is (empty? (variant/value (share/all *tenant-conn*)))))
 

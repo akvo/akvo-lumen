@@ -1,12 +1,12 @@
 (ns akvo.lumen.endpoint.public-test
   {:functional true}
-  (:require [akvo.lumen.endpoint.share-test :as share-test]
+  (:require [akvo.lumen.endpoint.commons.variant :as variant]
+            [akvo.lumen.endpoint.share-test :as share-test]
             [akvo.lumen.fixtures :refer [*tenant-conn*
                                          tenant-conn-fixture]]
             [akvo.lumen.lib.public :as public]
             [akvo.lumen.lib.share :as share]
             [akvo.lumen.test-utils :as tu]
-            [akvo.lumen.endpoint.commons.variant :as variant]
             [clojure.test :refer :all]
             [hugsql.core :as hugsql]))
 
