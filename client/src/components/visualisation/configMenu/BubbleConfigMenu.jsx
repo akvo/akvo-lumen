@@ -1,13 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
+import { intlShape, injectIntl } from 'react-intl';
 
 import ConfigMenuSectionOptionSelect from '../../common/ConfigMenu/ConfigMenuSectionOptionSelect';
 import ConfigMenuSectionOptionText from '../../common/ConfigMenu/ConfigMenuSectionOptionText';
 import ToggleInput from '../../common/ToggleInput';
 import { filterColumns } from '../../../utilities/utils';
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
-import { intlShape, injectIntl } from 'react-intl';
 
 const getColumnTitle = (columnName, columnOptions) =>
   get(columnOptions.find(obj => obj.value === columnName), 'title');
@@ -100,7 +100,7 @@ function BarConfigMenu(props) {
                 legendTitle: get(columnOptions.find(item => item.value === value), 'title'),
               }, spec, onChangeSpec, columnOptions)}
             />
-              {/* {spec.bucketColumn !== null && (
+            {/* {spec.bucketColumn !== null && (
               <ConfigMenuSectionOptionSelect
                 labelTextId="number_of_buckets_to_show"
                 value={spec.truncateSize !== null ? spec.truncateSize.toString() : null}
