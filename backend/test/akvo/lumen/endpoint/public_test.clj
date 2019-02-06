@@ -29,10 +29,10 @@
     (share-test/seed *tenant-conn* share-test/test-spec)
     (let [new-share (variant/value (share/fetch *tenant-conn*
                                                 {"visualisationId"
-                                                 (:visualisation-id share-test/test-spec)}))
+                                                 (:id (:vis-1 share-test/test-spec))}))
           p         (public/get-share *tenant-conn* (:id new-share))]
       (is (= (:visualisation-id p)
-             (:visualisation-id share-test/test-spec)))
+             (:id (:vis-1 share-test/test-spec))))
       (is (= (:id new-share)
              (:id p)))))
 
