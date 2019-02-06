@@ -1,5 +1,7 @@
 (ns akvo.lumen.lib.visualisation.map-metadata
   (:require [clojure.java.jdbc :as jdbc]
+            [clojure.tools.logging :as log]
+            [clojure.walk :as walk]
             [clojure.string :as str]))
 
 (def palette ["#BF2932"
@@ -150,11 +152,11 @@
      :boundingBox (bounds tenant-conn table-name layer where-clause)}))
 
 (defn raster-metadata [tenant-conn table-name layer where-clause]
-  (let [raster-meta (jdbc/query tenant-conn ["SELECT metadata FROM raster_dataset WHERE raster_table = ?" table-name])
-        {{:strs [bbox]} :metadata} (first raster-meta)]
+  (let [raster-meta (walk/keywordize-keys (jdbc/query tenant-conn ["SELECT metadata FROM raster_dataset WHERE raster_table = ?" table-name]))
+        {{:keys [bbox]} :metadata} (first raster-meta)]
     (merge
-      {:max (get (:metadata (first raster-meta)) "max")
-       :min (get (:metadata (first raster-meta)) "min")}
+      {:max (:max (:metadata (first raster-meta)) )
+       :min (:min (:metadata (first raster-meta)))}
       (if bbox
         {:boundingBox [(reverse (first bbox)) (reverse (second bbox))]}
         {}))))

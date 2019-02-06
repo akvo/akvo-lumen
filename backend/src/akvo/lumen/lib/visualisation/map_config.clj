@@ -366,12 +366,12 @@
    :layers (get-layers tenant-conn layers metadata-array table-name)})
 
 (defn build-raster [table-name min max]
-  {"version" "1.6.0"
-   "layers" [{"type" "mapnik"
-              "options" {"cartocss" (raster-css nil nil min max)
-                         "cartocss_version" "2.3.0"
-                         "geom_column" "rast"
-                         "geom_type" "raster"
-                         "raster_band" 1
-                         "sql" (format "SELECT * FROM %s" table-name)
-                         "srid" "3857"}}]})
+  {:version "1.6.0"
+   :layers [{:type "mapnik"
+             :options {:cartocss (raster-css nil nil min max)
+                       :cartocss_version "2.3.0"
+                       :geom_column "rast"
+                       :geom_type "raster"
+                       :raster_band 1
+                       :sql (format "SELECT * FROM %s" table-name)
+                       :srid "3857"}}]})

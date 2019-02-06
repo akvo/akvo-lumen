@@ -114,9 +114,9 @@
                                              :headers headers
                                              :content-type :json})
                            :body json/decode (get "layergroupid"))
-        layer-meta (map-metadata/build tenant-conn raster_table {"layerType" "raster"} nil)]
-    (lib/ok {"layerGroupId" layer-group-id
-             "layerMetadata" layer-meta})))
+        layer-meta (map-metadata/build tenant-conn raster_table {:layerType "raster"} nil)]
+    (lib/ok {:layerGroupId layer-group-id
+             :layerMetadata layer-meta})))
 
 (defn create
   [tenant-conn windshaft-url layers]
