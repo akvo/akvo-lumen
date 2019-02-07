@@ -42,6 +42,10 @@
   [tenant-conn dataset _ query]
   (pie/query tenant-conn dataset query))
 
+(defmethod query* "donut"
+  [tenant-conn dataset _ query]
+  (pie/query tenant-conn dataset query))
+
 (defmethod query* "line"
   [tenant-conn dataset _ query]
   (line/query tenant-conn dataset query))
