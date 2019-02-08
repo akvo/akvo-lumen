@@ -1,9 +1,9 @@
 (ns akvo.lumen.specs.visualisation.maps.layer
   (:require [akvo.lumen.specs :as lumen.s]
-            [clojure.string :as str]
+            [akvo.lumen.specs.db.dataset-version :as db.dataset-version.s]
             [akvo.lumen.specs.db.dataset-version.column :as db.dsv.column.s]
             [clojure.spec.alpha :as s]
-            )
+            [clojure.string :as str])
   (:import [java.awt Color]))
 
 (create-ns  'akvo.lumen.specs.visualisation.maps.layer.legend)
@@ -28,7 +28,10 @@
 (s/def ::popup-item (s/keys :req-un [::layer.popup.s/column]))
 (s/def ::popup (s/coll-of ::popup-item :kind vector? :distinct true)) 
 
-(s/def ::pointSize pos-int?)
+(defn string-pos-int? [s] (try (pos-int? (Integer/parseInt s))
+                          (catch Exception e false)))
+
+(s/def ::pointSize  string-pos-int?)
 
 (create-ns  'akvo.lumen.specs.visualisation.maps.layer.point-color-mapping)
 
@@ -48,9 +51,13 @@
 (s/def ::pointColorMapping (s/coll-of ::point-color-mapping-item :kind vector?))
 
 (s/def ::pointColorColumn ::db.dsv.column.s/columnName)
-(s/def ::rasterId (s/with-gen
-                    lumen.s/str-uuid?
-                    lumen.s/str-uuid-gen)) ;; todo recheck
+
+(s/def ::datasetId ::db.dataset-version.s/dataset-id)
+
+
+(s/def ::rasterId (s/nilable (s/with-gen
+                     lumen.s/str-uuid?
+                     lumen.s/str-uuid-gen))) ;; todo recheck
 (s/def ::longitude (s/nilable string?)) ;; todo
 (s/def ::latitude (s/nilable string?)) ;; todo
 (s/def ::title string?)
