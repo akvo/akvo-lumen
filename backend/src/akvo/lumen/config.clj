@@ -43,6 +43,7 @@
    'caddisfly-schema-uri (:lumen-caddisfly-schema-uri env "https://akvoflow-public.s3.amazonaws.com/caddisfly-tests.json")
    'email-password (:lumen-email-password env)
    'email-user (:lumen-email-user env)
+   'conform-specs (= "true" (:lumen-conform-specs env false))
    'encryption-key (:lumen-encryption-key env)
    'exporter-api-url (:exporter-api-url env "http://localhost:3001")
    'file-upload-path (:lumen-file-upload-path env "/tmp/akvo/lumen")

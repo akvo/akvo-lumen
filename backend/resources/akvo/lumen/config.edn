@@ -126,7 +126,7 @@
                   :maximum-pool-size 5
                   :minimum-idle 2
                   :metric-registry #ig/ref :akvo.lumen.monitoring/dropwizard-registry}
-
+  :conform-specs conform-specs
   :caddisfly     {:schema-uri caddisfly-schema-uri}
   :emailer {:email-password email-password
             :email-user     email-user
