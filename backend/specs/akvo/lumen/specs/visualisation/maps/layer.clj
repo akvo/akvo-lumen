@@ -31,7 +31,7 @@
 (defn string-pos-int? [s] (try (pos-int? (Integer/parseInt s))
                           (catch Exception e false)))
 
-(s/def ::pointSize  (s/or :s string-pos-int? :i pos-int?))
+(s/def ::pointSize  (s/or :s string-pos-int? :i pos-int?)) ;; only in geo-location we receive a string :!
 
 (create-ns  'akvo.lumen.specs.visualisation.maps.layer.point-color-mapping)
 
@@ -60,7 +60,7 @@
 (s/def ::longitude (s/nilable string?)) ;; todo
 (s/def ::latitude (s/nilable string?)) ;; todo
 (s/def ::title string?)
-(s/def ::geom (s/nilable string?)) ;; todo derivation columnName
+
 (s/def ::visible boolean?)
 
 
@@ -70,9 +70,10 @@
 
 (s/def ::layer.raster.s/datasetId nil?)
 (s/def ::layer.raster.s/rasterId ::rasterId)
-
+(s/def ::layer.raster.s/geom nil?)
 (create-ns  'akvo.lumen.specs.visualisation.maps.layer.geo-location)
 (alias 'layer.geo-location.s 'akvo.lumen.specs.visualisation.maps.layer.geo-location)
 
 (s/def ::layer.geo-location.s/datasetId ::datasetId)
 (s/def ::layer.geo-location.s/rasterId nil?)
+(s/def ::layer.geo-location.s/geom string?)  ;; todo derivation columnName

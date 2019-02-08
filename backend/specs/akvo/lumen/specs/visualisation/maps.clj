@@ -21,24 +21,26 @@
                                         ::layer.s/latitude
                                         ::layer.s/longitude
                                         ::layer.s/title
-                                        ::layer.s/geom
                                         ::layer.s/visible
-                                        ::layer.s/pointColorColumn                                        
-                                        ]))
+                                        ::layer.s/pointColorColumn]))
 
 (defmethod layer-type "geo-location" [_]
   (s/merge ::layer-commons
            (s/keys :req-un [::layer.geo-location.s/datasetId
-                            ::layer.geo-location.s/rasterId])))
+                            ::layer.geo-location.s/rasterId
+                            ::layer.geo-location.s/geom])))
 
 (defmethod layer-type "raster" [_]
-    (s/merge ::layer-commons
+  (s/merge ::layer-commons
            (s/keys :req-un [::layer.raster.s/datasetId
-                            ::layer.raster.s/rasterId])))
-
+                            ::layer.raster.s/rasterId
+                            ::layer.raster.s/geom])))
 
 (defmethod layer-type "geo-shape" [_]
-  (s/keys :req-un [::layerType]))
+  (s/merge ::layer-commons
+           (s/keys :req-un [::layer.geo-location.s/datasetId
+                            ::layer.geo-location.s/rasterId
+                            ::layer.geo-location.s/geom])))
 
 (s/def ::layer (s/multi-spec layer-type :layerType))
 
