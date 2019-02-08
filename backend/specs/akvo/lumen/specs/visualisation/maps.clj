@@ -6,31 +6,39 @@
             [akvo.lumen.specs.visualisation.maps.layer :as layer.s]
             [clojure.spec.alpha :as s]))
 
+(alias 'layer.geo-location.s 'akvo.lumen.specs.visualisation.maps.layer.geo-location)
+(alias 'layer.raster.s 'akvo.lumen.specs.visualisation.maps.layer.raster)
+
 (defmulti layer-type :layerType)
 
+(s/def ::layer-commons (s/keys :req-un [::layer.s/aggregationMethod
+                                        ::layer.s/popup
+                                        ::postgres.filter/filters
+                                        ::layer.s/layerType
+                                        ::layer.s/legend
+                                        ::layer.s/pointSize
+                                        ::layer.s/pointColorMapping
+                                        ::layer.s/latitude
+                                        ::layer.s/longitude
+                                        ::layer.s/title
+                                        ::layer.s/geom
+                                        ::layer.s/visible
+                                        ::layer.s/pointColorColumn                                        
+                                        ]))
+
 (defmethod layer-type "geo-location" [_]
-  (s/keys :req-un [::layer.s/aggregationMethod
-                   ::layer.s/popup
-                   ::postgres.filter/filters
-                   ::layer.s/layerType
-                   ::layer.s/legend
-                   ::layer.s/pointSize
-                   ::layer.s/pointColorMapping
-                   ::layer.s/datasetId
-                   ::layer.s/title
-                   ::layer.s/pointColorColumn
-                   ::layer.s/latitude
-                   ::layer.s/longitude
-                   ::layer.s/geom
-                   ::layer.s/visible
-                   ::layer.s/rasterId]))
+  (s/merge ::layer-commons
+           (s/keys :req-un [::layer.geo-location.s/datasetId
+                            ::layer.geo-location.s/rasterId])))
+
+(defmethod layer-type "raster" [_]
+    (s/merge ::layer-commons
+           (s/keys :req-un [::layer.raster.s/datasetId
+                            ::layer.raster.s/rasterId])))
+
 
 (defmethod layer-type "geo-shape" [_]
   (s/keys :req-un [::layerType]))
-
-(defmethod layer-type "raster" [_]
-  (s/keys :req-un [::layerType]))
-
 
 (s/def ::layer (s/multi-spec layer-type :layerType))
 

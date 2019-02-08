@@ -31,7 +31,7 @@
 (defn string-pos-int? [s] (try (pos-int? (Integer/parseInt s))
                           (catch Exception e false)))
 
-(s/def ::pointSize  string-pos-int?)
+(s/def ::pointSize  (s/or :s string-pos-int? :i pos-int?))
 
 (create-ns  'akvo.lumen.specs.visualisation.maps.layer.point-color-mapping)
 
@@ -50,34 +50,29 @@
                                                    ::layer.point-color-mapping.s/color]))
 (s/def ::pointColorMapping (s/coll-of ::point-color-mapping-item :kind vector?))
 
-(s/def ::pointColorColumn ::db.dsv.column.s/columnName)
+(s/def ::pointColorColumn (s/nilable ::db.dsv.column.s/columnName))
 
 (s/def ::datasetId ::db.dataset-version.s/dataset-id)
 
-
-(s/def ::rasterId (s/nilable (s/with-gen
+(s/def ::rasterId  (s/with-gen
                      lumen.s/str-uuid?
-                     lumen.s/str-uuid-gen))) ;; todo recheck
+                     lumen.s/str-uuid-gen)) ;; todo recheck
 (s/def ::longitude (s/nilable string?)) ;; todo
 (s/def ::latitude (s/nilable string?)) ;; todo
 (s/def ::title string?)
-(s/def ::geom string?) ;; todo derivation columnName 
+(s/def ::geom (s/nilable string?)) ;; todo derivation columnName
 (s/def ::visible boolean?)
 
-[{:aggregationMethod "avg",
-  :popup [],
-  :filters [],
-  :layerType "geo-location",
 
-  :legend {:title nil, :visible true},
 
-  :rasterId nil,
-  :pointSize 3,
-  :pointColorMapping [],
-  :longitude nil,
-  :datasetId "5c5bfbea-6a60-409f-9fcf-11c87a5f7da3",
-  :title "Untitled layer 1",
-  :geom "d1",
-  :pointColorColumn nil,
-  :latitude nil,
-  :visible true}]
+(create-ns  'akvo.lumen.specs.visualisation.maps.layer.raster)
+(alias 'layer.raster.s 'akvo.lumen.specs.visualisation.maps.layer.raster)
+
+(s/def ::layer.raster.s/datasetId nil?)
+(s/def ::layer.raster.s/rasterId ::rasterId)
+
+(create-ns  'akvo.lumen.specs.visualisation.maps.layer.geo-location)
+(alias 'layer.geo-location.s 'akvo.lumen.specs.visualisation.maps.layer.geo-location)
+
+(s/def ::layer.geo-location.s/datasetId ::datasetId)
+(s/def ::layer.geo-location.s/rasterId nil?)
