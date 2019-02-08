@@ -24,9 +24,9 @@
 	 :query ::aggregation.pie/query)
   :ret any?)
 
-(s/def ::aggregation.pivot/categoryColumn ::db.dsv.column.s/columnName)
-(s/def ::aggregation.pivot/rowColumn ::db.dsv.column.s/columnName)
-(s/def ::aggregation.pivot/valueColumn ::db.dsv.column.s/columnName)
+(s/def ::aggregation.pivot/categoryColumn (s/nilable ::db.dsv.column.s/columnName)) ;; todo should be fixed in client side?
+(s/def ::aggregation.pivot/rowColumn (s/nilable ::db.dsv.column.s/columnName)) ;; todo should be fixed in client side?
+(s/def ::aggregation.pivot/valueColumn (s/nilable ::db.dsv.column.s/columnName)) ;; todo should be fixed in client side?
 (s/def ::aggregation.pivot/aggregation #{"mean"
                                          "sum"
                                          "min"
