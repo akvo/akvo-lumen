@@ -44,7 +44,6 @@
 
 (s/def ::layer (s/multi-spec layer-type :layerType))
 
-
 (s/fdef lib.vis.maps/create
   :args (s/cat
          :db-conn ::db.s/tenant-connection
