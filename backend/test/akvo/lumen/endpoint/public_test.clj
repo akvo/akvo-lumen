@@ -1,12 +1,12 @@
 (ns akvo.lumen.endpoint.public-test
   {:functional true}
-  (:require [akvo.lumen.endpoint.share-test :as share-test]
+  (:require [akvo.lumen.endpoint.commons.variant :as variant]
+            [akvo.lumen.endpoint.share-test :as share-test]
             [akvo.lumen.fixtures :refer [*tenant-conn*
                                          tenant-conn-fixture]]
             [akvo.lumen.lib.public :as public]
             [akvo.lumen.lib.share :as share]
             [akvo.lumen.test-utils :as tu]
-            [akvo.lumen.endpoint.commons.variant :as variant]
             [clojure.test :refer :all]
             [hugsql.core :as hugsql]))
 
@@ -29,10 +29,10 @@
     (share-test/seed *tenant-conn* share-test/test-spec)
     (let [new-share (variant/value (share/fetch *tenant-conn*
                                                 {"visualisationId"
-                                                 (:visualisation-id share-test/test-spec)}))
+                                                 (:id (:vis-1 share-test/test-spec))}))
           p         (public/get-share *tenant-conn* (:id new-share))]
       (is (= (:visualisation-id p)
-             (:visualisation-id share-test/test-spec)))
+             (:id (:vis-1 share-test/test-spec))))
       (is (= (:id new-share)
              (:id p)))))
 
@@ -44,9 +44,9 @@
           share-data      (public/response-data *tenant-conn* share {})]
       (is (every? #(contains? share-data %)
                   ["dashboardId" "dashboards" "visualisations" "datasets"]))
-      (is (= 1
+      (is (= 2
              (count (get share-data "datasets"))))
-      (is (= 1
+      (is (= 2
              (count (get share-data "visualisations"))))
       (is (every? #(not (nil? %))
                   (vals share-data))))))

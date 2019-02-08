@@ -151,6 +151,7 @@ export default class Chart extends Component {
             colorMapping={visualisation.spec.colors}
             donut={Boolean(visualisation.visualisationType === 'donut')}
             legendVisible={visualisation.spec.showLegend}
+            legendPosition={visualisation.spec.legendPosition}
             labelsVisible={visualisation.spec.showLabels}
             legendTitle={visualisation.spec.legendTitle}
             onChangeVisualisationSpec={onChangeVisualisationSpec}
@@ -168,6 +169,7 @@ export default class Chart extends Component {
             colorMapping={visualisation.spec.colors}
             donut={Boolean(visualisation.visualisationType === 'donut')}
             legendVisible={visualisation.spec.showLegend}
+            legendPosition={visualisation.spec.legendPosition}
             labelsVisible={visualisation.spec.showLabels}
             legendTitle={visualisation.spec.legendTitle}
             onChangeVisualisationSpec={onChangeVisualisationSpec}
@@ -188,6 +190,7 @@ export default class Chart extends Component {
             area={Boolean(visualisation.visualisationType === 'area')}
             onChangeVisualisationSpec={onChangeVisualisationSpec}
             edit={Boolean(onChangeVisualisationSpec)}
+            legendPosition={visualisation.spec.legendPosition}
           />
         );
       case 'scatter':
@@ -206,8 +209,10 @@ export default class Chart extends Component {
             categoryLabel={visualisation.spec.categoryLabel}
             onChangeVisualisationSpec={onChangeVisualisationSpec}
             edit={Boolean(onChangeVisualisationSpec)}
+            legendVisible={visualisation.spec.showLegend}
             legendTitle={visualisation.spec.categoryLabel}
             legendDescription={visualisation.spec.sizeLabel}
+            legendPosition={visualisation.spec.legendPosition}
           />
         );
       case 'bar':
@@ -228,6 +233,7 @@ export default class Chart extends Component {
             onChangeVisualisationSpec={onChangeVisualisationSpec}
             legendTitle={visualisation.spec.legendTitle}
             legendVisible={visualisation.spec.showLegend}
+            legendPosition={visualisation.spec.legendPosition}
             valueLabelsVisible={visualisation.spec.showValueLabels}
             horizontal={visualisation.spec.horizontal}
           />
@@ -246,6 +252,7 @@ export default class Chart extends Component {
             legendTitle={visualisation.spec.legendTitle}
             legendDescription={visualisation.spec.metricLabel}
             legendVisible={visualisation.spec.showLegend}
+            legendPosition={visualisation.spec.legendPosition}
             labelsVisible={visualisation.spec.showLabels}
           />
         );

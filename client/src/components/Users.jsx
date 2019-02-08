@@ -178,7 +178,7 @@ class Users extends Component {
 
   getUsers() {
     api.get('/api/admin/users')
-      .then(({ body }) => this.setState({ users: body }))
+      .then(({ body: { users } }) => this.setState({ users }))
       .catch(() => {
         this.props.dispatch(showNotification('error', 'Failed to fetch users.'));
       });

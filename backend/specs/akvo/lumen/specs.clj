@@ -1,6 +1,7 @@
 (ns akvo.lumen.specs
   (:require [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
+            [integrant.core :as ig]
             [akvo.lumen.util :refer (squuid)]
             [clojure.tools.logging :as log]))
 
@@ -49,3 +50,6 @@
        (if (and (empty? res) (< attempt attempts))
          (recur (inc attempt))
          (first res))))))
+
+(defmethod ig/init-key :akvo.lumen.specs [_ opts]
+  opts)

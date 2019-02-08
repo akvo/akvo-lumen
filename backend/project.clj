@@ -2,7 +2,7 @@
   :description "Akvo Lumen backend"
   :url "https://github.com/akvo/akvo-lumen"
   :license {:name "GNU Affero General Public License 3.0"
-            :url  "https://www.gnu.org/licenses/agpl-3.0.html"}
+            :url "https://www.gnu.org/licenses/agpl-3.0.html"}
   :min-lein-version "2.0.0"
   :dependencies [[clojurewerkz/scrypt "1.2.0"]
                  [ch.qos.logback/logback-classic "1.2.3"]
@@ -46,10 +46,12 @@
                  [ring/ring-json "0.4.0"]
                  [selmer "1.11.8"]
                  [net.postgis/postgis-jdbc "2.2.1" :exclusions [org.postgresql/postgresql]]
-
                  [iapetos "0.1.8" :exclusions [io.prometheus/simpleclient]]
                  [io.prometheus/simpleclient_hotspot "0.5.0"]
-                 [io.prometheus/simpleclient_dropwizard "0.5.0"]]
+                 [io.prometheus/simpleclient_dropwizard "0.5.0"]
+                 [robert/hooke "1.3.0"]
+                 [org.clojure/test.check "0.10.0-alpha3"]]
+  :source-paths   ["src" "specs"]
   :uberjar-name "akvo-lumen.jar"
   :repl-options {:timeout 120000}
   :pedantic? :abort
@@ -58,25 +60,25 @@
             [lein-environ "1.0.3"]
             [lein-cljfmt "0.5.7"]
             [jonase/eastwood "0.3.3"]]
-  :codox {:doc-paths   ["resources/akvo/lumen/doc"]
+  :codox {:doc-paths ["resources/akvo/lumen/doc"]
           :output-path "../docs"}
   :main ^:skip-aot akvo.lumen.main
   :target-path "target/%s/"
-  :aliases {"setup"   ["run" "-m" "duct.util.repl/setup"]
+  :aliases {"setup" ["run" "-m" "duct.util.repl/setup"]
             "migrate" ["run" "-m" "dev/migrate"]
-            "seed"    ["run" "-m" "dev/seed"]}
+            "seed" ["run" "-m" "dev/seed"]}
   :test-selectors {:default (and (constantly true)
                                  (complement :functional))
                    :functional :functional
-                   :all     (constantly true)}
+                   :all (constantly true)}
   :eastwood {:config-files ["eastwood_cfg.clj"]}
   :profiles
   {:dev           [:project/dev :profiles/dev]
    :test          [:project/test :profiles/test]
    :uberjar       {:aot :all}
    :profiles/dev  {}
-   :project/dev   {:dependencies   [[org.clojure/test.check "0.10.0-alpha3"]
-                                    [diehard "0.7.2" :exclusions [org.clojure/spec.alpha]]
+   :profiles/test  {}
+   :project/dev   {:dependencies   [[diehard "0.7.2" :exclusions [org.clojure/spec.alpha]]
                                     [duct/generate "0.8.2"]
                                     [integrant/repl "0.2.0"]
                                     [reloaded.repl "0.2.4"]
@@ -84,9 +86,8 @@
                                     [org.clojure/tools.nrepl "0.2.13"]
                                     [eftest "0.5.1"]
                                     [com.gearswithingears/shrubbery "0.4.1"]
-                                    [kerodon "0.9.0"]
-                                    [robert/hooke "1.3.0"]]
-                   :source-paths   ["dev/src" "specs"]
+                                    [kerodon "0.9.0"]]
+                   :source-paths   ["dev/src"]
                    :resource-paths ["dev/resources" "test/resources"]
                    :repl-options   {:init-ns dev
                                     :init (do
@@ -97,10 +98,7 @@
                                     :host "0.0.0.0"
                                     :port 47480}
                    :env            {:port "3000"}}
-   :project/test  {:source-paths   ["specs"]
-                   :resource-paths ["test/resources"]
-                   :dependencies [[org.clojure/test.check "0.10.0-alpha3"]
-                                  [diehard "0.7.2" :exclusions [org.clojure/spec.alpha]]
-                                  [robert/hooke "1.3.0"]]
+   :project/test  {:resource-paths ["test/resources"]
+                   :dependencies [[diehard "0.7.2" :exclusions [org.clojure/spec.alpha]]]
                    :env
                    {:db {:uri "jdbc:postgresql://postgres/lumen?user=lumen&password=password"}}}})

@@ -4,6 +4,7 @@
             [akvo.lumen.endpoint.commons]
             [akvo.lumen.lib.aes :as aes]
             [akvo.lumen.migrate :as lumen-migrate]
+            [akvo.lumen.specs]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.java.jdbc :as jdbc]
