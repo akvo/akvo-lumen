@@ -41,10 +41,10 @@
 
 (defn valid-hex? [s] (try
                        (Color/decode s)
-                       true
                        (catch Exception e false)))
 
 (s/def ::layer.point-color-mapping.s/color valid-hex?)
+
 (s/def ::point-color-mapping-item (s/keys :req-un [::layer.point-color-mapping.s/op
                                                    ::layer.point-color-mapping.s/value
                                                    ::layer.point-color-mapping.s/color]))
