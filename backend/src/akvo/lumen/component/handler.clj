@@ -2,6 +2,8 @@
   (:require [compojure.core :as compojure.core]
             [compojure.response :as compojure.res]
             [integrant.core :as ig]
+            [akvo.lumen.specs.components :refer (integrant-key)]
+            [clojure.spec.alpha :as s]
             [ring.middleware.defaults]
             [ring.middleware.json]
             [ring.middleware.stacktrace]
@@ -40,11 +42,43 @@
 (defmethod ig/init-key :akvo.lumen.component.handler/wrap-json-body  [_ opts]
   ring.middleware.json/wrap-json-body)
 
+(defmethod integrant-key :akvo.lumen.component.handler/wrap-json-body [_]
+  (s/cat :kw keyword?
+         :config empty?))
+
 (defmethod ig/init-key :akvo.lumen.component.handler/wrap-json-response  [_ opts]
   ring.middleware.json/wrap-json-response)
 
 (defmethod ig/init-key :akvo.lumen.component.handler/wrap-defaults  [_ opts]
   #(ring.middleware.defaults/wrap-defaults % opts))
+
+(create-ns  'akvo.lumen.component.handler.wrap-defaults.params)
+(alias 'wrap-defaults.params 'akvo.lumen.component.handler.wrap-defaults.params)
+
+(create-ns  'akvo.lumen.component.handler.wrap-defaults.responses)
+(alias 'wrap-defaults.responses 'akvo.lumen.component.handler.wrap-defaults.responses)
+
+
+(s/def ::wrap-defaults.responses/not-modified-responses boolean?)
+(s/def ::wrap-defaults.responses/absolute-redirects boolean?)
+(s/def ::wrap-defaults.responses/content-types boolean?)
+(s/def ::wrap-defaults.responses/default-charset #{"utf-8"})
+
+(s/def ::wrap-defaults.params/urlencoded boolean?)
+(s/def ::wrap-defaults.params/keywordize boolean?)
+
+(s/def ::params (s/keys :req-un [::wrap-defaults.params/urlencoded
+                                 ::wrap-defaults.params/keywordize]))
+
+(s/def ::responses (s/keys :req-un [::wrap-defaults.responses/not-modified-responses
+                                    ::wrap-defaults.responses/absolute-redirects
+                                    ::wrap-defaults.responses/content-types
+                                    ::wrap-defaults.responses/default-charset]))
+
+(defmethod integrant-key :akvo.lumen.component.handler/wrap-defaults [_]
+  (s/cat :kw keyword?
+         :config (s/keys :req-un [::params ::responses])))
+
 
 (defmethod ig/init-key :akvo.lumen.component.handler/wrap-hide-errors  [_ {:keys [error-response]}]
   (fn [handler]
@@ -56,6 +90,12 @@
               (ring.response/content-type "text/html")
               (ring.response/status 500)))))))
 
+(s/def ::error-response string?)
+
+(defmethod integrant-key :akvo.lumen.component.handler/wrap-hide-errors [_]
+  (s/cat :kw keyword?
+         :config (s/keys :req-un [::error-response])))
+
 (defmethod ig/init-key :akvo.lumen.component.handler/wrap-not-found  [_ {:keys [error-response]}]
   (fn [handler]
     (fn [request]
@@ -63,3 +103,7 @@
           (-> (compojure.res/render error-response request)
               (ring.response/content-type "text/html")
               (ring.response/status 404))))))
+
+(defmethod integrant-key :akvo.lumen.component.handler/wrap-not-found [_]
+  (s/cat :kw keyword?
+         :config (s/keys :req-un [::error-response])))
