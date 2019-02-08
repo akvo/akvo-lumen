@@ -4,7 +4,8 @@
             [clojure.spec.alpha :as s]
             [akvo.lumen.specs.components :refer (integrant-key)]
             [duct.database.sql.hikaricp]
-            [akvo.lumen.monitoring :as monitoring]))
+            [akvo.lumen.monitoring :as monitoring])
+  (:import [duct.database.sql Boundary]))
 
 (defmethod ig/init-key :akvo.lumen.component.hikaricp/hikaricp  [_ opts]
   (ig/init-key :duct.database.sql/hikaricp (clojure.set/rename-keys opts {:uri :jdbc-url})))
@@ -16,8 +17,7 @@
 (s/def ::pool-name string?)
 (s/def ::maximum-pool-size pos-int?)
 (s/def ::minimum-idle pos-int?)
-
-
+(s/def ::hikaricp (partial instance? Boundary))
 (defmethod integrant-key :akvo.lumen.component.hikaricp/hikaricp [_]
   (s/cat :kw keyword?
          :config (s/keys :req-un [::uri

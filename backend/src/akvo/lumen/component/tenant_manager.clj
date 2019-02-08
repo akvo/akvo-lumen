@@ -1,13 +1,17 @@
 (ns akvo.lumen.component.tenant-manager
   "Component that controll the tenants,
   We use the first domain label e.g. t1 in t1.lumen.akvo.org to dispatch."
-  (:require [akvo.lumen.lib :as lib]
+  (:require [akvo.lumen.component.hikaricp :as hikaricp]
+            [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.aes :as aes]
+            [akvo.lumen.monitoring :as monitoring]
             [akvo.lumen.protocols :as p]
-            [clojure.tools.logging :as log]
-            [integrant.core :as ig]
+            [akvo.lumen.specs.components :refer (integrant-key)]
+            [clojure.spec.alpha :as s]
             [clojure.string :as str]
-            [hugsql.core :as hugsql])
+            [clojure.tools.logging :as log]
+            [hugsql.core :as hugsql]
+            [integrant.core :as ig])
   (:import [com.zaxxer.hikari HikariConfig HikariDataSource]))
 
 (hugsql/def-db-fns "akvo/lumen/component/tenant_manager.sql")
@@ -115,5 +119,18 @@
       (dissoc this :tenants))
     this))
 
+(s/def ::db ::hikaricp/hikaricp)
+(s/def ::encryption-key string?)
+(s/def ::dropwizard-registry ::monitoring/metric-registry)
+(s/def ::tenant-manager (partial instance? TenantManager))
+
+(defmethod integrant-key :akvo.lumen.component.tenant-manager [_]
+  (s/cat :kw keyword?
+         :config (s/keys :req-un [::db
+                                  ::encryption-key
+                                  ::dropwizard-registry])))
+
 (defmethod ig/init-key :akvo.lumen.component.tenant-manager/wrap-label-tenant  [_ opts]
   wrap-label-tenant)
+
+
