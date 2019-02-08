@@ -49,7 +49,8 @@
                  [iapetos "0.1.8" :exclusions [io.prometheus/simpleclient]]
                  [io.prometheus/simpleclient_hotspot "0.5.0"]
                  [io.prometheus/simpleclient_dropwizard "0.5.0"]
-                 [robert/hooke "1.3.0"]]
+                 [robert/hooke "1.3.0"]
+                 [org.clojure/test.check "0.10.0-alpha3"]]
   :source-paths   ["src" "specs"]
   :uberjar-name "akvo-lumen.jar"
   :repl-options {:timeout 120000}
@@ -76,8 +77,7 @@
    :test          [:project/test :profiles/test]
    :uberjar       {:aot :all}
    :profiles/dev  {}
-   :project/dev   {:dependencies   [[org.clojure/test.check "0.10.0-alpha3"]
-                                    [diehard "0.7.2" :exclusions [org.clojure/spec.alpha]]
+   :project/dev   {:dependencies   [[diehard "0.7.2" :exclusions [org.clojure/spec.alpha]]
                                     [duct/generate "0.8.2"]
                                     [integrant/repl "0.2.0"]
                                     [reloaded.repl "0.2.4"]
@@ -98,8 +98,7 @@
                                     :port 47480}
                    :env            {:port "3000"}}
    :project/test  {:resource-paths ["test/resources"]
-                   :dependencies [[org.clojure/test.check "0.10.0-alpha3"]
-                                  [diehard "0.7.2" :exclusions [org.clojure/spec.alpha]]
+                   :dependencies [[diehard "0.7.2" :exclusions [org.clojure/spec.alpha]]
                                   [robert/hooke "1.3.0"]]
                    :env
                    {:db {:uri "jdbc:postgresql://postgres/lumen?user=lumen&password=password"}}}})
