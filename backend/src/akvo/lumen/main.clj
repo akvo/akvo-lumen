@@ -5,6 +5,7 @@
             [akvo.lumen.migrate :as migrate]
             [akvo.lumen.specs.hooks :as hooks.s]
             [clojure.java.io :as io]
+            [clojure.pprint :refer (pprint)]
             [clojure.spec.test.alpha :as stest]
             [duct.core :as duct]
             [integrant.core :as ig]))
@@ -23,7 +24,11 @@
   (let [config ((comp duct/prep read-config))
         _ (ig/load-namespaces config)
         system (ig/init config)]
+    (pprint (:akvo.lumen.config system))
+    (println "-------")
+    (pprint config)
     (when (:conform-specs (:akvo.lumen.config system))
+      (println "conforming specs!")
       (stest/instrument)
       (hooks.s/apply-hooks))
     system))
