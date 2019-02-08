@@ -133,4 +133,6 @@
 (defmethod ig/init-key :akvo.lumen.component.tenant-manager/wrap-label-tenant  [_ opts]
   wrap-label-tenant)
 
-
+(defmethod integrant-key :akvo.lumen.component.tenant-manager/wrap-label-tenant [_]
+  (s/cat :kw keyword?
+         :config empty?))

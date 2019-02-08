@@ -3,8 +3,10 @@
             [cheshire.core :as json]
             [clj-http.client :as client]
             [clojure.set :as set]
-            [clojure.string :as s]
+            [clojure.string :as string]
+            [clojure.spec.alpha :as s]
             [integrant.core :as ig]
+            [akvo.lumen.specs.components :refer (integrant-key)]
             [ring.util.response :as response]))
 
 (defn claimed-roles [jwt-claims]
@@ -25,14 +27,14 @@
        (or (= "/api" path-info)
            (= "/env" path-info)
            (= "/healthz" path-info)
-           (s/starts-with? path-info "/share/")
-           (s/starts-with? path-info "/verify/"))))
+           (string/starts-with? path-info "/share/")
+           (string/starts-with? path-info "/verify/"))))
 
 (defn admin-path? [{:keys [path-info]}]
-  (s/starts-with? path-info "/api/admin/"))
+  (string/starts-with? path-info "/api/admin/"))
 
 (defn api-path? [{:keys [path-info]}]
-  (s/starts-with? path-info "/api/"))
+  (string/starts-with? path-info "/api/"))
 
 (def not-authenticated
   (-> (response/response "Not authenticated")
@@ -77,6 +79,10 @@
 
 (defmethod ig/init-key :akvo.lumen.auth/wrap-auth  [_ opts]
   wrap-auth)
+
+(defmethod integrant-key :akvo.lumen.auth/wrap-auth [_]
+  (s/cat :kw keyword?
+         :config empty?))
 
 (defmethod ig/init-key :akvo.lumen.auth/wrap-jwt  [_ {:keys [keycloak]}]
   (wrap-jwt keycloak))
