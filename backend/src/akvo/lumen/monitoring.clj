@@ -1,10 +1,13 @@
 (ns akvo.lumen.monitoring
-  (:require [iapetos.core :as prometheus]
+  (:require [clojure.spec.alpha :as s]
             [iapetos.collector.jvm :as jvm]
             [iapetos.collector.ring :as ring]
+            [iapetos.core :as prometheus]
             [integrant.core :as ig])
-  (:import (io.prometheus.client.dropwizard DropwizardExports)
-           (com.codahale.metrics MetricRegistry)))
+  (:import [com.codahale.metrics MetricRegistry]
+           [io.prometheus.client.dropwizard DropwizardExports]))
+
+(s/def ::metric-registry (partial instance? MetricRegistry))
 
 (defmethod ig/init-key ::dropwizard-registry [_ _]
   (MetricRegistry.))
