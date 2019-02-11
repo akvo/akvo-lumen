@@ -5,6 +5,8 @@
    [clojure.java.io :as io]
    [clojure.tools.logging :as log]
    [duct.core :as duct]
+   [clojure.spec.alpha :as s]
+   [akvo.lumen.specs.components :refer (integrant-key)]
    [environ.core :refer [env]]
    [hugsql.core :as hugsql]
    [integrant.core :as ig]
@@ -110,3 +112,11 @@
 
 (defmethod ig/init-key :akvo.lumen.migrate [_ opts]
   opts)
+(s/def ::tenant-manager string?)
+(s/def ::tenants string?)
+(s/def ::migrations (s/keys :req-un [::tenant-manager ::tenants]))
+
+(defmethod integrant-key :akvo.lumen.migrate [_]
+  (s/cat :kw keyword?
+         :config (s/keys :req-un [::migrations])))
+
