@@ -8,6 +8,9 @@
              [collection :as collection]
              [raster :as raster]]
             [akvo.lumen.endpoint.commons.variant :as variant]
+            [akvo.lumen.specs.components :refer (integrant-key)]
+            [clojure.spec.alpha :as s]
+            [akvo.lumen.component.tenant-manager :as tenant-manager]
             [compojure.core :refer :all]
             [integrant.core :as ig]))
 
@@ -24,3 +27,7 @@
 
 (defmethod ig/init-key :akvo.lumen.endpoint.library/library  [_ opts]
   (endpoint opts))
+
+(defmethod integrant-key :akvo.lumen.endpoint.library/library [_]
+  (s/cat :kw keyword?
+         :config (s/keys :req-un [::tenant-manager/tenant-manager] )))
