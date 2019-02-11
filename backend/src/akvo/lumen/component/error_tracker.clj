@@ -21,8 +21,17 @@
 (defmethod ig/init-key :akvo.lumen.component.error-tracker/local  [_ opts]
   (local-error-tracker nil))
 
+(defmethod integrant-key :akvo.lumen.component.error-tracker/prod [_]
+  (s/cat :kw keyword? :config empty?))
+
 (defmethod ig/init-key :akvo.lumen.component.error-tracker/prod  [_ {:keys [dsn] :as opts}]
   (sentry-error-tracker dsn))
+
+(s/def ::dsn string?)
+
+(defmethod integrant-key :akvo.lumen.component.error-tracker/prod [_]
+  (s/cat :kw keyword? :config (s/keys :req-un [::dsn])))
+
 
 (defn event-map [error]
   (let [text (str (ex-data error))]
