@@ -5,7 +5,6 @@
             [akvo.lumen.util :refer [squuid] :as util]
             [akvo.lumen.specs]
             [akvo.lumen.specs.components]
-            [akvo.lumen.specs.components.caddisfly]
             [akvo.lumen.specs.db]
             [akvo.lumen.specs.db.dataset-version]
             [akvo.lumen.specs.db.dataset-version.column]

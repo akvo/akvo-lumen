@@ -3,8 +3,16 @@
   (:require [cheshire.core :as json]
             [clj-http.client :as client]
             [clojure.java.io :as io]
+            [akvo.lumen.specs.components :refer (integrant-key)]
+            [clojure.spec.alpha :as s]
             [integrant.core :as ig]
             [clojure.tools.logging :as log]))
+
+(defrecord Caddisfly [local-schema-uri schema-uri schema])
+
+(defmethod clojure.core/print-method Caddisfly
+     [cad ^java.io.Writer writer]
+     (.write writer (str "#<Caddisfly> schema: " (or (:local-schema-uri cad) (:schema-uri cad)))))
 
 (defn extract-tests [json-schema]
   (->> (:tests json-schema)
@@ -14,14 +22,25 @@
   {:pre [local-schema-uri]}
   (let [tests (-> local-schema-uri io/resource slurp (json/parse-string keyword) extract-tests)]
     (log/warn ::start "Using caddisfly LOCAL schema-uri:" local-schema-uri)
-    (assoc opts :schema tests)))
+    (map->Caddisfly (assoc opts :schema tests))))
 
 (defmethod ig/init-key :akvo.lumen.component.caddisfly/prod  [_ {:keys [schema-uri] :as opts}]
   {:pre [schema-uri]}
   (let [tests (-> schema-uri client/get :body (json/decode keyword) extract-tests)]
     (log/info ::start "Using caddisfly ONLINE schema-uri" schema-uri)
-    (assoc opts :schema tests)))
+    (map->Caddisfly (assoc opts :schema tests))))
 
 (defn get-schema
   [caddisfly caddisflyResourceUuid]
   (get (:schema caddisfly) caddisflyResourceUuid))
+
+
+(s/def ::local-schema-uri string?)
+
+(s/def ::caddisfly (partial instance? Caddisfly))
+
+(defmethod integrant-key :akvo.lumen.component.caddisfly/local [_]
+  (s/cat :kw keyword? :config (s/keys :req-un [::local-schema-uri])))
+
+(defmethod integrant-key :akvo.lumen.component.caddisfly/prod [_]
+  (s/cat :kw keyword? :config (s/keys :req-un [::schema-uri])))
