@@ -26,7 +26,7 @@
   "Create a set of request headers to use for interaction with the Keycloak
    REST API. This allows us to reuse the same token for multiple requests."
   [{:keys [openid-config credentials]}]
-  (let [params (merge {"grant_type" "client_credentials"}
+  (let [params (merge {:grant_type "client_credentials"}
                       credentials)
         resp (client/post (get openid-config "token_endpoint")
                           {:form-params params})
