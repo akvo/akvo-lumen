@@ -2,6 +2,8 @@
   (:require [cheshire.core :as json]
             [clj-http.client :as client]
             [akvo.lumen.protocols :as p]
+            [akvo.lumen.specs.components :refer (integrant-key)]
+            [clojure.spec.alpha :as s]
             [clojure.tools.logging :as log]
             [integrant.core :as ig]))
 
@@ -38,3 +40,19 @@
    {:config {:credentials [email-user email-password]
              :from-email  from-email
              :from-name   from-name}}))
+
+(s/def ::email-password string?)
+(s/def ::email-user string?)
+(s/def ::from-email string?)
+(s/def ::from-name string?)
+
+(s/def ::emailer (partial satisfies? p/SendEmail))
+
+(defmethod integrant-key :akvo.lumen.component.emailer/dev-emailer [_]
+  (s/cat :kw keyword?
+         :config (s/keys :req-un [::from-email ::from-name])))
+
+
+(defmethod integrant-key :akvo.lumen.component.emailer/mailjet-v3-emailer [_]
+  (s/cat :kw keyword?
+         :config (s/keys :req-un [::email-password ::email-user ::from-email ::from-name])))

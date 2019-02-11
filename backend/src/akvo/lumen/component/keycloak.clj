@@ -303,6 +303,10 @@
 (s/def ::credentials (s/keys :req-un [::client_id
                                       ::client_secret]))
 
+(s/def ::config (s/keys :req-un [::data ::credentials]))
+
+(s/def ::keycloak (partial satisfies? p/KeycloakUserManagement))
+
 (defmethod integrant-key :akvo.lumen.component.keycloak [_]
   (s/cat :kw keyword?
-         :config (s/keys :req-un [::data ::credentials])))
+         :config ::config))
