@@ -33,6 +33,18 @@
       (assoc component :handler handler))
     opts))
 
+(s/def ::endpoints (s/coll-of fn? :count 24 :distinct true))
+
+(s/def ::functions (s/map-of keyword? fn?))
+(s/def ::applied (s/coll-of keyword?  :distinct true))
+(s/def ::middleware (s/keys :req-un [::functions ::applied]))
+
+(defmethod integrant-key :akvo.lumen.component.handler/handler [_]
+  (s/cat :kw keyword?
+         :config (s/keys :req-un [::endpoints ::middleware] )))
+
+
+
 (defmethod ig/halt-key! :akvo.lumen.component.handler/handler  [_ opts]
   (dissoc opts :handler))
 
