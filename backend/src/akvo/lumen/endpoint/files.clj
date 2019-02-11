@@ -1,6 +1,8 @@
 (ns akvo.lumen.endpoint.files
   (:require [compojure.core :refer [ANY]]
             [integrant.core :as ig]
+            [akvo.lumen.specs.components :refer (integrant-key)]
+            [clojure.spec.alpha :as s]
             [org.akvo.resumed :refer [make-handler]]))
 
 (defn endpoint
@@ -13,5 +15,3 @@
 (defmethod ig/init-key :akvo.lumen.endpoint.files/files  [_ opts]
   (endpoint (:upload-config opts)))
 
-(defmethod ig/init-key :akvo.lumen.upload  [_ opts]
-  opts)

@@ -46,6 +46,8 @@
   #(raven-clj.ring/wrap-sentry % dsn opts))
 
 
+(s/def ::error-tracker (partial satisfies? p/IErrorTracker))
+
 (s/def ::dsn string?)
 (s/def ::namespaces (s/coll-of string?))
 (s/def ::opts (s/keys :req-un [::namespaces]))
