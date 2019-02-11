@@ -1,6 +1,9 @@
 (ns akvo.lumen.component.http
   "Immutant web Duct component."
   (:require [integrant.core :as ig]
+            [clojure.spec.alpha :as s]
+            [akvo.lumen.component.handler :as handler]
+            [akvo.lumen.specs.components :refer (integrant-key)]
             [immutant.web :as web]))
 
 (defmethod ig/init-key :akvo.lumen.component.http/http  [_ {:keys [port handler] :as opts}]
@@ -16,3 +19,11 @@
   (when server
     (web/stop server))
     (dissoc opts :server))
+
+(s/def ::port pos-int?)
+
+(s/def ::handler (s/merge ::handler/config (s/keys :req-un [::handler/handler])))
+
+(defmethod integrant-key :akvo.lumen.component.http/http [_]
+  (s/cat :kw keyword?
+         :config (s/keys :req-un [::port ::handler])))

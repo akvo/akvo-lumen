@@ -39,11 +39,11 @@
 (s/def ::applied (s/coll-of keyword?  :distinct true))
 (s/def ::middleware (s/keys :req-un [::functions ::applied]))
 
+(s/def ::config (s/keys :req-un [::endpoints ::middleware]))
+(s/def ::handler fn?)
 (defmethod integrant-key :akvo.lumen.component.handler/handler [_]
   (s/cat :kw keyword?
-         :config (s/keys :req-un [::endpoints ::middleware] )))
-
-
+         :config ::config))
 
 (defmethod ig/halt-key! :akvo.lumen.component.handler/handler  [_ opts]
   (dissoc opts :handler))
