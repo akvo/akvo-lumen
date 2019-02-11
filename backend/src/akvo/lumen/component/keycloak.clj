@@ -296,3 +296,13 @@
         openid-config (fetch-openid-configuration issuer)]
       (log/info "Successfully got openid-config from provider.")
       (assoc this :openid-config openid-config)))
+
+(s/def ::client_id string?)
+(s/def ::client_secret string?)
+
+(s/def ::credentials (s/keys :req-un [::client_id
+                                      ::client_secret]))
+
+(defmethod integrant-key :akvo.lumen.component.keycloak [_]
+  (s/cat :kw keyword?
+         :config (s/keys :req-un [::data ::credentials])))
