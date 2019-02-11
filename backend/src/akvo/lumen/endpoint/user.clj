@@ -1,6 +1,9 @@
 (ns akvo.lumen.endpoint.user
   (:require [akvo.lumen.endpoint.commons.http :as http]
             [akvo.lumen.lib.user :as user]
+            [akvo.lumen.specs.components :refer (integrant-key)]
+            [clojure.spec.alpha :as s]
+            [akvo.lumen.component.keycloak :as keycloak]
             [compojure.core :refer :all]
             [integrant.core :as ig]))
 
@@ -35,3 +38,7 @@
 
 (defmethod ig/init-key :akvo.lumen.endpoint.user/user  [_ opts]
   (endpoint opts))
+
+(defmethod integrant-key :akvo.lumen.endpoint.user/user [_]
+  (s/cat :kw keyword?
+         :config (s/keys :req-un [::keycloak/keycloak])))

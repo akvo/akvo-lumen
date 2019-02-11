@@ -2,6 +2,9 @@
   (:require [akvo.lumen.protocols :as p]
             [akvo.lumen.lib.visualisation :as visualisation]
             [akvo.lumen.lib.visualisation.maps :as maps]
+            [akvo.lumen.specs.components :refer (integrant-key)]
+            [clojure.spec.alpha :as s]
+            [akvo.lumen.component.tenant-manager :as tenant-manager]
             [compojure.core :refer :all]
             [integrant.core :as ig]))
 
@@ -37,3 +40,10 @@
 
 (defmethod ig/init-key :akvo.lumen.endpoint.visualisation/visualisation  [_ opts]
   (endpoint opts))
+
+(s/def ::windshaft-url string?)
+
+(defmethod integrant-key :akvo.lumen.endpoint.visualisation/visualisation [_]
+  (s/cat :kw keyword?
+         :config (s/keys :req-un [::tenant-manager/tenant-manager
+                                  ::windshaft-url] )))
