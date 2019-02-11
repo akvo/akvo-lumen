@@ -1,6 +1,9 @@
 (ns akvo.lumen.endpoint.share
   (:require [akvo.lumen.protocols :as p]
             [akvo.lumen.lib.share :as share]
+            [akvo.lumen.specs.components :refer (integrant-key)]
+            [clojure.spec.alpha :as s]
+            [akvo.lumen.component.tenant-manager :as tenant-manager]
             [compojure.core :refer :all]
             [integrant.core :as ig]))
 
@@ -17,3 +20,7 @@
 
 (defmethod ig/init-key :akvo.lumen.endpoint.share/share  [_ opts]
   (endpoint opts))
+
+(defmethod integrant-key :akvo.lumen.endpoint.share/share [_]
+  (s/cat :kw keyword?
+         :config (s/keys :req-un [::tenant-manager/tenant-manager] )))

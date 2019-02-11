@@ -1,6 +1,10 @@
 (ns akvo.lumen.endpoint.transformation
   (:require [akvo.lumen.protocols :as p]
             [akvo.lumen.lib.transformation :as t]
+            [akvo.lumen.specs.components :refer (integrant-key)]
+            [akvo.lumen.component.caddisfly :as caddisfly]
+            [clojure.spec.alpha :as s]
+            [akvo.lumen.component.tenant-manager :as tenant-manager]
             [compojure.core :refer :all]
             [integrant.core :as ig]))
 
@@ -21,3 +25,8 @@
 
 (defmethod ig/init-key :akvo.lumen.endpoint.transformation/transformation  [_ opts]
   (endpoint opts))
+
+(defmethod integrant-key :akvo.lumen.endpoint.transformation/transformation [_]
+  (s/cat :kw keyword?
+         :config (s/keys :req-un [::tenant-manager/tenant-manager
+                                  ::caddisfly/caddisfly])))

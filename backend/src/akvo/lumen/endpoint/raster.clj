@@ -2,6 +2,10 @@
   (:require [akvo.lumen.protocols :as p]
             [integrant.core :as ig]
             [akvo.lumen.lib.raster :as raster]
+            [akvo.lumen.specs.components :refer (integrant-key)]
+            [clojure.spec.alpha :as s]
+            [akvo.lumen.component.tenant-manager :as tenant-manager]
+            [akvo.lumen.upload :as upload]
             [compojure.core :refer :all]))
 
 (defn endpoint [tenant-manager file-upload-path]
@@ -23,3 +27,10 @@
 
 (defmethod ig/init-key :akvo.lumen.endpoint.raster/raster  [_ opts]
   (endpoint (-> opts :tenant-manager) (-> opts :upload-config :file-upload-path)))
+
+(s/def ::upload-config ::upload/config)
+
+(defmethod integrant-key :akvo.lumen.endpoint.raster/raster [_]
+  (s/cat :kw keyword?
+         :config (s/keys :req-un [::tenant-manager/tenant-manager
+                                  ::upload-config] )))
