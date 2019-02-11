@@ -12,6 +12,7 @@
  :akvo.lumen.component.emailer/dev-emailer              {:from-email "devops@akvo.localhost"
                                                          :from-name "Akvo Lumen"}
 
+ :akvo.lumen.component.error-tracker/wrap-sentry         {:dsn "dev-dsn"}
  :akvo.lumen.component.handler/handler {:middleware
                                         {:functions {:stacktrace #ig/ref :akvo.lumen.component.handler/wrap-stacktrace}
                                          :applied   ^:replace [:not-found :json-response :ring-defaults :json-body

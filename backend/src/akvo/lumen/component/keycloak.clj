@@ -6,6 +6,8 @@
             [cheshire.core :as json]
             [clj-http.client :as client]
             [integrant.core :as ig]
+            [clojure.spec.alpha :as s]
+            [akvo.lumen.specs.components :refer (integrant-key)]
             [clojure.set :as set]
             [clojure.tools.logging :as log]
             [ring.util.response :refer [response]]))
@@ -279,6 +281,15 @@
 (defmethod ig/init-key :akvo.lumen.component.keycloak/data  [_ {:keys [url realm] :as opts}]
   opts)
 
+(s/def ::url string?)
+(s/def ::realm string?)
+
+(s/def ::data (s/keys :req-un [::url
+                               ::realm]))
+
+(defmethod integrant-key :akvo.lumen.component.keycloak/data [_]
+  (s/cat :kw keyword?
+         :config ::data))
 
 (defmethod ig/init-key :akvo.lumen.component.keycloak  [_ {:keys [credentials data] :as opts}]
   (let [{:keys [issuer openid-config api-root] :as this} (keycloak (assoc data :credentials credentials))

@@ -4,6 +4,8 @@
             [raven-clj.core :as raven]
             [integrant.core :as ig]
             [raven-clj.ring]
+            [akvo.lumen.specs.components :refer (integrant-key)]
+            [clojure.spec.alpha :as s]
             [raven-clj.interfaces :as raven-interface]))
 
 (defrecord SentryErrorTracker [dsn])
@@ -42,3 +44,12 @@
 
 (defmethod ig/init-key :akvo.lumen.component.error-tracker/wrap-sentry  [_ {:keys [dsn opts]}]
   #(raven-clj.ring/wrap-sentry % dsn opts))
+
+
+(s/def ::dsn string?)
+(s/def ::namespaces (s/coll-of string?))
+(s/def ::opts (s/keys :req-un [::namespaces]))
+
+(defmethod integrant-key :akvo.lumen.component.error-tracker/wrap-sentry [_]
+  (s/cat :kw keyword?
+         :config (s/keys :req-un [::dsn ::opts] )))

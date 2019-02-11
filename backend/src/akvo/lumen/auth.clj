@@ -5,6 +5,7 @@
             [clojure.set :as set]
             [clojure.string :as string]
             [clojure.spec.alpha :as s]
+            [akvo.lumen.component.keycloak :as keycloak]
             [integrant.core :as ig]
             [akvo.lumen.specs.components :refer (integrant-key)]
             [ring.util.response :as response]))
@@ -87,3 +88,7 @@
 (defmethod ig/init-key :akvo.lumen.auth/wrap-jwt  [_ {:keys [keycloak]}]
   (wrap-jwt keycloak))
 
+(s/def ::keycloak ::keycloak/data)
+(defmethod integrant-key :akvo.lumen.auth/wrap-jwt [_]
+  (s/cat :kw keyword?
+         :config (s/keys :req-un [::keycloak] )))
