@@ -2,9 +2,7 @@
   (:require [akvo.lumen.endpoint.commons.http :as http]
             [compojure.core :refer :all]
             [akvo.lumen.specs.components :refer [integrant-key]]
-
             [clojure.spec.alpha :as s]
-
             [environ.core :as env]
             [integrant.core :as ig]))
 
