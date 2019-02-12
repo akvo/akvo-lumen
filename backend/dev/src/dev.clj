@@ -54,7 +54,7 @@
 
 
 
-(def config (let [c (dissoc-prod-components (ig/prep (duct/merge-configs (read-config) (read-config "akvo/lumen/config.edn"))))]
+(def config (let [c (dissoc-prod-components (ig/prep (duct/merge-configs (read-config "akvo/lumen/config.edn") (read-config))))]
               (ir/set-prep! (fn [] c))
               (ig/load-namespaces c)
               c))

@@ -4,7 +4,7 @@
             [integrant.core :as ig]))
 
 
-(defmethod ig/init-key :akvo.lumen.upload  [_ opts]
+(defmethod ig/init-key :akvo.lumen.upload/data  [_ opts]
   opts)
 
 (s/def ::file-upload-path string?)
@@ -13,6 +13,6 @@
 (s/def ::config (s/keys :req-un [::file-upload-path
                                   ::max-upload-size]))
 
-(defmethod integrant-key :akvo.lumen.upload [_]
+(defmethod integrant-key :akvo.lumen.upload/data [_]
   (s/cat :kw keyword?
          :config ::config))
