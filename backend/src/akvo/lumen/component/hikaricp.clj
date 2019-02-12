@@ -2,7 +2,7 @@
   (:require [clojure.set]
             [integrant.core :as ig]
             [clojure.spec.alpha :as s]
-            [akvo.lumen.specs.components :refer (integrant-key)]
+            [akvo.lumen.specs.components :refer [integrant-key]]
             [duct.database.sql.hikaricp]
             [akvo.lumen.monitoring :as monitoring])
   (:import [duct.database.sql Boundary]))

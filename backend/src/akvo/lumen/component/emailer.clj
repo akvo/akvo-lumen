@@ -2,7 +2,7 @@
   (:require [cheshire.core :as json]
             [clj-http.client :as client]
             [akvo.lumen.protocols :as p]
-            [akvo.lumen.specs.components :refer (integrant-key)]
+            [akvo.lumen.specs.components :refer [integrant-key]]
             [clojure.spec.alpha :as s]
             [clojure.tools.logging :as log]
             [integrant.core :as ig]))

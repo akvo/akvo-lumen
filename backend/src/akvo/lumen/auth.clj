@@ -7,7 +7,7 @@
             [clojure.spec.alpha :as s]
             [akvo.lumen.component.keycloak :as keycloak]
             [integrant.core :as ig]
-            [akvo.lumen.specs.components :refer (integrant-key)]
+            [akvo.lumen.specs.components :refer [integrant-key]]
             [ring.util.response :as response]))
 
 (defn claimed-roles [jwt-claims]

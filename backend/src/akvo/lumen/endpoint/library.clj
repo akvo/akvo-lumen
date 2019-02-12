@@ -8,7 +8,7 @@
              [collection :as collection]
              [raster :as raster]]
             [akvo.lumen.endpoint.commons.variant :as variant]
-            [akvo.lumen.specs.components :refer (integrant-key)]
+            [akvo.lumen.specs.components :refer [integrant-key]]
             [clojure.spec.alpha :as s]
             [akvo.lumen.component.tenant-manager :as tenant-manager]
             [compojure.core :refer :all]

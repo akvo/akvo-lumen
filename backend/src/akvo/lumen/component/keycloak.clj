@@ -7,7 +7,7 @@
             [clj-http.client :as client]
             [integrant.core :as ig]
             [clojure.spec.alpha :as s]
-            [akvo.lumen.specs.components :refer (integrant-key)]
+            [akvo.lumen.specs.components :refer [integrant-key]]
             [clojure.set :as set]
             [clojure.tools.logging :as log]
             [ring.util.response :refer [response]]))

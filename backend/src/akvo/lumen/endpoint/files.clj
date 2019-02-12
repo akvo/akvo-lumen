@@ -1,7 +1,7 @@
 (ns akvo.lumen.endpoint.files
   (:require [compojure.core :refer [ANY]]
             [integrant.core :as ig]
-            [akvo.lumen.specs.components :refer (integrant-key)]
+            [akvo.lumen.specs.components :refer [integrant-key]]
             [akvo.lumen.upload :as upload]
             [clojure.spec.alpha :as s]
             [org.akvo.resumed :refer [make-handler]]))

@@ -4,7 +4,7 @@
             [raven-clj.core :as raven]
             [integrant.core :as ig]
             [raven-clj.ring]
-            [akvo.lumen.specs.components :refer (integrant-key)]
+            [akvo.lumen.specs.components :refer [integrant-key]]
             [clojure.spec.alpha :as s]
             [raven-clj.interfaces :as raven-interface]))
 

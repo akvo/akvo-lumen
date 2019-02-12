@@ -2,7 +2,7 @@
   (:require [akvo.lumen.protocols :as p]
             [integrant.core :as ig]
             [akvo.lumen.lib.raster :as raster]
-            [akvo.lumen.specs.components :refer (integrant-key)]
+            [akvo.lumen.specs.components :refer [integrant-key]]
             [clojure.spec.alpha :as s]
             [akvo.lumen.component.tenant-manager :as tenant-manager]
             [akvo.lumen.upload :as upload]

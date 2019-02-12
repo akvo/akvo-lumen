@@ -3,7 +3,7 @@
   (:require [integrant.core :as ig]
             [clojure.spec.alpha :as s]
             [akvo.lumen.component.handler :as handler]
-            [akvo.lumen.specs.components :refer (integrant-key)]
+            [akvo.lumen.specs.components :refer [integrant-key]]
             [immutant.web :as web]))
 
 (defmethod ig/init-key :akvo.lumen.component.http/http  [_ {:keys [port handler] :as opts}]

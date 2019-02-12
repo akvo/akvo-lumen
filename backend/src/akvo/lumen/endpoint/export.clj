@@ -2,7 +2,7 @@
   "Exposes the exporter proxy"
   (:require [akvo.lumen.lib.export :as export]
             [integrant.core :as ig]
-            [akvo.lumen.specs.components :refer (integrant-key)]
+            [akvo.lumen.specs.components :refer [integrant-key]]
             [clojure.spec.alpha :as s]
             [clojure.tools.logging :as log]
             [compojure.core :refer :all]))

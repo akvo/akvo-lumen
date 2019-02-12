@@ -1,7 +1,7 @@
 (ns akvo.lumen.endpoint.transformation
   (:require [akvo.lumen.protocols :as p]
             [akvo.lumen.lib.transformation :as t]
-            [akvo.lumen.specs.components :refer (integrant-key)]
+            [akvo.lumen.specs.components :refer [integrant-key]]
             [akvo.lumen.component.caddisfly :as caddisfly]
             [clojure.spec.alpha :as s]
             [akvo.lumen.component.tenant-manager :as tenant-manager]

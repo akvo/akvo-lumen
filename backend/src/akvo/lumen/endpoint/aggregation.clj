@@ -4,7 +4,7 @@
             [akvo.lumen.lib.aggregation :as aggregation]
             [cheshire.core :as json]
             [compojure.core :refer :all]
-            [akvo.lumen.specs.components :refer (integrant-key)]
+            [akvo.lumen.specs.components :refer [integrant-key]]
             [clojure.spec.alpha :as s]
             [akvo.lumen.component.tenant-manager :as tenant-manager]
             [integrant.core :as ig])

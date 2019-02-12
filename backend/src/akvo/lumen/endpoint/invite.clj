@@ -1,7 +1,7 @@
 (ns akvo.lumen.endpoint.invite
   (:require [akvo.lumen.protocols :as p]
             [akvo.lumen.lib.user :as user]
-            [akvo.lumen.specs.components :refer (integrant-key)]
+            [akvo.lumen.specs.components :refer [integrant-key]]
             [clojure.spec.alpha :as s]
             [akvo.lumen.component.tenant-manager :as tenant-manager]
             [akvo.lumen.component.emailer :as emailer]

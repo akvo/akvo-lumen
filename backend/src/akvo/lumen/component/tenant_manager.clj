@@ -6,7 +6,7 @@
             [akvo.lumen.lib.aes :as aes]
             [akvo.lumen.monitoring :as monitoring]
             [akvo.lumen.protocols :as p]
-            [akvo.lumen.specs.components :refer (integrant-key)]
+            [akvo.lumen.specs.components :refer [integrant-key]]
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [clojure.tools.logging :as log]

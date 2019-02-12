@@ -1,6 +1,6 @@
 (ns akvo.lumen.endpoint.multiple-column
   (:require [akvo.lumen.lib.multiple-column :as multiple-column]
-            [akvo.lumen.specs.components :refer (integrant-key)]
+            [akvo.lumen.specs.components :refer [integrant-key]]
             [clojure.spec.alpha :as s]
             [akvo.lumen.component.caddisfly :as caddisfly]
             [cheshire.core :as json]

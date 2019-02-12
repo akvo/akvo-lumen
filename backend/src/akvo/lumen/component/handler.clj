@@ -2,7 +2,7 @@
   (:require [compojure.core :as compojure.core]
             [compojure.response :as compojure.res]
             [integrant.core :as ig]
-            [akvo.lumen.specs.components :refer (integrant-key)]
+            [akvo.lumen.specs.components :refer [integrant-key]]
             [clojure.spec.alpha :as s]
             [ring.middleware.defaults]
             [ring.middleware.json]

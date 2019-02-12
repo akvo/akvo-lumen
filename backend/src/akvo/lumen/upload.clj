@@ -1,6 +1,6 @@
 (ns akvo.lumen.upload
   (:require [clojure.spec.alpha :as s]
-            [akvo.lumen.specs.components :refer (integrant-key)]
+            [akvo.lumen.specs.components :refer [integrant-key]]
             [integrant.core :as ig]))
 
 

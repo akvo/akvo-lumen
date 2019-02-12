@@ -1,7 +1,7 @@
 (ns akvo.lumen.endpoint.resource
   (:require [akvo.lumen.protocols :as p]
             [akvo.lumen.lib.resource :as resource]
-            [akvo.lumen.specs.components :refer (integrant-key)]
+            [akvo.lumen.specs.components :refer [integrant-key]]
             [clojure.spec.alpha :as s]
             [akvo.lumen.component.tenant-manager :as tenant-manager]
             [compojure.core :refer :all]

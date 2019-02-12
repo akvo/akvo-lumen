@@ -2,7 +2,7 @@
   (:require [akvo.lumen.protocols :as p]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.transformation.split-column :as transformation]
-            [akvo.lumen.specs.components :refer (integrant-key)]
+            [akvo.lumen.specs.components :refer [integrant-key]]
             [clojure.spec.alpha :as s]
             [akvo.lumen.component.tenant-manager :as tenant-manager]
             [cheshire.core :as json]

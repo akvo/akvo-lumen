@@ -1,7 +1,7 @@
 (ns akvo.lumen.endpoint.env
   (:require [compojure.core :refer :all]
             [integrant.core :as ig]
-            [akvo.lumen.specs.components :refer (integrant-key)]
+            [akvo.lumen.specs.components :refer [integrant-key]]
             [clojure.spec.alpha :as s]
             [ring.util.response :refer [response]]))
 

@@ -1,7 +1,7 @@
 (ns akvo.lumen.endpoint.healthz
   (:require [akvo.lumen.endpoint.commons.http :as http]
             [compojure.core :refer :all]
-            [akvo.lumen.specs.components :refer (integrant-key)]
+            [akvo.lumen.specs.components :refer [integrant-key]]
 
             [clojure.spec.alpha :as s]
 

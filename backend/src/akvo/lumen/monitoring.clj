@@ -2,7 +2,7 @@
   (:require [clojure.spec.alpha :as s]
             [iapetos.collector.jvm :as jvm]
             [iapetos.collector.ring :as ring]
-            [akvo.lumen.specs.components :refer (integrant-key)]
+            [akvo.lumen.specs.components :refer [integrant-key]]
             [iapetos.core :as prometheus]
             [iapetos.registry :as registry]
             [integrant.core :as ig])

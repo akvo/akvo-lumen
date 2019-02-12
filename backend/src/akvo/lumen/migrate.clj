@@ -6,7 +6,7 @@
    [clojure.tools.logging :as log]
    [duct.core :as duct]
    [clojure.spec.alpha :as s]
-   [akvo.lumen.specs.components :refer (integrant-key)]
+   [akvo.lumen.specs.components :refer [integrant-key]]
    [environ.core :refer [env]]
    [hugsql.core :as hugsql]
    [integrant.core :as ig]
