@@ -25,6 +25,10 @@
 
  :akvo.lumen.component.handler/wrap-stacktrace {}
 
+ :akvo.lumen.endpoint.public/public                   {:windshaft-url  "http://windshaft:4000"}
+
+ :akvo.lumen.endpoint.visualisation/visualisation     {:windshaft-url "http://windshaft:4000"}
+
  :akvo.lumen.endpoint.export/export                   {:exporter-api-url "http://exporter:3001"}
 
  :akvo.lumen.endpoint.invite/invite                   {:invite-redirect {:client-port 3030
@@ -33,10 +37,9 @@
  :akvo.lumen.endpoint.invite/verify                   {:invite-redirect {:client-port 3030
                                                                          :scheme :http}}
 
- :akvo.lumen.upload                     {:file-upload-path          "/tmp/akvo/lumen"}
- 
- :akvo.lumen.endpoint.dataset/dataset                 {:upload-config {:file-upload-path "/tmp/akvo/lumen"}
-                                                       :import-config {:flow-api-url "flow-api-url"}}
+ :akvo.lumen.upload/data                      {:file-upload-path          "/tmp/akvo/lumen"}
+
+ :akvo.lumen.endpoint.dataset/dataset                 {:import-config {:flow-api-url "flow-api-url"}}
 
  :akvo.lumen.endpoint.env/env                         {:keycloak-public-client-id "akvo-lumen"
                                                        :keycloak-url "http://auth.lumen.local:8080/auth"

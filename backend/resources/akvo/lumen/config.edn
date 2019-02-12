@@ -30,7 +30,7 @@
  :akvo.lumen.endpoint.dashboard/dashboard             {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
  :akvo.lumen.endpoint.dataset/dataset                 {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
                                                        :error-tracker  #ig/ref :akvo.lumen.component.error-tracker/error-tracker
-                                                       :upload-config #ig/ref :akvo.lumen.upload
+                                                       :upload-config #ig/ref :akvo.lumen.upload/data
                                                        :import-config {:flow-api-url #duct/env "LUMEN_FLOW_API_URL"
                                                                        :keycloak #ig/ref :akvo.lumen.component.keycloak/data}}
  :akvo.lumen.endpoint.data-source/data-source         {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
@@ -42,10 +42,10 @@
 
  :akvo.lumen.endpoint.export/export                   {:exporter-api-url          #duct/env [ "EXPORTER_API_URL" :or "http://localhost:3001" ]}
 
- :akvo.lumen.upload                     {:file-upload-path          #duct/env [ "LUMEN_FILE_UPLOAD_PATH" :or "/tmp/akvo/lumen" ]
+ :akvo.lumen.upload/data                     {:file-upload-path          #duct/env [ "LUMEN_FILE_UPLOAD_PATH" :or "/tmp/akvo/lumen" ]
                                          :max-upload-size           100}
  
- :akvo.lumen.endpoint.files/files                     {:upload-config #ig/ref :akvo.lumen.upload}
+ :akvo.lumen.endpoint.files/files                     {:upload-config #ig/ref :akvo.lumen.upload/data}
  :akvo.lumen.endpoint.healthz/healthz                 {}
  :akvo.lumen.endpoint.invite/invite                   {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
                                                        :keycloak       #ig/ref :akvo.lumen.component.keycloak
@@ -59,7 +59,7 @@
  :akvo.lumen.endpoint.public/public                   {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
                                                        :windshaft-url  "http://localhost:4000"}
  :akvo.lumen.endpoint.raster/raster                   {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager
-                                                       :upload-config #ig/ref :akvo.lumen.upload}
+                                                       :upload-config #ig/ref :akvo.lumen.upload/data}
  :akvo.lumen.endpoint.resource/resource               {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
  :akvo.lumen.endpoint.root/root                       {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
  :akvo.lumen.endpoint.share/share                     {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager}
