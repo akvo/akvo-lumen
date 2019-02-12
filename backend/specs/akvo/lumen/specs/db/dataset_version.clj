@@ -36,4 +36,4 @@
 (s/def ::column (s/merge ::import.column.s/header ::column*))
 
 
-(s/def ::columns (s/coll-of ::column :kind vector? :distinct true))
+(s/def ::columns (s/coll-of ::column :distinct true))
