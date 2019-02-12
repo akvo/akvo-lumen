@@ -2,6 +2,7 @@
   (:require [clojure.java.io :as io]
             [clojure.tools.logging :as log]
             [duct.core :as duct]
+            [integrant.core :as ig]
             [environ.core :refer [env]]))
 
 (defn error-msg [env-var]
@@ -25,6 +26,6 @@
   "Create a system definition."
   ([] (construct "akvo/lumen/config.edn"))
   ([config-path]
-   (duct/prep (duct/read-config (io/resource config-path)))))
+   (ig/prep (duct/read-config (io/resource config-path)))))
 
 

@@ -80,7 +80,7 @@
    :profiles/test  {}
    :project/dev   {:dependencies   [[diehard "0.7.2" :exclusions [org.clojure/spec.alpha]]
                                     [duct/generate "0.8.2"]
-                                    [integrant/repl "0.2.0" :exclusions [com.stuartsierra/dependency]]
+                                    [integrant/repl "0.3.1" :exclusions [com.stuartsierra/dependency]]
                                     [reloaded.repl "0.2.4"]
                                     [org.clojure/tools.namespace "0.2.11"]
                                     [org.clojure/tools.nrepl "0.2.13"]
