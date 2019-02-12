@@ -105,7 +105,7 @@
 ;;;
 
 (defn migrate []
-  (lumen-migrate/migrate "dev.edn"))
+  (lumen-migrate/migrate config))
 
 (defn migrate-and-seed []
   (migrate)
@@ -113,8 +113,8 @@
   (migrate))
 
 (defn rollback
-  ([] (lumen-migrate/rollback "dev.edn" {}))
-  ([args] (lumen-migrate/rollback "dev.edn" args)))
+  ([] (lumen-migrate/rollback config {}))
+  ([args] (lumen-migrate/rollback config args)))
 
 (defn reset-db []
   (rollback)
