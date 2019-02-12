@@ -2,6 +2,8 @@
   (:require [cheshire.core :as json]
             [clj-http.client :as client]
             [akvo.lumen.protocols :as p]
+            [akvo.lumen.specs.components :refer [integrant-key]]
+            [clojure.spec.alpha :as s]
             [clojure.tools.logging :as log]
             [integrant.core :as ig]))
 
@@ -29,13 +31,28 @@
                     :headers    {"Content-Type" "application/json"}
                     :body       (json/encode body)}))))
 
-(defmethod ig/init-key :akvo.lumen.component.emailer/dev-emailer  [_ {:keys [config] :as opts}]
-  (log/info  "Using std out emailer")
-  (map->DevEmailer (select-keys (:emailer config) [:from-email :from-name])))
+(defmethod ig/init-key :akvo.lumen.component.emailer/dev-emailer  [_ {:keys [from-email from-name] :as opts} ]
+  (log/info  "Using std out emailer" opts)
+  (map->DevEmailer opts))
 
-(defmethod ig/init-key :akvo.lumen.component.emailer/mailjet-v3-emailer  [_ {:keys [config]}]
-  (let [{:keys [email-password email-user from-email from-name]} (-> config :emailer)]
-    (map->MailJetV3Emailer
-     {:config {:credentials [email-user email-password]
-               :from-email  from-email
-               :from-name   from-name}})))
+(defmethod ig/init-key :akvo.lumen.component.emailer/mailjet-v3-emailer  [_ {:keys [email-password email-user from-email from-name]}]
+  (map->MailJetV3Emailer
+   {:config {:credentials [email-user email-password]
+             :from-email  from-email
+             :from-name   from-name}}))
+
+(s/def ::email-password string?)
+(s/def ::email-user string?)
+(s/def ::from-email string?)
+(s/def ::from-name string?)
+
+(s/def ::emailer (partial satisfies? p/SendEmail))
+
+(defmethod integrant-key :akvo.lumen.component.emailer/dev-emailer [_]
+  (s/cat :kw keyword?
+         :config (s/keys :req-un [::from-email ::from-name])))
+
+
+(defmethod integrant-key :akvo.lumen.component.emailer/mailjet-v3-emailer [_]
+  (s/cat :kw keyword?
+         :config (s/keys :req-un [::email-password ::email-user ::from-email ::from-name])))

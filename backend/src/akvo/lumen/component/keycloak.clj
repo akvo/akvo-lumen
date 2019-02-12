@@ -6,6 +6,8 @@
             [cheshire.core :as json]
             [clj-http.client :as client]
             [integrant.core :as ig]
+            [clojure.spec.alpha :as s]
+            [akvo.lumen.specs.components :refer [integrant-key]]
             [clojure.set :as set]
             [clojure.tools.logging :as log]
             [ring.util.response :refer [response]]))
@@ -24,7 +26,7 @@
   "Create a set of request headers to use for interaction with the Keycloak
    REST API. This allows us to reuse the same token for multiple requests."
   [{:keys [openid-config credentials]}]
-  (let [params (merge {"grant_type" "client_credentials"}
+  (let [params (merge {:grant_type "client_credentials"}
                       credentials)
         resp (client/post (get openid-config "token_endpoint")
                           {:form-params params})
@@ -276,8 +278,35 @@
                        :api-root (format "%s/admin/realms/%s" url realm)
                        :credentials credentials}))
 
-(defmethod ig/init-key :akvo.lumen.component.keycloak  [_ {:keys [config] :as opts}]
-  (let [{:keys [issuer openid-config api-root] :as this} (keycloak (:keycloak config))
+(defmethod ig/init-key :akvo.lumen.component.keycloak/data  [_ {:keys [url realm] :as opts}]
+  opts)
+
+(s/def ::url string?)
+(s/def ::realm string?)
+
+(s/def ::data (s/keys :req-un [::url
+                               ::realm]))
+
+(defmethod integrant-key :akvo.lumen.component.keycloak/data [_]
+  (s/cat :kw keyword?
+         :config ::data))
+
+(defmethod ig/init-key :akvo.lumen.component.keycloak  [_ {:keys [credentials data] :as opts}]
+  (let [{:keys [issuer openid-config api-root] :as this} (keycloak (assoc data :credentials credentials))
         openid-config (fetch-openid-configuration issuer)]
       (log/info "Successfully got openid-config from provider.")
       (assoc this :openid-config openid-config)))
+
+(s/def ::client_id string?)
+(s/def ::client_secret string?)
+
+(s/def ::credentials (s/keys :req-un [::client_id
+                                      ::client_secret]))
+
+(s/def ::config (s/keys :req-un [::data ::credentials]))
+
+(s/def ::keycloak (partial satisfies? p/KeycloakUserManagement))
+
+(defmethod integrant-key :akvo.lumen.component.keycloak [_]
+  (s/cat :kw keyword?
+         :config ::config))

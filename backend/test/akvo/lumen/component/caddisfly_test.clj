@@ -8,9 +8,9 @@
    (caddisfly :dev))
   ([type]
    (if (= type :prod)
-     (->> {:config {:caddisfly {:schema-uri "https://akvoflow-public.s3.amazonaws.com/caddisfly-tests.json"}}}
+     (->> {:schema-uri "https://akvoflow-public.s3.amazonaws.com/caddisfly-tests.json"}
           (ig/init-key :akvo.lumen.component.caddisfly/prod))
-     (->> {:config {:caddisfly {:local-schema-uri "./caddisfly/tests-schema.json"}}}
+     (->> {:local-schema-uri "./caddisfly/tests-schema.json"}
           (ig/init-key :akvo.lumen.component.caddisfly/local)))))
 
 (deftest component-versions-test

@@ -4,6 +4,9 @@
             [akvo.lumen.lib.aggregation :as aggregation]
             [cheshire.core :as json]
             [compojure.core :refer :all]
+            [akvo.lumen.specs.components :refer [integrant-key]]
+            [clojure.spec.alpha :as s]
+            [akvo.lumen.component.tenant-manager :as tenant-manager]
             [integrant.core :as ig])
   (:import [com.fasterxml.jackson.core JsonParseException]))
 
@@ -23,3 +26,7 @@
 
 (defmethod ig/init-key :akvo.lumen.endpoint.aggregation/aggregation  [_ opts]
   (endpoint opts))
+
+(defmethod integrant-key :akvo.lumen.endpoint.aggregation/aggregation [_]
+  (s/cat :kw keyword?
+         :config (s/keys :req-un [::tenant-manager/tenant-manager] )))
