@@ -36,8 +36,11 @@
   (check-specs!))
 
 
-(defn read-config []
-  (duct/read-config (io/resource "dev.edn")))
+(defn read-config
+  ([]
+   (read-config "dev.edn"))
+  ([resource-path]
+   (duct/read-config (io/resource resource-path))))
 
 (derive :akvo.lumen.component.emailer/dev-emailer :akvo.lumen.component.emailer/emailer)
 (derive :akvo.lumen.component.caddisfly/local :akvo.lumen.component.caddisfly/caddisfly)
@@ -49,7 +52,10 @@
           :akvo.lumen.component.caddisfly/prod
           :akvo.lumen.component.error-tracker/prod))
 
-(def config (let [c ((ir/set-prep!  (comp dissoc-prod-components duct/prep read-config)))]
+
+
+(def config (let [c (dissoc-prod-components (ig/prep (duct/merge-configs (read-config) (read-config "akvo/lumen/config.edn"))))]
+              (ir/set-prep! (fn [] c))
               (ig/load-namespaces c)
               c))
 
@@ -99,7 +105,7 @@
 ;;;
 
 (defn migrate []
-  (lumen-migrate/migrate "dev.edn"))
+  (lumen-migrate/migrate config))
 
 (defn migrate-and-seed []
   (migrate)
@@ -107,8 +113,8 @@
   (migrate))
 
 (defn rollback
-  ([] (lumen-migrate/rollback "dev.edn" {}))
-  ([args] (lumen-migrate/rollback "dev.edn" args)))
+  ([] (lumen-migrate/rollback config {}))
+  ([args] (lumen-migrate/rollback config args)))
 
 (defn reset-db []
   (rollback)

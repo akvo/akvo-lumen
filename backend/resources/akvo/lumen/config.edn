@@ -1,7 +1,4 @@
-{:duct.core/project-ns  akvo-lumen
- :duct.core/environment :production
-
- :duct.module/logging {}
+{:duct.module/logging {}
 
  :akvo.lumen.component.hikaricp/hikaricp {:uri #duct/env [ "LUMEN_DB_URL" :or "jdbc:postgresql://postgres/lumen?user=lumen&password=password&ssl=true" ]
                                           :pool-name "tenant-manager"

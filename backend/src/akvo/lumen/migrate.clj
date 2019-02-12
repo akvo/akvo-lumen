@@ -48,17 +48,15 @@
 
 (defn migrate
   "Migrate tenant manager and tenants."
-  ([] (migrate source-files))
-  ([config-path]
-   (let [system (config/construct config-path)
-         migrations (load-migrations system)
-         tenant-manager-db {:connection-uri (get-in system [:akvo.lumen.component.hikaricp/hikaricp :uri])}]
+  ([config]
+   (let [migrations (load-migrations config)
+         tenant-manager-db {:connection-uri (get-in config [:akvo.lumen.component.hikaricp/hikaricp :uri])}]
      (do-migrate (ragtime-jdbc/sql-database tenant-manager-db)
                  (:tenant-manager migrations))
      (doseq [tenant (all-tenants tenant-manager-db)]
        (try
          (do-migrate (ragtime-jdbc/sql-database
-                          {:connection-uri (aes/decrypt (get-in system [:akvo.lumen.component.tenant-manager :encryption-key])
+                          {:connection-uri (aes/decrypt (get-in config [:akvo.lumen.component.tenant-manager :encryption-key])
                                                         (:db_uri tenant))})
                         (:tenants migrations))
          (catch Exception e (throw (ex-info "Migration failed" {:tenant (:label tenant)} e))))))))
@@ -85,14 +83,13 @@
   "(rollback) ;; will rollback tenants
   (rollback 1 ;; will rollback 1 migration on all tenants)
   (rollback :tenant-manager) ;; will rollback tenant manager migrations"
-  [config-path arg]
-  (let [system (config/construct config-path)
-        migrations (load-migrations system)
+  [config arg]
+  (let [migrations (load-migrations config)
         tenant-migrations (:tenants migrations)
         tenant-manager-migrations (:tenant-manager migrations)
 
-        tenant-manager-db {:connection-uri (get-in system [:akvo.lumen.component.hikaricp/hikaricp :uri])}
-        tenant-connection-uri-fn #(aes/decrypt (get-in system [:akvo.lumen.component.tenant-manager :encryption-key])
+        tenant-manager-db {:connection-uri (get-in config [:akvo.lumen.component.hikaricp/hikaricp :uri])}
+        tenant-connection-uri-fn #(aes/decrypt (get-in config [:akvo.lumen.component.tenant-manager :encryption-key])
                                        (:db_uri %))]
     (cond
       (= arg :tenant-manager)
