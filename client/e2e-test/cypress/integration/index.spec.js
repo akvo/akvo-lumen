@@ -15,8 +15,8 @@ const COLUMNS = {
 
 Cypress.on('uncaught:exception', (err) => {
   cy.log(err);
-  debugger;
-  return false;
+  // debugger;
+  // return false;
 });
 
 context('Akvo Lumen', () => {
