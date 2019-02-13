@@ -89,7 +89,7 @@
                                       (log/debug :update-vals update-vals)
                                       (update-row conn table-name (:rnum m) update-vals))))
                                  doall)]
-      (log/info :db-txs selected-column add-db-columns update-db-columns)
+      (log/debug :db-txs selected-column add-db-columns update-db-columns)
       {:success?      true
        :execution-log [(format "Extract caddisfly column %s" (:columnName selected-column))]
        :columns       (into current-columns (vec new-columns))})))
