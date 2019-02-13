@@ -38,8 +38,8 @@
                                               (:spec visualisation))]
     (when (and (= tag ::lib/ok)
                (= dataset-tag ::lib/ok))
-      {"visualisations" {(:id visualisation) (assoc visualisation :data query-result)}
-       "datasets" { (:id dataset) dataset}})))
+      {:visualisations {(:id visualisation) (assoc visualisation :data query-result)}
+       :datasets { (:id dataset) dataset}})))
 
 (defn run-map-visualisation
   [tenant-conn visualisation windshaft-url]
@@ -50,21 +50,21 @@
               [dataset-tag dataset] (dataset/fetch-metadata tenant-conn dataset-id)]
           (when (and (= map-data-tag ::lib/ok)
                      (= dataset-tag ::lib/ok))
-            {"datasets" {dataset-id dataset}
-             "visualisations" {(:id visualisation) (merge visualisation map-data)}
-             "metadata" {(:id visualisation) map-data}}))
+            {:datasets {dataset-id dataset}
+             :visualisations {(:id visualisation) (merge visualisation map-data)}
+             :metadata {(:id visualisation) map-data}}))
       (let [[map-data-tag map-data] (maps/create tenant-conn windshaft-url (walk/keywordize-keys layers))]
           (when (= map-data-tag ::lib/ok)
-            {"visualisations" {(:id visualisation) (merge visualisation map-data)}
-             "metadata" {(:id visualisation) map-data}})))))
+            {:visualisations {(:id visualisation) (merge visualisation map-data)}
+             :metadata {(:id visualisation) map-data}})))))
 
 (defn run-unknown-type-visualisation 
   [tenant-conn visualisation]
   (let [dataset-id (:datasetId visualisation)
         [tag dataset] (dataset/fetch-metadata tenant-conn dataset-id)]
     (when (= tag ::lib/ok)
-      {"datasets" {dataset-id dataset}
-       "visualisations" {(:id visualisation) visualisation}})))
+      {:datasets {dataset-id dataset}
+       :visualisations {(:id visualisation) visualisation}})))
 
 (defn visualisation-response-data [tenant-conn id windshaft-url]
   (try
@@ -88,15 +88,15 @@
                       (map #(visualisation-response-data tenant-conn % windshaft-url))
                       (sort-by #(-> % (get "datasets") vals first (get :rows) boolean))
                       (apply merge-with merge))]
-        (assoc deps "dashboards" {id dashboard})))))
+        (assoc deps :dashboards {id dashboard})))))
 
 (defn response-data [tenant-conn share windshaft-url]
   (if-let [dashboard-id (:dashboard-id share)]
     (assoc (dashboard-response-data tenant-conn dashboard-id windshaft-url)
-           "dashboardId" dashboard-id)
+           :dashboardId dashboard-id)
     (let [visualisation-id (:visualisation-id share)]
       (assoc (visualisation-response-data tenant-conn visualisation-id windshaft-url)
-             "visualisationId" visualisation-id))))
+             :visualisationId visualisation-id))))
 
 (defn share
   [tenant-conn windshaft-url id password]
