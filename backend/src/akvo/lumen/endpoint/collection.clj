@@ -1,6 +1,9 @@
 (ns akvo.lumen.endpoint.collection
   (:require [akvo.lumen.protocols :as p]
-            [akvo.lumen.lib.collection :as collection]            
+            [akvo.lumen.lib.collection :as collection]
+            [akvo.lumen.specs.components :refer [integrant-key]]
+            [clojure.spec.alpha :as s]
+            [akvo.lumen.component.tenant-manager :as tenant-manager]
             [compojure.core :refer :all]
             [integrant.core :as ig]))
 
@@ -27,3 +30,7 @@
 
 (defmethod ig/init-key :akvo.lumen.endpoint.collection/collection  [_ opts]
   (endpoint opts))
+
+(defmethod integrant-key :akvo.lumen.endpoint.collection/collection [_]
+  (s/cat :kw keyword?
+         :config (s/keys :req-un [::tenant-manager/tenant-manager] )))

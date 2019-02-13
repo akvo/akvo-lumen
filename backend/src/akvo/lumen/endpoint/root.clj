@@ -1,6 +1,9 @@
 (ns akvo.lumen.endpoint.root
   (:require [compojure.core :refer :all]
             [integrant.core :as ig]
+            [akvo.lumen.specs.components :refer [integrant-key]]
+            [clojure.spec.alpha :as s]
+            [akvo.lumen.component.tenant-manager :as tenant-manager]
             [ring.util.response :refer [response]]))
 
 (defn endpoint [config]
@@ -21,3 +24,7 @@
 
 (defmethod ig/init-key :akvo.lumen.endpoint.root/root  [_ opts]
   (endpoint (assoc opts :config (:config (:config opts)))))
+
+(defmethod integrant-key :akvo.lumen.endpoint.root/root [_]
+  (s/cat :kw keyword?
+         :config (s/keys :req-un [::tenant-manager/tenant-manager] )))

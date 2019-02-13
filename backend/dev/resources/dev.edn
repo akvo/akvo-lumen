@@ -1,41 +1,50 @@
-{:duct.core/environment                                 :development
- :duct.core/include                                     ["akvo/lumen/config.edn"]
- :akvo.lumen.component.caddisfly/local                  {:config #ig/ref :akvo.lumen.config}
+{:akvo.lumen.component.hikaricp/hikaricp       {:uri "jdbc:postgresql://postgres/lumen?user=lumen&password=password&ssl=true"}
+
+ :akvo.lumen.component.http/http               {:port 3000}
+
+ :akvo.lumen.component.tenant-manager {:encryption-key  "secret"}
+
+ :akvo.lumen.component.caddisfly/local                  {:local-schema-uri "./caddisfly/tests-schema.json"}
  :akvo.lumen.component.error-tracker/local              {}
- :akvo.lumen.component.emailer/dev-emailer              {:config #ig/ref :akvo.lumen.config}
+ :akvo.lumen.component.emailer/dev-emailer              {:from-email "devops@akvo.localhost"
+                                                         :from-name "Akvo Lumen"}
+
+ :akvo.lumen.component.error-tracker/wrap-sentry         {:dsn "dev-dsn"}
+ :akvo.lumen.component.handler/handler {:middleware
+                                        {:functions {:stacktrace #ig/ref :akvo.lumen.component.handler/wrap-stacktrace}
+                                         :applied   ^:replace [:not-found :json-response :ring-defaults :json-body
+                                                               :wrap-auth :wrap-jwt :monitoring :wrap-label-tenant :stacktrace]}}
+
+ :akvo.lumen.component.keycloak/data  {:url         "http://auth.lumen.local:8080/auth"
+                                       :realm       "akvo"}
+
+ :akvo.lumen.component.keycloak      {:credentials
+                                      {:client_id     "akvo-lumen-confidential"
+                                       :client_secret "caed3964-09dd-4752-b0bb-22c8e8ffd631"}}
+
 
  :akvo.lumen.component.handler/wrap-stacktrace {}
 
- :akvo.lumen.config
- {:app
-  {:middleware
-   {:functions {:stacktrace #ig/ref :akvo.lumen.component.handler/wrap-stacktrace}
-    :applied   ^:replace [:not-found :json-response :ring-defaults :json-body
-                          :wrap-auth :wrap-jwt :monitoring :wrap-label-tenant :stacktrace]
-    :arguments {:wrap-jwt {:keycloak-url   "http://auth.lumen.local:8080/auth"
-                           :keycloak-realm "akvo"}}}}
-  :db {:uri "jdbc:postgresql://postgres/lumen?user=lumen&password=password&ssl=true"}
-  :caddisfly {:local-schema-uri "./caddisfly/tests-schema.json"}
-  :http {:port 3000}
-  :config {:encryption-key "secret"
-           :file-upload-path "/tmp/akvo/lumen"
-           :keycloak-realm "akvo"
-           :keycloak-url "http://auth.lumen.local:8080/auth"
-           :keycloak-public-client-id "akvo-lumen"
-           :flow-api-url "https://api.akvotest.org/flow"
-           :invite-redirect {:client-port 3030
-                             :scheme :http}
-           :sentry-backend-dsn ""
-           :sentry-client-dsn ""
-           :windshaft-url "http://windshaft:4000"
-           :exporter-api-url "http://exporter:3001"
-           :piwik-site-id "165"}
-  :emailer {:from-email "devops@akvo.localhost"
-            :from-name "Akvo Lumen"}
-  :error-tracker {:dsn ""}
-  :keycloak      {:url   "http://auth.lumen.local:8080/auth"
-                  :realm "akvo"
-                  :credentials
-                  {"client_id"     "akvo-lumen-confidential"
-                   "client_secret" "caed3964-09dd-4752-b0bb-22c8e8ffd631"}}}
- }
+ :akvo.lumen.endpoint.public/public                   {:windshaft-url  "http://windshaft:4000"}
+
+ :akvo.lumen.endpoint.visualisation/visualisation     {:windshaft-url "http://windshaft:4000"}
+
+ :akvo.lumen.endpoint.export/export                   {:exporter-api-url "http://exporter:3001"}
+
+ :akvo.lumen.endpoint.invite/invite                   {:invite-redirect {:client-port 3030
+                                                                         :scheme :http}}
+
+ :akvo.lumen.endpoint.invite/verify                   {:invite-redirect {:client-port 3030
+                                                                         :scheme :http}}
+
+ :akvo.lumen.upload/data                      {:file-upload-path          "/tmp/akvo/lumen"}
+
+ :akvo.lumen.endpoint.dataset/dataset                 {:import-config {:flow-api-url "https://api.akvotest.org/flow"}}
+
+ :akvo.lumen.endpoint.env/env                         {:keycloak-public-client-id "akvo-lumen"
+                                                       :keycloak-url "http://auth.lumen.local:8080/auth"
+                                                       :flow-api-url "https://api.akvotest.org/flow"
+                                                       :sentry-client-dsn "dev-sentry-client-dsn"
+                                                       :piwik-site-id "165"}
+ 
+}

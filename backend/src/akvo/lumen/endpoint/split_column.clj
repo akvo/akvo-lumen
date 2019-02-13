@@ -2,6 +2,9 @@
   (:require [akvo.lumen.protocols :as p]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.transformation.split-column :as transformation]
+            [akvo.lumen.specs.components :refer [integrant-key]]
+            [clojure.spec.alpha :as s]
+            [akvo.lumen.component.tenant-manager :as tenant-manager]
             [cheshire.core :as json]
             [clojure.tools.logging :as log]
             [compojure.core :refer :all]
@@ -32,3 +35,7 @@
 
 (defmethod ig/init-key :akvo.lumen.endpoint.split-column/endpoint  [_ opts]
   (endpoint opts))
+
+(defmethod integrant-key :akvo.lumen.endpoint.split-column/endpoint [_]
+  (s/cat :kw keyword?
+         :config (s/keys :req-un [::tenant-manager/tenant-manager] )))

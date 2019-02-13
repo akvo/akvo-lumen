@@ -35,8 +35,8 @@
              :id (format "c%s" (:id q))}
             (when (= t "multiple")
               (if (:caddisflyResourceUuid q)
-                {:multipleType :caddisfly
+                {:multipleType "caddisfly"
                  :multipleId (:caddisflyResourceUuid q)}
-                {:multipleType :unknown
+                {:multipleType "unknown"
                  :multipleId nil})))))
        questions))
