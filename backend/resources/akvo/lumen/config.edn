@@ -97,30 +97,17 @@
                       #ig/ref :akvo.lumen.endpoint.user/user
                       #ig/ref :akvo.lumen.endpoint.visualisation/visualisation]
               "/share" [ #ig/ref :akvo.lumen.endpoint.public/public]}
-  :middleware [
-
-               #ig/ref :akvo.lumen.component.handler/wrap-hide-errors
-
+  :middleware [#ig/ref :akvo.lumen.component.handler/wrap-hide-errors
                #ig/ref :akvo.lumen.component.error-tracker/wrap-sentry
-
                #ig/ref :akvo.lumen.component.tenant-manager/wrap-label-tenant
-
                #ig/ref :akvo.lumen.monitoring/middleware
-               
                #ig/ref :akvo.lumen.auth/wrap-jwt
-
                #ig/ref :akvo.lumen.auth/wrap-auth
-
-
                #ig/ref :akvo.lumen.component.handler/wrap-defaults
-
                #ig/ref :akvo.lumen.component.handler/wrap-json-body
-
                #ig/ref :akvo.lumen.component.handler/wrap-json-response
                #ig/ref :akvo.lumen.component.handler/variant
-               #ig/ref :akvo.lumen.component.handler/wrap-not-found
-               ]
-}
+               #ig/ref :akvo.lumen.component.handler/wrap-not-found]}
 
  :akvo.lumen.component.http/http      {:port #duct/env [ "PORT" Int :or 3000 ]
                                        :handler    #ig/ref :akvo.lumen.component.handler/handler}
