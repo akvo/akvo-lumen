@@ -32,8 +32,11 @@ services:
    environment:
      - PGSSLROOTCERT=/pg-certs/server.crt
      - LUMEN_ENCRYPTION_KEY=supersecret
+     - EXTRA_NODE_OPTS=--inspect=0.0.0.0:5555
    volumes:
       - pg-data:/pg-certs:ro
+   ports:
+      - "5555:5555"
  fe-e2e-tests:
    image: akvo/akvo-lumen-e2e-test:20181024.271ce79
    volumes:
