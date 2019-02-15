@@ -15,11 +15,15 @@ const COLUMNS = {
 
 Cypress.on('uncaught:exception', (err) => {
   cy.log(err);
-  debugger;
-  return false;
+  return true;
 });
 
-context('Akvo Lumen', () => {
+Cypress.on('fail', (error) => {
+  debugger;
+  throw error; // throw error to have test still fail
+});
+
+context('Akvo Lumen', ()  => {
   // login
   before(() => {
     cy.visit(baseUrl);

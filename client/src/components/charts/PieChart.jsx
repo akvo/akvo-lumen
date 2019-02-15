@@ -37,7 +37,7 @@ export default class PieChart extends Component {
     height: PropTypes.number.isRequired,
     innerRadius: PropTypes.number,
     outerRadius: PropTypes.number,
-    legendPosition: PropTypes.oneOf(['right']),
+    legendPosition: PropTypes.oneOf(['top', 'right', 'bottom', 'left', undefined]),
     legendTitle: PropTypes.string,
     print: PropTypes.bool,
     interactive: PropTypes.bool,
@@ -203,6 +203,7 @@ export default class PieChart extends Component {
       style,
       legendTitle,
       legendVisible,
+      legendPosition,
       edit,
       outerRadius,
       visualisation,
@@ -224,6 +225,7 @@ export default class PieChart extends Component {
         width={width}
         height={height}
         legendVisible={legendVisible}
+        legendPosition={legendPosition}
         onClick={() => {
           this.setState({ isPickingColor: undefined });
         }}

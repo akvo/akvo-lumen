@@ -2,10 +2,13 @@
   (:require [akvo.lumen.protocols :as p]
             [akvo.lumen.lib.visualisation :as visualisation]
             [akvo.lumen.lib.visualisation.maps :as maps]
+            [akvo.lumen.specs.components :refer [integrant-key]]
+            [clojure.spec.alpha :as s]
+            [akvo.lumen.component.tenant-manager :as tenant-manager]
             [compojure.core :refer :all]
             [integrant.core :as ig]))
 
-(defn endpoint [{:keys [config tenant-manager]}]
+(defn endpoint [{:keys [windshaft-url tenant-manager]}]
 
   (context "/api/visualisations" {:keys [params tenant] :as request}
     (let-routes [tenant-conn (p/connection tenant-manager tenant)]
@@ -18,11 +21,11 @@
       (context "/maps" _
         (POST "/" {{:strs [spec]} :body}
           (let [layers (get-in spec ["layers"])]
-            (maps/create tenant-conn (:windshaft-url config) layers))))
+            (maps/create tenant-conn windshaft-url layers))))
 
       (context "/rasters" _
         (POST "/" {{:strs [rasterId spec]} :body}
-          (maps/create-raster tenant-conn (:windshaft-url config) rasterId)))
+          (maps/create-raster tenant-conn windshaft-url rasterId)))
 
       (context "/:id" [id]
 
@@ -36,4 +39,11 @@
           (visualisation/delete tenant-conn id))))))
 
 (defmethod ig/init-key :akvo.lumen.endpoint.visualisation/visualisation  [_ opts]
-  (endpoint (assoc opts :config (:config (:config opts)))))
+  (endpoint opts))
+
+(s/def ::windshaft-url string?)
+
+(defmethod integrant-key :akvo.lumen.endpoint.visualisation/visualisation [_]
+  (s/cat :kw keyword?
+         :config (s/keys :req-un [::tenant-manager/tenant-manager
+                                  ::windshaft-url] )))

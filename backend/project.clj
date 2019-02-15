@@ -16,8 +16,8 @@
                  [com.layerware/hugsql "0.4.9"]
                  [commons-io/commons-io "2.6"]
                  [compojure "1.6.1" :exclusions [medley]]
-                 [duct/core "0.6.2"]
-                 [duct/module.logging "0.3.1"]
+                 [duct/core "0.7.0" :exclusions [org.clojure/clojure]]
+                 [duct/module.logging "0.3.1" :exclusions [com.stuartsierra/dependency]]
                  [duct/database.sql.hikaricp "0.3.3" :exclusions [org.slf4j/slf4j-nop integrant]]
                  [environ "1.1.0"]
                  [funcool/cuerdas "2.0.5"]
@@ -48,7 +48,10 @@
                  [net.postgis/postgis-jdbc "2.2.1" :exclusions [org.postgresql/postgresql]]
                  [iapetos "0.1.8" :exclusions [io.prometheus/simpleclient]]
                  [io.prometheus/simpleclient_hotspot "0.5.0"]
-                 [io.prometheus/simpleclient_dropwizard "0.5.0"]]
+                 [io.prometheus/simpleclient_dropwizard "0.5.0"]
+                 [robert/hooke "1.3.0"]
+                 [org.clojure/test.check "0.10.0-alpha3"]]
+  :source-paths   ["src" "specs"]
   :uberjar-name "akvo-lumen.jar"
   :repl-options {:timeout 120000}
   :pedantic? :abort
@@ -74,18 +77,17 @@
    :test          [:project/test :profiles/test]
    :uberjar       {:aot :all}
    :profiles/dev  {}
-   :project/dev   {:dependencies   [[org.clojure/test.check "0.10.0-alpha3"]
-                                    [diehard "0.7.2" :exclusions [org.clojure/spec.alpha]]
+   :profiles/test  {}
+   :project/dev   {:dependencies   [[diehard "0.7.2" :exclusions [org.clojure/spec.alpha]]
                                     [duct/generate "0.8.2"]
-                                    [integrant/repl "0.2.0"]
+                                    [integrant/repl "0.3.1" :exclusions [com.stuartsierra/dependency]]
                                     [reloaded.repl "0.2.4"]
                                     [org.clojure/tools.namespace "0.2.11"]
                                     [org.clojure/tools.nrepl "0.2.13"]
                                     [eftest "0.5.1"]
                                     [com.gearswithingears/shrubbery "0.4.1"]
-                                    [kerodon "0.9.0"]
-                                    [robert/hooke "1.3.0"]]
-                   :source-paths   ["dev/src" "specs"]
+                                    [kerodon "0.9.0"]]
+                   :source-paths   ["dev/src"]
                    :resource-paths ["dev/resources" "test/resources"]
                    :repl-options   {:init-ns dev
                                     :init (do
@@ -96,10 +98,7 @@
                                     :host "0.0.0.0"
                                     :port 47480}
                    :env            {:port "3000"}}
-   :project/test  {:source-paths   ["specs"]
-                   :resource-paths ["test/resources"]
-                   :dependencies [[org.clojure/test.check "0.10.0-alpha3"]
-                                  [diehard "0.7.2" :exclusions [org.clojure/spec.alpha]]
-                                  [robert/hooke "1.3.0"]]
+   :project/test  {:resource-paths ["test/resources"]
+                   :dependencies [[diehard "0.7.2" :exclusions [org.clojure/spec.alpha]]]
                    :env
                    {:db {:uri "jdbc:postgresql://postgres/lumen?user=lumen&password=password"}}}})

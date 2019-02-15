@@ -1,13 +1,17 @@
 (ns akvo.lumen.component.tenant-manager
   "Component that controll the tenants,
   We use the first domain label e.g. t1 in t1.lumen.akvo.org to dispatch."
-  (:require [akvo.lumen.lib :as lib]
+  (:require [akvo.lumen.component.hikaricp :as hikaricp]
+            [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.aes :as aes]
+            [akvo.lumen.monitoring :as monitoring]
             [akvo.lumen.protocols :as p]
-            [clojure.tools.logging :as log]
-            [integrant.core :as ig]
+            [akvo.lumen.specs.components :refer [integrant-key]]
+            [clojure.spec.alpha :as s]
             [clojure.string :as str]
-            [hugsql.core :as hugsql])
+            [clojure.tools.logging :as log]
+            [hugsql.core :as hugsql]
+            [integrant.core :as ig])
   (:import [com.zaxxer.hikari HikariConfig HikariDataSource]))
 
 (hugsql/def-db-fns "akvo/lumen/component/tenant_manager.sql")
@@ -65,33 +69,33 @@
     m
     (assoc m k v)))
 
-(defn load-tenant [db config tenants label]
+(defn load-tenant [db encryption-key dropwizard-registry tenants label]
   (if-let [{:keys [db_uri label]} (tenant-by-id (:spec db)
                                                 {:label label})]
-    (let [decrypted-db-uri (aes/decrypt (:encryption-key config) db_uri)]
+    (let [decrypted-db-uri (aes/decrypt encryption-key db_uri)]
       (swap! tenants
              assoc-if-key-does-not-exist
              label
              {::uri  decrypted-db-uri
               ::spec (delay (pool {:db_uri              decrypted-db-uri
-                                   :dropwizard-registry (:dropwizard-registry config)
+                                   :dropwizard-registry dropwizard-registry
                                    :label               label}))}))
     (throw (Exception. "Could not match dns label with tenant from tenats."))))
 
-(defn get-or-create-tenant [db config tenants label]
+(defn get-or-create-tenant [db encryption-key dropwizard-registry tenants label]
   (if-let [tenant (get @tenants label)]
     tenant
     (->
-      (load-tenant db config tenants label)
+      (load-tenant db encryption-key dropwizard-registry tenants label)
       (get label))))
 
-(defrecord TenantManager [db config]
+(defrecord TenantManager [db encryption-key dropwizard-registry]
   p/TenantConnection
   (connection [{:keys [tenants]} label]
-    @(::spec (get-or-create-tenant db config tenants label)))
+    @(::spec (get-or-create-tenant db encryption-key dropwizard-registry tenants label)))
 
   (uri [{:keys [tenants]} label]
-    (::uri (get-or-create-tenant db config tenants label)))
+    (::uri (get-or-create-tenant db encryption-key dropwizard-registry tenants label)))
 
   p/TenantAdmin
   (current-plan [{:keys [db]} label]
@@ -100,8 +104,8 @@
 (defn- tenant-manager [options]
   (map->TenantManager options))
 
-(defmethod ig/init-key :akvo.lumen.component.tenant-manager [_ {:keys [db config] :as opts}]
-  (let [this (tenant-manager (assoc config :db db))]
+(defmethod ig/init-key :akvo.lumen.component.tenant-manager [_ {:keys [db encryption-key dropwizard-registry] :as opts}]
+  (let [this (tenant-manager opts)]
     (if (:tenants this)
       this
       (assoc this :tenants (atom {})))))
@@ -115,5 +119,20 @@
       (dissoc this :tenants))
     this))
 
+(s/def ::db ::hikaricp/hikaricp)
+(s/def ::encryption-key string?)
+(s/def ::dropwizard-registry ::monitoring/metric-registry)
+(s/def ::tenant-manager (partial instance? TenantManager))
+
+(defmethod integrant-key :akvo.lumen.component.tenant-manager [_]
+  (s/cat :kw keyword?
+         :config (s/keys :req-un [::db
+                                  ::encryption-key
+                                  ::dropwizard-registry])))
+
 (defmethod ig/init-key :akvo.lumen.component.tenant-manager/wrap-label-tenant  [_ opts]
   wrap-label-tenant)
+
+(defmethod integrant-key :akvo.lumen.component.tenant-manager/wrap-label-tenant [_]
+  (s/cat :kw keyword?
+         :config empty?))

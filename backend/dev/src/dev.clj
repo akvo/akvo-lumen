@@ -4,6 +4,7 @@
             [akvo.lumen.endpoint.commons]
             [akvo.lumen.lib.aes :as aes]
             [akvo.lumen.migrate :as lumen-migrate]
+            [akvo.lumen.specs]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.java.jdbc :as jdbc]
@@ -35,8 +36,11 @@
   (check-specs!))
 
 
-(defn read-config []
-  (duct/read-config (io/resource "dev.edn")))
+(defn read-config
+  ([]
+   (read-config "dev.edn"))
+  ([resource-path]
+   (duct/read-config (io/resource resource-path))))
 
 (derive :akvo.lumen.component.emailer/dev-emailer :akvo.lumen.component.emailer/emailer)
 (derive :akvo.lumen.component.caddisfly/local :akvo.lumen.component.caddisfly/caddisfly)
@@ -48,7 +52,10 @@
           :akvo.lumen.component.caddisfly/prod
           :akvo.lumen.component.error-tracker/prod))
 
-(def config (let [c ((ir/set-prep!  (comp dissoc-prod-components duct/prep read-config)))]
+
+
+(def config (let [c (dissoc-prod-components (ig/prep (duct/merge-configs (read-config "akvo/lumen/config.edn") (read-config))))]
+              (ir/set-prep! (fn [] c))
               (ig/load-namespaces c)
               c))
 
@@ -89,7 +96,7 @@
   "At the moment only support seed of tenants table."
   []
   (let [db-uri (-> (config/construct)
-                   :akvo.lumen.config :db :uri)]
+                   :akvo.lumen.component.hikaricp/hikaricp :uri)]
     (doseq [tenant commons/tenants]
       (seed-tenant {:connection-uri db-uri} tenant))))
 
@@ -98,7 +105,7 @@
 ;;;
 
 (defn migrate []
-  (lumen-migrate/migrate "dev.edn"))
+  (lumen-migrate/migrate config))
 
 (defn migrate-and-seed []
   (migrate)
@@ -106,8 +113,8 @@
   (migrate))
 
 (defn rollback
-  ([] (lumen-migrate/rollback "dev.edn" {}))
-  ([args] (lumen-migrate/rollback "dev.edn" args)))
+  ([] (lumen-migrate/rollback config {}))
+  ([args] (lumen-migrate/rollback config args)))
 
 (defn reset-db []
   (rollback)

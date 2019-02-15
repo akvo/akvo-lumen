@@ -65,7 +65,7 @@ class ScatterChart extends Component {
     colorMapping: PropTypes.object,
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
-    legendPosition: PropTypes.oneOf(['right']),
+    legendPosition: PropTypes.oneOf(['top', 'right', 'bottom', 'left', undefined]),
     print: PropTypes.bool,
     interactive: PropTypes.bool,
     edit: PropTypes.bool,
@@ -274,6 +274,8 @@ class ScatterChart extends Component {
       visualisation,
       legendTitle,
       legendDescription,
+      legendVisible,
+      legendPosition,
     } = this.props;
 
     const {
@@ -306,7 +308,8 @@ class ScatterChart extends Component {
         style={style}
         width={width}
         height={height}
-        legendVisible={categoryExists}
+        legendVisible={categoryExists && legendVisible}
+        legendPosition={legendPosition}
         onClick={() => {
           this.setState({ isPickingColor: undefined });
         }}

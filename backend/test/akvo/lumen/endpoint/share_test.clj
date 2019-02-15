@@ -56,84 +56,49 @@
                          "h" 0
                          "i" "text-2"}}})
 
+
+(defn seed* [conn vis-spec]
+  (let [data {:columns [{:id "c1", :title "A", :type "text"}
+                        {:id "c2", :title "B", :type "number"}
+                        {:id "c3", :title "C", :type "date"}]
+              :rows    [[{:value "a"} {:value 1} {:value (tu/instant-date "01/02/2019")}]
+                        [{:value "b"} {:value 2} {:value (tu/instant-date "02/02/2019")}]
+                        [{:value "c"} {:value 3} {:value (tu/instant-date "03/02/2019")}]
+                        [{:value "c"} {:value 4} {:value (tu/instant-date "04/02/2019")}]]}
+
+        [job] (tu/import-file conn {} {:dataset-name "scatter"
+                                                        :kind "clj"
+                                                        :with-job? true
+                                                        :data data})
+        dataset-id (:dataset_id job)
+        data-source-id (:data_source_id job)]
+
+    (upsert-visualisation conn (merge vis-spec {:dataset-id dataset-id}))
+    {:visualisation-id (:id vis-spec) :dataset-id dataset-id :data-source-id data-source-id}))
+
 (defn seed
   [conn spec]
-  (jdbc/execute! conn [(str "CREATE TABLE IF NOT EXISTS " (:table-name spec) " ("
-                            "rnum serial PRIMARY KEY"
-                            ");")])
-  (jdbc/execute! conn [(str "CREATE TABLE IF NOT EXISTS " (:table-name-2 spec) " ("
-                            "rnum serial PRIMARY KEY"
-                            ");")])
-  (jdbc/execute! conn [(str "CREATE TABLE IF NOT EXISTS " (:imported-table-name spec) " ("
-                            "rnum serial PRIMARY KEY"
-                            ");")])
-  (jdbc/execute! conn [(str "CREATE TABLE IF NOT EXISTS " (:imported-table-name-2 spec) " ("
-                            "rnum serial PRIMARY KEY"
-                            ");")])
-
-  (insert-data-source conn {:id (:data-source-id spec)
-                            :spec "{}"})
-  (insert-job-execution conn {:id (:job-execution-id spec)
-                              :data-source-id (:data-source-id spec)})
-  (insert-job-execution conn {:id (:job-execution-id-2 spec)
-                              :data-source-id (:data-source-id spec)})
-  (insert-dataset conn {:id          (:dataset-id spec)
-                        :title       "Title"
-                        :description "Description"
-                        :author {}
-                        :source {}})
-  (insert-dataset conn {:id          (:dataset-id-2 spec)
-                        :title       "Title"
-                        :description "Description"
-                        :author {}
-                        :source {}})
-  (new-dataset-version conn {:id (squuid)
-                             :dataset-id (:dataset-id spec)
-                             :job-execution-id (:job-execution-id spec)
-                             :table-name (:table-name spec)
-                             :imported-table-name (:imported-table-name spec)
-                             :version 1
-                             :columns {}
-                             :transformations []})
-  (new-dataset-version conn {:id (squuid)
-                             :dataset-id (:dataset-id-2 spec)
-                             :job-execution-id (:job-execution-id-2 spec)
-                             :table-name (:table-name-2 spec)
-                             :imported-table-name (:imported-table-name-2 spec)
-                             :version 1
-                             :columns {}
-                             :transformations []})
-  (upsert-visualisation conn {:id         (:visualisation-id spec)
-                              :dataset-id (:dataset-id spec)
-                              :name       "Visualisation"
-                              :type       "pie"
-                              :spec       {"bucketColumn" "c1" :filters []}
-                              :author     {}})
-  (upsert-visualisation conn {:id         (:visualisation2-id spec)
-                              :dataset-id (:dataset-id-2 spec)
-                              :name       "Visualisation"
-                              :type       "bar"
-                              :spec       {:filters []}
-                              :author     {}})
-  (dashboard/create conn (dashboard-spec (:visualisation-id spec)
-                                         (:visualisation2-id spec)) {}))
+  (seed* conn (:vis-1 spec))
+  (seed* conn (:vis-2 spec))
+  (dashboard/create conn (dashboard-spec (:id (:vis-1 spec))
+                                         (:id (:vis-2 spec))) {}))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Test data
 ;;;
 
 (def test-spec
-  {:data-source-id        (str (squuid))
-   :job-execution-id      (str (squuid))
-   :job-execution-id-2    (str (squuid))
-   :dataset-id            (str (squuid))
-   :dataset-id-2          (str (squuid))
-   :visualisation-id      (str (squuid))
-   :visualisation2-id     (str (squuid))
-   :table-name            (gen-table-name "ds")
-   :table-name-2          (gen-table-name "ds")
-   :imported-table-name   (gen-table-name "imported")
-   :imported-table-name-2 (gen-table-name "imported")})
+  {:vis-1 {:id         (str (squuid))
+           :name       "Visualisation"
+           :type       "pie"
+           :spec       {:bucketColumn "c1" :filters []}
+           :author     {}}
+   :vis-2 {:id         (str (squuid))
+           :name       "Visualisation"
+           :type       "bar"
+           :spec       {:bucketColumn "c1" :filters []}
+           :author     {}}
+   })
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -146,7 +111,6 @@
 (hugsql/def-db-fns "akvo/lumen/lib/dashboard.sql")
 
 (deftest ^:functional share
-
   (testing "Empty collection"
     (is (empty? (variant/value (share/all *tenant-conn*)))))
 
@@ -154,7 +118,7 @@
     (seed *tenant-conn* test-spec)
     (let [new-share (variant/value (share/fetch *tenant-conn*
                                                 {"visualisationId"
-                                                 (:visualisation-id test-spec)}))
+                                                 (:id (:vis-1 test-spec))}))
           r (variant/value (share/all *tenant-conn*))]
       (is (= 1 (count r)))
       (is (= (:id new-share) (:id (first r))))))
@@ -163,7 +127,7 @@
     (let [old-share-id (:id (first (variant/value (share/all *tenant-conn*))))
           new-share-id (:id (variant/value (share/fetch *tenant-conn*
                                                         {"visualisationId"
-                                                         (:visualisation-id test-spec)})))]
+                                                         (:id (:vis-1 test-spec))})))]
       (is (= new-share-id old-share-id))))
 
   (testing "Remove share"

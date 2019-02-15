@@ -21,31 +21,12 @@
             [clojure.walk :refer (keywordize-keys)]
             [diehard.core :as dh]
             [hugsql.core :as hugsql]
-            [robert.hooke :refer (add-hook) :as r])
+            [akvo.lumen.specs.hooks :as hooks])
   (:import [java.time Instant]))
 
-(defn dataset-version-spec-adapter
-  "provisional spec adapter function to be removed when specs work was finished"
-  [dsv]
-  (-> (keywordize-keys dsv)
-      (update :transformations
-              (fn [txs]
-                (mapv (fn [t]
-                        (update t :changedColumns
-                                (fn [cc]
-                                  (reduce (fn [c [k v]] (assoc c (name k) v)) {} cc)))) txs)))))
-
-(defn new-dataset-version-conform
-  [f t d]
-  (log/info :conforming :akvo.lumen.specs.transformation/next-dataset-version)
-  (util/conform :akvo.lumen.specs.transformation/next-dataset-version d dataset-version-spec-adapter)
-  (f t d))
-
-(doseq [v [#'new-dataset-version #'import/new-dataset-version]]
-  (r/clear-hooks v)
-  (r/add-hook v #'new-dataset-version-conform))
-
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
+
+(hooks/apply-hooks)
 
 (defn spec-instrument
   "Fixture to instrument all functions"

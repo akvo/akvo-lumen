@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { get } from 'lodash';
 
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
 import ConfigMenuSectionOptionText from '../../common/ConfigMenu/ConfigMenuSectionOptionText';
@@ -7,7 +8,7 @@ import ConfigMenuSectionOptionSelect from '../../common/ConfigMenu/ConfigMenuSec
 import { filterColumns } from '../../../utilities/utils';
 
 const getColumnTitle = (columnName, columnOptions) =>
-  columnOptions.find(obj => obj.value === columnName).title;
+  get(columnOptions.find(obj => obj.value === columnName), 'title');
 
 const getAxisLabel = (axis, spec, columnOptions) => {
   if (spec[`axisLabel${axis}FromUser`]) {

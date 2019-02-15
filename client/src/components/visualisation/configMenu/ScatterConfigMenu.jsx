@@ -6,11 +6,12 @@ import { get } from 'lodash';
 
 import { filterColumns } from '../../../utilities/utils';
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
+import ToggleInput from '../../common/ToggleInput';
 import ConfigMenuSectionOptionText from '../../common/ConfigMenu/ConfigMenuSectionOptionText';
 import ConfigMenuSectionOptionSelect from '../../common/ConfigMenu/ConfigMenuSectionOptionSelect';
 
 const getColumnTitle = (columnName, columnOptions) =>
-  columnOptions.find(obj => obj.value === columnName).title;
+  get(columnOptions.find(obj => obj.value === columnName), 'title');
 
 const formatLabel = (spec, columnName, columnOptions) =>
   `${getColumnTitle(spec[columnName], columnOptions)}${spec.bucketColumn != null ? ` - ${spec.metricAggregation}` : ''}`;
@@ -60,6 +61,7 @@ function ScatterConfigMenu(props) {
             value={spec.metricColumnY !== null ? spec.metricColumnY.toString() : null}
             name="yColumnInput"
             options={filterColumns(columnOptions, ['number', 'date'])}
+            clearable
             onChange={(value) => {
               const change = { metricColumnY: value };
 
@@ -93,6 +95,7 @@ function ScatterConfigMenu(props) {
             value={spec.metricColumnX !== null ? spec.metricColumnX.toString() : null}
             name="xColumnInput"
             options={filterColumns(columnOptions, ['number', 'date'])}
+            clearable
             onChange={(value) => {
               const change = { metricColumnX: value };
 
@@ -130,6 +133,7 @@ function ScatterConfigMenu(props) {
                   null
               }
               name="sizeColumnInput"
+              clearable
               options={
                 [{
                   label: props.intl.formatMessage({ id: 'select_a_data_column_to_group_by' }),
@@ -146,20 +150,74 @@ function ScatterConfigMenu(props) {
           </div>
         )}
         advancedOptions={(
-          <ConfigMenuSectionOptionText
-            value={
-              itsSet(spec.categoryLabel) ?
-                spec.categoryLabel.toString() :
-                null
-            }
-            placeholderId="label"
-            labelTextId="label"
-            name="categoryLabel"
-            onChange={event => onChangeSpec({
-              categoryLabel: event.target.value.toString(),
-              categoryLabelFromUser: true,
-            })}
-          />
+          <div>
+            <ConfigMenuSectionOptionText
+              value={
+                itsSet(spec.categoryLabel) ?
+                  spec.categoryLabel.toString() :
+                  null
+              }
+              placeholderId="label"
+              labelTextId="label"
+              name="categoryLabel"
+              onChange={event => onChangeSpec({
+                categoryLabel: event.target.value.toString(),
+                categoryLabelFromUser: true,
+              })}
+            />
+            <ToggleInput
+              name="showLegend"
+              type="checkbox"
+              labelId="show_legend"
+              className="InputGroup"
+              checked={Boolean(spec.showLegend)}
+              onChange={val => onChangeSpec({
+                showLegend: val,
+              })}
+            />
+            {Boolean(spec.showLegend) && (
+              <div>
+                <ConfigMenuSectionOptionText
+                  value={spec.legendTitle != null ? spec.legendTitle.toString() : null}
+                  placeholderId="legend_title"
+                  name="legendLabel"
+                  maxLength={32}
+                  onChange={event => onChangeSpec({
+                    legendTitle: event.target.value.toString(),
+                  }, spec, onChangeSpec, columnOptions)}
+                />
+                <ConfigMenuSectionOptionSelect
+                  placeholderId="legend_position"
+                  value={spec.legendPosition}
+                  name="legendPosition"
+                  options={[
+                    {
+                      label: props.intl.formatMessage({ id: 'auto' }),
+                      value: null,
+                    },
+                    {
+                      label: props.intl.formatMessage({ id: 'top' }),
+                      value: 'top',
+                    },
+                    {
+                      label: props.intl.formatMessage({ id: 'right' }),
+                      value: 'right',
+                    },
+                    {
+                      label: props.intl.formatMessage({ id: 'bottom' }),
+                      value: 'bottom',
+                    },
+                    {
+                      label: props.intl.formatMessage({ id: 'left' }),
+                      value: 'left',
+                    },
+                  ]}
+                  clearable
+                  onChange={value => onChangeSpec({ legendPosition: value })}
+                />
+              </div>
+            )}
+          </div>
         )}
       />
 
@@ -176,6 +234,7 @@ function ScatterConfigMenu(props) {
                   null
               }
               name="sizeColumnInput"
+              clearable
               options={
                 [{
                   label: props.intl.formatMessage({ id: 'select_a_metric_column' }),

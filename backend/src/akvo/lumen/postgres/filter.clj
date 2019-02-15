@@ -55,7 +55,7 @@
 (defmethod filter-sql "isLower"
   [{:keys [column operation value]}]
   (let [op (if (= operation "keep") "<" ">=")]
-    (comparison op (:type column) (:columnName column) (:value column))))
+    (comparison op (:type column) (:columnName column) value)))
 
 (defmethod filter-sql "is"
   [{:keys [column operation value]}]

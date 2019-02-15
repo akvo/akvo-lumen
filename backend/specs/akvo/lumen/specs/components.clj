@@ -1,6 +1,5 @@
 (ns akvo.lumen.specs.components
-  (:require [akvo.lumen.component.caddisfly :as caddisfly]
-            [clojure.spec.alpha :as s]
+  (:require [clojure.spec.alpha :as s]
             [clojure.tools.logging :as log]
             [integrant.core :as ig]))
 

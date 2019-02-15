@@ -16,6 +16,7 @@ const scatterSpec = {
   categoryLabel: null,
   categoryLabelFromUser: null,
   filters: [],
+  showLegend: true,
 };
 
 export default scatterSpec;

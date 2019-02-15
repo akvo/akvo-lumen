@@ -47,7 +47,7 @@ export default class StackedBarChart extends Component {
     onChangeVisualisationSpec: PropTypes.func,
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
-    legendPosition: PropTypes.oneOf(['right']),
+    legendPosition: PropTypes.oneOf(['top', 'right', 'bottom', 'left', undefined]),
     print: PropTypes.bool,
     interactive: PropTypes.bool,
     edit: PropTypes.bool,

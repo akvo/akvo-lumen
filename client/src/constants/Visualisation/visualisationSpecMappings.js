@@ -19,15 +19,23 @@ const visualizationColumnMappings = {
     bar: {
       valueColumn: 'metricColumnY',
       categoryColumn: 'bucketColumn',
+      showLegend: 'showLegend',
+      legendPosition: 'legendPosition',
     },
     line: {
       valueColumn: 'metricColumnY',
+      showLegend: 'showLegend',
+      legendPosition: 'legendPosition',
     },
     area: {
       valueColumn: 'metricColumnY',
+      showLegend: 'showLegend',
+      legendPosition: 'legendPosition',
     },
     pie: {
       categoryColumn: 'bucketColumn',
+      showLegend: 'showLegend',
+      legendPosition: 'legendPosition',
     },
     get donut() {
       return this.pie;
@@ -38,10 +46,14 @@ const visualizationColumnMappings = {
     scatter: {
       valueColumn: 'metricColumnY',
       categoryColumn: 'bucketColumnCategory',
+      showLegend: 'showLegend',
+      legendPosition: 'legendPosition',
     },
     bubble: {
       valueColumn: 'metricColumn',
       categoryColumn: 'bucketColumn',
+      showLegend: 'showLegend',
+      legendPosition: 'legendPosition',
     },
   },
   bar: {
@@ -49,15 +61,23 @@ const visualizationColumnMappings = {
     'pivot table': {
       metricColumnY: 'valueColumn',
       bucketColumn: 'categoryColumn',
+      showLegend: 'showLegend',
+      legendPosition: 'legendPosition',
     },
     line: {
       metricColumnY: 'metricColumnY',
+      showLegend: 'showLegend',
+      legendPosition: 'legendPosition',
     },
     area: {
       metricColumnY: 'metricColumnY',
+      showLegend: 'showLegend',
+      legendPosition: 'legendPosition',
     },
     pie: {
       bucketColumn: 'bucketColumn',
+      showLegend: 'showLegend',
+      legendPosition: 'legendPosition',
     },
     get donut() {
       return this.pie;
@@ -68,29 +88,42 @@ const visualizationColumnMappings = {
     scatter: {
       metricColumnY: 'metricColumnY',
       bucketColumn: 'bucketColumnCategory',
+      showLegend: 'showLegend',
+      legendPosition: 'legendPosition',
     },
     bubble: {
       metricColumnY: 'metricColumn',
       bucketColumn: 'bucketColumn',
+      showLegend: 'showLegend',
+      legendPosition: 'legendPosition',
     },
   },
   line: {
     map: {},
     'pivot table': {
       metricColumnY: 'valueColumn',
+      showLegend: 'showLegend',
+      legendPosition: 'legendPosition',
     },
     bar: {
       metricColumnY: 'metricColumnY',
       metricColumnX: 'metricColumnX',
+      showLegend: 'showLegend',
+      legendPosition: 'legendPosition',
     },
     area: {
       metricColumnY: 'metricColumnY',
       metricColumnX: 'metricColumnX',
+      showLegend: 'showLegend',
+      legendPosition: 'legendPosition',
     },
     get line() {
       return this.area;
     },
-    pie: {},
+    pie: {
+      showLegend: 'showLegend',
+      legendPosition: 'legendPosition',
+    },
     get donut() {
       return this.pie;
     },
@@ -100,9 +133,13 @@ const visualizationColumnMappings = {
     scatter: {
       metricColumnY: 'metricColumnY',
       metricColumnX: 'metricColumnX',
+      showLegend: 'showLegend',
+      legendPosition: 'legendPosition',
     },
     bubble: {
       metricColumnY: 'metricColumn',
+      showLegend: 'showLegend',
+      legendPosition: 'legendPosition',
     },
   },
   get area() {
@@ -112,14 +149,26 @@ const visualizationColumnMappings = {
     map: {},
     'pivot table': {
       bucketColumn: 'categoryColumn',
+      showLegend: 'showLegend',
+      legendPosition: 'legendPosition',
     },
     bar: {
       bucketColumn: 'bucketColumn',
+      showLegend: 'showLegend',
+      legendPosition: 'legendPosition',
     },
-    line: {},
-    area: {},
+    line: {
+      showLegend: 'showLegend',
+      legendPosition: 'legendPosition',
+    },
+    area: {
+      showLegend: 'showLegend',
+      legendPosition: 'legendPosition',
+    },
     pie: {
       bucketColumn: 'bucketColumn',
+      showLegend: 'showLegend',
+      legendPosition: 'legendPosition',
     },
     get donut() {
       return this.pie;
@@ -129,10 +178,14 @@ const visualizationColumnMappings = {
     },
     scatter: {
       bucketColumn: 'bucketColumnCategory',
+      showLegend: 'showLegend',
+      legendPosition: 'legendPosition',
     },
     bubble: {
       bucketColumn: 'bucketColumn',
       legendTitle: 'legendTitle',
+      showLegend: 'showLegend',
+      legendPosition: 'legendPosition',
     },
   },
   get donut() {
@@ -146,21 +199,31 @@ const visualizationColumnMappings = {
     'pivot table': {
       metricColumnY: 'valueColumn',
       bucketColumn: 'categoryColumn',
+      showLegend: 'showLegend',
+      legendPosition: 'legendPosition',
     },
     bar: {
       metricColumnY: 'metricColumnY',
       bucketColumnCategory: 'bucketColumn',
+      showLegend: 'showLegend',
+      legendPosition: 'legendPosition',
     },
     line: {
       metricColumnY: 'metricColumnY',
       metricColumnX: 'metricColumnX',
+      showLegend: 'showLegend',
+      legendPosition: 'legendPosition',
     },
     area: {
       metricColumnY: 'metricColumnY',
       metricColumnX: 'metricColumnX',
+      showLegend: 'showLegend',
+      legendPosition: 'legendPosition',
     },
     pie: {
       bucketColumnCategory: 'bucketColumn',
+      showLegend: 'showLegend',
+      legendPosition: 'legendPosition',
     },
     get donut() {
       return this.pie;
@@ -174,6 +237,8 @@ const visualizationColumnMappings = {
       metricLabel: 'categoryLabel',
       metricLabelFromUser: 'categoryLabelFromuser',
       legendTitle: 'legendTitle',
+      showLegend: 'showLegend',
+      legendPosition: 'legendPosition',
     },
   },
   bubble: {
@@ -181,19 +246,29 @@ const visualizationColumnMappings = {
     'pivot table': {
       metricColumn: 'valueColumn',
       bucketColumn: 'categoryColumn',
+      showLegend: 'showLegend',
+      legendPosition: 'legendPosition',
     },
     bar: {
       metricColumn: 'metricColumnY',
       bucketColumn: 'bucketColumn',
+      showLegend: 'showLegend',
+      legendPosition: 'legendPosition',
     },
     line: {
       metricColumn: 'metricColumnY',
+      showLegend: 'showLegend',
+      legendPosition: 'legendPosition',
     },
     area: {
       metricColumn: 'metricColumnY',
+      showLegend: 'showLegend',
+      legendPosition: 'legendPosition',
     },
     pie: {
       bucketColumn: 'bucketColumn',
+      showLegend: 'showLegend',
+      legendPosition: 'legendPosition',
     },
     get donut() {
       return this.pie;
@@ -207,6 +282,8 @@ const visualizationColumnMappings = {
       categoryLabel: 'metricLabel',
       categoryLabelFromuser: 'metricLabelFromUser',
       legendTitle: 'legendTitle',
+      showLegend: 'showLegend',
+      legendPosition: 'legendPosition',
     },
   },
 };

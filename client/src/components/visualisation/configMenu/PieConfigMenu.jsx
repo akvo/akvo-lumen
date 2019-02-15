@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { injectIntl, intlShape } from 'react-intl';
 
 import ToggleInput from '../../common/ToggleInput';
 import { filterColumns } from '../../../utilities/utils';
@@ -7,7 +8,7 @@ import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
 import ConfigMenuSectionOptionText from '../../common/ConfigMenu/ConfigMenuSectionOptionText';
 import ConfigMenuSectionOptionSelect from '../../common/ConfigMenu/ConfigMenuSectionOptionSelect';
 
-export default function PieConfigMenu(props) {
+function PieConfigMenu(props) {
   const {
     visualisation,
     onChangeSpec,
@@ -22,8 +23,7 @@ export default function PieConfigMenu(props) {
         options={(
           <ConfigMenuSectionOptionSelect
             placeholderId="select_a_data_column_to_group_by"
-            value={spec.bucketColumn !== null ?
-              spec.bucketColumn.toString() : null}
+            value={spec.bucketColumn !== null ? spec.bucketColumn.toString() : null}
             name="xGroupColumnMenu"
             options={filterColumns(columnOptions, ['number', 'date', 'text'])}
             clearable
@@ -57,6 +57,35 @@ export default function PieConfigMenu(props) {
                     legendTitle: event.target.value.toString(),
                   }, spec, onChangeSpec, columnOptions)}
                 />
+                <ConfigMenuSectionOptionSelect
+                  placeholderId="legend_position"
+                  value={spec.legendPosition}
+                  name="legendPosition"
+                  options={[
+                    {
+                      label: props.intl.formatMessage({ id: 'auto' }),
+                      value: null,
+                    },
+                    {
+                      label: props.intl.formatMessage({ id: 'top' }),
+                      value: 'top',
+                    },
+                    {
+                      label: props.intl.formatMessage({ id: 'right' }),
+                      value: 'right',
+                    },
+                    {
+                      label: props.intl.formatMessage({ id: 'bottom' }),
+                      value: 'bottom',
+                    },
+                    {
+                      label: props.intl.formatMessage({ id: 'left' }),
+                      value: 'left',
+                    },
+                  ]}
+                  clearable
+                  onChange={value => onChangeSpec({ legendPosition: value })}
+                />
               </div>
             )}
             <ToggleInput
@@ -77,9 +106,12 @@ export default function PieConfigMenu(props) {
 }
 
 PieConfigMenu.propTypes = {
+  intl: intlShape.isRequired,
   visualisation: PropTypes.object.isRequired,
   datasets: PropTypes.object.isRequired,
   onChangeSpec: PropTypes.func.isRequired,
   columnOptions: PropTypes.array.isRequired,
   aggregationOptions: PropTypes.array.isRequired,
 };
+
+export default injectIntl(PieConfigMenu);
