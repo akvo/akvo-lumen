@@ -187,6 +187,7 @@
   "pattern_suggestion": "Suggestions for '{columnTitle}': {recommendations}",
   "pdf": "PDF",
   "pending": "Pending",
+  "percentage_stack_bars": "Percentage Stack Bars",
   "pie": "Pie",
   "polararea": "Polar Area",
   "pivot table": "Pivot table",

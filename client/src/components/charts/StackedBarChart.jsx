@@ -72,7 +72,7 @@ export default class StackedBarChart extends Component {
     legendTitle: PropTypes.string,
     yAxisLabel: PropTypes.string,
     xAxisLabel: PropTypes.string,
-    grouped: PropTypes.bool,
+    subBucketMethod: PropTypes.string,
     grid: PropTypes.bool,
     yAxisTicks: PropTypes.number,
     visualisation: PropTypes.object,
@@ -177,9 +177,11 @@ export default class StackedBarChart extends Component {
     if (this.state.isPickingColor) return;
     const { interactive, print, yAxisLabel } = this.props;
     if (!interactive || print) return;
+    const nodeTotal = Object.keys(node.values).reduce((acc, key) => acc + node.values[key], 0);
+    const percentage = Math.round((node.values[seriesIndex] / nodeTotal) * 10000) / 100;
     this.handleShowTooltip(event, [
       { key: seriesKey, color: this.getColor(seriesKey, seriesIndex), value: valueKey },
-      { key: yAxisLabel || 'y', value: heuristicRound(node.values[seriesKey]) },
+      { key: yAxisLabel || 'y', value: `${heuristicRound(node.values[seriesIndex])} (${percentage}%)` },
     ]);
     this.setState({ hoveredNode: { seriesKey, valueKey } });
   }
@@ -287,7 +289,7 @@ export default class StackedBarChart extends Component {
     );
   }
 
-  render() {
+  renderSplit() {
     const {
       width,
       height,
@@ -306,7 +308,6 @@ export default class StackedBarChart extends Component {
       yAxisLabel,
       yAxisTicks,
       xAxisLabel,
-      grouped,
       grid,
       visualisation,
     } = this.props;
@@ -344,7 +345,6 @@ export default class StackedBarChart extends Component {
                 [replaceLabelIfValueEmpty(key)]: this.getColor(key, i),
               }), {})
             }
-            // activeItem={get(this.state, 'hoveredNode.seriesKey')}
             onClick={({ datum }) => (event) => {
               this.handleClickNode(datum, event);
             }}
@@ -369,13 +369,9 @@ export default class StackedBarChart extends Component {
               dimensions.height - margins.bottom - margins.top - paddingBottom;
             const availableWidth = dimensions.width - margins.left - margins.right;
 
-            const domain = grouped ?
-              extent(series.data, ({ values }) =>
-                Object.keys(values).reduce((acc, key) => Math.max(acc, Math.abs(values[key])), 0)
-              ) :
-              extent(series.data, ({ values }) =>
-                Object.keys(values).reduce((acc, key) => acc + Math.abs(values[key]), 0)
-              );
+            const domain = extent(series.data, ({ values }) =>
+              Object.keys(values).reduce((acc, key) => Math.max(acc, Math.abs(values[key])), 0)
+            );
 
             if (domain[0] > 0) domain[0] = 0;
 
@@ -440,8 +436,8 @@ export default class StackedBarChart extends Component {
                       }}
                     >
                       {stackNodes.map((stackSeries, seriesIndex) => {
-                        const seriesKey = this.props.data.series[seriesIndex].key;
-                        const seriesIsHovered = (
+                        const seriesKey = stackSeries.key;
+                        const seriesIsNotHovered = (
                           this.state.hoveredSeries &&
                           this.state.hoveredSeries !== seriesKey
                         );
@@ -456,10 +452,9 @@ export default class StackedBarChart extends Component {
                               const normalizedHeight = availableHeight - heightScale(y1 - y0);
                               const colorpickerPlacement = valueIndex < dataCount / 2 ? 'right' : 'left';
                               const barWidth = (nodeWidth - (nodeWidth * padding * 2)) /
-                                (grouped ? seriesCount : 1);
-                              const normalizedX = x +
-                                (nodeWidth * padding) +
-                                (grouped ? seriesIndex * barWidth : 0);
+                                seriesCount;
+                              const normalizedX = x + (nodeWidth * padding) +
+                                (seriesIndex * barWidth);
 
                               return (
                                 <Group key={key}>
@@ -494,12 +489,12 @@ export default class StackedBarChart extends Component {
                                   <Rect
                                     key={key}
                                     x={normalizedX}
-                                    y={(grouped ? origin : normalizedY) - normalizedHeight}
+                                    y={origin - normalizedHeight}
                                     width={barWidth}
                                     height={normalizedHeight}
                                     fill={color}
                                     stroke={color}
-                                    opacity={seriesIsHovered ? 0.1 : 1}
+                                    opacity={seriesIsNotHovered ? 0.1 : 1}
                                     cursor={edit ? 'pointer' : 'default'}
                                     onClick={(event) => {
                                       this.handleClickNode({
@@ -528,7 +523,618 @@ export default class StackedBarChart extends Component {
                                     key,
                                     barWidth,
                                     x: normalizedX,
-                                    y: ((grouped ? origin : normalizedY) - normalizedHeight) +
+                                    y: (origin - normalizedHeight) + (normalizedHeight / 2),
+                                    value: nodes[valueIndex],
+                                    color,
+                                    barHeight: normalizedHeight,
+                                    node,
+                                    seriesKey,
+                                    seriesIndex,
+                                  })}
+                                </Group>
+                              );
+                            })}
+                          </Group>
+                        );
+                      })}
+
+                      {nodes.map((node, index) => {
+                        const { nodeWidth, x, key } = node;
+
+                        return (
+                          <Group key={key}>
+                            {this.renderLabel({
+                              nodeCount: series.data.length,
+                              index,
+                              nodeWidth,
+                              x,
+                              y: origin,
+                              domain,
+                              height: 100,
+                              node,
+                              labelsVisible,
+                            })}
+                          </Group>
+                        );
+                      })}
+                    </Group>
+                  )}</Grid>
+
+                  <AxisLeft
+                    scale={axisScale}
+                    left={margins.left}
+                    top={margins.top}
+                    label={yAxisLabel || ''}
+                    stroke={'#1b1a1e'}
+                    tickTextFill={'#1b1a1e'}
+                    numTicks={yAxisTicks}
+                    labelProps={{
+                      fontSize: axisLabelFontSize,
+                      textAnchor: 'middle',
+                    }}
+                    labelOffset={44}
+                    tickFormat={tickFormat}
+                  />
+
+                  <Text
+                    transform={[
+                      { type: 'translate', value: [Math.floor(this.props.width / 2) - 125, this.props.height - 10] },
+                    ]}
+                    fontSize={axisLabelFontSize}
+                    textAnchor="middle"
+                    fontFamily="Arial"
+                  >
+                    {xAxisLabel || ''}
+                  </Text>
+
+                </Svg>
+              </div>
+            );
+          }}</ResponsiveWrapper>
+        }
+      />
+    );
+  }
+
+  renderStack() {
+    const {
+      width,
+      height,
+      colorMapping,
+      onChangeVisualisationSpec,
+      marginTop,
+      marginRight,
+      marginBottom,
+      marginLeft,
+      style,
+      legendVisible,
+      labelsVisible,
+      legendTitle,
+      edit,
+      padding,
+      yAxisLabel,
+      yAxisTicks,
+      xAxisLabel,
+      grid,
+      visualisation,
+    } = this.props;
+
+    const { tooltipItems, tooltipVisible, tooltipPosition, hasRendered } = this.state;
+
+    const series = this.state.data;
+
+    if (!series) return null;
+
+    const stackNodes = series.stack;
+    const dataCount = series.data.length;
+    const paddingBottom = getPaddingBottom(series.data);
+    const axisLabelFontSize =
+      getLabelFontSize(yAxisLabel, xAxisLabel, MAX_FONT_SIZE, MIN_FONT_SIZE, height, width);
+
+    return (
+      <ChartLayout
+        style={style}
+        width={width}
+        height={height}
+        legendVisible={legendVisible}
+        onClick={() => {
+          this.setState({ isPickingColor: undefined });
+        }}
+        legend={({ horizontal }) => (
+          <Legend
+            horizontal={!horizontal}
+            title={legendTitle}
+            data={stackNodes.map(({ key }) => replaceLabelIfValueEmpty(key))}
+            colorMapping={
+              stackNodes.reduce((acc, { key }, i) => ({
+                ...acc,
+                [replaceLabelIfValueEmpty(key)]: this.getColor(key, i),
+              }), {})
+            }
+            onClick={({ datum }) => (event) => {
+              this.handleClickNode(datum, event);
+            }}
+            onMouseEnter={({ datum }) => () => {
+              if (this.state.isPickingColor) return;
+              this.handleMouseEnterLegendNode(datum);
+            }}
+            onMouseLeave={() => () => {
+              this.handleMouseLeaveLegendNode();
+            }}
+          />
+        )}
+        chart={
+          <ResponsiveWrapper>{(dimensions) => {
+            const margins = calculateMargins({
+              top: marginTop,
+              right: marginRight,
+              bottom: marginBottom,
+              left: marginLeft,
+            }, dimensions);
+            const availableHeight =
+              dimensions.height - margins.bottom - margins.top - paddingBottom;
+            const availableWidth = dimensions.width - margins.left - margins.right;
+
+            const domain = extent(series.data, ({ values }) =>
+              Object.keys(values).reduce((acc, key) => acc + Math.abs(values[key]), 0)
+            );
+
+            if (domain[0] > 0) domain[0] = 0;
+
+            const heightScale = scaleLinear()
+              .domain([0, domain[1]])
+              .range([availableHeight, 0]);
+
+            const origin = heightScale(Math.abs(0));
+
+            const axisScale = scaleLinear()
+              .domain([0, domain[1]])
+              .range([0, availableHeight].reverse());
+
+            const tickFormat = (value) => {
+              const cutoff = 10000;
+              if (cutoff >= 10000) {
+                return this.context.abbrNumber(value);
+              }
+              return value;
+            };
+
+            return (
+              <div
+                style={{ position: 'relative' }}
+                ref={(c) => {
+                  this.wrap = c;
+                }}
+              >
+                {hasRendered && visualisation && <RenderComplete id={visualisation.id} />}
+
+                {tooltipVisible && (
+                  <Tooltip
+                    items={tooltipItems}
+                    {...tooltipPosition}
+                  />
+                )}
+                <Svg width={dimensions.width} height={dimensions.height}>
+
+                  {grid && (
+                    <GridRows
+                      scale={axisScale}
+                      width={availableWidth}
+                      height={availableHeight}
+                      left={margins.left}
+                      top={margins.top}
+                      numTicks={yAxisTicks}
+                    />
+                  )}
+
+                  <Grid
+                    data={series.data}
+                    bands
+                    size={[
+                      dimensions.width - margins.left - margins.right,
+                      dimensions.height - margins.top - margins.bottom - paddingBottom,
+                    ]}
+                    rows={1}
+                  >{nodes => (
+                    <Group
+                      transform={{
+                        translate: [margins.left, margins.top],
+                      }}
+                    >
+                      {stackNodes.map((stackSeries, seriesIndex) => {
+                        const seriesKey = stackSeries.key;
+                        const seriesIsNotHovered = (
+                          this.state.hoveredSeries &&
+                          this.state.hoveredSeries !== seriesKey
+                        );
+
+                        return (
+                          <Group key={seriesKey}>
+                            {stackSeries.map(([y0, y1], valueIndex) => {
+                              const node = nodes[valueIndex];
+                              const { nodeWidth, x, key } = node;
+                              const color = this.getColor(seriesKey, seriesIndex);
+                              const normalizedY = heightScale(y0);
+                              const normalizedHeight = availableHeight - heightScale(y1 - y0);
+                              const colorpickerPlacement = valueIndex < dataCount / 2 ? 'right' : 'left';
+                              const barWidth = nodeWidth - (nodeWidth * padding * 2);
+                              const normalizedX = x + (nodeWidth * padding);
+
+                              return (
+                                <Group key={key}>
+                                  {(
+                                    get(this.state, 'isPickingColor') &&
+                                    get(this.state, 'isPickingColor.valueKey') === key &&
+                                    get(this.state, 'isPickingColor.seriesKey') === seriesKey
+                                  ) && (
+                                    <Portal node={this.wrap}>
+                                      <ColorPicker
+                                        title={`Pick color: ${key}`}
+                                        color={color}
+                                        left={
+                                          colorpickerPlacement === 'right' ?
+                                            margins.left + x + nodeWidth :
+                                            margins.left + x
+                                        }
+                                        top={normalizedY}
+                                        placement={colorpickerPlacement}
+                                        onChange={({ hex }) => {
+                                          onChangeVisualisationSpec({
+                                            colors: {
+                                              ...colorMapping,
+                                              [this.state.isPickingColor.seriesKey]: hex,
+                                            },
+                                          });
+                                          this.setState({ isPickingColor: undefined });
+                                        }}
+                                      />
+                                    </Portal>
+                                  )}
+                                  <Rect
+                                    key={key}
+                                    x={normalizedX}
+                                    y={normalizedY - normalizedHeight}
+                                    width={barWidth}
+                                    height={normalizedHeight}
+                                    fill={color}
+                                    stroke={color}
+                                    opacity={seriesIsNotHovered ? 0.1 : 1}
+                                    cursor={edit ? 'pointer' : 'default'}
+                                    onClick={(event) => {
+                                      this.handleClickNode({
+                                        seriesKey,
+                                        valueKey: key,
+                                        seriesIndex,
+                                      }, event);
+                                    }}
+                                    onMouseEnter={(event) => {
+                                      this.handleMouseEnterNode(
+                                        nodes[valueIndex],
+                                        { seriesKey, valueKey: key, seriesIndex },
+                                        event
+                                      );
+                                    }}
+                                    onMouseMove={(event) => {
+                                      this.handleMouseEnterNode(
+                                        nodes[valueIndex],
+                                        { seriesKey, valueKey: key, seriesIndex },
+                                        event
+                                      );
+                                    }}
+                                    onMouseLeave={this.handleMouseLeaveNode}
+                                  />
+                                  {this.renderValueLabel({
+                                    key,
+                                    barWidth,
+                                    x: normalizedX,
+                                    y: normalizedY - (normalizedHeight / 2),
+                                    value: nodes[valueIndex],
+                                    color,
+                                    barHeight: normalizedHeight,
+                                    node,
+                                    seriesKey,
+                                    seriesIndex,
+                                  })}
+                                </Group>
+                              );
+                            })}
+                          </Group>
+                        );
+                      })}
+
+                      {nodes.map((node, index) => {
+                        const { nodeWidth, x, key } = node;
+
+                        return (
+                          <Group key={key}>
+                            {this.renderLabel({
+                              nodeCount: series.data.length,
+                              index,
+                              nodeWidth,
+                              x,
+                              y: origin,
+                              domain,
+                              height: 100,
+                              node,
+                              labelsVisible,
+                            })}
+                          </Group>
+                        );
+                      })}
+                    </Group>
+                  )}</Grid>
+
+                  <AxisLeft
+                    scale={axisScale}
+                    left={margins.left}
+                    top={margins.top}
+                    label={yAxisLabel || ''}
+                    stroke={'#1b1a1e'}
+                    tickTextFill={'#1b1a1e'}
+                    numTicks={yAxisTicks}
+                    labelProps={{
+                      fontSize: axisLabelFontSize,
+                      textAnchor: 'middle',
+                    }}
+                    labelOffset={44}
+                    tickFormat={tickFormat}
+                  />
+
+                  <Text
+                    transform={[
+                      { type: 'translate', value: [Math.floor(this.props.width / 2) - 125, this.props.height - 10] },
+                    ]}
+                    fontSize={axisLabelFontSize}
+                    textAnchor="middle"
+                    fontFamily="Arial"
+                  >
+                    {xAxisLabel || ''}
+                  </Text>
+
+                </Svg>
+              </div>
+            );
+          }}</ResponsiveWrapper>
+        }
+      />
+    );
+  }
+
+  renderStackPercentage() {
+    const {
+      width,
+      height,
+      colorMapping,
+      onChangeVisualisationSpec,
+      marginTop,
+      marginRight,
+      marginBottom,
+      marginLeft,
+      style,
+      legendVisible,
+      labelsVisible,
+      legendTitle,
+      edit,
+      padding,
+      yAxisLabel,
+      yAxisTicks,
+      xAxisLabel,
+      grid,
+      visualisation,
+    } = this.props;
+
+    const { tooltipItems, tooltipVisible, tooltipPosition, hasRendered } = this.state;
+
+    const series = this.state.data;
+
+    if (!series) return null;
+
+    const stackNodes = series.stack;
+    const dataCount = series.data.length;
+    const paddingBottom = getPaddingBottom(series.data);
+    const axisLabelFontSize =
+      getLabelFontSize(yAxisLabel, xAxisLabel, MAX_FONT_SIZE, MIN_FONT_SIZE, height, width);
+
+    return (
+      <ChartLayout
+        style={style}
+        width={width}
+        height={height}
+        legendVisible={legendVisible}
+        onClick={() => {
+          this.setState({ isPickingColor: undefined });
+        }}
+        legend={({ horizontal }) => (
+          <Legend
+            horizontal={!horizontal}
+            title={legendTitle}
+            data={stackNodes.map(({ key }) => key)}
+            colorMapping={
+              stackNodes.reduce((acc, { key }, i) => ({
+                ...acc,
+                [key]: this.getColor(key, i),
+              }), {})
+            }
+            onClick={({ datum }) => (event) => {
+              this.handleClickNode(datum, event);
+            }}
+            onMouseEnter={({ datum }) => () => {
+              if (this.state.isPickingColor) return;
+              this.handleMouseEnterLegendNode(datum);
+            }}
+            onMouseLeave={() => () => {
+              this.handleMouseLeaveLegendNode();
+            }}
+          />
+        )}
+        chart={
+          <ResponsiveWrapper>{(dimensions) => {
+            const margins = calculateMargins({
+              top: marginTop,
+              right: marginRight,
+              bottom: marginBottom,
+              left: marginLeft,
+            }, dimensions);
+            const availableHeight =
+              dimensions.height - margins.bottom - margins.top - paddingBottom;
+            const availableWidth = dimensions.width - margins.left - margins.right;
+            const domain = extent(series.data, ({ values }) =>
+              Object.keys(values).reduce((acc, key) => acc + Math.abs(values[key]), 0)
+            );
+
+            if (domain[0] > 0) domain[0] = 0;
+
+            const heightScale = scaleLinear()
+              .domain([0, domain[1]])
+              .range([availableHeight, 0]);
+
+            const origin = heightScale(Math.abs(0));
+
+            const axisScale = scaleLinear()
+              .domain([0, 100])
+              .range([0, availableHeight].reverse());
+
+            const tickFormat = value => `${value}%`;
+
+            return (
+              <div
+                style={{ position: 'relative' }}
+                ref={(c) => {
+                  this.wrap = c;
+                }}
+              >
+                {hasRendered && visualisation && <RenderComplete id={visualisation.id} />}
+
+                {tooltipVisible && (
+                  <Tooltip
+                    items={tooltipItems}
+                    {...tooltipPosition}
+                  />
+                )}
+                <Svg width={dimensions.width} height={dimensions.height}>
+
+                  {grid && (
+                    <GridRows
+                      scale={axisScale}
+                      width={availableWidth}
+                      height={availableHeight}
+                      left={margins.left}
+                      top={margins.top}
+                      numTicks={yAxisTicks}
+                    />
+                  )}
+
+                  <Grid
+                    data={series.data}
+                    bands
+                    size={[
+                      dimensions.width - margins.left - margins.right,
+                      dimensions.height - margins.top - margins.bottom - paddingBottom,
+                    ]}
+                    rows={1}
+                  >{nodes => (
+                    <Group
+                      transform={{
+                        translate: [margins.left, margins.top],
+                      }}
+                    >
+                      {stackNodes.map((stackSeries, seriesIndex) => {
+                        const seriesKey = stackSeries.key;
+                        const seriesIsNotHovered = (
+                          this.state.hoveredSeries &&
+                          this.state.hoveredSeries !== seriesKey
+                        );
+
+                        return (
+                          <Group key={seriesKey}>
+                            {stackSeries.map(([y0, y1], valueIndex) => {
+                              const node = nodes[valueIndex];
+                              const { nodeWidth, x, key } = node;
+                              const individualHeightScale = scaleLinear()
+                                .range([availableHeight, 0])
+                                .domain([
+                                  0,
+                                  Object.keys(node.values).reduce((acc, subkey) =>
+                                    acc + node.values[subkey]
+                                  , 0),
+                                ]);
+
+                              const color = this.getColor(seriesKey, seriesIndex);
+                              const normalizedY = individualHeightScale(y0);
+                              const normalizedHeight = availableHeight -
+                                individualHeightScale(y1 - y0);
+                              const colorpickerPlacement = valueIndex < dataCount / 2 ? 'right' : 'left';
+                              const barWidth = (nodeWidth - (nodeWidth * padding * 2));
+                              const normalizedX = x + (nodeWidth * padding);
+
+                              return (
+                                <Group key={key}>
+                                  {(
+                                    get(this.state, 'isPickingColor') &&
+                                    get(this.state, 'isPickingColor.valueKey') === key &&
+                                    get(this.state, 'isPickingColor.seriesKey') === seriesKey
+                                  ) && (
+                                    <Portal node={this.wrap}>
+                                      <ColorPicker
+                                        title={`Pick color: ${key}`}
+                                        color={color}
+                                        left={
+                                          colorpickerPlacement === 'right' ?
+                                            margins.left + x + nodeWidth :
+                                            margins.left + x
+                                        }
+                                        top={normalizedY}
+                                        placement={colorpickerPlacement}
+                                        onChange={({ hex }) => {
+                                          onChangeVisualisationSpec({
+                                            colors: {
+                                              ...colorMapping,
+                                              [this.state.isPickingColor.seriesKey]: hex,
+                                            },
+                                          });
+                                          this.setState({ isPickingColor: undefined });
+                                        }}
+                                      />
+                                    </Portal>
+                                  )}
+                                  <Rect
+                                    key={key}
+                                    x={normalizedX}
+                                    y={normalizedY - normalizedHeight}
+                                    width={barWidth}
+                                    height={normalizedHeight}
+                                    fill={color}
+                                    stroke={color}
+                                    opacity={seriesIsNotHovered ? 0.1 : 1}
+                                    cursor={edit ? 'pointer' : 'default'}
+                                    onClick={(event) => {
+                                      this.handleClickNode({
+                                        seriesKey,
+                                        valueKey: key,
+                                        seriesIndex,
+                                      }, event);
+                                    }}
+                                    onMouseEnter={(event) => {
+                                      this.handleMouseEnterNode(
+                                        nodes[valueIndex],
+                                        { seriesKey, valueKey: key, seriesIndex },
+                                        event
+                                      );
+                                    }}
+                                    onMouseMove={(event) => {
+                                      this.handleMouseEnterNode(
+                                        nodes[valueIndex],
+                                        { seriesKey, valueKey: key, seriesIndex },
+                                        event
+                                      );
+                                    }}
+                                    onMouseLeave={this.handleMouseLeaveNode}
+                                  />
+                                  {this.renderValueLabel({
+                                    key,
+                                    barWidth,
+                                    x: normalizedX,
+                                    y: (normalizedY - normalizedHeight) +
                                       (normalizedHeight / 2),
                                     value: nodes[valueIndex],
                                     color,
@@ -600,6 +1206,22 @@ export default class StackedBarChart extends Component {
         }
       />
     );
+  }
+
+  render() {
+    const { subBucketMethod } = this.props;
+    switch (subBucketMethod) {
+      case 'split':
+      default: {
+        return this.renderSplit();
+      }
+      case 'stack': {
+        return this.renderStack();
+      }
+      case 'stack_percentage': {
+        return this.renderStackPercentage();
+      }
+    }
   }
 
 }

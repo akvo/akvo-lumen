@@ -229,7 +229,7 @@ export default class Chart extends Component {
             xAxisLabel={visualisation.spec.axisLabelX}
             yAxisLabel={visualisation.spec.axisLabelY}
             area={Boolean(visualisation.visualisationType === 'area')}
-            grouped={Boolean(visualisation.spec.subBucketMethod === 'split')}
+            subBucketMethod={visualisation.spec.subBucketMethod}
             onChangeVisualisationSpec={onChangeVisualisationSpec}
             legendTitle={visualisation.spec.legendTitle}
             legendVisible={visualisation.spec.showLegend}
