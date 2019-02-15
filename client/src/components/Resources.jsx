@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
 
 import * as api from '../utilities/api';
 import { showNotification } from '../actions/notification';
@@ -84,4 +85,4 @@ Resources.propTypes = {
   dispatch: PropTypes.func,
 };
 
-export default Resources;
+export default connect(state => state)(Resources);
