@@ -43,34 +43,41 @@
   "Validate map spec layer."
   [layer p]
   (let [m (into {} (remove (comp nil? val)
-                           (select-keys layer ["geom" "latitude" "longitude"])))]
+                           (select-keys layer [:geom :latitude :longitude])))]
     (match [m]
-           [({"geom" geom} :only ["geom"])] (p geom)
+           [({:geom geom} :only [:geom])] (p geom)
 
-           [({"geom" geom "latitude" latitude} :only ["geom" "latitude"])]
+           [({:geom geom :latitude latitude} :only [:geom :latitude])]
            (check-columns p geom latitude)
 
-           [({"geom" geom "longitude" longitude} :only ["geom" "longitude"])]
+           [({:geom geom :longitude longitude} :only [:geom :longitude])]
            (check-columns p geom longitude)
 
-           [({"latitude" latitude "longitude" longitude}
-             :only ["latitude" "longitude"])]
+           [({:latitude latitude :longitude longitude}
+             :only [:latitude :longitude])]
            (check-columns p latitude longitude)
 
-           [{"geom" geom "latitude" latitude "longitude" longitude}]
+           [{:geom geom :latitude latitude :longitude longitude}]
            (check-columns p geom latitude longitude)
 
            :else false)))
 
 (defn conform-create-args [layers]
-  (let [dataset-id (get (first (filter (fn[layer] (util/valid-dataset-id? (get layer "datasetId"))) layers)) "datasetId")
-        raster-id (get (first (filter (fn[layer] (util/valid-dataset-id? (get layer "rasterId"))) layers)) "rasterId")]
+  (let [dataset-id (->> layers
+                        (filter (fn[layer] (util/valid-dataset-id? (:datasetId layer))))
+                        first
+                        :datasetId)
+        raster-id (->> layers
+                       (filter (fn[layer] (util/valid-dataset-id? (:rasterId layer))))
+                       first
+                       :rasterId)]
     (cond
       (and (not dataset-id) (not raster-id))
       (throw (ex-info "No valid datasetID"
                       {"reason" "No valid datasetID"}))
 
-      (some (fn [layer] (not (valid-location? layer util/valid-column-name?))) (filter (fn [layer] (not (= (get layer "layerType") "raster"))) layers))
+      (some (fn [layer] (not (valid-location? layer util/valid-column-name?)))
+            (filter (fn [layer] (not (= (:layerType layer) "raster"))) layers))
       (throw (ex-info "Location spec not valid"
                       {"reason" "Location spec not valid"}))
 
@@ -78,14 +85,14 @@
 
 (defn do-create [tenant-conn windshaft-url dataset-id layers]
   (let [metadata-array (map (fn [current-layer]
-                              (let [current-layer-type (get current-layer "layerType")
+                              (let [current-layer-type (:layerType current-layer)
                                     current-dataset-id (if (= current-layer-type "raster")
-                                                         (get current-layer "rasterId")
-                                                         (get current-layer "datasetId"))
+                                                         (:rasterId current-layer)
+                                                         (:datasetId current-layer))
                                     {:keys [table-name columns raster_table]} (if (= current-layer-type "raster")
                                                                                 (raster-by-id tenant-conn {:id current-dataset-id})
                                                                                 (dataset-by-id tenant-conn {:id current-dataset-id}))
-                                    current-where-clause (filter/sql-str (walk/keywordize-keys columns) (walk/keywordize-keys (get current-layer "filters")))]
+                                    current-where-clause (filter/sql-str (walk/keywordize-keys columns) (:filters current-layer))]
                                 (map-metadata/build tenant-conn (or raster_table table-name) current-layer current-where-clause)))
                             layers)
         headers (headers tenant-conn)
@@ -95,8 +102,8 @@
                                              :headers headers
                                              :content-type :json})
                            :body json/decode (get "layergroupid"))]
-    (lib/ok {"layerGroupId" layer-group-id
-             "layerMetadata" metadata-array})))
+    (lib/ok {:layerGroupId layer-group-id
+             :layerMetadata metadata-array})))
 
 (defn create-raster [tenant-conn windshaft-url raster-id]
   (let [{:keys [raster_table metadata]} (raster-by-id tenant-conn {:id raster-id})
@@ -107,9 +114,9 @@
                                              :headers headers
                                              :content-type :json})
                            :body json/decode (get "layergroupid"))
-        layer-meta (map-metadata/build tenant-conn raster_table {"layerType" "raster"} nil)]
-    (lib/ok {"layerGroupId" layer-group-id
-             "layerMetadata" layer-meta})))
+        layer-meta (map-metadata/build tenant-conn raster_table {:layerType "raster"} nil)]
+    (lib/ok {:layerGroupId layer-group-id
+             :layerMetadata layer-meta})))
 
 (defn create
   [tenant-conn windshaft-url layers]
