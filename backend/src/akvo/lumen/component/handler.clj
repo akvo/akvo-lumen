@@ -1,6 +1,5 @@
 (ns akvo.lumen.component.handler
-  (:require [compojure.core :as compojure.core]
-            [compojure.response :as compojure.res]
+  (:require [compojure.response :as compojure.res]
             [integrant.core :as ig]
             [clojure.tools.logging :as log]
             [akvo.lumen.specs.components :refer [integrant-key]]
@@ -21,22 +20,13 @@
     (let [
           routes  (->> endpoints
                        (reduce-kv (fn [c k v]
-                                    (conj c [k v])
-                                    ) [] ))
-
-;;          _ (log/warn routes)
-
+                                    (conj c [k v])) [] ))
           handler (ring/ring-handler
                    (ring/router routes
-                                {:data {;; :coercion reitit.coercion.spec/coercion
-                                        ;;:muuntaja m/instance
-                                        :middleware middleware}
-                                 :conflicts (constantly nil)}))
-;;          _ (log/error :handler handler)
-]
+                                {:data {:middleware middleware}
+                                 :conflicts (constantly nil)}))]
       (assoc opts :handler handler))
     opts))
-
 
 (s/def ::endpoints (s/coll-of fn?
                               ;;:count 24
@@ -137,4 +127,3 @@
         (if (vector? res)
           (commons/variant->response res request)
           res)))))
-
