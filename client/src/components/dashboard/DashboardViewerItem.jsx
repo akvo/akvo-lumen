@@ -63,8 +63,8 @@ export default class DashboardViewerItem extends Component {
         return {
           position: 'absolute',
           display: 'block',
-          left: (layout.x * unit) + cMargin,
-          top: (layout.y * unit) + cMargin,
+          left: (layout.x * unit),
+          top: (layout.y * unit),
           width: (layout.w * unit) - (cMargin * 2),
           height: (
             item.type === 'visualisation' &&
