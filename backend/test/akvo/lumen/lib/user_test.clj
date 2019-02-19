@@ -2,10 +2,10 @@
   {:functional true}
   (:require [akvo.lumen.component.emailer :as emailer]
             [akvo.lumen.component.keycloak :as keycloak]
-            [akvo.lumen.fixtures :refer [migrate-tenant]]
+            [akvo.lumen.fixtures :refer [migrate-tenant tenant-conn-fixture *tenant-conn*]]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.user :as user]
-            [akvo.lumen.test-utils :refer [seed-data test-tenant test-tenant-conn] :as tu]
+            [akvo.lumen.test-utils :refer [seed-data ] :as tu]
             [akvo.lumen.endpoint.commons.variant :as variant]
             [clojure.set :as set]
             [clojure.test :refer :all]
@@ -24,7 +24,7 @@
 
 (def ^:dynamic *emailer*)
 (def ^:dynamic *keycloak*)
-(def ^:dynamic *tenant-conn*)
+
 
 (defn fixture [f]
   (migrate-tenant test-tenant)
@@ -33,7 +33,7 @@
             *tenant-conn* (test-tenant-conn test-tenant)]
     (f)))
 
-(use-fixtures :once fixture tu/spec-instrument)
+(use-fixtures :once tenant-conn-fixture fixture tu/spec-instrument)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
