@@ -2,8 +2,8 @@
  {:data {:url "http://auth.lumen.local:8080/auth"
          :realm "akvo"}
   :credentials
-  {"client_id" "akvo-lumen-confidential"
-   "client_secret" "caed3964-09dd-4752-b0bb-22c8e8ffd631"}}
+  {:client_id "akvo-lumen-confidential"
+   :client_secret "caed3964-09dd-4752-b0bb-22c8e8ffd631"}}
  :tenant-manager
  {:db_uri "jdbc:postgresql://postgres/test_lumen?ssl=true&user=lumen&password=password"}
  :tenants
