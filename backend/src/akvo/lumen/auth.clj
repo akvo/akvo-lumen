@@ -1,6 +1,7 @@
 (ns akvo.lumen.auth
   (:require [akvo.commons.jwt :as jwt]
             [cheshire.core :as json]
+            [clojure.tools.logging :as log]
             [clj-http.client :as client]
             [clojure.set :as set]
             [clojure.string :as string]

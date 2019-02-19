@@ -250,11 +250,22 @@ export default class StackedBarChart extends Component {
     seriesKey,
     seriesIndex,
   }) {
-    const { valueLabelsVisible } = this.props;
+    const { subBucketMethod, valueLabelsVisible } = this.props;
+
     if (!valueLabelsVisible) return null;
-    const labelText = heuristicRound(node.values[seriesKey]);
+
+    let labelText;
+    if (subBucketMethod === 'stack_percentage') {
+      const nodeTotal = Object.keys(node.values).reduce((acc, k) => acc + node.values[k], 0);
+      const percentage = Math.round((node.values[seriesIndex] / nodeTotal) * 100);
+      labelText = `${percentage}%`;
+    } else {
+      labelText = heuristicRound(node.values[seriesKey]);
+    }
+
     const labelX = x + (barWidth / 2);
     const labelY = y;
+
     if (!labelFitsWidth(labelText, barHeight) || !labelFitsHeight(barWidth)) return null;
 
     return (
