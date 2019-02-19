@@ -34,12 +34,12 @@ function ResourceList({ resources }) {
         </tr>
       </thead>
       <tbody>
-        {Object.keys(resources).map(key =>
+        {Object.keys(resources).map(key => (
           <tr key={key}>
             <td>{resourceRuleDescription(key)}</td>
             <td>{resources && resources[key]}</td>
           </tr>
-        )}
+        ))}
       </tbody>
     </table>
   );
@@ -63,7 +63,7 @@ class Resources extends Component {
 
   getResources() {
     api.get('/api/resources')
-      .then(({ body }) => this.setState({ resources: body }))
+      .then(({ body: { resources } }) => this.setState({ resources }))
       .catch(() => {
         this.props.dispatch(showNotification('error', 'Failed to fetch resources.'));
       });
