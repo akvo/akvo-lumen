@@ -11,7 +11,7 @@ const calculateDimensions = ({ width, height, legendVisible, legendPosition }) =
     case 'top': {
       dimensions.horizontal = false;
       dimensions.chartBeforeLegend = false;
-      dimensions.legend = 50;
+      dimensions.legend = 100;
       dimensions.chart = height - dimensions.legend;
       break;
     }
@@ -34,7 +34,7 @@ const calculateDimensions = ({ width, height, legendVisible, legendPosition }) =
     case 'bottom': {
       dimensions.horizontal = false;
       dimensions.chartBeforeLegend = true;
-      dimensions.legend = 50;
+      dimensions.legend = 100;
       dimensions.chart = height - dimensions.legend;
       break;
     }
@@ -71,6 +71,7 @@ const calculateDimensions = ({ width, height, legendVisible, legendPosition }) =
     }
 
   }
+  console.log(dimensions);
   return dimensions;
 };
 
