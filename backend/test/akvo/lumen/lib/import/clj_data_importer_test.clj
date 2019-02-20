@@ -2,6 +2,7 @@
   {:functional true}
   (:require [akvo.lumen.fixtures :refer [*tenant-conn*
                                          tenant-conn-fixture
+                                         system-fixture
                                          *error-tracker*
                                          error-tracker-fixture]]
             [clojure.tools.logging :as log]
@@ -18,7 +19,7 @@
 (hugsql/def-db-fns "akvo/lumen/lib/transformation_test.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
 
-(use-fixtures :once tenant-conn-fixture error-tracker-fixture tu/spec-instrument)
+(use-fixtures :once system-fixture tenant-conn-fixture error-tracker-fixture tu/spec-instrument)
 
 (deftest test-import
   (testing "Testing import"

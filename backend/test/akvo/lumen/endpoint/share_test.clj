@@ -1,7 +1,8 @@
 (ns akvo.lumen.endpoint.share-test
   {:functional true}
   (:require [akvo.lumen.fixtures :refer [*tenant-conn*
-                                         tenant-conn-fixture]]
+                                         tenant-conn-fixture
+                                         system-fixture]]
             [akvo.lumen.lib.dashboard :as dashboard]
             [akvo.lumen.lib.share :as share]
             [akvo.lumen.util :refer [gen-table-name squuid]]
@@ -105,7 +106,7 @@
 ;;; Tests
 ;;;
 
-(use-fixtures :once tenant-conn-fixture tu/spec-instrument)
+(use-fixtures :once system-fixture tenant-conn-fixture tu/spec-instrument)
 
 
 (hugsql/def-db-fns "akvo/lumen/lib/dashboard.sql")

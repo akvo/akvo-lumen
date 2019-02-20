@@ -3,7 +3,8 @@
   (:require [akvo.lumen.endpoint.commons.variant :as variant]
             [akvo.lumen.endpoint.share-test :as share-test]
             [akvo.lumen.fixtures :refer [*tenant-conn*
-                                         tenant-conn-fixture]]
+                                         tenant-conn-fixture
+                                         system-fixture]]
             [akvo.lumen.lib.public :as public]
             [akvo.lumen.lib.share :as share]
             [akvo.lumen.test-utils :as tu]
@@ -15,7 +16,7 @@
 ;;;
 
 
-(use-fixtures :once tenant-conn-fixture tu/spec-instrument)
+(use-fixtures :once system-fixture tenant-conn-fixture tu/spec-instrument)
 
 (hugsql/def-db-fns "akvo/lumen/lib/dashboard.sql")
 

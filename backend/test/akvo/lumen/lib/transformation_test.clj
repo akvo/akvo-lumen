@@ -2,6 +2,7 @@
   {:functional true}
   (:require [akvo.lumen.fixtures :refer [*tenant-conn*
                                          tenant-conn-fixture
+                                         system-fixture
                                          *error-tracker*
                                          error-tracker-fixture
                                          summarise-transformation-logs-fixture
@@ -55,7 +56,7 @@
 (alias 'db.dataset-version.s                    'akvo.lumen.specs.db.dataset-version)
 (alias 'db.dataset-version.column.s             'akvo.lumen.specs.db.dataset-version.column)
 
-(use-fixtures :once tu/spec-instrument caddisfly-fixture tenant-conn-fixture error-tracker-fixture summarise-transformation-logs-fixture)
+(use-fixtures :once tu/spec-instrument caddisfly-fixture system-fixture tenant-conn-fixture error-tracker-fixture summarise-transformation-logs-fixture)
 
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/transformation_test.sql")

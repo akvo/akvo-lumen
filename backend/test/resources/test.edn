@@ -1,0 +1,3 @@
+{:akvo.lumen.component.hikaricp/hikaricp       {:uri "jdbc:postgresql://postgres/test_lumen?ssl=true&user=lumen&password=password"}
+
+ :akvo.lumen.component.http/http               {:port 3100}}

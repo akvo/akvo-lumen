@@ -1,6 +1,6 @@
 (ns akvo.lumen.lib.transformation.engine-test
   {:functional true}
-  (:require [akvo.lumen.fixtures :refer [migrate-tenant rollback-tenant summarise-transformation-logs-fixture tenant-conn-fixture *tenant-conn*]]
+  (:require [akvo.lumen.fixtures :refer [migrate-tenant rollback-tenant summarise-transformation-logs-fixture tenant-conn-fixture *tenant-conn* system-fixture]]
             [akvo.lumen.lib.transformation.engine :refer :all]
             [akvo.lumen.test-utils :as tu]
             [cheshire.core :as json]
@@ -20,7 +20,7 @@
   (db-test-data *tenant-conn*)
   (f))
 
-(use-fixtures :once tenant-conn-fixture fixture summarise-transformation-logs-fixture tu/spec-instrument)
+(use-fixtures :once system-fixture tenant-conn-fixture fixture summarise-transformation-logs-fixture tu/spec-instrument)
 
 (def transformations
   {:ops [{"op" "core/to-titlecase"

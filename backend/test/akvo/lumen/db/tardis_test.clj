@@ -1,6 +1,6 @@
 (ns akvo.lumen.db.tardis-test
   {:functional true}
-  (:require [akvo.lumen.fixtures :refer [*tenant-conn* tenant-conn-fixture]]
+  (:require [akvo.lumen.fixtures :refer [*tenant-conn* tenant-conn-fixture system-fixture]]
             [clojure.string :as str]
             [clojure.test :refer :all]
             [hugsql.core :as hugsql])
@@ -8,7 +8,7 @@
 
 (hugsql/def-db-fns "akvo/lumen/db/tardis_test.sql")
 
-(use-fixtures :each tenant-conn-fixture)
+(use-fixtures :each system-fixture tenant-conn-fixture)
 
 (deftest tardis-with-alter-table
   (testing "with current data in public schema table, we alter table definition. Functionality keeps the same"

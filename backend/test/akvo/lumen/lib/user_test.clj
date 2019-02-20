@@ -2,7 +2,7 @@
   {:functional true}
   (:require [akvo.lumen.component.emailer :as emailer]
             [akvo.lumen.component.keycloak :as keycloak]
-            [akvo.lumen.fixtures :refer [migrate-tenant tenant-conn-fixture *tenant-conn*]]
+            [akvo.lumen.fixtures :refer [migrate-tenant tenant-conn-fixture *tenant-conn* system-fixture]]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.user :as user]
             [akvo.lumen.test-utils :refer [seed-data ] :as tu]
@@ -33,7 +33,7 @@
             *tenant-conn* (test-tenant-conn test-tenant)]
     (f)))
 
-(use-fixtures :once tenant-conn-fixture fixture tu/spec-instrument)
+(use-fixtures :once system-fixture tenant-conn-fixture fixture tu/spec-instrument)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
