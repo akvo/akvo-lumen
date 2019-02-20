@@ -178,10 +178,10 @@ export default class StackedBarChart extends Component {
     const { interactive, print, yAxisLabel } = this.props;
     if (!interactive || print) return;
     const nodeTotal = Object.keys(node.values).reduce((acc, key) => acc + node.values[key], 0);
-    const percentage = Math.round((node.values[seriesIndex] / nodeTotal) * 10000) / 100;
+    const percentage = Math.round((node.values[seriesKey] / nodeTotal) * 10000) / 100;
     this.handleShowTooltip(event, [
       { key: seriesKey, color: this.getColor(seriesKey, seriesIndex), value: valueKey },
-      { key: yAxisLabel || 'y', value: `${heuristicRound(node.values[seriesIndex])} (${percentage}%)` },
+      { key: yAxisLabel || 'y', value: `${heuristicRound(node.values[seriesKey])} (${percentage}%)` },
     ]);
     this.setState({ hoveredNode: { seriesKey, valueKey } });
   }
