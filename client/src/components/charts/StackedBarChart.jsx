@@ -257,7 +257,7 @@ export default class StackedBarChart extends Component {
     let labelText;
     if (subBucketMethod === 'stack_percentage') {
       const nodeTotal = Object.keys(node.values).reduce((acc, k) => acc + node.values[k], 0);
-      const percentage = Math.round((node.values[seriesIndex] / nodeTotal) * 100);
+      const percentage = Math.round((node.values[seriesKey] / nodeTotal) * 100);
       labelText = `${percentage}%`;
     } else {
       labelText = heuristicRound(node.values[seriesKey]);
