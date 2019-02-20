@@ -124,13 +124,13 @@ export default class StackedBarChart extends Component {
       .reduce((acc, datum, i) =>
         [
           ...acc,
-          data.series.reduce((acc2, series) => ({
+          data.series.reduce((acc2, series) => (itsSet(series) ? {
             ...acc2,
             values: {
               ...acc2.values,
               [series.key]: series.data[i].value,
             },
-          }), {}),
+          } : acc2), {}),
         ]
       , []);
 
