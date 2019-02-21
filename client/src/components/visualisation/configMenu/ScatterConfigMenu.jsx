@@ -192,20 +192,8 @@ function ScatterConfigMenu(props) {
                   name="legendPosition"
                   options={[
                     {
-                      label: props.intl.formatMessage({ id: 'legend_position_auto' }),
-                      value: null,
-                    },
-                    {
-                      label: props.intl.formatMessage({ id: 'legend_position_top' }),
-                      value: 'top',
-                    },
-                    {
                       label: props.intl.formatMessage({ id: 'legend_position_right' }),
                       value: 'right',
-                    },
-                    {
-                      label: props.intl.formatMessage({ id: 'legend_position_bottom' }),
-                      value: 'bottom',
                     },
                     {
                       label: props.intl.formatMessage({ id: 'legend_position_left' }),
