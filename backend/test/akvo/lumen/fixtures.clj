@@ -48,7 +48,7 @@
   (let [c (tu/start-config)]
     (try
       (tu/seed c)
-      (lumen-migrate/migrate c false)
+      (lumen-migrate/migrate c)
       (binding [*tenant-conn* (p/connection (:akvo.lumen.component.tenant-manager *system*)
                                             (-> c :akvo.lumen.migrate :seed :tenants first :label))]
         (f))
