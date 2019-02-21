@@ -136,17 +136,14 @@
 
 (defn halt-system [system]
   (when system (ig/halt! system)))
+
 (defn start-config []
   (let [c (dissoc-prod-components (prep "akvo/lumen/config.edn" "dev.edn" "test.edn"))]
              (ig/load-namespaces c)
              c))
+
 (defn start-system []
   (ig/init (start-config)))
-
-(comment (def s (start-system))
-         (halt-system s))
-;;
-;;(ig/init config)
 
 (defn- seed-tenant
   "Helper function that will seed tenant to the tenants table."
