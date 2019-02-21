@@ -165,7 +165,6 @@
   "At the moment only support seed of tenants table."
   [config]
   (let [db-uri (-> config :akvo.lumen.component.hikaricp/hikaricp :uri)]
-    (log/error :TT (-> config :akvo.lumen.migrate :seed :tenants))
     (doseq [tenant (-> config :akvo.lumen.migrate :seed :tenants)]
       (seed-tenant {:connection-uri db-uri} tenant))))
 
