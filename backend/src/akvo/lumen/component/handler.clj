@@ -2,6 +2,7 @@
   (:require [compojure.core :as compojure.core]
             [compojure.response :as compojure.res]
             [integrant.core :as ig]
+            [clojure.tools.logging :as log]
             [akvo.lumen.specs.components :refer [integrant-key]]
             [clojure.spec.alpha :as s]
             [ring.middleware.defaults]
@@ -97,7 +98,9 @@
     (fn [request]
       (try
         (handler request)
-        (catch Throwable _
+        (catch Throwable t
+          (log/error t "500 App Error")
+          (log/info :request-on-500 request)
           (-> (compojure.res/render error-response request)
               (ring.response/content-type "text/html")
               (ring.response/status 500)))))))
