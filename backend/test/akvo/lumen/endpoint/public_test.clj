@@ -43,10 +43,10 @@
           share           (public/get-share *tenant-conn* (:id dashboard-share))
           share-data      (public/response-data *tenant-conn* share {})]
       (is (every? #(contains? share-data %)
-                  ["dashboardId" "dashboards" "visualisations" "datasets"]))
+                  [:dashboardId :dashboards :visualisations :datasets]))
       (is (= 2
-             (count (get share-data "datasets"))))
+             (count (get share-data :datasets))))
       (is (= 2
-             (count (get share-data "visualisations"))))
+             (count (get share-data :visualisations))))
       (is (every? #(not (nil? %))
                   (vals share-data))))))

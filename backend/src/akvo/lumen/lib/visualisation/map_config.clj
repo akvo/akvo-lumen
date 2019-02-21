@@ -28,7 +28,7 @@
 
 (defn point-color-css [point-color-column point-color-mapping]
   (when point-color-column
-    (for [{:strs [value color]} point-color-mapping]
+    (for [{:keys [value color]} point-color-mapping]
       (format "[ %s = %s ] { marker-fill: %s }"
               point-color-column
               (if (string? value)
@@ -54,7 +54,7 @@
             (str/join " "
                       (point-color-css point-color-column point-color-mapping)))))
 
-(defn shape-cartocss [layer-index {:strs [shapeLabelColumn] :as layer}]
+(defn shape-cartocss [layer-index {:keys [shapeLabelColumn] :as layer}]
   (let [s-template "
 #s {
     polygon-opacity: 0.8;
@@ -72,7 +72,7 @@
     (cond-> (format s-template (layer-point-color layer-index))
       shapeLabelColumn (str (format labels-template shapeLabelColumn)))))
 
-(defn shape-aggregation-cartocss [layer-index {:strs [shapeLabelColumn]}]
+(defn shape-aggregation-cartocss [layer-index {:keys [shapeLabelColumn]}]
   (let [s-template "
 #s {
     polygon-opacity: 0.8;
@@ -92,7 +92,7 @@
       (str (format labels-template shapeLabelColumn)))))
 
 (defn cartocss
-  [{:strs [aggregationColumn aggregationDataset aggregationGeomColumn
+  [{:keys [aggregationColumn aggregationDataset aggregationGeomColumn
            layerType pointColorColumn pointSize] :as layer}
    layer-index metadata-array]
   (cond
@@ -104,8 +104,7 @@
 
     :else (point-cartocss pointSize
                           pointColorColumn
-                          (get (nth metadata-array layer-index)
-                               "pointColorMapping")
+                          (:pointColorMapping (nth metadata-array layer-index))
                           layer-index)))
 
 (defn trim-css [s]
@@ -127,7 +126,7 @@
   (if (= (count popup) 0)
     ""
     (str prefix
-         (clojure.string/join "," (map (fn [{:strs [column]}]
+         (clojure.string/join "," (map (fn [{:keys [column]}]
                                          (str table-name "." column))
                                        popup))
          postfix)))
@@ -135,26 +134,26 @@
 (defn popup-and-label-cols [popup-cols label-col]
   (cond
     (and (boolean popup-cols)
-         (boolean label-col)) (distinct (conj popup-cols {"column" label-col}))
+         (boolean label-col)) (distinct (conj popup-cols {:column label-col}))
 
     (boolean popup-cols) popup-cols
 
-    (boolean label-col) [{"column" label-col}]
+    (boolean label-col) [{:column label-col}]
 
     :else []))
 
 (defn shape-aggregation-sql
   [tenant-conn columns table-name geom-column popup-columns point-color-column where-clause current-layer layer-index]
-  (let [{:keys [table-name columns]} (dataset-by-id tenant-conn {:id (get current-layer "aggregationDataset")})
+  (let [{:keys [table-name columns]} (dataset-by-id tenant-conn {:id (:aggregationDataset current-layer)})
         point-table-name table-name
         point-columns columns
-        {:keys [table-name columns]} (dataset-by-id tenant-conn {:id (get current-layer "datasetId")})
+        {:keys [table-name columns]} (dataset-by-id tenant-conn {:id (:datasetId current-layer)})
         shape-table-name table-name
         shape-columns columns
-        aggregation-method (get current-layer "aggregationMethod" "avg")
+        aggregation-method (:aggregationMethod current-layer "avg")
         date-column-set (reduce (fn [m c]
-                                  (if (= "date" (get c "type"))
-                                    (conj m (get c "columnName"))
+                                  (if (= "date" (:type c))
+                                    (conj m (:columnName c))
                                     m)) #{} point-columns)
         cols (distinct
               (cond-> (conj (map (fn [c]
@@ -162,8 +161,8 @@
                                      (str c "::text")
                                      c)) popup-columns) geom-column)
                 point-color-column (conj point-color-column)))
-        hue (color-to-hue (clojure.string/upper-case (get current-layer "gradientColor" "#FF0000")))
-        extra-cols (popup-and-label-cols (get current-layer "popup") (get current-layer "shapeLabelColumn"))]
+        hue (color-to-hue (clojure.string/upper-case (:gradientColor current-layer "#FF0000")))
+        extra-cols (popup-and-label-cols (:popup current-layer) (:shapeLabelColumn current-layer))]
 
     (format "
             SELECT
@@ -216,16 +215,16 @@
 
             (shape-aggregagation-extra-cols-sql extra-cols "row_query" "" ",")
             shape-table-name
-            (get current-layer "geom")
+            (:geom current-layer )
             (shape-aggregagation-extra-cols-sql extra-cols shape-table-name "" ",")
             shape-table-name
             aggregation-method
-            (get current-layer "aggregationColumn")
+            (:aggregationColumn current-layer)
             shape-table-name
             point-table-name
             shape-table-name
-            (get current-layer "geom")
-            (get current-layer "aggregationGeomColumn")
+            (:geom current-layer)
+            (:aggregationGeomColumn current-layer)
             shape-table-name
             (shape-aggregagation-extra-cols-sql extra-cols shape-table-name "," "")
             (shape-aggregagation-extra-cols-sql extra-cols "temp_table" "" ",")
@@ -234,7 +233,7 @@
             shape-table-name)))
 
 (defn point-sql [tenant-conn columns table-name geom-column popup-columns
-                 point-color-column where-clause {:strs [datasetId] :as layer}]
+                 point-color-column where-clause {:keys [datasetId] :as layer}]
   (let [{:keys [table-name columns]} (dataset-by-id tenant-conn {:id datasetId})
         date-column-set (reduce (fn [m {:strs [columnName type]}]
                                   (if (= "date" type) (conj m columnName) m))
@@ -253,7 +252,7 @@
             where-clause)))
 
 (defn shape-sql [tenant-conn columns table-name geom-column popup-columns point-color-column where-clause
-                 {:strs [datasetId shapeLabelColumn ] :as layer}]
+                 {:keys [datasetId shapeLabelColumn ] :as layer}]
   (let [{:keys [table-name columns]} (dataset-by-id tenant-conn {:id datasetId})
         date-column-set (reduce (fn [m {:strs [columnName type]}]
                                   (if (= "date" type) (conj m columnName) m))
@@ -274,7 +273,7 @@
 
 (defn get-sql
   [tenant-conn columns table-name geom-column popup-columns point-color-column
-   where-clause {:strs [aggregationDataset aggregationColumn
+   where-clause {:keys [aggregationDataset aggregationColumn
                         aggregationGeomColumn layerType]
                  :as layer} layer-index]
   (cond
@@ -296,16 +295,16 @@
                point-color-column where-clause layer)))
 
 (defn get-interactivity
-  [{:strs [aggregationDataset aggregationColumn aggregationGeomColumn] :as layer}
+  [{:keys [aggregationDataset aggregationColumn aggregationGeomColumn] :as layer}
    popup-columns]
   (if (and aggregationDataset aggregationColumn aggregationGeomColumn)
     (into ["_aggregation"] popup-columns)
     popup-columns))
 
-(defn get-geom-column [layer-spec]
-  (if-let [geom (get layer-spec "geom")]
+(defn get-geom-column [layer]
+  (if-let [geom (:geom layer)]
     geom
-    (let [{:strs [latitude longitude]} layer-spec]
+    (let [{:keys [latitude longitude]} layer]
       (format "ST_SetSRID(ST_MakePoint(%s, %s), 4326) AS latlong"
               longitude latitude))))
 
@@ -328,52 +327,51 @@
           (or end-color "#000000")))
 
 (defn get-layers [tenant-conn layers metadata-array table-name]
-  (map-indexed (fn [idx {:strs [datasetId rasterId filters geom popup pointColorColumn]
+  (map-indexed (fn [idx {:keys [datasetId rasterId filters geom popup pointColorColumn]
                          :as layer}]
-                 (if (= (get layer "layerType") "raster")
-                   (let [{:keys [raster_table metadata]} (raster-by-id tenant-conn {:id (get layer "rasterId")})]
-                     {"type" "mapnik"
-                      "options" {"cartocss" (raster-css (get layer "startColor") (get layer "endColor") (:min metadata) (:max metadata))
-                                 "cartocss_version" "2.3.0"
-                                 "geom_column" "rast"
-                                 "geom_type" "raster"
-                                 "raster_band" 1
-                                 "sql" (format "SELECT * FROM %s" raster_table)
-                                 "srid" "3857"}})
+                 (if (= (:layerType layer) "raster")
+                   (let [{:keys [raster_table metadata]} (raster-by-id tenant-conn {:id (:rasterId layer)})]
+                     {:type "mapnik"
+                      :options {:cartocss (raster-css (:startColor layer) (:endColor layer) (:min metadata) (:max metadata))
+                                 :cartocss_version "2.3.0"
+                                 :geom_column "rast"
+                                 :geom_type "raster"
+                                 :raster_band 1
+                                 :sql (format "SELECT * FROM %s" raster_table)
+                                 :srid "3857"}})
                    (let [geom-column (get-geom-column layer)
                          {:keys [columns]} (dataset-by-id tenant-conn {:id datasetId})
-                         where-clause (filter/sql-str (walk/keywordize-keys columns)
-                                                      (walk/keywordize-keys filters))
-                         popup-columns (mapv #(get % "column") popup)
+                         where-clause (filter/sql-str (walk/keywordize-keys columns) filters)
+                         popup-columns (mapv :column popup)
                          point-color-column pointColorColumn
                          sql (get-sql tenant-conn columns table-name geom-column
                                       popup-columns point-color-column
                                       where-clause layer idx)]
 
 
-                     {"type" "mapnik"
-                      "options" {"cartocss" (trim-css (cartocss layer idx metadata-array))
-                                 "cartocss_version" "2.0.0"
-                                 "geom_column" (or geom "latlong")
-                                 "interactivity" (get-interactivity layer popup-columns)
-                                 "sql" sql
-                                 "srid" "4326"}})))
+                     {:type "mapnik"
+                      :options {:cartocss (trim-css (cartocss layer idx metadata-array))
+                                :cartocss_version "2.0.0"
+                                :geom_column (or geom "latlong")
+                                :interactivity (get-interactivity layer popup-columns)
+                                :sql sql
+                                :srid "4326"}})))
                layers))
 
 (defn build [tenant-conn table-name layers metadata-array]
-  {"version" "1.6.0"
-   "buffersize" {"png" 8
-                 "grid.json" 0
-                 "mvt" 0}
-   "layers" (get-layers tenant-conn layers metadata-array table-name)})
+  {:version "1.6.0"
+   :buffersize {:png 8
+                :grid.json 0
+                :mvt 0}
+   :layers (get-layers tenant-conn layers metadata-array table-name)})
 
 (defn build-raster [table-name min max]
-  {"version" "1.6.0"
-   "layers" [{"type" "mapnik"
-              "options" {"cartocss" (raster-css nil nil min max)
-                         "cartocss_version" "2.3.0"
-                         "geom_column" "rast"
-                         "geom_type" "raster"
-                         "raster_band" 1
-                         "sql" (format "SELECT * FROM %s" table-name)
-                         "srid" "3857"}}]})
+  {:version "1.6.0"
+   :layers [{:type "mapnik"
+             :options {:cartocss (raster-css nil nil min max)
+                       :cartocss_version "2.3.0"
+                       :geom_column "rast"
+                       :geom_type "raster"
+                       :raster_band 1
+                       :sql (format "SELECT * FROM %s" table-name)
+                       :srid "3857"}}]})

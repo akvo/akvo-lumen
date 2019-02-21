@@ -5,7 +5,16 @@ import specMappings from '../constants/Visualisation/visualisationSpecMappings';
 
 export const remapVisualisationDataColumnMappings = (visualisation, newVisualisationType) => {
   if (!visualisation.visualisationType) return {};
-  const mappings = specMappings[visualisation.visualisationType][newVisualisationType];
+
+  if (visualisation.visualisationType === newVisualisationType) {
+    return visualisation.spec;
+  }
+
+  const mappings = specMappings[visualisation.visualisationType][newVisualisationType] || {};
+
+  if (!specMappings[visualisation.visualisationType][newVisualisationType]) {
+    console.warn(`visualization data column mappings not defined for ${visualisation.visualisationType} -> ${newVisualisationType}`);
+  }
   return Object.keys(mappings)
     .reduce((acc, key) => {
       const result = { ...acc };

@@ -5,6 +5,7 @@
             [akvo.lumen.specs.components :refer [integrant-key]]
             [clojure.spec.alpha :as s]
             [akvo.lumen.component.tenant-manager :as tenant-manager]
+            [clojure.walk :as w]
             [compojure.core :refer :all]
             [integrant.core :as ig]))
 
@@ -21,7 +22,7 @@
       (context "/maps" _
         (POST "/" {{:strs [spec]} :body}
           (let [layers (get-in spec ["layers"])]
-            (maps/create tenant-conn windshaft-url layers))))
+            (maps/create tenant-conn windshaft-url (w/keywordize-keys layers)))))
 
       (context "/rasters" _
         (POST "/" {{:strs [rasterId spec]} :body}

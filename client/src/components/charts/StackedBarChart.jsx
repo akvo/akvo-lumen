@@ -124,13 +124,13 @@ export default class StackedBarChart extends Component {
       .reduce((acc, datum, i) =>
         [
           ...acc,
-          data.series.reduce((acc2, series) => ({
+          data.series.reduce((acc2, series) => (itsSet(series) ? {
             ...acc2,
             values: {
               ...acc2.values,
               [series.key]: series.data[i].value,
             },
-          }), {}),
+          } : acc2), {}),
         ]
       , []);
 
@@ -257,7 +257,7 @@ export default class StackedBarChart extends Component {
     let labelText;
     if (subBucketMethod === 'stack_percentage') {
       const nodeTotal = Object.keys(node.values).reduce((acc, k) => acc + node.values[k], 0);
-      const percentage = Math.round((node.values[seriesIndex] / nodeTotal) * 100);
+      const percentage = Math.round((node.values[seriesKey] / nodeTotal) * 100);
       labelText = `${percentage}%`;
     } else {
       labelText = heuristicRound(node.values[seriesKey]);

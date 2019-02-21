@@ -304,6 +304,7 @@ export default class SimpleBarChart extends Component {
       marginBottom,
       style,
       legendVisible,
+      legendPosition,
       edit,
       padding,
       yAxisLabel,
@@ -331,6 +332,7 @@ export default class SimpleBarChart extends Component {
         width={width}
         height={height}
         legendVisible={legendVisible}
+        legendPosition={legendPosition}
         onClick={() => {
           this.setState({ isPickingColor: undefined });
         }}

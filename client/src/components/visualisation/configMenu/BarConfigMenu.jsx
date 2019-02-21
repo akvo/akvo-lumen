@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
 import { get } from 'lodash';
 
 import ConfigMenuSectionOptionSelect from '../../common/ConfigMenu/ConfigMenuSectionOptionSelect';
@@ -74,7 +74,7 @@ const handleChangeSpec = (change, oldSpec, onChangeSpec, columnOptions) => {
   onChangeSpec(finalSpec);
 };
 
-export default function BarConfigMenu(props) {
+function BarConfigMenu(props) {
   const {
     visualisation,
     onChangeSpec,
@@ -199,6 +199,35 @@ export default function BarConfigMenu(props) {
                     legendTitle: event.target.value.toString(),
                   }, spec, onChangeSpec, columnOptions)}
                 />
+                <ConfigMenuSectionOptionSelect
+                  placeholderId="legend_position"
+                  value={spec.legendPosition}
+                  name="legendPosition"
+                  options={[
+                    {
+                      label: props.intl.formatMessage({ id: 'legend_position_auto' }),
+                      value: null,
+                    },
+                    {
+                      label: props.intl.formatMessage({ id: 'legend_position_top' }),
+                      value: 'top',
+                    },
+                    {
+                      label: props.intl.formatMessage({ id: 'legend_position_right' }),
+                      value: 'right',
+                    },
+                    {
+                      label: props.intl.formatMessage({ id: 'legend_position_bottom' }),
+                      value: 'bottom',
+                    },
+                    {
+                      label: props.intl.formatMessage({ id: 'legend_position_left' }),
+                      value: 'left',
+                    },
+                  ]}
+                  clearable
+                  onChange={value => onChangeSpec({ legendPosition: value })}
+                />
               </div>
             )}
             <ConfigMenuSectionOptionText
@@ -290,4 +319,7 @@ BarConfigMenu.propTypes = {
   onChangeSpec: PropTypes.func.isRequired,
   columnOptions: PropTypes.array.isRequired,
   aggregationOptions: PropTypes.array.isRequired,
+  intl: intlShape,
 };
+
+export default injectIntl(BarConfigMenu);
