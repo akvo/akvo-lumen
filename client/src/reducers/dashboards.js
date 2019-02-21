@@ -1,7 +1,7 @@
 import { handleActions } from 'redux-actions';
 import update from 'react-addons-update';
-import * as actions from '../actions/dashboard';
 import { get } from 'lodash';
+import * as actions from '../actions/dashboard';
 
 export const initialState = {};
 
