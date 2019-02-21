@@ -1,5 +1,6 @@
 import { handleActions } from 'redux-actions';
 import update from 'react-addons-update';
+import { get } from 'lodash';
 import * as actions from '../actions/dashboard';
 
 export const initialState = {};
@@ -82,7 +83,7 @@ function removeVisualisationFromDashboard(dashboard, visualisationId) {
 }
 
 function containsVisualisation(dashboard, visualisationId) {
-  return dashboard.entities[visualisationId] != null;
+  return get(dashboard, `entities[${visualisationId}]`) != null;
 }
 
 function removeVisualisation(state, { payload }) {
