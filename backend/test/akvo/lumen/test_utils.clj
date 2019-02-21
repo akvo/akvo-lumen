@@ -2,7 +2,6 @@
   (:require [akvo.lumen.component.tenant-manager :refer [pool]]
             [akvo.lumen.lib.import :as import]
             [akvo.lumen.lib.import.clj-data-importer]
-            [akvo.lumen.lib.transformation.engine :refer (new-dataset-version)]
             [akvo.lumen.lib.update :as update]
             [akvo.lumen.postgres]
             [akvo.lumen.specs.transformation]
@@ -20,13 +19,10 @@
             [clojure.tools.logging :as log]
             [clojure.walk :refer (keywordize-keys)]
             [diehard.core :as dh]
-            [hugsql.core :as hugsql]
-            [akvo.lumen.specs.hooks :as hooks])
+            [hugsql.core :as hugsql])
   (:import [java.time Instant]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
-
-(hooks/apply-hooks)
 
 (defn spec-instrument
   "Fixture to instrument all functions"

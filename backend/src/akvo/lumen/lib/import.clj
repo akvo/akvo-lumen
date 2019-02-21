@@ -33,23 +33,23 @@
                       {}
                       {:transaction? false})
     (new-dataset-version conn {:id (util/squuid)
-                                  :dataset-id dataset-id
-                                  :job-execution-id job-execution-id
-                                  :table-name table-name
-                                  :imported-table-name imported-table-name
-                                  :version 1
-                                  :columns (mapv (fn [{:keys [title id type key multipleType multipleId]}]
-                                                   {:columnName (name id)
-                                                    :direction nil
-                                                    :hidden false
-                                                    :key (boolean key)
-                                                    :multipleId multipleId
-                                                    :multipleType multipleType
-                                                    :sort nil
-                                                    :title (string/trim title)
-                                                    :type (name type)})
-                                                 columns)
-                                  :transformations []})
+                               :dataset-id dataset-id
+                               :job-execution-id job-execution-id
+                               :table-name table-name
+                               :imported-table-name imported-table-name
+                               :version 1
+                               :columns (mapv (fn [{:keys [title id type key multipleType multipleId]}]
+                                                {:columnName (name id)
+                                                 :direction nil
+                                                 :hidden false
+                                                 :key (boolean key)
+                                                 :multipleId multipleId
+                                                 :multipleType multipleType
+                                                 :sort nil
+                                                 :title (string/trim title)
+                                                 :type (name type)})
+                                              columns)
+                               :transformations []})
     (update-job-execution conn {:id             job-execution-id
                                 :status         "OK"
                                 :dataset-id     dataset-id

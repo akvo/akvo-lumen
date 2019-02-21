@@ -4,6 +4,7 @@
             [clojure.set :as set]
             [clojure.string :as str]
             [clojure.tools.logging :as log]
+            [clojure.walk :as w]
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
@@ -137,11 +138,12 @@
                                     :table-name source-table
                                     :imported-table-name (:imported-table-name dataset-version)
                                     :version (inc (:version dataset-version))
-                                    :transformations (conj (vec (:transformations dataset-version))
-                                                           (assoc transformation
-                                                                  "changedColumns" (diff-columns previous-columns
-                                                                                                 columns)))
-                                    :columns columns}]
+                                    :transformations (w/keywordize-keys
+                                                      (conj (vec (:transformations dataset-version))
+                                                            (assoc transformation
+                                                                   "changedColumns" (diff-columns previous-columns
+                                                                                                  columns))))
+                                    :columns (w/keywordize-keys columns)}]
           (new-dataset-version tenant-conn next-dataset-version)
           (touch-dataset tenant-conn {:id dataset-id})
           (lib/created next-dataset-version))))))
@@ -171,10 +173,11 @@
                                       :table-name table-name
                                       :imported-table-name (:imported-table-name current-dataset-version)
                                       :version (inc (:version current-dataset-version))
-                                      :transformations (vec
-                                                        (butlast
-                                                         (:transformations current-dataset-version)))
-                                      :columns columns}]
+                                      :transformations (w/keywordize-keys
+                                                        (vec
+                                                         (butlast
+                                                          (:transformations current-dataset-version))))
+                                      :columns (w/keywordize-keys columns)}]
             (new-dataset-version tenant-conn
                                  next-dataset-version)
             (touch-dataset tenant-conn {:id dataset-id})
@@ -238,10 +241,10 @@
                                         :transformations applied-txs})
           (recur (rest transformations) (:columns op) (inc version) applied-txs)))
       (new-dataset-version conn {:id                  (str (util/squuid))
-                                    :dataset-id          dataset-id
-                                    :job-execution-id    job-execution-id
-                                    :table-name          table-name
-                                    :imported-table-name imported-table-name
-                                    :version             (inc (:version dataset-version))
-                                    :columns             columns
-                                    :transformations     (vec applied-txs)}))))
+                                 :dataset-id          dataset-id
+                                 :job-execution-id    job-execution-id
+                                 :table-name          table-name
+                                 :imported-table-name imported-table-name
+                                 :version             (inc (:version dataset-version))
+                                 :columns             (w/keywordize-keys columns)
+                                 :transformations     (w/keywordize-keys (vec applied-txs))}))))

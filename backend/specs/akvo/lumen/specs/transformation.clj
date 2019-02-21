@@ -1,5 +1,6 @@
 (ns akvo.lumen.specs.transformation
   (:require [akvo.lumen.lib.transformation.engine :as engine]
+            [akvo.lumen.lib.transformation.engine :as lib.transformation.engine]
             [akvo.lumen.specs :as lumen.s]
             [akvo.lumen.specs.db :as db.s]
             [akvo.lumen.specs.db.dataset-version :as db.dsv.s]
@@ -417,9 +418,11 @@
 
 (s/def ::db.dsv.transformation.changed-columns/before (s/nilable ::db.dsv.s/column))
 
+(s/def ::db.dsv.transformation.changed-columns/columnName keyword?)
+
 (s/def ::db.dsv.transformation/changedColumns
-  (s/map-of ::db.dsv.column.s/columnName (s/keys :req-un [::db.dsv.transformation.changed-columns/after
-                                                        ::db.dsv.transformation.changed-columns/before])))
+  (s/map-of ::db.dsv.transformation.changed-columns/columnName (s/keys :req-un [::db.dsv.transformation.changed-columns/after
+                                                                                ::db.dsv.transformation.changed-columns/before])))
 
 (s/def ::db.dsv.transformation/changedColumns* (s/keys :req-un [::db.dsv.transformation/changedColumns]))
 
@@ -432,18 +435,6 @@
                                                ::db.dsv.s/imported-table-name ::db.dsv.s/version
                                                ::db.dsv.s/transformations ::db.dsv.s/columns]))
 
-#_{"op" "core/delete-column",
- "args" {"columnName" "c\n2"},
- "onError" "fail",
- "changedColumns"
- {"c2"
-  {"after" nil,
-   "before" {"key" false,
-             "sort" nil,
-             "direction" nil,
-             "title" "Column2",
-             "type" "number",
-             "multipleType" nil,
-             "hidden" false,
-             "multipleId" nil,
-             "columnName" "c2"}}}}
+(s/fdef lib.transformation.engine/new-dataset-version
+  :args (s/cat :conn ::db.s/tenant-connection
+               :dsv ::next-dataset-version))
