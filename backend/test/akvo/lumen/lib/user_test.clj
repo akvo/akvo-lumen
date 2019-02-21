@@ -2,10 +2,10 @@
   {:functional true}
   (:require [akvo.lumen.component.emailer :as emailer]
             [akvo.lumen.component.keycloak :as keycloak]
-            [akvo.lumen.fixtures :refer [migrate-tenant tenant-conn-fixture *tenant-conn* system-fixture]]
+            [akvo.lumen.fixtures :refer [tenant-conn-fixture *tenant-conn* system-fixture]]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.user :as user]
-            [akvo.lumen.test-utils :refer [seed-data ] :as tu]
+            [akvo.lumen.test-utils :as tu]
             [akvo.lumen.endpoint.commons.variant :as variant]
             [clojure.set :as set]
             [clojure.test :refer :all]
@@ -16,7 +16,11 @@
 ;;; System setup
 ;;;
 
-(def keycloak-config (:keycloak seed-data))
+
+(def keycloak-config (let [c (tu/start-config)]
+                       (merge (select-keys (:akvo.lumen.component.keycloak c) [:credentials])
+                              {:data (:akvo.lumen.component.keycloak/data c)}
+                              )))
 
 (def test-system
   {:emailer {}

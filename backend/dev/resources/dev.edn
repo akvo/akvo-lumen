@@ -46,5 +46,14 @@
                                                        :flow-api-url "https://api.akvotest.org/flow"
                                                        :sentry-client-dsn "dev-sentry-client-dsn"
                                                        :piwik-site-id "165"}
- 
+ :akvo.lumen.migrate {:seed
+                      {:tenants
+                       [{:db_uri "jdbc:postgresql://postgres/lumen_tenant_1?user=lumen&password=password&ssl=true"
+                         :label "t1"
+                         :title "Tenant 1"
+                         :plan "standard"}
+                        {:db_uri "jdbc:postgresql://postgres/lumen_tenant_2?user=lumen&password=password&ssl=true"
+                         :label "t2"
+                         :title "Tenant 2"
+                         :plan "pro"}]}}
 }

@@ -42,21 +42,6 @@
     (stest/unstrument)
     r))
 
-(def seed-data
-  (->> "test-seed.edn"
-       io/resource
-       slurp
-       edn/read-string))
-
-(def test-tenant-manager
-  (:tenant-manager seed-data))
-
-(def test-tenant
-  (first (filter #(= "t1" (:label %))
-                 (:tenants seed-data))))
-
-
-
 (defn import-file
   "Import a file and return the dataset-id, or the job-execution-id in case of FAIL status"
   [tenant-conn error-tracker {:keys [file dataset-name has-column-headers? kind data with-job?]}]
@@ -176,15 +161,12 @@
     (catch PSQLException e
       (println "Seed data already loaded."))))
 
-(def tenants (->> "seed.edn" io/resource slurp edn/read-string
-                        :tenant-manager :tenants))
-
 (defn seed
   "At the moment only support seed of tenants table."
   [config]
-  (let [db-uri (-> config
-                   :akvo.lumen.component.hikaricp/hikaricp :uri)]
-    (doseq [tenant tenants]
+  (let [db-uri (-> config :akvo.lumen.component.hikaricp/hikaricp :uri)]
+    (log/error :TT (-> config :akvo.lumen.migrate :seed :tenants))
+    (doseq [tenant (-> config :akvo.lumen.migrate :seed :tenants)]
       (seed-tenant {:connection-uri db-uri} tenant))))
 
 

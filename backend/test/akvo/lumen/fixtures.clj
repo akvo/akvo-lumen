@@ -7,7 +7,7 @@
             [akvo.lumen.test-utils :as tu]
             [akvo.lumen.test-utils
              :refer
-             [import-file test-tenant]]
+             [import-file]]
             [clojure.tools.logging :as log]
             [ragtime.jdbc :as jdbc]
             [ragtime.repl :as repl]))
@@ -26,33 +26,33 @@
   (let [spec (ragtime-spec tenant)]
     (repl/rollback spec (count (:migrations spec)))))
 
-(defn- user-manager-ragtime-spec []
-  {:datastore
-   (jdbc/sql-database {:connection-uri (:db_uri (tu/test-tenant-manager))})
-   :migrations
-   (jdbc/load-resources "akvo/lumen/migrations/tenant_manager")})
-
-(defn migrate-user-manager []
-  (repl/migrate (user-manager-ragtime-spec)))
-
 (def ^:dynamic *tenant-conn*)
 (def ^:dynamic *system*)
 
 (defn system-fixture
   "Returns a fixture that binds a connection pool to *tenant-conn*"
   [f]
-  (lumen-migrate/migrate (tu/start-config))
-  (tu/seed (tu/start-config))
-  (binding [*system* (tu/start-system)]
-    (f)
-    (tu/halt-system *system*)
-    (lumen-migrate/rollback (tu/start-config) {})))
+  (let [c (tu/start-config)]
+    (lumen-migrate/migrate c)
+    (binding [*system* (tu/start-system)]
+      (try
+        (f)
+        (finally (do
+                   (tu/halt-system *system*)
+                   (lumen-migrate/rollback c :tenant-manager)))))))
+
 
 (defn tenant-conn-fixture
   "Returns a fixture that binds a connection pool to *tenant-conn*"
   [f]
-  (binding [*tenant-conn* (p/connection (:akvo.lumen.component.tenant-manager *system*) (:label test-tenant))]
-    (f)))
+  (let [c (tu/start-config)]
+    (try
+      (tu/seed c)
+      (lumen-migrate/migrate c false)
+      (binding [*tenant-conn* (p/connection (:akvo.lumen.component.tenant-manager *system*)
+                                            (-> c :akvo.lumen.migrate :seed :tenants first :label))]
+        (f))
+      (finally (lumen-migrate/rollback c {})))))
 
 (def ^:dynamic *error-tracker*)
 
