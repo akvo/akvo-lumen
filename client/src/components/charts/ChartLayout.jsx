@@ -71,7 +71,6 @@ const calculateDimensions = ({ width, height, legendVisible, legendPosition }) =
     }
 
   }
-  console.log(dimensions);
   return dimensions;
 };
 
