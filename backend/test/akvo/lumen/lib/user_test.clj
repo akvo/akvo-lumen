@@ -28,7 +28,7 @@
 
 (defn fixture [f]
   (migrate-tenant test-tenant)
-  (binding [*emailer* (ig/init-key :akvo.lumen.component.emailer/dev-emailer {})
+  (binding [*emailer* (ig/init-key :akvo.lumen.component.emailer/dev-emailer {:config {:from-email "" :from-name ""}})
             *keycloak* (ig/init-key :akvo.lumen.component.keycloak keycloak-config)
             *tenant-conn* (test-tenant-conn test-tenant)]
     (f)))
