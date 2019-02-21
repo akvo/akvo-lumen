@@ -37,11 +37,6 @@
   (repl/refresh)
   (check-specs!))
 
-(def config (let [c (tu/dissoc-prod-components (tu/prep "akvo/lumen/config.edn" "dev.edn"))]
-              (ir/set-prep! (fn [] c))
-              (ig/load-namespaces c)
-              c))
-
 (defn go []
   (ir/go))
 
@@ -67,16 +62,16 @@
 ;;;
 
 (defn migrate []
-  (lumen-migrate/migrate config))
+  (lumen-migrate/migrate commons/config))
 
 (defn migrate-and-seed []
   (migrate)
-  (tu/seed config)
+  (tu/seed commons/config)
   (migrate))
 
 (defn rollback
-  ([] (lumen-migrate/rollback config {}))
-  ([args] (lumen-migrate/rollback config args)))
+  ([] (lumen-migrate/rollback commons/config {}))
+  ([args] (lumen-migrate/rollback commons/config args)))
 
 (defn reset-db []
   (rollback)
