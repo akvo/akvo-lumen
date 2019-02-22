@@ -129,7 +129,7 @@
  :akvo.lumen.component.error-tracker/prod {:dsn #duct/env "LUMEN_SENTRY_BACKEND_DSN"}
  :akvo.lumen.migrate   {:migrations {:tenant-manager "akvo/lumen/migrations/tenant_manager"
                                      :tenants        "akvo/lumen/migrations/tenants"}}
- :akvo.lumen.specs   {:conform-specs #duct/env [ "LUMEN_CONFORM_SPECS" Bool :or false]}
+ :akvo.lumen.specs/specs   {:conform-specs #duct/env [ "LUMEN_CONFORM_SPECS" Bool :or false]}
 
  :akvo.lumen.monitoring/dropwizard-registry {}
  :akvo.lumen.monitoring/collector {:dropwizard-registry #ig/ref :akvo.lumen.monitoring/dropwizard-registry}
