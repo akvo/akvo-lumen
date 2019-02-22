@@ -2,7 +2,7 @@
 
  :akvo.lumen.component.http/http               {:port 3000}
 
- :akvo.lumen.component.tenant-manager {:encryption-key  "secret"}
+ :akvo.lumen.component.tenant-manager/tenant-manager {:encryption-key  "secret"}
 
  :akvo.lumen.component.caddisfly/local                  {:local-schema-uri "./caddisfly/tests-schema.json"}
  :akvo.lumen.component.error-tracker/local              {}
@@ -18,9 +18,9 @@
  :akvo.lumen.component.keycloak/data  {:url         "http://auth.lumen.local:8080/auth"
                                        :realm       "akvo"}
 
- :akvo.lumen.component.keycloak      {:credentials
-                                      {:client_id     "akvo-lumen-confidential"
-                                       :client_secret "caed3964-09dd-4752-b0bb-22c8e8ffd631"}}
+ :akvo.lumen.component.keycloak/keycloak      {:credentials
+                                               {:client_id     "akvo-lumen-confidential"
+                                                :client_secret "caed3964-09dd-4752-b0bb-22c8e8ffd631"}}
 
 
  :akvo.lumen.component.handler/wrap-stacktrace {}

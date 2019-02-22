@@ -291,7 +291,7 @@
   (s/cat :kw keyword?
          :config ::data))
 
-(defmethod ig/init-key :akvo.lumen.component.keycloak  [_ {:keys [credentials data] :as opts}]
+(defmethod ig/init-key :akvo.lumen.component.keycloak/keycloak  [_ {:keys [credentials data] :as opts}]
   (let [{:keys [issuer openid-config api-root] :as this} (keycloak (assoc data :credentials credentials))
         openid-config (fetch-openid-configuration issuer)]
       (log/info "Successfully got openid-config from provider.")
@@ -307,6 +307,6 @@
 
 (s/def ::keycloak (partial satisfies? p/KeycloakUserManagement))
 
-(defmethod integrant-key :akvo.lumen.component.keycloak [_]
+(defmethod integrant-key :akvo.lumen.component.keycloak/keycloak [_]
   (s/cat :kw keyword?
          :config ::config))
