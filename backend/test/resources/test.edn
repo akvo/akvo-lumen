@@ -2,6 +2,7 @@
 
  :akvo.lumen.component.http/http               {:port 3100}
 
+ :akvo.lumen.auth/wrap-auth-mock                         {}
  :akvo.lumen.migrate/migrate {:seed
                               ^:replace {:tenants [{:db_uri "jdbc:postgresql://postgres/test_lumen_tenant_1?ssl=true&user=lumen&password=password"
                                                     :label "t1"

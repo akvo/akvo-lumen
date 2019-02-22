@@ -79,12 +79,22 @@
        (println "Could not get cert from Keycloak")
        (throw e)))))
 
-(defmethod ig/init-key :akvo.lumen.auth/wrap-auth  [_ opts]
+(defmethod ig/init-key :akvo.lumen.auth/wrap-auth-prod  [_ opts]
   wrap-auth)
 
-(defmethod integrant-key :akvo.lumen.auth/wrap-auth [_]
+(defmethod integrant-key :akvo.lumen.auth/wrap-auth-prod [_]
   (s/cat :kw keyword?
          :config empty?))
+
+(defmethod ig/init-key :akvo.lumen.auth/wrap-auth-mock  [_ opts]
+  (fn [h]
+    (fn [r]
+      (h r))))
+
+(defmethod integrant-key :akvo.lumen.auth/wrap-auth-mock [_]
+  (s/cat :kw keyword?
+         :config empty?))
+
 
 (defmethod ig/init-key :akvo.lumen.auth/wrap-jwt  [_ {:keys [keycloak]}]
   (wrap-jwt keycloak))

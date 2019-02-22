@@ -1,84 +1,34 @@
 (ns akvo.lumen.endpoints-test
   {:functional true}
-  (:require [akvo.lumen.component.tenant-manager :refer (wrap-label-tenant)]
-            
-            [akvo.lumen.endpoint.aggregation :as e.aggregation]
-            [akvo.lumen.endpoint.collection :as e.collection]
-            [akvo.lumen.endpoint.library :as e.library]
-            [dev.commons :as dev.commons]
-            
-            [akvo.lumen.fixtures :refer [*tenant-conn* tenant-conn-fixture *error-tracker* error-tracker-fixture]]
-            [akvo.lumen.lib :as lib]
-                        
-            [akvo.lumen.lib.collection :as collection]
-            [akvo.lumen.lib.dashboard :as dashboard]
-            [akvo.lumen.lib.dataset :as dataset]
-            [akvo.lumen.lib.visualisation :as visualisation]
+  (:require [akvo.lumen.fixtures :refer [*system* system-fixture *tenant-conn* tenant-conn-fixture *error-tracker* error-tracker-fixture]]
             [akvo.lumen.protocols :as p]
-            [akvo.lumen.test-utils :refer [import-file] :as tu]
-
             [cheshire.core :as json]
-
-            
+            [clojure.java.io :as io]
             [clojure.test :refer :all]
-            [muuntaja.core :as m]
+            [clojure.tools.logging :as log]
+            [diehard.core :as dh]
             [reitit.core :as r]
-            [reitit.coercion.spec]
-            [reitit.ring :as ring]
-            [reitit.ring.coercion :as rrc]
-            [reitit.ring.middleware.muuntaja :as muuntaja]
+            [reitit.ring :as ring]))
 
-            [ring.middleware.params :as params]
-
-            [ring.mock.request :as mock]))
-
-(defn t1-conn [] (tu/test-tenant-conn (first dev.commons/tenants)))
-
-(use-fixtures :once tenant-conn-fixture error-tracker-fixture)
+(use-fixtures :once system-fixture tenant-conn-fixture error-tracker-fixture)
 
 (def tenant-host "http://t1.lumen.local:3030")
 
-(defrecord Conn [conn]
-  p/TenantConnection
-  (connection [_ _]
-    conn))
-
-(defn opts* [conn]
-  {:tenant-manager (Conn. conn)})
-
-(defn url* [api-url]
-  (str  "/api" api-url))
-
-(defn router [opts]
-  (ring/router
-   ["/api"
-    (e.aggregation/routes opts)
-    (e.library/routes opts)
-    (e.collection/routes opts)]
-   {:data {:coercion reitit.coercion.spec/coercion
-                                        ;           :muuntaja m/instance
-           :middleware [wrap-label-tenant
-                                        ;                       params/wrap-params
-                        rrc/coerce-exceptions-middleware
-                        rrc/coerce-request-middleware
-                        rrc/coerce-response-middleware]}}))
-
-(defn app* [opts]
-  (ring/ring-handler
-   (router opts)))
-
+(defn api-url [api-url & args]
+  (str  "/api" api-url (when args (str "/" (apply str args)))))
 
 (defn with-body [method uri body & [query-params]]
   (cond->
       {:request-method method
        :uri uri
-       :headers {"host" "t1.lumen.local:3030"}
+       :headers {"host" "t1.lumen.local:3030" "content-type" "application/json"}
+       :path-info uri
        :server-port 3030,
        :server-name "t1.lumen.local",
        :remote-addr "localhost",
        :scheme :http,
-       :body-params body
-       :body body}
+;;       :body-params body
+       :body (io/reader (io/input-stream (.getBytes (json/generate-string body))))}
     query-params (assoc :query-params query-params))
   )
 (defn post* [uri body & args]
@@ -92,76 +42,148 @@
       {:request-method :get
        :server-port 3030,
        :server-name "t1.lumen.local",
+       :path-info uri
        :remote-addr "localhost",
        :scheme :http,
-       :headers {"host" "t1.lumen.local:3030"}
+       :headers {"host" "t1.lumen.local:3030" "content-type" "application/json"}
        :uri uri}
     query-params (assoc :query-params query-params)))
 
-(deftest aggregation-test
-  (let [app (app* (opts* *tenant-conn*))]
-    (is (= (app (get* (url* "/library")))
-           [:akvo.lumen.lib/ok
-	    {:dashboards ()
-	     :datasets ()
-	     :rasters ()
-	     :visualisations ()
-	     :collections []}]))
-    (let [title "new-col1"
-          [a {:keys [title entities id]}] (app (post* (url* "/collections") {:title title}))]
-     (is (= [a title entities] [:akvo.lumen.lib/created title []]))
-     (is (=  (let [[a {:keys [title id]}] (app (get* (url* (str "/collections/" id))))]
-               [a {:title title :id id}])
-             [:akvo.lumen.lib/ok
-              {:id id
-               :title title}])))
-    (is (= (app (get* (url* "/aggregation/dataset-id-uuid/barvis-type")))
-           {:status 400, :body {:message "No query supplied"}}))))
+(deftest handler-test
+  (let [h (:handler (:akvo.lumen.component.handler/handler *system*))]
+    (testing "/"
+      (let [r (h (get*  "/healthz"))]
+        (is (= 200 (:status r)))
+        (is (= {:healthz "ok", :pod nil, :blue-green-status nil}
+               (json/parse-string (:body r) keyword))))
+      (let [r (h (get*  "/env"))]
+        (is (= 200 (:status r)))
+        (is (= {:keycloakClient "akvo-lumen",
+                :keycloakURL "http://auth.lumen.local:8080/auth",
+                :flowApiUrl "https://api.akvotest.org/flow",
+                :piwikSiteId "165",
+                :tenant "t1",
+                :sentryDSN "dev-sentry-client-dsn"}
+               (json/parse-string (:body r) keyword)))))
+    (testing "/api"
+      (let [r (h (get* (api-url "/library")))]
+        (is (= 200 (:status r)))
+        (is (= {:dashboards []
+	        :datasets []
+	        :rasters []
+	        :visualisations []
+	        :collections []}
+               (json/parse-string (:body r) keyword))))
+      (testing "/collections"
+        (let [title* "col-title"]
+          (let [{:keys [title id]} (-> (h (post*  (api-url "/collections") {:title title*}))
+                                       :body
+                                       (json/parse-string keyword))]
+            (is (= title* title))
+            (is (= id (-> (h (get* (api-url "/collections" id)))
+                          :body (json/parse-string keyword) :id))))
 
-#_(let [handler (ring/ring-handler
-               (ring/router
-                ["/library" {:post {:parameters {:body {:jor int?}}
-                                    :handler (fn [{{{:keys [jor]} :body} :parameters}]
-                                               {:status 200
-;                                                :data jor
-                                                :body jor}
-                                               )}}]
-                {:data {:coercion reitit.coercion.spec/coercion
-                        :muuntaja m/instance
-                        
-                        :middleware [
-                                     muuntaja/format-request-middleware
-                                     rrc/coerce-exceptions-middleware
-                                     rrc/coerce-request-middleware
-                                     rrc/coerce-response-middleware]}}))]
+          (is (= title* (-> (h (get* (api-url "/library")))
+                           :body (json/parse-string keyword) :collections first :title)))
+          ))
+      (testing "/datasets"
+        (let [title "dataset-title"
+              dataset-url "https://raw.githubusercontent.com/akvo/akvo-lumen/develop/client/e2e-test/sample-data-1.csv"
+              import-id (-> (h (post*  (api-url "/datasets") {:source
+                                                              {:kind "LINK"
+                                                               :url dataset-url
+                                                               :hasColumnHeaders true
+                                                               :guessColumnTypes true}
+                                                              :name title}))
+                            :body
+                            (json/parse-string keyword)
+                            :importId)
+              _           (is (some? import-id))
+              dataset-id (dh/with-retry {:retry-if (fn [v e] (not v))
+                                         :max-retries 20
+                                         :delay-ms 100}
+                           (let [job (-> (h (get* (api-url "/job_executions" import-id)))
+                                         :body (json/parse-string keyword))
+                                 status (:status job)]
+                             (when (= "OK" status)
+                               (:datasetId job))))]
+          (let [dataset (-> (h (get* (api-url "/datasets" dataset-id)))
+                            :body (json/parse-string keyword))]
+            (is (= {:transformations []
+                    :columns
+                    [{:key false,
+                      :type "text",
+                      :title "Name",
+                      :multipleId nil,
+                      :hidden false,
+                      :multipleType nil,
+                      :columnName "c1",
+                      :direction nil,
+                      :sort nil}
+                     {:key false,
+                      :type "number",
+                      :title "Age",
+                      :multipleId nil,
+                      :hidden false,
+                      :multipleType nil,
+                      :columnName "c2",
+                      :direction nil,
+                      :sort nil}
+                     {:key false,
+                      :type "number",
+                      :title "Score",
+                      :multipleId nil,
+                      :hidden false,
+                      :multipleType nil,
+                      :columnName "c3",
+                      :direction nil,
+                      :sort nil}
+                     {:key false,
+                      :type "number",
+                      :title "Temperature",
+                      :multipleId nil,
+                      :hidden false,
+                      :multipleType nil,
+                      :columnName "c4",
+                      :direction nil,
+                      :sort nil}
+                     {:key false,
+                      :type "number",
+                      :title "Humidity",
+                      :multipleId nil,
+                      :hidden false,
+                      :multipleType nil,
+                      :columnName "c5",
+                      :direction nil,
+                      :sort nil}
+                     {:key false,
+                      :type "text",
+                      :title "Cat",
+                      :multipleId nil,
+                      :hidden false,
+                      :multipleType nil,
+                      :columnName "c6",
+                      :direction nil,
+                      :sort nil}]
+                    :name title
+                    ;;                :modified 1551089874635,
+                    ;;                :author nil,
+                    :rows
+                    [["Bob" 22.0 2.0 4.0 7.0 "A"]
+                     ["Jane" 34.0 4.0 8.0 2.0 "B"]
+                     ["Frank" 55.0 3.0 3.0 6.0 "A"]
+                     ["Lisa" 72.0 5.0 1.0 1.0 "B"]]
+                    :status "OK"
+                    :id dataset-id}
+                   (select-keys dataset [:transformations :columns :name :rows :status :id])))
+            (is (= {:url dataset-url
+                    :kind "LINK"
+                    :guessColumnTypes true
+                    :hasColumnHeaders true}
+                   (select-keys (:source dataset) [:url :kind :guessColumnTypes :hasColumnHeaders]))))
 
-  (handler #_(mock/request :post "/library" {:jor 1})
-           {:request-method :post :uri "/library" :body-params {:jor 40}}))
 
-#_(mock/request :post "/library" {:jor 1})
-(comment "dev utils"
-
-  (let [app (app* (opts* (t1-conn)))]
-   ;;  (app (get* (url* "/aggregation/dataset-id-uuid/barvis-type")))
-   ;; (app (get* (url* "/library")))
-   ;;(app (get* (url* "/collections")))
-   (let [[res {:keys [id] }] (app (post* (url* "/collections") {:title "other4"}))]
-     (app (get* (url* (str "/collections/" id))))
-
-     )
-  
-   ))
-
-(comment "example getting routes"
-  (-> ["/collections"
-       ["" {:get {:handler (fn [_]
-                             {:status 200
-                              :body "ok"})}}]
-       ["/:id"
-        {:get {:parameters {:path-params {:id string?}}
-               :handler (fn [{{:keys [id]} :path-params}]
-                          {:status 200
-                           :body "ok"})}}]]
-      ring/router
-      r/routes
-      ))
+          (is (= title (-> (h (get* (api-url "/library")))
+                           :body (json/parse-string keyword) :datasets first :name)))
+          ))
+      )))

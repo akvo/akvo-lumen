@@ -18,7 +18,6 @@
              :parameters {:body map?}
              :handler (fn [{tenant :tenant
                             body :body}]
-                        (log/error body)
                         (collection/create (p/connection tenant-manager tenant) (stringify-keys body)))}}]
    ["/:id" {:get {:responses {200 {}}
                   :parameters {:path-params {:id string?}}

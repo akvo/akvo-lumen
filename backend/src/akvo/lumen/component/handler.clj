@@ -1,7 +1,6 @@
 (ns akvo.lumen.component.handler
   (:require [compojure.response :as compojure.res]
             [integrant.core :as ig]
-            [clojure.tools.logging :as log]
             [akvo.lumen.specs.components :refer [integrant-key]]
             [akvo.lumen.endpoint.commons :as commons]
             [reitit.ring :as ring]
