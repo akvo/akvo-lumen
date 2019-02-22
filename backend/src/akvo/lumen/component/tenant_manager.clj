@@ -104,7 +104,7 @@
 (defn- tenant-manager [options]
   (map->TenantManager options))
 
-(defmethod ig/init-key :akvo.lumen.component.tenant-manager [_ {:keys [db encryption-key dropwizard-registry] :as opts}]
+(defmethod ig/init-key :akvo.lumen.component.tenant-manager/tenant-manager [_ {:keys [db encryption-key dropwizard-registry] :as opts}]
   (let [this (tenant-manager opts)]
     (if (:tenants this)
       this

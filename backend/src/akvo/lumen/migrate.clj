@@ -42,9 +42,9 @@
   "From a system definition get migrations for tenant manager and tenants."
   [system]
   {:tenant-manager (ragtime-jdbc/load-resources
-                    (get-in system [:akvo.lumen.migrate :migrations :tenant-manager]))
+                    (get-in system [:akvo.lumen.migrate/migrate :migrations :tenant-manager]))
    :tenants        (ragtime-jdbc/load-resources
-                    (get-in system [:akvo.lumen.migrate :migrations :tenants]))})
+                    (get-in system [:akvo.lumen.migrate/migrate :migrations :tenants]))})
 
 (defn migrate
   "Migrate tenant manager and tenants."
@@ -56,7 +56,7 @@
      (doseq [tenant (all-tenants tenant-manager-db)]
        (try
          (do-migrate (ragtime-jdbc/sql-database
-                          {:connection-uri (aes/decrypt (get-in config [:akvo.lumen.component.tenant-manager :encryption-key])
+                          {:connection-uri (aes/decrypt (get-in config [:akvo.lumen.component.tenant-manager/tenant-manager :encryption-key])
                                                         (:db_uri tenant))})
                         (:tenants migrations))
          (catch Exception e (throw (ex-info "Migration failed" {:tenant (:label tenant)} e))))))))
@@ -89,7 +89,7 @@
         tenant-manager-migrations (:tenant-manager migrations)
 
         tenant-manager-db {:connection-uri (get-in config [:akvo.lumen.component.hikaricp/hikaricp :uri])}
-        tenant-connection-uri-fn #(aes/decrypt (get-in config [:akvo.lumen.component.tenant-manager :encryption-key])
+        tenant-connection-uri-fn #(aes/decrypt (get-in config [:akvo.lumen.component.tenant-manager/tenant-manager :encryption-key])
                                        (:db_uri %))]
     (cond
       (= arg :tenant-manager)
