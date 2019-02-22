@@ -20,6 +20,6 @@
         _   (migrate/migrate config)
         _ (ig/load-namespaces config)
         system (ig/init config)]
-    (when (:conform-specs (:akvo.lumen.specs system))
+    (when (:conform-specs (:akvo.lumen.specs/specs system))
       (stest/instrument))
     system))

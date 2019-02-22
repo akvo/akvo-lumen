@@ -8,4 +8,4 @@
               (ig/load-namespaces c)
               c))
 
-(def tenants (-> config :akvo.lumen.migrate :seed :tenants))
+(def tenants (-> config :akvo.lumen.migrate/migrate :seed :tenants))

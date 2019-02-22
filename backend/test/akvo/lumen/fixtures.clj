@@ -49,8 +49,8 @@
     (try
       (tu/seed c)
       (lumen-migrate/migrate c)
-      (binding [*tenant-conn* (p/connection (:akvo.lumen.component.tenant-manager *system*)
-                                            (-> c :akvo.lumen.migrate :seed :tenants first :label))]
+      (binding [*tenant-conn* (p/connection (:akvo.lumen.component.tenant-manager/tenant-manager *system*)
+                                            (-> c :akvo.lumen.migrate/migrate :seed :tenants first :label))]
         (f))
       (finally (lumen-migrate/rollback c {})))))
 

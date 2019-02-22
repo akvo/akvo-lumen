@@ -16,7 +16,7 @@
 (defn t1-conn []
   (when-not system
     (dev/go))
-  (p/connection (:akvo.lumen.component.tenant-manager system) (-> commons/tenants first :label)))
+  (p/connection (:akvo.lumen.component.tenant-manager/tenant-manager system) (-> commons/tenants first :label)))
 
 (defn clj-data>dataset [{:keys [dataset-name data with-job? job]}]
   (if job

@@ -2,11 +2,11 @@
 
  :akvo.lumen.component.http/http               {:port 3100}
 
- :akvo.lumen.migrate {:seed
-                      ^:replace {:tenants [{:db_uri "jdbc:postgresql://postgres/test_lumen_tenant_1?ssl=true&user=lumen&password=password"
-                                  :label "t1"
-                                  :title "Tenant 1"}
-                                 {:db_uri "jdbc:postgresql://postgres/test_lumen_tenant_2?ssl=true&user=lumen&password=password"
-                                  :label "t2"
-                                  :title "Tenant 2"}]}}
+ :akvo.lumen.migrate/migrate {:seed
+                              ^:replace {:tenants [{:db_uri "jdbc:postgresql://postgres/test_lumen_tenant_1?ssl=true&user=lumen&password=password"
+                                                    :label "t1"
+                                                    :title "Tenant 1"}
+                                                   {:db_uri "jdbc:postgresql://postgres/test_lumen_tenant_2?ssl=true&user=lumen&password=password"
+                                                    :label "t2"
+                                                    :title "Tenant 2"}]}}
  }
