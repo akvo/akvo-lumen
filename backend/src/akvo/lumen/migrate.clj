@@ -107,13 +107,13 @@
                         (:tenants migrations)
                         (count (:tenants migrations))))))
 
-(defmethod ig/init-key :akvo.lumen.migrate [_ opts]
+(defmethod ig/init-key :akvo.lumen.migrate/migrate [_ opts]
   opts)
 (s/def ::tenant-manager string?)
 (s/def ::tenants string?)
 (s/def ::migrations (s/keys :req-un [::tenant-manager ::tenants]))
 
-(defmethod integrant-key :akvo.lumen.migrate [_]
+(defmethod integrant-key :akvo.lumen.migrate/migrate [_]
   (s/cat :kw keyword?
          :config (s/keys :req-un [::migrations])))
 

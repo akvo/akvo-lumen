@@ -127,7 +127,7 @@
                                                    :from-name      "Akvo Lumen"}
 
  :akvo.lumen.component.error-tracker/prod {:dsn #duct/env "LUMEN_SENTRY_BACKEND_DSN"}
- :akvo.lumen.migrate   {:migrations {:tenant-manager "akvo/lumen/migrations/tenant_manager"
+ :akvo.lumen.migrate/migrate   {:migrations {:tenant-manager "akvo/lumen/migrations/tenant_manager"
                                      :tenants        "akvo/lumen/migrations/tenants"}}
  :akvo.lumen.specs/specs   {:conform-specs #duct/env [ "LUMEN_CONFORM_SPECS" Bool :or false]}
 
