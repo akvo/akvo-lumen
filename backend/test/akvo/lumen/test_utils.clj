@@ -8,7 +8,6 @@
             [akvo.lumen.lib.update :as update]
             [akvo.lumen.postgres]
             [akvo.lumen.protocols :as p]
-            [akvo.lumen.specs.hooks :as hooks]
             [akvo.lumen.specs.transformation]
             [akvo.lumen.util :refer [squuid] :as util ]
             [cheshire.core :as json]
