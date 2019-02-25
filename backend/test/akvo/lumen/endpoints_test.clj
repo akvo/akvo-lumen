@@ -115,6 +115,32 @@
                             :direction nil,
                             :sort nil}])
 
+;; Todo: check if we can generate it with current vis specs!!
+(defn visualisation-bar-payload [dataset-id name*] {:type "visualisation",
+                                                    :name name*,
+                                                    :visualisationType "bar",
+                                                    :datasetId dataset-id
+                                                    :spec
+                                                    {:metricColumnX nil,
+                                                     :horizontal false,
+                                                     :metricAggregation "count",
+                                                     :filters [],
+                                                     :axisLabelYFromUser false,
+                                                     :bucketColumn nil,
+                                                     :showLabels false,
+                                                     :metricColumnY nil,
+                                                     :subBucketMethod "split",
+                                                     :subBucketColumn nil,
+                                                     :truncateSize nil,
+                                                     :axisLabelX nil,
+                                                     :legendTitle nil,
+                                                     :axisLabelXFromUser false,
+                                                     :axisLabelY nil,
+                                                     :version 1,
+                                                     :sort nil,
+                                                     :showValueLabels false}})
+
+
 (deftest handler-test
   (let [h (:handler (:akvo.lumen.component.handler/handler *system*))]
     (testing "/"
@@ -203,8 +229,17 @@
                                               :body (json/parse-string keyword)
                                               :modified)))))
 
-
           (is (= title (-> (h (get* (api-url "/library")))
                            :body (json/parse-string keyword) :datasets first :name)))
-          ))
+          (let [bar-vis-name "hello-bar-vis!"]
+            (is (= [bar-vis-name dataset-id]
+                   (-> (h (post*  (api-url "/visualisations") (visualisation-bar-payload dataset-id bar-vis-name)))
+                       :body
+                       (json/parse-string keyword)
+                       ((juxt :name :datasetId))
+                       )))
+            (is (= bar-vis-name (-> (h (get* (api-url "/library")))
+                                    :body (json/parse-string keyword) :visualisations first :name)))
+
+            )))
       )))
