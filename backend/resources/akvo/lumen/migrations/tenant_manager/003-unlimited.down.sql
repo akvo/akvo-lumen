@@ -4,7 +4,7 @@ ALTER TABLE plan
 
 DROP TYPE IF EXISTS tier;
 
-CREATE TYPE tier AS ENUM ('standard', 'pro')
+CREATE TYPE tier AS ENUM ('standard', 'pro');
 
 ALTER TABLE plan
       ALTER COLUMN tier TYPE tier USING tier::tier,

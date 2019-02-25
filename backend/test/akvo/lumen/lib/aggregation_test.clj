@@ -2,6 +2,7 @@
   {:functional true}
   (:require [akvo.lumen.fixtures :refer [*tenant-conn*
                                          tenant-conn-fixture
+                                         system-fixture
                                          *error-tracker*
                                          error-tracker-fixture]]
             [akvo.lumen.lib :as lib]
@@ -12,7 +13,7 @@
             [clojure.walk :refer (keywordize-keys stringify-keys)]
             [clojure.test :refer :all]))
 
-(use-fixtures :once tu/spec-instrument tenant-conn-fixture error-tracker-fixture)
+(use-fixtures :once tu/spec-instrument system-fixture tenant-conn-fixture error-tracker-fixture)
 
 (defn query* [t dataset-id & [expected-tag]]
   (fn [q]

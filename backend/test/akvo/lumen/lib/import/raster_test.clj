@@ -1,11 +1,12 @@
 (ns akvo.lumen.lib.import.raster-test
   (:require [clojure.test :refer :all]
             [akvo.lumen.fixtures :refer [*tenant-conn*
-                                         tenant-conn-fixture]]
+                                         tenant-conn-fixture
+                                         system-fixture]]
             [clojure.java.io :as io]
             [clojure.java.jdbc :as jdbc]))
 
-(use-fixtures :once tenant-conn-fixture)
+(use-fixtures :once system-fixture tenant-conn-fixture)
 
 #_(deftest ^:functional import-raster
   (testing "Import raster"

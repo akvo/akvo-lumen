@@ -2,6 +2,7 @@
   {:functional true}
   (:require [akvo.lumen.fixtures :refer [*tenant-conn*
                                          tenant-conn-fixture
+                                         system-fixture
                                          *error-tracker*
                                          error-tracker-fixture]]
             [akvo.lumen.lib :as lib]
@@ -15,7 +16,7 @@
             [clojure.test :refer :all]))
 
 
-(use-fixtures :once tenant-conn-fixture error-tracker-fixture tu/spec-instrument)
+(use-fixtures :once system-fixture tenant-conn-fixture error-tracker-fixture tu/spec-instrument)
 
 (defn visualisation-body [dataset-id]
   {"datasetId" dataset-id

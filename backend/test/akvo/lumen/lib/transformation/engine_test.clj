@@ -1,7 +1,6 @@
 (ns akvo.lumen.lib.transformation.engine-test
   {:functional true}
-  (:require [akvo.lumen.fixtures :refer [migrate-tenant rollback-tenant summarise-transformation-logs-fixture]]
-            [akvo.lumen.test-utils :refer [test-tenant test-tenant-conn]]
+  (:require [akvo.lumen.fixtures :refer [migrate-tenant rollback-tenant summarise-transformation-logs-fixture tenant-conn-fixture *tenant-conn* system-fixture]]
             [akvo.lumen.lib.transformation.engine :refer :all]
             [akvo.lumen.test-utils :as tu]
             [cheshire.core :as json]
@@ -15,18 +14,13 @@
 
 (def columns (vec (take 3 (json/parse-string (slurp (io/resource "columns_test.json"))))))
 
-(def ^:dynamic *tenant-conn*)
-
 (defn fixture [f]
-  (migrate-tenant test-tenant)
-  (binding [*tenant-conn* (test-tenant-conn test-tenant)]
-    (db-drop-test-table *tenant-conn*)
-    (db-test-table *tenant-conn*)
-    (db-test-data *tenant-conn*)
-    (f)
-    (rollback-tenant test-tenant)))
+  (db-drop-test-table *tenant-conn*)
+  (db-test-table *tenant-conn*)
+  (db-test-data *tenant-conn*)
+  (f))
 
-(use-fixtures :once fixture summarise-transformation-logs-fixture tu/spec-instrument)
+(use-fixtures :once system-fixture tenant-conn-fixture fixture summarise-transformation-logs-fixture tu/spec-instrument)
 
 (def transformations
   {:ops [{"op" "core/to-titlecase"

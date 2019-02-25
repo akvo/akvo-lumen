@@ -4,7 +4,9 @@
             [akvo.lumen.endpoint.commons]
             [akvo.lumen.lib.aes :as aes]
             [akvo.lumen.migrate :as lumen-migrate]
+            [akvo.lumen.protocols :as p]
             [akvo.lumen.specs]
+            [akvo.lumen.test-utils :as tu]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.java.jdbc :as jdbc]
@@ -35,30 +37,6 @@
   (repl/refresh)
   (check-specs!))
 
-
-(defn read-config
-  ([]
-   (read-config "dev.edn"))
-  ([resource-path]
-   (duct/read-config (io/resource resource-path))))
-
-(derive :akvo.lumen.component.emailer/dev-emailer :akvo.lumen.component.emailer/emailer)
-(derive :akvo.lumen.component.caddisfly/local :akvo.lumen.component.caddisfly/caddisfly)
-(derive :akvo.lumen.component.error-tracker/local :akvo.lumen.component.error-tracker/error-tracker)
-
-(defn dissoc-prod-components [c]
-  (dissoc c
-          :akvo.lumen.component.emailer/mailjet-v3-emailer
-          :akvo.lumen.component.caddisfly/prod
-          :akvo.lumen.component.error-tracker/prod))
-
-
-
-(def config (let [c (dissoc-prod-components (ig/prep (duct/merge-configs (read-config "akvo/lumen/config.edn") (read-config))))]
-              (ir/set-prep! (fn [] c))
-              (ig/load-namespaces c)
-              c))
-
 (defn go []
   (ir/go))
 
@@ -78,43 +56,22 @@
 ;;; Seed
 ;;;
 
-(defn- seed-tenant
-  "Helper function that will seed tenant to the tenants table."
-  [db tenant]
-  (try
-    (let [{:keys [id]} (first (jdbc/insert! db "tenants" (update (dissoc tenant :plan)
-                                                                 :db_uri #(aes/encrypt "secret" %))))]
-      (jdbc/insert! db "plan" {:tenant id
-                               :tier (doto (org.postgresql.util.PGobject.)
-                                       (.setType "tier")
-                                       (.setValue (:plan tenant)))}))
-    (catch PSQLException e
-      (println "Seed data already loaded."))))
-
-
-(defn seed
-  "At the moment only support seed of tenants table."
-  []
-  (let [db-uri (-> (config/construct)
-                   :akvo.lumen.component.hikaricp/hikaricp :uri)]
-    (doseq [tenant commons/tenants]
-      (seed-tenant {:connection-uri db-uri} tenant))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Migrate
 ;;;
 
 (defn migrate []
-  (lumen-migrate/migrate config))
+  (lumen-migrate/migrate commons/config))
 
 (defn migrate-and-seed []
   (migrate)
-  (seed)
+  (tu/seed commons/config)
   (migrate))
 
 (defn rollback
-  ([] (lumen-migrate/rollback config {}))
-  ([args] (lumen-migrate/rollback config args)))
+  ([] (lumen-migrate/rollback commons/config {}))
+  ([args] (lumen-migrate/rollback commons/config args)))
 
 (defn reset-db []
   (rollback)

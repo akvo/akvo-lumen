@@ -3,15 +3,20 @@
             [akvo.lumen.test-utils :as tu]
             [clj-time.core :as tc]
             [clojure.pprint :refer [pprint]]
+            [akvo.lumen.protocols :as p]
             [clojure.spec.alpha :as s]
             [clojure.spec.test.alpha :as stest]
             [clojure.tools.logging :as log]
             [dev.commons :as commons]
+            [dev :as dev]
             [integrant.repl.state :as state :refer (system)]))
 
 (def error-tracker (et/local-error-tracker nil))
 
-(defn t1-conn [] (tu/test-tenant-conn (first commons/tenants)))
+(defn t1-conn []
+  (when-not system
+    (dev/go))
+  (p/connection (:akvo.lumen.component.tenant-manager/tenant-manager system) (-> commons/tenants first :label)))
 
 (defn clj-data>dataset [{:keys [dataset-name data with-job? job]}]
   (if job

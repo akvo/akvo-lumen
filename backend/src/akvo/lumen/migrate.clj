@@ -111,7 +111,10 @@
   opts)
 (s/def ::tenant-manager string?)
 (s/def ::tenants string?)
-(s/def ::migrations (s/keys :req-un [::tenant-manager ::tenants]))
+(s/def ::seed any?)
+
+(s/def ::migrations (s/keys :req-un [::tenant-manager ::tenants]
+                            :opt-un [::seed]))
 
 (defmethod integrant-key :akvo.lumen.migrate/migrate [_]
   (s/cat :kw keyword?
