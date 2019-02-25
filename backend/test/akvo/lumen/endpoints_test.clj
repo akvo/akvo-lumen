@@ -2,6 +2,7 @@
   {:functional true}
   (:require [akvo.lumen.fixtures :refer [*system* system-fixture *tenant-conn* tenant-conn-fixture *error-tracker* error-tracker-fixture]]
             [akvo.lumen.protocols :as p]
+            [clojure.string :as str]
             [cheshire.core :as json]
             [clojure.java.io :as io]
             [clojure.test :refer :all]
@@ -15,7 +16,7 @@
 (def tenant-host "http://t1.lumen.local:3030")
 
 (defn api-url [api-url & args]
-  (str  "/api" api-url (when args (str "/" (apply str args)))))
+  (str  "/api" api-url (when args (str "/" (str/join "/"  args)))))
 
 (defn with-body [method uri body & [query-params]]
   (cond->
@@ -48,6 +49,71 @@
        :headers {"host" "t1.lumen.local:3030" "content-type" "application/json"}
        :uri uri}
     query-params (assoc :query-params query-params)))
+
+(defn job-execution-dataset-id [h job-id]
+  (dh/with-retry {:retry-if (fn [v e] (not v))
+                                         :max-retries 20
+                                         :delay-ms 100}
+                           (let [job (-> (h (get* (api-url "/job_executions" job-id)))
+                                         :body (json/parse-string keyword))
+                                 status (:status job)]
+                             (when (= "OK" status)
+                               (:datasetId job)))))
+
+(def dataset-link-columns [{:key false,
+                            :type "text",
+                            :title "Name",
+                            :multipleId nil,
+                            :hidden false,
+                            :multipleType nil,
+                            :columnName "c1",
+                            :direction nil,
+                            :sort nil}
+                           {:key false,
+                            :type "number",
+                            :title "Age",
+                            :multipleId nil,
+                            :hidden false,
+                            :multipleType nil,
+                            :columnName "c2",
+                            :direction nil,
+                            :sort nil}
+                           {:key false,
+                            :type "number",
+                            :title "Score",
+                            :multipleId nil,
+                            :hidden false,
+                            :multipleType nil,
+                            :columnName "c3",
+                            :direction nil,
+                            :sort nil}
+                           {:key false,
+                            :type "number",
+                            :title "Temperature",
+                            :multipleId nil,
+                            :hidden false,
+                            :multipleType nil,
+                            :columnName "c4",
+                            :direction nil,
+                            :sort nil}
+                           {:key false,
+                            :type "number",
+                            :title "Humidity",
+                            :multipleId nil,
+                            :hidden false,
+                            :multipleType nil,
+                            :columnName "c5",
+                            :direction nil,
+                            :sort nil}
+                           {:key false,
+                            :type "text",
+                            :title "Cat",
+                            :multipleId nil,
+                            :hidden false,
+                            :multipleType nil,
+                            :columnName "c6",
+                            :direction nil,
+                            :sort nil}])
 
 (deftest handler-test
   (let [h (:handler (:akvo.lumen.component.handler/handler *system*))]
@@ -99,75 +165,13 @@
                             (json/parse-string keyword)
                             :importId)
               _           (is (some? import-id))
-              dataset-id (dh/with-retry {:retry-if (fn [v e] (not v))
-                                         :max-retries 20
-                                         :delay-ms 100}
-                           (let [job (-> (h (get* (api-url "/job_executions" import-id)))
-                                         :body (json/parse-string keyword))
-                                 status (:status job)]
-                             (when (= "OK" status)
-                               (:datasetId job))))]
+              dataset-id (job-execution-dataset-id h import-id)]
           (let [dataset (-> (h (get* (api-url "/datasets" dataset-id)))
                             :body (json/parse-string keyword))]
             (is (= {:transformations []
-                    :columns
-                    [{:key false,
-                      :type "text",
-                      :title "Name",
-                      :multipleId nil,
-                      :hidden false,
-                      :multipleType nil,
-                      :columnName "c1",
-                      :direction nil,
-                      :sort nil}
-                     {:key false,
-                      :type "number",
-                      :title "Age",
-                      :multipleId nil,
-                      :hidden false,
-                      :multipleType nil,
-                      :columnName "c2",
-                      :direction nil,
-                      :sort nil}
-                     {:key false,
-                      :type "number",
-                      :title "Score",
-                      :multipleId nil,
-                      :hidden false,
-                      :multipleType nil,
-                      :columnName "c3",
-                      :direction nil,
-                      :sort nil}
-                     {:key false,
-                      :type "number",
-                      :title "Temperature",
-                      :multipleId nil,
-                      :hidden false,
-                      :multipleType nil,
-                      :columnName "c4",
-                      :direction nil,
-                      :sort nil}
-                     {:key false,
-                      :type "number",
-                      :title "Humidity",
-                      :multipleId nil,
-                      :hidden false,
-                      :multipleType nil,
-                      :columnName "c5",
-                      :direction nil,
-                      :sort nil}
-                     {:key false,
-                      :type "text",
-                      :title "Cat",
-                      :multipleId nil,
-                      :hidden false,
-                      :multipleType nil,
-                      :columnName "c6",
-                      :direction nil,
-                      :sort nil}]
+                    :columns dataset-link-columns
                     :name title
-                    ;;                :modified 1551089874635,
-                    ;;                :author nil,
+                    ;;:author nil,
                     :rows
                     [["Bob" 22.0 2.0 4.0 7.0 "A"]
                      ["Jane" 34.0 4.0 8.0 2.0 "B"]
@@ -180,7 +184,24 @@
                     :kind "LINK"
                     :guessColumnTypes true
                     :hasColumnHeaders true}
-                   (select-keys (:source dataset) [:url :kind :guessColumnTypes :hasColumnHeaders]))))
+                   (select-keys (:source dataset) [:url :kind :guessColumnTypes :hasColumnHeaders])))
+
+            (let [meta-dataset (-> (h (get* (api-url "/datasets" dataset-id "meta")))
+                                   :body (json/parse-string keyword))]
+              (is (= {:id dataset-id
+                      :name title
+                      :status "OK"
+                      :transformations []
+                      :columns dataset-link-columns}
+                     (select-keys meta-dataset [:id :name :status :transformations :columns]))))
+            (let [update-dataset (-> (h (post* (api-url "/datasets" dataset-id "update") (:source dataset)))
+                                     :body (json/parse-string keyword))
+                  dataset-id (job-execution-dataset-id h (:updateId update-dataset))]
+              (is (some? dataset-id))
+
+              (is (< (:modified dataset ) (-> (h (get* (api-url "/datasets" dataset-id)))
+                                              :body (json/parse-string keyword)
+                                              :modified)))))
 
 
           (is (= title (-> (h (get* (api-url "/library")))
