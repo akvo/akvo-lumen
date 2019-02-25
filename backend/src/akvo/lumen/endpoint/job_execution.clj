@@ -1,7 +1,6 @@
 (ns akvo.lumen.endpoint.job-execution
   (:require [akvo.lumen.protocols :as p]
             [akvo.lumen.lib.job-execution :as job-execution]
-            [akvo.lumen.specs.components :refer [integrant-key]]
             [clojure.spec.alpha :as s]
             [akvo.lumen.component.tenant-manager :as tenant-manager]
             [integrant.core :as ig]))
@@ -21,6 +20,5 @@
 (defmethod ig/init-key :akvo.lumen.endpoint.job-execution/job-execution  [_ opts]
   (routes opts))
 
-(defmethod integrant-key :akvo.lumen.endpoint.job-execution/job-execution [_]
-  (s/cat :kw keyword?
-         :config (s/keys :req-un [::tenant-manager/tenant-manager] )))
+(defmethod ig/pre-init-spec :akvo.lumen.endpoint.job-execution/job-execution [_]
+  (s/keys :req-un [::tenant-manager/tenant-manager] ))

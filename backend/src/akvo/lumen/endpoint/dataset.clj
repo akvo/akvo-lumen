@@ -1,7 +1,6 @@
 (ns akvo.lumen.endpoint.dataset
   (:require [akvo.lumen.protocols :as p]
             [akvo.lumen.lib.dataset :as dataset]
-            [akvo.lumen.specs.components :refer [integrant-key]]
             [clojure.tools.logging :as log]
             [clojure.spec.alpha :as s]
             [akvo.lumen.component.tenant-manager :as tenant-manager]
@@ -60,6 +59,5 @@
                                  ::upload-config
                                  ::import-config]))
 
-(defmethod integrant-key :akvo.lumen.endpoint.dataset/dataset [_]
-  (s/cat :kw keyword?
-         :config ::config))
+(defmethod ig/pre-init-spec :akvo.lumen.endpoint.dataset/dataset [_]
+  ::config)

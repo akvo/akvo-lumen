@@ -3,7 +3,6 @@
   (:require [integrant.core :as ig]
             [clojure.spec.alpha :as s]
             [akvo.lumen.component.handler :as handler]
-            [akvo.lumen.specs.components :refer [integrant-key]]
             [immutant.web :as web]))
 
 (defmethod ig/init-key :akvo.lumen.component.http/http  [_ {:keys [port handler] :as opts}]
@@ -24,6 +23,5 @@
 
 (s/def ::handler (s/merge ::handler/config (s/keys :req-un [::handler/handler])))
 
-(defmethod integrant-key :akvo.lumen.component.http/http [_]
-  (s/cat :kw keyword?
-         :config (s/keys :req-un [::port ::handler])))
+(defmethod ig/pre-init-spec :akvo.lumen.component.http/http [_]
+  (s/keys :req-un [::port ::handler]))

@@ -1,7 +1,6 @@
 (ns akvo.lumen.endpoint.invite
   (:require [akvo.lumen.protocols :as p]
             [akvo.lumen.lib.user :as user]
-            [akvo.lumen.specs.components :refer [integrant-key]]
             [clojure.spec.alpha :as s]
             [akvo.lumen.component.tenant-manager :as tenant-manager]
             [akvo.lumen.component.emailer :as emailer]
@@ -45,13 +44,11 @@
 (defmethod ig/init-key :akvo.lumen.endpoint.invite/verify  [_ opts]
   (verify-routes opts))
 
-(defmethod integrant-key :akvo.lumen.endpoint.invite/invite [_]
-  (s/cat :kw keyword?
-         :config (s/keys :req-un [::tenant-manager/tenant-manager
-                                  ::keycloak/keycloak
-                                  ::emailer/emailer])))
+(defmethod ig/pre-init-spec :akvo.lumen.endpoint.invite/invite [_]
+  (s/keys :req-un [::tenant-manager/tenant-manager
+                   ::keycloak/keycloak
+                   ::emailer/emailer]))
 
-(defmethod integrant-key :akvo.lumen.endpoint.invite/verify [_]
-  (s/cat :kw keyword?
-         :config (s/keys :req-un [::tenant-manager/tenant-manager
-                                  ::keycloak/keycloak])))
+(defmethod ig/pre-init-spec :akvo.lumen.endpoint.invite/verify [_]
+  (s/keys :req-un [::tenant-manager/tenant-manager
+                   ::keycloak/keycloak]))

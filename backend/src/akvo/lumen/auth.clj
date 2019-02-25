@@ -8,7 +8,6 @@
             [clojure.spec.alpha :as s]
             [akvo.lumen.component.keycloak :as keycloak]
             [integrant.core :as ig]
-            [akvo.lumen.specs.components :refer [integrant-key]]
             [ring.util.response :as response]))
 
 (defn claimed-roles [jwt-claims]
@@ -73,14 +72,12 @@
 (defmethod ig/init-key :akvo.lumen.auth/wrap-auth  [_ opts]
   wrap-auth)
 
-(defmethod integrant-key :akvo.lumen.auth/wrap-auth [_]
-  (s/cat :kw keyword?
-         :config empty?))
+(defmethod ig/pre-init-spec :akvo.lumen.auth/wrap-auth [_]
+  empty?)
 
 (defmethod ig/init-key :akvo.lumen.auth/wrap-jwt  [_ {:keys [keycloak]}]
   (wrap-jwt keycloak))
 
 (s/def ::keycloak ::keycloak/data)
-(defmethod integrant-key :akvo.lumen.auth/wrap-jwt [_]
-  (s/cat :kw keyword?
-         :config (s/keys :req-un [::keycloak] )))
+(defmethod ig/pre-init-spec :akvo.lumen.auth/wrap-jwt [_]
+  (s/keys :req-un [::keycloak]))

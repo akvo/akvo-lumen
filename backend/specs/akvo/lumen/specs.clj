@@ -2,7 +2,6 @@
   (:require [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
             [integrant.core :as ig]
-            [akvo.lumen.specs.components :refer [integrant-key]]
             [akvo.lumen.util :refer (squuid)]
             [clojure.tools.logging :as log]))
 
@@ -56,7 +55,6 @@
   opts)
 
 (s/def ::conform-specs boolean?)
-(defmethod integrant-key :akvo.lumen.specs/specs [_]
-  (s/cat :kw keyword?
-         :config (s/keys :req-un [::conform-specs])))
+(defmethod ig/pre-init-spec :akvo.lumen.specs/specs [_]
+  (s/keys :req-un [::conform-specs]))
 
