@@ -117,10 +117,10 @@
                             :sort nil}])
 
 ;; Todo: generate it with current vis + aggregation specs!!
-(defn visualisation-bar-payload [dataset-id name*]
+(defn visualisation-payload [dataset-id vis-type name*]
   {:type "visualisation",
    :name name*,
-   :visualisationType "bar",
+   :visualisationType vis-type
    :datasetId dataset-id
    :spec {:metricColumnX nil,
           :horizontal false,
@@ -234,12 +234,30 @@
           (let [bar-vis-name "hello-bar-vis!"]
             (is (= [bar-vis-name dataset-id]
                    (-> (h (post*  (api-url "/visualisations")
-                                  (visualisation-bar-payload dataset-id bar-vis-name)))
+                                  (visualisation-payload dataset-id "bar" bar-vis-name)))
                        :body
                        (json/parse-string keyword)
                        ((juxt :name :datasetId)))))
-            (is (= bar-vis-name (-> (h (get* (api-url "/library")))
-                                    :body (json/parse-string keyword) :visualisations first :name))))
+            (let [[name* id*] (-> (h (get* (api-url "/library")))
+                                  :body (json/parse-string keyword) :visualisations first                        ((juxt :name :id)))]
+              (is (= bar-vis-name name*))
+              (testing "/shares"
+                (let [share-id (-> (h (post*  (api-url "/shares") {:visualisationId id*}))
+                                   :body (json/parse-string keyword)
+                                   :id)]
+                  (is (some? share-id))
+                  (let [{:keys [visualisations datasets visualisationId]} (-> (h (get* (str "/share/" share-id)))
+                                                                              :body (json/parse-string keyword))]
+                    (is (= visualisationId id*))
+                    (is (some? visualisations))
+                    (is (some? datasets))
+                    )
+                  )
+
+                )
+               
+
+              ))
 
 
           )
