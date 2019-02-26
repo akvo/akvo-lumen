@@ -39,7 +39,7 @@
 (defn put* [uri body & args]
   (apply with-body :post uri body args))
 
-(defn >get* [method uri & [query-params]]
+(defn >get* [method uri [query-params]]
   (cond->
       {:request-method method
        :server-port 3030,
@@ -192,6 +192,15 @@
           (is (= title* (-> (h (get* (api-url "/library")))
                             :body (json/parse-string keyword) :collections first :title)))
           ))
+
+      (testing "/multiple-column"
+        (is (=
+             {:hasImage false, :columns [{:id 1, :name "Alkalinity-m (mg/l)", :type "text"}]}
+             (-> (h (get*  (api-url "/multiple-column")
+                             {"query" (json/encode {:multipleType "caddisfly"
+                                                    :multipleId "85e9bea2-8538-4759-a46a-46459783c2d3"})}))
+                   body-kw))))
+      
       (testing "/data-source/job-execution/:id/status/:status"
         (let [dataset-url "https://raw.githubusercontent.com/akvo/akvo-lumen/develop/client/e2e-test/sample-data-1.csv"
               import-id (-> (h (post*  (api-url "/datasets") {:source
