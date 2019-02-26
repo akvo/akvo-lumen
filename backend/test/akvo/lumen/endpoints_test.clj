@@ -39,9 +39,9 @@
 (defn put* [uri body & args]
   (apply with-body :post uri body args))
 
-(defn get* [uri & [query-params]]
+(defn >get* [method uri & [query-params]]
   (cond->
-      {:request-method :get
+      {:request-method method
        :server-port 3030,
        :server-name "t1.lumen.local",
        :path-info uri
@@ -50,6 +50,12 @@
        :headers {"host" "t1.lumen.local:3030" "content-type" "application/json"}
        :uri uri}
     query-params (assoc :query-params query-params)))
+
+(defn get* [uri & more]
+  (>get* :get uri more))
+
+(defn del* [uri & more]
+  (>get* :delete uri more))
 
 (defn job-execution-dataset-id [h job-id]
   (dh/with-retry {:retry-if (fn [v e] (not v))
@@ -141,6 +147,8 @@
           :sort nil,
           :showValueLabels false}})
 
+(defn body-kw [res]
+  (-> res :body (json/parse-string keyword)))
 
 (deftest handler-test
   (let [h (:handler (:akvo.lumen.component.handler/handler *system*))]
@@ -159,6 +167,11 @@
                 :sentryDSN "dev-sentry-client-dsn"}
                (json/parse-string (:body r) keyword)))))
     (testing "/api"
+      (testing "/admin/users"
+        (let [users (-> (h (get* (api-url "/admin/users"))) body-kw :users)]
+          (is (= '("jerome@t1.lumen.localhost" "salim@t1.lumen.localhost")
+                 (sort (map :email users))))))
+      
       (let [r (h (get* (api-url "/library")))]
         (is (= 200 (:status r)))
         (is (= {:dashboards []
@@ -177,7 +190,7 @@
                           :body (json/parse-string keyword) :id))))
 
           (is (= title* (-> (h (get* (api-url "/library")))
-                           :body (json/parse-string keyword) :collections first :title)))
+                            :body (json/parse-string keyword) :collections first :title)))
           ))
       (testing "/datasets"
         (let [title "dataset-title"
