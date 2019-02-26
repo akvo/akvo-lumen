@@ -61,7 +61,6 @@
  :akvo.lumen.endpoint.raster/raster                   {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
                                                        :upload-config #ig/ref :akvo.lumen.upload/data}
  :akvo.lumen.endpoint.resource/resource               {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager}
- :akvo.lumen.endpoint.root/root                       {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager}
  :akvo.lumen.endpoint.share/share                     {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager}
  :akvo.lumen.endpoint.split-column/endpoint           {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager}
  :akvo.lumen.endpoint.tier/tier                       {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager}
@@ -90,7 +89,6 @@
                       #ig/ref :akvo.lumen.endpoint.multiple-column/multiple-column
                       #ig/ref :akvo.lumen.endpoint.split-column/endpoint
                       #ig/ref :akvo.lumen.endpoint.resource/resource
-                      #ig/ref :akvo.lumen.endpoint.root/root
                       #ig/ref :akvo.lumen.endpoint.share/share
                       #ig/ref :akvo.lumen.endpoint.tier/tier
                       #ig/ref :akvo.lumen.endpoint.transformation/transformation
