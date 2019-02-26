@@ -192,6 +192,21 @@
           (is (= title* (-> (h (get* (api-url "/library")))
                             :body (json/parse-string keyword) :collections first :title)))
           ))
+      (testing "/data-source/job-execution/:id/status/:status"
+        (let [dataset-url "https://raw.githubusercontent.com/akvo/akvo-lumen/develop/client/e2e-test/sample-data-1.csv"
+              import-id (-> (h (post*  (api-url "/datasets") {:source
+                                                              {:kind             "LINK"
+                                                               :url              dataset-url
+                                                               :hasColumnHeaders true
+                                                               :guessColumnTypes true}
+                                                              :name "to-delete"}))
+                            :body
+                            (json/parse-string keyword)
+                            :importId)
+              _           (is (some? import-id))
+              dataset-id (job-execution-dataset-id h import-id)
+              _ (is (some? dataset-id))]
+          (is (= {} (body-kw (h (del*  (api-url "/data-source/job-execution" import-id "status" "ok"))))))))
       (testing "/datasets"
         (let [title "dataset-title"
               dataset-url "https://raw.githubusercontent.com/akvo/akvo-lumen/develop/client/e2e-test/sample-data-1.csv"
