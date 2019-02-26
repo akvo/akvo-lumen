@@ -9,13 +9,11 @@
 
 (defn routes [{:keys [tenant-manager] :as opts}]
   ["/shares"
-   ["" {:post {:responses {200 {}}
-             :parameters {:body map?}
-             :handler (fn [{tenant :tenant
-                            body :body}]
-                        (share/fetch (p/connection tenant-manager tenant) body))}}]
-   ["/:id" {:put {:responses {200 {}}
-                  :parameters {:body map?
+   ["" {:post {:parameters {:body map?}
+               :handler (fn [{tenant :tenant
+                              body :body}]
+                          (share/fetch (p/connection tenant-manager tenant) body))}}]
+   ["/:id" {:put {:parameters {:body map?
                                :path-params {:id string?}}
                   :handler (fn [{tenant :tenant
                                  body :body

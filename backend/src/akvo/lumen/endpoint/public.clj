@@ -25,7 +25,6 @@
 (defn routes [{:keys [tenant-manager] :as opts}]
   ["/:id"
    {:get {:parameters {:path-params {:id string?}}
-          :responses {200 {}}
           :handler (handler opts)}}])
 
 (defmethod ig/init-key :akvo.lumen.endpoint.public/public  [_ opts]
