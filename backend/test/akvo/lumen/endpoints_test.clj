@@ -4,6 +4,7 @@
             [akvo.lumen.protocols :as p]
             [clojure.string :as str]
             [cheshire.core :as json]
+            [akvo.lumen.test-utils :as tu]
             [clojure.java.io :as io]
             [clojure.test :refer :all]
             [clojure.tools.logging :as log]
@@ -11,7 +12,7 @@
             [reitit.core :as r]
             [reitit.ring :as ring]))
 
-(use-fixtures :once system-fixture tenant-conn-fixture error-tracker-fixture)
+(use-fixtures :once system-fixture tenant-conn-fixture error-tracker-fixture tu/spec-instrument)
 
 (def tenant-host "http://t1.lumen.local:3030")
 
@@ -115,30 +116,30 @@
                             :direction nil,
                             :sort nil}])
 
-;; Todo: check if we can generate it with current vis specs!!
-(defn visualisation-bar-payload [dataset-id name*] {:type "visualisation",
-                                                    :name name*,
-                                                    :visualisationType "bar",
-                                                    :datasetId dataset-id
-                                                    :spec
-                                                    {:metricColumnX nil,
-                                                     :horizontal false,
-                                                     :metricAggregation "count",
-                                                     :filters [],
-                                                     :axisLabelYFromUser false,
-                                                     :bucketColumn nil,
-                                                     :showLabels false,
-                                                     :metricColumnY nil,
-                                                     :subBucketMethod "split",
-                                                     :subBucketColumn nil,
-                                                     :truncateSize nil,
-                                                     :axisLabelX nil,
-                                                     :legendTitle nil,
-                                                     :axisLabelXFromUser false,
-                                                     :axisLabelY nil,
-                                                     :version 1,
-                                                     :sort nil,
-                                                     :showValueLabels false}})
+;; Todo: generate it with current vis + aggregation specs!!
+(defn visualisation-bar-payload [dataset-id name*]
+  {:type "visualisation",
+   :name name*,
+   :visualisationType "bar",
+   :datasetId dataset-id
+   :spec {:metricColumnX nil,
+          :horizontal false,
+          :metricAggregation "count",
+          :filters [],
+          :axisLabelYFromUser false,
+          :bucketColumn nil,
+          :showLabels false,
+          :metricColumnY nil,
+          :subBucketMethod "split",
+          :subBucketColumn nil,
+          :truncateSize nil,
+          :axisLabelX nil,
+          :legendTitle nil,
+          :axisLabelXFromUser false,
+          :axisLabelY nil,
+          :version 1,
+          :sort nil,
+          :showValueLabels false}})
 
 
 (deftest handler-test
@@ -228,18 +229,19 @@
               (is (< (:modified dataset ) (-> (h (get* (api-url "/datasets" dataset-id)))
                                               :body (json/parse-string keyword)
                                               :modified)))))
-
           (is (= title (-> (h (get* (api-url "/library")))
                            :body (json/parse-string keyword) :datasets first :name)))
           (let [bar-vis-name "hello-bar-vis!"]
             (is (= [bar-vis-name dataset-id]
-                   (-> (h (post*  (api-url "/visualisations") (visualisation-bar-payload dataset-id bar-vis-name)))
+                   (-> (h (post*  (api-url "/visualisations")
+                                  (visualisation-bar-payload dataset-id bar-vis-name)))
                        :body
                        (json/parse-string keyword)
-                       ((juxt :name :datasetId))
-                       )))
+                       ((juxt :name :datasetId)))))
             (is (= bar-vis-name (-> (h (get* (api-url "/library")))
-                                    :body (json/parse-string keyword) :visualisations first :name)))
+                                    :body (json/parse-string keyword) :visualisations first :name))))
 
-            )))
+
+          )
+        )
       )))

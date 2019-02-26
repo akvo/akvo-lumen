@@ -18,8 +18,7 @@
 
 (defn routes [{:keys [tenant-manager] :as opts}]
   ["/env"
-   {:get {:responses {200 {}}
-          :handler (handler opts)}}])
+   {:get {:handler (handler opts)}}])
 
 (defmethod ig/init-key :akvo.lumen.endpoint.env/env  [_ opts]
   (routes opts))

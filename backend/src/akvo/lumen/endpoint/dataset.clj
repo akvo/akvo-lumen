@@ -15,31 +15,27 @@
   ["/datasets"
    ["" {:get {:handler (fn [{tenant :tenant}]
                          (dataset/all (p/connection tenant-manager tenant)))}
-        :post {:responses {200 {}}
-               :parameters {:body map?}
+        :post {:parameters {:body map?}
                :handler (fn [{tenant :tenant
                               jwt-claims :jwt-claims
                               body :body}]
-                          (dataset/create (p/connection tenant-manager tenant) (merge import-config upload-config) error-tracker jwt-claims (w/stringify-keys body)))}}]
-   ["/:id" [["" {:get {:responses {200 {}}
-                       :parameters {:path-params {:id string?}}
+                          (dataset/create (p/connection tenant-manager tenant) (merge import-config upload-config)
+                                          error-tracker jwt-claims (w/stringify-keys body)))}}]
+   ["/:id" [["" {:get {:parameters {:path-params {:id string?}}
                        :handler (fn [{tenant :tenant
                                       {:keys [id]} :path-params}]
                                   (dataset/fetch (p/connection tenant-manager tenant) id))}
-                 :put {:responses {200 {}}
-                       :parameters {:body map?
+                 :put {:parameters {:body map?
                                     :path-params {:id string?}}
                        :handler (fn [{tenant :tenant
                                       body :body
                                       {:keys [id]} :path-params}]
                                   (dataset/update-meta (p/connection tenant-manager tenant) id body))}
-                 :delete {:responses {200 {}}
-                          :parameters {:path-params {:id string?}}
+                 :delete {:parameters {:path-params {:id string?}}
                           :handler (fn [{tenant :tenant
                                          {:keys [id]} :path-params}]
                                      (dataset/delete (p/connection tenant-manager tenant) id))}}]
-            ["/meta" {:get {:responses {200 {}}
-                            :parameters {:path-params {:id string?}}
+            ["/meta" {:get {:parameters {:path-params {:id string?}}
                             :handler (fn [{tenant :tenant
                                            {:keys [id]} :path-params}]
                                        (dataset/fetch-metadata (p/connection tenant-manager tenant) id))}}]
@@ -48,7 +44,8 @@
                                               jwt-claims :jwt-claims
                                               body :body
                                               {:keys [id]} :path-params}]
-                                          (dataset/update (p/connection tenant-manager tenant) (merge import-config upload-config) error-tracker id (w/stringify-keys body)))}}]]]])
+                                          (dataset/update (p/connection tenant-manager tenant) (merge import-config upload-config)
+                                                          error-tracker id (w/stringify-keys body)))}}]]]])
 
 
 (defmethod ig/init-key :akvo.lumen.endpoint.dataset/dataset  [_ opts]

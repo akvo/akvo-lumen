@@ -29,22 +29,22 @@
                                         (let [{:strs [rasterId spec]} body]
                                           (maps/create-raster (p/connection tenant-manager tenant) windshaft-url rasterId)
                                           ))}}]]]
-   [["/:id" ["" {:get {:responses {200 {}}
-                        :parameters {:path-params {:id string?}}
-                        :handler (fn [{tenant :tenant
-                                       {:keys [id]} :path-params}]
-                                   (visualisation/fetch (p/connection tenant-manager tenant) id))}
-                  :put {:parameters {:body map?
-                                     :path-params {:id string?}}
-                        :handler (fn [{tenant :tenant
-                                       jwt-claims :jwt-claims
-                                       {:keys [id]} :path-params
-                                       body :body}]
-                                   (visualisation/upsert (p/connection tenant-manager tenant) (assoc body "id" id) jwt-claims))}
-                  :delete {:parameters {:path-params {:id string?}}
-                           :handler (fn [{tenant :tenant
-                                          {:keys [id]} :path-params}]
-                                      (visualisation/delete (p/connection tenant-manager tenant) id))}}]]]])
+   ;; todo: fix path routing inconsistency here 
+   [["/:id" ["" {:get {:parameters {:path-params {:id string?}}
+                       :handler (fn [{tenant :tenant
+                                      {:keys [id]} :path-params}]
+                                  (visualisation/fetch (p/connection tenant-manager tenant) id))}
+                 :put {:parameters {:body map?
+                                    :path-params {:id string?}}
+                       :handler (fn [{tenant :tenant
+                                      jwt-claims :jwt-claims
+                                      {:keys [id]} :path-params
+                                      body :body}]
+                                  (visualisation/upsert (p/connection tenant-manager tenant) (assoc body "id" id) jwt-claims))}
+                 :delete {:parameters {:path-params {:id string?}}
+                          :handler (fn [{tenant :tenant
+                                         {:keys [id]} :path-params}]
+                                     (visualisation/delete (p/connection tenant-manager tenant) id))}}]]]])
 
 (defmethod ig/init-key :akvo.lumen.endpoint.visualisation/visualisation  [_ opts]
   (routes opts))

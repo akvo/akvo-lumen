@@ -28,10 +28,6 @@
                                   dataset-id
                                   {:type :undo}))}}]]])
 
-
-(defmethod ig/init-key :akvo.lumen.endpoint.transformation/transformation  [_ opts]
-  (routes opts))
-
 (defmethod integrant-key :akvo.lumen.endpoint.transformation/transformation [_]
   (s/cat :kw keyword?
          :config (s/keys :req-un [::tenant-manager/tenant-manager
