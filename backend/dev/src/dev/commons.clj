@@ -1,6 +1,11 @@
 (ns dev.commons
-  (:require [clojure.edn :as edn]
-            [clojure.java.io :as io]))
+  (:require [akvo.lumen.test-utils :as tu]
+            [integrant.core :as ig]
+            [integrant.repl :as ir]))
 
-(def tenants (->> "seed.edn" io/resource slurp edn/read-string
-                        :tenant-manager :tenants))
+(def config (let [c (tu/dissoc-prod-components (tu/prep "akvo/lumen/config.edn" "dev.edn"))]
+              (ir/set-prep! (fn [] c))
+              (ig/load-namespaces c)
+              c))
+
+(def tenants (-> config :akvo.lumen.migrate/migrate :seed :tenants))

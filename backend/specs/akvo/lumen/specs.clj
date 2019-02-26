@@ -52,11 +52,11 @@
          (recur (inc attempt))
          (first res))))))
 
-(defmethod ig/init-key :akvo.lumen.specs [_ opts]
+(defmethod ig/init-key :akvo.lumen.specs/specs [_ opts]
   opts)
 
 (s/def ::conform-specs boolean?)
-(defmethod integrant-key :akvo.lumen.specs [_]
+(defmethod integrant-key :akvo.lumen.specs/specs [_]
   (s/cat :kw keyword?
          :config (s/keys :req-un [::conform-specs])))
 

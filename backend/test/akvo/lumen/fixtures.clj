@@ -1,15 +1,16 @@
 (ns akvo.lumen.fixtures
   (:require [akvo.lumen.component.caddisfly-test :refer (caddisfly)]
             [akvo.lumen.component.error-tracker :refer [local-error-tracker]]
+            [akvo.lumen.migrate :as lumen-migrate]
             [akvo.lumen.lib.transformation.engine :refer (log-ex)]
-            [akvo.lumen.test-utils :as test-utils]
+            [akvo.lumen.protocols :as p]
+            [akvo.lumen.test-utils :as tu]
             [akvo.lumen.test-utils
              :refer
-             [import-file test-tenant test-tenant-conn]]
+             [import-file]]
             [clojure.tools.logging :as log]
             [ragtime.jdbc :as jdbc]
             [ragtime.repl :as repl]))
-
 
 (defn- ragtime-spec
   [tenant]
@@ -25,24 +26,33 @@
   (let [spec (ragtime-spec tenant)]
     (repl/rollback spec (count (:migrations spec)))))
 
-(defn- user-manager-ragtime-spec []
-  {:datastore
-   (jdbc/sql-database {:connection-uri (:db_uri (test-utils/test-tenant-manager))})
-   :migrations
-   (jdbc/load-resources "akvo/lumen/migrations/tenant_manager")})
-
-(defn migrate-user-manager []
-  (repl/migrate (user-manager-ragtime-spec)))
-
 (def ^:dynamic *tenant-conn*)
+(def ^:dynamic *system*)
+
+(defn system-fixture
+  "Returns a fixture that binds a connection pool to *tenant-conn*"
+  [f]
+  (let [c (tu/start-config)]
+    (lumen-migrate/migrate c)
+    (binding [*system* (tu/start-system)]
+      (try
+        (f)
+        (finally (do
+                   (tu/halt-system *system*)
+                   (lumen-migrate/rollback c :tenant-manager)))))))
+
 
 (defn tenant-conn-fixture
   "Returns a fixture that binds a connection pool to *tenant-conn*"
   [f]
-  (migrate-tenant test-tenant)
-  (binding [*tenant-conn* (test-tenant-conn test-tenant)]
-    (f)
-    (rollback-tenant test-tenant)))
+  (let [c (tu/start-config)]
+    (try
+      (tu/seed c)
+      (lumen-migrate/migrate c)
+      (binding [*tenant-conn* (p/connection (:akvo.lumen.component.tenant-manager/tenant-manager *system*)
+                                            (-> c :akvo.lumen.migrate/migrate :seed :tenants first :label))]
+        (f))
+      (finally (lumen-migrate/rollback c {})))))
 
 (def ^:dynamic *error-tracker*)
 

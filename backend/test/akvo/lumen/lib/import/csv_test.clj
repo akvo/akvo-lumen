@@ -2,6 +2,7 @@
   {:functional true}
   (:require [akvo.lumen.fixtures :refer [*tenant-conn*
                                          tenant-conn-fixture
+                                         system-fixture
                                          *error-tracker*
                                          error-tracker-fixture]]
             [akvo.lumen.test-utils :refer [import-file]]
@@ -16,7 +17,7 @@
 (hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
 
 
-(use-fixtures :once tenant-conn-fixture error-tracker-fixture tu/spec-instrument)
+(use-fixtures :once system-fixture tenant-conn-fixture error-tracker-fixture tu/spec-instrument)
 
 
 (deftest ^:functional test-dos-file

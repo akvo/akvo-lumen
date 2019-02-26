@@ -3,7 +3,6 @@
   (:require [akvo.lumen.config :as config]
             [akvo.lumen.endpoint.commons]
             [akvo.lumen.migrate :as migrate]
-            [akvo.lumen.specs.hooks :as hooks.s]
             [clojure.java.io :as io]
             [clojure.spec.test.alpha :as stest]
             [duct.core :as duct]
@@ -21,7 +20,6 @@
         _   (migrate/migrate config)
         _ (ig/load-namespaces config)
         system (ig/init config)]
-    (when (:conform-specs (:akvo.lumen.specs system))
-      (stest/instrument)
-      (hooks.s/apply-hooks))
+    (when (:conform-specs (:akvo.lumen.specs/specs system))
+      (stest/instrument))
     system))

@@ -1,32 +1,28 @@
 (ns akvo.lumen.test-utils
-  (:require [akvo.lumen.component.tenant-manager :refer [pool]]
+  (:require [akvo.lumen.lib.aes :as aes]
             [akvo.lumen.lib.import :as import]
             [akvo.lumen.lib.import.clj-data-importer]
-            [akvo.lumen.lib.transformation.engine :refer (new-dataset-version)]
             [akvo.lumen.lib.update :as update]
             [akvo.lumen.postgres]
             [akvo.lumen.specs.transformation]
-            [akvo.lumen.util :refer [squuid] :as util ]
             [cheshire.core :as json]
             [clj-time.coerce :as tcc]
             [clj-time.core :as tc]
             [clj-time.format :as timef]
-            [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [clojure.set :as set]
+            [clojure.java.jdbc :as jdbc]
             [clojure.spec.alpha :as s]
             [clojure.spec.test.alpha :as stest]
-            [clojure.test :as t]
             [clojure.tools.logging :as log]
-            [clojure.walk :refer (keywordize-keys)]
             [diehard.core :as dh]
+            [clojure.test :as t]
+            [duct.core :as duct]
             [hugsql.core :as hugsql]
-            [akvo.lumen.specs.hooks :as hooks])
-  (:import [java.time Instant]))
+            [integrant.core :as ig])
+  (:import [java.time Instant]
+           [org.postgresql.util PSQLException]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
-
-(hooks/apply-hooks)
 
 (defn spec-instrument
   "Fixture to instrument all functions"
@@ -35,27 +31,6 @@
   (let [r (f)]
     (stest/unstrument)
     r))
-
-(def seed-data
-  (->> "test-seed.edn"
-       io/resource
-       slurp
-       edn/read-string))
-
-(def test-tenant-manager
-  (:tenant-manager seed-data))
-
-(def test-tenant
-  (first (filter #(= "t1" (:label %))
-                 (:tenants seed-data))))
-
-(let [conn-cache (atom {})]
-  (defn test-tenant-conn
-    "Returns a Hikaricp for provided tenant, connections are cached."
-    [{:keys [label] :as tenant}]
-    (if-let [tenant-conn (get @conn-cache label)]
-      tenant-conn
-      (get (swap! conn-cache assoc label (pool tenant)) label))))
 
 (defn import-file
   "Import a file and return the dataset-id, or the job-execution-id in case of FAIL status"
@@ -129,3 +104,56 @@
        (timef/parse (timef/formatter "dd/MM/yyyy"))
        tcc/to-long
        Instant/ofEpochMilli))
+
+;; system utils
+
+(defn read-config
+  [resource-path]
+  (duct/read-config (io/resource resource-path)))
+
+(derive :akvo.lumen.component.emailer/dev-emailer :akvo.lumen.component.emailer/emailer)
+(derive :akvo.lumen.component.caddisfly/local :akvo.lumen.component.caddisfly/caddisfly)
+(derive :akvo.lumen.component.error-tracker/local :akvo.lumen.component.error-tracker/error-tracker)
+
+(defn dissoc-prod-components [c]
+  (dissoc c
+          :akvo.lumen.component.emailer/mailjet-v3-emailer
+          :akvo.lumen.component.caddisfly/prod
+          :akvo.lumen.component.error-tracker/prod))
+
+(defn prep [& paths]
+  (ig/prep (apply duct/merge-configs (map read-config paths))))
+
+(defn halt-system [system]
+  (when system (ig/halt! system)))
+
+(defn start-config []
+  (let [c (dissoc-prod-components (prep "akvo/lumen/config.edn" "dev.edn" "test.edn"))]
+             (ig/load-namespaces c)
+             c))
+
+(defn start-system []
+  (ig/init (start-config)))
+
+(defn- seed-tenant
+  "Helper function that will seed tenant to the tenants table."
+  [db tenant]
+  (try
+    (let [{:keys [id]} (first (jdbc/insert! db "tenants" (update (dissoc tenant :plan)
+                                                                 :db_uri #(aes/encrypt "secret" %))))]
+      (jdbc/insert! db "plan" {:tenant id
+                               :tier (doto (org.postgresql.util.PGobject.)
+                                       (.setType "tier")
+                                       (.setValue (:plan tenant)))}))
+    (catch PSQLException e
+      (println "Seed data already loaded."))))
+
+(defn seed
+  "At the moment only support seed of tenants table."
+  [config]
+  (let [db-uri (-> config :akvo.lumen.component.hikaricp/hikaricp :uri)]
+    (doseq [tenant (-> config :akvo.lumen.migrate/migrate :seed :tenants)]
+      (seed-tenant {:connection-uri db-uri} tenant))))
+
+
+
