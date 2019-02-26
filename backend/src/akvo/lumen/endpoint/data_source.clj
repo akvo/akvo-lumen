@@ -8,18 +8,15 @@
 
 (defn routes [{:keys [tenant-manager] :as opts}]
   ["/data-source/job-execution/:id/status/:status"
-   {:delete {:responses {200 {}}
-             :parameters {:path-params {:id string?
+   {:delete {:parameters {:path-params {:id string?
                                         :status string?}}
              :handler (fn [{tenant :tenant
                             {:keys [id status]} :path-params}]
                         (data-source/delete (p/connection tenant-manager tenant) id status))}}])
-
-
 
 (defmethod ig/init-key :akvo.lumen.endpoint.data-source/data-source  [_ opts]
   (routes opts))
 
 (defmethod integrant-key :akvo.lumen.endpoint.data-source/data-source [_]
   (s/cat :kw keyword?
-         :config (s/keys :req-un [::tenant-manager/tenant-manager] )))
+         :config (s/keys :req-un [::tenant-manager/tenant-manager])))
