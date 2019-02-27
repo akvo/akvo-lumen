@@ -193,8 +193,8 @@
                                                                            :title title*
                                                                            :entities {}
                                                                            :layout {}}))
-                                               :body
-                                               (json/parse-string keyword))]
+                                       :body
+                                       (json/parse-string keyword))]
 
             (is (= title* title))
             (is (= id (-> (h (get* (api-url "/dashboards" id)))
@@ -222,12 +222,11 @@
         (is (=
              {:hasImage false, :columns [{:id 1, :name "Alkalinity-m (mg/l)", :type "text"}]}
              (-> (h (get*  (api-url "/multiple-column")
-                             {"query" (json/encode {:multipleType "caddisfly"
-                                                    :multipleId "85e9bea2-8538-4759-a46a-46459783c2d3"})}))
-                   body-kw))))
-      
+                           {"query" (json/encode {:multipleType "caddisfly"
+                                                  :multipleId "85e9bea2-8538-4759-a46a-46459783c2d3"})}))
+                 body-kw))))
       (testing "/data-source/job-execution/:id/status/:status"
-        (let [dataset-url "https://raw.githubusercontent.com/akvo/akvo-lumen/develop/client/e2e-test/sample-data-1.csv"
+        (let [dataset-url (local-file "sample-data-1.csv")
               import-id (-> (h (post*  (api-url "/datasets") {:source
                                                               {:kind             "LINK"
                                                                :url              dataset-url
@@ -243,7 +242,7 @@
           (is (= {} (body-kw (h (del*  (api-url "/data-source/job-execution" import-id "status" "ok"))))))))
       (testing "/datasets"
         (let [title "dataset-title"
-              dataset-url "https://raw.githubusercontent.com/akvo/akvo-lumen/develop/client/e2e-test/sample-data-1.csv"
+              dataset-url (local-file "sample-data-1.csv")
               import-id (-> (h (post*  (api-url "/datasets") {:source
                                                               {:kind "LINK"
                                                                :url dataset-url
@@ -317,11 +316,31 @@
                   )
 
                 )
-               
+              
 
               ))
 
 
           )
         )
+      (testing "/split-column/:dataset-id/pattern-analysis"
+        (let [dataset-url (local-file "split_column_1785.csv")
+              import-id (-> (h (post*  (api-url "/datasets") {:source
+                                                              {:kind             "LINK"
+                                                               :url              dataset-url
+                                                               :hasColumnHeaders true
+                                                               :guessColumnTypes true}
+                                                              :name "to-delete"}))
+                            :body
+                            (json/parse-string keyword)
+                            :importId)
+              _           (is (some? import-id))
+              dataset-id (job-execution-dataset-id h import-id)
+              _ (is (some? dataset-id))]
+          
+          (is (= {:analysis ["$" "-"]}
+                 (-> (body-kw (h (get* (api-url  "/split-column" dataset-id "pattern-analysis")
+                                       {"query" (json/encode {:columnName "c1"})})))
+                     (update :analysis (comp vec sort))
+                     )))))
       )))
