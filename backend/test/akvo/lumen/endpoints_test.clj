@@ -343,4 +343,13 @@
                                        {"query" (json/encode {:columnName "c1"})})))
                      (update :analysis (comp vec sort))
                      )))))
-      )))
+
+      (testing "/admin/invites"
+        (let [email "user1@akvo.org"]
+          (is (= {:invites []} (body-kw (h (get* (api-url  "/admin/invites"))))))
+          (is (= {} (body-kw (h (post*  (api-url "/admin/invites") {:email email})))))
+          (let [store @(:store (:akvo.lumen.component.emailer/dev-emailer *system*))
+                invitation (last store)]
+            (is (= 1 (count store)))
+            (is (= email (-> invitation :recipients first)))
+            (is (= "Akvo Lumen invite" (-> invitation :email (get "Subject"))))))))))

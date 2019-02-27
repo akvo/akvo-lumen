@@ -25,7 +25,7 @@
                               body :body :as request}]
                           (user/create-invite emailer keycloak (p/connection tenant-manager tenant)
                                               tenant (location (:invite-redirect config) request)
-                                              (:email body) jwt-claims))}}]
+                                              (get body "email") jwt-claims))}}]
    ["/:id" {:delete {:parameters {:path-params {:id string?}}
                      :handler (fn [{tenant :tenant
                                  {:keys [id]} :path-params}]
