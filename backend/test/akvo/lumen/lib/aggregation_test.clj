@@ -118,6 +118,22 @@
                           {:title "a2" :type "number"}]
                 :rows [["b1" 10.5 10.0]
                        ["b2" 9.5 10.333333333333334]]
+                :metadata {:categoryColumnTitle "A"}}))))
+
+
+    (testing "Row & Category Column with count aggregation and rows filtered out"
+      (let [[tag query-result] (query {:aggregation "count",
+                                       :categoryColumn "c1",
+                                       :rowColumn "c2",
+                                       :valueColumn "c3",
+                                       :filters
+                                       [{:column "c3",
+                                         :value "1",
+                                         :operation "remove",
+                                         :strategy "isHigher"}]})]
+        (is (= query-result
+               {:columns []
+                :rows [[]]
                 :metadata {:categoryColumnTitle "A"}}))))))
 
 (deftest pie-tests
