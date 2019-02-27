@@ -51,18 +51,19 @@
   If request don't contain claims return 401. If current dns label (tenant) is
   not in claimed roles return 403.
   Otherwiese grant access. This implies that access is on tenant level."
-  [handler]
-  (fn [{:keys [jwt-claims] :as request}]
-    (cond
-      (public-path? request) (handler request)
-      (nil? jwt-claims) not-authenticated
-      (admin-path? request) (if (tenant-admin? request)
+  [public-path?-fn]
+  (fn[handler]
+    (fn [{:keys [jwt-claims] :as request}]
+      (cond
+        (public-path?-fn request) (handler request)
+        (nil? jwt-claims) not-authenticated
+        (admin-path? request) (if (tenant-admin? request)
+                                (handler request)
+                                not-authorized)
+        (api-path? request) (if (tenant-user? request)
                               (handler request)
                               not-authorized)
-      (api-path? request) (if (tenant-user? request)
-                            (handler request)
-                            not-authorized)
-      :else not-authorized)))
+        :else not-authorized))))
 
 (defn wrap-jwt
   "Go get cert from Keycloak and feed it to wrap-jwt-claims. Keycloak url can
@@ -79,21 +80,17 @@
        (println "Could not get cert from Keycloak")
        (throw e)))))
 
-(defmethod ig/init-key :akvo.lumen.auth/wrap-auth-prod  [_ opts]
-  wrap-auth)
+(defmethod ig/init-key :akvo.lumen.auth/publi-path?-prod   [_ opts]
+  public-path?)
 
-(defmethod integrant-key :akvo.lumen.auth/wrap-auth-prod [_]
+(defmethod ig/init-key :akvo.lumen.auth/wrap-auth  [_ opts]
+  (wrap-auth (:public-path?-fn opts)))
+
+(s/def ::public-path?-fn fn?)
+
+(defmethod integrant-key :akvo.lumen.auth/wrap-auth [_]
   (s/cat :kw keyword?
-         :config empty?))
-
-(defmethod ig/init-key :akvo.lumen.auth/wrap-auth-mock  [_ opts]
-  (fn [h]
-    (fn [r]
-      (h r))))
-
-(defmethod integrant-key :akvo.lumen.auth/wrap-auth-mock [_]
-  (s/cat :kw keyword?
-         :config empty?))
+         :config (s/keys :req-un [::public-path?-fn])))
 
 
 (defmethod ig/init-key :akvo.lumen.auth/wrap-jwt  [_ {:keys [keycloak]}]

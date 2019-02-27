@@ -1,5 +1,6 @@
 (ns akvo.lumen.test-utils
-  (:require [akvo.lumen.lib.aes :as aes]
+  (:require [akvo.lumen.auth :as auth]
+            [akvo.lumen.lib.aes :as aes]
             [akvo.lumen.lib.import :as import]
             [akvo.lumen.lib.import.clj-data-importer]
             [akvo.lumen.lib.update :as update]
@@ -13,9 +14,10 @@
             [clojure.java.jdbc :as jdbc]
             [clojure.spec.alpha :as s]
             [clojure.spec.test.alpha :as stest]
+            [clojure.string :as str]
+            [clojure.test :as t]
             [clojure.tools.logging :as log]
             [diehard.core :as dh]
-            [clojure.test :as t]
             [duct.core :as duct]
             [hugsql.core :as hugsql]
             [integrant.core :as ig])
@@ -114,14 +116,16 @@
 (derive :akvo.lumen.component.emailer/dev-emailer :akvo.lumen.component.emailer/emailer)
 (derive :akvo.lumen.component.caddisfly/local :akvo.lumen.component.caddisfly/caddisfly)
 (derive :akvo.lumen.component.error-tracker/local :akvo.lumen.component.error-tracker/error-tracker)
-(derive :akvo.lumen.auth/wrap-auth-mock :akvo.lumen.auth/wrap-auth)
+(derive :akvo.lumen.test-utils/public-path?-test :akvo.lumen.auth/public-path?)
 
 (defn dissoc-prod-components [c]
   (dissoc c
           :akvo.lumen.component.emailer/mailjet-v3-emailer
           :akvo.lumen.component.caddisfly/prod
           :akvo.lumen.component.error-tracker/prod
-          :akvo.lumen.auth/wrap-auth-prod))
+          :akvo.lumen.auth/public-path?-prod
+          :akvo.lumen.test-utils/public-path?-dev
+))
 
 (defn prep [& paths]
   (ig/prep (apply duct/merge-configs (map read-config paths))))
@@ -157,5 +161,17 @@
     (doseq [tenant (-> config :akvo.lumen.migrate/migrate :seed :tenants)]
       (seed-tenant {:connection-uri db-uri} tenant))))
 
+
+(defn public-path-dev? [{:keys [path-info request-method] :as data}]
+  (or (auth/public-path? data)
+      (str/starts-with? path-info "/local-development")))
+
+(defmethod ig/init-key :akvo.lumen.test-utils/public-path?-dev  [_ opts]
+  (log/error :akvo.lumen.test-utils/public-path?-dev)
+  public-path-dev?)
+
+(defmethod ig/init-key :akvo.lumen.test-utils/public-path?-test  [_ opts]
+  (log/error :akvo.lumen.test-utils/public-path?-test)
+  (constantly true))
 
 

@@ -15,7 +15,7 @@
   (derive :akvo.lumen.component.emailer/mailjet-v3-emailer :akvo.lumen.component.emailer/emailer)
   (derive :akvo.lumen.component.caddisfly/prod :akvo.lumen.component.caddisfly/caddisfly)
   (derive :akvo.lumen.component.error-tracker/prod :akvo.lumen.component.error-tracker/error-tracker)
-  (derive :akvo.lumen.auth/wrap-auth-prod :akvo.lumen.auth/wrap-auth)
+  (derive :akvo.lumen.auth/public-path?-prod :akvo.lumen.auth/public-path?)
   (let [config (config/construct config-file)
         _   (migrate/migrate config)
         _ (ig/load-namespaces config)
