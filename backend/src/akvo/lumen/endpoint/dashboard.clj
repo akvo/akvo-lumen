@@ -10,28 +10,25 @@
   ["/dashboards"
    ["" {:get {:handler (fn [{tenant :tenant}]
                          (dashboard/all (p/connection tenant-manager tenant)))}
-        :post {:responses {200 {}}
-               :parameters {:body map?}
+        :post {:parameters {:body map?}
                :handler (fn [{tenant :tenant
                               jwt-claims :jwt-claims
                               body :body}]
                           (dashboard/create (p/connection tenant-manager tenant) body jwt-claims))}}]
-   ["/:id" {:get {:responses {200 {}}
-                  :parameters {:path-params {:id string?}}
+   ["/:id" {:get {:parameters {:path-params {:id string?}}
                   :handler (fn [{tenant :tenant
                                  {:keys [id]} :path-params}]
                              (dashboard/fetch (p/connection tenant-manager tenant) id))}
-            :put {:responses {200 {}}
-                  :parameters {:body map?
+            :put {:parameters {:body map?
                                :path-params {:id string?}}
                   :handler (fn [{tenant :tenant
                                  body :body
                                  {:keys [id]} :path-params}]
                              (dashboard/upsert (p/connection tenant-manager tenant) id body))}
             :delete {:parameters {:path-params {:id string?}}
-                         :handler (fn [{tenant :tenant
-                                        {:keys [id]} :path-params}]
-                                    (dashboard/delete (p/connection tenant-manager tenant) id))}}]])
+                     :handler (fn [{tenant :tenant
+                                    {:keys [id]} :path-params}]
+                                (dashboard/delete (p/connection tenant-manager tenant) id))}}]])
 
 (defmethod ig/init-key :akvo.lumen.endpoint.dashboard/dashboard  [_ opts]
   (routes opts))

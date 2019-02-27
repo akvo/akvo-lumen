@@ -180,6 +180,26 @@
 	        :visualisations []
 	        :collections []}
                (json/parse-string (:body r) keyword))))
+
+
+      (testing "/dashboards"
+        (let [title* "dashboard-title"]
+          (let [{:keys [title id]} (-> (h (post*  (api-url "/dashboards") {:type "dashboard"
+                                                                           :title title*
+                                                                           :entities {}
+                                                                           :layout {}}))
+                                               :body
+                                               (json/parse-string keyword))]
+
+            (is (= title* title))
+            (is (= id (-> (h (get* (api-url "/dashboards" id)))
+                          :body (json/parse-string keyword) :id))))
+
+          (is (= title* (-> (h (get* (api-url "/library")))
+                            :body (json/parse-string keyword) :dashboards first :title)))
+          ))
+
+
       (testing "/collections"
         (let [title* "col-title"]
           (let [{:keys [title id]} (-> (h (post*  (api-url "/collections") {:title title*}))
