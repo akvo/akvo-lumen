@@ -117,6 +117,7 @@
 (derive :akvo.lumen.component.caddisfly/local :akvo.lumen.component.caddisfly/caddisfly)
 (derive :akvo.lumen.component.error-tracker/local :akvo.lumen.component.error-tracker/error-tracker)
 (derive :akvo.lumen.test-utils/public-path?-test :akvo.lumen.auth/public-path?)
+(derive :akvo.lumen.test-utils/wrap-jwt-mock :akvo.lumen.auth/wrap-jwt)
 
 (defn dissoc-prod-components [c]
   (dissoc c
@@ -125,6 +126,7 @@
           :akvo.lumen.component.error-tracker/prod
           :akvo.lumen.auth/public-path?-prod
           :akvo.lumen.test-utils/public-path?-dev
+          :akvo.lumen.auth/wrap-jwt-prod
 ))
 
 (defn prep [& paths]
@@ -174,4 +176,9 @@
   (log/error :akvo.lumen.test-utils/public-path?-test)
   (constantly true))
 
+
+(defmethod ig/init-key :akvo.lumen.test-utils/wrap-jwt-mock  [_ {:keys [keycloak]}]
+  (fn [handler]
+    (fn [req]
+      (handler (assoc req :jwt-claims {"typ" "Bearer"})))))
 
