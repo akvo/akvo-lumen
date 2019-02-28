@@ -33,6 +33,11 @@ const captureException = (error, runId = '') => {
   if (process.env.SENTRY_DSN) Sentry.captureException(error);
 };
 
+const captureMessage = (message) => {
+  console.error(message);
+  if (process.env.SENTRY_DSN) Sentry.captureMessage(message);
+};
+
 const configureScope = (contextData, callback) => {
   if (process.env.SENTRY_DSN) {
     Sentry.configureScope((scope) => {
@@ -99,7 +104,7 @@ const takeScreenshot = (req, runId) => new Promise((resolve, reject) => {
         try {
           await page.waitFor(s);
         } catch (error) {
-          console.log('Visualisation didnt render with ID: ', s.replace('.render-completed-', ''));
+          captureMessage('Visualisation didnt render with ID: ', s.replace('.render-completed-', ''));
           reject(error);
         }
       }));
@@ -173,7 +178,6 @@ const sendScreenshotResponse = ({
 };
 
 app.post('/screenshot', validate(validation.screenshot), async (req, res) => {
-  console.log(req);
   if (currentJobCount > MAX_CONCURRENT_JOBS) {
     res.sendStatus(503);
     return;
